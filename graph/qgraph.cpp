@@ -8,15 +8,31 @@ QGraph::QGraph() :
 {
 }
 
+QGraph::~QGraph()
+{
+    for(Graph::NodeId nodeId : nodeIds())
+        removeNode(nodeId);
+
+    // Removing all the nodes should remove all the edges
+    Q_ASSERT(numEdges() == 0);
+}
+
 Graph::NodeId QGraph::addNode()
 {
-    QNode* node = new QNode(nextNodeId);
-    nodesMap.insert(nextNodeId, node);
+    Graph::NodeId newNodeId;
+
+    if(!vacatedNodeIdQueue.isEmpty())
+        newNodeId = vacatedNodeIdQueue.dequeue();
+    else
+        newNodeId = nextNodeId++;
+
+    QNode* node = new QNode(newNodeId);
+    nodesMap.insert(newNodeId, node);
 
     for(const Graph::ChangeListener* changeListener : changeListeners)
-        changeListener->onNodeAdded(nextNodeId);
+        changeListener->onNodeAdded(newNodeId);
 
-    return nextNodeId++;
+    return newNodeId;
 }
 
 void QGraph::removeNode(Graph::NodeId nodeId)
@@ -31,18 +47,26 @@ void QGraph::removeNode(Graph::NodeId nodeId)
 
     delete node;
     nodesMap.remove(nodeId);
+    vacatedNodeIdQueue.enqueue(nodeId);
 }
 
 Graph::EdgeId QGraph::addEdge(Graph::NodeId sourceId, Graph::NodeId targetId)
 {
-    QEdge* edge = new QEdge(nextEdgeId);
-    edgesMap.insert(nextEdgeId, edge);
+    Graph::EdgeId newEdgeId;
+
+    if(!vacatedEdgeIdQueue.isEmpty())
+        newEdgeId = vacatedEdgeIdQueue.dequeue();
+    else
+        newEdgeId = nextEdgeId++;
+
+    QEdge* edge = new QEdge(newEdgeId);
+    edgesMap.insert(newEdgeId, edge);
     setNodeEdges(edge, sourceId, targetId);
 
     for(const Graph::ChangeListener* changeListener : changeListeners)
-        changeListener->onEdgeAdded(nextEdgeId);
+        changeListener->onEdgeAdded(newEdgeId);
 
-    return nextEdgeId++;
+    return newEdgeId;
 }
 
 void QGraph::removeEdge(Graph::EdgeId edgeId)
@@ -59,6 +83,7 @@ void QGraph::removeEdge(Graph::EdgeId edgeId)
 
     delete edge;
     edgesMap.remove(edgeId);
+    vacatedEdgeIdQueue.enqueue(edgeId);
 }
 
 void QGraph::setNodeEdges(Graph::Edge *edge, Graph::NodeId sourceId, Graph::NodeId targetId)

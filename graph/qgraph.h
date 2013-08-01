@@ -4,12 +4,13 @@
 #include "graph.h"
 
 #include <QHash>
+#include <QQueue>
 
 class QGraph : public Graph
 {
 public:
     QGraph();
-    virtual ~QGraph() {}
+    ~QGraph();
 
     class QNode : public Graph::Node
     {
@@ -60,8 +61,11 @@ public:
 private:
     QHash<NodeId,Node*> nodesMap;
     NodeId nextNodeId;
+    QQueue<NodeId> vacatedNodeIdQueue;
+
     QHash<EdgeId,Edge*> edgesMap;
     EdgeId nextEdgeId;
+    QQueue<EdgeId> vacatedEdgeIdQueue;
 
 public:
     QList<Node*> nodes() { return nodesMap.values(); }
