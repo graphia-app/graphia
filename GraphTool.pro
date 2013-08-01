@@ -20,6 +20,7 @@ SOURCES += main.cpp\
 
 HEADERS  += mainwindow.h \
     graph/graph.h \
-    graph/qgraph.h
+    graph/qgraph.h \
+    graph/grapharray.h
 
 FORMS    += mainwindow.ui

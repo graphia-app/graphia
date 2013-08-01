@@ -13,11 +13,17 @@ Graph::NodeId QGraph::addNode()
     QNode* node = new QNode(nextNodeId);
     nodesMap.insert(nextNodeId, node);
 
+    for(const Graph::ChangeListener* changeListener : changeListeners)
+        changeListener->onNodeAdded(nextNodeId);
+
     return nextNodeId++;
 }
 
 void QGraph::removeNode(Graph::NodeId nodeId)
 {
+    for(const Graph::ChangeListener* changeListener : changeListeners)
+        changeListener->onNodeRemoved(nodeId);
+
     // Remove all edges that touch this node
     QNode* node = static_cast<QNode*>(nodeById(nodeId));
     for(Graph::EdgeId edgeId : node->edges())
@@ -33,11 +39,17 @@ Graph::EdgeId QGraph::addEdge(Graph::NodeId sourceId, Graph::NodeId targetId)
     edgesMap.insert(nextEdgeId, edge);
     setNodeEdges(edge, sourceId, targetId);
 
+    for(const Graph::ChangeListener* changeListener : changeListeners)
+        changeListener->onEdgeAdded(nextEdgeId);
+
     return nextEdgeId++;
 }
 
 void QGraph::removeEdge(Graph::EdgeId edgeId)
 {
+    for(const Graph::ChangeListener* changeListener : changeListeners)
+        changeListener->onEdgeRemoved(edgeId);
+
     // Remove all node references to this edge
     QEdge* edge = static_cast<QEdge*>(edgeById(edgeId));
     QNode* source = static_cast<QNode*>(nodeById(edge->sourceId()));

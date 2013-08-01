@@ -67,6 +67,7 @@ public:
     QList<Node*> nodes() { return nodesMap.values(); }
     QList<NodeId> nodeIds() { return nodesMap.keys(); }
     int numNodes() { return nodesMap.size(); }
+    int nodeArrayCapactity() { return nextNodeId; }
 
     NodeId addNode();
     void removeNode(NodeId nodeId);
@@ -74,7 +75,8 @@ public:
 
     QList<Edge*> edges() { return edgesMap.values(); }
     QList<EdgeId> edgeIds() { return edgesMap.keys(); }
-    virtual int numEdges() { return edgesMap.size(); }
+    int numEdges() { return edgesMap.size(); }
+    int edgeArrayCapactity() { return nextEdgeId; }
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId);
     void removeEdge(EdgeId edgeId);

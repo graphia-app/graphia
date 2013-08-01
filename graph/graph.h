@@ -42,6 +42,7 @@ public:
     virtual QList<Node*> nodes() = 0;
     virtual QList<NodeId> nodeIds() = 0;
     virtual int numNodes() = 0;
+    virtual int nodeArrayCapactity() = 0;
 
     virtual NodeId addNode() = 0;
     virtual void removeNode(NodeId nodeId) = 0;
@@ -50,6 +51,7 @@ public:
     virtual QList<Edge*> edges() = 0;
     virtual QList<EdgeId> edgeIds() = 0;
     virtual int numEdges() = 0;
+    virtual int edgeArrayCapactity() = 0;
 
     virtual EdgeId addEdge(NodeId sourceId, NodeId targetId) = 0;
     virtual void removeEdge(EdgeId edgeId) = 0;
@@ -70,6 +72,29 @@ public:
             for(Edge* edge : edges())
                 qDebug() << "Edge" << edge->id() << "(" << edge->sourceId() << "->" << edge->targetId() << ")";
         }
+    }
+
+    class ChangeListener
+    {
+    public:
+        virtual void onNodeAdded(NodeId) const {}
+        virtual void onNodeRemoved(NodeId) const {}
+        virtual void onEdgeAdded(EdgeId) const {}
+        virtual void onEdgeRemoved(EdgeId) const {}
+    };
+
+protected:
+    QList<const ChangeListener*> changeListeners;
+
+public:
+    void addChangeListener(const ChangeListener* changeListener)
+    {
+        changeListeners.append(changeListener);
+    }
+
+    void removeChangeListener(const ChangeListener* changeListener)
+    {
+        changeListeners.removeAll(changeListener);
     }
 };
 
