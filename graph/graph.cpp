@@ -1,14 +1,14 @@
-#include "qgraph.h"
+#include "graph.h"
 
 #include <QtGlobal>
 
-QGraph::QGraph() :
+Graph::Graph() :
     nextNodeId(0),
     nextEdgeId(0)
 {
 }
 
-QGraph::~QGraph()
+Graph::~Graph()
 {
     for(Graph::NodeId nodeId : nodeIds())
         removeNode(nodeId);
@@ -17,7 +17,7 @@ QGraph::~QGraph()
     Q_ASSERT(numEdges() == 0);
 }
 
-Graph::NodeId QGraph::addNode()
+Graph::NodeId Graph::addNode()
 {
     Graph::NodeId newNodeId;
 
@@ -26,7 +26,7 @@ Graph::NodeId QGraph::addNode()
     else
         newNodeId = nextNodeId++;
 
-    QNode* node = new QNode(newNodeId);
+    Node* node = new Node(newNodeId);
     nodesMap.insert(newNodeId, node);
 
     for(const Graph::ChangeListener* changeListener : changeListeners)
@@ -35,13 +35,13 @@ Graph::NodeId QGraph::addNode()
     return newNodeId;
 }
 
-void QGraph::removeNode(Graph::NodeId nodeId)
+void Graph::removeNode(Graph::NodeId nodeId)
 {
     for(const Graph::ChangeListener* changeListener : changeListeners)
         changeListener->onNodeRemoved(nodeId);
 
     // Remove all edges that touch this node
-    QNode* node = static_cast<QNode*>(nodeById(nodeId));
+    Node* node = nodeById(nodeId);
     for(Graph::EdgeId edgeId : node->edges())
         removeEdge(edgeId);
 
@@ -50,7 +50,7 @@ void QGraph::removeNode(Graph::NodeId nodeId)
     vacatedNodeIdQueue.enqueue(nodeId);
 }
 
-Graph::EdgeId QGraph::addEdge(Graph::NodeId sourceId, Graph::NodeId targetId)
+Graph::EdgeId Graph::addEdge(Graph::NodeId sourceId, Graph::NodeId targetId)
 {
     Graph::EdgeId newEdgeId;
 
@@ -59,7 +59,7 @@ Graph::EdgeId QGraph::addEdge(Graph::NodeId sourceId, Graph::NodeId targetId)
     else
         newEdgeId = nextEdgeId++;
 
-    QEdge* edge = new QEdge(newEdgeId);
+    Edge* edge = new Edge(newEdgeId);
     edgesMap.insert(newEdgeId, edge);
     setNodeEdges(edge, sourceId, targetId);
 
@@ -69,15 +69,15 @@ Graph::EdgeId QGraph::addEdge(Graph::NodeId sourceId, Graph::NodeId targetId)
     return newEdgeId;
 }
 
-void QGraph::removeEdge(Graph::EdgeId edgeId)
+void Graph::removeEdge(Graph::EdgeId edgeId)
 {
     for(const Graph::ChangeListener* changeListener : changeListeners)
         changeListener->onEdgeRemoved(edgeId);
 
     // Remove all node references to this edge
-    QEdge* edge = static_cast<QEdge*>(edgeById(edgeId));
-    QNode* source = static_cast<QNode*>(nodeById(edge->sourceId()));
-    QNode* target = static_cast<QNode*>(nodeById(edge->targetId()));
+    Edge* edge = edgeById(edgeId);
+    Node* source = nodeById(edge->sourceId());
+    Node* target = nodeById(edge->targetId());
     source->_outEdges.remove(edgeId);
     target->_inEdges.remove(edgeId);
 
@@ -86,7 +86,7 @@ void QGraph::removeEdge(Graph::EdgeId edgeId)
     vacatedEdgeIdQueue.enqueue(edgeId);
 }
 
-void QGraph::setNodeEdges(Graph::Edge *edge, Graph::NodeId sourceId, Graph::NodeId targetId)
+void Graph::setNodeEdges(Graph::Edge *edge, Graph::NodeId sourceId, Graph::NodeId targetId)
 {
     Q_ASSERT(sourceId != Graph::NullNodeId);
     Q_ASSERT(targetId != Graph::NullNodeId);
@@ -94,29 +94,28 @@ void QGraph::setNodeEdges(Graph::Edge *edge, Graph::NodeId sourceId, Graph::Node
     if(edge->sourceId() != Graph::NullNodeId)
     {
         // Remove edge from source node out edges
-        QNode* source = static_cast<QNode*>(nodeById(edge->sourceId()));
+        Node* source = nodeById(edge->sourceId());
         source->_outEdges.remove(edge->id());
     }
 
     if(edge->targetId() != Graph::NullNodeId)
     {
         // Remove edge from target node in edges
-        QNode* target = static_cast<QNode*>(nodeById(edge->targetId()));
+        Node* target = nodeById(edge->targetId());
         target->_inEdges.remove(edge->id());
     }
 
-    QEdge* qEdge = static_cast<QEdge*>(edge);
-    qEdge->_sourceId = sourceId;
-    qEdge->_targetId = targetId;
+    edge->_sourceId = sourceId;
+    edge->_targetId = targetId;
 
-    QNode* source = static_cast<QNode*>(nodeById(sourceId));
+    Node* source = nodeById(sourceId);
     source->_outEdges.insert(edge->id());
 
-    QNode* target = static_cast<QNode*>(nodeById(targetId));
+    Node* target = nodeById(targetId);
     target->_inEdges.insert(edge->id());
 }
 
-void QGraph::setNodeEdges(Graph::EdgeId edgeId, Graph::NodeId sourceId, Graph::NodeId targetId)
+void Graph::setNodeEdges(Graph::EdgeId edgeId, Graph::NodeId sourceId, Graph::NodeId targetId)
 {
     setNodeEdges(edgeById(edgeId), sourceId, targetId);
 }

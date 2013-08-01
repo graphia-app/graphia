@@ -16,14 +16,13 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    graph/qgraph.cpp \
-    parsers/gmlfileparser.cpp
+    parsers/gmlfileparser.cpp \
+    graph/graph.cpp
 
 HEADERS  += mainwindow.h \
-    graph/graph.h \
-    graph/qgraph.h \
     graph/grapharray.h \
     parsers/graphfileparser.h \
-    parsers/gmlfileparser.h
+    parsers/gmlfileparser.h \
+    graph/graph.h
 
 FORMS    += mainwindow.ui

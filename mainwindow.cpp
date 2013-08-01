@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include "parsers/gmlfileparser.h"
-#include "graph/qgraph.h"
+#include "graph/graph.h"
 #include "graph/grapharray.h"
 
 #include <QFileDialog>
@@ -26,7 +26,7 @@ void MainWindow::on_actionOpen_triggered()
     if (!filename.isEmpty())
     {
         GmlFileParser gmlFileParser(filename);
-        QGraph graph;
+        Graph graph;
         gmlFileParser.parse(graph);
         graph.dumpToQDebug(1);
         NodeArray<QString> nodeArray(graph);

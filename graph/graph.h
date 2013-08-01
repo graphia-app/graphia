@@ -3,12 +3,15 @@
 
 #include <QList>
 #include <QSet>
+#include <QHash>
+#include <QQueue>
 #include <QDebug>
 
 class Graph
 {
 public:
-    virtual ~Graph() {}
+    Graph();
+    virtual ~Graph();
 
     typedef int NodeId;
     const static NodeId NullNodeId = -1;
@@ -17,48 +20,82 @@ public:
 
     class Node
     {
-    public:
-        virtual const QSet<EdgeId> inEdges() = 0;
-        virtual int inDegree() = 0;
-        virtual const QSet<EdgeId> outEdges() = 0;
-        virtual int outDegree() = 0;
-        virtual const QSet<EdgeId> edges() = 0;
-        virtual int degree() = 0;
+        friend class Graph;
 
-        virtual NodeId id() = 0;
+    private:
+        NodeId _id;
+        QSet<EdgeId> _inEdges;
+        QSet<EdgeId> _outEdges;
+
+    public:
+        Node(NodeId _id) : _id(_id) {}
+        virtual ~Node() {}
+
+        const QSet<EdgeId> inEdges() { return _inEdges; }
+        int inDegree() { return _inEdges.size(); }
+        const QSet<EdgeId> outEdges() { return _outEdges; }
+        int outDegree() { return _outEdges.size(); }
+        const QSet<EdgeId> edges() { return _inEdges + _outEdges; }
+        int degree() { return edges().size(); }
+
+        NodeId id() { return _id; }
     };
 
     class Edge
     {
+        friend class Graph;
+
+    private:
+        EdgeId _id;
+        NodeId _sourceId;
+        NodeId _targetId;
+
     public:
-        virtual NodeId sourceId() = 0;
-        virtual NodeId targetId() = 0;
+        Edge(EdgeId _id) :
+            _id(_id),
+            _sourceId(Graph::NullNodeId),
+            _targetId(Graph::NullNodeId)
+        {}
+        virtual ~Edge() {}
+
+        NodeId sourceId() { return _sourceId; }
+        NodeId targetId() { return _targetId; }
 
         bool isLoop() { return sourceId() == targetId(); }
 
-        virtual EdgeId id() = 0;
+        EdgeId id() { return _id; }
     };
 
-    virtual QList<Node*> nodes() = 0;
-    virtual QList<NodeId> nodeIds() = 0;
-    virtual int numNodes() = 0;
-    virtual int nodeArrayCapactity() = 0;
+private:
+    QHash<NodeId,Node*> nodesMap;
+    NodeId nextNodeId;
+    QQueue<NodeId> vacatedNodeIdQueue;
 
-    virtual NodeId addNode() = 0;
-    virtual void removeNode(NodeId nodeId) = 0;
-    virtual Node* nodeById(NodeId nodeId) = 0;
+    QHash<EdgeId,Edge*> edgesMap;
+    EdgeId nextEdgeId;
+    QQueue<EdgeId> vacatedEdgeIdQueue;
 
-    virtual QList<Edge*> edges() = 0;
-    virtual QList<EdgeId> edgeIds() = 0;
-    virtual int numEdges() = 0;
-    virtual int edgeArrayCapactity() = 0;
+public:
+    QList<Node*> nodes() { return nodesMap.values(); }
+    QList<NodeId> nodeIds() { return nodesMap.keys(); }
+    int numNodes() { return nodesMap.size(); }
+    int nodeArrayCapactity() { return nextNodeId; }
 
-    virtual EdgeId addEdge(NodeId sourceId, NodeId targetId) = 0;
-    virtual void removeEdge(EdgeId edgeId) = 0;
-    virtual Edge* edgeById(EdgeId edgeId) = 0;
+    NodeId addNode();
+    void removeNode(NodeId nodeId);
+    Node* nodeById(NodeId nodeId) { return nodesMap[nodeId]; }
 
-    virtual void setNodeEdges(Edge* edge, NodeId sourceId, NodeId targetId) = 0;
-    virtual void setNodeEdges(EdgeId edgeId, NodeId sourceId, NodeId targetId) = 0;
+    QList<Edge*> edges() { return edgesMap.values(); }
+    QList<EdgeId> edgeIds() { return edgesMap.keys(); }
+    int numEdges() { return edgesMap.size(); }
+    int edgeArrayCapactity() { return nextEdgeId; }
+
+    EdgeId addEdge(NodeId sourceId, NodeId targetId);
+    void removeEdge(EdgeId edgeId);
+    Edge* edgeById(EdgeId edgeId) { return edgesMap[edgeId]; }
+
+    void setNodeEdges(Edge* edge, NodeId sourceId, NodeId targetId);
+    void setNodeEdges(EdgeId edgeId, NodeId sourceId, NodeId targetId);
 
     void dumpToQDebug(int detail)
     {
