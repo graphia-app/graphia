@@ -30,7 +30,7 @@ public:
         return array[index];
     }
 
-    void dumpToQDebug(int detail)
+    void dumpToQDebug(int detail) const
     {
         qDebug() << "GraphArray size" << array.size();
 
@@ -51,6 +51,11 @@ public:
         graph.addChangeListener(this);
     }
 
+    ~NodeArray()
+    {
+        this->_graph->removeChangeListener(this);
+    }
+
 private:
     void onNodeAdded(Graph::NodeId)
     {
@@ -65,6 +70,11 @@ public:
     {
         this->array.resize(graph.edgeArrayCapactity());
         graph.addChangeListener(this);
+    }
+
+    ~EdgeArray()
+    {
+        this->_graph->removeChangeListener(this);
     }
 
 private:

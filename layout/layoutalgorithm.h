@@ -14,7 +14,7 @@ protected:
 public:
     LayoutAlgorithm(NodeArray<QVector3D>& positions) : positions(&positions) {}
 
-    const Graph& graph() { return *positions->graph(); }
+    Graph& graph() { return *positions->graph(); }
     virtual void execute() = 0;
 
     class ProgressListener

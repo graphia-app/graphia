@@ -5,6 +5,7 @@
 #include "graph/graph.h"
 #include "graph/grapharray.h"
 #include "layout/randomlayout.h"
+#include "layout/eadeslayout.h"
 
 #include <QFileDialog>
 
@@ -32,9 +33,18 @@ void MainWindow::on_actionOpen_triggered()
         graph.dumpToQDebug(1);
 
         NodeArray<QVector3D> positions(graph);
-        positions.dumpToQDebug(1);
+
         RandomLayout randomLayout(positions);
         randomLayout.execute();
+        positions.dumpToQDebug(1);
+
+        EadesLayout eadesLayout(positions);
+
+        for(int i = 0; i < 100; i++)
+        {
+            qDebug() << i;
+            eadesLayout.execute();
+        }
         positions.dumpToQDebug(1);
     }
 }

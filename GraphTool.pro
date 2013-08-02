@@ -18,7 +18,8 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     parsers/gmlfileparser.cpp \
     graph/graph.cpp \
-    layout/randomlayout.cpp
+    layout/randomlayout.cpp \
+    layout/eadeslayout.cpp
 
 HEADERS  += mainwindow.h \
     graph/grapharray.h \
@@ -27,6 +28,7 @@ HEADERS  += mainwindow.h \
     graph/graph.h \
     layout/layoutalgorithm.h \
     layout/randomlayout.h \
-    utils.h
+    utils.h \
+    layout/eadeslayout.h
 
 FORMS    += mainwindow.ui

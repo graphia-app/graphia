@@ -103,7 +103,7 @@ public:
     void setNodeEdges(Edge* edge, NodeId sourceId, NodeId targetId);
     void setNodeEdges(EdgeId edgeId, NodeId sourceId, NodeId targetId);
 
-    void dumpToQDebug(int detail)
+    void dumpToQDebug(int detail) const
     {
         qDebug() << numNodes() << "nodes" << numEdges() << "edges";
 
