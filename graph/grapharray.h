@@ -29,6 +29,17 @@ public:
     {
         return array[index];
     }
+
+    void dumpToQDebug(int detail)
+    {
+        qDebug() << "GraphArray size" << array.size();
+
+        if(detail > 0)
+        {
+            for(Element e : array)
+                qDebug() << e;
+        }
+    }
 };
 
 template<typename Element> class NodeArray : public GraphArray<Graph::NodeId, Element>, public Graph::ChangeListener
@@ -37,6 +48,7 @@ public:
     NodeArray(Graph& graph) : GraphArray<Graph::NodeId, Element>(graph)
     {
         this->array.resize(graph.nodeArrayCapactity());
+        graph.addChangeListener(this);
     }
 
 private:
@@ -52,6 +64,7 @@ public:
     EdgeArray(Graph& graph) : GraphArray<Graph::EdgeId, Element>(graph)
     {
         this->array.resize(graph.edgeArrayCapactity());
+        graph.addChangeListener(this);
     }
 
 private:

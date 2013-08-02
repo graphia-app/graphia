@@ -4,6 +4,7 @@
 #include "parsers/gmlfileparser.h"
 #include "graph/graph.h"
 #include "graph/grapharray.h"
+#include "layout/randomlayout.h"
 
 #include <QFileDialog>
 
@@ -29,7 +30,12 @@ void MainWindow::on_actionOpen_triggered()
         Graph graph;
         gmlFileParser.parse(graph);
         graph.dumpToQDebug(1);
-        NodeArray<QString> nodeArray(graph);
+
+        NodeArray<QVector3D> positions(graph);
+        positions.dumpToQDebug(1);
+        RandomLayout randomLayout(positions);
+        randomLayout.execute();
+        positions.dumpToQDebug(1);
     }
 }
 

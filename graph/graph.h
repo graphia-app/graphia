@@ -31,14 +31,14 @@ public:
         Node(NodeId _id) : _id(_id) {}
         virtual ~Node() {}
 
-        const QSet<EdgeId> inEdges() { return _inEdges; }
-        int inDegree() { return _inEdges.size(); }
-        const QSet<EdgeId> outEdges() { return _outEdges; }
-        int outDegree() { return _outEdges.size(); }
-        const QSet<EdgeId> edges() { return _inEdges + _outEdges; }
-        int degree() { return edges().size(); }
+        const QSet<EdgeId> inEdges() const { return _inEdges; }
+        int inDegree() const { return _inEdges.size(); }
+        const QSet<EdgeId> outEdges() const { return _outEdges; }
+        int outDegree() const { return _outEdges.size(); }
+        const QSet<EdgeId> edges() const { return _inEdges + _outEdges; }
+        int degree() const { return edges().size(); }
 
-        NodeId id() { return _id; }
+        NodeId id() const { return _id; }
     };
 
     class Edge
@@ -58,12 +58,12 @@ public:
         {}
         virtual ~Edge() {}
 
-        NodeId sourceId() { return _sourceId; }
-        NodeId targetId() { return _targetId; }
+        NodeId sourceId() const { return _sourceId; }
+        NodeId targetId() const { return _targetId; }
 
-        bool isLoop() { return sourceId() == targetId(); }
+        bool isLoop() const { return sourceId() == targetId(); }
 
-        EdgeId id() { return _id; }
+        EdgeId id() const { return _id; }
     };
 
 private:
@@ -77,22 +77,28 @@ private:
 
 public:
     QList<Node*> nodes() { return nodesMap.values(); }
+    const QList<Node*> nodes() const { return nodesMap.values(); }
     QList<NodeId> nodeIds() { return nodesMap.keys(); }
-    int numNodes() { return nodesMap.size(); }
-    int nodeArrayCapactity() { return nextNodeId; }
+    const QList<NodeId> nodeIds() const { return nodesMap.keys(); }
+    int numNodes() const { return nodesMap.size(); }
+    int nodeArrayCapactity() const { return nextNodeId; }
 
     NodeId addNode();
     void removeNode(NodeId nodeId);
     Node* nodeById(NodeId nodeId) { return nodesMap[nodeId]; }
+    const Node* nodeById(NodeId nodeId) const { return nodesMap[nodeId]; }
 
     QList<Edge*> edges() { return edgesMap.values(); }
+    const QList<Edge*> edges() const { return edgesMap.values(); }
     QList<EdgeId> edgeIds() { return edgesMap.keys(); }
-    int numEdges() { return edgesMap.size(); }
-    int edgeArrayCapactity() { return nextEdgeId; }
+    const QList<EdgeId> edgeIds() const { return edgesMap.keys(); }
+    int numEdges() const { return edgesMap.size(); }
+    int edgeArrayCapactity() const { return nextEdgeId; }
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId);
     void removeEdge(EdgeId edgeId);
     Edge* edgeById(EdgeId edgeId) { return edgesMap[edgeId]; }
+    const Edge* edgeById(EdgeId edgeId) const { return edgesMap[edgeId]; }
 
     void setNodeEdges(Edge* edge, NodeId sourceId, NodeId targetId);
     void setNodeEdges(EdgeId edgeId, NodeId sourceId, NodeId targetId);
