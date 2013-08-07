@@ -2,6 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QList>
+
+#include "ui/graphwidget.h"
 
 namespace Ui {
 class MainWindow;
@@ -17,11 +20,11 @@ public:
     
 private slots:
     void on_actionOpen_triggered();
-
     void on_actionQuit_triggered();
 
 private:
     Ui::MainWindow *ui;
+    QList<GraphWidget*> graphWidgets;
 };
 
 #endif // MAINWINDOW_H

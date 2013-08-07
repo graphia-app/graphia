@@ -1,5 +1,7 @@
 #include "gmlfileparser.h"
 
+#include <QFileInfo>
+
 #include <vector>
 #include <string>
 #include <fstream>
@@ -7,7 +9,6 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_istream_iterator.hpp>
 #include <boost/spirit/include/qi_parse_auto.hpp>
-#include <boost/variant/recursive_variant.hpp>
 #include <boost/spirit/include/qi_real.hpp>
 
 namespace fusion = boost::fusion;
@@ -54,14 +55,8 @@ namespace boost { namespace spirit { namespace traits
     };
 }}}
 
-struct KeyValuePairList;
-
-typedef boost::variant<int, double, QString, boost::recursive_wrapper<KeyValuePairList> > Value;
-typedef fusion::vector<QString,Value> KeyValuePair;
-struct KeyValuePairList : std::vector<KeyValuePair> {};
-
 template <typename Iterator>
-struct GmlGrammar : qi::grammar<Iterator, KeyValuePairList(), ascii::space_type>
+struct GmlGrammar : qi::grammar<Iterator, GmlFileParser::KeyValuePairList(), ascii::space_type>
 {
     GmlGrammar() : GmlGrammar::base_type(list)
     {
@@ -79,27 +74,20 @@ struct GmlGrammar : qi::grammar<Iterator, KeyValuePairList(), ascii::space_type>
         //debug(list);
     }
 
-    qi::rule<Iterator, KeyValuePairList(), ascii::space_type> list;
-    qi::rule<Iterator, Value(), ascii::space_type> value;
+    qi::rule<Iterator, GmlFileParser::KeyValuePairList(), ascii::space_type> list;
+    qi::rule<Iterator, GmlFileParser::Value(), ascii::space_type> value;
     qi::rule<Iterator, QString(), ascii::space_type> key;
     qi::rule<Iterator, QString(), ascii::space_type> string;
 };
 
-enum class GmlList
-{
-    File,
-    Graph,
-    Node,
-    Edge
-};
-
-static bool parseGmlList(Graph& graph, const KeyValuePairList& keyValuePairList, GmlList listType = GmlList::File)
+bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePairList& keyValuePairList, GmlList listType)
 {
     static QMap<int,Graph::NodeId> nodeIdMap;
     Graph::NodeId sourceId = Graph::NullNodeId;
 
-    for(const KeyValuePair keyValuePair : keyValuePairList)
+    for(unsigned int i = 0; i < keyValuePairList.size(); i++)
     {
+        const KeyValuePair& keyValuePair = keyValuePairList[i];
         QString key = fusion::at_c<0>(keyValuePair);
         Value value = fusion::at_c<1>(keyValuePair);
         KeyValuePairList* subKeyValuePairList = boost::get<KeyValuePairList>(&value);
@@ -110,10 +98,15 @@ static bool parseGmlList(Graph& graph, const KeyValuePairList& keyValuePairList,
         case GmlList::File:
             nodeIdMap.clear();
             if(!key.compare("graph") && subKeyValuePairList != 0)
-                return parseGmlList(graph, *subKeyValuePairList, GmlList::Graph);
+            {
+                bool result = parseGmlList(graph, *subKeyValuePairList, GmlList::Graph);
+                emit complete(result);
+                return result;
+            }
             break;
 
         case GmlList::Graph:
+        {
             if(subKeyValuePairList != 0)
             {
                 bool result = false;
@@ -126,7 +119,16 @@ static bool parseGmlList(Graph& graph, const KeyValuePairList& keyValuePairList,
                 if(!result)
                     return false;
             }
+
+            int newPercentage = ((i * 50) / keyValuePairList.size()) + 50;
+            if(newPercentage > percentage)
+            {
+                percentage = newPercentage;
+                emit progress(percentage);
+            }
+
             break;
+        }
 
         case GmlList::Node:
             if(intValue != 0)
@@ -155,18 +157,33 @@ static bool parseGmlList(Graph& graph, const KeyValuePairList& keyValuePairList,
     return true;
 }
 
+void GmlFileParser::onParsePositionIncremented(int64_t position)
+{
+    int64_t newPercentage = (position * 50) / fileSize;
+
+    if(newPercentage > percentage)
+    {
+        percentage = newPercentage;
+        emit progress(percentage);
+    }
+}
+
 bool GmlFileParser::parse(Graph& graph)
 {
+    QFileInfo info(filename);
     std::ifstream stream(filename.toStdString());
     stream.unsetf(std::ios::skipws);
 
-    spirit::istream_iterator begin(stream);
-    spirit::istream_iterator end;
+    fileSize = info.size();
 
-    GmlGrammar<spirit::istream_iterator> grammar;
+    spirit::istream_iterator begin(stream);
+    progess_iterator beginp(begin, this);
+    progess_iterator endp;
+
+    GmlGrammar<progess_iterator> grammar;
     KeyValuePairList keyValuePairList;
 
-    if(qi::phrase_parse(begin, end, grammar, boost::spirit::ascii::space, keyValuePairList))
+    if(qi::phrase_parse(beginp, endp, grammar, boost::spirit::ascii::space, keyValuePairList))
         return parseGmlList(graph, keyValuePairList);
 
     return false;
