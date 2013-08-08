@@ -87,6 +87,9 @@ bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePair
 
     for(unsigned int i = 0; i < keyValuePairList.size(); i++)
     {
+        if(cancelled())
+            return false;
+
         const KeyValuePair& keyValuePair = keyValuePairList[i];
         QString key = fusion::at_c<0>(keyValuePair);
         Value value = fusion::at_c<1>(keyValuePair);
@@ -97,7 +100,7 @@ bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePair
         {
         case GmlList::File:
             nodeIdMap.clear();
-            if(!key.compare("graph") && subKeyValuePairList != 0)
+            if(!key.compare("graph") && subKeyValuePairList != nullptr)
             {
                 bool result = parseGmlList(graph, *subKeyValuePairList, GmlList::Graph);
                 emit complete(result);
@@ -107,7 +110,7 @@ bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePair
 
         case GmlList::Graph:
         {
-            if(subKeyValuePairList != 0)
+            if(subKeyValuePairList != nullptr)
             {
                 bool result = false;
 
@@ -131,7 +134,7 @@ bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePair
         }
 
         case GmlList::Node:
-            if(intValue != 0)
+            if(intValue != nullptr)
             {
                 if(!key.compare("id"))
                     nodeIdMap.insert(*intValue, graph.addNode());
@@ -141,7 +144,7 @@ bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePair
             break;
 
         case GmlList::Edge:
-            if(intValue != 0)
+            if(intValue != nullptr)
             {
                 if(!key.compare("source") && nodeIdMap.contains(*intValue))
                     sourceId = nodeIdMap[*intValue];
@@ -177,10 +180,10 @@ bool GmlFileParser::parse(Graph& graph)
     fileSize = info.size();
 
     spirit::istream_iterator begin(stream);
-    progess_iterator beginp(begin, this);
-    progess_iterator endp;
+    progress_iterator endp;
+    progress_iterator beginp(begin, this, &endp);
 
-    GmlGrammar<progess_iterator> grammar;
+    GmlGrammar<progress_iterator> grammar;
     KeyValuePairList keyValuePairList;
 
     if(qi::phrase_parse(beginp, endp, grammar, boost::spirit::ascii::space, keyValuePairList))

@@ -5,7 +5,8 @@
 GenericGraphWidget::GenericGraphWidget(QWidget *parent) :
     GraphWidget(parent),
     _layout(_graph),
-    _initialised(false)
+    _initialised(false),
+    loaderThread(nullptr)
 {
 }
 
@@ -14,16 +15,25 @@ const QString& GenericGraphWidget::name()
     return _name;
 }
 
+void GenericGraphWidget::cancelInitialisation()
+{
+    if(!initialised())
+    {
+        loaderThread->cancel();
+        loaderThread->wait();
+    }
+}
+
 bool GenericGraphWidget::initFromFile(const QString &filename)
 {
     QFileInfo info(filename);
 
-    if(!info.exists())
+    if(!info.exists() || loaderThread != nullptr)
         return false;
 
     _name = info.fileName();
 
-    LoaderThread *loaderThread = new LoaderThread(filename, _graph, this);
+    loaderThread = new LoaderThread(filename, _graph, this);
     connect(loaderThread, &LoaderThread::finished, loaderThread, &QObject::deleteLater);
     loaderThread->start();
 

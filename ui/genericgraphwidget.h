@@ -11,6 +11,8 @@
 #include <QVector3D>
 #include <QThread>
 
+class LoaderThread;
+
 class GenericGraphWidget : public GraphWidget
 {
     Q_OBJECT
@@ -24,6 +26,7 @@ private:
     NodeArray<QVector3D> _layout;
 
     bool _initialised;
+    LoaderThread *loaderThread;
 
 signals:
 
@@ -38,6 +41,7 @@ public:
     const QString& name();
 
     bool initialised() { return _initialised; }
+    void cancelInitialisation();
 
     bool initFromFile(const QString& filename);
 };
@@ -49,21 +53,32 @@ private:
     QString filename;
     Graph* graph;
     GenericGraphWidget* graphWidget;
+    GraphFileParser* graphFileParser;
 
 public:
     LoaderThread(const QString& filename, Graph& graph, GenericGraphWidget* graphWidget) :
-        filename(filename), graph(&graph), graphWidget(graphWidget) {}
+        filename(filename),
+        graph(&graph),
+        graphWidget(graphWidget),
+        graphFileParser(nullptr) {}
+
+    void cancel()
+    {
+        if(this->isRunning())
+            graphFileParser->cancel();
+    }
 
 private:
     void run() Q_DECL_OVERRIDE
     {
-        GmlFileParser gmlFileParser(filename);
-        connect(&gmlFileParser, &GmlFileParser::progress,
+        graphFileParser = new GmlFileParser(filename); //FIXME choose parser based on file type
+        connect(graphFileParser, &GraphFileParser::progress,
                 graphWidget, &GenericGraphWidget::genericProgress);
-        connect(&gmlFileParser, &GmlFileParser::complete,
+        connect(graphFileParser, &GraphFileParser::complete,
                 graphWidget, &GenericGraphWidget::genericComplete);
 
-        gmlFileParser.parse(*graph);
+        graphFileParser->parse(*graph);
+        delete graphFileParser;
     }
 };
 

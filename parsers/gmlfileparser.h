@@ -20,7 +20,7 @@ private:
     int percentage;
 
 public:
-    GmlFileParser(QString filename) : filename(filename), fileSize(0), percentage(0) {}
+    GmlFileParser(QString filename) : GraphFileParser(), filename(filename), fileSize(0), percentage(0) {}
 
     bool parse(Graph& graph);
 

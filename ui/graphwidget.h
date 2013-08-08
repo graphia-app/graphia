@@ -12,6 +12,7 @@ class GraphWidget : public QWidget
 public:
     explicit GraphWidget(QWidget *parent = 0) :
         QWidget(parent) {}
+    virtual ~GraphWidget() {}
 
 signals:
     void progress(int percentage) const;
@@ -26,6 +27,7 @@ public:
     virtual const QString& name() = 0;
 
     virtual bool initialised() { return false; }
+    virtual void cancelInitialisation() = 0;
 };
 
 #endif // GRAPHWIDGET_H
