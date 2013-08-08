@@ -11,9 +11,9 @@ void RandomLayout::execute()
     for(Graph::NodeId nodeId : graph().nodeIds())
     {
         positions[nodeId] = Utils::randQVector3D(-1.0, 1.0);
-        int percentage = nodeNumber++ / numNodes;
-        notifyListenersOfProgress(percentage);
+        int percentage = (nodeNumber++ * 100) / numNodes;
+        emit progress(percentage);
     }
 
-    notifyListenersOfCompletion();
+    emit complete();
 }

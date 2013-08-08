@@ -5,6 +5,7 @@
 
 class EadesLayout : public LayoutAlgorithm
 {
+    Q_OBJECT
 public:
     EadesLayout(NodeArray<QVector3D>& positions) : LayoutAlgorithm(positions) {}
 

@@ -5,9 +5,11 @@
 
 #include <QList>
 #include <QVector3D>
+#include <QObject>
 
-class LayoutAlgorithm
+class LayoutAlgorithm : public QObject
 {
+    Q_OBJECT
 protected:
     NodeArray<QVector3D>* positions;
 
@@ -17,38 +19,9 @@ public:
     Graph& graph() { return *positions->graph(); }
     virtual void execute() = 0;
 
-    class ProgressListener
-    {
-    public:
-        virtual void onProgress(int) const {}
-        virtual void onCompletion() const {}
-    };
-
-protected:
-    QList<const ProgressListener*> progressListeners;
-
-public:
-    void addProgressListener(const ProgressListener* progressListener)
-    {
-        progressListeners.append(progressListener);
-    }
-
-    void removeProgressListener(const ProgressListener* progressListener)
-    {
-        progressListeners.removeAll(progressListener);
-    }
-
-    void notifyListenersOfProgress(int percentage)
-    {
-        for(const ProgressListener* progressListener : progressListeners)
-            progressListener->onProgress(percentage);
-    }
-
-    void notifyListenersOfCompletion()
-    {
-        for(const ProgressListener* progressListener : progressListeners)
-            progressListener->onCompletion();
-    }
+signals:
+    void progress(int percentage);
+    void complete();
 };
 
 #endif // LAYOUTALGORITHM_H

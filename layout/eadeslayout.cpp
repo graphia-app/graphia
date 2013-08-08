@@ -77,5 +77,5 @@ void EadesLayout::execute()
     for(Graph::NodeId nodeId : graph().nodeIds())
         positions[nodeId] += (moves[nodeId] * 0.1); //FIXME not sure what this constant is about, damping?
 
-    notifyListenersOfCompletion();
+    emit complete();
 }

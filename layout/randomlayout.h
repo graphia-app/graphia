@@ -5,6 +5,7 @@
 
 class RandomLayout : public LayoutAlgorithm
 {
+    Q_OBJECT
 public:
     RandomLayout(NodeArray<QVector3D>& positions) : LayoutAlgorithm(positions) {}
 
