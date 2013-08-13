@@ -120,22 +120,22 @@ public:
     class ChangeListener
     {
     public:
-        virtual void onNodeAdded(NodeId) const {}
-        virtual void onNodeRemoved(NodeId) const {}
-        virtual void onEdgeAdded(EdgeId) const {}
-        virtual void onEdgeRemoved(EdgeId) const {}
+        virtual void onNodeAdded(NodeId) {}
+        virtual void onNodeRemoved(NodeId) {}
+        virtual void onEdgeAdded(EdgeId) {}
+        virtual void onEdgeRemoved(EdgeId) {}
     };
 
 protected:
-    QList<const ChangeListener*> changeListeners;
+    QList<ChangeListener*> changeListeners;
 
 public:
-    void addChangeListener(const ChangeListener* changeListener)
+    void addChangeListener(ChangeListener* changeListener)
     {
         changeListeners.append(changeListener);
     }
 
-    void removeChangeListener(const ChangeListener* changeListener)
+    void removeChangeListener(ChangeListener* changeListener)
     {
         changeListeners.removeAll(changeListener);
     }

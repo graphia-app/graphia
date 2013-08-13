@@ -4,8 +4,6 @@
 #include <QMainWindow>
 #include <QList>
 
-#include "ui/graphwidget.h"
-
 namespace Ui {
 class MainWindow;
 }
@@ -28,7 +26,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QList<GraphWidget*> graphWidgets;
 };
 
 #endif // MAINWINDOW_H

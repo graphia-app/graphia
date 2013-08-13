@@ -29,7 +29,7 @@ Graph::NodeId Graph::addNode()
     Node* node = new Node(newNodeId);
     nodesMap.insert(newNodeId, node);
 
-    for(const Graph::ChangeListener* changeListener : changeListeners)
+    for(Graph::ChangeListener* changeListener : changeListeners)
         changeListener->onNodeAdded(newNodeId);
 
     return newNodeId;
@@ -37,7 +37,7 @@ Graph::NodeId Graph::addNode()
 
 void Graph::removeNode(Graph::NodeId nodeId)
 {
-    for(const Graph::ChangeListener* changeListener : changeListeners)
+    for(Graph::ChangeListener* changeListener : changeListeners)
         changeListener->onNodeRemoved(nodeId);
 
     // Remove all edges that touch this node
@@ -63,7 +63,7 @@ Graph::EdgeId Graph::addEdge(Graph::NodeId sourceId, Graph::NodeId targetId)
     edgesMap.insert(newEdgeId, edge);
     setNodeEdges(edge, sourceId, targetId);
 
-    for(const Graph::ChangeListener* changeListener : changeListeners)
+    for(Graph::ChangeListener* changeListener : changeListeners)
         changeListener->onEdgeAdded(newEdgeId);
 
     return newEdgeId;
@@ -71,7 +71,7 @@ Graph::EdgeId Graph::addEdge(Graph::NodeId sourceId, Graph::NodeId targetId)
 
 void Graph::removeEdge(Graph::EdgeId edgeId)
 {
-    for(const Graph::ChangeListener* changeListener : changeListeners)
+    for(Graph::ChangeListener* changeListener : changeListeners)
         changeListener->onEdgeRemoved(edgeId);
 
     // Remove all node references to this edge

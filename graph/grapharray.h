@@ -30,6 +30,16 @@ public:
         return array[index];
     }
 
+    typename QVector<Element>::iterator begin() { return array.begin(); }
+    typename QVector<Element>::const_iterator begin() const { return array.begin(); }
+    typename QVector<Element>::iterator end() { return array.end(); }
+    typename QVector<Element>::const_iterator end() const { return array.end(); }
+
+    int size() const
+    {
+        return array.size();
+    }
+
     void dumpToQDebug(int detail) const
     {
         qDebug() << "GraphArray size" << array.size();

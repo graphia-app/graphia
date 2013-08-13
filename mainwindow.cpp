@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "ui/genericgraphwidget.h"
+#include "ui/contentpanewidget.h"
 
 #include <QFileDialog>
 
@@ -23,41 +23,39 @@ void MainWindow::on_actionOpen_triggered()
                                               QString(), tr("GML Files (*.gml)"));
     if (!filename.isEmpty())
     {
-        GenericGraphWidget* graphWidget = new GenericGraphWidget;
+        ContentPaneWidget* contentPaneWidget = new ContentPaneWidget;
 
-        connect(graphWidget, &GraphWidget::progress, this, &MainWindow::on_loadProgress);
-        connect(graphWidget, &GraphWidget::complete, this, &MainWindow::on_loadCompletion);
+        connect(contentPaneWidget, &ContentPaneWidget::progress, this, &MainWindow::on_loadProgress);
+        connect(contentPaneWidget, &ContentPaneWidget::complete, this, &MainWindow::on_loadCompletion);
 
-        graphWidget->initFromFile(filename);
+        contentPaneWidget->initFromFile(filename);
 
-        ui->tabs->addTab(graphWidget, QString(tr("%1 0%")).arg(graphWidget->name()));
+        ui->tabs->addTab(contentPaneWidget, QString(tr("%1 0%")).arg(contentPaneWidget->graphModel()->name()));
     }
 }
 
 void MainWindow::on_tabs_tabCloseRequested(int index)
 {
-    GraphWidget* graphWidget = static_cast<GraphWidget*>(ui->tabs->widget(index));
-
-    graphWidget->cancelInitialisation();
-    delete graphWidget;
+    ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(ui->tabs->widget(index));
+    delete contentPaneWidget;
 }
 
 void MainWindow::on_loadProgress(int percentage)
 {
-    GraphWidget* graphWidget = static_cast<GraphWidget*>(sender());
-    Q_ASSERT(graphWidget != nullptr);
+    ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(sender());
+    Q_ASSERT(contentPaneWidget != nullptr);
 
-    int tabIndex = ui->tabs->indexOf(graphWidget);
-    ui->tabs->setTabText(tabIndex, QString(tr("%1 %2%")).arg(graphWidget->name()).arg(percentage));
+    int tabIndex = ui->tabs->indexOf(contentPaneWidget);
+    ui->tabs->setTabText(tabIndex, QString(tr("%1 %2%")).arg(contentPaneWidget->graphModel()->name()).arg(percentage));
 }
 
 void MainWindow::on_loadCompletion(int /*success*/)
 {
-    GraphWidget* graphWidget = static_cast<GraphWidget*>(sender());
-    Q_ASSERT(graphWidget != nullptr);
+    ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(sender());
+    Q_ASSERT(contentPaneWidget != nullptr);
 
-    int tabIndex = ui->tabs->indexOf(graphWidget);
-    ui->tabs->setTabText(tabIndex, graphWidget->name());
+    int tabIndex = ui->tabs->indexOf(contentPaneWidget);
+    ui->tabs->setTabText(tabIndex, contentPaneWidget->graphModel()->name());
 }
 
 void MainWindow::on_actionQuit_triggered()

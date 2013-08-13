@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>gl/shaders/instancedgeometry.vert</file>
+        <file>gl/shaders/instancedgeometry.frag</file>
+    </qresource>
+</RCC>

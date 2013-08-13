@@ -2,11 +2,11 @@
 
 #include "../utils.h"
 
-#define TAYLOR_LNX(x) (2.0*(((x)-1.0)/((x)+1.0)))
+#define TAYLOR_LNX(x) (2.0f*(((x)-1.0f)/((x)+1.0f)))
 
-#define FACTOR        0.6
+#define FACTOR        0.6f
 
-#define REPULSE(x)    (FACTOR*(1.0/((x)*(x))))
+#define REPULSE(x)    (FACTOR*(1.0f/((x)*(x))))
 #define ATTRACT(x)    (FACTOR*TAYLOR_LNX(x))
 
 void EadesLayout::execute()
@@ -16,12 +16,12 @@ void EadesLayout::execute()
 
     QVector3D axialDirections[] =
     {
-        {  1.0,  0.0,  0.0 },
-        {  0.0,  1.0,  0.0 },
-        {  0.0,  0.0,  1.0 },
-        {  0.0,  0.0, -1.0 },
-        {  0.0, -1.0,  0.0 },
-        { -1.0,  0.0,  0.0 },
+        {  1.0f,  0.0f,  0.0f },
+        {  0.0f,  1.0f,  0.0f },
+        {  0.0f,  0.0f,  1.0f },
+        {  0.0f,  0.0f, -1.0f },
+        {  0.0f, -1.0f,  0.0f },
+        { -1.0f,  0.0f,  0.0f },
     };
     int axialDirectionIndex = 0;
 
@@ -40,7 +40,7 @@ void EadesLayout::execute()
                 if(Utils::valueIsCloseToZero(distance))
                 {
                     // Pick a "random" direction
-                    force = 1.0;
+                    force = 1.0f;
                     direction = axialDirections[axialDirectionIndex];
                     axialDirectionIndex = (axialDirectionIndex + 1) % 6;
                 }
@@ -60,10 +60,10 @@ void EadesLayout::execute()
     {
         if(!edge->isLoop())
         {
-            QVector3D difference = positions[edge->sourceId()] - positions[edge->targetId()];
+            QVector3D difference = positions[edge->targetId()] - positions[edge->sourceId()];
             qreal distance = difference.length();
 
-            if(distance > 0.0)
+            if(distance > 0.0f)
             {
                 qreal force = ATTRACT(distance);
                 QVector3D direction = difference.normalized();
@@ -75,7 +75,7 @@ void EadesLayout::execute()
 
     // Apply the moves
     for(Graph::NodeId nodeId : graph().nodeIds())
-        positions[nodeId] += (moves[nodeId] * 0.1); //FIXME not sure what this constant is about, damping?
+        positions[nodeId] += (moves[nodeId] * 0.1f); //FIXME not sure what this constant is about, damping?
 
     emit complete();
 }
