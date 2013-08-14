@@ -7,6 +7,7 @@
 #define FACTOR        0.6f
 
 #define REPULSE(x)    (FACTOR*(1.0f/((x)*(x))))
+#define REPULSE_SQ(x) (FACTOR*(1.0f/(x)))
 #define ATTRACT(x)    (FACTOR*TAYLOR_LNX(x))
 
 void EadesLayout::execute()
@@ -30,10 +31,10 @@ void EadesLayout::execute()
     {
         for(Graph::NodeId j : graph().nodeIds())
         {
-            if( i != j )
+            if(i != j)
             {
                 QVector3D difference = positions[j] - positions[i];
-                qreal distance = difference.length();
+                qreal distance = difference.lengthSquared();
                 qreal force;
                 QVector3D direction;
 
@@ -46,8 +47,9 @@ void EadesLayout::execute()
                 }
                 else
                 {
-                    force = REPULSE(distance);
-                    direction = difference.normalized();
+                    force = REPULSE_SQ(distance);
+                    //direction = difference.normalized();
+                    direction = Utils::FastNormalize(difference);
                 }
 
                 moves[j] += (force * direction);
