@@ -23,7 +23,7 @@ void EadesLayout::execute()
         {  0.0f, -1.0f,  0.0f },
         { -1.0f,  0.0f,  0.0f },
     };
-    int axialDirectionIndex = 0;
+    static int axialDirectionIndex = 0;
 
     // Repulsive forces
     for(Graph::NodeId i : graph().nodeIds())
@@ -56,19 +56,20 @@ void EadesLayout::execute()
     }
 
     // Attractive forces
-    for(Graph::Edge* edge : graph().edges())
+    for(Graph::EdgeId edgeId : graph().edgeIds())
     {
-        if(!edge->isLoop())
+        Graph::Edge& edge = graph().edgeById(edgeId);
+        if(!edge.isLoop())
         {
-            QVector3D difference = positions[edge->targetId()] - positions[edge->sourceId()];
+            QVector3D difference = positions[edge.targetId()] - positions[edge.sourceId()];
             qreal distance = difference.length();
 
             if(distance > 0.0f)
             {
                 qreal force = ATTRACT(distance);
                 QVector3D direction = difference.normalized();
-                moves[edge->targetId()] -= (force * direction);
-                moves[edge->sourceId()] += (force * direction);
+                moves[edge.targetId()] -= (force * direction);
+                moves[edge.sourceId()] += (force * direction);
             }
         }
     }

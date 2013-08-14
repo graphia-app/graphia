@@ -57,7 +57,7 @@ template<typename Element> class NodeArray : public GraphArray<Graph::NodeId, El
 public:
     NodeArray(Graph& graph) : GraphArray<Graph::NodeId, Element>(graph)
     {
-        this->array.resize(graph.nodeArrayCapactity());
+        this->array.resize(graph.nodeArrayCapacity());
         graph.addChangeListener(this);
     }
 
@@ -69,7 +69,7 @@ public:
 private:
     void onNodeAdded(Graph::NodeId)
     {
-        this->array.resize(this->_graph->nodeArrayCapactity());
+        this->array.resize(this->_graph->nodeArrayCapacity());
     }
 };
 
@@ -78,7 +78,7 @@ template<typename Element> class EdgeArray : public GraphArray<Graph::EdgeId, El
 public:
     EdgeArray(Graph& graph) : GraphArray<Graph::EdgeId, Element>(graph)
     {
-        this->array.resize(graph.edgeArrayCapactity());
+        this->array.resize(graph.edgeArrayCapacity());
         graph.addChangeListener(this);
     }
 
@@ -90,7 +90,7 @@ public:
 private:
     void onEdgeAdded(Graph::EdgeId)
     {
-        this->array.resize(this->_graph->edgeArrayCapactity());
+        this->array.resize(this->_graph->edgeArrayCapacity());
     }
 };
 

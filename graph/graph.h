@@ -3,7 +3,7 @@
 
 #include <QList>
 #include <QSet>
-#include <QHash>
+#include <QVector>
 #include <QQueue>
 #include <QDebug>
 
@@ -28,8 +28,7 @@ public:
         QSet<EdgeId> _outEdges;
 
     public:
-        Node(NodeId _id) : _id(_id) {}
-        virtual ~Node() {}
+        Node() : _id(Graph::NullNodeId) {}
 
         const QSet<EdgeId> inEdges() const { return _inEdges; }
         int inDegree() const { return _inEdges.size(); }
@@ -51,12 +50,11 @@ public:
         NodeId _targetId;
 
     public:
-        Edge(EdgeId _id) :
-            _id(_id),
+        Edge() :
+            _id(Graph::NullNodeId),
             _sourceId(Graph::NullNodeId),
             _targetId(Graph::NullNodeId)
         {}
-        virtual ~Edge() {}
 
         NodeId sourceId() const { return _sourceId; }
         NodeId targetId() const { return _targetId; }
@@ -67,40 +65,38 @@ public:
     };
 
 private:
-    QHash<NodeId,Node*> nodesMap;
+    QList<NodeId> nodeIdsList;
+    QVector<Node> nodesVector;
     NodeId nextNodeId;
     QQueue<NodeId> vacatedNodeIdQueue;
 
-    QHash<EdgeId,Edge*> edgesMap;
+    QList<EdgeId> edgeIdsList;
+    QVector<Edge> edgesVector;
     EdgeId nextEdgeId;
     QQueue<EdgeId> vacatedEdgeIdQueue;
 
 public:
-    QList<Node*> nodes() { return nodesMap.values(); }
-    const QList<Node*> nodes() const { return nodesMap.values(); }
-    QList<NodeId> nodeIds() { return nodesMap.keys(); }
-    const QList<NodeId> nodeIds() const { return nodesMap.keys(); }
-    int numNodes() const { return nodesMap.size(); }
-    int nodeArrayCapactity() const { return nextNodeId; }
+    QList<NodeId>& nodeIds() { return nodeIdsList; }
+    const QList<NodeId>& nodeIds() const { return nodeIdsList; }
+    int numNodes() const { return nodeIdsList.size(); }
+    int nodeArrayCapacity() const { return nextNodeId; }
 
     NodeId addNode();
     void removeNode(NodeId nodeId);
-    Node* nodeById(NodeId nodeId) { return nodesMap[nodeId]; }
-    const Node* nodeById(NodeId nodeId) const { return nodesMap[nodeId]; }
+    Node& nodeById(NodeId nodeId) { return nodesVector[nodeId]; }
+    const Node& nodeById(NodeId nodeId) const { return nodesVector[nodeId]; }
 
-    QList<Edge*> edges() { return edgesMap.values(); }
-    const QList<Edge*> edges() const { return edgesMap.values(); }
-    QList<EdgeId> edgeIds() { return edgesMap.keys(); }
-    const QList<EdgeId> edgeIds() const { return edgesMap.keys(); }
-    int numEdges() const { return edgesMap.size(); }
-    int edgeArrayCapactity() const { return nextEdgeId; }
+    QList<EdgeId>& edgeIds() { return edgeIdsList; }
+    const QList<EdgeId>& edgeIds() const { return edgeIdsList; }
+    int numEdges() const { return edgeIdsList.size(); }
+    int edgeArrayCapacity() const { return nextEdgeId; }
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId);
     void removeEdge(EdgeId edgeId);
-    Edge* edgeById(EdgeId edgeId) { return edgesMap[edgeId]; }
-    const Edge* edgeById(EdgeId edgeId) const { return edgesMap[edgeId]; }
+    Edge& edgeById(EdgeId edgeId) { return edgesVector[edgeId]; }
+    const Edge& edgeById(EdgeId edgeId) const { return edgesVector[edgeId]; }
 
-    void setNodeEdges(Edge* edge, NodeId sourceId, NodeId targetId);
+    void setNodeEdges(Edge& edge, NodeId sourceId, NodeId targetId);
     void setNodeEdges(EdgeId edgeId, NodeId sourceId, NodeId targetId);
 
     void dumpToQDebug(int detail) const
@@ -109,11 +105,14 @@ public:
 
         if(detail > 0)
         {
-            for(Node* node : nodes())
-                qDebug() << "Node" << node->id();
+            for(NodeId nodeId : nodeIds())
+                qDebug() << "Node" << nodeId;
 
-            for(Edge* edge : edges())
-                qDebug() << "Edge" << edge->id() << "(" << edge->sourceId() << "->" << edge->targetId() << ")";
+            for(EdgeId edgeId : edgeIds())
+            {
+                const Edge& edge = edgeById(edgeId);
+                qDebug() << "Edge" << edgeId << "(" << edge.sourceId() << "->" << edge.targetId() << ")";
+            }
         }
     }
 
