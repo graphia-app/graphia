@@ -9,8 +9,7 @@
 #include <QMatrix4x4>
 
 class Camera;
-class Cube;
-class Torus;
+class Sphere;
 
 class QOpenGLFunctions_3_3_Core;
 
@@ -53,7 +52,7 @@ private:
     float m_panAngle;
     float m_tiltAngle;
 
-    Cube* m_cube;
+    Sphere* m_sphere;
 
     float m_theta;
     QMatrix4x4 m_modelMatrix;

@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     ui/graphview.cpp \
     ui/contentpanewidget.cpp \
     gl/graphscene.cpp \
-    graph/genericgraphmodel.cpp
+    graph/genericgraphmodel.cpp \
+    gl/sphere.cpp
 
 HEADERS  += mainwindow.h \
     graph/grapharray.h \
@@ -61,7 +62,8 @@ HEADERS  += mainwindow.h \
     ui/contentpanewidget.h \
     gl/graphscene.h \
     graph/genericgraphmodel.h \
-    graph/graphmodel.h
+    graph/graphmodel.h \
+    gl/sphere.h
 
 FORMS    += mainwindow.ui
 

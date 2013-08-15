@@ -1,7 +1,7 @@
 #include "graphscene.h"
 
 #include "../gl/camera.h"
-#include "../gl/cube.h"
+#include "../gl/sphere.h"
 #include "../gl/material.h"
 
 #include <QObject>
@@ -27,7 +27,7 @@ GraphScene::GraphScene( QObject* parent )
       m_vy( 0.0f ),
       m_vz( 0.0f ),
       m_viewCenterFixed( false ),
-      m_cube(0),
+      m_sphere(0),
       m_theta( 0.0f ),
       m_modelMatrix(),
       _graphModel(nullptr),
@@ -64,10 +64,12 @@ void GraphScene::initialise()
                           ":/gl/shaders/instancedgeometry.frag" );
 
     // Create a cube
-    m_cube = new Cube( this );
-    m_cube->setLength(1.0f);
-    m_cube->setMaterial( material );
-    m_cube->create();
+    m_sphere = new Sphere( this );
+    m_sphere->setRadius(1.0f);
+    m_sphere->setRings(16);
+    m_sphere->setSlices(16);
+    m_sphere->setMaterial( material );
+    m_sphere->create();
 
     // Create a pair of VBOs ready to hold our data
     prepareVertexBuffers();
@@ -135,7 +137,7 @@ void GraphScene::render()
     m_dataBuffer.allocate( m_data.data(), m_data.size() * sizeof( float ) );
 
     // Bind the shader program
-    QOpenGLShaderProgramPtr shader = m_cube->material()->shader();
+    QOpenGLShaderProgramPtr shader = m_sphere->material()->shader();
 
     // Calculate needed matrices
     m_modelMatrix.setToIdentity();
@@ -156,8 +158,8 @@ void GraphScene::render()
     shader->setUniformValue( "material.shininess", 100.0f );
 
     // Draw the cube(s)
-    m_cube->vertexArrayObject()->bind();
-    m_funcs->glDrawElementsInstanced(GL_TRIANGLES, m_cube->indexCount(), GL_UNSIGNED_INT, 0, m_data.size());
+    m_sphere->vertexArrayObject()->bind();
+    m_funcs->glDrawElementsInstanced(GL_TRIANGLES, m_sphere->indexCount(), GL_UNSIGNED_INT, 0, m_data.size());
 }
 
 void GraphScene::resize( int w, int h )
@@ -182,10 +184,10 @@ void GraphScene::prepareVertexBuffers()
 void GraphScene::prepareVertexArrayObject()
 {
     // Bind the marker's VAO
-    m_cube->vertexArrayObject()->bind();
+    m_sphere->vertexArrayObject()->bind();
 
     // Enable the data buffer and add it to the marker's VAO
-    QOpenGLShaderProgramPtr shader = m_cube->material()->shader();
+    QOpenGLShaderProgramPtr shader = m_sphere->material()->shader();
     shader->bind();
     m_dataBuffer.bind();
     shader->enableAttributeArray( "point" );
@@ -198,5 +200,5 @@ void GraphScene::prepareVertexArrayObject()
 #else
     m_instanceFuncs->glVertexAttribDivisorARB( pointLocation, 1 );
 #endif
-    m_cube->vertexArrayObject()->release();
+    m_sphere->vertexArrayObject()->release();
 }
