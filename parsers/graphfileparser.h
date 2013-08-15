@@ -2,6 +2,7 @@
 #define GRAPHFILEPARSER_H
 
 #include <QObject>
+#include <QThread>
 #include <QMutex>
 #include <QMutexLocker>
 
@@ -83,6 +84,38 @@ public:
             this->base_reference()++;
         }
     };
+};
+
+class GraphFileParserThread : public QThread
+{
+    Q_OBJECT
+private:
+    QString filename;
+    Graph* graph;
+    GraphFileParser* graphFileParser;
+
+public:
+    GraphFileParserThread(const QString& filename, Graph& graph, GraphFileParser* graphFileParser) :
+        filename(filename),
+        graph(&graph),
+        graphFileParser(graphFileParser)
+    {
+        // Take ownership of the parser
+        graphFileParser->moveToThread(this);
+    }
+
+    void cancel()
+    {
+        if(this->isRunning())
+            graphFileParser->cancel();
+    }
+
+private:
+    void run() Q_DECL_OVERRIDE
+    {
+        graphFileParser->parse(*graph);
+        delete graphFileParser;
+    }
 };
 
 #endif // GRAPHFILEPARSER_H

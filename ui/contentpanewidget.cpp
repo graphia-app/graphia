@@ -11,23 +11,23 @@ ContentPaneWidget::ContentPaneWidget(QWidget* parent) :
     QWidget(parent),
     _graphModel(nullptr),
     _initialised(false),
-    loaderThread(nullptr)
+    graphFileParserThread(nullptr)
 {
     this->setLayout(new QVBoxLayout());
 }
 
 ContentPaneWidget::~ContentPaneWidget()
 {
-    if(loaderThread != nullptr)
+    if(graphFileParserThread != nullptr)
     {
         if(!_initialised)
         {
-            loaderThread->cancel();
-            loaderThread->wait();
+            graphFileParserThread->cancel();
+            graphFileParserThread->wait();
         }
 
-        delete loaderThread;
-        loaderThread = nullptr;
+        delete graphFileParserThread;
+        graphFileParserThread = nullptr;
     }
 
     delete _graphModel;
@@ -37,7 +37,7 @@ bool ContentPaneWidget::initFromFile(const QString &filename)
 {
     QFileInfo info(filename);
 
-    if(!info.exists() || loaderThread != nullptr)
+    if(!info.exists() || graphFileParserThread != nullptr)
         return false;
 
     GraphFileParser* graphFileParser = nullptr;
@@ -51,8 +51,14 @@ bool ContentPaneWidget::initFromFile(const QString &filename)
         /*break;
     }*/
 
-    loaderThread = new LoaderThread(filename, _graphModel->graph(), graphFileParser, this);
-    loaderThread->start();
+    graphFileParserThread = new GraphFileParserThread(filename, _graphModel->graph(), graphFileParser);
+
+    connect(graphFileParser, &GraphFileParser::progress,
+            this, &ContentPaneWidget::onProgress);
+    connect(graphFileParser, &GraphFileParser::complete,
+            this, &ContentPaneWidget::onCompletion);
+
+    graphFileParserThread->start();
 
     return true;
 }
