@@ -15,15 +15,15 @@ public:
 
 private:
     GraphScene* graphScene;
-    const GraphModel* _graphModel;
+    GraphModel* _graphModel;
 
 public:
-    void setGraphModel(const GraphModel* graphModel)
+    void setGraphModel(GraphModel* graphModel)
     {
         this->_graphModel = graphModel;
         graphScene->setGraphModel(graphModel);
     }
-    const GraphModel* graphModel() { return _graphModel; }
+    GraphModel* graphModel() { return _graphModel; }
 
     static QSurfaceFormat& surfaceFormat()
     {

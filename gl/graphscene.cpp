@@ -12,6 +12,8 @@
 #include <QOpenGLExtensions>
 #endif
 
+#include <QMutexLocker>
+
 #include <math.h>
 
 GraphScene::GraphScene( QObject* parent )
@@ -88,7 +90,8 @@ void GraphScene::update( float /*t*/ )
 {
     if(_graphModel != nullptr)
     {
-        const NodeArray<QVector3D>& layout = _graphModel->layout();
+        NodeArray<QVector3D>& layout = _graphModel->layout();
+        QMutexLocker locker(&layout.mutex());
 
         EadesLayout graphLayout(const_cast<NodeArray<QVector3D>&>(_graphModel->layout()));
 

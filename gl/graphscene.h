@@ -36,7 +36,7 @@ public:
     void pan( float angle ) { m_panAngle = angle; }
     void tilt( float angle ) { m_tiltAngle = angle; }
 
-    void setGraphModel(const GraphModel* graphModel) { this->_graphModel = graphModel; }
+    void setGraphModel(GraphModel* graphModel) { this->_graphModel = graphModel; }
 
 private:
     void prepareVertexBuffers();
@@ -58,7 +58,7 @@ private:
     float m_theta;
     QMatrix4x4 m_modelMatrix;
 
-    const GraphModel* _graphModel;
+    GraphModel* _graphModel;
 
     // The data array and corresponding buffer
     QVector<float> m_data;

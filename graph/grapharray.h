@@ -4,12 +4,14 @@
 #include "graph.h"
 
 #include <QVector>
+#include <QMutex>
 
 template<typename Index, typename Element> class GraphArray
 {
 protected:
     Graph* _graph;
     QVector<Element> array;
+    QMutex _mutex;
 
 public:
     GraphArray(Graph& graph) :
@@ -17,6 +19,8 @@ public:
     {}
 
     virtual ~GraphArray() {}
+
+    QMutex& mutex() { return _mutex; }
 
     Graph* graph() { return _graph; }
 
