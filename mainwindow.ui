@@ -74,7 +74,7 @@
    </widget>
    <widget class="QMenu" name="menuLayout">
     <property name="title">
-     <string>Layout</string>
+     <string>&amp;Layout</string>
     </property>
     <addaction name="actionPause_Layout"/>
    </widget>
@@ -94,6 +94,9 @@
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
+   <property name="icon">
+    <iconset theme="document-open"/>
+   </property>
    <property name="text">
     <string>Open</string>
    </property>
@@ -102,6 +105,9 @@
    </property>
   </action>
   <action name="actionQuit">
+   <property name="icon">
+    <iconset theme="application-exit"/>
+   </property>
    <property name="text">
     <string>Quit</string>
    </property>
@@ -110,11 +116,17 @@
    </property>
   </action>
   <action name="actionPause_Layout">
+   <property name="icon">
+    <iconset theme="media-playback-pause"/>
+   </property>
    <property name="text">
     <string>Pause Layout</string>
    </property>
   </action>
   <action name="actionOpen_In_New_Tab">
+   <property name="icon">
+    <iconset theme="tab-new"/>
+   </property>
    <property name="text">
     <string>Open In New Tab</string>
    </property>

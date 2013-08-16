@@ -4,6 +4,7 @@
 #include "ui/contentpanewidget.h"
 
 #include <QFileDialog>
+#include <QIcon>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -46,10 +47,12 @@ void MainWindow::configureActionPauseLayout(bool pause)
     if(pause)
     {
         ui->actionPause_Layout->setText(tr("Resume Layout"));
+        ui->actionPause_Layout->setIcon(QIcon::fromTheme("media-playback-start"));
     }
     else
     {
         ui->actionPause_Layout->setText(tr("Pause Layout"));
+        ui->actionPause_Layout->setIcon(QIcon::fromTheme("media-playback-pause"));
     }
 }
 
