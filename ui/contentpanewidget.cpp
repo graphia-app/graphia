@@ -2,6 +2,8 @@
 
 #include "../parsers/gmlfileparser.h"
 #include "../graph/genericgraphmodel.h"
+#include "../layout/layoutalgorithm.h"
+#include "../layout/eadeslayout.h"
 #include "graphview.h"
 
 #include <QFileInfo>
@@ -11,7 +13,9 @@ ContentPaneWidget::ContentPaneWidget(QWidget* parent) :
     QWidget(parent),
     _graphModel(nullptr),
     _initialised(false),
-    graphFileParserThread(nullptr)
+    graphFileParserThread(nullptr),
+    layoutThread(nullptr),
+    resumeLayoutPostChange(false)
 {
     this->setLayout(new QVBoxLayout());
 }
@@ -28,6 +32,14 @@ ContentPaneWidget::~ContentPaneWidget()
 
         delete graphFileParserThread;
         graphFileParserThread = nullptr;
+
+        if(layoutThread != nullptr)
+        {
+            layoutThread->stop();
+            layoutThread->wait();
+            delete layoutThread;
+            layoutThread = nullptr;
+        }
     }
 
     delete _graphModel;
@@ -51,13 +63,12 @@ bool ContentPaneWidget::initFromFile(const QString &filename)
         /*break;
     }*/
 
+    connect(&_graphModel->graph(), &Graph::graphWillChange, this, &ContentPaneWidget::onGraphWillChange, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::graphChanged, this, &ContentPaneWidget::onGraphChanged, Qt::DirectConnection);
+
     graphFileParserThread = new GraphFileParserThread(filename, _graphModel->graph(), graphFileParser);
-
-    connect(graphFileParser, &GraphFileParser::progress,
-            this, &ContentPaneWidget::onProgress);
-    connect(graphFileParser, &GraphFileParser::complete,
-            this, &ContentPaneWidget::onCompletion);
-
+    connect(graphFileParser, &GraphFileParser::progress, this, &ContentPaneWidget::onProgress);
+    connect(graphFileParser, &GraphFileParser::complete, this, &ContentPaneWidget::onCompletion);
     graphFileParserThread->start();
 
     return true;
@@ -75,5 +86,32 @@ void ContentPaneWidget::onCompletion(int success)
     if(_graphModel->contentWidget() != nullptr)
         layout()->addWidget(_graphModel->contentWidget());
 
+    layoutThread = new LayoutThread(new EadesLayout(_graphModel->layout()));
+    layoutThread->start();
+
     emit complete(success);
+}
+
+void ContentPaneWidget::onGraphWillChange(Graph &)
+{
+    if(layoutThread == nullptr)
+        return;
+
+    // Graph is about to change so suspend any active layout process
+    if(!layoutThread->isPaused())
+    {
+        layoutThread->pause();
+        resumeLayoutPostChange = true;
+    }
+}
+
+void ContentPaneWidget::onGraphChanged(Graph &)
+{
+    if(layoutThread == nullptr)
+        return;
+
+    if(resumeLayoutPostChange)
+        layoutThread->resume();
+
+    resumeLayoutPostChange = false;
 }

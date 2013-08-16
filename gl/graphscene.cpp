@@ -95,11 +95,6 @@ void GraphScene::update( float /*t*/ )
         NodeArray<QVector3D>& layout = _graphModel->layout();
         QMutexLocker locker(&layout.mutex());
 
-        EadesLayout graphLayout(const_cast<NodeArray<QVector3D>&>(_graphModel->layout()));
-
-        for(int i = 0; i < 1; i++)
-            graphLayout.execute();
-
         m_data.resize(layout.size() * 3);
         int i = 0;
 

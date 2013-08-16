@@ -7,7 +7,9 @@ class EadesLayout : public LayoutAlgorithm
 {
     Q_OBJECT
 public:
-    EadesLayout(NodeArray<QVector3D>& positions) : LayoutAlgorithm(positions) {}
+    EadesLayout(NodeArray<QVector3D>& positions) :
+        LayoutAlgorithm(positions, LayoutAlgorithm::Unbounded)
+    {}
 
     void execute();
 };

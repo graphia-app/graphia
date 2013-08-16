@@ -1,14 +1,16 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+#include <QObject>
 #include <QList>
 #include <QSet>
 #include <QVector>
 #include <QQueue>
 #include <QDebug>
 
-class Graph
+class Graph : public QObject
 {
+    Q_OBJECT
 public:
     Graph();
     virtual ~Graph();
@@ -29,6 +31,11 @@ public:
 
     public:
         Node() : _id(Graph::NullNodeId) {}
+        Node(const Graph::Node& other) :
+            _id(other._id),
+            _inEdges(other._inEdges),
+            _outEdges(other._outEdges)
+        {}
 
         const QSet<EdgeId> inEdges() const { return _inEdges; }
         int inDegree() const { return _inEdges.size(); }
@@ -54,6 +61,11 @@ public:
             _id(Graph::NullNodeId),
             _sourceId(Graph::NullNodeId),
             _targetId(Graph::NullNodeId)
+        {}
+        Edge(const Graph::Edge& other) :
+            _id(other._id),
+            _sourceId(other._sourceId),
+            _targetId(other._targetId)
         {}
 
         NodeId sourceId() const { return _sourceId; }
@@ -116,28 +128,13 @@ public:
         }
     }
 
-    class ChangeListener
-    {
-    public:
-        virtual void onNodeAdded(NodeId) {}
-        virtual void onNodeRemoved(NodeId) {}
-        virtual void onEdgeAdded(EdgeId) {}
-        virtual void onEdgeRemoved(EdgeId) {}
-    };
-
-protected:
-    QList<ChangeListener*> changeListeners;
-
-public:
-    void addChangeListener(ChangeListener* changeListener)
-    {
-        changeListeners.append(changeListener);
-    }
-
-    void removeChangeListener(ChangeListener* changeListener)
-    {
-        changeListeners.removeAll(changeListener);
-    }
+signals:
+    void graphWillChange(Graph&);
+    void graphChanged(Graph&);
+    void nodeAdded(Graph&, NodeId);
+    void nodeWillBeRemoved(Graph&, NodeId);
+    void edgeAdded(Graph&, EdgeId);
+    void edgeWillBeRemoved(Graph&, EdgeId);
 };
 
 #endif // GRAPH_H

@@ -3,9 +3,11 @@
 
 #include <QWidget>
 
+#include "../graph/graph.h"
 #include "../graph/graphmodel.h"
 
 class GraphFileParserThread;
+class LayoutThread;
 
 class ContentPaneWidget : public QWidget
 {
@@ -26,6 +28,13 @@ private:
     GraphModel* _graphModel;
     bool _initialised;
     GraphFileParserThread *graphFileParserThread;
+    LayoutThread *layoutThread;
+
+    bool resumeLayoutPostChange;
+
+private slots:
+    void onGraphWillChange(Graph&);
+    void onGraphChanged(Graph&);
 
 public:
     GraphModel* graphModel() { return _graphModel; }

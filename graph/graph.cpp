@@ -19,6 +19,8 @@ Graph::~Graph()
 
 Graph::NodeId Graph::addNode()
 {
+    emit graphWillChange(*this);
+
     Graph::NodeId newNodeId;
 
     if(!vacatedNodeIdQueue.isEmpty())
@@ -30,16 +32,16 @@ Graph::NodeId Graph::addNode()
     nodesVector.resize(nodeArrayCapacity());
     nodesVector[newNodeId]._id = newNodeId;
 
-    for(Graph::ChangeListener* changeListener : changeListeners)
-        changeListener->onNodeAdded(newNodeId);
+    emit nodeAdded(*this, newNodeId);
+    emit graphChanged(*this);
 
     return newNodeId;
 }
 
 void Graph::removeNode(Graph::NodeId nodeId)
 {
-    for(Graph::ChangeListener* changeListener : changeListeners)
-        changeListener->onNodeRemoved(nodeId);
+    emit graphWillChange(*this);
+    emit nodeWillBeRemoved(*this, nodeId);
 
     // Remove all edges that touch this node
     Node& node = nodeById(nodeId);
@@ -48,10 +50,14 @@ void Graph::removeNode(Graph::NodeId nodeId)
 
     nodeIdsList.removeOne(nodeId);
     vacatedNodeIdQueue.enqueue(nodeId);
+
+    emit graphChanged(*this);
 }
 
 Graph::EdgeId Graph::addEdge(Graph::NodeId sourceId, Graph::NodeId targetId)
 {
+    emit graphWillChange(*this);
+
     Graph::EdgeId newEdgeId;
 
     if(!vacatedEdgeIdQueue.isEmpty())
@@ -65,16 +71,16 @@ Graph::EdgeId Graph::addEdge(Graph::NodeId sourceId, Graph::NodeId targetId)
 
     setNodeEdges(newEdgeId, sourceId, targetId);
 
-    for(Graph::ChangeListener* changeListener : changeListeners)
-        changeListener->onEdgeAdded(newEdgeId);
+    emit edgeAdded(*this, newEdgeId);
+    emit graphChanged(*this);
 
     return newEdgeId;
 }
 
 void Graph::removeEdge(Graph::EdgeId edgeId)
 {
-    for(Graph::ChangeListener* changeListener : changeListeners)
-        changeListener->onEdgeRemoved(edgeId);
+    emit graphWillChange(*this);
+    emit edgeWillBeRemoved(*this, edgeId);
 
     // Remove all node references to this edge
     Edge& edge = edgeById(edgeId);
@@ -85,10 +91,14 @@ void Graph::removeEdge(Graph::EdgeId edgeId)
 
     edgeIdsList.removeOne(edgeId);
     vacatedEdgeIdQueue.enqueue(edgeId);
+
+    emit graphChanged(*this);
 }
 
 void Graph::setNodeEdges(Graph::Edge& edge, Graph::NodeId sourceId, Graph::NodeId targetId)
 {
+    emit graphWillChange(*this);
+
     Q_ASSERT(sourceId != Graph::NullNodeId);
     Q_ASSERT(targetId != Graph::NullNodeId);
 
@@ -114,6 +124,8 @@ void Graph::setNodeEdges(Graph::Edge& edge, Graph::NodeId sourceId, Graph::NodeI
 
     Node& target = nodeById(targetId);
     target._inEdges.insert(edge.id());
+
+    emit graphChanged(*this);
 }
 
 void Graph::setNodeEdges(Graph::EdgeId edgeId, Graph::NodeId sourceId, Graph::NodeId targetId)
