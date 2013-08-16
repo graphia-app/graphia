@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QList>
 
+class ContentPaneWidget;
+
 namespace Ui {
 class MainWindow;
 }
@@ -17,6 +19,9 @@ public:
     ~MainWindow();
     
 private:
+    ContentPaneWidget* currentTabWidget();
+    ContentPaneWidget* createNewTabWidget(const QString &filename);
+    QString showGeneralFileOpenDialog();
     void configureActionPauseLayout(bool pause);
 
 private slots:
@@ -30,6 +35,8 @@ private slots:
     void on_actionPause_Layout_triggered();
 
     void on_tabs_currentChanged(int index);
+
+    void on_actionOpen_In_New_Tab_triggered();
 
 private:
     Ui::MainWindow *ui;

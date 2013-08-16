@@ -32,14 +32,14 @@ ContentPaneWidget::~ContentPaneWidget()
 
         delete graphFileParserThread;
         graphFileParserThread = nullptr;
+    }
 
-        if(layoutThread != nullptr)
-        {
-            layoutThread->stop();
-            layoutThread->wait();
-            delete layoutThread;
-            layoutThread = nullptr;
-        }
+    if(layoutThread != nullptr)
+    {
+        layoutThread->stop();
+        layoutThread->wait();
+        delete layoutThread;
+        layoutThread = nullptr;
     }
 
     delete _graphModel;

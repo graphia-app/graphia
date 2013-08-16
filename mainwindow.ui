@@ -68,9 +68,18 @@
      <string>&amp;File</string>
     </property>
     <addaction name="actionOpen"/>
+    <addaction name="actionOpen_In_New_Tab"/>
+    <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
+   <widget class="QMenu" name="menuLayout">
+    <property name="title">
+     <string>Layout</string>
+    </property>
+    <addaction name="actionPause_Layout"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuLayout"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -80,6 +89,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionOpen"/>
+   <addaction name="actionOpen_In_New_Tab"/>
    <addaction name="actionPause_Layout"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -102,6 +112,14 @@
   <action name="actionPause_Layout">
    <property name="text">
     <string>Pause Layout</string>
+   </property>
+  </action>
+  <action name="actionOpen_In_New_Tab">
+   <property name="text">
+    <string>Open In New Tab</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
    </property>
   </action>
  </widget>
