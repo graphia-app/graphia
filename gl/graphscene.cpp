@@ -145,12 +145,12 @@ void GraphScene::render()
     shader->setUniformValue( "projectionMatrix", m_camera->projectionMatrix() );
 
     // Set the lighting parameters
-    shader->setUniformValue( "light.position", QVector4D( 0.0f, 0.0f, 0.0f, 1.0f ) );
+    shader->setUniformValue( "light.position", QVector4D( -10.0f, 10.0f, 0.0f, 1.0f ) );
     shader->setUniformValue( "light.intensity", QVector3D( 1.0f, 1.0f, 1.0f ) );
     shader->setUniformValue( "material.kd", QVector3D( 0.0f, 0.0f, 1.0f ) );
     shader->setUniformValue( "material.ks", QVector3D( 0.95f, 0.95f, 0.95f ) );
     shader->setUniformValue( "material.ka", QVector3D( 0.1f, 0.1f, 0.1f ) );
-    shader->setUniformValue( "material.shininess", 100.0f );
+    shader->setUniformValue( "material.shininess", 10.0f );
 
     // Draw the cube(s)
     m_sphere->vertexArrayObject()->bind();
