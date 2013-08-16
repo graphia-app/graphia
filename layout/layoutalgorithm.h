@@ -63,6 +63,12 @@ public:
     {
         QMutexLocker locker(&mutex);
         _pause = true;
+    }
+
+    void pauseAndWait()
+    {
+        QMutexLocker locker(&mutex);
+        _pause = true;
         waitForPause.wait(&mutex);
     }
 
@@ -85,8 +91,13 @@ public:
 
     void stop()
     {
-        QMutexLocker locker(&mutex);
-        _stop = true;
+        {
+            QMutexLocker locker(&mutex);
+            _stop = true;
+            _pause = false;
+        }
+
+        waitForResume.wakeAll();
     }
 
 private:
@@ -99,8 +110,6 @@ private:
 
             {
                 QMutexLocker locker(&mutex);
-                if(_stop)
-                    break;
 
                 if(_pause)
                 {
@@ -108,6 +117,9 @@ private:
                     waitForPause.wakeAll();
                     waitForResume.wait(&mutex);
                 }
+
+                if(_stop)
+                    break;
             }
         }
 

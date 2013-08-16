@@ -17,6 +17,18 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::configureActionPauseLayout(bool pause)
+{
+    if(pause)
+    {
+        ui->actionPause_Layout->setText(tr("Resume Layout"));
+    }
+    else
+    {
+        ui->actionPause_Layout->setText(tr("Pause Layout"));
+    }
+}
+
 void MainWindow::on_actionOpen_triggered()
 {
     QString filename = QFileDialog::getOpenFileName(this, tr("Open GML File..."),
@@ -61,4 +73,27 @@ void MainWindow::on_loadCompletion(int /*success*/)
 void MainWindow::on_actionQuit_triggered()
 {
     qApp->quit();
+}
+
+void MainWindow::on_actionPause_Layout_triggered()
+{
+    ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(ui->tabs->currentWidget());
+
+    if(contentPaneWidget->layoutIsPaused())
+    {
+        contentPaneWidget->resumeLayout();
+        configureActionPauseLayout(false);
+    }
+    else
+    {
+        contentPaneWidget->pauseLayout();
+        configureActionPauseLayout(true);
+    }
+}
+
+void MainWindow::on_tabs_currentChanged(int)
+{
+    ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(ui->tabs->currentWidget());
+
+    configureActionPauseLayout(contentPaneWidget->layoutIsPaused());
 }

@@ -38,6 +38,9 @@ private slots:
 
 public:
     GraphModel* graphModel() { return _graphModel; }
+    void pauseLayout();
+    bool layoutIsPaused();
+    void resumeLayout();
 
     bool initFromFile(const QString& filename);
 };

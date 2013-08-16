@@ -100,7 +100,7 @@ void ContentPaneWidget::onGraphWillChange(Graph &)
     // Graph is about to change so suspend any active layout process
     if(!layoutThread->isPaused())
     {
-        layoutThread->pause();
+        layoutThread->pauseAndWait();
         resumeLayoutPostChange = true;
     }
 }
@@ -114,4 +114,28 @@ void ContentPaneWidget::onGraphChanged(Graph &)
         layoutThread->resume();
 
     resumeLayoutPostChange = false;
+}
+
+void ContentPaneWidget::pauseLayout()
+{
+    if(layoutThread == nullptr)
+        return;
+
+    layoutThread->pause();
+}
+
+bool ContentPaneWidget::layoutIsPaused()
+{
+    if(layoutThread == nullptr)
+        return false;
+
+    return layoutThread->isPaused();
+}
+
+void ContentPaneWidget::resumeLayout()
+{
+    if(layoutThread == nullptr)
+        return;
+
+    layoutThread->resume();
 }
