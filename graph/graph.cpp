@@ -1,4 +1,5 @@
 #include "graph.h"
+#include "grapharray.h"
 
 #include <QtGlobal>
 
@@ -31,6 +32,9 @@ Graph::NodeId Graph::addNode()
     nodeIdsList.append(newNodeId);
     nodesVector.resize(nodeArrayCapacity());
     nodesVector[newNodeId]._id = newNodeId;
+
+    for(ResizableGraphArray* nodeArray : nodeArrayList)
+        nodeArray->resize(nodeArrayCapacity());
 
     emit nodeAdded(*this, newNodeId);
     emit graphChanged(*this);
@@ -68,6 +72,9 @@ Graph::EdgeId Graph::addEdge(Graph::NodeId sourceId, Graph::NodeId targetId)
     edgeIdsList.append(newEdgeId);
     edgesVector.resize(edgeArrayCapacity());
     edgesVector[newEdgeId]._id = newEdgeId;
+
+    for(ResizableGraphArray* edgeArray : edgeArrayList)
+        edgeArray->resize(edgeArrayCapacity());
 
     setNodeEdges(newEdgeId, sourceId, targetId);
 

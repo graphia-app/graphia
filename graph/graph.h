@@ -8,6 +8,8 @@
 #include <QQueue>
 #include <QDebug>
 
+class ResizableGraphArray;
+
 class Graph : public QObject
 {
     Q_OBJECT
@@ -87,11 +89,18 @@ private:
     EdgeId nextEdgeId;
     QQueue<EdgeId> vacatedEdgeIdQueue;
 
+    template<typename> friend class NodeArray;
+    QList<ResizableGraphArray*> nodeArrayList;
+    int nodeArrayCapacity() const { return nextNodeId; }
+
+    template<typename> friend class EdgeArray;
+    QList<ResizableGraphArray*> edgeArrayList;
+    int edgeArrayCapacity() const { return nextEdgeId; }
+
 public:
     QList<NodeId>& nodeIds() { return nodeIdsList; }
     const QList<NodeId>& nodeIds() const { return nodeIdsList; }
     int numNodes() const { return nodeIdsList.size(); }
-    int nodeArrayCapacity() const { return nextNodeId; }
 
     NodeId addNode();
     void removeNode(NodeId nodeId);
@@ -101,7 +110,6 @@ public:
     QList<EdgeId>& edgeIds() { return edgeIdsList; }
     const QList<EdgeId>& edgeIds() const { return edgeIdsList; }
     int numEdges() const { return edgeIdsList.size(); }
-    int edgeArrayCapacity() const { return nextEdgeId; }
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId);
     void removeEdge(EdgeId edgeId);

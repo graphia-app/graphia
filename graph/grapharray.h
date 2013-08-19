@@ -8,7 +8,13 @@
 #include <QMutex>
 #include <QMutexLocker>
 
-template<typename Index, typename Element> class GraphArray
+class ResizableGraphArray
+{
+public:
+    virtual void resize(int size) = 0;
+};
+
+template<typename Index, typename Element> class GraphArray : public ResizableGraphArray
 {
 protected:
     Graph* _graph;
@@ -19,8 +25,6 @@ public:
     GraphArray(Graph& graph) :
         _graph(&graph)
     {}
-
-    virtual ~GraphArray() {}
 
     QMutex& mutex() { return _mutex; }
 
@@ -46,6 +50,11 @@ public:
         return array.size();
     }
 
+    void resize(int size)
+    {
+        array.resize(size);
+    }
+
     void dumpToQDebug(int detail) const
     {
         qDebug() << "GraphArray size" << array.size();
@@ -58,63 +67,33 @@ public:
     }
 };
 
-class NodeArrayQObject : public QObject
-{
-    Q_OBJECT
-private:
-    virtual void onNodeAddedReal(Graph&, Graph::NodeId) = 0;
-
-private slots:
-    void onNodeAdded(Graph& graph, Graph::NodeId nodeId)
-    {
-        onNodeAddedReal(graph, nodeId);
-    }
-};
-
-template<typename Element> class NodeArray : public NodeArrayQObject, public GraphArray<Graph::NodeId, Element>
+template<typename Element> class NodeArray : public GraphArray<Graph::NodeId, Element>
 {
 public:
     NodeArray(Graph& graph) : GraphArray<Graph::NodeId, Element>(graph)
     {
-        this->array.resize(graph.nodeArrayCapacity());
-        this->connect(&graph, &Graph::nodeAdded, this, &NodeArray::onNodeAdded, Qt::DirectConnection);
+        this->resize(graph.nodeArrayCapacity());
+        graph.nodeArrayList.append(this);
     }
 
-private:
-    void onNodeAddedReal(Graph&, Graph::NodeId)
+    ~NodeArray()
     {
-        QMutexLocker locker(&this->mutex());
-        this->array.resize(this->_graph->nodeArrayCapacity());
+        this->_graph->nodeArrayList.removeOne(this);
     }
 };
 
-class EdgeArrayQObject : public QObject
-{
-    Q_OBJECT
-private:
-    virtual void onEdgeAddedReal(Graph&, Graph::EdgeId) = 0;
-
-private slots:
-    void onEdgeAdded(Graph& graph, Graph::EdgeId edgeId)
-    {
-        onEdgeAddedReal(graph, edgeId);
-    }
-};
-
-template<typename Element> class EdgeArray : public EdgeArrayQObject, public GraphArray<Graph::EdgeId, Element>
+template<typename Element> class EdgeArray : public GraphArray<Graph::EdgeId, Element>
 {
 public:
     EdgeArray(Graph& graph) : GraphArray<Graph::EdgeId, Element>(graph)
     {
-        this->array.resize(graph.edgeArrayCapacity());
-        this->connect(&graph, &Graph::edgeAdded, this, &EdgeArray::onEdgeAdded, Qt::DirectConnection);
+        this->resize(graph.edgeArrayCapacity());
+        graph.edgeArrayList.append(this);
     }
 
-private:
-    void onEdgeAddedReal(Graph&, Graph::EdgeId)
+    ~EdgeArray()
     {
-        QMutexLocker locker(&this->mutex());
-        this->array.resize(this->_graph->edgeArrayCapacity());
+        this->_graph->edgeArrayList.removeOne(this);
     }
 };
 
