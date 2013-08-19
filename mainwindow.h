@@ -21,6 +21,7 @@ public:
 private:
     ContentPaneWidget* currentTabWidget();
     ContentPaneWidget* createNewTabWidget(const QString &filename);
+    void closeTab(int index);
     QString showGeneralFileOpenDialog();
     void configureActionPauseLayout(bool pause);
 

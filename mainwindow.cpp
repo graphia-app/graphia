@@ -37,6 +37,14 @@ ContentPaneWidget *MainWindow::createNewTabWidget(const QString& filename)
     return contentPaneWidget;
 }
 
+void MainWindow::closeTab(int index)
+{
+    ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(ui->tabs->widget(index));
+
+    ui->tabs->removeTab(index);
+    delete contentPaneWidget;
+}
+
 QString MainWindow::showGeneralFileOpenDialog()
 {
     return QFileDialog::getOpenFileName(this, tr("Open File..."), QString(), tr("GML Files (*.gml)"));
@@ -70,7 +78,7 @@ void MainWindow::on_actionOpen_triggered()
     {
         ui->tabs->setUpdatesEnabled(false);
         int index = ui->tabs->currentIndex();
-        ui->tabs->removeTab(index);
+        closeTab(index);
 
         ContentPaneWidget* contentPaneWidget = createNewTabWidget(filename);
 
@@ -94,9 +102,7 @@ void MainWindow::on_actionOpen_In_New_Tab_triggered()
 
 void MainWindow::on_tabs_tabCloseRequested(int index)
 {
-    /*ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(ui->tabs->widget(index));
-    delete contentPaneWidget;*/
-    ui->tabs->removeTab(index);
+    closeTab(index);
 }
 
 void MainWindow::on_loadProgress(int percentage)
