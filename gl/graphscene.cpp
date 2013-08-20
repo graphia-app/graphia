@@ -152,9 +152,9 @@ void GraphScene::render()
     shader->setUniformValue( "material.ka", QVector3D( 0.1f, 0.1f, 0.1f ) );
     shader->setUniformValue( "material.shininess", 10.0f );
 
-    // Draw the cube(s)
+    // Draw the nodes
     m_sphere->vertexArrayObject()->bind();
-    m_funcs->glDrawElementsInstanced(GL_TRIANGLES, m_sphere->indexCount(), GL_UNSIGNED_INT, 0, m_data.size());
+    m_funcs->glDrawElementsInstanced(GL_TRIANGLES, m_sphere->indexCount(), GL_UNSIGNED_INT, 0, _graphModel->graph().numNodes());
 }
 
 void GraphScene::resize( int w, int h )
