@@ -25,8 +25,7 @@ void EadesLayout::execute()
         {  0.0f, -1.0f,  0.0f },
         { -1.0f,  0.0f,  0.0f },
     };
-    static int axialDirectionIndex = 0;
-    static bool firstIteration = true;
+    int axialDirectionIndex = 0;
 
     if(firstIteration)
     {

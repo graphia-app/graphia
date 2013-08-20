@@ -6,9 +6,13 @@
 class EadesLayout : public LayoutAlgorithm
 {
     Q_OBJECT
+private:
+    bool firstIteration;
+
 public:
     EadesLayout(NodeArray<QVector3D>& positions) :
-        LayoutAlgorithm(positions, LayoutAlgorithm::Unbounded)
+        LayoutAlgorithm(positions, LayoutAlgorithm::Unbounded),
+        firstIteration(true)
     {}
 
     void execute();
