@@ -1,4 +1,5 @@
 #include "eadeslayout.h"
+#include "randomlayout.h"
 
 #include "../utils.h"
 
@@ -25,6 +26,17 @@ void EadesLayout::execute()
         { -1.0f,  0.0f,  0.0f },
     };
     static int axialDirectionIndex = 0;
+    static bool firstIteration = true;
+
+    if(firstIteration)
+    {
+        RandomLayout randomLayout(positions);
+        positions.mutex().lock();
+        randomLayout.execute();
+        positions.mutex().unlock();
+
+        firstIteration = false;
+    }
 
     // Repulsive forces
     for(Graph::NodeId i : graph().nodeIds())
