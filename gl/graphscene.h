@@ -3,13 +3,13 @@
 
 #include "abstractscene.h"
 
-#include "../graph/graphmodel.h"
-
 #include <QOpenGLBuffer>
 #include <QMatrix4x4>
 
 class Camera;
 class Sphere;
+class Cylinder;
+class GraphModel;
 
 class QOpenGLFunctions_3_3_Core;
 
@@ -20,10 +20,10 @@ class GraphScene : public AbstractScene
 public:
     GraphScene(QObject* parent = 0);
 
-    virtual void initialise();
-    virtual void update( float t );
-    virtual void render();
-    virtual void resize( int w, int h );
+    void initialise();
+    void update( float t );
+    void render();
+    void resize( int w, int h );
 
     // Camera motion control
     void setSideSpeed( float vx ) { m_vx = vx; }
@@ -39,8 +39,12 @@ public:
 
 private:
     void prepareVertexBuffers();
-    void prepareVertexArrayObject();
+    void prepareNodeVAO();
+    void prepareEdgeVAO();
     void prepareTexture();
+
+    void renderNodes();
+    void renderEdges();
 
     QOpenGLFunctions_3_3_Core* m_funcs;
 
@@ -53,6 +57,7 @@ private:
     float m_tiltAngle;
 
     Sphere* m_sphere;
+    Cylinder* m_cylinder;
 
     float m_theta;
     QMatrix4x4 m_modelMatrix;
@@ -60,8 +65,11 @@ private:
     GraphModel* _graphModel;
 
     // The data array and corresponding buffer
-    QVector<float> m_data;
-    QOpenGLBuffer m_dataBuffer;
+    QVector<GLfloat> m_nodePositionData;
+    QOpenGLBuffer m_nodePositionDataBuffer;
+
+    QVector<GLfloat> m_edgePositionData;
+    QOpenGLBuffer m_edgePositionDataBuffer;
 };
 
 #endif // INSTANCEDGEOMETRYSCENE_H

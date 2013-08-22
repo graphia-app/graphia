@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>gl/shaders/instancednodes.vert</file>
         <file>gl/shaders/ads.frag</file>
+        <file>gl/shaders/instancededges.vert</file>
     </qresource>
 </RCC>

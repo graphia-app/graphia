@@ -35,7 +35,8 @@ SOURCES += main.cpp\
     ui/contentpanewidget.cpp \
     gl/graphscene.cpp \
     graph/genericgraphmodel.cpp \
-    gl/sphere.cpp
+    gl/sphere.cpp \
+    gl/cylinder.cpp
 
 HEADERS  += mainwindow.h \
     graph/grapharray.h \
@@ -63,13 +64,15 @@ HEADERS  += mainwindow.h \
     gl/graphscene.h \
     graph/genericgraphmodel.h \
     graph/graphmodel.h \
-    gl/sphere.h
+    gl/sphere.h \
+    gl/cylinder.h
 
 FORMS    += mainwindow.ui
 
 OTHER_FILES += \
     gl/shaders/ads.frag \
-    gl/shaders/instancednodes.vert
+    gl/shaders/instancednodes.vert \
+    gl/shaders/instancededges.vert
 
 RESOURCES += \
     resources.qrc
