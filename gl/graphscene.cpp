@@ -78,7 +78,8 @@ void GraphScene::initialise()
     edgeMaterial->setShaders(":/gl/shaders/instancededges.vert", ":/gl/shaders/ads.frag" );
 
     m_cylinder = new Cylinder(this);
-    m_cylinder->setRadius(1.0f);
+    m_cylinder->setRadius(0.3f);
+    m_cylinder->setLength(1.0f);
     m_cylinder->setSlices(16);
     m_cylinder->setMaterial(edgeMaterial);
     m_cylinder->create();
@@ -203,16 +204,9 @@ void GraphScene::renderEdges()
     QOpenGLShaderProgramPtr shader = m_cylinder->material()->shader();
     shader->bind();
 
-    // Calculate needed matrices
-    m_modelMatrix.setToIdentity();
-    m_modelMatrix.rotate( m_theta, 0.0f, 1.0f, 0.0f );
-
     //FIXME: use UBOs
-    QMatrix4x4 modelViewMatrix = m_camera->viewMatrix() * m_modelMatrix;
-    QMatrix3x3 normalMatrix = modelViewMatrix.normalMatrix();
-    shader->setUniformValue( "modelViewMatrix", modelViewMatrix );
-    shader->setUniformValue( "normalMatrix", normalMatrix );
-    shader->setUniformValue( "projectionMatrix", m_camera->projectionMatrix() );
+    shader->setUniformValue("viewMatrix", m_camera->viewMatrix());
+    shader->setUniformValue("projectionMatrix", m_camera->projectionMatrix());
 
     // Set the lighting parameters
     shader->setUniformValue( "light.position", QVector4D( -10.0f, 10.0f, 0.0f, 1.0f ) );

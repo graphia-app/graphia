@@ -9,15 +9,36 @@ layout (location = 4) in vec3 target; // The position of the target node
 out vec3 position;
 out vec3 normal;
 
-uniform mat4 modelViewMatrix;
-uniform mat3 normalMatrix;
+uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
+
+mat4 makeOrientationMatrix(vec3 up)
+{
+    mat3 m;
+
+    m[1] = up;
+    m[0].x = -m[1].y;
+    m[0].y = m[1].x;
+    m[0].z = m[1].z;
+    m[2] = cross(m[0], m[1]);
+    m[2] = normalize(m[2]);
+
+    return mat4(m);
+}
 
 void main()
 {
+    float edgeLength = distance(source, target);
     vec3 midpoint = mix(source, target, 0.5);
-    position = ( modelViewMatrix * vec4( midpoint + vertexPosition, 1.0 ) ).xyz;
+    mat4 modelMatrix = makeOrientationMatrix(normalize(target - source));
 
+    vec3 scaledVertexPosition = vertexPosition;
+    scaledVertexPosition.y *= edgeLength;
+
+    position = (modelMatrix * vec4(scaledVertexPosition, 1.0)).xyz;
+    position = (viewMatrix * vec4(position + midpoint, 1.0)).xyz;
+
+    mat3 normalMatrix = transpose(inverse(mat3(viewMatrix * modelMatrix)));
     normal = normalMatrix * vertexNormal;
     gl_Position = projectionMatrix * vec4( position, 1.0 );
 }
