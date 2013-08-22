@@ -60,8 +60,8 @@ void GraphScene::initialise()
 
     // Create a Material we can use to operate on instanced geometry
     MaterialPtr material( new Material );
-    material->setShaders( ":/gl/shaders/instancedgeometry.vert",
-                          ":/gl/shaders/instancedgeometry.frag" );
+    material->setShaders( ":/gl/shaders/instancednodes.vert",
+                          ":/gl/shaders/ads.frag" );
 
     // Create a cube
     m_sphere = new Sphere( this );

@@ -68,8 +68,8 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui
 
 OTHER_FILES += \
-    gl/shaders/instancedgeometry.frag \
-    gl/shaders/instancedgeometry.vert
+    gl/shaders/ads.frag \
+    gl/shaders/instancednodes.vert
 
 RESOURCES += \
     resources.qrc
