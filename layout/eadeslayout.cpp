@@ -30,10 +30,8 @@ void EadesLayout::execute()
     if(firstIteration)
     {
         RandomLayout randomLayout(positions);
-        positions.mutex().lock();
-        randomLayout.execute();
-        positions.mutex().unlock();
 
+        randomLayout.execute();
         firstIteration = false;
     }
 

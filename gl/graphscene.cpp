@@ -86,8 +86,6 @@ void GraphScene::initialise()
     glClearColor( 0.75f, 0.75f, 0.75f, 1.0f );
 }
 
-#include "../layout/eadeslayout.h"
-
 void GraphScene::update( float /*t*/ )
 {
     if(_graphModel != nullptr)
