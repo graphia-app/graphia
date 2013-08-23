@@ -95,7 +95,7 @@ void EadesLayout::executeReal()
     positions.mutex().lock();
     // Apply the moves
     for(NodeId nodeId : graph().nodeIds())
-        positions[nodeId] += (moves[nodeId] * 0.1f); //FIXME not sure what this constant is about, damping?
+        positions[nodeId] += (moves[nodeId] * 0.2f); //FIXME not sure what this constant is about, damping?
     positions.mutex().unlock();
 
     emit complete();
