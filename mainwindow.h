@@ -5,6 +5,7 @@
 #include <QList>
 
 class ContentPaneWidget;
+class QLabel;
 
 namespace Ui {
 class MainWindow;
@@ -24,6 +25,7 @@ private:
     void closeTab(int index);
     QString showGeneralFileOpenDialog();
     void configureActionPauseLayout(bool pause);
+    void updatePerTabUi();
 
 private slots:
     void on_actionOpen_triggered();
@@ -41,6 +43,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QLabel* statusBarLabel;
 };
 
 #endif // MAINWINDOW_H

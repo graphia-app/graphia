@@ -5,12 +5,15 @@
 
 #include <QFileDialog>
 #include <QIcon>
+#include <QLabel>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    statusBarLabel(new QLabel)
 {
     ui->setupUi(this);
+    ui->statusBar->addWidget(statusBarLabel);
 }
 
 MainWindow::~MainWindow()
@@ -64,6 +67,19 @@ void MainWindow::configureActionPauseLayout(bool pause)
     }
 }
 
+void MainWindow::updatePerTabUi()
+{
+    ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(ui->tabs->currentWidget());
+
+    if (contentPaneWidget != nullptr)
+    {
+        configureActionPauseLayout(contentPaneWidget->layoutIsPaused());
+        statusBarLabel->setText(QString(tr("%1 nodes, %2 edges")).arg(
+                                    contentPaneWidget->graphModel()->graph().numNodes()).arg(
+                                    contentPaneWidget->graphModel()->graph().numEdges()));
+    }
+}
+
 void MainWindow::on_actionOpen_triggered()
 {
     if(ui->tabs->count() == 0)
@@ -112,6 +128,7 @@ void MainWindow::on_loadProgress(int percentage)
 
     int tabIndex = ui->tabs->indexOf(contentPaneWidget);
     ui->tabs->setTabText(tabIndex, QString(tr("%1 %2%")).arg(contentPaneWidget->graphModel()->name()).arg(percentage));
+    updatePerTabUi();
 }
 
 void MainWindow::on_loadCompletion(int /*success*/)
@@ -121,6 +138,7 @@ void MainWindow::on_loadCompletion(int /*success*/)
 
     int tabIndex = ui->tabs->indexOf(contentPaneWidget);
     ui->tabs->setTabText(tabIndex, contentPaneWidget->graphModel()->name());
+    updatePerTabUi();
 }
 
 void MainWindow::on_actionQuit_triggered()
@@ -146,8 +164,5 @@ void MainWindow::on_actionPause_Layout_triggered()
 
 void MainWindow::on_tabs_currentChanged(int)
 {
-    ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(ui->tabs->currentWidget());
-
-    if (contentPaneWidget != nullptr)
-        configureActionPauseLayout(contentPaneWidget->layoutIsPaused());
+    updatePerTabUi();
 }
