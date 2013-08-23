@@ -124,7 +124,7 @@ void GraphScene::update( float /*t*/ )
 
         for(Graph::EdgeId edgeId : _graphModel->graph().edgeIds())
         {
-            Graph::Edge& edge = _graphModel->graph().edgeById(edgeId);
+            const Graph::Edge& edge = _graphModel->graph().edgeById(edgeId);
             QVector3D& sourcePosition = layout[edge.sourceId()];
             QVector3D& targetPosition = layout[edge.targetId()];
 

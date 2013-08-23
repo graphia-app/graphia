@@ -48,7 +48,7 @@ void Graph::removeNode(Graph::NodeId nodeId)
     emit nodeWillBeRemoved(*this, nodeId);
 
     // Remove all edges that touch this node
-    Node& node = nodeById(nodeId);
+    const Node& node = nodesVector[nodeId];
     for(Graph::EdgeId edgeId : node.edges())
         removeEdge(edgeId);
 
@@ -76,7 +76,7 @@ Graph::EdgeId Graph::addEdge(Graph::NodeId sourceId, Graph::NodeId targetId)
     for(ResizableGraphArray* edgeArray : edgeArrayList)
         edgeArray->resize(edgeArrayCapacity());
 
-    setNodeEdges(newEdgeId, sourceId, targetId);
+    setEdgeNodes(newEdgeId, sourceId, targetId);
 
     emit edgeAdded(*this, newEdgeId);
     emit graphChanged(*this);
@@ -90,9 +90,9 @@ void Graph::removeEdge(Graph::EdgeId edgeId)
     emit edgeWillBeRemoved(*this, edgeId);
 
     // Remove all node references to this edge
-    Edge& edge = edgeById(edgeId);
-    Node& source = nodeById(edge.sourceId());
-    Node& target = nodeById(edge.targetId());
+    const Edge& edge = edgesVector[edgeId];
+    Node& source = nodesVector[edge.sourceId()];
+    Node& target = nodesVector[edge.targetId()];
     source._outEdges.remove(edgeId);
     target._inEdges.remove(edgeId);
 
@@ -102,7 +102,7 @@ void Graph::removeEdge(Graph::EdgeId edgeId)
     emit graphChanged(*this);
 }
 
-void Graph::setNodeEdges(Graph::Edge& edge, Graph::NodeId sourceId, Graph::NodeId targetId)
+void Graph::setEdgeNodes(Graph::Edge& edge, Graph::NodeId sourceId, Graph::NodeId targetId)
 {
     emit graphWillChange(*this);
 
@@ -112,31 +112,31 @@ void Graph::setNodeEdges(Graph::Edge& edge, Graph::NodeId sourceId, Graph::NodeI
     if(edge.sourceId() != Graph::NullNodeId)
     {
         // Remove edge from source node out edges
-        Node& source = nodeById(edge.sourceId());
+        Node& source = nodesVector[edge.sourceId()];
         source._outEdges.remove(edge.id());
     }
 
     if(edge.targetId() != Graph::NullNodeId)
     {
         // Remove edge from target node in edges
-        Node& target = nodeById(edge.targetId());
+        Node& target = nodesVector[edge.targetId()];
         target._inEdges.remove(edge.id());
     }
 
     edge._sourceId = sourceId;
     edge._targetId = targetId;
 
-    Node& source = nodeById(sourceId);
+    Node& source = nodesVector[sourceId];
     source._outEdges.insert(edge.id());
 
-    Node& target = nodeById(targetId);
+    Node& target = nodesVector[targetId];
     target._inEdges.insert(edge.id());
 
     emit graphChanged(*this);
 }
 
-void Graph::setNodeEdges(Graph::EdgeId edgeId, Graph::NodeId sourceId, Graph::NodeId targetId)
+void Graph::setEdgeNodes(Graph::EdgeId edgeId, Graph::NodeId sourceId, Graph::NodeId targetId)
 {
-    setNodeEdges(edgeById(edgeId), sourceId, targetId);
+    setEdgeNodes(edgesVector[edgeId], sourceId, targetId);
 }
 

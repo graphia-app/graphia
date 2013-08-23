@@ -76,7 +76,7 @@ void EadesLayout::executeReal()
         if(shouldCancel())
             return;
 
-        Graph::Edge& edge = graph().edgeById(edgeId);
+        const Graph::Edge& edge = graph().edgeById(edgeId);
         if(!edge.isLoop())
         {
             QVector3D difference = positions[edge.targetId()] - positions[edge.sourceId()];

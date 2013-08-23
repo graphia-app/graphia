@@ -98,26 +98,22 @@ private:
     int edgeArrayCapacity() const { return nextEdgeId; }
 
 public:
-    QList<NodeId>& nodeIds() { return nodeIdsList; }
     const QList<NodeId>& nodeIds() const { return nodeIdsList; }
     int numNodes() const { return nodeIdsList.size(); }
 
     NodeId addNode();
     void removeNode(NodeId nodeId);
-    Node& nodeById(NodeId nodeId) { return nodesVector[nodeId]; }
     const Node& nodeById(NodeId nodeId) const { return nodesVector[nodeId]; }
 
-    QList<EdgeId>& edgeIds() { return edgeIdsList; }
     const QList<EdgeId>& edgeIds() const { return edgeIdsList; }
     int numEdges() const { return edgeIdsList.size(); }
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId);
     void removeEdge(EdgeId edgeId);
-    Edge& edgeById(EdgeId edgeId) { return edgesVector[edgeId]; }
     const Edge& edgeById(EdgeId edgeId) const { return edgesVector[edgeId]; }
 
-    void setNodeEdges(Edge& edge, NodeId sourceId, NodeId targetId);
-    void setNodeEdges(EdgeId edgeId, NodeId sourceId, NodeId targetId);
+    void setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId);
+    void setEdgeNodes(EdgeId edgeId, NodeId sourceId, NodeId targetId);
 
     void dumpToQDebug(int detail) const
     {
