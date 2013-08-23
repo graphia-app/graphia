@@ -17,11 +17,14 @@ mat4 makeOrientationMatrix(vec3 up)
     mat3 m;
 
     m[1] = up;
-    m[0].x = -m[1].y;
-    m[0].y = m[1].x;
-    m[0].z = m[1].z;
+    m[0].y = -m[1].x;
+    m[0].z = m[1].y;
+    m[0].x = m[1].z;
+
+    float d = dot(m[0], m[1]);
+    m[0] -= (d * m[1]);
+    m[0] = normalize(m[0]);
     m[2] = cross(m[0], m[1]);
-    m[2] = normalize(m[2]);
 
     return mat4(m);
 }
