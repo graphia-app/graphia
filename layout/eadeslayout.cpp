@@ -37,9 +37,9 @@ void EadesLayout::executeReal()
     moves.fill(QVector3D(0.0f, 0.0f, 0.0f));
 
     // Repulsive forces
-    for(Graph::NodeId i : graph().nodeIds())
+    for(NodeId i : graph().nodeIds())
     {
-        for(Graph::NodeId j : graph().nodeIds())
+        for(NodeId j : graph().nodeIds())
         {
             if(shouldCancel())
                 return;
@@ -71,12 +71,12 @@ void EadesLayout::executeReal()
     }
 
     // Attractive forces
-    for(Graph::EdgeId edgeId : graph().edgeIds())
+    for(EdgeId edgeId : graph().edgeIds())
     {
         if(shouldCancel())
             return;
 
-        const Graph::Edge& edge = graph().edgeById(edgeId);
+        const Edge& edge = graph().edgeById(edgeId);
         if(!edge.isLoop())
         {
             QVector3D difference = positions[edge.targetId()] - positions[edge.sourceId()];
@@ -94,7 +94,7 @@ void EadesLayout::executeReal()
 
     positions.mutex().lock();
     // Apply the moves
-    for(Graph::NodeId nodeId : graph().nodeIds())
+    for(NodeId nodeId : graph().nodeIds())
         positions[nodeId] += (moves[nodeId] * 0.1f); //FIXME not sure what this constant is about, damping?
     positions.mutex().unlock();
 

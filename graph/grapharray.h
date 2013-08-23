@@ -72,10 +72,10 @@ public:
     }
 };
 
-template<typename Element> class NodeArray : public GraphArray<Graph::NodeId, Element>
+template<typename Element> class NodeArray : public GraphArray<NodeId, Element>
 {
 public:
-    NodeArray(Graph& graph) : GraphArray<Graph::NodeId, Element>(graph)
+    NodeArray(Graph& graph) : GraphArray<NodeId, Element>(graph)
     {
         this->resize(graph.nodeArrayCapacity());
         graph.nodeArrayList.append(this);
@@ -87,10 +87,10 @@ public:
     }
 };
 
-template<typename Element> class EdgeArray : public GraphArray<Graph::EdgeId, Element>
+template<typename Element> class EdgeArray : public GraphArray<EdgeId, Element>
 {
 public:
-    EdgeArray(Graph& graph) : GraphArray<Graph::EdgeId, Element>(graph)
+    EdgeArray(Graph& graph) : GraphArray<EdgeId, Element>(graph)
     {
         this->resize(graph.edgeArrayCapacity());
         graph.edgeArrayList.append(this);

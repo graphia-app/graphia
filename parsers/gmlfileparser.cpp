@@ -82,8 +82,8 @@ struct GmlGrammar : qi::grammar<Iterator, GmlFileParser::KeyValuePairList(), asc
 
 bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePairList& keyValuePairList, GmlList listType)
 {
-    static QMap<int,Graph::NodeId> nodeIdMap;
-    Graph::NodeId sourceId = Graph::NullNodeId;
+    static QMap<int,NodeId> nodeIdMap;
+    NodeId sourceId = NullNodeId;
 
     for(unsigned int i = 0; i < keyValuePairList.size(); i++)
     {
@@ -148,7 +148,7 @@ bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePair
             {
                 if(!key.compare("source") && nodeIdMap.contains(*intValue))
                     sourceId = nodeIdMap[*intValue];
-                else if(!key.compare("target") && sourceId != Graph::NullNodeId && nodeIdMap.contains(*intValue))
+                else if(!key.compare("target") && sourceId != NullNodeId && nodeIdMap.contains(*intValue))
                     graph.addEdge(sourceId, nodeIdMap[*intValue]);
                 else
                     return false;

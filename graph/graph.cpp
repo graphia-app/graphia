@@ -11,18 +11,18 @@ Graph::Graph() :
 
 Graph::~Graph()
 {
-    for(Graph::NodeId nodeId : nodeIds())
+    for(NodeId nodeId : nodeIds())
         removeNode(nodeId);
 
     // Removing all the nodes should remove all the edges
     Q_ASSERT(numEdges() == 0);
 }
 
-Graph::NodeId Graph::addNode()
+NodeId Graph::addNode()
 {
     emit graphWillChange(*this);
 
-    Graph::NodeId newNodeId;
+    NodeId newNodeId;
 
     if(!vacatedNodeIdQueue.isEmpty())
         newNodeId = vacatedNodeIdQueue.dequeue();
@@ -42,14 +42,14 @@ Graph::NodeId Graph::addNode()
     return newNodeId;
 }
 
-void Graph::removeNode(Graph::NodeId nodeId)
+void Graph::removeNode(NodeId nodeId)
 {
     emit graphWillChange(*this);
     emit nodeWillBeRemoved(*this, nodeId);
 
     // Remove all edges that touch this node
     const Node& node = nodesVector[nodeId];
-    for(Graph::EdgeId edgeId : node.edges())
+    for(EdgeId edgeId : node.edges())
         removeEdge(edgeId);
 
     nodeIdsList.removeOne(nodeId);
@@ -58,11 +58,11 @@ void Graph::removeNode(Graph::NodeId nodeId)
     emit graphChanged(*this);
 }
 
-Graph::EdgeId Graph::addEdge(Graph::NodeId sourceId, Graph::NodeId targetId)
+EdgeId Graph::addEdge(NodeId sourceId, NodeId targetId)
 {
     emit graphWillChange(*this);
 
-    Graph::EdgeId newEdgeId;
+    EdgeId newEdgeId;
 
     if(!vacatedEdgeIdQueue.isEmpty())
         newEdgeId = vacatedEdgeIdQueue.dequeue();
@@ -84,7 +84,7 @@ Graph::EdgeId Graph::addEdge(Graph::NodeId sourceId, Graph::NodeId targetId)
     return newEdgeId;
 }
 
-void Graph::removeEdge(Graph::EdgeId edgeId)
+void Graph::removeEdge(EdgeId edgeId)
 {
     emit graphWillChange(*this);
     emit edgeWillBeRemoved(*this, edgeId);
@@ -102,21 +102,21 @@ void Graph::removeEdge(Graph::EdgeId edgeId)
     emit graphChanged(*this);
 }
 
-void Graph::setEdgeNodes(Graph::Edge& edge, Graph::NodeId sourceId, Graph::NodeId targetId)
+void Graph::setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId)
 {
     emit graphWillChange(*this);
 
-    Q_ASSERT(sourceId != Graph::NullNodeId);
-    Q_ASSERT(targetId != Graph::NullNodeId);
+    Q_ASSERT(sourceId != NullNodeId);
+    Q_ASSERT(targetId != NullNodeId);
 
-    if(edge.sourceId() != Graph::NullNodeId)
+    if(edge.sourceId() != NullNodeId)
     {
         // Remove edge from source node out edges
         Node& source = nodesVector[edge.sourceId()];
         source._outEdges.remove(edge.id());
     }
 
-    if(edge.targetId() != Graph::NullNodeId)
+    if(edge.targetId() != NullNodeId)
     {
         // Remove edge from target node in edges
         Node& target = nodesVector[edge.targetId()];
@@ -135,7 +135,7 @@ void Graph::setEdgeNodes(Graph::Edge& edge, Graph::NodeId sourceId, Graph::NodeI
     emit graphChanged(*this);
 }
 
-void Graph::setEdgeNodes(Graph::EdgeId edgeId, Graph::NodeId sourceId, Graph::NodeId targetId)
+void Graph::setEdgeNodes(EdgeId edgeId, NodeId sourceId, NodeId targetId)
 {
     setEdgeNodes(edgesVector[edgeId], sourceId, targetId);
 }
