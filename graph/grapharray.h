@@ -55,6 +55,11 @@ public:
         array.resize(size);
     }
 
+    void fill(const Element& value)
+    {
+        array.fill(value);
+    }
+
     void dumpToQDebug(int detail) const
     {
         qDebug() << "GraphArray size" << array.size();

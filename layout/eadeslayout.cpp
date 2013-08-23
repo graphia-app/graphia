@@ -14,7 +14,6 @@
 void EadesLayout::executeReal()
 {
     NodeArray<QVector3D>& positions = *this->positions;
-    NodeArray<QVector3D> moves(graph());
 
     QVector3D axialDirections[] =
     {
@@ -34,6 +33,8 @@ void EadesLayout::executeReal()
         randomLayout.execute();
         firstIteration = false;
     }
+
+    moves.fill(QVector3D(0.0f, 0.0f, 0.0f));
 
     // Repulsive forces
     for(Graph::NodeId i : graph().nodeIds())
