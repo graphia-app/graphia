@@ -3,8 +3,7 @@
 
 #include <QObject>
 #include <QThread>
-#include <QMutex>
-#include <QMutexLocker>
+#include <QAtomicInt>
 
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/spirit/include/support_istream_iterator.hpp>
@@ -22,25 +21,29 @@ signals:
     void complete(bool success) const;
 
 public:
-    GraphFileParser() : _cancelled(false) {}
+    GraphFileParser() : cancelAtomic(0) {}
 
     virtual bool parse(Graph& graph) = 0;
 
 private:
-    QMutex cancelMutex;
-    bool _cancelled;
+    QAtomicInt cancelAtomic;
+    void setCancel(bool cancel)
+    {
+        int expectedValue = static_cast<int>(!cancel);
+        int newValue = static_cast<int>(!!cancel);
+
+        cancelAtomic.testAndSetRelaxed(expectedValue, newValue);
+    }
 
 public:
     void cancel()
     {
-        QMutexLocker lock(&cancelMutex);
-        _cancelled = true;
+        setCancel(true);
     }
 
     bool cancelled()
     {
-        QMutexLocker lock(&cancelMutex);
-        return _cancelled;
+        return cancelAtomic.testAndSetRelaxed(1, 1);
     }
 
 public:
