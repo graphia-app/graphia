@@ -10,22 +10,51 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QWaitCondition>
+#include <QAtomicInt>
 
 class LayoutAlgorithm : public QObject
 {
     Q_OBJECT
+private:
+    QAtomicInt cancelAtomic;
+    void setCancel(bool cancel)
+    {
+        int expectedValue = static_cast<int>(!cancel);
+        int newValue = static_cast<int>(!!cancel);
+
+        cancelAtomic.testAndSetRelaxed(expectedValue, newValue);
+    }
+
+    virtual void executeReal() = 0;
+
 protected:
     NodeArray<QVector3D>* positions;
     int _iterations;
 
+    bool shouldCancel()
+    {
+        return cancelAtomic.testAndSetRelaxed(1, 1);
+    }
+
 public:
     LayoutAlgorithm(NodeArray<QVector3D>& positions, int defaultNumIterations) :
+        cancelAtomic(0),
         positions(&positions),
         _iterations(defaultNumIterations)
     {}
 
     Graph& graph() { return *positions->graph(); }
-    virtual void execute() = 0;
+
+    void execute()
+    {
+        setCancel(false);
+        executeReal();
+    }
+
+    void cancel()
+    {
+        setCancel(true);
+    }
 
     bool iterative() { return _iterations != 1; }
 
@@ -63,12 +92,14 @@ public:
     {
         QMutexLocker locker(&mutex);
         _pause = true;
+        layoutAlgorithm->cancel();
     }
 
     void pauseAndWait()
     {
         QMutexLocker locker(&mutex);
         _pause = true;
+        layoutAlgorithm->cancel();
         waitForPause.wait(&mutex);
     }
 
@@ -95,6 +126,7 @@ public:
             QMutexLocker locker(&mutex);
             _stop = true;
             _pause = false;
+            layoutAlgorithm->cancel();
         }
 
         waitForResume.wakeAll();

@@ -9,7 +9,7 @@ class RandomLayout : public LayoutAlgorithm
 public:
     RandomLayout(NodeArray<QVector3D>& positions) : LayoutAlgorithm(positions, 1) {}
 
-    void execute();
+    void executeReal();
 };
 
 #endif // RANDOMLAYOUT_H

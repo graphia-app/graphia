@@ -11,7 +11,7 @@
 #define REPULSE_SQ(x) (FACTOR*(1.0f/(x)))
 #define ATTRACT(x)    (FACTOR*TAYLOR_LNX(x))
 
-void EadesLayout::execute()
+void EadesLayout::executeReal()
 {
     NodeArray<QVector3D>& positions = *this->positions;
     NodeArray<QVector3D> moves(graph());
@@ -40,6 +40,9 @@ void EadesLayout::execute()
     {
         for(Graph::NodeId j : graph().nodeIds())
         {
+            if(shouldCancel())
+                return;
+
             if(i != j)
             {
                 QVector3D difference = positions[j] - positions[i];
@@ -69,6 +72,9 @@ void EadesLayout::execute()
     // Attractive forces
     for(Graph::EdgeId edgeId : graph().edgeIds())
     {
+        if(shouldCancel())
+            return;
+
         Graph::Edge& edge = graph().edgeById(edgeId);
         if(!edge.isLoop())
         {

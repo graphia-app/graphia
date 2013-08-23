@@ -2,7 +2,7 @@
 
 #include "../utils.h"
 
-void RandomLayout::execute()
+void RandomLayout::executeReal()
 {
     NodeArray<QVector3D>& positions = *this->positions;
     int nodeNumber = 0;
