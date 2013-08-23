@@ -68,9 +68,9 @@ void GraphScene::initialise()
 
     // Create a sphere
     m_sphere = new Sphere( this );
-    m_sphere->setRadius(1.0f);
-    m_sphere->setRings(16);
-    m_sphere->setSlices(16);
+    m_sphere->setRadius(0.8f);
+    m_sphere->setRings(12);
+    m_sphere->setSlices(12);
     m_sphere->setMaterial(nodeMaterial);
     m_sphere->create();
 
@@ -78,9 +78,9 @@ void GraphScene::initialise()
     edgeMaterial->setShaders(":/gl/shaders/instancededges.vert", ":/gl/shaders/ads.frag" );
 
     m_cylinder = new Cylinder(this);
-    m_cylinder->setRadius(0.3f);
+    m_cylinder->setRadius(0.2f);
     m_cylinder->setLength(1.0f);
-    m_cylinder->setSlices(16);
+    m_cylinder->setSlices(8);
     m_cylinder->setMaterial(edgeMaterial);
     m_cylinder->create();
 
