@@ -67,7 +67,7 @@ struct GmlGrammar : qi::grammar<Iterator, GmlFileParser::KeyValuePairList(), asc
 
         string %= lexeme['"' >> (*(char_ - char_("&\"")) | ('&' >> +char_ >> ';')) >> '"'];
 
-        value %= int_ | strict_double | string | '[' >> list >> ']';
+        value %= strict_double | int_ | string | '[' >> list >> ']';
         key %= lexeme[char_("a-zA-Z") >> *(char_("a-zA-Z0-9"))];
         list %= *(key >> value);
 
@@ -139,7 +139,9 @@ bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePair
                 if(!key.compare("id"))
                     nodeIdMap.insert(*intValue, graph.addNode());
                 else
-                    return false;
+                {
+                    // Unhandled node data
+                }
             }
             break;
 
@@ -151,7 +153,9 @@ bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePair
                 else if(!key.compare("target") && sourceId != NullNodeId && nodeIdMap.contains(*intValue))
                     graph.addEdge(sourceId, nodeIdMap[*intValue]);
                 else
-                    return false;
+                {
+                    // Unhandled edge data
+                }
             }
             break;
         }
