@@ -7,7 +7,9 @@ class RandomLayout : public LayoutAlgorithm
 {
     Q_OBJECT
 public:
-    RandomLayout(NodeArray<QVector3D>& positions) : LayoutAlgorithm(positions, 1) {}
+    RandomLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions) :
+        LayoutAlgorithm(graph, positions)
+    {}
 
     void executeReal();
 };

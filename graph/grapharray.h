@@ -27,8 +27,10 @@ public:
     {}
 
     QMutex& mutex() { return _mutex; }
+    void lock() { _mutex.lock(); }
+    void unlock() { _mutex.unlock(); }
 
-    Graph* graph() { return _graph; }
+    const Graph& graph() { return *_graph; }
 
     Element& operator[](Index index)
     {

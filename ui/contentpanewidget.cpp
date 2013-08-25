@@ -86,7 +86,7 @@ void ContentPaneWidget::onCompletion(int success)
     if(_graphModel->contentWidget() != nullptr)
         layout()->addWidget(_graphModel->contentWidget());
 
-    layoutThread = new LayoutThread(new EadesLayout(_graphModel->layout()));
+    layoutThread = new LayoutThread(new EadesLayout(_graphModel->graph(), _graphModel->layout()));
     layoutThread->start();
 
     emit complete(success);

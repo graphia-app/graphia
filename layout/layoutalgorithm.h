@@ -28,6 +28,7 @@ private:
     virtual void executeReal() = 0;
 
 protected:
+    const ReadOnlyGraph* _graph;
     NodeArray<QVector3D>* positions;
     int _iterations;
 
@@ -37,13 +38,14 @@ protected:
     }
 
 public:
-    LayoutAlgorithm(NodeArray<QVector3D>& positions, int defaultNumIterations) :
+    LayoutAlgorithm(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions, int defaultNumIterations = 1) :
         cancelAtomic(0),
+        _graph(&graph),
         positions(&positions),
         _iterations(defaultNumIterations)
     {}
 
-    Graph& graph() { return *positions->graph(); }
+    const ReadOnlyGraph& graph() { return *_graph; }
 
     void execute()
     {
@@ -55,6 +57,9 @@ public:
     {
         setCancel(true);
     }
+
+    // Indicates that the algorithm is doing no useful work
+    virtual bool shouldPause() { return false; }
 
     bool iterative() { return _iterations != 1; }
 
@@ -143,7 +148,7 @@ private:
             {
                 QMutexLocker locker(&mutex);
 
-                if(_pause)
+                if(_pause || layoutAlgorithm->shouldPause())
                 {
                     _isPaused = true;
                     waitForPause.wakeAll();

@@ -3,20 +3,20 @@
 
 #include "layoutalgorithm.h"
 
-#include "../graph/grapharray.h"
+#include <QVector3D>
 
 class EadesLayout : public LayoutAlgorithm
 {
     Q_OBJECT
 private:
     bool firstIteration;
-    NodeArray<QVector3D> moves;
+    QVector<QVector3D> moves;
 
 public:
-    EadesLayout(NodeArray<QVector3D>& positions) :
-        LayoutAlgorithm(positions, LayoutAlgorithm::Unbounded),
+    EadesLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions) :
+        LayoutAlgorithm(graph, positions, LayoutAlgorithm::Unbounded),
         firstIteration(true),
-        moves(graph())
+        moves(graph.numNodes())
     {}
 
     void executeReal();

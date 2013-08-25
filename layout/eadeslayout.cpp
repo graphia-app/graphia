@@ -28,12 +28,13 @@ void EadesLayout::executeReal()
 
     if(firstIteration)
     {
-        RandomLayout randomLayout(positions);
+        RandomLayout randomLayout(graph(), positions);
 
         randomLayout.execute();
         firstIteration = false;
     }
 
+    moves.resize(graph().numNodes());
     moves.fill(QVector3D(0.0f, 0.0f, 0.0f));
 
     // Repulsive forces
@@ -92,11 +93,11 @@ void EadesLayout::executeReal()
         }
     }
 
-    positions.mutex().lock();
+    positions.lock();
     // Apply the moves
     for(NodeId nodeId : graph().nodeIds())
         positions[nodeId] += (moves[nodeId] * 0.2f); //FIXME not sure what this constant is about, damping?
-    positions.mutex().unlock();
+    positions.unlock();
 
     emit complete();
 }
