@@ -9,6 +9,7 @@
 #include <QDebug>
 
 class ResizableGraphArray;
+class GraphComponent;
 
 typedef int NodeId;
 const static NodeId NullNodeId = -1;
@@ -71,8 +72,9 @@ public:
     EdgeId id() const { return _id; }
 };
 
-class ReadonlyGraph
+class ReadOnlyGraph
 {
+public:
     virtual const QList<NodeId>& nodeIds() const = 0;
     virtual int numNodes() const = 0;
     virtual const Node& nodeById(NodeId nodeId) const = 0;
@@ -82,7 +84,7 @@ class ReadonlyGraph
     virtual const Edge& edgeById(EdgeId edgeId) const = 0;
 };
 
-class Graph : public QObject, public ReadonlyGraph
+class Graph : public QObject, public ReadOnlyGraph
 {
     Q_OBJECT
 public:
@@ -108,6 +110,8 @@ private:
     QList<ResizableGraphArray*> edgeArrayList;
     int edgeArrayCapacity() const { return nextEdgeId; }
 
+    QList<GraphComponent*> componentList;
+
 public:
     const QList<NodeId>& nodeIds() const { return nodeIdsList; }
     int numNodes() const { return nodeIdsList.size(); }
@@ -125,6 +129,8 @@ public:
 
     void setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId);
     void setEdgeNodes(EdgeId edgeId, NodeId sourceId, NodeId targetId);
+
+    const QList<GraphComponent*>& components() const { return componentList; }
 
     void dumpToQDebug(int detail) const
     {
@@ -150,6 +156,31 @@ signals:
     void nodeWillBeRemoved(Graph&, NodeId);
     void edgeAdded(Graph&, EdgeId);
     void edgeWillBeRemoved(Graph&, EdgeId);
+};
+
+class GraphComponent : public QObject, public ReadOnlyGraph
+{
+    friend class Graph;
+
+    Q_OBJECT
+public:
+    GraphComponent(Graph& graph) : _graph(&graph) {}
+
+private:
+    Graph* _graph;
+    QList<NodeId> nodeIdsList;
+    QList<EdgeId> edgeIdsList;
+
+public:
+    const Graph& graph() { return *_graph; }
+
+    const QList<NodeId>& nodeIds() const { return nodeIdsList; }
+    int numNodes() const { return nodeIdsList.size(); }
+    const Node& nodeById(NodeId nodeId) const { return _graph->nodeById(nodeId); }
+
+    const QList<EdgeId>& edgeIds() const { return edgeIdsList; }
+    int numEdges() const { return edgeIdsList.size(); }
+    const Edge& edgeById(EdgeId edgeId) const { return _graph->edgeById(edgeId); }
 };
 
 #endif // GRAPH_H
