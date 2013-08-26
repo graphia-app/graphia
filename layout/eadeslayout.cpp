@@ -30,6 +30,7 @@ void EadesLayout::executeReal()
     {
         RandomLayout randomLayout(graph(), positions);
 
+        randomLayout.setSpread(100.0f);
         randomLayout.execute();
         firstIteration = false;
     }
@@ -96,7 +97,7 @@ void EadesLayout::executeReal()
     positions.lock();
     // Apply the moves
     for(NodeId nodeId : graph().nodeIds())
-        positions[nodeId] += (moves[nodeId] * 0.2f); //FIXME not sure what this constant is about, damping?
+        positions[nodeId] += (moves[nodeId] * 0.1f); //FIXME not sure what this constant is about, damping?
     positions.unlock();
 
     emit complete();
