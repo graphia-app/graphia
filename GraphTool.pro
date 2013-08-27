@@ -36,7 +36,8 @@ SOURCES += main.cpp\
     gl/graphscene.cpp \
     graph/genericgraphmodel.cpp \
     gl/sphere.cpp \
-    gl/cylinder.cpp
+    gl/cylinder.cpp \
+    graph/simplecomponentmanager.cpp
 
 HEADERS  += mainwindow.h \
     graph/grapharray.h \
@@ -65,7 +66,9 @@ HEADERS  += mainwindow.h \
     graph/genericgraphmodel.h \
     graph/graphmodel.h \
     gl/sphere.h \
-    gl/cylinder.h
+    gl/cylinder.h \
+    graph/componentmanager.h \
+    graph/simplecomponentmanager.h
 
 FORMS    += mainwindow.ui
 

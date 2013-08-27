@@ -1,11 +1,13 @@
 #include "graph.h"
 #include "grapharray.h"
+#include "simplecomponentmanager.h"
 
 #include <QtGlobal>
 
 Graph::Graph() :
     nextNodeId(0),
-    nextEdgeId(0)
+    nextEdgeId(0),
+    componentManager(new SimpleComponentManager(*this))
 {
 }
 
@@ -16,6 +18,8 @@ Graph::~Graph()
 
     // Removing all the nodes should remove all the edges
     Q_ASSERT(numEdges() == 0);
+
+    delete componentManager;
 }
 
 NodeId Graph::addNode()
@@ -36,6 +40,9 @@ NodeId Graph::addNode()
     for(ResizableGraphArray* nodeArray : nodeArrayList)
         nodeArray->resize(nodeArrayCapacity());
 
+    if(componentManager != nullptr)
+        componentManager->nodeAdded(newNodeId);
+
     emit nodeAdded(*this, newNodeId);
     emit graphChanged(*this);
 
@@ -44,6 +51,9 @@ NodeId Graph::addNode()
 
 void Graph::removeNode(NodeId nodeId)
 {
+    if(componentManager != nullptr)
+        componentManager->nodeWillBeRemoved(nodeId);
+
     emit graphWillChange(*this);
     emit nodeWillBeRemoved(*this, nodeId);
 
@@ -78,6 +88,9 @@ EdgeId Graph::addEdge(NodeId sourceId, NodeId targetId)
 
     setEdgeNodes(newEdgeId, sourceId, targetId);
 
+    if(componentManager != nullptr)
+        componentManager->edgeAdded(newEdgeId);
+
     emit edgeAdded(*this, newEdgeId);
     emit graphChanged(*this);
 
@@ -86,6 +99,9 @@ EdgeId Graph::addEdge(NodeId sourceId, NodeId targetId)
 
 void Graph::removeEdge(EdgeId edgeId)
 {
+    if(componentManager != nullptr)
+        componentManager->edgeWillBeRemoved(edgeId);
+
     emit graphWillChange(*this);
     emit edgeWillBeRemoved(*this, edgeId);
 

@@ -5,11 +5,13 @@
 #include <QList>
 #include <QSet>
 #include <QVector>
+#include <QMap>
 #include <QQueue>
 #include <QDebug>
 
 class ResizableGraphArray;
 class GraphComponent;
+class ComponentManager;
 
 typedef int NodeId;
 const static NodeId NullNodeId = -1;
@@ -119,7 +121,10 @@ private:
     QList<ResizableGraphArray*> edgeArrayList;
     int edgeArrayCapacity() const { return nextEdgeId; }
 
-    QList<GraphComponent*> componentList;
+    ComponentManager* componentManager;
+
+    void setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId);
+    void setEdgeNodes(EdgeId edgeId, NodeId sourceId, NodeId targetId);
 
 public:
     const QList<NodeId>& nodeIds() const { return nodeIdsList; }
@@ -134,12 +139,7 @@ public:
     const Edge& edgeById(EdgeId edgeId) const { return edgesVector[edgeId]; }
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId);
-    void removeEdge(EdgeId edgeId); 
-
-    void setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId);
-    void setEdgeNodes(EdgeId edgeId, NodeId sourceId, NodeId targetId);
-
-    const QList<GraphComponent*>& components() const { return componentList; }
+    void removeEdge(EdgeId edgeId);
 
     void dumpToQDebug(int detail) const
     {
@@ -165,31 +165,6 @@ signals:
     void nodeWillBeRemoved(Graph&, NodeId);
     void edgeAdded(Graph&, EdgeId);
     void edgeWillBeRemoved(Graph&, EdgeId);
-};
-
-class GraphComponent : public QObject, public ReadOnlyGraph
-{
-    friend class Graph;
-
-    Q_OBJECT
-public:
-    GraphComponent(Graph& graph) : _graph(&graph) {}
-
-private:
-    Graph* _graph;
-    QList<NodeId> nodeIdsList;
-    QList<EdgeId> edgeIdsList;
-
-public:
-    const Graph& graph() { return *_graph; }
-
-    const QList<NodeId>& nodeIds() const { return nodeIdsList; }
-    int numNodes() const { return nodeIdsList.size(); }
-    const Node& nodeById(NodeId nodeId) const { return _graph->nodeById(nodeId); }
-
-    const QList<EdgeId>& edgeIds() const { return edgeIdsList; }
-    int numEdges() const { return edgeIdsList.size(); }
-    const Edge& edgeById(EdgeId edgeId) const { return _graph->edgeById(edgeId); }
 };
 
 #endif // GRAPH_H
