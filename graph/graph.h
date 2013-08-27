@@ -66,6 +66,15 @@ public:
 
     NodeId sourceId() const { return _sourceId; }
     NodeId targetId() const { return _targetId; }
+    NodeId oppositeId(NodeId nodeId) const
+    {
+        if(nodeId == _sourceId)
+            return _targetId;
+        else if(nodeId == _targetId)
+            return _sourceId;
+
+        return NullNodeId;
+    }
 
     bool isLoop() const { return sourceId() == targetId(); }
 
