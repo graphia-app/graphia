@@ -4,6 +4,7 @@
 #include "../graph/grapharray.h"
 
 #include <QList>
+#include <QMap>
 #include <QVector3D>
 #include <QObject>
 #include <QThread>
@@ -76,7 +77,8 @@ class LayoutThread : public QThread
 {
     Q_OBJECT
 private:
-    LayoutAlgorithm* layoutAlgorithm;
+    QList<LayoutAlgorithm*> layoutAlgorithms;
+    QMap<LayoutAlgorithm*, int> iterationsRemaining;
     QMutex mutex;
     bool _pause;
     bool _isPaused;
@@ -85,26 +87,36 @@ private:
     QWaitCondition waitForResume;
 
 public:
-    LayoutThread(LayoutAlgorithm* layoutAlgorithm) :
-        layoutAlgorithm(layoutAlgorithm),
+    LayoutThread() :
         _pause(false), _isPaused(false), _stop(false)
+    {}
+
+    void add(LayoutAlgorithm* layoutAlgorithm)
     {
+        QMutexLocker locker(&mutex);
         // Take ownership of the algorithm
         layoutAlgorithm->moveToThread(this);
+        layoutAlgorithms.append(layoutAlgorithm);
+        iterationsRemaining[layoutAlgorithm] = layoutAlgorithm->iterations();
     }
 
     void pause()
     {
         QMutexLocker locker(&mutex);
         _pause = true;
-        layoutAlgorithm->cancel();
+
+        for(LayoutAlgorithm* layoutAlgorithm : layoutAlgorithms)
+            layoutAlgorithm->cancel();
     }
 
     void pauseAndWait()
     {
         QMutexLocker locker(&mutex);
         _pause = true;
-        layoutAlgorithm->cancel();
+
+        for(LayoutAlgorithm* layoutAlgorithm : layoutAlgorithms)
+            layoutAlgorithm->cancel();
+
         waitForPause.wait(&mutex);
     }
 
@@ -131,24 +143,57 @@ public:
             QMutexLocker locker(&mutex);
             _stop = true;
             _pause = false;
-            layoutAlgorithm->cancel();
+
+            for(LayoutAlgorithm* layoutAlgorithm : layoutAlgorithms)
+                layoutAlgorithm->cancel();
         }
 
         waitForResume.wakeAll();
     }
 
 private:
+    bool workRemaining()
+    {
+        for(LayoutAlgorithm* layoutAlgorithm : layoutAlgorithms)
+        {
+            if(iterationsRemaining[layoutAlgorithm] != 0)
+                return true;
+        }
+
+        return false;
+    }
+
+    bool allLayoutAlgorithmsShouldPause()
+    {
+        for(LayoutAlgorithm* layoutAlgorithm : layoutAlgorithms)
+        {
+            if(!layoutAlgorithm->shouldPause())
+                return false;
+        }
+
+        return true;
+    }
+
     void run() Q_DECL_OVERRIDE
     {
-        for(int i = 0; i < layoutAlgorithm->iterations() ||
-            layoutAlgorithm->iterations() == LayoutAlgorithm::Unbounded; i++)
+        while(workRemaining())
         {
-            layoutAlgorithm->execute();
+            for(LayoutAlgorithm* layoutAlgorithm : layoutAlgorithms)
+            {
+                if(layoutAlgorithm->shouldPause())
+                    continue;
+
+                if(iterationsRemaining[layoutAlgorithm] != 0)
+                    layoutAlgorithm->execute();
+
+                if(iterationsRemaining[layoutAlgorithm] != LayoutAlgorithm::Unbounded)
+                    iterationsRemaining[layoutAlgorithm]--;
+            }
 
             {
                 QMutexLocker locker(&mutex);
 
-                if(_pause || layoutAlgorithm->shouldPause())
+                if(_pause || allLayoutAlgorithmsShouldPause())
                 {
                     _isPaused = true;
                     waitForPause.wakeAll();
@@ -160,7 +205,8 @@ private:
             }
         }
 
-        delete layoutAlgorithm;
+        for(LayoutAlgorithm* layoutAlgorithm : layoutAlgorithms)
+            delete layoutAlgorithm;
     }
 };
 
