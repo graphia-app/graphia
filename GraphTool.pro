@@ -44,7 +44,6 @@ HEADERS  += mainwindow.h \
     parsers/graphfileparser.h \
     parsers/gmlfileparser.h \
     graph/graph.h \
-    layout/layoutalgorithm.h \
     layout/randomlayout.h \
     utils.h \
     layout/eadeslayout.h \
@@ -68,7 +67,8 @@ HEADERS  += mainwindow.h \
     gl/sphere.h \
     gl/cylinder.h \
     graph/componentmanager.h \
-    graph/simplecomponentmanager.h
+    graph/simplecomponentmanager.h \
+    layout/layout.h
 
 FORMS    += mainwindow.ui
 

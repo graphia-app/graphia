@@ -2,7 +2,7 @@
 
 #include "../parsers/gmlfileparser.h"
 #include "../graph/genericgraphmodel.h"
-#include "../layout/layoutalgorithm.h"
+#include "../layout/layout.h"
 #include "../layout/eadeslayout.h"
 #include "graphview.h"
 

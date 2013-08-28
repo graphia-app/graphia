@@ -1,11 +1,11 @@
 #ifndef EADESLAYOUT_H
 #define EADESLAYOUT_H
 
-#include "layoutalgorithm.h"
+#include "layout.h"
 
 #include <QVector3D>
 
-class EadesLayout : public LayoutAlgorithm
+class EadesLayout : public Layout
 {
     Q_OBJECT
 private:
@@ -14,7 +14,7 @@ private:
 
 public:
     EadesLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions) :
-        LayoutAlgorithm(graph, positions, LayoutAlgorithm::Unbounded),
+        Layout(graph, positions, Layout::Unbounded),
         firstIteration(true),
         moves(graph.numNodes())
     {}

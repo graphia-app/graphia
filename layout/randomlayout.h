@@ -1,9 +1,9 @@
 #ifndef RANDOMLAYOUT_H
 #define RANDOMLAYOUT_H
 
-#include "layoutalgorithm.h"
+#include "layout.h"
 
-class RandomLayout : public LayoutAlgorithm
+class RandomLayout : public Layout
 {
     Q_OBJECT
 private:
@@ -11,7 +11,7 @@ private:
 
 public:
     RandomLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions) :
-        LayoutAlgorithm(graph, positions), spread(10.0f)
+        Layout(graph, positions), spread(10.0f)
     {}
 
     void setSpread(float spread) { this->spread = spread; }

@@ -1,5 +1,5 @@
-#ifndef LAYOUTALGORITHM_H
-#define LAYOUTALGORITHM_H
+#ifndef LAYOUT_H
+#define LAYOUT_H
 
 #include "../graph/grapharray.h"
 
@@ -13,7 +13,7 @@
 #include <QWaitCondition>
 #include <QAtomicInt>
 
-class LayoutAlgorithm : public QObject
+class Layout : public QObject
 {
     Q_OBJECT
 private:
@@ -39,7 +39,7 @@ protected:
     }
 
 public:
-    LayoutAlgorithm(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions, int defaultNumIterations = 1) :
+    Layout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions, int defaultNumIterations = 1) :
         cancelAtomic(0),
         _graph(&graph),
         positions(&positions),
@@ -77,8 +77,8 @@ class LayoutThread : public QThread
 {
     Q_OBJECT
 private:
-    QList<LayoutAlgorithm*> layoutAlgorithms;
-    QMap<LayoutAlgorithm*, int> iterationsRemaining;
+    QList<Layout*> layouts;
+    QMap<Layout*, int> iterationsRemaining;
     QMutex mutex;
     bool _pause;
     bool _isPaused;
@@ -91,13 +91,13 @@ public:
         _pause(false), _isPaused(false), _stop(false)
     {}
 
-    void add(LayoutAlgorithm* layoutAlgorithm)
+    void add(Layout* layout)
     {
         QMutexLocker locker(&mutex);
         // Take ownership of the algorithm
-        layoutAlgorithm->moveToThread(this);
-        layoutAlgorithms.append(layoutAlgorithm);
-        iterationsRemaining[layoutAlgorithm] = layoutAlgorithm->iterations();
+        layout->moveToThread(this);
+        layouts.append(layout);
+        iterationsRemaining[layout] = layout->iterations();
     }
 
     void pause()
@@ -105,7 +105,7 @@ public:
         QMutexLocker locker(&mutex);
         _pause = true;
 
-        for(LayoutAlgorithm* layoutAlgorithm : layoutAlgorithms)
+        for(Layout* layoutAlgorithm : layouts)
             layoutAlgorithm->cancel();
     }
 
@@ -114,7 +114,7 @@ public:
         QMutexLocker locker(&mutex);
         _pause = true;
 
-        for(LayoutAlgorithm* layoutAlgorithm : layoutAlgorithms)
+        for(Layout* layoutAlgorithm : layouts)
             layoutAlgorithm->cancel();
 
         waitForPause.wait(&mutex);
@@ -144,7 +144,7 @@ public:
             _stop = true;
             _pause = false;
 
-            for(LayoutAlgorithm* layoutAlgorithm : layoutAlgorithms)
+            for(Layout* layoutAlgorithm : layouts)
                 layoutAlgorithm->cancel();
         }
 
@@ -154,9 +154,9 @@ public:
 private:
     bool workRemaining()
     {
-        for(LayoutAlgorithm* layoutAlgorithm : layoutAlgorithms)
+        for(Layout* layout : layouts)
         {
-            if(iterationsRemaining[layoutAlgorithm] != 0)
+            if(iterationsRemaining[layout] != 0)
                 return true;
         }
 
@@ -165,9 +165,9 @@ private:
 
     bool allLayoutAlgorithmsShouldPause()
     {
-        for(LayoutAlgorithm* layoutAlgorithm : layoutAlgorithms)
+        for(Layout* layout : layouts)
         {
-            if(!layoutAlgorithm->shouldPause())
+            if(!layout->shouldPause())
                 return false;
         }
 
@@ -178,16 +178,16 @@ private:
     {
         while(workRemaining())
         {
-            for(LayoutAlgorithm* layoutAlgorithm : layoutAlgorithms)
+            for(Layout* layout : layouts)
             {
-                if(layoutAlgorithm->shouldPause())
+                if(layout->shouldPause())
                     continue;
 
-                if(iterationsRemaining[layoutAlgorithm] != 0)
-                    layoutAlgorithm->execute();
+                if(iterationsRemaining[layout] != 0)
+                    layout->execute();
 
-                if(iterationsRemaining[layoutAlgorithm] != LayoutAlgorithm::Unbounded)
-                    iterationsRemaining[layoutAlgorithm]--;
+                if(iterationsRemaining[layout] != Layout::Unbounded)
+                    iterationsRemaining[layout]--;
             }
 
             {
@@ -205,9 +205,9 @@ private:
             }
         }
 
-        for(LayoutAlgorithm* layoutAlgorithm : layoutAlgorithms)
-            delete layoutAlgorithm;
+        for(Layout* layout : layouts)
+            delete layout;
     }
 };
 
-#endif // LAYOUTALGORITHM_H
+#endif // LAYOUT_H
