@@ -92,7 +92,7 @@ void ContentPaneWidget::onCompletion(int success)
     emit complete(success);
 }
 
-void ContentPaneWidget::onGraphWillChange(Graph &)
+void ContentPaneWidget::onGraphWillChange(const Graph*)
 {
     if(layoutThread == nullptr)
         return;
@@ -105,7 +105,7 @@ void ContentPaneWidget::onGraphWillChange(Graph &)
     }
 }
 
-void ContentPaneWidget::onGraphChanged(Graph &)
+void ContentPaneWidget::onGraphChanged(const Graph*)
 {
     if(layoutThread == nullptr)
         return;

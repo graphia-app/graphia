@@ -33,8 +33,8 @@ private:
     bool resumeLayoutPostChange;
 
 private slots:
-    void onGraphWillChange(Graph&);
-    void onGraphChanged(Graph&);
+    void onGraphWillChange(const Graph*);
+    void onGraphChanged(const Graph*);
 
 public:
     GraphModel* graphModel() { return _graphModel; }

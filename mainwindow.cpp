@@ -74,9 +74,10 @@ void MainWindow::updatePerTabUi()
     if (contentPaneWidget != nullptr)
     {
         configureActionPauseLayout(contentPaneWidget->layoutIsPaused());
-        statusBarLabel->setText(QString(tr("%1 nodes, %2 edges")).arg(
+        statusBarLabel->setText(QString(tr("%1 nodes, %2 edges, %3 components")).arg(
                                     contentPaneWidget->graphModel()->graph().numNodes()).arg(
-                                    contentPaneWidget->graphModel()->graph().numEdges()));
+                                    contentPaneWidget->graphModel()->graph().numEdges()).arg(
+                                    contentPaneWidget->graphModel()->graph().numComponents()));
     }
 }
 

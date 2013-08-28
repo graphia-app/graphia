@@ -17,6 +17,8 @@ typedef int NodeId;
 const static NodeId NullNodeId = -1;
 typedef int EdgeId;
 const static EdgeId NullEdgeId = -1;
+typedef int ComponentId;
+const static ComponentId NullComponentId = -1;
 
 class Node
 {
@@ -127,6 +129,8 @@ private:
     void setEdgeNodes(EdgeId edgeId, NodeId sourceId, NodeId targetId);
 
 public:
+    void clear();
+
     const QList<NodeId>& nodeIds() const { return nodeIdsList; }
     int numNodes() const { return nodeIdsList.size(); }
     const Node& nodeById(NodeId nodeId) const { return nodesVector[nodeId]; }
@@ -140,6 +144,10 @@ public:
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId);
     void removeEdge(EdgeId edgeId);
+
+    const QList<ComponentId>* componentIds() const;
+    int numComponents() const;
+    const ReadOnlyGraph* componentById(ComponentId componentId) const;
 
     void dumpToQDebug(int detail) const
     {
@@ -158,13 +166,23 @@ public:
         }
     }
 
+public slots:
+    void onComponentAdded(const Graph* graph, ComponentId componentId) const { emit componentAdded(graph, componentId); }
+    void onComponentRemoved(const Graph* graph, ComponentId componentId) const { emit onComponentRemoved(graph, componentId); }
+    void onComponentSplit(const Graph* graph, ComponentId componentId, QSet<ComponentId> componentIds) const { emit onComponentSplit(graph, componentId, componentIds); }
+    void onComponentsMerged(const Graph* graph, ComponentId componentId, QSet<ComponentId> componentIds) const { emit onComponentsMerged(graph, componentId, componentIds); }
+
 signals:
-    void graphWillChange(Graph&);
-    void graphChanged(Graph&);
-    void nodeAdded(Graph&, NodeId);
-    void nodeWillBeRemoved(Graph&, NodeId);
-    void edgeAdded(Graph&, EdgeId);
-    void edgeWillBeRemoved(Graph&, EdgeId);
+    void graphWillChange(const Graph*) const;
+    void graphChanged(const Graph*) const;
+    void nodeAdded(const Graph*, NodeId) const;
+    void nodeWillBeRemoved(const Graph*, NodeId) const;
+    void edgeAdded(const Graph*, EdgeId) const;
+    void edgeWillBeRemoved(const Graph*, EdgeId) const;
+    void componentAdded(const Graph*, ComponentId) const;
+    void componentRemoved(const Graph*, ComponentId) const;
+    void componentSplit(const Graph*, ComponentId, QSet<ComponentId>) const;
+    void componentsMerged(const Graph*, ComponentId, QSet<ComponentId>) const;
 };
 
 #endif // GRAPH_H

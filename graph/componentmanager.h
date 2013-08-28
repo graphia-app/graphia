@@ -5,16 +5,13 @@
 
 #include <QObject>
 
-typedef int ComponentId;
-const static ComponentId NullComponentId = -1;
-
 class GraphComponent : public QObject, public ReadOnlyGraph
 {
-    friend class Graph;
+    friend class ComponentManager;
 
     Q_OBJECT
 public:
-    GraphComponent(ReadOnlyGraph& graph) : _graph(&graph) {}
+    GraphComponent(const ReadOnlyGraph& graph) : _graph(&graph) {}
     GraphComponent(const GraphComponent& other) :
         QObject(other.parent()),
         _graph(other._graph),
@@ -23,7 +20,7 @@ public:
     {}
 
 private:
-    ReadOnlyGraph* _graph;
+    const ReadOnlyGraph* _graph;
     QList<NodeId> nodeIdsList;
     QList<EdgeId> edgeIdsList;
 
@@ -39,31 +36,46 @@ public:
     const Edge& edgeById(EdgeId edgeId) const { return _graph->edgeById(edgeId); }
 };
 
-class ComponentManager
+class ComponentManager : public QObject
 {
+    Q_OBJECT
     friend class Graph;
 
-protected:
-    Graph* _graph;
-
 public:
-    ComponentManager(Graph& graph) :
+    ComponentManager(const Graph& graph) :
         _graph(&graph)
-    {}
+    {
+        connect(this, &ComponentManager::componentAdded, &graph, &Graph::onComponentAdded, Qt::DirectConnection);
+        connect(this, &ComponentManager::componentRemoved, &graph, &Graph::componentRemoved, Qt::DirectConnection);
+        connect(this, &ComponentManager::componentSplit, &graph, &Graph::componentSplit, Qt::DirectConnection);
+        connect(this, &ComponentManager::componentsMerged, &graph, &Graph::componentsMerged, Qt::DirectConnection);
+    }
     virtual ~ComponentManager() {}
 
-private:
+protected:
+    const Graph* _graph;
+
     virtual void nodeAdded(NodeId nodeId) = 0;
     virtual void nodeWillBeRemoved(NodeId nodeId) = 0;
 
     virtual void edgeAdded(EdgeId edgeId) = 0;
     virtual void edgeWillBeRemoved(EdgeId edgeId) = 0;
 
+    QList<NodeId>& graphComponentNodeIdsList(GraphComponent* graphComponent) { return graphComponent->nodeIdsList; }
+    QList<EdgeId>& graphComponentEdgeIdsList(GraphComponent* graphComponent) { return graphComponent->edgeIdsList; }
+
 public:
-    const Graph& graph() { return *_graph; }
+    const Graph& graph() const { return *_graph; }
 
     virtual const QList<ComponentId>& componentIds() const = 0;
-    virtual const ReadOnlyGraph& componentById(ComponentId componentId) const = 0;
+    int numComponents() const { return componentIds().size(); }
+    virtual const ReadOnlyGraph& componentById(ComponentId componentId) = 0;
+
+signals:
+    void componentAdded(const Graph*, ComponentId) const;
+    void componentRemoved(const Graph*, ComponentId) const;
+    void componentSplit(const Graph*, ComponentId, QSet<ComponentId>) const;
+    void componentsMerged(const Graph*, ComponentId, QSet<ComponentId>) const;
 };
 
 #endif // COMPONENTMANAGER_H
