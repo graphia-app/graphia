@@ -3,29 +3,29 @@
 
 #include "../utils.h"
 
-static float lnTaylorSeries( float x, int order )
+/*static float lnTaylorSeries( float x, int order )
 {
-  int   i, j, k;
-  float result = 0.0f;
-  float xMinus1 = x - 1.0f;
-  float xPlus1  = x + 1.0f;
-  float term = xMinus1 / xPlus1;
-  float y;
+    int   i, j, k;
+    float result = 0.0f;
+    float xMinus1 = x - 1.0f;
+    float xPlus1  = x + 1.0f;
+    float term = xMinus1 / xPlus1;
+    float y;
 
-  for( i = 0; i <= order; i++ )
-  {
-    k = i * 2 + 1;
+    for( i = 0; i <= order; i++ )
+    {
+        k = i * 2 + 1;
 
-    y = term;
+        y = term;
 
-    for( j = 1; j < k; j++ )
-      y *= term;
+        for( j = 1; j < k; j++ )
+            y *= term;
 
-    result += y * ( 1.0f / (float)k );
-  }
+        result += y * ( 1.0f / (float)k );
+    }
 
-  return 2.0f * result;
-}
+    return 2.0f * result;
+}*/
 
 #define TAYLOR_LNX(x) (2.0f*(((x)-1.0f)/((x)+1.0f)))
 
