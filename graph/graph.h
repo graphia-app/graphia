@@ -166,12 +166,6 @@ public:
         }
     }
 
-public slots:
-    void onComponentAdded(const Graph* graph, ComponentId componentId) const { emit componentAdded(graph, componentId); }
-    void onComponentRemoved(const Graph* graph, ComponentId componentId) const { emit onComponentRemoved(graph, componentId); }
-    void onComponentSplit(const Graph* graph, ComponentId componentId, QSet<ComponentId> componentIds) const { emit onComponentSplit(graph, componentId, componentIds); }
-    void onComponentsMerged(const Graph* graph, ComponentId componentId, QSet<ComponentId> componentIds) const { emit onComponentsMerged(graph, componentId, componentIds); }
-
 signals:
     void graphWillChange(const Graph*) const;
     void graphChanged(const Graph*) const;

@@ -45,7 +45,7 @@ public:
     ComponentManager(const Graph& graph) :
         _graph(&graph)
     {
-        connect(this, &ComponentManager::componentAdded, &graph, &Graph::onComponentAdded, Qt::DirectConnection);
+        connect(this, &ComponentManager::componentAdded, &graph, &Graph::componentAdded, Qt::DirectConnection);
         connect(this, &ComponentManager::componentRemoved, &graph, &Graph::componentRemoved, Qt::DirectConnection);
         connect(this, &ComponentManager::componentSplit, &graph, &Graph::componentSplit, Qt::DirectConnection);
         connect(this, &ComponentManager::componentsMerged, &graph, &Graph::componentsMerged, Qt::DirectConnection);
