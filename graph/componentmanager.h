@@ -46,9 +46,9 @@ public:
         _graph(&graph)
     {
         connect(this, &ComponentManager::componentAdded, &graph, &Graph::componentAdded, Qt::DirectConnection);
-        connect(this, &ComponentManager::componentRemoved, &graph, &Graph::componentRemoved, Qt::DirectConnection);
+        connect(this, &ComponentManager::componentWillBeRemoved, &graph, &Graph::componentWillBeRemoved, Qt::DirectConnection);
         connect(this, &ComponentManager::componentSplit, &graph, &Graph::componentSplit, Qt::DirectConnection);
-        connect(this, &ComponentManager::componentsMerged, &graph, &Graph::componentsMerged, Qt::DirectConnection);
+        connect(this, &ComponentManager::componentsWillMerge, &graph, &Graph::componentsWillMerge, Qt::DirectConnection);
     }
     virtual ~ComponentManager() {}
 
@@ -60,6 +60,8 @@ protected:
 
     virtual void edgeAdded(EdgeId edgeId) = 0;
     virtual void edgeWillBeRemoved(EdgeId edgeId) = 0;
+
+    virtual void findComponents() = 0;
 
     QList<NodeId>& graphComponentNodeIdsList(GraphComponent* graphComponent) { return graphComponent->nodeIdsList; }
     QList<EdgeId>& graphComponentEdgeIdsList(GraphComponent* graphComponent) { return graphComponent->edgeIdsList; }
@@ -73,9 +75,9 @@ public:
 
 signals:
     void componentAdded(const Graph*, ComponentId) const;
-    void componentRemoved(const Graph*, ComponentId) const;
+    void componentWillBeRemoved(const Graph*, ComponentId) const;
     void componentSplit(const Graph*, ComponentId, QSet<ComponentId>) const;
-    void componentsMerged(const Graph*, ComponentId, QSet<ComponentId>) const;
+    void componentsWillMerge(const Graph*, QSet<ComponentId>, ComponentId) const;
 };
 
 #endif // COMPONENTMANAGER_H

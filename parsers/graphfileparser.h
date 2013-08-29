@@ -107,9 +107,16 @@ public:
         graphFileParser->moveToThread(this);
     }
 
+    virtual ~GraphFileParserThread()
+    {
+        cancel();
+        if(isRunning())
+            wait();
+    }
+
     void cancel()
     {
-        if(this->isRunning())
+        if(isRunning())
             graphFileParser->cancel();
     }
 

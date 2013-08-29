@@ -2,6 +2,7 @@
 
 #include "../parsers/gmlfileparser.h"
 #include "../graph/genericgraphmodel.h"
+#include "../graph/simplecomponentmanager.h"
 #include "../layout/layout.h"
 #include "../layout/eadeslayout.h"
 #include "graphview.h"
@@ -12,7 +13,6 @@
 ContentPaneWidget::ContentPaneWidget(QWidget* parent) :
     QWidget(parent),
     _graphModel(nullptr),
-    _initialised(false),
     graphFileParserThread(nullptr),
     layoutThread(nullptr),
     resumeLayoutPostChange(false)
@@ -22,25 +22,11 @@ ContentPaneWidget::ContentPaneWidget(QWidget* parent) :
 
 ContentPaneWidget::~ContentPaneWidget()
 {
-    if(graphFileParserThread != nullptr)
-    {
-        if(!_initialised)
-        {
-            graphFileParserThread->cancel();
-            graphFileParserThread->wait();
-        }
+    delete graphFileParserThread;
+    graphFileParserThread = nullptr;
 
-        delete graphFileParserThread;
-        graphFileParserThread = nullptr;
-    }
-
-    if(layoutThread != nullptr)
-    {
-        layoutThread->stop();
-        layoutThread->wait();
-        delete layoutThread;
-        layoutThread = nullptr;
-    }
+    delete layoutThread;
+    layoutThread = nullptr;
 
     delete _graphModel;
 }
@@ -65,6 +51,10 @@ bool ContentPaneWidget::initFromFile(const QString &filename)
 
     connect(&_graphModel->graph(), &Graph::graphWillChange, this, &ContentPaneWidget::onGraphWillChange, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &ContentPaneWidget::onGraphChanged, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::componentAdded, this, &ContentPaneWidget::onComponentAdded, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::componentWillBeRemoved, this, &ContentPaneWidget::onComponentWillBeRemoved, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::componentSplit, this, &ContentPaneWidget::onComponentSplit, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::componentsWillMerge, this, &ContentPaneWidget::onComponentsWillMerge, Qt::DirectConnection);
 
     graphFileParserThread = new GraphFileParserThread(filename, _graphModel->graph(), graphFileParser);
     connect(graphFileParser, &GraphFileParser::progress, this, &ContentPaneWidget::onProgress);
@@ -76,7 +66,8 @@ bool ContentPaneWidget::initFromFile(const QString &filename)
 
 void ContentPaneWidget::onCompletion(int success)
 {
-    _initialised = true;
+    layoutThread = new LayoutThread(new EadesLayoutFactory(_graphModel));
+    _graphModel->graph().setComponentManager(new SimpleComponentManager(_graphModel->graph()));
 
     GraphView* graphView = new GraphView();
     graphView->setGraphModel(_graphModel);
@@ -85,10 +76,6 @@ void ContentPaneWidget::onCompletion(int success)
 
     if(_graphModel->contentWidget() != nullptr)
         layout()->addWidget(_graphModel->contentWidget());
-
-    layoutThread = new LayoutThread;
-    layoutThread->add(new EadesLayout(_graphModel->graph(), _graphModel->layout()));
-    layoutThread->start();
 
     emit complete(success);
 }
@@ -115,6 +102,43 @@ void ContentPaneWidget::onGraphChanged(const Graph*)
         layoutThread->resume();
 
     resumeLayoutPostChange = false;
+}
+
+void ContentPaneWidget::onComponentAdded(const Graph*, ComponentId componentId)
+{
+    if(layoutThread == nullptr)
+        return;
+
+    layoutThread->add(componentId);
+}
+
+void ContentPaneWidget::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
+{
+    if(layoutThread == nullptr)
+        return;
+
+    layoutThread->remove(componentId);
+}
+
+void ContentPaneWidget::onComponentSplit(const Graph*, ComponentId /*splitter*/, QSet<ComponentId> splitters)
+{
+    if(layoutThread == nullptr)
+        return;
+
+    for(ComponentId componentId : splitters)
+        layoutThread->add(componentId);
+}
+
+void ContentPaneWidget::onComponentsWillMerge(const Graph*, QSet<ComponentId> mergers, ComponentId merger)
+{
+    if(layoutThread == nullptr)
+        return;
+
+    for(ComponentId componentId : mergers)
+    {
+        if(componentId != merger)
+            layoutThread->remove(componentId);
+    }
 }
 
 void ContentPaneWidget::pauseLayout()

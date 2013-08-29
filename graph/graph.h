@@ -130,6 +130,7 @@ private:
 
 public:
     void clear();
+    void setComponentManager(ComponentManager* componentManager);
 
     const QList<NodeId>& nodeIds() const { return nodeIdsList; }
     int numNodes() const { return nodeIdsList.size(); }
@@ -174,9 +175,9 @@ signals:
     void edgeAdded(const Graph*, EdgeId) const;
     void edgeWillBeRemoved(const Graph*, EdgeId) const;
     void componentAdded(const Graph*, ComponentId) const;
-    void componentRemoved(const Graph*, ComponentId) const;
+    void componentWillBeRemoved(const Graph*, ComponentId) const;
     void componentSplit(const Graph*, ComponentId, QSet<ComponentId>) const;
-    void componentsMerged(const Graph*, ComponentId, QSet<ComponentId>) const;
+    void componentsWillMerge(const Graph*, QSet<ComponentId>, ComponentId) const;
 };
 
 #endif // GRAPH_H

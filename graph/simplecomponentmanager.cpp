@@ -32,6 +32,26 @@ void SimpleComponentManager::assignConnectedElementsComponentId(NodeId rootId, C
     }
 }
 
+void SimpleComponentManager::findComponents()
+{
+    nodesComponentId.fill(NullComponentId);
+    edgesComponentId.fill(NullComponentId);
+
+    const QList<NodeId>& nodeIdsList = graph().nodeIds();
+    for(NodeId nodeId : nodeIdsList)
+    {
+        if(nodesComponentId[nodeId] == NullComponentId)
+        {
+            ComponentId newComponentId = generateComponentId();
+            assignConnectedElementsComponentId(nodeId, newComponentId, NullEdgeId);
+            updatesRequired.insert(newComponentId);
+
+            // New component
+            emit componentAdded(&graph(), newComponentId);
+        }
+    }
+}
+
 ComponentId SimpleComponentManager::generateComponentId()
 {
     ComponentId newComponentId;
@@ -81,8 +101,8 @@ void SimpleComponentManager::updateGraphComponent(ComponentId componentId)
     }
 
     edgeIdsList.clear();
-    const QList<NodeId>& edgeIds = graph().edgeIds();
-    for(NodeId edgeId : edgeIds)
+    const QList<EdgeId>& edgeIds = graph().edgeIds();
+    for(EdgeId edgeId : edgeIds)
     {
         if(edgesComponentId[edgeId] == componentId)
             edgeIdsList.append(edgeId);
@@ -102,6 +122,7 @@ void SimpleComponentManager::nodeAdded(NodeId nodeId)
 {
     ComponentId newComponentId = generateComponentId();
     nodesComponentId[nodeId] = newComponentId;
+    updatesRequired.insert(newComponentId);
 
     // New component
     emit componentAdded(&graph(), newComponentId);
@@ -112,10 +133,11 @@ void SimpleComponentManager::nodeWillBeRemoved(NodeId nodeId)
     if(graph().nodeById(nodeId).degree() == 0)
     {
         ComponentId componentId = nodesComponentId[nodeId];
-        removeGraphComponent(componentId);
 
         // Component removed
-        emit componentRemoved(&graph(), componentId);
+        emit componentWillBeRemoved(&graph(), componentId);
+
+        removeGraphComponent(componentId);
     }
 }
 
@@ -123,10 +145,16 @@ void SimpleComponentManager::edgeAdded(EdgeId edgeId)
 {
     const Edge& edge = graph().edgeById(edgeId);
 
-    if (nodesComponentId[edge.sourceId()] != nodesComponentId[edge.targetId()])
+    if(nodesComponentId[edge.sourceId()] != nodesComponentId[edge.targetId()])
     {
         ComponentId firstComponentId = nodesComponentId[edge.sourceId()];
         ComponentId secondComponentId = nodesComponentId[edge.targetId()];
+
+        // Components merged
+        emit componentsWillMerge(&graph(), {firstComponentId, secondComponentId}, firstComponentId);
+
+        // Component removed
+        emit componentWillBeRemoved(&graph(), secondComponentId);
 
         // Assign every node in the second component to the first
         assignConnectedElementsComponentId(edge.targetId(), firstComponentId, edgeId);
@@ -134,13 +162,10 @@ void SimpleComponentManager::edgeAdded(EdgeId edgeId)
         updatesRequired.insert(firstComponentId);
         releaseComponentId(secondComponentId);
         removeGraphComponent(secondComponentId);
-
-        // Components merged
-        emit componentsMerged(&graph(), firstComponentId, {firstComponentId, secondComponentId});
-
-        // Component removed
-        emit componentRemoved(&graph(), secondComponentId);
     }
+    else
+        edgesComponentId[edgeId] = nodesComponentId[edge.sourceId()];
+
 }
 
 void SimpleComponentManager::edgeWillBeRemoved(EdgeId edgeId)

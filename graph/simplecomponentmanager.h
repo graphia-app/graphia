@@ -22,9 +22,9 @@ private:
     EdgeArray<ComponentId> edgesComponentId;
 
     void assignConnectedElementsComponentId(NodeId rootId, ComponentId componentId, EdgeId skipEdgeId);
+
     ComponentId generateComponentId();
     void releaseComponentId(ComponentId componentId);
-
     void updateGraphComponent(ComponentId componentId);
     void removeGraphComponent(ComponentId componentId);
 
@@ -42,6 +42,8 @@ private:
 
     void edgeAdded(EdgeId edgeId);
     void edgeWillBeRemoved(EdgeId edgeId);
+
+    void findComponents();
 
 public:
     const QList<ComponentId>& componentIds() const;

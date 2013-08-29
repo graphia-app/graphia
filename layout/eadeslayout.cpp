@@ -60,8 +60,10 @@ void EadesLayout::executeReal()
         firstIteration = false;
     }
 
-    moves.resize(graph().numNodes());
-    moves.fill(QVector3D(0.0f, 0.0f, 0.0f));
+    moves.resize(positions.size());
+
+    for(NodeId i : graph().nodeIds())
+        moves[i] = QVector3D(0.0f, 0.0f, 0.0f);
 
     // Repulsive forces
     for(NodeId i : graph().nodeIds())

@@ -2,6 +2,7 @@
 #define CONTENTPANEWIDGET_H
 
 #include <QWidget>
+#include <QMap>
 
 #include "../graph/graph.h"
 #include "../graph/graphmodel.h"
@@ -26,15 +27,19 @@ public slots:
 
 private:
     GraphModel* _graphModel;
-    bool _initialised;
     GraphFileParserThread *graphFileParserThread;
-    LayoutThread *layoutThread;
+    LayoutThread* layoutThread;
 
     bool resumeLayoutPostChange;
 
 private slots:
     void onGraphWillChange(const Graph*);
     void onGraphChanged(const Graph*);
+
+    void onComponentAdded(const Graph*, ComponentId componentId);
+    void onComponentWillBeRemoved(const Graph*, ComponentId componentId);
+    void onComponentSplit(const Graph*, ComponentId splitter, QSet<ComponentId> splitters);
+    void onComponentsWillMerge(const Graph*, QSet<ComponentId> mergers, ComponentId merger);
 
 public:
     GraphModel* graphModel() { return _graphModel; }

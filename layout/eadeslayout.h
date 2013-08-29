@@ -2,6 +2,7 @@
 #define EADESLAYOUT_H
 
 #include "layout.h"
+#include "../graph/graphmodel.h"
 
 #include <QVector3D>
 
@@ -20,6 +21,20 @@ public:
     {}
 
     void executeReal();
+};
+
+class EadesLayoutFactory : public LayoutFactory
+{
+public:
+    EadesLayoutFactory(GraphModel* _graphModel) :
+        LayoutFactory(_graphModel)
+    {}
+
+    Layout* create(ComponentId componentId) const
+    {
+        const ReadOnlyGraph* graph = this->_graphModel->graph().componentById(componentId);
+        return new EadesLayout(*graph, this->_graphModel->layout());
+    }
 };
 
 #endif // EADESLAYOUT_H

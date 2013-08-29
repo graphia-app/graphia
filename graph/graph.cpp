@@ -7,13 +7,14 @@
 Graph::Graph() :
     nextNodeId(0),
     nextEdgeId(0),
-    componentManager(new SimpleComponentManager(*this))
+    componentManager(nullptr)
 {
 }
 
 Graph::~Graph()
 {
     delete componentManager;
+    componentManager = nullptr;
 }
 
 void Graph::clear()
@@ -26,6 +27,14 @@ void Graph::clear()
 
     nodesVector.resize(0);
     edgesVector.resize(0);
+}
+
+void Graph::setComponentManager(ComponentManager *componentManager)
+{
+    delete this->componentManager;
+
+    this->componentManager = componentManager;
+    this->componentManager->findComponents();
 }
 
 NodeId Graph::addNode()

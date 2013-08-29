@@ -1,6 +1,7 @@
 #ifndef LAYOUT_H
 #define LAYOUT_H
 
+#include "../graph/graph.h"
 #include "../graph/grapharray.h"
 
 #include <QList>
@@ -73,11 +74,30 @@ signals:
     void complete();
 };
 
+class GraphModel;
+
+class LayoutFactory
+{
+protected:
+    GraphModel* _graphModel;
+
+public:
+    LayoutFactory(GraphModel* _graphModel) :
+        _graphModel(_graphModel)
+    {}
+    virtual ~LayoutFactory() {}
+
+    const GraphModel& graphModel() const { return *_graphModel; }
+
+    virtual Layout* create(ComponentId componentId) const = 0;
+};
+
 class LayoutThread : public QThread
 {
     Q_OBJECT
 private:
-    QList<Layout*> layouts;
+    const LayoutFactory* layoutFactory;
+    QMap<ComponentId, Layout*> layouts;
     QMap<Layout*, int> iterationsRemaining;
     QMutex mutex;
     bool _pause;
@@ -87,17 +107,54 @@ private:
     QWaitCondition waitForResume;
 
 public:
-    LayoutThread() :
+    LayoutThread(const LayoutFactory* layoutFactory) :
+        layoutFactory(layoutFactory),
         _pause(false), _isPaused(false), _stop(false)
     {}
 
-    void add(Layout* layout)
+    virtual ~LayoutThread()
+    {
+        stop();
+        wait();
+        delete layoutFactory;
+    }
+
+    void add(ComponentId componentId)
     {
         QMutexLocker locker(&mutex);
-        // Take ownership of the algorithm
-        layout->moveToThread(this);
-        layouts.append(layout);
-        iterationsRemaining[layout] = layout->iterations();
+
+        if(!layouts.contains(componentId))
+        {
+            Layout* layout = layoutFactory->create(componentId);
+
+            // Take ownership of the algorithm
+            layout->moveToThread(this);
+            layouts.insert(componentId, layout);
+            iterationsRemaining[layout] = layout->iterations();
+
+            start();
+        }
+    }
+
+    void remove(ComponentId componentId)
+    {
+        bool resumeAfterRemoval = false;
+
+        if(isPaused())
+        {
+            pauseAndWait();
+            resumeAfterRemoval = true;
+        }
+
+        if(layouts.contains(componentId))
+        {
+            Layout* layout = layouts[componentId];
+            layouts.remove(componentId);
+            delete layout;
+        }
+
+        if(resumeAfterRemoval)
+            resume();
     }
 
     void pause()
@@ -105,8 +162,8 @@ public:
         QMutexLocker locker(&mutex);
         _pause = true;
 
-        for(Layout* layoutAlgorithm : layouts)
-            layoutAlgorithm->cancel();
+        for(Layout* layout : layouts.values())
+            layout->cancel();
     }
 
     void pauseAndWait()
@@ -114,8 +171,8 @@ public:
         QMutexLocker locker(&mutex);
         _pause = true;
 
-        for(Layout* layoutAlgorithm : layouts)
-            layoutAlgorithm->cancel();
+        for(Layout* layout : layouts.values())
+            layout ->cancel();
 
         waitForPause.wait(&mutex);
     }
@@ -144,8 +201,8 @@ public:
             _stop = true;
             _pause = false;
 
-            for(Layout* layoutAlgorithm : layouts)
-                layoutAlgorithm->cancel();
+            for(Layout* layout : layouts.values())
+                layout->cancel();
         }
 
         waitForResume.wakeAll();
@@ -154,7 +211,7 @@ public:
 private:
     bool workRemaining()
     {
-        for(Layout* layout : layouts)
+        for(Layout* layout : layouts.values())
         {
             if(iterationsRemaining[layout] != 0)
                 return true;
@@ -165,7 +222,7 @@ private:
 
     bool allLayoutAlgorithmsShouldPause()
     {
-        for(Layout* layout : layouts)
+        for(Layout* layout : layouts.values())
         {
             if(!layout->shouldPause())
                 return false;
@@ -178,7 +235,7 @@ private:
     {
         while(workRemaining())
         {
-            for(Layout* layout : layouts)
+            for(Layout* layout : layouts.values())
             {
                 if(layout->shouldPause())
                     continue;
@@ -205,7 +262,7 @@ private:
             }
         }
 
-        for(Layout* layout : layouts)
+        for(Layout* layout : layouts.values())
             delete layout;
     }
 };
