@@ -42,7 +42,7 @@ GraphScene::GraphScene( QObject* parent )
     update( 0.0f );
 
     // Initialize the camera position and orientation
-    m_camera->setPosition( QVector3D( 0.0f, 0.0f, 20.0f ) );
+    m_camera->setPosition( QVector3D( 0.0f, 0.0f, -100.0f ) );
     m_camera->setViewCenter( QVector3D( 0.0f, 0.0f, 0.0f ) );
     m_camera->setUpVector( QVector3D( 0.0f, 1.0f, 0.0f ) );
 }
@@ -68,9 +68,9 @@ void GraphScene::initialise()
 
     // Create a sphere
     m_sphere = new Sphere( this );
-    m_sphere->setRadius(0.8f);
-    m_sphere->setRings(12);
-    m_sphere->setSlices(12);
+    m_sphere->setRadius(0.6f);
+    m_sphere->setRings(9);
+    m_sphere->setSlices(9);
     m_sphere->setMaterial(nodeMaterial);
     m_sphere->create();
 
@@ -80,7 +80,7 @@ void GraphScene::initialise()
     m_cylinder = new Cylinder(this);
     m_cylinder->setRadius(0.2f);
     m_cylinder->setLength(1.0f);
-    m_cylinder->setSlices(8);
+    m_cylinder->setSlices(5);
     m_cylinder->setMaterial(edgeMaterial);
     m_cylinder->create();
 
