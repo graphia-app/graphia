@@ -42,7 +42,7 @@ GraphScene::GraphScene( QObject* parent )
     update( 0.0f );
 
     // Initialize the camera position and orientation
-    m_camera->setPosition( QVector3D( 0.0f, 0.0f, -100.0f ) );
+    m_camera->setPosition( QVector3D( 0.0f, 0.0f, -150.0f ) );
     m_camera->setViewCenter( QVector3D( 0.0f, 0.0f, 0.0f ) );
     m_camera->setUpVector( QVector3D( 0.0f, 1.0f, 0.0f ) );
 }
