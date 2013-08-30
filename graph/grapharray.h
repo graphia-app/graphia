@@ -25,6 +25,12 @@ public:
     GraphArray(Graph& graph) :
         _graph(&graph)
     {}
+    GraphArray(const GraphArray& other) :
+        _graph(other._graph)
+    {
+        for(auto e : other.array)
+            array.append(e);
+    }
 
     QMutex& mutex() { return _mutex; }
     void lock() { _mutex.lock(); }
@@ -83,6 +89,11 @@ public:
         graph.nodeArrayList.append(this);
     }
 
+    NodeArray(const NodeArray& other) : GraphArray<NodeId, Element>(other)
+    {
+        this->_graph->nodeArrayList.append(this);
+    }
+
     ~NodeArray()
     {
         this->_graph->nodeArrayList.removeOne(this);
@@ -96,6 +107,11 @@ public:
     {
         this->resize(graph.edgeArrayCapacity());
         graph.edgeArrayList.append(this);
+    }
+
+    EdgeArray(const EdgeArray& other) : GraphArray<EdgeId, Element>(other)
+    {
+        this->_graph->edgeArrayList.append(this);
     }
 
     ~EdgeArray()

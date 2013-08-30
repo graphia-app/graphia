@@ -8,14 +8,14 @@ void RandomLayout::executeReal()
     int nodeNumber = 0;
     int numNodes = graph().numNodes();
 
-    positions.mutex().lock();
+    positions.lock();
     for(NodeId nodeId : graph().nodeIds())
     {
         positions[nodeId] = Utils::randQVector3D(-spread, spread);
         int percentage = (nodeNumber++ * 100) / numNodes;
         emit progress(percentage);
     }
-    positions.mutex().unlock();
+    positions.unlock();
 
     emit complete();
 }

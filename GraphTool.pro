@@ -37,7 +37,9 @@ SOURCES += main.cpp\
     graph/genericgraphmodel.cpp \
     gl/sphere.cpp \
     gl/cylinder.cpp \
-    graph/simplecomponentmanager.cpp
+    graph/simplecomponentmanager.cpp \
+    layout/normalisinglayout.cpp \
+    maths/boundingbox.cpp
 
 HEADERS  += mainwindow.h \
     graph/grapharray.h \
@@ -68,7 +70,9 @@ HEADERS  += mainwindow.h \
     gl/cylinder.h \
     graph/componentmanager.h \
     graph/simplecomponentmanager.h \
-    layout/layout.h
+    layout/layout.h \
+    layout/normalisinglayout.h \
+    maths/boundingbox.h
 
 FORMS    += mainwindow.ui
 
