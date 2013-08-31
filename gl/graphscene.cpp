@@ -79,7 +79,7 @@ void GraphScene::initialise()
     edgeMaterial->setShaders(":/gl/shaders/instancededges.vert", ":/gl/shaders/ads.frag" );
 
     m_cylinder = new Cylinder(this);
-    m_cylinder->setRadius(0.2f);
+    m_cylinder->setRadius(0.1f);
     m_cylinder->setLength(1.0f);
     m_cylinder->setSlices(5);
     m_cylinder->setMaterial(edgeMaterial);
@@ -107,10 +107,6 @@ void GraphScene::update( float /*t*/ )
     {
         NodeArray<QVector3D>& layout = _graphModel->layout();
 
-        layout.lock();
-        NodeArray<QVector3D> normalisedLayout = layout;
-        layout.unlock();
-
         m_nodePositionData.resize(_graphModel->graph().numNodes() * 3);
         m_edgePositionData.resize(_graphModel->graph().numEdges() * 6);
         int i = 0;
@@ -121,18 +117,15 @@ void GraphScene::update( float /*t*/ )
         {
             const ReadOnlyGraph& component = *_graphModel->graph().componentById(componentId);
 
-            NormalisingLayout normalisingLayout(component, normalisedLayout);
-            normalisingLayout.setNodeDensity(0.001f);
-            normalisingLayout.execute();
-
+            const float width = Layout::boundingBox(_graphModel->graph(), layout).xLength();
             const float COMPONENT_SEPARATION = 5.0f;
 
             if(i != 0)
-                offset.setX(offset.x() - ((0.5f * normalisingLayout.maxDimension()) + COMPONENT_SEPARATION));
+                offset.setX(offset.x() - ((0.5f * width) + COMPONENT_SEPARATION));
 
             for(NodeId nodeId : component.nodeIds())
             {
-                const QVector3D& position = normalisedLayout[nodeId] + offset;
+                const QVector3D& position = layout[nodeId] + offset;
                 m_nodePositionData[i++] = position.x();
                 m_nodePositionData[i++] = position.y();
                 m_nodePositionData[i++] = position.z();
@@ -141,8 +134,8 @@ void GraphScene::update( float /*t*/ )
             for(EdgeId edgeId : component.edgeIds())
             {
                 const Edge& edge = _graphModel->graph().edgeById(edgeId);
-                const QVector3D& sourcePosition = normalisedLayout[edge.sourceId()] + offset;
-                const QVector3D& targetPosition = normalisedLayout[edge.targetId()] + offset;
+                const QVector3D& sourcePosition = layout[edge.sourceId()] + offset;
+                const QVector3D& targetPosition = layout[edge.targetId()] + offset;
 
                 m_edgePositionData[j++] = sourcePosition.x();
                 m_edgePositionData[j++] = sourcePosition.y();
@@ -152,7 +145,7 @@ void GraphScene::update( float /*t*/ )
                 m_edgePositionData[j++] = targetPosition.z();
             }
 
-            offset.setX(offset.x() - ((0.5f * normalisingLayout.maxDimension()) + COMPONENT_SEPARATION));
+            offset.setX(offset.x() - ((0.5f * width) + COMPONENT_SEPARATION));
         }
     }
 

@@ -2,6 +2,8 @@
 #define EADESLAYOUT_H
 
 #include "layout.h"
+#include "sequencelayout.h"
+#include "centreinglayout.h"
 #include "../graph/graphmodel.h"
 
 #include <QVector3D>
@@ -15,7 +17,7 @@ private:
 
 public:
     EadesLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions) :
-        Layout(graph, positions, Layout::Unbounded),
+        Layout(graph, positions, true),
         firstIteration(true),
         moves(graph.numNodes())
     {}
@@ -33,7 +35,11 @@ public:
     Layout* create(ComponentId componentId) const
     {
         const ReadOnlyGraph* graph = this->_graphModel->graph().componentById(componentId);
-        return new EadesLayout(*graph, this->_graphModel->layout());
+        EadesLayout* eadesLayout = new EadesLayout(*graph, this->_graphModel->layout());
+        CentreingLayout* centreingLayout = new CentreingLayout(*graph, this->_graphModel->layout());
+
+        SequenceLayout* sequenceLayout = new SequenceLayout(*graph, this->_graphModel->layout(), {eadesLayout, centreingLayout});
+        return sequenceLayout;
     }
 };
 

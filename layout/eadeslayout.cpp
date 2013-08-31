@@ -55,7 +55,7 @@ void EadesLayout::executeReal()
     {
         RandomLayout randomLayout(graph(), positions);
 
-        randomLayout.setSpread(100.0f);
+        randomLayout.setSpread(10.0f);
         randomLayout.execute();
         firstIteration = false;
     }

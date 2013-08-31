@@ -128,7 +128,7 @@ bool CameraController::keyPressEvent( QKeyEvent* e )
             m_viewCenterFixed = true;
             break;
 
-        case Qt::Key_A:
+        case Qt::Key_M:
             toggleMSAA();
             break;
 

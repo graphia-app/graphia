@@ -3,6 +3,7 @@
 
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
+#include "../maths/boundingbox.h"
 
 #include <QList>
 #include <QMap>
@@ -13,6 +14,8 @@
 #include <QMutexLocker>
 #include <QWaitCondition>
 #include <QAtomicInt>
+
+#include <limits>
 
 class Layout : public QObject
 {
@@ -32,7 +35,7 @@ private:
 protected:
     const ReadOnlyGraph* _graph;
     NodeArray<QVector3D>* positions;
-    int _iterations;
+    bool _iterative;
 
     bool shouldCancel()
     {
@@ -40,11 +43,11 @@ protected:
     }
 
 public:
-    Layout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions, int defaultNumIterations = 1) :
+    Layout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions, bool _iterative = false) :
         cancelAtomic(0),
         _graph(&graph),
         positions(&positions),
-        _iterations(defaultNumIterations)
+        _iterative(_iterative)
     {}
 
     const ReadOnlyGraph& graph() { return *_graph; }
@@ -63,11 +66,23 @@ public:
     // Indicates that the algorithm is doing no useful work
     virtual bool shouldPause() { return false; }
 
-    bool iterative() { return _iterations != 1; }
+    virtual bool iterative() { return _iterative; }
 
-    const static int Unbounded = -1;
-    int iterations() { return _iterations; }
-    void setIterations(int _iterations) { this->_iterations = _iterations; }
+    static BoundingBox boundingBox(const ReadOnlyGraph& graph, const NodeArray<QVector3D>& positions)
+    {
+        const QVector3D& firstNodePosition = positions[graph.nodeIds()[0]];
+        BoundingBox boundingBox(firstNodePosition, firstNodePosition);
+
+        for(NodeId nodeId : graph.nodeIds())
+            boundingBox.expandToInclude(positions[nodeId]);
+
+        return boundingBox;
+    }
+
+    BoundingBox boundingBox()
+    {
+        return Layout::boundingBox(*_graph, *this->positions);
+    }
 
 signals:
     void progress(int percentage);
@@ -98,7 +113,6 @@ class LayoutThread : public QThread
 private:
     const LayoutFactory* layoutFactory;
     QMap<ComponentId, Layout*> layouts;
-    QMap<Layout*, int> iterationsRemaining;
     QMutex mutex;
     bool _pause;
     bool _isPaused;
@@ -130,7 +144,6 @@ public:
             // Take ownership of the algorithm
             layout->moveToThread(this);
             layouts.insert(componentId, layout);
-            iterationsRemaining[layout] = layout->iterations();
 
             start();
         }
@@ -213,7 +226,7 @@ private:
     {
         for(Layout* layout : layouts.values())
         {
-            if(iterationsRemaining[layout] != 0)
+            if(layout->iterative())
                 return true;
         }
 
@@ -233,18 +246,14 @@ private:
 
     void run() Q_DECL_OVERRIDE
     {
-        while(workRemaining())
+        do
         {
             for(Layout* layout : layouts.values())
             {
                 if(layout->shouldPause())
                     continue;
 
-                if(iterationsRemaining[layout] != 0)
-                    layout->execute();
-
-                if(iterationsRemaining[layout] != Layout::Unbounded)
-                    iterationsRemaining[layout]--;
+                layout->execute();
             }
 
             {
@@ -261,6 +270,7 @@ private:
                     break;
             }
         }
+        while(workRemaining());
 
         for(Layout* layout : layouts.values())
             delete layout;
