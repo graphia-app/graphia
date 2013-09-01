@@ -6,7 +6,7 @@
 #include "material.h"
 
 #include "../graph/graphmodel.h"
-#include "../layout/normalisinglayout.h"
+#include "../layout/layout.h"
 
 #include <QObject>
 #include <QOpenGLContext>
@@ -117,7 +117,7 @@ void GraphScene::update( float /*t*/ )
         {
             const ReadOnlyGraph& component = *_graphModel->graph().componentById(componentId);
 
-            const float width = Layout::boundingBox(_graphModel->graph(), layout).xLength();
+            const float width = Layout::boundingBox(component, layout).xLength();
             const float COMPONENT_SEPARATION = 5.0f;
 
             if(i != 0)
