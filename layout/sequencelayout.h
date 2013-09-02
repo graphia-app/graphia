@@ -22,6 +22,23 @@ public:
 
     void addSubLayout(Layout* layout) { subLayouts.append(layout); }
 
+    void cancel()
+    {
+        for(Layout* subLayout : subLayouts)
+            subLayout->cancel();
+    }
+
+    bool shouldPause()
+    {
+        for(Layout* subLayout : subLayouts)
+        {
+            if(!subLayout->shouldPause())
+                return false;
+        }
+
+        return true;
+    }
+
     bool iterative()
     {
         for(Layout* subLayout : subLayouts)
