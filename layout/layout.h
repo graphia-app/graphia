@@ -13,21 +13,18 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QWaitCondition>
-#include <QAtomicInt>
 
 #include <limits>
+#include <atomic>
 
 class Layout : public QObject
 {
     Q_OBJECT
 private:
-    QAtomicInt cancelAtomic;
+    std::atomic_bool atomicCancel;
     void setCancel(bool cancel)
     {
-        int expectedValue = static_cast<int>(!cancel);
-        int newValue = static_cast<int>(!!cancel);
-
-        cancelAtomic.testAndSetRelaxed(expectedValue, newValue);
+        atomicCancel = cancel;
     }
 
     virtual void executeReal() = 0;
@@ -39,12 +36,12 @@ protected:
 
     bool shouldCancel()
     {
-        return cancelAtomic.testAndSetRelaxed(1, 1);
+        return atomicCancel;
     }
 
 public:
     Layout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions, bool _iterative = false) :
-        cancelAtomic(0),
+        atomicCancel(false),
         _graph(&graph),
         positions(&positions),
         _iterative(_iterative)
@@ -58,7 +55,7 @@ public:
         executeReal();
     }
 
-    void cancel()
+    virtual void cancel()
     {
         setCancel(true);
     }
