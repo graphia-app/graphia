@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QMAKE_CXXFLAGS += -std=c++11
+gcc:QMAKE_CXXFLAGS += -std=c++11
 
 QT       += core gui opengl openglextensions
 
