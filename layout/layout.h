@@ -21,7 +21,7 @@ class Layout : public QObject
 {
     Q_OBJECT
 private:
-    std::atomic_bool atomicCancel;
+    std::atomic<bool> atomicCancel;
     void setCancel(bool cancel)
     {
         atomicCancel = cancel;

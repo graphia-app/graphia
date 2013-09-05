@@ -38,7 +38,10 @@ public:
         EadesLayout* eadesLayout = new EadesLayout(*graph, this->_graphModel->layout());
         CentreingLayout* centreingLayout = new CentreingLayout(*graph, this->_graphModel->layout());
 
-        SequenceLayout* sequenceLayout = new SequenceLayout(*graph, this->_graphModel->layout(), {eadesLayout, centreingLayout});
+        QList<Layout*> subLayouts;
+        subLayouts.append(eadesLayout);
+        subLayouts.append(centreingLayout);
+        SequenceLayout* sequenceLayout = new SequenceLayout(*graph, this->_graphModel->layout(), subLayouts);
         return sequenceLayout;
     }
 };

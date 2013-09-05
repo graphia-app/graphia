@@ -1,7 +1,7 @@
 #include "graphview.h"
 
-#include "gl/graphscene.h"
-#include "gl/openglwindow.h"
+#include "../gl/graphscene.h"
+#include "../gl/openglwindow.h"
 
 #include <QSurfaceFormat>
 #include <QVBoxLayout>

@@ -8,8 +8,10 @@
 
 #include <cstdint>
 
+#ifndef Q_MOC_RUN
 #include <boost/variant/recursive_variant.hpp>
 #include <boost/fusion/container/vector.hpp>
+#endif
 
 class GmlFileParser : public GraphFileParser
 {

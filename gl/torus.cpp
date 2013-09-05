@@ -4,8 +4,8 @@
 
 #include <math.h>
 
-const float pi = 3.14159265358979323846;
-const float twoPi = 2.0 * pi;
+const float pi = 3.14159265358979323846f;
+const float twoPi = 2.0f * pi;
 
 Torus::Torus( QObject* parent )
     : QObject( parent ),

@@ -123,7 +123,7 @@ bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePair
                     return false;
             }
 
-            int newPercentage = ((i * 50) / keyValuePairList.size()) + 50;
+            int newPercentage = ((i * 50) / (int)keyValuePairList.size()) + 50;
             if(newPercentage > percentage)
             {
                 percentage = newPercentage;

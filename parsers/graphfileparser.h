@@ -5,8 +5,10 @@
 #include <QThread>
 #include <QAtomicInt>
 
+#ifndef Q_MOC_RUN
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/spirit/include/support_istream_iterator.hpp>
+#endif
 
 #include <iterator>
 #include <cstdint>

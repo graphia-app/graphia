@@ -26,7 +26,7 @@ CameraController::CameraController() :
 void CameraController::setCamera( Camera* cam )
 {
     m_camera = cam;
-    m_camera->setPerspectiveProjection( 25.0, 1.0, 0.1, 1000 );
+    m_camera->setPerspectiveProjection( 25.0f, 1.0f, 0.1f, 1000 );
 }
 
 void CameraController::setLinearSpeed( float speed )

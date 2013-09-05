@@ -151,7 +151,10 @@ void SimpleComponentManager::edgeAdded(EdgeId edgeId)
         ComponentId secondComponentId = nodesComponentId[edge.targetId()];
 
         // Components merged
-        emit componentsWillMerge(&graph(), {firstComponentId, secondComponentId}, firstComponentId);
+        QSet<ComponentId> mergers;
+        mergers.insert(firstComponentId);
+        mergers.insert(secondComponentId);
+        emit componentsWillMerge(&graph(), mergers, firstComponentId);
 
         // Component removed
         emit componentWillBeRemoved(&graph(), secondComponentId);
@@ -191,7 +194,10 @@ void SimpleComponentManager::edgeWillBeRemoved(EdgeId edgeId)
     else
     {
         // Components split
-        emit componentSplit(&graph(), oldComponentId, {oldComponentId, newComponentId});
+        QSet<ComponentId> splitters;
+        splitters.insert(oldComponentId);
+        splitters.insert(newComponentId);
+        emit componentSplit(&graph(), oldComponentId, splitters);
 
         // New component
         emit componentAdded(&graph(), newComponentId);
