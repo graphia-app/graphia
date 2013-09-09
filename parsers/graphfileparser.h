@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QThread>
-#include <QAtomicInt>
 
 #ifndef Q_MOC_RUN
 #include <boost/iterator/iterator_adaptor.hpp>
@@ -12,6 +11,7 @@
 
 #include <iterator>
 #include <cstdint>
+#include <atomic>
 
 #include "../graph/graph.h"
 
@@ -28,13 +28,10 @@ public:
     virtual bool parse(Graph& graph) = 0;
 
 private:
-    QAtomicInt cancelAtomic;
+    std::atomic<bool> cancelAtomic;
     void setCancel(bool cancel)
     {
-        int expectedValue = static_cast<int>(!cancel);
-        int newValue = static_cast<int>(!!cancel);
-
-        cancelAtomic.testAndSetRelaxed(expectedValue, newValue);
+        cancelAtomic = cancel;
     }
 
 public:
@@ -45,7 +42,7 @@ public:
 
     bool cancelled()
     {
-        return cancelAtomic.testAndSetRelaxed(1, 1);
+        return cancelAtomic;
     }
 
 public:
