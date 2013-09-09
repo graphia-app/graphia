@@ -31,6 +31,8 @@ GraphScene::GraphScene( QObject* parent )
       m_vy( 0.0f ),
       m_vz( 0.0f ),
       m_viewCenterFixed( false ),
+      m_panAngle(0.0f),
+      m_tiltAngle(0.0f),
       m_sphere(nullptr),
       m_cylinder(nullptr),
       m_theta( 0.0f ),
