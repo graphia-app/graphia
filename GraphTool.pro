@@ -72,10 +72,11 @@ HEADERS  += mainwindow.h \
     graph/componentmanager.h \
     graph/simplecomponentmanager.h \
     layout/layout.h \
-    maths/boundingbox.h \
     layout/centreinglayout.h \
     layout/sequencelayout.h \
-    layout/scalinglayout.h
+    layout/scalinglayout.h \
+    layout/componentlayout.h \
+    maths/boundingbox.h
 
 FORMS    += mainwindow.ui
 

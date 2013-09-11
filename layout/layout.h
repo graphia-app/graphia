@@ -66,10 +66,10 @@ public:
 
     virtual bool iterative() { return _iterative; }
 
-    static BoundingBox boundingBox(const ReadOnlyGraph& graph, const NodeArray<QVector3D>& positions)
+    static BoundingBox3D boundingBox(const ReadOnlyGraph& graph, const NodeArray<QVector3D>& positions)
     {
         const QVector3D& firstNodePosition = positions[graph.nodeIds()[0]];
-        BoundingBox boundingBox(firstNodePosition, firstNodePosition);
+        BoundingBox3D boundingBox(firstNodePosition, firstNodePosition);
 
         for(NodeId nodeId : graph.nodeIds())
             boundingBox.expandToInclude(positions[nodeId]);
@@ -77,7 +77,7 @@ public:
         return boundingBox;
     }
 
-    BoundingBox boundingBox()
+    BoundingBox3D boundingBox()
     {
         return Layout::boundingBox(*_graph, *this->positions);
     }
@@ -90,7 +90,7 @@ public:
 
     static BoundingSphere boundingSphere(const ReadOnlyGraph& graph, const NodeArray<QVector3D>& positions)
     {
-        BoundingBox boundingBox = Layout::boundingBox(graph, positions);
+        BoundingBox3D boundingBox = Layout::boundingBox(graph, positions);
         BoundingSphere boundingSphere =
         {
             boundingBox.centre(),
@@ -107,7 +107,7 @@ public:
 
     static float boundingCircleRadiusInXY(const ReadOnlyGraph& graph, const NodeArray<QVector3D>& positions)
     {
-        BoundingBox boundingBox = Layout::boundingBox(graph, positions);
+        BoundingBox3D boundingBox = Layout::boundingBox(graph, positions);
         return std::max(boundingBox.xLength(), boundingBox.yLength()) * 0.5f * std::sqrt(2.0f);
     }
 
