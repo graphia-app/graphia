@@ -119,11 +119,11 @@ void GraphScene::update( float /*t*/ )
         {
             const ReadOnlyGraph& component = *_graphModel->graph().componentById(componentId);
 
-            const float width = Layout::boundingBox(component, layout).xLength();
+            const float radius = Layout::boundingCircleRadiusInXY(component, layout);
             const float COMPONENT_SEPARATION = 5.0f;
 
             if(i != 0)
-                offset.setX(offset.x() - ((0.5f * width) + COMPONENT_SEPARATION));
+                offset.setX(offset.x() - (radius + COMPONENT_SEPARATION));
 
             for(NodeId nodeId : component.nodeIds())
             {
@@ -147,7 +147,7 @@ void GraphScene::update( float /*t*/ )
                 m_edgePositionData[j++] = targetPosition.z();
             }
 
-            offset.setX(offset.x() - ((0.5f * width) + COMPONENT_SEPARATION));
+            offset.setX(offset.x() - (radius + COMPONENT_SEPARATION));
         }
     }
 

@@ -14,6 +14,7 @@
 #include <QMutexLocker>
 #include <QWaitCondition>
 
+#include <algorithm>
 #include <limits>
 #include <atomic>
 
@@ -79,6 +80,35 @@ public:
     BoundingBox boundingBox()
     {
         return Layout::boundingBox(*_graph, *this->positions);
+    }
+
+    struct BoundingSphere
+    {
+        QVector3D centre;
+        float radius;
+    };
+
+    static BoundingSphere boundingSphere(const ReadOnlyGraph& graph, const NodeArray<QVector3D>& positions)
+    {
+        BoundingBox boundingBox = Layout::boundingBox(graph, positions);
+        BoundingSphere boundingSphere =
+        {
+            boundingBox.centre(),
+            std::max(std::max(boundingBox.xLength(), boundingBox.yLength()), boundingBox.zLength()) * 0.5f * std::sqrt(3.0f)
+        };
+
+        return boundingSphere;
+    }
+
+    BoundingSphere boundingSphere()
+    {
+        return Layout::boundingSphere(*_graph, *this->positions);
+    }
+
+    static float boundingCircleRadiusInXY(const ReadOnlyGraph& graph, const NodeArray<QVector3D>& positions)
+    {
+        BoundingBox boundingBox = Layout::boundingBox(graph, positions);
+        return std::max(boundingBox.xLength(), boundingBox.yLength()) * 0.5f * std::sqrt(2.0f);
     }
 
 signals:
