@@ -3,7 +3,7 @@
 
 #include "layout.h"
 
-class ScalingLayout : public Layout
+class ScalingLayout : public NodeLayout
 {
     Q_OBJECT
 private:
@@ -11,7 +11,7 @@ private:
 
 public:
     ScalingLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions) :
-        Layout(graph, positions), _scale(1.0f)
+        NodeLayout(graph, positions), _scale(1.0f)
     {}
 
     void setScale(float _scale) { this->_scale = _scale; }

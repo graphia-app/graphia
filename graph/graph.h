@@ -123,6 +123,7 @@ private:
     QList<ResizableGraphArray*> edgeArrayList;
     int edgeArrayCapacity() const { return nextEdgeId; }
 
+    template<typename> friend class ComponentArray;
     ComponentManager* componentManager;
 
     void setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId);

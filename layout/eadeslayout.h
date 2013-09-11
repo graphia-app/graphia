@@ -8,7 +8,7 @@
 
 #include <QVector3D>
 
-class EadesLayout : public Layout
+class EadesLayout : public NodeLayout
 {
     Q_OBJECT
 private:
@@ -17,7 +17,7 @@ private:
 
 public:
     EadesLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions) :
-        Layout(graph, positions, true),
+        NodeLayout(graph, positions, true),
         firstIteration(true),
         moves(graph.numNodes())
     {}
@@ -32,16 +32,16 @@ public:
         LayoutFactory(_graphModel)
     {}
 
-    Layout* create(ComponentId componentId) const
+    NodeLayout* create(ComponentId componentId) const
     {
         const ReadOnlyGraph* graph = this->_graphModel->graph().componentById(componentId);
-        EadesLayout* eadesLayout = new EadesLayout(*graph, this->_graphModel->layout());
-        CentreingLayout* centreingLayout = new CentreingLayout(*graph, this->_graphModel->layout());
+        EadesLayout* eadesLayout = new EadesLayout(*graph, this->_graphModel->nodePositions());
+        CentreingLayout* centreingLayout = new CentreingLayout(*graph, this->_graphModel->nodePositions());
 
-        QList<Layout*> subLayouts;
+        QList<NodeLayout*> subLayouts;
         subLayouts.append(eadesLayout);
         subLayouts.append(centreingLayout);
-        SequenceLayout* sequenceLayout = new SequenceLayout(*graph, this->_graphModel->layout(), subLayouts);
+        SequenceLayout* sequenceLayout = new SequenceLayout(*graph, this->_graphModel->nodePositions(), subLayouts);
         return sequenceLayout;
     }
 };

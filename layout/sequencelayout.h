@@ -5,32 +5,32 @@
 
 #include <QList>
 
-class SequenceLayout : public Layout
+class SequenceLayout : public NodeLayout
 {
     Q_OBJECT
 private:
-    QList<Layout*> subLayouts;
+    QList<NodeLayout*> subLayouts;
 
 public:
     SequenceLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions) :
-        Layout(graph, positions)
+        NodeLayout(graph, positions)
     {}
 
-    SequenceLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions, QList<Layout*> subLayouts) :
-        Layout(graph, positions), subLayouts(subLayouts)
+    SequenceLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions, QList<NodeLayout*> subLayouts) :
+        NodeLayout(graph, positions), subLayouts(subLayouts)
     {}
 
-    void addSubLayout(Layout* layout) { subLayouts.append(layout); }
+    void addSubLayout(NodeLayout* layout) { subLayouts.append(layout); }
 
     void cancel()
     {
-        for(Layout* subLayout : subLayouts)
+        for(NodeLayout* subLayout : subLayouts)
             subLayout->cancel();
     }
 
     bool shouldPause()
     {
-        for(Layout* subLayout : subLayouts)
+        for(NodeLayout* subLayout : subLayouts)
         {
             if(!subLayout->shouldPause())
                 return false;
@@ -41,7 +41,7 @@ public:
 
     bool iterative()
     {
-        for(Layout* subLayout : subLayouts)
+        for(NodeLayout* subLayout : subLayouts)
         {
             if(subLayout->iterative())
                 return true;
@@ -52,7 +52,7 @@ public:
 
     void executeReal()
     {
-        for(Layout* subLayout : subLayouts)
+        for(NodeLayout* subLayout : subLayouts)
             subLayout->execute();
     }
 };

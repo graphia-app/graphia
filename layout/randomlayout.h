@@ -3,7 +3,7 @@
 
 #include "layout.h"
 
-class RandomLayout : public Layout
+class RandomLayout : public NodeLayout
 {
     Q_OBJECT
 private:
@@ -11,7 +11,7 @@ private:
 
 public:
     RandomLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions) :
-        Layout(graph, positions), spread(10.0f)
+        NodeLayout(graph, positions), spread(10.0f)
     {}
 
     void setSpread(float spread) { this->spread = spread; }

@@ -75,7 +75,6 @@ HEADERS  += mainwindow.h \
     layout/centreinglayout.h \
     layout/sequencelayout.h \
     layout/scalinglayout.h \
-    layout/componentlayout.h \
     maths/boundingbox.h
 
 FORMS    += mainwindow.ui

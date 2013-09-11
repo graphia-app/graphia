@@ -7,6 +7,7 @@
 
 #include <QList>
 #include <QMap>
+#include <QVector2D>
 #include <QVector3D>
 #include <QObject>
 #include <QThread>
@@ -31,8 +32,6 @@ private:
     virtual void executeReal() = 0;
 
 protected:
-    const ReadOnlyGraph* _graph;
-    NodeArray<QVector3D>* positions;
     bool _iterative;
 
     bool shouldCancel()
@@ -41,14 +40,10 @@ protected:
     }
 
 public:
-    Layout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions, bool _iterative = false) :
+    Layout(bool _iterative) :
         atomicCancel(false),
-        _graph(&graph),
-        positions(&positions),
         _iterative(_iterative)
     {}
-
-    const ReadOnlyGraph& graph() { return *_graph; }
 
     void execute()
     {
@@ -66,6 +61,27 @@ public:
 
     virtual bool iterative() { return _iterative; }
 
+signals:
+    void progress(int percentage);
+    void complete();
+};
+
+class NodeLayout : public Layout
+{
+    Q_OBJECT
+protected:
+    const ReadOnlyGraph* _graph;
+    NodeArray<QVector3D>* positions;
+
+public:
+    NodeLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions, bool iterative = false) :
+        Layout(iterative),
+        _graph(&graph),
+        positions(&positions)
+    {}
+
+    const ReadOnlyGraph& graph() { return *_graph; }
+
     static BoundingBox3D boundingBox(const ReadOnlyGraph& graph, const NodeArray<QVector3D>& positions)
     {
         const QVector3D& firstNodePosition = positions[graph.nodeIds()[0]];
@@ -79,7 +95,7 @@ public:
 
     BoundingBox3D boundingBox()
     {
-        return Layout::boundingBox(*_graph, *this->positions);
+        return NodeLayout::boundingBox(*_graph, *this->positions);
     }
 
     struct BoundingSphere
@@ -90,7 +106,7 @@ public:
 
     static BoundingSphere boundingSphere(const ReadOnlyGraph& graph, const NodeArray<QVector3D>& positions)
     {
-        BoundingBox3D boundingBox = Layout::boundingBox(graph, positions);
+        BoundingBox3D boundingBox = NodeLayout::boundingBox(graph, positions);
         BoundingSphere boundingSphere =
         {
             boundingBox.centre(),
@@ -102,18 +118,53 @@ public:
 
     BoundingSphere boundingSphere()
     {
-        return Layout::boundingSphere(*_graph, *this->positions);
+        return NodeLayout::boundingSphere(*_graph, *this->positions);
     }
 
     static float boundingCircleRadiusInXY(const ReadOnlyGraph& graph, const NodeArray<QVector3D>& positions)
     {
-        BoundingBox3D boundingBox = Layout::boundingBox(graph, positions);
+        BoundingBox3D boundingBox = NodeLayout::boundingBox(graph, positions);
         return std::max(boundingBox.xLength(), boundingBox.yLength()) * 0.5f * std::sqrt(2.0f);
     }
+};
 
-signals:
-    void progress(int percentage);
-    void complete();
+class ComponentLayout : public Layout
+{
+    Q_OBJECT
+protected:
+    const Graph* _graph;
+    ComponentArray<QVector2D>* positions;
+    const NodeArray<QVector3D>* nodePositions;
+
+public:
+    ComponentLayout(const Graph& graph, ComponentArray<QVector2D>& positions,
+                    const NodeArray<QVector3D>& nodePositions, bool iterative = false) :
+        Layout(iterative),
+        _graph(&graph),
+        positions(&positions),
+        nodePositions(&nodePositions)
+    {}
+
+    const ReadOnlyGraph& graph() { return *_graph; }
+
+    BoundingBox2D boundingBox()
+    {
+        BoundingBox2D _boundingBox;
+
+        for(ComponentId componentId : *_graph->componentIds())
+        {
+            const ReadOnlyGraph& component = *_graph->componentById(componentId);
+            float componentRadius = NodeLayout::boundingCircleRadiusInXY(component, *nodePositions);
+            QVector2D componentPosition = (*positions)[componentId];
+            BoundingBox2D componentBoundingBox(
+                        QVector2D(componentPosition.x() - componentRadius, componentPosition.y() - componentRadius),
+                        QVector2D(componentPosition.x() + componentRadius, componentPosition.y() + componentRadius));
+
+            _boundingBox.expandToInclude(componentBoundingBox);
+        }
+
+        return _boundingBox;
+    }
 };
 
 class GraphModel;
@@ -131,7 +182,7 @@ public:
 
     const GraphModel& graphModel() const { return *_graphModel; }
 
-    virtual Layout* create(ComponentId componentId) const = 0;
+    virtual NodeLayout* create(ComponentId componentId) const = 0;
 };
 
 class LayoutThread : public QThread
@@ -212,7 +263,7 @@ public:
         _pause = true;
 
         for(Layout* layout : layouts.values())
-            layout ->cancel();
+            layout->cancel();
 
         waitForPause.wait(&mutex);
     }

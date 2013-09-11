@@ -107,7 +107,7 @@ void GraphScene::update( float /*t*/ )
 {
     if(_graphModel != nullptr)
     {
-        NodeArray<QVector3D>& layout = _graphModel->layout();
+        NodeArray<QVector3D>& layout = _graphModel->nodePositions();
 
         m_nodePositionData.resize(_graphModel->graph().numNodes() * 3);
         m_edgePositionData.resize(_graphModel->graph().numEdges() * 6);
@@ -119,7 +119,7 @@ void GraphScene::update( float /*t*/ )
         {
             const ReadOnlyGraph& component = *_graphModel->graph().componentById(componentId);
 
-            const float radius = Layout::boundingCircleRadiusInXY(component, layout);
+            const float radius = NodeLayout::boundingCircleRadiusInXY(component, layout);
             const float COMPONENT_SEPARATION = 5.0f;
 
             if(i != 0)

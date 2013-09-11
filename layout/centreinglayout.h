@@ -3,12 +3,12 @@
 
 #include "layout.h"
 
-class CentreingLayout : public Layout
+class CentreingLayout : public NodeLayout
 {
     Q_OBJECT
 public:
     CentreingLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions) :
-        Layout(graph, positions)
+        NodeLayout(graph, positions)
     {}
 
     void executeReal();
