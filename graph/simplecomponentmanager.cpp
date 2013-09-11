@@ -47,7 +47,7 @@ void SimpleComponentManager::findComponents()
             updatesRequired.insert(newComponentId);
 
             // New component
-            emit componentAdded(&graph(), newComponentId);
+            onComponentAdded(newComponentId);
         }
     }
 }
@@ -125,7 +125,7 @@ void SimpleComponentManager::nodeAdded(NodeId nodeId)
     updatesRequired.insert(newComponentId);
 
     // New component
-    emit componentAdded(&graph(), newComponentId);
+    onComponentAdded(newComponentId);
 }
 
 void SimpleComponentManager::nodeWillBeRemoved(NodeId nodeId)
@@ -200,8 +200,17 @@ void SimpleComponentManager::edgeWillBeRemoved(EdgeId edgeId)
         emit componentSplit(&graph(), oldComponentId, splitters);
 
         // New component
-        emit componentAdded(&graph(), newComponentId);
+        onComponentAdded(newComponentId);
     }
+}
+
+void SimpleComponentManager::onComponentAdded(ComponentId componentId)
+{
+    for(ResizableGraphArray* componentArray : componentArrayList)
+        componentArray->resize(componentArrayCapacity());
+
+    // New component
+    emit componentAdded(&graph(), componentId);
 }
 
 const QList<ComponentId>& SimpleComponentManager::componentIds() const

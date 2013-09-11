@@ -62,7 +62,11 @@ private:
     void edgeAdded(EdgeId edgeId);
     void edgeWillBeRemoved(EdgeId edgeId);
 
+    void onComponentAdded(ComponentId componentId);
+
     void findComponents();
+
+    int componentArrayCapacity() const { return nextComponentId; }
 
 public:
     const QList<ComponentId>& componentIds() const;

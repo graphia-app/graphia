@@ -63,6 +63,10 @@ protected:
 
     virtual void findComponents() = 0;
 
+    template<typename> friend class ComponentArray;
+    QList<ResizableGraphArray*> componentArrayList;
+    virtual int componentArrayCapacity() const = 0;
+
     QList<NodeId>& graphComponentNodeIdsList(GraphComponent* graphComponent) { return graphComponent->nodeIdsList; }
     QList<EdgeId>& graphComponentEdgeIdsList(GraphComponent* graphComponent) { return graphComponent->edgeIdsList; }
 

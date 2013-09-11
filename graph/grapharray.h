@@ -2,6 +2,7 @@
 #define GRAPHARRAY_H
 
 #include "graph.h"
+#include "componentmanager.h"
 
 #include <QObject>
 #include <QVector>
@@ -117,6 +118,26 @@ public:
     ~EdgeArray()
     {
         this->_graph->edgeArrayList.removeOne(this);
+    }
+};
+
+template<typename Element> class ComponentArray : public GraphArray<ComponentId, Element>
+{
+public:
+    ComponentArray(Graph& graph) : GraphArray<ComponentId, Element>(graph)
+    {
+        this->resize(graph.componentManager->componentArrayCapacity());
+        graph.componentManager->componentArrayList.append(this);
+    }
+
+    ComponentArray(const ComponentArray& other) : GraphArray<ComponentId, Element>(other)
+    {
+        this->_graph->componentManager->componentArrayList.append(this);
+    }
+
+    ~ComponentArray()
+    {
+        this->_graph->componentManager->componentArrayList.removeOne(this);
     }
 };
 
