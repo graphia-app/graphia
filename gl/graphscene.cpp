@@ -45,7 +45,7 @@ GraphScene::GraphScene( QObject* parent )
     update( 0.0f );
 
     // Initialize the camera position and orientation
-    m_camera->setPosition( QVector3D( 0.0f, 0.0f, -50.0f ) );
+    m_camera->setPosition( QVector3D( 0.0f, 0.0f, 50.0f ) );
     m_camera->setViewCenter( QVector3D( 0.0f, 0.0f, 0.0f ) );
     m_camera->setUpVector( QVector3D( 0.0f, 1.0f, 0.0f ) );
 }
@@ -107,7 +107,8 @@ void GraphScene::update( float /*t*/ )
 {
     if(_graphModel != nullptr)
     {
-        NodeArray<QVector3D>& layout = _graphModel->nodePositions();
+        NodeArray<QVector3D>& nodePositions = _graphModel->nodePositions();
+        ComponentArray<QVector2D>& componentPositions = _graphModel->componentPositions();
 
         m_nodePositionData.resize(_graphModel->graph().numNodes() * 3);
         m_edgePositionData.resize(_graphModel->graph().numEdges() * 6);
@@ -119,35 +120,24 @@ void GraphScene::update( float /*t*/ )
         {
             const ReadOnlyGraph& component = *_graphModel->graph().componentById(componentId);
 
-            const float radius = NodeLayout::boundingCircleRadiusInXY(component, layout);
-            const float COMPONENT_SEPARATION = 5.0f;
-
-            if(i != 0)
-                offset.setX(offset.x() - (radius + COMPONENT_SEPARATION));
-
             for(NodeId nodeId : component.nodeIds())
             {
-                const QVector3D& position = layout[nodeId] + offset;
-                m_nodePositionData[i++] = position.x();
-                m_nodePositionData[i++] = position.y();
-                m_nodePositionData[i++] = position.z();
+                m_nodePositionData[i++] = nodePositions[nodeId].x() + componentPositions[componentId].x();
+                m_nodePositionData[i++] = nodePositions[nodeId].y() + componentPositions[componentId].y();
+                m_nodePositionData[i++] = nodePositions[nodeId].z();
             }
 
             for(EdgeId edgeId : component.edgeIds())
             {
                 const Edge& edge = _graphModel->graph().edgeById(edgeId);
-                const QVector3D& sourcePosition = layout[edge.sourceId()] + offset;
-                const QVector3D& targetPosition = layout[edge.targetId()] + offset;
 
-                m_edgePositionData[j++] = sourcePosition.x();
-                m_edgePositionData[j++] = sourcePosition.y();
-                m_edgePositionData[j++] = sourcePosition.z();
-                m_edgePositionData[j++] = targetPosition.x();
-                m_edgePositionData[j++] = targetPosition.y();
-                m_edgePositionData[j++] = targetPosition.z();
+                m_edgePositionData[j++] = nodePositions[edge.sourceId()].x() + componentPositions[componentId].x();
+                m_edgePositionData[j++] = nodePositions[edge.sourceId()].y() + componentPositions[componentId].y();
+                m_edgePositionData[j++] = nodePositions[edge.sourceId()].z();
+                m_edgePositionData[j++] = nodePositions[edge.targetId()].x() + componentPositions[componentId].x();
+                m_edgePositionData[j++] = nodePositions[edge.targetId()].y() + componentPositions[componentId].y();
+                m_edgePositionData[j++] = nodePositions[edge.targetId()].z();
             }
-
-            offset.setX(offset.x() - (radius + COMPONENT_SEPARATION));
         }
     }
 

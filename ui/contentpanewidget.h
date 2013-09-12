@@ -8,6 +8,7 @@
 #include "../graph/graphmodel.h"
 
 class GraphFileParserThread;
+class NodeLayoutThread;
 class LayoutThread;
 
 class ContentPaneWidget : public QWidget
@@ -28,7 +29,8 @@ public slots:
 private:
     GraphModel* _graphModel;
     GraphFileParserThread *graphFileParserThread;
-    LayoutThread* layoutThread;
+    NodeLayoutThread* nodeLayoutThread;
+    LayoutThread* componentLayoutThread;
 
     bool resumeLayoutPostChange;
 

@@ -63,7 +63,7 @@ public:
 
 signals:
     void progress(int percentage);
-    void complete();
+    void changed();
 };
 
 class NodeLayout : public Layout
@@ -133,19 +133,19 @@ class ComponentLayout : public Layout
     Q_OBJECT
 protected:
     const Graph* _graph;
-    ComponentArray<QVector2D>* positions;
+    ComponentArray<QVector2D>* componentPositions;
     const NodeArray<QVector3D>* nodePositions;
 
 public:
-    ComponentLayout(const Graph& graph, ComponentArray<QVector2D>& positions,
+    ComponentLayout(const Graph& graph, ComponentArray<QVector2D>& componentPositions,
                     const NodeArray<QVector3D>& nodePositions, bool iterative = false) :
         Layout(iterative),
         _graph(&graph),
-        positions(&positions),
+        componentPositions(&componentPositions),
         nodePositions(&nodePositions)
     {}
 
-    const ReadOnlyGraph& graph() { return *_graph; }
+    const Graph& graph() { return *_graph; }
 
     BoundingBox2D boundingBox()
     {
@@ -155,7 +155,7 @@ public:
         {
             const ReadOnlyGraph& component = *_graph->componentById(componentId);
             float componentRadius = NodeLayout::boundingCircleRadiusInXY(component, *nodePositions);
-            QVector2D componentPosition = (*positions)[componentId];
+            QVector2D componentPosition = (*componentPositions)[componentId];
             BoundingBox2D componentBoundingBox(
                         QVector2D(componentPosition.x() - componentRadius, componentPosition.y() - componentRadius),
                         QVector2D(componentPosition.x() + componentRadius, componentPosition.y() + componentRadius));
@@ -169,16 +169,16 @@ public:
 
 class GraphModel;
 
-class LayoutFactory
+class NodeLayoutFactory
 {
 protected:
     GraphModel* _graphModel;
 
 public:
-    LayoutFactory(GraphModel* _graphModel) :
+    NodeLayoutFactory(GraphModel* _graphModel) :
         _graphModel(_graphModel)
     {}
-    virtual ~LayoutFactory() {}
+    virtual ~NodeLayoutFactory() {}
 
     const GraphModel& graphModel() const { return *_graphModel; }
 
@@ -188,64 +188,50 @@ public:
 class LayoutThread : public QThread
 {
     Q_OBJECT
-private:
-    const LayoutFactory* layoutFactory;
-    QMap<ComponentId, Layout*> layouts;
+protected:
+    QSet<Layout*> layouts;
     QMutex mutex;
     bool _pause;
     bool _isPaused;
     bool _stop;
+    bool repeating;
     QWaitCondition waitForPause;
     QWaitCondition waitForResume;
 
 public:
-    LayoutThread(const LayoutFactory* layoutFactory) :
-        layoutFactory(layoutFactory),
-        _pause(false), _isPaused(false), _stop(false)
+    LayoutThread(bool repeating = false) :
+        _pause(false), _isPaused(false), _stop(false), repeating(repeating)
     {}
+
+    LayoutThread(Layout* layout, bool _repeating = false) :
+        _pause(false), _isPaused(false), _stop(false), repeating(_repeating)
+    {
+        addLayout(layout);
+    }
 
     virtual ~LayoutThread()
     {
         stop();
         wait();
-        delete layoutFactory;
     }
 
-    void add(ComponentId componentId)
+    void addLayout(Layout* layout)
     {
         QMutexLocker locker(&mutex);
 
-        if(!layouts.contains(componentId))
-        {
-            Layout* layout = layoutFactory->create(componentId);
+        // Take ownership of the algorithm
+        layout->moveToThread(this);
+        layouts.insert(layout);
 
-            // Take ownership of the algorithm
-            layout->moveToThread(this);
-            layouts.insert(componentId, layout);
-
-            start();
-        }
+        start();
     }
 
-    void remove(ComponentId componentId)
+    void removeLayout(Layout* layout)
     {
-        bool resumeAfterRemoval = false;
+        QMutexLocker locker(&mutex);
 
-        if(isPaused())
-        {
-            pauseAndWait();
-            resumeAfterRemoval = true;
-        }
-
-        if(layouts.contains(componentId))
-        {
-            Layout* layout = layouts[componentId];
-            layouts.remove(componentId);
-            delete layout;
-        }
-
-        if(resumeAfterRemoval)
-            resume();
+        layouts.remove(layout);
+        delete layout;
     }
 
     void pause()
@@ -253,7 +239,7 @@ public:
         QMutexLocker locker(&mutex);
         _pause = true;
 
-        for(Layout* layout : layouts.values())
+        for(Layout* layout : layouts)
             layout->cancel();
     }
 
@@ -262,7 +248,7 @@ public:
         QMutexLocker locker(&mutex);
         _pause = true;
 
-        for(Layout* layout : layouts.values())
+        for(Layout* layout : layouts)
             layout->cancel();
 
         waitForPause.wait(&mutex);
@@ -278,11 +264,19 @@ public:
     {
         {
             QMutexLocker locker(&mutex);
+            if(!_isPaused)
+                return;
+
             _pause = false;
             _isPaused = false;
         }
 
         waitForResume.wakeAll();
+    }
+
+    void execute()
+    {
+        resume();
     }
 
     void stop()
@@ -292,7 +286,7 @@ public:
             _stop = true;
             _pause = false;
 
-            for(Layout* layout : layouts.values())
+            for(Layout* layout : layouts)
                 layout->cancel();
         }
 
@@ -300,9 +294,9 @@ public:
     }
 
 private:
-    bool workRemaining()
+    bool iterative()
     {
-        for(Layout* layout : layouts.values())
+        for(Layout* layout : layouts)
         {
             if(layout->iterative())
                 return true;
@@ -311,9 +305,9 @@ private:
         return false;
     }
 
-    bool allLayoutAlgorithmsShouldPause()
+    bool allLayoutsShouldPause()
     {
-        for(Layout* layout : layouts.values())
+        for(Layout* layout : layouts)
         {
             if(!layout->shouldPause())
                 return false;
@@ -326,7 +320,7 @@ private:
     {
         do
         {
-            for(Layout* layout : layouts.values())
+            for(Layout* layout : layouts)
             {
                 if(layout->shouldPause())
                     continue;
@@ -334,10 +328,12 @@ private:
                 layout->execute();
             }
 
+            emit executed();
+
             {
                 QMutexLocker locker(&mutex);
 
-                if(_pause || allLayoutAlgorithmsShouldPause())
+                if(_pause || allLayoutsShouldPause() || (!iterative() && repeating))
                 {
                     _isPaused = true;
                     waitForPause.wakeAll();
@@ -348,10 +344,76 @@ private:
                     break;
             }
         }
-        while(workRemaining());
+        while(iterative() || repeating);
 
-        for(Layout* layout : layouts.values())
+        mutex.lock();
+        for(Layout* layout : layouts)
             delete layout;
+
+        layouts.clear();
+        mutex.unlock();
+    }
+
+signals:
+    void executed();
+};
+
+class NodeLayoutThread : public LayoutThread
+{
+    Q_OBJECT
+private:
+    const NodeLayoutFactory* layoutFactory;
+    QMap<ComponentId, Layout*> componentLayouts;
+
+public:
+    NodeLayoutThread(const NodeLayoutFactory* layoutFactory) :
+        LayoutThread(),
+        layoutFactory(layoutFactory)
+    {}
+
+    virtual ~NodeLayoutThread()
+    {
+        delete layoutFactory;
+    }
+
+    void addComponent(ComponentId componentId)
+    {
+        if(!componentLayouts.contains(componentId))
+        {
+            Layout* layout = layoutFactory->create(componentId);
+
+            addLayout(layout);
+            componentLayouts.insert(componentId, layout);
+
+            start();
+        }
+    }
+
+    void addAllComponents(const Graph& graph)
+    {
+        for(ComponentId componentId : *graph.componentIds())
+            addComponent(componentId);
+    }
+
+    void removeComponent(ComponentId componentId)
+    {
+        bool resumeAfterRemoval = false;
+
+        if(!isPaused())
+        {
+            pauseAndWait();
+            resumeAfterRemoval = true;
+        }
+
+        if(componentLayouts.contains(componentId))
+        {
+            componentLayouts.remove(componentId);
+            Layout* layout = componentLayouts[componentId];
+            removeLayout(layout);
+        }
+
+        if(resumeAfterRemoval)
+            resume();
     }
 };
 

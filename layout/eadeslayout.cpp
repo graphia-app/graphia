@@ -127,5 +127,5 @@ void EadesLayout::executeReal()
         positions[nodeId] += (moves[nodeId] * 0.1f); //FIXME not sure what this constant is about, damping?
     positions.unlock();
 
-    emit complete();
+    emit changed();
 }

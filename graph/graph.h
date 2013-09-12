@@ -125,6 +125,7 @@ private:
 
     template<typename> friend class ComponentArray;
     ComponentManager* componentManager;
+    bool componentManagementEnabled;
 
     void setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId);
     void setEdgeNodes(EdgeId edgeId, NodeId sourceId, NodeId targetId);
@@ -132,6 +133,8 @@ private:
 public:
     void clear();
     void setComponentManager(ComponentManager* componentManager);
+    void enableComponentMangagement();
+    void disableComponentMangagement();
 
     const QList<NodeId>& nodeIds() const { return nodeIdsList; }
     int numNodes() const { return nodeIdsList.size(); }
@@ -150,6 +153,7 @@ public:
     const QList<ComponentId>* componentIds() const;
     int numComponents() const;
     const ReadOnlyGraph* componentById(ComponentId componentId) const;
+    const ReadOnlyGraph* firstComponent() const { return componentById((*componentIds())[0]); }
 
     void dumpToQDebug(int detail) const
     {

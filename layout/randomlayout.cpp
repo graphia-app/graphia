@@ -17,5 +17,5 @@ void RandomLayout::executeReal()
     }
     positions.unlock();
 
-    emit complete();
+    emit changed();
 }

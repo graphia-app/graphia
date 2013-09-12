@@ -25,11 +25,11 @@ public:
     void executeReal();
 };
 
-class EadesLayoutFactory : public LayoutFactory
+class EadesLayoutFactory : public NodeLayoutFactory
 {
 public:
     EadesLayoutFactory(GraphModel* _graphModel) :
-        LayoutFactory(_graphModel)
+        NodeLayoutFactory(_graphModel)
     {}
 
     NodeLayout* create(ComponentId componentId) const

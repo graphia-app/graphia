@@ -9,5 +9,5 @@ void ScalingLayout::executeReal()
         positions[nodeId] = positions[nodeId] * _scale;
     positions.unlock();
 
-    emit complete();
+    emit changed();
 }

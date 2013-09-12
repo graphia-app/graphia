@@ -13,5 +13,5 @@ void CentreingLayout::executeReal()
         positions[nodeId] -= centerOfMass;
     positions.unlock();
 
-    emit complete();
+    emit changed();
 }

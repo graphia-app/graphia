@@ -40,7 +40,8 @@ SOURCES += main.cpp\
     graph/simplecomponentmanager.cpp \
     maths/boundingbox.cpp \
     layout/centreinglayout.cpp \
-    layout/scalinglayout.cpp
+    layout/scalinglayout.cpp \
+    layout/linearcomponentlayout.cpp
 
 HEADERS  += mainwindow.h \
     graph/grapharray.h \
@@ -75,7 +76,8 @@ HEADERS  += mainwindow.h \
     layout/centreinglayout.h \
     layout/sequencelayout.h \
     layout/scalinglayout.h \
-    maths/boundingbox.h
+    maths/boundingbox.h \
+    layout/linearcomponentlayout.h
 
 FORMS    += mainwindow.ui
 

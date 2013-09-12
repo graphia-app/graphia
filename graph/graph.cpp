@@ -7,7 +7,8 @@
 Graph::Graph() :
     nextNodeId(0),
     nextEdgeId(0),
-    componentManager(nullptr)
+    componentManager(new SimpleComponentManager(*this)),
+    componentManagementEnabled(true)
 {
 }
 
@@ -37,6 +38,17 @@ void Graph::setComponentManager(ComponentManager *componentManager)
     this->componentManager->findComponents();
 }
 
+void Graph::enableComponentMangagement()
+{
+    componentManagementEnabled = true;
+    componentManager->findComponents();
+}
+
+void Graph::disableComponentMangagement()
+{
+    componentManagementEnabled = false;
+}
+
 NodeId Graph::addNode()
 {
     emit graphWillChange(this);
@@ -55,7 +67,7 @@ NodeId Graph::addNode()
     for(ResizableGraphArray* nodeArray : nodeArrayList)
         nodeArray->resize(nodeArrayCapacity());
 
-    if(componentManager != nullptr)
+    if(componentManagementEnabled && componentManager != nullptr)
         componentManager->nodeAdded(newNodeId);
 
     emit nodeAdded(this, newNodeId);
@@ -66,7 +78,7 @@ NodeId Graph::addNode()
 
 void Graph::removeNode(NodeId nodeId)
 {
-    if(componentManager != nullptr)
+    if(componentManagementEnabled && componentManager != nullptr)
         componentManager->nodeWillBeRemoved(nodeId);
 
     emit graphWillChange(this);
@@ -103,7 +115,7 @@ EdgeId Graph::addEdge(NodeId sourceId, NodeId targetId)
 
     setEdgeNodes(newEdgeId, sourceId, targetId);
 
-    if(componentManager != nullptr)
+    if(componentManagementEnabled && componentManager != nullptr)
         componentManager->edgeAdded(newEdgeId);
 
     emit edgeAdded(this, newEdgeId);
@@ -114,7 +126,7 @@ EdgeId Graph::addEdge(NodeId sourceId, NodeId targetId)
 
 void Graph::removeEdge(EdgeId edgeId)
 {
-    if(componentManager != nullptr)
+    if(componentManagementEnabled && componentManager != nullptr)
         componentManager->edgeWillBeRemoved(edgeId);
 
     emit graphWillChange(this);
