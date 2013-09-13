@@ -114,7 +114,6 @@ void GraphScene::update( float /*t*/ )
         m_edgePositionData.resize(_graphModel->graph().numEdges() * 6);
         int i = 0;
         int j = 0;
-        QVector3D offset;
 
         for(ComponentId componentId : *_graphModel->graph().componentIds())
         {
