@@ -15,6 +15,11 @@ public:
         return value;
     }
 
+    static QVector2D randQVector2D(float low, float high)
+    {
+        return QVector2D(rand(low, high), rand(low, high));
+    }
+
     static QVector3D randQVector3D(float low, float high)
     {
         return QVector3D(rand(low, high), rand(low, high), rand(low, high));
