@@ -41,7 +41,8 @@ SOURCES += main.cpp\
     maths/boundingbox.cpp \
     layout/centreinglayout.cpp \
     layout/scalinglayout.cpp \
-    layout/linearcomponentlayout.cpp
+    layout/linearcomponentlayout.cpp \
+    layout/circlepackingcomponentlayout.cpp
 
 HEADERS  += mainwindow.h \
     graph/grapharray.h \
@@ -77,7 +78,8 @@ HEADERS  += mainwindow.h \
     layout/sequencelayout.h \
     layout/scalinglayout.h \
     maths/boundingbox.h \
-    layout/linearcomponentlayout.h
+    layout/linearcomponentlayout.h \
+    layout/circlepackingcomponentlayout.h
 
 FORMS    += mainwindow.ui
 

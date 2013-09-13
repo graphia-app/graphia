@@ -6,6 +6,7 @@
 #include "../layout/layout.h"
 #include "../layout/eadeslayout.h"
 #include "../layout/linearcomponentlayout.h"
+#include "../layout/circlepackingcomponentlayout.h"
 #include "graphview.h"
 
 #include <QFileInfo>
@@ -77,7 +78,7 @@ void ContentPaneWidget::onCompletion(int success)
     nodeLayoutThread = new NodeLayoutThread(new EadesLayoutFactory(_graphModel));
     nodeLayoutThread->addAllComponents(_graphModel->graph());
 
-    componentLayoutThread = new LayoutThread(new LinearComponentLayout(_graphModel->graph(),
+    componentLayoutThread = new LayoutThread(new CirclePackingComponentLayout(_graphModel->graph(),
                                                                        _graphModel->componentPositions(),
                                                                        _graphModel->nodePositions()), true);
 
