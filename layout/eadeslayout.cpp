@@ -65,17 +65,21 @@ void EadesLayout::executeReal()
     for(NodeId i : graph().nodeIds())
         moves[i] = QVector3D(0.0f, 0.0f, 0.0f);
 
+    int numNodes = graph().nodeIds().size();
+
     // Repulsive forces
-    for(NodeId i : graph().nodeIds())
+    for(int i = 0; i < numNodes - 1; i++)
     {
-        for(NodeId j : graph().nodeIds())
+        for(int j = i + 1; j < numNodes; j++)
         {
             if(shouldCancel())
                 return;
 
             if(i != j)
             {
-                QVector3D difference = positions[j] - positions[i];
+                NodeId nodeAId = graph().nodeIds().at(i);
+                NodeId nodeBId = graph().nodeIds().at(j);
+                QVector3D difference = positions[nodeBId] - positions[nodeAId];
                 qreal distance = difference.lengthSquared();
                 qreal force;
                 QVector3D direction;
@@ -94,7 +98,8 @@ void EadesLayout::executeReal()
                     direction = Utils::FastNormalize(difference);
                 }
 
-                moves[j] += (force * direction);
+                moves[nodeAId] -= (force * direction);
+                moves[nodeBId] += (force * direction);
             }
         }
     }
