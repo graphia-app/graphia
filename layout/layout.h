@@ -93,7 +93,7 @@ public:
         return boundingBox;
     }
 
-    BoundingBox3D boundingBox()
+    BoundingBox3D boundingBox() const
     {
         return NodeLayout::boundingBox(*_graph, *this->positions);
     }
@@ -116,7 +116,7 @@ public:
         return boundingSphere;
     }
 
-    BoundingSphere boundingSphere()
+    BoundingSphere boundingSphere() const
     {
         return NodeLayout::boundingSphere(*_graph, *this->positions);
     }
@@ -147,7 +147,7 @@ public:
 
     const Graph& graph() { return *_graph; }
 
-    BoundingBox2D boundingBox()
+    BoundingBox2D boundingBox() const
     {
         BoundingBox2D _boundingBox;
 
@@ -164,6 +164,12 @@ public:
         }
 
         return _boundingBox;
+    }
+
+    float radiusOfComponent(ComponentId componentId) const
+    {
+        const ReadOnlyGraph& component = *_graph->componentById(componentId);
+        return NodeLayout::boundingCircleRadiusInXY(component, *nodePositions);
     }
 };
 

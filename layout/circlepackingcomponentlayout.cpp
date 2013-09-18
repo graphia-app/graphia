@@ -21,10 +21,7 @@ void CirclePackingComponentLayout::executeReal()
     ComponentArray<float> componentRadii(const_cast<Graph&>(graph()));
 
     for(ComponentId componentId : componentIds)
-    {
-        const ReadOnlyGraph& component = *graph().componentById(componentId);
-        componentRadii[componentId] = NodeLayout::boundingCircleRadiusInXY(component, *nodePositions) + COMPONENT_SEPARATION;
-    }
+        componentRadii[componentId] = radiusOfComponent(componentId) + COMPONENT_SEPARATION;
 
     if(firstIteration)
     {
