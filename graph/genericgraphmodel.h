@@ -13,17 +13,17 @@ public:
 
 private:
     Graph _graph;
-    NodeArray<QVector3D> _nodePositions;
-    ComponentArray<QVector2D> _componentPositions;
+    NodePositions _nodePositions;
+    ComponentPositions _componentPositions;
     QString _name;
 
 public:
     Graph& graph() { return _graph; }
     const Graph& graph() const { return _graph; }
-    NodeArray<QVector3D>& nodePositions() { return _nodePositions; }
-    const NodeArray<QVector3D>& nodePositions() const { return _nodePositions; }
-    ComponentArray<QVector2D>& componentPositions() { return _componentPositions; }
-    const ComponentArray<QVector2D>& componentPositions() const { return _componentPositions; }
+    NodePositions& nodePositions() { return _nodePositions; }
+    const NodePositions& nodePositions() const { return _nodePositions; }
+    ComponentPositions& componentPositions() { return _componentPositions; }
+    const ComponentPositions& componentPositions() const { return _componentPositions; }
 
     const QString& name() { return _name; }
 };

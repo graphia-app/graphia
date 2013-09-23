@@ -4,7 +4,7 @@
 
 void RandomLayout::executeReal()
 {
-    NodeArray<QVector3D>& positions = *this->positions;
+    NodePositions& positions = *this->positions;
     int nodeNumber = 0;
     int numNodes = graph().numNodes();
 

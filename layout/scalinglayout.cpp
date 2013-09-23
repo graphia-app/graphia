@@ -2,7 +2,7 @@
 
 void ScalingLayout::executeReal()
 {
-    NodeArray<QVector3D>& positions = *this->positions;
+    NodePositions& positions = *this->positions;
 
     positions.lock();
     for(NodeId nodeId : graph().nodeIds())

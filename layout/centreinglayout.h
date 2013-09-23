@@ -7,7 +7,7 @@ class CentreingLayout : public NodeLayout
 {
     Q_OBJECT
 public:
-    CentreingLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions) :
+    CentreingLayout(const ReadOnlyGraph& graph, NodePositions& positions) :
         NodeLayout(graph, positions)
     {}
 

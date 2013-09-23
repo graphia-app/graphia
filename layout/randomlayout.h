@@ -10,7 +10,7 @@ private:
     float spread;
 
 public:
-    RandomLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions) :
+    RandomLayout(const ReadOnlyGraph& graph, NodePositions& positions) :
         NodeLayout(graph, positions), spread(10.0f)
     {}
 

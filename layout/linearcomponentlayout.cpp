@@ -4,7 +4,7 @@
 
 void LinearComponentLayout::executeReal()
 {
-    ComponentArray<QVector2D>& componentPositions = *this->componentPositions;
+    ComponentPositions& componentPositions = *this->componentPositions;
     const ReadOnlyGraph& firstComponent = *graph().firstComponent();
     const float COMPONENT_SEPARATION = 2.0f;
 

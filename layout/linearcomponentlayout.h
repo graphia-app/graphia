@@ -7,7 +7,7 @@ class LinearComponentLayout : public ComponentLayout
 {
     Q_OBJECT
 public:
-    LinearComponentLayout(const Graph& graph, ComponentArray<QVector2D>& componentPositions, NodeArray<QVector3D>& nodePositions) :
+    LinearComponentLayout(const Graph& graph, ComponentPositions& componentPositions, NodePositions& nodePositions) :
         ComponentLayout(graph, componentPositions, nodePositions)
     {}
 

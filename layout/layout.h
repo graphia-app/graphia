@@ -66,15 +66,18 @@ signals:
     void changed();
 };
 
+typedef NodeArray<QVector3D> NodePositions;
+typedef ComponentArray<QVector2D> ComponentPositions;
+
 class NodeLayout : public Layout
 {
     Q_OBJECT
 protected:
     const ReadOnlyGraph* _graph;
-    NodeArray<QVector3D>* positions;
+    NodePositions* positions;
 
 public:
-    NodeLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions, bool iterative = false) :
+    NodeLayout(const ReadOnlyGraph& graph, NodePositions& positions, bool iterative = false) :
         Layout(iterative),
         _graph(&graph),
         positions(&positions)
@@ -82,7 +85,7 @@ public:
 
     const ReadOnlyGraph& graph() { return *_graph; }
 
-    static BoundingBox3D boundingBox(const ReadOnlyGraph& graph, const NodeArray<QVector3D>& positions)
+    static BoundingBox3D boundingBox(const ReadOnlyGraph& graph, const NodePositions& positions)
     {
         const QVector3D& firstNodePosition = positions[graph.nodeIds()[0]];
         BoundingBox3D boundingBox(firstNodePosition, firstNodePosition);
@@ -104,7 +107,7 @@ public:
         float radius;
     };
 
-    static BoundingSphere boundingSphere(const ReadOnlyGraph& graph, const NodeArray<QVector3D>& positions)
+    static BoundingSphere boundingSphere(const ReadOnlyGraph& graph, const NodePositions& positions)
     {
         BoundingBox3D boundingBox = NodeLayout::boundingBox(graph, positions);
         BoundingSphere boundingSphere =
@@ -121,7 +124,7 @@ public:
         return NodeLayout::boundingSphere(*_graph, *this->positions);
     }
 
-    static float boundingCircleRadiusInXY(const ReadOnlyGraph& graph, const NodeArray<QVector3D>& positions)
+    static float boundingCircleRadiusInXY(const ReadOnlyGraph& graph, const NodePositions& positions)
     {
         BoundingBox3D boundingBox = NodeLayout::boundingBox(graph, positions);
         return std::max(boundingBox.xLength(), boundingBox.yLength()) * 0.5f * std::sqrt(2.0f);
@@ -133,12 +136,12 @@ class ComponentLayout : public Layout
     Q_OBJECT
 protected:
     const Graph* _graph;
-    ComponentArray<QVector2D>* componentPositions;
-    const NodeArray<QVector3D>* nodePositions;
+    ComponentPositions* componentPositions;
+    const NodePositions* nodePositions;
 
 public:
-    ComponentLayout(const Graph& graph, ComponentArray<QVector2D>& componentPositions,
-                    const NodeArray<QVector3D>& nodePositions, bool iterative = false) :
+    ComponentLayout(const Graph& graph, ComponentPositions& componentPositions,
+                    const NodePositions& nodePositions, bool iterative = false) :
         Layout(iterative),
         _graph(&graph),
         componentPositions(&componentPositions),

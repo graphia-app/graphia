@@ -12,11 +12,11 @@ private:
     QList<NodeLayout*> subLayouts;
 
 public:
-    SequenceLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions) :
+    SequenceLayout(const ReadOnlyGraph& graph, NodePositions& positions) :
         NodeLayout(graph, positions)
     {}
 
-    SequenceLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions, QList<NodeLayout*> subLayouts) :
+    SequenceLayout(const ReadOnlyGraph& graph, NodePositions& positions, QList<NodeLayout*> subLayouts) :
         NodeLayout(graph, positions), subLayouts(subLayouts)
     {}
 

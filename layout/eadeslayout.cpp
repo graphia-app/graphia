@@ -38,7 +38,7 @@
 
 void EadesLayout::executeReal()
 {
-    NodeArray<QVector3D>& positions = *this->positions;
+    NodePositions& positions = *this->positions;
 
     QVector3D axialDirections[] =
     {

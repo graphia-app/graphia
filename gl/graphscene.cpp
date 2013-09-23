@@ -107,8 +107,8 @@ void GraphScene::update( float /*t*/ )
 {
     if(_graphModel != nullptr)
     {
-        NodeArray<QVector3D>& nodePositions = _graphModel->nodePositions();
-        ComponentArray<QVector2D>& componentPositions = _graphModel->componentPositions();
+        NodePositions& nodePositions = _graphModel->nodePositions();
+        ComponentPositions& componentPositions = _graphModel->componentPositions();
 
         m_nodePositionData.resize(_graphModel->graph().numNodes() * 3);
         m_edgePositionData.resize(_graphModel->graph().numEdges() * 6);

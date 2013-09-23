@@ -4,7 +4,7 @@
 
 #include <QtAlgorithms>
 
-static ComponentArray<QVector2D>* sortComponentPositions;
+static ComponentPositions* sortComponentPositions;
 static bool distanceFromOriginLessThan(const ComponentId& a, const ComponentId& b)
 {
     const QVector2D& positionA = (*sortComponentPositions)[a];
@@ -17,7 +17,7 @@ void CirclePackingComponentLayout::executeReal()
 {
     QList<ComponentId> componentIds = *graph().componentIds();
     const float COMPONENT_SEPARATION = 2.0f;
-    ComponentArray<QVector2D>& componentPositions = *this->componentPositions;
+    ComponentPositions& componentPositions = *this->componentPositions;
     ComponentArray<float> componentRadii(const_cast<Graph&>(graph()));
 
     for(ComponentId componentId : componentIds)

@@ -3,6 +3,7 @@
 
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
+#include "../layout/layout.h"
 
 #include <QVector2D>
 #include <QVector3D>
@@ -15,10 +16,10 @@ class GraphModel : public QObject
 public:
     virtual Graph& graph() = 0;
     virtual const Graph& graph() const = 0;
-    virtual NodeArray<QVector3D>& nodePositions() = 0;
-    virtual const NodeArray<QVector3D>& nodePositions() const = 0;
-    virtual ComponentArray<QVector2D>& componentPositions() = 0;
-    virtual const ComponentArray<QVector2D>& componentPositions() const = 0;
+    virtual NodePositions& nodePositions() = 0;
+    virtual const NodePositions& nodePositions() const = 0;
+    virtual ComponentPositions& componentPositions() = 0;
+    virtual const ComponentPositions& componentPositions() const = 0;
 
     virtual const QString& name() = 0;
 

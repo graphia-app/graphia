@@ -16,7 +16,7 @@ private:
     QVector<QVector3D> moves;
 
 public:
-    EadesLayout(const ReadOnlyGraph& graph, NodeArray<QVector3D>& positions) :
+    EadesLayout(const ReadOnlyGraph& graph, NodePositions& positions) :
         NodeLayout(graph, positions, true),
         firstIteration(true),
         moves(graph.numNodes())

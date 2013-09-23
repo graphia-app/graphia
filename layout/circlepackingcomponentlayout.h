@@ -10,7 +10,7 @@ private:
     bool firstIteration;
 
 public:
-    CirclePackingComponentLayout(const Graph& graph, ComponentArray<QVector2D>& componentPositions, NodeArray<QVector3D>& nodePositions) :
+    CirclePackingComponentLayout(const Graph& graph, ComponentPositions& componentPositions, NodePositions& nodePositions) :
         ComponentLayout(graph, componentPositions, nodePositions, true), firstIteration(true)
     {}
 
