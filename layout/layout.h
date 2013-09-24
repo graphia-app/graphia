@@ -31,8 +31,15 @@ private:
 
     virtual void executeReal() = 0;
 
+public:
+    enum class Iterative
+    {
+        Yes,
+        No
+    };
+
 protected:
-    bool _iterative;
+    Iterative _iterative;
 
     bool shouldCancel()
     {
@@ -40,7 +47,7 @@ protected:
     }
 
 public:
-    Layout(bool _iterative) :
+    Layout(Iterative _iterative) :
         atomicCancel(false),
         _iterative(_iterative)
     {}
@@ -59,7 +66,7 @@ public:
     // Indicates that the algorithm is doing no useful work
     virtual bool shouldPause() { return false; }
 
-    virtual bool iterative() { return _iterative; }
+    virtual bool iterative() { return _iterative == Iterative::Yes; }
 
 signals:
     void progress(int percentage);
@@ -77,7 +84,7 @@ protected:
     NodePositions* positions;
 
 public:
-    NodeLayout(const ReadOnlyGraph& graph, NodePositions& positions, bool iterative = false) :
+    NodeLayout(const ReadOnlyGraph& graph, NodePositions& positions, Iterative iterative = Iterative::No) :
         Layout(iterative),
         _graph(&graph),
         positions(&positions)
@@ -99,6 +106,15 @@ public:
     BoundingBox3D boundingBox() const
     {
         return NodeLayout::boundingBox(*_graph, *this->positions);
+    }
+
+    static BoundingBox2D boundingBoxInXY(const ReadOnlyGraph& graph, const NodePositions& positions)
+    {
+        BoundingBox3D boundingBox = NodeLayout::boundingBox(graph, positions);
+
+        return BoundingBox2D(
+                    QVector2D(boundingBox.min().x(), boundingBox.min().y()),
+                    QVector2D(boundingBox.max().x(), boundingBox.max().y()));
     }
 
     struct BoundingSphere
@@ -141,7 +157,7 @@ protected:
 
 public:
     ComponentLayout(const Graph& graph, ComponentPositions& componentPositions,
-                    const NodePositions& nodePositions, bool iterative = false) :
+                    const NodePositions& nodePositions, Iterative iterative = Iterative::No) :
         Layout(iterative),
         _graph(&graph),
         componentPositions(&componentPositions),
@@ -173,6 +189,12 @@ public:
     {
         const ReadOnlyGraph& component = *_graph->componentById(componentId);
         return NodeLayout::boundingCircleRadiusInXY(component, *nodePositions);
+    }
+
+    BoundingBox2D boundingBoxOfComponent(ComponentId componentId) const
+    {
+        const ReadOnlyGraph& component = *_graph->componentById(componentId);
+        return NodeLayout::boundingBoxInXY(component, *nodePositions);
     }
 };
 
@@ -263,7 +285,7 @@ public:
         waitForPause.wait(&mutex);
     }
 
-    bool isPaused()
+    bool paused()
     {
         QMutexLocker locker(&mutex);
         return _isPaused;
@@ -408,7 +430,7 @@ public:
     {
         bool resumeAfterRemoval = false;
 
-        if(!isPaused())
+        if(!paused())
         {
             pauseAndWait();
             resumeAfterRemoval = true;

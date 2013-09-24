@@ -17,7 +17,7 @@ private:
 
 public:
     EadesLayout(const ReadOnlyGraph& graph, NodePositions& positions) :
-        NodeLayout(graph, positions, true),
+        NodeLayout(graph, positions, Iterative::Yes),
         firstIteration(true),
         moves(graph.numNodes())
     {}

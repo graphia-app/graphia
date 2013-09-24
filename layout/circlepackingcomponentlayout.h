@@ -11,7 +11,7 @@ private:
 
 public:
     CirclePackingComponentLayout(const Graph& graph, ComponentPositions& componentPositions, NodePositions& nodePositions) :
-        ComponentLayout(graph, componentPositions, nodePositions, true), firstIteration(true)
+        ComponentLayout(graph, componentPositions, nodePositions, Iterative::Yes), firstIteration(true)
     {}
 
     void executeReal();

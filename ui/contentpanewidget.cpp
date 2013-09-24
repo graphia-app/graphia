@@ -102,7 +102,7 @@ void ContentPaneWidget::onGraphWillChange(const Graph*)
         return;
 
     // Graph is about to change so suspend any active layout process
-    if(!nodeLayoutThread->isPaused() || !componentLayoutThread->isPaused())
+    if(!nodeLayoutThread->paused() || !componentLayoutThread->paused())
     {
         nodeLayoutThread->pauseAndWait();
         componentLayoutThread->pauseAndWait();
@@ -169,8 +169,8 @@ void ContentPaneWidget::pauseLayout()
 bool ContentPaneWidget::layoutIsPaused()
 {
     // Not typos: a non-existant thread counts as paused
-    bool nodeLayoutPaused = (nodeLayoutThread == nullptr || nodeLayoutThread->isPaused());
-    bool componentLayoutPaused = (componentLayoutThread == nullptr || componentLayoutThread->isPaused());
+    bool nodeLayoutPaused = (nodeLayoutThread == nullptr || nodeLayoutThread->paused());
+    bool componentLayoutPaused = (componentLayoutThread == nullptr || componentLayoutThread->paused());
 
     return nodeLayoutPaused && componentLayoutPaused;
 }
