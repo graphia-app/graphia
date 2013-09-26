@@ -3,6 +3,7 @@
 
 #include <QVector3D>
 #include <cstdlib>
+#include <cmath>
 
 class Utils
 {
@@ -71,6 +72,8 @@ public:
             return QVector3D();
         }
     }
+
+    static constexpr double Pi() { return std::atan2(0, -1); }
 };
 
 #endif // UTILS_H

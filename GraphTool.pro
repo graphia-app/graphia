@@ -42,7 +42,8 @@ SOURCES += main.cpp\
     layout/centreinglayout.cpp \
     layout/scalinglayout.cpp \
     layout/linearcomponentlayout.cpp \
-    layout/circlepackingcomponentlayout.cpp
+    layout/circlepackingcomponentlayout.cpp \
+    layout/radialcirclecomponentlayout.cpp
 
 HEADERS  += mainwindow.h \
     graph/grapharray.h \
@@ -79,7 +80,8 @@ HEADERS  += mainwindow.h \
     layout/scalinglayout.h \
     maths/boundingbox.h \
     layout/linearcomponentlayout.h \
-    layout/circlepackingcomponentlayout.h
+    layout/circlepackingcomponentlayout.h \
+    layout/radialcirclecomponentlayout.h
 
 FORMS    += mainwindow.ui
 
