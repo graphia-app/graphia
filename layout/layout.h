@@ -223,7 +223,7 @@ protected:
     QSet<Layout*> layouts;
     QMutex mutex;
     bool _pause;
-    bool _isPaused;
+    bool _paused;
     bool _stop;
     bool repeating;
     QWaitCondition waitForPause;
@@ -231,11 +231,11 @@ protected:
 
 public:
     LayoutThread(bool repeating = false) :
-        _pause(false), _isPaused(false), _stop(false), repeating(repeating)
+        _pause(false), _paused(false), _stop(false), repeating(repeating)
     {}
 
     LayoutThread(Layout* layout, bool _repeating = false) :
-        _pause(false), _isPaused(false), _stop(false), repeating(_repeating)
+        _pause(false), _paused(false), _stop(false), repeating(_repeating)
     {
         addLayout(layout);
     }
@@ -288,18 +288,18 @@ public:
     bool paused()
     {
         QMutexLocker locker(&mutex);
-        return _isPaused;
+        return _paused;
     }
 
     void resume()
     {
         {
             QMutexLocker locker(&mutex);
-            if(!_isPaused)
+            if(!_paused)
                 return;
 
             _pause = false;
-            _isPaused = false;
+            _paused = false;
         }
 
         waitForResume.wakeAll();
@@ -312,14 +312,12 @@ public:
 
     void stop()
     {
-        {
-            QMutexLocker locker(&mutex);
-            _stop = true;
-            _pause = false;
+        QMutexLocker locker(&mutex);
+        _stop = true;
+        _pause = false;
 
-            for(Layout* layout : layouts)
-                layout->cancel();
-        }
+        for(Layout* layout : layouts)
+            layout->cancel();
 
         waitForResume.wakeAll();
     }
@@ -366,7 +364,7 @@ private:
 
                 if(_pause || allLayoutsShouldPause() || (!iterative() && repeating))
                 {
-                    _isPaused = true;
+                    _paused = true;
                     waitForPause.wakeAll();
                     waitForResume.wait(&mutex);
                 }
