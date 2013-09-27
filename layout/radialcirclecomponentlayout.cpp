@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include <QList>
+#include <QMutexLocker>
 #include <QtAlgorithms>
 
 static float halfAngleOfComponent(float componentRadius, float placementRadius)
@@ -17,10 +18,65 @@ static float halfAngleOfComponent(float componentRadius, float placementRadius)
     return std::asin(componentRadius / totalRadius);
 }
 
+struct PlacementRegion
+{
+    float startAngle;
+    float endAngle;
+    float angle() const
+    {
+        return endAngle - startAngle;
+    }
+
+    float radius;
+};
+
+struct PendingComponentPlacement
+{
+    ComponentId id;
+    float radius;
+    float angle;
+};
+
+static void makePlacements(PlacementRegion& placementRegion,
+                           QList<PendingComponentPlacement>& placements,
+                           ComponentPositions& componentPositions,
+                           QList<PlacementRegion>& placementRegions)
+{
+    float totalAngle = 0.0f;
+    for(PendingComponentPlacement pcp : placements)
+        totalAngle += pcp.angle;
+
+    float remainingAngle = placementRegion.angle() - totalAngle;
+    float perComponentPaddingAngle = remainingAngle / placements.size();
+
+    float placementAngle = placementRegion.startAngle;
+    for(PendingComponentPlacement pcp : placements)
+    {
+        float paddedAngle = pcp.angle + perComponentPaddingAngle;
+
+        placementAngle += (0.5f * paddedAngle);
+        QVector2D nextPosition = QVector2D(std::sin(placementAngle), std::cos(placementAngle)) *
+                (placementRegion.radius + pcp.radius);
+        componentPositions[pcp.id] = nextPosition;
+
+        PlacementRegion childPlacementRegion =
+        {
+            placementAngle - (0.5f * paddedAngle),
+            placementAngle + (0.5f * paddedAngle),
+            placementRegion.radius + (2.0f * pcp.radius)
+        };
+
+        placementRegions.append(childPlacementRegion);
+        placementAngle += (0.5f * paddedAngle);
+    }
+
+    placements.clear();
+}
+
 void RadialCircleComponentLayout::executeReal()
 {
     QList<ComponentId> componentIds = *graph().componentIds();
-    const float COMPONENT_SEPARATION = 2.0f;
+    const float COMPONENT_SEPARATION = 1.0f;
     ComponentPositions& componentPositions = *this->componentPositions;
 
     qStableSort(componentIds.begin(), componentIds.end(),
@@ -32,29 +88,29 @@ void RadialCircleComponentLayout::executeReal()
             return numNodesA >= numNodesB;
         });
 
-    componentPositions.lock();
+    QMutexLocker(&componentPositions.mutex());
 
     // Place first component in the centre
     componentPositions[componentIds[0]] = QVector2D(0.0f, 0.0f);
 
-    struct PlacementRegion
-    {
-        float startAngle;
-        float endAngle;
-        float angle() const { return endAngle - startAngle; }
-        float radius;
-    };
+    if(componentIds.size() == 1)
+        return;
+
+    float secondComponentHalfAngle = halfAngleOfComponent(
+            radiusOfComponent(componentIds[1]) + COMPONENT_SEPARATION,
+            radiusOfComponent(componentIds[0]) + COMPONENT_SEPARATION);
 
     QList<PlacementRegion> placementRegions;
     PlacementRegion currentPlacementRegion =
     {
-        0.0f,
-        2.0f * Utils::Pi(),
+        0.5f * Utils::Pi() - secondComponentHalfAngle,
+        2.5f * Utils::Pi() - secondComponentHalfAngle,
         radiusOfComponent(componentIds[0]) + COMPONENT_SEPARATION
     };
 
     float angleRemaining = currentPlacementRegion.angle();
-    float angleOfPlacement = 0.0f;
+
+    QList<PendingComponentPlacement> placements;
 
     for(int i = 1; i < componentIds.size(); i++)
     {
@@ -65,8 +121,11 @@ void RadialCircleComponentLayout::executeReal()
 
         if((angleRemaining - componentAngle) < 0.0f)
         {
+            // Make any pending placements first
+            makePlacements(currentPlacementRegion, placements, componentPositions, placementRegions);
+
             bool foundNewRegion = false;
-            int largestAngle = 0.0f;
+            float largestAngle = 0.0f;
             int largestAngleIndex = -1;
 
             // Can't fit the component in this region so we need to find a new one
@@ -91,33 +150,28 @@ void RadialCircleComponentLayout::executeReal()
 
             if(!foundNewRegion)
             {
-                // Didn't find a large enough region, so pick the biggest and increase its placement radius
+                // Didn't find a large enough region, so pick the biggest and increase its placement radius to suit
                 currentPlacementRegion = placementRegions[largestAngleIndex];
                 currentPlacementRegion.radius =
-                        ((componentRadius / std::sin(largestAngle)) - componentRadius) + COMPONENT_SEPARATION;
+                        ((componentRadius / std::sin(0.5f * largestAngle)) - componentRadius) + COMPONENT_SEPARATION;
             }
 
             angleRemaining = currentPlacementRegion.angle();
-            angleOfPlacement = currentPlacementRegion.startAngle + componentHalfAngle;
         }
 
-        PlacementRegion childPlacementRegion =
+        PendingComponentPlacement placement =
         {
-            angleOfPlacement - componentHalfAngle,
-            angleOfPlacement + componentHalfAngle,
-            currentPlacementRegion.radius + (2.0f * componentRadius)
+            componentId,
+            componentRadius,
+            componentAngle
         };
 
-        placementRegions.append(childPlacementRegion);
+        placements.append(placement);
 
-        QVector2D nextPosition = QVector2D(std::sin(angleOfPlacement), std::cos(angleOfPlacement)) *
-                (currentPlacementRegion.radius + componentRadius);
-        componentPositions[componentId] = nextPosition;
         angleRemaining -= componentAngle;
-        angleOfPlacement += componentAngle;
     }
 
-    componentPositions.unlock();
+    makePlacements(currentPlacementRegion, placements, componentPositions, placementRegions);
 
     emit changed();
 }
