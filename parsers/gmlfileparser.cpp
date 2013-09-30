@@ -65,7 +65,8 @@ struct GmlGrammar : qi::grammar<Iterator, GmlFileParser::KeyValuePairList(), asc
         qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
         using qi::lexeme;
 
-        string %= lexeme['"' >> (*(char_ - char_("&\"")) | ('&' >> +char_ >> ';')) >> '"'];
+        instring %= lexeme["" >> (char_ - char_("&\"")) | '&' >> *(char_ - char_(";")) >> ';'];
+        string %= lexeme['"' >> *instring >> '"'];
 
         value %= strict_double | int_ | string | '[' >> list >> ']';
         key %= lexeme[char_("a-zA-Z") >> *(char_("a-zA-Z0-9"))];
@@ -78,6 +79,7 @@ struct GmlGrammar : qi::grammar<Iterator, GmlFileParser::KeyValuePairList(), asc
     qi::rule<Iterator, GmlFileParser::Value(), ascii::space_type> value;
     qi::rule<Iterator, QString(), ascii::space_type> key;
     qi::rule<Iterator, QString(), ascii::space_type> string;
+    qi::rule<Iterator, QString()> instring;
 };
 
 bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePairList& keyValuePairList, GmlList listType)
