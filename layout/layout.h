@@ -293,14 +293,12 @@ public:
 
     void resume()
     {
-        {
-            QMutexLocker locker(&mutex);
-            if(!_paused)
-                return;
+        QMutexLocker locker(&mutex);
+        if(!_paused)
+            return;
 
-            _pause = false;
-            _paused = false;
-        }
+        _pause = false;
+        _paused = false;
 
         waitForResume.wakeAll();
     }
@@ -362,7 +360,7 @@ private:
             {
                 QMutexLocker locker(&mutex);
 
-                if(_pause || allLayoutsShouldPause() || (!iterative() && repeating))
+                if(!_stop && (_pause || allLayoutsShouldPause() || (!iterative() && repeating)))
                 {
                     _paused = true;
                     waitForPause.wakeAll();
