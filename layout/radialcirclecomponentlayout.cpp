@@ -73,6 +73,77 @@ static void makePlacements(PlacementRegion& placementRegion,
     placements.clear();
 }
 
+static bool regionsAreMergeable(PlacementRegion& a, PlacementRegion& b)
+{
+    return qFuzzyCompare(a.endAngle, b.startAngle) || qFuzzyCompare(a.startAngle, b.endAngle);
+}
+
+static PlacementRegion mergeRegions(PlacementRegion& a, PlacementRegion& b)
+{
+    const float MERGE_EPSILON = 0.01f;
+
+    PlacementRegion merged;
+
+    merged.radius = std::max(a.radius, b.radius);
+
+    if((a.endAngle - b.startAngle) <= MERGE_EPSILON)
+    {
+        merged.startAngle = a.startAngle;
+        merged.endAngle = b.endAngle;
+    }
+    else if((b.endAngle - a.startAngle) <= MERGE_EPSILON)
+    {
+        merged.startAngle = b.startAngle;
+        merged.endAngle = a.endAngle;
+    }
+
+    return merged;
+}
+
+static PlacementRegion mergePlacementRegionsForAngle(QList<PlacementRegion>& placementRegions, float angle)
+{
+    float largestAngle = 0.0f;
+    float largestIndex = 0;
+
+    qStableSort(placementRegions.begin(), placementRegions.end(),
+        [&](const PlacementRegion& a, const PlacementRegion& b)
+        {
+            return a.startAngle < b.startAngle;
+        });
+
+    for(int i = 0; i < placementRegions.size(); i++)
+    {
+        PlacementRegion merged = placementRegions[i];
+
+        for(int j = i + 1; j < placementRegions.size(); j++)
+        {
+            PlacementRegion& other = placementRegions[j];
+
+            if(!regionsAreMergeable(merged, other))
+                break;
+
+            PlacementRegion merged = mergeRegions(merged, other);
+
+            if(merged.angle() >= angle)
+            {
+                for(int k = i; k <= j; k++)
+                    placementRegions.removeAt(k);
+                placementRegions.append(merged);
+
+                return merged;
+            }
+        }
+
+        if(placementRegions[i].angle() > largestAngle)
+        {
+            largestAngle = placementRegions[i].angle();
+            largestIndex = i;
+        }
+    }
+
+    return placementRegions[largestIndex];
+}
+
 void RadialCircleComponentLayout::executeReal()
 {
     QList<ComponentId> componentIds = *graph().componentIds();
@@ -125,19 +196,11 @@ void RadialCircleComponentLayout::executeReal()
             makePlacements(currentPlacementRegion, placements, componentPositions, placementRegions);
 
             bool foundNewRegion = false;
-            float largestAngle = 0.0f;
-            int largestAngleIndex = -1;
 
             // Can't fit the component in this region so we need to find a new one
             for(int j = 0; j < placementRegions.size(); j++)
             {
                 PlacementRegion placementRegion = placementRegions[j];
-
-                if(placementRegion.angle() > largestAngle)
-                {
-                    largestAngleIndex = j;
-                    largestAngle = placementRegion.angle();
-                }
 
                 if(placementRegion.angle() >= componentAngle)
                 {
@@ -150,10 +213,15 @@ void RadialCircleComponentLayout::executeReal()
 
             if(!foundNewRegion)
             {
-                // Didn't find a large enough region, so pick the biggest and increase its placement radius to suit
-                currentPlacementRegion = placementRegions[largestAngleIndex];
-                currentPlacementRegion.radius =
-                        ((componentRadius / std::sin(0.5f * largestAngle)) - componentRadius) + COMPONENT_SEPARATION;
+                // Try merging regions to make a bigger one that's large enough
+                currentPlacementRegion = mergePlacementRegionsForAngle(placementRegions, componentAngle);
+
+                // If it's still not big enough, increase the placement radius to suit
+                if(currentPlacementRegion.angle() < componentAngle)
+                {
+                    currentPlacementRegion.radius =
+                            ((componentRadius / std::sin(0.5f * currentPlacementRegion.angle())) - componentRadius) + COMPONENT_SEPARATION;
+                }
             }
 
             angleRemaining = currentPlacementRegion.angle();
