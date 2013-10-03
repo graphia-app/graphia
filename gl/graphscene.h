@@ -9,6 +9,7 @@
 class Camera;
 class Sphere;
 class Cylinder;
+class Quad;
 class GraphModel;
 
 class QOpenGLFunctions_3_3_Core;
@@ -41,10 +42,12 @@ private:
     void prepareVertexBuffers();
     void prepareNodeVAO();
     void prepareEdgeVAO();
+    void prepareComponentMarkerVAO();
     void prepareTexture();
 
     void renderNodes();
     void renderEdges();
+    void renderComponentMarkers();
 
     QOpenGLFunctions_3_3_Core* m_funcs;
 
@@ -58,18 +61,21 @@ private:
 
     Sphere* m_sphere;
     Cylinder* m_cylinder;
+    Quad* m_quad;
 
     float m_theta;
     QMatrix4x4 m_modelMatrix;
 
     GraphModel* _graphModel;
 
-    // The data array and corresponding buffer
     QVector<GLfloat> m_nodePositionData;
     QOpenGLBuffer m_nodePositionDataBuffer;
 
     QVector<GLfloat> m_edgePositionData;
     QOpenGLBuffer m_edgePositionDataBuffer;
+
+    QVector<GLfloat> m_componentMarkerData;
+    QOpenGLBuffer m_componentMarkerDataBuffer;
 };
 
 #endif // INSTANCEDGEOMETRYSCENE_H

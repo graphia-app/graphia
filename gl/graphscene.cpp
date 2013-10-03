@@ -3,6 +3,7 @@
 #include "camera.h"
 #include "sphere.h"
 #include "cylinder.h"
+#include "quad.h"
 #include "material.h"
 
 #include "../graph/graphmodel.h"
@@ -35,11 +36,13 @@ GraphScene::GraphScene( QObject* parent )
       m_tiltAngle(0.0f),
       m_sphere(nullptr),
       m_cylinder(nullptr),
+      m_quad(nullptr),
       m_theta( 0.0f ),
       m_modelMatrix(),
       _graphModel(nullptr),
       m_nodePositionData(0),
-      m_edgePositionData(0)
+      m_edgePositionData(0),
+      m_componentMarkerData(0)
 {
     m_modelMatrix.setToIdentity();
     update( 0.0f );
@@ -87,12 +90,21 @@ void GraphScene::initialise()
     m_cylinder->setMaterial(edgeMaterial);
     m_cylinder->create();
 
+    MaterialPtr componentMarkerMaterial(new Material);
+    componentMarkerMaterial->setShaders(":/gl/shaders/instancedmarkers.vert", ":/gl/shaders/marker.frag" );
+
+    m_quad = new Quad(this);
+    m_quad->setEdgeLength(1.0f);
+    m_quad->setMaterial(componentMarkerMaterial);
+    m_quad->create();
+
     // Create a pair of VBOs ready to hold our data
     prepareVertexBuffers();
 
     // Tell OpenGL how to pass the data VBOs to the shader program
     prepareNodeVAO();
     prepareEdgeVAO();
+    prepareComponentMarkerVAO();
 
     // Enable depth testing to prevent artifacts
     glEnable( GL_DEPTH_TEST );
@@ -112,8 +124,10 @@ void GraphScene::update( float /*t*/ )
 
         m_nodePositionData.resize(_graphModel->graph().numNodes() * 3);
         m_edgePositionData.resize(_graphModel->graph().numEdges() * 6);
+        m_componentMarkerData.resize(_graphModel->graph().numComponents() * 3);
         int i = 0;
         int j = 0;
+        int k = 0;
 
         for(ComponentId componentId : *_graphModel->graph().componentIds())
         {
@@ -137,6 +151,10 @@ void GraphScene::update( float /*t*/ )
                 m_edgePositionData[j++] = nodePositions[edge.targetId()].y() + componentPositions[componentId].y();
                 m_edgePositionData[j++] = nodePositions[edge.targetId()].z();
             }
+
+            m_componentMarkerData[k++] = componentPositions[componentId].x();
+            m_componentMarkerData[k++] = componentPositions[componentId].y();
+            m_componentMarkerData[k++] = NodeLayout::boundingCircleRadiusInXY(component, nodePositions);
         }
     }
 
@@ -172,7 +190,6 @@ void GraphScene::renderNodes()
     m_modelMatrix.setToIdentity();
     m_modelMatrix.rotate( m_theta, 0.0f, 1.0f, 0.0f );
 
-    //FIXME: use UBOs
     QMatrix4x4 modelViewMatrix = m_camera->viewMatrix() * m_modelMatrix;
     QMatrix3x3 normalMatrix = modelViewMatrix.normalMatrix();
     shader->setUniformValue( "modelViewMatrix", modelViewMatrix );
@@ -182,7 +199,7 @@ void GraphScene::renderNodes()
     // Set the lighting parameters
     shader->setUniformValue( "light.position", QVector4D( -10.0f, 10.0f, 0.0f, 1.0f ) );
     shader->setUniformValue( "light.intensity", QVector3D( 1.0f, 1.0f, 1.0f ) );
-    shader->setUniformValue( "material.kd", QVector3D( 0.0f, 0.0f, 1.0f ) );
+    shader->setUniformValue( "material.kd", QVector3D( 0.5f, 0.2f, 0.8f ) );
     shader->setUniformValue( "material.ks", QVector3D( 0.95f, 0.95f, 0.95f ) );
     shader->setUniformValue( "material.ka", QVector3D( 0.1f, 0.1f, 0.1f ) );
     shader->setUniformValue( "material.shininess", 10.0f );
@@ -205,14 +222,13 @@ void GraphScene::renderEdges()
     QOpenGLShaderProgramPtr shader = m_cylinder->material()->shader();
     shader->bind();
 
-    //FIXME: use UBOs
     shader->setUniformValue("viewMatrix", m_camera->viewMatrix());
     shader->setUniformValue("projectionMatrix", m_camera->projectionMatrix());
 
     // Set the lighting parameters
     shader->setUniformValue( "light.position", QVector4D( -10.0f, 10.0f, 0.0f, 1.0f ) );
     shader->setUniformValue( "light.intensity", QVector3D( 1.0f, 1.0f, 1.0f ) );
-    shader->setUniformValue( "material.kd", QVector3D( 0.0f, 1.0f, 0.0f ) );
+    shader->setUniformValue( "material.kd", QVector3D( 1.0f, 1.0f, 0.0f ) );
     shader->setUniformValue( "material.ks", QVector3D( 0.95f, 0.95f, 0.95f ) );
     shader->setUniformValue( "material.ka", QVector3D( 0.1f, 0.1f, 0.1f ) );
     shader->setUniformValue( "material.shininess", 10.0f );
@@ -225,12 +241,44 @@ void GraphScene::renderEdges()
     shader->release();
 }
 
+void GraphScene::renderComponentMarkers()
+{
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    m_componentMarkerDataBuffer.bind();
+    m_componentMarkerDataBuffer.allocate( m_componentMarkerData.data(),
+                                       m_componentMarkerData.size() * sizeof(GLfloat) );
+
+    // Bind the shader program
+    QOpenGLShaderProgramPtr shader = m_quad->material()->shader();
+    shader->bind();
+
+    // Calculate needed matrices
+    m_modelMatrix.setToIdentity();
+    m_modelMatrix.rotate( m_theta, 0.0f, 1.0f, 0.0f );
+
+    QMatrix4x4 modelViewMatrix = m_camera->viewMatrix() * m_modelMatrix;
+    shader->setUniformValue( "modelViewMatrix", modelViewMatrix );
+    shader->setUniformValue( "projectionMatrix", m_camera->projectionMatrix() );
+
+    // Draw the edges
+    m_quad->vertexArrayObject()->bind();
+    m_funcs->glDrawElementsInstanced(GL_TRIANGLES, m_quad->indexCount(),
+                                     GL_UNSIGNED_INT, 0, _graphModel->graph().numComponents());
+    m_quad->vertexArrayObject()->release();
+    shader->release();
+
+    glDisable(GL_BLEND);
+}
+
 void GraphScene::render()
 {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     renderNodes();
     renderEdges();
+    renderComponentMarkers();
 }
 
 void GraphScene::resize( int w, int h )
@@ -255,6 +303,11 @@ void GraphScene::prepareVertexBuffers()
     m_edgePositionDataBuffer.setUsagePattern( QOpenGLBuffer::DynamicDraw );
     m_edgePositionDataBuffer.bind();
     m_edgePositionDataBuffer.allocate( m_edgePositionData.data(), m_edgePositionData.size() * sizeof(GLfloat) );
+
+    m_componentMarkerDataBuffer.create();
+    m_componentMarkerDataBuffer.setUsagePattern( QOpenGLBuffer::DynamicDraw );
+    m_componentMarkerDataBuffer.bind();
+    m_componentMarkerDataBuffer.allocate( m_componentMarkerData.data(), m_componentMarkerData.size() * sizeof(GLfloat) );
 }
 
 void GraphScene::prepareNodeVAO()
@@ -305,5 +358,33 @@ void GraphScene::prepareEdgeVAO()
     m_instanceFuncs->glVertexAttribDivisorARB(targetPointLocation, 1);
 #endif
     m_cylinder->vertexArrayObject()->release();
+    shader->release();
+}
+
+void GraphScene::prepareComponentMarkerVAO()
+{
+    // Bind the marker's VAO
+    m_quad->vertexArrayObject()->bind();
+
+    // Enable the data buffer and add it to the marker's VAO
+    QOpenGLShaderProgramPtr shader = m_quad->material()->shader();
+    shader->bind();
+    m_componentMarkerDataBuffer.bind();
+    shader->enableAttributeArray("point");
+    shader->enableAttributeArray("scale");
+    shader->setAttributeBuffer("point", GL_FLOAT, 0, 2, 3 * sizeof(GLfloat));
+    shader->setAttributeBuffer("scale", GL_FLOAT, 2 * sizeof(GLfloat), 1, 3 * sizeof(GLfloat));
+
+    // We only vary the point attribute once per instance
+    GLuint pointLocation = shader->attributeLocation("point");
+    GLuint scaleLocation = shader->attributeLocation("scale");
+#if !defined(Q_OS_MAC)
+    m_funcs->glVertexAttribDivisor(pointLocation, 1);
+    m_funcs->glVertexAttribDivisor(scaleLocation, 1);
+#else
+    m_instanceFuncs->glVertexAttribDivisorARB(pointLocation, 1);
+    m_instanceFuncs->glVertexAttribDivisorARB(scaleLocation, 1);
+#endif
+    m_quad->vertexArrayObject()->release();
     shader->release();
 }

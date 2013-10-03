@@ -43,7 +43,8 @@ SOURCES += main.cpp\
     layout/scalinglayout.cpp \
     layout/linearcomponentlayout.cpp \
     layout/circlepackingcomponentlayout.cpp \
-    layout/radialcirclecomponentlayout.cpp
+    layout/radialcirclecomponentlayout.cpp \
+    gl/quad.cpp
 
 HEADERS  += mainwindow.h \
     graph/grapharray.h \
@@ -81,14 +82,17 @@ HEADERS  += mainwindow.h \
     maths/boundingbox.h \
     layout/linearcomponentlayout.h \
     layout/circlepackingcomponentlayout.h \
-    layout/radialcirclecomponentlayout.h
+    layout/radialcirclecomponentlayout.h \
+    gl/quad.h
 
 FORMS    += mainwindow.ui
 
 OTHER_FILES += \
     gl/shaders/ads.frag \
     gl/shaders/instancednodes.vert \
-    gl/shaders/instancededges.vert
+    gl/shaders/instancededges.vert \
+    gl/shaders/instancedmarkers.vert \
+    gl/shaders/marker.frag
 
 RESOURCES += \
     resources.qrc
