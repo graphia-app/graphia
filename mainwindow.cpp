@@ -79,6 +79,8 @@ void MainWindow::updatePerTabUi()
                                     contentPaneWidget->graphModel()->graph().numEdges()).arg(
                                     contentPaneWidget->graphModel()->graph().numComponents()));
     }
+    else
+        statusBarLabel->setText("");
 }
 
 void MainWindow::on_actionOpen_triggered()
