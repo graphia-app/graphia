@@ -44,7 +44,8 @@ SOURCES += main.cpp\
     layout/linearcomponentlayout.cpp \
     layout/circlepackingcomponentlayout.cpp \
     layout/radialcirclecomponentlayout.cpp \
-    gl/quad.cpp
+    gl/quad.cpp \
+    layout/layout.cpp
 
 HEADERS  += mainwindow.h \
     graph/grapharray.h \

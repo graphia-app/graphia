@@ -92,30 +92,9 @@ public:
 
     const ReadOnlyGraph& graph() { return *_graph; }
 
-    static BoundingBox3D boundingBox(const ReadOnlyGraph& graph, const NodePositions& positions)
-    {
-        const QVector3D& firstNodePosition = positions[graph.nodeIds()[0]];
-        BoundingBox3D boundingBox(firstNodePosition, firstNodePosition);
-
-        for(NodeId nodeId : graph.nodeIds())
-            boundingBox.expandToInclude(positions[nodeId]);
-
-        return boundingBox;
-    }
-
-    BoundingBox3D boundingBox() const
-    {
-        return NodeLayout::boundingBox(*_graph, *this->positions);
-    }
-
-    static BoundingBox2D boundingBoxInXY(const ReadOnlyGraph& graph, const NodePositions& positions)
-    {
-        BoundingBox3D boundingBox = NodeLayout::boundingBox(graph, positions);
-
-        return BoundingBox2D(
-                    QVector2D(boundingBox.min().x(), boundingBox.min().y()),
-                    QVector2D(boundingBox.max().x(), boundingBox.max().y()));
-    }
+    static BoundingBox3D boundingBox(const ReadOnlyGraph& graph, const NodePositions& positions);
+    BoundingBox3D boundingBox() const;
+    static BoundingBox2D boundingBoxInXY(const ReadOnlyGraph& graph, const NodePositions& positions);
 
     struct BoundingSphere
     {
@@ -123,28 +102,9 @@ public:
         float radius;
     };
 
-    static BoundingSphere boundingSphere(const ReadOnlyGraph& graph, const NodePositions& positions)
-    {
-        BoundingBox3D boundingBox = NodeLayout::boundingBox(graph, positions);
-        BoundingSphere boundingSphere =
-        {
-            boundingBox.centre(),
-            std::max(std::max(boundingBox.xLength(), boundingBox.yLength()), boundingBox.zLength()) * 0.5f * std::sqrt(3.0f)
-        };
-
-        return boundingSphere;
-    }
-
-    BoundingSphere boundingSphere() const
-    {
-        return NodeLayout::boundingSphere(*_graph, *this->positions);
-    }
-
-    static float boundingCircleRadiusInXY(const ReadOnlyGraph& graph, const NodePositions& positions)
-    {
-        BoundingBox3D boundingBox = NodeLayout::boundingBox(graph, positions);
-        return std::max(boundingBox.xLength(), boundingBox.yLength()) * 0.5f * std::sqrt(2.0f);
-    }
+    static BoundingSphere boundingSphere(const ReadOnlyGraph& graph, const NodePositions& positions);
+    BoundingSphere boundingSphere() const;
+    static float boundingCircleRadiusInXY(const ReadOnlyGraph& graph, const NodePositions& positions);
 };
 
 class ComponentLayout : public Layout
@@ -166,36 +126,9 @@ public:
 
     const Graph& graph() { return *_graph; }
 
-    BoundingBox2D boundingBox() const
-    {
-        BoundingBox2D _boundingBox;
-
-        for(ComponentId componentId : *_graph->componentIds())
-        {
-            const ReadOnlyGraph& component = *_graph->componentById(componentId);
-            float componentRadius = NodeLayout::boundingCircleRadiusInXY(component, *nodePositions);
-            QVector2D componentPosition = (*componentPositions)[componentId];
-            BoundingBox2D componentBoundingBox(
-                        QVector2D(componentPosition.x() - componentRadius, componentPosition.y() - componentRadius),
-                        QVector2D(componentPosition.x() + componentRadius, componentPosition.y() + componentRadius));
-
-            _boundingBox.expandToInclude(componentBoundingBox);
-        }
-
-        return _boundingBox;
-    }
-
-    float radiusOfComponent(ComponentId componentId) const
-    {
-        const ReadOnlyGraph& component = *_graph->componentById(componentId);
-        return NodeLayout::boundingCircleRadiusInXY(component, *nodePositions);
-    }
-
-    BoundingBox2D boundingBoxOfComponent(ComponentId componentId) const
-    {
-        const ReadOnlyGraph& component = *_graph->componentById(componentId);
-        return NodeLayout::boundingBoxInXY(component, *nodePositions);
-    }
+    BoundingBox2D boundingBox() const;
+    float radiusOfComponent(ComponentId componentId) const;
+    BoundingBox2D boundingBoxOfComponent(ComponentId componentId) const;
 };
 
 class GraphModel;
@@ -246,140 +179,21 @@ public:
         wait();
     }
 
-    void addLayout(Layout* layout)
-    {
-        QMutexLocker locker(&mutex);
+    void addLayout(Layout* layout);
+    void removeLayout(Layout* layout);
 
-        // Take ownership of the algorithm
-        layout->moveToThread(this);
-        layouts.insert(layout);
+    void pause();
+    void pauseAndWait();
+    bool paused();
+    void resume();
 
-        start();
-    }
-
-    void removeLayout(Layout* layout)
-    {
-        QMutexLocker locker(&mutex);
-
-        layouts.remove(layout);
-        delete layout;
-    }
-
-    void pause()
-    {
-        QMutexLocker locker(&mutex);
-        _pause = true;
-
-        for(Layout* layout : layouts)
-            layout->cancel();
-    }
-
-    void pauseAndWait()
-    {
-        QMutexLocker locker(&mutex);
-        _pause = true;
-
-        for(Layout* layout : layouts)
-            layout->cancel();
-
-        waitForPause.wait(&mutex);
-    }
-
-    bool paused()
-    {
-        QMutexLocker locker(&mutex);
-        return _paused;
-    }
-
-    void resume()
-    {
-        QMutexLocker locker(&mutex);
-        if(!_paused)
-            return;
-
-        _pause = false;
-        _paused = false;
-
-        waitForResume.wakeAll();
-    }
-
-    void execute()
-    {
-        resume();
-    }
-
-    void stop()
-    {
-        QMutexLocker locker(&mutex);
-        _stop = true;
-        _pause = false;
-
-        for(Layout* layout : layouts)
-            layout->cancel();
-
-        waitForResume.wakeAll();
-    }
+    void execute();
+    void stop();
 
 private:
-    bool iterative()
-    {
-        for(Layout* layout : layouts)
-        {
-            if(layout->iterative())
-                return true;
-        }
-
-        return false;
-    }
-
-    bool allLayoutsShouldPause()
-    {
-        for(Layout* layout : layouts)
-        {
-            if(!layout->shouldPause())
-                return false;
-        }
-
-        return true;
-    }
-
-    void run() Q_DECL_OVERRIDE
-    {
-        do
-        {
-            for(Layout* layout : layouts)
-            {
-                if(layout->shouldPause())
-                    continue;
-
-                layout->execute();
-            }
-
-            emit executed();
-
-            {
-                QMutexLocker locker(&mutex);
-
-                if(!_stop && (_pause || allLayoutsShouldPause() || (!iterative() && repeating)))
-                {
-                    _paused = true;
-                    waitForPause.wakeAll();
-                    waitForResume.wait(&mutex);
-                }
-
-                if(_stop)
-                    break;
-            }
-        }
-        while(iterative() || repeating);
-
-        mutex.lock();
-        for(Layout* layout : layouts)
-            delete layout;
-
-        layouts.clear();
-        mutex.unlock();
-    }
+    bool iterative();
+    bool allLayoutsShouldPause();
+    void run() Q_DECL_OVERRIDE;
 
 signals:
     void executed();
@@ -403,45 +217,9 @@ public:
         delete layoutFactory;
     }
 
-    void addComponent(ComponentId componentId)
-    {
-        if(!componentLayouts.contains(componentId))
-        {
-            Layout* layout = layoutFactory->create(componentId);
-
-            addLayout(layout);
-            componentLayouts.insert(componentId, layout);
-
-            start();
-        }
-    }
-
-    void addAllComponents(const Graph& graph)
-    {
-        for(ComponentId componentId : *graph.componentIds())
-            addComponent(componentId);
-    }
-
-    void removeComponent(ComponentId componentId)
-    {
-        bool resumeAfterRemoval = false;
-
-        if(!paused())
-        {
-            pauseAndWait();
-            resumeAfterRemoval = true;
-        }
-
-        if(componentLayouts.contains(componentId))
-        {
-            componentLayouts.remove(componentId);
-            Layout* layout = componentLayouts[componentId];
-            removeLayout(layout);
-        }
-
-        if(resumeAfterRemoval)
-            resume();
-    }
+    void addComponent(ComponentId componentId);
+    void addAllComponents(const Graph& graph);
+    void removeComponent(ComponentId componentId);
 };
 
 #endif // LAYOUT_H
