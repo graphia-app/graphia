@@ -21,6 +21,9 @@ public:
     float yLength() const { return _max.y() - _min.y(); }
     float maxLength() const;
 
+    QVector2D xVector() const { return QVector2D(xLength(), 0.0f); }
+    QVector2D yVector() const { return QVector2D(0.0f, yLength()); }
+
     float area() const { return xLength() * yLength(); }
 
     void set(const QVector2D& min, const QVector2D& max);
@@ -32,6 +35,8 @@ public:
 
     QVector2D centre() const;
 };
+
+class Ray;
 
 class BoundingBox3D
 {
@@ -51,6 +56,13 @@ public:
     float zLength() const { return _max.z() - _min.z(); }
     float maxLength() const;
 
+    QVector3D xVector() const { return QVector3D(xLength(), 0.0f, 0.0f); }
+    QVector3D yVector() const { return QVector3D(0.0f, yLength(), 0.0f); }
+    QVector3D zVector() const { return QVector3D(0.0f, 0.0f, zLength()); }
+
+    void scale(float s);
+    BoundingBox3D scaled(float s) const;
+
     float volume() const { return xLength() * yLength() * zLength(); }
 
     void set(const QVector3D& min, const QVector3D& max);
@@ -59,6 +71,8 @@ public:
 
     bool containsPoint(const QVector3D& point) const;
     bool containsLine(const QVector3D& pointA, const QVector3D& pointB) const;
+    bool intersects(const Ray& ray, float t0, float t1) const;
+    bool intersects(const Ray& ray) const;
 
     QVector3D centre() const;
 };
