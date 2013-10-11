@@ -5,5 +5,7 @@
         <file>gl/shaders/instancededges.vert</file>
         <file>gl/shaders/instancedmarkers.vert</file>
         <file>gl/shaders/marker.frag</file>
+        <file>gl/shaders/debuglines.frag</file>
+        <file>gl/shaders/debuglines.vert</file>
     </qresource>
 </RCC>

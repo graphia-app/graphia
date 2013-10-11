@@ -45,7 +45,9 @@ SOURCES += main.cpp\
     layout/circlepackingcomponentlayout.cpp \
     layout/radialcirclecomponentlayout.cpp \
     gl/quad.cpp \
-    layout/layout.cpp
+    layout/layout.cpp \
+    layout/collision.cpp \
+    layout/spatialoctree.cpp
 
 HEADERS  += mainwindow.h \
     graph/grapharray.h \
@@ -84,7 +86,10 @@ HEADERS  += mainwindow.h \
     layout/linearcomponentlayout.h \
     layout/circlepackingcomponentlayout.h \
     layout/radialcirclecomponentlayout.h \
-    gl/quad.h
+    gl/quad.h \
+    layout/collision.h \
+    maths/ray.h \
+    layout/spatialoctree.h
 
 FORMS    += mainwindow.ui
 
@@ -93,7 +98,9 @@ OTHER_FILES += \
     gl/shaders/instancednodes.vert \
     gl/shaders/instancededges.vert \
     gl/shaders/instancedmarkers.vert \
-    gl/shaders/marker.frag
+    gl/shaders/marker.frag \
+    gl/shaders/debuglines.vert \
+    gl/shaders/debuglines.frag
 
 RESOURCES += \
     resources.qrc

@@ -47,6 +47,7 @@ public:
 signals:
     
 public slots:
+    void layoutChanged();
     
 };
 

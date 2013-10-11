@@ -8,6 +8,7 @@
 #include "../layout/linearcomponentlayout.h"
 #include "../layout/circlepackingcomponentlayout.h"
 #include "../layout/radialcirclecomponentlayout.h"
+#include "../layout/collision.h"
 #include "graphview.h"
 
 #include <QFileInfo>
@@ -88,6 +89,7 @@ void ContentPaneWidget::onCompletion(int success)
 
     GraphView* graphView = new GraphView();
     graphView->setGraphModel(_graphModel);
+    connect(nodeLayoutThread, &LayoutThread::executed, graphView, &GraphView::layoutChanged);
 
     layout()->addWidget(graphView);
 
