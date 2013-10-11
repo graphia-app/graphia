@@ -42,7 +42,8 @@ GraphScene::GraphScene( QObject* parent )
       _graphModel(nullptr),
       m_nodePositionData(0),
       m_edgePositionData(0),
-      m_componentMarkerData(0)
+      m_componentMarkerData(0),
+      debugLinesData(0)
 {
     m_modelMatrix.setToIdentity();
     update( 0.0f );
@@ -98,6 +99,16 @@ void GraphScene::initialise()
     m_quad->setMaterial(componentMarkerMaterial);
     m_quad->create();
 
+    debugLinesDataVAO.create();
+    if(!debugLinesShader.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/gl/shaders/debuglines.vert"))
+        qCritical() << QObject::tr("Could not compile vertex shader. Log:") << debugLinesShader.log();
+
+    if(!debugLinesShader.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/gl/shaders/debuglines.frag"))
+        qCritical() << QObject::tr("Could not compile fragment shader. Log:") << debugLinesShader.log();
+
+    if(!debugLinesShader.link())
+        qCritical() << QObject::tr("Could not link shader program. Log:") << debugLinesShader.log();
+
     // Create a pair of VBOs ready to hold our data
     prepareVertexBuffers();
 
@@ -105,6 +116,7 @@ void GraphScene::initialise()
     prepareNodeVAO();
     prepareEdgeVAO();
     prepareComponentMarkerVAO();
+    prepareDebugLinesVAO();
 
     // Enable depth testing to prevent artifacts
     glEnable( GL_DEPTH_TEST );
@@ -272,6 +284,83 @@ void GraphScene::renderComponentMarkers()
     glDisable(GL_BLEND);
 }
 
+void GraphScene::renderDebugLines()
+{
+    QMutexLocker locker(&debugLinesMutex);
+
+    debugLinesDataBuffer.bind();
+    debugLinesDataBuffer.allocate(debugLinesData.data(), debugLinesData.size() * sizeof(GLfloat));
+
+    debugLinesShader.bind();
+
+    // Calculate needed matrices
+    m_modelMatrix.setToIdentity();
+    m_modelMatrix.rotate( m_theta, 0.0f, 1.0f, 0.0f );
+
+    QMatrix4x4 modelViewMatrix = m_camera->viewMatrix() * m_modelMatrix;
+    debugLinesShader.setUniformValue( "modelViewMatrix", modelViewMatrix );
+    debugLinesShader.setUniformValue( "projectionMatrix", m_camera->projectionMatrix() );
+
+    debugLinesDataVAO.bind();
+    glDrawArrays(GL_LINES, 0, debugLines.size() * 2);
+    debugLinesDataVAO.release();
+    debugLinesShader.release();
+}
+
+void GraphScene::addDebugBoundingBox(const BoundingBox3D& boundingBox, const QColor color)
+{
+    const QVector3D& min = boundingBox.min();
+    const QVector3D& max = boundingBox.max();
+
+    const QVector3D _0 = QVector3D(min.x(), min.y(), min.z());
+    const QVector3D _1 = QVector3D(max.x(), min.y(), min.z());
+    const QVector3D _2 = QVector3D(min.x(), max.y(), min.z());
+    const QVector3D _3 = QVector3D(max.x(), max.y(), min.z());
+    const QVector3D _4 = QVector3D(min.x(), min.y(), max.z());
+    const QVector3D _5 = QVector3D(max.x(), min.y(), max.z());
+    const QVector3D _6 = QVector3D(min.x(), max.y(), max.z());
+    const QVector3D _7 = QVector3D(max.x(), max.y(), max.z());
+
+    addDebugLine(_0, _1, color);
+    addDebugLine(_1, _3, color);
+    addDebugLine(_3, _2, color);
+    addDebugLine(_2, _0, color);
+
+    addDebugLine(_4, _5, color);
+    addDebugLine(_5, _7, color);
+    addDebugLine(_7, _6, color);
+    addDebugLine(_6, _4, color);
+
+    addDebugLine(_0, _4, color);
+    addDebugLine(_1, _5, color);
+    addDebugLine(_3, _7, color);
+    addDebugLine(_2, _6, color);
+}
+
+void GraphScene::submitDebugLines()
+{
+    QMutexLocker locker(&debugLinesMutex);
+
+    debugLinesData.resize(debugLines.size() * 12);
+
+    int i = 0;
+    for(const DebugLine debugLine : debugLines)
+    {
+        debugLinesData[i++] = debugLine.start.x();
+        debugLinesData[i++] = debugLine.start.y();
+        debugLinesData[i++] = debugLine.start.z();
+        debugLinesData[i++] = debugLine.color.redF();
+        debugLinesData[i++] = debugLine.color.greenF();
+        debugLinesData[i++] = debugLine.color.blueF();
+        debugLinesData[i++] = debugLine.end.x();
+        debugLinesData[i++] = debugLine.end.y();
+        debugLinesData[i++] = debugLine.end.z();
+        debugLinesData[i++] = debugLine.color.redF();
+        debugLinesData[i++] = debugLine.color.greenF();
+        debugLinesData[i++] = debugLine.color.blueF();
+    }
+}
+
 void GraphScene::render()
 {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -279,6 +368,7 @@ void GraphScene::render()
     renderNodes();
     renderEdges();
     renderComponentMarkers();
+    renderDebugLines();
 }
 
 void GraphScene::resize( int w, int h )
@@ -308,6 +398,11 @@ void GraphScene::prepareVertexBuffers()
     m_componentMarkerDataBuffer.setUsagePattern( QOpenGLBuffer::DynamicDraw );
     m_componentMarkerDataBuffer.bind();
     m_componentMarkerDataBuffer.allocate( m_componentMarkerData.data(), m_componentMarkerData.size() * sizeof(GLfloat) );
+
+    debugLinesDataBuffer.create();
+    debugLinesDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    debugLinesDataBuffer.bind();
+    debugLinesDataBuffer.allocate(debugLinesData.data(), debugLinesData.size() * sizeof(GLfloat));
 }
 
 void GraphScene::prepareNodeVAO()
@@ -387,4 +482,19 @@ void GraphScene::prepareComponentMarkerVAO()
 #endif
     m_quad->vertexArrayObject()->release();
     shader->release();
+}
+
+void GraphScene::prepareDebugLinesVAO()
+{
+    debugLinesDataVAO.bind();
+    debugLinesShader.bind();
+    debugLinesDataBuffer.bind();
+
+    debugLinesShader.enableAttributeArray("position");
+    debugLinesShader.enableAttributeArray("color");
+    debugLinesShader.setAttributeBuffer("position", GL_FLOAT, 0, 3, 6 * sizeof(GLfloat));
+    debugLinesShader.setAttributeBuffer("color", GL_FLOAT, 3 * sizeof(GLfloat), 3, 6 * sizeof(GLfloat));
+
+    debugLinesDataVAO.release();
+    debugLinesShader.release();
 }

@@ -2,11 +2,18 @@
 #define INSTANCEDGEOMETRYSCENE_H
 
 #include "abstractscene.h"
+#include "camera.h"
+#include "../maths/boundingbox.h"
 
+#include <QList>
 #include <QOpenGLBuffer>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLShaderProgram>
 #include <QMatrix4x4>
+#include <QVector3D>
+#include <QColor>
+#include <QMutex>
 
-class Camera;
 class Sphere;
 class Cylinder;
 class Quad;
@@ -39,15 +46,28 @@ public:
     void setGraphModel(GraphModel* graphModel) { this->_graphModel = graphModel; }
 
 private:
+    struct DebugLine
+    {
+        DebugLine(const QVector3D& start, const QVector3D& end, const QColor& color) :
+            start(start), end(end), color(color)
+        {}
+
+        QVector3D start;
+        QVector3D end;
+        QColor color;
+    };
+
     void prepareVertexBuffers();
     void prepareNodeVAO();
     void prepareEdgeVAO();
     void prepareComponentMarkerVAO();
+    void prepareDebugLinesVAO();
     void prepareTexture();
 
     void renderNodes();
     void renderEdges();
     void renderComponentMarkers();
+    void renderDebugLines();
 
     QOpenGLFunctions_3_3_Core* m_funcs;
 
@@ -76,6 +96,27 @@ private:
 
     QVector<GLfloat> m_componentMarkerData;
     QOpenGLBuffer m_componentMarkerDataBuffer;
+
+    QList<DebugLine> debugLines;
+    QMutex debugLinesMutex;
+    QVector<GLfloat> debugLinesData;
+    QVector<QVector3D> debugLinesVertices;
+    QOpenGLBuffer debugLinesDataBuffer;
+    QOpenGLVertexArrayObject debugLinesDataVAO;
+    QOpenGLShaderProgram debugLinesShader;
+
+public:
+    const QVector3D viewPosition() { return m_camera->position(); }
+    const QVector3D viewVector() { return m_camera->viewVector(); }
+
+    void addDebugLine(const QVector3D& start, const QVector3D& end, const QColor color = QColor(Qt::GlobalColor::white))
+    {
+        DebugLine debugLine(start, end, color);
+        debugLines.append(debugLine);
+    }
+    void addDebugBoundingBox(const BoundingBox3D& boundingBox, const QColor color = QColor(Qt::GlobalColor::white));
+    void clearDebugLines() { debugLines.clear(); }
+    void submitDebugLines();
 };
 
 #endif // INSTANCEDGEOMETRYSCENE_H
