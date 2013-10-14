@@ -25,9 +25,12 @@ static void subDivideBoundingBox(const BoundingBox3D& boundingBox, SpatialOctTre
     subVolumes[7].boundingBox = BoundingBox3D(QVector3D(cx,      cy,      cz     ), QVector3D(cx + xh, cy + yh, cz + zh));
 }
 
-static void distributeNodesOverVolume(SpatialOctTree& spatialOctTree, const QList<NodeId> nodeIds,
+static bool distributeNodesOverVolume(SpatialOctTree& spatialOctTree, const QList<NodeId> nodeIds,
                                       const NodePositions& nodePositions, QSet<SpatialOctTree::SubVolume*>& subVolumes)
 {
+    bool distinctPositions = false;
+    QVector3D lastPosition = nodePositions[nodeIds[0]];
+
     for(NodeId nodeId : nodeIds)
     {
         const QVector3D& nodePosition = nodePositions[nodeId];
@@ -35,7 +38,17 @@ static void distributeNodesOverVolume(SpatialOctTree& spatialOctTree, const QLis
 
         subVolume.nodeIds.append(nodeId);
         subVolumes.insert(&subVolume);
+
+        if(!distinctPositions)
+        {
+            if(nodePosition != lastPosition)
+                distinctPositions = true;
+            else
+                lastPosition = nodePosition;
+        }
     }
+
+    return distinctPositions;
 }
 
 static void distributeNodesOverSubVolumes(SpatialOctTree& spatialOctTree, const QList<NodeId> nodeIds,
@@ -45,14 +58,14 @@ static void distributeNodesOverSubVolumes(SpatialOctTree& spatialOctTree, const 
     const int MAX_NODES_PER_LEAF = 4;
 
     QSet<SpatialOctTree::SubVolume*> subVolumes;
-    distributeNodesOverVolume(spatialOctTree, nodeIds, nodePositions, subVolumes);
+    bool distinctPositions = distributeNodesOverVolume(spatialOctTree, nodeIds, nodePositions, subVolumes);
 
     for(SpatialOctTree::SubVolume* subVolume : subVolumes)
     {
         if(!predicate(subVolume))
             continue;
 
-        if(subVolume->nodeIds.size() > MAX_NODES_PER_LEAF && subVolumes.size() > 1)
+        if(subVolume->nodeIds.size() > MAX_NODES_PER_LEAF && distinctPositions)
         {
             // Subdivide
             subVolume->subTree = new SpatialOctTree(subVolume->boundingBox, subVolume->nodeIds, nodePositions);
