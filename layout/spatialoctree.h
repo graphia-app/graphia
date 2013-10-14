@@ -39,7 +39,7 @@ public:
     QList<const SubVolume*> leaves() const { return leaves([](const SubVolume*, int){ return true; }); }
     void visitVolumes(std::function<void(const SubVolume*, int treeDepth)> visitor = [](const SubVolume*, int){}, int treeDepth = 0) const;
     void dumpToQDebug();
-    void debugRenderOctTree(GraphScene* graphScene);
+    void debugRenderOctTree(GraphScene* graphScene, const QVector3D& offset);
 };
 
 #endif // SPATIALOCTREE_H

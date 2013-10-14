@@ -34,6 +34,8 @@ public:
     bool containsLine(const QVector2D& pointA, const QVector2D& pointB) const;
 
     QVector2D centre() const;
+
+    BoundingBox2D operator+(const QVector2D v) const { return BoundingBox2D(_min + v, _max + v); }
 };
 
 class Ray;
@@ -75,6 +77,8 @@ public:
     bool intersects(const Ray& ray) const;
 
     QVector3D centre() const;
+
+    BoundingBox3D operator+(const QVector3D v) const { return BoundingBox3D(_min + v, _max + v); }
 };
 
 #endif // BOUNDINGBOX_H

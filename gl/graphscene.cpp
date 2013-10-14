@@ -8,6 +8,7 @@
 
 #include "../graph/graphmodel.h"
 #include "../layout/layout.h"
+#include "../layout/spatialoctree.h"
 
 #include <QObject>
 #include <QOpenGLContext>
@@ -129,6 +130,8 @@ void GraphScene::initialise()
 
 void GraphScene::update( float /*t*/ )
 {
+    clearDebugLines();
+
     if(_graphModel != nullptr)
     {
         NodePositions& nodePositions = _graphModel->nodePositions();
@@ -167,8 +170,14 @@ void GraphScene::update( float /*t*/ )
             m_componentMarkerData[k++] = componentPositions[componentId].x();
             m_componentMarkerData[k++] = componentPositions[componentId].y();
             m_componentMarkerData[k++] = NodeLayout::boundingCircleRadiusInXY(component, nodePositions);
+
+            //FIXME debug
+            SpatialOctTree octree(NodeLayout::boundingBox(component, nodePositions), component.nodeIds(), nodePositions);
+            octree.debugRenderOctTree(this, componentPositions[componentId]);
         }
     }
+
+    submitDebugLines();
 
     Camera::CameraTranslationOption option = m_viewCenterFixed
                                            ? Camera::DontTranslateViewCenter

@@ -52,7 +52,7 @@ static void distributeNodesOverSubVolumes(SpatialOctTree& spatialOctTree, const 
         if(!predicate(subVolume))
             continue;
 
-        if(subVolume->nodeIds.size() > MAX_NODES_PER_LEAF)
+        if(subVolume->nodeIds.size() > MAX_NODES_PER_LEAF && subVolumes.size() > 1)
         {
             // Subdivide
             subVolume->subTree = new SpatialOctTree(subVolume->boundingBox, subVolume->nodeIds, nodePositions);
@@ -93,7 +93,7 @@ SpatialOctTree::~SpatialOctTree()
         delete subVolumes[i].subTree;
 }
 
-SpatialOctTree::SubVolume&SpatialOctTree::subVolumeForPoint(const QVector3D& point)
+SpatialOctTree::SubVolume& SpatialOctTree::subVolumeForPoint(const QVector3D& point)
 {
     int i = 0;
     QVector3D diff = point - centre;
@@ -162,21 +162,23 @@ void SpatialOctTree::dumpToQDebug()
     });
 }
 
-void SpatialOctTree::debugRenderOctTree(GraphScene* graphScene)
+void SpatialOctTree::debugRenderOctTree(GraphScene* graphScene, const QVector3D& offset)
 {
-    graphScene->clearDebugLines();
-
     visitVolumes(
-        [&graphScene](const SpatialOctTree::SubVolume* subVolume, int)
+        [&graphScene, &offset](const SpatialOctTree::SubVolume* subVolume, int)
         {
             int r = std::abs(static_cast<int>(subVolume->boundingBox.centre().x() * 10) % 255);
             int g = std::abs(static_cast<int>(subVolume->boundingBox.centre().y() * 10) % 255);
             int b = std::abs(static_cast<int>(subVolume->boundingBox.centre().z() * 10) % 255);
+            int mean = std::max((r + g + b) / 3, 1);
+            const int TARGET = 192;
+            r = std::min((r * TARGET) / mean, 255);
+            g = std::min((g * TARGET) / mean, 255);
+            b = std::min((b * TARGET) / mean, 255);
+
             QColor lineColor(r, g, b);
 
             if(!subVolume->nodeIds.isEmpty())
-                graphScene->addDebugBoundingBox(subVolume->boundingBox, lineColor);
+                graphScene->addDebugBoundingBox(subVolume->boundingBox + offset, lineColor);
         });
-
-    graphScene->submitDebugLines();
 }
