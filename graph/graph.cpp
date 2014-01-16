@@ -3,6 +3,7 @@
 #include "simplecomponentmanager.h"
 
 #include <QtGlobal>
+#include <QMetaType>
 
 Graph::Graph() :
     nextNodeId(0),
@@ -10,6 +11,8 @@ Graph::Graph() :
     componentManager(new SimpleComponentManager(*this)),
     componentManagementEnabled(true)
 {
+    qRegisterMetaType<NodeId>("NodeId");
+    qRegisterMetaType<EdgeId>("EdgeId");
 }
 
 Graph::~Graph()

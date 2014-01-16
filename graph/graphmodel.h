@@ -5,10 +5,25 @@
 #include "../graph/grapharray.h"
 #include "../layout/layout.h"
 
-#include <QVector2D>
-#include <QVector3D>
 #include <QWidget>
 #include <QString>
+#include <QColor>
+
+struct NodeVisual
+{
+    float size;
+    QColor color;
+};
+
+typedef NodeArray<NodeVisual> NodeVisuals;
+
+struct EdgeVisual
+{
+    float size;
+    QColor color;
+};
+
+typedef EdgeArray<EdgeVisual> EdgeVisuals;
 
 class GraphModel : public QObject
 {
@@ -20,6 +35,11 @@ public:
     virtual const NodePositions& nodePositions() const = 0;
     virtual ComponentPositions& componentPositions() = 0;
     virtual const ComponentPositions& componentPositions() const = 0;
+
+    virtual NodeVisuals& nodeVisuals() = 0;
+    virtual const NodeVisuals& nodeVisuals() const = 0;
+    virtual EdgeVisuals& edgeVisuals() = 0;
+    virtual const EdgeVisuals& edgeVisuals() const = 0;
 
     virtual const QString& name() = 0;
 

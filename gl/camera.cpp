@@ -399,3 +399,47 @@ void Camera::setStandardUniforms( const QOpenGLShaderProgramPtr& program, const 
     program->setUniformValue( "projectionMatrix", projectionMatrix() );
     program->setUniformValue( "mvp", mvp );
 }
+
+
+bool Camera::unproject(int x, int y, int z, QVector3D& result)
+{
+    QMatrix4x4 A = projectionMatrix() * viewMatrix();
+
+    bool invertable;
+    QMatrix4x4 m = A.inverted(&invertable);
+    if(!invertable)
+        return false;
+
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    y = viewport[3] - y;
+
+    QVector4D normalisedCoordinates;
+    normalisedCoordinates.setX((x - (float)viewport[0]) / (float)viewport[2] * 2.0f - 1.0f);
+    normalisedCoordinates.setY((y - (float)viewport[1]) / (float)viewport[3] * 2.0f - 1.0f);
+    normalisedCoordinates.setZ(2.0f * z - 1.0f);
+    normalisedCoordinates.setW(1.0f);
+
+    QVector4D o = m * normalisedCoordinates;
+    if(o.w() == 0.0f)
+        return false;
+
+    o.setW(1.0f / o.w());
+
+    result.setX(o.x() * o.w());
+    result.setY(o.y() * o.w());
+    result.setZ(o.z() * o.w());
+
+    return true;
+}
+
+const Ray Camera::rayForViewportCoordinates(int x, int y)
+{
+    QVector3D near, far;
+
+    unproject(x, y, 0.0, near);
+    unproject(x, y, 1.0, far);
+
+    return Ray(near, (far - near).normalized());
+}

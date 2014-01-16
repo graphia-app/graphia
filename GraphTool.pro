@@ -22,8 +22,6 @@ SOURCES += main.cpp\
     layout/eadeslayout.cpp \
     gl/openglwindow.cpp \
     gl/opengldebugmessagemodel.cpp \
-    gl/cameracontroller.cpp \
-    gl/camerascene.cpp \
     gl/camera.cpp \
     gl/abstractscene.cpp \
     gl/cube.cpp \
@@ -47,7 +45,8 @@ SOURCES += main.cpp\
     gl/quad.cpp \
     layout/layout.cpp \
     layout/collision.cpp \
-    layout/spatialoctree.cpp
+    layout/spatialoctree.cpp \
+    maths/plane.cpp
 
 HEADERS  += mainwindow.h \
     graph/grapharray.h \
@@ -58,9 +57,7 @@ HEADERS  += mainwindow.h \
     utils.h \
     layout/eadeslayout.h \
     gl/openglwindow.h \
-    gl/cameracontroller.h \
     gl/opengldebugmessagemodel.h \
-    gl/camerascene.h \
     gl/camera.h \
     gl/camera_p.h \
     gl/abstractscene.h \
@@ -89,7 +86,8 @@ HEADERS  += mainwindow.h \
     gl/quad.h \
     layout/collision.h \
     maths/ray.h \
-    layout/spatialoctree.h
+    layout/spatialoctree.h \
+    maths/plane.h
 
 FORMS    += mainwindow.ui
 

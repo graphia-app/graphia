@@ -4,9 +4,7 @@
 #include <QWindow>
 #include <QTime>
 
-class CameraScene;
 class AbstractScene;
-class CameraController;
 class QOpenGLDebugMessage;
 
 class OpenGLWindow : public QWindow
@@ -44,13 +42,8 @@ protected slots:
 private:
     QOpenGLContext* m_context;
     AbstractScene* m_scene;
-    CameraController* m_controller;
     
     QTime m_time;
-
-    bool m_leftButtonPressed;
-    QPoint m_prevPos;
-    QPoint m_pos;
 };
 
 #endif // OPENGLWINDOW_H

@@ -18,6 +18,7 @@ uniform MaterialInfo material;
 
 in vec3 position;
 in vec3 normal;
+in vec3 vColor;
 
 layout ( location = 0 ) out vec4 fragColor;
 
@@ -44,7 +45,7 @@ vec3 adsModel( const in vec3 pos, const in vec3 norm )
         specular = pow( max( dot( r, v ), 0.0 ), material.shininess );
 
     // Combine the ambient, diffuse and specular contributions
-    return light.intensity * ( material.ka + material.kd * diffuse + material.ks * specular );
+    return light.intensity * ( material.ka + vColor * diffuse + material.ks * specular );
 }
 
 void main()

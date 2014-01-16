@@ -4,6 +4,9 @@
 #include <QObject>
 
 class QOpenGLContext;
+class QMouseEvent;
+class QWheelEvent;
+class QKeyEvent;
 
 class AbstractScene : public QObject
 {
@@ -13,34 +16,23 @@ public:
     AbstractScene( QObject* parent = 0 );
     virtual ~AbstractScene();
 
-    void setContext( QOpenGLContext* context ) { m_context = context; }
+    void setContext(QOpenGLContext* context) { m_context = context; }
     QOpenGLContext* context() const { return m_context; }
 
-    /**
-      Load textures, initialize shaders, etc.
-      */
     virtual void initialise() = 0;
-    /**
-      Destroy textures, shaders, etc.; useful if you want to control
-      the cleanup (f.i. if it has to happen in another thread)
-      */
     virtual void cleanup() {}
-
-    /**
-      This is called prior to every frame.  Use this
-      to update your animation.
-      */
-    virtual void update( float t ) = 0;
-
-    /**
-      Draw your scene.
-      */
+    virtual void update(float t) = 0;
     virtual void render() = 0;
+    virtual void resize(int w, int h) = 0;
 
-    /**
-      Called when screen is resized
-      */
-    virtual void resize( int w, int h ) = 0;
+    virtual void mousePressEvent(QMouseEvent*) {}
+    virtual void mouseReleaseEvent(QMouseEvent*) {}
+    virtual void mouseMoveEvent(QMouseEvent*) {}
+
+    virtual bool keyPressEvent(QKeyEvent*) { return false; }
+    virtual bool keyReleaseEvent(QKeyEvent*) { return false; }
+
+    virtual bool handleScroll(QWheelEvent*) { return false; }
 
 protected:
     QOpenGLContext* m_context;

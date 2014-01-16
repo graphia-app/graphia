@@ -1,8 +1,5 @@
 #include "openglwindow.h"
 
-#include "camerascene.h"
-#include "cameracontroller.h"
-
 #include "opengldebugmessagemodel.h"
 
 #include "graphscene.h"
@@ -17,12 +14,8 @@ OpenGLWindow::OpenGLWindow( const QSurfaceFormat& format,
                             QScreen* screen )
     : QWindow( screen ),
       m_context( 0 ),
-      m_scene( 0 ),
-      m_controller( 0 ),
-      m_leftButtonPressed( false )
+      m_scene( 0 )
 {
-    m_controller = new CameraController;
-
     // Tell Qt we will use OpenGL for this window
     setSurfaceType( OpenGLSurface );
 
@@ -61,12 +54,6 @@ void OpenGLWindow::setScene( AbstractScene* scene )
     QTimer* timer = new QTimer( this );
     connect( timer, &QTimer::timeout, this, &OpenGLWindow::updateScene );
     timer->start( 16 );
-
-    CameraScene* camScene = qobject_cast<CameraScene*>( scene );
-    if ( camScene )
-    {
-        m_controller->setCamera( camScene->camera() );
-    }
 }
 
 void OpenGLWindow::initialise()
@@ -85,7 +72,6 @@ void OpenGLWindow::initialise()
 
             if (!startupMessages.isEmpty())
                 qDebug() << "Debug messages logged on startup:" << startupMessages;
-
         }
         else
         {
@@ -112,10 +98,8 @@ void OpenGLWindow::render()
     // Make the context current
     m_context->makeCurrent( this );
 
-    if ( m_controller->isMultisampleEnabled() )
-        glEnable( GL_MULTISAMPLE );
-    else
-        glDisable( GL_MULTISAMPLE );
+    // FIXME: make configurable
+    glEnable( GL_MULTISAMPLE );
 
     // Do the rendering (to the back buffer)
     m_scene->render();
@@ -127,7 +111,6 @@ void OpenGLWindow::render()
 void OpenGLWindow::updateScene()
 {
     float time = m_time.elapsed() / 1000.0f;
-    m_controller->update( time );
     m_scene->update( time );
     render();
 }
@@ -144,115 +127,30 @@ void OpenGLWindow::messageLogged(const QOpenGLDebugMessage &message)
     qDebug() << message;
 }
 
-void OpenGLWindow::keyPressEvent( QKeyEvent* e )
+void OpenGLWindow::keyPressEvent(QKeyEvent* e)
 {
-    const float MOVE_SPEED = 2.0f;
-
-    GraphScene* scene = static_cast<GraphScene*>( this->scene() );
-    switch ( e->key() )
-    {
-    case Qt::Key_D:
-        scene->setSideSpeed(MOVE_SPEED);
-        break;
-
-    case Qt::Key_A:
-        scene->setSideSpeed(-MOVE_SPEED);
-        break;
-
-    case Qt::Key_W:
-        scene->setForwardSpeed(MOVE_SPEED);
-        break;
-
-    case Qt::Key_S:
-        scene->setForwardSpeed(-MOVE_SPEED);
-        break;
-
-    case Qt::Key_Shift:
-        scene->setVerticalSpeed(MOVE_SPEED);
-        break;
-
-    case Qt::Key_Control:
-        scene->setVerticalSpeed(-MOVE_SPEED);
-        break;
-
-    case Qt::Key_Space:
-        scene->setViewCenterFixed( true );
-        break;
-
-    default:
-        if (m_controller->keyPressEvent(e))
-            return;
-
-        QWindow::keyPressEvent( e );
-        break;
-    }
+    if (!m_scene->keyPressEvent(e))
+        QWindow::keyPressEvent(e);
 }
 
-void OpenGLWindow::keyReleaseEvent( QKeyEvent* e )
+void OpenGLWindow::keyReleaseEvent(QKeyEvent* e)
 {
-    GraphScene* scene = static_cast<GraphScene*>( this->scene() );
-    switch ( e->key() )
-    {
-    case Qt::Key_A:
-    case Qt::Key_D:
-        scene->setSideSpeed( 0.0f );
-        break;
-
-    case Qt::Key_W:
-    case Qt::Key_S:
-        scene->setForwardSpeed( 0.0f );
-        break;
-
-    case Qt::Key_Shift:
-    case Qt::Key_Control:
-        scene->setVerticalSpeed( 0.0f );
-        break;
-
-    case Qt::Key_Space:
-        scene->setViewCenterFixed( false );
-
-    default:
-        if (m_controller->keyReleaseEvent(e))
-            return;
-
+    if (!m_scene->keyReleaseEvent(e))
         QWindow::keyReleaseEvent(e);
-        break;
-    }
 }
 
-void OpenGLWindow::mousePressEvent( QMouseEvent* e )
+void OpenGLWindow::mousePressEvent(QMouseEvent* e)
 {
-    if ( e->button() == Qt::LeftButton )
-    {
-        m_leftButtonPressed = true;
-        m_pos = m_prevPos = e->pos();
-    }
-
-    m_controller->mousePressEvent(e);
+    m_scene->mousePressEvent(e);
 }
 
-void OpenGLWindow::mouseReleaseEvent( QMouseEvent* e )
+void OpenGLWindow::mouseReleaseEvent(QMouseEvent* e)
 {
-    if ( e->button() == Qt::LeftButton )
-        m_leftButtonPressed = false;
-
-    m_controller->mouseReleaseEvent(e);
+    m_scene->mouseReleaseEvent(e);
 }
 
-void OpenGLWindow::mouseMoveEvent( QMouseEvent* e )
+void OpenGLWindow::mouseMoveEvent(QMouseEvent* e)
 {
-    if ( m_leftButtonPressed )
-    {
-        m_pos = e->pos();
-        float dx = 0.5f * ( m_pos.x() - m_prevPos.x() );
-        float dy = 0.5f * ( m_pos.y() - m_prevPos.y() );
-        m_prevPos = m_pos;
-
-        GraphScene* scene = static_cast<GraphScene*>( this->scene() );
-        scene->pan( dx );
-        scene->tilt( dy );
-    }
-
-    m_controller->mouseMoveEvent(e);
+    m_scene->mouseMoveEvent(e);
 }
 

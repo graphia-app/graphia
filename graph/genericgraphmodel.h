@@ -15,6 +15,9 @@ private:
     Graph _graph;
     NodePositions _nodePositions;
     ComponentPositions _componentPositions;
+    NodeVisuals _nodeVisuals;
+    EdgeVisuals _edgeVisuals;
+
     QString _name;
 
 public:
@@ -25,7 +28,16 @@ public:
     ComponentPositions& componentPositions() { return _componentPositions; }
     const ComponentPositions& componentPositions() const { return _componentPositions; }
 
+    NodeVisuals& nodeVisuals() { return _nodeVisuals; }
+    const NodeVisuals& nodeVisuals() const { return _nodeVisuals; }
+    EdgeVisuals& edgeVisuals() { return _edgeVisuals; }
+    const EdgeVisuals& edgeVisuals() const { return _edgeVisuals; }
+
     const QString& name() { return _name; }
+
+public slots:
+    void onNodeAdded(const Graph*, NodeId nodeId);
+    void onEdgeAdded(const Graph*, EdgeId edgeId);
 };
 
 #endif // GENERICGRAPHMODEL_H

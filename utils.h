@@ -2,6 +2,7 @@
 #define UTILS_H
 
 #include <QVector3D>
+#include <QColor>
 #include <cstdlib>
 #include <cmath>
 
@@ -11,7 +12,9 @@ public:
     template<typename T> static T rand(T low, T high)
     {
         T range = high - low;
-        T value = ((::rand() * range) / RAND_MAX) + low;
+        int64_t randValue = ::rand();
+        int64_t numerator = randValue * range;
+        T value = ( numerator / static_cast<T>(RAND_MAX)) + low;
 
         return value;
     }
@@ -24,6 +27,15 @@ public:
     static QVector3D randQVector3D(float low, float high)
     {
         return QVector3D(rand(low, high), rand(low, high), rand(low, high));
+    }
+
+    static QColor randQColor()
+    {
+        int r = rand(0, 255);
+        int g = rand(0, 255);
+        int b = rand(0, 255);
+
+        return QColor(r, g, b);
     }
 
     template<typename T> static bool valueIsCloseToZero(T value)

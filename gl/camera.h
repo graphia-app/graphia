@@ -8,6 +8,8 @@
 #include <QVector3D>
 #include <QSharedPointer>
 
+#include "../maths/ray.h"
+
 class CameraPrivate;
 
 class QOpenGLShaderProgram;
@@ -93,6 +95,8 @@ public:
     QMatrix4x4 projectionMatrix() const;
     QMatrix4x4 viewProjectionMatrix() const;
 
+    const Ray rayForViewportCoordinates(int x, int y);
+
     QQuaternion tiltRotation( const float& angle ) const;
     QQuaternion panRotation( const float& angle ) const;
     QQuaternion rollRotation( const float& angle ) const;
@@ -133,6 +137,8 @@ protected:
     Q_DECLARE_PRIVATE( Camera )
 
 private:
+    bool unproject(int x, int y, int z, QVector3D& result);
+
     CameraPrivate* d_ptr;
 };
 

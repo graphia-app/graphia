@@ -14,6 +14,7 @@
 #include <QColor>
 #include <QMutex>
 
+class Graph;
 class Sphere;
 class Cylinder;
 class Quad;
@@ -33,6 +34,13 @@ public:
     void render();
     void resize( int w, int h );
 
+    void mousePressEvent(QMouseEvent* mouseEvent);
+    void mouseReleaseEvent(QMouseEvent* mouseEvent);
+    void mouseMoveEvent(QMouseEvent* mouseEvent);
+
+    bool keyPressEvent(QKeyEvent* keyEvent);
+    bool keyReleaseEvent(QKeyEvent* keyEvent);
+
     // Camera motion control
     void setSideSpeed( float vx ) { m_vx = vx; }
     void setVerticalSpeed( float vy ) { m_vy = vy; }
@@ -43,7 +51,7 @@ public:
     void pan( float angle ) { m_panAngle = angle; }
     void tilt( float angle ) { m_tiltAngle = angle; }
 
-    void setGraphModel(GraphModel* graphModel) { this->_graphModel = graphModel; }
+    void setGraphModel(GraphModel* graphModel);
 
 private:
     struct DebugLine
@@ -69,6 +77,16 @@ private:
     void renderComponentMarkers();
     void renderDebugLines();
 
+    void updateVisualData();
+
+private slots:
+    void onGraphChanged(const Graph*);
+
+private:
+    bool m_leftButtonPressed;
+    QPoint m_prevPos;
+    QPoint m_pos;
+
     QOpenGLFunctions_3_3_Core* m_funcs;
 
     Camera* m_camera;
@@ -83,16 +101,19 @@ private:
     Cylinder* m_cylinder;
     Quad* m_quad;
 
-    float m_theta;
-    QMatrix4x4 m_modelMatrix;
-
     GraphModel* _graphModel;
 
     QVector<GLfloat> m_nodePositionData;
-    QOpenGLBuffer m_nodePositionDataBuffer;
+    QOpenGLBuffer m_nodePositionBuffer;
 
     QVector<GLfloat> m_edgePositionData;
-    QOpenGLBuffer m_edgePositionDataBuffer;
+    QOpenGLBuffer m_edgePositionBuffer;
+
+    QVector<GLfloat> m_nodeVisualData;
+    QOpenGLBuffer m_nodeVisualBuffer;
+
+    QVector<GLfloat> m_edgeVisualData;
+    QOpenGLBuffer m_edgeVisualBuffer;
 
     QVector<GLfloat> m_componentMarkerData;
     QOpenGLBuffer m_componentMarkerDataBuffer;
