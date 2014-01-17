@@ -4,6 +4,7 @@
 #include "abstractscene.h"
 #include "camera.h"
 #include "../maths/boundingbox.h"
+#include "../graph/graph.h"
 
 #include <QList>
 #include <QOpenGLBuffer>
@@ -14,7 +15,6 @@
 #include <QColor>
 #include <QMutex>
 
-class Graph;
 class Sphere;
 class Cylinder;
 class Quad;
@@ -86,6 +86,7 @@ private:
     bool m_leftButtonPressed;
     QPoint m_prevPos;
     QPoint m_pos;
+    NodeId clickedNodeId;
 
     QOpenGLFunctions_3_3_Core* m_funcs;
 
@@ -127,9 +128,6 @@ private:
     QOpenGLShaderProgram debugLinesShader;
 
 public:
-    const QVector3D viewPosition() { return m_camera->position(); }
-    const QVector3D viewVector() { return m_camera->viewVector(); }
-
     void addDebugLine(const QVector3D& start, const QVector3D& end, const QColor color = QColor(Qt::GlobalColor::white))
     {
         DebugLine debugLine(start, end, color);

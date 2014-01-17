@@ -3,6 +3,8 @@
 
 #include <QVector3D>
 
+#include "../maths/ray.h"
+
 class Plane
 {
 private:
@@ -26,6 +28,7 @@ public:
     };
 
     Side sideForPoint(const QVector3D& point);
+    QVector3D rayIntersection(const Ray& ray);
 };
 
 #endif // PLANE_H

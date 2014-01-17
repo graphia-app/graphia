@@ -11,6 +11,8 @@
 #include "../layout/spatialoctree.h"
 #include "../layout/collision.h"
 
+#include "../maths/plane.h"
+
 #include <QObject>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions_3_3_Core>
@@ -439,6 +441,9 @@ void GraphScene::mousePressEvent(QMouseEvent* mouseEvent)
         Ray ray = m_camera->rayForViewportCoordinates(m_pos.x(), m_pos.y());
         ComponentPositions& componentPositions = _graphModel->componentPositions();
 
+        clickedNodeId = NullNodeId;
+        ComponentId clickedComponentId = NullComponentId;
+
         for(ComponentId componentId : *_graphModel->graph().componentIds())
         {
             const ReadOnlyGraph& component = *_graphModel->graph().componentById(componentId);
@@ -448,28 +453,46 @@ void GraphScene::mousePressEvent(QMouseEvent* mouseEvent)
             NodeId nodeId = collision.closestNodeIntersectingLine(ray.origin(), ray.dir());
 
             if (nodeId != NullNodeId)
-                qDebug() << m_pos << nodeId << "(" << componentId << ")";
+            {
+                clickedNodeId = nodeId;
+                clickedComponentId = componentId;
+            }
         }
+
+        if(clickedNodeId != NullNodeId)
+            qDebug() << m_pos << clickedNodeId << "(" << clickedComponentId << ")";
+        else
+            qDebug() << m_pos << "empty";
     }
 }
 
 void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
 {
     if (mouseEvent->button() == Qt::LeftButton)
+    {
         m_leftButtonPressed = false;
+        clickedNodeId = NullNodeId;
+    }
 }
 
 void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
 {
-    if (m_leftButtonPressed)
+    if (m_leftButtonPressed && clickedNodeId != NullNodeId)
     {
         m_pos = mouseEvent->pos();
-        float dx = 0.5f * (m_pos.x() - m_prevPos.x());
-        float dy = 0.5f * (m_pos.y() - m_prevPos.y());
-        m_prevPos = m_pos;
 
-        pan(dx);
-        tilt(dy);
+        const QVector3D& clickedNodePosition = _graphModel->nodePositions()[clickedNodeId];
+
+        Plane translationPlane(clickedNodePosition, m_camera->viewVector().normalized());
+
+        QVector3D prevPoint = translationPlane.rayIntersection(
+                    m_camera->rayForViewportCoordinates(m_prevPos.x(), m_prevPos.y()));
+        QVector3D curPoint = translationPlane.rayIntersection(
+                    m_camera->rayForViewportCoordinates(m_pos.x(), m_pos.y()));
+
+        m_camera->translate(prevPoint - curPoint, Camera::TranslateViewCenter);
+
+        m_prevPos = m_pos;
     }
 }
 

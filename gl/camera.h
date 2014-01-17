@@ -96,6 +96,7 @@ public:
     QMatrix4x4 viewProjectionMatrix() const;
 
     const Ray rayForViewportCoordinates(int x, int y);
+    void lineForViewportCoordinates(int x, int y, QVector3D& pointA, QVector3D& pointB);
 
     QQuaternion tiltRotation( const float& angle ) const;
     QQuaternion panRotation( const float& angle ) const;
@@ -109,6 +110,7 @@ public:
      * @param model - the model matrix to use
      */
     void setStandardUniforms( const QOpenGLShaderProgramPtr& program, const QMatrix4x4& model ) const;
+
 public slots:
     void setPosition( const QVector3D& position );
     void setUpVector( const QVector3D& upVector );

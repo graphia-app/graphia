@@ -23,3 +23,12 @@ Plane::Side Plane::sideForPoint(const QVector3D& point)
 
     return Plane::Side::Back;
 }
+
+QVector3D Plane::rayIntersection(const Ray& ray)
+{
+    float o_n = QVector3D::dotProduct(ray.origin(), _normal);
+    float d_n = QVector3D::dotProduct(ray.dir(), _normal);
+    float t = -(o_n + _distance) / d_n;
+
+    return ray.origin() + (t * ray.dir());
+}
