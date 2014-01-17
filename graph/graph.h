@@ -154,6 +154,8 @@ public:
     int numComponents() const;
     const ReadOnlyGraph* componentById(ComponentId componentId) const;
     const ReadOnlyGraph* firstComponent() const { return componentById((*componentIds())[0]); }
+    ComponentId componentIdOfNode(NodeId nodeId) const;
+    ComponentId componentIdOfEdge(EdgeId edgeId) const;
 
     void dumpToQDebug(int detail) const
     {

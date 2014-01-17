@@ -71,6 +71,8 @@ private:
 public:
     const QList<ComponentId>& componentIds() const;
     const ReadOnlyGraph& componentById(ComponentId componentId);
+    ComponentId componentIdOfNode(NodeId nodeId) const;
+    ComponentId componentIdOfEdge(EdgeId edgeId) const;
 };
 
 #endif // SIMPLECOMPONENTMANAGER_H

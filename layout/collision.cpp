@@ -52,7 +52,7 @@ void Collision::nodesIntersectingLine(const QVector3D& point, const QVector3D& d
     }
 }
 
-NodeId Collision::closestNodeIntersectingLine(const QVector3D& point, const QVector3D& direction)
+NodeId Collision::nearestNodeIntersectingLine(const QVector3D& point, const QVector3D& direction)
 {
     QList<NodeId> nodeIds;
 

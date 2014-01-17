@@ -172,6 +172,22 @@ const ReadOnlyGraph *Graph::componentById(ComponentId componentId) const
     return nullptr;
 }
 
+ComponentId Graph::componentIdOfNode(NodeId nodeId) const
+{
+    if(componentManager != nullptr)
+        return componentManager->componentIdOfNode(nodeId);
+
+    return NullComponentId;
+}
+
+ComponentId Graph::componentIdOfEdge(EdgeId edgeId) const
+{
+    if(componentManager != nullptr)
+        return componentManager->componentIdOfEdge(edgeId);
+
+    return NullComponentId;
+}
+
 void Graph::setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId)
 {
     emit graphWillChange(this);

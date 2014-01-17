@@ -29,7 +29,7 @@ public:
     NodeId closestNodeToLine(const QVector3D& point, const QVector3D& direction);
 
     void nodesIntersectingLine(const QVector3D& point, const QVector3D& direction, QList<NodeId>& intersectingNodeIds);
-    NodeId closestNodeIntersectingLine(const QVector3D& point, const QVector3D& direction);
+    NodeId nearestNodeIntersectingLine(const QVector3D& point, const QVector3D& direction);
 };
 
 #endif // COLLISION_H

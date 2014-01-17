@@ -154,3 +154,8 @@ void OpenGLWindow::mouseMoveEvent(QMouseEvent* e)
     m_scene->mouseMoveEvent(e);
 }
 
+void OpenGLWindow::mouseDoubleClickEvent(QMouseEvent* e)
+{
+    m_scene->mouseDoubleClickEvent(e);
+}
+

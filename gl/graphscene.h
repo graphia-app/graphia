@@ -34,9 +34,12 @@ public:
     void render();
     void resize( int w, int h );
 
+    void centreNodeInViewport(NodeId nodeId);
+
     void mousePressEvent(QMouseEvent* mouseEvent);
     void mouseReleaseEvent(QMouseEvent* mouseEvent);
     void mouseMoveEvent(QMouseEvent* mouseEvent);
+    void mouseDoubleClickEvent(QMouseEvent* mouseEvent);
 
     bool keyPressEvent(QKeyEvent* keyEvent);
     bool keyReleaseEvent(QKeyEvent* keyEvent);
@@ -87,6 +90,7 @@ private:
     QPoint m_prevPos;
     QPoint m_pos;
     NodeId clickedNodeId;
+    ComponentId clickedComponentId;
 
     QOpenGLFunctions_3_3_Core* m_funcs;
 

@@ -76,6 +76,8 @@ public:
     virtual const QList<ComponentId>& componentIds() const = 0;
     int numComponents() const { return componentIds().size(); }
     virtual const ReadOnlyGraph& componentById(ComponentId componentId) = 0;
+    virtual ComponentId componentIdOfNode(NodeId nodeId) const = 0;
+    virtual ComponentId componentIdOfEdge(EdgeId edgeId) const = 0;
 
 signals:
     void componentAdded(const Graph*, ComponentId) const;

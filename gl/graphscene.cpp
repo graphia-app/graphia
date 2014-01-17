@@ -431,6 +431,18 @@ void GraphScene::resize( int w, int h )
     m_camera->setPerspectiveProjection( 60.0f, aspect, 0.3f, 10000.0f );
 }
 
+void GraphScene::centreNodeInViewport(NodeId nodeId)
+{
+    const QVector3D& nodePosition = _graphModel->nodePositions()[nodeId];
+
+    Plane translationPlane(nodePosition, m_camera->viewVector().normalized());
+
+    QVector3D centrePoint = translationPlane.rayIntersection(
+                Ray(m_camera->position(), m_camera->viewVector().normalized()));
+
+    m_camera->translate(nodePosition - centrePoint, Camera::TranslateViewCenter);
+}
+
 void GraphScene::mousePressEvent(QMouseEvent* mouseEvent)
 {
     if (mouseEvent->button() == Qt::LeftButton)
@@ -442,7 +454,7 @@ void GraphScene::mousePressEvent(QMouseEvent* mouseEvent)
         ComponentPositions& componentPositions = _graphModel->componentPositions();
 
         clickedNodeId = NullNodeId;
-        ComponentId clickedComponentId = NullComponentId;
+        clickedComponentId = NullComponentId;
 
         for(ComponentId componentId : *_graphModel->graph().componentIds())
         {
@@ -450,7 +462,7 @@ void GraphScene::mousePressEvent(QMouseEvent* mouseEvent)
 
             Collision collision(component, _graphModel->nodeVisuals(), _graphModel->nodePositions());
             collision.setOffset(componentPositions[componentId]);
-            NodeId nodeId = collision.closestNodeIntersectingLine(ray.origin(), ray.dir());
+            NodeId nodeId = collision.nearestNodeIntersectingLine(ray.origin(), ray.dir());
 
             if (nodeId != NullNodeId)
             {
@@ -470,8 +482,18 @@ void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
 {
     if (mouseEvent->button() == Qt::LeftButton)
     {
+        if(clickedComponentId != NullComponentId)
+        {
+            Collision collision(*_graphModel->graph().componentById(clickedComponentId),
+                                _graphModel->nodeVisuals(), _graphModel->nodePositions());
+            NodeId closestNodeId = collision.closestNodeToLine(m_camera->position(), m_camera->viewVector().normalized());
+            if(closestNodeId != NullNodeId)
+                centreNodeInViewport(closestNodeId);
+        }
+
         m_leftButtonPressed = false;
         clickedNodeId = NullNodeId;
+        clickedComponentId = NullComponentId;
     }
 }
 
@@ -493,6 +515,15 @@ void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
         m_camera->translate(prevPoint - curPoint, Camera::TranslateViewCenter);
 
         m_prevPos = m_pos;
+    }
+}
+
+void GraphScene::mouseDoubleClickEvent(QMouseEvent* mouseEvent)
+{
+    if (mouseEvent->button() == Qt::LeftButton)
+    {
+        if(clickedNodeId != NullNodeId)
+            centreNodeInViewport(clickedNodeId);
     }
 }
 

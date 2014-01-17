@@ -224,3 +224,19 @@ const ReadOnlyGraph& SimpleComponentManager::componentById(ComponentId component
     return *componentsMap[componentId];
 }
 
+ComponentId SimpleComponentManager::componentIdOfNode(NodeId nodeId) const
+{
+    if(nodeId == NullNodeId)
+        return NullComponentId;
+
+    return nodesComponentId[nodeId];
+}
+
+ComponentId SimpleComponentManager::componentIdOfEdge(EdgeId edgeId) const
+{
+    if(edgeId == NullEdgeId)
+        return NullComponentId;
+
+    return edgesComponentId[edgeId];
+}
+

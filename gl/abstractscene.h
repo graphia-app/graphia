@@ -28,6 +28,7 @@ public:
     virtual void mousePressEvent(QMouseEvent*) {}
     virtual void mouseReleaseEvent(QMouseEvent*) {}
     virtual void mouseMoveEvent(QMouseEvent*) {}
+    virtual void mouseDoubleClickEvent(QMouseEvent*) {}
 
     virtual bool keyPressEvent(QKeyEvent*) { return false; }
     virtual bool keyReleaseEvent(QKeyEvent*) { return false; }
