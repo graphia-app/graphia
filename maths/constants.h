@@ -1,6 +1,11 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+#ifdef _WIN32
+// Sigh...
+#define constexpr const
+#endif
+
 class Constants
 {
 public:

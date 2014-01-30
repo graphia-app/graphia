@@ -1,5 +1,5 @@
 #include "genericgraphmodel.h"
-#include "utils.h"
+#include "../utils.h"
 
 GenericGraphModel::GenericGraphModel(const QString &name) :
     _graph(),

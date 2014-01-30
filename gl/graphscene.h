@@ -90,7 +90,6 @@ private:
     ComponentId clickedComponentId;
     NodeId focusNodeId;
 
-    const float MINIMUM_CAMERA_DISTANCE = 2.5f;
     float zoomDistance;
     float targetZoomDistance;
     Transition zoomTransition;

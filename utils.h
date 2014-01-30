@@ -5,6 +5,7 @@
 #include <QVector3D>
 #include <QColor>
 #include <cstdlib>
+#include <cstdint>
 #include <cmath>
 
 class Utils

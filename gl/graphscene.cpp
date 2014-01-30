@@ -430,6 +430,8 @@ void GraphScene::resize( int w, int h )
     m_camera->setPerspectiveProjection( 60.0f, aspect, 0.3f, 10000.0f );
 }
 
+const float MINIMUM_CAMERA_DISTANCE = 2.5f;
+
 void GraphScene::zoom(float direction)
 {
     if(direction == 0.0f)
@@ -654,26 +656,14 @@ void GraphScene::mouseDoubleClickEvent(QMouseEvent* mouseEvent)
     }
 }
 
-bool GraphScene::keyPressEvent(QKeyEvent* keyEvent)
+bool GraphScene::keyPressEvent(QKeyEvent*)
 {
-    switch (keyEvent->key())
-    {
-    default:
-        return false;
-    }
-
-    return true;
+    return false;
 }
 
-bool GraphScene::keyReleaseEvent(QKeyEvent* keyEvent)
+bool GraphScene::keyReleaseEvent(QKeyEvent*)
 {
-    switch (keyEvent->key())
-    {
-    default:
-        return false;
-    }
-
-    return true;
+    return false;
 }
 
 void GraphScene::wheelEvent(QWheelEvent* wheelEvent)

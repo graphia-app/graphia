@@ -439,11 +439,11 @@ bool Camera::unproject(int x, int y, int z, QVector3D& result)
 
 const Ray Camera::rayForViewportCoordinates(int x, int y)
 {
-    QVector3D near, far;
+    QVector3D a, b;
 
-    lineForViewportCoordinates(x, y, near, far);
+    lineForViewportCoordinates(x, y, a, b);
 
-    return Ray(near, (far - near).normalized());
+    return Ray(a, (b - a).normalized());
 }
 
 void Camera::lineForViewportCoordinates(int x, int y, QVector3D& pointA, QVector3D& pointB)
