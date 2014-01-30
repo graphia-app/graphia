@@ -9,8 +9,8 @@ GenericGraphModel::GenericGraphModel(const QString &name) :
     _edgeVisuals(_graph),
     _name(name)
 {
-    connect(&_graph, &Graph::nodeAdded, this, &GenericGraphModel::onNodeAdded);
-    connect(&_graph, &Graph::edgeAdded, this, &GenericGraphModel::onEdgeAdded);
+    connect(&_graph, &Graph::nodeAdded, this, &GenericGraphModel::onNodeAdded, Qt::DirectConnection);
+    connect(&_graph, &Graph::edgeAdded, this, &GenericGraphModel::onEdgeAdded, Qt::DirectConnection);
 }
 
 const float NODE_SIZE = 0.6f;

@@ -21,7 +21,7 @@ class Camera : public QObject
 
     Q_PROPERTY( QVector3D position READ position WRITE setPosition )
     Q_PROPERTY( QVector3D upVector READ upVector WRITE setUpVector )
-    Q_PROPERTY( QVector3D viewCenter READ viewCenter WRITE setViewCenter )
+    Q_PROPERTY( QVector3D viewTarget READ viewTarget WRITE setViewTarget )
 
     Q_PROPERTY( ProjectionType projectionType READ projectionType )
     Q_PROPERTY( float nearPlane READ nearPlane WRITE setNearPlane )
@@ -54,7 +54,7 @@ public:
 
     QVector3D position() const;
     QVector3D upVector() const;
-    QVector3D viewCenter() const;
+    QVector3D viewTarget() const;
 
     QVector3D viewVector() const;
 
@@ -114,7 +114,7 @@ public:
 public slots:
     void setPosition( const QVector3D& position );
     void setUpVector( const QVector3D& upVector );
-    void setViewCenter( const QVector3D& viewCenter );
+    void setViewTarget( const QVector3D& viewTarget );
 
     void resetViewToIdentity();
 
@@ -133,7 +133,7 @@ public slots:
     void rollAboutViewCenter( const float& angle );
 
     void rotate( const QQuaternion& q );
-    void rotateAboutViewCenter( const QQuaternion& q );
+    void rotateAboutViewTarget( const QQuaternion& q );
 
 protected:
     Q_DECLARE_PRIVATE( Camera )

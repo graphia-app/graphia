@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <QVector2D>
 #include <QVector3D>
 #include <QColor>
 #include <cstdlib>
@@ -85,7 +86,15 @@ public:
         }
     }
 
-    static constexpr float Pi() { return std::atan2(0, -1); }
+    template<typename T> static T clamp(T min, T max, T value)
+    {
+        if(value < min)
+            return min;
+        else if(value > max)
+            return max;
+
+        return value;
+    }
 };
 
 #endif // UTILS_H

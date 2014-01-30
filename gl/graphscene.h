@@ -3,6 +3,7 @@
 
 #include "abstractscene.h"
 #include "camera.h"
+#include "transition.h"
 #include "../maths/boundingbox.h"
 #include "../graph/graph.h"
 
@@ -34,25 +35,17 @@ public:
     void render();
     void resize( int w, int h );
 
-    void centreNodeInViewport(NodeId nodeId);
+    void centreNodeInViewport(NodeId nodeId, Transition::Type transitionType, float cameraDistance = -1.0f);
+    void selectFocusNode(ComponentId componentId, Transition::Type transitionType);
 
     void mousePressEvent(QMouseEvent* mouseEvent);
     void mouseReleaseEvent(QMouseEvent* mouseEvent);
     void mouseMoveEvent(QMouseEvent* mouseEvent);
     void mouseDoubleClickEvent(QMouseEvent* mouseEvent);
+    void wheelEvent(QWheelEvent* wheelEvent);
 
     bool keyPressEvent(QKeyEvent* keyEvent);
     bool keyReleaseEvent(QKeyEvent* keyEvent);
-
-    // Camera motion control
-    void setSideSpeed( float vx ) { m_vx = vx; }
-    void setVerticalSpeed( float vy ) { m_vy = vy; }
-    void setForwardSpeed( float vz ) { m_vz = vz; }
-    void setViewCenterFixed( bool b ) { m_viewCenterFixed = b; }
-
-    // Camera orientation control
-    void pan( float angle ) { m_panAngle = angle; }
-    void tilt( float angle ) { m_tiltAngle = angle; }
 
     void setGraphModel(GraphModel* graphModel);
 
@@ -80,27 +73,32 @@ private:
     void renderComponentMarkers();
     void renderDebugLines();
 
+    void zoom(float delta);
+
     void updateVisualData();
 
 private slots:
     void onGraphChanged(const Graph*);
 
 private:
-    bool m_leftButtonPressed;
+    bool m_panButtonPressed;
+    bool m_rotateButtonPressed;
     QPoint m_prevPos;
     QPoint m_pos;
+    bool m_mouseMoving;
     NodeId clickedNodeId;
     ComponentId clickedComponentId;
+    NodeId focusNodeId;
+
+    const float MINIMUM_CAMERA_DISTANCE = 2.5f;
+    float zoomDistance;
+    float targetZoomDistance;
+    Transition zoomTransition;
 
     QOpenGLFunctions_3_3_Core* m_funcs;
 
     Camera* m_camera;
-    float m_vx;
-    float m_vy;
-    float m_vz;
-    bool m_viewCenterFixed;
-    float m_panAngle;
-    float m_tiltAngle;
+    Transition panTransition;
 
     Sphere* m_sphere;
     Cylinder* m_cylinder;

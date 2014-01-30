@@ -1,6 +1,7 @@
 #include "radialcirclecomponentlayout.h"
 
 #include "../utils.h"
+#include "../maths/constants.h"
 
 #include <cmath>
 
@@ -174,8 +175,8 @@ void RadialCircleComponentLayout::executeReal()
     QList<PlacementRegion> placementRegions;
     PlacementRegion currentPlacementRegion =
     {
-        0.5f * Utils::Pi() - secondComponentHalfAngle,
-        2.5f * Utils::Pi() - secondComponentHalfAngle,
+        0.5f * Constants::Pi() - secondComponentHalfAngle,
+        2.5f * Constants::Pi() - secondComponentHalfAngle,
         radiusOfComponent(componentIds[0]) + COMPONENT_SEPARATION
     };
 

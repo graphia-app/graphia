@@ -46,7 +46,10 @@ SOURCES += main.cpp\
     layout/layout.cpp \
     layout/collision.cpp \
     layout/spatialoctree.cpp \
-    maths/plane.cpp
+    maths/plane.cpp \
+    maths/boundingsphere.cpp \
+    maths/ray.cpp \
+    gl/transition.cpp
 
 HEADERS  += mainwindow.h \
     graph/grapharray.h \
@@ -87,7 +90,11 @@ HEADERS  += mainwindow.h \
     layout/collision.h \
     maths/ray.h \
     layout/spatialoctree.h \
-    maths/plane.h
+    maths/plane.h \
+    maths/interpolation.h \
+    maths/constants.h \
+    maths/boundingsphere.h \
+    gl/transition.h
 
 FORMS    += mainwindow.ui
 

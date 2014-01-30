@@ -159,3 +159,8 @@ void OpenGLWindow::mouseDoubleClickEvent(QMouseEvent* e)
     m_scene->mouseDoubleClickEvent(e);
 }
 
+void OpenGLWindow::wheelEvent(QWheelEvent* e)
+{
+    m_scene->wheelEvent(e);
+}
+

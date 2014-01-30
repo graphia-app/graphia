@@ -1,7 +1,10 @@
 #include "camera.h"
 #include "camera_p.h"
 
+#include "../maths/interpolation.h"
+
 #include <QOpenGLShaderProgram>
+#include <QDebug>
 
 Camera::Camera( QObject* parent )
     : QObject( parent )
@@ -25,7 +28,7 @@ void Camera::setPosition( const QVector3D& position )
 {
     Q_D( Camera );
     d->m_position = position;
-    d->m_cameraToCenter = d->m_viewCenter - position;
+    d->m_cameraToTarget = d->m_viewTarget - position;
     d->m_viewMatrixDirty = true;
 }
 
@@ -42,24 +45,24 @@ QVector3D Camera::upVector() const
     return d->m_upVector;
 }
 
-void Camera::setViewCenter( const QVector3D& viewCenter )
+void Camera::setViewTarget( const QVector3D& viewTarget )
 {
     Q_D( Camera );
-    d->m_viewCenter = viewCenter;
-    d->m_cameraToCenter = viewCenter - d->m_position;
+    d->m_viewTarget = viewTarget;
+    d->m_cameraToTarget = viewTarget - d->m_position;
     d->m_viewMatrixDirty = true;
 }
 
-QVector3D Camera::viewCenter() const
+QVector3D Camera::viewTarget() const
 {
     Q_D( const Camera );
-    return d->m_viewCenter;
+    return d->m_viewTarget;
 }
 
 QVector3D Camera::viewVector() const
 {
     Q_D( const Camera );
-    return d->m_cameraToCenter;
+    return d->m_cameraToTarget;
 }
 
 void Camera::setOrthographicProjection( float left, float right,
@@ -223,7 +226,7 @@ QMatrix4x4 Camera::viewMatrix() const
     if ( d->m_viewMatrixDirty )
     {
         d->m_viewMatrix.setToIdentity();
-        d->m_viewMatrix.lookAt( d->m_position, d->m_viewCenter, d->m_upVector );
+        d->m_viewMatrix.lookAt( d->m_position, d->m_viewTarget, d->m_upVector );
         d->m_viewMatrixDirty = false;
     }
     return d->m_viewMatrix;
@@ -232,7 +235,7 @@ QMatrix4x4 Camera::viewMatrix() const
 void Camera::resetViewToIdentity()
 {
     setPosition( QVector3D( 0.0, 0.0, 0.0) );
-    setViewCenter( QVector3D( 0.0, 0.0, 1.0) );
+    setViewTarget( QVector3D( 0.0, 0.0, 1.0) );
     setUpVector( QVector3D( 0.0, 1.0, 0.0) );
 }
 
@@ -262,7 +265,7 @@ void Camera::translate( const QVector3D& vLocal, CameraTranslationOption option 
     if ( !qFuzzyIsNull( vLocal.x() ) )
     {
         // Calculate the vector for the local x axis
-        QVector3D x = QVector3D::crossProduct( d->m_cameraToCenter, d->m_upVector ).normalized();
+        QVector3D x = QVector3D::crossProduct( d->m_cameraToTarget, d->m_upVector ).normalized();
         vWorld += vLocal.x() * x;
     }
 
@@ -270,17 +273,17 @@ void Camera::translate( const QVector3D& vLocal, CameraTranslationOption option 
         vWorld += vLocal.y() * d->m_upVector;
 
     if ( !qFuzzyIsNull( vLocal.z() ) )
-        vWorld += vLocal.z() * d->m_cameraToCenter.normalized();
+        vWorld += vLocal.z() * d->m_cameraToTarget.normalized();
 
     // Update the camera position using the calculated world vector
     d->m_position += vWorld;
 
     // May be also update the view center coordinates
     if ( option == TranslateViewCenter )
-        d->m_viewCenter += vWorld;
+        d->m_viewTarget += vWorld;
 
     // Refresh the camera -> view center vector
-    d->m_cameraToCenter = d->m_viewCenter - d->m_position;
+    d->m_cameraToTarget = d->m_viewTarget - d->m_position;
 
     // Calculate a new up vector. We do this by:
     // 1) Calculate a new local x-direction vector from the cross product of the new
@@ -288,14 +291,14 @@ void Camera::translate( const QVector3D& vLocal, CameraTranslationOption option 
     // 2) The local x vector is the normal to the plane in which the new up vector
     //    must lay. So we can take the cross product of this normal and the new
     //    x vector. The new normal vector forms the last part of the orthonormal basis
-    QVector3D x = QVector3D::crossProduct( d->m_cameraToCenter, d->m_upVector ).normalized();
-    d->m_upVector = QVector3D::crossProduct( x, d->m_cameraToCenter ).normalized();
+    QVector3D x = QVector3D::crossProduct( d->m_cameraToTarget, d->m_upVector ).normalized();
+    d->m_upVector = QVector3D::crossProduct( x, d->m_cameraToTarget ).normalized();
 
     d->m_viewMatrixDirty = true;
     d->m_viewProjectionMatrixDirty = true;
 }
 
-void Camera::translateWorld(const QVector3D& vWorld , CameraTranslationOption option )
+void Camera::translateWorld(const QVector3D& vWorld, CameraTranslationOption option )
 {
     Q_D( Camera );
 
@@ -304,10 +307,10 @@ void Camera::translateWorld(const QVector3D& vWorld , CameraTranslationOption op
 
     // May be also update the view center coordinates
     if ( option == TranslateViewCenter )
-        d->m_viewCenter += vWorld;
+        d->m_viewTarget += vWorld;
 
     // Refresh the camera -> view center vector
-    d->m_cameraToCenter = d->m_viewCenter - d->m_position;
+    d->m_cameraToTarget = d->m_viewTarget - d->m_position;
 
     d->m_viewMatrixDirty = true;
     d->m_viewProjectionMatrixDirty = true;
@@ -316,7 +319,7 @@ void Camera::translateWorld(const QVector3D& vWorld , CameraTranslationOption op
 QQuaternion Camera::tiltRotation( const float& angle ) const
 {
     Q_D( const Camera );
-    QVector3D xBasis = QVector3D::crossProduct( d->m_upVector, d->m_cameraToCenter.normalized() ).normalized();
+    QVector3D xBasis = QVector3D::crossProduct( d->m_upVector, d->m_cameraToTarget.normalized() ).normalized();
     return QQuaternion::fromAxisAndAngle( xBasis, -angle );
 }
 
@@ -329,7 +332,7 @@ QQuaternion Camera::panRotation( const float& angle ) const
 QQuaternion Camera::rollRotation( const float& angle ) const
 {
     Q_D( const Camera );
-    return QQuaternion::fromAxisAndAngle( d->m_cameraToCenter, -angle );
+    return QQuaternion::fromAxisAndAngle( d->m_cameraToTarget, -angle );
 }
 
 void Camera::tilt( const float& angle )
@@ -353,37 +356,37 @@ void Camera::roll( const float& angle )
 void Camera::tiltAboutViewCenter( const float& angle )
 {
     QQuaternion q = tiltRotation( -angle );
-    rotateAboutViewCenter( q );
+    rotateAboutViewTarget( q );
 }
 
 void Camera::panAboutViewCenter( const float& angle )
 {
     QQuaternion q = panRotation( angle );
-    rotateAboutViewCenter( q );
+    rotateAboutViewTarget( q );
 }
 
 void Camera::rollAboutViewCenter( const float& angle )
 {
     QQuaternion q = rollRotation( angle );
-    rotateAboutViewCenter( q );
+    rotateAboutViewTarget( q );
 }
 
 void Camera::rotate( const QQuaternion& q )
 {
     Q_D( Camera );
     d->m_upVector = q.rotatedVector( d->m_upVector );
-    d->m_cameraToCenter = q.rotatedVector( d->m_cameraToCenter );
-    d->m_viewCenter = d->m_position + d->m_cameraToCenter;
+    d->m_cameraToTarget = q.rotatedVector( d->m_cameraToTarget );
+    d->m_viewTarget = d->m_position + d->m_cameraToTarget;
     d->m_viewMatrixDirty = true;
     d->m_viewProjectionMatrixDirty = true;
 }
 
-void Camera::rotateAboutViewCenter( const QQuaternion& q )
+void Camera::rotateAboutViewTarget( const QQuaternion& q )
 {
     Q_D( Camera );
     d->m_upVector = q.rotatedVector( d->m_upVector );
-    d->m_cameraToCenter = q.rotatedVector( d->m_cameraToCenter );
-    d->m_position = d->m_viewCenter - d->m_cameraToCenter;
+    d->m_cameraToTarget = q.rotatedVector( d->m_cameraToTarget );
+    d->m_position = d->m_viewTarget - d->m_cameraToTarget;
     d->m_viewMatrixDirty = true;
     d->m_viewProjectionMatrixDirty = true;
 }

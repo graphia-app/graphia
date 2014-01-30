@@ -29,11 +29,10 @@ public:
     virtual void mouseReleaseEvent(QMouseEvent*) {}
     virtual void mouseMoveEvent(QMouseEvent*) {}
     virtual void mouseDoubleClickEvent(QMouseEvent*) {}
+    virtual void wheelEvent(QWheelEvent*) {}
 
     virtual bool keyPressEvent(QKeyEvent*) { return false; }
     virtual bool keyReleaseEvent(QKeyEvent*) { return false; }
-
-    virtual bool handleScroll(QWheelEvent*) { return false; }
 
 protected:
     QOpenGLContext* m_context;

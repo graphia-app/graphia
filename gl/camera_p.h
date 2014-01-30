@@ -11,8 +11,8 @@ public:
         : q_ptr( qq )
         , m_position( 0.0f, 0.0f, 1.0f )
         , m_upVector( 0.0f, 1.0f, 0.0f )
-        , m_viewCenter( 0.0f, 0.0f, 0.0f )
-        , m_cameraToCenter( 0.0f, 0.0f, -1.0f )
+        , m_viewTarget( 0.0f, 0.0f, 0.0f )
+        , m_cameraToTarget( 0.0f, 0.0f, -1.0f )
         , m_projectionType( Camera::OrthogonalProjection )
         , m_nearPlane( 0.1f )
         , m_farPlane( 1024.0f )
@@ -52,9 +52,9 @@ public:
 
     QVector3D m_position;
     QVector3D m_upVector;
-    QVector3D m_viewCenter;
+    QVector3D m_viewTarget;
 
-    QVector3D m_cameraToCenter; // The vector from the camera position to the view center
+    QVector3D m_cameraToTarget; // The vector from the camera position to the view center
 
     Camera::ProjectionType m_projectionType;
 
