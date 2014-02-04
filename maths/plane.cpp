@@ -11,6 +11,15 @@ Plane::Plane(const QVector3D& point, const QVector3D& normal) :
     _distance = -negDistance;
 }
 
+Plane::Plane(const QVector3D& pointA, const QVector3D& pointB, const QVector3D& pointC)
+{
+    const QVector3D a = pointB - pointA;
+    const QVector3D b = pointC - pointA;
+
+    _normal = QVector3D::crossProduct(a, b).normalized();
+    _distance = QVector3D::dotProduct(_normal, pointA);
+}
+
 Plane::Side Plane::sideForPoint(const QVector3D& point) const
 {
     float result =

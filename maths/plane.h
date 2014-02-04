@@ -17,6 +17,7 @@ public:
     {}
 
     Plane(const QVector3D& point, const QVector3D& normal);
+    Plane(const QVector3D& pointA, const QVector3D& pointB, const QVector3D& pointC);
 
     float distance() const { return _distance; }
     const QVector3D& normal() const { return _normal; }
