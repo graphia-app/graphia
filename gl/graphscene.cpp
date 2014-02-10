@@ -597,7 +597,7 @@ void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
             if(focusNodeId != clickedNodeId)
             {
                 const QVector3D& clickedNodePosition = _graphModel->nodePositions()[clickedNodeId];
-                QVector3D rotationCentre = _graphModel->nodePositions()[focusNodeId];
+                const QVector3D& rotationCentre = _graphModel->nodePositions()[focusNodeId];
                 float radius = clickedNodePosition.distanceToPoint(rotationCentre);
 
                 BoundingSphere boundingSphere(rotationCentre, radius);
@@ -617,9 +617,22 @@ void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
                 else
                 {
                     // When the ray misses the node completely we clamp the cursor point on the surface of the sphere
-                    QVector3D c = cursorRay.closestPointTo(Ray(rotationCentre, clickedNodePosition - rotationCentre));
-                    QVector3D d = (c - rotationCentre).normalized();
-                    cursorPoint = rotationCentre + (d * radius);
+                    QVector3D cameraToCentre = rotationCentre - m_camera->position();
+                    float cameraToCentreLengthSq = cameraToCentre.lengthSquared();
+                    float radiusSq = radius * radius;
+                    float cameraToClickedLengthSq = cameraToCentreLengthSq - radiusSq;
+
+                    // Form a right angled triangle from the camera, the circle tangent and a point which lies on the
+                    // camera to rotation centre vector
+                    float adjacentLength = (cameraToClickedLengthSq - radiusSq + cameraToCentreLengthSq) /
+                            (2.0f * cameraToCentre.length());
+                    float oppositeLength = sqrt(cameraToClickedLengthSq - (adjacentLength * adjacentLength));
+                    QVector3D corner = m_camera->position() + ((adjacentLength / cameraToCentre.length()) * cameraToCentre);
+
+                    Plane p(m_camera->position(), rotationCentre, cursorRay.origin());
+                    QVector3D oppositeDir = QVector3D::crossProduct(p.normal(), cameraToCentre).normalized();
+
+                    cursorPoint = corner + (oppositeLength * oppositeDir);
                 }
 
                 QVector3D clickedLine = clickedNodePosition - rotationCentre;
