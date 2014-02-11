@@ -3,7 +3,6 @@
 #include "../gl/graphscene.h"
 #include "../gl/openglwindow.h"
 
-#include <QSurfaceFormat>
 #include <QVBoxLayout>
 
 GraphView::GraphView(QWidget *parent) :
