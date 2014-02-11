@@ -20,6 +20,7 @@ class Sphere;
 class Cylinder;
 class Quad;
 class GraphModel;
+class SelectionManager;
 
 class QOpenGLFunctions_3_3_Core;
 
@@ -48,6 +49,7 @@ public:
     bool keyReleaseEvent(QKeyEvent* keyEvent);
 
     void setGraphModel(GraphModel* graphModel);
+    void setSelectionManager(SelectionManager* selectionManager);
 
 private:
     struct DebugLine
@@ -104,6 +106,7 @@ private:
     Quad* m_quad;
 
     GraphModel* _graphModel;
+    SelectionManager* _selectionManager;
 
     QVector<GLfloat> m_nodePositionData;
     QOpenGLBuffer m_nodePositionBuffer;

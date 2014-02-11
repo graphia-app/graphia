@@ -10,6 +10,7 @@
 #include "../layout/radialcirclecomponentlayout.h"
 #include "../layout/collision.h"
 #include "graphview.h"
+#include "selectionmanager.h"
 
 #include <QFileInfo>
 #include <QVBoxLayout>
@@ -17,6 +18,7 @@
 ContentPaneWidget::ContentPaneWidget(QWidget* parent) :
     QWidget(parent),
     _graphModel(nullptr),
+    _selectionManager(nullptr),
     graphFileParserThread(nullptr),
     nodeLayoutThread(nullptr),
     componentLayoutThread(nullptr),
@@ -36,6 +38,7 @@ ContentPaneWidget::~ContentPaneWidget()
     delete componentLayoutThread;
     componentLayoutThread = nullptr;
 
+    delete _selectionManager;
     delete _graphModel;
 }
 
@@ -87,8 +90,10 @@ void ContentPaneWidget::onCompletion(int success)
     // Do the component layout whenever the node layout changes
     connect(nodeLayoutThread, &LayoutThread::executed, componentLayoutThread, &LayoutThread::execute);
 
+    _selectionManager = new SelectionManager();
     GraphView* graphView = new GraphView();
     graphView->setGraphModel(_graphModel);
+    graphView->setSelectionManager(_selectionManager);
     connect(nodeLayoutThread, &LayoutThread::executed, graphView, &GraphView::layoutChanged);
 
     layout()->addWidget(graphView);

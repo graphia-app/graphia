@@ -7,6 +7,7 @@
 #include "../graph/graph.h"
 #include "../graph/graphmodel.h"
 
+class SelectionManager;
 class GraphFileParserThread;
 class NodeLayoutThread;
 class LayoutThread;
@@ -28,6 +29,7 @@ public slots:
 
 private:
     GraphModel* _graphModel;
+    SelectionManager* _selectionManager;
     GraphFileParserThread *graphFileParserThread;
     NodeLayoutThread* nodeLayoutThread;
     LayoutThread* componentLayoutThread;
@@ -45,6 +47,7 @@ private slots:
 
 public:
     GraphModel* graphModel() { return _graphModel; }
+    SelectionManager* selectionManager() { return _selectionManager; }
     void pauseLayout();
     bool layoutIsPaused();
     void resumeLayout();

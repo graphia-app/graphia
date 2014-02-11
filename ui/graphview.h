@@ -4,18 +4,21 @@
 #include <QWidget>
 #include <QSurfaceFormat>
 
-#include "../graph/graphmodel.h"
 #include "../gl/graphscene.h"
+
+class GraphModel;
+class SelectionManager;
 
 class GraphView : public QWidget
 {
     Q_OBJECT
 public:
-    explicit GraphView(QWidget *parent = 0);
+    explicit GraphView(QWidget *parent = nullptr);
 
 private:
     GraphScene* graphScene;
     GraphModel* _graphModel;
+    SelectionManager* _selectionManager;
 
 public:
     void setGraphModel(GraphModel* graphModel)
@@ -24,6 +27,13 @@ public:
         graphScene->setGraphModel(graphModel);
     }
     GraphModel* graphModel() { return _graphModel; }
+
+    void setSelectionManager(SelectionManager* selectionManager)
+    {
+        this->_selectionManager = selectionManager;
+        graphScene->setSelectionManager(selectionManager);
+    }
+    SelectionManager* selectionManager() { return _selectionManager; }
 
     static QSurfaceFormat& surfaceFormat()
     {

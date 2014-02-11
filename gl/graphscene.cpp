@@ -696,6 +696,11 @@ void GraphScene::setGraphModel(GraphModel* graphModel)
     selectFocusNode(0, Transition::Type::None);
 }
 
+void GraphScene::setSelectionManager(SelectionManager* selectionManager)
+{
+    this->_selectionManager = selectionManager;
+}
+
 void GraphScene::prepareVertexBuffers()
 {
     // Populate the data buffer object

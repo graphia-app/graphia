@@ -49,7 +49,8 @@ SOURCES += main.cpp\
     maths/plane.cpp \
     maths/boundingsphere.cpp \
     maths/ray.cpp \
-    gl/transition.cpp
+    gl/transition.cpp \
+    ui/selectionmanager.cpp
 
 HEADERS  += mainwindow.h \
     graph/grapharray.h \
@@ -93,7 +94,8 @@ HEADERS  += mainwindow.h \
     maths/interpolation.h \
     maths/constants.h \
     maths/boundingsphere.h \
-    gl/transition.h
+    gl/transition.h \
+    ui/selectionmanager.h
 
 FORMS    += mainwindow.ui
 
