@@ -14,6 +14,8 @@
 #include "../maths/plane.h"
 #include "../maths/boundingsphere.h"
 
+#include "../ui/selectionmanager.h"
+
 #include "../utils.h"
 
 #include <QObject>
@@ -36,6 +38,8 @@ GraphScene::GraphScene( QObject* parent )
     : AbstractScene( parent ),
       m_panButtonPressed(false),
       m_rotateButtonPressed(false),
+      m_controlKeyHeld(false),
+      m_selecting(false),
       m_mouseMoving(false),
       focusNodeId(0),
       zoomDistance(50.0f),
@@ -509,7 +513,11 @@ void GraphScene::mousePressEvent(QMouseEvent* mouseEvent)
 {
     switch(mouseEvent->button())
     {
-    case Qt::LeftButton: m_rotateButtonPressed = true; break;
+    case Qt::LeftButton:
+        m_rotateButtonPressed = true;
+        m_selecting = true;
+        break;
+
     case Qt::RightButton: m_panButtonPressed = true; break;
     default: break;
     }
@@ -537,10 +545,8 @@ void GraphScene::mousePressEvent(QMouseEvent* mouseEvent)
         }
     }
 
-    if(clickedNodeId != NullNodeId)
-        qDebug() << m_pos << clickedNodeId << "(" << clickedComponentId << ")";
-    else
-        qDebug() << m_pos << "empty";
+    if(clickedNodeId == NullNodeId)
+        qDebug() << m_pos << "empty"; //FIXME save click point for selection frustum
 }
 
 void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
@@ -558,6 +564,22 @@ void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
 
     case Qt::LeftButton:
         m_rotateButtonPressed = false;
+
+        if(m_selecting)
+        {
+            if(clickedNodeId != NullNodeId)
+            {
+                if(!m_controlKeyHeld)
+                    _selectionManager->resetNodeSelection();
+
+                _selectionManager->toggleNode(clickedNodeId);
+            }
+            else
+                _selectionManager->resetNodeSelection();
+
+            qDebug() << _selectionManager->selectedNodes();
+        }
+
         clickedNodeId = NullNodeId;
         clickedComponentId = NullComponentId;
         break;
@@ -575,6 +597,8 @@ void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
 
     if(clickedNodeId != NullNodeId)
     {
+        m_selecting = false;
+
         if(m_panButtonPressed)
         {
             const QVector3D& clickedNodePosition = _graphModel->nodePositions()[clickedNodeId];
@@ -669,14 +693,30 @@ void GraphScene::mouseDoubleClickEvent(QMouseEvent* mouseEvent)
     }
 }
 
-bool GraphScene::keyPressEvent(QKeyEvent*)
+bool GraphScene::keyPressEvent(QKeyEvent* keyEvent)
 {
-    return false;
+    switch(keyEvent->key())
+    {
+    case Qt::Key_Control:
+        m_controlKeyHeld = true;
+        return true;
+
+    default:
+        return false;
+    }
 }
 
-bool GraphScene::keyReleaseEvent(QKeyEvent*)
+bool GraphScene::keyReleaseEvent(QKeyEvent* keyEvent)
 {
-    return false;
+    switch(keyEvent->key())
+    {
+    case Qt::Key_Control:
+        m_controlKeyHeld = false;
+        return true;
+
+    default:
+        return false;
+    }
 }
 
 void GraphScene::wheelEvent(QWheelEvent* wheelEvent)

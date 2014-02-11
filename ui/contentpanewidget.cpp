@@ -90,7 +90,7 @@ void ContentPaneWidget::onCompletion(int success)
     // Do the component layout whenever the node layout changes
     connect(nodeLayoutThread, &LayoutThread::executed, componentLayoutThread, &LayoutThread::execute);
 
-    _selectionManager = new SelectionManager();
+    _selectionManager = new SelectionManager(_graphModel->graph());
     GraphView* graphView = new GraphView();
     graphView->setGraphModel(_graphModel);
     graphView->setSelectionManager(_selectionManager);

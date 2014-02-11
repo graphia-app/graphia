@@ -85,6 +85,8 @@ private slots:
 private:
     bool m_panButtonPressed;
     bool m_rotateButtonPressed;
+    bool m_controlKeyHeld;
+    bool m_selecting;
     QPoint m_prevPos;
     QPoint m_pos;
     bool m_mouseMoving;
