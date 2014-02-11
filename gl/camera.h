@@ -141,7 +141,45 @@ protected:
 private:
     bool unproject(int x, int y, int z, QVector3D& result);
 
-    CameraPrivate* d_ptr;
+    inline void updatePerpectiveProjection()
+    {
+        m_projectionMatrix.setToIdentity();
+        m_projectionMatrix.perspective( m_fieldOfView, m_aspectRatio, m_nearPlane, m_farPlane );
+        m_viewProjectionMatrixDirty = true;
+    }
+
+    inline void updateOrthogonalProjection()
+    {
+        m_projectionMatrix.setToIdentity();
+        m_projectionMatrix.ortho( m_left, m_right, m_bottom, m_top, m_nearPlane, m_farPlane );
+        m_viewProjectionMatrixDirty = true;
+    }
+
+    QVector3D m_position;
+    QVector3D m_upVector;
+    QVector3D m_viewTarget;
+
+    QVector3D m_cameraToTarget; // The vector from the camera position to the view center
+
+    Camera::ProjectionType m_projectionType;
+
+    float m_nearPlane;
+    float m_farPlane;
+
+    float m_fieldOfView;
+    float m_aspectRatio;
+
+    float m_left;
+    float m_right;
+    float m_bottom;
+    float m_top;
+
+    mutable QMatrix4x4 m_viewMatrix;
+    mutable QMatrix4x4 m_projectionMatrix;
+    mutable QMatrix4x4 m_viewProjectionMatrix;
+
+    mutable bool m_viewMatrixDirty;
+    mutable bool m_viewProjectionMatrixDirty;
 };
 
 #endif // CAMERA_H

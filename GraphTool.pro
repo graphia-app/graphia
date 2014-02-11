@@ -62,7 +62,6 @@ HEADERS  += mainwindow.h \
     gl/openglwindow.h \
     gl/opengldebugmessagemodel.h \
     gl/camera.h \
-    gl/camera_p.h \
     gl/abstractscene.h \
     gl/material.h \
     gl/torus.h \
