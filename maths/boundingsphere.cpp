@@ -49,9 +49,9 @@ bool BoundingSphere::containsPoint(const QVector3D& point) const
     return d <= _radius;
 }
 
-bool BoundingSphere::containsLine(const QVector3D& pointA, const QVector3D& pointB) const
+bool BoundingSphere::containsLine(const Line3D& line) const
 {
-    return containsPoint(pointA) && containsPoint(pointB);
+    return containsPoint(line.start()) && containsPoint(line.end());
 }
 
 bool BoundingSphere::containsSphere(const BoundingSphere& other) const

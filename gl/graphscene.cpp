@@ -11,6 +11,7 @@
 #include "../layout/spatialoctree.h"
 #include "../layout/collision.h"
 
+#include "../maths/frustum.h"
 #include "../maths/plane.h"
 #include "../maths/boundingsphere.h"
 
@@ -36,10 +37,11 @@
 
 GraphScene::GraphScene( QObject* parent )
     : AbstractScene( parent ),
-      m_panButtonPressed(false),
-      m_rotateButtonPressed(false),
+      m_rightMouseButtonHeld(false),
+      m_leftMouseButtonHeld(false),
       m_controlKeyHeld(false),
       m_selecting(false),
+      m_frustumSelecting(false),
       m_mouseMoving(false),
       focusNodeId(0),
       zoomDistance(50.0f),
@@ -234,7 +236,7 @@ void GraphScene::update( float t )
 
         if(!panTransition.finished())
             panTransition.update(t);
-        else if(!m_panButtonPressed)
+        else if(!m_rightMouseButtonHeld)
             centreNodeInViewport(focusNodeId, Transition::Type::None, zoomDistance);
     }
 
@@ -514,11 +516,14 @@ void GraphScene::mousePressEvent(QMouseEvent* mouseEvent)
     switch(mouseEvent->button())
     {
     case Qt::LeftButton:
-        m_rotateButtonPressed = true;
+        m_leftMouseButtonHeld = true;
         m_selecting = true;
         break;
 
-    case Qt::RightButton: m_panButtonPressed = true; break;
+    case Qt::RightButton:
+        m_rightMouseButtonHeld = true;
+        break;
+
     default: break;
     }
 
@@ -546,7 +551,7 @@ void GraphScene::mousePressEvent(QMouseEvent* mouseEvent)
     }
 
     if(clickedNodeId == NullNodeId)
-        qDebug() << m_pos << "empty"; //FIXME save click point for selection frustum
+        m_frustumSelectStart = m_pos;
 }
 
 void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
@@ -554,30 +559,54 @@ void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
     switch(mouseEvent->button())
     {
     case Qt::RightButton:
-        if(m_panButtonPressed && clickedComponentId != NullComponentId && m_mouseMoving)
+        if(m_rightMouseButtonHeld && clickedComponentId != NullComponentId && m_mouseMoving)
             selectFocusNode(clickedComponentId, Transition::Type::InversePower);
 
-        m_panButtonPressed = false;
+        m_rightMouseButtonHeld = false;
         clickedNodeId = NullNodeId;
         clickedComponentId = NullComponentId;
         break;
 
     case Qt::LeftButton:
-        m_rotateButtonPressed = false;
+        m_leftMouseButtonHeld = false;
 
         if(m_selecting)
         {
-            if(clickedNodeId != NullNodeId)
+            if(m_frustumSelecting)
             {
                 if(!m_controlKeyHeld)
                     _selectionManager->resetNodeSelection();
 
-                _selectionManager->toggleNode(clickedNodeId);
+                QPoint frustumEndPoint = mouseEvent->pos();
+                Frustum frustum = m_camera->frustumForViewportCoordinates(
+                            m_frustumSelectStart.x(), m_frustumSelectStart.y(),
+                            frustumEndPoint.x(), frustumEndPoint.y());
+
+                const ReadOnlyGraph& component = *_graphModel->graph().componentById(0); //FIXME not always component 0
+                for(NodeId nodeId : component.nodeIds())
+                {
+                    const QVector3D& nodePosition = _graphModel->nodePositions()[nodeId];
+                    if(frustum.containsPoint(nodePosition))
+                        _selectionManager->selectNode(nodeId);
+                }
+
+                m_frustumSelecting = false;
             }
             else
-                _selectionManager->resetNodeSelection();
+            {
+                if(clickedNodeId != NullNodeId)
+                {
+                    if(!m_controlKeyHeld)
+                        _selectionManager->resetNodeSelection();
 
-            qDebug() << _selectionManager->selectedNodes();
+                    _selectionManager->toggleNode(clickedNodeId);
+                }
+                else
+                    _selectionManager->resetNodeSelection();
+            }
+
+            m_selecting = false;
+            qDebug() << "Selection:" << _selectionManager->selectedNodes();
         }
 
         clickedNodeId = NullNodeId;
@@ -587,7 +616,7 @@ void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
     default: break;
     }
 
-    if(!m_panButtonPressed && !m_rotateButtonPressed)
+    if(!m_rightMouseButtonHeld && !m_leftMouseButtonHeld)
         m_mouseMoving = false;
 }
 
@@ -599,7 +628,7 @@ void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
     {
         m_selecting = false;
 
-        if(m_panButtonPressed)
+        if(m_rightMouseButtonHeld)
         {
             const QVector3D& clickedNodePosition = _graphModel->nodePositions()[clickedNodeId];
 
@@ -613,7 +642,7 @@ void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
 
             m_camera->translateWorld(translation);
         }
-        else if(m_rotateButtonPressed)
+        else if(m_leftMouseButtonHeld)
         {
             if(focusNodeId == NullNodeId)
                 selectFocusNode(clickedComponentId, Transition::Type::InversePower);
@@ -674,10 +703,14 @@ void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
             }
         }
     }
+    else if(m_leftMouseButtonHeld)
+    {
+        m_frustumSelecting = true;
+    }
 
     m_prevPos = m_pos;
 
-    if(m_panButtonPressed || m_rotateButtonPressed)
+    if(m_rightMouseButtonHeld || m_leftMouseButtonHeld)
         m_mouseMoving = true;
 }
 

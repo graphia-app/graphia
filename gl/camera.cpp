@@ -415,15 +415,53 @@ bool Camera::unproject(int x, int y, int z, QVector3D& result)
 
 const Ray Camera::rayForViewportCoordinates(int x, int y)
 {
-    QVector3D a, b;
+    Line3D line = lineForViewportCoordinates(x, y);
 
-    lineForViewportCoordinates(x, y, a, b);
-
-    return Ray(a, (b - a).normalized());
+    return Ray(line.start(), line.dir());
 }
 
-void Camera::lineForViewportCoordinates(int x, int y, QVector3D& pointA, QVector3D& pointB)
+Line3D Camera::lineForViewportCoordinates(int x, int y)
 {
-    unproject(x, y, 0.0, pointA);
-    unproject(x, y, 1.0, pointB);
+    QVector3D start;
+    QVector3D end;
+
+    unproject(x, y, 0.0, start);
+    unproject(x, y, 1.0, end);
+
+    return Line3D(start, end);
+}
+
+Frustum Camera::frustumForViewportCoordinates(int x1, int y1, int x2, int y2)
+{
+    int minX, maxX, minY, maxY;
+
+    if(x1 < x2)
+    {
+        minX = x1;
+        maxX = x2;
+    }
+    else
+    {
+        minX = x2;
+        maxX = x1;
+    }
+
+    if(y1 < y2)
+    {
+        minY = y1;
+        maxY = y2;
+    }
+    else
+    {
+        minY = y2;
+        maxY = y1;
+    }
+
+    // Lines in clockwise order around view vector
+    Line3D line1 = lineForViewportCoordinates(minX, minY);
+    Line3D line2 = lineForViewportCoordinates(maxX, minY);
+    Line3D line3 = lineForViewportCoordinates(maxX, maxY);
+    Line3D line4 = lineForViewportCoordinates(minX, maxY);
+
+    return Frustum(line1, line2, line3, line4);
 }

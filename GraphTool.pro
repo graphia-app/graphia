@@ -50,7 +50,8 @@ SOURCES += main.cpp\
     maths/boundingsphere.cpp \
     maths/ray.cpp \
     gl/transition.cpp \
-    ui/selectionmanager.cpp
+    ui/selectionmanager.cpp \
+    maths/frustum.cpp
 
 HEADERS  += mainwindow.h \
     graph/grapharray.h \
@@ -95,7 +96,9 @@ HEADERS  += mainwindow.h \
     maths/constants.h \
     maths/boundingsphere.h \
     gl/transition.h \
-    ui/selectionmanager.h
+    ui/selectionmanager.h \
+    maths/frustum.h \
+    maths/line.h
 
 FORMS    += mainwindow.ui
 

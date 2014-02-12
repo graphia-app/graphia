@@ -61,9 +61,9 @@ bool BoundingBox2D::containsPoint(const QVector2D& point) const
             (point.y() >= _min.y() && point.y() < _max.y());
 }
 
-bool BoundingBox2D::containsLine(const QVector2D& pointA, const QVector2D& pointB) const
+bool BoundingBox2D::containsLine(const Line2D& line) const
 {
-    return containsPoint(pointA) && containsPoint(pointB);
+    return containsPoint(line.start()) && containsPoint(line.end());
 }
 
 QVector2D BoundingBox2D::centre() const
@@ -147,9 +147,9 @@ bool BoundingBox3D::containsPoint(const QVector3D& point) const
             (point.z() >= _min.z() && point.z() < _max.z());
 }
 
-bool BoundingBox3D::containsLine(const QVector3D& pointA, const QVector3D& pointB) const
+bool BoundingBox3D::containsLine(const Line3D& line) const
 {
-    return containsPoint(pointA) && containsPoint(pointB);
+    return containsPoint(line.start()) && containsPoint(line.end());
 }
 
 // From "An Efficient and Robust Ray–Box Intersection Algorithm"

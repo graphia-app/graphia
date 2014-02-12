@@ -1,6 +1,8 @@
 #ifndef BOUNDINGBOX_H
 #define BOUNDINGBOX_H
 
+#include "line.h"
+
 #include <QVector2D>
 #include <QVector3D>
 
@@ -31,7 +33,7 @@ public:
     void expandToInclude(const BoundingBox2D& other);
 
     bool containsPoint(const QVector2D& point) const;
-    bool containsLine(const QVector2D& pointA, const QVector2D& pointB) const;
+    bool containsLine(const Line2D& line) const;
 
     QVector2D centre() const;
 
@@ -72,7 +74,7 @@ public:
     void expandToInclude(const BoundingBox3D& other);
 
     bool containsPoint(const QVector3D& point) const;
-    bool containsLine(const QVector3D& pointA, const QVector3D& pointB) const;
+    bool containsLine(const Line3D& line) const;
     bool intersects(const Ray& ray, float t0, float t1) const;
     bool intersects(const Ray& ray) const;
 

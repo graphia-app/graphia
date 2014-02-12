@@ -3,6 +3,7 @@
 
 #include <QVector3D>
 
+#include "line.h"
 #include "constants.h"
 
 class Ray;
@@ -30,7 +31,7 @@ public:
     void expandToInclude(const BoundingSphere& other);
 
     bool containsPoint(const QVector3D& point) const;
-    bool containsLine(const QVector3D& pointA, const QVector3D& pointB) const;
+    bool containsLine(const Line3D& line) const;
     bool containsSphere(const BoundingSphere& other) const;
     QList<QVector3D> rayIntersection(const Ray& ray) const;
 };

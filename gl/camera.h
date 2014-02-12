@@ -8,6 +8,8 @@
 #include <QVector3D>
 #include <QSharedPointer>
 
+#include "../maths/frustum.h"
+#include "../maths/line.h"
 #include "../maths/ray.h"
 
 class CameraPrivate;
@@ -96,7 +98,8 @@ public:
     QMatrix4x4 viewProjectionMatrix() const;
 
     const Ray rayForViewportCoordinates(int x, int y);
-    void lineForViewportCoordinates(int x, int y, QVector3D& pointA, QVector3D& pointB);
+    Line3D lineForViewportCoordinates(int x, int y);
+    Frustum frustumForViewportCoordinates(int x1, int y1, int x2, int y2);
 
     QQuaternion tiltRotation( const float& angle ) const;
     QQuaternion panRotation( const float& angle ) const;

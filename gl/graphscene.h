@@ -83,10 +83,14 @@ private slots:
     void onGraphChanged(const Graph*);
 
 private:
-    bool m_panButtonPressed;
-    bool m_rotateButtonPressed;
+    bool m_rightMouseButtonHeld;
+    bool m_leftMouseButtonHeld;
+
     bool m_controlKeyHeld;
     bool m_selecting;
+    bool m_frustumSelecting;
+    QPoint m_frustumSelectStart;
+
     QPoint m_prevPos;
     QPoint m_pos;
     bool m_mouseMoving;
