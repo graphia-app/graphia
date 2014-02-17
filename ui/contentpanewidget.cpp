@@ -106,14 +106,16 @@ void ContentPaneWidget::onCompletion(int success)
 
 void ContentPaneWidget::onGraphWillChange(const Graph*)
 {
-    if(nodeLayoutThread == nullptr || componentLayoutThread == nullptr)
-        return;
-
     // Graph is about to change so suspend any active layout process
-    if(!nodeLayoutThread->paused() || !componentLayoutThread->paused())
+    if(componentLayoutThread != nullptr && !componentLayoutThread->paused())
+    {
+        componentLayoutThread->pauseAndWait();
+        resumeLayoutPostChange = true;
+    }
+
+    if(nodeLayoutThread != nullptr && !nodeLayoutThread->paused())
     {
         nodeLayoutThread->pauseAndWait();
-        componentLayoutThread->pauseAndWait();
         resumeLayoutPostChange = true;
     }
 }
@@ -125,7 +127,7 @@ void ContentPaneWidget::onGraphChanged(const Graph*)
         if(nodeLayoutThread != nullptr)
             nodeLayoutThread->resume();
 
-        if(componentLayoutThread == nullptr)
+        if(componentLayoutThread != nullptr)
             componentLayoutThread->resume();
     }
 
