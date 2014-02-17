@@ -20,6 +20,12 @@ public:
         NodeLayout(graph, positions), subLayouts(subLayouts)
     {}
 
+    virtual ~SequenceLayout()
+    {
+        for(NodeLayout* subLayout : subLayouts)
+            delete subLayout;
+    }
+
     void addSubLayout(NodeLayout* layout) { subLayouts.append(layout); }
 
     void cancel()
