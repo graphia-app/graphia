@@ -61,6 +61,8 @@ protected:
     virtual void edgeAdded(EdgeId edgeId) = 0;
     virtual void edgeWillBeRemoved(EdgeId edgeId) = 0;
 
+    virtual void graphChanged(const Graph*) = 0;
+
     virtual void findComponents() = 0;
 
     template<typename> friend class ComponentArray;
@@ -75,7 +77,7 @@ public:
 
     virtual const QList<ComponentId>& componentIds() const = 0;
     int numComponents() const { return componentIds().size(); }
-    virtual const ReadOnlyGraph& componentById(ComponentId componentId) = 0;
+    virtual const ReadOnlyGraph* componentById(ComponentId componentId) = 0;
     virtual ComponentId componentIdOfNode(NodeId nodeId) const = 0;
     virtual ComponentId componentIdOfEdge(EdgeId edgeId) const = 0;
 

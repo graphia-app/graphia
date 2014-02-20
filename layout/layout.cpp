@@ -88,8 +88,6 @@ void LayoutThread::addLayout(Layout *layout)
     // Take ownership of the algorithm
     layout->moveToThread(this);
     layouts.insert(layout);
-
-    start();
 }
 
 void LayoutThread::removeLayout(Layout *layout)
@@ -103,6 +101,9 @@ void LayoutThread::removeLayout(Layout *layout)
 void LayoutThread::pause()
 {
     QMutexLocker locker(&mutex);
+    if(_paused)
+        return;
+
     _pause = true;
 
     for(Layout* layout : layouts)
@@ -112,6 +113,9 @@ void LayoutThread::pause()
 void LayoutThread::pauseAndWait()
 {
     QMutexLocker locker(&mutex);
+    if(_paused)
+        return;
+
     _pause = true;
 
     for(Layout* layout : layouts)
@@ -221,11 +225,8 @@ void NodeLayoutThread::addComponent(ComponentId componentId)
     if(!componentLayouts.contains(componentId))
     {
         Layout* layout = layoutFactory->create(componentId);
-
         addLayout(layout);
         componentLayouts.insert(componentId, layout);
-
-        start();
     }
 }
 
@@ -247,9 +248,9 @@ void NodeLayoutThread::removeComponent(ComponentId componentId)
 
     if(componentLayouts.contains(componentId))
     {
-        componentLayouts.remove(componentId);
         Layout* layout = componentLayouts[componentId];
         removeLayout(layout);
+        componentLayouts.remove(componentId);
     }
 
     if(resumeAfterRemoval)

@@ -44,6 +44,7 @@ private:
 
     ComponentId generateComponentId();
     void releaseComponentId(ComponentId componentId);
+    void queueGraphComponentUpdate(ComponentId componentId);
     void updateGraphComponent(ComponentId componentId);
     void removeGraphComponent(ComponentId componentId);
 
@@ -62,6 +63,8 @@ private:
     void edgeAdded(EdgeId edgeId);
     void edgeWillBeRemoved(EdgeId edgeId);
 
+    void graphChanged(const Graph*);
+
     void onComponentAdded(ComponentId componentId);
 
     void findComponents();
@@ -70,7 +73,7 @@ private:
 
 public:
     const QList<ComponentId>& componentIds() const;
-    const ReadOnlyGraph& componentById(ComponentId componentId);
+    const ReadOnlyGraph* componentById(ComponentId componentId);
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
 };

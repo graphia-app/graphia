@@ -82,10 +82,12 @@ void ContentPaneWidget::onCompletion(int success)
 
     nodeLayoutThread = new NodeLayoutThread(new EadesLayoutFactory(_graphModel));
     nodeLayoutThread->addAllComponents(_graphModel->graph());
+    nodeLayoutThread->start();
 
     componentLayoutThread = new LayoutThread(new RadialCircleComponentLayout(_graphModel->graph(),
                                                                        _graphModel->componentPositions(),
                                                                        _graphModel->nodePositions()), true);
+    componentLayoutThread->start();
 
     // Do the component layout whenever the node layout changes
     connect(nodeLayoutThread, &LayoutThread::executed, componentLayoutThread, &LayoutThread::execute);
@@ -120,7 +122,7 @@ void ContentPaneWidget::onGraphWillChange(const Graph*)
     }
 }
 
-void ContentPaneWidget::onGraphChanged(const Graph*)
+void ContentPaneWidget::onGraphChanged(const Graph* graph)
 {
     if(resumeLayoutPostChange)
     {
@@ -132,6 +134,8 @@ void ContentPaneWidget::onGraphChanged(const Graph*)
     }
 
     resumeLayoutPostChange = false;
+
+    emit graphChanged(graph);
 }
 
 void ContentPaneWidget::onComponentAdded(const Graph*, ComponentId componentId)

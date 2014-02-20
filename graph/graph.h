@@ -95,6 +95,23 @@ public:
     virtual const QList<EdgeId>& edgeIds() const = 0;
     virtual int numEdges() const = 0;
     virtual const Edge& edgeById(EdgeId edgeId) const = 0;
+
+    virtual void dumpToQDebug(int detail) const
+    {
+        qDebug() << numNodes() << "nodes" << numEdges() << "edges";
+
+        if(detail > 1)
+        {
+            for(NodeId nodeId : nodeIds())
+                qDebug() << "Node" << nodeId;
+
+            for(EdgeId edgeId : edgeIds())
+            {
+                const Edge& edge = edgeById(edgeId);
+                qDebug() << "Edge" << edgeId << "(" << edge.sourceId() << "->" << edge.targetId() << ")";
+            }
+        }
+    }
 };
 
 class Graph : public QObject, public ReadOnlyGraph
@@ -157,22 +174,7 @@ public:
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
 
-    void dumpToQDebug(int detail) const
-    {
-        qDebug() << numNodes() << "nodes" << numEdges() << "edges";
-
-        if(detail > 0)
-        {
-            for(NodeId nodeId : nodeIds())
-                qDebug() << "Node" << nodeId;
-
-            for(EdgeId edgeId : edgeIds())
-            {
-                const Edge& edge = edgeById(edgeId);
-                qDebug() << "Edge" << edgeId << "(" << edge.sourceId() << "->" << edge.targetId() << ")";
-            }
-        }
-    }
+    void dumpToQDebug(int detail) const;
 
 signals:
     void graphWillChange(const Graph*) const;

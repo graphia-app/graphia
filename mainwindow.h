@@ -6,6 +6,7 @@
 
 class ContentPaneWidget;
 class QLabel;
+class Graph;
 
 namespace Ui {
 class MainWindow;
@@ -34,6 +35,7 @@ private slots:
 
     void on_loadProgress(int percentage);
     void on_loadCompletion(int success);
+    void on_graphChanged(const Graph* graph);
 
     void on_actionPause_Layout_triggered();
 

@@ -582,7 +582,7 @@ void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
                             m_frustumSelectStart.x(), m_frustumSelectStart.y(),
                             frustumEndPoint.x(), frustumEndPoint.y());
 
-                const ReadOnlyGraph& component = *_graphModel->graph().componentById(0); //FIXME not always component 0
+                const ReadOnlyGraph& component = *_graphModel->graph().firstComponent(); //FIXME not always component 0
                 for(NodeId nodeId : component.nodeIds())
                 {
                     const QVector3D& nodePosition = _graphModel->nodePositions()[nodeId];
@@ -745,6 +745,11 @@ bool GraphScene::keyReleaseEvent(QKeyEvent* keyEvent)
     {
     case Qt::Key_Control:
         m_controlKeyHeld = false;
+        return true;
+
+    case Qt::Key_Delete:
+        for(NodeId nodeId : _selectionManager->selectedNodes())
+            _graphModel->graph().removeNode(nodeId);
         return true;
 
     default:

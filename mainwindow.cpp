@@ -34,6 +34,7 @@ ContentPaneWidget *MainWindow::createNewTabWidget(const QString& filename)
 
     connect(contentPaneWidget, &ContentPaneWidget::progress, this, &MainWindow::on_loadProgress);
     connect(contentPaneWidget, &ContentPaneWidget::complete, this, &MainWindow::on_loadCompletion);
+    connect(contentPaneWidget, &ContentPaneWidget::graphChanged, this, &MainWindow::on_graphChanged);
 
     contentPaneWidget->initFromFile(filename);
 
@@ -141,6 +142,11 @@ void MainWindow::on_loadCompletion(int /*success*/)
 
     int tabIndex = ui->tabs->indexOf(contentPaneWidget);
     ui->tabs->setTabText(tabIndex, contentPaneWidget->graphModel()->name());
+    updatePerTabUi();
+}
+
+void MainWindow::on_graphChanged(const Graph*)
+{
     updatePerTabUi();
 }
 

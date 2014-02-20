@@ -22,6 +22,7 @@ public:
 signals:
     void progress(int percentage) const;
     void complete(int success) const;
+    void graphChanged(const Graph*) const;
 
 public slots:
     void onProgress(int percentage) const { emit progress(percentage); }
@@ -38,7 +39,7 @@ private:
 
 private slots:
     void onGraphWillChange(const Graph*);
-    void onGraphChanged(const Graph*);
+    void onGraphChanged(const Graph* graph);
 
     void onComponentAdded(const Graph*, ComponentId componentId);
     void onComponentWillBeRemoved(const Graph*, ComponentId componentId);
