@@ -5,25 +5,56 @@
 #include <QOpenGLShaderProgram>
 #include <QDebug>
 
-Camera::Camera( QObject* parent )
-    : QObject( parent )
-    , m_position( 0.0f, 0.0f, 1.0f )
-    , m_upVector( 0.0f, 1.0f, 0.0f )
-    , m_viewTarget( 0.0f, 0.0f, 0.0f )
-    , m_cameraToTarget( 0.0f, 0.0f, -1.0f )
-    , m_projectionType( Camera::OrthogonalProjection )
-    , m_nearPlane( 0.1f )
-    , m_farPlane( 1024.0f )
-    , m_fieldOfView( 60.0f )
-    , m_aspectRatio( 1.0f )
-    , m_left( -0.5 )
-    , m_right( 0.5f )
-    , m_bottom( -0.5f )
-    , m_top( 0.5f )
-    , m_viewMatrixDirty( true )
-    , m_viewProjectionMatrixDirty( true )
+Camera::Camera()
+    : QObject(),
+    m_position(0.0f, 0.0f, 1.0f),
+    m_upVector(0.0f, 1.0f, 0.0f),
+    m_viewTarget(0.0f, 0.0f, 0.0f),
+    m_cameraToTarget(0.0f, 0.0f, -1.0f),
+    m_projectionType(Camera::OrthogonalProjection),
+    m_nearPlane(0.1f),
+    m_farPlane(1024.0f),
+    m_fieldOfView(60.0f),
+    m_aspectRatio(1.0f),
+    m_left(-0.5),
+    m_right(0.5f),
+    m_bottom(-0.5f),
+    m_top(0.5f),
+    m_viewMatrixDirty(true),
+    m_viewProjectionMatrixDirty(true)
 {
     updateOrthogonalProjection();
+}
+
+Camera::Camera(const Camera &other)
+    : QObject(),
+    m_position(other.m_position),
+    m_upVector(other.m_upVector),
+    m_viewTarget(other.m_viewTarget),
+    m_cameraToTarget(other.m_cameraToTarget),
+    m_projectionType(other.m_projectionType),
+    m_nearPlane(other.m_nearPlane),
+    m_farPlane(other.m_farPlane),
+    m_fieldOfView(other.m_fieldOfView),
+    m_aspectRatio(other.m_aspectRatio),
+    m_left(other.m_left),
+    m_right(other.m_right),
+    m_bottom(other.m_bottom),
+    m_top(other.m_top),
+    m_viewMatrixDirty(other.m_viewMatrixDirty),
+    m_viewProjectionMatrixDirty(other.m_viewProjectionMatrixDirty)
+{
+    switch(m_projectionType)
+    {
+    default:
+    case ProjectionType::OrthogonalProjection:
+        updateOrthogonalProjection();
+        break;
+
+    case ProjectionType::PerspectiveProjection:
+        updatePerspectiveProjection();
+        break;
+    }
 }
 
 Camera::ProjectionType Camera::projectionType() const
@@ -93,7 +124,7 @@ void Camera::setPerspectiveProjection( float fieldOfView, float aspectRatio,
     m_nearPlane = nearPlane;
     m_farPlane = farPlane;
     m_projectionType = PerspectiveProjection;
-    updatePerpectiveProjection();
+    updatePerspectiveProjection();
 }
 
 void Camera::setNearPlane( const float& nearPlane )
@@ -102,7 +133,7 @@ void Camera::setNearPlane( const float& nearPlane )
         return;
     m_nearPlane = nearPlane;
     if ( m_projectionType == PerspectiveProjection )
-        updatePerpectiveProjection();
+        updatePerspectiveProjection();
 }
 
 float Camera::nearPlane() const
@@ -116,7 +147,7 @@ void Camera::setFarPlane( const float& farPlane )
         return;
     m_farPlane = farPlane;
     if ( m_projectionType == PerspectiveProjection )
-        updatePerpectiveProjection();
+        updatePerspectiveProjection();
 }
 
 float Camera::farPlane() const
@@ -130,7 +161,7 @@ void Camera::setFieldOfView( const float& fieldOfView )
         return;
     m_fieldOfView = fieldOfView;
     if ( m_projectionType == PerspectiveProjection )
-        updatePerpectiveProjection();
+        updatePerspectiveProjection();
 }
 
 float Camera::fieldOfView() const
@@ -144,7 +175,7 @@ void Camera::setAspectRatio( const float& aspectRatio )
         return;
     m_aspectRatio = aspectRatio;
     if ( m_projectionType == PerspectiveProjection )
-        updatePerpectiveProjection();
+        updatePerspectiveProjection();
 }
 
 float Camera::aspectRatio() const

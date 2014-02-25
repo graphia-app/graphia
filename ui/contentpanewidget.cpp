@@ -84,13 +84,13 @@ void ContentPaneWidget::onCompletion(int success)
     nodeLayoutThread->addAllComponents(_graphModel->graph());
     nodeLayoutThread->start();
 
-    componentLayoutThread = new LayoutThread(new RadialCircleComponentLayout(_graphModel->graph(),
+    /*componentLayoutThread = new LayoutThread(new RadialCircleComponentLayout(_graphModel->graph(),
                                                                        _graphModel->componentPositions(),
                                                                        _graphModel->nodePositions()), true);
     componentLayoutThread->start();
 
     // Do the component layout whenever the node layout changes
-    connect(nodeLayoutThread, &LayoutThread::executed, componentLayoutThread, &LayoutThread::execute);
+    connect(nodeLayoutThread, &LayoutThread::executed, componentLayoutThread, &LayoutThread::execute);*/
 
     _selectionManager = new SelectionManager(_graphModel->graph());
     GraphView* graphView = new GraphView();

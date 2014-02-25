@@ -126,7 +126,6 @@ void SimpleComponentManager::nodeAdded(NodeId nodeId)
     ComponentId newComponentId = generateComponentId();
     nodesComponentId[nodeId] = newComponentId;
     queueGraphComponentUpdate(newComponentId);
-    //updateGraphComponent(newComponentId);
 
     // New component
     onComponentAdded(newComponentId);
@@ -169,9 +168,9 @@ void SimpleComponentManager::edgeAdded(EdgeId edgeId)
         assignConnectedElementsComponentId(edge.targetId(), firstComponentId, edgeId);
         edgesComponentId[edgeId] = firstComponentId;
         queueGraphComponentUpdate(firstComponentId);
-        //updateGraphComponent(firstComponentId);
-        releaseComponentId(secondComponentId);
+
         removeGraphComponent(secondComponentId);
+        releaseComponentId(secondComponentId);
     }
     else
     {

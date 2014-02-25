@@ -40,7 +40,8 @@ class Camera : public QObject
     Q_ENUMS( ProjectionType )
 
 public:
-    explicit Camera( QObject* parent = 0 );
+    Camera();
+    Camera(const Camera& other);
 
     enum ProjectionType
     {
@@ -144,7 +145,7 @@ protected:
 private:
     bool unproject(int x, int y, int z, QVector3D& result);
 
-    inline void updatePerpectiveProjection()
+    inline void updatePerspectiveProjection()
     {
         m_projectionMatrix.setToIdentity();
         m_projectionMatrix.perspective( m_fieldOfView, m_aspectRatio, m_nearPlane, m_farPlane );

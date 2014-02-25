@@ -33,6 +33,8 @@ public:
             array.append(e);
     }
 
+    virtual ~GraphArray() {}
+
     QMutex& mutex() { return _mutex; }
     void lock() { _mutex.lock(); }
     void unlock() { _mutex.unlock(); }

@@ -6,6 +6,7 @@
 #include "transition.h"
 #include "../maths/boundingbox.h"
 #include "../graph/graph.h"
+#include "../graph/grapharray.h"
 
 #include <QList>
 #include <QOpenGLBuffer>
@@ -23,6 +24,18 @@ class GraphModel;
 class SelectionManager;
 
 class QOpenGLFunctions_3_3_Core;
+
+class ComponentViewData
+{
+public:
+    ComponentViewData();
+
+    Camera camera;
+    float zoomDistance;
+    NodeId focusNodeId;
+
+    bool initialised;
+};
 
 class GraphScene : public AbstractScene
 {
@@ -80,7 +93,8 @@ private:
     void updateVisualData();
 
 private slots:
-    void onGraphChanged(const Graph*);
+    void onGraphChanged(const Graph* graph);
+    void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId);
 
 private:
     bool m_rightMouseButtonHeld;
@@ -95,15 +109,20 @@ private:
     QPoint m_pos;
     bool m_mouseMoving;
     NodeId clickedNodeId;
-    ComponentId clickedComponentId;
-    NodeId focusNodeId;
 
-    float zoomDistance;
     float targetZoomDistance;
     Transition zoomTransition;
 
     QOpenGLFunctions_3_3_Core* m_funcs;
 
+    ComponentId focusComponentId;
+    ComponentArray<ComponentViewData>* componentsViewData;
+    ComponentViewData* focusComponentViewData()
+    {
+        return componentsViewData != nullptr ? &(*componentsViewData)[focusComponentId] : nullptr;
+    }
+
+    float aspectRatio;
     Camera* m_camera;
     Transition panTransition;
 
@@ -136,6 +155,10 @@ private:
     QOpenGLBuffer debugLinesDataBuffer;
     QOpenGLVertexArrayObject debugLinesDataVAO;
     QOpenGLShaderProgram debugLinesShader;
+
+    void moveToNextComponent();
+    void moveToPreviousComponent();
+    void moveToComponent(ComponentId componentId);
 
 public:
     void addDebugLine(const QVector3D& start, const QVector3D& end, const QColor color = QColor(Qt::GlobalColor::white))

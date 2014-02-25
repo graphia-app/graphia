@@ -91,10 +91,12 @@ public:
     virtual const QList<NodeId>& nodeIds() const = 0;
     virtual int numNodes() const = 0;
     virtual const Node& nodeById(NodeId nodeId) const = 0;
+    NodeId firstNodeId() const { return nodeIds().size() > 0 ? nodeIds().at(0) : NullNodeId; }
 
     virtual const QList<EdgeId>& edgeIds() const = 0;
     virtual int numEdges() const = 0;
     virtual const Edge& edgeById(EdgeId edgeId) const = 0;
+    EdgeId firstEdgeId() const { return edgeIds().size() > 0 ? edgeIds().at(0) : NullEdgeId; }
 
     virtual void dumpToQDebug(int detail) const
     {
@@ -168,6 +170,7 @@ public:
     void removeEdge(EdgeId edgeId);
 
     const QList<ComponentId>* componentIds() const;
+    ComponentId firstComponentId() const { return (*componentIds())[0]; }
     int numComponents() const;
     const ReadOnlyGraph* componentById(ComponentId componentId) const;
     const ReadOnlyGraph* firstComponent() const { return componentById((*componentIds())[0]); }
