@@ -159,6 +159,9 @@ void MainWindow::on_actionPause_Layout_triggered()
 {
     ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(ui->tabs->currentWidget());
 
+    if(contentPaneWidget == nullptr)
+        return;
+
     if(contentPaneWidget->layoutIsPaused())
     {
         contentPaneWidget->resumeLayout();
