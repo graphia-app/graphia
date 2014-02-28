@@ -21,13 +21,18 @@ protected:
     Graph* _graph;
     QVector<Element> array;
     QMutex _mutex;
+    bool _flag; // Generic flag
 
 public:
     GraphArray(Graph& graph) :
-        _graph(&graph)
+        _graph(&graph),
+        _mutex(QMutex::Recursive),
+        _flag(false)
     {}
     GraphArray(const GraphArray& other) :
-        _graph(other._graph)
+        _graph(other._graph),
+        _mutex(QMutex::Recursive),
+        _flag(other._flag)
     {
         for(auto e : other.array)
             array.append(e);
@@ -38,6 +43,10 @@ public:
     QMutex& mutex() { return _mutex; }
     void lock() { _mutex.lock(); }
     void unlock() { _mutex.unlock(); }
+
+    bool flagged() { return _flag; }
+    void flag() { _flag = true; }
+    void resetFlag() { _flag = false; }
 
     const Graph& graph() { return *_graph; }
 

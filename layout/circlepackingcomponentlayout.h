@@ -6,12 +6,10 @@
 class CirclePackingComponentLayout : public ComponentLayout
 {
     Q_OBJECT
-private:
-    bool firstIteration;
 
 public:
     CirclePackingComponentLayout(const Graph& graph, ComponentPositions& componentPositions, NodePositions& nodePositions) :
-        ComponentLayout(graph, componentPositions, nodePositions, Iterative::Yes), firstIteration(true)
+        ComponentLayout(graph, componentPositions, nodePositions, Iterative::Yes)
     {}
 
     void executeReal();

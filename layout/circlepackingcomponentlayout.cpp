@@ -23,12 +23,14 @@ void CirclePackingComponentLayout::executeReal()
     for(ComponentId componentId : componentIds)
         componentRadii[componentId] = radiusOfComponent(componentId) + COMPONENT_SEPARATION;
 
-    if(firstIteration)
+    componentPositions.lock();
+    if(!componentPositions.flagged())
     {
         for(ComponentId componentId : componentIds)
             componentPositions[componentId] = Utils::randQVector2D(-1.0f, 1.0f);
-        firstIteration = false;
+        componentPositions.flag();
     }
+    componentPositions.unlock();
 
     sortComponentPositions = &componentPositions;
     qSort(componentIds.begin(), componentIds.end(), distanceFromOriginLessThan);

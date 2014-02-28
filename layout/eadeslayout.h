@@ -12,13 +12,11 @@ class EadesLayout : public NodeLayout
 {
     Q_OBJECT
 private:
-    bool firstIteration;
     QVector<QVector3D> moves;
 
 public:
     EadesLayout(const ReadOnlyGraph& graph, NodePositions& positions) :
         NodeLayout(graph, positions, Iterative::Yes),
-        firstIteration(true),
         moves(graph.numNodes())
     {}
 

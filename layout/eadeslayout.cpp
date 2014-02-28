@@ -51,14 +51,16 @@ void EadesLayout::executeReal()
     };
     int axialDirectionIndex = 0;
 
-    if(firstIteration)
+    positions.lock();
+    if(!positions.flagged())
     {
         RandomLayout randomLayout(graph(), positions);
 
         randomLayout.setSpread(10.0f);
         randomLayout.execute();
-        firstIteration = false;
+        positions.flag();
     }
+    positions.unlock();
 
     moves.resize(positions.size());
 
