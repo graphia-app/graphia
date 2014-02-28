@@ -21,10 +21,7 @@ public:
     {}
 
     virtual ~SequenceLayout()
-    {
-        for(NodeLayout* subLayout : subLayouts)
-            delete subLayout;
-    }
+    {}
 
     void addSubLayout(NodeLayout* layout) { subLayouts.append(layout); }
 
