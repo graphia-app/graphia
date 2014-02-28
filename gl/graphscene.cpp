@@ -47,6 +47,8 @@ GraphScene::GraphScene( QObject* parent )
 #if defined(Q_OS_MAC)
       m_instanceFuncs( 0 ),
 #endif
+      focusComponentId(NullComponentId),
+      lastSplitterFocusComponentId(NullComponentId),
       componentsViewData(nullptr),
       aspectRatio(4.0f / 3.0f),
       m_camera(nullptr),
@@ -141,13 +143,12 @@ void GraphScene::updateVisualData()
 {
     NodeVisuals& nodeVisuals = _graphModel->nodeVisuals();
     EdgeVisuals& edgeVisuals = _graphModel->edgeVisuals();
+    const ReadOnlyGraph& component = *_graphModel->graph().componentById(focusComponentId);
 
-    m_nodeVisualData.resize(_graphModel->graph().numNodes() * 4);
-    m_edgeVisualData.resize(_graphModel->graph().numEdges() * 4);
+    m_nodeVisualData.resize(component.numNodes() * 4);
+    m_edgeVisualData.resize(component.numEdges() * 4);
     int i = 0;
     int j = 0;
-
-    const ReadOnlyGraph& component = *_graphModel->graph().componentById(focusComponentId);
 
     for(NodeId nodeId : component.nodeIds())
     {
@@ -168,21 +169,13 @@ void GraphScene::updateVisualData()
 
 void GraphScene::onGraphChanged(const Graph*)
 {
-    updateVisualData();
-}
-
-void GraphScene::onComponentWillBeRemoved(const Graph* graph, ComponentId componentId)
-{
-    if(componentId == focusComponentId)
+    if(focusComponentId == NullComponentId)
     {
-        ComponentViewData* componentViewData = focusComponentViewData();
-        ComponentId componentIdForFocusNode = graph->componentIdOfNode(componentViewData->focusNodeId);
-
-        if(componentIdForFocusNode != NullComponentId)
-            moveToComponent(componentIdForFocusNode);
-        else
-            moveToNextComponent();
+        // The component we were focused on has gone, we need to find a new one
+        moveToNextComponent();
     }
+
+    updateVisualData();
 }
 
 static void setupCamera(Camera& camera, float aspectRatio)
@@ -190,7 +183,95 @@ static void setupCamera(Camera& camera, float aspectRatio)
     camera.setPerspectiveProjection(60.0f, aspectRatio, 0.3f, 10000.0f);
 }
 
-void GraphScene::update( float t )
+void GraphScene::onComponentAdded(const Graph*, ComponentId componentId)
+{
+    ComponentViewData* componentViewData = &(*componentsViewData)[componentId];
+
+    if(!componentViewData->initialised)
+    {
+        setupCamera(componentViewData->camera, aspectRatio);
+        targetZoomDistance = componentViewData->zoomDistance;
+        componentViewData->focusNodeId = NullNodeId;
+        componentViewData->initialised = true;
+    }
+}
+
+void GraphScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
+{
+    ComponentViewData* componentViewData = &(*componentsViewData)[componentId];
+    componentViewData->initialised = false;
+
+    if(componentId == lastSplitterFocusComponentId)
+        lastSplitterFocusComponentId = NullComponentId;
+
+    if(componentId == focusComponentId)
+    {
+        if(lastSplitterFocusComponentId != NullComponentId)
+        {
+            ComponentViewData* currentComponentViewData = focusComponentViewData();
+            ComponentViewData* lastSplitterComponentViewData = &(*componentsViewData)[lastSplitterFocusComponentId];
+            *lastSplitterComponentViewData = *currentComponentViewData;
+            lastSplitterComponentViewData->focusNodeId = NullNodeId; // This should already be null
+            focusComponentId = lastSplitterFocusComponentId;
+        }
+        else
+            focusComponentId = NullComponentId;
+    }
+}
+
+void GraphScene::onComponentSplit(const Graph* graph, ComponentId oldComponentId, const QSet<ComponentId>& splitters)
+{
+    if(oldComponentId == focusComponentId)
+    {
+        ComponentViewData* currentComponentViewData = focusComponentViewData();
+        NodeId currentFocusNodeId = currentComponentViewData->focusNodeId;
+        ComponentId newFocusComponentId = graph->componentIdOfNode(currentFocusNodeId);
+
+        for(ComponentId splitter : splitters)
+        {
+            ComponentViewData* splitterComponentViewData = &(*componentsViewData)[splitter];
+
+            if(newFocusComponentId == splitter)
+            {
+                *splitterComponentViewData = *currentComponentViewData;
+                splitterComponentViewData->focusNodeId = currentFocusNodeId;
+                focusComponentId = splitter;
+            }
+            else
+                splitterComponentViewData->focusNodeId = NullNodeId;
+        }
+
+        QSet<ComponentId> nonFocusSplitters(splitters);
+        nonFocusSplitters.remove(focusComponentId);
+        lastSplitterFocusComponentId = nonFocusSplitters.values().at(0);
+    }
+}
+
+void GraphScene::onComponentsWillMerge(const Graph*, const QSet<ComponentId>& mergers, ComponentId merged)
+{
+    qDebug() << "onComponentsWillMerge" << mergers << merged; //FIXME leaving this in as it's untested for now
+    for(ComponentId merger : mergers)
+    {
+        if(merger == focusComponentId)
+        {
+            ComponentViewData* mergerComponentViewData = &(*componentsViewData)[merger];
+            ComponentViewData* mergedComponentViewData = &(*componentsViewData)[merged];
+            *mergedComponentViewData = *mergerComponentViewData;
+            focusComponentId = merged;
+            break;
+        }
+    }
+}
+
+ComponentViewData* GraphScene::focusComponentViewData() const
+{
+    if(focusComponentId == NullComponentId)
+        return nullptr;
+
+    return componentsViewData != nullptr ? &(*componentsViewData)[focusComponentId] : nullptr;
+}
+
+void GraphScene::update(float t)
 {
     if(_graphModel != nullptr)
     {
@@ -201,14 +282,8 @@ void GraphScene::update( float t )
 
         ComponentViewData* componentViewData = focusComponentViewData();
         m_camera = &componentViewData->camera;
-        if(!componentViewData->initialised)
-        {
-            setupCamera(componentViewData->camera, aspectRatio);
-            targetZoomDistance = componentViewData->zoomDistance;
+        if(componentViewData->focusNodeId == NullNodeId)
             selectFocusNode(focusComponentId, Transition::Type::None);
-
-            componentViewData->initialised = true;
-        }
 
         m_nodePositionData.resize(component->numNodes() * 3);
         m_edgePositionData.resize(component->numEdges() * 6);
@@ -448,8 +523,12 @@ void GraphScene::resize(int w, int h)
 
     aspectRatio = static_cast<float>(w) / static_cast<float>(h);
 
-    if(m_camera != nullptr)
-        setupCamera(*m_camera, aspectRatio);
+
+    for(ComponentId componentId : *_graphModel->graph().componentIds())
+    {
+        ComponentViewData* componentViewData = &(*componentsViewData)[componentId];
+        setupCamera(componentViewData->camera, aspectRatio);
+    }
 }
 
 const float MINIMUM_CAMERA_DISTANCE = 2.5f;
@@ -480,6 +559,9 @@ void GraphScene::zoom(float direction)
 
 void GraphScene::centreNodeInViewport(NodeId nodeId, Transition::Type transitionType, float cameraDistance)
 {
+    if(nodeId == NullNodeId)
+        return;
+
     const QVector3D& nodePosition = _graphModel->nodePositions()[nodeId];
     Plane translationPlane(nodePosition, m_camera->viewVector().normalized());
 
@@ -517,6 +599,9 @@ void GraphScene::centreNodeInViewport(NodeId nodeId, Transition::Type transition
 
 void GraphScene::selectFocusNode(ComponentId componentId, Transition::Type transitionType)
 {
+    if(componentId == NullComponentId)
+        return;
+
     Collision collision(*_graphModel->graph().componentById(componentId),
                         _graphModel->nodeVisuals(), _graphModel->nodePositions());
     NodeId closestNodeId = collision.closestNodeToLine(m_camera->position(), m_camera->viewVector().normalized());
@@ -737,8 +822,8 @@ bool GraphScene::keyPressEvent(QKeyEvent* keyEvent)
         return true;
 
     case Qt::Key_Delete:
-        for(NodeId nodeId : _selectionManager->selectedNodes())
-            _graphModel->graph().removeNode(nodeId);
+        _graphModel->graph().removeNodes(_selectionManager->selectedNodes());
+        _selectionManager->resetNodeSelection();
         return true;
 
     case Qt::Key_Left:
@@ -768,34 +853,43 @@ static ComponentId cycleThroughComponentIds(const QList<ComponentId>& componentI
         }
     }
 
+    if(numComponents > 0)
+        return componentIds.at(0);
+
     return NullComponentId;
 }
 
 void GraphScene::moveToNextComponent()
 {
     focusComponentId = cycleThroughComponentIds(*_graphModel->graph().componentIds(), focusComponentId, -1);
-    updateVisualData();
 
     if(focusComponentId != NullComponentId)
+    {
+        updateVisualData();
         targetZoomDistance = focusComponentViewData()->zoomDistance;
+    }
 }
 
 void GraphScene::moveToPreviousComponent()
 {
     focusComponentId = cycleThroughComponentIds(*_graphModel->graph().componentIds(), focusComponentId, 1);
-    updateVisualData();
 
     if(focusComponentId != NullComponentId)
+    {
+        updateVisualData();
         targetZoomDistance = focusComponentViewData()->zoomDistance;
+    }
 }
 
 void GraphScene::moveToComponent(ComponentId componentId)
 {
     focusComponentId = componentId;
-    updateVisualData();
 
     if(focusComponentId != NullComponentId)
+    {
+        updateVisualData();
         targetZoomDistance = focusComponentViewData()->zoomDistance;
+    }
 }
 
 bool GraphScene::keyReleaseEvent(QKeyEvent* keyEvent)
@@ -829,9 +923,15 @@ void GraphScene::setGraphModel(GraphModel* graphModel)
     componentsViewData = new ComponentArray<ComponentViewData>(_graphModel->graph());
     focusComponentId = _graphModel->graph().firstComponentId();
 
+    for(ComponentId componentId : *_graphModel->graph().componentIds())
+        onComponentAdded(&_graphModel->graph(), componentId);
+
     updateVisualData();
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphScene::onGraphChanged);
+    connect(&_graphModel->graph(), &Graph::componentAdded, this, &GraphScene::onComponentAdded);
     connect(&_graphModel->graph(), &Graph::componentWillBeRemoved, this, &GraphScene::onComponentWillBeRemoved);
+    connect(&_graphModel->graph(), &Graph::componentSplit, this, &GraphScene::onComponentSplit);
+    connect(&_graphModel->graph(), &Graph::componentsWillMerge, this, &GraphScene::onComponentsWillMerge);
 }
 
 void GraphScene::setSelectionManager(SelectionManager* selectionManager)
@@ -1000,4 +1100,12 @@ ComponentViewData::ComponentViewData() :
     camera.setPosition(QVector3D(0.0f, 0.0f, 50.0f));
     camera.setViewTarget(QVector3D(0.0f, 0.0f, 0.0f));
     camera.setUpVector(QVector3D(0.0f, 1.0f, 0.0f));
+}
+
+ComponentViewData::ComponentViewData(const ComponentViewData& other) :
+    camera(other.camera),
+    zoomDistance(other.zoomDistance),
+    focusNodeId(other.focusNodeId),
+    initialised(true)
+{
 }

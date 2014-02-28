@@ -65,15 +65,13 @@ private:
 
     void graphChanged(const Graph*);
 
-    void onComponentAdded(ComponentId componentId);
-
     void findComponents();
 
     int componentArrayCapacity() const { return nextComponentId; }
 
 public:
     const QList<ComponentId>& componentIds() const;
-    const ReadOnlyGraph* componentById(ComponentId componentId);
+    const GraphComponent* componentById(ComponentId componentId);
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
 };

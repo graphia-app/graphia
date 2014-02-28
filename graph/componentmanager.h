@@ -69,23 +69,32 @@ protected:
     QList<ResizableGraphArray*> componentArrayList;
     virtual int componentArrayCapacity() const = 0;
 
-    QList<NodeId>& graphComponentNodeIdsList(GraphComponent* graphComponent) { return graphComponent->nodeIdsList; }
-    QList<EdgeId>& graphComponentEdgeIdsList(GraphComponent* graphComponent) { return graphComponent->edgeIdsList; }
+    QList<NodeId>& graphComponentNodeIdsList(GraphComponent* graphComponent)
+    {
+        Q_ASSERT(graphComponent != nullptr);
+        return graphComponent->nodeIdsList;
+    }
+
+    QList<EdgeId>& graphComponentEdgeIdsList(GraphComponent* graphComponent)
+    {
+        Q_ASSERT(graphComponent != nullptr);
+        return graphComponent->edgeIdsList;
+    }
 
 public:
     const Graph& graph() const { return *_graph; }
 
     virtual const QList<ComponentId>& componentIds() const = 0;
     int numComponents() const { return componentIds().size(); }
-    virtual const ReadOnlyGraph* componentById(ComponentId componentId) = 0;
+    virtual const GraphComponent* componentById(ComponentId componentId) = 0;
     virtual ComponentId componentIdOfNode(NodeId nodeId) const = 0;
     virtual ComponentId componentIdOfEdge(EdgeId edgeId) const = 0;
 
 signals:
     void componentAdded(const Graph*, ComponentId) const;
     void componentWillBeRemoved(const Graph*, ComponentId) const;
-    void componentSplit(const Graph*, ComponentId, QSet<ComponentId>) const;
-    void componentsWillMerge(const Graph*, QSet<ComponentId>, ComponentId) const;
+    void componentSplit(const Graph*, ComponentId, const QSet<ComponentId>&) const;
+    void componentsWillMerge(const Graph*, const QSet<ComponentId>&, ComponentId) const;
 };
 
 #endif // COMPONENTMANAGER_H

@@ -144,7 +144,7 @@ private:
 
     template<typename> friend class ComponentArray;
     ComponentManager* componentManager;
-    bool componentManagementEnabled;
+    bool _componentManagementEnabled;
 
     void setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId);
     void setEdgeNodes(EdgeId edgeId, NodeId sourceId, NodeId targetId);
@@ -154,6 +154,7 @@ public:
     void setComponentManager(ComponentManager* componentManager);
     void enableComponentMangagement();
     void disableComponentMangagement();
+    bool componentManagementEnabled() const { return _componentManagementEnabled; }
 
     const QList<NodeId>& nodeIds() const { return nodeIdsList; }
     int numNodes() const { return nodeIdsList.size(); }
@@ -161,6 +162,8 @@ public:
 
     NodeId addNode();
     void removeNode(NodeId nodeId);
+    void removeNodes(QSet<NodeId> nodeIds);
+    void removeNodes(QList<NodeId> nodeIds);
 
     const QList<EdgeId>& edgeIds() const { return edgeIdsList; }
     int numEdges() const { return edgeIdsList.size(); }
@@ -168,6 +171,8 @@ public:
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId);
     void removeEdge(EdgeId edgeId);
+    void removeEdges(QSet<EdgeId> edgeIds);
+    void removeEdges(QList<EdgeId> edgeIds);
 
     const QList<ComponentId>* componentIds() const;
     ComponentId firstComponentId() const { return (*componentIds())[0]; }
@@ -179,6 +184,11 @@ public:
 
     void dumpToQDebug(int detail) const;
 
+private:
+    int graphChangeDepth;
+    void emitGraphWillChange();
+    void emitGraphChanged();
+
 signals:
     void graphWillChange(const Graph*) const;
     void graphChanged(const Graph*) const;
@@ -188,8 +198,8 @@ signals:
     void edgeWillBeRemoved(const Graph*, EdgeId) const;
     void componentAdded(const Graph*, ComponentId) const;
     void componentWillBeRemoved(const Graph*, ComponentId) const;
-    void componentSplit(const Graph*, ComponentId, QSet<ComponentId>) const;
-    void componentsWillMerge(const Graph*, QSet<ComponentId>, ComponentId) const;
+    void componentSplit(const Graph*, ComponentId, const QSet<ComponentId>&) const;
+    void componentsWillMerge(const Graph*, const QSet<ComponentId>&, ComponentId) const;
 };
 
 #endif // GRAPH_H

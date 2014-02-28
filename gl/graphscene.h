@@ -29,6 +29,7 @@ class ComponentViewData
 {
 public:
     ComponentViewData();
+    ComponentViewData(const ComponentViewData& other);
 
     Camera camera;
     float zoomDistance;
@@ -94,7 +95,10 @@ private:
 
 private slots:
     void onGraphChanged(const Graph* graph);
+    void onComponentAdded(const Graph*, ComponentId);
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId);
+    void onComponentSplit(const Graph* graph, ComponentId oldComponentId, const QSet<ComponentId>& splitters);
+    void onComponentsWillMerge(const Graph* graph, const QSet<ComponentId>& mergers, ComponentId merged);
 
 private:
     bool m_rightMouseButtonHeld;
@@ -116,11 +120,9 @@ private:
     QOpenGLFunctions_3_3_Core* m_funcs;
 
     ComponentId focusComponentId;
+    ComponentId lastSplitterFocusComponentId;
     ComponentArray<ComponentViewData>* componentsViewData;
-    ComponentViewData* focusComponentViewData()
-    {
-        return componentsViewData != nullptr ? &(*componentsViewData)[focusComponentId] : nullptr;
-    }
+    ComponentViewData* focusComponentViewData() const;
 
     float aspectRatio;
     Camera* m_camera;

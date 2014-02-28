@@ -57,6 +57,28 @@ Camera::Camera(const Camera &other)
     }
 }
 
+Camera& Camera::operator=(const Camera& other)
+{
+    m_position = other.m_position;
+    m_upVector = other.m_upVector;
+    m_viewTarget = other.m_viewTarget;
+    m_cameraToTarget = other.m_cameraToTarget;
+    m_projectionType = other.m_projectionType;
+    m_nearPlane = other.m_nearPlane;
+    m_farPlane = other.m_farPlane;
+    m_fieldOfView = other.m_fieldOfView;
+    m_aspectRatio = other.m_aspectRatio;
+    m_left = other.m_left;
+    m_right = other.m_right;
+    m_bottom = other.m_bottom;
+    m_top = other.m_top;
+    m_viewMatrixDirty = other.m_viewMatrixDirty;
+    m_viewProjectionMatrixDirty = other.m_viewProjectionMatrixDirty;
+    m_projectionMatrix = other.m_projectionMatrix;
+
+    return *this;
+}
+
 Camera::ProjectionType Camera::projectionType() const
 {
     return m_projectionType;

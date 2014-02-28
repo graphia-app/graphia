@@ -42,6 +42,7 @@ class Camera : public QObject
 public:
     Camera();
     Camera(const Camera& other);
+    Camera& operator=(const Camera& other);
 
     enum ProjectionType
     {
