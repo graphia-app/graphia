@@ -2,18 +2,24 @@
 
 #include <QQueue>
 
-void SimpleComponentManager::assignConnectedElementsComponentId(NodeId rootId, ComponentId componentId, EdgeId skipEdgeId)
+static QSet<ComponentId> assignConnectedElementsComponentId(NodeId rootId, ComponentId componentId,
+                                                            const Graph& graph,
+                                                            NodeArray<ComponentId>& nodesComponentId,
+                                                            EdgeArray<ComponentId>& edgesComponentId,
+                                                            EdgeId skipEdgeId = NullEdgeId)
 {
     QQueue<NodeId> nodeIdSearchList;
+    QSet<ComponentId> oldComponentIdsAffected;
 
     nodeIdSearchList.enqueue(rootId);
 
     while(!nodeIdSearchList.isEmpty())
     {
         NodeId nodeId = nodeIdSearchList.dequeue();
+        oldComponentIdsAffected.insert(nodesComponentId[nodeId]);
         nodesComponentId[nodeId] = componentId;
 
-        const QSet<EdgeId> edgeIds = graph().nodeById(nodeId).edges();
+        const QSet<EdgeId> edgeIds = graph.nodeById(nodeId).edges();
 
         for(EdgeId edgeId : edgeIds)
         {
@@ -21,7 +27,7 @@ void SimpleComponentManager::assignConnectedElementsComponentId(NodeId rootId, C
                 continue;
 
             edgesComponentId[edgeId] = componentId;
-            NodeId oppositeNodeId = graph().edgeById(edgeId).oppositeId(nodeId);
+            NodeId oppositeNodeId = graph.edgeById(edgeId).oppositeId(nodeId);
 
             if(nodesComponentId[oppositeNodeId] != componentId)
             {
@@ -30,37 +36,113 @@ void SimpleComponentManager::assignConnectedElementsComponentId(NodeId rootId, C
             }
         }
     }
+
+    oldComponentIdsAffected.remove(NullComponentId);
+
+    return oldComponentIdsAffected;
 }
 
-void SimpleComponentManager::findComponents()
+void SimpleComponentManager::updateComponents()
 {
-    // Remove existing components first
-    QList<ComponentId> localComponentIdsList(componentIdsList);
+    QMap<ComponentId, QSet<ComponentId>> splitComponents;
+    QList<ComponentId> newComponentIds;
 
-    for(ComponentId componentId : localComponentIdsList)
-    {
-        emit componentWillBeRemoved(&graph(), componentId);
-        removeGraphComponent(componentId);
-    }
+    NodeArray<ComponentId> newNodesComponentId(graph());
+    EdgeArray<ComponentId> newEdgesComponentId(graph());
+    QList<ComponentId> newComponentIdsList;
 
-    nodesComponentId.fill(NullComponentId);
-    edgesComponentId.fill(NullComponentId);
+    newNodesComponentId.fill(NullComponentId);
+    newEdgesComponentId.fill(NullComponentId);
 
     const QList<NodeId>& nodeIdsList = graph().nodeIds();
+
+    // Search for mergers and splitters
     for(NodeId nodeId : nodeIdsList)
     {
-        if(nodesComponentId[nodeId] == NullComponentId)
-        {
-            ComponentId newComponentId = generateComponentId();
-            assignConnectedElementsComponentId(nodeId, newComponentId, NullEdgeId);
-            queueGraphComponentUpdate(newComponentId);
+        ComponentId oldComponentId = nodesComponentId[nodeId];
 
-            // New component
-            emit componentAdded(&graph(), newComponentId);
+        if(newNodesComponentId[nodeId] == NullComponentId && oldComponentId != NullComponentId)
+        {
+            if(newComponentIdsList.contains(oldComponentId))
+            {
+                // We have already used this ID so this is a component that has split
+                ComponentId newComponentId = generateComponentId();
+                newComponentIdsList.append(newComponentId);
+                assignConnectedElementsComponentId(nodeId, newComponentId, graph(),
+                                                   newNodesComponentId, newEdgesComponentId);
+
+                queueGraphComponentUpdate(oldComponentId);
+                queueGraphComponentUpdate(newComponentId);
+
+                splitComponents[oldComponentId].unite({oldComponentId, newComponentId});
+            }
+            else
+            {
+                newComponentIdsList.append(oldComponentId);
+                QSet<ComponentId> componentIdsAffected =
+                        assignConnectedElementsComponentId(nodeId, oldComponentId, graph(),
+                                                           newNodesComponentId, newEdgesComponentId);
+                queueGraphComponentUpdate(oldComponentId);
+
+                if(componentIdsAffected.size() > 1)
+                {
+                    // More than one old component IDs were observed so components have merged
+                    emit componentsWillMerge(&graph(), componentIdsAffected, oldComponentId);
+                    componentIdsAffected.remove(oldComponentId);
+
+                    for(ComponentId removedComponentId : componentIdsAffected)
+                    {
+                        emit componentWillBeRemoved(&graph(), removedComponentId);
+                        removeGraphComponent(removedComponentId);
+                    }
+                }
+            }
         }
     }
 
-    emit graphChanged(&graph());
+    // Search for entirely new components
+    for(NodeId nodeId : nodeIdsList)
+    {
+        if(newNodesComponentId[nodeId] == NullComponentId && nodesComponentId[nodeId] == NullComponentId)
+        {
+            ComponentId newComponentId = generateComponentId();
+            newComponentIdsList.append(newComponentId);
+            assignConnectedElementsComponentId(nodeId, newComponentId, graph(), newNodesComponentId, newEdgesComponentId);
+            queueGraphComponentUpdate(newComponentId);
+
+            newComponentIds.append(newComponentId);
+        }
+    }
+
+    // Search for removed components
+    QSet<ComponentId> removedComponentIds = componentIdsList.toSet().subtract(newComponentIdsList.toSet());
+    for(ComponentId removedComponentId : removedComponentIds)
+    {
+        // Component removed
+        emit componentWillBeRemoved(&graph(), removedComponentId);
+
+        removeGraphComponent(removedComponentId);
+    }
+
+    nodesComponentId = newNodesComponentId;
+    edgesComponentId = newEdgesComponentId;
+
+    // Notify all the splits
+    for(ComponentId splitee : splitComponents.keys())
+    {
+        QSet<ComponentId>& splitters = splitComponents[splitee];
+        emit componentSplit(&graph(), splitee, splitters);
+
+        for(ComponentId splitter : splitters)
+        {
+            if(splitter != splitee)
+                emit componentAdded(&graph(), splitter);
+        }
+    }
+
+    // Notify all the new components
+    for(ComponentId newComponentId : newComponentIds)
+        emit componentAdded(&graph(), newComponentId);
 }
 
 ComponentId SimpleComponentManager::generateComponentId()
@@ -135,108 +217,10 @@ void SimpleComponentManager::removeGraphComponent(ComponentId componentId)
     }
 }
 
-void SimpleComponentManager::nodeAdded(NodeId nodeId)
-{
-    ComponentId newComponentId = generateComponentId();
-    nodesComponentId[nodeId] = newComponentId;
-    queueGraphComponentUpdate(newComponentId);
-
-    // New component
-    emit componentAdded(&graph(), newComponentId);
-}
-
-void SimpleComponentManager::nodeWillBeRemoved(NodeId nodeId)
-{
-    ComponentId componentId = nodesComponentId[nodeId];
-
-    if(graph().nodeById(nodeId).degree() == 0)
-    {
-        // Component removed
-        emit componentWillBeRemoved(&graph(), componentId);
-
-        removeGraphComponent(componentId);
-    }
-    else
-        queueGraphComponentUpdate(componentId);
-}
-
-void SimpleComponentManager::edgeAdded(EdgeId edgeId)
-{
-    const Edge& edge = graph().edgeById(edgeId);
-
-    if(nodesComponentId[edge.sourceId()] != nodesComponentId[edge.targetId()])
-    {
-        ComponentId firstComponentId = nodesComponentId[edge.sourceId()];
-        ComponentId secondComponentId = nodesComponentId[edge.targetId()];
-
-        // Components merged
-        QSet<ComponentId> mergers;
-        mergers.insert(firstComponentId);
-        mergers.insert(secondComponentId);
-        emit componentsWillMerge(&graph(), mergers, firstComponentId);
-
-        // Component removed
-        emit componentWillBeRemoved(&graph(), secondComponentId);
-
-        // Assign every node in the second component to the first
-        assignConnectedElementsComponentId(edge.targetId(), firstComponentId, edgeId);
-        edgesComponentId[edgeId] = firstComponentId;
-        queueGraphComponentUpdate(firstComponentId);
-
-        removeGraphComponent(secondComponentId);
-    }
-    else
-    {
-        ComponentId existingComponentId = nodesComponentId[edge.sourceId()];
-        edgesComponentId[edgeId] = existingComponentId;
-        queueGraphComponentUpdate(existingComponentId);
-    }
-
-}
-
-void SimpleComponentManager::edgeWillBeRemoved(EdgeId edgeId)
-{
-    ComponentId newComponentId = generateComponentId();
-    const Edge& edge = graph().edgeById(edgeId);
-    ComponentId oldComponentId = nodesComponentId[edge.sourceId()];
-    GraphComponent* oldGraphComponent = componentsMap[oldComponentId];
-
-    // Assign every node connected to the target of the removed edge the new componentId
-    assignConnectedElementsComponentId(edge.targetId(), newComponentId, edgeId);
-
-    if(nodesComponentId[edge.sourceId()] == nodesComponentId[edge.targetId()])
-    {
-        // The edge removal didn't create a new component,
-        // so go back to using the original ComponentId
-        const QList<NodeId>& nodeIds = graphComponentNodeIdsList(oldGraphComponent);
-        for(NodeId nodeId : nodeIds)
-            nodesComponentId[nodeId] = oldComponentId;
-
-        const QList<EdgeId>& edgeIds = graphComponentEdgeIdsList(oldGraphComponent);
-        for(EdgeId edgeId : edgeIds)
-            edgesComponentId[edgeId] = oldComponentId;
-
-        queueGraphComponentUpdate(oldComponentId);
-        releaseComponentId(newComponentId);
-    }
-    else
-    {
-        queueGraphComponentUpdate(oldComponentId);
-        queueGraphComponentUpdate(newComponentId);
-
-        // Components split
-        QSet<ComponentId> splitters;
-        splitters.insert(oldComponentId);
-        splitters.insert(newComponentId);
-        emit componentSplit(&graph(), oldComponentId, splitters);
-
-        // New component
-        emit componentAdded(&graph(), newComponentId);
-    }
-}
-
 void SimpleComponentManager::graphChanged(const Graph*)
 {
+    updateComponents();
+
     for(ComponentId componentId : updatesRequired)
         updateGraphComponent(componentId);
 

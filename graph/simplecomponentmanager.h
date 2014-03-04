@@ -40,8 +40,6 @@ private:
     NodeArray<ComponentId> nodesComponentId;
     EdgeArray<ComponentId> edgesComponentId;
 
-    void assignConnectedElementsComponentId(NodeId rootId, ComponentId componentId, EdgeId skipEdgeId);
-
     ComponentId generateComponentId();
     void releaseComponentId(ComponentId componentId);
     void queueGraphComponentUpdate(ComponentId componentId);
@@ -52,20 +50,21 @@ public:
     SimpleComponentManager(Graph& graph) :
         ComponentManager(graph),
         nextComponentId(0),
-        nodesComponentId(graph),
-        edgesComponentId(graph)
+        nodesComponentId(graph, NullNodeId),
+        edgesComponentId(graph, NullEdgeId)
     {}
 
 private:
-    void nodeAdded(NodeId nodeId);
-    void nodeWillBeRemoved(NodeId nodeId);
+    // A more sophisticated implementation may make use of these
+    void nodeAdded(NodeId) {}
+    void nodeWillBeRemoved(NodeId) {}
 
-    void edgeAdded(EdgeId edgeId);
-    void edgeWillBeRemoved(EdgeId edgeId);
+    void edgeAdded(EdgeId) {}
+    void edgeWillBeRemoved(EdgeId) {}
 
     void graphChanged(const Graph*);
 
-    void findComponents();
+    void updateComponents();
 
     int componentArrayCapacity() const { return nextComponentId; }
 

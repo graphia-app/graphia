@@ -42,7 +42,7 @@ class ComponentManager : public QObject
     friend class Graph;
 
 public:
-    ComponentManager(const Graph& graph) :
+    ComponentManager(Graph& graph) :
         _graph(&graph)
     {
         connect(this, &ComponentManager::componentAdded, &graph, &Graph::componentAdded, Qt::DirectConnection);
@@ -53,7 +53,7 @@ public:
     virtual ~ComponentManager() {}
 
 protected:
-    const Graph* _graph;
+    Graph* _graph;
 
     virtual void nodeAdded(NodeId nodeId) = 0;
     virtual void nodeWillBeRemoved(NodeId nodeId) = 0;
@@ -62,8 +62,6 @@ protected:
     virtual void edgeWillBeRemoved(EdgeId edgeId) = 0;
 
     virtual void graphChanged(const Graph*) = 0;
-
-    virtual void findComponents() = 0;
 
     template<typename> friend class ComponentArray;
     QList<ResizableGraphArray*> componentArrayList;
@@ -82,7 +80,7 @@ protected:
     }
 
 public:
-    const Graph& graph() const { return *_graph; }
+    Graph& graph() { return *_graph; }
 
     virtual const QList<ComponentId>& componentIds() const = 0;
     int numComponents() const { return componentIds().size(); }

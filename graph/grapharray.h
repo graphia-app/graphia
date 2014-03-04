@@ -22,12 +22,14 @@ protected:
     QVector<Element> array;
     QMutex _mutex;
     bool _flag; // Generic flag
+    Element _defaultValue;
 
 public:
-    GraphArray(Graph& graph) :
+    GraphArray(Graph& graph, Element defaultValue = Element()) :
         _graph(&graph),
         _mutex(QMutex::Recursive),
-        _flag(false)
+        _flag(false),
+        _defaultValue(defaultValue)
     {}
     GraphArray(const GraphArray& other) :
         _graph(other._graph),
@@ -39,6 +41,15 @@ public:
     }
 
     virtual ~GraphArray() {}
+
+    GraphArray& operator=(const GraphArray& other)
+    {
+        Q_ASSERT(_graph == other._graph);
+        array = other.array;
+        _flag = other._flag;
+
+        return *this;
+    }
 
     QMutex& mutex() { return _mutex; }
     void lock() { _mutex.lock(); }
@@ -72,7 +83,13 @@ public:
 
     void resize(int size)
     {
+        int previousSize = array.size();
         array.resize(size);
+        int newSize = array.size();
+
+        int newElements = newSize - previousSize;
+        for(int i = newSize - newElements; i < newSize; i++)
+            array[i] = _defaultValue;
     }
 
     void fill(const Element& value)
@@ -95,7 +112,8 @@ public:
 template<typename Element> class NodeArray : public GraphArray<NodeId, Element>
 {
 public:
-    NodeArray(Graph& graph) : GraphArray<NodeId, Element>(graph)
+    NodeArray(Graph& graph, Element defaultValue = Element()) :
+        GraphArray<NodeId, Element>(graph, defaultValue)
     {
         this->resize(graph.nodeArrayCapacity());
         graph.nodeArrayList.append(this);
@@ -115,7 +133,8 @@ public:
 template<typename Element> class EdgeArray : public GraphArray<EdgeId, Element>
 {
 public:
-    EdgeArray(Graph& graph) : GraphArray<EdgeId, Element>(graph)
+    EdgeArray(Graph& graph, Element defaultValue = Element()) :
+        GraphArray<EdgeId, Element>(graph, defaultValue)
     {
         this->resize(graph.edgeArrayCapacity());
         graph.edgeArrayList.append(this);
@@ -135,7 +154,8 @@ public:
 template<typename Element> class ComponentArray : public GraphArray<ComponentId, Element>
 {
 public:
-    ComponentArray(Graph& graph) : GraphArray<ComponentId, Element>(graph)
+    ComponentArray(Graph& graph, Element defaultValue = Element()) :
+        GraphArray<ComponentId, Element>(graph, defaultValue)
     {
         this->resize(graph.componentManager->componentArrayCapacity());
         graph.componentManager->componentArrayList.append(this);

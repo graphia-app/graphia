@@ -36,16 +36,17 @@ void Graph::clear()
 
 void Graph::setComponentManager(ComponentManager *componentManager)
 {
+    emitGraphWillChange();
     delete this->componentManager;
-
     this->componentManager = componentManager;
-    this->componentManager->findComponents();
+    emitGraphChanged();
 }
 
 void Graph::enableComponentMangagement()
 {
+    emitGraphWillChange();
     _componentManagementEnabled = true;
-    componentManager->findComponents();
+    emitGraphChanged();
 }
 
 void Graph::disableComponentMangagement()
@@ -256,12 +257,14 @@ void Graph::emitGraphWillChange()
 
 void Graph::emitGraphChanged()
 {
-    if(_componentManagementEnabled && componentManager != nullptr)
-        componentManager->graphChanged(this);
-
     Q_ASSERT(graphChangeDepth > 0);
     if(--graphChangeDepth <= 0)
+    {
+        if(_componentManagementEnabled && componentManager != nullptr)
+            componentManager->graphChanged(this);
+
         emit graphChanged(this);
+    }
 }
 
 void Graph::setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId)

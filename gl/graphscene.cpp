@@ -178,6 +178,13 @@ void GraphScene::onGraphChanged(const Graph*)
     updateVisualData();
 }
 
+void GraphScene::onNodeWillBeRemoved(const Graph*, NodeId nodeId)
+{
+    ComponentViewData* currentComponentViewData = focusComponentViewData();
+    if(currentComponentViewData->focusNodeId == nodeId)
+        currentComponentViewData->focusNodeId = NullNodeId;
+}
+
 static void setupCamera(Camera& camera, float aspectRatio)
 {
     camera.setPerspectiveProjection(60.0f, aspectRatio, 0.3f, 10000.0f);
@@ -211,7 +218,7 @@ void GraphScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
             ComponentViewData* currentComponentViewData = focusComponentViewData();
             ComponentViewData* lastSplitterComponentViewData = &(*componentsViewData)[lastSplitterFocusComponentId];
             *lastSplitterComponentViewData = *currentComponentViewData;
-            lastSplitterComponentViewData->focusNodeId = NullNodeId; // This should already be null
+            lastSplitterComponentViewData->focusNodeId = NullNodeId;
             focusComponentId = lastSplitterFocusComponentId;
         }
         else
@@ -223,23 +230,22 @@ void GraphScene::onComponentSplit(const Graph* graph, ComponentId oldComponentId
 {
     if(oldComponentId == focusComponentId)
     {
-        ComponentViewData* currentComponentViewData = focusComponentViewData();
-        NodeId currentFocusNodeId = currentComponentViewData->focusNodeId;
-        ComponentId newFocusComponentId = graph->componentIdOfNode(currentFocusNodeId);
+        ComponentViewData currentComponentViewData = *focusComponentViewData();
+        ComponentId newFocusComponentId = graph->componentIdOfNode(currentComponentViewData.focusNodeId);
 
         for(ComponentId splitter : splitters)
         {
             ComponentViewData* splitterComponentViewData = &(*componentsViewData)[splitter];
 
-            if(newFocusComponentId == splitter)
-            {
-                *splitterComponentViewData = *currentComponentViewData;
-                splitterComponentViewData->focusNodeId = currentFocusNodeId;
-                focusComponentId = splitter;
-            }
-            else
+            // Clone the current camera data to all splitters
+            *splitterComponentViewData = currentComponentViewData;
+
+            // Splitters that don't contain the current focus node will need to find a new one
+            if(splitter != newFocusComponentId)
                 splitterComponentViewData->focusNodeId = NullNodeId;
         }
+
+        focusComponentId = newFocusComponentId;
 
         QSet<ComponentId> nonFocusSplitters(splitters);
         nonFocusSplitters.remove(focusComponentId);
@@ -928,6 +934,7 @@ void GraphScene::setGraphModel(GraphModel* graphModel)
 
     updateVisualData();
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphScene::onGraphChanged);
+    connect(&_graphModel->graph(), &Graph::nodeWillBeRemoved, this, &GraphScene::onNodeWillBeRemoved);
     connect(&_graphModel->graph(), &Graph::componentAdded, this, &GraphScene::onComponentAdded);
     connect(&_graphModel->graph(), &Graph::componentWillBeRemoved, this, &GraphScene::onComponentWillBeRemoved);
     connect(&_graphModel->graph(), &Graph::componentSplit, this, &GraphScene::onComponentSplit);
@@ -1106,6 +1113,6 @@ ComponentViewData::ComponentViewData(const ComponentViewData& other) :
     camera(other.camera),
     zoomDistance(other.zoomDistance),
     focusNodeId(other.focusNodeId),
-    initialised(true)
+    initialised(other.initialised)
 {
 }
