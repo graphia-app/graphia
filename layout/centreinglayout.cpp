@@ -1,6 +1,6 @@
 #include "centreinglayout.h"
 
-void CentreingLayout::executeReal()
+void CentreingLayout::executeReal(uint64_t)
 {
     NodePositions& positions = *this->positions;
 

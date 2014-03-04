@@ -15,7 +15,7 @@ public:
     {}
 
     void setSpread(float spread) { this->spread = spread; }
-    void executeReal();
+    void executeReal(uint64_t);
 };
 
 #endif // RANDOMLAYOUT_H

@@ -11,7 +11,7 @@ public:
         ComponentLayout(graph, componentPositions, nodePositions)
     {}
 
-    void executeReal();
+    void executeReal(uint64_t);
 };
 
 #endif // LINEARCOMPONENTLAYOUT_H

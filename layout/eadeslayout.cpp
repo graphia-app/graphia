@@ -36,7 +36,7 @@
 //#define ATTRACT(x)    (FACTOR*lnTaylorSeries(x, 4))
 #define ATTRACT(x)    (FACTOR*TAYLOR_LNX(x))
 
-void EadesLayout::executeReal()
+void EadesLayout::executeReal(uint64_t iteration)
 {
     NodePositions& positions = *this->positions;
 
@@ -51,16 +51,13 @@ void EadesLayout::executeReal()
     };
     int axialDirectionIndex = 0;
 
-    positions.lock();
-    if(!positions.flagged())
+    if(iteration == 0)
     {
         RandomLayout randomLayout(graph(), positions);
 
         randomLayout.setSpread(10.0f);
-        randomLayout.execute();
-        positions.flag();
+        randomLayout.execute(iteration);
     }
-    positions.unlock();
 
     moves.resize(positions.size());
 

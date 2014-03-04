@@ -20,7 +20,7 @@ public:
         moves(graph.numNodes())
     {}
 
-    void executeReal();
+    void executeReal(uint64_t iteration);
 };
 
 class EadesLayoutFactory : public NodeLayoutFactory

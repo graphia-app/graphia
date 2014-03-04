@@ -11,6 +11,6 @@ public:
         ComponentLayout(graph, componentPositions, nodePositions, Iterative::No)
     {}
 
-    void executeReal();
+    void executeReal(uint64_t);
 };
 #endif // RADIALCIRCLECOMPONENTLAYOUT_H

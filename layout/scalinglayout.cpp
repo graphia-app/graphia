@@ -1,6 +1,6 @@
 #include "scalinglayout.h"
 
-void ScalingLayout::executeReal()
+void ScalingLayout::executeReal(uint64_t)
 {
     NodePositions& positions = *this->positions;
 

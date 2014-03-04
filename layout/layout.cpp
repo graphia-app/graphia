@@ -190,8 +190,9 @@ void LayoutThread::run()
             if(layout->shouldPause())
                 continue;
 
-            layout->execute();
+            layout->execute(_iteration);
         }
+        _iteration++;
 
         emit executed();
 

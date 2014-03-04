@@ -12,7 +12,7 @@ public:
         ComponentLayout(graph, componentPositions, nodePositions, Iterative::Yes)
     {}
 
-    void executeReal();
+    void executeReal(uint64_t iteration);
 };
 
 #endif // CIRCLEPACKINGCOMPONENTLAYOUT_H

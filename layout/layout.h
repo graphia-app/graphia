@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <limits>
 #include <atomic>
+#include <cstdint>
 
 class Layout : public QObject
 {
@@ -29,7 +30,7 @@ private:
         atomicCancel = cancel;
     }
 
-    virtual void executeReal() = 0;
+    virtual void executeReal(uint64_t iteration) = 0;
 
 public:
     enum class Iterative
@@ -52,10 +53,10 @@ public:
         _iterative(_iterative)
     {}
 
-    void execute()
+    void execute(int iteration)
     {
         setCancel(false);
-        executeReal();
+        executeReal(iteration);
     }
 
     virtual void cancel()
@@ -159,16 +160,17 @@ protected:
     bool _paused;
     bool _stop;
     bool repeating;
+    uint64_t _iteration;
     QWaitCondition waitForPause;
     QWaitCondition waitForResume;
 
 public:
     LayoutThread(bool repeating = false) :
-        _pause(false), _paused(false), _stop(false), repeating(repeating)
+        _pause(false), _paused(false), _stop(false), repeating(repeating), _iteration(0)
     {}
 
     LayoutThread(Layout* layout, bool _repeating = false) :
-        _pause(false), _paused(false), _stop(false), repeating(_repeating)
+        _pause(false), _paused(false), _stop(false), repeating(_repeating), _iteration(0)
     {
         addLayout(layout);
     }

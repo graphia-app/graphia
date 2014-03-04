@@ -145,7 +145,7 @@ static PlacementRegion mergePlacementRegionsForAngle(QList<PlacementRegion>& pla
     return placementRegions[largestIndex];
 }
 
-void RadialCircleComponentLayout::executeReal()
+void RadialCircleComponentLayout::executeReal(uint64_t)
 {
     QList<ComponentId> componentIds = *graph().componentIds();
     const float COMPONENT_SEPARATION = 1.0f;

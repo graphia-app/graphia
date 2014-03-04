@@ -2,7 +2,7 @@
 
 #include "../utils.h"
 
-void RandomLayout::executeReal()
+void RandomLayout::executeReal(uint64_t)
 {
     NodePositions& positions = *this->positions;
     int nodeNumber = 0;

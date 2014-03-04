@@ -11,7 +11,7 @@ public:
         NodeLayout(graph, positions)
     {}
 
-    void executeReal();
+    void executeReal(uint64_t);
 };
 
 

@@ -13,7 +13,7 @@ static bool distanceFromOriginLessThan(const ComponentId& a, const ComponentId& 
     return positionA.lengthSquared() < positionB.lengthSquared();
 }
 
-void CirclePackingComponentLayout::executeReal()
+void CirclePackingComponentLayout::executeReal(uint64_t iteration)
 {
     QList<ComponentId> componentIds = *graph().componentIds();
     const float COMPONENT_SEPARATION = 2.0f;
@@ -23,14 +23,11 @@ void CirclePackingComponentLayout::executeReal()
     for(ComponentId componentId : componentIds)
         componentRadii[componentId] = radiusOfComponent(componentId) + COMPONENT_SEPARATION;
 
-    componentPositions.lock();
-    if(!componentPositions.flagged())
+    if(iteration == 0)
     {
         for(ComponentId componentId : componentIds)
             componentPositions[componentId] = Utils::randQVector2D(-1.0f, 1.0f);
-        componentPositions.flag();
     }
-    componentPositions.unlock();
 
     sortComponentPositions = &componentPositions;
     qSort(componentIds.begin(), componentIds.end(), distanceFromOriginLessThan);

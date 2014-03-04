@@ -2,7 +2,7 @@
 
 #include "../utils.h"
 
-void LinearComponentLayout::executeReal()
+void LinearComponentLayout::executeReal(uint64_t)
 {
     ComponentPositions& componentPositions = *this->componentPositions;
     const ReadOnlyGraph& firstComponent = *graph().firstComponent();
