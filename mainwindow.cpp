@@ -112,12 +112,24 @@ void MainWindow::on_actionOpen_In_New_Tab_triggered()
 {
     QString filename = showGeneralFileOpenDialog();
     if (!filename.isEmpty())
+        openFileInNewTab(filename);
+}
+
+bool MainWindow::openFileInNewTab(const QString& filename)
+{
+    QFile file(filename);
+
+    if(file.exists())
     {
         ContentPaneWidget* contentPaneWidget = createNewTabWidget(filename);
 
         int index = ui->tabs->addTab(contentPaneWidget, QString(tr("%1 0%")).arg(contentPaneWidget->graphModel()->name()));
         ui->tabs->setCurrentIndex(index);
+
+        return true;
     }
+
+    return false;
 }
 
 void MainWindow::on_tabs_tabCloseRequested(int index)

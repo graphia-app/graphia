@@ -22,7 +22,7 @@ public:
     
 private:
     ContentPaneWidget* currentTabWidget();
-    ContentPaneWidget* createNewTabWidget(const QString &filename);
+    ContentPaneWidget* createNewTabWidget(const QString& filename);
     void closeTab(int index);
     QString showGeneralFileOpenDialog();
     void configureActionPauseLayout(bool pause);
@@ -42,6 +42,9 @@ private slots:
     void on_tabs_currentChanged(int index);
 
     void on_actionOpen_In_New_Tab_triggered();
+
+public:
+    bool openFileInNewTab(const QString& filename);
 
 private:
     Ui::MainWindow *ui;
