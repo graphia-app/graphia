@@ -68,10 +68,13 @@ void OpenGLWindow::initialise()
             const QList<QOpenGLDebugMessage> startupMessages = logger->loggedMessages();
 
             connect(logger, &QOpenGLDebugLogger::messageLogged,
-                    this, &OpenGLWindow::messageLogged);
+                    this, &OpenGLWindow::messageLogged, Qt::DirectConnection);
 
             if (!startupMessages.isEmpty())
                 qDebug() << "Debug messages logged on startup:" << startupMessages;
+
+            logger->startLogging(QOpenGLDebugLogger::SynchronousLogging);
+            logger->enableMessages();
         }
         else
         {
