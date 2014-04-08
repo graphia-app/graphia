@@ -3,10 +3,12 @@
 
 #include "../graph/graph.h"
 
+#include <QObject>
 #include <QSet>
 
-class SelectionManager
+class SelectionManager : public QObject
 {
+    Q_OBJECT
 public:
     SelectionManager(const ReadOnlyGraph& graph) : _graph(&graph) {}
 
@@ -29,6 +31,9 @@ private:
     const ReadOnlyGraph* _graph;
 
     QSet<NodeId> _selectedNodes;
+
+signals:
+    void selectionChanged() const;
 };
 
 #endif // SELECTIONMANAGER_H
