@@ -7,6 +7,11 @@ QSet<NodeId> SelectionManager::selectedNodes()
     return _selectedNodes;
 }
 
+QSet<NodeId> SelectionManager::unselectedNodes()
+{
+    return _graph->nodeIds().toSet().subtract(_selectedNodes);
+}
+
 void SelectionManager::selectNode(NodeId nodeId)
 {
     bool selectionWillChange = !_selectedNodes.contains(nodeId);
@@ -73,5 +78,9 @@ bool SelectionManager::nodeIsSelected(NodeId nodeId)
 
 void SelectionManager::resetNodeSelection()
 {
+    bool selectionWillChange = !_selectedNodes.empty();
     _selectedNodes.clear();
+
+    if(selectionWillChange)
+        emit selectionChanged();
 }

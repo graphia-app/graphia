@@ -13,6 +13,7 @@ public:
     SelectionManager(const ReadOnlyGraph& graph) : _graph(&graph) {}
 
     QSet<NodeId> selectedNodes();
+    QSet<NodeId> unselectedNodes();
 
     void selectNode(NodeId nodeId);
     void selectNodes(QSet<NodeId> nodeIds);

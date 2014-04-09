@@ -20,11 +20,13 @@ void GenericGraphModel::onNodeAdded(const Graph*, NodeId nodeId)
 {
     _nodeVisuals[nodeId].size = NODE_SIZE + Utils::rand(-0.3f, 0.4f);
     _nodeVisuals[nodeId].color = Utils::randQColor();
+    _nodeVisuals[nodeId].outlineColor.setAlphaF(0.0f);
 }
 
 void GenericGraphModel::onEdgeAdded(const Graph*, EdgeId edgeId)
 {
     _edgeVisuals[edgeId].size = EDGE_SIZE + Utils::rand(-0.05f, 0.05f);
     _edgeVisuals[edgeId].color = Utils::randQColor();
+    _edgeVisuals[edgeId].outlineColor.setAlphaF(0.0f);
 }
 

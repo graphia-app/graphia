@@ -1,4 +1,4 @@
-#version 330
+#version 330 core
 
 struct LightInfo
 {
@@ -19,8 +19,10 @@ uniform MaterialInfo material;
 in vec3 position;
 in vec3 normal;
 in vec3 vColor;
+in vec4 vOutlineColor;
 
-layout ( location = 0 ) out vec4 fragColor;
+layout ( location = 0 ) out vec4 outColor;
+layout ( location = 1 ) out vec4 outSelection;
 
 vec3 adsModel( const in vec3 pos, const in vec3 norm )
 {
@@ -51,5 +53,6 @@ vec3 adsModel( const in vec3 pos, const in vec3 norm )
 void main()
 {
     vec3 color = adsModel( position, normalize( normal ) );
-    fragColor = vec4( color, 1.0 );
+    outColor = vec4( color, 1.0 );
+    outSelection = vOutlineColor;
 }

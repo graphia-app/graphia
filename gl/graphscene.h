@@ -84,8 +84,22 @@ private:
     void prepareDebugLinesVAO();
     void prepareTexture();
 
-    void renderNodes();
-    void renderEdges();
+    bool loadShaderProgram(QOpenGLShaderProgram& program, const QString& vertexShader, const QString& fragmentShader);
+
+    int width;
+    int height;
+
+    GLuint colorRBO;
+    GLuint selectionRBO;
+    GLuint depthRBO;
+    GLuint visualFBO;
+    GLuint colorFBO;
+    GLuint selectionFBO;
+
+    bool prepareRenderBuffers();
+
+    void renderNodes(QOpenGLShaderProgram& program);
+    void renderEdges(QOpenGLShaderProgram& program);
     void renderComponentMarkers();
     void renderDebugLines();
 
@@ -100,6 +114,7 @@ private slots:
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId);
     void onComponentSplit(const Graph* graph, ComponentId oldComponentId, const QSet<ComponentId>& splitters);
     void onComponentsWillMerge(const Graph* graph, const QSet<ComponentId>& mergers, ComponentId merged);
+    void onSelectionChanged();
 
 private:
     bool m_rightMouseButtonHeld;
@@ -136,9 +151,11 @@ private:
     GraphModel* _graphModel;
     SelectionManager* _selectionManager;
 
+    QOpenGLShaderProgram nodesShader;
     QVector<GLfloat> m_nodePositionData;
     QOpenGLBuffer m_nodePositionBuffer;
 
+    QOpenGLShaderProgram edgesShader;
     QVector<GLfloat> m_edgePositionData;
     QOpenGLBuffer m_edgePositionBuffer;
 
@@ -148,6 +165,7 @@ private:
     QVector<GLfloat> m_edgeVisualData;
     QOpenGLBuffer m_edgeVisualBuffer;
 
+    QOpenGLShaderProgram componentMarkerShader;
     QVector<GLfloat> m_componentMarkerData;
     QOpenGLBuffer m_componentMarkerDataBuffer;
 

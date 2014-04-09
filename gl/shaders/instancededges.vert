@@ -1,4 +1,4 @@
-#version 330
+#version 330 core
 
 layout (location = 0) in vec3 vertexPosition;
 layout (location = 1) in vec3 vertexNormal;
@@ -7,10 +7,12 @@ layout (location = 3) in vec3 source; // The position of the source node
 layout (location = 4) in vec3 target; // The position of the target node
 layout (location = 5) in float size; // The size of the edge
 layout (location = 6) in vec3 color; // The color of the edge
+layout (location = 7) in vec4 outlineColor; // The outline color of the node
 
 out vec3 position;
 out vec3 normal;
 out vec3 vColor;
+out vec4 vOutlineColor;
 
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
@@ -48,5 +50,6 @@ void main()
     mat3 normalMatrix = transpose(inverse(mat3(viewMatrix * modelMatrix)));
     normal = normalMatrix * vertexNormal;
     vColor = color;
+    vOutlineColor = outlineColor;
     gl_Position = projectionMatrix * vec4( position, 1.0 );
 }
