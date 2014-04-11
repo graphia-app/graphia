@@ -38,8 +38,8 @@
 GraphScene::GraphScene( QObject* parent )
     : AbstractScene( parent ),
       width(0), height(0),
-      colorRBO(0),
-      selectionRBO(0),
+      colorTexture(0),
+      selectionTexture(0),
       depthRBO(0),
       visualFBO(0),
       m_rightMouseButtonHeld(false),
@@ -130,12 +130,18 @@ void GraphScene::initialise()
     prepareEdgeVAO();
     prepareComponentMarkerVAO();
     prepareDebugLinesVAO();
+    prepareScreenQuad();
 
     // Enable depth testing to prevent artifacts
     glEnable( GL_DEPTH_TEST );
 
     // Cull back facing triangles to save the gpu some work
-    glEnable( GL_CULL_FACE );
+    //glEnable( GL_CULL_FACE );
+}
+
+void GraphScene::cleanup()
+{
+    //FIXME
 }
 
 void GraphScene::updateVisualData()
@@ -384,9 +390,9 @@ void GraphScene::renderNodes(QOpenGLShaderProgram& program)
     // Calculate needed matrices
     QMatrix4x4 modelViewMatrix = m_camera->viewMatrix();
     QMatrix3x3 normalMatrix = modelViewMatrix.normalMatrix();
-    program.setUniformValue( "modelViewMatrix", modelViewMatrix );
-    program.setUniformValue( "normalMatrix", normalMatrix );
-    program.setUniformValue( "projectionMatrix", m_camera->projectionMatrix() );
+    program.setUniformValue("modelViewMatrix", modelViewMatrix);
+    program.setUniformValue("normalMatrix", normalMatrix);
+    program.setUniformValue("projectionMatrix", m_camera->projectionMatrix());
 
     m_funcs->glBindFragDataLocation(program.programId(), 0, "outColor");
     m_funcs->glBindFragDataLocation(program.programId(), 1, "outSelection");
@@ -567,10 +573,24 @@ void GraphScene::render()
 
     m_funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    m_funcs->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    m_funcs->glBindFramebuffer(GL_READ_FRAMEBUFFER, colorRBO);
-    m_funcs->glReadBuffer(GL_COLOR_ATTACHMENT0);
-    m_funcs->glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    m_funcs->glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+    m_funcs->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    m_funcs->glDisable(GL_DEPTH_TEST);
+
+
+    screenQuadVAO.bind();
+    m_funcs->glActiveTexture(GL_TEXTURE0);
+    m_funcs->glBindTexture(GL_TEXTURE_2D, colorTexture);
+
+    screenShader.bind();
+    m_funcs->glDrawArrays(GL_TRIANGLES, 0, 6);
+    screenShader.release();
+
+    screenQuadVAO.release();
+
+    m_funcs->glEnable(GL_DEPTH_TEST);
+
 }
 
 void GraphScene::resize(int w, int h)
@@ -1168,6 +1188,44 @@ void GraphScene::prepareDebugLinesVAO()
     debugLinesShader.release();
 }
 
+void GraphScene::prepareScreenQuad()
+{
+    GLfloat quadVerts[] =
+    {
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f,  1.0f,  1.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+         1.0f, -1.0f,  1.0f, 0.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+        -1.0f,  1.0f,  0.0f, 1.0f
+    };
+    size_t quadVertsSize = sizeof(quadVerts);
+    QOpenGLBuffer quadBuffer;
+
+    screenQuadVAO.create();
+    loadShaderProgram(screenShader, ":/gl/shaders/screen.vert", ":/gl/shaders/screen.frag");
+
+    screenQuadVAO.bind();
+    screenShader.bind();
+
+    quadBuffer.create();
+    quadBuffer.bind();
+    quadBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    quadBuffer.allocate(quadVerts, quadVertsSize);
+
+    screenShader.enableAttributeArray("vertexPosition");
+    screenShader.enableAttributeArray("vertexTexCoord");
+
+    screenShader.setAttributeBuffer("vertexPosition", GL_FLOAT, 0, 2, 4 * sizeof(GLfloat));
+    screenShader.setAttributeBuffer("vertexTexCoord", GL_FLOAT, 2 * sizeof(GLfloat), 2, 4 * sizeof(GLfloat));
+    screenShader.setUniformValue("frameBufferTexture", 0);
+
+    quadBuffer.release();
+    screenQuadVAO.release();
+    screenShader.release();
+}
+
 bool GraphScene::loadShaderProgram(QOpenGLShaderProgram& program, const QString& vertexShader, const QString& fragmentShader)
 {
     if(!program.addShaderFromSourceFile(QOpenGLShader::Vertex, vertexShader))
@@ -1196,32 +1254,41 @@ bool GraphScene::prepareRenderBuffers()
     bool valid;
 
     // Color RBO
-    if(colorRBO == 0)
-        m_funcs->glGenRenderbuffers(1, &colorRBO);
-    m_funcs->glBindRenderbuffer(GL_RENDERBUFFER, colorRBO);
-    m_funcs->glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGBA8, width, height);
-    m_funcs->glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    if(colorTexture == 0)
+        m_funcs->glGenTextures(1, &colorTexture);
+    m_funcs->glBindTexture(GL_TEXTURE_2D, colorTexture);
+    //m_funcs->glTexImage2DMultisample(GL_TEXTURE_2D, 4, GL_RGBA8, width, height, GL_FALSE);
+    m_funcs->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    m_funcs->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    m_funcs->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    m_funcs->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+    m_funcs->glBindTexture(GL_TEXTURE_2D, 0);
 
     // Selection RBO
-    if(selectionRBO == 0)
-        m_funcs->glGenRenderbuffers(1, &selectionRBO);
-    m_funcs->glBindRenderbuffer(GL_RENDERBUFFER, selectionRBO);
-    m_funcs->glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGBA8, width, height);
-    m_funcs->glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    if(selectionTexture == 0)
+        m_funcs->glGenTextures(1, &selectionTexture);
+    m_funcs->glBindTexture(GL_TEXTURE_2D, selectionTexture);
+    //m_funcs->glTexImage2DMultisample(GL_TEXTURE_2D, 4, GL_RGBA8, width, height, GL_FALSE);
+    m_funcs->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    m_funcs->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    m_funcs->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    m_funcs->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+    m_funcs->glBindTexture(GL_TEXTURE_2D, 0);
 
     // Depth RBO
     if(depthRBO == 0)
         m_funcs->glGenRenderbuffers(1, &depthRBO);
     m_funcs->glBindRenderbuffer(GL_RENDERBUFFER, depthRBO);
-    m_funcs->glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT, width, height);
+    //m_funcs->glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT, width, height);
+    m_funcs->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
     m_funcs->glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     // Visual FBO
     if(visualFBO == 0)
         m_funcs->glGenFramebuffers(1, &visualFBO);
     m_funcs->glBindFramebuffer(GL_FRAMEBUFFER, visualFBO);
-    m_funcs->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRBO);
-    m_funcs->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_RENDERBUFFER, selectionRBO);
+    m_funcs->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0);
+    m_funcs->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, selectionTexture, 0);
     m_funcs->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRBO);
 
     GLenum status = m_funcs->glCheckFramebufferStatus(GL_FRAMEBUFFER);

@@ -46,6 +46,7 @@ public:
     GraphScene(QObject* parent = 0);
 
     void initialise();
+    void cleanup();
     void update( float t );
     void render();
     void resize( int w, int h );
@@ -84,17 +85,20 @@ private:
     void prepareDebugLinesVAO();
     void prepareTexture();
 
+    QOpenGLShaderProgram screenShader;
+    void prepareScreenQuad();
+
     bool loadShaderProgram(QOpenGLShaderProgram& program, const QString& vertexShader, const QString& fragmentShader);
 
     int width;
     int height;
 
-    GLuint colorRBO;
-    GLuint selectionRBO;
+    GLuint colorTexture;
+    GLuint selectionTexture;
     GLuint depthRBO;
     GLuint visualFBO;
-    GLuint colorFBO;
-    GLuint selectionFBO;
+
+    QOpenGLVertexArrayObject screenQuadVAO;
 
     bool prepareRenderBuffers();
 
@@ -192,4 +196,4 @@ public:
     void submitDebugLines();
 };
 
-#endif // INSTANCEDGEOMETRYSCENE_H
+#endif // GRAPHSCENE_H

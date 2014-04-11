@@ -7,5 +7,7 @@
         <file>gl/shaders/marker.frag</file>
         <file>gl/shaders/debuglines.frag</file>
         <file>gl/shaders/debuglines.vert</file>
+        <file>gl/shaders/screen.frag</file>
+        <file>gl/shaders/screen.vert</file>
     </qresource>
 </RCC>
