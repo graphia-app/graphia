@@ -86,6 +86,7 @@ private:
     void prepareTexture();
 
     QOpenGLShaderProgram screenShader;
+    QOpenGLShaderProgram selectionShader;
     void prepareScreenQuad();
 
     bool loadShaderProgram(QOpenGLShaderProgram& program, const QString& vertexShader, const QString& fragmentShader);

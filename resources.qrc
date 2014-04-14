@@ -9,5 +9,6 @@
         <file>gl/shaders/debuglines.vert</file>
         <file>gl/shaders/screen.frag</file>
         <file>gl/shaders/screen.vert</file>
+        <file>gl/shaders/selection.frag</file>
     </qresource>
 </RCC>

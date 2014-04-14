@@ -155,13 +155,6 @@ void GraphScene::updateVisualData()
     int i = 0;
     int j = 0;
 
-    ComponentViewData* componentViewData = focusComponentViewData();
-    if(componentViewData != nullptr && componentViewData->focusNodeId != NullNodeId)
-    {
-        nodeVisuals[componentViewData->focusNodeId].outlineColor = Qt::GlobalColor::red;
-        nodeVisuals[componentViewData->focusNodeId].outlineColor.setAlphaF(1.0f);
-    }
-
     for(NodeId nodeId : component.nodeIds())
     {
         m_nodeVisualData[i++] = nodeVisuals[nodeId].size;
@@ -295,18 +288,18 @@ void GraphScene::onSelectionChanged()
 
     NodeVisuals& nodeVisuals = _graphModel->nodeVisuals();
     EdgeVisuals& edgeVisuals = _graphModel->edgeVisuals();
-    for(NodeId nodeId : _selectionManager->selectedNodes())
-    {
-        nodeVisuals[nodeId].outlineColor = Qt::GlobalColor::black;
-        nodeVisuals[nodeId].outlineColor.setAlphaF(1.0f);
-    }
 
-    for(NodeId nodeId : _selectionManager->unselectedNodes())
-        nodeVisuals[nodeId].outlineColor.setAlphaF(0.0f);
+    for(NodeId nodeId : _graphModel->graph().nodeIds())
+    {
+        if(_selectionManager->nodeIsSelected(nodeId))
+            nodeVisuals[nodeId].outlineColor = Qt::GlobalColor::white;
+        else
+            nodeVisuals[nodeId].outlineColor = Qt::GlobalColor::black;
+    }
 
     // Edges can't be selected at the moment
     for(EdgeId edgeId : _graphModel->graph().edgeIds())
-        edgeVisuals[edgeId].outlineColor.setAlphaF(0.0f);
+        edgeVisuals[edgeId].outlineColor = Qt::GlobalColor::black;
 
     updateVisualData();
 }
@@ -549,7 +542,7 @@ void GraphScene::render()
     glClear(GL_COLOR_BUFFER_BIT);
 
     m_funcs->glDrawBuffer(GL_COLOR_ATTACHMENT1);
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
@@ -569,8 +562,6 @@ void GraphScene::render()
     //renderComponentMarkers();
     renderDebugLines();
 
-    glDisable(GL_BLEND);
-
     m_funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     m_funcs->glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
@@ -580,16 +571,26 @@ void GraphScene::render()
 
     screenQuadVAO.bind();
     m_funcs->glActiveTexture(GL_TEXTURE0);
+
+    // Color texture
     m_funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, colorTexture);
 
     screenShader.bind();
     m_funcs->glDrawArrays(GL_TRIANGLES, 0, 6);
     screenShader.release();
 
+    // Selection texture
+    m_funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, selectionTexture);
+
+    selectionShader.bind();
+    m_funcs->glDrawArrays(GL_TRIANGLES, 0, 6);
+    selectionShader.release();
+
     screenQuadVAO.release();
 
     m_funcs->glEnable(GL_DEPTH_TEST);
 
+    glDisable(GL_BLEND);
 }
 
 void GraphScene::resize(int w, int h)
@@ -1203,23 +1204,29 @@ void GraphScene::prepareScreenQuad()
     QOpenGLBuffer quadBuffer;
 
     screenQuadVAO.create();
-    loadShaderProgram(screenShader, ":/gl/shaders/screen.vert", ":/gl/shaders/screen.frag");
-
     screenQuadVAO.bind();
-    screenShader.bind();
 
     quadBuffer.create();
     quadBuffer.bind();
     quadBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     quadBuffer.allocate(quadVerts, quadVertsSize);
 
+    loadShaderProgram(screenShader, ":/gl/shaders/screen.vert", ":/gl/shaders/screen.frag");
+    screenShader.bind();
     screenShader.enableAttributeArray("vertexPosition");
     screenShader.setAttributeBuffer("vertexPosition", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
     screenShader.setUniformValue("frameBufferTexture", 0);
+    screenShader.release();
+
+    loadShaderProgram(selectionShader, ":/gl/shaders/screen.vert", ":/gl/shaders/selection.frag");
+    selectionShader.bind();
+    selectionShader.enableAttributeArray("vertexPosition");
+    selectionShader.setAttributeBuffer("vertexPosition", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
+    selectionShader.setUniformValue("frameBufferTexture", 0);
+    selectionShader.release();
 
     quadBuffer.release();
     screenQuadVAO.release();
-    screenShader.release();
 }
 
 bool GraphScene::loadShaderProgram(QOpenGLShaderProgram& program, const QString& vertexShader, const QString& fragmentShader)
