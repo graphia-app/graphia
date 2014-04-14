@@ -44,6 +44,7 @@ protected slots:
 private:
     QOpenGLContext* m_context;
     AbstractScene* m_scene;
+    int m_debugLevel;
     
     QTime m_time;
 };

@@ -60,7 +60,8 @@ void OpenGLWindow::initialise()
 {
     m_context->makeCurrent( this );
 
-    if (qgetenv("OPENGL_DEBUG").toInt())
+    m_debugLevel = qgetenv("OPENGL_DEBUG").toInt();
+    if(m_debugLevel != 0)
     {
         QOpenGLDebugLogger *logger = new QOpenGLDebugLogger(this);
         if (logger->initialize())
@@ -71,7 +72,10 @@ void OpenGLWindow::initialise()
                     this, &OpenGLWindow::messageLogged, Qt::DirectConnection);
 
             if (!startupMessages.isEmpty())
-                qDebug() << "Debug messages logged on startup:" << startupMessages;
+            {
+                for(auto startupMessage : startupMessages)
+                    messageLogged(startupMessage);
+            }
 
             logger->startLogging(QOpenGLDebugLogger::SynchronousLogging);
             logger->enableMessages();
@@ -127,7 +131,10 @@ void OpenGLWindow::resizeEvent( QResizeEvent* e )
 
 void OpenGLWindow::messageLogged(const QOpenGLDebugMessage &message)
 {
-    qDebug() << message;
+    if(!(message.severity() & m_debugLevel))
+        return;
+
+    qDebug() << "OpenGL:" << message.message();
 }
 
 void OpenGLWindow::keyPressEvent(QKeyEvent* e)
