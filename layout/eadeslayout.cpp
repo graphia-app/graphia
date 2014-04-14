@@ -94,7 +94,7 @@ void EadesLayout::executeReal(uint64_t iteration)
                 {
                     force = REPULSE_SQ(distance);
                     //direction = difference.normalized();
-                    direction = Utils::FastNormalize(difference);
+                    direction = Utils::fastNormalize(difference);
                 }
 
                 moves[nodeAId] -= (force * direction);

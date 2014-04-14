@@ -68,21 +68,28 @@ public:
         return y;
     }
 
-    static QVector3D FastNormalize(QVector3D& v)
+    static QVector3D fastNormalize(QVector3D& v)
     {
         float xp = v.x(); float yp = v.y(); float zp = v.z();
+
         // Need some extra precision if the length is very small.
         double len = double(xp) * double(xp) +
                      double(yp) * double(yp) +
                      double(zp) * double(zp);
-        if (qFuzzyIsNull(len - 1.0f)) {
+
+        if(qFuzzyIsNull(len - 1.0f))
+        {
             return v;
-        } else if (!qFuzzyIsNull(len)) {
+        }
+        else if(!qFuzzyIsNull(len))
+        {
             float rsqrtLen = fast_rsqrt(len);
             return QVector3D(xp * rsqrtLen,
                              yp * rsqrtLen,
                              zp * rsqrtLen);
-        } else {
+        }
+        else
+        {
             return QVector3D();
         }
     }
