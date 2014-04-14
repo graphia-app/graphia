@@ -95,7 +95,7 @@ private:
 
     GLuint colorTexture;
     GLuint selectionTexture;
-    GLuint depthRBO;
+    GLuint depthTexture;
     GLuint visualFBO;
 
     QOpenGLVertexArrayObject screenQuadVAO;
