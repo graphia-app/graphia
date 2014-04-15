@@ -532,11 +532,11 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
     QVector<Light> lights =
     {
         {
-            QVector4D(-10.0f, 7.0f, 3.0f, 1.0f),
+            QVector4D(-20.0f, 0.0f, 3.0f, 1.0f),
             QVector3D(0.6f, 0.6f, 0.6f)
         },
         {
-            QVector4D(7.0f, 7.0f, 0.0f, 1.0f),
+            QVector4D(0.0f, 0.0f, 0.0f, 1.0f),
             QVector3D(0.2f, 0.2f, 0.2f)
         },
         {
@@ -560,7 +560,7 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
 
     program.setUniformValue("material.ks", QVector3D(1.0f, 1.0f, 1.0f));
     program.setUniformValue("material.ka", QVector3D(0.1f, 0.1f, 0.1f));
-    program.setUniformValue("material.shininess", 30.0f);
+    program.setUniformValue("material.shininess", 20.0f);
 }
 
 void GraphScene::render()
