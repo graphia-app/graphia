@@ -41,5 +41,5 @@ void main()
         cnv[i] = dp3 * dp3;
     }
 
-    fragColor = vec4(1.0, 1.0, 0.0, 0.5 * sqrt(cnv[0] * cnv[0] + cnv[1] * cnv[1]));
+    fragColor = vec4(1.0, 1.0, 1.0, 0.5 * abs(cnv[0]) + abs(cnv[1]));
 }
