@@ -523,11 +523,44 @@ void GraphScene::submitDebugLines()
 
 static void setShaderADSParameters(QOpenGLShaderProgram& program)
 {
-    program.setUniformValue("light.position", QVector4D(-10.0f, 10.0f, 0.0f, 1.0f));
-    program.setUniformValue("light.intensity", QVector3D(1.0f, 1.0f, 1.0f));
-    program.setUniformValue("material.ks", QVector3D(0.95f, 0.95f, 0.95f));
+    struct Light
+    {
+        QVector4D position;
+        QVector3D intensity;
+    };
+
+    QVector<Light> lights =
+    {
+        {
+            QVector4D(-10.0f, 7.0f, 3.0f, 1.0f),
+            QVector3D(0.6f, 0.6f, 0.6f)
+        },
+        {
+            QVector4D(7.0f, 7.0f, 0.0f, 1.0f),
+            QVector3D(0.2f, 0.2f, 0.2f)
+        },
+        {
+            QVector4D(10.0f, -10.0f, -10.0f, 1.0f),
+            QVector3D(0.4f, 0.4f, 0.4f)
+        }
+    };
+
+    int numberOfLights = lights.size();
+
+    program.setUniformValue("numberOfLights", numberOfLights);
+
+    for(int i = 0; i < numberOfLights; i++)
+    {
+        const char* positionId = QString("lights[%1].position").arg(i).toLatin1().data();
+        program.setUniformValue(positionId, lights[i].position);
+
+        const char* intensityId = QString("lights[%1].intensity").arg(i).toLatin1().data();
+        program.setUniformValue(intensityId, lights[i].intensity);
+    }
+
+    program.setUniformValue("material.ks", QVector3D(1.0f, 1.0f, 1.0f));
     program.setUniformValue("material.ka", QVector3D(0.1f, 0.1f, 0.1f));
-    program.setUniformValue("material.shininess", 10.0f);
+    program.setUniformValue("material.shininess", 30.0f);
 }
 
 void GraphScene::render()
