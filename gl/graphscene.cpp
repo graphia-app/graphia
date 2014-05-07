@@ -560,7 +560,7 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
 
     program.setUniformValue("material.ks", QVector3D(1.0f, 1.0f, 1.0f));
     program.setUniformValue("material.ka", QVector3D(0.1f, 0.1f, 0.1f));
-    program.setUniformValue("material.shininess", 20.0f);
+    program.setUniformValue("material.shininess", 50.0f);
 }
 
 void GraphScene::render()
