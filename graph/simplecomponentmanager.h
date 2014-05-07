@@ -34,7 +34,7 @@ class SimpleComponentManager : public ComponentManager
 private:
     QList<ComponentId> componentIdsList;
     ComponentId nextComponentId;
-    QQueue<NodeId> vacatedComponentIdQueue;
+    QQueue<ComponentId> vacatedComponentIdQueue;
     QMap<ComponentId, GraphComponent*> componentsMap;
     QSet<ComponentId> updatesRequired;
     NodeArray<ComponentId> nodesComponentId;
@@ -50,8 +50,8 @@ public:
     SimpleComponentManager(Graph& graph) :
         ComponentManager(graph),
         nextComponentId(0),
-        nodesComponentId(graph, NullNodeId),
-        edgesComponentId(graph, NullEdgeId)
+        nodesComponentId(graph, NullComponentId),
+        edgesComponentId(graph, NullComponentId)
     {}
 
 private:
