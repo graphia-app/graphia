@@ -43,6 +43,12 @@ private slots:
 
     void on_actionOpen_In_New_Tab_triggered();
 
+    void on_actionSelect_All_triggered();
+
+    void on_actionSelect_None_triggered();
+
+    void on_actionInvert_Selection_triggered();
+
 public:
     bool openFileInNewTab(const QString& filename);
 

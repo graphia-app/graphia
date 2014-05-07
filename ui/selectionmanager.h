@@ -26,7 +26,9 @@ public:
 
     bool nodeIsSelected(NodeId nodeId);
 
-    void resetNodeSelection();
+    void selectAllNodes();
+    void clearNodeSelection();
+    void invertNodeSelection();
 
 private:
     const ReadOnlyGraph* _graph;

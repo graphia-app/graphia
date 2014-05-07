@@ -76,11 +76,21 @@ bool SelectionManager::nodeIsSelected(NodeId nodeId)
     return _selectedNodes.contains(nodeId);
 }
 
-void SelectionManager::resetNodeSelection()
+void SelectionManager::selectAllNodes()
+{
+    selectNodes(_graph->nodeIds().toSet());
+}
+
+void SelectionManager::clearNodeSelection()
 {
     bool selectionWillChange = !_selectedNodes.empty();
     _selectedNodes.clear();
 
     if(selectionWillChange)
         emit selectionChanged();
+}
+
+void SelectionManager::invertNodeSelection()
+{
+    toggleNodes(_graph->nodeIds().toSet());
 }

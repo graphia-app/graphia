@@ -24,7 +24,6 @@ MainWindow::~MainWindow()
 ContentPaneWidget *MainWindow::currentTabWidget()
 {
     ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(ui->tabs->currentWidget());
-    Q_ASSERT(contentPaneWidget != nullptr);
     return contentPaneWidget;
 }
 
@@ -169,24 +168,44 @@ void MainWindow::on_actionQuit_triggered()
 
 void MainWindow::on_actionPause_Layout_triggered()
 {
-    ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(ui->tabs->currentWidget());
-
-    if(contentPaneWidget == nullptr)
-        return;
-
-    if(contentPaneWidget->layoutIsPaused())
+    ContentPaneWidget* contentPaneWidget;
+    if((contentPaneWidget = currentTabWidget()) != nullptr)
     {
-        contentPaneWidget->resumeLayout();
-        configureActionPauseLayout(false);
-    }
-    else
-    {
-        contentPaneWidget->pauseLayout();
-        configureActionPauseLayout(true);
+        if(contentPaneWidget->layoutIsPaused())
+        {
+            contentPaneWidget->resumeLayout();
+            configureActionPauseLayout(false);
+        }
+        else
+        {
+            contentPaneWidget->pauseLayout();
+            configureActionPauseLayout(true);
+        }
     }
 }
 
 void MainWindow::on_tabs_currentChanged(int)
 {
     updatePerTabUi();
+}
+
+void MainWindow::on_actionSelect_All_triggered()
+{
+    ContentPaneWidget* contentPaneWidget;
+    if((contentPaneWidget = currentTabWidget()) != nullptr)
+        contentPaneWidget->selectAll();
+}
+
+void MainWindow::on_actionSelect_None_triggered()
+{
+    ContentPaneWidget* contentPaneWidget;
+    if((contentPaneWidget = currentTabWidget()) != nullptr)
+        contentPaneWidget->selectNone();
+}
+
+void MainWindow::on_actionInvert_Selection_triggered()
+{
+    ContentPaneWidget* contentPaneWidget;
+    if((contentPaneWidget = currentTabWidget()) != nullptr)
+        contentPaneWidget->invertSelection();
 }

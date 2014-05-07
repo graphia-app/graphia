@@ -775,7 +775,7 @@ void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
             if(m_frustumSelecting)
             {
                 if(!m_controlKeyHeld)
-                    _selectionManager->resetNodeSelection();
+                    _selectionManager->clearNodeSelection();
 
                 QPoint frustumEndPoint = mouseEvent->pos();
                 Frustum frustum = m_camera->frustumForViewportCoordinates(
@@ -801,12 +801,12 @@ void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
                 if(clickedNodeId != NullNodeId)
                 {
                     if(!m_controlKeyHeld)
-                        _selectionManager->resetNodeSelection();
+                        _selectionManager->clearNodeSelection();
 
                     _selectionManager->toggleNode(clickedNodeId);
                 }
                 else
-                    _selectionManager->resetNodeSelection();
+                    _selectionManager->clearNodeSelection();
             }
 
             m_selecting = false;
@@ -941,7 +941,7 @@ bool GraphScene::keyPressEvent(QKeyEvent* keyEvent)
 
     case Qt::Key_Delete:
         _graphModel->graph().removeNodes(_selectionManager->selectedNodes());
-        _selectionManager->resetNodeSelection();
+        _selectionManager->clearNodeSelection();
         return true;
 
     case Qt::Key_Left:

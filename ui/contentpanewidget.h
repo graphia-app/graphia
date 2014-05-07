@@ -53,6 +53,10 @@ public:
     bool layoutIsPaused();
     void resumeLayout();
 
+    void selectAll();
+    void selectNone();
+    void invertSelection();
+
     bool initFromFile(const QString& filename);
 };
 

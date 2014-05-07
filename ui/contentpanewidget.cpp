@@ -197,3 +197,21 @@ void ContentPaneWidget::resumeLayout()
     if(componentLayoutThread != nullptr)
         componentLayoutThread->resume();
 }
+
+void ContentPaneWidget::selectAll()
+{
+    if(_selectionManager != nullptr)
+        _selectionManager->selectAllNodes();
+}
+
+void ContentPaneWidget::selectNone()
+{
+    if(_selectionManager != nullptr)
+        _selectionManager->clearNodeSelection();
+}
+
+void ContentPaneWidget::invertSelection()
+{
+    if(_selectionManager != nullptr)
+        _selectionManager->invertNodeSelection();
+}
