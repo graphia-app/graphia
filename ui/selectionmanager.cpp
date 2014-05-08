@@ -1,15 +1,21 @@
 #include "selectionmanager.h"
 
+template<typename T> QSet<T> setForVector(QVector<T> vector)
+{
+    //FIXME this is probably sub-optimal
+    return vector.toList().toSet();
+}
+
 QSet<NodeId> SelectionManager::selectedNodes()
 {
     // Assertion that our selection doesn't contain things that aren't in the graph
-    Q_ASSERT(_graph->nodeIds().toSet().contains(_selectedNodes));
+    Q_ASSERT(setForVector(_graph->nodeIds()).contains(_selectedNodes));
     return _selectedNodes;
 }
 
 QSet<NodeId> SelectionManager::unselectedNodes()
 {
-    return _graph->nodeIds().toSet().subtract(_selectedNodes);
+    return setForVector(_graph->nodeIds()).subtract(_selectedNodes);
 }
 
 void SelectionManager::selectNode(NodeId nodeId)
@@ -78,7 +84,7 @@ bool SelectionManager::nodeIsSelected(NodeId nodeId)
 
 void SelectionManager::selectAllNodes()
 {
-    selectNodes(_graph->nodeIds().toSet());
+    selectNodes(setForVector(_graph->nodeIds()));
 }
 
 void SelectionManager::clearNodeSelection()
@@ -92,5 +98,5 @@ void SelectionManager::clearNodeSelection()
 
 void SelectionManager::invertNodeSelection()
 {
-    toggleNodes(_graph->nodeIds().toSet());
+    toggleNodes(setForVector(_graph->nodeIds()));
 }

@@ -25,10 +25,10 @@ public:
 
     void setOffset(QVector3D _offset) { offset = _offset; }
 
-    NodeId closestNodeToLine(const QList<NodeId> &nodeIds, const QVector3D& point, const QVector3D& direction);
+    NodeId closestNodeToLine(const QVector<NodeId>& nodeIds, const QVector3D& point, const QVector3D& direction);
     NodeId closestNodeToLine(const QVector3D& point, const QVector3D& direction);
 
-    void nodesIntersectingLine(const QVector3D& point, const QVector3D& direction, QList<NodeId>& intersectingNodeIds);
+    void nodesIntersectingLine(const QVector3D& point, const QVector3D& direction, QVector<NodeId>& intersectingNodeIds);
     NodeId nearestNodeIntersectingLine(const QVector3D& point, const QVector3D& direction);
 };
 

@@ -3,7 +3,7 @@
 #include "../maths/plane.h"
 #include "../gl/graphscene.h"
 
-NodeId Collision::closestNodeToLine(const QList<NodeId>& nodeIds, const QVector3D &point, const QVector3D &direction)
+NodeId Collision::closestNodeToLine(const QVector<NodeId>& nodeIds, const QVector3D &point, const QVector3D &direction)
 {
     Plane plane(point, direction);
     NodeId closestNodeId = NodeId::Null();
@@ -33,11 +33,11 @@ NodeId Collision::closestNodeToLine(const QVector3D &point, const QVector3D &dir
     return closestNodeToLine(_graph->nodeIds(), point, direction);
 }
 
-void Collision::nodesIntersectingLine(const QVector3D& point, const QVector3D& direction, QList<NodeId>& intersectingNodeIds)
+void Collision::nodesIntersectingLine(const QVector3D& point, const QVector3D& direction, QVector<NodeId>& intersectingNodeIds)
 {
     Plane plane(point, direction);
 
-    const QList<NodeId>& nodeIds = _graph->nodeIds();
+    const QVector<NodeId>& nodeIds = _graph->nodeIds();
     for(NodeId nodeId : nodeIds)
     {
         const QVector3D& position = (*_nodePositions)[nodeId] + offset;
@@ -54,7 +54,7 @@ void Collision::nodesIntersectingLine(const QVector3D& point, const QVector3D& d
 
 NodeId Collision::nearestNodeIntersectingLine(const QVector3D& point, const QVector3D& direction)
 {
-    QList<NodeId> nodeIds;
+    QVector<NodeId> nodeIds;
 
     nodesIntersectingLine(point, direction, nodeIds);
 

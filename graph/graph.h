@@ -128,12 +128,12 @@ public:
 class ReadOnlyGraph
 {
 public:
-    virtual const QList<NodeId>& nodeIds() const = 0;
+    virtual const QVector<NodeId>& nodeIds() const = 0;
     virtual int numNodes() const = 0;
     virtual const Node& nodeById(NodeId nodeId) const = 0;
     NodeId firstNodeId() const { return nodeIds().size() > 0 ? nodeIds().at(0) : NodeId::Null(); }
 
-    virtual const QList<EdgeId>& edgeIds() const = 0;
+    virtual const QVector<EdgeId>& edgeIds() const = 0;
     virtual int numEdges() const = 0;
     virtual const Edge& edgeById(EdgeId edgeId) const = 0;
     EdgeId firstEdgeId() const { return edgeIds().size() > 0 ? edgeIds().at(0) : EdgeId::Null(); }
@@ -164,12 +164,12 @@ public:
     virtual ~Graph();
 
 private:
-    QList<NodeId> nodeIdsList;
+    QVector<NodeId> nodeIdsList;
     QVector<Node> nodesVector;
     NodeId nextNodeId;
     QQueue<NodeId> vacatedNodeIdQueue;
 
-    QList<EdgeId> edgeIdsList;
+    QVector<EdgeId> edgeIdsList;
     QVector<Edge> edgesVector;
     EdgeId nextEdgeId;
     QQueue<EdgeId> vacatedEdgeIdQueue;
@@ -196,7 +196,7 @@ public:
     void disableComponentMangagement();
     bool componentManagementEnabled() const { return _componentManagementEnabled; }
 
-    const QList<NodeId>& nodeIds() const { return nodeIdsList; }
+    const QVector<NodeId>& nodeIds() const { return nodeIdsList; }
     int numNodes() const { return nodeIdsList.size(); }
     const Node& nodeById(NodeId nodeId) const { return nodesVector[nodeId]; }
 
@@ -205,7 +205,7 @@ public:
     void removeNodes(QSet<NodeId> nodeIds);
     void removeNodes(QList<NodeId> nodeIds);
 
-    const QList<EdgeId>& edgeIds() const { return edgeIdsList; }
+    const QVector<EdgeId>& edgeIds() const { return edgeIdsList; }
     int numEdges() const { return edgeIdsList.size(); }
     const Edge& edgeById(EdgeId edgeId) const { return edgesVector[edgeId]; }
 

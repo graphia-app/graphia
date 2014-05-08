@@ -96,7 +96,7 @@ void Graph::removeNode(NodeId nodeId)
 
     emit nodeWillBeRemoved(this, nodeId);
 
-    nodeIdsList.removeOne(nodeId);
+    nodeIdsList.remove(nodeIdsList.indexOf(nodeId));
     vacatedNodeIdQueue.enqueue(nodeId);
 
     emitGraphChanged();
@@ -166,7 +166,7 @@ void Graph::removeEdge(EdgeId edgeId)
     source._outEdges.remove(edgeId);
     target._inEdges.remove(edgeId);
 
-    edgeIdsList.removeOne(edgeId);
+    edgeIdsList.remove(edgeIdsList.indexOf(edgeId));
     vacatedEdgeIdQueue.enqueue(edgeId);
 
     emitGraphChanged();
