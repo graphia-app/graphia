@@ -6,7 +6,7 @@
 NodeId Collision::closestNodeToLine(const QList<NodeId>& nodeIds, const QVector3D &point, const QVector3D &direction)
 {
     Plane plane(point, direction);
-    NodeId closestNodeId = NullNodeId;
+    NodeId closestNodeId = NodeId::Null();
     float minimumDistance = std::numeric_limits<float>::max();
 
     for(NodeId nodeId : nodeIds)
@@ -58,7 +58,7 @@ NodeId Collision::nearestNodeIntersectingLine(const QVector3D& point, const QVec
 
     nodesIntersectingLine(point, direction, nodeIds);
 
-    NodeId closestNodeId = NullNodeId;
+    NodeId closestNodeId = NodeId::Null();
     float minimumDistance = std::numeric_limits<float>::max();
 
     for(NodeId nodeId : nodeIds)

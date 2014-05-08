@@ -52,8 +52,8 @@ GraphScene::GraphScene( QObject* parent )
 #if defined(Q_OS_MAC)
       m_instanceFuncs( 0 ),
 #endif
-      focusComponentId(NullComponentId),
-      lastSplitterFocusComponentId(NullComponentId),
+      focusComponentId(ComponentId::Null()),
+      lastSplitterFocusComponentId(ComponentId::Null()),
       componentsViewData(nullptr),
       aspectRatio(4.0f / 3.0f),
       m_camera(nullptr),
@@ -182,7 +182,7 @@ void GraphScene::updateVisualData()
 
 void GraphScene::onGraphChanged(const Graph*)
 {
-    if(focusComponentId == NullComponentId)
+    if(focusComponentId.IsNull())
     {
         // The component we were focused on has gone, we need to find a new one
         moveToNextComponent();
@@ -195,7 +195,7 @@ void GraphScene::onNodeWillBeRemoved(const Graph*, NodeId nodeId)
 {
     ComponentViewData* currentComponentViewData = focusComponentViewData();
     if(currentComponentViewData->focusNodeId == nodeId)
-        currentComponentViewData->focusNodeId = NullNodeId;
+        currentComponentViewData->focusNodeId = NodeId::Null();
 }
 
 static void setupCamera(Camera& camera, float aspectRatio)
@@ -211,7 +211,7 @@ void GraphScene::onComponentAdded(const Graph*, ComponentId componentId)
     {
         setupCamera(componentViewData->camera, aspectRatio);
         targetZoomDistance = componentViewData->zoomDistance;
-        componentViewData->focusNodeId = NullNodeId;
+        componentViewData->focusNodeId = NodeId::Null();
         componentViewData->initialised = true;
     }
 }
@@ -222,20 +222,20 @@ void GraphScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
     componentViewData->initialised = false;
 
     if(componentId == lastSplitterFocusComponentId)
-        lastSplitterFocusComponentId = NullComponentId;
+        lastSplitterFocusComponentId = ComponentId::Null();
 
     if(componentId == focusComponentId)
     {
-        if(lastSplitterFocusComponentId != NullComponentId)
+        if(!lastSplitterFocusComponentId.IsNull())
         {
             ComponentViewData* currentComponentViewData = focusComponentViewData();
             ComponentViewData* lastSplitterComponentViewData = &(*componentsViewData)[lastSplitterFocusComponentId];
             *lastSplitterComponentViewData = *currentComponentViewData;
-            lastSplitterComponentViewData->focusNodeId = NullNodeId;
+            lastSplitterComponentViewData->focusNodeId = NodeId::Null();
             focusComponentId = lastSplitterFocusComponentId;
         }
         else
-            focusComponentId = NullComponentId;
+            focusComponentId = ComponentId::Null();
     }
 }
 
@@ -255,7 +255,7 @@ void GraphScene::onComponentSplit(const Graph* graph, ComponentId oldComponentId
 
             // Splitters that don't contain the current focus node will need to find a new one
             if(splitter != newFocusComponentId)
-                splitterComponentViewData->focusNodeId = NullNodeId;
+                splitterComponentViewData->focusNodeId = NodeId::Null();
         }
 
         focusComponentId = newFocusComponentId;
@@ -306,7 +306,7 @@ void GraphScene::onSelectionChanged()
 
 ComponentViewData* GraphScene::focusComponentViewData() const
 {
-    if(focusComponentId == NullComponentId)
+    if(focusComponentId.IsNull())
         return nullptr;
 
     return componentsViewData != nullptr ? &(*componentsViewData)[focusComponentId] : nullptr;
@@ -323,7 +323,7 @@ void GraphScene::update(float t)
 
         ComponentViewData* componentViewData = focusComponentViewData();
         m_camera = &componentViewData->camera;
-        if(componentViewData->focusNodeId == NullNodeId)
+        if(componentViewData->focusNodeId.IsNull())
             selectFocusNode(focusComponentId, Transition::Type::None);
 
         m_nodePositionData.resize(component->numNodes() * 3);
@@ -672,7 +672,7 @@ void GraphScene::zoom(float direction)
 
 void GraphScene::centreNodeInViewport(NodeId nodeId, Transition::Type transitionType, float cameraDistance)
 {
-    if(nodeId == NullNodeId)
+    if(nodeId.IsNull())
         return;
 
     const QVector3D& nodePosition = _graphModel->nodePositions()[nodeId];
@@ -712,13 +712,13 @@ void GraphScene::centreNodeInViewport(NodeId nodeId, Transition::Type transition
 
 void GraphScene::selectFocusNode(ComponentId componentId, Transition::Type transitionType)
 {
-    if(componentId == NullComponentId)
+    if(componentId.IsNull())
         return;
 
     Collision collision(*_graphModel->graph().componentById(componentId),
                         _graphModel->nodeVisuals(), _graphModel->nodePositions());
     NodeId closestNodeId = collision.closestNodeToLine(m_camera->position(), m_camera->viewVector().normalized());
-    if(closestNodeId != NullNodeId)
+    if(!closestNodeId.IsNull())
     {
         centreNodeInViewport(closestNodeId, transitionType);
         focusComponentViewData()->focusNodeId = closestNodeId;
@@ -751,7 +751,7 @@ void GraphScene::mousePressEvent(QMouseEvent* mouseEvent)
     Collision collision(component, _graphModel->nodeVisuals(), _graphModel->nodePositions());
     clickedNodeId = collision.nearestNodeIntersectingLine(ray.origin(), ray.dir());
 
-    if(clickedNodeId == NullNodeId)
+    if(clickedNodeId.IsNull())
         m_frustumSelectStart = m_pos;
 }
 
@@ -764,7 +764,7 @@ void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
             selectFocusNode(focusComponentId, Transition::Type::InversePower);
 
         m_rightMouseButtonHeld = false;
-        clickedNodeId = NullNodeId;
+        clickedNodeId = NodeId::Null();
         break;
 
     case Qt::LeftButton:
@@ -798,7 +798,7 @@ void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
             }
             else
             {
-                if(clickedNodeId != NullNodeId)
+                if(!clickedNodeId.IsNull())
                 {
                     if(!m_controlKeyHeld)
                         _selectionManager->clearNodeSelection();
@@ -812,7 +812,7 @@ void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
             m_selecting = false;
         }
 
-        clickedNodeId = NullNodeId;
+        clickedNodeId = NodeId::Null();
         break;
 
     default: break;
@@ -826,7 +826,7 @@ void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
 {
     m_pos = mouseEvent->pos();
 
-    if(clickedNodeId != NullNodeId)
+    if(clickedNodeId != NodeId::Null())
     {
         m_selecting = false;
 
@@ -848,7 +848,7 @@ void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
         {
             ComponentViewData* componentViewData = focusComponentViewData();
 
-            if(componentViewData->focusNodeId == NullNodeId)
+            if(componentViewData->focusNodeId.IsNull())
                 selectFocusNode(focusComponentId, Transition::Type::InversePower);
 
             if(componentViewData->focusNodeId != clickedNodeId)
@@ -922,7 +922,7 @@ void GraphScene::mouseDoubleClickEvent(QMouseEvent* mouseEvent)
 {
     if (mouseEvent->button() == Qt::LeftButton)
     {
-        if(clickedNodeId != NullNodeId && !m_mouseMoving)
+        if(!clickedNodeId.IsNull() && !m_mouseMoving)
         {
             centreNodeInViewport(clickedNodeId, Transition::Type::EaseInEaseOut);
             focusComponentViewData()->focusNodeId = clickedNodeId;
@@ -974,14 +974,14 @@ static ComponentId cycleThroughComponentIds(const QList<ComponentId>& componentI
     if(numComponents > 0)
         return componentIds.at(0);
 
-    return NullComponentId;
+    return ComponentId::Null();
 }
 
 void GraphScene::moveToNextComponent()
 {
     focusComponentId = cycleThroughComponentIds(*_graphModel->graph().componentIds(), focusComponentId, -1);
 
-    if(focusComponentId != NullComponentId)
+    if(!focusComponentId.IsNull())
     {
         updateVisualData();
         targetZoomDistance = focusComponentViewData()->zoomDistance;
@@ -992,7 +992,7 @@ void GraphScene::moveToPreviousComponent()
 {
     focusComponentId = cycleThroughComponentIds(*_graphModel->graph().componentIds(), focusComponentId, 1);
 
-    if(focusComponentId != NullComponentId)
+    if(!focusComponentId.IsNull())
     {
         updateVisualData();
         targetZoomDistance = focusComponentViewData()->zoomDistance;
@@ -1003,7 +1003,7 @@ void GraphScene::moveToComponent(ComponentId componentId)
 {
     focusComponentId = componentId;
 
-    if(focusComponentId != NullComponentId)
+    if(!focusComponentId.IsNull())
     {
         updateVisualData();
         targetZoomDistance = focusComponentViewData()->zoomDistance;
@@ -1333,7 +1333,7 @@ bool GraphScene::prepareRenderBuffers()
 
 ComponentViewData::ComponentViewData() :
     zoomDistance(50.0f),
-    focusNodeId(NullNodeId),
+    focusNodeId(NodeId::Null()),
     initialised(false)
 {
     camera.setPosition(QVector3D(0.0f, 0.0f, 50.0f));

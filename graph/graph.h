@@ -13,12 +13,52 @@ class ResizableGraphArray;
 class GraphComponent;
 class ComponentManager;
 
-typedef int NodeId;
-const static NodeId NullNodeId = -1;
-typedef int EdgeId;
-const static EdgeId NullEdgeId = -1;
-typedef int ComponentId;
-const static ComponentId NullComponentId = -1;
+template<typename T> class ElementId
+{
+private:
+    static constexpr int NullValue = -1;
+    int value;
+
+public:
+    ElementId(int _value = NullValue) :
+        value(_value)
+    {}
+
+    inline operator int() const { return value; }
+    ElementId& operator=(const ElementId& other)
+    {
+        value = other.value;
+        return *this;
+    }
+
+    inline T& operator++()
+    {
+        ++value;
+        return static_cast<T&>(*this);
+    }
+
+    inline T operator++(int)
+    {
+        T previous = static_cast<T&>(*this);
+        operator++();
+        return previous;
+    }
+
+    inline bool IsNull() const
+    {
+        return value == NullValue;
+    }
+
+    inline static T Null()
+    {
+        static ElementId nullValue;
+        return static_cast<T&>(nullValue);
+    }
+};
+
+struct NodeId : ElementId<NodeId> { using ElementId::ElementId; };
+struct EdgeId : ElementId<EdgeId> { using ElementId::ElementId; };
+struct ComponentId : ElementId<ComponentId> { using ElementId::ElementId; };
 
 class Node
 {
@@ -30,7 +70,7 @@ private:
     QSet<EdgeId> _outEdges;
 
 public:
-    Node() : _id(NullNodeId) {}
+    Node() : _id(NodeId::Null()) {}
     Node(const Node& other) :
         _id(other._id),
         _inEdges(other._inEdges),
@@ -58,9 +98,9 @@ private:
 
 public:
     Edge() :
-        _id(NullNodeId),
-        _sourceId(NullNodeId),
-        _targetId(NullNodeId)
+        _id(NodeId::Null()),
+        _sourceId(NodeId::Null()),
+        _targetId(NodeId::Null())
     {}
     Edge(const Edge& other) :
         _id(other._id),
@@ -77,7 +117,7 @@ public:
         else if(nodeId == _targetId)
             return _sourceId;
 
-        return NullNodeId;
+        return NodeId::Null();
     }
 
     bool isLoop() const { return sourceId() == targetId(); }
@@ -91,12 +131,12 @@ public:
     virtual const QList<NodeId>& nodeIds() const = 0;
     virtual int numNodes() const = 0;
     virtual const Node& nodeById(NodeId nodeId) const = 0;
-    NodeId firstNodeId() const { return nodeIds().size() > 0 ? nodeIds().at(0) : NullNodeId; }
+    NodeId firstNodeId() const { return nodeIds().size() > 0 ? nodeIds().at(0) : NodeId::Null(); }
 
     virtual const QList<EdgeId>& edgeIds() const = 0;
     virtual int numEdges() const = 0;
     virtual const Edge& edgeById(EdgeId edgeId) const = 0;
-    EdgeId firstEdgeId() const { return edgeIds().size() > 0 ? edgeIds().at(0) : NullEdgeId; }
+    EdgeId firstEdgeId() const { return edgeIds().size() > 0 ? edgeIds().at(0) : EdgeId::Null(); }
 
     virtual void dumpToQDebug(int detail) const
     {
