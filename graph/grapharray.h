@@ -22,14 +22,12 @@ protected:
     QVector<Element> array;
     QMutex _mutex;
     bool _flag; // Generic flag
-    Element _defaultValue;
 
 public:
-    GraphArray(Graph& graph, Element defaultValue = Element()) :
+    GraphArray(Graph& graph) :
         _graph(&graph),
         _mutex(QMutex::Recursive),
-        _flag(false),
-        _defaultValue(defaultValue)
+        _flag(false)
     {}
     GraphArray(const GraphArray& other) :
         _graph(other._graph),
@@ -89,7 +87,7 @@ public:
 
         int newElements = newSize - previousSize;
         for(int i = newSize - newElements; i < newSize; i++)
-            array[i] = _defaultValue;
+            array[i] = Element();
     }
 
     void fill(const Element& value)
@@ -112,8 +110,8 @@ public:
 template<typename Element> class NodeArray : public GraphArray<NodeId, Element>
 {
 public:
-    NodeArray(Graph& graph, Element defaultValue = Element()) :
-        GraphArray<NodeId, Element>(graph, defaultValue)
+    NodeArray(Graph& graph) :
+        GraphArray<NodeId, Element>(graph)
     {
         this->resize(graph.nodeArrayCapacity());
         graph.nodeArrayList.append(this);
@@ -133,8 +131,8 @@ public:
 template<typename Element> class EdgeArray : public GraphArray<EdgeId, Element>
 {
 public:
-    EdgeArray(Graph& graph, Element defaultValue = Element()) :
-        GraphArray<EdgeId, Element>(graph, defaultValue)
+    EdgeArray(Graph& graph) :
+        GraphArray<EdgeId, Element>(graph)
     {
         this->resize(graph.edgeArrayCapacity());
         graph.edgeArrayList.append(this);
@@ -154,8 +152,8 @@ public:
 template<typename Element> class ComponentArray : public GraphArray<ComponentId, Element>
 {
 public:
-    ComponentArray(Graph& graph, Element defaultValue = Element()) :
-        GraphArray<ComponentId, Element>(graph, defaultValue)
+    ComponentArray(Graph& graph) :
+        GraphArray<ComponentId, Element>(graph)
     {
         this->resize(graph.componentManager->componentArrayCapacity());
         graph.componentManager->componentArrayList.append(this);

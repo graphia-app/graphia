@@ -220,7 +220,7 @@ ComponentId Graph::componentIdOfNode(NodeId nodeId) const
     if(componentManager != nullptr)
         return componentManager->componentIdOfNode(nodeId);
 
-    return ComponentId::Null();
+    return ComponentId();
 }
 
 ComponentId Graph::componentIdOfEdge(EdgeId edgeId) const
@@ -228,7 +228,7 @@ ComponentId Graph::componentIdOfEdge(EdgeId edgeId) const
     if(componentManager != nullptr)
         return componentManager->componentIdOfEdge(edgeId);
 
-    return ComponentId::Null();
+    return ComponentId();
 }
 
 void Graph::dumpToQDebug(int detail) const
@@ -269,17 +269,17 @@ void Graph::emitGraphChanged()
 
 void Graph::setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId)
 {
-    Q_ASSERT(!sourceId.IsNull());
-    Q_ASSERT(!targetId.IsNull());
+    Q_ASSERT(!sourceId.isNull());
+    Q_ASSERT(!targetId.isNull());
 
-    if(!edge.sourceId().IsNull())
+    if(!edge.sourceId().isNull())
     {
         // Remove edge from source node out edges
         Node& source = nodesVector[edge.sourceId()];
         source._outEdges.remove(edge.id());
     }
 
-    if(!edge.targetId().IsNull())
+    if(!edge.targetId().isNull())
     {
         // Remove edge from target node in edges
         Node& target = nodesVector[edge.targetId()];

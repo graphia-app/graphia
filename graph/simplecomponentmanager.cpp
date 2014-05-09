@@ -6,7 +6,7 @@ static QSet<ComponentId> assignConnectedElementsComponentId(NodeId rootId, Compo
                                                             const Graph& graph,
                                                             NodeArray<ComponentId>& nodesComponentId,
                                                             EdgeArray<ComponentId>& edgesComponentId,
-                                                            EdgeId skipEdgeId = EdgeId::Null())
+                                                            EdgeId skipEdgeId = EdgeId())
 {
     QQueue<NodeId> nodeIdSearchList;
     QSet<ComponentId> oldComponentIdsAffected;
@@ -37,7 +37,7 @@ static QSet<ComponentId> assignConnectedElementsComponentId(NodeId rootId, Compo
         }
     }
 
-    oldComponentIdsAffected.remove(ComponentId::Null());
+    oldComponentIdsAffected.remove(ComponentId());
 
     return oldComponentIdsAffected;
 }
@@ -51,9 +51,6 @@ void SimpleComponentManager::updateComponents()
     EdgeArray<ComponentId> newEdgesComponentId(graph());
     QList<ComponentId> newComponentIdsList;
 
-    newNodesComponentId.fill(ComponentId::Null());
-    newEdgesComponentId.fill(ComponentId::Null());
-
     const QVector<NodeId>& nodeIdsList = graph().nodeIds();
 
     // Search for mergers and splitters
@@ -61,7 +58,7 @@ void SimpleComponentManager::updateComponents()
     {
         ComponentId oldComponentId = nodesComponentId[nodeId];
 
-        if(newNodesComponentId[nodeId].IsNull() && !oldComponentId.IsNull())
+        if(newNodesComponentId[nodeId].isNull() && !oldComponentId.isNull())
         {
             if(newComponentIdsList.contains(oldComponentId))
             {
@@ -103,7 +100,7 @@ void SimpleComponentManager::updateComponents()
     // Search for entirely new components
     for(NodeId nodeId : nodeIdsList)
     {
-        if(newNodesComponentId[nodeId].IsNull() && nodesComponentId[nodeId].IsNull())
+        if(newNodesComponentId[nodeId].isNull() && nodesComponentId[nodeId].isNull())
         {
             ComponentId newComponentId = generateComponentId();
             newComponentIdsList.append(newComponentId);
@@ -242,19 +239,19 @@ const GraphComponent* SimpleComponentManager::componentById(ComponentId componen
 
 ComponentId SimpleComponentManager::componentIdOfNode(NodeId nodeId) const
 {
-    if(nodeId.IsNull())
-        return ComponentId::Null();
+    if(nodeId.isNull())
+        return ComponentId();
 
     ComponentId componentId = nodesComponentId[nodeId];
-    return componentIdsList.contains(componentId) ? componentId : ComponentId::Null();
+    return componentIdsList.contains(componentId) ? componentId : ComponentId();
 }
 
 ComponentId SimpleComponentManager::componentIdOfEdge(EdgeId edgeId) const
 {
-    if(edgeId.IsNull())
-        return ComponentId::Null();
+    if(edgeId.isNull())
+        return ComponentId();
 
     ComponentId componentId = edgesComponentId[edgeId];
-    return componentIdsList.contains(componentId) ? componentId : ComponentId::Null();
+    return componentIdsList.contains(componentId) ? componentId : ComponentId();
 }
 

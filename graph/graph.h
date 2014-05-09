@@ -13,22 +13,31 @@ class ResizableGraphArray;
 class GraphComponent;
 class ComponentManager;
 
+template<typename T> class ElementId;
+template<typename T> QDebug operator<<(QDebug d, const ElementId<T>& id);
+
 template<typename T> class ElementId
 {
 private:
-    static constexpr int NullValue = -1;
+    static const int NullValue = -1;
     int value;
 
 public:
-    ElementId(int _value = NullValue) :
+    explicit ElementId(int _value = NullValue) :
         value(_value)
     {}
 
     inline operator int() const { return value; }
-    ElementId& operator=(const ElementId& other)
+
+    ElementId& operator=(const ElementId<T>& other)
     {
         value = other.value;
         return *this;
+    }
+
+    explicit ElementId(const ElementId<T>& other)
+    {
+        value = other.value;
     }
 
     inline T& operator++()
@@ -44,17 +53,33 @@ public:
         return previous;
     }
 
-    inline bool IsNull() const
+    inline bool operator==(const ElementId<T>& other) const
+    {
+        return value == other.value;
+    }
+
+    inline bool isNull() const
     {
         return value == NullValue;
     }
 
-    inline static T Null()
+    inline void setToNull()
     {
-        static ElementId nullValue;
-        return static_cast<T&>(nullValue);
+        value = NullValue;
     }
+
+    friend QDebug operator<< <T>(QDebug d, const ElementId<T>& id);
 };
+
+template<typename T> QDebug operator<<(QDebug d, const ElementId<T>& id)
+{
+    if(id.isNull())
+        d << "Null";
+    else
+        d << id.value;
+
+    return d;
+}
 
 struct NodeId : ElementId<NodeId> { using ElementId::ElementId; };
 struct EdgeId : ElementId<EdgeId> { using ElementId::ElementId; };
@@ -70,7 +95,7 @@ private:
     QSet<EdgeId> _outEdges;
 
 public:
-    Node() : _id(NodeId::Null()) {}
+    Node() {}
     Node(const Node& other) :
         _id(other._id),
         _inEdges(other._inEdges),
@@ -97,11 +122,7 @@ private:
     NodeId _targetId;
 
 public:
-    Edge() :
-        _id(NodeId::Null()),
-        _sourceId(NodeId::Null()),
-        _targetId(NodeId::Null())
-    {}
+    Edge() {}
     Edge(const Edge& other) :
         _id(other._id),
         _sourceId(other._sourceId),
@@ -117,7 +138,7 @@ public:
         else if(nodeId == _targetId)
             return _sourceId;
 
-        return NodeId::Null();
+        return NodeId();
     }
 
     bool isLoop() const { return sourceId() == targetId(); }
@@ -131,12 +152,12 @@ public:
     virtual const QVector<NodeId>& nodeIds() const = 0;
     virtual int numNodes() const = 0;
     virtual const Node& nodeById(NodeId nodeId) const = 0;
-    NodeId firstNodeId() const { return nodeIds().size() > 0 ? nodeIds().at(0) : NodeId::Null(); }
+    NodeId firstNodeId() const { return nodeIds().size() > 0 ? nodeIds().at(0) : NodeId(); }
 
     virtual const QVector<EdgeId>& edgeIds() const = 0;
     virtual int numEdges() const = 0;
     virtual const Edge& edgeById(EdgeId edgeId) const = 0;
-    EdgeId firstEdgeId() const { return edgeIds().size() > 0 ? edgeIds().at(0) : EdgeId::Null(); }
+    EdgeId firstEdgeId() const { return edgeIds().size() > 0 ? edgeIds().at(0) : EdgeId(); }
 
     virtual void dumpToQDebug(int detail) const
     {

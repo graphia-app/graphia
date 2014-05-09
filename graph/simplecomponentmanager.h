@@ -50,8 +50,8 @@ public:
     SimpleComponentManager(Graph& graph) :
         ComponentManager(graph),
         nextComponentId(0),
-        nodesComponentId(graph, ComponentId::Null()),
-        edgesComponentId(graph, ComponentId::Null())
+        nodesComponentId(graph),
+        edgesComponentId(graph)
     {}
 
 private:
