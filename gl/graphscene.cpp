@@ -136,7 +136,7 @@ void GraphScene::initialise()
     glEnable( GL_DEPTH_TEST );
 
     // Cull back facing triangles to save the gpu some work
-    //glEnable( GL_CULL_FACE );
+    glEnable(GL_CULL_FACE);
 }
 
 void GraphScene::cleanup()
@@ -1225,13 +1225,13 @@ void GraphScene::prepareScreenQuad()
 {
     GLfloat quadVerts[] =
     {
-        -1.0f,  1.0f,
+         1.0f, -1.0f,
          1.0f,  1.0f,
-         1.0f, -1.0f,
-
-         1.0f, -1.0f,
-        -1.0f, -1.0f,
         -1.0f,  1.0f,
+
+        -1.0f,  1.0f,
+        -1.0f, -1.0f,
+         1.0f, -1.0f,
     };
     size_t quadVertsSize = sizeof(quadVerts);
     QOpenGLBuffer quadBuffer;
