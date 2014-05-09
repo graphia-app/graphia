@@ -1293,7 +1293,7 @@ bool GraphScene::prepareRenderBuffers()
     if(colorTexture == 0)
         m_funcs->glGenTextures(1, &colorTexture);
     m_funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, colorTexture);
-    m_funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA, width, height, GL_FALSE);
+    m_funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisamples, GL_RGBA, width, height, GL_FALSE);
     m_funcs->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
     m_funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 
@@ -1301,7 +1301,7 @@ bool GraphScene::prepareRenderBuffers()
     if(selectionTexture == 0)
         m_funcs->glGenTextures(1, &selectionTexture);
     m_funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, selectionTexture);
-    m_funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA, width, height, GL_FALSE);
+    m_funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisamples, GL_RGBA, width, height, GL_FALSE);
     m_funcs->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
     m_funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 
@@ -1309,7 +1309,7 @@ bool GraphScene::prepareRenderBuffers()
     if(depthTexture == 0)
         m_funcs->glGenTextures(1, &depthTexture);
     m_funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, depthTexture);
-    m_funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_DEPTH_COMPONENT, width, height, GL_FALSE);
+    m_funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisamples, GL_DEPTH_COMPONENT, width, height, GL_FALSE);
     m_funcs->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
     m_funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
     m_funcs->glBindRenderbuffer(GL_RENDERBUFFER, 0);

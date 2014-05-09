@@ -101,6 +101,7 @@ private:
 
     QOpenGLVertexArrayObject screenQuadVAO;
 
+    static const int multisamples = 4;
     bool prepareRenderBuffers();
 
     void renderNodes(QOpenGLShaderProgram& program);
