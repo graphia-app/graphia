@@ -71,7 +71,10 @@ void SimpleComponentManager::updateComponents()
                 queueGraphComponentUpdate(oldComponentId);
                 queueGraphComponentUpdate(newComponentId);
 
-                splitComponents[oldComponentId].unite({oldComponentId, newComponentId});
+                QSet<ComponentId> splitters;
+                splitters.insert(oldComponentId);
+                splitters.insert(newComponentId);
+                splitComponents[oldComponentId].unite(splitters);
             }
             else
             {

@@ -42,6 +42,7 @@ GraphScene::GraphScene( QObject* parent )
       selectionTexture(0),
       depthTexture(0),
       visualFBO(0),
+      FBOcomplete(false),
       m_rightMouseButtonHeld(false),
       m_leftMouseButtonHeld(false),
       m_controlKeyHeld(false),
@@ -523,25 +524,19 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
 {
     struct Light
     {
+        Light() {}
+        Light(const QVector4D& _position, const QVector3D& _intensity) :
+            position(_position), intensity(_intensity)
+        {}
+
         QVector4D position;
         QVector3D intensity;
     };
 
-    QVector<Light> lights =
-    {
-        {
-            QVector4D(-20.0f, 0.0f, 3.0f, 1.0f),
-            QVector3D(0.6f, 0.6f, 0.6f)
-        },
-        {
-            QVector4D(0.0f, 0.0f, 0.0f, 1.0f),
-            QVector3D(0.2f, 0.2f, 0.2f)
-        },
-        {
-            QVector4D(10.0f, -10.0f, -10.0f, 1.0f),
-            QVector3D(0.4f, 0.4f, 0.4f)
-        }
-    };
+    QVector<Light> lights;
+    lights.append(Light(QVector4D(-20.0f, 0.0f, 3.0f, 1.0f), QVector3D(0.6f, 0.6f, 0.6f)));
+    lights.append(Light(QVector4D(0.0f, 0.0f, 0.0f, 1.0f), QVector3D(0.2f, 0.2f, 0.2f)));
+    lights.append(Light(QVector4D(10.0f, -10.0f, -10.0f, 1.0f), QVector3D(0.4f, 0.4f, 0.4f)));
 
     int numberOfLights = lights.size();
 
@@ -549,11 +544,11 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
 
     for(int i = 0; i < numberOfLights; i++)
     {
-        const char* positionId = QString("lights[%1].position").arg(i).toLatin1().data();
-        program.setUniformValue(positionId, lights[i].position);
+        QByteArray positionId = QString("lights[%1].position").arg(i).toLatin1();
+        program.setUniformValue(positionId.data(), lights[i].position);
 
-        const char* intensityId = QString("lights[%1].intensity").arg(i).toLatin1().data();
-        program.setUniformValue(intensityId, lights[i].intensity);
+        QByteArray intensityId = QString("lights[%1].intensity").arg(i).toLatin1();
+        program.setUniformValue(intensityId.data(), lights[i].intensity);
     }
 
     program.setUniformValue("material.ks", QVector3D(1.0f, 1.0f, 1.0f));
@@ -563,6 +558,9 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
 
 void GraphScene::render()
 {
+    if(!FBOcomplete)
+        return;
+
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
 
@@ -629,16 +627,21 @@ void GraphScene::resize(int w, int h)
     width = w;
     height = h;
 
-    prepareRenderBuffers();
+    qDebug() << "GraphScene::resize(" << w << h << ")";
+
+    FBOcomplete = prepareRenderBuffers();
 
     glViewport(0, 0, w, h);
 
     aspectRatio = static_cast<float>(w) / static_cast<float>(h);
 
-    for(ComponentId componentId : *_graphModel->graph().componentIds())
+    if(_graphModel != nullptr)
     {
-        ComponentViewData* componentViewData = &(*componentsViewData)[componentId];
-        setupCamera(componentViewData->camera, aspectRatio);
+        for(ComponentId componentId : *_graphModel->graph().componentIds())
+        {
+            ComponentViewData* componentViewData = &(*componentsViewData)[componentId];
+            setupCamera(componentViewData->camera, aspectRatio);
+        }
     }
 }
 
@@ -1231,7 +1234,7 @@ void GraphScene::prepareScreenQuad()
         -1.0f, -1.0f,
          1.0f, -1.0f,
     };
-    size_t quadVertsSize = sizeof(quadVerts);
+    int quadVertsSize = sizeof(quadVerts);
     QOpenGLBuffer quadBuffer;
 
     screenQuadVAO.create();
@@ -1310,7 +1313,6 @@ bool GraphScene::prepareRenderBuffers()
     m_funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisamples, GL_DEPTH_COMPONENT, width, height, GL_FALSE);
     m_funcs->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
     m_funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-    m_funcs->glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     // Visual FBO
     if(visualFBO == 0)
