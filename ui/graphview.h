@@ -53,8 +53,6 @@ public:
 
         return format;
     }
-
-signals:
     
 public slots:
     void layoutChanged();
