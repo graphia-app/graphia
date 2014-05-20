@@ -664,10 +664,11 @@ void GraphScene::zoom(float direction)
     if(targetZoomDistance < MINIMUM_CAMERA_DISTANCE)
         targetZoomDistance = MINIMUM_CAMERA_DISTANCE;
 
+    float startZoomDistance = componentViewData->zoomDistance;
     zoomTransition.start(0.1f, Transition::Type::Linear,
     [=](float f)
     {
-        componentViewData->zoomDistance = componentViewData->zoomDistance + ((targetZoomDistance - componentViewData->zoomDistance) * f);
+        componentViewData->zoomDistance = startZoomDistance + ((targetZoomDistance - startZoomDistance) * f);
     });
 }
 
