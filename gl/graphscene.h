@@ -45,6 +45,8 @@ class GraphScene : public AbstractScene
 public:
     GraphScene(QObject* parent = 0);
 
+    static const int multisamples = 4;
+
     void initialise();
     void cleanup();
     void update( float t );
@@ -102,7 +104,6 @@ private:
 
     QOpenGLVertexArrayObject screenQuadVAO;
 
-    static const int multisamples = 4;
     bool prepareRenderBuffers();
 
     void renderNodes(QOpenGLShaderProgram& program);

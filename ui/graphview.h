@@ -46,7 +46,7 @@ public:
             format.setMinorVersion(3);
 
             format.setDepthBufferSize(24);
-            format.setSamples(4);
+            format.setSamples(GraphScene::multisamples);
             format.setProfile(QSurfaceFormat::CoreProfile);
             initialised = true;
         }
