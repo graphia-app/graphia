@@ -11,13 +11,16 @@ Transition::Transition() :
     _function([](float){})
 {}
 
-void Transition::start(float duration, Transition::Type type, std::function<void (float)> function)
+void Transition::start(float duration, Transition::Type type,
+                       std::function<void(float)> function,
+                       std::function<void()> finishedFunction)
 {
     lastTime = -1.0f;
     _duration = duration;
     elapsed = 0.0f;
     _type = type;
     _function = function;
+    _finishedFunction = finishedFunction;
 }
 
 bool Transition::update(float time)
@@ -55,6 +58,12 @@ bool Transition::update(float time)
 
     _function(f);
 
-    return finished();
+    if(finished())
+    {
+        _finishedFunction();
+        return true;
+    }
+
+    return false;
 }
 

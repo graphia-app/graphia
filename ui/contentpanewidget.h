@@ -35,7 +35,7 @@ private:
     NodeLayoutThread* nodeLayoutThread;
     LayoutThread* componentLayoutThread;
 
-    bool resumeLayoutPostChange;
+    bool resumePreviouslyActiveLayout;
 
 private slots:
     void onGraphWillChange(const Graph*);
@@ -49,9 +49,9 @@ private slots:
 public:
     GraphModel* graphModel() { return _graphModel; }
     SelectionManager* selectionManager() { return _selectionManager; }
-    void pauseLayout();
+    void pauseLayout(bool autoResume = false);
     bool layoutIsPaused();
-    void resumeLayout();
+    void resumeLayout(bool autoResume = false);
 
     void selectAll();
     void selectNone();

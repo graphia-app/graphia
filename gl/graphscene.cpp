@@ -649,7 +649,7 @@ const float MINIMUM_CAMERA_DISTANCE = 2.5f;
 
 void GraphScene::zoom(float direction)
 {
-    if(direction == 0.0f)
+    if(direction == 0.0f || !panTransition.finished())
         return;
 
     ComponentViewData* componentViewData = focusComponentViewData();
@@ -698,11 +698,16 @@ void GraphScene::centreNodeInViewport(NodeId nodeId, Transition::Type transition
 
     if(transitionType != Transition::Type::None)
     {
+        emit userInteractionStarted();
         panTransition.start(0.3f, transitionType,
         [=](float f)
         {
             m_camera->setPosition(startPosition + ((targetPosition - startPosition) * f));
             m_camera->setViewTarget(startViewTarget + ((nodePosition - startViewTarget) * f));
+        },
+        [=]()
+        {
+            emit userInteractionFinished();
         });
     }
     else
@@ -762,6 +767,14 @@ void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
     switch(mouseEvent->button())
     {
     case Qt::RightButton:
+        if(!panTransition.finished())
+        {
+            m_rightMouseButtonHeld = false;
+            return;
+        }
+
+        emit userInteractionFinished();
+
         if(m_rightMouseButtonHeld && m_mouseMoving)
             selectFocusNode(focusComponentId, Transition::Type::InversePower);
 
@@ -771,6 +784,11 @@ void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
 
     case Qt::LeftButton:
         m_leftMouseButtonHeld = false;
+
+        if(!panTransition.finished())
+            return;
+
+        emit userInteractionFinished();
 
         if(m_selecting)
         {
@@ -820,12 +838,15 @@ void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
     default: break;
     }
 
-    if(!m_rightMouseButtonHeld && !m_leftMouseButtonHeld)
+    if(m_mouseMoving && !m_rightMouseButtonHeld && !m_leftMouseButtonHeld)
         m_mouseMoving = false;
 }
 
 void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
 {
+    if(!panTransition.finished())
+        return;
+
     m_pos = mouseEvent->pos();
 
     if(!clickedNodeId.isNull())
@@ -834,6 +855,8 @@ void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
 
         if(m_rightMouseButtonHeld)
         {
+            emit userInteractionStarted();
+
             const QVector3D& clickedNodePosition = _graphModel->nodePositions()[clickedNodeId];
 
             Plane translationPlane(clickedNodePosition, m_camera->viewVector().normalized());
@@ -848,6 +871,8 @@ void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
         }
         else if(m_leftMouseButtonHeld)
         {
+            emit userInteractionStarted();
+
             ComponentViewData* componentViewData = focusComponentViewData();
 
             if(componentViewData->focusNodeId.isNull())
@@ -855,6 +880,8 @@ void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
 
             if(componentViewData->focusNodeId != clickedNodeId)
             {
+                emit userInteractionStarted();
+
                 const QVector3D& clickedNodePosition = _graphModel->nodePositions()[clickedNodeId];
                 const QVector3D& rotationCentre = _graphModel->nodePositions()[componentViewData->focusNodeId];
                 float radius = clickedNodePosition.distanceToPoint(rotationCentre);
@@ -902,15 +929,16 @@ void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
                 float value = dot / (clickedLine.length() * cursorLine.length());
                 value = Utils::clamp(-1.0f, 1.0f, value);
                 float radians = std::acos(value);
-                float angle = qRadiansToDegrees(radians);
-                QQuaternion rotation = QQuaternion::fromAxisAndAngle(axis, -angle);
+                float angle = -qRadiansToDegrees(radians);
 
+                QQuaternion rotation = QQuaternion::fromAxisAndAngle(axis, angle);
                 m_camera->rotateAboutViewTarget(rotation);
             }
         }
     }
     else if(m_leftMouseButtonHeld)
     {
+        emit userInteractionStarted();
         m_frustumSelecting = true;
     }
 
@@ -922,7 +950,7 @@ void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
 
 void GraphScene::mouseDoubleClickEvent(QMouseEvent* mouseEvent)
 {
-    if (mouseEvent->button() == Qt::LeftButton)
+    if(mouseEvent->button() == Qt::LeftButton)
     {
         if(!clickedNodeId.isNull() && !m_mouseMoving)
         {

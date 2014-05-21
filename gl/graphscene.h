@@ -189,6 +189,10 @@ private:
     void moveToPreviousComponent();
     void moveToComponent(ComponentId componentId);
 
+signals:
+    void userInteractionStarted();
+    void userInteractionFinished();
+
 public:
     void addDebugLine(const QVector3D& start, const QVector3D& end, const QColor color = QColor(Qt::GlobalColor::white))
     {

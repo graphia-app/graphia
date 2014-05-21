@@ -26,6 +26,7 @@ protected:
     virtual void resize();
     virtual void render();
 
+    virtual void keyPressEvent( QKeyEvent* e );
     virtual void keyReleaseEvent( QKeyEvent* e );
     virtual void mousePressEvent( QMouseEvent* e );
     virtual void mouseReleaseEvent( QMouseEvent* e );
@@ -37,7 +38,6 @@ protected slots:
     virtual void updateScene();
 
     void resizeEvent( QResizeEvent* e );
-    void keyPressEvent( QKeyEvent* e );
 
     void messageLogged(const QOpenGLDebugMessage &message);
 

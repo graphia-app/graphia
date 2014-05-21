@@ -53,7 +53,11 @@ public:
 
         return format;
     }
-    
+
+signals:
+    void userInteractionStarted();
+    void userInteractionFinished();
+
 public slots:
     void layoutChanged();
     

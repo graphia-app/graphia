@@ -13,6 +13,9 @@ GraphView::GraphView(QWidget *parent) :
     graphScene = new GraphScene;
     window->setScene(graphScene);
 
+    connect(graphScene, &GraphScene::userInteractionStarted, this, &GraphView::userInteractionStarted);
+    connect(graphScene, &GraphScene::userInteractionFinished, this, &GraphView::userInteractionFinished);
+
     this->setLayout(new QVBoxLayout());
     this->layout()->addWidget(QWidget::createWindowContainer(window));
 }

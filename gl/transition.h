@@ -24,11 +24,13 @@ private:
     float _duration;
     float elapsed;
     std::function<void(float)> _function;
+    std::function<void()> _finishedFunction;
 
 public:
     Transition();
 
-    void start(float duration, Type type, std::function<void(float)> function);
+    void start(float duration, Type type, std::function<void(float)> function,
+               std::function<void()> finishedFunction = [](){});
 
     bool update(float time);
     bool finished() const { return elapsed >= _duration; }

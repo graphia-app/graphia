@@ -22,7 +22,7 @@ ContentPaneWidget::ContentPaneWidget(QWidget* parent) :
     graphFileParserThread(nullptr),
     nodeLayoutThread(nullptr),
     componentLayoutThread(nullptr),
-    resumeLayoutPostChange(false)
+    resumePreviouslyActiveLayout(false)
 {
     this->setLayout(new QVBoxLayout());
 }
@@ -98,6 +98,16 @@ void ContentPaneWidget::onCompletion(int success)
     graphView->setSelectionManager(_selectionManager);
     connect(nodeLayoutThread, &LayoutThread::executed, graphView, &GraphView::layoutChanged);
 
+    connect(graphView, &GraphView::userInteractionStarted, [=]()
+    {
+        pauseLayout(true);
+    });
+
+    connect(graphView, &GraphView::userInteractionFinished, [=]()
+    {
+        resumeLayout(true);
+    });
+
     layout()->addWidget(graphView);
 
     if(_graphModel->contentWidget() != nullptr)
@@ -109,31 +119,12 @@ void ContentPaneWidget::onCompletion(int success)
 void ContentPaneWidget::onGraphWillChange(const Graph*)
 {
     // Graph is about to change so suspend any active layout process
-    if(componentLayoutThread != nullptr && !componentLayoutThread->paused())
-    {
-        componentLayoutThread->pauseAndWait();
-        resumeLayoutPostChange = true;
-    }
-
-    if(nodeLayoutThread != nullptr && !nodeLayoutThread->paused())
-    {
-        nodeLayoutThread->pauseAndWait();
-        resumeLayoutPostChange = true;
-    }
+    pauseLayout(true);
 }
 
 void ContentPaneWidget::onGraphChanged(const Graph* graph)
 {
-    if(resumeLayoutPostChange)
-    {
-        if(nodeLayoutThread != nullptr)
-            nodeLayoutThread->resume();
-
-        if(componentLayoutThread != nullptr)
-            componentLayoutThread->resume();
-    }
-
-    resumeLayoutPostChange = false;
+    resumeLayout(true);
 
     emit graphChanged(graph);
 }
@@ -171,13 +162,23 @@ void ContentPaneWidget::onComponentsWillMerge(const Graph*, const QSet<Component
     }
 }
 
-void ContentPaneWidget::pauseLayout()
+void ContentPaneWidget::pauseLayout(bool autoResume)
 {
-    if(nodeLayoutThread != nullptr)
-        nodeLayoutThread->pause();
-
     if(componentLayoutThread != nullptr)
-        componentLayoutThread->pause();
+    {
+        if(autoResume && !componentLayoutThread->paused())
+            resumePreviouslyActiveLayout = true;
+
+        componentLayoutThread->pauseAndWait();
+    }
+
+    if(nodeLayoutThread != nullptr)
+    {
+        if(autoResume && !nodeLayoutThread->paused())
+            resumePreviouslyActiveLayout = true;
+
+        nodeLayoutThread->pauseAndWait();
+    }
 }
 
 bool ContentPaneWidget::layoutIsPaused()
@@ -189,8 +190,13 @@ bool ContentPaneWidget::layoutIsPaused()
     return nodeLayoutPaused && componentLayoutPaused;
 }
 
-void ContentPaneWidget::resumeLayout()
+void ContentPaneWidget::resumeLayout(bool autoResume)
 {
+    if(autoResume && !resumePreviouslyActiveLayout)
+        return;
+
+    resumePreviouslyActiveLayout = false;
+
     if(nodeLayoutThread != nullptr)
         nodeLayoutThread->resume();
 
