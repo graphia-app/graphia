@@ -46,6 +46,7 @@ GraphScene::GraphScene( QObject* parent )
       m_rightMouseButtonHeld(false),
       m_leftMouseButtonHeld(false),
       m_controlKeyHeld(false),
+      m_shiftKeyHeld(false),
       m_selecting(false),
       m_frustumSelecting(false),
       m_mouseMoving(false),
@@ -758,7 +759,7 @@ void GraphScene::mousePressEvent(QMouseEvent* mouseEvent)
     Collision collision(component, _graphModel->nodeVisuals(), _graphModel->nodePositions());
     clickedNodeId = collision.nearestNodeIntersectingLine(ray.origin(), ray.dir());
 
-    if(clickedNodeId.isNull())
+    if(m_shiftKeyHeld)
         m_frustumSelectStart = m_pos;
 }
 
@@ -794,7 +795,7 @@ void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
         {
             if(m_frustumSelecting)
             {
-                if(!m_controlKeyHeld)
+                if(!m_shiftKeyHeld)
                     _selectionManager->clearNodeSelection();
 
                 QPoint frustumEndPoint = mouseEvent->pos();
@@ -820,7 +821,7 @@ void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
             {
                 if(!clickedNodeId.isNull())
                 {
-                    if(!m_controlKeyHeld)
+                    if(!m_shiftKeyHeld)
                         _selectionManager->clearNodeSelection();
 
                     _selectionManager->toggleNode(clickedNodeId);
@@ -849,7 +850,14 @@ void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
 
     m_pos = mouseEvent->pos();
 
-    if(!clickedNodeId.isNull())
+    if(m_shiftKeyHeld && m_leftMouseButtonHeld)
+    {
+        emit userInteractionStarted();
+        m_selecting = true;
+        m_frustumSelecting = true;
+        clickedNodeId.setToNull();
+    }
+    else if(!clickedNodeId.isNull())
     {
         m_selecting = false;
 
@@ -936,11 +944,6 @@ void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
             }
         }
     }
-    else if(m_leftMouseButtonHeld)
-    {
-        emit userInteractionStarted();
-        m_frustumSelecting = true;
-    }
 
     m_prevPos = m_pos;
 
@@ -965,6 +968,12 @@ bool GraphScene::keyPressEvent(QKeyEvent* keyEvent)
 {
     switch(keyEvent->key())
     {
+    case Qt::Key_Shift:
+        m_shiftKeyHeld = true;
+        if(m_leftMouseButtonHeld)
+            m_frustumSelectStart = m_pos;
+        return true;
+
     case Qt::Key_Control:
         m_controlKeyHeld = true;
         return true;
@@ -980,6 +989,23 @@ bool GraphScene::keyPressEvent(QKeyEvent* keyEvent)
 
     case Qt::Key_Right:
         moveToPreviousComponent();
+        return true;
+
+    default:
+        return false;
+    }
+}
+
+bool GraphScene::keyReleaseEvent(QKeyEvent* keyEvent)
+{
+    switch(keyEvent->key())
+    {
+    case Qt::Key_Shift:
+        m_shiftKeyHeld = false;
+        return true;
+
+    case Qt::Key_Control:
+        m_controlKeyHeld = false;
         return true;
 
     default:
@@ -1037,19 +1063,6 @@ void GraphScene::moveToComponent(ComponentId componentId)
     {
         updateVisualData();
         targetZoomDistance = focusComponentViewData()->zoomDistance;
-    }
-}
-
-bool GraphScene::keyReleaseEvent(QKeyEvent* keyEvent)
-{
-    switch(keyEvent->key())
-    {
-    case Qt::Key_Control:
-        m_controlKeyHeld = false;
-        return true;
-
-    default:
-        return false;
     }
 }
 
