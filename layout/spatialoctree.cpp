@@ -25,7 +25,7 @@ static void subDivideBoundingBox(const BoundingBox3D& boundingBox, SpatialOctTre
     subVolumes[7].boundingBox = BoundingBox3D(QVector3D(cx,      cy,      cz     ), QVector3D(cx + xh, cy + yh, cz + zh));
 }
 
-static bool distributeNodesOverVolume(SpatialOctTree& spatialOctTree, const QList<NodeId> nodeIds,
+static bool distributeNodesOverVolume(SpatialOctTree& spatialOctTree, const QVector<NodeId> nodeIds,
                                       const NodePositions& nodePositions, QSet<SpatialOctTree::SubVolume*>& subVolumes)
 {
     bool distinctPositions = false;
@@ -51,7 +51,7 @@ static bool distributeNodesOverVolume(SpatialOctTree& spatialOctTree, const QLis
     return distinctPositions;
 }
 
-static void distributeNodesOverSubVolumes(SpatialOctTree& spatialOctTree, const QList<NodeId> nodeIds,
+static void distributeNodesOverSubVolumes(SpatialOctTree& spatialOctTree, const QVector<NodeId> nodeIds,
                                           const NodePositions& nodePositions,
                                           std::function<bool(SpatialOctTree::SubVolume*)> predicate)
 {
@@ -74,7 +74,7 @@ static void distributeNodesOverSubVolumes(SpatialOctTree& spatialOctTree, const 
     }
 }
 
-SpatialOctTree::SpatialOctTree(const BoundingBox3D& boundingBox, const QList<NodeId> nodeIds, const NodePositions& nodePositions, std::function<bool(SubVolume*)> predicate) :
+SpatialOctTree::SpatialOctTree(const BoundingBox3D& boundingBox, const QVector<NodeId> nodeIds, const NodePositions& nodePositions, std::function<bool(SubVolume*)> predicate) :
     centre(boundingBox.centre())
 {
     for(int i = 0; i < 8; i++)
@@ -84,7 +84,7 @@ SpatialOctTree::SpatialOctTree(const BoundingBox3D& boundingBox, const QList<Nod
     distributeNodesOverSubVolumes(*this, nodeIds, nodePositions, predicate);
 }
 
-SpatialOctTree::SpatialOctTree(const BoundingBox3D& boundingBox, const QList<NodeId> nodeIds, const NodePositions& nodePositions,
+SpatialOctTree::SpatialOctTree(const BoundingBox3D& boundingBox, const QVector<NodeId> nodeIds, const NodePositions& nodePositions,
                                const QVector3D& origin, const QVector3D& direction) :
     centre(boundingBox.centre())
 {

@@ -356,8 +356,8 @@ void GraphScene::update(float t)
 
 #if 0
         //FIXME debug
-        SpatialOctTree octree(NodeLayout::boundingBox(component, nodePositions), component.nodeIds(), nodePositions);
-        octree.debugRenderOctTree(this, componentPositions[componentId]);
+        SpatialOctTree octree(NodeLayout::boundingBox(*component, nodePositions), component->nodeIds(), nodePositions);
+        octree.debugRenderOctTree(this);
 #endif
 
         zoomTransition.update(t);
