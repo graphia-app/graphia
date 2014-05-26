@@ -84,6 +84,7 @@ private:
     void prepareNodeVAO();
     void prepareEdgeVAO();
     void prepareComponentMarkerVAO();
+    void prepareSelectionMarkerVAO();
     void prepareDebugLinesVAO();
     void prepareTexture();
 
@@ -106,10 +107,11 @@ private:
 
     bool prepareRenderBuffers();
 
-    void renderNodes(QOpenGLShaderProgram& program);
-    void renderEdges(QOpenGLShaderProgram& program);
+    void renderNodes();
+    void renderEdges();
     void renderComponentMarkers();
     void renderDebugLines();
+    void render2D();
 
     void zoom(float delta);
 
@@ -178,10 +180,13 @@ private:
     QVector<GLfloat> m_componentMarkerData;
     QOpenGLBuffer m_componentMarkerDataBuffer;
 
+    QOpenGLShaderProgram selectionMarkerShader;
+    QOpenGLBuffer selectionMarkerDataBuffer;
+    QOpenGLVertexArrayObject selectionMarkerDataVAO;
+
     QList<DebugLine> debugLines;
     QMutex debugLinesMutex;
     QVector<GLfloat> debugLinesData;
-    QVector<QVector3D> debugLinesVertices;
     QOpenGLBuffer debugLinesDataBuffer;
     QOpenGLVertexArrayObject debugLinesDataVAO;
     QOpenGLShaderProgram debugLinesShader;

@@ -10,5 +10,7 @@
         <file>gl/shaders/screen.frag</file>
         <file>gl/shaders/screen.vert</file>
         <file>gl/shaders/selection.frag</file>
+        <file>gl/shaders/selectionMarker.frag</file>
+        <file>gl/shaders/2d.vert</file>
     </qresource>
 </RCC>

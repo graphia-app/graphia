@@ -122,6 +122,9 @@ void GraphScene::initialise()
     debugLinesDataVAO.create();
     loadShaderProgram(debugLinesShader, ":/gl/shaders/debuglines.vert", ":/gl/shaders/debuglines.frag");
 
+    selectionMarkerDataVAO.create();
+    loadShaderProgram(selectionMarkerShader, ":/gl/shaders/2d.vert", ":/gl/shaders/selectionMarker.frag");
+
     // Create a pair of VBOs ready to hold our data
     prepareVertexBuffers();
 
@@ -129,6 +132,7 @@ void GraphScene::initialise()
     prepareNodeVAO();
     prepareEdgeVAO();
     prepareComponentMarkerVAO();
+    prepareSelectionMarkerVAO();
     prepareDebugLinesVAO();
     prepareScreenQuad();
 
@@ -164,7 +168,6 @@ void GraphScene::updateVisualData()
         m_nodeVisualData[i++] = nodeVisuals[nodeId].outlineColor.redF();
         m_nodeVisualData[i++] = nodeVisuals[nodeId].outlineColor.greenF();
         m_nodeVisualData[i++] = nodeVisuals[nodeId].outlineColor.blueF();
-        m_nodeVisualData[i++] = nodeVisuals[nodeId].outlineColor.alphaF();
     }
 
     for(EdgeId edgeId : component.edgeIds())
@@ -176,7 +179,6 @@ void GraphScene::updateVisualData()
         m_edgeVisualData[j++] = edgeVisuals[edgeId].outlineColor.redF();
         m_edgeVisualData[j++] = edgeVisuals[edgeId].outlineColor.greenF();
         m_edgeVisualData[j++] = edgeVisuals[edgeId].outlineColor.blueF();
-        m_edgeVisualData[j++] = edgeVisuals[edgeId].outlineColor.alphaF();
     }
 }
 
@@ -371,8 +373,50 @@ void GraphScene::update(float t)
     submitDebugLines();
 }
 
-void GraphScene::renderNodes(QOpenGLShaderProgram& program)
+static void setShaderADSParameters(QOpenGLShaderProgram& program)
 {
+    struct Light
+    {
+        Light() {}
+        Light(const QVector4D& _position, const QVector3D& _intensity) :
+            position(_position), intensity(_intensity)
+        {}
+
+        QVector4D position;
+        QVector3D intensity;
+    };
+
+    QVector<Light> lights;
+    lights.append(Light(QVector4D(-20.0f, 0.0f, 3.0f, 1.0f), QVector3D(0.6f, 0.6f, 0.6f)));
+    lights.append(Light(QVector4D(0.0f, 0.0f, 0.0f, 1.0f), QVector3D(0.2f, 0.2f, 0.2f)));
+    lights.append(Light(QVector4D(10.0f, -10.0f, -10.0f, 1.0f), QVector3D(0.4f, 0.4f, 0.4f)));
+
+    int numberOfLights = lights.size();
+
+    program.setUniformValue("numberOfLights", numberOfLights);
+
+    for(int i = 0; i < numberOfLights; i++)
+    {
+        QByteArray positionId = QString("lights[%1].position").arg(i).toLatin1();
+        program.setUniformValue(positionId.data(), lights[i].position);
+
+        QByteArray intensityId = QString("lights[%1].intensity").arg(i).toLatin1();
+        program.setUniformValue(intensityId.data(), lights[i].intensity);
+    }
+
+    program.setUniformValue("material.ks", QVector3D(1.0f, 1.0f, 1.0f));
+    program.setUniformValue("material.ka", QVector3D(0.1f, 0.1f, 0.1f));
+    program.setUniformValue("material.shininess", 50.0f);
+}
+
+void GraphScene::renderNodes()
+{
+    GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+    m_funcs->glDrawBuffers(2, drawBuffers);
+
+    nodesShader.bind();
+    setShaderADSParameters(nodesShader);
+
     const ReadOnlyGraph* component = _graphModel->graph().componentById(focusComponentId);
 
     m_nodePositionBuffer.bind();
@@ -383,22 +427,27 @@ void GraphScene::renderNodes(QOpenGLShaderProgram& program)
     // Calculate needed matrices
     QMatrix4x4 modelViewMatrix = m_camera->viewMatrix();
     QMatrix3x3 normalMatrix = modelViewMatrix.normalMatrix();
-    program.setUniformValue("modelViewMatrix", modelViewMatrix);
-    program.setUniformValue("normalMatrix", normalMatrix);
-    program.setUniformValue("projectionMatrix", m_camera->projectionMatrix());
-
-    m_funcs->glBindFragDataLocation(program.programId(), 0, "outColor");
-    m_funcs->glBindFragDataLocation(program.programId(), 1, "outSelection");
+    nodesShader.setUniformValue("modelViewMatrix", modelViewMatrix);
+    nodesShader.setUniformValue("normalMatrix", normalMatrix);
+    nodesShader.setUniformValue("projectionMatrix", m_camera->projectionMatrix());
 
     // Draw the nodes
     m_sphere->vertexArrayObject()->bind();
     m_funcs->glDrawElementsInstanced(GL_TRIANGLES, m_sphere->indexCount(),
                                      GL_UNSIGNED_INT, 0, component->numNodes());
     m_sphere->vertexArrayObject()->release();
+
+    nodesShader.release();
 }
 
-void GraphScene::renderEdges(QOpenGLShaderProgram& program)
+void GraphScene::renderEdges()
 {
+    GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+    m_funcs->glDrawBuffers(2, drawBuffers);
+
+    edgesShader.bind();
+    setShaderADSParameters(edgesShader);
+
     const ReadOnlyGraph* component = _graphModel->graph().componentById(focusComponentId);
 
     m_edgePositionBuffer.bind();
@@ -406,17 +455,16 @@ void GraphScene::renderEdges(QOpenGLShaderProgram& program)
     m_edgeVisualBuffer.bind();
     m_edgeVisualBuffer.allocate(m_edgeVisualData.data(), m_edgeVisualData.size() * sizeof(GLfloat));
 
-    program.setUniformValue("viewMatrix", m_camera->viewMatrix());
-    program.setUniformValue("projectionMatrix", m_camera->projectionMatrix());
-
-    m_funcs->glBindFragDataLocation(program.programId(), 0, "outColor");
-    m_funcs->glBindFragDataLocation(program.programId(), 1, "outSelection");
+    edgesShader.setUniformValue("viewMatrix", m_camera->viewMatrix());
+    edgesShader.setUniformValue("projectionMatrix", m_camera->projectionMatrix());
 
     // Draw the edges
     m_cylinder->vertexArrayObject()->bind();
     m_funcs->glDrawElementsInstanced(GL_TRIANGLES, m_cylinder->indexCount(),
                                      GL_UNSIGNED_INT, 0, component->numEdges());
     m_cylinder->vertexArrayObject()->release();
+
+    edgesShader.release();
 }
 
 void GraphScene::renderComponentMarkers()
@@ -449,6 +497,8 @@ void GraphScene::renderDebugLines()
 {
     QMutexLocker locker(&debugLinesMutex);
 
+    m_funcs->glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
     debugLinesDataBuffer.bind();
     debugLinesDataBuffer.allocate(debugLinesData.data(), debugLinesData.size() * sizeof(GLfloat));
 
@@ -460,11 +510,73 @@ void GraphScene::renderDebugLines()
     debugLinesShader.setUniformValue( "projectionMatrix", m_camera->projectionMatrix() );
 
     debugLinesDataVAO.bind();
-    glDrawArrays(GL_LINES, 0, debugLines.size() * 2);
+    m_funcs->glDrawArrays(GL_LINES, 0, debugLines.size() * 2);
     debugLinesDataVAO.release();
     debugLinesShader.release();
 
     clearDebugLines();
+}
+
+void GraphScene::render2D()
+{
+    m_funcs->glDisable(GL_DEPTH_TEST);
+
+    QMatrix4x4 m;
+    m.ortho(0.0f, width, 0.0f, height, -1.0f, 1.0f);
+
+    if(m_frustumSelecting)
+    {
+        QVector2D corners[4];
+        QVector<GLfloat> data;
+        const QVector3D color(1.0f, 1.0f, 1.0f);
+
+        QPoint point = m_pos - m_frustumSelectStart;
+        if(Utils::signsMatch(point.rx(), point.ry()))
+        {
+            corners[3] = QVector2D(m_frustumSelectStart.rx(), height - m_frustumSelectStart.ry());
+            corners[2] = QVector2D(m_pos.rx(),                height - m_frustumSelectStart.ry());
+            corners[1] = QVector2D(m_pos.rx(),                height - m_pos.ry());
+            corners[0] = QVector2D(m_frustumSelectStart.rx(), height - m_pos.ry());
+        }
+        else
+        {
+            corners[0] = QVector2D(m_frustumSelectStart.rx(), height - m_frustumSelectStart.ry());
+            corners[1] = QVector2D(m_pos.rx(),                height - m_frustumSelectStart.ry());
+            corners[2] = QVector2D(m_pos.rx(),                height - m_pos.ry());
+            corners[3] = QVector2D(m_frustumSelectStart.rx(), height - m_pos.ry());
+        }
+
+        data.append(corners[0].x()); data.append(corners[0].y());
+        data.append(color.x()); data.append(color.y()); data.append(color.z());
+        data.append(corners[1].x()); data.append(corners[1].y());
+        data.append(color.x()); data.append(color.y()); data.append(color.z());
+        data.append(corners[2].x()); data.append(corners[2].y());
+        data.append(color.x()); data.append(color.y()); data.append(color.z());
+
+        data.append(corners[2].x()); data.append(corners[2].y());
+        data.append(color.x()); data.append(color.y()); data.append(color.z());
+        data.append(corners[3].x()); data.append(corners[3].y());
+        data.append(color.x()); data.append(color.y()); data.append(color.z());
+        data.append(corners[0].x()); data.append(corners[0].y());
+        data.append(color.x()); data.append(color.y()); data.append(color.z());
+
+        m_funcs->glDrawBuffer(GL_COLOR_ATTACHMENT1);
+
+        selectionMarkerDataBuffer.bind();
+        selectionMarkerDataBuffer.allocate(data.data(),
+                                           data.size() * sizeof(GLfloat));
+
+        selectionMarkerShader.bind();
+        selectionMarkerShader.setUniformValue("projectionMatrix", m);
+
+        selectionMarkerDataVAO.bind();
+        m_funcs->glDrawArrays(GL_TRIANGLES, 0, 6);
+        selectionMarkerDataVAO.release();
+
+        selectionMarkerShader.release();
+    }
+
+    m_funcs->glEnable(GL_DEPTH_TEST);
 }
 
 void GraphScene::addDebugBoundingBox(const BoundingBox3D& boundingBox, const QColor color)
@@ -521,42 +633,6 @@ void GraphScene::submitDebugLines()
     }
 }
 
-static void setShaderADSParameters(QOpenGLShaderProgram& program)
-{
-    struct Light
-    {
-        Light() {}
-        Light(const QVector4D& _position, const QVector3D& _intensity) :
-            position(_position), intensity(_intensity)
-        {}
-
-        QVector4D position;
-        QVector3D intensity;
-    };
-
-    QVector<Light> lights;
-    lights.append(Light(QVector4D(-20.0f, 0.0f, 3.0f, 1.0f), QVector3D(0.6f, 0.6f, 0.6f)));
-    lights.append(Light(QVector4D(0.0f, 0.0f, 0.0f, 1.0f), QVector3D(0.2f, 0.2f, 0.2f)));
-    lights.append(Light(QVector4D(10.0f, -10.0f, -10.0f, 1.0f), QVector3D(0.4f, 0.4f, 0.4f)));
-
-    int numberOfLights = lights.size();
-
-    program.setUniformValue("numberOfLights", numberOfLights);
-
-    for(int i = 0; i < numberOfLights; i++)
-    {
-        QByteArray positionId = QString("lights[%1].position").arg(i).toLatin1();
-        program.setUniformValue(positionId.data(), lights[i].position);
-
-        QByteArray intensityId = QString("lights[%1].intensity").arg(i).toLatin1();
-        program.setUniformValue(intensityId.data(), lights[i].intensity);
-    }
-
-    program.setUniformValue("material.ks", QVector3D(1.0f, 1.0f, 1.0f));
-    program.setUniformValue("material.ka", QVector3D(0.1f, 0.1f, 0.1f));
-    program.setUniformValue("material.shininess", 50.0f);
-}
-
 void GraphScene::render()
 {
     if(!FBOcomplete)
@@ -579,15 +655,9 @@ void GraphScene::render()
     m_funcs->glDrawBuffers(2, drawBuffers);
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    nodesShader.bind();
-    setShaderADSParameters(nodesShader);
-    renderNodes(nodesShader);
-    nodesShader.release();
-
-    edgesShader.bind();
-    setShaderADSParameters(edgesShader);
-    renderEdges(edgesShader);
-    edgesShader.release();
+    renderNodes();
+    renderEdges();
+    render2D();
 
     //renderComponentMarkers();
     renderDebugLines();
@@ -1130,6 +1200,10 @@ void GraphScene::prepareVertexBuffers()
     m_componentMarkerDataBuffer.bind();
     m_componentMarkerDataBuffer.allocate( m_componentMarkerData.data(), m_componentMarkerData.size() * sizeof(GLfloat) );
 
+    selectionMarkerDataBuffer.create();
+    selectionMarkerDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    selectionMarkerDataBuffer.bind();
+
     debugLinesDataBuffer.create();
     debugLinesDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     debugLinesDataBuffer.bind();
@@ -1152,9 +1226,9 @@ void GraphScene::prepareNodeVAO()
     shader->enableAttributeArray("size");
     shader->enableAttributeArray("color");
     shader->enableAttributeArray("outlineColor");
-    shader->setAttributeBuffer("size", GL_FLOAT, 0, 1, 8 * sizeof(GLfloat));
-    shader->setAttributeBuffer("color", GL_FLOAT, 1 * sizeof(GLfloat), 3, 8 * sizeof(GLfloat));
-    shader->setAttributeBuffer("outlineColor", GL_FLOAT, 4 * sizeof(GLfloat), 4, 8 * sizeof(GLfloat));
+    shader->setAttributeBuffer("size", GL_FLOAT, 0, 1, 7 * sizeof(GLfloat));
+    shader->setAttributeBuffer("color", GL_FLOAT, 1 * sizeof(GLfloat), 3, 7 * sizeof(GLfloat));
+    shader->setAttributeBuffer("outlineColor", GL_FLOAT, 4 * sizeof(GLfloat), 3, 7 * sizeof(GLfloat));
 
     // We only vary the point attribute once per instance
     GLuint pointLocation = shader->attributeLocation("point");
@@ -1194,9 +1268,9 @@ void GraphScene::prepareEdgeVAO()
     shader->enableAttributeArray("size");
     shader->enableAttributeArray("color");
     shader->enableAttributeArray("outlineColor");
-    shader->setAttributeBuffer("size", GL_FLOAT, 0, 1, 8 * sizeof(GLfloat));
-    shader->setAttributeBuffer("color", GL_FLOAT, 1 * sizeof(GLfloat), 3, 8 * sizeof(GLfloat));
-    shader->setAttributeBuffer("outlineColor", GL_FLOAT, 4 * sizeof(GLfloat), 4, 8 * sizeof(GLfloat));
+    shader->setAttributeBuffer("size", GL_FLOAT, 0, 1, 7 * sizeof(GLfloat));
+    shader->setAttributeBuffer("color", GL_FLOAT, 1 * sizeof(GLfloat), 3, 7 * sizeof(GLfloat));
+    shader->setAttributeBuffer("outlineColor", GL_FLOAT, 4 * sizeof(GLfloat), 3, 7 * sizeof(GLfloat));
 
     // We only vary the point attribute once per instance
     GLuint sourcePointLocation = shader->attributeLocation("source");
@@ -1247,6 +1321,22 @@ void GraphScene::prepareComponentMarkerVAO()
 #endif
     m_quad->vertexArrayObject()->release();
     shader->release();
+}
+
+void GraphScene::prepareSelectionMarkerVAO()
+{
+    selectionMarkerDataVAO.bind();
+    selectionMarkerShader.bind();
+    selectionMarkerDataBuffer.bind();
+
+    selectionMarkerShader.enableAttributeArray("position");
+    selectionMarkerShader.enableAttributeArray("color");
+    selectionMarkerShader.disableAttributeArray("texCoord");
+    selectionMarkerShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 5 * sizeof(GLfloat));
+    selectionMarkerShader.setAttributeBuffer("color", GL_FLOAT, 2 * sizeof(GLfloat), 3, 5 * sizeof(GLfloat));
+
+    selectionMarkerDataVAO.release();
+    selectionMarkerShader.release();
 }
 
 void GraphScene::prepareDebugLinesVAO()

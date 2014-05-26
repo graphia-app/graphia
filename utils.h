@@ -103,6 +103,11 @@ public:
 
         return value;
     }
+
+    template<typename T> static bool signsMatch(T a, T b)
+    {
+        return (a > 0 && b > 0) || (a <= 0 && b <= 0);
+    }
 };
 
 #endif // UTILS_H

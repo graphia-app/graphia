@@ -112,7 +112,9 @@ OTHER_FILES += \
     gl/shaders/debuglines.frag \
     gl/shaders/screen.vert \
     gl/shaders/screen.frag \
-    gl/shaders/selection.frag
+    gl/shaders/selection.frag \
+    gl/shaders/2d.vert \
+    gl/shaders/selectionMarker.frag
 
 RESOURCES += \
     resources.qrc
