@@ -130,8 +130,6 @@ private:
     bool m_rightMouseButtonHeld;
     bool m_leftMouseButtonHeld;
 
-    bool m_controlKeyHeld;
-    bool m_shiftKeyHeld;
     bool m_selecting;
     bool m_frustumSelecting;
     QPoint m_frustumSelectStart;
