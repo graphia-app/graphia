@@ -6,6 +6,7 @@
 
 #include "../graph/graph.h"
 #include "../graph/graphmodel.h"
+#include "commandmanager.h"
 
 class SelectionManager;
 class GraphFileParserThread;
@@ -31,6 +32,7 @@ public slots:
 private:
     GraphModel* _graphModel;
     SelectionManager* _selectionManager;
+    CommandManager _commandManager;
     GraphFileParserThread *graphFileParserThread;
     NodeLayoutThread* nodeLayoutThread;
     LayoutThread* componentLayoutThread;

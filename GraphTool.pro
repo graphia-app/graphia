@@ -51,7 +51,8 @@ SOURCES += source/main.cpp\
     source/maths/ray.cpp \
     source/gl/transition.cpp \
     source/ui/selectionmanager.cpp \
-    source/maths/frustum.cpp
+    source/maths/frustum.cpp \
+    source/ui/commandmanager.cpp
 
 HEADERS  += source/mainwindow.h \
     source/graph/grapharray.h \
@@ -98,7 +99,8 @@ HEADERS  += source/mainwindow.h \
     source/gl/transition.h \
     source/ui/selectionmanager.h \
     source/maths/frustum.h \
-    source/maths/line.h
+    source/maths/line.h \
+    source/ui/commandmanager.h
 
 FORMS    += source/mainwindow.ui
 
