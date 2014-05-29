@@ -5,6 +5,7 @@
 #include <QTime>
 
 class AbstractScene;
+class GraphView;
 class QOpenGLDebugMessage;
 
 class OpenGLWindow : public QWindow
@@ -13,6 +14,7 @@ class OpenGLWindow : public QWindow
 
 public:
     explicit OpenGLWindow( const QSurfaceFormat& format,
+                           GraphView* graphView,
                            QScreen* parent = 0 );
     //FIXME destructor to delete things
 
@@ -26,13 +28,13 @@ protected:
     virtual void resize();
     virtual void render();
 
-    virtual void keyPressEvent( QKeyEvent* e );
-    virtual void keyReleaseEvent( QKeyEvent* e );
-    virtual void mousePressEvent( QMouseEvent* e );
-    virtual void mouseReleaseEvent( QMouseEvent* e );
-    virtual void mouseMoveEvent( QMouseEvent* e );
-    virtual void mouseDoubleClickEvent( QMouseEvent* e );
-    virtual void wheelEvent(QWheelEvent* e );
+    virtual void keyPressEvent(QKeyEvent* e);
+    virtual void keyReleaseEvent(QKeyEvent* e);
+    virtual void mousePressEvent(QMouseEvent* e);
+    virtual void mouseReleaseEvent(QMouseEvent* e);
+    virtual void mouseMoveEvent(QMouseEvent* e);
+    virtual void mouseDoubleClickEvent(QMouseEvent* e);
+    virtual void wheelEvent(QWheelEvent* e);
 
 protected slots:
     virtual void updateScene();
@@ -44,6 +46,7 @@ protected slots:
 private:
     QOpenGLContext* m_context;
     AbstractScene* m_scene;
+    GraphView* m_graphView;
     int m_debugLevel;
     
     QTime m_time;

@@ -3,6 +3,7 @@
 #include "opengldebugmessagemodel.h"
 
 #include "graphscene.h"
+#include "../ui/graphview.h"
 
 #include <QGuiApplication>
 #include <QKeyEvent>
@@ -10,11 +11,12 @@
 #include <QOpenGLDebugLogger>
 #include <QTimer>
 
-OpenGLWindow::OpenGLWindow( const QSurfaceFormat& format,
+OpenGLWindow::OpenGLWindow(const QSurfaceFormat& format, GraphView* graphView,
                             QScreen* screen )
     : QWindow( screen ),
-      m_context( 0 ),
-      m_scene( 0 )
+      m_context( nullptr ),
+      m_scene( nullptr ),
+      m_graphView(graphView)
 {
     // Tell Qt we will use OpenGL for this window
     setSurfaceType( OpenGLSurface );
@@ -139,38 +141,36 @@ void OpenGLWindow::messageLogged(const QOpenGLDebugMessage &message)
 
 void OpenGLWindow::keyPressEvent(QKeyEvent* e)
 {
-    if (!m_scene->keyPressEvent(e))
-        QWindow::keyPressEvent(e);
+    m_graphView->keyPressEvent(e);
 }
 
 void OpenGLWindow::keyReleaseEvent(QKeyEvent* e)
 {
-    if (!m_scene->keyReleaseEvent(e))
-        QWindow::keyReleaseEvent(e);
+    m_graphView->keyReleaseEvent(e);
 }
 
 void OpenGLWindow::mousePressEvent(QMouseEvent* e)
 {
-    m_scene->mousePressEvent(e);
+    m_graphView->mousePressEvent(e);
 }
 
 void OpenGLWindow::mouseReleaseEvent(QMouseEvent* e)
 {
-    m_scene->mouseReleaseEvent(e);
+    m_graphView->mouseReleaseEvent(e);
 }
 
 void OpenGLWindow::mouseMoveEvent(QMouseEvent* e)
 {
-    m_scene->mouseMoveEvent(e);
+    m_graphView->mouseMoveEvent(e);
 }
 
 void OpenGLWindow::mouseDoubleClickEvent(QMouseEvent* e)
 {
-    m_scene->mouseDoubleClickEvent(e);
+    m_graphView->mouseDoubleClickEvent(e);
 }
 
 void OpenGLWindow::wheelEvent(QWheelEvent* e)
 {
-    m_scene->wheelEvent(e);
+    m_graphView->wheelEvent(e);
 }
 

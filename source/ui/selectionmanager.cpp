@@ -6,14 +6,14 @@ template<typename T> QSet<T> setForVector(QVector<T> vector)
     return vector.toList().toSet();
 }
 
-QSet<NodeId> SelectionManager::selectedNodes()
+QSet<NodeId> SelectionManager::selectedNodes() const
 {
     // Assertion that our selection doesn't contain things that aren't in the graph
     Q_ASSERT(setForVector(_graph->nodeIds()).contains(_selectedNodes));
     return _selectedNodes;
 }
 
-QSet<NodeId> SelectionManager::unselectedNodes()
+QSet<NodeId> SelectionManager::unselectedNodes() const
 {
     return setForVector(_graph->nodeIds()).subtract(_selectedNodes);
 }
@@ -24,7 +24,7 @@ void SelectionManager::selectNode(NodeId nodeId)
     _selectedNodes.insert(nodeId);
 
     if(selectionWillChange)
-        emit selectionChanged();
+        emit selectionChanged(*this);
 }
 
 void SelectionManager::selectNodes(QSet<NodeId> nodeIds)
@@ -33,7 +33,7 @@ void SelectionManager::selectNodes(QSet<NodeId> nodeIds)
     _selectedNodes.unite(nodeIds);
 
     if(selectionWillChange)
-        emit selectionChanged();
+        emit selectionChanged(*this);
 }
 
 void SelectionManager::deselectNode(NodeId nodeId)
@@ -42,7 +42,7 @@ void SelectionManager::deselectNode(NodeId nodeId)
     _selectedNodes.remove(nodeId);
 
     if(selectionWillChange)
-        emit selectionChanged();
+        emit selectionChanged(*this);
 }
 
 void SelectionManager::deselectNodes(QSet<NodeId> nodeIds)
@@ -54,7 +54,7 @@ void SelectionManager::deselectNodes(QSet<NodeId> nodeIds)
     _selectedNodes.subtract(nodeIds);
 
     if(selectionWillChange)
-        emit selectionChanged();
+        emit selectionChanged(*this);
 }
 
 void SelectionManager::toggleNode(NodeId nodeId)
@@ -73,10 +73,10 @@ void SelectionManager::toggleNodes(QSet<NodeId> nodeIds)
     _selectedNodes.unite(nodeIds);
     _selectedNodes.subtract(intersection);
 
-    emit selectionChanged();
+    emit selectionChanged(*this);
 }
 
-bool SelectionManager::nodeIsSelected(NodeId nodeId)
+bool SelectionManager::nodeIsSelected(NodeId nodeId) const
 {
     Q_ASSERT(_graph->nodeIds().contains(nodeId));
     return _selectedNodes.contains(nodeId);
@@ -93,7 +93,7 @@ void SelectionManager::clearNodeSelection()
     _selectedNodes.clear();
 
     if(selectionWillChange)
-        emit selectionChanged();
+        emit selectionChanged(*this);
 }
 
 void SelectionManager::invertNodeSelection()

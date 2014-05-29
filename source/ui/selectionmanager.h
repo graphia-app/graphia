@@ -12,8 +12,8 @@ class SelectionManager : public QObject
 public:
     SelectionManager(const ReadOnlyGraph& graph) : _graph(&graph) {}
 
-    QSet<NodeId> selectedNodes();
-    QSet<NodeId> unselectedNodes();
+    QSet<NodeId> selectedNodes() const;
+    QSet<NodeId> unselectedNodes() const;
 
     void selectNode(NodeId nodeId);
     void selectNodes(QSet<NodeId> nodeIds);
@@ -24,7 +24,7 @@ public:
     void toggleNode(NodeId nodeId);
     void toggleNodes(QSet<NodeId> nodeIds);
 
-    bool nodeIsSelected(NodeId nodeId);
+    bool nodeIsSelected(NodeId nodeId) const;
 
     void selectAllNodes();
     void clearNodeSelection();
@@ -36,7 +36,7 @@ private:
     QSet<NodeId> _selectedNodes;
 
 signals:
-    void selectionChanged() const;
+    void selectionChanged(const SelectionManager& selectionManager) const;
 };
 
 #endif // SELECTIONMANAGER_H

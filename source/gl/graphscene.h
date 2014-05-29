@@ -16,6 +16,7 @@
 #include <QVector3D>
 #include <QColor>
 #include <QMutex>
+#include <QRect>
 
 class Sphere;
 class Cylinder;
@@ -53,20 +54,30 @@ public:
     void render();
     void resize( int w, int h );
 
-    void centreNodeInViewport(NodeId nodeId, Transition::Type transitionType, float cameraDistance = -1.0f);
-    void selectFocusNode(ComponentId componentId, Transition::Type transitionType);
+    void moveFocusToNode(NodeId nodeId, Transition::Type transitionType);
+    void selectFocusNodeClosestToCameraVector(Transition::Type transitionType = Transition::Type::InversePower);
+    ComponentId focusComponentId() { return _focusComponentId; }
+    NodeId focusNodeId()
+    {
+        ComponentViewData* viewData = focusComponentViewData();
+        return viewData != nullptr ? viewData->focusNodeId : NodeId();
+    }
+    void enableFocusNodeTracking() { trackFocusNode = true; }
+    void disableFocusNodeTracking() { trackFocusNode = false; }
 
-    void mousePressEvent(QMouseEvent* mouseEvent);
-    void mouseReleaseEvent(QMouseEvent* mouseEvent);
-    void mouseMoveEvent(QMouseEvent* mouseEvent);
-    void mouseDoubleClickEvent(QMouseEvent* mouseEvent);
-    void wheelEvent(QWheelEvent* wheelEvent);
+    void moveToNextComponent();
+    void moveToPreviousComponent();
+    void moveToComponent(ComponentId componentId);
 
-    bool keyPressEvent(QKeyEvent* keyEvent);
-    bool keyReleaseEvent(QKeyEvent* keyEvent);
+    bool interactionAllowed();
 
     void setGraphModel(GraphModel* graphModel);
-    void setSelectionManager(SelectionManager* selectionManager);
+
+    Camera* camera() { return m_camera; }
+    void zoom(float delta);
+
+    void setSelectionRect(const QRect& rect) { selectionRect = rect; }
+    void clearSelectionRect() { selectionRect = QRect(); }
 
 private:
     struct DebugLine
@@ -113,8 +124,7 @@ private:
     void renderDebugLines();
     void render2D();
 
-    void zoom(float delta);
-
+    void centreNodeInViewport(NodeId nodeId, Transition::Type transitionType, float cameraDistance = -1.0f);
     void updateVisualData();
 
 private slots:
@@ -124,27 +134,19 @@ private slots:
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId);
     void onComponentSplit(const Graph* graph, ComponentId oldComponentId, const QSet<ComponentId>& splitters);
     void onComponentsWillMerge(const Graph* graph, const QSet<ComponentId>& mergers, ComponentId merged);
-    void onSelectionChanged();
+
+public slots:
+    void onSelectionChanged(const SelectionManager& selectionManager);
 
 private:
-    bool m_rightMouseButtonHeld;
-    bool m_leftMouseButtonHeld;
-
-    bool m_selecting;
-    bool m_frustumSelecting;
-    QPoint m_frustumSelectStart;
-
-    QPoint m_prevPos;
-    QPoint m_pos;
-    bool m_mouseMoving;
-    NodeId clickedNodeId;
-
+    bool trackFocusNode;
     float targetZoomDistance;
     Transition zoomTransition;
+    QRect selectionRect;
 
     QOpenGLFunctions_3_3_Core* m_funcs;
 
-    ComponentId focusComponentId;
+    ComponentId _focusComponentId;
     ComponentId lastSplitterFocusComponentId;
     ComponentArray<ComponentViewData>* componentsViewData;
     ComponentViewData* focusComponentViewData() const;
@@ -158,7 +160,6 @@ private:
     Quad* m_quad;
 
     GraphModel* _graphModel;
-    SelectionManager* _selectionManager;
 
     QOpenGLShaderProgram nodesShader;
     QVector<GLfloat> m_nodePositionData;
@@ -188,10 +189,6 @@ private:
     QOpenGLBuffer debugLinesDataBuffer;
     QOpenGLVertexArrayObject debugLinesDataVAO;
     QOpenGLShaderProgram debugLinesShader;
-
-    void moveToNextComponent();
-    void moveToPreviousComponent();
-    void moveToComponent(ComponentId componentId);
 
 signals:
     void userInteractionStarted();

@@ -43,11 +43,7 @@ GraphScene::GraphScene( QObject* parent )
       depthTexture(0),
       visualFBO(0),
       FBOcomplete(false),
-      m_rightMouseButtonHeld(false),
-      m_leftMouseButtonHeld(false),
-      m_selecting(false),
-      m_frustumSelecting(false),
-      m_mouseMoving(false),
+      trackFocusNode(true),
       m_funcs(nullptr),
 #if defined(Q_OS_MAC)
       m_instanceFuncs( 0 ),
@@ -150,7 +146,7 @@ void GraphScene::updateVisualData()
 {
     NodeVisuals& nodeVisuals = _graphModel->nodeVisuals();
     EdgeVisuals& edgeVisuals = _graphModel->edgeVisuals();
-    const ReadOnlyGraph& component = *_graphModel->graph().componentById(focusComponentId);
+    const ReadOnlyGraph& component = *_graphModel->graph().componentById(_focusComponentId);
 
     m_nodeVisualData.resize(component.numNodes() * 8);
     m_edgeVisualData.resize(component.numEdges() * 8);
@@ -182,7 +178,7 @@ void GraphScene::updateVisualData()
 
 void GraphScene::onGraphChanged(const Graph*)
 {
-    if(focusComponentId.isNull())
+    if(_focusComponentId.isNull())
     {
         // The component we were focused on has gone, we need to find a new one
         moveToNextComponent();
@@ -224,7 +220,7 @@ void GraphScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
     if(componentId == lastSplitterFocusComponentId)
         lastSplitterFocusComponentId.setToNull();
 
-    if(componentId == focusComponentId)
+    if(componentId == _focusComponentId)
     {
         if(!lastSplitterFocusComponentId.isNull())
         {
@@ -232,16 +228,16 @@ void GraphScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
             ComponentViewData* lastSplitterComponentViewData = &(*componentsViewData)[lastSplitterFocusComponentId];
             *lastSplitterComponentViewData = *currentComponentViewData;
             lastSplitterComponentViewData->focusNodeId.setToNull();
-            focusComponentId = lastSplitterFocusComponentId;
+            _focusComponentId = lastSplitterFocusComponentId;
         }
         else
-            focusComponentId.setToNull();
+            _focusComponentId.setToNull();
     }
 }
 
 void GraphScene::onComponentSplit(const Graph* graph, ComponentId oldComponentId, const QSet<ComponentId>& splitters)
 {
-    if(oldComponentId == focusComponentId)
+    if(oldComponentId == _focusComponentId)
     {
         ComponentViewData currentComponentViewData = *focusComponentViewData();
         ComponentId newFocusComponentId = graph->componentIdOfNode(currentComponentViewData.focusNodeId);
@@ -258,10 +254,10 @@ void GraphScene::onComponentSplit(const Graph* graph, ComponentId oldComponentId
                 splitterComponentViewData->focusNodeId.setToNull();
         }
 
-        focusComponentId = newFocusComponentId;
+        _focusComponentId = newFocusComponentId;
 
         QSet<ComponentId> nonFocusSplitters(splitters);
-        nonFocusSplitters.remove(focusComponentId);
+        nonFocusSplitters.remove(_focusComponentId);
         lastSplitterFocusComponentId = nonFocusSplitters.values().at(0);
     }
 }
@@ -271,27 +267,27 @@ void GraphScene::onComponentsWillMerge(const Graph*, const QSet<ComponentId>& me
     qDebug() << "onComponentsWillMerge" << mergers << merged; //FIXME leaving this in as it's untested for now
     for(ComponentId merger : mergers)
     {
-        if(merger == focusComponentId)
+        if(merger == _focusComponentId)
         {
             ComponentViewData* mergerComponentViewData = &(*componentsViewData)[merger];
             ComponentViewData* mergedComponentViewData = &(*componentsViewData)[merged];
             *mergedComponentViewData = *mergerComponentViewData;
-            focusComponentId = merged;
+            _focusComponentId = merged;
             break;
         }
     }
 }
 
-void GraphScene::onSelectionChanged()
+void GraphScene::onSelectionChanged(const SelectionManager& selectionManager)
 {
-    qDebug() << "Selection:" << _selectionManager->selectedNodes();
+    qDebug() << "Selection:" << selectionManager.selectedNodes();
 
     NodeVisuals& nodeVisuals = _graphModel->nodeVisuals();
     EdgeVisuals& edgeVisuals = _graphModel->edgeVisuals();
 
     for(NodeId nodeId : _graphModel->graph().nodeIds())
     {
-        if(_selectionManager->nodeIsSelected(nodeId))
+        if(selectionManager.nodeIsSelected(nodeId))
             nodeVisuals[nodeId].outlineColor = Qt::GlobalColor::white;
         else
             nodeVisuals[nodeId].outlineColor = Qt::GlobalColor::black;
@@ -306,10 +302,10 @@ void GraphScene::onSelectionChanged()
 
 ComponentViewData* GraphScene::focusComponentViewData() const
 {
-    if(focusComponentId.isNull())
+    if(_focusComponentId.isNull())
         return nullptr;
 
-    return componentsViewData != nullptr ? &(*componentsViewData)[focusComponentId] : nullptr;
+    return componentsViewData != nullptr ? &(*componentsViewData)[_focusComponentId] : nullptr;
 }
 
 void GraphScene::update(float t)
@@ -319,12 +315,12 @@ void GraphScene::update(float t)
         NodePositions& nodePositions = _graphModel->nodePositions();
         QMutexLocker mutexLocker(&nodePositions.mutex());
 
-        const ReadOnlyGraph* component = _graphModel->graph().componentById(focusComponentId);
+        const ReadOnlyGraph* component = _graphModel->graph().componentById(_focusComponentId);
 
         ComponentViewData* componentViewData = focusComponentViewData();
         m_camera = &componentViewData->camera;
         if(componentViewData->focusNodeId.isNull())
-            selectFocusNode(focusComponentId, Transition::Type::None);
+            selectFocusNodeClosestToCameraVector(Transition::Type::None);
 
         m_nodePositionData.resize(component->numNodes() * 3);
         m_edgePositionData.resize(component->numEdges() * 6);
@@ -364,7 +360,7 @@ void GraphScene::update(float t)
 
         if(!panTransition.finished())
             panTransition.update(t);
-        else if(!m_rightMouseButtonHeld)
+        else if(trackFocusNode)
             centreNodeInViewport(componentViewData->focusNodeId, Transition::Type::None, componentViewData->zoomDistance);
     }
 
@@ -415,7 +411,7 @@ void GraphScene::renderNodes()
     nodesShader.bind();
     setShaderADSParameters(nodesShader);
 
-    const ReadOnlyGraph* component = _graphModel->graph().componentById(focusComponentId);
+    const ReadOnlyGraph* component = _graphModel->graph().componentById(_focusComponentId);
 
     m_nodePositionBuffer.bind();
     m_nodePositionBuffer.allocate(m_nodePositionData.data(), m_nodePositionData.size() * sizeof(GLfloat) );
@@ -446,7 +442,7 @@ void GraphScene::renderEdges()
     edgesShader.bind();
     setShaderADSParameters(edgesShader);
 
-    const ReadOnlyGraph* component = _graphModel->graph().componentById(focusComponentId);
+    const ReadOnlyGraph* component = _graphModel->graph().componentById(_focusComponentId);
 
     m_edgePositionBuffer.bind();
     m_edgePositionBuffer.allocate(m_edgePositionData.data(), m_edgePositionData.size() * sizeof(GLfloat));
@@ -522,41 +518,31 @@ void GraphScene::render2D()
     QMatrix4x4 m;
     m.ortho(0.0f, width, 0.0f, height, -1.0f, 1.0f);
 
-    if(m_frustumSelecting)
+    if(!selectionRect.isNull())
     {
-        QVector2D corners[4];
+        const QColor color(Qt::GlobalColor::white);
+
+        QRect r;
+        r.setLeft(selectionRect.left());
+        r.setRight(selectionRect.right());
+        r.setTop(height - selectionRect.top());
+        r.setBottom(height - selectionRect.bottom());
+
         QVector<GLfloat> data;
-        const QVector3D color(1.0f, 1.0f, 1.0f);
 
-        QPoint point = m_pos - m_frustumSelectStart;
-        if(Utils::signsMatch(point.rx(), point.ry()))
-        {
-            corners[3] = QVector2D(m_frustumSelectStart.rx(), height - m_frustumSelectStart.ry());
-            corners[2] = QVector2D(m_pos.rx(),                height - m_frustumSelectStart.ry());
-            corners[1] = QVector2D(m_pos.rx(),                height - m_pos.ry());
-            corners[0] = QVector2D(m_frustumSelectStart.rx(), height - m_pos.ry());
-        }
-        else
-        {
-            corners[0] = QVector2D(m_frustumSelectStart.rx(), height - m_frustumSelectStart.ry());
-            corners[1] = QVector2D(m_pos.rx(),                height - m_frustumSelectStart.ry());
-            corners[2] = QVector2D(m_pos.rx(),                height - m_pos.ry());
-            corners[3] = QVector2D(m_frustumSelectStart.rx(), height - m_pos.ry());
-        }
+        data.append(r.left());  data.append(r.bottom());
+        data.append(color.redF()); data.append(color.blueF()); data.append(color.greenF());
+        data.append(r.right()); data.append(r.bottom());
+        data.append(color.redF()); data.append(color.blueF()); data.append(color.greenF());
+        data.append(r.right()); data.append(r.top());
+        data.append(color.redF()); data.append(color.blueF()); data.append(color.greenF());
 
-        data.append(corners[0].x()); data.append(corners[0].y());
-        data.append(color.x()); data.append(color.y()); data.append(color.z());
-        data.append(corners[1].x()); data.append(corners[1].y());
-        data.append(color.x()); data.append(color.y()); data.append(color.z());
-        data.append(corners[2].x()); data.append(corners[2].y());
-        data.append(color.x()); data.append(color.y()); data.append(color.z());
-
-        data.append(corners[2].x()); data.append(corners[2].y());
-        data.append(color.x()); data.append(color.y()); data.append(color.z());
-        data.append(corners[3].x()); data.append(corners[3].y());
-        data.append(color.x()); data.append(color.y()); data.append(color.z());
-        data.append(corners[0].x()); data.append(corners[0].y());
-        data.append(color.x()); data.append(color.y()); data.append(color.z());
+        data.append(r.right()); data.append(r.top());
+        data.append(color.redF()); data.append(color.blueF()); data.append(color.greenF());
+        data.append(r.left());  data.append(r.top());
+        data.append(color.redF()); data.append(color.blueF()); data.append(color.greenF());
+        data.append(r.left());  data.append(r.bottom());
+        data.append(color.redF()); data.append(color.blueF()); data.append(color.greenF());
 
         m_funcs->glDrawBuffer(GL_COLOR_ATTACHMENT1);
 
@@ -786,281 +772,26 @@ void GraphScene::centreNodeInViewport(NodeId nodeId, Transition::Type transition
     }
 }
 
-void GraphScene::selectFocusNode(ComponentId componentId, Transition::Type transitionType)
+void GraphScene::moveFocusToNode(NodeId nodeId, Transition::Type transitionType)
 {
-    if(componentId.isNull())
+    if(_focusComponentId.isNull())
         return;
 
-    Collision collision(*_graphModel->graph().componentById(componentId),
+    centreNodeInViewport(nodeId, transitionType);
+    focusComponentViewData()->focusNodeId = nodeId;
+    updateVisualData();
+}
+
+void GraphScene::selectFocusNodeClosestToCameraVector(Transition::Type transitionType)
+{
+    if(_focusComponentId.isNull())
+        return;
+
+    Collision collision(*_graphModel->graph().componentById(_focusComponentId),
                         _graphModel->nodeVisuals(), _graphModel->nodePositions());
     NodeId closestNodeId = collision.closestNodeToLine(m_camera->position(), m_camera->viewVector().normalized());
     if(!closestNodeId.isNull())
-    {
-        centreNodeInViewport(closestNodeId, transitionType);
-        focusComponentViewData()->focusNodeId = closestNodeId;
-        updateVisualData();
-    }
-}
-
-void GraphScene::mousePressEvent(QMouseEvent* mouseEvent)
-{
-    switch(mouseEvent->button())
-    {
-    case Qt::LeftButton:
-        m_leftMouseButtonHeld = true;
-        m_selecting = true;
-        break;
-
-    case Qt::RightButton:
-        m_rightMouseButtonHeld = true;
-        break;
-
-    default: break;
-    }
-
-    m_pos = m_prevPos = mouseEvent->pos();
-
-    Ray ray = m_camera->rayForViewportCoordinates(m_pos.x(), m_pos.y());
-
-    const ReadOnlyGraph& component = *_graphModel->graph().componentById(focusComponentId);
-
-    Collision collision(component, _graphModel->nodeVisuals(), _graphModel->nodePositions());
-    clickedNodeId = collision.nearestNodeIntersectingLine(ray.origin(), ray.dir());
-
-    if(mouseEvent->modifiers() & Qt::ShiftModifier)
-        m_frustumSelectStart = m_pos;
-}
-
-void GraphScene::mouseReleaseEvent(QMouseEvent* mouseEvent)
-{
-    switch(mouseEvent->button())
-    {
-    case Qt::RightButton:
-        if(!panTransition.finished())
-        {
-            m_rightMouseButtonHeld = false;
-            return;
-        }
-
-        emit userInteractionFinished();
-
-        if(m_rightMouseButtonHeld && m_mouseMoving)
-            selectFocusNode(focusComponentId, Transition::Type::InversePower);
-
-        m_rightMouseButtonHeld = false;
-        clickedNodeId.setToNull();
-        break;
-
-    case Qt::LeftButton:
-        m_leftMouseButtonHeld = false;
-
-        if(!panTransition.finished())
-            return;
-
-        emit userInteractionFinished();
-
-        if(m_selecting)
-        {
-            if(m_frustumSelecting)
-            {
-                if(!(mouseEvent->modifiers() & Qt::ShiftModifier))
-                    _selectionManager->clearNodeSelection();
-
-                QPoint frustumEndPoint = mouseEvent->pos();
-                Frustum frustum = m_camera->frustumForViewportCoordinates(
-                            m_frustumSelectStart.x(), m_frustumSelectStart.y(),
-                            frustumEndPoint.x(), frustumEndPoint.y());
-
-                QSet<NodeId> selection;
-
-                const ReadOnlyGraph& component = *_graphModel->graph().componentById(focusComponentId);
-                for(NodeId nodeId : component.nodeIds())
-                {
-                    const QVector3D& nodePosition = _graphModel->nodePositions()[nodeId];
-                    if(frustum.containsPoint(nodePosition))
-                        selection.insert(nodeId);
-                }
-
-                _selectionManager->selectNodes(selection);
-
-                m_frustumSelecting = false;
-            }
-            else
-            {
-                if(!clickedNodeId.isNull())
-                {
-                    if(!(mouseEvent->modifiers() & Qt::ShiftModifier))
-                        _selectionManager->clearNodeSelection();
-
-                    _selectionManager->toggleNode(clickedNodeId);
-                }
-                else
-                    _selectionManager->clearNodeSelection();
-            }
-
-            m_selecting = false;
-        }
-
-        clickedNodeId.setToNull();
-        break;
-
-    default: break;
-    }
-
-    if(m_mouseMoving && !m_rightMouseButtonHeld && !m_leftMouseButtonHeld)
-        m_mouseMoving = false;
-}
-
-void GraphScene::mouseMoveEvent(QMouseEvent* mouseEvent)
-{
-    if(!panTransition.finished())
-        return;
-
-    m_pos = mouseEvent->pos();
-
-    if((mouseEvent->modifiers() & Qt::ShiftModifier) && m_leftMouseButtonHeld)
-    {
-        emit userInteractionStarted();
-        m_selecting = true;
-        m_frustumSelecting = true;
-        clickedNodeId.setToNull();
-    }
-    else if(!clickedNodeId.isNull())
-    {
-        m_selecting = false;
-
-        if(m_rightMouseButtonHeld)
-        {
-            emit userInteractionStarted();
-
-            const QVector3D& clickedNodePosition = _graphModel->nodePositions()[clickedNodeId];
-
-            Plane translationPlane(clickedNodePosition, m_camera->viewVector().normalized());
-
-            QVector3D prevPoint = translationPlane.rayIntersection(
-                        m_camera->rayForViewportCoordinates(m_prevPos.x(), m_prevPos.y()));
-            QVector3D curPoint = translationPlane.rayIntersection(
-                        m_camera->rayForViewportCoordinates(m_pos.x(), m_pos.y()));
-            QVector3D translation = prevPoint - curPoint;
-
-            m_camera->translateWorld(translation);
-        }
-        else if(m_leftMouseButtonHeld)
-        {
-            emit userInteractionStarted();
-
-            ComponentViewData* componentViewData = focusComponentViewData();
-
-            if(componentViewData->focusNodeId.isNull())
-                selectFocusNode(focusComponentId, Transition::Type::InversePower);
-
-            if(componentViewData->focusNodeId != clickedNodeId)
-            {
-                emit userInteractionStarted();
-
-                const QVector3D& clickedNodePosition = _graphModel->nodePositions()[clickedNodeId];
-                const QVector3D& rotationCentre = _graphModel->nodePositions()[componentViewData->focusNodeId];
-                float radius = clickedNodePosition.distanceToPoint(rotationCentre);
-
-                BoundingSphere boundingSphere(rotationCentre, radius);
-                QVector3D cursorPoint;
-                Ray cursorRay = m_camera->rayForViewportCoordinates(m_pos.x(), m_pos.y());
-
-                Plane divisionPlane(rotationCentre, cursorRay.dir().normalized());
-
-                QList<QVector3D> intersections = boundingSphere.rayIntersection(cursorRay);
-                if(intersections.size() > 0)
-                {
-                    if(divisionPlane.sideForPoint(clickedNodePosition) == Plane::Side::Front && intersections.size() > 1)
-                        cursorPoint = intersections.at(1);
-                    else
-                        cursorPoint = intersections.at(0);
-                }
-                else
-                {
-                    // When the ray misses the node completely we clamp the cursor point on the surface of the sphere
-                    QVector3D cameraToCentre = rotationCentre - m_camera->position();
-                    float cameraToCentreLengthSq = cameraToCentre.lengthSquared();
-                    float radiusSq = radius * radius;
-                    float cameraToClickedLengthSq = cameraToCentreLengthSq - radiusSq;
-
-                    // Form a right angled triangle from the camera, the circle tangent and a point which lies on the
-                    // camera to rotation centre vector
-                    float adjacentLength = (cameraToClickedLengthSq - radiusSq + cameraToCentreLengthSq) /
-                            (2.0f * cameraToCentre.length());
-                    float oppositeLength = sqrt(cameraToClickedLengthSq - (adjacentLength * adjacentLength));
-                    QVector3D corner = m_camera->position() + ((adjacentLength / cameraToCentre.length()) * cameraToCentre);
-
-                    Plane p(m_camera->position(), rotationCentre, cursorRay.origin());
-                    QVector3D oppositeDir = QVector3D::crossProduct(p.normal(), cameraToCentre).normalized();
-
-                    cursorPoint = corner + (oppositeLength * oppositeDir);
-                }
-
-                QVector3D clickedLine = clickedNodePosition - rotationCentre;
-                QVector3D cursorLine = cursorPoint - rotationCentre;
-
-                QVector3D axis = QVector3D::crossProduct(clickedLine, cursorLine).normalized();
-                float dot = QVector3D::dotProduct(clickedLine, cursorLine);
-                float value = dot / (clickedLine.length() * cursorLine.length());
-                value = Utils::clamp(-1.0f, 1.0f, value);
-                float radians = std::acos(value);
-                float angle = -qRadiansToDegrees(radians);
-
-                QQuaternion rotation = QQuaternion::fromAxisAndAngle(axis, angle);
-                m_camera->rotateAboutViewTarget(rotation);
-            }
-        }
-    }
-
-    m_prevPos = m_pos;
-
-    if(m_rightMouseButtonHeld || m_leftMouseButtonHeld)
-        m_mouseMoving = true;
-}
-
-void GraphScene::mouseDoubleClickEvent(QMouseEvent* mouseEvent)
-{
-    if(mouseEvent->button() == Qt::LeftButton)
-    {
-        if(!clickedNodeId.isNull() && !m_mouseMoving)
-        {
-            centreNodeInViewport(clickedNodeId, Transition::Type::EaseInEaseOut);
-            focusComponentViewData()->focusNodeId = clickedNodeId;
-            updateVisualData();
-        }
-    }
-}
-
-bool GraphScene::keyPressEvent(QKeyEvent* keyEvent)
-{
-    switch(keyEvent->key())
-    {
-    case Qt::Key_Delete:
-        _graphModel->graph().removeNodes(_selectionManager->selectedNodes());
-        _selectionManager->clearNodeSelection();
-        return true;
-
-    case Qt::Key_Left:
-        moveToNextComponent();
-        return true;
-
-    case Qt::Key_Right:
-        moveToPreviousComponent();
-        return true;
-
-    default:
-        return false;
-    }
-}
-
-bool GraphScene::keyReleaseEvent(QKeyEvent* keyEvent)
-{
-    switch(keyEvent->key())
-    {
-    default:
-        return false;
-    }
+        moveFocusToNode(closestNodeId, transitionType);
 }
 
 static ComponentId cycleThroughComponentIds(const QList<ComponentId>& componentIds,
@@ -1085,9 +816,9 @@ static ComponentId cycleThroughComponentIds(const QList<ComponentId>& componentI
 
 void GraphScene::moveToNextComponent()
 {
-    focusComponentId = cycleThroughComponentIds(*_graphModel->graph().componentIds(), focusComponentId, -1);
+    _focusComponentId = cycleThroughComponentIds(*_graphModel->graph().componentIds(), _focusComponentId, -1);
 
-    if(!focusComponentId.isNull())
+    if(!_focusComponentId.isNull())
     {
         updateVisualData();
         targetZoomDistance = focusComponentViewData()->zoomDistance;
@@ -1096,9 +827,9 @@ void GraphScene::moveToNextComponent()
 
 void GraphScene::moveToPreviousComponent()
 {
-    focusComponentId = cycleThroughComponentIds(*_graphModel->graph().componentIds(), focusComponentId, 1);
+    _focusComponentId = cycleThroughComponentIds(*_graphModel->graph().componentIds(), _focusComponentId, 1);
 
-    if(!focusComponentId.isNull())
+    if(!_focusComponentId.isNull())
     {
         updateVisualData();
         targetZoomDistance = focusComponentViewData()->zoomDistance;
@@ -1107,21 +838,18 @@ void GraphScene::moveToPreviousComponent()
 
 void GraphScene::moveToComponent(ComponentId componentId)
 {
-    focusComponentId = componentId;
+    _focusComponentId = componentId;
 
-    if(!focusComponentId.isNull())
+    if(!_focusComponentId.isNull())
     {
         updateVisualData();
         targetZoomDistance = focusComponentViewData()->zoomDistance;
     }
 }
 
-void GraphScene::wheelEvent(QWheelEvent* wheelEvent)
+bool GraphScene::interactionAllowed()
 {
-    if(wheelEvent->angleDelta().y() > 0.0f)
-        zoom(1.0f);
-    else
-        zoom(-1.0f);
+    return panTransition.finished();
 }
 
 void GraphScene::setGraphModel(GraphModel* graphModel)
@@ -1132,7 +860,7 @@ void GraphScene::setGraphModel(GraphModel* graphModel)
         delete componentsViewData;
 
     componentsViewData = new ComponentArray<ComponentViewData>(_graphModel->graph());
-    focusComponentId = _graphModel->graph().firstComponentId();
+    _focusComponentId = _graphModel->graph().firstComponentId();
 
     for(ComponentId componentId : *_graphModel->graph().componentIds())
         onComponentAdded(&_graphModel->graph(), componentId);
@@ -1144,12 +872,6 @@ void GraphScene::setGraphModel(GraphModel* graphModel)
     connect(&_graphModel->graph(), &Graph::componentWillBeRemoved, this, &GraphScene::onComponentWillBeRemoved);
     connect(&_graphModel->graph(), &Graph::componentSplit, this, &GraphScene::onComponentSplit);
     connect(&_graphModel->graph(), &Graph::componentsWillMerge, this, &GraphScene::onComponentsWillMerge);
-}
-
-void GraphScene::setSelectionManager(SelectionManager* selectionManager)
-{
-    this->_selectionManager = selectionManager;
-    connect(selectionManager, &SelectionManager::selectionChanged, this, &GraphScene::onSelectionChanged);
 }
 
 void GraphScene::prepareVertexBuffers()

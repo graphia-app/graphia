@@ -28,11 +28,7 @@ public:
     }
     GraphModel* graphModel() { return _graphModel; }
 
-    void setSelectionManager(SelectionManager* selectionManager)
-    {
-        this->_selectionManager = selectionManager;
-        graphScene->setSelectionManager(selectionManager);
-    }
+    void setSelectionManager(SelectionManager* selectionManager);
     SelectionManager* selectionManager() { return _selectionManager; }
 
     static QSurfaceFormat& surfaceFormat()
@@ -61,6 +57,28 @@ signals:
 public slots:
     void layoutChanged();
     
+private:
+    bool m_rightMouseButtonHeld;
+    bool m_leftMouseButtonHeld;
+
+    bool m_selecting;
+    bool m_frustumSelecting;
+    QPoint m_frustumSelectStart;
+
+    QPoint m_prevCursorPosition;
+    QPoint m_cursorPosition;
+    bool m_mouseMoving;
+    NodeId clickedNodeId;
+
+protected:
+    friend class OpenGLWindow;
+    void mousePressEvent(QMouseEvent* mouseEvent);
+    void mouseReleaseEvent(QMouseEvent* mouseEvent);
+    void mouseMoveEvent(QMouseEvent* mouseEvent);
+    void mouseDoubleClickEvent(QMouseEvent* mouseEvent);
+    void keyPressEvent(QKeyEvent* keyEvent);
+    void keyReleaseEvent(QKeyEvent* keyEvent);
+    void wheelEvent(QWheelEvent* wheelEvent);
 };
 
 #endif // GRAPHVIEW_H
