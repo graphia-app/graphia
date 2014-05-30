@@ -18,8 +18,8 @@ public:
     void destroy();
     bool isCreated() const;
     GLuint samplerId() const;
-    void bind( GLuint unit );
-    void release( GLuint unit );
+    void bind(GLuint unit);
+    void release(GLuint unit);
 
     enum CoordinateDirection
     {
@@ -28,13 +28,13 @@ public:
         DirectionR = GL_TEXTURE_WRAP_R
     };
 
-    void setWrapMode( CoordinateDirection direction, GLenum wrapMode );
-    void setMinificationFilter( GLenum filter );
-    void setMagnificationFilter( GLenum filter );
-    void setMaximumAnisotropy( float anisotropy );
+    void setWrapMode(CoordinateDirection direction, GLenum wrapMode);
+    void setMinificationFilter(GLenum filter);
+    void setMagnificationFilter(GLenum filter);
+    void setMaximumAnisotropy(float anisotropy);
 
 private:
-    Q_DECLARE_PRIVATE( Sampler )
+    Q_DECLARE_PRIVATE(Sampler)
     SamplerPrivate* d_ptr;
 };
 

@@ -7,19 +7,19 @@
 Quad::Quad(QObject* parent)
     : QObject(parent),
       _edgeLength(1.0f),
-      _positionBuffer( QOpenGLBuffer::VertexBuffer ),
-      _normalBuffer( QOpenGLBuffer::VertexBuffer ),
-      _textureCoordBuffer( QOpenGLBuffer::VertexBuffer ),
-      _indexBuffer( QOpenGLBuffer::IndexBuffer ),
+      _positionBuffer(QOpenGLBuffer::VertexBuffer),
+      _normalBuffer(QOpenGLBuffer::VertexBuffer),
+      _textureCoordBuffer(QOpenGLBuffer::VertexBuffer),
+      _indexBuffer(QOpenGLBuffer::IndexBuffer),
       _vao(),
-      _normalLines( QOpenGLBuffer::VertexBuffer ),
-      _tangentLines( QOpenGLBuffer::VertexBuffer )
+      _normalLines(QOpenGLBuffer::VertexBuffer),
+      _tangentLines(QOpenGLBuffer::VertexBuffer)
 {
 }
 
 void Quad::setMaterial(const MaterialPtr& material)
 {
-    if ( material == _material )
+    if(material == _material)
         return;
     _material = material;
     updateVertexArrayObject();
@@ -71,14 +71,14 @@ void Quad::create()
     updateVertexArrayObject();
 }
 
-void Quad::generateVertexData( QVector<float>& vertices, QVector<float>& normals,
+void Quad::generateVertexData(QVector<float>& vertices, QVector<float>& normals,
                                 QVector<float>& texCoords, QVector<float>& tangents,
-                                QVector<unsigned int>& indices  )
+                                QVector<unsigned int>& indices)
 {
     // Resize vector to hold our data
-    vertices.resize( 12 );
-    normals.resize( 12 );
-    indices.resize( 6 );
+    vertices.resize(12);
+    normals.resize(12);
+    indices.resize(6);
 
     int index = 0; //, texCoordIndex = 0, tangentIndex = 0;
     float halfEdgeLength = _edgeLength * 0.5f;
@@ -119,11 +119,11 @@ void Quad::generateVertexData( QVector<float>& vertices, QVector<float>& normals
 void Quad::updateVertexArrayObject()
 {
     // Ensure that we have a valid material and geometry
-    if ( !_material || !_positionBuffer.isCreated() )
+    if(!_material || !_positionBuffer.isCreated())
         return;
 
     // Create a vertex array object
-    if ( !_vao.isCreated() )
+    if(!_vao.isCreated())
         _vao.create();
     _vao.bind();
 
@@ -143,20 +143,20 @@ void Quad::bindBuffers()
     shader->bind();
 
     _positionBuffer.bind();
-    shader->enableAttributeArray( "vertexPosition" );
-    shader->setAttributeBuffer( "vertexPosition", GL_FLOAT, 0, 3 );
+    shader->enableAttributeArray("vertexPosition");
+    shader->setAttributeBuffer("vertexPosition", GL_FLOAT, 0, 3);
 
     _normalBuffer.bind();
-    shader->enableAttributeArray( "vertexNormal" );
-    shader->setAttributeBuffer( "vertexNormal", GL_FLOAT, 0, 3 );
+    shader->enableAttributeArray("vertexNormal");
+    shader->setAttributeBuffer("vertexNormal", GL_FLOAT, 0, 3);
 
     _textureCoordBuffer.bind();
-    shader->enableAttributeArray( "vertexTexCoord" );
-    shader->setAttributeBuffer( "vertexTexCoord", GL_FLOAT, 0, 2 );
+    shader->enableAttributeArray("vertexTexCoord");
+    shader->setAttributeBuffer("vertexTexCoord", GL_FLOAT, 0, 2);
 
     _tangentBuffer.bind();
-    shader->enableAttributeArray( "vertexTangent" );
-    shader->setAttributeBuffer( "vertexTangent", GL_FLOAT, 0, 4 );
+    shader->enableAttributeArray("vertexTangent");
+    shader->setAttributeBuffer("vertexTangent", GL_FLOAT, 0, 4);
 
     _indexBuffer.bind();
 }

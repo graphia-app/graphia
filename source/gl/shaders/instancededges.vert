@@ -51,5 +51,5 @@ void main()
     normal = normalMatrix * vertexNormal;
     vColor = color;
     vOutlineColor = outlineColor;
-    gl_Position = projectionMatrix * vec4( position, 1.0 );
+    gl_Position = projectionMatrix * vec4(position, 1.0);
 }

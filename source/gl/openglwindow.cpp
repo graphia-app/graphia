@@ -12,18 +12,18 @@
 #include <QTimer>
 
 OpenGLWindow::OpenGLWindow(const QSurfaceFormat& format, GraphView* graphView,
-                            QScreen* screen )
-    : QWindow( screen ),
-      _context( nullptr ),
-      _scene( nullptr ),
+                            QScreen* screen)
+    : QWindow(screen),
+      _context(nullptr),
+      _scene(nullptr),
       _graphView(graphView)
 {
     // Tell Qt we will use OpenGL for this window
-    setSurfaceType( OpenGLSurface );
+    setSurfaceType(OpenGLSurface);
 
     // Request a full screen button (if available)
 #if !defined(Q_OS_WIN)
-    setFlags( flags() | Qt::WindowFullscreenButtonHint );
+    setFlags(flags() | Qt::WindowFullscreenButtonHint);
 #endif
 
     QSurfaceFormat actualFormat = format;
@@ -32,35 +32,35 @@ OpenGLWindow::OpenGLWindow(const QSurfaceFormat& format, GraphView* graphView,
         actualFormat.setOption(QSurfaceFormat::DebugContext);
 
     // Create the native window
-    setFormat( actualFormat );
+    setFormat(actualFormat);
     create();
 
     // Create an OpenGL context
     _context = new QOpenGLContext;
-    _context->setFormat( actualFormat );
+    _context->setFormat(actualFormat);
     _context->create();
 }
 
-void OpenGLWindow::setScene( AbstractScene* scene )
+void OpenGLWindow::setScene(AbstractScene* scene)
 {
     // We take ownership of the scene
-    Q_ASSERT( scene );
+    Q_ASSERT(scene);
     _scene = scene;
-    _scene->setParent( this );
+    _scene->setParent(this);
 
     // Initialise the scene
-    _scene->setContext( _context );
+    _scene->setContext(_context);
     initialise();
 
     // This timer drives the scene updates
-    QTimer* timer = new QTimer( this );
-    connect( timer, &QTimer::timeout, this, &OpenGLWindow::updateScene );
-    timer->start( 16 );
+    QTimer* timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &OpenGLWindow::updateScene);
+    timer->start(16);
 }
 
 void OpenGLWindow::initialise()
 {
-    _context->makeCurrent( this );
+    _context->makeCurrent(this);
 
     _debugLevel = qgetenv("OPENGL_DEBUG").toInt();
     if(_debugLevel != 0)
@@ -95,39 +95,39 @@ void OpenGLWindow::initialise()
 
 void OpenGLWindow::resize()
 {
-    _context->makeCurrent( this );
-    _scene->resize( width(), height() );
+    _context->makeCurrent(this);
+    _scene->resize(width(), height());
 }
 
 void OpenGLWindow::render()
 {
-    if ( !isExposed() )
+    if(!isExposed())
         return;
 
     // Make the context current
-    _context->makeCurrent( this );
+    _context->makeCurrent(this);
 
     // FIXME: make configurable
-    glEnable( GL_MULTISAMPLE );
+    glEnable(GL_MULTISAMPLE);
 
     // Do the rendering (to the back buffer)
     _scene->render();
 
     // Swap front/back buffers
-    _context->swapBuffers( this );
+    _context->swapBuffers(this);
 }
 
 void OpenGLWindow::updateScene()
 {
     float time = _time.elapsed() / 1000.0f;
-    _scene->update( time );
+    _scene->update(time);
     render();
 }
 
-void OpenGLWindow::resizeEvent( QResizeEvent* e )
+void OpenGLWindow::resizeEvent(QResizeEvent* e)
 {
-    Q_UNUSED( e );
-    if ( _context )
+    Q_UNUSED(e);
+    if(_context)
         resize();
 }
 

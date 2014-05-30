@@ -12,14 +12,14 @@ class Cylinder : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY( float radius READ radius WRITE setRadius )
-    Q_PROPERTY( float length READ length WRITE setLength )
-    Q_PROPERTY( int slices READ slices WRITE setSlices )
+    Q_PROPERTY(float radius READ radius WRITE setRadius)
+    Q_PROPERTY(float length READ length WRITE setLength)
+    Q_PROPERTY(int slices READ slices WRITE setSlices)
 
 public:
-    explicit Cylinder( QObject* parent = 0 );
+    explicit Cylinder(QObject* parent = 0);
 
-    void setMaterial( const MaterialPtr& material );
+    void setMaterial(const MaterialPtr& material);
     MaterialPtr material() const;
 
     float radius() const
@@ -44,17 +44,17 @@ public:
     void bindBuffers();
 
 public slots:
-    void setRadius( float arg )
+    void setRadius(float arg)
     {
         _radius = arg;
     }
 
-    void setLength( float arg )
+    void setLength(float arg)
     {
         _length = arg;
     }
 
-    void setSlices( int arg )
+    void setSlices(int arg)
     {
         _slices = arg;
     }
@@ -62,9 +62,9 @@ public slots:
     void create();
 
 private:
-    void generateVertexData( QVector<float>& vertices, QVector<float>& normals,
+    void generateVertexData(QVector<float>& vertices, QVector<float>& normals,
                              QVector<float>& texCoords, QVector<float>& tangents,
-                             QVector<unsigned int>& indices );
+                             QVector<unsigned int>& indices);
     void updateVertexArrayObject();
 
     MaterialPtr _material;

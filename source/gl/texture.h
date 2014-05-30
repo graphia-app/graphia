@@ -20,7 +20,7 @@ public:
         TextureCubeMap = GL_TEXTURE_CUBE_MAP
     };
 
-    Texture( TextureType type = Texture2D );
+    Texture(TextureType type = Texture2D);
     ~Texture();
 
     TextureType type() const;
@@ -31,13 +31,13 @@ public:
     void bind();
     void release();
 
-    void initializeToEmpty( const QSize& size );
+    void initializeToEmpty(const QSize& size);
 
-    void setImage( const QImage& image );
-    void setCubeMapImage( GLenum face, const QImage& image );
-    void setRawData2D( GLenum target, int mipmapLevel, GLenum internalFormat,
+    void setImage(const QImage& image);
+    void setCubeMapImage(GLenum face, const QImage& image);
+    void setRawData2D(GLenum target, int mipmapLevel, GLenum internalFormat,
                        int width, int height, int borderWidth,
-                       GLenum format, GLenum type, const void* data );
+                       GLenum format, GLenum type, const void* data);
 
     void generateMipMaps();
 
@@ -48,13 +48,13 @@ public:
         DirectionR = GL_TEXTURE_WRAP_R
     };
 
-    void setWrapMode( CoordinateDirection direction, GLenum wrapMode );
-    void setMinificationFilter( GLenum filter );
-    void setMagnificationFilter( GLenum filter );
-    void setMaximumAnisotropy( float anisotropy );
+    void setWrapMode(CoordinateDirection direction, GLenum wrapMode);
+    void setMinificationFilter(GLenum filter);
+    void setMagnificationFilter(GLenum filter);
+    void setMaximumAnisotropy(float anisotropy);
 
 private:
-    Q_DECLARE_PRIVATE( Texture )
+    Q_DECLARE_PRIVATE(Texture)
     TexturePrivate* d_ptr;
 };
 

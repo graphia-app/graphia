@@ -13,14 +13,14 @@ class OpenGLWindow : public QWindow
     Q_OBJECT
 
 public:
-    explicit OpenGLWindow( const QSurfaceFormat& format,
-                           GraphView* graphView,
-                           QScreen* parent = 0 );
+    explicit OpenGLWindow(const QSurfaceFormat& format,
+                          GraphView* graphView,
+                          QScreen* parent = 0);
     //FIXME destructor to delete things
 
     QOpenGLContext* context() const { return _context; }
 
-    void setScene( AbstractScene* scene );
+    void setScene(AbstractScene* scene);
     AbstractScene* scene() const { return _scene; }
     
 protected:
@@ -39,7 +39,7 @@ protected:
 protected slots:
     virtual void updateScene();
 
-    void resizeEvent( QResizeEvent* e );
+    void resizeEvent(QResizeEvent* e);
 
     void messageLogged(const QOpenGLDebugMessage &message);
 

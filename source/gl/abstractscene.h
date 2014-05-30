@@ -13,7 +13,7 @@ class AbstractScene : public QObject
     Q_OBJECT
 
 public:
-    AbstractScene( QObject* parent = 0 );
+    AbstractScene(QObject* parent = 0);
     virtual ~AbstractScene();
 
     void setContext(QOpenGLContext* context) { _context = context; }

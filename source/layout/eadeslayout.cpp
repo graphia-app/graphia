@@ -3,7 +3,7 @@
 
 #include "../utils.h"
 
-/*static float lnTaylorSeries( float x, int order )
+/*static float lnTaylorSeries(float x, int order)
 {
     int   i, j, k;
     float result = 0.0f;
@@ -12,16 +12,16 @@
     float term = xMinus1 / xPlus1;
     float y;
 
-    for( i = 0; i <= order; i++ )
+    for(i = 0; i <= order; i++)
     {
         k = i * 2 + 1;
 
         y = term;
 
-        for( j = 1; j < k; j++ )
+        for(j = 1; j < k; j++)
             y *= term;
 
-        result += y * ( 1.0f / (float)k );
+        result += y *(1.0f / (float)k);
     }
 
     return 2.0f * result;
@@ -42,11 +42,11 @@ void EadesLayout::executeReal(uint64_t iteration)
 
     QVector3D axialDirections[] =
     {
-        QVector3D( 1.0f,  0.0f,  0.0f),
-        QVector3D( 0.0f,  1.0f,  0.0f),
-        QVector3D( 0.0f,  0.0f,  1.0f),
-        QVector3D( 0.0f,  0.0f, -1.0f),
-        QVector3D( 0.0f, -1.0f,  0.0f),
+        QVector3D(1.0f,  0.0f,  0.0f),
+        QVector3D(0.0f,  1.0f,  0.0f),
+        QVector3D(0.0f,  0.0f,  1.0f),
+        QVector3D(0.0f,  0.0f, -1.0f),
+        QVector3D(0.0f, -1.0f,  0.0f),
         QVector3D(-1.0f,  0.0f,  0.0f),
     };
     int axialDirectionIndex = 0;

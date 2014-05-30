@@ -12,14 +12,14 @@ class Sphere : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY( float radius READ radius WRITE setRadius )
-    Q_PROPERTY( int rings READ rings WRITE setRings )
-    Q_PROPERTY( int slices READ slices WRITE setSlices )
+    Q_PROPERTY(float radius READ radius WRITE setRadius)
+    Q_PROPERTY(int rings READ rings WRITE setRings)
+    Q_PROPERTY(int slices READ slices WRITE setSlices)
 
 public:
-    explicit Sphere( QObject* parent = 0 );
+    explicit Sphere(QObject* parent = 0);
 
-    void setMaterial( const MaterialPtr& material );
+    void setMaterial(const MaterialPtr& material);
     MaterialPtr material() const;
 
     float radius() const
@@ -45,8 +45,8 @@ public:
      * @brief computeNormalLinesBuffer - compute a vertex buffer suitable for
      * rendering with GL_LINES, showing each vertex normal
      */
-    void computeNormalLinesBuffer( const MaterialPtr& mat, double scale = 1.0 );
-    void computeTangentLinesBuffer( const MaterialPtr& mat, double scale = 1.0 );
+    void computeNormalLinesBuffer(const MaterialPtr& mat, double scale = 1.0);
+    void computeTangentLinesBuffer(const MaterialPtr& mat, double scale = 1.0);
 
     void renderNormalLines();
     void renderTangentLines();
@@ -54,17 +54,17 @@ public:
     void bindBuffers();
 
 public slots:
-    void setRadius( float arg )
+    void setRadius(float arg)
     {
         _radius = arg;
     }
 
-    void setRings( int arg )
+    void setRings(int arg)
     {
         _rings = arg;
     }
 
-    void setSlices( int arg )
+    void setSlices(int arg)
     {
         _slices = arg;
     }
@@ -73,9 +73,9 @@ public slots:
     void render();
 
 private:
-    void generateVertexData( QVector<float>& vertices, QVector<float>& normals,
+    void generateVertexData(QVector<float>& vertices, QVector<float>& normals,
                              QVector<float>& texCoords, QVector<float>& tangents,
-                             QVector<unsigned int>& indices );
+                             QVector<unsigned int>& indices);
     void updateVertexArrayObject();
 
     MaterialPtr _material;

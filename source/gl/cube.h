@@ -13,12 +13,12 @@ class QOpenGLShaderProgram;
 class Cube : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY( float length READ length WRITE setLength )
+    Q_PROPERTY(float length READ length WRITE setLength)
 
 public:
-    explicit Cube( QObject* parent = 0 );
+    explicit Cube(QObject* parent = 0);
 
-    void setMaterial( const MaterialPtr& material );
+    void setMaterial(const MaterialPtr& material);
     MaterialPtr material() const;
 
     float length() const
@@ -33,7 +33,7 @@ public:
     int indexCount() const { return 36; }
 
 public slots:
-    void setLength( float arg )
+    void setLength(float arg)
     {
         _length = arg;
     }
@@ -43,7 +43,7 @@ public slots:
     void render();
 
 private:
-    void generateVertexData(float* vertices, float* normals, float* texCoords, float* tangents, unsigned int* indices );
+    void generateVertexData(float* vertices, float* normals, float* texCoords, float* tangents, unsigned int* indices);
     void updateVertexArrayObject();
 
     MaterialPtr _material;

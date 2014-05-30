@@ -18,19 +18,19 @@ class TextureUnitConfiguration : public QPair<TexturePtr, SamplerPtr>
 {
 public:
     TextureUnitConfiguration()
-        : QPair<TexturePtr, SamplerPtr>( TexturePtr(), SamplerPtr() )
+        : QPair<TexturePtr, SamplerPtr>(TexturePtr(), SamplerPtr())
     {
     }
 
-    explicit TextureUnitConfiguration( const TexturePtr& texture, const SamplerPtr& sampler )
-        : QPair<TexturePtr, SamplerPtr>( texture, sampler )
+    explicit TextureUnitConfiguration(const TexturePtr& texture, const SamplerPtr& sampler)
+        : QPair<TexturePtr, SamplerPtr>(texture, sampler)
     {
     }
 
-    void setTexture( const TexturePtr& texture ) { first = texture; }
+    void setTexture(const TexturePtr& texture) { first = texture; }
     TexturePtr texture() const { return first; }
 
-    void setSampler( const SamplerPtr sampler ) { second = sampler; }
+    void setSampler(const SamplerPtr sampler) { second = sampler; }
     SamplerPtr sampler() const { return second; }
 };
 
@@ -42,20 +42,20 @@ public:
 
     void bind();
 
-    void setShaders( const QString& vertexShader,
-                     const QString& fragmentShader );
+    void setShaders(const QString& vertexShader,
+                     const QString& fragmentShader);
 
-    void setShader( const QOpenGLShaderProgramPtr& shader );
+    void setShader(const QOpenGLShaderProgramPtr& shader);
 
     QOpenGLShaderProgramPtr shader() const { return _shader; }
 
-    void setTextureUnitConfiguration( GLuint unit, TexturePtr texture, SamplerPtr sampler );
-    void setTextureUnitConfiguration( GLuint unit, TexturePtr texture, SamplerPtr sampler, const QByteArray& uniformName );
+    void setTextureUnitConfiguration(GLuint unit, TexturePtr texture, SamplerPtr sampler);
+    void setTextureUnitConfiguration(GLuint unit, TexturePtr texture, SamplerPtr sampler, const QByteArray& uniformName);
 
-    void setTextureUnitConfiguration( GLuint unit, TexturePtr texture );
-    void setTextureUnitConfiguration( GLuint unit, TexturePtr texture, const QByteArray& uniformName );
+    void setTextureUnitConfiguration(GLuint unit, TexturePtr texture);
+    void setTextureUnitConfiguration(GLuint unit, TexturePtr texture, const QByteArray& uniformName);
 
-    TextureUnitConfiguration textureUnitConfiguration( GLuint unit ) const;
+    TextureUnitConfiguration textureUnitConfiguration(GLuint unit) const;
 
 private:
     void initialize();

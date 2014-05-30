@@ -50,9 +50,9 @@ public:
 
     void initialise();
     void cleanup();
-    void update( float t );
+    void update(float t);
     void render();
-    void resize( int w, int h );
+    void resize(int w, int h);
 
     void moveFocusToNode(NodeId nodeId, Transition::Type transitionType);
     void selectFocusNodeClosestToCameraVector(Transition::Type transitionType = Transition::Type::InversePower);

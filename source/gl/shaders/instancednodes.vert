@@ -19,10 +19,10 @@ uniform mat4 projectionMatrix;
 
 void main()
 {
-    position = ( modelViewMatrix * vec4( point + (vertexPosition * size), 1.0 ) ).xyz;
+    position = (modelViewMatrix * vec4(point + (vertexPosition * size), 1.0)).xyz;
 
     normal = normalMatrix * vertexNormal;
     vColor = color;
     vOutlineColor = outlineColor;
-    gl_Position = projectionMatrix * vec4( position, 1.0 );
+    gl_Position = projectionMatrix * vec4(position, 1.0);
 }

@@ -16,7 +16,7 @@ public:
         T range = high - low;
         int64_t randValue = ::rand();
         int64_t numerator = randValue * range;
-        T value = ( numerator / static_cast<T>(RAND_MAX)) + low;
+        T value = (numerator / static_cast<T>(RAND_MAX)) + low;
 
         return value;
     }
@@ -60,10 +60,10 @@ public:
 
         x2 = number * 0.5F;
         t.f  = number;
-        t.i  = 0x5f3759df - ( t.i >> 1 );               // what the fuck?
+        t.i  = 0x5f3759df -(t.i >> 1);               // what the fuck?
         y  = t.f;
-        y  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration
-    //	y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
+        y  = y *(threehalfs -(x2 * y * y));   // 1st iteration
+    //	y  = y *(threehalfs -(x2 * y * y));   // 2nd iteration, this can be removed
 
         return y;
     }

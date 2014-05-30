@@ -11,5 +11,5 @@ out vec3 vColor;
 void main()
 {
     vColor = color;
-    gl_Position = projectionMatrix * vec4( ( modelViewMatrix * vec4( position, 1.0 ) ).xyz, 1.0 );
+    gl_Position = projectionMatrix * vec4((modelViewMatrix * vec4(position, 1.0)).xyz, 1.0);
 }

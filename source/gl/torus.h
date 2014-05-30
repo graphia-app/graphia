@@ -13,15 +13,15 @@ class QOpenGLShaderProgram;
 class Torus : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY( float minorRadius READ minorRadius WRITE setMinorRadius )
-    Q_PROPERTY( float majorRadius READ majorRadius WRITE setMajorRadius )
-    Q_PROPERTY( int rings READ rings WRITE setRings )
-    Q_PROPERTY( int sides READ sides WRITE setSides )
+    Q_PROPERTY(float minorRadius READ minorRadius WRITE setMinorRadius)
+    Q_PROPERTY(float majorRadius READ majorRadius WRITE setMajorRadius)
+    Q_PROPERTY(int rings READ rings WRITE setRings)
+    Q_PROPERTY(int sides READ sides WRITE setSides)
 
 public:
-    explicit Torus( QObject* parent = 0 );
+    explicit Torus(QObject* parent = 0);
 
-    void setMaterial( const MaterialPtr& material );
+    void setMaterial(const MaterialPtr& material);
     MaterialPtr material() const;
 
     float minorRadius() const
@@ -49,22 +49,22 @@ public:
     int indexCount() const { return 6 * _sides * _rings; }
 
 public slots:
-    void setMinorRadius( float arg )
+    void setMinorRadius(float arg)
     {
         _minorRadius = arg;
     }
 
-    void setMajorRadius( float arg )
+    void setMajorRadius(float arg)
     {
         _majorRadius = arg;
     }
 
-    void setRings( int arg )
+    void setRings(int arg)
     {
         _rings = arg;
     }
 
-    void setSides( int arg )
+    void setSides(int arg)
     {
         _sides = arg;
     }
@@ -73,7 +73,7 @@ public slots:
     void render();
 
 private:
-    void generateVertexData( float* vertices, float* normals,float* texCoords, unsigned int* indices );
+    void generateVertexData(float* vertices, float* normals,float* texCoords, unsigned int* indices);
     void updateVertexArrayObject();
 
     MaterialPtr _material;

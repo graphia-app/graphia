@@ -15,9 +15,9 @@ void main()
 {
     vec3 point3 = vec3(point, 0.0);
     position = point3 + (vertexPosition * scale * 2.0);
-    vec3 transformedPosition = ( modelViewMatrix * vec4( position, 1.0 ) ).xyz;
+    vec3 transformedPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
     centre = vec3(point, 0.0);
     radius = scale;
 
-    gl_Position = projectionMatrix * vec4( transformedPosition, 1.0 );
+    gl_Position = projectionMatrix * vec4(transformedPosition, 1.0);
 }

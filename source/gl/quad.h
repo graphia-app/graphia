@@ -13,9 +13,9 @@ class Quad : public QObject
     Q_OBJECT
 
 public:
-    explicit Quad( QObject* parent = 0 );
+    explicit Quad(QObject* parent = 0);
 
-    void setMaterial( const MaterialPtr& material );
+    void setMaterial(const MaterialPtr& material);
     MaterialPtr material() const;
 
     QOpenGLVertexArrayObject* vertexArrayObject() { return &_vao; }
@@ -38,9 +38,9 @@ public slots:
     }
 
 private:
-    void generateVertexData( QVector<float>& vertices, QVector<float>& normals,
+    void generateVertexData(QVector<float>& vertices, QVector<float>& normals,
                              QVector<float>& texCoords, QVector<float>& tangents,
-                             QVector<unsigned int>& indices );
+                             QVector<unsigned int>& indices);
     void updateVertexArrayObject();
 
     MaterialPtr _material;

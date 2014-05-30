@@ -4,7 +4,7 @@ in vec3 position;
 in vec3 centre;
 in float radius;
 
-layout ( location = 0 ) out vec4 fragColor;
+layout (location = 0) out vec4 fragColor;
 
 void main()
 {

@@ -35,8 +35,8 @@
 #include <QtMath>
 #include <cmath>
 
-GraphScene::GraphScene( QObject* parent )
-    : AbstractScene( parent ),
+GraphScene::GraphScene(QObject* parent)
+    : AbstractScene(parent),
       _width(0), _height(0),
       _colorTexture(0),
       _selectionTexture(0),
@@ -46,7 +46,7 @@ GraphScene::GraphScene( QObject* parent )
       _trackFocusNode(true),
       _funcs(nullptr),
 #if defined(Q_OS_MAC)
-      _instanceFuncs( 0 ),
+      _instanceFuncs(0),
 #endif
       _componentsViewData(nullptr),
       _aspectRatio(4.0f / 3.0f),
@@ -72,21 +72,21 @@ void GraphScene::initialise()
     _funcs = _context->versionFunctions<QOpenGLFunctions_3_3_Core>();
 #else
     _instanceFuncs = new QOpenGLExtension_ARB_instanced_arrays;
-    if ( !_instanceFuncs->initializeOpenGLFunctions() )
-        qFatal( "Could not resolve GL_ARB_instanced_arrays functions" );
+    if(!_instanceFuncs->initializeOpenGLFunctions())
+        qFatal("Could not resolve GL_ARB_instanced_arrays functions");
 
     _funcs = _context->versionFunctions<QOpenGLFunctions_3_2_Core>();
 #endif
-    if ( !_funcs )
-        qFatal( "Could not obtain required OpenGL context version" );
+    if(!_funcs)
+        qFatal("Could not obtain required OpenGL context version");
     _funcs->initializeOpenGLFunctions();
 
     MaterialPtr nodeMaterial(new Material);
-    nodeMaterial->setShaders(":/gl/shaders/instancednodes.vert", ":/gl/shaders/ads.frag" );
+    nodeMaterial->setShaders(":/gl/shaders/instancednodes.vert", ":/gl/shaders/ads.frag");
     loadShaderProgram(_nodesShader, ":/gl/shaders/instancednodes.vert", ":/gl/shaders/ads.frag");
 
     // Create a sphere
-    _sphere = new Sphere( this );
+    _sphere = new Sphere(this);
     _sphere->setRadius(1.0f);
     _sphere->setRings(16);
     _sphere->setSlices(16);
@@ -94,7 +94,7 @@ void GraphScene::initialise()
     _sphere->create();
 
     MaterialPtr edgeMaterial(new Material);
-    edgeMaterial->setShaders(":/gl/shaders/instancededges.vert", ":/gl/shaders/ads.frag" );
+    edgeMaterial->setShaders(":/gl/shaders/instancededges.vert", ":/gl/shaders/ads.frag");
     loadShaderProgram(_edgesShader, ":/gl/shaders/instancededges.vert", ":/gl/shaders/ads.frag");
 
     _cylinder = new Cylinder(this);
@@ -105,7 +105,7 @@ void GraphScene::initialise()
     _cylinder->create();
 
     MaterialPtr componentMarkerMaterial(new Material);
-    componentMarkerMaterial->setShaders(":/gl/shaders/instancedmarkers.vert", ":/gl/shaders/marker.frag" );
+    componentMarkerMaterial->setShaders(":/gl/shaders/instancedmarkers.vert", ":/gl/shaders/marker.frag");
     loadShaderProgram(_componentMarkerShader, ":/gl/shaders/instancedmarkers.vert", ":/gl/shaders/marker.frag");
 
     _quad = new Quad(this);
@@ -131,7 +131,7 @@ void GraphScene::initialise()
     prepareScreenQuad();
 
     // Enable depth testing to prevent artifacts
-    glEnable( GL_DEPTH_TEST );
+    glEnable(GL_DEPTH_TEST);
 
     // Cull back facing triangles to save the gpu some work
     glEnable(GL_CULL_FACE);
@@ -414,9 +414,9 @@ void GraphScene::renderNodes()
     const ReadOnlyGraph* component = _graphModel->graph().componentById(_focusComponentId);
 
     _nodePositionBuffer.bind();
-    _nodePositionBuffer.allocate(_nodePositionData.data(), _nodePositionData.size() * sizeof(GLfloat) );
+    _nodePositionBuffer.allocate(_nodePositionData.data(), _nodePositionData.size() * sizeof(GLfloat));
     _nodeVisualBuffer.bind();
-    _nodeVisualBuffer.allocate(_nodeVisualData.data(), _nodeVisualData.size() * sizeof(GLfloat) );
+    _nodeVisualBuffer.allocate(_nodeVisualData.data(), _nodeVisualData.size() * sizeof(GLfloat));
 
     // Calculate needed matrices
     QMatrix4x4 modelViewMatrix = _camera->viewMatrix();
@@ -467,15 +467,15 @@ void GraphScene::renderComponentMarkers()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     _componentMarkerDataBuffer.bind();
-    _componentMarkerDataBuffer.allocate(_componentMarkerData.data(), _componentMarkerData.size() * sizeof(GLfloat) );
+    _componentMarkerDataBuffer.allocate(_componentMarkerData.data(), _componentMarkerData.size() * sizeof(GLfloat));
 
     // Bind the shader program
     _componentMarkerShader.bind();
 
     // Calculate needed matrices
     QMatrix4x4 modelViewMatrix = _camera->viewMatrix();
-    _componentMarkerShader.setUniformValue( "modelViewMatrix", modelViewMatrix );
-    _componentMarkerShader.setUniformValue( "projectionMatrix", _camera->projectionMatrix() );
+    _componentMarkerShader.setUniformValue("modelViewMatrix", modelViewMatrix);
+    _componentMarkerShader.setUniformValue("projectionMatrix", _camera->projectionMatrix());
 
     // Draw the edges
     _quad->vertexArrayObject()->bind();
@@ -500,8 +500,8 @@ void GraphScene::renderDebugLines()
 
     // Calculate needed matrices
     QMatrix4x4 modelViewMatrix = _camera->viewMatrix();
-    _debugLinesShader.setUniformValue( "modelViewMatrix", modelViewMatrix );
-    _debugLinesShader.setUniformValue( "projectionMatrix", _camera->projectionMatrix() );
+    _debugLinesShader.setUniformValue("modelViewMatrix", modelViewMatrix);
+    _debugLinesShader.setUniformValue("projectionMatrix", _camera->projectionMatrix());
 
     _debugLinesDataVAO.bind();
     _funcs->glDrawArrays(GL_LINES, 0, _debugLines.size() * 2);
@@ -878,29 +878,29 @@ void GraphScene::prepareVertexBuffers()
 {
     // Populate the data buffer object
     _nodePositionBuffer.create();
-    _nodePositionBuffer.setUsagePattern( QOpenGLBuffer::DynamicDraw );
+    _nodePositionBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     _nodePositionBuffer.bind();
-    _nodePositionBuffer.allocate( _nodePositionData.data(), _nodePositionData.size() * sizeof(GLfloat) );
+    _nodePositionBuffer.allocate(_nodePositionData.data(), _nodePositionData.size() * sizeof(GLfloat));
 
     _edgePositionBuffer.create();
-    _edgePositionBuffer.setUsagePattern( QOpenGLBuffer::DynamicDraw );
+    _edgePositionBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     _edgePositionBuffer.bind();
-    _edgePositionBuffer.allocate( _edgePositionData.data(), _edgePositionData.size() * sizeof(GLfloat) );
+    _edgePositionBuffer.allocate(_edgePositionData.data(), _edgePositionData.size() * sizeof(GLfloat));
 
     _nodeVisualBuffer.create();
-    _nodeVisualBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _nodeVisualBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     _nodeVisualBuffer.bind();
-    _nodeVisualBuffer.allocate( _nodeVisualData.data(), _nodeVisualData.size() * sizeof(GLfloat) );
+    _nodeVisualBuffer.allocate(_nodeVisualData.data(), _nodeVisualData.size() * sizeof(GLfloat));
 
     _edgeVisualBuffer.create();
-    _edgeVisualBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _edgeVisualBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     _edgeVisualBuffer.bind();
-    _edgeVisualBuffer.allocate( _edgeVisualData.data(), _edgeVisualData.size() * sizeof(GLfloat) );
+    _edgeVisualBuffer.allocate(_edgeVisualData.data(), _edgeVisualData.size() * sizeof(GLfloat));
 
     _componentMarkerDataBuffer.create();
-    _componentMarkerDataBuffer.setUsagePattern( QOpenGLBuffer::DynamicDraw );
+    _componentMarkerDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     _componentMarkerDataBuffer.bind();
-    _componentMarkerDataBuffer.allocate( _componentMarkerData.data(), _componentMarkerData.size() * sizeof(GLfloat) );
+    _componentMarkerDataBuffer.allocate(_componentMarkerData.data(), _componentMarkerData.size() * sizeof(GLfloat));
 
     _selectionMarkerDataBuffer.create();
     _selectionMarkerDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
