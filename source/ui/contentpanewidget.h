@@ -33,11 +33,11 @@ private:
     GraphModel* _graphModel;
     SelectionManager* _selectionManager;
     CommandManager _commandManager;
-    GraphFileParserThread *graphFileParserThread;
-    NodeLayoutThread* nodeLayoutThread;
-    LayoutThread* componentLayoutThread;
+    GraphFileParserThread* _graphFileParserThread;
+    NodeLayoutThread* _nodeLayoutThread;
+    LayoutThread* _componentLayoutThread;
 
-    bool resumePreviouslyActiveLayout;
+    bool _resumePreviouslyActiveLayout;
 
 private slots:
     void onGraphWillChange(const Graph*);

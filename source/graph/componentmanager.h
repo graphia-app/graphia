@@ -15,24 +15,24 @@ public:
     GraphComponent(const GraphComponent& other) :
         QObject(other.parent()),
         _graph(other._graph),
-        nodeIdsList(other.nodeIdsList),
-        edgeIdsList(other.edgeIdsList)
+        _nodeIdsList(other._nodeIdsList),
+        _edgeIdsList(other._edgeIdsList)
     {}
 
 private:
     const ReadOnlyGraph* _graph;
-    QVector<NodeId> nodeIdsList;
-    QVector<EdgeId> edgeIdsList;
+    QVector<NodeId> _nodeIdsList;
+    QVector<EdgeId> _edgeIdsList;
 
 public:
     const ReadOnlyGraph& graph() { return *_graph; }
 
-    const QVector<NodeId>& nodeIds() const { return nodeIdsList; }
-    int numNodes() const { return nodeIdsList.size(); }
+    const QVector<NodeId>& nodeIds() const { return _nodeIdsList; }
+    int numNodes() const { return _nodeIdsList.size(); }
     const Node& nodeById(NodeId nodeId) const { return _graph->nodeById(nodeId); }
 
-    const QVector<EdgeId>& edgeIds() const { return edgeIdsList; }
-    int numEdges() const { return edgeIdsList.size(); }
+    const QVector<EdgeId>& edgeIds() const { return _edgeIdsList; }
+    int numEdges() const { return _edgeIdsList.size(); }
     const Edge& edgeById(EdgeId edgeId) const { return _graph->edgeById(edgeId); }
 };
 
@@ -64,19 +64,19 @@ protected:
     virtual void graphChanged(const Graph*) = 0;
 
     template<typename> friend class ComponentArray;
-    QList<ResizableGraphArray*> componentArrayList;
+    QList<ResizableGraphArray*> _componentArrayList;
     virtual int componentArrayCapacity() const = 0;
 
     QVector<NodeId>& graphComponentNodeIdsList(GraphComponent* graphComponent)
     {
         Q_ASSERT(graphComponent != nullptr);
-        return graphComponent->nodeIdsList;
+        return graphComponent->_nodeIdsList;
     }
 
     QVector<EdgeId>& graphComponentEdgeIdsList(GraphComponent* graphComponent)
     {
         Q_ASSERT(graphComponent != nullptr);
-        return graphComponent->edgeIdsList;
+        return graphComponent->_edgeIdsList;
     }
 
 public:

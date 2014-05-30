@@ -23,10 +23,10 @@ public:
 
     float length() const
     {
-        return m_length;
+        return _length;
     }
 
-    QOpenGLVertexArrayObject* vertexArrayObject() { return &m_vao; }
+    QOpenGLVertexArrayObject* vertexArrayObject() { return &_vao; }
 
     void bindBuffers();
 
@@ -35,7 +35,7 @@ public:
 public slots:
     void setLength( float arg )
     {
-        m_length = arg;
+        _length = arg;
     }
 
     void create();
@@ -46,17 +46,17 @@ private:
     void generateVertexData(float* vertices, float* normals, float* texCoords, float* tangents, unsigned int* indices );
     void updateVertexArrayObject();
 
-    MaterialPtr m_material;
-    float m_length;
+    MaterialPtr _material;
+    float _length;
 
     // QVertexBuffers to hold the data
-    QOpenGLBuffer m_positionBuffer;
-    QOpenGLBuffer m_normalBuffer;
-    QOpenGLBuffer m_textureCoordBuffer;
-    QOpenGLBuffer m_tangentBuffer;
-    QOpenGLBuffer m_indexBuffer;
+    QOpenGLBuffer _positionBuffer;
+    QOpenGLBuffer _normalBuffer;
+    QOpenGLBuffer _textureCoordBuffer;
+    QOpenGLBuffer _tangentBuffer;
+    QOpenGLBuffer _indexBuffer;
 
-    QOpenGLVertexArrayObject m_vao;
+    QOpenGLVertexArrayObject _vao;
 };
 
 #endif // CUBE_H

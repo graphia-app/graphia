@@ -9,7 +9,7 @@ int OpenGLDebugMessageModel::rowCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return 0;
-    return m_messages.length();
+    return _messages.length();
 }
 
 int OpenGLDebugMessageModel::columnCount(const QModelIndex &parent) const
@@ -24,7 +24,7 @@ QVariant OpenGLDebugMessageModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    const QOpenGLDebugMessage &message = m_messages.at(index.row());
+    const QOpenGLDebugMessage &message = _messages.at(index.row());
 
     if (role != Qt::DisplayRole)
         return QVariant();
@@ -160,26 +160,26 @@ QVariant OpenGLDebugMessageModel::headerData(int section, Qt::Orientation orient
 
 QList<QOpenGLDebugMessage> OpenGLDebugMessageModel::messages() const
 {
-    return m_messages;
+    return _messages;
 }
 
 void OpenGLDebugMessageModel::clearMessages()
 {
     beginResetModel();
-    m_messages.clear();
+    _messages.clear();
     endResetModel();
 }
 
 void OpenGLDebugMessageModel::setMessages(const QList<QOpenGLDebugMessage> &messages)
 {
     beginResetModel();
-    m_messages = messages;
+    _messages = messages;
     endResetModel();
 }
 
 void OpenGLDebugMessageModel::appendMessage(const QOpenGLDebugMessage &message)
 {
     beginInsertRows(QModelIndex(), rowCount(), 1);
-    m_messages.append(message);
+    _messages.append(message);
     endInsertRows();
 }

@@ -38,7 +38,7 @@
 
 void EadesLayout::executeReal(uint64_t iteration)
 {
-    NodePositions& positions = *this->positions;
+    NodePositions& positions = *this->_positions;
 
     QVector3D axialDirections[] =
     {
@@ -59,10 +59,10 @@ void EadesLayout::executeReal(uint64_t iteration)
         randomLayout.execute(iteration);
     }
 
-    moves.resize(positions.size());
+    _moves.resize(positions.size());
 
     for(NodeId i : graph().nodeIds())
-        moves[i] = QVector3D(0.0f, 0.0f, 0.0f);
+        _moves[i] = QVector3D(0.0f, 0.0f, 0.0f);
 
     int numNodes = graph().nodeIds().size();
 
@@ -97,8 +97,8 @@ void EadesLayout::executeReal(uint64_t iteration)
                     direction = Utils::fastNormalize(difference);
                 }
 
-                moves[nodeAId] -= (force * direction);
-                moves[nodeBId] += (force * direction);
+                _moves[nodeAId] -= (force * direction);
+                _moves[nodeBId] += (force * direction);
             }
         }
     }
@@ -119,8 +119,8 @@ void EadesLayout::executeReal(uint64_t iteration)
             {
                 qreal force = ATTRACT(distance);
                 QVector3D direction = difference.normalized();
-                moves[edge.targetId()] -= (force * direction);
-                moves[edge.sourceId()] += (force * direction);
+                _moves[edge.targetId()] -= (force * direction);
+                _moves[edge.sourceId()] += (force * direction);
             }
         }
     }
@@ -128,7 +128,7 @@ void EadesLayout::executeReal(uint64_t iteration)
     positions.lock();
     // Apply the moves
     for(NodeId nodeId : graph().nodeIds())
-        positions[nodeId] += (moves[nodeId] * 0.1f); //FIXME not sure what this constant is about, damping?
+        positions[nodeId] += (_moves[nodeId] * 0.1f); //FIXME not sure what this constant is about, damping?
     positions.unlock();
 
     emit changed();

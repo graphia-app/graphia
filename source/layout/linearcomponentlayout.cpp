@@ -4,18 +4,18 @@
 
 void LinearComponentLayout::executeReal(uint64_t)
 {
-    ComponentPositions& componentPositions = *this->componentPositions;
+    ComponentPositions& componentPositions = *this->_componentPositions;
     const ReadOnlyGraph& firstComponent = *graph().firstComponent();
     const float COMPONENT_SEPARATION = 2.0f;
 
-    float offset = -(NodeLayout::boundingCircleRadiusInXY(firstComponent, *nodePositions) +
+    float offset = -(NodeLayout::boundingCircleRadiusInXY(firstComponent, *_nodePositions) +
                      COMPONENT_SEPARATION);
 
     componentPositions.lock();
     for(ComponentId componentId : *graph().componentIds())
     {
         const ReadOnlyGraph& component = *graph().componentById(componentId);
-        const float radius = NodeLayout::boundingCircleRadiusInXY(component, *nodePositions);
+        const float radius = NodeLayout::boundingCircleRadiusInXY(component, *_nodePositions);
 
         offset += (radius + COMPONENT_SEPARATION);
         componentPositions[componentId] = QVector2D(offset, 0.0f);

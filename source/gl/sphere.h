@@ -24,22 +24,22 @@ public:
 
     float radius() const
     {
-        return m_radius;
+        return _radius;
     }
 
     int rings() const
     {
-        return m_rings;
+        return _rings;
     }
 
     int slices() const
     {
-        return m_slices;
+        return _slices;
     }
 
-    QOpenGLVertexArrayObject* vertexArrayObject() { return &m_vao; }
+    QOpenGLVertexArrayObject* vertexArrayObject() { return &_vao; }
 
-    int indexCount() const { return 6 * m_slices * m_rings; }
+    int indexCount() const { return 6 * _slices * _rings; }
 
     /**
      * @brief computeNormalLinesBuffer - compute a vertex buffer suitable for
@@ -56,17 +56,17 @@ public:
 public slots:
     void setRadius( float arg )
     {
-        m_radius = arg;
+        _radius = arg;
     }
 
     void setRings( int arg )
     {
-        m_rings = arg;
+        _rings = arg;
     }
 
     void setSlices( int arg )
     {
-        m_slices = arg;
+        _slices = arg;
     }
 
     void create();
@@ -78,23 +78,23 @@ private:
                              QVector<unsigned int>& indices );
     void updateVertexArrayObject();
 
-    MaterialPtr m_material;
+    MaterialPtr _material;
 
-    float m_radius;
-    int m_rings;  // Rings of latitude
-    int m_slices; // Longitude
+    float _radius;
+    int _rings;  // Rings of latitude
+    int _slices; // Longitude
 
     // QVertexBuffers to hold the data
-    QOpenGLBuffer m_positionBuffer;
-    QOpenGLBuffer m_normalBuffer;
-    QOpenGLBuffer m_textureCoordBuffer;
-    QOpenGLBuffer m_indexBuffer;
-    QOpenGLBuffer m_tangentBuffer;
+    QOpenGLBuffer _positionBuffer;
+    QOpenGLBuffer _normalBuffer;
+    QOpenGLBuffer _textureCoordBuffer;
+    QOpenGLBuffer _indexBuffer;
+    QOpenGLBuffer _tangentBuffer;
 
-    QOpenGLVertexArrayObject m_vao;
+    QOpenGLVertexArrayObject _vao;
 
-    QOpenGLBuffer m_normalLines, m_tangentLines;
-    QOpenGLVertexArrayObject m_vaoNormals, m_vaoTangents;
+    QOpenGLBuffer _normalLines, _tangentLines;
+    QOpenGLVertexArrayObject _vaoNormals, _vaoTangents;
 };
 
 #endif // SPHERE_H

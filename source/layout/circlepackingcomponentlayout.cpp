@@ -17,7 +17,7 @@ void CirclePackingComponentLayout::executeReal(uint64_t iteration)
 {
     QList<ComponentId> componentIds = *graph().componentIds();
     const float COMPONENT_SEPARATION = 2.0f;
-    ComponentPositions& componentPositions = *this->componentPositions;
+    ComponentPositions& componentPositions = *this->_componentPositions;
     ComponentArray<float> componentRadii(const_cast<Graph&>(graph()));
 
     for(ComponentId componentId : componentIds)

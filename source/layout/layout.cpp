@@ -14,7 +14,7 @@ BoundingBox3D NodeLayout::boundingBox(const ReadOnlyGraph &graph, const NodePosi
 
 BoundingBox3D NodeLayout::boundingBox() const
 {
-    return NodeLayout::boundingBox(*_graph, *this->positions);
+    return NodeLayout::boundingBox(*_graph, *this->_positions);
 }
 
 BoundingBox2D NodeLayout::boundingBoxInXY(const ReadOnlyGraph &graph, const NodePositions &positions)
@@ -28,7 +28,7 @@ BoundingBox2D NodeLayout::boundingBoxInXY(const ReadOnlyGraph &graph, const Node
 
 NodeLayout::BoundingSphere NodeLayout::boundingSphere() const
 {
-    return NodeLayout::boundingSphere(*_graph, *this->positions);
+    return NodeLayout::boundingSphere(*_graph, *this->_positions);
 }
 
 float NodeLayout::boundingCircleRadiusInXY(const ReadOnlyGraph &graph, const NodePositions &positions)
@@ -56,8 +56,8 @@ BoundingBox2D ComponentLayout::boundingBox() const
     for(ComponentId componentId : *_graph->componentIds())
     {
         const ReadOnlyGraph& component = *_graph->componentById(componentId);
-        float componentRadius = NodeLayout::boundingCircleRadiusInXY(component, *nodePositions);
-        QVector2D componentPosition = (*componentPositions)[componentId];
+        float componentRadius = NodeLayout::boundingCircleRadiusInXY(component, *_nodePositions);
+        QVector2D componentPosition = (*_componentPositions)[componentId];
         BoundingBox2D componentBoundingBox(
                     QVector2D(componentPosition.x() - componentRadius, componentPosition.y() - componentRadius),
                     QVector2D(componentPosition.x() + componentRadius, componentPosition.y() + componentRadius));
@@ -71,75 +71,75 @@ BoundingBox2D ComponentLayout::boundingBox() const
 float ComponentLayout::radiusOfComponent(ComponentId componentId) const
 {
     const ReadOnlyGraph& component = *_graph->componentById(componentId);
-    return NodeLayout::boundingCircleRadiusInXY(component, *nodePositions);
+    return NodeLayout::boundingCircleRadiusInXY(component, *_nodePositions);
 }
 
 BoundingBox2D ComponentLayout::boundingBoxOfComponent(ComponentId componentId) const
 {
     const ReadOnlyGraph& component = *_graph->componentById(componentId);
-    return NodeLayout::boundingBoxInXY(component, *nodePositions);
+    return NodeLayout::boundingBoxInXY(component, *_nodePositions);
 }
 
 
 void LayoutThread::addLayout(Layout *layout)
 {
-    QMutexLocker locker(&mutex);
+    QMutexLocker locker(&_mutex);
 
     // Take ownership of the algorithm
     layout->moveToThread(this);
-    layouts.insert(layout);
+    _layouts.insert(layout);
 }
 
 void LayoutThread::removeLayout(Layout *layout)
 {
-    QMutexLocker locker(&mutex);
+    QMutexLocker locker(&_mutex);
 
-    layouts.remove(layout);
+    _layouts.remove(layout);
     delete layout;
 }
 
 void LayoutThread::pause()
 {
-    QMutexLocker locker(&mutex);
+    QMutexLocker locker(&_mutex);
     if(_paused)
         return;
 
     _pause = true;
 
-    for(Layout* layout : layouts)
+    for(Layout* layout : _layouts)
         layout->cancel();
 }
 
 void LayoutThread::pauseAndWait()
 {
-    QMutexLocker locker(&mutex);
+    QMutexLocker locker(&_mutex);
     if(_paused)
         return;
 
     _pause = true;
 
-    for(Layout* layout : layouts)
+    for(Layout* layout : _layouts)
         layout->cancel();
 
-    waitForPause.wait(&mutex);
+    _waitForPause.wait(&_mutex);
 }
 
 bool LayoutThread::paused()
 {
-    QMutexLocker locker(&mutex);
+    QMutexLocker locker(&_mutex);
     return _paused;
 }
 
 void LayoutThread::resume()
 {
-    QMutexLocker locker(&mutex);
+    QMutexLocker locker(&_mutex);
     if(!_paused)
         return;
 
     _pause = false;
     _paused = false;
 
-    waitForResume.wakeAll();
+    _waitForResume.wakeAll();
 }
 
 void LayoutThread::execute()
@@ -149,19 +149,19 @@ void LayoutThread::execute()
 
 void LayoutThread::stop()
 {
-    QMutexLocker locker(&mutex);
+    QMutexLocker locker(&_mutex);
     _stop = true;
     _pause = false;
 
-    for(Layout* layout : layouts)
+    for(Layout* layout : _layouts)
         layout->cancel();
 
-    waitForResume.wakeAll();
+    _waitForResume.wakeAll();
 }
 
 bool LayoutThread::iterative()
 {
-    for(Layout* layout : layouts)
+    for(Layout* layout : _layouts)
     {
         if(layout->iterative())
             return true;
@@ -172,7 +172,7 @@ bool LayoutThread::iterative()
 
 bool LayoutThread::allLayoutsShouldPause()
 {
-    for(Layout* layout : layouts)
+    for(Layout* layout : _layouts)
     {
         if(!layout->shouldPause())
             return false;
@@ -185,7 +185,7 @@ void LayoutThread::run()
 {
     do
     {
-        for(Layout* layout : layouts)
+        for(Layout* layout : _layouts)
         {
             if(layout->shouldPause())
                 continue;
@@ -197,27 +197,27 @@ void LayoutThread::run()
         emit executed();
 
         {
-            QMutexLocker locker(&mutex);
+            QMutexLocker locker(&_mutex);
 
-            if(!_stop && (_pause || allLayoutsShouldPause() || (!iterative() && repeating)))
+            if(!_stop && (_pause || allLayoutsShouldPause() || (!iterative() && _repeating)))
             {
                 _paused = true;
-                waitForPause.wakeAll();
-                waitForResume.wait(&mutex);
+                _waitForPause.wakeAll();
+                _waitForResume.wait(&_mutex);
             }
 
             if(_stop)
                 break;
         }
     }
-    while(iterative() || repeating);
+    while(iterative() || _repeating);
 
-    mutex.lock();
-    for(Layout* layout : layouts)
+    _mutex.lock();
+    for(Layout* layout : _layouts)
         delete layout;
 
-    layouts.clear();
-    mutex.unlock();
+    _layouts.clear();
+    _mutex.unlock();
 }
 
 

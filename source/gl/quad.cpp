@@ -6,28 +6,28 @@
 
 Quad::Quad(QObject* parent)
     : QObject(parent),
-      m_edgeLength(1.0f),
-      m_positionBuffer( QOpenGLBuffer::VertexBuffer ),
-      m_normalBuffer( QOpenGLBuffer::VertexBuffer ),
-      m_textureCoordBuffer( QOpenGLBuffer::VertexBuffer ),
-      m_indexBuffer( QOpenGLBuffer::IndexBuffer ),
-      m_vao(),
-      m_normalLines( QOpenGLBuffer::VertexBuffer ),
-      m_tangentLines( QOpenGLBuffer::VertexBuffer )
+      _edgeLength(1.0f),
+      _positionBuffer( QOpenGLBuffer::VertexBuffer ),
+      _normalBuffer( QOpenGLBuffer::VertexBuffer ),
+      _textureCoordBuffer( QOpenGLBuffer::VertexBuffer ),
+      _indexBuffer( QOpenGLBuffer::IndexBuffer ),
+      _vao(),
+      _normalLines( QOpenGLBuffer::VertexBuffer ),
+      _tangentLines( QOpenGLBuffer::VertexBuffer )
 {
 }
 
 void Quad::setMaterial(const MaterialPtr& material)
 {
-    if ( material == m_material )
+    if ( material == _material )
         return;
-    m_material = material;
+    _material = material;
     updateVertexArrayObject();
 }
 
 MaterialPtr Quad::material() const
 {
-    return m_material;
+    return _material;
 }
 
 void Quad::create()
@@ -43,30 +43,30 @@ void Quad::create()
     generateVertexData(v, n, tex, tang, el);
 
     // Create and populate the buffer objects
-    m_positionBuffer.create();
-    m_positionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_positionBuffer.bind();
-    m_positionBuffer.allocate(v.constData(), v.size() * sizeof(float));
+    _positionBuffer.create();
+    _positionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    _positionBuffer.bind();
+    _positionBuffer.allocate(v.constData(), v.size() * sizeof(float));
 
-    m_normalBuffer.create();
-    m_normalBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_normalBuffer.bind();
-    m_normalBuffer.allocate(n.constData(), n.size() * sizeof(float));
+    _normalBuffer.create();
+    _normalBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    _normalBuffer.bind();
+    _normalBuffer.allocate(n.constData(), n.size() * sizeof(float));
 
-    m_textureCoordBuffer.create();
-    m_textureCoordBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_textureCoordBuffer.bind();
-    m_textureCoordBuffer.allocate(tex.constData(), tex.size() * sizeof(float));
+    _textureCoordBuffer.create();
+    _textureCoordBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    _textureCoordBuffer.bind();
+    _textureCoordBuffer.allocate(tex.constData(), tex.size() * sizeof(float));
 
-    m_tangentBuffer.create();
-    m_tangentBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_tangentBuffer.bind();
-    m_tangentBuffer.allocate(tang.constData(), tang.size() * sizeof(float));
+    _tangentBuffer.create();
+    _tangentBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    _tangentBuffer.bind();
+    _tangentBuffer.allocate(tang.constData(), tang.size() * sizeof(float));
 
-    m_indexBuffer.create();
-    m_indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    m_indexBuffer.bind();
-    m_indexBuffer.allocate(el.constData(), el.size() * sizeof(unsigned int));
+    _indexBuffer.create();
+    _indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    _indexBuffer.bind();
+    _indexBuffer.allocate(el.constData(), el.size() * sizeof(unsigned int));
 
     updateVertexArrayObject();
 }
@@ -81,7 +81,7 @@ void Quad::generateVertexData( QVector<float>& vertices, QVector<float>& normals
     indices.resize( 6 );
 
     int index = 0; //, texCoordIndex = 0, tangentIndex = 0;
-    float halfEdgeLength = m_edgeLength * 0.5f;
+    float halfEdgeLength = _edgeLength * 0.5f;
 
     vertices[index++] = -halfEdgeLength;
     vertices[index++] = -halfEdgeLength;
@@ -119,44 +119,44 @@ void Quad::generateVertexData( QVector<float>& vertices, QVector<float>& normals
 void Quad::updateVertexArrayObject()
 {
     // Ensure that we have a valid material and geometry
-    if ( !m_material || !m_positionBuffer.isCreated() )
+    if ( !_material || !_positionBuffer.isCreated() )
         return;
 
     // Create a vertex array object
-    if ( !m_vao.isCreated() )
-        m_vao.create();
-    m_vao.bind();
+    if ( !_vao.isCreated() )
+        _vao.create();
+    _vao.bind();
 
     bindBuffers();
 
     // End VAO setup
-    m_vao.release();
+    _vao.release();
 
     // Tidy up after ourselves
-    m_tangentBuffer.release();
-    m_indexBuffer.release();
+    _tangentBuffer.release();
+    _indexBuffer.release();
 }
 
 void Quad::bindBuffers()
 {
-    QOpenGLShaderProgramPtr shader = m_material->shader();
+    QOpenGLShaderProgramPtr shader = _material->shader();
     shader->bind();
 
-    m_positionBuffer.bind();
+    _positionBuffer.bind();
     shader->enableAttributeArray( "vertexPosition" );
     shader->setAttributeBuffer( "vertexPosition", GL_FLOAT, 0, 3 );
 
-    m_normalBuffer.bind();
+    _normalBuffer.bind();
     shader->enableAttributeArray( "vertexNormal" );
     shader->setAttributeBuffer( "vertexNormal", GL_FLOAT, 0, 3 );
 
-    m_textureCoordBuffer.bind();
+    _textureCoordBuffer.bind();
     shader->enableAttributeArray( "vertexTexCoord" );
     shader->setAttributeBuffer( "vertexTexCoord", GL_FLOAT, 0, 2 );
 
-    m_tangentBuffer.bind();
+    _tangentBuffer.bind();
     shader->enableAttributeArray( "vertexTangent" );
     shader->setAttributeBuffer( "vertexTangent", GL_FLOAT, 0, 4 );
 
-    m_indexBuffer.bind();
+    _indexBuffer.bind();
 }

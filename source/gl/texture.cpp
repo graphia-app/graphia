@@ -12,9 +12,9 @@ class TexturePrivate
 public:
     TexturePrivate( Texture::TextureType type, Texture* qq )
         : q_ptr( qq ),
-          m_type( type ),
-          m_textureId( 0 ),
-          m_funcs( 0 )
+          _type( type ),
+          _textureId( 0 ),
+          _funcs( 0 )
     {
     }
 
@@ -29,46 +29,46 @@ public:
 
     Texture* q_ptr;
 
-    Texture::TextureType m_type;
-    GLuint m_textureId;
-    QOpenGLFunctions* m_funcs;
+    Texture::TextureType _type;
+    GLuint _textureId;
+    QOpenGLFunctions* _funcs;
 };
 
 bool TexturePrivate::create( QOpenGLContext* ctx )
 {
-    m_funcs = ctx->functions();
-    m_funcs->initializeOpenGLFunctions();
-    glGenTextures( 1, &m_textureId );
-    return (m_textureId != 0);
+    _funcs = ctx->functions();
+    _funcs->initializeOpenGLFunctions();
+    glGenTextures( 1, &_textureId );
+    return (_textureId != 0);
 }
 
 void TexturePrivate::destroy()
 {
-    if ( m_textureId )
+    if ( _textureId )
     {
-        glDeleteTextures( 1, &m_textureId );
-        m_textureId = 0;
+        glDeleteTextures( 1, &_textureId );
+        _textureId = 0;
     }
 }
 
 void TexturePrivate::bind()
 {
-    glBindTexture( m_type, m_textureId );
+    glBindTexture( _type, _textureId );
 }
 
 void TexturePrivate::release()
 {
-    glBindTexture( m_type, 0 );
+    glBindTexture( _type, 0 );
 }
 
 void TexturePrivate::setParameter( GLenum param, GLenum value )
 {
-    glTexParameteri( m_type, param, value );
+    glTexParameteri( _type, param, value );
 }
 
 void TexturePrivate::setParameter( GLenum param, float value )
 {
-    glTexParameterf( m_type, param, value );
+    glTexParameterf( _type, param, value );
 }
 
 Texture::Texture( TextureType type )
@@ -84,7 +84,7 @@ Texture::~Texture()
 Texture::TextureType Texture::type() const
 {
     Q_D( const Texture );
-    return d->m_type;
+    return d->_type;
 }
 
 bool Texture::create()
@@ -104,7 +104,7 @@ void Texture::destroy()
 GLuint Texture::textureId() const
 {
     Q_D( const Texture );
-    return d->m_textureId;
+    return d->_textureId;
 }
 
 void Texture::bind()
@@ -123,24 +123,24 @@ void Texture::initializeToEmpty( const QSize& size )
 {
     Q_D( Texture );
     Q_ASSERT( size.isValid() );
-    Q_ASSERT( d->m_type == Texture2D );
-    setRawData2D( d->m_type, 0, GL_RGBA, size.width(), size.height(), 0,
+    Q_ASSERT( d->_type == Texture2D );
+    setRawData2D( d->_type, 0, GL_RGBA, size.width(), size.height(), 0,
                   GL_RGBA, GL_UNSIGNED_BYTE, 0 );
 }
 
 void Texture::setImage( const QImage& image )
 {
     Q_D( Texture );
-    Q_ASSERT( d->m_type == Texture2D );
+    Q_ASSERT( d->_type == Texture2D );
     QImage glImage = QGLWidget::convertToGLFormat( image );
-    setRawData2D( d->m_type, 0, GL_RGBA, glImage.width(), glImage.height(), 0,
+    setRawData2D( d->_type, 0, GL_RGBA, glImage.width(), glImage.height(), 0,
                   GL_RGBA, GL_UNSIGNED_BYTE, glImage.bits() );
 }
 
 void Texture::setCubeMapImage( GLenum face, const QImage& image )
 {
     Q_D( Texture );
-    Q_ASSERT( d->m_type == TextureCubeMap );
+    Q_ASSERT( d->_type == TextureCubeMap );
     Q_UNUSED( d );
     QImage glImage = QGLWidget::convertToGLFormat( image );
     setRawData2D( face, 0, GL_RGBA8, glImage.width(), glImage.height(), 0,
@@ -158,7 +158,7 @@ void Texture::setRawData2D( GLenum target, int mipmapLevel, GLenum internalForma
 void Texture::generateMipMaps()
 {
     Q_D( Texture );
-    d->m_funcs->glGenerateMipmap( d->m_type );
+    d->_funcs->glGenerateMipmap( d->_type );
 }
 
 void Texture::setWrapMode( CoordinateDirection direction, GLenum wrapMode )

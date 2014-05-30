@@ -18,10 +18,10 @@ public:
                            QScreen* parent = 0 );
     //FIXME destructor to delete things
 
-    QOpenGLContext* context() const { return m_context; }
+    QOpenGLContext* context() const { return _context; }
 
     void setScene( AbstractScene* scene );
-    AbstractScene* scene() const { return m_scene; }
+    AbstractScene* scene() const { return _scene; }
     
 protected:
     virtual void initialise();
@@ -44,12 +44,12 @@ protected slots:
     void messageLogged(const QOpenGLDebugMessage &message);
 
 private:
-    QOpenGLContext* m_context;
-    AbstractScene* m_scene;
-    GraphView* m_graphView;
-    int m_debugLevel;
+    QOpenGLContext* _context;
+    AbstractScene* _scene;
+    GraphView* _graphView;
+    int _debugLevel;
     
-    QTime m_time;
+    QTime _time;
 };
 
 #endif // OPENGLWINDOW_H

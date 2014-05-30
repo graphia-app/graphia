@@ -12,12 +12,12 @@ class EadesLayout : public NodeLayout
 {
     Q_OBJECT
 private:
-    QVector<QVector3D> moves;
+    QVector<QVector3D> _moves;
 
 public:
     EadesLayout(const ReadOnlyGraph& graph, NodePositions& positions) :
         NodeLayout(graph, positions, Iterative::Yes),
-        moves(graph.numNodes())
+        _moves(graph.numNodes())
     {}
 
     void executeReal(uint64_t iteration);
@@ -26,8 +26,8 @@ public:
 class EadesLayoutFactory : public NodeLayoutFactory
 {
 public:
-    EadesLayoutFactory(GraphModel* _graphModel) :
-        NodeLayoutFactory(_graphModel)
+    EadesLayoutFactory(GraphModel* graphModel) :
+        NodeLayoutFactory(graphModel)
     {}
 
     NodeLayout* create(ComponentId componentId) const

@@ -20,29 +20,29 @@ template<typename T> class ElementId
 {
 private:
     static const int NullValue = -1;
-    int value;
+    int _value;
 
 public:
-    explicit ElementId(int _value = NullValue) :
-        value(_value)
+    explicit ElementId(int value = NullValue) :
+        _value(value)
     {}
 
-    inline operator int() const { return value; }
+    inline operator int() const { return _value; }
 
     ElementId& operator=(const ElementId<T>& other)
     {
-        value = other.value;
+        _value = other._value;
         return *this;
     }
 
     explicit ElementId(const ElementId<T>& other)
     {
-        value = other.value;
+        _value = other._value;
     }
 
     inline T& operator++()
     {
-        ++value;
+        ++_value;
         return static_cast<T&>(*this);
     }
 
@@ -55,17 +55,17 @@ public:
 
     inline bool operator==(const ElementId<T>& other) const
     {
-        return value == other.value;
+        return _value == other._value;
     }
 
     inline bool isNull() const
     {
-        return value == NullValue;
+        return _value == NullValue;
     }
 
     inline void setToNull()
     {
-        value = NullValue;
+        _value = NullValue;
     }
 
     friend QDebug operator<< <T>(QDebug d, const ElementId<T>& id);
@@ -76,7 +76,7 @@ template<typename T> QDebug operator<<(QDebug d, const ElementId<T>& id)
     if(id.isNull())
         d << "Null";
     else
-        d << id.value;
+        d << id._value;
 
     return d;
 }
@@ -87,7 +87,7 @@ struct NodeId : ElementId<NodeId>
     using ElementId::ElementId;
 #else
     explicit NodeId() : ElementId() {}
-    explicit NodeId(int _value) : ElementId(_value) {}
+    explicit NodeId(int value) : ElementId(value) {}
 #endif
 };
 
@@ -97,7 +97,7 @@ struct EdgeId : ElementId<EdgeId>
     using ElementId::ElementId;
 #else
     explicit EdgeId() : ElementId() {}
-    explicit EdgeId(int _value) : ElementId(_value) {}
+    explicit EdgeId(int value) : ElementId(value) {}
 #endif
 };
 
@@ -107,7 +107,7 @@ struct ComponentId : ElementId<ComponentId>
     using ElementId::ElementId;
 #else
     explicit ComponentId() : ElementId() {}
-    explicit ComponentId(int _value) : ElementId(_value) {}
+    explicit ComponentId(int value) : ElementId(value) {}
 #endif
 };
 
@@ -211,26 +211,26 @@ public:
     virtual ~Graph();
 
 private:
-    QVector<NodeId> nodeIdsList;
-    QVector<Node> nodesVector;
-    NodeId nextNodeId;
-    QQueue<NodeId> vacatedNodeIdQueue;
+    QVector<NodeId> _nodeIdsList;
+    QVector<Node> _nodesVector;
+    NodeId _nextNodeId;
+    QQueue<NodeId> _vacatedNodeIdQueue;
 
-    QVector<EdgeId> edgeIdsList;
-    QVector<Edge> edgesVector;
-    EdgeId nextEdgeId;
-    QQueue<EdgeId> vacatedEdgeIdQueue;
+    QVector<EdgeId> _edgeIdsList;
+    QVector<Edge> _edgesVector;
+    EdgeId _nextEdgeId;
+    QQueue<EdgeId> _vacatedEdgeIdQueue;
 
     template<typename> friend class NodeArray;
-    QList<ResizableGraphArray*> nodeArrayList;
-    int nodeArrayCapacity() const { return nextNodeId; }
+    QList<ResizableGraphArray*> _nodeArrayList;
+    int nodeArrayCapacity() const { return _nextNodeId; }
 
     template<typename> friend class EdgeArray;
-    QList<ResizableGraphArray*> edgeArrayList;
-    int edgeArrayCapacity() const { return nextEdgeId; }
+    QList<ResizableGraphArray*> _edgeArrayList;
+    int edgeArrayCapacity() const { return _nextEdgeId; }
 
     template<typename> friend class ComponentArray;
-    ComponentManager* componentManager;
+    ComponentManager* _componentManager;
     bool _componentManagementEnabled;
 
     void setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId);
@@ -238,23 +238,23 @@ private:
 
 public:
     void clear();
-    void setComponentManager(ComponentManager* componentManager);
+    void setComponentManager(ComponentManager* _componentManager);
     void enableComponentMangagement();
     void disableComponentMangagement();
     bool componentManagementEnabled() const { return _componentManagementEnabled; }
 
-    const QVector<NodeId>& nodeIds() const { return nodeIdsList; }
-    int numNodes() const { return nodeIdsList.size(); }
-    const Node& nodeById(NodeId nodeId) const { return nodesVector[nodeId]; }
+    const QVector<NodeId>& nodeIds() const { return _nodeIdsList; }
+    int numNodes() const { return _nodeIdsList.size(); }
+    const Node& nodeById(NodeId nodeId) const { return _nodesVector[nodeId]; }
 
     NodeId addNode();
     void removeNode(NodeId nodeId);
     void removeNodes(QSet<NodeId> nodeIds);
     void removeNodes(QList<NodeId> nodeIds);
 
-    const QVector<EdgeId>& edgeIds() const { return edgeIdsList; }
-    int numEdges() const { return edgeIdsList.size(); }
-    const Edge& edgeById(EdgeId edgeId) const { return edgesVector[edgeId]; }
+    const QVector<EdgeId>& edgeIds() const { return _edgeIdsList; }
+    int numEdges() const { return _edgeIdsList.size(); }
+    const Edge& edgeById(EdgeId edgeId) const { return _edgesVector[edgeId]; }
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId);
     void removeEdge(EdgeId edgeId);
@@ -272,7 +272,7 @@ public:
     void dumpToQDebug(int detail) const;
 
 private:
-    int graphChangeDepth;
+    int _graphChangeDepth;
     void emitGraphWillChange();
     void emitGraphChanged();
 

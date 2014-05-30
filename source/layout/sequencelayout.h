@@ -9,7 +9,7 @@ class SequenceLayout : public NodeLayout
 {
     Q_OBJECT
 private:
-    QList<NodeLayout*> subLayouts;
+    QList<NodeLayout*> _subLayouts;
 
 public:
     SequenceLayout(const ReadOnlyGraph& graph, NodePositions& positions) :
@@ -17,23 +17,23 @@ public:
     {}
 
     SequenceLayout(const ReadOnlyGraph& graph, NodePositions& positions, QList<NodeLayout*> subLayouts) :
-        NodeLayout(graph, positions), subLayouts(subLayouts)
+        NodeLayout(graph, positions), _subLayouts(subLayouts)
     {}
 
     virtual ~SequenceLayout()
     {}
 
-    void addSubLayout(NodeLayout* layout) { subLayouts.append(layout); }
+    void addSubLayout(NodeLayout* layout) { _subLayouts.append(layout); }
 
     void cancel()
     {
-        for(NodeLayout* subLayout : subLayouts)
+        for(NodeLayout* subLayout : _subLayouts)
             subLayout->cancel();
     }
 
     bool shouldPause()
     {
-        for(NodeLayout* subLayout : subLayouts)
+        for(NodeLayout* subLayout : _subLayouts)
         {
             if(!subLayout->shouldPause())
                 return false;
@@ -44,7 +44,7 @@ public:
 
     bool iterative()
     {
-        for(NodeLayout* subLayout : subLayouts)
+        for(NodeLayout* subLayout : _subLayouts)
         {
             if(subLayout->iterative())
                 return true;
@@ -55,7 +55,7 @@ public:
 
     void executeReal(uint64_t iteration)
     {
-        for(NodeLayout* subLayout : subLayouts)
+        for(NodeLayout* subLayout : _subLayouts)
             subLayout->execute(iteration);
     }
 };

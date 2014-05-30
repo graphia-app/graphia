@@ -20,9 +20,9 @@ public:
 
 private:
     Type _type;
-    float lastTime;
+    float _lastTime;
     float _duration;
-    float elapsed;
+    float _elapsed;
     std::function<void(float)> _function;
     std::function<void()> _finishedFunction;
 
@@ -33,7 +33,7 @@ public:
                std::function<void()> finishedFunction = [](){});
 
     bool update(float time);
-    bool finished() const { return elapsed >= _duration; }
+    bool finished() const { return _elapsed >= _duration; }
 };
 
 #endif // TRANSITION_H

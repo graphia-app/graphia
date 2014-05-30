@@ -19,7 +19,7 @@ template<typename Index, typename Element> class GraphArray : public ResizableGr
 {
 protected:
     Graph* _graph;
-    QVector<Element> array;
+    QVector<Element> _array;
     QMutex _mutex;
     bool _flag; // Generic flag
 
@@ -34,8 +34,8 @@ public:
         _mutex(QMutex::Recursive),
         _flag(other._flag)
     {
-        for(auto e : other.array)
-            array.append(e);
+        for(auto e : other._array)
+            _array.append(e);
     }
 
     virtual ~GraphArray() {}
@@ -43,7 +43,7 @@ public:
     GraphArray& operator=(const GraphArray& other)
     {
         Q_ASSERT(_graph == other._graph);
-        array = other.array;
+        _array = other._array;
         _flag = other._flag;
 
         return *this;
@@ -61,47 +61,47 @@ public:
 
     Element& operator[](Index index)
     {
-        return array[index];
+        return _array[index];
     }
 
     const Element& operator[](Index index) const
     {
-        return array[index];
+        return _array[index];
     }
 
-    typename QVector<Element>::iterator begin() { return array.begin(); }
-    typename QVector<Element>::const_iterator begin() const { return array.begin(); }
-    typename QVector<Element>::iterator end() { return array.end(); }
-    typename QVector<Element>::const_iterator end() const { return array.end(); }
+    typename QVector<Element>::iterator begin() { return _array.begin(); }
+    typename QVector<Element>::const_iterator begin() const { return _array.begin(); }
+    typename QVector<Element>::iterator end() { return _array.end(); }
+    typename QVector<Element>::const_iterator end() const { return _array.end(); }
 
     int size() const
     {
-        return array.size();
+        return _array.size();
     }
 
     void resize(int size)
     {
-        int previousSize = array.size();
-        array.resize(size);
-        int newSize = array.size();
+        int previousSize = _array.size();
+        _array.resize(size);
+        int newSize = _array.size();
 
         int newElements = newSize - previousSize;
         for(int i = newSize - newElements; i < newSize; i++)
-            array[i] = Element();
+            _array[i] = Element();
     }
 
     void fill(const Element& value)
     {
-        array.fill(value);
+        _array.fill(value);
     }
 
     void dumpToQDebug(int detail) const
     {
-        qDebug() << "GraphArray size" << array.size();
+        qDebug() << "GraphArray size" << _array.size();
 
         if(detail > 0)
         {
-            for(Element e : array)
+            for(Element e : _array)
                 qDebug() << e;
         }
     }
@@ -114,17 +114,17 @@ public:
         GraphArray<NodeId, Element>(graph)
     {
         this->resize(graph.nodeArrayCapacity());
-        graph.nodeArrayList.append(this);
+        graph._nodeArrayList.append(this);
     }
 
     NodeArray(const NodeArray& other) : GraphArray<NodeId, Element>(other)
     {
-        this->_graph->nodeArrayList.append(this);
+        this->_graph->_nodeArrayList.append(this);
     }
 
     ~NodeArray()
     {
-        this->_graph->nodeArrayList.removeOne(this);
+        this->_graph->_nodeArrayList.removeOne(this);
     }
 };
 
@@ -135,17 +135,17 @@ public:
         GraphArray<EdgeId, Element>(graph)
     {
         this->resize(graph.edgeArrayCapacity());
-        graph.edgeArrayList.append(this);
+        graph._edgeArrayList.append(this);
     }
 
     EdgeArray(const EdgeArray& other) : GraphArray<EdgeId, Element>(other)
     {
-        this->_graph->edgeArrayList.append(this);
+        this->_graph->_edgeArrayList.append(this);
     }
 
     ~EdgeArray()
     {
-        this->_graph->edgeArrayList.removeOne(this);
+        this->_graph->_edgeArrayList.removeOne(this);
     }
 };
 
@@ -155,18 +155,18 @@ public:
     ComponentArray(Graph& graph) :
         GraphArray<ComponentId, Element>(graph)
     {
-        this->resize(graph.componentManager->componentArrayCapacity());
-        graph.componentManager->componentArrayList.append(this);
+        this->resize(graph._componentManager->componentArrayCapacity());
+        graph._componentManager->_componentArrayList.append(this);
     }
 
     ComponentArray(const ComponentArray& other) : GraphArray<ComponentId, Element>(other)
     {
-        this->_graph->componentManager->componentArrayList.append(this);
+        this->_graph->_componentManager->_componentArrayList.append(this);
     }
 
     ~ComponentArray()
     {
-        this->_graph->componentManager->componentArrayList.removeOne(this);
+        this->_graph->_componentManager->_componentArrayList.removeOne(this);
     }
 };
 

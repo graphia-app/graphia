@@ -14,9 +14,9 @@
 OpenGLWindow::OpenGLWindow(const QSurfaceFormat& format, GraphView* graphView,
                             QScreen* screen )
     : QWindow( screen ),
-      m_context( nullptr ),
-      m_scene( nullptr ),
-      m_graphView(graphView)
+      _context( nullptr ),
+      _scene( nullptr ),
+      _graphView(graphView)
 {
     // Tell Qt we will use OpenGL for this window
     setSurfaceType( OpenGLSurface );
@@ -36,20 +36,20 @@ OpenGLWindow::OpenGLWindow(const QSurfaceFormat& format, GraphView* graphView,
     create();
 
     // Create an OpenGL context
-    m_context = new QOpenGLContext;
-    m_context->setFormat( actualFormat );
-    m_context->create();
+    _context = new QOpenGLContext;
+    _context->setFormat( actualFormat );
+    _context->create();
 }
 
 void OpenGLWindow::setScene( AbstractScene* scene )
 {
     // We take ownership of the scene
     Q_ASSERT( scene );
-    m_scene = scene;
-    m_scene->setParent( this );
+    _scene = scene;
+    _scene->setParent( this );
 
     // Initialise the scene
-    m_scene->setContext( m_context );
+    _scene->setContext( _context );
     initialise();
 
     // This timer drives the scene updates
@@ -60,10 +60,10 @@ void OpenGLWindow::setScene( AbstractScene* scene )
 
 void OpenGLWindow::initialise()
 {
-    m_context->makeCurrent( this );
+    _context->makeCurrent( this );
 
-    m_debugLevel = qgetenv("OPENGL_DEBUG").toInt();
-    if(m_debugLevel != 0)
+    _debugLevel = qgetenv("OPENGL_DEBUG").toInt();
+    if(_debugLevel != 0)
     {
         QOpenGLDebugLogger *logger = new QOpenGLDebugLogger(this);
         if (logger->initialize())
@@ -88,15 +88,15 @@ void OpenGLWindow::initialise()
         }
     }
 
-    m_scene->initialise();
+    _scene->initialise();
 
-    m_time.start();
+    _time.start();
 }
 
 void OpenGLWindow::resize()
 {
-    m_context->makeCurrent( this );
-    m_scene->resize( width(), height() );
+    _context->makeCurrent( this );
+    _scene->resize( width(), height() );
 }
 
 void OpenGLWindow::render()
@@ -105,35 +105,35 @@ void OpenGLWindow::render()
         return;
 
     // Make the context current
-    m_context->makeCurrent( this );
+    _context->makeCurrent( this );
 
     // FIXME: make configurable
     glEnable( GL_MULTISAMPLE );
 
     // Do the rendering (to the back buffer)
-    m_scene->render();
+    _scene->render();
 
     // Swap front/back buffers
-    m_context->swapBuffers( this );
+    _context->swapBuffers( this );
 }
 
 void OpenGLWindow::updateScene()
 {
-    float time = m_time.elapsed() / 1000.0f;
-    m_scene->update( time );
+    float time = _time.elapsed() / 1000.0f;
+    _scene->update( time );
     render();
 }
 
 void OpenGLWindow::resizeEvent( QResizeEvent* e )
 {
     Q_UNUSED( e );
-    if ( m_context )
+    if ( _context )
         resize();
 }
 
 void OpenGLWindow::messageLogged(const QOpenGLDebugMessage &message)
 {
-    if(!(message.severity() & m_debugLevel))
+    if(!(message.severity() & _debugLevel))
         return;
 
     qDebug() << "OpenGL:" << message.message();
@@ -141,36 +141,36 @@ void OpenGLWindow::messageLogged(const QOpenGLDebugMessage &message)
 
 void OpenGLWindow::keyPressEvent(QKeyEvent* e)
 {
-    m_graphView->keyPressEvent(e);
+    _graphView->keyPressEvent(e);
 }
 
 void OpenGLWindow::keyReleaseEvent(QKeyEvent* e)
 {
-    m_graphView->keyReleaseEvent(e);
+    _graphView->keyReleaseEvent(e);
 }
 
 void OpenGLWindow::mousePressEvent(QMouseEvent* e)
 {
-    m_graphView->mousePressEvent(e);
+    _graphView->mousePressEvent(e);
 }
 
 void OpenGLWindow::mouseReleaseEvent(QMouseEvent* e)
 {
-    m_graphView->mouseReleaseEvent(e);
+    _graphView->mouseReleaseEvent(e);
 }
 
 void OpenGLWindow::mouseMoveEvent(QMouseEvent* e)
 {
-    m_graphView->mouseMoveEvent(e);
+    _graphView->mouseMoveEvent(e);
 }
 
 void OpenGLWindow::mouseDoubleClickEvent(QMouseEvent* e)
 {
-    m_graphView->mouseDoubleClickEvent(e);
+    _graphView->mouseDoubleClickEvent(e);
 }
 
 void OpenGLWindow::wheelEvent(QWheelEvent* e)
 {
-    m_graphView->wheelEvent(e);
+    _graphView->wheelEvent(e);
 }
 

@@ -24,10 +24,10 @@ class Layout : public QObject
 {
     Q_OBJECT
 private:
-    std::atomic<bool> atomicCancel;
+    std::atomic<bool> _atomicCancel;
     void setCancel(bool cancel)
     {
-        atomicCancel = cancel;
+        _atomicCancel = cancel;
     }
 
     virtual void executeReal(uint64_t iteration) = 0;
@@ -44,13 +44,13 @@ protected:
 
     bool shouldCancel()
     {
-        return atomicCancel;
+        return _atomicCancel;
     }
 
 public:
-    Layout(Iterative _iterative) :
-        atomicCancel(false),
-        _iterative(_iterative)
+    Layout(Iterative iterative) :
+        _atomicCancel(false),
+        _iterative(iterative)
     {}
 
     void execute(int iteration)
@@ -82,30 +82,31 @@ class NodeLayout : public Layout
     Q_OBJECT
 protected:
     const ReadOnlyGraph* _graph;
-    NodePositions* positions;
+    NodePositions* _positions;
 
 public:
     NodeLayout(const ReadOnlyGraph& graph, NodePositions& positions, Iterative iterative = Iterative::No) :
         Layout(iterative),
         _graph(&graph),
-        positions(&positions)
+        _positions(&positions)
     {}
 
     const ReadOnlyGraph& graph() { return *_graph; }
 
-    static BoundingBox3D boundingBox(const ReadOnlyGraph& graph, const NodePositions& positions);
+    static BoundingBox3D boundingBox(const ReadOnlyGraph& graph, const NodePositions& _positions);
     BoundingBox3D boundingBox() const;
-    static BoundingBox2D boundingBoxInXY(const ReadOnlyGraph& graph, const NodePositions& positions);
+    static BoundingBox2D boundingBoxInXY(const ReadOnlyGraph& graph, const NodePositions& _positions);
 
+    //FIXME we have boundingsphere.h too!
     struct BoundingSphere
     {
-        QVector3D centre;
-        float radius;
+        QVector3D _centre;
+        float _radius;
     };
 
-    static BoundingSphere boundingSphere(const ReadOnlyGraph& graph, const NodePositions& positions);
+    static BoundingSphere boundingSphere(const ReadOnlyGraph& graph, const NodePositions& _positions);
     BoundingSphere boundingSphere() const;
-    static float boundingCircleRadiusInXY(const ReadOnlyGraph& graph, const NodePositions& positions);
+    static float boundingCircleRadiusInXY(const ReadOnlyGraph& graph, const NodePositions& _positions);
 };
 
 class ComponentLayout : public Layout
@@ -113,16 +114,16 @@ class ComponentLayout : public Layout
     Q_OBJECT
 protected:
     const Graph* _graph;
-    ComponentPositions* componentPositions;
-    const NodePositions* nodePositions;
+    ComponentPositions* _componentPositions;
+    const NodePositions* _nodePositions;
 
 public:
     ComponentLayout(const Graph& graph, ComponentPositions& componentPositions,
                     const NodePositions& nodePositions, Iterative iterative = Iterative::No) :
         Layout(iterative),
         _graph(&graph),
-        componentPositions(&componentPositions),
-        nodePositions(&nodePositions)
+        _componentPositions(&componentPositions),
+        _nodePositions(&nodePositions)
     {}
 
     const Graph& graph() { return *_graph; }
@@ -140,8 +141,8 @@ protected:
     GraphModel* _graphModel;
 
 public:
-    NodeLayoutFactory(GraphModel* _graphModel) :
-        _graphModel(_graphModel)
+    NodeLayoutFactory(GraphModel* graphModel) :
+        _graphModel(graphModel)
     {}
     virtual ~NodeLayoutFactory() {}
 
@@ -154,23 +155,23 @@ class LayoutThread : public QThread
 {
     Q_OBJECT
 protected:
-    QSet<Layout*> layouts;
-    QMutex mutex;
+    QSet<Layout*> _layouts;
+    QMutex _mutex;
     bool _pause;
     bool _paused;
     bool _stop;
-    bool repeating;
+    bool _repeating;
     uint64_t _iteration;
-    QWaitCondition waitForPause;
-    QWaitCondition waitForResume;
+    QWaitCondition _waitForPause;
+    QWaitCondition _waitForResume;
 
 public:
     LayoutThread(bool repeating = false) :
-        _pause(false), _paused(false), _stop(false), repeating(repeating), _iteration(0)
+        _pause(false), _paused(false), _stop(false), _repeating(repeating), _iteration(0)
     {}
 
-    LayoutThread(Layout* layout, bool _repeating = false) :
-        _pause(false), _paused(false), _stop(false), repeating(_repeating), _iteration(0)
+    LayoutThread(Layout* layout, bool repeating = false) :
+        _pause(false), _paused(false), _stop(false), _repeating(repeating), _iteration(0)
     {
         addLayout(layout);
     }

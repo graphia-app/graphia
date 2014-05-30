@@ -12,10 +12,10 @@ private:
     int _sign[3];
 
 public:
-    Ray(const QVector3D& _origin, const QVector3D& _dir) :
-        _origin(_origin), _dir(_dir)
+    Ray(const QVector3D& origin, const QVector3D& dir) :
+        _origin(origin), _dir(dir)
     {
-        _invDir = QVector3D(1.0f / _dir.x(), 1.0f / _dir.y(), 1.0f/ _dir.z());
+        _invDir = QVector3D(1.0f / dir.x(), 1.0f / dir.y(), 1.0f/ dir.z());
         _sign[0] = (_invDir.x() < 0.0f);
         _sign[1] = (_invDir.y() < 0.0f);
         _sign[2] = (_invDir.z() < 0.0f);

@@ -2,7 +2,7 @@
 
 void ScalingLayout::executeReal(uint64_t)
 {
-    NodePositions& positions = *this->positions;
+    NodePositions& positions = *this->_positions;
 
     positions.lock();
     for(NodeId nodeId : graph().nodeIds())

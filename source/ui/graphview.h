@@ -16,7 +16,7 @@ public:
     explicit GraphView(QWidget *parent = nullptr);
 
 private:
-    GraphScene* graphScene;
+    GraphScene* _graphScene;
     GraphModel* _graphModel;
     SelectionManager* _selectionManager;
 
@@ -24,7 +24,7 @@ public:
     void setGraphModel(GraphModel* graphModel)
     {
         this->_graphModel = graphModel;
-        graphScene->setGraphModel(graphModel);
+        _graphScene->setGraphModel(graphModel);
     }
     GraphModel* graphModel() { return _graphModel; }
 
@@ -58,17 +58,17 @@ public slots:
     void layoutChanged();
     
 private:
-    bool m_rightMouseButtonHeld;
-    bool m_leftMouseButtonHeld;
+    bool _rightMouseButtonHeld;
+    bool _leftMouseButtonHeld;
 
-    bool m_selecting;
-    bool m_frustumSelecting;
-    QPoint m_frustumSelectStart;
+    bool _selecting;
+    bool _frustumSelecting;
+    QPoint _frustumSelectStart;
 
-    QPoint m_prevCursorPosition;
-    QPoint m_cursorPosition;
-    bool m_mouseMoving;
-    NodeId clickedNodeId;
+    QPoint _prevCursorPosition;
+    QPoint _cursorPosition;
+    bool _mouseMoving;
+    NodeId _clickedNodeId;
 
 protected:
     friend class OpenGLWindow;

@@ -47,7 +47,7 @@ public:
 
     void setShader( const QOpenGLShaderProgramPtr& shader );
 
-    QOpenGLShaderProgramPtr shader() const { return m_shader; }
+    QOpenGLShaderProgramPtr shader() const { return _shader; }
 
     void setTextureUnitConfiguration( GLuint unit, TexturePtr texture, SamplerPtr sampler );
     void setTextureUnitConfiguration( GLuint unit, TexturePtr texture, SamplerPtr sampler, const QByteArray& uniformName );
@@ -59,28 +59,28 @@ public:
 
 private:
     void initialize();
-    bool isInitialized() const { return m_funcsType != Unknown; }
+    bool isInitialized() const { return _funcsType != Unknown; }
 
     // For now we assume that we own the shader
     /** \todo Allow this to use reference to non-owned shader */
-    QOpenGLShaderProgramPtr m_shader;
+    QOpenGLShaderProgramPtr _shader;
 
     // This map contains the configuration for the texture units
-    QMap<GLuint, TextureUnitConfiguration> m_unitConfigs;
-    QMap<GLuint, QByteArray> m_samplerUniforms;
+    QMap<GLuint, TextureUnitConfiguration> _unitConfigs;
+    QMap<GLuint, QByteArray> _samplerUniforms;
 
     union
     {
         QOpenGLFunctions_3_1* core;
         QOpenGLFunctions_1_3* compat;
-    } m_funcs;
+    } _funcs;
 
     enum
     {
         Unknown,
         Core,
         Compatibility
-    } m_funcsType;
+    } _funcsType;
 };
 
 typedef QSharedPointer<Material> MaterialPtr;

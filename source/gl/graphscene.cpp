@@ -37,30 +37,30 @@
 
 GraphScene::GraphScene( QObject* parent )
     : AbstractScene( parent ),
-      width(0), height(0),
-      colorTexture(0),
-      selectionTexture(0),
-      depthTexture(0),
-      visualFBO(0),
-      FBOcomplete(false),
-      trackFocusNode(true),
-      m_funcs(nullptr),
+      _width(0), _height(0),
+      _colorTexture(0),
+      _selectionTexture(0),
+      _depthTexture(0),
+      _visualFBO(0),
+      _FBOcomplete(false),
+      _trackFocusNode(true),
+      _funcs(nullptr),
 #if defined(Q_OS_MAC)
-      m_instanceFuncs( 0 ),
+      _instanceFuncs( 0 ),
 #endif
-      componentsViewData(nullptr),
-      aspectRatio(4.0f / 3.0f),
-      m_camera(nullptr),
-      m_sphere(nullptr),
-      m_cylinder(nullptr),
-      m_quad(nullptr),
+      _componentsViewData(nullptr),
+      _aspectRatio(4.0f / 3.0f),
+      _camera(nullptr),
+      _sphere(nullptr),
+      _cylinder(nullptr),
+      _quad(nullptr),
       _graphModel(nullptr),
-      m_nodePositionData(0),
-      m_edgePositionData(0),
-      m_nodeVisualData(0),
-      m_edgeVisualData(0),
-      m_componentMarkerData(0),
-      debugLinesData(0)
+      _nodePositionData(0),
+      _edgePositionData(0),
+      _nodeVisualData(0),
+      _edgeVisualData(0),
+      _componentMarkerData(0),
+      _debugLinesData(0)
 {
     update(0.0f);
 }
@@ -69,55 +69,55 @@ void GraphScene::initialise()
 {
     // Resolve the OpenGL functions that we need for instanced rendering
 #if !defined(Q_OS_MAC)
-    m_funcs = m_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
+    _funcs = _context->versionFunctions<QOpenGLFunctions_3_3_Core>();
 #else
-    m_instanceFuncs = new QOpenGLExtension_ARB_instanced_arrays;
-    if ( !m_instanceFuncs->initializeOpenGLFunctions() )
+    _instanceFuncs = new QOpenGLExtension_ARB_instanced_arrays;
+    if ( !_instanceFuncs->initializeOpenGLFunctions() )
         qFatal( "Could not resolve GL_ARB_instanced_arrays functions" );
 
-    m_funcs = m_context->versionFunctions<QOpenGLFunctions_3_2_Core>();
+    _funcs = _context->versionFunctions<QOpenGLFunctions_3_2_Core>();
 #endif
-    if ( !m_funcs )
+    if ( !_funcs )
         qFatal( "Could not obtain required OpenGL context version" );
-    m_funcs->initializeOpenGLFunctions();
+    _funcs->initializeOpenGLFunctions();
 
     MaterialPtr nodeMaterial(new Material);
     nodeMaterial->setShaders(":/gl/shaders/instancednodes.vert", ":/gl/shaders/ads.frag" );
-    loadShaderProgram(nodesShader, ":/gl/shaders/instancednodes.vert", ":/gl/shaders/ads.frag");
+    loadShaderProgram(_nodesShader, ":/gl/shaders/instancednodes.vert", ":/gl/shaders/ads.frag");
 
     // Create a sphere
-    m_sphere = new Sphere( this );
-    m_sphere->setRadius(1.0f);
-    m_sphere->setRings(16);
-    m_sphere->setSlices(16);
-    m_sphere->setMaterial(nodeMaterial);
-    m_sphere->create();
+    _sphere = new Sphere( this );
+    _sphere->setRadius(1.0f);
+    _sphere->setRings(16);
+    _sphere->setSlices(16);
+    _sphere->setMaterial(nodeMaterial);
+    _sphere->create();
 
     MaterialPtr edgeMaterial(new Material);
     edgeMaterial->setShaders(":/gl/shaders/instancededges.vert", ":/gl/shaders/ads.frag" );
-    loadShaderProgram(edgesShader, ":/gl/shaders/instancededges.vert", ":/gl/shaders/ads.frag");
+    loadShaderProgram(_edgesShader, ":/gl/shaders/instancededges.vert", ":/gl/shaders/ads.frag");
 
-    m_cylinder = new Cylinder(this);
-    m_cylinder->setRadius(1.0f);
-    m_cylinder->setLength(1.0f);
-    m_cylinder->setSlices(8);
-    m_cylinder->setMaterial(edgeMaterial);
-    m_cylinder->create();
+    _cylinder = new Cylinder(this);
+    _cylinder->setRadius(1.0f);
+    _cylinder->setLength(1.0f);
+    _cylinder->setSlices(8);
+    _cylinder->setMaterial(edgeMaterial);
+    _cylinder->create();
 
     MaterialPtr componentMarkerMaterial(new Material);
     componentMarkerMaterial->setShaders(":/gl/shaders/instancedmarkers.vert", ":/gl/shaders/marker.frag" );
-    loadShaderProgram(componentMarkerShader, ":/gl/shaders/instancedmarkers.vert", ":/gl/shaders/marker.frag");
+    loadShaderProgram(_componentMarkerShader, ":/gl/shaders/instancedmarkers.vert", ":/gl/shaders/marker.frag");
 
-    m_quad = new Quad(this);
-    m_quad->setEdgeLength(1.0f);
-    m_quad->setMaterial(componentMarkerMaterial);
-    m_quad->create();
+    _quad = new Quad(this);
+    _quad->setEdgeLength(1.0f);
+    _quad->setMaterial(componentMarkerMaterial);
+    _quad->create();
 
-    debugLinesDataVAO.create();
-    loadShaderProgram(debugLinesShader, ":/gl/shaders/debuglines.vert", ":/gl/shaders/debuglines.frag");
+    _debugLinesDataVAO.create();
+    loadShaderProgram(_debugLinesShader, ":/gl/shaders/debuglines.vert", ":/gl/shaders/debuglines.frag");
 
-    selectionMarkerDataVAO.create();
-    loadShaderProgram(selectionMarkerShader, ":/gl/shaders/2d.vert", ":/gl/shaders/selectionMarker.frag");
+    _selectionMarkerDataVAO.create();
+    loadShaderProgram(_selectionMarkerShader, ":/gl/shaders/2d.vert", ":/gl/shaders/selectionMarker.frag");
 
     // Create a pair of VBOs ready to hold our data
     prepareVertexBuffers();
@@ -148,31 +148,31 @@ void GraphScene::updateVisualData()
     EdgeVisuals& edgeVisuals = _graphModel->edgeVisuals();
     const ReadOnlyGraph& component = *_graphModel->graph().componentById(_focusComponentId);
 
-    m_nodeVisualData.resize(component.numNodes() * 8);
-    m_edgeVisualData.resize(component.numEdges() * 8);
+    _nodeVisualData.resize(component.numNodes() * 8);
+    _edgeVisualData.resize(component.numEdges() * 8);
     int i = 0;
     int j = 0;
 
     for(NodeId nodeId : component.nodeIds())
     {
-        m_nodeVisualData[i++] = nodeVisuals[nodeId].size;
-        m_nodeVisualData[i++] = nodeVisuals[nodeId].color.redF();
-        m_nodeVisualData[i++] = nodeVisuals[nodeId].color.greenF();
-        m_nodeVisualData[i++] = nodeVisuals[nodeId].color.blueF();
-        m_nodeVisualData[i++] = nodeVisuals[nodeId].outlineColor.redF();
-        m_nodeVisualData[i++] = nodeVisuals[nodeId].outlineColor.greenF();
-        m_nodeVisualData[i++] = nodeVisuals[nodeId].outlineColor.blueF();
+        _nodeVisualData[i++] = nodeVisuals[nodeId]._size;
+        _nodeVisualData[i++] = nodeVisuals[nodeId]._color.redF();
+        _nodeVisualData[i++] = nodeVisuals[nodeId]._color.greenF();
+        _nodeVisualData[i++] = nodeVisuals[nodeId]._color.blueF();
+        _nodeVisualData[i++] = nodeVisuals[nodeId]._outlineColor.redF();
+        _nodeVisualData[i++] = nodeVisuals[nodeId]._outlineColor.greenF();
+        _nodeVisualData[i++] = nodeVisuals[nodeId]._outlineColor.blueF();
     }
 
     for(EdgeId edgeId : component.edgeIds())
     {
-        m_edgeVisualData[j++] = edgeVisuals[edgeId].size;
-        m_edgeVisualData[j++] = edgeVisuals[edgeId].color.redF();
-        m_edgeVisualData[j++] = edgeVisuals[edgeId].color.greenF();
-        m_edgeVisualData[j++] = edgeVisuals[edgeId].color.blueF();
-        m_edgeVisualData[j++] = edgeVisuals[edgeId].outlineColor.redF();
-        m_edgeVisualData[j++] = edgeVisuals[edgeId].outlineColor.greenF();
-        m_edgeVisualData[j++] = edgeVisuals[edgeId].outlineColor.blueF();
+        _edgeVisualData[j++] = edgeVisuals[edgeId]._size;
+        _edgeVisualData[j++] = edgeVisuals[edgeId]._color.redF();
+        _edgeVisualData[j++] = edgeVisuals[edgeId]._color.greenF();
+        _edgeVisualData[j++] = edgeVisuals[edgeId]._color.blueF();
+        _edgeVisualData[j++] = edgeVisuals[edgeId]._outlineColor.redF();
+        _edgeVisualData[j++] = edgeVisuals[edgeId]._outlineColor.greenF();
+        _edgeVisualData[j++] = edgeVisuals[edgeId]._outlineColor.blueF();
     }
 }
 
@@ -190,8 +190,8 @@ void GraphScene::onGraphChanged(const Graph*)
 void GraphScene::onNodeWillBeRemoved(const Graph*, NodeId nodeId)
 {
     ComponentViewData* currentComponentViewData = focusComponentViewData();
-    if(currentComponentViewData->focusNodeId == nodeId)
-        currentComponentViewData->focusNodeId.setToNull();
+    if(currentComponentViewData->_focusNodeId == nodeId)
+        currentComponentViewData->_focusNodeId.setToNull();
 }
 
 static void setupCamera(Camera& camera, float aspectRatio)
@@ -201,34 +201,34 @@ static void setupCamera(Camera& camera, float aspectRatio)
 
 void GraphScene::onComponentAdded(const Graph*, ComponentId componentId)
 {
-    ComponentViewData* componentViewData = &(*componentsViewData)[componentId];
+    ComponentViewData* componentViewData = &(*_componentsViewData)[componentId];
 
-    if(!componentViewData->initialised)
+    if(!componentViewData->_initialised)
     {
-        setupCamera(componentViewData->camera, aspectRatio);
-        targetZoomDistance = componentViewData->zoomDistance;
-        componentViewData->focusNodeId.setToNull();
-        componentViewData->initialised = true;
+        setupCamera(componentViewData->_camera, _aspectRatio);
+        _targetZoomDistance = componentViewData->_zoomDistance;
+        componentViewData->_focusNodeId.setToNull();
+        componentViewData->_initialised = true;
     }
 }
 
 void GraphScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
 {
-    ComponentViewData* componentViewData = &(*componentsViewData)[componentId];
-    componentViewData->initialised = false;
+    ComponentViewData* componentViewData = &(*_componentsViewData)[componentId];
+    componentViewData->_initialised = false;
 
-    if(componentId == lastSplitterFocusComponentId)
-        lastSplitterFocusComponentId.setToNull();
+    if(componentId == _lastSplitterFocusComponentId)
+        _lastSplitterFocusComponentId.setToNull();
 
     if(componentId == _focusComponentId)
     {
-        if(!lastSplitterFocusComponentId.isNull())
+        if(!_lastSplitterFocusComponentId.isNull())
         {
             ComponentViewData* currentComponentViewData = focusComponentViewData();
-            ComponentViewData* lastSplitterComponentViewData = &(*componentsViewData)[lastSplitterFocusComponentId];
+            ComponentViewData* lastSplitterComponentViewData = &(*_componentsViewData)[_lastSplitterFocusComponentId];
             *lastSplitterComponentViewData = *currentComponentViewData;
-            lastSplitterComponentViewData->focusNodeId.setToNull();
-            _focusComponentId = lastSplitterFocusComponentId;
+            lastSplitterComponentViewData->_focusNodeId.setToNull();
+            _focusComponentId = _lastSplitterFocusComponentId;
         }
         else
             _focusComponentId.setToNull();
@@ -240,25 +240,25 @@ void GraphScene::onComponentSplit(const Graph* graph, ComponentId oldComponentId
     if(oldComponentId == _focusComponentId)
     {
         ComponentViewData currentComponentViewData = *focusComponentViewData();
-        ComponentId newFocusComponentId = graph->componentIdOfNode(currentComponentViewData.focusNodeId);
+        ComponentId newFocusComponentId = graph->componentIdOfNode(currentComponentViewData._focusNodeId);
 
         for(ComponentId splitter : splitters)
         {
-            ComponentViewData* splitterComponentViewData = &(*componentsViewData)[splitter];
+            ComponentViewData* splitterComponentViewData = &(*_componentsViewData)[splitter];
 
             // Clone the current camera data to all splitters
             *splitterComponentViewData = currentComponentViewData;
 
             // Splitters that don't contain the current focus node will need to find a new one
             if(splitter != newFocusComponentId)
-                splitterComponentViewData->focusNodeId.setToNull();
+                splitterComponentViewData->_focusNodeId.setToNull();
         }
 
         _focusComponentId = newFocusComponentId;
 
         QSet<ComponentId> nonFocusSplitters(splitters);
         nonFocusSplitters.remove(_focusComponentId);
-        lastSplitterFocusComponentId = nonFocusSplitters.values().at(0);
+        _lastSplitterFocusComponentId = nonFocusSplitters.values().at(0);
     }
 }
 
@@ -269,8 +269,8 @@ void GraphScene::onComponentsWillMerge(const Graph*, const QSet<ComponentId>& me
     {
         if(merger == _focusComponentId)
         {
-            ComponentViewData* mergerComponentViewData = &(*componentsViewData)[merger];
-            ComponentViewData* mergedComponentViewData = &(*componentsViewData)[merged];
+            ComponentViewData* mergerComponentViewData = &(*_componentsViewData)[merger];
+            ComponentViewData* mergedComponentViewData = &(*_componentsViewData)[merged];
             *mergedComponentViewData = *mergerComponentViewData;
             _focusComponentId = merged;
             break;
@@ -288,14 +288,14 @@ void GraphScene::onSelectionChanged(const SelectionManager& selectionManager)
     for(NodeId nodeId : _graphModel->graph().nodeIds())
     {
         if(selectionManager.nodeIsSelected(nodeId))
-            nodeVisuals[nodeId].outlineColor = Qt::GlobalColor::white;
+            nodeVisuals[nodeId]._outlineColor = Qt::GlobalColor::white;
         else
-            nodeVisuals[nodeId].outlineColor = Qt::GlobalColor::black;
+            nodeVisuals[nodeId]._outlineColor = Qt::GlobalColor::black;
     }
 
     // Edges can't be selected at the moment
     for(EdgeId edgeId : _graphModel->graph().edgeIds())
-        edgeVisuals[edgeId].outlineColor = Qt::GlobalColor::black;
+        edgeVisuals[edgeId]._outlineColor = Qt::GlobalColor::black;
 
     updateVisualData();
 }
@@ -305,7 +305,7 @@ ComponentViewData* GraphScene::focusComponentViewData() const
     if(_focusComponentId.isNull())
         return nullptr;
 
-    return componentsViewData != nullptr ? &(*componentsViewData)[_focusComponentId] : nullptr;
+    return _componentsViewData != nullptr ? &(*_componentsViewData)[_focusComponentId] : nullptr;
 }
 
 void GraphScene::update(float t)
@@ -318,21 +318,21 @@ void GraphScene::update(float t)
         const ReadOnlyGraph* component = _graphModel->graph().componentById(_focusComponentId);
 
         ComponentViewData* componentViewData = focusComponentViewData();
-        m_camera = &componentViewData->camera;
-        if(componentViewData->focusNodeId.isNull())
+        _camera = &componentViewData->_camera;
+        if(componentViewData->_focusNodeId.isNull())
             selectFocusNodeClosestToCameraVector(Transition::Type::None);
 
-        m_nodePositionData.resize(component->numNodes() * 3);
-        m_edgePositionData.resize(component->numEdges() * 6);
+        _nodePositionData.resize(component->numNodes() * 3);
+        _edgePositionData.resize(component->numEdges() * 6);
         int i = 0;
 
         for(NodeId nodeId : component->nodeIds())
         {
             QVector3D nodePosition = nodePositions[nodeId];
 
-            m_nodePositionData[i++] = nodePosition.x();
-            m_nodePositionData[i++] = nodePosition.y();
-            m_nodePositionData[i++] = nodePosition.z();
+            _nodePositionData[i++] = nodePosition.x();
+            _nodePositionData[i++] = nodePosition.y();
+            _nodePositionData[i++] = nodePosition.z();
         }
 
         i = 0;
@@ -342,12 +342,12 @@ void GraphScene::update(float t)
             QVector3D sourcePosition = nodePositions[edge.sourceId()];
             QVector3D targetPosition = nodePositions[edge.targetId()];
 
-            m_edgePositionData[i++] = sourcePosition.x();
-            m_edgePositionData[i++] = sourcePosition.y();
-            m_edgePositionData[i++] = sourcePosition.z();
-            m_edgePositionData[i++] = targetPosition.x();
-            m_edgePositionData[i++] = targetPosition.y();
-            m_edgePositionData[i++] = targetPosition.z();
+            _edgePositionData[i++] = sourcePosition.x();
+            _edgePositionData[i++] = sourcePosition.y();
+            _edgePositionData[i++] = sourcePosition.z();
+            _edgePositionData[i++] = targetPosition.x();
+            _edgePositionData[i++] = targetPosition.y();
+            _edgePositionData[i++] = targetPosition.z();
         }
 
 #if 0
@@ -356,12 +356,12 @@ void GraphScene::update(float t)
         octree.debugRenderOctree(this);
 #endif
 
-        zoomTransition.update(t);
+        _zoomTransition.update(t);
 
-        if(!panTransition.finished())
-            panTransition.update(t);
-        else if(trackFocusNode)
-            centreNodeInViewport(componentViewData->focusNodeId, Transition::Type::None, componentViewData->zoomDistance);
+        if(!_panTransition.finished())
+            _panTransition.update(t);
+        else if(_trackFocusNode)
+            centreNodeInViewport(componentViewData->_focusNodeId, Transition::Type::None, componentViewData->_zoomDistance);
     }
 
     submitDebugLines();
@@ -406,59 +406,59 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
 void GraphScene::renderNodes()
 {
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-    m_funcs->glDrawBuffers(2, drawBuffers);
+    _funcs->glDrawBuffers(2, drawBuffers);
 
-    nodesShader.bind();
-    setShaderADSParameters(nodesShader);
+    _nodesShader.bind();
+    setShaderADSParameters(_nodesShader);
 
     const ReadOnlyGraph* component = _graphModel->graph().componentById(_focusComponentId);
 
-    m_nodePositionBuffer.bind();
-    m_nodePositionBuffer.allocate(m_nodePositionData.data(), m_nodePositionData.size() * sizeof(GLfloat) );
-    m_nodeVisualBuffer.bind();
-    m_nodeVisualBuffer.allocate(m_nodeVisualData.data(), m_nodeVisualData.size() * sizeof(GLfloat) );
+    _nodePositionBuffer.bind();
+    _nodePositionBuffer.allocate(_nodePositionData.data(), _nodePositionData.size() * sizeof(GLfloat) );
+    _nodeVisualBuffer.bind();
+    _nodeVisualBuffer.allocate(_nodeVisualData.data(), _nodeVisualData.size() * sizeof(GLfloat) );
 
     // Calculate needed matrices
-    QMatrix4x4 modelViewMatrix = m_camera->viewMatrix();
+    QMatrix4x4 modelViewMatrix = _camera->viewMatrix();
     QMatrix3x3 normalMatrix = modelViewMatrix.normalMatrix();
-    nodesShader.setUniformValue("modelViewMatrix", modelViewMatrix);
-    nodesShader.setUniformValue("normalMatrix", normalMatrix);
-    nodesShader.setUniformValue("projectionMatrix", m_camera->projectionMatrix());
+    _nodesShader.setUniformValue("modelViewMatrix", modelViewMatrix);
+    _nodesShader.setUniformValue("normalMatrix", normalMatrix);
+    _nodesShader.setUniformValue("projectionMatrix", _camera->projectionMatrix());
 
     // Draw the nodes
-    m_sphere->vertexArrayObject()->bind();
-    m_funcs->glDrawElementsInstanced(GL_TRIANGLES, m_sphere->indexCount(),
+    _sphere->vertexArrayObject()->bind();
+    _funcs->glDrawElementsInstanced(GL_TRIANGLES, _sphere->indexCount(),
                                      GL_UNSIGNED_INT, 0, component->numNodes());
-    m_sphere->vertexArrayObject()->release();
+    _sphere->vertexArrayObject()->release();
 
-    nodesShader.release();
+    _nodesShader.release();
 }
 
 void GraphScene::renderEdges()
 {
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-    m_funcs->glDrawBuffers(2, drawBuffers);
+    _funcs->glDrawBuffers(2, drawBuffers);
 
-    edgesShader.bind();
-    setShaderADSParameters(edgesShader);
+    _edgesShader.bind();
+    setShaderADSParameters(_edgesShader);
 
     const ReadOnlyGraph* component = _graphModel->graph().componentById(_focusComponentId);
 
-    m_edgePositionBuffer.bind();
-    m_edgePositionBuffer.allocate(m_edgePositionData.data(), m_edgePositionData.size() * sizeof(GLfloat));
-    m_edgeVisualBuffer.bind();
-    m_edgeVisualBuffer.allocate(m_edgeVisualData.data(), m_edgeVisualData.size() * sizeof(GLfloat));
+    _edgePositionBuffer.bind();
+    _edgePositionBuffer.allocate(_edgePositionData.data(), _edgePositionData.size() * sizeof(GLfloat));
+    _edgeVisualBuffer.bind();
+    _edgeVisualBuffer.allocate(_edgeVisualData.data(), _edgeVisualData.size() * sizeof(GLfloat));
 
-    edgesShader.setUniformValue("viewMatrix", m_camera->viewMatrix());
-    edgesShader.setUniformValue("projectionMatrix", m_camera->projectionMatrix());
+    _edgesShader.setUniformValue("viewMatrix", _camera->viewMatrix());
+    _edgesShader.setUniformValue("projectionMatrix", _camera->projectionMatrix());
 
     // Draw the edges
-    m_cylinder->vertexArrayObject()->bind();
-    m_funcs->glDrawElementsInstanced(GL_TRIANGLES, m_cylinder->indexCount(),
+    _cylinder->vertexArrayObject()->bind();
+    _funcs->glDrawElementsInstanced(GL_TRIANGLES, _cylinder->indexCount(),
                                      GL_UNSIGNED_INT, 0, component->numEdges());
-    m_cylinder->vertexArrayObject()->release();
+    _cylinder->vertexArrayObject()->release();
 
-    edgesShader.release();
+    _edgesShader.release();
 }
 
 void GraphScene::renderComponentMarkers()
@@ -466,67 +466,67 @@ void GraphScene::renderComponentMarkers()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    m_componentMarkerDataBuffer.bind();
-    m_componentMarkerDataBuffer.allocate(m_componentMarkerData.data(), m_componentMarkerData.size() * sizeof(GLfloat) );
+    _componentMarkerDataBuffer.bind();
+    _componentMarkerDataBuffer.allocate(_componentMarkerData.data(), _componentMarkerData.size() * sizeof(GLfloat) );
 
     // Bind the shader program
-    componentMarkerShader.bind();
+    _componentMarkerShader.bind();
 
     // Calculate needed matrices
-    QMatrix4x4 modelViewMatrix = m_camera->viewMatrix();
-    componentMarkerShader.setUniformValue( "modelViewMatrix", modelViewMatrix );
-    componentMarkerShader.setUniformValue( "projectionMatrix", m_camera->projectionMatrix() );
+    QMatrix4x4 modelViewMatrix = _camera->viewMatrix();
+    _componentMarkerShader.setUniformValue( "modelViewMatrix", modelViewMatrix );
+    _componentMarkerShader.setUniformValue( "projectionMatrix", _camera->projectionMatrix() );
 
     // Draw the edges
-    m_quad->vertexArrayObject()->bind();
-    m_funcs->glDrawElementsInstanced(GL_TRIANGLES, m_quad->indexCount(),
+    _quad->vertexArrayObject()->bind();
+    _funcs->glDrawElementsInstanced(GL_TRIANGLES, _quad->indexCount(),
                                      GL_UNSIGNED_INT, 0, _graphModel->graph().numComponents());
-    m_quad->vertexArrayObject()->release();
-    componentMarkerShader.release();
+    _quad->vertexArrayObject()->release();
+    _componentMarkerShader.release();
 
     glDisable(GL_BLEND);
 }
 
 void GraphScene::renderDebugLines()
 {
-    QMutexLocker locker(&debugLinesMutex);
+    QMutexLocker locker(&_debugLinesMutex);
 
-    m_funcs->glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
-    debugLinesDataBuffer.bind();
-    debugLinesDataBuffer.allocate(debugLinesData.data(), debugLinesData.size() * sizeof(GLfloat));
+    _debugLinesDataBuffer.bind();
+    _debugLinesDataBuffer.allocate(_debugLinesData.data(), _debugLinesData.size() * sizeof(GLfloat));
 
-    debugLinesShader.bind();
+    _debugLinesShader.bind();
 
     // Calculate needed matrices
-    QMatrix4x4 modelViewMatrix = m_camera->viewMatrix();
-    debugLinesShader.setUniformValue( "modelViewMatrix", modelViewMatrix );
-    debugLinesShader.setUniformValue( "projectionMatrix", m_camera->projectionMatrix() );
+    QMatrix4x4 modelViewMatrix = _camera->viewMatrix();
+    _debugLinesShader.setUniformValue( "modelViewMatrix", modelViewMatrix );
+    _debugLinesShader.setUniformValue( "projectionMatrix", _camera->projectionMatrix() );
 
-    debugLinesDataVAO.bind();
-    m_funcs->glDrawArrays(GL_LINES, 0, debugLines.size() * 2);
-    debugLinesDataVAO.release();
-    debugLinesShader.release();
+    _debugLinesDataVAO.bind();
+    _funcs->glDrawArrays(GL_LINES, 0, _debugLines.size() * 2);
+    _debugLinesDataVAO.release();
+    _debugLinesShader.release();
 
     clearDebugLines();
 }
 
 void GraphScene::render2D()
 {
-    m_funcs->glDisable(GL_DEPTH_TEST);
+    _funcs->glDisable(GL_DEPTH_TEST);
 
     QMatrix4x4 m;
-    m.ortho(0.0f, width, 0.0f, height, -1.0f, 1.0f);
+    m.ortho(0.0f, _width, 0.0f, _height, -1.0f, 1.0f);
 
-    if(!selectionRect.isNull())
+    if(!_selectionRect.isNull())
     {
         const QColor color(Qt::GlobalColor::white);
 
         QRect r;
-        r.setLeft(selectionRect.left());
-        r.setRight(selectionRect.right());
-        r.setTop(height - selectionRect.top());
-        r.setBottom(height - selectionRect.bottom());
+        r.setLeft(_selectionRect.left());
+        r.setRight(_selectionRect.right());
+        r.setTop(_height - _selectionRect.top());
+        r.setBottom(_height - _selectionRect.bottom());
 
         QVector<GLfloat> data;
 
@@ -544,23 +544,23 @@ void GraphScene::render2D()
         data.append(r.left());  data.append(r.bottom());
         data.append(color.redF()); data.append(color.blueF()); data.append(color.greenF());
 
-        m_funcs->glDrawBuffer(GL_COLOR_ATTACHMENT1);
+        _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT1);
 
-        selectionMarkerDataBuffer.bind();
-        selectionMarkerDataBuffer.allocate(data.data(),
+        _selectionMarkerDataBuffer.bind();
+        _selectionMarkerDataBuffer.allocate(data.data(),
                                            data.size() * sizeof(GLfloat));
 
-        selectionMarkerShader.bind();
-        selectionMarkerShader.setUniformValue("projectionMatrix", m);
+        _selectionMarkerShader.bind();
+        _selectionMarkerShader.setUniformValue("projectionMatrix", m);
 
-        selectionMarkerDataVAO.bind();
-        m_funcs->glDrawArrays(GL_TRIANGLES, 0, 6);
-        selectionMarkerDataVAO.release();
+        _selectionMarkerDataVAO.bind();
+        _funcs->glDrawArrays(GL_TRIANGLES, 0, 6);
+        _selectionMarkerDataVAO.release();
 
-        selectionMarkerShader.release();
+        _selectionMarkerShader.release();
     }
 
-    m_funcs->glEnable(GL_DEPTH_TEST);
+    _funcs->glEnable(GL_DEPTH_TEST);
 }
 
 void GraphScene::addDebugBoundingBox(const BoundingBox3D& boundingBox, const QColor color)
@@ -595,48 +595,48 @@ void GraphScene::addDebugBoundingBox(const BoundingBox3D& boundingBox, const QCo
 
 void GraphScene::submitDebugLines()
 {
-    QMutexLocker locker(&debugLinesMutex);
+    QMutexLocker locker(&_debugLinesMutex);
 
-    debugLinesData.resize(debugLines.size() * 12);
+    _debugLinesData.resize(_debugLines.size() * 12);
 
     int i = 0;
-    for(const DebugLine debugLine : debugLines)
+    for(const DebugLine debugLine : _debugLines)
     {
-        debugLinesData[i++] = debugLine.start.x();
-        debugLinesData[i++] = debugLine.start.y();
-        debugLinesData[i++] = debugLine.start.z();
-        debugLinesData[i++] = debugLine.color.redF();
-        debugLinesData[i++] = debugLine.color.greenF();
-        debugLinesData[i++] = debugLine.color.blueF();
-        debugLinesData[i++] = debugLine.end.x();
-        debugLinesData[i++] = debugLine.end.y();
-        debugLinesData[i++] = debugLine.end.z();
-        debugLinesData[i++] = debugLine.color.redF();
-        debugLinesData[i++] = debugLine.color.greenF();
-        debugLinesData[i++] = debugLine.color.blueF();
+        _debugLinesData[i++] = debugLine._start.x();
+        _debugLinesData[i++] = debugLine._start.y();
+        _debugLinesData[i++] = debugLine._start.z();
+        _debugLinesData[i++] = debugLine._color.redF();
+        _debugLinesData[i++] = debugLine._color.greenF();
+        _debugLinesData[i++] = debugLine._color.blueF();
+        _debugLinesData[i++] = debugLine._end.x();
+        _debugLinesData[i++] = debugLine._end.y();
+        _debugLinesData[i++] = debugLine._end.z();
+        _debugLinesData[i++] = debugLine._color.redF();
+        _debugLinesData[i++] = debugLine._color.greenF();
+        _debugLinesData[i++] = debugLine._color.blueF();
     }
 }
 
 void GraphScene::render()
 {
-    if(!FBOcomplete)
+    if(!_FBOcomplete)
         return;
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
 
-    m_funcs->glBindFramebuffer(GL_FRAMEBUFFER, visualFBO);
+    _funcs->glBindFramebuffer(GL_FRAMEBUFFER, _visualFBO);
 
-    m_funcs->glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    m_funcs->glDrawBuffer(GL_COLOR_ATTACHMENT1);
+    _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT1);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-    m_funcs->glDrawBuffers(2, drawBuffers);
+    _funcs->glDrawBuffers(2, drawBuffers);
     glClear(GL_DEPTH_BUFFER_BIT);
 
     renderNodes();
@@ -646,84 +646,84 @@ void GraphScene::render()
     //renderComponentMarkers();
     renderDebugLines();
 
-    m_funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    _funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    m_funcs->glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
-    m_funcs->glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    _funcs->glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+    _funcs->glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-    m_funcs->glDisable(GL_DEPTH_TEST);
+    _funcs->glDisable(GL_DEPTH_TEST);
 
-    screenQuadVAO.bind();
-    m_funcs->glActiveTexture(GL_TEXTURE0);
+    _screenQuadVAO.bind();
+    _funcs->glActiveTexture(GL_TEXTURE0);
 
     // Color texture
-    m_funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, colorTexture);
+    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _colorTexture);
 
-    screenShader.bind();
-    m_funcs->glDrawArrays(GL_TRIANGLES, 0, 6);
-    screenShader.release();
+    _screenShader.bind();
+    _funcs->glDrawArrays(GL_TRIANGLES, 0, 6);
+    _screenShader.release();
 
     // Selection texture
-    m_funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, selectionTexture);
+    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture);
 
-    selectionShader.bind();
-    m_funcs->glDrawArrays(GL_TRIANGLES, 0, 6);
-    selectionShader.release();
+    _selectionShader.bind();
+    _funcs->glDrawArrays(GL_TRIANGLES, 0, 6);
+    _selectionShader.release();
 
-    screenQuadVAO.release();
+    _screenQuadVAO.release();
 
-    m_funcs->glEnable(GL_DEPTH_TEST);
+    _funcs->glEnable(GL_DEPTH_TEST);
 
     glDisable(GL_BLEND);
 }
 
 void GraphScene::resize(int w, int h)
 {
-    width = w;
-    height = h;
+    _width = w;
+    _height = h;
 
     qDebug() << "GraphScene::resize(" << w << h << ")";
 
-    FBOcomplete = prepareRenderBuffers();
+    _FBOcomplete = prepareRenderBuffers();
 
     glViewport(0, 0, w, h);
 
-    aspectRatio = static_cast<float>(w) / static_cast<float>(h);
+    _aspectRatio = static_cast<float>(w) / static_cast<float>(h);
 
     if(_graphModel != nullptr)
     {
         for(ComponentId componentId : *_graphModel->graph().componentIds())
         {
-            ComponentViewData* componentViewData = &(*componentsViewData)[componentId];
-            setupCamera(componentViewData->camera, aspectRatio);
+            ComponentViewData* componentViewData = &(*_componentsViewData)[componentId];
+            setupCamera(componentViewData->_camera, _aspectRatio);
         }
     }
 }
 
-const float MINIMUM_CAMERA_DISTANCE = 2.5f;
+const float MINIMU_CAMERA_DISTANCE = 2.5f;
 
 void GraphScene::zoom(float direction)
 {
-    if(direction == 0.0f || !panTransition.finished())
+    if(direction == 0.0f || !_panTransition.finished())
         return;
 
     ComponentViewData* componentViewData = focusComponentViewData();
-    float size = _graphModel->nodeVisuals()[componentViewData->focusNodeId].size;
+    float size = _graphModel->nodeVisuals()[componentViewData->_focusNodeId]._size;
 
     const float INTERSECTION_AVOIDANCE_OFFSET = 1.0f;
-    const float ZOOM_STEP_FRACTION = 0.2f;
-    float delta = (targetZoomDistance - size - INTERSECTION_AVOIDANCE_OFFSET) * ZOOM_STEP_FRACTION;
+    const float ZOO_STEP_FRACTION = 0.2f;
+    float delta = (_targetZoomDistance - size - INTERSECTION_AVOIDANCE_OFFSET) * ZOO_STEP_FRACTION;
 
-    targetZoomDistance -= delta * direction;
+    _targetZoomDistance -= delta * direction;
 
-    if(targetZoomDistance < MINIMUM_CAMERA_DISTANCE)
-        targetZoomDistance = MINIMUM_CAMERA_DISTANCE;
+    if(_targetZoomDistance < MINIMU_CAMERA_DISTANCE)
+        _targetZoomDistance = MINIMU_CAMERA_DISTANCE;
 
-    float startZoomDistance = componentViewData->zoomDistance;
-    zoomTransition.start(0.1f, Transition::Type::Linear,
+    float startZoomDistance = componentViewData->_zoomDistance;
+    _zoomTransition.start(0.1f, Transition::Type::Linear,
     [=](float f)
     {
-        componentViewData->zoomDistance = startZoomDistance + ((targetZoomDistance - startZoomDistance) * f);
+        componentViewData->_zoomDistance = startZoomDistance + ((_targetZoomDistance - startZoomDistance) * f);
     });
 }
 
@@ -733,32 +733,32 @@ void GraphScene::centreNodeInViewport(NodeId nodeId, Transition::Type transition
         return;
 
     const QVector3D& nodePosition = _graphModel->nodePositions()[nodeId];
-    Plane translationPlane(nodePosition, m_camera->viewVector().normalized());
+    Plane translationPlane(nodePosition, _camera->viewVector().normalized());
 
     QVector3D curPoint = translationPlane.rayIntersection(
-                Ray(m_camera->position(), m_camera->viewVector().normalized()));
+                Ray(_camera->position(), _camera->viewVector().normalized()));
 
     QVector3D translation = nodePosition - curPoint;
-    QVector3D startPosition = m_camera->position();
-    QVector3D startViewTarget = m_camera->viewTarget();
-    QVector3D targetPosition = m_camera->position() + translation;
+    QVector3D startPosition = _camera->position();
+    QVector3D startViewTarget = _camera->viewTarget();
+    QVector3D targetPosition = _camera->position() + translation;
 
     if(cameraDistance >= 0.0f)
-        targetPosition = nodePosition - (m_camera->viewVector().normalized() * cameraDistance);
+        targetPosition = nodePosition - (_camera->viewVector().normalized() * cameraDistance);
     else
-        focusComponentViewData()->zoomDistance = targetZoomDistance = translationPlane.distanceToPoint(targetPosition);
+        focusComponentViewData()->_zoomDistance = _targetZoomDistance = translationPlane.distanceToPoint(targetPosition);
 
-    if(targetPosition.distanceToPoint(nodePosition) < MINIMUM_CAMERA_DISTANCE)
-        targetPosition = nodePosition - (m_camera->viewVector().normalized() * MINIMUM_CAMERA_DISTANCE);
+    if(targetPosition.distanceToPoint(nodePosition) < MINIMU_CAMERA_DISTANCE)
+        targetPosition = nodePosition - (_camera->viewVector().normalized() * MINIMU_CAMERA_DISTANCE);
 
     if(transitionType != Transition::Type::None)
     {
         emit userInteractionStarted();
-        panTransition.start(0.3f, transitionType,
+        _panTransition.start(0.3f, transitionType,
         [=](float f)
         {
-            m_camera->setPosition(startPosition + ((targetPosition - startPosition) * f));
-            m_camera->setViewTarget(startViewTarget + ((nodePosition - startViewTarget) * f));
+            _camera->setPosition(startPosition + ((targetPosition - startPosition) * f));
+            _camera->setViewTarget(startViewTarget + ((nodePosition - startViewTarget) * f));
         },
         [=]()
         {
@@ -767,8 +767,8 @@ void GraphScene::centreNodeInViewport(NodeId nodeId, Transition::Type transition
     }
     else
     {
-        m_camera->setPosition(targetPosition);
-        m_camera->setViewTarget(nodePosition);
+        _camera->setPosition(targetPosition);
+        _camera->setViewTarget(nodePosition);
     }
 }
 
@@ -778,7 +778,7 @@ void GraphScene::moveFocusToNode(NodeId nodeId, Transition::Type transitionType)
         return;
 
     centreNodeInViewport(nodeId, transitionType);
-    focusComponentViewData()->focusNodeId = nodeId;
+    focusComponentViewData()->_focusNodeId = nodeId;
     updateVisualData();
 }
 
@@ -789,7 +789,7 @@ void GraphScene::selectFocusNodeClosestToCameraVector(Transition::Type transitio
 
     Collision collision(*_graphModel->graph().componentById(_focusComponentId),
                         _graphModel->nodeVisuals(), _graphModel->nodePositions());
-    NodeId closestNodeId = collision.closestNodeToLine(m_camera->position(), m_camera->viewVector().normalized());
+    NodeId closestNodeId = collision.closestNodeToLine(_camera->position(), _camera->viewVector().normalized());
     if(!closestNodeId.isNull())
         moveFocusToNode(closestNodeId, transitionType);
 }
@@ -821,7 +821,7 @@ void GraphScene::moveToNextComponent()
     if(!_focusComponentId.isNull())
     {
         updateVisualData();
-        targetZoomDistance = focusComponentViewData()->zoomDistance;
+        _targetZoomDistance = focusComponentViewData()->_zoomDistance;
     }
 }
 
@@ -832,7 +832,7 @@ void GraphScene::moveToPreviousComponent()
     if(!_focusComponentId.isNull())
     {
         updateVisualData();
-        targetZoomDistance = focusComponentViewData()->zoomDistance;
+        _targetZoomDistance = focusComponentViewData()->_zoomDistance;
     }
 }
 
@@ -843,23 +843,23 @@ void GraphScene::moveToComponent(ComponentId componentId)
     if(!_focusComponentId.isNull())
     {
         updateVisualData();
-        targetZoomDistance = focusComponentViewData()->zoomDistance;
+        _targetZoomDistance = focusComponentViewData()->_zoomDistance;
     }
 }
 
 bool GraphScene::interactionAllowed()
 {
-    return panTransition.finished();
+    return _panTransition.finished();
 }
 
 void GraphScene::setGraphModel(GraphModel* graphModel)
 {
     this->_graphModel = graphModel;
 
-    if(componentsViewData != nullptr)
-        delete componentsViewData;
+    if(_componentsViewData != nullptr)
+        delete _componentsViewData;
 
-    componentsViewData = new ComponentArray<ComponentViewData>(_graphModel->graph());
+    _componentsViewData = new ComponentArray<ComponentViewData>(_graphModel->graph());
     _focusComponentId = _graphModel->graph().firstComponentId();
 
     for(ComponentId componentId : *_graphModel->graph().componentIds())
@@ -877,54 +877,54 @@ void GraphScene::setGraphModel(GraphModel* graphModel)
 void GraphScene::prepareVertexBuffers()
 {
     // Populate the data buffer object
-    m_nodePositionBuffer.create();
-    m_nodePositionBuffer.setUsagePattern( QOpenGLBuffer::DynamicDraw );
-    m_nodePositionBuffer.bind();
-    m_nodePositionBuffer.allocate( m_nodePositionData.data(), m_nodePositionData.size() * sizeof(GLfloat) );
+    _nodePositionBuffer.create();
+    _nodePositionBuffer.setUsagePattern( QOpenGLBuffer::DynamicDraw );
+    _nodePositionBuffer.bind();
+    _nodePositionBuffer.allocate( _nodePositionData.data(), _nodePositionData.size() * sizeof(GLfloat) );
 
-    m_edgePositionBuffer.create();
-    m_edgePositionBuffer.setUsagePattern( QOpenGLBuffer::DynamicDraw );
-    m_edgePositionBuffer.bind();
-    m_edgePositionBuffer.allocate( m_edgePositionData.data(), m_edgePositionData.size() * sizeof(GLfloat) );
+    _edgePositionBuffer.create();
+    _edgePositionBuffer.setUsagePattern( QOpenGLBuffer::DynamicDraw );
+    _edgePositionBuffer.bind();
+    _edgePositionBuffer.allocate( _edgePositionData.data(), _edgePositionData.size() * sizeof(GLfloat) );
 
-    m_nodeVisualBuffer.create();
-    m_nodeVisualBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_nodeVisualBuffer.bind();
-    m_nodeVisualBuffer.allocate( m_nodeVisualData.data(), m_nodeVisualData.size() * sizeof(GLfloat) );
+    _nodeVisualBuffer.create();
+    _nodeVisualBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _nodeVisualBuffer.bind();
+    _nodeVisualBuffer.allocate( _nodeVisualData.data(), _nodeVisualData.size() * sizeof(GLfloat) );
 
-    m_edgeVisualBuffer.create();
-    m_edgeVisualBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_edgeVisualBuffer.bind();
-    m_edgeVisualBuffer.allocate( m_edgeVisualData.data(), m_edgeVisualData.size() * sizeof(GLfloat) );
+    _edgeVisualBuffer.create();
+    _edgeVisualBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _edgeVisualBuffer.bind();
+    _edgeVisualBuffer.allocate( _edgeVisualData.data(), _edgeVisualData.size() * sizeof(GLfloat) );
 
-    m_componentMarkerDataBuffer.create();
-    m_componentMarkerDataBuffer.setUsagePattern( QOpenGLBuffer::DynamicDraw );
-    m_componentMarkerDataBuffer.bind();
-    m_componentMarkerDataBuffer.allocate( m_componentMarkerData.data(), m_componentMarkerData.size() * sizeof(GLfloat) );
+    _componentMarkerDataBuffer.create();
+    _componentMarkerDataBuffer.setUsagePattern( QOpenGLBuffer::DynamicDraw );
+    _componentMarkerDataBuffer.bind();
+    _componentMarkerDataBuffer.allocate( _componentMarkerData.data(), _componentMarkerData.size() * sizeof(GLfloat) );
 
-    selectionMarkerDataBuffer.create();
-    selectionMarkerDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-    selectionMarkerDataBuffer.bind();
+    _selectionMarkerDataBuffer.create();
+    _selectionMarkerDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    _selectionMarkerDataBuffer.bind();
 
-    debugLinesDataBuffer.create();
-    debugLinesDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-    debugLinesDataBuffer.bind();
-    debugLinesDataBuffer.allocate(debugLinesData.data(), debugLinesData.size() * sizeof(GLfloat));
+    _debugLinesDataBuffer.create();
+    _debugLinesDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    _debugLinesDataBuffer.bind();
+    _debugLinesDataBuffer.allocate(_debugLinesData.data(), _debugLinesData.size() * sizeof(GLfloat));
 }
 
 void GraphScene::prepareNodeVAO()
 {
     // Bind the marker's VAO
-    m_sphere->vertexArrayObject()->bind();
+    _sphere->vertexArrayObject()->bind();
 
     // Enable the data buffer and add it to the marker's VAO
-    QOpenGLShaderProgramPtr shader = m_sphere->material()->shader();
+    QOpenGLShaderProgramPtr shader = _sphere->material()->shader();
     shader->bind();
-    m_nodePositionBuffer.bind();
+    _nodePositionBuffer.bind();
     shader->enableAttributeArray("point");
     shader->setAttributeBuffer("point", GL_FLOAT, 0, 3);
 
-    m_nodeVisualBuffer.bind();
+    _nodeVisualBuffer.bind();
     shader->enableAttributeArray("size");
     shader->enableAttributeArray("color");
     shader->enableAttributeArray("outlineColor");
@@ -938,35 +938,35 @@ void GraphScene::prepareNodeVAO()
     GLuint colorLocation = shader->attributeLocation("color");
     GLuint outlineColorLocation = shader->attributeLocation("outlineColor");
 #if !defined(Q_OS_MAC)
-    m_funcs->glVertexAttribDivisor(pointLocation, 1);
-    m_funcs->glVertexAttribDivisor(sizeLocation, 1);
-    m_funcs->glVertexAttribDivisor(colorLocation, 1);
-    m_funcs->glVertexAttribDivisor(outlineColorLocation, 1);
+    _funcs->glVertexAttribDivisor(pointLocation, 1);
+    _funcs->glVertexAttribDivisor(sizeLocation, 1);
+    _funcs->glVertexAttribDivisor(colorLocation, 1);
+    _funcs->glVertexAttribDivisor(outlineColorLocation, 1);
 #else
-    m_instanceFuncs->glVertexAttribDivisorARB(pointLocation, 1);
-    m_instanceFuncs->glVertexAttribDivisorARB(sizeLocation, 1);
-    m_instanceFuncs->glVertexAttribDivisorARB(colorLocation, 1);
-    m_instanceFuncs->glVertexAttribDivisorARB(outlineColorLocation, 1);
+    _instanceFuncs->glVertexAttribDivisorARB(pointLocation, 1);
+    _instanceFuncs->glVertexAttribDivisorARB(sizeLocation, 1);
+    _instanceFuncs->glVertexAttribDivisorARB(colorLocation, 1);
+    _instanceFuncs->glVertexAttribDivisorARB(outlineColorLocation, 1);
 #endif
-    m_sphere->vertexArrayObject()->release();
+    _sphere->vertexArrayObject()->release();
     shader->release();
 }
 
 void GraphScene::prepareEdgeVAO()
 {
     // Bind the marker's VAO
-    m_cylinder->vertexArrayObject()->bind();
+    _cylinder->vertexArrayObject()->bind();
 
     // Enable the data buffer and add it to the marker's VAO
-    QOpenGLShaderProgramPtr shader = m_cylinder->material()->shader();
+    QOpenGLShaderProgramPtr shader = _cylinder->material()->shader();
     shader->bind();
-    m_edgePositionBuffer.bind();
+    _edgePositionBuffer.bind();
     shader->enableAttributeArray("source");
     shader->enableAttributeArray("target");
     shader->setAttributeBuffer("source", GL_FLOAT, 0, 3, 6 * sizeof(GLfloat));
     shader->setAttributeBuffer("target", GL_FLOAT, 3 * sizeof(GLfloat), 3, 6 * sizeof(GLfloat));
 
-    m_edgeVisualBuffer.bind();
+    _edgeVisualBuffer.bind();
     shader->enableAttributeArray("size");
     shader->enableAttributeArray("color");
     shader->enableAttributeArray("outlineColor");
@@ -981,31 +981,31 @@ void GraphScene::prepareEdgeVAO()
     GLuint colorLocation = shader->attributeLocation("color");
     GLuint outlineColorLocation = shader->attributeLocation("outlineColor");
 #if !defined(Q_OS_MAC)
-    m_funcs->glVertexAttribDivisor(sourcePointLocation, 1);
-    m_funcs->glVertexAttribDivisor(targetPointLocation, 1);
-    m_funcs->glVertexAttribDivisor(sizeLocation, 1);
-    m_funcs->glVertexAttribDivisor(colorLocation, 1);
-    m_funcs->glVertexAttribDivisor(outlineColorLocation, 1);
+    _funcs->glVertexAttribDivisor(sourcePointLocation, 1);
+    _funcs->glVertexAttribDivisor(targetPointLocation, 1);
+    _funcs->glVertexAttribDivisor(sizeLocation, 1);
+    _funcs->glVertexAttribDivisor(colorLocation, 1);
+    _funcs->glVertexAttribDivisor(outlineColorLocation, 1);
 #else
-    m_instanceFuncs->glVertexAttribDivisorARB(sourcePointLocation, 1);
-    m_instanceFuncs->glVertexAttribDivisorARB(targetPointLocation, 1);
-    m_instanceFuncs->glVertexAttribDivisorARB(sizeLocation, 1);
-    m_instanceFuncs->glVertexAttribDivisorARB(colorLocation, 1);
-    m_instanceFuncs->glVertexAttribDivisorARB(outlineColorLocation, 1);
+    _instanceFuncs->glVertexAttribDivisorARB(sourcePointLocation, 1);
+    _instanceFuncs->glVertexAttribDivisorARB(targetPointLocation, 1);
+    _instanceFuncs->glVertexAttribDivisorARB(sizeLocation, 1);
+    _instanceFuncs->glVertexAttribDivisorARB(colorLocation, 1);
+    _instanceFuncs->glVertexAttribDivisorARB(outlineColorLocation, 1);
 #endif
-    m_cylinder->vertexArrayObject()->release();
+    _cylinder->vertexArrayObject()->release();
     shader->release();
 }
 
 void GraphScene::prepareComponentMarkerVAO()
 {
     // Bind the marker's VAO
-    m_quad->vertexArrayObject()->bind();
+    _quad->vertexArrayObject()->bind();
 
     // Enable the data buffer and add it to the marker's VAO
-    QOpenGLShaderProgramPtr shader = m_quad->material()->shader();
+    QOpenGLShaderProgramPtr shader = _quad->material()->shader();
     shader->bind();
-    m_componentMarkerDataBuffer.bind();
+    _componentMarkerDataBuffer.bind();
     shader->enableAttributeArray("point");
     shader->enableAttributeArray("scale");
     shader->setAttributeBuffer("point", GL_FLOAT, 0, 2, 3 * sizeof(GLfloat));
@@ -1015,45 +1015,45 @@ void GraphScene::prepareComponentMarkerVAO()
     GLuint pointLocation = shader->attributeLocation("point");
     GLuint scaleLocation = shader->attributeLocation("scale");
 #if !defined(Q_OS_MAC)
-    m_funcs->glVertexAttribDivisor(pointLocation, 1);
-    m_funcs->glVertexAttribDivisor(scaleLocation, 1);
+    _funcs->glVertexAttribDivisor(pointLocation, 1);
+    _funcs->glVertexAttribDivisor(scaleLocation, 1);
 #else
-    m_instanceFuncs->glVertexAttribDivisorARB(pointLocation, 1);
-    m_instanceFuncs->glVertexAttribDivisorARB(scaleLocation, 1);
+    _instanceFuncs->glVertexAttribDivisorARB(pointLocation, 1);
+    _instanceFuncs->glVertexAttribDivisorARB(scaleLocation, 1);
 #endif
-    m_quad->vertexArrayObject()->release();
+    _quad->vertexArrayObject()->release();
     shader->release();
 }
 
 void GraphScene::prepareSelectionMarkerVAO()
 {
-    selectionMarkerDataVAO.bind();
-    selectionMarkerShader.bind();
-    selectionMarkerDataBuffer.bind();
+    _selectionMarkerDataVAO.bind();
+    _selectionMarkerShader.bind();
+    _selectionMarkerDataBuffer.bind();
 
-    selectionMarkerShader.enableAttributeArray("position");
-    selectionMarkerShader.enableAttributeArray("color");
-    selectionMarkerShader.disableAttributeArray("texCoord");
-    selectionMarkerShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 5 * sizeof(GLfloat));
-    selectionMarkerShader.setAttributeBuffer("color", GL_FLOAT, 2 * sizeof(GLfloat), 3, 5 * sizeof(GLfloat));
+    _selectionMarkerShader.enableAttributeArray("position");
+    _selectionMarkerShader.enableAttributeArray("color");
+    _selectionMarkerShader.disableAttributeArray("texCoord");
+    _selectionMarkerShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 5 * sizeof(GLfloat));
+    _selectionMarkerShader.setAttributeBuffer("color", GL_FLOAT, 2 * sizeof(GLfloat), 3, 5 * sizeof(GLfloat));
 
-    selectionMarkerDataVAO.release();
-    selectionMarkerShader.release();
+    _selectionMarkerDataVAO.release();
+    _selectionMarkerShader.release();
 }
 
 void GraphScene::prepareDebugLinesVAO()
 {
-    debugLinesDataVAO.bind();
-    debugLinesShader.bind();
-    debugLinesDataBuffer.bind();
+    _debugLinesDataVAO.bind();
+    _debugLinesShader.bind();
+    _debugLinesDataBuffer.bind();
 
-    debugLinesShader.enableAttributeArray("position");
-    debugLinesShader.enableAttributeArray("color");
-    debugLinesShader.setAttributeBuffer("position", GL_FLOAT, 0, 3, 6 * sizeof(GLfloat));
-    debugLinesShader.setAttributeBuffer("color", GL_FLOAT, 3 * sizeof(GLfloat), 3, 6 * sizeof(GLfloat));
+    _debugLinesShader.enableAttributeArray("position");
+    _debugLinesShader.enableAttributeArray("color");
+    _debugLinesShader.setAttributeBuffer("position", GL_FLOAT, 0, 3, 6 * sizeof(GLfloat));
+    _debugLinesShader.setAttributeBuffer("color", GL_FLOAT, 3 * sizeof(GLfloat), 3, 6 * sizeof(GLfloat));
 
-    debugLinesDataVAO.release();
-    debugLinesShader.release();
+    _debugLinesDataVAO.release();
+    _debugLinesShader.release();
 }
 
 void GraphScene::prepareScreenQuad()
@@ -1071,30 +1071,30 @@ void GraphScene::prepareScreenQuad()
     int quadVertsSize = sizeof(quadVerts);
     QOpenGLBuffer quadBuffer;
 
-    screenQuadVAO.create();
-    screenQuadVAO.bind();
+    _screenQuadVAO.create();
+    _screenQuadVAO.bind();
 
     quadBuffer.create();
     quadBuffer.bind();
     quadBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     quadBuffer.allocate(quadVerts, quadVertsSize);
 
-    loadShaderProgram(screenShader, ":/gl/shaders/screen.vert", ":/gl/shaders/screen.frag");
-    screenShader.bind();
-    screenShader.enableAttributeArray("vertexPosition");
-    screenShader.setAttributeBuffer("vertexPosition", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
-    screenShader.setUniformValue("frameBufferTexture", 0);
-    screenShader.release();
+    loadShaderProgram(_screenShader, ":/gl/shaders/screen.vert", ":/gl/shaders/screen.frag");
+    _screenShader.bind();
+    _screenShader.enableAttributeArray("vertexPosition");
+    _screenShader.setAttributeBuffer("vertexPosition", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
+    _screenShader.setUniformValue("frameBufferTexture", 0);
+    _screenShader.release();
 
-    loadShaderProgram(selectionShader, ":/gl/shaders/screen.vert", ":/gl/shaders/selection.frag");
-    selectionShader.bind();
-    selectionShader.enableAttributeArray("vertexPosition");
-    selectionShader.setAttributeBuffer("vertexPosition", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
-    selectionShader.setUniformValue("frameBufferTexture", 0);
-    selectionShader.release();
+    loadShaderProgram(_selectionShader, ":/gl/shaders/screen.vert", ":/gl/shaders/selection.frag");
+    _selectionShader.bind();
+    _selectionShader.enableAttributeArray("vertexPosition");
+    _selectionShader.setAttributeBuffer("vertexPosition", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
+    _selectionShader.setUniformValue("frameBufferTexture", 0);
+    _selectionShader.release();
 
     quadBuffer.release();
-    screenQuadVAO.release();
+    _screenQuadVAO.release();
 }
 
 bool GraphScene::loadShaderProgram(QOpenGLShaderProgram& program, const QString& vertexShader, const QString& fragmentShader)
@@ -1125,59 +1125,59 @@ bool GraphScene::prepareRenderBuffers()
     bool valid;
 
     // Color texture
-    if(colorTexture == 0)
-        m_funcs->glGenTextures(1, &colorTexture);
-    m_funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, colorTexture);
-    m_funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisamples, GL_RGBA, width, height, GL_FALSE);
-    m_funcs->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
-    m_funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+    if(_colorTexture == 0)
+        _funcs->glGenTextures(1, &_colorTexture);
+    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _colorTexture);
+    _funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisamples, GL_RGBA, _width, _height, GL_FALSE);
+    _funcs->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
+    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 
     // Selection texture
-    if(selectionTexture == 0)
-        m_funcs->glGenTextures(1, &selectionTexture);
-    m_funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, selectionTexture);
-    m_funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisamples, GL_RGBA, width, height, GL_FALSE);
-    m_funcs->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
-    m_funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+    if(_selectionTexture == 0)
+        _funcs->glGenTextures(1, &_selectionTexture);
+    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture);
+    _funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisamples, GL_RGBA, _width, _height, GL_FALSE);
+    _funcs->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
+    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 
     // Depth texture
-    if(depthTexture == 0)
-        m_funcs->glGenTextures(1, &depthTexture);
-    m_funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, depthTexture);
-    m_funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisamples, GL_DEPTH_COMPONENT, width, height, GL_FALSE);
-    m_funcs->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
-    m_funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+    if(_depthTexture == 0)
+        _funcs->glGenTextures(1, &_depthTexture);
+    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _depthTexture);
+    _funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisamples, GL_DEPTH_COMPONENT, _width, _height, GL_FALSE);
+    _funcs->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
+    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 
     // Visual FBO
-    if(visualFBO == 0)
-        m_funcs->glGenFramebuffers(1, &visualFBO);
-    m_funcs->glBindFramebuffer(GL_FRAMEBUFFER, visualFBO);
-    m_funcs->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, colorTexture, 0);
-    m_funcs->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_MULTISAMPLE, selectionTexture, 0);
-    m_funcs->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, depthTexture, 0);
+    if(_visualFBO == 0)
+        _funcs->glGenFramebuffers(1, &_visualFBO);
+    _funcs->glBindFramebuffer(GL_FRAMEBUFFER, _visualFBO);
+    _funcs->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _colorTexture, 0);
+    _funcs->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture, 0);
+    _funcs->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, _depthTexture, 0);
 
-    GLenum status = m_funcs->glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    GLenum status = _funcs->glCheckFramebufferStatus(GL_FRAMEBUFFER);
     valid = (status == GL_FRAMEBUFFER_COMPLETE);
 
-    m_funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    _funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     Q_ASSERT(valid);
     return valid;
 }
 
 ComponentViewData::ComponentViewData() :
-    zoomDistance(50.0f),
-    initialised(false)
+    _zoomDistance(50.0f),
+    _initialised(false)
 {
-    camera.setPosition(QVector3D(0.0f, 0.0f, 50.0f));
-    camera.setViewTarget(QVector3D(0.0f, 0.0f, 0.0f));
-    camera.setUpVector(QVector3D(0.0f, 1.0f, 0.0f));
+    _camera.setPosition(QVector3D(0.0f, 0.0f, 50.0f));
+    _camera.setViewTarget(QVector3D(0.0f, 0.0f, 0.0f));
+    _camera.setUpVector(QVector3D(0.0f, 1.0f, 0.0f));
 }
 
 ComponentViewData::ComponentViewData(const ComponentViewData& other) :
-    camera(other.camera),
-    zoomDistance(other.zoomDistance),
-    focusNodeId(other.focusNodeId),
-    initialised(other.initialised)
+    _camera(other._camera),
+    _zoomDistance(other._zoomDistance),
+    _focusNodeId(other._focusNodeId),
+    _initialised(other._initialised)
 {
 }

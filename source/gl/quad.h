@@ -18,7 +18,7 @@ public:
     void setMaterial( const MaterialPtr& material );
     MaterialPtr material() const;
 
-    QOpenGLVertexArrayObject* vertexArrayObject() { return &m_vao; }
+    QOpenGLVertexArrayObject* vertexArrayObject() { return &_vao; }
 
     int indexCount() const { return 6; }
 
@@ -26,7 +26,7 @@ public:
 
     float edgeLength()
     {
-        return m_edgeLength;
+        return _edgeLength;
     }
 
 public slots:
@@ -34,7 +34,7 @@ public slots:
 
     void setEdgeLength(float edgeLength)
     {
-        m_edgeLength = edgeLength;
+        _edgeLength = edgeLength;
     }
 
 private:
@@ -43,21 +43,21 @@ private:
                              QVector<unsigned int>& indices );
     void updateVertexArrayObject();
 
-    MaterialPtr m_material;
+    MaterialPtr _material;
 
-    float m_edgeLength;
+    float _edgeLength;
 
     // QVertexBuffers to hold the data
-    QOpenGLBuffer m_positionBuffer;
-    QOpenGLBuffer m_normalBuffer;
-    QOpenGLBuffer m_textureCoordBuffer;
-    QOpenGLBuffer m_indexBuffer;
-    QOpenGLBuffer m_tangentBuffer;
+    QOpenGLBuffer _positionBuffer;
+    QOpenGLBuffer _normalBuffer;
+    QOpenGLBuffer _textureCoordBuffer;
+    QOpenGLBuffer _indexBuffer;
+    QOpenGLBuffer _tangentBuffer;
 
-    QOpenGLVertexArrayObject m_vao;
+    QOpenGLVertexArrayObject _vao;
 
-    QOpenGLBuffer m_normalLines, m_tangentLines;
-    QOpenGLVertexArrayObject m_vaoNormals, m_vaoTangents;
+    QOpenGLBuffer _normalLines, _tangentLines;
+    QOpenGLVertexArrayObject _vaoNormals, _vaoTangents;
 };
 
 #endif // UNITQUAD_H

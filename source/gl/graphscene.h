@@ -32,11 +32,11 @@ public:
     ComponentViewData();
     ComponentViewData(const ComponentViewData& other);
 
-    Camera camera;
-    float zoomDistance;
-    NodeId focusNodeId;
+    Camera _camera;
+    float _zoomDistance;
+    NodeId _focusNodeId;
 
-    bool initialised;
+    bool _initialised;
 };
 
 class GraphScene : public AbstractScene
@@ -60,10 +60,10 @@ public:
     NodeId focusNodeId()
     {
         ComponentViewData* viewData = focusComponentViewData();
-        return viewData != nullptr ? viewData->focusNodeId : NodeId();
+        return viewData != nullptr ? viewData->_focusNodeId : NodeId();
     }
-    void enableFocusNodeTracking() { trackFocusNode = true; }
-    void disableFocusNodeTracking() { trackFocusNode = false; }
+    void enableFocusNodeTracking() { _trackFocusNode = true; }
+    void disableFocusNodeTracking() { _trackFocusNode = false; }
 
     void moveToNextComponent();
     void moveToPreviousComponent();
@@ -73,22 +73,22 @@ public:
 
     void setGraphModel(GraphModel* graphModel);
 
-    Camera* camera() { return m_camera; }
+    Camera* camera() { return _camera; }
     void zoom(float delta);
 
-    void setSelectionRect(const QRect& rect) { selectionRect = rect; }
-    void clearSelectionRect() { selectionRect = QRect(); }
+    void setSelectionRect(const QRect& rect) { _selectionRect = rect; }
+    void clearSelectionRect() { _selectionRect = QRect(); }
 
 private:
     struct DebugLine
     {
         DebugLine(const QVector3D& start, const QVector3D& end, const QColor& color) :
-            start(start), end(end), color(color)
+            _start(start), _end(end), _color(color)
         {}
 
-        QVector3D start;
-        QVector3D end;
-        QColor color;
+        QVector3D _start;
+        QVector3D _end;
+        QColor _color;
     };
 
     void prepareVertexBuffers();
@@ -99,22 +99,22 @@ private:
     void prepareDebugLinesVAO();
     void prepareTexture();
 
-    QOpenGLShaderProgram screenShader;
-    QOpenGLShaderProgram selectionShader;
+    QOpenGLShaderProgram _screenShader;
+    QOpenGLShaderProgram _selectionShader;
     void prepareScreenQuad();
 
     bool loadShaderProgram(QOpenGLShaderProgram& program, const QString& vertexShader, const QString& fragmentShader);
 
-    int width;
-    int height;
+    int _width;
+    int _height;
 
-    GLuint colorTexture;
-    GLuint selectionTexture;
-    GLuint depthTexture;
-    GLuint visualFBO;
-    bool FBOcomplete;
+    GLuint _colorTexture;
+    GLuint _selectionTexture;
+    GLuint _depthTexture;
+    GLuint _visualFBO;
+    bool _FBOcomplete;
 
-    QOpenGLVertexArrayObject screenQuadVAO;
+    QOpenGLVertexArrayObject _screenQuadVAO;
 
     bool prepareRenderBuffers();
 
@@ -139,56 +139,56 @@ public slots:
     void onSelectionChanged(const SelectionManager& selectionManager);
 
 private:
-    bool trackFocusNode;
-    float targetZoomDistance;
-    Transition zoomTransition;
-    QRect selectionRect;
+    bool _trackFocusNode;
+    float _targetZoomDistance;
+    Transition _zoomTransition;
+    QRect _selectionRect;
 
-    QOpenGLFunctions_3_3_Core* m_funcs;
+    QOpenGLFunctions_3_3_Core* _funcs;
 
     ComponentId _focusComponentId;
-    ComponentId lastSplitterFocusComponentId;
-    ComponentArray<ComponentViewData>* componentsViewData;
+    ComponentId _lastSplitterFocusComponentId;
+    ComponentArray<ComponentViewData>* _componentsViewData;
     ComponentViewData* focusComponentViewData() const;
 
-    float aspectRatio;
-    Camera* m_camera;
-    Transition panTransition;
+    float _aspectRatio;
+    Camera* _camera;
+    Transition _panTransition;
 
-    Sphere* m_sphere;
-    Cylinder* m_cylinder;
-    Quad* m_quad;
+    Sphere* _sphere;
+    Cylinder* _cylinder;
+    Quad* _quad;
 
     GraphModel* _graphModel;
 
-    QOpenGLShaderProgram nodesShader;
-    QVector<GLfloat> m_nodePositionData;
-    QOpenGLBuffer m_nodePositionBuffer;
+    QOpenGLShaderProgram _nodesShader;
+    QVector<GLfloat> _nodePositionData;
+    QOpenGLBuffer _nodePositionBuffer;
 
-    QOpenGLShaderProgram edgesShader;
-    QVector<GLfloat> m_edgePositionData;
-    QOpenGLBuffer m_edgePositionBuffer;
+    QOpenGLShaderProgram _edgesShader;
+    QVector<GLfloat> _edgePositionData;
+    QOpenGLBuffer _edgePositionBuffer;
 
-    QVector<GLfloat> m_nodeVisualData;
-    QOpenGLBuffer m_nodeVisualBuffer;
+    QVector<GLfloat> _nodeVisualData;
+    QOpenGLBuffer _nodeVisualBuffer;
 
-    QVector<GLfloat> m_edgeVisualData;
-    QOpenGLBuffer m_edgeVisualBuffer;
+    QVector<GLfloat> _edgeVisualData;
+    QOpenGLBuffer _edgeVisualBuffer;
 
-    QOpenGLShaderProgram componentMarkerShader;
-    QVector<GLfloat> m_componentMarkerData;
-    QOpenGLBuffer m_componentMarkerDataBuffer;
+    QOpenGLShaderProgram _componentMarkerShader;
+    QVector<GLfloat> _componentMarkerData;
+    QOpenGLBuffer _componentMarkerDataBuffer;
 
-    QOpenGLShaderProgram selectionMarkerShader;
-    QOpenGLBuffer selectionMarkerDataBuffer;
-    QOpenGLVertexArrayObject selectionMarkerDataVAO;
+    QOpenGLShaderProgram _selectionMarkerShader;
+    QOpenGLBuffer _selectionMarkerDataBuffer;
+    QOpenGLVertexArrayObject _selectionMarkerDataVAO;
 
-    QList<DebugLine> debugLines;
-    QMutex debugLinesMutex;
-    QVector<GLfloat> debugLinesData;
-    QOpenGLBuffer debugLinesDataBuffer;
-    QOpenGLVertexArrayObject debugLinesDataVAO;
-    QOpenGLShaderProgram debugLinesShader;
+    QList<DebugLine> _debugLines;
+    QMutex _debugLinesMutex;
+    QVector<GLfloat> _debugLinesData;
+    QOpenGLBuffer _debugLinesDataBuffer;
+    QOpenGLVertexArrayObject _debugLinesDataVAO;
+    QOpenGLShaderProgram _debugLinesShader;
 
 signals:
     void userInteractionStarted();
@@ -198,10 +198,10 @@ public:
     void addDebugLine(const QVector3D& start, const QVector3D& end, const QColor color = QColor(Qt::GlobalColor::white))
     {
         DebugLine debugLine(start, end, color);
-        debugLines.append(debugLine);
+        _debugLines.append(debugLine);
     }
     void addDebugBoundingBox(const BoundingBox3D& boundingBox, const QColor color = QColor(Qt::GlobalColor::white));
-    void clearDebugLines() { debugLines.clear(); }
+    void clearDebugLines() { _debugLines.clear(); }
     void submitDebugLines();
 };
 

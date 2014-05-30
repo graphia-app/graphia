@@ -19,24 +19,24 @@ ContentPaneWidget::ContentPaneWidget(QWidget* parent) :
     QWidget(parent),
     _graphModel(nullptr),
     _selectionManager(nullptr),
-    graphFileParserThread(nullptr),
-    nodeLayoutThread(nullptr),
-    componentLayoutThread(nullptr),
-    resumePreviouslyActiveLayout(false)
+    _graphFileParserThread(nullptr),
+    _nodeLayoutThread(nullptr),
+    _componentLayoutThread(nullptr),
+    _resumePreviouslyActiveLayout(false)
 {
     this->setLayout(new QVBoxLayout());
 }
 
 ContentPaneWidget::~ContentPaneWidget()
 {
-    delete graphFileParserThread;
-    graphFileParserThread = nullptr;
+    delete _graphFileParserThread;
+    _graphFileParserThread = nullptr;
 
-    delete nodeLayoutThread;
-    nodeLayoutThread = nullptr;
+    delete _nodeLayoutThread;
+    _nodeLayoutThread = nullptr;
 
-    delete componentLayoutThread;
-    componentLayoutThread = nullptr;
+    delete _componentLayoutThread;
+    _componentLayoutThread = nullptr;
 
     delete _selectionManager;
     delete _graphModel;
@@ -46,7 +46,7 @@ bool ContentPaneWidget::initFromFile(const QString &filename)
 {
     QFileInfo info(filename);
 
-    if(!info.exists() || graphFileParserThread != nullptr)
+    if(!info.exists() || _graphFileParserThread != nullptr)
         return false;
 
     GraphFileParser* graphFileParser = nullptr;
@@ -68,10 +68,10 @@ bool ContentPaneWidget::initFromFile(const QString &filename)
     connect(&_graphModel->graph(), &Graph::componentSplit, this, &ContentPaneWidget::onComponentSplit, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::componentsWillMerge, this, &ContentPaneWidget::onComponentsWillMerge, Qt::DirectConnection);
 
-    graphFileParserThread = new GraphFileParserThread(filename, _graphModel->graph(), graphFileParser);
+    _graphFileParserThread = new GraphFileParserThread(filename, _graphModel->graph(), graphFileParser);
     connect(graphFileParser, &GraphFileParser::progress, this, &ContentPaneWidget::onProgress);
     connect(graphFileParser, &GraphFileParser::complete, this, &ContentPaneWidget::onCompletion);
-    graphFileParserThread->start();
+    _graphFileParserThread->start();
 
     return true;
 }
@@ -80,9 +80,9 @@ void ContentPaneWidget::onCompletion(int success)
 {
     _graphModel->graph().enableComponentMangagement();
 
-    nodeLayoutThread = new NodeLayoutThread(new EadesLayoutFactory(_graphModel));
-    nodeLayoutThread->addAllComponents(_graphModel->graph());
-    nodeLayoutThread->start();
+    _nodeLayoutThread = new NodeLayoutThread(new EadesLayoutFactory(_graphModel));
+    _nodeLayoutThread->addAllComponents(_graphModel->graph());
+    _nodeLayoutThread->start();
 
     /*componentLayoutThread = new LayoutThread(new RadialCircleComponentLayout(_graphModel->graph(),
                                                                        _graphModel->componentPositions(),
@@ -96,7 +96,7 @@ void ContentPaneWidget::onCompletion(int success)
     GraphView* graphView = new GraphView();
     graphView->setGraphModel(_graphModel);
     graphView->setSelectionManager(_selectionManager);
-    connect(nodeLayoutThread, &LayoutThread::executed, graphView, &GraphView::layoutChanged);
+    connect(_nodeLayoutThread, &LayoutThread::executed, graphView, &GraphView::layoutChanged);
 
     connect(graphView, &GraphView::userInteractionStarted, [=]()
     {
@@ -131,77 +131,77 @@ void ContentPaneWidget::onGraphChanged(const Graph* graph)
 
 void ContentPaneWidget::onComponentAdded(const Graph*, ComponentId componentId)
 {
-    if(nodeLayoutThread != nullptr)
-        nodeLayoutThread->addComponent(componentId);
+    if(_nodeLayoutThread != nullptr)
+        _nodeLayoutThread->addComponent(componentId);
 }
 
 void ContentPaneWidget::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
 {
-    if(nodeLayoutThread != nullptr)
-        nodeLayoutThread->removeComponent(componentId);
+    if(_nodeLayoutThread != nullptr)
+        _nodeLayoutThread->removeComponent(componentId);
 }
 
 void ContentPaneWidget::onComponentSplit(const Graph*, ComponentId /*splitter*/, const QSet<ComponentId>& splitters)
 {
-    if(nodeLayoutThread != nullptr)
+    if(_nodeLayoutThread != nullptr)
     {
         for(ComponentId componentId : splitters)
-            nodeLayoutThread->addComponent(componentId);
+            _nodeLayoutThread->addComponent(componentId);
     }
 }
 
 void ContentPaneWidget::onComponentsWillMerge(const Graph*, const QSet<ComponentId>& mergers, ComponentId merger)
 {
-    if(nodeLayoutThread != nullptr)
+    if(_nodeLayoutThread != nullptr)
     {
         for(ComponentId componentId : mergers)
         {
             if(componentId != merger)
-                nodeLayoutThread->removeComponent(componentId);
+                _nodeLayoutThread->removeComponent(componentId);
         }
     }
 }
 
 void ContentPaneWidget::pauseLayout(bool autoResume)
 {
-    if(componentLayoutThread != nullptr)
+    if(_componentLayoutThread != nullptr)
     {
-        if(autoResume && !componentLayoutThread->paused())
-            resumePreviouslyActiveLayout = true;
+        if(autoResume && !_componentLayoutThread->paused())
+            _resumePreviouslyActiveLayout = true;
 
-        componentLayoutThread->pauseAndWait();
+        _componentLayoutThread->pauseAndWait();
     }
 
-    if(nodeLayoutThread != nullptr)
+    if(_nodeLayoutThread != nullptr)
     {
-        if(autoResume && !nodeLayoutThread->paused())
-            resumePreviouslyActiveLayout = true;
+        if(autoResume && !_nodeLayoutThread->paused())
+            _resumePreviouslyActiveLayout = true;
 
-        nodeLayoutThread->pauseAndWait();
+        _nodeLayoutThread->pauseAndWait();
     }
 }
 
 bool ContentPaneWidget::layoutIsPaused()
 {
     // Not typos: a non-existant thread counts as paused
-    bool nodeLayoutPaused = (nodeLayoutThread == nullptr || nodeLayoutThread->paused());
-    bool componentLayoutPaused = (componentLayoutThread == nullptr || componentLayoutThread->paused());
+    bool nodeLayoutPaused = (_nodeLayoutThread == nullptr || _nodeLayoutThread->paused());
+    bool componentLayoutPaused = (_componentLayoutThread == nullptr || _componentLayoutThread->paused());
 
     return nodeLayoutPaused && componentLayoutPaused;
 }
 
 void ContentPaneWidget::resumeLayout(bool autoResume)
 {
-    if(autoResume && !resumePreviouslyActiveLayout)
+    if(autoResume && !_resumePreviouslyActiveLayout)
         return;
 
-    resumePreviouslyActiveLayout = false;
+    _resumePreviouslyActiveLayout = false;
 
-    if(nodeLayoutThread != nullptr)
-        nodeLayoutThread->resume();
+    if(_nodeLayoutThread != nullptr)
+        _nodeLayoutThread->resume();
 
-    if(componentLayoutThread != nullptr)
-        componentLayoutThread->resume();
+    if(_componentLayoutThread != nullptr)
+        _componentLayoutThread->resume();
 }
 
 void ContentPaneWidget::selectAll()

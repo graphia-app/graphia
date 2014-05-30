@@ -17,14 +17,14 @@ class SpatialOctree
 public:
     struct SubVolume
     {
-        BoundingBox3D boundingBox;
-        QVector<NodeId> nodeIds;
-        SpatialOctree* subTree;
+        BoundingBox3D _boundingBox;
+        QVector<NodeId> _nodeIds;
+        SpatialOctree* _subTree;
     };
 
 private:
-    QVector3D centre;
-    SubVolume subVolumes[8];
+    QVector3D _centre;
+    SubVolume _subVolumes[8];
 
 public:
     SpatialOctree(const BoundingBox3D& boundingBox, const QVector<NodeId> nodeIds, const NodePositions& nodePositions,

@@ -53,8 +53,8 @@ public:
     bool openFileInNewTab(const QString& filename);
 
 private:
-    Ui::MainWindow *ui;
-    QLabel* statusBarLabel;
+    Ui::MainWindow* _ui;
+    QLabel* _statusBarLabel;
 };
 
 #endif // MAINWINDOW_H

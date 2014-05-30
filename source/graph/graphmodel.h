@@ -11,18 +11,18 @@
 
 struct NodeVisual
 {
-    float size;
-    QColor color;
-    QColor outlineColor;
+    float _size;
+    QColor _color;
+    QColor _outlineColor;
 };
 
 typedef NodeArray<NodeVisual> NodeVisuals;
 
 struct EdgeVisual
 {
-    float size;
-    QColor color;
-    QColor outlineColor;
+    float _size;
+    QColor _color;
+    QColor _outlineColor;
 };
 
 typedef EdgeArray<EdgeVisual> EdgeVisuals;

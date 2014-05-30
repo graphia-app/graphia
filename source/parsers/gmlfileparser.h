@@ -17,12 +17,12 @@ class GmlFileParser : public GraphFileParser
 {
     Q_OBJECT
 private:
-    QString filename;
-    int64_t fileSize;
-    int percentage;
+    QString _filename;
+    int64_t _fileSize;
+    int _percentage;
 
 public:
-    GmlFileParser(QString filename) : GraphFileParser(), filename(filename), fileSize(0), percentage(0) {}
+    GmlFileParser(QString filename) : GraphFileParser(), _filename(filename), _fileSize(0), _percentage(0) {}
 
     bool parse(Graph& graph);
 

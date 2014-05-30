@@ -9,21 +9,21 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    statusBarLabel(new QLabel)
+    _ui(new Ui::MainWindow),
+    _statusBarLabel(new QLabel)
 {
-    ui->setupUi(this);
-    ui->statusBar->addWidget(statusBarLabel);
+    _ui->setupUi(this);
+    _ui->statusBar->addWidget(_statusBarLabel);
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+    delete _ui;
 }
 
 ContentPaneWidget *MainWindow::currentTabWidget()
 {
-    ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(ui->tabs->currentWidget());
+    ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(_ui->tabs->currentWidget());
     return contentPaneWidget;
 }
 
@@ -42,9 +42,9 @@ ContentPaneWidget *MainWindow::createNewTabWidget(const QString& filename)
 
 void MainWindow::closeTab(int index)
 {
-    ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(ui->tabs->widget(index));
+    ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(_ui->tabs->widget(index));
 
-    ui->tabs->removeTab(index);
+    _ui->tabs->removeTab(index);
     delete contentPaneWidget;
 }
 
@@ -57,35 +57,35 @@ void MainWindow::configureActionPauseLayout(bool pause)
 {
     if(pause)
     {
-        ui->actionPause_Layout->setText(tr("Resume Layout"));
-        ui->actionPause_Layout->setIcon(QIcon::fromTheme("media-playback-start"));
+        _ui->actionPause_Layout->setText(tr("Resume Layout"));
+        _ui->actionPause_Layout->setIcon(QIcon::fromTheme("media-playback-start"));
     }
     else
     {
-        ui->actionPause_Layout->setText(tr("Pause Layout"));
-        ui->actionPause_Layout->setIcon(QIcon::fromTheme("media-playback-pause"));
+        _ui->actionPause_Layout->setText(tr("Pause Layout"));
+        _ui->actionPause_Layout->setIcon(QIcon::fromTheme("media-playback-pause"));
     }
 }
 
 void MainWindow::updatePerTabUi()
 {
-    ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(ui->tabs->currentWidget());
+    ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(_ui->tabs->currentWidget());
 
     if (contentPaneWidget != nullptr)
     {
         configureActionPauseLayout(contentPaneWidget->layoutIsPaused());
-        statusBarLabel->setText(QString(tr("%1 nodes, %2 edges, %3 components")).arg(
+        _statusBarLabel->setText(QString(tr("%1 nodes, %2 edges, %3 components")).arg(
                                     contentPaneWidget->graphModel()->graph().numNodes()).arg(
                                     contentPaneWidget->graphModel()->graph().numEdges()).arg(
                                     contentPaneWidget->graphModel()->graph().numComponents()));
     }
     else
-        statusBarLabel->setText("");
+        _statusBarLabel->setText("");
 }
 
 void MainWindow::on_actionOpen_triggered()
 {
-    if(ui->tabs->count() == 0)
+    if(_ui->tabs->count() == 0)
     {
         // No tab to replace, open a new one
         on_actionOpen_In_New_Tab_triggered();
@@ -95,15 +95,15 @@ void MainWindow::on_actionOpen_triggered()
     QString filename = showGeneralFileOpenDialog();
     if (!filename.isEmpty())
     {
-        ui->tabs->setUpdatesEnabled(false);
-        int index = ui->tabs->currentIndex();
+        _ui->tabs->setUpdatesEnabled(false);
+        int index = _ui->tabs->currentIndex();
         closeTab(index);
 
         ContentPaneWidget* contentPaneWidget = createNewTabWidget(filename);
 
-        ui->tabs->insertTab(index, contentPaneWidget, QString(tr("%1 0%")).arg(contentPaneWidget->graphModel()->name()));
-        ui->tabs->setCurrentIndex(index);
-        ui->tabs->setUpdatesEnabled(true);
+        _ui->tabs->insertTab(index, contentPaneWidget, QString(tr("%1 0%")).arg(contentPaneWidget->graphModel()->name()));
+        _ui->tabs->setCurrentIndex(index);
+        _ui->tabs->setUpdatesEnabled(true);
     }
 }
 
@@ -122,8 +122,8 @@ bool MainWindow::openFileInNewTab(const QString& filename)
     {
         ContentPaneWidget* contentPaneWidget = createNewTabWidget(filename);
 
-        int index = ui->tabs->addTab(contentPaneWidget, QString(tr("%1 0%")).arg(contentPaneWidget->graphModel()->name()));
-        ui->tabs->setCurrentIndex(index);
+        int index = _ui->tabs->addTab(contentPaneWidget, QString(tr("%1 0%")).arg(contentPaneWidget->graphModel()->name()));
+        _ui->tabs->setCurrentIndex(index);
 
         return true;
     }
@@ -141,8 +141,8 @@ void MainWindow::on_loadProgress(int percentage)
     ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(sender());
     Q_ASSERT(contentPaneWidget != nullptr);
 
-    int tabIndex = ui->tabs->indexOf(contentPaneWidget);
-    ui->tabs->setTabText(tabIndex, QString(tr("%1 %2%")).arg(contentPaneWidget->graphModel()->name()).arg(percentage));
+    int tabIndex = _ui->tabs->indexOf(contentPaneWidget);
+    _ui->tabs->setTabText(tabIndex, QString(tr("%1 %2%")).arg(contentPaneWidget->graphModel()->name()).arg(percentage));
     updatePerTabUi();
 }
 
@@ -151,8 +151,8 @@ void MainWindow::on_loadCompletion(int /*success*/)
     ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(sender());
     Q_ASSERT(contentPaneWidget != nullptr);
 
-    int tabIndex = ui->tabs->indexOf(contentPaneWidget);
-    ui->tabs->setTabText(tabIndex, contentPaneWidget->graphModel()->name());
+    int tabIndex = _ui->tabs->indexOf(contentPaneWidget);
+    _ui->tabs->setTabText(tabIndex, contentPaneWidget->graphModel()->name());
     updatePerTabUi();
 }
 

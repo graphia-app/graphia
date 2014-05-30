@@ -24,7 +24,7 @@ public slots:
     void appendMessage(const QOpenGLDebugMessage &message);
 
 private:
-    QList<QOpenGLDebugMessage> m_messages;
+    QList<QOpenGLDebugMessage> _messages;
 };
 
 #endif // OPENGLDEBUGMESSAGEMODEL_H

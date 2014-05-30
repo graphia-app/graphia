@@ -7,14 +7,14 @@ class RandomLayout : public NodeLayout
 {
     Q_OBJECT
 private:
-    float spread;
+    float _spread;
 
 public:
     RandomLayout(const ReadOnlyGraph& graph, NodePositions& positions) :
-        NodeLayout(graph, positions), spread(10.0f)
+        NodeLayout(graph, positions), _spread(10.0f)
     {}
 
-    void setSpread(float spread) { this->spread = spread; }
+    void setSpread(float spread) { this->_spread = spread; }
     void executeReal(uint64_t);
 };
 

@@ -9,35 +9,35 @@ const float twoPi = 2.0f * pi;
 
 Torus::Torus( QObject* parent )
     : QObject( parent ),
-      m_minorRadius( 0.75f ),
-      m_majorRadius( 1.0f ),
-      m_rings( 50 ),
-      m_sides( 50 ),
-      m_positionBuffer( QOpenGLBuffer::VertexBuffer ),
-      m_normalBuffer( QOpenGLBuffer::VertexBuffer ),
-      m_textureCoordBuffer( QOpenGLBuffer::VertexBuffer ),
-      m_indexBuffer( QOpenGLBuffer::IndexBuffer ),
-      m_vao()
+      _minorRadius( 0.75f ),
+      _majorRadius( 1.0f ),
+      _rings( 50 ),
+      _sides( 50 ),
+      _positionBuffer( QOpenGLBuffer::VertexBuffer ),
+      _normalBuffer( QOpenGLBuffer::VertexBuffer ),
+      _textureCoordBuffer( QOpenGLBuffer::VertexBuffer ),
+      _indexBuffer( QOpenGLBuffer::IndexBuffer ),
+      _vao()
 {
 }
 
 void Torus::setMaterial( const MaterialPtr& material )
 {
-    if ( material == m_material )
+    if ( material == _material )
         return;
-    m_material = material;
+    _material = material;
     updateVertexArrayObject();
 }
 
 MaterialPtr Torus::material() const
 {
-    return m_material;
+    return _material;
 }
 
 void Torus::create()
 {
-    int faces = m_sides * m_rings;
-    int nVerts  = m_sides * ( m_rings + 1 );   // One extra ring to duplicate first ring
+    int faces = _sides * _rings;
+    int nVerts  = _sides * ( _rings + 1 );   // One extra ring to duplicate first ring
 
     // Allocate some storage to hold per-vertex data
     float* v = new float[3*nVerts];               // Vertices
@@ -49,25 +49,25 @@ void Torus::create()
     generateVertexData( v, n, tex, el );
 
     // Create and populate the buffer objects
-    m_positionBuffer.create();
-    m_positionBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_positionBuffer.bind();
-    m_positionBuffer.allocate( v, 3 * nVerts * sizeof( float ) );
+    _positionBuffer.create();
+    _positionBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _positionBuffer.bind();
+    _positionBuffer.allocate( v, 3 * nVerts * sizeof( float ) );
 
-    m_normalBuffer.create();
-    m_normalBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_normalBuffer.bind();
-    m_normalBuffer.allocate( n, 3 * nVerts * sizeof( float ) );
+    _normalBuffer.create();
+    _normalBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _normalBuffer.bind();
+    _normalBuffer.allocate( n, 3 * nVerts * sizeof( float ) );
 
-    m_textureCoordBuffer.create();
-    m_textureCoordBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_textureCoordBuffer.bind();
-    m_textureCoordBuffer.allocate( tex, 2 * nVerts * sizeof( float ) );
+    _textureCoordBuffer.create();
+    _textureCoordBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _textureCoordBuffer.bind();
+    _textureCoordBuffer.allocate( tex, 2 * nVerts * sizeof( float ) );
 
-    m_indexBuffer.create();
-    m_indexBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_indexBuffer.bind();
-    m_indexBuffer.allocate( el, 6 * faces * sizeof( unsigned int ) );
+    _indexBuffer.create();
+    _indexBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _indexBuffer.bind();
+    _indexBuffer.allocate( el, 6 * faces * sizeof( unsigned int ) );
 
     // Delete our copy of the data as we no longer need it
     delete [] v;
@@ -80,26 +80,26 @@ void Torus::create()
 
 void Torus::generateVertexData( float* vertices, float* normals, float* texCoords, unsigned int* indices )
 {
-    float ringFactor = twoPi / static_cast<float>( m_rings );
-    float sideFactor = twoPi / static_cast<float>( m_sides );
+    float ringFactor = twoPi / static_cast<float>( _rings );
+    float sideFactor = twoPi / static_cast<float>( _sides );
 
     int index = 0, texCoordIndex = 0;
-    for ( int ring = 0; ring <= m_rings; ring++ )
+    for ( int ring = 0; ring <= _rings; ring++ )
     {
         float u = ring * ringFactor;
         float cu = cos( u );
         float su = sin( u );
 
-        for ( int side = 0; side < m_sides; side++ )
+        for ( int side = 0; side < _sides; side++ )
         {
             float v = side * sideFactor;
             float cv = cos( v );
             float sv = sin( v );
-            float r = ( m_majorRadius + m_minorRadius * cv );
+            float r = ( _majorRadius + _minorRadius * cv );
 
             vertices[index] = r * cu;
             vertices[index+1] = r * su;
-            vertices[index+2] = m_minorRadius * sv;
+            vertices[index+2] = _minorRadius * sv;
 
             normals[index] = cv * cu * r;
             normals[index+1] = cv * su * r;
@@ -122,13 +122,13 @@ void Torus::generateVertexData( float* vertices, float* normals, float* texCoord
     }
 
     index = 0;
-    for ( int ring = 0; ring < m_rings; ring++ )
+    for ( int ring = 0; ring < _rings; ring++ )
     {
-        int ringStart = ring * m_sides;
-        int nextRingStart = ( ring + 1 ) * m_sides;
-        for ( int side = 0; side < m_sides; side++ )
+        int ringStart = ring * _sides;
+        int nextRingStart = ( ring + 1 ) * _sides;
+        for ( int side = 0; side < _sides; side++ )
         {
-            int nextSide = ( side + 1 ) % m_sides;
+            int nextSide = ( side + 1 ) % _sides;
 
             // The quad
             indices[index] = ( ringStart + side );
@@ -145,46 +145,46 @@ void Torus::generateVertexData( float* vertices, float* normals, float* texCoord
 void Torus::updateVertexArrayObject()
 {
     // Ensure that we have a valid material and geometry
-    if ( !m_material || !m_positionBuffer.isCreated() )
+    if ( !_material || !_positionBuffer.isCreated() )
         return;
 
     // Create a vertex array object
-    if ( !m_vao.isCreated() )
-        m_vao.create();
-    m_vao.bind();
+    if ( !_vao.isCreated() )
+        _vao.create();
+    _vao.bind();
 
-    QOpenGLShaderProgramPtr shader = m_material->shader();
+    QOpenGLShaderProgramPtr shader = _material->shader();
     shader->bind();
 
-    m_positionBuffer.bind();
+    _positionBuffer.bind();
     shader->enableAttributeArray( "vertexPosition" );
     shader->setAttributeBuffer( "vertexPosition", GL_FLOAT, 0, 3 );
 
-    m_normalBuffer.bind();
+    _normalBuffer.bind();
     shader->enableAttributeArray( "vertexNormal" );
     shader->setAttributeBuffer( "vertexNormal", GL_FLOAT, 0, 3 );
 
-    m_textureCoordBuffer.bind();
+    _textureCoordBuffer.bind();
     shader->enableAttributeArray( "vertexTexCoord" );
     shader->setAttributeBuffer( "vertexTexCoord", GL_FLOAT, 0, 2 );
 
-    m_indexBuffer.bind();
+    _indexBuffer.bind();
 
     // End VAO setup
-    m_vao.release();
+    _vao.release();
 
     // Tidy up after ourselves
-    m_textureCoordBuffer.release();
-    m_indexBuffer.release();
+    _textureCoordBuffer.release();
+    _indexBuffer.release();
 }
 
 void Torus::render()
 {
     // Bind the vertex array oobject to set up our vertex buffers and index buffer
-    m_vao.bind();
+    _vao.bind();
 
     // Draw it!
     glDrawElements( GL_TRIANGLES, indexCount(), GL_UNSIGNED_INT, 0 );
 
-    m_vao.release();
+    _vao.release();
 }

@@ -23,19 +23,19 @@
 
 GraphView::GraphView(QWidget *parent) :
     QWidget(parent),
-    m_rightMouseButtonHeld(false),
-    m_leftMouseButtonHeld(false),
-    m_selecting(false),
-    m_frustumSelecting(false),
-    m_mouseMoving(false)
+    _rightMouseButtonHeld(false),
+    _leftMouseButtonHeld(false),
+    _selecting(false),
+    _frustumSelecting(false),
+    _mouseMoving(false)
 {
     OpenGLWindow* window = new OpenGLWindow(surfaceFormat(), this);
 
-    graphScene = new GraphScene;
-    window->setScene(graphScene);
+    _graphScene = new GraphScene;
+    window->setScene(_graphScene);
 
-    connect(graphScene, &GraphScene::userInteractionStarted, this, &GraphView::userInteractionStarted);
-    connect(graphScene, &GraphScene::userInteractionFinished, this, &GraphView::userInteractionFinished);
+    connect(_graphScene, &GraphScene::userInteractionStarted, this, &GraphView::userInteractionStarted);
+    connect(_graphScene, &GraphScene::userInteractionFinished, this, &GraphView::userInteractionFinished);
 
     this->setLayout(new QVBoxLayout());
     this->layout()->addWidget(QWidget::createWindowContainer(window));
@@ -44,7 +44,7 @@ GraphView::GraphView(QWidget *parent) :
 void GraphView::setSelectionManager(SelectionManager* selectionManager)
 {
     this->_selectionManager = selectionManager;
-    connect(selectionManager, &SelectionManager::selectionChanged, graphScene, &GraphScene::onSelectionChanged);
+    connect(selectionManager, &SelectionManager::selectionChanged, _graphScene, &GraphScene::onSelectionChanged);
 }
 
 void GraphView::layoutChanged()
@@ -56,29 +56,29 @@ void GraphView::mousePressEvent(QMouseEvent* mouseEvent)
     switch(mouseEvent->button())
     {
     case Qt::LeftButton:
-        m_leftMouseButtonHeld = true;
-        m_selecting = true;
+        _leftMouseButtonHeld = true;
+        _selecting = true;
         break;
 
     case Qt::RightButton:
-        m_rightMouseButtonHeld = true;
-        graphScene->disableFocusNodeTracking();
+        _rightMouseButtonHeld = true;
+        _graphScene->disableFocusNodeTracking();
         break;
 
     default: break;
     }
 
-    m_pos = m_prevPos = mouseEvent->pos();
+    _cursorPosition = _prevCursorPosition = mouseEvent->pos();
 
-    Ray ray = graphScene->camera()->rayForViewportCoordinates(m_pos.x(), m_pos.y());
+    Ray ray = _graphScene->camera()->rayForViewportCoordinates(_cursorPosition.x(), _cursorPosition.y());
 
-    const ReadOnlyGraph& component = *_graphModel->graph().componentById(graphScene->focusComponentId());
+    const ReadOnlyGraph& component = *_graphModel->graph().componentById(_graphScene->focusComponentId());
 
     Collision collision(component, _graphModel->nodeVisuals(), _graphModel->nodePositions());
-    clickedNodeId = collision.nearestNodeIntersectingLine(ray.origin(), ray.dir());
+    _clickedNodeId = collision.nearestNodeIntersectingLine(ray.origin(), ray.dir());
 
     if(mouseEvent->modifiers() & Qt::ShiftModifier)
-        m_frustumSelectStart = m_pos;
+        _frustumSelectStart = _cursorPosition;
 }
 
 void GraphView::mouseReleaseEvent(QMouseEvent* mouseEvent)
@@ -86,46 +86,46 @@ void GraphView::mouseReleaseEvent(QMouseEvent* mouseEvent)
     switch(mouseEvent->button())
     {
     case Qt::RightButton:
-        if(!graphScene->interactionAllowed())
+        if(!_graphScene->interactionAllowed())
         {
-            m_rightMouseButtonHeld = false;
-            graphScene->enableFocusNodeTracking();
+            _rightMouseButtonHeld = false;
+            _graphScene->enableFocusNodeTracking();
             return;
         }
 
         emit userInteractionFinished();
 
-        if(m_rightMouseButtonHeld && m_mouseMoving)
-            graphScene->selectFocusNodeClosestToCameraVector();
+        if(_rightMouseButtonHeld && _mouseMoving)
+            _graphScene->selectFocusNodeClosestToCameraVector();
 
-        m_rightMouseButtonHeld = false;
-        graphScene->enableFocusNodeTracking();
-        clickedNodeId.setToNull();
+        _rightMouseButtonHeld = false;
+        _graphScene->enableFocusNodeTracking();
+        _clickedNodeId.setToNull();
         break;
 
     case Qt::LeftButton:
-        m_leftMouseButtonHeld = false;
+        _leftMouseButtonHeld = false;
 
-        if(!graphScene->interactionAllowed())
+        if(!_graphScene->interactionAllowed())
             return;
 
         emit userInteractionFinished();
 
-        if(m_selecting)
+        if(_selecting)
         {
-            if(m_frustumSelecting)
+            if(_frustumSelecting)
             {
                 if(!(mouseEvent->modifiers() & Qt::ShiftModifier))
                     _selectionManager->clearNodeSelection();
 
                 QPoint frustumEndPoint = mouseEvent->pos();
-                Frustum frustum = graphScene->camera()->frustumForViewportCoordinates(
-                            m_frustumSelectStart.x(), m_frustumSelectStart.y(),
+                Frustum frustum = _graphScene->camera()->frustumForViewportCoordinates(
+                            _frustumSelectStart.x(), _frustumSelectStart.y(),
                             frustumEndPoint.x(), frustumEndPoint.y());
 
                 QSet<NodeId> selection;
 
-                const ReadOnlyGraph& component = *_graphModel->graph().componentById(graphScene->focusComponentId());
+                const ReadOnlyGraph& component = *_graphModel->graph().componentById(_graphScene->focusComponentId());
                 for(NodeId nodeId : component.nodeIds())
                 {
                     const QVector3D& nodePosition = _graphModel->nodePositions()[nodeId];
@@ -135,89 +135,89 @@ void GraphView::mouseReleaseEvent(QMouseEvent* mouseEvent)
 
                 _selectionManager->selectNodes(selection);
 
-                m_frustumSelecting = false;
-                graphScene->clearSelectionRect();
+                _frustumSelecting = false;
+                _graphScene->clearSelectionRect();
             }
             else
             {
-                if(!clickedNodeId.isNull())
+                if(!_clickedNodeId.isNull())
                 {
                     if(!(mouseEvent->modifiers() & Qt::ShiftModifier))
                         _selectionManager->clearNodeSelection();
 
-                    _selectionManager->toggleNode(clickedNodeId);
+                    _selectionManager->toggleNode(_clickedNodeId);
                 }
                 else
                     _selectionManager->clearNodeSelection();
             }
 
-            m_selecting = false;
+            _selecting = false;
         }
 
-        clickedNodeId.setToNull();
+        _clickedNodeId.setToNull();
         break;
 
     default: break;
     }
 
-    if(m_mouseMoving && !m_rightMouseButtonHeld && !m_leftMouseButtonHeld)
-        m_mouseMoving = false;
+    if(_mouseMoving && !_rightMouseButtonHeld && !_leftMouseButtonHeld)
+        _mouseMoving = false;
 }
 
 void GraphView::mouseMoveEvent(QMouseEvent* mouseEvent)
 {
-    if(!graphScene->interactionAllowed())
+    if(!_graphScene->interactionAllowed())
         return;
 
-    Camera* camera = graphScene->camera();
-    m_pos = mouseEvent->pos();
+    Camera* camera = _graphScene->camera();
+    _cursorPosition = mouseEvent->pos();
 
-    if((mouseEvent->modifiers() & Qt::ShiftModifier) && m_leftMouseButtonHeld)
+    if((mouseEvent->modifiers() & Qt::ShiftModifier) && _leftMouseButtonHeld)
     {
         emit userInteractionStarted();
-        m_selecting = true;
-        m_frustumSelecting = true;
-        clickedNodeId.setToNull();
-        graphScene->setSelectionRect(QRect(m_frustumSelectStart, m_pos).normalized());
+        _selecting = true;
+        _frustumSelecting = true;
+        _clickedNodeId.setToNull();
+        _graphScene->setSelectionRect(QRect(_frustumSelectStart, _cursorPosition).normalized());
     }
-    else if(!clickedNodeId.isNull())
+    else if(!_clickedNodeId.isNull())
     {
-        m_selecting = false;
+        _selecting = false;
 
-        if(m_rightMouseButtonHeld)
+        if(_rightMouseButtonHeld)
         {
             emit userInteractionStarted();
 
-            const QVector3D& clickedNodePosition = _graphModel->nodePositions()[clickedNodeId];
+            const QVector3D& clickedNodePosition = _graphModel->nodePositions()[_clickedNodeId];
 
             Plane translationPlane(clickedNodePosition, camera->viewVector().normalized());
 
             QVector3D prevPoint = translationPlane.rayIntersection(
-                        camera->rayForViewportCoordinates(m_prevPos.x(), m_prevPos.y()));
+                        camera->rayForViewportCoordinates(_prevCursorPosition.x(), _prevCursorPosition.y()));
             QVector3D curPoint = translationPlane.rayIntersection(
-                        camera->rayForViewportCoordinates(m_pos.x(), m_pos.y()));
+                        camera->rayForViewportCoordinates(_cursorPosition.x(), _cursorPosition.y()));
             QVector3D translation = prevPoint - curPoint;
 
             camera->translateWorld(translation);
         }
-        else if(m_leftMouseButtonHeld)
+        else if(_leftMouseButtonHeld)
         {
             emit userInteractionStarted();
 
-            if(graphScene->focusNodeId().isNull())
-                graphScene->selectFocusNodeClosestToCameraVector();
+            if(_graphScene->focusNodeId().isNull())
+                _graphScene->selectFocusNodeClosestToCameraVector();
 
-            if(graphScene->focusNodeId() != clickedNodeId)
+            if(_graphScene->focusNodeId() != _clickedNodeId)
             {
                 emit userInteractionStarted();
 
-                const QVector3D& clickedNodePosition = _graphModel->nodePositions()[clickedNodeId];
-                const QVector3D& rotationCentre = _graphModel->nodePositions()[graphScene->focusNodeId()];
+                const QVector3D& clickedNodePosition = _graphModel->nodePositions()[_clickedNodeId];
+                const QVector3D& rotationCentre = _graphModel->nodePositions()[_graphScene->focusNodeId()];
                 float radius = clickedNodePosition.distanceToPoint(rotationCentre);
 
                 BoundingSphere boundingSphere(rotationCentre, radius);
                 QVector3D cursorPoint;
-                Ray cursorRay = camera->rayForViewportCoordinates(m_pos.x(), m_pos.y());
+                Ray cursorRay = camera->rayForViewportCoordinates(_cursorPosition.x(), _cursorPosition.y());
 
                 Plane divisionPlane(rotationCentre, cursorRay.dir().normalized());
 
@@ -266,18 +266,18 @@ void GraphView::mouseMoveEvent(QMouseEvent* mouseEvent)
         }
     }
 
-    m_prevPos = m_pos;
+    _prevCursorPosition = _cursorPosition;
 
-    if(m_rightMouseButtonHeld || m_leftMouseButtonHeld)
-        m_mouseMoving = true;
+    if(_rightMouseButtonHeld || _leftMouseButtonHeld)
+        _mouseMoving = true;
 }
 
 void GraphView::mouseDoubleClickEvent(QMouseEvent* mouseEvent)
 {
     if(mouseEvent->button() == Qt::LeftButton)
     {
-        if(!clickedNodeId.isNull() && !m_mouseMoving)
-            graphScene->moveFocusToNode(clickedNodeId, Transition::Type::EaseInEaseOut);
+        if(!_clickedNodeId.isNull() && !_mouseMoving)
+            _graphScene->moveFocusToNode(_clickedNodeId, Transition::Type::EaseInEaseOut);
     }
 }
 
@@ -291,11 +291,11 @@ void GraphView::keyPressEvent(QKeyEvent* keyEvent)
         break;
 
     case Qt::Key_Left:
-        graphScene->moveToNextComponent();
+        _graphScene->moveToNextComponent();
         break;
 
     case Qt::Key_Right:
-        graphScene->moveToPreviousComponent();
+        _graphScene->moveToPreviousComponent();
         break;
 
     default:
@@ -315,7 +315,7 @@ void GraphView::keyReleaseEvent(QKeyEvent* keyEvent)
 void GraphView::wheelEvent(QWheelEvent* wheelEvent)
 {
     if(wheelEvent->angleDelta().y() > 0.0f)
-        graphScene->zoom(1.0f);
+        _graphScene->zoom(1.0f);
     else
-        graphScene->zoom(-1.0f);
+        _graphScene->zoom(-1.0f);
 }

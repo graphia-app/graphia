@@ -32,13 +32,13 @@ class SimpleComponentManager : public ComponentManager
 {
     Q_OBJECT
 private:
-    QList<ComponentId> componentIdsList;
-    ComponentId nextComponentId;
-    QQueue<ComponentId> vacatedComponentIdQueue;
-    QMap<ComponentId, GraphComponent*> componentsMap;
-    QSet<ComponentId> updatesRequired;
-    NodeArray<ComponentId> nodesComponentId;
-    EdgeArray<ComponentId> edgesComponentId;
+    QList<ComponentId> _componentIdsList;
+    ComponentId _nextComponentId;
+    QQueue<ComponentId> _vacatedComponentIdQueue;
+    QMap<ComponentId, GraphComponent*> _componentsMap;
+    QSet<ComponentId> _updatesRequired;
+    NodeArray<ComponentId> _nodesComponentId;
+    EdgeArray<ComponentId> _edgesComponentId;
 
     ComponentId generateComponentId();
     void releaseComponentId(ComponentId componentId);
@@ -49,9 +49,9 @@ private:
 public:
     SimpleComponentManager(Graph& graph) :
         ComponentManager(graph),
-        nextComponentId(0),
-        nodesComponentId(graph),
-        edgesComponentId(graph)
+        _nextComponentId(0),
+        _nodesComponentId(graph),
+        _edgesComponentId(graph)
     {}
 
 private:
@@ -66,7 +66,7 @@ private:
 
     void updateComponents();
 
-    int componentArrayCapacity() const { return nextComponentId; }
+    int componentArrayCapacity() const { return _nextComponentId; }
 
 public:
     const QList<ComponentId>& componentIds() const;

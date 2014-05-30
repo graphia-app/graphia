@@ -6,11 +6,11 @@
 #include <QMetaType>
 
 Graph::Graph() :
-    nextNodeId(0),
-    nextEdgeId(0),
-    componentManager(new SimpleComponentManager(*this)),
+    _nextNodeId(0),
+    _nextEdgeId(0),
+    _componentManager(new SimpleComponentManager(*this)),
     _componentManagementEnabled(true),
-    graphChangeDepth(0)
+    _graphChangeDepth(0)
 {
     qRegisterMetaType<NodeId>("NodeId");
     qRegisterMetaType<EdgeId>("EdgeId");
@@ -18,8 +18,8 @@ Graph::Graph() :
 
 Graph::~Graph()
 {
-    delete componentManager;
-    componentManager = nullptr;
+    delete _componentManager;
+    _componentManager = nullptr;
 }
 
 void Graph::clear()
@@ -30,15 +30,15 @@ void Graph::clear()
     // Removing all the nodes should remove all the edges
     Q_ASSERT(numEdges() == 0);
 
-    nodesVector.resize(0);
-    edgesVector.resize(0);
+    _nodesVector.resize(0);
+    _edgesVector.resize(0);
 }
 
 void Graph::setComponentManager(ComponentManager *componentManager)
 {
     emitGraphWillChange();
-    delete this->componentManager;
-    this->componentManager = componentManager;
+    delete this->_componentManager;
+    this->_componentManager = componentManager;
     emitGraphChanged();
 }
 
@@ -60,20 +60,20 @@ NodeId Graph::addNode()
 
     NodeId newNodeId;
 
-    if(!vacatedNodeIdQueue.isEmpty())
-        newNodeId = vacatedNodeIdQueue.dequeue();
+    if(!_vacatedNodeIdQueue.isEmpty())
+        newNodeId = _vacatedNodeIdQueue.dequeue();
     else
-        newNodeId = nextNodeId++;
+        newNodeId = _nextNodeId++;
 
-    nodeIdsList.append(newNodeId);
-    nodesVector.resize(nodeArrayCapacity());
-    nodesVector[newNodeId]._id = newNodeId;
+    _nodeIdsList.append(newNodeId);
+    _nodesVector.resize(nodeArrayCapacity());
+    _nodesVector[newNodeId]._id = newNodeId;
 
-    for(ResizableGraphArray* nodeArray : nodeArrayList)
+    for(ResizableGraphArray* nodeArray : _nodeArrayList)
         nodeArray->resize(nodeArrayCapacity());
 
-    if(_componentManagementEnabled && componentManager != nullptr)
-        componentManager->nodeAdded(newNodeId);
+    if(_componentManagementEnabled && _componentManager != nullptr)
+        _componentManager->nodeAdded(newNodeId);
 
     emit nodeAdded(this, newNodeId);
 
@@ -87,17 +87,17 @@ void Graph::removeNode(NodeId nodeId)
     emitGraphWillChange();
 
     // Remove all edges that touch this node
-    const Node& node = nodesVector[nodeId];
+    const Node& node = _nodesVector[nodeId];
     for(EdgeId edgeId : node.edges())
         removeEdge(edgeId);
 
-    if(_componentManagementEnabled && componentManager != nullptr)
-        componentManager->nodeWillBeRemoved(nodeId);
+    if(_componentManagementEnabled && _componentManager != nullptr)
+        _componentManager->nodeWillBeRemoved(nodeId);
 
     emit nodeWillBeRemoved(this, nodeId);
 
-    nodeIdsList.remove(nodeIdsList.indexOf(nodeId));
-    vacatedNodeIdQueue.enqueue(nodeId);
+    _nodeIdsList.remove(_nodeIdsList.indexOf(nodeId));
+    _vacatedNodeIdQueue.enqueue(nodeId);
 
     emitGraphChanged();
 }
@@ -126,22 +126,22 @@ EdgeId Graph::addEdge(NodeId sourceId, NodeId targetId)
 
     EdgeId newEdgeId;
 
-    if(!vacatedEdgeIdQueue.isEmpty())
-        newEdgeId = vacatedEdgeIdQueue.dequeue();
+    if(!_vacatedEdgeIdQueue.isEmpty())
+        newEdgeId = _vacatedEdgeIdQueue.dequeue();
     else
-        newEdgeId = nextEdgeId++;
+        newEdgeId = _nextEdgeId++;
 
-    edgeIdsList.append(newEdgeId);
-    edgesVector.resize(edgeArrayCapacity());
-    edgesVector[newEdgeId]._id = newEdgeId;
+    _edgeIdsList.append(newEdgeId);
+    _edgesVector.resize(edgeArrayCapacity());
+    _edgesVector[newEdgeId]._id = newEdgeId;
 
-    for(ResizableGraphArray* edgeArray : edgeArrayList)
+    for(ResizableGraphArray* edgeArray : _edgeArrayList)
         edgeArray->resize(edgeArrayCapacity());
 
     setEdgeNodes(newEdgeId, sourceId, targetId);
 
-    if(_componentManagementEnabled && componentManager != nullptr)
-        componentManager->edgeAdded(newEdgeId);
+    if(_componentManagementEnabled && _componentManager != nullptr)
+        _componentManager->edgeAdded(newEdgeId);
 
     emit edgeAdded(this, newEdgeId);
 
@@ -154,20 +154,20 @@ void Graph::removeEdge(EdgeId edgeId)
 {
     emitGraphWillChange();
 
-    if(_componentManagementEnabled && componentManager != nullptr)
-        componentManager->edgeWillBeRemoved(edgeId);
+    if(_componentManagementEnabled && _componentManager != nullptr)
+        _componentManager->edgeWillBeRemoved(edgeId);
 
     emit edgeWillBeRemoved(this, edgeId);
 
     // Remove all node references to this edge
-    const Edge& edge = edgesVector[edgeId];
-    Node& source = nodesVector[edge.sourceId()];
-    Node& target = nodesVector[edge.targetId()];
+    const Edge& edge = _edgesVector[edgeId];
+    Node& source = _nodesVector[edge.sourceId()];
+    Node& target = _nodesVector[edge.targetId()];
     source._outEdges.remove(edgeId);
     target._inEdges.remove(edgeId);
 
-    edgeIdsList.remove(edgeIdsList.indexOf(edgeId));
-    vacatedEdgeIdQueue.enqueue(edgeId);
+    _edgeIdsList.remove(_edgeIdsList.indexOf(edgeId));
+    _vacatedEdgeIdQueue.enqueue(edgeId);
 
     emitGraphChanged();
 }
@@ -192,24 +192,24 @@ void Graph::removeEdges(QList<EdgeId> edgeIds)
 
 const QList<ComponentId> *Graph::componentIds() const
 {
-    if(componentManager != nullptr)
-        return &componentManager->componentIds();
+    if(_componentManager != nullptr)
+        return &_componentManager->componentIds();
 
     return nullptr;
 }
 
 int Graph::numComponents() const
 {
-    if(componentManager != nullptr)
-        return componentManager->componentIds().size();
+    if(_componentManager != nullptr)
+        return _componentManager->componentIds().size();
 
     return 0;
 }
 
 const ReadOnlyGraph *Graph::componentById(ComponentId componentId) const
 {
-    if(componentManager != nullptr)
-        return componentManager->componentById(componentId);
+    if(_componentManager != nullptr)
+        return _componentManager->componentById(componentId);
 
     Q_ASSERT(nullptr);
     return nullptr;
@@ -217,16 +217,16 @@ const ReadOnlyGraph *Graph::componentById(ComponentId componentId) const
 
 ComponentId Graph::componentIdOfNode(NodeId nodeId) const
 {
-    if(componentManager != nullptr)
-        return componentManager->componentIdOfNode(nodeId);
+    if(_componentManager != nullptr)
+        return _componentManager->componentIdOfNode(nodeId);
 
     return ComponentId();
 }
 
 ComponentId Graph::componentIdOfEdge(EdgeId edgeId) const
 {
-    if(componentManager != nullptr)
-        return componentManager->componentIdOfEdge(edgeId);
+    if(_componentManager != nullptr)
+        return _componentManager->componentIdOfEdge(edgeId);
 
     return ComponentId();
 }
@@ -237,11 +237,11 @@ void Graph::dumpToQDebug(int detail) const
 
     if(detail > 0)
     {
-        if(_componentManagementEnabled && componentManager != nullptr)
+        if(_componentManagementEnabled && _componentManager != nullptr)
         {
-            for(ComponentId componentId : componentManager->componentIds())
+            for(ComponentId componentId : _componentManager->componentIds())
             {
-                const ReadOnlyGraph* component = componentManager->componentById(componentId);
+                const ReadOnlyGraph* component = _componentManager->componentById(componentId);
                 qDebug() << "component" << componentId;
                 component->dumpToQDebug(detail);
             }
@@ -251,17 +251,17 @@ void Graph::dumpToQDebug(int detail) const
 
 void Graph::emitGraphWillChange()
 {
-    if(graphChangeDepth++ <= 0)
+    if(_graphChangeDepth++ <= 0)
         emit graphWillChange(this);
 }
 
 void Graph::emitGraphChanged()
 {
-    Q_ASSERT(graphChangeDepth > 0);
-    if(--graphChangeDepth <= 0)
+    Q_ASSERT(_graphChangeDepth > 0);
+    if(--_graphChangeDepth <= 0)
     {
-        if(_componentManagementEnabled && componentManager != nullptr)
-            componentManager->graphChanged(this);
+        if(_componentManagementEnabled && _componentManager != nullptr)
+            _componentManager->graphChanged(this);
 
         emit graphChanged(this);
     }
@@ -275,28 +275,28 @@ void Graph::setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId)
     if(!edge.sourceId().isNull())
     {
         // Remove edge from source node out edges
-        Node& source = nodesVector[edge.sourceId()];
+        Node& source = _nodesVector[edge.sourceId()];
         source._outEdges.remove(edge.id());
     }
 
     if(!edge.targetId().isNull())
     {
         // Remove edge from target node in edges
-        Node& target = nodesVector[edge.targetId()];
+        Node& target = _nodesVector[edge.targetId()];
         target._inEdges.remove(edge.id());
     }
 
     edge._sourceId = sourceId;
     edge._targetId = targetId;
 
-    Node& source = nodesVector[sourceId];
+    Node& source = _nodesVector[sourceId];
     source._outEdges.insert(edge.id());
 
-    Node& target = nodesVector[targetId];
+    Node& target = _nodesVector[targetId];
     target._inEdges.insert(edge.id());
 }
 
 void Graph::setEdgeNodes(EdgeId edgeId, NodeId sourceId, NodeId targetId)
 {
-    setEdgeNodes(edgesVector[edgeId], sourceId, targetId);
+    setEdgeNodes(_edgesVector[edgeId], sourceId, targetId);
 }

@@ -23,15 +23,15 @@ signals:
     void complete(bool success) const;
 
 public:
-    GraphFileParser() : cancelAtomic(0) {}
+    GraphFileParser() : _cancelAtomic(0) {}
 
     virtual bool parse(Graph& graph) = 0;
 
 private:
-    std::atomic<bool> cancelAtomic;
+    std::atomic<bool> _cancelAtomic;
     void setCancel(bool cancel)
     {
-        cancelAtomic = cancel;
+        _cancelAtomic = cancel;
     }
 
 public:
@@ -42,7 +42,7 @@ public:
 
     bool cancelled()
     {
-        return cancelAtomic;
+        return _cancelAtomic;
     }
 
 public:
@@ -52,9 +52,9 @@ public:
             boost::spirit::istream_iterator>
     {
      private:
-        GraphFileParser* parser;
-        int64_t position;
-        const progress_iterator* end;
+        GraphFileParser* _parser;
+        int64_t _position;
+        const progress_iterator* _end;
         struct enabler {};
 
      public:
@@ -64,9 +64,9 @@ public:
         explicit progress_iterator(const boost::spirit::istream_iterator iterator,
                                   GraphFileParser* parser, const progress_iterator* end)
             : progress_iterator::iterator_adaptor_(iterator),
-              parser(parser),
-              position(0),
-              end(end) {}
+              _parser(parser),
+              _position(0),
+              _end(end) {}
 
      private:
         friend class boost::iterator_core_access;
@@ -74,7 +74,7 @@ public:
         bool equal(progress_iterator const& x) const
         {
             // If the parse has been cancelled and x is the end iterator
-            if(parser->cancelled() && x.base_reference() == end->base_reference())
+            if(_parser->cancelled() && x.base_reference() == _end->base_reference())
                 return true;
 
             return this->base_reference() == x.base_reference();
@@ -82,7 +82,7 @@ public:
 
         void increment()
         {
-            parser->onParsePositionIncremented(position++);
+            _parser->onParsePositionIncremented(_position++);
             this->base_reference()++;
         }
     };
@@ -92,15 +92,15 @@ class GraphFileParserThread : public QThread
 {
     Q_OBJECT
 private:
-    QString filename;
-    Graph* graph;
-    GraphFileParser* graphFileParser;
+    QString _filename;
+    Graph* _graph;
+    GraphFileParser* _graphFileParser;
 
 public:
     GraphFileParserThread(const QString& filename, Graph& graph, GraphFileParser* graphFileParser) :
-        filename(filename),
-        graph(&graph),
-        graphFileParser(graphFileParser)
+        _filename(filename),
+        _graph(&graph),
+        _graphFileParser(graphFileParser)
     {
         // Take ownership of the parser
         graphFileParser->moveToThread(this);
@@ -116,14 +116,14 @@ public:
     void cancel()
     {
         if(isRunning())
-            graphFileParser->cancel();
+            _graphFileParser->cancel();
     }
 
 private:
     void run() Q_DECL_OVERRIDE
     {
-        graphFileParser->parse(*graph);
-        delete graphFileParser;
+        _graphFileParser->parse(*_graph);
+        delete _graphFileParser;
     }
 };
 

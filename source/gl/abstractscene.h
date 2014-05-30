@@ -16,8 +16,8 @@ public:
     AbstractScene( QObject* parent = 0 );
     virtual ~AbstractScene();
 
-    void setContext(QOpenGLContext* context) { m_context = context; }
-    QOpenGLContext* context() const { return m_context; }
+    void setContext(QOpenGLContext* context) { _context = context; }
+    QOpenGLContext* context() const { return _context; }
 
     virtual void initialise() = 0;
     virtual void cleanup() {}
@@ -35,7 +35,7 @@ public:
     virtual bool keyReleaseEvent(QKeyEvent*) { return false; }
 
 protected:
-    QOpenGLContext* m_context;
+    QOpenGLContext* _context;
 };
 
 #endif // ABSTRACTSCENE_H

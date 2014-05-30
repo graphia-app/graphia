@@ -149,7 +149,7 @@ void RadialCircleComponentLayout::executeReal(uint64_t)
 {
     QList<ComponentId> componentIds = *graph().componentIds();
     const float COMPONENT_SEPARATION = 1.0f;
-    ComponentPositions& componentPositions = *this->componentPositions;
+    ComponentPositions& componentPositions = *this->_componentPositions;
 
     qStableSort(componentIds.begin(), componentIds.end(),
         [&](const ComponentId& a, const ComponentId& b)

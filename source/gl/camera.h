@@ -148,43 +148,43 @@ private:
 
     inline void updatePerspectiveProjection()
     {
-        m_projectionMatrix.setToIdentity();
-        m_projectionMatrix.perspective( m_fieldOfView, m_aspectRatio, m_nearPlane, m_farPlane );
-        m_viewProjectionMatrixDirty = true;
+        _projectionMatrix.setToIdentity();
+        _projectionMatrix.perspective( _fieldOfView, _aspectRatio, _nearPlane, _farPlane );
+        _viewProjectionMatrixDirty = true;
     }
 
     inline void updateOrthogonalProjection()
     {
-        m_projectionMatrix.setToIdentity();
-        m_projectionMatrix.ortho( m_left, m_right, m_bottom, m_top, m_nearPlane, m_farPlane );
-        m_viewProjectionMatrixDirty = true;
+        _projectionMatrix.setToIdentity();
+        _projectionMatrix.ortho( _left, _right, _bottom, _top, _nearPlane, _farPlane );
+        _viewProjectionMatrixDirty = true;
     }
 
-    QVector3D m_position;
-    QVector3D m_upVector;
-    QVector3D m_viewTarget;
+    QVector3D _position;
+    QVector3D _upVector;
+    QVector3D _viewTarget;
 
-    QVector3D m_cameraToTarget; // The vector from the camera position to the view center
+    QVector3D _cameraToTarget; // The vector from the camera position to the view center
 
-    Camera::ProjectionType m_projectionType;
+    Camera::ProjectionType _projectionType;
 
-    float m_nearPlane;
-    float m_farPlane;
+    float _nearPlane;
+    float _farPlane;
 
-    float m_fieldOfView;
-    float m_aspectRatio;
+    float _fieldOfView;
+    float _aspectRatio;
 
-    float m_left;
-    float m_right;
-    float m_bottom;
-    float m_top;
+    float _left;
+    float _right;
+    float _bottom;
+    float _top;
 
-    mutable QMatrix4x4 m_viewMatrix;
-    mutable QMatrix4x4 m_projectionMatrix;
-    mutable QMatrix4x4 m_viewProjectionMatrix;
+    mutable QMatrix4x4 _viewMatrix;
+    mutable QMatrix4x4 _projectionMatrix;
+    mutable QMatrix4x4 _viewProjectionMatrix;
 
-    mutable bool m_viewMatrixDirty;
-    mutable bool m_viewProjectionMatrixDirty;
+    mutable bool _viewMatrixDirty;
+    mutable bool _viewProjectionMatrixDirty;
 };
 
 #endif // CAMERA_H

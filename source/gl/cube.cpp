@@ -185,27 +185,27 @@ static const unsigned int indexData[indexDataCount] = {
 
 Cube::Cube( QObject* parent )
     : QObject( parent ),
-      m_length( 1.0 ),
-      m_positionBuffer( QOpenGLBuffer::VertexBuffer ),
-      m_normalBuffer( QOpenGLBuffer::VertexBuffer ),
-      m_textureCoordBuffer( QOpenGLBuffer::VertexBuffer ),
-      m_tangentBuffer( QOpenGLBuffer::VertexBuffer ),
-      m_indexBuffer( QOpenGLBuffer::IndexBuffer ),
-      m_vao()
+      _length( 1.0 ),
+      _positionBuffer( QOpenGLBuffer::VertexBuffer ),
+      _normalBuffer( QOpenGLBuffer::VertexBuffer ),
+      _textureCoordBuffer( QOpenGLBuffer::VertexBuffer ),
+      _tangentBuffer( QOpenGLBuffer::VertexBuffer ),
+      _indexBuffer( QOpenGLBuffer::IndexBuffer ),
+      _vao()
 {
 }
 
 void Cube::setMaterial( const MaterialPtr& material )
 {
-    if ( material == m_material )
+    if ( material == _material )
         return;
-    m_material = material;
+    _material = material;
     updateVertexArrayObject();
 }
 
 MaterialPtr Cube::material() const
 {
-    return m_material;
+    return _material;
 }
 
 void Cube::create()
@@ -221,30 +221,30 @@ void Cube::create()
     generateVertexData( v, n, tex, t, el );
 
     // Create and populate the buffer objects
-    m_positionBuffer.create();
-    m_positionBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_positionBuffer.bind();
-    m_positionBuffer.allocate( v, vertexDataCount * sizeof( float ) );
+    _positionBuffer.create();
+    _positionBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _positionBuffer.bind();
+    _positionBuffer.allocate( v, vertexDataCount * sizeof( float ) );
 
-    m_normalBuffer.create();
-    m_normalBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_normalBuffer.bind();
-    m_normalBuffer.allocate( n, normalDataCount * sizeof( float ) );
+    _normalBuffer.create();
+    _normalBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _normalBuffer.bind();
+    _normalBuffer.allocate( n, normalDataCount * sizeof( float ) );
 
-    m_textureCoordBuffer.create();
-    m_textureCoordBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_textureCoordBuffer.bind();
-    m_textureCoordBuffer.allocate( tex, textureCoordDataCount * sizeof( float ) );
+    _textureCoordBuffer.create();
+    _textureCoordBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _textureCoordBuffer.bind();
+    _textureCoordBuffer.allocate( tex, textureCoordDataCount * sizeof( float ) );
 
-    m_tangentBuffer.create();
-    m_tangentBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_tangentBuffer.bind();
-    m_tangentBuffer.allocate( t, tangentDataCount * sizeof( float ) );
+    _tangentBuffer.create();
+    _tangentBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _tangentBuffer.bind();
+    _tangentBuffer.allocate( t, tangentDataCount * sizeof( float ) );
 
-    m_indexBuffer.create();
-    m_indexBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_indexBuffer.bind();
-    m_indexBuffer.allocate( el, indexDataCount * sizeof( unsigned int ) );
+    _indexBuffer.create();
+    _indexBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _indexBuffer.bind();
+    _indexBuffer.allocate( el, indexDataCount * sizeof( unsigned int ) );
 
     // Delete our copy of the data as we no longer need it
     delete [] v;
@@ -258,9 +258,9 @@ void Cube::create()
 
 void Cube::generateVertexData( float* vertices, float* normals, float* texCoords, float* tangents, unsigned int* indices )
 {
-    /** \todo Scale the vertex data by m_length */
+    /** \todo Scale the vertex data by _length */
     for(int i = 0; i < vertexDataCount; i++)
-        vertices[i] = (vertexData[i] * m_length);
+        vertices[i] = (vertexData[i] * _length);
     //memcpy( vertices, vertexData, vertexDataCount * sizeof( float ) );
     memcpy( normals, normalData, normalDataCount * sizeof( float ) );
     memcpy( texCoords, textureCoordData, textureCoordDataCount * sizeof( float ) );
@@ -271,51 +271,51 @@ void Cube::generateVertexData( float* vertices, float* normals, float* texCoords
 void Cube::updateVertexArrayObject()
 {
     // Ensure that we have a valid material and geometry
-    if ( !m_material || !m_positionBuffer.isCreated() )
+    if ( !_material || !_positionBuffer.isCreated() )
         return;
 
     // Create a vertex array object
-    if ( !m_vao.isCreated() )
-        m_vao.create();
-    m_vao.bind();
+    if ( !_vao.isCreated() )
+        _vao.create();
+    _vao.bind();
 
     bindBuffers();
 
     // End VAO setup
-    m_vao.release();
+    _vao.release();
 }
 
 void Cube::render()
 {
     // Bind the vertex array oobject to set up our vertex buffers and index buffer
-    m_vao.bind();
+    _vao.bind();
 
     // Draw it!
     glDrawElements( GL_TRIANGLES, indexCount(), GL_UNSIGNED_INT, 0 );
 
-    m_vao.release();
+    _vao.release();
 }
 
 void Cube::bindBuffers()
 {
-    QOpenGLShaderProgramPtr shader = m_material->shader();
+    QOpenGLShaderProgramPtr shader = _material->shader();
     shader->bind();
 
-    m_positionBuffer.bind();
+    _positionBuffer.bind();
     shader->enableAttributeArray( "vertexPosition" );
     shader->setAttributeBuffer( "vertexPosition", GL_FLOAT, 0, 3 );
 
-    m_normalBuffer.bind();
+    _normalBuffer.bind();
     shader->enableAttributeArray( "vertexNormal" );
     shader->setAttributeBuffer( "vertexNormal", GL_FLOAT, 0, 3 );
 
-    m_textureCoordBuffer.bind();
+    _textureCoordBuffer.bind();
     shader->enableAttributeArray( "vertexTexCoord" );
     shader->setAttributeBuffer( "vertexTexCoord", GL_FLOAT, 0, 2 );
 
-    m_tangentBuffer.bind();
+    _tangentBuffer.bind();
     shader->enableAttributeArray( "vertexTangent" );
     shader->setAttributeBuffer( "vertexTangent", GL_FLOAT, 0, 3 );
 
-    m_indexBuffer.bind();
+    _indexBuffer.bind();
 }

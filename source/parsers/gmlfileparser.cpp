@@ -126,10 +126,10 @@ bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePair
             }
 
             int newPercentage = ((i * 50) / (int)keyValuePairList.size()) + 50;
-            if(newPercentage > percentage)
+            if(newPercentage > _percentage)
             {
-                percentage = newPercentage;
-                emit progress(percentage);
+                _percentage = newPercentage;
+                emit progress(_percentage);
             }
 
             break;
@@ -168,22 +168,22 @@ bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePair
 
 void GmlFileParser::onParsePositionIncremented(int64_t position)
 {
-    int64_t newPercentage = (position * 50) / fileSize;
+    int64_t newPercentage = (position * 50) / _fileSize;
 
-    if(newPercentage > percentage)
+    if(newPercentage > _percentage)
     {
-        percentage = newPercentage;
-        emit progress(percentage);
+        _percentage = newPercentage;
+        emit progress(_percentage);
     }
 }
 
 bool GmlFileParser::parse(Graph& graph)
 {
-    QFileInfo info(filename);
-    std::ifstream stream(filename.toStdString());
+    QFileInfo info(_filename);
+    std::ifstream stream(_filename.toStdString());
     stream.unsetf(std::ios::skipws);
 
-    fileSize = info.size();
+    _fileSize = info.size();
 
     spirit::istream_iterator begin(stream);
     progress_iterator endp;

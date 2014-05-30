@@ -26,47 +26,47 @@ public:
 
     float minorRadius() const
     {
-        return m_minorRadius;
+        return _minorRadius;
     }
 
     float majorRadius() const
     {
-        return m_majorRadius;
+        return _majorRadius;
     }
 
     int rings() const
     {
-        return m_rings;
+        return _rings;
     }
 
     int sides() const
     {
-        return m_sides;
+        return _sides;
     }
 
-    QOpenGLVertexArrayObject* vertexArrayObject() { return &m_vao; }
+    QOpenGLVertexArrayObject* vertexArrayObject() { return &_vao; }
 
-    int indexCount() const { return 6 * m_sides * m_rings; }
+    int indexCount() const { return 6 * _sides * _rings; }
 
 public slots:
     void setMinorRadius( float arg )
     {
-        m_minorRadius = arg;
+        _minorRadius = arg;
     }
 
     void setMajorRadius( float arg )
     {
-        m_majorRadius = arg;
+        _majorRadius = arg;
     }
 
     void setRings( int arg )
     {
-        m_rings = arg;
+        _rings = arg;
     }
 
     void setSides( int arg )
     {
-        m_sides = arg;
+        _sides = arg;
     }
 
     void create();
@@ -76,20 +76,20 @@ private:
     void generateVertexData( float* vertices, float* normals,float* texCoords, unsigned int* indices );
     void updateVertexArrayObject();
 
-    MaterialPtr m_material;
+    MaterialPtr _material;
 
-    float m_minorRadius;
-    float m_majorRadius;
-    int m_rings;
-    int m_sides;
+    float _minorRadius;
+    float _majorRadius;
+    int _rings;
+    int _sides;
 
     // QVertexBuffers to hold the data
-    QOpenGLBuffer m_positionBuffer;
-    QOpenGLBuffer m_normalBuffer;
-    QOpenGLBuffer m_textureCoordBuffer;
-    QOpenGLBuffer m_indexBuffer;
+    QOpenGLBuffer _positionBuffer;
+    QOpenGLBuffer _normalBuffer;
+    QOpenGLBuffer _textureCoordBuffer;
+    QOpenGLBuffer _indexBuffer;
 
-    QOpenGLVertexArrayObject m_vao;
+    QOpenGLVertexArrayObject _vao;
 };
 
 #endif // TORUS_H

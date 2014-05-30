@@ -14,16 +14,16 @@ private:
     const ReadOnlyGraph* _graph;
     const NodeVisuals* _nodeVisuals;
     const NodePositions* _nodePositions;
-    QVector3D offset;
+    QVector3D _offset;
 
 public:
     Collision(const ReadOnlyGraph& graph, const NodeVisuals& nodeVisuals,
               const NodePositions& nodePositions) :
         _graph(&graph), _nodeVisuals(&nodeVisuals), _nodePositions(&nodePositions),
-        offset(0.0f, 0.0f, 0.0f)
+        _offset(0.0f, 0.0f, 0.0f)
     {}
 
-    void setOffset(QVector3D _offset) { offset = _offset; }
+    void setOffset(QVector3D _offset) { _offset = _offset; }
 
     NodeId closestNodeToLine(const QVector<NodeId>& nodeIds, const QVector3D& point, const QVector3D& direction);
     NodeId closestNodeToLine(const QVector3D& point, const QVector3D& direction);

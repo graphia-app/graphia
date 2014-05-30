@@ -6,8 +6,8 @@
 #include <QDebug>
 
 Transition::Transition() :
-    _type(Type::None), lastTime(0.0f),
-    _duration(0.0f), elapsed(0.0f),
+    _type(Type::None), _lastTime(0.0f),
+    _duration(0.0f), _elapsed(0.0f),
     _function([](float){})
 {}
 
@@ -15,9 +15,9 @@ void Transition::start(float duration, Transition::Type type,
                        std::function<void(float)> function,
                        std::function<void()> finishedFunction)
 {
-    lastTime = -1.0f;
+    _lastTime = -1.0f;
     _duration = duration;
-    elapsed = 0.0f;
+    _elapsed = 0.0f;
     _type = type;
     _function = function;
     _finishedFunction = finishedFunction;
@@ -28,13 +28,13 @@ bool Transition::update(float time)
     if(finished())
         return true;
 
-    if(lastTime <= 0.0f)
-        lastTime = time;
+    if(_lastTime <= 0.0f)
+        _lastTime = time;
 
-    elapsed += time - lastTime;
-    lastTime = time;
+    _elapsed += time - _lastTime;
+    _lastTime = time;
 
-    float f = Utils::clamp(0.0f, 1.0f, elapsed / _duration);
+    float f = Utils::clamp(0.0f, 1.0f, _elapsed / _duration);
 
     switch(_type)
     {

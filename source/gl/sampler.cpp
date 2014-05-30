@@ -10,7 +10,7 @@ public:
     SamplerPrivate( Sampler* qq )
         : q_ptr( qq ),
 #if !defined(QT_OPENGL_ES_2)
-          m_samplerId( 0 )
+          _samplerId( 0 )
 #endif
     {
     }
@@ -27,18 +27,18 @@ public:
     Sampler* q_ptr;
 
 #if !defined(QT_OPENGL_ES_2)
-    GLuint m_samplerId;
+    GLuint _samplerId;
 
     union {
         QOpenGLFunctions_3_3_Core* core;
         QOpenGLExtension_ARB_sampler_objects *arb;
-    } m_funcs;
+    } _funcs;
 
     enum {
         NotSupported,
         Core,
         ARB
-    } m_funcsType;
+    } _funcsType;
 #endif
 };
 
@@ -48,30 +48,30 @@ bool SamplerPrivate::create( QOpenGLContext* ctx )
     qFatal("Sampler objects are not supported on OpenGL ES 2");
     return false;
 #else
-    m_funcs.core = 0;
-    m_funcsType = NotSupported;
+    _funcs.core = 0;
+    _funcsType = NotSupported;
     QSurfaceFormat format = ctx->format();
     const int version = ( format.majorVersion() << 8 ) + format.minorVersion();
 
     if ( version >= 0x0303 )
     {
-        m_funcs.core = ctx->versionFunctions<QOpenGLFunctions_3_3_Core>();
-        if ( !m_funcs.core )
+        _funcs.core = ctx->versionFunctions<QOpenGLFunctions_3_3_Core>();
+        if ( !_funcs.core )
             return false;
-        m_funcsType = Core;
-        m_funcs.core->initializeOpenGLFunctions();
-        m_funcs.core->glGenSamplers( 1, &m_samplerId );
+        _funcsType = Core;
+        _funcs.core->initializeOpenGLFunctions();
+        _funcs.core->glGenSamplers( 1, &_samplerId );
     }
     else if ( ctx->hasExtension( "GL_ARB_sampler_objects" ) )
     {
-        m_funcs.arb = new QOpenGLExtension_ARB_sampler_objects;
-        if (!m_funcs.arb->initializeOpenGLFunctions())
+        _funcs.arb = new QOpenGLExtension_ARB_sampler_objects;
+        if (!_funcs.arb->initializeOpenGLFunctions())
             return false;
-        m_funcsType = ARB;
-        m_funcs.arb->glGenSamplers( 1, &m_samplerId );
+        _funcsType = ARB;
+        _funcs.arb->glGenSamplers( 1, &_samplerId );
     }
 
-    return ( m_samplerId != 0 );
+    return ( _samplerId != 0 );
 #endif
 }
 
@@ -80,16 +80,16 @@ void SamplerPrivate::destroy()
 #if defined(QT_OPENGL_ES_2)
     qFatal("Sampler objects are not supported on OpenGL ES 2");
 #else
-    if ( m_samplerId )
+    if ( _samplerId )
     {
-        switch ( m_funcsType )
+        switch ( _funcsType )
         {
             case Core:
-                m_funcs.core->glDeleteSamplers( 1, &m_samplerId );
+                _funcs.core->glDeleteSamplers( 1, &_samplerId );
                 break;
 
             case ARB:
-                m_funcs.arb->glDeleteSamplers( 1, &m_samplerId );
+                _funcs.arb->glDeleteSamplers( 1, &_samplerId );
                 break;
 
             default:
@@ -97,7 +97,7 @@ void SamplerPrivate::destroy()
                 // Shut the compiler up
                 qt_noop();
         }
-        m_samplerId = 0;
+        _samplerId = 0;
     }
 #endif
 }
@@ -107,14 +107,14 @@ void SamplerPrivate::bind( GLuint unit )
 #if defined(QT_OPENGL_ES_2)
     qFatal("Sampler objects are not supported on OpenGL ES 2");
 #else
-    switch ( m_funcsType )
+    switch ( _funcsType )
     {
         case Core:
-            m_funcs.core->glBindSampler( unit, m_samplerId );
+            _funcs.core->glBindSampler( unit, _samplerId );
             break;
 
         case ARB:
-            m_funcs.arb->glBindSampler( unit, m_samplerId );
+            _funcs.arb->glBindSampler( unit, _samplerId );
             break;
 
         default:
@@ -130,14 +130,14 @@ void SamplerPrivate::release( GLuint unit )
 #if defined(QT_OPENGL_ES_2)
     qFatal("Sampler objects are not supported on OpenGL ES 2");
 #else
-    switch ( m_funcsType )
+    switch ( _funcsType )
     {
         case Core:
-            m_funcs.core->glBindSampler( unit, 0 );
+            _funcs.core->glBindSampler( unit, 0 );
             break;
 
         case ARB:
-            m_funcs.arb->glBindSampler( unit, 0 );
+            _funcs.arb->glBindSampler( unit, 0 );
             break;
 
         default:
@@ -153,14 +153,14 @@ void SamplerPrivate::setParameter( GLenum param, GLenum value )
 #if defined(QT_OPENGL_ES_2)
     qFatal("Sampler objects are not supported on OpenGL ES 2");
 #else
-    switch ( m_funcsType )
+    switch ( _funcsType )
     {
         case Core:
-            m_funcs.core->glSamplerParameteri( m_samplerId, param, value );
+            _funcs.core->glSamplerParameteri( _samplerId, param, value );
             break;
 
         case ARB:
-            m_funcs.arb->glSamplerParameteri( m_samplerId, param, value );
+            _funcs.arb->glSamplerParameteri( _samplerId, param, value );
             break;
 
         default:
@@ -176,14 +176,14 @@ void SamplerPrivate::setParameter( GLenum param, float value )
 #if defined(QT_OPENGL_ES_2)
     qFatal("Sampler objects are not supported on OpenGL ES 2");
 #else
-    switch ( m_funcsType )
+    switch ( _funcsType )
     {
         case Core:
-            m_funcs.core->glSamplerParameterf( m_samplerId, param, value );
+            _funcs.core->glSamplerParameterf( _samplerId, param, value );
             break;
 
         case ARB:
-            m_funcs.arb->glSamplerParameterf( m_samplerId, param, value );
+            _funcs.arb->glSamplerParameterf( _samplerId, param, value );
             break;
 
         default:
@@ -220,13 +220,13 @@ void Sampler::destroy()
 bool Sampler::isCreated() const
 {
     Q_D( const Sampler );
-    return ( d->m_samplerId != 0 );
+    return ( d->_samplerId != 0 );
 }
 
 GLuint Sampler::samplerId() const
 {
     Q_D( const Sampler );
-    return d->m_samplerId;
+    return d->_samplerId;
 }
 
 void Sampler::bind( GLuint unit )

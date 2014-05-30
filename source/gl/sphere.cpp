@@ -9,30 +9,30 @@ const float twoPi = 2.0f * pi;
 
 Sphere::Sphere( QObject* parent )
     : QObject( parent ),
-      m_radius( 1.0f ),
-      m_rings( 30 ),
-      m_slices( 30 ),
-      m_positionBuffer( QOpenGLBuffer::VertexBuffer ),
-      m_normalBuffer( QOpenGLBuffer::VertexBuffer ),
-      m_textureCoordBuffer( QOpenGLBuffer::VertexBuffer ),
-      m_indexBuffer( QOpenGLBuffer::IndexBuffer ),
-      m_vao(),
-      m_normalLines( QOpenGLBuffer::VertexBuffer ),
-      m_tangentLines( QOpenGLBuffer::VertexBuffer )
+      _radius( 1.0f ),
+      _rings( 30 ),
+      _slices( 30 ),
+      _positionBuffer( QOpenGLBuffer::VertexBuffer ),
+      _normalBuffer( QOpenGLBuffer::VertexBuffer ),
+      _textureCoordBuffer( QOpenGLBuffer::VertexBuffer ),
+      _indexBuffer( QOpenGLBuffer::IndexBuffer ),
+      _vao(),
+      _normalLines( QOpenGLBuffer::VertexBuffer ),
+      _tangentLines( QOpenGLBuffer::VertexBuffer )
 {
 }
 
 void Sphere::setMaterial( const MaterialPtr& material )
 {
-    if ( material == m_material )
+    if ( material == _material )
         return;
-    m_material = material;
+    _material = material;
     updateVertexArrayObject();
 }
 
 MaterialPtr Sphere::material() const
 {
-    return m_material;
+    return _material;
 }
 
 void Sphere::create()
@@ -48,30 +48,30 @@ void Sphere::create()
     generateVertexData( v, n, tex, tang, el );
 
     // Create and populate the buffer objects
-    m_positionBuffer.create();
-    m_positionBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_positionBuffer.bind();
-    m_positionBuffer.allocate( v.constData(), v.size() * sizeof( float ) );
+    _positionBuffer.create();
+    _positionBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _positionBuffer.bind();
+    _positionBuffer.allocate( v.constData(), v.size() * sizeof( float ) );
 
-    m_normalBuffer.create();
-    m_normalBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_normalBuffer.bind();
-    m_normalBuffer.allocate( n.constData(), n.size() * sizeof( float ) );
+    _normalBuffer.create();
+    _normalBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _normalBuffer.bind();
+    _normalBuffer.allocate( n.constData(), n.size() * sizeof( float ) );
 
-    m_textureCoordBuffer.create();
-    m_textureCoordBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_textureCoordBuffer.bind();
-    m_textureCoordBuffer.allocate( tex.constData(), tex.size() * sizeof( float ) );
+    _textureCoordBuffer.create();
+    _textureCoordBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _textureCoordBuffer.bind();
+    _textureCoordBuffer.allocate( tex.constData(), tex.size() * sizeof( float ) );
 
-    m_tangentBuffer.create();
-    m_tangentBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_tangentBuffer.bind();
-    m_tangentBuffer.allocate( tang.constData(), tang.size() * sizeof( float )  );
+    _tangentBuffer.create();
+    _tangentBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _tangentBuffer.bind();
+    _tangentBuffer.allocate( tang.constData(), tang.size() * sizeof( float )  );
 
-    m_indexBuffer.create();
-    m_indexBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_indexBuffer.bind();
-    m_indexBuffer.allocate( el.constData(), el.size() * sizeof( unsigned int ) );
+    _indexBuffer.create();
+    _indexBuffer.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _indexBuffer.bind();
+    _indexBuffer.allocate( el.constData(), el.size() * sizeof( unsigned int ) );
 
     updateVertexArrayObject();
 }
@@ -80,9 +80,9 @@ void Sphere::generateVertexData( QVector<float>& vertices, QVector<float>& norma
                                 QVector<float>& texCoords, QVector<float>& tangents,
                                 QVector<unsigned int>& indices  )
 {
-    int faces = (m_slices - 2) * m_rings +           // Number of "rectangular" faces
-            (m_rings * 2); // and one ring for the top and bottom caps
-    int nVerts  = ( m_slices + 1 ) * ( m_rings + 1 ); // One extra line of latitude
+    int faces = (_slices - 2) * _rings +           // Number of "rectangular" faces
+            (_rings * 2); // and one ring for the top and bottom caps
+    int nVerts  = ( _slices + 1 ) * ( _rings + 1 ); // One extra line of latitude
 
     // Resize vector to hold our data
     vertices.resize( 3 * nVerts );
@@ -91,14 +91,14 @@ void Sphere::generateVertexData( QVector<float>& vertices, QVector<float>& norma
     texCoords.resize( 2 * nVerts );
     indices.resize( 6 * faces );
 
-    const float dTheta = twoPi / static_cast<float>( m_slices );
-    const float dPhi = pi / static_cast<float>( m_rings );
-    const float du = 1.0f / static_cast<float>( m_slices );
-    const float dv = 1.0f / static_cast<float>( m_rings );
+    const float dTheta = twoPi / static_cast<float>( _slices );
+    const float dPhi = pi / static_cast<float>( _rings );
+    const float du = 1.0f / static_cast<float>( _slices );
+    const float dv = 1.0f / static_cast<float>( _rings );
 
     // Iterate over latitudes (rings)
     int index = 0, texCoordIndex = 0, tangentIndex = 0;
-    for ( int lat = 0; lat < m_rings + 1; ++lat )
+    for ( int lat = 0; lat < _rings + 1; ++lat )
     {
         const float phi = pi / 2.0f - static_cast<float>( lat ) * dPhi;
         const float cosPhi = cosf( phi );
@@ -106,16 +106,16 @@ void Sphere::generateVertexData( QVector<float>& vertices, QVector<float>& norma
         const float v = 1.0f - static_cast<float>( lat ) * dv;
 
         // Iterate over longitudes (slices)
-        for ( int lon = 0; lon < m_slices + 1; ++lon )
+        for ( int lon = 0; lon < _slices + 1; ++lon )
         {
             const float theta = static_cast<float>( lon ) * dTheta;
             const float cosTheta = cosf( theta );
             const float sinTheta = sinf( theta );
             const float u = static_cast<float>( lon ) * du;
 
-            vertices[index]   = m_radius * cosTheta * cosPhi;
-            vertices[index+1] = m_radius * sinPhi;
-            vertices[index+2] = m_radius * sinTheta * cosPhi;
+            vertices[index]   = _radius * cosTheta * cosPhi;
+            vertices[index+1] = _radius * sinPhi;
+            vertices[index+2] = _radius * sinTheta * cosPhi;
 
             normals[index]   = cosTheta * cosPhi;
             normals[index+1] = sinPhi;
@@ -142,8 +142,8 @@ void Sphere::generateVertexData( QVector<float>& vertices, QVector<float>& norma
 
     // top cap
     {
-        const int nextRingStartIndex = m_slices + 1;
-        for ( int j = 0; j < m_slices; ++j )
+        const int nextRingStartIndex = _slices + 1;
+        for ( int j = 0; j < _slices; ++j )
         {
             indices[elIndex] = nextRingStartIndex + j;
             indices[elIndex+1] = 0;
@@ -152,12 +152,12 @@ void Sphere::generateVertexData( QVector<float>& vertices, QVector<float>& norma
         }
     }
 
-    for ( int i = 1; i < (m_rings - 1); ++i )
+    for ( int i = 1; i < (_rings - 1); ++i )
     {
-        const int ringStartIndex = i * ( m_slices + 1 );
-        const int nextRingStartIndex = ( i + 1 ) * ( m_slices + 1 );
+        const int ringStartIndex = i * ( _slices + 1 );
+        const int nextRingStartIndex = ( i + 1 ) * ( _slices + 1 );
 
-        for ( int j = 0; j < m_slices; ++j )
+        for ( int j = 0; j < _slices; ++j )
         {
             // Split the quad into two triangles
             indices[elIndex]   = ringStartIndex + j;
@@ -173,9 +173,9 @@ void Sphere::generateVertexData( QVector<float>& vertices, QVector<float>& norma
 
     // bottom cap
     {
-        const int ringStartIndex = (m_rings - 1) * ( m_slices + 1);
-        const int nextRingStartIndex = (m_rings) * ( m_slices + 1);
-        for ( int j = 0; j < m_slices; ++j )
+        const int ringStartIndex = (_rings - 1) * ( _slices + 1);
+        const int nextRingStartIndex = (_rings) * ( _slices + 1);
+        for ( int j = 0; j < _slices; ++j )
         {
             indices[elIndex] = ringStartIndex + j + 1;
             indices[elIndex+1] = nextRingStartIndex;
@@ -188,47 +188,47 @@ void Sphere::generateVertexData( QVector<float>& vertices, QVector<float>& norma
 void Sphere::updateVertexArrayObject()
 {
     // Ensure that we have a valid material and geometry
-    if ( !m_material || !m_positionBuffer.isCreated() )
+    if ( !_material || !_positionBuffer.isCreated() )
         return;
 
     // Create a vertex array object
-    if ( !m_vao.isCreated() )
-        m_vao.create();
-    m_vao.bind();
+    if ( !_vao.isCreated() )
+        _vao.create();
+    _vao.bind();
 
     bindBuffers();
 
     // End VAO setup
-    m_vao.release();
+    _vao.release();
 
     // Tidy up after ourselves
-    m_tangentBuffer.release();
-    m_indexBuffer.release();
+    _tangentBuffer.release();
+    _indexBuffer.release();
 }
 
 void Sphere::render()
 {
     // Bind the vertex array oobject to set up our vertex buffers and index buffer
-    m_vao.bind();
+    _vao.bind();
 
     // Draw it!
     glDrawElements( GL_TRIANGLES, indexCount(), GL_UNSIGNED_INT, 0 );
 
-    m_vao.release();
+    _vao.release();
 }
 
 void Sphere::computeNormalLinesBuffer( const MaterialPtr& mat, double scale )
 {
 
-    int nVerts  = ( m_slices + 1 ) * ( m_rings + 1 ); // One extra line of latitude
+    int nVerts  = ( _slices + 1 ) * ( _rings + 1 ); // One extra line of latitude
     float* v = new float[6 * nVerts];
     float* vPtr = v;
 
-    m_positionBuffer.bind();
-    float* p = reinterpret_cast<float*>( m_positionBuffer.map( QOpenGLBuffer::ReadOnly ) );
+    _positionBuffer.bind();
+    float* p = reinterpret_cast<float*>( _positionBuffer.map( QOpenGLBuffer::ReadOnly ) );
 
-    m_normalBuffer.bind();
-    float* n = reinterpret_cast<float*>( m_normalBuffer.map( QOpenGLBuffer::ReadOnly ) );
+    _normalBuffer.bind();
+    float* n = reinterpret_cast<float*>( _normalBuffer.map( QOpenGLBuffer::ReadOnly ) );
 
     Q_ASSERT(n);
     Q_ASSERT(p);
@@ -246,36 +246,36 @@ void Sphere::computeNormalLinesBuffer( const MaterialPtr& mat, double scale )
         *vPtr++ = z + (*n++ * scale);
     }
 
-    m_normalBuffer.unmap();
-    m_positionBuffer.bind();
-    m_positionBuffer.unmap();
+    _normalBuffer.unmap();
+    _positionBuffer.bind();
+    _positionBuffer.unmap();
 
-    m_normalLines.create();
-    m_normalLines.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_normalLines.bind();
-    m_normalLines.allocate( v, 6 * nVerts * sizeof( float ) );
+    _normalLines.create();
+    _normalLines.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _normalLines.bind();
+    _normalLines.allocate( v, 6 * nVerts * sizeof( float ) );
 
-    m_vaoNormals.create();
-    m_vaoNormals.bind();
+    _vaoNormals.create();
+    _vaoNormals.bind();
     mat->shader()->enableAttributeArray( "vertexPosition" );
     mat->shader()->setAttributeBuffer( "vertexPosition", GL_FLOAT, 0, 3 );
-    m_vaoNormals.release();
-    m_normalLines.release();
+    _vaoNormals.release();
+    _normalLines.release();
 
     delete[] v;
 }
 
 void Sphere::computeTangentLinesBuffer( const MaterialPtr& mat, double scale )
 {
-    int nVerts  = ( m_slices + 1 ) * ( m_rings + 1 ); // One extra line of latitude
+    int nVerts  = ( _slices + 1 ) * ( _rings + 1 ); // One extra line of latitude
     float* v = new float[6 * nVerts];
     float* vPtr = v;
 
-    m_tangentBuffer.bind();
-    float* t = reinterpret_cast<float*>( m_tangentBuffer.map( QOpenGLBuffer::ReadOnly ) );
+    _tangentBuffer.bind();
+    float* t = reinterpret_cast<float*>( _tangentBuffer.map( QOpenGLBuffer::ReadOnly ) );
 
-    m_positionBuffer.bind();
-    float* p = reinterpret_cast<float*>( m_positionBuffer.map( QOpenGLBuffer::ReadOnly ) );
+    _positionBuffer.bind();
+    float* p = reinterpret_cast<float*>( _positionBuffer.map( QOpenGLBuffer::ReadOnly ) );
 
     Q_ASSERT(t);
     Q_ASSERT(p);
@@ -294,21 +294,21 @@ void Sphere::computeTangentLinesBuffer( const MaterialPtr& mat, double scale )
         t++; // skip fourth tangent value
     }
 
-    m_positionBuffer.unmap();
-    m_tangentBuffer.bind();
-    m_tangentBuffer.unmap();
+    _positionBuffer.unmap();
+    _tangentBuffer.bind();
+    _tangentBuffer.unmap();
 
-    m_tangentLines.create();
-    m_tangentLines.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    m_tangentLines.bind();
-    m_tangentLines.allocate( v, 6 * nVerts * sizeof( float ) );
+    _tangentLines.create();
+    _tangentLines.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    _tangentLines.bind();
+    _tangentLines.allocate( v, 6 * nVerts * sizeof( float ) );
 
-    m_vaoTangents.create();
-    m_vaoTangents.bind();
+    _vaoTangents.create();
+    _vaoTangents.bind();
     mat->shader()->enableAttributeArray( "vertexPosition" );
     mat->shader()->setAttributeBuffer( "vertexPosition", GL_FLOAT, 0, 3 );
-    m_vaoTangents.release();
-    m_tangentLines.release();
+    _vaoTangents.release();
+    _tangentLines.release();
 
     delete[] v;
 }
@@ -316,42 +316,42 @@ void Sphere::computeTangentLinesBuffer( const MaterialPtr& mat, double scale )
 
 void Sphere::renderNormalLines()
 {
-    int nVerts  = ( m_slices + 1 ) * ( m_rings + 1 ); // One extra line of latitude
+    int nVerts  = ( _slices + 1 ) * ( _rings + 1 ); // One extra line of latitude
 
-    m_vaoNormals.bind();
+    _vaoNormals.bind();
     glDrawArrays( GL_LINES, 0, nVerts * 2 );
-    m_vaoNormals.release();
+    _vaoNormals.release();
 }
 
 void Sphere::renderTangentLines()
 {
-    int nVerts  = ( m_slices + 1 ) * ( m_rings + 1 ); // One extra line of latitude
+    int nVerts  = ( _slices + 1 ) * ( _rings + 1 ); // One extra line of latitude
 
-    m_vaoTangents.bind();
+    _vaoTangents.bind();
     glDrawArrays( GL_LINES, 0, nVerts * 2 );
-    m_vaoTangents.release();
+    _vaoTangents.release();
 }
 
 void Sphere::bindBuffers()
 {
-    QOpenGLShaderProgramPtr shader = m_material->shader();
+    QOpenGLShaderProgramPtr shader = _material->shader();
     shader->bind();
 
-    m_positionBuffer.bind();
+    _positionBuffer.bind();
     shader->enableAttributeArray( "vertexPosition" );
     shader->setAttributeBuffer( "vertexPosition", GL_FLOAT, 0, 3 );
 
-    m_normalBuffer.bind();
+    _normalBuffer.bind();
     shader->enableAttributeArray( "vertexNormal" );
     shader->setAttributeBuffer( "vertexNormal", GL_FLOAT, 0, 3 );
 
-    m_textureCoordBuffer.bind();
+    _textureCoordBuffer.bind();
     shader->enableAttributeArray( "vertexTexCoord" );
     shader->setAttributeBuffer( "vertexTexCoord", GL_FLOAT, 0, 2 );
 
-    m_tangentBuffer.bind();
+    _tangentBuffer.bind();
     shader->enableAttributeArray( "vertexTangent" );
     shader->setAttributeBuffer( "vertexTangent", GL_FLOAT, 0, 4 );
 
-    m_indexBuffer.bind();
+    _indexBuffer.bind();
 }
