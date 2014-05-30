@@ -53,21 +53,6 @@ void GraphView::layoutChanged()
 
 void GraphView::mousePressEvent(QMouseEvent* mouseEvent)
 {
-    switch(mouseEvent->button())
-    {
-    case Qt::LeftButton:
-        _leftMouseButtonHeld = true;
-        _selecting = true;
-        break;
-
-    case Qt::RightButton:
-        _rightMouseButtonHeld = true;
-        _graphScene->disableFocusNodeTracking();
-        break;
-
-    default: break;
-    }
-
     _cursorPosition = _prevCursorPosition = mouseEvent->pos();
 
     Ray ray = _graphScene->camera()->rayForViewportCoordinates(_cursorPosition.x(), _cursorPosition.y());
@@ -77,8 +62,25 @@ void GraphView::mousePressEvent(QMouseEvent* mouseEvent)
     Collision collision(component, _graphModel->nodeVisuals(), _graphModel->nodePositions());
     _clickedNodeId = collision.nearestNodeIntersectingLine(ray.origin(), ray.dir());
 
-    if(mouseEvent->modifiers() & Qt::ShiftModifier)
-        _frustumSelectStart = _cursorPosition;
+    switch(mouseEvent->button())
+    {
+    case Qt::LeftButton:
+        _leftMouseButtonHeld = true;
+        _selecting = true;
+
+        if(mouseEvent->modifiers() & Qt::ShiftModifier)
+            _frustumSelectStart = _cursorPosition;
+        break;
+
+    case Qt::RightButton:
+        _rightMouseButtonHeld = true;
+
+        if(!_clickedNodeId.isNull())
+            _graphScene->disableFocusNodeTracking();
+        break;
+
+    default: break;
+    }
 }
 
 void GraphView::mouseReleaseEvent(QMouseEvent* mouseEvent)
@@ -95,7 +97,7 @@ void GraphView::mouseReleaseEvent(QMouseEvent* mouseEvent)
 
         emit userInteractionFinished();
 
-        if(_rightMouseButtonHeld && _mouseMoving)
+        if(!_clickedNodeId.isNull() && _rightMouseButtonHeld && _mouseMoving)
             _graphScene->selectFocusNodeClosestToCameraVector();
 
         _rightMouseButtonHeld = false;
