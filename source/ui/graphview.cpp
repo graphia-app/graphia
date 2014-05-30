@@ -117,9 +117,6 @@ void GraphView::mouseReleaseEvent(QMouseEvent* mouseEvent)
         {
             if(_frustumSelecting)
             {
-                if(!(mouseEvent->modifiers() & Qt::ShiftModifier))
-                    _selectionManager->clearNodeSelection();
-
                 QPoint frustumEndPoint = mouseEvent->pos();
                 Frustum frustum = _graphScene->camera()->frustumForViewportCoordinates(
                             _frustumSelectStart.x(), _frustumSelectStart.y(),
