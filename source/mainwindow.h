@@ -7,6 +7,7 @@
 class ContentPaneWidget;
 class QLabel;
 class Graph;
+class CommandManager;
 
 namespace Ui {
 class MainWindow;
@@ -38,16 +39,15 @@ private slots:
     void on_graphChanged(const Graph* graph);
 
     void on_actionPause_Layout_triggered();
-
     void on_tabs_currentChanged(int index);
-
     void on_actionOpen_In_New_Tab_triggered();
-
     void on_actionSelect_All_triggered();
-
     void on_actionSelect_None_triggered();
-
     void on_actionInvert_Selection_triggered();
+    void on_actionUndo_triggered();
+    void on_actionRedo_triggered();
+
+    void on_commandStackChanged(const CommandManager& commandManager);
 
 public:
     bool openFileInNewTab(const QString& filename);

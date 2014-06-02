@@ -7,30 +7,25 @@
 #include "../gl/graphscene.h"
 
 class GraphModel;
+class CommandManager;
 class SelectionManager;
 
 class GraphView : public QWidget
 {
     Q_OBJECT
 public:
-    explicit GraphView(QWidget *parent = nullptr);
+    explicit GraphView(GraphModel* graphModel,
+                       CommandManager* commandManager,
+                       SelectionManager* selectionManager,
+                       QWidget *parent = nullptr);
 
 private:
     GraphScene* _graphScene;
     GraphModel* _graphModel;
+    CommandManager* _commandManager;
     SelectionManager* _selectionManager;
 
 public:
-    void setGraphModel(GraphModel* graphModel)
-    {
-        this->_graphModel = graphModel;
-        _graphScene->setGraphModel(graphModel);
-    }
-    GraphModel* graphModel() { return _graphModel; }
-
-    void setSelectionManager(SelectionManager* selectionManager);
-    SelectionManager* selectionManager() { return _selectionManager; }
-
     static QSurfaceFormat& surfaceFormat()
     {
         static QSurfaceFormat format;

@@ -18,34 +18,40 @@ QSet<NodeId> SelectionManager::unselectedNodes() const
     return setForVector(_graph->nodeIds()).subtract(_selectedNodes);
 }
 
-void SelectionManager::selectNode(NodeId nodeId)
+bool SelectionManager::selectNode(NodeId nodeId)
 {
     bool selectionWillChange = !_selectedNodes.contains(nodeId);
     _selectedNodes.insert(nodeId);
 
     if(selectionWillChange)
         emit selectionChanged(*this);
+
+    return selectionWillChange;
 }
 
-void SelectionManager::selectNodes(QSet<NodeId> nodeIds)
+bool SelectionManager::selectNodes(QSet<NodeId> nodeIds)
 {
     bool selectionWillChange = !_selectedNodes.contains(nodeIds);
     _selectedNodes.unite(nodeIds);
 
     if(selectionWillChange)
         emit selectionChanged(*this);
+
+    return selectionWillChange;
 }
 
-void SelectionManager::deselectNode(NodeId nodeId)
+bool SelectionManager::deselectNode(NodeId nodeId)
 {
     bool selectionWillChange = _selectedNodes.contains(nodeId);
     _selectedNodes.remove(nodeId);
 
     if(selectionWillChange)
         emit selectionChanged(*this);
+
+    return selectionWillChange;
 }
 
-void SelectionManager::deselectNodes(QSet<NodeId> nodeIds)
+bool SelectionManager::deselectNodes(QSet<NodeId> nodeIds)
 {
     QSet<NodeId> intersection(_selectedNodes);
     intersection.intersect(nodeIds);
@@ -55,6 +61,8 @@ void SelectionManager::deselectNodes(QSet<NodeId> nodeIds)
 
     if(selectionWillChange)
         emit selectionChanged(*this);
+
+    return selectionWillChange;
 }
 
 void SelectionManager::toggleNode(NodeId nodeId)
@@ -82,18 +90,31 @@ bool SelectionManager::nodeIsSelected(NodeId nodeId) const
     return _selectedNodes.contains(nodeId);
 }
 
-void SelectionManager::selectAllNodes()
+bool SelectionManager::setSelectedNodes(QSet<NodeId> nodeIds)
 {
-    selectNodes(setForVector(_graph->nodeIds()));
+    bool selectionWillChange = (_selectedNodes != nodeIds);
+    _selectedNodes = nodeIds;
+
+    if(selectionWillChange)
+        emit selectionChanged(*this);
+
+    return selectionWillChange;
 }
 
-void SelectionManager::clearNodeSelection()
+bool SelectionManager::selectAllNodes()
+{
+    return selectNodes(setForVector(_graph->nodeIds()));
+}
+
+bool SelectionManager::clearNodeSelection()
 {
     bool selectionWillChange = !_selectedNodes.empty();
     _selectedNodes.clear();
 
     if(selectionWillChange)
         emit selectionChanged(*this);
+
+    return selectionWillChange;
 }
 
 void SelectionManager::invertNodeSelection()

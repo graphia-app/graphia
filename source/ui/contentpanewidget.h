@@ -12,6 +12,7 @@ class SelectionManager;
 class GraphFileParserThread;
 class NodeLayoutThread;
 class LayoutThread;
+class CommandManager;
 
 class ContentPaneWidget : public QWidget
 {
@@ -24,9 +25,9 @@ signals:
     void progress(int percentage) const;
     void complete(int success) const;
     void graphChanged(const Graph*) const;
+    void commandStackChanged(const CommandManager& commandManager) const;
 
 public slots:
-    void onProgress(int percentage) const { emit progress(percentage); }
     void onCompletion(int success);
 
 private:
@@ -58,6 +59,14 @@ public:
     void selectAll();
     void selectNone();
     void invertSelection();
+
+    void undo();
+    bool canUndo() { return _commandManager.canUndo(); }
+    const QString nextUndoAction() const;
+
+    void redo();
+    bool canRedo() { return _commandManager.canRedo(); }
+    const QString nextRedoAction() const;
 
     bool initFromFile(const QString& filename);
 };

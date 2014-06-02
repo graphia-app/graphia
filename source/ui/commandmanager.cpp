@@ -1,15 +1,8 @@
 #include "commandmanager.h"
 
-
-Command::Command(const QString& description) :
-    _description(description)
-{
-}
-
 CommandManager::CommandManager() :
     _lastExecutedIndex(-1)
-{
-}
+{}
 
 CommandManager::~CommandManager()
 {
@@ -19,6 +12,12 @@ CommandManager::~CommandManager()
 
 void CommandManager::execute(Command* command)
 {
+    if(!command->execute())
+    {
+        delete command;
+        return;
+    }
+
     while(canRedo())
     {
         // There are commands on the stack ahead of us; throw them away
@@ -26,8 +25,15 @@ void CommandManager::execute(Command* command)
     }
 
     _stack.push(command);
-    command->execute();
     _lastExecutedIndex = _stack.size() - 1;
+
+    emit commandStackChanged(*this);
+}
+
+void CommandManager::execute(const QString& description, std::function<bool()> executeFunction, std::function<void()> undoFunction)
+{
+    Command* command = new Command(description, executeFunction, undoFunction);
+    execute(command);
 }
 
 void CommandManager::undo()
@@ -38,6 +44,8 @@ void CommandManager::undo()
     Command* command = _stack.at(_lastExecutedIndex);
     command->undo();
     _lastExecutedIndex--;
+
+    emit commandStackChanged(*this);
 }
 
 void CommandManager::redo()
@@ -48,6 +56,8 @@ void CommandManager::redo()
     _lastExecutedIndex++;
     Command* command = _stack.at(_lastExecutedIndex);
     command->execute();
+
+    emit commandStackChanged(*this);
 }
 
 bool CommandManager::canUndo() const

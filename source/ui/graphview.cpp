@@ -1,5 +1,6 @@
 #include "graphview.h"
 #include "selectionmanager.h"
+#include "commandmanager.h"
 
 #include "../gl/graphscene.h"
 #include "../gl/openglwindow.h"
@@ -21,7 +22,7 @@
 #include <QtMath>
 #include <cmath>
 
-GraphView::GraphView(QWidget *parent) :
+GraphView::GraphView(GraphModel* graphModel, CommandManager* commandManager, SelectionManager* selectionManager, QWidget *parent) :
     QWidget(parent),
     _rightMouseButtonHeld(false),
     _leftMouseButtonHeld(false),
@@ -37,13 +38,13 @@ GraphView::GraphView(QWidget *parent) :
     connect(_graphScene, &GraphScene::userInteractionStarted, this, &GraphView::userInteractionStarted);
     connect(_graphScene, &GraphScene::userInteractionFinished, this, &GraphView::userInteractionFinished);
 
-    this->setLayout(new QVBoxLayout());
-    this->layout()->addWidget(QWidget::createWindowContainer(window));
-}
+    setLayout(new QVBoxLayout());
+    layout()->addWidget(QWidget::createWindowContainer(window));
 
-void GraphView::setSelectionManager(SelectionManager* selectionManager)
-{
-    this->_selectionManager = selectionManager;
+    _graphModel = graphModel;
+    _graphScene->setGraphModel(graphModel);
+    _commandManager = commandManager;
+    _selectionManager = selectionManager;
     connect(selectionManager, &SelectionManager::selectionChanged, _graphScene, &GraphScene::onSelectionChanged);
 }
 
@@ -132,7 +133,10 @@ void GraphView::mouseReleaseEvent(QMouseEvent* mouseEvent)
                         selection.insert(nodeId);
                 }
 
-                _selectionManager->selectNodes(selection);
+                auto previousSelection = _selectionManager->selectedNodes();
+                _commandManager->execute(tr("Select Nodes"),
+                    [=]() { return _selectionManager->selectNodes(selection); },
+                    [=]() { _selectionManager->setSelectedNodes(previousSelection); });
 
                 _frustumSelecting = false;
                 _graphScene->clearSelectionRect();
@@ -141,13 +145,27 @@ void GraphView::mouseReleaseEvent(QMouseEvent* mouseEvent)
             {
                 if(!_clickedNodeId.isNull())
                 {
-                    if(!(mouseEvent->modifiers() & Qt::ShiftModifier))
-                        _selectionManager->clearNodeSelection();
+                    bool nodeSelected = _selectionManager->nodeIsSelected(_clickedNodeId);
+                    bool toggling = mouseEvent->modifiers() & Qt::ShiftModifier;
+                    auto previousSelection = _selectionManager->selectedNodes();
+                    _commandManager->execute(nodeSelected ? tr("Deselect Node") : tr("Select Node"),
+                        [=]()
+                        {
+                            if(!toggling)
+                                _selectionManager->clearNodeSelection();
 
-                    _selectionManager->toggleNode(_clickedNodeId);
+                            _selectionManager->toggleNode(_clickedNodeId);
+                            return true;
+                        },
+                        [=]() { _selectionManager->setSelectedNodes(previousSelection); });
                 }
                 else
-                    _selectionManager->clearNodeSelection();
+                {
+                    auto previousSelection = _selectionManager->selectedNodes();
+                    _commandManager->execute(tr("Select None"),
+                        [=]() { return _selectionManager->clearNodeSelection(); },
+                        [=]() { _selectionManager->setSelectedNodes(previousSelection); });
+                }
             }
 
             _selecting = false;

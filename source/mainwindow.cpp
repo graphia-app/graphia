@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include "ui/contentpanewidget.h"
+#include "ui/commandmanager.h"
 
 #include <QFileDialog>
 #include <QIcon>
@@ -34,6 +35,7 @@ ContentPaneWidget *MainWindow::createNewTabWidget(const QString& filename)
     connect(contentPaneWidget, &ContentPaneWidget::progress, this, &MainWindow::on_loadProgress);
     connect(contentPaneWidget, &ContentPaneWidget::complete, this, &MainWindow::on_loadCompletion);
     connect(contentPaneWidget, &ContentPaneWidget::graphChanged, this, &MainWindow::on_graphChanged);
+    connect(contentPaneWidget, &ContentPaneWidget::commandStackChanged, this, &MainWindow::on_commandStackChanged);
 
     contentPaneWidget->initFromFile(filename);
 
@@ -71,16 +73,28 @@ void MainWindow::updatePerTabUi()
 {
     ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(_ui->tabs->currentWidget());
 
-    if (contentPaneWidget != nullptr)
+    if(contentPaneWidget != nullptr)
     {
         configureActionPauseLayout(contentPaneWidget->layoutIsPaused());
         _statusBarLabel->setText(QString(tr("%1 nodes, %2 edges, %3 components")).arg(
                                     contentPaneWidget->graphModel()->graph().numNodes()).arg(
                                     contentPaneWidget->graphModel()->graph().numEdges()).arg(
                                     contentPaneWidget->graphModel()->graph().numComponents()));
+
+        _ui->actionUndo->setEnabled(contentPaneWidget->canUndo());
+        _ui->actionUndo->setText(contentPaneWidget->nextUndoAction());
+        _ui->actionRedo->setEnabled(contentPaneWidget->canRedo());
+        _ui->actionRedo->setText(contentPaneWidget->nextRedoAction());
     }
     else
+    {
         _statusBarLabel->setText("");
+
+        _ui->actionUndo->setEnabled(false);
+        _ui->actionUndo->setText(tr("Undo"));
+        _ui->actionRedo->setEnabled(false);
+        _ui->actionRedo->setText(tr("Redo"));
+    }
 }
 
 void MainWindow::on_actionOpen_triggered()
@@ -208,4 +222,23 @@ void MainWindow::on_actionInvert_Selection_triggered()
     ContentPaneWidget* contentPaneWidget;
     if((contentPaneWidget = currentTabWidget()) != nullptr)
         contentPaneWidget->invertSelection();
+}
+
+void MainWindow::on_actionUndo_triggered()
+{
+    ContentPaneWidget* contentPaneWidget;
+    if((contentPaneWidget = currentTabWidget()) != nullptr)
+        contentPaneWidget->undo();
+}
+
+void MainWindow::on_actionRedo_triggered()
+{
+    ContentPaneWidget* contentPaneWidget;
+    if((contentPaneWidget = currentTabWidget()) != nullptr)
+        contentPaneWidget->redo();
+}
+
+void MainWindow::on_commandStackChanged(const CommandManager&)
+{
+    updatePerTabUi();
 }

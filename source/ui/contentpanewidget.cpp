@@ -69,7 +69,7 @@ bool ContentPaneWidget::initFromFile(const QString &filename)
     connect(&_graphModel->graph(), &Graph::componentsWillMerge, this, &ContentPaneWidget::onComponentsWillMerge, Qt::DirectConnection);
 
     _graphFileParserThread = new GraphFileParserThread(filename, _graphModel->graph(), graphFileParser);
-    connect(graphFileParser, &GraphFileParser::progress, this, &ContentPaneWidget::onProgress);
+    connect(graphFileParser, &GraphFileParser::progress, this, &ContentPaneWidget::progress);
     connect(graphFileParser, &GraphFileParser::complete, this, &ContentPaneWidget::onCompletion);
     _graphFileParserThread->start();
 
@@ -93,9 +93,7 @@ void ContentPaneWidget::onCompletion(int success)
     connect(nodeLayoutThread, &LayoutThread::executed, componentLayoutThread, &LayoutThread::execute);*/
 
     _selectionManager = new SelectionManager(_graphModel->graph());
-    GraphView* graphView = new GraphView();
-    graphView->setGraphModel(_graphModel);
-    graphView->setSelectionManager(_selectionManager);
+    GraphView* graphView = new GraphView(_graphModel, &_commandManager, _selectionManager);
     connect(_nodeLayoutThread, &LayoutThread::executed, graphView, &GraphView::layoutChanged);
 
     connect(graphView, &GraphView::userInteractionStarted, [=]()
@@ -107,6 +105,8 @@ void ContentPaneWidget::onCompletion(int success)
     {
         resumeLayout(true);
     });
+
+    connect(&_commandManager, &CommandManager::commandStackChanged, this, &ContentPaneWidget::commandStackChanged);
 
     layout()->addWidget(graphView);
 
@@ -207,17 +207,64 @@ void ContentPaneWidget::resumeLayout(bool autoResume)
 void ContentPaneWidget::selectAll()
 {
     if(_selectionManager != nullptr)
-        _selectionManager->selectAllNodes();
+    {
+        auto previousSelection = _selectionManager->selectedNodes();
+        _commandManager.execute(tr("Select All"),
+            [=]() { return _selectionManager->selectAllNodes(); },
+            [=]() { _selectionManager->setSelectedNodes(previousSelection); });
+    }
 }
 
 void ContentPaneWidget::selectNone()
 {
     if(_selectionManager != nullptr)
-        _selectionManager->clearNodeSelection();
+    {
+        auto previousSelection = _selectionManager->selectedNodes();
+        _commandManager.execute(tr("Select None"),
+            [=]() { return _selectionManager->clearNodeSelection(); },
+            [=]() { _selectionManager->setSelectedNodes(previousSelection); });
+    }
 }
 
 void ContentPaneWidget::invertSelection()
 {
     if(_selectionManager != nullptr)
-        _selectionManager->invertNodeSelection();
+    {
+        auto previousSelection = _selectionManager->selectedNodes();
+        _commandManager.execute(tr("Invert Selection"),
+            [=]() { _selectionManager->invertNodeSelection(); return true; },
+            [=]() { _selectionManager->setSelectedNodes(previousSelection); });
+    }
+}
+
+const QString ContentPaneWidget::nextUndoAction() const
+{
+    QString undoAction = tr("Undo");
+
+    if(!_commandManager.undoableCommands().isEmpty())
+        undoAction.append(tr(" ") + _commandManager.undoableCommands().first()->description());
+
+    return undoAction;
+}
+
+const QString ContentPaneWidget::nextRedoAction() const
+{
+    QString redoAction = tr("Redo");
+
+    if(!_commandManager.redoableCommands().isEmpty())
+        redoAction.append(tr(" ") + _commandManager.redoableCommands().first()->description());
+
+    return redoAction;
+}
+
+void ContentPaneWidget::undo()
+{
+    if(_commandManager.canUndo())
+        _commandManager.undo();
+}
+
+void ContentPaneWidget::redo()
+{
+    if(_commandManager.canRedo())
+        _commandManager.redo();
 }
