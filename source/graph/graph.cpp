@@ -102,12 +102,12 @@ void Graph::removeNode(NodeId nodeId)
     emitGraphChanged();
 }
 
-void Graph::removeNodes(QSet<NodeId> nodeIds)
+void Graph::removeNodes(const QSet<NodeId>& nodeIds)
 {
     removeNodes(nodeIds.toList());
 }
 
-void Graph::removeNodes(QList<NodeId> nodeIds)
+void Graph::removeNodes(const QList<NodeId>& nodeIds)
 {
     if(nodeIds.isEmpty())
         return;
@@ -172,12 +172,12 @@ void Graph::removeEdge(EdgeId edgeId)
     emitGraphChanged();
 }
 
-void Graph::removeEdges(QSet<EdgeId> edgeIds)
+void Graph::removeEdges(const QSet<EdgeId>& edgeIds)
 {
     removeEdges(edgeIds.toList());
 }
 
-void Graph::removeEdges(QList<EdgeId> edgeIds)
+void Graph::removeEdges(const QList<EdgeId>& edgeIds)
 {
     if(edgeIds.isEmpty())
         return;
