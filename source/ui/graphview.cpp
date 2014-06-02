@@ -71,6 +71,8 @@ void GraphView::mousePressEvent(QMouseEvent* mouseEvent)
 
         if(mouseEvent->modifiers() & Qt::ShiftModifier)
             _frustumSelectStart = _cursorPosition;
+        else
+            _frustumSelectStart = QPoint();
         break;
 
     case Qt::RightButton:
@@ -138,6 +140,7 @@ void GraphView::mouseReleaseEvent(QMouseEvent* mouseEvent)
                     [=]() { return _selectionManager->selectNodes(selection); },
                     [=]() { _selectionManager->setSelectedNodes(previousSelection); });
 
+                _frustumSelectStart = QPoint();
                 _frustumSelecting = false;
                 _graphScene->clearSelectionRect();
             }
@@ -189,13 +192,29 @@ void GraphView::mouseMoveEvent(QMouseEvent* mouseEvent)
     Camera* camera = _graphScene->camera();
     _cursorPosition = mouseEvent->pos();
 
-    if((mouseEvent->modifiers() & Qt::ShiftModifier) && _leftMouseButtonHeld)
+    if(_leftMouseButtonHeld && (mouseEvent->modifiers() & Qt::ShiftModifier))
     {
-        emit userInteractionStarted();
-        _selecting = true;
-        _frustumSelecting = true;
-        _clickedNodeId.setToNull();
+        if(!_frustumSelecting)
+        {
+            emit userInteractionStarted();
+            _frustumSelecting = true;
+            _clickedNodeId.setToNull();
+
+            // This can happen if the user holds shift after clicking
+            if(_frustumSelectStart.isNull())
+                _frustumSelectStart = _cursorPosition;
+        }
+
         _graphScene->setSelectionRect(QRect(_frustumSelectStart, _cursorPosition).normalized());
+    }
+    else if(_leftMouseButtonHeld && _frustumSelecting)
+    {
+        // Shift key has been released
+        _frustumSelectStart = QPoint();
+        _frustumSelecting = false;
+        _graphScene->clearSelectionRect();
+
+        emit userInteractionFinished();
     }
     else if(!_clickedNodeId.isNull())
     {
