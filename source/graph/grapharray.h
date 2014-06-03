@@ -81,13 +81,7 @@ public:
 
     void resize(int size)
     {
-        int previousSize = _array.size();
         _array.resize(size);
-        int newSize = _array.size();
-
-        int newElements = newSize - previousSize;
-        for(int i = newSize - newElements; i < newSize; i++)
-            _array[i] = Element();
     }
 
     void fill(const Element& value)
