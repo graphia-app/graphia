@@ -323,9 +323,26 @@ void GraphView::keyPressEvent(QKeyEvent* keyEvent)
     switch(keyEvent->key())
     {
     case Qt::Key_Delete:
-        _graphModel->graph().removeNodes(_selectionManager->selectedNodes());
-        _selectionManager->clearNodeSelection();
+    {
+        auto edges = _graphModel->graph().edgesForNodes(_selectionManager->selectedNodes());
+        auto nodes = _selectionManager->selectedNodes();
+
+        _commandManager->execute(tr("Delete Nodes"),
+            [this, nodes, edges]()
+            {
+                _selectionManager->clearNodeSelection();
+                // Edge removal happens implicitly
+                _graphModel->graph().removeNodes(nodes);
+                return true;
+            },
+            [this, nodes, edges]()
+            {
+                _graphModel->graph().addNodes(nodes);
+                _graphModel->graph().addEdges(edges);
+                _selectionManager->selectNodes(nodes);
+            });
         break;
+    }
 
     case Qt::Key_Left:
         _graphScene->moveToNextComponent();

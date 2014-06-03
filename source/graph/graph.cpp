@@ -76,8 +76,8 @@ NodeId Graph::addNode(NodeId nodeId)
         _nextNodeId++;
     }
 
-    _vacatedNodeIdQueue.removeOne(nodeId); // May fail
-    _nextNodeId++;
+    if(!_vacatedNodeIdQueue.removeOne(nodeId))
+        _nextNodeId++;
 
     _nodeIdsVector.append(nodeId);
     _nodesVector.resize(nodeArrayCapacity());
@@ -180,8 +180,8 @@ EdgeId Graph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
         _nextEdgeId++;
     }
 
-    _vacatedEdgeIdQueue.removeOne(edgeId); // May fail
-    _nextEdgeId++;
+    if(!_vacatedEdgeIdQueue.removeOne(edgeId))
+        _nextEdgeId++;
 
     _edgeIdsVector.append(edgeId);
     _edgesVector.resize(edgeArrayCapacity());
@@ -302,6 +302,41 @@ ComponentId Graph::componentIdOfEdge(EdgeId edgeId) const
         return _componentManager->componentIdOfEdge(edgeId);
 
     return ComponentId();
+}
+
+const QList<EdgeId> Graph::edgeIdsForNodes(const QSet<NodeId>& nodeIds)
+{
+    return edgeIdsForNodes(nodeIds.toList());
+}
+
+const QList<EdgeId> Graph::edgeIdsForNodes(const QList<NodeId>& nodeIds)
+{
+    QSet<EdgeId> edgeIds;
+
+    for(NodeId nodeId : nodeIds)
+    {
+        const Node& node = _nodesVector[nodeId];
+        for(EdgeId edgeId : node.edges())
+            edgeIds.insert(edgeId);
+    }
+
+    return edgeIds.toList();
+}
+
+const QList<Edge> Graph::edgesForNodes(const QSet<NodeId>& nodeIds)
+{
+    return edgesForNodes(nodeIds.toList());
+}
+
+const QList<Edge> Graph::edgesForNodes(const QList<NodeId>& nodeIds)
+{
+    const QList<EdgeId>& edgeIds = edgeIdsForNodes(nodeIds);
+    QList<Edge> edges;
+
+    for(EdgeId edgeId : edgeIds)
+        edges.append(_edgesVector[edgeId]);
+
+    return edges;
 }
 
 void Graph::dumpToQDebug(int detail) const

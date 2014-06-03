@@ -279,6 +279,11 @@ public:
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
 
+    const QList<EdgeId> edgeIdsForNodes(const QSet<NodeId>& nodeIds);
+    const QList<EdgeId> edgeIdsForNodes(const QList<NodeId>& nodeIds);
+    const QList<Edge> edgesForNodes(const QSet<NodeId>& nodeIds);
+    const QList<Edge> edgesForNodes(const QList<NodeId>& nodeIds);
+
     void dumpToQDebug(int detail) const;
 
 private:
