@@ -65,7 +65,7 @@ NodeId Graph::addNode()
     else
         newNodeId = _nextNodeId++;
 
-    _nodeIdsList.append(newNodeId);
+    _nodeIdsVector.append(newNodeId);
     _nodesVector.resize(nodeArrayCapacity());
     _nodesVector[newNodeId]._id = newNodeId;
 
@@ -96,7 +96,7 @@ void Graph::removeNode(NodeId nodeId)
 
     emit nodeWillBeRemoved(this, nodeId);
 
-    _nodeIdsList.remove(_nodeIdsList.indexOf(nodeId));
+    _nodeIdsVector.remove(_nodeIdsVector.indexOf(nodeId));
     _vacatedNodeIdQueue.enqueue(nodeId);
 
     emitGraphChanged();
@@ -131,7 +131,7 @@ EdgeId Graph::addEdge(NodeId sourceId, NodeId targetId)
     else
         newEdgeId = _nextEdgeId++;
 
-    _edgeIdsList.append(newEdgeId);
+    _edgeIdsVector.append(newEdgeId);
     _edgesVector.resize(edgeArrayCapacity());
     _edgesVector[newEdgeId]._id = newEdgeId;
 
@@ -166,7 +166,7 @@ void Graph::removeEdge(EdgeId edgeId)
     source._outEdges.remove(edgeId);
     target._inEdges.remove(edgeId);
 
-    _edgeIdsList.remove(_edgeIdsList.indexOf(edgeId));
+    _edgeIdsVector.remove(_edgeIdsVector.indexOf(edgeId));
     _vacatedEdgeIdQueue.enqueue(edgeId);
 
     emitGraphChanged();

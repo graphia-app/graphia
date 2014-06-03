@@ -211,12 +211,12 @@ public:
     virtual ~Graph();
 
 private:
-    QVector<NodeId> _nodeIdsList;
+    QVector<NodeId> _nodeIdsVector;
     QVector<Node> _nodesVector;
     NodeId _nextNodeId;
     QQueue<NodeId> _vacatedNodeIdQueue;
 
-    QVector<EdgeId> _edgeIdsList;
+    QVector<EdgeId> _edgeIdsVector;
     QVector<Edge> _edgesVector;
     EdgeId _nextEdgeId;
     QQueue<EdgeId> _vacatedEdgeIdQueue;
@@ -243,8 +243,8 @@ public:
     void disableComponentMangagement();
     bool componentManagementEnabled() const { return _componentManagementEnabled; }
 
-    const QVector<NodeId>& nodeIds() const { return _nodeIdsList; }
-    int numNodes() const { return _nodeIdsList.size(); }
+    const QVector<NodeId>& nodeIds() const { return _nodeIdsVector; }
+    int numNodes() const { return _nodeIdsVector.size(); }
     const Node& nodeById(NodeId nodeId) const { return _nodesVector[nodeId]; }
 
     NodeId addNode();
@@ -253,8 +253,8 @@ public:
     void removeNodes(const QSet<NodeId>& nodeIds);
     void removeNodes(const QList<NodeId>& nodeIds);
 
-    const QVector<EdgeId>& edgeIds() const { return _edgeIdsList; }
-    int numEdges() const { return _edgeIdsList.size(); }
+    const QVector<EdgeId>& edgeIds() const { return _edgeIdsVector; }
+    int numEdges() const { return _edgeIdsVector.size(); }
     const Edge& edgeById(EdgeId edgeId) const { return _edgesVector[edgeId]; }
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId);
