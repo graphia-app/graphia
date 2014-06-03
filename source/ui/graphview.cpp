@@ -337,6 +337,7 @@ void GraphView::keyPressEvent(QKeyEvent* keyEvent)
             },
             [this, nodes, edges]()
             {
+                Graph::ScopedTransaction(_graphModel->graph());
                 _graphModel->graph().addNodes(nodes);
                 _graphModel->graph().addEdges(edges);
                 _selectionManager->selectNodes(nodes);

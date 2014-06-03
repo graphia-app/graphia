@@ -36,17 +36,17 @@ void Graph::clear()
 
 void Graph::setComponentManager(ComponentManager *componentManager)
 {
-    emitGraphWillChange();
+    beginTransaction();
     delete this->_componentManager;
     this->_componentManager = componentManager;
-    emitGraphChanged();
+    endTransaction();
 }
 
 void Graph::enableComponentMangagement()
 {
-    emitGraphWillChange();
+    beginTransaction();
     _componentManagementEnabled = true;
-    emitGraphChanged();
+    endTransaction();
 }
 
 void Graph::disableComponentMangagement()
@@ -67,7 +67,7 @@ NodeId Graph::addNode(NodeId nodeId)
     if(nodeId < _nextNodeId && !_vacatedNodeIdQueue.contains(nodeId))
         return NodeId(); // Already taken
 
-    emitGraphWillChange();
+    beginTransaction();
 
     while(_nextNodeId < nodeId)
     {
@@ -92,7 +92,7 @@ NodeId Graph::addNode(NodeId nodeId)
         _componentManager->nodeAdded(nodeId);
 
     emit nodeAdded(this, nodeId);
-    emitGraphChanged();
+    endTransaction();
 
     return nodeId;
 }
@@ -112,17 +112,17 @@ void Graph::addNodes(const QList<NodeId>& nodeIds)
     if(nodeIds.isEmpty())
         return;
 
-    emitGraphWillChange();
+    beginTransaction();
 
     for(NodeId nodeId : nodeIds)
         addNode(nodeId);
 
-    emitGraphChanged();
+    endTransaction();
 }
 
 void Graph::removeNode(NodeId nodeId)
 {
-    emitGraphWillChange();
+    beginTransaction();
 
     // Remove all edges that touch this node
     const Node& node = _nodesVector[nodeId];
@@ -137,7 +137,7 @@ void Graph::removeNode(NodeId nodeId)
     _nodeIdsVector.remove(_nodeIdsVector.indexOf(nodeId));
     _vacatedNodeIdQueue.enqueue(nodeId);
 
-    emitGraphChanged();
+    endTransaction();
 }
 
 void Graph::removeNodes(const QSet<NodeId>& nodeIds)
@@ -150,12 +150,12 @@ void Graph::removeNodes(const QList<NodeId>& nodeIds)
     if(nodeIds.isEmpty())
         return;
 
-    emitGraphWillChange();
+    beginTransaction();
 
     for(NodeId nodeId : nodeIds)
         removeNode(nodeId);
 
-    emitGraphChanged();
+    endTransaction();
 }
 
 EdgeId Graph::addEdge(NodeId sourceId, NodeId targetId)
@@ -171,7 +171,7 @@ EdgeId Graph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     if(edgeId < _nextEdgeId && !_vacatedEdgeIdQueue.contains(edgeId))
         return EdgeId(); // Already taken
 
-    emitGraphWillChange();
+    beginTransaction();
 
     while(_nextEdgeId < edgeId)
     {
@@ -195,7 +195,7 @@ EdgeId Graph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
         _componentManager->edgeAdded(edgeId);
 
     emit edgeAdded(this, edgeId);
-    emitGraphChanged();
+    endTransaction();
 
     return edgeId;
 }
@@ -215,17 +215,17 @@ void Graph::addEdges(const QList<Edge>& edges)
     if(edges.isEmpty())
         return;
 
-    emitGraphWillChange();
+    beginTransaction();
 
     for(const Edge& edge : edges)
         addEdge(edge);
 
-    emitGraphChanged();
+    endTransaction();
 }
 
 void Graph::removeEdge(EdgeId edgeId)
 {
-    emitGraphWillChange();
+    beginTransaction();
 
     if(_componentManagementEnabled && _componentManager != nullptr)
         _componentManager->edgeWillBeRemoved(edgeId);
@@ -242,7 +242,7 @@ void Graph::removeEdge(EdgeId edgeId)
     _edgeIdsVector.remove(_edgeIdsVector.indexOf(edgeId));
     _vacatedEdgeIdQueue.enqueue(edgeId);
 
-    emitGraphChanged();
+    endTransaction();
 }
 
 void Graph::removeEdges(const QSet<EdgeId>& edgeIds)
@@ -255,12 +255,12 @@ void Graph::removeEdges(const QList<EdgeId>& edgeIds)
     if(edgeIds.isEmpty())
         return;
 
-    emitGraphWillChange();
+    beginTransaction();
 
     for(EdgeId edgeId : edgeIds)
         removeEdge(edgeId);
 
-    emitGraphChanged();
+    endTransaction();
 }
 
 const QList<ComponentId> *Graph::componentIds() const
@@ -357,13 +357,13 @@ void Graph::dumpToQDebug(int detail) const
     }
 }
 
-void Graph::emitGraphWillChange()
+void Graph::beginTransaction()
 {
     if(_graphChangeDepth++ <= 0)
         emit graphWillChange(this);
 }
 
-void Graph::emitGraphChanged()
+void Graph::endTransaction()
 {
     Q_ASSERT(_graphChangeDepth > 0);
     if(--_graphChangeDepth <= 0)

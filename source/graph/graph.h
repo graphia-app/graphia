@@ -288,8 +288,27 @@ public:
 
 private:
     int _graphChangeDepth;
-    void emitGraphWillChange();
-    void emitGraphChanged();
+    void beginTransaction();
+    void endTransaction();
+
+public:
+    class ScopedTransaction
+    {
+    public:
+        ScopedTransaction(Graph& graph) :
+            _graph(graph)
+        {
+            _graph.beginTransaction();
+        }
+
+        ~ScopedTransaction()
+        {
+            _graph.endTransaction();
+        }
+
+    private:
+        Graph& _graph;
+    };
 
 signals:
     void graphWillChange(const Graph*) const;
