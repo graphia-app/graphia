@@ -56,30 +56,68 @@ void Graph::disableComponentMangagement()
 
 NodeId Graph::addNode()
 {
+    if(!_vacatedNodeIdQueue.isEmpty())
+        return addNode(_vacatedNodeIdQueue.head());
+
+    return addNode(_nextNodeId);
+}
+
+NodeId Graph::addNode(NodeId nodeId)
+{
+    if(nodeId < _nextNodeId && !_vacatedNodeIdQueue.contains(nodeId))
+        return NodeId(); // Already taken
+
     emitGraphWillChange();
 
-    NodeId newNodeId;
+    while(_nextNodeId < nodeId)
+    {
+        // Queue up intervening IDs that will be skipped
+        _vacatedNodeIdQueue.enqueue(_nextNodeId);
+        _nextNodeId++;
+    }
 
-    if(!_vacatedNodeIdQueue.isEmpty())
-        newNodeId = _vacatedNodeIdQueue.dequeue();
-    else
-        newNodeId = _nextNodeId++;
+    _vacatedNodeIdQueue.removeOne(nodeId); // May fail
+    _nextNodeId++;
 
-    _nodeIdsVector.append(newNodeId);
+    _nodeIdsVector.append(nodeId);
     _nodesVector.resize(nodeArrayCapacity());
-    _nodesVector[newNodeId]._id = newNodeId;
+    _nodesVector[nodeId]._id = nodeId;
+    _nodesVector[nodeId]._inEdges.clear();
+    _nodesVector[nodeId]._outEdges.clear();
 
     for(ResizableGraphArray* nodeArray : _nodeArrayList)
         nodeArray->resize(nodeArrayCapacity());
 
     if(_componentManagementEnabled && _componentManager != nullptr)
-        _componentManager->nodeAdded(newNodeId);
+        _componentManager->nodeAdded(nodeId);
 
-    emit nodeAdded(this, newNodeId);
-
+    emit nodeAdded(this, nodeId);
     emitGraphChanged();
 
-    return newNodeId;
+    return nodeId;
+}
+
+NodeId Graph::addNode(const Node& node)
+{
+    return addNode(node._id);
+}
+
+void Graph::addNodes(const QSet<NodeId>& nodeIds)
+{
+    addNodes(nodeIds.toList());
+}
+
+void Graph::addNodes(const QList<NodeId>& nodeIds)
+{
+    if(nodeIds.isEmpty())
+        return;
+
+    emitGraphWillChange();
+
+    for(NodeId nodeId : nodeIds)
+        addNode(nodeId);
+
+    emitGraphChanged();
 }
 
 void Graph::removeNode(NodeId nodeId)
@@ -122,32 +160,67 @@ void Graph::removeNodes(const QList<NodeId>& nodeIds)
 
 EdgeId Graph::addEdge(NodeId sourceId, NodeId targetId)
 {
+    if(!_vacatedEdgeIdQueue.isEmpty())
+        return addEdge(_vacatedEdgeIdQueue.head(), sourceId, targetId);
+
+    return addEdge(_nextEdgeId, sourceId, targetId);
+}
+
+EdgeId Graph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
+{
+    if(edgeId < _nextEdgeId && !_vacatedEdgeIdQueue.contains(edgeId))
+        return EdgeId(); // Already taken
+
     emitGraphWillChange();
 
-    EdgeId newEdgeId;
+    while(_nextEdgeId < edgeId)
+    {
+        // Queue up intervening IDs that will be skipped
+        _vacatedEdgeIdQueue.enqueue(_nextEdgeId);
+        _nextEdgeId++;
+    }
 
-    if(!_vacatedEdgeIdQueue.isEmpty())
-        newEdgeId = _vacatedEdgeIdQueue.dequeue();
-    else
-        newEdgeId = _nextEdgeId++;
+    _vacatedEdgeIdQueue.removeOne(edgeId); // May fail
+    _nextEdgeId++;
 
-    _edgeIdsVector.append(newEdgeId);
+    _edgeIdsVector.append(edgeId);
     _edgesVector.resize(edgeArrayCapacity());
-    _edgesVector[newEdgeId]._id = newEdgeId;
+    _edgesVector[edgeId]._id = edgeId;
+    setEdgeNodes(edgeId, sourceId, targetId);
 
     for(ResizableGraphArray* edgeArray : _edgeArrayList)
         edgeArray->resize(edgeArrayCapacity());
 
-    setEdgeNodes(newEdgeId, sourceId, targetId);
-
     if(_componentManagementEnabled && _componentManager != nullptr)
-        _componentManager->edgeAdded(newEdgeId);
+        _componentManager->edgeAdded(edgeId);
 
-    emit edgeAdded(this, newEdgeId);
-
+    emit edgeAdded(this, edgeId);
     emitGraphChanged();
 
-    return newEdgeId;
+    return edgeId;
+}
+
+EdgeId Graph::addEdge(const Edge& edge)
+{
+    return addEdge(edge._id, edge._sourceId, edge._targetId);
+}
+
+void Graph::addEdges(const QSet<Edge>& edges)
+{
+    addEdges(edges.toList());
+}
+
+void Graph::addEdges(const QList<Edge>& edges)
+{
+    if(edges.isEmpty())
+        return;
+
+    emitGraphWillChange();
+
+    for(const Edge& edge : edges)
+        addEdge(edge);
+
+    emitGraphChanged();
 }
 
 void Graph::removeEdge(EdgeId edgeId)

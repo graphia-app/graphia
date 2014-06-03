@@ -248,6 +248,10 @@ public:
     const Node& nodeById(NodeId nodeId) const { return _nodesVector[nodeId]; }
 
     NodeId addNode();
+    NodeId addNode(NodeId nodeId);
+    NodeId addNode(const Node& node);
+    void addNodes(const QSet<NodeId>& nodeIds);
+    void addNodes(const QList<NodeId>& nodeIds);
 
     void removeNode(NodeId nodeId);
     void removeNodes(const QSet<NodeId>& nodeIds);
@@ -258,6 +262,11 @@ public:
     const Edge& edgeById(EdgeId edgeId) const { return _edgesVector[edgeId]; }
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId);
+    EdgeId addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId);
+    EdgeId addEdge(const Edge& edge);
+    void addEdges(const QSet<Edge>& edges);
+    void addEdges(const QList<Edge>& edges);
+
     void removeEdge(EdgeId edgeId);
     void removeEdges(const QSet<EdgeId>& edgeIds);
     void removeEdges(const QList<EdgeId>& edgeIds);
