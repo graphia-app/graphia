@@ -210,8 +210,8 @@ void ContentPaneWidget::selectAll()
     {
         auto previousSelection = _selectionManager->selectedNodes();
         _commandManager.execute(tr("Select All"),
-            [=]() { return _selectionManager->selectAllNodes(); },
-            [=]() { _selectionManager->setSelectedNodes(previousSelection); });
+            [this]() { return _selectionManager->selectAllNodes(); },
+            [this, previousSelection]() { _selectionManager->setSelectedNodes(previousSelection); });
     }
 }
 
@@ -221,8 +221,8 @@ void ContentPaneWidget::selectNone()
     {
         auto previousSelection = _selectionManager->selectedNodes();
         _commandManager.execute(tr("Select None"),
-            [=]() { return _selectionManager->clearNodeSelection(); },
-            [=]() { _selectionManager->setSelectedNodes(previousSelection); });
+            [this]() { return _selectionManager->clearNodeSelection(); },
+            [this, previousSelection]() { _selectionManager->setSelectedNodes(previousSelection); });
     }
 }
 
@@ -232,8 +232,8 @@ void ContentPaneWidget::invertSelection()
     {
         auto previousSelection = _selectionManager->selectedNodes();
         _commandManager.execute(tr("Invert Selection"),
-            [=]() { _selectionManager->invertNodeSelection(); return true; },
-            [=]() { _selectionManager->setSelectedNodes(previousSelection); });
+            [this]() { _selectionManager->invertNodeSelection(); return true; },
+            [this, previousSelection]() { _selectionManager->setSelectedNodes(previousSelection); });
     }
 }
 
