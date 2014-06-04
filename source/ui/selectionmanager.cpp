@@ -29,7 +29,7 @@ bool SelectionManager::selectNode(NodeId nodeId)
     return selectionWillChange;
 }
 
-bool SelectionManager::selectNodes(QSet<NodeId> nodeIds)
+bool SelectionManager::selectNodes(const QSet<NodeId>& nodeIds)
 {
     bool selectionWillChange = !_selectedNodes.contains(nodeIds);
     _selectedNodes.unite(nodeIds);
@@ -51,7 +51,7 @@ bool SelectionManager::deselectNode(NodeId nodeId)
     return selectionWillChange;
 }
 
-bool SelectionManager::deselectNodes(QSet<NodeId> nodeIds)
+bool SelectionManager::deselectNodes(const QSet<NodeId>& nodeIds)
 {
     QSet<NodeId> intersection(_selectedNodes);
     intersection.intersect(nodeIds);
@@ -73,7 +73,7 @@ void SelectionManager::toggleNode(NodeId nodeId)
         selectNode(nodeId);
 }
 
-void SelectionManager::toggleNodes(QSet<NodeId> nodeIds)
+void SelectionManager::toggleNodes(const QSet<NodeId>& nodeIds)
 {
     QSet<NodeId> intersection(_selectedNodes);
     intersection.intersect(nodeIds);
@@ -90,7 +90,7 @@ bool SelectionManager::nodeIsSelected(NodeId nodeId) const
     return _selectedNodes.contains(nodeId);
 }
 
-bool SelectionManager::setSelectedNodes(QSet<NodeId> nodeIds)
+bool SelectionManager::setSelectedNodes(const QSet<NodeId>& nodeIds)
 {
     bool selectionWillChange = (_selectedNodes != nodeIds);
     _selectedNodes = nodeIds;

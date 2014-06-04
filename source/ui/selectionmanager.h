@@ -16,17 +16,17 @@ public:
     QSet<NodeId> unselectedNodes() const;
 
     bool selectNode(NodeId nodeId);
-    bool selectNodes(QSet<NodeId> nodeIds);
+    bool selectNodes(const QSet<NodeId>& nodeIds);
 
     bool deselectNode(NodeId nodeId);
-    bool deselectNodes(QSet<NodeId> nodeIds);
+    bool deselectNodes(const QSet<NodeId>& nodeIds);
 
     void toggleNode(NodeId nodeId);
-    void toggleNodes(QSet<NodeId> nodeIds);
+    void toggleNodes(const QSet<NodeId>& nodeIds);
 
     bool nodeIsSelected(NodeId nodeId) const;
 
-    bool setSelectedNodes(QSet<NodeId> nodeIds);
+    bool setSelectedNodes(const QSet<NodeId>& nodeIds);
 
     bool selectAllNodes();
     bool clearNodeSelection();
