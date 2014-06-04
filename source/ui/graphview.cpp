@@ -327,8 +327,8 @@ void GraphView::keyPressEvent(QKeyEvent* keyEvent)
         auto edges = _graphModel->graph().edgesForNodes(_selectionManager->selectedNodes());
         auto nodes = _selectionManager->selectedNodes();
 
-        _commandManager->execute(tr("Delete Nodes"),
-            [this, nodes, edges]()
+        _commandManager->execute(nodes.size() > 1 ? tr("Delete Nodes") : tr("Delete Node"),
+            [this, nodes]()
             {
                 _selectionManager->clearNodeSelection();
                 // Edge removal happens implicitly
