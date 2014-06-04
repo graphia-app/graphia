@@ -264,7 +264,6 @@ void GraphScene::onComponentSplit(const Graph* graph, ComponentId oldComponentId
 
 void GraphScene::onComponentsWillMerge(const Graph*, const QSet<ComponentId>& mergers, ComponentId merged)
 {
-    qDebug() << "onComponentsWillMerge" << mergers << merged; //FIXME leaving this in as it's untested for now
     for(ComponentId merger : mergers)
     {
         if(merger == _focusComponentId)
@@ -280,8 +279,6 @@ void GraphScene::onComponentsWillMerge(const Graph*, const QSet<ComponentId>& me
 
 void GraphScene::onSelectionChanged(const SelectionManager& selectionManager)
 {
-    qDebug() << "Selection:" << selectionManager.selectedNodes();
-
     NodeVisuals& nodeVisuals = _graphModel->nodeVisuals();
     EdgeVisuals& edgeVisuals = _graphModel->edgeVisuals();
 
