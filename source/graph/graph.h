@@ -39,11 +39,6 @@ public:
         return *this;
     }
 
-    explicit ElementId(const ElementId<T>& other)
-    {
-        _value = other._value;
-    }
-
     inline T& operator++()
     {
         ++_value;
