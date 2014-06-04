@@ -61,10 +61,13 @@ void EadesLayout::executeReal(uint64_t iteration)
 
     _moves.resize(positions.size());
 
+    const QVector<NodeId>& nodeIds = graph().nodeIds();
+    const QVector<EdgeId>& edgeIds = graph().edgeIds();
+
     for(NodeId i : graph().nodeIds())
         _moves[i] = QVector3D(0.0f, 0.0f, 0.0f);
 
-    int numNodes = graph().nodeIds().size();
+    int numNodes = nodeIds.size();
 
     // Repulsive forces
     for(int i = 0; i < numNodes - 1; i++)
@@ -76,10 +79,12 @@ void EadesLayout::executeReal(uint64_t iteration)
 
             if(i != j)
             {
-                NodeId nodeAId = graph().nodeIds().at(i);
-                NodeId nodeBId = graph().nodeIds().at(j);
+                NodeId nodeAId = nodeIds[i];
+                NodeId nodeBId = nodeIds[j];
                 QVector3D difference = positions[nodeBId] - positions[nodeAId];
-                qreal distance = difference.lengthSquared();
+                //qreal distance = difference.lengthSquared();
+                float x = difference.x(); float y = difference.y(); float z = difference.z();
+                qreal distance = x * x + y * y + z * z;
                 qreal force;
                 QVector3D direction;
 
@@ -104,7 +109,7 @@ void EadesLayout::executeReal(uint64_t iteration)
     }
 
     // Attractive forces
-    for(EdgeId edgeId : graph().edgeIds())
+    for(EdgeId edgeId : edgeIds)
     {
         if(shouldCancel())
             return;
@@ -127,7 +132,7 @@ void EadesLayout::executeReal(uint64_t iteration)
 
     positions.lock();
     // Apply the moves
-    for(NodeId nodeId : graph().nodeIds())
+    for(NodeId nodeId : nodeIds)
         positions[nodeId] += (_moves[nodeId] * 0.1f); //FIXME not sure what this constant is about, damping?
     positions.unlock();
 
