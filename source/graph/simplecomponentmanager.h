@@ -68,6 +68,10 @@ private:
 
     int componentArrayCapacity() const { return _nextComponentId; }
 
+    QSet<ComponentId> assignConnectedElementsComponentId(NodeId rootId, ComponentId componentId,
+                                                         NodeArray<ComponentId>& nodesComponentId,
+                                                         EdgeArray<ComponentId>& edgesComponentId);
+
 public:
     const QList<ComponentId>& componentIds() const;
     const GraphComponent* componentById(ComponentId componentId);

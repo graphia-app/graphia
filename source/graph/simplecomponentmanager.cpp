@@ -2,11 +2,10 @@
 
 #include <QQueue>
 
-static QSet<ComponentId> assignConnectedElementsComponentId(NodeId rootId, ComponentId componentId,
-                                                            const Graph& graph,
-                                                            NodeArray<ComponentId>& nodesComponentId,
-                                                            EdgeArray<ComponentId>& edgesComponentId,
-                                                            EdgeId skipEdgeId = EdgeId())
+QSet<ComponentId> SimpleComponentManager::assignConnectedElementsComponentId(
+        NodeId rootId, ComponentId componentId,
+        NodeArray<ComponentId>& nodesComponentId,
+        EdgeArray<ComponentId>& edgesComponentId)
 {
     QQueue<NodeId> nodeIdSearchList;
     QSet<ComponentId> oldComponentIdsAffected;
@@ -16,18 +15,15 @@ static QSet<ComponentId> assignConnectedElementsComponentId(NodeId rootId, Compo
     while(!nodeIdSearchList.isEmpty())
     {
         NodeId nodeId = nodeIdSearchList.dequeue();
-        oldComponentIdsAffected.insert(nodesComponentId[nodeId]);
+        oldComponentIdsAffected.insert(_nodesComponentId[nodeId]);
         nodesComponentId[nodeId] = componentId;
 
-        const QSet<EdgeId> edgeIds = graph.nodeById(nodeId).edges();
+        const QSet<EdgeId> edgeIds = graph().nodeById(nodeId).edges();
 
         for(EdgeId edgeId : edgeIds)
         {
-            if(edgeId == skipEdgeId)
-                continue;
-
             edgesComponentId[edgeId] = componentId;
-            NodeId oppositeNodeId = graph.edgeById(edgeId).oppositeId(nodeId);
+            NodeId oppositeNodeId = graph().edgeById(edgeId).oppositeId(nodeId);
 
             if(nodesComponentId[oppositeNodeId] != componentId)
             {
@@ -37,6 +33,7 @@ static QSet<ComponentId> assignConnectedElementsComponentId(NodeId rootId, Compo
         }
     }
 
+    // We don't count nodes that haven't yet been assigned a component
     oldComponentIdsAffected.remove(ComponentId());
 
     return oldComponentIdsAffected;
@@ -65,7 +62,7 @@ void SimpleComponentManager::updateComponents()
                 // We have already used this ID so this is a component that has split
                 ComponentId newComponentId = generateComponentId();
                 newComponentIdsList.append(newComponentId);
-                assignConnectedElementsComponentId(nodeId, newComponentId, graph(),
+                assignConnectedElementsComponentId(nodeId, newComponentId,
                                                    newNodesComponentId, newEdgesComponentId);
 
                 queueGraphComponentUpdate(oldComponentId);
@@ -80,7 +77,7 @@ void SimpleComponentManager::updateComponents()
             {
                 newComponentIdsList.append(oldComponentId);
                 QSet<ComponentId> componentIdsAffected =
-                        assignConnectedElementsComponentId(nodeId, oldComponentId, graph(),
+                        assignConnectedElementsComponentId(nodeId, oldComponentId,
                                                            newNodesComponentId, newEdgesComponentId);
                 queueGraphComponentUpdate(oldComponentId);
 
@@ -107,7 +104,7 @@ void SimpleComponentManager::updateComponents()
         {
             ComponentId newComponentId = generateComponentId();
             newComponentIdsList.append(newComponentId);
-            assignConnectedElementsComponentId(nodeId, newComponentId, graph(), newNodesComponentId, newEdgesComponentId);
+            assignConnectedElementsComponentId(nodeId, newComponentId, newNodesComponentId, newEdgesComponentId);
             queueGraphComponentUpdate(newComponentId);
 
             newComponentIds.append(newComponentId);
