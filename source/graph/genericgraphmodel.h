@@ -35,6 +35,8 @@ public:
 
     const QString& name() { return _name; }
 
+    bool editable() { return true; }
+
 public slots:
     void onNodeAdded(const Graph*, NodeId nodeId);
     void onEdgeAdded(const Graph*, EdgeId edgeId);

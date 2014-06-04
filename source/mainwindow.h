@@ -8,6 +8,7 @@ class ContentPaneWidget;
 class QLabel;
 class Graph;
 class CommandManager;
+class SelectionManager;
 
 namespace Ui {
 class MainWindow;
@@ -27,6 +28,7 @@ private:
     void closeTab(int index);
     QString showGeneralFileOpenDialog();
     void configureActionPauseLayout(bool pause);
+    void setEditActionAvailability();
     void updatePerTabUi();
 
 private slots:
@@ -46,8 +48,10 @@ private slots:
     void on_actionInvert_Selection_triggered();
     void on_actionUndo_triggered();
     void on_actionRedo_triggered();
+    void on_actionDelete_triggered();
 
     void on_commandStackChanged(const CommandManager& commandManager);
+    void on_selectionChanged(const SelectionManager& selectionManager);
 
 public:
     bool openFileInNewTab(const QString& filename);

@@ -3,6 +3,7 @@
 
 #include "ui/contentpanewidget.h"
 #include "ui/commandmanager.h"
+#include "ui/selectionmanager.h"
 
 #include <QFileDialog>
 #include <QIcon>
@@ -36,6 +37,7 @@ ContentPaneWidget *MainWindow::createNewTabWidget(const QString& filename)
     connect(contentPaneWidget, &ContentPaneWidget::complete, this, &MainWindow::on_loadCompletion);
     connect(contentPaneWidget, &ContentPaneWidget::graphChanged, this, &MainWindow::on_graphChanged);
     connect(contentPaneWidget, &ContentPaneWidget::commandStackChanged, this, &MainWindow::on_commandStackChanged);
+    connect(contentPaneWidget, &ContentPaneWidget::selectionChanged, this, &MainWindow::on_selectionChanged);
 
     contentPaneWidget->initFromFile(filename);
 
@@ -69,11 +71,26 @@ void MainWindow::configureActionPauseLayout(bool pause)
     }
 }
 
+void MainWindow::setEditActionAvailability()
+{
+    bool editable = false;
+    bool selectionNonEmpty = false;
+
+    ContentPaneWidget* contentPaneWidget;
+    if((contentPaneWidget = currentTabWidget()) != nullptr)
+    {
+        editable = contentPaneWidget->graphModel()->editable();
+        selectionNonEmpty = contentPaneWidget->selectionManager() != nullptr &&
+                !contentPaneWidget->selectionManager()->selectedNodes().isEmpty();
+    }
+
+    _ui->actionDelete->setEnabled(editable && selectionNonEmpty);
+}
+
 void MainWindow::updatePerTabUi()
 {
-    ContentPaneWidget* contentPaneWidget = static_cast<ContentPaneWidget*>(_ui->tabs->currentWidget());
-
-    if(contentPaneWidget != nullptr)
+    ContentPaneWidget* contentPaneWidget;
+    if((contentPaneWidget = currentTabWidget()) != nullptr)
     {
         configureActionPauseLayout(contentPaneWidget->layoutIsPaused());
         _statusBarLabel->setText(QString(tr("%1 nodes, %2 edges, %3 components")).arg(
@@ -85,6 +102,8 @@ void MainWindow::updatePerTabUi()
         _ui->actionUndo->setText(contentPaneWidget->nextUndoAction());
         _ui->actionRedo->setEnabled(contentPaneWidget->canRedo());
         _ui->actionRedo->setText(contentPaneWidget->nextRedoAction());
+
+        setEditActionAvailability();
     }
     else
     {
@@ -94,6 +113,8 @@ void MainWindow::updatePerTabUi()
         _ui->actionUndo->setText(tr("Undo"));
         _ui->actionRedo->setEnabled(false);
         _ui->actionRedo->setText(tr("Redo"));
+
+        setEditActionAvailability();
     }
 }
 
@@ -238,7 +259,19 @@ void MainWindow::on_actionRedo_triggered()
         contentPaneWidget->redo();
 }
 
+void MainWindow::on_actionDelete_triggered()
+{
+    ContentPaneWidget* contentPaneWidget;
+    if((contentPaneWidget = currentTabWidget()) != nullptr)
+        contentPaneWidget->deleteSelectedNodes();
+}
+
 void MainWindow::on_commandStackChanged(const CommandManager&)
+{
+    updatePerTabUi();
+}
+
+void MainWindow::on_selectionChanged(const SelectionManager&)
 {
     updatePerTabUi();
 }

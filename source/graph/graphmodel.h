@@ -47,6 +47,8 @@ public:
 
     virtual const QString& name() = 0;
 
+    virtual bool editable() { return false; }
+
     virtual QWidget* contentWidget() { return nullptr; }
 };
 

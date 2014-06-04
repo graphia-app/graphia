@@ -26,6 +26,7 @@ signals:
     void complete(int success) const;
     void graphChanged(const Graph*) const;
     void commandStackChanged(const CommandManager& commandManager) const;
+    void selectionChanged(const SelectionManager& selectionManager) const;
 
 public slots:
     void onCompletion(int success);
@@ -67,6 +68,8 @@ public:
     void redo();
     bool canRedo() { return _commandManager.canRedo(); }
     const QString nextRedoAction() const;
+
+    void deleteSelectedNodes();
 
     bool initFromFile(const QString& filename);
 };

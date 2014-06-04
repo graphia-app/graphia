@@ -85,6 +85,8 @@
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
     <addaction name="separator"/>
+    <addaction name="actionDelete"/>
+    <addaction name="separator"/>
     <addaction name="actionSelect_All"/>
     <addaction name="actionSelect_None"/>
     <addaction name="actionInvert_Selection"/>
@@ -103,6 +105,7 @@
    <addaction name="actionOpen"/>
    <addaction name="actionOpen_In_New_Tab"/>
    <addaction name="actionPause_Layout"/>
+   <addaction name="actionDelete"/>
    <addaction name="actionUndo"/>
    <addaction name="actionRedo"/>
   </widget>
@@ -141,6 +144,9 @@
    </property>
    <property name="text">
     <string>Pause Layout</string>
+   </property>
+   <property name="shortcut">
+    <string>Pause</string>
    </property>
   </action>
   <action name="actionOpen_In_New_Tab">
@@ -182,7 +188,9 @@
   </action>
   <action name="actionUndo">
    <property name="icon">
-    <iconset theme="undo"/>
+    <iconset theme="undo">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>Undo</string>
@@ -193,13 +201,26 @@
   </action>
   <action name="actionRedo">
    <property name="icon">
-    <iconset theme="redo"/>
+    <iconset theme="redo">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>Redo</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+Z</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="icon">
+    <iconset theme="edit-delete"/>
+   </property>
+   <property name="text">
+    <string>Delete</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
    </property>
   </action>
  </widget>

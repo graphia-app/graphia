@@ -107,6 +107,7 @@ void ContentPaneWidget::onCompletion(int success)
     });
 
     connect(&_commandManager, &CommandManager::commandStackChanged, this, &ContentPaneWidget::commandStackChanged);
+    connect(_selectionManager, &SelectionManager::selectionChanged, this, &ContentPaneWidget::selectionChanged);
 
     layout()->addWidget(graphView);
 
@@ -255,6 +256,31 @@ const QString ContentPaneWidget::nextRedoAction() const
         redoAction.append(tr(" ") + _commandManager.redoableCommands().first()->description());
 
     return redoAction;
+}
+
+void ContentPaneWidget::deleteSelectedNodes()
+{
+    auto edges = _graphModel->graph().edgesForNodes(_selectionManager->selectedNodes());
+    auto nodes = _selectionManager->selectedNodes();
+
+    if(nodes.isEmpty())
+        return;
+
+    _commandManager.execute(nodes.size() > 1 ? tr("Delete Nodes") : tr("Delete Node"),
+        [this, nodes]()
+        {
+            _selectionManager->clearNodeSelection();
+            // Edge removal happens implicitly
+            _graphModel->graph().removeNodes(nodes);
+            return true;
+        },
+        [this, nodes, edges]()
+        {
+            Graph::ScopedTransaction(_graphModel->graph());
+            _graphModel->graph().addNodes(nodes);
+            _graphModel->graph().addEdges(edges);
+            _selectionManager->selectNodes(nodes);
+        });
 }
 
 void ContentPaneWidget::undo()
