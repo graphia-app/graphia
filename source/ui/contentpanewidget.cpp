@@ -276,7 +276,7 @@ void ContentPaneWidget::deleteSelectedNodes()
         },
         [this, nodes, edges]()
         {
-            Graph::ScopedTransaction(_graphModel->graph());
+            Graph::ScopedTransaction lock(_graphModel->graph());
             _graphModel->graph().addNodes(nodes);
             _graphModel->graph().addEdges(edges);
             _selectionManager->selectNodes(nodes);
