@@ -9,6 +9,8 @@
 #include <QQueue>
 #include <QDebug>
 
+#include <type_traits>
+
 class ResizableGraphArray;
 class GraphComponent;
 class ComponentManager;
@@ -25,7 +27,9 @@ private:
 public:
     explicit ElementId(int value = NullValue) :
         _value(value)
-    {}
+    {
+        static_assert(sizeof(ElementId) == sizeof(_value), "ElementId should not be larger than an int");
+    }
 
     inline operator int() const { return _value; }
 
