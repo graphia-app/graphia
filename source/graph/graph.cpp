@@ -79,7 +79,8 @@ NodeId Graph::addNode(NodeId nodeId)
     if(!_vacatedNodeIdQueue.removeOne(nodeId))
         _nextNodeId++;
 
-    _nodeIdsVector.append(nodeId);
+    _nodeIdsInUse.resize(nodeArrayCapacity());
+    _nodeIdsInUse[nodeId] = true;
     _nodesVector.resize(nodeArrayCapacity());
     _nodesVector[nodeId]._id = nodeId;
     _nodesVector[nodeId]._inEdges.clear();
@@ -134,7 +135,7 @@ void Graph::removeNode(NodeId nodeId)
 
     emit nodeWillBeRemoved(this, nodeId);
 
-    _nodeIdsVector.remove(_nodeIdsVector.indexOf(nodeId));
+    _nodeIdsInUse[nodeId] = false;
     _vacatedNodeIdQueue.enqueue(nodeId);
 
     endTransaction();
@@ -183,7 +184,8 @@ EdgeId Graph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     if(!_vacatedEdgeIdQueue.removeOne(edgeId))
         _nextEdgeId++;
 
-    _edgeIdsVector.append(edgeId);
+    _edgeIdsInUse.resize(edgeArrayCapacity());
+    _edgeIdsInUse[edgeId] = true;
     _edgesVector.resize(edgeArrayCapacity());
     _edgesVector[edgeId]._id = edgeId;
     setEdgeNodes(edgeId, sourceId, targetId);
@@ -239,7 +241,7 @@ void Graph::removeEdge(EdgeId edgeId)
     source._outEdges.remove(edgeId);
     target._inEdges.remove(edgeId);
 
-    _edgeIdsVector.remove(_edgeIdsVector.indexOf(edgeId));
+    _edgeIdsInUse[edgeId] = false;
     _vacatedEdgeIdQueue.enqueue(edgeId);
 
     endTransaction();
@@ -368,6 +370,8 @@ void Graph::endTransaction()
     Q_ASSERT(_graphChangeDepth > 0);
     if(--_graphChangeDepth <= 0)
     {
+        updateElementIdVectors();
+
         if(_componentManagementEnabled && _componentManager != nullptr)
             _componentManager->graphChanged(this);
 
@@ -407,4 +411,21 @@ void Graph::setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId)
 void Graph::setEdgeNodes(EdgeId edgeId, NodeId sourceId, NodeId targetId)
 {
     setEdgeNodes(_edgesVector[edgeId], sourceId, targetId);
+}
+
+void Graph::updateElementIdVectors()
+{
+    _nodeIdsVector.clear();
+    for(NodeId nodeId(0); nodeId < _nodeIdsInUse.size(); nodeId++)
+    {
+        if(_nodeIdsInUse[nodeId])
+            _nodeIdsVector.append(nodeId);
+    }
+
+    _edgeIdsVector.clear();
+    for(EdgeId edgeId(0); edgeId < _edgeIdsInUse.size(); edgeId++)
+    {
+        if(_edgeIdsInUse[edgeId])
+            _edgeIdsVector.append(edgeId);
+    }
 }

@@ -211,11 +211,13 @@ public:
     virtual ~Graph();
 
 private:
+    QVector<bool> _nodeIdsInUse;
     QVector<NodeId> _nodeIdsVector;
     QVector<Node> _nodesVector;
     NodeId _nextNodeId;
     QQueue<NodeId> _vacatedNodeIdQueue;
 
+    QVector<bool> _edgeIdsInUse;
     QVector<EdgeId> _edgeIdsVector;
     QVector<Edge> _edgesVector;
     EdgeId _nextEdgeId;
@@ -235,6 +237,8 @@ private:
 
     void setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId);
     void setEdgeNodes(EdgeId edgeId, NodeId sourceId, NodeId targetId);
+
+    void updateElementIdVectors();
 
 public:
     void clear();
