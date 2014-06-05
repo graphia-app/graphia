@@ -20,7 +20,6 @@ class GraphFileParser : public QObject
     Q_OBJECT
 signals:
     void progress(int percentage) const;
-    void complete(bool success) const;
 
 public:
     GraphFileParser() : _cancelAtomic(0) {}
@@ -122,9 +121,23 @@ public:
 private:
     void run() Q_DECL_OVERRIDE
     {
-        _graphFileParser->parse(*_graph);
-        delete _graphFileParser;
+        connect(_graphFileParser, &GraphFileParser::progress, this, &GraphFileParserThread::progress);
+
+        bool result;
+
+        _graph->performTransaction(
+            [&](Graph& graph)
+            {
+                result = _graphFileParser->parse(graph);
+                delete _graphFileParser;
+            });
+
+        emit complete(result);
     }
+
+signals:
+    void progress(int percentage) const;
+    void complete(bool success) const;
 };
 
 #endif // GRAPHFILEPARSER_H

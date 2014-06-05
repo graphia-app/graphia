@@ -69,8 +69,8 @@ bool ContentPaneWidget::initFromFile(const QString &filename)
     connect(&_graphModel->graph(), &Graph::componentsWillMerge, this, &ContentPaneWidget::onComponentsWillMerge, Qt::DirectConnection);
 
     _graphFileParserThread = new GraphFileParserThread(filename, _graphModel->graph(), graphFileParser);
-    connect(graphFileParser, &GraphFileParser::progress, this, &ContentPaneWidget::progress);
-    connect(graphFileParser, &GraphFileParser::complete, this, &ContentPaneWidget::onCompletion);
+    connect(_graphFileParserThread, &GraphFileParserThread::progress, this, &ContentPaneWidget::progress);
+    connect(_graphFileParserThread, &GraphFileParserThread::complete, this, &ContentPaneWidget::onCompletion);
     _graphFileParserThread->start();
 
     return true;
