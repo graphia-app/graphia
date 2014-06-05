@@ -96,12 +96,12 @@ void ContentPaneWidget::onCompletion(int success)
     GraphView* graphView = new GraphView(_graphModel, &_commandManager, _selectionManager);
     connect(_nodeLayoutThread, &LayoutThread::executed, graphView, &GraphView::layoutChanged);
 
-    connect(graphView, &GraphView::userInteractionStarted, [=]()
+    connect(graphView, &GraphView::userInteractionStarted, [=]
     {
         pauseLayout(true);
     });
 
-    connect(graphView, &GraphView::userInteractionFinished, [=]()
+    connect(graphView, &GraphView::userInteractionFinished, [=]
     {
         resumeLayout(true);
     });
@@ -211,8 +211,8 @@ void ContentPaneWidget::selectAll()
     {
         auto previousSelection = _selectionManager->selectedNodes();
         _commandManager.execute(tr("Select All"),
-            [this]() { return _selectionManager->selectAllNodes(); },
-            [this, previousSelection]() { _selectionManager->setSelectedNodes(previousSelection); });
+            [this] { return _selectionManager->selectAllNodes(); },
+            [this, previousSelection] { _selectionManager->setSelectedNodes(previousSelection); });
     }
 }
 
@@ -222,8 +222,8 @@ void ContentPaneWidget::selectNone()
     {
         auto previousSelection = _selectionManager->selectedNodes();
         _commandManager.execute(tr("Select None"),
-            [this]() { return _selectionManager->clearNodeSelection(); },
-            [this, previousSelection]() { _selectionManager->setSelectedNodes(previousSelection); });
+            [this] { return _selectionManager->clearNodeSelection(); },
+            [this, previousSelection] { _selectionManager->setSelectedNodes(previousSelection); });
     }
 }
 
@@ -233,8 +233,8 @@ void ContentPaneWidget::invertSelection()
     {
         auto previousSelection = _selectionManager->selectedNodes();
         _commandManager.execute(tr("Invert Selection"),
-            [this]() { _selectionManager->invertNodeSelection(); return true; },
-            [this, previousSelection]() { _selectionManager->setSelectedNodes(previousSelection); });
+            [this] { _selectionManager->invertNodeSelection(); return true; },
+            [this, previousSelection] { _selectionManager->setSelectedNodes(previousSelection); });
     }
 }
 
@@ -267,14 +267,14 @@ void ContentPaneWidget::deleteSelectedNodes()
         return;
 
     _commandManager.execute(nodes.size() > 1 ? tr("Delete Nodes") : tr("Delete Node"),
-        [this, nodes]()
+        [this, nodes]
         {
             _selectionManager->clearNodeSelection();
             // Edge removal happens implicitly
             _graphModel->graph().removeNodes(nodes);
             return true;
         },
-        [this, nodes, edges]()
+        [this, nodes, edges]
         {
             _graphModel->graph().performTransaction(
                 [nodes, edges](Graph& graph)

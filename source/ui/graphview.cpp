@@ -137,8 +137,8 @@ void GraphView::mouseReleaseEvent(QMouseEvent* mouseEvent)
 
                 auto previousSelection = _selectionManager->selectedNodes();
                 _commandManager->execute(tr("Select Nodes"),
-                    [this, selection]() { return _selectionManager->selectNodes(selection); },
-                    [this, previousSelection]() { _selectionManager->setSelectedNodes(previousSelection); });
+                    [this, selection] { return _selectionManager->selectNodes(selection); },
+                    [this, previousSelection] { _selectionManager->setSelectedNodes(previousSelection); });
 
                 _frustumSelectStart = QPoint();
                 _frustumSelecting = false;
@@ -153,7 +153,7 @@ void GraphView::mouseReleaseEvent(QMouseEvent* mouseEvent)
                     auto previousSelection = _selectionManager->selectedNodes();
                     auto toggleNodeId = _clickedNodeId;
                     _commandManager->execute(nodeSelected ? tr("Deselect Node") : tr("Select Node"),
-                        [this, toggling, toggleNodeId]()
+                        [this, toggling, toggleNodeId]
                         {
                             if(!toggling)
                                 _selectionManager->clearNodeSelection();
@@ -161,14 +161,14 @@ void GraphView::mouseReleaseEvent(QMouseEvent* mouseEvent)
                             _selectionManager->toggleNode(toggleNodeId);
                             return true;
                         },
-                        [this, previousSelection]() { _selectionManager->setSelectedNodes(previousSelection); });
+                        [this, previousSelection] { _selectionManager->setSelectedNodes(previousSelection); });
                 }
                 else
                 {
                     auto previousSelection = _selectionManager->selectedNodes();
                     _commandManager->execute(tr("Select None"),
-                        [this]() { return _selectionManager->clearNodeSelection(); },
-                        [this, previousSelection]() { _selectionManager->setSelectedNodes(previousSelection); });
+                        [this] { return _selectionManager->clearNodeSelection(); },
+                        [this, previousSelection] { _selectionManager->setSelectedNodes(previousSelection); });
                 }
             }
 

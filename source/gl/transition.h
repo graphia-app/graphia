@@ -30,7 +30,7 @@ public:
     Transition();
 
     void start(float duration, Type type, std::function<void(float)> function,
-               std::function<void()> finishedFunction = [](){});
+               std::function<void()> finishedFunction = []{});
 
     bool update(float time);
     bool finished() const { return _elapsed >= _duration; }

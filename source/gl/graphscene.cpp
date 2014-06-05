@@ -757,7 +757,7 @@ void GraphScene::centreNodeInViewport(NodeId nodeId, Transition::Type transition
             _camera->setPosition(startPosition + ((targetPosition - startPosition) * f));
             _camera->setViewTarget(startViewTarget + ((nodePosition - startViewTarget) * f));
         },
-        [=]()
+        [=]
         {
             emit userInteractionFinished();
         });

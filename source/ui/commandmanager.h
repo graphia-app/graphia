@@ -21,13 +21,13 @@ class Command : public QObject
 public:
     Command(const QString& description,
             std::function<bool()> executeFunction =
-            []()
+            []
             {
                 Q_ASSERT(!"executeFunction not implmented");
                 return false;
             },
             std::function<void()> undoFunction =
-            []()
+            []
             {
                 Q_ASSERT(!"undoFunction not implemented");
             }) :
