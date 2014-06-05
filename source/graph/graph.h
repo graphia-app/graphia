@@ -214,22 +214,22 @@ private:
     QVector<bool> _nodeIdsInUse;
     QVector<NodeId> _nodeIdsVector;
     QVector<Node> _nodesVector;
-    NodeId _nextNodeId;
-    QQueue<NodeId> _vacatedNodeIdQueue;
+    NodeId _lastNodeId;
+    NodeId _firstVacantNodeId;
 
     QVector<bool> _edgeIdsInUse;
     QVector<EdgeId> _edgeIdsVector;
     QVector<Edge> _edgesVector;
-    EdgeId _nextEdgeId;
-    QQueue<EdgeId> _vacatedEdgeIdQueue;
+    EdgeId _lastEdgeId;
+    EdgeId _firstVacantEdgeId;
 
     template<typename> friend class NodeArray;
     QList<ResizableGraphArray*> _nodeArrayList;
-    int nodeArrayCapacity() const { return _nextNodeId; }
+    int nodeArrayCapacity() const { return _lastNodeId; }
 
     template<typename> friend class EdgeArray;
     QList<ResizableGraphArray*> _edgeArrayList;
-    int edgeArrayCapacity() const { return _nextEdgeId; }
+    int edgeArrayCapacity() const { return _lastEdgeId; }
 
     template<typename> friend class ComponentArray;
     ComponentManager* _componentManager;
