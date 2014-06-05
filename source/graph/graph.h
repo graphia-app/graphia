@@ -10,6 +10,7 @@
 #include <QDebug>
 
 #include <type_traits>
+#include <functional>
 
 class ResizableGraphArray;
 class GraphComponent;
@@ -308,6 +309,12 @@ public:
     private:
         Graph& _graph;
     };
+
+    void performTransaction(std::function<void(Graph& graph)> transaction)
+    {
+        ScopedTransaction lock(*this);
+        transaction(*this);
+    }
 
 signals:
     void graphWillChange(const Graph*) const;

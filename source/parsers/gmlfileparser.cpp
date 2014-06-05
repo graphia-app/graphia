@@ -104,7 +104,14 @@ bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePair
             nodeIdMap.clear();
             if(!key.compare("graph") && subKeyValuePairList != nullptr)
             {
-                bool result = parseGmlList(graph, *subKeyValuePairList, GmlList::Graph);
+                bool result;
+
+                graph.performTransaction(
+                    [&](Graph& graph)
+                    {
+                        result = parseGmlList(graph, *subKeyValuePairList, GmlList::Graph);
+                    });
+
                 emit complete(result);
                 return result;
             }
