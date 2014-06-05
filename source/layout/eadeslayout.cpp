@@ -61,8 +61,8 @@ void EadesLayout::executeReal(uint64_t iteration)
 
     _moves.resize(positions.size());
 
-    const QVector<NodeId>& nodeIds = graph().nodeIds();
-    const QVector<EdgeId>& edgeIds = graph().edgeIds();
+    const std::vector<NodeId>& nodeIds = graph().nodeIds();
+    const std::vector<EdgeId>& edgeIds = graph().edgeIds();
 
     for(NodeId i : graph().nodeIds())
         _moves[i] = QVector3D(0.0f, 0.0f, 0.0f);

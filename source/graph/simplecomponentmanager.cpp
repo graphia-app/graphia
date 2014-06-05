@@ -48,7 +48,7 @@ void SimpleComponentManager::updateComponents()
     EdgeArray<ComponentId> newEdgesComponentId(graph());
     QList<ComponentId> newComponentIdsList;
 
-    const QVector<NodeId>& nodeIdsList = graph().nodeIds();
+    const std::vector<NodeId>& nodeIdsList = graph().nodeIds();
 
     // Search for mergers and splitters
     for(NodeId nodeId : nodeIdsList)
@@ -180,23 +180,23 @@ void SimpleComponentManager::updateGraphComponent(ComponentId componentId)
 {
     GraphComponent* graphComponent = _componentsMap[componentId];
 
-    QVector<NodeId>& nodeIdsList = graphComponentNodeIdsList(graphComponent);
-    QVector<EdgeId>& edgeIdsList = graphComponentEdgeIdsList(graphComponent);
+    std::vector<NodeId>& nodeIdsList = graphComponentNodeIdsList(graphComponent);
+    std::vector<EdgeId>& edgeIdsList = graphComponentEdgeIdsList(graphComponent);
 
     nodeIdsList.clear();
-    const QVector<NodeId>& nodeIds = graph().nodeIds();
+    const std::vector<NodeId>& nodeIds = graph().nodeIds();
     for(NodeId nodeId : nodeIds)
     {
         if(_nodesComponentId[nodeId] == componentId)
-            nodeIdsList.append(nodeId);
+            nodeIdsList.push_back(nodeId);
     }
 
     edgeIdsList.clear();
-    const QVector<EdgeId>& edgeIds = graph().edgeIds();
+    const std::vector<EdgeId>& edgeIds = graph().edgeIds();
     for(EdgeId edgeId : edgeIds)
     {
         if(_edgesComponentId[edgeId] == componentId)
-            edgeIdsList.append(edgeId);
+            edgeIdsList.push_back(edgeId);
     }
 }
 

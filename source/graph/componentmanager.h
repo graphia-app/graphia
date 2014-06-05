@@ -21,17 +21,17 @@ public:
 
 private:
     const ReadOnlyGraph* _graph;
-    QVector<NodeId> _nodeIdsList;
-    QVector<EdgeId> _edgeIdsList;
+    std::vector<NodeId> _nodeIdsList;
+    std::vector<EdgeId> _edgeIdsList;
 
 public:
     const ReadOnlyGraph& graph() { return *_graph; }
 
-    const QVector<NodeId>& nodeIds() const { return _nodeIdsList; }
+    const std::vector<NodeId>& nodeIds() const { return _nodeIdsList; }
     int numNodes() const { return _nodeIdsList.size(); }
     const Node& nodeById(NodeId nodeId) const { return _graph->nodeById(nodeId); }
 
-    const QVector<EdgeId>& edgeIds() const { return _edgeIdsList; }
+    const std::vector<EdgeId>& edgeIds() const { return _edgeIdsList; }
     int numEdges() const { return _edgeIdsList.size(); }
     const Edge& edgeById(EdgeId edgeId) const { return _graph->edgeById(edgeId); }
 };
@@ -67,13 +67,13 @@ protected:
     QList<ResizableGraphArray*> _componentArrayList;
     virtual int componentArrayCapacity() const = 0;
 
-    QVector<NodeId>& graphComponentNodeIdsList(GraphComponent* graphComponent)
+    std::vector<NodeId>& graphComponentNodeIdsList(GraphComponent* graphComponent)
     {
         Q_ASSERT(graphComponent != nullptr);
         return graphComponent->_nodeIdsList;
     }
 
-    QVector<EdgeId>& graphComponentEdgeIdsList(GraphComponent* graphComponent)
+    std::vector<EdgeId>& graphComponentEdgeIdsList(GraphComponent* graphComponent)
     {
         Q_ASSERT(graphComponent != nullptr);
         return graphComponent->_edgeIdsList;

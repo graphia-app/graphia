@@ -3,12 +3,9 @@
 
 #include <QObject>
 #include <QList>
-#include <QSet>
-#include <QVector>
-#include <QMap>
-#include <QQueue>
 #include <QDebug>
 
+#include <vector>
 #include <type_traits>
 #include <functional>
 
@@ -56,6 +53,11 @@ public:
     inline bool operator==(const ElementId<T>& other) const
     {
         return _value == other._value;
+    }
+
+    inline bool operator<(const ElementId<T>& other) const
+    {
+        return _value < other._value;
     }
 
     inline bool isNull() const
@@ -175,12 +177,12 @@ public:
 class ReadOnlyGraph
 {
 public:
-    virtual const QVector<NodeId>& nodeIds() const = 0;
+    virtual const std::vector<NodeId>& nodeIds() const = 0;
     virtual int numNodes() const = 0;
     virtual const Node& nodeById(NodeId nodeId) const = 0;
     NodeId firstNodeId() const { return nodeIds().size() > 0 ? nodeIds().at(0) : NodeId(); }
 
-    virtual const QVector<EdgeId>& edgeIds() const = 0;
+    virtual const std::vector<EdgeId>& edgeIds() const = 0;
     virtual int numEdges() const = 0;
     virtual const Edge& edgeById(EdgeId edgeId) const = 0;
     EdgeId firstEdgeId() const { return edgeIds().size() > 0 ? edgeIds().at(0) : EdgeId(); }
@@ -211,15 +213,15 @@ public:
     virtual ~Graph();
 
 private:
-    QVector<bool> _nodeIdsInUse;
-    QVector<NodeId> _nodeIdsVector;
-    QVector<Node> _nodesVector;
+    std::vector<bool> _nodeIdsInUse;
+    std::vector<NodeId> _nodeIdsVector;
+    std::vector<Node> _nodesVector;
     NodeId _lastNodeId;
     NodeId _firstVacantNodeId;
 
-    QVector<bool> _edgeIdsInUse;
-    QVector<EdgeId> _edgeIdsVector;
-    QVector<Edge> _edgesVector;
+    std::vector<bool> _edgeIdsInUse;
+    std::vector<EdgeId> _edgeIdsVector;
+    std::vector<Edge> _edgesVector;
     EdgeId _lastEdgeId;
     EdgeId _firstVacantEdgeId;
 
@@ -247,7 +249,7 @@ public:
     void disableComponentMangagement();
     bool componentManagementEnabled() const { return _componentManagementEnabled; }
 
-    const QVector<NodeId>& nodeIds() const { return _nodeIdsVector; }
+    const std::vector<NodeId>& nodeIds() const { return _nodeIdsVector; }
     int numNodes() const { return _nodeIdsVector.size(); }
     const Node& nodeById(NodeId nodeId) const { return _nodesVector[nodeId]; }
 
@@ -261,7 +263,7 @@ public:
     void removeNodes(const QSet<NodeId>& nodeIds);
     void removeNodes(const QList<NodeId>& nodeIds);
 
-    const QVector<EdgeId>& edgeIds() const { return _edgeIdsVector; }
+    const std::vector<EdgeId>& edgeIds() const { return _edgeIdsVector; }
     int numEdges() const { return _edgeIdsVector.size(); }
     const Edge& edgeById(EdgeId edgeId) const { return _edgesVector[edgeId]; }
 

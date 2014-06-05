@@ -1,9 +1,15 @@
 #include "selectionmanager.h"
 
-template<typename T> QSet<T> setForVector(QVector<T> vector)
+#include <algorithm>
+
+template<typename T> QSet<T> setForVector(std::vector<T> vector)
 {
     //FIXME this is probably sub-optimal
-    return vector.toList().toSet();
+    QSet<T> set;
+    for(T t : vector)
+        set.insert(t);
+
+    return set;
 }
 
 QSet<NodeId> SelectionManager::selectedNodes() const
@@ -86,7 +92,9 @@ void SelectionManager::toggleNodes(const QSet<NodeId>& nodeIds)
 
 bool SelectionManager::nodeIsSelected(NodeId nodeId) const
 {
-    Q_ASSERT(_graph->nodeIds().contains(nodeId));
+    Q_ASSERT(std::find(_graph->nodeIds().begin(),
+                       _graph->nodeIds().end(),
+                       nodeId) != _graph->nodeIds().end());
     return _selectedNodes.contains(nodeId);
 }
 

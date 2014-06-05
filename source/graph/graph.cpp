@@ -420,16 +420,16 @@ void Graph::setEdgeNodes(EdgeId edgeId, NodeId sourceId, NodeId targetId)
 void Graph::updateElementIdVectors()
 {
     _nodeIdsVector.clear();
-    for(NodeId nodeId(0); nodeId < _nodeIdsInUse.size(); nodeId++)
+    for(NodeId nodeId(0); nodeId < _lastNodeId; nodeId++)
     {
         if(_nodeIdsInUse[nodeId])
-            _nodeIdsVector.append(nodeId);
+            _nodeIdsVector.push_back(nodeId);
     }
 
     _edgeIdsVector.clear();
-    for(EdgeId edgeId(0); edgeId < _edgeIdsInUse.size(); edgeId++)
+    for(EdgeId edgeId(0); edgeId < _lastEdgeId; edgeId++)
     {
         if(_edgeIdsInUse[edgeId])
-            _edgeIdsVector.append(edgeId);
+            _edgeIdsVector.push_back(edgeId);
     }
 }
