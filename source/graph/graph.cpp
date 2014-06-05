@@ -78,9 +78,6 @@ NodeId Graph::addNode(NodeId nodeId)
     _nodesVector[nodeId]._inEdges.clear();
     _nodesVector[nodeId]._outEdges.clear();
 
-    if(_componentManager != nullptr)
-        _componentManager->nodeAdded(nodeId);
-
     emit nodeAdded(this, nodeId);
     endTransaction();
 
@@ -118,9 +115,6 @@ void Graph::removeNode(NodeId nodeId)
     const Node& node = _nodesVector[nodeId];
     for(EdgeId edgeId : node.edges())
         removeEdge(edgeId);
-
-    if(_componentManager != nullptr)
-        _componentManager->nodeWillBeRemoved(nodeId);
 
     emit nodeWillBeRemoved(this, nodeId);
 
@@ -183,9 +177,6 @@ EdgeId Graph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     _edgesVector[edgeId]._id = edgeId;
     setEdgeNodes(edgeId, sourceId, targetId);
 
-    if(_componentManager != nullptr)
-        _componentManager->edgeAdded(edgeId);
-
     emit edgeAdded(this, edgeId);
     endTransaction();
 
@@ -218,9 +209,6 @@ void Graph::addEdges(const QList<Edge>& edges)
 void Graph::removeEdge(EdgeId edgeId)
 {
     beginTransaction();
-
-    if(_componentManager != nullptr)
-        _componentManager->edgeWillBeRemoved(edgeId);
 
     emit edgeWillBeRemoved(this, edgeId);
 
@@ -362,10 +350,6 @@ void Graph::endTransaction()
     if(--_graphChangeDepth <= 0)
     {
         updateElementIdVectors();
-
-        if(_componentManager != nullptr)
-            _componentManager->graphChanged(this);
-
         emit graphChanged(this);
     }
 }

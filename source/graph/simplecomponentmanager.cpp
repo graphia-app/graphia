@@ -214,7 +214,7 @@ void SimpleComponentManager::removeGraphComponent(ComponentId componentId)
     }
 }
 
-void SimpleComponentManager::graphChanged(const Graph*)
+void SimpleComponentManager::onGraphChanged(const Graph*)
 {
     updateComponents();
 

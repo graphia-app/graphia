@@ -45,6 +45,12 @@ public:
     ComponentManager(Graph& graph) :
         _graph(&graph)
     {
+        connect(&graph, &Graph::nodeAdded, this, &ComponentManager::onNodeAdded, Qt::DirectConnection);
+        connect(&graph, &Graph::nodeWillBeRemoved, this, &ComponentManager::onNodeWillBeRemoved, Qt::DirectConnection);
+        connect(&graph, &Graph::edgeAdded, this, &ComponentManager::onEdgeAdded, Qt::DirectConnection);
+        connect(&graph, &Graph::edgeWillBeRemoved, this, &ComponentManager::onEdgeWillBeRemoved, Qt::DirectConnection);
+        connect(&graph, &Graph::graphChanged, this, &ComponentManager::onGraphChanged, Qt::DirectConnection);
+
         connect(this, &ComponentManager::componentAdded, &graph, &Graph::componentAdded, Qt::DirectConnection);
         connect(this, &ComponentManager::componentWillBeRemoved, &graph, &Graph::componentWillBeRemoved, Qt::DirectConnection);
         connect(this, &ComponentManager::componentSplit, &graph, &Graph::componentSplit, Qt::DirectConnection);
@@ -52,16 +58,18 @@ public:
     }
     virtual ~ComponentManager() {}
 
+
+protected slots:
+    virtual void onNodeAdded(const Graph*, NodeId nodeId) = 0;
+    virtual void onNodeWillBeRemoved(const Graph*, NodeId nodeId) = 0;
+
+    virtual void onEdgeAdded(const Graph*, EdgeId edgeId) = 0;
+    virtual void onEdgeWillBeRemoved(const Graph*, EdgeId edgeId) = 0;
+
+    virtual void onGraphChanged(const Graph*) = 0;
+
 protected:
     Graph* _graph;
-
-    virtual void nodeAdded(NodeId nodeId) = 0;
-    virtual void nodeWillBeRemoved(NodeId nodeId) = 0;
-
-    virtual void edgeAdded(EdgeId edgeId) = 0;
-    virtual void edgeWillBeRemoved(EdgeId edgeId) = 0;
-
-    virtual void graphChanged(const Graph*) = 0;
 
     template<typename> friend class ComponentArray;
     QList<ResizableGraphArray*> _componentArrayList;
