@@ -235,7 +235,6 @@ private:
 
     template<typename> friend class ComponentArray;
     ComponentManager* _componentManager;
-    bool _componentManagementEnabled;
 
     void setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId);
     void setEdgeNodes(EdgeId edgeId, NodeId sourceId, NodeId targetId);
@@ -245,9 +244,6 @@ private:
 public:
     void clear();
     void setComponentManager(ComponentManager* _componentManager);
-    void enableComponentMangagement();
-    void disableComponentMangagement();
-    bool componentManagementEnabled() const { return _componentManagementEnabled; }
 
     const std::vector<NodeId>& nodeIds() const { return _nodeIdsVector; }
     int numNodes() const { return _nodeIdsVector.size(); }

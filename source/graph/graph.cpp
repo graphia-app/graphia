@@ -11,7 +11,6 @@ Graph::Graph() :
     _lastEdgeId(0),
     _firstVacantEdgeId(0),
     _componentManager(new SimpleComponentManager(*this)),
-    _componentManagementEnabled(true),
     _graphChangeDepth(0)
 {
     qRegisterMetaType<NodeId>("NodeId");
@@ -42,18 +41,6 @@ void Graph::setComponentManager(ComponentManager *componentManager)
     delete this->_componentManager;
     this->_componentManager = componentManager;
     endTransaction();
-}
-
-void Graph::enableComponentMangagement()
-{
-    beginTransaction();
-    _componentManagementEnabled = true;
-    endTransaction();
-}
-
-void Graph::disableComponentMangagement()
-{
-    _componentManagementEnabled = false;
 }
 
 NodeId Graph::addNode()
@@ -91,7 +78,7 @@ NodeId Graph::addNode(NodeId nodeId)
     _nodesVector[nodeId]._inEdges.clear();
     _nodesVector[nodeId]._outEdges.clear();
 
-    if(_componentManagementEnabled && _componentManager != nullptr)
+    if(_componentManager != nullptr)
         _componentManager->nodeAdded(nodeId);
 
     emit nodeAdded(this, nodeId);
@@ -132,7 +119,7 @@ void Graph::removeNode(NodeId nodeId)
     for(EdgeId edgeId : node.edges())
         removeEdge(edgeId);
 
-    if(_componentManagementEnabled && _componentManager != nullptr)
+    if(_componentManager != nullptr)
         _componentManager->nodeWillBeRemoved(nodeId);
 
     emit nodeWillBeRemoved(this, nodeId);
@@ -196,7 +183,7 @@ EdgeId Graph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     _edgesVector[edgeId]._id = edgeId;
     setEdgeNodes(edgeId, sourceId, targetId);
 
-    if(_componentManagementEnabled && _componentManager != nullptr)
+    if(_componentManager != nullptr)
         _componentManager->edgeAdded(edgeId);
 
     emit edgeAdded(this, edgeId);
@@ -232,7 +219,7 @@ void Graph::removeEdge(EdgeId edgeId)
 {
     beginTransaction();
 
-    if(_componentManagementEnabled && _componentManager != nullptr)
+    if(_componentManager != nullptr)
         _componentManager->edgeWillBeRemoved(edgeId);
 
     emit edgeWillBeRemoved(this, edgeId);
@@ -351,7 +338,7 @@ void Graph::dumpToQDebug(int detail) const
 
     if(detail > 0)
     {
-        if(_componentManagementEnabled && _componentManager != nullptr)
+        if(_componentManager != nullptr)
         {
             for(ComponentId componentId : _componentManager->componentIds())
             {
@@ -376,7 +363,7 @@ void Graph::endTransaction()
     {
         updateElementIdVectors();
 
-        if(_componentManagementEnabled && _componentManager != nullptr)
+        if(_componentManager != nullptr)
             _componentManager->graphChanged(this);
 
         emit graphChanged(this);

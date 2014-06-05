@@ -57,7 +57,6 @@ bool ContentPaneWidget::initFromFile(const QString &filename)
     case GmlFile:*/
         _graphModel = new GenericGraphModel(info.fileName());
         graphFileParser = new GmlFileParser(filename);
-        _graphModel->graph().disableComponentMangagement();
         /*break;
     }*/
 
@@ -78,8 +77,6 @@ bool ContentPaneWidget::initFromFile(const QString &filename)
 
 void ContentPaneWidget::onCompletion(int success)
 {
-    _graphModel->graph().enableComponentMangagement();
-
     _nodeLayoutThread = new NodeLayoutThread(new EadesLayoutFactory(_graphModel));
     _nodeLayoutThread->addAllComponents(_graphModel->graph());
     _nodeLayoutThread->start();
