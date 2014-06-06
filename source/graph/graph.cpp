@@ -363,14 +363,14 @@ void Graph::setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId)
     {
         // Remove edge from source node out edges
         Node& source = _nodesVector[edge.sourceId()];
-        source._outEdges.remove(edge.id());
+        source._outEdges.remove(edge._id);
     }
 
     if(!edge.targetId().isNull())
     {
         // Remove edge from target node in edges
         Node& target = _nodesVector[edge.targetId()];
-        target._inEdges.remove(edge.id());
+        target._inEdges.remove(edge._id);
     }
 
     edge._sourceId = sourceId;
