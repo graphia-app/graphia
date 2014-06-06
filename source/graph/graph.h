@@ -6,6 +6,7 @@
 #include <QDebug>
 
 #include <vector>
+#include <deque>
 #include <type_traits>
 #include <functional>
 
@@ -215,15 +216,15 @@ public:
 private:
     std::vector<bool> _nodeIdsInUse;
     std::vector<NodeId> _nodeIdsVector;
+    std::deque<NodeId> _unusedNodeIdsDeque;
     std::vector<Node> _nodesVector;
     NodeId _lastNodeId;
-    NodeId _firstVacantNodeId;
 
     std::vector<bool> _edgeIdsInUse;
     std::vector<EdgeId> _edgeIdsVector;
+    std::deque<EdgeId> _unusedEdgeIdsDeque;
     std::vector<Edge> _edgesVector;
     EdgeId _lastEdgeId;
-    EdgeId _firstVacantEdgeId;
 
     template<typename> friend class NodeArray;
     QList<ResizableGraphArray*> _nodeArrayList;
@@ -239,7 +240,7 @@ private:
     void setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId);
     void setEdgeNodes(EdgeId edgeId, NodeId sourceId, NodeId targetId);
 
-    void updateElementIdVectors();
+    void updateElementIdData();
 
 public:
     void clear();

@@ -7,9 +7,7 @@
 
 Graph::Graph() :
     _lastNodeId(0),
-    _firstVacantNodeId(0),
     _lastEdgeId(0),
-    _firstVacantEdgeId(0),
     _componentManager(new SimpleComponentManager(*this)),
     _graphChangeDepth(0)
 {
@@ -45,12 +43,15 @@ void Graph::setComponentManager(ComponentManager *componentManager)
 
 NodeId Graph::addNode()
 {
-    NodeId nodeId = addNode(_firstVacantNodeId);
+    if(!_unusedNodeIdsDeque.empty())
+    {
+        NodeId unusedNodeId = _unusedNodeIdsDeque.front();
+        _unusedNodeIdsDeque.pop_front();
 
-    while(_firstVacantNodeId < _lastNodeId && _nodeIdsInUse[_firstVacantNodeId])
-        _firstVacantNodeId++;
+        return addNode(unusedNodeId);
+    }
 
-    return nodeId;
+    return addNode(_lastNodeId);
 }
 
 NodeId Graph::addNode(NodeId nodeId)
@@ -69,8 +70,6 @@ NodeId Graph::addNode(NodeId nodeId)
         _nodesVector.resize(nodeArrayCapacity());
         for(ResizableGraphArray* nodeArray : _nodeArrayList)
             nodeArray->resize(nodeArrayCapacity());
-
-        _firstVacantNodeId = _lastNodeId;
     }
 
     _nodeIdsInUse[nodeId] = true;
@@ -119,8 +118,7 @@ void Graph::removeNode(NodeId nodeId)
     emit nodeWillBeRemoved(this, nodeId);
 
     _nodeIdsInUse[nodeId] = false;
-    if(nodeId < _firstVacantNodeId)
-        _firstVacantNodeId = nodeId;
+    _unusedNodeIdsDeque.push_back(nodeId);
 
     endTransaction();
 }
@@ -145,12 +143,15 @@ void Graph::removeNodes(const QList<NodeId>& nodeIds)
 
 EdgeId Graph::addEdge(NodeId sourceId, NodeId targetId)
 {
-    EdgeId edgeId = addEdge(_firstVacantEdgeId, sourceId, targetId);
+    if(!_unusedEdgeIdsDeque.empty())
+    {
+        EdgeId unusedEdgeId = _unusedEdgeIdsDeque.front();
+        _unusedEdgeIdsDeque.pop_front();
 
-    while(_firstVacantEdgeId < _lastEdgeId && _edgeIdsInUse[_firstVacantEdgeId])
-        _firstVacantEdgeId++;
+        return addEdge(unusedEdgeId, sourceId, targetId);
+    }
 
-    return edgeId;
+    return addEdge(_lastEdgeId, sourceId, targetId);
 }
 
 EdgeId Graph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
@@ -169,8 +170,6 @@ EdgeId Graph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
         _edgesVector.resize(edgeArrayCapacity());
         for(ResizableGraphArray* edgeArray : _edgeArrayList)
             edgeArray->resize(edgeArrayCapacity());
-
-        _firstVacantEdgeId = _lastEdgeId;
     }
 
     _edgeIdsInUse[edgeId] = true;
@@ -220,8 +219,7 @@ void Graph::removeEdge(EdgeId edgeId)
     target._inEdges.remove(edgeId);
 
     _edgeIdsInUse[edgeId] = false;
-    if(edgeId < _firstVacantEdgeId)
-        _firstVacantEdgeId = edgeId;
+    _unusedEdgeIdsDeque.push_back(edgeId);
 
     endTransaction();
 }
@@ -391,16 +389,22 @@ void Graph::setEdgeNodes(EdgeId edgeId, NodeId sourceId, NodeId targetId)
 void Graph::updateElementIdVectors()
 {
     _nodeIdsVector.clear();
+    _unusedNodeIdsDeque.clear();
     for(NodeId nodeId(0); nodeId < _lastNodeId; nodeId++)
     {
         if(_nodeIdsInUse[nodeId])
             _nodeIdsVector.push_back(nodeId);
+        else
+            _unusedNodeIdsDeque.push_back(nodeId);
     }
 
     _edgeIdsVector.clear();
+    _unusedEdgeIdsDeque.clear();
     for(EdgeId edgeId(0); edgeId < _lastEdgeId; edgeId++)
     {
         if(_edgeIdsInUse[edgeId])
             _edgeIdsVector.push_back(edgeId);
+        else
+            _unusedEdgeIdsDeque.push_back(edgeId);
     }
 }
