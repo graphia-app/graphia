@@ -73,9 +73,10 @@ NodeId Graph::addNode(NodeId nodeId)
     }
 
     _nodeIdsInUse[nodeId] = true;
-    _nodesVector[nodeId]._id = nodeId;
-    _nodesVector[nodeId]._inEdges.clear();
-    _nodesVector[nodeId]._outEdges.clear();
+    Node& node = _nodesVector[nodeId];
+    node._id = nodeId;
+    node._inEdges.clear();
+    node._outEdges.clear();
 
     emit nodeAdded(this, nodeId);
     endTransaction();
@@ -173,8 +174,13 @@ EdgeId Graph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     }
 
     _edgeIdsInUse[edgeId] = true;
-    _edgesVector[edgeId]._id = edgeId;
-    setEdgeNodes(edgeId, sourceId, targetId);
+    Edge& edge = _edgesVector[edgeId];
+    edge._id = edgeId;
+    edge._sourceId = sourceId;
+    edge._targetId = targetId;
+
+    _nodesVector[sourceId]._outEdges.insert(edgeId);
+    _nodesVector[targetId]._inEdges.insert(edgeId);
 
     emit edgeAdded(this, edgeId);
     endTransaction();
@@ -347,46 +353,12 @@ void Graph::endTransaction()
     Q_ASSERT(_graphChangeDepth > 0);
     if(--_graphChangeDepth <= 0)
     {
-        updateElementIdVectors();
+        updateElementIdData();
         emit graphChanged(this);
     }
 }
 
-void Graph::setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId)
-{
-    Q_ASSERT(!sourceId.isNull());
-    Q_ASSERT(!targetId.isNull());
-
-    if(!edge.sourceId().isNull())
-    {
-        // Remove edge from source node out edges
-        Node& source = _nodesVector[edge.sourceId()];
-        source._outEdges.remove(edge._id);
-    }
-
-    if(!edge.targetId().isNull())
-    {
-        // Remove edge from target node in edges
-        Node& target = _nodesVector[edge.targetId()];
-        target._inEdges.remove(edge._id);
-    }
-
-    edge._sourceId = sourceId;
-    edge._targetId = targetId;
-
-    Node& source = _nodesVector[sourceId];
-    source._outEdges.insert(edge.id());
-
-    Node& target = _nodesVector[targetId];
-    target._inEdges.insert(edge.id());
-}
-
-void Graph::setEdgeNodes(EdgeId edgeId, NodeId sourceId, NodeId targetId)
-{
-    setEdgeNodes(_edgesVector[edgeId], sourceId, targetId);
-}
-
-void Graph::updateElementIdVectors()
+void Graph::updateElementIdData()
 {
     _nodeIdsVector.clear();
     _unusedNodeIdsDeque.clear();

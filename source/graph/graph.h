@@ -237,9 +237,6 @@ private:
     template<typename> friend class ComponentArray;
     ComponentManager* _componentManager;
 
-    void setEdgeNodes(Edge& edge, NodeId sourceId, NodeId targetId);
-    void setEdgeNodes(EdgeId edgeId, NodeId sourceId, NodeId targetId);
-
     void updateElementIdData();
 
 public:
