@@ -54,7 +54,7 @@ void GraphView::layoutChanged()
 
 void GraphView::mousePressEvent(QMouseEvent* mouseEvent)
 {
-    _cursorPosition = _prevCursorPosition = mouseEvent->pos();
+    _cursorPosition = _prevCursorPosition = _clickPosition = mouseEvent->pos();
 
     Ray ray = _graphScene->camera()->rayForViewportCoordinates(_cursorPosition.x(), _cursorPosition.y());
 
@@ -192,6 +192,14 @@ void GraphView::mouseMoveEvent(QMouseEvent* mouseEvent)
 
     Camera* camera = _graphScene->camera();
     _cursorPosition = mouseEvent->pos();
+
+    if(!_mouseMoving)
+    {
+        const int MIN_MANHATTAN_MOVE = 3;
+        QPoint p = _cursorPosition - _clickPosition;
+        if(p.manhattanLength() <= MIN_MANHATTAN_MOVE)
+            return;
+    }
 
     if(_leftMouseButtonHeld && (mouseEvent->modifiers() & Qt::ShiftModifier))
     {

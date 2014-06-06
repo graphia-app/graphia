@@ -62,6 +62,7 @@ private:
 
     QPoint _prevCursorPosition;
     QPoint _cursorPosition;
+    QPoint _clickPosition;
     bool _mouseMoving;
     NodeId _clickedNodeId;
 
