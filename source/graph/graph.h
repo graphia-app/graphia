@@ -87,7 +87,7 @@ template<typename T> QDebug operator<<(QDebug d, const ElementId<T>& id)
     return d;
 }
 
-struct NodeId : ElementId<NodeId>
+class NodeId : public ElementId<NodeId>
 {
 #if __cplusplus == 201103L
     using ElementId::ElementId;
@@ -97,7 +97,7 @@ struct NodeId : ElementId<NodeId>
 #endif
 };
 
-struct EdgeId : ElementId<EdgeId>
+class EdgeId : public ElementId<EdgeId>
 {
 #if __cplusplus == 201103L
     using ElementId::ElementId;
@@ -121,7 +121,7 @@ namespace std
 
 template<typename T> using ElementIdSet = std::unordered_set<T, std::hash<ElementId<T>>>;
 
-struct ComponentId : ElementId<ComponentId>
+class ComponentId : public ElementId<ComponentId>
 {
 #if __cplusplus == 201103L
     using ElementId::ElementId;
