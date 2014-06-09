@@ -4,7 +4,8 @@
 #include "../graph/graph.h"
 
 #include <QObject>
-#include <QSet>
+
+#include <iterator>
 
 class SelectionManager : public QObject
 {
@@ -12,21 +13,27 @@ class SelectionManager : public QObject
 public:
     SelectionManager(const ReadOnlyGraph& graph) : _graph(&graph) {}
 
-    QSet<NodeId> selectedNodes() const;
-    QSet<NodeId> unselectedNodes() const;
+    ElementIdSet<NodeId> selectedNodes() const;
+    ElementIdSet<NodeId> unselectedNodes() const;
 
     bool selectNode(NodeId nodeId);
-    bool selectNodes(const QSet<NodeId>& nodeIds);
+    bool selectNodes(const ElementIdSet<NodeId>& nodeIds);
+    template<typename InputIterator> bool selectNodes(InputIterator first,
+                                                      InputIterator last);
 
     bool deselectNode(NodeId nodeId);
-    bool deselectNodes(const QSet<NodeId>& nodeIds);
+    bool deselectNodes(const ElementIdSet<NodeId>& nodeIds);
+    template<typename InputIterator> bool deselectNodes(InputIterator first,
+                                                        InputIterator last);
 
     void toggleNode(NodeId nodeId);
-    void toggleNodes(const QSet<NodeId>& nodeIds);
+    void toggleNodes(const ElementIdSet<NodeId>& nodeIds);
+    template<typename InputIterator> void toggleNodes(InputIterator first,
+                                                      InputIterator last);
 
     bool nodeIsSelected(NodeId nodeId) const;
 
-    bool setSelectedNodes(const QSet<NodeId>& nodeIds);
+    bool setSelectedNodes(const ElementIdSet<NodeId>& nodeIds);
 
     bool selectAllNodes();
     bool clearNodeSelection();
@@ -35,7 +42,7 @@ public:
 private:
     const ReadOnlyGraph* _graph;
 
-    QSet<NodeId> _selectedNodes;
+    ElementIdSet<NodeId> _selectedNodes;
 
 signals:
     void selectionChanged(const SelectionManager& selectionManager) const;

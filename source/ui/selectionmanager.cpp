@@ -1,55 +1,56 @@
 #include "selectionmanager.h"
 
 #include <algorithm>
+#include <utility>
 
-template<typename T> QSet<T> setForVector(std::vector<T> vector)
-{
-    //FIXME this is probably sub-optimal
-    QSet<T> set;
-    for(T t : vector)
-        set.insert(t);
-
-    return set;
-}
-
-QSet<NodeId> SelectionManager::selectedNodes() const
+ElementIdSet<NodeId> SelectionManager::selectedNodes() const
 {
     // Assertion that our selection doesn't contain things that aren't in the graph
-    Q_ASSERT(setForVector(_graph->nodeIds()).contains(_selectedNodes));
+    Q_ASSERT(std::includes(_graph->nodeIds().begin(), _graph->nodeIds().end(),
+                           _selectedNodes.begin(), _selectedNodes.end()));
+
     return _selectedNodes;
 }
 
-QSet<NodeId> SelectionManager::unselectedNodes() const
+ElementIdSet<NodeId> SelectionManager::unselectedNodes() const
 {
-    return setForVector(_graph->nodeIds()).subtract(_selectedNodes);
+    auto& nodeIds = _graph->nodeIds();
+    auto unselectedNodeIds = ElementIdSet<NodeId>(nodeIds.begin(), nodeIds.end());
+    unselectedNodeIds.erase(_selectedNodes.begin(), _selectedNodes.end());
+
+    return unselectedNodeIds;
 }
 
 bool SelectionManager::selectNode(NodeId nodeId)
 {
-    bool selectionWillChange = !_selectedNodes.contains(nodeId);
-    _selectedNodes.insert(nodeId);
+    auto result = _selectedNodes.insert(nodeId);
 
-    if(selectionWillChange)
+    if(result.second)
         emit selectionChanged(*this);
 
-    return selectionWillChange;
+    return result.second;
 }
 
-bool SelectionManager::selectNodes(const QSet<NodeId>& nodeIds)
+bool SelectionManager::selectNodes(const ElementIdSet<NodeId>& nodeIds)
 {
-    bool selectionWillChange = !_selectedNodes.contains(nodeIds);
-    _selectedNodes.unite(nodeIds);
+    return selectNodes(nodeIds.begin(), nodeIds.end());
+}
 
-    if(selectionWillChange)
+template<typename InputIterator> bool SelectionManager::selectNodes(InputIterator first, InputIterator last)
+{
+    auto oldSize = _selectedNodes.size();
+    _selectedNodes.insert(first, last);
+    bool selectionDidChange = _selectedNodes.size() > oldSize;
+
+    if(selectionDidChange)
         emit selectionChanged(*this);
 
-    return selectionWillChange;
+    return selectionDidChange;
 }
 
 bool SelectionManager::deselectNode(NodeId nodeId)
 {
-    bool selectionWillChange = _selectedNodes.contains(nodeId);
-    _selectedNodes.remove(nodeId);
+    bool selectionWillChange = _selectedNodes.erase(nodeId) > 0;
 
     if(selectionWillChange)
         emit selectionChanged(*this);
@@ -57,13 +58,15 @@ bool SelectionManager::deselectNode(NodeId nodeId)
     return selectionWillChange;
 }
 
-bool SelectionManager::deselectNodes(const QSet<NodeId>& nodeIds)
+bool SelectionManager::deselectNodes(const ElementIdSet<NodeId>& nodeIds)
 {
-    QSet<NodeId> intersection(_selectedNodes);
-    intersection.intersect(nodeIds);
+    return deselectNodes(nodeIds.begin(), nodeIds.end());
+}
 
-    bool selectionWillChange = !intersection.empty();
-    _selectedNodes.subtract(nodeIds);
+template<typename InputIterator> bool SelectionManager::deselectNodes(InputIterator first,
+                                                                      InputIterator last)
+{
+    bool selectionWillChange = _selectedNodes.erase(first, last) != first;
 
     if(selectionWillChange)
         emit selectionChanged(*this);
@@ -79,13 +82,20 @@ void SelectionManager::toggleNode(NodeId nodeId)
         selectNode(nodeId);
 }
 
-void SelectionManager::toggleNodes(const QSet<NodeId>& nodeIds)
+void SelectionManager::toggleNodes(const ElementIdSet<NodeId>& nodeIds)
 {
-    QSet<NodeId> intersection(_selectedNodes);
-    intersection.intersect(nodeIds);
+    toggleNodes(nodeIds.begin(), nodeIds.end());
+}
 
-    _selectedNodes.unite(nodeIds);
-    _selectedNodes.subtract(intersection);
+template<typename InputIterator> void SelectionManager::toggleNodes(InputIterator first,
+                                                                    InputIterator last)
+{
+    ElementIdSet<NodeId> difference;
+    std::set_symmetric_difference(_selectedNodes.begin(), _selectedNodes.end(),
+                                  first, last,
+                                  std::inserter(difference, difference.begin()));
+
+    _selectedNodes = std::move(difference);
 
     emit selectionChanged(*this);
 }
@@ -95,13 +105,13 @@ bool SelectionManager::nodeIsSelected(NodeId nodeId) const
     Q_ASSERT(std::find(_graph->nodeIds().begin(),
                        _graph->nodeIds().end(),
                        nodeId) != _graph->nodeIds().end());
-    return _selectedNodes.contains(nodeId);
+    return _selectedNodes.find(nodeId) != _selectedNodes.end();
 }
 
-bool SelectionManager::setSelectedNodes(const QSet<NodeId>& nodeIds)
+bool SelectionManager::setSelectedNodes(const ElementIdSet<NodeId>& nodeIds)
 {
     bool selectionWillChange = (_selectedNodes != nodeIds);
-    _selectedNodes = nodeIds;
+    _selectedNodes = std::move(nodeIds);
 
     if(selectionWillChange)
         emit selectionChanged(*this);
@@ -111,7 +121,8 @@ bool SelectionManager::setSelectedNodes(const QSet<NodeId>& nodeIds)
 
 bool SelectionManager::selectAllNodes()
 {
-    return selectNodes(setForVector(_graph->nodeIds()));
+    auto& nodeIds = _graph->nodeIds();
+    return selectNodes(nodeIds.begin(), nodeIds.end());
 }
 
 bool SelectionManager::clearNodeSelection()
@@ -127,5 +138,6 @@ bool SelectionManager::clearNodeSelection()
 
 void SelectionManager::invertNodeSelection()
 {
-    toggleNodes(setForVector(_graph->nodeIds()));
+    auto& nodeIds = _graph->nodeIds();
+    toggleNodes(nodeIds.begin(), nodeIds.end());
 }

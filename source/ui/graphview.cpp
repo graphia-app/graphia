@@ -125,7 +125,7 @@ void GraphView::mouseReleaseEvent(QMouseEvent* mouseEvent)
                             _frustumSelectStart.x(), _frustumSelectStart.y(),
                             frustumEndPoint.x(), frustumEndPoint.y());
 
-                QSet<NodeId> selection;
+                ElementIdSet<NodeId> selection;
 
                 const ReadOnlyGraph& component = *_graphModel->graph().componentById(_graphScene->focusComponentId());
                 for(NodeId nodeId : component.nodeIds())

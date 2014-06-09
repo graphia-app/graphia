@@ -260,7 +260,7 @@ void ContentPaneWidget::deleteSelectedNodes()
     auto edges = _graphModel->graph().edgesForNodes(_selectionManager->selectedNodes());
     auto nodes = _selectionManager->selectedNodes();
 
-    if(nodes.isEmpty())
+    if(nodes.empty())
         return;
 
     _commandManager.execute(nodes.size() > 1 ? tr("Delete Nodes") : tr("Delete Node"),

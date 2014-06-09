@@ -81,7 +81,7 @@ void MainWindow::setEditActionAvailability()
     {
         editable = contentPaneWidget->graphModel()->editable();
         selectionNonEmpty = contentPaneWidget->selectionManager() != nullptr &&
-                !contentPaneWidget->selectionManager()->selectedNodes().isEmpty();
+                !contentPaneWidget->selectionManager()->selectedNodes().empty();
     }
 
     _ui->actionDelete->setEnabled(editable && selectionNonEmpty);

@@ -18,7 +18,7 @@ QSet<ComponentId> SimpleComponentManager::assignConnectedElementsComponentId(
         oldComponentIdsAffected.insert(_nodesComponentId[nodeId]);
         nodesComponentId[nodeId] = componentId;
 
-        const QSet<EdgeId> edgeIds = graph().nodeById(nodeId).edges();
+        const ElementIdSet<EdgeId> edgeIds = graph().nodeById(nodeId).edges();
 
         for(EdgeId edgeId : edgeIds)
         {

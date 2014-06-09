@@ -89,14 +89,9 @@ NodeId Graph::addNode(const Node& node)
     return addNode(node._id);
 }
 
-void Graph::addNodes(const QSet<NodeId>& nodeIds)
+void Graph::addNodes(const ElementIdSet<NodeId>& nodeIds)
 {
-    addNodes(nodeIds.toList());
-}
-
-void Graph::addNodes(const QList<NodeId>& nodeIds)
-{
-    if(nodeIds.isEmpty())
+    if(nodeIds.empty())
         return;
 
     beginTransaction();
@@ -124,14 +119,9 @@ void Graph::removeNode(NodeId nodeId)
     endTransaction();
 }
 
-void Graph::removeNodes(const QSet<NodeId>& nodeIds)
+void Graph::removeNodes(const ElementIdSet<NodeId>& nodeIds)
 {
-    removeNodes(nodeIds.toList());
-}
-
-void Graph::removeNodes(const QList<NodeId>& nodeIds)
-{
-    if(nodeIds.isEmpty())
+    if(nodeIds.empty())
         return;
 
     beginTransaction();
@@ -180,7 +170,9 @@ EdgeId Graph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     edge._targetId = targetId;
 
     _nodesVector[sourceId]._outEdges.insert(edgeId);
+    _nodesVector[sourceId]._edges.insert(edgeId);
     _nodesVector[targetId]._inEdges.insert(edgeId);
+    _nodesVector[targetId]._edges.insert(edgeId);
 
     emit edgeAdded(this, edgeId);
     endTransaction();
@@ -193,14 +185,9 @@ EdgeId Graph::addEdge(const Edge& edge)
     return addEdge(edge._id, edge._sourceId, edge._targetId);
 }
 
-void Graph::addEdges(const QSet<Edge>& edges)
+void Graph::addEdges(const std::vector<Edge>& edges)
 {
-    addEdges(edges.toList());
-}
-
-void Graph::addEdges(const QList<Edge>& edges)
-{
-    if(edges.isEmpty())
+    if(edges.empty())
         return;
 
     beginTransaction();
@@ -221,8 +208,10 @@ void Graph::removeEdge(EdgeId edgeId)
     const Edge& edge = _edgesVector[edgeId];
     Node& source = _nodesVector[edge.sourceId()];
     Node& target = _nodesVector[edge.targetId()];
-    source._outEdges.remove(edgeId);
-    target._inEdges.remove(edgeId);
+    source._outEdges.erase(edgeId);
+    source._edges.erase(edgeId);
+    target._inEdges.erase(edgeId);
+    target._edges.erase(edgeId);
 
     _edgeIdsInUse[edgeId] = false;
     _unusedEdgeIdsDeque.push_back(edgeId);
@@ -230,14 +219,9 @@ void Graph::removeEdge(EdgeId edgeId)
     endTransaction();
 }
 
-void Graph::removeEdges(const QSet<EdgeId>& edgeIds)
+void Graph::removeEdges(const ElementIdSet<EdgeId>& edgeIds)
 {
-    removeEdges(edgeIds.toList());
-}
-
-void Graph::removeEdges(const QList<EdgeId>& edgeIds)
-{
-    if(edgeIds.isEmpty())
+    if(edgeIds.empty())
         return;
 
     beginTransaction();
@@ -289,14 +273,9 @@ ComponentId Graph::componentIdOfEdge(EdgeId edgeId) const
     return ComponentId();
 }
 
-const QList<EdgeId> Graph::edgeIdsForNodes(const QSet<NodeId>& nodeIds)
+const ElementIdSet<EdgeId> Graph::edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds)
 {
-    return edgeIdsForNodes(nodeIds.toList());
-}
-
-const QList<EdgeId> Graph::edgeIdsForNodes(const QList<NodeId>& nodeIds)
-{
-    QSet<EdgeId> edgeIds;
+    ElementIdSet<EdgeId> edgeIds;
 
     for(NodeId nodeId : nodeIds)
     {
@@ -305,21 +284,16 @@ const QList<EdgeId> Graph::edgeIdsForNodes(const QList<NodeId>& nodeIds)
             edgeIds.insert(edgeId);
     }
 
-    return edgeIds.toList();
+    return edgeIds;
 }
 
-const QList<Edge> Graph::edgesForNodes(const QSet<NodeId>& nodeIds)
+const std::vector<Edge> Graph::edgesForNodes(const ElementIdSet<NodeId>& nodeIds)
 {
-    return edgesForNodes(nodeIds.toList());
-}
-
-const QList<Edge> Graph::edgesForNodes(const QList<NodeId>& nodeIds)
-{
-    const QList<EdgeId>& edgeIds = edgeIdsForNodes(nodeIds);
-    QList<Edge> edges;
+    const ElementIdSet<EdgeId>& edgeIds = edgeIdsForNodes(nodeIds);
+    std::vector<Edge> edges;
 
     for(EdgeId edgeId : edgeIds)
-        edges.append(_edgesVector[edgeId]);
+        edges.push_back(_edgesVector[edgeId]);
 
     return edges;
 }

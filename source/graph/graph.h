@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <deque>
+#include <unordered_set>
 #include <type_traits>
 #include <functional>
 
@@ -16,9 +17,11 @@ class ComponentManager;
 
 template<typename T> class ElementId;
 template<typename T> QDebug operator<<(QDebug d, const ElementId<T>& id);
+//namespace std { template<typename T> struct hash<ElementId<T>> }
 
 template<typename T> class ElementId
 {
+    friend std::hash<ElementId<T>>;
 private:
     static const int NullValue = -1;
     int _value;
@@ -104,6 +107,20 @@ struct EdgeId : ElementId<EdgeId>
 #endif
 };
 
+namespace std
+{
+    template<typename T> struct hash<ElementId<T>>
+    {
+    public:
+        size_t operator()(const ElementId<T>& x) const
+        {
+            return x._value;
+        }
+    };
+}
+
+template<typename T> using ElementIdSet = std::unordered_set<T, std::hash<ElementId<T>>>;
+
 struct ComponentId : ElementId<ComponentId>
 {
 #if __cplusplus == 201103L
@@ -120,8 +137,9 @@ class Node
 
 private:
     NodeId _id;
-    QSet<EdgeId> _inEdges;
-    QSet<EdgeId> _outEdges;
+    ElementIdSet<EdgeId> _inEdges;
+    ElementIdSet<EdgeId> _outEdges;
+    ElementIdSet<EdgeId> _edges;
 
 public:
     Node() {}
@@ -131,12 +149,12 @@ public:
         _outEdges(other._outEdges)
     {}
 
-    const QSet<EdgeId> inEdges() const { return _inEdges; }
+    const ElementIdSet<EdgeId> inEdges() const { return _inEdges; }
     int inDegree() const { return _inEdges.size(); }
-    const QSet<EdgeId> outEdges() const { return _outEdges; }
+    const ElementIdSet<EdgeId> outEdges() const { return _outEdges; }
     int outDegree() const { return _outEdges.size(); }
-    const QSet<EdgeId> edges() const { return _inEdges + _outEdges; }
-    int degree() const { return edges().size(); }
+    const ElementIdSet<EdgeId> edges() const { return _edges; }
+    int degree() const { return _edges.size(); }
 
     NodeId id() const { return _id; }
 };
@@ -250,12 +268,10 @@ public:
     NodeId addNode();
     NodeId addNode(NodeId nodeId);
     NodeId addNode(const Node& node);
-    void addNodes(const QSet<NodeId>& nodeIds);
-    void addNodes(const QList<NodeId>& nodeIds);
+    void addNodes(const ElementIdSet<NodeId>& nodeIds);
 
     void removeNode(NodeId nodeId);
-    void removeNodes(const QSet<NodeId>& nodeIds);
-    void removeNodes(const QList<NodeId>& nodeIds);
+    void removeNodes(const ElementIdSet<NodeId>& nodeIds);
 
     const std::vector<EdgeId>& edgeIds() const { return _edgeIdsVector; }
     int numEdges() const { return _edgeIdsVector.size(); }
@@ -264,12 +280,10 @@ public:
     EdgeId addEdge(NodeId sourceId, NodeId targetId);
     EdgeId addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId);
     EdgeId addEdge(const Edge& edge);
-    void addEdges(const QSet<Edge>& edges);
-    void addEdges(const QList<Edge>& edges);
+    void addEdges(const std::vector<Edge>& edges);
 
     void removeEdge(EdgeId edgeId);
-    void removeEdges(const QSet<EdgeId>& edgeIds);
-    void removeEdges(const QList<EdgeId>& edgeIds);
+    void removeEdges(const ElementIdSet<EdgeId>& edgeIds);
 
     const QList<ComponentId>* componentIds() const;
     ComponentId firstComponentId() const { return (*componentIds())[0]; }
@@ -279,10 +293,8 @@ public:
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
 
-    const QList<EdgeId> edgeIdsForNodes(const QSet<NodeId>& nodeIds);
-    const QList<EdgeId> edgeIdsForNodes(const QList<NodeId>& nodeIds);
-    const QList<Edge> edgesForNodes(const QSet<NodeId>& nodeIds);
-    const QList<Edge> edgesForNodes(const QList<NodeId>& nodeIds);
+    const ElementIdSet<EdgeId> edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds);
+    const std::vector<Edge> edgesForNodes(const ElementIdSet<NodeId>& nodeIds);
 
     void dumpToQDebug(int detail) const;
 
