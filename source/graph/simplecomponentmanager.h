@@ -6,7 +6,6 @@
 
 #include <map>
 #include <queue>
-#include <QList>
 
 /*
 This class is somewhat sub-optimal in that it simply does a depth first
@@ -31,7 +30,7 @@ class SimpleComponentManager : public ComponentManager
 {
     Q_OBJECT
 private:
-    QList<ComponentId> _componentIdsList;
+    std::vector<ComponentId> _componentIdsList;
     ComponentId _nextComponentId;
     std::queue<ComponentId> _vacatedComponentIdQueue;
     std::map<ComponentId, GraphComponent*> _componentsMap;
@@ -72,7 +71,7 @@ private:
                                                                  EdgeArray<ComponentId>& edgesComponentId);
 
 public:
-    const QList<ComponentId>& componentIds() const;
+    const std::vector<ComponentId>& componentIds() const;
     const GraphComponent* componentById(ComponentId componentId);
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;

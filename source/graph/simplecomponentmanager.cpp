@@ -156,7 +156,7 @@ ComponentId SimpleComponentManager::generateComponentId()
     else
         newComponentId = _nextComponentId++;
 
-    _componentIdsList.append(newComponentId);
+    _componentIdsList.push_back(newComponentId);
 
     for(ResizableGraphArray* componentArray : _componentArrayList)
         componentArray->resize(componentArrayCapacity());
@@ -166,7 +166,7 @@ ComponentId SimpleComponentManager::generateComponentId()
 
 void SimpleComponentManager::releaseComponentId(ComponentId componentId)
 {
-    _componentIdsList.removeOne(componentId);
+    _componentIdsList.erase(std::remove(_componentIdsList.begin(), _componentIdsList.end(), componentId), _componentIdsList.end());
     _vacatedComponentIdQueue.push(componentId);
 }
 
@@ -213,7 +213,7 @@ void SimpleComponentManager::removeGraphComponent(ComponentId componentId)
         delete graphComponent;
 
         _componentsMap.erase(componentId);
-        _componentIdsList.removeOne(componentId);
+        _componentIdsList.erase(std::remove(_componentIdsList.begin(), _componentIdsList.end(), componentId), _componentIdsList.end());
         releaseComponentId(componentId);
         _updatesRequired.erase(componentId);
     }
@@ -229,7 +229,7 @@ void SimpleComponentManager::onGraphChanged(const Graph*)
     _updatesRequired.clear();
 }
 
-const QList<ComponentId>& SimpleComponentManager::componentIds() const
+const std::vector<ComponentId>& SimpleComponentManager::componentIds() const
 {
     return _componentIdsList;
 }
@@ -248,7 +248,8 @@ ComponentId SimpleComponentManager::componentIdOfNode(NodeId nodeId) const
         return ComponentId();
 
     ComponentId componentId = _nodesComponentId[nodeId];
-    return _componentIdsList.contains(componentId) ? componentId : ComponentId();
+    auto i = std::find(_componentIdsList.begin(), _componentIdsList.end(), componentId);
+    return i != _componentIdsList.end() ? *i : ComponentId();
 }
 
 ComponentId SimpleComponentManager::componentIdOfEdge(EdgeId edgeId) const
@@ -257,6 +258,7 @@ ComponentId SimpleComponentManager::componentIdOfEdge(EdgeId edgeId) const
         return ComponentId();
 
     ComponentId componentId = _edgesComponentId[edgeId];
-    return _componentIdsList.contains(componentId) ? componentId : ComponentId();
+    auto i = std::find(_componentIdsList.begin(), _componentIdsList.end(), componentId);
+    return i != _componentIdsList.end() ? *i : ComponentId();
 }
 

@@ -232,7 +232,7 @@ void Graph::removeEdges(const ElementIdSet<EdgeId>& edgeIds)
     endTransaction();
 }
 
-const QList<ComponentId> *Graph::componentIds() const
+const std::vector<ComponentId>* Graph::componentIds() const
 {
     if(_componentManager != nullptr)
         return &_componentManager->componentIds();

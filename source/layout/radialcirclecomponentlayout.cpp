@@ -147,11 +147,11 @@ static PlacementRegion mergePlacementRegionsForAngle(QList<PlacementRegion>& pla
 
 void RadialCircleComponentLayout::executeReal(uint64_t)
 {
-    QList<ComponentId> componentIds = *graph().componentIds();
+    std::vector<ComponentId> componentIds = *graph().componentIds();
     const float COMPONENT_SEPARATION = 1.0f;
     ComponentPositions& componentPositions = *this->_componentPositions;
 
-    qStableSort(componentIds.begin(), componentIds.end(),
+    std::sort(componentIds.begin(), componentIds.end(),
         [&](const ComponentId& a, const ComponentId& b)
         {
             const int numNodesA = graph().componentById(a)->numNodes();
@@ -184,7 +184,7 @@ void RadialCircleComponentLayout::executeReal(uint64_t)
 
     QList<PendingComponentPlacement> placements;
 
-    for(int i = 1; i < componentIds.size(); i++)
+    for(unsigned int i = 1; i < componentIds.size(); i++)
     {
         ComponentId componentId = componentIds[i];
         float componentRadius = radiusOfComponent(componentId) + COMPONENT_SEPARATION;

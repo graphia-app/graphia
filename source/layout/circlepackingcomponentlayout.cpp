@@ -2,20 +2,9 @@
 
 #include "../utils.h"
 
-#include <QtAlgorithms>
-
-static ComponentPositions* sortComponentPositions;
-static bool distanceFromOriginLessThan(const ComponentId& a, const ComponentId& b)
-{
-    const QVector2D& positionA = (*sortComponentPositions)[a];
-    const QVector2D& positionB = (*sortComponentPositions)[b];
-
-    return positionA.lengthSquared() < positionB.lengthSquared();
-}
-
 void CirclePackingComponentLayout::executeReal(uint64_t iteration)
 {
-    QList<ComponentId> componentIds = *graph().componentIds();
+    std::vector<ComponentId> componentIds = *graph().componentIds();
     const float COMPONENT_SEPARATION = 2.0f;
     ComponentPositions& componentPositions = *this->_componentPositions;
     ComponentArray<float> componentRadii(const_cast<Graph&>(graph()));
@@ -29,14 +18,20 @@ void CirclePackingComponentLayout::executeReal(uint64_t iteration)
             componentPositions[componentId] = Utils::randQVector2D(-1.0f, 1.0f);
     }
 
-    sortComponentPositions = &componentPositions;
-    qSort(componentIds.begin(), componentIds.end(), distanceFromOriginLessThan);
+    std::sort(componentIds.begin(), componentIds.end(),
+        [componentPositions](const ComponentId& a, const ComponentId& b)
+        {
+            const QVector2D& positionA = componentPositions[a];
+            const QVector2D& positionB = componentPositions[b];
+
+            return positionA.lengthSquared() < positionB.lengthSquared();
+        });
 
     QVector<QVector2D> moves(componentPositions.size());
 
-    for(int i = 0; i < componentIds.size() - 1; i++)
+    for(unsigned int i = 0; i < componentIds.size() - 1; i++)
     {
-        for(int j = i + 1; j < componentIds.size(); j++)
+        for(unsigned int j = i + 1; j < componentIds.size(); j++)
         {
             if(i == j)
                 continue;

@@ -5,6 +5,8 @@
 
 #include <QObject>
 
+#include <vector>
+
 class GraphComponent : public QObject, public ReadOnlyGraph
 {
     friend class ComponentManager;
@@ -90,7 +92,7 @@ protected:
 public:
     Graph& graph() { return *_graph; }
 
-    virtual const QList<ComponentId>& componentIds() const = 0;
+    virtual const std::vector<ComponentId>& componentIds() const = 0;
     int numComponents() const { return componentIds().size(); }
     virtual const GraphComponent* componentById(ComponentId componentId) = 0;
     virtual ComponentId componentIdOfNode(NodeId nodeId) const = 0;

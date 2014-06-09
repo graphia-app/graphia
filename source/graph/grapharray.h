@@ -5,9 +5,10 @@
 #include "componentmanager.h"
 
 #include <QObject>
-#include <QVector>
 #include <QMutex>
 #include <QMutexLocker>
+
+#include <vector>
 
 class ResizableGraphArray
 {
@@ -19,7 +20,7 @@ template<typename Index, typename Element> class GraphArray : public ResizableGr
 {
 protected:
     Graph* _graph;
-    QVector<Element> _array;
+    std::vector<Element> _array;
     QMutex _mutex;
     bool _flag; // Generic flag
 
@@ -35,7 +36,7 @@ public:
         _flag(other._flag)
     {
         for(auto e : other._array)
-            _array.append(e);
+            _array.push_back(e);
     }
 
     virtual ~GraphArray() {}
@@ -69,10 +70,10 @@ public:
         return _array[index];
     }
 
-    typename QVector<Element>::iterator begin() { return _array.begin(); }
-    typename QVector<Element>::const_iterator begin() const { return _array.begin(); }
-    typename QVector<Element>::iterator end() { return _array.end(); }
-    typename QVector<Element>::const_iterator end() const { return _array.end(); }
+    typename std::vector<Element>::iterator begin() { return _array.begin(); }
+    typename std::vector<Element>::const_iterator begin() const { return _array.begin(); }
+    typename std::vector<Element>::iterator end() { return _array.end(); }
+    typename std::vector<Element>::const_iterator end() const { return _array.end(); }
 
     int size() const
     {

@@ -285,11 +285,11 @@ public:
     void removeEdge(EdgeId edgeId);
     void removeEdges(const ElementIdSet<EdgeId>& edgeIds);
 
-    const QList<ComponentId>* componentIds() const;
-    ComponentId firstComponentId() const { return (*componentIds())[0]; }
+    const std::vector<ComponentId>* componentIds() const;
+    ComponentId firstComponentId() const { return *componentIds()->begin(); }
     int numComponents() const;
     const ReadOnlyGraph* componentById(ComponentId componentId) const;
-    const ReadOnlyGraph* firstComponent() const { return componentById((*componentIds())[0]); }
+    const ReadOnlyGraph* firstComponent() const { return componentById(firstComponentId()); }
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
 

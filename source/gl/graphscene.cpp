@@ -791,7 +791,7 @@ void GraphScene::selectFocusNodeClosestToCameraVector(Transition::Type transitio
         moveFocusToNode(closestNodeId, transitionType);
 }
 
-static ComponentId cycleThroughComponentIds(const QList<ComponentId>& componentIds,
+static ComponentId cycleThroughComponentIds(const std::vector<ComponentId>& componentIds,
                                             ComponentId currentComponentId, int amount)
 {
     int numComponents = componentIds.size();
