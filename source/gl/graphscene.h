@@ -183,7 +183,7 @@ private:
     QOpenGLBuffer _selectionMarkerDataBuffer;
     QOpenGLVertexArrayObject _selectionMarkerDataVAO;
 
-    QList<DebugLine> _debugLines;
+    std::vector<DebugLine> _debugLines;
     QMutex _debugLinesMutex;
     QVector<GLfloat> _debugLinesData;
     QOpenGLBuffer _debugLinesDataBuffer;
@@ -198,7 +198,7 @@ public:
     void addDebugLine(const QVector3D& start, const QVector3D& end, const QColor color = QColor(Qt::GlobalColor::white))
     {
         DebugLine debugLine(start, end, color);
-        _debugLines.append(debugLine);
+        _debugLines.push_back(debugLine);
     }
     void addDebugBoundingBox(const BoundingBox3D& boundingBox, const QColor color = QColor(Qt::GlobalColor::white));
     void clearDebugLines() { _debugLines.clear(); }

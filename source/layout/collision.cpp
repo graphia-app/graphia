@@ -33,7 +33,7 @@ NodeId Collision::closestNodeToLine(const QVector3D &point, const QVector3D &dir
     return closestNodeToLine(_graph->nodeIds(), point, direction);
 }
 
-void Collision::nodesIntersectingLine(const QVector3D& point, const QVector3D& direction, QVector<NodeId>& intersectingNodeIds)
+void Collision::nodesIntersectingLine(const QVector3D& point, const QVector3D& direction, std::vector<NodeId>& intersectingNodeIds)
 {
     Plane plane(point, direction);
 
@@ -48,13 +48,13 @@ void Collision::nodesIntersectingLine(const QVector3D& point, const QVector3D& d
         float distance = position.distanceToLine(point, direction);
 
         if(distance <= (*_nodeVisuals)[nodeId]._size)
-            intersectingNodeIds.append(nodeId);
+            intersectingNodeIds.push_back(nodeId);
     }
 }
 
 NodeId Collision::nearestNodeIntersectingLine(const QVector3D& point, const QVector3D& direction)
 {
-    QVector<NodeId> nodeIds;
+    std::vector<NodeId> nodeIds;
 
     nodesIntersectingLine(point, direction, nodeIds);
 

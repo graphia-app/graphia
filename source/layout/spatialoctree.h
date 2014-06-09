@@ -6,9 +6,9 @@
 #include "../layout/layout.h"
 
 #include <QVector3D>
-#include <QVector>
 
 #include <functional>
+#include <vector>
 
 class GraphScene;
 
@@ -18,7 +18,7 @@ public:
     struct SubVolume
     {
         BoundingBox3D _boundingBox;
-        QVector<NodeId> _nodeIds;
+        std::vector<NodeId> _nodeIds;
         SpatialOctree* _subTree;
     };
 
@@ -27,16 +27,16 @@ private:
     SubVolume _subVolumes[8];
 
 public:
-    SpatialOctree(const BoundingBox3D& boundingBox, const QVector<NodeId> nodeIds, const NodePositions& nodePositions,
+    SpatialOctree(const BoundingBox3D& boundingBox, const std::vector<NodeId> nodeIds, const NodePositions& nodePositions,
                    std::function<bool(SpatialOctree::SubVolume*)> predicate = [](SubVolume*) { return true; });
-    SpatialOctree(const BoundingBox3D& boundingBox, const QVector<NodeId> nodeIds, const NodePositions& nodePositions,
+    SpatialOctree(const BoundingBox3D& boundingBox, const std::vector<NodeId> nodeIds, const NodePositions& nodePositions,
                    const QVector3D& origin, const QVector3D& direction);
 
     virtual ~SpatialOctree();
 
     SubVolume& subVolumeForPoint(const QVector3D& point);
-    QList<const SubVolume*> leaves(std::function<bool(const SubVolume*, int)> predicate, int treeDepth = 0) const;
-    QList<const SubVolume*> leaves() const { return leaves([](const SubVolume*, int){ return true; }); }
+    std::vector<const SubVolume*> leaves(std::function<bool(const SubVolume*, int)> predicate, int treeDepth = 0) const;
+    std::vector<const SubVolume*> leaves() const { return leaves([](const SubVolume*, int){ return true; }); }
     void visitVolumes(std::function<void(const SubVolume*, int treeDepth)> visitor = [](const SubVolume*, int){}, int treeDepth = 0) const;
     void dumpToQDebug();
     void debugRenderOctree(GraphScene* graphScene, const QVector3D& offset = QVector3D());

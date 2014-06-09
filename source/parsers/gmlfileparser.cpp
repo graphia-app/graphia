@@ -3,6 +3,7 @@
 #include <QFileInfo>
 
 #include <vector>
+#include <map>
 #include <string>
 #include <fstream>
 
@@ -84,7 +85,7 @@ struct GmlGrammar : qi::grammar<Iterator, GmlFileParser::KeyValuePairList(), asc
 
 bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePairList& keyValuePairList, GmlList listType)
 {
-    static QMap<int,NodeId> nodeIdMap;
+    static std::map<int, NodeId> nodeIdMap;
     NodeId sourceId;
 
     for(unsigned int i = 0; i < keyValuePairList.size(); i++)
@@ -135,7 +136,7 @@ bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePair
             if(intValue != nullptr)
             {
                 if(!key.compare("id"))
-                    nodeIdMap.insert(*intValue, graph.addNode());
+                    nodeIdMap.insert(std::pair<int, NodeId>(*intValue, graph.addNode()));
                 else
                 {
                     // Unhandled node data
@@ -146,9 +147,9 @@ bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePair
         case GmlList::Edge:
             if(intValue != nullptr)
             {
-                if(!key.compare("source") && nodeIdMap.contains(*intValue))
+                if(!key.compare("source") && nodeIdMap.find(*intValue) != nodeIdMap.end())
                     sourceId = nodeIdMap[*intValue];
-                else if(!key.compare("target") && !sourceId.isNull() && nodeIdMap.contains(*intValue))
+                else if(!key.compare("target") && !sourceId.isNull() && nodeIdMap.find(*intValue) != nodeIdMap.end())
                     graph.addEdge(sourceId, nodeIdMap[*intValue]);
                 else
                 {

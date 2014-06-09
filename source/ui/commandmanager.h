@@ -5,9 +5,9 @@
 #include <QObject>
 #include <QStack>
 #include <QString>
-#include <QList>
 
 #include <functional>
+#include <vector>
 
 // For simple operations the Command class can be used directly, by passing
 // it lambdas to perform the execute and undo actions. For more complicated
@@ -74,8 +74,8 @@ public:
     bool canUndo() const;
     bool canRedo() const;
 
-    const QList<const Command*> undoableCommands() const;
-    const QList<const Command*> redoableCommands() const;
+    const std::vector<const Command*> undoableCommands() const;
+    const std::vector<const Command*> redoableCommands() const;
 
 private:
     QStack<Command*> _stack;

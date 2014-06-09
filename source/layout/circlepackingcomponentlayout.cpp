@@ -2,6 +2,8 @@
 
 #include "../utils.h"
 
+#include <vector>
+
 void CirclePackingComponentLayout::executeReal(uint64_t iteration)
 {
     std::vector<ComponentId> componentIds = *graph().componentIds();
@@ -27,7 +29,7 @@ void CirclePackingComponentLayout::executeReal(uint64_t iteration)
             return positionA.lengthSquared() < positionB.lengthSquared();
         });
 
-    QVector<QVector2D> moves(componentPositions.size());
+    std::vector<QVector2D> moves(componentPositions.size());
 
     for(unsigned int i = 0; i < componentIds.size() - 1; i++)
     {

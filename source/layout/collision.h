@@ -5,8 +5,9 @@
 #include "../graph/graphmodel.h"
 #include "layout.h"
 
-#include <QList>
 #include <QVector3D>
+
+#include <vector>
 
 class Collision
 {
@@ -28,7 +29,7 @@ public:
     NodeId closestNodeToLine(const std::vector<NodeId>& nodeIds, const QVector3D& point, const QVector3D& direction);
     NodeId closestNodeToLine(const QVector3D& point, const QVector3D& direction);
 
-    void nodesIntersectingLine(const QVector3D& point, const QVector3D& direction, QVector<NodeId>& intersectingNodeIds);
+    void nodesIntersectingLine(const QVector3D& point, const QVector3D& direction, std::vector<NodeId>& intersectingNodeIds);
     NodeId nearestNodeIntersectingLine(const QVector3D& point, const QVector3D& direction);
 };
 

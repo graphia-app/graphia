@@ -5,6 +5,7 @@
 #include "../maths/ray.h"
 
 #include <unordered_set>
+#include <vector>
 
 static void subDivideBoundingBox(const BoundingBox3D& boundingBox, SpatialOctree::SubVolume subVolumes[8])
 {
@@ -27,7 +28,7 @@ static void subDivideBoundingBox(const BoundingBox3D& boundingBox, SpatialOctree
     subVolumes[7]._boundingBox = BoundingBox3D(QVector3D(cx,      cy,      cz     ), QVector3D(cx + xh, cy + yh, cz + zh));
 }
 
-static bool distributeNodesOverVolume(SpatialOctree& spatialOctTree, const QVector<NodeId> nodeIds,
+static bool distributeNodesOverVolume(SpatialOctree& spatialOctTree, const std::vector<NodeId> nodeIds,
                                       const NodePositions& nodePositions, std::unordered_set<SpatialOctree::SubVolume*>& subVolumes)
 {
     bool distinctPositions = false;
@@ -38,7 +39,7 @@ static bool distributeNodesOverVolume(SpatialOctree& spatialOctTree, const QVect
         const QVector3D& nodePosition = nodePositions[nodeId];
         SpatialOctree::SubVolume& subVolume = spatialOctTree.subVolumeForPoint(nodePosition);
 
-        subVolume._nodeIds.append(nodeId);
+        subVolume._nodeIds.push_back(nodeId);
         subVolumes.insert(&subVolume);
 
         if(!distinctPositions)
@@ -53,7 +54,7 @@ static bool distributeNodesOverVolume(SpatialOctree& spatialOctTree, const QVect
     return distinctPositions;
 }
 
-static void distributeNodesOverSubVolumes(SpatialOctree& spatialOctTree, const QVector<NodeId> nodeIds,
+static void distributeNodesOverSubVolumes(SpatialOctree& spatialOctTree, const std::vector<NodeId> nodeIds,
                                           const NodePositions& nodePositions,
                                           std::function<bool(SpatialOctree::SubVolume*)> predicate)
 {
@@ -76,7 +77,7 @@ static void distributeNodesOverSubVolumes(SpatialOctree& spatialOctTree, const Q
     }
 }
 
-SpatialOctree::SpatialOctree(const BoundingBox3D& boundingBox, const QVector<NodeId> nodeIds, const NodePositions& nodePositions, std::function<bool(SubVolume*)> predicate) :
+SpatialOctree::SpatialOctree(const BoundingBox3D& boundingBox, const std::vector<NodeId> nodeIds, const NodePositions& nodePositions, std::function<bool(SubVolume*)> predicate) :
     _centre(boundingBox.centre())
 {
     for(int i = 0; i < 8; i++)
@@ -86,7 +87,7 @@ SpatialOctree::SpatialOctree(const BoundingBox3D& boundingBox, const QVector<Nod
     distributeNodesOverSubVolumes(*this, nodeIds, nodePositions, predicate);
 }
 
-SpatialOctree::SpatialOctree(const BoundingBox3D& boundingBox, const QVector<NodeId> nodeIds, const NodePositions& nodePositions,
+SpatialOctree::SpatialOctree(const BoundingBox3D& boundingBox, const std::vector<NodeId> nodeIds, const NodePositions& nodePositions,
                                const QVector3D& origin, const QVector3D& direction) :
     _centre(boundingBox.centre())
 {
@@ -130,9 +131,9 @@ SpatialOctree::SubVolume& SpatialOctree::subVolumeForPoint(const QVector3D& poin
     return subVolume;
 }
 
-QList<const SpatialOctree::SubVolume*> SpatialOctree::leaves(std::function<bool (const SpatialOctree::SubVolume*, int)> predicate, int treeDepth) const
+std::vector<const SpatialOctree::SubVolume*> SpatialOctree::leaves(std::function<bool (const SpatialOctree::SubVolume*, int)> predicate, int treeDepth) const
 {
-    QList<const SubVolume*> leafVolumes;
+    std::vector<const SubVolume*> leafVolumes;
 
     for(int i = 0; i < 8; i++)
     {
@@ -142,9 +143,12 @@ QList<const SpatialOctree::SubVolume*> SpatialOctree::leaves(std::function<bool 
             continue;
 
         if(subVolume._subTree != nullptr)
-            leafVolumes.append(subVolume._subTree->leaves(predicate, treeDepth + 1));
+        {
+            auto subLeafVolumes = subVolume._subTree->leaves(predicate, treeDepth + 1);
+            leafVolumes.insert(leafVolumes.begin(), subLeafVolumes.begin(), subLeafVolumes.end());
+        }
         else
-            leafVolumes.append(&subVolume);
+            leafVolumes.push_back(&subVolume);
     }
 
     return leafVolumes;
@@ -173,7 +177,9 @@ void SpatialOctree::dumpToQDebug()
         QString subVolumeString;
         subVolumeString.sprintf("0x%p", subVolume);
 
-        qDebug() << (indentString + subVolumeString) << subVolume->_nodeIds;
+        qDebug() << (indentString + subVolumeString);
+        for(auto nodeId : subVolume->_nodeIds )
+            qDebug() << nodeId;
     });
 }
 
@@ -193,7 +199,7 @@ void SpatialOctree::debugRenderOctree(GraphScene* graphScene, const QVector3D& o
 
             QColor lineColor(r, g, b);
 
-            if(!subVolume->_nodeIds.isEmpty())
+            if(!subVolume->_nodeIds.empty())
                 graphScene->addDebugBoundingBox(subVolume->_boundingBox + offset, lineColor);
         });
 }

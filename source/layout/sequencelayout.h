@@ -3,27 +3,27 @@
 
 #include "layout.h"
 
-#include <QList>
+#include <vector>
 
 class SequenceLayout : public NodeLayout
 {
     Q_OBJECT
 private:
-    QList<NodeLayout*> _subLayouts;
+    std::vector<NodeLayout*> _subLayouts;
 
 public:
     SequenceLayout(const ReadOnlyGraph& graph, NodePositions& positions) :
         NodeLayout(graph, positions)
     {}
 
-    SequenceLayout(const ReadOnlyGraph& graph, NodePositions& positions, QList<NodeLayout*> subLayouts) :
+    SequenceLayout(const ReadOnlyGraph& graph, NodePositions& positions, std::vector<NodeLayout*> subLayouts) :
         NodeLayout(graph, positions), _subLayouts(subLayouts)
     {}
 
     virtual ~SequenceLayout()
     {}
 
-    void addSubLayout(NodeLayout* layout) { _subLayouts.append(layout); }
+    void addSubLayout(NodeLayout* layout) { _subLayouts.push_back(layout); }
 
     void cancel()
     {

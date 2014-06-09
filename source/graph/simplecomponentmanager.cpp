@@ -44,11 +44,11 @@ ElementIdSet<ComponentId> SimpleComponentManager::assignConnectedElementsCompone
 void SimpleComponentManager::updateComponents()
 {
     std::map<ComponentId, ElementIdSet<ComponentId>> splitComponents;
-    QList<ComponentId> newComponentIds;
+    ElementIdSet<ComponentId> newComponentIds;
 
     NodeArray<ComponentId> newNodesComponentId(graph());
     EdgeArray<ComponentId> newEdgesComponentId(graph());
-    QList<ComponentId> newComponentIdsList;
+    ElementIdSet<ComponentId> newComponentIdsList;
 
     const std::vector<NodeId>& nodeIdsList = graph().nodeIds();
 
@@ -59,11 +59,11 @@ void SimpleComponentManager::updateComponents()
 
         if(newNodesComponentId[nodeId].isNull() && !oldComponentId.isNull())
         {
-            if(newComponentIdsList.contains(oldComponentId))
+            if(newComponentIdsList.find(oldComponentId) != newComponentIdsList.end())
             {
                 // We have already used this ID so this is a component that has split
                 ComponentId newComponentId = generateComponentId();
-                newComponentIdsList.append(newComponentId);
+                newComponentIdsList.insert(newComponentId);
                 assignConnectedElementsComponentId(nodeId, newComponentId,
                                                    newNodesComponentId, newEdgesComponentId);
 
@@ -75,7 +75,7 @@ void SimpleComponentManager::updateComponents()
             }
             else
             {
-                newComponentIdsList.append(oldComponentId);
+                newComponentIdsList.insert(oldComponentId);
                 ElementIdSet<ComponentId> componentIdsAffected =
                         assignConnectedElementsComponentId(nodeId, oldComponentId,
                                                            newNodesComponentId, newEdgesComponentId);
@@ -103,18 +103,18 @@ void SimpleComponentManager::updateComponents()
         if(newNodesComponentId[nodeId].isNull() && _nodesComponentId[nodeId].isNull())
         {
             ComponentId newComponentId = generateComponentId();
-            newComponentIdsList.append(newComponentId);
+            newComponentIdsList.insert(newComponentId);
             assignConnectedElementsComponentId(nodeId, newComponentId, newNodesComponentId, newEdgesComponentId);
             queueGraphComponentUpdate(newComponentId);
 
-            newComponentIds.append(newComponentId);
+            newComponentIds.insert(newComponentId);
         }
     }
 
     // Search for removed components
     for(ComponentId componentId : _componentIdsList)
     {
-        if(newComponentIdsList.contains(componentId))
+        if(newComponentIdsList.find(componentId) != newComponentIdsList.end())
             continue;
 
         // Component removed

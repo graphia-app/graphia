@@ -2,7 +2,7 @@
 
 #include "ray.h"
 
-#include <QList>
+#include <vector>
 #include <cmath>
 
 BoundingSphere::BoundingSphere() :
@@ -60,9 +60,9 @@ bool BoundingSphere::containsSphere(const BoundingSphere& other) const
     return d <= _radius;
 }
 
-QList<QVector3D> BoundingSphere::rayIntersection(const Ray& ray) const
+std::vector<QVector3D> BoundingSphere::rayIntersection(const Ray& ray) const
 {
-    QList<QVector3D> result;
+    std::vector<QVector3D> result;
     const QVector3D& origin = ray.origin();
     const QVector3D& dir = ray.dir();
     QVector3D oc = _centre - origin;
@@ -73,14 +73,14 @@ QList<QVector3D> BoundingSphere::rayIntersection(const Ray& ray) const
         float ocLength = oc.length();
 
         if(ocLength == _radius)
-            result.append(origin);
+            result.push_back(origin);
         else if(ocLength < _radius)
         {
             QVector3D centreProjectedOnRay = ray.closestPointTo(_centre);
             float rayDistFromCentre = (centreProjectedOnRay - _centre).length();
             float d = std::sqrt((_radius * _radius) - (rayDistFromCentre * rayDistFromCentre));
             float di1 = d - (centreProjectedOnRay - origin).length();
-            result.append(origin + (dir * di1));
+            result.push_back(origin + (dir * di1));
         }
     }
     else
@@ -98,11 +98,11 @@ QList<QVector3D> BoundingSphere::rayIntersection(const Ray& ray) const
 
             if(ocLength >= _radius)
             {
-                result.append(origin + (dir * di1));
-                result.append(origin + (dir * di2));
+                result.push_back(origin + (dir * di1));
+                result.push_back(origin + (dir * di2));
             }
             else
-                result.append(origin + (dir * di2));
+                result.push_back(origin + (dir * di2));
         }
     }
 

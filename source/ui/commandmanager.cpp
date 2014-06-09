@@ -70,27 +70,27 @@ bool CommandManager::canRedo() const
     return _lastExecutedIndex < _stack.size() - 1;
 }
 
-const QList<const Command*> CommandManager::undoableCommands() const
+const std::vector<const Command*> CommandManager::undoableCommands() const
 {
-    QList<const Command*> commands;
+    std::vector<const Command*> commands;
 
     if(canUndo())
     {
         for(int index = _lastExecutedIndex; index >= 0; index--)
-            commands.append(_stack.at(index));
+            commands.push_back(_stack.at(index));
     }
 
     return commands;
 }
 
-const QList<const Command*> CommandManager::redoableCommands() const
+const std::vector<const Command*> CommandManager::redoableCommands() const
 {
-    QList<const Command*> commands;
+    std::vector<const Command*> commands;
 
     if(canRedo())
     {
         for(int index = _lastExecutedIndex + 1; index < _stack.size(); index++)
-            commands.append(_stack.at(index));
+            commands.push_back(_stack.at(index));
     }
 
     return commands;

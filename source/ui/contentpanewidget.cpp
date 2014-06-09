@@ -239,8 +239,8 @@ const QString ContentPaneWidget::nextUndoAction() const
 {
     QString undoAction = tr("Undo");
 
-    if(!_commandManager.undoableCommands().isEmpty())
-        undoAction.append(tr(" ") + _commandManager.undoableCommands().first()->description());
+    if(!_commandManager.undoableCommands().empty())
+        undoAction.append(tr(" ") + _commandManager.undoableCommands()[0]->description());
 
     return undoAction;
 }
@@ -249,8 +249,8 @@ const QString ContentPaneWidget::nextRedoAction() const
 {
     QString redoAction = tr("Redo");
 
-    if(!_commandManager.redoableCommands().isEmpty())
-        redoAction.append(tr(" ") + _commandManager.redoableCommands().first()->description());
+    if(!_commandManager.redoableCommands().empty())
+        redoAction.append(tr(" ") + _commandManager.redoableCommands()[0]->description());
 
     return redoAction;
 }

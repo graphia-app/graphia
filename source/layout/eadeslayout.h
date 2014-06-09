@@ -8,11 +8,13 @@
 
 #include <QVector3D>
 
+#include <vector>
+
 class EadesLayout : public NodeLayout
 {
     Q_OBJECT
 private:
-    QVector<QVector3D> _moves;
+    std::vector<QVector3D> _moves;
 
 public:
     EadesLayout(const ReadOnlyGraph& graph, NodePositions& positions) :

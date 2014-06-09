@@ -2,7 +2,6 @@
 #define CONTENTPANEWIDGET_H
 
 #include <QWidget>
-#include <QMap>
 
 #include "../graph/graph.h"
 #include "../graph/graphmodel.h"

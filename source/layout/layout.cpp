@@ -223,11 +223,11 @@ void LayoutThread::run()
 
 void NodeLayoutThread::addComponent(ComponentId componentId)
 {
-    if(!componentLayouts.contains(componentId))
+    if(componentLayouts.find(componentId) == componentLayouts.end())
     {
         Layout* layout = layoutFactory->create(componentId);
         addLayout(layout);
-        componentLayouts.insert(componentId, layout);
+        componentLayouts.insert(std::pair<ComponentId, Layout*>(componentId, layout));
     }
 }
 
@@ -247,11 +247,11 @@ void NodeLayoutThread::removeComponent(ComponentId componentId)
         resumeAfterRemoval = true;
     }
 
-    if(componentLayouts.contains(componentId))
+    if(componentLayouts.find(componentId) != componentLayouts.end())
     {
         Layout* layout = componentLayouts[componentId];
         removeLayout(layout);
-        componentLayouts.remove(componentId);
+        componentLayouts.erase(componentId);
     }
 
     if(resumeAfterRemoval)

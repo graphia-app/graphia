@@ -266,13 +266,13 @@ void GraphView::mouseMoveEvent(QMouseEvent* mouseEvent)
 
                 Plane divisionPlane(rotationCentre, cursorRay.dir().normalized());
 
-                QList<QVector3D> intersections = boundingSphere.rayIntersection(cursorRay);
+                std::vector<QVector3D> intersections = boundingSphere.rayIntersection(cursorRay);
                 if(intersections.size() > 0)
                 {
                     if(divisionPlane.sideForPoint(clickedNodePosition) == Plane::Side::Front && intersections.size() > 1)
-                        cursorPoint = intersections.at(1);
+                        cursorPoint = intersections[1];
                     else
-                        cursorPoint = intersections.at(0);
+                        cursorPoint = intersections[0];
                 }
                 else
                 {

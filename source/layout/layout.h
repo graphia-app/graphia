@@ -5,8 +5,6 @@
 #include "../graph/grapharray.h"
 #include "../maths/boundingbox.h"
 
-#include <QList>
-#include <QMap>
 #include <QVector2D>
 #include <QVector3D>
 #include <QObject>
@@ -20,6 +18,7 @@
 #include <atomic>
 #include <cstdint>
 #include <set>
+#include <map>
 
 class Layout : public QObject
 {
@@ -208,7 +207,7 @@ class NodeLayoutThread : public LayoutThread
     Q_OBJECT
 private:
     const NodeLayoutFactory* layoutFactory;
-    QMap<ComponentId, Layout*> componentLayouts;
+    std::map<ComponentId, Layout*> componentLayouts;
 
 public:
     NodeLayoutThread(const NodeLayoutFactory* layoutFactory) :

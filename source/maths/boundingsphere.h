@@ -6,6 +6,8 @@
 #include "line.h"
 #include "constants.h"
 
+#include <vector>
+
 class Ray;
 
 class BoundingSphere
@@ -33,7 +35,7 @@ public:
     bool containsPoint(const QVector3D& point) const;
     bool containsLine(const Line3D& line) const;
     bool containsSphere(const BoundingSphere& other) const;
-    QList<QVector3D> rayIntersection(const Ray& ray) const;
+    std::vector<QVector3D> rayIntersection(const Ray& ray) const;
 };
 
 #endif // BOUNDINGSPHERE_H
