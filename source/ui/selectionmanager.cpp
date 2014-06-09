@@ -6,8 +6,12 @@
 ElementIdSet<NodeId> SelectionManager::selectedNodes() const
 {
     // Assertion that our selection doesn't contain things that aren't in the graph
-    Q_ASSERT(std::includes(_graph->nodeIds().begin(), _graph->nodeIds().end(),
-                           _selectedNodes.begin(), _selectedNodes.end()));
+    Q_ASSERT(std::all_of(_selectedNodes.begin(), _selectedNodes.end(),
+        [this](ElementId<NodeId> nodeId)
+        {
+            auto& nodeIds = _graph->nodeIds();
+            return std::find(nodeIds.begin(), nodeIds.end(), nodeId) != nodeIds.end();
+        }));
 
     return _selectedNodes;
 }
@@ -36,7 +40,8 @@ bool SelectionManager::selectNodes(const ElementIdSet<NodeId>& nodeIds)
     return selectNodes(nodeIds.begin(), nodeIds.end());
 }
 
-template<typename InputIterator> bool SelectionManager::selectNodes(InputIterator first, InputIterator last)
+template<typename InputIterator> bool SelectionManager::selectNodes(InputIterator first,
+                                                                    InputIterator last)
 {
     auto oldSize = _selectedNodes.size();
     _selectedNodes.insert(first, last);
@@ -91,9 +96,12 @@ template<typename InputIterator> void SelectionManager::toggleNodes(InputIterato
                                                                     InputIterator last)
 {
     ElementIdSet<NodeId> difference;
-    std::set_symmetric_difference(_selectedNodes.begin(), _selectedNodes.end(),
-                                  first, last,
-                                  std::inserter(difference, difference.begin()));
+    for(auto i = first; i != last; i++)
+    {
+        auto nodeId = *i;
+        if(_selectedNodes.find(nodeId) == _selectedNodes.end())
+            difference.insert(nodeId);
+    }
 
     _selectedNodes = std::move(difference);
 
