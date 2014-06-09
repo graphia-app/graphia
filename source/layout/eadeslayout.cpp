@@ -40,17 +40,6 @@ void EadesLayout::executeReal(uint64_t iteration)
 {
     NodePositions& positions = *this->_positions;
 
-    QVector3D axialDirections[] =
-    {
-        QVector3D(1.0f,  0.0f,  0.0f),
-        QVector3D(0.0f,  1.0f,  0.0f),
-        QVector3D(0.0f,  0.0f,  1.0f),
-        QVector3D(0.0f,  0.0f, -1.0f),
-        QVector3D(0.0f, -1.0f,  0.0f),
-        QVector3D(-1.0f,  0.0f,  0.0f),
-    };
-    int axialDirectionIndex = 0;
-
     if(iteration == 0)
     {
         RandomLayout randomLayout(graph(), positions);
@@ -82,25 +71,10 @@ void EadesLayout::executeReal(uint64_t iteration)
                 NodeId nodeAId = nodeIds[i];
                 NodeId nodeBId = nodeIds[j];
                 QVector3D difference = positions[nodeBId] - positions[nodeAId];
-                //qreal distance = difference.lengthSquared();
                 float x = difference.x(); float y = difference.y(); float z = difference.z();
                 float distance = x * x + y * y + z * z;
-                float force;
-                QVector3D direction;
-
-                if(Utils::valueIsCloseToZero(distance))
-                {
-                    // Pick a "random" direction
-                    force = 1.0f;
-                    direction = axialDirections[axialDirectionIndex];
-                    axialDirectionIndex = (axialDirectionIndex + 1) % 6;
-                }
-                else
-                {
-                    force = REPULSE_SQ(distance);
-                    //direction = difference.normalized();
-                    direction = Utils::fastNormalize(difference);
-                }
+                float force = REPULSE_SQ(distance);
+                QVector3D direction = Utils::fastNormalize(difference, distance);
 
                 _moves[nodeAId] -= (force * direction);
                 _moves[nodeBId] += (force * direction);

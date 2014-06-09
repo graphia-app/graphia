@@ -68,19 +68,10 @@ public:
         return y;
     }
 
-    static QVector3D fastNormalize(QVector3D& v)
+    static QVector3D fastNormalize(QVector3D& v, float len)
     {
-        float xp = v.x(); float yp = v.y(); float zp = v.z();
-
-        // Need some extra precision if the length is very small.
-        double len = double(xp) * double(xp) +
-                     double(yp) * double(yp) +
-                     double(zp) * double(zp);
-
         float rsqrtLen = fast_rsqrt(len);
-        return QVector3D(xp * rsqrtLen,
-                         yp * rsqrtLen,
-                         zp * rsqrtLen);
+        return v * rsqrtLen;
     }
 
     template<typename T> static T clamp(T min, T max, T value)
