@@ -84,8 +84,8 @@ void EadesLayout::executeReal(uint64_t iteration)
                 QVector3D difference = positions[nodeBId] - positions[nodeAId];
                 //qreal distance = difference.lengthSquared();
                 float x = difference.x(); float y = difference.y(); float z = difference.z();
-                qreal distance = x * x + y * y + z * z;
-                qreal force;
+                float distance = x * x + y * y + z * z;
+                float force;
                 QVector3D direction;
 
                 if(Utils::valueIsCloseToZero(distance))

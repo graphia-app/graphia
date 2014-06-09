@@ -77,21 +77,10 @@ public:
                      double(yp) * double(yp) +
                      double(zp) * double(zp);
 
-        if(qFuzzyIsNull(len - 1.0f))
-        {
-            return v;
-        }
-        else if(!qFuzzyIsNull(len))
-        {
-            float rsqrtLen = fast_rsqrt(len);
-            return QVector3D(xp * rsqrtLen,
-                             yp * rsqrtLen,
-                             zp * rsqrtLen);
-        }
-        else
-        {
-            return QVector3D();
-        }
+        float rsqrtLen = fast_rsqrt(len);
+        return QVector3D(xp * rsqrtLen,
+                         yp * rsqrtLen,
+                         zp * rsqrtLen);
     }
 
     template<typename T> static T clamp(T min, T max, T value)
