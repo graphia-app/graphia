@@ -5,8 +5,6 @@
 
 #include <QObject>
 
-#include <iterator>
-
 class SelectionManager : public QObject
 {
     Q_OBJECT

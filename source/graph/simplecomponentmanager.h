@@ -4,8 +4,8 @@
 #include "componentmanager.h"
 #include "grapharray.h"
 
-#include <QMap>
-#include <QQueue>
+#include <map>
+#include <queue>
 #include <QList>
 
 /*
@@ -33,8 +33,8 @@ class SimpleComponentManager : public ComponentManager
 private:
     QList<ComponentId> _componentIdsList;
     ComponentId _nextComponentId;
-    QQueue<ComponentId> _vacatedComponentIdQueue;
-    QMap<ComponentId, GraphComponent*> _componentsMap;
+    std::queue<ComponentId> _vacatedComponentIdQueue;
+    std::map<ComponentId, GraphComponent*> _componentsMap;
     ElementIdSet<ComponentId> _updatesRequired;
     NodeArray<ComponentId> _nodesComponentId;
     EdgeArray<ComponentId> _edgesComponentId;

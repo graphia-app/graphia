@@ -1,20 +1,22 @@
 #include "simplecomponentmanager.h"
 
-#include <QQueue>
+#include <queue>
+#include <map>
 
 ElementIdSet<ComponentId> SimpleComponentManager::assignConnectedElementsComponentId(
         NodeId rootId, ComponentId componentId,
         NodeArray<ComponentId>& nodesComponentId,
         EdgeArray<ComponentId>& edgesComponentId)
 {
-    QQueue<NodeId> nodeIdSearchList;
+    std::queue<NodeId> nodeIdSearchList;
     ElementIdSet<ComponentId> oldComponentIdsAffected;
 
-    nodeIdSearchList.enqueue(rootId);
+    nodeIdSearchList.push(rootId);
 
-    while(!nodeIdSearchList.isEmpty())
+    while(!nodeIdSearchList.empty())
     {
-        NodeId nodeId = nodeIdSearchList.dequeue();
+        NodeId nodeId = nodeIdSearchList.front();
+        nodeIdSearchList.pop();
         oldComponentIdsAffected.insert(_nodesComponentId[nodeId]);
         nodesComponentId[nodeId] = componentId;
 
@@ -27,7 +29,7 @@ ElementIdSet<ComponentId> SimpleComponentManager::assignConnectedElementsCompone
 
             if(nodesComponentId[oppositeNodeId] != componentId)
             {
-                nodeIdSearchList.enqueue(oppositeNodeId);
+                nodeIdSearchList.push(oppositeNodeId);
                 nodesComponentId[oppositeNodeId] = componentId;
             }
         }
@@ -41,7 +43,7 @@ ElementIdSet<ComponentId> SimpleComponentManager::assignConnectedElementsCompone
 
 void SimpleComponentManager::updateComponents()
 {
-    QMap<ComponentId, ElementIdSet<ComponentId>> splitComponents;
+    std::map<ComponentId, ElementIdSet<ComponentId>> splitComponents;
     QList<ComponentId> newComponentIds;
 
     NodeArray<ComponentId> newNodesComponentId(graph());
@@ -125,14 +127,14 @@ void SimpleComponentManager::updateComponents()
     _edgesComponentId = newEdgesComponentId;
 
     // Notify all the splits
-    for(ComponentId splitee : splitComponents.keys())
+    for(auto splitee : splitComponents)
     {
-        ElementIdSet<ComponentId>& splitters = splitComponents[splitee];
-        emit componentSplit(&graph(), splitee, splitters);
+        ElementIdSet<ComponentId>& splitters = splitee.second;
+        emit componentSplit(&graph(), splitee.first, splitters);
 
         for(ComponentId splitter : splitters)
         {
-            if(splitter != splitee)
+            if(splitter != splitee.first)
                 emit componentAdded(&graph(), splitter);
         }
     }
@@ -146,8 +148,11 @@ ComponentId SimpleComponentManager::generateComponentId()
 {
     ComponentId newComponentId;
 
-    if(!_vacatedComponentIdQueue.isEmpty())
-        newComponentId = _vacatedComponentIdQueue.dequeue();
+    if(!_vacatedComponentIdQueue.empty())
+    {
+        newComponentId = _vacatedComponentIdQueue.front();
+        _vacatedComponentIdQueue.pop();
+    }
     else
         newComponentId = _nextComponentId++;
 
@@ -162,17 +167,17 @@ ComponentId SimpleComponentManager::generateComponentId()
 void SimpleComponentManager::releaseComponentId(ComponentId componentId)
 {
     _componentIdsList.removeOne(componentId);
-    _vacatedComponentIdQueue.enqueue(componentId);
+    _vacatedComponentIdQueue.push(componentId);
 }
 
 void SimpleComponentManager::queueGraphComponentUpdate(ComponentId componentId)
 {
     _updatesRequired.insert(componentId);
 
-    if(!_componentsMap.contains(componentId))
+    if(_componentsMap.find(componentId) == _componentsMap.end())
     {
         GraphComponent* graphComponent = new GraphComponent(this->graph());
-        _componentsMap.insert(componentId, graphComponent);
+        _componentsMap.insert(std::pair<ComponentId, GraphComponent*>(componentId, graphComponent));
     }
 }
 
@@ -202,12 +207,12 @@ void SimpleComponentManager::updateGraphComponent(ComponentId componentId)
 
 void SimpleComponentManager::removeGraphComponent(ComponentId componentId)
 {
-    if(_componentsMap.contains(componentId))
+    if(_componentsMap.find(componentId) != _componentsMap.end())
     {
         GraphComponent* graphComponent = _componentsMap[componentId];
         delete graphComponent;
 
-        _componentsMap.remove(componentId);
+        _componentsMap.erase(componentId);
         _componentIdsList.removeOne(componentId);
         releaseComponentId(componentId);
         _updatesRequired.erase(componentId);
@@ -231,7 +236,7 @@ const QList<ComponentId>& SimpleComponentManager::componentIds() const
 
 const GraphComponent* SimpleComponentManager::componentById(ComponentId componentId)
 {
-    if(_componentsMap.contains(componentId))
+    if(_componentsMap.find(componentId) != _componentsMap.end())
         return _componentsMap[componentId];
 
     return nullptr;
