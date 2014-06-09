@@ -74,7 +74,7 @@ protected:
     Graph* _graph;
 
     template<typename> friend class ComponentArray;
-    QList<ResizableGraphArray*> _componentArrayList;
+    std::unordered_set<ResizableGraphArray*> _componentArrayList;
     virtual int componentArrayCapacity() const = 0;
 
     std::vector<NodeId>& graphComponentNodeIdsList(GraphComponent* graphComponent)

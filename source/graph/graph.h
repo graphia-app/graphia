@@ -2,7 +2,6 @@
 #define GRAPH_H
 
 #include <QObject>
-#include <QList>
 #include <QDebug>
 
 #include <vector>
@@ -17,7 +16,6 @@ class ComponentManager;
 
 template<typename T> class ElementId;
 template<typename T> QDebug operator<<(QDebug d, const ElementId<T>& id);
-//namespace std { template<typename T> struct hash<ElementId<T>> }
 
 template<typename T> class ElementId
 {
@@ -245,11 +243,11 @@ private:
     EdgeId _lastEdgeId;
 
     template<typename> friend class NodeArray;
-    QList<ResizableGraphArray*> _nodeArrayList;
+    std::unordered_set<ResizableGraphArray*> _nodeArrayList;
     int nodeArrayCapacity() const { return _lastNodeId; }
 
     template<typename> friend class EdgeArray;
-    QList<ResizableGraphArray*> _edgeArrayList;
+    std::unordered_set<ResizableGraphArray*> _edgeArrayList;
     int edgeArrayCapacity() const { return _lastEdgeId; }
 
     template<typename> friend class ComponentArray;

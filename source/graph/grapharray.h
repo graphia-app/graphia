@@ -109,17 +109,17 @@ public:
         GraphArray<NodeId, Element>(graph)
     {
         this->resize(graph.nodeArrayCapacity());
-        graph._nodeArrayList.append(this);
+        graph._nodeArrayList.insert(this);
     }
 
     NodeArray(const NodeArray& other) : GraphArray<NodeId, Element>(other)
     {
-        this->_graph->_nodeArrayList.append(this);
+        this->_graph->_nodeArrayList.insert(this);
     }
 
     ~NodeArray()
     {
-        this->_graph->_nodeArrayList.removeOne(this);
+        this->_graph->_nodeArrayList.erase(this);
     }
 };
 
@@ -130,17 +130,17 @@ public:
         GraphArray<EdgeId, Element>(graph)
     {
         this->resize(graph.edgeArrayCapacity());
-        graph._edgeArrayList.append(this);
+        graph._edgeArrayList.insert(this);
     }
 
     EdgeArray(const EdgeArray& other) : GraphArray<EdgeId, Element>(other)
     {
-        this->_graph->_edgeArrayList.append(this);
+        this->_graph->_edgeArrayList.insert(this);
     }
 
     ~EdgeArray()
     {
-        this->_graph->_edgeArrayList.removeOne(this);
+        this->_graph->_edgeArrayList.erase(this);
     }
 };
 
@@ -151,17 +151,17 @@ public:
         GraphArray<ComponentId, Element>(graph)
     {
         this->resize(graph._componentManager->componentArrayCapacity());
-        graph._componentManager->_componentArrayList.append(this);
+        graph._componentManager->_componentArrayList.insert(this);
     }
 
     ComponentArray(const ComponentArray& other) : GraphArray<ComponentId, Element>(other)
     {
-        this->_graph->_componentManager->_componentArrayList.append(this);
+        this->_graph->_componentManager->_componentArrayList.insert(this);
     }
 
     ~ComponentArray()
     {
-        this->_graph->_componentManager->_componentArrayList.removeOne(this);
+        this->_graph->_componentManager->_componentArrayList.erase(this);
     }
 };
 
