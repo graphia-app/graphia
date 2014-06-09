@@ -132,8 +132,8 @@ private slots:
     void onNodeWillBeRemoved(const Graph*, NodeId nodeId);
     void onComponentAdded(const Graph*, ComponentId);
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId);
-    void onComponentSplit(const Graph* graph, ComponentId oldComponentId, const QSet<ComponentId>& splitters);
-    void onComponentsWillMerge(const Graph* graph, const QSet<ComponentId>& mergers, ComponentId merged);
+    void onComponentSplit(const Graph* graph, ComponentId oldComponentId, const ElementIdSet<ComponentId>& splitters);
+    void onComponentsWillMerge(const Graph* graph, const ElementIdSet<ComponentId>& mergers, ComponentId merged);
 
 public slots:
     void onSelectionChanged(const SelectionManager& selectionManager);

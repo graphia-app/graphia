@@ -47,8 +47,8 @@ private slots:
 
     void onComponentAdded(const Graph*, ComponentId componentId);
     void onComponentWillBeRemoved(const Graph*, ComponentId componentId);
-    void onComponentSplit(const Graph*, ComponentId splitter, const QSet<ComponentId>& splitters);
-    void onComponentsWillMerge(const Graph*, const QSet<ComponentId>& mergers, ComponentId merger);
+    void onComponentSplit(const Graph*, ComponentId splitter, const ElementIdSet<ComponentId>& splitters);
+    void onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers, ComponentId merger);
 
 public:
     GraphModel* graphModel() { return _graphModel; }

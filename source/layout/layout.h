@@ -19,6 +19,7 @@
 #include <limits>
 #include <atomic>
 #include <cstdint>
+#include <set>
 
 class Layout : public QObject
 {
@@ -155,7 +156,7 @@ class LayoutThread : public QThread
 {
     Q_OBJECT
 protected:
-    QSet<Layout*> _layouts;
+    std::set<Layout*> _layouts;
     QMutex _mutex;
     bool _pause;
     bool _paused;

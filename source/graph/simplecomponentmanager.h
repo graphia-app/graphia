@@ -7,7 +7,6 @@
 #include <QMap>
 #include <QQueue>
 #include <QList>
-#include <QSet>
 
 /*
 This class is somewhat sub-optimal in that it simply does a depth first
@@ -36,7 +35,7 @@ private:
     ComponentId _nextComponentId;
     QQueue<ComponentId> _vacatedComponentIdQueue;
     QMap<ComponentId, GraphComponent*> _componentsMap;
-    QSet<ComponentId> _updatesRequired;
+    ElementIdSet<ComponentId> _updatesRequired;
     NodeArray<ComponentId> _nodesComponentId;
     EdgeArray<ComponentId> _edgesComponentId;
 
@@ -68,9 +67,9 @@ private:
 
     int componentArrayCapacity() const { return _nextComponentId; }
 
-    QSet<ComponentId> assignConnectedElementsComponentId(NodeId rootId, ComponentId componentId,
-                                                         NodeArray<ComponentId>& nodesComponentId,
-                                                         EdgeArray<ComponentId>& edgesComponentId);
+    ElementIdSet<ComponentId> assignConnectedElementsComponentId(NodeId rootId, ComponentId componentId,
+                                                                 NodeArray<ComponentId>& nodesComponentId,
+                                                                 EdgeArray<ComponentId>& edgesComponentId);
 
 public:
     const QList<ComponentId>& componentIds() const;

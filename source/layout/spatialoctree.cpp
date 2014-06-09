@@ -4,6 +4,8 @@
 #include "../gl/graphscene.h"
 #include "../maths/ray.h"
 
+#include <unordered_set>
+
 static void subDivideBoundingBox(const BoundingBox3D& boundingBox, SpatialOctree::SubVolume subVolumes[8])
 {
     const QVector3D c = boundingBox.centre();
@@ -26,7 +28,7 @@ static void subDivideBoundingBox(const BoundingBox3D& boundingBox, SpatialOctree
 }
 
 static bool distributeNodesOverVolume(SpatialOctree& spatialOctTree, const QVector<NodeId> nodeIds,
-                                      const NodePositions& nodePositions, QSet<SpatialOctree::SubVolume*>& subVolumes)
+                                      const NodePositions& nodePositions, std::unordered_set<SpatialOctree::SubVolume*>& subVolumes)
 {
     bool distinctPositions = false;
     QVector3D lastPosition = nodePositions[nodeIds[0]];
@@ -57,7 +59,7 @@ static void distributeNodesOverSubVolumes(SpatialOctree& spatialOctTree, const Q
 {
     const int MAX_NODES_PER_LEAF = 4;
 
-    QSet<SpatialOctree::SubVolume*> subVolumes;
+    std::unordered_set<SpatialOctree::SubVolume*> subVolumes;
     bool distinctPositions = distributeNodesOverVolume(spatialOctTree, nodeIds, nodePositions, subVolumes);
 
     for(SpatialOctree::SubVolume* subVolume : subVolumes)

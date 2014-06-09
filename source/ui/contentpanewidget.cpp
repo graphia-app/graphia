@@ -139,7 +139,7 @@ void ContentPaneWidget::onComponentWillBeRemoved(const Graph*, ComponentId compo
         _nodeLayoutThread->removeComponent(componentId);
 }
 
-void ContentPaneWidget::onComponentSplit(const Graph*, ComponentId /*splitter*/, const QSet<ComponentId>& splitters)
+void ContentPaneWidget::onComponentSplit(const Graph*, ComponentId /*splitter*/, const ElementIdSet<ComponentId>& splitters)
 {
     if(_nodeLayoutThread != nullptr)
     {
@@ -148,7 +148,7 @@ void ContentPaneWidget::onComponentSplit(const Graph*, ComponentId /*splitter*/,
     }
 }
 
-void ContentPaneWidget::onComponentsWillMerge(const Graph*, const QSet<ComponentId>& mergers, ComponentId merger)
+void ContentPaneWidget::onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers, ComponentId merger)
 {
     if(_nodeLayoutThread != nullptr)
     {

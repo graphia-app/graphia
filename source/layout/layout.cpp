@@ -94,7 +94,7 @@ void LayoutThread::removeLayout(Layout *layout)
 {
     QMutexLocker locker(&_mutex);
 
-    _layouts.remove(layout);
+    _layouts.erase(layout);
     delete layout;
 }
 

@@ -2,13 +2,13 @@
 
 #include <QQueue>
 
-QSet<ComponentId> SimpleComponentManager::assignConnectedElementsComponentId(
+ElementIdSet<ComponentId> SimpleComponentManager::assignConnectedElementsComponentId(
         NodeId rootId, ComponentId componentId,
         NodeArray<ComponentId>& nodesComponentId,
         EdgeArray<ComponentId>& edgesComponentId)
 {
     QQueue<NodeId> nodeIdSearchList;
-    QSet<ComponentId> oldComponentIdsAffected;
+    ElementIdSet<ComponentId> oldComponentIdsAffected;
 
     nodeIdSearchList.enqueue(rootId);
 
@@ -34,14 +34,14 @@ QSet<ComponentId> SimpleComponentManager::assignConnectedElementsComponentId(
     }
 
     // We don't count nodes that haven't yet been assigned a component
-    oldComponentIdsAffected.remove(ComponentId());
+    oldComponentIdsAffected.erase(ComponentId());
 
     return oldComponentIdsAffected;
 }
 
 void SimpleComponentManager::updateComponents()
 {
-    QMap<ComponentId, QSet<ComponentId>> splitComponents;
+    QMap<ComponentId, ElementIdSet<ComponentId>> splitComponents;
     QList<ComponentId> newComponentIds;
 
     NodeArray<ComponentId> newNodesComponentId(graph());
@@ -68,15 +68,13 @@ void SimpleComponentManager::updateComponents()
                 queueGraphComponentUpdate(oldComponentId);
                 queueGraphComponentUpdate(newComponentId);
 
-                QSet<ComponentId> splitters;
-                splitters.insert(oldComponentId);
-                splitters.insert(newComponentId);
-                splitComponents[oldComponentId].unite(splitters);
+                splitComponents[oldComponentId].insert(oldComponentId);
+                splitComponents[oldComponentId].insert(newComponentId);
             }
             else
             {
                 newComponentIdsList.append(oldComponentId);
-                QSet<ComponentId> componentIdsAffected =
+                ElementIdSet<ComponentId> componentIdsAffected =
                         assignConnectedElementsComponentId(nodeId, oldComponentId,
                                                            newNodesComponentId, newEdgesComponentId);
                 queueGraphComponentUpdate(oldComponentId);
@@ -85,7 +83,7 @@ void SimpleComponentManager::updateComponents()
                 {
                     // More than one old component IDs were observed so components have merged
                     emit componentsWillMerge(&graph(), componentIdsAffected, oldComponentId);
-                    componentIdsAffected.remove(oldComponentId);
+                    componentIdsAffected.erase(oldComponentId);
 
                     for(ComponentId removedComponentId : componentIdsAffected)
                     {
@@ -112,13 +110,15 @@ void SimpleComponentManager::updateComponents()
     }
 
     // Search for removed components
-    QSet<ComponentId> removedComponentIds = _componentIdsList.toSet().subtract(newComponentIdsList.toSet());
-    for(ComponentId removedComponentId : removedComponentIds)
+    for(ComponentId componentId : _componentIdsList)
     {
-        // Component removed
-        emit componentWillBeRemoved(&graph(), removedComponentId);
+        if(newComponentIdsList.contains(componentId))
+            continue;
 
-        removeGraphComponent(removedComponentId);
+        // Component removed
+        emit componentWillBeRemoved(&graph(), componentId);
+
+        removeGraphComponent(componentId);
     }
 
     _nodesComponentId = newNodesComponentId;
@@ -127,7 +127,7 @@ void SimpleComponentManager::updateComponents()
     // Notify all the splits
     for(ComponentId splitee : splitComponents.keys())
     {
-        QSet<ComponentId>& splitters = splitComponents[splitee];
+        ElementIdSet<ComponentId>& splitters = splitComponents[splitee];
         emit componentSplit(&graph(), splitee, splitters);
 
         for(ComponentId splitter : splitters)
@@ -210,7 +210,7 @@ void SimpleComponentManager::removeGraphComponent(ComponentId componentId)
         _componentsMap.remove(componentId);
         _componentIdsList.removeOne(componentId);
         releaseComponentId(componentId);
-        _updatesRequired.remove(componentId);
+        _updatesRequired.erase(componentId);
     }
 }
 

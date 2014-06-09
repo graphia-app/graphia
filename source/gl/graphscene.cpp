@@ -235,7 +235,7 @@ void GraphScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
     }
 }
 
-void GraphScene::onComponentSplit(const Graph* graph, ComponentId oldComponentId, const QSet<ComponentId>& splitters)
+void GraphScene::onComponentSplit(const Graph* graph, ComponentId oldComponentId, const ElementIdSet<ComponentId>& splitters)
 {
     if(oldComponentId == _focusComponentId)
     {
@@ -256,13 +256,13 @@ void GraphScene::onComponentSplit(const Graph* graph, ComponentId oldComponentId
 
         _focusComponentId = newFocusComponentId;
 
-        QSet<ComponentId> nonFocusSplitters(splitters);
-        nonFocusSplitters.remove(_focusComponentId);
-        _lastSplitterFocusComponentId = nonFocusSplitters.values().at(0);
+        ElementIdSet<ComponentId> nonFocusSplitters(splitters);
+        nonFocusSplitters.erase(_focusComponentId);
+        _lastSplitterFocusComponentId = *nonFocusSplitters.begin();
     }
 }
 
-void GraphScene::onComponentsWillMerge(const Graph*, const QSet<ComponentId>& mergers, ComponentId merged)
+void GraphScene::onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers, ComponentId merged)
 {
     for(ComponentId merger : mergers)
     {
