@@ -377,10 +377,10 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
         QVector3D intensity;
     };
 
-    QVector<Light> lights;
-    lights.append(Light(QVector4D(-20.0f, 0.0f, 3.0f, 1.0f), QVector3D(0.6f, 0.6f, 0.6f)));
-    lights.append(Light(QVector4D(0.0f, 0.0f, 0.0f, 1.0f), QVector3D(0.2f, 0.2f, 0.2f)));
-    lights.append(Light(QVector4D(10.0f, -10.0f, -10.0f, 1.0f), QVector3D(0.4f, 0.4f, 0.4f)));
+    std::vector<Light> lights;
+    lights.emplace_back(QVector4D(-20.0f, 0.0f, 3.0f, 1.0f), QVector3D(0.6f, 0.6f, 0.6f));
+    lights.emplace_back(QVector4D(0.0f, 0.0f, 0.0f, 1.0f), QVector3D(0.2f, 0.2f, 0.2f));
+    lights.emplace_back(QVector4D(10.0f, -10.0f, -10.0f, 1.0f), QVector3D(0.4f, 0.4f, 0.4f));
 
     int numberOfLights = lights.size();
 
@@ -525,21 +525,21 @@ void GraphScene::render2D()
         r.setTop(_height - _selectionRect.top());
         r.setBottom(_height - _selectionRect.bottom());
 
-        QVector<GLfloat> data;
+        std::vector<GLfloat> data;
 
-        data.append(r.left());  data.append(r.bottom());
-        data.append(color.redF()); data.append(color.blueF()); data.append(color.greenF());
-        data.append(r.right()); data.append(r.bottom());
-        data.append(color.redF()); data.append(color.blueF()); data.append(color.greenF());
-        data.append(r.right()); data.append(r.top());
-        data.append(color.redF()); data.append(color.blueF()); data.append(color.greenF());
+        data.push_back(r.left());  data.push_back(r.bottom());
+        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
+        data.push_back(r.right()); data.push_back(r.bottom());
+        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
+        data.push_back(r.right()); data.push_back(r.top());
+        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
 
-        data.append(r.right()); data.append(r.top());
-        data.append(color.redF()); data.append(color.blueF()); data.append(color.greenF());
-        data.append(r.left());  data.append(r.top());
-        data.append(color.redF()); data.append(color.blueF()); data.append(color.greenF());
-        data.append(r.left());  data.append(r.bottom());
-        data.append(color.redF()); data.append(color.blueF()); data.append(color.greenF());
+        data.push_back(r.right()); data.push_back(r.top());
+        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
+        data.push_back(r.left());  data.push_back(r.top());
+        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
+        data.push_back(r.left());  data.push_back(r.bottom());
+        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
 
         _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT1);
 

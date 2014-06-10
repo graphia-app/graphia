@@ -8,7 +8,6 @@
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
 
-#include <QList>
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
@@ -17,6 +16,8 @@
 #include <QColor>
 #include <QMutex>
 #include <QRect>
+
+#include <vector>
 
 class Sphere;
 class Cylinder;
@@ -162,21 +163,21 @@ private:
     GraphModel* _graphModel;
 
     QOpenGLShaderProgram _nodesShader;
-    QVector<GLfloat> _nodePositionData;
+    std::vector<GLfloat> _nodePositionData;
     QOpenGLBuffer _nodePositionBuffer;
 
     QOpenGLShaderProgram _edgesShader;
-    QVector<GLfloat> _edgePositionData;
+    std::vector<GLfloat> _edgePositionData;
     QOpenGLBuffer _edgePositionBuffer;
 
-    QVector<GLfloat> _nodeVisualData;
+    std::vector<GLfloat> _nodeVisualData;
     QOpenGLBuffer _nodeVisualBuffer;
 
-    QVector<GLfloat> _edgeVisualData;
+    std::vector<GLfloat> _edgeVisualData;
     QOpenGLBuffer _edgeVisualBuffer;
 
     QOpenGLShaderProgram _componentMarkerShader;
-    QVector<GLfloat> _componentMarkerData;
+    std::vector<GLfloat> _componentMarkerData;
     QOpenGLBuffer _componentMarkerDataBuffer;
 
     QOpenGLShaderProgram _selectionMarkerShader;
@@ -185,7 +186,7 @@ private:
 
     std::vector<DebugLine> _debugLines;
     QMutex _debugLinesMutex;
-    QVector<GLfloat> _debugLinesData;
+    std::vector<GLfloat> _debugLinesData;
     QOpenGLBuffer _debugLinesDataBuffer;
     QOpenGLVertexArrayObject _debugLinesDataVAO;
     QOpenGLShaderProgram _debugLinesShader;
