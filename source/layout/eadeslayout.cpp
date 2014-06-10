@@ -56,7 +56,7 @@ void EadesLayout::executeReal(uint64_t iteration)
     for(NodeId i : graph().nodeIds())
         _moves[i] = QVector3D(0.0f, 0.0f, 0.0f);
 
-    int numNodes = nodeIds.size();
+    int numNodes = static_cast<int>(nodeIds.size());
 
     // Repulsive forces
     for(int i = 0; i < numNodes - 1; i++)

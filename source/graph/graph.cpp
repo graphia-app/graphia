@@ -243,7 +243,7 @@ const std::vector<ComponentId>* Graph::componentIds() const
 int Graph::numComponents() const
 {
     if(_componentManager != nullptr)
-        return _componentManager->componentIds().size();
+        return static_cast<int>(_componentManager->componentIds().size());
 
     return 0;
 }

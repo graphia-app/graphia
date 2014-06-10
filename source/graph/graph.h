@@ -87,9 +87,10 @@ template<typename T> QDebug operator<<(QDebug d, const ElementId<T>& id)
 
 class NodeId : public ElementId<NodeId>
 {
-#if __cplusplus == 201103L
+#if __cplusplus >= 201103L
     using ElementId::ElementId;
 #else
+public:
     explicit NodeId() : ElementId() {}
     explicit NodeId(int value) : ElementId(value) {}
 #endif
@@ -97,9 +98,10 @@ class NodeId : public ElementId<NodeId>
 
 class EdgeId : public ElementId<EdgeId>
 {
-#if __cplusplus == 201103L
+#if __cplusplus >= 201103L
     using ElementId::ElementId;
 #else
+public:
     explicit EdgeId() : ElementId() {}
     explicit EdgeId(int value) : ElementId(value) {}
 #endif
@@ -121,9 +123,10 @@ template<typename T> using ElementIdSet = std::unordered_set<T, std::hash<Elemen
 
 class ComponentId : public ElementId<ComponentId>
 {
-#if __cplusplus == 201103L
+#if __cplusplus >= 201103L
     using ElementId::ElementId;
 #else
+public:
     explicit ComponentId() : ElementId() {}
     explicit ComponentId(int value) : ElementId(value) {}
 #endif
@@ -148,11 +151,11 @@ public:
     {}
 
     const ElementIdSet<EdgeId> inEdges() const { return _inEdges; }
-    int inDegree() const { return _inEdges.size(); }
+    int inDegree() const { return static_cast<int>(_inEdges.size()); }
     const ElementIdSet<EdgeId> outEdges() const { return _outEdges; }
-    int outDegree() const { return _outEdges.size(); }
+    int outDegree() const { return static_cast<int>(_outEdges.size()); }
     const ElementIdSet<EdgeId> edges() const { return _edges; }
-    int degree() const { return _edges.size(); }
+    int degree() const { return static_cast<int>(_edges.size()); }
 
     NodeId id() const { return _id; }
 };
@@ -260,7 +263,7 @@ public:
     void setComponentManager(ComponentManager* _componentManager);
 
     const std::vector<NodeId>& nodeIds() const { return _nodeIdsVector; }
-    int numNodes() const { return _nodeIdsVector.size(); }
+    int numNodes() const { return static_cast<int>(_nodeIdsVector.size()); }
     const Node& nodeById(NodeId nodeId) const { return _nodesVector[nodeId]; }
 
     NodeId addNode();
@@ -272,7 +275,7 @@ public:
     void removeNodes(const ElementIdSet<NodeId>& nodeIds);
 
     const std::vector<EdgeId>& edgeIds() const { return _edgeIdsVector; }
-    int numEdges() const { return _edgeIdsVector.size(); }
+    int numEdges() const { return static_cast<int>(_edgeIdsVector.size()); }
     const Edge& edgeById(EdgeId edgeId) const { return _edgesVector[edgeId]; }
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId);

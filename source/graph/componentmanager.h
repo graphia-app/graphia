@@ -30,11 +30,11 @@ public:
     const ReadOnlyGraph& graph() { return *_graph; }
 
     const std::vector<NodeId>& nodeIds() const { return _nodeIdsList; }
-    int numNodes() const { return _nodeIdsList.size(); }
+    int numNodes() const { return static_cast<int>(_nodeIdsList.size()); }
     const Node& nodeById(NodeId nodeId) const { return _graph->nodeById(nodeId); }
 
     const std::vector<EdgeId>& edgeIds() const { return _edgeIdsList; }
-    int numEdges() const { return _edgeIdsList.size(); }
+    int numEdges() const { return static_cast<int>(_edgeIdsList.size()); }
     const Edge& edgeById(EdgeId edgeId) const { return _graph->edgeById(edgeId); }
 };
 
@@ -93,7 +93,7 @@ public:
     Graph& graph() { return *_graph; }
 
     virtual const std::vector<ComponentId>& componentIds() const = 0;
-    int numComponents() const { return componentIds().size(); }
+    int numComponents() const { return static_cast<int>(componentIds().size()); }
     virtual const GraphComponent* componentById(ComponentId componentId) = 0;
     virtual ComponentId componentIdOfNode(NodeId nodeId) const = 0;
     virtual ComponentId componentIdOfEdge(EdgeId edgeId) const = 0;

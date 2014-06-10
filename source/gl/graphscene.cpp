@@ -382,7 +382,7 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
     lights.emplace_back(QVector4D(0.0f, 0.0f, 0.0f, 1.0f), QVector3D(0.2f, 0.2f, 0.2f));
     lights.emplace_back(QVector4D(10.0f, -10.0f, -10.0f, 1.0f), QVector3D(0.4f, 0.4f, 0.4f));
 
-    int numberOfLights = lights.size();
+    int numberOfLights = static_cast<int>(lights.size());
 
     program.setUniformValue("numberOfLights", numberOfLights);
 
@@ -411,9 +411,9 @@ void GraphScene::renderNodes()
     const ReadOnlyGraph* component = _graphModel->graph().componentById(_focusComponentId);
 
     _nodePositionBuffer.bind();
-    _nodePositionBuffer.allocate(_nodePositionData.data(), _nodePositionData.size() * sizeof(GLfloat));
+    _nodePositionBuffer.allocate(_nodePositionData.data(), static_cast<int>(_nodePositionData.size()) * sizeof(GLfloat));
     _nodeVisualBuffer.bind();
-    _nodeVisualBuffer.allocate(_nodeVisualData.data(), _nodeVisualData.size() * sizeof(GLfloat));
+    _nodeVisualBuffer.allocate(_nodeVisualData.data(), static_cast<int>(_nodeVisualData.size()) * sizeof(GLfloat));
 
     // Calculate needed matrices
     QMatrix4x4 modelViewMatrix = _camera->viewMatrix();
@@ -442,9 +442,9 @@ void GraphScene::renderEdges()
     const ReadOnlyGraph* component = _graphModel->graph().componentById(_focusComponentId);
 
     _edgePositionBuffer.bind();
-    _edgePositionBuffer.allocate(_edgePositionData.data(), _edgePositionData.size() * sizeof(GLfloat));
+    _edgePositionBuffer.allocate(_edgePositionData.data(), static_cast<int>(_edgePositionData.size()) * sizeof(GLfloat));
     _edgeVisualBuffer.bind();
-    _edgeVisualBuffer.allocate(_edgeVisualData.data(), _edgeVisualData.size() * sizeof(GLfloat));
+    _edgeVisualBuffer.allocate(_edgeVisualData.data(), static_cast<int>(_edgeVisualData.size()) * sizeof(GLfloat));
 
     _edgesShader.setUniformValue("viewMatrix", _camera->viewMatrix());
     _edgesShader.setUniformValue("projectionMatrix", _camera->projectionMatrix());
@@ -464,7 +464,7 @@ void GraphScene::renderComponentMarkers()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     _componentMarkerDataBuffer.bind();
-    _componentMarkerDataBuffer.allocate(_componentMarkerData.data(), _componentMarkerData.size() * sizeof(GLfloat));
+    _componentMarkerDataBuffer.allocate(_componentMarkerData.data(), static_cast<int>(_componentMarkerData.size()) * sizeof(GLfloat));
 
     // Bind the shader program
     _componentMarkerShader.bind();
@@ -491,7 +491,7 @@ void GraphScene::renderDebugLines()
     _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
     _debugLinesDataBuffer.bind();
-    _debugLinesDataBuffer.allocate(_debugLinesData.data(), _debugLinesData.size() * sizeof(GLfloat));
+    _debugLinesDataBuffer.allocate(_debugLinesData.data(), static_cast<int>(_debugLinesData.size()) * sizeof(GLfloat));
 
     _debugLinesShader.bind();
 
@@ -501,7 +501,7 @@ void GraphScene::renderDebugLines()
     _debugLinesShader.setUniformValue("projectionMatrix", _camera->projectionMatrix());
 
     _debugLinesDataVAO.bind();
-    _funcs->glDrawArrays(GL_LINES, 0, _debugLines.size() * 2);
+    _funcs->glDrawArrays(GL_LINES, 0, static_cast<int>(_debugLines.size()) * 2);
     _debugLinesDataVAO.release();
     _debugLinesShader.release();
 
@@ -544,8 +544,7 @@ void GraphScene::render2D()
         _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT1);
 
         _selectionMarkerDataBuffer.bind();
-        _selectionMarkerDataBuffer.allocate(data.data(),
-                                           data.size() * sizeof(GLfloat));
+        _selectionMarkerDataBuffer.allocate(data.data(), static_cast<int>(data.size()) * sizeof(GLfloat));
 
         _selectionMarkerShader.bind();
         _selectionMarkerShader.setUniformValue("projectionMatrix", m);
@@ -794,7 +793,7 @@ void GraphScene::selectFocusNodeClosestToCameraVector(Transition::Type transitio
 static ComponentId cycleThroughComponentIds(const std::vector<ComponentId>& componentIds,
                                             ComponentId currentComponentId, int amount)
 {
-    int numComponents = componentIds.size();
+    int numComponents = static_cast<int>(componentIds.size());
 
     for(int i = 0; i < numComponents; i++)
     {
@@ -877,27 +876,27 @@ void GraphScene::prepareVertexBuffers()
     _nodePositionBuffer.create();
     _nodePositionBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     _nodePositionBuffer.bind();
-    _nodePositionBuffer.allocate(_nodePositionData.data(), _nodePositionData.size() * sizeof(GLfloat));
+    _nodePositionBuffer.allocate(_nodePositionData.data(), static_cast<int>(_nodePositionData.size()) * sizeof(GLfloat));
 
     _edgePositionBuffer.create();
     _edgePositionBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     _edgePositionBuffer.bind();
-    _edgePositionBuffer.allocate(_edgePositionData.data(), _edgePositionData.size() * sizeof(GLfloat));
+    _edgePositionBuffer.allocate(_edgePositionData.data(), static_cast<int>(_edgePositionData.size()) * sizeof(GLfloat));
 
     _nodeVisualBuffer.create();
     _nodeVisualBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     _nodeVisualBuffer.bind();
-    _nodeVisualBuffer.allocate(_nodeVisualData.data(), _nodeVisualData.size() * sizeof(GLfloat));
+    _nodeVisualBuffer.allocate(_nodeVisualData.data(), static_cast<int>(_nodeVisualData.size()) * sizeof(GLfloat));
 
     _edgeVisualBuffer.create();
     _edgeVisualBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     _edgeVisualBuffer.bind();
-    _edgeVisualBuffer.allocate(_edgeVisualData.data(), _edgeVisualData.size() * sizeof(GLfloat));
+    _edgeVisualBuffer.allocate(_edgeVisualData.data(), static_cast<int>(_edgeVisualData.size()) * sizeof(GLfloat));
 
     _componentMarkerDataBuffer.create();
     _componentMarkerDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     _componentMarkerDataBuffer.bind();
-    _componentMarkerDataBuffer.allocate(_componentMarkerData.data(), _componentMarkerData.size() * sizeof(GLfloat));
+    _componentMarkerDataBuffer.allocate(_componentMarkerData.data(), static_cast<int>(_componentMarkerData.size()) * sizeof(GLfloat));
 
     _selectionMarkerDataBuffer.create();
     _selectionMarkerDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
@@ -906,7 +905,7 @@ void GraphScene::prepareVertexBuffers()
     _debugLinesDataBuffer.create();
     _debugLinesDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     _debugLinesDataBuffer.bind();
-    _debugLinesDataBuffer.allocate(_debugLinesData.data(), _debugLinesData.size() * sizeof(GLfloat));
+    _debugLinesDataBuffer.allocate(_debugLinesData.data(), static_cast<int>(_debugLinesData.size()) * sizeof(GLfloat));
 }
 
 void GraphScene::prepareNodeVAO()

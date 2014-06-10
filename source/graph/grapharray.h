@@ -77,7 +77,7 @@ public:
 
     int size() const
     {
-        return _array.size();
+        return static_cast<int>(_array.size());
     }
 
     void resize(int size)

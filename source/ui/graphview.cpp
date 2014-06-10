@@ -343,13 +343,13 @@ void GraphView::keyPressEvent(QKeyEvent* keyEvent)
     }
 }
 
-void GraphView::keyReleaseEvent(QKeyEvent* keyEvent)
+void GraphView::keyReleaseEvent(QKeyEvent* /*keyEvent*/)
 {
-    switch(keyEvent->key())
+    /*switch(keyEvent->key())
     {
     default:
         break;
-    }
+    }*/
 }
 
 void GraphView::wheelEvent(QWheelEvent* wheelEvent)
