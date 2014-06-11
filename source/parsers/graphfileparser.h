@@ -2,7 +2,6 @@
 #define GRAPHFILEPARSER_H
 
 #include <QObject>
-#include <QThread>
 
 #ifndef Q_MOC_RUN
 #include <boost/iterator/iterator_adaptor.hpp>
@@ -11,6 +10,7 @@
 
 #include <iterator>
 #include <cstdint>
+#include <thread>
 #include <atomic>
 
 #include "../graph/graph.h"
@@ -87,39 +87,41 @@ public:
     };
 };
 
-class GraphFileParserThread : public QThread
+class GraphFileParserThread : public QObject
 {
     Q_OBJECT
 private:
     QString _filename;
     Graph* _graph;
     GraphFileParser* _graphFileParser;
+    std::thread _thread;
 
 public:
     GraphFileParserThread(const QString& filename, Graph& graph, GraphFileParser* graphFileParser) :
         _filename(filename),
         _graph(&graph),
         _graphFileParser(graphFileParser)
-    {
-        // Take ownership of the parser
-        graphFileParser->moveToThread(this);
-    }
+    {}
 
     virtual ~GraphFileParserThread()
     {
         cancel();
-        if(isRunning())
-            wait();
+        _thread.join();
+    }
+
+    void start()
+    {
+        _thread = std::thread(&GraphFileParserThread::run, this);
     }
 
     void cancel()
     {
-        if(isRunning())
+        if(_thread.joinable())
             _graphFileParser->cancel();
     }
 
 private:
-    void run() Q_DECL_OVERRIDE
+    void run()
     {
         connect(_graphFileParser, &GraphFileParser::progress, this, &GraphFileParserThread::progress);
 
