@@ -8,14 +8,14 @@
 #include <QVector2D>
 #include <QVector3D>
 #include <QObject>
-#include <QThread>
-#include <QMutex>
-#include <QMutexLocker>
-#include <QWaitCondition>
+
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <atomic>
 
 #include <algorithm>
 #include <limits>
-#include <atomic>
 #include <cstdint>
 #include <set>
 #include <map>
@@ -151,19 +151,20 @@ public:
     virtual NodeLayout* create(ComponentId componentId) const = 0;
 };
 
-class LayoutThread : public QThread
+class LayoutThread : public QObject
 {
     Q_OBJECT
 protected:
     std::set<Layout*> _layouts;
-    QMutex _mutex;
+    std::mutex _mutex;
+    std::thread _thread;
     bool _pause;
     bool _paused;
     bool _stop;
     bool _repeating;
     uint64_t _iteration;
-    QWaitCondition _waitForPause;
-    QWaitCondition _waitForResume;
+    std::condition_variable _waitForPause;
+    std::condition_variable _waitForResume;
 
 public:
     LayoutThread(bool repeating = false) :
@@ -179,7 +180,7 @@ public:
     virtual ~LayoutThread()
     {
         stop();
-        wait();
+        _thread.join();
     }
 
     void addLayout(Layout* layout);
@@ -191,12 +192,13 @@ public:
     void resume();
 
     void execute();
+    void start();
     void stop();
 
 private:
     bool iterative();
     bool allLayoutsShouldPause();
-    void run() Q_DECL_OVERRIDE;
+    void run();
 
 signals:
     void executed();

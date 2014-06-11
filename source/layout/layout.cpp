@@ -83,16 +83,13 @@ BoundingBox2D ComponentLayout::boundingBoxOfComponent(ComponentId componentId) c
 
 void LayoutThread::addLayout(Layout *layout)
 {
-    QMutexLocker locker(&_mutex);
-
-    // Take ownership of the algorithm
-    layout->moveToThread(this);
+    std::lock_guard<std::mutex> locker(_mutex);
     _layouts.insert(layout);
 }
 
 void LayoutThread::removeLayout(Layout *layout)
 {
-    QMutexLocker locker(&_mutex);
+    std::lock_guard<std::mutex> locker(_mutex);
 
     _layouts.erase(layout);
     delete layout;
@@ -100,7 +97,7 @@ void LayoutThread::removeLayout(Layout *layout)
 
 void LayoutThread::pause()
 {
-    QMutexLocker locker(&_mutex);
+    std::lock_guard<std::mutex> locker(_mutex);
     if(_paused)
         return;
 
@@ -112,7 +109,7 @@ void LayoutThread::pause()
 
 void LayoutThread::pauseAndWait()
 {
-    QMutexLocker locker(&_mutex);
+    std::unique_lock<std::mutex> lock(_mutex);
     if(_paused)
         return;
 
@@ -121,25 +118,25 @@ void LayoutThread::pauseAndWait()
     for(Layout* layout : _layouts)
         layout->cancel();
 
-    _waitForPause.wait(&_mutex);
+    _waitForPause.wait(lock);
 }
 
 bool LayoutThread::paused()
 {
-    QMutexLocker locker(&_mutex);
+    std::lock_guard<std::mutex> locker(_mutex);
     return _paused;
 }
 
 void LayoutThread::resume()
 {
-    QMutexLocker locker(&_mutex);
+    std::lock_guard<std::mutex> locker(_mutex);
     if(!_paused)
         return;
 
     _pause = false;
     _paused = false;
 
-    _waitForResume.wakeAll();
+    _waitForResume.notify_all();
 }
 
 void LayoutThread::execute()
@@ -147,16 +144,21 @@ void LayoutThread::execute()
     resume();
 }
 
+void LayoutThread::start()
+{
+    _thread = std::thread(&LayoutThread::run, this);
+}
+
 void LayoutThread::stop()
 {
-    QMutexLocker locker(&_mutex);
+    std::lock_guard<std::mutex> locker(_mutex);
     _stop = true;
     _pause = false;
 
     for(Layout* layout : _layouts)
         layout->cancel();
 
-    _waitForResume.wakeAll();
+    _waitForResume.notify_all();
 }
 
 bool LayoutThread::iterative()
@@ -196,19 +198,24 @@ void LayoutThread::run()
 
         emit executed();
 
+        std::unique_lock<std::mutex> lock(_mutex);
+
+        if(_stop)
         {
-            QMutexLocker locker(&_mutex);
-
-            if(!_stop && (_pause || allLayoutsShouldPause() || (!iterative() && _repeating)))
-            {
-                _paused = true;
-                _waitForPause.wakeAll();
-                _waitForResume.wait(&_mutex);
-            }
-
-            if(_stop)
-                break;
+            lock.unlock();
+            break;
         }
+
+        if(!_stop && (_pause || allLayoutsShouldPause() || (!iterative() && _repeating)))
+        {
+            _paused = true;
+            _waitForPause.notify_all();
+            _waitForResume.wait(lock);
+        }
+        else
+            lock.unlock();
+
+        std::this_thread::yield();
     }
     while(iterative() || _repeating);
 
