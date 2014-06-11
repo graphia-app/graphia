@@ -4,6 +4,7 @@
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
 #include "../maths/boundingbox.h"
+#include "../maths/boundingsphere.h"
 
 #include <QVector2D>
 #include <QVector3D>
@@ -96,13 +97,6 @@ public:
     static BoundingBox3D boundingBox(const ReadOnlyGraph& graph, const NodePositions& _positions);
     BoundingBox3D boundingBox() const;
     static BoundingBox2D boundingBoxInXY(const ReadOnlyGraph& graph, const NodePositions& _positions);
-
-    //FIXME we have boundingsphere.h too!
-    struct BoundingSphere
-    {
-        QVector3D _centre;
-        float _radius;
-    };
 
     static BoundingSphere boundingSphere(const ReadOnlyGraph& graph, const NodePositions& _positions);
     BoundingSphere boundingSphere() const;

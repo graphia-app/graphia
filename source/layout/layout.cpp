@@ -26,7 +26,7 @@ BoundingBox2D NodeLayout::boundingBoxInXY(const ReadOnlyGraph &graph, const Node
                 QVector2D(boundingBox.max().x(), boundingBox.max().y()));
 }
 
-NodeLayout::BoundingSphere NodeLayout::boundingSphere() const
+BoundingSphere NodeLayout::boundingSphere() const
 {
     return NodeLayout::boundingSphere(*_graph, *this->_positions);
 }
@@ -37,14 +37,13 @@ float NodeLayout::boundingCircleRadiusInXY(const ReadOnlyGraph &graph, const Nod
     return std::max(boundingBox.xLength(), boundingBox.yLength()) * 0.5f * std::sqrt(2.0f);
 }
 
-NodeLayout::BoundingSphere NodeLayout::boundingSphere(const ReadOnlyGraph &graph, const NodePositions &positions)
+BoundingSphere NodeLayout::boundingSphere(const ReadOnlyGraph &graph, const NodePositions &positions)
 {
     BoundingBox3D boundingBox = NodeLayout::boundingBox(graph, positions);
-    BoundingSphere boundingSphere =
-    {
+    BoundingSphere boundingSphere(
         boundingBox.centre(),
         std::max(std::max(boundingBox.xLength(), boundingBox.yLength()), boundingBox.zLength()) * 0.5f * std::sqrt(3.0f)
-    };
+    );
 
     return boundingSphere;
 }
