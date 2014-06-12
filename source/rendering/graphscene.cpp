@@ -23,9 +23,6 @@
 #include <QOpenGLContext>
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLFunctions_3_2_Core>
-#if defined(Q_OS_MAC)
-#include <QOpenGLExtensions>
-#endif
 
 #include <QMutexLocker>
 
@@ -45,9 +42,6 @@ GraphScene::GraphScene(QObject* parent)
       _FBOcomplete(false),
       _trackFocusNode(true),
       _funcs(nullptr),
-#if defined(Q_OS_MAC)
-      _instanceFuncs(0),
-#endif
       _componentsViewData(nullptr),
       _aspectRatio(4.0f / 3.0f),
       _camera(nullptr),
@@ -61,16 +55,7 @@ GraphScene::GraphScene(QObject* parent)
 
 void GraphScene::initialise()
 {
-    // Resolve the OpenGL functions that we need for instanced rendering
-#if !defined(Q_OS_MAC)
     _funcs = _context->versionFunctions<QOpenGLFunctions_3_3_Core>();
-#else
-    _instanceFuncs = new QOpenGLExtension_ARB_instanced_arrays;
-    if(!_instanceFuncs->initializeOpenGLFunctions())
-        qFatal("Could not resolve GL_ARB_instanced_arrays functions");
-
-    _funcs = _context->versionFunctions<QOpenGLFunctions_3_2_Core>();
-#endif
     if(!_funcs)
         qFatal("Could not obtain required OpenGL context version");
     _funcs->initializeOpenGLFunctions();
@@ -745,15 +730,15 @@ void GraphScene::centreNodeInViewport(NodeId nodeId, Transition::Type transition
     {
         emit userInteractionStarted();
         _panTransition.start(0.3f, transitionType,
-        [=](float f)
-        {
-            _camera->setPosition(startPosition + ((targetPosition - startPosition) * f));
-            _camera->setViewTarget(startViewTarget + ((nodePosition - startViewTarget) * f));
-        },
-        [=]
-        {
-            emit userInteractionFinished();
-        });
+            [=](float f)
+            {
+                _camera->setPosition(startPosition + ((targetPosition - startPosition) * f));
+                _camera->setViewTarget(startViewTarget + ((nodePosition - startViewTarget) * f));
+            },
+            [=]
+            {
+                emit userInteractionFinished();
+            });
     }
     else
     {
@@ -923,21 +908,10 @@ void GraphScene::prepareNodeVAO()
     shader->setAttributeBuffer("outlineColor", GL_FLOAT, 4 * sizeof(GLfloat), 3, 7 * sizeof(GLfloat));
 
     // We only vary the point attribute once per instance
-    GLuint pointLocation = shader->attributeLocation("point");
-    GLuint sizeLocation = shader->attributeLocation("size");
-    GLuint colorLocation = shader->attributeLocation("color");
-    GLuint outlineColorLocation = shader->attributeLocation("outlineColor");
-#if !defined(Q_OS_MAC)
-    _funcs->glVertexAttribDivisor(pointLocation, 1);
-    _funcs->glVertexAttribDivisor(sizeLocation, 1);
-    _funcs->glVertexAttribDivisor(colorLocation, 1);
-    _funcs->glVertexAttribDivisor(outlineColorLocation, 1);
-#else
-    _instanceFuncs->glVertexAttribDivisorARB(pointLocation, 1);
-    _instanceFuncs->glVertexAttribDivisorARB(sizeLocation, 1);
-    _instanceFuncs->glVertexAttribDivisorARB(colorLocation, 1);
-    _instanceFuncs->glVertexAttribDivisorARB(outlineColorLocation, 1);
-#endif
+    _funcs->glVertexAttribDivisor(shader->attributeLocation("point"), 1);
+    _funcs->glVertexAttribDivisor(shader->attributeLocation("size"), 1);
+    _funcs->glVertexAttribDivisor(shader->attributeLocation("color"), 1);
+    _funcs->glVertexAttribDivisor(shader->attributeLocation("outlineColor"), 1);
     _sphere->vertexArrayObject()->release();
     shader->release();
 }
@@ -965,24 +939,11 @@ void GraphScene::prepareEdgeVAO()
     shader->setAttributeBuffer("outlineColor", GL_FLOAT, 4 * sizeof(GLfloat), 3, 7 * sizeof(GLfloat));
 
     // We only vary the point attribute once per instance
-    GLuint sourcePointLocation = shader->attributeLocation("source");
-    GLuint targetPointLocation = shader->attributeLocation("target");
-    GLuint sizeLocation = shader->attributeLocation("size");
-    GLuint colorLocation = shader->attributeLocation("color");
-    GLuint outlineColorLocation = shader->attributeLocation("outlineColor");
-#if !defined(Q_OS_MAC)
-    _funcs->glVertexAttribDivisor(sourcePointLocation, 1);
-    _funcs->glVertexAttribDivisor(targetPointLocation, 1);
-    _funcs->glVertexAttribDivisor(sizeLocation, 1);
-    _funcs->glVertexAttribDivisor(colorLocation, 1);
-    _funcs->glVertexAttribDivisor(outlineColorLocation, 1);
-#else
-    _instanceFuncs->glVertexAttribDivisorARB(sourcePointLocation, 1);
-    _instanceFuncs->glVertexAttribDivisorARB(targetPointLocation, 1);
-    _instanceFuncs->glVertexAttribDivisorARB(sizeLocation, 1);
-    _instanceFuncs->glVertexAttribDivisorARB(colorLocation, 1);
-    _instanceFuncs->glVertexAttribDivisorARB(outlineColorLocation, 1);
-#endif
+    _funcs->glVertexAttribDivisor(shader->attributeLocation("source"), 1);
+    _funcs->glVertexAttribDivisor(shader->attributeLocation("target"), 1);
+    _funcs->glVertexAttribDivisor(shader->attributeLocation("size"), 1);
+    _funcs->glVertexAttribDivisor(shader->attributeLocation("color"), 1);
+    _funcs->glVertexAttribDivisor(shader->attributeLocation("outlineColor"), 1);
     _cylinder->vertexArrayObject()->release();
     shader->release();
 }
@@ -1002,15 +963,8 @@ void GraphScene::prepareComponentMarkerVAO()
     shader->setAttributeBuffer("scale", GL_FLOAT, 2 * sizeof(GLfloat), 1, 3 * sizeof(GLfloat));
 
     // We only vary the point attribute once per instance
-    GLuint pointLocation = shader->attributeLocation("point");
-    GLuint scaleLocation = shader->attributeLocation("scale");
-#if !defined(Q_OS_MAC)
-    _funcs->glVertexAttribDivisor(pointLocation, 1);
-    _funcs->glVertexAttribDivisor(scaleLocation, 1);
-#else
-    _instanceFuncs->glVertexAttribDivisorARB(pointLocation, 1);
-    _instanceFuncs->glVertexAttribDivisorARB(scaleLocation, 1);
-#endif
+    _funcs->glVertexAttribDivisor(shader->attributeLocation("point"), 1);
+    _funcs->glVertexAttribDivisor(shader->attributeLocation("scale"), 1);
     _quad->vertexArrayObject()->release();
     shader->release();
 }
