@@ -61,8 +61,8 @@ void GraphScene::initialise()
     _funcs->initializeOpenGLFunctions();
 
     MaterialPtr nodeMaterial(new Material);
-    nodeMaterial->setShaders(":/gl/shaders/instancednodes.vert", ":/gl/shaders/ads.frag");
-    loadShaderProgram(_nodesShader, ":/gl/shaders/instancednodes.vert", ":/gl/shaders/ads.frag");
+    nodeMaterial->setShaders(":/rendering/shaders/instancednodes.vert", ":/rendering/shaders/ads.frag");
+    loadShaderProgram(_nodesShader, ":/rendering/shaders/instancednodes.vert", ":/rendering/shaders/ads.frag");
 
     // Create a sphere
     _sphere = new Sphere(this);
@@ -73,8 +73,8 @@ void GraphScene::initialise()
     _sphere->create();
 
     MaterialPtr edgeMaterial(new Material);
-    edgeMaterial->setShaders(":/gl/shaders/instancededges.vert", ":/gl/shaders/ads.frag");
-    loadShaderProgram(_edgesShader, ":/gl/shaders/instancededges.vert", ":/gl/shaders/ads.frag");
+    edgeMaterial->setShaders(":/rendering/shaders/instancededges.vert", ":/rendering/shaders/ads.frag");
+    loadShaderProgram(_edgesShader, ":/rendering/shaders/instancededges.vert", ":/rendering/shaders/ads.frag");
 
     _cylinder = new Cylinder(this);
     _cylinder->setRadius(1.0f);
@@ -84,8 +84,8 @@ void GraphScene::initialise()
     _cylinder->create();
 
     MaterialPtr componentMarkerMaterial(new Material);
-    componentMarkerMaterial->setShaders(":/gl/shaders/instancedmarkers.vert", ":/gl/shaders/marker.frag");
-    loadShaderProgram(_componentMarkerShader, ":/gl/shaders/instancedmarkers.vert", ":/gl/shaders/marker.frag");
+    componentMarkerMaterial->setShaders(":/rendering/shaders/instancedmarkers.vert", ":/rendering/shaders/marker.frag");
+    loadShaderProgram(_componentMarkerShader, ":/rendering/shaders/instancedmarkers.vert", ":/rendering/shaders/marker.frag");
 
     _quad = new Quad(this);
     _quad->setEdgeLength(1.0f);
@@ -93,10 +93,10 @@ void GraphScene::initialise()
     _quad->create();
 
     _debugLinesDataVAO.create();
-    loadShaderProgram(_debugLinesShader, ":/gl/shaders/debuglines.vert", ":/gl/shaders/debuglines.frag");
+    loadShaderProgram(_debugLinesShader, ":/rendering/shaders/debuglines.vert", ":/rendering/shaders/debuglines.frag");
 
     _selectionMarkerDataVAO.create();
-    loadShaderProgram(_selectionMarkerShader, ":/gl/shaders/2d.vert", ":/gl/shaders/selectionMarker.frag");
+    loadShaderProgram(_selectionMarkerShader, ":/rendering/shaders/2d.vert", ":/rendering/shaders/selectionMarker.frag");
 
     // Create a pair of VBOs ready to hold our data
     prepareVertexBuffers();
@@ -1023,14 +1023,14 @@ void GraphScene::prepareScreenQuad()
     quadBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     quadBuffer.allocate(quadVerts, quadVertsSize);
 
-    loadShaderProgram(_screenShader, ":/gl/shaders/screen.vert", ":/gl/shaders/screen.frag");
+    loadShaderProgram(_screenShader, ":/rendering/shaders/screen.vert", ":/rendering/shaders/screen.frag");
     _screenShader.bind();
     _screenShader.enableAttributeArray("vertexPosition");
     _screenShader.setAttributeBuffer("vertexPosition", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
     _screenShader.setUniformValue("frameBufferTexture", 0);
     _screenShader.release();
 
-    loadShaderProgram(_selectionShader, ":/gl/shaders/screen.vert", ":/gl/shaders/selection.frag");
+    loadShaderProgram(_selectionShader, ":/rendering/shaders/screen.vert", ":/rendering/shaders/selection.frag");
     _selectionShader.bind();
     _selectionShader.enableAttributeArray("vertexPosition");
     _selectionShader.setAttributeBuffer("vertexPosition", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
