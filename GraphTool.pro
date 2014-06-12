@@ -23,7 +23,6 @@ SOURCES += source/main.cpp\
     source/gl/openglwindow.cpp \
     source/gl/opengldebugmessagemodel.cpp \
     source/gl/camera.cpp \
-    source/gl/abstractscene.cpp \
     source/gl/cube.cpp \
     source/gl/material.cpp \
     source/gl/sampler.cpp \
@@ -65,7 +64,6 @@ HEADERS  += source/mainwindow.h \
     source/gl/openglwindow.h \
     source/gl/opengldebugmessagemodel.h \
     source/gl/camera.h \
-    source/gl/abstractscene.h \
     source/gl/material.h \
     source/gl/torus.h \
     source/gl/texture.h \
@@ -100,7 +98,8 @@ HEADERS  += source/mainwindow.h \
     source/ui/selectionmanager.h \
     source/maths/frustum.h \
     source/maths/line.h \
-    source/ui/commandmanager.h
+    source/ui/commandmanager.h \
+    source/gl/scene.h
 
 FORMS    += source/mainwindow.ui
 

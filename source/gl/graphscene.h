@@ -1,7 +1,7 @@
-#ifndef INSTANCEDGEOMETRYSCENE_H
-#define INSTANCEDGEOMETRYSCENE_H
+#ifndef GRAPHSCENE_H
+#define GRAPHSCENE_H
 
-#include "abstractscene.h"
+#include "scene.h"
 #include "camera.h"
 #include "transition.h"
 #include "../maths/boundingbox.h"
@@ -40,7 +40,7 @@ public:
     bool _initialised;
 };
 
-class GraphScene : public AbstractScene
+class GraphScene : public Scene
 {
     Q_OBJECT
 

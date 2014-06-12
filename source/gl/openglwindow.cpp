@@ -41,7 +41,7 @@ OpenGLWindow::OpenGLWindow(const QSurfaceFormat& format, GraphView* graphView,
     _context->create();
 }
 
-void OpenGLWindow::setScene(AbstractScene* scene)
+void OpenGLWindow::setScene(Scene* scene)
 {
     // We take ownership of the scene
     Q_ASSERT(scene);

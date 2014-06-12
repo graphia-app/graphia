@@ -1,5 +1,5 @@
-#ifndef ABSTRACTSCENE_H
-#define ABSTRACTSCENE_H
+#ifndef SCENE_H
+#define SCENE_H
 
 #include <QObject>
 
@@ -8,13 +8,13 @@ class QMouseEvent;
 class QWheelEvent;
 class QKeyEvent;
 
-class AbstractScene : public QObject
+class Scene : public QObject
 {
     Q_OBJECT
 
 public:
-    AbstractScene(QObject* parent = 0);
-    virtual ~AbstractScene();
+    Scene(QObject* parent = 0) : QObject(parent) {}
+    virtual ~Scene() {}
 
     void setContext(QOpenGLContext* context) { _context = context; }
     QOpenGLContext* context() const { return _context; }
@@ -38,4 +38,4 @@ protected:
     QOpenGLContext* _context;
 };
 
-#endif // ABSTRACTSCENE_H
+#endif // SCENE_H

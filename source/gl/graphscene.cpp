@@ -36,7 +36,7 @@
 #include <cmath>
 
 GraphScene::GraphScene(QObject* parent)
-    : AbstractScene(parent),
+    : Scene(parent),
       _width(0), _height(0),
       _colorTexture(0),
       _selectionTexture(0),

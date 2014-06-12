@@ -4,7 +4,7 @@
 #include <QWindow>
 #include <QTime>
 
-class AbstractScene;
+class Scene;
 class GraphView;
 class QOpenGLDebugMessage;
 
@@ -20,8 +20,8 @@ public:
 
     QOpenGLContext* context() const { return _context; }
 
-    void setScene(AbstractScene* scene);
-    AbstractScene* scene() const { return _scene; }
+    void setScene(Scene* scene);
+    Scene* scene() const { return _scene; }
     
 protected:
     virtual void initialise();
@@ -45,7 +45,7 @@ protected slots:
 
 private:
     QOpenGLContext* _context;
-    AbstractScene* _scene;
+    Scene* _scene;
     GraphView* _graphView;
     int _debugLevel;
     
