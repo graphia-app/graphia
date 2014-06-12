@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include "material.h"
+#include "../material.h"
 
 #include <QOpenGLBuffer>
 #include "qopenglvertexarrayobject.h"

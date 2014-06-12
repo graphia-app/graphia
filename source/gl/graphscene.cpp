@@ -1,9 +1,9 @@
 #include "graphscene.h"
 
 #include "camera.h"
-#include "sphere.h"
-#include "cylinder.h"
-#include "quad.h"
+#include "primitives/sphere.h"
+#include "primitives/cylinder.h"
+#include "primitives/quad.h"
 #include "material.h"
 
 #include "../graph/graphmodel.h"

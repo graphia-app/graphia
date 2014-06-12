@@ -1,23 +1,23 @@
-#ifndef CYLINDER_H
-#define CYLINDER_H
+#ifndef SPHERE_H
+#define SPHERE_H
 
 #include <QObject>
 
-#include "material.h"
+#include "../material.h"
 #include "qopenglvertexarrayobject.h"
 
 #include <QOpenGLBuffer>
 
-class Cylinder : public QObject
+class Sphere : public QObject
 {
     Q_OBJECT
 
     Q_PROPERTY(float radius READ radius WRITE setRadius)
-    Q_PROPERTY(float length READ length WRITE setLength)
+    Q_PROPERTY(int rings READ rings WRITE setRings)
     Q_PROPERTY(int slices READ slices WRITE setSlices)
 
 public:
-    explicit Cylinder(QObject* parent = 0);
+    explicit Sphere(QObject* parent = 0);
 
     void setMaterial(const MaterialPtr& material);
     MaterialPtr material() const;
@@ -27,9 +27,9 @@ public:
         return _radius;
     }
 
-    float length() const
+    int rings() const
     {
-        return _length;
+        return _rings;
     }
 
     int slices() const
@@ -39,7 +39,17 @@ public:
 
     QOpenGLVertexArrayObject* vertexArrayObject() { return &_vao; }
 
-    int indexCount() const { return 6 * _slices; }
+    int indexCount() const { return 6 * _slices * _rings; }
+
+    /**
+     * @brief computeNormalLinesBuffer - compute a vertex buffer suitable for
+     * rendering with GL_LINES, showing each vertex normal
+     */
+    void computeNormalLinesBuffer(const MaterialPtr& mat, double scale = 1.0);
+    void computeTangentLinesBuffer(const MaterialPtr& mat, double scale = 1.0);
+
+    void renderNormalLines();
+    void renderTangentLines();
 
     void bindBuffers();
 
@@ -49,9 +59,9 @@ public slots:
         _radius = arg;
     }
 
-    void setLength(float arg)
+    void setRings(int arg)
     {
-        _length = arg;
+        _rings = arg;
     }
 
     void setSlices(int arg)
@@ -60,6 +70,7 @@ public slots:
     }
 
     void create();
+    void render();
 
 private:
     void generateVertexData(QVector<float>& vertices, QVector<float>& normals,
@@ -70,7 +81,7 @@ private:
     MaterialPtr _material;
 
     float _radius;
-    float _length;
+    int _rings;  // Rings of latitude
     int _slices; // Longitude
 
     // QVertexBuffers to hold the data
@@ -86,4 +97,4 @@ private:
     QOpenGLVertexArrayObject _vaoNormals, _vaoTangents;
 };
 
-#endif // CYLINDER_H
+#endif // SPHERE_H
