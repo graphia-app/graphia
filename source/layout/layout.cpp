@@ -2,15 +2,12 @@
 
 BoundingBox3D NodeLayout::boundingBox(const ReadOnlyGraph &graph, const NodePositions &positions)
 {
-    const QVector3D& firstNodePosition = positions[graph.nodeIds()[0]];
-    BoundingBox3D boundingBox(firstNodePosition, firstNodePosition);
-
+    std::vector<QVector3D> graphPositions;
     for(NodeId nodeId : graph.nodeIds())
-        boundingBox.expandToInclude(positions[nodeId]);
+        graphPositions.push_back(positions[nodeId]);
 
-    return boundingBox;
+    return BoundingBox3D(graphPositions);
 }
-
 
 BoundingBox3D NodeLayout::boundingBox() const
 {

@@ -75,6 +75,11 @@ public:
     typename std::vector<Element>::iterator end() { return _array.end(); }
     typename std::vector<Element>::const_iterator end() const { return _array.end(); }
 
+    const std::vector<Element>& asVector() const
+    {
+        return _array;
+    }
+
     int size() const
     {
         return static_cast<int>(_array.size());

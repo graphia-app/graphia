@@ -6,6 +6,8 @@
 #include <QVector2D>
 #include <QVector3D>
 
+#include <vector>
+
 class BoundingBox2D
 {
 private:
@@ -15,6 +17,7 @@ private:
 public:
     BoundingBox2D();
     BoundingBox2D(const QVector2D& min, const QVector2D& max);
+    BoundingBox2D(const std::vector<QVector2D>& points);
 
     const QVector2D& min() const { return _min; }
     const QVector2D& max() const { return _max; }
@@ -51,6 +54,7 @@ private:
 public:
     BoundingBox3D();
     BoundingBox3D(const QVector3D& min, const QVector3D& max);
+    BoundingBox3D(const std::vector<QVector3D>& points);
 
     const QVector3D& min() const { return _min; }
     const QVector3D& max() const { return _max; }
