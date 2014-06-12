@@ -48,9 +48,6 @@ public:
 signals:
     void userInteractionStarted();
     void userInteractionFinished();
-
-public slots:
-    void layoutChanged();
     
 private:
     bool _rightMouseButtonHeld;

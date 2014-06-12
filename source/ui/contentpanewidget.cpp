@@ -91,17 +91,18 @@ void ContentPaneWidget::onCompletion(int success)
 
     _selectionManager = new SelectionManager(_graphModel->graph());
     GraphView* graphView = new GraphView(_graphModel, &_commandManager, _selectionManager);
-    connect(_nodeLayoutThread, &LayoutThread::executed, graphView, &GraphView::layoutChanged);
 
-    connect(graphView, &GraphView::userInteractionStarted, [=]
-    {
-        pauseLayout(true);
-    });
+    connect(graphView, &GraphView::userInteractionStarted,
+        [this]
+        {
+            pauseLayout(true);
+        });
 
-    connect(graphView, &GraphView::userInteractionFinished, [=]
-    {
-        resumeLayout(true);
-    });
+    connect(graphView, &GraphView::userInteractionFinished,
+        [this]
+        {
+            resumeLayout(true);
+        });
 
     connect(&_commandManager, &CommandManager::commandStackChanged, this, &ContentPaneWidget::commandStackChanged);
     connect(_selectionManager, &SelectionManager::selectionChanged, this, &ContentPaneWidget::selectionChanged);

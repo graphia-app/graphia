@@ -48,10 +48,6 @@ GraphView::GraphView(GraphModel* graphModel, CommandManager* commandManager, Sel
     connect(selectionManager, &SelectionManager::selectionChanged, _graphScene, &GraphScene::onSelectionChanged);
 }
 
-void GraphView::layoutChanged()
-{
-}
-
 void GraphView::mousePressEvent(QMouseEvent* mouseEvent)
 {
     _cursorPosition = _prevCursorPosition = _clickPosition = mouseEvent->pos();
