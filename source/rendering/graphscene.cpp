@@ -54,13 +54,7 @@ GraphScene::GraphScene(QObject* parent)
       _sphere(nullptr),
       _cylinder(nullptr),
       _quad(nullptr),
-      _graphModel(nullptr),
-      _nodePositionData(0),
-      _edgePositionData(0),
-      _nodeVisualData(0),
-      _edgeVisualData(0),
-      _componentMarkerData(0),
-      _debugLinesData(0)
+      _graphModel(nullptr)
 {
     update(0.0f);
 }
