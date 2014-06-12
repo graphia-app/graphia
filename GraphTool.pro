@@ -15,18 +15,18 @@ TEMPLATE = app
 
 
 SOURCES += \
-    source/gl/camera.cpp \
-    source/gl/graphscene.cpp \
-    source/gl/material.cpp \
-    source/gl/opengldebugmessagemodel.cpp \
-    source/gl/openglwindow.cpp \
-    source/gl/primitives/cube.cpp \
-    source/gl/primitives/cylinder.cpp \
-    source/gl/primitives/quad.cpp \
-    source/gl/primitives/sphere.cpp \
-    source/gl/sampler.cpp \
-    source/gl/texture.cpp \
-    source/gl/transition.cpp \
+    source/rendering/camera.cpp \
+    source/rendering/graphscene.cpp \
+    source/rendering/material.cpp \
+    source/rendering/opengldebugmessagemodel.cpp \
+    source/rendering/openglwindow.cpp \
+    source/rendering/primitives/cube.cpp \
+    source/rendering/primitives/cylinder.cpp \
+    source/rendering/primitives/quad.cpp \
+    source/rendering/primitives/sphere.cpp \
+    source/rendering/sampler.cpp \
+    source/rendering/texture.cpp \
+    source/rendering/transition.cpp \
     source/graph/genericgraphmodel.cpp \
     source/graph/graph.cpp \
     source/graph/simplecomponentmanager.cpp \
@@ -54,19 +54,19 @@ SOURCES += \
     source/ui/selectionmanager.cpp
 
 HEADERS += \
-    source/gl/camera.h \
-    source/gl/graphscene.h \
-    source/gl/material.h \
-    source/gl/opengldebugmessagemodel.h \
-    source/gl/openglwindow.h \
-    source/gl/primitives/cube.h \
-    source/gl/primitives/cylinder.h \
-    source/gl/primitives/quad.h \
-    source/gl/primitives/sphere.h \
-    source/gl/sampler.h \
-    source/gl/scene.h \
-    source/gl/texture.h \
-    source/gl/transition.h \
+    source/rendering/camera.h \
+    source/rendering/graphscene.h \
+    source/rendering/material.h \
+    source/rendering/opengldebugmessagemodel.h \
+    source/rendering/openglwindow.h \
+    source/rendering/primitives/cube.h \
+    source/rendering/primitives/cylinder.h \
+    source/rendering/primitives/quad.h \
+    source/rendering/primitives/sphere.h \
+    source/rendering/sampler.h \
+    source/rendering/scene.h \
+    source/rendering/texture.h \
+    source/rendering/transition.h \
     source/graph/componentmanager.h \
     source/graph/genericgraphmodel.h \
     source/graph/grapharray.h \
@@ -104,18 +104,18 @@ HEADERS += \
 FORMS    += source/mainwindow.ui
 
 OTHER_FILES += \
-    source/gl/shaders/2d.vert \
-    source/gl/shaders/ads.frag \
-    source/gl/shaders/debuglines.frag \
-    source/gl/shaders/debuglines.vert \
-    source/gl/shaders/instancededges.vert \
-    source/gl/shaders/instancedmarkers.vert \
-    source/gl/shaders/instancednodes.vert \
-    source/gl/shaders/marker.frag \
-    source/gl/shaders/screen.frag \
-    source/gl/shaders/screen.vert \
-    source/gl/shaders/selection.frag \
-    source/gl/shaders/selectionMarker.frag
+    source/rendering/shaders/2d.vert \
+    source/rendering/shaders/ads.frag \
+    source/rendering/shaders/debuglines.frag \
+    source/rendering/shaders/debuglines.vert \
+    source/rendering/shaders/instancededges.vert \
+    source/rendering/shaders/instancedmarkers.vert \
+    source/rendering/shaders/instancednodes.vert \
+    source/rendering/shaders/marker.frag \
+    source/rendering/shaders/screen.frag \
+    source/rendering/shaders/screen.vert \
+    source/rendering/shaders/selection.frag \
+    source/rendering/shaders/selectionMarker.frag
 
 RESOURCES += \
     source/resources.qrc
