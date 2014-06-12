@@ -19,6 +19,7 @@ private:
 public:
     BoundingSphere();
     BoundingSphere(const QVector3D centre, float radius);
+    BoundingSphere(const std::vector<QVector3D>& points);
 
     const QVector3D& centre() const { return _centre; }
     float radius() const { return _radius; }
