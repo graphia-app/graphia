@@ -47,7 +47,6 @@ GraphComponentScene::GraphComponentScene(QObject* parent)
       _camera(nullptr),
       _sphere(nullptr),
       _cylinder(nullptr),
-      _quad(nullptr),
       _graphModel(nullptr)
 {
     update(0.0f);
@@ -83,15 +82,6 @@ void GraphComponentScene::initialise()
     _cylinder->setMaterial(edgeMaterial);
     _cylinder->create();
 
-    MaterialPtr componentMarkerMaterial(new Material);
-    componentMarkerMaterial->setShaders(":/rendering/shaders/instancedmarkers.vert", ":/rendering/shaders/marker.frag");
-    loadShaderProgram(_componentMarkerShader, ":/rendering/shaders/instancedmarkers.vert", ":/rendering/shaders/marker.frag");
-
-    _quad = new Quad(this);
-    _quad->setEdgeLength(1.0f);
-    _quad->setMaterial(componentMarkerMaterial);
-    _quad->create();
-
     _debugLinesDataVAO.create();
     loadShaderProgram(_debugLinesShader, ":/rendering/shaders/debuglines.vert", ":/rendering/shaders/debuglines.frag");
 
@@ -104,7 +94,6 @@ void GraphComponentScene::initialise()
     // Tell OpenGL how to pass the data VBOs to the shader program
     prepareNodeVAO();
     prepareEdgeVAO();
-    prepareComponentMarkerVAO();
     prepareSelectionMarkerVAO();
     prepareDebugLinesVAO();
     prepareScreenQuad();
@@ -435,32 +424,6 @@ void GraphComponentScene::renderEdges()
     _cylinder->vertexArrayObject()->release();
 
     _edgesShader.release();
-}
-
-void GraphComponentScene::renderComponentMarkers()
-{
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    _componentMarkerDataBuffer.bind();
-    _componentMarkerDataBuffer.allocate(_componentMarkerData.data(), static_cast<int>(_componentMarkerData.size()) * sizeof(GLfloat));
-
-    // Bind the shader program
-    _componentMarkerShader.bind();
-
-    // Calculate needed matrices
-    QMatrix4x4 modelViewMatrix = _camera->viewMatrix();
-    _componentMarkerShader.setUniformValue("modelViewMatrix", modelViewMatrix);
-    _componentMarkerShader.setUniformValue("projectionMatrix", _camera->projectionMatrix());
-
-    // Draw the edges
-    _quad->vertexArrayObject()->bind();
-    _funcs->glDrawElementsInstanced(GL_TRIANGLES, _quad->indexCount(),
-                                     GL_UNSIGNED_INT, 0, _graphModel->graph().numComponents());
-    _quad->vertexArrayObject()->release();
-    _componentMarkerShader.release();
-
-    glDisable(GL_BLEND);
 }
 
 void GraphComponentScene::renderDebugLines()
@@ -870,11 +833,6 @@ void GraphComponentScene::prepareVertexBuffers()
     _edgeVisualBuffer.bind();
     _edgeVisualBuffer.allocate(_edgeVisualData.data(), static_cast<int>(_edgeVisualData.size()) * sizeof(GLfloat));
 
-    _componentMarkerDataBuffer.create();
-    _componentMarkerDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-    _componentMarkerDataBuffer.bind();
-    _componentMarkerDataBuffer.allocate(_componentMarkerData.data(), static_cast<int>(_componentMarkerData.size()) * sizeof(GLfloat));
-
     _selectionMarkerDataBuffer.create();
     _selectionMarkerDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     _selectionMarkerDataBuffer.bind();
@@ -943,27 +901,6 @@ void GraphComponentScene::prepareEdgeVAO()
     _funcs->glVertexAttribDivisor(shader->attributeLocation("color"), 1);
     _funcs->glVertexAttribDivisor(shader->attributeLocation("outlineColor"), 1);
     _cylinder->vertexArrayObject()->release();
-    shader->release();
-}
-
-void GraphComponentScene::prepareComponentMarkerVAO()
-{
-    // Bind the marker's VAO
-    _quad->vertexArrayObject()->bind();
-
-    // Enable the data buffer and add it to the marker's VAO
-    QOpenGLShaderProgramPtr shader = _quad->material()->shader();
-    shader->bind();
-    _componentMarkerDataBuffer.bind();
-    shader->enableAttributeArray("point");
-    shader->enableAttributeArray("scale");
-    shader->setAttributeBuffer("point", GL_FLOAT, 0, 2, 3 * sizeof(GLfloat));
-    shader->setAttributeBuffer("scale", GL_FLOAT, 2 * sizeof(GLfloat), 1, 3 * sizeof(GLfloat));
-
-    // We only vary the point attribute once per instance
-    _funcs->glVertexAttribDivisor(shader->attributeLocation("point"), 1);
-    _funcs->glVertexAttribDivisor(shader->attributeLocation("scale"), 1);
-    _quad->vertexArrayObject()->release();
     shader->release();
 }
 

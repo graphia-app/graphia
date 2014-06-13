@@ -36,7 +36,6 @@ private:
     CommandManager _commandManager;
     GraphFileParserThread* _graphFileParserThread;
     NodeLayoutThread* _nodeLayoutThread;
-    LayoutThread* _componentLayoutThread;
 
     bool _resumePreviouslyActiveLayout;
 

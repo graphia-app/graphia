@@ -5,9 +5,6 @@
 #include "../graph/simplecomponentmanager.h"
 #include "../layout/layout.h"
 #include "../layout/eadeslayout.h"
-#include "../layout/linearcomponentlayout.h"
-#include "../layout/circlepackingcomponentlayout.h"
-#include "../layout/radialcirclecomponentlayout.h"
 #include "../layout/collision.h"
 #include "graphview.h"
 #include "selectionmanager.h"
@@ -21,7 +18,6 @@ ContentPaneWidget::ContentPaneWidget(QWidget* parent) :
     _selectionManager(nullptr),
     _graphFileParserThread(nullptr),
     _nodeLayoutThread(nullptr),
-    _componentLayoutThread(nullptr),
     _resumePreviouslyActiveLayout(false)
 {
     this->setLayout(new QVBoxLayout());
@@ -34,9 +30,6 @@ ContentPaneWidget::~ContentPaneWidget()
 
     delete _nodeLayoutThread;
     _nodeLayoutThread = nullptr;
-
-    delete _componentLayoutThread;
-    _componentLayoutThread = nullptr;
 
     delete _selectionManager;
     delete _graphModel;
@@ -80,14 +73,6 @@ void ContentPaneWidget::onCompletion(int success)
     _nodeLayoutThread = new NodeLayoutThread(new EadesLayoutFactory(_graphModel));
     _nodeLayoutThread->addAllComponents(_graphModel->graph());
     _nodeLayoutThread->start();
-
-    /*componentLayoutThread = new LayoutThread(new RadialCircleComponentLayout(_graphModel->graph(),
-                                                                       _graphModel->componentPositions(),
-                                                                       _graphModel->nodePositions()), true);
-    componentLayoutThread->start();
-
-    // Do the component layout whenever the node layout changes
-    connect(nodeLayoutThread, &LayoutThread::executed, componentLayoutThread, &LayoutThread::execute);*/
 
     _selectionManager = new SelectionManager(_graphModel->graph());
     GraphView* graphView = new GraphView(_graphModel, &_commandManager, _selectionManager);
@@ -163,14 +148,6 @@ void ContentPaneWidget::onComponentsWillMerge(const Graph*, const ElementIdSet<C
 
 void ContentPaneWidget::pauseLayout(bool autoResume)
 {
-    if(_componentLayoutThread != nullptr)
-    {
-        if(autoResume && !_componentLayoutThread->paused())
-            _resumePreviouslyActiveLayout = true;
-
-        _componentLayoutThread->pauseAndWait();
-    }
-
     if(_nodeLayoutThread != nullptr)
     {
         if(autoResume && !_nodeLayoutThread->paused())
@@ -184,9 +161,8 @@ bool ContentPaneWidget::layoutIsPaused()
 {
     // Not typos: a non-existant thread counts as paused
     bool nodeLayoutPaused = (_nodeLayoutThread == nullptr || _nodeLayoutThread->paused());
-    bool componentLayoutPaused = (_componentLayoutThread == nullptr || _componentLayoutThread->paused());
 
-    return nodeLayoutPaused && componentLayoutPaused;
+    return nodeLayoutPaused;
 }
 
 void ContentPaneWidget::resumeLayout(bool autoResume)
@@ -198,9 +174,6 @@ void ContentPaneWidget::resumeLayout(bool autoResume)
 
     if(_nodeLayoutThread != nullptr)
         _nodeLayoutThread->resume();
-
-    if(_componentLayoutThread != nullptr)
-        _componentLayoutThread->resume();
 }
 
 void ContentPaneWidget::selectAll()

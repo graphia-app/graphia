@@ -95,7 +95,6 @@ private:
     void prepareVertexBuffers();
     void prepareNodeVAO();
     void prepareEdgeVAO();
-    void prepareComponentMarkerVAO();
     void prepareSelectionMarkerVAO();
     void prepareDebugLinesVAO();
     void prepareTexture();
@@ -121,7 +120,6 @@ private:
 
     void renderNodes();
     void renderEdges();
-    void renderComponentMarkers();
     void renderDebugLines();
     void render2D();
 
@@ -158,7 +156,6 @@ private:
 
     Sphere* _sphere;
     Cylinder* _cylinder;
-    Quad* _quad;
 
     GraphModel* _graphModel;
 
@@ -175,10 +172,6 @@ private:
 
     std::vector<GLfloat> _edgeVisualData;
     QOpenGLBuffer _edgeVisualBuffer;
-
-    QOpenGLShaderProgram _componentMarkerShader;
-    std::vector<GLfloat> _componentMarkerData;
-    QOpenGLBuffer _componentMarkerDataBuffer;
 
     QOpenGLShaderProgram _selectionMarkerShader;
     QOpenGLBuffer _selectionMarkerDataBuffer;

@@ -30,12 +30,9 @@ SOURCES += \
     source/graph/graph.cpp \
     source/graph/simplecomponentmanager.cpp \
     source/layout/centreinglayout.cpp \
-    source/layout/circlepackingcomponentlayout.cpp \
     source/layout/collision.cpp \
     source/layout/eadeslayout.cpp \
     source/layout/layout.cpp \
-    source/layout/linearcomponentlayout.cpp \
-    source/layout/radialcirclecomponentlayout.cpp \
     source/layout/randomlayout.cpp \
     source/layout/scalinglayout.cpp \
     source/layout/spatialoctree.cpp \
@@ -73,12 +70,9 @@ HEADERS += \
     source/graph/graphmodel.h \
     source/graph/simplecomponentmanager.h \
     source/layout/centreinglayout.h \
-    source/layout/circlepackingcomponentlayout.h \
     source/layout/collision.h \
     source/layout/eadeslayout.h \
     source/layout/layout.h \
-    source/layout/linearcomponentlayout.h \
-    source/layout/radialcirclecomponentlayout.h \
     source/layout/randomlayout.h \
     source/layout/scalinglayout.h \
     source/layout/sequencelayout.h \
