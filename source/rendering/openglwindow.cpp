@@ -2,7 +2,7 @@
 
 #include "opengldebugmessagemodel.h"
 
-#include "graphscene.h"
+#include "graphcomponentscene.h"
 #include "../ui/graphview.h"
 
 #include <QGuiApplication>

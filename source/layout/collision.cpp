@@ -1,7 +1,7 @@
 #include "collision.h"
 #include "../maths/ray.h"
 #include "../maths/plane.h"
-#include "../gl/graphscene.h"
+#include "../rendering/graphcomponentscene.h"
 
 NodeId Collision::closestNodeToLine(const std::vector<NodeId>& nodeIds, const QVector3D &point, const QVector3D &direction)
 {

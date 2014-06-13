@@ -10,7 +10,7 @@
 #include <functional>
 #include <vector>
 
-class GraphScene;
+class GraphComponentScene;
 
 class SpatialOctree
 {
@@ -39,7 +39,7 @@ public:
     std::vector<const SubVolume*> leaves() const { return leaves([](const SubVolume*, int){ return true; }); }
     void visitVolumes(std::function<void(const SubVolume*, int treeDepth)> visitor = [](const SubVolume*, int){}, int treeDepth = 0) const;
     void dumpToQDebug();
-    void debugRenderOctree(GraphScene* graphScene, const QVector3D& offset = QVector3D());
+    void debugRenderOctree(GraphComponentScene* graphComponentScene, const QVector3D& offset = QVector3D());
 };
 
 #endif // SPATIALOCTREE_H

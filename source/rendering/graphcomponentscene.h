@@ -1,5 +1,5 @@
-#ifndef GRAPHSCENE_H
-#define GRAPHSCENE_H
+#ifndef GRAPHCOMPONENTSCENE_H
+#define GRAPHCOMPONENTSCENE_H
 
 #include "scene.h"
 #include "camera.h"
@@ -40,12 +40,12 @@ public:
     bool _initialised;
 };
 
-class GraphScene : public Scene
+class GraphComponentScene : public Scene
 {
     Q_OBJECT
 
 public:
-    GraphScene(QObject* parent = 0);
+    GraphComponentScene(QObject* parent = 0);
 
     static const int multisamples = 4;
 
@@ -206,4 +206,4 @@ public:
     void submitDebugLines();
 };
 
-#endif // GRAPHSCENE_H
+#endif // GRAPHCOMPONENTSCENE_H

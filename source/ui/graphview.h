@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QSurfaceFormat>
 
-#include "../gl/graphscene.h"
+#include "../rendering/graphcomponentscene.h"
 
 class GraphModel;
 class CommandManager;
@@ -20,7 +20,7 @@ public:
                        QWidget *parent = nullptr);
 
 private:
-    GraphScene* _graphScene;
+    GraphComponentScene* _graphComponentScene;
     GraphModel* _graphModel;
     CommandManager* _commandManager;
     SelectionManager* _selectionManager;
@@ -37,7 +37,7 @@ public:
             format.setMinorVersion(3);
 
             format.setDepthBufferSize(24);
-            format.setSamples(GraphScene::multisamples);
+            format.setSamples(GraphComponentScene::multisamples);
             format.setProfile(QSurfaceFormat::CoreProfile);
             initialised = true;
         }

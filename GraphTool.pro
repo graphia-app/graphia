@@ -16,7 +16,6 @@ TEMPLATE = app
 
 SOURCES += \
     source/rendering/camera.cpp \
-    source/rendering/graphscene.cpp \
     source/rendering/material.cpp \
     source/rendering/opengldebugmessagemodel.cpp \
     source/rendering/openglwindow.cpp \
@@ -51,11 +50,11 @@ SOURCES += \
     source/ui/commandmanager.cpp \
     source/ui/contentpanewidget.cpp \
     source/ui/graphview.cpp \
-    source/ui/selectionmanager.cpp
+    source/ui/selectionmanager.cpp \
+    source/rendering/graphcomponentscene.cpp
 
 HEADERS += \
     source/rendering/camera.h \
-    source/rendering/graphscene.h \
     source/rendering/material.h \
     source/rendering/opengldebugmessagemodel.h \
     source/rendering/openglwindow.h \
@@ -99,7 +98,8 @@ HEADERS += \
     source/ui/contentpanewidget.h \
     source/ui/graphview.h \
     source/ui/selectionmanager.h \
-    source/utils.h
+    source/utils.h \
+    source/rendering/graphcomponentscene.h
 
 FORMS    += source/mainwindow.ui
 

@@ -1,7 +1,7 @@
 #include "spatialoctree.h"
 
 #include "../layout/layout.h"
-#include "../gl/graphscene.h"
+#include "../rendering/graphcomponentscene.h"
 #include "../maths/ray.h"
 
 #include <unordered_set>
@@ -183,10 +183,10 @@ void SpatialOctree::dumpToQDebug()
     });
 }
 
-void SpatialOctree::debugRenderOctree(GraphScene* graphScene, const QVector3D& offset)
+void SpatialOctree::debugRenderOctree(GraphComponentScene* graphComponentScene, const QVector3D& offset)
 {
     visitVolumes(
-        [&graphScene, &offset](const SpatialOctree::SubVolume* subVolume, int)
+        [&graphComponentScene, &offset](const SpatialOctree::SubVolume* subVolume, int)
         {
             int r = std::abs(static_cast<int>(subVolume->_boundingBox.centre().x() * 10) % 255);
             int g = std::abs(static_cast<int>(subVolume->_boundingBox.centre().y() * 10) % 255);
@@ -200,6 +200,6 @@ void SpatialOctree::debugRenderOctree(GraphScene* graphScene, const QVector3D& o
             QColor lineColor(r, g, b);
 
             if(!subVolume->_nodeIds.empty())
-                graphScene->addDebugBoundingBox(subVolume->_boundingBox + offset, lineColor);
+                graphComponentScene->addDebugBoundingBox(subVolume->_boundingBox + offset, lineColor);
         });
 }

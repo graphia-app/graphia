@@ -1,4 +1,4 @@
-#include "graphscene.h"
+#include "graphcomponentscene.h"
 
 #include "camera.h"
 #include "primitives/sphere.h"
@@ -32,7 +32,7 @@
 #include <QtMath>
 #include <cmath>
 
-GraphScene::GraphScene(QObject* parent)
+GraphComponentScene::GraphComponentScene(QObject* parent)
     : Scene(parent),
       _width(0), _height(0),
       _colorTexture(0),
@@ -53,7 +53,7 @@ GraphScene::GraphScene(QObject* parent)
     update(0.0f);
 }
 
-void GraphScene::initialise()
+void GraphComponentScene::initialise()
 {
     _funcs = _context->versionFunctions<QOpenGLFunctions_3_3_Core>();
     if(!_funcs)
@@ -116,12 +116,12 @@ void GraphScene::initialise()
     glEnable(GL_CULL_FACE);
 }
 
-void GraphScene::cleanup()
+void GraphComponentScene::cleanup()
 {
     //FIXME
 }
 
-void GraphScene::updateVisualData()
+void GraphComponentScene::updateVisualData()
 {
     NodeVisuals& nodeVisuals = _graphModel->nodeVisuals();
     EdgeVisuals& edgeVisuals = _graphModel->edgeVisuals();
@@ -155,7 +155,7 @@ void GraphScene::updateVisualData()
     }
 }
 
-void GraphScene::onGraphChanged(const Graph*)
+void GraphComponentScene::onGraphChanged(const Graph*)
 {
     if(_focusComponentId.isNull())
     {
@@ -166,7 +166,7 @@ void GraphScene::onGraphChanged(const Graph*)
     updateVisualData();
 }
 
-void GraphScene::onNodeWillBeRemoved(const Graph*, NodeId nodeId)
+void GraphComponentScene::onNodeWillBeRemoved(const Graph*, NodeId nodeId)
 {
     ComponentViewData* currentComponentViewData = focusComponentViewData();
     if(currentComponentViewData->_focusNodeId == nodeId)
@@ -178,7 +178,7 @@ static void setupCamera(Camera& camera, float aspectRatio)
     camera.setPerspectiveProjection(60.0f, aspectRatio, 0.3f, 10000.0f);
 }
 
-void GraphScene::onComponentAdded(const Graph*, ComponentId componentId)
+void GraphComponentScene::onComponentAdded(const Graph*, ComponentId componentId)
 {
     ComponentViewData* componentViewData = &(*_componentsViewData)[componentId];
 
@@ -191,7 +191,7 @@ void GraphScene::onComponentAdded(const Graph*, ComponentId componentId)
     }
 }
 
-void GraphScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
+void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
 {
     ComponentViewData* componentViewData = &(*_componentsViewData)[componentId];
     componentViewData->_initialised = false;
@@ -214,7 +214,7 @@ void GraphScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
     }
 }
 
-void GraphScene::onComponentSplit(const Graph* graph, ComponentId oldComponentId, const ElementIdSet<ComponentId>& splitters)
+void GraphComponentScene::onComponentSplit(const Graph* graph, ComponentId oldComponentId, const ElementIdSet<ComponentId>& splitters)
 {
     if(oldComponentId == _focusComponentId)
     {
@@ -241,7 +241,7 @@ void GraphScene::onComponentSplit(const Graph* graph, ComponentId oldComponentId
     }
 }
 
-void GraphScene::onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers, ComponentId merged)
+void GraphComponentScene::onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers, ComponentId merged)
 {
     for(ComponentId merger : mergers)
     {
@@ -256,7 +256,7 @@ void GraphScene::onComponentsWillMerge(const Graph*, const ElementIdSet<Componen
     }
 }
 
-void GraphScene::onSelectionChanged(const SelectionManager& selectionManager)
+void GraphComponentScene::onSelectionChanged(const SelectionManager& selectionManager)
 {
     NodeVisuals& nodeVisuals = _graphModel->nodeVisuals();
     EdgeVisuals& edgeVisuals = _graphModel->edgeVisuals();
@@ -276,7 +276,7 @@ void GraphScene::onSelectionChanged(const SelectionManager& selectionManager)
     updateVisualData();
 }
 
-ComponentViewData* GraphScene::focusComponentViewData() const
+ComponentViewData* GraphComponentScene::focusComponentViewData() const
 {
     if(_focusComponentId.isNull())
         return nullptr;
@@ -284,7 +284,7 @@ ComponentViewData* GraphScene::focusComponentViewData() const
     return _componentsViewData != nullptr ? &(*_componentsViewData)[_focusComponentId] : nullptr;
 }
 
-void GraphScene::update(float t)
+void GraphComponentScene::update(float t)
 {
     if(_graphModel != nullptr)
     {
@@ -379,7 +379,7 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
     program.setUniformValue("material.shininess", 50.0f);
 }
 
-void GraphScene::renderNodes()
+void GraphComponentScene::renderNodes()
 {
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
     _funcs->glDrawBuffers(2, drawBuffers);
@@ -410,7 +410,7 @@ void GraphScene::renderNodes()
     _nodesShader.release();
 }
 
-void GraphScene::renderEdges()
+void GraphComponentScene::renderEdges()
 {
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
     _funcs->glDrawBuffers(2, drawBuffers);
@@ -437,7 +437,7 @@ void GraphScene::renderEdges()
     _edgesShader.release();
 }
 
-void GraphScene::renderComponentMarkers()
+void GraphComponentScene::renderComponentMarkers()
 {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -463,7 +463,7 @@ void GraphScene::renderComponentMarkers()
     glDisable(GL_BLEND);
 }
 
-void GraphScene::renderDebugLines()
+void GraphComponentScene::renderDebugLines()
 {
     QMutexLocker locker(&_debugLinesMutex);
 
@@ -487,7 +487,7 @@ void GraphScene::renderDebugLines()
     clearDebugLines();
 }
 
-void GraphScene::render2D()
+void GraphComponentScene::render2D()
 {
     _funcs->glDisable(GL_DEPTH_TEST);
 
@@ -538,7 +538,7 @@ void GraphScene::render2D()
     _funcs->glEnable(GL_DEPTH_TEST);
 }
 
-void GraphScene::addDebugBoundingBox(const BoundingBox3D& boundingBox, const QColor color)
+void GraphComponentScene::addDebugBoundingBox(const BoundingBox3D& boundingBox, const QColor color)
 {
     const QVector3D& min = boundingBox.min();
     const QVector3D& max = boundingBox.max();
@@ -568,7 +568,7 @@ void GraphScene::addDebugBoundingBox(const BoundingBox3D& boundingBox, const QCo
     addDebugLine(_2, _6, color);
 }
 
-void GraphScene::submitDebugLines()
+void GraphComponentScene::submitDebugLines()
 {
     QMutexLocker locker(&_debugLinesMutex);
 
@@ -592,7 +592,7 @@ void GraphScene::submitDebugLines()
     }
 }
 
-void GraphScene::render()
+void GraphComponentScene::render()
 {
     if(!_FBOcomplete)
         return;
@@ -652,12 +652,10 @@ void GraphScene::render()
     glDisable(GL_BLEND);
 }
 
-void GraphScene::resize(int w, int h)
+void GraphComponentScene::resize(int w, int h)
 {
     _width = w;
     _height = h;
-
-    qDebug() << "GraphScene::resize(" << w << h << ")";
 
     _FBOcomplete = prepareRenderBuffers();
 
@@ -677,7 +675,7 @@ void GraphScene::resize(int w, int h)
 
 const float MINIMU_CAMERA_DISTANCE = 2.5f;
 
-void GraphScene::zoom(float direction)
+void GraphComponentScene::zoom(float direction)
 {
     if(direction == 0.0f || !_panTransition.finished())
         return;
@@ -702,7 +700,7 @@ void GraphScene::zoom(float direction)
     });
 }
 
-void GraphScene::centreNodeInViewport(NodeId nodeId, Transition::Type transitionType, float cameraDistance)
+void GraphComponentScene::centreNodeInViewport(NodeId nodeId, Transition::Type transitionType, float cameraDistance)
 {
     if(nodeId.isNull())
         return;
@@ -747,7 +745,7 @@ void GraphScene::centreNodeInViewport(NodeId nodeId, Transition::Type transition
     }
 }
 
-void GraphScene::moveFocusToNode(NodeId nodeId, Transition::Type transitionType)
+void GraphComponentScene::moveFocusToNode(NodeId nodeId, Transition::Type transitionType)
 {
     if(_focusComponentId.isNull())
         return;
@@ -757,7 +755,7 @@ void GraphScene::moveFocusToNode(NodeId nodeId, Transition::Type transitionType)
     updateVisualData();
 }
 
-void GraphScene::selectFocusNodeClosestToCameraVector(Transition::Type transitionType)
+void GraphComponentScene::selectFocusNodeClosestToCameraVector(Transition::Type transitionType)
 {
     if(_focusComponentId.isNull())
         return;
@@ -789,7 +787,7 @@ static ComponentId cycleThroughComponentIds(const std::vector<ComponentId>& comp
     return ComponentId();
 }
 
-void GraphScene::moveToNextComponent()
+void GraphComponentScene::moveToNextComponent()
 {
     _focusComponentId = cycleThroughComponentIds(*_graphModel->graph().componentIds(), _focusComponentId, -1);
 
@@ -800,7 +798,7 @@ void GraphScene::moveToNextComponent()
     }
 }
 
-void GraphScene::moveToPreviousComponent()
+void GraphComponentScene::moveToPreviousComponent()
 {
     _focusComponentId = cycleThroughComponentIds(*_graphModel->graph().componentIds(), _focusComponentId, 1);
 
@@ -811,7 +809,7 @@ void GraphScene::moveToPreviousComponent()
     }
 }
 
-void GraphScene::moveToComponent(ComponentId componentId)
+void GraphComponentScene::moveToComponent(ComponentId componentId)
 {
     _focusComponentId = componentId;
 
@@ -822,12 +820,12 @@ void GraphScene::moveToComponent(ComponentId componentId)
     }
 }
 
-bool GraphScene::interactionAllowed()
+bool GraphComponentScene::interactionAllowed()
 {
     return _panTransition.finished();
 }
 
-void GraphScene::setGraphModel(GraphModel* graphModel)
+void GraphComponentScene::setGraphModel(GraphModel* graphModel)
 {
     this->_graphModel = graphModel;
 
@@ -841,15 +839,15 @@ void GraphScene::setGraphModel(GraphModel* graphModel)
         onComponentAdded(&_graphModel->graph(), componentId);
 
     updateVisualData();
-    connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphScene::onGraphChanged);
-    connect(&_graphModel->graph(), &Graph::nodeWillBeRemoved, this, &GraphScene::onNodeWillBeRemoved);
-    connect(&_graphModel->graph(), &Graph::componentAdded, this, &GraphScene::onComponentAdded);
-    connect(&_graphModel->graph(), &Graph::componentWillBeRemoved, this, &GraphScene::onComponentWillBeRemoved);
-    connect(&_graphModel->graph(), &Graph::componentSplit, this, &GraphScene::onComponentSplit);
-    connect(&_graphModel->graph(), &Graph::componentsWillMerge, this, &GraphScene::onComponentsWillMerge);
+    connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphComponentScene::onGraphChanged);
+    connect(&_graphModel->graph(), &Graph::nodeWillBeRemoved, this, &GraphComponentScene::onNodeWillBeRemoved);
+    connect(&_graphModel->graph(), &Graph::componentAdded, this, &GraphComponentScene::onComponentAdded);
+    connect(&_graphModel->graph(), &Graph::componentWillBeRemoved, this, &GraphComponentScene::onComponentWillBeRemoved);
+    connect(&_graphModel->graph(), &Graph::componentSplit, this, &GraphComponentScene::onComponentSplit);
+    connect(&_graphModel->graph(), &Graph::componentsWillMerge, this, &GraphComponentScene::onComponentsWillMerge);
 }
 
-void GraphScene::prepareVertexBuffers()
+void GraphComponentScene::prepareVertexBuffers()
 {
     // Populate the data buffer object
     _nodePositionBuffer.create();
@@ -887,7 +885,7 @@ void GraphScene::prepareVertexBuffers()
     _debugLinesDataBuffer.allocate(_debugLinesData.data(), static_cast<int>(_debugLinesData.size()) * sizeof(GLfloat));
 }
 
-void GraphScene::prepareNodeVAO()
+void GraphComponentScene::prepareNodeVAO()
 {
     // Bind the marker's VAO
     _sphere->vertexArrayObject()->bind();
@@ -916,7 +914,7 @@ void GraphScene::prepareNodeVAO()
     shader->release();
 }
 
-void GraphScene::prepareEdgeVAO()
+void GraphComponentScene::prepareEdgeVAO()
 {
     // Bind the marker's VAO
     _cylinder->vertexArrayObject()->bind();
@@ -948,7 +946,7 @@ void GraphScene::prepareEdgeVAO()
     shader->release();
 }
 
-void GraphScene::prepareComponentMarkerVAO()
+void GraphComponentScene::prepareComponentMarkerVAO()
 {
     // Bind the marker's VAO
     _quad->vertexArrayObject()->bind();
@@ -969,7 +967,7 @@ void GraphScene::prepareComponentMarkerVAO()
     shader->release();
 }
 
-void GraphScene::prepareSelectionMarkerVAO()
+void GraphComponentScene::prepareSelectionMarkerVAO()
 {
     _selectionMarkerDataVAO.bind();
     _selectionMarkerShader.bind();
@@ -985,7 +983,7 @@ void GraphScene::prepareSelectionMarkerVAO()
     _selectionMarkerShader.release();
 }
 
-void GraphScene::prepareDebugLinesVAO()
+void GraphComponentScene::prepareDebugLinesVAO()
 {
     _debugLinesDataVAO.bind();
     _debugLinesShader.bind();
@@ -1000,7 +998,7 @@ void GraphScene::prepareDebugLinesVAO()
     _debugLinesShader.release();
 }
 
-void GraphScene::prepareScreenQuad()
+void GraphComponentScene::prepareScreenQuad()
 {
     GLfloat quadVerts[] =
     {
@@ -1041,7 +1039,7 @@ void GraphScene::prepareScreenQuad()
     _screenQuadVAO.release();
 }
 
-bool GraphScene::loadShaderProgram(QOpenGLShaderProgram& program, const QString& vertexShader, const QString& fragmentShader)
+bool GraphComponentScene::loadShaderProgram(QOpenGLShaderProgram& program, const QString& vertexShader, const QString& fragmentShader)
 {
     if(!program.addShaderFromSourceFile(QOpenGLShader::Vertex, vertexShader))
     {
@@ -1064,7 +1062,7 @@ bool GraphScene::loadShaderProgram(QOpenGLShaderProgram& program, const QString&
     return true;
 }
 
-bool GraphScene::prepareRenderBuffers()
+bool GraphComponentScene::prepareRenderBuffers()
 {
     bool valid;
 
