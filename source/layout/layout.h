@@ -50,6 +50,7 @@ protected:
 
 public:
     Layout(Iterative iterative) :
+        QObject(),
         _atomicCancel(false),
         _iterative(iterative)
     {}
