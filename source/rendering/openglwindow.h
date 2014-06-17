@@ -5,7 +5,7 @@
 #include <QTime>
 
 class Scene;
-class GraphView;
+class Interactor;
 class QOpenGLDebugMessage;
 
 class OpenGLWindow : public QWindow
@@ -13,15 +13,14 @@ class OpenGLWindow : public QWindow
     Q_OBJECT
 
 public:
-    explicit OpenGLWindow(const QSurfaceFormat& format,
-                          GraphView* graphView,
-                          QScreen* parent = 0);
-    //FIXME destructor to delete things
+    explicit OpenGLWindow(QScreen* parent = nullptr);
 
     QOpenGLContext* context() const { return _context; }
 
     void setScene(Scene* scene);
-    Scene* scene() const { return _scene; }
+    const Scene& scene() const { return *_scene; }
+    void setInteractor(Interactor* interactor) { _interactor = interactor; }
+    const Interactor& interactor() const { return *_interactor; }
     
 protected:
     virtual void initialise();
@@ -46,7 +45,7 @@ protected slots:
 private:
     QOpenGLContext* _context;
     Scene* _scene;
-    GraphView* _graphView;
+    Interactor* _interactor;
     int _debugLevel;
     
     QTime _time;

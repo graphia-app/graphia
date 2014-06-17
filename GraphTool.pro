@@ -48,7 +48,8 @@ SOURCES += \
     source/ui/contentpanewidget.cpp \
     source/ui/graphview.cpp \
     source/ui/selectionmanager.cpp \
-    source/rendering/graphcomponentscene.cpp
+    source/rendering/graphcomponentscene.cpp \
+    source/ui/graphcomponentinteractor.cpp
 
 HEADERS += \
     source/rendering/camera.h \
@@ -93,7 +94,9 @@ HEADERS += \
     source/ui/graphview.h \
     source/ui/selectionmanager.h \
     source/utils.h \
-    source/rendering/graphcomponentscene.h
+    source/rendering/graphcomponentscene.h \
+    source/ui/graphcomponentinteractor.h \
+    source/ui/interactor.h
 
 FORMS    += source/mainwindow.ui
 

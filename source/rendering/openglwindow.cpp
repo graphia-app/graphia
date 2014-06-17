@@ -3,7 +3,7 @@
 #include "opengldebugmessagemodel.h"
 
 #include "graphcomponentscene.h"
-#include "../ui/graphview.h"
+#include "../ui/graphcomponentinteractor.h"
 
 #include <QGuiApplication>
 #include <QKeyEvent>
@@ -11,12 +11,11 @@
 #include <QOpenGLDebugLogger>
 #include <QTimer>
 
-OpenGLWindow::OpenGLWindow(const QSurfaceFormat& format, GraphView* graphView,
-                            QScreen* screen)
+OpenGLWindow::OpenGLWindow(QScreen* screen)
     : QWindow(screen),
       _context(nullptr),
       _scene(nullptr),
-      _graphView(graphView)
+      _interactor(nullptr)
 {
     // Tell Qt we will use OpenGL for this window
     setSurfaceType(OpenGLSurface);
@@ -26,27 +25,31 @@ OpenGLWindow::OpenGLWindow(const QSurfaceFormat& format, GraphView* graphView,
     setFlags(flags() | Qt::WindowFullscreenButtonHint);
 #endif
 
-    QSurfaceFormat actualFormat = format;
+    QSurfaceFormat format;
+    format.setMajorVersion(3);
+    format.setMinorVersion(3);
+
+    format.setDepthBufferSize(24);
+    format.setSamples(1);
+    format.setProfile(QSurfaceFormat::CoreProfile);
 
     if (qgetenv("OPENGL_DEBUG").toInt())
-        actualFormat.setOption(QSurfaceFormat::DebugContext);
+        format.setOption(QSurfaceFormat::DebugContext);
 
     // Create the native window
-    setFormat(actualFormat);
+    setFormat(format);
     create();
 
     // Create an OpenGL context
-    _context = new QOpenGLContext;
-    _context->setFormat(actualFormat);
+    _context = new QOpenGLContext(this);
+    _context->setFormat(format);
     _context->create();
 }
 
 void OpenGLWindow::setScene(Scene* scene)
 {
-    // We take ownership of the scene
     Q_ASSERT(scene);
     _scene = scene;
-    _scene->setParent(this);
 
     // Initialise the scene
     _scene->setContext(_context);
@@ -141,36 +144,36 @@ void OpenGLWindow::messageLogged(const QOpenGLDebugMessage &message)
 
 void OpenGLWindow::keyPressEvent(QKeyEvent* e)
 {
-    _graphView->keyPressEvent(e);
+    _interactor->keyPressEvent(e);
 }
 
 void OpenGLWindow::keyReleaseEvent(QKeyEvent* e)
 {
-    _graphView->keyReleaseEvent(e);
+    _interactor->keyReleaseEvent(e);
 }
 
 void OpenGLWindow::mousePressEvent(QMouseEvent* e)
 {
-    _graphView->mousePressEvent(e);
+    _interactor->mousePressEvent(e);
 }
 
 void OpenGLWindow::mouseReleaseEvent(QMouseEvent* e)
 {
-    _graphView->mouseReleaseEvent(e);
+    _interactor->mouseReleaseEvent(e);
 }
 
 void OpenGLWindow::mouseMoveEvent(QMouseEvent* e)
 {
-    _graphView->mouseMoveEvent(e);
+    _interactor->mouseMoveEvent(e);
 }
 
 void OpenGLWindow::mouseDoubleClickEvent(QMouseEvent* e)
 {
-    _graphView->mouseDoubleClickEvent(e);
+    _interactor->mouseDoubleClickEvent(e);
 }
 
 void OpenGLWindow::wheelEvent(QWheelEvent* e)
 {
-    _graphView->wheelEvent(e);
+    _interactor->wheelEvent(e);
 }
 
