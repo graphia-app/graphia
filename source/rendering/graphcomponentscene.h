@@ -184,10 +184,6 @@ private:
     QOpenGLVertexArrayObject _debugLinesDataVAO;
     QOpenGLShaderProgram _debugLinesShader;
 
-signals:
-    void userInteractionStarted();
-    void userInteractionFinished();
-
 public:
     void addDebugLine(const QVector3D& start, const QVector3D& end, const QColor color = QColor(Qt::GlobalColor::white))
     {

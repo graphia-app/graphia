@@ -10,6 +10,7 @@ class SelectionManager;
 
 class GraphComponentInteractor : public Interactor
 {
+    Q_OBJECT
 public:
     GraphComponentInteractor(GraphModel* graphModel,
                              GraphComponentScene* graphComponentScene,
@@ -23,11 +24,6 @@ private:
     CommandManager* _commandManager;
     SelectionManager* _selectionManager;
 
-signals:
-    void userInteractionStarted();
-    void userInteractionFinished();
-
-private:
     bool _rightMouseButtonHeld;
     bool _leftMouseButtonHeld;
 

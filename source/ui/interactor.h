@@ -27,10 +27,6 @@ public:
 signals:
     void userInteractionStarted();
     void userInteractionFinished();
-
-protected:
-    void emitUserInteractionStarted() { emit userInteractionStarted(); }
-    void emitUserInteractionFinished() { emit userInteractionFinished(); }
 };
 
 #endif // INTERACTOR_H

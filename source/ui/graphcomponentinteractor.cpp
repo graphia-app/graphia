@@ -86,7 +86,7 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
             return;
         }
 
-        emitUserInteractionFinished();
+        emit userInteractionFinished();
 
         if(!_clickedNodeId.isNull() && _rightMouseButtonHeld && _mouseMoving)
             _scene->selectFocusNodeClosestToCameraVector();
@@ -102,7 +102,7 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
         if(!_scene->interactionAllowed())
             return;
 
-        emitUserInteractionFinished();
+        emit userInteractionFinished();
 
         if(_selecting)
         {
@@ -193,7 +193,7 @@ void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
     {
         if(!_frustumSelecting)
         {
-            emitUserInteractionStarted();
+            emit userInteractionStarted();
             _frustumSelecting = true;
             _clickedNodeId.setToNull();
 
@@ -211,7 +211,7 @@ void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
         _frustumSelecting = false;
         _scene->clearSelectionRect();
 
-        emitUserInteractionFinished();
+        emit userInteractionFinished();
     }
     else if(!_clickedNodeId.isNull())
     {
@@ -219,7 +219,7 @@ void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
 
         if(_rightMouseButtonHeld)
         {
-            emitUserInteractionStarted();
+            emit userInteractionStarted();
 
             const QVector3D& clickedNodePosition = _graphModel->nodePositions()[_clickedNodeId];
 
@@ -235,14 +235,14 @@ void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
         }
         else if(_leftMouseButtonHeld)
         {
-            emitUserInteractionStarted();
+            emit userInteractionStarted();
 
             if(_scene->focusNodeId().isNull())
                 _scene->selectFocusNodeClosestToCameraVector();
 
             if(_scene->focusNodeId() != _clickedNodeId)
             {
-                emitUserInteractionStarted();
+                emit userInteractionStarted();
 
                 const QVector3D& clickedNodePosition = _graphModel->nodePositions()[_clickedNodeId];
                 const QVector3D& rotationCentre = _graphModel->nodePositions()[_scene->focusNodeId()];

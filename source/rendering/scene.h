@@ -24,6 +24,10 @@ public:
 
 protected:
     QOpenGLContext* _context;
+
+signals:
+    void userInteractionStarted();
+    void userInteractionFinished();
 };
 
 #endif // SCENE_H
