@@ -22,6 +22,7 @@ public:
 private:
     GraphComponentScene* _graphComponentScene;
     GraphComponentInteractor* _graphComponentInteractor;
+
     GraphModel* _graphModel;
     CommandManager* _commandManager;
     SelectionManager* _selectionManager;
