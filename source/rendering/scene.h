@@ -14,7 +14,7 @@ public:
     virtual ~Scene() {}
 
     void setContext(QOpenGLContext* context) { _context = context; }
-    QOpenGLContext* context() const { return _context; }
+    const QOpenGLContext& context() const { return *_context; }
 
     virtual void initialise() = 0;
     virtual void cleanup() {}
