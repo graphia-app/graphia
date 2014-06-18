@@ -38,6 +38,8 @@ GraphComponentInteractor::GraphComponentInteractor(GraphModel* graphModel, Graph
 {
     _scene->setGraphModel(graphModel);
     connect(_selectionManager, &SelectionManager::selectionChanged, _scene, &GraphComponentScene::onSelectionChanged);
+    connect(_scene, &Scene::userInteractionStarted, this, &Interactor::userInteractionStarted);
+    connect(_scene, &Scene::userInteractionFinished, this, &Interactor::userInteractionFinished);
 }
 
 void GraphComponentInteractor::mousePressEvent(QMouseEvent* mouseEvent)
