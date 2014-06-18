@@ -14,6 +14,7 @@ class OpenGLWindow : public QWindow
 
 public:
     explicit OpenGLWindow(QScreen* parent = nullptr);
+    virtual ~OpenGLWindow();
 
     QOpenGLContext* context() const { return _context; }
 
