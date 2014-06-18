@@ -107,7 +107,10 @@ void LayoutThread::pauseAndWait()
 {
     std::unique_lock<std::mutex> lock(_mutex);
     if(_paused)
+    {
+        lock.unlock();
         return;
+    }
 
     _pause = true;
 
