@@ -41,9 +41,14 @@ OpenGLWindow::OpenGLWindow(QScreen* screen)
     create();
 
     // Create an OpenGL context
-    _context = new QOpenGLContext(this);
+    _context = new QOpenGLContext;
     _context->setFormat(format);
     _context->create();
+}
+
+OpenGLWindow::~OpenGLWindow()
+{
+    delete _context;
 }
 
 void OpenGLWindow::setScene(Scene* scene)
