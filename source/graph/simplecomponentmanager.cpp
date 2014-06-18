@@ -219,6 +219,12 @@ void SimpleComponentManager::removeGraphComponent(ComponentId componentId)
     }
 }
 
+SimpleComponentManager::~SimpleComponentManager()
+{
+    for(auto graphComponent : _componentsMap)
+        delete graphComponent.second;
+}
+
 void SimpleComponentManager::onGraphChanged(const Graph*)
 {
     updateComponents();

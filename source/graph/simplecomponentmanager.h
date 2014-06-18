@@ -52,6 +52,8 @@ public:
         _edgesComponentId(graph)
     {}
 
+    virtual ~SimpleComponentManager();
+
 private:
     // A more sophisticated implementation may make use of these
     void onNodeAdded(const Graph*, NodeId) {}
