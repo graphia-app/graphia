@@ -75,7 +75,7 @@ void ContentPaneWidget::onCompletion(int success)
     _nodeLayoutThread->start();
 
     _selectionManager = new SelectionManager(_graphModel->graph());
-    GraphView* graphView = new GraphView(_graphModel, &_commandManager, _selectionManager, this);
+    GraphView* graphView = new GraphView(_graphModel, &_commandManager, _selectionManager);
 
     connect(graphView, &GraphView::userInteractionStarted,
         [this]
