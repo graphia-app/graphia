@@ -106,7 +106,11 @@ public:
     virtual ~GraphFileParserThread()
     {
         cancel();
-        _thread.join();
+
+        if(_thread.joinable())
+            _thread.join();
+
+        delete _graphFileParser;
     }
 
     void start()
@@ -131,7 +135,6 @@ private:
             [&](Graph& graph)
             {
                 result = _graphFileParser->parse(graph);
-                delete _graphFileParser;
             });
 
         emit complete(result);
