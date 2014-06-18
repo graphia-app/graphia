@@ -52,6 +52,11 @@ GraphComponentScene::GraphComponentScene(QObject* parent)
     update(0.0f);
 }
 
+GraphComponentScene::~GraphComponentScene()
+{
+    delete _componentsViewData;
+}
+
 void GraphComponentScene::initialise()
 {
     _funcs = _context->versionFunctions<QOpenGLFunctions_3_3_Core>();

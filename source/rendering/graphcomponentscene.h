@@ -46,6 +46,7 @@ class GraphComponentScene : public Scene
 
 public:
     GraphComponentScene(QObject* parent = 0);
+    virtual ~GraphComponentScene();
 
     static const int multisamples = 4;
 

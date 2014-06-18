@@ -12,6 +12,7 @@ class GraphFileParserThread;
 class NodeLayoutThread;
 class LayoutThread;
 class CommandManager;
+class GraphView;
 
 class ContentPaneWidget : public QWidget
 {
@@ -36,6 +37,7 @@ private:
     CommandManager _commandManager;
     GraphFileParserThread* _graphFileParserThread;
     NodeLayoutThread* _nodeLayoutThread;
+    GraphView* _graphView;
 
     bool _resumePreviouslyActiveLayout;
 

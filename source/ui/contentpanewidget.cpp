@@ -25,6 +25,9 @@ ContentPaneWidget::ContentPaneWidget(QWidget* parent) :
 
 ContentPaneWidget::~ContentPaneWidget()
 {
+    layout()->removeWidget(_graphView);
+    delete _graphView;
+
     delete _graphFileParserThread;
     _graphFileParserThread = nullptr;
 
@@ -75,15 +78,15 @@ void ContentPaneWidget::onCompletion(int success)
     _nodeLayoutThread->start();
 
     _selectionManager = new SelectionManager(_graphModel->graph());
-    GraphView* graphView = new GraphView(_graphModel, &_commandManager, _selectionManager);
+    _graphView = new GraphView(_graphModel, &_commandManager, _selectionManager);
 
-    connect(graphView, &GraphView::userInteractionStarted,
+    connect(_graphView, &GraphView::userInteractionStarted,
         [this]
         {
             pauseLayout(true);
         });
 
-    connect(graphView, &GraphView::userInteractionFinished,
+    connect(_graphView, &GraphView::userInteractionFinished,
         [this]
         {
             resumeLayout(true);
@@ -92,7 +95,7 @@ void ContentPaneWidget::onCompletion(int success)
     connect(&_commandManager, &CommandManager::commandStackChanged, this, &ContentPaneWidget::commandStackChanged);
     connect(_selectionManager, &SelectionManager::selectionChanged, this, &ContentPaneWidget::selectionChanged);
 
-    layout()->addWidget(graphView);
+    layout()->addWidget(_graphView);
 
     if(_graphModel->contentWidget() != nullptr)
         layout()->addWidget(_graphModel->contentWidget());
