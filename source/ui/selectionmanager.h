@@ -9,8 +9,8 @@ class SelectionManager : public QObject
 {
     Q_OBJECT
 public:
-    SelectionManager(const ReadOnlyGraph& graph) : _graph(&graph) {}
-    SelectionManager(SelectionManager&& s) : _graph(s._graph), _selectedNodes(s._selectedNodes) {}
+    SelectionManager(const ReadOnlyGraph& graph) : QObject(), _graph(&graph) {}
+    SelectionManager(SelectionManager&& s) : QObject(), _graph(s._graph), _selectedNodes(s._selectedNodes) {}
 
     ElementIdSet<NodeId> selectedNodes() const;
     ElementIdSet<NodeId> unselectedNodes() const;

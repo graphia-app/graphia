@@ -60,7 +60,9 @@ class CommandManager : public QObject
     Q_OBJECT
 public:
     CommandManager();
-    CommandManager(const CommandManager& c) : _stack(c._stack), _lastExecutedIndex(c._lastExecutedIndex) {}
+    CommandManager(const CommandManager& c) :
+        QObject(), _stack(c._stack), _lastExecutedIndex(c._lastExecutedIndex)
+    {}
     ~CommandManager();
 
     void clear();
