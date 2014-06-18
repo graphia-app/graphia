@@ -175,7 +175,9 @@ public:
     virtual ~LayoutThread()
     {
         stop();
-        _thread.join();
+
+        if(_thread.joinable())
+            _thread.join();
     }
 
     void addLayout(Layout* layout);
