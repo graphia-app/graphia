@@ -96,6 +96,7 @@ void MainWidget::onCompletion(int success)
     connect(&_commandManager, &CommandManager::commandStackChanged, this, &MainWidget::commandStackChanged);
     connect(_selectionManager, &SelectionManager::selectionChanged, this, &MainWidget::selectionChanged);
 
+    layout()->setContentsMargins(0, 0, 0, 0);
     layout()->addWidget(_graphWidget);
 
     if(_graphModel->contentWidget() != nullptr)

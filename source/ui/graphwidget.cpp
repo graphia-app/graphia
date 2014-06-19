@@ -23,6 +23,7 @@ GraphWidget::GraphWidget(GraphModel* graphModel,
     connect(_graphComponentInteractor, &Interactor::userInteractionFinished, this, &GraphWidget::userInteractionFinished);
 
     setLayout(new QVBoxLayout());
+    layout()->setContentsMargins(0, 0, 0, 0);
     layout()->addWidget(QWidget::createWindowContainer(window));
 }
 
