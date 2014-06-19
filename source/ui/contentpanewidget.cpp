@@ -251,7 +251,7 @@ void ContentPaneWidget::deleteSelectedNodes()
         [this, nodes, edges]
         {
             _graphModel->graph().performTransaction(
-                [nodes, edges](Graph& graph)
+                [&nodes, &edges](Graph& graph)
                 {
                     graph.addNodes(nodes);
                     graph.addEdges(edges);
