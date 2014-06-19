@@ -1,4 +1,4 @@
-#include "contentpanewidget.h"
+#include "mainwidget.h"
 
 #include "../parsers/gmlfileparser.h"
 #include "../graph/genericgraphmodel.h"
@@ -12,18 +12,19 @@
 #include <QFileInfo>
 #include <QVBoxLayout>
 
-ContentPaneWidget::ContentPaneWidget(QWidget* parent) :
+MainWidget::MainWidget(QWidget* parent) :
     QWidget(parent),
     _graphModel(nullptr),
     _selectionManager(nullptr),
     _graphFileParserThread(nullptr),
     _nodeLayoutThread(nullptr),
+    _graphWidget(nullptr),
     _resumePreviouslyActiveLayout(false)
 {
     this->setLayout(new QVBoxLayout());
 }
 
-ContentPaneWidget::~ContentPaneWidget()
+MainWidget::~MainWidget()
 {
     layout()->removeWidget(_graphWidget);
     delete _graphWidget;
@@ -38,7 +39,7 @@ ContentPaneWidget::~ContentPaneWidget()
     delete _graphModel;
 }
 
-bool ContentPaneWidget::initFromFile(const QString &filename)
+bool MainWidget::initFromFile(const QString &filename)
 {
     QFileInfo info(filename);
 
@@ -56,22 +57,22 @@ bool ContentPaneWidget::initFromFile(const QString &filename)
         /*break;
     }*/
 
-    connect(&_graphModel->graph(), &Graph::graphWillChange, this, &ContentPaneWidget::onGraphWillChange, Qt::DirectConnection);
-    connect(&_graphModel->graph(), &Graph::graphChanged, this, &ContentPaneWidget::onGraphChanged, Qt::DirectConnection);
-    connect(&_graphModel->graph(), &Graph::componentAdded, this, &ContentPaneWidget::onComponentAdded, Qt::DirectConnection);
-    connect(&_graphModel->graph(), &Graph::componentWillBeRemoved, this, &ContentPaneWidget::onComponentWillBeRemoved, Qt::DirectConnection);
-    connect(&_graphModel->graph(), &Graph::componentSplit, this, &ContentPaneWidget::onComponentSplit, Qt::DirectConnection);
-    connect(&_graphModel->graph(), &Graph::componentsWillMerge, this, &ContentPaneWidget::onComponentsWillMerge, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::graphWillChange, this, &MainWidget::onGraphWillChange, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::graphChanged, this, &MainWidget::onGraphChanged, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::componentAdded, this, &MainWidget::onComponentAdded, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::componentWillBeRemoved, this, &MainWidget::onComponentWillBeRemoved, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::componentSplit, this, &MainWidget::onComponentSplit, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::componentsWillMerge, this, &MainWidget::onComponentsWillMerge, Qt::DirectConnection);
 
     _graphFileParserThread = new GraphFileParserThread(filename, _graphModel->graph(), graphFileParser);
-    connect(_graphFileParserThread, &GraphFileParserThread::progress, this, &ContentPaneWidget::progress);
-    connect(_graphFileParserThread, &GraphFileParserThread::complete, this, &ContentPaneWidget::onCompletion);
+    connect(_graphFileParserThread, &GraphFileParserThread::progress, this, &MainWidget::progress);
+    connect(_graphFileParserThread, &GraphFileParserThread::complete, this, &MainWidget::onCompletion);
     _graphFileParserThread->start();
 
     return true;
 }
 
-void ContentPaneWidget::onCompletion(int success)
+void MainWidget::onCompletion(int success)
 {
     _nodeLayoutThread = new NodeLayoutThread(new EadesLayoutFactory(_graphModel));
     _nodeLayoutThread->addAllComponents(_graphModel->graph());
@@ -92,8 +93,8 @@ void ContentPaneWidget::onCompletion(int success)
             resumeLayout(true);
         });
 
-    connect(&_commandManager, &CommandManager::commandStackChanged, this, &ContentPaneWidget::commandStackChanged);
-    connect(_selectionManager, &SelectionManager::selectionChanged, this, &ContentPaneWidget::selectionChanged);
+    connect(&_commandManager, &CommandManager::commandStackChanged, this, &MainWidget::commandStackChanged);
+    connect(_selectionManager, &SelectionManager::selectionChanged, this, &MainWidget::selectionChanged);
 
     layout()->addWidget(_graphWidget);
 
@@ -103,32 +104,32 @@ void ContentPaneWidget::onCompletion(int success)
     emit complete(success);
 }
 
-void ContentPaneWidget::onGraphWillChange(const Graph*)
+void MainWidget::onGraphWillChange(const Graph*)
 {
     // Graph is about to change so suspend any active layout process
     pauseLayout(true);
 }
 
-void ContentPaneWidget::onGraphChanged(const Graph* graph)
+void MainWidget::onGraphChanged(const Graph* graph)
 {
     resumeLayout(true);
 
     emit graphChanged(graph);
 }
 
-void ContentPaneWidget::onComponentAdded(const Graph*, ComponentId componentId)
+void MainWidget::onComponentAdded(const Graph*, ComponentId componentId)
 {
     if(_nodeLayoutThread != nullptr)
         _nodeLayoutThread->addComponent(componentId);
 }
 
-void ContentPaneWidget::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
+void MainWidget::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
 {
     if(_nodeLayoutThread != nullptr)
         _nodeLayoutThread->removeComponent(componentId);
 }
 
-void ContentPaneWidget::onComponentSplit(const Graph*, ComponentId /*splitter*/, const ElementIdSet<ComponentId>& splitters)
+void MainWidget::onComponentSplit(const Graph*, ComponentId /*splitter*/, const ElementIdSet<ComponentId>& splitters)
 {
     if(_nodeLayoutThread != nullptr)
     {
@@ -137,7 +138,7 @@ void ContentPaneWidget::onComponentSplit(const Graph*, ComponentId /*splitter*/,
     }
 }
 
-void ContentPaneWidget::onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers, ComponentId merger)
+void MainWidget::onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers, ComponentId merger)
 {
     if(_nodeLayoutThread != nullptr)
     {
@@ -149,7 +150,7 @@ void ContentPaneWidget::onComponentsWillMerge(const Graph*, const ElementIdSet<C
     }
 }
 
-void ContentPaneWidget::pauseLayout(bool autoResume)
+void MainWidget::pauseLayout(bool autoResume)
 {
     if(_nodeLayoutThread != nullptr)
     {
@@ -160,7 +161,7 @@ void ContentPaneWidget::pauseLayout(bool autoResume)
     }
 }
 
-bool ContentPaneWidget::layoutIsPaused()
+bool MainWidget::layoutIsPaused()
 {
     // Not typos: a non-existant thread counts as paused
     bool nodeLayoutPaused = (_nodeLayoutThread == nullptr || _nodeLayoutThread->paused());
@@ -168,7 +169,7 @@ bool ContentPaneWidget::layoutIsPaused()
     return nodeLayoutPaused;
 }
 
-void ContentPaneWidget::resumeLayout(bool autoResume)
+void MainWidget::resumeLayout(bool autoResume)
 {
     if(autoResume && !_resumePreviouslyActiveLayout)
         return;
@@ -179,7 +180,7 @@ void ContentPaneWidget::resumeLayout(bool autoResume)
         _nodeLayoutThread->resume();
 }
 
-void ContentPaneWidget::selectAll()
+void MainWidget::selectAll()
 {
     if(_selectionManager != nullptr)
     {
@@ -190,7 +191,7 @@ void ContentPaneWidget::selectAll()
     }
 }
 
-void ContentPaneWidget::selectNone()
+void MainWidget::selectNone()
 {
     if(_selectionManager != nullptr)
     {
@@ -201,7 +202,7 @@ void ContentPaneWidget::selectNone()
     }
 }
 
-void ContentPaneWidget::invertSelection()
+void MainWidget::invertSelection()
 {
     if(_selectionManager != nullptr)
     {
@@ -212,7 +213,7 @@ void ContentPaneWidget::invertSelection()
     }
 }
 
-const QString ContentPaneWidget::nextUndoAction() const
+const QString MainWidget::nextUndoAction() const
 {
     QString undoAction = tr("Undo");
 
@@ -222,7 +223,7 @@ const QString ContentPaneWidget::nextUndoAction() const
     return undoAction;
 }
 
-const QString ContentPaneWidget::nextRedoAction() const
+const QString MainWidget::nextRedoAction() const
 {
     QString redoAction = tr("Redo");
 
@@ -232,7 +233,7 @@ const QString ContentPaneWidget::nextRedoAction() const
     return redoAction;
 }
 
-void ContentPaneWidget::deleteSelectedNodes()
+void MainWidget::deleteSelectedNodes()
 {
     auto edges = _graphModel->graph().edgesForNodes(_selectionManager->selectedNodes());
     auto nodes = _selectionManager->selectedNodes();
@@ -261,13 +262,13 @@ void ContentPaneWidget::deleteSelectedNodes()
         });
 }
 
-void ContentPaneWidget::undo()
+void MainWidget::undo()
 {
     if(_commandManager.canUndo())
         _commandManager.undo();
 }
 
-void ContentPaneWidget::redo()
+void MainWidget::redo()
 {
     if(_commandManager.canRedo())
         _commandManager.redo();

@@ -45,11 +45,11 @@ SOURCES += \
     source/maths/ray.cpp \
     source/parsers/gmlfileparser.cpp \
     source/ui/commandmanager.cpp \
-    source/ui/contentpanewidget.cpp \
     source/ui/selectionmanager.cpp \
     source/rendering/graphcomponentscene.cpp \
     source/ui/graphcomponentinteractor.cpp \
-    source/ui/graphwidget.cpp
+    source/ui/graphwidget.cpp \
+    source/ui/mainwidget.cpp
 
 HEADERS += \
     source/rendering/camera.h \
@@ -90,13 +90,13 @@ HEADERS += \
     source/parsers/gmlfileparser.h \
     source/parsers/graphfileparser.h \
     source/ui/commandmanager.h \
-    source/ui/contentpanewidget.h \
     source/ui/selectionmanager.h \
     source/utils.h \
     source/rendering/graphcomponentscene.h \
     source/ui/graphcomponentinteractor.h \
     source/ui/interactor.h \
-    source/ui/graphwidget.h
+    source/ui/graphwidget.h \
+    source/ui/mainwidget.h
 
 FORMS    += source/mainwindow.ui
 

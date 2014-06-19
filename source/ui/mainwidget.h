@@ -1,5 +1,5 @@
-#ifndef CONTENTPANEWIDGET_H
-#define CONTENTPANEWIDGET_H
+#ifndef MAINWIDGET_H
+#define MAINWIDGET_H
 
 #include <QWidget>
 
@@ -14,12 +14,12 @@ class LayoutThread;
 class CommandManager;
 class GraphWidget;
 
-class ContentPaneWidget : public QWidget
+class MainWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit ContentPaneWidget(QWidget* parent = 0);
-    virtual ~ContentPaneWidget();
+    explicit MainWidget(QWidget* parent = 0);
+    virtual ~MainWidget();
 
 signals:
     void progress(int percentage) const;
@@ -74,4 +74,4 @@ public:
     bool initFromFile(const QString& filename);
 };
 
-#endif // CONTENTPANEWIDGET_H
+#endif // MAINWIDGET_H

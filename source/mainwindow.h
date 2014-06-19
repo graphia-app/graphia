@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 
-class ContentPaneWidget;
+class MainWidget;
 class QLabel;
 class Graph;
 class CommandManager;
@@ -22,8 +22,8 @@ public:
     ~MainWindow();
     
 private:
-    ContentPaneWidget* currentTabWidget();
-    ContentPaneWidget* createNewTabWidget(const QString& filename);
+    MainWidget* currentTabWidget();
+    MainWidget* createNewTabWidget(const QString& filename);
     void closeTab(int index);
     QString showGeneralFileOpenDialog();
     void configureActionPauseLayout(bool pause);
