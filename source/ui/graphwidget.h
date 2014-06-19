@@ -1,5 +1,5 @@
-#ifndef GRAPHVIEW_H
-#define GRAPHVIEW_H
+#ifndef GRAPHWIDGET_H
+#define GRAPHWIDGET_H
 
 #include <QWidget>
 
@@ -9,15 +9,15 @@ class GraphModel;
 class CommandManager;
 class SelectionManager;
 
-class GraphView : public QWidget
+class GraphWidget : public QWidget
 {
     Q_OBJECT
 public:
-    GraphView(GraphModel* graphModel,
-              CommandManager* commandManager,
-              SelectionManager* selectionManager,
-              QWidget *parent = nullptr);
-    virtual ~GraphView();
+    GraphWidget(GraphModel* graphModel,
+                CommandManager* commandManager,
+                SelectionManager* selectionManager,
+                QWidget *parent = nullptr);
+    virtual ~GraphWidget();
 
 private:
     GraphComponentScene* _graphComponentScene;
@@ -32,4 +32,4 @@ signals:
     void userInteractionFinished();
 };
 
-#endif // GRAPHVIEW_H
+#endif // GRAPHWIDGET_H

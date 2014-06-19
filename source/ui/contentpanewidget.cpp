@@ -6,7 +6,7 @@
 #include "../layout/layout.h"
 #include "../layout/eadeslayout.h"
 #include "../layout/collision.h"
-#include "graphview.h"
+#include "graphwidget.h"
 #include "selectionmanager.h"
 
 #include <QFileInfo>
@@ -25,8 +25,8 @@ ContentPaneWidget::ContentPaneWidget(QWidget* parent) :
 
 ContentPaneWidget::~ContentPaneWidget()
 {
-    layout()->removeWidget(_graphView);
-    delete _graphView;
+    layout()->removeWidget(_graphWidget);
+    delete _graphWidget;
 
     delete _graphFileParserThread;
     _graphFileParserThread = nullptr;
@@ -78,15 +78,15 @@ void ContentPaneWidget::onCompletion(int success)
     _nodeLayoutThread->start();
 
     _selectionManager = new SelectionManager(_graphModel->graph());
-    _graphView = new GraphView(_graphModel, &_commandManager, _selectionManager);
+    _graphWidget = new GraphWidget(_graphModel, &_commandManager, _selectionManager);
 
-    connect(_graphView, &GraphView::userInteractionStarted,
+    connect(_graphWidget, &GraphWidget::userInteractionStarted,
         [this]
         {
             pauseLayout(true);
         });
 
-    connect(_graphView, &GraphView::userInteractionFinished,
+    connect(_graphWidget, &GraphWidget::userInteractionFinished,
         [this]
         {
             resumeLayout(true);
@@ -95,7 +95,7 @@ void ContentPaneWidget::onCompletion(int success)
     connect(&_commandManager, &CommandManager::commandStackChanged, this, &ContentPaneWidget::commandStackChanged);
     connect(_selectionManager, &SelectionManager::selectionChanged, this, &ContentPaneWidget::selectionChanged);
 
-    layout()->addWidget(_graphView);
+    layout()->addWidget(_graphWidget);
 
     if(_graphModel->contentWidget() != nullptr)
         layout()->addWidget(_graphModel->contentWidget());

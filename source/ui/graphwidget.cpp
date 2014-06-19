@@ -1,4 +1,4 @@
-#include "graphview.h"
+#include "graphwidget.h"
 
 #include "../rendering/openglwindow.h"
 #include "../rendering/graphcomponentscene.h"
@@ -7,7 +7,9 @@
 
 #include <QVBoxLayout>
 
-GraphView::GraphView(GraphModel* graphModel, CommandManager* commandManager, SelectionManager* selectionManager, QWidget *parent) :
+GraphWidget::GraphWidget(GraphModel* graphModel,
+                         CommandManager* commandManager,
+                         SelectionManager* selectionManager, QWidget *parent) :
     QWidget(parent)
 {
     OpenGLWindow* window = new OpenGLWindow;
@@ -17,14 +19,14 @@ GraphView::GraphView(GraphModel* graphModel, CommandManager* commandManager, Sel
     window->setScene(_graphComponentScene);
     window->setInteractor(_graphComponentInteractor);
 
-    connect(_graphComponentInteractor, &Interactor::userInteractionStarted, this, &GraphView::userInteractionStarted);
-    connect(_graphComponentInteractor, &Interactor::userInteractionFinished, this, &GraphView::userInteractionFinished);
+    connect(_graphComponentInteractor, &Interactor::userInteractionStarted, this, &GraphWidget::userInteractionStarted);
+    connect(_graphComponentInteractor, &Interactor::userInteractionFinished, this, &GraphWidget::userInteractionFinished);
 
     setLayout(new QVBoxLayout());
     layout()->addWidget(QWidget::createWindowContainer(window));
 }
 
-GraphView::~GraphView()
+GraphWidget::~GraphWidget()
 {
     delete _graphComponentInteractor;
     delete _graphComponentScene;
