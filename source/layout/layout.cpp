@@ -45,38 +45,6 @@ BoundingSphere NodeLayout::boundingSphere(const ReadOnlyGraph &graph, const Node
     return boundingSphere;
 }
 
-BoundingBox2D ComponentLayout::boundingBox() const
-{
-    BoundingBox2D _boundingBox;
-
-    for(ComponentId componentId : *_graph->componentIds())
-    {
-        const ReadOnlyGraph& component = *_graph->componentById(componentId);
-        float componentRadius = NodeLayout::boundingCircleRadiusInXY(component, *_nodePositions);
-        QVector2D componentPosition = (*_componentPositions)[componentId];
-        BoundingBox2D componentBoundingBox(
-                    QVector2D(componentPosition.x() - componentRadius, componentPosition.y() - componentRadius),
-                    QVector2D(componentPosition.x() + componentRadius, componentPosition.y() + componentRadius));
-
-        _boundingBox.expandToInclude(componentBoundingBox);
-    }
-
-    return _boundingBox;
-}
-
-float ComponentLayout::radiusOfComponent(ComponentId componentId) const
-{
-    const ReadOnlyGraph& component = *_graph->componentById(componentId);
-    return NodeLayout::boundingCircleRadiusInXY(component, *_nodePositions);
-}
-
-BoundingBox2D ComponentLayout::boundingBoxOfComponent(ComponentId componentId) const
-{
-    const ReadOnlyGraph& component = *_graph->componentById(componentId);
-    return NodeLayout::boundingBoxInXY(component, *_nodePositions);
-}
-
-
 void LayoutThread::addLayout(Layout *layout)
 {
     std::lock_guard<std::mutex> locker(_mutex);

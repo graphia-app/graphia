@@ -14,7 +14,6 @@ public:
 private:
     Graph _graph;
     NodePositions _nodePositions;
-    ComponentPositions _componentPositions;
     NodeVisuals _nodeVisuals;
     EdgeVisuals _edgeVisuals;
 
@@ -25,8 +24,6 @@ public:
     const Graph& graph() const { return _graph; }
     NodePositions& nodePositions() { return _nodePositions; }
     const NodePositions& nodePositions() const { return _nodePositions; }
-    ComponentPositions& componentPositions() { return _componentPositions; }
-    const ComponentPositions& componentPositions() const { return _componentPositions; }
 
     NodeVisuals& nodeVisuals() { return _nodeVisuals; }
     const NodeVisuals& nodeVisuals() const { return _nodeVisuals; }

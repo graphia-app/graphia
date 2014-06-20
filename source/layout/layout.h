@@ -77,7 +77,6 @@ signals:
 };
 
 typedef NodeArray<QVector3D> NodePositions;
-typedef ComponentArray<QVector2D> ComponentPositions;
 
 class NodeLayout : public Layout
 {
@@ -102,30 +101,6 @@ public:
     static BoundingSphere boundingSphere(const ReadOnlyGraph& graph, const NodePositions& _positions);
     BoundingSphere boundingSphere() const;
     static float boundingCircleRadiusInXY(const ReadOnlyGraph& graph, const NodePositions& _positions);
-};
-
-class ComponentLayout : public Layout
-{
-    Q_OBJECT
-protected:
-    const Graph* _graph;
-    ComponentPositions* _componentPositions;
-    const NodePositions* _nodePositions;
-
-public:
-    ComponentLayout(const Graph& graph, ComponentPositions& componentPositions,
-                    const NodePositions& nodePositions, Iterative iterative = Iterative::No) :
-        Layout(iterative),
-        _graph(&graph),
-        _componentPositions(&componentPositions),
-        _nodePositions(&nodePositions)
-    {}
-
-    const Graph& graph() { return *_graph; }
-
-    BoundingBox2D boundingBox() const;
-    float radiusOfComponent(ComponentId componentId) const;
-    BoundingBox2D boundingBoxOfComponent(ComponentId componentId) const;
 };
 
 class GraphModel;

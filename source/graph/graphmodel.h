@@ -37,8 +37,6 @@ public:
     virtual const Graph& graph() const = 0;
     virtual NodePositions& nodePositions() = 0;
     virtual const NodePositions& nodePositions() const = 0;
-    virtual ComponentPositions& componentPositions() = 0;
-    virtual const ComponentPositions& componentPositions() const = 0;
 
     virtual NodeVisuals& nodeVisuals() = 0;
     virtual const NodeVisuals& nodeVisuals() const = 0;
