@@ -15,7 +15,7 @@ GenericGraphModel::GenericGraphModel(const QString &name) :
 const float NODE_SIZE = 0.6f;
 const float EDGE_SIZE = 0.1f;
 
-void GenericGraphModel::onNodeAdded(const Graph*, NodeId nodeId)
+void GenericGraphModel::onNodeAdded(const Graph&, NodeId nodeId)
 {
     if(!_nodeVisuals[nodeId]._initialised)
     {
@@ -26,7 +26,7 @@ void GenericGraphModel::onNodeAdded(const Graph*, NodeId nodeId)
     }
 }
 
-void GenericGraphModel::onEdgeAdded(const Graph*, EdgeId edgeId)
+void GenericGraphModel::onEdgeAdded(const Graph&, EdgeId edgeId)
 {
     if(!_edgeVisuals[edgeId]._initialised)
     {

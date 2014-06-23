@@ -84,12 +84,12 @@ void SimpleComponentManager::updateComponents()
                 if(componentIdsAffected.size() > 1)
                 {
                     // More than one old component IDs were observed so components have merged
-                    emit componentsWillMerge(&graph(), componentIdsAffected, oldComponentId);
+                    emit componentsWillMerge(graph(), componentIdsAffected, oldComponentId);
                     componentIdsAffected.erase(oldComponentId);
 
                     for(ComponentId removedComponentId : componentIdsAffected)
                     {
-                        emit componentWillBeRemoved(&graph(), removedComponentId);
+                        emit componentWillBeRemoved(graph(), removedComponentId);
                         removeGraphComponent(removedComponentId);
                     }
                 }
@@ -118,7 +118,7 @@ void SimpleComponentManager::updateComponents()
             continue;
 
         // Component removed
-        emit componentWillBeRemoved(&graph(), componentId);
+        emit componentWillBeRemoved(graph(), componentId);
 
         removeGraphComponent(componentId);
     }
@@ -130,18 +130,18 @@ void SimpleComponentManager::updateComponents()
     for(auto splitee : splitComponents)
     {
         ElementIdSet<ComponentId>& splitters = splitee.second;
-        emit componentSplit(&graph(), splitee.first, splitters);
+        emit componentSplit(graph(), splitee.first, splitters);
 
         for(ComponentId splitter : splitters)
         {
             if(splitter != splitee.first)
-                emit componentAdded(&graph(), splitter);
+                emit componentAdded(graph(), splitter);
         }
     }
 
     // Notify all the new components
     for(ComponentId newComponentId : newComponentIds)
-        emit componentAdded(&graph(), newComponentId);
+        emit componentAdded(graph(), newComponentId);
 }
 
 ComponentId SimpleComponentManager::generateComponentId()
@@ -225,7 +225,7 @@ SimpleComponentManager::~SimpleComponentManager()
         delete graphComponent.second;
 }
 
-void SimpleComponentManager::onGraphChanged(const Graph*)
+void SimpleComponentManager::onGraphChanged(const Graph&)
 {
     updateComponents();
 

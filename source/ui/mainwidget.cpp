@@ -21,6 +21,7 @@ MainWidget::MainWidget(QWidget* parent) :
 
 MainWidget::~MainWidget()
 {
+    // Defined so we can use smart pointers to incomplete types in the header
 }
 
 bool MainWidget::initFromFile(const QString &filename)
@@ -89,32 +90,32 @@ void MainWidget::onCompletion(int success)
     emit complete(success);
 }
 
-void MainWidget::onGraphWillChange(const Graph*)
+void MainWidget::onGraphWillChange(const Graph&)
 {
     // Graph is about to change so suspend any active layout process
     pauseLayout(true);
 }
 
-void MainWidget::onGraphChanged(const Graph* graph)
+void MainWidget::onGraphChanged(const Graph& graph)
 {
     resumeLayout(true);
 
     emit graphChanged(graph);
 }
 
-void MainWidget::onComponentAdded(const Graph*, ComponentId componentId)
+void MainWidget::onComponentAdded(const Graph&, ComponentId componentId)
 {
     if(_nodeLayoutThread != nullptr)
         _nodeLayoutThread->addComponent(componentId);
 }
 
-void MainWidget::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
+void MainWidget::onComponentWillBeRemoved(const Graph&, ComponentId componentId)
 {
     if(_nodeLayoutThread != nullptr)
         _nodeLayoutThread->removeComponent(componentId);
 }
 
-void MainWidget::onComponentSplit(const Graph*, ComponentId /*splitter*/, const ElementIdSet<ComponentId>& splitters)
+void MainWidget::onComponentSplit(const Graph&, ComponentId /*splitter*/, const ElementIdSet<ComponentId>& splitters)
 {
     if(_nodeLayoutThread != nullptr)
     {
@@ -123,7 +124,7 @@ void MainWidget::onComponentSplit(const Graph*, ComponentId /*splitter*/, const 
     }
 }
 
-void MainWidget::onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers, ComponentId merger)
+void MainWidget::onComponentsWillMerge(const Graph&, const ElementIdSet<ComponentId>& mergers, ComponentId merger)
 {
     if(_nodeLayoutThread != nullptr)
     {

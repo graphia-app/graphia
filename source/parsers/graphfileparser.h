@@ -98,46 +98,14 @@ private:
     std::thread _thread;
 
 public:
-    GraphFileParserThread(const QString& filename, Graph& graph, std::unique_ptr<GraphFileParser> graphFileParser) :
-        _filename(filename),
-        _graph(&graph),
-        _graphFileParser(std::move(graphFileParser))
-    {}
+    GraphFileParserThread(const QString& filename, Graph& graph, std::unique_ptr<GraphFileParser> graphFileParser);
+    virtual ~GraphFileParserThread();
 
-    virtual ~GraphFileParserThread()
-    {
-        cancel();
-
-        if(_thread.joinable())
-            _thread.join();
-    }
-
-    void start()
-    {
-        _thread = std::thread(&GraphFileParserThread::run, this);
-    }
-
-    void cancel()
-    {
-        if(_thread.joinable())
-            _graphFileParser->cancel();
-    }
+    void start();
+    void cancel();
 
 private:
-    void run()
-    {
-        connect(_graphFileParser.get(), &GraphFileParser::progress, this, &GraphFileParserThread::progress);
-
-        bool result;
-
-        _graph->performTransaction(
-            [&](Graph& graph)
-            {
-                result = _graphFileParser->parse(graph);
-            });
-
-        emit complete(result);
-    }
+    void run();
 
 signals:
     void progress(int percentage) const;

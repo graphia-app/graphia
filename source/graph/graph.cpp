@@ -78,7 +78,7 @@ NodeId Graph::addNode(NodeId nodeId)
     node._inEdges.clear();
     node._outEdges.clear();
 
-    emit nodeAdded(this, nodeId);
+    emit nodeAdded(*this, nodeId);
     endTransaction();
 
     return nodeId;
@@ -111,7 +111,7 @@ void Graph::removeNode(NodeId nodeId)
     for(EdgeId edgeId : node.edges())
         removeEdge(edgeId);
 
-    emit nodeWillBeRemoved(this, nodeId);
+    emit nodeWillBeRemoved(*this, nodeId);
 
     _nodeIdsInUse[nodeId] = false;
     _unusedNodeIdsDeque.push_back(nodeId);
@@ -174,7 +174,7 @@ EdgeId Graph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     _nodesVector[targetId]._inEdges.insert(edgeId);
     _nodesVector[targetId]._edges.insert(edgeId);
 
-    emit edgeAdded(this, edgeId);
+    emit edgeAdded(*this, edgeId);
     endTransaction();
 
     return edgeId;
@@ -202,7 +202,7 @@ void Graph::removeEdge(EdgeId edgeId)
 {
     beginTransaction();
 
-    emit edgeWillBeRemoved(this, edgeId);
+    emit edgeWillBeRemoved(*this, edgeId);
 
     // Remove all node references to this edge
     const Edge& edge = _edgesVector[edgeId];
@@ -319,7 +319,7 @@ void Graph::dumpToQDebug(int detail) const
 void Graph::beginTransaction()
 {
     if(_graphChangeDepth++ <= 0)
-        emit graphWillChange(this);
+        emit graphWillChange(*this);
 }
 
 void Graph::endTransaction()
@@ -328,7 +328,7 @@ void Graph::endTransaction()
     if(--_graphChangeDepth <= 0)
     {
         updateElementIdData();
-        emit graphChanged(this);
+        emit graphChanged(*this);
     }
 }
 

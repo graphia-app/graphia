@@ -62,13 +62,13 @@ public:
 
 
 protected slots:
-    virtual void onNodeAdded(const Graph*, NodeId nodeId) = 0;
-    virtual void onNodeWillBeRemoved(const Graph*, NodeId nodeId) = 0;
+    virtual void onNodeAdded(const Graph&, NodeId nodeId) = 0;
+    virtual void onNodeWillBeRemoved(const Graph&, NodeId nodeId) = 0;
 
-    virtual void onEdgeAdded(const Graph*, EdgeId edgeId) = 0;
-    virtual void onEdgeWillBeRemoved(const Graph*, EdgeId edgeId) = 0;
+    virtual void onEdgeAdded(const Graph&, EdgeId edgeId) = 0;
+    virtual void onEdgeWillBeRemoved(const Graph&, EdgeId edgeId) = 0;
 
-    virtual void onGraphChanged(const Graph*) = 0;
+    virtual void onGraphChanged(const Graph&) = 0;
 
 protected:
     Graph* _graph;
@@ -99,10 +99,10 @@ public:
     virtual ComponentId componentIdOfEdge(EdgeId edgeId) const = 0;
 
 signals:
-    void componentAdded(const Graph*, ComponentId) const;
-    void componentWillBeRemoved(const Graph*, ComponentId) const;
-    void componentSplit(const Graph*, ComponentId, const ElementIdSet<ComponentId>&) const;
-    void componentsWillMerge(const Graph*, const ElementIdSet<ComponentId>&, ComponentId) const;
+    void componentAdded(const Graph&, ComponentId) const;
+    void componentWillBeRemoved(const Graph&, ComponentId) const;
+    void componentSplit(const Graph&, ComponentId, const ElementIdSet<ComponentId>&) const;
+    void componentsWillMerge(const Graph&, const ElementIdSet<ComponentId>&, ComponentId) const;
 };
 
 #endif // COMPONENTMANAGER_H

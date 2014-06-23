@@ -49,7 +49,8 @@ SOURCES += \
     source/rendering/graphcomponentscene.cpp \
     source/ui/graphcomponentinteractor.cpp \
     source/ui/graphwidget.cpp \
-    source/ui/mainwidget.cpp
+    source/ui/mainwidget.cpp \
+    source/parsers/graphfileparser.cpp
 
 HEADERS += \
     source/rendering/camera.h \

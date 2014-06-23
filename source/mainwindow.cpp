@@ -193,7 +193,7 @@ void MainWindow::on_loadCompletion(int /*success*/)
     updatePerTabUi();
 }
 
-void MainWindow::on_graphChanged(const Graph*)
+void MainWindow::on_graphChanged(const Graph&)
 {
     updatePerTabUi();
 }

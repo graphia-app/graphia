@@ -56,13 +56,13 @@ public:
 
 private:
     // A more sophisticated implementation may make use of these
-    void onNodeAdded(const Graph*, NodeId) {}
-    void onNodeWillBeRemoved(const Graph*, NodeId) {}
+    void onNodeAdded(const Graph&, NodeId) {}
+    void onNodeWillBeRemoved(const Graph&, NodeId) {}
 
-    void onEdgeAdded(const Graph*, EdgeId) {}
-    void onEdgeWillBeRemoved(const Graph*, EdgeId) {}
+    void onEdgeAdded(const Graph&, EdgeId) {}
+    void onEdgeWillBeRemoved(const Graph&, EdgeId) {}
 
-    void onGraphChanged(const Graph*);
+    void onGraphChanged(const Graph&);
 
     void updateComponents();
 

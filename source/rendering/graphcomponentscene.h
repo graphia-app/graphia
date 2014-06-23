@@ -129,12 +129,12 @@ private:
     void updateVisualData();
 
 private slots:
-    void onGraphChanged(const Graph* graph);
-    void onNodeWillBeRemoved(const Graph*, NodeId nodeId);
-    void onComponentAdded(const Graph*, ComponentId);
-    void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId);
-    void onComponentSplit(const Graph* graph, ComponentId oldComponentId, const ElementIdSet<ComponentId>& splitters);
-    void onComponentsWillMerge(const Graph* graph, const ElementIdSet<ComponentId>& mergers, ComponentId merged);
+    void onGraphChanged(const Graph& graph);
+    void onNodeWillBeRemoved(const Graph&, NodeId nodeId);
+    void onComponentAdded(const Graph&, ComponentId);
+    void onComponentWillBeRemoved(const Graph& graph, ComponentId componentId);
+    void onComponentSplit(const Graph& graph, ComponentId oldComponentId, const ElementIdSet<ComponentId>& splitters);
+    void onComponentsWillMerge(const Graph& graph, const ElementIdSet<ComponentId>& mergers, ComponentId merged);
 
 public slots:
     void onSelectionChanged(const SelectionManager& selectionManager);

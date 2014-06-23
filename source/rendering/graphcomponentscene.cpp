@@ -149,7 +149,7 @@ void GraphComponentScene::updateVisualData()
     }
 }
 
-void GraphComponentScene::onGraphChanged(const Graph*)
+void GraphComponentScene::onGraphChanged(const Graph&)
 {
     if(_focusComponentId.isNull())
     {
@@ -160,7 +160,7 @@ void GraphComponentScene::onGraphChanged(const Graph*)
     updateVisualData();
 }
 
-void GraphComponentScene::onNodeWillBeRemoved(const Graph*, NodeId nodeId)
+void GraphComponentScene::onNodeWillBeRemoved(const Graph&, NodeId nodeId)
 {
     ComponentViewData* currentComponentViewData = focusComponentViewData();
     if(currentComponentViewData->_focusNodeId == nodeId)
@@ -172,7 +172,7 @@ static void setupCamera(Camera& camera, float aspectRatio)
     camera.setPerspectiveProjection(60.0f, aspectRatio, 0.3f, 10000.0f);
 }
 
-void GraphComponentScene::onComponentAdded(const Graph*, ComponentId componentId)
+void GraphComponentScene::onComponentAdded(const Graph&, ComponentId componentId)
 {
     ComponentViewData* componentViewData = &(*_componentsViewData)[componentId];
 
@@ -185,7 +185,7 @@ void GraphComponentScene::onComponentAdded(const Graph*, ComponentId componentId
     }
 }
 
-void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
+void GraphComponentScene::onComponentWillBeRemoved(const Graph&, ComponentId componentId)
 {
     ComponentViewData* componentViewData = &(*_componentsViewData)[componentId];
     componentViewData->_initialised = false;
@@ -208,12 +208,12 @@ void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId com
     }
 }
 
-void GraphComponentScene::onComponentSplit(const Graph* graph, ComponentId oldComponentId, const ElementIdSet<ComponentId>& splitters)
+void GraphComponentScene::onComponentSplit(const Graph& graph, ComponentId oldComponentId, const ElementIdSet<ComponentId>& splitters)
 {
     if(oldComponentId == _focusComponentId)
     {
         ComponentViewData currentComponentViewData = *focusComponentViewData();
-        ComponentId newFocusComponentId = graph->componentIdOfNode(currentComponentViewData._focusNodeId);
+        ComponentId newFocusComponentId = graph.componentIdOfNode(currentComponentViewData._focusNodeId);
 
         for(ComponentId splitter : splitters)
         {
@@ -235,7 +235,7 @@ void GraphComponentScene::onComponentSplit(const Graph* graph, ComponentId oldCo
     }
 }
 
-void GraphComponentScene::onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers, ComponentId merged)
+void GraphComponentScene::onComponentsWillMerge(const Graph&, const ElementIdSet<ComponentId>& mergers, ComponentId merged)
 {
     for(ComponentId merger : mergers)
     {
@@ -804,7 +804,7 @@ void GraphComponentScene::setGraphModel(std::shared_ptr<GraphModel> graphModel)
     _focusComponentId = _graphModel->graph().firstComponentId();
 
     for(ComponentId componentId : *_graphModel->graph().componentIds())
-        onComponentAdded(&_graphModel->graph(), componentId);
+        onComponentAdded(_graphModel->graph(), componentId);
 
     updateVisualData();
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphComponentScene::onGraphChanged);
