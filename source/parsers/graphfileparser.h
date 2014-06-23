@@ -8,6 +8,7 @@
 #include <boost/spirit/include/support_istream_iterator.hpp>
 #endif
 
+#include <memory>
 #include <iterator>
 #include <cstdint>
 #include <thread>
@@ -93,14 +94,14 @@ class GraphFileParserThread : public QObject
 private:
     QString _filename;
     Graph* _graph;
-    GraphFileParser* _graphFileParser;
+    std::unique_ptr<GraphFileParser> _graphFileParser;
     std::thread _thread;
 
 public:
-    GraphFileParserThread(const QString& filename, Graph& graph, GraphFileParser* graphFileParser) :
+    GraphFileParserThread(const QString& filename, Graph& graph, std::unique_ptr<GraphFileParser> graphFileParser) :
         _filename(filename),
         _graph(&graph),
-        _graphFileParser(graphFileParser)
+        _graphFileParser(std::move(graphFileParser))
     {}
 
     virtual ~GraphFileParserThread()
@@ -109,8 +110,6 @@ public:
 
         if(_thread.joinable())
             _thread.join();
-
-        delete _graphFileParser;
     }
 
     void start()
@@ -127,7 +126,7 @@ public:
 private:
     void run()
     {
-        connect(_graphFileParser, &GraphFileParser::progress, this, &GraphFileParserThread::progress);
+        connect(_graphFileParser.get(), &GraphFileParser::progress, this, &GraphFileParserThread::progress);
 
         bool result;
 

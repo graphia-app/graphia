@@ -4,6 +4,8 @@
 #include "interactor.h"
 #include "../rendering/graphcomponentscene.h"
 
+#include <memory>
+
 class GraphModel;
 class CommandManager;
 class SelectionManager;
@@ -12,17 +14,16 @@ class GraphComponentInteractor : public Interactor
 {
     Q_OBJECT
 public:
-    GraphComponentInteractor(GraphModel* graphModel,
-                             GraphComponentScene* graphComponentScene,
-                             CommandManager* commandManager,
-                             SelectionManager* selectionManager);
-    virtual ~GraphComponentInteractor() {}
+    GraphComponentInteractor(std::shared_ptr<GraphModel> graphModel,
+                             std::shared_ptr<GraphComponentScene> graphComponentScene,
+                             CommandManager& commandManager,
+                             std::shared_ptr<SelectionManager> selectionManager);
 
 private:
-    GraphModel* _graphModel;
-    GraphComponentScene* _scene;
-    CommandManager* _commandManager;
-    SelectionManager* _selectionManager;
+    std::shared_ptr<GraphModel> _graphModel;
+    std::shared_ptr<GraphComponentScene> _scene;
+    CommandManager& _commandManager;
+    std::shared_ptr<SelectionManager> _selectionManager;
 
     bool _rightMouseButtonHeld;
     bool _leftMouseButtonHeld;

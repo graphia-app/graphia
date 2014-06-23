@@ -7,28 +7,25 @@
 
 #include <QVBoxLayout>
 
-GraphWidget::GraphWidget(GraphModel* graphModel,
-                         CommandManager* commandManager,
-                         SelectionManager* selectionManager, QWidget *parent) :
-    QWidget(parent)
+GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
+                         CommandManager &commandManager,
+                         std::shared_ptr<SelectionManager> selectionManager, QWidget *parent) :
+    QWidget(parent),
+    _graphComponentScene(new GraphComponentScene),
+    _graphComponentInteractor(new GraphComponentInteractor(graphModel,
+                                                           _graphComponentScene,
+                                                           commandManager,
+                                                           selectionManager))
 {
     OpenGLWindow* window = new OpenGLWindow;
 
-    _graphComponentScene = new GraphComponentScene;
-    _graphComponentInteractor = new GraphComponentInteractor(graphModel, _graphComponentScene, commandManager, selectionManager);
-    window->setScene(_graphComponentScene);
-    window->setInteractor(_graphComponentInteractor);
+    window->setScene(_graphComponentScene.get());
+    window->setInteractor(_graphComponentInteractor.get());
 
-    connect(_graphComponentInteractor, &Interactor::userInteractionStarted, this, &GraphWidget::userInteractionStarted);
-    connect(_graphComponentInteractor, &Interactor::userInteractionFinished, this, &GraphWidget::userInteractionFinished);
+    connect(_graphComponentInteractor.get(), &Interactor::userInteractionStarted, this, &GraphWidget::userInteractionStarted);
+    connect(_graphComponentInteractor.get(), &Interactor::userInteractionFinished, this, &GraphWidget::userInteractionFinished);
 
     setLayout(new QVBoxLayout());
     layout()->setContentsMargins(0, 0, 0, 0);
     layout()->addWidget(QWidget::createWindowContainer(window));
-}
-
-GraphWidget::~GraphWidget()
-{
-    delete _graphComponentInteractor;
-    delete _graphComponentScene;
 }

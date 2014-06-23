@@ -5,6 +5,8 @@
 #include "ui/commandmanager.h"
 #include "ui/selectionmanager.h"
 
+#include "graph/graphmodel.h"
+
 #include <QFileDialog>
 #include <QIcon>
 #include <QLabel>

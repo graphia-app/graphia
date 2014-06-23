@@ -4,15 +4,15 @@
 #include <QWidget>
 
 #include "../graph/graph.h"
-#include "../graph/graphmodel.h"
 #include "commandmanager.h"
 
+#include <memory>
+
+class GraphModel;
 class SelectionManager;
 class GraphFileParserThread;
 class NodeLayoutThread;
 class LayoutThread;
-class CommandManager;
-class GraphWidget;
 
 class MainWidget : public QWidget
 {
@@ -32,12 +32,11 @@ public slots:
     void onCompletion(int success);
 
 private:
-    GraphModel* _graphModel;
-    SelectionManager* _selectionManager;
+    std::shared_ptr<GraphModel> _graphModel;
+    std::shared_ptr<SelectionManager> _selectionManager;
     CommandManager _commandManager;
-    GraphFileParserThread* _graphFileParserThread;
-    NodeLayoutThread* _nodeLayoutThread;
-    GraphWidget* _graphWidget;
+    std::unique_ptr<GraphFileParserThread> _graphFileParserThread;
+    std::unique_ptr<NodeLayoutThread> _nodeLayoutThread;
 
     bool _resumePreviouslyActiveLayout;
 
@@ -51,8 +50,8 @@ private slots:
     void onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers, ComponentId merger);
 
 public:
-    GraphModel* graphModel() { return _graphModel; }
-    SelectionManager* selectionManager() { return _selectionManager; }
+    std::shared_ptr<GraphModel> graphModel() { return _graphModel; }
+    std::shared_ptr<SelectionManager> selectionManager() { return _selectionManager; }
     void pauseLayout(bool autoResume = false);
     bool layoutIsPaused();
     void resumeLayout(bool autoResume = false);

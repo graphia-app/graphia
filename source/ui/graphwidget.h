@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+#include <memory>
+
 class GraphComponentScene;
 class GraphComponentInteractor;
 class GraphModel;
@@ -13,19 +15,14 @@ class GraphWidget : public QWidget
 {
     Q_OBJECT
 public:
-    GraphWidget(GraphModel* graphModel,
-                CommandManager* commandManager,
-                SelectionManager* selectionManager,
+    GraphWidget(std::shared_ptr<GraphModel> graphModel,
+                CommandManager& commandManager,
+                std::shared_ptr<SelectionManager> selectionManager,
                 QWidget *parent = nullptr);
-    virtual ~GraphWidget();
 
 private:
-    GraphComponentScene* _graphComponentScene;
-    GraphComponentInteractor* _graphComponentInteractor;
-
-    GraphModel* _graphModel;
-    CommandManager* _commandManager;
-    SelectionManager* _selectionManager;
+    std::shared_ptr<GraphComponentScene> _graphComponentScene;
+    std::shared_ptr<GraphComponentInteractor> _graphComponentInteractor;
 
 signals:
     void userInteractionStarted();

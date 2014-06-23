@@ -14,11 +14,6 @@
 
 MainWidget::MainWidget(QWidget* parent) :
     QWidget(parent),
-    _graphModel(nullptr),
-    _selectionManager(nullptr),
-    _graphFileParserThread(nullptr),
-    _nodeLayoutThread(nullptr),
-    _graphWidget(nullptr),
     _resumePreviouslyActiveLayout(false)
 {
     this->setLayout(new QVBoxLayout());
@@ -26,17 +21,6 @@ MainWidget::MainWidget(QWidget* parent) :
 
 MainWidget::~MainWidget()
 {
-    layout()->removeWidget(_graphWidget);
-    delete _graphWidget;
-
-    delete _graphFileParserThread;
-    _graphFileParserThread = nullptr;
-
-    delete _nodeLayoutThread;
-    _nodeLayoutThread = nullptr;
-
-    delete _selectionManager;
-    delete _graphModel;
 }
 
 bool MainWidget::initFromFile(const QString &filename)
@@ -46,14 +30,14 @@ bool MainWidget::initFromFile(const QString &filename)
     if(!info.exists() || _graphFileParserThread != nullptr)
         return false;
 
-    GraphFileParser* graphFileParser = nullptr;
+    std::unique_ptr<GraphFileParser> graphFileParser;
 
     //FIXME switch based on file content
     /*switch(fileTypeOf(filename))
     {
     case GmlFile:*/
-        _graphModel = new GenericGraphModel(info.fileName());
-        graphFileParser = new GmlFileParser(filename);
+        _graphModel.reset(new GenericGraphModel(info.fileName()));
+        graphFileParser.reset(new GmlFileParser(filename));
         /*break;
     }*/
 
@@ -64,9 +48,9 @@ bool MainWidget::initFromFile(const QString &filename)
     connect(&_graphModel->graph(), &Graph::componentSplit, this, &MainWidget::onComponentSplit, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::componentsWillMerge, this, &MainWidget::onComponentsWillMerge, Qt::DirectConnection);
 
-    _graphFileParserThread = new GraphFileParserThread(filename, _graphModel->graph(), graphFileParser);
-    connect(_graphFileParserThread, &GraphFileParserThread::progress, this, &MainWidget::progress);
-    connect(_graphFileParserThread, &GraphFileParserThread::complete, this, &MainWidget::onCompletion);
+    _graphFileParserThread.reset(new GraphFileParserThread(filename, _graphModel->graph(), std::move(graphFileParser)));
+    connect(_graphFileParserThread.get(), &GraphFileParserThread::progress, this, &MainWidget::progress);
+    connect(_graphFileParserThread.get(), &GraphFileParserThread::complete, this, &MainWidget::onCompletion);
     _graphFileParserThread->start();
 
     return true;
@@ -74,30 +58,30 @@ bool MainWidget::initFromFile(const QString &filename)
 
 void MainWidget::onCompletion(int success)
 {
-    _nodeLayoutThread = new NodeLayoutThread(new EadesLayoutFactory(_graphModel));
+    _nodeLayoutThread.reset(new NodeLayoutThread(new EadesLayoutFactory(_graphModel)));
     _nodeLayoutThread->addAllComponents(_graphModel->graph());
     _nodeLayoutThread->start();
 
-    _selectionManager = new SelectionManager(_graphModel->graph());
-    _graphWidget = new GraphWidget(_graphModel, &_commandManager, _selectionManager);
+    _selectionManager.reset(new SelectionManager(_graphModel->graph()));
+    GraphWidget* graphWidget = new GraphWidget(_graphModel, _commandManager, _selectionManager);
 
-    connect(_graphWidget, &GraphWidget::userInteractionStarted,
+    connect(graphWidget, &GraphWidget::userInteractionStarted,
         [this]
         {
             pauseLayout(true);
         });
 
-    connect(_graphWidget, &GraphWidget::userInteractionFinished,
+    connect(graphWidget, &GraphWidget::userInteractionFinished,
         [this]
         {
             resumeLayout(true);
         });
 
     connect(&_commandManager, &CommandManager::commandStackChanged, this, &MainWidget::commandStackChanged);
-    connect(_selectionManager, &SelectionManager::selectionChanged, this, &MainWidget::selectionChanged);
+    connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &MainWidget::selectionChanged);
 
     layout()->setContentsMargins(0, 0, 0, 0);
-    layout()->addWidget(_graphWidget);
+    layout()->addWidget(graphWidget);
 
     if(_graphModel->contentWidget() != nullptr)
         layout()->addWidget(_graphModel->contentWidget());

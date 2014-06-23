@@ -17,6 +17,7 @@
 #include <QMutex>
 #include <QRect>
 
+#include <memory>
 #include <vector>
 
 class Sphere;
@@ -73,7 +74,7 @@ public:
 
     bool interactionAllowed();
 
-    void setGraphModel(GraphModel* graphModel);
+    void setGraphModel(std::shared_ptr<GraphModel> graphModel);
 
     Camera* camera() { return _camera; }
     void zoom(float delta);
@@ -158,7 +159,7 @@ private:
     Sphere* _sphere;
     Cylinder* _cylinder;
 
-    GraphModel* _graphModel;
+    std::shared_ptr<GraphModel> _graphModel;
 
     QOpenGLShaderProgram _nodesShader;
     std::vector<GLfloat> _nodePositionData;

@@ -793,7 +793,7 @@ bool GraphComponentScene::interactionAllowed()
     return _panTransition.finished();
 }
 
-void GraphComponentScene::setGraphModel(GraphModel* graphModel)
+void GraphComponentScene::setGraphModel(std::shared_ptr<GraphModel> graphModel)
 {
     this->_graphModel = graphModel;
 

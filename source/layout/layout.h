@@ -10,6 +10,7 @@
 #include <QVector3D>
 #include <QObject>
 
+#include <memory>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -108,10 +109,10 @@ class GraphModel;
 class NodeLayoutFactory
 {
 protected:
-    GraphModel* _graphModel;
+    std::shared_ptr<GraphModel> _graphModel;
 
 public:
-    NodeLayoutFactory(GraphModel* graphModel) :
+    NodeLayoutFactory(std::shared_ptr<GraphModel> graphModel) :
         _graphModel(graphModel)
     {}
     virtual ~NodeLayoutFactory() {}

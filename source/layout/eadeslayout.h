@@ -28,7 +28,7 @@ public:
 class EadesLayoutFactory : public NodeLayoutFactory
 {
 public:
-    EadesLayoutFactory(GraphModel* graphModel) :
+    EadesLayoutFactory(std::shared_ptr<GraphModel> graphModel) :
         NodeLayoutFactory(graphModel)
     {}
 
