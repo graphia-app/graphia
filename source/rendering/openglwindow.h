@@ -4,6 +4,8 @@
 #include <QWindow>
 #include <QTime>
 
+#include <memory>
+
 class Scene;
 class Interactor;
 class QOpenGLDebugMessage;
@@ -14,13 +16,12 @@ class OpenGLWindow : public QWindow
 
 public:
     explicit OpenGLWindow(QScreen* parent = nullptr);
-    virtual ~OpenGLWindow();
 
-    QOpenGLContext* context() const { return _context; }
+    const QOpenGLContext& context() const { return *_context; }
 
-    void setScene(Scene* scene);
+    void setScene(std::shared_ptr<Scene> scene);
     const Scene& scene() const { return *_scene; }
-    void setInteractor(Interactor* interactor) { _interactor = interactor; }
+    void setInteractor(std::shared_ptr<Interactor> interactor) { _interactor = interactor; }
     const Interactor& interactor() const { return *_interactor; }
     
 protected:
@@ -44,9 +45,9 @@ protected slots:
     void messageLogged(const QOpenGLDebugMessage &message);
 
 private:
-    QOpenGLContext* _context;
-    Scene* _scene;
-    Interactor* _interactor;
+    std::shared_ptr<QOpenGLContext> _context;
+    std::shared_ptr<Scene> _scene;
+    std::shared_ptr<Interactor> _interactor;
     int _debugLevel;
     
     QTime _time;

@@ -1,8 +1,6 @@
 #include "graphcomponentscene.h"
 
 #include "camera.h"
-#include "primitives/sphere.h"
-#include "primitives/cylinder.h"
 #include "primitives/quad.h"
 #include "material.h"
 
@@ -42,19 +40,10 @@ GraphComponentScene::GraphComponentScene(QObject* parent)
       _FBOcomplete(false),
       _trackFocusNode(true),
       _funcs(nullptr),
-      _componentsViewData(nullptr),
       _aspectRatio(4.0f / 3.0f),
-      _camera(nullptr),
-      _sphere(nullptr),
-      _cylinder(nullptr),
-      _graphModel(nullptr)
+      _camera(nullptr)
 {
     update(0.0f);
-}
-
-GraphComponentScene::~GraphComponentScene()
-{
-    delete _componentsViewData;
 }
 
 void GraphComponentScene::initialise()
@@ -69,23 +58,21 @@ void GraphComponentScene::initialise()
     loadShaderProgram(_nodesShader, ":/rendering/shaders/instancednodes.vert", ":/rendering/shaders/ads.frag");
 
     // Create a sphere
-    _sphere = new Sphere(this);
-    _sphere->setRadius(1.0f);
-    _sphere->setRings(16);
-    _sphere->setSlices(16);
-    _sphere->setMaterial(nodeMaterial);
-    _sphere->create();
+    _sphere.setRadius(1.0f);
+    _sphere.setRings(16);
+    _sphere.setSlices(16);
+    _sphere.setMaterial(nodeMaterial);
+    _sphere.create();
 
     MaterialPtr edgeMaterial(new Material);
     edgeMaterial->setShaders(":/rendering/shaders/instancededges.vert", ":/rendering/shaders/ads.frag");
     loadShaderProgram(_edgesShader, ":/rendering/shaders/instancededges.vert", ":/rendering/shaders/ads.frag");
 
-    _cylinder = new Cylinder(this);
-    _cylinder->setRadius(1.0f);
-    _cylinder->setLength(1.0f);
-    _cylinder->setSlices(8);
-    _cylinder->setMaterial(edgeMaterial);
-    _cylinder->create();
+    _cylinder.setRadius(1.0f);
+    _cylinder.setLength(1.0f);
+    _cylinder.setSlices(8);
+    _cylinder.setMaterial(edgeMaterial);
+    _cylinder.create();
 
     _debugLinesDataVAO.create();
     loadShaderProgram(_debugLinesShader, ":/rendering/shaders/debuglines.vert", ":/rendering/shaders/debuglines.frag");
@@ -117,9 +104,9 @@ void GraphComponentScene::cleanup()
 
 void GraphComponentScene::updateVisualData()
 {
-    NodeVisuals& nodeVisuals = _graphModel->nodeVisuals();
-    EdgeVisuals& edgeVisuals = _graphModel->edgeVisuals();
-    const ReadOnlyGraph& component = *_graphModel->graph().componentById(_focusComponentId);
+    auto& nodeVisuals = *_graphModel->nodeVisuals();
+    auto& edgeVisuals = *_graphModel->edgeVisuals();
+    auto& component = *_graphModel->graph()->componentById(_focusComponentId);
 
     _nodeVisualData.resize(component.numNodes() * 8);
     _edgeVisualData.resize(component.numEdges() * 8);
@@ -149,7 +136,7 @@ void GraphComponentScene::updateVisualData()
     }
 }
 
-void GraphComponentScene::onGraphChanged(const Graph&)
+void GraphComponentScene::onGraphChanged(const Graph*)
 {
     if(_focusComponentId.isNull())
     {
@@ -160,7 +147,7 @@ void GraphComponentScene::onGraphChanged(const Graph&)
     updateVisualData();
 }
 
-void GraphComponentScene::onNodeWillBeRemoved(const Graph&, NodeId nodeId)
+void GraphComponentScene::onNodeWillBeRemoved(const Graph*, NodeId nodeId)
 {
     ComponentViewData* currentComponentViewData = focusComponentViewData();
     if(currentComponentViewData->_focusNodeId == nodeId)
@@ -172,23 +159,23 @@ static void setupCamera(Camera& camera, float aspectRatio)
     camera.setPerspectiveProjection(60.0f, aspectRatio, 0.3f, 10000.0f);
 }
 
-void GraphComponentScene::onComponentAdded(const Graph&, ComponentId componentId)
+void GraphComponentScene::onComponentAdded(const Graph*, ComponentId componentId)
 {
-    ComponentViewData* componentViewData = &(*_componentsViewData)[componentId];
+    auto& componentViewData = _componentsViewData->at(componentId);
 
-    if(!componentViewData->_initialised)
+    if(!componentViewData._initialised)
     {
-        setupCamera(componentViewData->_camera, _aspectRatio);
-        _targetZoomDistance = componentViewData->_zoomDistance;
-        componentViewData->_focusNodeId.setToNull();
-        componentViewData->_initialised = true;
+        setupCamera(componentViewData._camera, _aspectRatio);
+        _targetZoomDistance = componentViewData._zoomDistance;
+        componentViewData._focusNodeId.setToNull();
+        componentViewData._initialised = true;
     }
 }
 
-void GraphComponentScene::onComponentWillBeRemoved(const Graph&, ComponentId componentId)
+void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
 {
-    ComponentViewData* componentViewData = &(*_componentsViewData)[componentId];
-    componentViewData->_initialised = false;
+    auto& componentViewData = _componentsViewData->at(componentId);
+    componentViewData._initialised = false;
 
     if(componentId == _lastSplitterFocusComponentId)
         _lastSplitterFocusComponentId.setToNull();
@@ -198,9 +185,9 @@ void GraphComponentScene::onComponentWillBeRemoved(const Graph&, ComponentId com
         if(!_lastSplitterFocusComponentId.isNull())
         {
             ComponentViewData* currentComponentViewData = focusComponentViewData();
-            ComponentViewData* lastSplitterComponentViewData = &(*_componentsViewData)[_lastSplitterFocusComponentId];
-            *lastSplitterComponentViewData = *currentComponentViewData;
-            lastSplitterComponentViewData->_focusNodeId.setToNull();
+            auto& lastSplitterComponentViewData = _componentsViewData->at(_lastSplitterFocusComponentId);
+            lastSplitterComponentViewData = *currentComponentViewData;
+            lastSplitterComponentViewData._focusNodeId.setToNull();
             _focusComponentId = _lastSplitterFocusComponentId;
         }
         else
@@ -208,23 +195,23 @@ void GraphComponentScene::onComponentWillBeRemoved(const Graph&, ComponentId com
     }
 }
 
-void GraphComponentScene::onComponentSplit(const Graph& graph, ComponentId oldComponentId, const ElementIdSet<ComponentId>& splitters)
+void GraphComponentScene::onComponentSplit(const Graph* graph, ComponentId oldComponentId, const ElementIdSet<ComponentId>& splitters)
 {
     if(oldComponentId == _focusComponentId)
     {
         ComponentViewData currentComponentViewData = *focusComponentViewData();
-        ComponentId newFocusComponentId = graph.componentIdOfNode(currentComponentViewData._focusNodeId);
+        ComponentId newFocusComponentId = graph->componentIdOfNode(currentComponentViewData._focusNodeId);
 
         for(ComponentId splitter : splitters)
         {
-            ComponentViewData* splitterComponentViewData = &(*_componentsViewData)[splitter];
+            auto& splitterComponentViewData = _componentsViewData->at(splitter);
 
             // Clone the current camera data to all splitters
-            *splitterComponentViewData = currentComponentViewData;
+            splitterComponentViewData = currentComponentViewData;
 
             // Splitters that don't contain the current focus node will need to find a new one
             if(splitter != newFocusComponentId)
-                splitterComponentViewData->_focusNodeId.setToNull();
+                splitterComponentViewData._focusNodeId.setToNull();
         }
 
         _focusComponentId = newFocusComponentId;
@@ -235,15 +222,15 @@ void GraphComponentScene::onComponentSplit(const Graph& graph, ComponentId oldCo
     }
 }
 
-void GraphComponentScene::onComponentsWillMerge(const Graph&, const ElementIdSet<ComponentId>& mergers, ComponentId merged)
+void GraphComponentScene::onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers, ComponentId merged)
 {
     for(ComponentId merger : mergers)
     {
         if(merger == _focusComponentId)
         {
-            ComponentViewData* mergerComponentViewData = &(*_componentsViewData)[merger];
-            ComponentViewData* mergedComponentViewData = &(*_componentsViewData)[merged];
-            *mergedComponentViewData = *mergerComponentViewData;
+            auto& mergerComponentViewData = _componentsViewData->at(merger);
+            auto& mergedComponentViewData = _componentsViewData->at(merged);
+            mergedComponentViewData = mergerComponentViewData;
             _focusComponentId = merged;
             break;
         }
@@ -252,10 +239,10 @@ void GraphComponentScene::onComponentsWillMerge(const Graph&, const ElementIdSet
 
 void GraphComponentScene::onSelectionChanged(const SelectionManager& selectionManager)
 {
-    NodeVisuals& nodeVisuals = _graphModel->nodeVisuals();
-    EdgeVisuals& edgeVisuals = _graphModel->edgeVisuals();
+    NodeVisuals& nodeVisuals = *_graphModel->nodeVisuals();
+    EdgeVisuals& edgeVisuals = *_graphModel->edgeVisuals();
 
-    for(NodeId nodeId : _graphModel->graph().nodeIds())
+    for(NodeId nodeId : _graphModel->graph()->nodeIds())
     {
         if(selectionManager.nodeIsSelected(nodeId))
             nodeVisuals[nodeId]._outlineColor = Qt::GlobalColor::white;
@@ -264,7 +251,7 @@ void GraphComponentScene::onSelectionChanged(const SelectionManager& selectionMa
     }
 
     // Edges can't be selected at the moment
-    for(EdgeId edgeId : _graphModel->graph().edgeIds())
+    for(EdgeId edgeId : _graphModel->graph()->edgeIds())
         edgeVisuals[edgeId]._outlineColor = Qt::GlobalColor::black;
 
     updateVisualData();
@@ -275,28 +262,28 @@ ComponentViewData* GraphComponentScene::focusComponentViewData() const
     if(_focusComponentId.isNull())
         return nullptr;
 
-    return _componentsViewData != nullptr ? &(*_componentsViewData)[_focusComponentId] : nullptr;
+    return _componentsViewData ? &(*_componentsViewData)[_focusComponentId] : nullptr;
 }
 
 void GraphComponentScene::update(float t)
 {
-    if(_graphModel != nullptr)
+    if(_graphModel)
     {
-        NodePositions& nodePositions = _graphModel->nodePositions();
+        NodePositions& nodePositions = *_graphModel->nodePositions();
         QMutexLocker mutexLocker(&nodePositions.mutex());
 
-        const ReadOnlyGraph* component = _graphModel->graph().componentById(_focusComponentId);
+        auto& component = *_graphModel->graph()->componentById(_focusComponentId);
 
         ComponentViewData* componentViewData = focusComponentViewData();
         _camera = &componentViewData->_camera;
         if(componentViewData->_focusNodeId.isNull())
             selectFocusNodeClosestToCameraVector(Transition::Type::None);
 
-        _nodePositionData.resize(component->numNodes() * 3);
-        _edgePositionData.resize(component->numEdges() * 6);
+        _nodePositionData.resize(component.numNodes() * 3);
+        _edgePositionData.resize(component.numEdges() * 6);
         int i = 0;
 
-        for(NodeId nodeId : component->nodeIds())
+        for(NodeId nodeId : component.nodeIds())
         {
             QVector3D nodePosition = nodePositions[nodeId];
 
@@ -306,9 +293,9 @@ void GraphComponentScene::update(float t)
         }
 
         i = 0;
-        for(EdgeId edgeId : component->edgeIds())
+        for(EdgeId edgeId : component.edgeIds())
         {
-            const Edge& edge = _graphModel->graph().edgeById(edgeId);
+            const Edge& edge = _graphModel->graph()->edgeById(edgeId);
             QVector3D sourcePosition = nodePositions[edge.sourceId()];
             QVector3D targetPosition = nodePositions[edge.targetId()];
 
@@ -381,7 +368,7 @@ void GraphComponentScene::renderNodes()
     _nodesShader.bind();
     setShaderADSParameters(_nodesShader);
 
-    const ReadOnlyGraph* component = _graphModel->graph().componentById(_focusComponentId);
+    auto& component = *_graphModel->graph()->componentById(_focusComponentId);
 
     _nodePositionBuffer.bind();
     _nodePositionBuffer.allocate(_nodePositionData.data(), static_cast<int>(_nodePositionData.size()) * sizeof(GLfloat));
@@ -396,10 +383,10 @@ void GraphComponentScene::renderNodes()
     _nodesShader.setUniformValue("projectionMatrix", _camera->projectionMatrix());
 
     // Draw the nodes
-    _sphere->vertexArrayObject()->bind();
-    _funcs->glDrawElementsInstanced(GL_TRIANGLES, _sphere->indexCount(),
-                                     GL_UNSIGNED_INT, 0, component->numNodes());
-    _sphere->vertexArrayObject()->release();
+    _sphere.vertexArrayObject()->bind();
+    _funcs->glDrawElementsInstanced(GL_TRIANGLES, _sphere.indexCount(),
+                                    GL_UNSIGNED_INT, 0, component.numNodes());
+    _sphere.vertexArrayObject()->release();
 
     _nodesShader.release();
 }
@@ -412,7 +399,7 @@ void GraphComponentScene::renderEdges()
     _edgesShader.bind();
     setShaderADSParameters(_edgesShader);
 
-    const ReadOnlyGraph* component = _graphModel->graph().componentById(_focusComponentId);
+    auto& component = *_graphModel->graph()->componentById(_focusComponentId);
 
     _edgePositionBuffer.bind();
     _edgePositionBuffer.allocate(_edgePositionData.data(), static_cast<int>(_edgePositionData.size()) * sizeof(GLfloat));
@@ -423,10 +410,10 @@ void GraphComponentScene::renderEdges()
     _edgesShader.setUniformValue("projectionMatrix", _camera->projectionMatrix());
 
     // Draw the edges
-    _cylinder->vertexArrayObject()->bind();
-    _funcs->glDrawElementsInstanced(GL_TRIANGLES, _cylinder->indexCount(),
-                                     GL_UNSIGNED_INT, 0, component->numEdges());
-    _cylinder->vertexArrayObject()->release();
+    _cylinder.vertexArrayObject()->bind();
+    _funcs->glDrawElementsInstanced(GL_TRIANGLES, _cylinder.indexCount(),
+                                    GL_UNSIGNED_INT, 0, component.numEdges());
+    _cylinder.vertexArrayObject()->release();
 
     _edgesShader.release();
 }
@@ -633,10 +620,10 @@ void GraphComponentScene::resize(int w, int h)
 
     if(_graphModel != nullptr)
     {
-        for(ComponentId componentId : *_graphModel->graph().componentIds())
+        for(ComponentId componentId : _graphModel->graph()->componentIds())
         {
-            ComponentViewData* componentViewData = &(*_componentsViewData)[componentId];
-            setupCamera(componentViewData->_camera, _aspectRatio);
+            auto& componentViewData = _componentsViewData->at(componentId);
+            setupCamera(componentViewData._camera, _aspectRatio);
         }
     }
 }
@@ -649,7 +636,7 @@ void GraphComponentScene::zoom(float direction)
         return;
 
     ComponentViewData* componentViewData = focusComponentViewData();
-    float size = _graphModel->nodeVisuals()[componentViewData->_focusNodeId]._size;
+    float size = _graphModel->nodeVisuals()->at(componentViewData->_focusNodeId)._size;
 
     const float INTERSECTION_AVOIDANCE_OFFSET = 1.0f;
     const float ZOO_STEP_FRACTION = 0.2f;
@@ -673,7 +660,7 @@ void GraphComponentScene::centreNodeInViewport(NodeId nodeId, Transition::Type t
     if(nodeId.isNull())
         return;
 
-    const QVector3D& nodePosition = _graphModel->nodePositions()[nodeId];
+    const QVector3D& nodePosition = _graphModel->nodePositions()->at(nodeId);
     Plane translationPlane(nodePosition, _camera->viewVector().normalized());
 
     QVector3D curPoint = translationPlane.rayIntersection(
@@ -728,7 +715,7 @@ void GraphComponentScene::selectFocusNodeClosestToCameraVector(Transition::Type 
     if(_focusComponentId.isNull())
         return;
 
-    Collision collision(*_graphModel->graph().componentById(_focusComponentId),
+    Collision collision(_graphModel->graph()->componentById(_focusComponentId),
                         _graphModel->nodeVisuals(), _graphModel->nodePositions());
     NodeId closestNodeId = collision.closestNodeToLine(_camera->position(), _camera->viewVector().normalized());
     if(!closestNodeId.isNull())
@@ -757,7 +744,7 @@ static ComponentId cycleThroughComponentIds(const std::vector<ComponentId>& comp
 
 void GraphComponentScene::moveToNextComponent()
 {
-    _focusComponentId = cycleThroughComponentIds(*_graphModel->graph().componentIds(), _focusComponentId, -1);
+    _focusComponentId = cycleThroughComponentIds(_graphModel->graph()->componentIds(), _focusComponentId, -1);
 
     if(!_focusComponentId.isNull())
     {
@@ -768,7 +755,7 @@ void GraphComponentScene::moveToNextComponent()
 
 void GraphComponentScene::moveToPreviousComponent()
 {
-    _focusComponentId = cycleThroughComponentIds(*_graphModel->graph().componentIds(), _focusComponentId, 1);
+    _focusComponentId = cycleThroughComponentIds(_graphModel->graph()->componentIds(), _focusComponentId, 1);
 
     if(!_focusComponentId.isNull())
     {
@@ -797,22 +784,19 @@ void GraphComponentScene::setGraphModel(std::shared_ptr<GraphModel> graphModel)
 {
     this->_graphModel = graphModel;
 
-    if(_componentsViewData != nullptr)
-        delete _componentsViewData;
+    _componentsViewData = std::make_unique<ComponentArray<ComponentViewData>>(_graphModel->graph());
+    _focusComponentId = _graphModel->graph()->firstComponentId();
 
-    _componentsViewData = new ComponentArray<ComponentViewData>(_graphModel->graph());
-    _focusComponentId = _graphModel->graph().firstComponentId();
-
-    for(ComponentId componentId : *_graphModel->graph().componentIds())
-        onComponentAdded(_graphModel->graph(), componentId);
+    for(ComponentId componentId : _graphModel->graph()->componentIds())
+        onComponentAdded(_graphModel->graph().get(), componentId);
 
     updateVisualData();
-    connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphComponentScene::onGraphChanged);
-    connect(&_graphModel->graph(), &Graph::nodeWillBeRemoved, this, &GraphComponentScene::onNodeWillBeRemoved);
-    connect(&_graphModel->graph(), &Graph::componentAdded, this, &GraphComponentScene::onComponentAdded);
-    connect(&_graphModel->graph(), &Graph::componentWillBeRemoved, this, &GraphComponentScene::onComponentWillBeRemoved);
-    connect(&_graphModel->graph(), &Graph::componentSplit, this, &GraphComponentScene::onComponentSplit);
-    connect(&_graphModel->graph(), &Graph::componentsWillMerge, this, &GraphComponentScene::onComponentsWillMerge);
+    connect(_graphModel->graph().get(), &Graph::graphChanged, this, &GraphComponentScene::onGraphChanged);
+    connect(_graphModel->graph().get(), &Graph::nodeWillBeRemoved, this, &GraphComponentScene::onNodeWillBeRemoved);
+    connect(_graphModel->graph().get(), &Graph::componentAdded, this, &GraphComponentScene::onComponentAdded);
+    connect(_graphModel->graph().get(), &Graph::componentWillBeRemoved, this, &GraphComponentScene::onComponentWillBeRemoved);
+    connect(_graphModel->graph().get(), &Graph::componentSplit, this, &GraphComponentScene::onComponentSplit);
+    connect(_graphModel->graph().get(), &Graph::componentsWillMerge, this, &GraphComponentScene::onComponentsWillMerge);
 }
 
 void GraphComponentScene::prepareVertexBuffers()
@@ -851,10 +835,10 @@ void GraphComponentScene::prepareVertexBuffers()
 void GraphComponentScene::prepareNodeVAO()
 {
     // Bind the marker's VAO
-    _sphere->vertexArrayObject()->bind();
+    _sphere.vertexArrayObject()->bind();
 
     // Enable the data buffer and add it to the marker's VAO
-    QOpenGLShaderProgramPtr shader = _sphere->material()->shader();
+    QOpenGLShaderProgramPtr shader = _sphere.material()->shader();
     shader->bind();
     _nodePositionBuffer.bind();
     shader->enableAttributeArray("point");
@@ -873,17 +857,17 @@ void GraphComponentScene::prepareNodeVAO()
     _funcs->glVertexAttribDivisor(shader->attributeLocation("size"), 1);
     _funcs->glVertexAttribDivisor(shader->attributeLocation("color"), 1);
     _funcs->glVertexAttribDivisor(shader->attributeLocation("outlineColor"), 1);
-    _sphere->vertexArrayObject()->release();
+    _sphere.vertexArrayObject()->release();
     shader->release();
 }
 
 void GraphComponentScene::prepareEdgeVAO()
 {
     // Bind the marker's VAO
-    _cylinder->vertexArrayObject()->bind();
+    _cylinder.vertexArrayObject()->bind();
 
     // Enable the data buffer and add it to the marker's VAO
-    QOpenGLShaderProgramPtr shader = _cylinder->material()->shader();
+    QOpenGLShaderProgramPtr shader = _cylinder.material()->shader();
     shader->bind();
     _edgePositionBuffer.bind();
     shader->enableAttributeArray("source");
@@ -905,7 +889,7 @@ void GraphComponentScene::prepareEdgeVAO()
     _funcs->glVertexAttribDivisor(shader->attributeLocation("size"), 1);
     _funcs->glVertexAttribDivisor(shader->attributeLocation("color"), 1);
     _funcs->glVertexAttribDivisor(shader->attributeLocation("outlineColor"), 1);
-    _cylinder->vertexArrayObject()->release();
+    _cylinder.vertexArrayObject()->release();
     shader->release();
 }
 

@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include <type_traits>
 #include <functional>
+#include <memory>
 
 class ResizableGraphArray;
 class GraphComponent;
@@ -254,13 +255,12 @@ private:
     int edgeArrayCapacity() const { return _lastEdgeId; }
 
     template<typename> friend class ComponentArray;
-    ComponentManager* _componentManager;
+    std::unique_ptr<ComponentManager> _componentManager;
 
     void updateElementIdData();
 
 public:
     void clear();
-    void setComponentManager(ComponentManager* _componentManager);
 
     const std::vector<NodeId>& nodeIds() const { return _nodeIdsVector; }
     int numNodes() const { return static_cast<int>(_nodeIdsVector.size()); }
@@ -286,11 +286,11 @@ public:
     void removeEdge(EdgeId edgeId);
     void removeEdges(const ElementIdSet<EdgeId>& edgeIds);
 
-    const std::vector<ComponentId>* componentIds() const;
-    ComponentId firstComponentId() const { return *componentIds()->begin(); }
+    const std::vector<ComponentId>& componentIds() const;
+    ComponentId firstComponentId() const { return *componentIds().begin(); }
     int numComponents() const;
-    const ReadOnlyGraph* componentById(ComponentId componentId) const;
-    const ReadOnlyGraph* firstComponent() const { return componentById(firstComponentId()); }
+    std::shared_ptr<const ReadOnlyGraph> componentById(ComponentId componentId) const;
+    std::shared_ptr<const ReadOnlyGraph> firstComponent() const { return componentById(firstComponentId()); }
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
 
@@ -330,16 +330,16 @@ public:
     }
 
 signals:
-    void graphWillChange(const Graph&) const;
-    void graphChanged(const Graph&) const;
-    void nodeAdded(const Graph&, NodeId) const;
-    void nodeWillBeRemoved(const Graph&, NodeId) const;
-    void edgeAdded(const Graph&, EdgeId) const;
-    void edgeWillBeRemoved(const Graph&, EdgeId) const;
-    void componentAdded(const Graph&, ComponentId) const;
-    void componentWillBeRemoved(const Graph&, ComponentId) const;
-    void componentSplit(const Graph&, ComponentId, const ElementIdSet<ComponentId>&) const;
-    void componentsWillMerge(const Graph&, const ElementIdSet<ComponentId>&, ComponentId) const;
+    void graphWillChange(const Graph*) const;
+    void graphChanged(const Graph*) const;
+    void nodeAdded(const Graph*, NodeId) const;
+    void nodeWillBeRemoved(const Graph*, NodeId) const;
+    void edgeAdded(const Graph*, EdgeId) const;
+    void edgeWillBeRemoved(const Graph*, EdgeId) const;
+    void componentAdded(const Graph*, ComponentId) const;
+    void componentWillBeRemoved(const Graph*, ComponentId) const;
+    void componentSplit(const Graph*, ComponentId, const ElementIdSet<ComponentId>&) const;
+    void componentsWillMerge(const Graph*, const ElementIdSet<ComponentId>&, ComponentId) const;
 };
 
 #endif // GRAPH_H

@@ -5,12 +5,13 @@
 
 #include <QObject>
 
+#include <memory>
+
 class SelectionManager : public QObject
 {
     Q_OBJECT
 public:
-    SelectionManager(const ReadOnlyGraph& graph) : QObject(), _graph(&graph) {}
-    SelectionManager(SelectionManager&& s) : QObject(), _graph(s._graph), _selectedNodes(s._selectedNodes) {}
+    SelectionManager(std::shared_ptr<const ReadOnlyGraph> graph) : QObject(), _graph(graph) {}
 
     ElementIdSet<NodeId> selectedNodes() const;
     ElementIdSet<NodeId> unselectedNodes() const;
@@ -39,7 +40,7 @@ public:
     void invertNodeSelection();
 
 private:
-    const ReadOnlyGraph* _graph;
+    std::shared_ptr<const ReadOnlyGraph> _graph;
 
     ElementIdSet<NodeId> _selectedNodes;
 

@@ -4,6 +4,7 @@
 
 #include "graphcomponentscene.h"
 #include "../ui/graphcomponentinteractor.h"
+#include "../utils.h"
 
 #include <QGuiApplication>
 #include <QKeyEvent>
@@ -12,10 +13,7 @@
 #include <QTimer>
 
 OpenGLWindow::OpenGLWindow(QScreen* screen)
-    : QWindow(screen),
-      _context(nullptr),
-      _scene(nullptr),
-      _interactor(nullptr)
+    : QWindow(screen)
 {
     // Tell Qt we will use OpenGL for this window
     setSurfaceType(OpenGLSurface);
@@ -41,19 +39,13 @@ OpenGLWindow::OpenGLWindow(QScreen* screen)
     create();
 
     // Create an OpenGL context
-    _context = new QOpenGLContext;
+    _context = std::make_shared<QOpenGLContext>();
     _context->setFormat(format);
     _context->create();
 }
 
-OpenGLWindow::~OpenGLWindow()
+void OpenGLWindow::setScene(std::shared_ptr<Scene> scene)
 {
-    delete _context;
-}
-
-void OpenGLWindow::setScene(Scene* scene)
-{
-    Q_ASSERT(scene);
     _scene = scene;
 
     // Initialise the scene

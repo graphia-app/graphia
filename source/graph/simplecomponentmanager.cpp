@@ -3,10 +3,10 @@
 #include <queue>
 #include <map>
 
-ElementIdSet<ComponentId> SimpleComponentManager::assignConnectedElementsComponentId(
+ElementIdSet<ComponentId> SimpleComponentManager::assignConnectedElementsComponentId(const Graph* graph,
         NodeId rootId, ComponentId componentId,
-        NodeArray<ComponentId>& nodesComponentId,
-        EdgeArray<ComponentId>& edgesComponentId)
+        std::map<NodeId, ComponentId>& nodesComponentId,
+        std::map<EdgeId, ComponentId>& edgesComponentId)
 {
     std::queue<NodeId> nodeIdSearchList;
     ElementIdSet<ComponentId> oldComponentIdsAffected;
@@ -20,12 +20,12 @@ ElementIdSet<ComponentId> SimpleComponentManager::assignConnectedElementsCompone
         oldComponentIdsAffected.insert(_nodesComponentId[nodeId]);
         nodesComponentId[nodeId] = componentId;
 
-        const ElementIdSet<EdgeId> edgeIds = graph().nodeById(nodeId).edges();
+        const ElementIdSet<EdgeId> edgeIds = graph->nodeById(nodeId).edges();
 
         for(EdgeId edgeId : edgeIds)
         {
             edgesComponentId[edgeId] = componentId;
-            NodeId oppositeNodeId = graph().edgeById(edgeId).oppositeId(nodeId);
+            NodeId oppositeNodeId = graph->edgeById(edgeId).oppositeId(nodeId);
 
             if(nodesComponentId[oppositeNodeId] != componentId)
             {
@@ -41,16 +41,16 @@ ElementIdSet<ComponentId> SimpleComponentManager::assignConnectedElementsCompone
     return oldComponentIdsAffected;
 }
 
-void SimpleComponentManager::updateComponents()
+void SimpleComponentManager::updateComponents(const Graph* graph)
 {
     std::map<ComponentId, ElementIdSet<ComponentId>> splitComponents;
     ElementIdSet<ComponentId> newComponentIds;
 
-    NodeArray<ComponentId> newNodesComponentId(graph());
-    EdgeArray<ComponentId> newEdgesComponentId(graph());
+    std::map<NodeId, ComponentId> newNodesComponentId;
+    std::map<EdgeId, ComponentId> newEdgesComponentId;
     ElementIdSet<ComponentId> newComponentIdsList;
 
-    const std::vector<NodeId>& nodeIdsList = graph().nodeIds();
+    const std::vector<NodeId>& nodeIdsList = graph->nodeIds();
 
     // Search for mergers and splitters
     for(NodeId nodeId : nodeIdsList)
@@ -64,11 +64,11 @@ void SimpleComponentManager::updateComponents()
                 // We have already used this ID so this is a component that has split
                 ComponentId newComponentId = generateComponentId();
                 newComponentIdsList.insert(newComponentId);
-                assignConnectedElementsComponentId(nodeId, newComponentId,
+                assignConnectedElementsComponentId(graph, nodeId, newComponentId,
                                                    newNodesComponentId, newEdgesComponentId);
 
-                queueGraphComponentUpdate(oldComponentId);
-                queueGraphComponentUpdate(newComponentId);
+                queueGraphComponentUpdate(graph, oldComponentId);
+                queueGraphComponentUpdate(graph, newComponentId);
 
                 splitComponents[oldComponentId].insert(oldComponentId);
                 splitComponents[oldComponentId].insert(newComponentId);
@@ -77,19 +77,19 @@ void SimpleComponentManager::updateComponents()
             {
                 newComponentIdsList.insert(oldComponentId);
                 ElementIdSet<ComponentId> componentIdsAffected =
-                        assignConnectedElementsComponentId(nodeId, oldComponentId,
+                        assignConnectedElementsComponentId(graph, nodeId, oldComponentId,
                                                            newNodesComponentId, newEdgesComponentId);
-                queueGraphComponentUpdate(oldComponentId);
+                queueGraphComponentUpdate(graph, oldComponentId);
 
                 if(componentIdsAffected.size() > 1)
                 {
                     // More than one old component IDs were observed so components have merged
-                    emit componentsWillMerge(graph(), componentIdsAffected, oldComponentId);
+                    emit componentsWillMerge(graph, componentIdsAffected, oldComponentId);
                     componentIdsAffected.erase(oldComponentId);
 
                     for(ComponentId removedComponentId : componentIdsAffected)
                     {
-                        emit componentWillBeRemoved(graph(), removedComponentId);
+                        emit componentWillBeRemoved(graph, removedComponentId);
                         removeGraphComponent(removedComponentId);
                     }
                 }
@@ -104,8 +104,8 @@ void SimpleComponentManager::updateComponents()
         {
             ComponentId newComponentId = generateComponentId();
             newComponentIdsList.insert(newComponentId);
-            assignConnectedElementsComponentId(nodeId, newComponentId, newNodesComponentId, newEdgesComponentId);
-            queueGraphComponentUpdate(newComponentId);
+            assignConnectedElementsComponentId(graph, nodeId, newComponentId, newNodesComponentId, newEdgesComponentId);
+            queueGraphComponentUpdate(graph, newComponentId);
 
             newComponentIds.insert(newComponentId);
         }
@@ -118,30 +118,30 @@ void SimpleComponentManager::updateComponents()
             continue;
 
         // Component removed
-        emit componentWillBeRemoved(graph(), componentId);
+        emit componentWillBeRemoved(graph, componentId);
 
         removeGraphComponent(componentId);
     }
 
-    _nodesComponentId = newNodesComponentId;
-    _edgesComponentId = newEdgesComponentId;
+    _nodesComponentId = std::move(newNodesComponentId);
+    _edgesComponentId = std::move(newEdgesComponentId);
 
     // Notify all the splits
     for(auto splitee : splitComponents)
     {
         ElementIdSet<ComponentId>& splitters = splitee.second;
-        emit componentSplit(graph(), splitee.first, splitters);
+        emit componentSplit(graph, splitee.first, splitters);
 
         for(ComponentId splitter : splitters)
         {
             if(splitter != splitee.first)
-                emit componentAdded(graph(), splitter);
+                emit componentAdded(graph, splitter);
         }
     }
 
     // Notify all the new components
     for(ComponentId newComponentId : newComponentIds)
-        emit componentAdded(graph(), newComponentId);
+        emit componentAdded(graph, newComponentId);
 }
 
 ComponentId SimpleComponentManager::generateComponentId()
@@ -170,26 +170,26 @@ void SimpleComponentManager::releaseComponentId(ComponentId componentId)
     _vacatedComponentIdQueue.push(componentId);
 }
 
-void SimpleComponentManager::queueGraphComponentUpdate(ComponentId componentId)
+void SimpleComponentManager::queueGraphComponentUpdate(const Graph* graph, ComponentId componentId)
 {
     _updatesRequired.insert(componentId);
 
     if(_componentsMap.find(componentId) == _componentsMap.end())
     {
-        GraphComponent* graphComponent = new GraphComponent(this->graph());
-        _componentsMap.insert(std::pair<ComponentId, GraphComponent*>(componentId, graphComponent));
+        std::shared_ptr<GraphComponent> graphComponent = std::make_shared<GraphComponent>(graph);
+        _componentsMap.emplace(componentId, graphComponent);
     }
 }
 
-void SimpleComponentManager::updateGraphComponent(ComponentId componentId)
+void SimpleComponentManager::updateGraphComponent(const Graph* graph, ComponentId componentId)
 {
-    GraphComponent* graphComponent = _componentsMap[componentId];
+    std::shared_ptr<GraphComponent> graphComponent = _componentsMap[componentId];
 
     std::vector<NodeId>& nodeIdsList = graphComponentNodeIdsList(graphComponent);
     std::vector<EdgeId>& edgeIdsList = graphComponentEdgeIdsList(graphComponent);
 
     nodeIdsList.clear();
-    const std::vector<NodeId>& nodeIds = graph().nodeIds();
+    const std::vector<NodeId>& nodeIds = graph->nodeIds();
     for(NodeId nodeId : nodeIds)
     {
         if(_nodesComponentId[nodeId] == componentId)
@@ -197,7 +197,7 @@ void SimpleComponentManager::updateGraphComponent(ComponentId componentId)
     }
 
     edgeIdsList.clear();
-    const std::vector<EdgeId>& edgeIds = graph().edgeIds();
+    const std::vector<EdgeId>& edgeIds = graph->edgeIds();
     for(EdgeId edgeId : edgeIds)
     {
         if(_edgesComponentId[edgeId] == componentId)
@@ -209,9 +209,6 @@ void SimpleComponentManager::removeGraphComponent(ComponentId componentId)
 {
     if(_componentsMap.find(componentId) != _componentsMap.end())
     {
-        GraphComponent* graphComponent = _componentsMap[componentId];
-        delete graphComponent;
-
         _componentsMap.erase(componentId);
         _componentIdsList.erase(std::remove(_componentIdsList.begin(), _componentIdsList.end(), componentId), _componentIdsList.end());
         releaseComponentId(componentId);
@@ -219,18 +216,12 @@ void SimpleComponentManager::removeGraphComponent(ComponentId componentId)
     }
 }
 
-SimpleComponentManager::~SimpleComponentManager()
+void SimpleComponentManager::onGraphChanged(const Graph* graph)
 {
-    for(auto graphComponent : _componentsMap)
-        delete graphComponent.second;
-}
-
-void SimpleComponentManager::onGraphChanged(const Graph&)
-{
-    updateComponents();
+    updateComponents(graph);
 
     for(ComponentId componentId : _updatesRequired)
-        updateGraphComponent(componentId);
+        updateGraphComponent(graph, componentId);
 
     _updatesRequired.clear();
 }
@@ -240,11 +231,12 @@ const std::vector<ComponentId>& SimpleComponentManager::componentIds() const
     return _componentIdsList;
 }
 
-const GraphComponent* SimpleComponentManager::componentById(ComponentId componentId)
+std::shared_ptr<const GraphComponent> SimpleComponentManager::componentById(ComponentId componentId)
 {
     if(_componentsMap.find(componentId) != _componentsMap.end())
         return _componentsMap[componentId];
 
+    Q_ASSERT(nullptr);
     return nullptr;
 }
 
@@ -253,7 +245,7 @@ ComponentId SimpleComponentManager::componentIdOfNode(NodeId nodeId) const
     if(nodeId.isNull())
         return ComponentId();
 
-    ComponentId componentId = _nodesComponentId[nodeId];
+    ComponentId componentId = _nodesComponentId.at(nodeId);
     auto i = std::find(_componentIdsList.begin(), _componentIdsList.end(), componentId);
     return i != _componentIdsList.end() ? *i : ComponentId();
 }
@@ -263,7 +255,7 @@ ComponentId SimpleComponentManager::componentIdOfEdge(EdgeId edgeId) const
     if(edgeId.isNull())
         return ComponentId();
 
-    ComponentId componentId = _edgesComponentId[edgeId];
+    ComponentId componentId = _edgesComponentId.at(edgeId);
     auto i = std::find(_componentIdsList.begin(), _componentIdsList.end(), componentId);
     return i != _componentIdsList.end() ? *i : ComponentId();
 }

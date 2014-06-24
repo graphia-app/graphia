@@ -10,7 +10,8 @@ private:
     float _scale;
 
 public:
-    ScalingLayout(const ReadOnlyGraph& graph, NodePositions& positions) :
+    ScalingLayout(std::shared_ptr<const ReadOnlyGraph> graph,
+                  std::shared_ptr<NodePositions> positions) :
         NodeLayout(graph, positions), _scale(1.0f)
     {}
 

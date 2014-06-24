@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include <memory>
+
 class MainWidget;
 class QLabel;
 class Graph;
@@ -37,7 +39,7 @@ private slots:
 
     void on_loadProgress(int percentage);
     void on_loadCompletion(int success);
-    void on_graphChanged(const Graph& graph);
+    void on_graphChanged(const Graph* graph);
 
     void on_actionPause_Layout_triggered();
     void on_tabs_currentChanged(int index);

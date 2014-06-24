@@ -1,20 +1,20 @@
 #include "layout.h"
 
-BoundingBox3D NodeLayout::boundingBox(const ReadOnlyGraph &graph, const NodePositions &positions)
+BoundingBox3D NodeLayout::boundingBox(std::shared_ptr<const ReadOnlyGraph> graph, std::shared_ptr<const NodePositions> positions)
 {
     std::vector<QVector3D> graphPositions;
-    for(NodeId nodeId : graph.nodeIds())
-        graphPositions.push_back(positions[nodeId]);
+    for(NodeId nodeId : graph->nodeIds())
+        graphPositions.push_back((*positions)[nodeId]);
 
     return BoundingBox3D(graphPositions);
 }
 
 BoundingBox3D NodeLayout::boundingBox() const
 {
-    return NodeLayout::boundingBox(*_graph, *this->_positions);
+    return NodeLayout::boundingBox(_graph, _positions);
 }
 
-BoundingBox2D NodeLayout::boundingBoxInXY(const ReadOnlyGraph &graph, const NodePositions &positions)
+BoundingBox2D NodeLayout::boundingBoxInXY(std::shared_ptr<const ReadOnlyGraph> graph, std::shared_ptr<const NodePositions> positions)
 {
     BoundingBox3D boundingBox = NodeLayout::boundingBox(graph, positions);
 
@@ -25,16 +25,16 @@ BoundingBox2D NodeLayout::boundingBoxInXY(const ReadOnlyGraph &graph, const Node
 
 BoundingSphere NodeLayout::boundingSphere() const
 {
-    return NodeLayout::boundingSphere(*_graph, *this->_positions);
+    return NodeLayout::boundingSphere(_graph, _positions);
 }
 
-float NodeLayout::boundingCircleRadiusInXY(const ReadOnlyGraph &graph, const NodePositions &positions)
+float NodeLayout::boundingCircleRadiusInXY(std::shared_ptr<const ReadOnlyGraph> graph, std::shared_ptr<const NodePositions> positions)
 {
     BoundingBox3D boundingBox = NodeLayout::boundingBox(graph, positions);
     return std::max(boundingBox.xLength(), boundingBox.yLength()) * 0.5f * std::sqrt(2.0f);
 }
 
-BoundingSphere NodeLayout::boundingSphere(const ReadOnlyGraph &graph, const NodePositions &positions)
+BoundingSphere NodeLayout::boundingSphere(std::shared_ptr<const ReadOnlyGraph> graph, std::shared_ptr<const NodePositions> positions)
 {
     BoundingBox3D boundingBox = NodeLayout::boundingBox(graph, positions);
     BoundingSphere boundingSphere(
@@ -45,18 +45,17 @@ BoundingSphere NodeLayout::boundingSphere(const ReadOnlyGraph &graph, const Node
     return boundingSphere;
 }
 
-void LayoutThread::addLayout(Layout *layout)
+void LayoutThread::addLayout(std::shared_ptr<Layout> layout)
 {
     std::lock_guard<std::mutex> locker(_mutex);
     _layouts.insert(layout);
 }
 
-void LayoutThread::removeLayout(Layout *layout)
+void LayoutThread::removeLayout(std::shared_ptr<Layout> layout)
 {
     std::lock_guard<std::mutex> locker(_mutex);
 
     _layouts.erase(layout);
-    delete layout;
 }
 
 void LayoutThread::pause()
@@ -67,7 +66,7 @@ void LayoutThread::pause()
 
     _pause = true;
 
-    for(Layout* layout : _layouts)
+    for(auto layout : _layouts)
         layout->cancel();
 }
 
@@ -82,7 +81,7 @@ void LayoutThread::pauseAndWait()
 
     _pause = true;
 
-    for(Layout* layout : _layouts)
+    for(auto layout : _layouts)
         layout->cancel();
 
     _waitForPause.wait(lock);
@@ -122,7 +121,7 @@ void LayoutThread::stop()
     _stop = true;
     _pause = false;
 
-    for(Layout* layout : _layouts)
+    for(auto layout : _layouts)
         layout->cancel();
 
     _waitForResume.notify_all();
@@ -130,7 +129,7 @@ void LayoutThread::stop()
 
 bool LayoutThread::iterative()
 {
-    for(Layout* layout : _layouts)
+    for(auto layout : _layouts)
     {
         if(layout->iterative())
             return true;
@@ -141,7 +140,7 @@ bool LayoutThread::iterative()
 
 bool LayoutThread::allLayoutsShouldPause()
 {
-    for(Layout* layout : _layouts)
+    for(auto layout : _layouts)
     {
         if(!layout->shouldPause())
             return false;
@@ -154,7 +153,7 @@ void LayoutThread::run()
 {
     do
     {
-        for(Layout* layout : _layouts)
+        for(auto layout : _layouts)
         {
             if(layout->shouldPause())
                 continue;
@@ -187,9 +186,6 @@ void LayoutThread::run()
     while(iterative() || _repeating);
 
     _mutex.lock();
-    for(Layout* layout : _layouts)
-        delete layout;
-
     _layouts.clear();
     _mutex.unlock();
 }
@@ -197,17 +193,17 @@ void LayoutThread::run()
 
 void NodeLayoutThread::addComponent(ComponentId componentId)
 {
-    if(componentLayouts.find(componentId) == componentLayouts.end())
+    if(_componentLayouts.find(componentId) == _componentLayouts.end())
     {
-        Layout* layout = layoutFactory->create(componentId);
+        auto layout = _layoutFactory->create(componentId);
         addLayout(layout);
-        componentLayouts.insert(std::pair<ComponentId, Layout*>(componentId, layout));
+        _componentLayouts.emplace(componentId, layout);
     }
 }
 
 void NodeLayoutThread::addAllComponents(const Graph &graph)
 {
-    for(ComponentId componentId : *graph.componentIds())
+    for(ComponentId componentId : graph.componentIds())
         addComponent(componentId);
 }
 
@@ -221,11 +217,11 @@ void NodeLayoutThread::removeComponent(ComponentId componentId)
         resumeAfterRemoval = true;
     }
 
-    if(componentLayouts.find(componentId) != componentLayouts.end())
+    if(_componentLayouts.find(componentId) != _componentLayouts.end())
     {
-        Layout* layout = componentLayouts[componentId];
+        auto layout = _componentLayouts[componentId];
         removeLayout(layout);
-        componentLayouts.erase(componentId);
+        _componentLayouts.erase(componentId);
     }
 
     if(resumeAfterRemoval)

@@ -33,48 +33,43 @@ private:
     std::vector<ComponentId> _componentIdsList;
     ComponentId _nextComponentId;
     std::queue<ComponentId> _vacatedComponentIdQueue;
-    std::map<ComponentId, GraphComponent*> _componentsMap;
+    std::map<ComponentId, std::shared_ptr<GraphComponent>> _componentsMap;
     ElementIdSet<ComponentId> _updatesRequired;
-    NodeArray<ComponentId> _nodesComponentId;
-    EdgeArray<ComponentId> _edgesComponentId;
+    std::map<NodeId, ComponentId> _nodesComponentId;
+    std::map<EdgeId, ComponentId> _edgesComponentId;
 
     ComponentId generateComponentId();
     void releaseComponentId(ComponentId componentId);
-    void queueGraphComponentUpdate(ComponentId componentId);
-    void updateGraphComponent(ComponentId componentId);
+    void queueGraphComponentUpdate(const Graph* graph, ComponentId componentId);
+    void updateGraphComponent(const Graph* graph, ComponentId componentId);
     void removeGraphComponent(ComponentId componentId);
 
 public:
-    SimpleComponentManager(Graph& graph) :
+    SimpleComponentManager(const Graph& graph) :
         ComponentManager(graph),
-        _nextComponentId(0),
-        _nodesComponentId(graph),
-        _edgesComponentId(graph)
+        _nextComponentId(0)
     {}
-
-    virtual ~SimpleComponentManager();
 
 private:
     // A more sophisticated implementation may make use of these
-    void onNodeAdded(const Graph&, NodeId) {}
-    void onNodeWillBeRemoved(const Graph&, NodeId) {}
+    void onNodeAdded(const Graph*, NodeId) {}
+    void onNodeWillBeRemoved(const Graph*, NodeId) {}
 
-    void onEdgeAdded(const Graph&, EdgeId) {}
-    void onEdgeWillBeRemoved(const Graph&, EdgeId) {}
+    void onEdgeAdded(const Graph*, EdgeId) {}
+    void onEdgeWillBeRemoved(const Graph*, EdgeId) {}
 
-    void onGraphChanged(const Graph&);
+    void onGraphChanged(const Graph* graph);
 
-    void updateComponents();
-
+private:
+    void updateComponents(const Graph* graph);
     int componentArrayCapacity() const { return _nextComponentId; }
-
-    ElementIdSet<ComponentId> assignConnectedElementsComponentId(NodeId rootId, ComponentId componentId,
-                                                                 NodeArray<ComponentId>& nodesComponentId,
-                                                                 EdgeArray<ComponentId>& edgesComponentId);
+    ElementIdSet<ComponentId> assignConnectedElementsComponentId(const Graph* graph, NodeId rootId, ComponentId componentId,
+                                                                 std::map<NodeId, ComponentId>& nodesComponentId,
+                                                                 std::map<EdgeId, ComponentId>& edgesComponentId);
 
 public:
     const std::vector<ComponentId>& componentIds() const;
-    const GraphComponent* componentById(ComponentId componentId);
+    std::shared_ptr<const GraphComponent> componentById(ComponentId componentId);
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
 };

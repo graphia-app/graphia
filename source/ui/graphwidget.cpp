@@ -19,8 +19,8 @@ GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
 {
     OpenGLWindow* window = new OpenGLWindow;
 
-    window->setScene(_graphComponentScene.get());
-    window->setInteractor(_graphComponentInteractor.get());
+    window->setScene(_graphComponentScene);
+    window->setInteractor(_graphComponentInteractor);
 
     connect(_graphComponentInteractor.get(), &Interactor::userInteractionStarted, this, &GraphWidget::userInteractionStarted);
     connect(_graphComponentInteractor.get(), &Interactor::userInteractionFinished, this, &GraphWidget::userInteractionFinished);

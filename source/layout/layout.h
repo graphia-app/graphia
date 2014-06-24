@@ -83,25 +83,25 @@ class NodeLayout : public Layout
 {
     Q_OBJECT
 protected:
-    const ReadOnlyGraph* _graph;
-    NodePositions* _positions;
+    std::shared_ptr<const ReadOnlyGraph> _graph;
+    std::shared_ptr<NodePositions> _positions;
 
 public:
-    NodeLayout(const ReadOnlyGraph& graph, NodePositions& positions, Iterative iterative = Iterative::No) :
+    NodeLayout(std::shared_ptr<const ReadOnlyGraph> graph,
+               std::shared_ptr<NodePositions> positions,
+               Iterative iterative = Iterative::No) :
         Layout(iterative),
-        _graph(&graph),
-        _positions(&positions)
+        _graph(graph),
+        _positions(positions)
     {}
 
-    const ReadOnlyGraph& graph() { return *_graph; }
-
-    static BoundingBox3D boundingBox(const ReadOnlyGraph& graph, const NodePositions& _positions);
+    static BoundingBox3D boundingBox(std::shared_ptr<const ReadOnlyGraph> graph, std::shared_ptr<const NodePositions> positions);
     BoundingBox3D boundingBox() const;
-    static BoundingBox2D boundingBoxInXY(const ReadOnlyGraph& graph, const NodePositions& _positions);
+    static BoundingBox2D boundingBoxInXY(std::shared_ptr<const ReadOnlyGraph> graph, std::shared_ptr<const NodePositions> positions);
 
-    static BoundingSphere boundingSphere(const ReadOnlyGraph& graph, const NodePositions& _positions);
+    static BoundingSphere boundingSphere(std::shared_ptr<const ReadOnlyGraph> graph, std::shared_ptr<const NodePositions> positions);
     BoundingSphere boundingSphere() const;
-    static float boundingCircleRadiusInXY(const ReadOnlyGraph& graph, const NodePositions& _positions);
+    static float boundingCircleRadiusInXY(std::shared_ptr<const ReadOnlyGraph> graph, std::shared_ptr<const NodePositions> positions);
 };
 
 class GraphModel;
@@ -119,14 +119,14 @@ public:
 
     const GraphModel& graphModel() const { return *_graphModel; }
 
-    virtual NodeLayout* create(ComponentId componentId) const = 0;
+    virtual std::shared_ptr<NodeLayout> create(ComponentId componentId) const = 0;
 };
 
 class LayoutThread : public QObject
 {
     Q_OBJECT
 protected:
-    std::set<Layout*> _layouts;
+    std::set<std::shared_ptr<Layout>> _layouts;
     std::mutex _mutex;
     std::thread _thread;
     bool _pause;
@@ -142,7 +142,7 @@ public:
         _pause(false), _paused(false), _stop(false), _repeating(repeating), _iteration(0)
     {}
 
-    LayoutThread(Layout* layout, bool repeating = false) :
+    LayoutThread(std::shared_ptr<Layout> layout, bool repeating = false) :
         _pause(false), _paused(false), _stop(false), _repeating(repeating), _iteration(0)
     {
         addLayout(layout);
@@ -156,8 +156,8 @@ public:
             _thread.join();
     }
 
-    void addLayout(Layout* layout);
-    void removeLayout(Layout* layout);
+    void addLayout(std::shared_ptr<Layout> layout);
+    void removeLayout(std::shared_ptr<Layout> layout);
 
     void pause();
     void pauseAndWait();
@@ -181,19 +181,14 @@ class NodeLayoutThread : public LayoutThread
 {
     Q_OBJECT
 private:
-    const NodeLayoutFactory* layoutFactory;
-    std::map<ComponentId, Layout*> componentLayouts;
+    std::unique_ptr<const NodeLayoutFactory> _layoutFactory;
+    std::map<ComponentId, std::shared_ptr<Layout>> _componentLayouts;
 
 public:
-    NodeLayoutThread(const NodeLayoutFactory* layoutFactory) :
+    NodeLayoutThread(std::unique_ptr<const NodeLayoutFactory> layoutFactory) :
         LayoutThread(),
-        layoutFactory(layoutFactory)
+        _layoutFactory(std::move(layoutFactory))
     {}
-
-    virtual ~NodeLayoutThread()
-    {
-        delete layoutFactory;
-    }
 
     void addComponent(ComponentId componentId);
     void addAllComponents(const Graph& graph);

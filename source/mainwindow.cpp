@@ -96,9 +96,9 @@ void MainWindow::updatePerTabUi()
     {
         configureActionPauseLayout(widget->layoutIsPaused());
         _statusBarLabel->setText(QString(tr("%1 nodes, %2 edges, %3 components")).arg(
-                                    widget->graphModel()->graph().numNodes()).arg(
-                                    widget->graphModel()->graph().numEdges()).arg(
-                                    widget->graphModel()->graph().numComponents()));
+                                    widget->graphModel()->graph()->numNodes()).arg(
+                                    widget->graphModel()->graph()->numEdges()).arg(
+                                    widget->graphModel()->graph()->numComponents()));
 
         _ui->actionUndo->setEnabled(widget->canUndo());
         _ui->actionUndo->setText(widget->nextUndoAction());
@@ -193,7 +193,7 @@ void MainWindow::on_loadCompletion(int /*success*/)
     updatePerTabUi();
 }
 
-void MainWindow::on_graphChanged(const Graph&)
+void MainWindow::on_graphChanged(const Graph*)
 {
     updatePerTabUi();
 }

@@ -24,7 +24,7 @@ public:
 signals:
     void progress(int percentage) const;
     void complete(int success) const;
-    void graphChanged(const Graph&) const;
+    void graphChanged(const Graph*) const;
     void commandStackChanged(const CommandManager& commandManager) const;
     void selectionChanged(const SelectionManager& selectionManager) const;
 
@@ -41,13 +41,13 @@ private:
     bool _resumePreviouslyActiveLayout;
 
 private slots:
-    void onGraphWillChange(const Graph&);
-    void onGraphChanged(const Graph& graph);
+    void onGraphWillChange(const Graph*);
+    void onGraphChanged(const Graph* graph);
 
-    void onComponentAdded(const Graph&, ComponentId componentId);
-    void onComponentWillBeRemoved(const Graph&, ComponentId componentId);
-    void onComponentSplit(const Graph&, ComponentId splitter, const ElementIdSet<ComponentId>& splitters);
-    void onComponentsWillMerge(const Graph&, const ElementIdSet<ComponentId>& mergers, ComponentId merger);
+    void onComponentAdded(const Graph*, ComponentId componentId);
+    void onComponentWillBeRemoved(const Graph*, ComponentId componentId);
+    void onComponentSplit(const Graph*, ComponentId splitter, const ElementIdSet<ComponentId>& splitters);
+    void onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers, ComponentId merger);
 
 public:
     std::shared_ptr<GraphModel> graphModel() { return _graphModel; }

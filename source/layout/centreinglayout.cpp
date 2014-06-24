@@ -2,14 +2,14 @@
 
 void CentreingLayout::executeReal(uint64_t)
 {
-    NodePositions& positions = *this->_positions;
+    auto& positions = *_positions;
 
     QVector3D centerOfMass;
-    for(NodeId nodeId : graph().nodeIds())
-        centerOfMass += (positions[nodeId] / graph().numNodes());
+    for(NodeId nodeId : _graph->nodeIds())
+        centerOfMass += (positions[nodeId] / _graph->numNodes());
 
     positions.lock();
-    for(NodeId nodeId : graph().nodeIds())
+    for(NodeId nodeId : _graph->nodeIds())
         positions[nodeId] -= centerOfMass;
     positions.unlock();
 

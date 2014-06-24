@@ -1,13 +1,16 @@
 #ifndef COMMANDMANAGER_H
 #define COMMANDMANAGER_H
 
+#include "../utils.h"
+
 #include <QtGlobal>
 #include <QObject>
-#include <QStack>
 #include <QString>
 
 #include <functional>
+#include <deque>
 #include <vector>
+#include <memory>
 
 // For simple operations the Command class can be used directly, by passing
 // it lambdas to perform the execute and undo actions. For more complicated
@@ -60,13 +63,9 @@ class CommandManager : public QObject
     Q_OBJECT
 public:
     CommandManager();
-    CommandManager(const CommandManager& c) :
-        QObject(), _stack(c._stack), _lastExecutedIndex(c._lastExecutedIndex)
-    {}
-    ~CommandManager();
 
     void clear();
-    void execute(Command* command);
+    void execute(std::unique_ptr<Command> command);
     void execute(const QString& description,
                  std::function<bool()> executeFunction,
                  std::function<void()> undoFunction);
@@ -77,11 +76,11 @@ public:
     bool canUndo() const;
     bool canRedo() const;
 
-    const std::vector<const Command*> undoableCommands() const;
-    const std::vector<const Command*> redoableCommands() const;
+    const std::vector<QString> undoableCommandDescriptions() const;
+    const std::vector<QString> redoableCommandDescriptions() const;
 
 private:
-    QStack<Command*> _stack;
+    std::deque<std::unique_ptr<Command>> _stack;
     int _lastExecutedIndex;
 
 signals:

@@ -6,6 +6,7 @@
 #include <QObject>
 
 #include <vector>
+#include <memory>
 
 class GraphComponent : public QObject, public ReadOnlyGraph
 {
@@ -13,7 +14,7 @@ class GraphComponent : public QObject, public ReadOnlyGraph
 
     Q_OBJECT
 public:
-    GraphComponent(const ReadOnlyGraph& graph) : _graph(&graph) {}
+    GraphComponent(const ReadOnlyGraph* graph) : _graph(graph) {}
     GraphComponent(const GraphComponent& other) :
         QObject(other.parent()),
         _graph(other._graph),
@@ -27,8 +28,6 @@ private:
     std::vector<EdgeId> _edgeIdsList;
 
 public:
-    const ReadOnlyGraph& graph() { return *_graph; }
-
     const std::vector<NodeId>& nodeIds() const { return _nodeIdsList; }
     int numNodes() const { return static_cast<int>(_nodeIdsList.size()); }
     const Node& nodeById(NodeId nodeId) const { return _graph->nodeById(nodeId); }
@@ -44,8 +43,7 @@ class ComponentManager : public QObject
     friend class Graph;
 
 public:
-    ComponentManager(Graph& graph) :
-        _graph(&graph)
+    ComponentManager(const Graph& graph)
     {
         connect(&graph, &Graph::nodeAdded, this, &ComponentManager::onNodeAdded, Qt::DirectConnection);
         connect(&graph, &Graph::nodeWillBeRemoved, this, &ComponentManager::onNodeWillBeRemoved, Qt::DirectConnection);
@@ -58,51 +56,45 @@ public:
         connect(this, &ComponentManager::componentSplit, &graph, &Graph::componentSplit, Qt::DirectConnection);
         connect(this, &ComponentManager::componentsWillMerge, &graph, &Graph::componentsWillMerge, Qt::DirectConnection);
     }
-    virtual ~ComponentManager() {}
-
 
 protected slots:
-    virtual void onNodeAdded(const Graph&, NodeId nodeId) = 0;
-    virtual void onNodeWillBeRemoved(const Graph&, NodeId nodeId) = 0;
+    virtual void onNodeAdded(const Graph*, NodeId nodeId) = 0;
+    virtual void onNodeWillBeRemoved(const Graph*, NodeId nodeId) = 0;
 
-    virtual void onEdgeAdded(const Graph&, EdgeId edgeId) = 0;
-    virtual void onEdgeWillBeRemoved(const Graph&, EdgeId edgeId) = 0;
+    virtual void onEdgeAdded(const Graph*, EdgeId edgeId) = 0;
+    virtual void onEdgeWillBeRemoved(const Graph*, EdgeId edgeId) = 0;
 
-    virtual void onGraphChanged(const Graph&) = 0;
+    virtual void onGraphChanged(const Graph*) = 0;
 
 protected:
-    Graph* _graph;
-
     template<typename> friend class ComponentArray;
     std::unordered_set<ResizableGraphArray*> _componentArrayList;
     virtual int componentArrayCapacity() const = 0;
 
-    std::vector<NodeId>& graphComponentNodeIdsList(GraphComponent* graphComponent)
+    std::vector<NodeId>& graphComponentNodeIdsList(std::shared_ptr<GraphComponent> graphComponent)
     {
-        Q_ASSERT(graphComponent != nullptr);
+        Q_ASSERT(graphComponent.get() != nullptr);
         return graphComponent->_nodeIdsList;
     }
 
-    std::vector<EdgeId>& graphComponentEdgeIdsList(GraphComponent* graphComponent)
+    std::vector<EdgeId>& graphComponentEdgeIdsList(std::shared_ptr<GraphComponent> graphComponent)
     {
-        Q_ASSERT(graphComponent != nullptr);
+        Q_ASSERT(graphComponent.get() != nullptr);
         return graphComponent->_edgeIdsList;
     }
 
 public:
-    Graph& graph() { return *_graph; }
-
     virtual const std::vector<ComponentId>& componentIds() const = 0;
     int numComponents() const { return static_cast<int>(componentIds().size()); }
-    virtual const GraphComponent* componentById(ComponentId componentId) = 0;
+    virtual std::shared_ptr<const GraphComponent> componentById(ComponentId componentId) = 0;
     virtual ComponentId componentIdOfNode(NodeId nodeId) const = 0;
     virtual ComponentId componentIdOfEdge(EdgeId edgeId) const = 0;
 
 signals:
-    void componentAdded(const Graph&, ComponentId) const;
-    void componentWillBeRemoved(const Graph&, ComponentId) const;
-    void componentSplit(const Graph&, ComponentId, const ElementIdSet<ComponentId>&) const;
-    void componentsWillMerge(const Graph&, const ElementIdSet<ComponentId>&, ComponentId) const;
+    void componentAdded(const Graph*, ComponentId) const;
+    void componentWillBeRemoved(const Graph*, ComponentId) const;
+    void componentSplit(const Graph*, ComponentId, const ElementIdSet<ComponentId>&) const;
+    void componentsWillMerge(const Graph*, const ElementIdSet<ComponentId>&, ComponentId) const;
 };
 
 #endif // COMPONENTMANAGER_H

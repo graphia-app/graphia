@@ -4,6 +4,7 @@
 #include "layout.h"
 
 #include <vector>
+#include <memory>
 
 class SequenceLayout : public NodeLayout
 {
@@ -12,11 +13,14 @@ private:
     std::vector<NodeLayout*> _subLayouts;
 
 public:
-    SequenceLayout(const ReadOnlyGraph& graph, NodePositions& positions) :
+    SequenceLayout(std::shared_ptr<const ReadOnlyGraph> graph,
+                   std::shared_ptr<NodePositions> positions) :
         NodeLayout(graph, positions)
     {}
 
-    SequenceLayout(const ReadOnlyGraph& graph, NodePositions& positions, std::vector<NodeLayout*> subLayouts) :
+    SequenceLayout(std::shared_ptr<const ReadOnlyGraph> graph,
+                   std::shared_ptr<NodePositions> positions,
+                   std::vector<NodeLayout*> subLayouts) :
         NodeLayout(graph, positions), _subLayouts(subLayouts)
     {}
 

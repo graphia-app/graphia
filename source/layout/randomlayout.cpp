@@ -4,12 +4,12 @@
 
 void RandomLayout::executeReal(uint64_t)
 {
-    NodePositions& positions = *this->_positions;
+    auto& positions = *_positions;
     int nodeNumber = 0;
-    int numNodes = graph().numNodes();
+    int numNodes = _graph->numNodes();
 
     positions.lock();
-    for(NodeId nodeId : graph().nodeIds())
+    for(NodeId nodeId : _graph->nodeIds())
     {
         positions[nodeId] = Utils::randQVector3D(-_spread, _spread);
         int percentage = (nodeNumber++ * 100) / numNodes;

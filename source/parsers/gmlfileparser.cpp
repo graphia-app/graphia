@@ -1,5 +1,7 @@
 #include "gmlfileparser.h"
 
+#include "../graph/graph.h"
+
 #include <QFileInfo>
 
 #include <vector>
@@ -136,7 +138,7 @@ bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePair
             if(intValue != nullptr)
             {
                 if(!key.compare("id"))
-                    nodeIdMap.insert(std::pair<int, NodeId>(*intValue, graph.addNode()));
+                    nodeIdMap.emplace(*intValue, graph.addNode());
                 else
                 {
                     // Unhandled node data

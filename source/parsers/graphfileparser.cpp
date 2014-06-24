@@ -1,9 +1,10 @@
 #include "graphfileparser.h"
 
+#include "../graph/graph.h"
 
-GraphFileParserThread::GraphFileParserThread(const QString& filename, Graph& graph, std::unique_ptr<GraphFileParser> graphFileParser) :
+GraphFileParserThread::GraphFileParserThread(const QString& filename, std::shared_ptr<Graph> graph, std::unique_ptr<GraphFileParser> graphFileParser) :
     _filename(filename),
-    _graph(&graph),
+    _graph(graph),
     _graphFileParser(std::move(graphFileParser))
 {}
 
@@ -33,10 +34,10 @@ void GraphFileParserThread::run()
     bool result;
 
     _graph->performTransaction(
-                [&](Graph& graph)
-    {
-        result = _graphFileParser->parse(graph);
-    });
+        [&](Graph& graph)
+        {
+            result = _graphFileParser->parse(graph);
+        });
 
     emit complete(result);
 }

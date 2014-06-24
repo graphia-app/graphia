@@ -38,22 +38,22 @@
 
 void EadesLayout::executeReal(uint64_t iteration)
 {
-    NodePositions& positions = *this->_positions;
-
     if(iteration == 0)
     {
-        RandomLayout randomLayout(graph(), positions);
+        RandomLayout randomLayout(_graph, _positions);
 
         randomLayout.setSpread(10.0f);
         randomLayout.execute(iteration);
     }
 
+    auto& positions = *_positions;
+
     _moves.resize(positions.size());
 
-    const std::vector<NodeId>& nodeIds = graph().nodeIds();
-    const std::vector<EdgeId>& edgeIds = graph().edgeIds();
+    const std::vector<NodeId>& nodeIds = _graph->nodeIds();
+    const std::vector<EdgeId>& edgeIds = _graph->edgeIds();
 
-    for(NodeId i : graph().nodeIds())
+    for(NodeId i : _graph->nodeIds())
         _moves[i] = QVector3D(0.0f, 0.0f, 0.0f);
 
     int numNodes = static_cast<int>(nodeIds.size());
@@ -88,7 +88,7 @@ void EadesLayout::executeReal(uint64_t iteration)
         if(shouldCancel())
             return;
 
-        const Edge& edge = graph().edgeById(edgeId);
+        const Edge& edge = _graph->edgeById(edgeId);
         if(!edge.isLoop())
         {
             QVector3D difference = positions[edge.targetId()] - positions[edge.sourceId()];

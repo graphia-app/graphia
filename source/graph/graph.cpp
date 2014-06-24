@@ -1,6 +1,7 @@
 #include "graph.h"
 #include "grapharray.h"
 #include "simplecomponentmanager.h"
+#include "../utils.h"
 
 #include <QtGlobal>
 #include <QMetaType>
@@ -8,7 +9,7 @@
 Graph::Graph() :
     _lastNodeId(0),
     _lastEdgeId(0),
-    _componentManager(new SimpleComponentManager(*this)),
+    _componentManager(std::make_unique<SimpleComponentManager>(*this)),
     _graphChangeDepth(0)
 {
     qRegisterMetaType<NodeId>("NodeId");
@@ -17,8 +18,7 @@ Graph::Graph() :
 
 Graph::~Graph()
 {
-    delete _componentManager;
-    _componentManager = nullptr;
+    // Defined so we can use smart pointers to incomplete types in the header
 }
 
 void Graph::clear()
@@ -31,14 +31,6 @@ void Graph::clear()
 
     _nodesVector.resize(0);
     _edgesVector.resize(0);
-}
-
-void Graph::setComponentManager(ComponentManager *componentManager)
-{
-    beginTransaction();
-    delete this->_componentManager;
-    this->_componentManager = componentManager;
-    endTransaction();
 }
 
 NodeId Graph::addNode()
@@ -78,7 +70,7 @@ NodeId Graph::addNode(NodeId nodeId)
     node._inEdges.clear();
     node._outEdges.clear();
 
-    emit nodeAdded(*this, nodeId);
+    emit nodeAdded(this, nodeId);
     endTransaction();
 
     return nodeId;
@@ -111,7 +103,7 @@ void Graph::removeNode(NodeId nodeId)
     for(EdgeId edgeId : node.edges())
         removeEdge(edgeId);
 
-    emit nodeWillBeRemoved(*this, nodeId);
+    emit nodeWillBeRemoved(this, nodeId);
 
     _nodeIdsInUse[nodeId] = false;
     _unusedNodeIdsDeque.push_back(nodeId);
@@ -174,7 +166,7 @@ EdgeId Graph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     _nodesVector[targetId]._inEdges.insert(edgeId);
     _nodesVector[targetId]._edges.insert(edgeId);
 
-    emit edgeAdded(*this, edgeId);
+    emit edgeAdded(this, edgeId);
     endTransaction();
 
     return edgeId;
@@ -202,7 +194,7 @@ void Graph::removeEdge(EdgeId edgeId)
 {
     beginTransaction();
 
-    emit edgeWillBeRemoved(*this, edgeId);
+    emit edgeWillBeRemoved(this, edgeId);
 
     // Remove all node references to this edge
     const Edge& edge = _edgesVector[edgeId];
@@ -232,25 +224,27 @@ void Graph::removeEdges(const ElementIdSet<EdgeId>& edgeIds)
     endTransaction();
 }
 
-const std::vector<ComponentId>* Graph::componentIds() const
+const std::vector<ComponentId>& Graph::componentIds() const
 {
-    if(_componentManager != nullptr)
-        return &_componentManager->componentIds();
+    if(_componentManager)
+        return _componentManager->componentIds();
 
-    return nullptr;
+    static std::vector<ComponentId> emptyComponentIdList;
+
+    return emptyComponentIdList;
 }
 
 int Graph::numComponents() const
 {
-    if(_componentManager != nullptr)
+    if(_componentManager)
         return static_cast<int>(_componentManager->componentIds().size());
 
     return 0;
 }
 
-const ReadOnlyGraph *Graph::componentById(ComponentId componentId) const
+std::shared_ptr<const ReadOnlyGraph> Graph::componentById(ComponentId componentId) const
 {
-    if(_componentManager != nullptr)
+    if(_componentManager)
         return _componentManager->componentById(componentId);
 
     Q_ASSERT(nullptr);
@@ -259,7 +253,7 @@ const ReadOnlyGraph *Graph::componentById(ComponentId componentId) const
 
 ComponentId Graph::componentIdOfNode(NodeId nodeId) const
 {
-    if(_componentManager != nullptr)
+    if(_componentManager)
         return _componentManager->componentIdOfNode(nodeId);
 
     return ComponentId();
@@ -267,7 +261,7 @@ ComponentId Graph::componentIdOfNode(NodeId nodeId) const
 
 ComponentId Graph::componentIdOfEdge(EdgeId edgeId) const
 {
-    if(_componentManager != nullptr)
+    if(_componentManager)
         return _componentManager->componentIdOfEdge(edgeId);
 
     return ComponentId();
@@ -304,11 +298,11 @@ void Graph::dumpToQDebug(int detail) const
 
     if(detail > 0)
     {
-        if(_componentManager != nullptr)
+        if(_componentManager)
         {
             for(ComponentId componentId : _componentManager->componentIds())
             {
-                const ReadOnlyGraph* component = _componentManager->componentById(componentId);
+                auto component = _componentManager->componentById(componentId);
                 qDebug() << "component" << componentId;
                 component->dumpToQDebug(detail);
             }
@@ -319,7 +313,7 @@ void Graph::dumpToQDebug(int detail) const
 void Graph::beginTransaction()
 {
     if(_graphChangeDepth++ <= 0)
-        emit graphWillChange(*this);
+        emit graphWillChange(this);
 }
 
 void Graph::endTransaction()
@@ -328,7 +322,7 @@ void Graph::endTransaction()
     if(--_graphChangeDepth <= 0)
     {
         updateElementIdData();
-        emit graphChanged(*this);
+        emit graphChanged(this);
     }
 }
 

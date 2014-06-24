@@ -2,6 +2,8 @@
 #define GRAPHCOMPONENTSCENE_H
 
 #include "scene.h"
+#include "primitives/cylinder.h"
+#include "primitives/sphere.h"
 #include "camera.h"
 #include "transition.h"
 #include "../maths/boundingbox.h"
@@ -20,8 +22,6 @@
 #include <memory>
 #include <vector>
 
-class Sphere;
-class Cylinder;
 class Quad;
 class GraphModel;
 class SelectionManager;
@@ -47,7 +47,6 @@ class GraphComponentScene : public Scene
 
 public:
     GraphComponentScene(QObject* parent = 0);
-    virtual ~GraphComponentScene();
 
     static const int multisamples = 4;
 
@@ -129,12 +128,12 @@ private:
     void updateVisualData();
 
 private slots:
-    void onGraphChanged(const Graph& graph);
-    void onNodeWillBeRemoved(const Graph&, NodeId nodeId);
-    void onComponentAdded(const Graph&, ComponentId);
-    void onComponentWillBeRemoved(const Graph& graph, ComponentId componentId);
-    void onComponentSplit(const Graph& graph, ComponentId oldComponentId, const ElementIdSet<ComponentId>& splitters);
-    void onComponentsWillMerge(const Graph& graph, const ElementIdSet<ComponentId>& mergers, ComponentId merged);
+    void onGraphChanged(const Graph* graph);
+    void onNodeWillBeRemoved(const Graph*, NodeId nodeId);
+    void onComponentAdded(const Graph*, ComponentId);
+    void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId);
+    void onComponentSplit(const Graph* graph, ComponentId oldComponentId, const ElementIdSet<ComponentId>& splitters);
+    void onComponentsWillMerge(const Graph* graph, const ElementIdSet<ComponentId>& mergers, ComponentId merged);
 
 public slots:
     void onSelectionChanged(const SelectionManager& selectionManager);
@@ -149,15 +148,15 @@ private:
 
     ComponentId _focusComponentId;
     ComponentId _lastSplitterFocusComponentId;
-    ComponentArray<ComponentViewData>* _componentsViewData;
+    std::unique_ptr<ComponentArray<ComponentViewData>> _componentsViewData;
     ComponentViewData* focusComponentViewData() const;
 
     float _aspectRatio;
     Camera* _camera;
     Transition _panTransition;
 
-    Sphere* _sphere;
-    Cylinder* _cylinder;
+    Sphere _sphere;
+    Cylinder _cylinder;
 
     std::shared_ptr<GraphModel> _graphModel;
 

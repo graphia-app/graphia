@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+#include <memory>
+
 class QOpenGLContext;
 
 class Scene : public QObject
@@ -13,7 +15,7 @@ public:
     Scene(QObject* parent = nullptr) : QObject(parent) {}
     virtual ~Scene() {}
 
-    void setContext(QOpenGLContext* context) { _context = context; }
+    void setContext(std::shared_ptr<QOpenGLContext> context) { _context = context; }
     const QOpenGLContext& context() const { return *_context; }
 
     virtual void initialise() = 0;
@@ -23,7 +25,7 @@ public:
     virtual void resize(int w, int h) = 0;
 
 protected:
-    QOpenGLContext* _context;
+    std::shared_ptr<QOpenGLContext> _context;
 
 signals:
     void userInteractionStarted();

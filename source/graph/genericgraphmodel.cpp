@@ -3,37 +3,43 @@
 
 GenericGraphModel::GenericGraphModel(const QString &name) :
     _graph(),
-    _nodePositions(_graph),
-    _nodeVisuals(_graph),
-    _edgeVisuals(_graph),
     _name(name)
 {
-    connect(&_graph, &Graph::nodeAdded, this, &GenericGraphModel::onNodeAdded, Qt::DirectConnection);
-    connect(&_graph, &Graph::edgeAdded, this, &GenericGraphModel::onEdgeAdded, Qt::DirectConnection);
+    _graph = std::make_shared<Graph>();
+    _nodePositions = std::make_shared<NodePositions>(_graph);
+    _nodeVisuals = std::make_shared<NodeVisuals>(_graph);
+    _edgeVisuals = std::make_shared<EdgeVisuals>(_graph);
+
+    connect(_graph.get(), &Graph::nodeAdded, this, &GenericGraphModel::onNodeAdded, Qt::DirectConnection);
+    connect(_graph.get(), &Graph::edgeAdded, this, &GenericGraphModel::onEdgeAdded, Qt::DirectConnection);
 }
 
 const float NODE_SIZE = 0.6f;
 const float EDGE_SIZE = 0.1f;
 
-void GenericGraphModel::onNodeAdded(const Graph&, NodeId nodeId)
+void GenericGraphModel::onNodeAdded(const Graph*, NodeId nodeId)
 {
-    if(!_nodeVisuals[nodeId]._initialised)
+    auto& nodeVisuals = *_nodeVisuals;
+
+    if(!nodeVisuals[nodeId]._initialised)
     {
-        _nodeVisuals[nodeId]._size = NODE_SIZE + Utils::rand(-0.3f, 0.4f);
-        _nodeVisuals[nodeId]._color = Utils::randQColor();
-        _nodeVisuals[nodeId]._outlineColor.setAlphaF(0.0f);
-        _nodeVisuals[nodeId]._initialised = true;
+        nodeVisuals[nodeId]._size = NODE_SIZE + Utils::rand(-0.3f, 0.4f);
+        nodeVisuals[nodeId]._color = Utils::randQColor();
+        nodeVisuals[nodeId]._outlineColor.setAlphaF(0.0f);
+        nodeVisuals[nodeId]._initialised = true;
     }
 }
 
-void GenericGraphModel::onEdgeAdded(const Graph&, EdgeId edgeId)
+void GenericGraphModel::onEdgeAdded(const Graph*, EdgeId edgeId)
 {
-    if(!_edgeVisuals[edgeId]._initialised)
+    auto& edgeVisuals = *_edgeVisuals;
+
+    if(!edgeVisuals[edgeId]._initialised)
     {
-        _edgeVisuals[edgeId]._size = EDGE_SIZE + Utils::rand(-0.05f, 0.05f);
-        _edgeVisuals[edgeId]._color = Utils::randQColor();
-        _edgeVisuals[edgeId]._outlineColor.setAlphaF(0.0f);
-        _edgeVisuals[edgeId]._initialised = true;
+        edgeVisuals[edgeId]._size = EDGE_SIZE + Utils::rand(-0.05f, 0.05f);
+        edgeVisuals[edgeId]._color = Utils::randQColor();
+        edgeVisuals[edgeId]._outlineColor.setAlphaF(0.0f);
+        edgeVisuals[edgeId]._initialised = true;
     }
 }
 

@@ -8,19 +8,20 @@
 #include <QVector3D>
 
 #include <vector>
+#include <memory>
 
 class Collision
 {
 private:
-    const ReadOnlyGraph* _graph;
-    const NodeVisuals* _nodeVisuals;
-    const NodePositions* _nodePositions;
+    std::shared_ptr<const ReadOnlyGraph> _graph;
+    std::shared_ptr<const NodeVisuals> _nodeVisuals;
+    std::shared_ptr<const NodePositions> _nodePositions;
     QVector3D _offset;
 
 public:
-    Collision(const ReadOnlyGraph& graph, const NodeVisuals& nodeVisuals,
-              const NodePositions& nodePositions) :
-        _graph(&graph), _nodeVisuals(&nodeVisuals), _nodePositions(&nodePositions),
+    Collision(std::shared_ptr<const ReadOnlyGraph> graph, std::shared_ptr<const NodeVisuals> nodeVisuals,
+              std::shared_ptr<const NodePositions> nodePositions) :
+        _graph(graph), _nodeVisuals(nodeVisuals), _nodePositions(nodePositions),
         _offset(0.0f, 0.0f, 0.0f)
     {}
 

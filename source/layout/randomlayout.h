@@ -10,7 +10,8 @@ private:
     float _spread;
 
 public:
-    RandomLayout(const ReadOnlyGraph& graph, NodePositions& positions) :
+    RandomLayout(std::shared_ptr<const ReadOnlyGraph> graph,
+                 std::shared_ptr<NodePositions> positions) :
         NodeLayout(graph, positions), _spread(10.0f)
     {}
 

@@ -1,30 +1,25 @@
 #include "commandmanager.h"
 
+#include "../utils.h"
+
+#include <QDebug>
+
 CommandManager::CommandManager() :
     _lastExecutedIndex(-1)
 {}
 
-CommandManager::~CommandManager()
-{
-    while(!_stack.empty())
-        delete _stack.pop();
-}
-
-void CommandManager::execute(Command* command)
+void CommandManager::execute(std::unique_ptr<Command> command)
 {
     if(!command->execute())
-    {
-        delete command;
         return;
-    }
 
     while(canRedo())
     {
         // There are commands on the stack ahead of us; throw them away
-        delete _stack.pop();
+        _stack.pop_back();
     }
 
-    _stack.push(command);
+    _stack.push_back(std::move(command));
     _lastExecutedIndex = _stack.size() - 1;
 
     emit commandStackChanged(*this);
@@ -32,8 +27,7 @@ void CommandManager::execute(Command* command)
 
 void CommandManager::execute(const QString& description, std::function<bool()> executeFunction, std::function<void()> undoFunction)
 {
-    Command* command = new Command(description, executeFunction, undoFunction);
-    execute(command);
+    execute(std::make_unique<Command>(description, executeFunction, undoFunction));
 }
 
 void CommandManager::undo()
@@ -41,8 +35,7 @@ void CommandManager::undo()
     if(!canUndo())
         return;
 
-    Command* command = _stack.at(_lastExecutedIndex);
-    command->undo();
+    _stack.at(_lastExecutedIndex)->undo();
     _lastExecutedIndex--;
 
     emit commandStackChanged(*this);
@@ -54,8 +47,7 @@ void CommandManager::redo()
         return;
 
     _lastExecutedIndex++;
-    Command* command = _stack.at(_lastExecutedIndex);
-    command->execute();
+    _stack.at(_lastExecutedIndex)->execute();
 
     emit commandStackChanged(*this);
 }
@@ -67,31 +59,31 @@ bool CommandManager::canUndo() const
 
 bool CommandManager::canRedo() const
 {
-    return _lastExecutedIndex < _stack.size() - 1;
+    return _lastExecutedIndex < static_cast<int>(_stack.size()) - 1;
 }
 
-const std::vector<const Command*> CommandManager::undoableCommands() const
+const std::vector<QString> CommandManager::undoableCommandDescriptions() const
 {
-    std::vector<const Command*> commands;
+    std::vector<QString> commandDescriptions;
 
     if(canUndo())
     {
         for(int index = _lastExecutedIndex; index >= 0; index--)
-            commands.push_back(_stack.at(index));
+            commandDescriptions.push_back(_stack.at(index)->description());
     }
 
-    return commands;
+    return commandDescriptions;
 }
 
-const std::vector<const Command*> CommandManager::redoableCommands() const
+const std::vector<QString> CommandManager::redoableCommandDescriptions() const
 {
-    std::vector<const Command*> commands;
+    std::vector<QString> commandDescriptions;
 
     if(canRedo())
     {
-        for(int index = _lastExecutedIndex + 1; index < _stack.size(); index++)
-            commands.push_back(_stack.at(index));
+        for(int index = _lastExecutedIndex + 1; index < static_cast<int>(_stack.size()); index++)
+            commandDescriptions.push_back(_stack.at(index)->description());
     }
 
-    return commands;
+    return commandDescriptions;
 }
