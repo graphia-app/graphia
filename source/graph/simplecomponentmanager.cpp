@@ -112,11 +112,17 @@ void SimpleComponentManager::updateComponents(const Graph* graph)
     }
 
     // Search for removed components
+    ElementIdSet<ComponentId> componentIdsToBeRemoved;
     for(ComponentId componentId : _componentIdsList)
     {
         if(newComponentIdsList.find(componentId) != newComponentIdsList.end())
             continue;
 
+        componentIdsToBeRemoved.insert(componentId);
+    }
+
+    for(ComponentId componentId : componentIdsToBeRemoved)
+    {
         // Component removed
         emit componentWillBeRemoved(graph, componentId);
 
