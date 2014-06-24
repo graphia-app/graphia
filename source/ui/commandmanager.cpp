@@ -20,7 +20,7 @@ void CommandManager::execute(std::unique_ptr<Command> command)
     }
 
     _stack.push_back(std::move(command));
-    _lastExecutedIndex = _stack.size() - 1;
+    _lastExecutedIndex = static_cast<int>(_stack.size()) - 1;
 
     emit commandStackChanged(*this);
 }
