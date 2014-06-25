@@ -5,11 +5,10 @@
 #include "componentmanager.h"
 
 #include <QObject>
-#include <QMutex>
-#include <QMutexLocker>
 
 #include <memory>
 #include <vector>
+#include <mutex>
 
 class ResizableGraphArray
 {
@@ -23,21 +22,19 @@ template<typename Index, typename Element> class GraphArray : public ResizableGr
 protected:
     Graph& _graph;
     std::vector<Element> _array;
-    QMutex _mutex;
+    std::recursive_mutex _mutex;
     bool _flag; // Generic flag
     bool _invalid;
 
 public:
     GraphArray(Graph& graph) :
         _graph(graph),
-        _mutex(QMutex::Recursive),
         _flag(false),
         _invalid(false)
     {}
 
     GraphArray(const GraphArray& other) :
         _graph(other._graph),
-        _mutex(QMutex::Recursive),
         _flag(other._flag),
         _invalid(other._invalid)
     {
@@ -48,7 +45,6 @@ public:
     GraphArray(GraphArray&& other) :
         _graph(other._graph),
         _array(std::move(other._array)),
-        _mutex(QMutex::Recursive),
         _flag(other._flag),
         _invalid(other._invalid)
     {}
@@ -75,7 +71,7 @@ public:
         return *this;
     }
 
-    QMutex& mutex() { return _mutex; }
+    std::recursive_mutex& mutex() { return _mutex; }
     void lock() { _mutex.lock(); }
     void unlock() { _mutex.unlock(); }
 

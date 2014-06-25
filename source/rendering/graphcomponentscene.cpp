@@ -22,13 +22,12 @@
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLFunctions_3_2_Core>
 
-#include <QMutexLocker>
-
 #include <QKeyEvent>
 #include <QMouseEvent>
 
 #include <QtMath>
 #include <cmath>
+#include <mutex>
 
 GraphComponentScene::GraphComponentScene(QObject* parent)
     : Scene(parent),
@@ -270,7 +269,7 @@ void GraphComponentScene::update(float t)
     if(_graphModel)
     {
         NodePositions& nodePositions = _graphModel->nodePositions();
-        QMutexLocker mutexLocker(&nodePositions.mutex());
+        std::lock_guard<std::recursive_mutex> mutexLocker(nodePositions.mutex());
 
         auto component = _graphModel->graph().componentById(_focusComponentId);
 
