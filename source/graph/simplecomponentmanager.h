@@ -35,8 +35,8 @@ private:
     std::queue<ComponentId> _vacatedComponentIdQueue;
     std::map<ComponentId, std::shared_ptr<GraphComponent>> _componentsMap;
     ElementIdSet<ComponentId> _updatesRequired;
-    std::map<NodeId, ComponentId> _nodesComponentId;
-    std::map<EdgeId, ComponentId> _edgesComponentId;
+    NodeArray<ComponentId> _nodesComponentId;
+    EdgeArray<ComponentId> _edgesComponentId;
 
     ComponentId generateComponentId();
     void releaseComponentId(ComponentId componentId);
@@ -45,9 +45,11 @@ private:
     void removeGraphComponent(ComponentId componentId);
 
 public:
-    SimpleComponentManager(const Graph& graph) :
+    SimpleComponentManager(Graph& graph) :
         ComponentManager(graph),
-        _nextComponentId(0)
+        _nextComponentId(0),
+        _nodesComponentId(graph),
+        _edgesComponentId(graph)
     {}
 
 private:
@@ -64,8 +66,8 @@ private:
     void updateComponents(const Graph* graph);
     int componentArrayCapacity() const { return _nextComponentId; }
     ElementIdSet<ComponentId> assignConnectedElementsComponentId(const Graph* graph, NodeId rootId, ComponentId componentId,
-                                                                 std::map<NodeId, ComponentId>& nodesComponentId,
-                                                                 std::map<EdgeId, ComponentId>& edgesComponentId);
+                                                                 NodeArray<ComponentId>& nodesComponentId,
+                                                                 EdgeArray<ComponentId>& edgesComponentId);
 
 public:
     const std::vector<ComponentId>& componentIds() const;

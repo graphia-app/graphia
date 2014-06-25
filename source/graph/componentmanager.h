@@ -43,7 +43,7 @@ class ComponentManager : public QObject
     friend class Graph;
 
 public:
-    ComponentManager(const Graph& graph);
+    ComponentManager(Graph& graph);
     virtual ~ComponentManager();
 
 protected slots:

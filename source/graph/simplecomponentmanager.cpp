@@ -5,8 +5,8 @@
 
 ElementIdSet<ComponentId> SimpleComponentManager::assignConnectedElementsComponentId(const Graph* graph,
         NodeId rootId, ComponentId componentId,
-        std::map<NodeId, ComponentId>& nodesComponentId,
-        std::map<EdgeId, ComponentId>& edgesComponentId)
+        NodeArray<ComponentId>& nodesComponentId,
+        EdgeArray<ComponentId>& edgesComponentId)
 {
     std::queue<NodeId> nodeIdSearchList;
     ElementIdSet<ComponentId> oldComponentIdsAffected;
@@ -46,8 +46,8 @@ void SimpleComponentManager::updateComponents(const Graph* graph)
     std::map<ComponentId, ElementIdSet<ComponentId>> splitComponents;
     ElementIdSet<ComponentId> newComponentIds;
 
-    std::map<NodeId, ComponentId> newNodesComponentId;
-    std::map<EdgeId, ComponentId> newEdgesComponentId;
+    NodeArray<ComponentId> newNodesComponentId(*const_cast<Graph*>(graph));
+    EdgeArray<ComponentId> newEdgesComponentId(*const_cast<Graph*>(graph));
     ElementIdSet<ComponentId> newComponentIdsList;
 
     const std::vector<NodeId>& nodeIdsList = graph->nodeIds();

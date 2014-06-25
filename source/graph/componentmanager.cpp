@@ -1,7 +1,7 @@
 #include "componentmanager.h"
 #include "../graph/grapharray.h"
 
-ComponentManager::ComponentManager(const Graph& graph)
+ComponentManager::ComponentManager(Graph& graph)
 {
     connect(&graph, &Graph::nodeAdded, this, &ComponentManager::onNodeAdded, Qt::DirectConnection);
     connect(&graph, &Graph::nodeWillBeRemoved, this, &ComponentManager::onNodeWillBeRemoved, Qt::DirectConnection);
