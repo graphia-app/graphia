@@ -95,6 +95,12 @@ bool LayoutThread::paused()
 
 void LayoutThread::resume()
 {
+    if(!_started)
+    {
+        start();
+        return;
+    }
+
     std::lock_guard<std::mutex> locker(_mutex);
     if(!_paused)
         return;
@@ -112,6 +118,8 @@ void LayoutThread::execute()
 
 void LayoutThread::start()
 {
+    _started = true;
+    _paused = false;
     _thread = std::thread(&LayoutThread::run, this);
 }
 

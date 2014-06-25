@@ -127,6 +127,7 @@ protected:
     std::set<std::shared_ptr<Layout>> _layouts;
     std::mutex _mutex;
     std::thread _thread;
+    bool _started;
     bool _pause;
     bool _paused;
     bool _stop;
@@ -137,11 +138,11 @@ protected:
 
 public:
     LayoutThread(bool repeating = false) :
-        _pause(false), _paused(false), _stop(false), _repeating(repeating), _iteration(0)
+        _started(false), _pause(false), _paused(true), _stop(false), _repeating(repeating), _iteration(0)
     {}
 
     LayoutThread(std::shared_ptr<Layout> layout, bool repeating = false) :
-        _pause(false), _paused(false), _stop(false), _repeating(repeating), _iteration(0)
+        _started(false), _pause(false), _paused(true), _stop(false), _repeating(repeating), _iteration(0)
     {
         addLayout(layout);
     }
