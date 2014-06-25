@@ -51,9 +51,7 @@ public:
         _mutex(QMutex::Recursive),
         _flag(other._flag),
         _invalid(other._invalid)
-    {
-        qDebug() << _array.size() << other._array.size();
-    }
+    {}
 
     virtual ~GraphArray() {}
 
