@@ -9,7 +9,7 @@ ElementIdSet<NodeId> SelectionManager::selectedNodes() const
     Q_ASSERT(std::all_of(_selectedNodes.begin(), _selectedNodes.end(),
         [this](ElementId<NodeId> nodeId)
         {
-            auto& nodeIds = _graph->nodeIds();
+            auto& nodeIds = _graph.nodeIds();
             return std::find(nodeIds.begin(), nodeIds.end(), nodeId) != nodeIds.end();
         }));
 
@@ -18,7 +18,7 @@ ElementIdSet<NodeId> SelectionManager::selectedNodes() const
 
 ElementIdSet<NodeId> SelectionManager::unselectedNodes() const
 {
-    auto& nodeIds = _graph->nodeIds();
+    auto& nodeIds = _graph.nodeIds();
     auto unselectedNodeIds = ElementIdSet<NodeId>(nodeIds.begin(), nodeIds.end());
     unselectedNodeIds.erase(_selectedNodes.begin(), _selectedNodes.end());
 
@@ -110,9 +110,9 @@ template<typename InputIterator> void SelectionManager::toggleNodes(InputIterato
 
 bool SelectionManager::nodeIsSelected(NodeId nodeId) const
 {
-    Q_ASSERT(std::find(_graph->nodeIds().begin(),
-                       _graph->nodeIds().end(),
-                       nodeId) != _graph->nodeIds().end());
+    Q_ASSERT(std::find(_graph.nodeIds().begin(),
+                       _graph.nodeIds().end(),
+                       nodeId) != _graph.nodeIds().end());
     return _selectedNodes.find(nodeId) != _selectedNodes.end();
 }
 
@@ -129,7 +129,7 @@ bool SelectionManager::setSelectedNodes(const ElementIdSet<NodeId>& nodeIds)
 
 bool SelectionManager::selectAllNodes()
 {
-    auto& nodeIds = _graph->nodeIds();
+    auto& nodeIds = _graph.nodeIds();
     return selectNodes(nodeIds.begin(), nodeIds.end());
 }
 
@@ -146,6 +146,6 @@ bool SelectionManager::clearNodeSelection()
 
 void SelectionManager::invertNodeSelection()
 {
-    auto& nodeIds = _graph->nodeIds();
+    auto& nodeIds = _graph.nodeIds();
     toggleNodes(nodeIds.begin(), nodeIds.end());
 }

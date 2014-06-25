@@ -83,25 +83,25 @@ class NodeLayout : public Layout
 {
     Q_OBJECT
 protected:
-    std::shared_ptr<const ReadOnlyGraph> _graph;
-    std::shared_ptr<NodePositions> _positions;
+    const ReadOnlyGraph& _graph;
+    NodePositions& _positions;
 
 public:
-    NodeLayout(std::shared_ptr<const ReadOnlyGraph> graph,
-               std::shared_ptr<NodePositions> positions,
+    NodeLayout(const ReadOnlyGraph& graph,
+               NodePositions& positions,
                Iterative iterative = Iterative::No) :
         Layout(iterative),
         _graph(graph),
         _positions(positions)
     {}
 
-    static BoundingBox3D boundingBox(std::shared_ptr<const ReadOnlyGraph> graph, std::shared_ptr<const NodePositions> positions);
+    static BoundingBox3D boundingBox(const ReadOnlyGraph& graph, const NodePositions& positions);
     BoundingBox3D boundingBox() const;
-    static BoundingBox2D boundingBoxInXY(std::shared_ptr<const ReadOnlyGraph> graph, std::shared_ptr<const NodePositions> positions);
+    static BoundingBox2D boundingBoxInXY(const ReadOnlyGraph& graph, const NodePositions& positions);
 
-    static BoundingSphere boundingSphere(std::shared_ptr<const ReadOnlyGraph> graph, std::shared_ptr<const NodePositions> positions);
+    static BoundingSphere boundingSphere(const ReadOnlyGraph& graph, const NodePositions& positions);
     BoundingSphere boundingSphere() const;
-    static float boundingCircleRadiusInXY(std::shared_ptr<const ReadOnlyGraph> graph, std::shared_ptr<const NodePositions> positions);
+    static float boundingCircleRadiusInXY(const ReadOnlyGraph& graph, const NodePositions& positions);
 };
 
 class GraphModel;
@@ -116,8 +116,6 @@ public:
         _graphModel(graphModel)
     {}
     virtual ~NodeLayoutFactory() {}
-
-    const GraphModel& graphModel() const { return *_graphModel; }
 
     virtual std::shared_ptr<NodeLayout> create(ComponentId componentId) const = 0;
 };

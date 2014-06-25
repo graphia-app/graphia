@@ -191,8 +191,8 @@ void SimpleComponentManager::updateGraphComponent(const Graph* graph, ComponentI
 {
     std::shared_ptr<GraphComponent> graphComponent = _componentsMap[componentId];
 
-    std::vector<NodeId>& nodeIdsList = graphComponentNodeIdsList(graphComponent);
-    std::vector<EdgeId>& edgeIdsList = graphComponentEdgeIdsList(graphComponent);
+    std::vector<NodeId>& nodeIdsList = graphComponentNodeIdsList(*graphComponent);
+    std::vector<EdgeId>& edgeIdsList = graphComponentEdgeIdsList(*graphComponent);
 
     nodeIdsList.clear();
     const std::vector<NodeId>& nodeIds = graph->nodeIds();
@@ -237,10 +237,10 @@ const std::vector<ComponentId>& SimpleComponentManager::componentIds() const
     return _componentIdsList;
 }
 
-std::shared_ptr<const GraphComponent> SimpleComponentManager::componentById(ComponentId componentId)
+const GraphComponent* SimpleComponentManager::componentById(ComponentId componentId)
 {
     if(_componentsMap.find(componentId) != _componentsMap.end())
-        return _componentsMap[componentId];
+        return _componentsMap[componentId].get();
 
     Q_ASSERT(nullptr);
     return nullptr;

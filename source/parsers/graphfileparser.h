@@ -93,12 +93,12 @@ class GraphFileParserThread : public QObject
     Q_OBJECT
 private:
     QString _filename;
-    std::shared_ptr<Graph> _graph;
+    Graph& _graph;
     std::unique_ptr<GraphFileParser> _graphFileParser;
     std::thread _thread;
 
 public:
-    GraphFileParserThread(const QString& filename, std::shared_ptr<Graph> graph, std::unique_ptr<GraphFileParser> graphFileParser);
+    GraphFileParserThread(const QString& filename, Graph& graph, std::unique_ptr<GraphFileParser> graphFileParser);
     virtual ~GraphFileParserThread();
 
     void start();

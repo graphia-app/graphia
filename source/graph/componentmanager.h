@@ -43,19 +43,8 @@ class ComponentManager : public QObject
     friend class Graph;
 
 public:
-    ComponentManager(const Graph& graph)
-    {
-        connect(&graph, &Graph::nodeAdded, this, &ComponentManager::onNodeAdded, Qt::DirectConnection);
-        connect(&graph, &Graph::nodeWillBeRemoved, this, &ComponentManager::onNodeWillBeRemoved, Qt::DirectConnection);
-        connect(&graph, &Graph::edgeAdded, this, &ComponentManager::onEdgeAdded, Qt::DirectConnection);
-        connect(&graph, &Graph::edgeWillBeRemoved, this, &ComponentManager::onEdgeWillBeRemoved, Qt::DirectConnection);
-        connect(&graph, &Graph::graphChanged, this, &ComponentManager::onGraphChanged, Qt::DirectConnection);
-
-        connect(this, &ComponentManager::componentAdded, &graph, &Graph::componentAdded, Qt::DirectConnection);
-        connect(this, &ComponentManager::componentWillBeRemoved, &graph, &Graph::componentWillBeRemoved, Qt::DirectConnection);
-        connect(this, &ComponentManager::componentSplit, &graph, &Graph::componentSplit, Qt::DirectConnection);
-        connect(this, &ComponentManager::componentsWillMerge, &graph, &Graph::componentsWillMerge, Qt::DirectConnection);
-    }
+    ComponentManager(const Graph& graph);
+    virtual ~ComponentManager();
 
 protected slots:
     virtual void onNodeAdded(const Graph*, NodeId nodeId) = 0;
@@ -71,22 +60,20 @@ protected:
     std::unordered_set<ResizableGraphArray*> _componentArrayList;
     virtual int componentArrayCapacity() const = 0;
 
-    std::vector<NodeId>& graphComponentNodeIdsList(std::shared_ptr<GraphComponent> graphComponent)
+    std::vector<NodeId>& graphComponentNodeIdsList(GraphComponent& graphComponent)
     {
-        Q_ASSERT(graphComponent.get() != nullptr);
-        return graphComponent->_nodeIdsList;
+        return graphComponent._nodeIdsList;
     }
 
-    std::vector<EdgeId>& graphComponentEdgeIdsList(std::shared_ptr<GraphComponent> graphComponent)
+    std::vector<EdgeId>& graphComponentEdgeIdsList(GraphComponent& graphComponent)
     {
-        Q_ASSERT(graphComponent.get() != nullptr);
-        return graphComponent->_edgeIdsList;
+        return graphComponent._edgeIdsList;
     }
 
 public:
     virtual const std::vector<ComponentId>& componentIds() const = 0;
     int numComponents() const { return static_cast<int>(componentIds().size()); }
-    virtual std::shared_ptr<const GraphComponent> componentById(ComponentId componentId) = 0;
+    virtual const GraphComponent* componentById(ComponentId componentId) = 0;
     virtual ComponentId componentIdOfNode(NodeId nodeId) const = 0;
     virtual ComponentId componentIdOfEdge(EdgeId edgeId) const = 0;
 

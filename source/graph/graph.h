@@ -289,8 +289,8 @@ public:
     const std::vector<ComponentId>& componentIds() const;
     ComponentId firstComponentId() const { return *componentIds().begin(); }
     int numComponents() const;
-    std::shared_ptr<const ReadOnlyGraph> componentById(ComponentId componentId) const;
-    std::shared_ptr<const ReadOnlyGraph> firstComponent() const { return componentById(firstComponentId()); }
+    const ReadOnlyGraph* componentById(ComponentId componentId) const;
+    const ReadOnlyGraph* firstComponent() const { return componentById(firstComponentId()); }
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
 

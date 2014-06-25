@@ -46,14 +46,12 @@ void EadesLayout::executeReal(uint64_t iteration)
         randomLayout.execute(iteration);
     }
 
-    auto& positions = *_positions;
+    _moves.resize(_positions.size());
 
-    _moves.resize(positions.size());
+    const std::vector<NodeId>& nodeIds = _graph.nodeIds();
+    const std::vector<EdgeId>& edgeIds = _graph.edgeIds();
 
-    const std::vector<NodeId>& nodeIds = _graph->nodeIds();
-    const std::vector<EdgeId>& edgeIds = _graph->edgeIds();
-
-    for(NodeId i : _graph->nodeIds())
+    for(NodeId i : _graph.nodeIds())
         _moves[i] = QVector3D(0.0f, 0.0f, 0.0f);
 
     int numNodes = static_cast<int>(nodeIds.size());
@@ -70,7 +68,7 @@ void EadesLayout::executeReal(uint64_t iteration)
             {
                 NodeId nodeAId = nodeIds[i];
                 NodeId nodeBId = nodeIds[j];
-                QVector3D difference = positions[nodeBId] - positions[nodeAId];
+                QVector3D difference = _positions[nodeBId] - _positions[nodeAId];
                 float x = difference.x(); float y = difference.y(); float z = difference.z();
                 float distance = x * x + y * y + z * z;
                 float force = REPULSE_SQ(distance);
@@ -88,10 +86,10 @@ void EadesLayout::executeReal(uint64_t iteration)
         if(shouldCancel())
             return;
 
-        const Edge& edge = _graph->edgeById(edgeId);
+        const Edge& edge = _graph.edgeById(edgeId);
         if(!edge.isLoop())
         {
-            QVector3D difference = positions[edge.targetId()] - positions[edge.sourceId()];
+            QVector3D difference = _positions[edge.targetId()] - _positions[edge.sourceId()];
             qreal distance = difference.length();
 
             if(distance > 0.0f)
@@ -104,11 +102,11 @@ void EadesLayout::executeReal(uint64_t iteration)
         }
     }
 
-    positions.lock();
+    _positions.lock();
     // Apply the moves
     for(NodeId nodeId : nodeIds)
-        positions[nodeId] += (_moves[nodeId] * 0.1f); //FIXME not sure what this constant is about, damping?
-    positions.unlock();
+        _positions[nodeId] += (_moves[nodeId] * 0.1f); //FIXME not sure what this constant is about, damping?
+    _positions.unlock();
 
     emit changed();
 }

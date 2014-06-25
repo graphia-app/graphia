@@ -18,7 +18,12 @@ Graph::Graph() :
 
 Graph::~Graph()
 {
-    // Defined so we can use smart pointers to incomplete types in the header
+    // Let the GraphArrays know that we're going away
+    for(auto nodeArray : _nodeArrayList)
+        nodeArray->invalidate();
+
+    for(auto edgeArray : _edgeArrayList)
+        edgeArray->invalidate();
 }
 
 void Graph::clear()
@@ -242,7 +247,7 @@ int Graph::numComponents() const
     return 0;
 }
 
-std::shared_ptr<const ReadOnlyGraph> Graph::componentById(ComponentId componentId) const
+const ReadOnlyGraph* Graph::componentById(ComponentId componentId) const
 {
     if(_componentManager)
         return _componentManager->componentById(componentId);

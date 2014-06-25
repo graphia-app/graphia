@@ -49,9 +49,7 @@ void GraphComponentInteractor::mousePressEvent(QMouseEvent* mouseEvent)
 
     Ray ray = _scene->camera()->rayForViewportCoordinates(_cursorPosition.x(), _cursorPosition.y());
 
-    auto component = _graphModel->graph()->componentById(_scene->focusComponentId());
-
-    Collision collision(component, _graphModel->nodeVisuals(), _graphModel->nodePositions());
+    Collision collision(*_graphModel, _scene->focusComponentId());
     _clickedNodeId = collision.nearestNodeIntersectingLine(ray.origin(), ray.dir());
 
     switch(mouseEvent->button())
@@ -118,10 +116,10 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
 
                 ElementIdSet<NodeId> selection;
 
-                std::shared_ptr<const ReadOnlyGraph> component = _graphModel->graph()->componentById(_scene->focusComponentId());
+                auto component = _graphModel->graph().componentById(_scene->focusComponentId());
                 for(NodeId nodeId : component->nodeIds())
                 {
-                    const QVector3D& nodePosition = _graphModel->nodePositions()->at(nodeId);
+                    const QVector3D& nodePosition = _graphModel->nodePositions().at(nodeId);
                     if(frustum.containsPoint(nodePosition))
                         selection.insert(nodeId);
                 }
@@ -224,7 +222,7 @@ void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
         {
             emit userInteractionStarted();
 
-            const QVector3D& clickedNodePosition = _graphModel->nodePositions()->at(_clickedNodeId);
+            const QVector3D& clickedNodePosition = _graphModel->nodePositions().at(_clickedNodeId);
 
             Plane translationPlane(clickedNodePosition, camera->viewVector().normalized());
 
@@ -247,8 +245,8 @@ void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
             {
                 emit userInteractionStarted();
 
-                const QVector3D& clickedNodePosition = _graphModel->nodePositions()->at(_clickedNodeId);
-                const QVector3D& rotationCentre = _graphModel->nodePositions()->at(_scene->focusNodeId());
+                const QVector3D& clickedNodePosition = _graphModel->nodePositions().at(_clickedNodeId);
+                const QVector3D& rotationCentre = _graphModel->nodePositions().at(_scene->focusNodeId());
                 float radius = clickedNodePosition.distanceToPoint(rotationCentre);
 
                 BoundingSphere boundingSphere(rotationCentre, radius);

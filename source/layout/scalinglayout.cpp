@@ -2,12 +2,10 @@
 
 void ScalingLayout::executeReal(uint64_t)
 {
-    auto& positions = *_positions;
-
-    positions.lock();
-    for(NodeId nodeId : _graph->nodeIds())
-        positions[nodeId] = positions[nodeId] * _scale;
-    positions.unlock();
+    _positions.lock();
+    for(NodeId nodeId : _graph.nodeIds())
+        _positions[nodeId] = _positions[nodeId] * _scale;
+    _positions.unlock();
 
     emit changed();
 }

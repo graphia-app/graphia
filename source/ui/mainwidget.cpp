@@ -43,12 +43,12 @@ bool MainWidget::initFromFile(const QString& filename)
         /*break;
     }*/
 
-    connect(_graphModel->graph().get(), &Graph::graphWillChange, this, &MainWidget::onGraphWillChange, Qt::DirectConnection);
-    connect(_graphModel->graph().get(), &Graph::graphChanged, this, &MainWidget::onGraphChanged, Qt::DirectConnection);
-    connect(_graphModel->graph().get(), &Graph::componentAdded, this, &MainWidget::onComponentAdded, Qt::DirectConnection);
-    connect(_graphModel->graph().get(), &Graph::componentWillBeRemoved, this, &MainWidget::onComponentWillBeRemoved, Qt::DirectConnection);
-    connect(_graphModel->graph().get(), &Graph::componentSplit, this, &MainWidget::onComponentSplit, Qt::DirectConnection);
-    connect(_graphModel->graph().get(), &Graph::componentsWillMerge, this, &MainWidget::onComponentsWillMerge, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::graphWillChange, this, &MainWidget::onGraphWillChange, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::graphChanged, this, &MainWidget::onGraphChanged, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::componentAdded, this, &MainWidget::onComponentAdded, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::componentWillBeRemoved, this, &MainWidget::onComponentWillBeRemoved, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::componentSplit, this, &MainWidget::onComponentSplit, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::componentsWillMerge, this, &MainWidget::onComponentsWillMerge, Qt::DirectConnection);
 
     _graphFileParserThread = std::make_unique<GraphFileParserThread>(filename, _graphModel->graph(), std::move(graphFileParser));
     connect(_graphFileParserThread.get(), &GraphFileParserThread::progress, this, &MainWidget::progress);
@@ -61,7 +61,7 @@ bool MainWidget::initFromFile(const QString& filename)
 void MainWidget::onCompletion(int success)
 {
     _nodeLayoutThread = std::make_unique<NodeLayoutThread>(std::make_unique<EadesLayoutFactory>(_graphModel));
-    _nodeLayoutThread->addAllComponents(*_graphModel->graph());
+    _nodeLayoutThread->addAllComponents(_graphModel->graph());
     _nodeLayoutThread->start();
 
     _selectionManager = std::make_shared<SelectionManager>(_graphModel->graph());
@@ -222,7 +222,7 @@ const QString MainWidget::nextRedoAction() const
 
 void MainWidget::deleteSelectedNodes()
 {
-    auto edges = _graphModel->graph()->edgesForNodes(_selectionManager->selectedNodes());
+    auto edges = _graphModel->graph().edgesForNodes(_selectionManager->selectedNodes());
     auto nodes = _selectionManager->selectedNodes();
 
     if(nodes.empty())
@@ -233,12 +233,12 @@ void MainWidget::deleteSelectedNodes()
         {
             _selectionManager->clearNodeSelection();
             // Edge removal happens implicitly
-            _graphModel->graph()->removeNodes(nodes);
+            _graphModel->graph().removeNodes(nodes);
             return true;
         },
         [this, nodes, edges]
         {
-            _graphModel->graph()->performTransaction(
+            _graphModel->graph().performTransaction(
                 [&nodes, &edges](Graph& graph)
                 {
                     graph.addNodes(nodes);

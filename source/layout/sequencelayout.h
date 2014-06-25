@@ -13,13 +13,13 @@ private:
     std::vector<NodeLayout*> _subLayouts;
 
 public:
-    SequenceLayout(std::shared_ptr<const ReadOnlyGraph> graph,
-                   std::shared_ptr<NodePositions> positions) :
+    SequenceLayout(const ReadOnlyGraph& graph,
+                   NodePositions& positions) :
         NodeLayout(graph, positions)
     {}
 
-    SequenceLayout(std::shared_ptr<const ReadOnlyGraph> graph,
-                   std::shared_ptr<NodePositions> positions,
+    SequenceLayout(const ReadOnlyGraph& graph,
+                   NodePositions& positions,
                    std::vector<NodeLayout*> subLayouts) :
         NodeLayout(graph, positions), _subLayouts(subLayouts)
     {}

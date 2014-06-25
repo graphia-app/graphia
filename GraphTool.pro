@@ -50,7 +50,8 @@ SOURCES += \
     source/ui/graphcomponentinteractor.cpp \
     source/ui/graphwidget.cpp \
     source/ui/mainwidget.cpp \
-    source/parsers/graphfileparser.cpp
+    source/parsers/graphfileparser.cpp \
+    source/graph/componentmanager.cpp
 
 HEADERS += \
     source/rendering/camera.h \

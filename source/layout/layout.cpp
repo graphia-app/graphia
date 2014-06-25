@@ -1,10 +1,10 @@
 #include "layout.h"
 
-BoundingBox3D NodeLayout::boundingBox(std::shared_ptr<const ReadOnlyGraph> graph, std::shared_ptr<const NodePositions> positions)
+BoundingBox3D NodeLayout::boundingBox(const ReadOnlyGraph& graph, const NodePositions& positions)
 {
     std::vector<QVector3D> graphPositions;
-    for(NodeId nodeId : graph->nodeIds())
-        graphPositions.push_back((*positions)[nodeId]);
+    for(NodeId nodeId : graph.nodeIds())
+        graphPositions.push_back(positions.at(nodeId));
 
     return BoundingBox3D(graphPositions);
 }
@@ -14,7 +14,7 @@ BoundingBox3D NodeLayout::boundingBox() const
     return NodeLayout::boundingBox(_graph, _positions);
 }
 
-BoundingBox2D NodeLayout::boundingBoxInXY(std::shared_ptr<const ReadOnlyGraph> graph, std::shared_ptr<const NodePositions> positions)
+BoundingBox2D NodeLayout::boundingBoxInXY(const ReadOnlyGraph& graph, const NodePositions& positions)
 {
     BoundingBox3D boundingBox = NodeLayout::boundingBox(graph, positions);
 
@@ -28,13 +28,13 @@ BoundingSphere NodeLayout::boundingSphere() const
     return NodeLayout::boundingSphere(_graph, _positions);
 }
 
-float NodeLayout::boundingCircleRadiusInXY(std::shared_ptr<const ReadOnlyGraph> graph, std::shared_ptr<const NodePositions> positions)
+float NodeLayout::boundingCircleRadiusInXY(const ReadOnlyGraph& graph, const NodePositions& positions)
 {
     BoundingBox3D boundingBox = NodeLayout::boundingBox(graph, positions);
     return std::max(boundingBox.xLength(), boundingBox.yLength()) * 0.5f * std::sqrt(2.0f);
 }
 
-BoundingSphere NodeLayout::boundingSphere(std::shared_ptr<const ReadOnlyGraph> graph, std::shared_ptr<const NodePositions> positions)
+BoundingSphere NodeLayout::boundingSphere(const ReadOnlyGraph& graph, const NodePositions& positions)
 {
     BoundingBox3D boundingBox = NodeLayout::boundingBox(graph, positions);
     BoundingSphere boundingSphere(

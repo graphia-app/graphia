@@ -17,10 +17,10 @@ private:
     std::vector<QVector3D> _moves;
 
 public:
-    EadesLayout(std::shared_ptr<const ReadOnlyGraph> graph,
-                std::shared_ptr<NodePositions> positions) :
+    EadesLayout(const ReadOnlyGraph& graph,
+                NodePositions& positions) :
         NodeLayout(graph, positions, Iterative::Yes),
-        _moves(graph->numNodes())
+        _moves(graph.numNodes())
     {}
 
     void executeReal(uint64_t iteration);
@@ -35,8 +35,8 @@ public:
 
     std::shared_ptr<NodeLayout> create(ComponentId componentId) const
     {
-        auto graph = this->_graphModel->graph()->componentById(componentId);
-        return std::make_shared<EadesLayout>(graph, this->_graphModel->nodePositions());
+        auto component = this->_graphModel->graph().componentById(componentId);
+        return std::make_shared<EadesLayout>(*component, this->_graphModel->nodePositions());
     }
 };
 

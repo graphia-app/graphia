@@ -7,8 +7,8 @@ class CentreingLayout : public NodeLayout
 {
     Q_OBJECT
 public:
-    CentreingLayout(std::shared_ptr<const ReadOnlyGraph> graph,
-                    std::shared_ptr<NodePositions> positions) :
+    CentreingLayout(const ReadOnlyGraph& graph,
+                    NodePositions& positions) :
         NodeLayout(graph, positions)
     {}
 

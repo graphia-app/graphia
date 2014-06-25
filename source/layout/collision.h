@@ -13,15 +13,14 @@
 class Collision
 {
 private:
-    std::shared_ptr<const ReadOnlyGraph> _graph;
-    std::shared_ptr<const NodeVisuals> _nodeVisuals;
-    std::shared_ptr<const NodePositions> _nodePositions;
+    const GraphModel& _graphModel;
+    ComponentId _componentId;
     QVector3D _offset;
 
 public:
-    Collision(std::shared_ptr<const ReadOnlyGraph> graph, std::shared_ptr<const NodeVisuals> nodeVisuals,
-              std::shared_ptr<const NodePositions> nodePositions) :
-        _graph(graph), _nodeVisuals(nodeVisuals), _nodePositions(nodePositions),
+    Collision(const GraphModel& graphModel, ComponentId componentId) :
+        _graphModel(graphModel),
+        _componentId(componentId),
         _offset(0.0f, 0.0f, 0.0f)
     {}
 

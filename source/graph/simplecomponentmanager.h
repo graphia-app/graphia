@@ -69,7 +69,7 @@ private:
 
 public:
     const std::vector<ComponentId>& componentIds() const;
-    std::shared_ptr<const GraphComponent> componentById(ComponentId componentId);
+    const GraphComponent* componentById(ComponentId componentId);
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
 };

@@ -11,7 +11,7 @@ class SelectionManager : public QObject
 {
     Q_OBJECT
 public:
-    SelectionManager(std::shared_ptr<const ReadOnlyGraph> graph) : QObject(), _graph(graph) {}
+    SelectionManager(const ReadOnlyGraph& graph) : QObject(), _graph(graph) {}
 
     ElementIdSet<NodeId> selectedNodes() const;
     ElementIdSet<NodeId> unselectedNodes() const;
@@ -40,7 +40,7 @@ public:
     void invertNodeSelection();
 
 private:
-    std::shared_ptr<const ReadOnlyGraph> _graph;
+    const ReadOnlyGraph& _graph;
 
     ElementIdSet<NodeId> _selectedNodes;
 

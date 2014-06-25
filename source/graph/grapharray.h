@@ -15,26 +15,31 @@ class ResizableGraphArray
 {
 public:
     virtual void resize(int size) = 0;
+    virtual void invalidate() = 0;
 };
 
 template<typename Index, typename Element> class GraphArray : public ResizableGraphArray
 {
 protected:
-    std::shared_ptr<Graph> _graph;
+    Graph& _graph;
     std::vector<Element> _array;
     QMutex _mutex;
     bool _flag; // Generic flag
+    bool _invalid;
 
 public:
-    GraphArray(std::shared_ptr<Graph> graph) :
+    GraphArray(Graph& graph) :
         _graph(graph),
         _mutex(QMutex::Recursive),
-        _flag(false)
+        _flag(false),
+        _invalid(false)
     {}
+
     GraphArray(const GraphArray& other) :
         _graph(other._graph),
         _mutex(QMutex::Recursive),
-        _flag(other._flag)
+        _flag(other._flag),
+        _invalid(other._invalid)
     {
         for(auto e : other._array)
             _array.push_back(e);
@@ -44,7 +49,7 @@ public:
 
     GraphArray& operator=(const GraphArray& other)
     {
-        Q_ASSERT(_graph.get() == other._graph.get());
+        Q_ASSERT(&_graph == &other._graph);
         _array = other._array;
         _flag = other._flag;
 
@@ -58,6 +63,8 @@ public:
     bool flagged() { return _flag; }
     void flag() { _flag = true; }
     void resetFlag() { _flag = false; }
+
+    void invalidate() { _invalid = true; }
 
     Element& operator[](Index index)
     {
@@ -119,63 +126,66 @@ public:
 template<typename Element> class NodeArray : public GraphArray<NodeId, Element>
 {
 public:
-    NodeArray(std::shared_ptr<Graph> graph) :
+    NodeArray(Graph& graph) :
         GraphArray<NodeId, Element>(graph)
     {
-        this->resize(graph->nodeArrayCapacity());
-        graph->_nodeArrayList.insert(this);
+        this->resize(graph.nodeArrayCapacity());
+        graph._nodeArrayList.insert(this);
     }
 
     NodeArray(const NodeArray& other) : GraphArray<NodeId, Element>(other)
     {
-        this->_graph->_nodeArrayList.insert(this);
+        this->_graph._nodeArrayList.insert(this);
     }
 
     ~NodeArray()
     {
-        this->_graph->_nodeArrayList.erase(this);
+        if(!this->_invalid)
+            this->_graph._nodeArrayList.erase(this);
     }
 };
 
 template<typename Element> class EdgeArray : public GraphArray<EdgeId, Element>
 {
 public:
-    EdgeArray(std::shared_ptr<Graph> graph) :
+    EdgeArray(Graph& graph) :
         GraphArray<EdgeId, Element>(graph)
     {
-        this->resize(graph->edgeArrayCapacity());
-        graph->_edgeArrayList.insert(this);
+        this->resize(graph.edgeArrayCapacity());
+        graph._edgeArrayList.insert(this);
     }
 
     EdgeArray(const EdgeArray& other) : GraphArray<EdgeId, Element>(other)
     {
-        this->_graph->_edgeArrayList.insert(this);
+        this->_graph._edgeArrayList.insert(this);
     }
 
     ~EdgeArray()
     {
-        this->_graph->_edgeArrayList.erase(this);
+        if(!this->_invalid)
+            this->_graph._edgeArrayList.erase(this);
     }
 };
 
 template<typename Element> class ComponentArray : public GraphArray<ComponentId, Element>
 {
 public:
-    ComponentArray(std::shared_ptr<Graph> graph) :
+    ComponentArray(Graph& graph) :
         GraphArray<ComponentId, Element>(graph)
     {
-        this->resize(graph->_componentManager->componentArrayCapacity());
-        graph->_componentManager->_componentArrayList.insert(this);
+        this->resize(graph._componentManager->componentArrayCapacity());
+        graph._componentManager->_componentArrayList.insert(this);
     }
 
     ComponentArray(const ComponentArray& other) : GraphArray<ComponentId, Element>(other)
     {
-        this->_graph->_componentManager->_componentArrayList.insert(this);
+        this->_graph._componentManager->_componentArrayList.insert(this);
     }
 
     ~ComponentArray()
     {
-        this->_graph->_componentManager->_componentArrayList.erase(this);
+        if(!this->_invalid)
+            this->_graph._componentManager->_componentArrayList.erase(this);
     }
 };
 
