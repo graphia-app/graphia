@@ -45,6 +45,16 @@ public:
             _array.push_back(e);
     }
 
+    GraphArray(GraphArray&& other) :
+        _graph(other._graph),
+        _array(std::move(other._array)),
+        _mutex(QMutex::Recursive),
+        _flag(other._flag),
+        _invalid(other._invalid)
+    {
+        qDebug() << _array.size() << other._array.size();
+    }
+
     virtual ~GraphArray() {}
 
     GraphArray& operator=(const GraphArray& other)
@@ -52,6 +62,17 @@ public:
         Q_ASSERT(&_graph == &other._graph);
         _array = other._array;
         _flag = other._flag;
+        _invalid = other._invalid;
+
+        return *this;
+    }
+
+    GraphArray& operator=(GraphArray&& other)
+    {
+        Q_ASSERT(&_graph == &other._graph);
+        _array = std::move(other._array);
+        _flag = other._flag;
+        _invalid = other._invalid;
 
         return *this;
     }
@@ -138,6 +159,23 @@ public:
         this->_graph._nodeArrayList.insert(this);
     }
 
+    NodeArray(NodeArray&& other) : GraphArray<NodeId, Element>(std::move(other))
+    {
+        this->_graph._nodeArrayList.insert(this);
+    }
+
+    NodeArray& operator=(const NodeArray& other)
+    {
+        GraphArray<NodeId, Element>::operator=(other);
+        return *this;
+    }
+
+    NodeArray& operator=(NodeArray&& other)
+    {
+        GraphArray<NodeId, Element>::operator=(std::move(other));
+        return *this;
+    }
+
     ~NodeArray()
     {
         if(!this->_invalid)
@@ -160,6 +198,23 @@ public:
         this->_graph._edgeArrayList.insert(this);
     }
 
+    EdgeArray(EdgeArray&& other) : GraphArray<EdgeId, Element>(std::move(other))
+    {
+        this->_graph._edgeArrayList.insert(this);
+    }
+
+    EdgeArray& operator=(const EdgeArray& other)
+    {
+        GraphArray<EdgeId, Element>::operator=(other);
+        return *this;
+    }
+
+    EdgeArray& operator=(EdgeArray&& other)
+    {
+        GraphArray<EdgeId, Element>::operator=(std::move(other));
+        return *this;
+    }
+
     ~EdgeArray()
     {
         if(!this->_invalid)
@@ -180,6 +235,23 @@ public:
     ComponentArray(const ComponentArray& other) : GraphArray<ComponentId, Element>(other)
     {
         this->_graph._componentManager->_componentArrayList.insert(this);
+    }
+
+    ComponentArray(ComponentArray&& other) : GraphArray<ComponentId, Element>(std::move(other))
+    {
+        this->_graph._componentManager->_componentArrayList.insert(this);
+    }
+
+    ComponentArray& operator=(const ComponentArray& other)
+    {
+        GraphArray<ComponentId, Element>::operator=(other);
+        return *this;
+    }
+
+    ComponentArray& operator=(ComponentArray&& other)
+    {
+        GraphArray<ComponentId, Element>::operator=(std::move(other));
+        return *this;
     }
 
     ~ComponentArray()
