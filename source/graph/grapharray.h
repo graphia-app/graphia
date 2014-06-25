@@ -20,53 +20,47 @@ public:
 template<typename Index, typename Element> class GraphArray : public ResizableGraphArray
 {
 protected:
-    Graph& _graph;
+    Graph* _graph;
     std::vector<Element> _array;
     std::recursive_mutex _mutex;
     bool _flag; // Generic flag
-    bool _invalid;
 
 public:
     GraphArray(Graph& graph) :
-        _graph(graph),
-        _flag(false),
-        _invalid(false)
+        _graph(&graph),
+        _flag(false)
     {}
 
     GraphArray(const GraphArray& other) :
-        _graph(other._graph),
-        _flag(other._flag),
-        _invalid(other._invalid)
+        _graph(&other._graph),
+        _flag(other._flag)
     {
         for(auto e : other._array)
             _array.push_back(e);
     }
 
     GraphArray(GraphArray&& other) :
-        _graph(other._graph),
+        _graph(&other._graph),
         _array(std::move(other._array)),
-        _flag(other._flag),
-        _invalid(other._invalid)
+        _flag(other._flag)
     {}
 
     virtual ~GraphArray() {}
 
     GraphArray& operator=(const GraphArray& other)
     {
-        Q_ASSERT(&_graph == &other._graph);
+        Q_ASSERT(_graph == other._graph);
         _array = other._array;
         _flag = other._flag;
-        _invalid = other._invalid;
 
         return *this;
     }
 
     GraphArray& operator=(GraphArray&& other)
     {
-        Q_ASSERT(&_graph == &other._graph);
+        Q_ASSERT(_graph == other._graph);
         _array = std::move(other._array);
         _flag = other._flag;
-        _invalid = other._invalid;
 
         return *this;
     }
@@ -79,7 +73,7 @@ public:
     void flag() { _flag = true; }
     void resetFlag() { _flag = false; }
 
-    void invalidate() { _invalid = true; }
+    void invalidate() { _graph = nullptr; }
 
     Element& operator[](Index index)
     {
@@ -150,12 +144,12 @@ public:
 
     NodeArray(const NodeArray& other) : GraphArray<NodeId, Element>(other)
     {
-        this->_graph._nodeArrayList.insert(this);
+        this->_graph->_nodeArrayList.insert(this);
     }
 
     NodeArray(NodeArray&& other) : GraphArray<NodeId, Element>(std::move(other))
     {
-        this->_graph._nodeArrayList.insert(this);
+        this->_graph->_nodeArrayList.insert(this);
     }
 
     NodeArray& operator=(const NodeArray& other)
@@ -172,8 +166,8 @@ public:
 
     ~NodeArray()
     {
-        if(!this->_invalid)
-            this->_graph._nodeArrayList.erase(this);
+        if(this->_graph != nullptr)
+            this->_graph->_nodeArrayList.erase(this);
     }
 };
 
@@ -189,12 +183,12 @@ public:
 
     EdgeArray(const EdgeArray& other) : GraphArray<EdgeId, Element>(other)
     {
-        this->_graph._edgeArrayList.insert(this);
+        this->_graph->_edgeArrayList.insert(this);
     }
 
     EdgeArray(EdgeArray&& other) : GraphArray<EdgeId, Element>(std::move(other))
     {
-        this->_graph._edgeArrayList.insert(this);
+        this->_graph->_edgeArrayList.insert(this);
     }
 
     EdgeArray& operator=(const EdgeArray& other)
@@ -211,8 +205,8 @@ public:
 
     ~EdgeArray()
     {
-        if(!this->_invalid)
-            this->_graph._edgeArrayList.erase(this);
+        if(this->_graph != nullptr)
+            this->_graph->_edgeArrayList.erase(this);
     }
 };
 
@@ -228,12 +222,12 @@ public:
 
     ComponentArray(const ComponentArray& other) : GraphArray<ComponentId, Element>(other)
     {
-        this->_graph._componentManager->_componentArrayList.insert(this);
+        this->_graph->_componentManager->_componentArrayList.insert(this);
     }
 
     ComponentArray(ComponentArray&& other) : GraphArray<ComponentId, Element>(std::move(other))
     {
-        this->_graph._componentManager->_componentArrayList.insert(this);
+        this->_graph->_componentManager->_componentArrayList.insert(this);
     }
 
     ComponentArray& operator=(const ComponentArray& other)
@@ -250,8 +244,8 @@ public:
 
     ~ComponentArray()
     {
-        if(!this->_invalid)
-            this->_graph._componentManager->_componentArrayList.erase(this);
+        if(this->_graph != nullptr)
+            this->_graph->_componentManager->_componentArrayList.erase(this);
     }
 };
 
