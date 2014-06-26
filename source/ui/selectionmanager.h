@@ -11,7 +11,7 @@ class SelectionManager : public QObject
 {
     Q_OBJECT
 public:
-    SelectionManager(const ReadOnlyGraph& graph) : QObject(), _graph(graph) {}
+    SelectionManager(const ReadOnlyGraph& graph);
 
     ElementIdSet<NodeId> selectedNodes() const;
     ElementIdSet<NodeId> unselectedNodes() const;
@@ -45,7 +45,7 @@ private:
     ElementIdSet<NodeId> _selectedNodes;
 
 signals:
-    void selectionChanged(const SelectionManager& selectionManager) const;
+    void selectionChanged(const SelectionManager* selectionManager) const;
 };
 
 #endif // SELECTIONMANAGER_H

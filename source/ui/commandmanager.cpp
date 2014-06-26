@@ -4,30 +4,44 @@
 
 #include <QDebug>
 
+#include <thread>
+
 CommandManager::CommandManager() :
     _lastExecutedIndex(-1)
 {}
 
 void CommandManager::execute(std::unique_ptr<Command> command)
 {
-    if(!command->execute())
-        return;
+    std::unique_lock<std::mutex> locker(_lock);
 
-    while(canRedo())
+    auto executeCommand = [this](std::unique_lock<std::mutex> locker, std::unique_ptr<Command> command)
     {
+        if(!command->execute())
+            return;
+
         // There are commands on the stack ahead of us; throw them away
-        _stack.pop_back();
-    }
+        while(canRedo())
+            _stack.pop_back();
 
-    _stack.push_back(std::move(command));
-    _lastExecutedIndex = static_cast<int>(_stack.size()) - 1;
+        _stack.push_back(std::move(command));
+        _lastExecutedIndex = static_cast<int>(_stack.size()) - 1;
 
-    emit commandStackChanged(*this);
+        locker.unlock();
+        emit commandCompleted(this);
+    };
+
+    if(command->asynchronous())
+        std::thread(executeCommand, std::move(locker), std::move(command)).detach();
+    else
+        executeCommand(std::move(locker), std::move(command));
 }
 
-void CommandManager::execute(const QString& description, std::function<bool()> executeFunction, std::function<void()> undoFunction)
+void CommandManager::execute(const QString& description,
+                             std::function<bool()> executeFunction,
+                             std::function<void()> undoFunction,
+                             bool asynchronous)
 {
-    execute(std::make_unique<Command>(description, executeFunction, undoFunction));
+    execute(std::make_unique<Command>(description, executeFunction, undoFunction, asynchronous));
 }
 
 void CommandManager::undo()
@@ -35,10 +49,21 @@ void CommandManager::undo()
     if(!canUndo())
         return;
 
-    _stack.at(_lastExecutedIndex)->undo();
-    _lastExecutedIndex--;
+    std::unique_lock<std::mutex> locker(_lock);
+    auto& command = _stack.at(_lastExecutedIndex);
 
-    emit commandStackChanged(*this);
+    auto undoCommand = [this, &command](std::unique_lock<std::mutex> locker)
+    {
+        command->undo();
+        _lastExecutedIndex--;
+        locker.unlock();
+        emit commandCompleted(this);
+    };
+
+    if(command->asynchronous())
+        std::thread(undoCommand, std::move(locker)).detach();
+    else
+        undoCommand(std::move(locker));
 }
 
 void CommandManager::redo()
@@ -46,30 +71,54 @@ void CommandManager::redo()
     if(!canRedo())
         return;
 
-    _lastExecutedIndex++;
-    _stack.at(_lastExecutedIndex)->execute();
+    std::unique_lock<std::mutex> locker(_lock);
+    auto& command = _stack.at(++_lastExecutedIndex);
 
-    emit commandStackChanged(*this);
+    auto redoCommand = [this, &command](std::unique_lock<std::mutex> locker)
+    {
+        command->execute();
+        locker.unlock();
+        emit commandCompleted(this);
+    };
+
+    if(command->asynchronous())
+        std::thread(redoCommand, std::move(locker)).detach();
+    else
+        redoCommand(std::move(locker));
 }
 
 bool CommandManager::canUndo() const
 {
-    return _lastExecutedIndex >= 0;
+    std::unique_lock<std::mutex> locker(_lock, std::try_to_lock);
+
+    if(locker.owns_lock())
+        return _lastExecutedIndex >= 0;
+
+    return false;
 }
 
 bool CommandManager::canRedo() const
 {
-    return _lastExecutedIndex < static_cast<int>(_stack.size()) - 1;
+    std::unique_lock<std::mutex> locker(_lock, std::try_to_lock);
+
+    if(locker.owns_lock())
+        return _lastExecutedIndex < static_cast<int>(_stack.size()) - 1;
+
+    return false;
 }
 
 const std::vector<QString> CommandManager::undoableCommandDescriptions() const
 {
+    std::unique_lock<std::mutex> locker(_lock, std::try_to_lock);
     std::vector<QString> commandDescriptions;
 
-    if(canUndo())
+    if(locker.owns_lock())
     {
-        for(int index = _lastExecutedIndex; index >= 0; index--)
-            commandDescriptions.push_back(_stack.at(index)->description());
+        if(canUndo())
+        {
+            for(int index = _lastExecutedIndex; index >= 0; index--)
+                commandDescriptions.push_back(_stack.at(index)->description());
+        }
     }
 
     return commandDescriptions;
@@ -77,12 +126,16 @@ const std::vector<QString> CommandManager::undoableCommandDescriptions() const
 
 const std::vector<QString> CommandManager::redoableCommandDescriptions() const
 {
+    std::unique_lock<std::mutex> locker(_lock, std::try_to_lock);
     std::vector<QString> commandDescriptions;
 
-    if(canRedo())
+    if(locker.owns_lock())
     {
-        for(int index = _lastExecutedIndex + 1; index < static_cast<int>(_stack.size()); index++)
-            commandDescriptions.push_back(_stack.at(index)->description());
+        if(canRedo())
+        {
+            for(int index = _lastExecutedIndex + 1; index < static_cast<int>(_stack.size()); index++)
+                commandDescriptions.push_back(_stack.at(index)->description());
+        }
     }
 
     return commandDescriptions;

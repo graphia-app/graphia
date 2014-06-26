@@ -25,8 +25,8 @@ signals:
     void progress(int percentage) const;
     void complete(int success) const;
     void graphChanged(const Graph*) const;
-    void commandStackChanged(const CommandManager& commandManager) const;
-    void selectionChanged(const SelectionManager& selectionManager) const;
+    void commandStackChanged(const CommandManager* commandManager) const;
+    void selectionChanged(const SelectionManager* selectionManager) const;
 
 public slots:
     void onCompletion(int success);

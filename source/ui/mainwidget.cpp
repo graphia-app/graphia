@@ -79,7 +79,7 @@ void MainWidget::onCompletion(int success)
             resumeLayout(true);
         });
 
-    connect(&_commandManager, &CommandManager::commandStackChanged, this, &MainWidget::commandStackChanged);
+    connect(&_commandManager, &CommandManager::commandCompleted, this, &MainWidget::commandStackChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &MainWidget::selectionChanged);
 
     layout()->setContentsMargins(0, 0, 0, 0);

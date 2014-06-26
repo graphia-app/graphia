@@ -11,6 +11,7 @@
 #include <deque>
 #include <vector>
 #include <memory>
+#include <mutex>
 
 // For simple operations the Command class can be used directly, by passing
 // it lambdas to perform the execute and undo actions. For more complicated
@@ -33,13 +34,15 @@ public:
             []
             {
                 Q_ASSERT(!"undoFunction not implemented");
-            }) :
+            }, bool asynchronous = false) :
         _description(description),
         _executeFunction(executeFunction),
-        _undoFunction(undoFunction)
+        _undoFunction(undoFunction),
+        _asynchronous(asynchronous)
     {}
 
     const QString& description() const { return _description; }
+    bool asynchronous() const { return _asynchronous; }
 
 private:
     // Return false if the command failed, or did nothing
@@ -56,6 +59,7 @@ private:
     QString _description;
     std::function<bool()> _executeFunction;
     std::function<void()> _undoFunction;
+    bool _asynchronous;
 };
 
 class CommandManager : public QObject
@@ -68,7 +72,8 @@ public:
     void execute(std::unique_ptr<Command> command);
     void execute(const QString& description,
                  std::function<bool()> executeFunction,
-                 std::function<void()> undoFunction);
+                 std::function<void()> undoFunction,
+                 bool asynchronous = false);
 
     void undo();
     void redo();
@@ -83,8 +88,10 @@ private:
     std::deque<std::unique_ptr<Command>> _stack;
     int _lastExecutedIndex;
 
+    mutable std::mutex _lock;
+
 signals:
-    void commandStackChanged(const CommandManager& commandManager) const;
+    void commandCompleted(const CommandManager* commandManager) const;
 };
 
 #endif // COMMANDMANAGER_H

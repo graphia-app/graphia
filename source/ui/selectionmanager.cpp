@@ -3,6 +3,11 @@
 #include <algorithm>
 #include <utility>
 
+SelectionManager::SelectionManager(const ReadOnlyGraph& graph) :
+    QObject(),
+    _graph(graph)
+{}
+
 ElementIdSet<NodeId> SelectionManager::selectedNodes() const
 {
     // Assertion that our selection doesn't contain things that aren't in the graph
@@ -30,7 +35,7 @@ bool SelectionManager::selectNode(NodeId nodeId)
     auto result = _selectedNodes.insert(nodeId);
 
     if(result.second)
-        emit selectionChanged(*this);
+        emit selectionChanged(this);
 
     return result.second;
 }
@@ -48,7 +53,7 @@ template<typename InputIterator> bool SelectionManager::selectNodes(InputIterato
     bool selectionDidChange = _selectedNodes.size() > oldSize;
 
     if(selectionDidChange)
-        emit selectionChanged(*this);
+        emit selectionChanged(this);
 
     return selectionDidChange;
 }
@@ -58,7 +63,7 @@ bool SelectionManager::deselectNode(NodeId nodeId)
     bool selectionWillChange = _selectedNodes.erase(nodeId) > 0;
 
     if(selectionWillChange)
-        emit selectionChanged(*this);
+        emit selectionChanged(this);
 
     return selectionWillChange;
 }
@@ -74,7 +79,7 @@ template<typename InputIterator> bool SelectionManager::deselectNodes(InputItera
     bool selectionWillChange = _selectedNodes.erase(first, last) != first;
 
     if(selectionWillChange)
-        emit selectionChanged(*this);
+        emit selectionChanged(this);
 
     return selectionWillChange;
 }
@@ -105,7 +110,7 @@ template<typename InputIterator> void SelectionManager::toggleNodes(InputIterato
 
     _selectedNodes = std::move(difference);
 
-    emit selectionChanged(*this);
+    emit selectionChanged(this);
 }
 
 bool SelectionManager::nodeIsSelected(NodeId nodeId) const
@@ -122,7 +127,7 @@ bool SelectionManager::setSelectedNodes(const ElementIdSet<NodeId>& nodeIds)
     _selectedNodes = std::move(nodeIds);
 
     if(selectionWillChange)
-        emit selectionChanged(*this);
+        emit selectionChanged(this);
 
     return selectionWillChange;
 }
@@ -139,7 +144,7 @@ bool SelectionManager::clearNodeSelection()
     _selectedNodes.clear();
 
     if(selectionWillChange)
-        emit selectionChanged(*this);
+        emit selectionChanged(this);
 
     return selectionWillChange;
 }

@@ -136,7 +136,7 @@ private slots:
     void onComponentsWillMerge(const Graph* graph, const ElementIdSet<ComponentId>& mergers, ComponentId merged);
 
 public slots:
-    void onSelectionChanged(const SelectionManager& selectionManager);
+    void onSelectionChanged(const SelectionManager* selectionManager);
 
 private:
     bool _trackFocusNode;

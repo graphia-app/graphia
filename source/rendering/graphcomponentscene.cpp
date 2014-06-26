@@ -236,14 +236,14 @@ void GraphComponentScene::onComponentsWillMerge(const Graph*, const ElementIdSet
     }
 }
 
-void GraphComponentScene::onSelectionChanged(const SelectionManager& selectionManager)
+void GraphComponentScene::onSelectionChanged(const SelectionManager* selectionManager)
 {
     NodeVisuals& nodeVisuals = _graphModel->nodeVisuals();
     EdgeVisuals& edgeVisuals = _graphModel->edgeVisuals();
 
     for(NodeId nodeId : _graphModel->graph().nodeIds())
     {
-        if(selectionManager.nodeIsSelected(nodeId))
+        if(selectionManager->nodeIsSelected(nodeId))
             nodeVisuals[nodeId]._outlineColor = Qt::GlobalColor::white;
         else
             nodeVisuals[nodeId]._outlineColor = Qt::GlobalColor::black;

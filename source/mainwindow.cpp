@@ -268,12 +268,12 @@ void MainWindow::on_actionDelete_triggered()
         widget->deleteSelectedNodes();
 }
 
-void MainWindow::on_commandStackChanged(const CommandManager&)
+void MainWindow::on_commandStackChanged(const CommandManager*)
 {
     updatePerTabUi();
 }
 
-void MainWindow::on_selectionChanged(const SelectionManager&)
+void MainWindow::on_selectionChanged(const SelectionManager*)
 {
     updatePerTabUi();
 }

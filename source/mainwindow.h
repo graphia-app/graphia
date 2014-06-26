@@ -51,8 +51,8 @@ private slots:
     void on_actionRedo_triggered();
     void on_actionDelete_triggered();
 
-    void on_commandStackChanged(const CommandManager& commandManager);
-    void on_selectionChanged(const SelectionManager& selectionManager);
+    void on_commandStackChanged(const CommandManager* commandManager);
+    void on_selectionChanged(const SelectionManager* selectionManager);
 
 public:
     bool openFileInNewTab(const QString& filename);
