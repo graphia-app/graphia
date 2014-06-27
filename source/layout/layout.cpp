@@ -55,7 +55,6 @@ void LayoutThread::addLayout(std::shared_ptr<Layout> layout)
 void LayoutThread::removeLayout(std::shared_ptr<Layout> layout)
 {
     std::lock_guard<std::mutex> locker(_mutex);
-
     _layouts.erase(layout);
 }
 
@@ -75,10 +74,7 @@ void LayoutThread::pauseAndWait()
 {
     std::unique_lock<std::mutex> lock(_mutex);
     if(_paused)
-    {
-        lock.unlock();
         return;
-    }
 
     _pause = true;
 
