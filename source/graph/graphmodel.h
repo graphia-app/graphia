@@ -16,7 +16,6 @@ struct NodeVisual
     bool _initialised;
     float _size;
     QColor _color;
-    QColor _outlineColor;
 };
 
 typedef NodeArray<NodeVisual> NodeVisuals;
@@ -26,7 +25,6 @@ struct EdgeVisual
     bool _initialised;
     float _size;
     QColor _color;
-    QColor _outlineColor;
 };
 
 typedef EdgeArray<EdgeVisual> EdgeVisuals;

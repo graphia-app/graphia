@@ -1,7 +1,7 @@
 #include "eadeslayout.h"
 #include "randomlayout.h"
 
-#include "../utils.h"
+#include "../utils/utils.h"
 
 /*static float lnTaylorSeries(float x, int order)
 {

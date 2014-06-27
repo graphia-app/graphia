@@ -15,7 +15,7 @@
 
 #include "../ui/selectionmanager.h"
 
-#include "../utils.h"
+#include "../utils/utils.h"
 
 #include <QObject>
 #include <QOpenGLContext>
@@ -98,7 +98,6 @@ void GraphComponentScene::initialise()
 
 void GraphComponentScene::cleanup()
 {
-    //FIXME
 }
 
 void GraphComponentScene::updateVisualData()
@@ -112,15 +111,23 @@ void GraphComponentScene::updateVisualData()
     int i = 0;
     int j = 0;
 
+    const QColor selectedOutLineColor = Qt::GlobalColor::white;
+    const QColor deselectedOutLineColor = Qt::GlobalColor::black;
+
     for(NodeId nodeId : component->nodeIds())
     {
         _nodeVisualData[i++] = nodeVisuals[nodeId]._size;
         _nodeVisualData[i++] = nodeVisuals[nodeId]._color.redF();
         _nodeVisualData[i++] = nodeVisuals[nodeId]._color.greenF();
         _nodeVisualData[i++] = nodeVisuals[nodeId]._color.blueF();
-        _nodeVisualData[i++] = nodeVisuals[nodeId]._outlineColor.redF();
-        _nodeVisualData[i++] = nodeVisuals[nodeId]._outlineColor.greenF();
-        _nodeVisualData[i++] = nodeVisuals[nodeId]._outlineColor.blueF();
+
+        QColor outlineColor = _selectionManager && _selectionManager->nodeIsSelected(nodeId) ?
+            outlineColor = selectedOutLineColor :
+            outlineColor = deselectedOutLineColor;
+
+        _nodeVisualData[i++] = outlineColor.redF();
+        _nodeVisualData[i++] = outlineColor.greenF();
+        _nodeVisualData[i++] = outlineColor.blueF();
     }
 
     for(EdgeId edgeId : component->edgeIds())
@@ -129,9 +136,9 @@ void GraphComponentScene::updateVisualData()
         _edgeVisualData[j++] = edgeVisuals[edgeId]._color.redF();
         _edgeVisualData[j++] = edgeVisuals[edgeId]._color.greenF();
         _edgeVisualData[j++] = edgeVisuals[edgeId]._color.blueF();
-        _edgeVisualData[j++] = edgeVisuals[edgeId]._outlineColor.redF();
-        _edgeVisualData[j++] = edgeVisuals[edgeId]._outlineColor.greenF();
-        _edgeVisualData[j++] = edgeVisuals[edgeId]._outlineColor.blueF();
+        _edgeVisualData[j++] = deselectedOutLineColor.redF();
+        _edgeVisualData[j++] = deselectedOutLineColor.greenF();
+        _edgeVisualData[j++] = deselectedOutLineColor.blueF();
     }
 }
 
@@ -236,23 +243,8 @@ void GraphComponentScene::onComponentsWillMerge(const Graph*, const ElementIdSet
     }
 }
 
-void GraphComponentScene::onSelectionChanged(const SelectionManager* selectionManager)
+void GraphComponentScene::onSelectionChanged(const SelectionManager*)
 {
-    NodeVisuals& nodeVisuals = _graphModel->nodeVisuals();
-    EdgeVisuals& edgeVisuals = _graphModel->edgeVisuals();
-
-    for(NodeId nodeId : _graphModel->graph().nodeIds())
-    {
-        if(selectionManager->nodeIsSelected(nodeId))
-            nodeVisuals[nodeId]._outlineColor = Qt::GlobalColor::white;
-        else
-            nodeVisuals[nodeId]._outlineColor = Qt::GlobalColor::black;
-    }
-
-    // Edges can't be selected at the moment
-    for(EdgeId edgeId : _graphModel->graph().edgeIds())
-        edgeVisuals[edgeId]._outlineColor = Qt::GlobalColor::black;
-
     updateVisualData();
 }
 
@@ -796,6 +788,11 @@ void GraphComponentScene::setGraphModel(std::shared_ptr<GraphModel> graphModel)
     connect(&_graphModel->graph(), &Graph::componentWillBeRemoved, this, &GraphComponentScene::onComponentWillBeRemoved);
     connect(&_graphModel->graph(), &Graph::componentSplit, this, &GraphComponentScene::onComponentSplit);
     connect(&_graphModel->graph(), &Graph::componentsWillMerge, this, &GraphComponentScene::onComponentsWillMerge);
+}
+
+void GraphComponentScene::setSelectionManager(std::shared_ptr<SelectionManager> selectionManager)
+{
+    this->_selectionManager = selectionManager;
 }
 
 void GraphComponentScene::prepareVertexBuffers()

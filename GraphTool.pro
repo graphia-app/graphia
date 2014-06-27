@@ -51,7 +51,9 @@ SOURCES += \
     source/ui/graphwidget.cpp \
     source/ui/mainwidget.cpp \
     source/parsers/graphfileparser.cpp \
-    source/graph/componentmanager.cpp
+    source/graph/componentmanager.cpp \
+    source/utils/utils.cpp \
+    source/utils/namethread.cpp
 
 HEADERS += \
     source/rendering/camera.h \
@@ -98,7 +100,9 @@ HEADERS += \
     source/ui/graphcomponentinteractor.h \
     source/ui/interactor.h \
     source/ui/graphwidget.h \
-    source/ui/mainwidget.h
+    source/ui/mainwidget.h \
+    source/utils/utils.h \
+    source/utils/namethread.h
 
 FORMS    += source/mainwindow.ui
 

@@ -1,4 +1,5 @@
 #include "layout.h"
+#include "../utils/namethread.h"
 
 BoundingBox3D NodeLayout::boundingBox(const ReadOnlyGraph& graph, const NodePositions& positions)
 {
@@ -161,6 +162,7 @@ void LayoutThread::run()
 {
     do
     {
+        nameCurrentThread("Layout (executing)");
         for(auto layout : _layouts)
         {
             if(layout->shouldPause())
@@ -183,6 +185,7 @@ void LayoutThread::run()
         if(!_stop && (_pause || allLayoutsShouldPause() || (!iterative() && _repeating)))
         {
             _paused = true;
+            nameCurrentThread("Layout (paused)");
             _waitForPause.notify_all();
             _waitForResume.wait(lock);
         }

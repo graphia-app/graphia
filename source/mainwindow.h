@@ -8,6 +8,7 @@
 class MainWidget;
 class QLabel;
 class Graph;
+class Command;
 class CommandManager;
 class SelectionManager;
 
@@ -51,7 +52,7 @@ private slots:
     void on_actionRedo_triggered();
     void on_actionDelete_triggered();
 
-    void on_commandStackChanged(const CommandManager* commandManager);
+    void on_commandCompleted(const CommandManager* commandManager, const Command* command);
     void on_selectionChanged(const SelectionManager* selectionManager);
 
 public:

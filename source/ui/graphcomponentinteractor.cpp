@@ -14,7 +14,7 @@
 
 #include "../layout/collision.h"
 
-#include "../utils.h"
+#include "../utils/utils.h"
 
 #include <QVBoxLayout>
 #include <QMouseEvent>
@@ -38,6 +38,7 @@ GraphComponentInteractor::GraphComponentInteractor(std::shared_ptr<GraphModel> g
     _mouseMoving(false)
 {
     _scene->setGraphModel(graphModel);
+    _scene->setSelectionManager(selectionManager);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, _scene.get(), &GraphComponentScene::onSelectionChanged);
     connect(_scene.get(), &Scene::userInteractionStarted, this, &Interactor::userInteractionStarted);
     connect(_scene.get(), &Scene::userInteractionFinished, this, &Interactor::userInteractionFinished);
@@ -126,8 +127,8 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
 
                 auto previousSelection = _selectionManager->selectedNodes();
                 _commandManager.execute(tr("Select Nodes"),
-                    [this, selection] { return _selectionManager->selectNodes(selection); },
-                    [this, previousSelection] { _selectionManager->setSelectedNodes(previousSelection); });
+                    [this, selection](ProgressFn) { return _selectionManager->selectNodes(selection); },
+                    [this, previousSelection](ProgressFn) { _selectionManager->setSelectedNodes(previousSelection); });
 
                 _frustumSelectStart = QPoint();
                 _frustumSelecting = false;
@@ -142,7 +143,7 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
                     auto previousSelection = _selectionManager->selectedNodes();
                     auto toggleNodeId = _clickedNodeId;
                     _commandManager.execute(nodeSelected ? tr("Deselect Node") : tr("Select Node"),
-                        [this, toggling, toggleNodeId]
+                        [this, toggling, toggleNodeId](ProgressFn)
                         {
                             if(!toggling)
                                 _selectionManager->clearNodeSelection();
@@ -150,14 +151,14 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
                             _selectionManager->toggleNode(toggleNodeId);
                             return true;
                         },
-                        [this, previousSelection] { _selectionManager->setSelectedNodes(previousSelection); });
+                        [this, previousSelection](ProgressFn) { _selectionManager->setSelectedNodes(previousSelection); });
                 }
                 else
                 {
                     auto previousSelection = _selectionManager->selectedNodes();
                     _commandManager.execute(tr("Select None"),
-                        [this] { return _selectionManager->clearNodeSelection(); },
-                        [this, previousSelection] { _selectionManager->setSelectedNodes(previousSelection); });
+                        [this](ProgressFn) { return _selectionManager->clearNodeSelection(); },
+                        [this, previousSelection](ProgressFn) { _selectionManager->setSelectedNodes(previousSelection); });
                 }
             }
 

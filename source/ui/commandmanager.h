@@ -1,7 +1,7 @@
 #ifndef COMMANDMANAGER_H
 #define COMMANDMANAGER_H
 
-#include "../utils.h"
+#include "../utils/utils.h"
 
 #include <QtGlobal>
 #include <QObject>
@@ -12,6 +12,8 @@
 #include <vector>
 #include <memory>
 #include <mutex>
+
+using ProgressFn = std::function<void(int)>;
 
 // For simple operations the Command class can be used directly, by passing
 // it lambdas to perform the execute and undo actions. For more complicated
@@ -24,14 +26,14 @@ class Command : public QObject
     Q_OBJECT
 public:
     Command(const QString& description,
-            std::function<bool()> executeFunction =
-            []
+            std::function<bool(ProgressFn)> executeFunction =
+            [](ProgressFn)
             {
                 Q_ASSERT(!"executeFunction not implmented");
                 return false;
             },
-            std::function<void()> undoFunction =
-            []
+            std::function<void(ProgressFn)> undoFunction =
+            [](ProgressFn)
             {
                 Q_ASSERT(!"undoFunction not implemented");
             }, bool asynchronous = false) :
@@ -46,19 +48,19 @@ public:
 
 private:
     // Return false if the command failed, or did nothing
-    virtual bool execute()
+    virtual bool execute(ProgressFn p)
     {
-        return _executeFunction();
+        return _executeFunction(p);
     }
 
-    virtual void undo()
+    virtual void undo(ProgressFn p)
     {
-        _undoFunction();
+        _undoFunction(p);
     }
 
     QString _description;
-    std::function<bool()> _executeFunction;
-    std::function<void()> _undoFunction;
+    std::function<bool(ProgressFn)> _executeFunction;
+    std::function<void(ProgressFn)> _undoFunction;
     bool _asynchronous;
 };
 
@@ -71,8 +73,8 @@ public:
     void clear();
     void execute(std::unique_ptr<Command> command);
     void execute(const QString& description,
-                 std::function<bool()> executeFunction,
-                 std::function<void()> undoFunction,
+                 std::function<bool(ProgressFn)> executeFunction,
+                 std::function<void(ProgressFn)> undoFunction,
                  bool asynchronous = false);
 
     void undo();
@@ -91,7 +93,9 @@ private:
     mutable std::mutex _lock;
 
 signals:
-    void commandCompleted(const CommandManager* commandManager) const;
+    void commandWillExecuteAsynchronously(const CommandManager* commandManager, const Command* command) const;
+    void commandProgress(const CommandManager* commandManager, const Command* command, int progress) const;
+    void commandCompleted(const CommandManager* commandManager, const Command* command) const;
 };
 
 #endif // COMMANDMANAGER_H

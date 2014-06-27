@@ -74,6 +74,7 @@ public:
     bool interactionAllowed();
 
     void setGraphModel(std::shared_ptr<GraphModel> graphModel);
+    void setSelectionManager(std::shared_ptr<SelectionManager> selectionManager);
 
     Camera* camera() { return _camera; }
     void zoom(float delta);
@@ -136,7 +137,7 @@ private slots:
     void onComponentsWillMerge(const Graph* graph, const ElementIdSet<ComponentId>& mergers, ComponentId merged);
 
 public slots:
-    void onSelectionChanged(const SelectionManager* selectionManager);
+    void onSelectionChanged(const SelectionManager*);
 
 private:
     bool _trackFocusNode;
@@ -159,6 +160,7 @@ private:
     Cylinder _cylinder;
 
     std::shared_ptr<GraphModel> _graphModel;
+    std::shared_ptr<SelectionManager> _selectionManager;
 
     QOpenGLShaderProgram _nodesShader;
     std::vector<GLfloat> _nodePositionData;

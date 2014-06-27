@@ -25,7 +25,9 @@ signals:
     void progress(int percentage) const;
     void complete(int success) const;
     void graphChanged(const Graph*) const;
-    void commandStackChanged(const CommandManager* commandManager) const;
+    void commandWillExecuteAsynchronously(const CommandManager* commandManager, const Command* command) const;
+    void commandProgress(const CommandManager* commandManager, const Command* command, int progress) const;
+    void commandCompleted(const CommandManager* commandManager, const Command* command) const;
     void selectionChanged(const SelectionManager* selectionManager) const;
 
 public slots:
@@ -48,6 +50,9 @@ private slots:
     void onComponentWillBeRemoved(const Graph*, ComponentId componentId);
     void onComponentSplit(const Graph*, ComponentId splitter, const ElementIdSet<ComponentId>& splitters);
     void onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers, ComponentId merger);
+
+    void onCommandWillExecuteAsynchronously(const CommandManager* commandManager, const Command* command);
+    void onCommandCompleted(const CommandManager* commandManager, const Command* command);
 
 public:
     std::shared_ptr<GraphModel> graphModel() { return _graphModel; }

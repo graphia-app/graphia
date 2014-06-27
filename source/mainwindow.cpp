@@ -38,7 +38,7 @@ MainWidget *MainWindow::createNewTabWidget(const QString& filename)
     connect(widget, &MainWidget::progress, this, &MainWindow::on_loadProgress);
     connect(widget, &MainWidget::complete, this, &MainWindow::on_loadCompletion);
     connect(widget, &MainWidget::graphChanged, this, &MainWindow::on_graphChanged);
-    connect(widget, &MainWidget::commandStackChanged, this, &MainWindow::on_commandStackChanged);
+    connect(widget, &MainWidget::commandCompleted, this, &MainWindow::on_commandCompleted);
     connect(widget, &MainWidget::selectionChanged, this, &MainWindow::on_selectionChanged);
 
     widget->initFromFile(filename);
@@ -268,7 +268,7 @@ void MainWindow::on_actionDelete_triggered()
         widget->deleteSelectedNodes();
 }
 
-void MainWindow::on_commandStackChanged(const CommandManager*)
+void MainWindow::on_commandCompleted(const CommandManager*, const Command*)
 {
     updatePerTabUi();
 }

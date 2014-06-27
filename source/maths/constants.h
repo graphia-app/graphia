@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 // Sigh...
 #define constexpr const
 #endif

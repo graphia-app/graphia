@@ -10,6 +10,7 @@
 #include <type_traits>
 #include <functional>
 #include <memory>
+#include <mutex>
 
 class ResizableGraphArray;
 class GraphComponent;
@@ -301,6 +302,7 @@ public:
 
 private:
     int _graphChangeDepth;
+    std::mutex _mutex;
     void beginTransaction();
     void endTransaction();
 
@@ -308,26 +310,14 @@ public:
     class ScopedTransaction
     {
     public:
-        ScopedTransaction(Graph& graph) :
-            _graph(graph)
-        {
-            _graph.beginTransaction();
-        }
-
-        ~ScopedTransaction()
-        {
-            _graph.endTransaction();
-        }
+        ScopedTransaction(Graph& graph);
+        ~ScopedTransaction();
 
     private:
         Graph& _graph;
     };
 
-    void performTransaction(std::function<void(Graph& graph)> transaction)
-    {
-        ScopedTransaction lock(*this);
-        transaction(*this);
-    }
+    void performTransaction(std::function<void(Graph& graph)> transaction);
 
 signals:
     void graphWillChange(const Graph*) const;

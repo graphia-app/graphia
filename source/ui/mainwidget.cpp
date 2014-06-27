@@ -6,7 +6,7 @@
 #include "../layout/layout.h"
 #include "../layout/eadeslayout.h"
 #include "../layout/collision.h"
-#include "../utils.h"
+#include "../utils/utils.h"
 #include "graphwidget.h"
 #include "selectionmanager.h"
 
@@ -45,6 +45,7 @@ bool MainWidget::initFromFile(const QString& filename)
 
     connect(&_graphModel->graph(), &Graph::graphWillChange, this, &MainWidget::onGraphWillChange, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &MainWidget::onGraphChanged, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::graphChanged, this, &MainWidget::graphChanged, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::componentAdded, this, &MainWidget::onComponentAdded, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::componentWillBeRemoved, this, &MainWidget::onComponentWillBeRemoved, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::componentSplit, this, &MainWidget::onComponentSplit, Qt::DirectConnection);
@@ -79,7 +80,12 @@ void MainWidget::onCompletion(int success)
             resumeLayout(true);
         });
 
-    connect(&_commandManager, &CommandManager::commandCompleted, this, &MainWidget::commandStackChanged);
+    connect(&_commandManager, &CommandManager::commandWillExecuteAsynchronously, this, &MainWidget::commandWillExecuteAsynchronously);
+    connect(&_commandManager, &CommandManager::commandWillExecuteAsynchronously, this, &MainWidget::onCommandWillExecuteAsynchronously);
+    connect(&_commandManager, &CommandManager::commandProgress, this, &MainWidget::commandProgress);
+    connect(&_commandManager, &CommandManager::commandCompleted, this, &MainWidget::commandCompleted);
+    connect(&_commandManager, &CommandManager::commandCompleted, this, &MainWidget::onCommandCompleted);
+
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &MainWidget::selectionChanged);
 
     layout()->setContentsMargins(0, 0, 0, 0);
@@ -97,11 +103,9 @@ void MainWidget::onGraphWillChange(const Graph*)
     pauseLayout(true);
 }
 
-void MainWidget::onGraphChanged(const Graph* graph)
+void MainWidget::onGraphChanged(const Graph*)
 {
     resumeLayout(true);
-
-    emit graphChanged(graph);
 }
 
 void MainWidget::onComponentAdded(const Graph*, ComponentId componentId)
@@ -135,6 +139,16 @@ void MainWidget::onComponentsWillMerge(const Graph*, const ElementIdSet<Componen
                 _nodeLayoutThread->removeComponent(componentId);
         }
     }
+}
+
+void MainWidget::onCommandWillExecuteAsynchronously(const CommandManager*, const Command*)
+{
+    qDebug() << "onCommandWillExecuteAsynchronously stub";
+}
+
+void MainWidget::onCommandCompleted(const CommandManager*, const Command*)
+{
+    qDebug() << "onCommandCompleted stub";
 }
 
 void MainWidget::pauseLayout(bool autoResume)
@@ -173,8 +187,8 @@ void MainWidget::selectAll()
     {
         auto previousSelection = _selectionManager->selectedNodes();
         _commandManager.execute(tr("Select All"),
-            [this] { return _selectionManager->selectAllNodes(); },
-            [this, previousSelection] { _selectionManager->setSelectedNodes(previousSelection); });
+            [this](ProgressFn) { return _selectionManager->selectAllNodes(); },
+            [this, previousSelection](ProgressFn) { _selectionManager->setSelectedNodes(previousSelection); });
     }
 }
 
@@ -184,8 +198,8 @@ void MainWidget::selectNone()
     {
         auto previousSelection = _selectionManager->selectedNodes();
         _commandManager.execute(tr("Select None"),
-            [this] { return _selectionManager->clearNodeSelection(); },
-            [this, previousSelection] { _selectionManager->setSelectedNodes(previousSelection); });
+            [this](ProgressFn) { return _selectionManager->clearNodeSelection(); },
+            [this, previousSelection](ProgressFn) { _selectionManager->setSelectedNodes(previousSelection); });
     }
 }
 
@@ -195,8 +209,8 @@ void MainWidget::invertSelection()
     {
         auto previousSelection = _selectionManager->selectedNodes();
         _commandManager.execute(tr("Invert Selection"),
-            [this] { _selectionManager->invertNodeSelection(); return true; },
-            [this, previousSelection] { _selectionManager->setSelectedNodes(previousSelection); });
+            [this](ProgressFn) { _selectionManager->invertNodeSelection(); return true; },
+            [this, previousSelection](ProgressFn) { _selectionManager->setSelectedNodes(previousSelection); });
     }
 }
 
@@ -229,14 +243,14 @@ void MainWidget::deleteSelectedNodes()
         return;
 
     _commandManager.execute(nodes.size() > 1 ? tr("Delete Nodes") : tr("Delete Node"),
-        [this, nodes]
+        [this, nodes](ProgressFn)
         {
             _selectionManager->clearNodeSelection();
             // Edge removal happens implicitly
             _graphModel->graph().removeNodes(nodes);
             return true;
         },
-        [this, nodes, edges]
+        [this, nodes, edges](ProgressFn)
         {
             _graphModel->graph().performTransaction(
                 [&nodes, &edges](Graph& graph)

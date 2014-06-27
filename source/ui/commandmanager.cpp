@@ -1,6 +1,7 @@
 #include "commandmanager.h"
 
-#include "../utils.h"
+#include "../utils/utils.h"
+#include "../utils/namethread.h"
 
 #include <QDebug>
 
@@ -16,7 +17,9 @@ void CommandManager::execute(std::unique_ptr<Command> command)
 
     auto executeCommand = [this](std::unique_lock<std::mutex> locker, std::unique_ptr<Command> command)
     {
-        if(!command->execute())
+        nameCurrentThread(command->description() + " (first time)");
+
+        if(!command->execute([this, &command](int progress) { emit commandProgress(this, command.get(), progress); }))
             return;
 
         // There are commands on the stack ahead of us; throw them away
@@ -27,18 +30,21 @@ void CommandManager::execute(std::unique_ptr<Command> command)
         _lastExecutedIndex = static_cast<int>(_stack.size()) - 1;
 
         locker.unlock();
-        emit commandCompleted(this);
+        emit commandCompleted(this, command.get());
     };
 
     if(command->asynchronous())
+    {
+        emit commandWillExecuteAsynchronously(this, command.get());
         std::thread(executeCommand, std::move(locker), std::move(command)).detach();
+    }
     else
         executeCommand(std::move(locker), std::move(command));
 }
 
 void CommandManager::execute(const QString& description,
-                             std::function<bool()> executeFunction,
-                             std::function<void()> undoFunction,
+                             std::function<bool(ProgressFn)> executeFunction,
+                             std::function<void(ProgressFn)> undoFunction,
                              bool asynchronous)
 {
     execute(std::make_unique<Command>(description, executeFunction, undoFunction, asynchronous));
@@ -54,14 +60,19 @@ void CommandManager::undo()
 
     auto undoCommand = [this, &command](std::unique_lock<std::mutex> locker)
     {
-        command->undo();
+        nameCurrentThread(command->description() + " (undo)");
+
+        command->undo([this, &command](int progress) { emit commandProgress(this, command.get(), progress); });
         _lastExecutedIndex--;
         locker.unlock();
-        emit commandCompleted(this);
+        emit commandCompleted(this, command.get());
     };
 
     if(command->asynchronous())
+    {
+        emit commandWillExecuteAsynchronously(this, command.get());
         std::thread(undoCommand, std::move(locker)).detach();
+    }
     else
         undoCommand(std::move(locker));
 }
@@ -76,13 +87,18 @@ void CommandManager::redo()
 
     auto redoCommand = [this, &command](std::unique_lock<std::mutex> locker)
     {
-        command->execute();
+        nameCurrentThread(command->description() + " (redo)");
+
+        command->execute([this, &command](int progress) { emit commandProgress(this, command.get(), progress); });
         locker.unlock();
-        emit commandCompleted(this);
+        emit commandCompleted(this, command.get());
     };
 
     if(command->asynchronous())
+    {
+        emit commandWillExecuteAsynchronously(this, command.get());
         std::thread(redoCommand, std::move(locker)).detach();
+    }
     else
         redoCommand(std::move(locker));
 }

@@ -1,5 +1,5 @@
 #include "genericgraphmodel.h"
-#include "../utils.h"
+#include "../utils/utils.h"
 
 GenericGraphModel::GenericGraphModel(const QString &name) :
     _graph(),
@@ -21,7 +21,6 @@ void GenericGraphModel::onNodeAdded(const Graph*, NodeId nodeId)
     {
         _nodeVisuals[nodeId]._size = NODE_SIZE + Utils::rand(-0.3f, 0.4f);
         _nodeVisuals[nodeId]._color = Utils::randQColor();
-        _nodeVisuals[nodeId]._outlineColor.setAlphaF(0.0f);
         _nodeVisuals[nodeId]._initialised = true;
     }
 }
@@ -32,7 +31,6 @@ void GenericGraphModel::onEdgeAdded(const Graph*, EdgeId edgeId)
     {
         _edgeVisuals[edgeId]._size = EDGE_SIZE + Utils::rand(-0.05f, 0.05f);
         _edgeVisuals[edgeId]._color = Utils::randQColor();
-        _edgeVisuals[edgeId]._outlineColor.setAlphaF(0.0f);
         _edgeVisuals[edgeId]._initialised = true;
     }
 }

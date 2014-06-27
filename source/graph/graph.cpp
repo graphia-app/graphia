@@ -1,7 +1,7 @@
 #include "graph.h"
 #include "grapharray.h"
 #include "simplecomponentmanager.h"
-#include "../utils.h"
+#include "../utils/utils.h"
 
 #include <QtGlobal>
 #include <QMetaType>
@@ -318,7 +318,10 @@ void Graph::dumpToQDebug(int detail) const
 void Graph::beginTransaction()
 {
     if(_graphChangeDepth++ <= 0)
+    {
         emit graphWillChange(this);
+        _mutex.lock();
+    }
 }
 
 void Graph::endTransaction()
@@ -327,8 +330,15 @@ void Graph::endTransaction()
     if(--_graphChangeDepth <= 0)
     {
         updateElementIdData();
+        _mutex.unlock();
         emit graphChanged(this);
     }
+}
+
+void Graph::performTransaction(std::function<void(Graph&)> transaction)
+{
+    ScopedTransaction lock(*this);
+    transaction(*this);
 }
 
 void Graph::updateElementIdData()
@@ -352,4 +362,15 @@ void Graph::updateElementIdData()
         else
             _unusedEdgeIdsDeque.push_back(edgeId);
     }
+}
+
+Graph::ScopedTransaction::ScopedTransaction(Graph& graph) :
+    _graph(graph)
+{
+    _graph.beginTransaction();
+}
+
+Graph::ScopedTransaction::~ScopedTransaction()
+{
+    _graph.endTransaction();
 }

@@ -4,7 +4,7 @@
 
 #include "graphcomponentscene.h"
 #include "../ui/graphcomponentinteractor.h"
-#include "../utils.h"
+#include "../utils/utils.h"
 
 #include <QGuiApplication>
 #include <QKeyEvent>
