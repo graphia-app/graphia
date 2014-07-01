@@ -328,8 +328,8 @@ signals:
     void edgeWillBeRemoved(const Graph*, EdgeId) const;
     void componentAdded(const Graph*, ComponentId) const;
     void componentWillBeRemoved(const Graph*, ComponentId) const;
-    void componentSplit(const Graph*, ComponentId, const ElementIdSet<ComponentId>*) const;
-    void componentsWillMerge(const Graph*, const ElementIdSet<ComponentId>*, ComponentId) const;
+    void componentSplit(const Graph*, ComponentId, const ElementIdSet<ComponentId>&) const;
+    void componentsWillMerge(const Graph*, const ElementIdSet<ComponentId>&, ComponentId) const;
 };
 
 #endif // GRAPH_H

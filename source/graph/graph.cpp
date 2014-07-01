@@ -13,8 +13,11 @@ Graph::Graph() :
     _graphChangeDepth(0)
 {
     qRegisterMetaType<NodeId>("NodeId");
+    qRegisterMetaType<ElementIdSet<NodeId>>("ElementIdSet<NodeId>");
     qRegisterMetaType<EdgeId>("EdgeId");
+    qRegisterMetaType<ElementIdSet<EdgeId>>("ElementIdSet<EdgeId>");
     qRegisterMetaType<ComponentId>("ComponentId");
+    qRegisterMetaType<ElementIdSet<ComponentId>>("ElementIdSet<ComponentId>");
 }
 
 Graph::~Graph()

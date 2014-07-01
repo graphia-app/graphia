@@ -115,20 +115,20 @@ void MainWidget::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
         _nodeLayoutThread->removeComponent(componentId);
 }
 
-void MainWidget::onComponentSplit(const Graph*, ComponentId /*splitter*/, const ElementIdSet<ComponentId>* splitters)
+void MainWidget::onComponentSplit(const Graph*, ComponentId /*splitter*/, const ElementIdSet<ComponentId>& splitters)
 {
     if(_nodeLayoutThread)
     {
-        for(ComponentId componentId : *splitters)
+        for(ComponentId componentId : splitters)
             _nodeLayoutThread->addComponent(componentId);
     }
 }
 
-void MainWidget::onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>* mergers, ComponentId merger)
+void MainWidget::onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers, ComponentId merger)
 {
     if(_nodeLayoutThread)
     {
-        for(ComponentId componentId : *mergers)
+        for(ComponentId componentId : mergers)
         {
             if(componentId != merger)
                 _nodeLayoutThread->removeComponent(componentId);
