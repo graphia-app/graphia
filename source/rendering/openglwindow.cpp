@@ -14,6 +14,7 @@
 
 OpenGLWindow::OpenGLWindow(QScreen* screen)
     : QWindow(screen),
+      _sceneUpdateEnabled(true),
       _interactionEnabled(true)
 {
     // Tell Qt we will use OpenGL for this window
@@ -120,9 +121,12 @@ void OpenGLWindow::render()
 
 void OpenGLWindow::updateScene()
 {
-    float time = _time.elapsed() / 1000.0f;
-    _scene->update(time);
-    render();
+    if(_sceneUpdateEnabled)
+    {
+        float time = _time.elapsed() / 1000.0f;
+        _scene->update(time);
+        render();
+    }
 }
 
 void OpenGLWindow::resizeEvent(QResizeEvent* e)

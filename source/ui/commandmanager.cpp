@@ -149,3 +149,14 @@ const std::vector<QString> CommandManager::redoableCommandDescriptions() const
 
     return commandDescriptions;
 }
+
+bool CommandManager::busy() const
+{
+    if(_mutex.try_lock())
+    {
+        _mutex.unlock();
+        return false;
+    }
+
+    return true;
+}

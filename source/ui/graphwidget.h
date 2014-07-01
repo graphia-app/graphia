@@ -8,6 +8,7 @@
 class GraphComponentScene;
 class GraphComponentInteractor;
 class GraphModel;
+class Command;
 class CommandManager;
 class SelectionManager;
 class OpenGLWindow;
@@ -21,13 +22,14 @@ public:
                 std::shared_ptr<SelectionManager> selectionManager,
                 QWidget *parent = nullptr);
 
-    void enableInteraction();
-    void disableInteraction();
-
 private:
     std::shared_ptr<GraphComponentScene> _graphComponentScene;
     std::shared_ptr<GraphComponentInteractor> _graphComponentInteractor;
     OpenGLWindow* _openGLWindow;
+
+public slots:
+    void onCommandWillExecuteAsynchronously(const CommandManager* commandManager, const Command* command);
+    void onCommandCompleted(const CommandManager* commandManager, const Command* command);
 
 signals:
     void userInteractionStarted();

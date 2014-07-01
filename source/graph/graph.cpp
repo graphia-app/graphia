@@ -14,10 +14,14 @@ Graph::Graph() :
 {
     qRegisterMetaType<NodeId>("NodeId");
     qRegisterMetaType<EdgeId>("EdgeId");
+    qRegisterMetaType<ComponentId>("ComponentId");
 }
 
 Graph::~Graph()
 {
+    // Ensure no transactions are in progress
+    _mutex.lock();
+
     // Let the GraphArrays know that we're going away
     for(auto nodeArray : _nodeArrayList)
         nodeArray->invalidate();
@@ -339,20 +343,6 @@ void Graph::performTransaction(std::function<void(Graph&)> transaction)
 {
     ScopedTransaction lock(*this);
     transaction(*this);
-}
-
-void Graph::performIfUnlocked(std::function<void (Graph&)> transaction)
-{
-    if(_mutex.try_lock())
-    {
-        transaction(*this);
-        _mutex.unlock();
-    }
-}
-
-void Graph::waitForUnlock()
-{
-    std::unique_lock<std::mutex> locker(_mutex);
 }
 
 void Graph::updateElementIdData()

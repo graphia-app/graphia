@@ -163,7 +163,6 @@ public:
     bool paused();
     void resume();
 
-    void execute();
     void start();
     void stop();
 

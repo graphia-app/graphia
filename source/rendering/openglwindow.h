@@ -21,6 +21,9 @@ public:
 
     void setScene(std::shared_ptr<Scene> scene);
     const Scene& scene() const { return *_scene; }
+    void enableSceneUpdate() { _sceneUpdateEnabled = true; }
+    void disableSceneUpdate() { _sceneUpdateEnabled = false; }
+
     void setInteractor(std::shared_ptr<Interactor> interactor) { _interactor = interactor; }
     const Interactor& interactor() const { return *_interactor; }
     void enableInteraction() { _interactionEnabled = true; }
@@ -50,6 +53,7 @@ private:
     std::shared_ptr<QOpenGLContext> _context;
     std::shared_ptr<Scene> _scene;
     std::shared_ptr<Interactor> _interactor;
+    bool _sceneUpdateEnabled;
     bool _interactionEnabled;
     int _debugLevel;
     

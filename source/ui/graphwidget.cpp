@@ -11,11 +11,11 @@ GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
                          CommandManager &commandManager,
                          std::shared_ptr<SelectionManager> selectionManager, QWidget *parent) :
     QWidget(parent),
-    _graphComponentScene(new GraphComponentScene),
-    _graphComponentInteractor(new GraphComponentInteractor(graphModel,
-                                                           _graphComponentScene,
-                                                           commandManager,
-                                                           selectionManager))
+    _graphComponentScene(std::make_shared<GraphComponentScene>()),
+    _graphComponentInteractor(std::make_shared<GraphComponentInteractor>(graphModel,
+                                                                         _graphComponentScene,
+                                                                         commandManager,
+                                                                         selectionManager))
 {
     _openGLWindow = new OpenGLWindow;
 
@@ -30,14 +30,16 @@ GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
     layout()->addWidget(QWidget::createWindowContainer(_openGLWindow));
 }
 
-void GraphWidget::enableInteraction()
-{
-    _openGLWindow->enableInteraction();
-    _graphComponentScene->enableInteraction();
-}
-
-void GraphWidget::disableInteraction()
+void GraphWidget::onCommandWillExecuteAsynchronously(const CommandManager*, const Command*)
 {
     _graphComponentScene->disableInteraction();
     _openGLWindow->disableInteraction();
+    _openGLWindow->disableSceneUpdate();
+}
+
+void GraphWidget::onCommandCompleted(const CommandManager*, const Command*)
+{
+    _openGLWindow->enableSceneUpdate();
+    _openGLWindow->enableInteraction();
+    _graphComponentScene->enableInteraction();
 }

@@ -84,7 +84,7 @@ void SimpleComponentManager::updateComponents(const Graph* graph)
                 if(componentIdsAffected.size() > 1)
                 {
                     // More than one old component IDs were observed so components have merged
-                    emit componentsWillMerge(graph, componentIdsAffected, oldComponentId);
+                    emit componentsWillMerge(graph, &componentIdsAffected, oldComponentId);
                     componentIdsAffected.erase(oldComponentId);
 
                     for(ComponentId removedComponentId : componentIdsAffected)
@@ -136,7 +136,7 @@ void SimpleComponentManager::updateComponents(const Graph* graph)
     for(auto splitee : splitComponents)
     {
         ElementIdSet<ComponentId>& splitters = splitee.second;
-        emit componentSplit(graph, splitee.first, splitters);
+        emit componentSplit(graph, splitee.first, &splitters);
 
         for(ComponentId splitter : splitters)
         {

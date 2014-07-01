@@ -29,18 +29,17 @@ private:
     MainWidget* createNewTabWidget(const QString& filename);
     void closeTab(int index);
     QString showGeneralFileOpenDialog();
-    void configureActionPauseLayout(bool pause);
-    void setEditActionAvailability();
-    void updatePerTabUi();
+    void configurePauseLayoutAction();
+    void configureSelectActions();
+    void configureEditActions();
+    void configureUndoActions();
+    void configureStatusBar();
+    void configureUI();
 
 private slots:
     void on_actionOpen_triggered();
     void on_actionQuit_triggered();
     void on_tabs_tabCloseRequested(int index);
-
-    void on_loadProgress(int percentage);
-    void on_loadCompletion(int success);
-    void on_graphChanged(const Graph* graph);
 
     void on_actionPause_Layout_triggered();
     void on_tabs_currentChanged(int index);
@@ -52,8 +51,13 @@ private slots:
     void on_actionRedo_triggered();
     void on_actionDelete_triggered();
 
-    void on_commandCompleted(const CommandManager* commandManager, const Command* command);
-    void on_selectionChanged(const SelectionManager* selectionManager);
+    void onLoadProgress(int percentage);
+    void onLoadCompletion(int success);
+    void onGraphChanged(const Graph* graph);
+
+    void onCommandWillExecuteAsynchronously(const CommandManager* commandManager, const Command* command);
+    void onCommandCompleted(const CommandManager* commandManager, const Command* command);
+    void onSelectionChanged(const SelectionManager* selectionManager);
 
 public:
     bool openFileInNewTab(const QString& filename);
@@ -61,6 +65,7 @@ public:
 private:
     Ui::MainWindow* _ui;
     QLabel* _statusBarLabel;
+    bool _disableUI;
 };
 
 #endif // MAINWINDOW_H

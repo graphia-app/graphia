@@ -14,7 +14,8 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     _ui(new Ui::MainWindow),
-    _statusBarLabel(new QLabel)
+    _statusBarLabel(new QLabel),
+    _disableUI(false)
 {
     _ui->setupUi(this);
     _ui->statusBar->addWidget(_statusBarLabel);
@@ -35,11 +36,12 @@ MainWidget *MainWindow::createNewTabWidget(const QString& filename)
 {
     MainWidget* widget = new MainWidget;
 
-    connect(widget, &MainWidget::progress, this, &MainWindow::on_loadProgress);
-    connect(widget, &MainWidget::complete, this, &MainWindow::on_loadCompletion);
-    connect(widget, &MainWidget::graphChanged, this, &MainWindow::on_graphChanged);
-    connect(widget, &MainWidget::commandCompleted, this, &MainWindow::on_commandCompleted);
-    connect(widget, &MainWidget::selectionChanged, this, &MainWindow::on_selectionChanged);
+    connect(widget, &MainWidget::progress, this, &MainWindow::onLoadProgress);
+    connect(widget, &MainWidget::complete, this, &MainWindow::onLoadCompletion);
+    connect(widget, &MainWidget::graphChanged, this, &MainWindow::onGraphChanged);
+    connect(widget, &MainWidget::commandWillExecuteAsynchronously, this, &MainWindow::onCommandWillExecuteAsynchronously);
+    connect(widget, &MainWidget::commandCompleted, this, &MainWindow::onCommandCompleted);
+    connect(widget, &MainWidget::selectionChanged, this, &MainWindow::onSelectionChanged);
 
     widget->initFromFile(filename);
 
@@ -59,8 +61,13 @@ QString MainWindow::showGeneralFileOpenDialog()
     return QFileDialog::getOpenFileName(this, tr("Open File..."), QString(), tr("GML Files (*.gml)"));
 }
 
-void MainWindow::configureActionPauseLayout(bool pause)
+void MainWindow::configurePauseLayoutAction()
 {
+    bool pause = false;
+    MainWidget* widget;
+    if((widget = currentTabWidget()) != nullptr)
+        pause = widget->layoutIsPaused();
+
     if(pause)
     {
         _ui->actionPause_Layout->setText(tr("Resume Layout"));
@@ -71,9 +78,20 @@ void MainWindow::configureActionPauseLayout(bool pause)
         _ui->actionPause_Layout->setText(tr("Pause Layout"));
         _ui->actionPause_Layout->setIcon(QIcon::fromTheme("media-playback-pause"));
     }
+
+    _ui->actionPause_Layout->setEnabled(widget != nullptr && !_disableUI);
 }
 
-void MainWindow::setEditActionAvailability()
+void MainWindow::configureSelectActions()
+{
+    bool enabled = currentTabWidget() != nullptr && !_disableUI;
+
+    _ui->actionSelect_All->setEnabled(enabled);
+    _ui->actionSelect_None->setEnabled(enabled);
+    _ui->actionInvert_Selection->setEnabled(enabled);
+}
+
+void MainWindow::configureEditActions()
 {
     bool editable = false;
     bool selectionNonEmpty = false;
@@ -86,38 +104,51 @@ void MainWindow::setEditActionAvailability()
                 !widget->selectionManager()->selectedNodes().empty();
     }
 
-    _ui->actionDelete->setEnabled(editable && selectionNonEmpty);
+    _ui->actionDelete->setEnabled(editable && selectionNonEmpty && !_disableUI);
 }
 
-void MainWindow::updatePerTabUi()
+void MainWindow::configureUndoActions()
 {
     MainWidget* widget;
     if((widget = currentTabWidget()) != nullptr)
     {
-        configureActionPauseLayout(widget->layoutIsPaused());
-        _statusBarLabel->setText(QString(tr("%1 nodes, %2 edges, %3 components")).arg(
-                                    widget->graphModel()->graph().numNodes()).arg(
-                                    widget->graphModel()->graph().numEdges()).arg(
-                                    widget->graphModel()->graph().numComponents()));
-
-        _ui->actionUndo->setEnabled(widget->canUndo());
+        _ui->actionUndo->setEnabled(widget->canUndo() && !_disableUI);
         _ui->actionUndo->setText(widget->nextUndoAction());
-        _ui->actionRedo->setEnabled(widget->canRedo());
+        _ui->actionRedo->setEnabled(widget->canRedo() && !_disableUI);
         _ui->actionRedo->setText(widget->nextRedoAction());
-
-        setEditActionAvailability();
     }
     else
     {
-        _statusBarLabel->setText("");
-
         _ui->actionUndo->setEnabled(false);
         _ui->actionUndo->setText(tr("Undo"));
         _ui->actionRedo->setEnabled(false);
         _ui->actionRedo->setText(tr("Redo"));
-
-        setEditActionAvailability();
     }
+}
+
+void MainWindow::configureStatusBar()
+{
+    MainWidget* widget;
+    if((widget = currentTabWidget()) != nullptr)
+    {
+        _statusBarLabel->setText(QString(tr("%1 nodes, %2 edges, %3 components")).arg(
+                                    widget->graphModel()->graph().numNodes()).arg(
+                                    widget->graphModel()->graph().numEdges()).arg(
+                                    widget->graphModel()->graph().numComponents()));
+    }
+    else
+    {
+        _statusBarLabel->setText("");
+    }
+}
+
+void MainWindow::configureUI()
+{
+    configurePauseLayoutAction();
+    configureSelectActions();
+    configureEditActions();
+    configureUndoActions();
+    configureStatusBar();
 }
 
 void MainWindow::on_actionOpen_triggered()
@@ -173,29 +204,29 @@ void MainWindow::on_tabs_tabCloseRequested(int index)
     closeTab(index);
 }
 
-void MainWindow::on_loadProgress(int percentage)
+void MainWindow::onLoadProgress(int percentage)
 {
     MainWidget* widget = static_cast<MainWidget*>(sender());
     Q_ASSERT(widget != nullptr);
 
     int tabIndex = _ui->tabs->indexOf(widget);
     _ui->tabs->setTabText(tabIndex, QString(tr("%1 %2%")).arg(widget->graphModel()->name()).arg(percentage));
-    updatePerTabUi();
+    configureUI();
 }
 
-void MainWindow::on_loadCompletion(int /*success*/)
+void MainWindow::onLoadCompletion(int /*success*/)
 {
     MainWidget* widget = static_cast<MainWidget*>(sender());
     Q_ASSERT(widget != nullptr);
 
     int tabIndex = _ui->tabs->indexOf(widget);
     _ui->tabs->setTabText(tabIndex, widget->graphModel()->name());
-    updatePerTabUi();
+    configureUI();
 }
 
-void MainWindow::on_graphChanged(const Graph*)
+void MainWindow::onGraphChanged(const Graph*)
 {
-    updatePerTabUi();
+    configureUI();
 }
 
 void MainWindow::on_actionQuit_triggered()
@@ -209,21 +240,17 @@ void MainWindow::on_actionPause_Layout_triggered()
     if((widget = currentTabWidget()) != nullptr)
     {
         if(widget->layoutIsPaused())
-        {
             widget->resumeLayout();
-            configureActionPauseLayout(false);
-        }
         else
-        {
             widget->pauseLayout();
-            configureActionPauseLayout(true);
-        }
+
+        configurePauseLayoutAction();
     }
 }
 
 void MainWindow::on_tabs_currentChanged(int)
 {
-    updatePerTabUi();
+    configureUI();
 }
 
 void MainWindow::on_actionSelect_All_triggered()
@@ -268,12 +295,19 @@ void MainWindow::on_actionDelete_triggered()
         widget->deleteSelectedNodes();
 }
 
-void MainWindow::on_commandCompleted(const CommandManager*, const Command*)
+void MainWindow::onCommandWillExecuteAsynchronously(const CommandManager*, const Command*)
 {
-    updatePerTabUi();
+    _disableUI = true;
+    configureUI();
 }
 
-void MainWindow::on_selectionChanged(const SelectionManager*)
+void MainWindow::onCommandCompleted(const CommandManager*, const Command*)
 {
-    updatePerTabUi();
+    _disableUI = false;
+    configureUI();
+}
+
+void MainWindow::onSelectionChanged(const SelectionManager*)
+{
+    configureUI();
 }

@@ -86,6 +86,8 @@ public:
     const std::vector<QString> undoableCommandDescriptions() const;
     const std::vector<QString> redoableCommandDescriptions() const;
 
+    bool busy() const;
+
 private:
     std::deque<std::unique_ptr<Command>> _stack;
     int _lastExecutedIndex;

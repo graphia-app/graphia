@@ -68,23 +68,18 @@ void MainWidget::onCompletion(int success)
     _selectionManager = std::make_shared<SelectionManager>(_graphModel->graph());
     _graphWidget = new GraphWidget(_graphModel, _commandManager, _selectionManager);
 
-    connect(_graphWidget, &GraphWidget::userInteractionStarted,
-        [this]
-        {
-            pauseLayout(true);
-        });
+    connect(_graphWidget, &GraphWidget::userInteractionStarted,  [this] { pauseLayout(true); });
+    connect(_graphWidget, &GraphWidget::userInteractionFinished, [this] { resumeLayout(true); });
 
-    connect(_graphWidget, &GraphWidget::userInteractionFinished,
-        [this]
-        {
-            resumeLayout(true);
-        });
-
+    connect(&_commandManager, &CommandManager::commandWillExecuteAsynchronously, [this] { pauseLayout(true); });
+    connect(&_commandManager, &CommandManager::commandWillExecuteAsynchronously, _graphWidget, &GraphWidget::onCommandWillExecuteAsynchronously);
     connect(&_commandManager, &CommandManager::commandWillExecuteAsynchronously, this, &MainWidget::commandWillExecuteAsynchronously);
-    connect(&_commandManager, &CommandManager::commandWillExecuteAsynchronously, this, &MainWidget::onCommandWillExecuteAsynchronously);
-    connect(&_commandManager, &CommandManager::commandProgress, this, &MainWidget::commandProgress);
+
+    connect(&_commandManager, &CommandManager::commandProgress, this, &MainWidget::commandProgress); 
+
+    connect(&_commandManager, &CommandManager::commandCompleted, [this] { resumeLayout(true); });
+    connect(&_commandManager, &CommandManager::commandCompleted, _graphWidget, &GraphWidget::onCommandCompleted);
     connect(&_commandManager, &CommandManager::commandCompleted, this, &MainWidget::commandCompleted);
-    connect(&_commandManager, &CommandManager::commandCompleted, this, &MainWidget::onCommandCompleted);
 
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &MainWidget::selectionChanged);
 
@@ -120,37 +115,25 @@ void MainWidget::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
         _nodeLayoutThread->removeComponent(componentId);
 }
 
-void MainWidget::onComponentSplit(const Graph*, ComponentId /*splitter*/, const ElementIdSet<ComponentId>& splitters)
+void MainWidget::onComponentSplit(const Graph*, ComponentId /*splitter*/, const ElementIdSet<ComponentId>* splitters)
 {
     if(_nodeLayoutThread)
     {
-        for(ComponentId componentId : splitters)
+        for(ComponentId componentId : *splitters)
             _nodeLayoutThread->addComponent(componentId);
     }
 }
 
-void MainWidget::onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers, ComponentId merger)
+void MainWidget::onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>* mergers, ComponentId merger)
 {
     if(_nodeLayoutThread)
     {
-        for(ComponentId componentId : mergers)
+        for(ComponentId componentId : *mergers)
         {
             if(componentId != merger)
                 _nodeLayoutThread->removeComponent(componentId);
         }
     }
-}
-
-void MainWidget::onCommandWillExecuteAsynchronously(const CommandManager*, const Command*)
-{
-    pauseLayout(true);
-    _graphWidget->disableInteraction();
-}
-
-void MainWidget::onCommandCompleted(const CommandManager*, const Command*)
-{
-    _graphWidget->enableInteraction();
-    resumeLayout(true);
 }
 
 void MainWidget::pauseLayout(bool autoResume)
@@ -247,8 +230,7 @@ void MainWidget::deleteSelectedNodes()
     _commandManager.execute(nodes.size() > 1 ? tr("Delete Nodes") : tr("Delete Node"),
         [this, nodes](ProgressFn)
         {
-            _selectionManager->clearNodeSelection();
-            // Edge removal happens implicitly
+            _selectionManager->clearNodeSelection(false);
             _graphModel->graph().removeNodes(nodes);
             return true;
         },

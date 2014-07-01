@@ -108,11 +108,6 @@ void LayoutThread::resume()
     _waitForResume.notify_all();
 }
 
-void LayoutThread::execute()
-{
-    resume();
-}
-
 void LayoutThread::start()
 {
     _started = true;
@@ -173,10 +168,7 @@ void LayoutThread::run()
         std::unique_lock<std::mutex> lock(_mutex);
 
         if(_stop)
-        {
-            lock.unlock();
             break;
-        }
 
         if(!_stop && (_pause || allLayoutsShouldPause() || (!iterative() && _repeating)))
         {
@@ -185,8 +177,6 @@ void LayoutThread::run()
             _waitForPause.notify_all();
             _waitForResume.wait(lock);
         }
-        else
-            lock.unlock();
 
         std::this_thread::yield();
     }

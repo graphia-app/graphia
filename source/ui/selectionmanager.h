@@ -16,28 +16,31 @@ public:
     ElementIdSet<NodeId> selectedNodes() const;
     ElementIdSet<NodeId> unselectedNodes() const;
 
-    bool selectNode(NodeId nodeId);
-    bool selectNodes(const ElementIdSet<NodeId>& nodeIds);
+    bool selectNode(NodeId nodeId, bool notify = true);
+    bool selectNodes(const ElementIdSet<NodeId>& nodeIds, bool notify = true);
     template<typename InputIterator> bool selectNodes(InputIterator first,
-                                                      InputIterator last);
+                                                      InputIterator last,
+                                                      bool notify = true);
 
-    bool deselectNode(NodeId nodeId);
-    bool deselectNodes(const ElementIdSet<NodeId>& nodeIds);
+    bool deselectNode(NodeId nodeId, bool notify = true);
+    bool deselectNodes(const ElementIdSet<NodeId>& nodeIds, bool notify = true);
     template<typename InputIterator> bool deselectNodes(InputIterator first,
-                                                        InputIterator last);
+                                                        InputIterator last,
+                                                        bool notify = true);
 
-    void toggleNode(NodeId nodeId);
-    void toggleNodes(const ElementIdSet<NodeId>& nodeIds);
+    void toggleNode(NodeId nodeId, bool notify = true);
+    void toggleNodes(const ElementIdSet<NodeId>& nodeIds, bool notify = true);
     template<typename InputIterator> void toggleNodes(InputIterator first,
-                                                      InputIterator last);
+                                                      InputIterator last,
+                                                      bool notify = true);
 
     bool nodeIsSelected(NodeId nodeId) const;
 
-    bool setSelectedNodes(const ElementIdSet<NodeId>& nodeIds);
+    bool setSelectedNodes(const ElementIdSet<NodeId>& nodeIds, bool notify = true);
 
-    bool selectAllNodes();
-    bool clearNodeSelection();
-    void invertNodeSelection();
+    bool selectAllNodes(bool notify = true);
+    bool clearNodeSelection(bool notify = true);
+    void invertNodeSelection(bool notify = true);
 
 private:
     const ReadOnlyGraph& _graph;
