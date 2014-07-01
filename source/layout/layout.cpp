@@ -158,7 +158,7 @@ void LayoutThread::run()
 {
     do
     {
-        nameCurrentThread("Layout (executing)");
+        nameCurrentThread("Layout >");
         for(auto layout : _layouts)
         {
             if(layout->shouldPause())
@@ -181,7 +181,7 @@ void LayoutThread::run()
         if(!_stop && (_pause || allLayoutsShouldPause() || (!iterative() && _repeating)))
         {
             _paused = true;
-            nameCurrentThread("Layout (paused)");
+            nameCurrentThread("Layout ||");
             _waitForPause.notify_all();
             _waitForResume.wait(lock);
         }

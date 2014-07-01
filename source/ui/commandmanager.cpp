@@ -19,7 +19,7 @@ void CommandManager::execute(std::unique_ptr<Command> command)
 
     auto executeCommand = [this](unique_lock_with_side_effects<std::mutex> /*locker*/, std::unique_ptr<Command> command)
     {
-        nameCurrentThread(command->description() + " (first time)");
+        nameCurrentThread(command->description());
 
         if(!command->execute([this, &command](int progress) { emit commandProgress(this, command.get(), progress); }))
             return;
@@ -60,7 +60,7 @@ void CommandManager::undo()
 
     auto undoCommand = [this, &command](unique_lock_with_side_effects<std::mutex> /*locker*/)
     {
-        nameCurrentThread(command->description() + " (undo)");
+        nameCurrentThread("(u) " + command->description());
 
         command->undo([this, &command](int progress) { emit commandProgress(this, command.get(), progress); });
         _lastExecutedIndex--;
@@ -86,7 +86,7 @@ void CommandManager::redo()
 
     auto redoCommand = [this, &command](unique_lock_with_side_effects<std::mutex> /*locker*/)
     {
-        nameCurrentThread(command->description() + " (redo)");
+        nameCurrentThread("(r) " + command->description());
 
         command->execute([this, &command](int progress) { emit commandProgress(this, command.get(), progress); });
     };
