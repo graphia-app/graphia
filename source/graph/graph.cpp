@@ -319,8 +319,8 @@ void Graph::beginTransaction()
 {
     if(_graphChangeDepth++ <= 0)
     {
-        _mutex.lock();
         emit graphWillChange(this);
+        _mutex.lock();
     }
 }
 
@@ -330,8 +330,8 @@ void Graph::endTransaction()
     if(--_graphChangeDepth <= 0)
     {
         updateElementIdData();
-        emit graphChanged(this);
         _mutex.unlock();
+        emit graphChanged(this);
     }
 }
 
