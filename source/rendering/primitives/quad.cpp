@@ -72,7 +72,7 @@ void Quad::create()
 }
 
 void Quad::generateVertexData(QVector<float>& vertices, QVector<float>& normals,
-                                QVector<float>& texCoords, QVector<float>& tangents,
+                                QVector<float>& /*texCoords*/, QVector<float>& /*tangents*/,
                                 QVector<unsigned int>& indices)
 {
     // Resize vector to hold our data

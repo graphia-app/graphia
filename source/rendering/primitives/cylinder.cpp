@@ -77,7 +77,7 @@ void Cylinder::create()
 }
 
 void Cylinder::generateVertexData(QVector<float>& vertices, QVector<float>& normals,
-                                  QVector<float>& texCoords, QVector<float>& tangents,
+                                  QVector<float>& /*texCoords*/, QVector<float>& /*tangents*/,
                                   QVector<unsigned int>& indices)
 {
     int faces = (_slices);

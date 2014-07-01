@@ -38,8 +38,7 @@ public slots:
     }
 
 private:
-    void generateVertexData(QVector<float>& vertices, QVector<float>& normals,
-                             QVector<float>& texCoords, QVector<float>& tangents,
+    void generateVertexData(QVector<float>& vertices, QVector<float>& normals, QVector<float>&, QVector<float>&,
                              QVector<unsigned int>& indices);
     void updateVertexArrayObject();
 
