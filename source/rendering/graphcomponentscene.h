@@ -71,7 +71,7 @@ public:
     void moveToPreviousComponent();
     void moveToComponent(ComponentId componentId);
 
-    bool interactionAllowed();
+    bool transitioning();
 
     void setGraphModel(std::shared_ptr<GraphModel> graphModel);
     void setSelectionManager(std::shared_ptr<SelectionManager> selectionManager);
@@ -147,6 +147,9 @@ private:
 
     QOpenGLFunctions_3_3_Core* _funcs;
 
+    std::vector<ComponentId> _componentIdsCache;
+    void refreshComponentIdsCache();
+
     ComponentId _focusComponentId;
     ComponentId _lastSplitterFocusComponentId;
     std::unique_ptr<ComponentArray<ComponentViewData>> _componentsViewData;
@@ -164,10 +167,12 @@ private:
 
     QOpenGLShaderProgram _nodesShader;
     std::vector<GLfloat> _nodePositionData;
+    int _numNodesInPositionData;
     QOpenGLBuffer _nodePositionBuffer;
 
     QOpenGLShaderProgram _edgesShader;
     std::vector<GLfloat> _edgePositionData;
+    int _numEdgesInPositionData;
     QOpenGLBuffer _edgePositionBuffer;
 
     std::vector<GLfloat> _nodeVisualData;

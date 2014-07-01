@@ -10,6 +10,7 @@ class GraphComponentInteractor;
 class GraphModel;
 class CommandManager;
 class SelectionManager;
+class OpenGLWindow;
 
 class GraphWidget : public QWidget
 {
@@ -20,9 +21,13 @@ public:
                 std::shared_ptr<SelectionManager> selectionManager,
                 QWidget *parent = nullptr);
 
+    void enableInteraction();
+    void disableInteraction();
+
 private:
     std::shared_ptr<GraphComponentScene> _graphComponentScene;
     std::shared_ptr<GraphComponentInteractor> _graphComponentInteractor;
+    OpenGLWindow* _openGLWindow;
 
 signals:
     void userInteractionStarted();

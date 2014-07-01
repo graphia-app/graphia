@@ -6,7 +6,7 @@
 #include "../layout/layout.h"
 #include "../layout/eadeslayout.h"
 #include "../layout/collision.h"
-#include "../utils/utils.h"
+#include "../utils/make_unique.h"
 #include "graphwidget.h"
 #include "selectionmanager.h"
 
@@ -66,15 +66,15 @@ void MainWidget::onCompletion(int success)
     _nodeLayoutThread->start();
 
     _selectionManager = std::make_shared<SelectionManager>(_graphModel->graph());
-    GraphWidget* graphWidget = new GraphWidget(_graphModel, _commandManager, _selectionManager);
+    _graphWidget = new GraphWidget(_graphModel, _commandManager, _selectionManager);
 
-    connect(graphWidget, &GraphWidget::userInteractionStarted,
+    connect(_graphWidget, &GraphWidget::userInteractionStarted,
         [this]
         {
             pauseLayout(true);
         });
 
-    connect(graphWidget, &GraphWidget::userInteractionFinished,
+    connect(_graphWidget, &GraphWidget::userInteractionFinished,
         [this]
         {
             resumeLayout(true);
@@ -89,7 +89,7 @@ void MainWidget::onCompletion(int success)
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &MainWidget::selectionChanged);
 
     layout()->setContentsMargins(0, 0, 0, 0);
-    layout()->addWidget(graphWidget);
+    layout()->addWidget(_graphWidget);
 
     if(_graphModel->contentWidget() != nullptr)
         layout()->addWidget(_graphModel->contentWidget());
@@ -143,12 +143,14 @@ void MainWidget::onComponentsWillMerge(const Graph*, const ElementIdSet<Componen
 
 void MainWidget::onCommandWillExecuteAsynchronously(const CommandManager*, const Command*)
 {
-    qDebug() << "onCommandWillExecuteAsynchronously stub";
+    pauseLayout(true);
+    _graphWidget->disableInteraction();
 }
 
 void MainWidget::onCommandCompleted(const CommandManager*, const Command*)
 {
-    qDebug() << "onCommandCompleted stub";
+    _graphWidget->enableInteraction();
+    resumeLayout(true);
 }
 
 void MainWidget::pauseLayout(bool autoResume)
@@ -265,12 +267,10 @@ void MainWidget::deleteSelectedNodes()
 
 void MainWidget::undo()
 {
-    if(_commandManager.canUndo())
-        _commandManager.undo();
+    _commandManager.undo();
 }
 
 void MainWidget::redo()
 {
-    if(_commandManager.canRedo())
-        _commandManager.redo();
+    _commandManager.redo();
 }

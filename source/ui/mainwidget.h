@@ -13,6 +13,7 @@ class SelectionManager;
 class GraphFileParserThread;
 class NodeLayoutThread;
 class LayoutThread;
+class GraphWidget;
 
 class MainWidget : public QWidget
 {
@@ -39,6 +40,7 @@ private:
     CommandManager _commandManager;
     std::unique_ptr<GraphFileParserThread> _graphFileParserThread;
     std::unique_ptr<NodeLayoutThread> _nodeLayoutThread;
+    GraphWidget* _graphWidget;
 
     bool _resumePreviouslyActiveLayout;
 

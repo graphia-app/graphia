@@ -90,7 +90,7 @@ private:
     std::deque<std::unique_ptr<Command>> _stack;
     int _lastExecutedIndex;
 
-    mutable std::mutex _lock;
+    mutable std::mutex _mutex;
 
 signals:
     void commandWillExecuteAsynchronously(const CommandManager* commandManager, const Command* command) const;

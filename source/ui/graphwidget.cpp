@@ -17,15 +17,27 @@ GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
                                                            commandManager,
                                                            selectionManager))
 {
-    OpenGLWindow* window = new OpenGLWindow;
+    _openGLWindow = new OpenGLWindow;
 
-    window->setScene(_graphComponentScene);
-    window->setInteractor(_graphComponentInteractor);
+    _openGLWindow->setScene(_graphComponentScene);
+    _openGLWindow->setInteractor(_graphComponentInteractor);
 
     connect(_graphComponentInteractor.get(), &Interactor::userInteractionStarted, this, &GraphWidget::userInteractionStarted);
     connect(_graphComponentInteractor.get(), &Interactor::userInteractionFinished, this, &GraphWidget::userInteractionFinished);
 
     setLayout(new QVBoxLayout());
     layout()->setContentsMargins(0, 0, 0, 0);
-    layout()->addWidget(QWidget::createWindowContainer(window));
+    layout()->addWidget(QWidget::createWindowContainer(_openGLWindow));
+}
+
+void GraphWidget::enableInteraction()
+{
+    _openGLWindow->enableInteraction();
+    _graphComponentScene->enableInteraction();
+}
+
+void GraphWidget::disableInteraction()
+{
+    _graphComponentScene->disableInteraction();
+    _openGLWindow->disableInteraction();
 }

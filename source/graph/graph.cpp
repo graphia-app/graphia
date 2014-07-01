@@ -1,7 +1,7 @@
 #include "graph.h"
 #include "grapharray.h"
 #include "simplecomponentmanager.h"
-#include "../utils/utils.h"
+#include "../utils/make_unique.h"
 
 #include <QtGlobal>
 #include <QMetaType>
@@ -319,8 +319,8 @@ void Graph::beginTransaction()
 {
     if(_graphChangeDepth++ <= 0)
     {
-        emit graphWillChange(this);
         _mutex.lock();
+        emit graphWillChange(this);
     }
 }
 
@@ -330,8 +330,8 @@ void Graph::endTransaction()
     if(--_graphChangeDepth <= 0)
     {
         updateElementIdData();
-        _mutex.unlock();
         emit graphChanged(this);
+        _mutex.unlock();
     }
 }
 
@@ -339,6 +339,20 @@ void Graph::performTransaction(std::function<void(Graph&)> transaction)
 {
     ScopedTransaction lock(*this);
     transaction(*this);
+}
+
+void Graph::performIfUnlocked(std::function<void (Graph&)> transaction)
+{
+    if(_mutex.try_lock())
+    {
+        transaction(*this);
+        _mutex.unlock();
+    }
+}
+
+void Graph::waitForUnlock()
+{
+    std::unique_lock<std::mutex> locker(_mutex);
 }
 
 void Graph::updateElementIdData()

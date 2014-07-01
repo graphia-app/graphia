@@ -3,7 +3,7 @@
 #include "../layout/layout.h"
 #include "../rendering/graphcomponentscene.h"
 #include "../maths/ray.h"
-#include "../utils/utils.h"
+#include "../utils/make_unique.h"
 
 #include <unordered_set>
 #include <vector>

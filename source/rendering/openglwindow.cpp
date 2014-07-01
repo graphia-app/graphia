@@ -13,7 +13,8 @@
 #include <QTimer>
 
 OpenGLWindow::OpenGLWindow(QScreen* screen)
-    : QWindow(screen)
+    : QWindow(screen),
+      _interactionEnabled(true)
 {
     // Tell Qt we will use OpenGL for this window
     setSurfaceType(OpenGLSurface);
@@ -141,36 +142,43 @@ void OpenGLWindow::messageLogged(const QOpenGLDebugMessage &message)
 
 void OpenGLWindow::keyPressEvent(QKeyEvent* e)
 {
-    _interactor->keyPressEvent(e);
+    if(_interactionEnabled)
+        _interactor->keyPressEvent(e);
 }
 
 void OpenGLWindow::keyReleaseEvent(QKeyEvent* e)
 {
-    _interactor->keyReleaseEvent(e);
+    if(_interactionEnabled)
+        _interactor->keyReleaseEvent(e);
 }
 
 void OpenGLWindow::mousePressEvent(QMouseEvent* e)
 {
-    _interactor->mousePressEvent(e);
+    if(_interactionEnabled)
+        _interactor->mousePressEvent(e);
 }
 
 void OpenGLWindow::mouseReleaseEvent(QMouseEvent* e)
 {
-    _interactor->mouseReleaseEvent(e);
+    if(_interactionEnabled)
+        _interactor->mouseReleaseEvent(e);
 }
 
 void OpenGLWindow::mouseMoveEvent(QMouseEvent* e)
 {
-    _interactor->mouseMoveEvent(e);
+    if(_interactionEnabled)
+        _interactor->mouseMoveEvent(e);
 }
 
 void OpenGLWindow::mouseDoubleClickEvent(QMouseEvent* e)
 {
-    _interactor->mouseDoubleClickEvent(e);
+    if(_interactionEnabled)
+        _interactor->mouseDoubleClickEvent(e);
 }
 
 void OpenGLWindow::wheelEvent(QWheelEvent* e)
 {
-    _interactor->wheelEvent(e);
+    if(_interactionEnabled)
+        _interactor->wheelEvent(e);
 }
 

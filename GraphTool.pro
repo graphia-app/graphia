@@ -102,7 +102,9 @@ HEADERS += \
     source/ui/graphwidget.h \
     source/ui/mainwidget.h \
     source/utils/utils.h \
-    source/utils/namethread.h
+    source/utils/namethread.h \
+    source/utils/unique_lock_with_side_effects.h \
+    source/utils/make_unique.h
 
 FORMS    += source/mainwindow.ui
 

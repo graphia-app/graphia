@@ -23,6 +23,8 @@ public:
     const Scene& scene() const { return *_scene; }
     void setInteractor(std::shared_ptr<Interactor> interactor) { _interactor = interactor; }
     const Interactor& interactor() const { return *_interactor; }
+    void enableInteraction() { _interactionEnabled = true; }
+    void disableInteraction() { _interactionEnabled = false; }
     
 protected:
     virtual void initialise();
@@ -48,6 +50,7 @@ private:
     std::shared_ptr<QOpenGLContext> _context;
     std::shared_ptr<Scene> _scene;
     std::shared_ptr<Interactor> _interactor;
+    bool _interactionEnabled;
     int _debugLevel;
     
     QTime _time;

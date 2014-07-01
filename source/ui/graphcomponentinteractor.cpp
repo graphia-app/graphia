@@ -81,7 +81,7 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
     switch(mouseEvent->button())
     {
     case Qt::RightButton:
-        if(!_scene->interactionAllowed())
+        if(!_scene->transitioning())
         {
             _rightMouseButtonHeld = false;
             _scene->enableFocusNodeTracking();
@@ -101,7 +101,7 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
     case Qt::LeftButton:
         _leftMouseButtonHeld = false;
 
-        if(!_scene->interactionAllowed())
+        if(!_scene->transitioning())
             return;
 
         emit userInteractionFinished();
@@ -177,7 +177,7 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
 
 void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
 {
-    if(!_scene->interactionAllowed())
+    if(!_scene->transitioning())
         return;
 
     Camera* camera = _scene->camera();
