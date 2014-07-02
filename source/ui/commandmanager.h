@@ -36,29 +36,21 @@ public:
             [](ProgressFn)
             {
                 Q_ASSERT(!"undoFunction not implemented");
-            }, bool asynchronous = false) :
-        _description(description),
-        _executeFunction(executeFunction),
-        _undoFunction(undoFunction),
-        _asynchronous(asynchronous)
-    {}
+            }, bool asynchronous = false);
 
-    const QString& description() const { return _description; }
+    const QString& description() const;
+    const QString& undoDescription() const;
+    const QString& redoDescription() const;
     bool asynchronous() const { return _asynchronous; }
 
 private:
     // Return false if the command failed, or did nothing
-    virtual bool execute(ProgressFn p)
-    {
-        return _executeFunction(p);
-    }
-
-    virtual void undo(ProgressFn p)
-    {
-        _undoFunction(p);
-    }
+    virtual bool execute(ProgressFn p);
+    virtual void undo(ProgressFn p);
 
     QString _description;
+    QString _undoDescription;
+    QString _redoDescription;
     std::function<bool(ProgressFn)> _executeFunction;
     std::function<void(ProgressFn)> _undoFunction;
     bool _asynchronous;
@@ -86,9 +78,15 @@ public:
     const std::vector<QString> undoableCommandDescriptions() const;
     const std::vector<QString> redoableCommandDescriptions() const;
 
+    const QString nextUndoAction() const;
+    const QString nextRedoAction() const;
+
     bool busy() const;
 
 private:
+    bool canUndoNoLocking() const;
+    bool canRedoNoLocking() const;
+
     std::deque<std::shared_ptr<Command>> _stack;
     int _lastExecutedIndex;
 

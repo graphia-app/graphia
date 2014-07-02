@@ -204,20 +204,20 @@ void MainWidget::invertSelection()
 
 const QString MainWidget::nextUndoAction() const
 {
-    QString undoAction = tr("Undo");
+    QString undoAction = _commandManager.nextUndoAction();
 
-    if(!_commandManager.undoableCommandDescriptions().empty())
-        undoAction.append(tr(" ") + _commandManager.undoableCommandDescriptions().front());
+    if(undoAction.isEmpty())
+        undoAction = tr("Undo");
 
     return undoAction;
 }
 
 const QString MainWidget::nextRedoAction() const
 {
-    QString redoAction = tr("Redo");
+    QString redoAction = _commandManager.nextRedoAction();
 
-    if(!_commandManager.redoableCommandDescriptions().empty())
-        redoAction.append(tr(" ") + _commandManager.redoableCommandDescriptions().front());
+    if(redoAction.isEmpty())
+        redoAction = tr("Redo");
 
     return redoAction;
 }
