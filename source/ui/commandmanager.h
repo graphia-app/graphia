@@ -12,6 +12,7 @@
 #include <vector>
 #include <memory>
 #include <mutex>
+#include <atomic>
 
 using ProgressFn = std::function<void(int)>;
 
@@ -101,7 +102,7 @@ private:
     int _lastExecutedIndex;
 
     mutable std::mutex _mutex;
-    bool _busy;
+    std::atomic<bool> _busy;
 
 signals:
     void commandWillExecuteAsynchronously(std::shared_ptr<const Command> command, const QString& verb) const;
