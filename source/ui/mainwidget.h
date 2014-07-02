@@ -32,7 +32,7 @@ signals:
     void selectionChanged(const SelectionManager* selectionManager) const;
 
 public slots:
-    void onCompletion(int success);
+    void onLoadCompletion(bool success);
 
 private:
     bool _loadComplete;

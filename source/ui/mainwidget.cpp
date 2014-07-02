@@ -54,13 +54,13 @@ bool MainWidget::initFromFile(const QString& filename)
 
     _graphFileParserThread = std::make_unique<GraphFileParserThread>(filename, _graphModel->graph(), std::move(graphFileParser));
     connect(_graphFileParserThread.get(), &GraphFileParserThread::progress, this, &MainWidget::progress);
-    connect(_graphFileParserThread.get(), &GraphFileParserThread::complete, this, &MainWidget::onCompletion);
+    connect(_graphFileParserThread.get(), &GraphFileParserThread::complete, this, &MainWidget::onLoadCompletion);
     _graphFileParserThread->start();
 
     return true;
 }
 
-void MainWidget::onCompletion(int success)
+void MainWidget::onLoadCompletion(bool success)
 {
     _loadComplete = true;
 
