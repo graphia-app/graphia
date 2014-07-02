@@ -10,15 +10,23 @@
 #include <QFileDialog>
 #include <QIcon>
 #include <QLabel>
+#include <QProgressBar>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     _ui(new Ui::MainWindow),
     _statusBarLabel(new QLabel),
-    _disableUI(false)
+    _statusBarProgressLabel(new QLabel),
+    _statusBarProgressBar(new QProgressBar)
 {
     _ui->setupUi(this);
     _ui->statusBar->addWidget(_statusBarLabel);
+
+    _statusBarProgressLabel->setVisible(false);
+    _ui->statusBar->addPermanentWidget(_statusBarProgressLabel);
+    _statusBarProgressBar->setVisible(false);
+    _statusBarProgressBar->setFixedWidth(200);
+    _ui->statusBar->addPermanentWidget(_statusBarProgressBar);
 }
 
 MainWindow::~MainWindow()
@@ -32,14 +40,30 @@ MainWidget *MainWindow::currentTabWidget()
     return widget;
 }
 
+TabData* MainWindow::currentTabData()
+{
+    return tabDataForWidget(currentTabWidget());
+}
+
+TabData*MainWindow::tabDataForWidget(MainWidget* widget)
+{
+    if(widget != nullptr && _tabData.contains(widget))
+        return &_tabData[widget];
+
+    return nullptr;
+}
+
 MainWidget *MainWindow::createNewTabWidget(const QString& filename)
 {
     MainWidget* widget = new MainWidget;
+    TabData initialTabData;
+    _tabData.insert(widget, initialTabData);
 
     connect(widget, &MainWidget::progress, this, &MainWindow::onLoadProgress);
     connect(widget, &MainWidget::complete, this, &MainWindow::onLoadCompletion);
     connect(widget, &MainWidget::graphChanged, this, &MainWindow::onGraphChanged);
     connect(widget, &MainWidget::commandWillExecuteAsynchronously, this, &MainWindow::onCommandWillExecuteAsynchronously);
+    connect(widget, &MainWidget::commandProgress, this, &MainWindow::onCommandProgress);
     connect(widget, &MainWidget::commandCompleted, this, &MainWindow::onCommandCompleted);
     connect(widget, &MainWidget::selectionChanged, this, &MainWindow::onSelectionChanged);
 
@@ -52,6 +76,7 @@ void MainWindow::closeTab(int index)
 {
     MainWidget* widget = static_cast<MainWidget*>(_ui->tabs->widget(index));
 
+    _tabData.remove(widget);
     _ui->tabs->removeTab(index);
     delete widget;
 }
@@ -79,12 +104,14 @@ void MainWindow::configurePauseLayoutAction()
         _ui->actionPause_Layout->setIcon(QIcon::fromTheme("media-playback-pause"));
     }
 
-    _ui->actionPause_Layout->setEnabled(widget != nullptr && !_disableUI);
+    _ui->actionPause_Layout->setEnabled(widget != nullptr && !widget->busy());
 }
 
 void MainWindow::configureSelectActions()
 {
-    bool enabled = currentTabWidget() != nullptr && !_disableUI;
+    MainWidget* widget = currentTabWidget();
+
+    bool enabled = widget != nullptr && !widget->busy();
 
     _ui->actionSelect_All->setEnabled(enabled);
     _ui->actionSelect_None->setEnabled(enabled);
@@ -102,9 +129,11 @@ void MainWindow::configureEditActions()
         editable = widget->graphModel()->editable();
         selectionNonEmpty = widget->selectionManager() != nullptr &&
                 !widget->selectionManager()->selectedNodes().empty();
-    }
 
-    _ui->actionDelete->setEnabled(editable && selectionNonEmpty && !_disableUI);
+        _ui->actionDelete->setEnabled(editable && selectionNonEmpty && !widget->busy());
+    }
+    else
+        _ui->actionDelete->setEnabled(false);
 }
 
 void MainWindow::configureUndoActions()
@@ -112,9 +141,9 @@ void MainWindow::configureUndoActions()
     MainWidget* widget;
     if((widget = currentTabWidget()) != nullptr)
     {
-        _ui->actionUndo->setEnabled(widget->canUndo() && !_disableUI);
+        _ui->actionUndo->setEnabled(widget->canUndo() && !widget->busy());
         _ui->actionUndo->setText(widget->nextUndoAction());
-        _ui->actionRedo->setEnabled(widget->canRedo() && !_disableUI);
+        _ui->actionRedo->setEnabled(widget->canRedo() && !widget->busy());
         _ui->actionRedo->setText(widget->nextRedoAction());
     }
     else
@@ -135,10 +164,37 @@ void MainWindow::configureStatusBar()
                                     widget->graphModel()->graph().numNodes()).arg(
                                     widget->graphModel()->graph().numEdges()).arg(
                                     widget->graphModel()->graph().numComponents()));
+
+        if(widget->busy())
+        {
+            const auto* tb = currentTabData();
+            _statusBarProgressLabel->setText(tb->command);
+            _statusBarProgressLabel->setVisible(true);
+
+            if(tb->commandProgress >= 0)
+            {
+                _statusBarProgressBar->setRange(0, 100);
+                _statusBarProgressBar->setValue(tb->commandProgress);
+            }
+            else
+            {
+                // Indeterminate
+                _statusBarProgressBar->setRange(0, 0);
+            }
+
+            _statusBarProgressBar->setVisible(true);
+        }
+        else
+        {
+            _statusBarProgressLabel->setVisible(false);
+            _statusBarProgressBar->setVisible(false);
+        }
     }
     else
     {
         _statusBarLabel->setText("");
+        _statusBarProgressLabel->setVisible(false);
+        _statusBarProgressBar->setVisible(false);
     }
 }
 
@@ -190,8 +246,15 @@ bool MainWindow::openFileInNewTab(const QString& filename)
     {
         MainWidget* widget = createNewTabWidget(filename);
 
-        int index = _ui->tabs->addTab(widget, QString(tr("%1 0%")).arg(widget->graphModel()->name()));
+        int index = _ui->tabs->addTab(widget, widget->graphModel()->name());
+
+        auto* tb = tabDataForWidget(widget);
+        tb->command = tr("Loading");
+        tb->commandProgress = 0;
+
         _ui->tabs->setCurrentIndex(index);
+
+        configureUI();
 
         return true;
     }
@@ -206,21 +269,16 @@ void MainWindow::on_tabs_tabCloseRequested(int index)
 
 void MainWindow::onLoadProgress(int percentage)
 {
-    MainWidget* widget = static_cast<MainWidget*>(sender());
-    Q_ASSERT(widget != nullptr);
+    auto* tb = currentTabData();
 
-    int tabIndex = _ui->tabs->indexOf(widget);
-    _ui->tabs->setTabText(tabIndex, QString(tr("%1 %2%")).arg(widget->graphModel()->name()).arg(percentage));
+    if(tb != nullptr)
+        tb->commandProgress = percentage;
+
     configureUI();
 }
 
 void MainWindow::onLoadCompletion(int /*success*/)
 {
-    MainWidget* widget = static_cast<MainWidget*>(sender());
-    Q_ASSERT(widget != nullptr);
-
-    int tabIndex = _ui->tabs->indexOf(widget);
-    _ui->tabs->setTabText(tabIndex, widget->graphModel()->name());
     configureUI();
 }
 
@@ -295,15 +353,39 @@ void MainWindow::on_actionDelete_triggered()
         widget->deleteSelectedNodes();
 }
 
-void MainWindow::onCommandWillExecuteAsynchronously(const CommandManager*, const Command*)
+void MainWindow::onCommandWillExecuteAsynchronously(std::shared_ptr<const Command> command)
 {
-    _disableUI = true;
+    TabData* tb;
+    if((tb = tabDataForWidget(dynamic_cast<MainWidget*>(QObject::sender()))) != nullptr)
+    {
+        tb->command = command->description();
+        tb->commandProgress = -1;
+    }
+
     configureUI();
 }
 
-void MainWindow::onCommandCompleted(const CommandManager*, const Command*)
+void MainWindow::onCommandProgress(std::shared_ptr<const Command> command, int progress)
 {
-    _disableUI = false;
+    TabData* tb;
+    if((tb = tabDataForWidget(dynamic_cast<MainWidget*>(QObject::sender()))) != nullptr)
+    {
+        tb->command = command->description();
+        tb->commandProgress = progress;
+    }
+
+    configureUI();
+}
+
+void MainWindow::onCommandCompleted(std::shared_ptr<const Command> command)
+{
+    TabData* tb;
+    if((tb = tabDataForWidget(dynamic_cast<MainWidget*>(QObject::sender()))) != nullptr)
+    {
+        tb->command = command->description();
+        tb->commandProgress = 100;
+    }
+
     configureUI();
 }
 

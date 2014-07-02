@@ -2,11 +2,14 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QString>
+#include <QMap>
 
 #include <memory>
 
 class MainWidget;
 class QLabel;
+class QProgressBar;
 class Graph;
 class Command;
 class CommandManager;
@@ -15,6 +18,17 @@ class SelectionManager;
 namespace Ui {
 class MainWindow;
 }
+
+struct TabData
+{
+    TabData() :
+        command(QString()),
+        commandProgress(0)
+    {}
+
+    QString command;
+    int commandProgress;
+};
 
 class MainWindow : public QMainWindow
 {
@@ -26,6 +40,9 @@ public:
     
 private:
     MainWidget* currentTabWidget();
+    TabData* currentTabData();
+    TabData* tabDataForWidget(MainWidget* widget);
+
     MainWidget* createNewTabWidget(const QString& filename);
     void closeTab(int index);
     QString showGeneralFileOpenDialog();
@@ -55,8 +72,9 @@ private slots:
     void onLoadCompletion(int success);
     void onGraphChanged(const Graph* graph);
 
-    void onCommandWillExecuteAsynchronously(const CommandManager* commandManager, const Command* command);
-    void onCommandCompleted(const CommandManager* commandManager, const Command* command);
+    void onCommandWillExecuteAsynchronously(std::shared_ptr<const Command> command);
+    void onCommandProgress(std::shared_ptr<const Command> command, int progress);
+    void onCommandCompleted(std::shared_ptr<const Command> command);
     void onSelectionChanged(const SelectionManager* selectionManager);
 
 public:
@@ -64,8 +82,10 @@ public:
 
 private:
     Ui::MainWindow* _ui;
+    QMap<MainWidget*, TabData> _tabData;
     QLabel* _statusBarLabel;
-    bool _disableUI;
+    QLabel* _statusBarProgressLabel;
+    QProgressBar* _statusBarProgressBar;
 };
 
 #endif // MAINWINDOW_H

@@ -71,7 +71,7 @@ public:
     CommandManager();
 
     void clear();
-    void execute(std::unique_ptr<Command> command);
+    void execute(std::shared_ptr<Command> command);
     void execute(const QString& description,
                  std::function<bool(ProgressFn)> executeFunction,
                  std::function<void(ProgressFn)> undoFunction,
@@ -89,15 +89,16 @@ public:
     bool busy() const;
 
 private:
-    std::deque<std::unique_ptr<Command>> _stack;
+    std::deque<std::shared_ptr<Command>> _stack;
     int _lastExecutedIndex;
 
     mutable std::mutex _mutex;
+    bool _busy;
 
 signals:
-    void commandWillExecuteAsynchronously(const CommandManager* commandManager, const Command* command) const;
-    void commandProgress(const CommandManager* commandManager, const Command* command, int progress) const;
-    void commandCompleted(const CommandManager* commandManager, const Command* command) const;
+    void commandWillExecuteAsynchronously(std::shared_ptr<const Command> command) const;
+    void commandProgress(std::shared_ptr<const Command>, int progress) const;
+    void commandCompleted(std::shared_ptr<const Command> command) const;
 };
 
 #endif // COMMANDMANAGER_H

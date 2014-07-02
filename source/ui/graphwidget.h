@@ -28,8 +28,8 @@ private:
     OpenGLWindow* _openGLWindow;
 
 public slots:
-    void onCommandWillExecuteAsynchronously(const CommandManager* commandManager, const Command* command);
-    void onCommandCompleted(const CommandManager* commandManager, const Command* command);
+    void onCommandWillExecuteAsynchronously(std::shared_ptr<const Command> command);
+    void onCommandCompleted(std::shared_ptr<const Command> command);
 
 signals:
     void userInteractionStarted();

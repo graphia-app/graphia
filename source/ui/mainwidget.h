@@ -26,15 +26,17 @@ signals:
     void progress(int percentage) const;
     void complete(int success) const;
     void graphChanged(const Graph*) const;
-    void commandWillExecuteAsynchronously(const CommandManager* commandManager, const Command* command) const;
-    void commandProgress(const CommandManager* commandManager, const Command* command, int progress) const;
-    void commandCompleted(const CommandManager* commandManager, const Command* command) const;
+    void commandWillExecuteAsynchronously(std::shared_ptr<const Command> command) const;
+    void commandProgress(std::shared_ptr<const Command> command, int progress) const;
+    void commandCompleted(std::shared_ptr<const Command> command) const;
     void selectionChanged(const SelectionManager* selectionManager) const;
 
 public slots:
     void onCompletion(int success);
 
 private:
+    bool _loadComplete;
+
     std::shared_ptr<GraphModel> _graphModel;
     std::shared_ptr<SelectionManager> _selectionManager;
     CommandManager _commandManager;
@@ -71,6 +73,8 @@ public:
     void redo();
     bool canRedo() { return _commandManager.canRedo(); }
     const QString nextRedoAction() const;
+
+    bool busy() const;
 
     void deleteSelectedNodes();
 

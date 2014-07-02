@@ -30,14 +30,14 @@ GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
     layout()->addWidget(QWidget::createWindowContainer(_openGLWindow));
 }
 
-void GraphWidget::onCommandWillExecuteAsynchronously(const CommandManager*, const Command*)
+void GraphWidget::onCommandWillExecuteAsynchronously(std::shared_ptr<const Command>)
 {
     _graphComponentScene->disableInteraction();
     _openGLWindow->disableInteraction();
     _openGLWindow->disableSceneUpdate();
 }
 
-void GraphWidget::onCommandCompleted(const CommandManager*, const Command*)
+void GraphWidget::onCommandCompleted(std::shared_ptr<const Command>)
 {
     _openGLWindow->enableSceneUpdate();
     _openGLWindow->enableInteraction();

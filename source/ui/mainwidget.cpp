@@ -15,6 +15,7 @@
 
 MainWidget::MainWidget(QWidget* parent) :
     QWidget(parent),
+    _loadComplete(false),
     _resumePreviouslyActiveLayout(false)
 {
     this->setLayout(new QVBoxLayout());
@@ -61,6 +62,8 @@ bool MainWidget::initFromFile(const QString& filename)
 
 void MainWidget::onCompletion(int success)
 {
+    _loadComplete = true;
+
     _nodeLayoutThread = std::make_unique<NodeLayoutThread>(std::make_unique<EadesLayoutFactory>(_graphModel));
     _nodeLayoutThread->addAllComponents(_graphModel->graph());
     _nodeLayoutThread->start();
@@ -218,6 +221,8 @@ const QString MainWidget::nextRedoAction() const
 
     return redoAction;
 }
+
+bool MainWidget::busy() const { return _commandManager.busy() || !_loadComplete; }
 
 void MainWidget::deleteSelectedNodes()
 {
