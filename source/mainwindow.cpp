@@ -11,6 +11,8 @@
 #include <QIcon>
 #include <QLabel>
 #include <QProgressBar>
+#include <QCloseEvent>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -32,6 +34,25 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete _ui;
+}
+
+void MainWindow::closeEvent(QCloseEvent* e)
+{
+    //FIXME: this should be handled more elegantly
+    //FIXME: also, ask to save here
+    for(int i = 0; i < _ui->tabs->count(); i++)
+    {
+        MainWidget* widget = static_cast<MainWidget*>(_ui->tabs->widget(i));
+        if(widget->busy())
+        {
+            QMessageBox::information(nullptr, tr("Cannot close"),
+                                     tr("Please wait until all operations have completed before closing."));
+            e->ignore();
+            return;
+        }
+    }
+
+    e->accept();
 }
 
 MainWidget *MainWindow::currentTabWidget()

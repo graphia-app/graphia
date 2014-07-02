@@ -14,6 +14,7 @@ class Graph;
 class Command;
 class CommandManager;
 class SelectionManager;
+class QCloseEvent;
 
 namespace Ui {
 class MainWindow;
@@ -37,6 +38,9 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+protected:
+    void closeEvent(QCloseEvent* e);
     
 private:
     MainWidget* currentTabWidget();
