@@ -168,8 +168,9 @@ void MainWindow::configureStatusBar()
         if(widget->busy())
         {
             const auto* tb = currentTabData();
+
             _statusBarProgressLabel->setText(tb->commandVerb);
-            _statusBarProgressLabel->setVisible(true);
+            _statusBarProgressLabel->setVisible(!tb->commandVerb.isEmpty());
 
             if(tb->commandProgress >= 0)
             {
