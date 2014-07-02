@@ -37,7 +37,7 @@ public:
             [](ProgressFn)
             {
                 Q_ASSERT(!"undoFunction not implemented");
-            }, bool asynchronous = false);
+            }, bool asynchronous = true);
 
     const QString& description() const;
     const QString& undoDescription() const;
@@ -78,7 +78,7 @@ public:
     void execute(const QString& description, const QString& verb,
                  std::function<bool(ProgressFn)> executeFunction,
                  std::function<void(ProgressFn)> undoFunction,
-                 bool asynchronous = false);
+                 bool asynchronous = true);
 
     void undo();
     void redo();
