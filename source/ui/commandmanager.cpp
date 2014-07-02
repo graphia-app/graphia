@@ -43,7 +43,7 @@ void CommandManager::execute(std::shared_ptr<Command> command)
             return;
 
         // There are commands on the stack ahead of us; throw them away
-        while(canRedo())
+        while(canRedoNoLocking())
             _stack.pop_back();
 
         _stack.push_back(std::move(command));
