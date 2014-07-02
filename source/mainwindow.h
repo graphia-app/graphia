@@ -22,11 +22,11 @@ class MainWindow;
 struct TabData
 {
     TabData() :
-        command(QString()),
+        commandVerb(QString()),
         commandProgress(0)
     {}
 
-    QString command;
+    QString commandVerb;
     int commandProgress;
 };
 
@@ -72,7 +72,7 @@ private slots:
     void onLoadCompletion(int success);
     void onGraphChanged(const Graph* graph);
 
-    void onCommandWillExecuteAsynchronously(std::shared_ptr<const Command> command);
+    void onCommandWillExecuteAsynchronously(std::shared_ptr<const Command> command, const QString& verb);
     void onCommandProgress(std::shared_ptr<const Command> command, int progress);
     void onCommandCompleted(std::shared_ptr<const Command> command);
     void onSelectionChanged(const SelectionManager* selectionManager);

@@ -7,19 +7,30 @@
 
 #include <thread>
 
-Command::Command(const QString& description, std::function<bool (ProgressFn)> executeFunction, std::function<void (ProgressFn)> undoFunction, bool asynchronous) :
+Command::Command(const QString& description, const QString& verb,
+                 std::function<bool (ProgressFn)> executeFunction,
+                 std::function<void (ProgressFn)> undoFunction,
+                 bool asynchronous) :
     _description(description),
+    _verb(verb),
     _executeFunction(executeFunction),
     _undoFunction(undoFunction),
     _asynchronous(asynchronous)
 {
     _undoDescription = tr("Undo ") + _description;
     _redoDescription = tr("Redo ") + _description;
+    _undoVerb = tr("Undoing ") + _description;
+    _redoVerb = tr("Redoing ") + _description;
 }
 
 const QString&Command::description() const { return _description; }
 const QString&Command::undoDescription() const { return _undoDescription; }
 const QString&Command::redoDescription() const { return _redoDescription; }
+
+const QString&Command::verb() const { return _verb; }
+const QString&Command::undoVerb() const { return _undoVerb; }
+const QString&Command::redoVerb() const { return _redoVerb; }
+
 bool Command::execute(ProgressFn p) { return _executeFunction(p); }
 void Command::undo(ProgressFn p) { _undoFunction(p); }
 
@@ -53,7 +64,7 @@ void CommandManager::execute(std::shared_ptr<Command> command)
     _busy = true;
     if(command->asynchronous())
     {
-        emit commandWillExecuteAsynchronously(command);
+        emit commandWillExecuteAsynchronously(command, command->verb());
         std::thread(executeCommand, std::move(locker), command).detach();
     }
     else
@@ -61,11 +72,12 @@ void CommandManager::execute(std::shared_ptr<Command> command)
 }
 
 void CommandManager::execute(const QString& description,
+                             const QString& verb,
                              std::function<bool(ProgressFn)> executeFunction,
                              std::function<void(ProgressFn)> undoFunction,
                              bool asynchronous)
 {
-    execute(std::make_shared<Command>(description, executeFunction, undoFunction, asynchronous));
+    execute(std::make_shared<Command>(description, verb, executeFunction, undoFunction, asynchronous));
 }
 
 void CommandManager::undo()
@@ -89,7 +101,7 @@ void CommandManager::undo()
     _busy = true;
     if(command->asynchronous())
     {
-        emit commandWillExecuteAsynchronously(command);
+        emit commandWillExecuteAsynchronously(command, command->undoVerb());
         std::thread(undoCommand, std::move(locker)).detach();
     }
     else
@@ -116,7 +128,7 @@ void CommandManager::redo()
     _busy = true;
     if(command->asynchronous())
     {
-        emit commandWillExecuteAsynchronously(command);
+        emit commandWillExecuteAsynchronously(command, command->redoVerb());
         std::thread(redoCommand, std::move(locker)).detach();
     }
     else

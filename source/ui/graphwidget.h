@@ -28,7 +28,7 @@ private:
     OpenGLWindow* _openGLWindow;
 
 public slots:
-    void onCommandWillExecuteAsynchronously(std::shared_ptr<const Command> command);
+    void onCommandWillExecuteAsynchronously(std::shared_ptr<const Command> command, const QString& verb);
     void onCommandCompleted(std::shared_ptr<const Command> command);
 
 signals:

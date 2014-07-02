@@ -174,7 +174,7 @@ void MainWidget::selectAll()
     if(_selectionManager)
     {
         auto previousSelection = _selectionManager->selectedNodes();
-        _commandManager.execute(tr("Select All"),
+        _commandManager.execute(tr("Select All"), tr("Selecting All"),
             [this](ProgressFn) { return _selectionManager->selectAllNodes(); },
             [this, previousSelection](ProgressFn) { _selectionManager->setSelectedNodes(previousSelection); });
     }
@@ -185,7 +185,7 @@ void MainWidget::selectNone()
     if(_selectionManager)
     {
         auto previousSelection = _selectionManager->selectedNodes();
-        _commandManager.execute(tr("Select None"),
+        _commandManager.execute(tr("Select None"), tr("Selecting None"),
             [this](ProgressFn) { return _selectionManager->clearNodeSelection(); },
             [this, previousSelection](ProgressFn) { _selectionManager->setSelectedNodes(previousSelection); });
     }
@@ -196,7 +196,7 @@ void MainWidget::invertSelection()
     if(_selectionManager)
     {
         auto previousSelection = _selectionManager->selectedNodes();
-        _commandManager.execute(tr("Invert Selection"),
+        _commandManager.execute(tr("Invert Selection"), tr("Inverting Selection"),
             [this](ProgressFn) { _selectionManager->invertNodeSelection(); return true; },
             [this, previousSelection](ProgressFn) { _selectionManager->setSelectedNodes(previousSelection); });
     }
@@ -233,6 +233,7 @@ void MainWidget::deleteSelectedNodes()
         return;
 
     _commandManager.execute(nodes.size() > 1 ? tr("Delete Nodes") : tr("Delete Node"),
+                            nodes.size() > 1 ? tr("Deleting Nodes") : tr("Deleting Node"),
         [this, nodes](ProgressFn)
         {
             _selectionManager->clearNodeSelection(false);

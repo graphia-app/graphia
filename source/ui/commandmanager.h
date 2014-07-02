@@ -25,7 +25,7 @@ class Command : public QObject
 
     Q_OBJECT
 public:
-    Command(const QString& description,
+    Command(const QString& description, const QString& verb,
             std::function<bool(ProgressFn)> executeFunction =
             [](ProgressFn)
             {
@@ -41,6 +41,11 @@ public:
     const QString& description() const;
     const QString& undoDescription() const;
     const QString& redoDescription() const;
+
+    const QString& verb() const;
+    const QString& undoVerb() const;
+    const QString& redoVerb() const;
+
     bool asynchronous() const { return _asynchronous; }
 
 private:
@@ -51,6 +56,11 @@ private:
     QString _description;
     QString _undoDescription;
     QString _redoDescription;
+
+    QString _verb;
+    QString _undoVerb;
+    QString _redoVerb;
+
     std::function<bool(ProgressFn)> _executeFunction;
     std::function<void(ProgressFn)> _undoFunction;
     bool _asynchronous;
@@ -64,7 +74,7 @@ public:
 
     void clear();
     void execute(std::shared_ptr<Command> command);
-    void execute(const QString& description,
+    void execute(const QString& description, const QString& verb,
                  std::function<bool(ProgressFn)> executeFunction,
                  std::function<void(ProgressFn)> undoFunction,
                  bool asynchronous = false);
@@ -94,7 +104,7 @@ private:
     bool _busy;
 
 signals:
-    void commandWillExecuteAsynchronously(std::shared_ptr<const Command> command) const;
+    void commandWillExecuteAsynchronously(std::shared_ptr<const Command> command, const QString& verb) const;
     void commandProgress(std::shared_ptr<const Command>, int progress) const;
     void commandCompleted(std::shared_ptr<const Command> command) const;
 };

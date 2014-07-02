@@ -168,7 +168,7 @@ void MainWindow::configureStatusBar()
         if(widget->busy())
         {
             const auto* tb = currentTabData();
-            _statusBarProgressLabel->setText(tb->command);
+            _statusBarProgressLabel->setText(tb->commandVerb);
             _statusBarProgressLabel->setVisible(true);
 
             if(tb->commandProgress >= 0)
@@ -249,7 +249,7 @@ bool MainWindow::openFileInNewTab(const QString& filename)
         int index = _ui->tabs->addTab(widget, widget->graphModel()->name());
 
         auto* tb = tabDataForWidget(widget);
-        tb->command = tr("Loading");
+        tb->commandVerb = tr("Loading");
         tb->commandProgress = 0;
 
         _ui->tabs->setCurrentIndex(index);
@@ -353,38 +353,32 @@ void MainWindow::on_actionDelete_triggered()
         widget->deleteSelectedNodes();
 }
 
-void MainWindow::onCommandWillExecuteAsynchronously(std::shared_ptr<const Command> command)
+void MainWindow::onCommandWillExecuteAsynchronously(std::shared_ptr<const Command>, const QString& verb)
 {
     TabData* tb;
     if((tb = tabDataForWidget(dynamic_cast<MainWidget*>(QObject::sender()))) != nullptr)
     {
-        tb->command = command->description();
+        tb->commandVerb = verb;
         tb->commandProgress = -1;
     }
 
     configureUI();
 }
 
-void MainWindow::onCommandProgress(std::shared_ptr<const Command> command, int progress)
+void MainWindow::onCommandProgress(std::shared_ptr<const Command>, int progress)
 {
     TabData* tb;
     if((tb = tabDataForWidget(dynamic_cast<MainWidget*>(QObject::sender()))) != nullptr)
-    {
-        tb->command = command->description();
         tb->commandProgress = progress;
-    }
 
     configureUI();
 }
 
-void MainWindow::onCommandCompleted(std::shared_ptr<const Command> command)
+void MainWindow::onCommandCompleted(std::shared_ptr<const Command>)
 {
     TabData* tb;
     if((tb = tabDataForWidget(dynamic_cast<MainWidget*>(QObject::sender()))) != nullptr)
-    {
-        tb->command = command->description();
         tb->commandProgress = 100;
-    }
 
     configureUI();
 }
