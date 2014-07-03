@@ -45,8 +45,10 @@ protected:
     
 private:
     MainWidget* currentTabWidget();
+    MainWidget* signalSenderTabWidget();
     TabData* currentTabData();
     TabData* tabDataForWidget(MainWidget* widget);
+    TabData* tabDataForSignalSender();
 
     MainWidget* createNewTabWidget(const QString& filename);
     void closeTab(int index);

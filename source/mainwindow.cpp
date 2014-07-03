@@ -59,17 +59,28 @@ MainWidget *MainWindow::currentTabWidget()
     return widget;
 }
 
+MainWidget* MainWindow::signalSenderTabWidget()
+{
+    MainWidget* widget = dynamic_cast<MainWidget*>(QObject::sender());
+    return widget;
+}
+
 TabData* MainWindow::currentTabData()
 {
     return tabDataForWidget(currentTabWidget());
 }
 
-TabData*MainWindow::tabDataForWidget(MainWidget* widget)
+TabData* MainWindow::tabDataForWidget(MainWidget* widget)
 {
     if(widget != nullptr && _tabData.contains(widget))
         return &_tabData[widget];
 
     return nullptr;
+}
+
+TabData* MainWindow::tabDataForSignalSender()
+{
+    return tabDataForWidget(signalSenderTabWidget());
 }
 
 MainWidget *MainWindow::createNewTabWidget(const QString& filename)
@@ -290,7 +301,7 @@ void MainWindow::on_tabs_tabCloseRequested(int index)
 void MainWindow::onLoadProgress(int percentage)
 {
     TabData* tb;
-    if((tb = tabDataForWidget(dynamic_cast<MainWidget*>(QObject::sender()))) != nullptr)
+    if((tb = tabDataForSignalSender()) != nullptr)
         tb->commandProgress = percentage;
 
     configureUI();
@@ -298,7 +309,7 @@ void MainWindow::onLoadProgress(int percentage)
 
 void MainWindow::onLoadCompletion(int /*success*/)
 {
-    MainWidget* widget = dynamic_cast<MainWidget*>(QObject::sender());
+    MainWidget* widget = signalSenderTabWidget();
     TabData* tb;
     if((tb = tabDataForWidget(widget)) != nullptr)
     {
@@ -386,7 +397,7 @@ void MainWindow::on_actionDelete_triggered()
 void MainWindow::onCommandWillExecuteAsynchronously(std::shared_ptr<const Command>, const QString& verb)
 {
     TabData* tb;
-    if((tb = tabDataForWidget(dynamic_cast<MainWidget*>(QObject::sender()))) != nullptr)
+    if((tb = tabDataForSignalSender()) != nullptr)
     {
         tb->commandVerb = verb;
         tb->commandProgress = -1;
@@ -398,7 +409,7 @@ void MainWindow::onCommandWillExecuteAsynchronously(std::shared_ptr<const Comman
 void MainWindow::onCommandProgress(std::shared_ptr<const Command>, int progress)
 {
     TabData* tb;
-    if((tb = tabDataForWidget(dynamic_cast<MainWidget*>(QObject::sender()))) != nullptr)
+    if((tb = tabDataForSignalSender()) != nullptr)
         tb->commandProgress = progress;
 
     configureUI();
@@ -407,7 +418,7 @@ void MainWindow::onCommandProgress(std::shared_ptr<const Command>, int progress)
 void MainWindow::onCommandCompleted(std::shared_ptr<const Command>, const QString& pastParticiple)
 {
     TabData* tb;
-    if((tb = tabDataForWidget(dynamic_cast<MainWidget*>(QObject::sender()))) != nullptr)
+    if((tb = tabDataForSignalSender()) != nullptr)
     {
         tb->commandProgress = 100;
         tb->statusBarMessage = pastParticiple;
