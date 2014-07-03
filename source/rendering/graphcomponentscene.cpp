@@ -570,7 +570,6 @@ void GraphComponentScene::render()
     renderEdges();
     render2D();
 
-    //renderComponentMarkers();
     renderDebugLines();
 
     _funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
