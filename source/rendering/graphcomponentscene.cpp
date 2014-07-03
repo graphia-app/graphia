@@ -279,8 +279,8 @@ void GraphComponentScene::update(float t)
             auto& nodeVisuals = _graphModel->nodeVisuals();
             auto& edgeVisuals = _graphModel->edgeVisuals();
 
-            _nodeVisualData.resize(component->numNodes() * 8);
-            _edgeVisualData.resize(component->numEdges() * 8);
+            _nodeVisualData.resize(component->numNodes() * 7);
+            _edgeVisualData.resize(component->numEdges() * 7);
 
             const QColor selectedOutLineColor = Qt::GlobalColor::white;
             const QColor deselectedOutLineColor = Qt::GlobalColor::black;
