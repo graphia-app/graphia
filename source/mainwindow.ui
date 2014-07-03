@@ -19,6 +19,9 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QStatusBar::item {border: none;}</string>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <property name="maximumSize">
     <size>
