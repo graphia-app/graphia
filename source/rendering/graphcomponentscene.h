@@ -16,7 +16,6 @@
 #include <QMatrix4x4>
 #include <QVector3D>
 #include <QColor>
-#include <QMutex>
 #include <QRect>
 
 #include <memory>
@@ -186,7 +185,7 @@ private:
     QOpenGLVertexArrayObject _selectionMarkerDataVAO;
 
     std::vector<DebugLine> _debugLines;
-    QMutex _debugLinesMutex;
+    std::mutex _debugLinesMutex;
     std::vector<GLfloat> _debugLinesData;
     QOpenGLBuffer _debugLinesDataBuffer;
     QOpenGLVertexArrayObject _debugLinesDataVAO;

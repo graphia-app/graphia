@@ -269,7 +269,7 @@ void GraphComponentScene::update(float t)
         ComponentViewData* componentViewData = focusComponentViewData();
 
         NodePositions& nodePositions = _graphModel->nodePositions();
-        std::lock_guard<std::recursive_mutex> mutexLocker(nodePositions.mutex());
+        std::unique_lock<std::recursive_mutex> mutexLocker(nodePositions.mutex());
 
         auto component = _graphModel->graph().componentById(_focusComponentId);
 
@@ -417,7 +417,7 @@ void GraphComponentScene::renderEdges()
 
 void GraphComponentScene::renderDebugLines()
 {
-    QMutexLocker locker(&_debugLinesMutex);
+    std::unique_lock<std::mutex> locker(_debugLinesMutex);
 
     _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
@@ -522,7 +522,7 @@ void GraphComponentScene::addDebugBoundingBox(const BoundingBox3D& boundingBox, 
 
 void GraphComponentScene::submitDebugLines()
 {
-    QMutexLocker locker(&_debugLinesMutex);
+    std::unique_lock<std::mutex> locker(_debugLinesMutex);
 
     _debugLinesData.resize(_debugLines.size() * 12);
 
