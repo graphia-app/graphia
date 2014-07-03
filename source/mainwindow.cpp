@@ -214,12 +214,12 @@ void MainWindow::configureStatusBar()
         {
             _statusBarProgressLabel->setVisible(false);
             _statusBarProgressBar->setVisible(false);
-
-            if(!tb->statusBarMessage.isEmpty())
-                _ui->statusBar->showMessage(tb->statusBarMessage);
-            else
-                _ui->statusBar->clearMessage();
         }
+
+        if(!tb->statusBarMessage.isEmpty())
+            _ui->statusBar->showMessage(tb->statusBarMessage);
+        else
+            _ui->statusBar->clearMessage();
     }
     else
     {
