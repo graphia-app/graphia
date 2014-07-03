@@ -28,7 +28,7 @@ signals:
     void graphChanged(const Graph*) const;
     void commandWillExecuteAsynchronously(std::shared_ptr<const Command> command, const QString& verb) const;
     void commandProgress(std::shared_ptr<const Command> command, int progress) const;
-    void commandCompleted(std::shared_ptr<const Command> command) const;
+    void commandCompleted(std::shared_ptr<const Command> command, const QString& pastParticiple) const;
     void selectionChanged(const SelectionManager* selectionManager) const;
 
 public slots:

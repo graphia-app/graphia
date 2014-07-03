@@ -174,9 +174,14 @@ void MainWidget::selectAll()
     if(_selectionManager)
     {
         auto previousSelection = _selectionManager->selectedNodes();
-        _commandManager.execute(tr("Select All"), tr("Selecting All"),
-            [this](ProgressFn) { return _selectionManager->selectAllNodes(); },
-            [this, previousSelection](ProgressFn) { _selectionManager->setSelectedNodes(previousSelection); });
+        _commandManager.executeSynchronous(tr("Select All"),
+            [this](Command& command)
+            {
+                bool nodesSelected = _selectionManager->selectAllNodes();
+                command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
+                return nodesSelected;
+            },
+            [this, previousSelection](Command&) { _selectionManager->setSelectedNodes(previousSelection); });
     }
 }
 
@@ -185,9 +190,9 @@ void MainWidget::selectNone()
     if(_selectionManager)
     {
         auto previousSelection = _selectionManager->selectedNodes();
-        _commandManager.execute(tr("Select None"), tr("Selecting None"),
-            [this](ProgressFn) { return _selectionManager->clearNodeSelection(); },
-            [this, previousSelection](ProgressFn) { _selectionManager->setSelectedNodes(previousSelection); });
+        _commandManager.executeSynchronous(tr("Select None"),
+            [this](Command&) { return _selectionManager->clearNodeSelection(); },
+            [this, previousSelection](Command&) { _selectionManager->setSelectedNodes(previousSelection); });
     }
 }
 
@@ -197,8 +202,13 @@ void MainWidget::invertSelection()
     {
         auto previousSelection = _selectionManager->selectedNodes();
         _commandManager.execute(tr("Invert Selection"), tr("Inverting Selection"),
-            [this](ProgressFn) { _selectionManager->invertNodeSelection(); return true; },
-            [this, previousSelection](ProgressFn) { _selectionManager->setSelectedNodes(previousSelection); });
+            [this](Command& command)
+            {
+                _selectionManager->invertNodeSelection();
+                command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
+                return true;
+            },
+            [this, previousSelection](Command&) { _selectionManager->setSelectedNodes(previousSelection); });
     }
 }
 
@@ -234,13 +244,14 @@ void MainWidget::deleteSelectedNodes()
 
     _commandManager.execute(nodes.size() > 1 ? tr("Delete Nodes") : tr("Delete Node"),
                             nodes.size() > 1 ? tr("Deleting Nodes") : tr("Deleting Node"),
-        [this, nodes](ProgressFn)
+                            nodes.size() > 1 ? QString(tr("%1 Nodes Deleted")).arg(nodes.size()) : tr("Node Deleted"),
+        [this, nodes](Command&)
         {
             _selectionManager->clearNodeSelection(false);
             _graphModel->graph().removeNodes(nodes);
             return true;
         },
-        [this, nodes, edges](ProgressFn)
+        [this, nodes, edges](Command&)
         {
             _graphModel->graph().performTransaction(
                 [&nodes, &edges](Graph& graph)

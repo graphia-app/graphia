@@ -7,32 +7,114 @@
 
 #include <thread>
 
+void Command::initialise()
+{
+    if(!_description.isEmpty())
+    {
+        _undoDescription = tr("Undo ") + _description;
+        _redoDescription = tr("Redo ") + _description;
+        _undoVerb = tr("Undoing ") + _description;
+        _redoVerb = tr("Redoing ") + _description;
+    }
+    else
+    {
+        _undoDescription = tr("Undo");
+        _redoDescription = tr("Redo");
+        _undoVerb = tr("Undoing");
+        _redoVerb = tr("Redoing");
+    }
+
+    _progressFn = [](int){};
+}
+
 Command::Command(const QString& description, const QString& verb,
-                 std::function<bool (ProgressFn)> executeFunction,
-                 std::function<void (ProgressFn)> undoFunction,
+                 const QString& pastParticiple,
+                 ExecuteFn executeFn,
+                 UndoFn undoFn,
                  bool asynchronous) :
     _description(description),
     _verb(verb),
-    _executeFunction(executeFunction),
-    _undoFunction(undoFunction),
+    _pastParticiple(pastParticiple),
+    _executeFn(executeFn),
+    _undoFn(undoFn),
     _asynchronous(asynchronous)
 {
-    _undoDescription = tr("Undo ") + _description;
-    _redoDescription = tr("Redo ") + _description;
-    _undoVerb = tr("Undoing ") + _description;
-    _redoVerb = tr("Redoing ") + _description;
+    initialise();
 }
 
-const QString&Command::description() const { return _description; }
-const QString&Command::undoDescription() const { return _undoDescription; }
-const QString&Command::redoDescription() const { return _redoDescription; }
+Command::Command(const QString& description, const QString& verb,
+                 ExecuteFn executeFn,
+                 UndoFn undoFn,
+                 bool asynchronous) :
+    _description(description),
+    _verb(verb),
+    _executeFn(executeFn),
+    _undoFn(undoFn),
+    _asynchronous(asynchronous)
+{
+    initialise();
+}
 
-const QString&Command::verb() const { return _verb; }
-const QString&Command::undoVerb() const { return _undoVerb; }
-const QString&Command::redoVerb() const { return _redoVerb; }
+Command::Command(const QString& description,
+                 ExecuteFn executeFn,
+                 UndoFn undoFn,
+                 bool asynchronous) :
+    _description(description),
+    _executeFn(executeFn),
+    _undoFn(undoFn),
+    _asynchronous(asynchronous)
+{
+    initialise();
+}
 
-bool Command::execute(ProgressFn p) { return _executeFunction(p); }
-void Command::undo(ProgressFn p) { _undoFunction(p); }
+Command::Command(ExecuteFn executeFn,
+                 UndoFn undoFn,
+                 bool asynchronous) :
+    _executeFn(executeFn),
+    _undoFn(undoFn),
+    _asynchronous(asynchronous)
+{
+    initialise();
+}
+
+const QString& Command::description() const { return _description; }
+const QString& Command::undoDescription() const { return _undoDescription; }
+const QString& Command::redoDescription() const { return _redoDescription; }
+
+const QString& Command::verb() const { return _verb; }
+const QString& Command::undoVerb() const { return _undoVerb; }
+const QString& Command::redoVerb() const { return _redoVerb; }
+
+const QString& Command::pastParticiple() const { return _pastParticiple; }
+
+void Command::setPastParticiple(const QString& pastParticiple)
+{
+    _pastParticiple = pastParticiple;
+}
+
+void Command::setProgress(int progress)
+{
+    _progressFn(progress);
+}
+
+bool Command::execute(Command& command) { return _executeFn(command); }
+void Command::undo(Command& command) { _undoFn(command); }
+
+void Command::setProgressFn(ProgressFn progressFn)
+{
+    _progressFn = progressFn;
+}
+
+ExecuteFn Command::defaultExecuteFn = [](Command&)
+{
+    Q_ASSERT(!"executeFn not implmented");
+    return false;
+};
+
+UndoFn Command::defaultUndoFn = [](Command&)
+{
+    Q_ASSERT(!"undoFn not implemented");
+};
 
 CommandManager::CommandManager() :
     _lastExecutedIndex(-1),
@@ -44,13 +126,14 @@ CommandManager::CommandManager() :
 void CommandManager::execute(std::shared_ptr<Command> command)
 {
     unique_lock_with_side_effects<std::mutex> locker(_mutex);
-    locker.setPostUnlockAction([this, command] { _busy = false; emit commandCompleted(command); });
+    locker.setPostUnlockAction([this, command] { _busy = false; emit commandCompleted(command, command->pastParticiple()); });
+    command->setProgressFn([this, command](int progress) { emit commandProgress(command, progress); });
 
     auto executeCommand = [this](unique_lock_with_side_effects<std::mutex> /*locker*/, std::shared_ptr<Command> command)
     {
         nameCurrentThread(command->description());
 
-        if(!command->execute([this, command](int progress) { emit commandProgress(command, progress); }))
+        if(!command->execute(*command))
             return;
 
         // There are commands on the stack ahead of us; throw them away
@@ -71,15 +154,6 @@ void CommandManager::execute(std::shared_ptr<Command> command)
         executeCommand(std::move(locker), command);
 }
 
-void CommandManager::execute(const QString& description,
-                             const QString& verb,
-                             std::function<bool(ProgressFn)> executeFunction,
-                             std::function<void(ProgressFn)> undoFunction,
-                             bool asynchronous)
-{
-    execute(std::make_shared<Command>(description, verb, executeFunction, undoFunction, asynchronous));
-}
-
 void CommandManager::undo()
 {
     unique_lock_with_side_effects<std::mutex> locker(_mutex);
@@ -87,14 +161,14 @@ void CommandManager::undo()
     if(!canUndoNoLocking())
         return;
 
-    auto& command = _stack.at(_lastExecutedIndex);
-    locker.setPostUnlockAction([this, command] { _busy = false; emit commandCompleted(command); });
+    auto command = _stack.at(_lastExecutedIndex);
+    locker.setPostUnlockAction([this, command] { _busy = false; emit commandCompleted(command, QString()); });
 
     auto undoCommand = [this, command](unique_lock_with_side_effects<std::mutex> /*locker*/)
     {
         nameCurrentThread("(u) " + command->description());
 
-        command->undo([this, command](int progress) { emit commandProgress(command, progress); });
+        command->undo(*command);
         _lastExecutedIndex--;
     };
 
@@ -115,14 +189,14 @@ void CommandManager::redo()
     if(!canRedoNoLocking())
         return;
 
-    auto& command = _stack.at(++_lastExecutedIndex);
-    locker.setPostUnlockAction([this, command] { _busy = false; emit commandCompleted(command); });
+    auto command = _stack.at(++_lastExecutedIndex);
+    locker.setPostUnlockAction([this, command] { _busy = false; emit commandCompleted(command, command->pastParticiple()); });
 
     auto redoCommand = [this, command](unique_lock_with_side_effects<std::mutex> /*locker*/)
     {
         nameCurrentThread("(r) " + command->description());
 
-        command->execute([this, command](int progress) { emit commandProgress(command, progress); });
+        command->execute(*command);
     };
 
     _busy = true;

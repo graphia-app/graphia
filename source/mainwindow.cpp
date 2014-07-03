@@ -17,12 +17,10 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     _ui(new Ui::MainWindow),
-    _statusBarLabel(new QLabel),
     _statusBarProgressLabel(new QLabel),
     _statusBarProgressBar(new QProgressBar)
 {
     _ui->setupUi(this);
-    _ui->statusBar->addWidget(_statusBarLabel);
 
     _statusBarProgressLabel->setVisible(false);
     _ui->statusBar->addPermanentWidget(_statusBarProgressLabel);
@@ -181,15 +179,10 @@ void MainWindow::configureStatusBar()
     MainWidget* widget;
     if((widget = currentTabWidget()) != nullptr)
     {
-        _statusBarLabel->setText(QString(tr("%1 nodes, %2 edges, %3 components")).arg(
-                                    widget->graphModel()->graph().numNodes()).arg(
-                                    widget->graphModel()->graph().numEdges()).arg(
-                                    widget->graphModel()->graph().numComponents()));
+        const auto* tb = currentTabData();
 
         if(widget->busy())
         {
-            const auto* tb = currentTabData();
-
             _statusBarProgressLabel->setText(tb->commandVerb);
             _statusBarProgressLabel->setVisible(!tb->commandVerb.isEmpty());
 
@@ -210,11 +203,16 @@ void MainWindow::configureStatusBar()
         {
             _statusBarProgressLabel->setVisible(false);
             _statusBarProgressBar->setVisible(false);
+
+            if(!tb->statusBarMessage.isEmpty())
+                _ui->statusBar->showMessage(tb->statusBarMessage);
+            else
+                _ui->statusBar->clearMessage();
         }
     }
     else
     {
-        _statusBarLabel->setText("");
+        _ui->statusBar->clearMessage();
         _statusBarProgressLabel->setVisible(false);
         _statusBarProgressBar->setVisible(false);
     }
@@ -291,9 +289,8 @@ void MainWindow::on_tabs_tabCloseRequested(int index)
 
 void MainWindow::onLoadProgress(int percentage)
 {
-    auto* tb = currentTabData();
-
-    if(tb != nullptr)
+    TabData* tb;
+    if((tb = tabDataForWidget(dynamic_cast<MainWidget*>(QObject::sender()))) != nullptr)
         tb->commandProgress = percentage;
 
     configureUI();
@@ -301,6 +298,17 @@ void MainWindow::onLoadProgress(int percentage)
 
 void MainWindow::onLoadCompletion(int /*success*/)
 {
+    MainWidget* widget = dynamic_cast<MainWidget*>(QObject::sender());
+    TabData* tb;
+    if((tb = tabDataForWidget(widget)) != nullptr)
+    {
+        tb->statusBarMessage = QString(tr("Loaded %1 (%2 nodes, %3 edges, %4 components)")).arg(
+                    widget->graphModel()->name()).arg(
+                    widget->graphModel()->graph().numNodes()).arg(
+                    widget->graphModel()->graph().numEdges()).arg(
+                    widget->graphModel()->graph().numComponents());
+    }
+
     configureUI();
 }
 
@@ -396,11 +404,14 @@ void MainWindow::onCommandProgress(std::shared_ptr<const Command>, int progress)
     configureUI();
 }
 
-void MainWindow::onCommandCompleted(std::shared_ptr<const Command>)
+void MainWindow::onCommandCompleted(std::shared_ptr<const Command>, const QString& pastParticiple)
 {
     TabData* tb;
     if((tb = tabDataForWidget(dynamic_cast<MainWidget*>(QObject::sender()))) != nullptr)
+    {
         tb->commandProgress = 100;
+        tb->statusBarMessage = pastParticiple;
+    }
 
     configureUI();
 }

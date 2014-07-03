@@ -127,8 +127,13 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
 
                 auto previousSelection = _selectionManager->selectedNodes();
                 _commandManager.execute(tr("Select Nodes"), tr("Selecting Nodes"),
-                    [this, selection](ProgressFn) { return _selectionManager->selectNodes(selection); },
-                    [this, previousSelection](ProgressFn) { _selectionManager->setSelectedNodes(previousSelection); });
+                    [this, selection](Command& command)
+                    {
+                        bool nodesSelected = _selectionManager->selectNodes(selection);
+                        command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
+                        return nodesSelected;
+                    },
+                    [this, previousSelection](Command&) { _selectionManager->setSelectedNodes(previousSelection); });
 
                 _frustumSelectStart = QPoint();
                 _frustumSelecting = false;
@@ -142,24 +147,26 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
                     bool toggling = mouseEvent->modifiers() & Qt::ShiftModifier;
                     auto previousSelection = _selectionManager->selectedNodes();
                     auto toggleNodeId = _clickedNodeId;
-                    _commandManager.execute(nodeSelected ? tr("Deselect Node") : tr("Select Node"),
-                                            nodeSelected ? tr("Deselecting Node") : tr("Selecting Node"),
-                        [this, toggling, toggleNodeId](ProgressFn)
+                    _commandManager.executeSynchronous(nodeSelected ? tr("Deselect Node") : tr("Select Node"),
+                        [this, nodeSelected, toggling, toggleNodeId](Command& command)
                         {
                             if(!toggling)
                                 _selectionManager->clearNodeSelection();
 
                             _selectionManager->toggleNode(toggleNodeId);
+
+                            if(!nodeSelected)
+                                command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
                             return true;
                         },
-                        [this, previousSelection](ProgressFn) { _selectionManager->setSelectedNodes(previousSelection); });
+                        [this, previousSelection](Command&) { _selectionManager->setSelectedNodes(previousSelection); });
                 }
                 else
                 {
                     auto previousSelection = _selectionManager->selectedNodes();
-                    _commandManager.execute(tr("Select None"), tr("Selecting None"),
-                        [this](ProgressFn) { return _selectionManager->clearNodeSelection(); },
-                        [this, previousSelection](ProgressFn) { _selectionManager->setSelectedNodes(previousSelection); });
+                    _commandManager.executeSynchronous(tr("Select None"),
+                        [this](Command&) { return _selectionManager->clearNodeSelection(); },
+                        [this, previousSelection](Command&) { _selectionManager->setSelectedNodes(previousSelection); });
                 }
             }
 

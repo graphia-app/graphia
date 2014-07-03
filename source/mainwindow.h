@@ -28,6 +28,7 @@ struct TabData
     {}
 
     QString commandVerb;
+    QString statusBarMessage;
     int commandProgress;
 };
 
@@ -78,7 +79,7 @@ private slots:
 
     void onCommandWillExecuteAsynchronously(std::shared_ptr<const Command> command, const QString& verb);
     void onCommandProgress(std::shared_ptr<const Command> command, int progress);
-    void onCommandCompleted(std::shared_ptr<const Command> command);
+    void onCommandCompleted(std::shared_ptr<const Command> command, const QString& pastParticiple);
     void onSelectionChanged(const SelectionManager* selectionManager);
 
 public:
@@ -87,7 +88,6 @@ public:
 private:
     Ui::MainWindow* _ui;
     QMap<MainWidget*, TabData> _tabData;
-    QLabel* _statusBarLabel;
     QLabel* _statusBarProgressLabel;
     QProgressBar* _statusBarProgressBar;
 };

@@ -14,6 +14,10 @@
 #include <mutex>
 #include <atomic>
 
+class Command;
+
+using ExecuteFn = std::function<bool(Command&)>;
+using UndoFn = std::function<void(Command&)>;
 using ProgressFn = std::function<void(int)>;
 
 // For simple operations the Command class can be used directly, by passing
@@ -25,19 +29,30 @@ class Command : public QObject
     friend class CommandManager;
 
     Q_OBJECT
+
+private:
+    static ExecuteFn defaultExecuteFn;
+    static UndoFn defaultUndoFn;
+
+    void initialise();
+
 public:
     Command(const QString& description, const QString& verb,
-            std::function<bool(ProgressFn)> executeFunction =
-            [](ProgressFn)
-            {
-                Q_ASSERT(!"executeFunction not implmented");
-                return false;
-            },
-            std::function<void(ProgressFn)> undoFunction =
-            [](ProgressFn)
-            {
-                Q_ASSERT(!"undoFunction not implemented");
-            }, bool asynchronous = true);
+            const QString &pastParticiple,
+            ExecuteFn executeFn = defaultExecuteFn,
+            UndoFn undoFn = defaultUndoFn,
+            bool asynchronous = true);
+    Command(const QString& description, const QString& verb,
+            ExecuteFn executeFn = defaultExecuteFn,
+            UndoFn undoFn = defaultUndoFn,
+            bool asynchronous = true);
+    Command(const QString& description,
+            ExecuteFn executeFn = defaultExecuteFn,
+            UndoFn undoFn = defaultUndoFn,
+            bool asynchronous = true);
+    Command(ExecuteFn executeFn = defaultExecuteFn,
+            UndoFn undoFn = defaultUndoFn,
+            bool asynchronous = true);
 
     const QString& description() const;
     const QString& undoDescription() const;
@@ -47,12 +62,19 @@ public:
     const QString& undoVerb() const;
     const QString& redoVerb() const;
 
+    const QString& pastParticiple() const;
+    void setPastParticiple(const QString& pastParticiple);
+
+    void setProgress(int progress);
+
     bool asynchronous() const { return _asynchronous; }
 
 private:
     // Return false if the command failed, or did nothing
-    virtual bool execute(ProgressFn p);
-    virtual void undo(ProgressFn p);
+    virtual bool execute(Command& command);
+    virtual void undo(Command& command);
+
+    void setProgressFn(ProgressFn progressFn);
 
     QString _description;
     QString _undoDescription;
@@ -62,8 +84,11 @@ private:
     QString _undoVerb;
     QString _redoVerb;
 
-    std::function<bool(ProgressFn)> _executeFunction;
-    std::function<void(ProgressFn)> _undoFunction;
+    QString _pastParticiple;
+
+    ExecuteFn _executeFn;
+    UndoFn _undoFn;
+    ProgressFn _progressFn;
     bool _asynchronous;
 };
 
@@ -74,11 +99,18 @@ public:
     CommandManager();
 
     void clear();
+
     void execute(std::shared_ptr<Command> command);
-    void execute(const QString& description, const QString& verb,
-                 std::function<bool(ProgressFn)> executeFunction,
-                 std::function<void(ProgressFn)> undoFunction,
-                 bool asynchronous = true);
+
+    template<typename... Args> void execute(Args&&... args)
+    {
+        execute(std::make_shared<Command>(std::forward<Args>(args)...));
+    }
+
+    template<typename... Args> void executeSynchronous(Args&&... args)
+    {
+        execute(std::make_shared<Command>(std::forward<Args>(args)..., false));
+    }
 
     void undo();
     void redo();
@@ -107,7 +139,7 @@ private:
 signals:
     void commandWillExecuteAsynchronously(std::shared_ptr<const Command> command, const QString& verb) const;
     void commandProgress(std::shared_ptr<const Command>, int progress) const;
-    void commandCompleted(std::shared_ptr<const Command> command) const;
+    void commandCompleted(std::shared_ptr<const Command> command, const QString& pastParticiple) const;
 };
 
 #endif // COMMANDMANAGER_H

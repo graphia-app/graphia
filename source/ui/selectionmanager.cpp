@@ -164,3 +164,14 @@ void SelectionManager::invertNodeSelection(bool notify)
     auto& nodeIds = _graph.nodeIds();
     toggleNodes(nodeIds.begin(), nodeIds.end(), notify);
 }
+
+const QString SelectionManager::numNodesSelectedAsString() const
+{
+    int selectionSize = selectedNodes().size();
+    if(selectionSize > 1)
+        return QString(tr("%1 Nodes Selected")).arg(selectionSize);
+    else if(selectionSize == 1)
+        return tr("1 Node Selected");
+
+    return QString();
+}

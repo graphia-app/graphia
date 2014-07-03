@@ -42,6 +42,8 @@ public:
     bool clearNodeSelection(bool notify = true);
     void invertNodeSelection(bool notify = true);
 
+    const QString numNodesSelectedAsString() const;
+
 private:
     const ReadOnlyGraph& _graph;
 
