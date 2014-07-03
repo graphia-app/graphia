@@ -96,6 +96,8 @@ MainWidget *MainWindow::createNewTabWidget(const QString& filename)
     connect(widget, &MainWidget::commandProgress, this, &MainWindow::onCommandProgress);
     connect(widget, &MainWidget::commandCompleted, this, &MainWindow::onCommandCompleted);
     connect(widget, &MainWidget::selectionChanged, this, &MainWindow::onSelectionChanged);
+    connect(widget, &MainWidget::userInteractionStarted, this, &MainWindow::onUserInteractionStarted);
+    connect(widget, &MainWidget::userInteractionFinished, this, &MainWindow::onUserInteractionFinished);
 
     widget->initFromFile(filename);
 
@@ -134,14 +136,14 @@ void MainWindow::configurePauseLayoutAction()
         _ui->actionPause_Layout->setIcon(QIcon::fromTheme("media-playback-pause"));
     }
 
-    _ui->actionPause_Layout->setEnabled(widget != nullptr && !widget->busy());
+    _ui->actionPause_Layout->setEnabled(widget != nullptr && !widget->busy() && !widget->interacting());
 }
 
 void MainWindow::configureSelectActions()
 {
     MainWidget* widget = currentTabWidget();
 
-    bool enabled = widget != nullptr && !widget->busy();
+    bool enabled = widget != nullptr && !widget->busy() && !widget->interacting();
 
     _ui->actionSelect_All->setEnabled(enabled);
     _ui->actionSelect_None->setEnabled(enabled);
@@ -160,7 +162,8 @@ void MainWindow::configureEditActions()
         selectionNonEmpty = widget->selectionManager() != nullptr &&
                 !widget->selectionManager()->selectedNodes().empty();
 
-        _ui->actionDelete->setEnabled(editable && selectionNonEmpty && !widget->busy());
+        _ui->actionDelete->setEnabled(editable && selectionNonEmpty &&
+                                      !widget->busy() && !widget->interacting());
     }
     else
         _ui->actionDelete->setEnabled(false);
@@ -171,9 +174,9 @@ void MainWindow::configureUndoActions()
     MainWidget* widget;
     if((widget = currentTabWidget()) != nullptr)
     {
-        _ui->actionUndo->setEnabled(widget->canUndo() && !widget->busy());
+        _ui->actionUndo->setEnabled(widget->canUndo() && !widget->busy() && !widget->interacting());
         _ui->actionUndo->setText(widget->nextUndoAction());
-        _ui->actionRedo->setEnabled(widget->canRedo() && !widget->busy());
+        _ui->actionRedo->setEnabled(widget->canRedo() && !widget->busy() && !widget->interacting());
         _ui->actionRedo->setText(widget->nextRedoAction());
     }
     else
@@ -428,6 +431,16 @@ void MainWindow::onCommandCompleted(std::shared_ptr<const Command>, const QStrin
 }
 
 void MainWindow::onSelectionChanged(const SelectionManager*)
+{
+    configureUI();
+}
+
+void MainWindow::onUserInteractionStarted()
+{
+    configureUI();
+}
+
+void MainWindow::onUserInteractionFinished()
 {
     configureUI();
 }

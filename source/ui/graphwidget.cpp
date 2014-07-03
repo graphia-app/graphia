@@ -30,6 +30,11 @@ GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
     layout()->addWidget(QWidget::createWindowContainer(_openGLWindow));
 }
 
+bool GraphWidget::interacting() const
+{
+    return _graphComponentInteractor->interacting();
+}
+
 void GraphWidget::onCommandWillExecuteAsynchronously(std::shared_ptr<const Command>, const QString&)
 {
     _graphComponentScene->disableInteraction();

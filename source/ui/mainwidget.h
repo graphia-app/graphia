@@ -30,6 +30,8 @@ signals:
     void commandProgress(std::shared_ptr<const Command> command, int progress) const;
     void commandCompleted(std::shared_ptr<const Command> command, const QString& pastParticiple) const;
     void selectionChanged(const SelectionManager* selectionManager) const;
+    void userInteractionStarted() const;
+    void userInteractionFinished() const;
 
 public slots:
     void onLoadCompletion(bool success);
@@ -44,7 +46,7 @@ private:
     std::unique_ptr<NodeLayoutThread> _nodeLayoutThread;
     GraphWidget* _graphWidget;
 
-    bool _resumePreviouslyActiveLayout;
+    bool _autoResume;
 
 private slots:
     void onGraphWillChange(const Graph*);
@@ -75,6 +77,7 @@ public:
     const QString nextRedoAction() const;
 
     bool busy() const;
+    bool interacting() const;
 
     void deleteSelectedNodes();
 

@@ -22,6 +22,8 @@ public:
                 std::shared_ptr<SelectionManager> selectionManager,
                 QWidget *parent = nullptr);
 
+    bool interacting() const;
+
 private:
     std::shared_ptr<GraphComponentScene> _graphComponentScene;
     std::shared_ptr<GraphComponentInteractor> _graphComponentInteractor;
@@ -32,8 +34,8 @@ public slots:
     void onCommandCompleted(std::shared_ptr<const Command> command);
 
 signals:
-    void userInteractionStarted();
-    void userInteractionFinished();
+    void userInteractionStarted() const;
+    void userInteractionFinished() const;
 };
 
 #endif // GRAPHWIDGET_H

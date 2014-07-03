@@ -16,7 +16,7 @@
 MainWidget::MainWidget(QWidget* parent) :
     QWidget(parent),
     _loadComplete(false),
-    _resumePreviouslyActiveLayout(false)
+    _autoResume(false)
 {
     this->setLayout(new QVBoxLayout());
 }
@@ -71,8 +71,10 @@ void MainWidget::onLoadCompletion(bool success)
     _selectionManager = std::make_shared<SelectionManager>(_graphModel->graph());
     _graphWidget = new GraphWidget(_graphModel, _commandManager, _selectionManager);
 
-    connect(_graphWidget, &GraphWidget::userInteractionStarted,  [this] { pauseLayout(true); });
+    connect(_graphWidget, &GraphWidget::userInteractionStarted, [this] { pauseLayout(true); });
+    connect(_graphWidget, &GraphWidget::userInteractionStarted, this, &MainWidget::userInteractionStarted);
     connect(_graphWidget, &GraphWidget::userInteractionFinished, [this] { resumeLayout(true); });
+    connect(_graphWidget, &GraphWidget::userInteractionFinished, this, &MainWidget::userInteractionFinished);
 
     connect(&_commandManager, &CommandManager::commandWillExecuteAsynchronously, [this] { pauseLayout(true); });
     connect(&_commandManager, &CommandManager::commandWillExecuteAsynchronously, _graphWidget, &GraphWidget::onCommandWillExecuteAsynchronously);
@@ -144,7 +146,7 @@ void MainWidget::pauseLayout(bool autoResume)
     if(_nodeLayoutThread)
     {
         if(autoResume && !_nodeLayoutThread->paused())
-            _resumePreviouslyActiveLayout = true;
+            _autoResume = true;
 
         _nodeLayoutThread->pauseAndWait();
     }
@@ -153,17 +155,18 @@ void MainWidget::pauseLayout(bool autoResume)
 bool MainWidget::layoutIsPaused()
 {
     // Not typos: a non-existant thread counts as paused
-    bool nodeLayoutPaused = (_nodeLayoutThread == nullptr || _nodeLayoutThread->paused());
+    bool nodeLayoutPaused = (_nodeLayoutThread == nullptr || _nodeLayoutThread->paused()) &&
+            !_autoResume;
 
     return nodeLayoutPaused;
 }
 
 void MainWidget::resumeLayout(bool autoResume)
 {
-    if(autoResume && !_resumePreviouslyActiveLayout)
+    if(autoResume && !_autoResume)
         return;
 
-    _resumePreviouslyActiveLayout = false;
+    _autoResume = false;
 
     if(_nodeLayoutThread)
         _nodeLayoutThread->resume();
@@ -232,7 +235,15 @@ const QString MainWidget::nextRedoAction() const
     return redoAction;
 }
 
-bool MainWidget::busy() const { return _commandManager.busy() || !_loadComplete; }
+bool MainWidget::busy() const
+{
+    return _commandManager.busy() || !_loadComplete;
+}
+
+bool MainWidget::interacting() const
+{
+    return _graphWidget->interacting();
+}
 
 void MainWidget::deleteSelectedNodes()
 {

@@ -84,6 +84,9 @@ private slots:
     void onCommandCompleted(std::shared_ptr<const Command> command, const QString& pastParticiple);
     void onSelectionChanged(const SelectionManager* selectionManager);
 
+    void onUserInteractionStarted();
+    void onUserInteractionFinished();
+
 public:
     bool openFileInNewTab(const QString& filename);
 
