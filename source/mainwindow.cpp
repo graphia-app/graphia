@@ -316,6 +316,7 @@ void MainWindow::onLoadCompletion(int /*success*/)
     TabData* tb;
     if((tb = tabDataForWidget(widget)) != nullptr)
     {
+        tb->commandProgress = 100;
         tb->statusBarMessage = QString(tr("Loaded %1 (%2 nodes, %3 edges, %4 components)")).arg(
                     widget->graphModel()->name()).arg(
                     widget->graphModel()->graph().numNodes()).arg(
