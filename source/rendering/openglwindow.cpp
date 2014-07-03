@@ -125,8 +125,9 @@ void OpenGLWindow::updateScene()
     {
         float time = _time.elapsed() / 1000.0f;
         _scene->update(time);
-        render();
     }
+
+    render();
 }
 
 void OpenGLWindow::resizeEvent(QResizeEvent* e)

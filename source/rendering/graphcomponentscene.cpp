@@ -37,6 +37,7 @@ GraphComponentScene::GraphComponentScene(QObject* parent)
       _depthTexture(0),
       _visualFBO(0),
       _FBOcomplete(false),
+      _visualDataRequiresUpdate(false),
       _trackFocusNode(true),
       _funcs(nullptr),
       _aspectRatio(4.0f / 3.0f),
@@ -102,44 +103,7 @@ void GraphComponentScene::cleanup()
 
 void GraphComponentScene::updateVisualData()
 {
-    auto& nodeVisuals = _graphModel->nodeVisuals();
-    auto& edgeVisuals = _graphModel->edgeVisuals();
-    auto component = _graphModel->graph().componentById(_focusComponentId);
-
-    _nodeVisualData.resize(component->numNodes() * 8);
-    _edgeVisualData.resize(component->numEdges() * 8);
-    int i = 0;
-    int j = 0;
-
-    const QColor selectedOutLineColor = Qt::GlobalColor::white;
-    const QColor deselectedOutLineColor = Qt::GlobalColor::black;
-
-    for(NodeId nodeId : component->nodeIds())
-    {
-        _nodeVisualData[i++] = nodeVisuals[nodeId]._size;
-        _nodeVisualData[i++] = nodeVisuals[nodeId]._color.redF();
-        _nodeVisualData[i++] = nodeVisuals[nodeId]._color.greenF();
-        _nodeVisualData[i++] = nodeVisuals[nodeId]._color.blueF();
-
-        QColor outlineColor = _selectionManager && _selectionManager->nodeIsSelected(nodeId) ?
-                    outlineColor = selectedOutLineColor :
-                outlineColor = deselectedOutLineColor;
-
-        _nodeVisualData[i++] = outlineColor.redF();
-        _nodeVisualData[i++] = outlineColor.greenF();
-        _nodeVisualData[i++] = outlineColor.blueF();
-    }
-
-    for(EdgeId edgeId : component->edgeIds())
-    {
-        _edgeVisualData[j++] = edgeVisuals[edgeId]._size;
-        _edgeVisualData[j++] = edgeVisuals[edgeId]._color.redF();
-        _edgeVisualData[j++] = edgeVisuals[edgeId]._color.greenF();
-        _edgeVisualData[j++] = edgeVisuals[edgeId]._color.blueF();
-        _edgeVisualData[j++] = deselectedOutLineColor.redF();
-        _edgeVisualData[j++] = deselectedOutLineColor.greenF();
-        _edgeVisualData[j++] = deselectedOutLineColor.blueF();
-    }
+    _visualDataRequiresUpdate = true;
 }
 
 void GraphComponentScene::onGraphChanged(const Graph*)
@@ -306,6 +270,49 @@ void GraphComponentScene::update(float t)
             _edgePositionData[i++] = targetPosition.x();
             _edgePositionData[i++] = targetPosition.y();
             _edgePositionData[i++] = targetPosition.z();
+        }
+
+        if(_visualDataRequiresUpdate)
+        {
+            _visualDataRequiresUpdate = false;
+
+            auto& nodeVisuals = _graphModel->nodeVisuals();
+            auto& edgeVisuals = _graphModel->edgeVisuals();
+
+            _nodeVisualData.resize(component->numNodes() * 8);
+            _edgeVisualData.resize(component->numEdges() * 8);
+
+            const QColor selectedOutLineColor = Qt::GlobalColor::white;
+            const QColor deselectedOutLineColor = Qt::GlobalColor::black;
+
+            i = 0;
+            for(NodeId nodeId : component->nodeIds())
+            {
+                _nodeVisualData[i++] = nodeVisuals[nodeId]._size;
+                _nodeVisualData[i++] = nodeVisuals[nodeId]._color.redF();
+                _nodeVisualData[i++] = nodeVisuals[nodeId]._color.greenF();
+                _nodeVisualData[i++] = nodeVisuals[nodeId]._color.blueF();
+
+                QColor outlineColor = _selectionManager && _selectionManager->nodeIsSelected(nodeId) ?
+                            outlineColor = selectedOutLineColor :
+                        outlineColor = deselectedOutLineColor;
+
+                _nodeVisualData[i++] = outlineColor.redF();
+                _nodeVisualData[i++] = outlineColor.greenF();
+                _nodeVisualData[i++] = outlineColor.blueF();
+            }
+
+            i = 0;
+            for(EdgeId edgeId : component->edgeIds())
+            {
+                _edgeVisualData[i++] = edgeVisuals[edgeId]._size;
+                _edgeVisualData[i++] = edgeVisuals[edgeId]._color.redF();
+                _edgeVisualData[i++] = edgeVisuals[edgeId]._color.greenF();
+                _edgeVisualData[i++] = edgeVisuals[edgeId]._color.blueF();
+                _edgeVisualData[i++] = deselectedOutLineColor.redF();
+                _edgeVisualData[i++] = deselectedOutLineColor.greenF();
+                _edgeVisualData[i++] = deselectedOutLineColor.blueF();
+            }
         }
 
 #if 0

@@ -125,6 +125,8 @@ private:
     void render2D();
 
     void centreNodeInViewport(NodeId nodeId, Transition::Type transitionType, float cameraDistance = -1.0f);
+
+    bool _visualDataRequiresUpdate;
     void updateVisualData();
 
 private slots:
