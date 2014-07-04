@@ -35,6 +35,12 @@ public:
             subLayout->cancel();
     }
 
+    void uncancel()
+    {
+        for(NodeLayout* subLayout : _subLayouts)
+            subLayout->uncancel();
+    }
+
     bool shouldPause()
     {
         for(NodeLayout* subLayout : _subLayouts)

@@ -58,13 +58,17 @@ public:
 
     void execute(int iteration)
     {
-        setCancel(false);
         executeReal(iteration);
     }
 
     virtual void cancel()
     {
         setCancel(true);
+    }
+
+    virtual void uncancel()
+    {
+        setCancel(false);
     }
 
     // Indicates that the algorithm is doing no useful work
@@ -169,6 +173,7 @@ public:
 private:
     bool iterative();
     bool allLayoutsShouldPause();
+    void uncancel();
     void run();
 
 signals:

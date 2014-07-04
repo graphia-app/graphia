@@ -138,6 +138,12 @@ bool LayoutThread::iterative()
     return false;
 }
 
+void LayoutThread::uncancel()
+{
+    for(auto layout : _layouts)
+        layout->uncancel();
+}
+
 bool LayoutThread::allLayoutsShouldPause()
 {
     for(auto layout : _layouts)
@@ -174,6 +180,7 @@ void LayoutThread::run()
         {
             _paused = true;
             nameCurrentThread("Layout ||");
+            uncancel();
             _waitForPause.notify_all();
             _waitForResume.wait(lock);
         }
