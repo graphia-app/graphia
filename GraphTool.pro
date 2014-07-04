@@ -96,7 +96,6 @@ HEADERS += \
     source/parsers/gmlfileparser.h \
     source/parsers/graphfileparser.h \
     source/ui/selectionmanager.h \
-    source/utils.h \
     source/rendering/graphcomponentscene.h \
     source/ui/graphcomponentinteractor.h \
     source/ui/interactor.h \
