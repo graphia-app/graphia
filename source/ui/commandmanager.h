@@ -137,9 +137,9 @@ private:
     std::atomic<bool> _busy;
 
 signals:
-    void commandWillExecuteAsynchronously(std::shared_ptr<const Command> command, const QString& verb) const;
-    void commandProgress(std::shared_ptr<const Command>, int progress) const;
-    void commandCompleted(std::shared_ptr<const Command> command, const QString& pastParticiple) const;
+    void commandWillExecuteAsynchronously(const Command* command, const QString& verb) const;
+    void commandProgress(const Command*, int progress) const;
+    void commandCompleted(const Command* command, const QString& pastParticiple) const;
 };
 
 #endif // COMMANDMANAGER_H

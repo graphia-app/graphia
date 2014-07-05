@@ -81,9 +81,9 @@ private slots:
     void onLoadCompletion(int success);
     void onGraphChanged(const Graph* graph);
 
-    void onCommandWillExecuteAsynchronously(std::shared_ptr<const Command> command, const QString& verb);
-    void onCommandProgress(std::shared_ptr<const Command> command, int progress);
-    void onCommandCompleted(std::shared_ptr<const Command> command, const QString& pastParticiple);
+    void onCommandWillExecuteAsynchronously(const Command* command, const QString& verb);
+    void onCommandProgress(const Command* command, int progress);
+    void onCommandCompleted(const Command* command, const QString& pastParticiple);
     void onSelectionChanged(const SelectionManager* selectionManager);
 
     void onUserInteractionStarted();

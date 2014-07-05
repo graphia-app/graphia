@@ -35,14 +35,14 @@ bool GraphWidget::interacting() const
     return _graphComponentInteractor->interacting();
 }
 
-void GraphWidget::onCommandWillExecuteAsynchronously(std::shared_ptr<const Command>, const QString&)
+void GraphWidget::onCommandWillExecuteAsynchronously(const Command*, const QString&)
 {
     _graphComponentScene->disableInteraction();
     _openGLWindow->disableInteraction();
     _openGLWindow->disableSceneUpdate();
 }
 
-void GraphWidget::onCommandCompleted(std::shared_ptr<const Command>)
+void GraphWidget::onCommandCompleted(const Command*)
 {
     _openGLWindow->enableSceneUpdate();
     _openGLWindow->enableInteraction();

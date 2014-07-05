@@ -26,9 +26,9 @@ signals:
     void progress(int percentage) const;
     void complete(int success) const;
     void graphChanged(const Graph*) const;
-    void commandWillExecuteAsynchronously(std::shared_ptr<const Command> command, const QString& verb) const;
-    void commandProgress(std::shared_ptr<const Command> command, int progress) const;
-    void commandCompleted(std::shared_ptr<const Command> command, const QString& pastParticiple) const;
+    void commandWillExecuteAsynchronously(const Command* command, const QString& verb) const;
+    void commandProgress(const Command* command, int progress) const;
+    void commandCompleted(const Command* command, const QString& pastParticiple) const;
     void selectionChanged(const SelectionManager* selectionManager) const;
     void userInteractionStarted() const;
     void userInteractionFinished() const;

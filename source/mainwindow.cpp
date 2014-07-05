@@ -407,7 +407,7 @@ void MainWindow::on_actionDelete_triggered()
         widget->deleteSelectedNodes();
 }
 
-void MainWindow::onCommandWillExecuteAsynchronously(std::shared_ptr<const Command>, const QString& verb)
+void MainWindow::onCommandWillExecuteAsynchronously(const Command*, const QString& verb)
 {
     TabData* tb;
     if((tb = tabDataForSignalSender()) != nullptr)
@@ -419,7 +419,7 @@ void MainWindow::onCommandWillExecuteAsynchronously(std::shared_ptr<const Comman
     configureUI();
 }
 
-void MainWindow::onCommandProgress(std::shared_ptr<const Command>, int progress)
+void MainWindow::onCommandProgress(const Command*, int progress)
 {
     TabData* tb;
     if((tb = tabDataForSignalSender()) != nullptr)
@@ -428,7 +428,7 @@ void MainWindow::onCommandProgress(std::shared_ptr<const Command>, int progress)
     configureUI();
 }
 
-void MainWindow::onCommandCompleted(std::shared_ptr<const Command>, const QString& pastParticiple)
+void MainWindow::onCommandCompleted(const Command*, const QString& pastParticiple)
 {
     TabData* tb;
     if((tb = tabDataForSignalSender()) != nullptr)
