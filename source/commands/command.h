@@ -1,19 +1,9 @@
-#ifndef COMMANDMANAGER_H
-#define COMMANDMANAGER_H
+#ifndef COMMAND_H
+#define COMMAND_H
 
-#include "../utils/utils.h"
-
-#include <QtGlobal>
-#include <QObject>
 #include <QString>
 
 #include <functional>
-#include <deque>
-#include <vector>
-#include <memory>
-#include <mutex>
-#include <atomic>
-
 class Command;
 
 using ExecuteFn = std::function<bool(Command&)>;
@@ -24,11 +14,9 @@ using ProgressFn = std::function<void(int)>;
 // it lambdas to perform the execute and undo actions. For more complicated
 // operations that require maintaining non-trivial state, Command should be
 // subclassed and the execute and undo functions overridden.
-class Command : public QObject
+class Command
 {
     friend class CommandManager;
-
-    Q_OBJECT
 
 private:
     static ExecuteFn defaultExecuteFn;
@@ -55,10 +43,12 @@ public:
             bool asynchronous = true);
 
     const QString& description() const;
+    void setDescription(const QString& description);
     const QString& undoDescription() const;
     const QString& redoDescription() const;
 
     const QString& verb() const;
+    void setVerb(const QString& verb);
     const QString& undoVerb() const;
     const QString& redoVerb() const;
 
@@ -71,8 +61,8 @@ public:
 
 private:
     // Return false if the command failed, or did nothing
-    virtual bool execute(Command& command);
-    virtual void undo(Command& command);
+    virtual bool execute();
+    virtual void undo();
 
     void setProgressFn(ProgressFn progressFn);
 
@@ -92,54 +82,4 @@ private:
     bool _asynchronous;
 };
 
-class CommandManager : public QObject
-{
-    Q_OBJECT
-public:
-    CommandManager();
-
-    void clear();
-
-    void execute(std::shared_ptr<Command> command);
-
-    template<typename... Args> void execute(Args&&... args)
-    {
-        execute(std::make_shared<Command>(std::forward<Args>(args)...));
-    }
-
-    template<typename... Args> void executeSynchronous(Args&&... args)
-    {
-        execute(std::make_shared<Command>(std::forward<Args>(args)..., false));
-    }
-
-    void undo();
-    void redo();
-
-    bool canUndo() const;
-    bool canRedo() const;
-
-    const std::vector<QString> undoableCommandDescriptions() const;
-    const std::vector<QString> redoableCommandDescriptions() const;
-
-    const QString nextUndoAction() const;
-    const QString nextRedoAction() const;
-
-    bool busy() const;
-
-private:
-    bool canUndoNoLocking() const;
-    bool canRedoNoLocking() const;
-
-    std::deque<std::shared_ptr<Command>> _stack;
-    int _lastExecutedIndex;
-
-    mutable std::mutex _mutex;
-    std::atomic<bool> _busy;
-
-signals:
-    void commandWillExecuteAsynchronously(const Command* command, const QString& verb) const;
-    void commandProgress(const Command*, int progress) const;
-    void commandCompleted(const Command* command, const QString& pastParticiple) const;
-};
-
-#endif // COMMANDMANAGER_H
+#endif // COMMAND_H

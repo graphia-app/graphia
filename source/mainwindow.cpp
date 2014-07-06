@@ -2,8 +2,9 @@
 #include "ui_mainwindow.h"
 
 #include "ui/mainwidget.h"
-#include "ui/commandmanager.h"
 #include "ui/selectionmanager.h"
+
+#include "commands/commandmanager.h"
 
 #include "graph/graphmodel.h"
 

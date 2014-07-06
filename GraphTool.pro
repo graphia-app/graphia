@@ -44,7 +44,6 @@ SOURCES += \
     source/maths/plane.cpp \
     source/maths/ray.cpp \
     source/parsers/gmlfileparser.cpp \
-    source/ui/commandmanager.cpp \
     source/ui/selectionmanager.cpp \
     source/rendering/graphcomponentscene.cpp \
     source/ui/graphcomponentinteractor.cpp \
@@ -53,7 +52,10 @@ SOURCES += \
     source/parsers/graphfileparser.cpp \
     source/graph/componentmanager.cpp \
     source/utils/utils.cpp \
-    source/utils/namethread.cpp
+    source/utils/namethread.cpp \
+    source/commands/commandmanager.cpp \
+    source/commands/command.cpp \
+    source/commands/deleteselectednodescommand.cpp
 
 HEADERS += \
     source/rendering/camera.h \
@@ -93,7 +95,6 @@ HEADERS += \
     source/maths/ray.h \
     source/parsers/gmlfileparser.h \
     source/parsers/graphfileparser.h \
-    source/ui/commandmanager.h \
     source/ui/selectionmanager.h \
     source/utils.h \
     source/rendering/graphcomponentscene.h \
@@ -104,7 +105,10 @@ HEADERS += \
     source/utils/utils.h \
     source/utils/namethread.h \
     source/utils/unique_lock_with_side_effects.h \
-    source/utils/make_unique.h
+    source/utils/make_unique.h \
+    source/commands/commandmanager.h \
+    source/commands/command.h \
+    source/commands/deleteselectednodescommand.h
 
 FORMS    += source/mainwindow.ui
 

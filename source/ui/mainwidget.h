@@ -4,7 +4,7 @@
 #include <QWidget>
 
 #include "../graph/graph.h"
-#include "commandmanager.h"
+#include "../commands/commandmanager.h"
 
 #include <memory>
 

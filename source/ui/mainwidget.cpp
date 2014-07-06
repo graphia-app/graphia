@@ -7,6 +7,7 @@
 #include "../layout/eadeslayout.h"
 #include "../layout/collision.h"
 #include "../utils/make_unique.h"
+#include "../commands/deleteselectednodescommand.h"
 #include "graphwidget.h"
 #include "selectionmanager.h"
 
@@ -247,32 +248,10 @@ bool MainWidget::interacting() const
 
 void MainWidget::deleteSelectedNodes()
 {
-    auto edges = _graphModel->graph().edgesForNodes(_selectionManager->selectedNodes());
-    auto nodes = _selectionManager->selectedNodes();
-
-    if(nodes.empty())
+    if(_selectionManager->selectedNodes().empty())
         return;
 
-    _commandManager.execute(nodes.size() > 1 ? tr("Delete Nodes") : tr("Delete Node"),
-                            nodes.size() > 1 ? tr("Deleting Nodes") : tr("Deleting Node"),
-                            nodes.size() > 1 ? QString(tr("%1 Nodes Deleted")).arg(nodes.size()) : tr("Node Deleted"),
-        [this, nodes](Command&)
-        {
-            _selectionManager->clearNodeSelection(false);
-            _graphModel->graph().removeNodes(nodes);
-            return true;
-        },
-        [this, nodes, edges](Command&)
-        {
-            _graphModel->graph().performTransaction(
-                [&nodes, &edges](Graph& graph)
-                {
-                    graph.addNodes(nodes);
-                    graph.addEdges(edges);
-                });
-
-            _selectionManager->selectNodes(nodes);
-        });
+    _commandManager.execute(std::make_shared<DeleteSelectedNodesCommand>(_graphModel, _selectionManager));
 }
 
 void MainWidget::undo()

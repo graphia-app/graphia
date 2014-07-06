@@ -1,6 +1,7 @@
 #include "graphcomponentinteractor.h"
 #include "selectionmanager.h"
-#include "commandmanager.h"
+
+#include "../commands/commandmanager.h"
 
 #include "../rendering/graphcomponentscene.h"
 #include "../rendering/openglwindow.h"

@@ -7,121 +7,12 @@
 
 #include <thread>
 
-void Command::initialise()
-{
-    if(!_description.isEmpty())
-    {
-        _undoDescription = tr("Undo ") + _description;
-        _redoDescription = tr("Redo ") + _description;
-        _undoVerb = tr("Undoing ") + _description;
-        _redoVerb = tr("Redoing ") + _description;
-    }
-    else
-    {
-        _undoDescription = tr("Undo");
-        _redoDescription = tr("Redo");
-        _undoVerb = tr("Undoing");
-        _redoVerb = tr("Redoing");
-    }
-
-    _progressFn = [](int){};
-}
-
-Command::Command(const QString& description, const QString& verb,
-                 const QString& pastParticiple,
-                 ExecuteFn executeFn,
-                 UndoFn undoFn,
-                 bool asynchronous) :
-    _description(description),
-    _verb(verb),
-    _pastParticiple(pastParticiple),
-    _executeFn(executeFn),
-    _undoFn(undoFn),
-    _asynchronous(asynchronous)
-{
-    initialise();
-}
-
-Command::Command(const QString& description, const QString& verb,
-                 ExecuteFn executeFn,
-                 UndoFn undoFn,
-                 bool asynchronous) :
-    _description(description),
-    _verb(verb),
-    _executeFn(executeFn),
-    _undoFn(undoFn),
-    _asynchronous(asynchronous)
-{
-    initialise();
-}
-
-Command::Command(const QString& description,
-                 ExecuteFn executeFn,
-                 UndoFn undoFn,
-                 bool asynchronous) :
-    _description(description),
-    _executeFn(executeFn),
-    _undoFn(undoFn),
-    _asynchronous(asynchronous)
-{
-    initialise();
-}
-
-Command::Command(ExecuteFn executeFn,
-                 UndoFn undoFn,
-                 bool asynchronous) :
-    _executeFn(executeFn),
-    _undoFn(undoFn),
-    _asynchronous(asynchronous)
-{
-    initialise();
-}
-
-const QString& Command::description() const { return _description; }
-const QString& Command::undoDescription() const { return _undoDescription; }
-const QString& Command::redoDescription() const { return _redoDescription; }
-
-const QString& Command::verb() const { return _verb; }
-const QString& Command::undoVerb() const { return _undoVerb; }
-const QString& Command::redoVerb() const { return _redoVerb; }
-
-const QString& Command::pastParticiple() const { return _pastParticiple; }
-
-void Command::setPastParticiple(const QString& pastParticiple)
-{
-    _pastParticiple = pastParticiple;
-}
-
-void Command::setProgress(int progress)
-{
-    _progressFn(progress);
-}
-
-bool Command::execute(Command& command) { return _executeFn(command); }
-void Command::undo(Command& command) { _undoFn(command); }
-
-void Command::setProgressFn(ProgressFn progressFn)
-{
-    _progressFn = progressFn;
-}
-
-ExecuteFn Command::defaultExecuteFn = [](Command&)
-{
-    Q_ASSERT(!"executeFn not implmented");
-    return false;
-};
-
-UndoFn Command::defaultUndoFn = [](Command&)
-{
-    Q_ASSERT(!"undoFn not implemented");
-};
-
 CommandManager::CommandManager() :
     _lastExecutedIndex(-1),
     _busy(false)
 {}
 
-void CommandManager::execute(std::shared_ptr<Command> command)
+void CommandManager::executeReal(std::shared_ptr<Command> command)
 {
     unique_lock_with_side_effects<std::mutex> locker(_mutex);
     locker.setPostUnlockAction([this, command] { _busy = false; emit commandCompleted(command.get(), command->pastParticiple()); });
@@ -131,7 +22,7 @@ void CommandManager::execute(std::shared_ptr<Command> command)
     {
         nameCurrentThread(command->description());
 
-        if(!command->execute(*command))
+        if(!command->execute())
             return;
 
         // There are commands on the stack ahead of us; throw them away
@@ -166,7 +57,7 @@ void CommandManager::undo()
     {
         nameCurrentThread("(u) " + command->description());
 
-        command->undo(*command);
+        command->undo();
         _lastExecutedIndex--;
     };
 
@@ -194,7 +85,7 @@ void CommandManager::redo()
     {
         nameCurrentThread("(r) " + command->description());
 
-        command->execute(*command);
+        command->execute();
     };
 
     _busy = true;
