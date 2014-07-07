@@ -119,7 +119,9 @@ void OpenGLWindow::render()
         return;
 
     // Make the context current
-    _context->makeCurrent(this);
+    bool contextIsCurrent = _context->makeCurrent(this);
+    Q_ASSERT(contextIsCurrent);
+    Q_UNUSED(contextIsCurrent);
 
     // FIXME: make configurable
     glEnable(GL_MULTISAMPLE);
