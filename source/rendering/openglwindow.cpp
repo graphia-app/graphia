@@ -60,6 +60,18 @@ void OpenGLWindow::setScene(std::shared_ptr<Scene> scene)
     timer->start(16);
 }
 
+void OpenGLWindow::enableInteraction()
+{
+    _interactionEnabled = true;
+    _scene->enableInteraction();
+}
+
+void OpenGLWindow::disableInteraction()
+{
+    _interactionEnabled = false;
+    _scene->disableInteraction();
+}
+
 void OpenGLWindow::initialise()
 {
     _context->makeCurrent(this);

@@ -26,8 +26,8 @@ public:
 
     void setInteractor(std::shared_ptr<Interactor> interactor) { _interactor = interactor; }
     const Interactor& interactor() const { return *_interactor; }
-    void enableInteraction() { _interactionEnabled = true; }
-    void disableInteraction() { _interactionEnabled = false; }
+    void enableInteraction();
+    void disableInteraction();
     
 protected:
     virtual void initialise();

@@ -37,7 +37,6 @@ bool GraphWidget::interacting() const
 
 void GraphWidget::onCommandWillExecuteAsynchronously(const Command*, const QString&)
 {
-    _graphComponentScene->disableInteraction();
     _openGLWindow->disableInteraction();
     _openGLWindow->disableSceneUpdate();
 }
@@ -46,5 +45,4 @@ void GraphWidget::onCommandCompleted(const Command*)
 {
     _openGLWindow->enableSceneUpdate();
     _openGLWindow->enableInteraction();
-    _graphComponentScene->enableInteraction();
 }
