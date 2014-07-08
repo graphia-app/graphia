@@ -16,31 +16,28 @@ public:
     ElementIdSet<NodeId> selectedNodes() const;
     ElementIdSet<NodeId> unselectedNodes() const;
 
-    bool selectNode(NodeId nodeId, bool notify = true);
-    bool selectNodes(const ElementIdSet<NodeId>& nodeIds, bool notify = true);
+    bool selectNode(NodeId nodeId);
+    bool selectNodes(const ElementIdSet<NodeId>& nodeIds);
     template<typename InputIterator> bool selectNodes(InputIterator first,
-                                                      InputIterator last,
-                                                      bool notify = true);
+                                                      InputIterator last);
 
-    bool deselectNode(NodeId nodeId, bool notify = true);
-    bool deselectNodes(const ElementIdSet<NodeId>& nodeIds, bool notify = true);
+    bool deselectNode(NodeId nodeId);
+    bool deselectNodes(const ElementIdSet<NodeId>& nodeIds);
     template<typename InputIterator> bool deselectNodes(InputIterator first,
-                                                        InputIterator last,
-                                                        bool notify = true);
+                                                        InputIterator last);
 
-    void toggleNode(NodeId nodeId, bool notify = true);
-    void toggleNodes(const ElementIdSet<NodeId>& nodeIds, bool notify = true);
+    void toggleNode(NodeId nodeId);
+    void toggleNodes(const ElementIdSet<NodeId>& nodeIds);
     template<typename InputIterator> void toggleNodes(InputIterator first,
-                                                      InputIterator last,
-                                                      bool notify = true);
+                                                      InputIterator last);
 
     bool nodeIsSelected(NodeId nodeId) const;
 
-    bool setSelectedNodes(const ElementIdSet<NodeId>& nodeIds, bool notify = true);
+    bool setSelectedNodes(const ElementIdSet<NodeId>& nodeIds);
 
-    bool selectAllNodes(bool notify = true);
-    bool clearNodeSelection(bool notify = true);
-    void invertNodeSelection(bool notify = true);
+    bool selectAllNodes();
+    bool clearNodeSelection();
+    void invertNodeSelection();
 
     const QString numNodesSelectedAsString() const;
 

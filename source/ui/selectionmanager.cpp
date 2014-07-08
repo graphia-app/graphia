@@ -34,78 +34,75 @@ ElementIdSet<NodeId> SelectionManager::unselectedNodes() const
     return unselectedNodeIds;
 }
 
-bool SelectionManager::selectNode(NodeId nodeId, bool notify)
+bool SelectionManager::selectNode(NodeId nodeId)
 {
     auto result = _selectedNodes.insert(nodeId);
 
-    if(notify && result.second)
+    if(result.second)
         emit selectionChanged(this);
 
     return result.second;
 }
 
-bool SelectionManager::selectNodes(const ElementIdSet<NodeId>& nodeIds, bool notify)
+bool SelectionManager::selectNodes(const ElementIdSet<NodeId>& nodeIds)
 {
-    return selectNodes(nodeIds.begin(), nodeIds.end(), notify);
+    return selectNodes(nodeIds.begin(), nodeIds.end());
 }
 
 template<typename InputIterator> bool SelectionManager::selectNodes(InputIterator first,
-                                                                    InputIterator last,
-                                                                    bool notify)
+                                                                    InputIterator last)
 {
     auto oldSize = _selectedNodes.size();
     _selectedNodes.insert(first, last);
     bool selectionDidChange = _selectedNodes.size() > oldSize;
 
-    if(notify && selectionDidChange)
+    if(selectionDidChange)
         emit selectionChanged(this);
 
     return selectionDidChange;
 }
 
-bool SelectionManager::deselectNode(NodeId nodeId, bool notify)
+bool SelectionManager::deselectNode(NodeId nodeId)
 {
     bool selectionWillChange = _selectedNodes.erase(nodeId) > 0;
 
-    if(notify && selectionWillChange)
+    if(selectionWillChange)
         emit selectionChanged(this);
 
     return selectionWillChange;
 }
 
-bool SelectionManager::deselectNodes(const ElementIdSet<NodeId>& nodeIds, bool notify)
+bool SelectionManager::deselectNodes(const ElementIdSet<NodeId>& nodeIds)
 {
-    return deselectNodes(nodeIds.begin(), nodeIds.end(), notify);
+    return deselectNodes(nodeIds.begin(), nodeIds.end());
 }
 
 template<typename InputIterator> bool SelectionManager::deselectNodes(InputIterator first,
-                                                                      InputIterator last,
-                                                                      bool notify)
+                                                                      InputIterator last)
 {
     bool selectionWillChange = _selectedNodes.erase(first, last) != first;
 
-    if(notify && selectionWillChange)
+    if(selectionWillChange)
         emit selectionChanged(this);
 
     return selectionWillChange;
 }
 
-void SelectionManager::toggleNode(NodeId nodeId, bool notify)
+void SelectionManager::toggleNode(NodeId nodeId)
 {
     if(nodeIsSelected(nodeId))
-        deselectNode(nodeId, notify);
+        deselectNode(nodeId);
     else
-        selectNode(nodeId, notify);
+        selectNode(nodeId);
 }
 
-void SelectionManager::toggleNodes(const ElementIdSet<NodeId>& nodeIds, bool notify)
+void SelectionManager::toggleNodes(const ElementIdSet<NodeId>& nodeIds)
 {
-    toggleNodes(nodeIds.begin(), nodeIds.end(), notify);
+    toggleNodes(nodeIds.begin(), nodeIds.end());
 }
 
 template<typename InputIterator> void SelectionManager::toggleNodes(InputIterator first,
-                                                                    InputIterator last,
-                                                                    bool notify)
+                                                                    InputIterator last)
 {
     ElementIdSet<NodeId> difference;
     for(auto i = first; i != last; i++)
@@ -117,8 +114,7 @@ template<typename InputIterator> void SelectionManager::toggleNodes(InputIterato
 
     _selectedNodes = std::move(difference);
 
-    if(notify)
-        emit selectionChanged(this);
+    emit selectionChanged(this);
 }
 
 bool SelectionManager::nodeIsSelected(NodeId nodeId) const
@@ -131,38 +127,38 @@ bool SelectionManager::nodeIsSelected(NodeId nodeId) const
     return _selectedNodes.find(nodeId) != _selectedNodes.end();
 }
 
-bool SelectionManager::setSelectedNodes(const ElementIdSet<NodeId>& nodeIds, bool notify)
+bool SelectionManager::setSelectedNodes(const ElementIdSet<NodeId>& nodeIds)
 {
     bool selectionWillChange = (_selectedNodes != nodeIds);
     _selectedNodes = std::move(nodeIds);
 
-    if(notify && selectionWillChange)
+    if(selectionWillChange)
         emit selectionChanged(this);
 
     return selectionWillChange;
 }
 
-bool SelectionManager::selectAllNodes(bool notify)
+bool SelectionManager::selectAllNodes()
 {
     auto& nodeIds = _graph.nodeIds();
-    return selectNodes(nodeIds.begin(), nodeIds.end(), notify);
+    return selectNodes(nodeIds.begin(), nodeIds.end());
 }
 
-bool SelectionManager::clearNodeSelection(bool notify)
+bool SelectionManager::clearNodeSelection()
 {
     bool selectionWillChange = !_selectedNodes.empty();
     _selectedNodes.clear();
 
-    if(notify && selectionWillChange)
+    if(selectionWillChange)
         emit selectionChanged(this);
 
     return selectionWillChange;
 }
 
-void SelectionManager::invertNodeSelection(bool notify)
+void SelectionManager::invertNodeSelection()
 {
     auto& nodeIds = _graph.nodeIds();
-    toggleNodes(nodeIds.begin(), nodeIds.end(), notify);
+    toggleNodes(nodeIds.begin(), nodeIds.end());
 }
 
 const QString SelectionManager::numNodesSelectedAsString() const

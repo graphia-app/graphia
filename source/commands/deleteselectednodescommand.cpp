@@ -6,7 +6,7 @@
 #include "../ui/selectionmanager.h"
 
 DeleteSelectedNodesCommand::DeleteSelectedNodesCommand(std::shared_ptr<GraphModel> graphModel,
-                                       std::shared_ptr<SelectionManager> selectionManager) :
+                                                       std::shared_ptr<SelectionManager> selectionManager) :
     Command(),
     _graphModel(graphModel),
     _selectionManager(selectionManager),
@@ -31,7 +31,7 @@ DeleteSelectedNodesCommand::DeleteSelectedNodesCommand(std::shared_ptr<GraphMode
 bool DeleteSelectedNodesCommand::execute()
 {
     _edges = _graphModel->graph().edgesForNodes(_nodes);
-    _selectionManager->clearNodeSelection(false);
+    _selectionManager->clearNodeSelection();
     _graphModel->graph().removeNodes(_nodes);
     return true;
 }
