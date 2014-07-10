@@ -15,7 +15,7 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 
-const QString MainWindow::applicationName = tr("GraphTool");
+const char* MainWindow::applicationName = "GraphTool";
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _statusBarProgressBar(new QProgressBar)
 {
     _ui->setupUi(this);
-    setWindowTitle(applicationName);
+    setWindowTitle(tr(applicationName));
 
     _statusBarProgressLabel->setVisible(false);
     _ui->statusBar->addPermanentWidget(_statusBarProgressLabel);
@@ -246,9 +246,9 @@ void MainWindow::configureUI()
 
     MainWidget* widget;
     if((widget = currentTabWidget()) != nullptr)
-        setWindowTitle(QString("%1 - %2").arg(widget->graphModel()->name()).arg(applicationName));
+        setWindowTitle(QString("%1 - %2").arg(widget->graphModel()->name()).arg(tr(applicationName)));
     else
-        setWindowTitle(applicationName);
+        setWindowTitle(tr(applicationName));
 }
 
 void MainWindow::on_actionOpen_triggered()

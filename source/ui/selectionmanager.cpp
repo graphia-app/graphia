@@ -163,7 +163,7 @@ void SelectionManager::invertNodeSelection()
 
 const QString SelectionManager::numNodesSelectedAsString() const
 {
-    int selectionSize = selectedNodes().size();
+    int selectionSize = static_cast<int>(selectedNodes().size());
     if(selectionSize > 1)
         return QString(tr("%1 Nodes Selected")).arg(selectionSize);
     else if(selectionSize == 1)

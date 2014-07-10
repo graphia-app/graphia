@@ -40,7 +40,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    static const QString applicationName;
+    static const char* applicationName;
 
 protected:
     void closeEvent(QCloseEvent* e);
