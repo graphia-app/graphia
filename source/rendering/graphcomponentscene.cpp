@@ -394,6 +394,8 @@ void GraphComponentScene::renderNodes()
                                     GL_UNSIGNED_INT, 0, _numNodesInPositionData);
     _sphere.vertexArrayObject()->release();
 
+    _nodeVisualBuffer.release();
+    _nodePositionBuffer.release();
     _nodesShader.release();
 }
 
@@ -419,6 +421,8 @@ void GraphComponentScene::renderEdges()
                                     GL_UNSIGNED_INT, 0, _numEdgesInPositionData);
     _cylinder.vertexArrayObject()->release();
 
+    _edgeVisualBuffer.release();
+    _edgePositionBuffer.release();
     _edgesShader.release();
 }
 
@@ -442,6 +446,7 @@ void GraphComponentScene::renderDebugLines()
     _funcs->glDrawArrays(GL_LINES, 0, static_cast<int>(_debugLines.size()) * 2);
     _debugLinesDataVAO.release();
     _debugLinesShader.release();
+    _debugLinesDataBuffer.release();
 
     clearDebugLines();
 }
@@ -492,6 +497,7 @@ void GraphComponentScene::render2D()
         _selectionMarkerDataVAO.release();
 
         _selectionMarkerShader.release();
+        _selectionMarkerDataBuffer.release();
     }
 
     _funcs->glEnable(GL_DEPTH_TEST);
@@ -816,30 +822,34 @@ void GraphComponentScene::prepareVertexBuffers()
     _nodePositionBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     _nodePositionBuffer.bind();
     _nodePositionBuffer.allocate(_nodePositionData.data(), static_cast<int>(_nodePositionData.size()) * sizeof(GLfloat));
+    _nodePositionBuffer.release();
 
     _edgePositionBuffer.create();
     _edgePositionBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     _edgePositionBuffer.bind();
     _edgePositionBuffer.allocate(_edgePositionData.data(), static_cast<int>(_edgePositionData.size()) * sizeof(GLfloat));
+    _edgePositionBuffer.release();
 
     _nodeVisualBuffer.create();
     _nodeVisualBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     _nodeVisualBuffer.bind();
     _nodeVisualBuffer.allocate(_nodeVisualData.data(), static_cast<int>(_nodeVisualData.size()) * sizeof(GLfloat));
+    _nodeVisualBuffer.release();
 
     _edgeVisualBuffer.create();
     _edgeVisualBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     _edgeVisualBuffer.bind();
     _edgeVisualBuffer.allocate(_edgeVisualData.data(), static_cast<int>(_edgeVisualData.size()) * sizeof(GLfloat));
+    _edgeVisualBuffer.release();
 
     _selectionMarkerDataBuffer.create();
     _selectionMarkerDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-    _selectionMarkerDataBuffer.bind();
 
     _debugLinesDataBuffer.create();
     _debugLinesDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     _debugLinesDataBuffer.bind();
     _debugLinesDataBuffer.allocate(_debugLinesData.data(), static_cast<int>(_debugLinesData.size()) * sizeof(GLfloat));
+    _debugLinesDataBuffer.release();
 }
 
 void GraphComponentScene::prepareNodeVAO()
@@ -867,8 +877,11 @@ void GraphComponentScene::prepareNodeVAO()
     _funcs->glVertexAttribDivisor(shader->attributeLocation("size"), 1);
     _funcs->glVertexAttribDivisor(shader->attributeLocation("color"), 1);
     _funcs->glVertexAttribDivisor(shader->attributeLocation("outlineColor"), 1);
-    _sphere.vertexArrayObject()->release();
+
+    _nodeVisualBuffer.release();
+    _nodePositionBuffer.release();
     shader->release();
+    _sphere.vertexArrayObject()->release();
 }
 
 void GraphComponentScene::prepareEdgeVAO()
@@ -899,8 +912,11 @@ void GraphComponentScene::prepareEdgeVAO()
     _funcs->glVertexAttribDivisor(shader->attributeLocation("size"), 1);
     _funcs->glVertexAttribDivisor(shader->attributeLocation("color"), 1);
     _funcs->glVertexAttribDivisor(shader->attributeLocation("outlineColor"), 1);
-    _cylinder.vertexArrayObject()->release();
+
+    _edgeVisualBuffer.release();
+    _edgePositionBuffer.release();
     shader->release();
+    _cylinder.vertexArrayObject()->release();
 }
 
 void GraphComponentScene::prepareSelectionMarkerVAO()
@@ -915,6 +931,7 @@ void GraphComponentScene::prepareSelectionMarkerVAO()
     _selectionMarkerShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 5 * sizeof(GLfloat));
     _selectionMarkerShader.setAttributeBuffer("color", GL_FLOAT, 2 * sizeof(GLfloat), 3, 5 * sizeof(GLfloat));
 
+    _selectionMarkerDataBuffer.release();
     _selectionMarkerDataVAO.release();
     _selectionMarkerShader.release();
 }
@@ -930,6 +947,7 @@ void GraphComponentScene::prepareDebugLinesVAO()
     _debugLinesShader.setAttributeBuffer("position", GL_FLOAT, 0, 3, 6 * sizeof(GLfloat));
     _debugLinesShader.setAttributeBuffer("color", GL_FLOAT, 3 * sizeof(GLfloat), 3, 6 * sizeof(GLfloat));
 
+    _debugLinesDataBuffer.release();
     _debugLinesDataVAO.release();
     _debugLinesShader.release();
 }
