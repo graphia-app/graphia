@@ -42,6 +42,8 @@ public:
             UndoFn undoFn = defaultUndoFn,
             bool asynchronous = true);
 
+    virtual ~Command() {}
+
     const QString& description() const;
     void setDescription(const QString& description);
     const QString& undoDescription() const;

@@ -12,6 +12,7 @@
 #include <deque>
 #include <vector>
 #include <memory>
+#include <thread>
 #include <mutex>
 #include <atomic>
 #include <type_traits>
@@ -62,8 +63,11 @@ private:
     std::deque<std::shared_ptr<Command>> _stack;
     int _lastExecutedIndex;
 
+    std::thread _thread;
     mutable std::mutex _mutex;
     std::atomic<bool> _busy;
+
+    void onCommandCompleted(const Command* command, const QString& pastParticiple);
 
 signals:
     void commandWillExecuteAsynchronously(const Command* command, const QString& verb) const;

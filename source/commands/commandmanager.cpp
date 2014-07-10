@@ -10,13 +10,17 @@
 CommandManager::CommandManager() :
     _lastExecutedIndex(-1),
     _busy(false)
-{}
+{
+    connect(this, &CommandManager::commandCompleted, this, &CommandManager::onCommandCompleted);
+}
 
 void CommandManager::executeReal(std::shared_ptr<Command> command)
 {
     unique_lock_with_side_effects<std::mutex> locker(_mutex);
-    locker.setPostUnlockAction([this, command] { _busy = false; emit commandCompleted(command.get(), command->pastParticiple()); });
-    command->setProgressFn([this, command](int progress) { emit commandProgress(command.get(), progress); });
+    auto commandPtr = command.get();
+
+    locker.setPostUnlockAction([this, commandPtr] { _busy = false; emit commandCompleted(commandPtr, commandPtr->pastParticiple()); });
+    command->setProgressFn([this, commandPtr](int progress) { emit commandProgress(commandPtr, progress); });
 
     auto executeCommand = [this](unique_lock_with_side_effects<std::mutex> /*locker*/, std::shared_ptr<Command> command)
     {
@@ -29,7 +33,7 @@ void CommandManager::executeReal(std::shared_ptr<Command> command)
         while(canRedoNoLocking())
             _stack.pop_back();
 
-        _stack.push_back(std::move(command));
+        _stack.push_back(command);
         _lastExecutedIndex = static_cast<int>(_stack.size()) - 1;
     };
 
@@ -37,7 +41,7 @@ void CommandManager::executeReal(std::shared_ptr<Command> command)
     if(command->asynchronous())
     {
         emit commandWillExecuteAsynchronously(command.get(), command->verb());
-        std::thread(executeCommand, std::move(locker), command).detach();
+        _thread = std::thread(executeCommand, std::move(locker), command);
     }
     else
         executeCommand(std::move(locker), command);
@@ -51,7 +55,8 @@ void CommandManager::undo()
         return;
 
     auto command = _stack.at(_lastExecutedIndex);
-    locker.setPostUnlockAction([this, command] { _busy = false; emit commandCompleted(command.get(), QString()); });
+    auto commandPtr = command.get();
+    locker.setPostUnlockAction([this, commandPtr] { _busy = false; emit commandCompleted(commandPtr, QString()); });
 
     auto undoCommand = [this, command](unique_lock_with_side_effects<std::mutex> /*locker*/)
     {
@@ -65,7 +70,7 @@ void CommandManager::undo()
     if(command->asynchronous())
     {
         emit commandWillExecuteAsynchronously(command.get(), command->undoVerb());
-        std::thread(undoCommand, std::move(locker)).detach();
+        _thread = std::thread(undoCommand, std::move(locker));
     }
     else
         undoCommand(std::move(locker));
@@ -79,7 +84,8 @@ void CommandManager::redo()
         return;
 
     auto command = _stack.at(++_lastExecutedIndex);
-    locker.setPostUnlockAction([this, command] { _busy = false; emit commandCompleted(command.get(), command->pastParticiple()); });
+    auto commandPtr = command.get();
+    locker.setPostUnlockAction([this, commandPtr] { _busy = false; emit commandCompleted(commandPtr, commandPtr->pastParticiple()); });
 
     auto redoCommand = [this, command](unique_lock_with_side_effects<std::mutex> /*locker*/)
     {
@@ -92,7 +98,7 @@ void CommandManager::redo()
     if(command->asynchronous())
     {
         emit commandWillExecuteAsynchronously(command.get(), command->redoVerb());
-        std::thread(redoCommand, std::move(locker)).detach();
+        _thread = std::thread(redoCommand, std::move(locker));
     }
     else
         redoCommand(std::move(locker));
@@ -185,4 +191,11 @@ bool CommandManager::canUndoNoLocking() const
 bool CommandManager::canRedoNoLocking() const
 {
     return _lastExecutedIndex < static_cast<int>(_stack.size()) - 1;
+}
+
+void CommandManager::onCommandCompleted(const Command*, const QString&)
+{
+    // If the command executed asynchronously, we need to join its thread
+    if(_thread.joinable())
+        _thread.join();
 }
