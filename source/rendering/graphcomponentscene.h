@@ -2,9 +2,9 @@
 #define GRAPHCOMPONENTSCENE_H
 
 #include "scene.h"
+#include "graphcomponentviewdata.h"
 #include "primitives/cylinder.h"
 #include "primitives/sphere.h"
-#include "camera.h"
 #include "transition.h"
 #include "../maths/boundingbox.h"
 #include "../graph/graph.h"
@@ -24,28 +24,18 @@
 class Quad;
 class GraphModel;
 class SelectionManager;
+class Camera;
+class Octree;
 
 class QOpenGLFunctions_3_3_Core;
-
-class ComponentViewData
-{
-public:
-    ComponentViewData();
-    ComponentViewData(const ComponentViewData& other);
-
-    Camera _camera;
-    float _zoomDistance;
-    NodeId _focusNodeId;
-
-    bool _initialised;
-};
 
 class GraphComponentScene : public Scene
 {
     Q_OBJECT
 
 public:
-    GraphComponentScene(QObject* parent = 0);
+    GraphComponentScene(std::shared_ptr<ComponentArray<GraphComponentViewData>> componentsViewData,
+                        QObject* parent = nullptr);
 
     static const int multisamples = 4;
 
@@ -60,7 +50,7 @@ public:
     ComponentId focusComponentId() { return _focusComponentId; }
     NodeId focusNodeId()
     {
-        ComponentViewData* viewData = focusComponentViewData();
+        GraphComponentViewData* viewData = focusComponentViewData();
         return viewData != nullptr ? viewData->_focusNodeId : NodeId();
     }
     void enableFocusNodeTracking() { _trackFocusNode = true; }
@@ -126,7 +116,12 @@ private:
 
     void centreNodeInViewport(NodeId nodeId, Transition::Type transitionType, float cameraDistance = -1.0f);
 
+    bool _positionalDataRequiresUpdate;
+    void queuePositionalDataUpdate();
+    void updatePositionalData();
+
     bool _visualDataRequiresUpdate;
+    void queueVisualDataUpdate();
     void updateVisualData();
 
 private slots:
@@ -153,8 +148,8 @@ private:
 
     ComponentId _focusComponentId;
     ComponentId _lastSplitterFocusComponentId;
-    std::unique_ptr<ComponentArray<ComponentViewData>> _componentsViewData;
-    ComponentViewData* focusComponentViewData() const;
+    std::shared_ptr<ComponentArray<GraphComponentViewData>> _componentsViewData;
+    GraphComponentViewData* focusComponentViewData() const;
 
     float _aspectRatio;
     Camera* _camera;
@@ -165,6 +160,9 @@ private:
 
     std::shared_ptr<GraphModel> _graphModel;
     std::shared_ptr<SelectionManager> _selectionManager;
+
+    QMatrix4x4 _modelViewMatrix;
+    QMatrix4x4 _projectionMatrix;
 
     QOpenGLShaderProgram _nodesShader;
     std::vector<GLfloat> _nodePositionData;

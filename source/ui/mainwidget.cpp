@@ -4,7 +4,7 @@
 #include "../graph/genericgraphmodel.h"
 #include "../graph/simplecomponentmanager.h"
 #include "../layout/layout.h"
-#include "../layout/eadeslayout.h"
+#include "../layout/forcedirectedlayout.h"
 #include "../layout/collision.h"
 #include "../utils/make_unique.h"
 #include "../commands/deleteselectednodescommand.h"
@@ -65,7 +65,7 @@ void MainWidget::onLoadCompletion(bool success)
 {
     _loadComplete = true;
 
-    _nodeLayoutThread = std::make_unique<NodeLayoutThread>(std::make_unique<EadesLayoutFactory>(_graphModel));
+    _nodeLayoutThread = std::make_unique<NodeLayoutThread>(std::make_unique<ForceDirectedLayoutFactory>(_graphModel));
     _nodeLayoutThread->addAllComponents(_graphModel->graph());
     _nodeLayoutThread->start();
 
@@ -88,6 +88,8 @@ void MainWidget::onLoadCompletion(bool success)
     connect(&_commandManager, &CommandManager::commandCompleted, this, &MainWidget::commandCompleted);
 
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &MainWidget::selectionChanged);
+
+    connect(_nodeLayoutThread.get(), &NodeLayoutThread::executed, _graphWidget, &GraphWidget::layoutChanged);
 
     layout()->setContentsMargins(0, 0, 0, 0);
     layout()->addWidget(_graphWidget);

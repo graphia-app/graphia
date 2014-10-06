@@ -6,6 +6,11 @@
 
 gcc:QMAKE_CXXFLAGS += -std=c++11 -g
 
+# ThreadSanitizer settings
+#gcc:QMAKE_CXXFLAGS += -fsanitize=thread -fPIE
+#LIBS += -ltsan
+#QMAKE_LFLAGS += -pie
+
 QT       += core gui opengl openglextensions
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -31,11 +36,9 @@ SOURCES += \
     source/graph/simplecomponentmanager.cpp \
     source/layout/centreinglayout.cpp \
     source/layout/collision.cpp \
-    source/layout/eadeslayout.cpp \
     source/layout/layout.cpp \
     source/layout/randomlayout.cpp \
     source/layout/scalinglayout.cpp \
-    source/layout/spatialoctree.cpp \
     source/main.cpp \
     source/mainwindow.cpp \
     source/maths/boundingbox.cpp \
@@ -55,7 +58,13 @@ SOURCES += \
     source/utils/namethread.cpp \
     source/commands/commandmanager.cpp \
     source/commands/command.cpp \
-    source/commands/deleteselectednodescommand.cpp
+    source/commands/deleteselectednodescommand.cpp \
+    source/rendering/graphcomponentviewdata.cpp \
+    source/layout/barneshuttree.cpp \
+    source/layout/forcedirectedlayout.cpp \
+    source/utils/threadpool.cpp \
+    source/utils/semaphore.cpp \
+    source/layout/nodepositions.cpp
 
 HEADERS += \
     source/rendering/camera.h \
@@ -78,12 +87,10 @@ HEADERS += \
     source/graph/simplecomponentmanager.h \
     source/layout/centreinglayout.h \
     source/layout/collision.h \
-    source/layout/eadeslayout.h \
     source/layout/layout.h \
     source/layout/randomlayout.h \
     source/layout/scalinglayout.h \
     source/layout/sequencelayout.h \
-    source/layout/spatialoctree.h \
     source/mainwindow.h \
     source/maths/boundingbox.h \
     source/maths/boundingsphere.h \
@@ -107,7 +114,16 @@ HEADERS += \
     source/utils/make_unique.h \
     source/commands/commandmanager.h \
     source/commands/command.h \
-    source/commands/deleteselectednodescommand.h
+    source/commands/deleteselectednodescommand.h \
+    source/rendering/graphcomponentviewdata.h \
+    source/layout/octree.h \
+    source/layout/barneshuttree.h \
+    source/layout/forcedirectedlayout.h \
+    source/utils/threadpool.h \
+    source/utils/semaphore.h \
+    source/layout/nodepositions.h \
+    source/utils/circularbuffer.h \
+    source/utils/fixedsizestack.h
 
 FORMS    += source/mainwindow.ui
 

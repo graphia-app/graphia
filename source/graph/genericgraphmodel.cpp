@@ -13,7 +13,7 @@ GenericGraphModel::GenericGraphModel(const QString &name) :
 }
 
 const float NODE_SIZE = 0.6f;
-const float EDGE_SIZE = 0.1f;
+const float EDGE_SIZE = 0.2f;
 
 void GenericGraphModel::onNodeAdded(const Graph*, NodeId nodeId)
 {

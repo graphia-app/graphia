@@ -22,18 +22,14 @@ template<typename Index, typename Element> class GraphArray : public ResizableGr
 protected:
     Graph* _graph;
     std::vector<Element> _array;
-    std::recursive_mutex _mutex;
-    bool _flag; // Generic flag
 
 public:
     GraphArray(Graph& graph) :
-        _graph(&graph),
-        _flag(false)
+        _graph(&graph)
     {}
 
     GraphArray(const GraphArray& other) :
-        _graph(&other._graph),
-        _flag(other._flag)
+        _graph(&other._graph)
     {
         for(auto e : other._array)
             _array.push_back(e);
@@ -41,8 +37,7 @@ public:
 
     GraphArray(GraphArray&& other) :
         _graph(&other._graph),
-        _array(std::move(other._array)),
-        _flag(other._flag)
+        _array(std::move(other._array))
     {}
 
     virtual ~GraphArray() {}
@@ -51,7 +46,6 @@ public:
     {
         Q_ASSERT(_graph == other._graph);
         _array = other._array;
-        _flag = other._flag;
 
         return *this;
     }
@@ -60,18 +54,9 @@ public:
     {
         Q_ASSERT(_graph == other._graph);
         _array = std::move(other._array);
-        _flag = other._flag;
 
         return *this;
     }
-
-    std::recursive_mutex& mutex() { return _mutex; }
-    void lock() { _mutex.lock(); }
-    void unlock() { _mutex.unlock(); }
-
-    bool flagged() { return _flag; }
-    void flag() { _flag = true; }
-    void resetFlag() { _flag = false; }
 
     void invalidate() { _graph = nullptr; }
 

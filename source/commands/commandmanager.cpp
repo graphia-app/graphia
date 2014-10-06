@@ -40,7 +40,7 @@ void CommandManager::executeReal(std::shared_ptr<Command> command)
     _busy = true;
     if(command->asynchronous())
     {
-        emit commandWillExecuteAsynchronously(command.get(), command->verb());
+        emit commandWillExecuteAsynchronously(commandPtr, command->verb());
         _thread = std::thread(executeCommand, std::move(locker), command);
     }
     else
@@ -69,7 +69,7 @@ void CommandManager::undo()
     _busy = true;
     if(command->asynchronous())
     {
-        emit commandWillExecuteAsynchronously(command.get(), command->undoVerb());
+        emit commandWillExecuteAsynchronously(commandPtr, command->undoVerb());
         _thread = std::thread(undoCommand, std::move(locker));
     }
     else
@@ -97,7 +97,7 @@ void CommandManager::redo()
     _busy = true;
     if(command->asynchronous())
     {
-        emit commandWillExecuteAsynchronously(command.get(), command->redoVerb());
+        emit commandWillExecuteAsynchronously(commandPtr, command->redoVerb());
         _thread = std::thread(redoCommand, std::move(locker));
     }
     else

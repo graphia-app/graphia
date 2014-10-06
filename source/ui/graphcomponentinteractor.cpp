@@ -121,7 +121,7 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
                 auto component = _graphModel->graph().componentById(_scene->focusComponentId());
                 for(NodeId nodeId : component->nodeIds())
                 {
-                    const QVector3D& nodePosition = _graphModel->nodePositions().at(nodeId);
+                    const QVector3D nodePosition = _graphModel->nodePositions().getScaledAndSmoothed(nodeId);
                     if(frustum.containsPoint(nodePosition))
                         selection.insert(nodeId);
                 }
@@ -232,7 +232,7 @@ void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
         {
             emit userInteractionStarted();
 
-            const QVector3D& clickedNodePosition = _graphModel->nodePositions().at(_clickedNodeId);
+            const QVector3D clickedNodePosition = _graphModel->nodePositions().getScaledAndSmoothed(_clickedNodeId);
 
             Plane translationPlane(clickedNodePosition, camera->viewVector().normalized());
 
@@ -255,8 +255,8 @@ void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
             {
                 emit userInteractionStarted();
 
-                const QVector3D& clickedNodePosition = _graphModel->nodePositions().at(_clickedNodeId);
-                const QVector3D& rotationCentre = _graphModel->nodePositions().at(_scene->focusNodeId());
+                const QVector3D clickedNodePosition = _graphModel->nodePositions().getScaledAndSmoothed(_clickedNodeId);
+                const QVector3D rotationCentre = _graphModel->nodePositions().getScaledAndSmoothed(_scene->focusNodeId());
                 float radius = clickedNodePosition.distanceToPoint(rotationCentre);
 
                 BoundingSphere boundingSphere(rotationCentre, radius);

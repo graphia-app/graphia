@@ -5,7 +5,7 @@ BoundingBox3D NodeLayout::boundingBox(const ReadOnlyGraph& graph, const NodePosi
 {
     std::vector<QVector3D> graphPositions;
     for(NodeId nodeId : graph.nodeIds())
-        graphPositions.push_back(positions.at(nodeId));
+        graphPositions.push_back(positions.get(nodeId));
 
     return BoundingBox3D(graphPositions);
 }
@@ -189,9 +189,8 @@ void LayoutThread::run()
     }
     while(iterative() || _repeating);
 
-    _mutex.lock();
+    std::unique_lock<std::mutex> lock(_mutex);
     _layouts.clear();
-    _mutex.unlock();
 }
 
 

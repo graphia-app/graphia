@@ -75,6 +75,14 @@ public:
     }
 
     friend QDebug operator<< <T>(QDebug d, const ElementId<T>& id);
+
+    operator QString()
+    {
+        if(isNull())
+            return "Null";
+        else
+            return QString::number(_value);
+    }
 };
 
 template<typename T> QDebug operator<<(QDebug d, const ElementId<T>& id)

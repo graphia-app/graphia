@@ -1,12 +1,13 @@
 #include "graphcomponentscene.h"
 
 #include "camera.h"
+#include "graphcomponentviewdata.h"
 #include "primitives/quad.h"
 #include "material.h"
 
 #include "../graph/graphmodel.h"
 #include "../layout/layout.h"
-#include "../layout/spatialoctree.h"
+#include "../layout/barneshuttree.h"
 #include "../layout/collision.h"
 
 #include "../maths/frustum.h"
@@ -29,7 +30,7 @@
 #include <cmath>
 #include <mutex>
 
-GraphComponentScene::GraphComponentScene(QObject* parent)
+GraphComponentScene::GraphComponentScene(std::shared_ptr<ComponentArray<GraphComponentViewData>> componentsViewData, QObject* parent)
     : Scene(parent),
       _width(0), _height(0),
       _colorTexture(0),
@@ -37,11 +38,15 @@ GraphComponentScene::GraphComponentScene(QObject* parent)
       _depthTexture(0),
       _visualFBO(0),
       _FBOcomplete(false),
+      _positionalDataRequiresUpdate(false),
       _visualDataRequiresUpdate(false),
       _trackFocusNode(true),
       _funcs(nullptr),
+      _componentsViewData(componentsViewData),
       _aspectRatio(4.0f / 3.0f),
-      _camera(nullptr)
+      _camera(nullptr),
+      _numNodesInPositionData(0),
+      _numEdgesInPositionData(0)
 {
     update(0.0f);
 }
@@ -101,7 +106,12 @@ void GraphComponentScene::cleanup()
 {
 }
 
-void GraphComponentScene::updateVisualData()
+void GraphComponentScene::queuePositionalDataUpdate()
+{
+    _positionalDataRequiresUpdate = true;
+}
+
+void GraphComponentScene::queueVisualDataUpdate()
 {
     _visualDataRequiresUpdate = true;
 }
@@ -115,12 +125,13 @@ void GraphComponentScene::onGraphChanged(const Graph*)
     }
 
     refreshComponentIdsCache();
-    updateVisualData();
+    queuePositionalDataUpdate();
+    queueVisualDataUpdate();
 }
 
 void GraphComponentScene::onNodeWillBeRemoved(const Graph*, NodeId nodeId)
 {
-    ComponentViewData* currentComponentViewData = focusComponentViewData();
+    GraphComponentViewData* currentComponentViewData = focusComponentViewData();
     if(currentComponentViewData->_focusNodeId == nodeId)
         currentComponentViewData->_focusNodeId.setToNull();
 }
@@ -155,7 +166,7 @@ void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId com
     {
         if(!_lastSplitterFocusComponentId.isNull())
         {
-            ComponentViewData* currentComponentViewData = focusComponentViewData();
+            GraphComponentViewData* currentComponentViewData = focusComponentViewData();
             auto& lastSplitterComponentViewData = _componentsViewData->at(_lastSplitterFocusComponentId);
             lastSplitterComponentViewData = *currentComponentViewData;
             lastSplitterComponentViewData._focusNodeId.setToNull();
@@ -170,7 +181,7 @@ void GraphComponentScene::onComponentSplit(const Graph* graph, ComponentId oldCo
 {
     if(oldComponentId == _focusComponentId)
     {
-        ComponentViewData currentComponentViewData = *focusComponentViewData();
+        GraphComponentViewData currentComponentViewData = *focusComponentViewData();
         ComponentId newFocusComponentId = graph->componentIdOfNode(currentComponentViewData._focusNodeId);
 
         for(ComponentId splitter : splitters)
@@ -210,7 +221,7 @@ void GraphComponentScene::onComponentsWillMerge(const Graph*, const ElementIdSet
 
 void GraphComponentScene::onSelectionChanged(const SelectionManager*)
 {
-    updateVisualData();
+    queueVisualDataUpdate();
 }
 
 void GraphComponentScene::refreshComponentIdsCache()
@@ -218,7 +229,7 @@ void GraphComponentScene::refreshComponentIdsCache()
     _componentIdsCache = _graphModel->graph().componentIds();
 }
 
-ComponentViewData* GraphComponentScene::focusComponentViewData() const
+GraphComponentViewData* GraphComponentScene::focusComponentViewData() const
 {
     if(_focusComponentId.isNull())
         return nullptr;
@@ -226,100 +237,130 @@ ComponentViewData* GraphComponentScene::focusComponentViewData() const
     return _componentsViewData ? &(*_componentsViewData)[_focusComponentId] : nullptr;
 }
 
+void GraphComponentScene::updatePositionalData()
+{
+    std::unique_lock<std::recursive_mutex> lock(_graphModel->nodePositions().mutex());
+
+    if(!_positionalDataRequiresUpdate && !_graphModel->nodePositions().updated())
+        return;
+
+    _positionalDataRequiresUpdate = false;
+
+    auto component = _graphModel->graph().componentById(_focusComponentId);
+
+    NodePositions& nodePositions = _graphModel->nodePositions();
+
+    _nodePositionData.resize(_numNodesInPositionData * 3);
+    _edgePositionData.resize(_numEdgesInPositionData * 6);
+    int i = 0;
+
+    for(NodeId nodeId : component->nodeIds())
+    {
+        const QVector3D nodePosition = nodePositions.getScaledAndSmoothed(nodeId);
+
+        _nodePositionData[i++] = nodePosition.x();
+        _nodePositionData[i++] = nodePosition.y();
+        _nodePositionData[i++] = nodePosition.z();
+    }
+
+    _nodePositionBuffer.bind();
+    _nodePositionBuffer.allocate(_nodePositionData.data(), static_cast<int>(_nodePositionData.size()) * sizeof(GLfloat));
+    _nodePositionBuffer.release();
+
+    i = 0;
+    for(EdgeId edgeId : component->edgeIds())
+    {
+        const Edge& edge = _graphModel->graph().edgeById(edgeId);
+        const QVector3D sourcePosition = nodePositions.getScaledAndSmoothed(edge.sourceId());
+        const QVector3D targetPosition = nodePositions.getScaledAndSmoothed(edge.targetId());
+
+        _edgePositionData[i++] = sourcePosition.x();
+        _edgePositionData[i++] = sourcePosition.y();
+        _edgePositionData[i++] = sourcePosition.z();
+        _edgePositionData[i++] = targetPosition.x();
+        _edgePositionData[i++] = targetPosition.y();
+        _edgePositionData[i++] = targetPosition.z();
+    }
+
+    _edgePositionBuffer.bind();
+    _edgePositionBuffer.allocate(_edgePositionData.data(), static_cast<int>(_edgePositionData.size()) * sizeof(GLfloat));
+    _edgePositionBuffer.release();
+}
+
+void GraphComponentScene::updateVisualData()
+{
+    if(!_visualDataRequiresUpdate)
+        return;
+
+    auto component = _graphModel->graph().componentById(_focusComponentId);
+
+    _visualDataRequiresUpdate = false;
+
+    auto& nodeVisuals = _graphModel->nodeVisuals();
+    auto& edgeVisuals = _graphModel->edgeVisuals();
+
+    _nodeVisualData.resize(component->numNodes() * 7);
+    _edgeVisualData.resize(component->numEdges() * 7);
+
+    const QColor selectedOutLineColor = Qt::GlobalColor::white;
+    const QColor deselectedOutLineColor = Qt::GlobalColor::black;
+
+    int i = 0;
+    for(NodeId nodeId : component->nodeIds())
+    {
+        _nodeVisualData[i++] = nodeVisuals[nodeId]._size;
+        _nodeVisualData[i++] = nodeVisuals[nodeId]._color.redF();
+        _nodeVisualData[i++] = nodeVisuals[nodeId]._color.greenF();
+        _nodeVisualData[i++] = nodeVisuals[nodeId]._color.blueF();
+
+        QColor outlineColor = _selectionManager && _selectionManager->nodeIsSelected(nodeId) ?
+                    outlineColor = selectedOutLineColor :
+                outlineColor = deselectedOutLineColor;
+
+        _nodeVisualData[i++] = outlineColor.redF();
+        _nodeVisualData[i++] = outlineColor.greenF();
+        _nodeVisualData[i++] = outlineColor.blueF();
+    }
+
+    _nodeVisualBuffer.bind();
+    _nodeVisualBuffer.allocate(_nodeVisualData.data(), static_cast<int>(_nodeVisualData.size()) * sizeof(GLfloat));
+    _nodeVisualBuffer.release();
+
+    i = 0;
+    for(EdgeId edgeId : component->edgeIds())
+    {
+        _edgeVisualData[i++] = edgeVisuals[edgeId]._size;
+        _edgeVisualData[i++] = edgeVisuals[edgeId]._color.redF();
+        _edgeVisualData[i++] = edgeVisuals[edgeId]._color.greenF();
+        _edgeVisualData[i++] = edgeVisuals[edgeId]._color.blueF();
+        _edgeVisualData[i++] = deselectedOutLineColor.redF();
+        _edgeVisualData[i++] = deselectedOutLineColor.greenF();
+        _edgeVisualData[i++] = deselectedOutLineColor.blueF();
+    }
+
+    _edgeVisualBuffer.bind();
+    _edgeVisualBuffer.allocate(_edgeVisualData.data(), static_cast<int>(_edgeVisualData.size()) * sizeof(GLfloat));
+    _edgeVisualBuffer.release();
+}
+
 void GraphComponentScene::update(float t)
 {
     if(_graphModel)
     {
-        ComponentViewData* componentViewData = focusComponentViewData();
-
-        NodePositions& nodePositions = _graphModel->nodePositions();
-        std::unique_lock<std::recursive_mutex> mutexLocker(nodePositions.mutex());
+        GraphComponentViewData* componentViewData = focusComponentViewData();
 
         auto component = _graphModel->graph().componentById(_focusComponentId);
 
         _camera = &componentViewData->_camera;
+
         if(componentViewData->_focusNodeId.isNull())
             selectFocusNodeClosestToCameraVector(Transition::Type::None);
 
         _numNodesInPositionData = component->numNodes();
         _numEdgesInPositionData = component->numEdges();
 
-        _nodePositionData.resize(_numNodesInPositionData * 3);
-        _edgePositionData.resize(_numEdgesInPositionData * 6);
-        int i = 0;
-
-        for(NodeId nodeId : component->nodeIds())
-        {
-            QVector3D nodePosition = nodePositions[nodeId];
-
-            _nodePositionData[i++] = nodePosition.x();
-            _nodePositionData[i++] = nodePosition.y();
-            _nodePositionData[i++] = nodePosition.z();
-        }
-
-        i = 0;
-        for(EdgeId edgeId : component->edgeIds())
-        {
-            const Edge& edge = _graphModel->graph().edgeById(edgeId);
-            QVector3D sourcePosition = nodePositions[edge.sourceId()];
-            QVector3D targetPosition = nodePositions[edge.targetId()];
-
-            _edgePositionData[i++] = sourcePosition.x();
-            _edgePositionData[i++] = sourcePosition.y();
-            _edgePositionData[i++] = sourcePosition.z();
-            _edgePositionData[i++] = targetPosition.x();
-            _edgePositionData[i++] = targetPosition.y();
-            _edgePositionData[i++] = targetPosition.z();
-        }
-
-        if(_visualDataRequiresUpdate)
-        {
-            _visualDataRequiresUpdate = false;
-
-            auto& nodeVisuals = _graphModel->nodeVisuals();
-            auto& edgeVisuals = _graphModel->edgeVisuals();
-
-            _nodeVisualData.resize(component->numNodes() * 7);
-            _edgeVisualData.resize(component->numEdges() * 7);
-
-            const QColor selectedOutLineColor = Qt::GlobalColor::white;
-            const QColor deselectedOutLineColor = Qt::GlobalColor::black;
-
-            i = 0;
-            for(NodeId nodeId : component->nodeIds())
-            {
-                _nodeVisualData[i++] = nodeVisuals[nodeId]._size;
-                _nodeVisualData[i++] = nodeVisuals[nodeId]._color.redF();
-                _nodeVisualData[i++] = nodeVisuals[nodeId]._color.greenF();
-                _nodeVisualData[i++] = nodeVisuals[nodeId]._color.blueF();
-
-                QColor outlineColor = _selectionManager && _selectionManager->nodeIsSelected(nodeId) ?
-                            outlineColor = selectedOutLineColor :
-                        outlineColor = deselectedOutLineColor;
-
-                _nodeVisualData[i++] = outlineColor.redF();
-                _nodeVisualData[i++] = outlineColor.greenF();
-                _nodeVisualData[i++] = outlineColor.blueF();
-            }
-
-            i = 0;
-            for(EdgeId edgeId : component->edgeIds())
-            {
-                _edgeVisualData[i++] = edgeVisuals[edgeId]._size;
-                _edgeVisualData[i++] = edgeVisuals[edgeId]._color.redF();
-                _edgeVisualData[i++] = edgeVisuals[edgeId]._color.greenF();
-                _edgeVisualData[i++] = edgeVisuals[edgeId]._color.blueF();
-                _edgeVisualData[i++] = deselectedOutLineColor.redF();
-                _edgeVisualData[i++] = deselectedOutLineColor.greenF();
-                _edgeVisualData[i++] = deselectedOutLineColor.blueF();
-            }
-        }
-
-#if 0
-        //FIXME debug
-        SpatialOctree octree(NodeLayout::boundingBox(*component, nodePositions), component->nodeIds(), nodePositions);
-        octree.debugRenderOctree(this);
-#endif
+        updatePositionalData();
+        updateVisualData();
 
         _zoomTransition.update(t);
 
@@ -327,6 +368,9 @@ void GraphComponentScene::update(float t)
             _panTransition.update(t);
         else if(_trackFocusNode)
             centreNodeInViewport(componentViewData->_focusNodeId, Transition::Type::None, componentViewData->_zoomDistance);
+
+        _modelViewMatrix = _camera->viewMatrix();
+        _projectionMatrix = _camera->projectionMatrix();
     }
 
     submitDebugLines();
@@ -377,16 +421,13 @@ void GraphComponentScene::renderNodes()
     setShaderADSParameters(_nodesShader);
 
     _nodePositionBuffer.bind();
-    _nodePositionBuffer.allocate(_nodePositionData.data(), static_cast<int>(_nodePositionData.size()) * sizeof(GLfloat));
     _nodeVisualBuffer.bind();
-    _nodeVisualBuffer.allocate(_nodeVisualData.data(), static_cast<int>(_nodeVisualData.size()) * sizeof(GLfloat));
 
     // Calculate needed matrices
-    QMatrix4x4 modelViewMatrix = _camera->viewMatrix();
-    QMatrix3x3 normalMatrix = modelViewMatrix.normalMatrix();
-    _nodesShader.setUniformValue("modelViewMatrix", modelViewMatrix);
+    QMatrix3x3 normalMatrix = _modelViewMatrix.normalMatrix();
+    _nodesShader.setUniformValue("modelViewMatrix", _modelViewMatrix);
     _nodesShader.setUniformValue("normalMatrix", normalMatrix);
-    _nodesShader.setUniformValue("projectionMatrix", _camera->projectionMatrix());
+    _nodesShader.setUniformValue("projectionMatrix", _projectionMatrix);
 
     // Draw the nodes
     _sphere.vertexArrayObject()->bind();
@@ -408,12 +449,10 @@ void GraphComponentScene::renderEdges()
     setShaderADSParameters(_edgesShader);
 
     _edgePositionBuffer.bind();
-    _edgePositionBuffer.allocate(_edgePositionData.data(), static_cast<int>(_edgePositionData.size()) * sizeof(GLfloat));
     _edgeVisualBuffer.bind();
-    _edgeVisualBuffer.allocate(_edgeVisualData.data(), static_cast<int>(_edgeVisualData.size()) * sizeof(GLfloat));
 
-    _edgesShader.setUniformValue("viewMatrix", _camera->viewMatrix());
-    _edgesShader.setUniformValue("projectionMatrix", _camera->projectionMatrix());
+    _edgesShader.setUniformValue("viewMatrix", _modelViewMatrix);
+    _edgesShader.setUniformValue("projectionMatrix", _projectionMatrix);
 
     // Draw the edges
     _cylinder.vertexArrayObject()->bind();
@@ -438,9 +477,8 @@ void GraphComponentScene::renderDebugLines()
     _debugLinesShader.bind();
 
     // Calculate needed matrices
-    QMatrix4x4 modelViewMatrix = _camera->viewMatrix();
-    _debugLinesShader.setUniformValue("modelViewMatrix", modelViewMatrix);
-    _debugLinesShader.setUniformValue("projectionMatrix", _camera->projectionMatrix());
+    _debugLinesShader.setUniformValue("modelViewMatrix", _modelViewMatrix);
+    _debugLinesShader.setUniformValue("projectionMatrix", _projectionMatrix);
 
     _debugLinesDataVAO.bind();
     _funcs->glDrawArrays(GL_LINES, 0, static_cast<int>(_debugLines.size()) * 2);
@@ -567,10 +605,12 @@ void GraphComponentScene::render()
 
     _funcs->glBindFramebuffer(GL_FRAMEBUFFER, _visualFBO);
 
+    // Color buffer
     _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    // Selection buffer
     _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT1);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -644,7 +684,7 @@ void GraphComponentScene::zoom(float direction)
     if(direction == 0.0f || !_panTransition.finished())
         return;
 
-    ComponentViewData* componentViewData = focusComponentViewData();
+    GraphComponentViewData* componentViewData = focusComponentViewData();
     float size = _graphModel->nodeVisuals().at(componentViewData->_focusNodeId)._size;
 
     const float INTERSECTION_AVOIDANCE_OFFSET = 1.0f;
@@ -670,7 +710,7 @@ void GraphComponentScene::centreNodeInViewport(NodeId nodeId, Transition::Type t
     if(nodeId.isNull())
         return;
 
-    const QVector3D& nodePosition = _graphModel->nodePositions().at(nodeId);
+    const QVector3D nodePosition = _graphModel->nodePositions().getScaledAndSmoothed(nodeId);
     Plane translationPlane(nodePosition, _camera->viewVector().normalized());
 
     QVector3D curPoint = translationPlane.rayIntersection(
@@ -717,7 +757,7 @@ void GraphComponentScene::moveFocusToNode(NodeId nodeId, Transition::Type transi
 
     centreNodeInViewport(nodeId, transitionType);
     focusComponentViewData()->_focusNodeId = nodeId;
-    updateVisualData();
+    queueVisualDataUpdate();
 }
 
 void GraphComponentScene::selectFocusNodeClosestToCameraVector(Transition::Type transitionType)
@@ -757,7 +797,8 @@ void GraphComponentScene::moveToNextComponent()
 
     if(!_focusComponentId.isNull())
     {
-        updateVisualData();
+        queuePositionalDataUpdate();
+        queueVisualDataUpdate();
         _targetZoomDistance = focusComponentViewData()->_zoomDistance;
     }
 }
@@ -768,7 +809,8 @@ void GraphComponentScene::moveToPreviousComponent()
 
     if(!_focusComponentId.isNull())
     {
-        updateVisualData();
+        queuePositionalDataUpdate();
+        queueVisualDataUpdate();
         _targetZoomDistance = focusComponentViewData()->_zoomDistance;
     }
 }
@@ -779,7 +821,8 @@ void GraphComponentScene::moveToComponent(ComponentId componentId)
 
     if(!_focusComponentId.isNull())
     {
-        updateVisualData();
+        queuePositionalDataUpdate();
+        queueVisualDataUpdate();
         _targetZoomDistance = focusComponentViewData()->_zoomDistance;
     }
 }
@@ -793,14 +836,14 @@ void GraphComponentScene::setGraphModel(std::shared_ptr<GraphModel> graphModel)
 {
     _graphModel = graphModel;
 
-    _componentsViewData = std::make_unique<ComponentArray<ComponentViewData>>(_graphModel->graph());
     _focusComponentId = _graphModel->graph().firstComponentId();
 
     for(ComponentId componentId : _graphModel->graph().componentIds())
         onComponentAdded(&_graphModel->graph(), componentId);
 
     refreshComponentIdsCache();
-    updateVisualData();
+    queuePositionalDataUpdate();
+    queueVisualDataUpdate();
 
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphComponentScene::onGraphChanged);
     connect(&_graphModel->graph(), &Graph::nodeWillBeRemoved, this, &GraphComponentScene::onNodeWillBeRemoved);
@@ -1059,21 +1102,4 @@ bool GraphComponentScene::prepareRenderBuffers()
 
     Q_ASSERT(valid);
     return valid;
-}
-
-ComponentViewData::ComponentViewData() :
-    _zoomDistance(50.0f),
-    _initialised(false)
-{
-    _camera.setPosition(QVector3D(0.0f, 0.0f, 50.0f));
-    _camera.setViewTarget(QVector3D(0.0f, 0.0f, 0.0f));
-    _camera.setUpVector(QVector3D(0.0f, 1.0f, 0.0f));
-}
-
-ComponentViewData::ComponentViewData(const ComponentViewData& other) :
-    _camera(other._camera),
-    _zoomDistance(other._zoomDistance),
-    _focusNodeId(other._focusNodeId),
-    _initialised(other._initialised)
-{
 }

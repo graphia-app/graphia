@@ -1,5 +1,17 @@
 #include "utils.h"
 
+float Utils::rand(float low, float high)
+{
+    std::uniform_real_distribution<> distribution(low, high);
+    return distribution(_gen);
+}
+
+int Utils::rand(int low, int high)
+{
+    std::uniform_int_distribution<> distribution(low, high);
+    return distribution(_gen);
+}
+
 QVector2D Utils::randQVector2D(float low, float high)
 {
     return QVector2D(rand(low, high), rand(low, high));
@@ -42,8 +54,25 @@ float Utils::fast_rsqrt(float number)
     return y;
 }
 
-QVector3D Utils::fastNormalize(QVector3D& v, float len)
+QVector3D Utils::fastNormalize(const QVector3D& v)
 {
-    float rsqrtLen = fast_rsqrt(len);
+    float rsqrtLen = fast_rsqrt(v.lengthSquared());
     return v * rsqrtLen;
 }
+
+int Utils::smallestPowerOf2GreaterThan(int x)
+{
+    if(x < 0)
+        return 0;
+
+    x--;
+    x |= x >> 1;
+    x |= x >> 2;
+    x |= x >> 4;
+    x |= x >> 8;
+    x |= x >> 16;
+    return x + 1;
+}
+
+std::random_device Utils::_rd;
+std::mt19937 Utils::_gen(Utils::_rd());

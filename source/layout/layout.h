@@ -5,6 +5,7 @@
 #include "../graph/grapharray.h"
 #include "../maths/boundingbox.h"
 #include "../maths/boundingsphere.h"
+#include "nodepositions.h"
 
 #include <QVector2D>
 #include <QVector3D>
@@ -78,10 +79,7 @@ public:
 
 signals:
     void progress(int percentage);
-    void changed();
 };
-
-typedef NodeArray<QVector3D> NodePositions;
 
 class NodeLayout : public Layout
 {

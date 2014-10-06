@@ -2,10 +2,8 @@
 
 void ScalingLayout::executeReal(uint64_t)
 {
-    _positions.lock();
-    for(NodeId nodeId : _graph.nodeIds())
-        _positions[nodeId] = _positions[nodeId] * _scale;
-    _positions.unlock();
-
-    emit changed();
+    _positions.update(_graph, [this](NodeId, const QVector3D& position)
+        {
+            return position * _scale;
+        });
 }

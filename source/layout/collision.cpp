@@ -11,7 +11,7 @@ NodeId Collision::closestNodeToLine(const std::vector<NodeId>& nodeIds, const QV
 
     for(NodeId nodeId : nodeIds)
     {
-        const QVector3D& position = _graphModel.nodePositions().at(nodeId) + _offset;
+        const QVector3D position = _graphModel.nodePositions().getScaledAndSmoothed(nodeId) + _offset;
 
         if(plane.sideForPoint(position) != Plane::Side::Front)
             continue;
@@ -40,7 +40,7 @@ void Collision::nodesIntersectingLine(const QVector3D& point, const QVector3D& d
     const std::vector<NodeId>& nodeIds = _graphModel.graph().componentById(_componentId)->nodeIds();
     for(NodeId nodeId : nodeIds)
     {
-        const QVector3D& position = _graphModel.nodePositions().at(nodeId) + _offset;
+        const QVector3D position = _graphModel.nodePositions().getScaledAndSmoothed(nodeId) + _offset;
 
         if(plane.sideForPoint(position) != Plane::Side::Front)
             continue;
@@ -63,7 +63,7 @@ NodeId Collision::nearestNodeIntersectingLine(const QVector3D& point, const QVec
 
     for(NodeId nodeId : nodeIds)
     {
-        float distance = _graphModel.nodePositions().at(nodeId).distanceToPoint(point);
+        float distance = _graphModel.nodePositions().getScaledAndSmoothed(nodeId).distanceToPoint(point);
 
         if(distance < minimumDistance)
         {

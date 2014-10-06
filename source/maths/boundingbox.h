@@ -41,6 +41,7 @@ public:
     QVector2D centre() const;
 
     BoundingBox2D operator+(const QVector2D v) const { return BoundingBox2D(_min + v, _max + v); }
+    BoundingBox2D operator*(float s) const { return BoundingBox2D(_min * s, _max * s); }
 };
 
 class Ray;
@@ -85,6 +86,7 @@ public:
     QVector3D centre() const;
 
     BoundingBox3D operator+(const QVector3D v) const { return BoundingBox3D(_min + v, _max + v); }
+    BoundingBox3D operator*(float s) const { return BoundingBox3D(_min * s, _max * s); }
 };
 
 #endif // BOUNDINGBOX_H
