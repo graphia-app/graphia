@@ -22,7 +22,7 @@ void CommandManager::executeReal(std::shared_ptr<Command> command)
     locker.setPostUnlockAction([this, commandPtr] { _busy = false; emit commandCompleted(commandPtr, commandPtr->pastParticiple()); });
     command->setProgressFn([this, commandPtr](int progress) { emit commandProgress(commandPtr, progress); });
 
-    auto executeCommand = [this](unique_lock_with_side_effects<std::mutex> /*locker*/, std::shared_ptr<Command> command)
+    auto executeCommand = [this](const unique_lock_with_side_effects<std::mutex>& /*locker*/, std::shared_ptr<Command> command)
     {
         nameCurrentThread(command->description());
 
@@ -58,7 +58,7 @@ void CommandManager::undo()
     auto commandPtr = command.get();
     locker.setPostUnlockAction([this, commandPtr] { _busy = false; emit commandCompleted(commandPtr, QString()); });
 
-    auto undoCommand = [this, command](unique_lock_with_side_effects<std::mutex> /*locker*/)
+    auto undoCommand = [this, command](const unique_lock_with_side_effects<std::mutex>& /*locker*/)
     {
         nameCurrentThread("(u) " + command->description());
 
@@ -87,7 +87,7 @@ void CommandManager::redo()
     auto commandPtr = command.get();
     locker.setPostUnlockAction([this, commandPtr] { _busy = false; emit commandCompleted(commandPtr, commandPtr->pastParticiple()); });
 
-    auto redoCommand = [this, command](unique_lock_with_side_effects<std::mutex> /*locker*/)
+    auto redoCommand = [this, command](const unique_lock_with_side_effects<std::mutex>& /*locker*/)
     {
         nameCurrentThread("(r) " + command->description());
 
