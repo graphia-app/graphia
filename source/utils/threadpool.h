@@ -56,13 +56,17 @@ public:
         friend class ThreadPool;
 
     private:
+        std::vector<std::future<void>> _futures;
+
         Results(std::vector<std::future<void>>& futures) :
             _futures(std::move(futures))
         {}
 
-        std::vector<std::future<void>> _futures;
-
     public:
+        Results(Results&& other) :
+            _futures(std::move(other._futures))
+        {}
+
         void wait()
         {
             for(auto& future : _futures)
