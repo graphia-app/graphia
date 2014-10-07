@@ -48,19 +48,19 @@ BoundingSphere NodeLayout::boundingSphere(const ReadOnlyGraph& graph, const Node
 
 void LayoutThread::addLayout(std::shared_ptr<Layout> layout)
 {
-    std::lock_guard<std::mutex> locker(_mutex);
+    std::unique_lock<std::mutex> lock(_mutex);
     _layouts.insert(layout);
 }
 
 void LayoutThread::removeLayout(std::shared_ptr<Layout> layout)
 {
-    std::lock_guard<std::mutex> locker(_mutex);
+    std::unique_lock<std::mutex> lock(_mutex);
     _layouts.erase(layout);
 }
 
 void LayoutThread::pause()
 {
-    std::lock_guard<std::mutex> locker(_mutex);
+    std::unique_lock<std::mutex> lock(_mutex);
     if(_paused)
         return;
 
@@ -86,7 +86,7 @@ void LayoutThread::pauseAndWait()
 
 bool LayoutThread::paused()
 {
-    std::lock_guard<std::mutex> locker(_mutex);
+    std::unique_lock<std::mutex> lock(_mutex);
     return _paused;
 }
 
@@ -98,7 +98,7 @@ void LayoutThread::resume()
         return;
     }
 
-    std::lock_guard<std::mutex> locker(_mutex);
+    std::unique_lock<std::mutex> lock(_mutex);
     if(!_paused)
         return;
 
@@ -117,7 +117,7 @@ void LayoutThread::start()
 
 void LayoutThread::stop()
 {
-    std::lock_guard<std::mutex> locker(_mutex);
+    std::unique_lock<std::mutex> lock(_mutex);
     _stop = true;
     _pause = false;
 
