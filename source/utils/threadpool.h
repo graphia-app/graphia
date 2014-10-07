@@ -78,8 +78,9 @@ public:
                                                                  bool blocking = true)
     {
         const int numElements = std::distance(first, last);
-        const int threadElements = numElements / _threads.size() +
-                (numElements % _threads.size() ? 1 : 0);
+        const int numThreads = static_cast<int>(_threads.size());
+        const int threadElements = numElements / numThreads +
+                (numElements % numThreads ? 1 : 0);
 
         std::vector<std::future<void>> futures;
 

@@ -11,7 +11,7 @@ BarnesHutTree::BarnesHutTree() :
 
 void BarnesHutTree::initialiseTreeNode()
 {
-    _mass = _nodeIds.size();
+    _mass = static_cast<int>(_nodeIds.size());
     float massReciprocal = 1.0f / _mass;
     _centreOfMass = QVector3D();
 

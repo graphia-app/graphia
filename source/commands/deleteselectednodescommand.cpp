@@ -12,7 +12,7 @@ DeleteSelectedNodesCommand::DeleteSelectedNodesCommand(std::shared_ptr<GraphMode
     _selectionManager(selectionManager),
     _nodes(_selectionManager->selectedNodes())
 {
-    int numSelectedNodes = _selectionManager->selectedNodes().size();
+    int numSelectedNodes = static_cast<int>(_selectionManager->selectedNodes().size());
 
     if(numSelectedNodes > 1)
     {

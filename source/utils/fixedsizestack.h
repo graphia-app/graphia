@@ -7,7 +7,7 @@ template<typename T> class FixedSizeStack
 {
 private:
     std::vector<T> _vector;
-    int _size;
+    size_t _size;
     int _top;
 
 public:
@@ -19,7 +19,7 @@ public:
 
     void push(const T& t)
     {
-        if(_top < _size - 1)
+        if(_top + 1 < _size)
             _vector[++_top] = t;
     }
 
