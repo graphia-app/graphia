@@ -22,9 +22,17 @@ public:
             _f();
     }
 
+    unique_lock_with_side_effects(const unique_lock_with_side_effects&) = delete;
+    unique_lock_with_side_effects& operator=(const unique_lock_with_side_effects&) = delete;
+
     unique_lock_with_side_effects(unique_lock_with_side_effects&& other) :
         _lock(std::move(other._lock)), _f(std::move(other._f))
     {}
+    unique_lock_with_side_effects& operator=(unique_lock_with_side_effects&& other)
+    {
+        _lock = std::move(other._lock);
+        _f = std::move(other._f);
+    }
 
     void setPostUnlockAction(std::function<void()> f) { _f = f; }
 
