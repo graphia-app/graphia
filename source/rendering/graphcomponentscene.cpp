@@ -467,7 +467,7 @@ void GraphComponentScene::renderEdges()
 
 void GraphComponentScene::renderDebugLines()
 {
-    std::unique_lock<std::mutex> locker(_debugLinesMutex);
+    std::unique_lock<std::mutex> lock(_debugLinesMutex);
 
     _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
@@ -573,7 +573,7 @@ void GraphComponentScene::addDebugBoundingBox(const BoundingBox3D& boundingBox, 
 
 void GraphComponentScene::submitDebugLines()
 {
-    std::unique_lock<std::mutex> locker(_debugLinesMutex);
+    std::unique_lock<std::mutex> lock(_debugLinesMutex);
 
     _debugLinesData.resize(_debugLines.size() * 12);
 

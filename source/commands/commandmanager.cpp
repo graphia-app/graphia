@@ -16,13 +16,13 @@ CommandManager::CommandManager() :
 
 void CommandManager::executeReal(std::shared_ptr<Command> command)
 {
-    unique_lock_with_side_effects<std::mutex> locker(_mutex);
+    unique_lock_with_side_effects<std::mutex> lock(_mutex);
     auto commandPtr = command.get();
 
-    locker.setPostUnlockAction([this, commandPtr] { _busy = false; emit commandCompleted(commandPtr, commandPtr->pastParticiple()); });
+    lock.setPostUnlockAction([this, commandPtr] { _busy = false; emit commandCompleted(commandPtr, commandPtr->pastParticiple()); });
     command->setProgressFn([this, commandPtr](int progress) { emit commandProgress(commandPtr, progress); });
 
-    auto executeCommand = [this](const unique_lock_with_side_effects<std::mutex>& /*locker*/, std::shared_ptr<Command> command)
+    auto executeCommand = [this](const unique_lock_with_side_effects<std::mutex>& /*lock*/, std::shared_ptr<Command> command)
     {
         nameCurrentThread(command->description());
 
@@ -41,24 +41,24 @@ void CommandManager::executeReal(std::shared_ptr<Command> command)
     if(command->asynchronous())
     {
         emit commandWillExecuteAsynchronously(commandPtr, command->verb());
-        _thread = std::thread(executeCommand, std::move(locker), command);
+        _thread = std::thread(executeCommand, std::move(lock), command);
     }
     else
-        executeCommand(std::move(locker), command);
+        executeCommand(std::move(lock), command);
 }
 
 void CommandManager::undo()
 {
-    unique_lock_with_side_effects<std::mutex> locker(_mutex);
+    unique_lock_with_side_effects<std::mutex> lock(_mutex);
 
     if(!canUndoNoLocking())
         return;
 
     auto command = _stack.at(_lastExecutedIndex);
     auto commandPtr = command.get();
-    locker.setPostUnlockAction([this, commandPtr] { _busy = false; emit commandCompleted(commandPtr, QString()); });
+    lock.setPostUnlockAction([this, commandPtr] { _busy = false; emit commandCompleted(commandPtr, QString()); });
 
-    auto undoCommand = [this, command](const unique_lock_with_side_effects<std::mutex>& /*locker*/)
+    auto undoCommand = [this, command](const unique_lock_with_side_effects<std::mutex>& /*lock*/)
     {
         nameCurrentThread("(u) " + command->description());
 
@@ -70,24 +70,24 @@ void CommandManager::undo()
     if(command->asynchronous())
     {
         emit commandWillExecuteAsynchronously(commandPtr, command->undoVerb());
-        _thread = std::thread(undoCommand, std::move(locker));
+        _thread = std::thread(undoCommand, std::move(lock));
     }
     else
-        undoCommand(std::move(locker));
+        undoCommand(std::move(lock));
 }
 
 void CommandManager::redo()
 {
-    unique_lock_with_side_effects<std::mutex> locker(_mutex);
+    unique_lock_with_side_effects<std::mutex> lock(_mutex);
 
     if(!canRedoNoLocking())
         return;
 
     auto command = _stack.at(++_lastExecutedIndex);
     auto commandPtr = command.get();
-    locker.setPostUnlockAction([this, commandPtr] { _busy = false; emit commandCompleted(commandPtr, commandPtr->pastParticiple()); });
+    lock.setPostUnlockAction([this, commandPtr] { _busy = false; emit commandCompleted(commandPtr, commandPtr->pastParticiple()); });
 
-    auto redoCommand = [this, command](const unique_lock_with_side_effects<std::mutex>& /*locker*/)
+    auto redoCommand = [this, command](const unique_lock_with_side_effects<std::mutex>& /*lock*/)
     {
         nameCurrentThread("(r) " + command->description());
 
@@ -98,17 +98,17 @@ void CommandManager::redo()
     if(command->asynchronous())
     {
         emit commandWillExecuteAsynchronously(commandPtr, command->redoVerb());
-        _thread = std::thread(redoCommand, std::move(locker));
+        _thread = std::thread(redoCommand, std::move(lock));
     }
     else
-        redoCommand(std::move(locker));
+        redoCommand(std::move(lock));
 }
 
 bool CommandManager::canUndo() const
 {
-    std::unique_lock<std::mutex> locker(_mutex, std::try_to_lock);
+    std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
 
-    if(locker.owns_lock())
+    if(lock.owns_lock())
         return canUndoNoLocking();
 
     return false;
@@ -116,9 +116,9 @@ bool CommandManager::canUndo() const
 
 bool CommandManager::canRedo() const
 {
-    std::unique_lock<std::mutex> locker(_mutex, std::try_to_lock);
+    std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
 
-    if(locker.owns_lock())
+    if(lock.owns_lock())
         return canRedoNoLocking();
 
     return false;
@@ -126,10 +126,10 @@ bool CommandManager::canRedo() const
 
 const std::vector<QString> CommandManager::undoableCommandDescriptions() const
 {
-    std::unique_lock<std::mutex> locker(_mutex, std::try_to_lock);
+    std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
     std::vector<QString> commandDescriptions;
 
-    if(locker.owns_lock() && canUndoNoLocking())
+    if(lock.owns_lock() && canUndoNoLocking())
     {
         for(int index = _lastExecutedIndex; index >= 0; index--)
             commandDescriptions.push_back(_stack.at(index)->description());
@@ -140,10 +140,10 @@ const std::vector<QString> CommandManager::undoableCommandDescriptions() const
 
 const std::vector<QString> CommandManager::redoableCommandDescriptions() const
 {
-    std::unique_lock<std::mutex> locker(_mutex, std::try_to_lock);
+    std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
     std::vector<QString> commandDescriptions;
 
-    if(locker.owns_lock() && canRedoNoLocking())
+    if(lock.owns_lock() && canRedoNoLocking())
     {
         for(int index = _lastExecutedIndex + 1; index < static_cast<int>(_stack.size()); index++)
             commandDescriptions.push_back(_stack.at(index)->description());
@@ -154,9 +154,9 @@ const std::vector<QString> CommandManager::redoableCommandDescriptions() const
 
 const QString CommandManager::nextUndoAction() const
 {
-    std::unique_lock<std::mutex> locker(_mutex, std::try_to_lock);
+    std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
 
-    if(locker.owns_lock() && canUndoNoLocking())
+    if(lock.owns_lock() && canUndoNoLocking())
     {
         auto& command = _stack.at(_lastExecutedIndex);
         return command->undoDescription();
@@ -167,9 +167,9 @@ const QString CommandManager::nextUndoAction() const
 
 const QString CommandManager::nextRedoAction() const
 {
-    std::unique_lock<std::mutex> locker(_mutex, std::try_to_lock);
+    std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
 
-    if(locker.owns_lock() && canRedoNoLocking())
+    if(lock.owns_lock() && canRedoNoLocking())
     {
         auto& command = _stack.at(_lastExecutedIndex + 1);
         return command->redoDescription();
