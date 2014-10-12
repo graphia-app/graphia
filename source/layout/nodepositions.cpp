@@ -56,3 +56,15 @@ bool NodePositions::updated()
 
     return false;
 }
+
+QVector3D NodePositions::centreOfMass(const NodePositions& nodePositions,
+                                      const std::vector<NodeId>& nodeIds)
+{
+    float reciprocal = 1.0f / nodeIds.size();
+    QVector3D centreOfMass = QVector3D();
+
+    for(auto nodeId : nodeIds)
+        centreOfMass += (nodePositions.get(nodeId) * reciprocal);
+
+    return centreOfMass;
+}

@@ -42,6 +42,9 @@ public:
                 float scale = 1.0f, int smoothing = 1);
     bool updated();
 
+    static QVector3D centreOfMass(const NodePositions& nodePositions,
+                                  const std::vector<NodeId>& nodeIds);
+
 private:
     using NodeArray<MeanPosition>::operator[];
     using NodeArray<MeanPosition>::at;

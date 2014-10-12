@@ -12,11 +12,7 @@ BarnesHutTree::BarnesHutTree() :
 void BarnesHutTree::initialiseTreeNode()
 {
     _mass = static_cast<int>(_nodeIds.size());
-    float massReciprocal = 1.0f / _mass;
-    _centreOfMass = QVector3D();
-
-    for(auto nodeId : _nodeIds)
-        _centreOfMass += (_nodePositions->get(nodeId) * massReciprocal);
+    _centreOfMass = NodePositions::centreOfMass(*_nodePositions, _nodeIds);
 
     for(auto& subVolume : _subVolumes)
         subVolume._sSq = subVolume._boundingBox.maxLength() * subVolume._boundingBox.maxLength();
