@@ -44,6 +44,8 @@ public:
 
     static QVector3D centreOfMass(const NodePositions& nodePositions,
                                   const std::vector<NodeId>& nodeIds);
+    static QVector3D centreOfMassScaled(const NodePositions& nodePositions,
+                                        const std::vector<NodeId>& nodeIds);
 
 private:
     using NodeArray<MeanPosition>::operator[];

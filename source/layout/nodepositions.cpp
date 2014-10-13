@@ -68,3 +68,8 @@ QVector3D NodePositions::centreOfMass(const NodePositions& nodePositions,
 
     return centreOfMass;
 }
+
+QVector3D NodePositions::centreOfMassScaled(const NodePositions& nodePositions, const std::vector<NodeId>& nodeIds)
+{
+    return centreOfMass(nodePositions, nodeIds) * nodePositions.scale();
+}
