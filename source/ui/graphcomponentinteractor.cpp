@@ -52,6 +52,7 @@ void GraphComponentInteractor::mousePressEvent(QMouseEvent* mouseEvent)
     Ray ray = _scene->camera()->rayForViewportCoordinates(_cursorPosition.x(), _cursorPosition.y());
 
     Collision collision(*_graphModel, _scene->focusComponentId());
+    //FIXME nearestNodeInsideCylinder/Cone?
     _clickedNodeId = collision.nearestNodeIntersectingLine(ray.origin(), ray.dir());
 
     switch(mouseEvent->button())
@@ -70,7 +71,7 @@ void GraphComponentInteractor::mousePressEvent(QMouseEvent* mouseEvent)
         _rightMouseButtonHeld = true;
 
         if(!_clickedNodeId.isNull())
-            _scene->disableFocusNodeTracking();
+            _scene->disableFocusTracking();
         break;
 
     default: break;
@@ -85,7 +86,7 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
         if(!_scene->transitioning())
         {
             _rightMouseButtonHeld = false;
-            _scene->enableFocusNodeTracking();
+            _scene->enableFocusTracking();
             return;
         }
 
@@ -95,7 +96,7 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
             _scene->selectFocusNodeClosestToCameraVector();
 
         _rightMouseButtonHeld = false;
-        _scene->enableFocusNodeTracking();
+        _scene->enableFocusTracking();
         _clickedNodeId.setToNull();
         break;
 
@@ -248,15 +249,12 @@ void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
         {
             emit userInteractionStarted();
 
-            if(_scene->focusNodeId().isNull())
-                _scene->selectFocusNodeClosestToCameraVector();
-
             if(_scene->focusNodeId() != _clickedNodeId)
             {
                 emit userInteractionStarted();
 
                 const QVector3D clickedNodePosition = _graphModel->nodePositions().getScaledAndSmoothed(_clickedNodeId);
-                const QVector3D rotationCentre = _graphModel->nodePositions().getScaledAndSmoothed(_scene->focusNodeId());
+                const QVector3D rotationCentre = _scene->focusPosition();
                 float radius = clickedNodePosition.distanceToPoint(rotationCentre);
 
                 BoundingSphere boundingSphere(rotationCentre, radius);
@@ -320,8 +318,13 @@ void GraphComponentInteractor::mouseDoubleClickEvent(QMouseEvent* mouseEvent)
 {
     if(mouseEvent->button() == Qt::LeftButton)
     {
-        if(!_clickedNodeId.isNull() && !_mouseMoving)
-            _scene->moveFocusToNode(_clickedNodeId, Transition::Type::EaseInEaseOut);
+        if(!_mouseMoving)
+        {
+            if(!_clickedNodeId.isNull())
+                _scene->moveFocusToNode(_clickedNodeId, Transition::Type::EaseInEaseOut);
+            else
+                _scene->moveFocusToCentreOfMass(Transition::Type::EaseInEaseOut);
+        }
     }
 }
 

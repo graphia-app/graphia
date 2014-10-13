@@ -46,15 +46,13 @@ public:
     void resize(int w, int h);
 
     void moveFocusToNode(NodeId nodeId, Transition::Type transitionType);
+    void moveFocusToCentreOfMass(Transition::Type transitionType);
     void selectFocusNodeClosestToCameraVector(Transition::Type transitionType = Transition::Type::InversePower);
     ComponentId focusComponentId() { return _focusComponentId; }
-    NodeId focusNodeId()
-    {
-        GraphComponentViewData* viewData = focusComponentViewData();
-        return viewData != nullptr ? viewData->_focusNodeId : NodeId();
-    }
-    void enableFocusNodeTracking() { _trackFocusNode = true; }
-    void disableFocusNodeTracking() { _trackFocusNode = false; }
+    NodeId focusNodeId();
+    QVector3D focusPosition();
+    void enableFocusTracking() { _trackFocus = true; }
+    void disableFocusTracking() { _trackFocus = false; }
 
     void moveToNextComponent();
     void moveToPreviousComponent();
@@ -114,7 +112,10 @@ private:
     void renderDebugLines();
     void render2D();
 
-    void centreNodeInViewport(NodeId nodeId, Transition::Type transitionType, float cameraDistance = -1.0f);
+    void centreNodeInViewport(NodeId nodeId, float cameraDistance = -1.0f,
+                              Transition::Type transitionType = Transition::Type::None);
+    void centrePositionInViewport(const QVector3D& position, float cameraDistance = -1.0f,
+                                  Transition::Type transitionType = Transition::Type::None);
 
     bool _positionalDataRequiresUpdate;
     void queuePositionalDataUpdate();
@@ -136,7 +137,7 @@ public slots:
     void onSelectionChanged(const SelectionManager*);
 
 private:
-    bool _trackFocusNode;
+    bool _trackFocus;
     float _targetZoomDistance;
     Transition _zoomTransition;
     QRect _selectionRect;
@@ -147,7 +148,6 @@ private:
     void refreshComponentIdsCache();
 
     ComponentId _focusComponentId;
-    ComponentId _lastSplitterFocusComponentId;
     std::shared_ptr<ComponentArray<GraphComponentViewData>> _componentsViewData;
     GraphComponentViewData* focusComponentViewData() const;
 

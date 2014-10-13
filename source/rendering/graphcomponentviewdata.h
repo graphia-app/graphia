@@ -13,6 +13,7 @@ public:
     Camera _camera;
     float _zoomDistance;
     NodeId _focusNodeId;
+    QVector3D _focusPosition;
 
     int _textureSizeDivisor;
 

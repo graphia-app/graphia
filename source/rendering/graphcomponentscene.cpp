@@ -40,7 +40,7 @@ GraphComponentScene::GraphComponentScene(std::shared_ptr<ComponentArray<GraphCom
       _FBOcomplete(false),
       _positionalDataRequiresUpdate(false),
       _visualDataRequiresUpdate(false),
-      _trackFocusNode(true),
+      _trackFocus(true),
       _funcs(nullptr),
       _componentsViewData(componentsViewData),
       _aspectRatio(4.0f / 3.0f),
@@ -124,6 +124,11 @@ void GraphComponentScene::onGraphChanged(const Graph*)
         moveToNextComponent();
     }
 
+    // Graph changes may significantly alter the centre of mass; ease the transition
+    auto currentComponentViewData = focusComponentViewData();
+    if(currentComponentViewData->_focusNodeId.isNull())
+        moveFocusToCentreOfMass(Transition::Type::EaseInEaseOut);
+
     refreshComponentIdsCache();
     queuePositionalDataUpdate();
     queueVisualDataUpdate();
@@ -131,9 +136,9 @@ void GraphComponentScene::onGraphChanged(const Graph*)
 
 void GraphComponentScene::onNodeWillBeRemoved(const Graph*, NodeId nodeId)
 {
-    GraphComponentViewData* currentComponentViewData = focusComponentViewData();
+    auto currentComponentViewData = focusComponentViewData();
     if(currentComponentViewData->_focusNodeId == nodeId)
-        currentComponentViewData->_focusNodeId.setToNull();
+        moveFocusToCentreOfMass(Transition::Type::EaseInEaseOut);
 }
 
 static void setupCamera(Camera& camera, float aspectRatio)
@@ -159,48 +164,55 @@ void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId com
     auto& componentViewData = _componentsViewData->at(componentId);
     componentViewData._initialised = false;
 
-    if(componentId == _lastSplitterFocusComponentId)
-        _lastSplitterFocusComponentId.setToNull();
-
     if(componentId == _focusComponentId)
-    {
-        if(!_lastSplitterFocusComponentId.isNull())
-        {
-            GraphComponentViewData* currentComponentViewData = focusComponentViewData();
-            auto& lastSplitterComponentViewData = _componentsViewData->at(_lastSplitterFocusComponentId);
-            lastSplitterComponentViewData = *currentComponentViewData;
-            lastSplitterComponentViewData._focusNodeId.setToNull();
-            _focusComponentId = _lastSplitterFocusComponentId;
-        }
-        else
-            _focusComponentId.setToNull();
-    }
+        _focusComponentId.setToNull();
 }
 
 void GraphComponentScene::onComponentSplit(const Graph* graph, ComponentId oldComponentId, const ElementIdSet<ComponentId>& splitters)
 {
     if(oldComponentId == _focusComponentId)
     {
-        GraphComponentViewData currentComponentViewData = *focusComponentViewData();
-        ComponentId newFocusComponentId = graph->componentIdOfNode(currentComponentViewData._focusNodeId);
+        ComponentId newFocusComponentId;
 
-        for(ComponentId splitter : splitters)
+        auto currentComponentViewData = focusComponentViewData();
+
+        if(currentComponentViewData->_focusNodeId.isNull())
+        {
+            ComponentId largestSplitter;
+
+            for(auto splitter : splitters)
+            {
+
+                if(largestSplitter.isNull())
+                    largestSplitter = splitter;
+                else
+                {
+                    auto splitterNumNodes = graph->componentById(splitter)->numNodes();
+                    auto largestNumNodes = graph->componentById(largestSplitter)->numNodes();
+
+                    if(splitterNumNodes > largestNumNodes)
+                        largestSplitter = splitter;
+                }
+            }
+
+            newFocusComponentId = largestSplitter;
+        }
+        else
+            newFocusComponentId = graph->componentIdOfNode(currentComponentViewData->_focusNodeId);
+
+        for(auto splitter : splitters)
         {
             auto& splitterComponentViewData = _componentsViewData->at(splitter);
 
             // Clone the current camera data to all splitters
-            splitterComponentViewData = currentComponentViewData;
+            splitterComponentViewData = *currentComponentViewData;
 
-            // Splitters that don't contain the current focus node will need to find a new one
+            // Splitters that don't contain the current focus node will be refocused
             if(splitter != newFocusComponentId)
                 splitterComponentViewData._focusNodeId.setToNull();
         }
 
         _focusComponentId = newFocusComponentId;
-
-        ElementIdSet<ComponentId> nonFocusSplitters(splitters);
-        nonFocusSplitters.erase(_focusComponentId);
-        _lastSplitterFocusComponentId = *nonFocusSplitters.begin();
     }
 }
 
@@ -353,9 +365,6 @@ void GraphComponentScene::update(float t)
 
         _camera = &componentViewData->_camera;
 
-        if(componentViewData->_focusNodeId.isNull())
-            selectFocusNodeClosestToCameraVector(Transition::Type::None);
-
         _numNodesInPositionData = component->numNodes();
         _numEdgesInPositionData = component->numEdges();
 
@@ -366,8 +375,17 @@ void GraphComponentScene::update(float t)
 
         if(!_panTransition.finished())
             _panTransition.update(t);
-        else if(_trackFocusNode)
-            centreNodeInViewport(componentViewData->_focusNodeId, Transition::Type::None, componentViewData->_zoomDistance);
+        else if(_trackFocus)
+        {
+            if(componentViewData->_focusNodeId.isNull())
+            {
+                componentViewData->_focusPosition =
+                        NodePositions::centreOfMassScaled(_graphModel->nodePositions(), component->nodeIds());
+                centrePositionInViewport(componentViewData->_focusPosition, componentViewData->_zoomDistance);
+            }
+            else
+                centreNodeInViewport(componentViewData->_focusNodeId, componentViewData->_zoomDistance);
+        }
 
         _modelViewMatrix = _camera->viewMatrix();
         _projectionMatrix = _camera->projectionMatrix();
@@ -684,12 +702,16 @@ void GraphComponentScene::zoom(float direction)
     if(direction == 0.0f || !_panTransition.finished())
         return;
 
-    GraphComponentViewData* componentViewData = focusComponentViewData();
-    float size = _graphModel->nodeVisuals().at(componentViewData->_focusNodeId)._size;
+    auto componentViewData = focusComponentViewData();
+    auto focusNodeId = componentViewData->_focusNodeId;
+    float size = 0.0f;
+
+    if(!focusNodeId.isNull())
+        size = _graphModel->nodeVisuals().at(focusNodeId)._size;
 
     const float INTERSECTION_AVOIDANCE_OFFSET = 1.0f;
-    const float ZOO_STEP_FRACTION = 0.2f;
-    float delta = (_targetZoomDistance - size - INTERSECTION_AVOIDANCE_OFFSET) * ZOO_STEP_FRACTION;
+    const float ZOOM_STEP_FRACTION = 0.2f;
+    float delta = (_targetZoomDistance - size - INTERSECTION_AVOIDANCE_OFFSET) * ZOOM_STEP_FRACTION;
 
     _targetZoomDistance -= delta * direction;
 
@@ -705,29 +727,34 @@ void GraphComponentScene::zoom(float direction)
         });
 }
 
-void GraphComponentScene::centreNodeInViewport(NodeId nodeId, Transition::Type transitionType, float cameraDistance)
+void GraphComponentScene::centreNodeInViewport(NodeId nodeId, float cameraDistance, Transition::Type transitionType)
 {
     if(nodeId.isNull())
         return;
 
-    const QVector3D nodePosition = _graphModel->nodePositions().getScaledAndSmoothed(nodeId);
-    Plane translationPlane(nodePosition, _camera->viewVector().normalized());
+    centrePositionInViewport(_graphModel->nodePositions().getScaledAndSmoothed(nodeId),
+                             cameraDistance, transitionType);
+}
+
+void GraphComponentScene::centrePositionInViewport(const QVector3D& position, float cameraDistance, Transition::Type transitionType)
+{
+    Plane translationPlane(position, _camera->viewVector().normalized());
 
     QVector3D curPoint = translationPlane.rayIntersection(
                 Ray(_camera->position(), _camera->viewVector().normalized()));
 
-    QVector3D translation = nodePosition - curPoint;
+    QVector3D translation = position - curPoint;
     QVector3D startPosition = _camera->position();
     QVector3D startViewTarget = _camera->viewTarget();
     QVector3D targetPosition = _camera->position() + translation;
 
     if(cameraDistance >= 0.0f)
-        targetPosition = nodePosition - (_camera->viewVector().normalized() * cameraDistance);
+        targetPosition = position - (_camera->viewVector().normalized() * cameraDistance);
     else
         focusComponentViewData()->_zoomDistance = _targetZoomDistance = translationPlane.distanceToPoint(targetPosition);
 
-    if(targetPosition.distanceToPoint(nodePosition) < MINIMUM_CAMERA_DISTANCE)
-        targetPosition = nodePosition - (_camera->viewVector().normalized() * MINIMUM_CAMERA_DISTANCE);
+    if(targetPosition.distanceToPoint(position) < MINIMUM_CAMERA_DISTANCE)
+        targetPosition = position - (_camera->viewVector().normalized() * MINIMUM_CAMERA_DISTANCE);
 
     if(transitionType != Transition::Type::None)
     {
@@ -736,7 +763,7 @@ void GraphComponentScene::centreNodeInViewport(NodeId nodeId, Transition::Type t
                              [=](float f)
         {
             _camera->setPosition(startPosition + ((targetPosition - startPosition) * f));
-            _camera->setViewTarget(startViewTarget + ((nodePosition - startViewTarget) * f));
+            _camera->setViewTarget(startViewTarget + ((position - startViewTarget) * f));
         },
         [=]
         {
@@ -746,7 +773,7 @@ void GraphComponentScene::centreNodeInViewport(NodeId nodeId, Transition::Type t
     else
     {
         _camera->setPosition(targetPosition);
-        _camera->setViewTarget(nodePosition);
+        _camera->setViewTarget(position);
     }
 }
 
@@ -755,8 +782,21 @@ void GraphComponentScene::moveFocusToNode(NodeId nodeId, Transition::Type transi
     if(_focusComponentId.isNull())
         return;
 
-    centreNodeInViewport(nodeId, transitionType);
+    centreNodeInViewport(nodeId, -1.0f, transitionType);
     focusComponentViewData()->_focusNodeId = nodeId;
+    queueVisualDataUpdate();
+}
+
+void GraphComponentScene::moveFocusToCentreOfMass(Transition::Type transitionType)
+{
+    if(_focusComponentId.isNull())
+        return;
+
+    auto component = _graphModel->graph().componentById(_focusComponentId);
+    focusComponentViewData()->_focusPosition =
+            NodePositions::centreOfMassScaled(_graphModel->nodePositions(), component->nodeIds());
+    centrePositionInViewport(focusComponentViewData()->_focusPosition, -1.0f, transitionType);
+    focusComponentViewData()->_focusNodeId.setToNull();
     queueVisualDataUpdate();
 }
 
@@ -766,9 +806,30 @@ void GraphComponentScene::selectFocusNodeClosestToCameraVector(Transition::Type 
         return;
 
     Collision collision(*_graphModel, _focusComponentId);
+    //FIXME closestNodeToCylinder/Cone?
     NodeId closestNodeId = collision.closestNodeToLine(_camera->position(), _camera->viewVector().normalized());
     if(!closestNodeId.isNull())
         moveFocusToNode(closestNodeId, transitionType);
+}
+
+NodeId GraphComponentScene::focusNodeId()
+{
+    auto viewData = focusComponentViewData();
+    return viewData != nullptr ? viewData->_focusNodeId : NodeId();
+}
+
+QVector3D GraphComponentScene::focusPosition()
+{
+    auto viewData = focusComponentViewData();
+    if(viewData != nullptr)
+    {
+        if(viewData->_focusNodeId.isNull())
+            return viewData->_focusPosition;
+        else
+            return _graphModel->nodePositions().getScaledAndSmoothed(viewData->_focusNodeId);
+    }
+
+    return QVector3D();
 }
 
 static ComponentId cycleThroughComponentIds(const std::vector<ComponentId>& componentIds,
