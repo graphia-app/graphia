@@ -132,6 +132,11 @@ void SimpleComponentManager::updateComponents(const Graph* graph)
     _nodesComponentId = std::move(newNodesComponentId);
     _edgesComponentId = std::move(newEdgesComponentId);
 
+    for(ComponentId componentId : _updatesRequired)
+        updateGraphComponent(graph, componentId);
+
+    _updatesRequired.clear();
+
     // Notify all the splits
     for(auto splitee : splitComponents)
     {
@@ -225,11 +230,6 @@ void SimpleComponentManager::removeGraphComponent(ComponentId componentId)
 void SimpleComponentManager::onGraphChanged(const Graph* graph)
 {
     updateComponents(graph);
-
-    for(ComponentId componentId : _updatesRequired)
-        updateGraphComponent(graph, componentId);
-
-    _updatesRequired.clear();
 }
 
 const std::vector<ComponentId>& SimpleComponentManager::componentIds() const
