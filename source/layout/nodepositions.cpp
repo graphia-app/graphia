@@ -73,3 +73,23 @@ QVector3D NodePositions::centreOfMassScaled(const NodePositions& nodePositions, 
 {
     return centreOfMass(nodePositions, nodeIds) * nodePositions.scale();
 }
+
+BoundingBox3D NodePositions::boundingBox(const NodePositions& positions, const std::vector<NodeId>& nodeIds)
+{
+    std::vector<QVector3D> graphPositions;
+    for(NodeId nodeId : nodeIds)
+        graphPositions.push_back(positions.get(nodeId));
+
+    return BoundingBox3D(graphPositions);
+}
+
+BoundingSphere NodePositions::boundingSphere(const NodePositions& positions, const std::vector<NodeId>& nodeIds)
+{
+    BoundingBox3D boundingBox = NodePositions::boundingBox(positions, nodeIds);
+    BoundingSphere boundingSphere(
+        boundingBox.centre(),
+        std::max(std::max(boundingBox.xLength(), boundingBox.yLength()), boundingBox.zLength()) * 0.5f * std::sqrt(3.0f)
+    );
+
+    return boundingSphere;
+}

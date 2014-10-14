@@ -3,6 +3,8 @@
 
 #include "../graph/grapharray.h"
 #include "../utils/circularbuffer.h"
+#include "../maths/boundingbox.h"
+#include "../maths/boundingsphere.h"
 
 #include <array>
 #include <mutex>
@@ -46,6 +48,12 @@ public:
                                   const std::vector<NodeId>& nodeIds);
     static QVector3D centreOfMassScaled(const NodePositions& nodePositions,
                                         const std::vector<NodeId>& nodeIds);
+
+    static BoundingBox3D boundingBox(const NodePositions& positions,
+                                     const std::vector<NodeId>& nodeIds);
+
+    static BoundingSphere boundingSphere(const NodePositions& positions,
+                                         const std::vector<NodeId>& nodeIds);
 
 private:
     using NodeArray<MeanPosition>::operator[];

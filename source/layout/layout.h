@@ -3,8 +3,6 @@
 
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
-#include "../maths/boundingbox.h"
-#include "../maths/boundingsphere.h"
 #include "nodepositions.h"
 
 #include <QVector2D>
@@ -96,14 +94,6 @@ public:
         _graph(graph),
         _positions(positions)
     {}
-
-    static BoundingBox3D boundingBox(const ReadOnlyGraph& graph, const NodePositions& positions);
-    BoundingBox3D boundingBox() const;
-    static BoundingBox2D boundingBoxInXY(const ReadOnlyGraph& graph, const NodePositions& positions);
-
-    static BoundingSphere boundingSphere(const ReadOnlyGraph& graph, const NodePositions& positions);
-    BoundingSphere boundingSphere() const;
-    static float boundingCircleRadiusInXY(const ReadOnlyGraph& graph, const NodePositions& positions);
 };
 
 class GraphModel;

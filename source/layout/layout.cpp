@@ -1,51 +1,6 @@
 #include "layout.h"
 #include "../utils/namethread.h"
 
-BoundingBox3D NodeLayout::boundingBox(const ReadOnlyGraph& graph, const NodePositions& positions)
-{
-    std::vector<QVector3D> graphPositions;
-    for(NodeId nodeId : graph.nodeIds())
-        graphPositions.push_back(positions.get(nodeId));
-
-    return BoundingBox3D(graphPositions);
-}
-
-BoundingBox3D NodeLayout::boundingBox() const
-{
-    return NodeLayout::boundingBox(_graph, _positions);
-}
-
-BoundingBox2D NodeLayout::boundingBoxInXY(const ReadOnlyGraph& graph, const NodePositions& positions)
-{
-    BoundingBox3D boundingBox = NodeLayout::boundingBox(graph, positions);
-
-    return BoundingBox2D(
-                QVector2D(boundingBox.min().x(), boundingBox.min().y()),
-                QVector2D(boundingBox.max().x(), boundingBox.max().y()));
-}
-
-BoundingSphere NodeLayout::boundingSphere() const
-{
-    return NodeLayout::boundingSphere(_graph, _positions);
-}
-
-float NodeLayout::boundingCircleRadiusInXY(const ReadOnlyGraph& graph, const NodePositions& positions)
-{
-    BoundingBox3D boundingBox = NodeLayout::boundingBox(graph, positions);
-    return std::max(boundingBox.xLength(), boundingBox.yLength()) * 0.5f * std::sqrt(2.0f);
-}
-
-BoundingSphere NodeLayout::boundingSphere(const ReadOnlyGraph& graph, const NodePositions& positions)
-{
-    BoundingBox3D boundingBox = NodeLayout::boundingBox(graph, positions);
-    BoundingSphere boundingSphere(
-        boundingBox.centre(),
-        std::max(std::max(boundingBox.xLength(), boundingBox.yLength()), boundingBox.zLength()) * 0.5f * std::sqrt(3.0f)
-    );
-
-    return boundingSphere;
-}
-
 void LayoutThread::addLayout(std::shared_ptr<Layout> layout)
 {
     std::unique_lock<std::mutex> lock(_mutex);
