@@ -6,6 +6,17 @@
 
 ThreadPool ForceDirectedLayout::_threadPool("FDPLayout");
 
+static QVector3D normalized(const QVector3D& v)
+{
+    float lengthSq = v.lengthSquared();
+    if (qFuzzyIsNull(lengthSq - 1.0f))
+        return v;
+    else if (!qIsNull(lengthSq))
+        return v / std::sqrt(lengthSq);
+
+    return QVector3D();
+}
+
 // This promotes movements where the direction is constant and mitigates movements when the direction changes
 static void dampOscillations(QVector3D& previous, QVector3D& next)
 {
@@ -14,7 +25,7 @@ static void dampOscillations(QVector3D& previous, QVector3D& next)
 
     if(previousLength > 0.0f && nextLength > 0.0f)
     {
-        const float dotProduct = QVector3D::dotProduct(previous.normalized(), next.normalized());
+        const float dotProduct = QVector3D::dotProduct(normalized(previous), normalized(next));
 
         // http://www.wolframalpha.com/input/?i=plot+0.5x%5E2%2B1.2x%2B1+from+x%3D-1to1
         const float f = (0.5f * dotProduct * dotProduct) + (1.2f * dotProduct) + 1.0f;
