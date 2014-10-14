@@ -7,6 +7,7 @@
 #include "../commands/commandmanager.h"
 
 #include <memory>
+#include <mutex>
 
 class GraphModel;
 class SelectionManager;
@@ -46,7 +47,8 @@ private:
     std::unique_ptr<NodeLayoutThread> _nodeLayoutThread;
     GraphWidget* _graphWidget;
 
-    bool _autoResume;
+    std::mutex _autoResumeMutex;
+    int _autoResume;
 
 private slots:
     void onGraphWillChange(const Graph*);

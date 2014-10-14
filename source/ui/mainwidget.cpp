@@ -17,7 +17,7 @@
 MainWidget::MainWidget(QWidget* parent) :
     QWidget(parent),
     _loadComplete(false),
-    _autoResume(false)
+    _autoResume(0)
 {
     this->setLayout(new QVBoxLayout());
 }
@@ -146,10 +146,12 @@ void MainWidget::onComponentsWillMerge(const Graph*, const ElementIdSet<Componen
 
 void MainWidget::pauseLayout(bool autoResume)
 {
+    std::unique_lock<std::mutex> lock(_autoResumeMutex);
+
     if(_nodeLayoutThread)
     {
         if(autoResume && !_nodeLayoutThread->paused())
-            _autoResume = true;
+            _autoResume++;
 
         _nodeLayoutThread->pauseAndWait();
     }
@@ -157,19 +159,26 @@ void MainWidget::pauseLayout(bool autoResume)
 
 bool MainWidget::layoutIsPaused()
 {
-    // Not typos: a non-existant thread counts as paused
+    std::unique_lock<std::mutex> lock(_autoResumeMutex);
+
+    // Not a typo: a non-existant thread counts as paused
     bool nodeLayoutPaused = (_nodeLayoutThread == nullptr || _nodeLayoutThread->paused()) &&
-            !_autoResume;
+            _autoResume == 0;
 
     return nodeLayoutPaused;
 }
 
 void MainWidget::resumeLayout(bool autoResume)
 {
-    if(autoResume && !_autoResume)
-        return;
+    std::unique_lock<std::mutex> lock(_autoResumeMutex);
 
-    _autoResume = false;
+    if(autoResume)
+    {
+        if(_autoResume == 0)
+            return;
+
+        _autoResume--;
+    }
 
     if(_nodeLayoutThread)
         _nodeLayoutThread->resume();
