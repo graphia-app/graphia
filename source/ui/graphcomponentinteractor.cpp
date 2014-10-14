@@ -231,7 +231,8 @@ void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
 
         if(_rightMouseButtonHeld)
         {
-            emit userInteractionStarted();
+            if(!_mouseMoving)
+                emit userInteractionStarted();
 
             const QVector3D clickedNodePosition = _graphModel->nodePositions().getScaledAndSmoothed(_clickedNodeId);
 
@@ -247,12 +248,11 @@ void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
         }
         else if(_leftMouseButtonHeld)
         {
-            emit userInteractionStarted();
+            if(!_mouseMoving)
+                emit userInteractionStarted();
 
             if(_scene->focusNodeId() != _clickedNodeId)
             {
-                emit userInteractionStarted();
-
                 const QVector3D clickedNodePosition = _graphModel->nodePositions().getScaledAndSmoothed(_clickedNodeId);
                 const QVector3D rotationCentre = _scene->focusPosition();
                 float radius = clickedNodePosition.distanceToPoint(rotationCentre);
