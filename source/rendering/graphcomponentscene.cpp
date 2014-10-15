@@ -16,6 +16,7 @@
 
 #include "../ui/selectionmanager.h"
 
+#include "../utils/utils.h"
 #include "../utils/make_unique.h"
 
 #include <QObject>
@@ -760,15 +761,15 @@ void GraphComponentScene::centrePositionInViewport(const QVector3D& position, fl
     {
         emit userInteractionStarted();
         _panTransition.start(0.3f, transitionType,
-                             [=](float f)
-        {
-            _camera->setPosition(startPosition + ((targetPosition - startPosition) * f));
-            _camera->setViewTarget(startViewTarget + ((position - startViewTarget) * f));
-        },
-        [=]
-        {
-            emit userInteractionFinished();
-        });
+            [=](float f)
+            {
+                _camera->setPosition(Utils::interpolate(startPosition, targetPosition, f));
+                _camera->setViewTarget(Utils::interpolate(startViewTarget, position, f));
+            },
+            [this]
+            {
+                emit userInteractionFinished();
+            });
     }
     else
     {

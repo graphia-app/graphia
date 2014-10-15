@@ -24,6 +24,11 @@ public:
     static QVector3D randQVector3D(float low, float high);
     static QColor randQColor();
 
+    template<typename T> static T interpolate(const T& a, const T& b, float f)
+    {
+        return a + ((b - a) * f);
+    }
+
     template<typename T> static bool valueIsCloseToZero(T value)
     {
         return qFuzzyCompare(1, value + 1);
