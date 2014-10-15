@@ -737,25 +737,43 @@ void GraphComponentScene::centreNodeInViewport(NodeId nodeId, float cameraDistan
                              cameraDistance, transitionType);
 }
 
-void GraphComponentScene::centrePositionInViewport(const QVector3D& position, float cameraDistance, Transition::Type transitionType)
+void GraphComponentScene::centrePositionInViewport(const QVector3D& viewTarget, float cameraDistance, Transition::Type transitionType)
 {
-    Plane translationPlane(position, _camera->viewVector().normalized());
-
-    QVector3D curPoint = translationPlane.rayIntersection(
-                Ray(_camera->position(), _camera->viewVector().normalized()));
-
-    QVector3D translation = position - curPoint;
     QVector3D startPosition = _camera->position();
     QVector3D startViewTarget = _camera->viewTarget();
-    QVector3D targetPosition = _camera->position() + translation;
+    QVector3D position;
 
-    if(cameraDistance >= 0.0f)
-        targetPosition = position - (_camera->viewVector().normalized() * cameraDistance);
+    if(cameraDistance < 0.0f)
+    {
+        Plane translationPlane(viewTarget, _camera->viewVector().normalized());
+
+        if(translationPlane.sideForPoint(_camera->position()) == Plane::Side::Back)
+        {
+            // We're behind the translation plane, so move along it
+            QVector3D cameraPlaneIntersection = translationPlane.rayIntersection(
+                        Ray(_camera->position(), _camera->viewVector().normalized()));
+            QVector3D translation = viewTarget - cameraPlaneIntersection;
+
+            position = _camera->position() + translation;
+        }
+        else
+        {
+            // We're in front of the translation plane, so move directly to the target
+            position = viewTarget + (startPosition - startViewTarget);
+        }
+
+        float distanceToTarget = (viewTarget - position).length();
+        focusComponentViewData()->_zoomDistance = _targetZoomDistance = distanceToTarget;
+    }
     else
-        focusComponentViewData()->_zoomDistance = _targetZoomDistance = translationPlane.distanceToPoint(targetPosition);
+    {
+        // Given a specific camera distance
+        position = viewTarget - (_camera->viewVector().normalized() * cameraDistance);
+    }
 
-    if(targetPosition.distanceToPoint(position) < MINIMUM_CAMERA_DISTANCE)
-        targetPosition = position - (_camera->viewVector().normalized() * MINIMUM_CAMERA_DISTANCE);
+    // Enforce minimum camera distance
+    if(position.distanceToPoint(viewTarget) < MINIMUM_CAMERA_DISTANCE)
+        position = viewTarget - (_camera->viewVector().normalized() * MINIMUM_CAMERA_DISTANCE);
 
     if(transitionType != Transition::Type::None)
     {
@@ -763,8 +781,8 @@ void GraphComponentScene::centrePositionInViewport(const QVector3D& position, fl
         _panTransition.start(0.3f, transitionType,
             [=](float f)
             {
-                _camera->setPosition(Utils::interpolate(startPosition, targetPosition, f));
-                _camera->setViewTarget(Utils::interpolate(startViewTarget, position, f));
+                _camera->setPosition(Utils::interpolate(startPosition, position, f));
+                _camera->setViewTarget(Utils::interpolate(startViewTarget, viewTarget, f));
             },
             [this]
             {
@@ -773,8 +791,8 @@ void GraphComponentScene::centrePositionInViewport(const QVector3D& position, fl
     }
     else
     {
-        _camera->setPosition(targetPosition);
-        _camera->setViewTarget(position);
+        _camera->setPosition(position);
+        _camera->setViewTarget(viewTarget);
     }
 }
 

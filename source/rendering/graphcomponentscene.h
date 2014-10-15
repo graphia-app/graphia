@@ -114,7 +114,7 @@ private:
 
     void centreNodeInViewport(NodeId nodeId, float cameraDistance = -1.0f,
                               Transition::Type transitionType = Transition::Type::None);
-    void centrePositionInViewport(const QVector3D& position, float cameraDistance = -1.0f,
+    void centrePositionInViewport(const QVector3D& viewTarget, float cameraDistance = -1.0f,
                                   Transition::Type transitionType = Transition::Type::None);
 
     bool _positionalDataRequiresUpdate;
