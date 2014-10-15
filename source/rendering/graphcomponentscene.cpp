@@ -808,7 +808,7 @@ void GraphComponentScene::moveFocusToNode(NodeId nodeId, Transition::Type transi
 
 void GraphComponentScene::moveFocusToCentreOfMass(Transition::Type transitionType)
 {
-    if(_focusComponentId.isNull())
+    if(_focusComponentId.isNull() || focusComponentViewData()->_focusNodeId.isNull())
         return;
 
     auto component = _graphModel->graph().componentById(_focusComponentId);
