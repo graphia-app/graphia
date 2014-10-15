@@ -59,6 +59,7 @@ public:
     void moveToComponent(ComponentId componentId);
 
     bool transitioning();
+    bool trackingCentreOfMass();
 
     void setGraphModel(std::shared_ptr<GraphModel> graphModel);
     void setSelectionManager(std::shared_ptr<SelectionManager> selectionManager);

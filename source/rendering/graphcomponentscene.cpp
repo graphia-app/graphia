@@ -808,7 +808,7 @@ void GraphComponentScene::moveFocusToNode(NodeId nodeId, Transition::Type transi
 
 void GraphComponentScene::moveFocusToCentreOfMass(Transition::Type transitionType)
 {
-    if(_focusComponentId.isNull() || focusComponentViewData()->_focusNodeId.isNull())
+    if(_focusComponentId.isNull())
         return;
 
     auto component = _graphModel->graph().componentById(_focusComponentId);
@@ -910,6 +910,12 @@ void GraphComponentScene::moveToComponent(ComponentId componentId)
 bool GraphComponentScene::transitioning()
 {
     return _panTransition.finished();
+}
+
+bool GraphComponentScene::trackingCentreOfMass()
+{
+    auto viewData = focusComponentViewData();
+    return viewData != nullptr ? viewData->_focusNodeId.isNull() : false;
 }
 
 void GraphComponentScene::setGraphModel(std::shared_ptr<GraphModel> graphModel)

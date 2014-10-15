@@ -321,8 +321,11 @@ void GraphComponentInteractor::mouseDoubleClickEvent(QMouseEvent* mouseEvent)
         if(!_mouseMoving)
         {
             if(!_clickedNodeId.isNull())
-                _scene->moveFocusToNode(_clickedNodeId, Transition::Type::EaseInEaseOut);
-            else
+            {
+                if(_clickedNodeId != _scene->focusNodeId())
+                    _scene->moveFocusToNode(_clickedNodeId, Transition::Type::EaseInEaseOut);
+            }
+            else if(!_scene->trackingCentreOfMass())
                 _scene->moveFocusToCentreOfMass(Transition::Type::EaseInEaseOut);
         }
     }
