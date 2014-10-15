@@ -64,7 +64,7 @@ public:
     void setGraphModel(std::shared_ptr<GraphModel> graphModel);
     void setSelectionManager(std::shared_ptr<SelectionManager> selectionManager);
 
-    Camera* camera() { return _camera; }
+    Camera* camera();
     void zoom(float delta);
 
     void setSelectionRect(const QRect& rect) { _selectionRect = rect; }
@@ -153,7 +153,6 @@ private:
     GraphComponentViewData* focusComponentViewData() const;
 
     float _aspectRatio;
-    Camera* _camera;
     Transition _panTransition;
 
     Sphere _sphere;

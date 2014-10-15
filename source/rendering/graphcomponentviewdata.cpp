@@ -14,6 +14,7 @@ GraphComponentViewData::GraphComponentViewData(const GraphComponentViewData& oth
     _camera(other._camera),
     _zoomDistance(other._zoomDistance),
     _focusNodeId(other._focusNodeId),
+    _focusPosition(other._focusPosition),
     _textureSizeDivisor(other._textureSizeDivisor),
     _initialised(other._initialised)
 {

@@ -45,7 +45,6 @@ GraphComponentScene::GraphComponentScene(std::shared_ptr<ComponentArray<GraphCom
       _funcs(nullptr),
       _componentsViewData(componentsViewData),
       _aspectRatio(4.0f / 3.0f),
-      _camera(nullptr),
       _numNodesInPositionData(0),
       _numEdgesInPositionData(0)
 {
@@ -364,8 +363,6 @@ void GraphComponentScene::update(float t)
 
         auto component = _graphModel->graph().componentById(_focusComponentId);
 
-        _camera = &componentViewData->_camera;
-
         _numNodesInPositionData = component->numNodes();
         _numEdgesInPositionData = component->numEdges();
 
@@ -388,8 +385,8 @@ void GraphComponentScene::update(float t)
                 centreNodeInViewport(componentViewData->_focusNodeId, componentViewData->_zoomDistance);
         }
 
-        _modelViewMatrix = _camera->viewMatrix();
-        _projectionMatrix = _camera->projectionMatrix();
+        _modelViewMatrix = camera()->viewMatrix();
+        _projectionMatrix = camera()->projectionMatrix();
     }
 
     submitDebugLines();
@@ -739,22 +736,22 @@ void GraphComponentScene::centreNodeInViewport(NodeId nodeId, float cameraDistan
 
 void GraphComponentScene::centrePositionInViewport(const QVector3D& viewTarget, float cameraDistance, Transition::Type transitionType)
 {
-    QVector3D startPosition = _camera->position();
-    QVector3D startViewTarget = _camera->viewTarget();
+    QVector3D startPosition = camera()->position();
+    QVector3D startViewTarget = camera()->viewTarget();
     QVector3D position;
 
     if(cameraDistance < 0.0f)
     {
-        Plane translationPlane(viewTarget, _camera->viewVector().normalized());
+        Plane translationPlane(viewTarget, camera()->viewVector().normalized());
 
-        if(translationPlane.sideForPoint(_camera->position()) == Plane::Side::Back)
+        if(translationPlane.sideForPoint(camera()->position()) == Plane::Side::Back)
         {
             // We're behind the translation plane, so move along it
             QVector3D cameraPlaneIntersection = translationPlane.rayIntersection(
-                        Ray(_camera->position(), _camera->viewVector().normalized()));
+                        Ray(camera()->position(), camera()->viewVector().normalized()));
             QVector3D translation = viewTarget - cameraPlaneIntersection;
 
-            position = _camera->position() + translation;
+            position = camera()->position() + translation;
         }
         else
         {
@@ -768,12 +765,12 @@ void GraphComponentScene::centrePositionInViewport(const QVector3D& viewTarget, 
     else
     {
         // Given a specific camera distance
-        position = viewTarget - (_camera->viewVector().normalized() * cameraDistance);
+        position = viewTarget - (camera()->viewVector().normalized() * cameraDistance);
     }
 
     // Enforce minimum camera distance
     if(position.distanceToPoint(viewTarget) < MINIMUM_CAMERA_DISTANCE)
-        position = viewTarget - (_camera->viewVector().normalized() * MINIMUM_CAMERA_DISTANCE);
+        position = viewTarget - (camera()->viewVector().normalized() * MINIMUM_CAMERA_DISTANCE);
 
     if(transitionType != Transition::Type::None)
     {
@@ -781,8 +778,8 @@ void GraphComponentScene::centrePositionInViewport(const QVector3D& viewTarget, 
         _panTransition.start(0.3f, transitionType,
             [=](float f)
             {
-                _camera->setPosition(Utils::interpolate(startPosition, position, f));
-                _camera->setViewTarget(Utils::interpolate(startViewTarget, viewTarget, f));
+                camera()->setPosition(Utils::interpolate(startPosition, position, f));
+                camera()->setViewTarget(Utils::interpolate(startViewTarget, viewTarget, f));
             },
             [this]
             {
@@ -791,8 +788,8 @@ void GraphComponentScene::centrePositionInViewport(const QVector3D& viewTarget, 
     }
     else
     {
-        _camera->setPosition(position);
-        _camera->setViewTarget(viewTarget);
+        camera()->setPosition(position);
+        camera()->setViewTarget(viewTarget);
     }
 }
 
@@ -826,7 +823,7 @@ void GraphComponentScene::selectFocusNodeClosestToCameraVector(Transition::Type 
 
     Collision collision(*_graphModel, _focusComponentId);
     //FIXME closestNodeToCylinder/Cone?
-    NodeId closestNodeId = collision.closestNodeToLine(_camera->position(), _camera->viewVector().normalized());
+    NodeId closestNodeId = collision.closestNodeToLine(camera()->position(), camera()->viewVector().normalized());
     if(!closestNodeId.isNull())
         moveFocusToNode(closestNodeId, transitionType);
 }
@@ -916,6 +913,12 @@ bool GraphComponentScene::trackingCentreOfMass()
 {
     auto viewData = focusComponentViewData();
     return viewData != nullptr ? viewData->_focusNodeId.isNull() : false;
+}
+
+Camera* GraphComponentScene::camera()
+{
+    auto viewData = focusComponentViewData();
+    return viewData != nullptr ? &viewData->_camera : nullptr;
 }
 
 void GraphComponentScene::setGraphModel(std::shared_ptr<GraphModel> graphModel)
