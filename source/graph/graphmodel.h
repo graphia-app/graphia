@@ -13,6 +13,11 @@
 
 struct NodeVisual
 {
+    NodeVisual() :
+        _initialised(false),
+        _size(1.0f)
+    {}
+
     bool _initialised;
     float _size;
     QColor _color;
@@ -22,6 +27,11 @@ typedef NodeArray<NodeVisual> NodeVisuals;
 
 struct EdgeVisual
 {
+    EdgeVisual() :
+        _initialised(false),
+        _size(1.0f)
+    {}
+
     bool _initialised;
     float _size;
     QColor _color;
