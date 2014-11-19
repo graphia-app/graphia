@@ -1,5 +1,5 @@
-#ifndef FRUSTU_H
-#define FRUSTU_H
+#ifndef FRUSTUM_H
+#define FRUSTUM_H
 
 #include "plane.h"
 #include "line.h"
@@ -18,4 +18,4 @@ public:
     bool containsLine(const Line3D& line) const;
 };
 
-#endif // FRUSTU_H
+#endif // FRUSTUM_H
