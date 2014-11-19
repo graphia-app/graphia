@@ -64,7 +64,8 @@ SOURCES += \
     source/layout/forcedirectedlayout.cpp \
     source/utils/threadpool.cpp \
     source/utils/semaphore.cpp \
-    source/layout/nodepositions.cpp
+    source/layout/nodepositions.cpp \
+    source/maths/conicalfrustum.cpp
 
 HEADERS += \
     source/rendering/camera.h \
@@ -123,7 +124,8 @@ HEADERS += \
     source/utils/semaphore.h \
     source/layout/nodepositions.h \
     source/utils/circularbuffer.h \
-    source/utils/fixedsizestack.h
+    source/utils/fixedsizestack.h \
+    source/maths/conicalfrustum.h
 
 FORMS    += source/mainwindow.ui
 

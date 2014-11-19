@@ -518,3 +518,11 @@ Frustum Camera::frustumForViewportCoordinates(int x1, int y1, int x2, int y2)
 
     return Frustum(line1, line2, line3, line4);
 }
+
+ConicalFrustum Camera::conicalFrustumForViewportCoordinates(int x, int y, int radius)
+{
+    Line3D centreLine = lineForViewportCoordinates(x, y);
+    Line3D surfaceLine = lineForViewportCoordinates(x + radius, y);
+
+    return ConicalFrustum(centreLine, surfaceLine);
+}

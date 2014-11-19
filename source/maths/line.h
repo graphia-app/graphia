@@ -45,7 +45,7 @@ public:
     }
 };
 
-typedef Line<QVector3D> Line3D;
-typedef Line<QVector2D> Line2D;
+using Line3D = Line<QVector3D>;
+using Line2D = Line<QVector2D>;
 
 #endif // LINE_H

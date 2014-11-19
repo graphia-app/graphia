@@ -28,6 +28,9 @@ public:
 
     QVector3D closestPointTo(const QVector3D& point) const;
     QVector3D closestPointTo(const Ray& other) const;
+
+    float distanceTo(const QVector3D& point) const;
+    float distanceTo(const Ray& other) const;
 };
 
 #endif // RAY_H

@@ -21,3 +21,13 @@ QVector3D Ray::closestPointTo(const Ray& other) const
 
     return _origin + (_dir * t);
 }
+
+float Ray::distanceTo(const QVector3D& point) const
+{
+    return closestPointTo(point).length();
+}
+
+float Ray::distanceTo(const Ray& other) const
+{
+    return closestPointTo(other).length();
+}

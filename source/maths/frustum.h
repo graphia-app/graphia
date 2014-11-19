@@ -9,7 +9,7 @@
 class Frustum
 {
 private:
-    Plane planes[6];
+    Plane _planes[6];
 
 public:
     Frustum(const Line3D& line1, const Line3D& line2, const Line3D& line3, const Line3D& line4);

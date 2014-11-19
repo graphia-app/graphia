@@ -9,6 +9,7 @@
 #include <QSharedPointer>
 
 #include "../maths/frustum.h"
+#include "../maths/conicalfrustum.h"
 #include "../maths/line.h"
 #include "../maths/ray.h"
 
@@ -102,6 +103,7 @@ public:
     const Ray rayForViewportCoordinates(int x, int y);
     Line3D lineForViewportCoordinates(int x, int y);
     Frustum frustumForViewportCoordinates(int x1, int y1, int x2, int y2);
+    ConicalFrustum conicalFrustumForViewportCoordinates(int x, int y, int radius);
 
     QQuaternion tiltRotation(const float& angle) const;
     QQuaternion panRotation(const float& angle) const;
