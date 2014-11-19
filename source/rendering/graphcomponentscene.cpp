@@ -823,7 +823,7 @@ void GraphComponentScene::selectFocusNodeClosestToCameraVector(Transition::Type 
 
     Collision collision(*_graphModel, _focusComponentId);
     //FIXME closestNodeToCylinder/Cone?
-    NodeId closestNodeId = collision.closestNodeToLine(camera()->position(), camera()->viewVector().normalized());
+    NodeId closestNodeId = collision.nodeClosestToLine(camera()->position(), camera()->viewVector().normalized());
     if(!closestNodeId.isNull())
         moveFocusToNode(closestNodeId, transitionType);
 }

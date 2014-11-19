@@ -3,7 +3,7 @@
 #include "../maths/plane.h"
 #include "../rendering/graphcomponentscene.h"
 
-NodeId Collision::closestNodeToLine(const std::vector<NodeId>& nodeIds, const QVector3D &point, const QVector3D &direction)
+NodeId Collision::nodeClosestToLine(const std::vector<NodeId>& nodeIds, const QVector3D &point, const QVector3D &direction)
 {
     Plane plane(point, direction);
     NodeId closestNodeId;
@@ -28,12 +28,17 @@ NodeId Collision::closestNodeToLine(const std::vector<NodeId>& nodeIds, const QV
     return closestNodeId;
 }
 
-NodeId Collision::closestNodeToLine(const QVector3D &point, const QVector3D &direction)
+NodeId Collision::nodeClosestToLine(const QVector3D &point, const QVector3D &direction)
 {
-    return closestNodeToLine(_graphModel.graph().componentById(_componentId)->nodeIds(), point, direction);
+    return nodeClosestToLine(_graphModel.graph().componentById(_componentId)->nodeIds(), point, direction);
 }
 
 void Collision::nodesIntersectingLine(const QVector3D& point, const QVector3D& direction, std::vector<NodeId>& intersectingNodeIds)
+{
+    nodesInsideCylinder(point, direction, 0.0f, intersectingNodeIds);
+}
+
+void Collision::nodesInsideCylinder(const QVector3D &point, const QVector3D &direction, float radius, std::vector<NodeId>& containedNodeIds)
 {
     Plane plane(point, direction);
 
@@ -47,16 +52,21 @@ void Collision::nodesIntersectingLine(const QVector3D& point, const QVector3D& d
 
         float distance = position.distanceToLine(point, direction);
 
-        if(distance <= _graphModel.nodeVisuals().at(nodeId)._size)
-            intersectingNodeIds.push_back(nodeId);
+        if(distance <= radius + _graphModel.nodeVisuals().at(nodeId)._size)
+            containedNodeIds.push_back(nodeId);
     }
 }
 
 NodeId Collision::nearestNodeIntersectingLine(const QVector3D& point, const QVector3D& direction)
 {
+    return nearestNodeInsideCylinder(point, direction, 0.0f);
+}
+
+NodeId Collision::nearestNodeInsideCylinder(const QVector3D& point, const QVector3D& direction, float radius)
+{
     std::vector<NodeId> nodeIds;
 
-    nodesIntersectingLine(point, direction, nodeIds);
+    nodesInsideCylinder(point, direction, radius, nodeIds);
 
     NodeId closestNodeId;
     float minimumDistance = std::numeric_limits<float>::max();

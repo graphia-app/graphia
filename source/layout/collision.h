@@ -30,7 +30,11 @@ public:
     NodeId nodeClosestToLine(const QVector3D& point, const QVector3D& direction);
 
     void nodesIntersectingLine(const QVector3D& point, const QVector3D& direction, std::vector<NodeId>& intersectingNodeIds);
+    void nodesInsideCylinder(const QVector3D& point, const QVector3D& direction,
+                             float radius, std::vector<NodeId>& containedNodeIds);
+
     NodeId nearestNodeIntersectingLine(const QVector3D& point, const QVector3D& direction);
+    NodeId nearestNodeInsideCylinder(const QVector3D& point, const QVector3D& direction, float radius);
 };
 
 #endif // COLLISION_H
