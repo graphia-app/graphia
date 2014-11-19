@@ -5,7 +5,6 @@
 ConicalFrustum::ConicalFrustum(const Line3D& centreLine, const Line3D& surfaceLine) :
     _centreLine(centreLine)
 {
-    //FIXME: check direction of normals
     _nearPlane = Plane(_centreLine.start(), -_centreLine.dir());
     _farPlane = Plane(_centreLine.end(), _centreLine.dir());
 
@@ -19,14 +18,15 @@ bool ConicalFrustum::containsPoint(const QVector3D& point) const
        _farPlane.sideForPoint(point) == Plane::Side::Front)
         return false;
 
-    float height = _centreLine.length();
-    float distanceToPoint = _nearPlane.distanceToPoint(point); //FIXME: check sign
+    float distanceBetweenPlanes = _centreLine.length();
+    float distanceFromNearPlane = _nearPlane.distanceToPoint(point);
     float testRadius = Utils::interpolate(_nearRadius, _farRadius,
-                                          height / distanceToPoint);
+                                          distanceFromNearPlane / distanceBetweenPlanes);
 
-    Ray ray(_centreLine.start(), _centreLine.end());
+    float distanceToCentreLine = point.distanceToLine(_centreLine.start(),
+        (_centreLine.end() - _centreLine.start()).normalized());
 
-    return ray.distanceTo(point) < testRadius;
+    return distanceToCentreLine < testRadius;
 }
 
 bool ConicalFrustum::containsLine(const Line3D& line) const
