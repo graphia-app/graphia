@@ -28,8 +28,3 @@ bool ConicalFrustum::containsPoint(const QVector3D& point) const
 
     return distanceToCentreLine < testRadius;
 }
-
-bool ConicalFrustum::containsLine(const Line3D& line) const
-{
-    return containsPoint(line.start()) && containsPoint(line.end());
-}

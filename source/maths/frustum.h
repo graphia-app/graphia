@@ -6,7 +6,14 @@
 
 #include <QVector3D>
 
-class Frustum
+class BaseFrustum
+{
+public:
+    virtual bool containsPoint(const QVector3D& point) const = 0;
+    bool containsLine(const Line3D& line) const;
+};
+
+class Frustum : public BaseFrustum
 {
 private:
     Plane _planes[6];

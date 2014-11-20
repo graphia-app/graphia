@@ -23,7 +23,7 @@ bool Frustum::containsPoint(const QVector3D& point) const
     return true;
 }
 
-bool Frustum::containsLine(const Line3D& line) const
+bool BaseFrustum::containsLine(const Line3D& line) const
 {
     return containsPoint(line.start()) && containsPoint(line.end());
 }

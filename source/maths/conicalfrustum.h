@@ -1,12 +1,13 @@
 #ifndef CONICALFRUSTUM_H
 #define CONICALFRUSTUM_H
 
+#include "frustum.h"
 #include "plane.h"
 #include "line.h"
 
 #include <QVector3D>
 
-class ConicalFrustum
+class ConicalFrustum : public BaseFrustum
 {
 private:
     Line3D _centreLine;
@@ -21,7 +22,6 @@ public:
     ConicalFrustum(const Line3D& centreLine, const Line3D& surfaceLine);
 
     bool containsPoint(const QVector3D& point) const;
-    bool containsLine(const Line3D& line) const;
 };
 
 #endif // CONICALFRUSTUM_H
