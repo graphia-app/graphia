@@ -23,6 +23,49 @@
 #include <QtMath>
 #include <cmath>
 
+static ElementIdSet<NodeId> nodeIdsInsideFrustum(const GraphModel& graphModel,
+                                                 ComponentId componentId,
+                                                 const BaseFrustum& frustum)
+{
+    ElementIdSet<NodeId> selection;
+
+    auto component = graphModel.graph().componentById(componentId);
+    for(NodeId nodeId : component->nodeIds())
+    {
+        const QVector3D nodePosition = graphModel.nodePositions().getScaledAndSmoothed(nodeId);
+        if(frustum.containsPoint(nodePosition))
+            selection.insert(nodeId);
+    }
+
+    return selection;
+}
+
+static NodeId nodeIdInsideFrustumNearestPoint(const GraphModel& graphModel,
+                                              ComponentId componentId,
+                                              const BaseFrustum& frustum,
+                                              const QVector3D& point)
+{
+    auto nodeIds = nodeIdsInsideFrustum(graphModel, componentId, frustum);
+
+    NodeId closestNodeId;
+    float minimumDistance = std::numeric_limits<float>::max();
+
+    for(auto nodeId : nodeIds)
+    {
+        float distanceToCentre = Ray(frustum.centreLine()).distanceTo(point);
+        float distanceToPoint = graphModel.nodePositions().getScaledAndSmoothed(nodeId).distanceToPoint(point);
+        float distance = distanceToCentre + distanceToPoint;
+
+        if(distance < minimumDistance)
+        {
+            minimumDistance = distance;
+            closestNodeId = nodeId;
+        }
+    }
+
+    return closestNodeId;
+}
+
 GraphComponentInteractor::GraphComponentInteractor(std::shared_ptr<GraphModel> graphModel,
                                                    std::shared_ptr<GraphComponentScene> graphComponentScene,
                                                    CommandManager &commandManager,
@@ -52,8 +95,19 @@ void GraphComponentInteractor::mousePressEvent(QMouseEvent* mouseEvent)
     Ray ray = _scene->camera()->rayForViewportCoordinates(_cursorPosition.x(), _cursorPosition.y());
 
     Collision collision(*_graphModel, _scene->focusComponentId());
-    //FIXME nearestNodeInsideCylinder/Cone?
     _clickedNodeId = collision.nearestNodeIntersectingLine(ray.origin(), ray.dir());
+
+    if(_clickedNodeId.isNull())
+    {
+        const int PICK_RADIUS = 40;
+        ConicalFrustum frustum = _scene->camera()->conicalFrustumForViewportCoordinates(
+                    _cursorPosition.x(), _cursorPosition.y(), PICK_RADIUS);
+
+        _nearClickNodeId = nodeIdInsideFrustumNearestPoint(*_graphModel, _scene->focusComponentId(),
+                                                           frustum, ray.origin());
+    }
+    else
+        _nearClickNodeId = _clickedNodeId;
 
     switch(mouseEvent->button())
     {
@@ -70,7 +124,7 @@ void GraphComponentInteractor::mousePressEvent(QMouseEvent* mouseEvent)
     case Qt::RightButton:
         _rightMouseButtonHeld = true;
 
-        if(!_clickedNodeId.isNull())
+        if(!_nearClickNodeId.isNull())
             _scene->disableFocusTracking();
         break;
 
@@ -92,12 +146,13 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
 
         emit userInteractionFinished();
 
-        if(!_clickedNodeId.isNull() && _rightMouseButtonHeld && _mouseMoving)
+        if(!_nearClickNodeId.isNull() && _rightMouseButtonHeld && _mouseMoving)
             _scene->selectFocusNodeClosestToCameraVector();
 
         _rightMouseButtonHeld = false;
         _scene->enableFocusTracking();
         _clickedNodeId.setToNull();
+        _nearClickNodeId.setToNull();
         break;
 
     case Qt::LeftButton:
@@ -112,20 +167,12 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
         {
             if(_frustumSelecting)
             {
-                QPoint frustumEndPoint = mouseEvent->pos();
+                QPoint frustumSelectEndPoint = mouseEvent->pos();
                 Frustum frustum = _scene->camera()->frustumForViewportCoordinates(
                             _frustumSelectStart.x(), _frustumSelectStart.y(),
-                            frustumEndPoint.x(), frustumEndPoint.y());
+                            frustumSelectEndPoint.x(), frustumSelectEndPoint.y());
 
-                ElementIdSet<NodeId> selection;
-
-                auto component = _graphModel->graph().componentById(_scene->focusComponentId());
-                for(NodeId nodeId : component->nodeIds())
-                {
-                    const QVector3D nodePosition = _graphModel->nodePositions().getScaledAndSmoothed(nodeId);
-                    if(frustum.containsPoint(nodePosition))
-                        selection.insert(nodeId);
-                }
+                auto selection = nodeIdsInsideFrustum(*_graphModel, _scene->focusComponentId(), frustum);
 
                 auto previousSelection = _selectionManager->selectedNodes();
                 _commandManager.execute(tr("Select Nodes"), tr("Selecting Nodes"),
@@ -176,6 +223,7 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
         }
 
         _clickedNodeId.setToNull();
+        _nearClickNodeId.setToNull();
         break;
 
     default: break;
@@ -208,6 +256,7 @@ void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
             emit userInteractionStarted();
             _frustumSelecting = true;
             _clickedNodeId.setToNull();
+            _nearClickNodeId.setToNull();
 
             // This can happen if the user holds shift after clicking
             if(_frustumSelectStart.isNull())
@@ -225,7 +274,7 @@ void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
 
         emit userInteractionFinished();
     }
-    else if(!_clickedNodeId.isNull())
+    else if(!_nearClickNodeId.isNull())
     {
         _selecting = false;
 
@@ -234,7 +283,7 @@ void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
             if(!_mouseMoving)
                 emit userInteractionStarted();
 
-            const QVector3D clickedNodePosition = _graphModel->nodePositions().getScaledAndSmoothed(_clickedNodeId);
+            const QVector3D clickedNodePosition = _graphModel->nodePositions().getScaledAndSmoothed(_nearClickNodeId);
 
             Plane translationPlane(clickedNodePosition, camera->viewVector().normalized());
 
@@ -251,9 +300,9 @@ void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
             if(!_mouseMoving)
                 emit userInteractionStarted();
 
-            if(_scene->focusNodeId() != _clickedNodeId)
+            if(_scene->focusNodeId() != _nearClickNodeId)
             {
-                const QVector3D clickedNodePosition = _graphModel->nodePositions().getScaledAndSmoothed(_clickedNodeId);
+                const QVector3D clickedNodePosition = _graphModel->nodePositions().getScaledAndSmoothed(_nearClickNodeId);
                 const QVector3D rotationCentre = _scene->focusPosition();
                 float radius = clickedNodePosition.distanceToPoint(rotationCentre);
 
@@ -320,10 +369,10 @@ void GraphComponentInteractor::mouseDoubleClickEvent(QMouseEvent* mouseEvent)
     {
         if(!_mouseMoving)
         {
-            if(!_clickedNodeId.isNull())
+            if(!_nearClickNodeId.isNull())
             {
-                if(_clickedNodeId != _scene->focusNodeId())
-                    _scene->moveFocusToNode(_clickedNodeId, Transition::Type::EaseInEaseOut);
+                if(_nearClickNodeId != _scene->focusNodeId())
+                    _scene->moveFocusToNode(_nearClickNodeId, Transition::Type::EaseInEaseOut);
             }
             else if(!_scene->trackingCentreOfMass())
                 _scene->moveFocusToCentreOfMass(Transition::Type::EaseInEaseOut);

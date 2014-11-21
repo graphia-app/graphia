@@ -37,6 +37,7 @@ private:
     QPoint _clickPosition;
     bool _mouseMoving;
     NodeId _clickedNodeId;
+    NodeId _nearClickNodeId;
 
     void mousePressEvent(QMouseEvent* e);
     void mouseReleaseEvent(QMouseEvent* e);

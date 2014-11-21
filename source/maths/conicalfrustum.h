@@ -22,6 +22,7 @@ public:
     ConicalFrustum(const Line3D& centreLine, const Line3D& surfaceLine);
 
     bool containsPoint(const QVector3D& point) const;
+    Line3D centreLine() const { return _centreLine; }
 };
 
 #endif // CONICALFRUSTUM_H

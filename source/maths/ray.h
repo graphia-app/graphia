@@ -3,6 +3,8 @@
 
 #include <QVector3D>
 
+#include "line.h"
+
 class Ray
 {
 private:
@@ -11,14 +13,25 @@ private:
     QVector3D _invDir;
     int _sign[3];
 
+    void initialise()
+    {
+        _invDir = QVector3D(1.0f / _dir.x(), 1.0f / _dir.y(), 1.0f/ _dir.z());
+        _sign[0] = (_invDir.x() < 0.0f);
+        _sign[1] = (_invDir.y() < 0.0f);
+        _sign[2] = (_invDir.z() < 0.0f);
+    }
+
 public:
     Ray(const QVector3D& origin, const QVector3D& dir) :
         _origin(origin), _dir(dir)
     {
-        _invDir = QVector3D(1.0f / dir.x(), 1.0f / dir.y(), 1.0f/ dir.z());
-        _sign[0] = (_invDir.x() < 0.0f);
-        _sign[1] = (_invDir.y() < 0.0f);
-        _sign[2] = (_invDir.z() < 0.0f);
+        initialise();
+    }
+
+    Ray(const Line3D& line) :
+        _origin(line.start()), _dir(line.dir())
+    {
+        initialise();
     }
 
     const QVector3D& origin() const { return _origin; }

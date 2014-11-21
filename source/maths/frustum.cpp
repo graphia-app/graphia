@@ -8,6 +8,9 @@ Frustum::Frustum(const Line3D& line1, const Line3D& line2, const Line3D& line3, 
     _planes[3] = Plane(line3.start(), line4.start(), line3.end());
     _planes[4] = Plane(line4.start(), line1.start(), line4.end());
     _planes[5] = Plane(line2.end(),   line3.end(),   line1.end());
+
+    _centreLine = Line3D(0.5f * (line1.start() + line3.start()),
+                         0.5f * (line1.end() + line3.end()));
 }
 
 bool Frustum::containsPoint(const QVector3D& point) const
