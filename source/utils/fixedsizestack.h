@@ -19,7 +19,7 @@ public:
 
     void push(const T& t)
     {
-        if(_top + 1 < _size)
+        if(_top + 1 < static_cast<int>(_size))
             _vector[++_top] = t;
     }
 
