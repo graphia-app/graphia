@@ -233,18 +233,32 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
         _mouseMoving = false;
 }
 
+// https://www.opengl.org/wiki/Object_Mouse_Trackball
 static QVector3D virtualTrackballVector(int width, int height, const QPoint& cursor)
 {
-    QVector3D p;
+    const int minDimension = std::min(width, height);
+    const float x = (2.0f * cursor.x() - width) / minDimension;
+    const float y = (height - 2.0f * cursor.y()) / minDimension;
+    const float d = std::sqrt(x * x + y * y);
+    const float RADIUS = 0.9f; // Radius of trackball
+    const float ROOT2 = std::sqrt(2.0f);
+    const float CUTOFF = ROOT2 / 2.0f;
 
-    p.setX((2.0f * cursor.x() - width) / width);
-    p.setY((height - 2.0f * cursor.y()) / height);
-    float d = std::sqrt(p.x() * p.x() + p.y() * p.y());
-    p.setZ(std::cos((Constants::Pi() * 0.5f) * ((d < 1.0f) ? d : 1.0f)));
-    float a = 1.0f / p.length();
-    p = p * a;
+    float z;
 
-    return p;
+    if(d < (RADIUS * CUTOFF))
+    {
+        // Sphere
+        z = std::sqrt(RADIUS * RADIUS - d * d);
+    }
+    else
+    {
+        // Hyperbolic sheet
+        float t = RADIUS / ROOT2;
+        z = t * t / d;
+    }
+
+    return QVector3D(x, y, z);
 }
 
 QQuaternion GraphComponentInteractor::mouseMoveToRotation()
