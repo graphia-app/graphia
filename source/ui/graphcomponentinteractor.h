@@ -39,6 +39,8 @@ private:
     NodeId _clickedNodeId;
     NodeId _nearClickNodeId;
 
+    QQuaternion mouseMoveToRotation();
+
     void mousePressEvent(QMouseEvent* e);
     void mouseReleaseEvent(QMouseEvent* e);
     void mouseMoveEvent(QMouseEvent* e);

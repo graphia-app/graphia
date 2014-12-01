@@ -49,11 +49,10 @@ public:
     static QVector3D centreOfMassScaled(const NodePositions& nodePositions,
                                         const std::vector<NodeId>& nodeIds);
 
-    static BoundingBox3D boundingBox(const NodePositions& positions,
-                                     const std::vector<NodeId>& nodeIds);
-
-    static BoundingSphere boundingSphere(const NodePositions& positions,
-                                         const std::vector<NodeId>& nodeIds);
+    static std::vector<QVector3D> positionsVector(const NodePositions& nodePositions,
+                                                  const std::vector<NodeId>& nodeIds);
+    static std::vector<QVector3D> positionsVectorScaled(const NodePositions& nodePositions,
+                                                        const std::vector<NodeId>& nodeIds);
 
 private:
     using NodeArray<MeanPosition>::operator[];

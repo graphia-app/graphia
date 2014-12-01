@@ -384,19 +384,19 @@ void Camera::roll(const float& angle)
     rotate(q);
 }
 
-void Camera::tiltAboutViewCenter(const float& angle)
+void Camera::tiltAboutViewTarget(const float& angle)
 {
     QQuaternion q = tiltRotation(-angle);
     rotateAboutViewTarget(q);
 }
 
-void Camera::panAboutViewCenter(const float& angle)
+void Camera::panAboutViewTarget(const float& angle)
 {
     QQuaternion q = panRotation(angle);
     rotateAboutViewTarget(q);
 }
 
-void Camera::rollAboutViewCenter(const float& angle)
+void Camera::rollAboutViewTarget(const float& angle)
 {
     QQuaternion q = rollRotation(angle);
     rotateAboutViewTarget(q);

@@ -70,6 +70,9 @@ public:
     void setSelectionRect(const QRect& rect) { _selectionRect = rect; }
     void clearSelectionRect() { _selectionRect = QRect(); }
 
+    int width() const { return _width; }
+    int height() const { return _height; }
+
 private:
     struct DebugLine
     {

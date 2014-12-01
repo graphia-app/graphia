@@ -165,7 +165,7 @@ public:
 
     void build(const ReadOnlyGraph& graph, const NodePositions& nodePositions)
     {
-        BoundingBox3D boundingBox = NodePositions::boundingBox(nodePositions, graph.nodeIds());
+        BoundingBox3D boundingBox = BoundingBox3D(NodePositions::positionsVector(nodePositions, graph.nodeIds()));
         build(graph.nodeIds(), nodePositions, boundingBox);
     }
 

@@ -74,22 +74,20 @@ QVector3D NodePositions::centreOfMassScaled(const NodePositions& nodePositions, 
     return centreOfMass(nodePositions, nodeIds) * nodePositions.scale();
 }
 
-BoundingBox3D NodePositions::boundingBox(const NodePositions& positions, const std::vector<NodeId>& nodeIds)
+std::vector<QVector3D> NodePositions::positionsVector(const NodePositions& nodePositions, const std::vector<NodeId>& nodeIds)
 {
-    std::vector<QVector3D> graphPositions;
+    std::vector<QVector3D> positionsVector;
     for(NodeId nodeId : nodeIds)
-        graphPositions.push_back(positions.get(nodeId));
+        positionsVector.push_back(nodePositions.get(nodeId));
 
-    return BoundingBox3D(graphPositions);
+    return positionsVector;
 }
 
-BoundingSphere NodePositions::boundingSphere(const NodePositions& positions, const std::vector<NodeId>& nodeIds)
+std::vector<QVector3D> NodePositions::positionsVectorScaled(const NodePositions& nodePositions, const std::vector<NodeId>& nodeIds)
 {
-    BoundingBox3D boundingBox = NodePositions::boundingBox(positions, nodeIds);
-    BoundingSphere boundingSphere(
-        boundingBox.centre(),
-        std::max(std::max(boundingBox.xLength(), boundingBox.yLength()), boundingBox.zLength()) * 0.5f * std::sqrt(3.0f)
-    );
+    std::vector<QVector3D> positionsVector;
+    for(NodeId nodeId : nodeIds)
+        positionsVector.push_back(nodePositions.getScaledAndSmoothed(nodeId));
 
-    return boundingSphere;
+    return positionsVector;
 }

@@ -135,9 +135,9 @@ public slots:
     void pan(const float& angle);
     void roll(const float& angle);
 
-    void tiltAboutViewCenter(const float& angle);
-    void panAboutViewCenter(const float& angle);
-    void rollAboutViewCenter(const float& angle);
+    void tiltAboutViewTarget(const float& angle);
+    void panAboutViewTarget(const float& angle);
+    void rollAboutViewTarget(const float& angle);
 
     void rotate(const QQuaternion& q);
     void rotateAboutViewTarget(const QQuaternion& q);

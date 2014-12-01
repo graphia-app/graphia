@@ -15,6 +15,20 @@ BoundingSphere::BoundingSphere(const QVector3D centre, float radius) :
 {
 }
 
+static float maxDistanceFromCentre(const QVector3D centre, const std::vector<QVector3D>& points)
+{
+    float radius = 0.0f;
+
+    for(auto& point : points)
+    {
+        float lengthSquared = (centre - point).lengthSquared();
+        if(lengthSquared > radius)
+            radius = lengthSquared;
+    }
+
+    return std::sqrt(radius);
+}
+
 BoundingSphere::BoundingSphere(const std::vector<QVector3D>& points) :
     _centre(), _radius(0.0f)
 {
@@ -25,15 +39,13 @@ BoundingSphere::BoundingSphere(const std::vector<QVector3D>& points) :
         _centre += point;
     _centre /= points.size();
 
-    // Find max distance from barycentre
-    for(auto& point : points)
-    {
-        float lengthSquared = (_centre - point).lengthSquared();
-        if(lengthSquared > _radius)
-            _radius = lengthSquared;
-    }
+    _radius = maxDistanceFromCentre(_centre, points);
+}
 
-    _radius = std::sqrt(_radius);
+BoundingSphere::BoundingSphere(const QVector3D centre, const std::vector<QVector3D>& points) :
+    _centre(centre)
+{
+    _radius = maxDistanceFromCentre(_centre, points);
 }
 
 void BoundingSphere::scale(float s)

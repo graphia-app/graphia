@@ -233,6 +233,41 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
         _mouseMoving = false;
 }
 
+static QVector3D virtualTrackballVector(int width, int height, const QPoint& cursor)
+{
+    QVector3D p;
+
+    p.setX((2.0f * cursor.x() - width) / width);
+    p.setY((height - 2.0f * cursor.y()) / height);
+    float d = std::sqrt(p.x() * p.x() + p.y() * p.y());
+    p.setZ(std::cos((Constants::Pi() * 0.5f) * ((d < 1.0f) ? d : 1.0f)));
+    float a = 1.0f / p.length();
+    p = p * a;
+
+    return p;
+}
+
+QQuaternion GraphComponentInteractor::mouseMoveToRotation()
+{
+    QVector3D previous = virtualTrackballVector(_scene->width(), _scene->height(), _prevCursorPosition);
+    QVector3D current = virtualTrackballVector(_scene->width(), _scene->height(), _cursorPosition);
+
+    QVector3D axis = QVector3D::crossProduct(previous, current).normalized();
+
+    float dot = QVector3D::dotProduct(previous, current);
+    float value = dot / (previous.length() * current.length());
+    value = Utils::clamp(-1.0f, 1.0f, value);
+    float radians = std::acos(value);
+    float angle = -qRadiansToDegrees(radians);
+
+    auto m = _scene->camera()->viewMatrix();
+    m.setColumn(3, QVector4D(0.0f, 0.0f, 0.0f, 1.0f));
+
+    QQuaternion rotation = QQuaternion::fromAxisAndAngle(axis * m, angle);
+
+    return rotation;
+}
+
 void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
 {
     if(!_scene->transitioning())
@@ -274,87 +309,34 @@ void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
 
         emit userInteractionFinished();
     }
-    else if(!_nearClickNodeId.isNull())
+    else if(!_nearClickNodeId.isNull() && _rightMouseButtonHeld)
     {
         _selecting = false;
 
-        if(_rightMouseButtonHeld)
-        {
-            if(!_mouseMoving)
-                emit userInteractionStarted();
+        if(!_mouseMoving)
+            emit userInteractionStarted();
 
-            const QVector3D clickedNodePosition = _graphModel->nodePositions().getScaledAndSmoothed(_nearClickNodeId);
+        const QVector3D clickedNodePosition = _graphModel->nodePositions().getScaledAndSmoothed(_nearClickNodeId);
 
-            Plane translationPlane(clickedNodePosition, camera->viewVector().normalized());
+        Plane translationPlane(clickedNodePosition, camera->viewVector().normalized());
 
-            QVector3D prevPoint = translationPlane.rayIntersection(
-                        camera->rayForViewportCoordinates(_prevCursorPosition.x(), _prevCursorPosition.y()));
-            QVector3D curPoint = translationPlane.rayIntersection(
-                        camera->rayForViewportCoordinates(_cursorPosition.x(), _cursorPosition.y()));
-            QVector3D translation = prevPoint - curPoint;
+        QVector3D prevPoint = translationPlane.rayIntersection(
+                    camera->rayForViewportCoordinates(_prevCursorPosition.x(), _prevCursorPosition.y()));
+        QVector3D curPoint = translationPlane.rayIntersection(
+                    camera->rayForViewportCoordinates(_cursorPosition.x(), _cursorPosition.y()));
+        QVector3D translation = prevPoint - curPoint;
 
-            camera->translateWorld(translation);
-        }
-        else if(_leftMouseButtonHeld)
-        {
-            if(!_mouseMoving)
-                emit userInteractionStarted();
+        camera->translateWorld(translation);
+    }
+    else if(_leftMouseButtonHeld)
+    {
+        _selecting = false;
 
-            if(_scene->focusNodeId() != _nearClickNodeId)
-            {
-                const QVector3D clickedNodePosition = _graphModel->nodePositions().getScaledAndSmoothed(_nearClickNodeId);
-                const QVector3D rotationCentre = _scene->focusPosition();
-                float radius = clickedNodePosition.distanceToPoint(rotationCentre);
+        if(!_mouseMoving)
+            emit userInteractionStarted();
 
-                BoundingSphere boundingSphere(rotationCentre, radius);
-                QVector3D cursorPoint;
-                Ray cursorRay = camera->rayForViewportCoordinates(_cursorPosition.x(), _cursorPosition.y());
-
-                Plane divisionPlane(rotationCentre, cursorRay.dir().normalized());
-
-                std::vector<QVector3D> intersections = boundingSphere.rayIntersection(cursorRay);
-                if(intersections.size() > 0)
-                {
-                    if(divisionPlane.sideForPoint(clickedNodePosition) == Plane::Side::Front && intersections.size() > 1)
-                        cursorPoint = intersections[1];
-                    else
-                        cursorPoint = intersections[0];
-                }
-                else
-                {
-                    // When the ray misses the node completely we clamp the cursor point on the surface of the sphere
-                    QVector3D cameraToCentre = rotationCentre - camera->position();
-                    float cameraToCentreLengthSq = cameraToCentre.lengthSquared();
-                    float radiusSq = radius * radius;
-                    float cameraToClickedLengthSq = cameraToCentreLengthSq - radiusSq;
-
-                    // Form a right angled triangle from the camera, the circle tangent and a point which lies on the
-                    // camera to rotation centre vector
-                    float adjacentLength = (cameraToClickedLengthSq - radiusSq + cameraToCentreLengthSq) /
-                            (2.0f * cameraToCentre.length());
-                    float oppositeLength = sqrt(cameraToClickedLengthSq - (adjacentLength * adjacentLength));
-                    QVector3D corner = camera->position() + ((adjacentLength / cameraToCentre.length()) * cameraToCentre);
-
-                    Plane p(camera->position(), rotationCentre, cursorRay.origin());
-                    QVector3D oppositeDir = QVector3D::crossProduct(p.normal(), cameraToCentre).normalized();
-
-                    cursorPoint = corner + (oppositeLength * oppositeDir);
-                }
-
-                QVector3D clickedLine = clickedNodePosition - rotationCentre;
-                QVector3D cursorLine = cursorPoint - rotationCentre;
-
-                QVector3D axis = QVector3D::crossProduct(clickedLine, cursorLine).normalized();
-                float dot = QVector3D::dotProduct(clickedLine, cursorLine);
-                float value = dot / (clickedLine.length() * cursorLine.length());
-                value = Utils::clamp(-1.0f, 1.0f, value);
-                float radians = std::acos(value);
-                float angle = -qRadiansToDegrees(radians);
-
-                QQuaternion rotation = QQuaternion::fromAxisAndAngle(axis, angle);
-                camera->rotateAboutViewTarget(rotation);
-            }
-        }
+        QQuaternion rotation = mouseMoveToRotation();
+        camera->rotateAboutViewTarget(rotation);
     }
 
     _prevCursorPosition = _cursorPosition;
