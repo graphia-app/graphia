@@ -47,6 +47,7 @@ public:
 
     void moveFocusToNode(NodeId nodeId, Transition::Type transitionType);
     void moveFocusToCentreOfMass(Transition::Type transitionType);
+    void resetView(Transition::Type transitionType = Transition::Type::EaseInEaseOut);
     void selectFocusNodeClosestToCameraVector(Transition::Type transitionType = Transition::Type::InversePower);
     ComponentId focusComponentId() { return _focusComponentId; }
     NodeId focusNodeId();
@@ -60,12 +61,15 @@ public:
 
     bool transitioning();
     bool trackingCentreOfMass();
+    bool autoZooming();
+    bool viewIsReset() { return trackingCentreOfMass() && autoZooming(); }
 
     void setGraphModel(std::shared_ptr<GraphModel> graphModel);
     void setSelectionManager(std::shared_ptr<SelectionManager> selectionManager);
 
     Camera* camera();
     void zoom(float delta);
+    void zoomToDistance(float distance);
 
     void setSelectionRect(const QRect& rect) { _selectionRect = rect; }
     void clearSelectionRect() { _selectionRect = QRect(); }
@@ -120,6 +124,7 @@ private:
                               Transition::Type transitionType = Transition::Type::None);
     void centrePositionInViewport(const QVector3D& viewTarget, float cameraDistance = -1.0f,
                                   Transition::Type transitionType = Transition::Type::None);
+    float entireComponentZoomDistance();
 
     bool _positionalDataRequiresUpdate;
     void queuePositionalDataUpdate();
@@ -155,7 +160,10 @@ private:
     std::shared_ptr<ComponentArray<GraphComponentViewData>> _componentsViewData;
     GraphComponentViewData* focusComponentViewData() const;
 
+    bool _initialised;
     float _aspectRatio;
+    float _fovx;
+    float _fovy;
     Transition _panTransition;
 
     Sphere _sphere;

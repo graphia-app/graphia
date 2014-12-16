@@ -257,6 +257,16 @@ bool MainWidget::interacting() const
     return _graphWidget->interacting();
 }
 
+void MainWidget::resetView()
+{
+    _graphWidget->resetView();
+}
+
+bool MainWidget::viewIsReset() const
+{
+    _graphWidget->viewIsReset();
+}
+
 void MainWidget::deleteSelectedNodes()
 {
     if(_selectionManager->selectedNodes().empty())

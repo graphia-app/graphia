@@ -2,6 +2,7 @@
 
 GraphComponentViewData::GraphComponentViewData() :
     _zoomDistance(50.0f),
+    _autoZooming(true),
     _textureSizeDivisor(1),
     _initialised(false)
 {
@@ -13,6 +14,7 @@ GraphComponentViewData::GraphComponentViewData() :
 GraphComponentViewData::GraphComponentViewData(const GraphComponentViewData& other) :
     _camera(other._camera),
     _zoomDistance(other._zoomDistance),
+    _autoZooming(other._autoZooming),
     _focusNodeId(other._focusNodeId),
     _focusPosition(other._focusPosition),
     _textureSizeDivisor(other._textureSizeDivisor),

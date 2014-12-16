@@ -49,6 +49,16 @@ bool GraphWidget::interacting() const
     return _graphComponentInteractor->interacting();
 }
 
+void GraphWidget::resetView()
+{
+    _graphComponentScene->resetView();
+}
+
+bool GraphWidget::viewIsReset() const
+{
+    return _graphComponentScene->viewIsReset();
+}
+
 void GraphWidget::onGraphChanged(const Graph* graph)
 {
     int maxNumNodes = 0;

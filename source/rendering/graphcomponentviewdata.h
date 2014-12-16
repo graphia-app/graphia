@@ -12,6 +12,7 @@ public:
 
     Camera _camera;
     float _zoomDistance;
+    bool _autoZooming;
     NodeId _focusNodeId;
     QVector3D _focusPosition;
 

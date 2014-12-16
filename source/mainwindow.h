@@ -59,6 +59,7 @@ private:
     void configureSelectActions();
     void configureEditActions();
     void configureUndoActions();
+    void configureResetViewAction();
     void configureStatusBar();
     void configureUI();
 
@@ -76,6 +77,7 @@ private slots:
     void on_actionUndo_triggered();
     void on_actionRedo_triggered();
     void on_actionDelete_triggered();
+    void on_actionReset_View_triggered();
 
     void onLoadProgress(int percentage);
     void onLoadCompletion(int success);

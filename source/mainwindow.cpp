@@ -192,6 +192,13 @@ void MainWindow::configureUndoActions()
     }
 }
 
+void MainWindow::configureResetViewAction()
+{
+    MainWidget* widget;
+    if((widget = currentTabWidget()) != nullptr)
+        _ui->actionReset_View->setEnabled(!widget->busy() && !widget->viewIsReset());
+}
+
 void MainWindow::configureStatusBar()
 {
     MainWidget* widget;
@@ -242,6 +249,7 @@ void MainWindow::configureUI()
     configureSelectActions();
     configureEditActions();
     configureUndoActions();
+    configureResetViewAction();
     configureStatusBar();
 
     MainWidget* widget;
@@ -453,5 +461,14 @@ void MainWindow::onUserInteractionStarted()
 
 void MainWindow::onUserInteractionFinished()
 {
+    configureUI();
+}
+
+void MainWindow::on_actionReset_View_triggered()
+{
+    MainWidget* widget;
+    if((widget = currentTabWidget()) != nullptr)
+        widget->resetView();
+
     configureUI();
 }

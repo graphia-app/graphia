@@ -370,8 +370,8 @@ void GraphComponentInteractor::mouseDoubleClickEvent(QMouseEvent* mouseEvent)
                 if(_nearClickNodeId != _scene->focusNodeId())
                     _scene->moveFocusToNode(_nearClickNodeId, Transition::Type::EaseInEaseOut);
             }
-            else if(!_scene->trackingCentreOfMass())
-                _scene->moveFocusToCentreOfMass(Transition::Type::EaseInEaseOut);
+            else if(!_scene->viewIsReset())
+                _scene->resetView();
         }
     }
 }

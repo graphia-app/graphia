@@ -81,6 +81,9 @@ public:
     bool busy() const;
     bool interacting() const;
 
+    void resetView();
+    bool viewIsReset() const;
+
     void deleteSelectedNodes();
 
     bool initFromFile(const QString& filename);

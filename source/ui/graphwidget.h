@@ -27,6 +27,9 @@ public:
 
     bool interacting() const;
 
+    void resetView();
+    bool viewIsReset() const;
+
 private:
     std::shared_ptr<ComponentArray<GraphComponentViewData>> _graphComponentViewData;
 

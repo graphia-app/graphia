@@ -94,8 +94,15 @@
     <addaction name="actionSelect_None"/>
     <addaction name="actionInvert_Selection"/>
    </widget>
+   <widget class="QMenu" name="menu_View">
+    <property name="title">
+     <string>&amp;View</string>
+    </property>
+    <addaction name="actionReset_View"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menu_Edit"/>
+   <addaction name="menu_View"/>
    <addaction name="menuLayout"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -111,6 +118,7 @@
    <addaction name="actionDelete"/>
    <addaction name="actionUndo"/>
    <addaction name="actionRedo"/>
+   <addaction name="actionReset_View"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -226,6 +234,17 @@
    </property>
    <property name="shortcut">
     <string>Del</string>
+   </property>
+  </action>
+  <action name="actionReset_View">
+   <property name="icon">
+    <iconset theme="zoom-fit-best"/>
+   </property>
+   <property name="text">
+    <string>Reset View</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
  </widget>
