@@ -534,7 +534,7 @@ void GraphComponentScene::render2D()
 
         std::vector<GLfloat> data;
 
-        data.push_back(r.left());  data.push_back(r.bottom());
+        data.push_back(r.left()); data.push_back(r.bottom());
         data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
         data.push_back(r.right()); data.push_back(r.bottom());
         data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
@@ -821,12 +821,22 @@ void GraphComponentScene::centrePositionInViewport(const QVector3D& viewTarget, 
 float GraphComponentScene::entireComponentZoomDistance()
 {
     auto component = _graphModel->graph().componentById(_focusComponentId);
-    auto boundingSphere = BoundingSphere(focusPosition(),
-        NodePositions::positionsVectorScaled(_graphModel->nodePositions(), component->nodeIds()));
+
+    QVector3D centre = focusPosition();
+    float maxDistance = std::numeric_limits<float>::min();
+    for(auto nodeId : component->nodeIds())
+    {
+        QVector3D nodePosition = _graphModel->nodePositions().getScaledAndSmoothed(nodeId);
+        auto& nodeVisual = _graphModel->nodeVisuals().at(nodeId);
+        float distance = (centre - nodePosition).length() + nodeVisual._size;
+
+        if(distance > maxDistance)
+            maxDistance = distance;
+    }
 
     float minHalfFov = qDegreesToRadians(std::min(_fovx, _fovy) * 0.5f);
 
-    return boundingSphere.radius() / std::sin(minHalfFov);
+    return maxDistance / std::sin(minHalfFov);
 }
 
 void GraphComponentScene::moveFocusToNode(NodeId nodeId, Transition::Type transitionType)
