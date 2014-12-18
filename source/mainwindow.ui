@@ -119,6 +119,7 @@
    <addaction name="actionUndo"/>
    <addaction name="actionRedo"/>
    <addaction name="actionReset_View"/>
+   <addaction name="actionToggle_Modes"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -245,6 +246,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionToggle_Modes">
+   <property name="text">
+    <string>Toggle Modes</string>
    </property>
   </action>
  </widget>

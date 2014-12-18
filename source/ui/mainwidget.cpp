@@ -264,7 +264,12 @@ void MainWidget::resetView()
 
 bool MainWidget::viewIsReset() const
 {
-    _graphWidget->viewIsReset();
+    return _graphWidget->viewIsReset();
+}
+
+void MainWidget::toggleModes()
+{
+    _graphWidget->toggleModes();
 }
 
 void MainWidget::deleteSelectedNodes()

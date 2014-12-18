@@ -65,7 +65,9 @@ SOURCES += \
     source/utils/threadpool.cpp \
     source/utils/semaphore.cpp \
     source/layout/nodepositions.cpp \
-    source/maths/conicalfrustum.cpp
+    source/maths/conicalfrustum.cpp \
+    source/rendering/graphscene.cpp \
+    source/ui/graphinteractor.cpp
 
 HEADERS += \
     source/rendering/camera.h \
@@ -125,7 +127,9 @@ HEADERS += \
     source/layout/nodepositions.h \
     source/utils/circularbuffer.h \
     source/utils/fixedsizestack.h \
-    source/maths/conicalfrustum.h
+    source/maths/conicalfrustum.h \
+    source/rendering/graphscene.h \
+    source/ui/graphinteractor.h
 
 FORMS    += source/mainwindow.ui
 

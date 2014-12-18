@@ -13,12 +13,17 @@ class Scene : public QObject
 
 public:
     Scene(QObject* parent = nullptr) :
-        QObject(parent), _interactionEnabled(true)
+        QObject(parent),
+        _interactionEnabled(true),
+        _initialised(false)
     {}
     virtual ~Scene() {}
 
     void setContext(std::shared_ptr<QOpenGLContext> context) { _context = context; }
     const QOpenGLContext& context() const { return *_context; }
+
+    bool initialised() { return _initialised; }
+    void setInitialised() { _initialised = true; }
 
     void enableInteraction() { _interactionEnabled = true; }
     void disableInteraction() { _interactionEnabled = false; }
@@ -32,6 +37,7 @@ public:
 
 private:
     bool _interactionEnabled;
+    bool _initialised;
     std::shared_ptr<QOpenGLContext> _context;
 
 signals:

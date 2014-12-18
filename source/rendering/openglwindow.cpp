@@ -44,20 +44,26 @@ OpenGLWindow::OpenGLWindow(QScreen* screen)
     _context = std::make_shared<QOpenGLContext>();
     _context->setFormat(format);
     _context->create();
+
+    initialise();
+
+    QTimer* timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &OpenGLWindow::updateScene);
+    timer->start(16);
 }
 
 void OpenGLWindow::setScene(std::shared_ptr<Scene> scene)
 {
     _scene = scene;
-
-    // Initialise the scene
     _scene->setContext(_context);
-    initialise();
 
-    // This timer drives the scene updates
-    QTimer* timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &OpenGLWindow::updateScene);
-    timer->start(16);
+    if(!_scene->initialised())
+    {
+        _scene->initialise();
+        _scene->setInitialised();
+    }
+
+    resize();
 }
 
 void OpenGLWindow::enableInteraction()
@@ -102,15 +108,16 @@ void OpenGLWindow::initialise()
         }
     }
 
-    _scene->initialise();
-
     _time.start();
 }
 
 void OpenGLWindow::resize()
 {
-    _context->makeCurrent(this);
-    _scene->resize(width(), height());
+    if(width() > 0 && height() > 0)
+    {
+        _context->makeCurrent(this);
+        _scene->resize(width(), height());
+    }
 }
 
 void OpenGLWindow::render()

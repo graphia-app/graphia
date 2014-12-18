@@ -44,7 +44,6 @@ GraphComponentScene::GraphComponentScene(std::shared_ptr<ComponentArray<GraphCom
       _trackFocus(true),
       _funcs(nullptr),
       _componentsViewData(componentsViewData),
-      _initialised(false),
       _aspectRatio(4.0f / 3.0f),
       _fovx(0.0f),
       _fovy(0.0f),
@@ -363,7 +362,7 @@ void GraphComponentScene::updateVisualData()
 
 void GraphComponentScene::update(float t)
 {
-    if(_graphModel && _initialised)
+    if(_graphModel && initialised())
     {
         GraphComponentViewData* componentViewData = focusComponentViewData();
 
@@ -703,8 +702,6 @@ void GraphComponentScene::resize(int w, int h)
             setupCamera(componentViewData._camera, _fovy, _aspectRatio);
         }
     }
-
-    _initialised = true;
 }
 
 const float MINIMUM_CAMERA_DISTANCE = 2.5f;

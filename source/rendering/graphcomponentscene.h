@@ -160,7 +160,6 @@ private:
     std::shared_ptr<ComponentArray<GraphComponentViewData>> _componentsViewData;
     GraphComponentViewData* focusComponentViewData() const;
 
-    bool _initialised;
     float _aspectRatio;
     float _fovx;
     float _fovy;

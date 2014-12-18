@@ -8,6 +8,8 @@
 #include <memory>
 
 class GraphComponentViewData;
+class GraphScene;
+class GraphInteractor;
 class GraphComponentScene;
 class GraphComponentInteractor;
 class GraphModel;
@@ -30,11 +32,27 @@ public:
     void resetView();
     bool viewIsReset() const;
 
+    enum class Mode
+    {
+        Overview,
+        Component
+    };
+
+    Mode mode() const { return _mode; }
+    void toggleModes();
+    void switchToOverviewMode();
+    void switchToComponentMode(ComponentId componentId = ComponentId());
+
 private:
     std::shared_ptr<ComponentArray<GraphComponentViewData>> _graphComponentViewData;
 
+    std::shared_ptr<GraphScene> _graphScene;
+    std::shared_ptr<GraphInteractor> _graphInteractor;
+
     std::shared_ptr<GraphComponentScene> _graphComponentScene;
     std::shared_ptr<GraphComponentInteractor> _graphComponentInteractor;
+
+    Mode _mode;
     OpenGLWindow* _openGLWindow;
 
 private slots:

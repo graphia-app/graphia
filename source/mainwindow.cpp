@@ -472,3 +472,12 @@ void MainWindow::on_actionReset_View_triggered()
 
     configureUI();
 }
+
+void MainWindow::on_actionToggle_Modes_triggered()
+{
+    MainWidget* widget;
+    if((widget = currentTabWidget()) != nullptr)
+        widget->toggleModes();
+
+    configureUI();
+}

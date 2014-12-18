@@ -84,6 +84,8 @@ public:
     void resetView();
     bool viewIsReset() const;
 
+    void toggleModes();
+
     void deleteSelectedNodes();
 
     bool initFromFile(const QString& filename);
