@@ -4,7 +4,7 @@
 
 #include <QObject>
 
-GraphScene::GraphScene(std::shared_ptr<ComponentArray<GraphComponentViewData>> componentsViewData, QObject* parent)
+GraphScene::GraphScene(std::shared_ptr<ComponentArray<GraphComponentViewData>> /*componentsViewData*/, QObject* parent)
     : Scene(parent)
 {
     update(0.0f);
