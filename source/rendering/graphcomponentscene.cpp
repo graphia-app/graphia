@@ -44,7 +44,7 @@ GraphComponentScene::GraphComponentScene(std::shared_ptr<ComponentArray<GraphCom
       _trackFocus(true),
       _funcs(nullptr),
       _componentsViewData(componentsViewData),
-      _aspectRatio(4.0f / 3.0f),
+      _aspectRatio(0.0f),
       _fovx(0.0f),
       _fovy(0.0f),
       _numNodesInPositionData(0),
@@ -817,23 +817,28 @@ void GraphComponentScene::centrePositionInViewport(const QVector3D& viewTarget, 
 
 float GraphComponentScene::entireComponentZoomDistance()
 {
-    auto component = _graphModel->graph().componentById(_focusComponentId);
-
-    QVector3D centre = focusPosition();
-    float maxDistance = std::numeric_limits<float>::min();
-    for(auto nodeId : component->nodeIds())
-    {
-        QVector3D nodePosition = _graphModel->nodePositions().getScaledAndSmoothed(nodeId);
-        auto& nodeVisual = _graphModel->nodeVisuals().at(nodeId);
-        float distance = (centre - nodePosition).length() + nodeVisual._size;
-
-        if(distance > maxDistance)
-            maxDistance = distance;
-    }
-
     float minHalfFov = qDegreesToRadians(std::min(_fovx, _fovy) * 0.5f);
 
-    return maxDistance / std::sin(minHalfFov);
+    if(minHalfFov > 0.0f)
+    {
+        auto component = _graphModel->graph().componentById(_focusComponentId);
+
+        QVector3D centre = focusPosition();
+        float maxDistance = std::numeric_limits<float>::min();
+        for(auto nodeId : component->nodeIds())
+        {
+            QVector3D nodePosition = _graphModel->nodePositions().getScaledAndSmoothed(nodeId);
+            auto& nodeVisual = _graphModel->nodeVisuals().at(nodeId);
+            float distance = (centre - nodePosition).length() + nodeVisual._size;
+
+            if(distance > maxDistance)
+                maxDistance = distance;
+        }
+
+        return maxDistance / std::sin(minHalfFov);
+    }
+
+    return 0.0f;
 }
 
 void GraphComponentScene::moveFocusToNode(NodeId nodeId, Transition::Type transitionType)

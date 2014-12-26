@@ -151,14 +151,20 @@ private:
     inline void updatePerspectiveProjection()
     {
         _projectionMatrix.setToIdentity();
-        _projectionMatrix.perspective(_fieldOfView, _aspectRatio, _nearPlane, _farPlane);
+
+        if(_fieldOfView > 0.0f && _aspectRatio > 0.0f && _nearPlane < _farPlane)
+            _projectionMatrix.perspective(_fieldOfView, _aspectRatio, _nearPlane, _farPlane);
+
         _viewProjectionMatrixDirty = true;
     }
 
     inline void updateOrthogonalProjection()
     {
         _projectionMatrix.setToIdentity();
-        _projectionMatrix.ortho(_left, _right, _bottom, _top, _nearPlane, _farPlane);
+
+        if(_left < _right && _bottom < _top && _nearPlane < _farPlane)
+            _projectionMatrix.ortho(_left, _right, _bottom, _top, _nearPlane, _farPlane);
+
         _viewProjectionMatrixDirty = true;
     }
 
