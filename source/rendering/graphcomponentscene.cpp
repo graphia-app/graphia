@@ -42,6 +42,7 @@ GraphComponentScene::GraphComponentScene(std::shared_ptr<ComponentArray<GraphCom
       _positionalDataRequiresUpdate(false),
       _visualDataRequiresUpdate(false),
       _trackFocus(true),
+      _targetZoomDistance(0.0f),
       _funcs(nullptr),
       _componentsViewData(componentsViewData),
       _aspectRatio(0.0f),
@@ -704,7 +705,7 @@ void GraphComponentScene::resize(int w, int h)
     }
 }
 
-const float MINIMUM_CAMERA_DISTANCE = 2.5f;
+const float MINIMUM_ZOOM_DISTANCE = 2.5f;
 
 void GraphComponentScene::zoom(float direction)
 {
@@ -712,6 +713,11 @@ void GraphComponentScene::zoom(float direction)
         return;
 
     auto componentViewData = focusComponentViewData();
+
+    // Don't allow zooming out if autozooming
+    if(direction < 0.0f && componentViewData->_autoZooming)
+        return;
+
     auto focusNodeId = componentViewData->_focusNodeId;
     float size = 0.0f;
 
@@ -725,7 +731,17 @@ void GraphComponentScene::zoom(float direction)
     float delta = (_targetZoomDistance - size - INTERSECTION_AVOIDANCE_OFFSET) * ZOOM_STEP_FRACTION;
 
     _targetZoomDistance -= delta * direction;
-    _targetZoomDistance = std::max(_targetZoomDistance, MINIMUM_CAMERA_DISTANCE);
+    _targetZoomDistance = std::max(_targetZoomDistance, MINIMUM_ZOOM_DISTANCE);
+
+    float maximumZoomDistance = entireComponentZoomDistance();
+    if(_targetZoomDistance > maximumZoomDistance)
+    {
+        _targetZoomDistance = maximumZoomDistance;
+
+        // If we zoom out all the way then use autozoom mode
+        if(componentViewData->_focusNodeId.isNull())
+            componentViewData->_autoZooming = true;
+    }
 
     float startZoomDistance = componentViewData->_zoomDistance;
     emit userInteractionStarted();
@@ -743,7 +759,8 @@ void GraphComponentScene::zoom(float direction)
 
 void GraphComponentScene::zoomToDistance(float distance)
 {
-    distance = std::max(distance, MINIMUM_CAMERA_DISTANCE);
+    distance = std::max(distance, MINIMUM_ZOOM_DISTANCE);
+    distance = std::min(distance, entireComponentZoomDistance());
     focusComponentViewData()->_zoomDistance = _targetZoomDistance = distance;
 }
 
@@ -791,8 +808,13 @@ void GraphComponentScene::centrePositionInViewport(const QVector3D& viewTarget, 
     }
 
     // Enforce minimum camera distance
-    if(position.distanceToPoint(viewTarget) < MINIMUM_CAMERA_DISTANCE)
-        position = viewTarget - (camera()->viewVector().normalized() * MINIMUM_CAMERA_DISTANCE);
+    if(position.distanceToPoint(viewTarget) < MINIMUM_ZOOM_DISTANCE)
+        position = viewTarget - (camera()->viewVector().normalized() * MINIMUM_ZOOM_DISTANCE);
+
+    // Enforce maximum camera distance
+    float maximumZoomDistance = entireComponentZoomDistance();
+    if(position.distanceToPoint(viewTarget) > maximumZoomDistance)
+        position = viewTarget - (camera()->viewVector().normalized() * maximumZoomDistance);
 
     if(transitionType != Transition::Type::None)
     {
@@ -838,7 +860,7 @@ float GraphComponentScene::entireComponentZoomDistance()
         return maxDistance / std::sin(minHalfFov);
     }
 
-    return 0.0f;
+    return 1.0f;
 }
 
 void GraphComponentScene::moveFocusToNode(NodeId nodeId, Transition::Type transitionType)
