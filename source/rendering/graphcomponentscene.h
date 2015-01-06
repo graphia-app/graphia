@@ -98,7 +98,10 @@ private:
 
     QOpenGLShaderProgram _screenShader;
     QOpenGLShaderProgram _selectionShader;
-    void prepareScreenQuad();
+
+    QOpenGLVertexArrayObject _screenQuadVAO;
+    QOpenGLBuffer _screenQuadDataBuffer;
+    void prepareQuad();
 
     bool loadShaderProgram(QOpenGLShaderProgram& program, const QString& vertexShader, const QString& fragmentShader);
 
@@ -110,8 +113,6 @@ private:
     GLuint _depthTexture;
     GLuint _visualFBO;
     bool _FBOcomplete;
-
-    QOpenGLVertexArrayObject _screenQuadVAO;
 
     bool prepareRenderBuffers();
 

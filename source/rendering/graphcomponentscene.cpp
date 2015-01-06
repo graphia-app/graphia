@@ -96,7 +96,7 @@ void GraphComponentScene::initialise()
     prepareEdgeVAO();
     prepareSelectionMarkerVAO();
     prepareDebugLinesVAO();
-    prepareScreenQuad();
+    prepareQuad();
 
     // Enable depth testing to prevent artifacts
     glEnable(GL_DEPTH_TEST);
@@ -658,6 +658,34 @@ void GraphComponentScene::render()
 
     _funcs->glDisable(GL_DEPTH_TEST);
 
+    QMatrix4x4 m;
+    m.ortho(0, _width, 0, _height, -1.0f, 1.0f);
+
+    QRect r;
+    r.setLeft(0);
+    r.setRight(_width);
+    r.setTop(_height);
+    r.setBottom(0);
+
+    std::vector<GLfloat> data;
+
+    data.push_back(r.left());  data.push_back(r.bottom());
+    data.push_back(0);         data.push_back(0);
+    data.push_back(r.right()); data.push_back(r.bottom());
+    data.push_back(_width);    data.push_back(0);
+    data.push_back(r.right()); data.push_back(r.top());
+    data.push_back(_width);    data.push_back(_height);
+
+    data.push_back(r.right()); data.push_back(r.top());
+    data.push_back(_width);    data.push_back(_height);
+    data.push_back(r.left());  data.push_back(r.top());
+    data.push_back(0);         data.push_back(_height);
+    data.push_back(r.left());  data.push_back(r.bottom());
+    data.push_back(0);         data.push_back(0);
+
+    _screenQuadDataBuffer.bind();
+    _screenQuadDataBuffer.allocate(data.data(), static_cast<int>(data.size()) * sizeof(GLfloat));
+
     _screenQuadVAO.bind();
     _funcs->glActiveTexture(GL_TEXTURE0);
 
@@ -665,6 +693,7 @@ void GraphComponentScene::render()
     _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _colorTexture);
 
     _screenShader.bind();
+    _screenShader.setUniformValue("projectionMatrix", m);
     _funcs->glDrawArrays(GL_TRIANGLES, 0, 6);
     _screenShader.release();
 
@@ -672,10 +701,12 @@ void GraphComponentScene::render()
     _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture);
 
     _selectionShader.bind();
+    _selectionShader.setUniformValue("projectionMatrix", m);
     _funcs->glDrawArrays(GL_TRIANGLES, 0, 6);
     _selectionShader.release();
 
     _screenQuadVAO.release();
+    _screenQuadDataBuffer.release();
 
     _funcs->glEnable(GL_DEPTH_TEST);
 
@@ -1187,44 +1218,34 @@ void GraphComponentScene::prepareDebugLinesVAO()
     _debugLinesShader.release();
 }
 
-void GraphComponentScene::prepareScreenQuad()
+void GraphComponentScene::prepareQuad()
 {
-    GLfloat quadVerts[] =
-    {
-         1.0f, -1.0f,
-         1.0f,  1.0f,
-        -1.0f,  1.0f,
-
-        -1.0f,  1.0f,
-        -1.0f, -1.0f,
-         1.0f, -1.0f,
-    };
-    int quadVertsSize = sizeof(quadVerts);
-    QOpenGLBuffer quadBuffer;
-
     _screenQuadVAO.create();
     _screenQuadVAO.bind();
 
-    quadBuffer.create();
-    quadBuffer.bind();
-    quadBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    quadBuffer.allocate(quadVerts, quadVertsSize);
+    _screenQuadDataBuffer.create();
+    _screenQuadDataBuffer.bind();
+    _screenQuadDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
 
     loadShaderProgram(_screenShader, ":/rendering/shaders/screen.vert", ":/rendering/shaders/screen.frag");
     _screenShader.bind();
-    _screenShader.enableAttributeArray("vertexPosition");
-    _screenShader.setAttributeBuffer("vertexPosition", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
+    _screenShader.enableAttributeArray("position");
+    _screenShader.enableAttributeArray("texCoord");
+    _screenShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 4 * sizeof(GLfloat));
+    _screenShader.setAttributeBuffer("texCoord", GL_FLOAT, 2 * sizeof(GLfloat), 2, 4 * sizeof(GLfloat)); //FIXME GL_INT?
     _screenShader.setUniformValue("frameBufferTexture", 0);
     _screenShader.release();
 
     loadShaderProgram(_selectionShader, ":/rendering/shaders/screen.vert", ":/rendering/shaders/selection.frag");
     _selectionShader.bind();
-    _selectionShader.enableAttributeArray("vertexPosition");
-    _selectionShader.setAttributeBuffer("vertexPosition", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
+    _selectionShader.enableAttributeArray("position");
+    _selectionShader.enableAttributeArray("texCoord");
+    _selectionShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 4 * sizeof(GLfloat));
+    _selectionShader.setAttributeBuffer("texCoord", GL_FLOAT, 2 * sizeof(GLfloat), 2, 4 * sizeof(GLfloat)); //FIXME GL_INT?
     _selectionShader.setUniformValue("frameBufferTexture", 0);
     _selectionShader.release();
 
-    quadBuffer.release();
+    _screenQuadDataBuffer.release();
     _screenQuadVAO.release();
 }
 

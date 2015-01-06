@@ -1,5 +1,8 @@
 #version 330 core
 
+in vec2 vPosition;
+in vec2 vTexCoord;
+
 layout (location = 0) out vec4 fragColor;
 
 uniform sampler2DMS frameBufferTexture;
@@ -18,6 +21,6 @@ vec4 multisampledValue(ivec2 coord)
 
 void main()
 {
-    ivec2 coord = ivec2(gl_FragCoord.xy);
+    ivec2 coord = ivec2(vTexCoord);
     fragColor = multisampledValue(coord);
 }
