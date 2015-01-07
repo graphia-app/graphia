@@ -16,6 +16,7 @@ class OpenGLWindow : public QWindow
 
 public:
     explicit OpenGLWindow(QScreen* parent = nullptr);
+    ~OpenGLWindow();
 
     const QOpenGLContext& context() const { return *_context; }
 
@@ -57,6 +58,7 @@ private:
     bool _interactionEnabled;
     int _debugLevel;
     
+    QTimer* _timer;
     QTime _time;
 };
 

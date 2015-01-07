@@ -47,9 +47,14 @@ OpenGLWindow::OpenGLWindow(QScreen* screen)
 
     initialise();
 
-    QTimer* timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &OpenGLWindow::updateScene);
-    timer->start(16);
+    _timer = new QTimer(this);
+    connect(_timer, &QTimer::timeout, this, &OpenGLWindow::updateScene);
+    _timer->start(16);
+}
+
+OpenGLWindow::~OpenGLWindow()
+{
+    _timer->stop();
 }
 
 void OpenGLWindow::setScene(std::shared_ptr<Scene> scene)
