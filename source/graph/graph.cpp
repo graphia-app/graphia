@@ -23,7 +23,7 @@ Graph::Graph() :
 Graph::~Graph()
 {
     // Ensure no transactions are in progress
-    _mutex.lock();
+    std::unique_lock<std::mutex>(_mutex);
 
     // Let the GraphArrays know that we're going away
     for(auto nodeArray : _nodeArrayList)
