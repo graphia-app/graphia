@@ -14,6 +14,11 @@
 #include <thread>
 #include <vector>
 
+template<typename It> static It incrementIterator(It it, It last, const int n)
+{
+    return it + std::min(n, static_cast<const int>(std::distance(it, last)));
+}
+
 class ThreadPool
 {
 private:
@@ -79,14 +84,14 @@ public:
     {
         const int numElements = std::distance(first, last);
         const int numThreads = static_cast<int>(_threads.size());
-        const int threadElements = numElements / numThreads +
+        const int numElementsPerThread = numElements / numThreads +
                 (numElements % numThreads ? 1 : 0);
 
         std::vector<std::future<void>> futures;
 
-        for(It it = first; it < last; it += threadElements)
+        for(It it = first; it < last; it = incrementIterator(it, last, numElementsPerThread))
         {
-            It threadLast = std::min(it + threadElements, last);
+            It threadLast = incrementIterator(it, last, numElementsPerThread);
             futures.emplace_back(execute([it, threadLast, f]
             {
                 std::for_each(it, threadLast, f);
