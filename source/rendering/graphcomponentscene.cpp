@@ -332,8 +332,8 @@ void GraphComponentScene::updateVisualData()
         _nodeVisualData[i++] = nodeVisuals[nodeId]._color.blueF();
 
         QColor outlineColor = _selectionManager && _selectionManager->nodeIsSelected(nodeId) ?
-                    outlineColor = selectedOutLineColor :
-                outlineColor = deselectedOutLineColor;
+            outlineColor = selectedOutLineColor :
+            outlineColor = deselectedOutLineColor;
 
         _nodeVisualData[i++] = outlineColor.redF();
         _nodeVisualData[i++] = outlineColor.greenF();
