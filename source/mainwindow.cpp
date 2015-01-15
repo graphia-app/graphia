@@ -277,7 +277,7 @@ void MainWindow::on_actionOpen_triggered()
 
         MainWidget* widget = createNewTabWidget(filename);
 
-        _ui->tabs->insertTab(index, widget, QString(tr("%1 0%")).arg(widget->graphModel()->name()));
+        _ui->tabs->insertTab(index, widget, QString(tr("%1")).arg(widget->graphModel()->name()));
         _ui->tabs->setCurrentIndex(index);
         _ui->tabs->setUpdatesEnabled(true);
     }
@@ -437,13 +437,15 @@ void MainWindow::onCommandProgress(const Command*, int progress)
     configureUI();
 }
 
-void MainWindow::onCommandCompleted(const Command*, const QString& pastParticiple)
+void MainWindow::onCommandCompleted(const Command* command, const QString& pastParticiple)
 {
     TabData* tb;
     if((tb = tabDataForSignalSender()) != nullptr)
     {
         tb->commandProgress = 100;
-        tb->statusBarMessage = pastParticiple;
+
+        if(command != nullptr)
+            tb->statusBarMessage = pastParticiple;
     }
 
     configureUI();

@@ -22,18 +22,15 @@ void CommandManager::executeReal(std::shared_ptr<Command> command)
     lock.setPostUnlockAction([this, commandPtr] { _busy = false; emit commandCompleted(commandPtr, commandPtr->pastParticiple()); });
     command->setProgressFn([this, commandPtr](int progress) { emit commandProgress(commandPtr, progress); });
 
-    // It seems counter-intuitive that the lock is passed by const& here since in the
-    // asynchronous case at face value the lock is getting move'd to the argument of
-    // the lambda. In reality, the lock is getting moved to some member variable in a
-    // variadic template expansion of std::thread, which is then passed by reference
-    // to the lambda. Therefore, the thread still owns the lock and its destructor
-    // also invokes the lock's destructor, so it all works out.
-    auto executeCommand = [this](const unique_lock_with_side_effects<std::mutex>& /*lock*/, std::shared_ptr<Command> command)
+    auto executeCommand = [this](unique_lock_with_side_effects<std::mutex>&& lock, std::shared_ptr<Command> command)
     {
         nameCurrentThread(command->description());
 
         if(!command->execute())
+        {
+            lock.setPostUnlockAction([this] { _busy = false; emit commandCompleted(nullptr, QString()); });
             return;
+        }
 
         // There are commands on the stack ahead of us; throw them away
         while(canRedoNoLocking())
@@ -50,7 +47,7 @@ void CommandManager::executeReal(std::shared_ptr<Command> command)
         _thread = std::thread(executeCommand, std::move(lock), command);
     }
     else
-        executeCommand(lock, command);
+        executeCommand(std::move(lock), command);
 }
 
 void CommandManager::undo()
@@ -64,7 +61,7 @@ void CommandManager::undo()
     auto commandPtr = command.get();
     lock.setPostUnlockAction([this, commandPtr] { _busy = false; emit commandCompleted(commandPtr, QString()); });
 
-    auto undoCommand = [this, command](const unique_lock_with_side_effects<std::mutex>& /*lock*/)
+    auto undoCommand = [this, command](unique_lock_with_side_effects<std::mutex>&& /*lock*/)
     {
         nameCurrentThread("(u) " + command->description());
 
@@ -79,7 +76,7 @@ void CommandManager::undo()
         _thread = std::thread(undoCommand, std::move(lock));
     }
     else
-        undoCommand(lock);
+        undoCommand(std::move(lock));
 }
 
 void CommandManager::redo()
@@ -93,7 +90,7 @@ void CommandManager::redo()
     auto commandPtr = command.get();
     lock.setPostUnlockAction([this, commandPtr] { _busy = false; emit commandCompleted(commandPtr, commandPtr->pastParticiple()); });
 
-    auto redoCommand = [this, command](const unique_lock_with_side_effects<std::mutex>& /*lock*/)
+    auto redoCommand = [this, command](const unique_lock_with_side_effects<std::mutex>&& /*lock*/)
     {
         nameCurrentThread("(r) " + command->description());
 
@@ -107,7 +104,7 @@ void CommandManager::redo()
         _thread = std::thread(redoCommand, std::move(lock));
     }
     else
-        redoCommand(lock);
+        redoCommand(std::move(lock));
 }
 
 bool CommandManager::canUndo() const
