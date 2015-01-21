@@ -97,8 +97,6 @@ public:
     int width() const { return _width; }
     int height() const { return _height; }
 
-    void setTextureSizeDivisor(int divisor) { _textureSizeDivisor = divisor; }
-
     void updatePositionalData();
     void updateVisualData();
 
@@ -118,8 +116,6 @@ private:
     bool _autoZooming;
     NodeId _focusNodeId;
     QVector3D _focusPosition;
-
-    int _textureSizeDivisor;
 
     void prepareVertexBuffers();
     void prepareNodeVAO();

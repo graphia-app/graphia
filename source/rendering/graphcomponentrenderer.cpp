@@ -22,7 +22,6 @@
 #include <QObject>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions_3_3_Core>
-#include <QOpenGLFunctions_3_2_Core>
 
 #include <QKeyEvent>
 #include <QMouseEvent>
@@ -78,7 +77,6 @@ GraphComponentRenderer::GraphComponentRenderer()
       _visible(false),
       _zoomDistance(1.0f),
       _autoZooming(true),
-      _textureSizeDivisor(1),
       _width(0), _height(0),
       _colorTexture(0),
       _selectionTexture(0),
@@ -194,7 +192,6 @@ void GraphComponentRenderer::cloneCameraDataFrom(const GraphComponentRenderer& o
     _autoZooming = other._autoZooming;
     _focusNodeId = other._focusNodeId;
     _focusPosition = other._focusPosition;
-    _textureSizeDivisor = other._textureSizeDivisor;
 }
 
 void GraphComponentRenderer::updatePositionalDataIfRequired()

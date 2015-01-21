@@ -10,9 +10,6 @@
 
 class GraphWidget;
 class GraphComponentRenderer;
-class Quad;
-class Camera;
-class Octree;
 
 class QOpenGLFunctions_3_3_Core;
 
@@ -21,7 +18,7 @@ class GraphComponentScene : public Scene, public GraphComponentRenderersReferenc
     Q_OBJECT
 
 public:
-    GraphComponentScene(GraphWidget* graphWidget = nullptr);
+    GraphComponentScene(GraphWidget* graphWidget);
 
     static const int multisamples = 4;
 

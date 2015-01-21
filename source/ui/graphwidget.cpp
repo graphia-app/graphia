@@ -199,10 +199,6 @@ void GraphWidget::onGraphChanged(const Graph* graph)
             graphComponentRenderer->updatePositionalData();
             graphComponentRenderer->updateVisualData();
         });
-
-        auto component = graph->componentById(componentId);
-        int divisor = maxNumNodes / component->numNodes();
-        graphComponentRenderer->setTextureSizeDivisor(Utils::smallestPowerOf2GreaterThan(divisor));
     }
 }
 
