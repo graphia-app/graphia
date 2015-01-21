@@ -71,6 +71,7 @@ void MainWidget::onLoadCompletion(bool success)
 
     _selectionManager = std::make_shared<SelectionManager>(_graphModel->graph());
     _graphWidget = new GraphWidget(_graphModel, _commandManager, _selectionManager);
+    _graphWidget->initialise();
 
     connect(_graphWidget, &GraphWidget::userInteractionStarted, [this] { pauseLayout(true); });
     connect(_graphWidget, &GraphWidget::userInteractionStarted, this, &MainWidget::userInteractionStarted);

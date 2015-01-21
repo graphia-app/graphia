@@ -2,26 +2,22 @@
 #define GRAPHSCENE_H
 
 #include "scene.h"
-#include "graphcomponentviewdata.h"
-#include "../graph/grapharray.h"
+#include "graphcomponentrenderersreference.h"
 
-#include <QObject>
+class GraphWidget;
 
-#include <memory>
-
-class GraphScene : public Scene
+class GraphScene : public Scene, public GraphComponentRenderersReference
 {
     Q_OBJECT
 
 public:
-    GraphScene(std::shared_ptr<ComponentArray<GraphComponentViewData>> componentsViewData,
-               QObject* parent = nullptr);
+    GraphScene(GraphWidget* parent = nullptr);
 
     void initialise();
     void cleanup();
     void update(float t);
     void render();
-    void resize(int w, int h);
+    void resize(int width, int height);
 };
 
 #endif // GRAPHSCENE_H

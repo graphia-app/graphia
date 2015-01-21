@@ -20,15 +20,17 @@ public:
 
     const QOpenGLContext& context() const { return *_context; }
 
-    void setScene(std::shared_ptr<Scene> scene);
+    void setScene(Scene* scene);
     const Scene& scene() const { return *_scene; }
     void enableSceneUpdate() { _sceneUpdateEnabled = true; }
     void disableSceneUpdate() { _sceneUpdateEnabled = false; }
 
-    void setInteractor(std::shared_ptr<Interactor> interactor) { _interactor = interactor; }
+    void setInteractor(Interactor* interactor) { _interactor = interactor; }
     const Interactor& interactor() const { return *_interactor; }
     void enableInteraction();
     void disableInteraction();
+
+    void update();
     
 protected:
     virtual void initialise();
@@ -44,21 +46,18 @@ protected:
     virtual void wheelEvent(QWheelEvent* e);
 
 protected slots:
-    virtual void updateScene();
-
     void resizeEvent(QResizeEvent* e);
 
     void messageLogged(const QOpenGLDebugMessage &message);
 
 private:
     std::shared_ptr<QOpenGLContext> _context;
-    std::shared_ptr<Scene> _scene;
-    std::shared_ptr<Interactor> _interactor;
+    Scene* _scene;
+    Interactor* _interactor;
     bool _sceneUpdateEnabled;
     bool _interactionEnabled;
     int _debugLevel;
     
-    QTimer* _timer;
     QTime _time;
 };
 

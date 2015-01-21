@@ -1,8 +1,14 @@
 #include "componentmanager.h"
 #include "../graph/grapharray.h"
 
-ComponentManager::ComponentManager(Graph& graph)
+#include <QtGlobal>
+
+ComponentManager::ComponentManager(Graph& graph) :
+    _debug(false)
 {
+    if(qgetenv("COMPONENTS_DEBUG").toInt())
+        _debug = true;
+
     connect(&graph, &Graph::nodeAdded, this, &ComponentManager::onNodeAdded, Qt::DirectConnection);
     connect(&graph, &Graph::nodeWillBeRemoved, this, &ComponentManager::onNodeWillBeRemoved, Qt::DirectConnection);
     connect(&graph, &Graph::edgeAdded, this, &ComponentManager::onEdgeAdded, Qt::DirectConnection);

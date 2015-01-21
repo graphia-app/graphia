@@ -131,6 +131,16 @@ namespace std
 
 template<typename T> using ElementIdSet = std::unordered_set<T, std::hash<ElementId<T>>>;
 
+template<typename T> QDebug operator<<(QDebug d, const ElementIdSet<T>& idSet)
+{
+    d << "[";
+    for(auto id : idSet)
+        d << id;
+    d << "]";
+
+    return d;
+}
+
 class ComponentId : public ElementId<ComponentId>
 {
 #if __cplusplus >= 201103L

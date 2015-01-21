@@ -135,6 +135,7 @@ public:
             subTree->_centre = subTree->_boundingBox.centre();
             subTree->_nodePositions = &nodePositions;
 
+            //FIXME there is a NaN bug in here somewhere that causes an infinite loop
             const float cx = subTree->_centre.x();
             const float cy = subTree->_centre.y();
             const float cz = subTree->_centre.z();

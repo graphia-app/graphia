@@ -33,16 +33,12 @@ public:
     virtual void cleanup() {}
     virtual void update(float t) = 0;
     virtual void render() = 0;
-    virtual void resize(int w, int h) = 0;
+    virtual void resize(int width, int height) = 0;
 
 private:
     bool _interactionEnabled;
     bool _initialised;
     std::shared_ptr<QOpenGLContext> _context;
-
-signals:
-    void userInteractionStarted();
-    void userInteractionFinished();
 };
 
 #endif // SCENE_H

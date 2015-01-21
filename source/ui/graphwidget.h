@@ -1,13 +1,20 @@
 #ifndef GRAPHWIDGET_H
 #define GRAPHWIDGET_H
 
+#include "../rendering/graphcomponentrenderersreference.h"
+
 #include "../graph/grapharray.h"
 
-#include <QWidget>
+#include "../utils/deferredexecutor.h"
 
+#include <QWidget>
+#include <QTimer>
+
+#include <vector>
 #include <memory>
 
-class GraphComponentViewData;
+class GraphComponentRendererShared;
+class GraphComponentRenderer;
 class GraphScene;
 class GraphInteractor;
 class GraphComponentScene;
@@ -27,10 +34,16 @@ public:
                 std::shared_ptr<SelectionManager> selectionManager,
                 QWidget *parent = nullptr);
 
+    virtual ~GraphWidget();
+
+    void initialise();
+
     bool interacting() const;
 
     void resetView();
     bool viewIsReset() const;
+
+    std::shared_ptr<GraphModel> graphModel() { return _graphModel; }
 
     enum class Mode
     {
@@ -43,25 +56,43 @@ public:
     void switchToOverviewMode();
     void switchToComponentMode(ComponentId componentId = ComponentId());
 
+    void rendererStartedTransition();
+    void rendererFinishedTransition();
+
+    void executeOnRendererThread(DeferredExecutor::TaskFn task);
+
 private:
-    std::shared_ptr<ComponentArray<GraphComponentViewData>> _graphComponentViewData;
+    bool _initialised;
 
-    std::shared_ptr<GraphScene> _graphScene;
-    std::shared_ptr<GraphInteractor> _graphInteractor;
+    OpenGLWindow* _openGLWindow;
+    QTimer* _timer;
 
-    std::shared_ptr<GraphComponentScene> _graphComponentScene;
-    std::shared_ptr<GraphComponentInteractor> _graphComponentInteractor;
+    std::shared_ptr<GraphModel> _graphModel;
+    std::shared_ptr<SelectionManager> _selectionManager;
+
+    std::shared_ptr<GraphComponentRendererShared> _graphComponentRendererShared;
+    std::shared_ptr<ComponentArray<GraphComponentRendererManager>> _graphComponentRendererManagers;
+    int _numTransitioningRenderers;
+    DeferredExecutor _preUpdateExecutor;
+
+    GraphScene* _graphScene;
+    GraphInteractor* _graphInteractor;
+
+    GraphComponentScene* _graphComponentScene;
+    GraphComponentInteractor* _graphComponentInteractor;
 
     Mode _mode;
-    OpenGLWindow* _openGLWindow;
+    ComponentId _defaultComponentId;
 
 private slots:
     void onGraphChanged(const Graph* graph);
-    void onNodeWillBeRemoved(const Graph*, NodeId nodeId);
-    void onComponentAdded(const Graph*, ComponentId);
+    void onNodeWillBeRemoved(const Graph* graph, NodeId nodeId);
+    void onComponentAdded(const Graph*, ComponentId componentId);
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId);
-    void onComponentSplit(const Graph* graph, ComponentId oldComponentId, const ElementIdSet<ComponentId>& splitters);
-    void onComponentsWillMerge(const Graph* graph, const ElementIdSet<ComponentId>& mergers, ComponentId merged);
+
+    void onSelectionChanged(const SelectionManager*);
+
+    void onUpdate();
 
 public slots:
     void onCommandWillExecuteAsynchronously(const Command* command, const QString& verb);

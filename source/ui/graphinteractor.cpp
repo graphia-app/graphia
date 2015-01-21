@@ -5,11 +5,14 @@
 #include "../rendering/graphscene.h"
 #include "../graph/graphmodel.h"
 
+class GraphWidget;
+
 GraphInteractor::GraphInteractor(std::shared_ptr<GraphModel> /*graphModel*/,
-                                 std::shared_ptr<GraphScene> /*graphScene*/,
+                                 GraphScene* /*graphScene*/,
                                  CommandManager& /*commandManager*/,
-                                 std::shared_ptr<SelectionManager> /*selectionManager*/) :
-    Interactor()
+                                 std::shared_ptr<SelectionManager>, /*selectionManager*/
+                                 GraphWidget* parent) :
+    Interactor(parent)
 {
 }
 

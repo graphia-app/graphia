@@ -14,6 +14,8 @@
 
 OpenGLWindow::OpenGLWindow(QScreen* screen)
     : QWindow(screen),
+      _scene(nullptr),
+      _interactor(nullptr),
       _sceneUpdateEnabled(true),
       _interactionEnabled(true)
 {
@@ -46,18 +48,13 @@ OpenGLWindow::OpenGLWindow(QScreen* screen)
     _context->create();
 
     initialise();
-
-    _timer = new QTimer(this);
-    connect(_timer, &QTimer::timeout, this, &OpenGLWindow::updateScene);
-    _timer->start(16);
 }
 
 OpenGLWindow::~OpenGLWindow()
 {
-    _timer->stop();
 }
 
-void OpenGLWindow::setScene(std::shared_ptr<Scene> scene)
+void OpenGLWindow::setScene(Scene* scene)
 {
     _scene = scene;
     _scene->setContext(_context);
@@ -118,7 +115,7 @@ void OpenGLWindow::initialise()
 
 void OpenGLWindow::resize()
 {
-    if(width() > 0 && height() > 0)
+    if(_scene && width() > 0 && height() > 0)
     {
         _context->makeCurrent(this);
         _scene->resize(width(), height());
@@ -145,7 +142,7 @@ void OpenGLWindow::render()
     _context->swapBuffers(this);
 }
 
-void OpenGLWindow::updateScene()
+void OpenGLWindow::update()
 {
     if(_sceneUpdateEnabled)
     {
@@ -212,4 +209,3 @@ void OpenGLWindow::wheelEvent(QWheelEvent* e)
     if(_interactionEnabled)
         _interactor->wheelEvent(e);
 }
-

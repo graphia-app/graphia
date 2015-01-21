@@ -2,6 +2,7 @@
 #define GRAPHINTERACTOR_H
 
 #include "interactor.h"
+#include "graphwidget.h"
 
 #include <memory>
 
@@ -15,9 +16,10 @@ class GraphInteractor : public Interactor
     Q_OBJECT
 public:
     GraphInteractor(std::shared_ptr<GraphModel> graphModel,
-                    std::shared_ptr<GraphScene> graphScene,
+                    GraphScene* graphScene,
                     CommandManager& commandManager,
-                    std::shared_ptr<SelectionManager> selectionManager);
+                    std::shared_ptr<SelectionManager> selectionManager,
+                    GraphWidget* parent = nullptr);
 
 private:
     void mousePressEvent(QMouseEvent* e);

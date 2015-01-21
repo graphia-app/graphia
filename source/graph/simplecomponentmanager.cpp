@@ -84,11 +84,13 @@ void SimpleComponentManager::updateComponents(const Graph* graph)
                 if(componentIdsAffected.size() > 1)
                 {
                     // More than one old component IDs were observed so components have merged
+                    if(_debug) qDebug() << "componentsWillMerge" << componentIdsAffected << "->" << oldComponentId;
                     emit componentsWillMerge(graph, componentIdsAffected, oldComponentId);
                     componentIdsAffected.erase(oldComponentId);
 
                     for(ComponentId removedComponentId : componentIdsAffected)
                     {
+                        if(_debug) qDebug() << "componentWillBeRemoved" << removedComponentId;
                         emit componentWillBeRemoved(graph, removedComponentId);
                         removeGraphComponent(removedComponentId);
                     }
@@ -124,6 +126,7 @@ void SimpleComponentManager::updateComponents(const Graph* graph)
     for(ComponentId componentId : componentIdsToBeRemoved)
     {
         // Component removed
+        if(_debug) qDebug() << "componentWillBeRemoved" << componentId;
         emit componentWillBeRemoved(graph, componentId);
 
         removeGraphComponent(componentId);
@@ -141,18 +144,26 @@ void SimpleComponentManager::updateComponents(const Graph* graph)
     for(auto splitee : splitComponents)
     {
         ElementIdSet<ComponentId>& splitters = splitee.second;
-        emit componentSplit(graph, splitee.first, splitters);
 
         for(ComponentId splitter : splitters)
         {
             if(splitter != splitee.first)
+            {
+                if(_debug) qDebug() << "componentAdded" << splitter;
                 emit componentAdded(graph, splitter);
+            }
         }
+
+        if(_debug) qDebug() << "componentSplit" << splitee.first << "->" << splitters;
+        emit componentSplit(graph, splitee.first, splitters);
     }
 
     // Notify all the new components
     for(ComponentId newComponentId : newComponentIds)
+    {
+        if(_debug) qDebug() << "componentAdded" << newComponentId;
         emit componentAdded(graph, newComponentId);
+    }
 }
 
 ComponentId SimpleComponentManager::generateComponentId()

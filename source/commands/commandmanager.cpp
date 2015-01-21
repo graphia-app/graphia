@@ -3,8 +3,6 @@
 #include "../utils/namethread.h"
 #include "../utils/unique_lock_with_side_effects.h"
 
-#include <QDebug>
-
 #include <thread>
 
 CommandManager::CommandManager() :
@@ -90,7 +88,7 @@ void CommandManager::redo()
     auto commandPtr = command.get();
     lock.setPostUnlockAction([this, commandPtr] { _busy = false; emit commandCompleted(commandPtr, commandPtr->pastParticiple()); });
 
-    auto redoCommand = [this, command](const unique_lock_with_side_effects<std::mutex>&& /*lock*/)
+    auto redoCommand = [this, command](unique_lock_with_side_effects<std::mutex>&& /*lock*/)
     {
         nameCurrentThread("(r) " + command->description());
 

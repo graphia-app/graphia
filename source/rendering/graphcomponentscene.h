@@ -2,40 +2,26 @@
 #define GRAPHCOMPONENTSCENE_H
 
 #include "scene.h"
-#include "graphcomponentviewdata.h"
-#include "primitives/cylinder.h"
-#include "primitives/sphere.h"
-#include "transition.h"
-#include "../maths/boundingbox.h"
+#include "graphcomponentrenderersreference.h"
+
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
+#include "transition.h"
 
-#include <QOpenGLBuffer>
-#include <QOpenGLVertexArrayObject>
-#include <QOpenGLShaderProgram>
-#include <QMatrix4x4>
-#include <QVector3D>
-#include <QColor>
-#include <QRect>
-
-#include <memory>
-#include <vector>
-
+class GraphWidget;
+class GraphComponentRenderer;
 class Quad;
-class GraphModel;
-class SelectionManager;
 class Camera;
 class Octree;
 
 class QOpenGLFunctions_3_3_Core;
 
-class GraphComponentScene : public Scene
+class GraphComponentScene : public Scene, public GraphComponentRenderersReference
 {
     Q_OBJECT
 
 public:
-    GraphComponentScene(std::shared_ptr<ComponentArray<GraphComponentViewData>> componentsViewData,
-                        QObject* parent = nullptr);
+    GraphComponentScene(GraphWidget* graphWidget = nullptr);
 
     static const int multisamples = 4;
 
@@ -43,174 +29,31 @@ public:
     void cleanup();
     void update(float t);
     void render();
-    void resize(int w, int h);
+    void resize(int width, int height);
 
-    void moveFocusToNode(NodeId nodeId, Transition::Type transitionType);
-    void moveFocusToCentreOfMass(Transition::Type transitionType);
-    void resetView(Transition::Type transitionType = Transition::Type::EaseInEaseOut);
-    void selectFocusNodeClosestToCameraVector(Transition::Type transitionType = Transition::Type::InversePower);
-    ComponentId focusComponentId() { return _focusComponentId; }
-    NodeId focusNodeId();
-    QVector3D focusPosition();
-    void enableFocusTracking() { _trackFocus = true; }
-    void disableFocusTracking() { _trackFocus = false; }
-
-    void moveToNextComponent();
-    void moveToPreviousComponent();
-    void moveToComponent(ComponentId componentId);
-
-    bool transitioning();
-    bool trackingCentreOfMass();
-    bool autoZooming();
-    bool viewIsReset() { return trackingCentreOfMass() && autoZooming(); }
-
-    void setGraphModel(std::shared_ptr<GraphModel> graphModel);
-    void setSelectionManager(std::shared_ptr<SelectionManager> selectionManager);
-
-    Camera* camera();
-    void zoom(float delta);
-    void zoomToDistance(float distance);
-
-    void setSelectionRect(const QRect& rect) { _selectionRect = rect; }
-    void clearSelectionRect() { _selectionRect = QRect(); }
+    ComponentId componentId() { return _componentId; }
+    void setComponentId(ComponentId componentId);
 
     int width() const { return _width; }
     int height() const { return _height; }
 
+    void resetView(Transition::Type transitionType = Transition::Type::EaseInEaseOut);
+    bool viewIsReset();
+
+    GraphComponentRenderer* renderer();
+
 private:
-    struct DebugLine
-    {
-        DebugLine(const QVector3D& start, const QVector3D& end, const QColor& color) :
-            _start(start), _end(end), _color(color)
-        {}
-
-        QVector3D _start;
-        QVector3D _end;
-        QColor _color;
-    };
-
-    void prepareVertexBuffers();
-    void prepareNodeVAO();
-    void prepareEdgeVAO();
-    void prepareSelectionMarkerVAO();
-    void prepareDebugLinesVAO();
-    void prepareTexture();
-
-    QOpenGLShaderProgram _screenShader;
-    QOpenGLShaderProgram _selectionShader;
-
-    QOpenGLVertexArrayObject _screenQuadVAO;
-    QOpenGLBuffer _screenQuadDataBuffer;
-    void prepareQuad();
-
-    bool loadShaderProgram(QOpenGLShaderProgram& program, const QString& vertexShader, const QString& fragmentShader);
+    GraphWidget* _graphWidget;
 
     int _width;
     int _height;
 
-    GLuint _colorTexture;
-    GLuint _selectionTexture;
-    GLuint _depthTexture;
-    GLuint _visualFBO;
-    bool _FBOcomplete;
-
-    bool prepareRenderBuffers();
-
-    void renderNodes();
-    void renderEdges();
-    void renderDebugLines();
-    void render2D();
-
-    void centreNodeInViewport(NodeId nodeId, float cameraDistance = -1.0f,
-                              Transition::Type transitionType = Transition::Type::None);
-    void centrePositionInViewport(const QVector3D& viewTarget, float cameraDistance = -1.0f,
-                                  Transition::Type transitionType = Transition::Type::None);
-    float entireComponentZoomDistance();
-
-    bool _positionalDataRequiresUpdate;
-    void queuePositionalDataUpdate();
-    void updatePositionalData();
-
-    bool _visualDataRequiresUpdate;
-    void queueVisualDataUpdate();
-    void updateVisualData();
+    ComponentId _componentId;
 
 private slots:
-    void onGraphChanged(const Graph* graph);
-    void onNodeWillBeRemoved(const Graph*, NodeId nodeId);
-    void onComponentAdded(const Graph*, ComponentId);
-    void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId);
     void onComponentSplit(const Graph* graph, ComponentId oldComponentId, const ElementIdSet<ComponentId>& splitters);
-    void onComponentsWillMerge(const Graph* graph, const ElementIdSet<ComponentId>& mergers, ComponentId merged);
-
-public slots:
-    void onSelectionChanged(const SelectionManager*);
-
-private:
-    bool _trackFocus;
-    float _targetZoomDistance;
-    Transition _zoomTransition;
-    QRect _selectionRect;
-
-    QOpenGLFunctions_3_3_Core* _funcs;
-
-    std::vector<ComponentId> _componentIdsCache;
-    void refreshComponentIdsCache();
-
-    ComponentId _focusComponentId;
-    std::shared_ptr<ComponentArray<GraphComponentViewData>> _componentsViewData;
-    GraphComponentViewData* focusComponentViewData() const;
-
-    float _aspectRatio;
-    float _fovx;
-    float _fovy;
-    Transition _panTransition;
-
-    Sphere _sphere;
-    Cylinder _cylinder;
-
-    std::shared_ptr<GraphModel> _graphModel;
-    std::shared_ptr<SelectionManager> _selectionManager;
-
-    QMatrix4x4 _modelViewMatrix;
-    QMatrix4x4 _projectionMatrix;
-
-    QOpenGLShaderProgram _nodesShader;
-    std::vector<GLfloat> _nodePositionData;
-    int _numNodesInPositionData;
-    QOpenGLBuffer _nodePositionBuffer;
-
-    QOpenGLShaderProgram _edgesShader;
-    std::vector<GLfloat> _edgePositionData;
-    int _numEdgesInPositionData;
-    QOpenGLBuffer _edgePositionBuffer;
-
-    std::vector<GLfloat> _nodeVisualData;
-    QOpenGLBuffer _nodeVisualBuffer;
-
-    std::vector<GLfloat> _edgeVisualData;
-    QOpenGLBuffer _edgeVisualBuffer;
-
-    QOpenGLShaderProgram _selectionMarkerShader;
-    QOpenGLBuffer _selectionMarkerDataBuffer;
-    QOpenGLVertexArrayObject _selectionMarkerDataVAO;
-
-    std::vector<DebugLine> _debugLines;
-    std::mutex _debugLinesMutex;
-    std::vector<GLfloat> _debugLinesData;
-    QOpenGLBuffer _debugLinesDataBuffer;
-    QOpenGLVertexArrayObject _debugLinesDataVAO;
-    QOpenGLShaderProgram _debugLinesShader;
-
-public:
-    void addDebugLine(const QVector3D& start, const QVector3D& end, const QColor color = QColor(Qt::GlobalColor::white))
-    {
-        DebugLine debugLine(start, end, color);
-        _debugLines.push_back(debugLine);
-    }
-    void addDebugBoundingBox(const BoundingBox3D& boundingBox, const QColor color = QColor(Qt::GlobalColor::white));
-    void clearDebugLines() { _debugLines.clear(); }
-    void submitDebugLines();
+    void onComponentsWillMerge(const Graph* graph, const ElementIdSet<ComponentId>& mergers, ComponentId newComponentId);
+    void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId);
 };
 
 #endif // GRAPHCOMPONENTSCENE_H

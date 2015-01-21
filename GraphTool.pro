@@ -59,7 +59,6 @@ SOURCES += \
     source/commands/commandmanager.cpp \
     source/commands/command.cpp \
     source/commands/deleteselectednodescommand.cpp \
-    source/rendering/graphcomponentviewdata.cpp \
     source/layout/barneshuttree.cpp \
     source/layout/forcedirectedlayout.cpp \
     source/utils/threadpool.cpp \
@@ -67,7 +66,9 @@ SOURCES += \
     source/layout/nodepositions.cpp \
     source/maths/conicalfrustum.cpp \
     source/rendering/graphscene.cpp \
-    source/ui/graphinteractor.cpp
+    source/ui/graphinteractor.cpp \
+    source/rendering/graphcomponentrenderer.cpp \
+    source/utils/deferredexecutor.cpp
 
 HEADERS += \
     source/rendering/camera.h \
@@ -118,7 +119,6 @@ HEADERS += \
     source/commands/commandmanager.h \
     source/commands/command.h \
     source/commands/deleteselectednodescommand.h \
-    source/rendering/graphcomponentviewdata.h \
     source/layout/octree.h \
     source/layout/barneshuttree.h \
     source/layout/forcedirectedlayout.h \
@@ -129,7 +129,10 @@ HEADERS += \
     source/utils/fixedsizestack.h \
     source/maths/conicalfrustum.h \
     source/rendering/graphscene.h \
-    source/ui/graphinteractor.h
+    source/ui/graphinteractor.h \
+    source/rendering/graphcomponentrenderer.h \
+    source/rendering/graphcomponentrenderersreference.h \
+    source/utils/deferredexecutor.h
 
 FORMS    += source/mainwindow.ui
 
