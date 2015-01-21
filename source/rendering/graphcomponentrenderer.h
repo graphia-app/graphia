@@ -68,7 +68,7 @@ public:
     void cleanup();
     void update(float t);
     void render(int x, int y);
-    void resize(int w, int h);
+    void resize(int width, int height);
 
     void moveFocusToNode(NodeId nodeId, Transition::Type transitionType);
     void moveFocusToCentreOfMass(Transition::Type transitionType);
