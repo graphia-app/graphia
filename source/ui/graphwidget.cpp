@@ -140,12 +140,12 @@ void GraphWidget::switchToComponentMode(ComponentId componentId)
 {
     executeOnRendererThread([this, componentId]
     {
-        _openGLWindow->setScene(_graphComponentScene);
-
         if(componentId.isNull())
             _graphComponentScene->setComponentId(_defaultComponentId);
         else
             _graphComponentScene->setComponentId(componentId);
+
+        _openGLWindow->setScene(_graphComponentScene);
 
         _openGLWindow->setInteractor(_graphComponentInteractor);
         _mode = GraphWidget::Mode::Component;
