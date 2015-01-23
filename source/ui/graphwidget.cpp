@@ -203,7 +203,7 @@ void GraphWidget::onGraphChanged(const Graph* graph)
 
             graphComponentRenderer->updatePositionalData();
             graphComponentRenderer->updateVisualData();
-        }, "GraphWidget::onGraphChanged (moveFocusToCentreOfMass)");
+        }, QString("GraphWidget::onGraphChanged (moveFocusToCentreOfMass) component %1").arg((int)componentId));
     }
 }
 
@@ -240,7 +240,7 @@ void GraphWidget::onComponentWillBeRemoved(const Graph*, ComponentId componentId
     executeOnRendererThread([graphComponentRenderer]
     {
         graphComponentRenderer->cleanup();
-    }, "GraphWidget::onComponentWillBeRemoved (cleanup)");
+    }, QString("GraphWidget::onComponentWillBeRemoved (cleanup) component %1").arg((int)componentId));
 }
 
 void GraphWidget::onSelectionChanged(const SelectionManager*)
@@ -251,7 +251,7 @@ void GraphWidget::onSelectionChanged(const SelectionManager*)
         executeOnRendererThread([graphComponentRenderer]
         {
             graphComponentRenderer->updateVisualData();
-        }, "GraphWidget::onSelectionChanged");
+        }, QString("GraphWidget::onSelectionChanged component %1").arg((int)componentId));
     }
 }
 
