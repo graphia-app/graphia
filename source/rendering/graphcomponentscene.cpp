@@ -6,6 +6,9 @@
 
 #include "../ui/graphwidget.h"
 
+#include <QOpenGLContext>
+#include <QOpenGLFunctions_3_3_Core>
+
 GraphComponentScene::GraphComponentScene(GraphWidget* graphWidget)
     : Scene(graphWidget),
       _graphWidget(graphWidget),
@@ -14,16 +17,15 @@ GraphComponentScene::GraphComponentScene(GraphWidget* graphWidget)
     connect(&graphWidget->graphModel()->graph(), &Graph::componentSplit, this, &GraphComponentScene::onComponentSplit, Qt::DirectConnection);
     connect(&graphWidget->graphModel()->graph(), &Graph::componentsWillMerge, this, &GraphComponentScene::onComponentsWillMerge, Qt::DirectConnection);
     connect(&graphWidget->graphModel()->graph(), &Graph::componentWillBeRemoved, this, &GraphComponentScene::onComponentWillBeRemoved, Qt::DirectConnection);
+    connect(&graphWidget->graphModel()->graph(), &Graph::graphChanged, this, &GraphComponentScene::onGraphChanged, Qt::DirectConnection);
 }
 
 void GraphComponentScene::initialise()
 {
-}
-
-void GraphComponentScene::cleanup()
-{
-    if(renderer() != nullptr)
-        renderer()->cleanup();
+    _funcs = context().versionFunctions<QOpenGLFunctions_3_3_Core>();
+    if(!_funcs)
+        qFatal("Could not obtain required OpenGL context version");
+    _funcs->initializeOpenGLFunctions();
 }
 
 void GraphComponentScene::update(float t)
@@ -34,6 +36,11 @@ void GraphComponentScene::update(float t)
 
 void GraphComponentScene::render()
 {
+    _funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    _funcs->glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+    _funcs->glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
     if(renderer() != nullptr)
         renderer()->render(0, 0);
 }
@@ -44,18 +51,33 @@ void GraphComponentScene::resize(int width, int height)
     _height = height;
 
     if(renderer() != nullptr)
+    {
+        renderer()->resizeViewport(width, height);
         renderer()->resize(width, height);
+    }
+}
+
+void GraphComponentScene::onShow()
+{
+    resolveVisibility();
+}
+
+void GraphComponentScene::resolveVisibility()
+{
+    if(visible())
+    {
+        for(auto& rendererManager : rendererManagers())
+        {
+            auto renderer = rendererManager.get();
+            renderer->setVisible(renderer->componentId() == _componentId);
+        }
+    }
 }
 
 void GraphComponentScene::setComponentId(ComponentId componentId)
 {
     _componentId = componentId;
-
-    for(auto& rendererManager : rendererManagers())
-    {
-        auto renderer = rendererManager.get();
-        renderer->setVisibility(renderer->componentId() == _componentId);
-    }
+    resolveVisibility();
 }
 
 void GraphComponentScene::resetView(Transition::Type transitionType)
@@ -119,29 +141,50 @@ void GraphComponentScene::onComponentSplit(const Graph* graph, ComponentId oldCo
             // Clone the current camera data to the new component
             newGraphComponentRenderer->cloneCameraDataFrom(*oldGraphComponentRenderer);
             setComponentId(newComponentId);
-        });
+        }, "GraphComponentScene::onComponentSplit (clone camera data, set component ID)");
     }
 }
 
-void GraphComponentScene::onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>&,
+void GraphComponentScene::onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers,
                                                 ComponentId newComponentId)
 {
-    auto newGraphComponentRenderer = GraphComponentRenderersReference::renderer(newComponentId);
-    auto oldGraphComponentRenderer = GraphComponentRenderersReference::renderer(_componentId);
-    _graphWidget->executeOnRendererThread([this, newComponentId,
-                                          newGraphComponentRenderer,
-                                          oldGraphComponentRenderer]
+    for(auto merger : mergers)
     {
-        newGraphComponentRenderer->cloneCameraDataFrom(*oldGraphComponentRenderer);
-        setComponentId(newComponentId);
-    });
+        if(merger == _componentId)
+        {
+            auto newGraphComponentRenderer = GraphComponentRenderersReference::renderer(newComponentId);
+            auto oldGraphComponentRenderer = GraphComponentRenderersReference::renderer(_componentId);
+            _graphWidget->executeOnRendererThread([this, newComponentId,
+                                                  newGraphComponentRenderer,
+                                                  oldGraphComponentRenderer]
+            {
+                newGraphComponentRenderer->cloneCameraDataFrom(*oldGraphComponentRenderer);
+                setComponentId(newComponentId);
+            }, "GraphComponentScene::onComponentsWillMerge (clone camera data, set component ID)");
+            break;
+        }
+    }
 }
 
 void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
 {
-    _graphWidget->executeOnRendererThread([this, componentId]
+    if(visible())
     {
-        if(componentId == _componentId)
-            _graphWidget->switchToOverviewMode();
-    });
+        _graphWidget->executeOnRendererThread([this, componentId]
+        {
+            if(componentId == _componentId)
+                _graphWidget->switchToOverviewMode();
+        }, "GraphComponentScene::onComponentWillBeRemoved (switch to overview mode)");
+    }
+}
+
+void GraphComponentScene::onGraphChanged(const Graph*)
+{
+    if(visible())
+    {
+        _graphWidget->executeOnRendererThread([this]
+        {
+            resize(_width, _height);
+        }, "GraphComponentScene::onGraphChanged (resize)");
+    }
 }

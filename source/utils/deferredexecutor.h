@@ -5,20 +5,28 @@
 #include <queue>
 #include <functional>
 
+#include <QString>
+
 class DeferredExecutor
 {
 public:
     using TaskFn = std::function<void()>;
 
 private:
+    struct Task
+    {
+        TaskFn _function;
+        QString _description;
+    };
+
     std::mutex _mutex;
-    std::queue<TaskFn> _tasks;
+    std::queue<Task> _tasks;
 
 public:
     DeferredExecutor() {}
     virtual ~DeferredExecutor();
 
-    void enqueue(TaskFn task);
+    void enqueue(TaskFn function, const QString& description = QString());
 
     void execute();
     void cancel();

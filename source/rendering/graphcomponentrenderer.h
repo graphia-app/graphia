@@ -63,12 +63,13 @@ public:
                     std::shared_ptr<GraphComponentRendererShared> shared);
 
     bool visible() { return _visible; }
-    void setVisibility(bool visible) { _visible = visible; }
+    void setVisible(bool visible) { _visible = visible; }
 
     void cleanup();
     void update(float t);
     void render(int x, int y);
     void resize(int width, int height);
+    void resizeViewport(int width, int height);
 
     void moveFocusToNode(NodeId nodeId, Transition::Type transitionType);
     void moveFocusToCentreOfMass(Transition::Type transitionType);
@@ -130,6 +131,8 @@ private:
 
     int _width;
     int _height;
+    int _viewportWidth;
+    int _viewportHeight;
 
     GLuint _colorTexture;
     GLuint _selectionTexture;

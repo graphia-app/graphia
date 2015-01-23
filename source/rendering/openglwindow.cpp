@@ -56,6 +56,12 @@ OpenGLWindow::~OpenGLWindow()
 
 void OpenGLWindow::setScene(Scene* scene)
 {
+    if(_scene != nullptr)
+    {
+        _scene->setVisible(false);
+        _scene->onHide();
+    }
+
     _scene = scene;
     _scene->setContext(_context);
 
@@ -64,6 +70,9 @@ void OpenGLWindow::setScene(Scene* scene)
         _scene->initialise();
         _scene->setInitialised();
     }
+
+    _scene->setVisible(true);
+    _scene->onShow();
 
     resize();
 }

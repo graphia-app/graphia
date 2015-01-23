@@ -36,7 +36,8 @@ GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
     _graphScene(new GraphScene(this)),
     _graphInteractor(new GraphInteractor(graphModel, _graphScene, commandManager, selectionManager, this)),
     _graphComponentScene(new GraphComponentScene(this)),
-    _graphComponentInteractor(new GraphComponentInteractor(graphModel, _graphComponentScene, commandManager, selectionManager, this))
+    _graphComponentInteractor(new GraphComponentInteractor(graphModel, _graphComponentScene, commandManager, selectionManager, this)),
+    _mode(GraphWidget::Mode::Component)
 {
     _graphScene->setGraphComponentRendererManagers(_graphComponentRendererManagers);
     _graphComponentScene->setGraphComponentRendererManagers(_graphComponentRendererManagers);
@@ -96,12 +97,16 @@ bool GraphWidget::interacting() const
 
 void GraphWidget::resetView()
 {
-    _graphComponentScene->resetView();
+    if(_mode == GraphWidget::Mode::Component)
+        _graphComponentScene->resetView();
 }
 
 bool GraphWidget::viewIsReset() const
 {
-    return _graphComponentScene->viewIsReset();
+    if(_mode == GraphWidget::Mode::Component)
+        return _graphComponentScene->viewIsReset();
+
+    return true;
 }
 
 void GraphWidget::toggleModes()
@@ -128,7 +133,7 @@ void GraphWidget::switchToOverviewMode()
         _openGLWindow->setScene(_graphScene);
         _openGLWindow->setInteractor(_graphInteractor);
         _mode = GraphWidget::Mode::Overview;
-    });
+    }, "GraphWidget::switchToOverviewMode");
 }
 
 void GraphWidget::switchToComponentMode(ComponentId componentId)
@@ -144,7 +149,7 @@ void GraphWidget::switchToComponentMode(ComponentId componentId)
 
         _openGLWindow->setInteractor(_graphComponentInteractor);
         _mode = GraphWidget::Mode::Component;
-    });
+    }, "GraphWidget::switchToComponentMode");
 }
 
 void GraphWidget::rendererStartedTransition()
@@ -167,9 +172,9 @@ void GraphWidget::rendererFinishedTransition()
         emit userInteractionFinished();
 }
 
-void GraphWidget::executeOnRendererThread(DeferredExecutor::TaskFn task)
+void GraphWidget::executeOnRendererThread(DeferredExecutor::TaskFn task, const QString& description)
 {
-    _preUpdateExecutor.enqueue(task);
+    _preUpdateExecutor.enqueue(task, description);
 }
 
 void GraphWidget::onGraphChanged(const Graph* graph)
@@ -198,7 +203,7 @@ void GraphWidget::onGraphChanged(const Graph* graph)
 
             graphComponentRenderer->updatePositionalData();
             graphComponentRenderer->updateVisualData();
-        });
+        }, "GraphWidget::onGraphChanged (moveFocusToCentreOfMass)");
     }
 }
 
@@ -213,7 +218,7 @@ void GraphWidget::onNodeWillBeRemoved(const Graph* graph, NodeId nodeId)
             executeOnRendererThread([graphComponentRenderer]
             {
                 graphComponentRenderer->moveFocusToCentreOfMass(Transition::Type::EaseInEaseOut);
-            });
+            }, "GraphWidget::onNodeWillBeRemoved");
         }
     }
 }
@@ -226,8 +231,7 @@ void GraphWidget::onComponentAdded(const Graph*, ComponentId componentId)
         graphComponentRenderer->initialise(_graphModel, componentId, *this,
                                            _selectionManager,
                                            _graphComponentRendererShared);
-        graphComponentRenderer->resize(_openGLWindow->width(), _openGLWindow->height());
-    });
+    }, "GraphWidget::onComponentAdded");
 }
 
 void GraphWidget::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
@@ -236,7 +240,7 @@ void GraphWidget::onComponentWillBeRemoved(const Graph*, ComponentId componentId
     executeOnRendererThread([graphComponentRenderer]
     {
         graphComponentRenderer->cleanup();
-    });
+    }, "GraphWidget::onComponentWillBeRemoved (cleanup)");
 }
 
 void GraphWidget::onSelectionChanged(const SelectionManager*)
@@ -247,7 +251,7 @@ void GraphWidget::onSelectionChanged(const SelectionManager*)
         executeOnRendererThread([graphComponentRenderer]
         {
             graphComponentRenderer->updateVisualData();
-        });
+        }, "GraphWidget::onSelectionChanged");
     }
 }
 

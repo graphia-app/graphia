@@ -9,6 +9,7 @@
 
 #include <QWidget>
 #include <QTimer>
+#include <QString>
 
 #include <vector>
 #include <memory>
@@ -59,7 +60,7 @@ public:
     void rendererStartedTransition();
     void rendererFinishedTransition();
 
-    void executeOnRendererThread(DeferredExecutor::TaskFn task);
+    void executeOnRendererThread(DeferredExecutor::TaskFn task, const QString& description = QString());
 
 private:
     bool _initialised;

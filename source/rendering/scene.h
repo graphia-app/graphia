@@ -11,11 +11,14 @@ class Scene : public QObject
 {
     Q_OBJECT
 
+    friend class OpenGLWindow;
+
 public:
     Scene(QObject* parent = nullptr) :
         QObject(parent),
         _interactionEnabled(true),
-        _initialised(false)
+        _initialised(false),
+        _visible(false)
     {}
     virtual ~Scene() {}
 
@@ -35,10 +38,19 @@ public:
     virtual void render() = 0;
     virtual void resize(int width, int height) = 0;
 
+    virtual void onShow() {}
+    virtual void onHide() {}
+
+protected:
+    bool visible() { return _visible; }
+
 private:
     bool _interactionEnabled;
     bool _initialised;
+    bool _visible;
     std::shared_ptr<QOpenGLContext> _context;
+
+    void setVisible(bool visible) { _visible = visible; }
 };
 
 #endif // SCENE_H

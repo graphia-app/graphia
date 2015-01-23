@@ -568,6 +568,7 @@ void GraphComponentRenderer::render(int x, int y)
     _funcs->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     _funcs->glEnable(GL_BLEND);
 
+    _funcs->glViewport(0, 0, _width, _height);
     _funcs->glBindFramebuffer(GL_FRAMEBUFFER, _visualFBO);
 
     // Color buffer
@@ -590,21 +591,18 @@ void GraphComponentRenderer::render(int x, int y)
 
     renderDebugLines();
 
+    _funcs->glViewport(0, 0, _viewportWidth, _viewportHeight);
     _funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    _funcs->glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
-    _funcs->glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
     _funcs->glDisable(GL_DEPTH_TEST);
 
     QMatrix4x4 m;
-    m.ortho(0, _width, 0, _height, -1.0f, 1.0f);
+    m.ortho(0, _viewportWidth, 0, _viewportHeight, -1.0f, 1.0f);
 
     QRect r;
     r.setLeft(x);
-    r.setRight(_width);
-    r.setTop(_height - y);
-    r.setBottom(0);
+    r.setRight(r.left() + _width);
+    r.setTop(_viewportHeight - y);
+    r.setBottom(r.top() - _height);
 
     std::vector<GLfloat> data;
 
@@ -660,8 +658,6 @@ void GraphComponentRenderer::resize(int width, int height)
 
         _FBOcomplete = prepareRenderBuffers();
 
-        glViewport(0, 0, width, height);
-
         _aspectRatio = static_cast<float>(width) / static_cast<float>(height);
         _fovy = 60.0f;
         _fovx = _fovy * _aspectRatio;
@@ -669,6 +665,12 @@ void GraphComponentRenderer::resize(int width, int height)
         if(_graphModel)
             setupCamera(_camera, _fovy, _aspectRatio);
     }
+}
+
+void GraphComponentRenderer::resizeViewport(int width, int height)
+{
+    _viewportWidth = width;
+    _viewportHeight = height;
 }
 
 const float MINIMUM_ZOOM_DISTANCE = 2.5f;
