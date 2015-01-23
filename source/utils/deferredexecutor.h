@@ -2,7 +2,7 @@
 #define DEFERREDEXECUTOR_H
 
 #include <mutex>
-#include <queue>
+#include <deque>
 #include <functional>
 
 #include <QString>
@@ -20,7 +20,7 @@ private:
     };
 
     std::mutex _mutex;
-    std::queue<Task> _tasks;
+    std::deque<Task> _tasks;
 
 public:
     DeferredExecutor() {}
