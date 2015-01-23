@@ -665,6 +665,11 @@ void GraphComponentRenderer::resize(int width, int height)
         if(_graphModel)
             setupCamera(_camera, _fovy, _aspectRatio);
     }
+    else
+    {
+        qWarning() << "GraphComponentRenderer::resize(" << width << "," << height <<
+                    ") failed _initialised:" << _initialised;
+    }
 }
 
 void GraphComponentRenderer::resizeViewport(int width, int height)
