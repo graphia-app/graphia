@@ -83,7 +83,6 @@ GraphComponentRenderer::GraphComponentRenderer()
       _depthTexture(0),
       _visualFBO(0),
       _FBOcomplete(false),
-      _positionalDataRequiresUpdate(false),
       _visualDataRequiresUpdate(false),
       _trackFocus(true),
       _targetZoomDistance(0.0f),
@@ -175,11 +174,6 @@ void GraphComponentRenderer::cleanup()
     _initialised = false;
 }
 
-void GraphComponentRenderer::updatePositionalData()
-{
-    _positionalDataRequiresUpdate = true;
-}
-
 void GraphComponentRenderer::updateVisualData()
 {
     _visualDataRequiresUpdate = true;
@@ -194,18 +188,16 @@ void GraphComponentRenderer::cloneCameraDataFrom(const GraphComponentRenderer& o
     _focusPosition = other._focusPosition;
 }
 
-void GraphComponentRenderer::updatePositionalDataIfRequired()
+void GraphComponentRenderer::updatePositionalData()
 {
     std::unique_lock<std::recursive_mutex> lock(_graphModel->nodePositions().mutex());
-
-    if(!_positionalDataRequiresUpdate && !_graphModel->nodePositions().updated())
-        return;
-
-    _positionalDataRequiresUpdate = false;
 
     auto component = _graphModel->graph().componentById(_componentId);
 
     NodePositions& nodePositions = _graphModel->nodePositions();
+
+    _numNodesInPositionData = component->numNodes();
+    _numEdgesInPositionData = component->numEdges();
 
     _nodePositionData.resize(_numNodesInPositionData * 3);
     _edgePositionData.resize(_numEdgesInPositionData * 6);
@@ -306,10 +298,6 @@ void GraphComponentRenderer::update(float t)
     {
         auto component = _graphModel->graph().componentById(_componentId);
 
-        _numNodesInPositionData = component->numNodes();
-        _numEdgesInPositionData = component->numEdges();
-
-        updatePositionalDataIfRequired();
         updateVisualDataIfRequired();
 
         _zoomTransition.update(t);

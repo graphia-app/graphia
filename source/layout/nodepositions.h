@@ -42,7 +42,7 @@ public:
 
     void update(const ReadOnlyGraph& graph, std::function<QVector3D(NodeId, const QVector3D&)> f,
                 float scale = 1.0f, int smoothing = 1);
-    bool updated();
+    void executeIfUpdated(std::function<void()> f);
 
     static QVector3D centreOfMass(const NodePositions& nodePositions,
                                   const std::vector<NodeId>& nodeIds);

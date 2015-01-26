@@ -61,6 +61,7 @@ public:
     void rendererFinishedTransition();
 
     void executeOnRendererThread(DeferredExecutor::TaskFn task, const QString& description = QString());
+    void updateNodePositions();
 
 private:
     bool _initialised;

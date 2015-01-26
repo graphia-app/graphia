@@ -35,6 +35,8 @@ void GraphScene::initialise()
 
 void GraphScene::update(float t)
 {
+    _graphWidget->updateNodePositions();
+
     for(auto componentId : _graphModel->graph().componentIds())
     {
         auto renderer = GraphComponentRenderersReference::renderer(componentId);

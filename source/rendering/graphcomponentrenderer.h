@@ -153,9 +153,6 @@ private:
                                   Transition::Type transitionType = Transition::Type::None);
     float entireComponentZoomDistance();
 
-    bool _positionalDataRequiresUpdate;
-    void updatePositionalDataIfRequired();
-
     bool _visualDataRequiresUpdate;
     void updateVisualDataIfRequired();
 

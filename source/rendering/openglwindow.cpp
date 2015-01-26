@@ -19,10 +19,8 @@ OpenGLWindow::OpenGLWindow(QScreen* screen)
       _sceneUpdateEnabled(true),
       _interactionEnabled(true)
 {
-    // Tell Qt we will use OpenGL for this window
     setSurfaceType(OpenGLSurface);
 
-    // Request a full screen button (if available)
 #if !defined(Q_OS_WIN)
     setFlags(flags() | Qt::WindowFullscreenButtonHint);
 #endif
@@ -38,11 +36,9 @@ OpenGLWindow::OpenGLWindow(QScreen* screen)
     if (qgetenv("OPENGL_DEBUG").toInt())
         format.setOption(QSurfaceFormat::DebugContext);
 
-    // Create the native window
     setFormat(format);
     create();
 
-    // Create an OpenGL context
     _context = std::make_shared<QOpenGLContext>();
     _context->setFormat(format);
     _context->create();
@@ -91,7 +87,7 @@ void OpenGLWindow::disableInteraction()
 
 void OpenGLWindow::initialise()
 {
-    _context->makeCurrent(this);
+    makeContextCurrent();
 
     _debugLevel = qgetenv("OPENGL_DEBUG").toInt();
     if(_debugLevel != 0)
@@ -126,7 +122,7 @@ void OpenGLWindow::resize()
 {
     if(_scene && width() > 0 && height() > 0)
     {
-        _context->makeCurrent(this);
+        makeContextCurrent();
         _scene->resize(width(), height());
     }
 }
@@ -136,23 +132,17 @@ void OpenGLWindow::render()
     if(!isExposed())
         return;
 
-    // Make the context current
-    bool contextIsCurrent = _context->makeCurrent(this);
-    Q_ASSERT(contextIsCurrent);
-    Q_UNUSED(contextIsCurrent);
-
     // FIXME: make configurable
     glEnable(GL_MULTISAMPLE);
 
-    // Do the rendering (to the back buffer)
     _scene->render();
-
-    // Swap front/back buffers
     _context->swapBuffers(this);
 }
 
 void OpenGLWindow::update()
 {
+    makeContextCurrent();
+
     if(_sceneUpdateEnabled)
     {
         float time = _time.elapsed() / 1000.0f;
@@ -175,6 +165,13 @@ void OpenGLWindow::messageLogged(const QOpenGLDebugMessage &message)
         return;
 
     qDebug() << "OpenGL:" << message.message();
+}
+
+void OpenGLWindow::makeContextCurrent()
+{
+    bool contextIsCurrent = _context->makeCurrent(this);
+    Q_ASSERT(contextIsCurrent);
+    Q_UNUSED(contextIsCurrent);
 }
 
 void OpenGLWindow::keyPressEvent(QKeyEvent* e)

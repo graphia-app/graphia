@@ -51,6 +51,8 @@ protected slots:
     void messageLogged(const QOpenGLDebugMessage &message);
 
 private:
+    void makeContextCurrent();
+
     std::shared_ptr<QOpenGLContext> _context;
     Scene* _scene;
     Interactor* _interactor;

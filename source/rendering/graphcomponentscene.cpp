@@ -30,6 +30,8 @@ void GraphComponentScene::initialise()
 
 void GraphComponentScene::update(float t)
 {
+    _graphWidget->updateNodePositions();
+
     if(renderer() != nullptr)
         renderer()->update(t);
 }

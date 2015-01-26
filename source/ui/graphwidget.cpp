@@ -177,6 +177,20 @@ void GraphWidget::executeOnRendererThread(DeferredExecutor::TaskFn task, const Q
     _preUpdateExecutor.enqueue(task, description);
 }
 
+void GraphWidget::updateNodePositions()
+{
+    _graphModel->nodePositions().executeIfUpdated([this]
+    {
+        for(auto componentId : _graphModel->graph().componentIds())
+        {
+            auto graphComponentRenderer = _graphComponentRendererManagers->at(componentId).get();
+
+            if(graphComponentRenderer->visible())
+                graphComponentRenderer->updatePositionalData();
+        }
+    });
+}
+
 void GraphWidget::onGraphChanged(const Graph* graph)
 {
     // Find default (largest) component
@@ -201,7 +215,6 @@ void GraphWidget::onGraphChanged(const Graph* graph)
             if(_initialised && graphComponentRenderer->focusNodeId().isNull())
                 graphComponentRenderer->moveFocusToCentreOfMass(Transition::Type::EaseInEaseOut);
 
-            graphComponentRenderer->updatePositionalData();
             graphComponentRenderer->updateVisualData();
         }, QString("GraphWidget::onGraphChanged (moveFocusToCentreOfMass) component %1").arg((int)componentId));
     }
