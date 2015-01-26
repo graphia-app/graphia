@@ -179,42 +179,42 @@ void OpenGLWindow::messageLogged(const QOpenGLDebugMessage &message)
 
 void OpenGLWindow::keyPressEvent(QKeyEvent* e)
 {
-    if(_interactionEnabled)
+    if(_interactor && _interactionEnabled)
         _interactor->keyPressEvent(e);
 }
 
 void OpenGLWindow::keyReleaseEvent(QKeyEvent* e)
 {
-    if(_interactionEnabled)
+    if(_interactor && _interactionEnabled)
         _interactor->keyReleaseEvent(e);
 }
 
 void OpenGLWindow::mousePressEvent(QMouseEvent* e)
 {
-    if(_interactionEnabled)
+    if(_interactor && _interactionEnabled)
         _interactor->mousePressEvent(e);
 }
 
 void OpenGLWindow::mouseReleaseEvent(QMouseEvent* e)
 {
-    if(_interactionEnabled)
+    if(_interactor && _interactionEnabled)
         _interactor->mouseReleaseEvent(e);
 }
 
 void OpenGLWindow::mouseMoveEvent(QMouseEvent* e)
 {
-    if(_interactionEnabled)
+    if(_interactor && _interactionEnabled)
         _interactor->mouseMoveEvent(e);
 }
 
 void OpenGLWindow::mouseDoubleClickEvent(QMouseEvent* e)
 {
-    if(_interactionEnabled)
+    if(_interactor && _interactionEnabled)
         _interactor->mouseDoubleClickEvent(e);
 }
 
 void OpenGLWindow::wheelEvent(QWheelEvent* e)
 {
-    if(_interactionEnabled)
+    if(_interactor && _interactionEnabled)
         _interactor->wheelEvent(e);
 }
