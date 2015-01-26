@@ -185,7 +185,7 @@ void GraphComponentRenderer::cloneCameraDataFrom(const GraphComponentRenderer& o
     _zoomDistance = other._zoomDistance;
     _autoZooming = other._autoZooming;
     _focusNodeId = other._focusNodeId;
-    _focusPosition = other._focusPosition;
+    _centreOfMass = other._centreOfMass;
 }
 
 void GraphComponentRenderer::updatePositionalData()
@@ -195,6 +195,9 @@ void GraphComponentRenderer::updatePositionalData()
     auto component = _graphModel->graph().componentById(_componentId);
 
     NodePositions& nodePositions = _graphModel->nodePositions();
+
+    if(_focusNodeId.isNull())
+        _centreOfMass = NodePositions::centreOfMassScaled(nodePositions, component->nodeIds());
 
     _numNodesInPositionData = component->numNodes();
     _numEdgesInPositionData = component->numEdges();
@@ -296,8 +299,6 @@ void GraphComponentRenderer::update(float t)
 {
     if(_graphModel)
     {
-        auto component = _graphModel->graph().componentById(_componentId);
-
         updateVisualDataIfRequired();
 
         _zoomTransition.update(t);
@@ -308,13 +309,10 @@ void GraphComponentRenderer::update(float t)
         {
             if(_focusNodeId.isNull())
             {
-                _focusPosition = NodePositions::centreOfMassScaled(_graphModel->nodePositions(),
-                                                                   component->nodeIds());
-
                 if(_zoomTransition.finished() && _autoZooming)
                     zoomToDistance(entireComponentZoomDistance());
 
-                centrePositionInViewport(_focusPosition, _zoomDistance);
+                centrePositionInViewport(_centreOfMass, _zoomDistance);
             }
             else
                 centreNodeInViewport(_focusNodeId, _zoomDistance);
@@ -858,18 +856,14 @@ void GraphComponentRenderer::moveFocusToCentreOfMass(Transition::Type transition
     if(_componentId.isNull())
         return;
 
-    auto component = _graphModel->graph().componentById(_componentId);
-
     _focusNodeId.setToNull();
-    _focusPosition = NodePositions::centreOfMassScaled(_graphModel->nodePositions(),
-                                                       component->nodeIds());
 
     if(_autoZooming)
         zoomToDistance(entireComponentZoomDistance());
     else
         _zoomDistance = -1.0f;
 
-    centrePositionInViewport(_focusPosition, _zoomDistance, transitionType);
+    centrePositionInViewport(_centreOfMass, _zoomDistance, transitionType);
     updateVisualData();
 }
 
@@ -893,7 +887,7 @@ NodeId GraphComponentRenderer::focusNodeId()
 QVector3D GraphComponentRenderer::focusPosition()
 {
     if(_focusNodeId.isNull())
-        return _focusPosition;
+        return _centreOfMass;
     else
         return _graphModel->nodePositions().getScaledAndSmoothed(_focusNodeId);
 }

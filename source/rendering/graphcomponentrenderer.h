@@ -116,7 +116,7 @@ private:
     float _zoomDistance;
     bool _autoZooming;
     NodeId _focusNodeId;
-    QVector3D _focusPosition;
+    QVector3D _centreOfMass;
 
     void prepareVertexBuffers();
     void prepareNodeVAO();
