@@ -5,6 +5,8 @@
 #include "../graph/grapharray.h"
 #include "nodepositions.h"
 
+#include "../utils/performancecounter.h"
+
 #include <QVector2D>
 #include <QVector3D>
 #include <QObject>
@@ -129,15 +131,9 @@ protected:
     std::condition_variable _waitForResume;
 
 public:
-    LayoutThread(bool repeating = false) :
-        _started(false), _pause(false), _paused(true), _stop(false), _repeating(repeating), _iteration(0)
-    {}
+    LayoutThread(bool repeating = false);
 
-    LayoutThread(std::shared_ptr<Layout> layout, bool repeating = false) :
-        _started(false), _pause(false), _paused(true), _stop(false), _repeating(repeating), _iteration(0)
-    {
-        addLayout(layout);
-    }
+    LayoutThread(std::shared_ptr<Layout> layout, bool repeating = false);
 
     virtual ~LayoutThread()
     {
@@ -163,6 +159,8 @@ private:
     bool allLayoutsShouldPause();
     void uncancel();
     void run();
+
+    PerformanceCounter _performanceCounter;
 
 signals:
     void executed();

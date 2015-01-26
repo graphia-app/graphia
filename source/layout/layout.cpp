@@ -1,6 +1,25 @@
 #include "layout.h"
 #include "../utils/namethread.h"
 
+LayoutThread::LayoutThread(bool repeating) :
+    _started(false),_pause(false), _paused(true), _stop(false),
+    _repeating(repeating), _iteration(0),
+    _performanceCounter(std::chrono::seconds(3))
+{
+    bool debug = qgetenv("LAYOUT_DEBUG").toInt();
+    _performanceCounter.setReportFn([debug](float ticksPerSecond)
+    {
+        if(debug)
+            qDebug() << "Layout" << ticksPerSecond << "ips";
+    });
+}
+
+LayoutThread::LayoutThread(std::shared_ptr<Layout> layout, bool repeating) :
+    LayoutThread(repeating)
+{
+    addLayout(layout);
+}
+
 void LayoutThread::addLayout(std::shared_ptr<Layout> layout)
 {
     std::unique_lock<std::mutex> lock(_mutex);
@@ -123,6 +142,8 @@ void LayoutThread::run()
             layout->execute(_iteration);
         }
         _iteration++;
+
+        _performanceCounter.tick();
 
         emit executed();
 
