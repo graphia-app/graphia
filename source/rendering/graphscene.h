@@ -28,6 +28,12 @@ public:
     void onShow();
     void onHide();
 
+    const ComponentArray<QRect>& componentLayout() { return _componentLayout; }
+
+    void zoom(float delta);
+    int renderSizeDivisor() { return _renderSizeDivisor; }
+    void setRenderSizeDivisor(int divisor);
+
 private:
     GraphWidget* _graphWidget;
     std::shared_ptr<GraphModel> _graphModel;
@@ -35,6 +41,7 @@ private:
     int _width;
     int _height;
 
+    int _renderSizeDivisor;
     ComponentArray<int> _renderSizeDivisors;
 
     QOpenGLFunctions_3_3_Core* _funcs;

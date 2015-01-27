@@ -19,6 +19,7 @@ GraphScene::GraphScene(GraphWidget* graphWidget)
       _graphWidget(graphWidget),
       _graphModel(graphWidget->graphModel()),
       _width(0), _height(0),
+      _renderSizeDivisor(1),
       _renderSizeDivisors(graphWidget->graphModel()->graph()),
       _componentLayout(graphWidget->graphModel()->graph())
 {
@@ -76,15 +77,15 @@ void GraphScene::resize(int width, int height)
     {
         auto renderer = GraphComponentRenderersReference::renderer(componentId);
         int divisor =_renderSizeDivisors[componentId];
-        int dividedSize = size / divisor;
+        int dividedSize = size / (divisor * _renderSizeDivisor);
 
         const int MINIMUM_SIZE = 64;
         if(size > MINIMUM_SIZE)
         {
-            while(dividedSize < MINIMUM_SIZE)
+            while(dividedSize < MINIMUM_SIZE && divisor > 1)
             {
                 divisor /= 2;
-                dividedSize = size / divisor;
+                dividedSize = size / (divisor * _renderSizeDivisor);
             }
         }
 
@@ -109,6 +110,24 @@ void GraphScene::onHide()
         auto renderer = GraphComponentRenderersReference::renderer(componentId);
         renderer->setVisible(false);
     }
+}
+
+void GraphScene::zoom(float delta)
+{
+    if(delta > 0.0f)
+        setRenderSizeDivisor(_renderSizeDivisor / 2);
+    else
+        setRenderSizeDivisor(_renderSizeDivisor * 2);
+}
+
+void GraphScene::setRenderSizeDivisor(int divisor)
+{
+    if(divisor < 1)
+        divisor = 1;
+
+    _renderSizeDivisor = divisor;
+
+    resize(_width, _height);
 }
 
 void GraphScene::layoutComponents()
