@@ -9,15 +9,18 @@
 
 #include <QOpenGLContext>
 #include <QOpenGLFunctions_3_3_Core>
+#include <QPoint>
 
 #include <stack>
+#include <vector>
 
 GraphScene::GraphScene(GraphWidget* graphWidget)
     : Scene(graphWidget),
       _graphWidget(graphWidget),
       _graphModel(graphWidget->graphModel()),
       _width(0), _height(0),
-      _renderSizeDivisors(graphWidget->graphModel()->graph())
+      _renderSizeDivisors(graphWidget->graphModel()->graph()),
+      _componentLayout(graphWidget->graphModel()->graph())
 {
     connect(&_graphModel->graph(), &Graph::componentSplit, this, &GraphScene::onComponentSplit, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphScene::onGraphChanged, Qt::DirectConnection);
@@ -43,13 +46,7 @@ void GraphScene::update(float t)
         renderer->update(t);
     }
 
-    auto& graph = _graphModel->graph();
-    _sortedComponentIds = _graphModel->graph().componentIds();
-    std::sort(_sortedComponentIds.begin(), _sortedComponentIds.end(),
-              [&graph](const ComponentId& a, const ComponentId& b)
-    {
-        return graph.componentById(a)->numNodes() > graph.componentById(b)->numNodes();
-    });
+    layoutComponents();
 }
 
 void GraphScene::render()
@@ -59,38 +56,12 @@ void GraphScene::render()
     _funcs->glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
     _funcs->glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-    struct Coord
+    for(auto componentId : _graphModel->graph().componentIds())
     {
-        Coord(int x, int y) { _x = x; _y = y; }
-        Coord(const Coord& other) { _x = other._x; _y = other._y; }
-        int _x, _y;
-    };
-    std::stack<Coord> coords;
-
-    coords.emplace(0, 0);
-    for(auto componentId : _sortedComponentIds)
-    {
-        Coord c = coords.top();
-        coords.pop();
-
         auto renderer = GraphComponentRenderersReference::renderer(componentId);
+        auto rect = _componentLayout[componentId];
 
-        if(c._y + renderer->height() > _height)
-        {
-            c = coords.top();
-            coords.pop();
-        }
-
-        renderer->render(c._x, c._y);
-
-        Coord right(c._x + renderer->width(), c._y);
-        Coord down(c._x, c._y + renderer->height());
-
-        if(coords.empty() || right._x < coords.top()._x)
-            coords.emplace(right);
-
-        if(down._y < _height)
-            coords.emplace(down);
+        renderer->render(rect.x(), rect.y(), rect.width(), rect.height());
     }
 }
 
@@ -137,6 +108,45 @@ void GraphScene::onHide()
     {
         auto renderer = GraphComponentRenderersReference::renderer(componentId);
         renderer->setVisible(false);
+    }
+}
+
+void GraphScene::layoutComponents()
+{
+    auto& graph = _graphModel->graph();
+    auto sortedComponentIds = _graphModel->graph().componentIds();
+    std::sort(sortedComponentIds.begin(), sortedComponentIds.end(),
+              [&graph](const ComponentId& a, const ComponentId& b)
+    {
+        return graph.componentById(a)->numNodes() > graph.componentById(b)->numNodes();
+    });
+
+    std::stack<QPoint> coords;
+
+    coords.emplace(0, 0);
+    for(auto componentId : sortedComponentIds)
+    {
+        auto coord = coords.top();
+        coords.pop();
+
+        auto renderer = GraphComponentRenderersReference::renderer(componentId);
+
+        if(coord.y() + renderer->height() > _height)
+        {
+            coord = coords.top();
+            coords.pop();
+        }
+
+        _componentLayout[componentId] = QRect(coord.x(), coord.y(), renderer->width(), renderer->height());
+
+        QPoint right(coord.x() + renderer->width(), coord.y());
+        QPoint down(coord.x(), coord.y() + renderer->height());
+
+        if(coords.empty() || right.x() < coords.top().x())
+            coords.emplace(right);
+
+        if(down.y() < _height)
+            coords.emplace(down);
     }
 }
 

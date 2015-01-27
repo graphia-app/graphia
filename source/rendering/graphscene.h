@@ -7,7 +7,7 @@
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
 
-#include <vector>
+#include <QRect>
 
 class GraphWidget;
 class GraphModel;
@@ -35,10 +35,12 @@ private:
     int _width;
     int _height;
 
-    std::vector<ComponentId> _sortedComponentIds;
     ComponentArray<int> _renderSizeDivisors;
 
     QOpenGLFunctions_3_3_Core* _funcs;
+
+    ComponentArray<QRect> _componentLayout;
+    void layoutComponents();
 
 private slots:
     void onGraphChanged(const Graph* graph);

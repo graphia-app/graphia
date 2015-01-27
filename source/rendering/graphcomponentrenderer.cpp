@@ -546,10 +546,16 @@ void GraphComponentRenderer::submitDebugLines()
     }
 }
 
-void GraphComponentRenderer::render(int x, int y)
+void GraphComponentRenderer::render(int x, int y, int width, int height)
 {
     if(!_FBOcomplete)
         return;
+
+    if(width <= 0)
+        width = _width;
+
+    if(height <= 0)
+        height = _height;
 
     _funcs->glEnable(GL_DEPTH_TEST);
     _funcs->glEnable(GL_CULL_FACE);
@@ -587,9 +593,9 @@ void GraphComponentRenderer::render(int x, int y)
 
     QRect r;
     r.setLeft(x);
-    r.setRight(r.left() + _width);
+    r.setRight(r.left() + width);
     r.setTop(_viewportHeight - y);
-    r.setBottom(r.top() - _height);
+    r.setBottom(r.top() - height);
 
     std::vector<GLfloat> data;
 
