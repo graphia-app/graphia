@@ -163,6 +163,7 @@ void GraphComponentRenderer::cleanup()
 {
     _funcs->glDeleteFramebuffers(1, &_visualFBO);
     _visualFBO = 0;
+    _FBOcomplete = false;
 
     _funcs->glDeleteTextures(1, &_colorTexture);
     _colorTexture = 0;
