@@ -115,5 +115,5 @@ void ForceDirectedLayout::executeReal(uint64_t iteration)
     _positions.update(_graph, [this](NodeId nodeId, const QVector3D& position)
         {
             return position + _displacements[nodeId];
-        }, 0.4f, 8);
+        }, 0.4f, 4);
 }
