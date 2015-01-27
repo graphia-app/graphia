@@ -40,7 +40,7 @@ void GraphComponentScene::render()
 {
     _funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    _funcs->glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+    _funcs->glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     _funcs->glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     if(renderer() != nullptr)

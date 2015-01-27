@@ -12,7 +12,8 @@ vec4 multisampledValue(ivec2 coord)
     vec4 accumulator = vec4(0.0);
     for(int s = 0; s < 4; s++)
     {
-        accumulator += texelFetch(frameBufferTexture, coord, s);
+        vec4 texel = texelFetch(frameBufferTexture, coord, s);
+        accumulator += texel * texel.a;
     }
     accumulator /= 4;
 

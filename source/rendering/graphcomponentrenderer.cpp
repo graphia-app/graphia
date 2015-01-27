@@ -552,16 +552,14 @@ void GraphComponentRenderer::render(int x, int y)
 
     _funcs->glEnable(GL_DEPTH_TEST);
     _funcs->glEnable(GL_CULL_FACE);
-
-    _funcs->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    _funcs->glEnable(GL_BLEND);
+    _funcs->glDisable(GL_BLEND);
 
     _funcs->glViewport(0, 0, _width, _height);
     _funcs->glBindFramebuffer(GL_FRAMEBUFFER, _visualFBO);
 
     // Color buffer
     _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    _funcs->glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+    _funcs->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     _funcs->glClear(GL_COLOR_BUFFER_BIT);
 
     // Selection buffer
@@ -613,6 +611,8 @@ void GraphComponentRenderer::render(int x, int y)
 
     _screenQuadVAO.bind();
     _funcs->glActiveTexture(GL_TEXTURE0);
+    _funcs->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    _funcs->glEnable(GL_BLEND);
 
     // Color texture
     _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _colorTexture);
