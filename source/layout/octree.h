@@ -135,7 +135,6 @@ public:
             subTree->_centre = subTree->_boundingBox.centre();
             subTree->_nodePositions = &nodePositions;
 
-            //FIXME there is a NaN bug in here somewhere that causes an infinite loop
             const float cx = subTree->_centre.x();
             const float cy = subTree->_centre.y();
             const float cz = subTree->_centre.z();
@@ -154,7 +153,12 @@ public:
             subTree->_subVolumes[7]._boundingBox = BoundingBox3D(QVector3D(cx,      cy,      cz     ), QVector3D(cx + xh, cy + yh, cz + zh));
 
             for(auto& subVolume : subTree->_subVolumes)
+            {
+                Q_ASSERT(subVolume._boundingBox.valid() &&
+                         (nodeIds.size() == 1 || subVolume._boundingBox.volume() > 0.0f));
+
                 subVolume._passesPredicate = _predicate(subVolume._boundingBox);
+            }
 
             subTree->distributeNodesOverSubVolumes(stack);
             subTree->initialiseTreeNode();
@@ -167,6 +171,7 @@ public:
     void build(const ReadOnlyGraph& graph, const NodePositions& nodePositions)
     {
         BoundingBox3D boundingBox = BoundingBox3D(NodePositions::positionsVector(nodePositions, graph.nodeIds()));
+        Q_ASSERT(boundingBox.valid() && (graph.numNodes() == 1 || boundingBox.volume() > 0.0f));
         build(graph.nodeIds(), nodePositions, boundingBox);
     }
 

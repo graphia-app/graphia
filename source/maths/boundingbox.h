@@ -85,6 +85,8 @@ public:
 
     QVector3D centre() const;
 
+    bool valid() const;
+
     BoundingBox3D operator+(const QVector3D v) const { return BoundingBox3D(_min + v, _max + v); }
     BoundingBox3D operator*(float s) const { return BoundingBox3D(_min * s, _max * s); }
 };
