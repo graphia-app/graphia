@@ -142,6 +142,7 @@ void GraphScene::layoutComponents()
 
     std::stack<QPoint> coords;
 
+    //FIXME this is a mess
     coords.emplace(0, 0);
     for(auto componentId : sortedComponentIds)
     {
@@ -150,7 +151,8 @@ void GraphScene::layoutComponents()
 
         auto renderer = GraphComponentRenderersReference::renderer(componentId);
 
-        if(coord.y() + renderer->height() > _height)
+        if(!coords.empty() && (coord.x() + renderer->width() > coords.top().x() ||
+            coord.y() + renderer->height() > _height))
         {
             coord = coords.top();
             coords.pop();
