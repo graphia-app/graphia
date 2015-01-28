@@ -54,7 +54,7 @@ void GraphScene::render()
 {
     _funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    _funcs->glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+    _funcs->glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     _funcs->glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     for(auto componentId : _graphModel->graph().componentIds())
@@ -79,7 +79,7 @@ void GraphScene::resize(int width, int height)
         int divisor =_renderSizeDivisors[componentId];
         int dividedSize = size / (divisor * _renderSizeDivisor);
 
-        const int MINIMUM_SIZE = 64;
+        const int MINIMUM_SIZE = 32;
         if(size > MINIMUM_SIZE)
         {
             while(dividedSize < MINIMUM_SIZE && divisor > 1)
