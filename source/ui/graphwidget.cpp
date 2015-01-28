@@ -191,6 +191,11 @@ void GraphWidget::updateNodePositions()
     });
 }
 
+void GraphWidget::makeContextCurrent()
+{
+    _openGLWindow->makeContextCurrent();
+}
+
 void GraphWidget::onGraphChanged(const Graph* graph)
 {
     // Find default (largest) component
@@ -241,6 +246,7 @@ void GraphWidget::onComponentAdded(const Graph*, ComponentId componentId)
     auto graphComponentRenderer = _graphComponentRendererManagers->at(componentId).get();
     executeOnRendererThread([this, graphComponentRenderer, componentId]
     {
+        makeContextCurrent();
         graphComponentRenderer->initialise(_graphModel, componentId, *this,
                                            _selectionManager,
                                            _graphComponentRendererShared);
@@ -250,8 +256,9 @@ void GraphWidget::onComponentAdded(const Graph*, ComponentId componentId)
 void GraphWidget::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
 {
     auto graphComponentRenderer = _graphComponentRendererManagers->at(componentId).get();
-    executeOnRendererThread([graphComponentRenderer]
+    executeOnRendererThread([this, graphComponentRenderer]
     {
+        makeContextCurrent();
         graphComponentRenderer->cleanup();
     }, QString("GraphWidget::onComponentWillBeRemoved (cleanup) component %1").arg((int)componentId));
 }

@@ -64,6 +64,8 @@ public:
     void updateNodePositions();
 
 private:
+    void makeContextCurrent();
+
     bool _initialised;
 
     OpenGLWindow* _openGLWindow;

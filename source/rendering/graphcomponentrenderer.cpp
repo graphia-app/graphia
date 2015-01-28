@@ -172,6 +172,7 @@ void GraphComponentRenderer::cleanup()
     _funcs->glDeleteTextures(1, &_depthTexture);
     _depthTexture = 0;
 
+    _funcs = nullptr;
     _initialised = false;
 }
 
