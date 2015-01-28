@@ -205,9 +205,12 @@ void GraphComponentRenderer::updatePositionalData()
     _edgePositionData.resize(_numEdgesInPositionData * 6);
     int i = 0;
 
+    NodeArray<QVector3D> scaledAndSmoothedNodePositions(_graphModel->graph());
+
     for(NodeId nodeId : component->nodeIds())
     {
         const QVector3D nodePosition = nodePositions.getScaledAndSmoothed(nodeId);
+        scaledAndSmoothedNodePositions[nodeId] = nodePosition;
 
         _nodePositionData[i++] = nodePosition.x();
         _nodePositionData[i++] = nodePosition.y();
@@ -222,8 +225,8 @@ void GraphComponentRenderer::updatePositionalData()
     for(EdgeId edgeId : component->edgeIds())
     {
         const Edge& edge = _graphModel->graph().edgeById(edgeId);
-        const QVector3D sourcePosition = nodePositions.getScaledAndSmoothed(edge.sourceId());
-        const QVector3D targetPosition = nodePositions.getScaledAndSmoothed(edge.targetId());
+        const QVector3D sourcePosition = scaledAndSmoothedNodePositions[edge.sourceId()];
+        const QVector3D targetPosition = scaledAndSmoothedNodePositions[edge.targetId()];
 
         _edgePositionData[i++] = sourcePosition.x();
         _edgePositionData[i++] = sourcePosition.y();
