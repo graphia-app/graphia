@@ -1,0 +1,27 @@
+{
+   /usr/lib/nvidia-346/libGL.so.346.35[Memcheck:Cond]
+   Memcheck:Cond
+   obj:/usr/lib/nvidia-346/libGL.so.346.35
+   obj:/usr/lib/nvidia-346/libnvidia-glcore.so.346.35
+   obj:/usr/lib/nvidia-346/libGL.so.346.35
+   obj:/home/tim/sdks/Qt/5.4/gcc_64/plugins/platforms/libqxcb.so
+   fun:_ZN14QOpenGLContext11swapBuffersEP8QSurface
+   fun:_ZN12OpenGLWindow6renderEv
+   fun:_ZN12OpenGLWindow6updateEv
+   fun:_ZN11GraphWidget8onUpdateEv
+   fun:_ZN9QtPrivate11FunctorCallINS_11IndexesListIIEEENS_4ListIIEEEvM11GraphWidgetFvvEE4callES7_PS5_PPv
+   fun:_ZN9QtPrivate15FunctionPointerIM11GraphWidgetFvvEE4callINS_4ListIIEEEvEEvS3_PS1_PPv
+   fun:_ZN9QtPrivate11QSlotObjectIM11GraphWidgetFvvENS_4ListIIEEEvE4implEiPNS_15QSlotObjectBaseEP7QObjectPPvPb
+   fun:_ZN11QMetaObject8activateEP7QObjectiiPPv
+   fun:_ZN6QTimer10timerEventEP11QTimerEvent
+   fun:_ZN7QObject5eventEP6QEvent
+   fun:_ZN19QApplicationPrivate13notify_helperEP7QObjectP6QEvent
+   fun:_ZN12QApplication6notifyEP7QObjectP6QEvent
+   fun:_ZN16QCoreApplication14notifyInternalEP7QObjectP6QEvent
+   fun:_ZN14QTimerInfoList14activateTimersEv
+   obj:/home/tim/sdks/Qt/5.4/gcc_64/lib/libQt5Core.so.5.4.0
+   fun:g_main_context_dispatch
+   obj:/lib/x86_64-linux-gnu/libglib-2.0.so.0.4200.1
+   fun:g_main_context_iteration
+   fun:_ZN20QEventDispatcherGlib13processEventsE6QFlagsIN10QEventLoop17ProcessEventsFlagEE
+}

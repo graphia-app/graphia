@@ -150,7 +150,8 @@ OTHER_FILES += \
     source/rendering/shaders/screen.frag \
     source/rendering/shaders/screen.vert \
     source/rendering/shaders/selection.frag \
-    source/rendering/shaders/selectionMarker.frag
+    source/rendering/shaders/selectionMarker.frag \
+    GraphTool.supp
 
 RESOURCES += \
     source/resources.qrc
