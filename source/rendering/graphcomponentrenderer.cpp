@@ -861,10 +861,10 @@ void GraphComponentRenderer::resetView(Transition::Type transitionType)
 
     _autoZooming = true;
 
-    moveFocusToCentreOfMass(transitionType);
+    moveFocusToCentreOfComponent(transitionType);
 }
 
-void GraphComponentRenderer::moveFocusToCentreOfMass(Transition::Type transitionType)
+void GraphComponentRenderer::moveFocusToCentreOfComponent(Transition::Type transitionType)
 {
     if(_componentId.isNull())
         return;
@@ -914,7 +914,7 @@ bool GraphComponentRenderer::transitioning()
     return _panTransition.finished();
 }
 
-bool GraphComponentRenderer::trackingCentreOfMass()
+bool GraphComponentRenderer::trackingCentreOfComponent()
 {
     return _focusNodeId.isNull();
 }

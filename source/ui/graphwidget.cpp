@@ -216,12 +216,12 @@ void GraphWidget::onGraphChanged(const Graph* graph)
 
         executeOnRendererThread([this,  graphComponentRenderer]
         {
-            // Graph changes may significantly alter the centre of mass; ease the transition
+            // Graph changes may significantly alter the centre; ease the transition
             if(_initialised && graphComponentRenderer->focusNodeId().isNull())
-                graphComponentRenderer->moveFocusToCentreOfMass(Transition::Type::EaseInEaseOut);
+                graphComponentRenderer->moveFocusToCentreOfComponent(Transition::Type::EaseInEaseOut);
 
             graphComponentRenderer->updateVisualData();
-        }, QString("GraphWidget::onGraphChanged (moveFocusToCentreOfMass) component %1").arg((int)componentId));
+        }, QString("GraphWidget::onGraphChanged (moveFocusToCentreOfComponent) component %1").arg((int)componentId));
     }
 }
 
@@ -235,7 +235,7 @@ void GraphWidget::onNodeWillBeRemoved(const Graph* graph, NodeId nodeId)
         {
             executeOnRendererThread([graphComponentRenderer]
             {
-                graphComponentRenderer->moveFocusToCentreOfMass(Transition::Type::EaseInEaseOut);
+                graphComponentRenderer->moveFocusToCentreOfComponent(Transition::Type::EaseInEaseOut);
             }, "GraphWidget::onNodeWillBeRemoved");
         }
     }

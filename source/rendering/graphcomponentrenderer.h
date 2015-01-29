@@ -72,7 +72,7 @@ public:
     void resizeViewport(int width, int height);
 
     void moveFocusToNode(NodeId nodeId, Transition::Type transitionType);
-    void moveFocusToCentreOfMass(Transition::Type transitionType);
+    void moveFocusToCentreOfComponent(Transition::Type transitionType);
     void selectFocusNodeClosestToCameraVector(Transition::Type transitionType = Transition::Type::InversePower);
 
     ComponentId componentId() { return _componentId; }
@@ -82,11 +82,11 @@ public:
     void disableFocusTracking() { _trackFocus = false; }
 
     bool transitioning();
-    bool trackingCentreOfMass();
+    bool trackingCentreOfComponent();
     bool autoZooming();
 
     void resetView(Transition::Type transitionType = Transition::Type::EaseInEaseOut);
-    bool viewIsReset() { return trackingCentreOfMass() && autoZooming(); }
+    bool viewIsReset() { return trackingCentreOfComponent() && autoZooming(); }
 
     Camera* camera() { return &_camera; }
     void zoom(float delta);
