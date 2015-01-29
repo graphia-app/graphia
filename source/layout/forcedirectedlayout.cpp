@@ -21,11 +21,19 @@ static QVector3D normalized(const QVector3D& v)
 static void dampOscillations(QVector3D& previous, QVector3D& next)
 {
     const float previousLength = previous.length();
-    const float nextLength = next.length();
+    float nextLength = next.length();
+    const float MAX_DISPLACEMENT = 10.0f;
+
+    // Filter large displacements that can induce instability
+    if(nextLength > MAX_DISPLACEMENT)
+    {
+        nextLength = MAX_DISPLACEMENT;
+        next = normalized(next) * nextLength;
+    }
 
     if(previousLength > 0.0f && nextLength > 0.0f)
     {
-        const float dotProduct = QVector3D::dotProduct(normalized(previous), normalized(next));
+        const float dotProduct = QVector3D::dotProduct(previous / previousLength, next / nextLength);
 
         // http://www.wolframalpha.com/input/?i=plot+0.5x%5E2%2B1.2x%2B1+from+x%3D-1to1
         const float f = (0.5f * dotProduct * dotProduct) + (1.2f * dotProduct) + 1.0f;
