@@ -54,6 +54,9 @@ public:
     static std::vector<QVector3D> positionsVectorScaled(const NodePositions& nodePositions,
                                                         const std::vector<NodeId>& nodeIds);
 
+    static BoundingSphere boundingSphere(const NodePositions& nodePositions,
+                                         const std::vector<NodeId>& nodeIds);
+
 private:
     using NodeArray<MeanPosition>::operator[];
     using NodeArray<MeanPosition>::at;

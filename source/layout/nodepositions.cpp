@@ -89,3 +89,44 @@ std::vector<QVector3D> NodePositions::positionsVectorScaled(const NodePositions&
 
     return positionsVector;
 }
+
+// http://stackoverflow.com/a/24818473
+BoundingSphere NodePositions::boundingSphere(const NodePositions& nodePositions, const std::vector<NodeId>& nodeIds)
+{
+    QVector3D center = nodePositions.getScaledAndSmoothed(nodeIds.front());
+    float radius = 0.0001f;
+    QVector3D pos, diff;
+    float len, alpha, alphaSq;
+
+    for(int i = 0; i < 2; i++)
+    {
+        for(auto& nodeId : nodeIds)
+        {
+            pos = nodePositions.getScaledAndSmoothed(nodeId);
+            diff = pos - center;
+            len = diff.length();
+
+            if(len > radius)
+            {
+                alpha = len / radius;
+                alphaSq = alpha * alpha;
+                radius = 0.5f * (alpha + 1.0f / alpha) * radius;
+                center = 0.5f * ((1.0f + 1.0f / alphaSq) * center + (1.0f - 1.0f / alphaSq) * pos);
+            }
+        }
+    }
+
+    for(auto& nodeId : nodeIds)
+    {
+        pos = nodePositions.getScaledAndSmoothed(nodeId);
+        diff = pos - center;
+        len = diff.length();
+        if(len > radius)
+        {
+            radius = (radius + len) / 2.0f;
+            center = center + ((len - radius) / len * diff);
+        }
+    }
+
+    return BoundingSphere(center, radius);
+}
