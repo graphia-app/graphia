@@ -4,6 +4,7 @@
 #include "../graph/graph.h"
 #include "../maths/boundingbox.h"
 #include "../utils/make_unique.h"
+#include "../utils/threadpool.h"
 #include "layout.h"
 
 #include <QVector3D>
@@ -47,6 +48,8 @@ protected:
 private:
     unsigned int _maxNodesPerLeaf;
     std::function<bool(const BoundingBox3D&)> _predicate;
+    static ThreadPool _threadPool;
+    static std::mutex _mutex;
 
     void distributeNodesOverSubVolumes(std::stack<BaseOctree*>& stack)
     {
@@ -85,6 +88,8 @@ private:
                 subVolume._subTree = std::make_unique<TreeType>();
                 subVolume._subTree->_nodeIds = std::move(subVolume._nodeIds);
                 subVolume._subTree->_boundingBox = subVolume._boundingBox;
+
+                std::unique_lock<std::mutex> lock(_mutex);
                 stack.push(subVolume._subTree.get());
 
                 subVolume._leaf = false;
@@ -127,41 +132,50 @@ public:
 
         while(!stack.empty())
         {
-            BaseOctree* subTree;
             _depth = std::max(_depth, stack.size());
-            subTree = stack.top();
-            stack.pop();
 
-            subTree->_centre = subTree->_boundingBox.centre();
-            subTree->_nodePositions = &nodePositions;
+            std::vector<BaseOctree*> subTrees;
 
-            const float cx = subTree->_centre.x();
-            const float cy = subTree->_centre.y();
-            const float cz = subTree->_centre.z();
-            const float xh = subTree->_boundingBox.xLength() * 0.5f;
-            const float yh = subTree->_boundingBox.yLength() * 0.5f;
-            const float zh = subTree->_boundingBox.zLength() * 0.5f;
-
-            subTree->_subVolumes[0]._boundingBox = BoundingBox3D(QVector3D(cx - xh, cy - yh, cz - zh), QVector3D(cx,      cy,      cz     ));
-            subTree->_subVolumes[1]._boundingBox = BoundingBox3D(QVector3D(cx,      cy - yh, cz - zh), QVector3D(cx + xh, cy,      cz     ));
-            subTree->_subVolumes[2]._boundingBox = BoundingBox3D(QVector3D(cx - xh, cy,      cz - zh), QVector3D(cx,      cy + yh, cz     ));
-            subTree->_subVolumes[3]._boundingBox = BoundingBox3D(QVector3D(cx,      cy,      cz - zh), QVector3D(cx + xh, cy + yh, cz     ));
-
-            subTree->_subVolumes[4]._boundingBox = BoundingBox3D(QVector3D(cx - xh, cy - yh, cz     ), QVector3D(cx,      cy,      cz + zh));
-            subTree->_subVolumes[5]._boundingBox = BoundingBox3D(QVector3D(cx,      cy - yh, cz     ), QVector3D(cx + xh, cy,      cz + zh));
-            subTree->_subVolumes[6]._boundingBox = BoundingBox3D(QVector3D(cx - xh, cy,      cz     ), QVector3D(cx,      cy + yh, cz + zh));
-            subTree->_subVolumes[7]._boundingBox = BoundingBox3D(QVector3D(cx,      cy,      cz     ), QVector3D(cx + xh, cy + yh, cz + zh));
-
-            for(auto& subVolume : subTree->_subVolumes)
+            while(!stack.empty())
             {
-                Q_ASSERT(subVolume._boundingBox.valid() &&
-                         (nodeIds.size() == 1 || subVolume._boundingBox.volume() > 0.0f));
-
-                subVolume._passesPredicate = _predicate(subVolume._boundingBox);
+                subTrees.emplace_back(stack.top());
+                stack.pop();
             }
 
-            subTree->distributeNodesOverSubVolumes(stack);
-            subTree->initialiseTreeNode();
+            _threadPool.concurrentForEach(subTrees.begin(), subTrees.end(),
+            [this, &nodePositions, &nodeIds, &stack](BaseOctree* subTree)
+            {
+                subTree->_centre = subTree->_boundingBox.centre();
+                subTree->_nodePositions = &nodePositions;
+
+                const float cx = subTree->_centre.x();
+                const float cy = subTree->_centre.y();
+                const float cz = subTree->_centre.z();
+                const float xh = subTree->_boundingBox.xLength() * 0.5f;
+                const float yh = subTree->_boundingBox.yLength() * 0.5f;
+                const float zh = subTree->_boundingBox.zLength() * 0.5f;
+
+                subTree->_subVolumes[0]._boundingBox = BoundingBox3D(QVector3D(cx - xh, cy - yh, cz - zh), QVector3D(cx,      cy,      cz     ));
+                subTree->_subVolumes[1]._boundingBox = BoundingBox3D(QVector3D(cx,      cy - yh, cz - zh), QVector3D(cx + xh, cy,      cz     ));
+                subTree->_subVolumes[2]._boundingBox = BoundingBox3D(QVector3D(cx - xh, cy,      cz - zh), QVector3D(cx,      cy + yh, cz     ));
+                subTree->_subVolumes[3]._boundingBox = BoundingBox3D(QVector3D(cx,      cy,      cz - zh), QVector3D(cx + xh, cy + yh, cz     ));
+
+                subTree->_subVolumes[4]._boundingBox = BoundingBox3D(QVector3D(cx - xh, cy - yh, cz     ), QVector3D(cx,      cy,      cz + zh));
+                subTree->_subVolumes[5]._boundingBox = BoundingBox3D(QVector3D(cx,      cy - yh, cz     ), QVector3D(cx + xh, cy,      cz + zh));
+                subTree->_subVolumes[6]._boundingBox = BoundingBox3D(QVector3D(cx - xh, cy,      cz     ), QVector3D(cx,      cy + yh, cz + zh));
+                subTree->_subVolumes[7]._boundingBox = BoundingBox3D(QVector3D(cx,      cy,      cz     ), QVector3D(cx + xh, cy + yh, cz + zh));
+
+                for(auto& subVolume : subTree->_subVolumes)
+                {
+                    Q_ASSERT(subVolume._boundingBox.valid() &&
+                             (nodeIds.size() == 1 || subVolume._boundingBox.volume() > 0.0f));
+
+                    subVolume._passesPredicate = _predicate(subVolume._boundingBox);
+                }
+
+                subTree->distributeNodesOverSubVolumes(stack);
+                subTree->initialiseTreeNode();
+            });
 
             // Nodes now distributed, don't need them any more
             _nodeIds.clear();
@@ -301,5 +315,8 @@ public:
 };
 
 class Octree : public BaseOctree<Octree> {};
+
+template<typename TreeType, typename SubVolumeType> ThreadPool BaseOctree<TreeType, SubVolumeType>::_threadPool("Octree");
+template<typename TreeType, typename SubVolumeType> std::mutex BaseOctree<TreeType, SubVolumeType>::_mutex;
 
 #endif // OCTREE_H
