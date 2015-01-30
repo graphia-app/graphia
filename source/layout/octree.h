@@ -49,9 +49,8 @@ private:
     unsigned int _maxNodesPerLeaf;
     std::function<bool(const BoundingBox3D&)> _predicate;
     static ThreadPool _threadPool;
-    static std::mutex _mutex;
 
-    void distributeNodesOverSubVolumes(std::stack<BaseOctree*>& stack)
+    void distributeNodesOverSubVolumes(std::deque<BaseOctree*>& stack)
     {
         bool distinctPositions = false;
         QVector3D lastPosition = _nodePositions->get(_nodeIds[0]);
@@ -89,8 +88,7 @@ private:
                 subVolume._subTree->_nodeIds = std::move(subVolume._nodeIds);
                 subVolume._subTree->_boundingBox = subVolume._boundingBox;
 
-                std::unique_lock<std::mutex> lock(_mutex);
-                stack.push(subVolume._subTree.get());
+                stack.push_back(subVolume._subTree.get());
 
                 subVolume._leaf = false;
                 _internalNodes[_numInternalNodes++] = &subVolume;
@@ -142,9 +140,11 @@ public:
                 stack.pop();
             }
 
-            _threadPool.concurrentForEach(subTrees.begin(), subTrees.end(),
-            [this, &nodePositions, &nodeIds, &stack](BaseOctree* subTree)
+            auto results = _threadPool.concurrentForEach(subTrees.begin(), subTrees.end(),
+            [this, &nodePositions, &nodeIds](BaseOctree* subTree)
             {
+                std::deque<BaseOctree*> stack;
+
                 subTree->_centre = subTree->_boundingBox.centre();
                 subTree->_nodePositions = &nodePositions;
 
@@ -175,7 +175,18 @@ public:
 
                 subTree->distributeNodesOverSubVolumes(stack);
                 subTree->initialiseTreeNode();
+
+                return stack;
             });
+
+            for(auto& result : results.get())
+            {
+                while(!result.empty())
+                {
+                    stack.push(result.front());
+                    result.pop_front();
+                }
+            }
 
             // Nodes now distributed, don't need them any more
             _nodeIds.clear();
@@ -317,6 +328,5 @@ public:
 class Octree : public BaseOctree<Octree> {};
 
 template<typename TreeType, typename SubVolumeType> ThreadPool BaseOctree<TreeType, SubVolumeType>::_threadPool("Octree");
-template<typename TreeType, typename SubVolumeType> std::mutex BaseOctree<TreeType, SubVolumeType>::_mutex;
 
 #endif // OCTREE_H
