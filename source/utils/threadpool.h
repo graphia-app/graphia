@@ -56,14 +56,14 @@ public:
         return taskPtr->get_future();
     }
 
-    class Results
+    template<typename ValueType> class Results
     {
         friend class ThreadPool;
 
     private:
-        std::vector<std::future<void>> _futures;
+        std::vector<std::future<ValueType>> _futures;
 
-        Results(std::vector<std::future<void>>& futures) :
+        Results(std::vector<std::future<ValueType>>& futures) :
             _futures(std::move(futures))
         {}
 
@@ -77,28 +77,74 @@ public:
             for(auto& future : _futures)
                 future.wait();
         }
+
+        template<typename T = ValueType> typename std::enable_if<!std::is_void<T>::value, T>::type
+        get()
+        {
+            //FIXME: profile this
+            ValueType values;
+
+            for(auto& future : _futures)
+            {
+                const auto& v = future.get();
+                values.reserve(values.size() + v.size());
+                values.insert(values.end(), v.cbegin(), v.cend());
+            }
+
+            return values;
+        }
     };
 
-    template<typename It, typename Fn> Results concurrentForEach(It first, It last, Fn&& f,
-                                                                 bool blocking = true)
+    template<typename It, typename Fn, typename T> struct Executor
+    {
+        using ValueType = std::vector<T>;
+
+        ValueType operator()(It it, It last, Fn&& f)
+        {
+            ValueType values;
+
+            for(; it != last; ++it)
+                values.emplace_back(f(*it));
+
+            return values;
+        }
+    };
+
+    template<typename It, typename Fn> struct Executor<It, Fn, void>
+    {
+        using ValueType = void;
+
+        ValueType operator()(It it, It last, Fn&& f)
+        {
+            for(; it != last; ++it)
+                f(*it);
+        }
+    };
+
+    template<typename It, typename Fn> using FnExecutor =
+        Executor<It, Fn, typename std::result_of<Fn(typename It::value_type)>::type>;
+
+    template<typename It, typename Fn> auto concurrentForEach(It first, It last, Fn&& f, bool blocking = true) ->
+        Results<typename FnExecutor<It, Fn>::ValueType>
     {
         const int numElements = std::distance(first, last);
         const int numThreads = static_cast<int>(_threads.size());
         const int numElementsPerThread = numElements / numThreads +
                 (numElements % numThreads ? 1 : 0);
 
-        std::vector<std::future<void>> futures;
+        FnExecutor<It, Fn> executor;
+        std::vector<std::future<typename FnExecutor<It, Fn>::ValueType>> futures;
 
         for(It it = first; it < last; it = incrementIterator(it, last, numElementsPerThread))
         {
             It threadLast = incrementIterator(it, last, numElementsPerThread);
-            futures.emplace_back(execute([it, threadLast, f]
+            futures.emplace_back(execute([executor, it, threadLast, f]() mutable
             {
-                std::for_each(it, threadLast, f);
+                return executor(it, threadLast, std::move(f));
             }));
         }
 
-        auto results = Results(futures);
+        auto results = Results<typename FnExecutor<It, Fn>::ValueType>(futures);
 
         if(blocking)
             results.wait();
