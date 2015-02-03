@@ -47,7 +47,7 @@ GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
     connect(&graphModel->graph(), &Graph::componentAdded, this, &GraphWidget::onComponentAdded, Qt::DirectConnection);
     connect(&graphModel->graph(), &Graph::componentWillBeRemoved, this, &GraphWidget::onComponentWillBeRemoved, Qt::DirectConnection);
 
-    connect(selectionManager.get(), &SelectionManager::selectionChanged, this, &GraphWidget::onSelectionChanged);
+    connect(selectionManager.get(), &SelectionManager::selectionChanged, this, &GraphWidget::onSelectionChanged, Qt::DirectConnection);
 
     connect(_graphInteractor, &Interactor::userInteractionStarted, this, &GraphWidget::userInteractionStarted);
     connect(_graphInteractor, &Interactor::userInteractionFinished, this, &GraphWidget::userInteractionFinished);
