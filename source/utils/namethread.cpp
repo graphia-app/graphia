@@ -1,6 +1,6 @@
 #include "namethread.h"
 
-#if defined(__linux__) && defined(QT_DEBUG)
+#if defined(__linux__)
 #include <sys/prctl.h>
 #include <unistd.h>
 #include <sys/syscall.h>
