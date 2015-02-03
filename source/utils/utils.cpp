@@ -1,5 +1,7 @@
 #include "utils.h"
 
+#include <thread>
+
 float Utils::rand(float low, float high)
 {
     std::uniform_real_distribution<> distribution(low, high);
@@ -72,6 +74,11 @@ int Utils::smallestPowerOf2GreaterThan(int x)
     x |= x >> 8;
     x |= x >> 16;
     return x + 1;
+}
+
+int Utils::currentThreadId()
+{
+    return std::hash<std::thread::id>()(std::this_thread::get_id());
 }
 
 std::random_device Utils::_rd;

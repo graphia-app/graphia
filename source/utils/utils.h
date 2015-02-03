@@ -53,6 +53,8 @@ public:
     }
 
     static int smallestPowerOf2GreaterThan(int x);
+
+    static int currentThreadId();
 };
 
 #endif // UTILS_H

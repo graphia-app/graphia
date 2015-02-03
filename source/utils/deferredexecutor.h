@@ -21,9 +21,10 @@ private:
 
     std::mutex _mutex;
     std::deque<Task> _tasks;
+    bool _debug;
 
 public:
-    DeferredExecutor() {}
+    DeferredExecutor();
     virtual ~DeferredExecutor();
 
     void enqueue(TaskFn function, const QString& description = QString());

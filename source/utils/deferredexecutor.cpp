@@ -1,7 +1,14 @@
 #include "deferredexecutor.h"
 
+#include "../utils/utils.h"
+
 #include <QDebug>
 #include <QtGlobal>
+
+DeferredExecutor::DeferredExecutor()
+{
+    _debug = qgetenv("DEFERREDEXECUTOR_DEBUG").toInt();
+}
 
 DeferredExecutor::~DeferredExecutor()
 {
@@ -10,37 +17,38 @@ DeferredExecutor::~DeferredExecutor()
 
 void DeferredExecutor::enqueue(TaskFn function, const QString& description)
 {
-    std::unique_lock<std::mutex>(_mutex);
+    std::unique_lock<std::mutex> lock(_mutex);
 
     Task task;
     task._function = function;
     task._description = description;
+
+    if(_debug)
+        qDebug() << "enqueue(...) thread ID:" << Utils::currentThreadId() << description;
 
     _tasks.emplace_back(task);
 }
 
 void DeferredExecutor::execute()
 {
-    std::unique_lock<std::mutex>(_mutex);
-    bool debug = qgetenv("DEFERREDEXECUTOR_DEBUG").toInt();
+    std::unique_lock<std::mutex> lock(_mutex);
 
-    if(debug)
+    if(!_tasks.empty() && _debug)
     {
-        if(!_tasks.empty())
-            qDebug() << "[";
+        qDebug() << "execute() thread ID" << Utils::currentThreadId();
+        qDebug() << "[";
 
         for(auto task : _tasks)
             qDebug() << task._description;
 
-        if(!_tasks.empty())
-            qDebug() << "]";
+        qDebug() << "]";
     }
 
     while(!_tasks.empty())
     {
         auto task = _tasks.front();
 
-        if(debug)
+        if(_debug)
             qDebug() << "Executing" << task._description;
 
         task._function();
@@ -50,7 +58,7 @@ void DeferredExecutor::execute()
 
 void DeferredExecutor::cancel()
 {
-    std::unique_lock<std::mutex>(_mutex);
+    std::unique_lock<std::mutex> lock(_mutex);
 
     while(!_tasks.empty())
         _tasks.pop_front();
