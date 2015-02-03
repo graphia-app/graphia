@@ -1,17 +1,25 @@
 #include "utils.h"
 
+#include <cstdlib>
+#include <cstdint>
+#include <cmath>
+#include <memory>
+#include <random>
 #include <thread>
+
+static std::random_device rd;
+static std::mt19937 gen(rd());
 
 float Utils::rand(float low, float high)
 {
     std::uniform_real_distribution<> distribution(low, high);
-    return distribution(_gen);
+    return distribution(gen);
 }
 
 int Utils::rand(int low, int high)
 {
     std::uniform_int_distribution<> distribution(low, high);
-    return distribution(_gen);
+    return distribution(gen);
 }
 
 QVector2D Utils::randQVector2D(float low, float high)
@@ -80,6 +88,3 @@ int Utils::currentThreadId()
 {
     return std::hash<std::thread::id>()(std::this_thread::get_id());
 }
-
-std::random_device Utils::_rd;
-std::mt19937 Utils::_gen(Utils::_rd());
