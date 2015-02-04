@@ -99,7 +99,13 @@ public:
     int height() const { return _height; }
 
     void updatePositionalData();
-    void updateVisualData();
+    enum class When
+    {
+        Later,
+        Now
+    };
+
+    void updateVisualData(When when = When::Later);
 
     void cloneCameraDataFrom(const GraphComponentRenderer& other);
 

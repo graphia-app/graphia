@@ -96,8 +96,6 @@ GraphComponentRenderer::GraphComponentRenderer()
     _camera.setPosition(QVector3D(0.0f, 0.0f, 1.0f));
     _camera.setViewTarget(QVector3D(0.0f, 0.0f, 0.0f));
     _camera.setUpVector(QVector3D(0.0f, 1.0f, 0.0f));
-
-    update(0.0f);
 }
 
 void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, ComponentId componentId,
@@ -154,7 +152,7 @@ void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, 
     _focusNodeId.setToNull();
 
     updatePositionalData();
-    updateVisualData();
+    updateVisualData(When::Now);
 
     _initialised = true;
 }
@@ -172,13 +170,25 @@ void GraphComponentRenderer::cleanup()
     _funcs->glDeleteTextures(1, &_depthTexture);
     _depthTexture = 0;
 
+    _numNodesInPositionData = 0;
+    _nodePositionData.clear();
+
+    _numEdgesInPositionData = 0;
+    _edgePositionData.clear();
+
+    _nodeVisualData.clear();
+    _edgeVisualData.clear();
+
     _funcs = nullptr;
     _initialised = false;
 }
 
-void GraphComponentRenderer::updateVisualData()
+void GraphComponentRenderer::updateVisualData(When when)
 {
     _visualDataRequiresUpdate = true;
+
+    if(when == When::Now)
+        updateVisualDataIfRequired();
 }
 
 void GraphComponentRenderer::cloneCameraDataFrom(const GraphComponentRenderer& other)
