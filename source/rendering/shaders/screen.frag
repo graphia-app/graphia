@@ -9,15 +9,18 @@ uniform sampler2DMS frameBufferTexture;
 
 vec4 multisampledValue(ivec2 coord)
 {
-    vec4 accumulator = vec4(0.0);
+    vec3 rgb = vec3(0.0);
+    float a = 0.0;
     for(int s = 0; s < 4; s++)
     {
         vec4 texel = texelFetch(frameBufferTexture, coord, s);
-        accumulator += texel * texel.a;
+        rgb += texel.rgb;
+        a += texel.a;
     }
-    accumulator /= 4;
 
-    return accumulator;
+    vec4 color = vec4(rgb / a, a / 4.0);
+
+    return color;
 }
 
 void main()
