@@ -30,7 +30,7 @@ const QVector3D NodePositions::getScaledAndSmoothed(NodeId nodeId) const
     return _array[nodeId].mean(_smoothing) * _scale;
 }
 
-void NodePositions::update(const ReadOnlyGraph& graph, std::function<QVector3D(NodeId, const QVector3D&)> f,
+void NodePositions::update(const ImmutableGraph& graph, std::function<QVector3D(NodeId, const QVector3D&)> f,
                            float scale, int smoothing)
 {
     Q_ASSERT(smoothing <= MAX_SMOOTHING);

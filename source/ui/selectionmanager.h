@@ -11,7 +11,7 @@ class SelectionManager : public QObject
 {
     Q_OBJECT
 public:
-    SelectionManager(const ReadOnlyGraph& graph);
+    SelectionManager(const ImmutableGraph& graph);
 
     ElementIdSet<NodeId> selectedNodes() const;
     ElementIdSet<NodeId> unselectedNodes() const;
@@ -42,7 +42,7 @@ public:
     const QString numNodesSelectedAsString() const;
 
 private:
-    const ReadOnlyGraph& _graph;
+    const ImmutableGraph& _graph;
 
     ElementIdSet<NodeId> _selectedNodes;
 

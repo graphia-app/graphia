@@ -8,13 +8,13 @@
 #include <vector>
 #include <memory>
 
-class GraphComponent : public QObject, public ReadOnlyGraph
+class GraphComponent : public QObject, public ImmutableGraph
 {
     friend class ComponentManager;
 
     Q_OBJECT
 public:
-    GraphComponent(const ReadOnlyGraph* graph) : _graph(graph) {}
+    GraphComponent(const ImmutableGraph* graph) : _graph(graph) {}
     GraphComponent(const GraphComponent& other) :
         QObject(other.parent()),
         _graph(other._graph),
@@ -23,7 +23,7 @@ public:
     {}
 
 private:
-    const ReadOnlyGraph* _graph;
+    const ImmutableGraph* _graph;
     std::vector<NodeId> _nodeIdsList;
     std::vector<EdgeId> _edgeIdsList;
 

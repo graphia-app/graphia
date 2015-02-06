@@ -10,7 +10,7 @@ private:
     float _scale;
 
 public:
-    ScalingLayout(const ReadOnlyGraph& graph,
+    ScalingLayout(const ImmutableGraph& graph,
                   NodePositions& positions) :
         NodeLayout(graph, positions), _scale(1.0f)
     {}

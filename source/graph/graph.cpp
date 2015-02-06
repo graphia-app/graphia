@@ -254,7 +254,7 @@ int Graph::numComponents() const
     return 0;
 }
 
-const ReadOnlyGraph* Graph::componentById(ComponentId componentId) const
+const ImmutableGraph* Graph::componentById(ComponentId componentId) const
 {
     if(_componentManager)
         return _componentManager->componentById(componentId);
@@ -306,7 +306,7 @@ const std::vector<Edge> Graph::edgesForNodes(const ElementIdSet<NodeId>& nodeIds
 
 void Graph::dumpToQDebug(int detail) const
 {
-    ReadOnlyGraph::dumpToQDebug(detail);
+    ImmutableGraph::dumpToQDebug(detail);
 
     if(detail > 0)
     {

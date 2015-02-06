@@ -13,12 +13,12 @@ private:
     std::vector<NodeLayout*> _subLayouts;
 
 public:
-    SequenceLayout(const ReadOnlyGraph& graph,
+    SequenceLayout(const ImmutableGraph& graph,
                    NodePositions& positions) :
         NodeLayout(graph, positions)
     {}
 
-    SequenceLayout(const ReadOnlyGraph& graph,
+    SequenceLayout(const ImmutableGraph& graph,
                    NodePositions& positions,
                    std::vector<NodeLayout*> subLayouts) :
         NodeLayout(graph, positions), _subLayouts(subLayouts)

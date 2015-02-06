@@ -214,7 +214,7 @@ public:
     EdgeId id() const { return _id; }
 };
 
-class ReadOnlyGraph
+class ImmutableGraph
 {
 public:
     virtual const std::vector<NodeId>& nodeIds() const = 0;
@@ -245,7 +245,7 @@ public:
     }
 };
 
-class Graph : public QObject, public ReadOnlyGraph
+class Graph : public QObject, public ImmutableGraph
 {
     Q_OBJECT
 public:
@@ -308,8 +308,8 @@ public:
     const std::vector<ComponentId>& componentIds() const;
     ComponentId firstComponentId() const { return *componentIds().begin(); }
     int numComponents() const;
-    const ReadOnlyGraph* componentById(ComponentId componentId) const;
-    const ReadOnlyGraph* firstComponent() const { return componentById(firstComponentId()); }
+    const ImmutableGraph* componentById(ComponentId componentId) const;
+    const ImmutableGraph* firstComponent() const { return componentById(firstComponentId()); }
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
 

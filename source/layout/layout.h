@@ -85,11 +85,11 @@ class NodeLayout : public Layout
 {
     Q_OBJECT
 protected:
-    const ReadOnlyGraph& _graph;
+    const ImmutableGraph& _graph;
     NodePositions& _positions;
 
 public:
-    NodeLayout(const ReadOnlyGraph& graph,
+    NodeLayout(const ImmutableGraph& graph,
                NodePositions& positions,
                Iterative iterative = Iterative::No) :
         Layout(iterative),

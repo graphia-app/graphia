@@ -5,7 +5,7 @@
 
 //#define EXPENSIVE_DEBUG_CHECKS
 
-SelectionManager::SelectionManager(const ReadOnlyGraph& graph) :
+SelectionManager::SelectionManager(const ImmutableGraph& graph) :
     QObject(),
     _graph(graph)
 {}

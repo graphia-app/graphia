@@ -20,7 +20,7 @@ private:
     static ThreadPool _threadPool;
 
 public:
-    ForceDirectedLayout(const ReadOnlyGraph& graph,
+    ForceDirectedLayout(const ImmutableGraph& graph,
                         NodePositions& positions) :
         NodeLayout(graph, positions, Iterative::Yes),
         _prevDisplacements(graph.numNodes()),

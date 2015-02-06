@@ -168,7 +168,7 @@ public:
         }
     }
 
-    void build(const ReadOnlyGraph& graph, const NodePositions& nodePositions)
+    void build(const ImmutableGraph& graph, const NodePositions& nodePositions)
     {
         BoundingBox3D boundingBox = BoundingBox3D(NodePositions::positionsVector(nodePositions, graph.nodeIds()));
         Q_ASSERT(boundingBox.valid() && (graph.numNodes() == 1 || boundingBox.volume() > 0.0f));
