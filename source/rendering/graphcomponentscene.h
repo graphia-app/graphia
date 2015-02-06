@@ -29,8 +29,6 @@ public:
 
     void onShow();
 
-    void resolveVisibility();
-
     ComponentId componentId() { return _componentId; }
     void setComponentId(ComponentId componentId);
 

@@ -22,8 +22,6 @@ public:
 
     void setScene(Scene* scene);
     const Scene& scene() const { return *_scene; }
-    void enableSceneUpdate() { _sceneUpdateEnabled = true; }
-    void disableSceneUpdate() { _sceneUpdateEnabled = false; }
 
     void setInteractor(Interactor* interactor) { _interactor = interactor; }
     const Interactor& interactor() const { return *_interactor; }
@@ -31,13 +29,13 @@ public:
     void disableInteraction();
 
     void update();
+    void render();
 
     void makeContextCurrent();
     
 protected:
-    virtual void initialise();
-    virtual void resize();
-    virtual void render();
+    void initialise();
+    void resize();
 
     virtual void keyPressEvent(QKeyEvent* e);
     virtual void keyReleaseEvent(QKeyEvent* e);
@@ -56,7 +54,6 @@ private:
     std::shared_ptr<QOpenGLContext> _context;
     Scene* _scene;
     Interactor* _interactor;
-    bool _sceneUpdateEnabled;
     bool _interactionEnabled;
     int _debugLevel;
     

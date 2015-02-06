@@ -16,7 +16,6 @@ OpenGLWindow::OpenGLWindow(QScreen* screen)
     : QWindow(screen),
       _scene(nullptr),
       _interactor(nullptr),
-      _sceneUpdateEnabled(true),
       _interactionEnabled(true)
 {
     setSurfaceType(OpenGLSurface);
@@ -132,6 +131,8 @@ void OpenGLWindow::render()
     if(!isExposed())
         return;
 
+    makeContextCurrent();
+
     // FIXME: make configurable
     glEnable(GL_MULTISAMPLE);
 
@@ -141,15 +142,8 @@ void OpenGLWindow::render()
 
 void OpenGLWindow::update()
 {
-    makeContextCurrent();
-
-    if(_sceneUpdateEnabled)
-    {
-        float time = _time.elapsed() / 1000.0f;
-        _scene->update(time);
-    }
-
-    render();
+    float time = _time.elapsed() / 1000.0f;
+    _scene->update(time);
 }
 
 void OpenGLWindow::resizeEvent(QResizeEvent* e)

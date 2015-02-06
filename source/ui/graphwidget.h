@@ -70,6 +70,7 @@ private:
 
     OpenGLWindow* _openGLWindow;
     QTimer* _timer;
+    bool _sceneUpdateEnabled;
 
     std::shared_ptr<GraphModel> _graphModel;
     std::shared_ptr<SelectionManager> _selectionManager;

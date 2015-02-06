@@ -61,11 +61,6 @@ void GraphComponentScene::resize(int width, int height)
 
 void GraphComponentScene::onShow()
 {
-    resolveVisibility();
-}
-
-void GraphComponentScene::resolveVisibility()
-{
     if(visible())
     {
         for(auto& rendererManager : rendererManagers())
@@ -79,7 +74,7 @@ void GraphComponentScene::resolveVisibility()
 void GraphComponentScene::setComponentId(ComponentId componentId)
 {
     _componentId = componentId;
-    resolveVisibility();
+    onShow();
 }
 
 void GraphComponentScene::resetView(Transition::Type transitionType)
@@ -106,41 +101,42 @@ void GraphComponentScene::onComponentSplit(const Graph* graph, ComponentId oldCo
 {
     if(oldComponentId == _componentId)
     {
-        auto oldGraphComponentRenderer = GraphComponentRenderersReference::renderer(oldComponentId);
-        auto oldFocusNodeId = oldGraphComponentRenderer->focusNodeId();
+        ComponentId largestSplitter;
 
-        ComponentId newComponentId;
-
-        if(oldFocusNodeId.isNull())
+        for(auto splitter : splitters)
         {
-            ComponentId largestSplitter;
 
-            for(auto splitter : splitters)
+            if(largestSplitter.isNull())
+                largestSplitter = splitter;
+            else
             {
+                auto splitterNumNodes = graph->componentById(splitter)->numNodes();
+                auto largestNumNodes = graph->componentById(largestSplitter)->numNodes();
 
-                if(largestSplitter.isNull())
+                if(splitterNumNodes > largestNumNodes)
                     largestSplitter = splitter;
-                else
-                {
-                    auto splitterNumNodes = graph->componentById(splitter)->numNodes();
-                    auto largestNumNodes = graph->componentById(largestSplitter)->numNodes();
-
-                    if(splitterNumNodes > largestNumNodes)
-                        largestSplitter = splitter;
-                }
             }
-
-            newComponentId = largestSplitter;
         }
-        else
-            newComponentId = graph->componentIdOfNode(oldFocusNodeId);
 
-        auto newGraphComponentRenderer = GraphComponentRenderersReference::renderer(newComponentId);
-        _graphWidget->executeOnRendererThread([this, newComponentId,
-                                              newGraphComponentRenderer,
+        auto oldGraphComponentRenderer = GraphComponentRenderersReference::renderer(oldComponentId); 
+
+        _graphWidget->executeOnRendererThread([this, largestSplitter,
                                               oldGraphComponentRenderer]
         {
-            // Clone the current camera data to the new component
+            auto oldFocusNodeId = oldGraphComponentRenderer->focusNodeId();
+            auto& graph = _graphWidget->graphModel()->graph();
+
+            ComponentId newComponentId;
+
+            if(oldFocusNodeId.isNull())
+                newComponentId = largestSplitter;
+            else
+                newComponentId = graph.componentIdOfNode(oldFocusNodeId);
+
+            Q_ASSERT(!newComponentId.isNull());
+
+            auto newGraphComponentRenderer = GraphComponentRenderersReference::renderer(newComponentId);
+
             newGraphComponentRenderer->cloneCameraDataFrom(*oldGraphComponentRenderer);
             setComponentId(newComponentId);
         }, "GraphComponentScene::onComponentSplit (clone camera data, set component ID)");

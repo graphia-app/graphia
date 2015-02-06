@@ -157,7 +157,8 @@ private:
                               Transition::Type transitionType = Transition::Type::None);
     void centrePositionInViewport(const QVector3D& viewTarget, float cameraDistance = -1.0f,
                                   Transition::Type transitionType = Transition::Type::None);
-    float entireComponentZoomDistance();
+
+    float _entireComponentZoomDistance;
 
     bool _visualDataRequiresUpdate;
     void updateVisualDataIfRequired();

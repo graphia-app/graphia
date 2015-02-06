@@ -209,6 +209,8 @@ void GraphScene::onGraphChanged(const Graph* graph)
 
     if(visible())
     {
+        onShow();
+
         _graphWidget->executeOnRendererThread([this]
         {
             resize(_width, _height);

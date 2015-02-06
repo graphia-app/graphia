@@ -183,14 +183,6 @@ void GraphComponentRenderer::cleanup()
     _initialised = false;
 }
 
-void GraphComponentRenderer::updateVisualData(When when)
-{
-    _visualDataRequiresUpdate = true;
-
-    if(when == When::Now)
-        updateVisualDataIfRequired();
-}
-
 void GraphComponentRenderer::cloneCameraDataFrom(const GraphComponentRenderer& other)
 {
     _camera = other._camera;
@@ -249,6 +241,43 @@ void GraphComponentRenderer::updatePositionalData()
     _edgePositionBuffer.bind();
     _edgePositionBuffer.allocate(_edgePositionData.data(), static_cast<int>(_edgePositionData.size()) * sizeof(GLfloat));
     _edgePositionBuffer.release();
+
+    _focusPosition = NodePositions::centreOfMassScaled(_graphModel->nodePositions(),
+                                                       component->nodeIds());
+
+    float minHalfFov = qDegreesToRadians(std::min(_fovx, _fovy) * 0.5f);
+
+    if(minHalfFov > 0.0f)
+    {
+        auto component = _graphModel->graph().componentById(_componentId);
+
+        QVector3D centre = focusPosition();
+        float maxDistance = std::numeric_limits<float>::min();
+        for(auto nodeId : component->nodeIds())
+        {
+            QVector3D nodePosition = _graphModel->nodePositions().getScaledAndSmoothed(nodeId);
+            auto& nodeVisual = _graphModel->nodeVisuals().at(nodeId);
+            float distance = (centre - nodePosition).length() + nodeVisual._size;
+
+            if(distance > maxDistance)
+                maxDistance = distance;
+        }
+
+        _entireComponentZoomDistance = maxDistance / std::sin(minHalfFov);
+    }
+    else
+    {
+        qWarning() << "GraphComponentRenderer::_entireComponentZoomDistance set to default value";
+        _entireComponentZoomDistance = 1.0f;
+    }
+}
+
+void GraphComponentRenderer::updateVisualData(When when)
+{
+    _visualDataRequiresUpdate = true;
+
+    if(when == When::Now)
+        updateVisualDataIfRequired();
 }
 
 void GraphComponentRenderer::updateVisualDataIfRequired()
@@ -311,8 +340,6 @@ void GraphComponentRenderer::update(float t)
 {
     if(_graphModel)
     {
-        auto component = _graphModel->graph().componentById(_componentId);
-
         updateVisualDataIfRequired();
 
         _zoomTransition.update(t);
@@ -323,11 +350,8 @@ void GraphComponentRenderer::update(float t)
         {
             if(_focusNodeId.isNull())
             {
-                _focusPosition = NodePositions::centreOfMassScaled(_graphModel->nodePositions(),
-                                                                   component->nodeIds());
-
                 if(_zoomTransition.finished() && _autoZooming)
-                    zoomToDistance(entireComponentZoomDistance());
+                    zoomToDistance(_entireComponentZoomDistance);
 
                 centrePositionInViewport(_focusPosition, _zoomDistance);
             }
@@ -712,10 +736,9 @@ void GraphComponentRenderer::zoom(float direction)
     _targetZoomDistance -= delta * direction;
     _targetZoomDistance = std::max(_targetZoomDistance, MINIMUM_ZOOM_DISTANCE);
 
-    float maximumZoomDistance = entireComponentZoomDistance();
-    if(_targetZoomDistance > maximumZoomDistance)
+    if(_targetZoomDistance > _entireComponentZoomDistance)
     {
-        _targetZoomDistance = maximumZoomDistance;
+        _targetZoomDistance = _entireComponentZoomDistance;
 
         // If we zoom out all the way then use autozoom mode
         if(_focusNodeId.isNull())
@@ -747,7 +770,7 @@ void GraphComponentRenderer::zoom(float direction)
 void GraphComponentRenderer::zoomToDistance(float distance)
 {
     distance = std::max(distance, MINIMUM_ZOOM_DISTANCE);
-    distance = std::min(distance, entireComponentZoomDistance());
+    distance = std::min(distance, _entireComponentZoomDistance);
     _zoomDistance = _targetZoomDistance = distance;
 }
 
@@ -799,9 +822,8 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& viewTarge
         position = viewTarget - (_camera.viewVector().normalized() * MINIMUM_ZOOM_DISTANCE);
 
     // Enforce maximum camera distance
-    float maximumZoomDistance = entireComponentZoomDistance();
-    if(position.distanceToPoint(viewTarget) > maximumZoomDistance)
-        position = viewTarget - (_camera.viewVector().normalized() * maximumZoomDistance);
+    if(position.distanceToPoint(viewTarget) > _entireComponentZoomDistance)
+        position = viewTarget - (_camera.viewVector().normalized() * _entireComponentZoomDistance);
 
     if(transitionType != Transition::Type::None && visible())
     {
@@ -825,33 +847,6 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& viewTarge
         _camera.setPosition(position);
         _camera.setViewTarget(viewTarget);
     }
-}
-
-float GraphComponentRenderer::entireComponentZoomDistance()
-{
-    float minHalfFov = qDegreesToRadians(std::min(_fovx, _fovy) * 0.5f);
-
-    if(minHalfFov > 0.0f)
-    {
-        auto component = _graphModel->graph().componentById(_componentId);
-
-        QVector3D centre = focusPosition();
-        float maxDistance = std::numeric_limits<float>::min();
-        for(auto nodeId : component->nodeIds())
-        {
-            QVector3D nodePosition = _graphModel->nodePositions().getScaledAndSmoothed(nodeId);
-            auto& nodeVisual = _graphModel->nodeVisuals().at(nodeId);
-            float distance = (centre - nodePosition).length() + nodeVisual._size;
-
-            if(distance > maxDistance)
-                maxDistance = distance;
-        }
-
-        return maxDistance / std::sin(minHalfFov);
-    }
-
-    qWarning() << "GraphComponentRenderer::entireComponentZoomDistance returning default value";
-    return 1.0f;
 }
 
 void GraphComponentRenderer::moveFocusToNode(NodeId nodeId, Transition::Type transitionType)
@@ -879,14 +874,10 @@ void GraphComponentRenderer::moveFocusToCentreOfComponent(Transition::Type trans
     if(_componentId.isNull())
         return;
 
-    auto component = _graphModel->graph().componentById(_componentId);
-
     _focusNodeId.setToNull();
-    _focusPosition = NodePositions::centreOfMassScaled(_graphModel->nodePositions(),
-                                                       component->nodeIds());
 
     if(_autoZooming)
-        zoomToDistance(entireComponentZoomDistance());
+        zoomToDistance(_entireComponentZoomDistance);
     else
         _zoomDistance = -1.0f;
 

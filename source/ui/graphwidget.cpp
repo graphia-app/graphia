@@ -28,6 +28,7 @@ GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
     QWidget(parent),
     _initialised(false),
     _openGLWindow(new OpenGLWindow),
+    _sceneUpdateEnabled(true),
     _graphModel(graphModel),
     _selectionManager(selectionManager),
     _graphComponentRendererShared(std::make_shared<GraphComponentRendererShared>(_openGLWindow->context())),
@@ -86,8 +87,13 @@ void GraphWidget::initialise()
 
 void GraphWidget::onUpdate()
 {
-    _preUpdateExecutor.execute();
-    _openGLWindow->update();
+    if(_sceneUpdateEnabled)
+    {
+        _preUpdateExecutor.execute();
+        _openGLWindow->update();
+    }
+
+    _openGLWindow->render();
 }
 
 bool GraphWidget::interacting() const
@@ -216,11 +222,12 @@ void GraphWidget::onGraphChanged(const Graph* graph)
 
         executeOnRendererThread([this,  graphComponentRenderer]
         {
+            graphComponentRenderer->updateVisualData();
+            graphComponentRenderer->updatePositionalData();
+
             // Graph changes may significantly alter the centre; ease the transition
             if(_initialised && graphComponentRenderer->focusNodeId().isNull())
                 graphComponentRenderer->moveFocusToCentreOfComponent(Transition::Type::EaseInEaseOut);
-
-            graphComponentRenderer->updateVisualData();
         }, QString("GraphWidget::onGraphChanged (moveFocusToCentreOfComponent) component %1").arg((int)componentId));
     }
 }
@@ -278,11 +285,11 @@ void GraphWidget::onSelectionChanged(const SelectionManager*)
 void GraphWidget::onCommandWillExecuteAsynchronously(const Command*, const QString&)
 {
     _openGLWindow->disableInteraction();
-    _openGLWindow->disableSceneUpdate();
+    _sceneUpdateEnabled = false;
 }
 
 void GraphWidget::onCommandCompleted(const Command*)
 {
-    _openGLWindow->enableSceneUpdate();
+    _sceneUpdateEnabled = true;
     _openGLWindow->enableInteraction();
 }
