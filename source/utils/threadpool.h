@@ -27,32 +27,37 @@ private:
     std::condition_variable _waitForNewTask;
     std::queue<std::function<void()>> _tasks;
     std::atomic<bool> _stop;
+    std::atomic<int> _activeThreads;
 
 public:
     ThreadPool(const QString& threadNamePrefix = QString("ThreadPool"),
                int numThreads = std::thread::hardware_concurrency());
     ~ThreadPool();
 
-    template<typename Fn> using ReturnType = typename std::result_of<Fn()>::type;
+    bool saturated() { return _activeThreads >= static_cast<int>(_threads.size()); }
+    bool idle() { return _activeThreads == 0; }
 
-    template<typename Fn> std::future<ReturnType<Fn>> execute(Fn&& f)
+    template<typename Fn, typename... Args> using ReturnType = typename std::result_of<Fn(Args...)>::type;
+
+    template<typename Fn, typename... Args> std::future<ReturnType<Fn, Args...>> execute(Fn&& f, Args&&... args)
     {
         if(_stop)
-            return std::future<ReturnType<Fn>>();
+            return std::future<ReturnType<Fn, Args...>>();
 
-        auto taskPtr = std::make_shared<std::packaged_task<ReturnType<Fn>()>>(f);
+        auto taskPtr = std::make_shared<std::packaged_task<ReturnType<Fn, Args...>(Args...)>>(f);
 
         {
             std::unique_lock<std::mutex> lock(_mutex);
             _tasks.push(
-                [taskPtr]
+                [taskPtr, args...]() mutable
                 {
-                    (*taskPtr)();
+                    (*taskPtr)(std::forward<Args>(args)...);
                 });
         }
 
         // Wake a thread up
         _waitForNewTask.notify_one();
+        _activeThreads++;
         return taskPtr->get_future();
     }
 

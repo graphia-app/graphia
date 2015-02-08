@@ -3,7 +3,7 @@
 #include "namethread.h"
 
 ThreadPool::ThreadPool(const QString& threadNamePrefix, int numThreads) :
-    _stop(false)
+    _stop(false), _activeThreads(0)
 {
     for(int i = 0; i < numThreads; i++)
     {
@@ -21,6 +21,7 @@ ThreadPool::ThreadPool(const QString& threadNamePrefix, int numThreads) :
                         _tasks.pop();
                         lock.unlock();
                         task();
+                        _activeThreads--;
                     }
                     else if(!_stop)
                     {
