@@ -2,6 +2,7 @@
 #define FIXEDSIZESTACK_H
 
 #include <array>
+#include <cstdlib>
 
 template<typename T> class FixedSizeStack
 {
@@ -21,6 +22,8 @@ public:
     {
         if(_top + 1 < static_cast<int>(_size))
             _vector[++_top] = t;
+        else
+            std::abort(); // Top of stack breached
     }
 
     T& top() { return _vector.at(_top); }
