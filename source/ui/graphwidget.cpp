@@ -1,7 +1,7 @@
 #include "graphwidget.h"
 
 #include "../rendering/openglwindow.h"
-#include "../rendering/graphscene.h"
+#include "../rendering/graphoverviewscene.h"
 #include "../rendering/graphcomponentscene.h"
 
 #include "../graph/graphmodel.h"
@@ -11,7 +11,7 @@
 #include "../utils/make_unique.h"
 #include "../utils/utils.h"
 
-#include "graphinteractor.h"
+#include "graphoverviewinteractor.h"
 #include "graphcomponentinteractor.h"
 #include "selectionmanager.h"
 
@@ -29,13 +29,13 @@ GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
     _graphComponentRendererShared(std::make_shared<GraphComponentRendererShared>(_openGLWindow->context())),
     _graphComponentRendererManagers(std::make_shared<ComponentArray<GraphComponentRendererManager>>(graphModel->graph())),
     _numTransitioningRenderers(0),
-    _graphScene(new GraphScene(this)),
-    _graphInteractor(new GraphInteractor(graphModel, _graphScene, commandManager, selectionManager, this)),
+    _graphOverviewScene(new GraphOverviewScene(this)),
+    _graphOverviewInteractor(new GraphOverviewInteractor(graphModel, _graphOverviewScene, commandManager, selectionManager, this)),
     _graphComponentScene(new GraphComponentScene(this)),
     _graphComponentInteractor(new GraphComponentInteractor(graphModel, _graphComponentScene, commandManager, selectionManager, this)),
     _mode(GraphWidget::Mode::Component)
 {
-    _graphScene->setGraphComponentRendererManagers(_graphComponentRendererManagers);
+    _graphOverviewScene->setGraphComponentRendererManagers(_graphComponentRendererManagers);
     _graphComponentScene->setGraphComponentRendererManagers(_graphComponentRendererManagers);
 
     connect(&graphModel->graph(), &Graph::graphChanged, this, &GraphWidget::onGraphChanged, Qt::DirectConnection);
@@ -45,8 +45,8 @@ GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
 
     connect(selectionManager.get(), &SelectionManager::selectionChanged, this, &GraphWidget::onSelectionChanged, Qt::DirectConnection);
 
-    connect(_graphInteractor, &Interactor::userInteractionStarted, this, &GraphWidget::userInteractionStarted);
-    connect(_graphInteractor, &Interactor::userInteractionFinished, this, &GraphWidget::userInteractionFinished);
+    connect(_graphOverviewInteractor, &Interactor::userInteractionStarted, this, &GraphWidget::userInteractionStarted);
+    connect(_graphOverviewInteractor, &Interactor::userInteractionFinished, this, &GraphWidget::userInteractionFinished);
     connect(_graphComponentInteractor, &Interactor::userInteractionStarted, this, &GraphWidget::userInteractionStarted);
     connect(_graphComponentInteractor, &Interactor::userInteractionFinished, this, &GraphWidget::userInteractionFinished);
 
@@ -135,8 +135,8 @@ void GraphWidget::switchToOverviewMode()
         _graphComponentScene->saveViewData();
         _graphComponentScene->resetView();
 
-        _openGLWindow->setScene(_graphScene);
-        _openGLWindow->setInteractor(_graphInteractor);
+        _openGLWindow->setScene(_graphOverviewScene);
+        _openGLWindow->setInteractor(_graphOverviewInteractor);
 
         _mode = GraphWidget::Mode::Overview;
     }, "GraphWidget::switchToOverviewMode");

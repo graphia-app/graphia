@@ -16,8 +16,8 @@
 
 class GraphComponentRendererShared;
 class GraphComponentRenderer;
-class GraphScene;
-class GraphInteractor;
+class GraphOverviewScene;
+class GraphOverviewInteractor;
 class GraphComponentScene;
 class GraphComponentInteractor;
 class GraphModel;
@@ -80,8 +80,8 @@ private:
     int _numTransitioningRenderers;
     DeferredExecutor _preUpdateExecutor;
 
-    GraphScene* _graphScene;
-    GraphInteractor* _graphInteractor;
+    GraphOverviewScene* _graphOverviewScene;
+    GraphOverviewInteractor* _graphOverviewInteractor;
 
     GraphComponentScene* _graphComponentScene;
     GraphComponentInteractor* _graphComponentInteractor;

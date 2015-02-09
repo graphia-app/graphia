@@ -6,24 +6,24 @@
 #include <memory>
 
 class GraphModel;
-class GraphScene;
+class GraphOverviewScene;
 class CommandManager;
 class SelectionManager;
 class GraphWidget;
 
-class GraphInteractor : public Interactor
+class GraphOverviewInteractor : public Interactor
 {
     Q_OBJECT
 public:
-    GraphInteractor(std::shared_ptr<GraphModel> graphModel,
-                    GraphScene* graphScene,
+    GraphOverviewInteractor(std::shared_ptr<GraphModel> graphModel,
+                    GraphOverviewScene* graphOverviewScene,
                     CommandManager& commandManager,
                     std::shared_ptr<SelectionManager> selectionManager,
                     GraphWidget* graphWidget = nullptr);
 
 private:
     std::shared_ptr<GraphModel> _graphModel;
-    GraphScene* _scene;
+    GraphOverviewScene* _scene;
     GraphWidget* _graphWidget;
 
     void mousePressEvent(QMouseEvent* e);

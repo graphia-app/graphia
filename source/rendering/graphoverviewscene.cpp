@@ -1,4 +1,4 @@
-#include "graphscene.h"
+#include "graphoverviewscene.h"
 #include "graphcomponentrenderer.h"
 
 #include "../graph/graphmodel.h"
@@ -14,7 +14,7 @@
 #include <stack>
 #include <vector>
 
-GraphScene::GraphScene(GraphWidget* graphWidget)
+GraphOverviewScene::GraphOverviewScene(GraphWidget* graphWidget)
     : Scene(graphWidget),
       _graphWidget(graphWidget),
       _graphModel(graphWidget->graphModel()),
@@ -23,11 +23,11 @@ GraphScene::GraphScene(GraphWidget* graphWidget)
       _renderSizeDivisors(graphWidget->graphModel()->graph()),
       _componentLayout(graphWidget->graphModel()->graph())
 {
-    connect(&_graphModel->graph(), &Graph::componentSplit, this, &GraphScene::onComponentSplit, Qt::DirectConnection);
-    connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphScene::onGraphChanged, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::componentSplit, this, &GraphOverviewScene::onComponentSplit, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphOverviewScene::onGraphChanged, Qt::DirectConnection);
 }
 
-void GraphScene::initialise()
+void GraphOverviewScene::initialise()
 {
     _funcs = context().versionFunctions<QOpenGLFunctions_3_3_Core>();
     if(!_funcs)
@@ -37,7 +37,7 @@ void GraphScene::initialise()
     onGraphChanged(&_graphWidget->graphModel()->graph());
 }
 
-void GraphScene::update(float t)
+void GraphOverviewScene::update(float t)
 {
     _graphWidget->updateNodePositions();
 
@@ -50,7 +50,7 @@ void GraphScene::update(float t)
     layoutComponents();
 }
 
-void GraphScene::render()
+void GraphOverviewScene::render()
 {
     _funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -66,7 +66,7 @@ void GraphScene::render()
     }
 }
 
-void GraphScene::resize(int width, int height)
+void GraphOverviewScene::resize(int width, int height)
 {
     _width = width;
     _height = height;
@@ -94,7 +94,7 @@ void GraphScene::resize(int width, int height)
     }
 }
 
-void GraphScene::onShow()
+void GraphOverviewScene::onShow()
 {
     for(auto componentId : _graphModel->graph().componentIds())
     {
@@ -103,7 +103,7 @@ void GraphScene::onShow()
     }
 }
 
-void GraphScene::onHide()
+void GraphOverviewScene::onHide()
 {
     for(auto componentId : _graphModel->graph().componentIds())
     {
@@ -112,7 +112,7 @@ void GraphScene::onHide()
     }
 }
 
-void GraphScene::zoom(float delta)
+void GraphOverviewScene::zoom(float delta)
 {
     if(delta > 0.0f)
         setRenderSizeDivisor(_renderSizeDivisor / 2);
@@ -120,7 +120,7 @@ void GraphScene::zoom(float delta)
         setRenderSizeDivisor(_renderSizeDivisor * 2);
 }
 
-void GraphScene::setRenderSizeDivisor(int divisor)
+void GraphOverviewScene::setRenderSizeDivisor(int divisor)
 {
     if(divisor < 1)
         divisor = 1;
@@ -130,7 +130,7 @@ void GraphScene::setRenderSizeDivisor(int divisor)
     resize(_width, _height);
 }
 
-void GraphScene::layoutComponents()
+void GraphOverviewScene::layoutComponents()
 {
     auto& graph = _graphModel->graph();
     auto sortedComponentIds = _graphModel->graph().componentIds();
@@ -171,7 +171,7 @@ void GraphScene::layoutComponents()
     }
 }
 
-void GraphScene::onComponentSplit(const Graph*, ComponentId oldComponentId,
+void GraphOverviewScene::onComponentSplit(const Graph*, ComponentId oldComponentId,
                                   const ElementIdSet<ComponentId>& splitters)
 {
     auto oldGraphComponentRenderer = GraphComponentRenderersReference::renderer(oldComponentId);
@@ -186,10 +186,10 @@ void GraphScene::onComponentSplit(const Graph*, ComponentId oldComponentId,
                 renderer->cloneViewDataFrom(*oldGraphComponentRenderer);
             }
         }
-    }, "GraphScene::onComponentSplit (cloneCameraDataFrom)");
+    }, "GraphOverviewScene::onComponentSplit (cloneCameraDataFrom)");
 }
 
-void GraphScene::onGraphChanged(const Graph* graph)
+void GraphOverviewScene::onGraphChanged(const Graph* graph)
 {
     // Find the number of nodes in the largest component
     int maxNumNodes = 0;
@@ -214,6 +214,6 @@ void GraphScene::onGraphChanged(const Graph* graph)
         _graphWidget->executeOnRendererThread([this]
         {
             resize(_width, _height);
-        }, "GraphScene::onGraphChanged (resize)");
+        }, "GraphOverviewScene::onGraphChanged (resize)");
     }
 }

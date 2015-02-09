@@ -1,5 +1,5 @@
-#ifndef GRAPHSCENE_H
-#define GRAPHSCENE_H
+#ifndef GRAPHOVERVIEWSCENE_H
+#define GRAPHOVERVIEWSCENE_H
 
 #include "scene.h"
 #include "graphcomponentrenderersreference.h"
@@ -13,12 +13,12 @@ class GraphWidget;
 class GraphModel;
 class QOpenGLFunctions_3_3_Core;
 
-class GraphScene : public Scene, public GraphComponentRenderersReference
+class GraphOverviewScene : public Scene, public GraphComponentRenderersReference
 {
     Q_OBJECT
 
 public:
-    GraphScene(GraphWidget* graphWidget);
+    GraphOverviewScene(GraphWidget* graphWidget);
 
     void initialise();
     void update(float t);
@@ -54,4 +54,4 @@ private slots:
     void onComponentSplit(const Graph* graph, ComponentId oldComponentId, const ElementIdSet<ComponentId>& splitters);
 };
 
-#endif // GRAPHSCENE_H
+#endif // GRAPHOVERVIEWSCENE_H

@@ -1,39 +1,39 @@
-#include "graphinteractor.h"
+#include "graphoverviewinteractor.h"
 #include "graphwidget.h"
 
 #include "selectionmanager.h"
 #include "../commands/commandmanager.h"
-#include "../rendering/graphscene.h"
+#include "../rendering/graphoverviewscene.h"
 #include "../graph/graphmodel.h"
 
 #include <QMouseEvent>
 #include <QWheelEvent>
 
-GraphInteractor::GraphInteractor(std::shared_ptr<GraphModel> graphModel,
-                                 GraphScene* graphScene,
+GraphOverviewInteractor::GraphOverviewInteractor(std::shared_ptr<GraphModel> graphModel,
+                                 GraphOverviewScene* graphOverviewScene,
                                  CommandManager& /*commandManager*/,
                                  std::shared_ptr<SelectionManager>, /*selectionManager*/
                                  GraphWidget* graphWidget) :
     Interactor(graphWidget),
     _graphModel(graphModel),
-    _scene(graphScene),
+    _scene(graphOverviewScene),
     _graphWidget(graphWidget)
 {
 }
 
-void GraphInteractor::mousePressEvent(QMouseEvent* /*mouseEvent*/)
+void GraphOverviewInteractor::mousePressEvent(QMouseEvent* /*mouseEvent*/)
 {
 }
 
-void GraphInteractor::mouseReleaseEvent(QMouseEvent* /*mouseEvent*/)
+void GraphOverviewInteractor::mouseReleaseEvent(QMouseEvent* /*mouseEvent*/)
 {
 }
 
-void GraphInteractor::mouseMoveEvent(QMouseEvent* /*mouseEvent*/)
+void GraphOverviewInteractor::mouseMoveEvent(QMouseEvent* /*mouseEvent*/)
 {
 }
 
-void GraphInteractor::mouseDoubleClickEvent(QMouseEvent* mouseEvent)
+void GraphOverviewInteractor::mouseDoubleClickEvent(QMouseEvent* mouseEvent)
 {
     auto& componentLayout = _scene->componentLayout();
 
@@ -49,7 +49,7 @@ void GraphInteractor::mouseDoubleClickEvent(QMouseEvent* mouseEvent)
     }
 }
 
-void GraphInteractor::keyPressEvent(QKeyEvent* /*keyEvent*/)
+void GraphOverviewInteractor::keyPressEvent(QKeyEvent* /*keyEvent*/)
 {
     /*switch(keyEvent->key())
     {
@@ -58,7 +58,7 @@ void GraphInteractor::keyPressEvent(QKeyEvent* /*keyEvent*/)
     }*/
 }
 
-void GraphInteractor::keyReleaseEvent(QKeyEvent* /*keyEvent*/)
+void GraphOverviewInteractor::keyReleaseEvent(QKeyEvent* /*keyEvent*/)
 {
     /*switch(keyEvent->key())
     {
@@ -67,7 +67,7 @@ void GraphInteractor::keyReleaseEvent(QKeyEvent* /*keyEvent*/)
     }*/
 }
 
-void GraphInteractor::wheelEvent(QWheelEvent* wheelEvent)
+void GraphOverviewInteractor::wheelEvent(QWheelEvent* wheelEvent)
 {
     _scene->zoom(wheelEvent->angleDelta().y());
 }

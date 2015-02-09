@@ -65,12 +65,12 @@ SOURCES += \
     source/utils/semaphore.cpp \
     source/layout/nodepositions.cpp \
     source/maths/conicalfrustum.cpp \
-    source/rendering/graphscene.cpp \
-    source/ui/graphinteractor.cpp \
     source/rendering/graphcomponentrenderer.cpp \
     source/utils/deferredexecutor.cpp \
     source/utils/performancecounter.cpp \
-    source/rendering/graphcomponentrenderersreference.cpp
+    source/rendering/graphcomponentrenderersreference.cpp \
+    source/rendering/graphoverviewscene.cpp \
+    source/ui/graphoverviewinteractor.cpp
 
 HEADERS += \
     source/rendering/camera.h \
@@ -130,12 +130,12 @@ HEADERS += \
     source/utils/circularbuffer.h \
     source/utils/fixedsizestack.h \
     source/maths/conicalfrustum.h \
-    source/rendering/graphscene.h \
-    source/ui/graphinteractor.h \
     source/rendering/graphcomponentrenderer.h \
     source/rendering/graphcomponentrenderersreference.h \
     source/utils/deferredexecutor.h \
-    source/utils/performancecounter.h
+    source/utils/performancecounter.h \
+    source/ui/graphoverviewinteractor.h \
+    source/rendering/graphoverviewscene.h
 
 FORMS    += source/mainwindow.ui
 
