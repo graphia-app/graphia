@@ -4,7 +4,8 @@
 
 BarnesHutTree::BarnesHutTree() :
     BaseOctree(),
-    _theta(0.8f)
+    _theta(0.8f),
+    _mass(0)
 {
     setMaxNodesPerLeaf(1);
 }
