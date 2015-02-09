@@ -17,11 +17,6 @@
 
 #include <QVBoxLayout>
 
-GraphComponentRendererManager::GraphComponentRendererManager() :
-    _graphComponentRenderer(std::make_unique<GraphComponentRenderer>())
-{
-}
-
 GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
                          CommandManager& commandManager,
                          std::shared_ptr<SelectionManager> selectionManager, QWidget* parent) :

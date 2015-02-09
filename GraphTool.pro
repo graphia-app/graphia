@@ -69,7 +69,8 @@ SOURCES += \
     source/ui/graphinteractor.cpp \
     source/rendering/graphcomponentrenderer.cpp \
     source/utils/deferredexecutor.cpp \
-    source/utils/performancecounter.cpp
+    source/utils/performancecounter.cpp \
+    source/rendering/graphcomponentrenderersreference.cpp
 
 HEADERS += \
     source/rendering/camera.h \

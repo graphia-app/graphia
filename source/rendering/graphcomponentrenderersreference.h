@@ -2,10 +2,9 @@
 #define GRAPHCOMPONENTRENDERERSREFERENCE_CPP
 
 #include "../graph/grapharray.h"
+#include "graphcomponentrenderer.h"
 
 #include <memory>
-
-class GraphComponentRenderer;
 
 class GraphComponentRendererManager
 {
@@ -14,6 +13,8 @@ private:
 
 public:
     GraphComponentRendererManager();
+    GraphComponentRendererManager(GraphComponentRendererManager&& other);
+
     GraphComponentRenderer* get() { return _graphComponentRenderer.get(); }
 };
 

@@ -86,5 +86,5 @@ int Utils::smallestPowerOf2GreaterThan(int x)
 
 int Utils::currentThreadId()
 {
-    return std::hash<std::thread::id>()(std::this_thread::get_id());
+    return static_cast<int>(std::hash<std::thread::id>()(std::this_thread::get_id()));
 }
