@@ -34,11 +34,11 @@ public:
         _f = std::move(other._f);
     }
 
-    void setPostUnlockAction(std::function<void()> f) { _f = f; }
+    void setPostUnlockAction(std::function<void()> f) const { _f = f; }
 
 private:
     std::unique_lock<T> _lock;
-    std::function<void()> _f;
+    mutable std::function<void()> _f;
 };
 
 #endif // UNIQUE_LOCK_WITH_SIDE_EFFECTS_H

@@ -26,7 +26,7 @@ void CommandManager::executeReal(std::shared_ptr<Command> command)
     // variadic template expansion of std::thread, which is then passed by reference
     // to the lambda. Therefore, the thread still owns the lock and its destructor
     // also invokes the lock's destructor, so it all works out.
-    auto executeCommand = [this](unique_lock_with_side_effects<std::mutex>& lock, std::shared_ptr<Command> command)
+    auto executeCommand = [this](const unique_lock_with_side_effects<std::mutex>& lock, std::shared_ptr<Command> command)
     {
         nameCurrentThread(command->description());
 
