@@ -108,6 +108,8 @@ public:
     void updateVisualData(When when = When::Later);
 
     void cloneViewDataFrom(const GraphComponentRenderer& other);
+    void saveViewData() { _savedViewData = _viewData; }
+    void restoreViewData() { _viewData = _savedViewData; }
 
 private:
     GraphWidget* _graphWidget;
@@ -137,6 +139,7 @@ private:
     };
 
     ViewData _viewData;
+    ViewData _savedViewData;
 
     void prepareVertexBuffers();
     void prepareNodeVAO();

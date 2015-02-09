@@ -77,6 +77,18 @@ void GraphComponentScene::setComponentId(ComponentId componentId)
     onShow();
 }
 
+void GraphComponentScene::saveViewData()
+{
+    if(renderer() != nullptr)
+        renderer()->saveViewData();
+}
+
+void GraphComponentScene::restoreViewData()
+{
+    if(renderer() != nullptr)
+        renderer()->restoreViewData();
+}
+
 void GraphComponentScene::resetView(Transition::Type transitionType)
 {
     if(renderer() != nullptr)

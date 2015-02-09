@@ -35,6 +35,9 @@ public:
     int width() const { return _width; }
     int height() const { return _height; }
 
+    void saveViewData();
+    void restoreViewData();
+
     void resetView(Transition::Type transitionType = Transition::Type::EaseInEaseOut);
     bool viewIsReset();
 
