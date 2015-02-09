@@ -245,6 +245,11 @@ void GraphComponentRenderer::updatePositionalData()
     _focusPosition = NodePositions::centreOfMassScaled(_graphModel->nodePositions(),
                                                        component->nodeIds());
 
+    updateEntireComponentZoomDistance();
+}
+
+void GraphComponentRenderer::updateEntireComponentZoomDistance()
+{
     float minHalfFov = qDegreesToRadians(std::min(_fovx, _fovy) * 0.5f);
 
     if(minHalfFov > 0.0f)
@@ -856,6 +861,8 @@ void GraphComponentRenderer::moveFocusToNode(NodeId nodeId, Transition::Type tra
 
     centreNodeInViewport(nodeId, -1.0f, transitionType);
     _focusNodeId = nodeId;
+    _autoZooming = false;
+    updateEntireComponentZoomDistance();
     updateVisualData();
 }
 
@@ -875,6 +882,7 @@ void GraphComponentRenderer::moveFocusToCentreOfComponent(Transition::Type trans
         return;
 
     _focusNodeId.setToNull();
+    updateEntireComponentZoomDistance();
 
     if(_autoZooming)
         zoomToDistance(_entireComponentZoomDistance);
