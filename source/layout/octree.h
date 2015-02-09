@@ -248,9 +248,10 @@ public:
     void dumpToQDebug() const
     {
         QString dump;
+        int totalNodes = 0;
 
         visitVolumes(
-            [&dump](const SubVolumeType& subVolume, int treeDepth)
+            [&dump, &totalNodes](const SubVolumeType& subVolume, int treeDepth)
             {
                 QString indentString = "";
                 for(int i = 0; i < treeDepth; i++)
@@ -271,10 +272,12 @@ public:
                     dump.append(indentString).append("]\n");
                 }
 
+                totalNodes += subVolume._nodeIds.size();
+
                 return true;
             });
 
-        qDebug() << dump;
+        qDebug() << dump << "Total nodes:" << totalNodes;
     }
 
     void debugRenderOctree(std::function<void(bool, const BoundingBox3D&, const QColor)> render)
