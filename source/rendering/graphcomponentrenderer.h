@@ -88,7 +88,7 @@ public:
     void resetView(Transition::Type transitionType = Transition::Type::EaseInEaseOut);
     bool viewIsReset() { return trackingCentreOfComponent() && autoZooming(); }
 
-    Camera* camera() { return &_camera; }
+    Camera* camera() { return &_viewData._camera; }
     void zoom(float delta);
     void zoomToDistance(float distance);
 
@@ -107,7 +107,7 @@ public:
 
     void updateVisualData(When when = When::Later);
 
-    void cloneCameraDataFrom(const GraphComponentRenderer& other);
+    void cloneViewDataFrom(const GraphComponentRenderer& other);
 
 private:
     GraphWidget* _graphWidget;
@@ -118,11 +118,25 @@ private:
     bool _initialised;
     bool _visible;
 
-    Camera _camera;
-    float _zoomDistance;
-    bool _autoZooming;
-    NodeId _focusNodeId;
-    QVector3D _focusPosition;
+    struct ViewData
+    {
+        ViewData() :
+            _zoomDistance(1.0f),
+            _autoZooming(true)
+        {
+            _camera.setPosition(QVector3D(0.0f, 0.0f, 1.0f));
+            _camera.setViewTarget(QVector3D(0.0f, 0.0f, 0.0f));
+            _camera.setUpVector(QVector3D(0.0f, 1.0f, 0.0f));
+        }
+
+        Camera _camera;
+        float _zoomDistance;
+        bool _autoZooming;
+        NodeId _focusNodeId;
+        QVector3D _focusPosition;
+    };
+
+    ViewData _viewData;
 
     void prepareVertexBuffers();
     void prepareNodeVAO();

@@ -183,7 +183,7 @@ void GraphScene::onComponentSplit(const Graph*, ComponentId oldComponentId,
             for(auto splitter : splitters)
             {
                 auto renderer = GraphComponentRenderersReference::renderer(splitter);
-                renderer->cloneCameraDataFrom(*oldGraphComponentRenderer);
+                renderer->cloneViewDataFrom(*oldGraphComponentRenderer);
             }
         }
     }, "GraphScene::onComponentSplit (cloneCameraDataFrom)");

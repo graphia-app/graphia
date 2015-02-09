@@ -137,7 +137,7 @@ void GraphComponentScene::onComponentSplit(const Graph* graph, ComponentId oldCo
 
             auto newGraphComponentRenderer = GraphComponentRenderersReference::renderer(newComponentId);
 
-            newGraphComponentRenderer->cloneCameraDataFrom(*oldGraphComponentRenderer);
+            newGraphComponentRenderer->cloneViewDataFrom(*oldGraphComponentRenderer);
             setComponentId(newComponentId);
         }, "GraphComponentScene::onComponentSplit (clone camera data, set component ID)");
     }
@@ -156,7 +156,7 @@ void GraphComponentScene::onComponentsWillMerge(const Graph*, const ElementIdSet
                                                   newGraphComponentRenderer,
                                                   oldGraphComponentRenderer]
             {
-                newGraphComponentRenderer->cloneCameraDataFrom(*oldGraphComponentRenderer);
+                newGraphComponentRenderer->cloneViewDataFrom(*oldGraphComponentRenderer);
                 setComponentId(newComponentId);
             }, "GraphComponentScene::onComponentsWillMerge (clone camera data, set component ID)");
             break;
