@@ -66,10 +66,10 @@ void OpenGLWindow::setScene(Scene* scene)
         _scene->setInitialised();
     }
 
+    resize();
+
     _scene->setVisible(true);
     _scene->onShow();
-
-    resize();
 }
 
 void OpenGLWindow::enableInteraction()
