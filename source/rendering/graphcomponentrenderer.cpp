@@ -580,7 +580,7 @@ void GraphComponentRenderer::submitDebugLines()
     }
 }
 
-void GraphComponentRenderer::render(int x, int y, int width, int height)
+void GraphComponentRenderer::render(int x, int y, int width, int height, float alpha)
 {
     if(!_FBOcomplete)
         return;
@@ -625,30 +625,31 @@ void GraphComponentRenderer::render(int x, int y, int width, int height)
     QMatrix4x4 m;
     m.ortho(0, _viewportWidth, 0, _viewportHeight, -1.0f, 1.0f);
 
-    QRect r;
-    r.setLeft(x);
-    r.setRight(r.left() + width);
-    r.setTop(_viewportHeight - y);
-    r.setBottom(r.top() - height);
+    QRect rect;
+    rect.setLeft(x);
+    rect.setRight(rect.left() + width);
+    rect.setTop(_viewportHeight - y);
+    rect.setBottom(rect.top() - height);
 
-    std::vector<GLfloat> data;
+    GLfloat l = static_cast<GLfloat>(rect.left());
+    GLfloat r = static_cast<GLfloat>(rect.right());
+    GLfloat b = static_cast<GLfloat>(rect.bottom());
+    GLfloat t = static_cast<GLfloat>(rect.top());
+    GLfloat w = static_cast<GLfloat>(_width);
+    GLfloat h = static_cast<GLfloat>(_height);
+    GLfloat data[] =
+    {
+        l, b, 0, 0, 1.0f, 1.0f, 1.0f, alpha,
+        r, b, w, 0, 1.0f, 1.0f, 1.0f, alpha,
+        r, t, w, h, 1.0f, 1.0f, 1.0f, alpha,
 
-    data.push_back(r.left());  data.push_back(r.bottom());
-    data.push_back(0);         data.push_back(0);
-    data.push_back(r.right()); data.push_back(r.bottom());
-    data.push_back(_width);    data.push_back(0);
-    data.push_back(r.right()); data.push_back(r.top());
-    data.push_back(_width);    data.push_back(_height);
-
-    data.push_back(r.right()); data.push_back(r.top());
-    data.push_back(_width);    data.push_back(_height);
-    data.push_back(r.left());  data.push_back(r.top());
-    data.push_back(0);         data.push_back(_height);
-    data.push_back(r.left());  data.push_back(r.bottom());
-    data.push_back(0);         data.push_back(0);
+        r, t, w, h, 1.0f, 1.0f, 1.0f, alpha,
+        l, t, 0, h, 1.0f, 1.0f, 1.0f, alpha,
+        l, b, 0, 0, 1.0f, 1.0f, 1.0f, alpha,
+    };
 
     _screenQuadDataBuffer.bind();
-    _screenQuadDataBuffer.allocate(data.data(), static_cast<int>(data.size()) * sizeof(GLfloat));
+    _screenQuadDataBuffer.allocate(data, static_cast<int>(sizeof(data)));
 
     _screenQuadVAO.bind();
     _funcs->glActiveTexture(GL_TEXTURE0);
@@ -1069,16 +1070,20 @@ void GraphComponentRenderer::prepareQuad()
     _shared->_screenShader.bind();
     _shared->_screenShader.enableAttributeArray("position");
     _shared->_screenShader.enableAttributeArray("texCoord");
-    _shared->_screenShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 4 * sizeof(GLfloat));
-    _shared->_screenShader.setAttributeBuffer("texCoord", GL_FLOAT, 2 * sizeof(GLfloat), 2, 4 * sizeof(GLfloat)); //FIXME GL_INT?
+    _shared->_screenShader.enableAttributeArray("color");
+    _shared->_screenShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 8 * sizeof(GLfloat));
+    _shared->_screenShader.setAttributeBuffer("texCoord", GL_FLOAT, 2 * sizeof(GLfloat), 2, 8 * sizeof(GLfloat)); //FIXME GL_INT?
+    _shared->_screenShader.setAttributeBuffer("color", GL_FLOAT, 4 * sizeof(GLfloat), 4, 8 * sizeof(GLfloat));
     _shared->_screenShader.setUniformValue("frameBufferTexture", 0);
     _shared->_screenShader.release();
 
     _shared->_selectionShader.bind();
     _shared->_selectionShader.enableAttributeArray("position");
     _shared->_selectionShader.enableAttributeArray("texCoord");
-    _shared->_selectionShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 4 * sizeof(GLfloat));
-    _shared->_selectionShader.setAttributeBuffer("texCoord", GL_FLOAT, 2 * sizeof(GLfloat), 2, 4 * sizeof(GLfloat)); //FIXME GL_INT?
+    _shared->_selectionShader.enableAttributeArray("color");
+    _shared->_selectionShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 8 * sizeof(GLfloat));
+    _shared->_selectionShader.setAttributeBuffer("texCoord", GL_FLOAT, 2 * sizeof(GLfloat), 2, 8 * sizeof(GLfloat)); //FIXME GL_INT?
+    _shared->_selectionShader.setAttributeBuffer("color", GL_FLOAT, 4 * sizeof(GLfloat), 4, 8 * sizeof(GLfloat));
     _shared->_selectionShader.setUniformValue("frameBufferTexture", 0);
     _shared->_selectionShader.release();
 

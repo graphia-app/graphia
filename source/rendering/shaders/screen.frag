@@ -2,6 +2,7 @@
 
 in vec2 vPosition;
 in vec2 vTexCoord;
+in vec4 vColor;
 
 layout (location = 0) out vec4 fragColor;
 
@@ -20,7 +21,7 @@ vec4 multisampledValue(ivec2 coord)
 
     vec4 color = vec4(rgb / a, a / 4.0);
 
-    return color;
+    return color * vColor;
 }
 
 void main()

@@ -67,7 +67,7 @@ public:
 
     void cleanup();
     void update(float t);
-    void render(int x, int y, int width = 0, int height = 0);
+    void render(int x, int y, int width = 0, int height = 0, float alpha = 1.0f);
     void resize(int width, int height);
     void resizeViewport(int width, int height);
 
