@@ -28,11 +28,10 @@ public:
         _graph(&graph)
     {}
 
-    GraphArray(const GraphArray& other) :
-        _graph(&other._graph)
+    GraphArray(GraphArray& other) :
+        _graph(other._graph)
     {
-        for(auto e : other._array)
-            _array.push_back(e);
+        _array = other._array;
     }
 
     GraphArray(GraphArray&& other) :
@@ -127,7 +126,7 @@ public:
         graph._nodeArrayList.insert(this);
     }
 
-    NodeArray(const NodeArray& other) : GraphArray<NodeId, Element>(other)
+    NodeArray(NodeArray& other) : GraphArray<NodeId, Element>(other)
     {
         this->_graph->_nodeArrayList.insert(this);
     }
@@ -166,7 +165,7 @@ public:
         graph._edgeArrayList.insert(this);
     }
 
-    EdgeArray(const EdgeArray& other) : GraphArray<EdgeId, Element>(other)
+    EdgeArray(EdgeArray& other) : GraphArray<EdgeId, Element>(other)
     {
         this->_graph->_edgeArrayList.insert(this);
     }
@@ -205,7 +204,7 @@ public:
         graph._componentManager->_componentArrayList.insert(this);
     }
 
-    ComponentArray(const ComponentArray& other) : GraphArray<ComponentId, Element>(other)
+    ComponentArray(ComponentArray& other) : GraphArray<ComponentId, Element>(other)
     {
         this->_graph->_componentManager->_componentArrayList.insert(this);
     }
