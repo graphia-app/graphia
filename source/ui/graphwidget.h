@@ -92,8 +92,8 @@ private:
 private slots:
     void onGraphChanged(const Graph* graph);
     void onNodeWillBeRemoved(const Graph* graph, NodeId nodeId);
-    void onComponentAdded(const Graph*, ComponentId componentId);
-    void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId);
+    void onComponentAdded(const Graph*, ComponentId componentId, bool);
+    void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool);
 
     void onSelectionChanged(const SelectionManager*);
 

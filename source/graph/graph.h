@@ -152,6 +152,38 @@ public:
 #endif
 };
 
+class ComponentSplitSet
+{
+private:
+    ComponentId _oldComponentId;
+    ElementIdSet<ComponentId> _splitters;
+
+public:
+    ComponentSplitSet(ComponentId oldComponentId, ElementIdSet<ComponentId>&& splitters) :
+        _oldComponentId(oldComponentId), _splitters(splitters)
+    {
+    }
+
+    ComponentId oldComponentId() const { return _oldComponentId; }
+    const ElementIdSet<ComponentId>& splitters() const { return _splitters; }
+};
+
+class ComponentMergeSet
+{
+private:
+    ElementIdSet<ComponentId> _mergers;
+    ComponentId _newComponentId;
+
+public:
+    ComponentMergeSet(ElementIdSet<ComponentId>&& mergers, ComponentId newComponentId) :
+        _mergers(mergers), _newComponentId(newComponentId)
+    {
+    }
+
+    const ElementIdSet<ComponentId>& mergers() const { return _mergers; }
+    ComponentId newComponentId() const { return _newComponentId; }
+};
+
 class Node
 {
     friend class Graph;
@@ -344,10 +376,10 @@ signals:
     void nodeWillBeRemoved(const Graph*, NodeId) const;
     void edgeAdded(const Graph*, EdgeId) const;
     void edgeWillBeRemoved(const Graph*, EdgeId) const;
-    void componentAdded(const Graph*, ComponentId) const;
-    void componentWillBeRemoved(const Graph*, ComponentId) const;
-    void componentSplit(const Graph*, ComponentId, const ElementIdSet<ComponentId>&) const;
-    void componentsWillMerge(const Graph*, const ElementIdSet<ComponentId>&, ComponentId) const;
+    void componentAdded(const Graph*, ComponentId, bool) const;
+    void componentWillBeRemoved(const Graph*, ComponentId, bool) const;
+    void componentSplit(const Graph*, const ComponentSplitSet&) const;
+    void componentsWillMerge(const Graph*, const ComponentMergeSet&) const;
 };
 
 #endif // GRAPH_H

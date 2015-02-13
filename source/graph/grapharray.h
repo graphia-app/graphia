@@ -35,7 +35,7 @@ public:
     }
 
     GraphArray(GraphArray&& other) :
-        _graph(&other._graph),
+        _graph(other._graph),
         _array(std::move(other._array))
     {}
 

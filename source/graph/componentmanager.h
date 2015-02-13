@@ -80,10 +80,10 @@ public:
     virtual ComponentId componentIdOfEdge(EdgeId edgeId) const = 0;
 
 signals:
-    void componentAdded(const Graph*, ComponentId) const;
-    void componentWillBeRemoved(const Graph*, ComponentId) const;
-    void componentSplit(const Graph*, ComponentId, const ElementIdSet<ComponentId>&) const;
-    void componentsWillMerge(const Graph*, const ElementIdSet<ComponentId>&, ComponentId) const;
+    void componentAdded(const Graph*, ComponentId, bool) const;
+    void componentWillBeRemoved(const Graph*, ComponentId, bool) const;
+    void componentSplit(const Graph*, const ComponentSplitSet&) const;
+    void componentsWillMerge(const Graph*, const ComponentMergeSet&) const;
 };
 
 #endif // COMPONENTMANAGER_H

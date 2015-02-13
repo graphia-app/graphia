@@ -105,17 +105,17 @@ bool GraphComponentScene::viewIsReset()
 
 GraphComponentRenderer* GraphComponentScene::renderer()
 {
-    return GraphComponentRenderersReference::renderer(_componentId);
+    return rendererForComponentId(_componentId);
 }
 
-void GraphComponentScene::onComponentSplit(const Graph* graph, ComponentId oldComponentId,
-                                           const ElementIdSet<ComponentId>& splitters)
+void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet)
 {
+    auto oldComponentId = componentSplitSet.oldComponentId();
     if(oldComponentId == _componentId)
     {
         ComponentId largestSplitter;
 
-        for(auto splitter : splitters)
+        for(auto splitter : componentSplitSet.splitters())
         {
 
             if(largestSplitter.isNull())
@@ -130,7 +130,7 @@ void GraphComponentScene::onComponentSplit(const Graph* graph, ComponentId oldCo
             }
         }
 
-        auto oldGraphComponentRenderer = GraphComponentRenderersReference::renderer(oldComponentId); 
+        auto oldGraphComponentRenderer = rendererForComponentId(oldComponentId);
 
         _graphWidget->executeOnRendererThread([this, largestSplitter,
                                               oldGraphComponentRenderer]
@@ -147,7 +147,7 @@ void GraphComponentScene::onComponentSplit(const Graph* graph, ComponentId oldCo
 
             Q_ASSERT(!newComponentId.isNull());
 
-            auto newGraphComponentRenderer = GraphComponentRenderersReference::renderer(newComponentId);
+            auto newGraphComponentRenderer = rendererForComponentId(newComponentId);
 
             newGraphComponentRenderer->cloneViewDataFrom(*oldGraphComponentRenderer);
             setComponentId(newComponentId);
@@ -155,15 +155,15 @@ void GraphComponentScene::onComponentSplit(const Graph* graph, ComponentId oldCo
     }
 }
 
-void GraphComponentScene::onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers,
-                                                ComponentId newComponentId)
+void GraphComponentScene::onComponentsWillMerge(const Graph*, const ComponentMergeSet& componentMergeSet)
 {
-    for(auto merger : mergers)
+    for(auto merger : componentMergeSet.mergers())
     {
         if(merger == _componentId)
         {
-            auto newGraphComponentRenderer = GraphComponentRenderersReference::renderer(newComponentId);
-            auto oldGraphComponentRenderer = GraphComponentRenderersReference::renderer(_componentId);
+            auto newComponentId = componentMergeSet.newComponentId();
+            auto newGraphComponentRenderer = rendererForComponentId(newComponentId);
+            auto oldGraphComponentRenderer = rendererForComponentId(_componentId);
             _graphWidget->executeOnRendererThread([this, newComponentId,
                                                   newGraphComponentRenderer,
                                                   oldGraphComponentRenderer]
@@ -176,7 +176,7 @@ void GraphComponentScene::onComponentsWillMerge(const Graph*, const ElementIdSet
     }
 }
 
-void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
+void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool)
 {
     if(visible())
     {

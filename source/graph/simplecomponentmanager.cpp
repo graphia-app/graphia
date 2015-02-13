@@ -85,13 +85,13 @@ void SimpleComponentManager::updateComponents(const Graph* graph)
                 {
                     // More than one old component IDs were observed so components have merged
                     if(_debug) qDebug() << "componentsWillMerge" << componentIdsAffected << "->" << oldComponentId;
-                    emit componentsWillMerge(graph, componentIdsAffected, oldComponentId);
+                    emit componentsWillMerge(graph, ComponentMergeSet(std::move(componentIdsAffected), oldComponentId));
                     componentIdsAffected.erase(oldComponentId);
 
                     for(ComponentId removedComponentId : componentIdsAffected)
                     {
                         if(_debug) qDebug() << "componentWillBeRemoved" << removedComponentId;
-                        emit componentWillBeRemoved(graph, removedComponentId);
+                        emit componentWillBeRemoved(graph, removedComponentId, true);
                         removeGraphComponent(removedComponentId);
                     }
                 }
@@ -127,7 +127,7 @@ void SimpleComponentManager::updateComponents(const Graph* graph)
     {
         // Component removed
         if(_debug) qDebug() << "componentWillBeRemoved" << componentId;
-        emit componentWillBeRemoved(graph, componentId);
+        emit componentWillBeRemoved(graph, componentId, false);
 
         removeGraphComponent(componentId);
     }
@@ -150,19 +150,19 @@ void SimpleComponentManager::updateComponents(const Graph* graph)
             if(splitter != splitee.first)
             {
                 if(_debug) qDebug() << "componentAdded" << splitter;
-                emit componentAdded(graph, splitter);
+                emit componentAdded(graph, splitter, true);
             }
         }
 
         if(_debug) qDebug() << "componentSplit" << splitee.first << "->" << splitters;
-        emit componentSplit(graph, splitee.first, splitters);
+        emit componentSplit(graph, ComponentSplitSet(splitee.first, std::move(splitters)));
     }
 
     // Notify all the new components
     for(ComponentId newComponentId : newComponentIds)
     {
         if(_debug) qDebug() << "componentAdded" << newComponentId;
-        emit componentAdded(graph, newComponentId);
+        emit componentAdded(graph, newComponentId, false);
     }
 }
 

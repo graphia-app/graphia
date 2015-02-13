@@ -54,10 +54,10 @@ private slots:
     void onGraphWillChange(const Graph*);
     void onGraphChanged(const Graph* graph);
 
-    void onComponentAdded(const Graph*, ComponentId componentId);
-    void onComponentWillBeRemoved(const Graph*, ComponentId componentId);
-    void onComponentSplit(const Graph*, ComponentId splitter, const ElementIdSet<ComponentId>& splitters);
-    void onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers, ComponentId merger);
+    void onComponentAdded(const Graph*, ComponentId componentId, bool);
+    void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
+    void onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet);
+    void onComponentsWillMerge(const Graph*, const ComponentMergeSet& componentMergeSet);
 
 public:
     std::shared_ptr<GraphModel> graphModel() { return _graphModel; }

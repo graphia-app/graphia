@@ -39,9 +39,9 @@ void GraphOverviewInteractor::mouseDoubleClickEvent(QMouseEvent* mouseEvent)
 
     for(auto componentId : _graphModel->graph().componentIds())
     {
-        auto& rect = componentLayout[componentId];
+        auto& layoutData = componentLayout[componentId];
 
-        if(rect.contains(mouseEvent->pos()))
+        if(layoutData._rect.contains(mouseEvent->pos()))
         {
             _graphWidget->switchToComponentMode(componentId);
             break;

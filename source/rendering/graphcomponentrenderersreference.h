@@ -24,23 +24,9 @@ private:
     std::shared_ptr<ComponentArray<GraphComponentRendererManager>> _rendererManagers;
 
 public:
-    void setGraphComponentRendererManagers(std::shared_ptr<ComponentArray<GraphComponentRendererManager>> rendererManagers)
-    {
-        _rendererManagers = rendererManagers;
-    }
-
-    ComponentArray<GraphComponentRendererManager>& rendererManagers()
-    {
-        return *_rendererManagers.get();
-    }
-
-    GraphComponentRenderer* renderer(ComponentId componentId)
-    {
-        if(componentId.isNull())
-            return nullptr;
-
-        return _rendererManagers->at(componentId).get();
-    }
+    void setGraphComponentRendererManagers(std::shared_ptr<ComponentArray<GraphComponentRendererManager>> rendererManagers);
+    ComponentArray<GraphComponentRendererManager>& rendererManagers();
+    GraphComponentRenderer* rendererForComponentId(ComponentId componentId);
 };
 
 #endif // GRAPHCOMPONENTRENDERERSREFERENCE_CPP

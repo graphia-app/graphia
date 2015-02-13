@@ -7,6 +7,8 @@
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
 
+#include "../rendering/transition.h"
+
 #include <QRect>
 
 class GraphWidget;
@@ -28,7 +30,17 @@ public:
     void onShow();
     void onHide();
 
-    const ComponentArray<QRect>& componentLayout() { return _componentLayout; }
+    struct LayoutData
+    {
+        LayoutData() : _alpha(1.0f) {}
+        LayoutData(const QRect& rect, float alpha) :
+            _rect(rect), _alpha(alpha) {}
+
+        QRect _rect;
+        float _alpha;
+    };
+
+    const ComponentArray<LayoutData>& componentLayout() { return _componentLayout; }
 
     void zoom(float delta);
     int renderSizeDivisor() { return _renderSizeDivisor; }
@@ -46,12 +58,22 @@ private:
 
     QOpenGLFunctions_3_3_Core* _funcs;
 
-    ComponentArray<QRect> _componentLayout;
+    ComponentArray<LayoutData> _previousComponentLayout;
+    ComponentArray<LayoutData> _componentLayout;
     void layoutComponents();
 
+    std::vector<ComponentId> _transitionComponentIds;
+    std::vector<ComponentMergeSet> _componentMergeSets;
+    Transition _transition;
+    void startTransition();
+
 private slots:
+    void onGraphWillChange(const Graph* graph);
     void onGraphChanged(const Graph* graph);
-    void onComponentSplit(const Graph* graph, ComponentId oldComponentId, const ElementIdSet<ComponentId>& splitters);
+    void onComponentAdded(const Graph* graph, ComponentId componentId, bool hasSplit);
+    void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool hasMerged);
+    void onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet);
+    void onComponentsWillMerge(const Graph* graph, const ComponentMergeSet& componentMergeSet);
 };
 
 #endif // GRAPHOVERVIEWSCENE_H

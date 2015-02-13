@@ -56,6 +56,7 @@ public:
     GraphComponentRenderer();
 
     static const int multisamples = 4;
+    static constexpr float TRANSITION_DURATION = 1.0f;
 
     void initialise(std::shared_ptr<GraphModel> graphModel, ComponentId componentId,
                     GraphWidget& graphWidget,
@@ -111,6 +112,11 @@ public:
     void saveViewData() { _savedViewData = _viewData; }
     void restoreViewData() { _viewData = _savedViewData; }
 
+    bool initialised() { return _initialised; }
+
+    void freeze();
+    void thaw();
+
 private:
     GraphWidget* _graphWidget;
     std::shared_ptr<GraphComponentRendererShared> _shared;
@@ -119,6 +125,9 @@ private:
 
     bool _initialised;
     bool _visible;
+
+    bool _frozen;
+    bool _cleanupWhenThawed;
 
     struct ViewData
     {

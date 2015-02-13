@@ -112,34 +112,34 @@ void MainWidget::onGraphChanged(const Graph*)
     resumeLayout(true);
 }
 
-void MainWidget::onComponentAdded(const Graph*, ComponentId componentId)
+void MainWidget::onComponentAdded(const Graph*, ComponentId componentId, bool)
 {
     if(_nodeLayoutThread)
         _nodeLayoutThread->addComponent(componentId);
 }
 
-void MainWidget::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
+void MainWidget::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool)
 {
     if(_nodeLayoutThread)
         _nodeLayoutThread->removeComponent(componentId);
 }
 
-void MainWidget::onComponentSplit(const Graph*, ComponentId /*splitter*/, const ElementIdSet<ComponentId>& splitters)
+void MainWidget::onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet)
 {
     if(_nodeLayoutThread)
     {
-        for(ComponentId componentId : splitters)
+        for(ComponentId componentId : componentSplitSet.splitters())
             _nodeLayoutThread->addComponent(componentId);
     }
 }
 
-void MainWidget::onComponentsWillMerge(const Graph*, const ElementIdSet<ComponentId>& mergers, ComponentId merger)
+void MainWidget::onComponentsWillMerge(const Graph*, const ComponentMergeSet& componentMergeSet)
 {
     if(_nodeLayoutThread)
     {
-        for(ComponentId componentId : mergers)
+        for(ComponentId componentId : componentMergeSet.mergers())
         {
-            if(componentId != merger)
+            if(componentId != componentMergeSet.newComponentId())
                 _nodeLayoutThread->removeComponent(componentId);
         }
     }

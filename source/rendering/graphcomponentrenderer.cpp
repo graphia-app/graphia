@@ -75,6 +75,8 @@ GraphComponentRenderer::GraphComponentRenderer()
     : _graphWidget(nullptr),
       _initialised(false),
       _visible(false),
+      _frozen(false),
+      _cleanupWhenThawed(false),
       _width(0), _height(0),
       _colorTexture(0),
       _selectionTexture(0),
@@ -154,25 +156,51 @@ void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, 
 
 void GraphComponentRenderer::cleanup()
 {
-    _funcs->glDeleteFramebuffers(1, &_visualFBO);
-    _visualFBO = 0;
+    if(_frozen)
+    {
+        _cleanupWhenThawed = true;
+        return;
+    }
+
+    if(_visualFBO != 0)
+    {
+        _funcs->glDeleteFramebuffers(1, &_visualFBO);
+        _visualFBO = 0;
+    }
+
     _FBOcomplete = false;
 
-    _funcs->glDeleteTextures(1, &_colorTexture);
-    _colorTexture = 0;
-    _funcs->glDeleteTextures(1, &_selectionTexture);
-    _selectionTexture = 0;
-    _funcs->glDeleteTextures(1, &_depthTexture);
-    _depthTexture = 0;
+    if(_colorTexture != 0)
+    {
+        _funcs->glDeleteTextures(1, &_colorTexture);
+        _colorTexture = 0;
+    }
 
-    _numNodesInPositionData = 0;
+    if(_selectionTexture != 0)
+    {
+        _funcs->glDeleteTextures(1, &_selectionTexture);
+        _selectionTexture = 0;
+    }
+
+    if(_depthTexture != 0)
+    {
+        _funcs->glDeleteTextures(1, &_depthTexture);
+        _depthTexture = 0;
+    }
+
     _nodePositionData.clear();
-
-    _numEdgesInPositionData = 0;
+    _numNodesInPositionData = 0;
     _edgePositionData.clear();
+    _numEdgesInPositionData = 0;
 
     _nodeVisualData.clear();
     _edgeVisualData.clear();
+
+    _graphModel = nullptr;
+    _componentId.setToNull();
+    _graphWidget = nullptr;
+    _selectionManager = nullptr;
+    _shared = nullptr;
 
     _funcs = nullptr;
     _initialised = false;
@@ -183,8 +211,27 @@ void GraphComponentRenderer::cloneViewDataFrom(const GraphComponentRenderer& oth
     _viewData = other._viewData;
 }
 
+void GraphComponentRenderer::freeze()
+{
+    _frozen = true;
+}
+
+void GraphComponentRenderer::thaw()
+{
+    _frozen = false;
+
+    if(_cleanupWhenThawed)
+    {
+        cleanup();
+        _cleanupWhenThawed = false;
+    }
+}
+
 void GraphComponentRenderer::updatePositionalData()
 {
+    if(_frozen)
+        return;
+
     std::unique_lock<std::recursive_mutex> lock(_graphModel->nodePositions().mutex());
 
     auto component = _graphModel->graph().componentById(_componentId);
@@ -278,7 +325,7 @@ void GraphComponentRenderer::updateVisualData(When when)
 
 void GraphComponentRenderer::updateVisualDataIfRequired()
 {
-    if(!_visualDataRequiresUpdate)
+    if(!_visualDataRequiresUpdate || _frozen)
         return;
 
     auto component = _graphModel->graph().componentById(_componentId);
@@ -583,7 +630,11 @@ void GraphComponentRenderer::submitDebugLines()
 void GraphComponentRenderer::render(int x, int y, int width, int height, float alpha)
 {
     if(!_FBOcomplete)
+    {
+        qWarning() << "Attempting to render component" <<
+                      _componentId << "without a complete FBO";
         return;
+    }
 
     if(width <= 0)
         width = _width;
@@ -828,7 +879,7 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& viewTarge
         {
             _graphWidget->rendererStartedTransition();
         }
-        _panTransition.start(0.3f, transitionType,
+        _panTransition.start(TRANSITION_DURATION, transitionType,
             [=](float f)
             {
                 _viewData._camera.setPosition(Utils::interpolate(startPosition, position, f));

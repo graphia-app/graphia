@@ -54,9 +54,9 @@ private:
     QOpenGLFunctions_3_3_Core* _funcs;
 
 private slots:
-    void onComponentSplit(const Graph* graph, ComponentId oldComponentId, const ElementIdSet<ComponentId>& splitters);
-    void onComponentsWillMerge(const Graph* graph, const ElementIdSet<ComponentId>& mergers, ComponentId newComponentId);
-    void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId);
+    void onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet);
+    void onComponentsWillMerge(const Graph* graph, const ComponentMergeSet& componentMergeSet);
+    void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool);
     void onGraphChanged(const Graph* graph);
 };
 

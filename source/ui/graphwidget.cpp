@@ -71,7 +71,7 @@ void GraphWidget::initialise()
     Graph* graph = &_graphModel->graph();
 
     for(auto componentId : graph->componentIds())
-        onComponentAdded(graph, componentId);
+        onComponentAdded(graph, componentId, false);
 
     onGraphChanged(graph);
 
@@ -151,7 +151,7 @@ void GraphWidget::switchToComponentMode(ComponentId componentId)
         else
             _graphComponentScene->setComponentId(componentId);
 
-        // Go back to where we before
+        // Go back to where we were before
         _graphComponentScene->restoreViewData();
 
         _openGLWindow->setScene(_graphComponentScene);
@@ -221,12 +221,22 @@ void GraphWidget::onGraphChanged(const Graph* graph)
 
     for(auto componentId : graph->componentIds())
     {
-        auto graphComponentRenderer = _graphComponentRendererManagers->at(componentId).get();
-
-        executeOnRendererThread([this,  graphComponentRenderer]
+        executeOnRendererThread([this, componentId]
         {
-            graphComponentRenderer->updateVisualData();
-            graphComponentRenderer->updatePositionalData();
+            auto graphComponentRenderer = _graphComponentRendererManagers->at(componentId).get();
+
+            makeContextCurrent();
+            if(!graphComponentRenderer->initialised())
+            {
+                graphComponentRenderer->initialise(_graphModel, componentId, *this,
+                                                   _selectionManager,
+                                                   _graphComponentRendererShared);
+            }
+            else
+            {
+                graphComponentRenderer->updateVisualData();
+                graphComponentRenderer->updatePositionalData();
+            }
 
             // Graph changes may significantly alter the centre; ease the transition
             if(_initialised && graphComponentRenderer->focusNodeId().isNull())
@@ -251,7 +261,7 @@ void GraphWidget::onNodeWillBeRemoved(const Graph* graph, NodeId nodeId)
     }
 }
 
-void GraphWidget::onComponentAdded(const Graph*, ComponentId componentId)
+void GraphWidget::onComponentAdded(const Graph*, ComponentId componentId, bool)
 {
     auto graphComponentRenderer = _graphComponentRendererManagers->at(componentId).get();
     executeOnRendererThread([this, graphComponentRenderer, componentId]
@@ -263,7 +273,7 @@ void GraphWidget::onComponentAdded(const Graph*, ComponentId componentId)
     }, "GraphWidget::onComponentAdded");
 }
 
-void GraphWidget::onComponentWillBeRemoved(const Graph*, ComponentId componentId)
+void GraphWidget::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool)
 {
     auto graphComponentRenderer = _graphComponentRendererManagers->at(componentId).get();
     executeOnRendererThread([this, graphComponentRenderer]
