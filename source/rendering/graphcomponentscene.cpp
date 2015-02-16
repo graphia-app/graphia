@@ -183,12 +183,10 @@ void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId com
 }
 
 void GraphComponentScene::onGraphChanged(const Graph*)
-{
-    if(visible())
+{  
+    _graphWidget->executeOnRendererThread([this]
     {
-        _graphWidget->executeOnRendererThread([this]
-        {
+        if(visible())
             resize(_width, _height);
-        }, "GraphComponentScene::onGraphChanged (resize)");
-    }
+    }, "GraphComponentScene::onGraphChanged (resize)");
 }
