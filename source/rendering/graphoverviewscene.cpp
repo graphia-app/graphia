@@ -271,6 +271,9 @@ void GraphOverviewScene::onComponentAdded(const Graph*, ComponentId componentId,
 
 void GraphOverviewScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool hasMerged)
 {
+    if(!visible())
+        return;
+
     if(!hasMerged)
     {
         auto renderer = rendererForComponentId(componentId);
@@ -301,6 +304,9 @@ void GraphOverviewScene::onComponentSplit(const Graph*, const ComponentSplitSet&
 
 void GraphOverviewScene::onComponentsWillMerge(const Graph*, const ComponentMergeSet& componentMergeSet)
 {
+    if(!visible())
+        return;
+
     _componentMergeSets.emplace_back(componentMergeSet);
 
     for(auto merger : componentMergeSet.mergers())
