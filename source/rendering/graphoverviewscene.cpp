@@ -105,36 +105,6 @@ void GraphOverviewScene::render()
     }
 }
 
-void GraphOverviewScene::resize(int width, int height)
-{
-    _width = width;
-    _height = height;
-
-    int size = height;
-
-    for(auto componentId : _graphModel->graph().componentIds())
-    {
-        auto renderer = rendererForComponentId(componentId);
-        int divisor =_renderSizeDivisors[componentId];
-        int dividedSize = size / (divisor * _renderSizeDivisor);
-
-        const int MINIMUM_SIZE = 32;
-        if(size > MINIMUM_SIZE)
-        {
-            while(dividedSize < MINIMUM_SIZE && divisor > 1)
-            {
-                divisor /= 2;
-                dividedSize = size / (divisor * _renderSizeDivisor);
-            }
-        }
-
-        renderer->resizeViewport(width, height);
-        renderer->resize(dividedSize, dividedSize);
-    }
-
-    layoutComponents();
-}
-
 void GraphOverviewScene::onShow()
 {
     for(auto componentId : _graphModel->graph().componentIds())
@@ -199,20 +169,31 @@ void GraphOverviewScene::layoutComponents()
         auto coord = coords.top();
         coords.pop();
 
-        auto renderer = rendererForComponentId(componentId);
+        int divisor =_renderSizeDivisors[componentId];
+        int dividedSize = _height / (divisor * _renderSizeDivisor);
 
-        if(!coords.empty() && (coord.x() + renderer->width() > coords.top().x() ||
-            coord.y() + renderer->height() > _height))
+        const int MINIMUM_SIZE = 32;
+        if(_height > MINIMUM_SIZE)
+        {
+            while(dividedSize < MINIMUM_SIZE && divisor > 1)
+            {
+                divisor /= 2;
+                dividedSize = _height / (divisor * _renderSizeDivisor);
+            }
+        }
+
+        if(!coords.empty() && (coord.x() + dividedSize > coords.top().x() ||
+            coord.y() + dividedSize > _height))
         {
             coord = coords.top();
             coords.pop();
         }
 
-        auto rect = QRect(coord.x(), coord.y(), renderer->width(), renderer->height());
+        auto rect = QRect(coord.x(), coord.y(), dividedSize, dividedSize);
         _componentLayout[componentId] = LayoutData(rect, 1.0f);
 
-        QPoint right(coord.x() + renderer->width(), coord.y());
-        QPoint down(coord.x(), coord.y() + renderer->height());
+        QPoint right(coord.x() + dividedSize, coord.y());
+        QPoint down(coord.x(), coord.y() + dividedSize);
 
         if(coords.empty() || right.x() < coords.top().x())
             coords.emplace(right);
@@ -220,6 +201,49 @@ void GraphOverviewScene::layoutComponents()
         if(down.y() < _height)
             coords.emplace(down);
     }
+
+    // If the component is fading in, keep it in a fixed position
+    for(auto componentId : _graphModel->graph().componentIds())
+    {
+        if(_previousComponentLayout[componentId]._alpha == 0.0f)
+        {
+            _previousComponentLayout[componentId]._rect =
+                    _componentLayout[componentId]._rect;
+        }
+    }
+
+    for(auto componentMergeSet : _componentMergeSets)
+    {
+        auto newComponentId = componentMergeSet.newComponentId();
+
+        for(auto merger : componentMergeSet.mergers())
+            _componentLayout[merger] = _componentLayout[newComponentId];
+    }
+}
+
+void GraphOverviewScene::resize(int width, int height)
+{
+    _width = width;
+    _height = height;
+
+    layoutComponents();
+
+    auto resizeComponent = [this](ComponentId componentId)
+    {
+        int previousSize = _previousComponentLayout[componentId]._rect.height();
+        int newSize = _componentLayout[componentId]._rect.height();
+        int maxSize = std::max(previousSize, newSize);
+
+        auto renderer = rendererForComponentId(componentId);
+        renderer->resizeViewport(_width, _height);
+        renderer->resize(maxSize, maxSize);
+    };
+
+    for(auto componentId : _graphModel->graph().componentIds())
+        resizeComponent(componentId);
+
+    for(auto componentId : _transitionComponentIds)
+        resizeComponent(componentId);
 }
 
 static GraphOverviewScene::LayoutData interpolateLayout(const GraphOverviewScene::LayoutData& a,
@@ -236,21 +260,7 @@ static GraphOverviewScene::LayoutData interpolateLayout(const GraphOverviewScene
 
 void GraphOverviewScene::startTransition()
 {
-    // If the component is fading in, keep it in a fixed position
-    for(auto componentId : _graphModel->graph().componentIds())
-    {
-        auto& layoutData = _previousComponentLayout[componentId];
-        if(layoutData._alpha == 0.0f)
-            layoutData._rect = _componentLayout[componentId]._rect;
-    }
-
-    for(auto componentMergeSet : _componentMergeSets)
-    {
-        auto newComponentId = componentMergeSet.newComponentId();
-
-        for(auto merger : componentMergeSet.mergers())
-            _componentLayout[merger] = _componentLayout[newComponentId];
-    }
+    resize(_width, _height);
 
     auto targetComponentLayout = _componentLayout;
 
@@ -272,6 +282,9 @@ void GraphOverviewScene::startTransition()
     },
     [this]
     {
+        _previousComponentLayout = _componentLayout;
+        resize(_width, _height);
+
         for(auto componentId : _transitionComponentIds)
         {
             auto renderer = rendererForComponentId(componentId);
@@ -367,7 +380,6 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph)
     {
         _graphWidget->executeOnRendererThread([this]
         {
-            resize(_width, _height);
             onShow();
             startTransition();
         }, "GraphOverviewScene::onGraphChanged (resize)");
