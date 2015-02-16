@@ -2,6 +2,7 @@
 #define DEFERREDEXECUTOR_H
 
 #include <mutex>
+#include <atomic>
 #include <deque>
 #include <functional>
 
@@ -22,6 +23,7 @@ private:
     std::mutex _mutex;
     std::deque<Task> _tasks;
     bool _debug;
+    std::atomic<bool> _executing;
 
 public:
     DeferredExecutor();

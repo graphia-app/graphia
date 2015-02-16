@@ -5,7 +5,8 @@
 #include <QDebug>
 #include <QtGlobal>
 
-DeferredExecutor::DeferredExecutor()
+DeferredExecutor::DeferredExecutor() :
+    _executing(false)
 {
     _debug = qgetenv("DEFERREDEXECUTOR_DEBUG").toInt();
 }
@@ -17,6 +18,9 @@ DeferredExecutor::~DeferredExecutor()
 
 void DeferredExecutor::enqueue(TaskFn function, const QString& description)
 {
+    if(_executing)
+        std::abort(); // Calling enqueue from execute
+
     std::unique_lock<std::mutex> lock(_mutex);
 
     Task task;
@@ -51,7 +55,9 @@ void DeferredExecutor::execute()
         if(_debug)
             qDebug() << "Executing" << task._description;
 
+        _executing = true;
         task._function();
+        _executing = false;
         _tasks.pop_front();
     }
 }
