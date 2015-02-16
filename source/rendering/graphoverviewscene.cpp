@@ -236,6 +236,14 @@ static GraphOverviewScene::LayoutData interpolateLayout(const GraphOverviewScene
 
 void GraphOverviewScene::startTransition()
 {
+    // If the component is fading in, keep it in a fixed position
+    for(auto componentId : _graphModel->graph().componentIds())
+    {
+        auto& layoutData = _previousComponentLayout[componentId];
+        if(layoutData._alpha == 0.0f)
+            layoutData._rect = _componentLayout[componentId]._rect;
+    }
+
     for(auto componentMergeSet : _componentMergeSets)
     {
         auto newComponentId = componentMergeSet.newComponentId();
@@ -289,6 +297,7 @@ void GraphOverviewScene::onComponentWillBeRemoved(const Graph*, ComponentId comp
         renderer->freeze();
 
         _transitionComponentIds.emplace_back(componentId);
+        _componentLayout[componentId]._alpha = 0.0f;
     }
 }
 
