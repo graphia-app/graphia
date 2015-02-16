@@ -131,12 +131,14 @@ void GraphWidget::switchToOverviewMode()
 {
     executeOnRendererThread([this]
     {
-        // When in overview mode we want the whole of each component to be visible
+        // So that we can return to the current view parameters later
         _graphComponentScene->saveViewData();
-        _graphComponentScene->resetView();
 
         _openGLWindow->setScene(_graphOverviewScene);
         _openGLWindow->setInteractor(_graphOverviewInteractor);
+
+        // When in overview mode we want the whole of each component to be visible
+        _graphOverviewScene->resetView();
 
         _mode = GraphWidget::Mode::Overview;
     }, "GraphWidget::switchToOverviewMode");

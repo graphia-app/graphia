@@ -171,6 +171,15 @@ void GraphOverviewScene::setRenderSizeDivisor(int divisor)
     resize(_width, _height);
 }
 
+void GraphOverviewScene::resetView(Transition::Type transitionType)
+{
+    for(auto componentId : _graphModel->graph().componentIds())
+    {
+        auto renderer = rendererForComponentId(componentId);
+        renderer->resetView(transitionType);
+    }
+}
+
 void GraphOverviewScene::layoutComponents()
 {
     auto& graph = _graphModel->graph();

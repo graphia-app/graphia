@@ -46,6 +46,8 @@ public:
     int renderSizeDivisor() { return _renderSizeDivisor; }
     void setRenderSizeDivisor(int divisor);
 
+    void resetView(Transition::Type transitionType = Transition::Type::EaseInEaseOut);
+
 private:
     GraphWidget* _graphWidget;
     std::shared_ptr<GraphModel> _graphModel;
