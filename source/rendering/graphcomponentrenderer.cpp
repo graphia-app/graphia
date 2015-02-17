@@ -646,7 +646,9 @@ void GraphComponentRenderer::render(int x, int y, int width, int height, float a
     _funcs->glEnable(GL_CULL_FACE);
     _funcs->glDisable(GL_BLEND);
 
-    _funcs->glViewport(0, 0, _width, _height);
+    int viewportWidth = std::min(width, _width);
+    int viewportHeight = std::min(height, _height);
+    _funcs->glViewport(0, _height - viewportHeight, viewportWidth, viewportHeight);
     _funcs->glBindFramebuffer(GL_FRAMEBUFFER, _visualFBO);
 
     // Color buffer
@@ -676,11 +678,13 @@ void GraphComponentRenderer::render(int x, int y, int width, int height, float a
     QMatrix4x4 m;
     m.ortho(0, _viewportWidth, 0, _viewportHeight, -1.0f, 1.0f);
 
+    int quadWidth = std::max(width, _width);
+    int quadHeight = std::max(height, _height);
     QRect rect;
     rect.setLeft(x);
-    rect.setRight(rect.left() + width);
+    rect.setRight(rect.left() + quadWidth);
     rect.setTop(_viewportHeight - y);
-    rect.setBottom(rect.top() - height);
+    rect.setBottom(rect.top() - quadHeight);
 
     GLfloat l = static_cast<GLfloat>(rect.left());
     GLfloat r = static_cast<GLfloat>(rect.right());
