@@ -110,6 +110,9 @@ GraphComponentRenderer* GraphComponentScene::renderer()
 
 void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet)
 {
+    if(!visible())
+        return;
+
     auto oldComponentId = componentSplitSet.oldComponentId();
     if(oldComponentId == _componentId)
     {
@@ -157,6 +160,9 @@ void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSp
 
 void GraphComponentScene::onComponentsWillMerge(const Graph*, const ComponentMergeSet& componentMergeSet)
 {
+    if(!visible())
+        return;
+
     for(auto merger : componentMergeSet.mergers())
     {
         if(merger == _componentId)
