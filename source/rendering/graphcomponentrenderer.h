@@ -128,6 +128,8 @@ private:
 
     bool _frozen;
     bool _cleanupWhenThawed;
+    bool _updateVisualDataWhenThawed;
+    bool _updatePositionDataWhenThawed;
 
     struct ViewData
     {

@@ -77,6 +77,8 @@ GraphComponentRenderer::GraphComponentRenderer()
       _visible(false),
       _frozen(false),
       _cleanupWhenThawed(false),
+      _updateVisualDataWhenThawed(false),
+      _updatePositionDataWhenThawed(false),
       _width(0), _height(0),
       _colorTexture(0),
       _selectionTexture(0),
@@ -220,6 +222,18 @@ void GraphComponentRenderer::thaw()
 {
     _frozen = false;
 
+    if(_updateVisualDataWhenThawed)
+    {
+        updateVisualData(When::Now);
+        _updateVisualDataWhenThawed = false;
+    }
+
+    if(_updatePositionDataWhenThawed)
+    {
+        updatePositionalData();
+        _updatePositionDataWhenThawed = false;
+    }
+
     if(_cleanupWhenThawed)
     {
         cleanup();
@@ -230,7 +244,10 @@ void GraphComponentRenderer::thaw()
 void GraphComponentRenderer::updatePositionalData()
 {
     if(_frozen)
+    {
+        _updatePositionDataWhenThawed = true;
         return;
+    }
 
     std::unique_lock<std::recursive_mutex> lock(_graphModel->nodePositions().mutex());
 
@@ -325,8 +342,14 @@ void GraphComponentRenderer::updateVisualData(When when)
 
 void GraphComponentRenderer::updateVisualDataIfRequired()
 {
-    if(!_visualDataRequiresUpdate || _frozen)
+    if(!_visualDataRequiresUpdate)
         return;
+
+    if(_frozen)
+    {
+        _updateVisualDataWhenThawed = true;
+        return;
+    }
 
     auto component = _graphModel->graph().componentById(_componentId);
 
