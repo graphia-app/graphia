@@ -181,9 +181,9 @@ void GraphComponentScene::onComponentsWillMerge(const Graph*, const ComponentMer
     }
 }
 
-void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool)
+void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool hasMerged)
 {
-    if(visible() && componentId == _componentId)
+    if(visible() && componentId == _componentId && !hasMerged)
         _graphWidget->switchToOverviewMode();
 }
 
