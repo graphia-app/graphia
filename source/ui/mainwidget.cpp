@@ -151,10 +151,16 @@ void MainWidget::pauseLayout(bool autoResume)
 
     if(_nodeLayoutThread)
     {
-        if(autoResume && !_nodeLayoutThread->paused())
-            _autoResume++;
+        if(!autoResume)
+            _nodeLayoutThread->pauseAndWait();
+        else
+        {
+            if(_autoResume > 0 || !_nodeLayoutThread->paused())
+                _autoResume++;
 
-        _nodeLayoutThread->pauseAndWait();
+            if(_autoResume == 1)
+                _nodeLayoutThread->pauseAndWait();
+        }
     }
 }
 
@@ -173,16 +179,19 @@ void MainWidget::resumeLayout(bool autoResume)
 {
     std::unique_lock<std::mutex> lock(_autoResumeMutex);
 
-    if(autoResume)
-    {
-        if(_autoResume == 0)
-            return;
-
-        _autoResume--;
-    }
-
     if(_nodeLayoutThread)
-        _nodeLayoutThread->resume();
+    {
+        if(!autoResume)
+            _nodeLayoutThread->resume();
+        else
+        {
+            if(_autoResume == 1)
+                _nodeLayoutThread->resume();
+
+            if(_autoResume > 0)
+                _autoResume--;
+        }
+    }
 }
 
 void MainWidget::selectAll()
