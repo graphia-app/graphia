@@ -290,6 +290,9 @@ void GraphOverviewScene::startTransition()
             auto renderer = rendererForComponentId(componentId);
             renderer->thaw();
         }
+
+        _transitionComponentIds.clear();
+        _componentMergeSets.clear();
     });
 }
 
@@ -353,9 +356,6 @@ void GraphOverviewScene::onGraphWillChange(const Graph*)
 {
     // Take a copy of the existing layout before the graph is changed
     _previousComponentLayout = _componentLayout;
-
-    _transitionComponentIds.clear();
-    _componentMergeSets.clear();
 }
 
 void GraphOverviewScene::onGraphChanged(const Graph* graph)
