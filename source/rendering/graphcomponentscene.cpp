@@ -138,15 +138,14 @@ void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSp
         _graphWidget->executeOnRendererThread([this, largestSplitter,
                                               oldGraphComponentRenderer]
         {
-            auto oldFocusNodeId = oldGraphComponentRenderer->focusNodeId();
             auto& graph = _graphWidget->graphModel()->graph();
 
             ComponentId newComponentId;
 
-            if(oldFocusNodeId.isNull())
+            if(oldGraphComponentRenderer->trackingCentreOfComponent())
                 newComponentId = largestSplitter;
             else
-                newComponentId = graph.componentIdOfNode(oldFocusNodeId);
+                newComponentId = graph.componentIdOfNode(oldGraphComponentRenderer->focusNodeId());
 
             Q_ASSERT(!newComponentId.isNull());
 

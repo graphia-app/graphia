@@ -246,7 +246,7 @@ void GraphWidget::onGraphChanged(const Graph* graph)
             }
 
             // Graph changes may significantly alter the centre; ease the transition
-            if(_initialised && graphComponentRenderer->focusNodeId().isNull())
+            if(_initialised && graphComponentRenderer->trackingCentreOfComponent())
                 graphComponentRenderer->moveFocusToCentreOfComponent(Transition::Type::EaseInEaseOut);
 
             // Partner to the hack described above
