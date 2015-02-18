@@ -223,6 +223,11 @@ void GraphWidget::onGraphChanged(const Graph* graph)
 
     for(auto componentId : graph->componentIds())
     {
+        // This is a slight hack to prevent there being a gap in which
+        // layout can occur, inbetween the graph change and user
+        // interaction phases
+        rendererStartedTransition();
+
         executeOnRendererThread([this, componentId]
         {
             auto graphComponentRenderer = _graphComponentRendererManagers->at(componentId).get();
@@ -243,6 +248,9 @@ void GraphWidget::onGraphChanged(const Graph* graph)
             // Graph changes may significantly alter the centre; ease the transition
             if(_initialised && graphComponentRenderer->focusNodeId().isNull())
                 graphComponentRenderer->moveFocusToCentreOfComponent(Transition::Type::EaseInEaseOut);
+
+            // Partner to the hack described above
+            rendererFinishedTransition();
         }, QString("GraphWidget::onGraphChanged (moveFocusToCentreOfComponent) component %1").arg((int)componentId));
     }
 }
