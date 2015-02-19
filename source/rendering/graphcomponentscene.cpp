@@ -192,6 +192,12 @@ void GraphComponentScene::onGraphChanged(const Graph*)
     _graphWidget->executeOnRendererThread([this]
     {
         if(visible())
+        {
             resize(_width, _height);
-    }, "GraphComponentScene::onGraphChanged (resize)");
+
+            // Graph changes may significantly alter the centre; ease the transition
+            if(renderer()->trackingCentreOfComponent())
+                renderer()->moveFocusToCentreOfComponent(Transition::Type::EaseInEaseOut);
+        }
+    }, "GraphComponentScene::onGraphChanged (resize/moveFocusToCentreOfComponent)");
 }

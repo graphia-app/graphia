@@ -264,6 +264,9 @@ void GraphOverviewScene::startTransition()
 
     auto targetComponentLayout = _componentLayout;
 
+    if(_transition.finished())
+        _graphWidget->rendererStartedTransition();
+
     _transition.start(GraphComponentRenderer::TRANSITION_DURATION, Transition::Type::EaseInEaseOut,
     [this, targetComponentLayout /*FIXME C++14 move capture*/](float f)
     {
@@ -293,6 +296,8 @@ void GraphOverviewScene::startTransition()
 
         _transitionComponentIds.clear();
         _componentMergeSets.clear();
+
+        _graphWidget->rendererFinishedTransition();
     });
 }
 

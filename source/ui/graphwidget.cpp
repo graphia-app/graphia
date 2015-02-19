@@ -29,19 +29,22 @@ GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
     _graphComponentRendererShared(std::make_shared<GraphComponentRendererShared>(_openGLWindow->context())),
     _graphComponentRendererManagers(std::make_shared<ComponentArray<GraphComponentRendererManager>>(graphModel->graph())),
     _numTransitioningRenderers(0),
-    _graphOverviewScene(new GraphOverviewScene(this)),
-    _graphOverviewInteractor(new GraphOverviewInteractor(graphModel, _graphOverviewScene, commandManager, selectionManager, this)),
-    _graphComponentScene(new GraphComponentScene(this)),
-    _graphComponentInteractor(new GraphComponentInteractor(graphModel, _graphComponentScene, commandManager, selectionManager, this)),
     _mode(GraphWidget::Mode::Component)
 {
-    _graphOverviewScene->setGraphComponentRendererManagers(_graphComponentRendererManagers);
-    _graphComponentScene->setGraphComponentRendererManagers(_graphComponentRendererManagers);
-
     connect(&graphModel->graph(), &Graph::graphChanged, this, &GraphWidget::onGraphChanged, Qt::DirectConnection);
     connect(&graphModel->graph(), &Graph::nodeWillBeRemoved, this, &GraphWidget::onNodeWillBeRemoved, Qt::DirectConnection);
     connect(&graphModel->graph(), &Graph::componentAdded, this, &GraphWidget::onComponentAdded, Qt::DirectConnection);
     connect(&graphModel->graph(), &Graph::componentWillBeRemoved, this, &GraphWidget::onComponentWillBeRemoved, Qt::DirectConnection);
+
+    _graphOverviewScene = new GraphOverviewScene(this);
+    _graphOverviewScene->setGraphComponentRendererManagers(_graphComponentRendererManagers);
+    _graphOverviewInteractor = new GraphOverviewInteractor(graphModel, _graphOverviewScene,
+                                                           commandManager, selectionManager, this);
+
+    _graphComponentScene = new GraphComponentScene(this);
+    _graphComponentScene->setGraphComponentRendererManagers(_graphComponentRendererManagers);
+    _graphComponentInteractor = new GraphComponentInteractor(graphModel, _graphComponentScene,
+                                                             commandManager, selectionManager, this);
 
     connect(selectionManager.get(), &SelectionManager::selectionChanged, this, &GraphWidget::onSelectionChanged, Qt::DirectConnection);
 
@@ -223,6 +226,7 @@ void GraphWidget::onGraphChanged(const Graph* graph)
 
     for(auto componentId : graph->componentIds())
     {
+        //FIXME: this makes me feel dirty
         // This is a slight hack to prevent there being a gap in which
         // layout can occur, inbetween the graph change and user
         // interaction phases
@@ -245,13 +249,9 @@ void GraphWidget::onGraphChanged(const Graph* graph)
                 graphComponentRenderer->updatePositionalData();
             }
 
-            // Graph changes may significantly alter the centre; ease the transition
-            if(_initialised && graphComponentRenderer->trackingCentreOfComponent())
-                graphComponentRenderer->moveFocusToCentreOfComponent(Transition::Type::EaseInEaseOut);
-
             // Partner to the hack described above
             rendererFinishedTransition();
-        }, QString("GraphWidget::onGraphChanged (moveFocusToCentreOfComponent) component %1").arg((int)componentId));
+        }, QString("GraphWidget::onGraphChanged (initialise/update) component %1").arg((int)componentId));
     }
 }
 

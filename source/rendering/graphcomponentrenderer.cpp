@@ -414,7 +414,7 @@ void GraphComponentRenderer::update(float t)
             _panTransition.update(t);
         else if(_trackFocus)
         {
-            if(_viewData._focusNodeId.isNull())
+            if(trackingCentreOfComponent())
             {
                 if(_zoomTransition.finished() && _viewData._autoZooming)
                     zoomToDistance(_entireComponentZoomDistance);
@@ -903,9 +903,8 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& viewTarge
     if(transitionType != Transition::Type::None && visible())
     {
         if(_panTransition.finished())
-        {
             _graphWidget->rendererStartedTransition();
-        }
+
         _panTransition.start(TRANSITION_DURATION, transitionType,
             [=](float f)
             {
