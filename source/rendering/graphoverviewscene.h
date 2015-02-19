@@ -7,8 +7,6 @@
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
 
-#include "../rendering/transition.h"
-
 #include <QRect>
 
 class GraphWidget;
@@ -46,7 +44,7 @@ public:
     int renderSizeDivisor() { return _renderSizeDivisor; }
     void setRenderSizeDivisor(int divisor);
 
-    void resetView(Transition::Type transitionType = Transition::Type::EaseInEaseOut);
+    void resetView();
 
 private:
     GraphWidget* _graphWidget;
@@ -66,7 +64,6 @@ private:
 
     std::vector<ComponentId> _transitionComponentIds;
     std::vector<ComponentMergeSet> _componentMergeSets;
-    Transition _transition;
     void startTransition();
 
 private slots:

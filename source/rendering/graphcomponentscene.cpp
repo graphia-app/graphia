@@ -18,6 +18,7 @@ GraphComponentScene::GraphComponentScene(GraphWidget* graphWidget)
     connect(&graphWidget->graphModel()->graph(), &Graph::componentsWillMerge, this, &GraphComponentScene::onComponentsWillMerge, Qt::DirectConnection);
     connect(&graphWidget->graphModel()->graph(), &Graph::componentWillBeRemoved, this, &GraphComponentScene::onComponentWillBeRemoved, Qt::DirectConnection);
     connect(&graphWidget->graphModel()->graph(), &Graph::graphChanged, this, &GraphComponentScene::onGraphChanged, Qt::DirectConnection);
+    connect(&graphWidget->graphModel()->graph(), &Graph::nodeWillBeRemoved, this, &GraphComponentScene::onNodeWillBeRemoved, Qt::DirectConnection);
 }
 
 void GraphComponentScene::initialise()
@@ -31,6 +32,7 @@ void GraphComponentScene::initialise()
 void GraphComponentScene::update(float t)
 {
     _graphWidget->updateNodePositions();
+    _graphWidget->transition().update(t);
 
     if(renderer() != nullptr)
         renderer()->update(t);
@@ -89,10 +91,13 @@ void GraphComponentScene::restoreViewData()
         renderer()->restoreViewData();
 }
 
-void GraphComponentScene::resetView(Transition::Type transitionType)
+void GraphComponentScene::resetView()
 {
     if(renderer() != nullptr)
-        renderer()->resetView(transitionType);
+    {
+        startTransition();
+        renderer()->resetView();
+    }
 }
 
 bool GraphComponentScene::viewIsReset()
@@ -106,6 +111,22 @@ bool GraphComponentScene::viewIsReset()
 GraphComponentRenderer* GraphComponentScene::renderer()
 {
     return rendererForComponentId(_componentId);
+}
+
+void GraphComponentScene::startTransition(Transition::Type transitionType, float duration)
+{
+    if(_graphWidget->transition().finished())
+        _graphWidget->rendererStartedTransition();
+
+    _graphWidget->transition().start(duration, transitionType,
+    [this](float f)
+    {
+        renderer()->updateTransition(f);
+    },
+    [this]
+    {
+        _graphWidget->rendererFinishedTransition();
+    });
 }
 
 void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet)
@@ -197,7 +218,22 @@ void GraphComponentScene::onGraphChanged(const Graph*)
 
             // Graph changes may significantly alter the centre; ease the transition
             if(renderer()->trackingCentreOfComponent())
-                renderer()->moveFocusToCentreOfComponent(Transition::Type::EaseInEaseOut);
+            {
+                startTransition();
+                renderer()->moveFocusToCentreOfComponent();
+            }
         }
     }, "GraphComponentScene::onGraphChanged (resize/moveFocusToCentreOfComponent)");
+}
+
+void GraphComponentScene::onNodeWillBeRemoved(const Graph*, NodeId nodeId)
+{
+    if(renderer()->focusNodeId() == nodeId)
+    {
+        _graphWidget->executeOnRendererThread([this]
+        {
+            startTransition();
+            renderer()->moveFocusToCentreOfComponent();
+        }, "GraphWidget::onNodeWillBeRemoved");
+    }
 }

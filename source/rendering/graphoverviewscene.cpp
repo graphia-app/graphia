@@ -45,6 +45,7 @@ void GraphOverviewScene::initialise()
 void GraphOverviewScene::update(float t)
 {
     _graphWidget->updateNodePositions();
+    _graphWidget->transition().update(t);
 
     auto update = [this](ComponentId componentId, float t)
     {
@@ -55,12 +56,10 @@ void GraphOverviewScene::update(float t)
     for(auto componentId : _graphModel->graph().componentIds())
         update(componentId, t);
 
-    if(!_transition.finished())
+    if(!_graphWidget->transition().finished())
     {
         for(auto componentId : _transitionComponentIds)
             update(componentId, t);
-
-        _transition.update(t);
     }
 }
 
@@ -94,11 +93,11 @@ void GraphOverviewScene::render()
         });
 
 
-        if(_transition.finished() || !componentIdIsMerger)
+        if(_graphWidget->transition().finished() || !componentIdIsMerger)
             render(componentId);
     }
 
-    if(!_transition.finished())
+    if(!_graphWidget->transition().finished())
     {
         for(auto componentId : _transitionComponentIds)
             render(componentId);
@@ -141,12 +140,12 @@ void GraphOverviewScene::setRenderSizeDivisor(int divisor)
     resize(_width, _height);
 }
 
-void GraphOverviewScene::resetView(Transition::Type transitionType)
+void GraphOverviewScene::resetView()
 {
     for(auto componentId : _graphModel->graph().componentIds())
     {
         auto renderer = rendererForComponentId(componentId);
-        renderer->resetView(transitionType);
+        renderer->resetView();
     }
 }
 
@@ -264,10 +263,10 @@ void GraphOverviewScene::startTransition()
 
     auto targetComponentLayout = _componentLayout;
 
-    if(_transition.finished())
+    if(_graphWidget->transition().finished())
         _graphWidget->rendererStartedTransition();
 
-    _transition.start(GraphComponentRenderer::TRANSITION_DURATION, Transition::Type::EaseInEaseOut,
+    _graphWidget->transition().start(1.0f, Transition::Type::EaseInEaseOut,
     [this, targetComponentLayout /*FIXME C++14 move capture*/](float f)
     {
         auto interpolate = [&](const ComponentId componentId)
@@ -275,6 +274,8 @@ void GraphOverviewScene::startTransition()
             _componentLayout[componentId] = interpolateLayout(
                     _previousComponentLayout[componentId],
                     targetComponentLayout[componentId], f);
+
+            rendererForComponentId(componentId)->updateTransition(f);
         };
 
         for(auto componentId : _graphModel->graph().componentIds())

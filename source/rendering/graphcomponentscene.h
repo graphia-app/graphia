@@ -38,10 +38,13 @@ public:
     void saveViewData();
     void restoreViewData();
 
-    void resetView(Transition::Type transitionType = Transition::Type::EaseInEaseOut);
+    void resetView();
     bool viewIsReset();
 
     GraphComponentRenderer* renderer();
+
+    void startTransition(Transition::Type transitionType = Transition::Type::EaseInEaseOut,
+                         float duration = 0.3f);
 
 private:
     GraphWidget* _graphWidget;
@@ -58,6 +61,7 @@ private slots:
     void onComponentsWillMerge(const Graph* graph, const ComponentMergeSet& componentMergeSet);
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool);
     void onGraphChanged(const Graph* graph);
+    void onNodeWillBeRemoved(const Graph* graph, NodeId nodeId);
 };
 
 #endif // GRAPHCOMPONENTSCENE_H

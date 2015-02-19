@@ -56,7 +56,6 @@ public:
     GraphComponentRenderer();
 
     static const int multisamples = 4;
-    static constexpr float TRANSITION_DURATION = 1.0f;
 
     void initialise(std::shared_ptr<GraphModel> graphModel, ComponentId componentId,
                     GraphWidget& graphWidget,
@@ -72,9 +71,9 @@ public:
     void resize(int width, int height);
     void resizeViewport(int width, int height);
 
-    void moveFocusToNode(NodeId nodeId, Transition::Type transitionType);
-    void moveFocusToCentreOfComponent(Transition::Type transitionType);
-    void selectFocusNodeClosestToCameraVector(Transition::Type transitionType = Transition::Type::InversePower);
+    void moveFocusToNode(NodeId nodeId);
+    void moveFocusToCentreOfComponent();
+    void moveFocusToNodeClosestCameraVector();
 
     ComponentId componentId() { return _componentId; }
     NodeId focusNodeId();
@@ -82,11 +81,10 @@ public:
     void enableFocusTracking() { _trackFocus = true; }
     void disableFocusTracking() { _trackFocus = false; }
 
-    bool transitioning();
     bool trackingCentreOfComponent();
     bool autoZooming();
 
-    void resetView(Transition::Type transitionType = Transition::Type::EaseInEaseOut);
+    void resetView();
     bool viewIsReset() { return trackingCentreOfComponent() && autoZooming(); }
 
     Camera* camera() { return &_viewData._camera; }
@@ -116,6 +114,8 @@ public:
 
     void freeze();
     void thaw();
+
+    void updateTransition(float f);
 
 private:
     GraphWidget* _graphWidget;
@@ -147,6 +147,11 @@ private:
         bool _autoZooming;
         NodeId _focusNodeId;
         QVector3D _focusPosition;
+
+        QVector3D _transitionStartPosition;
+        QVector3D _transitionStartViewTarget;
+        QVector3D _transitionEndPosition;
+        QVector3D _transitionEndViewTarget;
     };
 
     ViewData _viewData;
@@ -181,10 +186,8 @@ private:
     void renderDebugLines();
     void render2D();
 
-    void centreNodeInViewport(NodeId nodeId, float cameraDistance = -1.0f,
-                              Transition::Type transitionType = Transition::Type::None);
-    void centrePositionInViewport(const QVector3D& viewTarget, float cameraDistance = -1.0f,
-                                  Transition::Type transitionType = Transition::Type::None);
+    void centreNodeInViewport(NodeId nodeId, float cameraDistance = -1.0f);
+    void centrePositionInViewport(const QVector3D& viewTarget, float cameraDistance = -1.0f);
 
     float _entireComponentZoomDistance;
     void updateEntireComponentZoomDistance();
@@ -205,7 +208,6 @@ private:
     float _aspectRatio;
     float _fovx;
     float _fovy;
-    Transition _panTransition;
 
     std::shared_ptr<GraphModel> _graphModel;
     std::shared_ptr<SelectionManager> _selectionManager;

@@ -21,13 +21,14 @@ public:
                              GraphComponentScene* graphComponentScene,
                              CommandManager& commandManager,
                              std::shared_ptr<SelectionManager> selectionManager,
-                             GraphWidget* parent = nullptr);
+                             GraphWidget* graphWidget = nullptr);
 
 private:
     std::shared_ptr<GraphModel> _graphModel;
     GraphComponentScene* _scene;
     CommandManager& _commandManager;
     std::shared_ptr<SelectionManager> _selectionManager;
+    GraphWidget* _graphWidget;
 
     bool _rightMouseButtonHeld;
     bool _leftMouseButtonHeld;

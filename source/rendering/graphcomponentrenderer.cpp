@@ -410,9 +410,7 @@ void GraphComponentRenderer::update(float t)
 
         _zoomTransition.update(t);
 
-        if(!_panTransition.finished())
-            _panTransition.update(t);
-        else if(_trackFocus)
+        if(_graphWidget->transition().finished() && _trackFocus)
         {
             if(trackingCentreOfComponent())
             {
@@ -790,7 +788,7 @@ const float MINIMUM_ZOOM_DISTANCE = 2.5f;
 
 void GraphComponentRenderer::zoom(float direction)
 {
-    if(direction == 0.0f || !_panTransition.finished())
+    if(direction == 0.0f || !_graphWidget->transition().finished())
         return;
 
     // Don't allow zooming out if autozooming
@@ -849,16 +847,16 @@ void GraphComponentRenderer::zoomToDistance(float distance)
     _viewData._zoomDistance = _targetZoomDistance = distance;
 }
 
-void GraphComponentRenderer::centreNodeInViewport(NodeId nodeId, float cameraDistance, Transition::Type transitionType)
+void GraphComponentRenderer::centreNodeInViewport(NodeId nodeId, float cameraDistance)
 {
     if(nodeId.isNull())
         return;
 
     centrePositionInViewport(_graphModel->nodePositions().getScaledAndSmoothed(nodeId),
-                             cameraDistance, transitionType);
+                             cameraDistance);
 }
 
-void GraphComponentRenderer::centrePositionInViewport(const QVector3D& viewTarget, float cameraDistance, Transition::Type transitionType)
+void GraphComponentRenderer::centrePositionInViewport(const QVector3D& viewTarget, float cameraDistance)
 {
     QVector3D startPosition = _viewData._camera.position();
     QVector3D startViewTarget = _viewData._camera.viewTarget();
@@ -900,52 +898,41 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& viewTarge
     if(position.distanceToPoint(viewTarget) > _entireComponentZoomDistance)
         position = viewTarget - (_viewData._camera.viewVector().normalized() * _entireComponentZoomDistance);
 
-    if(transitionType != Transition::Type::None && visible())
-    {
-        if(_panTransition.finished())
-            _graphWidget->rendererStartedTransition();
-
-        _panTransition.start(TRANSITION_DURATION, transitionType,
-            [=](float f)
-            {
-                _viewData._camera.setPosition(Utils::interpolate(startPosition, position, f));
-                _viewData._camera.setViewTarget(Utils::interpolate(startViewTarget, viewTarget, f));
-            },
-            [this]
-            {
-                _graphWidget->rendererFinishedTransition();
-            });
-    }
-    else
+    if(_graphWidget->transition().finished())
     {
         _viewData._camera.setPosition(position);
         _viewData._camera.setViewTarget(viewTarget);
     }
+
+    _viewData._transitionStartPosition = startPosition;
+    _viewData._transitionEndPosition = position;
+    _viewData._transitionStartViewTarget = startViewTarget;
+    _viewData._transitionEndViewTarget = viewTarget;
 }
 
-void GraphComponentRenderer::moveFocusToNode(NodeId nodeId, Transition::Type transitionType)
+void GraphComponentRenderer::moveFocusToNode(NodeId nodeId)
 {
     if(_componentId.isNull())
         return;
 
-    centreNodeInViewport(nodeId, -1.0f, transitionType);
+    centreNodeInViewport(nodeId, -1.0f);
     _viewData._focusNodeId = nodeId;
     _viewData._autoZooming = false;
     updateEntireComponentZoomDistance();
     updateVisualData();
 }
 
-void GraphComponentRenderer::resetView(Transition::Type transitionType)
+void GraphComponentRenderer::resetView()
 {
     if(_componentId.isNull())
         return;
 
     _viewData._autoZooming = true;
 
-    moveFocusToCentreOfComponent(transitionType);
+    moveFocusToCentreOfComponent();
 }
 
-void GraphComponentRenderer::moveFocusToCentreOfComponent(Transition::Type transitionType)
+void GraphComponentRenderer::moveFocusToCentreOfComponent()
 {
     if(_componentId.isNull())
         return;
@@ -958,11 +945,11 @@ void GraphComponentRenderer::moveFocusToCentreOfComponent(Transition::Type trans
     else
         _viewData._zoomDistance = -1.0f;
 
-    centrePositionInViewport(_viewData._focusPosition, _viewData._zoomDistance, transitionType);
+    centrePositionInViewport(_viewData._focusPosition, _viewData._zoomDistance);
     updateVisualData();
 }
 
-void GraphComponentRenderer::selectFocusNodeClosestToCameraVector(Transition::Type transitionType)
+void GraphComponentRenderer::moveFocusToNodeClosestCameraVector()
 {
     if(_componentId.isNull())
         return;
@@ -971,7 +958,15 @@ void GraphComponentRenderer::selectFocusNodeClosestToCameraVector(Transition::Ty
     //FIXME closestNodeToCylinder/Cone?
     NodeId closestNodeId = collision.nodeClosestToLine(_viewData._camera.position(), _viewData._camera.viewVector().normalized());
     if(!closestNodeId.isNull())
-        moveFocusToNode(closestNodeId, transitionType);
+        moveFocusToNode(closestNodeId);
+}
+
+void GraphComponentRenderer::updateTransition(float f)
+{
+    _viewData._camera.setPosition(Utils::interpolate(_viewData._transitionStartPosition,
+                                                     _viewData._transitionEndPosition, f));
+    _viewData._camera.setViewTarget(Utils::interpolate(_viewData._transitionStartViewTarget,
+                                                       _viewData._transitionEndViewTarget, f));
 }
 
 NodeId GraphComponentRenderer::focusNodeId()
@@ -985,11 +980,6 @@ QVector3D GraphComponentRenderer::focusPosition()
         return _viewData._focusPosition;
     else
         return _graphModel->nodePositions().getScaledAndSmoothed(_viewData._focusNodeId);
-}
-
-bool GraphComponentRenderer::transitioning()
-{
-    return _panTransition.finished();
 }
 
 bool GraphComponentRenderer::trackingCentreOfComponent()

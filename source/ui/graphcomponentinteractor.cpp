@@ -73,12 +73,13 @@ GraphComponentInteractor::GraphComponentInteractor(std::shared_ptr<GraphModel> g
                                                    GraphComponentScene* graphComponentScene,
                                                    CommandManager &commandManager,
                                                    std::shared_ptr<SelectionManager> selectionManager,
-                                                   GraphWidget* parent) :
-    Interactor(parent),
+                                                   GraphWidget* graphWidget) :
+    Interactor(graphWidget),
     _graphModel(graphModel),
     _scene(graphComponentScene),
     _commandManager(commandManager),
     _selectionManager(selectionManager),
+    _graphWidget(graphWidget),
     _rightMouseButtonHeld(false),
     _leftMouseButtonHeld(false),
     _selecting(false),
@@ -136,7 +137,7 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
     switch(mouseEvent->button())
     {
     case Qt::RightButton:
-        if(!_scene->renderer()->transitioning())
+        if(!_graphWidget->transition().finished())
         {
             _rightMouseButtonHeld = false;
             _scene->renderer()->enableFocusTracking();
@@ -146,7 +147,10 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
         emit userInteractionFinished();
 
         if(!_nearClickNodeId.isNull() && _rightMouseButtonHeld && _mouseMoving)
-            _scene->renderer()->selectFocusNodeClosestToCameraVector();
+        {
+            _scene->startTransition();
+            _scene->renderer()->moveFocusToNodeClosestCameraVector();
+        }
 
         _rightMouseButtonHeld = false;
         _scene->renderer()->enableFocusTracking();
@@ -157,7 +161,7 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
     case Qt::LeftButton:
         _leftMouseButtonHeld = false;
 
-        if(!_scene->renderer()->transitioning())
+        if(!_graphWidget->transition().finished())
             return;
 
         emit userInteractionFinished();
@@ -283,7 +287,7 @@ QQuaternion GraphComponentInteractor::mouseMoveToRotation()
 
 void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
 {
-    if(!_scene->renderer()->transitioning())
+    if(!_graphWidget->transition().finished())
         return;
 
     Camera* camera = _scene->renderer()->camera();
@@ -367,10 +371,16 @@ void GraphComponentInteractor::mouseDoubleClickEvent(QMouseEvent* mouseEvent)
             if(!_nearClickNodeId.isNull())
             {
                 if(_nearClickNodeId != _scene->renderer()->focusNodeId())
-                    _scene->renderer()->moveFocusToNode(_nearClickNodeId, Transition::Type::EaseInEaseOut);
+                {
+                    _scene->startTransition();
+                    _scene->renderer()->moveFocusToNode(_nearClickNodeId);
+                }
             }
             else if(!_scene->renderer()->viewIsReset())
+            {
+                _scene->startTransition();
                 _scene->renderer()->resetView();
+            }
         }
     }
 }

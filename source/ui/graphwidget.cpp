@@ -32,7 +32,6 @@ GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
     _mode(GraphWidget::Mode::Component)
 {
     connect(&graphModel->graph(), &Graph::graphChanged, this, &GraphWidget::onGraphChanged, Qt::DirectConnection);
-    connect(&graphModel->graph(), &Graph::nodeWillBeRemoved, this, &GraphWidget::onNodeWillBeRemoved, Qt::DirectConnection);
     connect(&graphModel->graph(), &Graph::componentAdded, this, &GraphWidget::onComponentAdded, Qt::DirectConnection);
     connect(&graphModel->graph(), &Graph::componentWillBeRemoved, this, &GraphWidget::onComponentWillBeRemoved, Qt::DirectConnection);
 
@@ -141,7 +140,7 @@ void GraphWidget::switchToOverviewMode()
         _openGLWindow->setInteractor(_graphOverviewInteractor);
 
         // When in overview mode we want the whole of each component to be visible
-        _graphOverviewScene->resetView(Transition::Type::None);
+        _graphOverviewScene->resetView();
 
         _mode = GraphWidget::Mode::Overview;
     }, "GraphWidget::switchToOverviewMode");
@@ -252,22 +251,6 @@ void GraphWidget::onGraphChanged(const Graph* graph)
             // Partner to the hack described above
             rendererFinishedTransition();
         }, QString("GraphWidget::onGraphChanged (initialise/update) component %1").arg((int)componentId));
-    }
-}
-
-void GraphWidget::onNodeWillBeRemoved(const Graph* graph, NodeId nodeId)
-{
-    for(auto componentId : graph->componentIds())
-    {
-        auto graphComponentRenderer = _graphComponentRendererManagers->at(componentId).get();
-
-        if(graphComponentRenderer->focusNodeId() == nodeId)
-        {
-            executeOnRendererThread([graphComponentRenderer]
-            {
-                graphComponentRenderer->moveFocusToCentreOfComponent(Transition::Type::EaseInEaseOut);
-            }, "GraphWidget::onNodeWillBeRemoved");
-        }
     }
 }
 

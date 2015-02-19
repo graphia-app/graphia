@@ -2,6 +2,7 @@
 #define GRAPHWIDGET_H
 
 #include "../rendering/graphcomponentrenderersreference.h"
+#include "../rendering/transition.h"
 
 #include "../graph/grapharray.h"
 
@@ -63,6 +64,8 @@ public:
     void executeOnRendererThread(DeferredExecutor::TaskFn task, const QString& description = QString());
     void updateNodePositions();
 
+    Transition& transition() { return _transition; }
+
 private:
     void makeContextCurrent();
 
@@ -89,9 +92,10 @@ private:
     Mode _mode;
     ComponentId _defaultComponentId;
 
+    Transition _transition;
+
 private slots:
     void onGraphChanged(const Graph* graph);
-    void onNodeWillBeRemoved(const Graph* graph, NodeId nodeId);
     void onComponentAdded(const Graph*, ComponentId componentId, bool);
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool);
 
