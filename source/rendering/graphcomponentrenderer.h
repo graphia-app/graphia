@@ -74,6 +74,7 @@ public:
     void moveFocusToNode(NodeId nodeId);
     void moveFocusToCentreOfComponent();
     void moveFocusToNodeClosestCameraVector();
+    void moveFocusToPositionContainingNodes(const QVector3D& position, std::vector<NodeId> nodeIds);
 
     ComponentId componentId() { return _componentId; }
     NodeId focusNodeId();
@@ -190,6 +191,7 @@ private:
     void centrePositionInViewport(const QVector3D& viewTarget, float cameraDistance = -1.0f);
 
     float _entireComponentZoomDistance;
+    float zoomDistanceForNodeIds(const QVector3D& centre, std::vector<NodeId> nodeIds);
     void updateEntireComponentZoomDistance();
 
     bool _visualDataRequiresUpdate;

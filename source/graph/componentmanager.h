@@ -8,6 +8,44 @@
 #include <vector>
 #include <memory>
 
+class ComponentSplitSet
+{
+private:
+    const Graph* _graph;
+    ComponentId _oldComponentId;
+    ElementIdSet<ComponentId> _splitters;
+
+public:
+    ComponentSplitSet(const Graph* graph, ComponentId oldComponentId, ElementIdSet<ComponentId>&& splitters) :
+        _graph(graph), _oldComponentId(oldComponentId), _splitters(splitters)
+    {
+    }
+
+    ComponentId oldComponentId() const { return _oldComponentId; }
+    const ElementIdSet<ComponentId>& splitters() const { return _splitters; }
+
+    std::vector<NodeId> nodeIds() const;
+};
+
+class ComponentMergeSet
+{
+private:
+    const Graph* _graph;
+    ElementIdSet<ComponentId> _mergers;
+    ComponentId _newComponentId;
+
+public:
+    ComponentMergeSet(const Graph* graph, ElementIdSet<ComponentId>&& mergers, ComponentId newComponentId) :
+        _graph(graph), _mergers(mergers), _newComponentId(newComponentId)
+    {
+    }
+
+    const ElementIdSet<ComponentId>& mergers() const { return _mergers; }
+    ComponentId newComponentId() const { return _newComponentId; }
+
+    std::vector<NodeId> nodeIds() const;
+};
+
 class GraphComponent : public QObject, public ImmutableGraph
 {
     friend class ComponentManager;

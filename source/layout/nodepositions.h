@@ -1,6 +1,7 @@
 #ifndef NODEPOSITIONS_H
 #define NODEPOSITIONS_H
 
+#include "../graph/graph.h"
 #include "../graph/grapharray.h"
 #include "../utils/circularbuffer.h"
 #include "../maths/boundingbox.h"

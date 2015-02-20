@@ -15,6 +15,8 @@
 class ResizableGraphArray;
 class GraphComponent;
 class ComponentManager;
+class ComponentSplitSet;
+class ComponentMergeSet;
 
 template<typename T> class ElementId;
 template<typename T> QDebug operator<<(QDebug d, const ElementId<T>& id);
@@ -150,38 +152,6 @@ public:
     explicit ComponentId() : ElementId() {}
     explicit ComponentId(int value) : ElementId(value) {}
 #endif
-};
-
-class ComponentSplitSet
-{
-private:
-    ComponentId _oldComponentId;
-    ElementIdSet<ComponentId> _splitters;
-
-public:
-    ComponentSplitSet(ComponentId oldComponentId, ElementIdSet<ComponentId>&& splitters) :
-        _oldComponentId(oldComponentId), _splitters(splitters)
-    {
-    }
-
-    ComponentId oldComponentId() const { return _oldComponentId; }
-    const ElementIdSet<ComponentId>& splitters() const { return _splitters; }
-};
-
-class ComponentMergeSet
-{
-private:
-    ElementIdSet<ComponentId> _mergers;
-    ComponentId _newComponentId;
-
-public:
-    ComponentMergeSet(ElementIdSet<ComponentId>&& mergers, ComponentId newComponentId) :
-        _mergers(mergers), _newComponentId(newComponentId)
-    {
-    }
-
-    const ElementIdSet<ComponentId>& mergers() const { return _mergers; }
-    ComponentId newComponentId() const { return _newComponentId; }
 };
 
 class Node

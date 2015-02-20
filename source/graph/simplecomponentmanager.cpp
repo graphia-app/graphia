@@ -85,7 +85,7 @@ void SimpleComponentManager::updateComponents(const Graph* graph)
                 {
                     // More than one old component IDs were observed so components have merged
                     if(_debug) qDebug() << "componentsWillMerge" << componentIdsAffected << "->" << oldComponentId;
-                    emit componentsWillMerge(graph, ComponentMergeSet(std::move(componentIdsAffected), oldComponentId));
+                    emit componentsWillMerge(graph, ComponentMergeSet(graph, std::move(componentIdsAffected), oldComponentId));
                     componentIdsAffected.erase(oldComponentId);
 
                     for(ComponentId removedComponentId : componentIdsAffected)
@@ -155,7 +155,7 @@ void SimpleComponentManager::updateComponents(const Graph* graph)
         }
 
         if(_debug) qDebug() << "componentSplit" << splitee.first << "->" << splitters;
-        emit componentSplit(graph, ComponentSplitSet(splitee.first, std::move(splitters)));
+        emit componentSplit(graph, ComponentSplitSet(graph, splitee.first, std::move(splitters)));
     }
 
     // Notify all the new components

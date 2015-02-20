@@ -303,17 +303,14 @@ void GraphComponentRenderer::updatePositionalData()
     updateEntireComponentZoomDistance();
 }
 
-void GraphComponentRenderer::updateEntireComponentZoomDistance()
+float GraphComponentRenderer::zoomDistanceForNodeIds(const QVector3D& centre, std::vector<NodeId> nodeIds)
 {
     float minHalfFov = qDegreesToRadians(std::min(_fovx, _fovy) * 0.5f);
 
     if(minHalfFov > 0.0f)
     {
-        auto component = _graphModel->graph().componentById(_componentId);
-
-        QVector3D centre = focusPosition();
         float maxDistance = std::numeric_limits<float>::min();
-        for(auto nodeId : component->nodeIds())
+        for(auto nodeId : nodeIds)
         {
             QVector3D nodePosition = _graphModel->nodePositions().getScaledAndSmoothed(nodeId);
             auto& nodeVisual = _graphModel->nodeVisuals().at(nodeId);
@@ -323,13 +320,19 @@ void GraphComponentRenderer::updateEntireComponentZoomDistance()
                 maxDistance = distance;
         }
 
-        _entireComponentZoomDistance = maxDistance / std::sin(minHalfFov);
+        return maxDistance / std::sin(minHalfFov);
     }
     else
     {
-        qWarning() << "GraphComponentRenderer::_entireComponentZoomDistance set to default value";
-        _entireComponentZoomDistance = 1.0f;
+        qWarning() << "zoomDistanceForNodes returning default value";
+        return 1.0f;
     }
+}
+
+void GraphComponentRenderer::updateEntireComponentZoomDistance()
+{
+    auto component = _graphModel->graph().componentById(_componentId);
+    _entireComponentZoomDistance = zoomDistanceForNodeIds(focusPosition(), component->nodeIds());
 }
 
 void GraphComponentRenderer::updateVisualData(When when)
@@ -903,11 +906,13 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& viewTarge
         _viewData._camera.setPosition(position);
         _viewData._camera.setViewTarget(viewTarget);
     }
-
-    _viewData._transitionStartPosition = startPosition;
-    _viewData._transitionEndPosition = position;
-    _viewData._transitionStartViewTarget = startViewTarget;
-    _viewData._transitionEndViewTarget = viewTarget;
+    else
+    {
+        _viewData._transitionStartPosition = startPosition;
+        _viewData._transitionEndPosition = position;
+        _viewData._transitionStartViewTarget = startViewTarget;
+        _viewData._transitionEndViewTarget = viewTarget;
+    }
 }
 
 void GraphComponentRenderer::moveFocusToNode(NodeId nodeId)
@@ -915,11 +920,11 @@ void GraphComponentRenderer::moveFocusToNode(NodeId nodeId)
     if(_componentId.isNull())
         return;
 
-    centreNodeInViewport(nodeId, -1.0f);
     _viewData._focusNodeId = nodeId;
     _viewData._autoZooming = false;
     updateEntireComponentZoomDistance();
-    updateVisualData();
+
+    centreNodeInViewport(nodeId, -1.0f);
 }
 
 void GraphComponentRenderer::resetView()
@@ -946,7 +951,6 @@ void GraphComponentRenderer::moveFocusToCentreOfComponent()
         _viewData._zoomDistance = -1.0f;
 
     centrePositionInViewport(_viewData._focusPosition, _viewData._zoomDistance);
-    updateVisualData();
 }
 
 void GraphComponentRenderer::moveFocusToNodeClosestCameraVector()
@@ -959,6 +963,19 @@ void GraphComponentRenderer::moveFocusToNodeClosestCameraVector()
     NodeId closestNodeId = collision.nodeClosestToLine(_viewData._camera.position(), _viewData._camera.viewVector().normalized());
     if(!closestNodeId.isNull())
         moveFocusToNode(closestNodeId);
+}
+
+void GraphComponentRenderer::moveFocusToPositionContainingNodes(const QVector3D& position, std::vector<NodeId> nodeIds)
+{
+    if(_componentId.isNull())
+        return;
+
+    _viewData._focusNodeId.setToNull();
+    _viewData._focusPosition = position;
+    _entireComponentZoomDistance = zoomDistanceForNodeIds(position, nodeIds);
+    zoomToDistance(_entireComponentZoomDistance);
+
+    centrePositionInViewport(_viewData._focusPosition, _viewData._zoomDistance);
 }
 
 void GraphComponentRenderer::updateTransition(float f)

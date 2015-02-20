@@ -296,10 +296,34 @@ void GraphOverviewScene::startTransition()
         }
 
         _transitionComponentIds.clear();
+        _componentSplitSets.clear();
         _componentMergeSets.clear();
 
         _graphWidget->rendererFinishedTransition();
     });
+
+    for(auto componentSplitSet : _componentSplitSets)
+    {
+        for(auto splitter : componentSplitSet.splitters())
+        {
+            auto renderer = rendererForComponentId(splitter);
+            renderer->resetView();
+        }
+    }
+
+    for(auto componentMergeSet : _componentMergeSets)
+    {
+        auto mergedComponent = _graphModel->graph().componentById(componentMergeSet.newComponentId());
+        auto mergedNodeIds = mergedComponent->nodeIds();
+        auto mergedFocusPosition = NodePositions::centreOfMassScaled(_graphModel->nodePositions(),
+                                                                     mergedNodeIds);
+
+        for(auto merger : componentMergeSet.mergers())
+        {
+            auto renderer = rendererForComponentId(merger);
+            renderer->moveFocusToPositionContainingNodes(mergedFocusPosition, mergedNodeIds);
+        }
+    }
 }
 
 void GraphOverviewScene::onComponentAdded(const Graph*, ComponentId componentId, bool hasSplit)
@@ -325,6 +349,11 @@ void GraphOverviewScene::onComponentWillBeRemoved(const Graph*, ComponentId comp
 
 void GraphOverviewScene::onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet)
 {
+    if(!visible())
+        return;
+
+    _componentSplitSets.emplace_back(componentSplitSet);
+
     _graphWidget->executeOnRendererThread([this, componentSplitSet]
     {
         if(visible())

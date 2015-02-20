@@ -27,3 +27,29 @@ ComponentManager::~ComponentManager()
     for(auto componentArray : _componentArrayList)
         componentArray->invalidate();
 }
+
+std::vector<NodeId> ComponentSplitSet::nodeIds() const
+{
+    std::vector<NodeId> nodeIds;
+
+    for(auto componentId : _splitters)
+    {
+        auto component = _graph->componentById(componentId);
+        nodeIds.insert(nodeIds.end(), component->nodeIds().begin(), component->nodeIds().end());
+    }
+
+    return nodeIds;
+}
+
+std::vector<NodeId> ComponentMergeSet::nodeIds() const
+{
+    std::vector<NodeId> nodeIds;
+
+    for(auto componentId : _mergers)
+    {
+        auto component = _graph->componentById(componentId);
+        nodeIds.insert(nodeIds.end(), component->nodeIds().begin(), component->nodeIds().end());
+    }
+
+    return nodeIds;
+}

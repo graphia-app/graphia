@@ -63,6 +63,7 @@ private:
     void layoutComponents();
 
     std::vector<ComponentId> _transitionComponentIds;
+    std::vector<ComponentSplitSet> _componentSplitSets;
     std::vector<ComponentMergeSet> _componentMergeSets;
     void startTransition();
 
