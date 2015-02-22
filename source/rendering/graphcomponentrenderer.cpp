@@ -150,10 +150,10 @@ void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, 
     _targetZoomDistance = _viewData._zoomDistance;
     _viewData._focusNodeId.setToNull();
 
+    _initialised = true;
+
     updatePositionalData();
     updateVisualData(When::Now);
-
-    _initialised = true;
 }
 
 void GraphComponentRenderer::cleanup()
@@ -243,6 +243,8 @@ void GraphComponentRenderer::thaw()
 
 void GraphComponentRenderer::updatePositionalData()
 {
+    Q_ASSERT(_initialised);
+
     if(_frozen)
     {
         _updatePositionDataWhenThawed = true;
@@ -345,6 +347,8 @@ void GraphComponentRenderer::updateVisualData(When when)
 
 void GraphComponentRenderer::updateVisualDataIfRequired()
 {
+    Q_ASSERT(_initialised);
+
     if(!_visualDataRequiresUpdate)
         return;
 
@@ -407,6 +411,8 @@ void GraphComponentRenderer::updateVisualDataIfRequired()
 
 void GraphComponentRenderer::update(float t)
 {
+    Q_ASSERT(_initialised);
+
     if(_graphModel)
     {
         updateVisualDataIfRequired();
@@ -653,6 +659,9 @@ void GraphComponentRenderer::submitDebugLines()
 
 void GraphComponentRenderer::render(int x, int y, int width, int height, float alpha)
 {
+    if(!_initialised)
+        return;
+
     if(!_FBOcomplete)
     {
         qWarning() << "Attempting to render component" <<
