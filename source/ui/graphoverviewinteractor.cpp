@@ -25,8 +25,20 @@ void GraphOverviewInteractor::mousePressEvent(QMouseEvent* /*mouseEvent*/)
 {
 }
 
-void GraphOverviewInteractor::mouseReleaseEvent(QMouseEvent* /*mouseEvent*/)
+void GraphOverviewInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
 {
+    auto& componentLayout = _scene->componentLayout();
+
+    for(auto componentId : _graphModel->graph().componentIds())
+    {
+        auto& layoutData = componentLayout[componentId];
+
+        if(layoutData._rect.contains(mouseEvent->pos()))
+        {
+            qDebug() << componentId;
+            break;
+        }
+    }
 }
 
 void GraphOverviewInteractor::mouseMoveEvent(QMouseEvent* /*mouseEvent*/)
