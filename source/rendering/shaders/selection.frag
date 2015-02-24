@@ -1,8 +1,6 @@
 #version 330 core
 
 in vec2 vPosition;
-in vec2 vTexCoord;
-in vec4 vColor;
 
 layout (location = 0) out vec4 fragColor;
 
@@ -27,7 +25,7 @@ vec4 multisampledValue(ivec2 coord)
 
 void main()
 {
-    ivec2 coord = ivec2(vTexCoord);
+    ivec2 coord = ivec2(vPosition);
     mat3 I;
     float cnv[2];
 
@@ -48,5 +46,5 @@ void main()
     float outlineAlpha = 0.5 * abs(cnv[0]) + abs(cnv[1]);
     float interiorAlpha = I[1][1];
     vec3 highlightColor = vec3(1.0, 1.0, 1.0);
-    fragColor = vec4(highlightColor, (outlineAlpha + interiorAlpha) * 0.5) * vColor;
+    fragColor = vec4(highlightColor, (outlineAlpha + interiorAlpha) * 0.5);
 }

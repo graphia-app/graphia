@@ -35,10 +35,20 @@ class GraphComponentRendererShared
     friend class GraphComponentRenderer;
 
 public:
-    GraphComponentRendererShared(const QOpenGLContext& context);
+    GraphComponentRendererShared(GraphWidget* graphWidget, const QOpenGLContext& context);
+    virtual ~GraphComponentRendererShared();
+
+    static const int NUM_MULTISAMPLES = 4;
+
+    void resize(int width, int height);
+
+    void clear();
+    void render();
 
 private:
+    GraphWidget* _graphWidget;
     const QOpenGLContext* _context;
+    QOpenGLFunctions_3_3_Core* _funcs;
 
     QOpenGLShaderProgram _screenShader;
     QOpenGLShaderProgram _selectionShader;
@@ -48,14 +58,28 @@ private:
 
     QOpenGLShaderProgram _selectionMarkerShader;
     QOpenGLShaderProgram _debugLinesShader;
+
+    int _width;
+    int _height;
+
+    GLuint _colorTexture;
+    GLuint _selectionTexture;
+    GLuint _depthTexture;
+    GLuint _visualFBO;
+    bool _FBOcomplete;
+
+    bool prepareRenderBuffers(int width, int height);
+
+    QOpenGLVertexArrayObject _screenQuadVAO;
+    QOpenGLBuffer _screenQuadDataBuffer;
+
+    void prepareQuad();
 };
 
 class GraphComponentRenderer
 {
 public:
     GraphComponentRenderer();
-
-    static const int multisamples = 4;
 
     void initialise(std::shared_ptr<GraphModel> graphModel, ComponentId componentId,
                     GraphWidget& graphWidget,
@@ -68,8 +92,8 @@ public:
     void cleanup();
     void update(float t);
     void render(int x, int y, int width = 0, int height = 0, float alpha = 1.0f);
-    void resize(int width, int height);
-    void resizeViewport(int width, int height);
+    void resize(int viewportWidth, int viewportHeight,
+                int renderWidth = 0, int renderHeight = 0);
 
     void moveFocusToNode(NodeId nodeId);
     void moveFocusToCentreOfComponent();
@@ -94,9 +118,6 @@ public:
 
     void setSelectionRect(const QRect& rect) { _selectionRect = rect; }
     void clearSelectionRect() { _selectionRect = QRect(); }
-
-    int width() const { return _width; }
-    int height() const { return _height; }
 
     void updatePositionalData();
     enum class When
@@ -163,27 +184,12 @@ private:
     void prepareEdgeVAO();
     void prepareSelectionMarkerVAO();
     void prepareDebugLinesVAO();
-    void prepareTexture();
 
-    QOpenGLVertexArrayObject _screenQuadVAO;
-    QOpenGLBuffer _screenQuadDataBuffer;
-    void prepareQuad();
-
-    int _width;
-    int _height;
     int _viewportWidth;
     int _viewportHeight;
 
-    GLuint _colorTexture;
-    GLuint _selectionTexture;
-    GLuint _depthTexture;
-    GLuint _visualFBO;
-    bool _FBOcomplete;
-
-    bool prepareRenderBuffers();
-
-    void renderNodes();
-    void renderEdges();
+    void renderNodes(float alpha);
+    void renderEdges(float alpha);
     void renderDebugLines();
     void render2D();
 
@@ -207,7 +213,6 @@ private:
 
     ComponentId _componentId;
 
-    float _aspectRatio;
     float _fovx;
     float _fovy;
 

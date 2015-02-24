@@ -45,8 +45,12 @@ void GraphComponentScene::render()
     _funcs->glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     _funcs->glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+    _graphWidget->clearScene();
+
     if(renderer() != nullptr)
         renderer()->render(0, 0);
+
+    _graphWidget->renderScene();
 }
 
 void GraphComponentScene::resize(int width, int height)
@@ -54,11 +58,10 @@ void GraphComponentScene::resize(int width, int height)
     _width = width;
     _height = height;
 
+    _graphWidget->resizeScene(width, height);
+
     if(renderer() != nullptr)
-    {
-        renderer()->resizeViewport(width, height);
         renderer()->resize(width, height);
-    }
 }
 
 void GraphComponentScene::onShow()

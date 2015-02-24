@@ -30,11 +30,6 @@
 #include <cmath>
 #include <mutex>
 
-static void setupCamera(Camera& camera, float fovy, float aspectRatio)
-{
-    camera.setPerspectiveProjection(fovy, aspectRatio, 0.3f, 50000.0f);
-}
-
 static bool loadShaderProgram(QOpenGLShaderProgram& program, const QString& vertexShader, const QString& fragmentShader)
 {
     if(!program.addShaderFromSourceFile(QOpenGLShader::Vertex, vertexShader))
@@ -58,9 +53,21 @@ static bool loadShaderProgram(QOpenGLShaderProgram& program, const QString& vert
     return true;
 }
 
-GraphComponentRendererShared::GraphComponentRendererShared(const QOpenGLContext& context) :
-    _context(&context)
+GraphComponentRendererShared::GraphComponentRendererShared(GraphWidget* graphWidget, const QOpenGLContext& context) :
+    _graphWidget(graphWidget),
+    _context(&context),
+    _width(0), _height(0),
+    _colorTexture(0),
+    _selectionTexture(0),
+    _depthTexture(0),
+    _visualFBO(0),
+    _FBOcomplete(false)
 {
+    _funcs = _context->versionFunctions<QOpenGLFunctions_3_3_Core>();
+    if(!_funcs)
+        qFatal("Could not obtain required OpenGL context version");
+    _funcs->initializeOpenGLFunctions();
+
     loadShaderProgram(_screenShader, ":/rendering/shaders/screen.vert", ":/rendering/shaders/screen.frag");
     loadShaderProgram(_selectionShader, ":/rendering/shaders/screen.vert", ":/rendering/shaders/selection.frag");
 
@@ -69,6 +76,202 @@ GraphComponentRendererShared::GraphComponentRendererShared(const QOpenGLContext&
 
     loadShaderProgram(_selectionMarkerShader, ":/rendering/shaders/2d.vert", ":/rendering/shaders/selectionMarker.frag");
     loadShaderProgram(_debugLinesShader, ":/rendering/shaders/debuglines.vert", ":/rendering/shaders/debuglines.frag");
+
+    prepareQuad();
+}
+
+GraphComponentRendererShared::~GraphComponentRendererShared()
+{
+    if(_visualFBO != 0)
+    {
+        _funcs->glDeleteFramebuffers(1, &_visualFBO);
+        _visualFBO = 0;
+    }
+
+    _FBOcomplete = false;
+
+    if(_colorTexture != 0)
+    {
+        _funcs->glDeleteTextures(1, &_colorTexture);
+        _colorTexture = 0;
+    }
+
+    if(_selectionTexture != 0)
+    {
+        _funcs->glDeleteTextures(1, &_selectionTexture);
+        _selectionTexture = 0;
+    }
+
+    if(_depthTexture != 0)
+    {
+        _funcs->glDeleteTextures(1, &_depthTexture);
+        _depthTexture = 0;
+    }
+}
+
+void GraphComponentRendererShared::resize(int width, int height)
+{
+    _width = width;
+    _height = height;
+
+    if(width > 0 && height > 0)
+        _FBOcomplete = prepareRenderBuffers(width, height);
+
+    GLfloat w = static_cast<GLfloat>(_width);
+    GLfloat h = static_cast<GLfloat>(_height);
+    GLfloat data[] =
+    {
+        0, 0,
+        w, 0,
+        w, h,
+
+        w, h,
+        0, h,
+        0, 0,
+    };
+
+    _screenQuadDataBuffer.bind();
+    _screenQuadDataBuffer.allocate(data, static_cast<int>(sizeof(data)));
+    _screenQuadDataBuffer.release();
+}
+
+void GraphComponentRendererShared::clear()
+{
+    if(!_FBOcomplete)
+    {
+        qWarning() << "Attempting to clear incomplete FBO";
+        return;
+    }
+
+    _funcs->glBindFramebuffer(GL_FRAMEBUFFER, _visualFBO);
+
+    // Color buffer
+    _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    _funcs->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    _funcs->glClear(GL_COLOR_BUFFER_BIT);
+
+    // Selection buffer
+    _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT1);
+    _funcs->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    _funcs->glClear(GL_COLOR_BUFFER_BIT);
+
+    GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+    _funcs->glDrawBuffers(2, drawBuffers);
+    _funcs->glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void GraphComponentRendererShared::render()
+{
+    if(!_FBOcomplete)
+    {
+        qWarning() << "Attempting to render incomplete FBO";
+        return;
+    }
+
+    _funcs->glViewport(0, 0, _width, _height);
+    _funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    _funcs->glDisable(GL_DEPTH_TEST);
+
+    QMatrix4x4 m;
+    m.ortho(0, _width, 0, _height, -1.0f, 1.0f);
+
+    _screenQuadDataBuffer.bind();
+
+    _screenQuadVAO.bind();
+    _funcs->glActiveTexture(GL_TEXTURE0);
+    _funcs->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    _funcs->glEnable(GL_BLEND);
+
+    // Color texture
+    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _colorTexture);
+
+    _screenShader.bind();
+    _screenShader.setUniformValue("projectionMatrix", m);
+    _funcs->glDrawArrays(GL_TRIANGLES, 0, 6);
+    _screenShader.release();
+
+    // Selection texture
+    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture);
+
+    _selectionShader.bind();
+    _selectionShader.setUniformValue("projectionMatrix", m);
+    _funcs->glDrawArrays(GL_TRIANGLES, 0, 6);
+    _selectionShader.release();
+
+    _screenQuadVAO.release();
+    _screenQuadDataBuffer.release();
+}
+
+bool GraphComponentRendererShared::prepareRenderBuffers(int width, int height)
+{
+    bool valid;
+
+    // Color texture
+    if(_colorTexture == 0)
+        _funcs->glGenTextures(1, &_colorTexture);
+    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _colorTexture);
+    _funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, NUM_MULTISAMPLES, GL_RGBA, width, height, GL_FALSE);
+    _funcs->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
+    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+
+    // Selection texture
+    if(_selectionTexture == 0)
+        _funcs->glGenTextures(1, &_selectionTexture);
+    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture);
+    _funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, NUM_MULTISAMPLES, GL_RGBA, width, height, GL_FALSE);
+    _funcs->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
+    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+
+    // Depth texture
+    if(_depthTexture == 0)
+        _funcs->glGenTextures(1, &_depthTexture);
+    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _depthTexture);
+    _funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, NUM_MULTISAMPLES, GL_DEPTH_COMPONENT, width, height, GL_FALSE);
+    _funcs->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
+    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+
+    // Visual FBO
+    if(_visualFBO == 0)
+        _funcs->glGenFramebuffers(1, &_visualFBO);
+    _funcs->glBindFramebuffer(GL_FRAMEBUFFER, _visualFBO);
+    _funcs->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _colorTexture, 0);
+    _funcs->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture, 0);
+    _funcs->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, _depthTexture, 0);
+
+    GLenum status = _funcs->glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    valid = (status == GL_FRAMEBUFFER_COMPLETE);
+
+    _funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    Q_ASSERT(valid);
+    return valid;
+}
+
+void GraphComponentRendererShared::prepareQuad()
+{
+    if(!_screenQuadVAO.isCreated())
+        _screenQuadVAO.create();
+
+    _screenQuadVAO.bind();
+
+    _screenQuadDataBuffer.create();
+    _screenQuadDataBuffer.bind();
+    _screenQuadDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+
+    _screenShader.bind();
+    _screenShader.enableAttributeArray("position");
+    _screenShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
+    _screenShader.setUniformValue("frameBufferTexture", 0);
+    _screenShader.release();
+
+    _selectionShader.bind();
+    _selectionShader.enableAttributeArray("position");
+    _selectionShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
+    _selectionShader.setUniformValue("frameBufferTexture", 0);
+    _selectionShader.release();
+
+    _screenQuadDataBuffer.release();
+    _screenQuadVAO.release();
 }
 
 GraphComponentRenderer::GraphComponentRenderer()
@@ -79,17 +282,12 @@ GraphComponentRenderer::GraphComponentRenderer()
       _cleanupWhenThawed(false),
       _updateVisualDataWhenThawed(false),
       _updatePositionDataWhenThawed(false),
-      _width(0), _height(0),
-      _colorTexture(0),
-      _selectionTexture(0),
-      _depthTexture(0),
-      _visualFBO(0),
-      _FBOcomplete(false),
+      _viewportWidth(0), _viewportHeight(0),
+
       _visualDataRequiresUpdate(false),
       _trackFocus(true),
       _targetZoomDistance(0.0f),
       _funcs(nullptr),
-      _aspectRatio(0.0f),
       _fovx(0.0f),
       _fovy(0.0f),
       _numNodesInPositionData(0),
@@ -144,9 +342,7 @@ void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, 
     prepareEdgeVAO();
     prepareSelectionMarkerVAO();
     prepareDebugLinesVAO();
-    prepareQuad();
 
-    setupCamera(_viewData._camera, _fovy, _aspectRatio);
     _targetZoomDistance = _viewData._zoomDistance;
     _viewData._focusNodeId.setToNull();
 
@@ -162,32 +358,6 @@ void GraphComponentRenderer::cleanup()
     {
         _cleanupWhenThawed = true;
         return;
-    }
-
-    if(_visualFBO != 0)
-    {
-        _funcs->glDeleteFramebuffers(1, &_visualFBO);
-        _visualFBO = 0;
-    }
-
-    _FBOcomplete = false;
-
-    if(_colorTexture != 0)
-    {
-        _funcs->glDeleteTextures(1, &_colorTexture);
-        _colorTexture = 0;
-    }
-
-    if(_selectionTexture != 0)
-    {
-        _funcs->glDeleteTextures(1, &_selectionTexture);
-        _selectionTexture = 0;
-    }
-
-    if(_depthTexture != 0)
-    {
-        _funcs->glDeleteTextures(1, &_depthTexture);
-        _depthTexture = 0;
     }
 
     _nodePositionData.clear();
@@ -222,22 +392,24 @@ void GraphComponentRenderer::thaw()
 {
     _frozen = false;
 
-    if(_updateVisualDataWhenThawed)
-    {
-        updateVisualData(When::Now);
-        _updateVisualDataWhenThawed = false;
-    }
-
-    if(_updatePositionDataWhenThawed)
-    {
-        updatePositionalData();
-        _updatePositionDataWhenThawed = false;
-    }
-
     if(_cleanupWhenThawed)
     {
         cleanup();
         _cleanupWhenThawed = false;
+    }
+    else
+    {
+        if(_updateVisualDataWhenThawed)
+        {
+            updateVisualData(When::Now);
+            _updateVisualDataWhenThawed = false;
+        }
+
+        if(_updatePositionDataWhenThawed)
+        {
+            updatePositionalData();
+            _updatePositionDataWhenThawed = false;
+        }
     }
 }
 
@@ -439,7 +611,7 @@ void GraphComponentRenderer::update(float t)
     submitDebugLines();
 }
 
-static void setShaderADSParameters(QOpenGLShaderProgram& program)
+static void setShaderADSParameters(QOpenGLShaderProgram& program, float alpha)
 {
     struct Light
     {
@@ -473,15 +645,17 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
     program.setUniformValue("material.ks", QVector3D(1.0f, 1.0f, 1.0f));
     program.setUniformValue("material.ka", QVector3D(0.1f, 0.1f, 0.1f));
     program.setUniformValue("material.shininess", 50.0f);
+
+    program.setUniformValue("alpha", alpha);
 }
 
-void GraphComponentRenderer::renderNodes()
+void GraphComponentRenderer::renderNodes(float alpha)
 {
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
     _funcs->glDrawBuffers(2, drawBuffers);
 
     _shared->_nodesShader.bind();
-    setShaderADSParameters(_shared->_nodesShader);
+    setShaderADSParameters(_shared->_nodesShader, alpha);
 
     _nodePositionBuffer.bind();
     _nodeVisualBuffer.bind();
@@ -502,13 +676,13 @@ void GraphComponentRenderer::renderNodes()
     _shared->_nodesShader.release();
 }
 
-void GraphComponentRenderer::renderEdges()
+void GraphComponentRenderer::renderEdges(float alpha)
 {
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
     _funcs->glDrawBuffers(2, drawBuffers);
 
     _shared->_edgesShader.bind();
-    setShaderADSParameters(_shared->_edgesShader);
+    setShaderADSParameters(_shared->_edgesShader, alpha);
 
     _edgePositionBuffer.bind();
     _edgeVisualBuffer.bind();
@@ -556,7 +730,7 @@ void GraphComponentRenderer::render2D()
     _funcs->glDisable(GL_DEPTH_TEST);
 
     QMatrix4x4 m;
-    m.ortho(0.0f, _width, 0.0f, _height, -1.0f, 1.0f);
+    m.ortho(0.0f, _viewportWidth, 0.0f, _viewportHeight, -1.0f, 1.0f);
 
     if(!_selectionRect.isNull())
     {
@@ -565,8 +739,8 @@ void GraphComponentRenderer::render2D()
         QRect r;
         r.setLeft(_selectionRect.left());
         r.setRight(_selectionRect.right());
-        r.setTop(_height - _selectionRect.top());
-        r.setBottom(_height - _selectionRect.bottom());
+        r.setTop(_viewportHeight - _selectionRect.top());
+        r.setBottom(_viewportHeight - _selectionRect.bottom());
 
         std::vector<GLfloat> data;
 
@@ -662,7 +836,7 @@ void GraphComponentRenderer::render(int x, int y, int width, int height, float a
     if(!_initialised)
         return;
 
-    if(!_FBOcomplete)
+    if(!_shared->_FBOcomplete)
     {
         qWarning() << "Attempting to render component" <<
                       _componentId << "without a complete FBO";
@@ -670,130 +844,52 @@ void GraphComponentRenderer::render(int x, int y, int width, int height, float a
     }
 
     if(width <= 0)
-        width = _width;
+        width = _viewportWidth;
 
     if(height <= 0)
-        height = _height;
+        height = _viewportHeight;
 
     _funcs->glEnable(GL_DEPTH_TEST);
     _funcs->glEnable(GL_CULL_FACE);
     _funcs->glDisable(GL_BLEND);
 
-    int viewportWidth = std::min(width, _width);
-    int viewportHeight = std::min(height, _height);
-    _funcs->glViewport(0, _height - viewportHeight, viewportWidth, viewportHeight);
-    _funcs->glBindFramebuffer(GL_FRAMEBUFFER, _visualFBO);
-
-    // Color buffer
-    _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    _funcs->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    _funcs->glClear(GL_COLOR_BUFFER_BIT);
-
-    // Selection buffer
-    _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT1);
-    _funcs->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    _funcs->glClear(GL_COLOR_BUFFER_BIT);
+    _funcs->glViewport(x, _viewportHeight - height - y, width, height);
+    _funcs->glBindFramebuffer(GL_FRAMEBUFFER, _shared->_visualFBO);
 
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
     _funcs->glDrawBuffers(2, drawBuffers);
-    _funcs->glClear(GL_DEPTH_BUFFER_BIT);
 
-    renderNodes();
-    renderEdges();
+    renderNodes(alpha);
+    renderEdges(alpha);
     render2D();
 
     renderDebugLines();
-
-    _funcs->glViewport(0, 0, _viewportWidth, _viewportHeight);
-    _funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    _funcs->glDisable(GL_DEPTH_TEST);
-
-    QMatrix4x4 m;
-    m.ortho(0, _viewportWidth, 0, _viewportHeight, -1.0f, 1.0f);
-
-    int quadWidth = std::max(width, _width);
-    int quadHeight = std::max(height, _height);
-    QRect rect;
-    rect.setLeft(x);
-    rect.setRight(rect.left() + quadWidth);
-    rect.setTop(_viewportHeight - y);
-    rect.setBottom(rect.top() - quadHeight);
-
-    GLfloat l = static_cast<GLfloat>(rect.left());
-    GLfloat r = static_cast<GLfloat>(rect.right());
-    GLfloat b = static_cast<GLfloat>(rect.bottom());
-    GLfloat t = static_cast<GLfloat>(rect.top());
-    GLfloat w = static_cast<GLfloat>(_width);
-    GLfloat h = static_cast<GLfloat>(_height);
-    GLfloat data[] =
-    {
-        l, b, 0, 0, 1.0f, 1.0f, 1.0f, alpha,
-        r, b, w, 0, 1.0f, 1.0f, 1.0f, alpha,
-        r, t, w, h, 1.0f, 1.0f, 1.0f, alpha,
-
-        r, t, w, h, 1.0f, 1.0f, 1.0f, alpha,
-        l, t, 0, h, 1.0f, 1.0f, 1.0f, alpha,
-        l, b, 0, 0, 1.0f, 1.0f, 1.0f, alpha,
-    };
-
-    _screenQuadDataBuffer.bind();
-    _screenQuadDataBuffer.allocate(data, static_cast<int>(sizeof(data)));
-
-    _screenQuadVAO.bind();
-    _funcs->glActiveTexture(GL_TEXTURE0);
-    _funcs->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    _funcs->glEnable(GL_BLEND);
-
-    // Color texture
-    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _colorTexture);
-
-    _shared->_screenShader.bind();
-    _shared->_screenShader.setUniformValue("projectionMatrix", m);
-    _funcs->glDrawArrays(GL_TRIANGLES, 0, 6);
-    _shared->_screenShader.release();
-
-    // Selection texture
-    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture);
-
-    _shared->_selectionShader.bind();
-    _shared->_selectionShader.setUniformValue("projectionMatrix", m);
-    _funcs->glDrawArrays(GL_TRIANGLES, 0, 6);
-    _shared->_selectionShader.release();
-
-    _screenQuadVAO.release();
-    _screenQuadDataBuffer.release();
-
-    _funcs->glEnable(GL_DEPTH_TEST);
-    _funcs->glDisable(GL_BLEND);
 }
 
-void GraphComponentRenderer::resize(int width, int height)
+void GraphComponentRenderer::resize(int viewportWidth, int viewportHeight,
+                                    int renderWidth, int renderHeight)
 {
-    if(_initialised && width > 0 && height > 0)
+    if(_initialised && viewportWidth > 0 && viewportHeight > 0)
     {
-        _width = width;
-        _height = height;
+        _viewportWidth = viewportWidth;
+        _viewportHeight = viewportHeight;
 
-        _FBOcomplete = prepareRenderBuffers();
+        if(renderWidth <= 0)
+            renderWidth = _viewportWidth;
 
-        _aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+        if(renderHeight <= 0)
+            renderHeight = _viewportHeight;
+
+        float aspectRatio = static_cast<float>(renderWidth) / static_cast<float>(renderHeight);
         _fovy = 60.0f;
-        _fovx = _fovy * _aspectRatio;
-
-        if(_graphModel)
-            setupCamera(_viewData._camera, _fovy, _aspectRatio);
+        _fovx = _fovy * aspectRatio;
+        _viewData._camera.setPerspectiveProjection(_fovy, aspectRatio, 0.3f, 50000.0f);
     }
     else
     {
-        qWarning() << "GraphComponentRenderer::resize(" << width << "," << height <<
+        qWarning() << "GraphComponentRenderer::resize(" << viewportWidth << "," << viewportHeight <<
                     ") failed _initialised:" << _initialised;
     }
-}
-
-void GraphComponentRenderer::resizeViewport(int width, int height)
-{
-    _viewportWidth = width;
-    _viewportHeight = height;
 }
 
 const float MINIMUM_ZOOM_DISTANCE = 2.5f;
@@ -914,6 +1010,11 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& viewTarge
     {
         _viewData._camera.setPosition(position);
         _viewData._camera.setViewTarget(viewTarget);
+
+        _viewData._transitionStartPosition =
+                _viewData._transitionEndPosition = position;
+        _viewData._transitionStartViewTarget =
+                _viewData._transitionEndViewTarget = viewTarget;
     }
     else
     {
@@ -1147,84 +1248,4 @@ void GraphComponentRenderer::prepareDebugLinesVAO()
     _debugLinesDataBuffer.release();
     _debugLinesDataVAO.release();
     _shared->_debugLinesShader.release();
-}
-
-void GraphComponentRenderer::prepareQuad()
-{
-    if(!_screenQuadVAO.isCreated())
-        _screenQuadVAO.create();
-
-    _screenQuadVAO.bind();
-
-    _screenQuadDataBuffer.create();
-    _screenQuadDataBuffer.bind();
-    _screenQuadDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-
-    _shared->_screenShader.bind();
-    _shared->_screenShader.enableAttributeArray("position");
-    _shared->_screenShader.enableAttributeArray("texCoord");
-    _shared->_screenShader.enableAttributeArray("color");
-    _shared->_screenShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 8 * sizeof(GLfloat));
-    _shared->_screenShader.setAttributeBuffer("texCoord", GL_FLOAT, 2 * sizeof(GLfloat), 2, 8 * sizeof(GLfloat)); //FIXME GL_INT?
-    _shared->_screenShader.setAttributeBuffer("color", GL_FLOAT, 4 * sizeof(GLfloat), 4, 8 * sizeof(GLfloat));
-    _shared->_screenShader.setUniformValue("frameBufferTexture", 0);
-    _shared->_screenShader.release();
-
-    _shared->_selectionShader.bind();
-    _shared->_selectionShader.enableAttributeArray("position");
-    _shared->_selectionShader.enableAttributeArray("texCoord");
-    _shared->_selectionShader.enableAttributeArray("color");
-    _shared->_selectionShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 8 * sizeof(GLfloat));
-    _shared->_selectionShader.setAttributeBuffer("texCoord", GL_FLOAT, 2 * sizeof(GLfloat), 2, 8 * sizeof(GLfloat)); //FIXME GL_INT?
-    _shared->_selectionShader.setAttributeBuffer("color", GL_FLOAT, 4 * sizeof(GLfloat), 4, 8 * sizeof(GLfloat));
-    _shared->_selectionShader.setUniformValue("frameBufferTexture", 0);
-    _shared->_selectionShader.release();
-
-    _screenQuadDataBuffer.release();
-    _screenQuadVAO.release();
-}
-
-bool GraphComponentRenderer::prepareRenderBuffers()
-{
-    bool valid;
-
-    // Color texture
-    if(_colorTexture == 0)
-        _funcs->glGenTextures(1, &_colorTexture);
-    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _colorTexture);
-    _funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisamples, GL_RGBA, _width, _height, GL_FALSE);
-    _funcs->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
-    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-
-    // Selection texture
-    if(_selectionTexture == 0)
-        _funcs->glGenTextures(1, &_selectionTexture);
-    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture);
-    _funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisamples, GL_RGBA, _width, _height, GL_FALSE);
-    _funcs->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
-    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-
-    // Depth texture
-    if(_depthTexture == 0)
-        _funcs->glGenTextures(1, &_depthTexture);
-    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _depthTexture);
-    _funcs->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisamples, GL_DEPTH_COMPONENT, _width, _height, GL_FALSE);
-    _funcs->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
-    _funcs->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-
-    // Visual FBO
-    if(_visualFBO == 0)
-        _funcs->glGenFramebuffers(1, &_visualFBO);
-    _funcs->glBindFramebuffer(GL_FRAMEBUFFER, _visualFBO);
-    _funcs->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _colorTexture, 0);
-    _funcs->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture, 0);
-    _funcs->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, _depthTexture, 0);
-
-    GLenum status = _funcs->glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    valid = (status == GL_FRAMEBUFFER_COMPLETE);
-
-    _funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    Q_ASSERT(valid);
-    return valid;
 }

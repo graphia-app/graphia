@@ -66,6 +66,10 @@ public:
 
     Transition& transition() { return _transition; }
 
+    void resizeScene(int width, int height);
+    void clearScene();
+    void renderScene();
+
 private:
     void makeContextCurrent();
 

@@ -26,7 +26,7 @@ GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
     _sceneUpdateEnabled(true),
     _graphModel(graphModel),
     _selectionManager(selectionManager),
-    _graphComponentRendererShared(std::make_shared<GraphComponentRendererShared>(_openGLWindow->context())),
+    _graphComponentRendererShared(std::make_shared<GraphComponentRendererShared>(this, _openGLWindow->context())),
     _graphComponentRendererManagers(std::make_shared<ComponentArray<GraphComponentRendererManager>>(graphModel->graph())),
     _numTransitioningRenderers(0),
     _mode(GraphWidget::Mode::Component)
@@ -202,6 +202,21 @@ void GraphWidget::updateNodePositions()
                 graphComponentRenderer->updatePositionalData();
         }
     });
+}
+
+void GraphWidget::resizeScene(int width, int height)
+{
+    _graphComponentRendererShared->resize(width, height);
+}
+
+void GraphWidget::clearScene()
+{
+    _graphComponentRendererShared->clear();
+}
+
+void GraphWidget::renderScene()
+{
+    _graphComponentRendererShared->render();
 }
 
 void GraphWidget::makeContextCurrent()

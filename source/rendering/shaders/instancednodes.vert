@@ -6,12 +6,12 @@ layout (location = 2) in vec2 vertexTexCoord;
 layout (location = 3) in vec3 point; // The position of the node
 layout (location = 4) in float size; // The size of the node
 layout (location = 5) in vec3 color; // The color of the node
-layout (location = 6) in vec4 outlineColor; // The outline color of the node
+layout (location = 6) in vec3 outlineColor; // The outline color of the node
 
 out vec3 position;
 out vec3 normal;
 out vec3 vColor;
-out vec4 vOutlineColor;
+out vec3 vOutlineColor;
 
 uniform mat4 modelViewMatrix;
 uniform mat3 normalMatrix;

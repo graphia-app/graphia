@@ -70,6 +70,8 @@ void GraphOverviewScene::render()
     _funcs->glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     _funcs->glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+    _graphWidget->clearScene();
+
     auto render = [this](ComponentId componentId)
     {
         auto renderer = rendererForComponentId(componentId);
@@ -102,6 +104,8 @@ void GraphOverviewScene::render()
         for(auto componentId : _transitionComponentIds)
             render(componentId);
     }
+
+    _graphWidget->renderScene();
 }
 
 void GraphOverviewScene::onShow()
@@ -208,6 +212,9 @@ void GraphOverviewScene::layoutComponents()
         {
             _previousComponentLayout[componentId]._rect =
                     _componentLayout[componentId]._rect;
+
+            auto renderer = rendererForComponentId(componentId);
+            renderer->resetView();
         }
     }
 
@@ -225,17 +232,17 @@ void GraphOverviewScene::resize(int width, int height)
     _width = width;
     _height = height;
 
+    _graphWidget->resizeScene(width, height);
+
     layoutComponents();
 
     auto resizeComponent = [this](ComponentId componentId)
     {
-        int previousSize = _previousComponentLayout[componentId]._rect.height();
-        int newSize = _componentLayout[componentId]._rect.height();
-        int maxSize = std::max(previousSize, newSize);
-
         auto renderer = rendererForComponentId(componentId);
-        renderer->resizeViewport(_width, _height);
-        renderer->resize(maxSize, maxSize);
+        auto layoutData = _componentLayout[componentId];
+        renderer->resize(_width, _height,
+                         layoutData._rect.width(),
+                         layoutData._rect.height());
     };
 
     for(auto componentId : _graphModel->graph().componentIds())
@@ -287,7 +294,6 @@ void GraphOverviewScene::startTransition()
     [this]
     {
         _previousComponentLayout = _componentLayout;
-        resize(_width, _height);
 
         for(auto componentId : _transitionComponentIds)
         {
