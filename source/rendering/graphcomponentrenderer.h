@@ -1,6 +1,7 @@
 #ifndef GRAPHCOMPONENTRENDERER_H
 #define GRAPHCOMPONENTRENDERER_H
 
+#include "graphrenderer.h"
 #include "camera.h"
 #include "primitives/cylinder.h"
 #include "primitives/sphere.h"
@@ -28,54 +29,6 @@ class SelectionManager;
 class Camera;
 class Octree;
 
-class QOpenGLFunctions_3_3_Core;
-
-class GraphComponentRendererShared
-{
-    friend class GraphComponentRenderer;
-
-public:
-    GraphComponentRendererShared(GraphWidget* graphWidget, const QOpenGLContext& context);
-    virtual ~GraphComponentRendererShared();
-
-    static const int NUM_MULTISAMPLES = 4;
-
-    void resize(int width, int height);
-
-    void clear();
-    void render();
-
-private:
-    GraphWidget* _graphWidget;
-    const QOpenGLContext* _context;
-    QOpenGLFunctions_3_3_Core* _funcs;
-
-    QOpenGLShaderProgram _screenShader;
-    QOpenGLShaderProgram _selectionShader;
-
-    QOpenGLShaderProgram _nodesShader;
-    QOpenGLShaderProgram _edgesShader;
-
-    QOpenGLShaderProgram _selectionMarkerShader;
-    QOpenGLShaderProgram _debugLinesShader;
-
-    int _width;
-    int _height;
-
-    GLuint _colorTexture;
-    GLuint _selectionTexture;
-    GLuint _depthTexture;
-    GLuint _visualFBO;
-    bool _FBOcomplete;
-
-    bool prepareRenderBuffers(int width, int height);
-
-    QOpenGLVertexArrayObject _screenQuadVAO;
-    QOpenGLBuffer _screenQuadDataBuffer;
-
-    void prepareQuad();
-};
-
 class GraphComponentRenderer
 {
 public:
@@ -84,7 +37,7 @@ public:
     void initialise(std::shared_ptr<GraphModel> graphModel, ComponentId componentId,
                     GraphWidget& graphWidget,
                     std::shared_ptr<SelectionManager> selectionManager,
-                    std::shared_ptr<GraphComponentRendererShared> shared);
+                    std::shared_ptr<GraphRenderer> shared);
 
     bool visible() { return _visible; }
     void setVisible(bool visible) { _visible = visible; }
@@ -141,7 +94,7 @@ public:
 
 private:
     GraphWidget* _graphWidget;
-    std::shared_ptr<GraphComponentRendererShared> _shared;
+    std::shared_ptr<GraphRenderer> _shared;
     Sphere _sphere;
     Cylinder _cylinder;
 

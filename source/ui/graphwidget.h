@@ -15,7 +15,7 @@
 #include <vector>
 #include <memory>
 
-class GraphComponentRendererShared;
+class GraphRenderer;
 class GraphComponentRenderer;
 class GraphOverviewScene;
 class GraphOverviewInteractor;
@@ -82,7 +82,7 @@ private:
     std::shared_ptr<GraphModel> _graphModel;
     std::shared_ptr<SelectionManager> _selectionManager;
 
-    std::shared_ptr<GraphComponentRendererShared> _graphComponentRendererShared;
+    std::shared_ptr<GraphRenderer> _graphRenderer;
     std::shared_ptr<ComponentArray<GraphComponentRendererManager>> _graphComponentRendererManagers;
     int _numTransitioningRenderers;
     DeferredExecutor _preUpdateExecutor;

@@ -26,7 +26,7 @@ GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
     _sceneUpdateEnabled(true),
     _graphModel(graphModel),
     _selectionManager(selectionManager),
-    _graphComponentRendererShared(std::make_shared<GraphComponentRendererShared>(this, _openGLWindow->context())),
+    _graphRenderer(std::make_shared<GraphRenderer>(this, _openGLWindow->context())),
     _graphComponentRendererManagers(std::make_shared<ComponentArray<GraphComponentRendererManager>>(graphModel->graph())),
     _numTransitioningRenderers(0),
     _mode(GraphWidget::Mode::Component)
@@ -206,17 +206,17 @@ void GraphWidget::updateNodePositions()
 
 void GraphWidget::resizeScene(int width, int height)
 {
-    _graphComponentRendererShared->resize(width, height);
+    _graphRenderer->resize(width, height);
 }
 
 void GraphWidget::clearScene()
 {
-    _graphComponentRendererShared->clear();
+    _graphRenderer->clear();
 }
 
 void GraphWidget::renderScene()
 {
-    _graphComponentRendererShared->render();
+    _graphRenderer->render();
 }
 
 void GraphWidget::makeContextCurrent()
@@ -255,7 +255,7 @@ void GraphWidget::onGraphChanged(const Graph* graph)
             {
                 graphComponentRenderer->initialise(_graphModel, componentId, *this,
                                                    _selectionManager,
-                                                   _graphComponentRendererShared);
+                                                   _graphRenderer);
             }
             else
             {
@@ -277,7 +277,7 @@ void GraphWidget::onComponentAdded(const Graph*, ComponentId componentId, bool)
         makeContextCurrent();
         graphComponentRenderer->initialise(_graphModel, componentId, *this,
                                            _selectionManager,
-                                           _graphComponentRendererShared);
+                                           _graphRenderer);
     }, "GraphWidget::onComponentAdded");
 }
 
