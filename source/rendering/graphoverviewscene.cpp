@@ -85,25 +85,10 @@ void GraphOverviewScene::render()
     };
 
     for(auto componentId : _graphModel->graph().componentIds())
-    {
-        bool componentIdIsMerger = std::any_of(
-                    _componentMergeSets.cbegin(),
-                    _componentMergeSets.cend(),
-                    [componentId](const ComponentMergeSet& componentMergeSet)
-        {
-            return componentMergeSet.newComponentId() == componentId;
-        });
+        render(componentId);
 
-
-        if(_graphWidget->transition().finished() || !componentIdIsMerger)
-            render(componentId);
-    }
-
-    if(!_graphWidget->transition().finished())
-    {
-        for(auto componentId : _transitionComponentIds)
-            render(componentId);
-    }
+    for(auto componentId : _transitionComponentIds)
+        render(componentId);
 
     _graphWidget->renderScene();
 }
@@ -301,6 +286,12 @@ void GraphOverviewScene::startTransition()
             renderer->thaw();
         }
 
+        for(auto componentMergeSet : _componentMergeSets)
+        {
+            auto renderer = rendererForComponentId(componentMergeSet.newComponentId());
+            renderer->thaw();
+        }
+
         _transitionComponentIds.clear();
         _componentSplitSets.clear();
         _componentMergeSets.clear();
@@ -389,7 +380,8 @@ void GraphOverviewScene::onComponentsWillMerge(const Graph*, const ComponentMerg
         auto renderer = rendererForComponentId(merger);
         renderer->freeze();
 
-        _transitionComponentIds.emplace_back(merger);
+        if(merger != componentMergeSet.newComponentId())
+            _transitionComponentIds.emplace_back(merger);
     }
 }
 
