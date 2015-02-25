@@ -67,7 +67,7 @@ void GraphOverviewScene::render()
 {
     _funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    _funcs->glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+    _funcs->glClearColor(0.75f, 0.75f, 0.75f, 1.0f);
     _funcs->glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     _graphWidget->clearScene();
