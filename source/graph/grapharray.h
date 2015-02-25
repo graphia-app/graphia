@@ -20,7 +20,7 @@ public:
 template<typename Index, typename Element> class GraphArray : public ResizableGraphArray
 {
 protected:
-    Graph* _graph;
+    mutable Graph* _graph;
     std::vector<Element> _array;
 
 public:
@@ -28,7 +28,7 @@ public:
         _graph(&graph)
     {}
 
-    GraphArray(GraphArray& other) :
+    GraphArray(const GraphArray& other) :
         _graph(other._graph)
     {
         _array = other._array;
@@ -126,7 +126,7 @@ public:
         graph._nodeArrayList.insert(this);
     }
 
-    NodeArray(NodeArray& other) : GraphArray<NodeId, Element>(other)
+    NodeArray(const NodeArray& other) : GraphArray<NodeId, Element>(other)
     {
         this->_graph->_nodeArrayList.insert(this);
     }
@@ -165,7 +165,7 @@ public:
         graph._edgeArrayList.insert(this);
     }
 
-    EdgeArray(EdgeArray& other) : GraphArray<EdgeId, Element>(other)
+    EdgeArray(const EdgeArray& other) : GraphArray<EdgeId, Element>(other)
     {
         this->_graph->_edgeArrayList.insert(this);
     }
@@ -204,7 +204,7 @@ public:
         graph._componentManager->_componentArrayList.insert(this);
     }
 
-    ComponentArray(ComponentArray& other) : GraphArray<ComponentId, Element>(other)
+    ComponentArray(const ComponentArray& other) : GraphArray<ComponentId, Element>(other)
     {
         this->_graph->_componentManager->_componentArrayList.insert(this);
     }
