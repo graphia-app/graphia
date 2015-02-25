@@ -204,6 +204,16 @@ void GraphWidget::updateNodePositions()
     });
 }
 
+void GraphWidget::setSelectionRect(const QRect& rect)
+{
+    _graphRenderer->setSelectionRect(rect);
+}
+
+void GraphWidget::clearSelectionRect()
+{
+    _graphRenderer->clearSelectionRect();
+}
+
 void GraphWidget::resizeScene(int width, int height)
 {
     _graphRenderer->resize(width, height);

@@ -89,14 +89,10 @@ void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, 
     if(!_debugLinesDataVAO.isCreated())
         _debugLinesDataVAO.create();
 
-    if(!_selectionMarkerDataVAO.isCreated())
-        _selectionMarkerDataVAO.create();
-
     prepareVertexBuffers();
 
     prepareNodeVAO();
     prepareEdgeVAO();
-    prepareSelectionMarkerVAO();
     prepareDebugLinesVAO();
 
     _targetZoomDistance = _viewData._zoomDistance;
@@ -488,48 +484,6 @@ void GraphComponentRenderer::render2D()
     QMatrix4x4 m;
     m.ortho(0.0f, _viewportWidth, 0.0f, _viewportHeight, -1.0f, 1.0f);
 
-    if(!_selectionRect.isNull())
-    {
-        const QColor color(Qt::GlobalColor::white);
-
-        QRect r;
-        r.setLeft(_selectionRect.left());
-        r.setRight(_selectionRect.right());
-        r.setTop(_viewportHeight - _selectionRect.top());
-        r.setBottom(_viewportHeight - _selectionRect.bottom());
-
-        std::vector<GLfloat> data;
-
-        data.push_back(r.left()); data.push_back(r.bottom());
-        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
-        data.push_back(r.right()); data.push_back(r.bottom());
-        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
-        data.push_back(r.right()); data.push_back(r.top());
-        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
-
-        data.push_back(r.right()); data.push_back(r.top());
-        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
-        data.push_back(r.left());  data.push_back(r.top());
-        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
-        data.push_back(r.left());  data.push_back(r.bottom());
-        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
-
-        _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT1);
-
-        _selectionMarkerDataBuffer.bind();
-        _selectionMarkerDataBuffer.allocate(data.data(), static_cast<int>(data.size()) * sizeof(GLfloat));
-
-        _shared->_selectionMarkerShader.bind();
-        _shared->_selectionMarkerShader.setUniformValue("projectionMatrix", m);
-
-        _selectionMarkerDataVAO.bind();
-        _funcs->glDrawArrays(GL_TRIANGLES, 0, 6);
-        _selectionMarkerDataVAO.release();
-
-        _shared->_selectionMarkerShader.release();
-        _selectionMarkerDataBuffer.release();
-    }
-
     _funcs->glEnable(GL_DEPTH_TEST);
 }
 
@@ -901,9 +855,6 @@ void GraphComponentRenderer::prepareVertexBuffers()
     _edgeVisualBuffer.allocate(_edgeVisualData.data(), static_cast<int>(_edgeVisualData.size()) * sizeof(GLfloat));
     _edgeVisualBuffer.release();
 
-    _selectionMarkerDataBuffer.create();
-    _selectionMarkerDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-
     _debugLinesDataBuffer.create();
     _debugLinesDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     _debugLinesDataBuffer.bind();
@@ -970,23 +921,6 @@ void GraphComponentRenderer::prepareEdgeVAO()
     _edgePositionBuffer.release();
     shader->release();
     _cylinder.vertexArrayObject()->release();
-}
-
-void GraphComponentRenderer::prepareSelectionMarkerVAO()
-{
-    _selectionMarkerDataVAO.bind();
-    _shared->_selectionMarkerShader.bind();
-    _selectionMarkerDataBuffer.bind();
-
-    _shared->_selectionMarkerShader.enableAttributeArray("position");
-    _shared->_selectionMarkerShader.enableAttributeArray("color");
-    _shared->_selectionMarkerShader.disableAttributeArray("texCoord");
-    _shared->_selectionMarkerShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 5 * sizeof(GLfloat));
-    _shared->_selectionMarkerShader.setAttributeBuffer("color", GL_FLOAT, 2 * sizeof(GLfloat), 3, 5 * sizeof(GLfloat));
-
-    _selectionMarkerDataBuffer.release();
-    _selectionMarkerDataVAO.release();
-    _shared->_selectionMarkerShader.release();
 }
 
 void GraphComponentRenderer::prepareDebugLinesVAO()

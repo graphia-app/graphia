@@ -189,7 +189,7 @@ void GraphComponentInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
 
                 _frustumSelectStart = QPoint();
                 _frustumSelecting = false;
-                _scene->renderer()->clearSelectionRect();
+                _graphWidget->clearSelectionRect();
             }
             else
             {
@@ -315,14 +315,14 @@ void GraphComponentInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
                 _frustumSelectStart = _cursorPosition;
         }
 
-        _scene->renderer()->setSelectionRect(QRect(_frustumSelectStart, _cursorPosition).normalized());
+        _graphWidget->setSelectionRect(QRect(_frustumSelectStart, _cursorPosition).normalized());
     }
     else if(_leftMouseButtonHeld && _frustumSelecting)
     {
         // Shift key has been released
         _frustumSelectStart = QPoint();
         _frustumSelecting = false;
-        _scene->renderer()->clearSelectionRect();
+        _graphWidget->clearSelectionRect();
 
         emit userInteractionFinished();
     }

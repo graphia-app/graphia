@@ -69,9 +69,6 @@ public:
     void zoom(float delta);
     void zoomToDistance(float distance);
 
-    void setSelectionRect(const QRect& rect) { _selectionRect = rect; }
-    void clearSelectionRect() { _selectionRect = QRect(); }
-
     void updatePositionalData();
     enum class When
     {
@@ -135,7 +132,6 @@ private:
     void prepareVertexBuffers();
     void prepareNodeVAO();
     void prepareEdgeVAO();
-    void prepareSelectionMarkerVAO();
     void prepareDebugLinesVAO();
 
     int _viewportWidth;
@@ -160,7 +156,6 @@ private:
     bool _trackFocus;
     float _targetZoomDistance;
     Transition _zoomTransition;
-    QRect _selectionRect;
 
     QOpenGLFunctions_3_3_Core* _funcs;
 
@@ -188,9 +183,6 @@ private:
 
     std::vector<GLfloat> _edgeVisualData;
     QOpenGLBuffer _edgeVisualBuffer;
-
-    QOpenGLBuffer _selectionMarkerDataBuffer;
-    QOpenGLVertexArrayObject _selectionMarkerDataVAO;
 
 private:
     struct DebugLine

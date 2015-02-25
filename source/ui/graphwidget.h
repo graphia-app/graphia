@@ -11,6 +11,7 @@
 #include <QWidget>
 #include <QTimer>
 #include <QString>
+#include <QRect>
 
 #include <vector>
 #include <memory>
@@ -65,6 +66,9 @@ public:
     void updateNodePositions();
 
     Transition& transition() { return _transition; }
+
+    void setSelectionRect(const QRect& rect);
+    void clearSelectionRect();
 
     void resizeScene(int width, int height);
     void clearScene();

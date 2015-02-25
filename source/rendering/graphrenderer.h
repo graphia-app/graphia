@@ -24,6 +24,9 @@ public:
     void clear();
     void render();
 
+    void setSelectionRect(const QRect& rect) { _selectionRect = rect; }
+    void clearSelectionRect() { _selectionRect = QRect(); }
+
 private:
     GraphWidget* _graphWidget;
     const QOpenGLContext* _context;
@@ -47,12 +50,19 @@ private:
     GLuint _visualFBO;
     bool _FBOcomplete;
 
-    bool prepareRenderBuffers(int width, int height);
-
     QOpenGLVertexArrayObject _screenQuadVAO;
     QOpenGLBuffer _screenQuadDataBuffer;
 
+    QOpenGLBuffer _selectionMarkerDataBuffer;
+    QOpenGLVertexArrayObject _selectionMarkerDataVAO;
+
+    QRect _selectionRect;
+
+    bool prepareRenderBuffers(int width, int height);
+    void prepareSelectionMarkerVAO();
     void prepareQuad();
+
+    void render2D();
 };
 
 #endif // GRAPHRENDERER_H

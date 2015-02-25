@@ -1,5 +1,6 @@
 #include "graphrenderer.h"
 
+#include <QColor>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions_3_3_Core>
 
@@ -50,6 +51,7 @@ GraphRenderer::GraphRenderer(GraphWidget* graphWidget, const QOpenGLContext& con
     loadShaderProgram(_selectionMarkerShader, ":/rendering/shaders/2d.vert", ":/rendering/shaders/selectionMarker.frag");
     loadShaderProgram(_debugLinesShader, ":/rendering/shaders/debuglines.vert", ":/rendering/shaders/debuglines.frag");
 
+    prepareSelectionMarkerVAO();
     prepareQuad();
 }
 
@@ -133,6 +135,58 @@ void GraphRenderer::clear()
     _funcs->glClear(GL_DEPTH_BUFFER_BIT);
 }
 
+void GraphRenderer::render2D()
+{
+    _funcs->glDisable(GL_DEPTH_TEST);
+
+    QMatrix4x4 m;
+    m.ortho(0.0f, _width, 0.0f, _height, -1.0f, 1.0f);
+
+    if(!_selectionRect.isNull())
+    {
+        const QColor color(Qt::GlobalColor::white);
+
+        QRect r;
+        r.setLeft(_selectionRect.left());
+        r.setRight(_selectionRect.right());
+        r.setTop(_height - _selectionRect.top());
+        r.setBottom(_height - _selectionRect.bottom());
+
+        std::vector<GLfloat> data;
+
+        data.push_back(r.left()); data.push_back(r.bottom());
+        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
+        data.push_back(r.right()); data.push_back(r.bottom());
+        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
+        data.push_back(r.right()); data.push_back(r.top());
+        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
+
+        data.push_back(r.right()); data.push_back(r.top());
+        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
+        data.push_back(r.left());  data.push_back(r.top());
+        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
+        data.push_back(r.left());  data.push_back(r.bottom());
+        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
+
+        _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT1);
+
+        _selectionMarkerDataBuffer.bind();
+        _selectionMarkerDataBuffer.allocate(data.data(), static_cast<int>(data.size()) * sizeof(GLfloat));
+
+        _selectionMarkerShader.bind();
+        _selectionMarkerShader.setUniformValue("projectionMatrix", m);
+
+        _selectionMarkerDataVAO.bind();
+        _funcs->glDrawArrays(GL_TRIANGLES, 0, 6);
+        _selectionMarkerDataVAO.release();
+
+        _selectionMarkerShader.release();
+        _selectionMarkerDataBuffer.release();
+    }
+
+    _funcs->glEnable(GL_DEPTH_TEST);
+}
+
 void GraphRenderer::render()
 {
     if(!_FBOcomplete)
@@ -140,6 +194,8 @@ void GraphRenderer::render()
         qWarning() << "Attempting to render incomplete FBO";
         return;
     }
+
+    render2D();
 
     _funcs->glViewport(0, 0, _width, _height);
     _funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -218,6 +274,28 @@ bool GraphRenderer::prepareRenderBuffers(int width, int height)
 
     Q_ASSERT(valid);
     return valid;
+}
+
+void GraphRenderer::prepareSelectionMarkerVAO()
+{
+    _selectionMarkerDataVAO.create();
+
+    _selectionMarkerDataVAO.bind();
+    _selectionMarkerShader.bind();
+
+    _selectionMarkerDataBuffer.create();
+    _selectionMarkerDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    _selectionMarkerDataBuffer.bind();
+
+    _selectionMarkerShader.enableAttributeArray("position");
+    _selectionMarkerShader.enableAttributeArray("color");
+    _selectionMarkerShader.disableAttributeArray("texCoord");
+    _selectionMarkerShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 5 * sizeof(GLfloat));
+    _selectionMarkerShader.setAttributeBuffer("color", GL_FLOAT, 2 * sizeof(GLfloat), 3, 5 * sizeof(GLfloat));
+
+    _selectionMarkerDataBuffer.release();
+    _selectionMarkerDataVAO.release();
+    _selectionMarkerShader.release();
 }
 
 void GraphRenderer::prepareQuad()
