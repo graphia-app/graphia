@@ -71,7 +71,8 @@ SOURCES += \
     source/rendering/graphcomponentrenderersreference.cpp \
     source/rendering/graphoverviewscene.cpp \
     source/ui/graphoverviewinteractor.cpp \
-    source/rendering/graphrenderer.cpp
+    source/rendering/graphrenderer.cpp \
+    source/ui/graphcommoninteractor.cpp
 
 HEADERS += \
     source/rendering/camera.h \
@@ -137,7 +138,8 @@ HEADERS += \
     source/utils/performancecounter.h \
     source/ui/graphoverviewinteractor.h \
     source/rendering/graphoverviewscene.h \
-    source/rendering/graphrenderer.h
+    source/rendering/graphrenderer.h \
+    source/ui/graphcommoninteractor.h
 
 FORMS    += source/mainwindow.ui
 

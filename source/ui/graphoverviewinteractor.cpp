@@ -14,7 +14,7 @@ GraphOverviewInteractor::GraphOverviewInteractor(std::shared_ptr<GraphModel> gra
                                  CommandManager& /*commandManager*/,
                                  std::shared_ptr<SelectionManager>, /*selectionManager*/
                                  GraphWidget* graphWidget) :
-    Interactor(graphWidget),
+    GraphCommonInteractor(graphWidget),
     _graphModel(graphModel),
     _scene(graphOverviewScene),
     _graphWidget(graphWidget)

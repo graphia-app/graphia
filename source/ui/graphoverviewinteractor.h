@@ -1,7 +1,7 @@
 #ifndef GRAPHINTERACTOR_H
 #define GRAPHINTERACTOR_H
 
-#include "interactor.h"
+#include "graphcommoninteractor.h"
 
 #include <memory>
 
@@ -11,7 +11,7 @@ class CommandManager;
 class SelectionManager;
 class GraphWidget;
 
-class GraphOverviewInteractor : public Interactor
+class GraphOverviewInteractor : public GraphCommonInteractor
 {
     Q_OBJECT
 public:

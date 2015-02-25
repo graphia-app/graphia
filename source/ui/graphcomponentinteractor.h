@@ -1,7 +1,7 @@
 #ifndef GRAPHCOMPONENTINTERACTOR_H
 #define GRAPHCOMPONENTINTERACTOR_H
 
-#include "interactor.h"
+#include "graphcommoninteractor.h"
 #include "../rendering/graphcomponentscene.h"
 
 #include <QPoint>
@@ -13,7 +13,7 @@ class CommandManager;
 class SelectionManager;
 class GraphWidget;
 
-class GraphComponentInteractor : public Interactor
+class GraphComponentInteractor : public GraphCommonInteractor
 {
     Q_OBJECT
 public:

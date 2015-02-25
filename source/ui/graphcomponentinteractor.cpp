@@ -74,7 +74,7 @@ GraphComponentInteractor::GraphComponentInteractor(std::shared_ptr<GraphModel> g
                                                    CommandManager &commandManager,
                                                    std::shared_ptr<SelectionManager> selectionManager,
                                                    GraphWidget* graphWidget) :
-    Interactor(graphWidget),
+    GraphCommonInteractor(graphWidget),
     _graphModel(graphModel),
     _scene(graphComponentScene),
     _commandManager(commandManager),
