@@ -66,10 +66,10 @@ void OpenGLWindow::setScene(Scene* scene)
         _scene->setInitialised();
     }
 
-    resize();
-
     _scene->setVisible(true);
     _scene->onShow();
+
+    resize();
 }
 
 void OpenGLWindow::enableInteraction()
@@ -131,8 +131,6 @@ void OpenGLWindow::render()
     if(!isExposed())
         return;
 
-    makeContextCurrent();
-
     // FIXME: make configurable
     glEnable(GL_MULTISAMPLE);
 
@@ -142,6 +140,8 @@ void OpenGLWindow::render()
 
 void OpenGLWindow::update()
 {
+    makeContextCurrent();
+
     float time = _time.elapsed() / 1000.0f;
     _scene->update(time);
 }
