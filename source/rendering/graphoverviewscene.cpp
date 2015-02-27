@@ -325,13 +325,11 @@ void GraphOverviewScene::startTransition()
         _graphWidget->rendererFinishedTransition();
     });
 
-    for(auto componentSplitSet : _componentSplitSets)
+    // Reset all components by default
+    for(auto componentId : _graphModel->graph().componentIds())
     {
-        for(auto splitter : componentSplitSet.splitters())
-        {
-            auto renderer = rendererForComponentId(splitter);
-            renderer->resetView();
-        }
+        auto renderer = rendererForComponentId(componentId);
+        renderer->resetView();
     }
 
     for(auto componentMergeSet : _componentMergeSets)
