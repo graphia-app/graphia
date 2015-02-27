@@ -39,7 +39,7 @@ GraphComponentRenderer::GraphComponentRenderer()
       _updateVisualDataWhenThawed(false),
       _updatePositionDataWhenThawed(false),
       _viewportWidth(0), _viewportHeight(0),
-
+      _renderWidth(0), _renderHeight(0),
       _visualDataRequiresUpdate(false),
       _trackFocus(true),
       _targetZoomDistance(0.0f),
@@ -590,10 +590,16 @@ void GraphComponentRenderer::resize(int viewportWidth, int viewportHeight,
         if(renderHeight <= 0)
             renderHeight = _viewportHeight;
 
+        _renderWidth = renderWidth;
+        _renderHeight = renderHeight;
+
         float aspectRatio = static_cast<float>(renderWidth) / static_cast<float>(renderHeight);
         _fovy = 60.0f;
         _fovx = _fovy * aspectRatio;
+
         _viewData._camera.setPerspectiveProjection(_fovy, aspectRatio, 0.3f, 50000.0f);
+        _viewData._camera.setViewportWidth(renderWidth);
+        _viewData._camera.setViewportHeight(renderHeight);
     }
     else
     {

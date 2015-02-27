@@ -24,36 +24,20 @@ public:
                              GraphWidget* graphWidget = nullptr);
 
 private:
-    std::shared_ptr<GraphModel> _graphModel;
     GraphComponentScene* _scene;
-    CommandManager& _commandManager;
-    std::shared_ptr<SelectionManager> _selectionManager;
-    GraphWidget* _graphWidget;
 
-    bool _rightMouseButtonHeld;
-    bool _leftMouseButtonHeld;
+    void rightMouseDown();
+    void rightMouseUp();
+    void rightDrag();
 
-    bool _selecting;
-    bool _frustumSelecting;
-    QPoint _frustumSelectStart;
+    void leftDoubleClick();
 
-    QPoint _prevCursorPosition;
-    QPoint _cursorPosition;
-    QPoint _clickPosition;
-    bool _mouseMoving;
-    NodeId _clickedNodeId;
-    NodeId _nearClickNodeId;
+    virtual void wheelUp();
+    virtual void wheelDown();
 
-    QQuaternion mouseMoveToRotation();
-
-    void mousePressEvent(QMouseEvent* e);
-    void mouseReleaseEvent(QMouseEvent* e);
-    void mouseMoveEvent(QMouseEvent* e);
-    void mouseDoubleClickEvent(QMouseEvent* e);
-    void wheelEvent(QWheelEvent* e);
-
-    void keyPressEvent(QKeyEvent* e);
-    void keyReleaseEvent(QKeyEvent* e);
+    GraphComponentRenderer* rendererAtPosition(const QPoint& position);
+    QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position);
+    ElementIdSet<NodeId> selectionForRect(const QRect& rect);
 };
 
 #endif // GRAPHCOMPONENTINTERACTOR_H

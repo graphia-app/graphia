@@ -17,12 +17,12 @@ void GraphComponentRenderersReference::setGraphComponentRendererManagers(std::sh
     _rendererManagers = rendererManagers;
 }
 
-ComponentArray<GraphComponentRendererManager>&GraphComponentRenderersReference::rendererManagers()
+ComponentArray<GraphComponentRendererManager>& GraphComponentRenderersReference::rendererManagers()
 {
     return *_rendererManagers.get();
 }
 
-GraphComponentRenderer*GraphComponentRenderersReference::rendererForComponentId(ComponentId componentId)
+GraphComponentRenderer* GraphComponentRenderersReference::rendererForComponentId(ComponentId componentId)
 {
     if(componentId.isNull())
         return nullptr;

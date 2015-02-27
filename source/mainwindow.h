@@ -60,6 +60,7 @@ private:
     void configureEditActions();
     void configureUndoActions();
     void configureResetViewAction();
+    void configureToggleModesAction();
     void configureStatusBar();
     void configureUI();
 

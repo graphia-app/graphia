@@ -22,18 +22,16 @@ public:
                     GraphWidget* graphWidget = nullptr);
 
 private:
-    std::shared_ptr<GraphModel> _graphModel;
     GraphOverviewScene* _scene;
-    GraphWidget* _graphWidget;
 
-    void mousePressEvent(QMouseEvent* e);
-    void mouseReleaseEvent(QMouseEvent* e);
-    void mouseMoveEvent(QMouseEvent* e);
-    void mouseDoubleClickEvent(QMouseEvent* e);
-    void wheelEvent(QWheelEvent* e);
+    void leftDoubleClick();
 
-    void keyPressEvent(QKeyEvent* e);
-    void keyReleaseEvent(QKeyEvent* e);
+    virtual void wheelUp();
+    virtual void wheelDown();
+
+    GraphComponentRenderer* rendererAtPosition(const QPoint& position);
+    QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position);
+    ElementIdSet<NodeId> selectionForRect(const QRect& rect);
 };
 
 #endif // GRAPHINTERACTOR_H

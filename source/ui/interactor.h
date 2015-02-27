@@ -28,8 +28,8 @@ public:
     virtual void mouseDoubleClickEvent(QMouseEvent*) = 0;
     virtual void wheelEvent(QWheelEvent*) = 0;
 
-    virtual void keyPressEvent(QKeyEvent*) = 0;
-    virtual void keyReleaseEvent(QKeyEvent*) = 0;
+    virtual void keyPressEvent(QKeyEvent*) {}
+    virtual void keyReleaseEvent(QKeyEvent*) {}
 
     bool interacting() const { return _interacting; }
 

@@ -199,6 +199,13 @@ void MainWindow::configureResetViewAction()
         _ui->actionReset_View->setEnabled(!widget->busy() && !widget->viewIsReset());
 }
 
+void MainWindow::configureToggleModesAction()
+{
+    MainWidget* widget;
+    if((widget = currentTabWidget()) != nullptr)
+        _ui->actionToggle_Modes->setEnabled(!widget->busy());
+}
+
 void MainWindow::configureStatusBar()
 {
     MainWidget* widget;
@@ -250,6 +257,7 @@ void MainWindow::configureUI()
     configureEditActions();
     configureUndoActions();
     configureResetViewAction();
+    configureToggleModesAction();
     configureStatusBar();
 
     MainWidget* widget;

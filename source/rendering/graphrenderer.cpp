@@ -195,9 +195,10 @@ void GraphRenderer::render()
         return;
     }
 
+    _funcs->glViewport(0, 0, _width, _height);
+
     render2D();
 
-    _funcs->glViewport(0, 0, _width, _height);
     _funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
     _funcs->glDisable(GL_DEPTH_TEST);
 

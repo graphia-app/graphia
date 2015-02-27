@@ -96,6 +96,9 @@ public:
     void setTop(const float& top);
     float top() const;
 
+    void setViewportWidth(const float viewportWidth) { _viewportWidth = viewportWidth; }
+    void setViewportHeight(const float viewportHeight) { _viewportHeight = viewportHeight; }
+
     QMatrix4x4 viewMatrix() const;
     QMatrix4x4 projectionMatrix() const;
     QMatrix4x4 viewProjectionMatrix() const;
@@ -186,6 +189,9 @@ private:
     float _right;
     float _bottom;
     float _top;
+
+    int _viewportWidth;
+    int _viewportHeight;
 
     mutable QMatrix4x4 _viewMatrix;
     mutable QMatrix4x4 _projectionMatrix;

@@ -442,14 +442,11 @@ bool Camera::unproject(int x, int y, int z, QVector3D& result)
     if(!invertable)
         return false;
 
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-
-    y = viewport[3] - y;
+    y = _viewportHeight - y;
 
     QVector4D normalisedCoordinates;
-    normalisedCoordinates.setX((x - (float)viewport[0]) / (float)viewport[2] * 2.0f - 1.0f);
-    normalisedCoordinates.setY((y - (float)viewport[1]) / (float)viewport[3] * 2.0f - 1.0f);
+    normalisedCoordinates.setX((x / (float)_viewportWidth) * 2.0f - 1.0f);
+    normalisedCoordinates.setY((y / (float)_viewportHeight) * 2.0f - 1.0f);
     normalisedCoordinates.setZ(2.0f * z - 1.0f);
     normalisedCoordinates.setW(1.0f);
 

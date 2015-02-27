@@ -48,6 +48,12 @@ public:
     void resize(int viewportWidth, int viewportHeight,
                 int renderWidth = 0, int renderHeight = 0);
 
+    int viewportWidth() const { return _viewportWidth; }
+    int viewportHeight() const { return _viewportHeight; }
+
+    int renderWidth() const { return _renderWidth; }
+    int renderHeight() const { return _renderHeight; }
+
     void moveFocusToNode(NodeId nodeId);
     void moveFocusToCentreOfComponent();
     void moveFocusToNodeClosestCameraVector();
@@ -66,6 +72,7 @@ public:
     bool viewIsReset() { return trackingCentreOfComponent() && autoZooming(); }
 
     Camera* camera() { return &_viewData._camera; }
+    const Camera* camera() const { return &_viewData._camera; }
     void zoom(float delta);
     void zoomToDistance(float distance);
 
@@ -136,6 +143,8 @@ private:
 
     int _viewportWidth;
     int _viewportHeight;
+    int _renderWidth;
+    int _renderHeight;
 
     void renderNodes(float alpha);
     void renderEdges(float alpha);
