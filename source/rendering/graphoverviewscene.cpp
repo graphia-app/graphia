@@ -84,11 +84,24 @@ void GraphOverviewScene::render()
                          layoutData._alpha);
     };
 
-    for(auto componentId : _graphModel->graph().componentIds())
-        render(componentId);
+    std::unique_lock<std::mutex> lock(_cachedComponentIdsMutex);
+    if(!_cachedComponentIds.empty())
+    {
+        for(auto componentId : _cachedComponentIds)
+            render(componentId);
 
-    for(auto componentId : _transitionComponentIds)
-        render(componentId);
+        lock.unlock();
+    }
+    else
+    {
+        lock.unlock();
+
+        for(auto componentId : _graphModel->graph().componentIds())
+            render(componentId);
+
+        for(auto componentId : _transitionComponentIds)
+            render(componentId);
+    }
 
     _graphWidget->renderScene();
 }
@@ -230,11 +243,24 @@ void GraphOverviewScene::resize(int width, int height)
                          layoutData._rect.height());
     };
 
-    for(auto componentId : _graphModel->graph().componentIds())
-        resizeComponent(componentId);
+    std::unique_lock<std::mutex> lock(_cachedComponentIdsMutex);
+    if(!_cachedComponentIds.empty())
+    {
+        for(auto componentId : _cachedComponentIds)
+            resizeComponent(componentId);
 
-    for(auto componentId : _transitionComponentIds)
-        resizeComponent(componentId);
+        lock.unlock();
+    }
+    else
+    {
+        lock.unlock();
+
+        for(auto componentId : _graphModel->graph().componentIds())
+            resizeComponent(componentId);
+
+        for(auto componentId : _transitionComponentIds)
+            resizeComponent(componentId);
+    }
 }
 
 static GraphOverviewScene::LayoutData interpolateLayout(const GraphOverviewScene::LayoutData& a,
@@ -385,14 +411,23 @@ void GraphOverviewScene::onComponentsWillMerge(const Graph*, const ComponentMerg
     }
 }
 
-void GraphOverviewScene::onGraphWillChange(const Graph*)
+void GraphOverviewScene::onGraphWillChange(const Graph* graph)
 {
     // Take a copy of the existing layout before the graph is changed
     _previousComponentLayout = _componentLayout;
+
+    // The ComponentIds will be referenced when we render them, so
+    // take a copy to use in case the list is altered during the change
+    std::unique_lock<std::mutex> lock(_cachedComponentIdsMutex);
+    _cachedComponentIds = graph->componentIds();
 }
 
 void GraphOverviewScene::onGraphChanged(const Graph* graph)
 {
+    std::unique_lock<std::mutex> lock(_cachedComponentIdsMutex);
+    _cachedComponentIds.clear();
+    lock.unlock();
+
     // Find the number of nodes in the largest component
     int maxNumNodes = 0;
     for(auto componentId : graph->componentIds())

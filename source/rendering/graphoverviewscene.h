@@ -7,6 +7,10 @@
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
 
+#include <vector>
+#include <mutex>
+#include <memory>
+
 #include <QRect>
 
 class GraphWidget;
@@ -66,6 +70,9 @@ private:
     std::vector<ComponentSplitSet> _componentSplitSets;
     std::vector<ComponentMergeSet> _componentMergeSets;
     void startTransition();
+
+    std::vector<ComponentId> _cachedComponentIds;
+    std::mutex _cachedComponentIdsMutex;
 
 private slots:
     void onGraphWillChange(const Graph* graph);
