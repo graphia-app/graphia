@@ -114,6 +114,12 @@ void Camera::setViewTarget(const QVector3D& viewTarget)
     _viewMatrixDirty = true;
 }
 
+void Camera::setViewTarget(const QVector3D& viewVector, float distance)
+{
+    setViewTarget(_position + (viewVector.normalized() * distance));
+}
+
+
 QVector3D Camera::viewTarget() const
 {
     return _viewTarget;

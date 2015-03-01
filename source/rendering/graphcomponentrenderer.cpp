@@ -679,10 +679,10 @@ void GraphComponentRenderer::centreNodeInViewport(NodeId nodeId, float cameraDis
                              cameraDistance);
 }
 
-void GraphComponentRenderer::centrePositionInViewport(const QVector3D& viewTarget, float cameraDistance)
+void GraphComponentRenderer::centrePositionInViewport(const QVector3D& viewTarget,
+                                                      float cameraDistance,
+                                                      const QVector3D /*viewVector*/)
 {
-    QVector3D startPosition = _viewData._camera.position();
-    QVector3D startViewTarget = _viewData._camera.viewTarget();
     QVector3D position;
 
     if(cameraDistance < 0.0f)
@@ -701,10 +701,10 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& viewTarge
         else
         {
             // We're in front of the translation plane, so move directly to the target
-            position = viewTarget + (startPosition - startViewTarget);
+            position = viewTarget + (_viewData._camera.position() - _viewData._camera.viewTarget());
         }
 
-        float distanceToTarget = (viewTarget - position).length();
+        float distanceToTarget = position.distanceToPoint(viewTarget);
         zoomToDistance(distanceToTarget);
     }
     else
@@ -726,17 +726,15 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& viewTarge
         _viewData._camera.setPosition(position);
         _viewData._camera.setViewTarget(viewTarget);
 
-        _viewData._transitionStartPosition =
-                _viewData._transitionEndPosition = position;
-        _viewData._transitionStartViewTarget =
-                _viewData._transitionEndViewTarget = viewTarget;
+        _viewData._transitionStart = _viewData._transitionEnd = _viewData._camera;
     }
     else
     {
-        _viewData._transitionStartPosition = startPosition;
-        _viewData._transitionEndPosition = position;
-        _viewData._transitionStartViewTarget = startViewTarget;
-        _viewData._transitionEndViewTarget = viewTarget;
+        _viewData._transitionStart = _viewData._camera;
+
+        _viewData._transitionEnd = _viewData._camera;
+        _viewData._transitionEnd.setPosition(position);
+        _viewData._transitionEnd.setViewTarget(viewTarget);
     }
 }
 
@@ -790,7 +788,9 @@ void GraphComponentRenderer::moveFocusToNodeClosestCameraVector()
         moveFocusToNode(closestNodeId);
 }
 
-void GraphComponentRenderer::moveFocusToPositionContainingNodes(const QVector3D& position, std::vector<NodeId> nodeIds)
+void GraphComponentRenderer::moveFocusToPositionContainingNodes(const QVector3D& position,
+                                                                std::vector<NodeId> nodeIds,
+                                                                const QVector3D& viewVector)
 {
     if(_componentId.isNull())
         return;
@@ -800,15 +800,15 @@ void GraphComponentRenderer::moveFocusToPositionContainingNodes(const QVector3D&
     _entireComponentZoomDistance = zoomDistanceForNodeIds(position, nodeIds);
     zoomToDistance(_entireComponentZoomDistance);
 
-    centrePositionInViewport(_viewData._focusPosition, _viewData._zoomDistance);
+    centrePositionInViewport(_viewData._focusPosition, _viewData._zoomDistance, viewVector);
 }
 
 void GraphComponentRenderer::updateTransition(float f)
 {
-    _viewData._camera.setPosition(Utils::interpolate(_viewData._transitionStartPosition,
-                                                     _viewData._transitionEndPosition, f));
-    _viewData._camera.setViewTarget(Utils::interpolate(_viewData._transitionStartViewTarget,
-                                                       _viewData._transitionEndViewTarget, f));
+    _viewData._camera.setPosition(Utils::interpolate(_viewData._transitionStart.position(),
+                                                     _viewData._transitionEnd.position(), f));
+    _viewData._camera.setViewTarget(Utils::interpolate(_viewData._transitionStart.viewTarget(),
+                                                       _viewData._transitionEnd.viewTarget(), f));
 }
 
 NodeId GraphComponentRenderer::focusNodeId()

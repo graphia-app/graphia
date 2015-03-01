@@ -125,6 +125,7 @@ public slots:
     void setPosition(const QVector3D& position);
     void setUpVector(const QVector3D& upVector);
     void setViewTarget(const QVector3D& viewTarget);
+    void setViewTarget(const QVector3D& viewVector, float distance);
 
     void resetViewToIdentity();
 

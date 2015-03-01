@@ -57,7 +57,9 @@ public:
     void moveFocusToNode(NodeId nodeId);
     void moveFocusToCentreOfComponent();
     void moveFocusToNodeClosestCameraVector();
-    void moveFocusToPositionContainingNodes(const QVector3D& position, std::vector<NodeId> nodeIds);
+    void moveFocusToPositionContainingNodes(const QVector3D& position,
+                                            std::vector<NodeId> nodeIds,
+                                            const QVector3D& viewVector);
 
     ComponentId componentId() { return _componentId; }
     NodeId focusNodeId();
@@ -127,10 +129,8 @@ private:
         NodeId _focusNodeId;
         QVector3D _focusPosition;
 
-        QVector3D _transitionStartPosition;
-        QVector3D _transitionStartViewTarget;
-        QVector3D _transitionEndPosition;
-        QVector3D _transitionEndViewTarget;
+        Camera _transitionStart;
+        Camera _transitionEnd;
     };
 
     ViewData _viewData;
@@ -152,7 +152,9 @@ private:
     void render2D();
 
     void centreNodeInViewport(NodeId nodeId, float cameraDistance = -1.0f);
-    void centrePositionInViewport(const QVector3D& viewTarget, float cameraDistance = -1.0f);
+    void centrePositionInViewport(const QVector3D& viewTarget,
+                                  float cameraDistance = -1.0f,
+                                  const QVector3D viewVector = QVector3D());
 
     float _entireComponentZoomDistance;
     float zoomDistanceForNodeIds(const QVector3D& centre, std::vector<NodeId> nodeIds);

@@ -339,10 +339,20 @@ void GraphOverviewScene::startTransition()
         auto mergedFocusPosition = NodePositions::centreOfMassScaled(_graphModel->nodePositions(),
                                                                      mergedNodeIds);
 
+        // Calculate the average view vector
+        float reciprocal = 1.0f / componentMergeSet.mergers().size();
+        QVector3D viewVector;
+
         for(auto merger : componentMergeSet.mergers())
         {
             auto renderer = rendererForComponentId(merger);
-            renderer->moveFocusToPositionContainingNodes(mergedFocusPosition, mergedNodeIds);
+            viewVector += renderer->camera()->viewVector() * reciprocal;
+        }
+
+        for(auto merger : componentMergeSet.mergers())
+        {
+            auto renderer = rendererForComponentId(merger);
+            renderer->moveFocusToPositionContainingNodes(mergedFocusPosition, mergedNodeIds, viewVector);
         }
     }
 }
