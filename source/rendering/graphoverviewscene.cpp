@@ -515,6 +515,8 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph)
             onShow();
             resize(_width, _height);
             startTransition();
+            //FIXME if graph change has resulted in a single component, switch
+            // to component mode once the transition had completed
         }, "GraphOverviewScene::onGraphChanged (resize)");
     }
 }

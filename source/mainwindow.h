@@ -60,7 +60,7 @@ private:
     void configureEditActions();
     void configureUndoActions();
     void configureResetViewAction();
-    void configureToggleModesAction();
+    void configureOverviewModeAction();
     void configureStatusBar();
     void configureUI();
 
@@ -79,7 +79,7 @@ private slots:
     void on_actionRedo_triggered();
     void on_actionDelete_triggered();
     void on_actionReset_View_triggered();
-    void on_actionToggle_Modes_triggered();
+    void on_actionOverview_Mode_triggered();
 
     void onLoadProgress(int percentage);
     void onLoadCompletion(int success);

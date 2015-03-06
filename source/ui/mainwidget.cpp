@@ -277,9 +277,14 @@ bool MainWidget::viewIsReset() const
     return _graphWidget->viewIsReset();
 }
 
-void MainWidget::toggleModes()
+void MainWidget::switchToOverviewMode()
 {
-    _graphWidget->toggleModes();
+    _graphWidget->switchToOverviewMode();
+}
+
+GraphWidget::Mode MainWidget::mode() const
+{
+    return _graphWidget->mode();
 }
 
 void MainWidget::deleteSelectedNodes()

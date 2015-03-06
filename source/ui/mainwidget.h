@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+#include "graphwidget.h"
+
 #include "../graph/graph.h"
 #include "../commands/commandmanager.h"
 
@@ -14,7 +16,6 @@ class SelectionManager;
 class GraphFileParserThread;
 class NodeLayoutThread;
 class LayoutThread;
-class GraphWidget;
 
 class MainWidget : public QWidget
 {
@@ -84,7 +85,8 @@ public:
     void resetView();
     bool viewIsReset() const;
 
-    void toggleModes();
+    void switchToOverviewMode();
+    GraphWidget::Mode mode() const;
 
     void deleteSelectedNodes();
 

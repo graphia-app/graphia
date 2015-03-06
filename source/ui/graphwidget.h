@@ -55,7 +55,6 @@ public:
     };
 
     Mode mode() const { return _mode; }
-    void toggleModes();
     void switchToOverviewMode();
     void switchToComponentMode(ComponentId componentId = ComponentId());
 

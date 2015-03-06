@@ -98,6 +98,7 @@
     <property name="title">
      <string>&amp;View</string>
     </property>
+    <addaction name="actionOverview_Mode"/>
     <addaction name="actionReset_View"/>
    </widget>
    <addaction name="menuFile"/>
@@ -119,7 +120,7 @@
    <addaction name="actionUndo"/>
    <addaction name="actionRedo"/>
    <addaction name="actionReset_View"/>
-   <addaction name="actionToggle_Modes"/>
+   <addaction name="actionOverview_Mode"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -239,7 +240,9 @@
   </action>
   <action name="actionReset_View">
    <property name="icon">
-    <iconset theme="zoom-fit-best"/>
+    <iconset theme="zoom-fit-best">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>Reset View</string>
@@ -248,9 +251,18 @@
     <string>Ctrl+R</string>
    </property>
   </action>
-  <action name="actionToggle_Modes">
+  <action name="actionOverview_Mode">
+   <property name="icon">
+    <iconset theme="view-fullscreen"/>
+   </property>
    <property name="text">
-    <string>Toggle Modes</string>
+    <string>Overview Mode</string>
+   </property>
+   <property name="toolTip">
+    <string>Go To Overview Mode</string>
+   </property>
+   <property name="shortcut">
+    <string>Esc</string>
    </property>
   </action>
  </widget>

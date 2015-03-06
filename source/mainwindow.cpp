@@ -199,11 +199,16 @@ void MainWindow::configureResetViewAction()
         _ui->actionReset_View->setEnabled(!widget->busy() && !widget->viewIsReset());
 }
 
-void MainWindow::configureToggleModesAction()
+void MainWindow::configureOverviewModeAction()
 {
     MainWidget* widget;
     if((widget = currentTabWidget()) != nullptr)
-        _ui->actionToggle_Modes->setEnabled(!widget->busy());
+    {
+        _ui->actionOverview_Mode->setEnabled(!widget->busy() &&
+                                             !widget->interacting() &&
+                                             widget->mode() != GraphWidget::Mode::Overview &&
+                                             widget->graphModel()->graph().numComponents() > 1);
+    }
 }
 
 void MainWindow::configureStatusBar()
@@ -257,7 +262,7 @@ void MainWindow::configureUI()
     configureEditActions();
     configureUndoActions();
     configureResetViewAction();
-    configureToggleModesAction();
+    configureOverviewModeAction();
     configureStatusBar();
 
     MainWidget* widget;
@@ -483,11 +488,11 @@ void MainWindow::on_actionReset_View_triggered()
     configureUI();
 }
 
-void MainWindow::on_actionToggle_Modes_triggered()
+void MainWindow::on_actionOverview_Mode_triggered()
 {
     MainWidget* widget;
     if((widget = currentTabWidget()) != nullptr)
-        widget->toggleModes();
+        widget->switchToOverviewMode();
 
     configureUI();
 }

@@ -57,8 +57,6 @@ GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
     layout()->setContentsMargins(0, 0, 0, 0);
     layout()->addWidget(QWidget::createWindowContainer(_openGLWindow));
 
-    //switchToComponentMode();
-
     _timer = new QTimer(this);
     connect(_timer, &QTimer::timeout, this, &GraphWidget::onUpdate);
     _timer->start(16);
@@ -135,23 +133,6 @@ bool GraphWidget::viewIsReset() const
     return true;
 }
 
-void GraphWidget::toggleModes()
-{
-    switch(_mode)
-    {
-        case GraphWidget::Mode::Overview:
-            switchToComponentMode();
-            break;
-
-        case GraphWidget::Mode::Component:
-            switchToOverviewMode();
-            break;
-
-        default:
-            break;
-    }
-}
-
 void GraphWidget::switchToOverviewMode()
 {
     executeOnRendererThread([this]
@@ -163,11 +144,15 @@ void GraphWidget::switchToOverviewMode()
         {
             if(!_graphComponentScene->viewIsReset())
             {
+                if(_transition.finished())
+                    rendererStartedTransition();
+
                 _graphComponentScene->startTransition(0.3f, Transition::Type::EaseInEaseOut,
                 [this]
                 {
                     _modeChanged = true;
                     _mode = GraphWidget::Mode::Overview;
+                    rendererFinishedTransition();
                 });
 
                 _graphComponentScene->resetView();
@@ -206,12 +191,16 @@ void GraphWidget::switchToComponentMode(ComponentId componentId)
 
         if(_mode != GraphWidget::Mode::Component)
         {
+            if(_transition.finished())
+                rendererStartedTransition();
+
             _graphOverviewScene->startTransitionToComponentMode(_graphComponentScene->componentId(),
                                                                 0.3f, Transition::Type::EaseInEaseOut,
             [this]
             {
                 _modeChanged = true;
                 _mode = GraphWidget::Mode::Component;
+                rendererFinishedTransition();
             });
         }
         else
