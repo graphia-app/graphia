@@ -88,6 +88,14 @@ void GraphComponentScene::saveViewData()
         renderer()->saveViewData();
 }
 
+bool GraphComponentScene::savedViewIsReset()
+{
+    if(renderer() == nullptr)
+        return true;
+
+    return renderer()->savedViewIsReset();
+}
+
 void GraphComponentScene::restoreViewData()
 {
     if(renderer() != nullptr)
@@ -97,10 +105,7 @@ void GraphComponentScene::restoreViewData()
 void GraphComponentScene::resetView()
 {
     if(renderer() != nullptr)
-    {
-        startTransition();
         renderer()->resetView();
-    }
 }
 
 bool GraphComponentScene::viewIsReset()
@@ -116,7 +121,8 @@ GraphComponentRenderer* GraphComponentScene::renderer()
     return rendererForComponentId(_componentId);
 }
 
-void GraphComponentScene::startTransition(Transition::Type transitionType, float duration)
+void GraphComponentScene::startTransition(float duration, Transition::Type transitionType,
+                                          std::function<void()> finishedFunction)
 {
     if(_graphWidget->transition().finished())
         _graphWidget->rendererStartedTransition();
@@ -129,7 +135,8 @@ void GraphComponentScene::startTransition(Transition::Type transitionType, float
     [this]
     {
         _graphWidget->rendererFinishedTransition();
-    });
+    },
+    finishedFunction);
 }
 
 void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet)

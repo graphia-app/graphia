@@ -96,6 +96,11 @@ void Camera::setPosition(const QVector3D& position)
     _viewMatrixDirty = true;
 }
 
+void Camera::setPosition(const QVector3D &viewVector, float distance)
+{
+    setPosition(_viewTarget - (viewVector.normalized() * distance));
+}
+
 void Camera::setUpVector(const QVector3D& upVector)
 {
     _upVector = upVector;

@@ -2,6 +2,8 @@
 
 #include "../graph/graph.h"
 
+#include "../utils/namethread.h"
+
 GraphFileParserThread::GraphFileParserThread(const QString& filename,
                                              Graph& graph,
                                              std::unique_ptr<GraphFileParser> graphFileParser) :
@@ -31,6 +33,8 @@ void GraphFileParserThread::cancel()
 
 void GraphFileParserThread::run()
 {
+    nameCurrentThread("Parser");
+
     connect(_graphFileParser.get(), &GraphFileParser::progress, this, &GraphFileParserThread::progress);
 
     bool result;

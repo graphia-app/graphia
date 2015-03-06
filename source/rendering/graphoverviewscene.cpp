@@ -72,35 +72,59 @@ void GraphOverviewScene::render()
 
     _graphWidget->clearScene();
 
-    auto render = [this](ComponentId componentId)
+    auto render = [this](const std::vector<ComponentId>& componentIds)
     {
-        auto renderer = rendererForComponentId(componentId);
-        auto layoutData = _componentLayout[componentId];
+        // Alpha blended first...
+        for(auto componentId : componentIds)
+        {
+            if(_componentLayout[componentId]._alpha >= 1.0f)
+                continue;
 
-        renderer->render(layoutData._rect.x(),
-                         layoutData._rect.y(),
-                         layoutData._rect.width(),
-                         layoutData._rect.height(),
-                         layoutData._alpha);
+            auto renderer = rendererForComponentId(componentId);
+            auto layoutData = _componentLayout[componentId];
+
+            renderer->render(layoutData._rect.x(),
+                             layoutData._rect.y(),
+                             layoutData._rect.width(),
+                             layoutData._rect.height(),
+                             layoutData._alpha);
+        }
+
+        //...then opaque
+        for(auto componentId : componentIds)
+        {
+            if(_componentLayout[componentId]._alpha < 1.0f)
+                continue;
+
+            auto renderer = rendererForComponentId(componentId);
+            auto layoutData = _componentLayout[componentId];
+
+            renderer->render(layoutData._rect.x(),
+                             layoutData._rect.y(),
+                             layoutData._rect.width(),
+                             layoutData._rect.height(),
+                             layoutData._alpha);
+        }
     };
 
     std::unique_lock<std::mutex> lock(_cachedComponentIdsMutex);
     if(!_cachedComponentIds.empty())
     {
-        for(auto componentId : _cachedComponentIds)
-            render(componentId);
-
+        render(_cachedComponentIds);
         lock.unlock();
     }
     else
     {
         lock.unlock();
 
-        for(auto componentId : _graphModel->graph().componentIds())
-            render(componentId);
+        auto& a = _graphModel->graph().componentIds();
+        auto& b = _transitionComponentIds;
+        std::vector<ComponentId> componentIds;
+        componentIds.reserve(a.size() + b.size());
+        componentIds.insert(componentIds.end(), a.begin(), a.end());
+        componentIds.insert(componentIds.end(), b.begin(), b.end());
 
-        for(auto componentId : _transitionComponentIds)
-            render(componentId);
+        render(componentIds);
     }
 
     _graphWidget->renderScene();
@@ -142,13 +166,44 @@ void GraphOverviewScene::setRenderSizeDivisor(int divisor)
     resize(_width, _height);
 }
 
-void GraphOverviewScene::resetView()
+void GraphOverviewScene::startTransitionFromComponentMode(ComponentId focusComponentId,
+                                                          float duration,
+                                                          Transition::Type transitionType,
+                                                          std::function<void()> finishedFunction)
 {
+    startTransition(duration, transitionType, finishedFunction);
+    _previousComponentLayout = _componentLayout;
+
     for(auto componentId : _graphModel->graph().componentIds())
     {
         auto renderer = rendererForComponentId(componentId);
         renderer->resetView();
+
+        if(componentId != focusComponentId)
+            _previousComponentLayout[componentId]._alpha = 0.0f;
     }
+
+    int left = (_width * 0.5f) - (_height * 0.5f);
+    _previousComponentLayout[focusComponentId]._rect = QRect(left, 0, _height, _height);
+}
+
+void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusComponentId,
+                                                        float duration,
+                                                        Transition::Type transitionType,
+                                                        std::function<void()> finishedFunction)
+{
+    _previousComponentLayout = _componentLayout;
+
+    for(auto componentId : _graphModel->graph().componentIds())
+    {
+        if(componentId != focusComponentId)
+            _componentLayout[componentId]._alpha = 0.0f;
+    }
+
+    int left = (_width * 0.5f) - (_height * 0.5f);
+    _componentLayout[focusComponentId]._rect = QRect(left, 0, _height, _height);
+
+    startTransition(duration, transitionType, finishedFunction);
 }
 
 void GraphOverviewScene::layoutComponents()
@@ -170,7 +225,7 @@ void GraphOverviewScene::layoutComponents()
         auto coord = coords.top();
         coords.pop();
 
-        int divisor =_renderSizeDivisors[componentId];
+        int divisor = _renderSizeDivisors[componentId];
         int dividedSize = _height / (divisor * _renderSizeDivisor);
 
         const int MINIMUM_SIZE = 32;
@@ -275,16 +330,16 @@ static GraphOverviewScene::LayoutData interpolateLayout(const GraphOverviewScene
         ), Utils::interpolate(a._alpha, b._alpha, f));
 }
 
-void GraphOverviewScene::startTransition()
+void GraphOverviewScene::startTransition(float duration,
+                                         Transition::Type transitionType,
+                                         std::function<void()> finishedFunction)
 {
-    resize(_width, _height);
-
     auto targetComponentLayout = _componentLayout;
 
     if(_graphWidget->transition().finished())
         _graphWidget->rendererStartedTransition();
 
-    _graphWidget->transition().start(1.0f, Transition::Type::EaseInEaseOut,
+    _graphWidget->transition().start(duration, transitionType,
     [this, targetComponentLayout /*FIXME C++14 move capture*/](float f)
     {
         auto interpolate = [&](const ComponentId componentId)
@@ -323,7 +378,8 @@ void GraphOverviewScene::startTransition()
         _componentMergeSets.clear();
 
         _graphWidget->rendererFinishedTransition();
-    });
+    },
+    finishedFunction);
 
     // Reset all components by default
     for(auto componentId : _graphModel->graph().componentIds())
@@ -457,6 +513,7 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph)
         _graphWidget->executeOnRendererThread([this]
         {
             onShow();
+            resize(_width, _height);
             startTransition();
         }, "GraphOverviewScene::onGraphChanged (resize)");
     }

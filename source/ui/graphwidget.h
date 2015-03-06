@@ -76,6 +76,8 @@ public:
 
 private:
     void makeContextCurrent();
+    void finishTransitionToOverviewMode();
+    void finishTransitionToComponentMode();
 
     bool _initialised;
 
@@ -97,6 +99,7 @@ private:
     GraphComponentScene* _graphComponentScene;
     GraphComponentInteractor* _graphComponentInteractor;
 
+    bool _modeChanged;
     Mode _mode;
     ComponentId _defaultComponentId;
 

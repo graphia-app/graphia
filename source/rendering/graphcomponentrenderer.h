@@ -71,7 +71,7 @@ public:
     bool autoZooming();
 
     void resetView();
-    bool viewIsReset() { return trackingCentreOfComponent() && autoZooming(); }
+    bool viewIsReset() { return _viewData.isReset(); }
 
     Camera* camera() { return &_viewData._camera; }
     const Camera* camera() const { return &_viewData._camera; }
@@ -89,7 +89,8 @@ public:
 
     void cloneViewDataFrom(const GraphComponentRenderer& other);
     void saveViewData() { _savedViewData = _viewData; }
-    void restoreViewData() { _viewData = _savedViewData; }
+    bool savedViewIsReset() { return _savedViewData.isReset(); }
+    void restoreViewData();
 
     bool initialised() { return _initialised; }
 
@@ -122,6 +123,8 @@ private:
             _camera.setViewTarget(QVector3D(0.0f, 0.0f, 0.0f));
             _camera.setUpVector(QVector3D(0.0f, 1.0f, 0.0f));
         }
+
+        bool isReset() { return _focusNodeId.isNull() && _autoZooming; }
 
         Camera _camera;
         float _zoomDistance;

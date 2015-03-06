@@ -36,6 +36,7 @@ public:
     int height() const { return _height; }
 
     void saveViewData();
+    bool savedViewIsReset();
     void restoreViewData();
 
     void resetView();
@@ -43,8 +44,9 @@ public:
 
     GraphComponentRenderer* renderer();
 
-    void startTransition(Transition::Type transitionType = Transition::Type::EaseInEaseOut,
-                         float duration = 0.3f);
+    void startTransition(float duration = 0.3f,
+                         Transition::Type transitionType = Transition::Type::EaseInEaseOut,
+                         std::function<void()> finishedFunction = []{});
 
 private:
     GraphWidget* _graphWidget;

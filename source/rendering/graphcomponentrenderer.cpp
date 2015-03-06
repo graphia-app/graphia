@@ -135,6 +135,14 @@ void GraphComponentRenderer::cloneViewDataFrom(const GraphComponentRenderer& oth
     _viewData = other._viewData;
 }
 
+void GraphComponentRenderer::restoreViewData()
+{
+    ViewData oldViewData = _viewData;
+    _viewData = _savedViewData;
+    _viewData._transitionStart = oldViewData._camera;
+    _targetZoomDistance = _viewData._zoomDistance;
+}
+
 void GraphComponentRenderer::freeze()
 {
     _frozen = true;
@@ -568,6 +576,7 @@ void GraphComponentRenderer::render(int x, int y, int width, int height, float a
 
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
     _funcs->glDrawBuffers(2, drawBuffers);
+    _funcs->glClear(GL_DEPTH_BUFFER_BIT);
 
     renderNodes(alpha);
     renderEdges(alpha);

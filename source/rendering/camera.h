@@ -123,6 +123,7 @@ public:
 
 public slots:
     void setPosition(const QVector3D& position);
+    void setPosition(const QVector3D& viewVector, float distance);
     void setUpVector(const QVector3D& upVector);
     void setViewTarget(const QVector3D& viewTarget);
     void setViewTarget(const QVector3D& viewVector, float distance);

@@ -29,6 +29,7 @@ GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
     _graphRenderer(std::make_shared<GraphRenderer>(this, _openGLWindow->context())),
     _graphComponentRendererManagers(std::make_shared<ComponentArray<GraphComponentRendererManager>>(graphModel->graph())),
     _numTransitioningRenderers(0),
+    _modeChanged(false),
     _mode(GraphWidget::Mode::Component)
 {
     connect(&graphModel->graph(), &Graph::graphChanged, this, &GraphWidget::onGraphChanged, Qt::DirectConnection);
@@ -56,7 +57,7 @@ GraphWidget::GraphWidget(std::shared_ptr<GraphModel> graphModel,
     layout()->setContentsMargins(0, 0, 0, 0);
     layout()->addWidget(QWidget::createWindowContainer(_openGLWindow));
 
-    switchToComponentMode();
+    //switchToComponentMode();
 
     _timer = new QTimer(this);
     connect(_timer, &QTimer::timeout, this, &GraphWidget::onUpdate);
@@ -86,6 +87,25 @@ void GraphWidget::onUpdate()
 {
     if(_sceneUpdateEnabled)
     {
+        if(_modeChanged)
+        {
+            switch(_mode)
+            {
+                case GraphWidget::Mode::Overview:
+                    finishTransitionToOverviewMode();
+                    break;
+
+                case GraphWidget::Mode::Component:
+                    finishTransitionToComponentMode();
+                    break;
+
+                default:
+                    break;
+            }
+
+            _modeChanged = false;
+        }
+
         _preUpdateExecutor.execute();
         _openGLWindow->update();
     }
@@ -101,7 +121,10 @@ bool GraphWidget::interacting() const
 void GraphWidget::resetView()
 {
     if(_mode == GraphWidget::Mode::Component)
+    {
+        _graphComponentScene->startTransition();
         _graphComponentScene->resetView();
+    }
 }
 
 bool GraphWidget::viewIsReset() const
@@ -136,14 +159,40 @@ void GraphWidget::switchToOverviewMode()
         // So that we can return to the current view parameters later
         _graphComponentScene->saveViewData();
 
-        _openGLWindow->setScene(_graphOverviewScene);
-        _openGLWindow->setInteractor(_graphOverviewInteractor);
+        if(_mode != GraphWidget::Mode::Overview)
+        {
+            if(!_graphComponentScene->viewIsReset())
+            {
+                _graphComponentScene->startTransition(0.3f, Transition::Type::EaseInEaseOut,
+                [this]
+                {
+                    _modeChanged = true;
+                    _mode = GraphWidget::Mode::Overview;
+                });
 
-        // When in overview mode we want the whole of each component to be visible
-        _graphOverviewScene->resetView();
-
-        _mode = GraphWidget::Mode::Overview;
+                _graphComponentScene->resetView();
+            }
+            else
+            {
+                _modeChanged = true;
+                _mode = GraphWidget::Mode::Overview;
+            }
+        }
+        else
+            finishTransitionToOverviewMode();
     }, "GraphWidget::switchToOverviewMode");
+}
+
+void GraphWidget::finishTransitionToOverviewMode()
+{
+    _openGLWindow->setScene(_graphOverviewScene);
+    _openGLWindow->setInteractor(_graphOverviewInteractor);
+
+    if(_modeChanged)
+    {
+        _graphOverviewScene->startTransitionFromComponentMode(_graphComponentScene->componentId(),
+                                                              0.3f, Transition::Type::EaseInEaseOut);
+    }
 }
 
 void GraphWidget::switchToComponentMode(ComponentId componentId)
@@ -155,14 +204,35 @@ void GraphWidget::switchToComponentMode(ComponentId componentId)
         else
             _graphComponentScene->setComponentId(componentId);
 
-        // Go back to where we were before
-        _graphComponentScene->restoreViewData();
+        if(_mode != GraphWidget::Mode::Component)
+        {
+            _graphOverviewScene->startTransitionToComponentMode(_graphComponentScene->componentId(),
+                                                                0.3f, Transition::Type::EaseInEaseOut,
+            [this]
+            {
+                _modeChanged = true;
+                _mode = GraphWidget::Mode::Component;
+            });
+        }
+        else
+            finishTransitionToComponentMode();
 
-        _openGLWindow->setScene(_graphComponentScene);
-        _openGLWindow->setInteractor(_graphComponentInteractor);
-
-        _mode = GraphWidget::Mode::Component;
     }, "GraphWidget::switchToComponentMode");
+}
+
+void GraphWidget::finishTransitionToComponentMode()
+{
+    _openGLWindow->setScene(_graphComponentScene);
+    _openGLWindow->setInteractor(_graphComponentInteractor);
+
+    if(!_graphComponentScene->savedViewIsReset())
+    {
+        // Go back to where we were before
+        if(_modeChanged)
+            _graphComponentScene->startTransition(0.3f, Transition::Type::EaseInEaseOut);
+
+        _graphComponentScene->restoreViewData();
+    }
 }
 
 void GraphWidget::rendererStartedTransition()

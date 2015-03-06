@@ -24,13 +24,22 @@ private:
     float _duration;
     float _elapsed;
     std::function<void(float)> _function;
-    std::function<void()> _finishedFunction;
+    std::vector<std::function<void()>> _finishedFunctions;
 
 public:
     Transition();
 
-    void start(float duration, Type type, std::function<void(float)> function,
-               std::function<void()> finishedFunction = []{});
+    template<typename... Args> void start(float duration, Type type,
+                                          std::function<void(float)> function,
+                                          Args... finishedFunctions)
+    {
+        _lastTime = -1.0f;
+        _duration = duration;
+        _elapsed = 0.0f;
+        _type = type;
+        _function = function;
+        _finishedFunctions = {finishedFunctions...};
+    }
 
     bool update(float time);
     bool finished() const { return _elapsed >= _duration; }

@@ -129,10 +129,6 @@ void GraphRenderer::clear()
     _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT1);
     _funcs->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     _funcs->glClear(GL_COLOR_BUFFER_BIT);
-
-    GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-    _funcs->glDrawBuffers(2, drawBuffers);
-    _funcs->glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void GraphRenderer::render2D()

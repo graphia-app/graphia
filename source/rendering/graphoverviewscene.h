@@ -48,7 +48,14 @@ public:
     int renderSizeDivisor() { return _renderSizeDivisor; }
     void setRenderSizeDivisor(int divisor);
 
-    void resetView();
+    void startTransitionFromComponentMode(ComponentId focusComponentId,
+                                          float duration = 0.3f,
+                                          Transition::Type transitionType = Transition::Type::EaseInEaseOut,
+                                          std::function<void()> finishedFunction = []{});
+    void startTransitionToComponentMode(ComponentId focusComponentId,
+                                        float duration = 0.3f,
+                                        Transition::Type transitionType = Transition::Type::EaseInEaseOut,
+                                        std::function<void()> finishedFunction = []{});
 
 private:
     GraphWidget* _graphWidget;
@@ -69,7 +76,9 @@ private:
     std::vector<ComponentId> _transitionComponentIds;
     std::vector<ComponentSplitSet> _componentSplitSets;
     std::vector<ComponentMergeSet> _componentMergeSets;
-    void startTransition();
+    void startTransition(float duration = 1.0f,
+                         Transition::Type transitionType = Transition::Type::EaseInEaseOut,
+                         std::function<void()> finishedFunction = []{});
 
     std::vector<ComponentId> _cachedComponentIds;
     std::mutex _cachedComponentIdsMutex;
