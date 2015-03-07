@@ -176,9 +176,6 @@ void GraphOverviewScene::startTransitionFromComponentMode(ComponentId focusCompo
 
     for(auto componentId : _graphModel->graph().componentIds())
     {
-        auto renderer = rendererForComponentId(componentId);
-        renderer->resetView();
-
         if(componentId != focusComponentId)
             _previousComponentLayout[componentId]._alpha = 0.0f;
     }
@@ -392,8 +389,8 @@ void GraphOverviewScene::startTransition(float duration,
     {
         auto mergedComponent = _graphModel->graph().componentById(componentMergeSet.newComponentId());
         auto mergedNodeIds = mergedComponent->nodeIds();
-        auto mergedFocusPosition = NodePositions::centreOfMassScaled(_graphModel->nodePositions(),
-                                                                     mergedNodeIds);
+        auto mergedFocusPosition = NodePositions::centreOfMassScaledAndSmoothed(_graphModel->nodePositions(),
+                                                                                mergedNodeIds);
 
         // Calculate the average view vector
         float reciprocal = 1.0f / componentMergeSet.mergers().size();

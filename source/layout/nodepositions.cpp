@@ -67,9 +67,15 @@ QVector3D NodePositions::centreOfMass(const NodePositions& nodePositions,
     return centreOfMass;
 }
 
-QVector3D NodePositions::centreOfMassScaled(const NodePositions& nodePositions, const std::vector<NodeId>& nodeIds)
+QVector3D NodePositions::centreOfMassScaledAndSmoothed(const NodePositions& nodePositions, const std::vector<NodeId>& nodeIds)
 {
-    return centreOfMass(nodePositions, nodeIds) * nodePositions.scale();
+    float reciprocal = 1.0f / nodeIds.size();
+    QVector3D centreOfMass = QVector3D();
+
+    for(auto nodeId : nodeIds)
+        centreOfMass += (nodePositions.getScaledAndSmoothed(nodeId) * reciprocal);
+
+    return centreOfMass;
 }
 
 std::vector<QVector3D> NodePositions::positionsVector(const NodePositions& nodePositions, const std::vector<NodeId>& nodeIds)

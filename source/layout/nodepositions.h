@@ -47,8 +47,8 @@ public:
 
     static QVector3D centreOfMass(const NodePositions& nodePositions,
                                   const std::vector<NodeId>& nodeIds);
-    static QVector3D centreOfMassScaled(const NodePositions& nodePositions,
-                                        const std::vector<NodeId>& nodeIds);
+    static QVector3D centreOfMassScaledAndSmoothed(const NodePositions& nodePositions,
+                                                   const std::vector<NodeId>& nodeIds);
 
     static std::vector<QVector3D> positionsVector(const NodePositions& nodePositions,
                                                   const std::vector<NodeId>& nodeIds);

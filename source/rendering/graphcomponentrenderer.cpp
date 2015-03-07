@@ -137,10 +137,15 @@ void GraphComponentRenderer::cloneViewDataFrom(const GraphComponentRenderer& oth
 
 void GraphComponentRenderer::restoreViewData()
 {
-    ViewData oldViewData = _viewData;
-    _viewData = _savedViewData;
-    _viewData._transitionStart = oldViewData._camera;
-    _targetZoomDistance = _viewData._zoomDistance;
+    updateFocusPosition();
+    _viewData._autoZooming = _savedViewData._autoZooming;
+    _viewData._focusNodeId = _savedViewData._focusNodeId;
+    zoomToDistance(_savedViewData._zoomDistance);
+
+    if(_savedViewData._focusNodeId.isNull())
+        centrePositionInViewport(_viewData._focusPosition, _viewData._zoomDistance);
+    else
+        centreNodeInViewport(_savedViewData._focusNodeId, _viewData._zoomDistance);
 }
 
 void GraphComponentRenderer::freeze()
@@ -231,9 +236,7 @@ void GraphComponentRenderer::updatePositionalData()
     _edgePositionBuffer.allocate(_edgePositionData.data(), static_cast<int>(_edgePositionData.size()) * sizeof(GLfloat));
     _edgePositionBuffer.release();
 
-    _viewData._focusPosition = NodePositions::centreOfMassScaled(_graphModel->nodePositions(),
-                                                                 component->nodeIds());
-
+    updateFocusPosition();
     updateEntireComponentZoomDistance();
 }
 
@@ -261,6 +264,13 @@ float GraphComponentRenderer::zoomDistanceForNodeIds(const QVector3D& centre, st
         qWarning() << "zoomDistanceForNodes returning default value";
         return 1.0f;
     }
+}
+
+void GraphComponentRenderer::updateFocusPosition()
+{
+    auto component = _graphModel->graph().componentById(_componentId);
+    _viewData._focusPosition = NodePositions::centreOfMassScaledAndSmoothed(_graphModel->nodePositions(),
+                                                                            component->nodeIds());
 }
 
 void GraphComponentRenderer::updateEntireComponentZoomDistance()
@@ -775,6 +785,7 @@ void GraphComponentRenderer::moveFocusToCentreOfComponent()
         return;
 
     _viewData._focusNodeId.setToNull();
+    updateFocusPosition();
     updateEntireComponentZoomDistance();
 
     if(_viewData._autoZooming)

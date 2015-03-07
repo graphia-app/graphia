@@ -161,6 +161,7 @@ private:
 
     float _entireComponentZoomDistance;
     float zoomDistanceForNodeIds(const QVector3D& centre, std::vector<NodeId> nodeIds);
+    void updateFocusPosition();
     void updateEntireComponentZoomDistance();
 
     bool _visualDataRequiresUpdate;
