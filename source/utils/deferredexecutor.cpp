@@ -18,10 +18,7 @@ DeferredExecutor::~DeferredExecutor()
 
 void DeferredExecutor::enqueue(TaskFn function, const QString& description)
 {
-    if(_executing)
-        std::abort(); // Calling enqueue from execute
-
-    std::unique_lock<std::mutex> lock(_mutex);
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     Task task;
     task._function = function;
@@ -35,7 +32,7 @@ void DeferredExecutor::enqueue(TaskFn function, const QString& description)
 
 void DeferredExecutor::execute()
 {
-    std::unique_lock<std::mutex> lock(_mutex);
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     if(!_tasks.empty() && _debug)
     {
@@ -64,7 +61,7 @@ void DeferredExecutor::execute()
 
 void DeferredExecutor::cancel()
 {
-    std::unique_lock<std::mutex> lock(_mutex);
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     while(!_tasks.empty())
         _tasks.pop_front();

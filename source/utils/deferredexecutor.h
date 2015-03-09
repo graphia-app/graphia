@@ -20,7 +20,7 @@ private:
         QString _description;
     };
 
-    std::mutex _mutex;
+    std::recursive_mutex _mutex;
     std::deque<Task> _tasks;
     bool _debug;
     std::atomic<bool> _executing;
