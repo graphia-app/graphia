@@ -404,6 +404,8 @@ Qt::KeyboardModifiers GraphCommonInteractor::modifiers()
 
 void GraphCommonInteractor::wheelEvent(QWheelEvent* wheelEvent)
 {
+    _rendererUnderCursor = rendererAtPosition(wheelEvent->pos());
+
     if(wheelEvent->angleDelta().y() > 0.0f)
         wheelUp();
     else
