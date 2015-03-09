@@ -104,6 +104,19 @@ void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, 
     updateVisualData(When::Now);
 }
 
+void GraphComponentRenderer::setVisible(bool visible)
+{
+    if(visible && !_visible)
+    {
+        // We're about to display for the first time
+        // so make sure the GPU data is up-to-date
+        updatePositionalData();
+        updateVisualData();
+    }
+
+    _visible = visible;
+}
+
 void GraphComponentRenderer::cleanup()
 {
     if(_frozen)

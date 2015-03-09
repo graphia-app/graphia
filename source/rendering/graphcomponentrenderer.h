@@ -40,7 +40,7 @@ public:
                     std::shared_ptr<GraphRenderer> shared);
 
     bool visible() { return _visible; }
-    void setVisible(bool visible) { _visible = visible; }
+    void setVisible(bool visible);
 
     void cleanup();
     void update(float t);
