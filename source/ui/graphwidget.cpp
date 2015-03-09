@@ -175,6 +175,14 @@ void GraphWidget::finishTransitionToOverviewMode()
 
     if(_modeChanged)
     {
+        // When we first change to overview mode we want all
+        // the renderers to be in their reset state
+        for(auto componentId : _graphModel->graph().componentIds())
+        {
+            auto renderer = _graphComponentRendererManagers->at(componentId).get();
+            renderer->resetView();
+        }
+
         _graphOverviewScene->startTransitionFromComponentMode(_graphComponentScene->componentId(),
                                                               0.3f, Transition::Type::EaseInEaseOut);
     }
