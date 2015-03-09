@@ -61,7 +61,7 @@ vec3 adsModel(const in vec3 pos, const in vec3 n)
         float kl = 0.0 * d;
         float kq = 0.0002 * d * d;
         float attenuation = 1.0 / (kc + kl + kq);
-        attenuation = clamp(attenuation, 0.5, 1.0);
+        attenuation = clamp(attenuation, 0.7, 1.0);
 
         // Combine the ambient, diffuse and specular contributions
         result += attenuation * light.intensity * (material.ka + vColor * diffuse + material.ks * specular);
