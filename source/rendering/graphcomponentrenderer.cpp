@@ -768,6 +768,8 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& viewTarge
         _viewData._transitionEnd.setPosition(position);
         _viewData._transitionEnd.setViewTarget(viewTarget);
     }
+
+    _viewData._camera.setRotation(_viewData._camera.rotation());
 }
 
 void GraphComponentRenderer::moveFocusToNode(NodeId nodeId)

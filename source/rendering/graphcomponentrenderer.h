@@ -118,11 +118,7 @@ private:
         ViewData() :
             _zoomDistance(1.0f),
             _autoZooming(true)
-        {
-            _camera.setPosition(QVector3D(0.0f, 0.0f, 1.0f));
-            _camera.setViewTarget(QVector3D(0.0f, 0.0f, 0.0f));
-            _camera.setUpVector(QVector3D(0.0f, 1.0f, 0.0f));
-        }
+        {}
 
         bool isReset() { return _focusNodeId.isNull() && _autoZooming; }
 

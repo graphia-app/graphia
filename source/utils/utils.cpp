@@ -88,3 +88,47 @@ int Utils::currentThreadId()
 {
     return static_cast<int>(std::hash<std::thread::id>()(std::this_thread::get_id()));
 }
+
+QQuaternion Utils::matrixToQuaternion(const QMatrix4x4& m)
+{
+    // Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
+    // article "Quaternion Calculus and Fast Animation".
+    auto trace = m(0, 0) + m(1, 1) + m(2, 2);
+    float w;
+    float v[3];
+
+    if(trace > 0.0f)
+    {
+        // |w| > 1/2, may as well choose w > 1/2
+        auto root = std::sqrt(trace + 1.0f);  // 2w
+        w = 0.5f * root;
+        root = 0.5f/root;  // 1/(4w)
+        v[0] = (m(1, 2) - m(2, 1)) * root;
+        v[1] = (m(2, 0) - m(0, 2)) * root;
+        v[2] = (m(0, 1) - m(1, 0)) * root;
+    }
+    else
+    {
+        // |w| <= 1/2
+        int i = 0;
+
+        if(m(1, 1) > m(0, 0))
+          i = 1;
+
+        if(m(2, 2) > m(i, i))
+          i = 2;
+
+        int next[3] = {1, 2, 0};
+        int j = next[i];
+        int k = next[j];
+
+        auto root = std::sqrt(m(i, i) - m(j, j) - m(k, k) + 1.0f);
+        v[i] = 0.5f * root;
+        root = 0.5f / root;
+        w = (m(j, k) - m(k, j)) * root;
+        v[j] = (m(i, j) + m(j, i)) * root;
+        v[k] = (m(i, k) + m(k, i)) * root;
+    }
+
+    return QQuaternion(w, v[0], v[1], v[2]);
+}

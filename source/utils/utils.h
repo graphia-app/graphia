@@ -3,6 +3,8 @@
 
 #include <QVector2D>
 #include <QVector3D>
+#include <QMatrix4x4>
+#include <QQuaternion>
 #include <QColor>
 
 namespace Utils
@@ -45,6 +47,8 @@ namespace Utils
     int smallestPowerOf2GreaterThan(int x);
 
     int currentThreadId();
+
+    QQuaternion matrixToQuaternion(const QMatrix4x4& m);
 }
 
 #endif // UTILS_H

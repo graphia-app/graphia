@@ -1,6 +1,7 @@
 #include "camera.h"
 
 #include "../maths/interpolation.h"
+#include "../utils/utils.h"
 
 #include <QOpenGLShaderProgram>
 #include <QDebug>
@@ -11,6 +12,7 @@ Camera::Camera()
     _upVector(0.0f, 1.0f, 0.0f),
     _viewTarget(0.0f, 0.0f, 0.0f),
     _cameraToTarget(0.0f, 0.0f, -1.0f),
+    _distance(1.0f),
     _projectionType(Camera::OrthogonalProjection),
     _nearPlane(0.1f),
     _farPlane(1024.0f),
@@ -32,6 +34,7 @@ Camera::Camera(const Camera &other)
     _upVector(other._upVector),
     _viewTarget(other._viewTarget),
     _cameraToTarget(other._cameraToTarget),
+    _distance(other._distance),
     _projectionType(other._projectionType),
     _nearPlane(other._nearPlane),
     _farPlane(other._farPlane),
@@ -63,6 +66,7 @@ Camera& Camera::operator=(const Camera& other)
     _upVector = other._upVector;
     _viewTarget = other._viewTarget;
     _cameraToTarget = other._cameraToTarget;
+    _distance = other._distance;
     _projectionType = other._projectionType;
     _nearPlane = other._nearPlane;
     _farPlane = other._farPlane;
@@ -101,12 +105,6 @@ void Camera::setPosition(const QVector3D &viewVector, float distance)
     setPosition(_viewTarget - (viewVector.normalized() * distance));
 }
 
-void Camera::setUpVector(const QVector3D& upVector)
-{
-    _upVector = upVector;
-    _viewMatrixDirty = true;
-}
-
 QVector3D Camera::upVector() const
 {
     return _upVector;
@@ -122,6 +120,25 @@ void Camera::setViewTarget(const QVector3D& viewTarget)
 void Camera::setViewTarget(const QVector3D& viewVector, float distance)
 {
     setViewTarget(_position + (viewVector.normalized() * distance));
+}
+
+void Camera::setRotation(const QQuaternion& rotation)
+{
+    QMatrix4x4 m;
+
+    m.setToIdentity();
+    m.rotate(rotation);
+
+    float distance = _cameraToTarget.length();
+
+    auto viewVector = QVector3D(m.column(2));
+    _upVector = QVector3D(m.column(1));
+
+    _position = _viewTarget + (viewVector * distance);
+    _cameraToTarget = _viewTarget - _position;
+
+    _viewMatrixDirty = true;
+    _viewProjectionMatrixDirty = true;
 }
 
 
@@ -160,118 +177,6 @@ void Camera::setPerspectiveProjection(float fieldOfView, float aspectRatio,
     updatePerspectiveProjection();
 }
 
-void Camera::setNearPlane(const float& nearPlane)
-{
-    if(qFuzzyCompare(_nearPlane, nearPlane))
-        return;
-    _nearPlane = nearPlane;
-    if(_projectionType == PerspectiveProjection)
-        updatePerspectiveProjection();
-}
-
-float Camera::nearPlane() const
-{
-    return _nearPlane;
-}
-
-void Camera::setFarPlane(const float& farPlane)
-{
-    if(qFuzzyCompare(_farPlane, farPlane))
-        return;
-    _farPlane = farPlane;
-    if(_projectionType == PerspectiveProjection)
-        updatePerspectiveProjection();
-}
-
-float Camera::farPlane() const
-{
-    return _farPlane;
-}
-
-void Camera::setFieldOfView(const float& fieldOfView)
-{
-    if(qFuzzyCompare(_fieldOfView, fieldOfView))
-        return;
-    _fieldOfView = fieldOfView;
-    if(_projectionType == PerspectiveProjection)
-        updatePerspectiveProjection();
-}
-
-float Camera::fieldOfView() const
-{
-    return _fieldOfView;
-}
-
-void Camera::setAspectRatio(const float& aspectRatio)
-{
-    if(qFuzzyCompare(_aspectRatio, aspectRatio))
-        return;
-    _aspectRatio = aspectRatio;
-    if(_projectionType == PerspectiveProjection)
-        updatePerspectiveProjection();
-}
-
-float Camera::aspectRatio() const
-{
-    return _aspectRatio;
-}
-
-void Camera::setLeft(const float& left)
-{
-    if(qFuzzyCompare(_left, left))
-        return;
-    _left = left;
-    if(_projectionType == OrthogonalProjection)
-        updateOrthogonalProjection();
-}
-
-float Camera::left() const
-{
-    return _left;
-}
-
-void Camera::setRight(const float& right)
-{
-    if(qFuzzyCompare(_right, right))
-        return;
-    _right = right;
-    if(_projectionType == OrthogonalProjection)
-        updateOrthogonalProjection();
-}
-
-float Camera::right() const
-{
-    return _right;
-}
-
-void Camera::setBottom(const float& bottom)
-{
-    if(qFuzzyCompare(_bottom, bottom))
-        return;
-    _bottom = bottom;
-    if(_projectionType == OrthogonalProjection)
-        updateOrthogonalProjection();
-}
-
-float Camera::bottom() const
-{
-    return _bottom;
-}
-
-void Camera::setTop(const float& top)
-{
-    if(qFuzzyCompare(_top, top))
-        return;
-    _top = top;
-    if(_projectionType == OrthogonalProjection)
-        updateOrthogonalProjection();
-}
-
-float Camera::top() const
-{
-    return _top;
-}
-
 QMatrix4x4 Camera::viewMatrix() const
 {
     if(_viewMatrixDirty)
@@ -287,7 +192,9 @@ void Camera::resetViewToIdentity()
 {
     setPosition(QVector3D(0.0, 0.0, 0.0));
     setViewTarget(QVector3D(0.0, 0.0, 1.0));
-    setUpVector(QVector3D(0.0, 1.0, 0.0));
+    _upVector = QVector3D(0.0, 1.0, 0.0);
+
+    _viewMatrixDirty = true;
 }
 
 QMatrix4x4 Camera::projectionMatrix() const
@@ -305,7 +212,7 @@ QMatrix4x4 Camera::viewProjectionMatrix() const
     return _viewProjectionMatrix;
 }
 
-void Camera::translate(const QVector3D& vLocal, CameraTranslationOption option)
+/*void Camera::translate(const QVector3D& vLocal, CameraTranslationOption option)
 {
     // Calculate the amount to move by in world coordinates
     QVector3D vWorld;
@@ -343,7 +250,7 @@ void Camera::translate(const QVector3D& vLocal, CameraTranslationOption option)
 
     _viewMatrixDirty = true;
     _viewProjectionMatrixDirty = true;
-}
+}*/
 
 void Camera::translateWorld(const QVector3D& vWorld, CameraTranslationOption option)
 {
@@ -361,56 +268,27 @@ void Camera::translateWorld(const QVector3D& vWorld, CameraTranslationOption opt
     _viewProjectionMatrixDirty = true;
 }
 
-QQuaternion Camera::tiltRotation(const float& angle) const
+QQuaternion Camera::rotation() const
 {
-    QVector3D xBasis = QVector3D::crossProduct(_upVector, _cameraToTarget.normalized()).normalized();
-    return QQuaternion::fromAxisAndAngle(xBasis, -angle);
+    QMatrix4x4 m;
+
+    m.setToIdentity();
+    m.lookAt(_position, _viewTarget, _upVector);
+
+    return Utils::matrixToQuaternion(m);
 }
 
-QQuaternion Camera::panRotation(const float& angle) const
+void Camera::setDistance(float distance)
 {
-    return QQuaternion::fromAxisAndAngle(_upVector, angle);
+    _distance = distance;
+
+    _viewMatrixDirty = true;
+    _viewProjectionMatrixDirty = true;
 }
 
-QQuaternion Camera::rollRotation(const float& angle) const
+float Camera::distance()
 {
-    return QQuaternion::fromAxisAndAngle(_cameraToTarget, -angle);
-}
-
-void Camera::tilt(const float& angle)
-{
-    QQuaternion q = tiltRotation(angle);
-    rotate(q);
-}
-
-void Camera::pan(const float& angle)
-{
-    QQuaternion q = panRotation(-angle);
-    rotate(q);
-}
-
-void Camera::roll(const float& angle)
-{
-    QQuaternion q = rollRotation(-angle);
-    rotate(q);
-}
-
-void Camera::tiltAboutViewTarget(const float& angle)
-{
-    QQuaternion q = tiltRotation(-angle);
-    rotateAboutViewTarget(q);
-}
-
-void Camera::panAboutViewTarget(const float& angle)
-{
-    QQuaternion q = panRotation(angle);
-    rotateAboutViewTarget(q);
-}
-
-void Camera::rollAboutViewTarget(const float& angle)
-{
-    QQuaternion q = rollRotation(angle);
-    rotateAboutViewTarget(q);
+    return _distance;
 }
 
 void Camera::rotate(const QQuaternion& q)
@@ -430,19 +308,6 @@ void Camera::rotateAboutViewTarget(const QQuaternion& q)
     _viewMatrixDirty = true;
     _viewProjectionMatrixDirty = true;
 }
-
-void Camera::setStandardUniforms(const QOpenGLShaderProgramPtr& program, const QMatrix4x4& mm) const
-{
-    QMatrix4x4 modelViewMatrix = viewMatrix() * mm;
-    QMatrix3x3 normalMatrix = modelViewMatrix.normalMatrix();
-    QMatrix4x4 mvp = viewProjectionMatrix() * mm;
-
-    program->setUniformValue("modelViewMatrix", modelViewMatrix);
-    program->setUniformValue("normalMatrix", normalMatrix);
-    program->setUniformValue("projectionMatrix", projectionMatrix());
-    program->setUniformValue("mvp", mvp);
-}
-
 
 bool Camera::unproject(int x, int y, int z, QVector3D& result)
 {
