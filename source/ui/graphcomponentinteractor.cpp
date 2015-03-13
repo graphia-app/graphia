@@ -73,7 +73,7 @@ void GraphComponentInteractor::rightDrag()
 
         const QVector3D clickedNodePosition = _graphModel->nodePositions().getScaledAndSmoothed(clickedNodeId());
 
-        Plane translationPlane(clickedNodePosition, camera->viewVector().normalized());
+        Plane translationPlane(clickedNodePosition, camera->viewVector());
 
         QVector3D prevPoint = translationPlane.rayIntersection(
                     camera->rayForViewportCoordinates(localPrevCursorPosition().x(),
@@ -83,7 +83,7 @@ void GraphComponentInteractor::rightDrag()
                                                       localCursorPosition().y()));
         QVector3D translation = prevPoint - curPoint;
 
-        camera->translateWorld(translation);
+        camera->translate(translation);
     }
 }
 

@@ -1,8 +1,6 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <QObject>
-
 #include <QMatrix4x4>
 #include <QQuaternion>
 #include <QVector3D>
@@ -18,10 +16,8 @@ class CameraPrivate;
 class QOpenGLShaderProgram;
 typedef QSharedPointer<QOpenGLShaderProgram> QOpenGLShaderProgramPtr;
 
-class Camera : public QObject
+class Camera
 {
-    Q_OBJECT
-
 public:
     Camera();
     Camera(const Camera& other);
@@ -33,17 +29,18 @@ public:
         PerspectiveProjection
     };
 
-    enum CameraTranslationOption
-    {
-        TranslateViewCenter,
-        DontTranslateViewCenter
-    };
-
-    QVector3D position() const;
-    QVector3D upVector() const;
-    QVector3D viewTarget() const;
-
     QVector3D viewVector() const;
+    QVector3D position() const;
+    QVector3D focus() const;
+    QQuaternion rotation() const;
+    float distance() const;
+
+    void setFocus(const QVector3D& focus);
+    void setRotation(const QQuaternion& rotation);
+    void setDistance(float distance);
+
+    void translate(const QVector3D& translation);
+    void rotate(const QQuaternion& q);
 
     ProjectionType projectionType() const;
 
@@ -65,31 +62,6 @@ public:
     Line3D lineForViewportCoordinates(int x, int y);
     Frustum frustumForViewportCoordinates(int x1, int y1, int x2, int y2);
     ConicalFrustum conicalFrustumForViewportCoordinates(int x, int y, int radius);
-
-    void setPosition(const QVector3D& position);
-    void setPosition(const QVector3D& viewVector, float distance);
-    void setViewTarget(const QVector3D& viewTarget);
-    void setViewTarget(const QVector3D& viewVector, float distance);
-
-    void setRotation(const QQuaternion& rotation);
-    QQuaternion rotation() const;
-
-    void setDistance(float distance);
-    float distance();
-
-    void resetViewToIdentity();
-
-    /*// Translate relative to camera orientation axes
-    void translate(const QVector3D& vLocal, CameraTranslationOption option = TranslateViewCenter);*/
-
-    // Translate relative to world axes
-    void translateWorld(const QVector3D& vWorld, CameraTranslationOption option = TranslateViewCenter);
-
-    void rotate(const QQuaternion& q);
-    void rotateAboutViewTarget(const QQuaternion& q);
-
-protected:
-    Q_DECLARE_PRIVATE(Camera)
 
 private:
     bool unproject(int x, int y, int z, QVector3D& result);
@@ -114,11 +86,8 @@ private:
         _viewProjectionMatrixDirty = true;
     }
 
-    QVector3D _position;
-    QVector3D _upVector;
-    QVector3D _viewTarget;
-
-    QVector3D _cameraToTarget; // The vector from the camera position to the view center
+    QVector3D _focus;
+    QQuaternion _rotation;
     float _distance;
 
     Camera::ProjectionType _projectionType;

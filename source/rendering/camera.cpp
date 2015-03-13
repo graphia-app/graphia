@@ -6,12 +6,7 @@
 #include <QOpenGLShaderProgram>
 #include <QDebug>
 
-Camera::Camera()
-    : QObject(),
-    _position(0.0f, 0.0f, 1.0f),
-    _upVector(0.0f, 1.0f, 0.0f),
-    _viewTarget(0.0f, 0.0f, 0.0f),
-    _cameraToTarget(0.0f, 0.0f, -1.0f),
+Camera::Camera() :
     _distance(1.0f),
     _projectionType(Camera::OrthogonalProjection),
     _nearPlane(0.1f),
@@ -28,12 +23,9 @@ Camera::Camera()
     updateOrthogonalProjection();
 }
 
-Camera::Camera(const Camera &other)
-    : QObject(),
-    _position(other._position),
-    _upVector(other._upVector),
-    _viewTarget(other._viewTarget),
-    _cameraToTarget(other._cameraToTarget),
+Camera::Camera(const Camera &other) :
+    _focus(other._focus),
+    _rotation(other._rotation),
     _distance(other._distance),
     _projectionType(other._projectionType),
     _nearPlane(other._nearPlane),
@@ -62,10 +54,8 @@ Camera::Camera(const Camera &other)
 
 Camera& Camera::operator=(const Camera& other)
 {
-    _position = other._position;
-    _upVector = other._upVector;
-    _viewTarget = other._viewTarget;
-    _cameraToTarget = other._cameraToTarget;
+    _focus = other._focus;
+    _rotation = other._rotation;
     _distance = other._distance;
     _projectionType = other._projectionType;
     _nearPlane = other._nearPlane;
@@ -83,73 +73,64 @@ Camera& Camera::operator=(const Camera& other)
     return *this;
 }
 
-Camera::ProjectionType Camera::projectionType() const
+QVector3D Camera::viewVector() const
 {
-    return _projectionType;
+    return -QVector3D(viewMatrix().row(2));
 }
 
 QVector3D Camera::position() const
 {
-    return _position;
+    return _focus - (viewVector() * _distance);
 }
 
-void Camera::setPosition(const QVector3D& position)
+QVector3D Camera::focus() const
 {
-    _position = position;
-    _cameraToTarget = _viewTarget - position;
+    return _focus;
+}
+
+QQuaternion Camera::rotation() const
+{
+    return _rotation;
+}
+
+float Camera::distance() const
+{
+    return _distance;
+}
+
+void Camera::setFocus(const QVector3D& focus)
+{
+    _focus = focus;
     _viewMatrixDirty = true;
 }
 
-void Camera::setPosition(const QVector3D &viewVector, float distance)
+void Camera::setDistance(float distance)
 {
-    setPosition(_viewTarget - (viewVector.normalized() * distance));
-}
-
-QVector3D Camera::upVector() const
-{
-    return _upVector;
-}
-
-void Camera::setViewTarget(const QVector3D& viewTarget)
-{
-    _viewTarget = viewTarget;
-    _cameraToTarget = viewTarget - _position;
+    _distance = distance;
     _viewMatrixDirty = true;
-}
-
-void Camera::setViewTarget(const QVector3D& viewVector, float distance)
-{
-    setViewTarget(_position + (viewVector.normalized() * distance));
 }
 
 void Camera::setRotation(const QQuaternion& rotation)
 {
-    QMatrix4x4 m;
-
-    m.setToIdentity();
-    m.rotate(rotation);
-
-    float distance = _cameraToTarget.length();
-
-    auto viewVector = QVector3D(m.column(2));
-    _upVector = QVector3D(m.column(1));
-
-    _position = _viewTarget + (viewVector * distance);
-    _cameraToTarget = _viewTarget - _position;
-
+    _rotation = rotation;
     _viewMatrixDirty = true;
-    _viewProjectionMatrixDirty = true;
 }
 
-
-QVector3D Camera::viewTarget() const
+void Camera::translate(const QVector3D& translation)
 {
-    return _viewTarget;
+    _focus += translation;
+    _viewMatrixDirty = true;
 }
 
-QVector3D Camera::viewVector() const
+void Camera::rotate(const QQuaternion& q)
 {
-    return _cameraToTarget;
+    _rotation = q * _rotation;
+    _viewMatrixDirty = true;
+}
+
+Camera::ProjectionType Camera::projectionType() const
+{
+    return _projectionType;
 }
 
 void Camera::setOrthographicProjection(float left, float right,
@@ -182,19 +163,17 @@ QMatrix4x4 Camera::viewMatrix() const
     if(_viewMatrixDirty)
     {
         _viewMatrix.setToIdentity();
-        _viewMatrix.lookAt(_position, _viewTarget, _upVector);
+        _viewMatrix.rotate(_rotation.conjugate());
+
+        auto viewVector = -QVector3D(_viewMatrix.row(2));
+
+        QVector3D eye = _focus - (viewVector * _distance);
+        _viewMatrix.translate(-eye);
+
         _viewMatrixDirty = false;
     }
+
     return _viewMatrix;
-}
-
-void Camera::resetViewToIdentity()
-{
-    setPosition(QVector3D(0.0, 0.0, 0.0));
-    setViewTarget(QVector3D(0.0, 0.0, 1.0));
-    _upVector = QVector3D(0.0, 1.0, 0.0);
-
-    _viewMatrixDirty = true;
 }
 
 QMatrix4x4 Camera::projectionMatrix() const
@@ -209,104 +188,8 @@ QMatrix4x4 Camera::viewProjectionMatrix() const
         _viewProjectionMatrix = _projectionMatrix * viewMatrix();
         _viewProjectionMatrixDirty = false;
     }
+
     return _viewProjectionMatrix;
-}
-
-/*void Camera::translate(const QVector3D& vLocal, CameraTranslationOption option)
-{
-    // Calculate the amount to move by in world coordinates
-    QVector3D vWorld;
-    if(!qFuzzyIsNull(vLocal.x()))
-    {
-        // Calculate the vector for the local x axis
-        QVector3D x = QVector3D::crossProduct(_cameraToTarget, _upVector).normalized();
-        vWorld += vLocal.x() * x;
-    }
-
-    if(!qFuzzyIsNull(vLocal.y()))
-        vWorld += vLocal.y() * _upVector;
-
-    if(!qFuzzyIsNull(vLocal.z()))
-        vWorld += vLocal.z() * _cameraToTarget.normalized();
-
-    // Update the camera position using the calculated world vector
-    _position += vWorld;
-
-    // May be also update the view center coordinates
-    if(option == TranslateViewCenter)
-        _viewTarget += vWorld;
-
-    // Refresh the camera -> view center vector
-    _cameraToTarget = _viewTarget - _position;
-
-    // Calculate a new up vector. We do this by:
-    // 1) Calculate a new local x-direction vector from the cross product of the new
-    //    camera to view center vector and the old up vector.
-    // 2) The local x vector is the normal to the plane in which the new up vector
-    //    must lay. So we can take the cross product of this normal and the new
-    //    x vector. The new normal vector forms the last part of the orthonormal basis
-    QVector3D x = QVector3D::crossProduct(_cameraToTarget, _upVector).normalized();
-    _upVector = QVector3D::crossProduct(x, _cameraToTarget).normalized();
-
-    _viewMatrixDirty = true;
-    _viewProjectionMatrixDirty = true;
-}*/
-
-void Camera::translateWorld(const QVector3D& vWorld, CameraTranslationOption option)
-{
-    // Update the camera position using the calculated world vector
-    _position += vWorld;
-
-    // May be also update the view center coordinates
-    if(option == TranslateViewCenter)
-        _viewTarget += vWorld;
-
-    // Refresh the camera -> view center vector
-    _cameraToTarget = _viewTarget - _position;
-
-    _viewMatrixDirty = true;
-    _viewProjectionMatrixDirty = true;
-}
-
-QQuaternion Camera::rotation() const
-{
-    QMatrix4x4 m;
-
-    m.setToIdentity();
-    m.lookAt(_position, _viewTarget, _upVector);
-
-    return Utils::matrixToQuaternion(m);
-}
-
-void Camera::setDistance(float distance)
-{
-    _distance = distance;
-
-    _viewMatrixDirty = true;
-    _viewProjectionMatrixDirty = true;
-}
-
-float Camera::distance()
-{
-    return _distance;
-}
-
-void Camera::rotate(const QQuaternion& q)
-{
-    _upVector = q.rotatedVector(_upVector);
-    _cameraToTarget = q.rotatedVector(_cameraToTarget);
-    _viewTarget = _position + _cameraToTarget;
-    _viewMatrixDirty = true;
-    _viewProjectionMatrixDirty = true;
-}
-
-void Camera::rotateAboutViewTarget(const QQuaternion& q)
-{
-    _upVector = q.rotatedVector(_upVector);
-    _cameraToTarget = q.rotatedVector(_cameraToTarget);
-    _position = _viewTarget - _cameraToTarget;
-    _viewMatrixDirty = true;
-    _viewProjectionMatrixDirty = true;
 }
 
 bool Camera::unproject(int x, int y, int z, QVector3D& result)

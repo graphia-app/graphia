@@ -371,7 +371,7 @@ void GraphCommonInteractor::leftDrag()
         QQuaternion rotation = mouseMoveToRotation(localPrevCursorPosition(),
                                                    localCursorPosition(),
                                                    clickedRenderer());
-        camera->rotateAboutViewTarget(rotation);
+        camera->rotate(rotation);
     }
 }
 

@@ -151,7 +151,7 @@ private:
     void render2D();
 
     void centreNodeInViewport(NodeId nodeId, float cameraDistance = -1.0f);
-    void centrePositionInViewport(const QVector3D& viewTarget,
+    void centrePositionInViewport(const QVector3D& focus,
                                   float cameraDistance = -1.0f,
                                   const QVector3D viewVector = QVector3D());
 
