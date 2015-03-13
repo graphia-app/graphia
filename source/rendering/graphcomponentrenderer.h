@@ -15,6 +15,7 @@
 #include <QOpenGLShaderProgram>
 #include <QMatrix4x4>
 #include <QVector3D>
+#include <QQuaternion>
 #include <QColor>
 #include <QRect>
 
@@ -59,7 +60,7 @@ public:
     void moveFocusToNodeClosestCameraVector();
     void moveFocusToPositionContainingNodes(const QVector3D& position,
                                             std::vector<NodeId> nodeIds,
-                                            const QVector3D& viewVector);
+                                            const QQuaternion& rotation);
 
     ComponentId componentId() { return _componentId; }
     NodeId focusNodeId();
@@ -153,7 +154,7 @@ private:
     void centreNodeInViewport(NodeId nodeId, float cameraDistance = -1.0f);
     void centrePositionInViewport(const QVector3D& focus,
                                   float cameraDistance = -1.0f,
-                                  const QVector3D viewVector = QVector3D());
+                                  const QQuaternion rotation = QQuaternion());
 
     float _entireComponentZoomDistance;
     float zoomDistanceForNodeIds(const QVector3D& centre, std::vector<NodeId> nodeIds);

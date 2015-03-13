@@ -713,7 +713,7 @@ void GraphComponentRenderer::centreNodeInViewport(NodeId nodeId, float cameraDis
 
 void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
                                                       float cameraDistance,
-                                                      const QVector3D /*viewVector*/)
+                                                      const QQuaternion rotation)
 {
     if(cameraDistance < 0.0f)
     {
@@ -746,6 +746,8 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
     {
         _viewData._camera.setDistance(cameraDistance);
         _viewData._camera.setFocus(focus);
+        if(!rotation.isIdentity())
+            _viewData._camera.setRotation(rotation);
 
         _viewData._transitionStart = _viewData._transitionEnd = _viewData._camera;
     }
@@ -756,6 +758,8 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
         _viewData._transitionEnd = _viewData._camera;
         _viewData._transitionEnd.setDistance(cameraDistance);
         _viewData._transitionEnd.setFocus(focus);
+        if(!rotation.isIdentity())
+            _viewData._transitionEnd.setRotation(rotation);
     }
 }
 
@@ -812,7 +816,7 @@ void GraphComponentRenderer::moveFocusToNodeClosestCameraVector()
 
 void GraphComponentRenderer::moveFocusToPositionContainingNodes(const QVector3D& position,
                                                                 std::vector<NodeId> nodeIds,
-                                                                const QVector3D& viewVector)
+                                                                const QQuaternion& rotation)
 {
     if(_componentId.isNull())
         return;
@@ -822,7 +826,7 @@ void GraphComponentRenderer::moveFocusToPositionContainingNodes(const QVector3D&
     _entireComponentZoomDistance = zoomDistanceForNodeIds(position, nodeIds);
     zoomToDistance(_entireComponentZoomDistance);
 
-    centrePositionInViewport(_viewData._focusPosition, _viewData._zoomDistance, viewVector);
+    centrePositionInViewport(_viewData._focusPosition, _viewData._zoomDistance, rotation);
 }
 
 void GraphComponentRenderer::updateTransition(float f)
@@ -831,6 +835,8 @@ void GraphComponentRenderer::updateTransition(float f)
                                                      _viewData._transitionEnd.distance(), f));
     _viewData._camera.setFocus(Utils::interpolate(_viewData._transitionStart.focus(),
                                                        _viewData._transitionEnd.focus(), f));
+    _viewData._camera.setRotation(QQuaternion::slerp(_viewData._transitionStart.rotation(),
+                                                     _viewData._transitionEnd.rotation(), f));
 }
 
 NodeId GraphComponentRenderer::focusNodeId()
