@@ -56,7 +56,7 @@ void GraphOverviewScene::update(float t)
     for(auto componentId : _graphModel->graph().componentIds())
         update(componentId, t);
 
-    if(!_graphWidget->transition().finished())
+    if(_graphWidget->transition().active())
     {
         for(auto componentId : _transitionComponentIds)
             update(componentId, t);
@@ -333,7 +333,7 @@ void GraphOverviewScene::startTransition(float duration,
 {
     auto targetComponentLayout = _componentLayout;
 
-    if(_graphWidget->transition().finished())
+    if(!_graphWidget->transition().active())
         _graphWidget->rendererStartedTransition();
 
     _graphWidget->transition().start(duration, transitionType,

@@ -42,7 +42,7 @@ public:
     }
 
     bool update(float time);
-    bool finished() const { return _elapsed >= _duration; }
+    bool active() const { return _elapsed < _duration; }
 };
 
 #endif // TRANSITION_H

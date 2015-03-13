@@ -374,11 +374,11 @@ void GraphComponentRenderer::update(float t)
 
         _zoomTransition.update(t);
 
-        if(_graphWidget->transition().finished() && _trackFocus)
+        if(!_graphWidget->transition().active() && _trackFocus)
         {
             if(trackingCentreOfComponent())
             {
-                if(_zoomTransition.finished() && _viewData._autoZooming)
+                if(!_zoomTransition.active() && _viewData._autoZooming)
                     zoomToDistance(_entireComponentZoomDistance);
 
                 centrePositionInViewport(_viewData._focusPosition, _viewData._zoomDistance);
@@ -644,7 +644,7 @@ const float MINIMUM_ZOOM_DISTANCE = 2.5f;
 
 void GraphComponentRenderer::zoom(float direction)
 {
-    if(direction == 0.0f || !_graphWidget->transition().finished())
+    if(direction == 0.0f || _graphWidget->transition().active())
         return;
 
     // Don't allow zooming out if autozooming
@@ -678,7 +678,7 @@ void GraphComponentRenderer::zoom(float direction)
 
     if(visible())
     {
-        if(_zoomTransition.finished())
+        if(!_zoomTransition.active())
             _graphWidget->rendererStartedTransition();
 
         _zoomTransition.start(0.1f, Transition::Type::Linear,
@@ -742,7 +742,7 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
 
     cameraDistance = Utils::clamp(MINIMUM_ZOOM_DISTANCE, _entireComponentZoomDistance, cameraDistance);
 
-    if(_graphWidget->transition().finished())
+    if(!_graphWidget->transition().active())
     {
         _viewData._camera.setDistance(cameraDistance);
         _viewData._camera.setFocus(focus);

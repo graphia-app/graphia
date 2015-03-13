@@ -124,7 +124,7 @@ GraphComponentRenderer* GraphComponentScene::renderer()
 void GraphComponentScene::startTransition(float duration, Transition::Type transitionType,
                                           std::function<void()> finishedFunction)
 {
-    if(_graphWidget->transition().finished())
+    if(!_graphWidget->transition().active())
         _graphWidget->rendererStartedTransition();
 
     _graphWidget->transition().start(duration, transitionType,

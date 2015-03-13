@@ -45,7 +45,7 @@ void GraphComponentInteractor::rightMouseUp()
     if(clickedRenderer() == nullptr)
         return;
 
-    if(!_graphWidget->transition().finished())
+    if(_graphWidget->transition().active())
     {
         clickedRenderer()->enableFocusTracking();
         return;

@@ -161,7 +161,7 @@ void GraphCommonInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
 {
     _rendererUnderCursor = rendererAtPosition(mouseEvent->pos());
 
-    if(!_graphWidget->transition().finished())
+    if(_graphWidget->transition().active())
         return;
 
     _cursorPosition = mouseEvent->pos();
@@ -219,7 +219,7 @@ void GraphCommonInteractor::leftMouseDown()
 
 void GraphCommonInteractor::leftMouseUp()
 {
-    if(!_graphWidget->transition().finished())
+    if(_graphWidget->transition().active())
         return;
 
     emit userInteractionFinished();

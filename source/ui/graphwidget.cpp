@@ -144,7 +144,7 @@ void GraphWidget::switchToOverviewMode()
         {
             if(!_graphComponentScene->viewIsReset())
             {
-                if(_transition.finished())
+                if(!_transition.active())
                     rendererStartedTransition();
 
                 _graphComponentScene->startTransition(0.3f, Transition::Type::EaseInEaseOut,
@@ -199,7 +199,7 @@ void GraphWidget::switchToComponentMode(ComponentId componentId)
 
         if(_mode != GraphWidget::Mode::Component)
         {
-            if(_transition.finished())
+            if(!_transition.active())
                 rendererStartedTransition();
 
             _graphOverviewScene->startTransitionToComponentMode(_graphComponentScene->componentId(),
