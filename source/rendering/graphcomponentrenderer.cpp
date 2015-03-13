@@ -717,7 +717,7 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
 {
     if(cameraDistance < 0.0f)
     {
-        QVector3D oldPosition = _viewData._camera.position();
+        const QVector3D& oldPosition = _viewData._camera.position();
         QVector3D newPosition;
         Plane translationPlane(focus, _viewData._camera.viewVector());
 
