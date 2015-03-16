@@ -253,6 +253,8 @@ void GraphComponentRenderer::updatePositionalData()
     updateEntireComponentZoomDistance();
 }
 
+const float MINIMUM_ZOOM_DISTANCE = 2.5f;
+
 float GraphComponentRenderer::zoomDistanceForNodeIds(const QVector3D& centre, std::vector<NodeId> nodeIds)
 {
     float minHalfFov = qDegreesToRadians(std::min(_fovx, _fovy) * 0.5f);
@@ -270,12 +272,12 @@ float GraphComponentRenderer::zoomDistanceForNodeIds(const QVector3D& centre, st
                 maxDistance = distance;
         }
 
-        return maxDistance / std::sin(minHalfFov);
+        return std::max(maxDistance / std::sin(minHalfFov), MINIMUM_ZOOM_DISTANCE);
     }
     else
     {
         qWarning() << "zoomDistanceForNodes returning default value";
-        return 1.0f;
+        return MINIMUM_ZOOM_DISTANCE;
     }
 }
 
@@ -640,8 +642,6 @@ void GraphComponentRenderer::resize(int viewportWidth, int viewportHeight,
     }
 }
 
-const float MINIMUM_ZOOM_DISTANCE = 2.5f;
-
 void GraphComponentRenderer::zoom(float direction)
 {
     if(direction == 0.0f || _graphWidget->transition().active())
@@ -697,8 +697,7 @@ void GraphComponentRenderer::zoom(float direction)
 
 void GraphComponentRenderer::zoomToDistance(float distance)
 {
-    distance = std::max(distance, MINIMUM_ZOOM_DISTANCE);
-    distance = std::min(distance, _entireComponentZoomDistance);
+    distance = Utils::clamp(MINIMUM_ZOOM_DISTANCE, _entireComponentZoomDistance, distance);
     _viewData._zoomDistance = _targetZoomDistance = distance;
 }
 
