@@ -48,6 +48,11 @@ bool MainWidget::initFromFile(const QString& filename)
         _graphModel = std::make_shared<GenericGraphModel>(info.fileName());
         graphFileParser = std::make_unique<GmlFileParser>(filename);
     }
+    else
+    {
+        // Don't know how to load this
+        return false;
+    }
 
     //FIXME what we should really be doing:
     // query which plugins can load fileTypeName
