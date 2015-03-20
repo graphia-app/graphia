@@ -1,6 +1,8 @@
 #include "mainwidget.h"
 
-#include "../parsers/gmlfileparser.h"
+#include "../loading/fileidentifier.h"
+#include "../loading/gmlfiletype.h"
+#include "../loading/gmlfileparser.h"
 #include "../graph/genericgraphmodel.h"
 #include "../graph/simplecomponentmanager.h"
 #include "../layout/layout.h"
@@ -36,14 +38,22 @@ bool MainWidget::initFromFile(const QString& filename)
 
     std::unique_ptr<GraphFileParser> graphFileParser;
 
-    //FIXME switch based on file content
-    /*switch(fileTypeOf(filename))
+    FileIdentifier fi;
+    fi.registerFileType(std::make_shared<GmlFileType>());
+
+    auto fileTypeName = fi.identify(filename);
+
+    if(fileTypeName.compare("GML") == 0)
     {
-    case GmlFile:*/
         _graphModel = std::make_shared<GenericGraphModel>(info.fileName());
         graphFileParser = std::make_unique<GmlFileParser>(filename);
-        /*break;
-    }*/
+    }
+
+    //FIXME what we should really be doing:
+    // query which plugins can load fileTypeName
+    // allow the user to choose which plugin to use if there is more than 1
+    // _graphModel = plugin->graphModelForFilename(filename);
+    // graphFileParser = plugin->parserForFilename(filename);
 
     connect(&_graphModel->graph(), &Graph::graphWillChange, this, &MainWidget::onGraphWillChange, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &MainWidget::onGraphChanged, Qt::DirectConnection);

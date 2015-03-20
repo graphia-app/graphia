@@ -46,13 +46,11 @@ SOURCES += \
     source/maths/frustum.cpp \
     source/maths/plane.cpp \
     source/maths/ray.cpp \
-    source/parsers/gmlfileparser.cpp \
     source/ui/selectionmanager.cpp \
     source/rendering/graphcomponentscene.cpp \
     source/ui/graphcomponentinteractor.cpp \
     source/ui/graphwidget.cpp \
     source/ui/mainwidget.cpp \
-    source/parsers/graphfileparser.cpp \
     source/graph/componentmanager.cpp \
     source/utils/utils.cpp \
     source/utils/namethread.cpp \
@@ -72,7 +70,11 @@ SOURCES += \
     source/rendering/graphoverviewscene.cpp \
     source/ui/graphoverviewinteractor.cpp \
     source/rendering/graphrenderer.cpp \
-    source/ui/graphcommoninteractor.cpp
+    source/ui/graphcommoninteractor.cpp \
+    source/loading/gmlfileparser.cpp \
+    source/loading/graphfileparser.cpp \
+    source/loading/fileidentifier.cpp \
+    source/loading/gmlfiletype.cpp
 
 HEADERS += \
     source/rendering/camera.h \
@@ -108,8 +110,6 @@ HEADERS += \
     source/maths/line.h \
     source/maths/plane.h \
     source/maths/ray.h \
-    source/parsers/gmlfileparser.h \
-    source/parsers/graphfileparser.h \
     source/ui/selectionmanager.h \
     source/rendering/graphcomponentscene.h \
     source/ui/graphcomponentinteractor.h \
@@ -139,7 +139,11 @@ HEADERS += \
     source/ui/graphoverviewinteractor.h \
     source/rendering/graphoverviewscene.h \
     source/rendering/graphrenderer.h \
-    source/ui/graphcommoninteractor.h
+    source/ui/graphcommoninteractor.h \
+    source/loading/gmlfileparser.h \
+    source/loading/graphfileparser.h \
+    source/loading/fileidentifier.h \
+    source/loading/gmlfiletype.h
 
 FORMS    += source/mainwindow.ui
 
