@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "loading/fileidentifier.h"
+
 #include <QMainWindow>
 #include <QString>
 #include <QMap>
@@ -50,6 +52,7 @@ private:
     MainWidget* signalSenderTabWidget();
     TabData* currentTabData();
     TabData* tabDataForWidget(MainWidget* widget);
+    TabData* tabDataForIndex(int index);
     TabData* tabDataForSignalSender();
 
     MainWidget* createNewTabWidget(const QString& filename);
@@ -63,6 +66,7 @@ private:
     void configureOverviewModeAction();
     void configureStatusBar();
     void configureUI();
+    void configureUIForLoadingOnTabIndex(int index);
 
 private slots:
     void on_actionOpen_triggered();
@@ -94,13 +98,15 @@ private slots:
     void onUserInteractionFinished();
 
 public:
-    bool openFileInNewTab(const QString& filename);
+    void openFileInNewTab(const QString& filename);
 
 private:
     Ui::MainWindow* _ui;
     QMap<MainWidget*, TabData> _tabData;
     QLabel* _statusBarProgressLabel;
     QProgressBar* _statusBarProgressBar;
+
+    FileIdentifier _fileIdentifier;
 };
 
 #endif // MAINWINDOW_H

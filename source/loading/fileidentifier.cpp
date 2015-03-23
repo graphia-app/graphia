@@ -1,5 +1,7 @@
 #include "fileidentifier.h"
 
+#include <QFileInfo>
+
 FileIdentifier::FileIdentifier()
 {
 }
@@ -9,13 +11,18 @@ void FileIdentifier::registerFileType(const std::shared_ptr<Type> fileType)
     _fileTypes.push_back(fileType);
 }
 
-QString FileIdentifier::identify(const QString& filename)
+const FileIdentifier::Type* FileIdentifier::identify(const QString& filename)
 {
-    for(auto fileType : _fileTypes)
+    QFileInfo info(filename);
+
+    if(info.exists())
     {
-        if(fileType->identify(filename))
-            return fileType->name();
+        for(auto fileType : _fileTypes)
+        {
+            if(fileType->identify(filename))
+                return fileType.get();
+        }
     }
 
-    return "";
+    return nullptr;
 }

@@ -1,10 +1,8 @@
 #include "mainwidget.h"
 
-#include "../loading/fileidentifier.h"
-#include "../loading/gmlfiletype.h"
-#include "../loading/gmlfileparser.h"
-#include "../graph/genericgraphmodel.h"
 #include "../graph/simplecomponentmanager.h"
+#include "../loading/fileidentifier.h"
+#include "../loading/graphfileparser.h"
 #include "../layout/layout.h"
 #include "../layout/forcedirectedlayout.h"
 #include "../layout/collision.h"
@@ -29,36 +27,14 @@ MainWidget::~MainWidget()
     // Defined so we can use smart pointers to incomplete types in the header
 }
 
-bool MainWidget::initFromFile(const QString& filename)
+bool MainWidget::initFromFile(const QString& filename,
+                              std::shared_ptr<GraphModel> graphModel,
+                              std::unique_ptr<GraphFileParser> graphFileParser)
 {
-    QFileInfo info(filename);
-
-    if(!info.exists() || _graphFileParserThread)
+    if(_graphFileParserThread)
         return false;
 
-    std::unique_ptr<GraphFileParser> graphFileParser;
-
-    FileIdentifier fi;
-    fi.registerFileType(std::make_shared<GmlFileType>());
-
-    auto fileTypeName = fi.identify(filename);
-
-    if(fileTypeName.compare("GML") == 0)
-    {
-        _graphModel = std::make_shared<GenericGraphModel>(info.fileName());
-        graphFileParser = std::make_unique<GmlFileParser>(filename);
-    }
-    else
-    {
-        // Don't know how to load this
-        return false;
-    }
-
-    //FIXME what we should really be doing:
-    // query which plugins can load fileTypeName
-    // allow the user to choose which plugin to use if there is more than 1
-    // _graphModel = plugin->graphModelForFilename(filename);
-    // graphFileParser = plugin->parserForFilename(filename);
+    _graphModel = graphModel;
 
     connect(&_graphModel->graph(), &Graph::graphWillChange, this, &MainWidget::onGraphWillChange, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &MainWidget::onGraphChanged, Qt::DirectConnection);

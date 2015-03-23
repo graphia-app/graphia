@@ -6,7 +6,13 @@
 
 #include "commands/commandmanager.h"
 
+#include "graph/genericgraphmodel.h"
 #include "graph/graphmodel.h"
+
+#include "loading/gmlfiletype.h"
+#include "loading/gmlfileparser.h"
+
+#include "utils/make_unique.h"
 
 #include <QFileDialog>
 #include <QIcon>
@@ -31,6 +37,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _statusBarProgressBar->setVisible(false);
     _statusBarProgressBar->setFixedWidth(200);
     _ui->statusBar->addPermanentWidget(_statusBarProgressBar);
+
+    _fileIdentifier.registerFileType(std::make_shared<GmlFileType>());
 }
 
 MainWindow::~MainWindow()
@@ -82,13 +90,53 @@ TabData* MainWindow::tabDataForWidget(MainWidget* widget)
     return nullptr;
 }
 
+TabData* MainWindow::tabDataForIndex(int index)
+{
+    MainWidget* widget = dynamic_cast<MainWidget*>(_ui->tabs->widget(index));
+
+    return tabDataForWidget(widget);
+}
+
 TabData* MainWindow::tabDataForSignalSender()
 {
     return tabDataForWidget(signalSenderTabWidget());
 }
 
-MainWidget *MainWindow::createNewTabWidget(const QString& filename)
+MainWidget* MainWindow::createNewTabWidget(const QString& filename)
 {
+    auto fileType = _fileIdentifier.identify(filename);
+
+    // Don't know what type this file is
+    if(fileType == nullptr)
+    {
+        QMessageBox::critical(nullptr, tr("Unknown file type"),
+            QString(tr("%1 cannot be loaded as its file type is unknown.")).arg(filename));
+        return nullptr;
+    }
+
+    std::shared_ptr<GraphModel> graphModel;
+    std::unique_ptr<GraphFileParser> graphFileParser;
+
+    if(fileType->name().compare("GML") == 0)
+    {
+        graphModel = std::make_shared<GenericGraphModel>(filename);
+        graphFileParser = std::make_unique<GmlFileParser>(filename);
+    }
+
+    //FIXME what we should really be doing:
+    // query which plugins can load fileTypeName
+    // allow the user to choose which plugin to use if there is more than 1
+    // _graphModel = plugin->graphModelForFilename(filename);
+    // graphFileParser = plugin->parserForFilename(filename);
+
+    // Couldn't find a way to interpret this file
+    if(graphModel == nullptr || graphFileParser == nullptr)
+    {
+        QMessageBox::critical(nullptr, tr("Cannot interpret file"),
+            QString(tr("%1 cannot be parsed.")).arg(filename));
+        return nullptr;
+    }
+
     MainWidget* widget = new MainWidget;
     TabData initialTabData;
     _tabData.insert(widget, initialTabData);
@@ -103,7 +151,7 @@ MainWidget *MainWindow::createNewTabWidget(const QString& filename)
     connect(widget, &MainWidget::userInteractionStarted, this, &MainWindow::onUserInteractionStarted);
     connect(widget, &MainWidget::userInteractionFinished, this, &MainWindow::onUserInteractionFinished);
 
-    widget->initFromFile(filename);
+    widget->initFromFile(filename, graphModel, std::move(graphFileParser));
 
     return widget;
 }
@@ -272,6 +320,17 @@ void MainWindow::configureUI()
         setWindowTitle(tr(applicationName));
 }
 
+void MainWindow::configureUIForLoadingOnTabIndex(int index)
+{
+    auto* tb = tabDataForIndex(index);
+    tb->commandVerb = tr("Loading");
+    tb->commandProgress = 0;
+
+    _ui->tabs->setCurrentIndex(index);
+
+    configureUI();
+}
+
 void MainWindow::on_actionOpen_triggered()
 {
     if(_ui->tabs->count() == 0)
@@ -282,17 +341,21 @@ void MainWindow::on_actionOpen_triggered()
     }
 
     QString filename = showGeneralFileOpenDialog();
-    if (!filename.isEmpty())
+    if(!filename.isEmpty())
     {
-        _ui->tabs->setUpdatesEnabled(false);
-        int index = _ui->tabs->currentIndex();
-        closeTab(index);
-
         MainWidget* widget = createNewTabWidget(filename);
 
-        _ui->tabs->insertTab(index, widget, QString(tr("%1")).arg(widget->graphModel()->name()));
-        _ui->tabs->setCurrentIndex(index);
-        _ui->tabs->setUpdatesEnabled(true);
+        if(widget != nullptr)
+        {
+            _ui->tabs->setUpdatesEnabled(false);
+            int index = _ui->tabs->currentIndex();
+            closeTab(index);
+
+            _ui->tabs->insertTab(index, widget, widget->graphModel()->name());
+            configureUIForLoadingOnTabIndex(index);
+
+            _ui->tabs->setUpdatesEnabled(true);
+        }
     }
 }
 
@@ -303,28 +366,15 @@ void MainWindow::on_actionOpen_In_New_Tab_triggered()
         openFileInNewTab(filename);
 }
 
-bool MainWindow::openFileInNewTab(const QString& filename)
+void MainWindow::openFileInNewTab(const QString& filename)
 {
-    QFile file(filename);
+   MainWidget* widget = createNewTabWidget(filename);
 
-    if(file.exists())
-    {
-        MainWidget* widget = createNewTabWidget(filename);
-
+   if(widget != nullptr)
+   {
         int index = _ui->tabs->addTab(widget, widget->graphModel()->name());
-
-        auto* tb = tabDataForWidget(widget);
-        tb->commandVerb = tr("Loading");
-        tb->commandProgress = 0;
-
-        _ui->tabs->setCurrentIndex(index);
-
-        configureUI();
-
-        return true;
-    }
-
-    return false;
+        configureUIForLoadingOnTabIndex(index);
+   }
 }
 
 void MainWindow::on_tabs_tabCloseRequested(int index)

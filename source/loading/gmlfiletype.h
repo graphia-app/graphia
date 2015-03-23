@@ -10,7 +10,7 @@ public:
         FileIdentifier::Type("GML")
     {}
 
-    bool identify(const QString& filename);
+    bool identify(const QFileInfo& fileInfo);
 };
 
 #endif // GMLFILETYPE_H

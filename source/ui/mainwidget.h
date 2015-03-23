@@ -12,6 +12,7 @@
 #include <mutex>
 
 class GraphModel;
+class GraphFileParser;
 class SelectionManager;
 class GraphFileParserThread;
 class NodeLayoutThread;
@@ -90,7 +91,9 @@ public:
 
     void deleteSelectedNodes();
 
-    bool initFromFile(const QString& filename);
+    bool initFromFile(const QString& filename,
+                      std::shared_ptr<GraphModel> graphModel,
+                      std::unique_ptr<GraphFileParser> graphFileParser);
 };
 
 #endif // MAINWIDGET_H

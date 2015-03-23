@@ -2,10 +2,8 @@
 
 #include <QFileInfo>
 
-bool GmlFileType::identify(const QString& filename)
+bool GmlFileType::identify(const QFileInfo& fileInfo)
 {
-    QFileInfo info(filename);
-
     //FIXME actually check the file contents
-    return info.completeSuffix().compare("gml", Qt::CaseInsensitive) == 0;
+    return fileInfo.completeSuffix().compare("gml", Qt::CaseInsensitive) == 0;
 }
