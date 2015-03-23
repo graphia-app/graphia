@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <memory>
+#include <tuple>
 
 class FileIdentifier
 {
@@ -36,7 +37,7 @@ public:
     FileIdentifier();
 
     void registerFileType(const std::shared_ptr<Type> fileType);
-    const Type* identify(const QString& filename) const;
+    const std::tuple<Type*, QString> identify(const QString& filename) const;
     const QString& filter() const { return _filter; }
 
 private:

@@ -36,7 +36,7 @@ void FileIdentifier::registerFileType(const std::shared_ptr<Type> fileType)
     }
 }
 
-const FileIdentifier::Type* FileIdentifier::identify(const QString& filename) const
+const std::tuple<FileIdentifier::Type*, QString> FileIdentifier::identify(const QString& filename) const
 {
     QFileInfo info(filename);
 
@@ -45,9 +45,9 @@ const FileIdentifier::Type* FileIdentifier::identify(const QString& filename) co
         for(auto fileType : _fileTypes)
         {
             if(fileType->identify(filename))
-                return fileType.get();
+                return std::make_tuple(fileType.get(), info.fileName());
         }
     }
 
-    return nullptr;
+    return std::make_tuple( nullptr, info.fileName());
 }

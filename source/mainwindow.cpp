@@ -21,6 +21,8 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 
+#include <tuple>
+
 const char* MainWindow::applicationName = "GraphTool";
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -104,7 +106,9 @@ TabData* MainWindow::tabDataForSignalSender()
 
 MainWidget* MainWindow::createNewTabWidget(const QString& filename)
 {
-    auto fileType = _fileIdentifier.identify(filename);
+    FileIdentifier::Type* fileType;
+    QString baseFilename;
+    std::tie(fileType, baseFilename) = _fileIdentifier.identify(filename);
 
     // Don't know what type this file is
     if(fileType == nullptr)
@@ -119,7 +123,7 @@ MainWidget* MainWindow::createNewTabWidget(const QString& filename)
 
     if(fileType->name().compare("GML") == 0)
     {
-        graphModel = std::make_shared<GenericGraphModel>(filename);
+        graphModel = std::make_shared<GenericGraphModel>(baseFilename);
         graphFileParser = std::make_unique<GmlFileParser>(filename);
     }
 
