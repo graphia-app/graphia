@@ -167,7 +167,7 @@ void MainWindow::closeTab(int index)
 
 QString MainWindow::showGeneralFileOpenDialog()
 {
-    return QFileDialog::getOpenFileName(this, tr("Open File..."), QString(), tr("GML Files (*.gml)"));
+    return QFileDialog::getOpenFileName(this, tr("Open File..."), QString(), _fileIdentifier.filter());
 }
 
 void MainWindow::configurePauseLayoutAction()

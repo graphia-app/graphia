@@ -3,14 +3,16 @@
 
 #include "fileidentifier.h"
 
+#include <QString>
+
 class GmlFileType : public FileIdentifier::Type
 {
 public:
     GmlFileType() :
-        FileIdentifier::Type("GML")
+        FileIdentifier::Type("GML", QObject::tr("GML Files"), {"gml"})
     {}
 
-    bool identify(const QFileInfo& fileInfo);
+    bool identify(const QFileInfo& fileInfo) const;
 };
 
 #endif // GMLFILETYPE_H

@@ -4,6 +4,7 @@
 #include <QString>
 #include <QFileInfo>
 
+#include <vector>
 #include <memory>
 
 class FileIdentifier
@@ -12,25 +13,35 @@ public:
     class Type
     {
     public:
-        Type(const QString& name) :
-            _name(name)
+        Type(const QString& name,
+             const QString& collectiveDescription,
+             const std::vector<QString>& extensions) :
+            _name(name),
+            _collectiveDescription(collectiveDescription),
+            _extensions(extensions)
         {}
 
         const QString& name() const { return _name; }
-        virtual bool identify(const QFileInfo& fileInfo) = 0;
+        const QString& collectiveDescription() const { return _collectiveDescription; }
+        const std::vector<QString> extensions() const { return _extensions; }
+
+        virtual bool identify(const QFileInfo& fileInfo) const = 0;
 
     private:
         QString _name;
+        QString _collectiveDescription;
+        std::vector<QString> _extensions;
     };
 
-public:
     FileIdentifier();
 
     void registerFileType(const std::shared_ptr<Type> fileType);
-    const Type* identify(const QString& filename);
+    const Type* identify(const QString& filename) const;
+    const QString& filter() const { return _filter; }
 
 private:
     std::vector<std::shared_ptr<Type>> _fileTypes;
+    QString _filter;
 };
 
 #endif // FILETYPEIDENTIFIER_H
