@@ -3,8 +3,6 @@
 
 #include "fileidentifier.h"
 
-#include <QString>
-
 class GmlFileType : public FileIdentifier::Type
 {
 public:

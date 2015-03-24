@@ -12,6 +12,9 @@
 #include "loading/gmlfiletype.h"
 #include "loading/gmlfileparser.h"
 
+#include "loading/pairwisetxtfiletype.h"
+#include "loading/pairwisetxtfileparser.h"
+
 #include "utils/make_unique.h"
 
 #include <QFileDialog>
@@ -41,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _ui->statusBar->addPermanentWidget(_statusBarProgressBar);
 
     _fileIdentifier.registerFileType(std::make_shared<GmlFileType>());
+    _fileIdentifier.registerFileType(std::make_shared<PairwiseTxtFileType>());
 }
 
 MainWindow::~MainWindow()
@@ -125,6 +129,11 @@ MainWidget* MainWindow::createNewTabWidget(const QString& filename)
     {
         graphModel = std::make_shared<GenericGraphModel>(baseFilename);
         graphFileParser = std::make_unique<GmlFileParser>(filename);
+    }
+    else if(fileType->name().compare("PairwiseTXT") == 0)
+    {
+        graphModel = std::make_shared<GenericGraphModel>(baseFilename);
+        graphFileParser = std::make_unique<PairwiseTxtFileParser>(filename);
     }
 
     //FIXME what we should really be doing:

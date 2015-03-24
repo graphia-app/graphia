@@ -74,7 +74,9 @@ SOURCES += \
     source/loading/gmlfileparser.cpp \
     source/loading/graphfileparser.cpp \
     source/loading/fileidentifier.cpp \
-    source/loading/gmlfiletype.cpp
+    source/loading/gmlfiletype.cpp \
+    source/loading/pairwisetxtfiletype.cpp \
+    source/loading/pairwisetxtfileparser.cpp
 
 HEADERS += \
     source/rendering/camera.h \
@@ -143,7 +145,9 @@ HEADERS += \
     source/loading/gmlfileparser.h \
     source/loading/graphfileparser.h \
     source/loading/fileidentifier.h \
-    source/loading/gmlfiletype.h
+    source/loading/gmlfiletype.h \
+    source/loading/pairwisetxtfiletype.h \
+    source/loading/pairwisetxtfileparser.h
 
 FORMS    += source/mainwindow.ui
 
