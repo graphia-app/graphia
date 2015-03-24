@@ -18,16 +18,27 @@ void FileIdentifier::registerFileType(const std::shared_ptr<Type> fileType)
     });
 
     _filter.clear();
-    bool second = false;
+    _filter += QObject::tr("All Files (");
 
     for(auto fileType : _fileTypes)
     {
-        if(second)
-            _filter += "; ";
-        else
-            second = true;
+        bool second = false;
+        for(auto extension : fileType->extensions())
+        {
+            if(second)
+                _filter += " ";
+            else
+                second = true;
 
-        _filter += fileType->collectiveDescription() + " (";
+            _filter += "*." + extension;
+        }
+    }
+
+    _filter += ")";
+
+    for(auto fileType : _fileTypes)
+    {
+        _filter += ";;" + fileType->collectiveDescription() + " (";
 
         for(auto extension : fileType->extensions())
             _filter += "*." + extension;
