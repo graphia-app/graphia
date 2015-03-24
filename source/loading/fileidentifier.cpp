@@ -19,10 +19,10 @@ void FileIdentifier::registerFileType(const std::shared_ptr<Type> fileType)
 
     _filter.clear();
     _filter += QObject::tr("All Files (");
+    bool second = false;
 
     for(auto fileType : _fileTypes)
     {
-        bool second = false;
         for(auto extension : fileType->extensions())
         {
             if(second)
