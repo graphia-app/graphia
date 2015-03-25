@@ -9,6 +9,9 @@
 
 #include <QDebug>
 
+#include <map>
+#include <vector>
+
 bool PairwiseTxtFileParser::parse(Graph& graph)
 {
     QFileInfo info(_filename);
@@ -17,7 +20,8 @@ bool PairwiseTxtFileParser::parse(Graph& graph)
     QFile file(_filename);
     if(file.open(QIODevice::ReadOnly))
     {
-        QHash<QString, NodeId> nodeIdHash;
+        std::map<QString, NodeId> nodeIdHash;
+        std::vector<std::pair<NodeId, NodeId>> edges; //HACK
 
         int percentComplete = 0;
         QTextStream textStream(&file);
@@ -25,13 +29,13 @@ bool PairwiseTxtFileParser::parse(Graph& graph)
         while(!textStream.atEnd())
         {
             QString line = textStream.readLine();
-            QRegExp re("(\"[^\"]+\")|([^\\s]+)");
+            QRegExp re("\"([^\"]+)\"|([^\\s]+)");
             QStringList list;
             int pos = 0;
 
             while((pos = re.indexIn(line, pos)) != -1)
             {
-                list << re.cap(0);
+                list << (!re.cap(1).isEmpty() ? re.cap(1) : re.cap(2));
                 pos += re.matchedLength();
             }
 
@@ -40,13 +44,26 @@ bool PairwiseTxtFileParser::parse(Graph& graph)
                 auto first = list.at(0);
                 auto second = list.at(1);
 
-                if(!nodeIdHash.contains(first))
-                    nodeIdHash.insert(first, graph.addNode());
+                NodeId firstNodeId;
+                NodeId secondNodeId;
 
-                if(!nodeIdHash.contains(second))
-                    nodeIdHash.insert(second, graph.addNode());
+                if(nodeIdHash.find(first) == nodeIdHash.end())
+                {
+                    firstNodeId = graph.addNode();
+                    nodeIdHash.emplace(first, firstNodeId);
+                }
+                else
+                    firstNodeId = nodeIdHash[first];
 
-                graph.addEdge(nodeIdHash.value(first), nodeIdHash.value(second));
+                if(nodeIdHash.find(second) == nodeIdHash.end())
+                {
+                    secondNodeId = graph.addNode();
+                    nodeIdHash.emplace(second, secondNodeId);
+                }
+                else
+                    secondNodeId = nodeIdHash[second];
+
+                edges.emplace_back(firstNodeId, secondNodeId); //HACK
             }
 
             int newPercentComplete = static_cast<int>(file.pos() * 100 / fileSize);
@@ -57,6 +74,10 @@ bool PairwiseTxtFileParser::parse(Graph& graph)
                 emit progress(newPercentComplete);
             }
         }
+
+        //HACK
+        for(auto edge : edges)
+            graph.addEdge(edge.first, edge.second);
 
         file.close();
     }
