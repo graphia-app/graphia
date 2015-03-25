@@ -35,16 +35,19 @@ bool PairwiseTxtFileParser::parse(Graph& graph)
                 pos += re.matchedLength();
             }
 
-            auto first = list.at(0);
-            auto second = list.at(1);
+            if(list.size() >= 2)
+            {
+                auto first = list.at(0);
+                auto second = list.at(1);
 
-            if(!nodeIdHash.contains(first))
-                nodeIdHash.insert(first, graph.addNode());
+                if(!nodeIdHash.contains(first))
+                    nodeIdHash.insert(first, graph.addNode());
 
-            if(!nodeIdHash.contains(second))
-                nodeIdHash.insert(second, graph.addNode());
+                if(!nodeIdHash.contains(second))
+                    nodeIdHash.insert(second, graph.addNode());
 
-            graph.addEdge(nodeIdHash.value(first), nodeIdHash.value(second));
+                graph.addEdge(nodeIdHash.value(first), nodeIdHash.value(second));
+            }
 
             int newPercentComplete = static_cast<int>(file.pos() * 100 / fileSize);
 
