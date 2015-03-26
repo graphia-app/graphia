@@ -81,6 +81,7 @@ NodeId Graph::addNode(NodeId nodeId)
     node._id = nodeId;
     node._inEdges.clear();
     node._outEdges.clear();
+    node._edges.clear();
 
     emit nodeAdded(this, nodeId);
     endTransaction();

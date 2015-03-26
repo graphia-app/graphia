@@ -169,7 +169,8 @@ public:
     Node(const Node& other) :
         _id(other._id),
         _inEdges(other._inEdges),
-        _outEdges(other._outEdges)
+        _outEdges(other._outEdges),
+        _edges(other._edges)
     {}
 
     const ElementIdSet<EdgeId> inEdges() const { return _inEdges; }
