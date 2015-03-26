@@ -166,11 +166,19 @@ private:
 
 public:
     Node() {}
+
     Node(const Node& other) :
         _id(other._id),
         _inEdges(other._inEdges),
         _outEdges(other._outEdges),
         _edges(other._edges)
+    {}
+
+    Node(Node&& other) noexcept :
+        _id(other._id),
+        _inEdges(std::move(other._inEdges)),
+        _outEdges(std::move(other._outEdges)),
+        _edges(std::move(other._edges))
     {}
 
     const ElementIdSet<EdgeId> inEdges() const { return _inEdges; }
