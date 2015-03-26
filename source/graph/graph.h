@@ -202,6 +202,7 @@ private:
 
 public:
     Edge() {}
+
     Edge(const Edge& other) :
         _id(other._id),
         _sourceId(other._sourceId),
