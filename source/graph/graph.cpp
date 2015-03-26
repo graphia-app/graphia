@@ -309,7 +309,7 @@ void Graph::dumpToQDebug(int detail) const
 {
     ImmutableGraph::dumpToQDebug(detail);
 
-    if(detail > 0)
+    if(detail > 1)
     {
         if(_componentManager)
         {

@@ -234,10 +234,13 @@ public:
     {
         qDebug() << numNodes() << "nodes" << numEdges() << "edges";
 
-        if(detail > 1)
+        if(detail > 0)
         {
             for(NodeId nodeId : nodeIds())
-                qDebug() << "Node" << nodeId;
+            {
+                const Node& node = nodeById(nodeId);
+                qDebug() << "Node" << nodeId << "in" << node.inEdges() << "out" << node.outEdges();
+            }
 
             for(EdgeId edgeId : edgeIds())
             {
