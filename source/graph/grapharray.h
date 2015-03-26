@@ -19,6 +19,9 @@ public:
 
 template<typename Index, typename Element> class GraphArray : public ResizableGraphArray
 {
+    static_assert(std::is_nothrow_move_constructible<Element>::value,
+                  "GraphArray Element needs a noexcept move constructor");
+
 protected:
     mutable Graph* _graph;
     std::vector<Element> _array;

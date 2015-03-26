@@ -7,7 +7,7 @@ GraphComponentRendererManager::GraphComponentRendererManager() :
 {
 }
 
-GraphComponentRendererManager::GraphComponentRendererManager(GraphComponentRendererManager&& other) :
+GraphComponentRendererManager::GraphComponentRendererManager(GraphComponentRendererManager&& other) noexcept :
     _graphComponentRenderer(std::move(other._graphComponentRenderer))
 {
 }

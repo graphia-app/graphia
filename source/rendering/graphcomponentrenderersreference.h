@@ -13,7 +13,7 @@ private:
 
 public:
     GraphComponentRendererManager();
-    GraphComponentRendererManager(GraphComponentRendererManager&& other);
+    GraphComponentRendererManager(GraphComponentRendererManager&& other) noexcept;
 
     GraphComponentRenderer* get() { return _graphComponentRenderer.get(); }
 };

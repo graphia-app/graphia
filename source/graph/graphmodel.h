@@ -18,6 +18,11 @@ struct NodeVisual
         _size(1.0f)
     {}
 
+    NodeVisual(NodeVisual&& other) noexcept :
+        _initialised(other._initialised),
+        _size(other._size)
+    {}
+
     bool _initialised;
     float _size;
     QColor _color;
@@ -30,6 +35,11 @@ struct EdgeVisual
     EdgeVisual() :
         _initialised(false),
         _size(1.0f)
+    {}
+
+    EdgeVisual(EdgeVisual&& other) noexcept :
+        _initialised(other._initialised),
+        _size(other._size)
     {}
 
     bool _initialised;
