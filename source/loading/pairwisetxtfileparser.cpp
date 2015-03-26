@@ -21,7 +21,6 @@ bool PairwiseTxtFileParser::parse(Graph& graph)
     if(file.open(QIODevice::ReadOnly))
     {
         std::map<QString, NodeId> nodeIdHash;
-        std::vector<std::pair<NodeId, NodeId>> edges; //HACK
 
         int percentComplete = 0;
         QTextStream textStream(&file);
@@ -63,7 +62,7 @@ bool PairwiseTxtFileParser::parse(Graph& graph)
                 else
                     secondNodeId = nodeIdHash[second];
 
-                edges.emplace_back(firstNodeId, secondNodeId); //HACK
+                graph.addEdge(firstNodeId, secondNodeId);
             }
 
             int newPercentComplete = static_cast<int>(file.pos() * 100 / fileSize);
@@ -74,10 +73,6 @@ bool PairwiseTxtFileParser::parse(Graph& graph)
                 emit progress(newPercentComplete);
             }
         }
-
-        //HACK
-        for(auto edge : edges)
-            graph.addEdge(edge.first, edge.second);
 
         file.close();
     }
