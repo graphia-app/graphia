@@ -1,6 +1,6 @@
 #include "graphcomponentrenderersreference.h"
 
-#include "../utils/make_unique.h"
+#include "../utils/cpp1x_hacks.h"
 
 GraphComponentRendererManager::GraphComponentRendererManager() :
     _graphComponentRenderer(std::make_unique<GraphComponentRenderer>())

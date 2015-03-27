@@ -6,7 +6,7 @@
 #include "../layout/layout.h"
 #include "../layout/forcedirectedlayout.h"
 #include "../layout/collision.h"
-#include "../utils/make_unique.h"
+#include "../utils/cpp1x_hacks.h"
 #include "../commands/deleteselectednodescommand.h"
 #include "graphwidget.h"
 #include "selectionmanager.h"

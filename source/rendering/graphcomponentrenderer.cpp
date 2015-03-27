@@ -17,7 +17,7 @@
 #include "../ui/selectionmanager.h"
 
 #include "../utils/utils.h"
-#include "../utils/make_unique.h"
+#include "../utils/cpp1x_hacks.h"
 
 #include <QObject>
 #include <QOpenGLContext>

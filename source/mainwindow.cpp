@@ -15,7 +15,7 @@
 #include "loading/pairwisetxtfiletype.h"
 #include "loading/pairwisetxtfileparser.h"
 
-#include "utils/make_unique.h"
+#include "utils/cpp1x_hacks.h"
 
 #include <QFileDialog>
 #include <QIcon>

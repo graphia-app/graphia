@@ -1,7 +1,7 @@
 #include "graph.h"
 #include "grapharray.h"
 #include "simplecomponentmanager.h"
-#include "../utils/make_unique.h"
+#include "../utils/cpp1x_hacks.h"
 
 #include <QtGlobal>
 #include <QMetaType>

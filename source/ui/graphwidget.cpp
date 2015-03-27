@@ -8,7 +8,7 @@
 #include "../graph/grapharray.h"
 #include "../rendering/graphcomponentrenderer.h"
 
-#include "../utils/make_unique.h"
+#include "../utils/cpp1x_hacks.h"
 #include "../utils/utils.h"
 
 #include "graphoverviewinteractor.h"

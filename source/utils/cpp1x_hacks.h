@@ -1,5 +1,5 @@
-#ifndef MAKE_UNIQUE_H
-#define MAKE_UNIQUE_H
+#ifndef CPP1X_HACKS_H
+#define CPP1X_HACKS_H
 
 #ifndef _MSC_VER
 #if __cplusplus <= 201103L
@@ -15,4 +15,11 @@ std::unique_ptr<T> make_unique( Args&& ...args )
 #endif
 #endif
 
-#endif // MAKE_UNIQUE_H
+#if defined(_MSC_FULL_VER) && _MSC_FULL_VER <= 180031101
+#include <yvals.h>
+#ifdef _NOEXCEPT
+#define noexcept _NOEXCEPT
+#endif
+#endif
+
+#endif // CPP1X_HACKS_H

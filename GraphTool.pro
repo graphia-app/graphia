@@ -121,7 +121,6 @@ HEADERS += \
     source/utils/utils.h \
     source/utils/namethread.h \
     source/utils/unique_lock_with_side_effects.h \
-    source/utils/make_unique.h \
     source/commands/commandmanager.h \
     source/commands/command.h \
     source/commands/deleteselectednodescommand.h \
@@ -147,7 +146,8 @@ HEADERS += \
     source/loading/fileidentifier.h \
     source/loading/gmlfiletype.h \
     source/loading/pairwisetxtfiletype.h \
-    source/loading/pairwisetxtfileparser.h
+    source/loading/pairwisetxtfileparser.h \
+    source/utils/cpp1x_hacks.h
 
 FORMS    += source/mainwindow.ui
 

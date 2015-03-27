@@ -4,6 +4,7 @@
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
 #include "../layout/layout.h"
+#include "../utils/cpp1x_hacks.h"
 
 #include <QWidget>
 #include <QString>

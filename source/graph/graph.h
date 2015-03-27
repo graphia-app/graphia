@@ -1,6 +1,8 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+#include "../utils/cpp1x_hacks.h"
+
 #include <QObject>
 #include <QDebug>
 

@@ -3,7 +3,7 @@
 
 #include "../graph/graph.h"
 #include "../maths/boundingbox.h"
-#include "../utils/make_unique.h"
+#include "../utils/cpp1x_hacks.h"
 #include "layout.h"
 
 #include <QVector3D>
