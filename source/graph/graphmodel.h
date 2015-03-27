@@ -21,7 +21,8 @@ struct NodeVisual
 
     NodeVisual(NodeVisual&& other) noexcept :
         _initialised(other._initialised),
-        _size(other._size)
+        _size(other._size),
+        _color(other._color)
     {}
 
     bool _initialised;
@@ -40,7 +41,8 @@ struct EdgeVisual
 
     EdgeVisual(EdgeVisual&& other) noexcept :
         _initialised(other._initialised),
-        _size(other._size)
+        _size(other._size),
+        _color(other._color)
     {}
 
     bool _initialised;
