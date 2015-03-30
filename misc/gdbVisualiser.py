@@ -2,7 +2,12 @@
 
 def qdump__ElementId(d, value):
     v = value["_value"]
-    d.putValue(v)
+
+    if v >= 0:
+        d.putValue(v)
+    else:
+        d.putValue("null")
+
     d.putNumChild(0)
 
 def qdump__NodeId(d, value):
