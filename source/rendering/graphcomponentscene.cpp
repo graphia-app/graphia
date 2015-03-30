@@ -238,7 +238,7 @@ void GraphComponentScene::onGraphChanged(const Graph*)
 
 void GraphComponentScene::onNodeWillBeRemoved(const Graph*, NodeId nodeId)
 {
-    if(renderer()->focusNodeId() == nodeId)
+    if(visible() && renderer()->focusNodeId() == nodeId)
     {
         _graphWidget->executeOnRendererThread([this]
         {
