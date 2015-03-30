@@ -55,8 +55,8 @@ public:
     };
 
     Mode mode() const { return _mode; }
-    void switchToOverviewMode();
-    void switchToComponentMode(ComponentId componentId = ComponentId());
+    void switchToOverviewMode(bool doTransition = true);
+    void switchToComponentMode(ComponentId componentId = ComponentId(), bool doTransition = true);
 
     void rendererStartedTransition();
     void rendererFinishedTransition();
@@ -98,7 +98,7 @@ private:
     GraphComponentScene* _graphComponentScene;
     GraphComponentInteractor* _graphComponentInteractor;
 
-    bool _modeChanged;
+    bool _modeTransitionInProgress;
     Mode _mode;
     ComponentId _defaultComponentId;
 
