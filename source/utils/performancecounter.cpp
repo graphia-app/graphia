@@ -7,7 +7,8 @@ PerformanceCounter::PerformanceCounter(std::chrono::seconds interval) :
 
 void PerformanceCounter::tick()
 {
-    auto now = std::chrono::high_resolution_clock::now();
+    std::chrono::time_point<std::chrono::high_resolution_clock> now =
+            std::chrono::high_resolution_clock::now();
 
     _samples.emplace_back(now);
 
