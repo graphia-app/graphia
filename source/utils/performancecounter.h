@@ -20,7 +20,7 @@ private:
     static const int MAX_SAMPLES = 16;
     std::deque<std::chrono::time_point<std::chrono::high_resolution_clock>> _samples;
 
-    std::chrono::time_point<std::chrono::system_clock> _lastReport;
+    std::chrono::time_point<std::chrono::steady_clock> _lastReport;
     std::chrono::seconds _interval;
     ReportFn _f;
 };

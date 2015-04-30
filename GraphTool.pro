@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-gcc:QMAKE_CXXFLAGS += -std=c++11 -g
+CONFIG += c++11
+#gcc:QMAKE_CXXFLAGS += -std=c++11 -g
 
 # ThreadSanitizer settings
 #gcc:QMAKE_CXXFLAGS += -fsanitize=thread -fPIE

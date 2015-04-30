@@ -4,6 +4,7 @@
 #include <QObject>
 
 #ifndef Q_MOC_RUN
+#include <iostream>
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/spirit/include/support_istream_iterator.hpp>
 #endif

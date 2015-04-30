@@ -7,12 +7,14 @@
 #include "layout.h"
 
 #include <QVector3D>
+#include <QColor>
 
 #include <functional>
 #include <vector>
 #include <memory>
 #include <stack>
 #include <tuple>
+#include <cstdlib>
 
 template<typename TreeType> struct SubVolume
 {
