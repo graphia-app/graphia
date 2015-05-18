@@ -23,6 +23,9 @@ namespace std
 #ifdef _NOEXCEPT
 #define noexcept _NOEXCEPT
 #endif
+
+// No constexpr yet, apparently
+#define constexpr
 #endif
 
 #endif // CPP1X_HACKS_H
