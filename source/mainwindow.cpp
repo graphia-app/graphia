@@ -139,7 +139,7 @@ MainWidget* MainWindow::createNewTabWidget(const QString& filename)
     //FIXME what we should really be doing:
     // query which plugins can load fileTypeName
     // allow the user to choose which plugin to use if there is more than 1
-    // _graphModel = plugin->graphModelForFilename(filename);
+    // graphModel = plugin->graphModelForFilename(filename);
     // graphFileParser = plugin->parserForFilename(filename);
 
     // Couldn't find a way to interpret this file
