@@ -17,8 +17,7 @@ void FileIdentifier::registerFileType(const std::shared_ptr<Type> fileType)
         return a->collectiveDescription().compare(b->collectiveDescription(), Qt::CaseInsensitive);
     });
 
-    _filter.clear();
-    _filter += QObject::tr("All Files (");
+    QString description = QObject::tr("All Files (");
     bool second = false;
 
     for(auto fileType : _fileTypes)
@@ -26,39 +25,57 @@ void FileIdentifier::registerFileType(const std::shared_ptr<Type> fileType)
         for(auto extension : fileType->extensions())
         {
             if(second)
-                _filter += " ";
+                description += " ";
             else
                 second = true;
 
-            _filter += "*." + extension;
+            description += "*." + extension;
         }
     }
 
-    _filter += ")";
+    description += ")";
+
+    _nameFilters.clear();
+    _nameFilters.append(description);
 
     for(auto fileType : _fileTypes)
     {
-        _filter += ";;" + fileType->collectiveDescription() + " (";
+        description = fileType->collectiveDescription() + " (";
 
         for(auto extension : fileType->extensions())
-            _filter += "*." + extension;
+            description += "*." + extension;
 
-        _filter += ")";
+        description += ")";
+
+        _nameFilters.append(description);
     }
+
+    emit nameFiltersChanged();
 }
 
-const std::tuple<FileIdentifier::Type*, QString> FileIdentifier::identify(const QString& filename) const
+std::vector<const FileIdentifier::Type*> FileIdentifier::identify(const QString& filename) const
 {
     QFileInfo info(filename);
+    std::vector<const FileIdentifier::Type*> types;
 
     if(info.exists())
     {
         for(auto fileType : _fileTypes)
         {
             if(fileType->identify(filename))
-                return std::make_tuple(fileType.get(), info.fileName());
+                types.push_back(fileType.get());
         }
     }
 
-    return std::make_tuple( nullptr, info.fileName());
+    return types;
+}
+
+const QStringList FileIdentifier::fileTypeNames() const
+{
+    QStringList fileTypeNames;
+
+    for(auto fileType : _fileTypes)
+        fileTypeNames.append(fileType->name());
+
+    return fileTypeNames;
 }

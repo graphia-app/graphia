@@ -22,7 +22,7 @@ private:
 
     std::recursive_mutex _mutex;
     std::deque<Task> _tasks;
-    bool _debug;
+    int _debug;
     std::atomic<bool> _executing;
 
 public:

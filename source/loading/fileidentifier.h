@@ -1,15 +1,18 @@
 #ifndef FILETYPEIDENTIFIER_H
 #define FILETYPEIDENTIFIER_H
 
+#include <QObject>
 #include <QString>
+#include <QStringList>
+#include <QList>
 #include <QFileInfo>
 
 #include <vector>
 #include <memory>
-#include <tuple>
 
-class FileIdentifier
+class FileIdentifier : public QObject
 {
+    Q_OBJECT
 public:
     class Type
     {
@@ -37,12 +40,16 @@ public:
     FileIdentifier();
 
     void registerFileType(const std::shared_ptr<Type> fileType);
-    const std::tuple<Type*, QString> identify(const QString& filename) const;
-    const QString& filter() const { return _filter; }
+    std::vector<const Type*> identify(const QString& filename) const;
+    const QStringList nameFilters() const { return _nameFilters; }
+    const QStringList fileTypeNames() const;
+
+signals:
+    void nameFiltersChanged();
 
 private:
     std::vector<std::shared_ptr<Type>> _fileTypes;
-    QString _filter;
+    QStringList _nameFilters;
 };
 
 #endif // FILETYPEIDENTIFIER_H

@@ -10,7 +10,7 @@
 class GraphModel;
 class CommandManager;
 class SelectionManager;
-class GraphWidget;
+class GraphRenderer;
 class GraphComponentRenderer;
 class BaseFrustum;
 
@@ -25,13 +25,13 @@ public:
     GraphCommonInteractor(std::shared_ptr<GraphModel> graphModel,
                           CommandManager& commandManager,
                           std::shared_ptr<SelectionManager> selectionManager,
-                          GraphWidget* graphWidget);
+                          GraphRenderer* graphRenderer);
 
 protected:
     std::shared_ptr<GraphModel> _graphModel;
     CommandManager& _commandManager;
     std::shared_ptr<SelectionManager> _selectionManager;
-    GraphWidget* _graphWidget;
+    GraphRenderer* _graphRenderer;
 
 private:
     QPoint _cursorPosition;

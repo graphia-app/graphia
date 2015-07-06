@@ -1,6 +1,6 @@
 #include "graph.h"
 #include "grapharray.h"
-#include "simplecomponentmanager.h"
+#include "componentmanager.h"
 #include "../utils/cpp1x_hacks.h"
 
 #include <QtGlobal>
@@ -9,7 +9,7 @@
 Graph::Graph() :
     _lastNodeId(0),
     _lastEdgeId(0),
-    _componentManager(std::make_unique<SimpleComponentManager>(*this)),
+    _componentManager(std::make_unique<ComponentManager>(*this)),
     _graphChangeDepth(0)
 {
     qRegisterMetaType<NodeId>("NodeId");
@@ -278,6 +278,23 @@ ComponentId Graph::componentIdOfEdge(EdgeId edgeId) const
         return _componentManager->componentIdOfEdge(edgeId);
 
     return ComponentId();
+}
+
+ComponentId Graph::largestComponentId() const
+{
+    ComponentId largestComponentId;
+    int maxNumNodes = 0;
+    for(auto componentId : componentIds())
+    {
+        auto component = componentById(componentId);
+        if(component->numNodes() > maxNumNodes)
+        {
+            maxNumNodes = component->numNodes();
+            largestComponentId = componentId;
+        }
+    }
+
+    return largestComponentId;
 }
 
 const ElementIdSet<EdgeId> Graph::edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds)

@@ -1,9 +1,10 @@
 #include "graphcomponentinteractor.h"
 #include "selectionmanager.h"
-#include "graphwidget.h"
+#include "graphquickitem.h"
 
 #include "../commands/commandmanager.h"
 
+#include "../rendering/graphrenderer.h"
 #include "../rendering/graphcomponentscene.h"
 #include "../rendering/graphcomponentrenderer.h"
 #include "../rendering/camera.h"
@@ -28,8 +29,8 @@ GraphComponentInteractor::GraphComponentInteractor(std::shared_ptr<GraphModel> g
                                                    GraphComponentScene* graphComponentScene,
                                                    CommandManager &commandManager,
                                                    std::shared_ptr<SelectionManager> selectionManager,
-                                                   GraphWidget* graphWidget) :
-    GraphCommonInteractor(graphModel, commandManager, selectionManager, graphWidget),
+                                                   GraphRenderer* graphRenderer) :
+    GraphCommonInteractor(graphModel, commandManager, selectionManager, graphRenderer),
     _scene(graphComponentScene)
 {
 }
@@ -45,7 +46,7 @@ void GraphComponentInteractor::rightMouseUp()
     if(clickedRenderer() == nullptr)
         return;
 
-    if(_graphWidget->transition().active())
+    if(_graphRenderer->transition().active())
     {
         clickedRenderer()->enableFocusTracking();
         return;
@@ -117,9 +118,9 @@ void GraphComponentInteractor::wheelDown()
     rendererUnderCursor()->zoom(-1.0f);
 }
 
-GraphComponentRenderer*GraphComponentInteractor::rendererAtPosition(const QPoint&)
+GraphComponentRenderer* GraphComponentInteractor::rendererAtPosition(const QPoint&)
 {
-    return _scene->renderer();
+    return _scene->componentRenderer();
 }
 
 QPoint GraphComponentInteractor::componentLocalCursorPosition(const ComponentId&, const QPoint& position)
@@ -129,11 +130,11 @@ QPoint GraphComponentInteractor::componentLocalCursorPosition(const ComponentId&
 
 ElementIdSet<NodeId> GraphComponentInteractor::selectionForRect(const QRect& rect)
 {
-    Frustum frustum = _scene->renderer()->camera()->frustumForViewportCoordinates(
+    Frustum frustum = _scene->componentRenderer()->camera()->frustumForViewportCoordinates(
                 rect.topLeft().x(), rect.topLeft().y(),
                 rect.bottomRight().x(), rect.bottomRight().y());
 
     return nodeIdsInsideFrustum(*_graphModel,
-                                _scene->renderer()->componentId(),
+                                _scene->componentRenderer()->componentId(),
                                 frustum);
 }

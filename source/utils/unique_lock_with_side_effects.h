@@ -6,7 +6,7 @@
 
 // Call a lambda after a lock is released
 // It may be that this is a terrible idea
-template<typename T> struct unique_lock_with_side_effects
+template<typename T> class unique_lock_with_side_effects
 {
 public:
     unique_lock_with_side_effects(T& mutex) :

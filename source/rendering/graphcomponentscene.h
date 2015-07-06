@@ -2,30 +2,30 @@
 #define GRAPHCOMPONENTSCENE_H
 
 #include "scene.h"
-#include "graphcomponentrenderersreference.h"
+#include "openglfunctions.h"
 
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
 #include "transition.h"
 
-class GraphWidget;
+class GraphRenderer;
 class GraphComponentRenderer;
 
-class QOpenGLFunctions_3_3_Core;
-
-class GraphComponentScene : public Scene, public GraphComponentRenderersReference
+class GraphComponentScene :
+        public Scene,
+        protected OpenGLFunctions
 {
     Q_OBJECT
 
 public:
-    GraphComponentScene(GraphWidget* graphWidget);
-
-    static const int multisamples = 4;
+    GraphComponentScene(GraphRenderer* graphRenderer);
 
     void initialise();
     void update(float t);
     void render();
-    void resize(int width, int height);
+    void setSize(int width, int height);
+
+    bool transitionActive();
 
     void onShow();
 
@@ -42,25 +42,25 @@ public:
     void resetView();
     bool viewIsReset();
 
-    GraphComponentRenderer* renderer();
+    GraphComponentRenderer* componentRenderer();
 
     void startTransition(float duration = 0.3f,
                          Transition::Type transitionType = Transition::Type::EaseInEaseOut,
                          std::function<void()> finishedFunction = []{});
 
 private:
-    GraphWidget* _graphWidget;
+    GraphRenderer* _graphRenderer;
 
     int _width;
     int _height;
 
+    ComponentId _defaultComponentId;
     ComponentId _componentId;
-
-    QOpenGLFunctions_3_3_Core* _funcs;
 
 private slots:
     void onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet);
     void onComponentsWillMerge(const Graph* graph, const ComponentMergeSet& componentMergeSet);
+    void onComponentAdded(const Graph* graph, ComponentId componentId, bool);
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool);
     void onGraphChanged(const Graph* graph);
     void onNodeWillBeRemoved(const Graph* graph, NodeId nodeId);

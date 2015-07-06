@@ -3,7 +3,7 @@
 
 #include "layout.h"
 
-class RandomLayout : public NodeLayout
+class RandomLayout : public Layout
 {
     Q_OBJECT
 private:
@@ -12,7 +12,7 @@ private:
 public:
     RandomLayout(const ImmutableGraph& graph,
                  NodePositions& positions) :
-        NodeLayout(graph, positions), _spread(10.0f)
+        Layout(graph, positions), _spread(10.0f)
     {}
 
     void setSpread(float spread) { this->_spread = spread; }

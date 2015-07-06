@@ -1,7 +1,7 @@
 #ifndef GRAPHCOMPONENTRENDERER_H
 #define GRAPHCOMPONENTRENDERER_H
 
-#include "graphrenderer.h"
+#include "openglfunctions.h"
 #include "camera.h"
 #include "primitives/cylinder.h"
 #include "primitives/sphere.h"
@@ -22,23 +22,21 @@
 #include <memory>
 #include <vector>
 
-class GraphWidget;
-class QOpenGLContext;
+class GraphRenderer;
 class Quad;
 class GraphModel;
 class SelectionManager;
 class Camera;
 class Octree;
 
-class GraphComponentRenderer
+class GraphComponentRenderer : protected OpenGLFunctions
 {
 public:
     GraphComponentRenderer();
 
     void initialise(std::shared_ptr<GraphModel> graphModel, ComponentId componentId,
-                    GraphWidget& graphWidget,
                     std::shared_ptr<SelectionManager> selectionManager,
-                    std::shared_ptr<GraphRenderer> shared);
+                    GraphRenderer* graphRenderer);
 
     bool visible() { return _visible; }
     void setVisible(bool visible);
@@ -48,6 +46,8 @@ public:
     void render(int x, int y, int width = 0, int height = 0, float alpha = 1.0f);
     void resize(int viewportWidth, int viewportHeight,
                 int renderWidth = 0, int renderHeight = 0);
+
+    bool transitionActive();
 
     int viewportWidth() const { return _viewportWidth; }
     int viewportHeight() const { return _viewportHeight; }
@@ -101,8 +101,7 @@ public:
     void updateTransition(float f);
 
 private:
-    GraphWidget* _graphWidget;
-    std::shared_ptr<GraphRenderer> _shared;
+    GraphRenderer* _graphRenderer;
     Sphere _sphere;
     Cylinder _cylinder;
 
@@ -168,8 +167,6 @@ private:
     bool _trackFocus;
     float _targetZoomDistance;
     Transition _zoomTransition;
-
-    QOpenGLFunctions_3_3_Core* _funcs;
 
     ComponentId _componentId;
 

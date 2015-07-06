@@ -1,140 +1,134 @@
 #include "graphcomponentscene.h"
+#include "graphrenderer.h"
 
 #include "graphcomponentrenderer.h"
 
 #include "../graph/graphmodel.h"
 
-#include "../ui/graphwidget.h"
+#include "../ui/graphquickitem.h"
 
-#include <QOpenGLContext>
-#include <QOpenGLFunctions_3_3_Core>
-
-GraphComponentScene::GraphComponentScene(GraphWidget* graphWidget)
-    : Scene(graphWidget),
-      _graphWidget(graphWidget),
-      _width(0), _height(0)
+GraphComponentScene::GraphComponentScene(GraphRenderer* graphRenderer) :
+    Scene(graphRenderer),
+    OpenGLFunctions(),
+    _graphRenderer(graphRenderer),
+    _width(0), _height(0)
 {
-    connect(&graphWidget->graphModel()->graph(), &Graph::componentSplit, this, &GraphComponentScene::onComponentSplit, Qt::DirectConnection);
-    connect(&graphWidget->graphModel()->graph(), &Graph::componentsWillMerge, this, &GraphComponentScene::onComponentsWillMerge, Qt::DirectConnection);
-    connect(&graphWidget->graphModel()->graph(), &Graph::componentWillBeRemoved, this, &GraphComponentScene::onComponentWillBeRemoved, Qt::DirectConnection);
-    connect(&graphWidget->graphModel()->graph(), &Graph::graphChanged, this, &GraphComponentScene::onGraphChanged, Qt::DirectConnection);
-    connect(&graphWidget->graphModel()->graph(), &Graph::nodeWillBeRemoved, this, &GraphComponentScene::onNodeWillBeRemoved, Qt::DirectConnection);
+    connect(&_graphRenderer->graphModel()->graph(), &Graph::componentSplit, this, &GraphComponentScene::onComponentSplit, Qt::DirectConnection);
+    connect(&_graphRenderer->graphModel()->graph(), &Graph::componentsWillMerge, this, &GraphComponentScene::onComponentsWillMerge, Qt::DirectConnection);
+    connect(&_graphRenderer->graphModel()->graph(), &Graph::componentAdded, this, &GraphComponentScene::onComponentAdded, Qt::DirectConnection);
+    connect(&_graphRenderer->graphModel()->graph(), &Graph::componentWillBeRemoved, this, &GraphComponentScene::onComponentWillBeRemoved, Qt::DirectConnection);
+    connect(&_graphRenderer->graphModel()->graph(), &Graph::graphChanged, this, &GraphComponentScene::onGraphChanged, Qt::DirectConnection);
+    connect(&_graphRenderer->graphModel()->graph(), &Graph::nodeWillBeRemoved, this, &GraphComponentScene::onNodeWillBeRemoved, Qt::DirectConnection);
+
+    _defaultComponentId = _graphRenderer->graphModel()->graph().largestComponentId();
 }
 
 void GraphComponentScene::initialise()
 {
-    _funcs = context().versionFunctions<QOpenGLFunctions_3_3_Core>();
-    if(!_funcs)
-        qFatal("Could not obtain required OpenGL context version");
-    _funcs->initializeOpenGLFunctions();
+    resolveOpenGLFunctions();
 }
 
 void GraphComponentScene::update(float t)
 {
-    _graphWidget->updateNodePositions();
-    _graphWidget->transition().update(t);
-
-    if(renderer() != nullptr)
-        renderer()->update(t);
+    if(componentRenderer() != nullptr)
+        componentRenderer()->update(t);
 }
 
 void GraphComponentScene::render()
 {
-    _funcs->glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    _funcs->glClearColor(0.75f, 0.75f, 0.75f, 1.0f);
-    _funcs->glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-    _graphWidget->clearScene();
-
-    if(renderer() != nullptr)
-        renderer()->render(0, 0);
-
-    _graphWidget->renderScene();
+    if(componentRenderer() != nullptr)
+        componentRenderer()->render(0, 0);
 }
 
-void GraphComponentScene::resize(int width, int height)
+void GraphComponentScene::setSize(int width, int height)
 {
     _width = width;
     _height = height;
 
-    _graphWidget->resizeScene(width, height);
+    if(componentRenderer() != nullptr)
+        componentRenderer()->resize(width, height);
+}
 
-    if(renderer() != nullptr)
-        renderer()->resize(width, height);
+bool GraphComponentScene::transitionActive()
+{
+    if(componentRenderer() != nullptr)
+        return componentRenderer()->transitionActive();
+
+    return false;
 }
 
 void GraphComponentScene::onShow()
 {
     if(visible())
     {
-        for(auto& rendererManager : rendererManagers())
-        {
-            auto renderer = rendererManager.get();
-            renderer->setVisible(renderer->componentId() == _componentId);
-        }
+        for(GraphComponentRenderer* componentRenderer : _graphRenderer->componentRenderers())
+            componentRenderer->setVisible(componentRenderer->componentId() == _componentId);
     }
 }
 
 void GraphComponentScene::setComponentId(ComponentId componentId)
 {
-    _componentId = componentId;
+    if(componentId.isNull())
+        _componentId = _defaultComponentId;
+    else
+        _componentId = componentId;
+
     onShow();
 }
 
 void GraphComponentScene::saveViewData()
 {
-    if(renderer() != nullptr)
-        renderer()->saveViewData();
+    if(componentRenderer() != nullptr)
+        componentRenderer()->saveViewData();
 }
 
 bool GraphComponentScene::savedViewIsReset()
 {
-    if(renderer() == nullptr)
+    if(componentRenderer() == nullptr)
         return true;
 
-    return renderer()->savedViewIsReset();
+    return componentRenderer()->savedViewIsReset();
 }
 
 void GraphComponentScene::restoreViewData()
 {
-    if(renderer() != nullptr)
-        renderer()->restoreViewData();
+    if(componentRenderer() != nullptr)
+        componentRenderer()->restoreViewData();
 }
 
 void GraphComponentScene::resetView()
 {
-    if(renderer() != nullptr)
-        renderer()->resetView();
+    if(componentRenderer() != nullptr)
+        componentRenderer()->resetView();
 }
 
 bool GraphComponentScene::viewIsReset()
 {
-    if(renderer() == nullptr)
+    if(componentRenderer() == nullptr)
         return true;
 
-    return renderer()->viewIsReset();
+    return componentRenderer()->viewIsReset();
 }
 
-GraphComponentRenderer* GraphComponentScene::renderer()
+GraphComponentRenderer* GraphComponentScene::componentRenderer()
 {
-    return rendererForComponentId(_componentId);
+    return _graphRenderer->componentRendererForId(_componentId);
 }
 
 void GraphComponentScene::startTransition(float duration, Transition::Type transitionType,
                                           std::function<void()> finishedFunction)
 {
-    if(!_graphWidget->transition().active())
-        _graphWidget->rendererStartedTransition();
+    if(!_graphRenderer->transition().active())
+        _graphRenderer->rendererStartedTransition();
 
-    _graphWidget->transition().start(duration, transitionType,
+    _graphRenderer->transition().start(duration, transitionType,
     [this](float f)
     {
-        renderer()->updateTransition(f);
+        componentRenderer()->updateTransition(f);
     },
     [this]
     {
-        _graphWidget->rendererFinishedTransition();
+        _graphRenderer->rendererFinishedTransition();
     },
     finishedFunction);
 }
@@ -164,12 +158,12 @@ void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSp
             }
         }
 
-        auto oldGraphComponentRenderer = rendererForComponentId(oldComponentId);
+        auto oldGraphComponentRenderer = _graphRenderer->componentRendererForId(oldComponentId);
 
-        _graphWidget->executeOnRendererThread([this, largestSplitter,
+        _graphRenderer->executeOnRendererThread([this, largestSplitter,
                                               oldGraphComponentRenderer]
         {
-            auto& graph = _graphWidget->graphModel()->graph();
+            auto& graph = _graphRenderer->graphModel()->graph();
 
             ComponentId newComponentId;
 
@@ -180,7 +174,7 @@ void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSp
 
             Q_ASSERT(!newComponentId.isNull());
 
-            auto newGraphComponentRenderer = rendererForComponentId(newComponentId);
+            auto newGraphComponentRenderer = _graphRenderer->componentRendererForId(newComponentId);
 
             newGraphComponentRenderer->cloneViewDataFrom(*oldGraphComponentRenderer);
             setComponentId(newComponentId);
@@ -198,9 +192,9 @@ void GraphComponentScene::onComponentsWillMerge(const Graph*, const ComponentMer
         if(merger == _componentId)
         {
             auto newComponentId = componentMergeSet.newComponentId();
-            auto newGraphComponentRenderer = rendererForComponentId(newComponentId);
-            auto oldGraphComponentRenderer = rendererForComponentId(_componentId);
-            _graphWidget->executeOnRendererThread([this, newComponentId,
+            auto newGraphComponentRenderer = _graphRenderer->componentRendererForId(newComponentId);
+            auto oldGraphComponentRenderer = _graphRenderer->componentRendererForId(_componentId);
+            _graphRenderer->executeOnRendererThread([this, newComponentId,
                                                   newGraphComponentRenderer,
                                                   oldGraphComponentRenderer]
             {
@@ -212,38 +206,53 @@ void GraphComponentScene::onComponentsWillMerge(const Graph*, const ComponentMer
     }
 }
 
-void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool hasMerged)
+void GraphComponentScene::onComponentAdded(const Graph*, ComponentId componentId, bool)
 {
-    if(visible() && componentId == _componentId && !hasMerged)
-        _graphWidget->switchToOverviewMode();
+    if(_componentId.isNull())
+        setComponentId(componentId);
 }
 
-void GraphComponentScene::onGraphChanged(const Graph*)
-{  
-    _graphWidget->executeOnRendererThread([this]
+void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool hasMerged)
+{
+    if(componentId == _componentId)
+    {
+        bool thisIsTheLastComponent = _graphRenderer->graphModel()->graph().numComponents() == 1;
+
+        if(visible() && !hasMerged && !thisIsTheLastComponent)
+            _graphRenderer->switchToOverviewMode();
+
+        _componentId.setToNull();
+    }
+}
+
+void GraphComponentScene::onGraphChanged(const Graph* graph)
+{
+    _defaultComponentId = graph->largestComponentId();
+
+    _graphRenderer->executeOnRendererThread([this]
     {
         if(visible())
         {
-            resize(_width, _height);
+            setSize(_width, _height);
 
             // Graph changes may significantly alter the centre; ease the transition
-            if(renderer()->trackingCentreOfComponent())
+            if(componentRenderer() != nullptr && componentRenderer()->trackingCentreOfComponent())
             {
                 startTransition();
-                renderer()->moveFocusToCentreOfComponent();
+                componentRenderer()->moveFocusToCentreOfComponent();
             }
         }
-    }, "GraphComponentScene::onGraphChanged (resize/moveFocusToCentreOfComponent)");
+    }, "GraphComponentScene::onGraphChanged (setSize/moveFocusToCentreOfComponent)");
 }
 
 void GraphComponentScene::onNodeWillBeRemoved(const Graph*, NodeId nodeId)
 {
-    if(visible() && renderer()->focusNodeId() == nodeId)
+    if(visible() && componentRenderer()->focusNodeId() == nodeId)
     {
-        _graphWidget->executeOnRendererThread([this]
+        _graphRenderer->executeOnRendererThread([this]
         {
             startTransition();
-            renderer()->moveFocusToCentreOfComponent();
+            componentRenderer()->moveFocusToCentreOfComponent();
         }, "GraphWidget::onNodeWillBeRemoved");
     }
 }

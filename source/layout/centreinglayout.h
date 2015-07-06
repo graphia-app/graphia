@@ -3,13 +3,13 @@
 
 #include "layout.h"
 
-class CentreingLayout : public NodeLayout
+class CentreingLayout : public Layout
 {
     Q_OBJECT
 public:
     CentreingLayout(const ImmutableGraph& graph,
                     NodePositions& positions) :
-        NodeLayout(graph, positions)
+        Layout(graph, positions)
     {}
 
     void executeReal(uint64_t);

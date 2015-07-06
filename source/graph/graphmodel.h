@@ -6,7 +6,7 @@
 #include "../layout/layout.h"
 #include "../utils/cpp1x_hacks.h"
 
-#include <QWidget>
+#include <QQuickItem>
 #include <QString>
 #include <QColor>
 
@@ -70,7 +70,7 @@ public:
 
     virtual bool editable() { return false; }
 
-    virtual QWidget* contentWidget() { return nullptr; }
+    virtual QQuickItem* contentQuickItem() { return nullptr; }
 };
 
 #endif // GRAPHMODEL_H

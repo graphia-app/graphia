@@ -13,12 +13,8 @@ class Interactor : public QObject
 
 public:
     Interactor(QObject* parent = nullptr) :
-        QObject(parent),
-        _interacting(false)
-    {
-        connect(this, &Interactor::userInteractionStarted, this, &Interactor::onUserInteractionStarted);
-        connect(this, &Interactor::userInteractionFinished, this, &Interactor::onUserInteractionFinished);
-    }
+        QObject(parent)
+    {}
 
     virtual ~Interactor() {}
 
@@ -30,15 +26,6 @@ public:
 
     virtual void keyPressEvent(QKeyEvent*) {}
     virtual void keyReleaseEvent(QKeyEvent*) {}
-
-    bool interacting() const { return _interacting; }
-
-private:
-    bool _interacting;
-
-private slots:
-    void onUserInteractionStarted() { _interacting = true; }
-    void onUserInteractionFinished() { _interacting = false; }
 
 signals:
     void userInteractionStarted() const;

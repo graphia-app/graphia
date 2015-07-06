@@ -1,9 +1,13 @@
 #include "layout.h"
 #include "../utils/namethread.h"
 
-LayoutThread::LayoutThread(bool repeating) :
+LayoutThread::LayoutThread(const Graph& graph,
+                           std::unique_ptr<const LayoutFactory> layoutFactory,
+                           bool repeating) :
+    _graph(&graph),
     _started(false),_pause(false), _paused(true), _stop(false),
     _repeating(repeating), _iteration(0),
+    _layoutFactory(std::move(layoutFactory)),
     _performanceCounter(std::chrono::seconds(3))
 {
     bool debug = qgetenv("LAYOUT_DEBUG").toInt();
@@ -12,12 +16,11 @@ LayoutThread::LayoutThread(bool repeating) :
         if(debug)
             qDebug() << "Layout" << ticksPerSecond << "ips";
     });
-}
 
-LayoutThread::LayoutThread(std::shared_ptr<Layout> layout, bool repeating) :
-    LayoutThread(repeating)
-{
-    addLayout(layout);
+    connect(&graph, &Graph::componentAdded, this, &LayoutThread::onComponentAdded, Qt::DirectConnection);
+    connect(&graph, &Graph::componentWillBeRemoved, this, &LayoutThread::onComponentWillBeRemoved, Qt::DirectConnection);
+    connect(&graph, &Graph::componentSplit, this, &LayoutThread::onComponentSplit, Qt::DirectConnection);
+    connect(&graph, &Graph::componentsWillMerge, this, &LayoutThread::onComponentsWillMerge, Qt::DirectConnection);
 }
 
 void LayoutThread::addLayout(std::shared_ptr<Layout> layout)
@@ -42,6 +45,9 @@ void LayoutThread::pause()
 
     for(auto layout : _layouts)
         layout->cancel();
+
+    lock.unlock();
+    emit pausedChanged();
 }
 
 void LayoutThread::pauseAndWait()
@@ -56,6 +62,9 @@ void LayoutThread::pauseAndWait()
         layout->cancel();
 
     _waitForPause.wait(lock);
+
+    lock.unlock();
+    emit pausedChanged();
 }
 
 bool LayoutThread::paused()
@@ -80,12 +89,20 @@ void LayoutThread::resume()
     _paused = false;
 
     _waitForResume.notify_all();
+
+    lock.unlock();
+    emit pausedChanged();
 }
 
 void LayoutThread::start()
 {
     _started = true;
     _paused = false;
+    emit pausedChanged();
+
+    if(_thread.joinable())
+        _thread.join();
+
     _thread = std::thread(&LayoutThread::run, this);
 }
 
@@ -167,10 +184,13 @@ void LayoutThread::run()
 
     std::unique_lock<std::mutex> lock(_mutex);
     _layouts.clear();
+    _started = false;
+    _paused = true;
+    _waitForPause.notify_all();
 }
 
 
-void NodeLayoutThread::addComponent(ComponentId componentId)
+void LayoutThread::addComponent(ComponentId componentId)
 {
     if(_componentLayouts.find(componentId) == _componentLayouts.end())
     {
@@ -180,13 +200,13 @@ void NodeLayoutThread::addComponent(ComponentId componentId)
     }
 }
 
-void NodeLayoutThread::addAllComponents(const Graph &graph)
+void LayoutThread::addAllComponents()
 {
-    for(ComponentId componentId : graph.componentIds())
+    for(ComponentId componentId : _graph->componentIds())
         addComponent(componentId);
 }
 
-void NodeLayoutThread::removeComponent(ComponentId componentId)
+void LayoutThread::removeComponent(ComponentId componentId)
 {
     bool resumeAfterRemoval = false;
 
@@ -205,4 +225,29 @@ void NodeLayoutThread::removeComponent(ComponentId componentId)
 
     if(resumeAfterRemoval)
         resume();
+}
+
+void LayoutThread::onComponentAdded(const Graph*, ComponentId componentId, bool)
+{
+    addComponent(componentId);
+}
+
+void LayoutThread::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool)
+{
+    removeComponent(componentId);
+}
+
+void LayoutThread::onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet)
+{
+    for(ComponentId componentId : componentSplitSet.splitters())
+        addComponent(componentId);
+}
+
+void LayoutThread::onComponentsWillMerge(const Graph*, const ComponentMergeSet& componentMergeSet)
+{
+    for(ComponentId componentId : componentMergeSet.mergers())
+    {
+        if(componentId != componentMergeSet.newComponentId())
+            removeComponent(componentId);
+    }
 }

@@ -1,4 +1,5 @@
 #include "graphcomponentrenderer.h"
+#include "graphrenderer.h"
 
 #include "camera.h"
 #include "primitives/quad.h"
@@ -13,15 +14,13 @@
 #include "../maths/plane.h"
 #include "../maths/boundingsphere.h"
 
-#include "../ui/graphwidget.h"
+#include "../ui/graphquickitem.h"
 #include "../ui/selectionmanager.h"
 
 #include "../utils/utils.h"
 #include "../utils/cpp1x_hacks.h"
 
 #include <QObject>
-#include <QOpenGLContext>
-#include <QOpenGLFunctions_3_3_Core>
 
 #include <QKeyEvent>
 #include <QMouseEvent>
@@ -30,46 +29,40 @@
 #include <cmath>
 #include <mutex>
 
-GraphComponentRenderer::GraphComponentRenderer()
-    : _graphWidget(nullptr),
-      _initialised(false),
-      _visible(false),
-      _frozen(false),
-      _cleanupWhenThawed(false),
-      _updateVisualDataWhenThawed(false),
-      _updatePositionDataWhenThawed(false),
-      _viewportWidth(0), _viewportHeight(0),
-      _renderWidth(0), _renderHeight(0),
-      _visualDataRequiresUpdate(false),
-      _trackFocus(true),
-      _targetZoomDistance(0.0f),
-      _funcs(nullptr),
-      _fovx(0.0f),
-      _fovy(0.0f),
-      _numNodesInPositionData(0),
-      _numEdgesInPositionData(0)
+GraphComponentRenderer::GraphComponentRenderer() :
+    OpenGLFunctions(),
+    _initialised(false),
+    _visible(false),
+    _frozen(false),
+    _cleanupWhenThawed(false),
+    _updateVisualDataWhenThawed(false),
+    _updatePositionDataWhenThawed(false),
+    _viewportWidth(0), _viewportHeight(0),
+    _renderWidth(0), _renderHeight(0),
+    _visualDataRequiresUpdate(false),
+    _trackFocus(true),
+    _targetZoomDistance(0.0f),
+    _fovx(0.0f),
+    _fovy(0.0f),
+    _numNodesInPositionData(0),
+    _numEdgesInPositionData(0)
 {
 }
 
 void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, ComponentId componentId,
-                                        GraphWidget& graphWidget,
                                         std::shared_ptr<SelectionManager> selectionManager,
-                                        std::shared_ptr<GraphRenderer> shared)
+                                        GraphRenderer* graphRenderer)
 {
     _graphModel = graphModel;
     _componentId = componentId;
-    _graphWidget = &graphWidget;
     _selectionManager = selectionManager;
-    _shared = shared;
+    _graphRenderer = graphRenderer;
 
-    _funcs = _shared->_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
-    if(!_funcs)
-        qFatal("Could not obtain required OpenGL context version");
-    _funcs->initializeOpenGLFunctions();
+    resolveOpenGLFunctions();
 
     //FIXME: eliminate Material, set shader directly?
     MaterialPtr nodeMaterial(new Material);
-    nodeMaterial->setShaders(":/rendering/shaders/instancednodes.vert", ":/rendering/shaders/ads.frag");
+    nodeMaterial->setShaders(":/shaders/instancednodes.vert", ":/shaders/ads.frag");
 
     _sphere.setRadius(1.0f);
     _sphere.setRings(16);
@@ -78,7 +71,7 @@ void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, 
     _sphere.create();
 
     MaterialPtr edgeMaterial(new Material);
-    edgeMaterial->setShaders(":/rendering/shaders/instancededges.vert", ":/rendering/shaders/ads.frag");
+    edgeMaterial->setShaders(":/shaders/instancededges.vert", ":/shaders/ads.frag");
 
     _cylinder.setRadius(1.0f);
     _cylinder.setLength(1.0f);
@@ -135,11 +128,9 @@ void GraphComponentRenderer::cleanup()
 
     _graphModel = nullptr;
     _componentId.setToNull();
-    _graphWidget = nullptr;
     _selectionManager = nullptr;
-    _shared = nullptr;
+    _graphRenderer = nullptr;
 
-    _funcs = nullptr;
     _initialised = false;
 }
 
@@ -275,10 +266,7 @@ float GraphComponentRenderer::zoomDistanceForNodeIds(const QVector3D& centre, st
         return std::max(maxDistance / std::sin(minHalfFov), MINIMUM_ZOOM_DISTANCE);
     }
     else
-    {
-        qWarning() << "zoomDistanceForNodes returning default value";
         return MINIMUM_ZOOM_DISTANCE;
-    }
 }
 
 void GraphComponentRenderer::updateFocusPosition()
@@ -376,7 +364,7 @@ void GraphComponentRenderer::update(float t)
 
         _zoomTransition.update(t);
 
-        if(!_graphWidget->transition().active() && _trackFocus)
+        if(!_graphRenderer->transition().active() && _trackFocus)
         {
             if(trackingCentreOfComponent())
             {
@@ -437,74 +425,74 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program, float alpha)
 void GraphComponentRenderer::renderNodes(float alpha)
 {
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-    _funcs->glDrawBuffers(2, drawBuffers);
+    glDrawBuffers(2, drawBuffers);
 
-    _shared->_nodesShader.bind();
-    setShaderADSParameters(_shared->_nodesShader, alpha);
+    _graphRenderer->_nodesShader.bind();
+    setShaderADSParameters(_graphRenderer->_nodesShader, alpha);
 
     _nodePositionBuffer.bind();
     _nodeVisualBuffer.bind();
 
     QMatrix3x3 normalMatrix = _modelViewMatrix.normalMatrix();
-    _shared->_nodesShader.setUniformValue("modelViewMatrix", _modelViewMatrix);
-    _shared->_nodesShader.setUniformValue("normalMatrix", normalMatrix);
-    _shared->_nodesShader.setUniformValue("projectionMatrix", _projectionMatrix);
+    _graphRenderer->_nodesShader.setUniformValue("modelViewMatrix", _modelViewMatrix);
+    _graphRenderer->_nodesShader.setUniformValue("normalMatrix", normalMatrix);
+    _graphRenderer->_nodesShader.setUniformValue("projectionMatrix", _projectionMatrix);
 
     // Draw the nodes
     _sphere.vertexArrayObject()->bind();
-    _funcs->glDrawElementsInstanced(GL_TRIANGLES, _sphere.indexCount(),
-                                    GL_UNSIGNED_INT, 0, _numNodesInPositionData);
+    glDrawElementsInstanced(GL_TRIANGLES, _sphere.indexCount(),
+                            GL_UNSIGNED_INT, 0, _numNodesInPositionData);
     _sphere.vertexArrayObject()->release();
 
     _nodeVisualBuffer.release();
     _nodePositionBuffer.release();
-    _shared->_nodesShader.release();
+    _graphRenderer->_nodesShader.release();
 }
 
 void GraphComponentRenderer::renderEdges(float alpha)
 {
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-    _funcs->glDrawBuffers(2, drawBuffers);
+    glDrawBuffers(2, drawBuffers);
 
-    _shared->_edgesShader.bind();
-    setShaderADSParameters(_shared->_edgesShader, alpha);
+    _graphRenderer->_edgesShader.bind();
+    setShaderADSParameters(_graphRenderer->_edgesShader, alpha);
 
     _edgePositionBuffer.bind();
     _edgeVisualBuffer.bind();
 
-    _shared->_edgesShader.setUniformValue("viewMatrix", _modelViewMatrix);
-    _shared->_edgesShader.setUniformValue("projectionMatrix", _projectionMatrix);
+    _graphRenderer->_edgesShader.setUniformValue("viewMatrix", _modelViewMatrix);
+    _graphRenderer->_edgesShader.setUniformValue("projectionMatrix", _projectionMatrix);
 
     // Draw the edges
     _cylinder.vertexArrayObject()->bind();
-    _funcs->glDrawElementsInstanced(GL_TRIANGLES, _cylinder.indexCount(),
-                                    GL_UNSIGNED_INT, 0, _numEdgesInPositionData);
+    glDrawElementsInstanced(GL_TRIANGLES, _cylinder.indexCount(),
+                            GL_UNSIGNED_INT, 0, _numEdgesInPositionData);
     _cylinder.vertexArrayObject()->release();
 
     _edgeVisualBuffer.release();
     _edgePositionBuffer.release();
-    _shared->_edgesShader.release();
+    _graphRenderer->_edgesShader.release();
 }
 
 void GraphComponentRenderer::renderDebugLines()
 {
     std::unique_lock<std::mutex> lock(_debugLinesMutex);
 
-    _funcs->glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
     _debugLinesDataBuffer.bind();
     _debugLinesDataBuffer.allocate(_debugLinesData.data(), static_cast<int>(_debugLinesData.size()) * sizeof(GLfloat));
 
-    _shared->_debugLinesShader.bind();
+    _graphRenderer->_debugLinesShader.bind();
 
     // Calculate needed matrices
-    _shared->_debugLinesShader.setUniformValue("modelViewMatrix", _modelViewMatrix);
-    _shared->_debugLinesShader.setUniformValue("projectionMatrix", _projectionMatrix);
+    _graphRenderer->_debugLinesShader.setUniformValue("modelViewMatrix", _modelViewMatrix);
+    _graphRenderer->_debugLinesShader.setUniformValue("projectionMatrix", _projectionMatrix);
 
     _debugLinesDataVAO.bind();
-    _funcs->glDrawArrays(GL_LINES, 0, static_cast<int>(_debugLines.size()) * 2);
+    glDrawArrays(GL_LINES, 0, static_cast<int>(_debugLines.size()) * 2);
     _debugLinesDataVAO.release();
-    _shared->_debugLinesShader.release();
+    _graphRenderer->_debugLinesShader.release();
     _debugLinesDataBuffer.release();
 
     clearDebugLines();
@@ -512,12 +500,12 @@ void GraphComponentRenderer::renderDebugLines()
 
 void GraphComponentRenderer::render2D()
 {
-    _funcs->glDisable(GL_DEPTH_TEST);
+    glDisable(GL_DEPTH_TEST);
 
     QMatrix4x4 m;
     m.ortho(0.0f, _viewportWidth, 0.0f, _viewportHeight, -1.0f, 1.0f);
 
-    _funcs->glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 }
 
 void GraphComponentRenderer::addDebugBoundingBox(const BoundingBox3D& boundingBox, const QColor color)
@@ -579,7 +567,7 @@ void GraphComponentRenderer::render(int x, int y, int width, int height, float a
     if(!_initialised)
         return;
 
-    if(!_shared->_FBOcomplete)
+    if(!_graphRenderer->_FBOcomplete)
     {
         qWarning() << "Attempting to render component" <<
                       _componentId << "without a complete FBO";
@@ -592,16 +580,16 @@ void GraphComponentRenderer::render(int x, int y, int width, int height, float a
     if(height <= 0)
         height = _viewportHeight;
 
-    _funcs->glEnable(GL_DEPTH_TEST);
-    _funcs->glEnable(GL_CULL_FACE);
-    _funcs->glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glDisable(GL_BLEND);
 
-    _funcs->glViewport(x, _viewportHeight - height - y, width, height);
-    _funcs->glBindFramebuffer(GL_FRAMEBUFFER, _shared->_visualFBO);
+    glViewport(x, _viewportHeight - height - y, width, height);
+    glBindFramebuffer(GL_FRAMEBUFFER, _graphRenderer->_visualFBO);
 
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-    _funcs->glDrawBuffers(2, drawBuffers);
-    _funcs->glClear(GL_DEPTH_BUFFER_BIT);
+    glDrawBuffers(2, drawBuffers);
+    glClear(GL_DEPTH_BUFFER_BIT);
 
     renderNodes(alpha);
     renderEdges(alpha);
@@ -642,9 +630,14 @@ void GraphComponentRenderer::resize(int viewportWidth, int viewportHeight,
     }
 }
 
+bool GraphComponentRenderer::transitionActive()
+{
+    return _graphRenderer->transition().active() || _zoomTransition.active();
+}
+
 void GraphComponentRenderer::zoom(float direction)
 {
-    if(direction == 0.0f || _graphWidget->transition().active())
+    if(direction == 0.0f || _graphRenderer->transition().active())
         return;
 
     // Don't allow zooming out if autozooming
@@ -679,7 +672,7 @@ void GraphComponentRenderer::zoom(float direction)
     if(visible())
     {
         if(!_zoomTransition.active())
-            _graphWidget->rendererStartedTransition();
+            _graphRenderer->rendererStartedTransition();
 
         _zoomTransition.start(0.1f, Transition::Type::Linear,
             [=](float f)
@@ -688,7 +681,7 @@ void GraphComponentRenderer::zoom(float direction)
             },
             [this]
             {
-                _graphWidget->rendererFinishedTransition();
+                _graphRenderer->rendererFinishedTransition();
             });
     }
     else
@@ -741,7 +734,7 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
 
     cameraDistance = Utils::clamp(MINIMUM_ZOOM_DISTANCE, _entireComponentZoomDistance, cameraDistance);
 
-    if(!_graphWidget->transition().active())
+    if(!_graphRenderer->transition().active())
     {
         _viewData._camera.setDistance(cameraDistance);
         _viewData._camera.setFocus(focus);
@@ -913,10 +906,10 @@ void GraphComponentRenderer::prepareNodeVAO()
     shader->setAttributeBuffer("color", GL_FLOAT, 1 * sizeof(GLfloat), 3, 7 * sizeof(GLfloat));
     shader->setAttributeBuffer("outlineColor", GL_FLOAT, 4 * sizeof(GLfloat), 3, 7 * sizeof(GLfloat));
 
-    _funcs->glVertexAttribDivisor(shader->attributeLocation("point"), 1);
-    _funcs->glVertexAttribDivisor(shader->attributeLocation("size"), 1);
-    _funcs->glVertexAttribDivisor(shader->attributeLocation("color"), 1);
-    _funcs->glVertexAttribDivisor(shader->attributeLocation("outlineColor"), 1);
+    glVertexAttribDivisor(shader->attributeLocation("point"), 1);
+    glVertexAttribDivisor(shader->attributeLocation("size"), 1);
+    glVertexAttribDivisor(shader->attributeLocation("color"), 1);
+    glVertexAttribDivisor(shader->attributeLocation("outlineColor"), 1);
 
     _nodeVisualBuffer.release();
     _nodePositionBuffer.release();
@@ -944,11 +937,11 @@ void GraphComponentRenderer::prepareEdgeVAO()
     shader->setAttributeBuffer("color", GL_FLOAT, 1 * sizeof(GLfloat), 3, 7 * sizeof(GLfloat));
     shader->setAttributeBuffer("outlineColor", GL_FLOAT, 4 * sizeof(GLfloat), 3, 7 * sizeof(GLfloat));
 
-    _funcs->glVertexAttribDivisor(shader->attributeLocation("source"), 1);
-    _funcs->glVertexAttribDivisor(shader->attributeLocation("target"), 1);
-    _funcs->glVertexAttribDivisor(shader->attributeLocation("size"), 1);
-    _funcs->glVertexAttribDivisor(shader->attributeLocation("color"), 1);
-    _funcs->glVertexAttribDivisor(shader->attributeLocation("outlineColor"), 1);
+    glVertexAttribDivisor(shader->attributeLocation("source"), 1);
+    glVertexAttribDivisor(shader->attributeLocation("target"), 1);
+    glVertexAttribDivisor(shader->attributeLocation("size"), 1);
+    glVertexAttribDivisor(shader->attributeLocation("color"), 1);
+    glVertexAttribDivisor(shader->attributeLocation("outlineColor"), 1);
 
     _edgeVisualBuffer.release();
     _edgePositionBuffer.release();
@@ -959,15 +952,15 @@ void GraphComponentRenderer::prepareEdgeVAO()
 void GraphComponentRenderer::prepareDebugLinesVAO()
 {
     _debugLinesDataVAO.bind();
-    _shared->_debugLinesShader.bind();
+    _graphRenderer->_debugLinesShader.bind();
     _debugLinesDataBuffer.bind();
 
-    _shared->_debugLinesShader.enableAttributeArray("position");
-    _shared->_debugLinesShader.enableAttributeArray("color");
-    _shared->_debugLinesShader.setAttributeBuffer("position", GL_FLOAT, 0, 3, 6 * sizeof(GLfloat));
-    _shared->_debugLinesShader.setAttributeBuffer("color", GL_FLOAT, 3 * sizeof(GLfloat), 3, 6 * sizeof(GLfloat));
+    _graphRenderer->_debugLinesShader.enableAttributeArray("position");
+    _graphRenderer->_debugLinesShader.enableAttributeArray("color");
+    _graphRenderer->_debugLinesShader.setAttributeBuffer("position", GL_FLOAT, 0, 3, 6 * sizeof(GLfloat));
+    _graphRenderer->_debugLinesShader.setAttributeBuffer("color", GL_FLOAT, 3 * sizeof(GLfloat), 3, 6 * sizeof(GLfloat));
 
     _debugLinesDataBuffer.release();
     _debugLinesDataVAO.release();
-    _shared->_debugLinesShader.release();
+    _graphRenderer->_debugLinesShader.release();
 }

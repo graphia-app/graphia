@@ -17,6 +17,7 @@
 
 class Graph;
 
+//FIXME rename this FileParser? files not necessarily graphs
 class GraphFileParser : public QObject
 {
     Q_OBJECT

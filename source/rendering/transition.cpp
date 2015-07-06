@@ -16,7 +16,7 @@ Transition::Transition() :
 bool Transition::update(float time)
 {
     if(!active())
-        return true;
+        return false;
 
     if(_lastTime <= 0.0f)
         _lastTime = time;
@@ -53,9 +53,9 @@ bool Transition::update(float time)
         for(auto finishedFunction : _finishedFunctions)
             finishedFunction();
 
-        return true;
+        return false;
     }
 
-    return false;
+    return true;
 }
 

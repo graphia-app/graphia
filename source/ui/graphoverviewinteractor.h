@@ -1,5 +1,5 @@
-#ifndef GRAPHINTERACTOR_H
-#define GRAPHINTERACTOR_H
+#ifndef GRAPHOVERVIEWINTERACTOR_H
+#define GRAPHOVERVIEWINTERACTOR_H
 
 #include "graphcommoninteractor.h"
 
@@ -9,17 +9,17 @@ class GraphModel;
 class GraphOverviewScene;
 class CommandManager;
 class SelectionManager;
-class GraphWidget;
+class GraphQuickItem;
 
 class GraphOverviewInteractor : public GraphCommonInteractor
 {
     Q_OBJECT
 public:
     GraphOverviewInteractor(std::shared_ptr<GraphModel> graphModel,
-                    GraphOverviewScene* graphOverviewScene,
-                    CommandManager& commandManager,
-                    std::shared_ptr<SelectionManager> selectionManager,
-                    GraphWidget* graphWidget = nullptr);
+                            GraphOverviewScene* graphOverviewScene,
+                            CommandManager& commandManager,
+                            std::shared_ptr<SelectionManager> selectionManager,
+                            GraphRenderer* graphRenderer);
 
 private:
     GraphOverviewScene* _scene;
@@ -34,4 +34,4 @@ private:
     ElementIdSet<NodeId> selectionForRect(const QRect& rect);
 };
 
-#endif // GRAPHINTERACTOR_H
+#endif // GRAPHOVERVIEWINTERACTOR_H

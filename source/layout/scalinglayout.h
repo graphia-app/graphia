@@ -3,7 +3,7 @@
 
 #include "layout.h"
 
-class ScalingLayout : public NodeLayout
+class ScalingLayout : public Layout
 {
     Q_OBJECT
 private:
@@ -12,7 +12,7 @@ private:
 public:
     ScalingLayout(const ImmutableGraph& graph,
                   NodePositions& positions) :
-        NodeLayout(graph, positions), _scale(1.0f)
+        Layout(graph, positions), _scale(1.0f)
     {}
 
     void setScale(float _scale) { this->_scale = _scale; }

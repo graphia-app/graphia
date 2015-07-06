@@ -2,7 +2,7 @@
 #define GRAPHARRAY_H
 
 #include "graph.h"
-#include "componentmanager.h"
+#include "abstractcomponentmanager.h"
 
 #include <QObject>
 

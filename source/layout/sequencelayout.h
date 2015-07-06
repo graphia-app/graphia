@@ -6,44 +6,44 @@
 #include <vector>
 #include <memory>
 
-class SequenceLayout : public NodeLayout
+class SequenceLayout : public Layout
 {
     Q_OBJECT
 private:
-    std::vector<NodeLayout*> _subLayouts;
+    std::vector<Layout*> _subLayouts;
 
 public:
     SequenceLayout(const ImmutableGraph& graph,
                    NodePositions& positions) :
-        NodeLayout(graph, positions)
+        Layout(graph, positions)
     {}
 
     SequenceLayout(const ImmutableGraph& graph,
                    NodePositions& positions,
-                   std::vector<NodeLayout*> subLayouts) :
-        NodeLayout(graph, positions), _subLayouts(subLayouts)
+                   std::vector<Layout*> subLayouts) :
+        Layout(graph, positions), _subLayouts(subLayouts)
     {}
 
     virtual ~SequenceLayout()
     {}
 
-    void addSubLayout(NodeLayout* layout) { _subLayouts.push_back(layout); }
+    void addSubLayout(Layout* layout) { _subLayouts.push_back(layout); }
 
     void cancel()
     {
-        for(NodeLayout* subLayout : _subLayouts)
+        for(auto subLayout : _subLayouts)
             subLayout->cancel();
     }
 
     void uncancel()
     {
-        for(NodeLayout* subLayout : _subLayouts)
+        for(auto subLayout : _subLayouts)
             subLayout->uncancel();
     }
 
     bool shouldPause()
     {
-        for(NodeLayout* subLayout : _subLayouts)
+        for(auto subLayout : _subLayouts)
         {
             if(!subLayout->shouldPause())
                 return false;
@@ -54,7 +54,7 @@ public:
 
     bool iterative()
     {
-        for(NodeLayout* subLayout : _subLayouts)
+        for(auto subLayout : _subLayouts)
         {
             if(subLayout->iterative())
                 return true;
@@ -65,7 +65,7 @@ public:
 
     void executeReal(uint64_t iteration)
     {
-        for(NodeLayout* subLayout : _subLayouts)
+        for(auto subLayout : _subLayouts)
             subLayout->execute(iteration);
     }
 };

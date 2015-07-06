@@ -5,13 +5,11 @@
 
 #include <memory>
 
-class QOpenGLContext;
-
 class Scene : public QObject
 {
     Q_OBJECT
 
-    friend class OpenGLWindow;
+    friend class GraphRenderer;
 
 public:
     Scene(QObject* parent = nullptr) :
@@ -21,9 +19,6 @@ public:
         _visible(false)
     {}
     virtual ~Scene() {}
-
-    void setContext(std::shared_ptr<QOpenGLContext> context) { _context = context; }
-    const QOpenGLContext& context() const { return *_context; }
 
     bool initialised() { return _initialised; }
     void setInitialised() { _initialised = true; }
@@ -36,7 +31,9 @@ public:
     virtual void cleanup() {}
     virtual void update(float t) = 0;
     virtual void render() = 0;
-    virtual void resize(int width, int height) = 0;
+    virtual void setSize(int width, int height) = 0;
+
+    virtual bool transitionActive() = 0;
 
     virtual void onShow() {}
     virtual void onHide() {}
@@ -48,7 +45,6 @@ private:
     bool _interactionEnabled;
     bool _initialised;
     bool _visible;
-    std::shared_ptr<QOpenGLContext> _context;
 
     void setVisible(bool visible) { _visible = visible; }
 };

@@ -16,12 +16,9 @@
 
 class ResizableGraphArray;
 class GraphComponent;
-class ComponentManager;
+class AbstractComponentManager;
 class ComponentSplitSet;
 class ComponentMergeSet;
-
-template<typename T> class ElementId;
-template<typename T> QDebug operator<<(QDebug d, const ElementId<T>& id);
 
 template<typename T> class ElementId
 {
@@ -78,8 +75,6 @@ public:
         _value = NullValue;
     }
 
-    friend QDebug operator<< <T>(QDebug d, const ElementId<T>& id);
-
     operator QString()
     {
         if(isNull())
@@ -94,7 +89,7 @@ template<typename T> QDebug operator<<(QDebug d, const ElementId<T>& id)
     if(id.isNull())
         d << "Null";
     else
-        d << id._value;
+        d << (int)id;
 
     return d;
 }
@@ -291,7 +286,7 @@ private:
     int edgeArrayCapacity() const { return _lastEdgeId; }
 
     template<typename> friend class ComponentArray;
-    std::unique_ptr<ComponentManager> _componentManager;
+    std::unique_ptr<AbstractComponentManager> _componentManager;
 
     void updateElementIdData();
 
@@ -323,12 +318,11 @@ public:
     void removeEdges(const ElementIdSet<EdgeId>& edgeIds);
 
     const std::vector<ComponentId>& componentIds() const;
-    ComponentId firstComponentId() const { return *componentIds().begin(); }
     int numComponents() const;
     const ImmutableGraph* componentById(ComponentId componentId) const;
-    const ImmutableGraph* firstComponent() const { return componentById(firstComponentId()); }
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
+    ComponentId largestComponentId() const;
 
     const ElementIdSet<EdgeId> edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds);
     const std::vector<Edge> edgesForNodes(const ElementIdSet<NodeId>& nodeIds);

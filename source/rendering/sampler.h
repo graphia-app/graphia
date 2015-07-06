@@ -8,6 +8,7 @@ class QOpenGLFunctions_3_3_Core;
 
 class SamplerPrivate;
 
+//FIXME remove
 class Sampler
 {
 public:

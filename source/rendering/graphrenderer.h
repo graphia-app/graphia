@@ -1,36 +1,113 @@
 #ifndef GRAPHRENDERER_H
 #define GRAPHRENDERER_H
 
+#include "opengldebuglogger.h"
+#include "openglfunctions.h"
+#include "graphcomponentrenderer.h"
+#include "transition.h"
+
+#include "../graph/grapharray.h"
+
+#include "../utils/movablepointer.h"
+#include "../utils/deferredexecutor.h"
+
+#include <QObject>
+#include <QTime>
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
+#include <QQuickFramebufferObject>
 
-class GraphWidget;
-class QOpenGLContext;
-class QOpenGLFunctions_3_3_Core;
+#include <functional>
+#include <memory>
 
-class GraphRenderer
+class GraphQuickItem;
+class GraphModel;
+class CommandManager;
+class SelectionManager;
+class QOpenGLDebugMessage;
+
+class Scene;
+class GraphOverviewScene;
+class GraphComponentScene;
+
+class Interactor;
+class GraphOverviewInteractor;
+class GraphComponentInteractor;
+
+class Command;
+
+class GraphRenderer :
+        public QObject,
+        protected OpenGLFunctions,
+        public QQuickFramebufferObject::Renderer
 {
+    Q_OBJECT
+
     friend class GraphComponentRenderer;
 
 public:
-    GraphRenderer(GraphWidget* graphWidget, const QOpenGLContext& context);
+    GraphRenderer(std::shared_ptr<GraphModel> graphModel,
+                  CommandManager& commandManager,
+                  std::shared_ptr<SelectionManager> selectionManager);
     virtual ~GraphRenderer();
 
-    static const int NUM_MULTISAMPLES = 4;
+    static const int NUM_MULTISAMPLES = 4; //FIXME pass to screen.frag
 
-    void resize(int width, int height);
+    ComponentArray<MovablePointer<GraphComponentRenderer>>& componentRenderers() { return _componentRenderers; }
+    GraphComponentRenderer* componentRendererForId(ComponentId componentId);
+    Transition& transition() { return _transition; }
 
-    void clear();
-    void render();
+    std::shared_ptr<GraphModel> graphModel() { return _graphModel; }
 
-    void setSelectionRect(const QRect& rect) { _selectionRect = rect; }
+    QRect selectionRect() { return _selectionRect; }
+    void setSelectionRect(const QRect& selectionRect) { _selectionRect = selectionRect; }
     void clearSelectionRect() { _selectionRect = QRect(); }
 
+    void resetView();
+    bool viewIsReset() const;
+
+    void switchToOverviewMode(bool doTransition = true);
+    void switchToComponentMode(bool doTransition = true, ComponentId componentId = ComponentId());
+    void rendererStartedTransition();
+    void rendererFinishedTransition();
+    void executeOnRendererThread(DeferredExecutor::TaskFn task, const QString& description);
+
+private slots:
+    void onGraphChanged(const Graph* graph);
+    void onComponentAdded(const Graph*, ComponentId componentId, bool);
+    void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
+    void onSelectionChanged(const SelectionManager*);
+
+public slots:
+    void onCommandWillExecuteAsynchronously();
+    void onCommandCompleted(const Command*, const QString&);
+
 private:
-    GraphWidget* _graphWidget;
-    const QOpenGLContext* _context;
-    QOpenGLFunctions_3_3_Core* _funcs;
+    std::shared_ptr<GraphModel> _graphModel;
+    std::shared_ptr<SelectionManager> _selectionManager;
+
+    ComponentArray<MovablePointer<GraphComponentRenderer>> _componentRenderers;
+    int _numTransitioningRenderers;
+    DeferredExecutor _preUpdateExecutor;
+
+    enum class Mode
+    {
+        Overview,
+        Component
+    };
+
+    Mode _mode;
+
+    Scene* _scene;
+    GraphOverviewScene* _graphOverviewScene;
+    GraphComponentScene* _graphComponentScene;
+
+    Interactor* _interactor;
+    GraphOverviewInteractor* _graphOverviewInteractor;
+    GraphComponentInteractor* _graphComponentInteractor;
+
+    OpenGLDebugLogger _openGLDebugLogger;
 
     QOpenGLShaderProgram _screenShader;
     QOpenGLShaderProgram _selectionShader;
@@ -43,6 +120,7 @@ private:
 
     int _width;
     int _height;
+    bool _resized;
 
     GLuint _colorTexture;
     GLuint _selectionTexture;
@@ -58,11 +136,45 @@ private:
 
     QRect _selectionRect;
 
+    QTime _time;
+    bool _sceneUpdateEnabled;
+
+    bool _modeTransitionInProgress;
+
+    Transition _transition;
+
     bool prepareRenderBuffers(int width, int height);
     void prepareSelectionMarkerVAO();
     void prepareQuad();
 
+    void resize(int width, int height);
+
+    void clear();
+    void finishRender();
+    void renderScene();
     void render2D();
+
+    QOpenGLFramebufferObject* createFramebufferObject(const QSize &size);
+    void render();
+    void synchronize(QQuickFramebufferObject* item);
+
+    std::function<void()> resetOpenGLState;
+
+    void finishTransitionToOverviewMode();
+    void finishTransitionToComponentMode();
+    void setScene(Scene* scene);
+    void setInteractor(Interactor* interactor) { _interactor = interactor; }
+
+    Mode mode() const;
+    void setMode(Mode mode);
+
+signals:
+    void modeChanged() const;
+
+    void userInteractionStarted() const;
+    void userInteractionFinished() const;
+
+    void taskAddedToExecutor() const;
 };
 
 #endif // GRAPHRENDERER_H

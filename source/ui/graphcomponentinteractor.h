@@ -11,7 +11,7 @@
 class GraphModel;
 class CommandManager;
 class SelectionManager;
-class GraphWidget;
+class GraphQuickItem;
 
 class GraphComponentInteractor : public GraphCommonInteractor
 {
@@ -21,7 +21,7 @@ public:
                              GraphComponentScene* graphComponentScene,
                              CommandManager& commandManager,
                              std::shared_ptr<SelectionManager> selectionManager,
-                             GraphWidget* graphWidget = nullptr);
+                             GraphRenderer* graphRenderer);
 
 private:
     GraphComponentScene* _scene;

@@ -9,6 +9,7 @@ class QOpenGLFunctions;
 
 class TexturePrivate;
 
+//FIXME remove
 class Texture
 {
 public:

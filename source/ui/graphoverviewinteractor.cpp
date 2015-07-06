@@ -1,20 +1,23 @@
 #include "graphoverviewinteractor.h"
-#include "graphwidget.h"
+#include "graphquickitem.h"
 
 #include "selectionmanager.h"
 #include "../commands/commandmanager.h"
+
+#include "../rendering/graphrenderer.h"
 #include "../rendering/graphoverviewscene.h"
+
 #include "../graph/graphmodel.h"
 
 #include <QMouseEvent>
 #include <QWheelEvent>
 
 GraphOverviewInteractor::GraphOverviewInteractor(std::shared_ptr<GraphModel> graphModel,
-                                 GraphOverviewScene* graphOverviewScene,
-                                 CommandManager& commandManager,
-                                 std::shared_ptr<SelectionManager> selectionManager,
-                                 GraphWidget* graphWidget) :
-    GraphCommonInteractor(graphModel, commandManager, selectionManager, graphWidget),
+                                                 GraphOverviewScene* graphOverviewScene,
+                                                 CommandManager& commandManager,
+                                                 std::shared_ptr<SelectionManager> selectionManager,
+                                                 GraphRenderer* graphRenderer) :
+    GraphCommonInteractor(graphModel, commandManager, selectionManager, graphRenderer),
     _scene(graphOverviewScene)
 {
 }
@@ -29,7 +32,7 @@ void GraphOverviewInteractor::leftDoubleClick()
 
         if(layoutData._rect.contains(cursorPosition()))
         {
-            _graphWidget->switchToComponentMode(componentId);
+            _graphRenderer->switchToComponentMode(true, componentId);
             break;
         }
     }
@@ -54,7 +57,7 @@ GraphComponentRenderer* GraphOverviewInteractor::rendererAtPosition(const QPoint
         auto& layoutData = componentLayout[componentId];
 
         if(layoutData._rect.contains(pos))
-            return _scene->rendererForComponentId(componentId);
+            return _graphRenderer->componentRendererForId(componentId);
     }
 
     return nullptr;
@@ -81,7 +84,7 @@ ElementIdSet<NodeId> GraphOverviewInteractor::selectionForRect(const QRect& rect
 
         if(rect.intersects((layoutData._rect)))
         {
-            auto renderer = _scene->rendererForComponentId(componentId);
+            auto renderer = _graphRenderer->componentRendererForId(componentId);
             auto subRect = rect.intersected(layoutData._rect).translated(-layoutData._rect.topLeft());
 
             Frustum frustum = renderer->camera()->frustumForViewportCoordinates(

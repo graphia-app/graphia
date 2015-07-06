@@ -2,7 +2,8 @@
 #define GRAPHOVERVIEWSCENE_H
 
 #include "scene.h"
-#include "graphcomponentrenderersreference.h"
+#include "openglfunctions.h"
+#include "transition.h"
 
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
@@ -13,21 +14,24 @@
 
 #include <QRect>
 
-class GraphWidget;
+class GraphRenderer;
 class GraphModel;
-class QOpenGLFunctions_3_3_Core;
 
-class GraphOverviewScene : public Scene, public GraphComponentRenderersReference
+class GraphOverviewScene :
+        public Scene,
+        protected OpenGLFunctions
 {
     Q_OBJECT
 
 public:
-    GraphOverviewScene(GraphWidget* graphWidget);
+    GraphOverviewScene(GraphRenderer* graphRenderer);
 
     void initialise();
     void update(float t);
     void render();
-    void resize(int width, int height);
+    void setSize(int width, int height);
+
+    bool transitionActive();
 
     void onShow();
     void onHide();
@@ -58,7 +62,7 @@ public:
                                         std::function<void()> finishedFunction = []{});
 
 private:
-    GraphWidget* _graphWidget;
+    GraphRenderer* _graphRenderer;
     std::shared_ptr<GraphModel> _graphModel;
 
     int _width;
@@ -67,13 +71,11 @@ private:
     int _renderSizeDivisor;
     ComponentArray<int> _renderSizeDivisors;
 
-    QOpenGLFunctions_3_3_Core* _funcs;
-
     ComponentArray<LayoutData> _previousComponentLayout;
     ComponentArray<LayoutData> _componentLayout;
-    void layoutComponents();
+    void layoutComponents(const std::vector<ComponentId> &componentIds);
 
-    std::vector<ComponentId> _transitionComponentIds;
+    std::vector<ComponentId> _removedComponentIds;
     std::vector<ComponentSplitSet> _componentSplitSets;
     std::vector<ComponentMergeSet> _componentMergeSets;
     void startTransition(float duration = 1.0f,
@@ -82,6 +84,8 @@ private:
 
     std::vector<ComponentId> _cachedComponentIds;
     std::mutex _cachedComponentIdsMutex;
+
+    void executeOnCachedComponentIdsIfNecessary(std::function<void (const std::vector<ComponentId> &)> f);
 
 private slots:
     void onGraphWillChange(const Graph* graph);

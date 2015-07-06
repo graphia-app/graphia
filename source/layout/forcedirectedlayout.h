@@ -11,7 +11,7 @@
 
 #include <vector>
 
-class ForceDirectedLayout : public NodeLayout
+class ForceDirectedLayout : public Layout
 {
     Q_OBJECT
 private:
@@ -22,7 +22,7 @@ private:
 public:
     ForceDirectedLayout(const ImmutableGraph& graph,
                         NodePositions& positions) :
-        NodeLayout(graph, positions, Iterative::Yes),
+        Layout(graph, positions, Iterative::Yes),
         _prevDisplacements(graph.numNodes()),
         _displacements(graph.numNodes())
     {}
@@ -30,14 +30,14 @@ public:
     void executeReal(uint64_t iteration);
 };
 
-class ForceDirectedLayoutFactory : public NodeLayoutFactory
+class ForceDirectedLayoutFactory : public LayoutFactory
 {
 public:
     ForceDirectedLayoutFactory(std::shared_ptr<GraphModel> graphModel) :
-        NodeLayoutFactory(graphModel)
+        LayoutFactory(graphModel)
     {}
 
-    std::shared_ptr<NodeLayout> create(ComponentId componentId) const
+    std::shared_ptr<Layout> create(ComponentId componentId) const
     {
         auto component = this->_graphModel->graph().componentById(componentId);
         return std::make_shared<ForceDirectedLayout>(*component, this->_graphModel->nodePositions());

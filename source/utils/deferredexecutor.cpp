@@ -1,5 +1,6 @@
 #include "deferredexecutor.h"
 
+#include "../utils/namethread.h"
 #include "../utils/utils.h"
 
 #include <QDebug>
@@ -24,8 +25,8 @@ void DeferredExecutor::enqueue(TaskFn function, const QString& description)
     task._function = function;
     task._description = description;
 
-    if(_debug)
-        qDebug() << "enqueue(...) thread ID:" << Utils::currentThreadId() << description;
+    if(_debug > 1)
+        qDebug() << "enqueue(...) thread:" << currentThreadName() << description;
 
     _tasks.emplace_back(task);
 }
@@ -34,22 +35,19 @@ void DeferredExecutor::execute()
 {
     std::unique_lock<std::recursive_mutex> lock(_mutex);
 
-    if(!_tasks.empty() && _debug)
+    if(!_tasks.empty() && _debug > 0)
     {
-        qDebug() << "execute() thread ID" << Utils::currentThreadId();
-        qDebug() << "[";
+        qDebug() << "execute() thread" << currentThreadName();
 
         for(auto task : _tasks)
-            qDebug() << task._description;
-
-        qDebug() << "]";
+            qDebug() << "\t" << task._description;
     }
 
     while(!_tasks.empty())
     {
         auto task = _tasks.front();
 
-        if(_debug)
+        if(_debug > 2)
             qDebug() << "Executing" << task._description;
 
         _executing = true;

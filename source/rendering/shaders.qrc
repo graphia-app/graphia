@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <file>shaders/instancednodes.vert</file>
+        <file>shaders/ads.frag</file>
+        <file>shaders/instancededges.vert</file>
+        <file>shaders/instancedmarkers.vert</file>
+        <file>shaders/marker.frag</file>
+        <file>shaders/debuglines.frag</file>
+        <file>shaders/debuglines.vert</file>
+        <file>shaders/screen.frag</file>
+        <file>shaders/screen.vert</file>
+        <file>shaders/selection.frag</file>
+        <file>shaders/selectionMarker.frag</file>
+        <file>shaders/2d.vert</file>
+    </qresource>
+</RCC>

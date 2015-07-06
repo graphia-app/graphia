@@ -44,6 +44,8 @@ public:
 
 protected:
     Iterative _iterative;
+    const ImmutableGraph& _graph;
+    NodePositions& _positions;
 
     bool shouldCancel()
     {
@@ -51,10 +53,14 @@ protected:
     }
 
 public:
-    Layout(Iterative iterative) :
+    Layout(const ImmutableGraph& graph,
+           NodePositions& positions,
+           Iterative iterative = Iterative::No) :
         QObject(),
         _atomicCancel(false),
-        _iterative(iterative)
+        _iterative(iterative),
+        _graph(graph),
+        _positions(positions)
     {}
 
     void execute(int iteration)
@@ -81,43 +87,30 @@ signals:
     void progress(int percentage);
 };
 
-class NodeLayout : public Layout
-{
-    Q_OBJECT
-protected:
-    const ImmutableGraph& _graph;
-    NodePositions& _positions;
-
-public:
-    NodeLayout(const ImmutableGraph& graph,
-               NodePositions& positions,
-               Iterative iterative = Iterative::No) :
-        Layout(iterative),
-        _graph(graph),
-        _positions(positions)
-    {}
-};
-
 class GraphModel;
 
-class NodeLayoutFactory
+class LayoutFactory
 {
 protected:
     std::shared_ptr<GraphModel> _graphModel;
 
 public:
-    NodeLayoutFactory(std::shared_ptr<GraphModel> graphModel) :
+    LayoutFactory(std::shared_ptr<GraphModel> graphModel) :
         _graphModel(graphModel)
     {}
-    virtual ~NodeLayoutFactory() {}
+    virtual ~LayoutFactory() {}
 
-    virtual std::shared_ptr<NodeLayout> create(ComponentId componentId) const = 0;
+    virtual std::shared_ptr<Layout> create(ComponentId componentId) const = 0;
 };
 
 class LayoutThread : public QObject
 {
     Q_OBJECT
-protected:
+
+    Q_PROPERTY(bool paused READ paused NOTIFY pausedChanged)
+
+private:
+    const Graph* _graph;
     std::set<std::shared_ptr<Layout>> _layouts;
     std::mutex _mutex;
     std::thread _thread;
@@ -130,10 +123,15 @@ protected:
     std::condition_variable _waitForPause;
     std::condition_variable _waitForResume;
 
-public:
-    LayoutThread(bool repeating = false);
+    std::unique_ptr<const LayoutFactory> _layoutFactory;
+    std::map<ComponentId, std::shared_ptr<Layout>> _componentLayouts;
 
-    LayoutThread(std::shared_ptr<Layout> layout, bool repeating = false);
+    PerformanceCounter _performanceCounter;
+
+public:
+    LayoutThread(const Graph& graph,
+                 std::unique_ptr<const LayoutFactory> layoutFactory,
+                 bool repeating = false);
 
     virtual ~LayoutThread()
     {
@@ -154,34 +152,26 @@ public:
     void start();
     void stop();
 
+    void addAllComponents();
+
 private:
     bool iterative();
     bool allLayoutsShouldPause();
     void uncancel();
     void run();
 
-    PerformanceCounter _performanceCounter;
+    void addComponent(ComponentId componentId);
+    void removeComponent(ComponentId componentId);
+
+private slots:
+    void onComponentAdded(const Graph*, ComponentId componentId, bool);
+    void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
+    void onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet);
+    void onComponentsWillMerge(const Graph*, const ComponentMergeSet& componentMergeSet);
 
 signals:
     void executed();
-};
-
-class NodeLayoutThread : public LayoutThread
-{
-    Q_OBJECT
-private:
-    std::unique_ptr<const NodeLayoutFactory> _layoutFactory;
-    std::map<ComponentId, std::shared_ptr<Layout>> _componentLayouts;
-
-public:
-    NodeLayoutThread(std::unique_ptr<const NodeLayoutFactory> layoutFactory) :
-        LayoutThread(),
-        _layoutFactory(std::move(layoutFactory))
-    {}
-
-    void addComponent(ComponentId componentId);
-    void addAllComponents(const Graph& graph);
-    void removeComponent(ComponentId componentId);
+    void pausedChanged();
 };
 
 #endif // LAYOUT_H

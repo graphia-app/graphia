@@ -7,7 +7,8 @@
 
 CommandManager::CommandManager() :
     _lastExecutedIndex(-1),
-    _busy(false)
+    _busy(false),
+    _commandProgress(0)
 {
     connect(this, &CommandManager::commandCompleted, this, &CommandManager::onCommandCompleted);
 }
@@ -18,7 +19,7 @@ void CommandManager::executeReal(std::shared_ptr<Command> command)
     auto commandPtr = command.get();
 
     lock.setPostUnlockAction([this, commandPtr] { _busy = false; emit commandCompleted(commandPtr, commandPtr->pastParticiple()); });
-    command->setProgressFn([this, commandPtr](int progress) { emit commandProgress(commandPtr, progress); });
+    command->setProgressFn([this, commandPtr](int progress) { _commandProgress = progress; emit commandProgressChanged(); });
 
     // It seems counter-intuitive that the lock is passed by reference here since in the
     // asynchronous case at face value the lock is getting move'd to the argument of
@@ -28,7 +29,8 @@ void CommandManager::executeReal(std::shared_ptr<Command> command)
     // also invokes the lock's destructor, so it all works out.
     auto executeCommand = [this](const unique_lock_with_side_effects<std::mutex>& lock, std::shared_ptr<Command> command)
     {
-        nameCurrentThread(command->description());
+        if(command->asynchronous())
+            nameCurrentThread(command->description());
 
         if(!command->execute())
         {
@@ -45,9 +47,15 @@ void CommandManager::executeReal(std::shared_ptr<Command> command)
     };
 
     _busy = true;
+    emit busyChanged();
+
     if(command->asynchronous())
     {
-        emit commandWillExecuteAsynchronously(commandPtr, command->verb());
+        _commandProgress = -1;
+        _commandVerb = command->verb();
+        emit commandProgressChanged();
+        emit commandVerbChanged();
+        emit commandWillExecuteAsynchronously();
         _thread = std::thread(executeCommand, std::move(lock), command);
     }
     else
@@ -67,16 +75,21 @@ void CommandManager::undo()
 
     auto undoCommand = [this, command](const unique_lock_with_side_effects<std::mutex>& /*lock*/)
     {
-        nameCurrentThread("(u) " + command->description());
+        if(command->asynchronous())
+            nameCurrentThread("(u) " + command->description());
 
         command->undo();
         _lastExecutedIndex--;
     };
 
     _busy = true;
+    emit busyChanged();
+
     if(command->asynchronous())
     {
-        emit commandWillExecuteAsynchronously(commandPtr, command->undoVerb());
+        _commandVerb = command->undoVerb();
+        emit commandVerbChanged();
+        emit commandWillExecuteAsynchronously();
         _thread = std::thread(undoCommand, std::move(lock));
     }
     else
@@ -96,15 +109,20 @@ void CommandManager::redo()
 
     auto redoCommand = [this, command](const unique_lock_with_side_effects<std::mutex>& /*lock*/)
     {
-        nameCurrentThread("(r) " + command->description());
+        if(command->asynchronous())
+            nameCurrentThread("(r) " + command->description());
 
         command->execute();
     };
 
     _busy = true;
+    emit busyChanged();
+
     if(command->asynchronous())
     {
-        emit commandWillExecuteAsynchronously(commandPtr, command->redoVerb());
+        _commandVerb = command->redoVerb();
+        emit commandVerbChanged();
+        emit commandWillExecuteAsynchronously();
         _thread = std::thread(redoCommand, std::move(lock));
     }
     else
@@ -159,7 +177,7 @@ const std::vector<QString> CommandManager::redoableCommandDescriptions() const
     return commandDescriptions;
 }
 
-const QString CommandManager::nextUndoAction() const
+QString CommandManager::nextUndoAction() const
 {
     std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
 
@@ -169,10 +187,10 @@ const QString CommandManager::nextUndoAction() const
         return command->undoDescription();
     }
 
-    return QString();
+    return tr("Undo");
 }
 
-const QString CommandManager::nextRedoAction() const
+QString CommandManager::nextRedoAction() const
 {
     std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
 
@@ -182,7 +200,7 @@ const QString CommandManager::nextRedoAction() const
         return command->redoDescription();
     }
 
-    return QString();
+    return tr("Redo");
 }
 
 bool CommandManager::busy() const
@@ -205,4 +223,6 @@ void CommandManager::onCommandCompleted(const Command*, const QString&)
     // If the command executed asynchronously, we need to join its thread
     if(_thread.joinable())
         _thread.join();
+
+    emit busyChanged();
 }

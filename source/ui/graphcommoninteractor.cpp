@@ -1,9 +1,10 @@
 #include "graphcommoninteractor.h"
 #include "selectionmanager.h"
-#include "graphwidget.h"
+#include "graphquickitem.h"
 
 #include "../commands/commandmanager.h"
 
+#include "../rendering/graphrenderer.h"
 #include "../rendering/graphcomponentscene.h"
 #include "../rendering/graphcomponentrenderer.h"
 #include "../rendering/camera.h"
@@ -66,14 +67,14 @@ static NodeId nodeIdInsideFrustumNearestPoint(const GraphModel& graphModel,
 }
 
 GraphCommonInteractor::GraphCommonInteractor(std::shared_ptr<GraphModel> graphModel,
-                                             CommandManager &commandManager,
+                                             CommandManager& commandManager,
                                              std::shared_ptr<SelectionManager> selectionManager,
-                                             GraphWidget *graphWidget) :
-    Interactor(graphWidget),
+                                             GraphRenderer* graphRenderer) :
+    Interactor(graphRenderer),
     _graphModel(graphModel),
     _commandManager(commandManager),
     _selectionManager(selectionManager),
-    _graphWidget(graphWidget),
+    _graphRenderer(graphRenderer),
     _rightMouseButtonHeld(false),
     _leftMouseButtonHeld(false),
     _selecting(false),
@@ -81,7 +82,10 @@ GraphCommonInteractor::GraphCommonInteractor(std::shared_ptr<GraphModel> graphMo
     _mouseMoving(false),
     _clickedRenderer(nullptr),
     _rendererUnderCursor(nullptr)
-{}
+{
+    connect(this, &Interactor::userInteractionStarted, graphRenderer, &GraphRenderer::userInteractionStarted);
+    connect(this, &Interactor::userInteractionFinished, graphRenderer, &GraphRenderer::userInteractionFinished);
+}
 
 void GraphCommonInteractor::mousePressEvent(QMouseEvent* mouseEvent)
 {
@@ -161,7 +165,7 @@ void GraphCommonInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
 {
     _rendererUnderCursor = rendererAtPosition(mouseEvent->pos());
 
-    if(_graphWidget->transition().active())
+    if(_graphRenderer->transition().active())
         return;
 
     _cursorPosition = mouseEvent->pos();
@@ -219,7 +223,7 @@ void GraphCommonInteractor::leftMouseDown()
 
 void GraphCommonInteractor::leftMouseUp()
 {
-    if(_graphWidget->transition().active())
+    if(_graphRenderer->transition().active())
         return;
 
     emit userInteractionFinished();
@@ -243,7 +247,7 @@ void GraphCommonInteractor::leftMouseUp()
 
             _frustumSelectStart = QPoint();
             _frustumSelecting = false;
-            _graphWidget->clearSelectionRect();
+            _graphRenderer->clearSelectionRect();
         }
         else
         {
@@ -349,14 +353,14 @@ void GraphCommonInteractor::leftDrag()
                 _frustumSelectStart = cursorPosition();
         }
 
-        _graphWidget->setSelectionRect(QRect(_frustumSelectStart, cursorPosition()).normalized());
+        _graphRenderer->setSelectionRect(QRect(_frustumSelectStart, cursorPosition()).normalized());
     }
     else if(_frustumSelecting)
     {
         // Shift key has been released
         _frustumSelectStart = QPoint();
         _frustumSelecting = false;
-        _graphWidget->clearSelectionRect();
+        _graphRenderer->clearSelectionRect();
 
         emit userInteractionFinished();
     }
