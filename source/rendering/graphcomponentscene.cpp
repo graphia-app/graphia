@@ -133,7 +133,7 @@ void GraphComponentScene::startTransition(float duration, Transition::Type trans
     finishedFunction);
 }
 
-void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet)
+void GraphComponentScene::onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet)
 {
     if(!visible())
         return;
@@ -141,23 +141,7 @@ void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSp
     auto oldComponentId = componentSplitSet.oldComponentId();
     if(oldComponentId == _componentId)
     {
-        ComponentId largestSplitter;
-
-        for(auto splitter : componentSplitSet.splitters())
-        {
-
-            if(largestSplitter.isNull())
-                largestSplitter = splitter;
-            else
-            {
-                auto splitterNumNodes = graph->componentById(splitter)->numNodes();
-                auto largestNumNodes = graph->componentById(largestSplitter)->numNodes();
-
-                if(splitterNumNodes > largestNumNodes)
-                    largestSplitter = splitter;
-            }
-        }
-
+        auto largestSplitter = componentSplitSet.largestComponentId();
         auto oldGraphComponentRenderer = _graphRenderer->componentRendererForId(oldComponentId);
 
         _graphRenderer->executeOnRendererThread([this, largestSplitter,

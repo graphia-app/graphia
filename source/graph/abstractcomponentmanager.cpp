@@ -24,6 +24,27 @@ AbstractComponentManager::~AbstractComponentManager()
         componentArray->invalidate();
 }
 
+ComponentId ComponentSplitSet::largestComponentId() const
+{
+    ComponentId largestSplitter;
+
+    for(auto splitter : _splitters)
+    {
+        if(largestSplitter.isNull())
+            largestSplitter = splitter;
+        else
+        {
+            auto splitterNumNodes = _graph->componentById(splitter)->numNodes();
+            auto largestNumNodes = _graph->componentById(largestSplitter)->numNodes();
+
+            if(splitterNumNodes > largestNumNodes)
+                largestSplitter = splitter;
+        }
+    }
+
+    return largestSplitter;
+}
+
 std::vector<NodeId> ComponentSplitSet::nodeIds() const
 {
     std::vector<NodeId> nodeIds;

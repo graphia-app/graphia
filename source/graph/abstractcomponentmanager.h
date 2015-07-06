@@ -23,6 +23,7 @@ public:
 
     ComponentId oldComponentId() const { return _oldComponentId; }
     const ElementIdSet<ComponentId>& splitters() const { return _splitters; }
+    ComponentId largestComponentId() const;
 
     std::vector<NodeId> nodeIds() const;
 };
