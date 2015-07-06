@@ -1,6 +1,7 @@
 #include "command.h"
 
 #include <QObject>
+#include <QDebug>
 
 void Command::initialise()
 {
@@ -108,6 +109,11 @@ void Command::setProgress(int progress)
 
 bool Command::execute() { return _executeFn(*this); }
 void Command::undo() { _undoFn(*this); }
+
+void Command::cancel()
+{
+    qWarning() << description() << "does not implement cancel(); now blocked until it completes";
+}
 
 void Command::setProgressFn(ProgressFn progressFn)
 {

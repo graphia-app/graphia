@@ -13,6 +13,15 @@ CommandManager::CommandManager() :
     connect(this, &CommandManager::commandCompleted, this, &CommandManager::onCommandCompleted);
 }
 
+CommandManager::~CommandManager()
+{
+    if(_thread.joinable())
+    {
+        _currentCommand->cancel();
+        _thread.join();
+    }
+}
+
 void CommandManager::executeReal(std::shared_ptr<Command> command)
 {
     unique_lock_with_side_effects<std::mutex> lock(_mutex);
@@ -50,14 +59,7 @@ void CommandManager::executeReal(std::shared_ptr<Command> command)
     emit busyChanged();
 
     if(command->asynchronous())
-    {
-        _commandProgress = -1;
-        _commandVerb = command->verb();
-        emit commandProgressChanged();
-        emit commandVerbChanged();
-        emit commandWillExecuteAsynchronously();
-        _thread = std::thread(executeCommand, std::move(lock), command);
-    }
+        executeAsynchronous(command, command->verb(), executeCommand, std::move(lock), command);
     else
         executeCommand(lock, command);
 }
@@ -86,12 +88,7 @@ void CommandManager::undo()
     emit busyChanged();
 
     if(command->asynchronous())
-    {
-        _commandVerb = command->undoVerb();
-        emit commandVerbChanged();
-        emit commandWillExecuteAsynchronously();
-        _thread = std::thread(undoCommand, std::move(lock));
-    }
+        executeAsynchronous(command, command->undoVerb(), undoCommand, std::move(lock));
     else
         undoCommand(lock);
 }
@@ -119,12 +116,7 @@ void CommandManager::redo()
     emit busyChanged();
 
     if(command->asynchronous())
-    {
-        _commandVerb = command->redoVerb();
-        emit commandVerbChanged();
-        emit commandWillExecuteAsynchronously();
-        _thread = std::thread(redoCommand, std::move(lock));
-    }
+        executeAsynchronous(command, command->redoVerb(), redoCommand, std::move(lock));
     else
         redoCommand(lock);
 }

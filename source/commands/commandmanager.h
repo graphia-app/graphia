@@ -28,6 +28,7 @@ class CommandManager : public QObject
 
 public:
     CommandManager();
+    virtual ~CommandManager();
 
     void clear();
 
@@ -64,6 +65,17 @@ public:
     bool busy() const;
 
 private:
+    template<typename... Args> void executeAsynchronous(std::shared_ptr<Command> command, QString verb, Args&&... args)
+    {
+        _currentCommand = command;
+        _commandProgress = -1;
+        _commandVerb = verb;
+        emit commandProgressChanged();
+        emit commandVerbChanged();
+        emit commandWillExecuteAsynchronously();
+        _thread = std::thread(std::forward<Args>(args)...);
+    }
+
     void executeReal(std::shared_ptr<Command> command);
 
     bool canUndoNoLocking() const;
@@ -76,6 +88,7 @@ private:
     mutable std::mutex _mutex;
     std::atomic<bool> _busy;
 
+    std::shared_ptr<Command> _currentCommand;
     int _commandProgress;
     QString _commandVerb;
 

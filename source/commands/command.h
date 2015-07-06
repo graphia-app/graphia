@@ -65,6 +65,7 @@ private:
     // Return false if the command failed, or did nothing
     virtual bool execute();
     virtual void undo();
+    virtual void cancel();
 
     void setProgressFn(ProgressFn progressFn);
 
