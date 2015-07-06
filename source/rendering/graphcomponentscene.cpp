@@ -141,11 +141,11 @@ void GraphComponentScene::onComponentSplit(const Graph*, const ComponentSplitSet
     auto oldComponentId = componentSplitSet.oldComponentId();
     if(oldComponentId == _componentId)
     {
+        // Both of these things still exist after this returns
         auto largestSplitter = componentSplitSet.largestComponentId();
         auto oldGraphComponentRenderer = _graphRenderer->componentRendererForId(oldComponentId);
 
-        _graphRenderer->executeOnRendererThread([this, largestSplitter,
-                                              oldGraphComponentRenderer]
+        _graphRenderer->executeOnRendererThread([this, largestSplitter, oldGraphComponentRenderer]
         {
             auto& graph = _graphRenderer->graphModel()->graph();
 
@@ -178,10 +178,12 @@ void GraphComponentScene::onComponentsWillMerge(const Graph*, const ComponentMer
             auto newComponentId = componentMergeSet.newComponentId();
             auto newGraphComponentRenderer = _graphRenderer->componentRendererForId(newComponentId);
             auto oldGraphComponentRenderer = _graphRenderer->componentRendererForId(_componentId);
+
             _graphRenderer->executeOnRendererThread([this, newComponentId,
-                                                  newGraphComponentRenderer,
-                                                  oldGraphComponentRenderer]
+                                                    newGraphComponentRenderer,
+                                                    oldGraphComponentRenderer]
             {
+                // This occurs before GraphComponentRenderer::cleanup is called on oldGraphComponentRenderer
                 newGraphComponentRenderer->cloneViewDataFrom(*oldGraphComponentRenderer);
                 setComponentId(newComponentId);
             }, "GraphComponentScene::onComponentsWillMerge (clone camera data, set component ID)");
