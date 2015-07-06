@@ -469,12 +469,6 @@ void GraphRenderer::renderScene()
 
     if(_sceneUpdateEnabled)
     {
-        if(_resized)
-        {
-            _scene->setSize(_width, _height);
-            _resized = false;
-        }
-
         _graphModel->nodePositions().executeIfUpdated([this]
         {
             for(auto componentId : _graphModel->graph().componentIds())
@@ -495,6 +489,12 @@ void GraphRenderer::renderScene()
         float time = _time.elapsed() / 1000.0f;
         _transition.update(time);
         _scene->update(time);
+    }
+
+    if(_resized)
+    {
+        _scene->setSize(_width, _height);
+        _resized = false;
     }
 
     _scene->render();

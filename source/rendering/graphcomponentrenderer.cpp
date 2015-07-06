@@ -377,11 +377,16 @@ void GraphComponentRenderer::update(float t)
                 centreNodeInViewport(_viewData._focusNodeId, _viewData._zoomDistance);
         }
 
-        _modelViewMatrix = _viewData._camera.viewMatrix();
-        _projectionMatrix = _viewData._camera.projectionMatrix();
+        updateMatrices();
     }
 
     submitDebugLines();
+}
+
+void GraphComponentRenderer::updateMatrices()
+{
+    _modelViewMatrix = _viewData._camera.viewMatrix();
+    _projectionMatrix = _viewData._camera.projectionMatrix();
 }
 
 static void setShaderADSParameters(QOpenGLShaderProgram& program, float alpha)
@@ -622,6 +627,8 @@ void GraphComponentRenderer::resize(int viewportWidth, int viewportHeight,
         _viewData._camera.setPerspectiveProjection(_fovy, aspectRatio, 0.3f, 50000.0f);
         _viewData._camera.setViewportWidth(renderWidth);
         _viewData._camera.setViewportHeight(renderHeight);
+
+        updateMatrices();
     }
     else
     {

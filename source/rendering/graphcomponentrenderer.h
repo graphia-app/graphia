@@ -145,6 +145,8 @@ private:
     int _renderWidth;
     int _renderHeight;
 
+    void updateMatrices();
+
     void renderNodes(float alpha);
     void renderEdges(float alpha);
     void renderDebugLines();
