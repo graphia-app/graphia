@@ -131,6 +131,8 @@ public slots:
 
     void switchToOverviewMode(bool doTransition = true);
 
+    void toggleLongRunningCommand();
+
 private slots:
     void onGraphWillChange(const Graph*);
     void onGraphChanged(const Graph* graph);

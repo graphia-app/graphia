@@ -40,6 +40,15 @@ public slots:
     QString name() const { return _name; }
     QString baseFileNameForUrl(const QUrl& url) const { return url.fileName(); }
 
+    bool debugEnabled() const
+    {
+#ifdef QT_QML_DEBUG //FIXME create a more generic debug define
+        return true;
+#else
+        return false;
+#endif
+    }
+
 private:
     static const char* _name;
     FileIdentifier _fileIdentifier;

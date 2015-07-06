@@ -234,6 +234,16 @@ ApplicationWindow
         onTriggered: currentDocument && currentDocument.resetView()
     }
 
+    Action
+    {
+        id: debugLongRunningCommandAction
+        text: currentDocument && currentDocument.idle ? qsTr("Start Long Running Command") :
+                                                        qsTr("Stop Long Running Command")
+        shortcut: "Ctrl+L"
+        enabled: application.debugEnabled()
+        onTriggered: currentDocument && currentDocument.toggleLongRunningCommand()
+    }
+
     menuBar: MenuBar
     {
         Menu
@@ -267,6 +277,13 @@ ApplicationWindow
         {
             title: qsTr("&Layout")
             MenuItem { action: pauseLayoutAction }
+        }
+        Menu
+        {
+            title: qsTr("&Debug")
+            enabled: application.debugEnabled()
+            visible: application.debugEnabled()
+            MenuItem { action: debugLongRunningCommandAction }
         }
         Menu
         {

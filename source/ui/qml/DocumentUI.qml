@@ -52,6 +52,7 @@ Item
     function deleteSelectedNodes() { document.deleteSelectedNodes(); }
     function resetView() { document.resetView(); }
     function switchToOverviewMode() { document.switchToOverviewMode(); }
+    function toggleLongRunningCommand() { document.toggleLongRunningCommand(); }
 
     Graph
     {

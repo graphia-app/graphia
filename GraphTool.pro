@@ -73,7 +73,8 @@ HEADERS += \
     source/rendering/openglfunctions.h \
     source/utils/movablepointer.h \
     source/graph/abstractcomponentmanager.h \
-    source/graph/componentmanager.h
+    source/graph/componentmanager.h \
+    source/commands/debuglongrunningcommand.h
 
 SOURCES += \
     source/main.cpp \
@@ -131,7 +132,8 @@ SOURCES += \
     source/rendering/opengldebuglogger.cpp \
     source/rendering/openglfunctions.cpp \
     source/graph/abstractcomponentmanager.cpp \
-    source/graph/componentmanager.cpp
+    source/graph/componentmanager.cpp \
+    source/commands/debuglongrunningcommand.cpp
 
 OTHER_FILES += \
     source/ui/qml/main.qml \
