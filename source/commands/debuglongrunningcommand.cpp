@@ -1,9 +1,13 @@
 #include "debuglongrunningcommand.h"
 
+#include "../graph/graph.h"
+
 #include <QObject>
 
-DebugLongRunningCommand::DebugLongRunningCommand() :
-    Command()
+DebugLongRunningCommand::DebugLongRunningCommand(Graph* graph, bool doGraphChange) :
+    Command(),
+    _graph(graph),
+    _doGraphChange(doGraphChange)
 {
     setDescription(QObject::tr("Long Running Command"));
     setVerb(QObject::tr("Running Long Command"));
@@ -16,7 +20,14 @@ bool DebugLongRunningCommand::execute()
 {
     std::unique_lock<std::mutex> lock(_mutex);
     _activeLongRunningCommand = this;
-    _blocker.wait(lock);
+
+    if(_doGraphChange)
+    {
+        Graph::ScopedTransaction transaction(*_graph);
+        _blocker.wait(lock);
+    }
+    else
+        _blocker.wait(lock);
 
     return true;
 }

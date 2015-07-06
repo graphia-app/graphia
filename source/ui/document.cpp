@@ -373,7 +373,7 @@ void Document::switchToOverviewMode(bool doTransition)
 void Document::toggleLongRunningCommand()
 {
     if(!DebugLongRunningCommand::running())
-        _commandManager.execute(std::make_shared<DebugLongRunningCommand>());
+        _commandManager.execute(std::make_shared<DebugLongRunningCommand>(&_graphModel->graph(), true));
     else
         DebugLongRunningCommand::stop();
 }
