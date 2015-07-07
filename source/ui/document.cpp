@@ -10,7 +10,6 @@
 #include "../layout/collision.h"
 
 #include "../commands/deleteselectednodescommand.h"
-#include "../commands/debuglongrunningcommand.h"
 
 #include "selectionmanager.h"
 #include "graphquickitem.h"
@@ -387,14 +386,6 @@ void Document::switchToOverviewMode(bool doTransition)
         return;
 
     _graphQuickItem->switchToOverviewMode(doTransition);
-}
-
-void Document::toggleLongRunningCommand()
-{
-    if(!DebugLongRunningCommand::running())
-        _commandManager.execute(std::make_shared<DebugLongRunningCommand>(&_graphModel->graph(), true));
-    else
-        DebugLongRunningCommand::stop();
 }
 
 void Document::toggleDebugPauser()

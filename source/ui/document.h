@@ -143,7 +143,6 @@ public slots:
 
     void switchToOverviewMode(bool doTransition = true);
 
-    void toggleLongRunningCommand();
     void toggleDebugPauser();
     void debugResume();
 

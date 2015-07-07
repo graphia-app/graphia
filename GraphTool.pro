@@ -78,7 +78,6 @@ HEADERS += \
     source/utils/movablepointer.h \
     source/graph/abstractcomponentmanager.h \
     source/graph/componentmanager.h \
-    source/commands/debuglongrunningcommand.h \
     source/utils/debugpauser.h
 
 SOURCES += \
@@ -138,7 +137,6 @@ SOURCES += \
     source/rendering/openglfunctions.cpp \
     source/graph/abstractcomponentmanager.cpp \
     source/graph/componentmanager.cpp \
-    source/commands/debuglongrunningcommand.cpp \
     source/utils/debugpauser.cpp
 
 OTHER_FILES += \

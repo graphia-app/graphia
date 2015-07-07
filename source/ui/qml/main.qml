@@ -236,16 +236,6 @@ ApplicationWindow
 
     Action
     {
-        id: debugLongRunningCommandAction
-        text: currentDocument && currentDocument.idle ? qsTr("Start Long Running Command") :
-                                                        qsTr("Stop Long Running Command")
-        shortcut: "Ctrl+L"
-        enabled: application.debugEnabled()
-        onTriggered: currentDocument && currentDocument.toggleLongRunningCommand()
-    }
-
-    Action
-    {
         id: toggleDebugPauserAction
         text: qsTr("Debug Pauser")
         shortcut: "Ctrl+P"
@@ -303,7 +293,6 @@ ApplicationWindow
             title: qsTr("&Debug")
             enabled: application.debugEnabled()
             visible: application.debugEnabled()
-            MenuItem { action: debugLongRunningCommandAction }
             MenuItem { action: toggleDebugPauserAction }
             MenuItem
             {

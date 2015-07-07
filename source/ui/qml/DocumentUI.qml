@@ -56,7 +56,6 @@ Item
     function deleteSelectedNodes() { document.deleteSelectedNodes(); }
     function resetView() { document.resetView(); }
     function switchToOverviewMode() { document.switchToOverviewMode(); }
-    function toggleLongRunningCommand() { document.toggleLongRunningCommand(); }
 
     function toggleDebugPauser() { document.toggleDebugPauser(); }
     function debugResume() { document.debugResume(); }
