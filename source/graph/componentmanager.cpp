@@ -146,6 +146,13 @@ void ComponentManager::updateComponents(const Graph* graph)
 
     _updatesRequired.clear();
 
+    // Notify all the new components
+    for(ComponentId newComponentId : newComponentIds)
+    {
+        if(_debug) qDebug() << "componentAdded" << newComponentId;
+        emit componentAdded(graph, newComponentId, false);
+    }
+
     // Notify all the splits
     for(auto splitee : splitComponents)
     {
@@ -162,13 +169,6 @@ void ComponentManager::updateComponents(const Graph* graph)
 
         if(_debug) qDebug() << "componentSplit" << splitee.first << "->" << splitters;
         emit componentSplit(graph, ComponentSplitSet(graph, splitee.first, std::move(splitters)));
-    }
-
-    // Notify all the new components
-    for(ComponentId newComponentId : newComponentIds)
-    {
-        if(_debug) qDebug() << "componentAdded" << newComponentId;
-        emit componentAdded(graph, newComponentId, false);
     }
 }
 

@@ -349,16 +349,20 @@ public:
     void performTransaction(std::function<void(Graph& graph)> transaction);
 
 signals:
+    // The signals are listed here in the order in which they are emitted
     void graphWillChange(const Graph*) const;
-    void graphChanged(const Graph*) const;
+
     void nodeAdded(const Graph*, NodeId) const;
     void nodeWillBeRemoved(const Graph*, NodeId) const;
     void edgeAdded(const Graph*, EdgeId) const;
     void edgeWillBeRemoved(const Graph*, EdgeId) const;
-    void componentAdded(const Graph*, ComponentId, bool) const;
-    void componentWillBeRemoved(const Graph*, ComponentId, bool) const;
-    void componentSplit(const Graph*, const ComponentSplitSet&) const;
+
     void componentsWillMerge(const Graph*, const ComponentMergeSet&) const;
+    void componentWillBeRemoved(const Graph*, ComponentId, bool) const;
+    void componentAdded(const Graph*, ComponentId, bool) const;
+    void componentSplit(const Graph*, const ComponentSplitSet&) const;
+
+    void graphChanged(const Graph*) const;
 };
 
 #endif // GRAPH_H
