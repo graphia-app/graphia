@@ -145,6 +145,21 @@ bool Document::canEnterOverviewMode() const
     return idle() && _graphQuickItem->canEnterOverviewMode();
 }
 
+bool Document::debugPauserEnabled() const
+{
+    return _graphModel != nullptr && _graphModel->graph().debugPauser.enabled();
+}
+
+bool Document::debugPaused() const
+{
+    return _graphModel != nullptr && _graphModel->graph().debugPauser.paused();
+}
+
+QString Document::debugResumeAction() const
+{
+    return _graphModel != nullptr ? _graphModel->graph().debugPauser.resumeAction() : tr("&Resume");
+}
+
 void Document::setTitle(const QString& title)
 {
     if(title != _title)
@@ -180,6 +195,10 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType)
 
     connect(&_graphModel->graph(), &Graph::graphWillChange, this, &Document::onGraphWillChange, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &Document::onGraphChanged, Qt::DirectConnection);
+
+    connect(&_graphModel->graph().debugPauser, &DebugPauser::enabledChanged, this, &Document::debugPauserEnabledChanged);
+    connect(&_graphModel->graph().debugPauser, &DebugPauser::pausedChanged, this, &Document::debugPausedChanged);
+    connect(&_graphModel->graph().debugPauser, &DebugPauser::resumeActionChanged, this, &Document::debugResumeActionChanged);
 
     _graphFileParserThread = std::make_unique<GraphFileParserThread>(fileUrl.url(), _graphModel->graph(), std::move(graphFileParser));
     connect(_graphFileParserThread.get(), &GraphFileParserThread::progress, this, &Document::onLoadProgress);
@@ -376,6 +395,16 @@ void Document::toggleLongRunningCommand()
         _commandManager.execute(std::make_shared<DebugLongRunningCommand>(&_graphModel->graph(), true));
     else
         DebugLongRunningCommand::stop();
+}
+
+void Document::toggleDebugPauser()
+{
+    _graphModel->graph().debugPauser.toggleEnabled();
+}
+
+void Document::debugResume()
+{
+    _graphModel->graph().debugPauser.resume();
 }
 
 void Document::onGraphWillChange(const Graph*)

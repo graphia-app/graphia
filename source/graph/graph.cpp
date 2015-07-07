@@ -346,6 +346,7 @@ void Graph::beginTransaction()
     {
         emit graphWillChange(this);
         _mutex.lock();
+        debugPauser.pause("Begin Graph Transaction");
     }
 }
 
@@ -356,6 +357,7 @@ void Graph::endTransaction()
     {
         updateElementIdData();
         _mutex.unlock();
+        debugPauser.pause("End Graph Transaction");
         emit graphChanged(this);
     }
 }

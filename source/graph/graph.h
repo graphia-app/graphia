@@ -2,6 +2,7 @@
 #define GRAPH_H
 
 #include "../utils/cpp1x_hacks.h"
+#include "../utils/debugpauser.h"
 
 #include <QObject>
 #include <QDebug>
@@ -328,6 +329,8 @@ public:
     const std::vector<Edge> edgesForNodes(const ElementIdSet<NodeId>& nodeIds);
 
     void dumpToQDebug(int detail) const;
+
+    mutable DebugPauser debugPauser;
 
 private:
     int _graphChangeDepth;

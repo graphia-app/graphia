@@ -11,6 +11,8 @@
 #include "../ui/graphquickitem.h"
 #include "../ui/selectionmanager.h"
 
+#include "../commands/command.h"
+
 #include "../utils/cpp1x_hacks.h"
 
 #include <QObject>
@@ -407,7 +409,7 @@ void GraphRenderer::onSelectionChanged(const SelectionManager*)
     }
 }
 
-void GraphRenderer::onCommandWillExecuteAsynchronously()
+void GraphRenderer::onCommandWillExecuteAsynchronously(const Command*)
 {
     _scene->disableInteraction();
     _sceneUpdateEnabled = false;

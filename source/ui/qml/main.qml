@@ -244,6 +244,26 @@ ApplicationWindow
         onTriggered: currentDocument && currentDocument.toggleLongRunningCommand()
     }
 
+    Action
+    {
+        id: toggleDebugPauserAction
+        text: qsTr("Debug Pauser")
+        shortcut: "Ctrl+P"
+        enabled: application.debugEnabled()
+        onTriggered: currentDocument && currentDocument.toggleDebugPauser()
+        checkable: true
+        checked: currentDocument && currentDocument.debugPauserEnabled
+    }
+
+    Action
+    {
+        id: debugResumeAction
+        text: currentDocument ? currentDocument.debugResumeAction : qsTr("&Resume")
+        shortcut: "Ctrl+N"
+        enabled: application.debugEnabled()
+        onTriggered: currentDocument && currentDocument.debugResume()
+    }
+
     menuBar: MenuBar
     {
         Menu
@@ -284,6 +304,12 @@ ApplicationWindow
             enabled: application.debugEnabled()
             visible: application.debugEnabled()
             MenuItem { action: debugLongRunningCommandAction }
+            MenuItem { action: toggleDebugPauserAction }
+            MenuItem
+            {
+                action: debugResumeAction
+                visible: currentDocument && currentDocument.debugPaused
+            }
         }
         Menu
         {
@@ -308,6 +334,11 @@ ApplicationWindow
             ToolButton { action: redoAction }
             ToolButton { action: overviewModeAction }
             ToolButton { action: resetViewAction }
+            ToolButton
+            {
+                action: debugResumeAction
+                visible: currentDocument && currentDocument.debugPaused
+            }
 
             Item { Layout.fillWidth: true }
         }

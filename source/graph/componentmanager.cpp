@@ -247,7 +247,9 @@ void ComponentManager::removeGraphComponent(ComponentId componentId)
 void ComponentManager::onGraphChanged(const Graph* graph)
 {
     std::unique_lock<std::mutex>(_updateMutex);
+    graph->debugPauser.pause("Call updateComponents from ComponentManager::onGraphChanged");
     updateComponents(graph);
+    graph->debugPauser.pause("Signal Graph::onGraphChanged");
 }
 
 template<typename T> class unique_lock_with_warning

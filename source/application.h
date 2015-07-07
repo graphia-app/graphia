@@ -42,7 +42,7 @@ public slots:
 
     bool debugEnabled() const
     {
-#ifdef QT_QML_DEBUG //FIXME create a more generic debug define
+#ifdef _DEBUG
         return true;
 #else
         return false;

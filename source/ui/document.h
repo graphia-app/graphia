@@ -45,6 +45,10 @@ class Document : public QObject
     Q_PROPERTY(bool canResetView READ canResetView NOTIFY canResetViewChanged)
     Q_PROPERTY(bool canEnterOverviewMode READ canEnterOverviewMode NOTIFY canEnterOverviewModeChanged)
 
+    Q_PROPERTY(bool debugPauserEnabled READ debugPauserEnabled NOTIFY debugPauserEnabledChanged)
+    Q_PROPERTY(bool debugPaused READ debugPaused NOTIFY debugPausedChanged)
+    Q_PROPERTY(QString debugResumeAction READ debugResumeAction NOTIFY debugResumeActionChanged)
+
 public:
     explicit Document(QObject* parent = nullptr);
 
@@ -66,6 +70,10 @@ public:
 
     bool canResetView() const;
     bool canEnterOverviewMode() const;
+
+    bool debugPauserEnabled() const;
+    bool debugPaused() const;
+    QString debugResumeAction() const;
 
     void setTitle(const QString& status);
     void setStatus(const QString& status);
@@ -113,6 +121,10 @@ signals:
     void canResetViewChanged();
     void canEnterOverviewModeChanged();
 
+    void debugPauserEnabledChanged();
+    void debugPausedChanged();
+    void debugResumeActionChanged();
+
 public slots:
     bool openFile(const QUrl& fileUrl, const QString& fileType);
 
@@ -132,6 +144,8 @@ public slots:
     void switchToOverviewMode(bool doTransition = true);
 
     void toggleLongRunningCommand();
+    void toggleDebugPauser();
+    void debugResume();
 
 private slots:
     void onGraphWillChange(const Graph*);

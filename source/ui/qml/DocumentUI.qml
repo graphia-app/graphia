@@ -30,6 +30,10 @@ Item
     property bool canResetView: document.canResetView
     property bool canEnterOverviewMode: document.canEnterOverviewMode
 
+    property bool debugPauserEnabled: document.debugPauserEnabled
+    property bool debugPaused: document.debugPaused
+    property string debugResumeAction: document.debugResumeAction
+
     function openFile(fileUrl, fileType)
     {
         if(document.openFile(fileUrl, fileType))
@@ -53,6 +57,9 @@ Item
     function resetView() { document.resetView(); }
     function switchToOverviewMode() { document.switchToOverviewMode(); }
     function toggleLongRunningCommand() { document.toggleLongRunningCommand(); }
+
+    function toggleDebugPauser() { document.toggleDebugPauser(); }
+    function debugResume() { document.debugResume(); }
 
     Graph
     {
