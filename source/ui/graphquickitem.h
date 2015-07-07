@@ -94,7 +94,7 @@ signals:
     void viewIsResetChanged() const;
     void canEnterOverviewModeChanged() const;
 
-    void commandWillExecuteAsynchronously() const;
+    void commandWillExecuteAsynchronously(const Command* command) const;
     void commandCompleted(const Command* command, const QString& pastParticiple) const;
 };
 

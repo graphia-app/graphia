@@ -72,7 +72,7 @@ private:
         _commandVerb = verb;
         emit commandProgressChanged();
         emit commandVerbChanged();
-        emit commandWillExecuteAsynchronously();
+        emit commandWillExecuteAsynchronously(command.get());
         _thread = std::thread(std::forward<Args>(args)...);
     }
 
@@ -95,7 +95,7 @@ private:
     void onCommandCompleted(const Command* command, const QString& pastParticiple);
 
 signals:
-    void commandWillExecuteAsynchronously() const;
+    void commandWillExecuteAsynchronously(const Command* command) const;
     void commandProgressChanged() const;
     void commandVerbChanged() const;
     void commandCompleted(const Command* command, const QString& pastParticiple) const;

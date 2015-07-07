@@ -80,7 +80,7 @@ private slots:
     void onSelectionChanged(const SelectionManager*);
 
 public slots:
-    void onCommandWillExecuteAsynchronously();
+    void onCommandWillExecuteAsynchronously(const Command*);
     void onCommandCompleted(const Command*, const QString&);
 
 private:
