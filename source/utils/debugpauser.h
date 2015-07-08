@@ -22,7 +22,7 @@ public:
     QString resumeAction() const { return _resumeAction; }
     void setResumeAction(const QString& resumeAction);
 
-    void pause(const QString& resumeAction);
+    void pause(const QString& resumeAction, bool* debugPaused = nullptr);
     void resume();
     bool paused() const;
 

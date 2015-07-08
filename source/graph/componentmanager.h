@@ -17,7 +17,8 @@ public:
         AbstractComponentManager(graph),
         _nextComponentId(0),
         _nodesComponentId(graph),
-        _edgesComponentId(graph)
+        _edgesComponentId(graph),
+        _debugPaused(false)
     {}
 
 private:
@@ -29,7 +30,8 @@ private:
     NodeArray<ComponentId> _nodesComponentId;
     EdgeArray<ComponentId> _edgesComponentId;
 
-    mutable std::mutex _updateMutex;
+    mutable std::recursive_mutex _updateMutex;
+    bool _debugPaused;
 
     ComponentId generateComponentId();
     void releaseComponentId(ComponentId componentId);

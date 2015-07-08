@@ -31,7 +31,7 @@ void DebugPauser::setResumeAction(const QString& description)
 #endif
 }
 
-void DebugPauser::pause(const QString& resumeAction)
+void DebugPauser::pause(const QString& resumeAction, bool* debugPaused)
 {
 #ifdef _DEBUG
     if(!_enabled)
@@ -40,10 +40,18 @@ void DebugPauser::pause(const QString& resumeAction)
     std::unique_lock<std::mutex> lock(_mutex);
     setResumeAction(resumeAction);
     qDebug() << "DebugPauser: paused before" << resumeAction;
+
+    if(debugPaused != nullptr)
+        *debugPaused = true;
+
     emit pausedChanged();
     _blocker.wait(lock);
+
+    if(debugPaused != nullptr)
+        *debugPaused = true;
 #else
     Q_UNUSED(resumeAction)
+    Q_UNUSED(debugPaused)
 #endif
 }
 

@@ -141,7 +141,7 @@ void ComponentManager::updateComponents(const Graph* graph)
     std::sort(_componentIdsList.begin(), _componentIdsList.end(),
               [this](const ComponentId& a, const ComponentId& b)
     {
-        return componentById(a)->numNodes() > componentById(b)->numNodes();
+        return _componentsMap.at(a)->numNodes() > _componentsMap.at(b)->numNodes();
     });
 
     _updatesRequired.clear();
@@ -246,16 +246,16 @@ void ComponentManager::removeGraphComponent(ComponentId componentId)
 
 void ComponentManager::onGraphChanged(const Graph* graph)
 {
-    std::unique_lock<std::mutex>(_updateMutex);
-    graph->debugPauser.pause("Call updateComponents from ComponentManager::onGraphChanged");
+    std::unique_lock<std::recursive_mutex> lock(_updateMutex);
+    graph->debugPauser.pause("Call updateComponents from ComponentManager::onGraphChanged", &_debugPaused);
     updateComponents(graph);
-    graph->debugPauser.pause("Signal Graph::onGraphChanged");
+    graph->debugPauser.pause("Signal Graph::onGraphChanged", &_debugPaused);
 }
 
 template<typename T> class unique_lock_with_warning
 {
 public:
-    unique_lock_with_warning(T& mutex) :
+    unique_lock_with_warning(T& mutex, bool alreadyBlocked) :
         _lock(mutex, std::try_to_lock)
     {
         if(!_lock.owns_lock())
@@ -263,7 +263,11 @@ public:
             qWarning() << "Needed to acquire lock when reading from ComponentManager; "
                           "this implies inappropriate concurrent access which is bad "
                           "because it means this thread is blocked until the update completes";
-            _lock.lock();
+
+            // If the DebugPauser is in action, it is already effectively locking things
+            // for us, so trying to lock again here causes deadlock
+            if(!alreadyBlocked)
+                _lock.lock();
         }
     }
 
@@ -279,14 +283,14 @@ private:
 
 const std::vector<ComponentId>& ComponentManager::componentIds() const
 {
-    unique_lock_with_warning<std::mutex> lock(_updateMutex);
+    unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex, _debugPaused);
 
     return _componentIdsList;
 }
 
 const GraphComponent* ComponentManager::componentById(ComponentId componentId) const
 {
-    unique_lock_with_warning<std::mutex> lock(_updateMutex);
+    unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex, _debugPaused);
 
     if(_componentsMap.find(componentId) != _componentsMap.end())
         return _componentsMap.at(componentId).get();
@@ -300,7 +304,7 @@ ComponentId ComponentManager::componentIdOfNode(NodeId nodeId) const
     if(nodeId.isNull())
         return ComponentId();
 
-    unique_lock_with_warning<std::mutex> lock(_updateMutex);
+    unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex, _debugPaused);
 
     ComponentId componentId = _nodesComponentId.at(nodeId);
     auto i = std::find(_componentIdsList.begin(), _componentIdsList.end(), componentId);
@@ -312,7 +316,7 @@ ComponentId ComponentManager::componentIdOfEdge(EdgeId edgeId) const
     if(edgeId.isNull())
         return ComponentId();
 
-    unique_lock_with_warning<std::mutex> lock(_updateMutex);
+    unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex, _debugPaused);
 
     ComponentId componentId = _edgesComponentId.at(edgeId);
     auto i = std::find(_componentIdsList.begin(), _componentIdsList.end(), componentId);
