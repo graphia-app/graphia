@@ -38,7 +38,7 @@ GraphComponentRenderer::GraphComponentRenderer() :
     _updateVisualDataWhenThawed(false),
     _updatePositionDataWhenThawed(false),
     _viewportWidth(0), _viewportHeight(0),
-    _renderWidth(0), _renderHeight(0),
+    _width(0), _height(0),
     _visualDataRequiresUpdate(false),
     _trackFocus(true),
     _targetZoomDistance(0.0f),
@@ -603,30 +603,30 @@ void GraphComponentRenderer::render(int x, int y, int width, int height, float a
     renderDebugLines();
 }
 
-void GraphComponentRenderer::resize(int viewportWidth, int viewportHeight,
-                                    int renderWidth, int renderHeight)
+void GraphComponentRenderer::setSize(int viewportWidth, int viewportHeight,
+                                     int width, int height)
 {
     if(_initialised && viewportWidth > 0 && viewportHeight > 0)
     {
         _viewportWidth = viewportWidth;
         _viewportHeight = viewportHeight;
 
-        if(renderWidth <= 0)
-            renderWidth = _viewportWidth;
+        if(width <= 0)
+            width = _viewportWidth;
 
-        if(renderHeight <= 0)
-            renderHeight = _viewportHeight;
+        if(height <= 0)
+            height = _viewportHeight;
 
-        _renderWidth = renderWidth;
-        _renderHeight = renderHeight;
+        _width = width;
+        _height = height;
 
-        float aspectRatio = static_cast<float>(renderWidth) / static_cast<float>(renderHeight);
+        float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
         _fovy = 60.0f;
         _fovx = _fovy * aspectRatio;
 
         _viewData._camera.setPerspectiveProjection(_fovy, aspectRatio, 0.3f, 50000.0f);
-        _viewData._camera.setViewportWidth(renderWidth);
-        _viewData._camera.setViewportHeight(renderHeight);
+        _viewData._camera.setViewportWidth(width);
+        _viewData._camera.setViewportHeight(height);
 
         updateMatrices();
     }

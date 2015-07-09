@@ -264,9 +264,9 @@ void GraphOverviewScene::setSize(int width, int height)
         {
             auto renderer = _graphRenderer->componentRendererForId(componentId);
             auto layoutData = _componentLayout[componentId];
-            renderer->resize(_width, _height,
-                             layoutData._rect.width(),
-                             layoutData._rect.height());
+            renderer->setSize(_width, _height,
+                              layoutData._rect.width(),
+                              layoutData._rect.height());
         }
     });
 }

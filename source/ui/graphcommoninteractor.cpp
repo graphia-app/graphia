@@ -315,8 +315,8 @@ static QVector3D virtualTrackballVector(int width, int height, const QPoint& cur
 static QQuaternion mouseMoveToRotation(const QPoint& prev, const QPoint& cur,
                                        const GraphComponentRenderer* renderer)
 {
-    int w = renderer->renderWidth();
-    int h = renderer->renderHeight();
+    int w = renderer->width();
+    int h = renderer->height();
 
     QVector3D previous = virtualTrackballVector(w, h, prev);
     QVector3D current = virtualTrackballVector(w, h, cur);

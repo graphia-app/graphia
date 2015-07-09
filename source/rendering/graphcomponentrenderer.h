@@ -44,16 +44,16 @@ public:
     void cleanup();
     void update(float t);
     void render(int x, int y, int width = 0, int height = 0, float alpha = 1.0f);
-    void resize(int viewportWidth, int viewportHeight,
-                int renderWidth = 0, int renderHeight = 0);
+    void setSize(int viewportWidth, int viewportHeight,
+                 int width = 0, int height = 0);
 
     bool transitionActive();
 
     int viewportWidth() const { return _viewportWidth; }
     int viewportHeight() const { return _viewportHeight; }
 
-    int renderWidth() const { return _renderWidth; }
-    int renderHeight() const { return _renderHeight; }
+    int width() const { return _width; }
+    int height() const { return _height; }
 
     void moveFocusToNode(NodeId nodeId);
     void moveFocusToCentreOfComponent();
@@ -142,8 +142,8 @@ private:
 
     int _viewportWidth;
     int _viewportHeight;
-    int _renderWidth;
-    int _renderHeight;
+    int _width;
+    int _height;
 
     void updateMatrices();
 

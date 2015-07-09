@@ -46,7 +46,7 @@ void GraphComponentScene::setSize(int width, int height)
     _height = height;
 
     if(componentRenderer() != nullptr)
-        componentRenderer()->resize(width, height);
+        componentRenderer()->setSize(width, height);
 }
 
 bool GraphComponentScene::transitionActive()
