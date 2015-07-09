@@ -33,7 +33,7 @@ public:
     virtual void render() = 0;
     virtual void setSize(int width, int height) = 0;
 
-    virtual bool transitionActive() = 0;
+    virtual bool transitionActive() const = 0;
 
     virtual void onShow() {}
     virtual void onHide() {}

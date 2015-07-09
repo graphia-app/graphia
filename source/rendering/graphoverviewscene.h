@@ -31,7 +31,7 @@ public:
     void render();
     void setSize(int width, int height);
 
-    bool transitionActive();
+    bool transitionActive() const;
 
     void onShow();
     void onHide();

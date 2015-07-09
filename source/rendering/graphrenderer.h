@@ -55,7 +55,7 @@ public:
     static const int NUM_MULTISAMPLES = 4; //FIXME pass to screen.frag
 
     ComponentArray<MovablePointer<GraphComponentRenderer>>& componentRenderers() { return _componentRenderers; }
-    GraphComponentRenderer* componentRendererForId(ComponentId componentId);
+    GraphComponentRenderer* componentRendererForId(ComponentId componentId) const;
     Transition& transition() { return _transition; }
 
     std::shared_ptr<GraphModel> graphModel() { return _graphModel; }

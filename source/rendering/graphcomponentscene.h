@@ -25,24 +25,24 @@ public:
     void render();
     void setSize(int width, int height);
 
-    bool transitionActive();
+    bool transitionActive() const;
 
     void onShow();
 
-    ComponentId componentId() { return _componentId; }
+    ComponentId componentId() const { return _componentId; }
     void setComponentId(ComponentId componentId);
 
     int width() const { return _width; }
     int height() const { return _height; }
 
     void saveViewData();
-    bool savedViewIsReset();
+    bool savedViewIsReset() const;
     void restoreViewData();
 
     void resetView();
-    bool viewIsReset();
+    bool viewIsReset() const;
 
-    GraphComponentRenderer* componentRenderer();
+    GraphComponentRenderer* componentRenderer() const;
 
     void startTransition(float duration = 0.3f,
                          Transition::Type transitionType = Transition::Type::EaseInEaseOut,

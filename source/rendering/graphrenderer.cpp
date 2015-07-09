@@ -667,7 +667,7 @@ void GraphRenderer::finishRender()
     _screenQuadDataBuffer.release();
 }
 
-GraphComponentRenderer* GraphRenderer::componentRendererForId(ComponentId componentId)
+GraphComponentRenderer* GraphRenderer::componentRendererForId(ComponentId componentId) const
 {
     if(componentId.isNull())
         return nullptr;

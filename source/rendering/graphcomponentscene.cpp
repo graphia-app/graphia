@@ -49,7 +49,7 @@ void GraphComponentScene::setSize(int width, int height)
         componentRenderer()->setSize(width, height);
 }
 
-bool GraphComponentScene::transitionActive()
+bool GraphComponentScene::transitionActive() const
 {
     if(componentRenderer() != nullptr)
         return componentRenderer()->transitionActive();
@@ -82,7 +82,7 @@ void GraphComponentScene::saveViewData()
         componentRenderer()->saveViewData();
 }
 
-bool GraphComponentScene::savedViewIsReset()
+bool GraphComponentScene::savedViewIsReset() const
 {
     if(componentRenderer() == nullptr)
         return true;
@@ -102,7 +102,7 @@ void GraphComponentScene::resetView()
         componentRenderer()->resetView();
 }
 
-bool GraphComponentScene::viewIsReset()
+bool GraphComponentScene::viewIsReset() const
 {
     if(componentRenderer() == nullptr)
         return true;
@@ -110,7 +110,7 @@ bool GraphComponentScene::viewIsReset()
     return componentRenderer()->viewIsReset();
 }
 
-GraphComponentRenderer* GraphComponentScene::componentRenderer()
+GraphComponentRenderer* GraphComponentScene::componentRenderer() const
 {
     return _graphRenderer->componentRendererForId(_componentId);
 }

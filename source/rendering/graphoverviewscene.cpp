@@ -271,7 +271,7 @@ void GraphOverviewScene::setSize(int width, int height)
     });
 }
 
-bool GraphOverviewScene::transitionActive()
+bool GraphOverviewScene::transitionActive() const
 {
     bool result;
 
