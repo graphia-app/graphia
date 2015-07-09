@@ -745,7 +745,7 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
     {
         _viewData._camera.setDistance(cameraDistance);
         _viewData._camera.setFocus(focus);
-        if(!rotation.isIdentity())
+        if(!rotation.isNull())
             _viewData._camera.setRotation(rotation);
 
         _viewData._transitionStart = _viewData._transitionEnd = _viewData._camera;
@@ -757,7 +757,7 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
         _viewData._transitionEnd = _viewData._camera;
         _viewData._transitionEnd.setDistance(cameraDistance);
         _viewData._transitionEnd.setFocus(focus);
-        if(!rotation.isIdentity())
+        if(!rotation.isNull())
             _viewData._transitionEnd.setRotation(rotation);
     }
 }
