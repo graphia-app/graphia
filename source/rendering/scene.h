@@ -23,10 +23,6 @@ public:
     bool initialised() { return _initialised; }
     void setInitialised() { _initialised = true; }
 
-    void enableInteraction() { _interactionEnabled = true; }
-    void disableInteraction() { _interactionEnabled = false; }
-    bool interactionEnabled() { return _interactionEnabled; }
-
     virtual void initialise() = 0;
     virtual void cleanup() {}
     virtual void update(float t) = 0;

@@ -101,8 +101,8 @@ QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const
 {
     auto graphRenderer = new GraphRenderer(_graphModel, *_commandManager, _selectionManager);
 
-    connect(this, &GraphQuickItem::commandWillExecuteAsynchronously, graphRenderer, &GraphRenderer::onCommandWillExecuteAsynchronously);
-    connect(this, &GraphQuickItem::commandCompleted, graphRenderer, &GraphRenderer::onCommandCompleted);
+    connect(this, &GraphQuickItem::commandWillExecuteAsynchronously, graphRenderer, &GraphRenderer::onCommandWillExecuteAsynchronously, Qt::DirectConnection);
+    connect(this, &GraphQuickItem::commandCompleted, graphRenderer, &GraphRenderer::onCommandCompleted, Qt::DirectConnection);
     connect(this, &GraphQuickItem::commandCompleted, this, &GraphQuickItem::update);
 
     connect(graphRenderer, &GraphRenderer::modeChanged, this, &GraphQuickItem::update);

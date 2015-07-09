@@ -213,10 +213,10 @@ void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId com
 
 void GraphComponentScene::onGraphChanged(const Graph* graph)
 {
-    _defaultComponentId = graph->largestComponentId();
-
-    _graphRenderer->executeOnRendererThread([this]
+    _graphRenderer->executeOnRendererThread([this, graph]
     {
+        _defaultComponentId = graph->largestComponentId();
+
         if(visible())
         {
             setSize(_width, _height);

@@ -73,19 +73,15 @@ private:
 
     ComponentArray<LayoutData> _previousComponentLayout;
     ComponentArray<LayoutData> _componentLayout;
-    void layoutComponents(const std::vector<ComponentId> &componentIds);
+    void layoutComponents();
 
     std::vector<ComponentId> _removedComponentIds;
-    std::vector<ComponentSplitSet> _componentSplitSets;
     std::vector<ComponentMergeSet> _componentMergeSets;
     void startTransition(float duration = 1.0f,
                          Transition::Type transitionType = Transition::Type::EaseInEaseOut,
                          std::function<void()> finishedFunction = []{});
 
-    std::vector<ComponentId> _cachedComponentIds;
-    std::mutex _cachedComponentIdsMutex;
-
-    void executeOnCachedComponentIdsIfNecessary(std::function<void (const std::vector<ComponentId> &)> f);
+    std::vector<ComponentId> _componentIds;
 
 private slots:
     void onGraphWillChange(const Graph* graph);

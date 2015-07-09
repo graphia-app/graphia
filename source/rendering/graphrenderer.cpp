@@ -51,6 +51,7 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
     QObject(),
     OpenGLFunctions(),
     _graphModel(graphModel),
+    _numComponents(0),
     _selectionManager(selectionManager),
     _componentRenderers(_graphModel->graph()),
     _numTransitioningRenderers(0),
@@ -347,6 +348,8 @@ void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId compone
 
 void GraphRenderer::onGraphChanged(const Graph* graph)
 {
+    _numComponents = graph->numComponents();
+
     for(auto componentId : graph->componentIds())
     {
         //FIXME: this makes me feel dirty
@@ -411,15 +414,12 @@ void GraphRenderer::onSelectionChanged(const SelectionManager*)
 
 void GraphRenderer::onCommandWillExecuteAsynchronously(const Command*)
 {
-    _scene->disableInteraction();
     _sceneUpdateEnabled = false;
 }
 
 void GraphRenderer::onCommandCompleted(const Command*, const QString&)
 {
     _sceneUpdateEnabled = true;
-    _scene->enableInteraction();
-
     update();
 }
 
@@ -469,6 +469,12 @@ void GraphRenderer::renderScene()
     if(_scene == nullptr || !_scene->initialised())
         return;
 
+    if(_resized)
+    {
+        _scene->setSize(_width, _height);
+        _resized = false;
+    }
+
     if(_sceneUpdateEnabled)
     {
         _graphModel->nodePositions().executeIfUpdated([this]
@@ -491,12 +497,6 @@ void GraphRenderer::renderScene()
         float time = _time.elapsed() / 1000.0f;
         _transition.update(time);
         _scene->update(time);
-    }
-
-    if(_resized)
-    {
-        _scene->setSize(_width, _height);
-        _resized = false;
     }
 
     _scene->render();
@@ -599,7 +599,7 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
     if(graphQuickItem->overviewModeSwitchPending())
         switchToOverviewMode();
 
-    if(_scene != nullptr && _scene->interactionEnabled())
+    if(_scene != nullptr && _sceneUpdateEnabled)
     {
         //FIXME try delivering these events by queued connection instead
         while(graphQuickItem->eventsPending())
@@ -622,7 +622,7 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
 
     // Tell the QuickItem what we're doing
     graphQuickItem->setViewIsReset(viewIsReset());
-    graphQuickItem->setCanEnterOverviewMode(mode() != Mode::Overview && _graphModel->graph().numComponents() > 1);
+    graphQuickItem->setCanEnterOverviewMode(mode() != Mode::Overview && _numComponents > 1);
 }
 
 void GraphRenderer::finishRender()

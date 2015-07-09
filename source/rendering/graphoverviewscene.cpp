@@ -13,6 +13,7 @@
 #include <stack>
 #include <vector>
 #include <functional>
+#include <algorithm>
 
 GraphOverviewScene::GraphOverviewScene(GraphRenderer* graphRenderer) :
     Scene(graphRenderer),
@@ -36,85 +37,55 @@ GraphOverviewScene::GraphOverviewScene(GraphRenderer* graphRenderer) :
 void GraphOverviewScene::initialise()
 {
     resolveOpenGLFunctions();
-
-    onGraphChanged(&_graphRenderer->graphModel()->graph());
-}
-
-void GraphOverviewScene::executeOnCachedComponentIdsIfNecessary(std::function<void(const std::vector<ComponentId>& componentIds)> f)
-{
-    std::unique_lock<std::mutex> lock(_cachedComponentIdsMutex);
-    if(!_cachedComponentIds.empty())
-    {
-        f(_cachedComponentIds);
-    }
-    else
-    {
-        lock.unlock();
-
-        auto& a = _graphModel->graph().componentIds();
-        auto& b = _removedComponentIds;
-        std::vector<ComponentId> componentIds;
-        componentIds.reserve(a.size() + b.size());
-        componentIds.insert(componentIds.end(), a.begin(), a.end());
-        componentIds.insert(componentIds.end(), b.begin(), b.end());
-
-        f(componentIds);
-    }
 }
 
 void GraphOverviewScene::update(float t)
 {
-    executeOnCachedComponentIdsIfNecessary([this, &t](const std::vector<ComponentId>& componentIds)
+    for(auto componentId : _componentIds)
     {
-        for(auto componentId : componentIds)
-        {
-            auto renderer = _graphRenderer->componentRendererForId(componentId);
-            renderer->update(t);
-        }
-    });
+        auto renderer = _graphRenderer->componentRendererForId(componentId);
+        renderer->update(t);
+    }
 }
 
 void GraphOverviewScene::render()
 {
-    executeOnCachedComponentIdsIfNecessary([this](const std::vector<ComponentId>& componentIds)
+    // Alpha blended first...
+    for(auto componentId : _componentIds)
     {
-        // Alpha blended first...
-        for(auto componentId : componentIds)
-        {
-            if(_componentLayout[componentId]._alpha >= 1.0f)
-                continue;
+        if(_componentLayout[componentId]._alpha >= 1.0f)
+            continue;
 
-            auto renderer = _graphRenderer->componentRendererForId(componentId);
-            auto layoutData = _componentLayout[componentId];
+        auto renderer = _graphRenderer->componentRendererForId(componentId);
+        auto layoutData = _componentLayout[componentId];
 
-            renderer->render(layoutData._rect.x(),
-                             layoutData._rect.y(),
-                             layoutData._rect.width(),
-                             layoutData._rect.height(),
-                             layoutData._alpha);
-        }
+        renderer->render(layoutData._rect.x(),
+                         layoutData._rect.y(),
+                         layoutData._rect.width(),
+                         layoutData._rect.height(),
+                         layoutData._alpha);
+    }
 
-        //...then opaque
-        for(auto componentId : componentIds)
-        {
-            if(_componentLayout[componentId]._alpha < 1.0f)
-                continue;
+    //...then opaque
+    for(auto componentId : _componentIds)
+    {
+        if(_componentLayout[componentId]._alpha < 1.0f)
+            continue;
 
-            auto renderer = _graphRenderer->componentRendererForId(componentId);
-            auto layoutData = _componentLayout[componentId];
+        auto renderer = _graphRenderer->componentRendererForId(componentId);
+        auto layoutData = _componentLayout[componentId];
 
-            renderer->render(layoutData._rect.x(),
-                             layoutData._rect.y(),
-                             layoutData._rect.width(),
-                             layoutData._rect.height(),
-                             layoutData._alpha);
-        }
-    });
+        renderer->render(layoutData._rect.x(),
+                         layoutData._rect.y(),
+                         layoutData._rect.width(),
+                         layoutData._rect.height(),
+                         layoutData._alpha);
+    }
 }
 
 void GraphOverviewScene::onShow()
 {
-    for(auto componentId : _graphModel->graph().componentIds())
+    for(auto componentId : _componentIds)
     {
         auto renderer = _graphRenderer->componentRendererForId(componentId);
         renderer->setVisible(true);
@@ -123,7 +94,7 @@ void GraphOverviewScene::onShow()
 
 void GraphOverviewScene::onHide()
 {
-    for(auto componentId : _graphModel->graph().componentIds())
+    for(auto componentId : _componentIds)
     {
         auto renderer = _graphRenderer->componentRendererForId(componentId);
         renderer->setVisible(false);
@@ -156,7 +127,7 @@ void GraphOverviewScene::startTransitionFromComponentMode(ComponentId focusCompo
     startTransition(duration, transitionType, finishedFunction);
     _previousComponentLayout = _componentLayout;
 
-    for(auto componentId : _graphModel->graph().componentIds())
+    for(auto componentId : _componentIds)
     {
         if(componentId != focusComponentId)
             _previousComponentLayout[componentId]._alpha = 0.0f;
@@ -173,7 +144,7 @@ void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusCompone
 {
     _previousComponentLayout = _componentLayout;
 
-    for(auto componentId : _graphModel->graph().componentIds())
+    for(auto componentId : _componentIds)
     {
         if(componentId != focusComponentId)
             _componentLayout[componentId]._alpha = 0.0f;
@@ -185,13 +156,13 @@ void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusCompone
     startTransition(duration, transitionType, finishedFunction);
 }
 
-void GraphOverviewScene::layoutComponents(const std::vector<ComponentId>& componentIds)
+void GraphOverviewScene::layoutComponents()
 {
     std::stack<QPoint> coords;
 
     //FIXME this is a mess
     coords.emplace(0, 0);
-    for(auto componentId : componentIds)
+    for(auto componentId : _componentIds)
     {
         auto coord = coords.top();
         coords.pop();
@@ -230,7 +201,7 @@ void GraphOverviewScene::layoutComponents(const std::vector<ComponentId>& compon
     }
 
     // If the component is fading in, keep it in a fixed position
-    for(auto componentId : componentIds)
+    for(auto componentId : _componentIds)
     {
         if(_previousComponentLayout[componentId]._alpha == 0.0f)
         {
@@ -256,42 +227,29 @@ void GraphOverviewScene::setSize(int width, int height)
     _width = width;
     _height = height;
 
-    executeOnCachedComponentIdsIfNecessary([this](const std::vector<ComponentId>& componentIds)
-    {
-        layoutComponents(componentIds);
+    layoutComponents();
 
-        for(auto componentId : componentIds)
-        {
-            auto renderer = _graphRenderer->componentRendererForId(componentId);
-            auto layoutData = _componentLayout[componentId];
-            renderer->setSize(_width, _height,
-                              layoutData._rect.width(),
-                              layoutData._rect.height());
-        }
-    });
+    for(auto componentId : _componentIds)
+    {
+        auto renderer = _graphRenderer->componentRendererForId(componentId);
+        auto layoutData = _componentLayout[componentId];
+        renderer->setSize(_width, _height,
+                          layoutData._rect.width(),
+                          layoutData._rect.height());
+    }
 }
 
 bool GraphOverviewScene::transitionActive() const
 {
-    bool result;
-
-    executeOnCachedComponentIdsIfNecessary([this, &result](const std::vector<ComponentId>& componentIds)
+    for(auto componentId : _componentIds)
     {
-        for(auto componentId : componentIds)
-        {
-            auto renderer = _graphRenderer->componentRendererForId(componentId);
+        auto renderer = _graphRenderer->componentRendererForId(componentId);
 
-            if(renderer->transitionActive())
-            {
-                result = true;
-                return;
-            }
-        }
+        if(renderer->transitionActive())
+            return true;
+    }
 
-        result = false;
-    });
-
-    return result;
+    return false;
 }
 
 static GraphOverviewScene::LayoutData interpolateLayout(const GraphOverviewScene::LayoutData& a,
@@ -327,10 +285,7 @@ void GraphOverviewScene::startTransition(float duration,
             _graphRenderer->componentRendererForId(componentId)->updateTransition(f);
         };
 
-        for(auto componentId : _graphModel->graph().componentIds())
-            interpolate(componentId);
-
-        for(auto componentId : _removedComponentIds)
+        for(auto componentId : _componentIds)
             interpolate(componentId);
     },
     [this]
@@ -349,8 +304,15 @@ void GraphOverviewScene::startTransition(float duration,
             renderer->thaw();
         }
 
+        // Subtract the removed ComponentIds, no we no longer need to render them
+        std::vector<ComponentId> postTransitionComponentIds;
+        std::set_difference(_componentIds.begin(), _componentIds.end(),
+                            _removedComponentIds.begin(), _removedComponentIds.end(),
+                            std::inserter(postTransitionComponentIds, postTransitionComponentIds.begin()));
+
+        _componentIds = std::move(postTransitionComponentIds);
+
         _removedComponentIds.clear();
-        _componentSplitSets.clear();
         _componentMergeSets.clear();
 
         _graphRenderer->rendererFinishedTransition();
@@ -358,7 +320,7 @@ void GraphOverviewScene::startTransition(float duration,
     finishedFunction);
 
     // Reset all components by default
-    for(auto componentId : _graphModel->graph().componentIds())
+    for(auto componentId : _componentIds)
     {
         auto renderer = _graphRenderer->componentRendererForId(componentId);
         renderer->resetView();
@@ -386,7 +348,12 @@ void GraphOverviewScene::startTransition(float duration,
 void GraphOverviewScene::onComponentAdded(const Graph*, ComponentId componentId, bool hasSplit)
 {
     if(!hasSplit)
-        _previousComponentLayout[componentId]._alpha = 0.0f;
+    {
+        _graphRenderer->executeOnRendererThread([this, componentId]
+        {
+            _previousComponentLayout[componentId]._alpha = 0.0f;
+        }, "GraphOverviewScene::onComponentAdded (set source alpha to 0)");
+    }
 }
 
 void GraphOverviewScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool hasMerged)
@@ -396,11 +363,14 @@ void GraphOverviewScene::onComponentWillBeRemoved(const Graph*, ComponentId comp
 
     if(!hasMerged)
     {
-        auto renderer = _graphRenderer->componentRendererForId(componentId);
-        renderer->freeze();
+        _graphRenderer->executeOnRendererThread([this, componentId]
+        {
+            auto renderer = _graphRenderer->componentRendererForId(componentId);
+            renderer->freeze();
 
-        _removedComponentIds.emplace_back(componentId);
-        _componentLayout[componentId]._alpha = 0.0f;
+            _removedComponentIds.emplace_back(componentId);
+            _componentLayout[componentId]._alpha = 0.0f;
+        }, "GraphOverviewScene::onComponentWillBeRemoved (freeze renderer, set target alpha to 0)");
     }
 }
 
@@ -408,8 +378,6 @@ void GraphOverviewScene::onComponentSplit(const Graph*, const ComponentSplitSet&
 {
     if(!visible())
         return;
-
-    _componentSplitSets.emplace_back(componentSplitSet);
 
     _graphRenderer->executeOnRendererThread([this, componentSplitSet]
     {
@@ -433,62 +401,66 @@ void GraphOverviewScene::onComponentsWillMerge(const Graph*, const ComponentMerg
     if(!visible())
         return;
 
-    _componentMergeSets.emplace_back(componentMergeSet);
-
-    for(auto merger : componentMergeSet.mergers())
+    _graphRenderer->executeOnRendererThread([this, componentMergeSet]
     {
-        auto renderer = _graphRenderer->componentRendererForId(merger);
-        renderer->freeze();
+        _componentMergeSets.emplace_back(componentMergeSet);
 
-        if(merger != componentMergeSet.newComponentId())
-            _removedComponentIds.emplace_back(merger);
-    }
+        for(auto merger : componentMergeSet.mergers())
+        {
+            auto renderer = _graphRenderer->componentRendererForId(merger);
+            renderer->freeze();
+
+            if(merger != componentMergeSet.newComponentId())
+                _removedComponentIds.emplace_back(merger);
+        }
+    }, "GraphOverviewScene::onComponentsWillMerge (freeze renderers)");
 }
 
-void GraphOverviewScene::onGraphWillChange(const Graph* graph)
+void GraphOverviewScene::onGraphWillChange(const Graph*)
 {
     // Take a copy of the existing layout before the graph is changed
     _previousComponentLayout = _componentLayout;
-
-    // The ComponentIds will be referenced when we render them, so
-    // take a copy to use in case the list is altered during the change
-    std::unique_lock<std::mutex> lock(_cachedComponentIdsMutex);
-    _cachedComponentIds = graph->componentIds();
 }
 
 void GraphOverviewScene::onGraphChanged(const Graph* graph)
 {
-    std::unique_lock<std::mutex> lock(_cachedComponentIdsMutex);
-    _cachedComponentIds.clear();
-    lock.unlock();
-
-    // Find the number of nodes in the largest component
-    int maxNumNodes = 0;
-
-    if(graph->numComponents() > 0)
-        maxNumNodes = graph->componentById(graph->largestComponentId())->numNodes();
-
-    for(auto componentId : graph->componentIds())
+    qDebug() << "GraphOverviewScene::onGraphChanged";
+    _graphRenderer->executeOnRendererThread([this, graph]
     {
-        auto component = graph->componentById(componentId);
-        int divisor = maxNumNodes / component->numNodes();
-        _renderSizeDivisors[componentId] = Utils::smallestPowerOf2GreaterThan(divisor);
-    }
+        _componentIds = graph->componentIds();
 
-    if(visible())
-    {
-        _graphRenderer->executeOnRendererThread([this]
+        // Find the number of nodes in the largest component
+        int maxNumNodes = 0;
+
+        if(graph->numComponents() > 0)
+            maxNumNodes = graph->componentById(graph->largestComponentId())->numNodes();
+
+        for(auto componentId : _componentIds)
+        {
+            auto component = graph->componentById(componentId);
+            int divisor = maxNumNodes / component->numNodes();
+            _renderSizeDivisors[componentId] = Utils::smallestPowerOf2GreaterThan(divisor);
+        }
+
+        if(visible())
         {
             onShow();
             setSize(_width, _height);
+
             startTransition(1.0f, Transition::Type::EaseInEaseOut,
-            [this]
+            [this, graph]
             {
                 // If graph change has resulted in a single component, switch
                 // to component mode once the transition had completed
-                if(_graphModel->graph().numComponents() == 1)
+                if(graph->numComponents() == 1)
                     _graphRenderer->switchToComponentMode();
             });
-        }, "GraphOverviewScene::onGraphChanged (setSize)");
-    }
+        }
+
+        // We still need to render any components that have been removed, while they
+        // transition away
+        _componentIds.insert(_componentIds.end(),
+                             _removedComponentIds.begin(),
+                             _removedComponentIds.end());
+    }, "GraphOverviewScene::onGraphChanged");
 }

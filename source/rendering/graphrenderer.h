@@ -20,6 +20,7 @@
 
 #include <functional>
 #include <memory>
+#include <atomic>
 
 class GraphQuickItem;
 class GraphModel;
@@ -85,6 +86,8 @@ public slots:
 
 private:
     std::shared_ptr<GraphModel> _graphModel;
+    int _numComponents;
+
     std::shared_ptr<SelectionManager> _selectionManager;
 
     // It's important that these are pointers and not values, because the array will
@@ -142,7 +145,7 @@ private:
     QRect _selectionRect;
 
     QTime _time;
-    bool _sceneUpdateEnabled;
+    std::atomic<bool> _sceneUpdateEnabled;
 
     bool _modeTransitionInProgress;
 
