@@ -424,7 +424,6 @@ void GraphOverviewScene::onGraphWillChange(const Graph*)
 
 void GraphOverviewScene::onGraphChanged(const Graph* graph)
 {
-    qDebug() << "GraphOverviewScene::onGraphChanged";
     _graphRenderer->executeOnRendererThread([this, graph]
     {
         _componentIds = graph->componentIds();
