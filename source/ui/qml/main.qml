@@ -227,7 +227,7 @@ ApplicationWindow
     {
         id: resetViewAction
         //iconSource: "images/.png"
-        iconName: "zoom-fit-best"
+        iconName: "view-refresh"
         text: qsTr("&Reset View")
         shortcut: "Ctrl+R"
         enabled: currentDocument ? currentDocument.canResetView : false
