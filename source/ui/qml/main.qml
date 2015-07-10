@@ -371,6 +371,7 @@ ApplicationWindow
     {
         RowLayout
         {
+            id: rowLayout
             width: parent.width
 
             // Status
@@ -393,6 +394,9 @@ ApplicationWindow
                 visible: currentDocument ? currentDocument.commandInProgress : false
                 indeterminate: currentDocument ? currentDocument.commandProgress < 0.0 : false
             }
+
+            // Hack to force the RowLayout height to be the maximum of its children
+            Rectangle { height: rowLayout.childrenRect.height }
         }
     }
 
