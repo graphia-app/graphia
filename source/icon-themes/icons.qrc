@@ -1,0 +1,32 @@
+<RCC>
+	<qresource prefix="/icons">
+		<file>Tango/index.theme</file>
+		<file>Tango/32x32/actions/document-open.png</file>
+		<file>Tango/16x16/actions/document-open.png</file>
+		<file>Tango/22x22/actions/document-open.png</file>
+		<file>Tango/32x32/actions/tab-new.png</file>
+		<file>Tango/16x16/actions/tab-new.png</file>
+		<file>Tango/22x22/actions/tab-new.png</file>
+		<file>Tango/32x32/actions/undo.png</file>
+		<file>Tango/16x16/actions/undo.png</file>
+		<file>Tango/22x22/actions/undo.png</file>
+		<file>Tango/32x32/actions/redo.png</file>
+		<file>Tango/16x16/actions/redo.png</file>
+		<file>Tango/22x22/actions/redo.png</file>
+		<file>Tango/32x32/actions/edit-delete.png</file>
+		<file>Tango/16x16/actions/edit-delete.png</file>
+		<file>Tango/22x22/actions/edit-delete.png</file>
+		<file>Tango/32x32/actions/media-playback-start.png</file>
+		<file>Tango/16x16/actions/media-playback-start.png</file>
+		<file>Tango/22x22/actions/media-playback-start.png</file>
+		<file>Tango/32x32/actions/media-playback-pause.png</file>
+		<file>Tango/16x16/actions/media-playback-pause.png</file>
+		<file>Tango/22x22/actions/media-playback-pause.png</file>
+		<file>Tango/32x32/actions/view-fullscreen.png</file>
+		<file>Tango/16x16/actions/view-fullscreen.png</file>
+		<file>Tango/22x22/actions/view-fullscreen.png</file>
+		<file>Tango/32x32/actions/view-refresh.png</file>
+		<file>Tango/16x16/actions/view-refresh.png</file>
+		<file>Tango/22x22/actions/view-refresh.png</file>
+	</qresource>
+</RCC>

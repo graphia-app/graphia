@@ -145,4 +145,4 @@ OTHER_FILES += \
 RESOURCES += \
     source/rendering/shaders.qrc \
     source/ui/qml.qrc \
-    source/images/images.qrc
+    source/icon-themes/icons.qrc

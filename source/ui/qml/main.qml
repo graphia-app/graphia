@@ -103,7 +103,6 @@ ApplicationWindow
     Action
     {
         id: fileOpenAction
-        iconSource: "/images/" + iconName + ".png"
         iconName: "document-open"
         text: qsTr("&Open...")
         shortcut: "Ctrl+O"
@@ -113,7 +112,6 @@ ApplicationWindow
     Action
     {
         id: fileOpenInTabAction
-        iconSource: "/images/" + iconName + ".png"
         iconName: "tab-new"
         text: qsTr("Open In New &Tab...")
         shortcut: "Ctrl+T"
@@ -123,7 +121,6 @@ ApplicationWindow
     Action
     {
         id: closeTabAction
-        iconSource: "/images/" + iconName + ".png"
         iconName: "window-close"
         text: qsTr("&Close Tab")
         shortcut: "Ctrl+W"
@@ -134,7 +131,6 @@ ApplicationWindow
     Action
     {
         id: quitAction
-        iconSource: "/images/" + iconName + ".png"
         iconName: "application-exit"
         text: qsTr("&Quit")
         shortcut: "Ctrl+Q"
@@ -144,7 +140,6 @@ ApplicationWindow
     Action
     {
         id: undoAction
-        iconSource: "/images/" + iconName + ".png"
         iconName: "undo"
         text: currentDocument ? currentDocument.nextUndoAction : qsTr("&Undo")
         shortcut: "Ctrl+Z"
@@ -155,7 +150,6 @@ ApplicationWindow
     Action
     {
         id: redoAction
-        iconSource: "/images/" + iconName + ".png"
         iconName: "redo"
         text: currentDocument ? currentDocument.nextRedoAction : qsTr("&Redo")
         shortcut: "Ctrl+Shift+Z"
@@ -166,7 +160,6 @@ ApplicationWindow
     Action
     {
         id: deleteAction
-        iconSource: "/images/" + iconName + ".png"
         iconName: "edit-delete"
         text: qsTr("&Delete")
         shortcut: "Del"
@@ -204,7 +197,6 @@ ApplicationWindow
     Action
     {
         id: pauseLayoutAction
-        iconSource: "/images/" + iconName + ".png"
         iconName: currentDocument && currentDocument.layoutIsPaused ? "media-playback-start" : "media-playback-pause"
         text: currentDocument && currentDocument.layoutIsPaused ? qsTr("&Resume Layout") : qsTr("&Pause Layout")
         shortcut: "Pause"
@@ -215,7 +207,6 @@ ApplicationWindow
     Action
     {
         id: overviewModeAction
-        iconSource: "/images/" + iconName + ".png"
         iconName: "view-fullscreen"
         text: qsTr("&Overview Mode")
         shortcut: "Esc"
@@ -226,7 +217,6 @@ ApplicationWindow
     Action
     {
         id: resetViewAction
-        iconSource: "/images/" + iconName + ".png"
         iconName: "view-refresh"
         text: qsTr("&Reset View")
         shortcut: "Ctrl+R"

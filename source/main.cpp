@@ -4,6 +4,7 @@
 #include <QQmlEngine>
 #include <QQmlApplicationEngine>
 #include <QtGlobal>
+#include <QIcon>
 
 #include "application.h"
 #include "ui/document.h"
@@ -19,6 +20,10 @@ int main(int argc, char *argv[])
     // to give it a hint that we want debug context
     if(qgetenv("OPENGL_DEBUG").toInt() > 0)
         qputenv("QSG_OPENGL_DEBUG", "1");
+
+#ifndef Q_OS_UNIX
+    QIcon::setThemeName("Tango");
+#endif
 
     bool hasOpenGLSupport = OpenGLFunctions::checkOpenGLSupport();
     Q_UNUSED(hasOpenGLSupport); //FIXME do something with this
