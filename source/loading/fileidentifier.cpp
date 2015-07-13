@@ -14,7 +14,7 @@ void FileIdentifier::registerFileType(const std::shared_ptr<Type> fileType)
     std::sort(_fileTypes.begin(), _fileTypes.end(),
     [](const std::shared_ptr<Type>& a, const std::shared_ptr<Type>& b)
     {
-        return a->collectiveDescription().compare(b->collectiveDescription(), Qt::CaseInsensitive);
+        return a->collectiveDescription().compare(b->collectiveDescription(), Qt::CaseInsensitive) < 0;
     });
 
     QString description = QObject::tr("All Files (");
