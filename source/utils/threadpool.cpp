@@ -47,5 +47,8 @@ ThreadPool::~ThreadPool()
 
     // Wait for all threads to finish
     for(auto& thread : _threads)
-        thread.join();
+    {
+        if(thread.joinable())
+            thread.join();
+    }
 }
