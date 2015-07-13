@@ -160,9 +160,17 @@ void GraphOverviewScene::layoutComponents()
 {
     std::stack<QPoint> coords;
 
+    std::vector<ComponentId> sortedComponentIds = _componentIds;
+
+    std::sort(sortedComponentIds.begin(), sortedComponentIds.end(),
+              [this](const ComponentId& a, const ComponentId& b)
+    {
+        return _renderSizeDivisors[a] < _renderSizeDivisors[b];
+    });
+
     //FIXME this is a mess
     coords.emplace(0, 0);
-    for(auto componentId : _componentIds)
+    for(auto componentId : sortedComponentIds)
     {
         auto coord = coords.top();
         coords.pop();

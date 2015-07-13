@@ -138,12 +138,6 @@ void ComponentManager::updateComponents(const Graph* graph)
     for(ComponentId componentId : _updatesRequired)
         updateGraphComponent(graph, componentId);
 
-    std::sort(_componentIdsList.begin(), _componentIdsList.end(),
-              [this](const ComponentId& a, const ComponentId& b)
-    {
-        return _componentsMap.at(a)->numNodes() > _componentsMap.at(b)->numNodes();
-    });
-
     _updatesRequired.clear();
 
     // Notify all the new components
