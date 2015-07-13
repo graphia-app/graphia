@@ -38,7 +38,7 @@ bool TexturePrivate::create(QOpenGLContext* ctx)
 {
     _funcs = ctx->functions();
     _funcs->initializeOpenGLFunctions();
-    glGenTextures(1, &_textureId);
+    //glGenTextures(1, &_textureId);
     return (_textureId != 0);
 }
 
@@ -46,29 +46,29 @@ void TexturePrivate::destroy()
 {
     if(_textureId)
     {
-        glDeleteTextures(1, &_textureId);
+        //glDeleteTextures(1, &_textureId);
         _textureId = 0;
     }
 }
 
 void TexturePrivate::bind()
 {
-    glBindTexture(_type, _textureId);
+    //glBindTexture(_type, _textureId);
 }
 
 void TexturePrivate::release()
 {
-    glBindTexture(_type, 0);
+    //glBindTexture(_type, 0);
 }
 
-void TexturePrivate::setParameter(GLenum param, GLenum value)
+void TexturePrivate::setParameter(GLenum, GLenum)
 {
-    glTexParameteri(_type, param, value);
+    //glTexParameteri(_type, param, value);
 }
 
-void TexturePrivate::setParameter(GLenum param, float value)
+void TexturePrivate::setParameter(GLenum, float)
 {
-    glTexParameterf(_type, param, value);
+    //glTexParameterf(_type, param, value);
 }
 
 Texture::Texture(TextureType type)
@@ -147,12 +147,12 @@ void Texture::setCubeMapImage(GLenum face, const QImage& image)
                   GL_RGBA, GL_UNSIGNED_BYTE, glImage.bits());
 }
 
-void Texture::setRawData2D(GLenum target, int mipmapLevel, GLenum internalFormat,
-                            int width, int height, int borderWidth,
-                            GLenum format, GLenum type, const void* data)
+void Texture::setRawData2D(GLenum, int, GLenum,
+                            int, int, int,
+                            GLenum, GLenum, const void*)
 {
-    glTexImage2D(target, mipmapLevel, internalFormat, width, height,
-                  borderWidth, format, type, data);
+    /*glTexImage2D(target, mipmapLevel, internalFormat, width, height,
+                  borderWidth, format, type, data);*/
 }
 
 void Texture::generateMipMaps()

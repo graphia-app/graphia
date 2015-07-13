@@ -212,7 +212,7 @@ void Sphere::render()
     _vao.bind();
 
     // Draw it!
-    glDrawElements(GL_TRIANGLES, indexCount(), GL_UNSIGNED_INT, 0);
+    //glDrawElements(GL_TRIANGLES, indexCount(), GL_UNSIGNED_INT, 0);
 
     _vao.release();
 }
@@ -316,19 +316,19 @@ void Sphere::computeTangentLinesBuffer(const MaterialPtr& mat, double scale)
 
 void Sphere::renderNormalLines()
 {
-    int nVerts  = (_slices + 1) *(_rings + 1); // One extra line of latitude
+    //int nVerts  = (_slices + 1) *(_rings + 1); // One extra line of latitude
 
     _vaoNormals.bind();
-    glDrawArrays(GL_LINES, 0, nVerts * 2);
+    //glDrawArrays(GL_LINES, 0, nVerts * 2);
     _vaoNormals.release();
 }
 
 void Sphere::renderTangentLines()
 {
-    int nVerts  = (_slices + 1) *(_rings + 1); // One extra line of latitude
+    //int nVerts  = (_slices + 1) *(_rings + 1); // One extra line of latitude
 
     _vaoTangents.bind();
-    glDrawArrays(GL_LINES, 0, nVerts * 2);
+    //glDrawArrays(GL_LINES, 0, nVerts * 2);
     _vaoTangents.release();
 }
 

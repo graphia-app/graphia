@@ -291,7 +291,7 @@ void Cube::render()
     _vao.bind();
 
     // Draw it!
-    glDrawElements(GL_TRIANGLES, indexCount(), GL_UNSIGNED_INT, 0);
+    //glDrawElements(GL_TRIANGLES, indexCount(), GL_UNSIGNED_INT, 0);
 
     _vao.release();
 }
