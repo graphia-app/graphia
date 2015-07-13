@@ -25,7 +25,7 @@ ApplicationWindow
     {
         for(var i = 1; i < Qt.application.arguments.length; i++)
         {
-            var fileUrl = Qt.resolvedUrl(Qt.application.arguments[i]);
+            var fileUrl = application.urlForFileName(Qt.application.arguments[i]);
             openFile(fileUrl, true);
         }
     }

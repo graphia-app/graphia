@@ -39,6 +39,7 @@ public slots:
 
     QString name() const { return _name; }
     QString baseFileNameForUrl(const QUrl& url) const { return url.fileName(); }
+    QUrl urlForFileName(const QString& fileName) const { return QUrl::fromLocalFile(fileName); }
 
     bool debugEnabled() const
     {
