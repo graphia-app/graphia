@@ -68,7 +68,6 @@ HEADERS += \
     source/utils/performancecounter.h \
     source/utils/semaphore.h \
     source/utils/threadpool.h \
-    source/utils/unique_lock_with_side_effects.h \
     source/utils/utils.h \
     source/application.h \
     source/ui/document.h \
