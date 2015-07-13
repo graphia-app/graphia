@@ -47,7 +47,7 @@ bool GraphQuickItem::interacting() const
     return _interacting;
 }
 
-void GraphQuickItem::setInteracting(bool interacting)
+void GraphQuickItem::setInteracting(bool interacting) const
 {
     if(_interacting != interacting)
     {

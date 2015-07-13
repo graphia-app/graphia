@@ -42,7 +42,7 @@ public:
     bool viewResetPending();
 
     bool interacting() const;
-    void setInteracting(bool interacting);
+    void setInteracting(bool interacting) const;
     bool viewIsReset() const;
     void setViewIsReset(bool viewIsReset);
     bool canEnterOverviewMode() const;
@@ -71,7 +71,7 @@ private:
     bool _viewResetPending;
     bool _overviewModeSwitchPending;
 
-    bool _interacting;
+    mutable bool _interacting;
     bool _viewIsReset;
     bool _canEnterOverviewMode;
 
