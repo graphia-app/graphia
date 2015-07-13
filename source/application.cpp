@@ -34,7 +34,7 @@ bool Application::parserAndModelForFile(const QUrl& url, const QString& fileType
     // graphModel = plugin->graphModelForFilename(filename);
     // graphFileParser = plugin->parserForFilename(filename);
 
-    QString fileName = url.path();
+    QString fileName = url.toLocalFile();
     QString baseFileName = baseFileNameForUrl(url);
 
     if(fileTypeName.compare("GML") == 0)

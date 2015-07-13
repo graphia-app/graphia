@@ -15,6 +15,10 @@
 bool PairwiseTxtFileParser::parse(Graph& graph)
 {
     QFileInfo info(_filename);
+
+    if(!info.exists())
+        return false;
+
     auto fileSize = info.size();
 
     QFile file(_filename);

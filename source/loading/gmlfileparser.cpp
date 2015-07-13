@@ -179,6 +179,10 @@ void GmlFileParser::onParsePositionIncremented(int64_t position)
 bool GmlFileParser::parse(Graph& graph)
 {
     QFileInfo info(_filename);
+
+    if(!info.exists())
+        return false;
+
     std::ifstream stream(_filename.toStdString());
     stream.unsetf(std::ios::skipws);
 

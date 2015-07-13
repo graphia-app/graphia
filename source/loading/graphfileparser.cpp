@@ -4,10 +4,8 @@
 
 #include "../utils/namethread.h"
 
-GraphFileParserThread::GraphFileParserThread(const QString& filename,
-                                             Graph& graph,
+GraphFileParserThread::GraphFileParserThread(Graph& graph,
                                              std::unique_ptr<GraphFileParser> graphFileParser) :
-    _filename(filename),
     _graph(graph),
     _graphFileParser(std::move(graphFileParser))
 {}
