@@ -76,7 +76,7 @@ QStringList Application::fileTypesOf(const QUrl& url) const
 {
     QStringList fileTypes;
 
-    for(auto fileType : _fileIdentifier.identify(url.path()))
+    for(auto fileType : _fileIdentifier.identify(url.toLocalFile()))
         fileTypes.append(fileType->name());
 
     return fileTypes;
