@@ -34,17 +34,21 @@ public:
 
     template<typename T> typename std::enable_if<std::is_base_of<Command, T>::value, void>::type execute(std::shared_ptr<T> command)
     {
-        executeReal(command);
+        QMetaObject::invokeMethod(this, "executeReal", Q_ARG(std::shared_ptr<Command>, command));
     }
 
     template<typename... Args> void execute(Args&&... args)
     {
-        executeReal(std::make_shared<Command>(std::forward<Args>(args)...));
+        QMetaObject::invokeMethod(this, "executeReal",
+                                  Q_ARG(std::shared_ptr<Command>,
+                                        std::make_shared<Command>(std::forward<Args>(args)...)));
     }
 
     template<typename... Args> void executeSynchronous(Args&&... args)
     {
-        executeReal(std::make_shared<Command>(std::forward<Args>(args)..., false));
+        QMetaObject::invokeMethod(this, "executeReal",
+                                  Q_ARG(std::shared_ptr<Command>,
+                                        std::make_shared<Command>(std::forward<Args>(args)..., false)));
     }
 
     void undo();
@@ -76,8 +80,6 @@ private:
         _thread = std::thread(std::forward<Args>(args)...);
     }
 
-    void executeReal(std::shared_ptr<Command> command);
-
     bool canUndoNoLocking() const;
     bool canRedoNoLocking() const;
 
@@ -86,11 +88,18 @@ private:
 
     std::thread _thread;
     mutable std::mutex _mutex;
+    std::unique_lock<std::mutex> _lock;
     std::atomic<bool> _busy;
 
     std::shared_ptr<Command> _currentCommand;
     int _commandProgress;
     QString _commandVerb;
+
+private slots:
+    void executeReal(std::shared_ptr<Command> command);
+
+    void undoReal();
+    void redoReal();
 
     void onCommandCompleted(const Command* command, const QString& pastParticiple);
 
