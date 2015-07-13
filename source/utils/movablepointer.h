@@ -14,6 +14,8 @@ public:
         std::unique_ptr<T>(std::make_unique<T>(std::forward<Args>(args)...))
     {}
 
+    explicit MovablePointer(MovablePointer&& other) noexcept : std::unique_ptr<T>(std::move(other)) {}
+
     inline operator T*() const { return this->get(); }
 };
 
