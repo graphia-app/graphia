@@ -45,6 +45,14 @@ static bool loadShaderProgram(QOpenGLShaderProgram& program, const QString& vert
     return true;
 }
 
+void GraphInitialiser::initialiseFromGraph(const Graph *graph)
+{
+    for(auto componentId : graph->componentIds())
+        onComponentAdded(graph, componentId, false);
+
+    onGraphChanged(graph);
+}
+
 GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
                              CommandManager& commandManager,
                              std::shared_ptr<SelectionManager> selectionManager) :
@@ -82,22 +90,21 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
     prepareSelectionMarkerVAO();
     prepareQuad();
 
+    Graph* graph = &_graphModel->graph();
+
+    connect(graph, &Graph::graphChanged, this, &GraphRenderer::onGraphChanged, Qt::DirectConnection);
+    connect(graph, &Graph::componentAdded, this, &GraphRenderer::onComponentAdded, Qt::DirectConnection);
+    connect(graph, &Graph::componentWillBeRemoved, this, &GraphRenderer::onComponentWillBeRemoved, Qt::DirectConnection);
+
     _graphOverviewScene = new GraphOverviewScene(this);
     _graphComponentScene = new GraphComponentScene(this);
 
     _graphOverviewInteractor = new GraphOverviewInteractor(_graphModel, _graphOverviewScene, commandManager, _selectionManager, this);
     _graphComponentInteractor = new GraphComponentInteractor(_graphModel, _graphComponentScene, commandManager, _selectionManager, this);
 
-    connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphRenderer::onGraphChanged, Qt::DirectConnection);
-    connect(&_graphModel->graph(), &Graph::componentAdded, this, &GraphRenderer::onComponentAdded, Qt::DirectConnection);
-    connect(&_graphModel->graph(), &Graph::componentWillBeRemoved, this, &GraphRenderer::onComponentWillBeRemoved, Qt::DirectConnection);
-
-    Graph* graph = &_graphModel->graph();
-
-    for(auto componentId : graph->componentIds())
-        onComponentAdded(graph, componentId, false);
-
-    onGraphChanged(graph);
+    initialiseFromGraph(graph);
+    _graphOverviewScene->initialiseFromGraph(graph);
+    _graphComponentScene->initialiseFromGraph(graph);
 
     if(graph->componentIds().size() == 1)
         switchToComponentMode(false);

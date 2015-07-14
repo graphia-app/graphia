@@ -38,9 +38,20 @@ class GraphComponentInteractor;
 
 class Command;
 
+class GraphInitialiser
+{
+public:
+    void initialiseFromGraph(const Graph* graph);
+
+protected:
+    virtual void onGraphChanged(const Graph*) = 0;
+    virtual void onComponentAdded(const Graph*, ComponentId, bool) = 0;
+};
+
 class GraphRenderer :
         public QObject,
         protected OpenGLFunctions,
+        public GraphInitialiser,
         public QQuickFramebufferObject::Renderer
 {
     Q_OBJECT

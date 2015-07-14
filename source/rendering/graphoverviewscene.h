@@ -2,6 +2,7 @@
 #define GRAPHOVERVIEWSCENE_H
 
 #include "scene.h"
+#include "graphrenderer.h"
 #include "openglfunctions.h"
 #include "transition.h"
 
@@ -14,11 +15,11 @@
 
 #include <QRect>
 
-class GraphRenderer;
 class GraphModel;
 
 class GraphOverviewScene :
         public Scene,
+        public GraphInitialiser,
         protected OpenGLFunctions
 {
     Q_OBJECT

@@ -2,17 +2,18 @@
 #define GRAPHCOMPONENTSCENE_H
 
 #include "scene.h"
+#include "graphrenderer.h"
 #include "openglfunctions.h"
 
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
 #include "transition.h"
 
-class GraphRenderer;
 class GraphComponentRenderer;
 
 class GraphComponentScene :
         public Scene,
+        public GraphInitialiser,
         protected OpenGLFunctions
 {
     Q_OBJECT
