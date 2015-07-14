@@ -177,6 +177,7 @@ private:
     void render();
     void synchronize(QQuickFramebufferObject* item);
 
+    std::mutex _resetOpenGLStateMutex;
     std::function<void()> resetOpenGLState;
 
     void finishTransitionToOverviewMode();
