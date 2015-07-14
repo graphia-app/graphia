@@ -22,6 +22,8 @@ bool OpenGLFunctions::checkOpenGLSupport()
     format.setMinorVersion(3);
     format.setProfile(QSurfaceFormat::CoreProfile);
 
+    QSurfaceFormat::setDefaultFormat(format);
+
     QOpenGLContext context;
     context.setFormat(format);
     context.create();
