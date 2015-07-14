@@ -140,7 +140,7 @@ ApplicationWindow
     Action
     {
         id: undoAction
-        iconName: "undo"
+        iconName: "edit-undo"
         text: currentDocument ? currentDocument.nextUndoAction : qsTr("&Undo")
         shortcut: "Ctrl+Z"
         enabled: currentDocument ? currentDocument.canUndo : false
@@ -150,7 +150,7 @@ ApplicationWindow
     Action
     {
         id: redoAction
-        iconName: "redo"
+        iconName: "edit-redo"
         text: currentDocument ? currentDocument.nextRedoAction : qsTr("&Redo")
         shortcut: "Ctrl+Shift+Z"
         enabled: currentDocument ? currentDocument.canRedo : false

@@ -7,12 +7,12 @@
 		<file>Tango/32x32/actions/tab-new.png</file>
 		<file>Tango/16x16/actions/tab-new.png</file>
 		<file>Tango/22x22/actions/tab-new.png</file>
-		<file>Tango/32x32/actions/undo.png</file>
-		<file>Tango/16x16/actions/undo.png</file>
-		<file>Tango/22x22/actions/undo.png</file>
-		<file>Tango/32x32/actions/redo.png</file>
-		<file>Tango/16x16/actions/redo.png</file>
-		<file>Tango/22x22/actions/redo.png</file>
+		<file>Tango/32x32/actions/edit-undo.png</file>
+		<file>Tango/16x16/actions/edit-undo.png</file>
+		<file>Tango/22x22/actions/edit-undo.png</file>
+		<file>Tango/32x32/actions/edit-redo.png</file>
+		<file>Tango/16x16/actions/edit-redo.png</file>
+		<file>Tango/22x22/actions/edit-redo.png</file>
 		<file>Tango/32x32/actions/edit-delete.png</file>
 		<file>Tango/16x16/actions/edit-delete.png</file>
 		<file>Tango/22x22/actions/edit-delete.png</file>
