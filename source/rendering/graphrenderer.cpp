@@ -577,7 +577,8 @@ void GraphRenderer::render()
     render2D();
     finishRender();
 
-    resetOpenGLState();
+    if(resetOpenGLState)
+        resetOpenGLState();
 }
 
 void GraphRenderer::synchronize(QQuickFramebufferObject* item)
@@ -591,6 +592,8 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
             if(graphQuickItem->window() != nullptr)
                 graphQuickItem->window()->resetOpenGLState();
         };
+
+        connect(graphQuickItem, &QObject::destroyed, this, [this] { resetOpenGLState = {}; });
     }
 
     if(graphQuickItem->viewResetPending())
