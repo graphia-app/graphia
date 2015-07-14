@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     if(qgetenv("OPENGL_DEBUG").toInt() > 0)
         qputenv("QSG_OPENGL_DEBUG", "1");
 
-#ifndef Q_OS_UNIX
+#ifndef Q_OS_LINUX
     QIcon::setThemeName("Tango");
 #endif
 
