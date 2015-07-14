@@ -289,7 +289,7 @@ const GraphComponent* ComponentManager::componentById(ComponentId componentId) c
     if(_componentsMap.find(componentId) != _componentsMap.end())
         return _componentsMap.at(componentId).get();
 
-    Q_ASSERT(nullptr);
+    Q_ASSERT(!"ComponentManager::componentById returning nullptr");
     return nullptr;
 }
 

@@ -260,7 +260,7 @@ const ImmutableGraph* Graph::componentById(ComponentId componentId) const
     if(_componentManager)
         return _componentManager->componentById(componentId);
 
-    Q_ASSERT(nullptr);
+    Q_ASSERT(!"Graph::componentById returning nullptr");
     return nullptr;
 }
 
