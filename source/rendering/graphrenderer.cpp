@@ -590,22 +590,22 @@ void GraphRenderer::render()
 
 void GraphRenderer::synchronize(QQuickFramebufferObject* item)
 {
-    auto graphQuickItem = qobject_cast<GraphQuickItem*>(item);
-
     if(!resetOpenGLState)
     {
-        resetOpenGLState = [graphQuickItem]
+        resetOpenGLState = [item]
         {
-            if(graphQuickItem->window() != nullptr)
-                graphQuickItem->window()->resetOpenGLState();
+            if(item->window() != nullptr)
+                item->window()->resetOpenGLState();
         };
 
-        connect(graphQuickItem, &QObject::destroyed, this, [this]
+        connect(item, &QObject::destroyed, this, [this]
         {
             std::unique_lock<std::mutex>(_resetOpenGLStateMutex);
             resetOpenGLState = []{};
         }, Qt::DirectConnection);
     }
+
+    auto graphQuickItem = qobject_cast<GraphQuickItem*>(item);
 
     if(graphQuickItem->viewResetPending())
         resetView();
