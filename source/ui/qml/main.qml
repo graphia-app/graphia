@@ -76,7 +76,9 @@ ApplicationWindow
         console.assert(fileTypes.length === 1)
         var fileType = fileTypes[0];
 
-        if(currentDocument == null || inNewTab)
+        if(currentDocument != null && !inNewTab)
+            tabView.replaceTab();
+        else
             tabView.createTab();
 
         tabView.openInCurrentTab(fileUrl, fileType);
@@ -334,6 +336,19 @@ ApplicationWindow
         {
             var tab = addTab("", tabComponent);
             tabView.currentIndex = tabView.count - 1;
+
+            // Make the tab title match the document title
+            tab.title = Qt.binding(function() { return tab.item.title });
+
+            return tab;
+        }
+
+        function replaceTab()
+        {
+            var newIndex = tabView.currentIndex;
+            removeTab(tabView.currentIndex);
+            var tab = insertTab(newIndex, "", tabComponent);
+            tabView.currentIndex = newIndex;
 
             // Make the tab title match the document title
             tab.title = Qt.binding(function() { return tab.item.title });
