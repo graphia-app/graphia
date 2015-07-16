@@ -332,10 +332,11 @@ ApplicationWindow
         tabsVisible: count > 1
         frameVisible: count > 1
 
-        function createTab()
+        function insertTabAtIndex(index)
         {
-            var tab = addTab("", tabComponent);
-            tabView.currentIndex = tabView.count - 1;
+            var tab = insertTab(index, "", tabComponent);
+            tab.active = true;
+            tabView.currentIndex = index;
 
             // Make the tab title match the document title
             tab.title = Qt.binding(function() { return tab.item.title });
@@ -343,17 +344,20 @@ ApplicationWindow
             return tab;
         }
 
+        function createTab()
+        {
+            return insertTabAtIndex(tabView.count);
+        }
+
         function replaceTab()
         {
-            var newIndex = tabView.currentIndex;
+            var oldIndex = tabView.currentIndex;
             removeTab(tabView.currentIndex);
-            var tab = insertTab(newIndex, "", tabComponent);
-            tabView.currentIndex = newIndex;
 
-            // Make the tab title match the document title
-            tab.title = Qt.binding(function() { return tab.item.title });
+            //FIXME for some reason the DocumentUI doesn't get destroyed here
+            // This is a suspected Qt bug
 
-            return tab;
+            return insertTabAtIndex(oldIndex);
         }
 
         function openInCurrentTab(fileUrl, fileType)
