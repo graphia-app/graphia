@@ -6,6 +6,7 @@
 #include "../graph/graph.h"
 
 #include <QPoint>
+#include <QNativeGestureEvent>
 
 class GraphModel;
 class CommandManager;
@@ -61,6 +62,8 @@ private:
 
     void wheelEvent(QWheelEvent* e) final;
 
+    void nativeGestureEvent(QNativeGestureEvent* e);
+
     virtual void leftMouseDown();
     virtual void leftMouseUp();
     virtual void leftDrag();
@@ -72,8 +75,9 @@ private:
     virtual void leftDoubleClick() {}
     virtual void rightDoubleClick() {}
 
-    virtual void wheelUp() {}
-    virtual void wheelDown() {}
+    virtual void wheelMove(float) {}
+    virtual void trackpadScrollGesture(float) {}
+    virtual void trackpadZoomGesture(float) {}
 
     virtual GraphComponentRenderer* rendererAtPosition(const QPoint& position) = 0;
     virtual QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) = 0;

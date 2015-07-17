@@ -26,8 +26,9 @@ private:
 
     void leftDoubleClick();
 
-    virtual void wheelUp();
-    virtual void wheelDown();
+    void wheelMove(float angle);
+    void trackpadScrollGesture(float pixels);
+    void trackpadZoomGesture(float value);
 
     GraphComponentRenderer* rendererAtPosition(const QPoint& position);
     QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position);

@@ -108,14 +108,23 @@ void GraphComponentInteractor::leftDoubleClick()
     }
 }
 
-void GraphComponentInteractor::wheelUp()
+void GraphComponentInteractor::wheelMove(float angle)
 {
-    rendererUnderCursor()->zoom(1.0f);
+    const float WHEEL_STEP_TRANSITION_SIZE = 0.2f / 120.0f;
+
+    rendererUnderCursor()->zoom(angle * WHEEL_STEP_TRANSITION_SIZE, true);
 }
 
-void GraphComponentInteractor::wheelDown()
+void GraphComponentInteractor::trackpadScrollGesture(float pixels)
 {
-    rendererUnderCursor()->zoom(-1.0f);
+    const float PIXELS_ZOOM_SCALING = 0.0015f;
+
+    rendererUnderCursor()->zoom(pixels * PIXELS_ZOOM_SCALING, false);
+}
+
+void GraphComponentInteractor::trackpadZoomGesture(float value)
+{
+    rendererUnderCursor()->zoom(value, false);
 }
 
 GraphComponentRenderer* GraphComponentInteractor::rendererAtPosition(const QPoint&)

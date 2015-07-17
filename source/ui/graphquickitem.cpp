@@ -100,7 +100,6 @@ bool GraphQuickItem::overviewModeSwitchPending()
 QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const
 {
     auto graphRenderer = new GraphRenderer(_graphModel, *_commandManager, _selectionManager);
-
     connect(this, &GraphQuickItem::commandWillExecuteAsynchronously, graphRenderer, &GraphRenderer::onCommandWillExecuteAsynchronously, Qt::DirectConnection);
     connect(this, &GraphQuickItem::commandCompleted, graphRenderer, &GraphRenderer::onCommandCompleted, Qt::DirectConnection);
     connect(this, &GraphQuickItem::commandCompleted, this, &GraphQuickItem::update);
@@ -144,6 +143,17 @@ std::unique_ptr<QEvent> GraphQuickItem::nextEvent()
     }
 
     return {};
+}
+
+bool GraphQuickItem::event(QEvent* e)
+{
+    switch(e->type())
+    {
+    case QEvent::Type::NativeGesture: enqueueEvent(dynamic_cast<QNativeGestureEvent*>(e)); return true;
+    default: break;
+    }
+
+    return QQuickItem::event(e);
 }
 
 void GraphQuickItem::onLayoutChanged()

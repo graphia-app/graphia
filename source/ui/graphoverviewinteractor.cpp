@@ -38,14 +38,19 @@ void GraphOverviewInteractor::leftDoubleClick()
     }
 }
 
-void GraphOverviewInteractor::wheelUp()
+void GraphOverviewInteractor::wheelMove(float angle)
 {
-    _scene->zoom(1.0f);
+    _scene->zoom(angle);
 }
 
-void GraphOverviewInteractor::wheelDown()
+void GraphOverviewInteractor::trackpadScrollGesture(float pixels)
 {
-    _scene->zoom(-1.0f);
+    _scene->zoom(pixels);
+}
+
+void GraphOverviewInteractor::trackpadZoomGesture(float value)
+{
+    _scene->zoom(value);
 }
 
 GraphComponentRenderer* GraphOverviewInteractor::rendererAtPosition(const QPoint& pos)

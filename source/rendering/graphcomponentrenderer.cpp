@@ -642,13 +642,13 @@ bool GraphComponentRenderer::transitionActive()
     return _graphRenderer->transition().active() || _zoomTransition.active();
 }
 
-void GraphComponentRenderer::zoom(float direction)
+void GraphComponentRenderer::zoom(float delta, bool doTransition)
 {
-    if(direction == 0.0f || _graphRenderer->transition().active())
+    if(delta == 0.0f || _graphRenderer->transition().active())
         return;
 
     // Don't allow zooming out if autozooming
-    if(direction < 0.0f && _viewData._autoZooming)
+    if(delta < 0.0f && _viewData._autoZooming)
         return;
 
     float size = 0.0f;
@@ -659,10 +659,9 @@ void GraphComponentRenderer::zoom(float direction)
         size = _graphModel->nodeVisuals().at(_viewData._focusNodeId)._size;
 
     const float INTERSECTION_AVOIDANCE_OFFSET = 1.0f;
-    const float ZOOM_STEP_FRACTION = 0.2f;
-    float delta = (_targetZoomDistance - size - INTERSECTION_AVOIDANCE_OFFSET) * ZOOM_STEP_FRACTION;
+    delta *= (_targetZoomDistance - size - INTERSECTION_AVOIDANCE_OFFSET);
 
-    _targetZoomDistance -= delta * direction;
+    _targetZoomDistance -= delta;
     _targetZoomDistance = std::max(_targetZoomDistance, MINIMUM_ZOOM_DISTANCE);
 
     if(_targetZoomDistance > _entireComponentZoomDistance)
@@ -678,18 +677,23 @@ void GraphComponentRenderer::zoom(float direction)
 
     if(visible())
     {
-        if(!_zoomTransition.active())
-            _graphRenderer->rendererStartedTransition();
+        if(doTransition)
+        {
+            if(!_zoomTransition.active())
+                _graphRenderer->rendererStartedTransition();
 
-        _zoomTransition.start(0.1f, Transition::Type::Linear,
-            [=](float f)
-            {
-                _viewData._zoomDistance = startZoomDistance + ((_targetZoomDistance - startZoomDistance) * f);
-            },
-            [this]
-            {
-                _graphRenderer->rendererFinishedTransition();
-            });
+            _zoomTransition.start(0.1f, Transition::Type::Linear,
+                [=](float f)
+                {
+                    _viewData._zoomDistance = startZoomDistance + ((_targetZoomDistance - startZoomDistance) * f);
+                },
+                [this]
+                {
+                    _graphRenderer->rendererFinishedTransition();
+                });
+        }
+        else
+            _viewData._zoomDistance = _targetZoomDistance;
     }
     else
         _viewData._zoomDistance = _targetZoomDistance;

@@ -21,6 +21,7 @@
 #include <QColor>
 #include <QQuickWindow>
 #include <QEvent>
+#include <QNativeGestureEvent>
 
 static bool loadShaderProgram(QOpenGLShaderProgram& program, const QString& vertexShader, const QString& fragmentShader)
 {
@@ -621,14 +622,16 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
             auto e = std::move(graphQuickItem->nextEvent());
             auto mouseEvent = dynamic_cast<QMouseEvent*>(e.get());
             auto wheelEvent = dynamic_cast<QWheelEvent*>(e.get());
+            auto nativeGestureEvent = dynamic_cast<QNativeGestureEvent*>(e.get());
 
             switch(e->type())
             {
-            case QEvent::Type::MouseButtonPress:    _interactor->mousePressEvent(mouseEvent);       break;
-            case QEvent::Type::MouseButtonRelease:  _interactor->mouseReleaseEvent(mouseEvent);     break;
-            case QEvent::Type::MouseMove:           _interactor->mouseMoveEvent(mouseEvent);        break;
-            case QEvent::Type::MouseButtonDblClick: _interactor->mouseDoubleClickEvent(mouseEvent); break;
-            case QEvent::Type::Wheel:               _interactor->wheelEvent(wheelEvent);            break;
+            case QEvent::Type::MouseButtonPress:    _interactor->mousePressEvent(mouseEvent);               break;
+            case QEvent::Type::MouseButtonRelease:  _interactor->mouseReleaseEvent(mouseEvent);             break;
+            case QEvent::Type::MouseMove:           _interactor->mouseMoveEvent(mouseEvent);                break;
+            case QEvent::Type::MouseButtonDblClick: _interactor->mouseDoubleClickEvent(mouseEvent);         break;
+            case QEvent::Type::Wheel:               _interactor->wheelEvent(wheelEvent);                    break;
+            case QEvent::Type::NativeGesture:       _interactor->nativeGestureEvent(nativeGestureEvent);    break;
             default: break;
             }
         }

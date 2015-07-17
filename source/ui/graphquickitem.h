@@ -58,6 +58,7 @@ public:
     std::unique_ptr<QEvent> nextEvent();
 
 private:
+    bool event(QEvent* e);
     void mousePressEvent(QMouseEvent* e);
     void mouseReleaseEvent(QMouseEvent* e);
     void mouseMoveEvent(QMouseEvent* e);

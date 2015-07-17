@@ -410,8 +410,16 @@ void GraphCommonInteractor::wheelEvent(QWheelEvent* wheelEvent)
 {
     _rendererUnderCursor = rendererAtPosition(wheelEvent->pos());
 
-    if(wheelEvent->angleDelta().y() > 0.0f)
-        wheelUp();
+    if(wheelEvent->source() == Qt::MouseEventSynthesizedBySystem)
+        trackpadScrollGesture(wheelEvent->pixelDelta().y());
     else
-        wheelDown();
+        wheelMove(wheelEvent->angleDelta().y());
+}
+
+void GraphCommonInteractor::nativeGestureEvent(QNativeGestureEvent* nativeEvent)
+{
+    _rendererUnderCursor = rendererAtPosition(nativeEvent->pos());
+
+    if(nativeEvent->gestureType() == Qt::ZoomNativeGesture)
+        trackpadZoomGesture(nativeEvent->value());
 }

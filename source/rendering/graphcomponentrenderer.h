@@ -76,7 +76,7 @@ public:
 
     Camera* camera() { return &_viewData._camera; }
     const Camera* camera() const { return &_viewData._camera; }
-    void zoom(float delta);
+    void zoom(float delta, bool doTransition);
     void zoomToDistance(float distance);
 
     void updatePositionalData();

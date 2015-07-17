@@ -5,6 +5,7 @@
 
 class QMouseEvent;
 class QWheelEvent;
+class QNativeGestureEvent;
 class QKeyEvent;
 
 class Interactor : public QObject
@@ -23,6 +24,7 @@ public:
     virtual void mouseMoveEvent(QMouseEvent*) = 0;
     virtual void mouseDoubleClickEvent(QMouseEvent*) = 0;
     virtual void wheelEvent(QWheelEvent*) = 0;
+    virtual void nativeGestureEvent(QNativeGestureEvent*) = 0;
 
     virtual void keyPressEvent(QKeyEvent*) {}
     virtual void keyReleaseEvent(QKeyEvent*) {}
