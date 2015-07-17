@@ -105,7 +105,7 @@ void GraphOverviewScene::zoom(float delta)
 {
     if(delta > 0.0f)
         setRenderSizeDivisor(_renderSizeDivisor / 2);
-    else
+    else if(_renderSizeDivisor < 64)
         setRenderSizeDivisor(_renderSizeDivisor * 2);
 }
 
