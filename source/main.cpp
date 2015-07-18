@@ -17,7 +17,6 @@
 int main(int argc, char *argv[])
 {
     std::cout << "1";
-    ThreadPool threadPool;
     std::cout << "2";
     QApplication app(argc, argv);
     std::cout << "3";
@@ -43,6 +42,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<GraphQuickItem>("com.kajeka", 1, 0, "Graph");
 
     std::cout << "7";
+    ThreadPool threadPool;
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
 
