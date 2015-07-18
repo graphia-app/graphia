@@ -3,8 +3,7 @@
 #include "barneshuttree.h"
 
 #include "../utils/utils.h"
-
-ThreadPool ForceDirectedLayout::_threadPool("FDPLayout");
+#include "../utils/threadpool.h"
 
 static QVector3D normalized(const QVector3D& v)
 {
@@ -74,7 +73,7 @@ void ForceDirectedLayout::executeReal(uint64_t iteration)
     barnesHutTree.build(_graph, _positions);
 
     // Repulsive forces
-    auto repulsiveResults = _threadPool.concurrentForEach(nodeIds.cbegin(), nodeIds.cend(),
+    auto repulsiveResults = concurrent_for(nodeIds.cbegin(), nodeIds.cend(),
         [this, &barnesHutTree](const NodeId& nodeId)
         {
             if(shouldCancel())
@@ -88,7 +87,7 @@ void ForceDirectedLayout::executeReal(uint64_t iteration)
         }, false);
 
     // Attractive forces
-    auto attractiveResults = _threadPool.concurrentForEach(edgeIds.cbegin(), edgeIds.cend(),
+    auto attractiveResults = concurrent_for(edgeIds.cbegin(), edgeIds.cend(),
         [this](const EdgeId& edgeId)
         {
             if(shouldCancel())
@@ -113,7 +112,7 @@ void ForceDirectedLayout::executeReal(uint64_t iteration)
     if(shouldCancel())
         return;
 
-    _threadPool.concurrentForEach(nodeIds.cbegin(), nodeIds.cend(),
+    concurrent_for(nodeIds.cbegin(), nodeIds.cend(),
         [this](const NodeId& nodeId)
         {
             dampOscillations(_prevDisplacements[nodeId], _displacements[nodeId]);

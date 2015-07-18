@@ -10,10 +10,13 @@
 #include "ui/document.h"
 #include "ui/graphquickitem.h"
 
+#include "utils/threadpool.h"
+
 #include "rendering/openglfunctions.h"
 
 int main(int argc, char *argv[])
 {
+    ThreadPool threadPool;
     QApplication app(argc, argv);
 
     // Since Qt is responsible for managing OpenGL, we need

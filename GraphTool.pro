@@ -77,7 +77,8 @@ HEADERS += \
     source/utils/movablepointer.h \
     source/graph/abstractcomponentmanager.h \
     source/graph/componentmanager.h \
-    source/utils/debugpauser.h
+    source/utils/debugpauser.h \
+    source/utils/singleton.h
 
 SOURCES += \
     source/main.cpp \

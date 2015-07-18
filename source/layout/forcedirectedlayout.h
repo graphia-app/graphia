@@ -1,11 +1,10 @@
-#ifndef EADESLAYOUT_H
-#define EADESLAYOUT_H
+#ifndef FORCEDIRECTEDLAYOUT_H
+#define FORCEDIRECTEDLAYOUT_H
 
 #include "layout.h"
 #include "sequencelayout.h"
 #include "centreinglayout.h"
 #include "../graph/graphmodel.h"
-#include "../utils/threadpool.h"
 
 #include <QVector3D>
 
@@ -17,7 +16,6 @@ class ForceDirectedLayout : public Layout
 private:
     std::vector<QVector3D> _prevDisplacements;
     std::vector<QVector3D> _displacements;
-    static ThreadPool _threadPool;
 
 public:
     ForceDirectedLayout(const ImmutableGraph& graph,
@@ -44,4 +42,4 @@ public:
     }
 };
 
-#endif // EADESLAYOUT_H
+#endif // FORCEDIRECTEDLAYOUT_H

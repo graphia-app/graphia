@@ -1,0 +1,32 @@
+#ifndef SINGLETON_H
+#define SINGLETON_H
+
+#include <QtGlobal>
+
+template<typename T> class Singleton
+{
+public:
+  Singleton()
+  {
+    Q_ASSERT(_singletonPtr == nullptr);
+    _singletonPtr = static_cast<T*>(this);
+  }
+
+  virtual ~Singleton()
+  {
+    Q_ASSERT(_singletonPtr != nullptr);
+    _singletonPtr = nullptr;
+  }
+
+  Singleton(const Singleton&) = delete;
+  Singleton& operator=(const Singleton&) = delete;
+
+  static T* instance() { return _singletonPtr; }
+
+private:
+  static T* _singletonPtr;
+};
+
+template<typename T> T* Singleton <T>::_singletonPtr = nullptr;
+
+#endif

@@ -1,6 +1,8 @@
 #ifndef THREADPOOL_H
 #define THREADPOOL_H
 
+#include "singleton.h"
+
 #include <QString>
 
 #include <algorithm>
@@ -19,7 +21,7 @@ template<typename It> static It incrementIterator(It it, It last, const int n)
     return it + std::min(n, static_cast<const int>(std::distance(it, last)));
 }
 
-class ThreadPool
+class ThreadPool : public Singleton<ThreadPool>
 {
 private:
     std::vector<std::thread> _threads;
@@ -30,7 +32,7 @@ private:
     std::atomic<int> _activeThreads;
 
 public:
-    ThreadPool(const QString& threadNamePrefix = QString("ThreadPool"),
+    ThreadPool(const QString& threadNamePrefix = QString("Worker"),
                int numThreads = std::thread::hardware_concurrency());
     ~ThreadPool();
 
@@ -39,7 +41,7 @@ public:
 
     template<typename Fn, typename... Args> using ReturnType = typename std::result_of<Fn(Args...)>::type;
 
-    template<typename Fn, typename... Args> std::future<ReturnType<Fn, Args...>> execute(Fn&& f, Args&&... args)
+    template<typename Fn, typename... Args> std::future<ReturnType<Fn, Args...>> execute_on_threadpool(Fn&& f, Args&&... args)
     {
         if(_stop)
             return std::future<ReturnType<Fn, Args...>>();
@@ -129,7 +131,7 @@ public:
     template<typename It, typename Fn> using FnExecutor =
         Executor<It, Fn, typename std::result_of<Fn(typename It::value_type)>::type>;
 
-    template<typename It, typename Fn> auto concurrentForEach(It first, It last, Fn&& f, bool blocking = true) ->
+    template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn&& f, bool blocking = true) ->
         Results<typename FnExecutor<It, Fn>::ValueType>
     {
         const int numElements = std::distance(first, last);
@@ -143,7 +145,7 @@ public:
         for(It it = first; it < last; it = incrementIterator(it, last, numElementsPerThread))
         {
             It threadLast = incrementIterator(it, last, numElementsPerThread);
-            futures.emplace_back(execute([executor, it, threadLast, f]() mutable
+            futures.emplace_back(execute_on_threadpool([executor, it, threadLast, f]() mutable
             {
                 return executor(it, threadLast, std::move(f));
             }));
@@ -157,5 +159,20 @@ public:
         return results;
     }
 };
+
+template<typename Fn, typename... Args> std::future<ThreadPool::ReturnType<Fn, Args...>> execute_on_threadpool(Fn&& f, Args&&... args)
+{
+    ThreadPool* threadPool = ThreadPool::instance();
+
+    return threadPool->execute_on_threadpool(std::move(f), args...);
+}
+
+template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn&& f, bool blocking = true) ->
+    ThreadPool::Results<typename ThreadPool::FnExecutor<It, Fn>::ValueType>
+{
+    ThreadPool* threadPool = ThreadPool::instance();
+
+    return threadPool->concurrent_for(first, last, std::move(f), blocking);
+}
 
 #endif // THREADPOOL_H
