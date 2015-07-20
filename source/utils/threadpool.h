@@ -63,19 +63,20 @@ public:
         return taskPtr->get_future();
     }
 
-    template<typename ValueType> class Results
+private:
+    template<typename ValueType> class ResultsType
     {
         friend class ThreadPool;
 
     private:
         std::vector<std::future<ValueType>> _futures;
 
-        Results(std::vector<std::future<ValueType>>& futures) :
+        ResultsType(std::vector<std::future<ValueType>>& futures) :
             _futures(std::move(futures))
         {}
 
     public:
-        Results(Results&& other) :
+        ResultsType(ResultsType&& other) :
             _futures(std::move(other._futures))
         {}
 
@@ -131,8 +132,12 @@ public:
     template<typename It, typename Fn> using FnExecutor =
         Executor<It, Fn, typename std::result_of<Fn(typename It::value_type)>::type>;
 
+public:
+    template<typename It, typename Fn> using Results =
+        ResultsType<typename FnExecutor<It, Fn>::ValueType>;
+
     template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn&& f, bool blocking = true) ->
-        Results<typename FnExecutor<It, Fn>::ValueType>
+        Results<It, Fn>
     {
         const int numElements = std::distance(first, last);
         const int numThreads = static_cast<int>(_threads.size());
@@ -151,7 +156,7 @@ public:
             }));
         }
 
-        auto results = Results<typename FnExecutor<It, Fn>::ValueType>(futures);
+        auto results = Results<It, Fn>(futures);
 
         if(blocking)
             results.wait();
@@ -162,17 +167,13 @@ public:
 
 template<typename Fn, typename... Args> std::future<ThreadPool::ReturnType<Fn, Args...>> execute_on_threadpool(Fn&& f, Args&&... args)
 {
-    ThreadPool* threadPool = ThreadPool::instance();
-
-    return threadPool->execute_on_threadpool(std::move(f), args...);
+    return ThreadPool::instance()->execute_on_threadpool(std::move(f), args...);
 }
 
 template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn&& f, bool blocking = true) ->
-    ThreadPool::Results<typename ThreadPool::FnExecutor<It, Fn>::ValueType>
+    ThreadPool::Results<It, Fn>
 {
-    ThreadPool* threadPool = ThreadPool::instance();
-
-    return threadPool->concurrent_for(first, last, std::move(f), blocking);
+    return ThreadPool::instance()->concurrent_for(first, last, std::move(f), blocking);
 }
 
 #endif // THREADPOOL_H
