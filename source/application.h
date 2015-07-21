@@ -37,7 +37,7 @@ public slots:
     bool canOpenAnyOf(const QStringList& fileTypeNames) const;
     QStringList fileTypesOf(const QUrl& url) const;
 
-    QString name() const { return _name; }
+    static QString name() { return _name; }
     QString baseFileNameForUrl(const QUrl& url) const { return url.fileName(); }
     QUrl urlForFileName(const QString& fileName) const { return QUrl::fromLocalFile(fileName); }
 

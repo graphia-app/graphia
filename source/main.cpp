@@ -5,6 +5,7 @@
 #include <QQmlApplicationEngine>
 #include <QtGlobal>
 #include <QIcon>
+#include <QMessageBox>
 
 #include "application.h"
 #include "ui/document.h"
@@ -27,8 +28,14 @@ int main(int argc, char *argv[])
     QIcon::setThemeName("Tango");
 #endif
 
-    bool hasOpenGLSupport = OpenGLFunctions::checkOpenGLSupport();
-    Q_UNUSED(hasOpenGLSupport); //FIXME do something with this
+    if(!OpenGLFunctions::hasOpenGLSupport())
+    {
+        QMessageBox::critical(nullptr, QObject::tr("OpenGL support"),
+                              QObject::tr("The version of OpenGL found is insufficient to run %1. "
+                                          "Please install the latest video drivers available from "
+                                          "your vendor.").arg(Application::name()), QMessageBox::Close);
+        return 1;
+    }
 
     qmlRegisterType<Application>("com.kajeka", 1, 0, "Application");
     qmlRegisterType<Document>("com.kajeka", 1, 0, "Document");

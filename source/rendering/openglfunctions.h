@@ -13,7 +13,7 @@ public:
 
     void resolveOpenGLFunctions();
 
-    static bool checkOpenGLSupport();
+    static bool hasOpenGLSupport();
 };
 
 #endif // OPENGLFUNCTIONS_H

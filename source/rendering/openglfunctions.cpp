@@ -15,7 +15,7 @@ void OpenGLFunctions::resolveOpenGLFunctions()
     }
 }
 
-bool OpenGLFunctions::checkOpenGLSupport()
+bool OpenGLFunctions::hasOpenGLSupport()
 {
     QSurfaceFormat format;
     format.setMajorVersion(3);
