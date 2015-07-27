@@ -2,8 +2,6 @@
 #include "graphrenderer.h"
 
 #include "camera.h"
-#include "primitives/quad.h"
-#include "material.h"
 
 #include "../graph/graphmodel.h"
 #include "../layout/layout.h"
@@ -60,24 +58,15 @@ void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, 
 
     resolveOpenGLFunctions();
 
-    //FIXME: eliminate Material, set shader directly?
-    MaterialPtr nodeMaterial(new Material);
-    nodeMaterial->setShaders(":/shaders/instancednodes.vert", ":/shaders/ads.frag");
-
     _sphere.setRadius(1.0f);
     _sphere.setRings(16);
     _sphere.setSlices(16);
-    _sphere.setMaterial(nodeMaterial);
-    _sphere.create();
-
-    MaterialPtr edgeMaterial(new Material);
-    edgeMaterial->setShaders(":/shaders/instancededges.vert", ":/shaders/ads.frag");
+    _sphere.create(_graphRenderer->_nodesShader);
 
     _cylinder.setRadius(1.0f);
     _cylinder.setLength(1.0f);
     _cylinder.setSlices(8);
-    _cylinder.setMaterial(edgeMaterial);
-    _cylinder.create();
+    _cylinder.create(_graphRenderer->_edgesShader);
 
     if(!_debugLinesDataVAO.isCreated())
         _debugLinesDataVAO.create();
@@ -903,7 +892,7 @@ void GraphComponentRenderer::prepareNodeVAO()
 {
     _sphere.vertexArrayObject()->bind();
 
-    QOpenGLShaderProgramPtr shader = _sphere.material()->shader();
+    QOpenGLShaderProgram* shader = &_graphRenderer->_nodesShader;
     shader->bind();
     _nodePositionBuffer.bind();
     shader->enableAttributeArray("point");
@@ -932,7 +921,7 @@ void GraphComponentRenderer::prepareEdgeVAO()
 {
     _cylinder.vertexArrayObject()->bind();
 
-    QOpenGLShaderProgramPtr shader = _cylinder.material()->shader();
+    QOpenGLShaderProgram* shader = &_graphRenderer->_edgesShader;
     shader->bind();
     _edgePositionBuffer.bind();
     shader->enableAttributeArray("source");

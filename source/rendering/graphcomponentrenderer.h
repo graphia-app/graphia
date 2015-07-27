@@ -23,7 +23,6 @@
 #include <vector>
 
 class GraphRenderer;
-class Quad;
 class GraphModel;
 class SelectionManager;
 class Camera;

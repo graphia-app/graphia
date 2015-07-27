@@ -3,10 +3,11 @@
 
 #include <QObject>
 
-#include "../material.h"
-#include "qopenglvertexarrayobject.h"
-
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
+
+#include <vector>
 
 class Cylinder : public QObject
 {
@@ -19,60 +20,30 @@ class Cylinder : public QObject
 public:
     explicit Cylinder(QObject* parent = 0);
 
-    void setMaterial(const MaterialPtr& material);
-    MaterialPtr material() const;
-
-    float radius() const
-    {
-        return _radius;
-    }
-
-    float length() const
-    {
-        return _length;
-    }
-
-    int slices() const
-    {
-        return _slices;
-    }
+    float radius() const { return _radius; }
+    int length() const { return _length; }
+    int slices() const { return _slices; }
 
     QOpenGLVertexArrayObject* vertexArrayObject() { return &_vao; }
 
     int indexCount() const { return 6 * _slices; }
 
-    void bindBuffers();
-
 public slots:
-    void setRadius(float arg)
-    {
-        _radius = arg;
-    }
+    void setRadius(float radius) { _radius = radius; }
+    void setLength(int length) { _length = length; }
+    void setSlices(int slices) { _slices = slices; }
 
-    void setLength(float arg)
-    {
-        _length = arg;
-    }
-
-    void setSlices(int arg)
-    {
-        _slices = arg;
-    }
-
-    void create();
+    void create(QOpenGLShaderProgram& shader);
 
 private:
-    void generateVertexData(QVector<float>& vertices, QVector<float>& normals, QVector<float>&, QVector<float>&,
-                             QVector<unsigned int>& indices);
-    void updateVertexArrayObject();
-
-    MaterialPtr _material;
+    void generateVertexData(std::vector<float>& vertices, std::vector<float>& normals,
+                            std::vector<float>& texCoords, std::vector<float>&tangents,
+                            std::vector<unsigned int>& indices);
 
     float _radius;
     float _length;
-    int _slices; // Longitude
+    int _slices;
 
-    // QVertexBuffers to hold the data
     QOpenGLBuffer _positionBuffer;
     QOpenGLBuffer _normalBuffer;
     QOpenGLBuffer _textureCoordBuffer;
@@ -80,9 +51,6 @@ private:
     QOpenGLBuffer _tangentBuffer;
 
     QOpenGLVertexArrayObject _vao;
-
-    QOpenGLBuffer _normalLines, _tangentLines;
-    QOpenGLVertexArrayObject _vaoNormals, _vaoTangents;
 };
 
 #endif // CYLINDER_H

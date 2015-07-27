@@ -1,11 +1,8 @@
 #include "cylinder.h"
 
+#include "../../maths/constants.h"
+
 #include <QOpenGLShaderProgram>
-
-#include <math.h>
-
-const float pi = 3.14159265358979323846f;
-const float twoPi = 2.0f * pi;
 
 Cylinder::Cylinder(QObject* parent)
     : QObject(parent),
@@ -16,85 +13,98 @@ Cylinder::Cylinder(QObject* parent)
       _normalBuffer(QOpenGLBuffer::VertexBuffer),
       _textureCoordBuffer(QOpenGLBuffer::VertexBuffer),
       _indexBuffer(QOpenGLBuffer::IndexBuffer),
-      _vao(),
-      _normalLines(QOpenGLBuffer::VertexBuffer),
-      _tangentLines(QOpenGLBuffer::VertexBuffer)
+      _vao()
 {
 }
 
-void Cylinder::setMaterial(const MaterialPtr& material)
+void Cylinder::create(QOpenGLShaderProgram& shader)
 {
-    if(material == _material)
-        return;
-    _material = material;
-    updateVertexArrayObject();
-}
+    std::vector<float> vertices;
+    std::vector<float> normals;
+    std::vector<float> texCoords;
+    std::vector<float> tangents;
+    std::vector<unsigned int> indices;
 
-MaterialPtr Cylinder::material() const
-{
-    return _material;
-}
+    generateVertexData(vertices, normals, texCoords, tangents, indices);
 
-void Cylinder::create()
-{
-    // Allocate some storage to hold per-vertex data
-    QVector<float> v;         // Vertices
-    QVector<float> n;         // Normals
-    QVector<float> tex;       // Tex coords
-    QVector<float> tang;      // Tangents
-    QVector<unsigned int> el; // Element indices
-
-    // Generate the vertex data
-    generateVertexData(v, n, tex, tang, el);
-
-    // Create and populate the buffer objects
     _positionBuffer.create();
     _positionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     _positionBuffer.bind();
-    _positionBuffer.allocate(v.constData(), v.size() * sizeof(float));
+    _positionBuffer.allocate(vertices.data(), vertices.size() * sizeof(float));
 
     _normalBuffer.create();
     _normalBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     _normalBuffer.bind();
-    _normalBuffer.allocate(n.constData(), n.size() * sizeof(float));
+    _normalBuffer.allocate(normals.data(), normals.size() * sizeof(float));
 
     _textureCoordBuffer.create();
     _textureCoordBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     _textureCoordBuffer.bind();
-    _textureCoordBuffer.allocate(tex.constData(), tex.size() * sizeof(float));
+    _textureCoordBuffer.allocate(texCoords.data(), texCoords.size() * sizeof(float));
 
     _tangentBuffer.create();
     _tangentBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     _tangentBuffer.bind();
-    _tangentBuffer.allocate(tang.constData(), tang.size() * sizeof(float));
+    _tangentBuffer.allocate(tangents.data(), tangents.size() * sizeof(float));
 
     _indexBuffer.create();
     _indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     _indexBuffer.bind();
-    _indexBuffer.allocate(el.constData(), el.size() * sizeof(unsigned int));
+    _indexBuffer.allocate(indices.data(), indices.size() * sizeof(unsigned int));
 
-    updateVertexArrayObject();
+    if(!_vao.isCreated())
+        _vao.create();
+
+    _vao.bind();
+
+    shader.bind();
+
+    _positionBuffer.bind();
+    shader.enableAttributeArray("vertexPosition");
+    shader.setAttributeBuffer("vertexPosition", GL_FLOAT, 0, 3);
+
+    _normalBuffer.bind();
+    shader.enableAttributeArray("vertexNormal");
+    shader.setAttributeBuffer("vertexNormal", GL_FLOAT, 0, 3);
+
+    _textureCoordBuffer.bind();
+    shader.enableAttributeArray("vertexTexCoord");
+    shader.setAttributeBuffer("vertexTexCoord", GL_FLOAT, 0, 2);
+
+    _tangentBuffer.bind();
+    shader.enableAttributeArray("vertexTangent");
+    shader.setAttributeBuffer("vertexTangent", GL_FLOAT, 0, 4);
+
+    _indexBuffer.bind();
+
+    _vao.release();
+
+    _indexBuffer.release();
+    _tangentBuffer.release();
+    _textureCoordBuffer.release();
+    _normalBuffer.release();
+    _positionBuffer.release();
+
+    shader.release();
 }
 
-void Cylinder::generateVertexData(QVector<float>& vertices, QVector<float>& normals,
-                                  QVector<float>& /*texCoords*/, QVector<float>& /*tangents*/,
-                                  QVector<unsigned int>& indices)
+void Cylinder::generateVertexData(std::vector<float>& vertices, std::vector<float>& normals,
+                                  std::vector<float>& texCoords, std::vector<float>& tangents,
+                                  std::vector<unsigned int>& indices)
 {
     int faces = (_slices);
-    int nVerts  = ((_slices + 1) * 2);
+    int numVerts  = ((_slices + 1) * 2);
 
-    // Resize vector to hold our data
-    vertices.resize(3 * nVerts);
-    normals.resize(3 * nVerts);
-    //tangents.resize(4 * nVerts);
-    //texCoords.resize(2 * nVerts);
+    vertices.resize(3 * numVerts);
+    normals.resize(3 * numVerts);
+    tangents.resize(4 * numVerts);
+    texCoords.resize(2 * numVerts);
     indices.resize(6 * faces);
 
-    const float dTheta = twoPi / static_cast<float>(_slices);
-    //const float du = 1.0f / static_cast<float>(_slices);
-    //const float dv = 1.0f / static_cast<float>(_rings);
+    const float dTheta = Constants::TwoPi() / static_cast<float>(_slices);
+    const float du = 1.0f / static_cast<float>(_slices);
 
-    int index = 0; //, texCoordIndex = 0, tangentIndex = 0;
+    int index = 0, texCoordIndex = 0, tangentIndex = 0;
 
     // Iterate over longitudes (slices)
     for(int slice = 0; slice < _slices + 1; slice++)
@@ -102,7 +112,7 @@ void Cylinder::generateVertexData(QVector<float>& vertices, QVector<float>& norm
         const float theta = static_cast<float>(slice) * dTheta;
         const float cosTheta = cosf(theta);
         const float sinTheta = sinf(theta);
-        //const float u = static_cast<float>(slice) * du;
+        const float u = static_cast<float>(slice) * du;
 
         vertices[index+0] = _radius * cosTheta;
         vertices[index+1] = _length * 0.5f;
@@ -114,6 +124,17 @@ void Cylinder::generateVertexData(QVector<float>& vertices, QVector<float>& norm
 
         index += 3;
 
+        tangents[tangentIndex] = sinTheta;
+        tangents[tangentIndex + 1] = 0.0;
+        tangents[tangentIndex + 2] = -cosTheta;
+        tangents[tangentIndex + 3] = 1.0;
+        tangentIndex += 4;
+
+        texCoords[texCoordIndex] = u;
+        texCoords[texCoordIndex+1] = 0.0f;
+
+        texCoordIndex += 2;
+
         vertices[index+0] = _radius * cosTheta;
         vertices[index+1] = _length * -0.5f;
         vertices[index+2] = _radius * sinTheta;
@@ -124,76 +145,31 @@ void Cylinder::generateVertexData(QVector<float>& vertices, QVector<float>& norm
 
         index += 3;
 
-        /*tangents[tangentIndex] = sinTheta;
+        tangents[tangentIndex] = sinTheta;
         tangents[tangentIndex + 1] = 0.0;
         tangents[tangentIndex + 2] = -cosTheta;
         tangents[tangentIndex + 3] = 1.0;
         tangentIndex += 4;
 
         texCoords[texCoordIndex] = u;
-        texCoords[texCoordIndex+1] = v;
+        texCoords[texCoordIndex+1] = 1.0f;
 
-        texCoordIndex += 2;*/
+        texCoordIndex += 2;
     }
 
-    int elIndex = 0;
+    index = 0;
 
     for(int slice = 0; slice < _slices; slice++)
     {
         int baseIndex = slice * 2;
 
-        indices[elIndex+0] = baseIndex + 3;
-        indices[elIndex+1] = baseIndex + 1;
-        indices[elIndex+2] = baseIndex + 0;
-        indices[elIndex+3] = baseIndex + 0;
-        indices[elIndex+4] = baseIndex + 2;
-        indices[elIndex+5] = baseIndex + 3;
+        indices[index+0] = baseIndex + 3;
+        indices[index+1] = baseIndex + 1;
+        indices[index+2] = baseIndex + 0;
+        indices[index+3] = baseIndex + 0;
+        indices[index+4] = baseIndex + 2;
+        indices[index+5] = baseIndex + 3;
 
-        elIndex += 6;
+        index += 6;
     }
-}
-
-void Cylinder::updateVertexArrayObject()
-{
-    // Ensure that we have a valid material and geometry
-    if(!_material || !_positionBuffer.isCreated())
-        return;
-
-    // Create a vertex array object
-    if(!_vao.isCreated())
-        _vao.create();
-    _vao.bind();
-
-    bindBuffers();
-
-    // End VAO setup
-    _vao.release();
-
-    // Tidy up after ourselves
-    _tangentBuffer.release();
-    _indexBuffer.release();
-}
-
-void Cylinder::bindBuffers()
-{
-    QOpenGLShaderProgramPtr shader = _material->shader();
-    shader->bind();
-
-    _positionBuffer.bind();
-    shader->enableAttributeArray("vertexPosition");
-    shader->setAttributeBuffer("vertexPosition", GL_FLOAT, 0, 3);
-
-    _normalBuffer.bind();
-    shader->enableAttributeArray("vertexNormal");
-    shader->setAttributeBuffer("vertexNormal", GL_FLOAT, 0, 3);
-
-    _textureCoordBuffer.bind();
-    shader->enableAttributeArray("vertexTexCoord");
-    shader->setAttributeBuffer("vertexTexCoord", GL_FLOAT, 0, 2);
-
-    _tangentBuffer.bind();
-    shader->enableAttributeArray("vertexTangent");
-    shader->setAttributeBuffer("vertexTangent", GL_FLOAT, 0, 4);
-
-    _indexBuffer.bind();
 }
