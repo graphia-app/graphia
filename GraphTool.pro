@@ -41,19 +41,14 @@ HEADERS += \
     source/maths/line.h \
     source/maths/plane.h \
     source/maths/ray.h \
-    source/rendering/primitives/cube.h \
     source/rendering/primitives/cylinder.h \
-    source/rendering/primitives/quad.h \
     source/rendering/primitives/sphere.h \
     source/rendering/camera.h \
     source/rendering/graphcomponentrenderer.h \
     source/rendering/graphcomponentscene.h \
     source/rendering/graphoverviewscene.h \
     source/rendering/graphrenderer.h \
-    source/rendering/material.h \
-    source/rendering/sampler.h \
     source/rendering/scene.h \
-    source/rendering/texture.h \
     source/rendering/transition.h \
     source/ui/graphcommoninteractor.h \
     source/ui/graphcomponentinteractor.h \
@@ -107,18 +102,13 @@ SOURCES += \
     source/maths/frustum.cpp \
     source/maths/plane.cpp \
     source/maths/ray.cpp \
-    source/rendering/primitives/cube.cpp \
     source/rendering/primitives/cylinder.cpp \
-    source/rendering/primitives/quad.cpp \
     source/rendering/primitives/sphere.cpp \
     source/rendering/camera.cpp \
     source/rendering/graphcomponentrenderer.cpp \
     source/rendering/graphcomponentscene.cpp \
     source/rendering/graphoverviewscene.cpp \
     source/rendering/graphrenderer.cpp \
-    source/rendering/material.cpp \
-    source/rendering/sampler.cpp \
-    source/rendering/texture.cpp \
     source/rendering/transition.cpp \
     source/ui/graphcommoninteractor.cpp \
     source/ui/graphcomponentinteractor.cpp \
