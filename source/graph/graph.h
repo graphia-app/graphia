@@ -229,6 +229,8 @@ class ImmutableGraph : public QObject
     Q_OBJECT
 
 public:
+    virtual ~ImmutableGraph();
+
     virtual const std::vector<NodeId>& nodeIds() const = 0;
     virtual int numNodes() const = 0;
     virtual const Node& nodeById(NodeId nodeId) const = 0;
@@ -239,25 +241,29 @@ public:
     virtual const Edge& edgeById(EdgeId edgeId) const = 0;
     EdgeId firstEdgeId() const { return edgeIds().size() > 0 ? edgeIds().at(0) : EdgeId(); }
 
-    virtual void dumpToQDebug(int detail) const
-    {
-        qDebug() << numNodes() << "nodes" << numEdges() << "edges";
+    virtual void dumpToQDebug(int detail) const;
 
-        if(detail > 0)
-        {
-            for(NodeId nodeId : nodeIds())
-            {
-                const Node& node = nodeById(nodeId);
-                qDebug() << "Node" << nodeId << "in" << node.inEdges() << "out" << node.outEdges();
-            }
+    virtual void enableComponentManagement() { qFatal("enabledComponentManagement is not callable"); }
 
-            for(EdgeId edgeId : edgeIds())
-            {
-                const Edge& edge = edgeById(edgeId);
-                qDebug() << "Edge" << edgeId << "(" << edge.sourceId() << "->" << edge.targetId() << ")";
-            }
-        }
-    }
+protected:
+    template<typename> friend class NodeArray;
+    std::unordered_set<ResizableGraphArray*> _nodeArrayList;
+    virtual int nodeArrayCapacity() const { qFatal("nodeArrayCapacity is not callable"); }
+
+    template<typename> friend class EdgeArray;
+    std::unordered_set<ResizableGraphArray*> _edgeArrayList;
+    virtual int edgeArrayCapacity() const { qFatal("edgeArrayCapacity is not callable"); }
+
+    template<typename> friend class ComponentArray;
+    std::unique_ptr<AbstractComponentManager> _componentManager;
+
+public:
+    const std::vector<ComponentId>& componentIds() const;
+    int numComponents() const;
+    const ImmutableGraph* componentById(ComponentId componentId) const;
+    ComponentId componentIdOfNode(NodeId nodeId) const;
+    ComponentId componentIdOfEdge(EdgeId edgeId) const;
+    ComponentId largestComponentId() const;
 
 signals:
     // The signals are listed here in the order in which they are emitted
@@ -287,16 +293,8 @@ private:
     std::vector<Edge> _edgesVector;
     EdgeId _lastEdgeId;
 
-    template<typename> friend class NodeArray;
-    std::unordered_set<ResizableGraphArray*> _nodeArrayList;
     int nodeArrayCapacity() const { return _lastNodeId; }
-
-    template<typename> friend class EdgeArray;
-    std::unordered_set<ResizableGraphArray*> _edgeArrayList;
     int edgeArrayCapacity() const { return _lastEdgeId; }
-
-    template<typename> friend class ComponentArray;
-    std::unique_ptr<AbstractComponentManager> _componentManager;
 
     void updateElementIdData();
 
@@ -327,17 +325,12 @@ public:
     void removeEdge(EdgeId edgeId);
     void removeEdges(const ElementIdSet<EdgeId>& edgeIds);
 
-    const std::vector<ComponentId>& componentIds() const;
-    int numComponents() const;
-    const ImmutableGraph* componentById(ComponentId componentId) const;
-    ComponentId componentIdOfNode(NodeId nodeId) const;
-    ComponentId componentIdOfEdge(EdgeId edgeId) const;
-    ComponentId largestComponentId() const;
-
     const ElementIdSet<EdgeId> edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds);
     const std::vector<Edge> edgesForNodes(const ElementIdSet<NodeId>& nodeIds);
 
     void dumpToQDebug(int detail) const;
+
+    void enableComponentManagement();
 
     mutable DebugPauser debugPauser;
 

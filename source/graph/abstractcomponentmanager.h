@@ -112,10 +112,10 @@ public:
     virtual ComponentId componentIdOfEdge(EdgeId edgeId) const = 0;
 
 signals:
-    void componentAdded(const Graph*, ComponentId, bool) const;
-    void componentWillBeRemoved(const Graph*, ComponentId, bool) const;
-    void componentSplit(const Graph*, const ComponentSplitSet&) const;
-    void componentsWillMerge(const Graph*, const ComponentMergeSet&) const;
+    void componentAdded(const ImmutableGraph*, ComponentId, bool) const;
+    void componentWillBeRemoved(const ImmutableGraph*, ComponentId, bool) const;
+    void componentSplit(const ImmutableGraph*, const ComponentSplitSet&) const;
+    void componentsWillMerge(const ImmutableGraph*, const ComponentMergeSet&) const;
 };
 
 #endif // ABSTRACTCOMPONENTMANAGER_H

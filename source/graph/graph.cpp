@@ -6,12 +6,103 @@
 #include <QtGlobal>
 #include <QMetaType>
 
+ImmutableGraph::~ImmutableGraph()
+{
+    // Let the GraphArrays know that we're going away
+    for(auto nodeArray : _nodeArrayList)
+        nodeArray->invalidate();
+
+    for(auto edgeArray : _edgeArrayList)
+        edgeArray->invalidate();
+}
+
+void ImmutableGraph::dumpToQDebug(int detail) const
+{
+    qDebug() << numNodes() << "nodes" << numEdges() << "edges";
+
+    if(detail > 0)
+    {
+        for(NodeId nodeId : nodeIds())
+        {
+            const Node& node = nodeById(nodeId);
+            qDebug() << "Node" << nodeId << "in" << node.inEdges() << "out" << node.outEdges();
+        }
+
+        for(EdgeId edgeId : edgeIds())
+        {
+            const Edge& edge = edgeById(edgeId);
+            qDebug() << "Edge" << edgeId << "(" << edge.sourceId() << "->" << edge.targetId() << ")";
+        }
+    }
+}
+
+const std::vector<ComponentId>& ImmutableGraph::componentIds() const
+{
+    if(_componentManager)
+        return _componentManager->componentIds();
+
+    static std::vector<ComponentId> emptyComponentIdList;
+
+    return emptyComponentIdList;
+}
+
+int ImmutableGraph::numComponents() const
+{
+    if(_componentManager)
+        return static_cast<int>(_componentManager->componentIds().size());
+
+    return 0;
+}
+
+const ImmutableGraph* ImmutableGraph::componentById(ComponentId componentId) const
+{
+    if(_componentManager)
+        return _componentManager->componentById(componentId);
+
+    Q_ASSERT(!"Graph::componentById returning nullptr");
+    return nullptr;
+}
+
+ComponentId ImmutableGraph::componentIdOfNode(NodeId nodeId) const
+{
+    if(_componentManager)
+        return _componentManager->componentIdOfNode(nodeId);
+
+    return ComponentId();
+}
+
+ComponentId ImmutableGraph::componentIdOfEdge(EdgeId edgeId) const
+{
+    if(_componentManager)
+        return _componentManager->componentIdOfEdge(edgeId);
+
+    return ComponentId();
+}
+
+ComponentId ImmutableGraph::largestComponentId() const
+{
+    ComponentId largestComponentId;
+    int maxNumNodes = 0;
+    for(auto componentId : componentIds())
+    {
+        auto component = componentById(componentId);
+        if(component->numNodes() > maxNumNodes)
+        {
+            maxNumNodes = component->numNodes();
+            largestComponentId = componentId;
+        }
+    }
+
+    return largestComponentId;
+}
+
 Graph::Graph() :
     _lastNodeId(0),
     _lastEdgeId(0),
-    _componentManager(std::make_unique<ComponentManager>(*this)),
     _graphChangeDepth(0)
 {
+    enableComponentManagement(); //FIXME remove eventually
+
     qRegisterMetaType<NodeId>("NodeId");
     qRegisterMetaType<ElementIdSet<NodeId>>("ElementIdSet<NodeId>");
     qRegisterMetaType<EdgeId>("EdgeId");
@@ -24,13 +115,6 @@ Graph::~Graph()
 {
     // Ensure no transactions are in progress
     std::unique_lock<std::mutex>(_mutex);
-
-    // Let the GraphArrays know that we're going away
-    for(auto nodeArray : _nodeArrayList)
-        nodeArray->invalidate();
-
-    for(auto edgeArray : _edgeArrayList)
-        edgeArray->invalidate();
 }
 
 void Graph::clear()
@@ -237,66 +321,6 @@ void Graph::removeEdges(const ElementIdSet<EdgeId>& edgeIds)
     endTransaction();
 }
 
-const std::vector<ComponentId>& Graph::componentIds() const
-{
-    if(_componentManager)
-        return _componentManager->componentIds();
-
-    static std::vector<ComponentId> emptyComponentIdList;
-
-    return emptyComponentIdList;
-}
-
-int Graph::numComponents() const
-{
-    if(_componentManager)
-        return static_cast<int>(_componentManager->componentIds().size());
-
-    return 0;
-}
-
-const ImmutableGraph* Graph::componentById(ComponentId componentId) const
-{
-    if(_componentManager)
-        return _componentManager->componentById(componentId);
-
-    Q_ASSERT(!"Graph::componentById returning nullptr");
-    return nullptr;
-}
-
-ComponentId Graph::componentIdOfNode(NodeId nodeId) const
-{
-    if(_componentManager)
-        return _componentManager->componentIdOfNode(nodeId);
-
-    return ComponentId();
-}
-
-ComponentId Graph::componentIdOfEdge(EdgeId edgeId) const
-{
-    if(_componentManager)
-        return _componentManager->componentIdOfEdge(edgeId);
-
-    return ComponentId();
-}
-
-ComponentId Graph::largestComponentId() const
-{
-    ComponentId largestComponentId;
-    int maxNumNodes = 0;
-    for(auto componentId : componentIds())
-    {
-        auto component = componentById(componentId);
-        if(component->numNodes() > maxNumNodes)
-        {
-            maxNumNodes = component->numNodes();
-            largestComponentId = componentId;
-        }
-    }
-
-    return largestComponentId;
-}
-
 const ElementIdSet<EdgeId> Graph::edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds)
 {
     ElementIdSet<EdgeId> edgeIds;
@@ -338,6 +362,12 @@ void Graph::dumpToQDebug(int detail) const
             }
         }
     }
+}
+
+void Graph::enableComponentManagement()
+{
+    if(_componentManager == nullptr)
+        _componentManager = std::make_unique<ComponentManager>(*this);
 }
 
 void Graph::beginTransaction()

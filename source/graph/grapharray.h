@@ -23,11 +23,11 @@ template<typename Index, typename Element> class GraphArray : public ResizableGr
                   "GraphArray Element needs a noexcept move constructor");
 
 protected:
-    mutable Graph* _graph;
+    mutable ImmutableGraph* _graph;
     std::vector<Element> _array;
 
 public:
-    GraphArray(Graph& graph) :
+    GraphArray(ImmutableGraph& graph) :
         _graph(&graph)
     {}
 
@@ -117,7 +117,7 @@ public:
 template<typename Element> class NodeArray : public GraphArray<NodeId, Element>
 {
 public:
-    NodeArray(Graph& graph) :
+    NodeArray(ImmutableGraph& graph) :
         GraphArray<NodeId, Element>(graph)
     {
         this->resize(graph.nodeArrayCapacity());
@@ -156,7 +156,7 @@ public:
 template<typename Element> class EdgeArray : public GraphArray<EdgeId, Element>
 {
 public:
-    EdgeArray(Graph& graph) :
+    EdgeArray(ImmutableGraph& graph) :
         GraphArray<EdgeId, Element>(graph)
     {
         this->resize(graph.edgeArrayCapacity());
@@ -195,7 +195,7 @@ public:
 template<typename Element> class ComponentArray : public GraphArray<ComponentId, Element>
 {
 public:
-    ComponentArray(Graph& graph) :
+    ComponentArray(ImmutableGraph& graph) :
         GraphArray<ComponentId, Element>(graph)
     {
         this->resize(graph._componentManager->componentArrayCapacity());
