@@ -355,7 +355,7 @@ void GraphOverviewScene::startTransition(float duration,
     }
 }
 
-void GraphOverviewScene::onComponentAdded(const Graph*, ComponentId componentId, bool hasSplit)
+void GraphOverviewScene::onComponentAdded(const ImmutableGraph*, ComponentId componentId, bool hasSplit)
 {
     if(!hasSplit)
     {
@@ -366,7 +366,7 @@ void GraphOverviewScene::onComponentAdded(const Graph*, ComponentId componentId,
     }
 }
 
-void GraphOverviewScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool hasMerged)
+void GraphOverviewScene::onComponentWillBeRemoved(const ImmutableGraph*, ComponentId componentId, bool hasMerged)
 {
     if(!visible())
         return;
@@ -384,7 +384,7 @@ void GraphOverviewScene::onComponentWillBeRemoved(const Graph*, ComponentId comp
     }
 }
 
-void GraphOverviewScene::onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet)
+void GraphOverviewScene::onComponentSplit(const ImmutableGraph*, const ComponentSplitSet& componentSplitSet)
 {
     if(!visible())
         return;
@@ -406,7 +406,7 @@ void GraphOverviewScene::onComponentSplit(const Graph*, const ComponentSplitSet&
     }, "GraphOverviewScene::onComponentSplit (cloneCameraDataFrom, component layout)");
 }
 
-void GraphOverviewScene::onComponentsWillMerge(const Graph*, const ComponentMergeSet& componentMergeSet)
+void GraphOverviewScene::onComponentsWillMerge(const ImmutableGraph*, const ComponentMergeSet& componentMergeSet)
 {
     if(!visible())
         return;

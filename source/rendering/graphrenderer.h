@@ -45,7 +45,7 @@ public:
 
 protected:
     virtual void onGraphChanged(const Graph*) = 0;
-    virtual void onComponentAdded(const Graph*, ComponentId, bool) = 0;
+    virtual void onComponentAdded(const ImmutableGraph*, ComponentId, bool) = 0;
 };
 
 class GraphRenderer :
@@ -87,8 +87,8 @@ public:
 
 private slots:
     void onGraphChanged(const Graph* graph);
-    void onComponentAdded(const Graph*, ComponentId componentId, bool);
-    void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
+    void onComponentAdded(const ImmutableGraph*, ComponentId componentId, bool);
+    void onComponentWillBeRemoved(const ImmutableGraph*, ComponentId componentId, bool);
     void onSelectionChanged(const SelectionManager*);
 
 public slots:

@@ -224,8 +224,10 @@ public:
     EdgeId id() const { return _id; }
 };
 
-class ImmutableGraph
+class ImmutableGraph : public QObject
 {
+    Q_OBJECT
+
 public:
     virtual const std::vector<NodeId>& nodeIds() const = 0;
     virtual int numNodes() const = 0;
@@ -256,9 +258,16 @@ public:
             }
         }
     }
+
+signals:
+    // The signals are listed here in the order in which they are emitted
+    void componentsWillMerge(const ImmutableGraph*, const ComponentMergeSet&) const;
+    void componentWillBeRemoved(const ImmutableGraph*, ComponentId, bool) const;
+    void componentAdded(const ImmutableGraph*, ComponentId, bool) const;
+    void componentSplit(const ImmutableGraph*, const ComponentSplitSet&) const;
 };
 
-class Graph : public QObject, public ImmutableGraph
+class Graph : public ImmutableGraph
 {
     Q_OBJECT
 public:
@@ -359,11 +368,6 @@ signals:
     void nodeWillBeRemoved(const Graph*, NodeId) const;
     void edgeAdded(const Graph*, EdgeId) const;
     void edgeWillBeRemoved(const Graph*, EdgeId) const;
-
-    void componentsWillMerge(const Graph*, const ComponentMergeSet&) const;
-    void componentWillBeRemoved(const Graph*, ComponentId, bool) const;
-    void componentAdded(const Graph*, ComponentId, bool) const;
-    void componentSplit(const Graph*, const ComponentSplitSet&) const;
 
     void graphChanged(const Graph*) const;
 };

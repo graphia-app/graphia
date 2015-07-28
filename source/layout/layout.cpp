@@ -227,23 +227,23 @@ void LayoutThread::removeComponent(ComponentId componentId)
         resume();
 }
 
-void LayoutThread::onComponentAdded(const Graph*, ComponentId componentId, bool)
+void LayoutThread::onComponentAdded(const ImmutableGraph*, ComponentId componentId, bool)
 {
     addComponent(componentId);
 }
 
-void LayoutThread::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool)
+void LayoutThread::onComponentWillBeRemoved(const ImmutableGraph*, ComponentId componentId, bool)
 {
     removeComponent(componentId);
 }
 
-void LayoutThread::onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet)
+void LayoutThread::onComponentSplit(const ImmutableGraph*, const ComponentSplitSet& componentSplitSet)
 {
     for(ComponentId componentId : componentSplitSet.splitters())
         addComponent(componentId);
 }
 
-void LayoutThread::onComponentsWillMerge(const Graph*, const ComponentMergeSet& componentMergeSet)
+void LayoutThread::onComponentsWillMerge(const ImmutableGraph*, const ComponentMergeSet& componentMergeSet)
 {
     for(ComponentId componentId : componentMergeSet.mergers())
     {

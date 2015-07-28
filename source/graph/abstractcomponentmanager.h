@@ -47,7 +47,7 @@ public:
     std::vector<NodeId> nodeIds() const;
 };
 
-class GraphComponent : public QObject, public ImmutableGraph
+class GraphComponent : public ImmutableGraph
 {
     friend class AbstractComponentManager;
 
@@ -55,7 +55,6 @@ class GraphComponent : public QObject, public ImmutableGraph
 public:
     GraphComponent(const ImmutableGraph* graph) : _graph(graph) {}
     GraphComponent(const GraphComponent& other) :
-        QObject(other.parent()),
         _graph(other._graph),
         _nodeIdsList(other._nodeIdsList),
         _edgeIdsList(other._edgeIdsList)

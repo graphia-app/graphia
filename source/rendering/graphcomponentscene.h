@@ -59,10 +59,10 @@ private:
     ComponentId _componentId;
 
 private slots:
-    void onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet);
-    void onComponentsWillMerge(const Graph* graph, const ComponentMergeSet& componentMergeSet);
-    void onComponentAdded(const Graph* graph, ComponentId componentId, bool);
-    void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool);
+    void onComponentSplit(const ImmutableGraph* graph, const ComponentSplitSet& componentSplitSet);
+    void onComponentsWillMerge(const ImmutableGraph* graph, const ComponentMergeSet& componentMergeSet);
+    void onComponentAdded(const ImmutableGraph* graph, ComponentId componentId, bool);
+    void onComponentWillBeRemoved(const ImmutableGraph* graph, ComponentId componentId, bool);
     void onGraphChanged(const Graph* graph);
     void onNodeWillBeRemoved(const Graph* graph, NodeId nodeId);
 };

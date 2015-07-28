@@ -133,7 +133,7 @@ void GraphComponentScene::startTransition(float duration, Transition::Type trans
     finishedFunction);
 }
 
-void GraphComponentScene::onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet)
+void GraphComponentScene::onComponentSplit(const ImmutableGraph*, const ComponentSplitSet& componentSplitSet)
 {
     if(!visible())
         return;
@@ -166,7 +166,7 @@ void GraphComponentScene::onComponentSplit(const Graph*, const ComponentSplitSet
     }
 }
 
-void GraphComponentScene::onComponentsWillMerge(const Graph*, const ComponentMergeSet& componentMergeSet)
+void GraphComponentScene::onComponentsWillMerge(const ImmutableGraph*, const ComponentMergeSet& componentMergeSet)
 {
     if(!visible())
         return;
@@ -192,13 +192,13 @@ void GraphComponentScene::onComponentsWillMerge(const Graph*, const ComponentMer
     }
 }
 
-void GraphComponentScene::onComponentAdded(const Graph*, ComponentId componentId, bool)
+void GraphComponentScene::onComponentAdded(const ImmutableGraph*, ComponentId componentId, bool)
 {
     if(_componentId.isNull())
         setComponentId(componentId);
 }
 
-void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool hasMerged)
+void GraphComponentScene::onComponentWillBeRemoved(const ImmutableGraph*, ComponentId componentId, bool hasMerged)
 {
     if(componentId == _componentId)
     {

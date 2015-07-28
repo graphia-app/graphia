@@ -388,7 +388,7 @@ void GraphRenderer::onGraphChanged(const Graph* graph)
     }
 }
 
-void GraphRenderer::onComponentAdded(const Graph*, ComponentId componentId, bool)
+void GraphRenderer::onComponentAdded(const ImmutableGraph*, ComponentId componentId, bool)
 {
     auto graphComponentRenderer = componentRendererForId(componentId);
     executeOnRendererThread([this, graphComponentRenderer, componentId]
@@ -399,7 +399,7 @@ void GraphRenderer::onComponentAdded(const Graph*, ComponentId componentId, bool
     }, "GraphRenderer::onComponentAdded");
 }
 
-void GraphRenderer::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool)
+void GraphRenderer::onComponentWillBeRemoved(const ImmutableGraph*, ComponentId componentId, bool)
 {
     auto graphComponentRenderer = componentRendererForId(componentId);
     executeOnRendererThread([this, graphComponentRenderer]
