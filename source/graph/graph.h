@@ -76,7 +76,7 @@ public:
         _value = NullValue;
     }
 
-    operator QString()
+    operator QString() const
     {
         if(isNull())
             return "Null";
@@ -87,10 +87,8 @@ public:
 
 template<typename T> QDebug operator<<(QDebug d, const ElementId<T>& id)
 {
-    if(id.isNull())
-        d << "Null";
-    else
-        d << (int)id;
+    QString idString = id;
+    d << idString;
 
     return d;
 }
