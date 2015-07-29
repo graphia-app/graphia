@@ -50,7 +50,7 @@ Graph::~Graph()
         edgeArray->invalidate();
 }
 
-const ElementIdSet<EdgeId> Graph::edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds)
+const ElementIdSet<EdgeId> Graph::edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds) const
 {
     ElementIdSet<EdgeId> edgeIds;
 
@@ -64,7 +64,7 @@ const ElementIdSet<EdgeId> Graph::edgeIdsForNodes(const ElementIdSet<NodeId>& no
     return edgeIds;
 }
 
-const std::vector<Edge> Graph::edgesForNodes(const ElementIdSet<NodeId>& nodeIds)
+const std::vector<Edge> Graph::edgesForNodes(const ElementIdSet<NodeId>& nodeIds) const
 {
     const ElementIdSet<EdgeId>& edgeIds = edgeIdsForNodes(nodeIds);
     std::vector<Edge> edges;

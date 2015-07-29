@@ -242,8 +242,8 @@ public:
     virtual const Edge& edgeById(EdgeId edgeId) const = 0;
     EdgeId firstEdgeId() const { return edgeIds().size() > 0 ? edgeIds().at(0) : EdgeId(); }
 
-    const ElementIdSet<EdgeId> edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds);
-    const std::vector<Edge> edgesForNodes(const ElementIdSet<NodeId>& nodeIds);
+    const ElementIdSet<EdgeId> edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds) const;
+    const std::vector<Edge> edgesForNodes(const ElementIdSet<NodeId>& nodeIds) const;
 
     const std::vector<ComponentId>& componentIds() const;
     int numComponents() const;
