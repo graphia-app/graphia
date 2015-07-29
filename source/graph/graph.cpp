@@ -49,6 +49,12 @@ void Graph::dumpToQDebug(int detail) const
     }
 }
 
+void Graph::enableComponentManagement()
+{
+    if(_componentManager == nullptr)
+        _componentManager = std::make_unique<ComponentManager>(*this);
+}
+
 const std::vector<ComponentId>& Graph::componentIds() const
 {
     if(_componentManager)
@@ -357,12 +363,6 @@ const std::vector<Edge> MutableGraph::edgesForNodes(const ElementIdSet<NodeId>& 
         edges.push_back(_edgesVector[edgeId]);
 
     return edges;
-}
-
-void MutableGraph::enableComponentManagement()
-{
-    if(_componentManager == nullptr)
-        _componentManager = std::make_unique<ComponentManager>(*this);
 }
 
 void MutableGraph::beginTransaction()

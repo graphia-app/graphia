@@ -243,16 +243,16 @@ public:
 
     virtual void dumpToQDebug(int detail) const;
 
-    virtual void enableComponentManagement() { qFatal("enabledComponentManagement is not callable"); }
+    void enableComponentManagement();
 
 protected:
     template<typename> friend class NodeArray;
     std::unordered_set<ResizableGraphArray*> _nodeArrayList;
-    virtual int nodeArrayCapacity() const { qFatal("nodeArrayCapacity is not callable"); }
+    virtual int nodeArrayCapacity() const { qFatal("Graph::nodeArrayCapacity is not callable"); }
 
     template<typename> friend class EdgeArray;
     std::unordered_set<ResizableGraphArray*> _edgeArrayList;
-    virtual int edgeArrayCapacity() const { qFatal("edgeArrayCapacity is not callable"); }
+    virtual int edgeArrayCapacity() const { qFatal("Graph::edgeArrayCapacity is not callable"); }
 
     template<typename> friend class ComponentArray;
     std::unique_ptr<AbstractComponentManager> _componentManager;
@@ -338,8 +338,6 @@ public:
 
     const ElementIdSet<EdgeId> edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds);
     const std::vector<Edge> edgesForNodes(const ElementIdSet<NodeId>& nodeIds);
-
-    void enableComponentManagement();
 
 private:
     int _graphChangeDepth;
