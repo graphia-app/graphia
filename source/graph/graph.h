@@ -339,8 +339,6 @@ public:
     const ElementIdSet<EdgeId> edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds);
     const std::vector<Edge> edgesForNodes(const ElementIdSet<NodeId>& nodeIds);
 
-    void dumpToQDebug(int detail) const;
-
     void enableComponentManagement();
 
 private:

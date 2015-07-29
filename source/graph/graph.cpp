@@ -34,6 +34,19 @@ void Graph::dumpToQDebug(int detail) const
             qDebug() << "Edge" << edgeId << "(" << edge.sourceId() << "->" << edge.targetId() << ")";
         }
     }
+
+    if(detail > 1)
+    {
+        if(_componentManager)
+        {
+            for(ComponentId componentId : _componentManager->componentIds())
+            {
+                auto component = _componentManager->componentById(componentId);
+                qDebug() << "component" << componentId;
+                component->dumpToQDebug(detail);
+            }
+        }
+    }
 }
 
 const std::vector<ComponentId>& Graph::componentIds() const
@@ -344,24 +357,6 @@ const std::vector<Edge> MutableGraph::edgesForNodes(const ElementIdSet<NodeId>& 
         edges.push_back(_edgesVector[edgeId]);
 
     return edges;
-}
-
-void MutableGraph::dumpToQDebug(int detail) const
-{
-    Graph::dumpToQDebug(detail);
-
-    if(detail > 1)
-    {
-        if(_componentManager)
-        {
-            for(ComponentId componentId : _componentManager->componentIds())
-            {
-                auto component = _componentManager->componentById(componentId);
-                qDebug() << "component" << componentId;
-                component->dumpToQDebug(detail);
-            }
-        }
-    }
 }
 
 void MutableGraph::enableComponentManagement()
