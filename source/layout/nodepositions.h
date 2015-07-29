@@ -29,7 +29,7 @@ private:
     int _smoothing;
 
 public:
-    NodePositions(Graph& graph);
+    NodePositions(MutableGraph& graph);
 
 public:
     std::recursive_mutex& mutex() { return _mutex; }
@@ -41,7 +41,7 @@ public:
     const QVector3D& get(NodeId nodeId) const;
     const QVector3D getScaledAndSmoothed(NodeId nodeId) const;
 
-    void update(const ImmutableGraph& graph, std::function<QVector3D(NodeId, const QVector3D&)> f,
+    void update(const Graph& graph, std::function<QVector3D(NodeId, const QVector3D&)> f,
                 float scale = 1.0f, int smoothing = 1);
     void executeIfUpdated(std::function<void()> f);
 

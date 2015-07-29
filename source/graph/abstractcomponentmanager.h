@@ -11,12 +11,12 @@
 class ComponentSplitSet
 {
 private:
-    const Graph* _graph;
+    const MutableGraph* _graph;
     ComponentId _oldComponentId;
     ElementIdSet<ComponentId> _splitters;
 
 public:
-    ComponentSplitSet(const Graph* graph, ComponentId oldComponentId, ElementIdSet<ComponentId>&& splitters) :
+    ComponentSplitSet(const MutableGraph* graph, ComponentId oldComponentId, ElementIdSet<ComponentId>&& splitters) :
         _graph(graph), _oldComponentId(oldComponentId), _splitters(splitters)
     {
     }
@@ -31,12 +31,12 @@ public:
 class ComponentMergeSet
 {
 private:
-    const Graph* _graph;
+    const MutableGraph* _graph;
     ElementIdSet<ComponentId> _mergers;
     ComponentId _newComponentId;
 
 public:
-    ComponentMergeSet(const Graph* graph, ElementIdSet<ComponentId>&& mergers, ComponentId newComponentId) :
+    ComponentMergeSet(const MutableGraph* graph, ElementIdSet<ComponentId>&& mergers, ComponentId newComponentId) :
         _graph(graph), _mergers(mergers), _newComponentId(newComponentId)
     {
     }
@@ -47,13 +47,13 @@ public:
     std::vector<NodeId> nodeIds() const;
 };
 
-class GraphComponent : public ImmutableGraph
+class GraphComponent : public Graph
 {
     friend class AbstractComponentManager;
 
     Q_OBJECT
 public:
-    GraphComponent(const ImmutableGraph* graph) : _graph(graph) {}
+    GraphComponent(const Graph* graph) : _graph(graph) {}
     GraphComponent(const GraphComponent& other) :
         _graph(other._graph),
         _nodeIdsList(other._nodeIdsList),
@@ -61,7 +61,7 @@ public:
     {}
 
 private:
-    const ImmutableGraph* _graph;
+    const Graph* _graph;
     std::vector<NodeId> _nodeIdsList;
     std::vector<EdgeId> _edgeIdsList;
 
@@ -78,14 +78,14 @@ public:
 class AbstractComponentManager : public QObject
 {
     Q_OBJECT
-    friend class Graph;
+    friend class MutableGraph;
 
 public:
-    AbstractComponentManager(Graph& graph);
+    AbstractComponentManager(MutableGraph& graph);
     virtual ~AbstractComponentManager();
 
 protected slots:
-    virtual void onGraphChanged(const Graph*) = 0;
+    virtual void onGraphChanged(const MutableGraph*) = 0;
 
 protected:
     template<typename> friend class ComponentArray;
@@ -112,10 +112,10 @@ public:
     virtual ComponentId componentIdOfEdge(EdgeId edgeId) const = 0;
 
 signals:
-    void componentAdded(const ImmutableGraph*, ComponentId, bool) const;
-    void componentWillBeRemoved(const ImmutableGraph*, ComponentId, bool) const;
-    void componentSplit(const ImmutableGraph*, const ComponentSplitSet&) const;
-    void componentsWillMerge(const ImmutableGraph*, const ComponentMergeSet&) const;
+    void componentAdded(const Graph*, ComponentId, bool) const;
+    void componentWillBeRemoved(const Graph*, ComponentId, bool) const;
+    void componentSplit(const Graph*, const ComponentSplitSet&) const;
+    void componentsWillMerge(const Graph*, const ComponentMergeSet&) const;
 };
 
 #endif // ABSTRACTCOMPONENTMANAGER_H

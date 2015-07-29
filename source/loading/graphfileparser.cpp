@@ -4,7 +4,7 @@
 
 #include "../utils/namethread.h"
 
-GraphFileParserThread::GraphFileParserThread(Graph& graph,
+GraphFileParserThread::GraphFileParserThread(MutableGraph& graph,
                                              std::unique_ptr<GraphFileParser> graphFileParser) :
     _graph(graph),
     _graphFileParser(std::move(graphFileParser))
@@ -38,7 +38,7 @@ void GraphFileParserThread::run()
     bool result;
 
     _graph.performTransaction(
-        [&](Graph& graph)
+        [&](MutableGraph& graph)
         {
             result = _graphFileParser->parse(graph);
         });

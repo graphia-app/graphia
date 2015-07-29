@@ -1,7 +1,7 @@
 #include "layout.h"
 #include "../utils/namethread.h"
 
-LayoutThread::LayoutThread(const Graph& graph,
+LayoutThread::LayoutThread(const MutableGraph& graph,
                            std::unique_ptr<const LayoutFactory> layoutFactory,
                            bool repeating) :
     _graph(&graph),
@@ -17,10 +17,10 @@ LayoutThread::LayoutThread(const Graph& graph,
             qDebug() << "Layout" << ticksPerSecond << "ips";
     });
 
-    connect(&graph, &Graph::componentAdded, this, &LayoutThread::onComponentAdded, Qt::DirectConnection);
-    connect(&graph, &Graph::componentWillBeRemoved, this, &LayoutThread::onComponentWillBeRemoved, Qt::DirectConnection);
-    connect(&graph, &Graph::componentSplit, this, &LayoutThread::onComponentSplit, Qt::DirectConnection);
-    connect(&graph, &Graph::componentsWillMerge, this, &LayoutThread::onComponentsWillMerge, Qt::DirectConnection);
+    connect(&graph, &MutableGraph::componentAdded, this, &LayoutThread::onComponentAdded, Qt::DirectConnection);
+    connect(&graph, &MutableGraph::componentWillBeRemoved, this, &LayoutThread::onComponentWillBeRemoved, Qt::DirectConnection);
+    connect(&graph, &MutableGraph::componentSplit, this, &LayoutThread::onComponentSplit, Qt::DirectConnection);
+    connect(&graph, &MutableGraph::componentsWillMerge, this, &LayoutThread::onComponentsWillMerge, Qt::DirectConnection);
 }
 
 void LayoutThread::addLayout(std::shared_ptr<Layout> layout)
@@ -227,23 +227,23 @@ void LayoutThread::removeComponent(ComponentId componentId)
         resume();
 }
 
-void LayoutThread::onComponentAdded(const ImmutableGraph*, ComponentId componentId, bool)
+void LayoutThread::onComponentAdded(const Graph*, ComponentId componentId, bool)
 {
     addComponent(componentId);
 }
 
-void LayoutThread::onComponentWillBeRemoved(const ImmutableGraph*, ComponentId componentId, bool)
+void LayoutThread::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool)
 {
     removeComponent(componentId);
 }
 
-void LayoutThread::onComponentSplit(const ImmutableGraph*, const ComponentSplitSet& componentSplitSet)
+void LayoutThread::onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet)
 {
     for(ComponentId componentId : componentSplitSet.splitters())
         addComponent(componentId);
 }
 
-void LayoutThread::onComponentsWillMerge(const ImmutableGraph*, const ComponentMergeSet& componentMergeSet)
+void LayoutThread::onComponentsWillMerge(const Graph*, const ComponentMergeSet& componentMergeSet)
 {
     for(ComponentId componentId : componentMergeSet.mergers())
     {

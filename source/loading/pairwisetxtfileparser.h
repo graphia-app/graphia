@@ -15,7 +15,7 @@ public:
         _filename(filename)
     {}
 
-    bool parse(Graph& graph);
+    bool parse(MutableGraph& graph);
 };
 
 #endif // PAIRWISETXTFILEPARSER_H

@@ -15,7 +15,7 @@
 #include <thread>
 #include <atomic>
 
-class Graph;
+class MutableGraph;
 
 //FIXME rename this FileParser? files not necessarily graphs
 class GraphFileParser : public QObject
@@ -27,7 +27,7 @@ signals:
 public:
     GraphFileParser() : _cancelAtomic(0) {}
 
-    virtual bool parse(Graph& graph) = 0;
+    virtual bool parse(MutableGraph& graph) = 0;
 
 private:
     std::atomic<bool> _cancelAtomic;
@@ -94,12 +94,12 @@ class GraphFileParserThread : public QObject
 {
     Q_OBJECT
 private:
-    Graph& _graph;
+    MutableGraph& _graph;
     std::unique_ptr<GraphFileParser> _graphFileParser;
     std::thread _thread;
 
 public:
-    GraphFileParserThread(Graph& graph, std::unique_ptr<GraphFileParser> graphFileParser);
+    GraphFileParserThread(MutableGraph& graph, std::unique_ptr<GraphFileParser> graphFileParser);
     virtual ~GraphFileParserThread();
 
     void start();

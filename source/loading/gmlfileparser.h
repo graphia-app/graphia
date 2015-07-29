@@ -29,7 +29,7 @@ public:
         _percentage(0)
     {}
 
-    bool parse(Graph& graph);
+    bool parse(MutableGraph& graph);
 
 public:
     struct KeyValuePairList;
@@ -47,7 +47,7 @@ private:
         Edge
     };
 
-    bool parseGmlList(Graph& graph, const KeyValuePairList& keyValuePairList, GmlList listType = GmlList::File);
+    bool parseGmlList(MutableGraph& graph, const KeyValuePairList& keyValuePairList, GmlList listType = GmlList::File);
     void onParsePositionIncremented(int64_t position);
 };
 

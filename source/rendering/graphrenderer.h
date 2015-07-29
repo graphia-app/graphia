@@ -41,11 +41,11 @@ class Command;
 class GraphInitialiser
 {
 public:
-    void initialiseFromGraph(const Graph* graph);
+    void initialiseFromGraph(const MutableGraph* graph);
 
 protected:
-    virtual void onGraphChanged(const Graph*) = 0;
-    virtual void onComponentAdded(const ImmutableGraph*, ComponentId, bool) = 0;
+    virtual void onGraphChanged(const MutableGraph*) = 0;
+    virtual void onComponentAdded(const Graph*, ComponentId, bool) = 0;
 };
 
 class GraphRenderer :
@@ -86,9 +86,9 @@ public:
     void executeOnRendererThread(DeferredExecutor::TaskFn task, const QString& description);
 
 private slots:
-    void onGraphChanged(const Graph* graph);
-    void onComponentAdded(const ImmutableGraph*, ComponentId componentId, bool);
-    void onComponentWillBeRemoved(const ImmutableGraph*, ComponentId componentId, bool);
+    void onGraphChanged(const MutableGraph* graph);
+    void onComponentAdded(const Graph*, ComponentId componentId, bool);
+    void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
     void onSelectionChanged(const SelectionManager*);
 
 public slots:

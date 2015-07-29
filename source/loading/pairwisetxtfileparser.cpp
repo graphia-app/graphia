@@ -12,7 +12,7 @@
 #include <map>
 #include <vector>
 
-bool PairwiseTxtFileParser::parse(Graph& graph)
+bool PairwiseTxtFileParser::parse(MutableGraph& graph)
 {
     QFileInfo info(_filename);
 

@@ -7,7 +7,7 @@ class CentreingLayout : public Layout
 {
     Q_OBJECT
 public:
-    CentreingLayout(const ImmutableGraph& graph,
+    CentreingLayout(const Graph& graph,
                     NodePositions& positions) :
         Layout(graph, positions)
     {}

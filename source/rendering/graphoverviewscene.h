@@ -85,12 +85,12 @@ private:
     std::vector<ComponentId> _componentIds;
 
 private slots:
-    void onGraphWillChange(const Graph* graph);
-    void onGraphChanged(const Graph* graph);
-    void onComponentAdded(const ImmutableGraph* graph, ComponentId componentId, bool hasSplit);
-    void onComponentWillBeRemoved(const ImmutableGraph* graph, ComponentId componentId, bool hasMerged);
-    void onComponentSplit(const ImmutableGraph* graph, const ComponentSplitSet& componentSplitSet);
-    void onComponentsWillMerge(const ImmutableGraph* graph, const ComponentMergeSet& componentMergeSet);
+    void onGraphWillChange(const MutableGraph* graph);
+    void onGraphChanged(const MutableGraph* graph);
+    void onComponentAdded(const Graph* graph, ComponentId componentId, bool hasSplit);
+    void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool hasMerged);
+    void onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet);
+    void onComponentsWillMerge(const Graph* graph, const ComponentMergeSet& componentMergeSet);
 };
 
 #endif // GRAPHOVERVIEWSCENE_H

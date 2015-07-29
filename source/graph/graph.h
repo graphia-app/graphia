@@ -154,7 +154,7 @@ public:
 
 class Node
 {
-    friend class Graph;
+    friend class MutableGraph;
 
 private:
     NodeId _id;
@@ -191,7 +191,7 @@ public:
 
 class Edge
 {
-    friend class Graph;
+    friend class MutableGraph;
 
 private:
     EdgeId _id;
@@ -224,12 +224,12 @@ public:
     EdgeId id() const { return _id; }
 };
 
-class ImmutableGraph : public QObject
+class Graph : public QObject
 {
     Q_OBJECT
 
 public:
-    virtual ~ImmutableGraph();
+    virtual ~Graph();
 
     virtual const std::vector<NodeId>& nodeIds() const = 0;
     virtual int numNodes() const = 0;
@@ -260,25 +260,25 @@ protected:
 public:
     const std::vector<ComponentId>& componentIds() const;
     int numComponents() const;
-    const ImmutableGraph* componentById(ComponentId componentId) const;
+    const Graph* componentById(ComponentId componentId) const;
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
     ComponentId largestComponentId() const;
 
 signals:
     // The signals are listed here in the order in which they are emitted
-    void componentsWillMerge(const ImmutableGraph*, const ComponentMergeSet&) const;
-    void componentWillBeRemoved(const ImmutableGraph*, ComponentId, bool) const;
-    void componentAdded(const ImmutableGraph*, ComponentId, bool) const;
-    void componentSplit(const ImmutableGraph*, const ComponentSplitSet&) const;
+    void componentsWillMerge(const Graph*, const ComponentMergeSet&) const;
+    void componentWillBeRemoved(const Graph*, ComponentId, bool) const;
+    void componentAdded(const Graph*, ComponentId, bool) const;
+    void componentSplit(const Graph*, const ComponentSplitSet&) const;
 };
 
-class Graph : public ImmutableGraph
+class MutableGraph : public Graph
 {
     Q_OBJECT
 public:
-    Graph();
-    virtual ~Graph();
+    MutableGraph();
+    virtual ~MutableGraph();
 
 private:
     std::vector<bool> _nodeIdsInUse;
@@ -344,25 +344,25 @@ public:
     class ScopedTransaction
     {
     public:
-        ScopedTransaction(Graph& graph);
+        ScopedTransaction(MutableGraph& graph);
         ~ScopedTransaction();
 
     private:
-        Graph& _graph;
+        MutableGraph& _graph;
     };
 
-    void performTransaction(std::function<void(Graph& graph)> transaction);
+    void performTransaction(std::function<void(MutableGraph& graph)> transaction);
 
 signals:
     // The signals are listed here in the order in which they are emitted
-    void graphWillChange(const Graph*) const;
+    void graphWillChange(const MutableGraph*) const;
 
-    void nodeAdded(const Graph*, NodeId) const;
-    void nodeWillBeRemoved(const Graph*, NodeId) const;
-    void edgeAdded(const Graph*, EdgeId) const;
-    void edgeWillBeRemoved(const Graph*, EdgeId) const;
+    void nodeAdded(const MutableGraph*, NodeId) const;
+    void nodeWillBeRemoved(const MutableGraph*, NodeId) const;
+    void edgeAdded(const MutableGraph*, EdgeId) const;
+    void edgeWillBeRemoved(const MutableGraph*, EdgeId) const;
 
-    void graphChanged(const Graph*) const;
+    void graphChanged(const MutableGraph*) const;
 };
 
 #endif // GRAPH_H

@@ -6,7 +6,7 @@
 #include <QtGlobal>
 #include <QMetaType>
 
-ImmutableGraph::~ImmutableGraph()
+Graph::~Graph()
 {
     // Let the GraphArrays know that we're going away
     for(auto nodeArray : _nodeArrayList)
@@ -16,7 +16,7 @@ ImmutableGraph::~ImmutableGraph()
         edgeArray->invalidate();
 }
 
-void ImmutableGraph::dumpToQDebug(int detail) const
+void Graph::dumpToQDebug(int detail) const
 {
     qDebug() << numNodes() << "nodes" << numEdges() << "edges";
 
@@ -36,7 +36,7 @@ void ImmutableGraph::dumpToQDebug(int detail) const
     }
 }
 
-const std::vector<ComponentId>& ImmutableGraph::componentIds() const
+const std::vector<ComponentId>& Graph::componentIds() const
 {
     if(_componentManager)
         return _componentManager->componentIds();
@@ -46,7 +46,7 @@ const std::vector<ComponentId>& ImmutableGraph::componentIds() const
     return emptyComponentIdList;
 }
 
-int ImmutableGraph::numComponents() const
+int Graph::numComponents() const
 {
     if(_componentManager)
         return static_cast<int>(_componentManager->componentIds().size());
@@ -54,7 +54,7 @@ int ImmutableGraph::numComponents() const
     return 0;
 }
 
-const ImmutableGraph* ImmutableGraph::componentById(ComponentId componentId) const
+const Graph* Graph::componentById(ComponentId componentId) const
 {
     if(_componentManager)
         return _componentManager->componentById(componentId);
@@ -63,7 +63,7 @@ const ImmutableGraph* ImmutableGraph::componentById(ComponentId componentId) con
     return nullptr;
 }
 
-ComponentId ImmutableGraph::componentIdOfNode(NodeId nodeId) const
+ComponentId Graph::componentIdOfNode(NodeId nodeId) const
 {
     if(_componentManager)
         return _componentManager->componentIdOfNode(nodeId);
@@ -71,7 +71,7 @@ ComponentId ImmutableGraph::componentIdOfNode(NodeId nodeId) const
     return ComponentId();
 }
 
-ComponentId ImmutableGraph::componentIdOfEdge(EdgeId edgeId) const
+ComponentId Graph::componentIdOfEdge(EdgeId edgeId) const
 {
     if(_componentManager)
         return _componentManager->componentIdOfEdge(edgeId);
@@ -79,7 +79,7 @@ ComponentId ImmutableGraph::componentIdOfEdge(EdgeId edgeId) const
     return ComponentId();
 }
 
-ComponentId ImmutableGraph::largestComponentId() const
+ComponentId Graph::largestComponentId() const
 {
     ComponentId largestComponentId;
     int maxNumNodes = 0;
@@ -96,7 +96,7 @@ ComponentId ImmutableGraph::largestComponentId() const
     return largestComponentId;
 }
 
-Graph::Graph() :
+MutableGraph::MutableGraph() :
     _lastNodeId(0),
     _lastEdgeId(0),
     _graphChangeDepth(0)
@@ -111,13 +111,13 @@ Graph::Graph() :
     qRegisterMetaType<ElementIdSet<ComponentId>>("ElementIdSet<ComponentId>");
 }
 
-Graph::~Graph()
+MutableGraph::~MutableGraph()
 {
     // Ensure no transactions are in progress
     std::unique_lock<std::mutex>(_mutex);
 }
 
-void Graph::clear()
+void MutableGraph::clear()
 {
     for(NodeId nodeId : nodeIds())
         removeNode(nodeId);
@@ -129,7 +129,7 @@ void Graph::clear()
     _edgesVector.resize(0);
 }
 
-NodeId Graph::addNode()
+NodeId MutableGraph::addNode()
 {
     if(!_unusedNodeIdsDeque.empty())
     {
@@ -142,7 +142,7 @@ NodeId Graph::addNode()
     return addNode(_lastNodeId);
 }
 
-NodeId Graph::addNode(NodeId nodeId)
+NodeId MutableGraph::addNode(NodeId nodeId)
 {
     Q_ASSERT(!nodeId.isNull());
 
@@ -173,12 +173,12 @@ NodeId Graph::addNode(NodeId nodeId)
     return nodeId;
 }
 
-NodeId Graph::addNode(const Node& node)
+NodeId MutableGraph::addNode(const Node& node)
 {
     return addNode(node._id);
 }
 
-void Graph::addNodes(const ElementIdSet<NodeId>& nodeIds)
+void MutableGraph::addNodes(const ElementIdSet<NodeId>& nodeIds)
 {
     if(nodeIds.empty())
         return;
@@ -191,7 +191,7 @@ void Graph::addNodes(const ElementIdSet<NodeId>& nodeIds)
     endTransaction();
 }
 
-void Graph::removeNode(NodeId nodeId)
+void MutableGraph::removeNode(NodeId nodeId)
 {
     beginTransaction();
 
@@ -208,7 +208,7 @@ void Graph::removeNode(NodeId nodeId)
     endTransaction();
 }
 
-void Graph::removeNodes(const ElementIdSet<NodeId>& nodeIds)
+void MutableGraph::removeNodes(const ElementIdSet<NodeId>& nodeIds)
 {
     if(nodeIds.empty())
         return;
@@ -221,7 +221,7 @@ void Graph::removeNodes(const ElementIdSet<NodeId>& nodeIds)
     endTransaction();
 }
 
-EdgeId Graph::addEdge(NodeId sourceId, NodeId targetId)
+EdgeId MutableGraph::addEdge(NodeId sourceId, NodeId targetId)
 {
     if(!_unusedEdgeIdsDeque.empty())
     {
@@ -234,7 +234,7 @@ EdgeId Graph::addEdge(NodeId sourceId, NodeId targetId)
     return addEdge(_lastEdgeId, sourceId, targetId);
 }
 
-EdgeId Graph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
+EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
 {
     Q_ASSERT(!edgeId.isNull());
 
@@ -269,12 +269,12 @@ EdgeId Graph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     return edgeId;
 }
 
-EdgeId Graph::addEdge(const Edge& edge)
+EdgeId MutableGraph::addEdge(const Edge& edge)
 {
     return addEdge(edge._id, edge._sourceId, edge._targetId);
 }
 
-void Graph::addEdges(const std::vector<Edge>& edges)
+void MutableGraph::addEdges(const std::vector<Edge>& edges)
 {
     if(edges.empty())
         return;
@@ -287,7 +287,7 @@ void Graph::addEdges(const std::vector<Edge>& edges)
     endTransaction();
 }
 
-void Graph::removeEdge(EdgeId edgeId)
+void MutableGraph::removeEdge(EdgeId edgeId)
 {
     beginTransaction();
 
@@ -308,7 +308,7 @@ void Graph::removeEdge(EdgeId edgeId)
     endTransaction();
 }
 
-void Graph::removeEdges(const ElementIdSet<EdgeId>& edgeIds)
+void MutableGraph::removeEdges(const ElementIdSet<EdgeId>& edgeIds)
 {
     if(edgeIds.empty())
         return;
@@ -321,7 +321,7 @@ void Graph::removeEdges(const ElementIdSet<EdgeId>& edgeIds)
     endTransaction();
 }
 
-const ElementIdSet<EdgeId> Graph::edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds)
+const ElementIdSet<EdgeId> MutableGraph::edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds)
 {
     ElementIdSet<EdgeId> edgeIds;
 
@@ -335,7 +335,7 @@ const ElementIdSet<EdgeId> Graph::edgeIdsForNodes(const ElementIdSet<NodeId>& no
     return edgeIds;
 }
 
-const std::vector<Edge> Graph::edgesForNodes(const ElementIdSet<NodeId>& nodeIds)
+const std::vector<Edge> MutableGraph::edgesForNodes(const ElementIdSet<NodeId>& nodeIds)
 {
     const ElementIdSet<EdgeId>& edgeIds = edgeIdsForNodes(nodeIds);
     std::vector<Edge> edges;
@@ -346,9 +346,9 @@ const std::vector<Edge> Graph::edgesForNodes(const ElementIdSet<NodeId>& nodeIds
     return edges;
 }
 
-void Graph::dumpToQDebug(int detail) const
+void MutableGraph::dumpToQDebug(int detail) const
 {
-    ImmutableGraph::dumpToQDebug(detail);
+    Graph::dumpToQDebug(detail);
 
     if(detail > 1)
     {
@@ -364,13 +364,13 @@ void Graph::dumpToQDebug(int detail) const
     }
 }
 
-void Graph::enableComponentManagement()
+void MutableGraph::enableComponentManagement()
 {
     if(_componentManager == nullptr)
         _componentManager = std::make_unique<ComponentManager>(*this);
 }
 
-void Graph::beginTransaction()
+void MutableGraph::beginTransaction()
 {
     if(_graphChangeDepth++ <= 0)
     {
@@ -380,7 +380,7 @@ void Graph::beginTransaction()
     }
 }
 
-void Graph::endTransaction()
+void MutableGraph::endTransaction()
 {
     Q_ASSERT(_graphChangeDepth > 0);
     if(--_graphChangeDepth <= 0)
@@ -392,13 +392,13 @@ void Graph::endTransaction()
     }
 }
 
-void Graph::performTransaction(std::function<void(Graph&)> transaction)
+void MutableGraph::performTransaction(std::function<void(MutableGraph&)> transaction)
 {
     ScopedTransaction lock(*this);
     transaction(*this);
 }
 
-void Graph::updateElementIdData()
+void MutableGraph::updateElementIdData()
 {
     _nodeIdsVector.clear();
     _unusedNodeIdsDeque.clear();
@@ -421,13 +421,13 @@ void Graph::updateElementIdData()
     }
 }
 
-Graph::ScopedTransaction::ScopedTransaction(Graph& graph) :
+MutableGraph::ScopedTransaction::ScopedTransaction(MutableGraph& graph) :
     _graph(graph)
 {
     _graph.beginTransaction();
 }
 
-Graph::ScopedTransaction::~ScopedTransaction()
+MutableGraph::ScopedTransaction::~ScopedTransaction()
 {
     _graph.endTransaction();
 }

@@ -18,7 +18,7 @@ private:
     std::vector<QVector3D> _displacements;
 
 public:
-    ForceDirectedLayout(const ImmutableGraph& graph,
+    ForceDirectedLayout(const Graph& graph,
                         NodePositions& positions) :
         Layout(graph, positions, Iterative::Yes),
         _prevDisplacements(graph.numNodes()),

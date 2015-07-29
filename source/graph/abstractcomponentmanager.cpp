@@ -3,18 +3,18 @@
 
 #include <QtGlobal>
 
-AbstractComponentManager::AbstractComponentManager(Graph& graph) :
+AbstractComponentManager::AbstractComponentManager(MutableGraph& graph) :
     _debug(false)
 {
     if(qgetenv("COMPONENTS_DEBUG").toInt())
         _debug = true;
 
-    connect(&graph, &Graph::graphChanged, this, &AbstractComponentManager::onGraphChanged, Qt::DirectConnection);
+    connect(&graph, &MutableGraph::graphChanged, this, &AbstractComponentManager::onGraphChanged, Qt::DirectConnection);
 
-    connect(this, &AbstractComponentManager::componentAdded, &graph, &Graph::componentAdded, Qt::DirectConnection);
-    connect(this, &AbstractComponentManager::componentWillBeRemoved, &graph, &Graph::componentWillBeRemoved, Qt::DirectConnection);
-    connect(this, &AbstractComponentManager::componentSplit, &graph, &Graph::componentSplit, Qt::DirectConnection);
-    connect(this, &AbstractComponentManager::componentsWillMerge, &graph, &Graph::componentsWillMerge, Qt::DirectConnection);
+    connect(this, &AbstractComponentManager::componentAdded, &graph, &MutableGraph::componentAdded, Qt::DirectConnection);
+    connect(this, &AbstractComponentManager::componentWillBeRemoved, &graph, &MutableGraph::componentWillBeRemoved, Qt::DirectConnection);
+    connect(this, &AbstractComponentManager::componentSplit, &graph, &MutableGraph::componentSplit, Qt::DirectConnection);
+    connect(this, &AbstractComponentManager::componentsWillMerge, &graph, &MutableGraph::componentsWillMerge, Qt::DirectConnection);
 }
 
 AbstractComponentManager::~AbstractComponentManager()

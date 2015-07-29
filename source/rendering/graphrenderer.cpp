@@ -46,7 +46,7 @@ static bool loadShaderProgram(QOpenGLShaderProgram& program, const QString& vert
     return true;
 }
 
-void GraphInitialiser::initialiseFromGraph(const Graph *graph)
+void GraphInitialiser::initialiseFromGraph(const MutableGraph *graph)
 {
     for(auto componentId : graph->componentIds())
         onComponentAdded(graph, componentId, false);
@@ -91,11 +91,11 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
     prepareSelectionMarkerVAO();
     prepareQuad();
 
-    Graph* graph = &_graphModel->graph();
+    MutableGraph* graph = &_graphModel->graph();
 
-    connect(graph, &Graph::graphChanged, this, &GraphRenderer::onGraphChanged, Qt::DirectConnection);
-    connect(graph, &Graph::componentAdded, this, &GraphRenderer::onComponentAdded, Qt::DirectConnection);
-    connect(graph, &Graph::componentWillBeRemoved, this, &GraphRenderer::onComponentWillBeRemoved, Qt::DirectConnection);
+    connect(graph, &MutableGraph::graphChanged, this, &GraphRenderer::onGraphChanged, Qt::DirectConnection);
+    connect(graph, &MutableGraph::componentAdded, this, &GraphRenderer::onComponentAdded, Qt::DirectConnection);
+    connect(graph, &MutableGraph::componentWillBeRemoved, this, &GraphRenderer::onComponentWillBeRemoved, Qt::DirectConnection);
 
     _graphOverviewScene = new GraphOverviewScene(this);
     _graphComponentScene = new GraphComponentScene(this);
@@ -354,7 +354,7 @@ void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId compone
     }, "GraphRenderer::switchToComponentMode");
 }
 
-void GraphRenderer::onGraphChanged(const Graph* graph)
+void GraphRenderer::onGraphChanged(const MutableGraph* graph)
 {
     _numComponents = graph->numComponents();
 
@@ -388,7 +388,7 @@ void GraphRenderer::onGraphChanged(const Graph* graph)
     }
 }
 
-void GraphRenderer::onComponentAdded(const ImmutableGraph*, ComponentId componentId, bool)
+void GraphRenderer::onComponentAdded(const Graph*, ComponentId componentId, bool)
 {
     auto graphComponentRenderer = componentRendererForId(componentId);
     executeOnRendererThread([this, graphComponentRenderer, componentId]
@@ -399,7 +399,7 @@ void GraphRenderer::onComponentAdded(const ImmutableGraph*, ComponentId componen
     }, "GraphRenderer::onComponentAdded");
 }
 
-void GraphRenderer::onComponentWillBeRemoved(const ImmutableGraph*, ComponentId componentId, bool)
+void GraphRenderer::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool)
 {
     auto graphComponentRenderer = componentRendererForId(componentId);
     executeOnRendererThread([this, graphComponentRenderer]

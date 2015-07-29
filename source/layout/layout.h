@@ -44,7 +44,7 @@ public:
 
 protected:
     Iterative _iterative;
-    const ImmutableGraph& _graph;
+    const Graph& _graph;
     NodePositions& _positions;
 
     bool shouldCancel()
@@ -53,7 +53,7 @@ protected:
     }
 
 public:
-    Layout(const ImmutableGraph& graph,
+    Layout(const Graph& graph,
            NodePositions& positions,
            Iterative iterative = Iterative::No) :
         QObject(),
@@ -110,7 +110,7 @@ class LayoutThread : public QObject
     Q_PROPERTY(bool paused READ paused NOTIFY pausedChanged)
 
 private:
-    const Graph* _graph;
+    const MutableGraph* _graph;
     std::set<std::shared_ptr<Layout>> _layouts;
     std::mutex _mutex;
     std::thread _thread;
@@ -129,7 +129,7 @@ private:
     PerformanceCounter _performanceCounter;
 
 public:
-    LayoutThread(const Graph& graph,
+    LayoutThread(const MutableGraph& graph,
                  std::unique_ptr<const LayoutFactory> layoutFactory,
                  bool repeating = false);
 
@@ -164,10 +164,10 @@ private:
     void removeComponent(ComponentId componentId);
 
 private slots:
-    void onComponentAdded(const ImmutableGraph*, ComponentId componentId, bool);
-    void onComponentWillBeRemoved(const ImmutableGraph*, ComponentId componentId, bool);
-    void onComponentSplit(const ImmutableGraph*, const ComponentSplitSet& componentSplitSet);
-    void onComponentsWillMerge(const ImmutableGraph*, const ComponentMergeSet& componentMergeSet);
+    void onComponentAdded(const Graph*, ComponentId componentId, bool);
+    void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
+    void onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet);
+    void onComponentsWillMerge(const Graph*, const ComponentMergeSet& componentMergeSet);
 
 signals:
     void executed();

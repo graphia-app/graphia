@@ -13,12 +13,12 @@ GraphComponentScene::GraphComponentScene(GraphRenderer* graphRenderer) :
     _graphRenderer(graphRenderer),
     _width(0), _height(0)
 {
-    connect(&_graphRenderer->graphModel()->graph(), &Graph::componentSplit, this, &GraphComponentScene::onComponentSplit, Qt::DirectConnection);
-    connect(&_graphRenderer->graphModel()->graph(), &Graph::componentsWillMerge, this, &GraphComponentScene::onComponentsWillMerge, Qt::DirectConnection);
-    connect(&_graphRenderer->graphModel()->graph(), &Graph::componentAdded, this, &GraphComponentScene::onComponentAdded, Qt::DirectConnection);
-    connect(&_graphRenderer->graphModel()->graph(), &Graph::componentWillBeRemoved, this, &GraphComponentScene::onComponentWillBeRemoved, Qt::DirectConnection);
-    connect(&_graphRenderer->graphModel()->graph(), &Graph::graphChanged, this, &GraphComponentScene::onGraphChanged, Qt::DirectConnection);
-    connect(&_graphRenderer->graphModel()->graph(), &Graph::nodeWillBeRemoved, this, &GraphComponentScene::onNodeWillBeRemoved, Qt::DirectConnection);
+    connect(&_graphRenderer->graphModel()->graph(), &MutableGraph::componentSplit, this, &GraphComponentScene::onComponentSplit, Qt::DirectConnection);
+    connect(&_graphRenderer->graphModel()->graph(), &MutableGraph::componentsWillMerge, this, &GraphComponentScene::onComponentsWillMerge, Qt::DirectConnection);
+    connect(&_graphRenderer->graphModel()->graph(), &MutableGraph::componentAdded, this, &GraphComponentScene::onComponentAdded, Qt::DirectConnection);
+    connect(&_graphRenderer->graphModel()->graph(), &MutableGraph::componentWillBeRemoved, this, &GraphComponentScene::onComponentWillBeRemoved, Qt::DirectConnection);
+    connect(&_graphRenderer->graphModel()->graph(), &MutableGraph::graphChanged, this, &GraphComponentScene::onGraphChanged, Qt::DirectConnection);
+    connect(&_graphRenderer->graphModel()->graph(), &MutableGraph::nodeWillBeRemoved, this, &GraphComponentScene::onNodeWillBeRemoved, Qt::DirectConnection);
 
     _defaultComponentId = _graphRenderer->graphModel()->graph().largestComponentId();
 }
@@ -133,7 +133,7 @@ void GraphComponentScene::startTransition(float duration, Transition::Type trans
     finishedFunction);
 }
 
-void GraphComponentScene::onComponentSplit(const ImmutableGraph*, const ComponentSplitSet& componentSplitSet)
+void GraphComponentScene::onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet)
 {
     if(!visible())
         return;
@@ -166,7 +166,7 @@ void GraphComponentScene::onComponentSplit(const ImmutableGraph*, const Componen
     }
 }
 
-void GraphComponentScene::onComponentsWillMerge(const ImmutableGraph*, const ComponentMergeSet& componentMergeSet)
+void GraphComponentScene::onComponentsWillMerge(const Graph*, const ComponentMergeSet& componentMergeSet)
 {
     if(!visible())
         return;
@@ -192,13 +192,13 @@ void GraphComponentScene::onComponentsWillMerge(const ImmutableGraph*, const Com
     }
 }
 
-void GraphComponentScene::onComponentAdded(const ImmutableGraph*, ComponentId componentId, bool)
+void GraphComponentScene::onComponentAdded(const Graph*, ComponentId componentId, bool)
 {
     if(_componentId.isNull())
         setComponentId(componentId);
 }
 
-void GraphComponentScene::onComponentWillBeRemoved(const ImmutableGraph*, ComponentId componentId, bool hasMerged)
+void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool hasMerged)
 {
     if(componentId == _componentId)
     {
@@ -211,7 +211,7 @@ void GraphComponentScene::onComponentWillBeRemoved(const ImmutableGraph*, Compon
     }
 }
 
-void GraphComponentScene::onGraphChanged(const Graph* graph)
+void GraphComponentScene::onGraphChanged(const MutableGraph* graph)
 {
     _graphRenderer->executeOnRendererThread([this, graph]
     {
@@ -231,7 +231,7 @@ void GraphComponentScene::onGraphChanged(const Graph* graph)
     }, "GraphComponentScene::onGraphChanged (setSize/moveFocusToCentreOfComponent)");
 }
 
-void GraphComponentScene::onNodeWillBeRemoved(const Graph*, NodeId nodeId)
+void GraphComponentScene::onNodeWillBeRemoved(const MutableGraph*, NodeId nodeId)
 {
     if(visible() && componentRenderer()->focusNodeId() == nodeId)
     {

@@ -10,7 +10,7 @@ private:
     float _spread;
 
 public:
-    RandomLayout(const ImmutableGraph& graph,
+    RandomLayout(const Graph& graph,
                  NodePositions& positions) :
         Layout(graph, positions), _spread(10.0f)
     {}

@@ -12,7 +12,7 @@ public:
     GenericGraphModel(const QString& name);
 
 private:
-    Graph _graph;
+    MutableGraph _graph;
     NodePositions _nodePositions;
     NodeVisuals _nodeVisuals;
     EdgeVisuals _edgeVisuals;
@@ -20,8 +20,8 @@ private:
     QString _name;
 
 public:
-    Graph& graph() { return _graph; }
-    const Graph& graph() const { return _graph; }
+    MutableGraph& graph() { return _graph; }
+    const MutableGraph& graph() const { return _graph; }
     NodePositions& nodePositions() { return _nodePositions; }
     const NodePositions& nodePositions() const { return _nodePositions; }
 
@@ -35,8 +35,8 @@ public:
     bool editable() { return true; }
 
 public slots:
-    void onNodeAdded(const Graph*, NodeId nodeId);
-    void onEdgeAdded(const Graph*, EdgeId edgeId);
+    void onNodeAdded(const MutableGraph*, NodeId nodeId);
+    void onEdgeAdded(const MutableGraph*, EdgeId edgeId);
 };
 
 #endif // GENERICGRAPHMODEL_H

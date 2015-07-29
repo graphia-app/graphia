@@ -85,7 +85,7 @@ struct GmlGrammar : qi::grammar<Iterator, GmlFileParser::KeyValuePairList(), asc
     qi::rule<Iterator, QString()> instring;
 };
 
-bool GmlFileParser::parseGmlList(Graph& graph, const GmlFileParser::KeyValuePairList& keyValuePairList, GmlList listType)
+bool GmlFileParser::parseGmlList(MutableGraph& graph, const GmlFileParser::KeyValuePairList& keyValuePairList, GmlList listType)
 {
     static std::map<int, NodeId> nodeIdMap;
     NodeId sourceId;
@@ -176,7 +176,7 @@ void GmlFileParser::onParsePositionIncremented(int64_t position)
     }
 }
 
-bool GmlFileParser::parse(Graph& graph)
+bool GmlFileParser::parse(MutableGraph& graph)
 {
     QFileInfo info(_filename);
 

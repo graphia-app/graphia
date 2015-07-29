@@ -13,7 +13,7 @@ class ComponentManager : public AbstractComponentManager
     Q_OBJECT
 
 public:
-    ComponentManager(Graph& graph) :
+    ComponentManager(MutableGraph& graph) :
         AbstractComponentManager(graph),
         _nextComponentId(0),
         _nodesComponentId(graph),
@@ -35,18 +35,18 @@ private:
 
     ComponentId generateComponentId();
     void releaseComponentId(ComponentId componentId);
-    void queueGraphComponentUpdate(const Graph* graph, ComponentId componentId);
-    void updateGraphComponent(const Graph* graph, ComponentId componentId);
+    void queueGraphComponentUpdate(const MutableGraph* graph, ComponentId componentId);
+    void updateGraphComponent(const MutableGraph* graph, ComponentId componentId);
     void removeGraphComponent(ComponentId componentId);
 
-    void updateComponents(const Graph* graph);
+    void updateComponents(const MutableGraph* graph);
     int componentArrayCapacity() const { return _nextComponentId; }
-    ElementIdSet<ComponentId> assignConnectedElementsComponentId(const Graph* graph, NodeId rootId, ComponentId componentId,
+    ElementIdSet<ComponentId> assignConnectedElementsComponentId(const MutableGraph* graph, NodeId rootId, ComponentId componentId,
                                                                  NodeArray<ComponentId>& nodesComponentId,
                                                                  EdgeArray<ComponentId>& edgesComponentId);
 
 private slots:
-    void onGraphChanged(const Graph* graph);
+    void onGraphChanged(const MutableGraph* graph);
 
 public:
     const std::vector<ComponentId>& componentIds() const;

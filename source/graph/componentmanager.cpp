@@ -3,7 +3,7 @@
 #include <queue>
 #include <map>
 
-ElementIdSet<ComponentId> ComponentManager::assignConnectedElementsComponentId(const Graph* graph,
+ElementIdSet<ComponentId> ComponentManager::assignConnectedElementsComponentId(const MutableGraph* graph,
         NodeId rootId, ComponentId componentId,
         NodeArray<ComponentId>& nodesComponentId,
         EdgeArray<ComponentId>& edgesComponentId)
@@ -41,13 +41,13 @@ ElementIdSet<ComponentId> ComponentManager::assignConnectedElementsComponentId(c
     return oldComponentIdsAffected;
 }
 
-void ComponentManager::updateComponents(const Graph* graph)
+void ComponentManager::updateComponents(const MutableGraph* graph)
 {
     std::map<ComponentId, ElementIdSet<ComponentId>> splitComponents;
     ElementIdSet<ComponentId> newComponentIds;
 
-    NodeArray<ComponentId> newNodesComponentId(*const_cast<Graph*>(graph));
-    EdgeArray<ComponentId> newEdgesComponentId(*const_cast<Graph*>(graph));
+    NodeArray<ComponentId> newNodesComponentId(*const_cast<MutableGraph*>(graph));
+    EdgeArray<ComponentId> newEdgesComponentId(*const_cast<MutableGraph*>(graph));
     ElementIdSet<ComponentId> newComponentIdsList;
 
     const std::vector<NodeId>& nodeIdsList = graph->nodeIds();
@@ -192,7 +192,7 @@ void ComponentManager::releaseComponentId(ComponentId componentId)
     _vacatedComponentIdQueue.push(componentId);
 }
 
-void ComponentManager::queueGraphComponentUpdate(const Graph* graph, ComponentId componentId)
+void ComponentManager::queueGraphComponentUpdate(const MutableGraph* graph, ComponentId componentId)
 {
     _updatesRequired.insert(componentId);
 
@@ -203,7 +203,7 @@ void ComponentManager::queueGraphComponentUpdate(const Graph* graph, ComponentId
     }
 }
 
-void ComponentManager::updateGraphComponent(const Graph* graph, ComponentId componentId)
+void ComponentManager::updateGraphComponent(const MutableGraph* graph, ComponentId componentId)
 {
     std::shared_ptr<GraphComponent> graphComponent = _componentsMap[componentId];
 
@@ -238,7 +238,7 @@ void ComponentManager::removeGraphComponent(ComponentId componentId)
     }
 }
 
-void ComponentManager::onGraphChanged(const Graph* graph)
+void ComponentManager::onGraphChanged(const MutableGraph* graph)
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
     graph->debugPauser.pause("Call updateComponents from ComponentManager::onGraphChanged", &_debugPaused);
