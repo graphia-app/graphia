@@ -192,8 +192,8 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType)
 
     _graphModel = graphModel;
 
-    connect(&_graphModel->graph(), &MutableGraph::graphWillChange, this, &Document::onGraphWillChange, Qt::DirectConnection);
-    connect(&_graphModel->graph(), &MutableGraph::graphChanged, this, &Document::onGraphChanged, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::graphWillChange, this, &Document::onGraphWillChange, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::graphChanged, this, &Document::onGraphChanged, Qt::DirectConnection);
 
     connect(&_graphModel->graph().debugPauser, &DebugPauser::enabledChanged, this, &Document::debugPauserEnabledChanged);
     connect(&_graphModel->graph().debugPauser, &DebugPauser::pausedChanged, this, &Document::debugPausedChanged);
@@ -398,13 +398,13 @@ void Document::debugResume()
     _graphModel->graph().debugPauser.resume();
 }
 
-void Document::onGraphWillChange(const MutableGraph*)
+void Document::onGraphWillChange(const Graph*)
 {
     // Graph is about to change so suspend any active layout process
     pauseLayout(true);
 }
 
-void Document::onGraphChanged(const MutableGraph*)
+void Document::onGraphChanged(const Graph*)
 {
     resumeLayout(true);
 }

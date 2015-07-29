@@ -35,8 +35,8 @@ public:
     bool editable() { return true; }
 
 public slots:
-    void onNodeAdded(const MutableGraph*, NodeId nodeId);
-    void onEdgeAdded(const MutableGraph*, EdgeId edgeId);
+    void onNodeAdded(const Graph*, NodeId nodeId);
+    void onEdgeAdded(const Graph*, EdgeId edgeId);
 };
 
 #endif // GENERICGRAPHMODEL_H

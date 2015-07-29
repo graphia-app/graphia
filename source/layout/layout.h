@@ -110,7 +110,7 @@ class LayoutThread : public QObject
     Q_PROPERTY(bool paused READ paused NOTIFY pausedChanged)
 
 private:
-    const MutableGraph* _graph;
+    const Graph* _graph;
     std::set<std::shared_ptr<Layout>> _layouts;
     std::mutex _mutex;
     std::thread _thread;
@@ -129,7 +129,7 @@ private:
     PerformanceCounter _performanceCounter;
 
 public:
-    LayoutThread(const MutableGraph& graph,
+    LayoutThread(const Graph& graph,
                  std::unique_ptr<const LayoutFactory> layoutFactory,
                  bool repeating = false);
 

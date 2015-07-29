@@ -63,8 +63,8 @@ private slots:
     void onComponentsWillMerge(const Graph* graph, const ComponentMergeSet& componentMergeSet);
     void onComponentAdded(const Graph* graph, ComponentId componentId, bool);
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool);
-    void onGraphChanged(const MutableGraph* graph);
-    void onNodeWillBeRemoved(const MutableGraph* graph, NodeId nodeId);
+    void onGraphChanged(const Graph* graph);
+    void onNodeWillBeRemoved(const Graph* graph, NodeId nodeId);
 };
 
 #endif // GRAPHCOMPONENTSCENE_H

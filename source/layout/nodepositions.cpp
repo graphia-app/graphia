@@ -13,7 +13,7 @@ QVector3D MeanPosition::mean(int samples) const
     return result;
 }
 
-NodePositions::NodePositions(MutableGraph& graph) :
+NodePositions::NodePositions(Graph& graph) :
     NodeArray<MeanPosition>(graph),
     _updated(false),
     _scale(1.0f),

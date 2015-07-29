@@ -147,8 +147,8 @@ public slots:
     void debugResume();
 
 private slots:
-    void onGraphWillChange(const MutableGraph*);
-    void onGraphChanged(const MutableGraph* graph);
+    void onGraphWillChange(const Graph*);
+    void onGraphChanged(const Graph* graph);
 
     void onLoadProgress(int percentage);
     void onLoadComplete(bool success);

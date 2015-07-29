@@ -11,12 +11,12 @@
 class ComponentSplitSet
 {
 private:
-    const MutableGraph* _graph;
+    const Graph* _graph;
     ComponentId _oldComponentId;
     ElementIdSet<ComponentId> _splitters;
 
 public:
-    ComponentSplitSet(const MutableGraph* graph, ComponentId oldComponentId, ElementIdSet<ComponentId>&& splitters) :
+    ComponentSplitSet(const Graph* graph, ComponentId oldComponentId, ElementIdSet<ComponentId>&& splitters) :
         _graph(graph), _oldComponentId(oldComponentId), _splitters(splitters)
     {
     }
@@ -31,12 +31,12 @@ public:
 class ComponentMergeSet
 {
 private:
-    const MutableGraph* _graph;
+    const Graph* _graph;
     ElementIdSet<ComponentId> _mergers;
     ComponentId _newComponentId;
 
 public:
-    ComponentMergeSet(const MutableGraph* graph, ElementIdSet<ComponentId>&& mergers, ComponentId newComponentId) :
+    ComponentMergeSet(const Graph* graph, ElementIdSet<ComponentId>&& mergers, ComponentId newComponentId) :
         _graph(graph), _mergers(mergers), _newComponentId(newComponentId)
     {
     }
@@ -78,14 +78,14 @@ public:
 class AbstractComponentManager : public QObject
 {
     Q_OBJECT
-    friend class MutableGraph;
+    friend class Graph;
 
 public:
-    AbstractComponentManager(MutableGraph& graph);
+    AbstractComponentManager(Graph& graph);
     virtual ~AbstractComponentManager();
 
 protected slots:
-    virtual void onGraphChanged(const MutableGraph*) = 0;
+    virtual void onGraphChanged(const Graph*) = 0;
 
 protected:
     template<typename> friend class ComponentArray;

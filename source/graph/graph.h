@@ -265,12 +265,23 @@ public:
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
     ComponentId largestComponentId() const;
 
+    mutable DebugPauser debugPauser; //FIXME debug builds only?
+
 signals:
     // The signals are listed here in the order in which they are emitted
+    void graphWillChange(const Graph*) const;
+
+    void nodeAdded(const Graph*, NodeId) const;
+    void nodeWillBeRemoved(const Graph*, NodeId) const;
+    void edgeAdded(const Graph*, EdgeId) const;
+    void edgeWillBeRemoved(const Graph*, EdgeId) const;
+
     void componentsWillMerge(const Graph*, const ComponentMergeSet&) const;
     void componentWillBeRemoved(const Graph*, ComponentId, bool) const;
     void componentAdded(const Graph*, ComponentId, bool) const;
     void componentSplit(const Graph*, const ComponentSplitSet&) const;
+
+    void graphChanged(const Graph*) const;
 };
 
 class MutableGraph : public Graph
@@ -332,8 +343,6 @@ public:
 
     void enableComponentManagement();
 
-    mutable DebugPauser debugPauser;
-
 private:
     int _graphChangeDepth;
     std::mutex _mutex;
@@ -352,17 +361,6 @@ public:
     };
 
     void performTransaction(std::function<void(MutableGraph& graph)> transaction);
-
-signals:
-    // The signals are listed here in the order in which they are emitted
-    void graphWillChange(const MutableGraph*) const;
-
-    void nodeAdded(const MutableGraph*, NodeId) const;
-    void nodeWillBeRemoved(const MutableGraph*, NodeId) const;
-    void edgeAdded(const MutableGraph*, EdgeId) const;
-    void edgeWillBeRemoved(const MutableGraph*, EdgeId) const;
-
-    void graphChanged(const MutableGraph*) const;
 };
 
 #endif // GRAPH_H

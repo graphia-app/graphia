@@ -1,7 +1,7 @@
 #include "layout.h"
 #include "../utils/namethread.h"
 
-LayoutThread::LayoutThread(const MutableGraph& graph,
+LayoutThread::LayoutThread(const Graph& graph,
                            std::unique_ptr<const LayoutFactory> layoutFactory,
                            bool repeating) :
     _graph(&graph),
@@ -17,10 +17,10 @@ LayoutThread::LayoutThread(const MutableGraph& graph,
             qDebug() << "Layout" << ticksPerSecond << "ips";
     });
 
-    connect(&graph, &MutableGraph::componentAdded, this, &LayoutThread::onComponentAdded, Qt::DirectConnection);
-    connect(&graph, &MutableGraph::componentWillBeRemoved, this, &LayoutThread::onComponentWillBeRemoved, Qt::DirectConnection);
-    connect(&graph, &MutableGraph::componentSplit, this, &LayoutThread::onComponentSplit, Qt::DirectConnection);
-    connect(&graph, &MutableGraph::componentsWillMerge, this, &LayoutThread::onComponentsWillMerge, Qt::DirectConnection);
+    connect(&graph, &Graph::componentAdded, this, &LayoutThread::onComponentAdded, Qt::DirectConnection);
+    connect(&graph, &Graph::componentWillBeRemoved, this, &LayoutThread::onComponentWillBeRemoved, Qt::DirectConnection);
+    connect(&graph, &Graph::componentSplit, this, &LayoutThread::onComponentSplit, Qt::DirectConnection);
+    connect(&graph, &Graph::componentsWillMerge, this, &LayoutThread::onComponentsWillMerge, Qt::DirectConnection);
 }
 
 void LayoutThread::addLayout(std::shared_ptr<Layout> layout)

@@ -8,14 +8,14 @@ GenericGraphModel::GenericGraphModel(const QString &name) :
     _edgeVisuals(_graph),
     _name(name)
 {
-    connect(&_graph, &MutableGraph::nodeAdded, this, &GenericGraphModel::onNodeAdded, Qt::DirectConnection);
-    connect(&_graph, &MutableGraph::edgeAdded, this, &GenericGraphModel::onEdgeAdded, Qt::DirectConnection);
+    connect(&_graph, &Graph::nodeAdded, this, &GenericGraphModel::onNodeAdded, Qt::DirectConnection);
+    connect(&_graph, &Graph::edgeAdded, this, &GenericGraphModel::onEdgeAdded, Qt::DirectConnection);
 }
 
 const float NODE_SIZE = 0.6f;
 const float EDGE_SIZE = 0.2f;
 
-void GenericGraphModel::onNodeAdded(const MutableGraph*, NodeId nodeId)
+void GenericGraphModel::onNodeAdded(const Graph*, NodeId nodeId)
 {
     if(!_nodeVisuals[nodeId]._initialised)
     {
@@ -25,7 +25,7 @@ void GenericGraphModel::onNodeAdded(const MutableGraph*, NodeId nodeId)
     }
 }
 
-void GenericGraphModel::onEdgeAdded(const MutableGraph*, EdgeId edgeId)
+void GenericGraphModel::onEdgeAdded(const Graph*, EdgeId edgeId)
 {
     if(!_edgeVisuals[edgeId]._initialised)
     {

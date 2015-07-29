@@ -26,12 +26,12 @@ GraphOverviewScene::GraphOverviewScene(GraphRenderer* graphRenderer) :
     _previousComponentLayout(graphRenderer->graphModel()->graph()),
     _componentLayout(graphRenderer->graphModel()->graph())
 {
-    connect(&_graphModel->graph(), &MutableGraph::componentAdded, this, &GraphOverviewScene::onComponentAdded, Qt::DirectConnection);
-    connect(&_graphModel->graph(), &MutableGraph::componentWillBeRemoved, this, &GraphOverviewScene::onComponentWillBeRemoved, Qt::DirectConnection);
-    connect(&_graphModel->graph(), &MutableGraph::componentSplit, this, &GraphOverviewScene::onComponentSplit, Qt::DirectConnection);
-    connect(&_graphModel->graph(), &MutableGraph::componentsWillMerge, this, &GraphOverviewScene::onComponentsWillMerge, Qt::DirectConnection);
-    connect(&_graphModel->graph(), &MutableGraph::graphWillChange, this, &GraphOverviewScene::onGraphWillChange, Qt::DirectConnection);
-    connect(&_graphModel->graph(), &MutableGraph::graphChanged, this, &GraphOverviewScene::onGraphChanged, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::componentAdded, this, &GraphOverviewScene::onComponentAdded, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::componentWillBeRemoved, this, &GraphOverviewScene::onComponentWillBeRemoved, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::componentSplit, this, &GraphOverviewScene::onComponentSplit, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::componentsWillMerge, this, &GraphOverviewScene::onComponentsWillMerge, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::graphWillChange, this, &GraphOverviewScene::onGraphWillChange, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphOverviewScene::onGraphChanged, Qt::DirectConnection);
 }
 
 void GraphOverviewScene::initialise()
@@ -426,13 +426,13 @@ void GraphOverviewScene::onComponentsWillMerge(const Graph*, const ComponentMerg
     }, "GraphOverviewScene::onComponentsWillMerge (freeze renderers)");
 }
 
-void GraphOverviewScene::onGraphWillChange(const MutableGraph*)
+void GraphOverviewScene::onGraphWillChange(const Graph*)
 {
     // Take a copy of the existing layout before the graph is changed
     _previousComponentLayout = _componentLayout;
 }
 
-void GraphOverviewScene::onGraphChanged(const MutableGraph* graph)
+void GraphOverviewScene::onGraphChanged(const Graph* graph)
 {
     _graphRenderer->executeOnRendererThread([this, graph]
     {

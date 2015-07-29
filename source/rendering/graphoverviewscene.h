@@ -85,8 +85,8 @@ private:
     std::vector<ComponentId> _componentIds;
 
 private slots:
-    void onGraphWillChange(const MutableGraph* graph);
-    void onGraphChanged(const MutableGraph* graph);
+    void onGraphWillChange(const Graph* graph);
+    void onGraphChanged(const Graph* graph);
     void onComponentAdded(const Graph* graph, ComponentId componentId, bool hasSplit);
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool hasMerged);
     void onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet);
