@@ -6,7 +6,9 @@
 #include <QtGlobal>
 #include <QMetaType>
 
-Graph::Graph()
+Graph::Graph() :
+    _nodeArrayCapacity(0),
+    _edgeArrayCapacity(0)
 {
     qRegisterMetaType<NodeId>("NodeId");
     qRegisterMetaType<ElementIdSet<NodeId>>("ElementIdSet<NodeId>");
@@ -14,6 +16,28 @@ Graph::Graph()
     qRegisterMetaType<ElementIdSet<EdgeId>>("ElementIdSet<EdgeId>");
     qRegisterMetaType<ComponentId>("ComponentId");
     qRegisterMetaType<ElementIdSet<ComponentId>>("ElementIdSet<ComponentId>");
+
+    connect(this, &Graph::nodeAdded, [this](const Graph*, NodeId nodeId)
+    {
+        NodeId nextNodeId(nodeId + 1);
+        if(nextNodeId > _nodeArrayCapacity)
+        {
+            _nodeArrayCapacity = nextNodeId;
+            for(ResizableGraphArray* nodeArray : _nodeArrayList)
+                nodeArray->resize(_nodeArrayCapacity);
+        }
+    });
+
+    connect(this, &Graph::edgeAdded, [this](const Graph*, EdgeId edgeId)
+    {
+        EdgeId nextEdgeId(edgeId + 1);
+        if(nextEdgeId > _edgeArrayCapacity)
+        {
+            _edgeArrayCapacity = nextEdgeId;
+            for(ResizableGraphArray* edgeArray : _edgeArrayList)
+                edgeArray->resize(_edgeArrayCapacity);
+        }
+    });
 }
 
 Graph::~Graph()
@@ -151,8 +175,8 @@ ComponentId Graph::largestComponentId() const
 }
 
 MutableGraph::MutableGraph() :
-    _lastNodeId(0),
-    _lastEdgeId(0),
+    _nextNodeId(0),
+    _nextEdgeId(0),
     _graphChangeDepth(0)
 {
     enableComponentManagement(); //FIXME remove eventually
@@ -186,7 +210,7 @@ NodeId MutableGraph::addNode()
         return addNode(unusedNodeId);
     }
 
-    return addNode(_lastNodeId);
+    return addNode(_nextNodeId);
 }
 
 NodeId MutableGraph::addNode(NodeId nodeId)
@@ -196,15 +220,13 @@ NodeId MutableGraph::addNode(NodeId nodeId)
     beginTransaction();
 
     // The requested ID is not available or is out of range, so resize and append
-    if(nodeId >= _lastNodeId || (nodeId < _lastNodeId && _nodeIdsInUse[nodeId]))
+    if(nodeId >= _nextNodeId || (nodeId < _nextNodeId && _nodeIdsInUse[nodeId]))
     {
-        nodeId = _lastNodeId;
-        _lastNodeId++;
+        nodeId = _nextNodeId;
+        _nextNodeId++;
 
-        _nodeIdsInUse.resize(nodeArrayCapacity());
-        _nodesVector.resize(nodeArrayCapacity());
-        for(ResizableGraphArray* nodeArray : _nodeArrayList)
-            nodeArray->resize(nodeArrayCapacity());
+        _nodeIdsInUse.resize(_nextNodeId);
+        _nodesVector.resize(_nextNodeId);
     }
 
     _nodeIdsInUse[nodeId] = true;
@@ -278,7 +300,7 @@ EdgeId MutableGraph::addEdge(NodeId sourceId, NodeId targetId)
         return addEdge(unusedEdgeId, sourceId, targetId);
     }
 
-    return addEdge(_lastEdgeId, sourceId, targetId);
+    return addEdge(_nextEdgeId, sourceId, targetId);
 }
 
 EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
@@ -288,15 +310,13 @@ EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     beginTransaction();
 
     // The requested ID is not available or is out of range, so resize and append
-    if(edgeId >= _lastEdgeId || (edgeId < _lastEdgeId && _edgeIdsInUse[edgeId]))
+    if(edgeId >= _nextEdgeId || (edgeId < _nextEdgeId && _edgeIdsInUse[edgeId]))
     {
-        edgeId = _lastEdgeId;
-        _lastEdgeId++;
+        edgeId = _nextEdgeId;
+        _nextEdgeId++;
 
-        _edgeIdsInUse.resize(edgeArrayCapacity());
-        _edgesVector.resize(edgeArrayCapacity());
-        for(ResizableGraphArray* edgeArray : _edgeArrayList)
-            edgeArray->resize(edgeArrayCapacity());
+        _edgeIdsInUse.resize(_nextEdgeId);
+        _edgesVector.resize(_nextEdgeId);
     }
 
     _edgeIdsInUse[edgeId] = true;
@@ -400,7 +420,7 @@ void MutableGraph::updateElementIdData()
 {
     _nodeIdsVector.clear();
     _unusedNodeIdsDeque.clear();
-    for(NodeId nodeId(0); nodeId < _lastNodeId; nodeId++)
+    for(NodeId nodeId(0); nodeId < _nextNodeId; nodeId++)
     {
         if(_nodeIdsInUse[nodeId])
             _nodeIdsVector.push_back(nodeId);
@@ -410,7 +430,7 @@ void MutableGraph::updateElementIdData()
 
     _edgeIdsVector.clear();
     _unusedEdgeIdsDeque.clear();
-    for(EdgeId edgeId(0); edgeId < _lastEdgeId; edgeId++)
+    for(EdgeId edgeId(0); edgeId < _nextEdgeId; edgeId++)
     {
         if(_edgeIdsInUse[edgeId])
             _edgeIdsVector.push_back(edgeId);

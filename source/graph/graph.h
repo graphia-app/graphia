@@ -245,23 +245,6 @@ public:
     const ElementIdSet<EdgeId> edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds);
     const std::vector<Edge> edgesForNodes(const ElementIdSet<NodeId>& nodeIds);
 
-    virtual void dumpToQDebug(int detail) const;
-
-    void enableComponentManagement();
-
-protected:
-    template<typename> friend class NodeArray;
-    std::unordered_set<ResizableGraphArray*> _nodeArrayList;
-    virtual int nodeArrayCapacity() const { qFatal("Graph::nodeArrayCapacity is not callable"); }
-
-    template<typename> friend class EdgeArray;
-    std::unordered_set<ResizableGraphArray*> _edgeArrayList;
-    virtual int edgeArrayCapacity() const { qFatal("Graph::edgeArrayCapacity is not callable"); }
-
-    template<typename> friend class ComponentArray;
-    std::unique_ptr<AbstractComponentManager> _componentManager;
-
-public:
     const std::vector<ComponentId>& componentIds() const;
     int numComponents() const;
     const Graph* componentById(ComponentId componentId) const;
@@ -269,7 +252,25 @@ public:
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
     ComponentId largestComponentId() const;
 
-    mutable DebugPauser debugPauser; //FIXME debug builds only?
+    void enableComponentManagement();
+
+    mutable DebugPauser debugPauser;
+    void dumpToQDebug(int detail) const;
+
+private:
+    template<typename> friend class NodeArray;
+    template<typename> friend class EdgeArray;
+    template<typename> friend class ComponentArray;
+
+    int _nodeArrayCapacity;
+    int nodeArrayCapacity() const { return _nodeArrayCapacity; }
+    std::unordered_set<ResizableGraphArray*> _nodeArrayList;
+
+    int _edgeArrayCapacity;
+    int edgeArrayCapacity() const { return _edgeArrayCapacity; }
+    std::unordered_set<ResizableGraphArray*> _edgeArrayList;
+
+    std::unique_ptr<AbstractComponentManager> _componentManager;
 
 signals:
     // The signals are listed here in the order in which they are emitted
@@ -300,16 +301,13 @@ private:
     std::vector<NodeId> _nodeIdsVector;
     std::deque<NodeId> _unusedNodeIdsDeque;
     std::vector<Node> _nodesVector;
-    NodeId _lastNodeId;
+    NodeId _nextNodeId;
 
     std::vector<bool> _edgeIdsInUse;
     std::vector<EdgeId> _edgeIdsVector;
     std::deque<EdgeId> _unusedEdgeIdsDeque;
     std::vector<Edge> _edgesVector;
-    EdgeId _lastEdgeId;
-
-    int nodeArrayCapacity() const { return _lastNodeId; }
-    int edgeArrayCapacity() const { return _lastEdgeId; }
+    EdgeId _nextEdgeId;
 
     void updateElementIdData();
 
