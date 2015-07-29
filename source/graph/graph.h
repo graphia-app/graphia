@@ -36,45 +36,14 @@ public:
     }
 
     inline operator int() const { return _value; }
+    ElementId& operator=(const ElementId<T>& other) { _value = other._value; return *this; }
+    inline T& operator++() { ++_value; return static_cast<T&>(*this); }
+    inline T operator++(int) { T previous = static_cast<T&>(*this); operator++(); return previous; }
+    inline bool operator==(const ElementId<T>& other) const { return _value == other._value; }
+    inline bool operator<(const ElementId<T>& other) const { return _value < other._value; }
 
-    ElementId& operator=(const ElementId<T>& other)
-    {
-        _value = other._value;
-        return *this;
-    }
-
-    inline T& operator++()
-    {
-        ++_value;
-        return static_cast<T&>(*this);
-    }
-
-    inline T operator++(int)
-    {
-        T previous = static_cast<T&>(*this);
-        operator++();
-        return previous;
-    }
-
-    inline bool operator==(const ElementId<T>& other) const
-    {
-        return _value == other._value;
-    }
-
-    inline bool operator<(const ElementId<T>& other) const
-    {
-        return _value < other._value;
-    }
-
-    inline bool isNull() const
-    {
-        return _value == NullValue;
-    }
-
-    inline void setToNull()
-    {
-        _value = NullValue;
-    }
+    inline bool isNull() const { return _value == NullValue; }
+    inline void setToNull() { _value = NullValue; }
 
     operator QString() const
     {
@@ -115,6 +84,17 @@ public:
 #endif
 };
 
+class ComponentId : public ElementId<ComponentId>
+{
+#if __cplusplus >= 201103L
+    using ElementId::ElementId;
+#else
+public:
+    explicit ComponentId() : ElementId() {}
+    explicit ComponentId(int value) : ElementId(value) {}
+#endif
+};
+
 namespace std
 {
     template<typename T> struct hash<ElementId<T>>
@@ -138,17 +118,6 @@ template<typename T> QDebug operator<<(QDebug d, const ElementIdSet<T>& idSet)
 
     return d;
 }
-
-class ComponentId : public ElementId<ComponentId>
-{
-#if __cplusplus >= 201103L
-    using ElementId::ElementId;
-#else
-public:
-    explicit ComponentId() : ElementId() {}
-    explicit ComponentId(int value) : ElementId(value) {}
-#endif
-};
 
 class Node
 {
