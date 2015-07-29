@@ -229,6 +229,7 @@ class Graph : public QObject
     Q_OBJECT
 
 public:
+    Graph();
     virtual ~Graph();
 
     virtual const std::vector<NodeId>& nodeIds() const = 0;

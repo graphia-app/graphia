@@ -6,6 +6,16 @@
 #include <QtGlobal>
 #include <QMetaType>
 
+Graph::Graph()
+{
+    qRegisterMetaType<NodeId>("NodeId");
+    qRegisterMetaType<ElementIdSet<NodeId>>("ElementIdSet<NodeId>");
+    qRegisterMetaType<EdgeId>("EdgeId");
+    qRegisterMetaType<ElementIdSet<EdgeId>>("ElementIdSet<EdgeId>");
+    qRegisterMetaType<ComponentId>("ComponentId");
+    qRegisterMetaType<ElementIdSet<ComponentId>>("ElementIdSet<ComponentId>");
+}
+
 Graph::~Graph()
 {
     // Let the GraphArrays know that we're going away
@@ -146,13 +156,6 @@ MutableGraph::MutableGraph() :
     _graphChangeDepth(0)
 {
     enableComponentManagement(); //FIXME remove eventually
-
-    qRegisterMetaType<NodeId>("NodeId");
-    qRegisterMetaType<ElementIdSet<NodeId>>("ElementIdSet<NodeId>");
-    qRegisterMetaType<EdgeId>("EdgeId");
-    qRegisterMetaType<ElementIdSet<EdgeId>>("ElementIdSet<EdgeId>");
-    qRegisterMetaType<ComponentId>("ComponentId");
-    qRegisterMetaType<ElementIdSet<ComponentId>>("ElementIdSet<ComponentId>");
 }
 
 MutableGraph::~MutableGraph()
