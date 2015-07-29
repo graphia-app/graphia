@@ -16,6 +16,31 @@ Graph::~Graph()
         edgeArray->invalidate();
 }
 
+const ElementIdSet<EdgeId> Graph::edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds)
+{
+    ElementIdSet<EdgeId> edgeIds;
+
+    for(NodeId nodeId : nodeIds)
+    {
+        const Node& node = nodeById(nodeId);
+        for(EdgeId edgeId : node.edges())
+            edgeIds.insert(edgeId);
+    }
+
+    return edgeIds;
+}
+
+const std::vector<Edge> Graph::edgesForNodes(const ElementIdSet<NodeId>& nodeIds)
+{
+    const ElementIdSet<EdgeId>& edgeIds = edgeIdsForNodes(nodeIds);
+    std::vector<Edge> edges;
+
+    for(EdgeId edgeId : edgeIds)
+        edges.push_back(edgeById(edgeId));
+
+    return edges;
+}
+
 void Graph::dumpToQDebug(int detail) const
 {
     qDebug() << numNodes() << "nodes" << numEdges() << "edges";
@@ -338,31 +363,6 @@ void MutableGraph::removeEdges(const ElementIdSet<EdgeId>& edgeIds)
         removeEdge(edgeId);
 
     endTransaction();
-}
-
-const ElementIdSet<EdgeId> MutableGraph::edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds)
-{
-    ElementIdSet<EdgeId> edgeIds;
-
-    for(NodeId nodeId : nodeIds)
-    {
-        const Node& node = _nodesVector[nodeId];
-        for(EdgeId edgeId : node.edges())
-            edgeIds.insert(edgeId);
-    }
-
-    return edgeIds;
-}
-
-const std::vector<Edge> MutableGraph::edgesForNodes(const ElementIdSet<NodeId>& nodeIds)
-{
-    const ElementIdSet<EdgeId>& edgeIds = edgeIdsForNodes(nodeIds);
-    std::vector<Edge> edges;
-
-    for(EdgeId edgeId : edgeIds)
-        edges.push_back(_edgesVector[edgeId]);
-
-    return edges;
 }
 
 void MutableGraph::beginTransaction()

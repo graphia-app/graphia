@@ -241,6 +241,9 @@ public:
     virtual const Edge& edgeById(EdgeId edgeId) const = 0;
     EdgeId firstEdgeId() const { return edgeIds().size() > 0 ? edgeIds().at(0) : EdgeId(); }
 
+    const ElementIdSet<EdgeId> edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds);
+    const std::vector<Edge> edgesForNodes(const ElementIdSet<NodeId>& nodeIds);
+
     virtual void dumpToQDebug(int detail) const;
 
     void enableComponentManagement();
@@ -335,9 +338,6 @@ public:
 
     void removeEdge(EdgeId edgeId);
     void removeEdges(const ElementIdSet<EdgeId>& edgeIds);
-
-    const ElementIdSet<EdgeId> edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds);
-    const std::vector<Edge> edgesForNodes(const ElementIdSet<NodeId>& nodeIds);
 
 private:
     int _graphChangeDepth;
