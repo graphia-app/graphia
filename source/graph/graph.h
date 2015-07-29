@@ -219,7 +219,7 @@ public:
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
     ComponentId largestComponentId() const;
 
-    void enableComponentManagement();
+    virtual void enableComponentManagement();
 
     mutable DebugPauser debugPauser;
     void dumpToQDebug(int detail) const;
