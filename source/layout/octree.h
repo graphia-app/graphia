@@ -47,7 +47,7 @@ protected:
 
 private:
     unsigned int _maxNodesPerLeaf = 1;
-    std::function<bool(const BoundingBox3D&)> _predicate = [](const BoundingBox3D&) { return true; };
+    std::function<bool(const BoundingBox3D&)> _predicate;
 
     void distributeNodesOverSubVolumes(std::stack<BaseOctree*>& stack)
     {
@@ -103,6 +103,7 @@ private:
     virtual void initialiseTreeNode() {}
 
 public:
+    BaseOctree() : _predicate([](const BoundingBox3D&) { return true; }) {}
     virtual ~BaseOctree() {}
 
     void setMaxNodesPerLeaf(unsigned int maxNodesPerLeaf) { _maxNodesPerLeaf = maxNodesPerLeaf; }

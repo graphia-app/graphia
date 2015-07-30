@@ -57,6 +57,7 @@ public:
            NodePositions& positions,
            Iterative iterative = Iterative::No) :
         QObject(),
+        _atomicCancel(false),
         _iterative(iterative),
         _graph(graph),
         _positions(positions)

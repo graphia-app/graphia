@@ -6,7 +6,8 @@
 #include <QDebug>
 #include <QtGlobal>
 
-DeferredExecutor::DeferredExecutor()
+DeferredExecutor::DeferredExecutor() :
+    _executing(false)
 {
     _debug = qgetenv("DEFERREDEXECUTOR_DEBUG").toInt();
 }

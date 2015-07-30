@@ -9,6 +9,8 @@ class Transition : public QObject
 {
     Q_OBJECT
 public:
+    Transition() : _function([](float) {}) {}
+
     enum class Type
     {
         None,
@@ -23,7 +25,7 @@ private:
     float _lastTime = 0.0f;
     float _duration = 0.0f;
     float _elapsed = 0.0f;
-    std::function<void(float)> _function = [](float) {};
+    std::function<void(float)> _function;
     std::vector<std::function<void()>> _finishedFunctions;
 
 public:

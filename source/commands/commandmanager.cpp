@@ -5,7 +5,8 @@
 #include <thread>
 
 CommandManager::CommandManager() :
-    _lock(_mutex, std::defer_lock)
+    _lock(_mutex, std::defer_lock),
+    _busy(false)
 {
     qRegisterMetaType<std::shared_ptr<Command>>("std::shared_ptr<Command>");
     connect(this, &CommandManager::commandCompleted, this, &CommandManager::onCommandCompleted);
