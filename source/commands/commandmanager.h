@@ -89,7 +89,7 @@ private:
     std::thread _thread;
     mutable std::mutex _mutex;
     std::unique_lock<std::mutex> _lock;
-    std::atomic<bool> _busy = false;
+    std::atomic<bool> _busy;
 
     std::shared_ptr<Command> _currentCommand;
     int _commandProgress = 0;

@@ -15,13 +15,14 @@ class ComponentManager : public AbstractComponentManager
 public:
     ComponentManager(Graph& graph) :
         AbstractComponentManager(graph),
+        _nextComponentId(0),
         _nodesComponentId(graph),
         _edgesComponentId(graph)
     {}
 
 private:
     std::vector<ComponentId> _componentIdsList;
-    ComponentId _nextComponentId = 0;
+    ComponentId _nextComponentId;
     std::queue<ComponentId> _vacatedComponentIdQueue;
     std::map<ComponentId, std::shared_ptr<GraphComponent>> _componentsMap;
     ElementIdSet<ComponentId> _updatesRequired;

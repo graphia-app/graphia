@@ -23,7 +23,7 @@ private:
     std::recursive_mutex _mutex;
     std::deque<Task> _tasks;
     int _debug;
-    std::atomic<bool> _executing = false;
+    std::atomic<bool> _executing;
 
 public:
     DeferredExecutor();

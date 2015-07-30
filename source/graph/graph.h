@@ -268,13 +268,13 @@ private:
     std::vector<NodeId> _nodeIdsVector;
     std::deque<NodeId> _unusedNodeIdsDeque;
     std::vector<Node> _nodesVector;
-    NodeId _nextNodeId = 0;
+    NodeId _nextNodeId;
 
     std::vector<bool> _edgeIdsInUse;
     std::vector<EdgeId> _edgeIdsVector;
     std::deque<EdgeId> _unusedEdgeIdsDeque;
     std::vector<Edge> _edgesVector;
-    EdgeId _nextEdgeId = 0;
+    EdgeId _nextEdgeId;
 
     void updateElementIdData();
 

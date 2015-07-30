@@ -61,7 +61,8 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
     OpenGLFunctions(),
     _graphModel(graphModel),
     _selectionManager(selectionManager),
-    _componentRenderers(_graphModel->graph())
+    _componentRenderers(_graphModel->graph()),
+    _sceneUpdateEnabled(true)
 {
     resolveOpenGLFunctions();
 

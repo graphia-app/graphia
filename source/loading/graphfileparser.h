@@ -28,7 +28,7 @@ public:
     virtual bool parse(MutableGraph& graph) = 0;
 
 private:
-    std::atomic<bool> _cancelAtomic = false;
+    std::atomic<bool> _cancelAtomic;
     void setCancel(bool cancel)
     {
         _cancelAtomic = cancel;

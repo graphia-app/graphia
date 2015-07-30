@@ -172,7 +172,9 @@ ComponentId Graph::largestComponentId() const
     return largestComponentId;
 }
 
-MutableGraph::MutableGraph()
+MutableGraph::MutableGraph() :
+    _nextNodeId(0),
+    _nextEdgeId(0)
 {
     enableComponentManagement(); //FIXME remove eventually
 }

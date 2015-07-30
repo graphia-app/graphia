@@ -156,7 +156,7 @@ private:
     QRect _selectionRect;
 
     QTime _time;
-    std::atomic<bool> _sceneUpdateEnabled = true;
+    std::atomic<bool> _sceneUpdateEnabled;
 
     bool _modeTransitionInProgress = false;
 
