@@ -37,23 +37,23 @@ protected:
 private:
     QPoint _cursorPosition;
     QPoint _prevCursorPosition;
-    bool _rightMouseButtonHeld;
-    bool _leftMouseButtonHeld;
+    bool _rightMouseButtonHeld = false;
+    bool _leftMouseButtonHeld = false;
 
     Qt::KeyboardModifiers _modifiers;
 
-    bool _selecting;
-    bool _frustumSelecting;
+    bool _selecting = false;
+    bool _frustumSelecting = false;
     QPoint _frustumSelectStart;
 
     QPoint _clickPosition;
     NodeId _clickedNodeId;
     NodeId _nearClickNodeId;
 
-    bool _mouseMoving;
+    bool _mouseMoving = false;
 
-    GraphComponentRenderer* _clickedRenderer;
-    GraphComponentRenderer* _rendererUnderCursor;
+    GraphComponentRenderer* _clickedRenderer = nullptr;
+    GraphComponentRenderer* _rendererUnderCursor = nullptr;
 
     void mousePressEvent(QMouseEvent* e) final;
     void mouseReleaseEvent(QMouseEvent* e) final;

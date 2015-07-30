@@ -39,12 +39,12 @@ public:
 
     struct LayoutData
     {
-        LayoutData() : _alpha(1.0f) {}
+        LayoutData() {}
         LayoutData(const QRect& rect, float alpha) :
             _rect(rect), _alpha(alpha) {}
 
         QRect _rect;
-        float _alpha;
+        float _alpha = 1.0f;
     };
 
     const ComponentArray<LayoutData>& componentLayout() { return _componentLayout; }
@@ -66,10 +66,10 @@ private:
     GraphRenderer* _graphRenderer;
     std::shared_ptr<GraphModel> _graphModel;
 
-    int _width;
-    int _height;
+    int _width = 0;
+    int _height = 0;
 
-    int _renderSizeDivisor;
+    int _renderSizeDivisor = 1;
     ComponentArray<int> _renderSizeDivisors;
 
     ComponentArray<LayoutData> _previousComponentLayout;

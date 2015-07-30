@@ -28,8 +28,8 @@ private:
     std::mutex _mutex;
     std::condition_variable _waitForNewTask;
     std::queue<std::function<void()>> _tasks;
-    std::atomic<bool> _stop;
-    std::atomic<int> _activeThreads;
+    std::atomic<bool> _stop = false;
+    std::atomic<int> _activeThreads = 0;
 
 public:
     ThreadPool(const QString& threadNamePrefix = QString("Worker"),

@@ -6,9 +6,7 @@
 #include <QtGlobal>
 #include <QMetaType>
 
-Graph::Graph() :
-    _nodeArrayCapacity(0),
-    _edgeArrayCapacity(0)
+Graph::Graph()
 {
     qRegisterMetaType<NodeId>("NodeId");
     qRegisterMetaType<ElementIdSet<NodeId>>("ElementIdSet<NodeId>");
@@ -174,10 +172,7 @@ ComponentId Graph::largestComponentId() const
     return largestComponentId;
 }
 
-MutableGraph::MutableGraph() :
-    _nextNodeId(0),
-    _nextEdgeId(0),
-    _graphChangeDepth(0)
+MutableGraph::MutableGraph()
 {
     enableComponentManagement(); //FIXME remove eventually
 }

@@ -5,12 +5,7 @@
 #include "../commands/commandmanager.h"
 
 GraphQuickItem::GraphQuickItem(QQuickItem* parent) :
-    QQuickFramebufferObject(parent),
-    _viewResetPending(false),
-    _overviewModeSwitchPending(false),
-    _interacting(false),
-    _viewIsReset(true),
-    _canEnterOverviewMode(false)
+    QQuickFramebufferObject(parent)
 {
     // Prevent updates until we're properly initialised
     setFlag(Flag::ItemHasContents, false);

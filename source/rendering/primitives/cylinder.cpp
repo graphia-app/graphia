@@ -4,11 +4,8 @@
 
 #include <QOpenGLShaderProgram>
 
-Cylinder::Cylinder(QObject* parent)
-    : QObject(parent),
-      _radius(1.0f),
-      _length(2.0f),
-      _slices(30),
+Cylinder::Cylinder(QObject* parent) :
+      QObject(parent),
       _positionBuffer(QOpenGLBuffer::VertexBuffer),
       _normalBuffer(QOpenGLBuffer::VertexBuffer),
       _textureCoordBuffer(QOpenGLBuffer::VertexBuffer),

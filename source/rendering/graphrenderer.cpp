@@ -60,22 +60,8 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
     QObject(),
     OpenGLFunctions(),
     _graphModel(graphModel),
-    _numComponents(0),
     _selectionManager(selectionManager),
-    _componentRenderers(_graphModel->graph()),
-    _numTransitioningRenderers(0),
-    _mode(Mode::Overview),
-    _scene(nullptr),
-    _interactor(nullptr),
-    _width(0), _height(0),
-    _resized(false),
-    _colorTexture(0),
-    _selectionTexture(0),
-    _depthTexture(0),
-    _visualFBO(0),
-    _FBOcomplete(false),
-    _sceneUpdateEnabled(true),
-    _modeTransitionInProgress(false)
+    _componentRenderers(_graphModel->graph())
 {
     resolveOpenGLFunctions();
 

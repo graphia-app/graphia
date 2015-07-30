@@ -22,7 +22,7 @@ private:
 
     std::chrono::time_point<std::chrono::high_resolution_clock> _lastReport;
     std::chrono::seconds _interval;
-    ReportFn _f;
+    ReportFn _f = [](float) {};
 };
 
 #endif // PERFORMANCECOUNTER_H

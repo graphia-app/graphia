@@ -84,15 +84,15 @@ private:
     bool canRedoNoLocking() const;
 
     std::deque<std::shared_ptr<Command>> _stack;
-    int _lastExecutedIndex;
+    int _lastExecutedIndex = -1;
 
     std::thread _thread;
     mutable std::mutex _mutex;
     std::unique_lock<std::mutex> _lock;
-    std::atomic<bool> _busy;
+    std::atomic<bool> _busy = false;
 
     std::shared_ptr<Command> _currentCommand;
-    int _commandProgress;
+    int _commandProgress = 0;
     QString _commandVerb;
 
 private slots:

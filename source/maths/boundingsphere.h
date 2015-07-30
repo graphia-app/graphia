@@ -14,7 +14,7 @@ class BoundingSphere
 {
 private:
     QVector3D _centre;
-    float _radius;
+    float _radius = 0.0f;
 
 public:
     BoundingSphere();

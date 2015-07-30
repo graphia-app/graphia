@@ -40,9 +40,9 @@ private:
                             std::vector<float>& texCoords, std::vector<float>& tangents,
                             std::vector<unsigned int>& indices);
 
-    float _radius;
-    int _rings;
-    int _slices;
+    float _radius = 1.0f;
+    int _rings = 30;
+    int _slices = 30;
 
     QOpenGLBuffer _positionBuffer;
     QOpenGLBuffer _normalBuffer;

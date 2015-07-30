@@ -18,14 +18,13 @@
 
 template<typename TreeType> struct SubVolume
 {
-    SubVolume() : _leaf(true), _empty(true), _passesPredicate(true) {}
     BoundingBox3D _boundingBox;
     std::vector<NodeId> _nodeIds;
     std::unique_ptr<TreeType> _subTree;
-    bool _leaf;
-    bool _empty;
+    bool _leaf = true;
+    bool _empty = true;
 
-    bool _passesPredicate;
+    bool _passesPredicate = true;
 };
 
 // Use the CRT pattern so we can create instances of subclasses by default constructor
@@ -39,16 +38,16 @@ protected:
     SubVolumeType _subVolumes[8];
 
     const SubVolumeType* _nonEmptyLeaves[8];
-    int _numNonEmptyLeaves;
+    int _numNonEmptyLeaves = 0;
 
     const SubVolumeType* _internalNodes[8];
-    int _numInternalNodes;
+    int _numInternalNodes = 0;
 
     std::vector<NodeId> _nodeIds;
 
 private:
-    unsigned int _maxNodesPerLeaf;
-    std::function<bool(const BoundingBox3D&)> _predicate;
+    unsigned int _maxNodesPerLeaf = 1;
+    std::function<bool(const BoundingBox3D&)> _predicate = [](const BoundingBox3D&) { return true; };
 
     void distributeNodesOverSubVolumes(std::stack<BaseOctree*>& stack)
     {
@@ -104,14 +103,6 @@ private:
     virtual void initialiseTreeNode() {}
 
 public:
-    BaseOctree() :
-        _numNonEmptyLeaves(0),
-        _numInternalNodes(0),
-        _maxNodesPerLeaf(1),
-        _predicate([](const BoundingBox3D&) { return true; })
-
-    {}
-
     virtual ~BaseOctree() {}
 
     void setMaxNodesPerLeaf(unsigned int maxNodesPerLeaf) { _maxNodesPerLeaf = maxNodesPerLeaf; }

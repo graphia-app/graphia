@@ -7,15 +7,14 @@ class ScalingLayout : public Layout
 {
     Q_OBJECT
 private:
-    float _scale;
+    float _scale = 1.0f;
 
 public:
-    ScalingLayout(const Graph& graph,
-                  NodePositions& positions) :
-        Layout(graph, positions), _scale(1.0f)
+    ScalingLayout(const Graph& graph, NodePositions& positions) :
+        Layout(graph, positions)
     {}
 
-    void setScale(float _scale) { this->_scale = _scale; }
+    void setScale(float _scale) { _scale = _scale; }
     float scale() { return _scale; }
 
     void executeReal(uint64_t);

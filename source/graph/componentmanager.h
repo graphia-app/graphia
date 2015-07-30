@@ -15,15 +15,13 @@ class ComponentManager : public AbstractComponentManager
 public:
     ComponentManager(Graph& graph) :
         AbstractComponentManager(graph),
-        _nextComponentId(0),
         _nodesComponentId(graph),
-        _edgesComponentId(graph),
-        _debugPaused(false)
+        _edgesComponentId(graph)
     {}
 
 private:
     std::vector<ComponentId> _componentIdsList;
-    ComponentId _nextComponentId;
+    ComponentId _nextComponentId = 0;
     std::queue<ComponentId> _vacatedComponentIdQueue;
     std::map<ComponentId, std::shared_ptr<GraphComponent>> _componentsMap;
     ElementIdSet<ComponentId> _updatesRequired;
@@ -31,7 +29,7 @@ private:
     EdgeArray<ComponentId> _edgesComponentId;
 
     mutable std::recursive_mutex _updateMutex;
-    bool _debugPaused;
+    bool _debugPaused = false;
 
     ComponentId generateComponentId();
     void releaseComponentId(ComponentId componentId);

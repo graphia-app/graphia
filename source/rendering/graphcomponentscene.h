@@ -52,8 +52,8 @@ public:
 private:
     GraphRenderer* _graphRenderer;
 
-    int _width;
-    int _height;
+    int _width = 0;
+    int _height = 0;
 
     ComponentId _defaultComponentId;
     ComponentId _componentId;

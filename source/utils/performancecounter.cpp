@@ -1,8 +1,7 @@
 #include "performancecounter.h"
 
 PerformanceCounter::PerformanceCounter(std::chrono::seconds interval) :
-    _interval(interval),
-    _f([](float){})
+    _interval(interval)
 {}
 
 void PerformanceCounter::tick()

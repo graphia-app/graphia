@@ -5,14 +5,6 @@
 
 #include <QDebug>
 
-Transition::Transition() :
-    _type(Type::None), _lastTime(0.0f),
-    _duration(0.0f), _elapsed(0.0f),
-    _function([](float){})
-{}
-
-
-
 bool Transition::update(float time)
 {
     if(!active())

@@ -5,12 +5,12 @@
 #include <limits>
 #include <cmath>
 
-BoundingBox2D::BoundingBox2D()
-    : _min(), _max()
+BoundingBox2D::BoundingBox2D() :
+    _min(), _max()
 {}
 
-BoundingBox2D::BoundingBox2D(const QVector2D& min, const QVector2D& max)
-    : _min(min), _max(max)
+BoundingBox2D::BoundingBox2D(const QVector2D& min, const QVector2D& max) :
+    _min(min), _max(max)
 {}
 
 BoundingBox2D::BoundingBox2D(const std::vector<QVector2D>& points)
@@ -79,12 +79,12 @@ QVector2D BoundingBox2D::centre() const
     return (_min + _max) / 2.0f;
 }
 
-BoundingBox3D::BoundingBox3D()
-    : _min(), _max()
+BoundingBox3D::BoundingBox3D() :
+    _min(), _max()
 {}
 
-BoundingBox3D::BoundingBox3D(const QVector3D& min, const QVector3D& max)
-    : _min(min), _max(max)
+BoundingBox3D::BoundingBox3D(const QVector3D& min, const QVector3D& max) :
+    _min(min), _max(max)
 {}
 
 BoundingBox3D::BoundingBox3D(const std::vector<QVector3D>& points)

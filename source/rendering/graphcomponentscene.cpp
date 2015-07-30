@@ -10,8 +10,7 @@
 GraphComponentScene::GraphComponentScene(GraphRenderer* graphRenderer) :
     Scene(graphRenderer),
     OpenGLFunctions(),
-    _graphRenderer(graphRenderer),
-    _width(0), _height(0)
+    _graphRenderer(graphRenderer)
 {
     connect(&_graphRenderer->graphModel()->graph(), &Graph::componentSplit, this, &GraphComponentScene::onComponentSplit, Qt::DirectConnection);
     connect(&_graphRenderer->graphModel()->graph(), &Graph::componentsWillMerge, this, &GraphComponentScene::onComponentsWillMerge, Qt::DirectConnection);

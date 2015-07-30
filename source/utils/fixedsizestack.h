@@ -9,13 +9,12 @@ template<typename T> class FixedSizeStack
 private:
     std::vector<T> _vector;
     size_t _size;
-    int _top;
+    int _top = -1;
 
 public:
     FixedSizeStack(size_t size) :
         _vector(size),
-        _size(size),
-        _top(-1)
+        _size(size)
     {}
 
     void push(const T& t)

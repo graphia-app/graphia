@@ -3,8 +3,7 @@
 
 #include <QtGlobal>
 
-AbstractComponentManager::AbstractComponentManager(Graph& graph) :
-    _debug(false)
+AbstractComponentManager::AbstractComponentManager(Graph& graph)
 {
     if(qgetenv("COMPONENTS_DEBUG").toInt())
         _debug = true;

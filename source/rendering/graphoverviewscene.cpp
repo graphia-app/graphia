@@ -20,11 +20,9 @@ GraphOverviewScene::GraphOverviewScene(GraphRenderer* graphRenderer) :
     OpenGLFunctions(),
     _graphRenderer(graphRenderer),
     _graphModel(graphRenderer->graphModel()),
-    _width(0), _height(0),
-    _renderSizeDivisor(1),
-    _renderSizeDivisors(graphRenderer->graphModel()->graph()),
-    _previousComponentLayout(graphRenderer->graphModel()->graph()),
-    _componentLayout(graphRenderer->graphModel()->graph())
+    _renderSizeDivisors(_graphModel->graph()),
+    _previousComponentLayout(_graphModel->graph()),
+    _componentLayout(_graphModel->graph())
 {
     connect(&_graphModel->graph(), &Graph::componentAdded, this, &GraphOverviewScene::onComponentAdded, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::componentWillBeRemoved, this, &GraphOverviewScene::onComponentWillBeRemoved, Qt::DirectConnection);

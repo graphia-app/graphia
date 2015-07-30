@@ -14,10 +14,7 @@ QVector3D MeanPosition::mean(int samples) const
 }
 
 NodePositions::NodePositions(Graph& graph) :
-    NodeArray<MeanPosition>(graph),
-    _updated(false),
-    _scale(1.0f),
-    _smoothing(1)
+    NodeArray<MeanPosition>(graph)
 {}
 
 const QVector3D& NodePositions::get(NodeId nodeId) const

@@ -14,8 +14,8 @@ public:
     virtual ~OpenGLDebugLogger();
 
 private:
-    int _debugLevel;
-    QOpenGLDebugLogger* _logger;
+    int _debugLevel = 0;
+    QOpenGLDebugLogger* _logger = nullptr;
 
 private slots:
     void onMessageLogged(const QOpenGLDebugMessage& message);

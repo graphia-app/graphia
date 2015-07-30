@@ -13,8 +13,7 @@ private:
     std::vector<Layout*> _subLayouts;
 
 public:
-    SequenceLayout(const Graph& graph,
-                   NodePositions& positions) :
+    SequenceLayout(const Graph& graph, NodePositions& positions) :
         Layout(graph, positions)
     {}
 

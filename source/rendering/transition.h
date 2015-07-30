@@ -19,16 +19,14 @@ public:
     };
 
 private:
-    Type _type;
-    float _lastTime;
-    float _duration;
-    float _elapsed;
-    std::function<void(float)> _function;
+    Type _type = Type::None;
+    float _lastTime = 0.0f;
+    float _duration = 0.0f;
+    float _elapsed = 0.0f;
+    std::function<void(float)> _function = [](float) {};
     std::vector<std::function<void()>> _finishedFunctions;
 
 public:
-    Transition();
-
     template<typename... Args> void start(float duration, Type type,
                                           std::function<void(float)> function,
                                           Args... finishedFunctions)

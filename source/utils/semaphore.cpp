@@ -1,7 +1,7 @@
 #include "semaphore.h"
 
-semaphore::semaphore(int count)
-    : _count(count)
+semaphore::semaphore(int count) :
+      _count(count)
 {}
 
 void semaphore::notify()

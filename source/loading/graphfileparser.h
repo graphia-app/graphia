@@ -25,12 +25,10 @@ signals:
     void progress(int percentage) const;
 
 public:
-    GraphFileParser() : _cancelAtomic(0) {}
-
     virtual bool parse(MutableGraph& graph) = 0;
 
 private:
-    std::atomic<bool> _cancelAtomic;
+    std::atomic<bool> _cancelAtomic = false;
     void setCancel(bool cancel)
     {
         _cancelAtomic = cancel;
@@ -60,12 +58,12 @@ public:
         struct enabler {};
 
      public:
-        progress_iterator()
-            : progress_iterator::iterator_adaptor_() {}
+        progress_iterator() :
+            progress_iterator::iterator_adaptor_() {}
 
         explicit progress_iterator(const boost::spirit::istream_iterator iterator,
-                                  GraphFileParser* parser, const progress_iterator* end)
-            : progress_iterator::iterator_adaptor_(iterator),
+                                  GraphFileParser* parser, const progress_iterator* end) :
+            progress_iterator::iterator_adaptor_(iterator),
               _parser(parser),
               _position(0),
               _end(end) {}

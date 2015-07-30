@@ -13,10 +13,7 @@ class Scene : public QObject
 
 public:
     Scene(QObject* parent = nullptr) :
-        QObject(parent),
-        _interactionEnabled(true),
-        _initialised(false),
-        _visible(false)
+        QObject(parent)
     {}
     virtual ~Scene() {}
 
@@ -38,9 +35,9 @@ protected:
     bool visible() { return _visible; }
 
 private:
-    bool _interactionEnabled;
-    bool _initialised;
-    bool _visible;
+    bool _interactionEnabled = true;
+    bool _initialised = false;
+    bool _visible = false;
 
     void setVisible(bool visible) { _visible = visible; }
 };

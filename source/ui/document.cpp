@@ -17,10 +17,7 @@
 #include "../utils/cpp1x_hacks.h"
 
 Document::Document(QObject* parent) :
-    QObject(parent),
-    _loadProgress(0),
-    _loadComplete(false),
-    _autoResume(0)
+    QObject(parent)
 {
 }
 

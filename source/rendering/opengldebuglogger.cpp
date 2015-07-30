@@ -4,9 +4,7 @@
 #include <QDebug>
 
 OpenGLDebugLogger::OpenGLDebugLogger(QObject* parent) :
-    QObject(parent),
-    _debugLevel(0),
-    _logger(nullptr)
+    QObject(parent)
 {
     _debugLevel = qgetenv("OPENGL_DEBUG").toInt();
     if(_debugLevel != 0)

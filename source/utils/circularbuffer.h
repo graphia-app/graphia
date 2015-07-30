@@ -8,15 +8,11 @@ template<typename T, size_t Size> class CircularBuffer
 {
 private:
     std::array<T, Size> _array;
-    size_t _size;
-    size_t _current;
-    size_t _next;
+    size_t _size = 0;
+    size_t _current = 0;
+    size_t _next = 0;
 
 public:
-    CircularBuffer() :
-        _size(0), _current(0), _next(0)
-    {}
-
     void push_back(const T& t)
     {
         _array[_next] = t;

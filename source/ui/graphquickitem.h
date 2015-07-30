@@ -69,12 +69,12 @@ private:
     CommandManager* _commandManager;
     std::shared_ptr<SelectionManager> _selectionManager;
 
-    bool _viewResetPending;
-    bool _overviewModeSwitchPending;
+    bool _viewResetPending = false;
+    bool _overviewModeSwitchPending = false;
 
-    mutable bool _interacting;
-    bool _viewIsReset;
-    bool _canEnterOverviewMode;
+    mutable bool _interacting = false;
+    bool _viewIsReset = true;
+    bool _canEnterOverviewMode = false;
 
     std::queue<std::unique_ptr<QEvent>> _eventQueue;
 

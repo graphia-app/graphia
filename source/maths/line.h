@@ -9,13 +9,12 @@ template <typename Vector> class Line
 private:
     Vector _start;
     Vector _end;
-    mutable float _length;
+    mutable float _length = -1.0f;
 
 public:
-    Line() : _length(-1.0f)
-    {}
+    Line() {}
     Line(const Vector& start, const Vector& end) :
-        _start(start), _end(end), _length(-1.0f)
+        _start(start), _end(end)
     {}
 
     const Vector& start() const { return _start; }

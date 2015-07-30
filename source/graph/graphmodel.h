@@ -14,19 +14,15 @@
 
 struct NodeVisual
 {
-    NodeVisual() :
-        _initialised(false),
-        _size(1.0f)
-    {}
-
+    NodeVisual() noexcept {}
     NodeVisual(NodeVisual&& other) noexcept :
         _initialised(other._initialised),
         _size(other._size),
         _color(other._color)
     {}
 
-    bool _initialised;
-    float _size;
+    bool _initialised = false;
+    float _size = 1.0f;
     QColor _color;
 };
 
@@ -34,19 +30,15 @@ typedef NodeArray<NodeVisual> NodeVisuals;
 
 struct EdgeVisual
 {
-    EdgeVisual() :
-        _initialised(false),
-        _size(1.0f)
-    {}
-
+    EdgeVisual() noexcept {}
     EdgeVisual(EdgeVisual&& other) noexcept :
         _initialised(other._initialised),
         _size(other._size),
         _color(other._color)
     {}
 
-    bool _initialised;
-    float _size;
+    bool _initialised = false;
+    float _size = 1.0f;
     QColor _color;
 };
 

@@ -4,11 +4,8 @@
 
 #include <QOpenGLShaderProgram>
 
-Sphere::Sphere(QObject* parent)
-    : QObject(parent),
-      _radius(1.0f),
-      _rings(30),
-      _slices(30),
+Sphere::Sphere(QObject* parent) :
+      QObject(parent),
       _positionBuffer(QOpenGLBuffer::VertexBuffer),
       _normalBuffer(QOpenGLBuffer::VertexBuffer),
       _textureCoordBuffer(QOpenGLBuffer::VertexBuffer),

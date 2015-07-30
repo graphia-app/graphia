@@ -2,8 +2,7 @@
 
 #include "namethread.h"
 
-ThreadPool::ThreadPool(const QString& threadNamePrefix, int numThreads) :
-    _stop(false), _activeThreads(0)
+ThreadPool::ThreadPool(const QString& threadNamePrefix, int numThreads)
 {
     for(int i = 0; i < numThreads; i++)
     {

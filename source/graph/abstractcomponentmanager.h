@@ -94,7 +94,7 @@ protected:
     std::unordered_set<ResizableGraphArray*> _componentArrayList;
     virtual int componentArrayCapacity() const = 0;
 
-    bool _debug;
+    bool _debug = false;
 
     std::vector<NodeId>& graphComponentNodeIdsList(GraphComponent& graphComponent)
     {

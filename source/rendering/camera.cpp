@@ -6,24 +6,12 @@
 #include <QOpenGLShaderProgram>
 #include <QDebug>
 
-Camera::Camera() :
-    _distance(1.0f),
-    _projectionType(Camera::OrthogonalProjection),
-    _nearPlane(0.1f),
-    _farPlane(1024.0f),
-    _fieldOfView(60.0f),
-    _aspectRatio(1.0f),
-    _left(-0.5),
-    _right(0.5f),
-    _bottom(-0.5f),
-    _top(0.5f),
-    _viewMatrixDirty(true),
-    _viewProjectionMatrixDirty(true)
+Camera::Camera()
 {
     updateOrthogonalProjection();
 }
 
-Camera::Camera(const Camera &other) :
+Camera::Camera(const Camera& other) :
     _focus(other._focus),
     _rotation(other._rotation),
     _distance(other._distance),

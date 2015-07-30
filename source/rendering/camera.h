@@ -88,20 +88,20 @@ private:
 
     QVector3D _focus;
     QQuaternion _rotation;
-    float _distance;
+    float _distance = 1.0f;
 
-    Camera::ProjectionType _projectionType;
+    Camera::ProjectionType _projectionType = Camera::OrthogonalProjection;
 
-    float _nearPlane;
-    float _farPlane;
+    float _nearPlane = 0.1f;
+    float _farPlane = 1024.0f;
 
-    float _fieldOfView;
-    float _aspectRatio;
+    float _fieldOfView = 60.0f;
+    float _aspectRatio = 1.0f;
 
-    float _left;
-    float _right;
-    float _bottom;
-    float _top;
+    float _left = -0.5f;
+    float _right = 0.5f;
+    float _bottom = -0.5f ;
+    float _top = 0.5f;
 
     int _viewportWidth;
     int _viewportHeight;
@@ -110,8 +110,8 @@ private:
     mutable QMatrix4x4 _projectionMatrix;
     mutable QMatrix4x4 _viewProjectionMatrix;
 
-    mutable bool _viewMatrixDirty;
-    mutable bool _viewProjectionMatrixDirty;
+    mutable bool _viewMatrixDirty = true;
+    mutable bool _viewProjectionMatrixDirty = true;
 };
 
 #endif // CAMERA_H

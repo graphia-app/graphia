@@ -27,7 +27,7 @@ class Layout : public QObject
 {
     Q_OBJECT
 private:
-    std::atomic<bool> _atomicCancel;
+    std::atomic<bool> _atomicCancel = false;
     void setCancel(bool cancel)
     {
         _atomicCancel = cancel;
@@ -57,7 +57,6 @@ public:
            NodePositions& positions,
            Iterative iterative = Iterative::No) :
         QObject(),
-        _atomicCancel(false),
         _iterative(iterative),
         _graph(graph),
         _positions(positions)
@@ -114,12 +113,12 @@ private:
     std::set<std::shared_ptr<Layout>> _layouts;
     std::mutex _mutex;
     std::thread _thread;
-    bool _started;
-    bool _pause;
-    bool _paused;
-    bool _stop;
-    bool _repeating;
-    uint64_t _iteration;
+    bool _started = false;
+    bool _pause = false;
+    bool _paused = true;
+    bool _stop = false;
+    bool _repeating = false;
+    uint64_t _iteration = 0;
     std::condition_variable _waitForPause;
     std::condition_variable _waitForResume;
 

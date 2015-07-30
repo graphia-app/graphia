@@ -5,8 +5,7 @@ LayoutThread::LayoutThread(const Graph& graph,
                            std::unique_ptr<const LayoutFactory> layoutFactory,
                            bool repeating) :
     _graph(&graph),
-    _started(false),_pause(false), _paused(true), _stop(false),
-    _repeating(repeating), _iteration(0),
+    _repeating(repeating),
     _layoutFactory(std::move(layoutFactory)),
     _performanceCounter(std::chrono::seconds(3))
 {

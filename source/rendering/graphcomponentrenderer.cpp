@@ -28,22 +28,7 @@
 #include <mutex>
 
 GraphComponentRenderer::GraphComponentRenderer() :
-    OpenGLFunctions(),
-    _initialised(false),
-    _visible(false),
-    _frozen(false),
-    _cleanupWhenThawed(false),
-    _updateVisualDataWhenThawed(false),
-    _updatePositionDataWhenThawed(false),
-    _viewportWidth(0), _viewportHeight(0),
-    _width(0), _height(0),
-    _visualDataRequiresUpdate(false),
-    _trackFocus(true),
-    _targetZoomDistance(0.0f),
-    _fovx(0.0f),
-    _fovy(0.0f),
-    _numNodesInPositionData(0),
-    _numEdgesInPositionData(0)
+    OpenGLFunctions()
 {
 }
 

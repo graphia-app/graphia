@@ -229,11 +229,11 @@ private:
     template<typename> friend class EdgeArray;
     template<typename> friend class ComponentArray;
 
-    int _nodeArrayCapacity;
+    int _nodeArrayCapacity = 0;
     int nodeArrayCapacity() const { return _nodeArrayCapacity; }
     std::unordered_set<ResizableGraphArray*> _nodeArrayList;
 
-    int _edgeArrayCapacity;
+    int _edgeArrayCapacity = 0;
     int edgeArrayCapacity() const { return _edgeArrayCapacity; }
     std::unordered_set<ResizableGraphArray*> _edgeArrayList;
 
@@ -268,13 +268,13 @@ private:
     std::vector<NodeId> _nodeIdsVector;
     std::deque<NodeId> _unusedNodeIdsDeque;
     std::vector<Node> _nodesVector;
-    NodeId _nextNodeId;
+    NodeId _nextNodeId = 0;
 
     std::vector<bool> _edgeIdsInUse;
     std::vector<EdgeId> _edgeIdsVector;
     std::deque<EdgeId> _unusedEdgeIdsDeque;
     std::vector<Edge> _edgesVector;
-    EdgeId _nextEdgeId;
+    EdgeId _nextEdgeId = 0;
 
     void updateElementIdData();
 
@@ -306,7 +306,7 @@ public:
     void removeEdges(const ElementIdSet<EdgeId>& edgeIds);
 
 private:
-    int _graphChangeDepth;
+    int _graphChangeDepth = 0;
     std::mutex _mutex;
     void beginTransaction();
     void endTransaction();

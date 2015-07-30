@@ -74,14 +74,7 @@ GraphCommonInteractor::GraphCommonInteractor(std::shared_ptr<GraphModel> graphMo
     _graphModel(graphModel),
     _commandManager(commandManager),
     _selectionManager(selectionManager),
-    _graphRenderer(graphRenderer),
-    _rightMouseButtonHeld(false),
-    _leftMouseButtonHeld(false),
-    _selecting(false),
-    _frustumSelecting(false),
-    _mouseMoving(false),
-    _clickedRenderer(nullptr),
-    _rendererUnderCursor(nullptr)
+    _graphRenderer(graphRenderer)
 {
     connect(this, &Interactor::userInteractionStarted, graphRenderer, &GraphRenderer::userInteractionStarted);
     connect(this, &Interactor::userInteractionFinished, graphRenderer, &GraphRenderer::userInteractionFinished);

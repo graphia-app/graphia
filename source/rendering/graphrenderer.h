@@ -97,7 +97,7 @@ public slots:
 
 private:
     std::shared_ptr<GraphModel> _graphModel;
-    int _numComponents;
+    int _numComponents = 0;
 
     std::shared_ptr<SelectionManager> _selectionManager;
 
@@ -107,7 +107,7 @@ private:
     // values, then the storage for the renderers themselves would potentially be
     // moved around, as opposed to just the storage for the pointers.
     ComponentArray<MovablePointer<GraphComponentRenderer>> _componentRenderers;
-    int _numTransitioningRenderers;
+    int _numTransitioningRenderers = 0;
     DeferredExecutor _preUpdateExecutor;
 
     enum class Mode
@@ -116,13 +116,13 @@ private:
         Component
     };
 
-    Mode _mode;
+    Mode _mode = Mode::Overview;
 
-    Scene* _scene;
+    Scene* _scene = nullptr;
     GraphOverviewScene* _graphOverviewScene;
     GraphComponentScene* _graphComponentScene;
 
-    Interactor* _interactor;
+    Interactor* _interactor = nullptr;
     GraphOverviewInteractor* _graphOverviewInteractor;
     GraphComponentInteractor* _graphComponentInteractor;
 
@@ -137,15 +137,15 @@ private:
     QOpenGLShaderProgram _selectionMarkerShader;
     QOpenGLShaderProgram _debugLinesShader;
 
-    int _width;
-    int _height;
-    bool _resized;
+    int _width = 0;
+    int _height = 0;
+    bool _resized = false;
 
-    GLuint _colorTexture;
-    GLuint _selectionTexture;
-    GLuint _depthTexture;
-    GLuint _visualFBO;
-    bool _FBOcomplete;
+    GLuint _colorTexture = 0;
+    GLuint _selectionTexture = 0;
+    GLuint _depthTexture = 0;
+    GLuint _visualFBO = 0;
+    bool _FBOcomplete = false;
 
     QOpenGLVertexArrayObject _screenQuadVAO;
     QOpenGLBuffer _screenQuadDataBuffer;
@@ -156,9 +156,9 @@ private:
     QRect _selectionRect;
 
     QTime _time;
-    std::atomic<bool> _sceneUpdateEnabled;
+    std::atomic<bool> _sceneUpdateEnabled = true;
 
-    bool _modeTransitionInProgress;
+    bool _modeTransitionInProgress = false;
 
     Transition _transition;
 

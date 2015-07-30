@@ -6,7 +6,7 @@
 #include <cmath>
 
 BoundingSphere::BoundingSphere() :
-    _centre(), _radius(0.0f)
+    _centre()
 {
 }
 

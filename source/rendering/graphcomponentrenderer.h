@@ -104,26 +104,21 @@ private:
     Sphere _sphere;
     Cylinder _cylinder;
 
-    bool _initialised;
-    bool _visible;
+    bool _initialised = false;
+    bool _visible = false;
 
-    bool _frozen;
-    bool _cleanupWhenThawed;
-    bool _updateVisualDataWhenThawed;
-    bool _updatePositionDataWhenThawed;
+    bool _frozen = false;
+    bool _cleanupWhenThawed = false;
+    bool _updateVisualDataWhenThawed = false;
+    bool _updatePositionDataWhenThawed = false;
 
     struct ViewData
     {
-        ViewData() :
-            _zoomDistance(1.0f),
-            _autoZooming(true)
-        {}
-
         bool isReset() { return _focusNodeId.isNull() && _autoZooming; }
 
         Camera _camera;
-        float _zoomDistance;
-        bool _autoZooming;
+        float _zoomDistance = 1.0f;
+        bool _autoZooming = true;
         NodeId _focusNodeId;
         QVector3D _focusPosition;
 
@@ -139,10 +134,10 @@ private:
     void prepareEdgeVAO();
     void prepareDebugLinesVAO();
 
-    int _viewportWidth;
-    int _viewportHeight;
-    int _width;
-    int _height;
+    int _viewportWidth = 0;
+    int _viewportHeight = 0;
+    int _width = 0;
+    int _height = 0;
 
     void updateMatrices();
 
@@ -162,18 +157,18 @@ private:
     void updateFocusPosition();
     void updateEntireComponentZoomDistance();
 
-    bool _visualDataRequiresUpdate;
+    bool _visualDataRequiresUpdate = false;
     void updateVisualDataIfRequired();
 
 private:
-    bool _trackFocus;
-    float _targetZoomDistance;
+    bool _trackFocus = true;
+    float _targetZoomDistance = 0.0f;
     Transition _zoomTransition;
 
     ComponentId _componentId;
 
-    float _fovx;
-    float _fovy;
+    float _fovx = 0.0f;
+    float _fovy = 0.0f;
 
     std::shared_ptr<GraphModel> _graphModel;
     std::shared_ptr<SelectionManager> _selectionManager;
@@ -182,11 +177,11 @@ private:
     QMatrix4x4 _projectionMatrix;
 
     std::vector<GLfloat> _nodePositionData;
-    int _numNodesInPositionData;
+    int _numNodesInPositionData = 0;
     QOpenGLBuffer _nodePositionBuffer;
 
     std::vector<GLfloat> _edgePositionData;
-    int _numEdgesInPositionData;
+    int _numEdgesInPositionData = 0;
     QOpenGLBuffer _edgePositionBuffer;
 
     std::vector<GLfloat> _nodeVisualData;

@@ -14,8 +14,8 @@ struct BarnesHutSubVolume : SubVolume<BarnesHutTree> { float _sSq; };
 class BarnesHutTree : public BaseOctree<BarnesHutTree, BarnesHutSubVolume>
 {
 private:
-    float _theta;
-    int _mass;
+    float _theta = 0.8f;
+    int _mass = 0;
     QVector3D _centreOfMass;
 
     void initialiseTreeNode() override;

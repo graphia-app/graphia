@@ -85,8 +85,8 @@ private:
     QString _title;
     QString _status;
 
-    int _loadProgress;
-    bool _loadComplete;
+    int _loadProgress = 0;
+    bool _loadComplete = false;
 
     std::shared_ptr<GraphModel> _graphModel;
     std::shared_ptr<SelectionManager> _selectionManager;
@@ -95,7 +95,7 @@ private:
     std::unique_ptr<LayoutThread> _layoutThread;
 
     std::recursive_mutex _autoResumeMutex;
-    int _autoResume;
+    int _autoResume = 0;
 
 signals:
     void applicationChanged();

@@ -3,9 +3,7 @@
 #include <stack>
 
 BarnesHutTree::BarnesHutTree() :
-    BaseOctree(),
-    _theta(0.8f),
-    _mass(0)
+    BaseOctree()
 {
     setMaxNodesPerLeaf(1);
 }
