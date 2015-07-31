@@ -21,7 +21,8 @@ private:
     QString _name;
 
 public:
-    MutableGraph& graph() { return _graph; }
+    MutableGraph& mutableGraph() { return _graph; }
+    Graph& graph() { return _graphTransformer.graph(); }
     const Graph& graph() const { return _graphTransformer.graph(); }
     NodePositions& nodePositions() { return _nodePositions; }
     const NodePositions& nodePositions() const { return _nodePositions; }

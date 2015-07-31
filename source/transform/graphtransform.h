@@ -12,7 +12,7 @@ class GraphTransform : public QObject
     Q_OBJECT
 
 public:
-    virtual const Graph& graph() = 0;
+    virtual Graph& graph() = 0;
 
 private slots:
     virtual void onGraphWillChange(const Graph*) const {}

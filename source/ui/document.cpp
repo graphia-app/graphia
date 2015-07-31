@@ -196,7 +196,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType)
     connect(&_graphModel->graph().debugPauser, &DebugPauser::pausedChanged, this, &Document::debugPausedChanged);
     connect(&_graphModel->graph().debugPauser, &DebugPauser::resumeActionChanged, this, &Document::debugResumeActionChanged);
 
-    _graphFileParserThread = std::make_unique<GraphFileParserThread>(_graphModel->graph(), std::move(graphFileParser));
+    _graphFileParserThread = std::make_unique<GraphFileParserThread>(_graphModel->mutableGraph(), std::move(graphFileParser));
     connect(_graphFileParserThread.get(), &GraphFileParserThread::progress, this, &Document::onLoadProgress);
     connect(_graphFileParserThread.get(), &GraphFileParserThread::complete, this, &Document::onLoadComplete);
     _graphFileParserThread->start();

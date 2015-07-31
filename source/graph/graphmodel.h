@@ -48,7 +48,8 @@ class GraphModel : public QObject
 {
     Q_OBJECT
 public:
-    virtual MutableGraph& graph() = 0;
+    virtual MutableGraph& mutableGraph() = 0;
+    virtual Graph& graph() = 0;
     virtual const Graph& graph() const = 0;
     virtual NodePositions& nodePositions() = 0;
     virtual const NodePositions& nodePositions() const = 0;

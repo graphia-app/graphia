@@ -14,9 +14,11 @@ class GraphTransformer : public QObject
     Q_OBJECT
 
 public:
-    GraphTransformer(const Graph& graph);
+    GraphTransformer(Graph& graph);
 
-    const Graph& graph() const;
+    Graph& graph() { return _graphTransform->graph(); }
+    const Graph& graph() const { return _graphTransform->graph(); }
+
     void setTransform(std::unique_ptr<GraphTransform> graphTransform);
 
 private:

@@ -198,17 +198,20 @@ public:
     ComponentArray(Graph& graph) :
         GraphArray<ComponentId, Element>(graph)
     {
+        Q_ASSERT(graph._componentManager != nullptr);
         this->resize(graph._componentManager->componentArrayCapacity());
         graph._componentManager->_componentArrayList.insert(this);
     }
 
     ComponentArray(const ComponentArray& other) : GraphArray<ComponentId, Element>(other)
     {
+        Q_ASSERT(graph._componentManager != nullptr);
         this->_graph->_componentManager->_componentArrayList.insert(this);
     }
 
     ComponentArray(ComponentArray&& other) : GraphArray<ComponentId, Element>(std::move(other))
     {
+        Q_ASSERT(graph._componentManager != nullptr);
         this->_graph->_componentManager->_componentArrayList.insert(this);
     }
 

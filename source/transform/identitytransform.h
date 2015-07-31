@@ -8,14 +8,14 @@ class IdentityTransform : public GraphTransform
     Q_OBJECT
 
 public:
-    IdentityTransform(const Graph& graph) :
+    IdentityTransform(Graph& graph) :
         _graph(&graph)
     {}
 
-    const Graph& graph() { return *_graph; }
+    Graph& graph() { return *_graph; }
 
 private:
-    const Graph* _graph;
+    Graph* _graph;
 };
 
 #endif // IDENTITYTRANSFORM_H
