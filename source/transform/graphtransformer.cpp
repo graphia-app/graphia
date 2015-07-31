@@ -1,10 +1,15 @@
 #include "graphtransformer.h"
 
+#include "identitytransform.h"
+
 #include "../graph/graph.h"
+
+#include "../utils/cpp1x_hacks.h"
 
 GraphTransformer::GraphTransformer(const Graph& graph) :
     _graph(&graph)
 {
+    setTransform(std::make_unique<IdentityTransform>(graph));
 }
 
 const Graph& GraphTransformer::graph()
