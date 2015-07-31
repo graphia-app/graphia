@@ -205,13 +205,13 @@ public:
 
     ComponentArray(const ComponentArray& other) : GraphArray<ComponentId, Element>(other)
     {
-        Q_ASSERT(graph._componentManager != nullptr);
+        Q_ASSERT(this->_graph->_componentManager != nullptr);
         this->_graph->_componentManager->_componentArrayList.insert(this);
     }
 
     ComponentArray(ComponentArray&& other) : GraphArray<ComponentId, Element>(std::move(other))
     {
-        Q_ASSERT(graph._componentManager != nullptr);
+        Q_ASSERT(this->_graph->_componentManager != nullptr);
         this->_graph->_componentManager->_componentArrayList.insert(this);
     }
 
