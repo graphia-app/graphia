@@ -187,8 +187,12 @@ MutableGraph::~MutableGraph()
 
 void MutableGraph::clear()
 {
+    beginTransaction();
+
     for(NodeId nodeId : nodeIds())
         removeNode(nodeId);
+
+    endTransaction();
 
     // Removing all the nodes should remove all the edges
     Q_ASSERT(numEdges() == 0);
