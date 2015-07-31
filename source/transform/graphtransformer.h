@@ -16,7 +16,7 @@ class GraphTransformer : public QObject
 public:
     GraphTransformer(const Graph& graph);
 
-    const Graph& graph();
+    const Graph& graph() const;
     void setTransform(std::unique_ptr<GraphTransform> graphTransform);
 
 private:

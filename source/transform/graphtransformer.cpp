@@ -12,7 +12,7 @@ GraphTransformer::GraphTransformer(const Graph& graph) :
     setTransform(std::make_unique<IdentityTransform>(graph));
 }
 
-const Graph& GraphTransformer::graph()
+const Graph& GraphTransformer::graph() const
 {
     return _graphTransform->graph();
 }
