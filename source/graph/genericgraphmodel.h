@@ -1,8 +1,6 @@
 #ifndef GENERICGRAPHMODEL_H
 #define GENERICGRAPHMODEL_H
 
-#include <QLabel>
-
 #include "graphmodel.h"
 
 class GenericGraphModel : public GraphModel
@@ -21,7 +19,7 @@ private:
 
 public:
     MutableGraph& graph() { return _graph; }
-    const MutableGraph& graph() const { return _graph; }
+    const Graph& graph() const { return _graph; }
     NodePositions& nodePositions() { return _nodePositions; }
     const NodePositions& nodePositions() const { return _nodePositions; }
 
