@@ -18,7 +18,7 @@ class Cylinder : public QObject
     Q_PROPERTY(int slices READ slices WRITE setSlices)
 
 public:
-    explicit Cylinder(QObject* parent = 0);
+    explicit Cylinder(QObject* parent = nullptr);
 
     float radius() const { return _radius; }
     int length() const { return _length; }

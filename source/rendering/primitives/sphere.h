@@ -18,7 +18,7 @@ class Sphere : public QObject
     Q_PROPERTY(int slices READ slices WRITE setSlices)
 
 public:
-    explicit Sphere(QObject* parent = 0);
+    explicit Sphere(QObject* parent = nullptr);
 
     float radius() const { return _radius; }
     int rings() const { return _rings; }

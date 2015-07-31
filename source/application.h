@@ -21,7 +21,7 @@ class Application : public QObject
     Q_PROPERTY(QStringList nameFilters READ nameFilters NOTIFY nameFiltersChanged)
 
 public:
-    explicit Application(QObject *parent = 0);
+    explicit Application(QObject *parent = nullptr);
 
     const QStringList nameFilters() const { return _fileIdentifier.nameFilters(); }
 
