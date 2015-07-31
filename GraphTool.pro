@@ -73,7 +73,9 @@ HEADERS += \
     source/graph/abstractcomponentmanager.h \
     source/graph/componentmanager.h \
     source/utils/debugpauser.h \
-    source/utils/singleton.h
+    source/utils/singleton.h \
+    source/transform/graphtransformer.h \
+    source/transform/graphtransform.h
 
 SOURCES += \
     source/main.cpp \
@@ -127,7 +129,8 @@ SOURCES += \
     source/rendering/openglfunctions.cpp \
     source/graph/abstractcomponentmanager.cpp \
     source/graph/componentmanager.cpp \
-    source/utils/debugpauser.cpp
+    source/utils/debugpauser.cpp \
+    source/transform/graphtransformer.cpp
 
 OTHER_FILES += \
     source/ui/qml/main.qml \
