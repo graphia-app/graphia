@@ -6,7 +6,7 @@
 #include <QtGlobal>
 #include <QMetaType>
 
-Graph::Graph()
+Graph::Graph(bool componentManagement)
 {
     qRegisterMetaType<NodeId>("NodeId");
     qRegisterMetaType<ElementIdSet<NodeId>>("ElementIdSet<NodeId>");
@@ -15,9 +15,9 @@ Graph::Graph()
     qRegisterMetaType<ComponentId>("ComponentId");
     qRegisterMetaType<ElementIdSet<ComponentId>>("ElementIdSet<ComponentId>");
 
-    connect(this, &Graph::nodeAdded, [this](const Graph*, NodeId nodeId)
+    connect(this, &Graph::nodeAdded, [this](const Graph*, const Node* node)
     {
-        NodeId nextNodeId(nodeId + 1);
+        NodeId nextNodeId(node->id() + 1);
         if(nextNodeId > _nodeArrayCapacity)
         {
             _nodeArrayCapacity = nextNodeId;
@@ -26,9 +26,9 @@ Graph::Graph()
         }
     });
 
-    connect(this, &Graph::edgeAdded, [this](const Graph*, EdgeId edgeId)
+    connect(this, &Graph::edgeAdded, [this](const Graph*, const Edge* edge)
     {
-        EdgeId nextEdgeId(edgeId + 1);
+        EdgeId nextEdgeId(edge->id() + 1);
         if(nextEdgeId > _edgeArrayCapacity)
         {
             _edgeArrayCapacity = nextEdgeId;
@@ -36,6 +36,9 @@ Graph::Graph()
                 edgeArray->resize(_edgeArrayCapacity);
         }
     });
+
+    if(componentManagement)
+        _componentManager = std::make_unique<ComponentManager>(*this);
 }
 
 Graph::~Graph()
@@ -106,12 +109,6 @@ void Graph::dumpToQDebug(int detail) const
     }
 }
 
-void Graph::enableComponentManagement()
-{
-    if(_componentManager == nullptr)
-        _componentManager = std::make_unique<ComponentManager>(*this);
-}
-
 const std::vector<ComponentId>& Graph::componentIds() const
 {
     if(_componentManager)
@@ -172,11 +169,11 @@ ComponentId Graph::largestComponentId() const
     return largestComponentId;
 }
 
-MutableGraph::MutableGraph() :
+MutableGraph::MutableGraph(bool componentManagement) :
+    Graph(componentManagement),
     _nextNodeId(0),
     _nextEdgeId(0)
 {
-    enableComponentManagement(); //FIXME remove eventually
 }
 
 MutableGraph::~MutableGraph()
@@ -237,7 +234,7 @@ NodeId MutableGraph::addNode(NodeId nodeId)
     node._outEdges.clear();
     node._edges.clear();
 
-    emit nodeAdded(this, nodeId);
+    emit nodeAdded(this, &node);
     endTransaction();
 
     return nodeId;
@@ -270,7 +267,7 @@ void MutableGraph::removeNode(NodeId nodeId)
     for(EdgeId edgeId : node.edges())
         removeEdge(edgeId);
 
-    emit nodeWillBeRemoved(this, nodeId);
+    emit nodeWillBeRemoved(this, &node);
 
     _nodeIdsInUse[nodeId] = false;
     _unusedNodeIdsDeque.push_back(nodeId);
@@ -331,7 +328,7 @@ EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     _nodesVector[targetId]._inEdges.insert(edgeId);
     _nodesVector[targetId]._edges.insert(edgeId);
 
-    emit edgeAdded(this, edgeId);
+    emit edgeAdded(this, &edge);
     endTransaction();
 
     return edgeId;
@@ -359,10 +356,11 @@ void MutableGraph::removeEdge(EdgeId edgeId)
 {
     beginTransaction();
 
-    emit edgeWillBeRemoved(this, edgeId);
-
     // Remove all node references to this edge
     const Edge& edge = _edgesVector[edgeId];
+
+    emit edgeWillBeRemoved(this, &edge);
+
     Node& source = _nodesVector[edge.sourceId()];
     Node& target = _nodesVector[edge.targetId()];
     source._outEdges.erase(edgeId);

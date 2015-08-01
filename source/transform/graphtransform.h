@@ -11,18 +11,15 @@ class GraphTransform : public QObject
 
     Q_OBJECT
 
-public:
-    virtual Graph& graph() = 0;
-
 private slots:
-    virtual void onGraphWillChange(const Graph*) const {}
+    virtual void onGraphWillChange(const Graph*) {}
 
-    virtual void onNodeAdded(const Graph*, NodeId) const {}
-    virtual void onNodeWillBeRemoved(const Graph*, NodeId) const {}
-    virtual void onEdgeAdded(const Graph*, EdgeId) const {}
-    virtual void onEdgeWillBeRemoved(const Graph*, EdgeId) const {}
+    virtual void onNodeAdded(const Graph*, const Node*) {}
+    virtual void onNodeWillBeRemoved(const Graph*, const Node*) {}
+    virtual void onEdgeAdded(const Graph*, const Edge*) {}
+    virtual void onEdgeWillBeRemoved(const Graph*, const Edge*) {}
 
-    virtual void onGraphChanged(const Graph*) const {}
+    virtual void onGraphChanged(const Graph*) {}
 };
 
 #endif // GRAPHTRANSFORM_H

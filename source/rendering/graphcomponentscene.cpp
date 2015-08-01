@@ -230,9 +230,9 @@ void GraphComponentScene::onGraphChanged(const Graph* graph)
     }, "GraphComponentScene::onGraphChanged (setSize/moveFocusToCentreOfComponent)");
 }
 
-void GraphComponentScene::onNodeWillBeRemoved(const Graph*, NodeId nodeId)
+void GraphComponentScene::onNodeWillBeRemoved(const Graph*, const Node* node)
 {
-    if(visible() && componentRenderer()->focusNodeId() == nodeId)
+    if(visible() && componentRenderer()->focusNodeId() == node->id())
     {
         _graphRenderer->executeOnRendererThread([this]
         {

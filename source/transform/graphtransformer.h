@@ -16,14 +16,15 @@ class GraphTransformer : public QObject
 public:
     GraphTransformer(Graph& graph);
 
-    Graph& graph() { return _graphTransform->graph(); }
-    const Graph& graph() const { return _graphTransform->graph(); }
+    Graph& graph() { return _transformedGraph; }
+    const Graph& graph() const { return _transformedGraph; }
 
     void setTransform(std::unique_ptr<GraphTransform> graphTransform);
 
 private:
     const Graph* _graph;
     std::unique_ptr<GraphTransform> _graphTransform;
+    MutableGraph _transformedGraph;
 };
 
 #endif // GRAPHTRANSFORMER_H

@@ -196,7 +196,7 @@ class Graph : public QObject
     Q_OBJECT
 
 public:
-    Graph();
+    Graph(bool componentManagement = false);
     virtual ~Graph();
 
     virtual const std::vector<NodeId>& nodeIds() const = 0;
@@ -218,8 +218,6 @@ public:
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
     ComponentId largestComponentId() const;
-
-    virtual void enableComponentManagement();
 
     mutable DebugPauser debugPauser;
     void dumpToQDebug(int detail) const;
@@ -243,10 +241,10 @@ signals:
     // The signals are listed here in the order in which they are emitted
     void graphWillChange(const Graph*) const;
 
-    void nodeAdded(const Graph*, NodeId) const;
-    void nodeWillBeRemoved(const Graph*, NodeId) const;
-    void edgeAdded(const Graph*, EdgeId) const;
-    void edgeWillBeRemoved(const Graph*, EdgeId) const;
+    void nodeAdded(const Graph*, const Node*) const;
+    void nodeWillBeRemoved(const Graph*, const Node*) const;
+    void edgeAdded(const Graph*, const Edge*) const;
+    void edgeWillBeRemoved(const Graph*, const Edge*) const;
 
     void componentsWillMerge(const Graph*, const ComponentMergeSet&) const;
     void componentWillBeRemoved(const Graph*, ComponentId, bool) const;
@@ -260,7 +258,7 @@ class MutableGraph : public Graph
 {
     Q_OBJECT
 public:
-    MutableGraph();
+    MutableGraph(bool componentManagement = false);
     virtual ~MutableGraph();
 
 private:
@@ -308,10 +306,11 @@ public:
 private:
     int _graphChangeDepth = 0;
     std::mutex _mutex;
+
+public:
     void beginTransaction();
     void endTransaction();
 
-public:
     class ScopedTransaction
     {
     public:

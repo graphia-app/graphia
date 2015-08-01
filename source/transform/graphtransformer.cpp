@@ -7,9 +7,10 @@
 #include "../utils/cpp1x_hacks.h"
 
 GraphTransformer::GraphTransformer(Graph& graph) :
-    _graph(&graph)
+    _graph(&graph),
+    _transformedGraph(true)
 {
-    setTransform(std::make_unique<IdentityTransform>(graph));
+    setTransform(std::make_unique<IdentityTransform>(_transformedGraph));
 }
 
 void GraphTransformer::setTransform(std::unique_ptr<GraphTransform> graphTransform)

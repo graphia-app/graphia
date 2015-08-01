@@ -55,6 +55,7 @@ class GraphComponent : public Graph
 public:
     GraphComponent(const Graph* graph) : _graph(graph) {}
     GraphComponent(const GraphComponent& other) :
+        Graph(false),
         _graph(other._graph),
         _nodeIdsList(other._nodeIdsList),
         _edgeIdsList(other._edgeIdsList)
@@ -73,8 +74,6 @@ public:
     const std::vector<EdgeId>& edgeIds() const { return _edgeIdsList; }
     int numEdges() const { return static_cast<int>(_edgeIdsList.size()); }
     const Edge& edgeById(EdgeId edgeId) const { return _graph->edgeById(edgeId); }
-
-    void enableComponentManagement() { qFatal("GraphComponent doesn't need component management"); }
 };
 
 class AbstractComponentManager : public QObject

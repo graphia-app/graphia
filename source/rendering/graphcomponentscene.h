@@ -64,7 +64,7 @@ private slots:
     void onComponentAdded(const Graph* graph, ComponentId componentId, bool);
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool);
     void onGraphChanged(const Graph* graph);
-    void onNodeWillBeRemoved(const Graph* graph, NodeId nodeId);
+    void onNodeWillBeRemoved(const Graph* graph, const Node* node);
 };
 
 #endif // GRAPHCOMPONENTSCENE_H
