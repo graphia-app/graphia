@@ -64,7 +64,7 @@ public:
                   std::shared_ptr<SelectionManager> selectionManager);
     virtual ~GraphRenderer();
 
-    static const int NUM_MULTISAMPLES = 4; //FIXME pass to screen.frag
+    static const int NUM_MULTISAMPLES = 4;
 
     ComponentArray<MovablePointer<GraphComponentRenderer>>& componentRenderers() { return _componentRenderers; }
     GraphComponentRenderer* componentRendererForId(ComponentId componentId) const;

@@ -5,6 +5,7 @@ in vec2 vPosition;
 layout (location = 0) out vec4 fragColor;
 
 uniform sampler2DMS frameBufferTexture;
+uniform int multisamples;
 
 uniform mat3 G[2] = mat3[](
     mat3(1.0, 2.0, 1.0, 0.0, 0.0, 0.0, -1.0, -2.0, -1.0),
@@ -14,11 +15,11 @@ uniform mat3 G[2] = mat3[](
 vec4 multisampledValue(ivec2 coord)
 {
     vec4 accumulator = vec4(0.0);
-    for(int s = 0; s < 4; s++)
+    for(int s = 0; s < multisamples; s++)
     {
         accumulator += texelFetch(frameBufferTexture, coord, s);
     }
-    accumulator /= 4;
+    accumulator /= multisamples;
 
     return accumulator;
 }

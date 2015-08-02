@@ -759,12 +759,14 @@ void GraphRenderer::prepareQuad()
     _screenShader.enableAttributeArray("position");
     _screenShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
     _screenShader.setUniformValue("frameBufferTexture", 0);
+    _screenShader.setUniformValue("multisamples", NUM_MULTISAMPLES);
     _screenShader.release();
 
     _selectionShader.bind();
     _selectionShader.enableAttributeArray("position");
     _selectionShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
     _selectionShader.setUniformValue("frameBufferTexture", 0);
+    _selectionShader.setUniformValue("multisamples", NUM_MULTISAMPLES);
     _selectionShader.release();
 
     _screenQuadDataBuffer.release();
