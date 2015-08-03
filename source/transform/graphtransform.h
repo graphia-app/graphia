@@ -7,7 +7,7 @@
 
 class GraphTransform : public QObject
 {
-    friend class GraphTransformer;
+    friend class TransformedGraph;
 
     Q_OBJECT
 

@@ -74,9 +74,9 @@ HEADERS += \
     source/graph/componentmanager.h \
     source/utils/debugpauser.h \
     source/utils/singleton.h \
-    source/transform/graphtransformer.h \
     source/transform/graphtransform.h \
-    source/transform/identitytransform.h
+    source/transform/identitytransform.h \
+    source/transform/transformedgraph.h
 
 SOURCES += \
     source/main.cpp \
@@ -131,7 +131,7 @@ SOURCES += \
     source/graph/abstractcomponentmanager.cpp \
     source/graph/componentmanager.cpp \
     source/utils/debugpauser.cpp \
-    source/transform/graphtransformer.cpp
+    source/transform/transformedgraph.cpp
 
 OTHER_FILES += \
     source/ui/qml/main.qml \

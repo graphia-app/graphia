@@ -3,7 +3,7 @@
 
 GenericGraphModel::GenericGraphModel(const QString &name) :
     _graph(),
-    _graphTransformer(_graph),
+    _transformedGraph(_graph),
     _nodePositions(_graph),
     _nodeVisuals(_graph),
     _edgeVisuals(_graph),

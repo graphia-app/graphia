@@ -3,7 +3,7 @@
 
 #include "graphmodel.h"
 
-#include "../transform/graphtransformer.h"
+#include "../transform/transformedgraph.h"
 
 class GenericGraphModel : public GraphModel
 {
@@ -13,7 +13,7 @@ public:
 
 private:
     MutableGraph _graph;
-    GraphTransformer _graphTransformer;
+    TransformedGraph _transformedGraph;
     NodePositions _nodePositions;
     NodeVisuals _nodeVisuals;
     EdgeVisuals _edgeVisuals;
@@ -22,8 +22,8 @@ private:
 
 public:
     MutableGraph& mutableGraph() { return _graph; }
-    Graph& graph() { return _graphTransformer.graph(); }
-    const Graph& graph() const { return _graphTransformer.graph(); }
+    Graph& graph() { return _transformedGraph; }
+    const Graph& graph() const { return _transformedGraph; }
     NodePositions& nodePositions() { return _nodePositions; }
     const NodePositions& nodePositions() const { return _nodePositions; }
 
