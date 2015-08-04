@@ -49,6 +49,14 @@ namespace Utils
     int currentThreadId();
 
     QQuaternion matrixToQuaternion(const QMatrix4x4& m);
+
+    template<typename T> void checkEqual(T a, T b)
+    {
+        // Hopefully we only pay for this function call when _DEBUG is defined
+#if _DEBUG
+        Q_ASSERT(a == b);
+#endif
+    }
 }
 
 #endif // UTILS_H

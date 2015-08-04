@@ -203,12 +203,14 @@ public:
     virtual int numNodes() const = 0;
     virtual const Node& nodeById(NodeId nodeId) const = 0;
     NodeId firstNodeId() const;
+    NodeId lastNodeId() const;
     bool containsNodeId(NodeId nodeId) const;
 
     virtual const std::vector<EdgeId>& edgeIds() const = 0;
     virtual int numEdges() const = 0;
     virtual const Edge& edgeById(EdgeId edgeId) const = 0;
     EdgeId firstEdgeId() const;
+    EdgeId lastEdgeId() const;
     bool containsEdgeId(EdgeId edgeId) const;
 
     const ElementIdSet<EdgeId> edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds) const;
@@ -229,10 +231,12 @@ private:
     template<typename> friend class EdgeArray;
     template<typename> friend class ComponentArray;
 
+    NodeId _lastNodeId;
     int _nodeArrayCapacity = 0;
     int nodeArrayCapacity() const { return _nodeArrayCapacity; }
     std::unordered_set<ResizableGraphArray*> _nodeArrayList;
 
+    EdgeId _lastEdgeId;
     int _edgeArrayCapacity = 0;
     int edgeArrayCapacity() const { return _edgeArrayCapacity; }
     std::unordered_set<ResizableGraphArray*> _edgeArrayList;
@@ -276,6 +280,9 @@ private:
     std::vector<Edge> _edgesVector;
     EdgeId _nextEdgeId;
 
+    void reserveNodeId(NodeId nodeId);
+    void reserveEdgeId(EdgeId edgeId);
+
     void updateElementIdData();
 
 public:
@@ -304,6 +311,8 @@ public:
 
     void removeEdge(EdgeId edgeId);
     void removeEdges(const ElementIdSet<EdgeId>& edgeIds);
+
+    void reserve(const Graph& other);
 
 private:
     int _graphChangeDepth = 0;

@@ -2,6 +2,7 @@
 
 #include "identitytransform.h"
 
+#include "../utils/utils.h"
 #include "../utils/cpp1x_hacks.h"
 
 #include <functional>
@@ -43,11 +44,13 @@ void synchronise(const std::vector<T>& source, const std::vector<T>& target,
         if(t == tLast)
             break;
 
-        if(filtered(*s))
-            s++;
-
         if(*s < *t)
-            add(*s++);
+        {
+            if(!filtered(*s))
+                add(*s);
+
+            s++;
+        }
         else
         {
             if(*t < *s)
@@ -60,7 +63,12 @@ void synchronise(const std::vector<T>& source, const std::vector<T>& target,
     }
 
     while(s != sLast)
-        add(*s++);
+    {
+        if(!filtered(*s))
+            add(*s);
+
+        s++;
+    }
 
     while(t != tLast)
         remove(*t++);
@@ -70,14 +78,16 @@ void TransformedGraph::rebuild()
 {
     MutableGraph::ScopedTransaction transaction(_target);
 
+    _target.reserve(*_source);
+
     synchronise(_source->nodeIds(), _target.nodeIds(),
                 [this](NodeId nodeId) { return _graphTransform->nodeIsFiltered(_source->nodeById(nodeId)); },
-                [this](NodeId nodeId) { _target.addNode(nodeId); },
+                [this](NodeId nodeId) { Utils::checkEqual(_target.addNode(nodeId), nodeId); },
                 [this](NodeId nodeId) { _target.removeNode(nodeId); });
 
     synchronise(_source->edgeIds(), _target.edgeIds(),
                 [this](EdgeId edgeId) { return _graphTransform->edgeIsFiltered(_source->edgeById(edgeId)); },
-                [this](EdgeId edgeId) { _target.addEdge(_source->edgeById(edgeId)); },
+                [this](EdgeId edgeId) { Utils::checkEqual(_target.addEdge(_source->edgeById(edgeId)), edgeId); },
                 [this](EdgeId edgeId) { _target.removeEdge(edgeId); });
 
     _graphTransform->transform(*_source, _target);

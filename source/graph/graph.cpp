@@ -20,6 +20,7 @@ Graph::Graph(bool componentManagement)
         NodeId nextNodeId(node->id() + 1);
         if(nextNodeId > _nodeArrayCapacity)
         {
+            _lastNodeId = node->id();
             _nodeArrayCapacity = nextNodeId;
             for(ResizableGraphArray* nodeArray : _nodeArrayList)
                 nodeArray->resize(_nodeArrayCapacity);
@@ -31,6 +32,7 @@ Graph::Graph(bool componentManagement)
         EdgeId nextEdgeId(edge->id() + 1);
         if(nextEdgeId > _edgeArrayCapacity)
         {
+            _lastEdgeId = edge->id();
             _edgeArrayCapacity = nextEdgeId;
             for(ResizableGraphArray* edgeArray : _edgeArrayList)
                 edgeArray->resize(_edgeArrayCapacity);
@@ -56,6 +58,11 @@ NodeId Graph::firstNodeId() const
     return nodeIds().size() > 0 ? nodeIds().at(0) : NodeId();
 }
 
+NodeId Graph::lastNodeId() const
+{
+    return _lastNodeId;
+}
+
 bool Graph::containsNodeId(NodeId nodeId) const
 {
     return std::find(nodeIds().cbegin(), nodeIds().cend(), nodeId) != nodeIds().cend();
@@ -64,6 +71,11 @@ bool Graph::containsNodeId(NodeId nodeId) const
 EdgeId Graph::firstEdgeId() const
 {
     return edgeIds().size() > 0 ? edgeIds().at(0) : EdgeId();
+}
+
+EdgeId Graph::lastEdgeId() const
+{
+    return _lastEdgeId;
 }
 
 bool Graph::containsEdgeId(EdgeId edgeId) const
@@ -231,6 +243,16 @@ NodeId MutableGraph::addNode()
     return addNode(_nextNodeId);
 }
 
+void MutableGraph::reserveNodeId(NodeId nodeId)
+{
+    if(nodeId < _nextNodeId)
+        return;
+
+    _nextNodeId = NodeId(nodeId + 1);
+    _nodeIdsInUse.resize(_nextNodeId);
+    _nodesVector.resize(_nextNodeId);
+}
+
 NodeId MutableGraph::addNode(NodeId nodeId)
 {
     Q_ASSERT(!nodeId.isNull());
@@ -241,10 +263,7 @@ NodeId MutableGraph::addNode(NodeId nodeId)
     if(nodeId >= _nextNodeId || (nodeId < _nextNodeId && _nodeIdsInUse[nodeId]))
     {
         nodeId = _nextNodeId;
-        _nextNodeId++;
-
-        _nodeIdsInUse.resize(_nextNodeId);
-        _nodesVector.resize(_nextNodeId);
+        reserveNodeId(nodeId);
     }
 
     _nodeIdsInUse[nodeId] = true;
@@ -321,6 +340,16 @@ EdgeId MutableGraph::addEdge(NodeId sourceId, NodeId targetId)
     return addEdge(_nextEdgeId, sourceId, targetId);
 }
 
+void MutableGraph::reserveEdgeId(EdgeId edgeId)
+{
+    if(edgeId < _nextEdgeId)
+        return;
+
+    _nextEdgeId = EdgeId(edgeId + 1);
+    _edgeIdsInUse.resize(_nextEdgeId);
+    _edgesVector.resize(_nextEdgeId);
+}
+
 EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
 {
     Q_ASSERT(!edgeId.isNull());
@@ -331,10 +360,7 @@ EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     if(edgeId >= _nextEdgeId || (edgeId < _nextEdgeId && _edgeIdsInUse[edgeId]))
     {
         edgeId = _nextEdgeId;
-        _nextEdgeId++;
-
-        _edgeIdsInUse.resize(_nextEdgeId);
-        _edgesVector.resize(_nextEdgeId);
+        reserveEdgeId(edgeId);
     }
 
     _edgeIdsInUse[edgeId] = true;
@@ -405,6 +431,12 @@ void MutableGraph::removeEdges(const ElementIdSet<EdgeId>& edgeIds)
         removeEdge(edgeId);
 
     endTransaction();
+}
+
+void MutableGraph::reserve(const Graph& other)
+{
+    reserveNodeId(other.lastNodeId());
+    reserveEdgeId(other.lastEdgeId());
 }
 
 void MutableGraph::beginTransaction()
