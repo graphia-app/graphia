@@ -55,6 +55,9 @@ namespace Utils
         // Hopefully we only pay for this function call when _DEBUG is defined
 #if _DEBUG
         Q_ASSERT(a == b);
+#else
+        Q_UNUSED(a);
+        Q_UNUSED(b);
 #endif
     }
 }
