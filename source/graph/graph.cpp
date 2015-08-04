@@ -184,7 +184,7 @@ ComponentId Graph::componentIdOfEdge(EdgeId edgeId) const
     return ComponentId();
 }
 
-ComponentId Graph::largestComponentId() const
+ComponentId Graph::componentIdOfLargestComponent() const
 {
     ComponentId largestComponentId;
     int maxNumNodes = 0;

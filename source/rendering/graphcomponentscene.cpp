@@ -19,7 +19,7 @@ GraphComponentScene::GraphComponentScene(GraphRenderer* graphRenderer) :
     connect(&_graphRenderer->graphModel()->graph(), &Graph::graphChanged, this, &GraphComponentScene::onGraphChanged, Qt::DirectConnection);
     connect(&_graphRenderer->graphModel()->graph(), &Graph::nodeWillBeRemoved, this, &GraphComponentScene::onNodeWillBeRemoved, Qt::DirectConnection);
 
-    _defaultComponentId = _graphRenderer->graphModel()->graph().largestComponentId();
+    _defaultComponentId = _graphRenderer->graphModel()->graph().componentIdOfLargestComponent();
 }
 
 void GraphComponentScene::initialise()
@@ -214,7 +214,7 @@ void GraphComponentScene::onGraphChanged(const Graph* graph)
 {
     _graphRenderer->executeOnRendererThread([this, graph]
     {
-        _defaultComponentId = graph->largestComponentId();
+        _defaultComponentId = graph->componentIdOfLargestComponent();
 
         if(visible())
         {
