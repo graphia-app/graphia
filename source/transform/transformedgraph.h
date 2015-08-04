@@ -28,6 +28,11 @@ private:
     const Graph* _source;
     std::unique_ptr<GraphTransform> _graphTransform;
     MutableGraph _target;
+
+    void rebuild();
+
+private slots:
+    void onGraphChanged(const Graph*);
 };
 
 #endif // TRANSFORMEDGRAPH_H
