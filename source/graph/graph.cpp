@@ -51,6 +51,26 @@ Graph::~Graph()
         edgeArray->invalidate();
 }
 
+NodeId Graph::firstNodeId() const
+{
+    return nodeIds().size() > 0 ? nodeIds().at(0) : NodeId();
+}
+
+bool Graph::containsNodeId(NodeId nodeId) const
+{
+    return std::find(nodeIds().cbegin(), nodeIds().cend(), nodeId) != nodeIds().cend();
+}
+
+EdgeId Graph::firstEdgeId() const
+{
+    return edgeIds().size() > 0 ? edgeIds().at(0) : EdgeId();
+}
+
+bool Graph::containsEdgeId(EdgeId edgeId) const
+{
+    return std::find(edgeIds().cbegin(), edgeIds().cend(), edgeId) != edgeIds().cend();
+}
+
 const ElementIdSet<EdgeId> Graph::edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds) const
 {
     ElementIdSet<EdgeId> edgeIds;
