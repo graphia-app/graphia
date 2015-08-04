@@ -309,10 +309,10 @@ private:
     int _graphChangeDepth = 0;
     std::mutex _mutex;
 
-public:
     void beginTransaction();
     void endTransaction();
 
+public:
     class ScopedTransaction
     {
     public:
