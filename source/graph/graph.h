@@ -221,7 +221,7 @@ public:
     const Graph* componentById(ComponentId componentId) const;
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
-    ComponentId largestComponentId() const;
+    ComponentId componentIdOfLargestComponent() const;
 
     mutable DebugPauser debugPauser;
     void dumpToQDebug(int detail) const;

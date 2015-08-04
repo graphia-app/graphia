@@ -440,7 +440,7 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph)
         int maxNumNodes = 0;
 
         if(graph->numComponents() > 0)
-            maxNumNodes = graph->componentById(graph->largestComponentId())->numNodes();
+            maxNumNodes = graph->componentById(graph->componentIdOfLargestComponent())->numNodes();
 
         for(auto componentId : _componentIds)
         {
