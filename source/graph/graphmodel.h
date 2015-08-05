@@ -3,7 +3,7 @@
 
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
-#include "../layout/layout.h"
+#include "../layout/nodepositions.h"
 #include "../utils/cpp1x_hacks.h"
 
 #include <QQuickItem>

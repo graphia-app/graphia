@@ -49,31 +49,28 @@ static void dampOscillations(QVector3D& previous, QVector3D& next)
 
 void ForceDirectedLayout::executeReal(uint64_t iteration)
 {
-    const std::vector<NodeId>& nodeIds = _graph.nodeIds();
-    const std::vector<EdgeId>& edgeIds = _graph.edgeIds();
-
-    _prevDisplacements.resize(_positions.size());
-    _displacements.resize(_positions.size());
+    _prevDisplacements.resize(positions().size());
+    _displacements.resize(positions().size());
 
     if(iteration == 0)
     {
-        RandomLayout randomLayout(_graph, _positions);
+        RandomLayout randomLayout(graph(), positions());
 
         randomLayout.setSpread(10.0f);
         randomLayout.execute(iteration);
 
-        for(NodeId nodeId : nodeIds)
+        for(NodeId nodeId : nodeIds())
             _prevDisplacements[nodeId] = QVector3D(0.0f, 0.0f, 0.0f);
     }
 
-    for(NodeId nodeId : nodeIds)
+    for(NodeId nodeId : nodeIds())
         _displacements[nodeId] = QVector3D(0.0f, 0.0f, 0.0f);
 
     BarnesHutTree barnesHutTree;
-    barnesHutTree.build(_graph, _positions);
+    barnesHutTree.build(graph(), positions());
 
     // Repulsive forces
-    auto repulsiveResults = concurrent_for(nodeIds.cbegin(), nodeIds.cend(),
+    auto repulsiveResults = concurrent_for(nodeIds().cbegin(), nodeIds().cend(),
         [this, &barnesHutTree](const NodeId& nodeId)
         {
             if(shouldCancel())
@@ -87,16 +84,16 @@ void ForceDirectedLayout::executeReal(uint64_t iteration)
         }, false);
 
     // Attractive forces
-    auto attractiveResults = concurrent_for(edgeIds.cbegin(), edgeIds.cend(),
+    auto attractiveResults = concurrent_for(edgeIds().cbegin(), edgeIds().cend(),
         [this](const EdgeId& edgeId)
         {
             if(shouldCancel())
                 return;
 
-            const Edge& edge = _graph.edgeById(edgeId);
+            const Edge& edge = graph().edgeById(edgeId);
             if(!edge.isLoop())
             {
-                const QVector3D difference = _positions.get(edge.targetId()) - _positions.get(edge.sourceId());
+                const QVector3D difference = positions().get(edge.targetId()) - positions().get(edge.sourceId());
                 float distanceSq = difference.lengthSquared();
                 const float SPRING_LENGTH = 10.0f;
                 const float force = distanceSq / (SPRING_LENGTH * SPRING_LENGTH * SPRING_LENGTH);
@@ -112,15 +109,13 @@ void ForceDirectedLayout::executeReal(uint64_t iteration)
     if(shouldCancel())
         return;
 
-    concurrent_for(nodeIds.cbegin(), nodeIds.cend(),
+    concurrent_for(nodeIds().cbegin(), nodeIds().cend(),
         [this](const NodeId& nodeId)
         {
             dampOscillations(_prevDisplacements[nodeId], _displacements[nodeId]);
         });
 
     // Apply the forces
-    _positions.update(_graph, [this](NodeId nodeId, const QVector3D& position)
-        {
-            return position + _displacements[nodeId];
-        }, 0.4f, 4);
+    for(auto nodeId : nodeIds())
+        positions().set(nodeId, positions().get(nodeId) + _displacements[nodeId]);
 }

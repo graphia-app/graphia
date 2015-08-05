@@ -1,12 +1,13 @@
 #include "layout.h"
 #include "../utils/namethread.h"
 
-LayoutThread::LayoutThread(const Graph& graph,
+LayoutThread::LayoutThread(GraphModel& graphModel,
                            std::unique_ptr<const LayoutFactory> layoutFactory,
                            bool repeating) :
-    _graph(&graph),
+    _graphModel(&graphModel),
     _repeating(repeating),
     _layoutFactory(std::move(layoutFactory)),
+    _intermediatePositions(graphModel.graph()),
     _performanceCounter(std::chrono::seconds(3))
 {
     bool debug = qgetenv("LAYOUT_DEBUG").toInt();
@@ -16,10 +17,10 @@ LayoutThread::LayoutThread(const Graph& graph,
             qDebug() << "Layout" << ticksPerSecond << "ips";
     });
 
-    connect(&graph, &Graph::componentAdded, this, &LayoutThread::onComponentAdded, Qt::DirectConnection);
-    connect(&graph, &Graph::componentWillBeRemoved, this, &LayoutThread::onComponentWillBeRemoved, Qt::DirectConnection);
-    connect(&graph, &Graph::componentSplit, this, &LayoutThread::onComponentSplit, Qt::DirectConnection);
-    connect(&graph, &Graph::componentsWillMerge, this, &LayoutThread::onComponentsWillMerge, Qt::DirectConnection);
+    connect(&graphModel.graph(), &Graph::componentAdded, this, &LayoutThread::onComponentAdded, Qt::DirectConnection);
+    connect(&graphModel.graph(), &Graph::componentWillBeRemoved, this, &LayoutThread::onComponentWillBeRemoved, Qt::DirectConnection);
+    connect(&graphModel.graph(), &Graph::componentSplit, this, &LayoutThread::onComponentSplit, Qt::DirectConnection);
+    connect(&graphModel.graph(), &Graph::componentsWillMerge, this, &LayoutThread::onComponentsWillMerge, Qt::DirectConnection);
 }
 
 void LayoutThread::addLayout(std::shared_ptr<Layout> layout)
@@ -159,6 +160,8 @@ void LayoutThread::run()
         }
         _iteration++;
 
+        _graphModel->nodePositions().update(_intermediatePositions);
+
         _performanceCounter.tick();
 
         emit executed();
@@ -193,15 +196,17 @@ void LayoutThread::addComponent(ComponentId componentId)
 {
     if(_componentLayouts.find(componentId) == _componentLayouts.end())
     {
-        auto layout = _layoutFactory->create(componentId);
+        auto layout = _layoutFactory->create(componentId, _intermediatePositions);
         addLayout(layout);
         _componentLayouts.emplace(componentId, layout);
+        _graphModel->nodePositions().setScale(layout->scaling());
+        _graphModel->nodePositions().setSmoothing(layout->smoothing());
     }
 }
 
 void LayoutThread::addAllComponents()
 {
-    for(ComponentId componentId : _graph->componentIds())
+    for(ComponentId componentId : _graphModel->graph().componentIds())
         addComponent(componentId);
 }
 

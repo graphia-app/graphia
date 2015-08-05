@@ -2,8 +2,6 @@
 #define FORCEDIRECTEDLAYOUT_H
 
 #include "layout.h"
-#include "sequencelayout.h"
-#include "centreinglayout.h"
 #include "../graph/graphmodel.h"
 
 #include <QVector3D>
@@ -20,7 +18,7 @@ private:
 public:
     ForceDirectedLayout(const Graph& graph,
                         NodePositions& positions) :
-        Layout(graph, positions, Iterative::Yes),
+        Layout(graph, positions, Iterative::Yes, 0.4f, 4),
         _prevDisplacements(graph.numNodes()),
         _displacements(graph.numNodes())
     {}
@@ -35,10 +33,10 @@ public:
         LayoutFactory(graphModel)
     {}
 
-    std::shared_ptr<Layout> create(ComponentId componentId) const
+    std::shared_ptr<Layout> create(ComponentId componentId, NodePositions& nodePositions) const
     {
         auto component = this->_graphModel->graph().componentById(componentId);
-        return std::make_shared<ForceDirectedLayout>(*component, this->_graphModel->nodePositions());
+        return std::make_shared<ForceDirectedLayout>(*component, nodePositions);
     }
 };
 

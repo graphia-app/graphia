@@ -35,14 +35,14 @@ public:
     std::recursive_mutex& mutex() { return _mutex; }
     void setScale(float scale) { _scale = scale; }
     float scale() const { return _scale; }
-    void setSmoothing(int smoothing) { _smoothing = smoothing; }
+    void setSmoothing(int smoothing) { Q_ASSERT(smoothing <= MAX_SMOOTHING); _smoothing = smoothing; }
     int smoothing() const { return _smoothing; }
 
     const QVector3D& get(NodeId nodeId) const;
     const QVector3D getScaledAndSmoothed(NodeId nodeId) const;
+    void set(NodeId nodeId, const QVector3D& position);
 
-    void update(const Graph& graph, std::function<QVector3D(NodeId, const QVector3D&)> f,
-                float scale = 1.0f, int smoothing = 1);
+    void update(const NodePositions& other);
     void executeIfUpdated(std::function<void()> f);
 
     static QVector3D centreOfMass(const NodePositions& nodePositions,

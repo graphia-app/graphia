@@ -3,6 +3,7 @@
 
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
+#include "../graph/graphmodel.h"
 #include "nodepositions.h"
 
 #include "../utils/performancecounter.h"
@@ -26,14 +27,6 @@
 class Layout : public QObject
 {
     Q_OBJECT
-private:
-    std::atomic<bool> _atomicCancel;
-    void setCancel(bool cancel)
-    {
-        _atomicCancel = cancel;
-    }
-
-    virtual void executeReal(uint64_t iteration) = 0;
 
 public:
     enum class Iterative
@@ -42,46 +35,54 @@ public:
         No
     };
 
-protected:
+private:
+    std::atomic<bool> _atomicCancel;
     Iterative _iterative;
+    float _scaling;
+    int _smoothing;
     const Graph& _graph;
     NodePositions& _positions;
 
-    bool shouldCancel()
-    {
-        return _atomicCancel;
-    }
+    void setCancel(bool cancel) { _atomicCancel = cancel; }
+
+    virtual void executeReal(uint64_t iteration) = 0;
+
+protected:
+    bool shouldCancel() const { return _atomicCancel; }
+
+    NodePositions& positions() { return _positions; }
 
 public:
     Layout(const Graph& graph,
            NodePositions& positions,
-           Iterative iterative = Iterative::No) :
+           Iterative iterative = Iterative::No,
+           float scaling = 1.0f,
+           int smoothing = 1) :
         QObject(),
         _atomicCancel(false),
         _iterative(iterative),
+        _scaling(scaling),
+        _smoothing(smoothing),
         _graph(graph),
         _positions(positions)
     {}
 
-    void execute(int iteration)
-    {
-        executeReal(iteration);
-    }
+    float scaling() const { return _scaling; }
+    int smoothing() const { return _smoothing; }
 
-    virtual void cancel()
-    {
-        setCancel(true);
-    }
+    const Graph& graph() const { return _graph; }
+    const std::vector<NodeId>& nodeIds() const { return _graph.nodeIds(); }
+    const std::vector<EdgeId>& edgeIds() const { return _graph.edgeIds(); }
 
-    virtual void uncancel()
-    {
-        setCancel(false);
-    }
+    void execute(int iteration) { executeReal(iteration); }
+
+    virtual void cancel() { setCancel(true); }
+    virtual void uncancel() { setCancel(false); }
 
     // Indicates that the algorithm is doing no useful work
     virtual bool shouldPause() { return false; }
 
-    virtual bool iterative() { return _iterative == Iterative::Yes; }
+    virtual bool iterative() const { return _iterative == Iterative::Yes; }
 
 signals:
     void progress(int percentage);
@@ -100,7 +101,7 @@ public:
     {}
     virtual ~LayoutFactory() {}
 
-    virtual std::shared_ptr<Layout> create(ComponentId componentId) const = 0;
+    virtual std::shared_ptr<Layout> create(ComponentId componentId, NodePositions& results) const = 0;
 };
 
 class LayoutThread : public QObject
@@ -110,7 +111,7 @@ class LayoutThread : public QObject
     Q_PROPERTY(bool paused READ paused NOTIFY pausedChanged)
 
 private:
-    const Graph* _graph;
+    GraphModel* _graphModel;
     std::set<std::shared_ptr<Layout>> _layouts;
     std::mutex _mutex;
     std::thread _thread;
@@ -126,10 +127,12 @@ private:
     std::unique_ptr<const LayoutFactory> _layoutFactory;
     std::map<ComponentId, std::shared_ptr<Layout>> _componentLayouts;
 
+    NodePositions _intermediatePositions;
+
     PerformanceCounter _performanceCounter;
 
 public:
-    LayoutThread(const Graph& graph,
+    LayoutThread(GraphModel& graphModel,
                  std::unique_ptr<const LayoutFactory> layoutFactory,
                  bool repeating = false);
 

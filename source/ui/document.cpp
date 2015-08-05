@@ -217,7 +217,7 @@ void Document::onLoadComplete(bool /*success FIXME hmm*/)
     emit idleChanged();
     emit commandVerbChanged(); // Stop showing loading message
 
-    _layoutThread = std::make_unique<LayoutThread>(_graphModel->graph(), std::make_unique<ForceDirectedLayoutFactory>(_graphModel));
+    _layoutThread = std::make_unique<LayoutThread>(*_graphModel, std::make_unique<ForceDirectedLayoutFactory>(_graphModel));
     _layoutThread->addAllComponents();
     connect(_layoutThread.get(), &LayoutThread::pausedChanged, this, &Document::layoutIsPausedChanged);
     _layoutThread->start();

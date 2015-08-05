@@ -27,18 +27,16 @@ const QVector3D NodePositions::getScaledAndSmoothed(NodeId nodeId) const
     return _array[nodeId].mean(_smoothing) * _scale;
 }
 
-void NodePositions::update(const Graph& graph, std::function<QVector3D(NodeId, const QVector3D&)> f,
-                           float scale, int smoothing)
+void NodePositions::set(NodeId nodeId, const QVector3D& position)
 {
-    Q_ASSERT(smoothing <= MAX_SMOOTHING);
+    _array.at(nodeId).push_back(position);
+}
+
+void NodePositions::update(const NodePositions& other)
+{
     std::unique_lock<std::recursive_mutex> lock(_mutex);
 
-    setScale(scale);
-    setSmoothing(smoothing);
-
-    for(NodeId nodeId : graph.nodeIds())
-        _array.at(nodeId).push_back(f(nodeId, _array.at(nodeId).front()));
-
+    _array = other._array;
     _updated = true;
 }
 

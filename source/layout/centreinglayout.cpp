@@ -2,10 +2,8 @@
 
 void CentreingLayout::executeReal(uint64_t)
 {
-    QVector3D centreOfMass = NodePositions::centreOfMass(_positions, _graph.nodeIds());
+    QVector3D centreOfMass = NodePositions::centreOfMass(positions(), nodeIds());
 
-    _positions.update(_graph, [&](NodeId, const QVector3D& position)
-        {
-            return position - centreOfMass;
-        });
+    for(auto nodeId : nodeIds())
+        positions().set(nodeId, positions().get(nodeId) - centreOfMass);
 }
