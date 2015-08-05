@@ -52,13 +52,8 @@ namespace Utils
 
     template<typename T> void checkEqual(T a, T b)
     {
-        // Hopefully we only pay for this function call when _DEBUG is defined
-#if _DEBUG
+        // Hopefully this function call elides to nothing when in release mode
         Q_ASSERT(a == b);
-#else
-        Q_UNUSED(a);
-        Q_UNUSED(b);
-#endif
     }
 }
 
