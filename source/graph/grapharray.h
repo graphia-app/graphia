@@ -124,6 +124,8 @@ public:
         graph._nodeArrayList.insert(this);
     }
 
+    NodeArray(const Graph& graph) : NodeArray(const_cast<Graph&>(graph)) {}
+
     NodeArray(const NodeArray& other) : GraphArray<NodeId, Element>(other)
     {
         this->_graph->_nodeArrayList.insert(this);
@@ -162,6 +164,8 @@ public:
         this->resize(graph.edgeArrayCapacity());
         graph._edgeArrayList.insert(this);
     }
+
+    EdgeArray(const Graph& graph) : EdgeArray(const_cast<Graph&>(graph)) {}
 
     EdgeArray(const EdgeArray& other) : GraphArray<EdgeId, Element>(other)
     {
@@ -202,6 +206,8 @@ public:
         this->resize(graph._componentManager->componentArrayCapacity());
         graph._componentManager->_componentArrayList.insert(this);
     }
+
+    ComponentArray(const Graph& graph) : ComponentArray(const_cast<Graph&>(graph)) {}
 
     ComponentArray(const ComponentArray& other) : GraphArray<ComponentId, Element>(other)
     {
