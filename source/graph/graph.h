@@ -125,33 +125,46 @@ class Node
 
 private:
     NodeId _id;
-    ElementIdSet<EdgeId> _inEdges;
-    ElementIdSet<EdgeId> _outEdges;
-    ElementIdSet<EdgeId> _edges;
+    ElementIdSet<EdgeId> _inEdgeIds;
+    ElementIdSet<EdgeId> _outEdgeIds;
+    ElementIdSet<EdgeId> _edgeIds;
 
 public:
     Node() {}
 
     Node(const Node& other) :
         _id(other._id),
-        _inEdges(other._inEdges),
-        _outEdges(other._outEdges),
-        _edges(other._edges)
+        _inEdgeIds(other._inEdgeIds),
+        _outEdgeIds(other._outEdgeIds),
+        _edgeIds(other._edgeIds)
     {}
 
     Node(Node&& other) noexcept :
         _id(other._id),
-        _inEdges(std::move(other._inEdges)),
-        _outEdges(std::move(other._outEdges)),
-        _edges(std::move(other._edges))
+        _inEdgeIds(std::move(other._inEdgeIds)),
+        _outEdgeIds(std::move(other._outEdgeIds)),
+        _edgeIds(std::move(other._edgeIds))
     {}
 
-    const ElementIdSet<EdgeId> inEdges() const { return _inEdges; }
-    int inDegree() const { return static_cast<int>(_inEdges.size()); }
-    const ElementIdSet<EdgeId> outEdges() const { return _outEdges; }
-    int outDegree() const { return static_cast<int>(_outEdges.size()); }
-    const ElementIdSet<EdgeId> edges() const { return _edges; }
-    int degree() const { return static_cast<int>(_edges.size()); }
+    Node& operator=(const Node& other)
+    {
+        if(this != &other)
+        {
+            _id         = other._id;
+            _inEdgeIds  = other._inEdgeIds;
+            _outEdgeIds = other._outEdgeIds;
+            _edgeIds    = other._edgeIds;
+        }
+
+        return *this;
+    }
+
+    const ElementIdSet<EdgeId> inEdgeIds() const { return _inEdgeIds; }
+    int inDegree() const { return static_cast<int>(_inEdgeIds.size()); }
+    const ElementIdSet<EdgeId> outEdgeIds() const { return _outEdgeIds; }
+    int outDegree() const { return static_cast<int>(_outEdgeIds.size()); }
+    const ElementIdSet<EdgeId> edgeIds() const { return _edgeIds; }
+    int degree() const { return static_cast<int>(_edgeIds.size()); }
 
     NodeId id() const { return _id; }
 };
@@ -173,6 +186,24 @@ public:
         _sourceId(other._sourceId),
         _targetId(other._targetId)
     {}
+
+    Edge(Edge&& other) noexcept :
+        _id(other._id),
+        _sourceId(other._sourceId),
+        _targetId(other._targetId)
+    {}
+
+    Edge& operator=(const Edge& other)
+    {
+        if(this != &other)
+        {
+            _id         = other._id;
+            _sourceId   = other._sourceId;
+            _targetId   = other._targetId;
+        }
+
+        return *this;
+    }
 
     NodeId sourceId() const { return _sourceId; }
     NodeId targetId() const { return _targetId; }
@@ -215,6 +246,7 @@ public:
 
     const ElementIdSet<EdgeId> edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds) const;
     const std::vector<Edge> edgesForNodes(const ElementIdSet<NodeId>& nodeIds) const;
+    const ElementIdSet<NodeId> adjacentNodeIds(NodeId nodeId) const;
 
     const std::vector<ComponentId>& componentIds() const;
     int numComponents() const;

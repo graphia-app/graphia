@@ -20,7 +20,7 @@ ElementIdSet<ComponentId> ComponentManager::assignConnectedElementsComponentId(c
         oldComponentIdsAffected.insert(_nodesComponentId[nodeId]);
         nodesComponentId[nodeId] = componentId;
 
-        const ElementIdSet<EdgeId> edgeIds = graph->nodeById(nodeId).edges();
+        const ElementIdSet<EdgeId> edgeIds = graph->nodeById(nodeId).edgeIds();
 
         for(EdgeId edgeId : edgeIds)
         {
