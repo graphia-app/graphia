@@ -120,7 +120,7 @@ public:
     NodeArray(Graph& graph) :
         GraphArray<NodeId, Element>(graph)
     {
-        this->resize(graph.nodeArrayCapacity());
+        this->resize(graph.nextNodeId());
         graph._nodeArrayList.insert(this);
     }
 
@@ -161,7 +161,7 @@ public:
     EdgeArray(Graph& graph) :
         GraphArray<EdgeId, Element>(graph)
     {
-        this->resize(graph.edgeArrayCapacity());
+        this->resize(graph.nextEdgeId());
         graph._edgeArrayList.insert(this);
     }
 
