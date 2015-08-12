@@ -75,7 +75,6 @@ HEADERS += \
     source/utils/debugpauser.h \
     source/utils/singleton.h \
     source/transform/graphtransform.h \
-    source/transform/identitytransform.h \
     source/transform/transformedgraph.h
 
 SOURCES += \

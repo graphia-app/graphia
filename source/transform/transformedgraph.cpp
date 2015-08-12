@@ -1,25 +1,27 @@
 #include "transformedgraph.h"
 
-#include "identitytransform.h"
-
 #include "../utils/utils.h"
 #include "../utils/cpp1x_hacks.h"
 
 #include <functional>
 
-TransformedGraph::TransformedGraph(const Graph& source) :
+TransformedGraph::TransformedGraph(const MutableGraph& source) :
     Graph(true),
-    _source(&source)
+    _source(&source),
+    _nodesDifference(source),
+    _edgesDifference(source)
 {
-    connect(_source, &Graph::graphChanged, this, &TransformedGraph::onGraphChanged, Qt::DirectConnection);
+    connect(_source, &Graph::graphChanged, [this](const Graph*) { rebuild(); });
 
-    // Forward the signals, but with the graph argument replaced with this
-    connect(&_target, &Graph::graphWillChange,   [this](const Graph*)                   { emit graphWillChange(this); });
-    connect(&_target, &Graph::nodeWillBeRemoved, [this](const Graph*, const Node* node) { emit nodeWillBeRemoved(this, node); });
-    connect(&_target, &Graph::nodeAdded,         [this](const Graph*, const Node* node) { emit nodeAdded(this, node); });
-    connect(&_target, &Graph::edgeWillBeRemoved, [this](const Graph*, const Edge* edge) { emit edgeWillBeRemoved(this, edge); });
-    connect(&_target, &Graph::edgeAdded,         [this](const Graph*, const Edge* edge) { emit edgeAdded(this, edge); });
-    connect(&_target, &Graph::graphChanged,      [this](const Graph*)                   { emit graphChanged(this); });
+    connect(_source, &Graph::nodeWillBeRemoved,         [this](const Graph*, const Node* node) { _nodesDifference[node->id()].remove(); });
+    connect(_source, &Graph::nodeAdded,                 [this](const Graph*, const Node* node) { _nodesDifference[node->id()].add(); });
+    connect(_source, &Graph::edgeWillBeRemoved,         [this](const Graph*, const Edge* edge) { _edgesDifference[edge->id()].remove(); });
+    connect(_source, &Graph::edgeAdded,                 [this](const Graph*, const Edge* edge) { _edgesDifference[edge->id()].add(); });
+
+    connect(&_target, &Graph::nodeWillBeRemoved,        [this](const Graph*, const Node* node) { _nodesDifference[node->id()].remove(); });
+    connect(&_target, &Graph::nodeAdded,                [this](const Graph*, const Node* node) { _nodesDifference[node->id()].add(); });
+    connect(&_target, &Graph::edgeWillBeRemoved,        [this](const Graph*, const Edge* edge) { _edgesDifference[edge->id()].remove(); });
+    connect(&_target, &Graph::edgeAdded,                [this](const Graph*, const Edge* edge) { _edgesDifference[edge->id()].add(); });
 
     setTransform(std::make_unique<IdentityTransform>());
 }
@@ -30,70 +32,87 @@ void TransformedGraph::setTransform(std::unique_ptr<GraphTransform> graphTransfo
     rebuild();
 }
 
-template<typename T, typename FilterFunction, typename AddFunction, typename RemoveFunction>
-void synchronise(const std::vector<T>& source, const std::vector<T>& target,
-                 FilterFunction filtered, AddFunction add, RemoveFunction remove)
+void TransformedGraph::contractEdge(EdgeId edgeId)
 {
-    auto s = source.cbegin();
-    auto sLast = source.cend();
-    auto t = target.cbegin();
-    auto tLast = target.cend();
+    // Can't contract an edge that has been removed already
+    if(!_target.containsEdgeId(edgeId))
+        return;
 
-    while(s != sLast)
+    auto edge = _target.edgeById(edgeId);
+    NodeId nodeIdToRemove;
+    NodeId nodeIdToKeep;
+
+    if(edge.sourceId() > edge.targetId())
     {
-        if(t == tLast)
-            break;
+        nodeIdToRemove = edge.sourceId();
+        nodeIdToKeep = edge.targetId();
+    }
+    else
+    {
+        nodeIdToRemove = edge.targetId();
+        nodeIdToKeep = edge.sourceId();
+    }
 
-        if(*s < *t)
-        {
-            if(!filtered(*s))
-                add(*s);
+    auto nodeToRemove = _target.nodeById(nodeIdToRemove);
 
-            s++;
-        }
-        else
+    for(auto edgeIdToMove : nodeToRemove.edgeIds())
+    {
+        if(edgeIdToMove != edgeId)
         {
-            if(*t < *s)
-                remove(*t);
+            auto edgeToMove = _target.edgeById(edgeIdToMove);
+            auto otherNodeId = edgeToMove.oppositeId(nodeIdToRemove);
+            auto adjacentNodeIds = _target.adjacentNodeIds(otherNodeId);
+
+            _target.removeEdge(edgeIdToMove);
+
+            // If otherNodeId is not already connected to nodeIdToKeep
+            if(adjacentNodeIds.find(nodeIdToKeep) == adjacentNodeIds.end())
+            {
+                if(edgeToMove.sourceId() == otherNodeId)
+                    _target.addEdge(edgeIdToMove, otherNodeId, nodeIdToKeep);
+                else
+                    _target.addEdge(edgeIdToMove, nodeIdToKeep, otherNodeId);
+            }
             else
-                s++;
-
-            t++;
+            {
+                //FIXME edgeIdToMove and edge between otherNodeId and nodeIdToKeep becomes a multiedge
+            }
         }
     }
 
-    while(s != sLast)
-    {
-        if(!filtered(*s))
-            add(*s);
-
-        s++;
-    }
-
-    while(t != tLast)
-        remove(*t++);
+    _target.removeNode(nodeIdToRemove);
+    //FIXME nodeIdToKeep and nodeIdToRemove becomes a multinode
 }
 
 void TransformedGraph::rebuild()
 {
-    MutableGraph::ScopedTransaction transaction(_target);
+    _target.performTransaction([this](MutableGraph&)
+    {
+        _target.cloneFrom(*_source);
+        _graphTransform->apply(*this);
+    });
 
-    _target.reserve(*_source);
+    emit graphWillChange(this);
 
-    synchronise(_source->nodeIds(), _target.nodeIds(),
-                [this](NodeId nodeId) { return _graphTransform->nodeIsFiltered(_source->nodeById(nodeId)); },
-                [this](NodeId nodeId) { Utils::checkEqual(_target.addNode(nodeId), nodeId); },
-                [this](NodeId nodeId) { _target.removeNode(nodeId); });
+    for(auto nodeId : _source->nodeIds())
+    {
+        if(_nodesDifference[nodeId].added())
+            emit nodeAdded(this, &_source->nodeById(nodeId));
+    }
 
-    synchronise(_source->edgeIds(), _target.edgeIds(),
-                [this](EdgeId edgeId) { return _graphTransform->edgeIsFiltered(_source->edgeById(edgeId)); },
-                [this](EdgeId edgeId) { Utils::checkEqual(_target.addEdge(_source->edgeById(edgeId)), edgeId); },
-                [this](EdgeId edgeId) { _target.removeEdge(edgeId); });
+    for(auto edgeId : _source->edgeIds())
+    {
+        if(_edgesDifference[edgeId].added())
+            emit edgeAdded(this, &_source->edgeById(edgeId));
+        else if(_edgesDifference[edgeId].removed())
+            emit edgeWillBeRemoved(this, &_source->edgeById(edgeId));
+    }
 
-    _graphTransform->transform(*_source, _target);
-}
+    for(auto nodeId : _source->nodeIds())
+    {
+        if(_nodesDifference[nodeId].removed())
+            emit nodeWillBeRemoved(this, &_source->nodeById(nodeId));
+    }
 
-void TransformedGraph::onGraphChanged(const Graph*)
-{
-    rebuild();
+    emit graphChanged(this);
 }
