@@ -345,7 +345,7 @@ public:
     void removeEdges(const ElementIdSet<EdgeId>& edgeIds);
 
     void reserve(const MutableGraph& other);
-    void clone(const MutableGraph& other);
+    void cloneFrom(const MutableGraph& other);
 
 private:
     int _graphChangeDepth = 0;

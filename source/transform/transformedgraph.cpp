@@ -39,20 +39,8 @@ void TransformedGraph::contractEdge(EdgeId edgeId)
         return;
 
     auto edge = _target.edgeById(edgeId);
-    NodeId nodeIdToRemove;
-    NodeId nodeIdToKeep;
-
-    if(edge.sourceId() > edge.targetId())
-    {
-        nodeIdToRemove = edge.sourceId();
-        nodeIdToKeep = edge.targetId();
-    }
-    else
-    {
-        nodeIdToRemove = edge.targetId();
-        nodeIdToKeep = edge.sourceId();
-    }
-
+    auto nodeIdToRemove = edge.sourceId() > edge.targetId() ? edge.sourceId() : edge.targetId();
+    auto nodeIdToKeep = edge.oppositeId(nodeIdToRemove);
     auto nodeToRemove = _target.nodeById(nodeIdToRemove);
 
     for(auto edgeIdToMove : nodeToRemove.edgeIds())

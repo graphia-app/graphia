@@ -453,7 +453,7 @@ void MutableGraph::reserve(const MutableGraph& other)
     reserveEdgeId(other.nextEdgeId());
 }
 
-void MutableGraph::clone(const MutableGraph& other)
+void MutableGraph::cloneFrom(const MutableGraph& other)
 {
     _nodeIdsInUse       = other._nodeIdsInUse;
     _nodeIdsVector      = other._nodeIdsVector;
