@@ -34,7 +34,7 @@ void TransformedGraph::setTransform(std::unique_ptr<GraphTransform> graphTransfo
 
 void TransformedGraph::contractEdge(EdgeId edgeId)
 {
-    // Can't contract an edge that has been removed already
+    // Can't contract an edge that doesn't exist
     if(!_target.containsEdgeId(edgeId))
         return;
 
