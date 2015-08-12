@@ -130,7 +130,8 @@ SOURCES += \
     source/graph/abstractcomponentmanager.cpp \
     source/graph/componentmanager.cpp \
     source/utils/debugpauser.cpp \
-    source/transform/transformedgraph.cpp
+    source/transform/transformedgraph.cpp \
+    source/transform/graphtransform.cpp
 
 OTHER_FILES += \
     source/ui/qml/main.qml \

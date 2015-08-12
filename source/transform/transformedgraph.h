@@ -43,6 +43,8 @@ public:
 
     void contractEdge(EdgeId edgeId);
 
+    void cloneFrom(const MutableGraph& other) { _target.cloneFrom(other); }
+
 private:
     const MutableGraph* _source;
     std::unique_ptr<GraphTransform> _graphTransform;

@@ -76,8 +76,7 @@ void TransformedGraph::rebuild()
 {
     _target.performTransaction([this](MutableGraph&)
     {
-        _target.cloneFrom(*_source);
-        _graphTransform->apply(*this);
+        _graphTransform->apply(*_source, *this);
     });
 
     emit graphWillChange(this);
