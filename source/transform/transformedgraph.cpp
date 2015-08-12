@@ -13,15 +13,17 @@ TransformedGraph::TransformedGraph(const MutableGraph& source) :
 {
     connect(_source, &Graph::graphChanged, [this](const Graph*) { rebuild(); });
 
-    connect(_source, &Graph::nodeWillBeRemoved,         [this](const Graph*, const Node* node) { _nodesDifference[node->id()].remove(); });
-    connect(_source, &Graph::nodeAdded,                 [this](const Graph*, const Node* node) { _nodesDifference[node->id()].add(); });
-    connect(_source, &Graph::edgeWillBeRemoved,         [this](const Graph*, const Edge* edge) { _edgesDifference[edge->id()].remove(); });
-    connect(_source, &Graph::edgeAdded,                 [this](const Graph*, const Edge* edge) { _edgesDifference[edge->id()].add(); });
+    // These connections allow us to track what changes, so we can then
+    // re-emit a canonical set of signals once the transform is complete
+    connect(_source, &Graph::nodeWillBeRemoved, [this](const Graph*, const Node* node) { _nodesDifference[node->id()].remove(); });
+    connect(_source, &Graph::nodeAdded,         [this](const Graph*, const Node* node) { _nodesDifference[node->id()].add(); });
+    connect(_source, &Graph::edgeWillBeRemoved, [this](const Graph*, const Edge* edge) { _edgesDifference[edge->id()].remove(); });
+    connect(_source, &Graph::edgeAdded,         [this](const Graph*, const Edge* edge) { _edgesDifference[edge->id()].add(); });
 
-    connect(&_target, &Graph::nodeWillBeRemoved,        [this](const Graph*, const Node* node) { _nodesDifference[node->id()].remove(); });
-    connect(&_target, &Graph::nodeAdded,                [this](const Graph*, const Node* node) { _nodesDifference[node->id()].add(); });
-    connect(&_target, &Graph::edgeWillBeRemoved,        [this](const Graph*, const Edge* edge) { _edgesDifference[edge->id()].remove(); });
-    connect(&_target, &Graph::edgeAdded,                [this](const Graph*, const Edge* edge) { _edgesDifference[edge->id()].add(); });
+    connect(&_target, &Graph::nodeWillBeRemoved,[this](const Graph*, const Node* node) { _nodesDifference[node->id()].remove(); });
+    connect(&_target, &Graph::nodeAdded,        [this](const Graph*, const Node* node) { _nodesDifference[node->id()].add(); });
+    connect(&_target, &Graph::edgeWillBeRemoved,[this](const Graph*, const Edge* edge) { _edgesDifference[edge->id()].remove(); });
+    connect(&_target, &Graph::edgeAdded,        [this](const Graph*, const Edge* edge) { _edgesDifference[edge->id()].add(); });
 
     setTransform(std::make_unique<IdentityTransform>());
 }
@@ -79,6 +81,9 @@ void TransformedGraph::rebuild()
         _graphTransform->apply(*_source, *this);
     });
 
+    // Let everything know what changed; note the signals won't necessarily happen in the order
+    // in which the changes originally occurred, but adding nodes and edges, then removing edges
+    // and nodes ensures that the receivers get a sane view at all times
     emit graphWillChange(this);
 
     for(auto nodeId : _source->nodeIds())
