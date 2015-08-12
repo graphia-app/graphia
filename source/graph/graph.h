@@ -234,13 +234,13 @@ public:
     virtual int numNodes() const = 0;
     virtual const Node& nodeById(NodeId nodeId) const = 0;
     NodeId firstNodeId() const;
-    bool containsNodeId(NodeId nodeId) const;
+    virtual bool containsNodeId(NodeId nodeId) const;
 
     virtual const std::vector<EdgeId>& edgeIds() const = 0;
     virtual int numEdges() const = 0;
     virtual const Edge& edgeById(EdgeId edgeId) const = 0;
     EdgeId firstEdgeId() const;
-    bool containsEdgeId(EdgeId edgeId) const;
+    virtual bool containsEdgeId(EdgeId edgeId) const;
 
     const ElementIdSet<EdgeId> edgeIdsForNodes(const ElementIdSet<NodeId>& nodeIds) const;
     const std::vector<Edge> edgesForNodes(const ElementIdSet<NodeId>& nodeIds) const;
@@ -321,6 +321,7 @@ public:
     const std::vector<NodeId>& nodeIds() const { return _nodeIdsVector; }
     int numNodes() const { return static_cast<int>(_nodeIdsVector.size()); }
     const Node& nodeById(NodeId nodeId) const { return _nodesVector[nodeId]; }
+    bool containsNodeId(NodeId nodeId) const { return _nodeIdsInUse[nodeId]; }
 
     NodeId addNode();
     NodeId addNode(NodeId nodeId);
@@ -333,6 +334,7 @@ public:
     const std::vector<EdgeId>& edgeIds() const { return _edgeIdsVector; }
     int numEdges() const { return static_cast<int>(_edgeIdsVector.size()); }
     const Edge& edgeById(EdgeId edgeId) const { return _edgesVector[edgeId]; }
+    bool containsEdgeId(EdgeId edgeId) const { return _edgeIdsInUse[edgeId]; }
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId);
     EdgeId addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId);
