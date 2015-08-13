@@ -75,7 +75,8 @@ HEADERS += \
     source/utils/debugpauser.h \
     source/utils/singleton.h \
     source/transform/graphtransform.h \
-    source/transform/transformedgraph.h
+    source/transform/transformedgraph.h \
+    source/transform/filtertransform.h
 
 SOURCES += \
     source/main.cpp \
@@ -131,7 +132,8 @@ SOURCES += \
     source/graph/componentmanager.cpp \
     source/utils/debugpauser.cpp \
     source/transform/transformedgraph.cpp \
-    source/transform/graphtransform.cpp
+    source/transform/graphtransform.cpp \
+    source/transform/filtertransform.cpp
 
 OTHER_FILES += \
     source/ui/qml/main.qml \

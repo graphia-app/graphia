@@ -20,10 +20,12 @@ public:
     const std::vector<NodeId>& nodeIds() const { return _target.nodeIds(); }
     int numNodes() const { return _target.numNodes(); }
     const Node& nodeById(NodeId nodeId) const { return _target.nodeById(nodeId); }
+    bool containsNodeId(NodeId nodeId) const { return _target.containsNodeId(nodeId); }
 
     const std::vector<EdgeId>& edgeIds() const { return _target.edgeIds(); }
     int numEdges() const { return _target.numEdges(); }
     const Edge& edgeById(EdgeId edgeId) const { return _target.edgeById(edgeId); }
+    bool containsEdgeId(EdgeId edgeId) const { return _target.containsEdgeId(edgeId); }
 
     NodeId addNode() { return _target.addNode(); }
     NodeId addNode(NodeId nodeId) { return _target.addNode(nodeId); }
@@ -33,16 +35,17 @@ public:
     void removeNode(NodeId nodeId) { _target.removeNode(nodeId); }
     void removeNodes(const ElementIdSet<NodeId>& nodeIds) { _target.removeNodes(nodeIds); }
 
-    EdgeId addEdge(NodeId sourceId, NodeId targetId) { return addEdge(sourceId, targetId); }
-    EdgeId addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId) { return addEdge(edgeId, sourceId, targetId); }
-    EdgeId addEdge(const Edge& edge) { return addEdge(edge); }
-    void addEdges(const std::vector<Edge>& edges) { addEdges(edges); }
+    EdgeId addEdge(NodeId sourceId, NodeId targetId) { return _target.addEdge(sourceId, targetId); }
+    EdgeId addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId) { return _target.addEdge(edgeId, sourceId, targetId); }
+    EdgeId addEdge(const Edge& edge) { return _target.addEdge(edge); }
+    void addEdges(const std::vector<Edge>& edges) { _target.addEdges(edges); }
 
-    void removeEdge(EdgeId edgeId) { removeEdge(edgeId); }
-    void removeEdges(const ElementIdSet<EdgeId>& edgeIds) { removeEdges(edgeIds); }
+    void removeEdge(EdgeId edgeId) { _target.removeEdge(edgeId); }
+    void removeEdges(const ElementIdSet<EdgeId>& edgeIds) { _target.removeEdges(edgeIds); }
 
     void contractEdge(EdgeId edgeId);
 
+    void reserve(const MutableGraph& other) { _target.reserve(other); }
     void cloneFrom(const MutableGraph& other) { _target.cloneFrom(other); }
 
 private:
@@ -53,27 +56,15 @@ private:
     class Difference
     {
     private:
-        bool _added = false;
-        bool _removed = false;
-        bool _changed = false;
+        enum class State { Removed, Unchanged, Added };
+        State state = State::Unchanged;
 
     public:
-        void add()
-        {
-            _changed = !_added || _removed;
-            _added = true;
-            _removed = false;
-        }
+        void add()     { state = state == State::Removed ? State::Unchanged : State::Added; }
+        void remove()  { state = state == State::Added ?   State::Unchanged : State::Removed; }
 
-        void remove()
-        {
-            _changed = _added || !_removed;
-            _added = false;
-            _removed = true;
-        }
-
-        bool added() { return _added && _changed; }
-        bool removed() { return _removed && _changed; }
+        bool added()   { return state == State::Added; }
+        bool removed() { return state == State::Removed; }
     };
 
     NodeArray<Difference> _nodesDifference;

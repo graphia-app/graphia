@@ -1,5 +1,7 @@
 #include "transformedgraph.h"
 
+#include "filtertransform.h"
+
 #include "../utils/utils.h"
 #include "../utils/cpp1x_hacks.h"
 
@@ -54,6 +56,9 @@ void TransformedGraph::contractEdge(EdgeId edgeId)
             auto adjacentNodeIds = _target.adjacentNodeIds(otherNodeId);
 
             _target.removeEdge(edgeIdToMove);
+
+            //FIXME The Graph class allows for multiedges itself, so maybe we should just add them here
+            // instead of avoiding it, then deal with the querying/rendering of them at that level?
 
             // If otherNodeId is not already connected to nodeIdToKeep
             if(adjacentNodeIds.find(nodeIdToKeep) == adjacentNodeIds.end())
