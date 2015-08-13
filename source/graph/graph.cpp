@@ -367,6 +367,8 @@ void MutableGraph::reserveEdgeId(EdgeId edgeId)
 EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
 {
     Q_ASSERT(!edgeId.isNull());
+    Q_ASSERT(_nodeIdsInUse[sourceId]);
+    Q_ASSERT(_nodeIdsInUse[targetId]);
 
     beginTransaction();
 
