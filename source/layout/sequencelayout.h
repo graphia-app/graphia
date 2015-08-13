@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <memory>
+#include <algorithm>
 
 class SequenceLayout : public Layout
 {
@@ -42,24 +43,14 @@ public:
 
     bool shouldPause()
     {
-        for(auto subLayout : _subLayouts)
-        {
-            if(!subLayout->shouldPause())
-                return false;
-        }
-
-        return true;
+        return std::any_of(_subLayouts.cbegin(), _subLayouts.cend(),
+                           [](Layout* layout) { return layout->shouldPause(); });
     }
 
     bool iterative()
     {
-        for(auto subLayout : _subLayouts)
-        {
-            if(subLayout->iterative())
-                return true;
-        }
-
-        return false;
+        return std::any_of(_subLayouts.cbegin(), _subLayouts.cend(),
+                           [](Layout* layout) { return layout->iterative(); });
     }
 
     void executeReal(uint64_t iteration)
