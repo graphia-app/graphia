@@ -449,25 +449,31 @@ void MutableGraph::removeEdges(const ElementIdSet<EdgeId>& edgeIds)
     endTransaction();
 }
 
-void MutableGraph::reserve(const MutableGraph& other)
+void MutableGraph::reserve(const Graph& other)
 {
-    reserveNodeId(other.nextNodeId());
-    reserveEdgeId(other.nextEdgeId());
+    const MutableGraph* mutableOther = dynamic_cast<const MutableGraph*>(&other);
+    Q_ASSERT(mutableOther != nullptr);
+
+    reserveNodeId(mutableOther->nextNodeId());
+    reserveEdgeId(mutableOther->nextEdgeId());
 }
 
-void MutableGraph::cloneFrom(const MutableGraph& other)
+void MutableGraph::cloneFrom(const Graph& other)
 {
-    _nodeIdsInUse       = other._nodeIdsInUse;
-    _nodeIdsVector      = other._nodeIdsVector;
-    _unusedNodeIdsDeque = other._unusedNodeIdsDeque;
-    _nodesVector        = other._nodesVector;
-    setNextNodeId(other.nextNodeId());
+    const MutableGraph* mutableOther = dynamic_cast<const MutableGraph*>(&other);
+    Q_ASSERT(mutableOther != nullptr);
 
-    _edgeIdsInUse       = other._edgeIdsInUse;
-    _edgeIdsVector      = other._edgeIdsVector;
-    _unusedEdgeIdsDeque = other._unusedEdgeIdsDeque;
-    _edgesVector        = other._edgesVector;
-    setNextEdgeId(other.nextEdgeId());
+    _nodeIdsInUse       = mutableOther->_nodeIdsInUse;
+    _nodeIdsVector      = mutableOther->_nodeIdsVector;
+    _unusedNodeIdsDeque = mutableOther->_unusedNodeIdsDeque;
+    _nodesVector        = mutableOther->_nodesVector;
+    setNextNodeId(mutableOther->nextNodeId());
+
+    _edgeIdsInUse       = mutableOther->_edgeIdsInUse;
+    _edgeIdsVector      = mutableOther->_edgeIdsVector;
+    _unusedEdgeIdsDeque = mutableOther->_unusedEdgeIdsDeque;
+    _edgesVector        = mutableOther->_edgesVector;
+    setNextEdgeId(mutableOther->nextEdgeId());
 }
 
 void MutableGraph::beginTransaction()

@@ -14,7 +14,7 @@ using EdgeFilterFn = ElementFilterFn<EdgeId>;
 class FilterTransform : public GraphTransform
 {
 public:
-    void apply(const MutableGraph &source, TransformedGraph &target) const;
+    void apply(const Graph &source, TransformedGraph &target) const;
     void apply(TransformedGraph &target) const;
 
     void addNodeFilter(const NodeFilterFn& f) { _nodeFilters.emplace_back(f); }

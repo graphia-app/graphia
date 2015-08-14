@@ -74,6 +74,9 @@ public:
     const std::vector<EdgeId>& edgeIds() const { return _edgeIdsList; }
     int numEdges() const { return static_cast<int>(_edgeIdsList.size()); }
     const Edge& edgeById(EdgeId edgeId) const { return _graph->edgeById(edgeId); }
+
+    void reserve(const Graph& other);
+    void cloneFrom(const Graph& other);
 };
 
 class AbstractComponentManager : public QObject

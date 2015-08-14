@@ -69,3 +69,23 @@ std::vector<NodeId> ComponentMergeSet::nodeIds() const
 
     return nodeIds;
 }
+
+void GraphComponent::reserve(const Graph& other)
+{
+    const GraphComponent* otherGraphComponent = dynamic_cast<const GraphComponent*>(&other);
+    Q_ASSERT(otherGraphComponent != nullptr);
+
+    Q_ASSERT(_graph == otherGraphComponent->_graph);
+    _nodeIdsList.reserve(otherGraphComponent->_nodeIdsList.size());
+    _edgeIdsList.reserve(otherGraphComponent->_edgeIdsList.size());
+}
+
+void GraphComponent::cloneFrom(const Graph& other)
+{
+    const GraphComponent* otherGraphComponent = dynamic_cast<const GraphComponent*>(&other);
+    Q_ASSERT(otherGraphComponent != nullptr);
+
+    Q_ASSERT(_graph == otherGraphComponent->_graph);
+    _nodeIdsList = otherGraphComponent->_nodeIdsList;
+    _edgeIdsList = otherGraphComponent->_edgeIdsList;
+}

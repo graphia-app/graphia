@@ -5,7 +5,7 @@
 
 #include <functional>
 
-TransformedGraph::TransformedGraph(const MutableGraph& source) :
+TransformedGraph::TransformedGraph(const Graph& source) :
     Graph(true),
     _source(&source),
     _nodesDifference(source),

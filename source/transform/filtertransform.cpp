@@ -54,7 +54,7 @@ template<typename ElementId> bool elementIdFiltered(std::vector<ElementFilterFn<
     return std::any_of(elements.cbegin(), elements.cend(), [value](ElementFilterFn<ElementId> f) { return f(value); });
 }
 
-void FilterTransform::apply(const MutableGraph& source, TransformedGraph& target) const
+void FilterTransform::apply(const Graph& source, TransformedGraph& target) const
 {
     target.reserve(source);
 

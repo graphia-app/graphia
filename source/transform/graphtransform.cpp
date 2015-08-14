@@ -3,7 +3,7 @@
 
 #include "../graph/graph.h"
 
-void GraphTransform::apply(const MutableGraph& source, TransformedGraph& target) const
+void GraphTransform::apply(const Graph& source, TransformedGraph& target) const
 {
     target.cloneFrom(source);
     apply(target);

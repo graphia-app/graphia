@@ -13,7 +13,7 @@ class TransformedGraph : public Graph
     Q_OBJECT
 
 public:
-    TransformedGraph(const MutableGraph& source);
+    TransformedGraph(const Graph& source);
 
     void setTransform(std::unique_ptr<GraphTransform> graphTransform);
 
@@ -45,11 +45,11 @@ public:
 
     void contractEdge(EdgeId edgeId);
 
-    void reserve(const MutableGraph& other) { _target.reserve(other); }
-    void cloneFrom(const MutableGraph& other) { _target.cloneFrom(other); }
+    void reserve(const Graph& other) { _target.reserve(other); }
+    void cloneFrom(const Graph& other) { _target.cloneFrom(other); }
 
 private:
-    const MutableGraph* _source;
+    const Graph* _source;
     std::unique_ptr<GraphTransform> _graphTransform;
     MutableGraph _target;
 

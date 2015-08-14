@@ -246,6 +246,9 @@ public:
     const std::vector<Edge> edgesForNodes(const ElementIdSet<NodeId>& nodeIds) const;
     const ElementIdSet<NodeId> adjacentNodeIds(NodeId nodeId) const;
 
+    virtual void reserve(const Graph& other) = 0;
+    virtual void cloneFrom(const Graph& other) = 0;
+
     const std::vector<ComponentId>& componentIds() const;
     int numComponents() const;
     const Graph* componentById(ComponentId componentId) const;
@@ -344,8 +347,8 @@ public:
     void removeEdge(EdgeId edgeId);
     void removeEdges(const ElementIdSet<EdgeId>& edgeIds);
 
-    void reserve(const MutableGraph& other);
-    void cloneFrom(const MutableGraph& other);
+    void reserve(const Graph& other);
+    void cloneFrom(const Graph& other);
 
 private:
     int _graphChangeDepth = 0;
