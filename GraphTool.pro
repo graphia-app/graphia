@@ -77,7 +77,8 @@ HEADERS += \
     source/transform/graphtransform.h \
     source/transform/transformedgraph.h \
     source/transform/filtertransform.h \
-    source/transform/edgecontractiontransform.h
+    source/transform/edgecontractiontransform.h \
+    source/transform/compoundtransform.h
 
 SOURCES += \
     source/main.cpp \
@@ -135,7 +136,8 @@ SOURCES += \
     source/transform/transformedgraph.cpp \
     source/transform/graphtransform.cpp \
     source/transform/filtertransform.cpp \
-    source/transform/edgecontractiontransform.cpp
+    source/transform/edgecontractiontransform.cpp \
+    source/transform/compoundtransform.cpp
 
 OTHER_FILES += \
     source/ui/qml/main.qml \
