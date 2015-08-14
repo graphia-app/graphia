@@ -1,7 +1,5 @@
 #include "transformedgraph.h"
 
-#include "filtertransform.h"
-
 #include "../utils/utils.h"
 #include "../utils/cpp1x_hacks.h"
 
