@@ -38,7 +38,7 @@ public:
     inline operator int() const { return _value; }
     ElementId& operator=(const ElementId<T>& other) { _value = other._value; return *this; }
     inline T& operator++() { ++_value; return static_cast<T&>(*this); }
-    inline T operator++(int) { T previous = static_cast<T&>(*this); operator++(); return previous; }
+    inline T operator++(int) { T previous = static_cast<T&>(*this); ++_value; return previous; }
     inline bool operator==(const ElementId<T>& other) const { return _value == other._value; }
     inline bool operator<(const ElementId<T>& other) const { return _value < other._value; }
 
