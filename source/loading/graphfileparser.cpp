@@ -41,6 +41,10 @@ void GraphFileParserThread::run()
         [&](MutableGraph& graph)
         {
             result = _graphFileParser->parse(graph);
+
+            // Extra processing may occur after the actual parsing, so we emit this here
+            // in order that the progress indication doesn't just freeze
+            emit progress(-1);
         });
 
     emit complete(result);

@@ -50,7 +50,12 @@ int Document::commandProgress() const
 QString Document::commandVerb() const
 {
     if(!_loadComplete)
+    {
+        if(_loadProgress < 0)
+            return tr("Finishing");
+
         return QString(tr("Loading %1").arg(_title));
+    }
 
     return _commandManager.commandVerb();
 }
@@ -208,6 +213,7 @@ void Document::onLoadProgress(int percentage)
 {
     _loadProgress = percentage;
     emit commandProgressChanged();
+    emit commandVerbChanged();
 }
 
 void Document::onLoadComplete(bool /*success FIXME hmm*/)
