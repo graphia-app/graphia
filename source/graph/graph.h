@@ -202,15 +202,15 @@ public:
 
 private:
     std::vector<bool> _nodeIdsInUse;
-    std::vector<NodeId> _nodeIdsVector;
-    std::deque<NodeId> _unusedNodeIdsDeque;
-    std::vector<Node> _nodesVector;
+    std::vector<NodeId> _nodeIds;
+    std::deque<NodeId> _unusedNodeIds;
+    std::vector<Node> _nodes;
     std::vector<MultiNodeId> _multiNodeIds;
 
     std::vector<bool> _edgeIdsInUse;
-    std::vector<EdgeId> _edgeIdsVector;
-    std::deque<EdgeId> _unusedEdgeIdsDeque;
-    std::vector<Edge> _edgesVector;
+    std::vector<EdgeId> _edgeIds;
+    std::deque<EdgeId> _unusedEdgeIds;
+    std::vector<Edge> _edges;
     std::vector<MultiEdgeId> _multiEdgeIds;
 
     void reserveNodeId(NodeId nodeId);
