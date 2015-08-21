@@ -46,8 +46,8 @@ void ComponentManager::updateComponents(const Graph* graph)
     std::map<ComponentId, ComponentIdSet> splitComponents;
     ComponentIdSet newComponentIds;
 
-    NodeArray<ComponentId> newNodesComponentId(*const_cast<Graph*>(graph));
-    EdgeArray<ComponentId> newEdgesComponentId(*const_cast<Graph*>(graph));
+    NodeArray<ComponentId> newNodesComponentId(*graph);
+    EdgeArray<ComponentId> newEdgesComponentId(*graph);
 
     // Search for mergers and splitters
     for(auto nodeId : graph->nodeIds())
