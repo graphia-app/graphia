@@ -37,7 +37,7 @@ public slots:
 
 private:
     void generateVertexData(std::vector<float>& vertices, std::vector<float>& normals,
-                            std::vector<float>& texCoords, std::vector<float>&tangents,
+                            std::vector<float>& texCoords, std::vector<float>& tangents,
                             std::vector<unsigned int>& indices);
 
     float _radius = 1.0f;

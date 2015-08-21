@@ -235,7 +235,7 @@ void MutableGraph::clear()
     _edges.resize(0);
 }
 
-const std::vector<NodeId>&MutableGraph::nodeIds() const
+const std::vector<NodeId>& MutableGraph::nodeIds() const
 {
     return _nodeIds;
 }
@@ -245,7 +245,7 @@ int MutableGraph::numNodes() const
     return static_cast<int>(_nodeIds.size());
 }
 
-const Node&MutableGraph::nodeById(NodeId nodeId) const
+const Node& MutableGraph::nodeById(NodeId nodeId) const
 {
     Q_ASSERT(_nodeIdsInUse[nodeId]);
     return _nodes[nodeId];
@@ -359,7 +359,7 @@ void MutableGraph::removeNodes(const NodeIdSet& nodeIds)
     endTransaction();
 }
 
-const std::vector<EdgeId>&MutableGraph::edgeIds() const
+const std::vector<EdgeId>& MutableGraph::edgeIds() const
 {
     return _edgeIds;
 }
