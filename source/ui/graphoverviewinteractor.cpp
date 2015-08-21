@@ -77,9 +77,9 @@ QPoint GraphOverviewInteractor::componentLocalCursorPosition(const ComponentId& 
     return transformedPos;
 }
 
-ElementIdSet<NodeId> GraphOverviewInteractor::selectionForRect(const QRect& rect)
+NodeIdSet GraphOverviewInteractor::selectionForRect(const QRect& rect)
 {
-    ElementIdSet<NodeId> selection;
+    NodeIdSet selection;
 
     auto& componentLayout = _scene->componentLayout();
 

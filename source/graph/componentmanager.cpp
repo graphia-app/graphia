@@ -3,29 +3,29 @@
 #include <queue>
 #include <map>
 
-ElementIdSet<ComponentId> ComponentManager::assignConnectedElementsComponentId(const Graph* graph,
+ComponentIdSet ComponentManager::assignConnectedElementsComponentId(const Graph* graph,
         NodeId rootId, ComponentId componentId,
         NodeArray<ComponentId>& nodesComponentId,
         EdgeArray<ComponentId>& edgesComponentId)
 {
     std::queue<NodeId> nodeIdSearchList;
-    ElementIdSet<ComponentId> oldComponentIdsAffected;
+    ComponentIdSet oldComponentIdsAffected;
 
     nodeIdSearchList.push(rootId);
 
     while(!nodeIdSearchList.empty())
     {
-        NodeId nodeId = nodeIdSearchList.front();
+        auto nodeId = nodeIdSearchList.front();
         nodeIdSearchList.pop();
         oldComponentIdsAffected.insert(_nodesComponentId[nodeId]);
         nodesComponentId[nodeId] = componentId;
 
-        const ElementIdSet<EdgeId> edgeIds = graph->nodeById(nodeId).edgeIds();
+        auto edgeIds = graph->nodeById(nodeId).edgeIds();
 
-        for(EdgeId edgeId : edgeIds)
+        for(auto edgeId : edgeIds)
         {
             edgesComponentId[edgeId] = componentId;
-            NodeId oppositeNodeId = graph->edgeById(edgeId).oppositeId(nodeId);
+            auto oppositeNodeId = graph->edgeById(edgeId).oppositeId(nodeId);
 
             if(nodesComponentId[oppositeNodeId] != componentId)
             {
@@ -43,26 +43,26 @@ ElementIdSet<ComponentId> ComponentManager::assignConnectedElementsComponentId(c
 
 void ComponentManager::updateComponents(const Graph* graph)
 {
-    std::map<ComponentId, ElementIdSet<ComponentId>> splitComponents;
-    ElementIdSet<ComponentId> newComponentIds;
+    std::map<ComponentId, ComponentIdSet> splitComponents;
+    ComponentIdSet newComponentIds;
 
     NodeArray<ComponentId> newNodesComponentId(*const_cast<Graph*>(graph));
     EdgeArray<ComponentId> newEdgesComponentId(*const_cast<Graph*>(graph));
-    ElementIdSet<ComponentId> newComponentIdsList;
+    ComponentIdSet newComponentIdsList;
 
     const std::vector<NodeId>& nodeIdsList = graph->nodeIds();
 
     // Search for mergers and splitters
-    for(NodeId nodeId : nodeIdsList)
+    for(auto nodeId : nodeIdsList)
     {
-        ComponentId oldComponentId = _nodesComponentId[nodeId];
+        auto oldComponentId = _nodesComponentId[nodeId];
 
         if(newNodesComponentId[nodeId].isNull() && !oldComponentId.isNull())
         {
             if(newComponentIdsList.find(oldComponentId) != newComponentIdsList.end())
             {
                 // We have already used this ID so this is a component that has split
-                ComponentId newComponentId = generateComponentId();
+                auto newComponentId = generateComponentId();
                 newComponentIdsList.insert(newComponentId);
                 assignConnectedElementsComponentId(graph, nodeId, newComponentId,
                                                    newNodesComponentId, newEdgesComponentId);
@@ -76,9 +76,8 @@ void ComponentManager::updateComponents(const Graph* graph)
             else
             {
                 newComponentIdsList.insert(oldComponentId);
-                ElementIdSet<ComponentId> componentIdsAffected =
-                        assignConnectedElementsComponentId(graph, nodeId, oldComponentId,
-                                                           newNodesComponentId, newEdgesComponentId);
+                auto componentIdsAffected = assignConnectedElementsComponentId(graph, nodeId, oldComponentId,
+                                                                               newNodesComponentId, newEdgesComponentId);
                 queueGraphComponentUpdate(graph, oldComponentId);
 
                 if(componentIdsAffected.size() > 1)
@@ -88,7 +87,7 @@ void ComponentManager::updateComponents(const Graph* graph)
                     emit componentsWillMerge(graph, ComponentMergeSet(graph, std::move(componentIdsAffected), oldComponentId));
                     componentIdsAffected.erase(oldComponentId);
 
-                    for(ComponentId removedComponentId : componentIdsAffected)
+                    for(auto removedComponentId : componentIdsAffected)
                     {
                         if(_debug) qDebug() << "componentWillBeRemoved" << removedComponentId;
                         emit componentWillBeRemoved(graph, removedComponentId, true);
@@ -100,11 +99,11 @@ void ComponentManager::updateComponents(const Graph* graph)
     }
 
     // Search for entirely new components
-    for(NodeId nodeId : nodeIdsList)
+    for(auto nodeId : nodeIdsList)
     {
         if(newNodesComponentId[nodeId].isNull() && _nodesComponentId[nodeId].isNull())
         {
-            ComponentId newComponentId = generateComponentId();
+            auto newComponentId = generateComponentId();
             newComponentIdsList.insert(newComponentId);
             assignConnectedElementsComponentId(graph, nodeId, newComponentId, newNodesComponentId, newEdgesComponentId);
             queueGraphComponentUpdate(graph, newComponentId);
@@ -114,8 +113,8 @@ void ComponentManager::updateComponents(const Graph* graph)
     }
 
     // Search for removed components
-    ElementIdSet<ComponentId> componentIdsToBeRemoved;
-    for(ComponentId componentId : _componentIdsList)
+    ComponentIdSet componentIdsToBeRemoved;
+    for(auto componentId : _componentIdsList)
     {
         if(newComponentIdsList.find(componentId) != newComponentIdsList.end())
             continue;
@@ -123,7 +122,7 @@ void ComponentManager::updateComponents(const Graph* graph)
         componentIdsToBeRemoved.insert(componentId);
     }
 
-    for(ComponentId componentId : componentIdsToBeRemoved)
+    for(auto componentId : componentIdsToBeRemoved)
     {
         // Component removed
         if(_debug) qDebug() << "componentWillBeRemoved" << componentId;
@@ -135,13 +134,13 @@ void ComponentManager::updateComponents(const Graph* graph)
     _nodesComponentId = std::move(newNodesComponentId);
     _edgesComponentId = std::move(newEdgesComponentId);
 
-    for(ComponentId componentId : _updatesRequired)
+    for(auto componentId : _updatesRequired)
         updateGraphComponent(graph, componentId);
 
     _updatesRequired.clear();
 
     // Notify all the new components
-    for(ComponentId newComponentId : newComponentIds)
+    for(auto newComponentId : newComponentIds)
     {
         if(_debug) qDebug() << "componentAdded" << newComponentId;
         emit componentAdded(graph, newComponentId, false);
@@ -150,9 +149,9 @@ void ComponentManager::updateComponents(const Graph* graph)
     // Notify all the splits
     for(auto splitee : splitComponents)
     {
-        ElementIdSet<ComponentId>& splitters = splitee.second;
+        auto& splitters = splitee.second;
 
-        for(ComponentId splitter : splitters)
+        for(auto splitter : splitters)
         {
             if(splitter != splitee.first)
             {
@@ -180,7 +179,7 @@ ComponentId ComponentManager::generateComponentId()
 
     _componentIdsList.push_back(newComponentId);
 
-    for(ResizableGraphArray* componentArray : _componentArrayList)
+    for(auto* componentArray : _componentArrayList)
         componentArray->resize(componentArrayCapacity());
 
     return newComponentId;
@@ -211,16 +210,16 @@ void ComponentManager::updateGraphComponent(const Graph* graph, ComponentId comp
     std::vector<EdgeId>& edgeIdsList = graphComponentEdgeIdsList(*graphComponent);
 
     nodeIdsList.clear();
-    const std::vector<NodeId>& nodeIds = graph->nodeIds();
-    for(NodeId nodeId : nodeIds)
+    auto& nodeIds = graph->nodeIds();
+    for(auto nodeId : nodeIds)
     {
         if(_nodesComponentId[nodeId] == componentId)
             nodeIdsList.push_back(nodeId);
     }
 
     edgeIdsList.clear();
-    const std::vector<EdgeId>& edgeIds = graph->edgeIds();
-    for(EdgeId edgeId : edgeIds)
+    auto& edgeIds = graph->edgeIds();
+    for(auto edgeId : edgeIds)
     {
         if(_edgesComponentId[edgeId] == componentId)
             edgeIdsList.push_back(edgeId);
@@ -300,7 +299,7 @@ ComponentId ComponentManager::componentIdOfNode(NodeId nodeId) const
 
     unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex, _debugPaused);
 
-    ComponentId componentId = _nodesComponentId.at(nodeId);
+    auto componentId = _nodesComponentId.at(nodeId);
     auto i = std::find(_componentIdsList.begin(), _componentIdsList.end(), componentId);
     return i != _componentIdsList.end() ? *i : ComponentId();
 }
@@ -312,7 +311,7 @@ ComponentId ComponentManager::componentIdOfEdge(EdgeId edgeId) const
 
     unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex, _debugPaused);
 
-    ComponentId componentId = _edgesComponentId.at(edgeId);
+    auto componentId = _edgesComponentId.at(edgeId);
     auto i = std::find(_componentIdsList.begin(), _componentIdsList.end(), componentId);
     return i != _componentIdsList.end() ? *i : ComponentId();
 }

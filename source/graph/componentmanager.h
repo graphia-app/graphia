@@ -25,7 +25,7 @@ private:
     ComponentId _nextComponentId;
     std::queue<ComponentId> _vacatedComponentIdQueue;
     std::map<ComponentId, std::shared_ptr<GraphComponent>> _componentsMap;
-    ElementIdSet<ComponentId> _updatesRequired;
+    ComponentIdSet _updatesRequired;
     NodeArray<ComponentId> _nodesComponentId;
     EdgeArray<ComponentId> _edgesComponentId;
 
@@ -40,9 +40,9 @@ private:
 
     void updateComponents(const Graph* graph);
     int componentArrayCapacity() const { return _nextComponentId; }
-    ElementIdSet<ComponentId> assignConnectedElementsComponentId(const Graph* graph, NodeId rootId, ComponentId componentId,
-                                                                 NodeArray<ComponentId>& nodesComponentId,
-                                                                 EdgeArray<ComponentId>& edgesComponentId);
+    ComponentIdSet assignConnectedElementsComponentId(const Graph* graph, NodeId rootId, ComponentId componentId,
+                                                      NodeArray<ComponentId>& nodesComponentId,
+                                                      EdgeArray<ComponentId>& edgesComponentId);
 
 private slots:
     void onGraphChanged(const Graph* graph);

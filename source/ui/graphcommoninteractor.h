@@ -15,9 +15,9 @@ class GraphRenderer;
 class GraphComponentRenderer;
 class BaseFrustum;
 
-ElementIdSet<NodeId> nodeIdsInsideFrustum(const GraphModel& graphModel,
-                                          ComponentId componentId,
-                                          const BaseFrustum& frustum);
+NodeIdSet nodeIdsInsideFrustum(const GraphModel& graphModel,
+                               ComponentId componentId,
+                               const BaseFrustum& frustum);
 
 class GraphCommonInteractor : public Interactor
 {
@@ -81,7 +81,7 @@ private:
 
     virtual GraphComponentRenderer* rendererAtPosition(const QPoint& position) = 0;
     virtual QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) = 0;
-    virtual ElementIdSet<NodeId> selectionForRect(const QRect& rect) = 0;
+    virtual NodeIdSet selectionForRect(const QRect& rect) = 0;
 
 protected:
     QPoint cursorPosition();

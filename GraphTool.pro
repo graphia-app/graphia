@@ -78,7 +78,8 @@ HEADERS += \
     source/transform/transformedgraph.h \
     source/transform/filtertransform.h \
     source/transform/edgecontractiontransform.h \
-    source/transform/compoundtransform.h
+    source/transform/compoundtransform.h \
+    source/graph/elementid.h
 
 SOURCES += \
     source/main.cpp \

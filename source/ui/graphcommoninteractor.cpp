@@ -23,11 +23,11 @@
 #include <QtMath>
 #include <cmath>
 
-ElementIdSet<NodeId> nodeIdsInsideFrustum(const GraphModel& graphModel,
-                                          ComponentId componentId,
-                                          const BaseFrustum& frustum)
+NodeIdSet nodeIdsInsideFrustum(const GraphModel& graphModel,
+                               ComponentId componentId,
+                               const BaseFrustum& frustum)
 {
-    ElementIdSet<NodeId> selection;
+    NodeIdSet selection;
 
     auto component = graphModel.graph().componentById(componentId);
     for(NodeId nodeId : component->nodeIds())

@@ -16,7 +16,7 @@ private:
     std::shared_ptr<GraphModel> _graphModel;
     std::shared_ptr<SelectionManager> _selectionManager;
 
-    const ElementIdSet<NodeId> _nodes;
+    const NodeIdSet _nodes;
     std::vector<Edge> _edges;
 
 

@@ -64,21 +64,25 @@ public:
 
     Element& operator[](Index index)
     {
+        Q_ASSERT(index >= 0 && index < size());
         return _array[index];
     }
 
     const Element& operator[](Index index) const
     {
+        Q_ASSERT(index >= 0 && index < size());
         return _array[index];
     }
 
     Element& at(Index index)
     {
+        Q_ASSERT(index >= 0 && index < size());
         return _array.at(index);
     }
 
     const Element& at(Index index) const
     {
+        Q_ASSERT(index >= 0 && index < size());
         return _array.at(index);
     }
 

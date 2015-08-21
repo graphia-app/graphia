@@ -36,9 +36,8 @@ public:
 
     bool editable() { return true; }
 
-public slots:
-    void onNodeAdded(const Graph*, const Node* node);
-    void onEdgeAdded(const Graph*, const Edge* edge);
+private slots:
+    void onGraphChanged(const Graph* graph);
 };
 
 #endif // GENERICGRAPHMODEL_H

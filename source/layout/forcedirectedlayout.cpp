@@ -71,7 +71,7 @@ void ForceDirectedLayout::executeReal(uint64_t iteration)
 
     // Repulsive forces
     auto repulsiveResults = concurrent_for(nodeIds().cbegin(), nodeIds().cend(),
-        [this, &barnesHutTree](const NodeId& nodeId)
+        [this, &barnesHutTree](const NodeId nodeId)
         {
             if(shouldCancel())
                 return;
@@ -85,7 +85,7 @@ void ForceDirectedLayout::executeReal(uint64_t iteration)
 
     // Attractive forces
     auto attractiveResults = concurrent_for(edgeIds().cbegin(), edgeIds().cend(),
-        [this](const EdgeId& edgeId)
+        [this](const EdgeId edgeId)
         {
             if(shouldCancel())
                 return;

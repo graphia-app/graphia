@@ -21,19 +21,21 @@ public:
     int numNodes() const { return _target.numNodes(); }
     const Node& nodeById(NodeId nodeId) const { return _target.nodeById(nodeId); }
     bool containsNodeId(NodeId nodeId) const { return _target.containsNodeId(nodeId); }
+    MultiNodeId::Type typeOf(NodeId nodeId) const { return _target.typeOf(nodeId); }
 
     const std::vector<EdgeId>& edgeIds() const { return _target.edgeIds(); }
     int numEdges() const { return _target.numEdges(); }
     const Edge& edgeById(EdgeId edgeId) const { return _target.edgeById(edgeId); }
     bool containsEdgeId(EdgeId edgeId) const { return _target.containsEdgeId(edgeId); }
+    MultiEdgeId::Type typeOf(EdgeId edgeId) const { return _target.typeOf(edgeId); }
 
     NodeId addNode() { return _target.addNode(); }
     NodeId addNode(NodeId nodeId) { return _target.addNode(nodeId); }
     NodeId addNode(const Node& node) { return _target.addNode(node); }
-    void addNodes(const ElementIdSet<NodeId>& nodeIds) { addNodes(nodeIds); }
+    void addNodes(const NodeIdSet& nodeIds) { addNodes(nodeIds); }
 
     void removeNode(NodeId nodeId) { _target.removeNode(nodeId); }
-    void removeNodes(const ElementIdSet<NodeId>& nodeIds) { _target.removeNodes(nodeIds); }
+    void removeNodes(const NodeIdSet& nodeIds) { _target.removeNodes(nodeIds); }
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId) { return _target.addEdge(sourceId, targetId); }
     EdgeId addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId) { return _target.addEdge(edgeId, sourceId, targetId); }
@@ -41,9 +43,9 @@ public:
     void addEdges(const std::vector<Edge>& edges) { _target.addEdges(edges); }
 
     void removeEdge(EdgeId edgeId) { _target.removeEdge(edgeId); }
-    void removeEdges(const ElementIdSet<EdgeId>& edgeIds) { _target.removeEdges(edgeIds); }
+    void removeEdges(const EdgeIdSet& edgeIds) { _target.removeEdges(edgeIds); }
 
-    void contractEdge(EdgeId edgeId);
+    void contractEdge(EdgeId edgeId) { _target.contractEdge(edgeId); }
 
     void reserve(const Graph& other) { _target.reserve(other); }
     void cloneFrom(const Graph& other) { _target.cloneFrom(other); }

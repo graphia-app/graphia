@@ -9,30 +9,28 @@ GenericGraphModel::GenericGraphModel(const QString &name) :
     _edgeVisuals(_graph),
     _name(name)
 {
-    connect(&_graph, &Graph::nodeAdded, this, &GenericGraphModel::onNodeAdded, Qt::DirectConnection);
-    connect(&_graph, &Graph::edgeAdded, this, &GenericGraphModel::onEdgeAdded, Qt::DirectConnection);
+    connect(&_transformedGraph, &Graph::graphChanged, this, &GenericGraphModel::onGraphChanged, Qt::DirectConnection);
 }
 
 const float NODE_SIZE = 0.6f;
 const float EDGE_SIZE = 0.2f;
 
-void GenericGraphModel::onNodeAdded(const Graph*, const Node* node)
+void GenericGraphModel::onGraphChanged(const Graph* graph)
 {
-    if(!_nodeVisuals[node->id()]._initialised)
+    for(auto nodeId : graph->nodeIds())
     {
-        _nodeVisuals[node->id()]._size = NODE_SIZE + Utils::rand(-0.3f, 0.4f);
-        _nodeVisuals[node->id()]._color = Utils::randQColor();
-        _nodeVisuals[node->id()]._initialised = true;
+        _nodeVisuals[nodeId]._size = NODE_SIZE;
+        _nodeVisuals[nodeId]._color = graph->typeOf(nodeId) == MultiNodeId::Type::Not ?
+                    Qt::GlobalColor::blue : Qt::GlobalColor::red;
+        _nodeVisuals[nodeId]._initialised = true;
     }
-}
 
-void GenericGraphModel::onEdgeAdded(const Graph*, const Edge* edge)
-{
-    if(!_edgeVisuals[edge->id()]._initialised)
+    for(auto edgeId : graph->edgeIds())
     {
-        _edgeVisuals[edge->id()]._size = EDGE_SIZE + Utils::rand(-0.05f, 0.05f);
-        _edgeVisuals[edge->id()]._color = Utils::randQColor();
-        _edgeVisuals[edge->id()]._initialised = true;
+        _edgeVisuals[edgeId]._size = EDGE_SIZE;
+        _edgeVisuals[edgeId]._color = graph->typeOf(edgeId) == MultiEdgeId::Type::Not ?
+                    Qt::GlobalColor::white : Qt::GlobalColor::red;
+        _edgeVisuals[edgeId]._initialised = true;
     }
 }
 

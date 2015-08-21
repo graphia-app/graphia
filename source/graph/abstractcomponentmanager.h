@@ -13,16 +13,16 @@ class ComponentSplitSet
 private:
     const Graph* _graph;
     ComponentId _oldComponentId;
-    ElementIdSet<ComponentId> _splitters;
+    ComponentIdSet _splitters;
 
 public:
-    ComponentSplitSet(const Graph* graph, ComponentId oldComponentId, ElementIdSet<ComponentId>&& splitters) :
+    ComponentSplitSet(const Graph* graph, ComponentId oldComponentId, ComponentIdSet&& splitters) :
         _graph(graph), _oldComponentId(oldComponentId), _splitters(splitters)
     {
     }
 
     ComponentId oldComponentId() const { return _oldComponentId; }
-    const ElementIdSet<ComponentId>& splitters() const { return _splitters; }
+    const ComponentIdSet& splitters() const { return _splitters; }
     ComponentId largestComponentId() const;
 
     std::vector<NodeId> nodeIds() const;
@@ -32,16 +32,16 @@ class ComponentMergeSet
 {
 private:
     const Graph* _graph;
-    ElementIdSet<ComponentId> _mergers;
+    ComponentIdSet _mergers;
     ComponentId _newComponentId;
 
 public:
-    ComponentMergeSet(const Graph* graph, ElementIdSet<ComponentId>&& mergers, ComponentId newComponentId) :
+    ComponentMergeSet(const Graph* graph, ComponentIdSet&& mergers, ComponentId newComponentId) :
         _graph(graph), _mergers(mergers), _newComponentId(newComponentId)
     {
     }
 
-    const ElementIdSet<ComponentId>& mergers() const { return _mergers; }
+    const ComponentIdSet& mergers() const { return _mergers; }
     ComponentId newComponentId() const { return _newComponentId; }
 
     std::vector<NodeId> nodeIds() const;
@@ -70,10 +70,12 @@ public:
     const std::vector<NodeId>& nodeIds() const { return _nodeIdsList; }
     int numNodes() const { return static_cast<int>(_nodeIdsList.size()); }
     const Node& nodeById(NodeId nodeId) const { return _graph->nodeById(nodeId); }
+    MultiNodeId::Type typeOf(NodeId) const { return MultiNodeId::Type::Not; }
 
     const std::vector<EdgeId>& edgeIds() const { return _edgeIdsList; }
     int numEdges() const { return static_cast<int>(_edgeIdsList.size()); }
     const Edge& edgeById(EdgeId edgeId) const { return _graph->edgeById(edgeId); }
+    MultiEdgeId::Type typeOf(EdgeId) const { return MultiEdgeId::Type::Not; }
 
     void reserve(const Graph& other);
     void cloneFrom(const Graph& other);

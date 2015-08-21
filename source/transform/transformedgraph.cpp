@@ -34,49 +34,6 @@ void TransformedGraph::setTransform(std::unique_ptr<GraphTransform> graphTransfo
     rebuild();
 }
 
-void TransformedGraph::contractEdge(EdgeId edgeId)
-{
-    // Can't contract an edge that doesn't exist
-    if(!_target.containsEdgeId(edgeId))
-        return;
-
-    auto edge = _target.edgeById(edgeId);
-    auto nodeIdToRemove = edge.sourceId() > edge.targetId() ? edge.sourceId() : edge.targetId();
-    auto nodeIdToKeep = edge.oppositeId(nodeIdToRemove);
-    auto nodeToRemove = _target.nodeById(nodeIdToRemove);
-
-    for(auto edgeIdToMove : nodeToRemove.edgeIds())
-    {
-        if(edgeIdToMove != edgeId)
-        {
-            auto edgeToMove = _target.edgeById(edgeIdToMove);
-            auto otherNodeId = edgeToMove.oppositeId(nodeIdToRemove);
-            auto adjacentNodeIds = _target.adjacentNodeIds(otherNodeId);
-
-            _target.removeEdge(edgeIdToMove);
-
-            //FIXME The Graph class allows for multiedges itself, so maybe we should just add them here
-            // instead of avoiding it, then deal with the querying/rendering of them at that level?
-
-            // If otherNodeId is not already connected to nodeIdToKeep
-            if(adjacentNodeIds.find(nodeIdToKeep) == adjacentNodeIds.end())
-            {
-                if(edgeToMove.sourceId() == otherNodeId)
-                    _target.addEdge(edgeIdToMove, otherNodeId, nodeIdToKeep);
-                else
-                    _target.addEdge(edgeIdToMove, nodeIdToKeep, otherNodeId);
-            }
-            else
-            {
-                //FIXME edgeIdToMove and edge between otherNodeId and nodeIdToKeep becomes a multiedge
-            }
-        }
-    }
-
-    _target.removeNode(nodeIdToRemove);
-    //FIXME nodeIdToKeep and nodeIdToRemove becomes a multinode
-}
-
 void TransformedGraph::rebuild()
 {
     _target.performTransaction([this](MutableGraph&)

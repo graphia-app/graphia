@@ -13,27 +13,27 @@ class SelectionManager : public QObject
 public:
     SelectionManager(const Graph& graph);
 
-    ElementIdSet<NodeId> selectedNodes() const;
-    ElementIdSet<NodeId> unselectedNodes() const;
+    NodeIdSet selectedNodes() const;
+    NodeIdSet unselectedNodes() const;
 
     bool selectNode(NodeId nodeId);
-    bool selectNodes(const ElementIdSet<NodeId>& nodeIds);
+    bool selectNodes(const NodeIdSet& nodeIds);
     template<typename InputIterator> bool selectNodes(InputIterator first,
                                                       InputIterator last);
 
     bool deselectNode(NodeId nodeId);
-    bool deselectNodes(const ElementIdSet<NodeId>& nodeIds);
+    bool deselectNodes(const NodeIdSet& nodeIds);
     template<typename InputIterator> bool deselectNodes(InputIterator first,
                                                         InputIterator last);
 
     void toggleNode(NodeId nodeId);
-    void toggleNodes(const ElementIdSet<NodeId>& nodeIds);
+    void toggleNodes(const NodeIdSet& nodeIds);
     template<typename InputIterator> void toggleNodes(InputIterator first,
                                                       InputIterator last);
 
     bool nodeIsSelected(NodeId nodeId) const;
 
-    bool setSelectedNodes(const ElementIdSet<NodeId>& nodeIds);
+    bool setSelectedNodes(const NodeIdSet& nodeIds);
 
     bool selectAllNodes();
     bool clearNodeSelection();
@@ -44,7 +44,7 @@ public:
 private:
     const Graph& _graph;
 
-    ElementIdSet<NodeId> _selectedNodes;
+    NodeIdSet _selectedNodes;
 
 signals:
     void selectionChanged(const SelectionManager* selectionManager) const;

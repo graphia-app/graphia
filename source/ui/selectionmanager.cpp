@@ -10,7 +10,7 @@ SelectionManager::SelectionManager(const Graph& graph) :
     _graph(graph)
 {}
 
-ElementIdSet<NodeId> SelectionManager::selectedNodes() const
+NodeIdSet SelectionManager::selectedNodes() const
 {
 #ifdef EXPENSIVE_DEBUG_CHECKS
     // Assertion that our selection doesn't contain things that aren't in the graph
@@ -25,10 +25,10 @@ ElementIdSet<NodeId> SelectionManager::selectedNodes() const
     return _selectedNodes;
 }
 
-ElementIdSet<NodeId> SelectionManager::unselectedNodes() const
+NodeIdSet SelectionManager::unselectedNodes() const
 {
     auto& nodeIds = _graph.nodeIds();
-    auto unselectedNodeIds = ElementIdSet<NodeId>(nodeIds.begin(), nodeIds.end());
+    auto unselectedNodeIds = NodeIdSet(nodeIds.begin(), nodeIds.end());
     unselectedNodeIds.erase(_selectedNodes.begin(), _selectedNodes.end());
 
     return unselectedNodeIds;
@@ -44,7 +44,7 @@ bool SelectionManager::selectNode(NodeId nodeId)
     return result.second;
 }
 
-bool SelectionManager::selectNodes(const ElementIdSet<NodeId>& nodeIds)
+bool SelectionManager::selectNodes(const NodeIdSet& nodeIds)
 {
     return selectNodes(nodeIds.begin(), nodeIds.end());
 }
@@ -72,7 +72,7 @@ bool SelectionManager::deselectNode(NodeId nodeId)
     return selectionWillChange;
 }
 
-bool SelectionManager::deselectNodes(const ElementIdSet<NodeId>& nodeIds)
+bool SelectionManager::deselectNodes(const NodeIdSet& nodeIds)
 {
     return deselectNodes(nodeIds.begin(), nodeIds.end());
 }
@@ -96,7 +96,7 @@ void SelectionManager::toggleNode(NodeId nodeId)
         selectNode(nodeId);
 }
 
-void SelectionManager::toggleNodes(const ElementIdSet<NodeId>& nodeIds)
+void SelectionManager::toggleNodes(const NodeIdSet& nodeIds)
 {
     toggleNodes(nodeIds.begin(), nodeIds.end());
 }
@@ -104,7 +104,7 @@ void SelectionManager::toggleNodes(const ElementIdSet<NodeId>& nodeIds)
 template<typename InputIterator> void SelectionManager::toggleNodes(InputIterator first,
                                                                     InputIterator last)
 {
-    ElementIdSet<NodeId> difference;
+    NodeIdSet difference;
     for(auto i = first; i != last; i++)
     {
         auto nodeId = *i;
@@ -127,7 +127,7 @@ bool SelectionManager::nodeIsSelected(NodeId nodeId) const
     return _selectedNodes.find(nodeId) != _selectedNodes.end();
 }
 
-bool SelectionManager::setSelectedNodes(const ElementIdSet<NodeId>& nodeIds)
+bool SelectionManager::setSelectedNodes(const NodeIdSet& nodeIds)
 {
     bool selectionWillChange = (_selectedNodes != nodeIds);
     _selectedNodes = std::move(nodeIds);
