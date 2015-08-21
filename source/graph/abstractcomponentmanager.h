@@ -95,17 +95,17 @@ protected slots:
 
 protected:
     template<typename> friend class ComponentArray;
-    std::unordered_set<ResizableGraphArray*> _componentArrayList;
+    std::unordered_set<ResizableGraphArray*> _componentArrays;
     virtual int componentArrayCapacity() const = 0;
 
     bool _debug = false;
 
-    std::vector<NodeId>& graphComponentNodeIdsList(GraphComponent& graphComponent)
+    std::vector<NodeId>& graphComponentNodeIds(GraphComponent& graphComponent)
     {
         return graphComponent._nodeIdsList;
     }
 
-    std::vector<EdgeId>& graphComponentEdgeIdsList(GraphComponent& graphComponent)
+    std::vector<EdgeId>& graphComponentEdgeIds(GraphComponent& graphComponent)
     {
         return graphComponent._edgeIdsList;
     }

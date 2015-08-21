@@ -19,7 +19,7 @@ AbstractComponentManager::AbstractComponentManager(Graph& graph)
 AbstractComponentManager::~AbstractComponentManager()
 {
     // Let the ComponentArrays know that we're going away
-    for(auto componentArray : _componentArrayList)
+    for(auto componentArray : _componentArrays)
         componentArray->invalidate();
 }
 

@@ -21,7 +21,7 @@ public:
     {}
 
 private:
-    std::vector<ComponentId> _componentIdsList;
+    std::vector<ComponentId> _componentIds;
     ComponentId _nextComponentId;
     std::queue<ComponentId> _vacatedComponentIdQueue;
     std::map<ComponentId, std::shared_ptr<GraphComponent>> _componentsMap;
