@@ -13,8 +13,8 @@ class ComponentManager : public AbstractComponentManager
     Q_OBJECT
 
 public:
-    ComponentManager(Graph& graph) :
-        AbstractComponentManager(graph),
+    ComponentManager(Graph& graph, bool ignoreMultiElements = true) :
+        AbstractComponentManager(graph, ignoreMultiElements),
         _nextComponentId(0),
         _nodesComponentId(graph),
         _edgesComponentId(graph)

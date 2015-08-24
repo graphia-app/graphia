@@ -20,10 +20,11 @@ ComponentIdSet ComponentManager::assignConnectedElementsComponentId(const Graph*
         oldComponentIdsAffected.insert(_nodesComponentId[nodeId]);
         nodesComponentId[nodeId] = componentId;
 
-        auto edgeIds = graph->nodeById(nodeId).edgeIds();
-
-        for(auto edgeId : edgeIds)
+        for(auto edgeId : graph->nodeById(nodeId).edgeIds())
         {
+            if(_ignoreMultiElements && graph->typeOf(edgeId) == MultiEdgeId::Type::Tail)
+                continue;
+
             edgesComponentId[edgeId] = componentId;
             auto oppositeNodeId = graph->edgeById(edgeId).oppositeId(nodeId);
 
@@ -52,6 +53,9 @@ void ComponentManager::updateComponents(const Graph* graph)
     // Search for mergers and splitters
     for(auto nodeId : graph->nodeIds())
     {
+        if(_ignoreMultiElements && graph->typeOf(nodeId) == MultiNodeId::Type::Tail)
+            continue;
+
         auto oldComponentId = _nodesComponentId[nodeId];
 
         if(newNodesComponentId[nodeId].isNull() && !oldComponentId.isNull())
@@ -98,6 +102,9 @@ void ComponentManager::updateComponents(const Graph* graph)
     // Search for entirely new components
     for(auto nodeId : graph->nodeIds())
     {
+        if(_ignoreMultiElements && graph->typeOf(nodeId) == MultiNodeId::Type::Tail)
+            continue;
+
         if(newNodesComponentId[nodeId].isNull() && _nodesComponentId[nodeId].isNull())
         {
             auto newComponentId = generateComponentId();
@@ -209,6 +216,9 @@ void ComponentManager::updateGraphComponent(const Graph* graph, ComponentId comp
     nodeIds.clear();
     for(auto nodeId : graph->nodeIds())
     {
+        if(_ignoreMultiElements && graph->typeOf(nodeId) == MultiNodeId::Type::Tail)
+            continue;
+
         if(_nodesComponentId[nodeId] == componentId)
             nodeIds.push_back(nodeId);
     }
@@ -216,6 +226,9 @@ void ComponentManager::updateGraphComponent(const Graph* graph, ComponentId comp
     edgeIds.clear();
     for(auto edgeId : graph->edgeIds())
     {
+        if(_ignoreMultiElements && graph->typeOf(edgeId) == MultiEdgeId::Type::Tail)
+            continue;
+
         if(_edgesComponentId[edgeId] == componentId)
             edgeIds.push_back(edgeId);
     }

@@ -3,7 +3,8 @@
 
 #include <QtGlobal>
 
-AbstractComponentManager::AbstractComponentManager(Graph& graph)
+AbstractComponentManager::AbstractComponentManager(Graph& graph, bool ignoreMultiElements) :
+    _ignoreMultiElements(ignoreMultiElements)
 {
     if(qgetenv("COMPONENTS_DEBUG").toInt())
         _debug = true;

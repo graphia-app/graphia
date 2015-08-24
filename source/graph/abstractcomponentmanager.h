@@ -87,7 +87,7 @@ class AbstractComponentManager : public QObject
     friend class Graph;
 
 public:
-    AbstractComponentManager(Graph& graph);
+    AbstractComponentManager(Graph& graph, bool ignoreMultiElements = true);
     virtual ~AbstractComponentManager();
 
 protected slots:
@@ -99,6 +99,7 @@ protected:
     virtual int componentArrayCapacity() const = 0;
 
     bool _debug = false;
+    bool _ignoreMultiElements = false;
 
     std::vector<NodeId>& graphComponentNodeIds(GraphComponent& graphComponent)
     {
