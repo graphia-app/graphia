@@ -157,6 +157,10 @@ public:
         Q_ASSERT(!elementIdA.isNull());
         Q_ASSERT(!elementIdB.isNull());
 
+        // Can't merge something with itself
+        if(elementIdA == elementIdB)
+            return ElementId();
+
         auto setMultiElementId = [&multiElementIds](ElementId start, ElementId elementId)
         {
             iterateMultiElements<ElementId>(start, multiElementIds,
