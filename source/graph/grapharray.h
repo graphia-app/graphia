@@ -32,10 +32,9 @@ public:
     {}
 
     GraphArray(const GraphArray& other) :
-        _graph(other._graph)
-    {
-        _array = other._array;
-    }
+        _graph(other._graph),
+        _array(other._array)
+    {}
 
     GraphArray(GraphArray&& other) :
         _graph(other._graph),
@@ -125,19 +124,19 @@ public:
         GraphArray<NodeId, Element>(graph)
     {
         this->resize(graph.nextNodeId());
-        graph._nodeArrayList.insert(this);
+        graph._nodeArrays.insert(this);
     }
 
     NodeArray(const Graph& graph) : NodeArray(const_cast<Graph&>(graph)) {}
 
     NodeArray(const NodeArray& other) : GraphArray<NodeId, Element>(other)
     {
-        this->_graph->_nodeArrayList.insert(this);
+        this->_graph->_nodeArrays.insert(this);
     }
 
     NodeArray(NodeArray&& other) : GraphArray<NodeId, Element>(std::move(other))
     {
-        this->_graph->_nodeArrayList.insert(this);
+        this->_graph->_nodeArrays.insert(this);
     }
 
     NodeArray& operator=(const NodeArray& other)
@@ -155,7 +154,7 @@ public:
     ~NodeArray()
     {
         if(this->_graph != nullptr)
-            this->_graph->_nodeArrayList.erase(this);
+            this->_graph->_nodeArrays.erase(this);
     }
 };
 
@@ -166,19 +165,19 @@ public:
         GraphArray<EdgeId, Element>(graph)
     {
         this->resize(graph.nextEdgeId());
-        graph._edgeArrayList.insert(this);
+        graph._edgeArrays.insert(this);
     }
 
     EdgeArray(const Graph& graph) : EdgeArray(const_cast<Graph&>(graph)) {}
 
     EdgeArray(const EdgeArray& other) : GraphArray<EdgeId, Element>(other)
     {
-        this->_graph->_edgeArrayList.insert(this);
+        this->_graph->_edgeArrays.insert(this);
     }
 
     EdgeArray(EdgeArray&& other) : GraphArray<EdgeId, Element>(std::move(other))
     {
-        this->_graph->_edgeArrayList.insert(this);
+        this->_graph->_edgeArrays.insert(this);
     }
 
     EdgeArray& operator=(const EdgeArray& other)
@@ -196,7 +195,7 @@ public:
     ~EdgeArray()
     {
         if(this->_graph != nullptr)
-            this->_graph->_edgeArrayList.erase(this);
+            this->_graph->_edgeArrays.erase(this);
     }
 };
 

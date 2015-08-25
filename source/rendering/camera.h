@@ -100,7 +100,7 @@ private:
 
     float _left = -0.5f;
     float _right = 0.5f;
-    float _bottom = -0.5f ;
+    float _bottom = -0.5f;
     float _top = 0.5f;
 
     int _viewportWidth;

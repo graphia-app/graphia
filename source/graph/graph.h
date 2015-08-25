@@ -164,8 +164,8 @@ private:
     NodeId _nextNodeId;
     EdgeId _nextEdgeId;
 
-    std::unordered_set<ResizableGraphArray*> _nodeArrayList;
-    std::unordered_set<ResizableGraphArray*> _edgeArrayList;
+    std::unordered_set<ResizableGraphArray*> _nodeArrays;
+    std::unordered_set<ResizableGraphArray*> _edgeArrays;
 
     std::unique_ptr<AbstractComponentManager> _componentManager;
 

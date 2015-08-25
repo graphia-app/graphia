@@ -37,10 +37,10 @@ Graph::Graph(bool componentManagement) :
 Graph::~Graph()
 {
     // Let the GraphArrays know that we're going away
-    for(auto nodeArray : _nodeArrayList)
+    for(auto nodeArray : _nodeArrays)
         nodeArray->invalidate();
 
-    for(auto edgeArray : _edgeArrayList)
+    for(auto edgeArray : _edgeArrays)
         edgeArray->invalidate();
 }
 
@@ -136,7 +136,7 @@ void Graph::setNextNodeId(NodeId nextNodeId)
 {
     _nextNodeId = nextNodeId;
 
-    for(auto nodeArray : _nodeArrayList)
+    for(auto nodeArray : _nodeArrays)
         nodeArray->resize(_nextNodeId);
 }
 
@@ -144,7 +144,7 @@ void Graph::setNextEdgeId(EdgeId lastEdgeId)
 {
     _nextEdgeId = lastEdgeId;
 
-    for(auto edgeArray : _edgeArrayList)
+    for(auto edgeArray : _edgeArrays)
         edgeArray->resize(_nextEdgeId);
 }
 
@@ -568,18 +568,18 @@ void MutableGraph::cloneFrom(const Graph& other)
     const auto* mutableOther = dynamic_cast<const MutableGraph*>(&other);
     Q_ASSERT(mutableOther != nullptr);
 
-    _nodeIdsInUse       = mutableOther->_nodeIdsInUse;
-    _nodeIds      = mutableOther->_nodeIds;
+    _nodeIdsInUse  = mutableOther->_nodeIdsInUse;
+    _nodeIds       = mutableOther->_nodeIds;
     _unusedNodeIds = mutableOther->_unusedNodeIds;
-    _nodes        = mutableOther->_nodes;
-    _multiNodeIds       = mutableOther->_multiNodeIds;
+    _nodes         = mutableOther->_nodes;
+    _multiNodeIds  = mutableOther->_multiNodeIds;
     setNextNodeId(mutableOther->nextNodeId());
 
-    _edgeIdsInUse       = mutableOther->_edgeIdsInUse;
-    _edgeIds      = mutableOther->_edgeIds;
+    _edgeIdsInUse  = mutableOther->_edgeIdsInUse;
+    _edgeIds       = mutableOther->_edgeIds;
     _unusedEdgeIds = mutableOther->_unusedEdgeIds;
-    _edges        = mutableOther->_edges;
-    _multiEdgeIds       = mutableOther->_multiEdgeIds;
+    _edges         = mutableOther->_edges;
+    _multiEdgeIds  = mutableOther->_multiEdgeIds;
     setNextEdgeId(mutableOther->nextEdgeId());
 }
 
