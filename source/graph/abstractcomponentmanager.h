@@ -95,7 +95,7 @@ protected slots:
 
 protected:
     template<typename> friend class ComponentArray;
-    std::unordered_set<ResizableGraphArray*> _componentArrays;
+    std::unordered_set<GraphArray*> _componentArrays;
     virtual int componentArrayCapacity() const = 0;
 
     bool _debug = false;

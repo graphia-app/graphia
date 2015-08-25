@@ -16,7 +16,7 @@
 #include <memory>
 #include <mutex>
 
-class ResizableGraphArray;
+class GraphArray;
 class GraphComponent;
 class AbstractComponentManager;
 class ComponentSplitSet;
@@ -164,8 +164,8 @@ private:
     NodeId _nextNodeId;
     EdgeId _nextEdgeId;
 
-    std::unordered_set<ResizableGraphArray*> _nodeArrays;
-    std::unordered_set<ResizableGraphArray*> _edgeArrays;
+    std::unordered_set<GraphArray*> _nodeArrays;
+    std::unordered_set<GraphArray*> _edgeArrays;
 
     std::unique_ptr<AbstractComponentManager> _componentManager;
 

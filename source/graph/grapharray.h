@@ -8,16 +8,15 @@
 
 #include <memory>
 #include <vector>
-#include <mutex>
 
-class ResizableGraphArray
+class GraphArray
 {
 public:
     virtual void resize(int size) = 0;
     virtual void invalidate() = 0;
 };
 
-template<typename Index, typename Element> class GraphArray : public ResizableGraphArray
+template<typename Index, typename Element> class GenericGraphArray : public GraphArray
 {
     static_assert(std::is_nothrow_move_constructible<Element>::value,
                   "GraphArray Element needs a noexcept move constructor");
@@ -27,23 +26,23 @@ protected:
     std::vector<Element> _array;
 
 public:
-    GraphArray(Graph& graph) :
+    GenericGraphArray(Graph& graph) :
         _graph(&graph)
     {}
 
-    GraphArray(const GraphArray& other) :
+    GenericGraphArray(const GenericGraphArray& other) :
         _graph(other._graph),
         _array(other._array)
     {}
 
-    GraphArray(GraphArray&& other) :
+    GenericGraphArray(GenericGraphArray&& other) :
         _graph(other._graph),
         _array(std::move(other._array))
     {}
 
-    virtual ~GraphArray() {}
+    virtual ~GenericGraphArray() {}
 
-    GraphArray& operator=(const GraphArray& other)
+    GenericGraphArray& operator=(const GenericGraphArray& other)
     {
         Q_ASSERT(_graph == other._graph);
         _array = other._array;
@@ -51,7 +50,7 @@ public:
         return *this;
     }
 
-    GraphArray& operator=(GraphArray&& other)
+    GenericGraphArray& operator=(GenericGraphArray&& other)
     {
         Q_ASSERT(_graph == other._graph);
         _array = std::move(other._array);
@@ -117,11 +116,11 @@ public:
     }
 };
 
-template<typename Element> class NodeArray : public GraphArray<NodeId, Element>
+template<typename Element> class NodeArray : public GenericGraphArray<NodeId, Element>
 {
 public:
     NodeArray(Graph& graph) :
-        GraphArray<NodeId, Element>(graph)
+        GenericGraphArray<NodeId, Element>(graph)
     {
         this->resize(graph.nextNodeId());
         graph._nodeArrays.insert(this);
@@ -129,25 +128,25 @@ public:
 
     NodeArray(const Graph& graph) : NodeArray(const_cast<Graph&>(graph)) {}
 
-    NodeArray(const NodeArray& other) : GraphArray<NodeId, Element>(other)
+    NodeArray(const NodeArray& other) : GenericGraphArray<NodeId, Element>(other)
     {
         this->_graph->_nodeArrays.insert(this);
     }
 
-    NodeArray(NodeArray&& other) : GraphArray<NodeId, Element>(std::move(other))
+    NodeArray(NodeArray&& other) : GenericGraphArray<NodeId, Element>(std::move(other))
     {
         this->_graph->_nodeArrays.insert(this);
     }
 
     NodeArray& operator=(const NodeArray& other)
     {
-        GraphArray<NodeId, Element>::operator=(other);
+        GenericGraphArray<NodeId, Element>::operator=(other);
         return *this;
     }
 
     NodeArray& operator=(NodeArray&& other)
     {
-        GraphArray<NodeId, Element>::operator=(std::move(other));
+        GenericGraphArray<NodeId, Element>::operator=(std::move(other));
         return *this;
     }
 
@@ -158,11 +157,11 @@ public:
     }
 };
 
-template<typename Element> class EdgeArray : public GraphArray<EdgeId, Element>
+template<typename Element> class EdgeArray : public GenericGraphArray<EdgeId, Element>
 {
 public:
     EdgeArray(Graph& graph) :
-        GraphArray<EdgeId, Element>(graph)
+        GenericGraphArray<EdgeId, Element>(graph)
     {
         this->resize(graph.nextEdgeId());
         graph._edgeArrays.insert(this);
@@ -170,25 +169,25 @@ public:
 
     EdgeArray(const Graph& graph) : EdgeArray(const_cast<Graph&>(graph)) {}
 
-    EdgeArray(const EdgeArray& other) : GraphArray<EdgeId, Element>(other)
+    EdgeArray(const EdgeArray& other) : GenericGraphArray<EdgeId, Element>(other)
     {
         this->_graph->_edgeArrays.insert(this);
     }
 
-    EdgeArray(EdgeArray&& other) : GraphArray<EdgeId, Element>(std::move(other))
+    EdgeArray(EdgeArray&& other) : GenericGraphArray<EdgeId, Element>(std::move(other))
     {
         this->_graph->_edgeArrays.insert(this);
     }
 
     EdgeArray& operator=(const EdgeArray& other)
     {
-        GraphArray<EdgeId, Element>::operator=(other);
+        GenericGraphArray<EdgeId, Element>::operator=(other);
         return *this;
     }
 
     EdgeArray& operator=(EdgeArray&& other)
     {
-        GraphArray<EdgeId, Element>::operator=(std::move(other));
+        GenericGraphArray<EdgeId, Element>::operator=(std::move(other));
         return *this;
     }
 
@@ -199,11 +198,11 @@ public:
     }
 };
 
-template<typename Element> class ComponentArray : public GraphArray<ComponentId, Element>
+template<typename Element> class ComponentArray : public GenericGraphArray<ComponentId, Element>
 {
 public:
     ComponentArray(Graph& graph) :
-        GraphArray<ComponentId, Element>(graph)
+        GenericGraphArray<ComponentId, Element>(graph)
     {
         Q_ASSERT(graph._componentManager != nullptr);
         this->resize(graph._componentManager->componentArrayCapacity());
@@ -212,13 +211,13 @@ public:
 
     ComponentArray(const Graph& graph) : ComponentArray(const_cast<Graph&>(graph)) {}
 
-    ComponentArray(const ComponentArray& other) : GraphArray<ComponentId, Element>(other)
+    ComponentArray(const ComponentArray& other) : GenericGraphArray<ComponentId, Element>(other)
     {
         Q_ASSERT(this->_graph->_componentManager != nullptr);
         this->_graph->_componentManager->_componentArrays.insert(this);
     }
 
-    ComponentArray(ComponentArray&& other) : GraphArray<ComponentId, Element>(std::move(other))
+    ComponentArray(ComponentArray&& other) : GenericGraphArray<ComponentId, Element>(std::move(other))
     {
         Q_ASSERT(this->_graph->_componentManager != nullptr);
         this->_graph->_componentManager->_componentArrays.insert(this);
@@ -226,13 +225,13 @@ public:
 
     ComponentArray& operator=(const ComponentArray& other)
     {
-        GraphArray<ComponentId, Element>::operator=(other);
+        GenericGraphArray<ComponentId, Element>::operator=(other);
         return *this;
     }
 
     ComponentArray& operator=(ComponentArray&& other)
     {
-        GraphArray<ComponentId, Element>::operator=(std::move(other));
+        GenericGraphArray<ComponentId, Element>::operator=(std::move(other));
         return *this;
     }
 
