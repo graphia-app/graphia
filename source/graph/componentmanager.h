@@ -33,7 +33,6 @@ private:
     bool _debugPaused = false;
 
     ComponentId generateComponentId();
-    void releaseComponentId(ComponentId componentId);
     void queueGraphComponentUpdate(const Graph* graph, ComponentId componentId);
     void updateGraphComponent(const Graph* graph, ComponentId componentId);
     void removeGraphComponent(ComponentId componentId);
