@@ -7,6 +7,9 @@
 #include <QQuaternion>
 #include <QColor>
 
+#include <type_traits>
+#include <algorithm>
+
 namespace Utils
 {
     float rand(float low, float high);
@@ -54,6 +57,62 @@ namespace Utils
     {
         // Hopefully this function call elides to nothing when in release mode
         Q_ASSERT(a == b);
+    }
+
+    template<typename C, typename T> void removeByValue(C& container, const T& value)
+    {
+        container.erase(std::remove(container.begin(), container.end(), value), container.end());
+    }
+
+    template<typename C, typename T>
+    auto contains(const C& container, T const& value, int)
+    -> decltype(container.find(value), bool())
+    {
+        return container.find(value) != container.cend();
+    }
+
+    template<typename C, typename T>
+    auto contains(const C& container, T const& value, long)
+    -> decltype(std::find(container.cbegin(), container.cend(), value), bool())
+    {
+        return std::find(container.cbegin(), container.cend(), value) != container.cend();
+    }
+
+    template<typename C, typename T> bool contains(const C& container, T const& value)
+    {
+        return contains(container, value, 0);
+    }
+
+    template<typename T,
+             template<typename, typename...> class C1, typename... Args1,
+             template<typename, typename...> class C2, typename... Args2>
+    std::vector<T> setDifference(const C1<T, Args1...>& a, const C2<T, Args2...>& b)
+    {
+        std::vector<T> result;
+
+        for(auto& value : a)
+        {
+            if(!contains(b, value))
+                result.emplace_back(value);
+        }
+
+        return result;
+    }
+
+    template<typename T,
+             template<typename, typename...> class C1, typename... Args1,
+             template<typename, typename...> class C2, typename... Args2>
+    std::vector<T> setUnion(const C1<T, Args1...>& a, const C2<T, Args2...>& b)
+    {
+        std::vector<T> result;
+
+        for(auto& value : a)
+        {
+            if(contains(b, value))
+                result.emplace_back(value);
+        }
+
+        return result;
     }
 }
 
