@@ -123,7 +123,7 @@ class Graph : public QObject
     Q_OBJECT
 
 public:
-    Graph(bool componentManagement = false);
+    Graph();
     virtual ~Graph();
 
     virtual const std::vector<NodeId>& nodeIds() const = 0;
@@ -146,7 +146,9 @@ public:
     virtual void reserve(const Graph& other) = 0;
     virtual void cloneFrom(const Graph& other) = 0;
 
-    const std::vector<ComponentId>& componentIds() const;
+    void enableComponentManagement(const Graph* other = nullptr);
+
+    virtual const std::vector<ComponentId>& componentIds() const;
     int numComponents() const;
     const Graph* componentById(ComponentId componentId) const;
     ComponentId componentIdOfNode(NodeId nodeId) const;
@@ -167,7 +169,7 @@ private:
     std::unordered_set<GraphArray*> _nodeArrays;
     std::unordered_set<GraphArray*> _edgeArrays;
 
-    std::unique_ptr<AbstractComponentManager> _componentManager;
+    std::shared_ptr<AbstractComponentManager> _componentManager;
 
 protected:
     NodeId nextNodeId() const;
@@ -197,7 +199,6 @@ class MutableGraph : public Graph
     Q_OBJECT
 
 public:
-    MutableGraph(bool componentManagement = false);
     virtual ~MutableGraph();
 
 private:

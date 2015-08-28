@@ -55,7 +55,7 @@ class GraphComponent : public Graph
 public:
     GraphComponent(const Graph* graph) : _graph(graph) {}
     GraphComponent(const GraphComponent& other) :
-        Graph(false),
+        Graph(),
         _graph(other._graph),
         _nodeIdsList(other._nodeIdsList),
         _edgeIdsList(other._edgeIdsList)

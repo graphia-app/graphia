@@ -6,12 +6,22 @@
 #include <functional>
 
 TransformedGraph::TransformedGraph(const Graph& source) :
-    Graph(true),
+    Graph(),
     _source(&source),
     _nodesDifference(source),
     _edgesDifference(source)
 {
     connect(_source, &Graph::graphChanged, [this](const Graph*) { rebuild(); });
+    connect(&_target, &Graph::graphChanged, this, &TransformedGraph::onTargetGraphChanged, Qt::DirectConnection);
+    _target.enableComponentManagement();
+
+    // TransformedGraph has component management by proxy, through _target
+    enableComponentManagement(&_target);
+
+    connect(&_target, &Graph::componentsWillMerge,    this, &Graph::componentsWillMerge,    Qt::DirectConnection);
+    connect(&_target, &Graph::componentWillBeRemoved, this, &Graph::componentWillBeRemoved, Qt::DirectConnection);
+    connect(&_target, &Graph::componentAdded,         this, &Graph::componentAdded,         Qt::DirectConnection);
+    connect(&_target, &Graph::componentSplit,         this, &Graph::componentSplit,         Qt::DirectConnection);
 
     // These connections allow us to track what changes, so we can then
     // re-emit a canonical set of signals once the transform is complete
@@ -36,16 +46,21 @@ void TransformedGraph::setTransform(std::unique_ptr<GraphTransform> graphTransfo
 
 void TransformedGraph::rebuild()
 {
+    emit graphWillChange(this);
+
     _target.performTransaction([this](MutableGraph&)
     {
         _graphTransform->apply(*_source, *this);
     });
 
+    emit graphChanged(this);
+}
+
+void TransformedGraph::onTargetGraphChanged(const Graph*)
+{
     // Let everything know what changed; note the signals won't necessarily happen in the order
     // in which the changes originally occurred, but adding nodes and edges, then removing edges
     // and nodes ensures that the receivers get a sane view at all times
-    emit graphWillChange(this);
-
     for(auto nodeId : _source->nodeIds())
     {
         if(_nodesDifference[nodeId].added())
@@ -65,6 +80,4 @@ void TransformedGraph::rebuild()
         if(_nodesDifference[nodeId].removed())
             emit nodeWillBeRemoved(this, &_source->nodeById(nodeId));
     }
-
-    emit graphChanged(this);
 }

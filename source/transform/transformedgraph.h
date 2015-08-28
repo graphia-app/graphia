@@ -73,6 +73,9 @@ private:
     EdgeArray<Difference> _edgesDifference;
 
     void rebuild();
+
+private slots:
+    void onTargetGraphChanged(const Graph* graph);
 };
 
 #endif // TRANSFORMEDGRAPH_H

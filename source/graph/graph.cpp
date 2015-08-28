@@ -8,7 +8,7 @@
 
 #include <tuple>
 
-Graph::Graph(bool componentManagement) :
+Graph::Graph() :
     _nextNodeId(0), _nextEdgeId(0)
 {
     qRegisterMetaType<NodeId>("NodeId");
@@ -29,9 +29,6 @@ Graph::Graph(bool componentManagement) :
         if(edge->id() >= nextEdgeId())
             setNextEdgeId(EdgeId(edge->id() + 1));
     });
-
-    if(componentManagement)
-        _componentManager = std::make_unique<ComponentManager>(*this);
 }
 
 Graph::~Graph()
@@ -87,6 +84,14 @@ const std::vector<Edge> Graph::edgesForNodes(const NodeIdSet& nodeIds) const
         edges.push_back(edgeById(edgeId));
 
     return edges;
+}
+
+void Graph::enableComponentManagement(const Graph* other)
+{
+    if(other != nullptr)
+        _componentManager = other->_componentManager;
+    else if(_componentManager == nullptr)
+        _componentManager = std::make_shared<ComponentManager>(*this);
 }
 
 void Graph::dumpToQDebug(int detail) const
@@ -160,10 +165,7 @@ const std::vector<ComponentId>& Graph::componentIds() const
 
 int Graph::numComponents() const
 {
-    if(_componentManager)
-        return static_cast<int>(_componentManager->componentIds().size());
-
-    return 0;
+    return static_cast<int>(componentIds().size());
 }
 
 const Graph* Graph::componentById(ComponentId componentId) const
@@ -206,11 +208,6 @@ ComponentId Graph::componentIdOfLargestComponent() const
     }
 
     return largestComponentId;
-}
-
-MutableGraph::MutableGraph(bool componentManagement) :
-    Graph(componentManagement)
-{
 }
 
 MutableGraph::~MutableGraph()
