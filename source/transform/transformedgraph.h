@@ -50,6 +50,8 @@ public:
     void reserve(const Graph& other) { _target.reserve(other); }
     void cloneFrom(const Graph& other) { _target.cloneFrom(other); }
 
+    const std::vector<ComponentId>& componentIds() const { return _filteredComponentIds; }
+
 private:
     const Graph* _source;
     std::unique_ptr<GraphTransform> _graphTransform;
@@ -71,6 +73,8 @@ private:
 
     NodeArray<Difference> _nodesDifference;
     EdgeArray<Difference> _edgesDifference;
+
+    std::vector<ComponentId> _filteredComponentIds;
 
     void rebuild();
 

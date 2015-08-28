@@ -53,6 +53,9 @@ void TransformedGraph::rebuild()
         _graphTransform->apply(*_source, *this);
     });
 
+    //FIXME filter components here
+    _filteredComponentIds = _target.componentIds();
+
     emit graphChanged(this);
 }
 
