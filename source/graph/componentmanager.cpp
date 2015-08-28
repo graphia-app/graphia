@@ -118,7 +118,7 @@ void ComponentManager::updateComponents(const Graph* graph)
     auto componentIdsToBeRemoved = Utils::setDifference(_componentIds, componentIds);
 
     // Notify all the merges
-    for(auto mergee : mergedComponents)
+    for(auto& mergee : mergedComponents)
     {
         if(_debug) qDebug() << "componentsWillMerge" << mergee.second << "->" << mergee.first;
         emit componentsWillMerge(graph, ComponentMergeSet(graph, std::move(mergee.second), mergee.first));
@@ -151,7 +151,7 @@ void ComponentManager::updateComponents(const Graph* graph)
     }
 
     // Notify all the splits
-    for(auto splitee : splitComponents)
+    for(auto& splitee : splitComponents)
     {
         if(_debug) qDebug() << "componentSplit" << splitee.first << "->" << splitee.second;
         emit componentSplit(graph, ComponentSplitSet(graph, splitee.first, std::move(splitee.second)));
