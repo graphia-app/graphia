@@ -169,8 +169,6 @@ private:
 private slots:
     void onComponentAdded(const Graph*, ComponentId componentId, bool);
     void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
-    void onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet);
-    void onComponentsWillMerge(const Graph*, const ComponentMergeSet& componentMergeSet);
 
 signals:
     void executed();

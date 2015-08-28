@@ -19,8 +19,6 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
 
     connect(&graphModel.graph(), &Graph::componentAdded, this, &LayoutThread::onComponentAdded, Qt::DirectConnection);
     connect(&graphModel.graph(), &Graph::componentWillBeRemoved, this, &LayoutThread::onComponentWillBeRemoved, Qt::DirectConnection);
-    connect(&graphModel.graph(), &Graph::componentSplit, this, &LayoutThread::onComponentSplit, Qt::DirectConnection);
-    connect(&graphModel.graph(), &Graph::componentsWillMerge, this, &LayoutThread::onComponentsWillMerge, Qt::DirectConnection);
 }
 
 void LayoutThread::addLayout(std::shared_ptr<Layout> layout)
@@ -239,19 +237,4 @@ void LayoutThread::onComponentAdded(const Graph*, ComponentId componentId, bool)
 void LayoutThread::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool)
 {
     removeComponent(componentId);
-}
-
-void LayoutThread::onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet)
-{
-    for(ComponentId componentId : componentSplitSet.splitters())
-        addComponent(componentId);
-}
-
-void LayoutThread::onComponentsWillMerge(const Graph*, const ComponentMergeSet& componentMergeSet)
-{
-    for(ComponentId componentId : componentMergeSet.mergers())
-    {
-        if(componentId != componentMergeSet.newComponentId())
-            removeComponent(componentId);
-    }
 }
