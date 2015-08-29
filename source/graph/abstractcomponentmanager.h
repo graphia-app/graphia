@@ -18,8 +18,7 @@ private:
 public:
     ComponentSplitSet(const Graph* graph, ComponentId oldComponentId, ComponentIdSet&& splitters) :
         _graph(graph), _oldComponentId(oldComponentId), _splitters(splitters)
-    {
-    }
+    {}
 
     ComponentId oldComponentId() const { return _oldComponentId; }
     const ComponentIdSet& splitters() const { return _splitters; }
@@ -38,8 +37,7 @@ private:
 public:
     ComponentMergeSet(const Graph* graph, ComponentIdSet&& mergers, ComponentId newComponentId) :
         _graph(graph), _mergers(mergers), _newComponentId(newComponentId)
-    {
-    }
+    {}
 
     const ComponentIdSet& mergers() const { return _mergers; }
     ComponentId newComponentId() const { return _newComponentId; }
