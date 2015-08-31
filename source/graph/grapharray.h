@@ -101,7 +101,12 @@ public:
 
     void fill(const Element& value)
     {
-        _array.fill(value);
+        std::fill(_array.begin(), _array.end(), value);
+    }
+
+    void resetElements()
+    {
+        fill(Element());
     }
 
     void dumpToQDebug(int detail) const
