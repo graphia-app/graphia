@@ -24,53 +24,6 @@ AbstractComponentManager::~AbstractComponentManager()
         componentArray->invalidate();
 }
 
-ComponentId ComponentSplitSet::largestComponentId() const
-{
-    ComponentId largestSplitter;
-
-    for(auto splitter : _splitters)
-    {
-        if(largestSplitter.isNull())
-            largestSplitter = splitter;
-        else
-        {
-            auto splitterNumNodes = _graph->componentById(splitter)->numNodes();
-            auto largestNumNodes = _graph->componentById(largestSplitter)->numNodes();
-
-            if(splitterNumNodes > largestNumNodes)
-                largestSplitter = splitter;
-        }
-    }
-
-    return largestSplitter;
-}
-
-std::vector<NodeId> ComponentSplitSet::nodeIds() const
-{
-    std::vector<NodeId> nodeIds;
-
-    for(auto componentId : _splitters)
-    {
-        auto component = _graph->componentById(componentId);
-        nodeIds.insert(nodeIds.end(), component->nodeIds().begin(), component->nodeIds().end());
-    }
-
-    return nodeIds;
-}
-
-std::vector<NodeId> ComponentMergeSet::nodeIds() const
-{
-    std::vector<NodeId> nodeIds;
-
-    for(auto componentId : _mergers)
-    {
-        auto component = _graph->componentById(componentId);
-        nodeIds.insert(nodeIds.end(), component->nodeIds().begin(), component->nodeIds().end());
-    }
-
-    return nodeIds;
-}
-
 void GraphComponent::reserve(const Graph& other)
 {
     const GraphComponent* otherGraphComponent = dynamic_cast<const GraphComponent*>(&other);

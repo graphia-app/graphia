@@ -11,38 +11,31 @@
 class ComponentSplitSet
 {
 private:
-    const Graph* _graph;
     ComponentId _oldComponentId;
     ComponentIdSet _splitters;
 
 public:
-    ComponentSplitSet(const Graph* graph, ComponentId oldComponentId, ComponentIdSet&& splitters) :
-        _graph(graph), _oldComponentId(oldComponentId), _splitters(splitters)
+    ComponentSplitSet(ComponentId oldComponentId, ComponentIdSet&& splitters) :
+        _oldComponentId(oldComponentId), _splitters(splitters)
     {}
 
     ComponentId oldComponentId() const { return _oldComponentId; }
     const ComponentIdSet& splitters() const { return _splitters; }
-    ComponentId largestComponentId() const;
-
-    std::vector<NodeId> nodeIds() const;
 };
 
 class ComponentMergeSet
 {
 private:
-    const Graph* _graph;
     ComponentIdSet _mergers;
     ComponentId _newComponentId;
 
 public:
-    ComponentMergeSet(const Graph* graph, ComponentIdSet&& mergers, ComponentId newComponentId) :
-        _graph(graph), _mergers(mergers), _newComponentId(newComponentId)
+    ComponentMergeSet(ComponentIdSet&& mergers, ComponentId newComponentId) :
+        _mergers(mergers), _newComponentId(newComponentId)
     {}
 
     const ComponentIdSet& mergers() const { return _mergers; }
     ComponentId newComponentId() const { return _newComponentId; }
-
-    std::vector<NodeId> nodeIds() const;
 };
 
 class GraphComponent : public Graph

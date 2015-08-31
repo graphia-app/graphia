@@ -121,7 +121,7 @@ void ComponentManager::updateComponents(const Graph* graph)
     for(auto& mergee : mergedComponents)
     {
         if(_debug) qDebug() << "componentsWillMerge" << mergee.second << "->" << mergee.first;
-        emit componentsWillMerge(graph, ComponentMergeSet(graph, std::move(mergee.second), mergee.first));
+        emit componentsWillMerge(graph, ComponentMergeSet(std::move(mergee.second), mergee.first));
     }
 
     for(auto componentId : componentIdsToBeRemoved)
@@ -154,7 +154,7 @@ void ComponentManager::updateComponents(const Graph* graph)
     for(auto& splitee : splitComponents)
     {
         if(_debug) qDebug() << "componentSplit" << splitee.first << "->" << splitee.second;
-        emit componentSplit(graph, ComponentSplitSet(graph, splitee.first, std::move(splitee.second)));
+        emit componentSplit(graph, ComponentSplitSet(splitee.first, std::move(splitee.second)));
     }
 }
 

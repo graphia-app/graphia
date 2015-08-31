@@ -132,7 +132,7 @@ void GraphComponentScene::startTransition(float duration, Transition::Type trans
     finishedFunction);
 }
 
-void GraphComponentScene::onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet)
+void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet)
 {
     if(!visible())
         return;
@@ -141,7 +141,7 @@ void GraphComponentScene::onComponentSplit(const Graph*, const ComponentSplitSet
     if(oldComponentId == _componentId)
     {
         // Both of these things still exist after this returns
-        auto largestSplitter = componentSplitSet.largestComponentId();
+        auto largestSplitter = graph->componentIdOfLargestComponent(componentSplitSet.splitters());
         auto oldGraphComponentRenderer = _graphRenderer->componentRendererForId(oldComponentId);
 
         _graphRenderer->executeOnRendererThread([this, largestSplitter, oldGraphComponentRenderer]

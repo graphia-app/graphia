@@ -155,6 +155,23 @@ public:
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
     ComponentId componentIdOfLargestComponent() const;
 
+    template<typename C> ComponentId componentIdOfLargestComponent(const C& componentIds) const
+    {
+        ComponentId largestComponentId;
+        int maxNumNodes = 0;
+        for(auto componentId : componentIds)
+        {
+            auto component = componentById(componentId);
+            if(component->numNodes() > maxNumNodes)
+            {
+                maxNumNodes = component->numNodes();
+                largestComponentId = componentId;
+            }
+        }
+
+        return largestComponentId;
+    }
+
     mutable DebugPauser debugPauser;
     void dumpToQDebug(int detail) const;
 

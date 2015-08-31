@@ -195,19 +195,7 @@ ComponentId Graph::componentIdOfEdge(EdgeId edgeId) const
 
 ComponentId Graph::componentIdOfLargestComponent() const
 {
-    ComponentId largestComponentId;
-    int maxNumNodes = 0;
-    for(auto componentId : componentIds())
-    {
-        auto component = componentById(componentId);
-        if(component->numNodes() > maxNumNodes)
-        {
-            maxNumNodes = component->numNodes();
-            largestComponentId = componentId;
-        }
-    }
-
-    return largestComponentId;
+    return componentIdOfLargestComponent(componentIds());
 }
 
 MutableGraph::~MutableGraph()
