@@ -9,6 +9,7 @@
 
 #include <type_traits>
 #include <algorithm>
+#include <vector>
 
 namespace Utils
 {
@@ -102,7 +103,7 @@ namespace Utils
     template<typename T,
              template<typename, typename...> class C1, typename... Args1,
              template<typename, typename...> class C2, typename... Args2>
-    std::vector<T> setUnion(const C1<T, Args1...>& a, const C2<T, Args2...>& b)
+    std::vector<T> setIntersection(const C1<T, Args1...>& a, const C2<T, Args2...>& b)
     {
         std::vector<T> result;
 
