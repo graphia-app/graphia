@@ -251,10 +251,32 @@ public:
     NodeId addNode();
     NodeId addNode(NodeId nodeId);
     NodeId addNode(const Node& node);
-    void addNodes(const NodeIdSet& nodeIds);
+    template<typename C> void addNodes(const C& nodeIds)
+    {
+        if(nodeIds.empty())
+            return;
+
+        beginTransaction();
+
+        for(auto nodeId : nodeIds)
+            addNode(nodeId);
+
+        endTransaction();
+    }
 
     void removeNode(NodeId nodeId);
-    void removeNodes(const NodeIdSet& nodeIds);
+    template<typename C> void removeNodes(const C& nodeIds)
+    {
+        if(nodeIds.empty())
+            return;
+
+        beginTransaction();
+
+        for(auto nodeId : nodeIds)
+            removeNode(nodeId);
+
+        endTransaction();
+    }
 
     const std::vector<EdgeId>& edgeIds() const;
     int numEdges() const;
@@ -265,10 +287,32 @@ public:
     EdgeId addEdge(NodeId sourceId, NodeId targetId);
     EdgeId addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId);
     EdgeId addEdge(const Edge& edge);
-    void addEdges(const std::vector<Edge>& edges);
+    template<typename C> void addEdges(const C& edges)
+    {
+        if(edges.empty())
+            return;
+
+        beginTransaction();
+
+        for(const auto& edge : edges)
+            addEdge(edge);
+
+        endTransaction();
+    }
 
     void removeEdge(EdgeId edgeId);
-    void removeEdges(const EdgeIdSet& edgeIds);
+    template<typename C> void removeEdges(const C& edgeIds)
+    {
+        if(edgeIds.empty())
+            return;
+
+        beginTransaction();
+
+        for(auto edgeId : edgeIds)
+            removeEdge(edgeId);
+
+        endTransaction();
+    }
 
     void contractEdge(EdgeId edgeId);
 

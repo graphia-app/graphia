@@ -300,19 +300,6 @@ NodeId MutableGraph::addNode(const Node& node)
     return addNode(node._id);
 }
 
-void MutableGraph::addNodes(const NodeIdSet& nodeIds)
-{
-    if(nodeIds.empty())
-        return;
-
-    beginTransaction();
-
-    for(auto nodeId : nodeIds)
-        addNode(nodeId);
-
-    endTransaction();
-}
-
 void MutableGraph::removeNode(NodeId nodeId)
 {
     beginTransaction();
@@ -327,19 +314,6 @@ void MutableGraph::removeNode(NodeId nodeId)
     MultiNodeId::removeMultiElementId(nodeId, _multiNodeIds);
     _nodeIdsInUse[nodeId] = false;
     _unusedNodeIds.push_back(nodeId);
-
-    endTransaction();
-}
-
-void MutableGraph::removeNodes(const NodeIdSet& nodeIds)
-{
-    if(nodeIds.empty())
-        return;
-
-    beginTransaction();
-
-    for(auto nodeId : nodeIds)
-        removeNode(nodeId);
 
     endTransaction();
 }
@@ -460,19 +434,6 @@ EdgeId MutableGraph::addEdge(const Edge& edge)
     return addEdge(edge._id, edge._sourceId, edge._targetId);
 }
 
-void MutableGraph::addEdges(const std::vector<Edge>& edges)
-{
-    if(edges.empty())
-        return;
-
-    beginTransaction();
-
-    for(const auto& edge : edges)
-        addEdge(edge);
-
-    endTransaction();
-}
-
 void MutableGraph::removeEdge(EdgeId edgeId)
 {
     beginTransaction();
@@ -492,19 +453,6 @@ void MutableGraph::removeEdge(EdgeId edgeId)
     MultiEdgeId::removeMultiElementId(edgeId, _multiEdgeIds);
     _edgeIdsInUse[edgeId] = false;
     _unusedEdgeIds.push_back(edgeId);
-
-    endTransaction();
-}
-
-void MutableGraph::removeEdges(const EdgeIdSet& edgeIds)
-{
-    if(edgeIds.empty())
-        return;
-
-    beginTransaction();
-
-    for(auto edgeId : edgeIds)
-        removeEdge(edgeId);
 
     endTransaction();
 }
