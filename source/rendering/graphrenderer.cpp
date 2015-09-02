@@ -282,7 +282,8 @@ void GraphRenderer::switchToOverviewMode(bool doTransition)
         // So that we can return to the current view parameters later
         _graphComponentScene->saveViewData();
 
-        if(mode() != GraphRenderer::Mode::Overview && doTransition)
+        if(mode() != GraphRenderer::Mode::Overview && doTransition &&
+           _graphComponentScene->componentRenderer() != nullptr)
         {
             if(!_graphComponentScene->viewIsReset())
             {
