@@ -83,4 +83,7 @@ void TransformedGraph::onTargetGraphChanged(const Graph*)
         if(_nodesDifference[nodeId].removed())
             emit nodeWillBeRemoved(this, &_source->nodeById(nodeId));
     }
+
+    _nodesDifference.resetElements();
+    _edgesDifference.resetElements();
 }
