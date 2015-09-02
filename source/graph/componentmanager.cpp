@@ -1,6 +1,7 @@
 #include "componentmanager.h"
 
 #include "../utils/utils.h"
+#include "../utils/namethread.h"
 
 #include <queue>
 #include <map>
@@ -243,7 +244,8 @@ public:
         {
             qWarning() << "Needed to acquire lock when reading from ComponentManager; "
                           "this implies inappropriate concurrent access which is bad "
-                          "because it means this thread is blocked until the update completes";
+                          "because it means the thread" << currentThreadName() <<
+                          "is blocked until the update completes";
 
             // If the DebugPauser is in action, it is already effectively locking things
             // for us, so trying to lock again here causes deadlock
