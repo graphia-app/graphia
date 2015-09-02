@@ -463,6 +463,8 @@ void MutableGraph::contractEdge(EdgeId edgeId)
     if(!containsEdgeId(edgeId))
         return;
 
+    beginTransaction();
+
     auto& edge = edgeById(edgeId);
     NodeId nodeId, nodeIdToMerge;
     std::tie(nodeId, nodeIdToMerge) = std::minmax(edge.sourceId(), edge.targetId());
@@ -485,6 +487,8 @@ void MutableGraph::contractEdge(EdgeId edgeId)
     }
 
     mergeNodes(nodeId, nodeIdToMerge);
+
+    endTransaction();
 }
 
 void MutableGraph::reserve(const Graph& other)
