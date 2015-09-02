@@ -247,7 +247,7 @@ void ComponentManager::onGraphChanged(const Graph* graph)
 template<typename T> class unique_lock_with_warning
 {
 public:
-    unique_lock_with_warning(T& mutex, bool alreadyBlocked) :
+    unique_lock_with_warning(T& mutex) :
         _lock(mutex, std::try_to_lock)
     {
         if(!_lock.owns_lock())
@@ -257,10 +257,7 @@ public:
                           "because it means the thread" << currentThreadName() <<
                           "is blocked until the update completes";
 
-            // If the DebugPauser is in action, it is already effectively locking things
-            // for us, so trying to lock again here causes deadlock
-            if(!alreadyBlocked)
-                _lock.lock();
+            _lock.lock();
         }
     }
 
@@ -276,14 +273,14 @@ private:
 
 const std::vector<ComponentId>& ComponentManager::componentIds() const
 {
-    unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex, _debugPaused);
+    unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
     return _componentIds;
 }
 
 const GraphComponent* ComponentManager::componentById(ComponentId componentId) const
 {
-    unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex, _debugPaused);
+    unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
     if(Utils::contains(_componentsMap, componentId))
         return _componentsMap.at(componentId).get();
@@ -297,7 +294,7 @@ ComponentId ComponentManager::componentIdOfNode(NodeId nodeId) const
     if(nodeId.isNull())
         return ComponentId();
 
-    unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex, _debugPaused);
+    unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
     auto componentId = _nodesComponentId.at(nodeId);
     auto i = std::find(_componentIds.cbegin(), _componentIds.cend(), componentId);
@@ -309,7 +306,7 @@ ComponentId ComponentManager::componentIdOfEdge(EdgeId edgeId) const
     if(edgeId.isNull())
         return ComponentId();
 
-    unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex, _debugPaused);
+    unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
     auto componentId = _edgesComponentId.at(edgeId);
     auto i = std::find(_componentIds.cbegin(), _componentIds.cend(), componentId);
