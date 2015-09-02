@@ -146,7 +146,7 @@ public:
     virtual void reserve(const Graph& other) = 0;
     virtual void cloneFrom(const Graph& other) = 0;
 
-    void enableComponentManagement(const Graph* other = nullptr);
+    void enableComponentManagement();
 
     virtual const std::vector<ComponentId>& componentIds() const;
     int numComponents() const;
@@ -186,7 +186,7 @@ private:
     std::unordered_set<GraphArray*> _nodeArrays;
     std::unordered_set<GraphArray*> _edgeArrays;
 
-    std::shared_ptr<AbstractComponentManager> _componentManager;
+    std::unique_ptr<AbstractComponentManager> _componentManager;
 
 protected:
     NodeId nextNodeId() const;

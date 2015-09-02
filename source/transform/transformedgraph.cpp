@@ -13,15 +13,7 @@ TransformedGraph::TransformedGraph(const Graph& source) :
 {
     connect(_source, &Graph::graphChanged, [this](const Graph*) { rebuild(); });
     connect(&_target, &Graph::graphChanged, this, &TransformedGraph::onTargetGraphChanged, Qt::DirectConnection);
-    _target.enableComponentManagement();
-
-    // TransformedGraph has component management by proxy, through _target
-    enableComponentManagement(&_target);
-
-    connect(&_target, &Graph::componentsWillMerge,    this, &Graph::componentsWillMerge,    Qt::DirectConnection);
-    connect(&_target, &Graph::componentWillBeRemoved, this, &Graph::componentWillBeRemoved, Qt::DirectConnection);
-    connect(&_target, &Graph::componentAdded,         this, &Graph::componentAdded,         Qt::DirectConnection);
-    connect(&_target, &Graph::componentSplit,         this, &Graph::componentSplit,         Qt::DirectConnection);
+    enableComponentManagement();
 
     // These connections allow us to track what changes, so we can then
     // re-emit a canonical set of signals once the transform is complete

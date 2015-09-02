@@ -86,12 +86,17 @@ const std::vector<Edge> Graph::edgesForNodes(const NodeIdSet& nodeIds) const
     return edges;
 }
 
-void Graph::enableComponentManagement(const Graph* other)
+void Graph::enableComponentManagement()
 {
-    if(other != nullptr)
-        _componentManager = other->_componentManager;
-    else if(_componentManager == nullptr)
-        _componentManager = std::make_shared<ComponentManager>(*this);
+    if(_componentManager == nullptr)
+    {
+        _componentManager = std::make_unique<ComponentManager>(*this);
+
+        connect(_componentManager.get(), &AbstractComponentManager::componentAdded,         this, &Graph::componentAdded, Qt::DirectConnection);
+        connect(_componentManager.get(), &AbstractComponentManager::componentWillBeRemoved, this, &Graph::componentWillBeRemoved, Qt::DirectConnection);
+        connect(_componentManager.get(), &AbstractComponentManager::componentSplit,         this, &Graph::componentSplit, Qt::DirectConnection);
+        connect(_componentManager.get(), &AbstractComponentManager::componentsWillMerge,    this, &Graph::componentsWillMerge, Qt::DirectConnection);
+    }
 }
 
 void Graph::dumpToQDebug(int detail) const

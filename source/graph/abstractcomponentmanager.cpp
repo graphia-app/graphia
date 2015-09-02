@@ -10,11 +10,6 @@ AbstractComponentManager::AbstractComponentManager(Graph& graph, bool ignoreMult
         _debug = true;
 
     connect(&graph, &Graph::graphChanged, this, &AbstractComponentManager::onGraphChanged, Qt::DirectConnection);
-
-    connect(this, &AbstractComponentManager::componentAdded, &graph, &Graph::componentAdded, Qt::DirectConnection);
-    connect(this, &AbstractComponentManager::componentWillBeRemoved, &graph, &Graph::componentWillBeRemoved, Qt::DirectConnection);
-    connect(this, &AbstractComponentManager::componentSplit, &graph, &Graph::componentSplit, Qt::DirectConnection);
-    connect(this, &AbstractComponentManager::componentsWillMerge, &graph, &Graph::componentsWillMerge, Qt::DirectConnection);
 }
 
 AbstractComponentManager::~AbstractComponentManager()
