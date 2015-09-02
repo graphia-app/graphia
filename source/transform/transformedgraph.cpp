@@ -1,5 +1,7 @@
 #include "transformedgraph.h"
 
+#include "../graph/componentmanager.h"
+
 #include "../utils/utils.h"
 #include "../utils/cpp1x_hacks.h"
 
@@ -36,6 +38,12 @@ void TransformedGraph::setTransform(std::unique_ptr<GraphTransform> graphTransfo
     rebuild();
 }
 
+void TransformedGraph::setComponentFilter(ComponentFilterFn componentFilter)
+{
+    _componentFilter = componentFilter;
+    rebuild();
+}
+
 void TransformedGraph::rebuild()
 {
     emit graphWillChange(this);
@@ -43,10 +51,19 @@ void TransformedGraph::rebuild()
     _target.performTransaction([this](MutableGraph&)
     {
         _graphTransform->apply(*_source, *this);
-    });
 
-    //FIXME filter components here
-    _filteredComponentIds = _target.componentIds();
+        if(_componentFilter != nullptr)
+        {
+            ComponentManager componentManager(_target);
+
+            for(auto componentId : componentManager.componentIds())
+            {
+                auto component = componentManager.componentById(componentId);
+                if(_componentFilter(*component))
+                    _target.removeNodes(component->nodeIds());
+            }
+        }
+    });
 
     emit graphChanged(this);
 }

@@ -8,6 +8,8 @@
 
 #include <QObject>
 
+#include <functional>
+
 class TransformedGraph : public Graph
 {
     Q_OBJECT
@@ -16,6 +18,9 @@ public:
     TransformedGraph(const Graph& source);
 
     void setTransform(std::unique_ptr<GraphTransform> graphTransform);
+
+    using ComponentFilterFn = std::function<bool(const Graph&)>;
+    void setComponentFilter(ComponentFilterFn componentFilter);
 
     const std::vector<NodeId>& nodeIds() const { return _target.nodeIds(); }
     int numNodes() const { return _target.numNodes(); }
@@ -50,8 +55,6 @@ public:
     void reserve(const Graph& other) { _target.reserve(other); }
     void cloneFrom(const Graph& other) { _target.cloneFrom(other); }
 
-    const std::vector<ComponentId>& componentIds() const { return _filteredComponentIds; }
-
 private:
     const Graph* _source;
     std::unique_ptr<GraphTransform> _graphTransform;
@@ -74,7 +77,7 @@ private:
     NodeArray<Difference> _nodesDifference;
     EdgeArray<Difference> _edgesDifference;
 
-    std::vector<ComponentId> _filteredComponentIds;
+    ComponentFilterFn _componentFilter;
 
     void rebuild();
 
