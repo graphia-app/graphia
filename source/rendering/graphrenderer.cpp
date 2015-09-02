@@ -82,10 +82,11 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
 
     connect(graph, &Graph::graphChanged, this, &GraphRenderer::onGraphChanged, Qt::DirectConnection);
 
+    connect(graph, &Graph::componentAdded, this, &GraphRenderer::onComponentAdded, Qt::DirectConnection);
+
     _graphOverviewScene = new GraphOverviewScene(this);
     _graphComponentScene = new GraphComponentScene(this);
 
-    connect(graph, &Graph::componentAdded, this, &GraphRenderer::onComponentAdded, Qt::DirectConnection);
     connect(graph, &Graph::componentWillBeRemoved, this, &GraphRenderer::onComponentWillBeRemoved, Qt::DirectConnection);
 
     _graphOverviewInteractor = new GraphOverviewInteractor(_graphModel, _graphOverviewScene, commandManager, _selectionManager, this);

@@ -58,11 +58,14 @@ bool GraphComponentScene::transitionActive() const
 
 void GraphComponentScene::onShow()
 {
-    if(visible())
+    _graphRenderer->executeOnRendererThread([this]
     {
-        for(GraphComponentRenderer* componentRenderer : _graphRenderer->componentRenderers())
-            componentRenderer->setVisible(componentRenderer->componentId() == _componentId);
-    }
+        if(visible())
+        {
+            for(GraphComponentRenderer* componentRenderer : _graphRenderer->componentRenderers())
+                componentRenderer->setVisible(componentRenderer->componentId() == _componentId);
+        }
+    }, "GraphComponentScene::onShow (setVisible)");
 }
 
 void GraphComponentScene::setComponentId(ComponentId componentId)
