@@ -13,12 +13,7 @@ class ComponentManager : public AbstractComponentManager
     Q_OBJECT
 
 public:
-    ComponentManager(Graph& graph, bool ignoreMultiElements = true) :
-        AbstractComponentManager(graph, ignoreMultiElements),
-        _nextComponentId(0),
-        _nodesComponentId(graph),
-        _edgesComponentId(graph)
-    {}
+    ComponentManager(Graph& graph, bool ignoreMultiElements = true);
 
 private:
     std::vector<ComponentId> _componentIds;

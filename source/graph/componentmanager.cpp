@@ -6,6 +6,15 @@
 #include <queue>
 #include <map>
 
+ComponentManager::ComponentManager(Graph& graph, bool ignoreMultiElements) :
+    AbstractComponentManager(graph, ignoreMultiElements),
+    _nextComponentId(0),
+    _nodesComponentId(graph),
+    _edgesComponentId(graph)
+{
+    updateComponents(&graph);
+}
+
 ComponentIdSet ComponentManager::assignConnectedElementsComponentId(const Graph* graph,
         NodeId rootId, ComponentId componentId,
         NodeArray<ComponentId>& nodesComponentId,
@@ -47,6 +56,8 @@ ComponentIdSet ComponentManager::assignConnectedElementsComponentId(const Graph*
 
 void ComponentManager::updateComponents(const Graph* graph)
 {
+    std::unique_lock<std::recursive_mutex> lock(_updateMutex);
+
     std::map<ComponentId, ComponentIdSet> splitComponents;
     ComponentIdSet splitComponentIds;
     std::map<ComponentId, ComponentIdSet> mergedComponents;
@@ -125,9 +136,9 @@ void ComponentManager::updateComponents(const Graph* graph)
         emit componentsWillMerge(graph, ComponentMergeSet(std::move(mergee.second), mergee.first));
     }
 
+    // Removed components
     for(auto componentId : componentIdsToBeRemoved)
     {
-        // Component removed
         if(_debug) qDebug() << "componentWillBeRemoved" << componentId;
         Utils::removeByValue(_componentIds, componentId);
         emit componentWillBeRemoved(graph, componentId, Utils::contains(mergedComponentIds, componentId));
@@ -228,7 +239,6 @@ void ComponentManager::removeGraphComponent(ComponentId componentId)
 
 void ComponentManager::onGraphChanged(const Graph* graph)
 {
-    std::unique_lock<std::recursive_mutex> lock(_updateMutex);
     graph->debugPauser.pause("Call updateComponents from ComponentManager::onGraphChanged", &_debugPaused);
     updateComponents(graph);
     graph->debugPauser.pause("Signal Graph::onGraphChanged", &_debugPaused);
