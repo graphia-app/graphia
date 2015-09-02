@@ -140,9 +140,9 @@ void ComponentManager::updateComponents(const Graph* graph)
     for(auto componentId : componentIdsToBeRemoved)
     {
         if(_debug) qDebug() << "componentWillBeRemoved" << componentId;
-        Utils::removeByValue(_componentIds, componentId);
         emit componentWillBeRemoved(graph, componentId, Utils::contains(mergedComponentIds, componentId));
 
+        Utils::removeByValue(_componentIds, componentId);
         removeGraphComponent(componentId);
     }
 
