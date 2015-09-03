@@ -38,12 +38,6 @@ void TransformedGraph::setTransform(std::unique_ptr<GraphTransform> graphTransfo
     rebuild();
 }
 
-void TransformedGraph::setComponentFilter(ComponentFilterFn componentFilter)
-{
-    _componentFilter = componentFilter;
-    rebuild();
-}
-
 void TransformedGraph::rebuild()
 {
     emit graphWillChange(this);
@@ -51,18 +45,6 @@ void TransformedGraph::rebuild()
     _target.performTransaction([this](MutableGraph&)
     {
         _graphTransform->apply(*_source, *this);
-
-        if(_componentFilter != nullptr)
-        {
-            ComponentManager componentManager(_target);
-
-            for(auto componentId : componentManager.componentIds())
-            {
-                auto component = componentManager.componentById(componentId);
-                if(_componentFilter(*component))
-                    _target.removeNodes(component->nodeIds());
-            }
-        }
     });
 
     emit graphChanged(this);

@@ -19,9 +19,6 @@ public:
 
     void setTransform(std::unique_ptr<GraphTransform> graphTransform);
 
-    using ComponentFilterFn = std::function<bool(const Graph&)>;
-    void setComponentFilter(ComponentFilterFn componentFilter);
-
     const std::vector<NodeId>& nodeIds() const { return _target.nodeIds(); }
     int numNodes() const { return _target.numNodes(); }
     const Node& nodeById(NodeId nodeId) const { return _target.nodeById(nodeId); }
@@ -78,8 +75,6 @@ private:
 
     NodeArray<Difference> _nodesDifference;
     EdgeArray<Difference> _edgesDifference;
-
-    ComponentFilterFn _componentFilter;
 
     void rebuild();
 

@@ -1,6 +1,8 @@
 #include "filtertransform.h"
 #include "transformedgraph.h"
 
+#include "../graph/componentmanager.h"
+
 #include "../utils/utils.h"
 
 #include <algorithm>
@@ -49,9 +51,29 @@ void filter(const std::vector<ElementId>& source, const std::vector<ElementId>& 
         remove(*t++);
 }
 
-template<typename ElementId> bool elementIdFiltered(std::vector<ElementFilterFn<ElementId>> elements, ElementId value)
+template<typename ElementId> bool elementIdFiltered(std::vector<ElementFilterFn<ElementId>> filters, ElementId elementId)
 {
-    return std::any_of(elements.cbegin(), elements.cend(), [value](ElementFilterFn<ElementId> f) { return f(value); });
+    return std::any_of(filters.cbegin(), filters.cend(), [elementId](ElementFilterFn<ElementId> f) { return f(elementId); });
+}
+
+bool componentFiltered(std::vector<ComponentFilterFn> filters, const Graph& component)
+{
+    return std::any_of(filters.cbegin(), filters.cend(), [&component](ComponentFilterFn f) { return f(component); });
+}
+
+void FilterTransform::filterComponents(TransformedGraph& target) const
+{
+    if(!_componentFilters.empty())
+    {
+        ComponentManager componentManager(target);
+
+        for(auto componentId : componentManager.componentIds())
+        {
+            auto component = componentManager.componentById(componentId);
+            if(componentFiltered(_componentFilters, *component))
+                target.removeNodes(component->nodeIds());
+        }
+    }
 }
 
 void FilterTransform::apply(const Graph& source, TransformedGraph& target) const
@@ -74,6 +96,8 @@ void FilterTransform::apply(const Graph& source, TransformedGraph& target) const
         },
         [&source, &target](EdgeId edgeId) { Utils::checkEqual(target.addEdge(source.edgeById(edgeId)), edgeId); },
         [&target](EdgeId edgeId) { target.removeEdge(edgeId); });
+
+    filterComponents(target);
 }
 
 void FilterTransform::apply(TransformedGraph& target) const
@@ -89,4 +113,6 @@ void FilterTransform::apply(TransformedGraph& target) const
         if(elementIdFiltered(_nodeFilters, nodeId))
             target.removeNode(nodeId);
     }
+
+    filterComponents(target);
 }
