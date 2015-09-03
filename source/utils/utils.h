@@ -58,6 +58,8 @@ namespace Utils
     {
         // Hopefully this function call elides to nothing when in release mode
         Q_ASSERT(a == b);
+        Q_UNUSED(a);
+        Q_UNUSED(b);
     }
 
     template<typename C, typename T> void removeByValue(C& container, const T& value)
