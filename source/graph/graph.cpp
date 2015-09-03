@@ -504,8 +504,8 @@ void MutableGraph::reserve(const Graph& other)
     const auto* mutableOther = dynamic_cast<const MutableGraph*>(&other);
     Q_ASSERT(mutableOther != nullptr);
 
-    reserveNodeId(largestNodeId());
-    reserveEdgeId(largestEdgeId());
+    reserveNodeId(mutableOther->largestNodeId());
+    reserveEdgeId(mutableOther->largestEdgeId());
 }
 
 void MutableGraph::cloneFrom(const Graph& other)
