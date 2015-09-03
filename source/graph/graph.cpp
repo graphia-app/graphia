@@ -213,6 +213,7 @@ void MutableGraph::clear()
     for(auto nodeId : nodeIds())
         removeNode(nodeId);
 
+    _updateRequired = true;
     endTransaction();
 
     // Removing all the nodes should remove all the edges
@@ -292,6 +293,7 @@ NodeId MutableGraph::addNode(NodeId nodeId)
     node._adjacentNodeIds.clear();
 
     emit nodeAdded(this, &node);
+    _updateRequired = true;
     endTransaction();
 
     return nodeId;
@@ -317,6 +319,7 @@ void MutableGraph::removeNode(NodeId nodeId)
     _nodeIdsInUse[nodeId] = false;
     _unusedNodeIds.push_back(nodeId);
 
+    _updateRequired = true;
     endTransaction();
 }
 
@@ -426,6 +429,7 @@ EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     }
 
     emit edgeAdded(this, &edge);
+    _updateRequired = true;
     endTransaction();
 
     return edgeId;
@@ -456,6 +460,7 @@ void MutableGraph::removeEdge(EdgeId edgeId)
     _edgeIdsInUse[edgeId] = false;
     _unusedEdgeIds.push_back(edgeId);
 
+    _updateRequired = true;
     endTransaction();
 }
 
@@ -490,6 +495,7 @@ void MutableGraph::contractEdge(EdgeId edgeId)
 
     mergeNodes(nodeId, nodeIdToMerge);
 
+    _updateRequired = true;
     endTransaction();
 }
 
@@ -523,6 +529,7 @@ void MutableGraph::cloneFrom(const Graph& other)
     _multiEdgeIds  = mutableOther->_multiEdgeIds;
     reserveEdgeId(mutableOther->largestEdgeId());
 
+    _updateRequired = true;
     endTransaction();
 }
 
@@ -538,8 +545,6 @@ void MutableGraph::beginTransaction()
 
 void MutableGraph::endTransaction()
 {
-    _updateRequired = true;
-
     Q_ASSERT(_graphChangeDepth > 0);
     if(--_graphChangeDepth <= 0)
     {
