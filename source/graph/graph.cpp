@@ -514,14 +514,14 @@ void MutableGraph::cloneFrom(const Graph& other)
     _unusedNodeIds = mutableOther->_unusedNodeIds;
     _nodes         = mutableOther->_nodes;
     _multiNodeIds  = mutableOther->_multiNodeIds;
-    reserveNodeId(largestNodeId());
+    reserveNodeId(mutableOther->largestNodeId());
 
     _edgeIdsInUse  = mutableOther->_edgeIdsInUse;
     _edgeIds       = mutableOther->_edgeIds;
     _unusedEdgeIds = mutableOther->_unusedEdgeIds;
     _edges         = mutableOther->_edges;
     _multiEdgeIds  = mutableOther->_multiEdgeIds;
-    reserveEdgeId(largestEdgeId());
+    reserveEdgeId(mutableOther->largestEdgeId());
 
     endTransaction();
 }
