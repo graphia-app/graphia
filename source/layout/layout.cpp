@@ -25,6 +25,13 @@ void LayoutThread::addLayout(std::shared_ptr<Layout> layout)
 {
     std::unique_lock<std::mutex> lock(_mutex);
     _layouts.insert(layout);
+
+    if(_layouts.size() == 1)
+    {
+        // If this is the first layout, resume
+        lock.unlock();
+        resume();
+    }
 }
 
 void LayoutThread::removeLayout(std::shared_ptr<Layout> layout)
@@ -180,7 +187,7 @@ void LayoutThread::run()
 
         std::this_thread::yield();
     }
-    while(iterative() || _repeating);
+    while(iterative() || _repeating || allLayoutsShouldPause());
 
     std::unique_lock<std::mutex> lock(_mutex);
     _layouts.clear();

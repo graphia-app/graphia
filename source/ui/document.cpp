@@ -224,9 +224,8 @@ void Document::onLoadComplete(bool /*success FIXME hmm*/)
     emit commandVerbChanged(); // Stop showing loading message
 
     _layoutThread = std::make_unique<LayoutThread>(*_graphModel, std::make_unique<ForceDirectedLayoutFactory>(_graphModel));
-    _layoutThread->addAllComponents();
     connect(_layoutThread.get(), &LayoutThread::pausedChanged, this, &Document::layoutIsPausedChanged);
-    _layoutThread->start();
+    _layoutThread->addAllComponents();
 
     _selectionManager = std::make_shared<SelectionManager>(_graphModel->graph());
     _graphQuickItem->initialise(_graphModel, _commandManager, _selectionManager);
