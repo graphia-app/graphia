@@ -18,17 +18,8 @@ Graph::Graph() :
     qRegisterMetaType<ComponentId>("ComponentId");
     qRegisterMetaType<ComponentIdSet>("ComponentIdSet");
 
-    connect(this, &Graph::nodeAdded, [this](const Graph*, const Node* node)
-    {
-        if(node->id() >= nextNodeId())
-            setNextNodeId(NodeId(node->id() + 1));
-    });
-
-    connect(this, &Graph::edgeAdded, [this](const Graph*, const Edge* edge)
-    {
-        if(edge->id() >= nextEdgeId())
-            setNextEdgeId(EdgeId(edge->id() + 1));
-    });
+    connect(this, &Graph::nodeAdded, [this](const Graph*, const Node* node) { reserveNodeId(node->id()); });
+    connect(this, &Graph::edgeAdded, [this](const Graph*, const Edge* edge) { reserveEdgeId(edge->id()); });
 }
 
 Graph::~Graph()
@@ -142,17 +133,23 @@ EdgeId Graph::nextEdgeId() const
     return _nextEdgeId;
 }
 
-void Graph::setNextNodeId(NodeId nextNodeId)
+void Graph::reserveNodeId(NodeId nodeId)
 {
-    _nextNodeId = nextNodeId;
+    if(nodeId < nextNodeId())
+        return;
+
+    _nextNodeId = NodeId(nodeId + 1);
 
     for(auto nodeArray : _nodeArrays)
         nodeArray->resize(_nextNodeId);
 }
 
-void Graph::setNextEdgeId(EdgeId lastEdgeId)
+void Graph::reserveEdgeId(EdgeId edgeId)
 {
-    _nextEdgeId = lastEdgeId;
+    if(edgeId < nextEdgeId())
+        return;
+
+    _nextEdgeId = EdgeId(edgeId + 1);
 
     for(auto edgeArray : _edgeArrays)
         edgeArray->resize(_nextEdgeId);
@@ -269,7 +266,7 @@ void MutableGraph::reserveNodeId(NodeId nodeId)
     if(nodeId < nextNodeId())
         return;
 
-    setNextNodeId(NodeId(nodeId + 1));
+    Graph::reserveNodeId(nodeId);
     _nodeIdsInUse.resize(nextNodeId());
     _multiNodeIds.resize(nextNodeId());
     _nodes.resize(nextNodeId());
@@ -367,7 +364,7 @@ void MutableGraph::reserveEdgeId(EdgeId edgeId)
     if(edgeId < nextEdgeId())
         return;
 
-    setNextEdgeId(EdgeId(edgeId + 1));
+    Graph::reserveEdgeId(edgeId);
     _edgeIdsInUse.resize(nextEdgeId());
     _multiEdgeIds.resize(nextEdgeId());
     _edges.resize(nextEdgeId());
@@ -501,12 +498,14 @@ void MutableGraph::reserve(const Graph& other)
     const auto* mutableOther = dynamic_cast<const MutableGraph*>(&other);
     Q_ASSERT(mutableOther != nullptr);
 
-    reserveNodeId(mutableOther->nextNodeId());
-    reserveEdgeId(mutableOther->nextEdgeId());
+    reserveNodeId(largestNodeId());
+    reserveEdgeId(largestEdgeId());
 }
 
 void MutableGraph::cloneFrom(const Graph& other)
 {
+    beginTransaction();
+
     const auto* mutableOther = dynamic_cast<const MutableGraph*>(&other);
     Q_ASSERT(mutableOther != nullptr);
 
@@ -515,14 +514,16 @@ void MutableGraph::cloneFrom(const Graph& other)
     _unusedNodeIds = mutableOther->_unusedNodeIds;
     _nodes         = mutableOther->_nodes;
     _multiNodeIds  = mutableOther->_multiNodeIds;
-    setNextNodeId(mutableOther->nextNodeId());
+    reserveNodeId(largestNodeId());
 
     _edgeIdsInUse  = mutableOther->_edgeIdsInUse;
     _edgeIds       = mutableOther->_edgeIds;
     _unusedEdgeIds = mutableOther->_unusedEdgeIds;
     _edges         = mutableOther->_edges;
     _multiEdgeIds  = mutableOther->_multiEdgeIds;
-    setNextEdgeId(mutableOther->nextEdgeId());
+    reserveEdgeId(largestEdgeId());
+
+    endTransaction();
 }
 
 void MutableGraph::beginTransaction()
@@ -537,10 +538,12 @@ void MutableGraph::beginTransaction()
 
 void MutableGraph::endTransaction()
 {
+    _updateRequired = true;
+
     Q_ASSERT(_graphChangeDepth > 0);
     if(--_graphChangeDepth <= 0)
     {
-        updateElementIdData();
+        update();
         _mutex.unlock();
         debugPauser.pause("End Graph Transaction");
         emit graphChanged(this);
@@ -553,8 +556,13 @@ void MutableGraph::performTransaction(std::function<void(MutableGraph&)> transac
     transaction(*this);
 }
 
-void MutableGraph::updateElementIdData()
+void MutableGraph::update()
 {
+    if(!_updateRequired)
+        return;
+
+    _updateRequired = false;
+
     _nodeIds.clear();
     _unusedNodeIds.clear();
     for(NodeId nodeId(0); nodeId < nextNodeId(); nodeId++)

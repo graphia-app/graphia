@@ -12,6 +12,7 @@ ComponentManager::ComponentManager(Graph& graph, bool ignoreMultiElements) :
     _nodesComponentId(graph),
     _edgesComponentId(graph)
 {
+    graph.update();
     updateComponents(&graph);
 }
 

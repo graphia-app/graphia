@@ -172,6 +172,12 @@ public:
         return largestComponentId;
     }
 
+    // Call this to ensure the Graph is in a consistent state
+    // Usually it is called automatically and is generally only
+    // necessary when accessing the Graph before changes have
+    // been completed
+    virtual void update() {}
+
     mutable DebugPauser debugPauser;
     void dumpToQDebug(int detail) const;
 
@@ -190,9 +196,11 @@ private:
 
 protected:
     NodeId nextNodeId() const;
-    void setNextNodeId(NodeId nextNodeId);
+    NodeId largestNodeId() const { return NodeId(nextNodeId() - 1); }
+    virtual void reserveNodeId(NodeId nodeId);
     EdgeId nextEdgeId() const;
-    void setNextEdgeId(EdgeId nextEdgeId);
+    EdgeId largestEdgeId() const { return EdgeId(nextEdgeId() - 1); }
+    virtual void reserveEdgeId(EdgeId edgeId);
 
 signals:
     // The signals are listed here in the order in which they are emitted
@@ -231,13 +239,13 @@ private:
     std::vector<Edge> _edges;
     std::vector<MultiEdgeId> _multiEdgeIds;
 
+    bool _updateRequired = false;
+
     void reserveNodeId(NodeId nodeId);
     void reserveEdgeId(EdgeId edgeId);
 
     NodeId mergeNodes(NodeId nodeIdA, NodeId nodeIdB);
     EdgeId mergeEdges(EdgeId edgeIdA, EdgeId edgeIdB);
-
-    void updateElementIdData();
 
 public:
     void clear();
@@ -318,6 +326,8 @@ public:
 
     void reserve(const Graph& other);
     void cloneFrom(const Graph& other);
+
+    void update();
 
 private:
     int _graphChangeDepth = 0;

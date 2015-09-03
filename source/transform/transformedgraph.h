@@ -37,23 +37,25 @@ public:
     NodeId addNode() { return _target.addNode(); }
     NodeId addNode(NodeId nodeId) { return _target.addNode(nodeId); }
     NodeId addNode(const Node& node) { return _target.addNode(node); }
-    void addNodes(const NodeIdSet& nodeIds) { addNodes(nodeIds); }
+    template<typename C> void addNodes(const C& nodeIds) { addNodes(nodeIds); }
 
     void removeNode(NodeId nodeId) { _target.removeNode(nodeId); }
-    void removeNodes(const NodeIdSet& nodeIds) { _target.removeNodes(nodeIds); }
+    template<typename C> void removeNodes(const C& nodeIds) { _target.removeNodes(nodeIds); }
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId) { return _target.addEdge(sourceId, targetId); }
     EdgeId addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId) { return _target.addEdge(edgeId, sourceId, targetId); }
     EdgeId addEdge(const Edge& edge) { return _target.addEdge(edge); }
-    void addEdges(const std::vector<Edge>& edges) { _target.addEdges(edges); }
+    template<typename C> void addEdges(const C& edges) { _target.addEdges(edges); }
 
     void removeEdge(EdgeId edgeId) { _target.removeEdge(edgeId); }
-    void removeEdges(const EdgeIdSet& edgeIds) { _target.removeEdges(edgeIds); }
+    template<typename C> void removeEdges(const C& edgeIds) { _target.removeEdges(edgeIds); }
 
     void contractEdge(EdgeId edgeId) { _target.contractEdge(edgeId); }
 
     void reserve(const Graph& other) { _target.reserve(other); }
     void cloneFrom(const Graph& other) { _target.cloneFrom(other); }
+
+    void update() { _target.update(); }
 
 private:
     const Graph* _source;

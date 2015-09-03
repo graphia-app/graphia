@@ -25,9 +25,9 @@ TransformedGraph::TransformedGraph(const Graph& source) :
     connect(_source, &Graph::edgeAdded,         [this](const Graph*, const Edge* edge) { _edgesDifference[edge->id()].add(); });
 
     connect(&_target, &Graph::nodeWillBeRemoved,[this](const Graph*, const Node* node) { _nodesDifference[node->id()].remove(); });
-    connect(&_target, &Graph::nodeAdded,        [this](const Graph*, const Node* node) { _nodesDifference[node->id()].add(); });
+    connect(&_target, &Graph::nodeAdded,        [this](const Graph*, const Node* node) { _nodesDifference[node->id()].add(); reserveNodeId(node->id()); });
     connect(&_target, &Graph::edgeWillBeRemoved,[this](const Graph*, const Edge* edge) { _edgesDifference[edge->id()].remove(); });
-    connect(&_target, &Graph::edgeAdded,        [this](const Graph*, const Edge* edge) { _edgesDifference[edge->id()].add(); });
+    connect(&_target, &Graph::edgeAdded,        [this](const Graph*, const Edge* edge) { _edgesDifference[edge->id()].add(); reserveEdgeId(edge->id()); });
 
     setTransform(std::make_unique<IdentityTransform>());
 }
