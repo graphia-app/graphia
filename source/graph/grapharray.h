@@ -84,6 +84,18 @@ public:
         return _array.at(index);
     }
 
+    Element get(Index index) const
+    {
+        Q_ASSERT(index >= 0 && index < size());
+        return _array[index];
+    }
+
+    void set(Index index, const Element& value)
+    {
+        Q_ASSERT(index >= 0 && index < size());
+        _array[index] = value;
+    }
+
     typename std::vector<Element>::iterator begin() { return _array.begin(); }
     typename std::vector<Element>::const_iterator begin() const { return _array.begin(); }
     typename std::vector<Element>::iterator end() { return _array.end(); }
