@@ -139,7 +139,7 @@ void SetThreadName(char* threadName)
     }
 }
 
-void u::nameCurrentThread(const QString& name)
+void u::setCurrentThreadName(const QString& name)
 {
     SetThreadName(name.toLatin1().data());
 }
@@ -150,7 +150,7 @@ const QString u::currentThreadName()
     return QString::number(u::currentThreadId());
 }
 #else
-void u::nameCurrentThread(const QString&) {}
+void u::setCurrentThreadName(const QString&) {}
 const QString u::currentThreadName()
 {
     return QString::number(u::currentThreadId());
