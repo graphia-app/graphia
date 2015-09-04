@@ -40,7 +40,7 @@ NodeId Graph::firstNodeId() const
 
 bool Graph::containsNodeId(NodeId nodeId) const
 {
-    return Utils::contains(nodeIds(), nodeId);
+    return u::contains(nodeIds(), nodeId);
 }
 
 EdgeId Graph::firstEdgeId() const
@@ -50,7 +50,7 @@ EdgeId Graph::firstEdgeId() const
 
 bool Graph::containsEdgeId(EdgeId edgeId) const
 {
-    return Utils::contains(edgeIds(), edgeId);
+    return u::contains(edgeIds(), edgeId);
 }
 
 const EdgeIdSet Graph::edgeIdsForNodes(const NodeIdSet& nodeIds) const

@@ -16,7 +16,7 @@ bool Transition::update(float time)
     _elapsed += time - _lastTime;
     _lastTime = time;
 
-    float f = Utils::clamp(0.0f, 1.0f, _elapsed / _duration);
+    float f = u::clamp(0.0f, 1.0f, _elapsed / _duration);
 
     switch(_type)
     {

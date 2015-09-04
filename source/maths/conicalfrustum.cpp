@@ -20,8 +20,8 @@ bool ConicalFrustum::containsPoint(const QVector3D& point) const
 
     float distanceBetweenPlanes = _centreLine.length();
     float distanceFromNearPlane = _nearPlane.distanceToPoint(point);
-    float testRadius = Utils::interpolate(_nearRadius, _farRadius,
-                                          distanceFromNearPlane / distanceBetweenPlanes);
+    float testRadius = u::interpolate(_nearRadius, _farRadius,
+                                      distanceFromNearPlane / distanceBetweenPlanes);
 
     float distanceToCentreLine = point.distanceToLine(_centreLine.start(),
         (_centreLine.end() - _centreLine.start()).normalized());

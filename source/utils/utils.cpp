@@ -10,29 +10,29 @@
 static std::random_device rd;
 static std::mt19937 gen(rd());
 
-float Utils::rand(float low, float high)
+float u::rand(float low, float high)
 {
     std::uniform_real_distribution<> distribution(low, high);
     return distribution(gen);
 }
 
-int Utils::rand(int low, int high)
+int u::rand(int low, int high)
 {
     std::uniform_int_distribution<> distribution(low, high);
     return distribution(gen);
 }
 
-QVector2D Utils::randQVector2D(float low, float high)
+QVector2D u::randQVector2D(float low, float high)
 {
     return QVector2D(rand(low, high), rand(low, high));
 }
 
-QVector3D Utils::randQVector3D(float low, float high)
+QVector3D u::randQVector3D(float low, float high)
 {
     return QVector3D(rand(low, high), rand(low, high), rand(low, high));
 }
 
-QColor Utils::randQColor()
+QColor u::randQColor()
 {
     int r = rand(0, 255);
     int g = rand(0, 255);
@@ -41,7 +41,7 @@ QColor Utils::randQColor()
     return QColor(r, g, b);
 }
 
-float Utils::fast_rsqrt(float number)
+float u::fast_rsqrt(float number)
 {
     typedef union
     {
@@ -64,13 +64,13 @@ float Utils::fast_rsqrt(float number)
     return y;
 }
 
-QVector3D Utils::fastNormalize(const QVector3D& v)
+QVector3D u::fastNormalize(const QVector3D& v)
 {
     float rsqrtLen = fast_rsqrt(v.lengthSquared());
     return v * rsqrtLen;
 }
 
-int Utils::smallestPowerOf2GreaterThan(int x)
+int u::smallestPowerOf2GreaterThan(int x)
 {
     if(x < 0)
         return 0;
@@ -84,12 +84,12 @@ int Utils::smallestPowerOf2GreaterThan(int x)
     return x + 1;
 }
 
-int Utils::currentThreadId()
+int u::currentThreadId()
 {
     return static_cast<int>(std::hash<std::thread::id>()(std::this_thread::get_id()));
 }
 
-QQuaternion Utils::matrixToQuaternion(const QMatrix4x4& m)
+QQuaternion u::matrixToQuaternion(const QMatrix4x4& m)
 {
     // Algorithm in Ken Shoemake's article in 1987 SIGGRAPH course notes
     // article "Quaternion Calculus and Fast Animation".

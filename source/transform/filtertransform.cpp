@@ -82,7 +82,7 @@ void FilterTransform::apply(const Graph& source, TransformedGraph& target) const
 
     filter(source.nodeIds(), target.nodeIds(),
         [this](NodeId nodeId) { return elementIdFiltered(_nodeFilters, nodeId); },
-        [&target](NodeId nodeId) { Utils::checkEqual(target.addNode(nodeId), nodeId); },
+        [&target](NodeId nodeId) { u::checkEqual(target.addNode(nodeId), nodeId); },
         [&target](NodeId nodeId) { target.removeNode(nodeId); });
 
     filter(source.edgeIds(), target.edgeIds(),
@@ -94,7 +94,7 @@ void FilterTransform::apply(const Graph& source, TransformedGraph& target) const
                    !target.containsNodeId(edge.targetId()) ||
                    elementIdFiltered(_edgeFilters, edgeId);
         },
-        [&source, &target](EdgeId edgeId) { Utils::checkEqual(target.addEdge(source.edgeById(edgeId)), edgeId); },
+        [&source, &target](EdgeId edgeId) { u::checkEqual(target.addEdge(source.edgeById(edgeId)), edgeId); },
         [&target](EdgeId edgeId) { target.removeEdge(edgeId); });
 
     filterComponents(target);

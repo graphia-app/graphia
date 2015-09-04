@@ -51,7 +51,7 @@ bool PairwiseTxtFileParser::parse(MutableGraph& graph)
                 NodeId firstNodeId;
                 NodeId secondNodeId;
 
-                if(!Utils::contains(nodeIdHash, first))
+                if(!u::contains(nodeIdHash, first))
                 {
                     firstNodeId = graph.addNode();
                     nodeIdHash.emplace(first, firstNodeId);
@@ -59,7 +59,7 @@ bool PairwiseTxtFileParser::parse(MutableGraph& graph)
                 else
                     firstNodeId = nodeIdHash[first];
 
-                if(!Utils::contains(nodeIdHash, second))
+                if(!u::contains(nodeIdHash, second))
                 {
                     secondNodeId = graph.addNode();
                     nodeIdHash.emplace(second, secondNodeId);

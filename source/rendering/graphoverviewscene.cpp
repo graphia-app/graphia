@@ -263,11 +263,11 @@ static GraphOverviewScene::LayoutData interpolateLayout(const GraphOverviewScene
                                                         float f)
 {
     return GraphOverviewScene::LayoutData(QRect(
-        Utils::interpolate(a._rect.left(),   b._rect.left(),   f),
-        Utils::interpolate(a._rect.top(),    b._rect.top(),    f),
-        Utils::interpolate(a._rect.width(),  b._rect.width(),  f),
-        Utils::interpolate(a._rect.height(), b._rect.height(), f)
-        ), Utils::interpolate(a._alpha, b._alpha, f));
+        u::interpolate(a._rect.left(),   b._rect.left(),   f),
+        u::interpolate(a._rect.top(),    b._rect.top(),    f),
+        u::interpolate(a._rect.width(),  b._rect.width(),  f),
+        u::interpolate(a._rect.height(), b._rect.height(), f)
+        ), u::interpolate(a._alpha, b._alpha, f));
 }
 
 void GraphOverviewScene::startTransition(float duration,
@@ -446,7 +446,7 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph)
         {
             auto component = graph->componentById(componentId);
             int divisor = maxNumNodes / component->numNodes();
-            _renderSizeDivisors[componentId] = Utils::smallestPowerOf2GreaterThan(divisor);
+            _renderSizeDivisors[componentId] = u::smallestPowerOf2GreaterThan(divisor);
         }
 
         if(visible())

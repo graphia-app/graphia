@@ -200,7 +200,7 @@ void LayoutThread::run()
 
 void LayoutThread::addComponent(ComponentId componentId)
 {
-    if(!Utils::contains(_componentLayouts, componentId))
+    if(!u::contains(_componentLayouts, componentId))
     {
         auto layout = _layoutFactory->create(componentId, _intermediatePositions);
         addLayout(layout);
@@ -226,7 +226,7 @@ void LayoutThread::removeComponent(ComponentId componentId)
         resumeAfterRemoval = true;
     }
 
-    if(Utils::contains(_componentLayouts, componentId))
+    if(u::contains(_componentLayouts, componentId))
     {
         auto layout = _componentLayouts[componentId];
         removeLayout(layout);

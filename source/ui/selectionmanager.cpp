@@ -109,7 +109,7 @@ template<typename InputIterator> void SelectionManager::toggleNodes(InputIterato
     for(auto i = first; i != last; i++)
     {
         auto nodeId = *i;
-        if(!Utils::contains(_selectedNodes, nodeId))
+        if(!u::contains(_selectedNodes, nodeId))
             difference.insert(nodeId);
     }
 
@@ -123,7 +123,7 @@ bool SelectionManager::nodeIsSelected(NodeId nodeId) const
 #ifdef EXPENSIVE_DEBUG_CHECKS
     Q_ASSERT(Utils::contains(_graph.nodeIds(), nodeId));
 #endif
-    return Utils::contains(_selectedNodes, nodeId);
+    return u::contains(_selectedNodes, nodeId);
 }
 
 bool SelectionManager::setSelectedNodes(const NodeIdSet& nodeIds)

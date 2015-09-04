@@ -318,7 +318,7 @@ static QQuaternion mouseMoveToRotation(const QPoint& prev, const QPoint& cur,
 
     float dot = QVector3D::dotProduct(previous, current);
     float value = dot / (previous.length() * current.length());
-    value = Utils::clamp(-1.0f, 1.0f, value);
+    value = u::clamp(-1.0f, 1.0f, value);
     float radians = std::acos(value);
     float angle = -qRadiansToDegrees(radians);
 

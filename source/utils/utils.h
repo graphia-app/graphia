@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace Utils
+namespace u
 {
     float rand(float low, float high);
     int rand(int low, int high);

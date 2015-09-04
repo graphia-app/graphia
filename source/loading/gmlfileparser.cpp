@@ -150,9 +150,9 @@ bool GmlFileParser::parseGmlList(MutableGraph& graph, const GmlFileParser::KeyVa
         case GmlList::Edge:
             if(intValue != nullptr)
             {
-                if(!key.compare("source") && Utils::contains(nodeIdMap, *intValue))
+                if(!key.compare("source") && u::contains(nodeIdMap, *intValue))
                     sourceId = nodeIdMap[*intValue];
-                else if(!key.compare("target") && !sourceId.isNull() && Utils::contains(nodeIdMap, *intValue))
+                else if(!key.compare("target") && !sourceId.isNull() && u::contains(nodeIdMap, *intValue))
                     graph.addEdge(sourceId, nodeIdMap[*intValue]);
                 else
                 {
