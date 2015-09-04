@@ -147,13 +147,13 @@ void u::nameCurrentThread(const QString& name)
 const QString u::currentThreadName()
 {
     // Windows doesn't really have a concept of named threads (see above), so use the ID instead
-    return QString::number(Utils::currentThreadId());
+    return QString::number(u::currentThreadId());
 }
 #else
 void u::nameCurrentThread(const QString&) {}
 const QString u::currentThreadName()
 {
-    return QString::number(Utils::currentThreadId());
+    return QString::number(u::currentThreadId());
 }
 #endif
 
