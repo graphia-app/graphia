@@ -94,7 +94,7 @@ int u::currentThreadId()
 #include <unistd.h>
 #include <sys/syscall.h>
 
-void u::nameCurrentThread(const QString& name)
+void u::setCurrentThreadName(const QString& name)
 {
     if(syscall(SYS_gettid) != getpid()) // Avoid renaming main thread
         prctl(PR_SET_NAME, (char*)name.toUtf8().constData());

@@ -52,7 +52,7 @@ namespace u
     int smallestPowerOf2GreaterThan(int x);
 
     int currentThreadId();
-    void nameCurrentThread(const QString& name);
+    void setCurrentThreadName(const QString& name);
     const QString currentThreadName();
 
     QQuaternion matrixToQuaternion(const QMatrix4x4& m);

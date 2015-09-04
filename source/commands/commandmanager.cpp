@@ -43,7 +43,7 @@ void CommandManager::executeReal(std::shared_ptr<Command> command)
     auto executeCommand = [this, command]()
     {
         if(command->asynchronous())
-            u::nameCurrentThread(command->description());
+            u::setCurrentThreadName(command->description());
 
         if(!command->execute())
         {
@@ -84,7 +84,7 @@ void CommandManager::undoReal()
     auto undoCommand = [this, command]()
     {
         if(command->asynchronous())
-            u::nameCurrentThread("(u) " + command->description());
+            u::setCurrentThreadName("(u) " + command->description());
 
         command->undo();
         _lastExecutedIndex--;
@@ -114,7 +114,7 @@ void CommandManager::redoReal()
     auto redoCommand = [this, command]()
     {
         if(command->asynchronous())
-            u::nameCurrentThread("(r) " + command->description());
+            u::setCurrentThreadName("(r) " + command->description());
 
         command->execute();
 

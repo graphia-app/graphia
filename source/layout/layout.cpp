@@ -137,7 +137,7 @@ void LayoutThread::run()
 {
     do
     {
-        u::nameCurrentThread("Layout >");
+        u::setCurrentThreadName("Layout >");
 
         for(auto& layout : _layouts)
         {
@@ -160,7 +160,7 @@ void LayoutThread::run()
         if(!_stop && (_pause || allLayoutsShouldPause() || (!iterative() && _repeating)))
         {
             _paused = true;
-            u::nameCurrentThread("Layout ||");
+            u::setCurrentThreadName("Layout ||");
             uncancel();
             _waitForPause.notify_all();
             _waitForResume.wait(lock);

@@ -9,7 +9,7 @@ ThreadPool::ThreadPool(const QString& threadNamePrefix, int numThreads) :
     {
         _threads.emplace_back([threadNamePrefix, i, this]
             {
-                u::nameCurrentThread(QString("%1%2").arg(threadNamePrefix).arg(i + 1));
+                u::setCurrentThreadName(QString("%1%2").arg(threadNamePrefix).arg(i + 1));
 
                 while(!_stop)
                 {

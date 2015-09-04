@@ -31,7 +31,7 @@ void GraphFileParserThread::cancel()
 
 void GraphFileParserThread::run()
 {
-    u::nameCurrentThread("Parser");
+    u::setCurrentThreadName("Parser");
 
     connect(_graphFileParser.get(), &GraphFileParser::progress, this, &GraphFileParserThread::progress);
 
