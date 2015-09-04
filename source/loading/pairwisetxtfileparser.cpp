@@ -1,5 +1,6 @@
 #include "pairwisetxtfileparser.h"
 
+#include "../utils/utils.h"
 #include "../graph/graph.h"
 
 #include <QFile>
@@ -50,7 +51,7 @@ bool PairwiseTxtFileParser::parse(MutableGraph& graph)
                 NodeId firstNodeId;
                 NodeId secondNodeId;
 
-                if(nodeIdHash.find(first) == nodeIdHash.end())
+                if(!Utils::contains(nodeIdHash, first))
                 {
                     firstNodeId = graph.addNode();
                     nodeIdHash.emplace(first, firstNodeId);
@@ -58,7 +59,7 @@ bool PairwiseTxtFileParser::parse(MutableGraph& graph)
                 else
                     firstNodeId = nodeIdHash[first];
 
-                if(nodeIdHash.find(second) == nodeIdHash.end())
+                if(!Utils::contains(nodeIdHash, second))
                 {
                     secondNodeId = graph.addNode();
                     nodeIdHash.emplace(second, secondNodeId);

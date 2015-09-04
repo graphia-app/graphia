@@ -1,6 +1,7 @@
 #include "graph.h"
 #include "grapharray.h"
 #include "componentmanager.h"
+#include "../utils/utils.h"
 #include "../utils/cpp1x_hacks.h"
 
 #include <QtGlobal>
@@ -39,7 +40,7 @@ NodeId Graph::firstNodeId() const
 
 bool Graph::containsNodeId(NodeId nodeId) const
 {
-    return std::find(nodeIds().cbegin(), nodeIds().cend(), nodeId) != nodeIds().cend();
+    return Utils::contains(nodeIds(), nodeId);
 }
 
 EdgeId Graph::firstEdgeId() const
@@ -49,7 +50,7 @@ EdgeId Graph::firstEdgeId() const
 
 bool Graph::containsEdgeId(EdgeId edgeId) const
 {
-    return std::find(edgeIds().cbegin(), edgeIds().cend(), edgeId) != edgeIds().cend();
+    return Utils::contains(edgeIds(), edgeId);
 }
 
 const EdgeIdSet Graph::edgeIdsForNodes(const NodeIdSet& nodeIds) const

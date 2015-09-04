@@ -1,5 +1,6 @@
 #include "gmlfileparser.h"
 
+#include "../utils/utils.h"
 #include "../graph/graph.h"
 
 #include <QFileInfo>
@@ -149,9 +150,9 @@ bool GmlFileParser::parseGmlList(MutableGraph& graph, const GmlFileParser::KeyVa
         case GmlList::Edge:
             if(intValue != nullptr)
             {
-                if(!key.compare("source") && nodeIdMap.find(*intValue) != nodeIdMap.end())
+                if(!key.compare("source") && Utils::contains(nodeIdMap, *intValue))
                     sourceId = nodeIdMap[*intValue];
-                else if(!key.compare("target") && !sourceId.isNull() && nodeIdMap.find(*intValue) != nodeIdMap.end())
+                else if(!key.compare("target") && !sourceId.isNull() && Utils::contains(nodeIdMap, *intValue))
                     graph.addEdge(sourceId, nodeIdMap[*intValue]);
                 else
                 {

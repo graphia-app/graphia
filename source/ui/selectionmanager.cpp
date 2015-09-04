@@ -1,5 +1,6 @@
 #include "selectionmanager.h"
 
+#include "../utils/utils.h"
 #include <algorithm>
 #include <utility>
 
@@ -18,7 +19,7 @@ NodeIdSet SelectionManager::selectedNodes() const
         [this](ElementId<NodeId> nodeId)
         {
             auto& nodeIds = _graph.nodeIds();
-            return std::find(nodeIds.begin(), nodeIds.end(), nodeId) != nodeIds.end();
+            return Utils::contains(nodeIds, nodeId);
         }));
 #endif
 
@@ -108,7 +109,7 @@ template<typename InputIterator> void SelectionManager::toggleNodes(InputIterato
     for(auto i = first; i != last; i++)
     {
         auto nodeId = *i;
-        if(_selectedNodes.find(nodeId) == _selectedNodes.end())
+        if(!Utils::contains(_selectedNodes, nodeId))
             difference.insert(nodeId);
     }
 
@@ -120,11 +121,9 @@ template<typename InputIterator> void SelectionManager::toggleNodes(InputIterato
 bool SelectionManager::nodeIsSelected(NodeId nodeId) const
 {
 #ifdef EXPENSIVE_DEBUG_CHECKS
-    Q_ASSERT(std::find(_graph.nodeIds().begin(),
-                       _graph.nodeIds().end(),
-                       nodeId) != _graph.nodeIds().end());
+    Q_ASSERT(Utils::contains(_graph.nodeIds(), nodeId));
 #endif
-    return _selectedNodes.find(nodeId) != _selectedNodes.end();
+    return Utils::contains(_selectedNodes, nodeId);
 }
 
 bool SelectionManager::setSelectedNodes(const NodeIdSet& nodeIds)

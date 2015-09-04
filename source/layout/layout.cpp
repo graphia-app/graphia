@@ -1,4 +1,5 @@
 #include "layout.h"
+#include "../utils/utils.h"
 #include "../utils/namethread.h"
 
 LayoutThread::LayoutThread(GraphModel& graphModel,
@@ -199,7 +200,7 @@ void LayoutThread::run()
 
 void LayoutThread::addComponent(ComponentId componentId)
 {
-    if(_componentLayouts.find(componentId) == _componentLayouts.end())
+    if(!Utils::contains(_componentLayouts, componentId))
     {
         auto layout = _layoutFactory->create(componentId, _intermediatePositions);
         addLayout(layout);
@@ -225,7 +226,7 @@ void LayoutThread::removeComponent(ComponentId componentId)
         resumeAfterRemoval = true;
     }
 
-    if(_componentLayouts.find(componentId) != _componentLayouts.end())
+    if(Utils::contains(_componentLayouts, componentId))
     {
         auto layout = _componentLayouts[componentId];
         removeLayout(layout);
