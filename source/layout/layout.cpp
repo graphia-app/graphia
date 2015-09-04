@@ -1,6 +1,5 @@
 #include "layout.h"
 #include "../utils/utils.h"
-#include "../utils/namethread.h"
 
 LayoutThread::LayoutThread(GraphModel& graphModel,
                            std::unique_ptr<const LayoutFactory> layoutFactory,
@@ -156,7 +155,7 @@ void LayoutThread::run()
 {
     do
     {
-        nameCurrentThread("Layout >");
+        u::nameCurrentThread("Layout >");
         for(auto layout : _layouts)
         {
             if(layout->shouldPause())
@@ -180,7 +179,7 @@ void LayoutThread::run()
         if(!_stop && (_pause || allLayoutsShouldPause() || (!iterative() && _repeating)))
         {
             _paused = true;
-            nameCurrentThread("Layout ||");
+            u::nameCurrentThread("Layout ||");
             uncancel();
             _waitForPause.notify_all();
             _waitForResume.wait(lock);

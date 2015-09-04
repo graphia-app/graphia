@@ -59,7 +59,6 @@ HEADERS += \
     source/utils/cpp1x_hacks.h \
     source/utils/deferredexecutor.h \
     source/utils/fixedsizestack.h \
-    source/utils/namethread.h \
     source/utils/performancecounter.h \
     source/utils/semaphore.h \
     source/utils/threadpool.h \
@@ -121,7 +120,6 @@ SOURCES += \
     source/ui/graphoverviewinteractor.cpp \
     source/ui/selectionmanager.cpp \
     source/utils/deferredexecutor.cpp \
-    source/utils/namethread.cpp \
     source/utils/performancecounter.cpp \
     source/utils/semaphore.cpp \
     source/utils/threadpool.cpp \

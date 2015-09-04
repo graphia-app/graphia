@@ -1,6 +1,6 @@
 #include "commandmanager.h"
 
-#include "../utils/namethread.h"
+#include "../utils/utils.h"
 
 #include <thread>
 
@@ -43,7 +43,7 @@ void CommandManager::executeReal(std::shared_ptr<Command> command)
     auto executeCommand = [this, command]()
     {
         if(command->asynchronous())
-            nameCurrentThread(command->description());
+            u::nameCurrentThread(command->description());
 
         if(!command->execute())
         {
@@ -84,7 +84,7 @@ void CommandManager::undoReal()
     auto undoCommand = [this, command]()
     {
         if(command->asynchronous())
-            nameCurrentThread("(u) " + command->description());
+            u::nameCurrentThread("(u) " + command->description());
 
         command->undo();
         _lastExecutedIndex--;
@@ -114,7 +114,7 @@ void CommandManager::redoReal()
     auto redoCommand = [this, command]()
     {
         if(command->asynchronous())
-            nameCurrentThread("(r) " + command->description());
+            u::nameCurrentThread("(r) " + command->description());
 
         command->execute();
 

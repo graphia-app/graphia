@@ -1,6 +1,5 @@
 #include "deferredexecutor.h"
 
-#include "../utils/namethread.h"
 #include "../utils/utils.h"
 
 #include <QDebug>
@@ -26,7 +25,7 @@ void DeferredExecutor::enqueue(TaskFn function, const QString& description)
     task._description = description;
 
     if(_debug > 1)
-        qDebug() << "enqueue(...) thread:" << currentThreadName() << description;
+        qDebug() << "enqueue(...) thread:" << u::currentThreadName() << description;
 
     _tasks.emplace_back(task);
 }
@@ -37,7 +36,7 @@ void DeferredExecutor::execute()
 
     if(!_tasks.empty() && _debug > 0)
     {
-        qDebug() << "execute() thread" << currentThreadName();
+        qDebug() << "execute() thread" << u::currentThreadName();
 
         for(auto task : _tasks)
             qDebug() << "\t" << task._description;

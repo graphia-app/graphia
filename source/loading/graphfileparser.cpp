@@ -2,7 +2,7 @@
 
 #include "../graph/graph.h"
 
-#include "../utils/namethread.h"
+#include "../utils/utils.h"
 
 GraphFileParserThread::GraphFileParserThread(MutableGraph& graph,
                                              std::unique_ptr<GraphFileParser> graphFileParser) :
@@ -31,7 +31,7 @@ void GraphFileParserThread::cancel()
 
 void GraphFileParserThread::run()
 {
-    nameCurrentThread("Parser");
+    u::nameCurrentThread("Parser");
 
     connect(_graphFileParser.get(), &GraphFileParser::progress, this, &GraphFileParserThread::progress);
 

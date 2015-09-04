@@ -6,6 +6,7 @@
 #include <QMatrix4x4>
 #include <QQuaternion>
 #include <QColor>
+#include <QString>
 
 #include <type_traits>
 #include <algorithm>
@@ -51,6 +52,8 @@ namespace u
     int smallestPowerOf2GreaterThan(int x);
 
     int currentThreadId();
+    void nameCurrentThread(const QString& name);
+    const QString currentThreadName();
 
     QQuaternion matrixToQuaternion(const QMatrix4x4& m);
 

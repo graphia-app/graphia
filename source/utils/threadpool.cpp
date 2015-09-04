@@ -1,6 +1,6 @@
 #include "threadpool.h"
 
-#include "namethread.h"
+#include "utils.h"
 
 ThreadPool::ThreadPool(const QString& threadNamePrefix, int numThreads) :
     _stop(false), _activeThreads(0)
@@ -9,7 +9,7 @@ ThreadPool::ThreadPool(const QString& threadNamePrefix, int numThreads) :
     {
         _threads.emplace_back([threadNamePrefix, i, this]
             {
-                nameCurrentThread(QString("%1%2").arg(threadNamePrefix).arg(i + 1));
+                u::nameCurrentThread(QString("%1%2").arg(threadNamePrefix).arg(i + 1));
 
                 while(!_stop)
                 {

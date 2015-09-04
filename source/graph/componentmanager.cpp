@@ -1,7 +1,6 @@
 #include "componentmanager.h"
 
 #include "../utils/utils.h"
-#include "../utils/namethread.h"
 
 #include <queue>
 #include <map>
@@ -255,7 +254,7 @@ public:
         {
             qWarning() << "Needed to acquire lock when reading from ComponentManager; "
                           "this implies inappropriate concurrent access which is bad "
-                          "because it means the thread" << currentThreadName() <<
+                          "because it means the thread" << u::currentThreadName() <<
                           "is blocked until the update completes";
 
             _lock.lock();
