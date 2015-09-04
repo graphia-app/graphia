@@ -46,6 +46,7 @@ void main()
 
     float outlineAlpha = 0.5 * abs(cnv[0]) + abs(cnv[1]);
     float interiorAlpha = I[1][1];
+    float frameBufferAlpha = multisampledValue(coord).a;
     vec3 highlightColor = vec3(1.0, 1.0, 1.0);
-    fragColor = vec4(highlightColor, (outlineAlpha + interiorAlpha) * 0.5);
+    fragColor = vec4(highlightColor, (outlineAlpha + interiorAlpha) * 0.5 * frameBufferAlpha);
 }
