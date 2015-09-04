@@ -47,17 +47,17 @@ static void dampOscillations(QVector3D& previous, QVector3D& next)
     previous = next;
 }
 
-void ForceDirectedLayout::executeReal(uint64_t iteration)
+void ForceDirectedLayout::executeReal(bool firstIteration)
 {
     _prevDisplacements.resize(positions().size());
     _displacements.resize(positions().size());
 
-    if(iteration == 0)
+    if(firstIteration)
     {
         RandomLayout randomLayout(graph(), positions());
 
         randomLayout.setSpread(10.0f);
-        randomLayout.execute(iteration);
+        randomLayout.execute(firstIteration);
 
         for(NodeId nodeId : nodeIds())
             _prevDisplacements[nodeId] = QVector3D(0.0f, 0.0f, 0.0f);

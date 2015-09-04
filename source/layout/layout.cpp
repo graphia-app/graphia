@@ -7,6 +7,7 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
     _graphModel(&graphModel),
     _repeating(repeating),
     _layoutFactory(std::move(layoutFactory)),
+    _executedAtLeastOnce(graphModel.graph()),
     _intermediatePositions(graphModel.graph()),
     _performanceCounter(std::chrono::seconds(3))
 {
@@ -21,25 +22,6 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
     connect(&graphModel.graph(), &Graph::componentWillBeRemoved, this, &LayoutThread::onComponentWillBeRemoved, Qt::DirectConnection);
 }
 
-void LayoutThread::addLayout(std::shared_ptr<Layout> layout)
-{
-    std::unique_lock<std::mutex> lock(_mutex);
-    _layouts.insert(layout);
-
-    if(_layouts.size() == 1)
-    {
-        // If this is the first layout, resume
-        lock.unlock();
-        resume();
-    }
-}
-
-void LayoutThread::removeLayout(std::shared_ptr<Layout> layout)
-{
-    std::unique_lock<std::mutex> lock(_mutex);
-    _layouts.erase(layout);
-}
-
 void LayoutThread::pause()
 {
     std::unique_lock<std::mutex> lock(_mutex);
@@ -48,8 +30,8 @@ void LayoutThread::pause()
 
     _pause = true;
 
-    for(auto layout : _layouts)
-        layout->cancel();
+    for(auto& layout : _layouts)
+        layout.second->cancel();
 
     lock.unlock();
     emit pausedChanged();
@@ -63,8 +45,8 @@ void LayoutThread::pauseAndWait()
 
     _pause = true;
 
-    for(auto layout : _layouts)
-        layout->cancel();
+    for(auto& layout : _layouts)
+        layout.second->cancel();
 
     _waitForPause.wait(lock);
 
@@ -117,17 +99,17 @@ void LayoutThread::stop()
     _stop = true;
     _pause = false;
 
-    for(auto layout : _layouts)
-        layout->cancel();
+    for(auto& layout : _layouts)
+        layout.second->cancel();
 
     _waitForResume.notify_all();
 }
 
 bool LayoutThread::iterative()
 {
-    for(auto layout : _layouts)
+    for(auto& layout : _layouts)
     {
-        if(layout->iterative())
+        if(layout.second->iterative())
             return true;
     }
 
@@ -136,15 +118,15 @@ bool LayoutThread::iterative()
 
 void LayoutThread::uncancel()
 {
-    for(auto layout : _layouts)
-        layout->uncancel();
+    for(auto& layout : _layouts)
+        layout.second->uncancel();
 }
 
 bool LayoutThread::allLayoutsShouldPause()
 {
-    for(auto layout : _layouts)
+    for(auto& layout : _layouts)
     {
-        if(!layout->shouldPause())
+        if(!layout.second->shouldPause())
             return false;
     }
 
@@ -156,19 +138,18 @@ void LayoutThread::run()
     do
     {
         u::nameCurrentThread("Layout >");
-        for(auto layout : _layouts)
+
+        for(auto& layout : _layouts)
         {
-            if(layout->shouldPause())
+            if(layout.second->shouldPause())
                 continue;
 
-            layout->execute(_iteration);
+            layout.second->execute(!_executedAtLeastOnce.get(layout.first));
+            _executedAtLeastOnce.set(layout.first, true);
         }
-        _iteration++;
 
         _graphModel->nodePositions().update(_intermediatePositions);
-
         _performanceCounter.tick();
-
         emit executed();
 
         std::unique_lock<std::mutex> lock(_mutex);
@@ -199,13 +180,22 @@ void LayoutThread::run()
 
 void LayoutThread::addComponent(ComponentId componentId)
 {
-    if(!u::contains(_componentLayouts, componentId))
+    if(!u::contains(_layouts, componentId))
     {
+        std::unique_lock<std::mutex> lock(_mutex);
+
         auto layout = _layoutFactory->create(componentId, _intermediatePositions);
-        addLayout(layout);
-        _componentLayouts.emplace(componentId, layout);
+
+        _layouts.emplace(componentId, layout);
         _graphModel->nodePositions().setScale(layout->scaling());
         _graphModel->nodePositions().setSmoothing(layout->smoothing());
+
+        if(_layouts.size() == 1)
+        {
+            // If this is the first layout, resume
+            lock.unlock();
+            resume();
+        }
     }
 }
 
@@ -225,11 +215,10 @@ void LayoutThread::removeComponent(ComponentId componentId)
         resumeAfterRemoval = true;
     }
 
-    if(u::contains(_componentLayouts, componentId))
+    if(u::contains(_layouts, componentId))
     {
-        auto layout = _componentLayouts[componentId];
-        removeLayout(layout);
-        _componentLayouts.erase(componentId);
+        std::unique_lock<std::mutex> lock(_mutex);
+        _layouts.erase(componentId);
     }
 
     if(resumeAfterRemoval)

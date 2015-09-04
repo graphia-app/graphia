@@ -45,7 +45,7 @@ private:
 
     void setCancel(bool cancel) { _atomicCancel = cancel; }
 
-    virtual void executeReal(uint64_t iteration) = 0;
+    virtual void executeReal(bool firstIteration) = 0;
 
 protected:
     bool shouldCancel() const { return _atomicCancel; }
@@ -74,7 +74,7 @@ public:
     const std::vector<NodeId>& nodeIds() const { return _graph.nodeIds(); }
     const std::vector<EdgeId>& edgeIds() const { return _graph.edgeIds(); }
 
-    void execute(int iteration) { executeReal(iteration); }
+    void execute(bool firstIteration) { executeReal(firstIteration); }
 
     virtual void cancel() { setCancel(true); }
     virtual void uncancel() { setCancel(false); }
@@ -112,7 +112,6 @@ class LayoutThread : public QObject
 
 private:
     GraphModel* _graphModel;
-    std::set<std::shared_ptr<Layout>> _layouts;
     std::mutex _mutex;
     std::thread _thread;
     bool _started = false;
@@ -120,12 +119,12 @@ private:
     bool _paused = true;
     bool _stop = false;
     bool _repeating = false;
-    uint64_t _iteration = 0;
     std::condition_variable _waitForPause;
     std::condition_variable _waitForResume;
 
     std::unique_ptr<const LayoutFactory> _layoutFactory;
-    std::map<ComponentId, std::shared_ptr<Layout>> _componentLayouts;
+    std::map<ComponentId, std::shared_ptr<Layout>> _layouts;
+    ComponentArray<bool> _executedAtLeastOnce;
 
     NodePositions _intermediatePositions;
 
@@ -143,9 +142,6 @@ public:
         if(_thread.joinable())
             _thread.join();
     }
-
-    void addLayout(std::shared_ptr<Layout> layout);
-    void removeLayout(std::shared_ptr<Layout> layout);
 
     void pause();
     void pauseAndWait();

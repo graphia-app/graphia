@@ -12,7 +12,7 @@ public:
         Layout(graph, positions)
     {}
 
-    void executeReal(uint64_t);
+    void executeReal(bool);
 };
 
 

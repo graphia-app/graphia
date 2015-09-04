@@ -23,7 +23,7 @@ public:
         _displacements(graph.numNodes())
     {}
 
-    void executeReal(uint64_t iteration);
+    void executeReal(bool firstIteration);
 };
 
 class ForceDirectedLayoutFactory : public LayoutFactory
