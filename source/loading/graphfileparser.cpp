@@ -38,7 +38,7 @@ void GraphFileParserThread::run()
     bool result;
 
     _graph.performTransaction(
-        [&](MutableGraph& graph)
+        [this, &result](MutableGraph& graph)
         {
             result = _graphFileParser->parse(graph);
 
