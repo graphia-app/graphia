@@ -2,6 +2,7 @@
 
 #include "../utils/utils.h"
 #include "../graph/graph.h"
+#include "../graph/weightededgegraphmodel.h"
 
 #include <QFile>
 #include <QTextStream>
@@ -55,6 +56,7 @@ bool PairwiseTxtFileParser::parse(MutableGraph& graph)
                 {
                     firstNodeId = graph.addNode();
                     nodeIdHash.emplace(first, firstNodeId);
+                    _graphModel->nodeNames()[firstNodeId] = first;
                 }
                 else
                     firstNodeId = nodeIdHash[first];
@@ -63,11 +65,19 @@ bool PairwiseTxtFileParser::parse(MutableGraph& graph)
                 {
                     secondNodeId = graph.addNode();
                     nodeIdHash.emplace(second, secondNodeId);
+                    _graphModel->nodeNames()[secondNodeId] = second;
                 }
                 else
                     secondNodeId = nodeIdHash[second];
 
-                graph.addEdge(firstNodeId, secondNodeId);
+                auto edgeId = graph.addEdge(firstNodeId, secondNodeId);
+
+                if(list.size() >= 3)
+                {
+                    // We have an edge weight too
+                    auto third = list.at(2);
+                    _graphModel->edgeWeights()[edgeId] = third.toFloat();
+                }
             }
 
             int newPercentComplete = static_cast<int>(file.pos() * 100 / fileSize);

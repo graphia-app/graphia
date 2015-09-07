@@ -7,6 +7,7 @@ GenericGraphModel::GenericGraphModel(const QString &name) :
     _nodePositions(_graph),
     _nodeVisuals(_graph),
     _edgeVisuals(_graph),
+    _nodeNames(_graph),
     _name(name)
 {
     connect(&_transformedGraph, &Graph::graphChanged, this, &GenericGraphModel::onGraphChanged, Qt::DirectConnection);

@@ -7,6 +7,7 @@
 #include "loading/pairwisetxtfileparser.h"
 
 #include "graph/genericgraphmodel.h"
+#include "graph/weightededgegraphmodel.h"
 
 #include "utils/cpp1x_hacks.h"
 
@@ -46,8 +47,9 @@ bool Application::parserAndModelForFile(const QUrl& url, const QString& fileType
     }
     else if(fileTypeName.compare("PairwiseTXT") == 0)
     {
-        graphFileParser = std::make_unique<PairwiseTxtFileParser>(fileName);
-        graphModel = std::make_shared<GenericGraphModel>(baseFileName);
+        auto weightedEdgeGraphModel = std::make_shared<WeightedEdgeGraphModel>(baseFileName);
+        graphFileParser = std::make_unique<PairwiseTxtFileParser>(fileName, weightedEdgeGraphModel);
+        graphModel = weightedEdgeGraphModel;
 
         return true;
     }

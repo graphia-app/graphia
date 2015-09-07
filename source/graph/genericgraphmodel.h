@@ -18,6 +18,8 @@ private:
     NodeVisuals _nodeVisuals;
     EdgeVisuals _edgeVisuals;
 
+    NodeArray<QString> _nodeNames;
+
     QString _name;
 
 public:
@@ -31,6 +33,9 @@ public:
     const NodeVisuals& nodeVisuals() const { return _nodeVisuals; }
     EdgeVisuals& edgeVisuals() { return _edgeVisuals; }
     const EdgeVisuals& edgeVisuals() const { return _edgeVisuals; }
+
+    NodeArray<QString>& nodeNames() { return _nodeNames; }
+    const NodeArray<QString>& nodeNames() const { return _nodeNames; }
 
     const QString& name() { return _name; }
 
