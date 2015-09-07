@@ -79,8 +79,8 @@ public:
     void setStatus(const QString& status);
 
 private:
-    Application* _application;
-    GraphQuickItem* _graphQuickItem;
+    Application* _application = nullptr;
+    GraphQuickItem* _graphQuickItem = nullptr;
 
     QString _title;
     QString _status;
