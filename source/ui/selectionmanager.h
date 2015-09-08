@@ -1,7 +1,7 @@
 #ifndef SELECTIONMANAGER_H
 #define SELECTIONMANAGER_H
 
-#include "../graph/graph.h"
+#include "../graph/graphmodel.h"
 
 #include <QObject>
 
@@ -11,7 +11,7 @@ class SelectionManager : public QObject
 {
     Q_OBJECT
 public:
-    SelectionManager(const Graph& graph);
+    SelectionManager(const GraphModel& graph);
 
     NodeIdSet selectedNodes() const;
     NodeIdSet unselectedNodes() const;
@@ -42,7 +42,7 @@ public:
     const QString numNodesSelectedAsString() const;
 
 private:
-    const Graph& _graph;
+    const GraphModel& _graphModel;
 
     NodeIdSet _selectedNodes;
 

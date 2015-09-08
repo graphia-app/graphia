@@ -227,7 +227,7 @@ void Document::onLoadComplete(bool /*success FIXME hmm*/)
     connect(_layoutThread.get(), &LayoutThread::pausedChanged, this, &Document::layoutIsPausedChanged);
     _layoutThread->addAllComponents();
 
-    _selectionManager = std::make_shared<SelectionManager>(_graphModel->graph());
+    _selectionManager = std::make_shared<SelectionManager>(*_graphModel);
     _graphQuickItem->initialise(_graphModel, _commandManager, _selectionManager);
 
     connect(_graphQuickItem, &GraphQuickItem::userInteractionStarted, [this] { pauseLayout(true); });

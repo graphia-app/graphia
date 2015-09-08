@@ -6,9 +6,9 @@
 
 //#define EXPENSIVE_DEBUG_CHECKS
 
-SelectionManager::SelectionManager(const Graph& graph) :
+SelectionManager::SelectionManager(const GraphModel& graph) :
     QObject(),
-    _graph(graph)
+    _graphModel(graph)
 {}
 
 NodeIdSet SelectionManager::selectedNodes() const
@@ -18,8 +18,8 @@ NodeIdSet SelectionManager::selectedNodes() const
     Q_ASSERT(std::all_of(_selectedNodes.begin(), _selectedNodes.end(),
         [this](ElementId<NodeId> nodeId)
         {
-            auto& nodeIds = _graph.nodeIds();
-            return Utils::contains(nodeIds, nodeId);
+            auto& nodeIds = _graphModel.graph().nodeIds();
+            return u::contains(nodeIds, nodeId);
         }));
 #endif
 
@@ -28,7 +28,7 @@ NodeIdSet SelectionManager::selectedNodes() const
 
 NodeIdSet SelectionManager::unselectedNodes() const
 {
-    auto& nodeIds = _graph.nodeIds();
+    auto& nodeIds = _graphModel.graph().nodeIds();
     auto unselectedNodeIds = NodeIdSet(nodeIds.begin(), nodeIds.end());
     unselectedNodeIds.erase(_selectedNodes.begin(), _selectedNodes.end());
 
@@ -121,7 +121,7 @@ template<typename InputIterator> void SelectionManager::toggleNodes(InputIterato
 bool SelectionManager::nodeIsSelected(NodeId nodeId) const
 {
 #ifdef EXPENSIVE_DEBUG_CHECKS
-    Q_ASSERT(Utils::contains(_graph.nodeIds(), nodeId));
+    Q_ASSERT(u::contains(_graphModel.graph().nodeIds(), nodeId));
 #endif
     return u::contains(_selectedNodes, nodeId);
 }
@@ -139,7 +139,7 @@ bool SelectionManager::setSelectedNodes(const NodeIdSet& nodeIds)
 
 bool SelectionManager::selectAllNodes()
 {
-    auto& nodeIds = _graph.nodeIds();
+    auto& nodeIds = _graphModel.graph().nodeIds();
     return selectNodes(nodeIds.begin(), nodeIds.end());
 }
 
@@ -156,17 +156,26 @@ bool SelectionManager::clearNodeSelection()
 
 void SelectionManager::invertNodeSelection()
 {
-    auto& nodeIds = _graph.nodeIds();
+    auto& nodeIds = _graphModel.graph().nodeIds();
     toggleNodes(nodeIds.begin(), nodeIds.end());
 }
 
 const QString SelectionManager::numNodesSelectedAsString() const
 {
     int selectionSize = static_cast<int>(selectedNodes().size());
-    if(selectionSize > 1)
-        return QString(tr("%1 Nodes Selected")).arg(selectionSize);
-    else if(selectionSize == 1)
+
+    if(selectionSize == 1)
+    {
+        auto nodeId = *selectedNodes().begin();
+        auto& nodeName = _graphModel.nodeNames()[nodeId];
+
+        if(!nodeName.isEmpty())
+            return QString(tr("Selected %1")).arg(nodeName);
+
         return tr("1 Node Selected");
+    }
+    else if(selectionSize > 1)
+        return QString(tr("%1 Nodes Selected")).arg(selectionSize);
 
     return QString();
 }
