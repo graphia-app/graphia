@@ -201,6 +201,25 @@ ComponentId Graph::componentIdOfLargestComponent() const
     return componentIdOfLargestComponent(componentIds());
 }
 
+void Graph::setPhase(const QString& phase) const
+{
+    if(phase != _phase)
+    {
+        _phase = phase;
+        emit phaseChanged();
+    }
+}
+
+void Graph::clearPhase() const
+{
+    setPhase("");
+}
+
+const QString&Graph::phase() const
+{
+    return _phase;
+}
+
 MutableGraph::~MutableGraph()
 {
     // Ensure no transactions are in progress
@@ -553,6 +572,7 @@ void MutableGraph::endTransaction()
         _mutex.unlock();
         debugPauser.pause("End Graph Transaction");
         emit graphChanged(this);
+        clearPhase();
     }
 }
 

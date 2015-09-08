@@ -42,12 +42,14 @@ void TransformedGraph::rebuild()
 {
     emit graphWillChange(this);
 
+    setPhase(tr("Transforming"));
     _target.performTransaction([this](MutableGraph&)
     {
         _graphTransform->apply(*_source, *this);
     });
 
     emit graphChanged(this);
+    clearPhase();
 }
 
 void TransformedGraph::onTargetGraphChanged(const Graph*)

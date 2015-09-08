@@ -49,13 +49,23 @@ int Document::commandProgress() const
 
 QString Document::commandVerb() const
 {
+    auto& phase = _graphModel->graph().phase();
+
     if(!_loadComplete)
     {
         if(_loadProgress < 0)
+        {
+            if(!phase.isEmpty())
+                return phase;
+
             return tr("Finishing");
+        }
 
         return QString(tr("Loading %1").arg(_title));
     }
+
+    if(!phase.isEmpty())
+        return QString(tr("%1 (%2)")).arg(_commandManager.commandVerb()).arg(phase);
 
     return _commandManager.commandVerb();
 }
@@ -196,6 +206,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType)
 
     connect(&_graphModel->graph(), &Graph::graphWillChange, this, &Document::onGraphWillChange, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &Document::onGraphChanged, Qt::DirectConnection);
+    connect(&_graphModel->graph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
 
     connect(&_graphModel->graph().debugPauser, &DebugPauser::enabledChanged, this, &Document::debugPauserEnabledChanged);
     connect(&_graphModel->graph().debugPauser, &DebugPauser::pausedChanged, this, &Document::debugPausedChanged);

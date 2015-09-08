@@ -178,6 +178,10 @@ public:
     // been completed
     virtual void update() {}
 
+    void setPhase(const QString& phase) const;
+    void clearPhase() const;
+    const QString& phase() const;
+
     mutable DebugPauser debugPauser;
     void dumpToQDebug(int detail) const;
 
@@ -193,6 +197,8 @@ private:
     std::unordered_set<GraphArray*> _edgeArrays;
 
     std::unique_ptr<AbstractComponentManager> _componentManager;
+
+    mutable QString _phase;
 
 protected:
     NodeId nextNodeId() const;
@@ -217,6 +223,8 @@ signals:
     void componentSplit(const Graph*, const ComponentSplitSet&) const;
 
     void graphChanged(const Graph*) const;
+
+    void phaseChanged() const;
 };
 
 class MutableGraph : public Graph
