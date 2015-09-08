@@ -46,37 +46,37 @@ bool PairwiseTxtFileParser::parse(MutableGraph& graph)
 
             if(list.size() >= 2)
             {
-                auto first = list.at(0);
-                auto second = list.at(1);
+                auto firstToken = list.at(0);
+                auto secondToken = list.at(1);
 
                 NodeId firstNodeId;
                 NodeId secondNodeId;
 
-                if(!u::contains(nodeIdHash, first))
+                if(!u::contains(nodeIdHash, firstToken))
                 {
                     firstNodeId = graph.addNode();
-                    nodeIdHash.emplace(first, firstNodeId);
-                    _graphModel->nodeNames()[firstNodeId] = first;
+                    nodeIdHash.emplace(firstToken, firstNodeId);
+                    _graphModel->setNodeName(firstNodeId, firstToken);
                 }
                 else
-                    firstNodeId = nodeIdHash[first];
+                    firstNodeId = nodeIdHash[firstToken];
 
-                if(!u::contains(nodeIdHash, second))
+                if(!u::contains(nodeIdHash, secondToken))
                 {
                     secondNodeId = graph.addNode();
-                    nodeIdHash.emplace(second, secondNodeId);
-                    _graphModel->nodeNames()[secondNodeId] = second;
+                    nodeIdHash.emplace(secondToken, secondNodeId);
+                    _graphModel->setNodeName(secondNodeId, secondToken);
                 }
                 else
-                    secondNodeId = nodeIdHash[second];
+                    secondNodeId = nodeIdHash[secondToken];
 
                 auto edgeId = graph.addEdge(firstNodeId, secondNodeId);
 
                 if(list.size() >= 3)
                 {
                     // We have an edge weight too
-                    auto third = list.at(2);
-                    _graphModel->edgeWeights()[edgeId] = third.toFloat();
+                    auto thirdToken = list.at(2);
+                    _graphModel->setEdgeWeight(edgeId, thirdToken.toFloat());
                 }
             }
 

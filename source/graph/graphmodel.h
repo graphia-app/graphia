@@ -73,14 +73,14 @@ public:
     const NodeVisuals& nodeVisuals() const { return _nodeVisuals; }
     const EdgeVisuals& edgeVisuals() const { return _edgeVisuals; }
 
-    NodeArray<QString>& nodeNames() { return _nodeNames; }
     const NodeArray<QString>& nodeNames() const { return _nodeNames; }
+    void setNodeName(NodeId nodeId, const QString& name) { _nodeNames[nodeId] = name; }
 
-    const QString& name() { return _name; }
+    const QString& name() const { return _name; }
 
-    bool editable() { return true; }
+    bool editable() const { return true; }
 
-    virtual QQuickItem* contentQuickItem() { return nullptr; }
+    virtual QQuickItem* contentQuickItem() const { return nullptr; }
 
 private slots:
     void onGraphChanged(const Graph* graph);

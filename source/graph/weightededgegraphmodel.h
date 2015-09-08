@@ -13,8 +13,8 @@ private:
     EdgeArray<float> _edgeWeights;
 
 public:
-    EdgeArray<float>& edgeWeights() { return _edgeWeights; }
     const EdgeArray<float>& edgeWeights() const { return _edgeWeights; }
+    void setEdgeWeight(EdgeId edgeId, float weight) { _edgeWeights[edgeId] = weight; }
 };
 
 #endif // WEIGHTEDEDGEGRAPHMODEL_H
