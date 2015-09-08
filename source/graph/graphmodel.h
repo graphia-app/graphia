@@ -65,7 +65,6 @@ private:
 
 public:
     MutableGraph& mutableGraph() { return _graph; }
-    Graph& graph() { return _transformedGraph; }
     const Graph& graph() const { return _transformedGraph; }
     NodePositions& nodePositions() { return _nodePositions; }
     const NodePositions& nodePositions() const { return _nodePositions; }

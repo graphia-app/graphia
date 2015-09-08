@@ -30,6 +30,7 @@ private:
 
 public:
     NodePositions(Graph& graph);
+    NodePositions(const Graph& graph);
 
 public:
     std::recursive_mutex& mutex() { return _mutex; }

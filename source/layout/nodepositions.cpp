@@ -17,6 +17,10 @@ NodePositions::NodePositions(Graph& graph) :
     NodeArray<MeanPosition>(graph)
 {}
 
+NodePositions::NodePositions(const Graph& graph) :
+    NodePositions(const_cast<Graph&>(graph))
+{}
+
 const QVector3D& NodePositions::get(NodeId nodeId) const
 {
     return _array[nodeId].front();
