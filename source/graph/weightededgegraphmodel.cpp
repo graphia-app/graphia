@@ -2,7 +2,7 @@
 #include "../utils/utils.h"
 
 WeightedEdgeGraphModel::WeightedEdgeGraphModel(const QString &name) :
-    GenericGraphModel(name),
+    GraphModel(name),
     _edgeWeights(mutableGraph())
 {
 }

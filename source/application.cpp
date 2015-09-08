@@ -6,7 +6,7 @@
 #include "loading/gmlfileparser.h"
 #include "loading/pairwisetxtfileparser.h"
 
-#include "graph/genericgraphmodel.h"
+#include "graph/graphmodel.h"
 #include "graph/weightededgegraphmodel.h"
 
 #include "utils/cpp1x_hacks.h"
@@ -41,7 +41,7 @@ bool Application::parserAndModelForFile(const QUrl& url, const QString& fileType
     if(fileTypeName.compare("GML") == 0)
     {
         graphFileParser = std::make_unique<GmlFileParser>(fileName);
-        graphModel = std::make_shared<GenericGraphModel>(baseFileName);
+        graphModel = std::make_shared<GraphModel>(baseFileName);
 
         return true;
     }

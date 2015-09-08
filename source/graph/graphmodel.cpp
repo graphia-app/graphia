@@ -1,7 +1,7 @@
-#include "genericgraphmodel.h"
+#include "graphmodel.h"
 #include "../utils/utils.h"
 
-GenericGraphModel::GenericGraphModel(const QString &name) :
+GraphModel::GraphModel(const QString &name) :
     _graph(),
     _transformedGraph(_graph),
     _nodePositions(_graph),
@@ -10,13 +10,13 @@ GenericGraphModel::GenericGraphModel(const QString &name) :
     _nodeNames(_graph),
     _name(name)
 {
-    connect(&_transformedGraph, &Graph::graphChanged, this, &GenericGraphModel::onGraphChanged, Qt::DirectConnection);
+    connect(&_transformedGraph, &Graph::graphChanged, this, &GraphModel::onGraphChanged, Qt::DirectConnection);
 }
 
 const float NODE_SIZE = 0.6f;
 const float EDGE_SIZE = 0.2f;
 
-void GenericGraphModel::onGraphChanged(const Graph* graph)
+void GraphModel::onGraphChanged(const Graph* graph)
 {
     for(auto nodeId : graph->nodeIds())
     {

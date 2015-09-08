@@ -12,7 +12,6 @@ HEADERS += \
     source/commands/command.h \
     source/commands/commandmanager.h \
     source/commands/deleteselectednodescommand.h \
-    source/graph/genericgraphmodel.h \
     source/graph/graph.h \
     source/graph/grapharray.h \
     source/graph/graphmodel.h \
@@ -86,7 +85,6 @@ SOURCES += \
     source/commands/command.cpp \
     source/commands/commandmanager.cpp \
     source/commands/deleteselectednodescommand.cpp \
-    source/graph/genericgraphmodel.cpp \
     source/graph/graph.cpp \
     source/layout/barneshuttree.cpp \
     source/layout/centreinglayout.cpp \
@@ -138,7 +136,8 @@ SOURCES += \
     source/transform/filtertransform.cpp \
     source/transform/edgecontractiontransform.cpp \
     source/transform/compoundtransform.cpp \
-    source/graph/weightededgegraphmodel.cpp
+    source/graph/weightededgegraphmodel.cpp \
+    source/graph/graphmodel.cpp
 
 OTHER_FILES += \
     source/ui/qml/main.qml \

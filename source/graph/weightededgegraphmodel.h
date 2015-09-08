@@ -2,9 +2,8 @@
 #define WEIGHTEDEDGEGRAPHMODEL_H
 
 #include "graphmodel.h"
-#include "genericgraphmodel.h"
 
-class WeightedEdgeGraphModel : public GenericGraphModel
+class WeightedEdgeGraphModel : public GraphModel
 {
     Q_OBJECT
 public:

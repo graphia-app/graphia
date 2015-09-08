@@ -3,6 +3,8 @@
 
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
+#include "../transform/transformedgraph.h"
+
 #include "../layout/nodepositions.h"
 #include "../utils/cpp1x_hacks.h"
 
@@ -48,22 +50,40 @@ class GraphModel : public QObject
 {
     Q_OBJECT
 public:
-    virtual MutableGraph& mutableGraph() = 0;
-    virtual Graph& graph() = 0;
-    virtual const Graph& graph() const = 0;
-    virtual NodePositions& nodePositions() = 0;
-    virtual const NodePositions& nodePositions() const = 0;
+    GraphModel(const QString& name);
 
-    virtual NodeVisuals& nodeVisuals() = 0;
-    virtual const NodeVisuals& nodeVisuals() const = 0;
-    virtual EdgeVisuals& edgeVisuals() = 0;
-    virtual const EdgeVisuals& edgeVisuals() const = 0;
+private:
+    MutableGraph _graph;
+    TransformedGraph _transformedGraph;
+    NodePositions _nodePositions;
+    NodeVisuals _nodeVisuals;
+    EdgeVisuals _edgeVisuals;
 
-    virtual const QString& name() = 0;
+    NodeArray<QString> _nodeNames;
 
-    virtual bool editable() { return false; }
+    QString _name;
+
+public:
+    MutableGraph& mutableGraph() { return _graph; }
+    Graph& graph() { return _transformedGraph; }
+    const Graph& graph() const { return _transformedGraph; }
+    NodePositions& nodePositions() { return _nodePositions; }
+    const NodePositions& nodePositions() const { return _nodePositions; }
+
+    const NodeVisuals& nodeVisuals() const { return _nodeVisuals; }
+    const EdgeVisuals& edgeVisuals() const { return _edgeVisuals; }
+
+    NodeArray<QString>& nodeNames() { return _nodeNames; }
+    const NodeArray<QString>& nodeNames() const { return _nodeNames; }
+
+    const QString& name() { return _name; }
+
+    bool editable() { return true; }
 
     virtual QQuickItem* contentQuickItem() { return nullptr; }
+
+private slots:
+    void onGraphChanged(const Graph* graph);
 };
 
 #endif // GRAPHMODEL_H
