@@ -32,7 +32,7 @@ private:
     void updateGraphComponents(const Graph* graph);
     void removeGraphComponent(ComponentId componentId);
 
-    void updateComponents(const Graph* graph);
+    void update(const Graph* graph);
     int componentArrayCapacity() const { return _nextComponentId; }
     ComponentIdSet assignConnectedElementsComponentId(const Graph* graph, NodeId rootId, ComponentId componentId,
                                                       NodeArray<ComponentId>& nodesComponentId,
