@@ -25,8 +25,8 @@ void GraphComponent::reserve(const Graph& other)
     Q_ASSERT(otherGraphComponent != nullptr);
 
     Q_ASSERT(_graph == otherGraphComponent->_graph);
-    _nodeIdsList.reserve(otherGraphComponent->_nodeIdsList.size());
-    _edgeIdsList.reserve(otherGraphComponent->_edgeIdsList.size());
+    _nodeIds.reserve(otherGraphComponent->_nodeIds.size());
+    _edgeIds.reserve(otherGraphComponent->_edgeIds.size());
 }
 
 void GraphComponent::cloneFrom(const Graph& other)
@@ -35,6 +35,6 @@ void GraphComponent::cloneFrom(const Graph& other)
     Q_ASSERT(otherGraphComponent != nullptr);
 
     Q_ASSERT(_graph == otherGraphComponent->_graph);
-    _nodeIdsList = otherGraphComponent->_nodeIdsList;
-    _edgeIdsList = otherGraphComponent->_edgeIdsList;
+    _nodeIds = otherGraphComponent->_nodeIds;
+    _edgeIds = otherGraphComponent->_edgeIds;
 }

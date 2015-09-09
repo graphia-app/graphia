@@ -48,23 +48,23 @@ public:
     GraphComponent(const GraphComponent& other) :
         Graph(),
         _graph(other._graph),
-        _nodeIdsList(other._nodeIdsList),
-        _edgeIdsList(other._edgeIdsList)
+        _nodeIds(other._nodeIds),
+        _edgeIds(other._edgeIds)
     {}
 
 private:
     const Graph* _graph;
-    std::vector<NodeId> _nodeIdsList;
-    std::vector<EdgeId> _edgeIdsList;
+    std::vector<NodeId> _nodeIds;
+    std::vector<EdgeId> _edgeIds;
 
 public:
-    const std::vector<NodeId>& nodeIds() const { return _nodeIdsList; }
-    int numNodes() const { return static_cast<int>(_nodeIdsList.size()); }
+    const std::vector<NodeId>& nodeIds() const { return _nodeIds; }
+    int numNodes() const { return static_cast<int>(_nodeIds.size()); }
     const Node& nodeById(NodeId nodeId) const { return _graph->nodeById(nodeId); }
     MultiNodeId::Type typeOf(NodeId) const { return MultiNodeId::Type::Not; }
 
-    const std::vector<EdgeId>& edgeIds() const { return _edgeIdsList; }
-    int numEdges() const { return static_cast<int>(_edgeIdsList.size()); }
+    const std::vector<EdgeId>& edgeIds() const { return _edgeIds; }
+    int numEdges() const { return static_cast<int>(_edgeIds.size()); }
     const Edge& edgeById(EdgeId edgeId) const { return _graph->edgeById(edgeId); }
     MultiEdgeId::Type typeOf(EdgeId) const { return MultiEdgeId::Type::Not; }
 

@@ -204,8 +204,8 @@ void ComponentManager::updateGraphComponents(const Graph* graph)
     {
         if(u::contains(_updatesRequired, graphComponent.first))
         {
-            graphComponent.second->_nodeIdsList.clear();
-            graphComponent.second->_edgeIdsList.clear();
+            graphComponent.second->_nodeIds.clear();
+            graphComponent.second->_edgeIds.clear();
         }
     }
 
@@ -217,7 +217,7 @@ void ComponentManager::updateGraphComponents(const Graph* graph)
         auto componentId = _nodesComponentId[nodeId];
 
         if(u::contains(_updatesRequired, componentId))
-            _componentsMap[componentId]->_nodeIdsList.push_back(nodeId);
+            _componentsMap[componentId]->_nodeIds.push_back(nodeId);
     }
 
     for(auto edgeId : graph->edgeIds())
@@ -228,7 +228,7 @@ void ComponentManager::updateGraphComponents(const Graph* graph)
         auto componentId = _edgesComponentId[edgeId];
 
         if(u::contains(_updatesRequired, componentId))
-            _componentsMap[componentId]->_edgeIdsList.push_back(edgeId);
+            _componentsMap[componentId]->_edgeIds.push_back(edgeId);
     }
 }
 
