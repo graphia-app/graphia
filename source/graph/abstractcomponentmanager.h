@@ -40,7 +40,7 @@ public:
 
 class GraphComponent : public Graph
 {
-    friend class AbstractComponentManager;
+    friend class ComponentManager;
 
     Q_OBJECT
 public:
@@ -91,16 +91,6 @@ protected:
 
     bool _debug = false;
     bool _ignoreMultiElements = false;
-
-    std::vector<NodeId>& graphComponentNodeIds(GraphComponent& graphComponent)
-    {
-        return graphComponent._nodeIdsList;
-    }
-
-    std::vector<EdgeId>& graphComponentEdgeIds(GraphComponent& graphComponent)
-    {
-        return graphComponent._edgeIdsList;
-    }
 
 public:
     virtual const std::vector<ComponentId>& componentIds() const = 0;

@@ -149,8 +149,7 @@ void ComponentManager::updateComponents(const Graph* graph)
     _nodesComponentId = std::move(newNodesComponentId);
     _edgesComponentId = std::move(newEdgesComponentId);
 
-    for(auto componentId : _updatesRequired)
-        updateGraphComponent(graph, componentId);
+    updateGraphComponents(graph);
 
     _updatesRequired.clear();
 
@@ -199,31 +198,37 @@ void ComponentManager::queueGraphComponentUpdate(const Graph* graph, ComponentId
     }
 }
 
-void ComponentManager::updateGraphComponent(const Graph* graph, ComponentId componentId)
+void ComponentManager::updateGraphComponents(const Graph* graph)
 {
-    std::shared_ptr<GraphComponent> graphComponent = _componentsMap[componentId];
+    for(auto& graphComponent : _componentsMap)
+    {
+        if(u::contains(_updatesRequired, graphComponent.first))
+        {
+            graphComponent.second->_nodeIdsList.clear();
+            graphComponent.second->_edgeIdsList.clear();
+        }
+    }
 
-    std::vector<NodeId>& nodeIds = graphComponentNodeIds(*graphComponent);
-    std::vector<EdgeId>& edgeIds = graphComponentEdgeIds(*graphComponent);
-
-    nodeIds.clear();
     for(auto nodeId : graph->nodeIds())
     {
         if(_ignoreMultiElements && graph->typeOf(nodeId) == MultiNodeId::Type::Tail)
             continue;
 
-        if(_nodesComponentId[nodeId] == componentId)
-            nodeIds.push_back(nodeId);
+        auto componentId = _nodesComponentId[nodeId];
+
+        if(u::contains(_updatesRequired, componentId))
+            _componentsMap[componentId]->_nodeIdsList.push_back(nodeId);
     }
 
-    edgeIds.clear();
     for(auto edgeId : graph->edgeIds())
     {
         if(_ignoreMultiElements && graph->typeOf(edgeId) == MultiEdgeId::Type::Tail)
             continue;
 
-        if(_edgesComponentId[edgeId] == componentId)
-            edgeIds.push_back(edgeId);
+        auto componentId = _edgesComponentId[edgeId];
+
+        if(u::contains(_updatesRequired, componentId))
+            _componentsMap[componentId]->_edgeIdsList.push_back(edgeId);
     }
 }
 

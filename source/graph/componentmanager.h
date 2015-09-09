@@ -29,7 +29,7 @@ private:
 
     ComponentId generateComponentId();
     void queueGraphComponentUpdate(const Graph* graph, ComponentId componentId);
-    void updateGraphComponent(const Graph* graph, ComponentId componentId);
+    void updateGraphComponents(const Graph* graph);
     void removeGraphComponent(ComponentId componentId);
 
     void updateComponents(const Graph* graph);
