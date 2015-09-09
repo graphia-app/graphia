@@ -12,7 +12,7 @@ ComponentManager::ComponentManager(Graph& graph, bool ignoreMultiElements) :
     _edgesComponentId(graph)
 {
     graph.update();
-    updateComponents(&graph);
+    update(&graph);
 }
 
 ComponentIdSet ComponentManager::assignConnectedElementsComponentId(const Graph* graph,
@@ -54,7 +54,7 @@ ComponentIdSet ComponentManager::assignConnectedElementsComponentId(const Graph*
     return oldComponentIdsAffected;
 }
 
-void ComponentManager::updateComponents(const Graph* graph)
+void ComponentManager::update(const Graph* graph)
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
@@ -246,7 +246,7 @@ void ComponentManager::onGraphChanged(const Graph* graph)
 {
     graph->debugPauser.pause("Call updateComponents from ComponentManager::onGraphChanged", &_debugPaused);
     graph->setPhase(tr("Componentising"));
-    updateComponents(graph);
+    update(graph);
     graph->debugPauser.pause("Signal Graph::onGraphChanged", &_debugPaused);
 }
 
