@@ -77,9 +77,11 @@ public:
 
     const QString& name() const { return _name; }
 
-    bool editable() const { return true; }
-
+    virtual bool editable() const { return true; }
     virtual QQuickItem* contentQuickItem() const { return nullptr; }
+
+protected:
+    TransformedGraph& transformedGraph() { return _transformedGraph; }
 
 private slots:
     void onGraphChanged(const Graph* graph);
