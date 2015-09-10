@@ -26,7 +26,7 @@ private:
 
 public:
     Command(const QString& description, const QString& verb,
-            const QString &pastParticiple,
+            const QString& pastParticiple,
             ExecuteFn executeFn = defaultExecuteFn,
             UndoFn undoFn = defaultUndoFn,
             bool asynchronous = true);
