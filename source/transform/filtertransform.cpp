@@ -33,7 +33,12 @@ void filter(const std::vector<ElementId>& source, const std::vector<ElementId>& 
             if(*t < *s)
                 remove(*t);
             else
+            {
+                if(filtered(*t))
+                    remove(*t);
+
                 s++;
+            }
 
             t++;
         }
@@ -49,11 +54,6 @@ void filter(const std::vector<ElementId>& source, const std::vector<ElementId>& 
 
     while(t != tLast)
         remove(*t++);
-}
-
-template<typename ElementId> bool elementIdFiltered(std::vector<ElementFilterFn<ElementId>> filters, ElementId elementId)
-{
-    return std::any_of(filters.cbegin(), filters.cend(), [elementId](ElementFilterFn<ElementId> f) { return f(elementId); });
 }
 
 bool componentFiltered(std::vector<ComponentFilterFn> filters, const Graph& component)
@@ -74,6 +74,11 @@ void FilterTransform::filterComponents(TransformedGraph& target) const
                 target.removeNodes(component->nodeIds());
         }
     }
+}
+
+template<typename ElementId> bool elementIdFiltered(std::vector<ElementFilterFn<ElementId>> filters, ElementId elementId)
+{
+    return std::any_of(filters.cbegin(), filters.cend(), [elementId](ElementFilterFn<ElementId> f) { return f(elementId); });
 }
 
 void FilterTransform::apply(const Graph& source, TransformedGraph& target) const
