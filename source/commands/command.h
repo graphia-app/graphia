@@ -23,16 +23,28 @@ private:
     static FailableCommandFn defaultFailableCommandFn;
     static CommandFn defaultCommandFn;
 
-    template<typename Fn, bool = std::result_of<Fn(Command&)>()>
-    void initialiseExecuteFn(Fn executeFn)
-    {
-        _failableExecuteFn = executeFn;
-    }
+    template<typename Fn, typename Result = typename std::result_of<Fn(Command&)>::type>
+    struct ExecuteFnInitialisationHelper;
 
-    template<typename Fn, typename = std::enable_if<std::is_same<std::result_of<Fn(Command&)>, void>::value>>
-    void initialiseExecuteFn(Fn executeFn)
+    template<typename Fn> struct ExecuteFnInitialisationHelper<Fn, void>
     {
-        _executeFn = executeFn;
+        static void initialise(Command& command, Fn executeFn)
+        {
+            command._executeFn = executeFn;
+        }
+    };
+
+    template<typename Fn> struct ExecuteFnInitialisationHelper<Fn, bool>
+    {
+        static void initialise(Command& command, Fn executeFn)
+        {
+            command._failableExecuteFn = executeFn;
+        }
+    };
+
+    template<typename Fn> void initialiseExecuteFn(Fn executeFn)
+    {
+        ExecuteFnInitialisationHelper<Fn>::initialise(*this, executeFn);
     }
 
     void initialise();
