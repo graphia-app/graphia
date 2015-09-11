@@ -11,51 +11,10 @@ void Command::initialise()
     _progressFn = [](int){};
 }
 
-Command::Command(const QString& description, const QString& verb,
-                 const QString& pastParticiple,
-                 ExecuteFn executeFn,
-                 UndoFn undoFn,
-                 bool asynchronous) :
-    _description(description),
-    _verb(verb),
-    _pastParticiple(pastParticiple),
-    _executeFn(executeFn),
-    _undoFn(undoFn),
-    _asynchronous(asynchronous)
-{
-    initialise();
-}
-
-Command::Command(const QString& description, const QString& verb,
-                 ExecuteFn executeFn,
-                 UndoFn undoFn,
-                 bool asynchronous) :
-    _description(description),
-    _verb(verb),
-    _executeFn(executeFn),
-    _undoFn(undoFn),
-    _asynchronous(asynchronous)
-{
-    initialise();
-}
-
-Command::Command(const QString& description,
-                 ExecuteFn executeFn,
-                 UndoFn undoFn,
-                 bool asynchronous) :
-    _description(description),
-    _executeFn(executeFn),
-    _undoFn(undoFn),
-    _asynchronous(asynchronous)
-{
-    initialise();
-}
-
-Command::Command(ExecuteFn executeFn,
-                 UndoFn undoFn,
-                 bool asynchronous) :
-    _executeFn(executeFn),
-    _undoFn(undoFn),
+Command::Command(bool asynchronous) :
+    _failableExecuteFn(defaultFailableCommandFn),
+    _executeFn(defaultCommandFn),
+    _undoFn(defaultCommandFn),
     _asynchronous(asynchronous)
 {
     initialise();
@@ -107,7 +66,15 @@ void Command::setProgress(int progress)
     _progressFn(progress);
 }
 
-bool Command::execute() { return _executeFn(*this); }
+bool Command::execute()
+{
+    if(_failableExecuteFn != nullptr)
+        return _failableExecuteFn(*this);
+
+    _executeFn(*this);
+    return true;
+}
+
 void Command::undo() { _undoFn(*this); }
 
 void Command::cancel()
@@ -120,13 +87,13 @@ void Command::setProgressFn(ProgressFn progressFn)
     _progressFn = progressFn;
 }
 
-ExecuteFn Command::defaultExecuteFn = [](Command&)
+FailableCommandFn Command::defaultFailableCommandFn = [](Command&)
 {
-    Q_ASSERT(!"executeFn not implmented");
+    Q_ASSERT(!"failableCommandFn not implmented");
     return false;
 };
 
-UndoFn Command::defaultUndoFn = [](Command&)
+CommandFn Command::defaultCommandFn = [](Command&)
 {
-    Q_ASSERT(!"undoFn not implemented");
+    Q_ASSERT(!"commandFn not implemented");
 };

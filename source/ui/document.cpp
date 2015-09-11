@@ -352,7 +352,6 @@ void Document::invertSelection()
             {
                 _selectionManager->invertNodeSelection();
                 command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
-                return true;
             },
             [this, previousSelection](Command&) { _selectionManager->setSelectedNodes(previousSelection); });
     }

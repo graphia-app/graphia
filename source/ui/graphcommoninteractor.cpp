@@ -260,7 +260,6 @@ void GraphCommonInteractor::leftMouseUp()
 
                         if(!nodeSelected)
                             command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
-                        return true;
                     },
                     [this, previousSelection](Command&) { _selectionManager->setSelectedNodes(previousSelection); });
             }

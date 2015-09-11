@@ -4,10 +4,11 @@
 #include <QString>
 
 #include <functional>
+#include <type_traits>
 class Command;
 
-using ExecuteFn = std::function<bool(Command&)>;
-using UndoFn = std::function<void(Command&)>;
+using FailableCommandFn = std::function<bool(Command&)>;
+using CommandFn = std::function<void(Command&)>;
 using ProgressFn = std::function<void(int)>;
 
 // For simple operations the Command class can be used directly, by passing
@@ -19,28 +20,68 @@ class Command
     friend class CommandManager;
 
 private:
-    static ExecuteFn defaultExecuteFn;
-    static UndoFn defaultUndoFn;
+    static FailableCommandFn defaultFailableCommandFn;
+    static CommandFn defaultCommandFn;
+
+    template<typename Fn, bool = std::result_of<Fn(Command&)>()>
+    void initialiseExecuteFn(Fn executeFn)
+    {
+        _failableExecuteFn = executeFn;
+    }
+
+    template<typename Fn, typename = std::enable_if<std::is_same<std::result_of<Fn(Command&)>, void>::value>>
+    void initialiseExecuteFn(Fn executeFn)
+    {
+        _executeFn = executeFn;
+    }
 
     void initialise();
 
 public:
+    template<typename ExecuteFn>
     Command(const QString& description, const QString& verb,
             const QString& pastParticiple,
-            ExecuteFn executeFn = defaultExecuteFn,
-            UndoFn undoFn = defaultUndoFn,
-            bool asynchronous = true);
+            ExecuteFn executeFn,
+            CommandFn undoFn = defaultCommandFn,
+            bool asynchronous = true) :
+        _description(description),
+        _verb(verb),
+        _pastParticiple(pastParticiple),
+        _undoFn(undoFn),
+        _asynchronous(asynchronous)
+    {
+        initialise();
+        initialiseExecuteFn(executeFn);
+    }
+
+    template<typename ExecuteFn>
     Command(const QString& description, const QString& verb,
-            ExecuteFn executeFn = defaultExecuteFn,
-            UndoFn undoFn = defaultUndoFn,
-            bool asynchronous = true);
+            ExecuteFn executeFn,
+            CommandFn undoFn = defaultCommandFn,
+            bool asynchronous = true) :
+        _description(description),
+        _verb(verb),
+        _undoFn(undoFn),
+        _asynchronous(asynchronous)
+    {
+        initialise();
+        initialiseExecuteFn(executeFn);
+    }
+
+    template<typename ExecuteFn>
     Command(const QString& description,
-            ExecuteFn executeFn = defaultExecuteFn,
-            UndoFn undoFn = defaultUndoFn,
-            bool asynchronous = true);
-    Command(ExecuteFn executeFn = defaultExecuteFn,
-            UndoFn undoFn = defaultUndoFn,
-            bool asynchronous = true);
+            ExecuteFn executeFn,
+            CommandFn undoFn = defaultCommandFn,
+            bool asynchronous = true) :
+        _description(description),
+        _undoFn(undoFn),
+        _asynchronous(asynchronous)
+    {
+        initialise();
+        initialiseExecuteFn(executeFn);
+    }
+
+    Command(bool asynchronous = true);
 
     virtual ~Command() {}
 
@@ -79,8 +120,9 @@ private:
 
     QString _pastParticiple;
 
-    ExecuteFn _executeFn;
-    UndoFn _undoFn;
+    FailableCommandFn _failableExecuteFn;
+    CommandFn _executeFn;
+    CommandFn _undoFn;
     ProgressFn _progressFn;
     bool _asynchronous;
 };
