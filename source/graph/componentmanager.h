@@ -1,7 +1,7 @@
 #ifndef COMPONENTMANAGER_H
 #define COMPONENTMANAGER_H
 
-#include "componentmanager.h"
+#include "abstractcomponentmanager.h"
 #include "grapharray.h"
 
 #include <map>
