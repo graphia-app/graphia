@@ -76,28 +76,23 @@ void FilterTransform::filterComponents(TransformedGraph& target) const
     }
 }
 
-template<typename ElementId> bool elementIdFiltered(std::vector<ElementFilterFn<ElementId>> filters, ElementId elementId)
-{
-    return std::any_of(filters.cbegin(), filters.cend(), [elementId](ElementFilterFn<ElementId> f) { return f(elementId); });
-}
-
 void FilterTransform::apply(const Graph& source, TransformedGraph& target) const
 {
     target.reserve(source);
 
     filter(source.nodeIds(), target.nodeIds(),
-        [this](NodeId nodeId) { return elementIdFiltered(_nodeFilters, nodeId); },
+        [this](NodeId nodeId) { return nodeIdFiltered(nodeId); },
         [&target](NodeId nodeId) { u::checkEqual(target.addNode(nodeId), nodeId); },
         [&target](NodeId nodeId) { target.removeNode(nodeId); });
 
     filter(source.edgeIds(), target.edgeIds(),
         [this, &source, &target](EdgeId edgeId)
         {
-            auto edge = source.edgeById(edgeId);
+            auto& edge = source.edgeById(edgeId);
             // Check the nodes this edge connected haven't already been filtered
             return !target.containsNodeId(edge.sourceId()) ||
                    !target.containsNodeId(edge.targetId()) ||
-                   elementIdFiltered(_edgeFilters, edgeId);
+                   edgeIdFiltered(edgeId);
         },
         [&source, &target](EdgeId edgeId) { u::checkEqual(target.addEdge(source.edgeById(edgeId)), edgeId); },
         [&target](EdgeId edgeId) { target.removeEdge(edgeId); });
@@ -109,13 +104,13 @@ void FilterTransform::apply(TransformedGraph& target) const
 {
     for(auto edgeId : target.edgeIds())
     {
-        if(elementIdFiltered(_edgeFilters, edgeId))
+        if(edgeIdFiltered(edgeId))
             target.removeEdge(edgeId);
     }
 
     for(auto nodeId : target.nodeIds())
     {
-        if(elementIdFiltered(_nodeFilters, nodeId))
+        if(nodeIdFiltered(nodeId))
             target.removeNode(nodeId);
     }
 

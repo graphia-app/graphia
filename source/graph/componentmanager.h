@@ -3,11 +3,13 @@
 
 #include "graph.h"
 #include "grapharray.h"
+#include "filter.h"
 
 #include <map>
 #include <queue>
 #include <mutex>
 #include <vector>
+#include <functional>
 
 class ComponentSplitSet
 {
@@ -73,13 +75,15 @@ public:
     void cloneFrom(const Graph& other);
 };
 
-class ComponentManager : public QObject
+class ComponentManager : public QObject, public Filter
 {
     friend class Graph;
 
     Q_OBJECT
 public:
-    ComponentManager(Graph& graph, bool ignoreMultiElements = true);
+    ComponentManager(Graph& graph,
+                     NodeFilterFn nodeFilter = nullptr,
+                     EdgeFilterFn edgeFilter = nullptr);
     virtual ~ComponentManager();
 
 private:
@@ -97,7 +101,6 @@ private:
     std::unordered_set<GraphArray*> _componentArrays;
 
     bool _debug = false;
-    bool _ignoreMultiElements = false;
 
     ComponentId generateComponentId();
     void queueGraphComponentUpdate(const Graph* graph, ComponentId componentId);

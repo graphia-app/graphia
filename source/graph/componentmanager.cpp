@@ -25,14 +25,23 @@ void GraphComponent::cloneFrom(const Graph& other)
     _edgeIds = otherGraphComponent->_edgeIds;
 }
 
-ComponentManager::ComponentManager(Graph& graph, bool ignoreMultiElements) :
+ComponentManager::ComponentManager(Graph& graph, NodeFilterFn nodeFilter, EdgeFilterFn edgeFilter) :
     _nextComponentId(0),
     _nodesComponentId(graph),
-    _edgesComponentId(graph),
-    _ignoreMultiElements(ignoreMultiElements)
+    _edgesComponentId(graph)
 {
     if(qgetenv("COMPONENTS_DEBUG").toInt())
         _debug = true;
+
+    // Ignore all multi-elements
+    addNodeFilter([&graph](NodeId nodeId) { return graph.typeOf(nodeId) == MultiNodeId::Type::Tail; });
+    addEdgeFilter([&graph](EdgeId edgeId) { return graph.typeOf(edgeId) == MultiEdgeId::Type::Tail; });
+
+    if(nodeFilter)
+        addNodeFilter(nodeFilter);
+
+    if(edgeFilter)
+        addEdgeFilter(edgeFilter);
 
     connect(&graph, &Graph::graphChanged, this, &ComponentManager::onGraphChanged, Qt::DirectConnection);
 
@@ -66,7 +75,7 @@ ComponentIdSet ComponentManager::assignConnectedElementsComponentId(const Graph*
 
         for(auto edgeId : graph->nodeById(nodeId).edgeIds())
         {
-            if(_ignoreMultiElements && graph->typeOf(edgeId) == MultiEdgeId::Type::Tail)
+            if(edgeIdFiltered(edgeId))
                 continue;
 
             edgesComponentId[edgeId] = componentId;
@@ -102,7 +111,7 @@ void ComponentManager::update(const Graph* graph)
     // Search for mergers and splitters
     for(auto nodeId : graph->nodeIds())
     {
-        if(_ignoreMultiElements && graph->typeOf(nodeId) == MultiNodeId::Type::Tail)
+        if(nodeIdFiltered(nodeId))
             continue;
 
         auto oldComponentId = _nodesComponentId[nodeId];
@@ -145,7 +154,7 @@ void ComponentManager::update(const Graph* graph)
     // Search for entirely new components
     for(auto nodeId : graph->nodeIds())
     {
-        if(_ignoreMultiElements && graph->typeOf(nodeId) == MultiNodeId::Type::Tail)
+        if(nodeIdFiltered(nodeId))
             continue;
 
         if(newNodesComponentId[nodeId].isNull() && _nodesComponentId[nodeId].isNull())
@@ -243,7 +252,7 @@ void ComponentManager::updateGraphComponents(const Graph* graph)
 
     for(auto nodeId : graph->nodeIds())
     {
-        if(_ignoreMultiElements && graph->typeOf(nodeId) == MultiNodeId::Type::Tail)
+        if(nodeIdFiltered(nodeId))
             continue;
 
         auto componentId = _nodesComponentId[nodeId];
@@ -254,7 +263,7 @@ void ComponentManager::updateGraphComponents(const Graph* graph)
 
     for(auto edgeId : graph->edgeIds())
     {
-        if(_ignoreMultiElements && graph->typeOf(edgeId) == MultiEdgeId::Type::Tail)
+        if(edgeIdFiltered(edgeId))
             continue;
 
         auto componentId = _edgesComponentId[edgeId];

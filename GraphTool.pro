@@ -77,7 +77,8 @@ HEADERS += \
     source/transform/edgecontractiontransform.h \
     source/transform/compoundtransform.h \
     source/graph/elementid.h \
-    source/graph/weightededgegraphmodel.h
+    source/graph/weightededgegraphmodel.h \
+    source/graph/filter.h
 
 SOURCES += \
     source/main.cpp \
