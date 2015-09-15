@@ -5,14 +5,46 @@
 #include <queue>
 #include <map>
 
+void GraphComponent::reserve(const Graph& other)
+{
+    const GraphComponent* otherGraphComponent = dynamic_cast<const GraphComponent*>(&other);
+    Q_ASSERT(otherGraphComponent != nullptr);
+
+    Q_ASSERT(_graph == otherGraphComponent->_graph);
+    _nodeIds.reserve(otherGraphComponent->_nodeIds.size());
+    _edgeIds.reserve(otherGraphComponent->_edgeIds.size());
+}
+
+void GraphComponent::cloneFrom(const Graph& other)
+{
+    const GraphComponent* otherGraphComponent = dynamic_cast<const GraphComponent*>(&other);
+    Q_ASSERT(otherGraphComponent != nullptr);
+
+    Q_ASSERT(_graph == otherGraphComponent->_graph);
+    _nodeIds = otherGraphComponent->_nodeIds;
+    _edgeIds = otherGraphComponent->_edgeIds;
+}
+
 ComponentManager::ComponentManager(Graph& graph, bool ignoreMultiElements) :
-    AbstractComponentManager(graph, ignoreMultiElements),
     _nextComponentId(0),
     _nodesComponentId(graph),
-    _edgesComponentId(graph)
+    _edgesComponentId(graph),
+    _ignoreMultiElements(ignoreMultiElements)
 {
+    if(qgetenv("COMPONENTS_DEBUG").toInt())
+        _debug = true;
+
+    connect(&graph, &Graph::graphChanged, this, &ComponentManager::onGraphChanged, Qt::DirectConnection);
+
     graph.update();
     update(&graph);
+}
+
+ComponentManager::~ComponentManager()
+{
+    // Let the ComponentArrays know that we're going away
+    for(auto componentArray : _componentArrays)
+        componentArray->invalidate();
 }
 
 ComponentIdSet ComponentManager::assignConnectedElementsComponentId(const Graph* graph,

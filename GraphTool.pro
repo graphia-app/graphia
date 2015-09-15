@@ -68,7 +68,6 @@ HEADERS += \
     source/rendering/opengldebuglogger.h \
     source/rendering/openglfunctions.h \
     source/utils/movablepointer.h \
-    source/graph/abstractcomponentmanager.h \
     source/graph/componentmanager.h \
     source/utils/debugpauser.h \
     source/utils/singleton.h \
@@ -128,7 +127,6 @@ SOURCES += \
     source/ui/graphquickitem.cpp \
     source/rendering/opengldebuglogger.cpp \
     source/rendering/openglfunctions.cpp \
-    source/graph/abstractcomponentmanager.cpp \
     source/graph/componentmanager.cpp \
     source/utils/debugpauser.cpp \
     source/transform/transformedgraph.cpp \

@@ -2,7 +2,6 @@
 #define GRAPHARRAY_H
 
 #include "graph.h"
-#include "abstractcomponentmanager.h"
 
 #include <QObject>
 
@@ -222,8 +221,8 @@ public:
         GenericGraphArray<ComponentId, Element>(graph)
     {
         Q_ASSERT(graph._componentManager != nullptr);
-        this->resize(graph._componentManager->componentArrayCapacity());
-        graph._componentManager->_componentArrays.insert(this);
+        this->resize(graph.numComponentArrays());
+        graph.insertComponentArray(this);
     }
 
     ComponentArray(const Graph& graph) : ComponentArray(const_cast<Graph&>(graph)) {}
@@ -231,13 +230,13 @@ public:
     ComponentArray(const ComponentArray& other) : GenericGraphArray<ComponentId, Element>(other)
     {
         Q_ASSERT(this->_graph->_componentManager != nullptr);
-        this->_graph->_componentManager->_componentArrays.insert(this);
+        this->_graph->insertComponentArray(this);
     }
 
     ComponentArray(ComponentArray&& other) : GenericGraphArray<ComponentId, Element>(std::move(other))
     {
         Q_ASSERT(this->_graph->_componentManager != nullptr);
-        this->_graph->_componentManager->_componentArrays.insert(this);
+        this->_graph->insertComponentArray(this);
     }
 
     ComponentArray& operator=(const ComponentArray& other)
@@ -255,7 +254,7 @@ public:
     ~ComponentArray()
     {
         if(this->_graph != nullptr)
-            this->_graph->_componentManager->_componentArrays.erase(this);
+            this->_graph->eraseComponentArray(this);
     }
 };
 

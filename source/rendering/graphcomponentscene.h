@@ -6,6 +6,7 @@
 #include "openglfunctions.h"
 
 #include "../graph/graph.h"
+#include "../graph/componentmanager.h"
 #include "../graph/grapharray.h"
 #include "transition.h"
 

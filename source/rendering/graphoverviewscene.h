@@ -7,6 +7,7 @@
 #include "transition.h"
 
 #include "../graph/graph.h"
+#include "../graph/componentmanager.h"
 #include "../graph/grapharray.h"
 
 #include <vector>

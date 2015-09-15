@@ -84,10 +84,10 @@ void Graph::enableComponentManagement()
     {
         _componentManager = std::make_unique<ComponentManager>(*this);
 
-        connect(_componentManager.get(), &AbstractComponentManager::componentAdded,         this, &Graph::componentAdded, Qt::DirectConnection);
-        connect(_componentManager.get(), &AbstractComponentManager::componentWillBeRemoved, this, &Graph::componentWillBeRemoved, Qt::DirectConnection);
-        connect(_componentManager.get(), &AbstractComponentManager::componentSplit,         this, &Graph::componentSplit, Qt::DirectConnection);
-        connect(_componentManager.get(), &AbstractComponentManager::componentsWillMerge,    this, &Graph::componentsWillMerge, Qt::DirectConnection);
+        connect(_componentManager.get(), &ComponentManager::componentAdded,         this, &Graph::componentAdded, Qt::DirectConnection);
+        connect(_componentManager.get(), &ComponentManager::componentWillBeRemoved, this, &Graph::componentWillBeRemoved, Qt::DirectConnection);
+        connect(_componentManager.get(), &ComponentManager::componentSplit,         this, &Graph::componentSplit, Qt::DirectConnection);
+        connect(_componentManager.get(), &ComponentManager::componentsWillMerge,    this, &Graph::componentsWillMerge, Qt::DirectConnection);
     }
 }
 
@@ -122,6 +122,26 @@ void Graph::dumpToQDebug(int detail) const
             }
         }
     }
+}
+
+int Graph::numComponentArrays()
+{
+    if(_componentManager)
+        return _componentManager->componentArrayCapacity();
+
+    return 0;
+}
+
+void Graph::insertComponentArray(GraphArray* componentArray)
+{
+    if(_componentManager)
+        _componentManager->_componentArrays.insert(componentArray);
+}
+
+void Graph::eraseComponentArray(GraphArray* componentArray)
+{
+    if(_componentManager)
+        _componentManager->_componentArrays.erase(componentArray);
 }
 
 NodeId Graph::nextNodeId() const

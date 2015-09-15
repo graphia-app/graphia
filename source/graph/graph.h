@@ -18,7 +18,7 @@
 
 class GraphArray;
 class GraphComponent;
-class AbstractComponentManager;
+class ComponentManager;
 class ComponentSplitSet;
 class ComponentMergeSet;
 
@@ -196,9 +196,13 @@ private:
     std::unordered_set<GraphArray*> _nodeArrays;
     std::unordered_set<GraphArray*> _edgeArrays;
 
-    std::unique_ptr<AbstractComponentManager> _componentManager;
+    std::unique_ptr<ComponentManager> _componentManager;
 
     mutable QString _phase;
+
+    int numComponentArrays();
+    void insertComponentArray(GraphArray* componentArray);
+    void eraseComponentArray(GraphArray* componentArray);
 
 protected:
     NodeId nextNodeId() const;
