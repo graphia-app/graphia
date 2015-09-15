@@ -8,9 +8,13 @@ bool edgeIdContracted(std::vector<EdgeContractedFn> edgeIds, EdgeId value)
 
 void EdgeContractionTransform::apply(TransformedGraph& target) const
 {
+    EdgeIdSet edgeIdsToContract;
+
     for(auto edgeId : target.edgeIds())
     {
         if(edgeIdContracted(_edgeFilters, edgeId))
-            target.contractEdge(edgeId);
+            edgeIdsToContract.insert(edgeId);
     }
+
+    target.contractEdges(edgeIdsToContract);
 }

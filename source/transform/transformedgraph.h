@@ -48,6 +48,7 @@ public:
     template<typename C> void removeEdges(const C& edgeIds) { _target.removeEdges(edgeIds); }
 
     void contractEdge(EdgeId edgeId) { _target.contractEdge(edgeId); }
+    template<typename C> void contractEdges(const C& edgeIds) { _target.contractEdges(edgeIds); }
 
     void reserve(const Graph& other) { _target.reserve(other); }
     void cloneFrom(const Graph& other) { _target.cloneFrom(other); }

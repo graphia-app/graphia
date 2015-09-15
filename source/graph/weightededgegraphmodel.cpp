@@ -6,4 +6,3 @@ WeightedEdgeGraphModel::WeightedEdgeGraphModel(const QString &name) :
     _edgeWeights(mutableGraph())
 {
 }
-
