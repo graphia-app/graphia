@@ -386,11 +386,7 @@ public:
     }
 
     void contractEdge(EdgeId edgeId);
-    template<typename C> void contractEdges(const C& edgeIds)
-    {
-        for(auto edgeId : edgeIds)
-            contractEdge(edgeId);
-    }
+    void contractEdges(const EdgeIdSet& edgeIds);
 
     void reserve(const Graph& other);
     void cloneFrom(const Graph& other);

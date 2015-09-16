@@ -486,6 +486,26 @@ void MutableGraph::removeEdge(EdgeId edgeId)
     endTransaction();
 }
 
+// Move the edges to connect to nodeId
+template<typename C> static void moveEdgesTo(MutableGraph& graph, NodeId nodeId,
+                                             const C& inEdgeIds,
+                                             const C& outEdgeIds)
+{
+    for(auto edgeIdToMove : inEdgeIds)
+    {
+        auto sourceId = graph.edgeById(edgeIdToMove).sourceId();
+        graph.removeEdge(edgeIdToMove);
+        graph.addEdge(edgeIdToMove, sourceId, nodeId);
+    }
+
+    for(auto edgeIdToMove : outEdgeIds)
+    {
+        auto targetId = graph.edgeById(edgeIdToMove).targetId();
+        graph.removeEdge(edgeIdToMove);
+        graph.addEdge(edgeIdToMove, nodeId, targetId);
+    }
+}
+
 void MutableGraph::contractEdge(EdgeId edgeId)
 {
     // Can't contract an edge that doesn't exist
@@ -500,22 +520,47 @@ void MutableGraph::contractEdge(EdgeId edgeId)
     auto& nodeToMerge = nodeById(nodeIdToMerge);
 
     removeEdge(edgeId);
-
-    // Move all the edges that were connected to nodeIdToMerge to nodeId
-    for(auto edgeIdToMove : nodeToMerge.edgeIds())
-    {
-        auto& edgeToMove = edgeById(edgeIdToMove);
-        auto otherNodeId = edgeToMove.oppositeId(nodeIdToMerge);
-
-        removeEdge(edgeIdToMove);
-
-        if(edgeToMove.sourceId() == otherNodeId)
-            addEdge(edgeIdToMove, otherNodeId, nodeId);
-        else
-            addEdge(edgeIdToMove, nodeId, otherNodeId);
-    }
-
+    moveEdgesTo(*this, nodeId, nodeToMerge.inEdgeIds(), nodeToMerge.outEdgeIds());
     mergeNodes(nodeId, nodeIdToMerge);
+
+    _updateRequired = true;
+    endTransaction();
+}
+
+void MutableGraph::contractEdges(const EdgeIdSet& edgeIds)
+{
+    if(edgeIds.empty())
+        return;
+
+    beginTransaction();
+
+    // Divide into components, but ignore any edges that aren't being contracted,
+    // so that each component represents a set of nodes that will be merged
+    ComponentManager componentManager(*this, nullptr,
+    [edgeIds](EdgeId edgeId)
+    {
+        return !u::contains(edgeIds, edgeId);
+    });
+
+    removeEdges(edgeIds);
+
+    for(auto componentId : componentManager.componentIds())
+    {
+        auto component = componentManager.componentById(componentId);
+
+        // Nothing to contract
+        if(component->numEdges() == 0)
+            continue;
+
+        auto nodeId = *std::min_element(component->nodeIds().cbegin(),
+                                        component->nodeIds().cend());
+
+        moveEdgesTo(*this, nodeId, inEdgeIdsForNodes(component->nodeIds()),
+                    outEdgeIdsForNodes(component->nodeIds()));
+
+        for(auto nodeIdToMerge : component->nodeIds())
+            mergeNodes(nodeId, nodeIdToMerge);
+    }
 
     _updateRequired = true;
     endTransaction();
