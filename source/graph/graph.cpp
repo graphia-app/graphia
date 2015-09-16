@@ -53,31 +53,6 @@ bool Graph::containsEdgeId(EdgeId edgeId) const
     return u::contains(edgeIds(), edgeId);
 }
 
-const EdgeIdSet Graph::edgeIdsForNodes(const NodeIdSet& nodeIds) const
-{
-    EdgeIdSet edgeIds;
-
-    for(auto nodeId : nodeIds)
-    {
-        auto& node = nodeById(nodeId);
-        for(auto edgeId : node.edgeIds())
-            edgeIds.insert(edgeId);
-    }
-
-    return edgeIds;
-}
-
-const std::vector<Edge> Graph::edgesForNodes(const NodeIdSet& nodeIds) const
-{
-    auto& edgeIds = edgeIdsForNodes(nodeIds);
-    std::vector<Edge> edges;
-
-    for(auto edgeId : edgeIds)
-        edges.push_back(edgeById(edgeId));
-
-    return edges;
-}
-
 void Graph::enableComponentManagement()
 {
     if(_componentManager == nullptr)

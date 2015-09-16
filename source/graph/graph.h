@@ -153,8 +153,46 @@ public:
     virtual bool containsEdgeId(EdgeId edgeId) const;
     virtual MultiEdgeId::Type typeOf(EdgeId edgeId) const = 0;
 
-    const EdgeIdSet edgeIdsForNodes(const NodeIdSet& nodeIds) const;
-    const std::vector<Edge> edgesForNodes(const NodeIdSet& nodeIds) const;
+    template<typename C, typename EdgesIdFn>
+    EdgeIdSet edgeIdsForNodes(const C& nodeIds, EdgesIdFn edgeIdsFn) const
+    {
+        EdgeIdSet edgeIds;
+
+        for(auto nodeId : nodeIds)
+        {
+            auto& node = nodeById(nodeId);
+            for(auto edgeId : edgeIdsFn(node))
+                edgeIds.insert(edgeId);
+        }
+
+        return edgeIds;
+    }
+
+    template<typename C> EdgeIdSet edgeIdsForNodes(const C& nodeIds) const
+    {
+        return edgeIdsForNodes(nodeIds, [](const Node& node) { return node.edgeIds(); });
+    }
+
+    template<typename C> EdgeIdSet inEdgeIdsForNodes(const C& nodeIds) const
+    {
+        return edgeIdsForNodes(nodeIds, [](const Node& node) { return node.inEdgeIds(); });
+    }
+
+    template<typename C> EdgeIdSet outEdgeIdsForNodes(const C& nodeIds) const
+    {
+        return edgeIdsForNodes(nodeIds, [](const Node& node) { return node.outEdgeIds(); });
+    }
+
+    template<typename C> std::vector<Edge> edgesForNodes(const C& nodeIds) const
+    {
+        auto edgeIds = edgeIdsForNodes(nodeIds);
+        std::vector<Edge> edges;
+
+        for(auto edgeId : edgeIds)
+            edges.emplace_back(edgeById(edgeId));
+
+        return edges;
+    }
 
     virtual void reserve(const Graph& other) = 0;
     virtual void cloneFrom(const Graph& other) = 0;
