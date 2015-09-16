@@ -28,7 +28,8 @@ class Node
 
 private:
     NodeId _id;
-    EdgeIdSet _edgeIds;
+    EdgeIdSet _inEdgeIds;
+    EdgeIdSet _outEdgeIds;
     NodeIdSet _adjacentNodeIds;
 
 public:
@@ -36,13 +37,15 @@ public:
 
     Node(const Node& other) :
         _id(other._id),
-        _edgeIds(other._edgeIds),
+        _inEdgeIds(other._inEdgeIds),
+        _outEdgeIds(other._outEdgeIds),
         _adjacentNodeIds(other._adjacentNodeIds)
     {}
 
     Node(Node&& other) noexcept :
         _id(other._id),
-        _edgeIds(std::move(other._edgeIds)),
+        _inEdgeIds(std::move(other._inEdgeIds)),
+        _outEdgeIds(std::move(other._outEdgeIds)),
         _adjacentNodeIds(std::move(other._adjacentNodeIds))
     {}
 
@@ -51,16 +54,26 @@ public:
         if(this != &other)
         {
             _id                 = other._id;
-            _edgeIds            = other._edgeIds;
+            _inEdgeIds          = other._inEdgeIds;
+            _outEdgeIds         = other._outEdgeIds;
             _adjacentNodeIds    = other._adjacentNodeIds;
         }
 
         return *this;
     }
 
-    const EdgeIdSet edgeIds() const { return _edgeIds; }
+    const EdgeIdSet edgeIds() const
+    {
+        EdgeIdSet edgeIds;
+        edgeIds.insert(_inEdgeIds.cbegin(), _inEdgeIds.cend());
+        edgeIds.insert(_outEdgeIds.cbegin(), _outEdgeIds.cend());
+        return edgeIds;
+    }
+
+    const EdgeIdSet inEdgeIds() const { return _inEdgeIds; }
+    const EdgeIdSet outEdgeIds() const { return _outEdgeIds; }
     const NodeIdSet adjacentNodeIds() const { return _adjacentNodeIds; }
-    int degree() const { return static_cast<int>(_edgeIds.size()); }
+    int degree() const { return static_cast<int>(_inEdgeIds.size() + _outEdgeIds.size()); }
 
     NodeId id() const { return _id; }
 };

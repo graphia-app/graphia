@@ -329,7 +329,8 @@ NodeId MutableGraph::addNode(NodeId nodeId)
     _nodeIdsInUse[nodeId] = true;
     auto& node = _nodes[nodeId];
     node._id = nodeId;
-    node._edgeIds.clear();
+    node._inEdgeIds.clear();
+    node._outEdgeIds.clear();
     node._adjacentNodeIds.clear();
 
     emit nodeAdded(this, &node);
@@ -444,28 +445,34 @@ EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     edge._sourceId = sourceId;
     edge._targetId = targetId;
 
-    _nodes[sourceId]._edgeIds.insert(edgeId);
+    _nodes[sourceId]._outEdgeIds.insert(edgeId);
     auto sourceInsert = _nodes[sourceId]._adjacentNodeIds.insert(targetId);
-    _nodes[targetId]._edgeIds.insert(edgeId);
+    _nodes[targetId]._inEdgeIds.insert(edgeId);
     auto targetInsert = _nodes[targetId]._adjacentNodeIds.insert(sourceId);
 
     Q_ASSERT(sourceId == targetId || sourceInsert.second == targetInsert.second);
     if(!sourceInsert.second && !targetInsert.second)
     {
         // No insert occurred, meaning there is already an edge between these nodes
-        for(auto otherEdgeId : _nodes[sourceId]._edgeIds)
+        auto merge = [this, edgeId, sourceId, targetId](const EdgeIdSet& edgeIds)
         {
-            if(otherEdgeId == edgeId)
-                continue;
-
-            auto otherEdge = edgeById(otherEdgeId);
-
-            if(std::minmax(sourceId, targetId) == std::minmax(otherEdge.sourceId(), otherEdge.targetId()))
+            for(auto otherEdgeId : edgeIds)
             {
-                mergeEdges(edgeId, otherEdgeId);
-                break;
+                if(otherEdgeId == edgeId)
+                    continue;
+
+                auto otherEdge = edgeById(otherEdgeId);
+
+                if(std::minmax(sourceId, targetId) == std::minmax(otherEdge.sourceId(), otherEdge.targetId()))
+                {
+                    mergeEdges(edgeId, otherEdgeId);
+                    break;
+                }
             }
-        }
+        };
+
+        merge(_nodes[sourceId]._inEdgeIds);
+        merge(_nodes[sourceId]._outEdgeIds);
     }
 
     emit edgeAdded(this, &edge);
@@ -491,9 +498,9 @@ void MutableGraph::removeEdge(EdgeId edgeId)
 
     auto& source = _nodes[edge.sourceId()];
     auto& target = _nodes[edge.targetId()];
-    source._edgeIds.erase(edgeId);
+    source._outEdgeIds.erase(edgeId);
     source._adjacentNodeIds.erase(edge.targetId());
-    target._edgeIds.erase(edgeId);
+    target._inEdgeIds.erase(edgeId);
     target._adjacentNodeIds.erase(edge.sourceId());
 
     MultiEdgeId::removeMultiElementId(edgeId, _multiEdgeIds);
