@@ -1,6 +1,8 @@
 #ifndef ELEMENTID_H
 #define ELEMENTID_H
 
+#include "../utils/cpp1x_hacks.h"
+
 #include <QDebug>
 
 #include <unordered_set>
