@@ -12,11 +12,7 @@ using ComponentFilterFn = std::function<bool(const Graph&)>;
 
 class FilterTransform : public GraphTransform, public Filter
 {
-private:
-    void filterComponents(TransformedGraph& target) const;
-
 public:
-    void apply(const Graph &source, TransformedGraph &target) const;
     void apply(TransformedGraph &target) const;
 
     void addComponentFilter(const ComponentFilterFn& f) { _componentFilters.emplace_back(f); }
