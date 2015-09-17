@@ -421,34 +421,13 @@ EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     edge._targetId = targetId;
 
     _nodes[sourceId]._outEdgeIds.insert(edgeId);
-    auto sourceInsert = _nodes[sourceId]._adjacentNodeIds.insert(targetId);
+    auto sourceInsert = _nodes[sourceId]._adjacentNodeIds.insert({targetId, edgeId});
     _nodes[targetId]._inEdgeIds.insert(edgeId);
-    auto targetInsert = _nodes[targetId]._adjacentNodeIds.insert(sourceId);
+    auto targetInsert = _nodes[targetId]._adjacentNodeIds.insert({sourceId, edgeId});
 
     Q_ASSERT(sourceId == targetId || sourceInsert.second == targetInsert.second);
     if(!sourceInsert.second && !targetInsert.second)
-    {
-        // No insert occurred, meaning there is already an edge between these nodes
-        auto merge = [this, edgeId, sourceId, targetId](const EdgeIdSet& edgeIds)
-        {
-            for(auto otherEdgeId : edgeIds)
-            {
-                if(otherEdgeId == edgeId)
-                    continue;
-
-                auto otherEdge = edgeById(otherEdgeId);
-
-                if(std::minmax(sourceId, targetId) == std::minmax(otherEdge.sourceId(), otherEdge.targetId()))
-                {
-                    mergeEdges(edgeId, otherEdgeId);
-                    break;
-                }
-            }
-        };
-
-        merge(_nodes[sourceId]._inEdgeIds);
-        merge(_nodes[sourceId]._outEdgeIds);
-    }
+        mergeEdges(edgeId, (*sourceInsert.first).second);
 
     emit edgeAdded(this, &edge);
     _updateRequired = true;

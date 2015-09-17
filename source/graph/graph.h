@@ -30,7 +30,7 @@ private:
     NodeId _id;
     EdgeIdSet _inEdgeIds;
     EdgeIdSet _outEdgeIds;
-    NodeIdSet _adjacentNodeIds;
+    NodeIdMap<EdgeId> _adjacentNodeIds;
 
 public:
     Node() {}
@@ -72,7 +72,6 @@ public:
 
     const EdgeIdSet inEdgeIds() const { return _inEdgeIds; }
     const EdgeIdSet outEdgeIds() const { return _outEdgeIds; }
-    const NodeIdSet adjacentNodeIds() const { return _adjacentNodeIds; }
     int degree() const { return static_cast<int>(_inEdgeIds.size() + _outEdgeIds.size()); }
 
     NodeId id() const { return _id; }
