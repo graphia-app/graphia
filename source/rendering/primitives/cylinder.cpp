@@ -108,8 +108,8 @@ void Cylinder::generateVertexData(std::vector<float>& vertices, std::vector<floa
     for(int slice = 0; slice < _slices + 1; slice++)
     {
         const float theta = static_cast<float>(slice) * dTheta;
-        const float cosTheta = std::cosf(theta);
-        const float sinTheta = std::sinf(theta);
+        const float cosTheta = std::cos(theta);
+        const float sinTheta = std::sin(theta);
         const float u = static_cast<float>(slice) * du;
 
         vertices[index+0] = _radius * cosTheta;
