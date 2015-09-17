@@ -2,6 +2,7 @@
 
 #include "../../maths/constants.h"
 
+#include <cmath>
 #include <QOpenGLShaderProgram>
 
 Sphere::Sphere(QObject* parent) :
@@ -110,16 +111,16 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
     for(int lat = 0; lat < _rings + 1; ++lat)
     {
         const float phi = Constants::Pi() / 2.0f - static_cast<float>(lat) * dPhi;
-        const float cosPhi = cosf(phi);
-        const float sinPhi = sinf(phi);
+        const float cosPhi = std::cosf(phi);
+        const float sinPhi = std::sinf(phi);
         const float v = 1.0f - static_cast<float>(lat) * dv;
 
         // Iterate over longitudes (slices)
         for(int lon = 0; lon < _slices + 1; ++lon)
         {
             const float theta = static_cast<float>(lon) * dTheta;
-            const float cosTheta = cosf(theta);
-            const float sinTheta = sinf(theta);
+            const float cosTheta = std::cosf(theta);
+            const float sinTheta = std::sinf(theta);
             const float u = static_cast<float>(lon) * du;
 
             vertices[index]   = _radius * cosTheta * cosPhi;
