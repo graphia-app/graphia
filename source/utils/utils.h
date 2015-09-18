@@ -74,14 +74,14 @@ namespace u
     auto contains(const C& container, T const& value, int)
     -> decltype(container.find(value), bool())
     {
-        return container.find(value) != container.cend();
+        return container.find(value) != container.end();
     }
 
     template<typename C, typename T>
     auto contains(const C& container, T const& value, long)
-    -> decltype(std::find(container.cbegin(), container.cend(), value), bool())
+    -> decltype(std::find(container.begin(), container.end(), value), bool())
     {
-        return std::find(container.cbegin(), container.cend(), value) != container.cend();
+        return std::find(container.begin(), container.end(), value) != container.end();
     }
 
     template<typename C, typename T> bool contains(const C& container, T const& value)
@@ -96,7 +96,7 @@ namespace u
     {
         std::vector<T> result;
 
-        for(auto& value : a)
+        for(const auto& value : a)
         {
             if(!contains(b, value))
                 result.emplace_back(value);
@@ -112,7 +112,7 @@ namespace u
     {
         std::vector<T> result;
 
-        for(auto& value : a)
+        for(const auto& value : a)
         {
             if(contains(b, value))
                 result.emplace_back(value);
