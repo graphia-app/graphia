@@ -11,7 +11,7 @@ class SelectionManager : public QObject
 {
     Q_OBJECT
 public:
-    SelectionManager(const GraphModel& graph);
+    SelectionManager(const GraphModel& graphModel);
 
     NodeIdSet selectedNodes() const;
     NodeIdSet unselectedNodes() const;

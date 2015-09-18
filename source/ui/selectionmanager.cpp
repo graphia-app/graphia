@@ -6,9 +6,9 @@
 
 //#define EXPENSIVE_DEBUG_CHECKS
 
-SelectionManager::SelectionManager(const GraphModel& graph) :
+SelectionManager::SelectionManager(const GraphModel& graphModel) :
     QObject(),
-    _graphModel(graph)
+    _graphModel(graphModel)
 {}
 
 NodeIdSet SelectionManager::selectedNodes() const
