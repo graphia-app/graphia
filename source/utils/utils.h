@@ -108,6 +108,28 @@ namespace u
     template<typename T,
              template<typename, typename...> class C1, typename... Args1,
              template<typename, typename...> class C2, typename... Args2>
+    bool setsDiffer(const C1<T, Args1...>& a, const C2<T, Args2...>& b)
+    {
+        for(const auto& value : a)
+        {
+            if(!contains(b, value))
+                return true;
+        }
+
+        return false;
+    }
+
+    template<typename T,
+             template<typename, typename...> class C1, typename... Args1,
+             template<typename, typename...> class C2, typename... Args2>
+    bool setsEqual(const C1<T, Args1...>& a, const C2<T, Args2...>& b)
+    {
+        return !setsDiffer(a, b);
+    }
+
+    template<typename T,
+             template<typename, typename...> class C1, typename... Args1,
+             template<typename, typename...> class C2, typename... Args2>
     std::vector<T> setIntersection(const C1<T, Args1...>& a, const C2<T, Args2...>& b)
     {
         std::vector<T> result;

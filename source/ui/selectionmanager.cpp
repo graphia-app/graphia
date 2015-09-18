@@ -106,7 +106,7 @@ template<typename InputIterator> void SelectionManager::toggleNodes(InputIterato
                                                                     InputIterator last)
 {
     NodeIdSet difference;
-    for(auto i = first; i != last; i++)
+    for(auto i = first; i != last; ++i)
     {
         auto nodeId = *i;
         if(!u::contains(_selectedNodes, nodeId))
@@ -128,7 +128,7 @@ bool SelectionManager::nodeIsSelected(NodeId nodeId) const
 
 bool SelectionManager::setSelectedNodes(const NodeIdSet& nodeIds)
 {
-    bool selectionWillChange = (_selectedNodes != nodeIds);
+    bool selectionWillChange = u::setsDiffer(_selectedNodes, nodeIds);
     _selectedNodes = std::move(nodeIds);
 
     if(selectionWillChange)
