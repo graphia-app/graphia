@@ -29,8 +29,9 @@ public:
             newSelectedNodeIds.insert(multiNodeIds.begin(), multiNodeIds.end());
         }
 
-        bool selectionWillChange = u::setsDiffer(_selectedNodeIds, newSelectedNodeIds);
-        _selectedNodeIds = newSelectedNodeIds;
+        bool oldSize = _selectedNodeIds.size();
+        _selectedNodeIds.insert(newSelectedNodeIds.begin(), newSelectedNodeIds.end());
+        bool selectionWillChange = _selectedNodeIds.size() > oldSize;
 
         if(selectionWillChange)
             emit selectionChanged(this);
