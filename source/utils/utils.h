@@ -110,6 +110,9 @@ namespace u
              template<typename, typename...> class C2, typename... Args2>
     bool setsDiffer(const C1<T, Args1...>& a, const C2<T, Args2...>& b)
     {
+        if(a.size() != b.size())
+            return true;
+
         for(const auto& value : a)
         {
             if(!contains(b, value))
