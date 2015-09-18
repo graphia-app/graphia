@@ -23,21 +23,21 @@ NodeIdSet SelectionManager::selectedNodes() const
         }));
 #endif
 
-    return _selectedNodes;
+    return _selectedNodeIds;
 }
 
 NodeIdSet SelectionManager::unselectedNodes() const
 {
     auto& nodeIds = _graphModel.graph().nodeIds();
     auto unselectedNodeIds = NodeIdSet(nodeIds.begin(), nodeIds.end());
-    unselectedNodeIds.erase(_selectedNodes.begin(), _selectedNodes.end());
+    unselectedNodeIds.erase(_selectedNodeIds.begin(), _selectedNodeIds.end());
 
     return unselectedNodeIds;
 }
 
 bool SelectionManager::selectNode(NodeId nodeId)
 {
-    auto result = _selectedNodes.insert(nodeId);
+    auto result = _selectedNodeIds.insert(nodeId);
 
     if(result.second)
         emit selectionChanged(this);
@@ -53,9 +53,9 @@ bool SelectionManager::selectNodes(const NodeIdSet& nodeIds)
 template<typename InputIterator> bool SelectionManager::selectNodes(InputIterator first,
                                                                     InputIterator last)
 {
-    auto oldSize = _selectedNodes.size();
-    _selectedNodes.insert(first, last);
-    bool selectionDidChange = _selectedNodes.size() > oldSize;
+    auto oldSize = _selectedNodeIds.size();
+    _selectedNodeIds.insert(first, last);
+    bool selectionDidChange = _selectedNodeIds.size() > oldSize;
 
     if(selectionDidChange)
         emit selectionChanged(this);
@@ -65,7 +65,7 @@ template<typename InputIterator> bool SelectionManager::selectNodes(InputIterato
 
 bool SelectionManager::deselectNode(NodeId nodeId)
 {
-    bool selectionWillChange = _selectedNodes.erase(nodeId) > 0;
+    bool selectionWillChange = _selectedNodeIds.erase(nodeId) > 0;
 
     if(selectionWillChange)
         emit selectionChanged(this);
@@ -81,7 +81,7 @@ bool SelectionManager::deselectNodes(const NodeIdSet& nodeIds)
 template<typename InputIterator> bool SelectionManager::deselectNodes(InputIterator first,
                                                                       InputIterator last)
 {
-    bool selectionWillChange = _selectedNodes.erase(first, last) != first;
+    bool selectionWillChange = _selectedNodeIds.erase(first, last) != first;
 
     if(selectionWillChange)
         emit selectionChanged(this);
@@ -109,11 +109,11 @@ template<typename InputIterator> void SelectionManager::toggleNodes(InputIterato
     for(auto i = first; i != last; ++i)
     {
         auto nodeId = *i;
-        if(!u::contains(_selectedNodes, nodeId))
+        if(!u::contains(_selectedNodeIds, nodeId))
             difference.insert(nodeId);
     }
 
-    _selectedNodes = std::move(difference);
+    _selectedNodeIds = std::move(difference);
 
     emit selectionChanged(this);
 }
@@ -123,13 +123,13 @@ bool SelectionManager::nodeIsSelected(NodeId nodeId) const
 #ifdef EXPENSIVE_DEBUG_CHECKS
     Q_ASSERT(u::contains(_graphModel.graph().nodeIds(), nodeId));
 #endif
-    return u::contains(_selectedNodes, nodeId);
+    return u::contains(_selectedNodeIds, nodeId);
 }
 
 bool SelectionManager::setSelectedNodes(const NodeIdSet& nodeIds)
 {
-    bool selectionWillChange = u::setsDiffer(_selectedNodes, nodeIds);
-    _selectedNodes = std::move(nodeIds);
+    bool selectionWillChange = u::setsDiffer(_selectedNodeIds, nodeIds);
+    _selectedNodeIds = std::move(nodeIds);
 
     if(selectionWillChange)
         emit selectionChanged(this);
@@ -145,8 +145,8 @@ bool SelectionManager::selectAllNodes()
 
 bool SelectionManager::clearNodeSelection()
 {
-    bool selectionWillChange = !_selectedNodes.empty();
-    _selectedNodes.clear();
+    bool selectionWillChange = !_selectedNodeIds.empty();
+    _selectedNodeIds.clear();
 
     if(selectionWillChange)
         emit selectionChanged(this);

@@ -44,7 +44,7 @@ public:
 private:
     const GraphModel& _graphModel;
 
-    NodeIdSet _selectedNodes;
+    NodeIdSet _selectedNodeIds;
 
 signals:
     void selectionChanged(const SelectionManager* selectionManager) const;
