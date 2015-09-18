@@ -36,22 +36,12 @@ NodeIdSet SelectionManager::unselectedNodes() const
 
 bool SelectionManager::selectNode(NodeId nodeId)
 {
-    auto result = _selectedNodeIds.insert(nodeId);
-
-    if(result.second)
-        emit selectionChanged(this);
-
-    return result.second;
+    return selectNodes(_graphModel.graph().multiNodesForNodeId(nodeId));
 }
 
 bool SelectionManager::deselectNode(NodeId nodeId)
 {
-    bool selectionWillChange = _selectedNodeIds.erase(nodeId) > 0;
-
-    if(selectionWillChange)
-        emit selectionChanged(this);
-
-    return selectionWillChange;
+    return deselectNodes(_graphModel.graph().multiNodesForNodeId(nodeId));
 }
 
 void SelectionManager::toggleNode(NodeId nodeId)
@@ -72,8 +62,7 @@ bool SelectionManager::nodeIsSelected(NodeId nodeId) const
 
 bool SelectionManager::selectAllNodes()
 {
-    auto& nodeIds = _graphModel.graph().nodeIds();
-    return selectNodes(nodeIds.begin(), nodeIds.end());
+    return selectNodes(_graphModel.graph().nodeIds());
 }
 
 bool SelectionManager::clearNodeSelection()
@@ -89,8 +78,7 @@ bool SelectionManager::clearNodeSelection()
 
 void SelectionManager::invertNodeSelection()
 {
-    auto& nodeIds = _graphModel.graph().nodeIds();
-    toggleNodes(nodeIds.begin(), nodeIds.end());
+    toggleNodes(_graphModel.graph().nodeIds());
 }
 
 const QString SelectionManager::numNodesSelectedAsString() const

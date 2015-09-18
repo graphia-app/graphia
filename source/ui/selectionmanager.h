@@ -21,15 +21,16 @@ public:
 
     template<typename C> bool selectNodes(const C& nodeIds)
     {
-        return selectNodes(nodeIds.begin(), nodeIds.end());
-    }
+        NodeIdSet newSelectedNodeIds;
 
-    template<typename InputIterator> bool selectNodes(InputIterator first,
-                                                      InputIterator last)
-    {
-        auto oldSize = _selectedNodeIds.size();
-        _selectedNodeIds.insert(first, last);
-        bool selectionWillChange = _selectedNodeIds.size() > oldSize;
+        for(auto nodeId : nodeIds)
+        {
+            auto multiNodeIds = _graphModel.graph().multiNodesForNodeId(nodeId);
+            newSelectedNodeIds.insert(multiNodeIds.begin(), multiNodeIds.end());
+        }
+
+        bool selectionWillChange = u::setsDiffer(_selectedNodeIds, newSelectedNodeIds);
+        _selectedNodeIds = newSelectedNodeIds;
 
         if(selectionWillChange)
             emit selectionChanged(this);
@@ -41,13 +42,7 @@ public:
 
     template<typename C> bool deselectNodes(const C& nodeIds)
     {
-        return deselectNodes(nodeIds.begin(), nodeIds.end());
-    }
-
-    template<typename InputIterator> bool deselectNodes(InputIterator first,
-                                                        InputIterator last)
-    {
-        bool selectionWillChange = _selectedNodeIds.erase(first, last) != first;
+        bool selectionWillChange = _selectedNodeIds.erase(nodeIds.begin(), nodeIds.end()) != nodeIds.begin();
 
         if(selectionWillChange)
             emit selectionChanged(this);
@@ -59,14 +54,8 @@ public:
 
     template<typename C> void toggleNodes(const C& nodeIds)
     {
-        toggleNodes(nodeIds.begin(), nodeIds.end());
-    }
-
-    template<typename InputIterator> void toggleNodes(InputIterator first,
-                                                      InputIterator last)
-    {
         NodeIdSet difference;
-        for(auto i = first; i != last; ++i)
+        for(auto i = nodeIds.begin(); i != nodeIds.end(); ++i)
         {
             auto nodeId = *i;
             if(!u::contains(_selectedNodeIds, nodeId))
