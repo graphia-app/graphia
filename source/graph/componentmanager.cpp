@@ -143,9 +143,9 @@ void ComponentManager::update(const Graph* graph)
                 if(componentIdsAffected.size() > 1)
                 {
                     // More than one old component IDs were observed so components have merged
-                    mergedComponents[oldComponentId].insert(componentIdsAffected.cbegin(), componentIdsAffected.cend());
+                    mergedComponents[oldComponentId].insert(componentIdsAffected.begin(), componentIdsAffected.end());
                     componentIdsAffected.erase(oldComponentId);
-                    mergedComponentIds.insert(componentIdsAffected.cbegin(), componentIdsAffected.cend());
+                    mergedComponentIds.insert(componentIdsAffected.begin(), componentIdsAffected.end());
                 }
             }
         }

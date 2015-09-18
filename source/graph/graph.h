@@ -65,8 +65,8 @@ public:
     const EdgeIdSet edgeIds() const
     {
         EdgeIdSet edgeIds;
-        edgeIds.insert(_inEdgeIds.cbegin(), _inEdgeIds.cend());
-        edgeIds.insert(_outEdgeIds.cbegin(), _outEdgeIds.cend());
+        edgeIds.insert(_inEdgeIds.begin(), _inEdgeIds.end());
+        edgeIds.insert(_outEdgeIds.begin(), _outEdgeIds.end());
         return edgeIds;
     }
 
