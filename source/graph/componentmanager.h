@@ -65,11 +65,13 @@ public:
     int numNodes() const { return static_cast<int>(_nodeIds.size()); }
     const Node& nodeById(NodeId nodeId) const { return _graph->nodeById(nodeId); }
     MultiNodeId::Type typeOf(NodeId) const { return MultiNodeId::Type::Not; }
+    NodeIdSet multiNodesForNodeId(NodeId nodeId) const { return _graph->multiNodesForNodeId(nodeId); }
 
     const std::vector<EdgeId>& edgeIds() const { return _edgeIds; }
     int numEdges() const { return static_cast<int>(_edgeIds.size()); }
     const Edge& edgeById(EdgeId edgeId) const { return _graph->edgeById(edgeId); }
     MultiEdgeId::Type typeOf(EdgeId) const { return MultiEdgeId::Type::Not; }
+    EdgeIdSet multiEdgesForEdgeId(EdgeId edgeId) const { return _graph->multiEdgesForEdgeId(edgeId); }
 
     void reserve(const Graph& other);
     void cloneFrom(const Graph& other);

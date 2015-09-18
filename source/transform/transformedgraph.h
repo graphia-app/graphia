@@ -24,12 +24,14 @@ public:
     const Node& nodeById(NodeId nodeId) const { return _target.nodeById(nodeId); }
     bool containsNodeId(NodeId nodeId) const { return _target.containsNodeId(nodeId); }
     MultiNodeId::Type typeOf(NodeId nodeId) const { return _target.typeOf(nodeId); }
+    NodeIdSet multiNodesForNodeId(NodeId nodeId) const { return _target.multiNodesForNodeId(nodeId); }
 
     const std::vector<EdgeId>& edgeIds() const { return _target.edgeIds(); }
     int numEdges() const { return _target.numEdges(); }
     const Edge& edgeById(EdgeId edgeId) const { return _target.edgeById(edgeId); }
     bool containsEdgeId(EdgeId edgeId) const { return _target.containsEdgeId(edgeId); }
     MultiEdgeId::Type typeOf(EdgeId edgeId) const { return _target.typeOf(edgeId); }
+    EdgeIdSet multiEdgesForEdgeId(EdgeId edgeId) const { return _target.multiEdgesForEdgeId(edgeId); }
 
     NodeId addNode() { return _target.addNode(); }
     NodeId addNode(NodeId nodeId) { return _target.addNode(nodeId); }

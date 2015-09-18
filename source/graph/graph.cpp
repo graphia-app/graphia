@@ -264,6 +264,11 @@ MultiNodeId::Type MutableGraph::typeOf(NodeId nodeId) const
     return MultiNodeId::typeOf(nodeId, _multiNodeIds);
 }
 
+NodeIdSet MutableGraph::multiNodesForNodeId(NodeId nodeId) const
+{
+    return MultiNodeId::elements(nodeId, _multiNodeIds);
+}
+
 NodeId MutableGraph::addNode()
 {
     if(!_unusedNodeIds.empty())
@@ -363,6 +368,11 @@ bool MutableGraph::containsEdgeId(EdgeId edgeId) const
 MultiEdgeId::Type MutableGraph::typeOf(EdgeId edgeId) const
 {
     return MultiEdgeId::typeOf(edgeId, _multiEdgeIds);
+}
+
+EdgeIdSet MutableGraph::multiEdgesForEdgeId(EdgeId edgeId) const
+{
+    return MultiEdgeId::elements(edgeId, _multiEdgeIds);
 }
 
 EdgeId MutableGraph::addEdge(NodeId sourceId, NodeId targetId)

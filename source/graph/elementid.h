@@ -151,6 +151,14 @@ private:
         }
     }
 
+    template<typename ElementId>
+    static void iterateMultiElements(ElementId start, const std::vector<MultiElementId<ElementId>>& multiElementIds,
+                                     std::function<void(MultiElementId<ElementId>&)> f)
+
+    {
+        iterateMultiElements(start, const_cast<std::vector<MultiElementId<ElementId>>&>(multiElementIds), f);
+    }
+
 public:
     enum class Type
     {
@@ -220,10 +228,10 @@ public:
         oldMultiElementId.setToNull();
     }
 
-    template<typename ElementId>
-    static typename MultiElementId<ElementId>::Type
+    template<typename ElementId> static typename MultiElementId<ElementId>::Type
     typeOf(ElementId elementId, const std::vector<MultiElementId<ElementId>>& multiElementIds)
     {
+        Q_ASSERT(!elementId.isNull());
         auto& multiElementId = multiElementIds[elementId];
 
         if(!multiElementId.isNull())
@@ -235,6 +243,24 @@ public:
         }
 
         return MultiElementId<ElementId>::Type::Not;
+    }
+
+    template<typename ElementId> static ElementIdSet<ElementId>
+    elements(ElementId elementId, const std::vector<MultiElementId<ElementId>>& multiElementIds)
+    {
+        ElementIdSet<ElementId> elementIdSet;
+        elementIdSet.insert(elementId);
+
+        if(typeOf(elementId, multiElementIds) == MultiElementId<ElementId>::Type::Head)
+        {
+            iterateMultiElements<ElementId>(elementId, multiElementIds,
+            [&elementIdSet](const MultiElementId<ElementId>& multiElementId)
+            {
+                elementIdSet.insert(multiElementId._id);
+            });
+        }
+
+        return elementIdSet;
     }
 };
 
