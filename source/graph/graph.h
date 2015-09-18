@@ -256,10 +256,10 @@ private:
 
 protected:
     NodeId nextNodeId() const;
-    NodeId largestNodeId() const { return NodeId(nextNodeId() - 1); }
+    NodeId largestNodeId() const { return nextNodeId() - 1; }
     virtual void reserveNodeId(NodeId nodeId);
     EdgeId nextEdgeId() const;
-    EdgeId largestEdgeId() const { return EdgeId(nextEdgeId() - 1); }
+    EdgeId largestEdgeId() const { return nextEdgeId() - 1; }
     virtual void reserveEdgeId(EdgeId edgeId);
 
 signals:

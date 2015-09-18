@@ -19,7 +19,7 @@ private:
     int _value;
 
 public:
-    explicit ElementId(int value = NullValue) :
+    ElementId(int value = NullValue) :
         _value(value)
     {
         static_assert(sizeof(ElementId) == sizeof(_value), "ElementId should not be larger than an int");
@@ -29,8 +29,12 @@ public:
     ElementId& operator=(const ElementId<T>& other) { _value = other._value; return *this; }
     inline T& operator++() { ++_value; return static_cast<T&>(*this); }
     inline T operator++(int) { T previous = static_cast<T&>(*this); ++_value; return previous; }
+    inline T& operator--() { --_value; return static_cast<T&>(*this); }
+    inline T operator--(int) { T previous = static_cast<T&>(*this); --_value; return previous; }
     inline bool operator==(const ElementId<T>& other) const { return _value == other._value; }
+    inline bool operator==(int value) const { return _value == value; }
     inline bool operator<(const ElementId<T>& other) const { return _value < other._value; }
+    inline bool operator<(int value) const { return _value < value; }
 
     inline bool isNull() const { return _value == NullValue; }
     inline void setToNull() { _value = NullValue; }

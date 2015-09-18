@@ -134,7 +134,7 @@ void Graph::reserveNodeId(NodeId nodeId)
     if(nodeId < nextNodeId())
         return;
 
-    _nextNodeId = NodeId(nodeId + 1);
+    _nextNodeId = nodeId + 1;
 
     for(auto nodeArray : _nodeArrays)
         nodeArray->resize(_nextNodeId);
@@ -145,7 +145,7 @@ void Graph::reserveEdgeId(EdgeId edgeId)
     if(edgeId < nextEdgeId())
         return;
 
-    _nextEdgeId = EdgeId(edgeId + 1);
+    _nextEdgeId = edgeId + 1;
 
     for(auto edgeArray : _edgeArrays)
         edgeArray->resize(_nextEdgeId);
