@@ -55,12 +55,12 @@ template<typename InputIterator> bool SelectionManager::selectNodes(InputIterato
 {
     auto oldSize = _selectedNodeIds.size();
     _selectedNodeIds.insert(first, last);
-    bool selectionDidChange = _selectedNodeIds.size() > oldSize;
+    bool selectionWillChange = _selectedNodeIds.size() > oldSize;
 
-    if(selectionDidChange)
+    if(selectionWillChange)
         emit selectionChanged(this);
 
-    return selectionDidChange;
+    return selectionWillChange;
 }
 
 bool SelectionManager::deselectNode(NodeId nodeId)
