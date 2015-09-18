@@ -1,6 +1,5 @@
 #include "selectionmanager.h"
 
-#include "../utils/utils.h"
 #include <algorithm>
 #include <utility>
 
@@ -45,43 +44,9 @@ bool SelectionManager::selectNode(NodeId nodeId)
     return result.second;
 }
 
-bool SelectionManager::selectNodes(const NodeIdSet& nodeIds)
-{
-    return selectNodes(nodeIds.begin(), nodeIds.end());
-}
-
-template<typename InputIterator> bool SelectionManager::selectNodes(InputIterator first,
-                                                                    InputIterator last)
-{
-    auto oldSize = _selectedNodeIds.size();
-    _selectedNodeIds.insert(first, last);
-    bool selectionWillChange = _selectedNodeIds.size() > oldSize;
-
-    if(selectionWillChange)
-        emit selectionChanged(this);
-
-    return selectionWillChange;
-}
-
 bool SelectionManager::deselectNode(NodeId nodeId)
 {
     bool selectionWillChange = _selectedNodeIds.erase(nodeId) > 0;
-
-    if(selectionWillChange)
-        emit selectionChanged(this);
-
-    return selectionWillChange;
-}
-
-bool SelectionManager::deselectNodes(const NodeIdSet& nodeIds)
-{
-    return deselectNodes(nodeIds.begin(), nodeIds.end());
-}
-
-template<typename InputIterator> bool SelectionManager::deselectNodes(InputIterator first,
-                                                                      InputIterator last)
-{
-    bool selectionWillChange = _selectedNodeIds.erase(first, last) != first;
 
     if(selectionWillChange)
         emit selectionChanged(this);
@@ -97,44 +62,12 @@ void SelectionManager::toggleNode(NodeId nodeId)
         selectNode(nodeId);
 }
 
-void SelectionManager::toggleNodes(const NodeIdSet& nodeIds)
-{
-    toggleNodes(nodeIds.begin(), nodeIds.end());
-}
-
-template<typename InputIterator> void SelectionManager::toggleNodes(InputIterator first,
-                                                                    InputIterator last)
-{
-    NodeIdSet difference;
-    for(auto i = first; i != last; ++i)
-    {
-        auto nodeId = *i;
-        if(!u::contains(_selectedNodeIds, nodeId))
-            difference.insert(nodeId);
-    }
-
-    _selectedNodeIds = std::move(difference);
-
-    emit selectionChanged(this);
-}
-
 bool SelectionManager::nodeIsSelected(NodeId nodeId) const
 {
 #ifdef EXPENSIVE_DEBUG_CHECKS
     Q_ASSERT(u::contains(_graphModel.graph().nodeIds(), nodeId));
 #endif
     return u::contains(_selectedNodeIds, nodeId);
-}
-
-bool SelectionManager::setSelectedNodes(const NodeIdSet& nodeIds)
-{
-    bool selectionWillChange = u::setsDiffer(_selectedNodeIds, nodeIds);
-    _selectedNodeIds = std::move(nodeIds);
-
-    if(selectionWillChange)
-        emit selectionChanged(this);
-
-    return selectionWillChange;
 }
 
 bool SelectionManager::selectAllNodes()
