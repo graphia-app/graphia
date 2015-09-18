@@ -253,11 +253,13 @@ public:
 
         if(typeOf(elementId, multiElementIds) == MultiElementId<ElementId>::Type::Head)
         {
-            iterateMultiElements<ElementId>(elementId, multiElementIds,
-            [&elementIdSet](const MultiElementId<ElementId>& multiElementId)
+            const MultiElementId<ElementId>* multiElementId = &multiElementIds[elementId];
+
+            while(multiElementId->hasNext())
             {
-                elementIdSet.insert(multiElementId._id);
-            });
+                elementIdSet.insert(multiElementId->next());
+                multiElementId = &multiElementIds[multiElementId->next()];
+            }
         }
 
         return elementIdSet;
