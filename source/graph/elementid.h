@@ -184,7 +184,7 @@ public:
         auto setMultiElementId = [&multiElementIds](ElementId start, ElementId elementId)
         {
             iterateMultiElements<ElementId>(start, multiElementIds,
-            [&elementId](MultiElementId<ElementId>& multiElementId)
+            [elementId](MultiElementId<ElementId>& multiElementId)
             {
                 multiElementId._id = elementId;
             });
@@ -194,7 +194,10 @@ public:
         std::tie(elementId, nextElementId) = std::minmax(elementIdA, elementIdB);
         auto& multiElementId = multiElementIds[elementId];
 
-        multiElementId._next = nextElementId;
+        auto* tail = &multiElementIds[elementId];
+        while(tail->hasNext())
+            tail = &multiElementIds[tail->_next];
+        tail->_next = nextElementId;
 
         if(multiElementId.isNull())
             setMultiElementId(elementId, elementId);
@@ -253,7 +256,7 @@ public:
 
         if(typeOf(elementId, multiElementIds) == MultiElementId<ElementId>::Type::Head)
         {
-            const MultiElementId<ElementId>* multiElementId = &multiElementIds[elementId];
+            const auto* multiElementId = &multiElementIds[elementId];
 
             while(multiElementId->hasNext())
             {
