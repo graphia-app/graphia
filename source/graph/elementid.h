@@ -62,8 +62,8 @@ class NodeId : public ElementId<NodeId>
     using ElementId::ElementId;
 #else
 public:
-    explicit NodeId() : ElementId() {}
-    explicit NodeId(int value) : ElementId(value) {}
+    NodeId() : ElementId() {}
+    NodeId(int value) : ElementId(value) {}
 #endif
 };
 
@@ -73,8 +73,8 @@ class EdgeId : public ElementId<EdgeId>
     using ElementId::ElementId;
 #else
 public:
-    explicit EdgeId() : ElementId() {}
-    explicit EdgeId(int value) : ElementId(value) {}
+    EdgeId() : ElementId() {}
+    EdgeId(int value) : ElementId(value) {}
 #endif
 };
 
@@ -84,8 +84,8 @@ class ComponentId : public ElementId<ComponentId>
     using ElementId::ElementId;
 #else
 public:
-    explicit ComponentId() : ElementId() {}
-    explicit ComponentId(int value) : ElementId(value) {}
+    ComponentId() : ElementId() {}
+    ComponentId(int value) : ElementId(value) {}
 #endif
 };
 
