@@ -126,38 +126,13 @@ template<typename T> class MultiElementId
 {
 private:
     T _next;
-    T _id;
+    T _tail;
 
-    void setToNull() { _id.setToNull(); _next.setToNull(); }
-    bool hasNext() const { return !_next.isNull(); }
-    T next() const { return _next; }
+    bool isNull() const { return _next.isNull(); }
+    bool isHead() const { return !_tail.isNull(); }
 
-    template<typename ElementId>
-    static void iterateMultiElements(ElementId start, std::vector<MultiElementId<ElementId>>& multiElementIds,
-                                     std::function<void(MultiElementId<ElementId>&)> f)
-
-    {
-        if(start.isNull())
-            return;
-
-        auto* multiElementId = &multiElementIds[start];
-
-        f(*multiElementId);
-
-        while(multiElementId->hasNext())
-        {
-            multiElementId = &multiElementIds[multiElementId->next()];
-            f(*multiElementId);
-        }
-    }
-
-    template<typename ElementId>
-    static void iterateMultiElements(ElementId start, const std::vector<MultiElementId<ElementId>>& multiElementIds,
-                                     std::function<void(MultiElementId<ElementId>&)> f)
-
-    {
-        iterateMultiElements(start, const_cast<std::vector<MultiElementId<ElementId>>&>(multiElementIds), f);
-    }
+    void setToNull() { _next.setToNull(); _tail.setToNull(); }
+    bool hasNext(T elementId) const { return !_next.isNull() && _next != elementId; }
 
 public:
     enum class Type
@@ -166,9 +141,6 @@ public:
         Head,
         Tail
     };
-
-    T id() const { return _id; }
-    bool isNull() const { return _id.isNull(); }
 
     template<typename ElementId>
     static ElementId mergeElements(ElementId elementIdA, ElementId elementIdB,
@@ -181,54 +153,44 @@ public:
         if(elementIdA == elementIdB)
             return ElementId();
 
-        auto setMultiElementId = [&multiElementIds](ElementId start, ElementId elementId)
+        ElementId lowId, highId;
+        std::tie(lowId, highId) = std::minmax(elementIdA, elementIdB);
+        auto& lowMultiId = multiElementIds[lowId];
+        auto& highMultiId = multiElementIds[highId];
+
+        if(lowMultiId.isNull())
         {
-            iterateMultiElements<ElementId>(start, multiElementIds,
-            [elementId](MultiElementId<ElementId>& multiElementId)
+            // Adding to the front of the linked list
+            lowMultiId._next = highId;
+
+            if(!highMultiId.isNull())
             {
-                multiElementId._id = elementId;
-            });
-        };
+                Q_ASSERT(highMultiId.isHead());
 
-        ElementId elementId, nextElementId;
-        std::tie(elementId, nextElementId) = std::minmax(elementIdA, elementIdB);
-        auto& multiElementId = multiElementIds[elementId];
-
-        auto* tail = &multiElementIds[elementId];
-        while(tail->hasNext())
-            tail = &multiElementIds[tail->_next];
-        tail->_next = nextElementId;
-
-        if(multiElementId.isNull())
-            setMultiElementId(elementId, elementId);
+                // Move head from high to low
+                lowMultiId._tail = highMultiId._tail;
+                highMultiId._tail.setToNull();
+            }
+            else
+            {
+                // high is the new tail
+                lowMultiId._tail = highId;
+                highMultiId._next = highId;
+            }
+        }
         else
-            setMultiElementId(nextElementId, multiElementId._id);
-
-        return multiElementId._id;
-    }
-
-    template<typename ElementId>
-    static void removeMultiElementId(ElementId elementId, std::vector<MultiElementId<ElementId>>& multiElementIds)
-    {
-        Q_ASSERT(!elementId.isNull());
-
-        auto& oldMultiElementId = multiElementIds[elementId];
-
-        if(oldMultiElementId.isNull())
-            return;
-
-        auto rightMultiElementId = oldMultiElementId._next;
-
-        iterateMultiElements<ElementId>(oldMultiElementId._id, multiElementIds,
-        [elementId, rightMultiElementId](MultiElementId<ElementId>& multiElementId)
         {
-            if(multiElementId._next == elementId)
-                multiElementId._next.setToNull(); // Break link
-            else if(multiElementId._next > rightMultiElementId || multiElementId.isNull())
-                multiElementId._id = rightMultiElementId; // Set everything right of removee to new id
-        });
+            Q_ASSERT(lowMultiId.isHead());
 
-        oldMultiElementId.setToNull();
+            auto& tail = multiElementIds[lowMultiId._tail];
+            tail._next = highId;
+
+            // high is the new tail
+            lowMultiId._tail = highId;
+            highMultiId._next = highId;
+        }
+
+        return lowId;
     }
 
     template<typename ElementId> static typename MultiElementId<ElementId>::Type
@@ -239,7 +201,7 @@ public:
 
         if(!multiElementId.isNull())
         {
-            if(multiElementId.id() == elementId)
+            if(multiElementId.isHead())
                 return MultiElementId<ElementId>::Type::Head;
 
             return MultiElementId<ElementId>::Type::Tail;
@@ -258,10 +220,11 @@ public:
         {
             const auto* multiElementId = &multiElementIds[elementId];
 
-            while(multiElementId->hasNext())
+            while(multiElementId->hasNext(elementId))
             {
-                elementIdSet.insert(multiElementId->next());
-                multiElementId = &multiElementIds[multiElementId->next()];
+                elementIdSet.insert(multiElementId->_next);
+                elementId = multiElementId->_next;
+                multiElementId = &multiElementIds[multiElementId->_next];
             }
         }
 
