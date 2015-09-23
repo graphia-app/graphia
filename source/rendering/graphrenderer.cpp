@@ -492,7 +492,7 @@ void GraphRenderer::renderScene()
 
         // If there is a transition active then we'll need another
         // frame once we're finished with this one
-        if(_scene->transitionActive() || _modeTransitionInProgress)
+        if(_transition.active() || _scene->transitionActive() || _modeTransitionInProgress)
             update();
 
         //FIXME should be passing a delta around?
