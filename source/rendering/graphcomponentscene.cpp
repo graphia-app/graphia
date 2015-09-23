@@ -204,9 +204,7 @@ void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId com
 {
     if(componentId == _componentId)
     {
-        bool thisIsTheLastComponent = _graphRenderer->graphModel()->graph().numComponents() == 1;
-
-        if(visible() && !hasMerged && !thisIsTheLastComponent)
+        if(visible() && !hasMerged)
             _graphRenderer->switchToOverviewMode();
 
         _componentId.setToNull();
