@@ -62,22 +62,24 @@ private:
     std::unique_ptr<GraphTransform> _graphTransform;
     MutableGraph _target;
 
-    class Difference
+    class State
     {
     private:
-        enum class State { Removed, Unchanged, Added };
-        State state = State::Unchanged;
+        enum class Value { Removed, Unchanged, Added };
+        Value state = Value::Unchanged;
 
     public:
-        void add()     { state = state == State::Removed ? State::Unchanged : State::Added; }
-        void remove()  { state = state == State::Added ?   State::Unchanged : State::Removed; }
+        void add()     { state = state == Value::Removed ? Value::Unchanged : Value::Added; }
+        void remove()  { state = state == Value::Added ?   Value::Unchanged : Value::Removed; }
 
-        bool added()   { return state == State::Added; }
-        bool removed() { return state == State::Removed; }
+        bool added()   { return state == Value::Added; }
+        bool removed() { return state == Value::Removed; }
     };
 
-    NodeArray<Difference> _nodesDifference;
-    EdgeArray<Difference> _edgesDifference;
+    NodeArray<State> _nodesState;
+    EdgeArray<State> _edgesState;
+    NodeArray<State> _previousNodesState;
+    EdgeArray<State> _previousEdgesState;
 
     void rebuild();
 
