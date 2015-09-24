@@ -125,14 +125,16 @@ template<typename V> using ComponentIdMap = ElementIdMap<ComponentId, V>;
 template<typename T> class MultiElementId
 {
 private:
+    T _prev;
     T _next;
-    T _tail;
+    T _opposite;
 
     bool isNull() const { return _next.isNull(); }
-    bool isHead() const { return !_tail.isNull(); }
+    bool isTail(T elementId) const { return _next == elementId; }
+    bool isHead(T elementId) const { return !_opposite.isNull() && !isTail(elementId); }
 
-    void setToNull() { _next.setToNull(); _tail.setToNull(); }
-    bool hasNext(T elementId) const { return !_next.isNull() && _next != elementId; }
+    void setToNull() { _prev.setToNull(); _next.setToNull(); _opposite.setToNull(); }
+    bool hasNext(T elementId) const { return !_next.isNull() && !isTail(elementId); }
 
 public:
     enum class Type
@@ -158,39 +160,142 @@ public:
         auto& lowMultiId = multiElementIds[lowId];
         auto& highMultiId = multiElementIds[highId];
 
-        if(lowMultiId.isNull())
+        if(lowMultiId.isNull() && highMultiId.isNull())
         {
-            // Adding to the front of the linked list
+            // Neither is yet merged with anything
             lowMultiId._next = highId;
+            lowMultiId._opposite = highId;
 
-            if(!highMultiId.isNull())
-            {
-                Q_ASSERT(highMultiId.isHead());
+            highMultiId._prev = lowId;
+            highMultiId._next = highId;
+            highMultiId._opposite = lowId;
+        }
+        else if(highMultiId.isHead(highId))
+        {
+            Q_ASSERT(!highMultiId._opposite.isNull());
+            Q_ASSERT(lowMultiId.isNull());
+            Q_ASSERT(lowMultiId._prev.isNull());
+            Q_ASSERT(lowMultiId._opposite.isNull());
 
-                // Move head from high to low
-                lowMultiId._tail = highMultiId._tail;
-                highMultiId._tail.setToNull();
-            }
-            else
-            {
-                // high is the new tail
-                lowMultiId._tail = highId;
-                highMultiId._next = highId;
-            }
+            // Adding to the head
+            auto& tail = multiElementIds[highMultiId._opposite];
+            tail._opposite = lowId;
+
+            lowMultiId._next = highId;
+            lowMultiId._opposite = highMultiId._opposite;
+
+            highMultiId._prev = lowId;
+            highMultiId._opposite.setToNull();
+        }
+        else if(lowMultiId.isTail(lowId))
+        {
+            Q_ASSERT(!lowMultiId._opposite.isNull());
+            Q_ASSERT(highMultiId.isNull());
+            Q_ASSERT(highMultiId._prev.isNull());
+            Q_ASSERT(highMultiId._opposite.isNull());
+
+            // Adding to the tail
+            auto& head = multiElementIds[lowMultiId._opposite];
+            head._opposite = highId;
+
+            highMultiId._prev = lowId;
+            highMultiId._next = highId;
+            highMultiId._opposite = lowMultiId._opposite;
+
+            lowMultiId._next = highId;
+            lowMultiId._opposite.setToNull();
         }
         else
         {
-            Q_ASSERT(lowMultiId.isHead());
+            // Adding in the middle
+            if(!lowMultiId.isNull())
+            {
+                Q_ASSERT(highMultiId.isNull());
+                Q_ASSERT(!lowMultiId._next.isNull());
+                auto& next = multiElementIds[lowMultiId._next];
 
-            auto& tail = multiElementIds[lowMultiId._tail];
-            tail._next = highId;
+                highMultiId._prev = lowId;
+                highMultiId._next = lowMultiId._next;
 
-            // high is the new tail
-            lowMultiId._tail = highId;
-            highMultiId._next = highId;
+                lowMultiId._next = highId;
+                next._prev = highId;
+            }
+            else if(!highMultiId.isNull())
+            {
+                Q_ASSERT(lowMultiId.isNull());
+                Q_ASSERT(!highMultiId._prev.isNull());
+                auto& prev = multiElementIds[highMultiId._prev];
+
+                lowMultiId._prev = highMultiId._prev;
+                lowMultiId._next = highId;
+
+                highMultiId._prev = lowId;
+                prev._next = lowId;
+            }
         }
 
         return lowId;
+    }
+
+    template<typename ElementId>
+    static void removeMultiElementId(ElementId elementId, std::vector<MultiElementId<ElementId>>& multiElementIds)
+    {
+        Q_ASSERT(!elementId.isNull());
+        auto& multiElementId = multiElementIds[elementId];
+
+        // Can't remove it if it isn't a multielement
+        if(multiElementId.isNull())
+            return;
+
+        if(multiElementId._next == multiElementId._opposite)
+        {
+            // The tail is the only other element
+            auto& next = multiElementIds[multiElementId._next];
+            next.setToNull();
+        }
+        else if(multiElementId._prev == multiElementId._opposite)
+        {
+            // The head is the only other element
+            auto& prev = multiElementIds[multiElementId._prev];
+            prev.setToNull();
+        }
+        else if(multiElementId.isHead(elementId))
+        {
+            // Removing from the head
+            Q_ASSERT(!multiElementId._next.isNull());
+            Q_ASSERT(!multiElementId._opposite.isNull());
+            auto& newHead = multiElementIds[multiElementId._next];
+            auto& tail = multiElementIds[multiElementId._opposite];
+
+            newHead._opposite = multiElementId._opposite;
+            newHead._prev.setToNull();
+            tail._opposite = multiElementId._next;
+        }
+        else if(multiElementId.isTail(elementId))
+        {
+            // Removing from the tail
+            Q_ASSERT(!multiElementId._opposite.isNull());
+            Q_ASSERT(!multiElementId._prev.isNull());
+            auto& head = multiElementIds[multiElementId._opposite];
+            auto& newTail = multiElementIds[multiElementId._prev];
+
+            head._opposite = multiElementId._prev;
+            newTail._next = multiElementId._prev;
+            newTail._opposite = multiElementId._opposite;
+        }
+        else
+        {
+            // Removing in the middle
+            Q_ASSERT(!multiElementId._prev.isNull());
+            Q_ASSERT(!multiElementId._next.isNull());
+            auto& prev = multiElementIds[multiElementId._prev];
+            auto& next = multiElementIds[multiElementId._next];
+
+            prev._next = multiElementId._next;
+            next._prev = multiElementId._prev;
+        }
+
+        multiElementId.setToNull();
     }
 
     template<typename ElementId> static typename MultiElementId<ElementId>::Type
@@ -201,7 +306,7 @@ public:
 
         if(!multiElementId.isNull())
         {
-            if(multiElementId.isHead())
+            if(multiElementId.isHead(elementId))
                 return MultiElementId<ElementId>::Type::Head;
 
             return MultiElementId<ElementId>::Type::Tail;

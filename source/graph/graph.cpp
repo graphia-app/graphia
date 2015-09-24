@@ -336,7 +336,7 @@ void MutableGraph::removeNode(NodeId nodeId)
 
     emit nodeWillBeRemoved(this, &node);
 
-    Q_ASSERT(typeOf(nodeId) == MultiNodeId::Type::Not);
+    MultiNodeId::removeMultiElementId(nodeId, _multiNodeIds);
     _nodeIdsInUse[nodeId] = false;
     _unusedNodeIds.push_back(nodeId);
 
@@ -467,7 +467,7 @@ void MutableGraph::removeEdge(EdgeId edgeId)
     target._inEdgeIds.erase(edgeId);
     target._adjacentNodeIds.erase(edge.sourceId());
 
-    Q_ASSERT(typeOf(edgeId) == MultiEdgeId::Type::Not);
+    MultiEdgeId::removeMultiElementId(edgeId, _multiEdgeIds);
     _edgeIdsInUse[edgeId] = false;
     _unusedEdgeIds.push_back(edgeId);
 
