@@ -683,7 +683,9 @@ GraphComponentRenderer* GraphRenderer::componentRendererForId(ComponentId compon
     if(componentId.isNull())
         return nullptr;
 
-    return _componentRenderers.at(componentId);
+    GraphComponentRenderer* renderer = _componentRenderers.at(componentId);
+    Q_ASSERT(renderer != nullptr);
+    return renderer;
 }
 
 bool GraphRenderer::prepareRenderBuffers(int width, int height)
