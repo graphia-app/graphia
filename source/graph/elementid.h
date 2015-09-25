@@ -124,6 +124,8 @@ template<typename V> using ComponentIdMap = ElementIdMap<ComponentId, V>;
 
 template<typename T> class MultiElementId
 {
+    static_assert(std::is_base_of<ElementId<T>, T>::value, "T must be an ElementId");
+
 private:
     T _prev;
     T _next;
