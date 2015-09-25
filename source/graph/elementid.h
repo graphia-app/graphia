@@ -131,9 +131,12 @@ private:
 
     bool isNull() const { return _next.isNull(); }
     bool isTail(T elementId) const { return _next == elementId; }
-    bool isHead(T elementId) const { return !_opposite.isNull() && !isTail(elementId); }
+    bool isHead(T elementId) const { return !_opposite.isNull() && (!isTail(elementId) || _opposite == elementId); }
+    bool isSingleton(T elementId) const { return isHead(elementId) && isTail(elementId); }
 
     void setToNull() { _prev.setToNull(); _next.setToNull(); _opposite.setToNull(); }
+    void setToSingleton(T elementId) { _prev = _next = _opposite = elementId; }
+
     bool hasNext(T elementId) const { return !_next.isNull() && !isTail(elementId); }
 
 public:
@@ -151,14 +154,16 @@ public:
         Q_ASSERT(!elementIdA.isNull());
         Q_ASSERT(!elementIdB.isNull());
 
-        // Can't merge something with itself
-        if(elementIdA == elementIdB)
-            return ElementId();
-
         ElementId lowId, highId;
         std::tie(lowId, highId) = std::minmax(elementIdA, elementIdB);
         auto& lowMultiId = multiElementIds[lowId];
         auto& highMultiId = multiElementIds[highId];
+
+        if(lowMultiId.isSingleton(lowId))
+            lowMultiId.setToNull();
+
+        if(highMultiId.isSingleton(highId))
+            highMultiId.setToNull();
 
         if(lowMultiId.isNull() && highMultiId.isNull())
         {
@@ -250,14 +255,14 @@ public:
         if(multiElementId._next == multiElementId._opposite)
         {
             // The tail is the only other element
-            auto& next = multiElementIds[multiElementId._next];
-            next.setToNull();
+            auto& tail = multiElementIds[multiElementId._next];
+            tail.setToSingleton(multiElementId._next);
         }
         else if(multiElementId._prev == multiElementId._opposite)
         {
             // The head is the only other element
-            auto& prev = multiElementIds[multiElementId._prev];
-            prev.setToNull();
+            auto& head = multiElementIds[multiElementId._prev];
+            head.setToSingleton(multiElementId._prev);
         }
         else if(multiElementId.isHead(elementId))
         {
@@ -304,7 +309,7 @@ public:
         Q_ASSERT(!elementId.isNull());
         auto& multiElementId = multiElementIds[elementId];
 
-        if(!multiElementId.isNull())
+        if(!multiElementId.isNull() && !multiElementId.isSingleton(elementId))
         {
             if(multiElementId.isHead(elementId))
                 return MultiElementId<ElementId>::Type::Head;
