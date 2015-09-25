@@ -234,8 +234,8 @@ void MutableGraph::clear()
     // Removing all the nodes should remove all the edges
     Q_ASSERT(numEdges() == 0);
 
-    _nodes.resize(0);
-    _edges.resize(0);
+    _n.clear();
+    _e.clear();
 }
 
 const std::vector<NodeId>& MutableGraph::nodeIds() const
@@ -250,23 +250,23 @@ int MutableGraph::numNodes() const
 
 const Node& MutableGraph::nodeById(NodeId nodeId) const
 {
-    Q_ASSERT(_nodeIdsInUse[nodeId]);
-    return _nodes[nodeId];
+    Q_ASSERT(_n._nodeIdsInUse[nodeId]);
+    return _n._nodes[nodeId];
 }
 
 bool MutableGraph::containsNodeId(NodeId nodeId) const
 {
-    return _nodeIdsInUse[nodeId];
+    return _n._nodeIdsInUse[nodeId];
 }
 
 MultiNodeId::Type MutableGraph::typeOf(NodeId nodeId) const
 {
-    return MultiNodeId::typeOf(nodeId, _multiNodeIds);
+    return MultiNodeId::typeOf(nodeId, _n._multiNodeIds);
 }
 
 NodeIdSet MutableGraph::multiNodesForNodeId(NodeId nodeId) const
 {
-    return MultiNodeId::elements(nodeId, _multiNodeIds);
+    return MultiNodeId::elements(nodeId, _n._multiNodeIds);
 }
 
 NodeId MutableGraph::addNode()
@@ -288,9 +288,7 @@ void MutableGraph::reserveNodeId(NodeId nodeId)
         return;
 
     Graph::reserveNodeId(nodeId);
-    _nodeIdsInUse.resize(nextNodeId());
-    _multiNodeIds.resize(nextNodeId());
-    _nodes.resize(nextNodeId());
+    _n.resize(nextNodeId());
 }
 
 NodeId MutableGraph::addNode(NodeId nodeId)
@@ -300,14 +298,14 @@ NodeId MutableGraph::addNode(NodeId nodeId)
     beginTransaction();
 
     // The requested ID is not available or is out of range, so resize and append
-    if(nodeId >= nextNodeId() || (nodeId < nextNodeId() && _nodeIdsInUse[nodeId]))
+    if(nodeId >= nextNodeId() || (nodeId < nextNodeId() && _n._nodeIdsInUse[nodeId]))
     {
         nodeId = nextNodeId();
         reserveNodeId(nodeId);
     }
 
-    _nodeIdsInUse[nodeId] = true;
-    auto& node = _nodes[nodeId];
+    _n._nodeIdsInUse[nodeId] = true;
+    auto& node = _n._nodes[nodeId];
     node._id = nodeId;
     node._inEdgeIds.clear();
     node._outEdgeIds.clear();
@@ -330,14 +328,14 @@ void MutableGraph::removeNode(NodeId nodeId)
     beginTransaction();
 
     // Remove all edges that touch this node
-    auto& node = _nodes[nodeId];
+    auto& node = _n._nodes[nodeId];
     for(auto edgeId : node.edgeIds())
         removeEdge(edgeId);
 
     emit nodeWillBeRemoved(this, &node);
 
-    MultiNodeId::removeMultiElementId(nodeId, _multiNodeIds);
-    _nodeIdsInUse[nodeId] = false;
+    MultiNodeId::removeMultiElementId(nodeId, _n._multiNodeIds);
+    _n._nodeIdsInUse[nodeId] = false;
     _unusedNodeIds.push_back(nodeId);
 
     _updateRequired = true;
@@ -356,23 +354,23 @@ int MutableGraph::numEdges() const
 
 const Edge& MutableGraph::edgeById(EdgeId edgeId) const
 {
-    Q_ASSERT(_edgeIdsInUse[edgeId]);
-    return _edges[edgeId];
+    Q_ASSERT(_e._edgeIdsInUse[edgeId]);
+    return _e._edges[edgeId];
 }
 
 bool MutableGraph::containsEdgeId(EdgeId edgeId) const
 {
-    return _edgeIdsInUse[edgeId];
+    return _e._edgeIdsInUse[edgeId];
 }
 
 MultiEdgeId::Type MutableGraph::typeOf(EdgeId edgeId) const
 {
-    return MultiEdgeId::typeOf(edgeId, _multiEdgeIds);
+    return MultiEdgeId::typeOf(edgeId, _e._multiEdgeIds);
 }
 
 EdgeIdSet MutableGraph::multiEdgesForEdgeId(EdgeId edgeId) const
 {
-    return MultiEdgeId::elements(edgeId, _multiEdgeIds);
+    return MultiEdgeId::elements(edgeId, _e._multiEdgeIds);
 }
 
 EdgeId MutableGraph::addEdge(NodeId sourceId, NodeId targetId)
@@ -394,46 +392,44 @@ void MutableGraph::reserveEdgeId(EdgeId edgeId)
         return;
 
     Graph::reserveEdgeId(edgeId);
-    _edgeIdsInUse.resize(nextEdgeId());
-    _multiEdgeIds.resize(nextEdgeId());
-    _edges.resize(nextEdgeId());
+    _e.resize(nextEdgeId());
 }
 
 NodeId MutableGraph::mergeNodes(NodeId nodeIdA, NodeId nodeIdB)
 {
-    return MultiNodeId::mergeElements(nodeIdA, nodeIdB, _multiNodeIds);
+    return MultiNodeId::mergeElements(nodeIdA, nodeIdB, _n._multiNodeIds);
 }
 
 EdgeId MutableGraph::mergeEdges(EdgeId edgeIdA, EdgeId edgeIdB)
 {
-    return MultiEdgeId::mergeElements(edgeIdA, edgeIdB, _multiEdgeIds);
+    return MultiEdgeId::mergeElements(edgeIdA, edgeIdB, _e._multiEdgeIds);
 }
 
 EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
 {
     Q_ASSERT(!edgeId.isNull());
-    Q_ASSERT(_nodeIdsInUse[sourceId]);
-    Q_ASSERT(_nodeIdsInUse[targetId]);
+    Q_ASSERT(_n._nodeIdsInUse[sourceId]);
+    Q_ASSERT(_n._nodeIdsInUse[targetId]);
 
     beginTransaction();
 
     // The requested ID is not available or is out of range, so resize and append
-    if(edgeId >= nextEdgeId() || (edgeId < nextEdgeId() && _edgeIdsInUse[edgeId]))
+    if(edgeId >= nextEdgeId() || (edgeId < nextEdgeId() && _e._edgeIdsInUse[edgeId]))
     {
         edgeId = nextEdgeId();
         reserveEdgeId(edgeId);
     }
 
-    _edgeIdsInUse[edgeId] = true;
-    auto& edge = _edges[edgeId];
+    _e._edgeIdsInUse[edgeId] = true;
+    auto& edge = _e._edges[edgeId];
     edge._id = edgeId;
     edge._sourceId = sourceId;
     edge._targetId = targetId;
 
-    _nodes[sourceId]._outEdgeIds.insert(edgeId);
-    auto sourceInsert = _nodes[sourceId]._adjacentNodeIds.insert({targetId, edgeId});
-    _nodes[targetId]._inEdgeIds.insert(edgeId);
-    auto targetInsert = _nodes[targetId]._adjacentNodeIds.insert({sourceId, edgeId});
+    _n._nodes[sourceId]._outEdgeIds.insert(edgeId);
+    auto sourceInsert = _n._nodes[sourceId]._adjacentNodeIds.insert({targetId, edgeId});
+    _n._nodes[targetId]._inEdgeIds.insert(edgeId);
+    auto targetInsert = _n._nodes[targetId]._adjacentNodeIds.insert({sourceId, edgeId});
 
     Q_ASSERT(sourceId == targetId || sourceInsert.second == targetInsert.second);
     if(!sourceInsert.second && !targetInsert.second)
@@ -456,19 +452,19 @@ void MutableGraph::removeEdge(EdgeId edgeId)
     beginTransaction();
 
     // Remove all node references to this edge
-    const auto& edge = _edges[edgeId];
+    const auto& edge = _e._edges[edgeId];
 
     emit edgeWillBeRemoved(this, &edge);
 
-    auto& source = _nodes[edge.sourceId()];
-    auto& target = _nodes[edge.targetId()];
+    auto& source = _n._nodes[edge.sourceId()];
+    auto& target = _n._nodes[edge.targetId()];
     source._outEdgeIds.erase(edgeId);
     source._adjacentNodeIds.erase(edge.targetId());
     target._inEdgeIds.erase(edgeId);
     target._adjacentNodeIds.erase(edge.sourceId());
 
-    MultiEdgeId::removeMultiElementId(edgeId, _multiEdgeIds);
-    _edgeIdsInUse[edgeId] = false;
+    MultiEdgeId::removeMultiElementId(edgeId, _e._multiEdgeIds);
+    _e._edgeIdsInUse[edgeId] = false;
     _unusedEdgeIds.push_back(edgeId);
 
     _updateRequired = true;
@@ -571,18 +567,14 @@ void MutableGraph::cloneFrom(const Graph& other)
     const auto* mutableOther = dynamic_cast<const MutableGraph*>(&other);
     Q_ASSERT(mutableOther != nullptr);
 
-    _nodeIdsInUse  = mutableOther->_nodeIdsInUse;
+    _n             = mutableOther->_n;
     _nodeIds       = mutableOther->_nodeIds;
     _unusedNodeIds = mutableOther->_unusedNodeIds;
-    _nodes         = mutableOther->_nodes;
-    _multiNodeIds  = mutableOther->_multiNodeIds;
     reserveNodeId(mutableOther->largestNodeId());
 
-    _edgeIdsInUse  = mutableOther->_edgeIdsInUse;
+    _e             = mutableOther->_e;
     _edgeIds       = mutableOther->_edgeIds;
     _unusedEdgeIds = mutableOther->_unusedEdgeIds;
-    _edges         = mutableOther->_edges;
-    _multiEdgeIds  = mutableOther->_multiEdgeIds;
     reserveEdgeId(mutableOther->largestEdgeId());
 
     _updateRequired = true;
@@ -629,7 +621,7 @@ void MutableGraph::update()
     _unusedNodeIds.clear();
     for(NodeId nodeId(0); nodeId < nextNodeId(); nodeId++)
     {
-        if(_nodeIdsInUse[nodeId])
+        if(_n._nodeIdsInUse[nodeId])
             _nodeIds.emplace_back(nodeId);
         else
             _unusedNodeIds.emplace_back(nodeId);
@@ -639,7 +631,7 @@ void MutableGraph::update()
     _unusedEdgeIds.clear();
     for(EdgeId edgeId(0); edgeId < nextEdgeId(); edgeId++)
     {
-        if(_edgeIdsInUse[edgeId])
+        if(_e._edgeIdsInUse[edgeId])
             _edgeIds.emplace_back(edgeId);
         else
             _unusedEdgeIds.emplace_back(edgeId);

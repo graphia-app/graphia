@@ -291,17 +291,55 @@ public:
     virtual ~MutableGraph();
 
 private:
-    std::vector<bool> _nodeIdsInUse;
+    struct
+    {
+        std::vector<bool> _nodeIdsInUse;
+        std::vector<MultiNodeId> _multiNodeIds;
+        std::vector<Node> _nodes;
+
+        void resize(std::size_t size)
+        {
+            _nodeIdsInUse.resize(size);
+            _multiNodeIds.resize(size);
+            _nodes.resize(size);
+        }
+
+        void clear()
+        {
+            _nodeIdsInUse.clear();
+            _multiNodeIds.clear();
+            _nodes.clear();
+        }
+    } _n;
+
     std::vector<NodeId> _nodeIds;
     std::deque<NodeId> _unusedNodeIds;
-    std::vector<Node> _nodes;
-    std::vector<MultiNodeId> _multiNodeIds;
 
-    std::vector<bool> _edgeIdsInUse;
+    struct
+    {
+        std::vector<bool> _edgeIdsInUse;
+        std::vector<MultiEdgeId> _multiEdgeIds;
+        std::vector<Edge> _edges;
+
+        void resize(std::size_t size)
+        {
+            _edgeIdsInUse.resize(size);
+            _multiEdgeIds.resize(size);
+            _edges.resize(size);
+        }
+
+        void clear()
+        {
+            _edgeIdsInUse.clear();
+            _multiEdgeIds.clear();
+            _edges.clear();
+        }
+    } _e;
+
     std::vector<EdgeId> _edgeIds;
     std::deque<EdgeId> _unusedEdgeIds;
-    std::vector<Edge> _edges;
-    std::vector<MultiEdgeId> _multiEdgeIds;
+
+
 
     bool _updateRequired = false;
 
