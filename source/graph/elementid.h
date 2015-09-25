@@ -150,8 +150,8 @@ public:
     };
 
     template<typename ElementId>
-    static ElementId mergeElements(ElementId elementIdA, ElementId elementIdB,
-                                   std::vector<MultiElementId<ElementId>>& multiElementIds)
+    static ElementId add(ElementId elementIdA, ElementId elementIdB,
+                         std::vector<MultiElementId<ElementId>>& multiElementIds)
     {
         Q_ASSERT(!elementIdA.isNull());
         Q_ASSERT(!elementIdB.isNull());
@@ -245,7 +245,13 @@ public:
     }
 
     template<typename ElementId>
-    static void removeMultiElementId(ElementId elementId, std::vector<MultiElementId<ElementId>>& multiElementIds)
+    static ElementId add(ElementId elementId, std::vector<MultiElementId<ElementId>>& multiElementIds)
+    {
+        return add(elementId, elementId, multiElementIds);
+    }
+
+    template<typename ElementId>
+    static void remove(ElementId elementId, std::vector<MultiElementId<ElementId>>& multiElementIds)
     {
         Q_ASSERT(!elementId.isNull());
         auto& multiElementId = multiElementIds[elementId];

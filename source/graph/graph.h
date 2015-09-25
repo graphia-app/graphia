@@ -293,21 +293,21 @@ public:
 private:
     struct
     {
-        std::vector<bool> _nodeIdsInUse;
-        std::vector<MultiNodeId> _multiNodeIds;
-        std::vector<Node> _nodes;
+        std::vector<bool>        _nodeIdsInUse;
+        std::vector<MultiNodeId> _mergedNodeIds;
+        std::vector<Node>        _nodes;
 
         void resize(std::size_t size)
         {
             _nodeIdsInUse.resize(size);
-            _multiNodeIds.resize(size);
+            _mergedNodeIds.resize(size);
             _nodes.resize(size);
         }
 
         void clear()
         {
             _nodeIdsInUse.clear();
-            _multiNodeIds.clear();
+            _mergedNodeIds.clear();
             _nodes.clear();
         }
     } _n;
@@ -317,21 +317,21 @@ private:
 
     struct
     {
-        std::vector<bool> _edgeIdsInUse;
-        std::vector<MultiEdgeId> _multiEdgeIds;
-        std::vector<Edge> _edges;
+        std::vector<bool>        _edgeIdsInUse;
+        std::vector<MultiEdgeId> _mergedEdgeIds;
+        std::vector<Edge>        _edges;
 
         void resize(std::size_t size)
         {
             _edgeIdsInUse.resize(size);
-            _multiEdgeIds.resize(size);
+            _mergedEdgeIds.resize(size);
             _edges.resize(size);
         }
 
         void clear()
         {
             _edgeIdsInUse.clear();
-            _multiEdgeIds.clear();
+            _mergedEdgeIds.clear();
             _edges.clear();
         }
     } _e;

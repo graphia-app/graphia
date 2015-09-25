@@ -261,12 +261,12 @@ bool MutableGraph::containsNodeId(NodeId nodeId) const
 
 MultiNodeId::Type MutableGraph::typeOf(NodeId nodeId) const
 {
-    return MultiNodeId::typeOf(nodeId, _n._multiNodeIds);
+    return MultiNodeId::typeOf(nodeId, _n._mergedNodeIds);
 }
 
 NodeIdSet MutableGraph::multiNodesForNodeId(NodeId nodeId) const
 {
-    return MultiNodeId::elements(nodeId, _n._multiNodeIds);
+    return MultiNodeId::elements(nodeId, _n._mergedNodeIds);
 }
 
 NodeId MutableGraph::addNode()
@@ -334,7 +334,7 @@ void MutableGraph::removeNode(NodeId nodeId)
 
     emit nodeWillBeRemoved(this, &node);
 
-    MultiNodeId::removeMultiElementId(nodeId, _n._multiNodeIds);
+    MultiNodeId::remove(nodeId, _n._mergedNodeIds);
     _n._nodeIdsInUse[nodeId] = false;
     _unusedNodeIds.push_back(nodeId);
 
@@ -365,12 +365,12 @@ bool MutableGraph::containsEdgeId(EdgeId edgeId) const
 
 MultiEdgeId::Type MutableGraph::typeOf(EdgeId edgeId) const
 {
-    return MultiEdgeId::typeOf(edgeId, _e._multiEdgeIds);
+    return MultiEdgeId::typeOf(edgeId, _e._mergedEdgeIds);
 }
 
 EdgeIdSet MutableGraph::multiEdgesForEdgeId(EdgeId edgeId) const
 {
-    return MultiEdgeId::elements(edgeId, _e._multiEdgeIds);
+    return MultiEdgeId::elements(edgeId, _e._mergedEdgeIds);
 }
 
 EdgeId MutableGraph::addEdge(NodeId sourceId, NodeId targetId)
@@ -397,12 +397,12 @@ void MutableGraph::reserveEdgeId(EdgeId edgeId)
 
 NodeId MutableGraph::mergeNodes(NodeId nodeIdA, NodeId nodeIdB)
 {
-    return MultiNodeId::mergeElements(nodeIdA, nodeIdB, _n._multiNodeIds);
+    return MultiNodeId::add(nodeIdA, nodeIdB, _n._mergedNodeIds);
 }
 
 EdgeId MutableGraph::mergeEdges(EdgeId edgeIdA, EdgeId edgeIdB)
 {
-    return MultiEdgeId::mergeElements(edgeIdA, edgeIdB, _e._multiEdgeIds);
+    return MultiEdgeId::add(edgeIdA, edgeIdB, _e._mergedEdgeIds);
 }
 
 EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
@@ -463,7 +463,7 @@ void MutableGraph::removeEdge(EdgeId edgeId)
     target._inEdgeIds.erase(edgeId);
     target._adjacentNodeIds.erase(edge.sourceId());
 
-    MultiEdgeId::removeMultiElementId(edgeId, _e._multiEdgeIds);
+    MultiEdgeId::remove(edgeId, _e._mergedEdgeIds);
     _e._edgeIdsInUse[edgeId] = false;
     _unusedEdgeIds.push_back(edgeId);
 
