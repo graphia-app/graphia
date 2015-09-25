@@ -29,7 +29,6 @@ private:
     int _smoothing = 1;
 
 public:
-    NodePositions(Graph& graph);
     NodePositions(const Graph& graph);
 
 public:

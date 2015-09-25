@@ -99,7 +99,7 @@ void Graph::dumpToQDebug(int detail) const
     }
 }
 
-int Graph::numComponentArrays()
+int Graph::numComponentArrays() const
 {
     if(_componentManager)
         return _componentManager->componentArrayCapacity();
@@ -107,13 +107,13 @@ int Graph::numComponentArrays()
     return 0;
 }
 
-void Graph::insertComponentArray(GraphArray* componentArray)
+void Graph::insertComponentArray(GraphArray* componentArray) const
 {
     if(_componentManager)
         _componentManager->_componentArrays.insert(componentArray);
 }
 
-void Graph::eraseComponentArray(GraphArray* componentArray)
+void Graph::eraseComponentArray(GraphArray* componentArray) const
 {
     if(_componentManager)
         _componentManager->_componentArrays.erase(componentArray);

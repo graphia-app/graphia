@@ -245,16 +245,16 @@ private:
     NodeId _nextNodeId;
     EdgeId _nextEdgeId;
 
-    std::unordered_set<GraphArray*> _nodeArrays;
-    std::unordered_set<GraphArray*> _edgeArrays;
+    mutable std::unordered_set<GraphArray*> _nodeArrays;
+    mutable std::unordered_set<GraphArray*> _edgeArrays;
 
     std::unique_ptr<ComponentManager> _componentManager;
 
     mutable QString _phase;
 
-    int numComponentArrays();
-    void insertComponentArray(GraphArray* componentArray);
-    void eraseComponentArray(GraphArray* componentArray);
+    int numComponentArrays() const;
+    void insertComponentArray(GraphArray* componentArray) const;
+    void eraseComponentArray(GraphArray* componentArray) const;
 
 protected:
     NodeId nextNodeId() const;

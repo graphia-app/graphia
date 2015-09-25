@@ -21,11 +21,11 @@ template<typename Index, typename Element> class GenericGraphArray : public Grap
                   "GraphArray Element needs a noexcept move constructor");
 
 protected:
-    mutable Graph* _graph;
+    const Graph* _graph;
     std::vector<Element> _array;
 
 public:
-    GenericGraphArray(Graph& graph) :
+    GenericGraphArray(const Graph& graph) :
         _graph(&graph)
     {}
 
@@ -135,14 +135,12 @@ public:
 template<typename Element> class NodeArray : public GenericGraphArray<NodeId, Element>
 {
 public:
-    NodeArray(Graph& graph) :
+    NodeArray(const Graph& graph) :
         GenericGraphArray<NodeId, Element>(graph)
     {
         this->resize(graph.nextNodeId());
         graph._nodeArrays.insert(this);
     }
-
-    NodeArray(const Graph& graph) : NodeArray(const_cast<Graph&>(graph)) {}
 
     NodeArray(const NodeArray& other) : GenericGraphArray<NodeId, Element>(other)
     {
@@ -176,14 +174,12 @@ public:
 template<typename Element> class EdgeArray : public GenericGraphArray<EdgeId, Element>
 {
 public:
-    EdgeArray(Graph& graph) :
+    EdgeArray(const Graph& graph) :
         GenericGraphArray<EdgeId, Element>(graph)
     {
         this->resize(graph.nextEdgeId());
         graph._edgeArrays.insert(this);
     }
-
-    EdgeArray(const Graph& graph) : EdgeArray(const_cast<Graph&>(graph)) {}
 
     EdgeArray(const EdgeArray& other) : GenericGraphArray<EdgeId, Element>(other)
     {
@@ -217,15 +213,13 @@ public:
 template<typename Element> class ComponentArray : public GenericGraphArray<ComponentId, Element>
 {
 public:
-    ComponentArray(Graph& graph) :
+    ComponentArray(const Graph& graph) :
         GenericGraphArray<ComponentId, Element>(graph)
     {
         Q_ASSERT(graph._componentManager != nullptr);
         this->resize(graph.numComponentArrays());
         graph.insertComponentArray(this);
     }
-
-    ComponentArray(const Graph& graph) : ComponentArray(const_cast<Graph&>(graph)) {}
 
     ComponentArray(const ComponentArray& other) : GenericGraphArray<ComponentId, Element>(other)
     {
