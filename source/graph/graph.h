@@ -2,6 +2,7 @@
 #define GRAPH_H
 
 #include "elementid.h"
+#include "elementidsetcollection.h"
 
 #include "../utils/cpp1x_hacks.h"
 #include "../utils/debugpauser.h"
@@ -143,7 +144,7 @@ public:
     virtual const Node& nodeById(NodeId nodeId) const = 0;
     NodeId firstNodeId() const;
     virtual bool containsNodeId(NodeId nodeId) const;
-    virtual MultiNodeId::Type typeOf(NodeId nodeId) const = 0;
+    virtual NodeIdSetCollection::Type typeOf(NodeId nodeId) const = 0;
     virtual NodeIdSet multiNodesForNodeId(NodeId nodeId) const = 0;
 
     virtual const std::vector<EdgeId>& edgeIds() const = 0;
@@ -151,7 +152,7 @@ public:
     virtual const Edge& edgeById(EdgeId edgeId) const = 0;
     EdgeId firstEdgeId() const;
     virtual bool containsEdgeId(EdgeId edgeId) const;
-    virtual MultiEdgeId::Type typeOf(EdgeId edgeId) const = 0;
+    virtual EdgeIdSetCollection::Type typeOf(EdgeId edgeId) const = 0;
     virtual EdgeIdSet multiEdgesForEdgeId(EdgeId edgeId) const = 0;
 
     template<typename C, typename EdgesIdFn>
@@ -294,7 +295,7 @@ private:
     struct
     {
         std::vector<bool>        _nodeIdsInUse;
-        std::vector<MultiNodeId> _mergedNodeIds;
+        NodeIdSetCollection      _mergedNodeIds;
         std::vector<Node>        _nodes;
 
         void resize(std::size_t size)
@@ -318,7 +319,7 @@ private:
     struct
     {
         std::vector<bool>        _edgeIdsInUse;
-        std::vector<MultiEdgeId> _mergedEdgeIds;
+        EdgeIdSetCollection      _mergedEdgeIds;
         std::vector<Edge>        _edges;
 
         void resize(std::size_t size)
@@ -356,7 +357,7 @@ public:
     int numNodes() const;
     const Node& nodeById(NodeId nodeId) const;
     bool containsNodeId(NodeId nodeId) const;
-    MultiNodeId::Type typeOf(NodeId nodeId) const;
+    NodeIdSetCollection::Type typeOf(NodeId nodeId) const;
     NodeIdSet multiNodesForNodeId(NodeId nodeId) const;
 
     NodeId addNode();
@@ -393,7 +394,7 @@ public:
     int numEdges() const;
     const Edge& edgeById(EdgeId edgeId) const;
     bool containsEdgeId(EdgeId edgeId) const;
-    MultiEdgeId::Type typeOf(EdgeId edgeId) const;
+    EdgeIdSetCollection::Type typeOf(EdgeId edgeId) const;
     EdgeIdSet multiEdgesForEdgeId(EdgeId edgeId) const;
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId);

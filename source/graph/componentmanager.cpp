@@ -34,8 +34,8 @@ ComponentManager::ComponentManager(Graph& graph, NodeFilterFn nodeFilter, EdgeFi
         _debug = true;
 
     // Ignore all multi-elements
-    addNodeFilter([&graph](NodeId nodeId) { return graph.typeOf(nodeId) == MultiNodeId::Type::Tail; });
-    addEdgeFilter([&graph](EdgeId edgeId) { return graph.typeOf(edgeId) == MultiEdgeId::Type::Tail; });
+    addNodeFilter([&graph](NodeId nodeId) { return graph.typeOf(nodeId) == NodeIdSetCollection::Type::Tail; });
+    addEdgeFilter([&graph](EdgeId edgeId) { return graph.typeOf(edgeId) == EdgeIdSetCollection::Type::Tail; });
 
     if(nodeFilter)
         addNodeFilter(nodeFilter);
