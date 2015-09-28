@@ -239,9 +239,9 @@ public:
     void dumpToQDebug(int detail) const;
 
 private:
-    template<typename> friend class NodeArray;
-    template<typename> friend class EdgeArray;
-    template<typename> friend class ComponentArray;
+    template<typename, typename> friend class NodeArray;
+    template<typename, typename> friend class EdgeArray;
+    template<typename, typename> friend class ComponentArray;
 
     NodeId _nextNodeId;
     EdgeId _nextEdgeId;

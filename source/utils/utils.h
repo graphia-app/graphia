@@ -11,6 +11,7 @@
 #include <type_traits>
 #include <algorithm>
 #include <vector>
+#include <mutex>
 
 namespace u
 {
@@ -145,6 +146,20 @@ namespace u
 
         return result;
     }
+
+    struct Locking {};
+
+    // A lock that does nothing if the second parameter isn't Locking
+    template<typename Mutex, typename L> struct MaybeLock
+    {
+        MaybeLock(Mutex&) {}
+    };
+
+    template<typename Mutex> struct MaybeLock<Mutex, Locking>
+    {
+        std::unique_lock<Mutex> _lock;
+        MaybeLock(Mutex& mutex) : _lock(mutex) {}
+    };
 }
 
 #endif // UTILS_H
