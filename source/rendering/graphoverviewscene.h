@@ -48,7 +48,7 @@ public:
         float _alpha = 1.0f;
     };
 
-    const ComponentArray<LayoutData>& componentLayout() { return _componentLayout; }
+    const ComponentArray<LayoutData, u::Locking>& componentLayout() { return _componentLayout; }
 
     void zoom(float delta);
     int renderSizeDivisor() { return _renderSizeDivisor; }
@@ -73,8 +73,8 @@ private:
     int _renderSizeDivisor = 1;
     ComponentArray<int> _renderSizeDivisors;
 
-    ComponentArray<LayoutData> _previousComponentLayout;
-    ComponentArray<LayoutData> _componentLayout;
+    ComponentArray<LayoutData, u::Locking> _previousComponentLayout;
+    ComponentArray<LayoutData, u::Locking> _componentLayout;
     void layoutComponents();
 
     std::vector<ComponentId> _removedComponentIds;
