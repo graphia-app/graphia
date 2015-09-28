@@ -166,6 +166,10 @@ void ComponentManager::update(const Graph* graph)
         }
     }
 
+    // Resize the component arrays
+    for(auto* componentArray : _componentArrays)
+        componentArray->resize(componentArrayCapacity());
+
     // Search for added or removed components
     auto componentIdsToBeAdded = u::setDifference(componentIds, _componentIds);
     auto componentIdsToBeRemoved = u::setDifference(_componentIds, componentIds);
@@ -221,9 +225,6 @@ ComponentId ComponentManager::generateComponentId()
     }
     else
         newComponentId = _nextComponentId++;
-
-    for(auto* componentArray : _componentArrays)
-        componentArray->resize(componentArrayCapacity());
 
     return newComponentId;
 }
