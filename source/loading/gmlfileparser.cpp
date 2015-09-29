@@ -1,7 +1,7 @@
 #include "gmlfileparser.h"
 
 #include "../utils/utils.h"
-#include "../graph/graph.h"
+#include "../graph/mutablegraph.h"
 
 #include <QFileInfo>
 

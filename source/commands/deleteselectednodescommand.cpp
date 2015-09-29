@@ -2,6 +2,7 @@
 
 #include <QObject>
 
+#include "../graph/mutablegraph.h"
 #include "../graph/graphmodel.h"
 #include "../ui/selectionmanager.h"
 

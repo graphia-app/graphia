@@ -79,7 +79,8 @@ HEADERS += \
     source/graph/elementid.h \
     source/graph/weightededgegraphmodel.h \
     source/graph/filter.h \
-    source/graph/elementidsetcollection.h
+    source/graph/elementidsetcollection.h \
+    source/graph/mutablegraph.h
 
 SOURCES += \
     source/main.cpp \
@@ -137,7 +138,8 @@ SOURCES += \
     source/transform/edgecontractiontransform.cpp \
     source/transform/compoundtransform.cpp \
     source/graph/weightededgegraphmodel.cpp \
-    source/graph/graphmodel.cpp
+    source/graph/graphmodel.cpp \
+    source/graph/mutablegraph.cpp
 
 OTHER_FILES += \
     source/ui/qml/main.qml \

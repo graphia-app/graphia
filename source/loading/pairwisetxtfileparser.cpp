@@ -1,7 +1,7 @@
 #include "pairwisetxtfileparser.h"
 
 #include "../utils/utils.h"
-#include "../graph/graph.h"
+#include "../graph/mutablegraph.h"
 #include "../graph/weightededgegraphmodel.h"
 
 #include <QFile>

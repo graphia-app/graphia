@@ -2,6 +2,7 @@
 #define GRAPHMODEL_H
 
 #include "../graph/graph.h"
+#include "../graph/mutablegraph.h"
 #include "../graph/grapharray.h"
 #include "../transform/transformedgraph.h"
 

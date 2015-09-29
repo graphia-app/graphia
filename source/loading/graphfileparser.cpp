@@ -1,6 +1,6 @@
 #include "graphfileparser.h"
 
-#include "../graph/graph.h"
+#include "../graph/mutablegraph.h"
 
 #include "../utils/utils.h"
 

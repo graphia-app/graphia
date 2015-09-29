@@ -19,7 +19,6 @@ private:
     const NodeIdSet _nodes;
     std::vector<Edge> _edges;
 
-
 public:
     DeleteSelectedNodesCommand(std::shared_ptr<GraphModel> graphModel,
                                std::shared_ptr<SelectionManager> selectionManager);

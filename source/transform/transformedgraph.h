@@ -4,6 +4,7 @@
 #include "graphtransform.h"
 
 #include "../graph/graph.h"
+#include "../graph/mutablegraph.h"
 #include "../graph/grapharray.h"
 
 #include <QObject>
