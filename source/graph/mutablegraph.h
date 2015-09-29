@@ -5,6 +5,7 @@
 
 #include <deque>
 #include <mutex>
+#include <functional>
 
 class MutableGraph : public Graph
 {
