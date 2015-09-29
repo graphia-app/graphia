@@ -43,13 +43,13 @@ public:
 
     bool shouldPause()
     {
-        return std::any_of(_subLayouts.cbegin(), _subLayouts.cend(),
+        return std::any_of(_subLayouts.begin(), _subLayouts.end(),
                            [](Layout* layout) { return layout->shouldPause(); });
     }
 
     bool iterative()
     {
-        return std::any_of(_subLayouts.cbegin(), _subLayouts.cend(),
+        return std::any_of(_subLayouts.begin(), _subLayouts.end(),
                            [](Layout* layout) { return layout->iterative(); });
     }
 

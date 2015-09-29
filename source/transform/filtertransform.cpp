@@ -7,7 +7,7 @@
 
 static bool componentFiltered(std::vector<ComponentFilterFn> filters, const Graph& component)
 {
-    return std::any_of(filters.cbegin(), filters.cend(), [&component](ComponentFilterFn f) { return f(component); });
+    return std::any_of(filters.begin(), filters.end(), [&component](ComponentFilterFn f) { return f(component); });
 }
 
 void FilterTransform::apply(TransformedGraph& target) const

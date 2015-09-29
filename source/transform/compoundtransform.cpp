@@ -9,7 +9,7 @@ void CompoundTransform::apply(const Graph& source, TransformedGraph& target) con
     _transforms.front()->apply(source, target);
 
     // ...thereafter we use the inplace one
-    for(auto i = _transforms.cbegin() + 1; i != _transforms.cend(); i++)
+    for(auto i = _transforms.begin() + 1; i != _transforms.end(); i++)
         (*i)->apply(target);
 }
 

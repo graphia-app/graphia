@@ -537,8 +537,8 @@ void MutableGraph::contractEdges(const EdgeIdSet& edgeIds)
         if(component->numEdges() == 0)
             continue;
 
-        auto nodeId = *std::min_element(component->nodeIds().cbegin(),
-                                        component->nodeIds().cend());
+        auto nodeId = *std::min_element(component->nodeIds().begin(),
+                                        component->nodeIds().end());
 
         moveEdgesTo(*this, nodeId, inEdgeIdsForNodes(component->nodeIds()),
                     outEdgeIdsForNodes(component->nodeIds()));

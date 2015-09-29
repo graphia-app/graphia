@@ -345,7 +345,7 @@ ComponentId ComponentManager::componentIdOfNode(NodeId nodeId) const
     unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
     auto componentId = _nodesComponentId.at(nodeId);
-    auto i = std::find(_componentIds.cbegin(), _componentIds.cend(), componentId);
+    auto i = std::find(_componentIds.begin(), _componentIds.end(), componentId);
     return i != _componentIds.end() ? *i : ComponentId();
 }
 
@@ -357,7 +357,7 @@ ComponentId ComponentManager::componentIdOfEdge(EdgeId edgeId) const
     unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
     auto componentId = _edgesComponentId.at(edgeId);
-    auto i = std::find(_componentIds.cbegin(), _componentIds.cend(), componentId);
+    auto i = std::find(_componentIds.begin(), _componentIds.end(), componentId);
     return i != _componentIds.end() ? *i : ComponentId();
 }
 

@@ -96,7 +96,7 @@ private:
             {
                 const auto& v = future.get();
                 values.reserve(values.size() + v.size());
-                values.insert(values.end(), v.cbegin(), v.cend());
+                values.insert(values.end(), v.begin(), v.end());
             }
 
             return values;

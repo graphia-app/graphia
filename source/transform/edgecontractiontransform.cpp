@@ -3,7 +3,7 @@
 
 bool edgeIdContracted(std::vector<EdgeContractedFn> edgeIds, EdgeId value)
 {
-    return std::any_of(edgeIds.cbegin(), edgeIds.cend(), [value](EdgeContractedFn f) { return f(value); });
+    return std::any_of(edgeIds.begin(), edgeIds.end(), [value](EdgeContractedFn f) { return f(value); });
 }
 
 void EdgeContractionTransform::apply(TransformedGraph& target) const

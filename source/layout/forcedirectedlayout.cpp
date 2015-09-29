@@ -70,7 +70,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
     barnesHutTree.build(graph(), positions());
 
     // Repulsive forces
-    auto repulsiveResults = concurrent_for(nodeIds().cbegin(), nodeIds().cend(),
+    auto repulsiveResults = concurrent_for(nodeIds().begin(), nodeIds().end(),
         [this, &barnesHutTree](const NodeId nodeId)
         {
             if(shouldCancel())
@@ -84,7 +84,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
         }, false);
 
     // Attractive forces
-    auto attractiveResults = concurrent_for(edgeIds().cbegin(), edgeIds().cend(),
+    auto attractiveResults = concurrent_for(edgeIds().begin(), edgeIds().end(),
         [this](const EdgeId edgeId)
         {
             if(shouldCancel())
@@ -109,7 +109,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
     if(shouldCancel())
         return;
 
-    concurrent_for(nodeIds().cbegin(), nodeIds().cend(),
+    concurrent_for(nodeIds().begin(), nodeIds().end(),
         [this](const NodeId& nodeId)
         {
             dampOscillations(_prevDisplacements[nodeId], _displacements[nodeId]);
