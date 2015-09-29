@@ -264,9 +264,9 @@ NodeIdSetCollection::Type MutableGraph::typeOf(NodeId nodeId) const
     return _n._mergedNodeIds.typeOf(nodeId);
 }
 
-NodeIdSet MutableGraph::multiNodesForNodeId(NodeId nodeId) const
+NodeIdSetCollection::Set MutableGraph::mergedNodesForNodeId(NodeId nodeId) const
 {
-    return _n._mergedNodeIds.elements(nodeId);
+    return _n._mergedNodeIds.setById(nodeId);
 }
 
 NodeId MutableGraph::addNode()
@@ -368,9 +368,9 @@ EdgeIdSetCollection::Type MutableGraph::typeOf(EdgeId edgeId) const
     return _e._mergedEdgeIds.typeOf(edgeId);
 }
 
-EdgeIdSet MutableGraph::multiEdgesForEdgeId(EdgeId edgeId) const
+EdgeIdSetCollection::Set MutableGraph::mergedEdgesForEdgeId(EdgeId edgeId) const
 {
-    return _e._mergedEdgeIds.elements(edgeId);
+    return _e._mergedEdgeIds.setById(edgeId);
 }
 
 EdgeId MutableGraph::addEdge(NodeId sourceId, NodeId targetId)

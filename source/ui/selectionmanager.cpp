@@ -36,12 +36,12 @@ NodeIdSet SelectionManager::unselectedNodes() const
 
 bool SelectionManager::selectNode(NodeId nodeId)
 {
-    return selectNodes(_graphModel.graph().multiNodesForNodeId(nodeId));
+    return selectNodes(_graphModel.graph().mergedNodesForNodeId(nodeId));
 }
 
 bool SelectionManager::deselectNode(NodeId nodeId)
 {
-    return deselectNodes(_graphModel.graph().multiNodesForNodeId(nodeId));
+    return deselectNodes(_graphModel.graph().mergedNodesForNodeId(nodeId));
 }
 
 void SelectionManager::toggleNode(NodeId nodeId)
@@ -62,7 +62,7 @@ bool SelectionManager::nodeIsSelected(NodeId nodeId) const
 
 bool SelectionManager::selectAllNodes()
 {
-    return selectNodes(_graphModel.graph().nodeIds());
+    return selectNodes(_graphModel.graph().nodeIds(), false);
 }
 
 bool SelectionManager::clearNodeSelection()

@@ -30,6 +30,8 @@ private:
     std::vector<MultiElementId> _multiElementIds;
 
 public:
+    using SetId = T;
+
     enum class Type
     {
         Not,
@@ -47,13 +49,15 @@ public:
         _multiElementIds.clear();
     }
 
-    T add(T elementIdA, T elementIdB)
+    SetId add(SetId setId, T elementId)
     {
-        Q_ASSERT(!elementIdA.isNull());
-        Q_ASSERT(!elementIdB.isNull());
+        Q_ASSERT(!elementId.isNull());
+
+        if(setId.isNull())
+            elementId = setId;
 
         T lowId, highId;
-        std::tie(lowId, highId) = std::minmax(elementIdA, elementIdB);
+        std::tie(lowId, highId) = std::minmax(setId, elementId);
         auto& lowMultiId = _multiElementIds[lowId];
         auto& highMultiId = _multiElementIds[highId];
 
@@ -187,7 +191,7 @@ public:
         }
         else
         {
-            // Removing in the middle
+            // Removing from the middle
             Q_ASSERT(!multiElementId._prev.isNull());
             Q_ASSERT(!multiElementId._next.isNull());
             auto& prev = _multiElementIds[multiElementId._prev];
@@ -216,24 +220,97 @@ public:
         return Type::Not;
     }
 
-    ElementIdSet<T> elements(T elementId) const
+    class Set
     {
-        ElementIdSet<T> elementIdSet;
-        elementIdSet.insert(elementId);
+        friend class ElementIdSetCollection<T>;
 
-        if(typeOf(elementId) == Type::Head)
+    private:
+        const ElementIdSetCollection<T>* _setCollection;
+        T _head;
+
+        Set(const ElementIdSetCollection<T>* setCollection, T head = T()) :
+            _setCollection(setCollection), _head(head)
+        {}
+
+    public:
+        class iterator_base
         {
-            const auto* multiElementId = &_multiElementIds[elementId];
+        public:
+            using self_type = iterator_base;
+            using value_type = T;
+            using reference = T;
+            using pointer = T;
+            using iterator_category = std::forward_iterator_tag;
+            using difference_type = int;
 
-            while(multiElementId->hasNext(elementId))
+        protected:
+            pointer _p;
+        private:
+            const std::vector<MultiElementId>& _multiElementIds;
+
+            void incrementPointer()
             {
-                elementIdSet.insert(multiElementId->_next);
-                elementId = multiElementId->_next;
-                multiElementId = &_multiElementIds[multiElementId->_next];
+                if(_multiElementIds[_p].hasNext(_p))
+                    _p = _multiElementIds[_p]._next;
+                else
+                    _p.setToNull();
             }
-        }
 
-        return elementIdSet;
+        public:
+            iterator_base(const std::vector<MultiElementId>& multiElementIds, pointer p) :
+                 _p(p), _multiElementIds(multiElementIds) {}
+
+            self_type operator++()
+            {
+                self_type i = *this;
+                incrementPointer();
+                return i;
+            }
+
+            self_type operator++(int)
+            {
+                incrementPointer();
+                return *this;
+            }
+
+
+            bool operator==(const self_type& other) { return _p == other._p; }
+            bool operator!=(const self_type& other) { return _p != other._p; }
+        };
+
+        class iterator : public iterator_base
+        {
+        public:
+            iterator(const std::vector<MultiElementId>& multiElementIds, typename iterator_base::pointer p) :
+                iterator_base(multiElementIds, p)
+            {}
+
+            typename iterator_base::reference operator*() { return this->_p; }
+            typename iterator_base::pointer operator->() { return this->_p; }
+        };
+
+        class const_iterator : public iterator_base
+        {
+        public:
+            const_iterator(const std::vector<MultiElementId>& multiElementIds, typename iterator_base::pointer p) :
+                iterator_base(multiElementIds, p)
+            {}
+
+            const typename iterator_base::reference operator*() const { return this->_p; }
+            const typename iterator_base::pointer operator->() const { return this->_p; }
+        };
+
+        iterator begin() { return iterator(_setCollection->_multiElementIds, _head); }
+        iterator end()   { return iterator(_setCollection->_multiElementIds, T()); }
+
+        const_iterator begin() const { return const_iterator(_setCollection->_multiElementIds, _head); }
+        const_iterator end() const   { return const_iterator(_setCollection->_multiElementIds, T()); }
+    };
+
+    Set setById(SetId setId) const
+    {
+        Q_ASSERT(!setId.isNull());
+        return Set(this, setId);
     }
 };
 

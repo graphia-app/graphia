@@ -145,7 +145,7 @@ public:
     NodeId firstNodeId() const;
     virtual bool containsNodeId(NodeId nodeId) const;
     virtual NodeIdSetCollection::Type typeOf(NodeId nodeId) const = 0;
-    virtual NodeIdSet multiNodesForNodeId(NodeId nodeId) const = 0;
+    virtual NodeIdSetCollection::Set mergedNodesForNodeId(NodeId nodeId) const = 0;
 
     virtual const std::vector<EdgeId>& edgeIds() const = 0;
     virtual int numEdges() const = 0;
@@ -153,7 +153,7 @@ public:
     EdgeId firstEdgeId() const;
     virtual bool containsEdgeId(EdgeId edgeId) const;
     virtual EdgeIdSetCollection::Type typeOf(EdgeId edgeId) const = 0;
-    virtual EdgeIdSet multiEdgesForEdgeId(EdgeId edgeId) const = 0;
+    virtual EdgeIdSetCollection::Set mergedEdgesForEdgeId(EdgeId edgeId) const = 0;
 
     template<typename C, typename EdgesIdFn>
     EdgeIdSet edgeIdsForNodes(const C& nodeIds, EdgesIdFn edgeIdsFn) const
@@ -358,7 +358,7 @@ public:
     const Node& nodeById(NodeId nodeId) const;
     bool containsNodeId(NodeId nodeId) const;
     NodeIdSetCollection::Type typeOf(NodeId nodeId) const;
-    NodeIdSet multiNodesForNodeId(NodeId nodeId) const;
+    NodeIdSetCollection::Set mergedNodesForNodeId(NodeId nodeId) const;
 
     NodeId addNode();
     NodeId addNode(NodeId nodeId);
@@ -395,7 +395,7 @@ public:
     const Edge& edgeById(EdgeId edgeId) const;
     bool containsEdgeId(EdgeId edgeId) const;
     EdgeIdSetCollection::Type typeOf(EdgeId edgeId) const;
-    EdgeIdSet multiEdgesForEdgeId(EdgeId edgeId) const;
+    EdgeIdSetCollection::Set mergedEdgesForEdgeId(EdgeId edgeId) const;
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId);
     EdgeId addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId);

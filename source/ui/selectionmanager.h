@@ -19,14 +19,24 @@ public:
 
     bool selectNode(NodeId nodeId);
 
-    template<typename C> bool selectNodes(const C& nodeIds)
+    template<typename C> bool selectNodes(const C& nodeIds, bool selectMergedNodes = true)
     {
         NodeIdSet newSelectedNodeIds;
 
-        for(auto nodeId : nodeIds)
+        if(selectMergedNodes)
         {
-            auto multiNodeIds = _graphModel.graph().multiNodesForNodeId(nodeId);
-            newSelectedNodeIds.insert(multiNodeIds.begin(), multiNodeIds.end());
+            for(auto nodeId : nodeIds)
+            {
+                auto mergedNodeIds = _graphModel.graph().mergedNodesForNodeId(nodeId);
+
+                for(auto mergedNodeId : mergedNodeIds)
+                    newSelectedNodeIds.insert(mergedNodeId);
+            }
+        }
+        else
+        {
+            for(auto nodeId : nodeIds)
+                newSelectedNodeIds.insert(nodeId);
         }
 
         bool oldSize = _selectedNodeIds.size();
@@ -39,16 +49,42 @@ public:
         return selectionWillChange;
     }
 
+    bool selectNodes(const NodeIdSetCollection::Set& nodeIds)
+    {
+        return selectNodes(nodeIds, false);
+    }
+
     bool deselectNode(NodeId nodeId);
 
-    template<typename C> bool deselectNodes(const C& nodeIds)
+    template<typename C> bool deselectNodes(const C& nodeIds, bool deselectMergedNodes = true)
     {
-        bool selectionWillChange = _selectedNodeIds.erase(nodeIds.begin(), nodeIds.end()) != nodeIds.begin();
+        bool selectionWillChange = false;
+
+        if(deselectMergedNodes)
+        {
+            for(auto nodeId : nodeIds)
+            {
+                auto mergedNodeIds = _graphModel.graph().mergedNodesForNodeId(nodeId);
+
+                for(auto mergedNodeId : mergedNodeIds)
+                    selectionWillChange |= _selectedNodeIds.erase(mergedNodeId);
+            }
+        }
+        else
+        {
+            for(auto nodeId : nodeIds)
+                selectionWillChange |= _selectedNodeIds.erase(nodeId);
+        }
 
         if(selectionWillChange)
             emit selectionChanged(this);
 
         return selectionWillChange;
+    }
+
+    bool deselectNodes(const NodeIdSetCollection::Set& nodeIds)
+    {
+        return deselectNodes(nodeIds, false);
     }
 
     void toggleNode(NodeId nodeId);
