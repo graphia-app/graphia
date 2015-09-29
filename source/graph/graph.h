@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <unordered_set>
+#include <memory>
 
 class GraphArray;
 class GraphComponent;
