@@ -23,7 +23,9 @@ void MutableGraph::clear()
     Q_ASSERT(numEdges() == 0);
 
     _n.clear();
+    _n.resize(0);
     _e.clear();
+    _e.resize(0);
 }
 
 const std::vector<NodeId>& MutableGraph::nodeIds() const
