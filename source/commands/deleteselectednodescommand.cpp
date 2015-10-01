@@ -11,7 +11,7 @@ DeleteSelectedNodesCommand::DeleteSelectedNodesCommand(std::shared_ptr<GraphMode
     Command(),
     _graphModel(graphModel),
     _selectionManager(selectionManager),
-    _nodes(_selectionManager->selectedNodes())
+    _nodeIds(_selectionManager->selectedNodes())
 {
     int numSelectedNodes = static_cast<int>(_selectionManager->selectedNodes().size());
 
@@ -33,7 +33,7 @@ bool DeleteSelectedNodesCommand::execute()
 {
     _edges = _graphModel->mutableGraph().edgesForNodes(_nodes);
     _selectionManager->clearNodeSelection();
-    _graphModel->mutableGraph().removeNodes(_nodes);
+    _graphModel->mutableGraph().removeNodes(_nodeIds);
     return true;
 }
 
@@ -42,9 +42,9 @@ void DeleteSelectedNodesCommand::undo()
     _graphModel->mutableGraph().performTransaction(
         [this](MutableGraph& graph)
         {
-            graph.addNodes(_nodes);
+            graph.addNodes(_nodeIds);
             graph.addEdges(_edges);
         });
 
-    _selectionManager->selectNodes(_nodes);
+    _selectionManager->selectNodes(_nodeIds);
 }
