@@ -139,7 +139,8 @@ SOURCES += \
     source/transform/compoundtransform.cpp \
     source/graph/weightededgegraphmodel.cpp \
     source/graph/graphmodel.cpp \
-    source/graph/mutablegraph.cpp
+    source/graph/mutablegraph.cpp \
+    source/graph/elementidsetcollection.cpp
 
 OTHER_FILES += \
     source/ui/qml/main.qml \

@@ -73,7 +73,7 @@ ComponentIdSet ComponentManager::assignConnectedElementsComponentId(const Graph*
         oldComponentIdsAffected.insert(_nodesComponentId[nodeId]);
         nodesComponentId[nodeId] = componentId;
 
-        for(auto edgeId : graph->nodeById(nodeId).edgeIds())
+        for(auto edgeId : graph->edgeIdsForNodeId(nodeId))
         {
             if(edgeIdFiltered(edgeId))
                 continue;

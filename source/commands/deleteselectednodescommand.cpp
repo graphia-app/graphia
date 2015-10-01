@@ -31,7 +31,7 @@ DeleteSelectedNodesCommand::DeleteSelectedNodesCommand(std::shared_ptr<GraphMode
 
 bool DeleteSelectedNodesCommand::execute()
 {
-    _edges = _graphModel->mutableGraph().edgesForNodes(_nodes);
+    _edges = _graphModel->mutableGraph().edgesForNodeIds(_nodeIds);
     _selectionManager->clearNodeSelection();
     _graphModel->mutableGraph().removeNodes(_nodeIds);
     return true;

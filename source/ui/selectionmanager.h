@@ -27,7 +27,7 @@ public:
         {
             for(auto nodeId : nodeIds)
             {
-                auto mergedNodeIds = _graphModel.graph().mergedNodesForNodeId(nodeId);
+                auto mergedNodeIds = _graphModel.graph().mergedNodeIdsForNodeId(nodeId);
 
                 for(auto mergedNodeId : mergedNodeIds)
                     newSelectedNodeIds.insert(mergedNodeId);
@@ -64,7 +64,7 @@ public:
         {
             for(auto nodeId : nodeIds)
             {
-                auto mergedNodeIds = _graphModel.graph().mergedNodesForNodeId(nodeId);
+                auto mergedNodeIds = _graphModel.graph().mergedNodeIdsForNodeId(nodeId);
 
                 for(auto mergedNodeId : mergedNodeIds)
                     selectionWillChange |= _selectedNodeIds.erase(mergedNodeId);

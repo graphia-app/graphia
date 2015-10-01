@@ -24,8 +24,10 @@ class Node
 
 private:
     NodeId _id;
-    EdgeIdSet _inEdgeIds;
-    EdgeIdSet _outEdgeIds;
+    EdgeIdSetCollection::SetId _inEdgeIds;
+    int _numInEdges = 0;
+    EdgeIdSetCollection::SetId _outEdgeIds;
+    int _numOutEdges = 0;
     NodeIdMap<EdgeId> _adjacentNodeIds;
 
 public:
@@ -34,14 +36,18 @@ public:
     Node(const Node& other) :
         _id(other._id),
         _inEdgeIds(other._inEdgeIds),
+        _numInEdges(other._numInEdges),
         _outEdgeIds(other._outEdgeIds),
+        _numOutEdges(other._numOutEdges),
         _adjacentNodeIds(other._adjacentNodeIds)
     {}
 
     Node(Node&& other) noexcept :
         _id(other._id),
-        _inEdgeIds(std::move(other._inEdgeIds)),
-        _outEdgeIds(std::move(other._outEdgeIds)),
+        _inEdgeIds(other._inEdgeIds),
+        _numInEdges(other._numInEdges),
+        _outEdgeIds(other._outEdgeIds),
+        _numOutEdges(other._numOutEdges),
         _adjacentNodeIds(std::move(other._adjacentNodeIds))
     {}
 
@@ -51,24 +57,16 @@ public:
         {
             _id                 = other._id;
             _inEdgeIds          = other._inEdgeIds;
+            _numInEdges         = other._numInEdges;
             _outEdgeIds         = other._outEdgeIds;
+            _numOutEdges        = other._numOutEdges;
             _adjacentNodeIds    = other._adjacentNodeIds;
         }
 
         return *this;
     }
 
-    const EdgeIdSet edgeIds() const
-    {
-        EdgeIdSet edgeIds;
-        edgeIds.insert(_inEdgeIds.begin(), _inEdgeIds.end());
-        edgeIds.insert(_outEdgeIds.begin(), _outEdgeIds.end());
-        return edgeIds;
-    }
-
-    const EdgeIdSet inEdgeIds() const { return _inEdgeIds; }
-    const EdgeIdSet outEdgeIds() const { return _outEdgeIds; }
-    int degree() const { return static_cast<int>(_inEdgeIds.size() + _outEdgeIds.size()); }
+    int degree() const { return _numInEdges + _numOutEdges; }
 
     NodeId id() const { return _id; }
 };
@@ -121,7 +119,7 @@ public:
         return NodeId();
     }
 
-    bool isLoop() const { return sourceId() == targetId(); }
+    bool isLoop() const { return _sourceId == _targetId; }
 
     EdgeId id() const { return _id; }
 };
@@ -140,7 +138,7 @@ public:
     NodeId firstNodeId() const;
     virtual bool containsNodeId(NodeId nodeId) const;
     virtual NodeIdSetCollection::Type typeOf(NodeId nodeId) const = 0;
-    virtual NodeIdSetCollection::Set mergedNodesForNodeId(NodeId nodeId) const = 0;
+    virtual NodeIdSetCollection::Set mergedNodeIdsForNodeId(NodeId nodeId) const = 0;
 
     virtual const std::vector<EdgeId>& edgeIds() const = 0;
     virtual int numEdges() const = 0;
@@ -148,41 +146,26 @@ public:
     EdgeId firstEdgeId() const;
     virtual bool containsEdgeId(EdgeId edgeId) const;
     virtual EdgeIdSetCollection::Type typeOf(EdgeId edgeId) const = 0;
-    virtual EdgeIdSetCollection::Set mergedEdgesForEdgeId(EdgeId edgeId) const = 0;
+    virtual EdgeIdSetCollection::Set mergedEdgeIdsForEdgeId(EdgeId edgeId) const = 0;
 
-    template<typename C, typename EdgesIdFn>
-    EdgeIdSet edgeIdsForNodes(const C& nodeIds, EdgesIdFn edgeIdsFn) const
+    virtual EdgeIdSetCollection::Set edgeIdsForNodeId(NodeId nodeId) const = 0;
+
+    template<typename C> EdgeIdSet edgeIdsForNodeIds(const C& nodeIds) const
     {
         EdgeIdSet edgeIds;
 
         for(auto nodeId : nodeIds)
         {
-            auto& node = nodeById(nodeId);
-            for(auto edgeId : edgeIdsFn(node))
+            for(auto edgeId : edgeIdsForNodeId(nodeId))
                 edgeIds.insert(edgeId);
         }
 
         return edgeIds;
     }
 
-    template<typename C> EdgeIdSet edgeIdsForNodes(const C& nodeIds) const
+    template<typename C> std::vector<Edge> edgesForNodeIds(const C& nodeIds) const
     {
-        return edgeIdsForNodes(nodeIds, [](const Node& node) { return node.edgeIds(); });
-    }
-
-    template<typename C> EdgeIdSet inEdgeIdsForNodes(const C& nodeIds) const
-    {
-        return edgeIdsForNodes(nodeIds, [](const Node& node) { return node.inEdgeIds(); });
-    }
-
-    template<typename C> EdgeIdSet outEdgeIdsForNodes(const C& nodeIds) const
-    {
-        return edgeIdsForNodes(nodeIds, [](const Node& node) { return node.outEdgeIds(); });
-    }
-
-    template<typename C> std::vector<Edge> edgesForNodes(const C& nodeIds) const
-    {
-        auto edgeIds = edgeIdsForNodes(nodeIds);
+        auto edgeIds = edgeIdsForNodeIds(nodeIds);
         std::vector<Edge> edges;
 
         for(auto edgeId : edgeIds)

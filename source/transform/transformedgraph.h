@@ -25,14 +25,16 @@ public:
     const Node& nodeById(NodeId nodeId) const { return _target.nodeById(nodeId); }
     bool containsNodeId(NodeId nodeId) const { return _target.containsNodeId(nodeId); }
     NodeIdSetCollection::Type typeOf(NodeId nodeId) const { return _target.typeOf(nodeId); }
-    NodeIdSetCollection::Set mergedNodesForNodeId(NodeId nodeId) const { return _target.mergedNodesForNodeId(nodeId); }
+    NodeIdSetCollection::Set mergedNodeIdsForNodeId(NodeId nodeId) const { return _target.mergedNodeIdsForNodeId(nodeId); }
 
     const std::vector<EdgeId>& edgeIds() const { return _target.edgeIds(); }
     int numEdges() const { return _target.numEdges(); }
     const Edge& edgeById(EdgeId edgeId) const { return _target.edgeById(edgeId); }
     bool containsEdgeId(EdgeId edgeId) const { return _target.containsEdgeId(edgeId); }
     EdgeIdSetCollection::Type typeOf(EdgeId edgeId) const { return _target.typeOf(edgeId); }
-    EdgeIdSetCollection::Set mergedEdgesForEdgeId(EdgeId edgeId) const { return _target.mergedEdgesForEdgeId(edgeId); }
+    EdgeIdSetCollection::Set mergedEdgeIdsForEdgeId(EdgeId edgeId) const { return _target.mergedEdgeIdsForEdgeId(edgeId); }
+
+    EdgeIdSetCollection::Set edgeIdsForNodeId(NodeId nodeId) const { return _target.edgeIdsForNodeId(nodeId); }
 
     NodeId addNode() { return _target.addNode(); }
     NodeId addNode(NodeId nodeId) { return _target.addNode(nodeId); }

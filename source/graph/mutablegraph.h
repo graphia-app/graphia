@@ -45,11 +45,16 @@ private:
         EdgeIdSetCollection      _mergedEdgeIds;
         std::vector<Edge>        _edges;
 
+        EdgeIdSetCollection      _inEdgeIds;
+        EdgeIdSetCollection      _outEdgeIds;
+
         void resize(std::size_t size)
         {
             _edgeIdsInUse.resize(size);
             _mergedEdgeIds.resize(size);
             _edges.resize(size);
+            _inEdgeIds.resize(size);
+            _outEdgeIds.resize(size);
         }
 
         void clear()
@@ -57,6 +62,8 @@ private:
             _edgeIdsInUse.clear();
             _mergedEdgeIds.clear();
             _edges.clear();
+            _inEdgeIds.clear();
+            _outEdgeIds.clear();
         }
     } _e;
 
@@ -81,7 +88,7 @@ public:
     const Node& nodeById(NodeId nodeId) const;
     bool containsNodeId(NodeId nodeId) const;
     NodeIdSetCollection::Type typeOf(NodeId nodeId) const;
-    NodeIdSetCollection::Set mergedNodesForNodeId(NodeId nodeId) const;
+    NodeIdSetCollection::Set mergedNodeIdsForNodeId(NodeId nodeId) const;
 
     NodeId addNode();
     NodeId addNode(NodeId nodeId);
@@ -118,7 +125,30 @@ public:
     const Edge& edgeById(EdgeId edgeId) const;
     bool containsEdgeId(EdgeId edgeId) const;
     EdgeIdSetCollection::Type typeOf(EdgeId edgeId) const;
-    EdgeIdSetCollection::Set mergedEdgesForEdgeId(EdgeId edgeId) const;
+    EdgeIdSetCollection::Set mergedEdgeIdsForEdgeId(EdgeId edgeId) const; //FIXME rename mergedEdgeIds
+    EdgeIdSetCollection::Set edgeIdsForNodeId(NodeId nodeId) const;
+    EdgeIdSetCollection::Set inEdgeIdsForNodeId(NodeId nodeId) const;
+    EdgeIdSetCollection::Set outEdgeIdsForNodeId(NodeId nodeId) const;
+
+    template<typename C> EdgeIdSetCollection::Set inEdgeIdsForNodeIds(const C& nodeIds) const
+    {
+        std::vector<EdgeIdSetCollection::SetId> setIds;
+
+        for(auto nodeId : nodeIds)
+            setIds.push_back(_n._nodes[nodeId]._inEdgeIds);
+
+        return _e._inEdgeIds.setByIds(setIds);
+    }
+
+    template<typename C> EdgeIdSetCollection::Set outEdgeIdsForNodeIds(const C& nodeIds) const
+    {
+        std::vector<EdgeIdSetCollection::SetId> setIds;
+
+        for(auto nodeId : nodeIds)
+            setIds.push_back(_n._nodes[nodeId]._outEdgeIds);
+
+        return _e._outEdgeIds.setByIds(setIds);
+    }
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId);
     EdgeId addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId);

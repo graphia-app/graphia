@@ -3,6 +3,8 @@
 
 #include "elementid.h"
 
+#include <QDebug>
+
 #include <vector>
 
 template<typename T> class ElementIdSetCollection
@@ -27,7 +29,8 @@ private:
         bool hasNext(T elementId) const { return !_next.isNull() && !isTail(elementId); }
     };
 
-    std::vector<MultiElementId> _multiElementIds;
+    using MultiElementIds = std::vector<MultiElementId>;
+    MultiElementIds _multiElementIds;
 
 public:
     using SetId = T;
@@ -54,7 +57,7 @@ public:
         Q_ASSERT(!elementId.isNull());
 
         if(setId.isNull())
-            elementId = setId;
+            setId = elementId;
 
         T lowId, highId;
         std::tie(lowId, highId) = std::minmax(setId, elementId);
@@ -144,20 +147,25 @@ public:
         return lowId;
     }
 
-    void remove(T elementId)
+    SetId remove(SetId setId, T elementId)
     {
         Q_ASSERT(!elementId.isNull());
         auto& multiElementId = _multiElementIds[elementId];
 
         // Can't remove it if it isn't a multielement
         if(multiElementId.isNull())
-            return;
+            return setId;
 
-        if(multiElementId._next == multiElementId._opposite)
+        if(multiElementId.isSingleton(elementId))
+        {
+            setId.setToNull();
+        }
+        else if(multiElementId._next == multiElementId._opposite)
         {
             // The tail is the only other element
             auto& tail = _multiElementIds[multiElementId._next];
             tail.setToSingleton(multiElementId._next);
+            setId = multiElementId._next;
         }
         else if(multiElementId._prev == multiElementId._opposite)
         {
@@ -176,6 +184,7 @@ public:
             newHead._opposite = multiElementId._opposite;
             newHead._prev.setToNull();
             tail._opposite = multiElementId._next;
+            setId = multiElementId._next;
         }
         else if(multiElementId.isTail(elementId))
         {
@@ -202,6 +211,8 @@ public:
         }
 
         multiElementId.setToNull();
+
+        return setId;
     }
 
     Type typeOf(T elementId) const
@@ -223,16 +234,23 @@ public:
     class Set
     {
         friend class ElementIdSetCollection<T>;
+        friend class MutableGraph;
 
     private:
-        const ElementIdSetCollection<T>* _setCollection;
-        T _head;
+        std::vector<std::pair<T, const MultiElementIds*>> _heads;
 
-        Set(const ElementIdSetCollection<T>* setCollection, T head = T()) :
-            _setCollection(setCollection), _head(head)
+        Set(T head, const MultiElementIds* multiElementIds) :
+            _heads({{head, multiElementIds}})
         {}
 
     public:
+        Set() {}
+
+        void add(const Set& other)
+        {
+            _heads.insert(_heads.end(), other._heads.begin(), other._heads.end());
+        }
+
         class iterator_base
         {
         public:
@@ -245,20 +263,38 @@ public:
 
         protected:
             pointer _p;
+
         private:
-            const std::vector<MultiElementId>& _multiElementIds;
+            const Set* _set = nullptr;
+            int i = 0;
+
+            const MultiElementId& multiElementId()
+            {
+                return (*_set->_heads[i].second)[_p];
+            }
 
             void incrementPointer()
             {
-                if(_multiElementIds[_p].hasNext(_p))
-                    _p = _multiElementIds[_p]._next;
+                if(multiElementId().hasNext(_p))
+                    _p = multiElementId()._next;
+                else if(i < static_cast<int>(_set->_heads.size()) - 1)
+                {
+                    i++;
+                    _p = _set->_heads[i].first;
+                }
                 else
                     _p.setToNull();
             }
 
         public:
-            iterator_base(const std::vector<MultiElementId>& multiElementIds, pointer p) :
-                 _p(p), _multiElementIds(multiElementIds) {}
+            iterator_base() {}
+
+            iterator_base(const Set* set) :
+                 _set(set)
+            {
+                if(!_set->_heads.empty())
+                    _p = _set->_heads.front().first;
+            }
 
             self_type operator++()
             {
@@ -281,9 +317,11 @@ public:
         class iterator : public iterator_base
         {
         public:
-            iterator(const std::vector<MultiElementId>& multiElementIds, typename iterator_base::pointer p) :
-                iterator_base(multiElementIds, p)
-            {}
+#if __cplusplus >= 201103L
+            using iterator_base::iterator_base;
+#else
+            iterator(const Set* set) : iterator_base(set) {}
+#endif
 
             typename iterator_base::reference operator*() { return this->_p; }
             typename iterator_base::pointer operator->() { return this->_p; }
@@ -292,30 +330,44 @@ public:
         class const_iterator : public iterator_base
         {
         public:
-            const_iterator(const std::vector<MultiElementId>& multiElementIds, typename iterator_base::pointer p) :
-                iterator_base(multiElementIds, p)
-            {}
+#if __cplusplus >= 201103L
+            using iterator_base::iterator_base;
+#else
+            const_iterator(const Set* set) : iterator_base(set) {}
+#endif
 
             const typename iterator_base::reference operator*() const { return this->_p; }
             const typename iterator_base::pointer operator->() const { return this->_p; }
         };
 
-        iterator begin() { return iterator(_setCollection->_multiElementIds, _head); }
-        iterator end()   { return iterator(_setCollection->_multiElementIds, T()); }
+        iterator begin() { return iterator(this); }
+        iterator end()   { return iterator(); }
 
-        const_iterator begin() const { return const_iterator(_setCollection->_multiElementIds, _head); }
-        const_iterator end() const   { return const_iterator(_setCollection->_multiElementIds, T()); }
+        const_iterator begin() const { return const_iterator(this); }
+        const_iterator end() const   { return const_iterator(); }
     };
 
     Set setById(SetId setId) const
     {
-        Q_ASSERT(!setId.isNull());
-        return Set(this, setId);
+        return Set(setId, &_multiElementIds);
+    }
+
+    template<typename C> Set setByIds(const C& setIds) const
+    {
+        Set set;
+
+        for(auto setId : setIds)
+            set.add(setById(setId));
+
+        return set;
     }
 };
 
 using NodeIdSetCollection = ElementIdSetCollection<NodeId>;
 using EdgeIdSetCollection = ElementIdSetCollection<EdgeId>;
+
+QDebug operator<<(QDebug d, typename NodeIdSetCollection::Set& set);
+QDebug operator<<(QDebug d, typename EdgeIdSetCollection::Set& set);
 
 #endif // ELEMENTIDSETCOLLECTION
 
