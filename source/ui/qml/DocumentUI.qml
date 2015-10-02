@@ -59,6 +59,7 @@ Item
 
     function toggleDebugPauser() { document.toggleDebugPauser(); }
     function debugResume() { document.debugResume(); }
+    function dumpGraph() { document.dumpGraph(); }
 
     Graph
     {

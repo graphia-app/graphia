@@ -410,6 +410,11 @@ void Document::debugResume()
     _graphModel->graph().debugPauser.resume();
 }
 
+void Document::dumpGraph()
+{
+    _graphModel->graph().dumpToQDebug(2);
+}
+
 void Document::onGraphWillChange(const Graph*)
 {
     // Graph is about to change so suspend any active layout process

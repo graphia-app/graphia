@@ -146,6 +146,8 @@ public slots:
     void toggleDebugPauser();
     void debugResume();
 
+    void dumpGraph();
+
 private slots:
     void onGraphWillChange(const Graph*);
     void onGraphChanged(const Graph* graph);

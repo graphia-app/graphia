@@ -239,6 +239,15 @@ ApplicationWindow
 
     Action
     {
+        id: dumpGraphAction
+        text: qsTr("Dump graph to qDebug")
+        shortcut: "Ctrl+D"
+        enabled: application.debugEnabled()
+        onTriggered: currentDocument && currentDocument.dumpGraph()
+    }
+
+    Action
+    {
         id: debugResumeAction
         text: currentDocument ? currentDocument.debugResumeAction : qsTr("&Resume")
         shortcut: "Ctrl+N"
@@ -291,6 +300,7 @@ ApplicationWindow
                 action: debugResumeAction
                 visible: currentDocument && currentDocument.debugPaused
             }
+            MenuItem { action: dumpGraphAction }
         }
         Menu
         {
