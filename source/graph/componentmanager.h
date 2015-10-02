@@ -64,12 +64,14 @@ public:
     const std::vector<NodeId>& nodeIds() const { return _nodeIds; }
     int numNodes() const { return static_cast<int>(_nodeIds.size()); }
     const Node& nodeById(NodeId nodeId) const { return _graph->nodeById(nodeId); }
+    bool containsNodeId(NodeId nodeId) const { return _graph->containsNodeId(nodeId); }
     NodeIdSetCollection::Type typeOf(NodeId) const { return NodeIdSetCollection::Type::Not; }
     NodeIdSetCollection::Set mergedNodeIdsForNodeId(NodeId nodeId) const { return _graph->mergedNodeIdsForNodeId(nodeId); }
 
     const std::vector<EdgeId>& edgeIds() const { return _edgeIds; }
     int numEdges() const { return static_cast<int>(_edgeIds.size()); }
     const Edge& edgeById(EdgeId edgeId) const { return _graph->edgeById(edgeId); }
+    bool containsEdgeId(EdgeId edgeId) const { return _graph->containsEdgeId(edgeId); }
     EdgeIdSetCollection::Type typeOf(EdgeId) const { return EdgeIdSetCollection::Type::Not; }
     EdgeIdSetCollection::Set mergedEdgeIdsForEdgeId(EdgeId edgeId) const { return _graph->mergedEdgeIdsForEdgeId(edgeId); }
 
