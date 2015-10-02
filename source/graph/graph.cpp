@@ -211,7 +211,7 @@ void Graph::clearPhase() const
     setPhase("");
 }
 
-const QString&Graph::phase() const
+const QString& Graph::phase() const
 {
     return _phase;
 }
