@@ -80,7 +80,8 @@ HEADERS += \
     source/graph/weightededgegraphmodel.h \
     source/graph/filter.h \
     source/graph/elementidsetcollection.h \
-    source/graph/mutablegraph.h
+    source/graph/mutablegraph.h \
+    source/graph/graphconsistencychecker.h
 
 SOURCES += \
     source/main.cpp \
@@ -140,7 +141,8 @@ SOURCES += \
     source/graph/weightededgegraphmodel.cpp \
     source/graph/graphmodel.cpp \
     source/graph/mutablegraph.cpp \
-    source/graph/elementidsetcollection.cpp
+    source/graph/elementidsetcollection.cpp \
+    source/graph/graphconsistencychecker.cpp
 
 OTHER_FILES += \
     source/ui/qml/main.qml \

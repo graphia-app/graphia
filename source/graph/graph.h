@@ -3,6 +3,7 @@
 
 #include "elementid.h"
 #include "elementidsetcollection.h"
+#include "graphconsistencychecker.h"
 
 #include "../utils/debugpauser.h"
 
@@ -230,6 +231,7 @@ private:
     std::unique_ptr<ComponentManager> _componentManager;
 
     mutable QString _phase;
+    GraphConsistencyChecker _graphConsistencyChecker;
 
     int numComponentArrays() const;
     void insertComponentArray(GraphArray* componentArray) const;

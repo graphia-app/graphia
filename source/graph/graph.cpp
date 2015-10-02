@@ -11,7 +11,8 @@
 #include <tuple>
 
 Graph::Graph() :
-    _nextNodeId(0), _nextEdgeId(0)
+    _nextNodeId(0), _nextEdgeId(0),
+    _graphConsistencyChecker(*this)
 {
     qRegisterMetaType<NodeId>("NodeId");
     qRegisterMetaType<NodeIdSet>("NodeIdSet");
