@@ -321,6 +321,7 @@ public:
 #if __cplusplus >= 201103L
             using iterator_base::iterator_base;
 #else
+            iterator() : iterator_base() {}
             iterator(const Set* set) : iterator_base(set) {}
 #endif
 
@@ -334,6 +335,7 @@ public:
 #if __cplusplus >= 201103L
             using iterator_base::iterator_base;
 #else
+            const_iterator() : iterator_base() {}
             const_iterator(const Set* set) : iterator_base(set) {}
 #endif
 
