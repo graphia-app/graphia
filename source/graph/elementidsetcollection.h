@@ -376,8 +376,8 @@ public:
 using NodeIdSetCollection = ElementIdSetCollection<NodeId>;
 using EdgeIdSetCollection = ElementIdSetCollection<EdgeId>;
 
-QDebug operator<<(QDebug d, typename NodeIdSetCollection::Set& set);
-QDebug operator<<(QDebug d, typename EdgeIdSetCollection::Set& set);
+QDebug operator<<(QDebug d, NodeIdSetCollection::Set& set);
+QDebug operator<<(QDebug d, EdgeIdSetCollection::Set& set);
 
 #endif // ELEMENTIDSETCOLLECTION
 
