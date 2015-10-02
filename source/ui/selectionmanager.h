@@ -39,7 +39,7 @@ public:
                 newSelectedNodeIds.insert(nodeId);
         }
 
-        bool oldSize = _selectedNodeIds.size();
+        auto oldSize = _selectedNodeIds.size();
         _selectedNodeIds.insert(newSelectedNodeIds.begin(), newSelectedNodeIds.end());
         bool selectionWillChange = _selectedNodeIds.size() > oldSize;
 
@@ -67,13 +67,13 @@ public:
                 auto mergedNodeIds = _graphModel.graph().mergedNodeIdsForNodeId(nodeId);
 
                 for(auto mergedNodeId : mergedNodeIds)
-                    selectionWillChange |= _selectedNodeIds.erase(mergedNodeId);
+                    selectionWillChange |= (_selectedNodeIds.erase(mergedNodeId) > 0);
             }
         }
         else
         {
             for(auto nodeId : nodeIds)
-                selectionWillChange |= _selectedNodeIds.erase(nodeId);
+                selectionWillChange |= (_selectedNodeIds.erase(nodeId) > 0);
         }
 
         if(selectionWillChange)
