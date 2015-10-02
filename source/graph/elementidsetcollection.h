@@ -6,6 +6,7 @@
 #include <QDebug>
 
 #include <vector>
+#include <algorithm>
 
 template<typename T> class ElementIdSetCollection
 {
@@ -345,6 +346,15 @@ public:
 
         const_iterator begin() const { return const_iterator(this); }
         const_iterator end() const   { return const_iterator(); }
+
+        std::vector<T> copy()
+        {
+            std::vector<T> v;
+
+            std::copy(begin(), end(), std::back_inserter(v));
+
+            return v;
+        }
     };
 
     Set setById(SetId setId) const

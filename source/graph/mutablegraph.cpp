@@ -116,11 +116,7 @@ void MutableGraph::removeNode(NodeId nodeId)
     beginTransaction();
 
     // Remove all edges that touch this node
-    std::vector<EdgeId> edgeIds;
-    for(auto edgeId : edgeIdsForNodeId(nodeId))
-        edgeIds.push_back(edgeId);
-
-    for(auto edgeId : edgeIds)
+    for(auto edgeId : edgeIdsForNodeId(nodeId).copy())
         removeEdge(edgeId);
 
     emit nodeWillBeRemoved(this, &_n._nodes[nodeId]);
@@ -326,7 +322,9 @@ void MutableGraph::contractEdge(EdgeId edgeId)
     std::tie(nodeId, nodeIdToMerge) = std::minmax(edge.sourceId(), edge.targetId());
 
     removeEdge(edgeId);
-    moveEdgesTo(*this, nodeId, inEdgeIdsForNodeId(nodeIdToMerge), outEdgeIdsForNodeId(nodeIdToMerge));
+    moveEdgesTo(*this, nodeId,
+                inEdgeIdsForNodeId(nodeIdToMerge).copy(),
+                outEdgeIdsForNodeId(nodeIdToMerge).copy());
     mergeNodes(nodeId, nodeIdToMerge);
 
     _updateRequired = true;
@@ -361,8 +359,9 @@ void MutableGraph::contractEdges(const EdgeIdSet& edgeIds)
         auto nodeId = *std::min_element(component->nodeIds().begin(),
                                         component->nodeIds().end());
 
-        moveEdgesTo(*this, nodeId, inEdgeIdsForNodeIds(component->nodeIds()),
-                    outEdgeIdsForNodeIds(component->nodeIds()));
+        moveEdgesTo(*this, nodeId,
+                    inEdgeIdsForNodeIds(component->nodeIds()).copy(),
+                    outEdgeIdsForNodeIds(component->nodeIds()).copy());
 
         for(auto nodeIdToMerge : component->nodeIds())
             mergeNodes(nodeId, nodeIdToMerge);
