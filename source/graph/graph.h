@@ -25,9 +25,9 @@ class Node
 
 private:
     NodeId _id;
-    EdgeIdDistinctSetCollection::SetId _inEdgeIds;
+    EdgeIdDistinctSet _inEdgeIds;
     int _numInEdges = 0;
-    EdgeIdDistinctSetCollection::SetId _outEdgeIds;
+    EdgeIdDistinctSet _outEdgeIds;
     int _numOutEdges = 0;
     NodeIdMap<EdgeId> _adjacentNodeIds;
 

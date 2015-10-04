@@ -56,7 +56,7 @@ NodeIdDistinctSetCollection::Type MutableGraph::typeOf(NodeId nodeId) const
 
 NodeIdDistinctSet MutableGraph::mergedNodeIdsForNodeId(NodeId nodeId) const
 {
-    return _n._mergedNodeIds.setById(nodeId);
+    return NodeIdDistinctSet(nodeId, &_n._mergedNodeIds);
 }
 
 NodeId MutableGraph::addNode()
@@ -97,6 +97,8 @@ NodeId MutableGraph::addNode(NodeId nodeId)
     _n._nodeIdsInUse[nodeId] = true;
     auto& node = _n._nodes[nodeId];
     node._id = nodeId;
+    node._inEdgeIds = EdgeIdDistinctSet(&_e._inEdgeIdsCollection);
+    node._outEdgeIds = EdgeIdDistinctSet(&_e._outEdgeIdsCollection);
     node._adjacentNodeIds.clear();
 
     emit nodeAdded(this, &node);
@@ -157,7 +159,7 @@ EdgeIdDistinctSetCollection::Type MutableGraph::typeOf(EdgeId edgeId) const
 
 EdgeIdDistinctSet MutableGraph::mergedEdgeIdsForEdgeId(EdgeId edgeId) const
 {
-    return _e._mergedEdgeIds.setById(edgeId);
+    return EdgeIdDistinctSet(edgeId, &_e._mergedEdgeIds);
 }
 
 EdgeIdDistinctSet MutableGraph::edgeIdsForNodeId(NodeId nodeId) const
@@ -165,23 +167,20 @@ EdgeIdDistinctSet MutableGraph::edgeIdsForNodeId(NodeId nodeId) const
     EdgeIdDistinctSet set;
     auto& node = _n._nodes[nodeId];
 
-    if(!node._inEdgeIds.isNull())
-        set.add(_e._inEdgeIds.setById(node._inEdgeIds));
-
-    if(!node._outEdgeIds.isNull())
-        set.add(_e._outEdgeIds.setById(node._outEdgeIds));
+    set.add(node._inEdgeIds);
+    set.add(node._outEdgeIds);
 
     return set;
 }
 
 EdgeIdDistinctSet MutableGraph::inEdgeIdsForNodeId(NodeId nodeId) const
 {
-    return _e._inEdgeIds.setById(_n._nodes[nodeId]._inEdgeIds);
+    return _n._nodes[nodeId]._inEdgeIds;
 }
 
 EdgeIdDistinctSet MutableGraph::outEdgeIdsForNodeId(NodeId nodeId) const
 {
-    return _e._outEdgeIds.setById(_n._nodes[nodeId]._outEdgeIds);
+    return _n._nodes[nodeId]._outEdgeIds;
 }
 
 EdgeId MutableGraph::addEdge(NodeId sourceId, NodeId targetId)
@@ -240,10 +239,10 @@ EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     auto& source = _n._nodes[sourceId];
     auto& target = _n._nodes[targetId];
 
-    source._outEdgeIds = _e._outEdgeIds.add(source._outEdgeIds, edgeId);
+    source._outEdgeIds.add(edgeId);
     source._numOutEdges++;
     auto sourceInsert = source._adjacentNodeIds.insert({targetId, edgeId});
-    target._inEdgeIds = _e._inEdgeIds.add(target._inEdgeIds, edgeId);
+    target._inEdgeIds.add(edgeId);
     target._numInEdges++;
     auto targetInsert = target._adjacentNodeIds.insert({sourceId, edgeId});
 
@@ -274,10 +273,10 @@ void MutableGraph::removeEdge(EdgeId edgeId)
 
     auto& source = _n._nodes[edge.sourceId()];
     auto& target = _n._nodes[edge.targetId()];
-    source._outEdgeIds = _e._outEdgeIds.remove(source._outEdgeIds, edgeId);
+    source._outEdgeIds.remove(edgeId);
     source._numOutEdges--;
     source._adjacentNodeIds.erase(edge.targetId());
-    target._inEdgeIds = _e._inEdgeIds.remove(target._inEdgeIds, edgeId);
+    target._inEdgeIds.remove(edgeId);
     target._numInEdges--;
     target._adjacentNodeIds.erase(edge.sourceId());
 

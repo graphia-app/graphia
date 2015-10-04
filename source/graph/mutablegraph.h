@@ -45,16 +45,16 @@ private:
         EdgeIdDistinctSetCollection _mergedEdgeIds;
         std::vector<Edge>           _edges;
 
-        EdgeIdDistinctSetCollection _inEdgeIds;
-        EdgeIdDistinctSetCollection _outEdgeIds;
+        EdgeIdDistinctSetCollection _inEdgeIdsCollection;
+        EdgeIdDistinctSetCollection _outEdgeIdsCollection;
 
         void resize(std::size_t size)
         {
             _edgeIdsInUse.resize(size);
             _mergedEdgeIds.resize(size);
             _edges.resize(size);
-            _inEdgeIds.resize(size);
-            _outEdgeIds.resize(size);
+            _inEdgeIdsCollection.resize(size);
+            _outEdgeIdsCollection.resize(size);
         }
 
         void clear()
@@ -62,8 +62,8 @@ private:
             _edgeIdsInUse.clear();
             _mergedEdgeIds.clear();
             _edges.clear();
-            _inEdgeIds.clear();
-            _outEdgeIds.clear();
+            _inEdgeIdsCollection.clear();
+            _outEdgeIdsCollection.clear();
         }
     } _e;
 
@@ -132,22 +132,22 @@ public:
 
     template<typename C> EdgeIdDistinctSet inEdgeIdsForNodeIds(const C& nodeIds) const
     {
-        std::vector<EdgeIdDistinctSetCollection::SetId> setIds;
+        EdgeIdDistinctSet set;
 
         for(auto nodeId : nodeIds)
-            setIds.push_back(_n._nodes[nodeId]._inEdgeIds);
+            set.add(_n._nodes[nodeId]._inEdgeIds);
 
-        return _e._inEdgeIds.setByIds(setIds);
+        return set;
     }
 
     template<typename C> EdgeIdDistinctSet outEdgeIdsForNodeIds(const C& nodeIds) const
     {
-        std::vector<EdgeIdDistinctSetCollection::SetId> setIds;
+        EdgeIdDistinctSet set;
 
         for(auto nodeId : nodeIds)
-            setIds.push_back(_n._nodes[nodeId]._outEdgeIds);
+            set.add(_n._nodes[nodeId]._outEdgeIds);
 
-        return _e._outEdgeIds.setByIds(setIds);
+        return set;
     }
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId);

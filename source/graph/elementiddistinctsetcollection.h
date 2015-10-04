@@ -235,21 +235,6 @@ public:
 
         return Type::Not;
     }
-
-    ElementIdDistinctSet<T> setById(SetId setId) const
-    {
-        return ElementIdDistinctSet<T>(setId, &_multiElementIds);
-    }
-
-    template<typename C> ElementIdDistinctSet<T> setByIds(const C& setIds) const
-    {
-        ElementIdDistinctSet<T> set;
-
-        for(auto setId : setIds)
-            set.add(setById(setId));
-
-        return set;
-    }
 };
 
 using NodeIdDistinctSetCollection = ElementIdDistinctSetCollection<NodeId>;
@@ -257,24 +242,43 @@ using EdgeIdDistinctSetCollection = ElementIdDistinctSetCollection<EdgeId>;
 
 template<typename T> class ElementIdDistinctSet
 {
-    friend class ElementIdDistinctSetCollection<T>;
-    friend class MutableGraph;
-
     using Collection = ElementIdDistinctSetCollection<T>;
 
 private:
-    std::vector<std::pair<T, const typename Collection::MultiElementIds*>> _heads;
-
-    ElementIdDistinctSet(T head, const typename Collection::MultiElementIds* multiElementIds) :
-        _heads({{head, multiElementIds}})
-    {}
+    std::vector<std::pair<T, const Collection*>> _heads;
 
 public:
     ElementIdDistinctSet() {}
 
+    ElementIdDistinctSet(const Collection* collection) :
+        _heads({{T(), collection}})
+    {}
+
+    ElementIdDistinctSet(T head, const Collection* collection) :
+        _heads({{head, collection}})
+    {}
+
     void add(const ElementIdDistinctSet& other)
     {
         _heads.insert(_heads.end(), other._heads.begin(), other._heads.end());
+    }
+
+    void add(T elementId)
+    {
+        Q_ASSERT(_heads.size() == 1);
+
+        auto& head = _heads.front();
+        auto* collection = const_cast<Collection*>(head.second); //ICK
+        head.first = collection->add(head.first, elementId);
+    }
+
+    void remove(T elementId)
+    {
+        Q_ASSERT(_heads.size() == 1);
+
+        auto& head = _heads.front();
+        auto* collection = const_cast<Collection*>(head.second); //ICK
+        head.first = collection->remove(head.first, elementId);
     }
 
     class iterator_base
@@ -296,7 +300,7 @@ public:
 
         const typename Collection::MultiElementId& multiElementId() const
         {
-            return (*_set->_heads[_i].second)[_p];
+            return _set->_heads[_i].second->_multiElementIds[_p];
         }
 
         pointer nextHead()
@@ -386,7 +390,7 @@ public:
     const_iterator begin() const { return const_iterator(this); }
     const_iterator end() const   { return const_iterator(); }
 
-    std::vector<T> copy()
+    std::vector<T> copy() const
     {
         std::vector<T> v;
 
