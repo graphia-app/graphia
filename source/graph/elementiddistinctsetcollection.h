@@ -363,7 +363,7 @@ public:
         using iterator_base::iterator_base;
 #else
         iterator() : iterator_base() {}
-        iterator(const Set* set) : iterator_base(set) {}
+        iterator(const ElementIdDistinctSet* set) : iterator_base(set) {}
 #endif
 
         typename iterator_base::reference operator*() { return this->_p; }
@@ -377,7 +377,7 @@ public:
         using iterator_base::iterator_base;
 #else
         const_iterator() : iterator_base() {}
-        const_iterator(const Set* set) : iterator_base(set) {}
+        const_iterator(const ElementIdDistinctSet* set) : iterator_base(set) {}
 #endif
 
         const typename iterator_base::reference operator*() const { return this->_p; }
