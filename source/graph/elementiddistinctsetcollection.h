@@ -1,5 +1,5 @@
-#ifndef ELEMENTIDSETCOLLECTION
-#define ELEMENTIDSETCOLLECTION
+#ifndef ELEMENTIDDISTINCTSETCOLLECTION
+#define ELEMENTIDDISTINCTSETCOLLECTION
 
 #include "elementid.h"
 
@@ -8,9 +8,13 @@
 #include <vector>
 #include <algorithm>
 
-template<typename T> class ElementIdSetCollection
+template<typename T> class ElementIdDistinctSet;
+
+template<typename T> class ElementIdDistinctSetCollection
 {
     static_assert(std::is_base_of<ElementId<T>, T>::value, "T must be an ElementId");
+
+    friend class ElementIdDistinctSet<T>;
 
 private:
     struct MultiElementId
@@ -232,153 +236,14 @@ public:
         return Type::Not;
     }
 
-    class Set
+    ElementIdDistinctSet<T> setById(SetId setId) const
     {
-        friend class ElementIdSetCollection<T>;
-        friend class MutableGraph;
-
-    private:
-        std::vector<std::pair<T, const MultiElementIds*>> _heads;
-
-        Set(T head, const MultiElementIds* multiElementIds) :
-            _heads({{head, multiElementIds}})
-        {}
-
-    public:
-        Set() {}
-
-        void add(const Set& other)
-        {
-            _heads.insert(_heads.end(), other._heads.begin(), other._heads.end());
-        }
-
-        class iterator_base
-        {
-        public:
-            using self_type = iterator_base;
-            using value_type = T;
-            using reference = T;
-            using pointer = T;
-            using iterator_category = std::forward_iterator_tag;
-            using difference_type = int;
-
-        protected:
-            pointer _p;
-
-        private:
-            const Set* _set = nullptr;
-            int _i = 0;
-
-            const MultiElementId& multiElementId() const
-            {
-                return (*_set->_heads[_i].second)[_p];
-            }
-
-            pointer nextHead()
-            {
-                pointer p;
-                while(_i < static_cast<int>(_set->_heads.size()))
-                {
-                    p = _set->_heads[_i].first;
-                    if(p.isNull())
-                        _i++;
-                    else
-                        break;
-                }
-
-                return p;
-            }
-
-            void incrementPointer()
-            {
-                if(!multiElementId().hasNext(_p))
-                {
-                    _i++;
-                    _p = nextHead();
-                }
-                else
-                    _p = multiElementId()._next;
-            }
-
-        public:
-            iterator_base() {}
-
-            iterator_base(const Set* set) :
-                 _set(set)
-            {
-                _p = nextHead();
-            }
-
-            self_type operator++()
-            {
-                self_type i = *this;
-                incrementPointer();
-                return i;
-            }
-
-            self_type operator++(int)
-            {
-                incrementPointer();
-                return *this;
-            }
-
-
-            bool operator==(const self_type& other) { return _p == other._p; }
-            bool operator!=(const self_type& other) { return _p != other._p; }
-        };
-
-        class iterator : public iterator_base
-        {
-        public:
-#if __cplusplus >= 201103L
-            using iterator_base::iterator_base;
-#else
-            iterator() : iterator_base() {}
-            iterator(const Set* set) : iterator_base(set) {}
-#endif
-
-            typename iterator_base::reference operator*() { return this->_p; }
-            typename iterator_base::pointer operator->() { return this->_p; }
-        };
-
-        class const_iterator : public iterator_base
-        {
-        public:
-#if __cplusplus >= 201103L
-            using iterator_base::iterator_base;
-#else
-            const_iterator() : iterator_base() {}
-            const_iterator(const Set* set) : iterator_base(set) {}
-#endif
-
-            const typename iterator_base::reference operator*() const { return this->_p; }
-            const typename iterator_base::pointer operator->() const { return this->_p; }
-        };
-
-        iterator begin() { return iterator(this); }
-        iterator end()   { return iterator(); }
-
-        const_iterator begin() const { return const_iterator(this); }
-        const_iterator end() const   { return const_iterator(); }
-
-        std::vector<T> copy()
-        {
-            std::vector<T> v;
-
-            std::copy(begin(), end(), std::back_inserter(v));
-
-            return v;
-        }
-    };
-
-    Set setById(SetId setId) const
-    {
-        return Set(setId, &_multiElementIds);
+        return ElementIdDistinctSet<T>(setId, &_multiElementIds);
     }
 
-    template<typename C> Set setByIds(const C& setIds) const
+    template<typename C> ElementIdDistinctSet<T> setByIds(const C& setIds) const
     {
-        Set set;
+        ElementIdDistinctSet<T> set;
 
         for(auto setId : setIds)
             set.add(setById(setId));
@@ -387,11 +252,162 @@ public:
     }
 };
 
-using NodeIdSetCollection = ElementIdSetCollection<NodeId>;
-using EdgeIdSetCollection = ElementIdSetCollection<EdgeId>;
+using NodeIdDistinctSetCollection = ElementIdDistinctSetCollection<NodeId>;
+using EdgeIdDistinctSetCollection = ElementIdDistinctSetCollection<EdgeId>;
 
-QDebug operator<<(QDebug d, NodeIdSetCollection::Set& set);
-QDebug operator<<(QDebug d, EdgeIdSetCollection::Set& set);
+template<typename T> class ElementIdDistinctSet
+{
+    friend class ElementIdDistinctSetCollection<T>;
+    friend class MutableGraph;
+
+    using Collection = ElementIdDistinctSetCollection<T>;
+
+private:
+    std::vector<std::pair<T, const typename Collection::MultiElementIds*>> _heads;
+
+    ElementIdDistinctSet(T head, const typename Collection::MultiElementIds* multiElementIds) :
+        _heads({{head, multiElementIds}})
+    {}
+
+public:
+    ElementIdDistinctSet() {}
+
+    void add(const ElementIdDistinctSet& other)
+    {
+        _heads.insert(_heads.end(), other._heads.begin(), other._heads.end());
+    }
+
+    class iterator_base
+    {
+    public:
+        using self_type = iterator_base;
+        using value_type = T;
+        using reference = T;
+        using pointer = T;
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = int;
+
+    protected:
+        pointer _p;
+
+    private:
+        const ElementIdDistinctSet* _set = nullptr;
+        int _i = 0;
+
+        const typename Collection::MultiElementId& multiElementId() const
+        {
+            return (*_set->_heads[_i].second)[_p];
+        }
+
+        pointer nextHead()
+        {
+            pointer p;
+            while(_i < static_cast<int>(_set->_heads.size()))
+            {
+                p = _set->_heads[_i].first;
+                if(p.isNull())
+                    _i++;
+                else
+                    break;
+            }
+
+            return p;
+        }
+
+        void incrementPointer()
+        {
+            if(!multiElementId().hasNext(_p))
+            {
+                _i++;
+                _p = nextHead();
+            }
+            else
+                _p = multiElementId()._next;
+        }
+
+    public:
+        iterator_base() {}
+
+        iterator_base(const ElementIdDistinctSet* set) :
+             _set(set)
+        {
+            _p = nextHead();
+        }
+
+        self_type operator++()
+        {
+            self_type i = *this;
+            incrementPointer();
+            return i;
+        }
+
+        self_type operator++(int)
+        {
+            incrementPointer();
+            return *this;
+        }
+
+
+        bool operator==(const self_type& other) { return _p == other._p; }
+        bool operator!=(const self_type& other) { return _p != other._p; }
+    };
+
+    class iterator : public iterator_base
+    {
+    public:
+#if __cplusplus >= 201103L
+        using iterator_base::iterator_base;
+#else
+        iterator() : iterator_base() {}
+        iterator(const Set* set) : iterator_base(set) {}
+#endif
+
+        typename iterator_base::reference operator*() { return this->_p; }
+        typename iterator_base::pointer operator->() { return this->_p; }
+    };
+
+    class const_iterator : public iterator_base
+    {
+    public:
+#if __cplusplus >= 201103L
+        using iterator_base::iterator_base;
+#else
+        const_iterator() : iterator_base() {}
+        const_iterator(const Set* set) : iterator_base(set) {}
+#endif
+
+        const typename iterator_base::reference operator*() const { return this->_p; }
+        const typename iterator_base::pointer operator->() const { return this->_p; }
+    };
+
+    iterator begin() { return iterator(this); }
+    iterator end()   { return iterator(); }
+
+    const_iterator begin() const { return const_iterator(this); }
+    const_iterator end() const   { return const_iterator(); }
+
+    std::vector<T> copy()
+    {
+        std::vector<T> v;
+
+        std::copy(begin(), end(), std::back_inserter(v));
+
+        return v;
+    }
+};
+
+using NodeIdDistinctSet = ElementIdDistinctSet<NodeId>;
+using EdgeIdDistinctSet = ElementIdDistinctSet<EdgeId>;
+
+template<typename T> QDebug operator<<(QDebug d, const ElementIdDistinctSet<T>& set)
+{
+    d << "[";
+    for(auto id : set)
+        d << id;
+    d << "]";
+
+    return d;
+}
 
 #endif // ELEMENTIDSETCOLLECTION
 

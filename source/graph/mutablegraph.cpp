@@ -49,12 +49,12 @@ bool MutableGraph::containsNodeId(NodeId nodeId) const
     return _n._nodeIdsInUse[nodeId];
 }
 
-NodeIdSetCollection::Type MutableGraph::typeOf(NodeId nodeId) const
+NodeIdDistinctSetCollection::Type MutableGraph::typeOf(NodeId nodeId) const
 {
     return _n._mergedNodeIds.typeOf(nodeId);
 }
 
-NodeIdSetCollection::Set MutableGraph::mergedNodeIdsForNodeId(NodeId nodeId) const
+NodeIdDistinctSet MutableGraph::mergedNodeIdsForNodeId(NodeId nodeId) const
 {
     return _n._mergedNodeIds.setById(nodeId);
 }
@@ -121,7 +121,7 @@ void MutableGraph::removeNode(NodeId nodeId)
 
     emit nodeWillBeRemoved(this, &_n._nodes[nodeId]);
 
-    _n._mergedNodeIds.remove(NodeIdSetCollection::SetId(), nodeId);
+    _n._mergedNodeIds.remove(NodeIdDistinctSetCollection::SetId(), nodeId);
     _n._nodeIdsInUse[nodeId] = false;
     _unusedNodeIds.push_back(nodeId);
 
@@ -150,19 +150,19 @@ bool MutableGraph::containsEdgeId(EdgeId edgeId) const
     return _e._edgeIdsInUse[edgeId];
 }
 
-EdgeIdSetCollection::Type MutableGraph::typeOf(EdgeId edgeId) const
+EdgeIdDistinctSetCollection::Type MutableGraph::typeOf(EdgeId edgeId) const
 {
     return _e._mergedEdgeIds.typeOf(edgeId);
 }
 
-EdgeIdSetCollection::Set MutableGraph::mergedEdgeIdsForEdgeId(EdgeId edgeId) const
+EdgeIdDistinctSet MutableGraph::mergedEdgeIdsForEdgeId(EdgeId edgeId) const
 {
     return _e._mergedEdgeIds.setById(edgeId);
 }
 
-EdgeIdSetCollection::Set MutableGraph::edgeIdsForNodeId(NodeId nodeId) const
+EdgeIdDistinctSet MutableGraph::edgeIdsForNodeId(NodeId nodeId) const
 {
-    EdgeIdSetCollection::Set set;
+    EdgeIdDistinctSet set;
     auto& node = _n._nodes[nodeId];
 
     if(!node._inEdgeIds.isNull())
@@ -174,12 +174,12 @@ EdgeIdSetCollection::Set MutableGraph::edgeIdsForNodeId(NodeId nodeId) const
     return set;
 }
 
-EdgeIdSetCollection::Set MutableGraph::inEdgeIdsForNodeId(NodeId nodeId) const
+EdgeIdDistinctSet MutableGraph::inEdgeIdsForNodeId(NodeId nodeId) const
 {
     return _e._inEdgeIds.setById(_n._nodes[nodeId]._inEdgeIds);
 }
 
-EdgeIdSetCollection::Set MutableGraph::outEdgeIdsForNodeId(NodeId nodeId) const
+EdgeIdDistinctSet MutableGraph::outEdgeIdsForNodeId(NodeId nodeId) const
 {
     return _e._outEdgeIds.setById(_n._nodes[nodeId]._outEdgeIds);
 }
@@ -281,7 +281,7 @@ void MutableGraph::removeEdge(EdgeId edgeId)
     target._numInEdges--;
     target._adjacentNodeIds.erase(edge.sourceId());
 
-    _e._mergedEdgeIds.remove(EdgeIdSetCollection::SetId(), edgeId);
+    _e._mergedEdgeIds.remove(EdgeIdDistinctSetCollection::SetId(), edgeId);
     _e._edgeIdsInUse[edgeId] = false;
     _unusedEdgeIds.push_back(edgeId);
 

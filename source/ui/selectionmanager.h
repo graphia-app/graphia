@@ -49,7 +49,7 @@ public:
         return selectionWillChange;
     }
 
-    bool selectNodes(const NodeIdSetCollection::Set& nodeIds)
+    bool selectNodes(const NodeIdDistinctSet& nodeIds)
     {
         return selectNodes(nodeIds, false);
     }
@@ -82,7 +82,7 @@ public:
         return selectionWillChange;
     }
 
-    bool deselectNodes(const NodeIdSetCollection::Set& nodeIds)
+    bool deselectNodes(const NodeIdDistinctSet& nodeIds)
     {
         return deselectNodes(nodeIds, false);
     }

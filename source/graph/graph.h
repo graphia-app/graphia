@@ -2,7 +2,7 @@
 #define GRAPH_H
 
 #include "elementid.h"
-#include "elementidsetcollection.h"
+#include "elementiddistinctsetcollection.h"
 #include "graphconsistencychecker.h"
 
 #include "../utils/debugpauser.h"
@@ -25,9 +25,9 @@ class Node
 
 private:
     NodeId _id;
-    EdgeIdSetCollection::SetId _inEdgeIds;
+    EdgeIdDistinctSetCollection::SetId _inEdgeIds;
     int _numInEdges = 0;
-    EdgeIdSetCollection::SetId _outEdgeIds;
+    EdgeIdDistinctSetCollection::SetId _outEdgeIds;
     int _numOutEdges = 0;
     NodeIdMap<EdgeId> _adjacentNodeIds;
 
@@ -138,18 +138,18 @@ public:
     virtual const Node& nodeById(NodeId nodeId) const = 0;
     NodeId firstNodeId() const;
     virtual bool containsNodeId(NodeId nodeId) const;
-    virtual NodeIdSetCollection::Type typeOf(NodeId nodeId) const = 0;
-    virtual NodeIdSetCollection::Set mergedNodeIdsForNodeId(NodeId nodeId) const = 0;
+    virtual NodeIdDistinctSetCollection::Type typeOf(NodeId nodeId) const = 0;
+    virtual NodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const = 0;
 
     virtual const std::vector<EdgeId>& edgeIds() const = 0;
     virtual int numEdges() const = 0;
     virtual const Edge& edgeById(EdgeId edgeId) const = 0;
     EdgeId firstEdgeId() const;
     virtual bool containsEdgeId(EdgeId edgeId) const;
-    virtual EdgeIdSetCollection::Type typeOf(EdgeId edgeId) const = 0;
-    virtual EdgeIdSetCollection::Set mergedEdgeIdsForEdgeId(EdgeId edgeId) const = 0;
+    virtual EdgeIdDistinctSetCollection::Type typeOf(EdgeId edgeId) const = 0;
+    virtual EdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const = 0;
 
-    virtual EdgeIdSetCollection::Set edgeIdsForNodeId(NodeId nodeId) const = 0;
+    virtual EdgeIdDistinctSet edgeIdsForNodeId(NodeId nodeId) const = 0;
 
     template<typename C> EdgeIdSet edgeIdsForNodeIds(const C& nodeIds) const
     {
