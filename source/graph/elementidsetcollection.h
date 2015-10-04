@@ -267,24 +267,37 @@ public:
 
         private:
             const Set* _set = nullptr;
-            int i = 0;
+            int _i = 0;
 
-            const MultiElementId& multiElementId()
+            const MultiElementId& multiElementId() const
             {
-                return (*_set->_heads[i].second)[_p];
+                return (*_set->_heads[_i].second)[_p];
+            }
+
+            pointer nextHead()
+            {
+                pointer p;
+                while(_i < static_cast<int>(_set->_heads.size()))
+                {
+                    p = _set->_heads[_i].first;
+                    if(p.isNull())
+                        _i++;
+                    else
+                        break;
+                }
+
+                return p;
             }
 
             void incrementPointer()
             {
-                if(multiElementId().hasNext(_p))
-                    _p = multiElementId()._next;
-                else if(i < static_cast<int>(_set->_heads.size()) - 1)
+                if(!multiElementId().hasNext(_p))
                 {
-                    i++;
-                    _p = _set->_heads[i].first;
+                    _i++;
+                    _p = nextHead();
                 }
                 else
-                    _p.setToNull();
+                    _p = multiElementId()._next;
             }
 
         public:
@@ -293,8 +306,7 @@ public:
             iterator_base(const Set* set) :
                  _set(set)
             {
-                if(!_set->_heads.empty())
-                    _p = _set->_heads.front().first;
+                _p = nextHead();
             }
 
             self_type operator++()

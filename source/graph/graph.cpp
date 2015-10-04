@@ -76,7 +76,7 @@ void Graph::dumpToQDebug(int detail) const
     {
         for(auto nodeId : nodeIds())
         {
-            EdgeIdSetCollection::Set edgeIds = edgeIdsForNodeId(nodeId);
+            auto edgeIds = edgeIdsForNodeId(nodeId);
             qDebug() << "Node" << nodeId << edgeIds;
         }
 
