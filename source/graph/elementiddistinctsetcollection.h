@@ -2,6 +2,7 @@
 #define ELEMENTIDDISTINCTSETCOLLECTION
 
 #include "elementid.h"
+#include "../utils/utils.h"
 
 #include <QDebug>
 
@@ -246,12 +247,14 @@ template<typename T> class ElementIdDistinctSet
 
 private:
     std::vector<std::pair<T, const Collection*>> _heads;
+    mutable int _size = -1;
 
 public:
-    ElementIdDistinctSet() {}
+    ElementIdDistinctSet() : _size(0)
+    {}
 
     ElementIdDistinctSet(const Collection* collection) :
-        _heads({{T(), collection}})
+        _heads({{T(), collection}}), _size(0)
     {}
 
     ElementIdDistinctSet(T head, const Collection* collection) :
@@ -261,6 +264,7 @@ public:
     void add(const ElementIdDistinctSet& other)
     {
         _heads.insert(_heads.end(), other._heads.begin(), other._heads.end());
+        _size += other._size;
     }
 
     void add(T elementId)
@@ -270,6 +274,9 @@ public:
         auto& head = _heads.front();
         auto* collection = const_cast<Collection*>(head.second); //ICK
         head.first = collection->add(head.first, elementId);
+
+        if(_size >= 0)
+            _size++;
     }
 
     void remove(T elementId)
@@ -279,6 +286,9 @@ public:
         auto& head = _heads.front();
         auto* collection = const_cast<Collection*>(head.second); //ICK
         head.first = collection->remove(head.first, elementId);
+
+        if(_size > 0)
+            _size--;
     }
 
     class iterator_base
@@ -389,6 +399,17 @@ public:
 
     const_iterator begin() const { return const_iterator(this); }
     const_iterator end() const   { return const_iterator(); }
+
+    int size() const
+    {
+        if(_size < 0)
+        {
+            // If we don't know the size, calculate it on demand
+            _size = u::count(*this);
+        }
+
+        return _size;
+    }
 
     std::vector<T> copy() const
     {

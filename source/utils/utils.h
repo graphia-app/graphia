@@ -160,6 +160,19 @@ namespace u
         std::unique_lock<Mutex> _lock;
         MaybeLock(Mutex& mutex) : _lock(mutex) {}
     };
+
+    template<typename C> int count(const C& c)
+    {
+        int n = 0;
+
+        for(auto i : c)
+        {
+            Q_UNUSED(i);
+            n++;
+        }
+
+        return n;
+    }
 }
 
 #endif // UTILS_H

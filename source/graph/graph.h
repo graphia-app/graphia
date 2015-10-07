@@ -26,9 +26,7 @@ class Node
 private:
     NodeId _id;
     EdgeIdDistinctSet _inEdgeIds;
-    int _numInEdges = 0;
     EdgeIdDistinctSet _outEdgeIds;
-    int _numOutEdges = 0;
     NodeIdMap<EdgeId> _adjacentNodeIds;
 
 public:
@@ -37,18 +35,14 @@ public:
     Node(const Node& other) :
         _id(other._id),
         _inEdgeIds(other._inEdgeIds),
-        _numInEdges(other._numInEdges),
         _outEdgeIds(other._outEdgeIds),
-        _numOutEdges(other._numOutEdges),
         _adjacentNodeIds(other._adjacentNodeIds)
     {}
 
     Node(Node&& other) noexcept :
         _id(other._id),
         _inEdgeIds(other._inEdgeIds),
-        _numInEdges(other._numInEdges),
         _outEdgeIds(other._outEdgeIds),
-        _numOutEdges(other._numOutEdges),
         _adjacentNodeIds(std::move(other._adjacentNodeIds))
     {}
 
@@ -58,16 +52,14 @@ public:
         {
             _id                 = other._id;
             _inEdgeIds          = other._inEdgeIds;
-            _numInEdges         = other._numInEdges;
             _outEdgeIds         = other._outEdgeIds;
-            _numOutEdges        = other._numOutEdges;
             _adjacentNodeIds    = other._adjacentNodeIds;
         }
 
         return *this;
     }
 
-    int degree() const { return _numInEdges + _numOutEdges; }
+    int degree() const { return _inEdgeIds.size() + _outEdgeIds.size(); }
 
     NodeId id() const { return _id; }
 };

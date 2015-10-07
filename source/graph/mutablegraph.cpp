@@ -240,10 +240,8 @@ EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     auto& target = _n._nodes[targetId];
 
     source._outEdgeIds.add(edgeId);
-    source._numOutEdges++;
     auto sourceInsert = source._adjacentNodeIds.insert({targetId, edgeId});
     target._inEdgeIds.add(edgeId);
-    target._numInEdges++;
     auto targetInsert = target._adjacentNodeIds.insert({sourceId, edgeId});
 
     Q_ASSERT(sourceId == targetId || sourceInsert.second == targetInsert.second);
@@ -274,10 +272,8 @@ void MutableGraph::removeEdge(EdgeId edgeId)
     auto& source = _n._nodes[edge.sourceId()];
     auto& target = _n._nodes[edge.targetId()];
     source._outEdgeIds.remove(edgeId);
-    source._numOutEdges--;
     source._adjacentNodeIds.erase(edge.targetId());
     target._inEdgeIds.remove(edgeId);
-    target._numInEdges--;
     target._adjacentNodeIds.erase(edge.sourceId());
 
     _e._mergedEdgeIds.remove(EdgeIdDistinctSetCollection::SetId(), edgeId);
