@@ -336,14 +336,6 @@ public:
             return i;
         }
 
-        self_type operator++(int)
-        {
-            incrementPointer();
-            return *this;
-        }
-
-
-        bool operator==(const self_type& other) { return _p == other._p; }
         bool operator!=(const self_type& other) { return _p != other._p; }
     };
 
@@ -358,7 +350,6 @@ public:
 #endif
 
         typename iterator_base::reference operator*() { return this->_p; }
-        typename iterator_base::pointer operator->() { return this->_p; }
     };
 
     class const_iterator : public iterator_base
@@ -372,7 +363,6 @@ public:
 #endif
 
         const typename iterator_base::reference operator*() const { return this->_p; }
-        const typename iterator_base::pointer operator->() const { return this->_p; }
     };
 
     iterator begin() { return iterator(this); }
@@ -447,20 +437,20 @@ public:
         pointer _p;
 
     private:
-        const ElementIdDistinctSets* _set = nullptr;
+        const ElementIdDistinctSets* _sets = nullptr;
         int _i = 0;
 
         const typename Collection::MultiElementId& multiElementId() const
         {
-            return _set->_sets[_i]->_collection->_multiElementIds[_p];
+            return _sets->_sets[_i]->_collection->_multiElementIds[_p];
         }
 
         pointer nextHead()
         {
             pointer p;
-            while(_i < static_cast<int>(_set->_sets.size()))
+            while(_i < static_cast<int>(_sets->_sets.size()))
             {
-                p = _set->_sets[_i]->_head;
+                p = _sets->_sets[_i]->_head;
                 if(p.isNull())
                     _i++;
                 else
@@ -484,8 +474,8 @@ public:
     public:
         iterator_base() {}
 
-        iterator_base(const ElementIdDistinctSets* set) :
-             _set(set)
+        iterator_base(const ElementIdDistinctSets* sets) :
+             _sets(sets)
         {
             _p = nextHead();
         }
@@ -497,14 +487,6 @@ public:
             return i;
         }
 
-        self_type operator++(int)
-        {
-            incrementPointer();
-            return *this;
-        }
-
-
-        bool operator==(const self_type& other) { return _p == other._p; }
         bool operator!=(const self_type& other) { return _p != other._p; }
     };
 
@@ -515,11 +497,10 @@ public:
         using iterator_base::iterator_base;
 #else
         iterator() : iterator_base() {}
-        iterator(const ElementIdDistinctSets* set) : iterator_base(set) {}
+        iterator(const ElementIdDistinctSets* sets) : iterator_base(sets) {}
 #endif
 
         typename iterator_base::reference operator*() { return this->_p; }
-        typename iterator_base::pointer operator->() { return this->_p; }
     };
 
     class const_iterator : public iterator_base
@@ -529,11 +510,10 @@ public:
         using iterator_base::iterator_base;
 #else
         const_iterator() : iterator_base() {}
-        const_iterator(const ElementIdDistinctSets* set) : iterator_base(set) {}
+        const_iterator(const ElementIdDistinctSets* sets) : iterator_base(sets) {}
 #endif
 
         const typename iterator_base::reference operator*() const { return this->_p; }
-        const typename iterator_base::pointer operator->() const { return this->_p; }
     };
 
     iterator begin() { return iterator(this); }
