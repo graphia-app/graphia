@@ -221,6 +221,11 @@ public:
         return setId;
     }
 
+    SetId remove(T elementId)
+    {
+        return remove(SetId(), elementId);
+    }
+
     Type typeOf(T elementId) const
     {
         Q_ASSERT(!elementId.isNull());
@@ -253,13 +258,22 @@ public:
     ElementIdDistinctSet() : _size(0)
     {}
 
-    ElementIdDistinctSet(const Collection* collection) :
-        _heads({{T(), collection}}), _size(0)
-    {}
-
     ElementIdDistinctSet(T head, const Collection* collection) :
         _heads({{head, collection}})
     {}
+
+    void setCollection(const Collection* collection)
+    {
+        Q_ASSERT(_heads.size() == 1);
+        _heads.front().second = collection;
+    }
+
+    void clear(const Collection* collection)
+    {
+        _heads.clear();
+        _size = 0;
+        _heads.emplace_back(T(), collection);
+    }
 
     void add(const ElementIdDistinctSet& other)
     {

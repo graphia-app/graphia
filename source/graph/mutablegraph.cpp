@@ -97,8 +97,8 @@ NodeId MutableGraph::addNode(NodeId nodeId)
     _n._nodeIdsInUse[nodeId] = true;
     auto& node = _n._nodes[nodeId];
     node._id = nodeId;
-    node._inEdgeIds = EdgeIdDistinctSet(&_e._inEdgeIdsCollection);
-    node._outEdgeIds = EdgeIdDistinctSet(&_e._outEdgeIdsCollection);
+    node._inEdgeIds.clear(&_e._inEdgeIdsCollection);
+    node._outEdgeIds.clear(&_e._outEdgeIdsCollection);
     node._adjacentNodeIds.clear();
 
     emit nodeAdded(this, &node);
@@ -276,7 +276,7 @@ void MutableGraph::removeEdge(EdgeId edgeId)
     target._inEdgeIds.remove(edgeId);
     target._adjacentNodeIds.erase(edge.sourceId());
 
-    _e._mergedEdgeIds.remove(EdgeIdDistinctSetCollection::SetId(), edgeId);
+    _e._mergedEdgeIds.remove(edgeId);
     _e._edgeIdsInUse[edgeId] = false;
     _unusedEdgeIds.push_back(edgeId);
 
@@ -391,6 +391,13 @@ void MutableGraph::cloneFrom(const Graph& other)
     _edgeIds       = mutableOther->_edgeIds;
     _unusedEdgeIds = mutableOther->_unusedEdgeIds;
     reserveEdgeId(mutableOther->largestEdgeId());
+
+    // Reset collection pointers to collections in this
+    for(auto& node : _n._nodes)
+    {
+        node._inEdgeIds.setCollection(&_e._inEdgeIdsCollection);
+        node._outEdgeIds.setCollection(&_e._outEdgeIdsCollection);
+    }
 
     _updateRequired = true;
     endTransaction();
