@@ -141,7 +141,7 @@ public:
     virtual EdgeIdDistinctSetCollection::Type typeOf(EdgeId edgeId) const = 0;
     virtual EdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const = 0;
 
-    virtual EdgeIdDistinctSet edgeIdsForNodeId(NodeId nodeId) const = 0;
+    virtual EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const = 0;
 
     template<typename C> EdgeIdSet edgeIdsForNodeIds(const C& nodeIds) const
     {

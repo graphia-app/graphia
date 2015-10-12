@@ -75,7 +75,7 @@ public:
     EdgeIdDistinctSetCollection::Type typeOf(EdgeId) const { return EdgeIdDistinctSetCollection::Type::Not; }
     EdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const { return _graph->mergedEdgeIdsForEdgeId(edgeId); }
 
-    EdgeIdDistinctSet edgeIdsForNodeId(NodeId nodeId) const { return _graph->edgeIdsForNodeId(nodeId); }
+    EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const { return _graph->edgeIdsForNodeId(nodeId); }
 
     void reserve(const Graph& other);
     void cloneFrom(const Graph& other);

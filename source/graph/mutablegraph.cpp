@@ -97,8 +97,8 @@ NodeId MutableGraph::addNode(NodeId nodeId)
     _n._nodeIdsInUse[nodeId] = true;
     auto& node = _n._nodes[nodeId];
     node._id = nodeId;
-    node._inEdgeIds.clear(&_e._inEdgeIdsCollection);
-    node._outEdgeIds.clear(&_e._outEdgeIdsCollection);
+    node._inEdgeIds.setCollection(&_e._inEdgeIdsCollection);
+    node._outEdgeIds.setCollection(&_e._outEdgeIdsCollection);
     node._adjacentNodeIds.clear();
 
     emit nodeAdded(this, &node);
@@ -162,9 +162,9 @@ EdgeIdDistinctSet MutableGraph::mergedEdgeIdsForEdgeId(EdgeId edgeId) const
     return EdgeIdDistinctSet(edgeId, &_e._mergedEdgeIds);
 }
 
-EdgeIdDistinctSet MutableGraph::edgeIdsForNodeId(NodeId nodeId) const
+EdgeIdDistinctSets MutableGraph::edgeIdsForNodeId(NodeId nodeId) const
 {
-    EdgeIdDistinctSet set;
+    EdgeIdDistinctSets set;
     auto& node = _n._nodes[nodeId];
 
     set.add(node._inEdgeIds);

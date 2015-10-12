@@ -34,7 +34,7 @@ public:
     EdgeIdDistinctSetCollection::Type typeOf(EdgeId edgeId) const { return _target.typeOf(edgeId); }
     EdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const { return _target.mergedEdgeIdsForEdgeId(edgeId); }
 
-    EdgeIdDistinctSet edgeIdsForNodeId(NodeId nodeId) const { return _target.edgeIdsForNodeId(nodeId); }
+    EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const { return _target.edgeIdsForNodeId(nodeId); }
 
     NodeId addNode() { return _target.addNode(); }
     NodeId addNode(NodeId nodeId) { return _target.addNode(nodeId); }

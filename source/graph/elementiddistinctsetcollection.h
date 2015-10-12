@@ -10,12 +10,14 @@
 #include <algorithm>
 
 template<typename T> class ElementIdDistinctSet;
+template<typename T> class ElementIdDistinctSets;
 
 template<typename T> class ElementIdDistinctSetCollection
 {
     static_assert(std::is_base_of<ElementId<T>, T>::value, "T must be an ElementId");
 
     friend class ElementIdDistinctSet<T>;
+    friend class ElementIdDistinctSets<T>;
 
 private:
     struct MultiElementId
@@ -250,8 +252,11 @@ template<typename T> class ElementIdDistinctSet
 {
     using Collection = ElementIdDistinctSetCollection<T>;
 
+    friend class ElementIdDistinctSets<T>;
+
 private:
-    std::vector<std::pair<T, const Collection*>> _heads;
+    T _head;
+    const Collection* _collection = nullptr;
     mutable int _size = -1;
 
 public:
@@ -259,35 +264,19 @@ public:
     {}
 
     ElementIdDistinctSet(T head, const Collection* collection) :
-        _heads({{head, collection}})
+        _head(head),
+        _collection(collection)
     {}
 
     void setCollection(const Collection* collection)
     {
-        Q_ASSERT(_heads.size() == 1);
-        _heads.front().second = collection;
-    }
-
-    void clear(const Collection* collection)
-    {
-        _heads.clear();
-        _size = 0;
-        _heads.emplace_back(T(), collection);
-    }
-
-    void add(const ElementIdDistinctSet& other)
-    {
-        _heads.insert(_heads.end(), other._heads.begin(), other._heads.end());
-        _size += other._size;
+        _collection = collection;
     }
 
     void add(T elementId)
     {
-        Q_ASSERT(_heads.size() == 1);
-
-        auto& head = _heads.front();
-        auto* collection = const_cast<Collection*>(head.second); //ICK
-        head.first = collection->add(head.first, elementId);
+        auto* collection = const_cast<Collection*>(_collection); //ICK
+        _head = collection->add(_head, elementId);
 
         if(_size >= 0)
             _size++;
@@ -295,11 +284,8 @@ public:
 
     void remove(T elementId)
     {
-        Q_ASSERT(_heads.size() == 1);
-
-        auto& head = _heads.front();
-        auto* collection = const_cast<Collection*>(head.second); //ICK
-        head.first = collection->remove(head.first, elementId);
+        auto* collection = const_cast<Collection*>(_collection); //ICK
+        _head = collection->remove(_head, elementId);
 
         if(_size > 0)
             _size--;
@@ -320,37 +306,18 @@ public:
 
     private:
         const ElementIdDistinctSet* _set = nullptr;
-        int _i = 0;
 
         const typename Collection::MultiElementId& multiElementId() const
         {
-            return _set->_heads[_i].second->_multiElementIds[_p];
-        }
-
-        pointer nextHead()
-        {
-            pointer p;
-            while(_i < static_cast<int>(_set->_heads.size()))
-            {
-                p = _set->_heads[_i].first;
-                if(p.isNull())
-                    _i++;
-                else
-                    break;
-            }
-
-            return p;
+            return _set->_collection->_multiElementIds[_p];
         }
 
         void incrementPointer()
         {
-            if(!multiElementId().hasNext(_p))
-            {
-                _i++;
-                _p = nextHead();
-            }
-            else
+            if(multiElementId().hasNext(_p))
                 _p = multiElementId()._next;
+            else
+                _p.setToNull();
         }
 
     public:
@@ -359,7 +326,7 @@ public:
         iterator_base(const ElementIdDistinctSet* set) :
              _set(set)
         {
-            _p = nextHead();
+            _p = _set->_head;
         }
 
         self_type operator++()
@@ -439,6 +406,167 @@ using NodeIdDistinctSet = ElementIdDistinctSet<NodeId>;
 using EdgeIdDistinctSet = ElementIdDistinctSet<EdgeId>;
 
 template<typename T> QDebug operator<<(QDebug d, const ElementIdDistinctSet<T>& set)
+{
+    d << "[";
+    for(auto id : set)
+        d << id;
+    d << "]";
+
+    return d;
+}
+
+template<typename T> class ElementIdDistinctSets
+{
+    using Collection = ElementIdDistinctSetCollection<T>;
+
+private:
+    std::vector<const ElementIdDistinctSet<T>*> _sets;
+    mutable int _size = -1;
+
+public:
+    ElementIdDistinctSets() : _size(0)
+    {}
+
+    void add(const ElementIdDistinctSet<T>& set)
+    {
+        _sets.push_back(&set);
+        _size += set._size;
+    }
+
+    class iterator_base
+    {
+    public:
+        using self_type = iterator_base;
+        using value_type = T;
+        using reference = T;
+        using pointer = T;
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = int;
+
+    protected:
+        pointer _p;
+
+    private:
+        const ElementIdDistinctSets* _set = nullptr;
+        int _i = 0;
+
+        const typename Collection::MultiElementId& multiElementId() const
+        {
+            return _set->_sets[_i]->_collection->_multiElementIds[_p];
+        }
+
+        pointer nextHead()
+        {
+            pointer p;
+            while(_i < static_cast<int>(_set->_sets.size()))
+            {
+                p = _set->_sets[_i]->_head;
+                if(p.isNull())
+                    _i++;
+                else
+                    break;
+            }
+
+            return p;
+        }
+
+        void incrementPointer()
+        {
+            if(!multiElementId().hasNext(_p))
+            {
+                _i++;
+                _p = nextHead();
+            }
+            else
+                _p = multiElementId()._next;
+        }
+
+    public:
+        iterator_base() {}
+
+        iterator_base(const ElementIdDistinctSets* set) :
+             _set(set)
+        {
+            _p = nextHead();
+        }
+
+        self_type operator++()
+        {
+            self_type i = *this;
+            incrementPointer();
+            return i;
+        }
+
+        self_type operator++(int)
+        {
+            incrementPointer();
+            return *this;
+        }
+
+
+        bool operator==(const self_type& other) { return _p == other._p; }
+        bool operator!=(const self_type& other) { return _p != other._p; }
+    };
+
+    class iterator : public iterator_base
+    {
+    public:
+#if __cplusplus >= 201103L
+        using iterator_base::iterator_base;
+#else
+        iterator() : iterator_base() {}
+        iterator(const ElementIdDistinctSets* set) : iterator_base(set) {}
+#endif
+
+        typename iterator_base::reference operator*() { return this->_p; }
+        typename iterator_base::pointer operator->() { return this->_p; }
+    };
+
+    class const_iterator : public iterator_base
+    {
+    public:
+#if __cplusplus >= 201103L
+        using iterator_base::iterator_base;
+#else
+        const_iterator() : iterator_base() {}
+        const_iterator(const ElementIdDistinctSets* set) : iterator_base(set) {}
+#endif
+
+        const typename iterator_base::reference operator*() const { return this->_p; }
+        const typename iterator_base::pointer operator->() const { return this->_p; }
+    };
+
+    iterator begin() { return iterator(this); }
+    iterator end()   { return iterator(); }
+
+    const_iterator begin() const { return const_iterator(this); }
+    const_iterator end() const   { return const_iterator(); }
+
+    int size() const
+    {
+        if(_size < 0)
+        {
+            // If we don't know the size, calculate it on demand
+            _size = u::count(*this);
+        }
+
+        return _size;
+    }
+
+    std::vector<T> copy() const
+    {
+        std::vector<T> v;
+
+        std::copy(begin(), end(), std::back_inserter(v));
+
+        return v;
+    }
+};
+
+using NodeIdDistinctSets = ElementIdDistinctSets<NodeId>;
+using EdgeIdDistinctSets = ElementIdDistinctSets<EdgeId>;
+
+template<typename T> QDebug operator<<(QDebug d, const ElementIdDistinctSets<T>& set)
 {
     d << "[";
     for(auto id : set)

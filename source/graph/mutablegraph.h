@@ -126,13 +126,13 @@ public:
     bool containsEdgeId(EdgeId edgeId) const;
     EdgeIdDistinctSetCollection::Type typeOf(EdgeId edgeId) const;
     EdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const;
-    EdgeIdDistinctSet edgeIdsForNodeId(NodeId nodeId) const;
+    EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const;
     EdgeIdDistinctSet inEdgeIdsForNodeId(NodeId nodeId) const;
     EdgeIdDistinctSet outEdgeIdsForNodeId(NodeId nodeId) const;
 
-    template<typename C> EdgeIdDistinctSet inEdgeIdsForNodeIds(const C& nodeIds) const
+    template<typename C> EdgeIdDistinctSets inEdgeIdsForNodeIds(const C& nodeIds) const
     {
-        EdgeIdDistinctSet set;
+        EdgeIdDistinctSets set;
 
         for(auto nodeId : nodeIds)
             set.add(_n._nodes[nodeId]._inEdgeIds);
@@ -140,9 +140,9 @@ public:
         return set;
     }
 
-    template<typename C> EdgeIdDistinctSet outEdgeIdsForNodeIds(const C& nodeIds) const
+    template<typename C> EdgeIdDistinctSets outEdgeIdsForNodeIds(const C& nodeIds) const
     {
-        EdgeIdDistinctSet set;
+        EdgeIdDistinctSets set;
 
         for(auto nodeId : nodeIds)
             set.add(_n._nodes[nodeId]._outEdgeIds);
