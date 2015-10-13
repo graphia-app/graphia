@@ -131,7 +131,7 @@ public:
     NodeId firstNodeId() const;
     virtual bool containsNodeId(NodeId nodeId) const;
     virtual NodeIdDistinctSetCollection::Type typeOf(NodeId nodeId) const = 0;
-    virtual NodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const = 0;
+    virtual ConstNodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const = 0;
 
     virtual const std::vector<EdgeId>& edgeIds() const = 0;
     virtual int numEdges() const = 0;
@@ -139,7 +139,7 @@ public:
     EdgeId firstEdgeId() const;
     virtual bool containsEdgeId(EdgeId edgeId) const;
     virtual EdgeIdDistinctSetCollection::Type typeOf(EdgeId edgeId) const = 0;
-    virtual EdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const = 0;
+    virtual ConstEdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const = 0;
 
     virtual EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const = 0;
 

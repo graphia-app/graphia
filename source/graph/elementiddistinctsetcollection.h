@@ -9,14 +9,15 @@
 #include <vector>
 #include <algorithm>
 
-template<typename T> class ElementIdDistinctSet;
+template<typename C, typename T> class ElementIdDistinctSet;
 template<typename T> class ElementIdDistinctSets;
 
 template<typename T> class ElementIdDistinctSetCollection
 {
     static_assert(std::is_base_of<ElementId<T>, T>::value, "T must be an ElementId");
 
-    friend class ElementIdDistinctSet<T>;
+    friend class ElementIdDistinctSet<ElementIdDistinctSetCollection<T>, T>;
+    friend class ElementIdDistinctSet<const ElementIdDistinctSetCollection<T>, T>;
     friend class ElementIdDistinctSets<T>;
 
 private:
@@ -248,35 +249,35 @@ public:
 using NodeIdDistinctSetCollection = ElementIdDistinctSetCollection<NodeId>;
 using EdgeIdDistinctSetCollection = ElementIdDistinctSetCollection<EdgeId>;
 
-template<typename T> class ElementIdDistinctSet
+template<typename C, typename T> class ElementIdDistinctSet
 {
-    using Collection = ElementIdDistinctSetCollection<T>;
+    static_assert(std::is_same<ElementIdDistinctSetCollection<T>, typename std::remove_const<C>::type>::value,
+                  "C must be an ElementIdDistinctSetCollection");
 
     friend class ElementIdDistinctSets<T>;
 
 private:
     T _head;
-    const Collection* _collection = nullptr;
+    C* _collection = nullptr;
     mutable int _size = -1;
 
 public:
     ElementIdDistinctSet() : _size(0)
     {}
 
-    ElementIdDistinctSet(T head, const Collection* collection) :
+    ElementIdDistinctSet(T head, C* collection) :
         _head(head),
         _collection(collection)
     {}
 
-    void setCollection(const Collection* collection)
+    void setCollection(C* collection)
     {
         _collection = collection;
     }
 
     void add(T elementId)
     {
-        auto* collection = const_cast<Collection*>(_collection); //ICK
-        _head = collection->add(_head, elementId);
+        _head = _collection->add(_head, elementId);
 
         if(_size >= 0)
             _size++;
@@ -284,8 +285,7 @@ public:
 
     void remove(T elementId)
     {
-        auto* collection = const_cast<Collection*>(_collection); //ICK
-        _head = collection->remove(_head, elementId);
+        _head = _collection->remove(_head, elementId);
 
         if(_size > 0)
             _size--;
@@ -307,7 +307,7 @@ public:
     private:
         const ElementIdDistinctSet* _set = nullptr;
 
-        const typename Collection::MultiElementId& multiElementId() const
+        const typename ElementIdDistinctSetCollection<T>::MultiElementId& multiElementId() const
         {
             return _set->_collection->_multiElementIds[_p];
         }
@@ -392,10 +392,13 @@ public:
     }
 };
 
-using NodeIdDistinctSet = ElementIdDistinctSet<NodeId>;
-using EdgeIdDistinctSet = ElementIdDistinctSet<EdgeId>;
+using NodeIdDistinctSet = ElementIdDistinctSet<ElementIdDistinctSetCollection<NodeId>, NodeId>;
+using EdgeIdDistinctSet = ElementIdDistinctSet<ElementIdDistinctSetCollection<EdgeId>, EdgeId>;
 
-template<typename T> QDebug operator<<(QDebug d, const ElementIdDistinctSet<T>& set)
+using ConstNodeIdDistinctSet = ElementIdDistinctSet<const ElementIdDistinctSetCollection<NodeId>, NodeId>;
+using ConstEdgeIdDistinctSet = ElementIdDistinctSet<const ElementIdDistinctSetCollection<EdgeId>, EdgeId>;
+
+template<typename C, typename T> QDebug operator<<(QDebug d, const ElementIdDistinctSet<C, T>& set)
 {
     d << "[";
     for(auto id : set)
@@ -407,17 +410,15 @@ template<typename T> QDebug operator<<(QDebug d, const ElementIdDistinctSet<T>& 
 
 template<typename T> class ElementIdDistinctSets
 {
-    using Collection = ElementIdDistinctSetCollection<T>;
-
 private:
-    std::vector<const ElementIdDistinctSet<T>*> _sets;
+    std::vector<const ElementIdDistinctSet<ElementIdDistinctSetCollection<T>, T>*> _sets;
     mutable int _size = -1;
 
 public:
     ElementIdDistinctSets() : _size(0)
     {}
 
-    void add(const ElementIdDistinctSet<T>& set)
+    void add(const ElementIdDistinctSet<ElementIdDistinctSetCollection<T>, T>& set)
     {
         _sets.push_back(&set);
         _size += set._size;
@@ -440,7 +441,7 @@ public:
         const ElementIdDistinctSets* _sets = nullptr;
         int _i = 0;
 
-        const typename Collection::MultiElementId& multiElementId() const
+        const typename ElementIdDistinctSetCollection<T>::MultiElementId& multiElementId() const
         {
             return _sets->_sets[_i]->_collection->_multiElementIds[_p];
         }

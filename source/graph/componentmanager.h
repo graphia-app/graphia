@@ -66,14 +66,14 @@ public:
     const Node& nodeById(NodeId nodeId) const { return _graph->nodeById(nodeId); }
     bool containsNodeId(NodeId nodeId) const { return _graph->containsNodeId(nodeId); }
     NodeIdDistinctSetCollection::Type typeOf(NodeId) const { return NodeIdDistinctSetCollection::Type::Not; }
-    NodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const { return _graph->mergedNodeIdsForNodeId(nodeId); }
+    ConstNodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const { return _graph->mergedNodeIdsForNodeId(nodeId); }
 
     const std::vector<EdgeId>& edgeIds() const { return _edgeIds; }
     int numEdges() const { return static_cast<int>(_edgeIds.size()); }
     const Edge& edgeById(EdgeId edgeId) const { return _graph->edgeById(edgeId); }
     bool containsEdgeId(EdgeId edgeId) const { return _graph->containsEdgeId(edgeId); }
     EdgeIdDistinctSetCollection::Type typeOf(EdgeId) const { return EdgeIdDistinctSetCollection::Type::Not; }
-    EdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const { return _graph->mergedEdgeIdsForEdgeId(edgeId); }
+    ConstEdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const { return _graph->mergedEdgeIdsForEdgeId(edgeId); }
 
     EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const { return _graph->edgeIdsForNodeId(nodeId); }
 

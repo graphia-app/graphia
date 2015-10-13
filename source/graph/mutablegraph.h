@@ -88,7 +88,7 @@ public:
     const Node& nodeById(NodeId nodeId) const;
     bool containsNodeId(NodeId nodeId) const;
     NodeIdDistinctSetCollection::Type typeOf(NodeId nodeId) const;
-    NodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const;
+    ConstNodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const;
 
     NodeId addNode();
     NodeId addNode(NodeId nodeId);
@@ -125,7 +125,7 @@ public:
     const Edge& edgeById(EdgeId edgeId) const;
     bool containsEdgeId(EdgeId edgeId) const;
     EdgeIdDistinctSetCollection::Type typeOf(EdgeId edgeId) const;
-    EdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const;
+    ConstEdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const;
     EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const;
     EdgeIdDistinctSet inEdgeIdsForNodeId(NodeId nodeId) const;
     EdgeIdDistinctSet outEdgeIdsForNodeId(NodeId nodeId) const;
