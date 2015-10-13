@@ -21,7 +21,7 @@ template<typename T> class ElementIdDistinctSetCollection
     friend class ElementIdDistinctSets<T>;
 
 private:
-    struct MultiElementId
+    struct ListNode
     {
         T _prev;
         T _next;
@@ -38,8 +38,8 @@ private:
         bool hasNext(T elementId) const { return !_next.isNull() && !isTail(elementId); }
     };
 
-    using MultiElementIds = std::vector<MultiElementId>;
-    MultiElementIds _multiElementIds;
+    using List = std::vector<ListNode>;
+    List _list;
 
 public:
     using SetId = T;
@@ -53,12 +53,12 @@ public:
 
     void resize(std::size_t size)
     {
-        _multiElementIds.resize(size);
+        _list.resize(size);
     }
 
     void clear()
     {
-        _multiElementIds.clear();
+        _list.clear();
     }
 
     SetId add(SetId setId, T elementId)
@@ -70,85 +70,85 @@ public:
 
         T lowId, highId;
         std::tie(lowId, highId) = std::minmax(setId, elementId);
-        auto& lowMultiId = _multiElementIds[lowId];
-        auto& highMultiId = _multiElementIds[highId];
+        auto& lowListNode = _list[lowId];
+        auto& highListNode = _list[highId];
 
-        if(lowMultiId.isSingleton(lowId))
-            lowMultiId.setToNull();
+        if(lowListNode.isSingleton(lowId))
+            lowListNode.setToNull();
 
-        if(highMultiId.isSingleton(highId))
-            highMultiId.setToNull();
+        if(highListNode.isSingleton(highId))
+            highListNode.setToNull();
 
-        if(lowMultiId.isNull() && highMultiId.isNull())
+        if(lowListNode.isNull() && highListNode.isNull())
         {
             // Neither is yet merged with anything
-            lowMultiId._next = highId;
-            lowMultiId._opposite = highId;
+            lowListNode._next = highId;
+            lowListNode._opposite = highId;
 
-            highMultiId._prev = lowId;
-            highMultiId._next = highId;
-            highMultiId._opposite = lowId;
+            highListNode._prev = lowId;
+            highListNode._next = highId;
+            highListNode._opposite = lowId;
         }
-        else if(highMultiId.isHead(highId))
+        else if(highListNode.isHead(highId))
         {
-            Q_ASSERT(!highMultiId._opposite.isNull());
-            Q_ASSERT(lowMultiId.isNull());
-            Q_ASSERT(lowMultiId._prev.isNull());
-            Q_ASSERT(lowMultiId._opposite.isNull());
+            Q_ASSERT(!highListNode._opposite.isNull());
+            Q_ASSERT(lowListNode.isNull());
+            Q_ASSERT(lowListNode._prev.isNull());
+            Q_ASSERT(lowListNode._opposite.isNull());
 
             // Adding to the head
-            auto& tail = _multiElementIds[highMultiId._opposite];
+            auto& tail = _list[highListNode._opposite];
             tail._opposite = lowId;
 
-            lowMultiId._next = highId;
-            lowMultiId._opposite = highMultiId._opposite;
+            lowListNode._next = highId;
+            lowListNode._opposite = highListNode._opposite;
 
-            highMultiId._prev = lowId;
-            highMultiId._opposite.setToNull();
+            highListNode._prev = lowId;
+            highListNode._opposite.setToNull();
         }
-        else if(lowMultiId.isTail(lowId))
+        else if(lowListNode.isTail(lowId))
         {
-            Q_ASSERT(!lowMultiId._opposite.isNull());
-            Q_ASSERT(highMultiId.isNull());
-            Q_ASSERT(highMultiId._prev.isNull());
-            Q_ASSERT(highMultiId._opposite.isNull());
+            Q_ASSERT(!lowListNode._opposite.isNull());
+            Q_ASSERT(highListNode.isNull());
+            Q_ASSERT(highListNode._prev.isNull());
+            Q_ASSERT(highListNode._opposite.isNull());
 
             // Adding to the tail
-            auto& head = _multiElementIds[lowMultiId._opposite];
+            auto& head = _list[lowListNode._opposite];
             head._opposite = highId;
 
-            highMultiId._prev = lowId;
-            highMultiId._next = highId;
-            highMultiId._opposite = lowMultiId._opposite;
+            highListNode._prev = lowId;
+            highListNode._next = highId;
+            highListNode._opposite = lowListNode._opposite;
 
-            lowMultiId._next = highId;
-            lowMultiId._opposite.setToNull();
+            lowListNode._next = highId;
+            lowListNode._opposite.setToNull();
         }
         else
         {
             // Adding in the middle
-            if(!lowMultiId.isNull())
+            if(!lowListNode.isNull())
             {
-                Q_ASSERT(highMultiId.isNull());
-                Q_ASSERT(!lowMultiId._next.isNull());
-                auto& next = _multiElementIds[lowMultiId._next];
+                Q_ASSERT(highListNode.isNull());
+                Q_ASSERT(!lowListNode._next.isNull());
+                auto& next = _list[lowListNode._next];
 
-                highMultiId._prev = lowId;
-                highMultiId._next = lowMultiId._next;
+                highListNode._prev = lowId;
+                highListNode._next = lowListNode._next;
 
-                lowMultiId._next = highId;
+                lowListNode._next = highId;
                 next._prev = highId;
             }
-            else if(!highMultiId.isNull())
+            else if(!highListNode.isNull())
             {
-                Q_ASSERT(lowMultiId.isNull());
-                Q_ASSERT(!highMultiId._prev.isNull());
-                auto& prev = _multiElementIds[highMultiId._prev];
+                Q_ASSERT(lowListNode.isNull());
+                Q_ASSERT(!highListNode._prev.isNull());
+                auto& prev = _list[highListNode._prev];
 
-                lowMultiId._prev = highMultiId._prev;
-                lowMultiId._next = highId;
+                lowListNode._prev = highListNode._prev;
+                lowListNode._next = highId;
 
-                highMultiId._prev = lowId;
+                highListNode._prev = lowId;
                 prev._next = lowId;
             }
         }
@@ -159,67 +159,67 @@ public:
     SetId remove(SetId setId, T elementId)
     {
         Q_ASSERT(!elementId.isNull());
-        auto& multiElementId = _multiElementIds[elementId];
+        auto& listNode = _list[elementId];
 
-        // Can't remove it if it isn't a multielement
-        if(multiElementId.isNull())
+        // Can't remove it if it isn't in the list
+        if(listNode.isNull())
             return setId;
 
-        if(multiElementId.isSingleton(elementId))
+        if(listNode.isSingleton(elementId))
         {
             setId.setToNull();
         }
-        else if(multiElementId._next == multiElementId._opposite)
+        else if(listNode._next == listNode._opposite)
         {
             // The tail is the only other element
-            auto& tail = _multiElementIds[multiElementId._next];
-            tail.setToSingleton(multiElementId._next);
-            setId = multiElementId._next;
+            auto& tail = _list[listNode._next];
+            tail.setToSingleton(listNode._next);
+            setId = listNode._next;
         }
-        else if(multiElementId._prev == multiElementId._opposite)
+        else if(listNode._prev == listNode._opposite)
         {
             // The head is the only other element
-            auto& head = _multiElementIds[multiElementId._prev];
-            head.setToSingleton(multiElementId._prev);
+            auto& head = _list[listNode._prev];
+            head.setToSingleton(listNode._prev);
         }
-        else if(multiElementId.isHead(elementId))
+        else if(listNode.isHead(elementId))
         {
             // Removing from the head
-            Q_ASSERT(!multiElementId._next.isNull());
-            Q_ASSERT(!multiElementId._opposite.isNull());
-            auto& newHead = _multiElementIds[multiElementId._next];
-            auto& tail = _multiElementIds[multiElementId._opposite];
+            Q_ASSERT(!listNode._next.isNull());
+            Q_ASSERT(!listNode._opposite.isNull());
+            auto& newHead = _list[listNode._next];
+            auto& tail = _list[listNode._opposite];
 
-            newHead._opposite = multiElementId._opposite;
+            newHead._opposite = listNode._opposite;
             newHead._prev.setToNull();
-            tail._opposite = multiElementId._next;
-            setId = multiElementId._next;
+            tail._opposite = listNode._next;
+            setId = listNode._next;
         }
-        else if(multiElementId.isTail(elementId))
+        else if(listNode.isTail(elementId))
         {
             // Removing from the tail
-            Q_ASSERT(!multiElementId._opposite.isNull());
-            Q_ASSERT(!multiElementId._prev.isNull());
-            auto& head = _multiElementIds[multiElementId._opposite];
-            auto& newTail = _multiElementIds[multiElementId._prev];
+            Q_ASSERT(!listNode._opposite.isNull());
+            Q_ASSERT(!listNode._prev.isNull());
+            auto& head = _list[listNode._opposite];
+            auto& newTail = _list[listNode._prev];
 
-            head._opposite = multiElementId._prev;
-            newTail._next = multiElementId._prev;
-            newTail._opposite = multiElementId._opposite;
+            head._opposite = listNode._prev;
+            newTail._next = listNode._prev;
+            newTail._opposite = listNode._opposite;
         }
         else
         {
             // Removing from the middle
-            Q_ASSERT(!multiElementId._prev.isNull());
-            Q_ASSERT(!multiElementId._next.isNull());
-            auto& prev = _multiElementIds[multiElementId._prev];
-            auto& next = _multiElementIds[multiElementId._next];
+            Q_ASSERT(!listNode._prev.isNull());
+            Q_ASSERT(!listNode._next.isNull());
+            auto& prev = _list[listNode._prev];
+            auto& next = _list[listNode._next];
 
-            prev._next = multiElementId._next;
-            next._prev = multiElementId._prev;
+            prev._next = listNode._next;
+            next._prev = listNode._prev;
         }
 
-        multiElementId.setToNull();
+        listNode.setToNull();
 
         return setId;
     }
@@ -232,11 +232,11 @@ public:
     Type typeOf(T elementId) const
     {
         Q_ASSERT(!elementId.isNull());
-        auto& multiElementId = _multiElementIds[elementId];
+        auto& listNode = _list[elementId];
 
-        if(!multiElementId.isNull() && !multiElementId.isSingleton(elementId))
+        if(!listNode.isNull() && !listNode.isSingleton(elementId))
         {
-            if(multiElementId.isHead(elementId))
+            if(listNode.isHead(elementId))
                 return Type::Head;
 
             return Type::Tail;
@@ -307,15 +307,15 @@ public:
     private:
         const ElementIdDistinctSet* _set = nullptr;
 
-        const typename ElementIdDistinctSetCollection<T>::MultiElementId& multiElementId() const
+        const typename ElementIdDistinctSetCollection<T>::ListNode& listNode() const
         {
-            return _set->_collection->_multiElementIds[_p];
+            return _set->_collection->_list[_p];
         }
 
         void incrementPointer()
         {
-            if(multiElementId().hasNext(_p))
-                _p = multiElementId()._next;
+            if(listNode().hasNext(_p))
+                _p = listNode()._next;
             else
                 _p.setToNull();
         }
@@ -441,9 +441,9 @@ public:
         const ElementIdDistinctSets* _sets = nullptr;
         int _i = 0;
 
-        const typename ElementIdDistinctSetCollection<T>::MultiElementId& multiElementId() const
+        const typename ElementIdDistinctSetCollection<T>::ListNode& listNode() const
         {
-            return _sets->_sets[_i]->_collection->_multiElementIds[_p];
+            return _sets->_sets[_i]->_collection->_list[_p];
         }
 
         pointer nextHead()
@@ -463,13 +463,13 @@ public:
 
         void incrementPointer()
         {
-            if(!multiElementId().hasNext(_p))
+            if(!listNode().hasNext(_p))
             {
                 _i++;
                 _p = nextHead();
             }
             else
-                _p = multiElementId()._next;
+                _p = listNode()._next;
         }
 
     public:
