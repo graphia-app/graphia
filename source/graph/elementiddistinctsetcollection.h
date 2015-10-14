@@ -163,7 +163,7 @@ public:
 
         // Can't remove it if it isn't in the list
         if(listNode.isNull())
-            return setId;
+            return SetId();
 
         if(listNode.isSingleton(elementId))
         {
@@ -181,6 +181,7 @@ public:
             // The head is the only other element
             auto& head = _list[listNode._prev];
             head.setToSingleton(listNode._prev);
+            setId = listNode._prev;
         }
         else if(listNode.isHead(elementId))
         {
@@ -206,6 +207,7 @@ public:
             head._opposite = listNode._prev;
             newTail._next = listNode._prev;
             newTail._opposite = listNode._opposite;
+            setId = listNode._opposite;
         }
         else
         {
