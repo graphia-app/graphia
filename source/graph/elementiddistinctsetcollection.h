@@ -7,6 +7,7 @@
 #include <QDebug>
 
 #include <vector>
+#include <array>
 #include <algorithm>
 
 template<typename C, typename T> class ElementIdDistinctSet;
@@ -413,8 +414,21 @@ template<typename C, typename T> QDebug operator<<(QDebug d, const ElementIdDist
 template<typename T> class ElementIdDistinctSets
 {
 private:
-    std::vector<const ElementIdDistinctSet<ElementIdDistinctSetCollection<T>, T>*> _sets;
+    // Using a vector causes malloc overhead so for small numbers of sets use an array instead
+    std::array<const ElementIdDistinctSet<ElementIdDistinctSetCollection<T>, T>*, 8> _setsSmall;
+    std::vector<const ElementIdDistinctSet<ElementIdDistinctSetCollection<T>, T>*> _setsBig;
+    size_t _numSets = 0;
     mutable int _size = -1;
+
+    const ElementIdDistinctSet<ElementIdDistinctSetCollection<T>, T>* setAt(size_t index) const
+    {
+        if(index >= _numSets)
+            return nullptr;
+        else if(index < _setsSmall.size())
+            return _setsSmall[index];
+        else
+            return _setsBig[index - _setsSmall.size()];
+    }
 
 public:
     ElementIdDistinctSets() : _size(0)
@@ -422,7 +436,14 @@ public:
 
     void add(const ElementIdDistinctSet<ElementIdDistinctSetCollection<T>, T>& set)
     {
-        _sets.push_back(&set);
+        if(_numSets < _setsSmall.size())
+            _setsSmall[_numSets++] = &set;
+        else
+        {
+            _setsBig.push_back(&set);
+            _numSets++;
+        }
+
         _size += set._size;
     }
 
@@ -441,19 +462,19 @@ public:
 
     private:
         const ElementIdDistinctSets* _sets = nullptr;
-        int _i = 0;
+        size_t _i = 0;
 
         const typename ElementIdDistinctSetCollection<T>::ListNode& listNode() const
         {
-            return _sets->_sets[_i]->_collection->_list[_p];
+            return _sets->setAt(_i)->_collection->_list[_p];
         }
 
         pointer nextHead()
         {
             pointer p;
-            while(_i < static_cast<int>(_sets->_sets.size()))
+            while(_i < _sets->_numSets)
             {
-                p = _sets->_sets[_i]->_head;
+                p = _sets->setAt(_i)->_head;
                 if(p.isNull())
                     _i++;
                 else
