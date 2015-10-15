@@ -7,17 +7,17 @@
 #include <vector>
 #include <functional>
 
-using EdgeContractedFn = std::function<bool(const EdgeId)>;
+using EdgeContractionFn = std::function<bool(const EdgeId)>;
 
 class EdgeContractionTransform : public GraphTransform
 {
 public:
     void apply(TransformedGraph &target) const;
 
-    void addEdgeContractionFilter(const EdgeContractedFn& f) { _edgeFilters.emplace_back(f); }
+    void addEdgeContractionFilter(const EdgeContractionFn& f) { _edgeFilters.emplace_back(f); }
 
 private:
-    std::vector<EdgeContractedFn> _edgeFilters;
+    std::vector<EdgeContractionFn> _edgeFilters;
 };
 
 #endif // FILTERTRANSFORM_H
