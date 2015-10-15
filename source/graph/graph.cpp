@@ -10,16 +10,27 @@
 
 #include <tuple>
 
+void registerQtTypes()
+{
+    static bool registered = false;
+    if(!registered)
+    {
+        qRegisterMetaType<NodeId>("NodeId");
+        qRegisterMetaType<NodeIdSet>("NodeIdSet");
+        qRegisterMetaType<EdgeId>("EdgeId");
+        qRegisterMetaType<EdgeIdSet>("EdgeIdSet");
+        qRegisterMetaType<ComponentId>("ComponentId");
+        qRegisterMetaType<ComponentIdSet>("ComponentIdSet");
+
+        registered = true;
+    }
+}
+
 Graph::Graph() :
     _nextNodeId(0), _nextEdgeId(0),
     _graphConsistencyChecker(*this)
 {
-    qRegisterMetaType<NodeId>("NodeId");
-    qRegisterMetaType<NodeIdSet>("NodeIdSet");
-    qRegisterMetaType<EdgeId>("EdgeId");
-    qRegisterMetaType<EdgeIdSet>("EdgeIdSet");
-    qRegisterMetaType<ComponentId>("ComponentId");
-    qRegisterMetaType<ComponentIdSet>("ComponentIdSet");
+    registerQtTypes();
 
     connect(this, &Graph::nodeAdded, [this](const Graph*, const Node* node) { reserveNodeId(node->id()); });
     connect(this, &Graph::edgeAdded, [this](const Graph*, const Edge* edge) { reserveEdgeId(edge->id()); });
