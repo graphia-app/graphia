@@ -341,7 +341,7 @@ void MutableGraph::contractEdges(const EdgeIdSet& edgeIds)
     // Divide into components, but ignore any edges that aren't being contracted,
     // so that each component represents a set of nodes that will be merged
     ComponentManager componentManager(*this, nullptr,
-    [edgeIds](EdgeId edgeId)
+    [&edgeIds](EdgeId edgeId)
     {
         return !u::contains(edgeIds, edgeId);
     });
