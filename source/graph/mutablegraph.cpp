@@ -289,6 +289,9 @@ template<typename C> static void moveEdgesTo(MutableGraph& graph, NodeId nodeId,
                                              const C& inEdgeIds,
                                              const C& outEdgeIds)
 {
+    // Don't bother emitting signals for edges that are moving
+    bool wasBlocked = graph.blockSignals(true);
+
     for(auto edgeIdToMove : inEdgeIds)
     {
         auto sourceId = graph.edgeById(edgeIdToMove).sourceId();
@@ -302,6 +305,8 @@ template<typename C> static void moveEdgesTo(MutableGraph& graph, NodeId nodeId,
         graph.removeEdge(edgeIdToMove);
         graph.addEdge(edgeIdToMove, nodeId, targetId);
     }
+
+    graph.blockSignals(wasBlocked);
 }
 
 void MutableGraph::contractEdge(EdgeId edgeId)
