@@ -1,9 +1,15 @@
 #include "edgecontractiontransform.h"
 #include "transformedgraph.h"
 
-bool edgeIdContracted(std::vector<EdgeContractedFn> edgeIds, EdgeId value)
+bool edgeIdContracted(const std::vector<EdgeContractionFn>& filters, EdgeId value)
 {
-    return std::any_of(edgeIds.begin(), edgeIds.end(), [value](EdgeContractedFn f) { return f(value); });
+    for(auto& filter : filters)
+    {
+        if(filter(value))
+            return true;
+    }
+
+    return false;
 }
 
 void EdgeContractionTransform::apply(TransformedGraph& target) const

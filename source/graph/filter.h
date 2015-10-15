@@ -20,7 +20,13 @@ private:
     template<typename ElementId>
     bool elementIdFiltered(const std::vector<ElementFilterFn<ElementId>>& filters, ElementId elementId) const
     {
-        return std::any_of(filters.begin(), filters.end(), [elementId](const ElementFilterFn<ElementId>& f) { return f(elementId); });
+        for(auto& filter : filters)
+        {
+            if(filter(elementId))
+                return true;
+        }
+
+        return false;
     }
 
 public:
