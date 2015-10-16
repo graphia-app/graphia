@@ -27,7 +27,6 @@ private:
     NodeId _id;
     EdgeIdDistinctSet _inEdgeIds;
     EdgeIdDistinctSet _outEdgeIds;
-    NodeIdMap<EdgeId> _adjacentNodeIds;
 
 public:
     Node() {}
@@ -35,15 +34,13 @@ public:
     Node(const Node& other) :
         _id(other._id),
         _inEdgeIds(other._inEdgeIds),
-        _outEdgeIds(other._outEdgeIds),
-        _adjacentNodeIds(other._adjacentNodeIds)
+        _outEdgeIds(other._outEdgeIds)
     {}
 
     Node(Node&& other) noexcept :
         _id(other._id),
         _inEdgeIds(other._inEdgeIds),
-        _outEdgeIds(other._outEdgeIds),
-        _adjacentNodeIds(std::move(other._adjacentNodeIds))
+        _outEdgeIds(other._outEdgeIds)
     {}
 
     Node& operator=(const Node& other)
@@ -53,7 +50,6 @@ public:
             _id                 = other._id;
             _inEdgeIds          = other._inEdgeIds;
             _outEdgeIds         = other._outEdgeIds;
-            _adjacentNodeIds    = other._adjacentNodeIds;
         }
 
         return *this;

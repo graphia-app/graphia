@@ -6,6 +6,29 @@
 #include <deque>
 #include <mutex>
 #include <functional>
+#include <vector>
+#include <map>
+
+class UndirectedEdge
+{
+private:
+    NodeId lo;
+    NodeId hi;
+
+public:
+    UndirectedEdge(NodeId a, NodeId b)
+    {
+        std::tie(lo, hi) = std::minmax(a, b);
+    }
+
+    bool operator<(const UndirectedEdge& other) const
+    {
+        if(lo == other.lo)
+            return hi < other.hi;
+
+        return lo < other.lo;
+    }
+};
 
 class MutableGraph : public Graph
 {
@@ -48,6 +71,8 @@ private:
         EdgeIdDistinctSetCollection _inEdgeIdsCollection;
         EdgeIdDistinctSetCollection _outEdgeIdsCollection;
 
+        std::map<UndirectedEdge, EdgeIdDistinctSet> _connections;
+
         void resize(std::size_t size)
         {
             _edgeIdsInUse.resize(size);
@@ -55,6 +80,7 @@ private:
             _edges.resize(size);
             _inEdgeIdsCollection.resize(size);
             _outEdgeIdsCollection.resize(size);
+            //_connections.resize(size);
         }
 
         void clear()
@@ -64,6 +90,7 @@ private:
             _edges.clear();
             _inEdgeIdsCollection.clear();
             _outEdgeIdsCollection.clear();
+            _connections.clear();
         }
     } _e;
 

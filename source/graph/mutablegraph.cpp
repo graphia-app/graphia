@@ -99,7 +99,6 @@ NodeId MutableGraph::addNode(NodeId nodeId)
     node._id = nodeId;
     node._inEdgeIds.setCollection(&_e._inEdgeIdsCollection);
     node._outEdgeIds.setCollection(&_e._outEdgeIdsCollection);
-    node._adjacentNodeIds.clear();
 
     emit nodeAdded(this, &node);
     _updateRequired = true;
@@ -236,17 +235,14 @@ EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     edge._sourceId = sourceId;
     edge._targetId = targetId;
 
-    auto& source = _n._nodes[sourceId];
-    auto& target = _n._nodes[targetId];
+    _n._nodes[sourceId]._outEdgeIds.add(edgeId);
+    _n._nodes[targetId]._inEdgeIds.add(edgeId);
 
-    source._outEdgeIds.add(edgeId);
-    auto sourceInsert = source._adjacentNodeIds.insert({targetId, edgeId});
-    target._inEdgeIds.add(edgeId);
-    auto targetInsert = target._adjacentNodeIds.insert({sourceId, edgeId});
+    auto undirectedEdge = UndirectedEdge(sourceId, targetId);
+    if(!u::contains(_e._connections, undirectedEdge))
+        _e._connections.emplace(undirectedEdge, EdgeIdDistinctSet(&_e._mergedEdgeIds));
 
-    Q_ASSERT(sourceId == targetId || sourceInsert.second == targetInsert.second);
-    if(!sourceInsert.second && !targetInsert.second)
-        mergeEdges(edgeId, (*sourceInsert.first).second);
+    _e._connections[undirectedEdge].add(edgeId);
 
     emit edgeAdded(this, &edge);
     _updateRequired = true;
@@ -269,14 +265,17 @@ void MutableGraph::removeEdge(EdgeId edgeId)
 
     emit edgeWillBeRemoved(this, &edge);
 
-    auto& source = _n._nodes[edge.sourceId()];
-    auto& target = _n._nodes[edge.targetId()];
-    source._outEdgeIds.remove(edgeId);
-    source._adjacentNodeIds.erase(edge.targetId());
-    target._inEdgeIds.remove(edgeId);
-    target._adjacentNodeIds.erase(edge.sourceId());
+    _n._nodes[edge.sourceId()]._outEdgeIds.remove(edgeId);
+    _n._nodes[edge.targetId()]._inEdgeIds.remove(edgeId);
 
-    _e._mergedEdgeIds.remove(edgeId);
+    auto undirectedEdge = UndirectedEdge(edge.sourceId(), edge.targetId());
+    auto& connection = _e._connections[undirectedEdge];
+    Q_ASSERT(connection.size() > 0);
+    connection.remove(edgeId);
+
+    if(connection.size() == 0)
+        _e._connections.erase(undirectedEdge);
+
     _e._edgeIdsInUse[edgeId] = false;
     _unusedEdgeIds.push_back(edgeId);
 
@@ -403,6 +402,9 @@ void MutableGraph::cloneFrom(const Graph& other)
         node._inEdgeIds.setCollection(&_e._inEdgeIdsCollection);
         node._outEdgeIds.setCollection(&_e._outEdgeIdsCollection);
     }
+
+    for(auto& connection : _e._connections)
+        connection.second.setCollection(&_e._mergedEdgeIds);
 
     _updateRequired = true;
     endTransaction();

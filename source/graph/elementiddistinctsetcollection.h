@@ -242,11 +242,6 @@ public:
         return setId;
     }
 
-    SetId remove(T elementId)
-    {
-        return remove(SetId(), elementId);
-    }
-
     Type typeOf(T elementId) const
     {
         Q_ASSERT(!elementId.isNull());
@@ -281,6 +276,11 @@ private:
 
 public:
     ElementIdDistinctSet() : _size(0)
+    {}
+
+    ElementIdDistinctSet(C* collection) :
+        _collection(collection),
+        _size(0)
     {}
 
     ElementIdDistinctSet(T head, C* collection) :
