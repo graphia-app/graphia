@@ -29,8 +29,8 @@ private:
         T _opposite;
 
         bool isNull() const { return _next.isNull(); }
-        bool isTail(T elementId) const { return _next == elementId; }
-        bool isHead(T elementId) const { return !_opposite.isNull() && (!isTail(elementId) || _opposite == elementId); }
+        bool isTail(T elementId) const { return !isNull() && _next == elementId; }
+        bool isHead(T elementId) const { return !isNull() && !_opposite.isNull() && (!isTail(elementId) || _opposite == elementId); }
         bool isSingleton(T elementId) const { return isHead(elementId) && isTail(elementId); }
 
         void setToNull() { _prev.setToNull(); _next.setToNull(); _opposite.setToNull(); }
@@ -67,7 +67,10 @@ public:
         Q_ASSERT(!elementId.isNull());
 
         if(setId.isNull())
+        {
+            Q_ASSERT(_list[elementId].isNull() || _list[elementId].isSingleton(elementId));
             setId = elementId;
+        }
 
         T lowId, highId;
         std::tie(lowId, highId) = std::minmax(setId, elementId);
@@ -176,6 +179,8 @@ public:
             auto& tail = _list[listNode._next];
             tail.setToSingleton(listNode._next);
             setId = listNode._next;
+
+            Q_ASSERT(_list[setId].isHead(setId) && _list[setId].isSingleton(setId));
         }
         else if(listNode._prev == listNode._opposite)
         {
@@ -183,6 +188,8 @@ public:
             auto& head = _list[listNode._prev];
             head.setToSingleton(listNode._prev);
             setId = listNode._prev;
+
+            Q_ASSERT(_list[setId].isHead(setId) && _list[setId].isSingleton(setId));
         }
         else if(listNode.isHead(elementId))
         {
@@ -196,6 +203,8 @@ public:
             newHead._prev.setToNull();
             tail._opposite = listNode._next;
             setId = listNode._next;
+
+            Q_ASSERT(_list[setId].isHead(setId));
         }
         else if(listNode.isTail(elementId))
         {
@@ -209,9 +218,13 @@ public:
             newTail._next = listNode._prev;
             newTail._opposite = listNode._opposite;
             setId = listNode._opposite;
+
+            Q_ASSERT(_list[setId].isHead(setId));
         }
         else
         {
+            Q_ASSERT(_list[setId].isHead(setId));
+
             // Removing from the middle
             Q_ASSERT(!listNode._prev.isNull());
             Q_ASSERT(!listNode._next.isNull());
@@ -223,6 +236,8 @@ public:
         }
 
         listNode.setToNull();
+
+        Q_ASSERT(_list[setId].isNull() || _list[setId].isHead(setId));
 
         return setId;
     }
@@ -290,6 +305,7 @@ public:
     {
         _head = _collection->remove(_head, elementId);
 
+        Q_ASSERT(_size == -1 || _size > 0);
         if(_size > 0)
             _size--;
     }
