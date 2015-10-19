@@ -237,7 +237,7 @@ public:
 
         listNode.setToNull();
 
-        Q_ASSERT(_list[setId].isNull() || _list[setId].isHead(setId));
+        Q_ASSERT(setId.isNull() || _list[setId].isNull() || _list[setId].isHead(setId));
 
         return setId;
     }
@@ -356,6 +356,7 @@ public:
         }
 
         bool operator!=(const self_type& other) { return _p != other._p; }
+        bool operator==(const self_type& other) { return _p == other._p; }
     };
 
     class iterator : public iterator_base
@@ -528,6 +529,7 @@ public:
         }
 
         bool operator!=(const self_type& other) { return _p != other._p; }
+        bool operator==(const self_type& other) { return _p == other._p; }
     };
 
     class iterator : public iterator_base
