@@ -13,6 +13,8 @@
 
 #include <memory>
 
+#include "ui/preferences.h"
+
 const char* Application::_name = "GraphTool";
 
 Application::Application(QObject *parent) :
@@ -22,6 +24,7 @@ Application::Application(QObject *parent) :
 
     _fileIdentifier.registerFileType(std::make_shared<GmlFileType>());
     _fileIdentifier.registerFileType(std::make_shared<PairwiseTxtFileType>());
+
 }
 
 bool Application::parserAndModelForFile(const QUrl& url, const QString& fileTypeName,

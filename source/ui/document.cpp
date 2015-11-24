@@ -16,9 +16,12 @@
 
 #include "../utils/cpp1x_hacks.h"
 
+#include "../ui/preferences.h"
+
 Document::Document(QObject* parent) :
     QObject(parent)
 {
+    _settings = std::make_unique<Settings>();
 }
 
 bool Document::commandInProgress() const
@@ -189,6 +192,7 @@ void Document::setStatus(const QString& status)
     }
 }
 
+
 bool Document::openFile(const QUrl& fileUrl, const QString& fileType)
 {
     std::unique_ptr<GraphFileParser> graphFileParser;
@@ -237,6 +241,11 @@ void Document::onLoadComplete(bool /*success FIXME hmm*/)
     _layoutThread = std::make_unique<LayoutThread>(*_graphModel, std::make_unique<ForceDirectedLayoutFactory>(_graphModel));
     connect(_layoutThread.get(), &LayoutThread::pausedChanged, this, &Document::layoutIsPausedChanged);
     _layoutThread->addAllComponents();
+
+    emit layoutParamChanged();
+
+
+
 
     _selectionManager = std::make_shared<SelectionManager>(*_graphModel);
     _graphQuickItem->initialise(_graphModel, _commandManager, _selectionManager);
@@ -292,6 +301,10 @@ void Document::onLoadComplete(bool /*success FIXME hmm*/)
                 _graphModel->graph().numNodes()).arg(
                 _graphModel->graph().numEdges()).arg(
                 _graphModel->graph().numComponents()));
+}
+
+void Document::updateLayoutParams(QString key, float value){
+    Preferences::instance()->settings->setValue("key",value);
 }
 
 
@@ -425,3 +438,35 @@ void Document::onGraphChanged(const Graph*)
 {
     resumeLayout(true);
 }
+
+QQmlListProperty<LayoutParam> Document::layoutParams()
+{
+    if (_layoutThread != nullptr){
+        return QQmlListProperty<LayoutParam>(this, this, &Document::count, &Document::at);
+    } else {
+        return QQmlListProperty<LayoutParam>();
+    }
+}
+
+int Document::count(QQmlListProperty<LayoutParam> *list)
+{
+    return static_cast<int>(static_cast<Document*>(list->object)->_layoutThread->layoutParams().size());
+}
+
+LayoutParam* Document::at(QQmlListProperty<LayoutParam> *list, int index){
+    const auto* document = static_cast<Document*>(list->object);
+    const auto& settings = document->_layoutThread->layoutParams();
+    int i=0;
+    for(const auto& setting : settings)
+    {
+        if (i==index){
+            return setting.second.get();
+        }
+        i++;
+    }
+
+    return nullptr;
+}
+
+
+

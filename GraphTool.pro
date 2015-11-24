@@ -81,7 +81,10 @@ HEADERS += \
     source/graph/filter.h \
     source/graph/mutablegraph.h \
     source/graph/graphconsistencychecker.h \
-    source/graph/elementiddistinctsetcollection.h
+    source/graph/elementiddistinctsetcollection.h \
+    source/ui/preferences.h \
+    source/utils/settings.h \
+    source/layout/layoutsettings.h
 
 SOURCES += \
     source/main.cpp \
@@ -141,13 +144,20 @@ SOURCES += \
     source/graph/weightededgegraphmodel.cpp \
     source/graph/graphmodel.cpp \
     source/graph/mutablegraph.cpp \
-    source/graph/graphconsistencychecker.cpp
+    source/graph/graphconsistencychecker.cpp \
+    source/ui/preferences.cpp \
+    source/utils/settings.cpp \
+    source/layout/layoutsettings.cpp
 
 OTHER_FILES += \
     source/ui/qml/main.qml \
     source/ui/qml/DocumentUI.qml
 
+
 RESOURCES += \
     source/rendering/shaders.qrc \
     source/ui/qml.qrc \
     source/icon-themes/icons.qrc
+
+DISTFILES += \
+    PreferencesForm.ui.qml

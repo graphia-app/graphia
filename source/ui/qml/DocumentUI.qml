@@ -5,6 +5,7 @@ import com.kajeka 1.0
 
 Item
 {
+
     property Application application
 
     property url fileUrl
@@ -33,6 +34,9 @@ Item
     property bool debugPauserEnabled: document.debugPauserEnabled
     property bool debugPaused: document.debugPaused
     property string debugResumeAction: document.debugResumeAction
+
+    property alias preferencesform: preferencesform
+
 
     function openFile(fileUrl, fileType)
     {
@@ -72,4 +76,12 @@ Item
         id: document
         graph: graph
     }
+
+    PreferencesForm {
+        id: preferencesform
+        paramList.model: document.layoutParams
+        //sldrTension.onValueChanged: document.updatePreferences(sldrTension.value);
+    }
+
+
 }

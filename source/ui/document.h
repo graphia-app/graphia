@@ -12,6 +12,7 @@
 
 #include <memory>
 #include <mutex>
+#include "../utils/settings.h"
 
 class Application;
 class GraphQuickItem;
@@ -49,6 +50,8 @@ class Document : public QObject
     Q_PROPERTY(bool debugPaused READ debugPaused NOTIFY debugPausedChanged)
     Q_PROPERTY(QString debugResumeAction READ debugResumeAction NOTIFY debugResumeActionChanged)
 
+    Q_PROPERTY(QQmlListProperty<LayoutParam> layoutParams READ layoutParams NOTIFY layoutParamChanged)
+
 public:
     explicit Document(QObject* parent = nullptr);
 
@@ -78,9 +81,17 @@ public:
     void setTitle(const QString& status);
     void setStatus(const QString& status);
 
+    QQmlListProperty<LayoutParam> layoutParams();
+
+    static int count(QQmlListProperty<LayoutParam> *list);
+
+    static LayoutParam* at(QQmlListProperty<LayoutParam> *list, int index);
+
+
 private:
     Application* _application = nullptr;
     GraphQuickItem* _graphQuickItem = nullptr;
+    std::unique_ptr<Settings> _settings;
 
     QString _title;
     QString _status;
@@ -112,6 +123,7 @@ signals:
     void commandVerbChanged();
 
     void layoutIsPausedChanged();
+    void layoutParamChanged();
 
     void canUndoChanged();
     void nextUndoActionChanged();
@@ -127,6 +139,7 @@ signals:
 
 public slots:
     bool openFile(const QUrl& fileUrl, const QString& fileType);
+    void updateLayoutParams(QString key, float value);
 
     void toggleLayout();
 

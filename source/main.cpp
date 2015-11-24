@@ -15,6 +15,8 @@
 
 #include "rendering/openglfunctions.h"
 
+#include "ui/preferences.h"
+
 int main(int argc, char *argv[])
 {
     QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
@@ -41,8 +43,11 @@ int main(int argc, char *argv[])
     qmlRegisterType<Application>("com.kajeka", 1, 0, "Application");
     qmlRegisterType<Document>("com.kajeka", 1, 0, "Document");
     qmlRegisterType<GraphQuickItem>("com.kajeka", 1, 0, "Graph");
+    qmlRegisterType<LayoutParam>("com.kajeka", 1, 0, "LayoutParam");
 
     ThreadPool threadPool;
+    Preferences preferences;
+
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
 

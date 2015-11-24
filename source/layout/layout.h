@@ -7,6 +7,7 @@
 #include "nodepositions.h"
 
 #include "../utils/performancecounter.h"
+#include "layoutsettings.h"
 
 #include <QVector2D>
 #include <QVector3D>
@@ -49,12 +50,14 @@ private:
 
 protected:
     bool shouldCancel() const { return _atomicCancel; }
+    std::shared_ptr<LayoutSettings> _settings;
 
     NodePositions& positions() { return _positions; }
 
 public:
     Layout(const Graph& graph,
            NodePositions& positions,
+           std::shared_ptr<LayoutSettings> settings = nullptr,
            Iterative iterative = Iterative::No,
            float scaling = 1.0f,
            int smoothing = 1) :
@@ -64,8 +67,10 @@ public:
         _scaling(scaling),
         _smoothing(smoothing),
         _graph(graph),
-        _positions(positions)
-    {}
+        _positions(positions),
+        _settings(settings)
+    {
+    }
 
     float scaling() const { return _scaling; }
     int smoothing() const { return _smoothing; }
@@ -94,12 +99,19 @@ class LayoutFactory
 {
 protected:
     std::shared_ptr<GraphModel> _graphModel;
+    std::shared_ptr<LayoutSettings> _layoutSettings;
 
 public:
     LayoutFactory(std::shared_ptr<GraphModel> graphModel) :
         _graphModel(graphModel)
-    {}
+    {
+
+    }
     virtual ~LayoutFactory() {}
+
+    std::shared_ptr<LayoutSettings> getSettings() const {
+        return _layoutSettings;
+    }
 
     virtual std::shared_ptr<Layout> create(ComponentId componentId, NodePositions& results) const = 0;
 };
@@ -112,6 +124,7 @@ class LayoutThread : public QObject
 
 private:
     GraphModel* _graphModel;
+
     std::mutex _mutex;
     std::thread _thread;
     bool _started = false;
@@ -130,6 +143,7 @@ private:
 
     PerformanceCounter _performanceCounter;
 
+
 public:
     LayoutThread(GraphModel& graphModel,
                  std::unique_ptr<const LayoutFactory> layoutFactory,
@@ -143,6 +157,8 @@ public:
             _thread.join();
     }
 
+    std::map<QString, std::shared_ptr<LayoutParam>>& layoutParams() const;
+
     void pause();
     void pauseAndWait();
     bool paused();
@@ -152,6 +168,9 @@ public:
     void stop();
 
     void addAllComponents();
+
+protected:
+
 
 private:
     bool iterative();

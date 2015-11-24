@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>qml/DocumentUI.qml</file>
         <file>qml/main.qml</file>
+        <file>qml/PreferencesForm.qml</file>
     </qresource>
 </RCC>

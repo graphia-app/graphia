@@ -22,6 +22,11 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
     connect(&graphModel.graph(), &Graph::componentWillBeRemoved, this, &LayoutThread::onComponentWillBeRemoved, Qt::DirectConnection);
 }
 
+std::map<QString, std::shared_ptr<LayoutParam>>& LayoutThread::layoutParams() const
+{
+   return _layoutFactory->getSettings()->paramMap();
+}
+
 void LayoutThread::pause()
 {
     std::unique_lock<std::mutex> lock(_mutex);
