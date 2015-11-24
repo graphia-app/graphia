@@ -14,7 +14,7 @@ public:
 
     template<typename T>
     void setValue(QString key, T t){
-        qSettings->setValue(key,T);
+        qSettings->setValue(key,t);
     }
     template<typename T>
     T value(QString key){
