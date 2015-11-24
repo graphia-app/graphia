@@ -5,7 +5,15 @@
 
 #include <functional>
 #include <type_traits>
+
 class Command;
+enum class CommandAction
+{
+    None,
+    Execute,
+    Undo,
+    Redo
+};
 
 using FailableCommandFn = std::function<bool(Command&)>;
 using CommandFn = std::function<void(Command&)>;
@@ -114,13 +122,17 @@ public:
 
     bool asynchronous() const { return _asynchronous; }
 
+    void executeSynchronouslyOnCompletion(const CommandFn& postExecuteFn);
+
 private:
     // Return false if the command failed, or did nothing
     virtual bool execute();
     virtual void undo();
     virtual void cancel();
 
-    void setProgressFn(ProgressFn progressFn);
+    void postExecute();
+
+    void setProgressFn(const ProgressFn& progressFn);
 
     QString _description;
     QString _undoDescription;
@@ -135,6 +147,7 @@ private:
     FailableCommandFn _failableExecuteFn;
     CommandFn _executeFn;
     CommandFn _undoFn;
+    CommandFn _postExecuteFn;
     ProgressFn _progressFn;
     bool _asynchronous;
 };

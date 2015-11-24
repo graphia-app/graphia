@@ -47,16 +47,16 @@ public:
                            [](Layout* layout) { return layout->shouldPause(); });
     }
 
-    bool iterative()
+    bool iterative() const
     {
         return std::any_of(_subLayouts.begin(), _subLayouts.end(),
                            [](Layout* layout) { return layout->iterative(); });
     }
 
-    void executeReal(uint64_t iteration)
+    void executeReal(bool firstIteration)
     {
         for(auto subLayout : _subLayouts)
-            subLayout->execute(iteration);
+            subLayout->execute(firstIteration);
     }
 };
 

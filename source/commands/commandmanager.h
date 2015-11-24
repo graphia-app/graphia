@@ -101,13 +101,13 @@ private slots:
     void undoReal();
     void redoReal();
 
-    void onCommandCompleted(const Command* command, const QString& pastParticiple);
+    void onCommandCompleted(Command* command, const QString& pastParticiple, CommandAction action);
 
 signals:
     void commandWillExecuteAsynchronously(const Command* command) const;
     void commandProgressChanged() const;
     void commandVerbChanged() const;
-    void commandCompleted(const Command* command, const QString& pastParticiple) const;
+    void commandCompleted(Command* command, const QString& pastParticiple, CommandAction action) const;
 
     void busyChanged() const;
 };

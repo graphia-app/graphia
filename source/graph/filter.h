@@ -7,18 +7,14 @@
 #include <functional>
 #include <algorithm>
 
-template<typename Element> using ElementFilterFn = std::function<bool(const Element)>;
-using NodeFilterFn = ElementFilterFn<NodeId>;
-using EdgeFilterFn = ElementFilterFn<EdgeId>;
-
 class Filter
 {
 private:
-    std::vector<NodeFilterFn> _nodeFilters;
-    std::vector<EdgeFilterFn> _edgeFilters;
+    std::vector<NodeConditionFn> _nodeFilters;
+    std::vector<EdgeConditionFn> _edgeFilters;
 
     template<typename ElementId>
-    bool elementIdFiltered(const std::vector<ElementFilterFn<ElementId>>& filters, ElementId elementId) const
+    bool elementIdFiltered(const std::vector<ElementConditionFn<ElementId>>& filters, ElementId elementId) const
     {
         for(auto& filter : filters)
         {
@@ -29,9 +25,13 @@ private:
         return false;
     }
 
+protected:
+    bool hasNodeFilters() const { return !_nodeFilters.empty(); }
+    bool hasEdgeFilters() const { return !_edgeFilters.empty(); }
+
 public:
-    void addNodeFilter(const NodeFilterFn& f) { _nodeFilters.emplace_back(f); }
-    void addEdgeFilter(const EdgeFilterFn& f) { _edgeFilters.emplace_back(f); }
+    void addNodeFilter(const NodeConditionFn& f) { _nodeFilters.emplace_back(f); }
+    void addEdgeFilter(const EdgeConditionFn& f) { _edgeFilters.emplace_back(f); }
 
     bool nodeIdFiltered(NodeId nodeId) const { return elementIdFiltered(_nodeFilters, nodeId); }
     bool edgeIdFiltered(EdgeId edgeId) const { return elementIdFiltered(_edgeFilters, edgeId); }

@@ -10,6 +10,7 @@
 #include "application.h"
 #include "ui/document.h"
 #include "ui/graphquickitem.h"
+#include "ui/graphtransformconfiguration.h"
 
 #include "utils/threadpool.h"
 
@@ -40,10 +41,15 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    qmlRegisterType<Application>("com.kajeka", 1, 0, "Application");
-    qmlRegisterType<Document>("com.kajeka", 1, 0, "Document");
-    qmlRegisterType<GraphQuickItem>("com.kajeka", 1, 0, "Graph");
-    qmlRegisterType<LayoutParam>("com.kajeka", 1, 0, "LayoutParam");
+    const char* uri = "com.kajeka";
+    const int maj = 1;
+    const int min = 0;
+
+    qmlRegisterType<Application>(uri, maj, min, "Application");
+    qmlRegisterType<Document>(uri, maj, min, "Document");
+    qmlRegisterType<GraphQuickItem>(uri, maj, min, "Graph");
+    qmlRegisterType<GraphTransformConfiguration>(uri, maj, min, "GraphTransform");
+    qmlRegisterType<LayoutParam>(uri, maj, min, "LayoutParam");
 
     ThreadPool threadPool;
     Preferences preferences;

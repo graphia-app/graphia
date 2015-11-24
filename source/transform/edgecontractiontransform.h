@@ -5,19 +5,24 @@
 #include "../graph/graph.h"
 
 #include <vector>
-#include <functional>
-
-using EdgeContractionFn = std::function<bool(const EdgeId)>;
 
 class EdgeContractionTransform : public GraphTransform
 {
 public:
     void apply(TransformedGraph &target) const;
 
-    void addEdgeContractionFilter(const EdgeContractionFn& f) { _edgeFilters.emplace_back(f); }
+    void addEdgeContractionFilter(const EdgeConditionFn& f) { _edgeFilters.emplace_back(f); }
 
 private:
-    std::vector<EdgeContractionFn> _edgeFilters;
+    std::vector<EdgeConditionFn> _edgeFilters;
+};
+
+class EdgeContractionTransformFactory : public GraphTransformFactory
+{
+public:
+    std::unique_ptr<GraphTransform> create(const NodeConditionFn&) const { return nullptr; }
+    std::unique_ptr<GraphTransform> create(const EdgeConditionFn& conditionFn) const;
+    std::unique_ptr<GraphTransform> create(const ComponentConditionFn&) const { return nullptr; }
 };
 
 #endif // FILTERTRANSFORM_H

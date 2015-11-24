@@ -80,7 +80,6 @@ private:
             _edges.resize(size);
             _inEdgeIdsCollection.resize(size);
             _outEdgeIdsCollection.resize(size);
-            //_connections.resize(size);
         }
 
         void clear()

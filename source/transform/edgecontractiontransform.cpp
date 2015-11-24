@@ -1,7 +1,9 @@
 #include "edgecontractiontransform.h"
 #include "transformedgraph.h"
 
-bool edgeIdContracted(const std::vector<EdgeContractionFn>& filters, EdgeId value)
+#include <QObject>
+
+bool edgeIdContracted(const std::vector<EdgeConditionFn>& filters, EdgeId value)
 {
     for(auto& filter : filters)
     {
@@ -14,6 +16,8 @@ bool edgeIdContracted(const std::vector<EdgeContractionFn>& filters, EdgeId valu
 
 void EdgeContractionTransform::apply(TransformedGraph& target) const
 {
+    target.setSubPhase(QObject::tr("Contracting"));
+
     EdgeIdSet edgeIdsToContract;
 
     for(auto edgeId : target.edgeIds())
@@ -23,4 +27,12 @@ void EdgeContractionTransform::apply(TransformedGraph& target) const
     }
 
     target.contractEdges(edgeIdsToContract);
+}
+
+std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(const EdgeConditionFn& conditionFn) const
+{
+    auto edgeContractionTransform = std::make_unique<EdgeContractionTransform>();
+    edgeContractionTransform->addEdgeContractionFilter(conditionFn);
+
+    return std::move(edgeContractionTransform);
 }

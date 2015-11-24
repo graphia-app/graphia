@@ -82,6 +82,11 @@ HEADERS += \
     source/graph/mutablegraph.h \
     source/graph/graphconsistencychecker.h \
     source/graph/elementiddistinctsetcollection.h \
+    source/transform/datafield.h \
+    source/utils/enumreflection.h \
+    source/ui/graphtransformconfiguration.h \
+    source/utils/qmlenum.h \
+    source/utils/qmlcontainerwrapper.h \
     source/ui/preferences.h \
     source/utils/settings.h \
     source/layout/layoutsettings.h
@@ -145,19 +150,21 @@ SOURCES += \
     source/graph/graphmodel.cpp \
     source/graph/mutablegraph.cpp \
     source/graph/graphconsistencychecker.cpp \
+    source/transform/datafield.cpp \
+    source/ui/graphtransformconfiguration.cpp \
     source/ui/preferences.cpp \
     source/utils/settings.cpp \
     source/layout/layoutsettings.cpp
 
 OTHER_FILES += \
+    source/ui/qml/ButtonMenu.qml \
     source/ui/qml/main.qml \
-    source/ui/qml/DocumentUI.qml
-
+    source/ui/qml/DocumentUI.qml \
+    source/ui/qml/Transform.qml \
+    source/ui/qml/PreferencesForm.qml
 
 RESOURCES += \
     source/rendering/shaders.qrc \
     source/ui/qml.qrc \
     source/icon-themes/icons.qrc
 
-DISTFILES += \
-    PreferencesForm.ui.qml

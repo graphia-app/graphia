@@ -14,7 +14,7 @@ public:
         Layout(graph, positions)
     {}
 
-    void setScale(float _scale) { _scale = _scale; }
+    void setScale(float scale) { _scale = scale; }
     float scale() { return _scale; }
 
     void executeReal(bool);

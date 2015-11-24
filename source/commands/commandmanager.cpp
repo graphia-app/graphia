@@ -9,6 +9,7 @@ CommandManager::CommandManager() :
     _busy(false)
 {
     qRegisterMetaType<std::shared_ptr<Command>>("std::shared_ptr<Command>");
+    qRegisterMetaType<CommandAction>("CommandAction");
     connect(this, &CommandManager::commandCompleted, this, &CommandManager::onCommandCompleted);
 }
 
@@ -34,8 +35,20 @@ void CommandManager::redo()
     QMetaObject::invokeMethod(this, "redoReal");
 }
 
+static void checkForRecursiveExecution(const char* function, const std::unique_lock<std::mutex>& lock,
+                                       const QString& verb)
+{
+    Q_UNUSED(function);
+    Q_UNUSED(lock);
+    Q_UNUSED(verb);
+    Q_ASSERT_X(!lock.owns_lock(), function,
+               QString("Recursive execution! (Already executing '%1')").arg(verb).toLatin1());
+}
+
 void CommandManager::executeReal(std::shared_ptr<Command> command)
 {
+    checkForRecursiveExecution("CommandManager::executeReal", _lock, _commandVerb);
+
     _lock.lock();
 
     command->setProgressFn([this](int progress) { _commandProgress = progress; emit commandProgressChanged(); });
@@ -48,7 +61,7 @@ void CommandManager::executeReal(std::shared_ptr<Command> command)
         if(!command->execute())
         {
             _busy = false;
-            emit commandCompleted(nullptr, QString());
+            emit commandCompleted(nullptr, QString(), CommandAction::None);
             return;
         }
 
@@ -60,7 +73,7 @@ void CommandManager::executeReal(std::shared_ptr<Command> command)
         _lastExecutedIndex = static_cast<int>(_stack.size()) - 1;
 
         _busy = false;
-        emit commandCompleted(command.get(), command->pastParticiple());
+        emit commandCompleted(command.get(), command->pastParticiple(), CommandAction::Execute);
     };
 
     _busy = true;
@@ -74,6 +87,8 @@ void CommandManager::executeReal(std::shared_ptr<Command> command)
 
 void CommandManager::undoReal()
 {
+    checkForRecursiveExecution("CommandManager::undoReal", _lock, _commandVerb);
+
     _lock.lock();
 
     if(!canUndoNoLocking())
@@ -90,7 +105,7 @@ void CommandManager::undoReal()
         _lastExecutedIndex--;
 
         _busy = false;
-        emit commandCompleted(command.get(), QString());
+        emit commandCompleted(command.get(), QString(), CommandAction::Undo);
     };
 
     _busy = true;
@@ -104,6 +119,8 @@ void CommandManager::undoReal()
 
 void CommandManager::redoReal()
 {
+    checkForRecursiveExecution("CommandManager::redoReal", _lock, _commandVerb);
+
     _lock.lock();
 
     if(!canRedoNoLocking())
@@ -119,7 +136,7 @@ void CommandManager::redoReal()
         command->execute();
 
         _busy = false;
-        emit commandCompleted(command.get(), command->pastParticiple());
+        emit commandCompleted(command.get(), command->pastParticiple(), CommandAction::Redo);
     };
 
     _busy = true;
@@ -220,7 +237,7 @@ bool CommandManager::canRedoNoLocking() const
     return _lastExecutedIndex < static_cast<int>(_stack.size()) - 1;
 }
 
-void CommandManager::onCommandCompleted(const Command*, const QString&)
+void CommandManager::onCommandCompleted(Command* command, const QString&, CommandAction)
 {
     // If the command executed asynchronously, we need to join its thread
     if(_thread.joinable())
@@ -228,6 +245,9 @@ void CommandManager::onCommandCompleted(const Command*, const QString&)
 
     Q_ASSERT(_lock.owns_lock());
     _lock.unlock();
+
+    if(command != nullptr)
+        command->postExecute();
 
     emit busyChanged();
 }

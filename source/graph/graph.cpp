@@ -211,6 +211,8 @@ ComponentId Graph::componentIdOfLargestComponent() const
 
 void Graph::setPhase(const QString& phase) const
 {
+    clearSubPhase();
+
     if(phase != _phase)
     {
         _phase = phase;
@@ -221,9 +223,29 @@ void Graph::setPhase(const QString& phase) const
 void Graph::clearPhase() const
 {
     setPhase("");
+    clearSubPhase();
 }
 
 const QString& Graph::phase() const
 {
     return _phase;
+}
+
+void Graph::setSubPhase(const QString& subPhase) const
+{
+    if(subPhase != _subPhase)
+    {
+        _subPhase = subPhase;
+        emit phaseChanged();
+    }
+}
+
+void Graph::clearSubPhase() const
+{
+    setSubPhase("");
+}
+
+const QString& Graph::subPhase() const
+{
+    return _subPhase;
 }

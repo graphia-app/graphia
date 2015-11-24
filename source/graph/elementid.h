@@ -122,4 +122,11 @@ template<typename V> using NodeIdMap = ElementIdMap<NodeId, V>;
 template<typename V> using EdgeIdMap = ElementIdMap<EdgeId, V>;
 template<typename V> using ComponentIdMap = ElementIdMap<ComponentId, V>;
 
+template<typename Element> using ElementConditionFn = std::function<bool(const Element)>;
+using NodeConditionFn = ElementConditionFn<NodeId>;
+using EdgeConditionFn = ElementConditionFn<EdgeId>;
+
+class GraphComponent;
+using ComponentConditionFn = std::function<bool(const GraphComponent& component)>;
+
 #endif // ELEMENTID_H

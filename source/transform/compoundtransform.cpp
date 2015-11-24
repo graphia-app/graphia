@@ -5,7 +5,11 @@
 void CompoundTransform::apply(const Graph& source, TransformedGraph& target) const
 {
     if(_transforms.empty())
+    {
+        // Effectively behave like an identity transform
+        target.cloneFrom(source);
         return;
+    }
 
     // We can only use the apply overload with a source for the first transformation...
     _transforms.front()->apply(source, target);

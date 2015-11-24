@@ -202,6 +202,10 @@ public:
     void clearPhase() const;
     const QString& phase() const;
 
+    void setSubPhase(const QString& subPhase) const;
+    void clearSubPhase() const;
+    const QString& subPhase() const;
+
     mutable DebugPauser debugPauser;
     void dumpToQDebug(int detail) const;
 
@@ -219,6 +223,7 @@ private:
     std::unique_ptr<ComponentManager> _componentManager;
 
     mutable QString _phase;
+    mutable QString _subPhase;
     GraphConsistencyChecker _graphConsistencyChecker;
 
     int numComponentArrays() const;

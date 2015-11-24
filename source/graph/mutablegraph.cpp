@@ -114,6 +114,8 @@ NodeId MutableGraph::addNode(const Node& node)
 
 void MutableGraph::removeNode(NodeId nodeId)
 {
+    Q_ASSERT(containsNodeId(nodeId));
+
     beginTransaction();
 
     // Remove all edges that touch this node
@@ -258,6 +260,8 @@ EdgeId MutableGraph::addEdge(const Edge& edge)
 
 void MutableGraph::removeEdge(EdgeId edgeId)
 {
+    Q_ASSERT(containsEdgeId(edgeId));
+
     beginTransaction();
 
     // Remove all node references to this edge

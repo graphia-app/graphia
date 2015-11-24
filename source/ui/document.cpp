@@ -53,13 +53,19 @@ int Document::commandProgress() const
 QString Document::commandVerb() const
 {
     auto& phase = _graphModel->graph().phase();
+    auto& subPhase = _graphModel->graph().subPhase();
 
     if(!_loadComplete)
     {
         if(_loadProgress < 0)
         {
             if(!phase.isEmpty())
+            {
+                if(!subPhase.isEmpty())
+                    return QString(tr("%1: %2")).arg(phase).arg(subPhase);
+
                 return phase;
+            }
 
             return tr("Finishing");
         }
@@ -68,7 +74,12 @@ QString Document::commandVerb() const
     }
 
     if(!phase.isEmpty())
+    {
+        if(!subPhase.isEmpty())
+            return QString(tr("%1 (%2: %3)")).arg(_commandManager.commandVerb()).arg(phase).arg(subPhase);
+
         return QString(tr("%1 (%2)")).arg(_commandManager.commandVerb()).arg(phase);
+    }
 
     return _commandManager.commandVerb();
 }
@@ -192,6 +203,74 @@ void Document::setStatus(const QString& status)
     }
 }
 
+QString Document::contentQmlPath() const
+{
+    return _graphModel != nullptr ? _graphModel->contentQmlPath() : QString();
+}
+
+std::vector<GraphTransformConfiguration> Document::transformsWithEmptyAppended(
+        const std::vector<GraphTransformConfiguration>& graphTransformConfigurations)
+{
+    bool allValid = std::all_of(graphTransformConfigurations.begin(), graphTransformConfigurations.end(),
+    [](const GraphTransformConfiguration& graphTransformConfiguration)
+    {
+        return graphTransformConfiguration.valid();
+    });
+
+    std::vector<GraphTransformConfiguration> newGraphTransformConfigurations = graphTransformConfigurations;
+
+    if(allValid)
+        newGraphTransformConfigurations.emplace_back(this);
+
+    return newGraphTransformConfigurations;
+}
+
+void Document::applyTransforms()
+{
+    if(_graphModel == nullptr)
+        return;
+
+    auto nextGraphTransformConfigurations = _graphTransformConfigurations.vector();
+    auto previousGraphTransformConfigurations = _previousGraphTransformConfigurations;
+
+    auto command = Command(tr("Apply Transformations"), tr("Applying Transformations"),
+    [this, nextGraphTransformConfigurations](Command& command)
+    {
+        _graphModel->buildTransforms(nextGraphTransformConfigurations);
+        _previousGraphTransformConfigurations = nextGraphTransformConfigurations;
+
+        command.executeSynchronouslyOnCompletion([&](Command&)
+        {
+            _graphTransformConfigurations.setVector(transformsWithEmptyAppended(nextGraphTransformConfigurations));
+        });
+    },
+    [this, previousGraphTransformConfigurations](Command& command)
+    {
+        _graphModel->buildTransforms(previousGraphTransformConfigurations);
+
+        command.executeSynchronouslyOnCompletion([&](Command&)
+        {
+            _graphTransformConfigurations.setVector(transformsWithEmptyAppended(previousGraphTransformConfigurations));
+        });
+    });
+
+    _commandManager.execute(command);
+}
+
+void Document::onGraphTransformsConfigurationDataChanged(const QModelIndex& index,
+                                                         const QModelIndex&,
+                                                         const QVector<int>& roles)
+{
+    auto& graphTransformConfiguration = _graphTransformConfigurations.vector().at(index.row());
+    auto& roleName = _graphTransformConfigurations.roleNames().value(roles.at(0));
+    bool enabledChanging = (roleName == "transformEnabled");
+
+    // Don't apply any changes when not enabled, as they will have no effect
+    bool enabled = graphTransformConfiguration.enabled() || enabledChanging;
+
+    if(graphTransformConfiguration.valid() && enabled)
+        applyTransforms();
+}
 
 bool Document::openFile(const QUrl& fileUrl, const QString& fileType)
 {
@@ -215,6 +294,8 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType)
     connect(&_graphModel->graph().debugPauser, &DebugPauser::enabledChanged, this, &Document::debugPauserEnabledChanged);
     connect(&_graphModel->graph().debugPauser, &DebugPauser::pausedChanged, this, &Document::debugPausedChanged);
     connect(&_graphModel->graph().debugPauser, &DebugPauser::resumeActionChanged, this, &Document::debugResumeActionChanged);
+
+    emit contentQmlPathChanged();
 
     _graphFileParserThread = std::make_unique<GraphFileParserThread>(_graphModel->mutableGraph(), std::move(graphFileParser));
     connect(_graphFileParserThread.get(), &GraphFileParserThread::progress, this, &Document::onLoadProgress);
@@ -290,11 +371,9 @@ void Document::onLoadComplete(bool /*success FIXME hmm*/)
 
     connect(_layoutThread.get(), &LayoutThread::executed, _graphQuickItem, &GraphQuickItem::onLayoutChanged);
 
-    /*FIXME layout()->setContentsMargins(0, 0, 0, 0);
-    layout()->addWidget(_graphWidget);
-
-    if(_graphModel->contentWidget() != nullptr)
-        layout()->addWidget(_graphModel->contentWidget());*/
+    connect(&_graphTransformConfigurations, &QmlContainerWrapperBase::dataChanged,
+            this, &Document::onGraphTransformsConfigurationDataChanged);
+    addGraphTransform();
 
     setStatus(QString(tr("Loaded %1 (%2 nodes, %3 edges, %4 components)")).arg(
                 _graphModel->name()).arg(
@@ -421,6 +500,47 @@ void Document::toggleDebugPauser()
 void Document::debugResume()
 {
     _graphModel->graph().debugPauser.resume();
+}
+
+QStringList Document::availableTransformNames() const
+{
+    return _graphModel != nullptr ? _graphModel->availableTransformNames() : QStringList();
+}
+
+QStringList Document::availableDataFields(const QString& transformName) const
+{
+    return _graphModel != nullptr ? _graphModel->availableDataFields(transformName) : QStringList();
+}
+
+const DataField& Document::dataFieldByName(const QString& dataFieldName) const
+{
+    static DataField nullDataField;
+    return _graphModel != nullptr ? _graphModel->dataFieldByName(dataFieldName) : nullDataField;
+}
+
+DataFieldType Document::typeOfDataField(const QString& dataFieldName) const
+{
+    return _graphModel != nullptr ? _graphModel->typeOfDataField(dataFieldName) : DataFieldType::Unknown;
+}
+
+QStringList Document::avaliableConditionFnOps(const QString& dataFieldName) const
+{
+    return _graphModel != nullptr ? _graphModel->avaliableConditionFnOps(dataFieldName) : QStringList();
+}
+
+void Document::removeGraphTransform(int index)
+{
+    auto graphTransformConfigurations = _graphTransformConfigurations.vector();
+
+    auto& graphTransformConfiguration = graphTransformConfigurations.at(index);
+    bool needToRebuildTransforms = graphTransformConfiguration.valid() && graphTransformConfiguration.enabled();
+
+    graphTransformConfigurations.erase(graphTransformConfigurations.begin() + index);
+
+    _graphTransformConfigurations.setVector(transformsWithEmptyAppended(graphTransformConfigurations));
+
+    if(needToRebuildTransforms)
+        applyTransforms();
 }
 
 void Document::dumpGraph()

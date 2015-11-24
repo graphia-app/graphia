@@ -3,5 +3,7 @@
         <file>qml/DocumentUI.qml</file>
         <file>qml/main.qml</file>
         <file>qml/PreferencesForm.qml</file>
+        <file>qml/Transform.qml</file>
+        <file>qml/ButtonMenu.qml</file>
     </qresource>
 </RCC>

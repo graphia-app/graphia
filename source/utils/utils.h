@@ -71,6 +71,11 @@ namespace u
         container.erase(std::remove(container.begin(), container.end(), value), container.end());
     }
 
+    template<typename C, typename T> size_t indexOf(C& container, const T& value)
+    {
+        return std::distance(container.begin(), std::find(container.begin(), container.end(), value));
+    }
+
     template<typename C, typename T>
     auto contains(const C& container, T const& value, int)
     -> decltype(container.find(value), bool())
@@ -174,5 +179,7 @@ namespace u
         return n;
     }
 }
+
+#define ARRAY_SIZEOF(x) (sizeof(x)/sizeof((x)[0]))
 
 #endif // UTILS_H

@@ -4,16 +4,23 @@
 #include "../graph/graph.h"
 #include "../graph/mutablegraph.h"
 #include "../graph/grapharray.h"
+
 #include "../transform/transformedgraph.h"
+#include "../transform/datafield.h"
+
+#include "../ui/graphtransformconfiguration.h"
 
 #include "../layout/nodepositions.h"
 #include "../utils/cpp1x_hacks.h"
 
 #include <QQuickItem>
 #include <QString>
+#include <QStringList>
 #include <QColor>
 
 #include <memory>
+#include <utility>
+#include <map>
 
 struct NodeVisual
 {
@@ -64,6 +71,9 @@ private:
 
     QString _name;
 
+    std::map<QString, DataField> _dataFields;
+    std::map<QString, std::pair<DataFieldElementType, std::unique_ptr<GraphTransformFactory>>> _graphTransformFactories;
+
 public:
     MutableGraph& mutableGraph() { return _graph; }
     const Graph& graph() const { return _transformedGraph; }
@@ -79,10 +89,21 @@ public:
     const QString& name() const { return _name; }
 
     virtual bool editable() const { return true; }
-    virtual QQuickItem* contentQuickItem() const { return nullptr; }
+    virtual QString contentQmlPath() const { return {}; }
+
+    void buildTransforms(const std::vector<GraphTransformConfiguration>& graphTransformConfigurations);
+
+    QStringList availableTransformNames() const;
+    QStringList availableDataFields(const QString& transformName) const;
+    DataFieldType typeOfDataField(const QString& dataFieldName) const;
+    const DataField& dataFieldByName(const QString& name) const;
+    QStringList avaliableConditionFnOps(const QString& dataFieldName) const;
 
 protected:
     TransformedGraph& transformedGraph() { return _transformedGraph; }
+
+    DataField& addDataField(const QString& name);
+    DataField& mutableDataFieldByName(const QString& name);
 
 private slots:
     void onGraphChanged(const Graph* graph);

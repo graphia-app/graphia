@@ -15,6 +15,9 @@ private:
 public:
     const EdgeArray<float>& edgeWeights() const { return _edgeWeights; }
     void setEdgeWeight(EdgeId edgeId, float weight) { _edgeWeights[edgeId] = weight; }
+
+private slots:
+    void onGraphChanged(const Graph*);
 };
 
 #endif // WEIGHTEDEDGEGRAPHMODEL_H

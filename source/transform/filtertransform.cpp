@@ -5,7 +5,9 @@
 
 #include <algorithm>
 
-static bool componentFiltered(const std::vector<ComponentFilterFn>& filters, const Graph& component)
+#include <QObject>
+
+static bool componentFiltered(const std::vector<ComponentConditionFn>& filters, const GraphComponent& component)
 {
     for(auto& filter : filters)
     {
@@ -18,16 +20,25 @@ static bool componentFiltered(const std::vector<ComponentFilterFn>& filters, con
 
 void FilterTransform::apply(TransformedGraph& target) const
 {
-    for(auto edgeId : target.edgeIds())
+    target.setSubPhase(QObject::tr("Filtering"));
+
+    //FIXME probably need to create lists first, then do the removals in a second step
+    if(hasEdgeFilters())
     {
-        if(edgeIdFiltered(edgeId))
-            target.removeEdge(edgeId);
+        for(auto edgeId : target.edgeIds())
+        {
+            if(edgeIdFiltered(edgeId))
+                target.removeEdge(edgeId);
+        }
     }
 
-    for(auto nodeId : target.nodeIds())
+    if(hasNodeFilters())
     {
-        if(nodeIdFiltered(nodeId))
-            target.removeNode(nodeId);
+        for(auto nodeId : target.nodeIds())
+        {
+            if(nodeIdFiltered(nodeId))
+                target.removeNode(nodeId);
+        }
     }
 
     if(!_componentFilters.empty())
@@ -41,4 +52,28 @@ void FilterTransform::apply(TransformedGraph& target) const
                 target.removeNodes(component->nodeIds());
         }
     }
+}
+
+std::unique_ptr<GraphTransform> FilterTransformFactory::create(const NodeConditionFn& conditionFn) const
+{
+    auto filterTransform = std::make_unique<FilterTransform>();
+    filterTransform->addNodeFilter(conditionFn);
+
+    return std::move(filterTransform);
+}
+
+std::unique_ptr<GraphTransform> FilterTransformFactory::create(const EdgeConditionFn& conditionFn) const
+{
+    auto filterTransform = std::make_unique<FilterTransform>();
+    filterTransform->addEdgeFilter(conditionFn);
+
+    return std::move(filterTransform);
+}
+
+std::unique_ptr<GraphTransform> FilterTransformFactory::create(const ComponentConditionFn& conditionFn) const
+{
+    auto filterTransform = std::make_unique<FilterTransform>();
+    filterTransform->addComponentFilter(conditionFn);
+
+    return std::move(filterTransform);
 }

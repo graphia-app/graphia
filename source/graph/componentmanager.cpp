@@ -26,8 +26,8 @@ void GraphComponent::cloneFrom(const Graph& other)
 }
 
 ComponentManager::ComponentManager(Graph& graph,
-                                   const NodeFilterFn& nodeFilter,
-                                   const EdgeFilterFn& edgeFilter) :
+                                   const NodeConditionFn& nodeFilter,
+                                   const EdgeConditionFn& edgeFilter) :
     _nextComponentId(0),
     _nodesComponentId(graph),
     _edgesComponentId(graph)

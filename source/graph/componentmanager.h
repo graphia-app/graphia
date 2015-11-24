@@ -88,8 +88,8 @@ class ComponentManager : public QObject, public Filter
     Q_OBJECT
 public:
     ComponentManager(Graph& graph,
-                     const NodeFilterFn& nodeFilter = nullptr,
-                     const EdgeFilterFn& edgeFilter = nullptr);
+                     const NodeConditionFn& nodeFilter = nullptr,
+                     const EdgeConditionFn& edgeFilter = nullptr);
     virtual ~ComponentManager();
 
 private:

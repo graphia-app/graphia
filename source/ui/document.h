@@ -1,15 +1,21 @@
 #ifndef DOCUMENT_H
 #define DOCUMENT_H
 
-#include <QQuickItem>
-#include <QString>
-#include <QUrl>
+#include "graphtransformconfiguration.h"
 
 #include "../graph/graph.h"
 #include "../loading/graphfileparser.h"
 #include "../commands/commandmanager.h"
 #include "../layout/layout.h"
 
+#include "../utils/qmlenum.h"
+#include "../utils/qmlcontainerwrapper.h"
+
+#include <QQuickItem>
+#include <QString>
+#include <QUrl>
+
+#include <vector>
 #include <memory>
 #include <mutex>
 #include "../utils/settings.h"
@@ -25,6 +31,7 @@ class Document : public QObject
 
     Q_PROPERTY(Application* application MEMBER _application NOTIFY applicationChanged)
     Q_PROPERTY(GraphQuickItem* graph MEMBER _graphQuickItem NOTIFY graphQuickItemChanged)
+    Q_PROPERTY(QString contentQmlPath READ contentQmlPath NOTIFY contentQmlPathChanged)
 
     Q_PROPERTY(QString title MEMBER _title WRITE setTitle NOTIFY titleChanged)
     Q_PROPERTY(QString status MEMBER _status WRITE setStatus NOTIFY statusChanged)
@@ -45,6 +52,8 @@ class Document : public QObject
 
     Q_PROPERTY(bool canResetView READ canResetView NOTIFY canResetViewChanged)
     Q_PROPERTY(bool canEnterOverviewMode READ canEnterOverviewMode NOTIFY canEnterOverviewModeChanged)
+
+    Q_PROPERTY(QmlContainerWrapperBase* transforms READ transforms CONSTANT)
 
     Q_PROPERTY(bool debugPauserEnabled READ debugPauserEnabled NOTIFY debugPauserEnabledChanged)
     Q_PROPERTY(bool debugPaused READ debugPaused NOTIFY debugPausedChanged)
@@ -87,6 +96,9 @@ public:
 
     static LayoutParam* at(QQmlListProperty<LayoutParam> *list, int index);
 
+    QmlContainerWrapper<GraphTransformConfiguration>* transforms() { return &_graphTransformConfigurations; }
+
+    QString contentQmlPath() const;
 
 private:
     Application* _application = nullptr;
@@ -105,12 +117,32 @@ private:
     std::unique_ptr<GraphFileParserThread> _graphFileParserThread;
     std::unique_ptr<LayoutThread> _layoutThread;
 
+    std::vector<GraphTransformConfiguration> _previousGraphTransformConfigurations;
+    QmlContainerWrapper<GraphTransformConfiguration> _graphTransformConfigurations;
+
     std::recursive_mutex _autoResumeMutex;
     int _autoResume = 0;
+
+    template<typename... Args>
+    void addGraphTransform(Args&&... args)
+    {
+        auto graphTransformConfigurations = _graphTransformConfigurations.vector();
+        graphTransformConfigurations.emplace_back(this, std::forward<Args>(args)...);
+        _graphTransformConfigurations.setVector(graphTransformConfigurations);
+    }
+
+    std::vector<GraphTransformConfiguration> transformsWithEmptyAppended(
+            const std::vector<GraphTransformConfiguration>& graphTransformConfigurations);
+    void applyTransforms();
+
+private slots:
+    void onGraphTransformsConfigurationDataChanged(const QModelIndex& index, const QModelIndex&,
+                                                   const QVector<int>& roles);
 
 signals:
     void applicationChanged();
     void graphQuickItemChanged();
+    void contentQmlPathChanged();
 
     void titleChanged();
     void statusChanged();
@@ -158,6 +190,14 @@ public slots:
 
     void toggleDebugPauser();
     void debugResume();
+
+    QStringList availableTransformNames() const;
+    QStringList availableDataFields(const QString& transformName) const;
+    const DataField& dataFieldByName(const QString& dataFieldName) const;
+    DataFieldType typeOfDataField(const QString& dataFieldName) const;
+    QStringList avaliableConditionFnOps(const QString& dataFieldName) const;
+
+    void removeGraphTransform(int index);
 
     void dumpGraph();
 

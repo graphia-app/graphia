@@ -66,6 +66,11 @@ void Command::setProgress(int progress)
     _progressFn(progress);
 }
 
+void Command::executeSynchronouslyOnCompletion(const CommandFn& postExecuteFn)
+{
+    _postExecuteFn = postExecuteFn;
+}
+
 bool Command::execute()
 {
     if(_failableExecuteFn != nullptr)
@@ -82,7 +87,13 @@ void Command::cancel()
     qWarning() << description() << "does not implement cancel(); now blocked until it completes";
 }
 
-void Command::setProgressFn(ProgressFn progressFn)
+void Command::postExecute()
+{
+    if(_postExecuteFn != nullptr)
+        _postExecuteFn(*this);
+}
+
+void Command::setProgressFn(const ProgressFn& progressFn)
 {
     _progressFn = progressFn;
 }

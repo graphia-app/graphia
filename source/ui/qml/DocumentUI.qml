@@ -1,10 +1,12 @@
-import QtQuick 2.2
-import QtQuick.Controls 1.2
+import QtQuick 2.5
+import QtQuick.Controls 1.4
+import QtQuick.Layouts 1.1
 
 import com.kajeka 1.0
 
 Item
 {
+    id: root
 
     property Application application
 
@@ -65,16 +67,71 @@ Item
     function debugResume() { document.debugResume(); }
     function dumpGraph() { document.dumpGraph(); }
 
-    Graph
+    SplitView
     {
-        id: graph
         anchors.fill: parent
+        orientation: Qt.Vertical
+
+        Item
+        {
+            id: graphItem
+
+            Layout.fillHeight: true
+            Layout.minimumHeight: 100
+
+            Graph
+            {
+                id: graph
+                anchors.fill: parent
+            }
+
+            Column
+            {
+                anchors.right: parent.right
+
+                Repeater
+                {
+                    model: document.transforms
+                    Transform
+                    {
+                        enabled: document.idle
+
+                        // Not entirely sure why parent is ever null, but it is
+                        anchors.right: parent ? parent.right : undefined
+                    }
+                }
+            }
+        }
+
+        Item
+        {
+            id: contentItem
+            Layout.minimumHeight: 100
+            visible: document.contentQmlPath
+        }
     }
 
     Document
     {
         id: document
+        application: root.application
         graph: graph
+
+        onContentQmlPathChanged:
+        {
+            if(document.contentQmlPath)
+            {
+                // Destroy anything already there
+                while(contentItem.children.length > 0)
+                    contentItem.children[0].destroy();
+
+                var contentComponent = Qt.createComponent(document.contentQmlPath);
+                var contentObject = contentComponent.createObject(contentItem);
+
+                if(contentObject === null)
+                    console.log(document.contentQmlPath + " failed to load");
+            }
+        }
     }
 
     PreferencesForm {
