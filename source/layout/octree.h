@@ -85,6 +85,7 @@ private:
                 // Subdivide
                 subVolume._subTree = std::make_unique<TreeType>();
                 subVolume._subTree->_nodeIds = std::move(subVolume._nodeIds);
+                Q_ASSERT(subVolume._boundingBox.volume() > 0.0f);
                 subVolume._subTree->_boundingBox = subVolume._boundingBox;
                 stack.push(subVolume._subTree.get());
 

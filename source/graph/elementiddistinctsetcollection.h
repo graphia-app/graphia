@@ -405,6 +405,7 @@ public:
     std::vector<T> copy() const
     {
         std::vector<T> v;
+        v.reserve(_size);
 
         std::copy(begin(), end(), std::back_inserter(v));
 
@@ -578,6 +579,7 @@ public:
     std::vector<T> copy() const
     {
         std::vector<T> v;
+        v.reserve(_size);
 
         std::copy(begin(), end(), std::back_inserter(v));
 

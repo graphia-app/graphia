@@ -119,7 +119,11 @@ void MutableGraph::removeNode(NodeId nodeId)
     beginTransaction();
 
     // Remove all edges that touch this node
-    for(auto edgeId : edgeIdsForNodeId(nodeId).copy())
+    for(auto edgeId : inEdgeIdsForNodeId(nodeId).copy())
+        removeEdge(edgeId);
+
+    // ...do in and out separately in case an edge is in both
+    for(auto edgeId : outEdgeIdsForNodeId(nodeId).copy())
         removeEdge(edgeId);
 
     emit nodeWillBeRemoved(this, &_n._nodes[nodeId]);

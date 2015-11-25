@@ -22,23 +22,35 @@ void FilterTransform::apply(TransformedGraph& target) const
 {
     target.setSubPhase(QObject::tr("Filtering"));
 
-    //FIXME probably need to create lists first, then do the removals in a second step
+    // The elements to be filtered are calculated first and then removed, because
+    // removing elements during the filtering could affect the result of filter functions
+
     if(hasEdgeFilters())
     {
+        std::vector<EdgeId> removees;
+
         for(auto edgeId : target.edgeIds())
         {
             if(edgeIdFiltered(edgeId))
-                target.removeEdge(edgeId);
+                removees.push_back(edgeId);
         }
+
+        for(auto edgeId : removees)
+            target.removeEdge(edgeId);
     }
 
     if(hasNodeFilters())
     {
+        std::vector<NodeId> removees;
+
         for(auto nodeId : target.nodeIds())
         {
             if(nodeIdFiltered(nodeId))
-                target.removeNode(nodeId);
+                removees.push_back(nodeId);
         }
+
+        for(auto nodeId : removees)
+            target.removeNode(nodeId);
     }
 
     if(!_componentFilters.empty())

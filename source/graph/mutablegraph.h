@@ -96,8 +96,6 @@ private:
     std::vector<EdgeId> _edgeIds;
     std::deque<EdgeId> _unusedEdgeIds;
 
-
-
     bool _updateRequired = false;
 
     void reserveNodeId(NodeId nodeId);

@@ -13,6 +13,8 @@ Item
     {
         id: rows
 
+        ExclusiveGroup { id: buttonMenuGroup }
+
         ButtonMenu
         {
             id: transformMenu
@@ -23,6 +25,7 @@ Item
             visible: creationState === GraphTransformCreationState.Uncreated ||
                      creationState === GraphTransformCreationState.TransformSelected
             enabled: transformEnabled
+            exclusiveGroup: buttonMenuGroup
             onSelectedValueChanged:
             {
                 valueTextField.unfocusAndReset();
@@ -64,6 +67,7 @@ Item
             visible: creationState === GraphTransformCreationState.TransformSelected ||
                      creationState === GraphTransformCreationState.FieldSelected
             enabled: transformEnabled
+            exclusiveGroup: buttonMenuGroup
             onSelectedValueChanged:
             {
                 valueTextField.unfocusAndReset();
@@ -82,6 +86,7 @@ Item
                      creationState === GraphTransformCreationState.OperationSelected ||
                      creationState === GraphTransformCreationState.Created
             enabled: transformEnabled
+            exclusiveGroup: buttonMenuGroup
             onSelectedValueChanged:
             {
                 valueTextField.unfocusAndReset();
@@ -204,13 +209,12 @@ Item
         {
             id: enabledCheckBox
 
-            visible: creationState >= GraphTransformCreationState.OperationSelected ||
-                     creationState === GraphTransformCreationState.Created
+            visible: creationState === GraphTransformCreationState.Created
 
             onCheckedStateChanged:
             {
                 valueTextField.unfocusAndReset();
-                transformEnabled = checked
+                transformEnabled = checked;
             }
         }
 

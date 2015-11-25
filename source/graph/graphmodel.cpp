@@ -22,7 +22,7 @@ GraphModel::GraphModel(const QString &name) :
     connect(&_transformedGraph, &Graph::graphChanged, this, &GraphModel::onGraphChanged, Qt::DirectConnection);
 
     addDataField(tr("Node Degree"))
-        .setIntValueFn(INT_NODE_FN([this](NodeId nodeId) { return _graph.nodeById(nodeId).degree(); }))
+        .setIntValueFn(INT_NODE_FN([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).degree(); }))
         .setIntMin(0);
 
     addDataField(tr("Node Name"))
@@ -97,7 +97,10 @@ QStringList GraphModel::availableTransformNames() const
     QStringList stringList;
 
     for(auto& t : _graphTransformFactories)
-        stringList.append(t.first);
+    {
+        if(!availableDataFields(t.first).isEmpty())
+            stringList.append(t.first);
+    }
 
     return stringList;
 }
