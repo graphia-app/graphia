@@ -149,6 +149,10 @@ public:
 
             for(auto& subVolume : subTree->_subVolumes)
             {
+                //FIXME the subVolumes can legitimately get to zero volume when one of the bounding box
+                // dimensions added to the centre equals the centre, due to floating point precision limits,
+                // so I think we just need to accept that the subVolumes can be zero volume and deal with
+                // it some way
                 Q_ASSERT(subVolume._boundingBox.valid() &&
                          (nodeIds.size() == 1 || subVolume._boundingBox.volume() > 0.0f));
 
@@ -232,7 +236,7 @@ public:
                     return false;
 
                 if(subVolume._leaf)
-                    leafVolumes.push_back(subVolume);
+                    leafVolumes.push_back(&subVolume);
 
                 return true;
             });

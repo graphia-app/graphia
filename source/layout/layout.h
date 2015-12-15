@@ -182,6 +182,7 @@ private:
     void removeComponent(ComponentId componentId);
 
 private slots:
+    void onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet);
     void onComponentAdded(const Graph*, ComponentId componentId, bool);
     void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
 

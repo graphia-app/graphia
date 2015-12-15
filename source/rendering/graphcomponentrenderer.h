@@ -42,17 +42,22 @@ public:
 
     void cleanup();
     void update(float t);
-    void render(int x, int y, int width = 0, int height = 0, float alpha = 1.0f);
-    void setSize(int viewportWidth, int viewportHeight,
-                 int width = 0, int height = 0);
+    void setViewportSize(int viewportWidth, int viewportHeight);
+    void setDimensions(const QRect& dimensions);
 
     bool transitionActive();
 
     int viewportWidth() const { return _viewportWidth; }
     int viewportHeight() const { return _viewportHeight; }
 
-    int width() const { return _width; }
-    int height() const { return _height; }
+    int width() const { return _dimensions.width(); }
+    int height() const { return _dimensions.height(); }
+
+    float alpha() const { return _alpha; }
+    void setAlpha(float alpha);
+
+    QMatrix4x4 modelViewMatrix() const;
+    QMatrix4x4 projectionMatrix() const;
 
     void moveFocusToNode(NodeId nodeId);
     void moveFocusToCentreOfComponent();
@@ -78,15 +83,6 @@ public:
     void zoom(float delta, bool doTransition);
     void zoomToDistance(float distance);
 
-    void updatePositionalData();
-    enum class When
-    {
-        Later,
-        Now
-    };
-
-    void updateVisualData(When when = When::Later);
-
     void cloneViewDataFrom(const GraphComponentRenderer& other);
     void saveViewData() { _savedViewData = _viewData; }
     bool savedViewIsReset() { return _savedViewData.isReset(); }
@@ -101,16 +97,12 @@ public:
 
 private:
     GraphRenderer* _graphRenderer;
-    Sphere _sphere;
-    Cylinder _cylinder;
 
     bool _initialised = false;
     bool _visible = false;
 
     bool _frozen = false;
     bool _cleanupWhenThawed = false;
-    bool _updateVisualDataWhenThawed = false;
-    bool _updatePositionDataWhenThawed = false;
 
     struct ViewData
     {
@@ -129,38 +121,13 @@ private:
     ViewData _viewData;
     ViewData _savedViewData;
 
-    void prepareVertexBuffers();
-    void prepareNodeVAO();
-    void prepareEdgeVAO();
-    void prepareDebugLinesVAO();
-
     int _viewportWidth = 0;
     int _viewportHeight = 0;
-    int _width = 0;
-    int _height = 0;
 
-    void updateMatrices();
+    QRect _dimensions;
 
-    void renderNodes(float alpha);
-    void renderEdges(float alpha);
-    void renderDebugLines();
-    void render2D();
+    float _alpha = 1.0f;
 
-    void centreNodeInViewport(NodeId nodeId, float cameraDistance = -1.0f);
-    void centrePositionInViewport(const QVector3D& focus,
-                                  float cameraDistance = -1.0f,
-                                  // Odd constructor makes a null quaternion
-                                  const QQuaternion rotation = QQuaternion(QVector4D()));
-
-    float _entireComponentZoomDistance;
-    float zoomDistanceForNodeIds(const QVector3D& centre, std::vector<NodeId> nodeIds);
-    void updateFocusPosition();
-    void updateEntireComponentZoomDistance();
-
-    bool _visualDataRequiresUpdate = false;
-    void updateVisualDataIfRequired();
-
-private:
     bool _trackFocus = true;
     float _targetZoomDistance = 0.0f;
     Transition _zoomTransition;
@@ -173,50 +140,18 @@ private:
     std::shared_ptr<GraphModel> _graphModel;
     std::shared_ptr<SelectionManager> _selectionManager;
 
-    QMatrix4x4 _modelViewMatrix;
-    QMatrix4x4 _projectionMatrix;
+    QMatrix4x4 subViewportMatrix() const;
 
-    std::vector<GLfloat> _nodePositionData;
-    int _numNodesInPositionData = 0;
-    QOpenGLBuffer _nodePositionBuffer;
+    void centreNodeInViewport(NodeId nodeId, float cameraDistance = -1.0f);
+    void centrePositionInViewport(const QVector3D& focus,
+                                  float cameraDistance = -1.0f,
+                                  // Odd constructor makes a null quaternion
+                                  const QQuaternion rotation = QQuaternion(QVector4D()));
 
-    std::vector<GLfloat> _edgePositionData;
-    int _numEdgesInPositionData = 0;
-    QOpenGLBuffer _edgePositionBuffer;
-
-    std::vector<GLfloat> _nodeVisualData;
-    QOpenGLBuffer _nodeVisualBuffer;
-
-    std::vector<GLfloat> _edgeVisualData;
-    QOpenGLBuffer _edgeVisualBuffer;
-
-private:
-    struct DebugLine
-    {
-        DebugLine(const QVector3D& start, const QVector3D& end, const QColor& color) :
-            _start(start), _end(end), _color(color)
-        {}
-
-        QVector3D _start;
-        QVector3D _end;
-        QColor _color;
-    };
-
-    std::vector<DebugLine> _debugLines;
-    std::mutex _debugLinesMutex;
-    std::vector<GLfloat> _debugLinesData;
-    QOpenGLBuffer _debugLinesDataBuffer;
-    QOpenGLVertexArrayObject _debugLinesDataVAO;
-
-public:
-    void addDebugLine(const QVector3D& start, const QVector3D& end, const QColor color = QColor(Qt::GlobalColor::white))
-    {
-        DebugLine debugLine(start, end, color);
-        _debugLines.push_back(debugLine);
-    }
-    void addDebugBoundingBox(const BoundingBox3D& boundingBox, const QColor color = QColor(Qt::GlobalColor::white));
-    void clearDebugLines() { _debugLines.clear(); }
-    void submitDebugLines();
+    float _entireComponentZoomDistance;
+    float zoomDistanceForNodeIds(const QVector3D& centre, std::vector<NodeId> nodeIds);
+    void updateFocusPosition();
+    void updateEntireComponentZoomDistance();
 };
 
 #endif // GRAPHCOMPONENTRENDERER_H

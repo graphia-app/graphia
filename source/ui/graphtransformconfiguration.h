@@ -18,8 +18,7 @@ DEFINE_QML_ENUM(com.kajeka, 1, 0, GraphTransformCreationState,
                 TransformSelected,
                 FieldSelected,
                 OperationSelected,
-                Created,
-                Fixed);
+                Created);
 
 class GraphTransformConfiguration : public QObject
 {
@@ -30,6 +29,7 @@ class GraphTransformConfiguration : public QObject
     Q_PROPERTY(QString fieldName READ fieldName WRITE setFieldName NOTIFY fieldNameChanged)
     Q_PROPERTY(QString op READ op WRITE setOp NOTIFY opChanged)
     Q_PROPERTY(QString fieldValue READ value WRITE setValue NOTIFY valueChanged)
+    Q_PROPERTY(bool locked READ locked WRITE setLocked NOTIFY lockedChanged)
 
     Q_PROPERTY(bool hasFieldRange READ hasFieldRange NOTIFY hasFieldRangeChanged)
     Q_PROPERTY(double minFieldValue READ minFieldValue NOTIFY minFieldValueChanged)
@@ -50,6 +50,7 @@ private:
     QString _fieldName;
     ConditionFnOp _op = ConditionFnOp::None;
     QString _value;
+    bool _locked = false;
 
     bool _valid = false;
     GraphTransformCreationState::Enum _creationState = GraphTransformCreationState::Enum::Uncreated;
@@ -79,6 +80,7 @@ public:
     QString op() const;
     ConditionFnOp opType() const;
     QString value() const;
+    bool locked() const;
 
     void setEnabled(bool enabled);
     void setName(const QString& name);
@@ -86,6 +88,7 @@ public:
     void setOp(ConditionFnOp op);
     void setOp(const QString& op);
     void setValue(const QString& value);
+    void setLocked(bool locked);
 
     void refreshField();
 
@@ -111,6 +114,7 @@ signals:
     void fieldNameChanged();
     void opChanged();
     void valueChanged();
+    void lockedChanged();
 
     void hasFieldRangeChanged();
     void minFieldValueChanged();

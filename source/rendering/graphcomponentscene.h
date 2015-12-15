@@ -24,8 +24,7 @@ public:
 
     void initialise();
     void update(float t);
-    void render();
-    void setSize(int width, int height);
+    void setViewportSize(int width, int height);
 
     bool transitionActive() const;
 

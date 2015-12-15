@@ -1,6 +1,8 @@
 #include "layout.h"
 #include "../utils/utils.h"
 
+#include "../graph/componentmanager.h"
+
 LayoutThread::LayoutThread(GraphModel& graphModel,
                            std::unique_ptr<const LayoutFactory> layoutFactory,
                            bool repeating) :
@@ -18,6 +20,7 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
             qDebug() << "Layout" << ticksPerSecond << "ips";
     });
 
+    connect(&graphModel.graph(), &Graph::componentSplit, this, &LayoutThread::onComponentSplit, Qt::DirectConnection);
     connect(&graphModel.graph(), &Graph::componentAdded, this, &LayoutThread::onComponentAdded, Qt::DirectConnection);
     connect(&graphModel.graph(), &Graph::componentWillBeRemoved, this, &LayoutThread::onComponentWillBeRemoved, Qt::DirectConnection);
 }
@@ -146,7 +149,7 @@ void LayoutThread::run()
 
         for(auto& layout : _layouts)
         {
-            if(layout.second->shouldPause())
+            if(layout.second->shouldPause() || layout.second->graph().numNodes() == 1)
                 continue;
 
             layout.second->execute(!_executedAtLeastOnce.get(layout.first));
@@ -228,6 +231,17 @@ void LayoutThread::removeComponent(ComponentId componentId)
 
     if(resumeAfterRemoval)
         resume();
+}
+
+void LayoutThread::onComponentSplit(const Graph*, const ComponentSplitSet& componentSplitSet)
+{
+    // When a component splits and it has already had a layout iteration, all the splitees
+    // have therefore also had an iteration
+    if(_executedAtLeastOnce.get(componentSplitSet.oldComponentId()))
+    {
+        for(auto componentId : componentSplitSet.splitters())
+            _executedAtLeastOnce.set(componentId, true);
+    }
 }
 
 void LayoutThread::onComponentAdded(const Graph*, ComponentId componentId, bool)

@@ -27,6 +27,8 @@ Camera::Camera(const Camera& other) :
     _viewMatrixDirty(other._viewMatrixDirty),
     _viewProjectionMatrixDirty(other._viewProjectionMatrixDirty)
 {
+    _viewMatrix = other._viewMatrix;
+
     switch(_projectionType)
     {
     default:
@@ -38,6 +40,8 @@ Camera::Camera(const Camera& other) :
         updatePerspectiveProjection();
         break;
     }
+
+    _viewProjectionMatrix = other._viewProjectionMatrix;
 }
 
 Camera& Camera::operator=(const Camera& other)
@@ -56,7 +60,9 @@ Camera& Camera::operator=(const Camera& other)
     _top = other._top;
     _viewMatrixDirty = other._viewMatrixDirty;
     _viewProjectionMatrixDirty = other._viewProjectionMatrixDirty;
+    _viewMatrix = other._viewMatrix;
     _projectionMatrix = other._projectionMatrix;
+    _viewProjectionMatrix = other._viewProjectionMatrix;
 
     return *this;
 }
@@ -88,20 +94,29 @@ float Camera::distance() const
 
 void Camera::setFocus(const QVector3D& focus)
 {
-    _focus = focus;
-    _viewMatrixDirty = true;
+    if(_focus != focus)
+    {
+        _focus = focus;
+        _viewMatrixDirty = true;
+    }
 }
 
 void Camera::setDistance(float distance)
 {
-    _distance = distance;
-    _viewMatrixDirty = true;
+    if(_distance != distance)
+    {
+        _distance = distance;
+        _viewMatrixDirty = true;
+    }
 }
 
 void Camera::setRotation(const QQuaternion& rotation)
 {
-    _rotation = rotation;
-    _viewMatrixDirty = true;
+    if(_rotation != rotation)
+    {
+        _rotation = rotation;
+        _viewMatrixDirty = true;
+    }
 }
 
 void Camera::translate(const QVector3D& translation)
@@ -208,6 +223,26 @@ bool Camera::unproject(int x, int y, int z, QVector3D& result)
     result.setZ(o.z() * o.w());
 
     return true;
+}
+
+void Camera::updatePerspectiveProjection()
+{
+    _projectionMatrix.setToIdentity();
+
+    if(_fieldOfView > 0.0f && _aspectRatio > 0.0f && _nearPlane < _farPlane)
+        _projectionMatrix.perspective(_fieldOfView, _aspectRatio, _nearPlane, _farPlane);
+
+    _viewProjectionMatrixDirty = true;
+}
+
+void Camera::updateOrthogonalProjection()
+{
+    _projectionMatrix.setToIdentity();
+
+    if(_left < _right && _bottom < _top && _nearPlane < _farPlane)
+        _projectionMatrix.ortho(_left, _right, _bottom, _top, _nearPlane, _farPlane);
+
+    _viewProjectionMatrixDirty = true;
 }
 
 const Ray Camera::rayForViewportCoordinates(int x, int y)

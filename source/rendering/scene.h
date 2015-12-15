@@ -23,8 +23,7 @@ public:
     virtual void initialise() = 0;
     virtual void cleanup() {}
     virtual void update(float t) = 0;
-    virtual void render() = 0;
-    virtual void setSize(int width, int height) = 0;
+    virtual void setViewportSize(int width, int height) = 0;
 
     virtual bool transitionActive() const = 0;
 

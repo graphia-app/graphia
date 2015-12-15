@@ -36,6 +36,12 @@ public:
         _graph(&graph)
     {}
 
+    GenericGraphArray(const Graph& graph, const Element& defaultValue) :
+        _graph(&graph)
+    {
+        fill(defaultValue);
+    }
+
     GenericGraphArray(const GenericGraphArray& other) :
         _graph(other._graph),
         _array(other._array)
@@ -124,6 +130,12 @@ public:
         return static_cast<int>(_array.size());
     }
 
+    bool empty() const
+    {
+        MaybeLock lock(_mutex);
+        return _array.empty();
+    }
+
     void resize(int size)
     {
         MaybeLock lock(_mutex);
@@ -160,6 +172,13 @@ class NodeArray : public GenericGraphArray<NodeId, Element, Locking>
 public:
     NodeArray(const Graph& graph) :
         GenericGraphArray<NodeId, Element, Locking>(graph)
+    {
+        this->resize(graph.nextNodeId());
+        graph._nodeArrays.insert(this);
+    }
+
+    NodeArray(const Graph& graph, const Element& defaultValue) :
+        GenericGraphArray<NodeId, Element, Locking>(graph, defaultValue)
     {
         this->resize(graph.nextNodeId());
         graph._nodeArrays.insert(this);
@@ -207,6 +226,13 @@ public:
         graph._edgeArrays.insert(this);
     }
 
+    EdgeArray(const Graph& graph, const Element& defaultValue) :
+        GenericGraphArray<EdgeId, Element, Locking>(graph, defaultValue)
+    {
+        this->resize(graph.nextEdgeId());
+        graph._edgeArrays.insert(this);
+    }
+
     EdgeArray(const EdgeArray& other) :
         GenericGraphArray<EdgeId, Element, Locking>(other)
     {
@@ -244,6 +270,14 @@ class ComponentArray : public GenericGraphArray<ComponentId, Element, Locking>
 public:
     ComponentArray(const Graph& graph) :
         GenericGraphArray<ComponentId, Element, Locking>(graph)
+    {
+        Q_ASSERT(graph._componentManager != nullptr);
+        this->resize(graph.numComponentArrays());
+        graph.insertComponentArray(this);
+    }
+
+    ComponentArray(const Graph& graph, const Element& defaultValue) :
+        GenericGraphArray<ComponentId, Element, Locking>(graph, defaultValue)
     {
         Q_ASSERT(graph._componentManager != nullptr);
         this->resize(graph.numComponentArrays());

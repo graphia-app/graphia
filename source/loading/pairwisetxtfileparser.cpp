@@ -11,85 +11,117 @@
 
 #include <QDebug>
 
-#include <map>
+#include <unordered_map>
 #include <vector>
+
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <cctype>
 
 bool PairwiseTxtFileParser::parse(MutableGraph& graph)
 {
-    QFileInfo info(_filename);
-
-    if(!info.exists())
+    std::ifstream file(_filename.toStdString());
+    if(!file)
         return false;
 
-    auto fileSize = info.size();
+    auto fileSize = file.tellg();
+    file.seekg(0, std::ios::end);
+    fileSize = file.tellg() - fileSize;
 
-    QFile file(_filename);
-    if(file.open(QIODevice::ReadOnly))
+    std::unordered_map<std::string, NodeId> nodeIdHash;
+
+    int percentComplete = 0;
+    std::string line;
+    std::string token;
+    std::vector<std::string> tokens;
+
+    file.seekg(0, std::ios::beg);
+    while(std::getline(file, line))
     {
-        std::map<QString, NodeId> nodeIdHash;
+        if(cancelled())
+            return false;
 
-        int percentComplete = 0;
-        QTextStream textStream(&file);
+        tokens.clear();
 
-        while(!textStream.atEnd())
+        bool inQuotes = false;
+
+        for(size_t i = 0; i < line.length(); i++)
         {
-            QString line = textStream.readLine();
-            QRegExp re("\"([^\"]+)\"|([^\\s]+)");
-            QStringList list;
-            int pos = 0;
-
-            while((pos = re.indexIn(line, pos)) != -1)
+            if(line[i] == '\"')
             {
-                list << (!re.cap(1).isEmpty() ? re.cap(1) : re.cap(2));
-                pos += re.matchedLength();
+                if(inQuotes)
+                {
+                    tokens.emplace_back(std::move(token));
+                    token.clear();
+                }
+
+                inQuotes = !inQuotes;
             }
-
-            if(list.size() >= 2)
+            else
             {
-                auto firstToken = list.at(0);
-                auto secondToken = list.at(1);
+                bool space = std::isspace(line[i]);
+                bool trailingSpace = space && !token.empty();
 
-                NodeId firstNodeId;
-                NodeId secondNodeId;
-
-                if(!u::contains(nodeIdHash, firstToken))
+                if(trailingSpace && !inQuotes)
                 {
-                    firstNodeId = graph.addNode();
-                    nodeIdHash.emplace(firstToken, firstNodeId);
-                    _graphModel->setNodeName(firstNodeId, firstToken);
+                    tokens.emplace_back(std::move(token));
+                    token.clear();
                 }
-                else
-                    firstNodeId = nodeIdHash[firstToken];
-
-                if(!u::contains(nodeIdHash, secondToken))
-                {
-                    secondNodeId = graph.addNode();
-                    nodeIdHash.emplace(secondToken, secondNodeId);
-                    _graphModel->setNodeName(secondNodeId, secondToken);
-                }
-                else
-                    secondNodeId = nodeIdHash[secondToken];
-
-                auto edgeId = graph.addEdge(firstNodeId, secondNodeId);
-
-                if(list.size() >= 3)
-                {
-                    // We have an edge weight too
-                    auto thirdToken = list.at(2);
-                    _graphModel->setEdgeWeight(edgeId, thirdToken.toFloat());
-                }
-            }
-
-            int newPercentComplete = static_cast<int>(file.pos() * 100 / fileSize);
-
-            if(newPercentComplete > percentComplete)
-            {
-                percentComplete = newPercentComplete;
-                emit progress(newPercentComplete);
+                else if(!space || inQuotes)
+                    token += line[i];
             }
         }
 
-        file.close();
+        if(!token.empty())
+        {
+            tokens.emplace_back(std::move(token));
+            token.clear();
+        }
+
+        if(tokens.size() >= 2)
+        {
+            auto& firstToken = tokens.at(0);
+            auto& secondToken = tokens.at(1);
+
+            NodeId firstNodeId;
+            NodeId secondNodeId;
+
+            if(!u::contains(nodeIdHash, firstToken))
+            {
+                firstNodeId = graph.addNode();
+                nodeIdHash.emplace(firstToken, firstNodeId);
+                _graphModel->setNodeName(firstNodeId, QString::fromStdString(firstToken));
+            }
+            else
+                firstNodeId = nodeIdHash[firstToken];
+
+            if(!u::contains(nodeIdHash, secondToken))
+            {
+                secondNodeId = graph.addNode();
+                nodeIdHash.emplace(secondToken, secondNodeId);
+                _graphModel->setNodeName(secondNodeId, QString::fromStdString(secondToken));
+            }
+            else
+                secondNodeId = nodeIdHash[secondToken];
+
+            auto edgeId = graph.addEdge(firstNodeId, secondNodeId);
+
+            if(tokens.size() >= 3)
+            {
+                // We have an edge weight too
+                auto& thirdToken = tokens.at(2);
+                _graphModel->setEdgeWeight(edgeId, std::atof(thirdToken.c_str()));
+            }
+        }
+
+        int newPercentComplete = static_cast<int>(file.tellg() * 100 / fileSize);
+
+        if(newPercentComplete > percentComplete)
+        {
+            percentComplete = newPercentComplete;
+            emit progress(newPercentComplete);
+        }
     }
 
     return true;

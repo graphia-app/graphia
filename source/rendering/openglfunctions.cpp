@@ -10,7 +10,7 @@ void OpenGLFunctions::resolveOpenGLFunctions()
 
     if(!initializeOpenGLFunctions())
     {
-        // This should never happen if checkOpenGLSupport has returned true
+        // This should never happen if hasOpenGLSupport has returned true
         qFatal("Could not obtain required OpenGL context version");
     }
 }

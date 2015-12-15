@@ -66,25 +66,8 @@ public:
 private:
     bool unproject(int x, int y, int z, QVector3D& result);
 
-    inline void updatePerspectiveProjection()
-    {
-        _projectionMatrix.setToIdentity();
-
-        if(_fieldOfView > 0.0f && _aspectRatio > 0.0f && _nearPlane < _farPlane)
-            _projectionMatrix.perspective(_fieldOfView, _aspectRatio, _nearPlane, _farPlane);
-
-        _viewProjectionMatrixDirty = true;
-    }
-
-    inline void updateOrthogonalProjection()
-    {
-        _projectionMatrix.setToIdentity();
-
-        if(_left < _right && _bottom < _top && _nearPlane < _farPlane)
-            _projectionMatrix.ortho(_left, _right, _bottom, _top, _nearPlane, _farPlane);
-
-        _viewProjectionMatrixDirty = true;
-    }
+    void updatePerspectiveProjection();
+    void updateOrthogonalProjection();
 
     QVector3D _focus;
     QQuaternion _rotation;

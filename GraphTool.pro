@@ -156,13 +156,6 @@ SOURCES += \
     source/utils/settings.cpp \
     source/layout/layoutsettings.cpp
 
-OTHER_FILES += \
-    source/ui/qml/ButtonMenu.qml \
-    source/ui/qml/main.qml \
-    source/ui/qml/DocumentUI.qml \
-    source/ui/qml/Transform.qml \
-    source/ui/qml/PreferencesForm.qml
-
 RESOURCES += \
     source/rendering/shaders.qrc \
     source/ui/qml.qrc \

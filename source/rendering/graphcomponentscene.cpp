@@ -30,22 +30,23 @@ void GraphComponentScene::initialise()
 void GraphComponentScene::update(float t)
 {
     if(componentRenderer() != nullptr)
+    {
+        componentRenderer()->setDimensions(QRect(0, 0, _width, _height));
+        componentRenderer()->setAlpha(1.0f);
         componentRenderer()->update(t);
+    }
 }
 
-void GraphComponentScene::render()
-{
-    if(componentRenderer() != nullptr)
-        componentRenderer()->render(0, 0);
-}
-
-void GraphComponentScene::setSize(int width, int height)
+void GraphComponentScene::setViewportSize(int width, int height)
 {
     _width = width;
     _height = height;
 
     if(componentRenderer() != nullptr)
-        componentRenderer()->setSize(width, height);
+    {
+        componentRenderer()->setDimensions(QRect(0, 0, width, height));
+        componentRenderer()->setViewportSize(width, height);
+    }
 }
 
 bool GraphComponentScene::transitionActive() const
@@ -219,7 +220,7 @@ void GraphComponentScene::onGraphChanged(const Graph* graph)
 
         if(visible())
         {
-            setSize(_width, _height);
+            setViewportSize(_width, _height);
 
             // Graph changes may significantly alter the centre; ease the transition
             if(componentRenderer() != nullptr && componentRenderer()->trackingCentreOfComponent())

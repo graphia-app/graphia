@@ -19,12 +19,11 @@ struct MaterialInfo
 };
 uniform MaterialInfo material;
 
-uniform float alpha;
-
 in vec3 position;
 in vec3 normal;
 in vec3 vColor;
 in vec3 vOutlineColor;
+in float vAlpha;
 
 layout (location = 0) out vec4 outColor;
 layout (location = 1) out vec4 outSelection;
@@ -73,6 +72,6 @@ vec3 adsModel(const in vec3 pos, const in vec3 n)
 void main()
 {
     vec3 color = adsModel(position, normalize(normal));
-    outColor = vec4(color, alpha);
-    outSelection = vec4(vOutlineColor, alpha);
+    outColor = vec4(color, vAlpha);
+    outSelection = vec4(vOutlineColor, vAlpha);
 }

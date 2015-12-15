@@ -35,6 +35,7 @@ GraphTransformConfiguration::GraphTransformConfiguration(const GraphTransformCon
     _fieldName(other._fieldName),
     _op(other._op),
     _value(other._value),
+    _locked(other._locked),
     _valid(other._valid),
     _creationState(other._creationState)
 {}
@@ -49,6 +50,7 @@ GraphTransformConfiguration& GraphTransformConfiguration::operator=(const GraphT
         _fieldName = other._fieldName;
         _op = other._op;
         _value = other._value;
+        _locked = other._locked;
         _valid = other._valid;
         _creationState = other._creationState;
     }
@@ -205,6 +207,11 @@ QString GraphTransformConfiguration::value() const
     return _value;
 }
 
+bool GraphTransformConfiguration::locked() const
+{
+    return _locked;
+}
+
 void GraphTransformConfiguration::setEnabled(bool enabled)
 {
     if(_enabled != enabled)
@@ -264,6 +271,15 @@ void GraphTransformConfiguration::setValue(const QString& value)
         emit valueChanged();
 
         updateCreationState();
+    }
+}
+
+void GraphTransformConfiguration::setLocked(bool locked)
+{
+    if(_locked != locked)
+    {
+        _locked = locked;
+        emit lockedChanged();
     }
 }
 

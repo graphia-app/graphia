@@ -22,7 +22,6 @@ public:
 
 private:
     Type _type = Type::None;
-    float _lastTime = 0.0f;
     float _duration = 0.0f;
     float _elapsed = 0.0f;
     std::function<void(float)> _function;
@@ -33,7 +32,6 @@ public:
                                           std::function<void(float)> function,
                                           Args... finishedFunctions)
     {
-        _lastTime = -1.0f;
         _duration = duration;
         _elapsed = 0.0f;
         _type = type;
@@ -41,7 +39,7 @@ public:
         _finishedFunctions = {finishedFunctions...};
     }
 
-    bool update(float time);
+    bool update(float dTime);
     bool active() const { return _elapsed < _duration; }
 };
 

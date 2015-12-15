@@ -28,6 +28,10 @@ class GraphQuickItem : public QQuickFramebufferObject
     Q_PROPERTY(bool viewIsReset MEMBER _viewIsReset NOTIFY viewIsResetChanged)
     Q_PROPERTY(bool canEnterOverviewMode MEMBER _canEnterOverviewMode NOTIFY canEnterOverviewModeChanged)
 
+    Q_PROPERTY(int numNodes READ numNodes NOTIFY graphChanged)
+    Q_PROPERTY(int numEdges READ numEdges NOTIFY graphChanged)
+    Q_PROPERTY(int numComponents READ numComponents NOTIFY graphChanged)
+
 public:
     GraphQuickItem(QQuickItem* parent = nullptr);
 
@@ -84,6 +88,10 @@ private:
         update();
     }
 
+    int numNodes() const;
+    int numEdges() const;
+    int numComponents() const;
+
 public slots:
     void onLayoutChanged();
 
@@ -97,6 +105,10 @@ signals:
 
     void commandWillExecuteAsynchronously(const Command* command) const;
     void commandCompleted(const Command* command, const QString& pastParticiple) const;
+
+    void layoutChanged() const;
+
+    void graphChanged() const;
 };
 
 #endif // GRAPHQUICKITEM_H

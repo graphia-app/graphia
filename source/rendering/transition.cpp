@@ -5,16 +5,12 @@
 
 #include <QDebug>
 
-bool Transition::update(float time)
+bool Transition::update(float dTime)
 {
     if(!active())
         return false;
 
-    if(_lastTime <= 0.0f)
-        _lastTime = time;
-
-    _elapsed += time - _lastTime;
-    _lastTime = time;
+    _elapsed += dTime;
 
     float f = u::clamp(0.0f, 1.0f, _elapsed / _duration);
 

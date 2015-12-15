@@ -15,8 +15,11 @@ WeightedEdgeGraphModel::WeightedEdgeGraphModel(const QString &name) :
 
 void WeightedEdgeGraphModel::onGraphChanged(const Graph*)
 {
-    float min = *std::min_element(_edgeWeights.begin(), _edgeWeights.end());
-    float max = *std::max_element(_edgeWeights.begin(), _edgeWeights.end());
+    if(!_edgeWeights.empty())
+    {
+        float min = *std::min_element(_edgeWeights.begin(), _edgeWeights.end());
+        float max = *std::max_element(_edgeWeights.begin(), _edgeWeights.end());
 
-    mutableDataFieldByName(tr("Edge Weight")).setFloatMin(min).setFloatMax(max);
+        mutableDataFieldByName(tr("Edge Weight")).setFloatMin(min).setFloatMax(max);
+    }
 }

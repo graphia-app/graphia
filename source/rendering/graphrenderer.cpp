@@ -23,6 +23,8 @@
 #include <QEvent>
 #include <QNativeGestureEvent>
 
+#include <cstddef>
+
 static bool loadShaderProgram(QOpenGLShaderProgram& program, const QString& vertexShader, const QString& fragmentShader)
 {
     if(!program.addShaderFromSourceFile(QOpenGLShader::Vertex, vertexShader))
@@ -54,6 +56,130 @@ void GraphInitialiser::initialiseFromGraph(const Graph *graph)
     onGraphChanged(graph);
 }
 
+GPUGraphData::GPUGraphData()
+{
+    resolveOpenGLFunctions();
+}
+
+void GPUGraphData::initialise(QOpenGLShaderProgram& nodesShader,
+                              QOpenGLShaderProgram& edgesShader)
+{
+    _sphere.setRadius(1.0f);
+    _sphere.setRings(16);
+    _sphere.setSlices(16);
+    _sphere.create(nodesShader);
+
+    _cylinder.setRadius(1.0f);
+    _cylinder.setLength(1.0f);
+    _cylinder.setSlices(8);
+    _cylinder.create(edgesShader);
+
+    prepareVertexBuffers();
+    prepareNodeVAO(nodesShader);
+    prepareEdgeVAO(edgesShader);
+}
+
+void GPUGraphData::prepareVertexBuffers()
+{
+    _nodeVBO.create();
+    _nodeVBO.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+
+    _edgeVBO.create();
+    _edgeVBO.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+
+    /*_debugLinesDataBuffer.create();
+    _debugLinesDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);*/
+}
+
+void GPUGraphData::prepareNodeVAO(QOpenGLShaderProgram& shader)
+{
+    _sphere.vertexArrayObject()->bind();
+    shader.bind();
+
+    _nodeVBO.bind();
+    shader.enableAttributeArray("nodePosition");
+    shader.enableAttributeArray("component");
+    shader.enableAttributeArray("size");
+    shader.enableAttributeArray("color");
+    shader.enableAttributeArray("outlineColor");
+    shader.setAttributeBuffer("nodePosition", GL_FLOAT, offsetof(NodeData, _position),     3,         sizeof(NodeData));
+    glVertexAttribIPointer(shader.attributeLocation("component"),                          1, GL_INT, sizeof(NodeData),
+                          reinterpret_cast<const void*>(offsetof(NodeData, _component)));
+    shader.setAttributeBuffer("size",         GL_FLOAT, offsetof(NodeData, _size),         1,         sizeof(NodeData));
+    shader.setAttributeBuffer("color",        GL_FLOAT, offsetof(NodeData, _color),        3,         sizeof(NodeData));
+    shader.setAttributeBuffer("outlineColor", GL_FLOAT, offsetof(NodeData, _outlineColor), 3,         sizeof(NodeData));
+    glVertexAttribDivisor(shader.attributeLocation("nodePosition"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("component"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("size"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("color"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("outlineColor"), 1);
+    _nodeVBO.release();
+
+    shader.release();
+    _sphere.vertexArrayObject()->release();
+}
+
+void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
+{
+    _cylinder.vertexArrayObject()->bind();
+    shader.bind();
+
+    _edgeVBO.bind();
+    shader.enableAttributeArray("sourcePosition");
+    shader.enableAttributeArray("targetPosition");
+    shader.enableAttributeArray("component");
+    shader.enableAttributeArray("size");
+    shader.enableAttributeArray("color");
+    shader.enableAttributeArray("outlineColor");
+    shader.setAttributeBuffer("sourcePosition", GL_FLOAT, offsetof(EdgeData, _sourcePosition), 3,         sizeof(EdgeData));
+    shader.setAttributeBuffer("targetPosition", GL_FLOAT, offsetof(EdgeData, _targetPosition), 3,         sizeof(EdgeData));
+    glVertexAttribIPointer(shader.attributeLocation("component"),                              1, GL_INT, sizeof(EdgeData),
+                            reinterpret_cast<const void*>(offsetof(EdgeData, _component)));
+    shader.setAttributeBuffer("size",           GL_FLOAT, offsetof(EdgeData, _size),           1,         sizeof(EdgeData));
+    shader.setAttributeBuffer("color",          GL_FLOAT, offsetof(EdgeData, _color),          3,         sizeof(EdgeData));
+    shader.setAttributeBuffer("outlineColor",   GL_FLOAT, offsetof(EdgeData, _outlineColor),   3,         sizeof(EdgeData));
+    glVertexAttribDivisor(shader.attributeLocation("sourcePosition"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("targetPosition"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("component"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("size"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("color"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("outlineColor"), 1);
+    _edgeVBO.release();
+
+    shader.release();
+    _cylinder.vertexArrayObject()->release();
+}
+
+void GPUGraphData::reset(const Graph& graph)
+{
+    _nodeData.reserve(graph.numNodes());
+    _nodeData.clear();
+
+    _edgeData.reserve(graph.numEdges());
+    _edgeData.clear();
+}
+
+void GPUGraphData::upload()
+{
+    _nodeVBO.bind();
+    _nodeVBO.allocate(_nodeData.data(), static_cast<int>(_nodeData.size()) * sizeof(NodeData));
+    _nodeVBO.release();
+
+    _edgeVBO.bind();
+    _edgeVBO.allocate(_edgeData.data(), static_cast<int>(_edgeData.size()) * sizeof(EdgeData));
+    _edgeVBO.release();
+}
+
+int GPUGraphData::numNodes() const
+{
+    return _nodeData.size();
+}
+
+int GPUGraphData::numEdges() const
+{
+    return _edgeData.size();
+}
+
 GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
                              CommandManager& commandManager,
                              std::shared_ptr<SelectionManager> selectionManager) :
@@ -62,7 +188,7 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
     _graphModel(graphModel),
     _selectionManager(selectionManager),
     _componentRenderers(_graphModel->graph()),
-    _sceneUpdateEnabled(true)
+    _layoutChanged(true)
 {
     resolveOpenGLFunctions();
 
@@ -78,10 +204,14 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
     prepareSelectionMarkerVAO();
     prepareQuad();
 
+    _gpuGraphData.initialise(_nodesShader, _edgesShader);
+    _gpuGraphDataAlpha.initialise(_nodesShader, _edgesShader);
+
+    prepareComponentDataTexture();
+
     auto graph = &_graphModel->graph();
 
     connect(graph, &Graph::graphChanged, this, &GraphRenderer::onGraphChanged, Qt::DirectConnection);
-
     connect(graph, &Graph::componentAdded, this, &GraphRenderer::onComponentAdded, Qt::DirectConnection);
 
     _graphOverviewScene = new GraphOverviewScene(this);
@@ -103,11 +233,23 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
 
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &GraphRenderer::onSelectionChanged, Qt::DirectConnection);
 
-    _time.start();
+    enableSceneUpdate();
 }
 
 GraphRenderer::~GraphRenderer()
 {
+    if(_componentDataTBO != 0)
+    {
+        glDeleteBuffers(1, &_componentDataTBO);
+        _componentDataTBO = 0;
+    }
+
+    if(_componentDataTexture != 0)
+    {
+        glDeleteTextures(1, &_componentDataTexture);
+        _componentDataTexture = 0;
+    }
+
     if(_visualFBO != 0)
     {
         glDeleteFramebuffers(1, &_visualFBO);
@@ -162,8 +304,167 @@ void GraphRenderer::resize(int width, int height)
     _screenQuadDataBuffer.release();
 }
 
+void GraphRenderer::updateGPUDataIfRequired()
+{
+    if(!_gpuDataRequiresUpdate)
+        return;
+
+    _gpuDataRequiresUpdate = false;
+
+    if(_frozen)
+    {
+        _updateGPUDataWhenThawed = true;
+        return;
+    }
+
+    std::unique_lock<std::recursive_mutex> lock(_graphModel->nodePositions().mutex());
+
+    int componentIndex = 0;
+    _componentIdsOnGPU.clear();
+
+    auto& nodePositions = _graphModel->nodePositions();
+    auto& nodeVisuals = _graphModel->nodeVisuals();
+    auto& edgeVisuals = _graphModel->edgeVisuals();
+    const QColor selectedOutLineColor = Qt::GlobalColor::white;
+    const QColor deselectedOutLineColor = Qt::GlobalColor::black;
+
+    _gpuGraphData.reset(_graphModel->graph());
+    _gpuGraphDataAlpha.reset(_graphModel->graph());
+
+    NodeArray<QVector3D> scaledAndSmoothedNodePositions(_graphModel->graph());
+
+    for(ComponentId componentId : _graphModel->graph().componentIds())
+    {
+        auto* componentRenderer = componentRendererForId(componentId);
+
+        Q_ASSERT(componentRenderer->initialised());
+
+        if(!componentRenderer->visible())
+            continue;
+
+        auto component = _graphModel->graph().componentById(componentId);
+        auto& gpuGraphData = componentRenderer->alpha() >= 1.0f ? _gpuGraphData : _gpuGraphDataAlpha;
+
+        for(NodeId nodeId : component->nodeIds())
+        {
+            const QVector3D nodePosition = nodePositions.getScaledAndSmoothed(nodeId);
+            scaledAndSmoothedNodePositions[nodeId] = nodePosition;
+
+            GPUGraphData::NodeData nodeData;
+            nodeData._position[0] = nodePosition.x();
+            nodeData._position[1] = nodePosition.y();
+            nodeData._position[2] = nodePosition.z();
+            nodeData._component = componentIndex;
+            nodeData._size = nodeVisuals[nodeId]._size;
+            nodeData._color[0] = nodeVisuals[nodeId]._color.redF();
+            nodeData._color[1] = nodeVisuals[nodeId]._color.greenF();
+            nodeData._color[2] = nodeVisuals[nodeId]._color.blueF();
+
+            QColor outlineColor = _selectionManager && _selectionManager->nodeIsSelected(nodeId) ?
+                selectedOutLineColor :
+                deselectedOutLineColor;
+
+            nodeData._outlineColor[0] = outlineColor.redF();
+            nodeData._outlineColor[1] = outlineColor.greenF();
+            nodeData._outlineColor[2] = outlineColor.blueF();
+
+            gpuGraphData._nodeData.push_back(nodeData);
+        }
+
+        for(EdgeId edgeId : component->edgeIds())
+        {
+            const Edge& edge = _graphModel->graph().edgeById(edgeId);
+            const QVector3D sourcePosition = scaledAndSmoothedNodePositions[edge.sourceId()];
+            const QVector3D targetPosition = scaledAndSmoothedNodePositions[edge.targetId()];
+
+            GPUGraphData::EdgeData edgeData;
+            edgeData._sourcePosition[0] = sourcePosition.x();
+            edgeData._sourcePosition[1] = sourcePosition.y();
+            edgeData._sourcePosition[2] = sourcePosition.z();
+            edgeData._targetPosition[0] = targetPosition.x();
+            edgeData._targetPosition[1] = targetPosition.y();
+            edgeData._targetPosition[2] = targetPosition.z();
+            edgeData._component = componentIndex;
+            edgeData._size = edgeVisuals[edgeId]._size;
+            edgeData._color[0] = edgeVisuals[edgeId]._color.redF();
+            edgeData._color[1] = edgeVisuals[edgeId]._color.greenF();
+            edgeData._color[2] = edgeVisuals[edgeId]._color.blueF();
+            edgeData._outlineColor[0] = deselectedOutLineColor.redF();
+            edgeData._outlineColor[1] = deselectedOutLineColor.greenF();
+            edgeData._outlineColor[2] = deselectedOutLineColor.blueF();
+
+            gpuGraphData._edgeData.push_back(edgeData);
+        }
+
+        _componentIdsOnGPU.push_back(componentId);
+        componentIndex++;
+    }
+
+    _gpuGraphData.upload();
+    _gpuGraphDataAlpha.upload();
+}
+
+void GraphRenderer::updateGPUData(GraphRenderer::When when)
+{
+    _gpuDataRequiresUpdate = true;
+
+    if(when == When::Now)
+        updateGPUDataIfRequired();
+}
+
+void GraphRenderer::updateComponentGPUData()
+{
+    //FIXME this doesn't necessarily need to be entirely regenerated and rebuffered
+    // every frame, so it makes sense to do partial updates as and when required.
+    // OTOH, it's probably not ever going to be masses of data, so maybe we should
+    // just suck it up; need to get a profiler on it and see how long we're spending
+    // here transfering the buffer, when there are lots of components
+    std::vector<GLfloat> componentData;
+
+    for(auto componentId : _componentIdsOnGPU)
+    {
+        auto* componentRenderer = componentRendererForId(componentId);
+
+        if(!componentRenderer->visible())
+            continue;
+
+        for(int i = 0; i < 16; i++)
+            componentData.push_back(componentRenderer->modelViewMatrix().data()[i]);
+
+        for(int i = 0; i < 16; i++)
+            componentData.push_back(componentRenderer->projectionMatrix().data()[i]);
+
+        componentData.push_back(componentRenderer->alpha());
+
+        // Padding
+        for(int i = 0; i < 3; i++)
+            componentData.push_back(0.0f);
+    }
+
+    glBindBuffer(GL_TEXTURE_BUFFER, _componentDataTBO);
+    glBufferData(GL_TEXTURE_BUFFER, componentData.size() * sizeof(GLfloat), componentData.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_TEXTURE_BUFFER, 0);
+}
+
+void GraphRenderer::freeze()
+{
+    _frozen = true;
+}
+
+void GraphRenderer::thaw()
+{
+    _frozen = false;
+
+    if(_updateGPUDataWhenThawed)
+    {
+        updateGPUData(When::Now);
+        _updateGPUDataWhenThawed = false;
+    }
+}
+
 void GraphRenderer::clear()
 {
+    glViewport(0, 0, _width, _height);
     glBindFramebuffer(GL_FRAMEBUFFER, _visualFBO);
 
     // Color buffer
@@ -196,7 +497,7 @@ void GraphRenderer::setScene(Scene* scene)
     _scene->setVisible(true);
     _scene->onShow();
 
-    _scene->setSize(_width, _height);
+    _scene->setViewportSize(_width, _height);
 }
 
 GraphRenderer::Mode GraphRenderer::mode() const
@@ -213,13 +514,31 @@ void GraphRenderer::setMode(Mode mode)
     }
 }
 
+void GraphRenderer::resetTime()
+{
+    _time.start();
+    _lastTime = 0.0f;
+}
+
+float GraphRenderer::secondsElapsed()
+{
+    float time = _time.elapsed() / 1000.0f;
+    float dTime = time - _lastTime;
+    _lastTime = time;
+
+    return dTime;
+}
+
 //FIXME this reference counting thing is rubbish, and gives rise to hacks
 void GraphRenderer::rendererStartedTransition()
 {
     Q_ASSERT(_numTransitioningRenderers >= 0);
 
     if(_numTransitioningRenderers == 0)
+    {
         emit userInteractionStarted();
+        resetTime();
+    }
 
     _numTransitioningRenderers++;
 }
@@ -258,6 +577,8 @@ void GraphRenderer::finishTransitionToOverviewMode()
         _graphOverviewScene->startTransitionFromComponentMode(_graphComponentScene->componentId(),
                                                               0.3f, Transition::Type::EaseInEaseOut);
     }
+
+    updateGPUData(When::Later);
 }
 
 void GraphRenderer::finishTransitionToComponentMode()
@@ -273,6 +594,8 @@ void GraphRenderer::finishTransitionToComponentMode()
 
         _graphComponentScene->restoreViewData();
     }
+
+    updateGPUData(When::Later);
 }
 
 void GraphRenderer::switchToOverviewMode(bool doTransition)
@@ -352,34 +675,27 @@ void GraphRenderer::onGraphChanged(const Graph* graph)
 {
     _numComponents = graph->numComponents();
 
+    //FIXME: this makes me feel dirty
+    // This is a slight hack to prevent there being a gap in which
+    // layout can occur, inbetween the graph change and user
+    // interaction phases
+    rendererStartedTransition();
+
     for(auto componentId : graph->componentIds())
     {
-        //FIXME: this makes me feel dirty
-        // This is a slight hack to prevent there being a gap in which
-        // layout can occur, inbetween the graph change and user
-        // interaction phases
-        rendererStartedTransition();
-
         executeOnRendererThread([this, componentId]
         {
-            auto graphComponentRenderer = componentRendererForId(componentId);
-
-            if(!graphComponentRenderer->initialised())
-            {
-                graphComponentRenderer->initialise(_graphModel, componentId,
-                                                   _selectionManager,
-                                                   this);
-            }
-            else
-            {
-                graphComponentRenderer->updateVisualData();
-                graphComponentRenderer->updatePositionalData();
-            }
-
-            // Partner to the hack described above
-            rendererFinishedTransition();
-        }, QString("GraphRenderer::onGraphChanged (initialise/update) component %1").arg((int)componentId));
+            componentRendererForId(componentId)->initialise(_graphModel, componentId, _selectionManager, this);
+        }, QString("GraphRenderer::onGraphChanged (initialise) component %1").arg((int)componentId));
     }
+
+    executeOnRendererThread([this]
+    {
+        updateGPUData(When::Later);
+
+        // Partner to the hack described above
+        rendererFinishedTransition();
+    }, "GraphRenderer::onGraphChanged update");
 }
 
 void GraphRenderer::onComponentAdded(const Graph*, ComponentId componentId, bool)
@@ -387,9 +703,7 @@ void GraphRenderer::onComponentAdded(const Graph*, ComponentId componentId, bool
     auto graphComponentRenderer = componentRendererForId(componentId);
     executeOnRendererThread([this, graphComponentRenderer, componentId]
     {
-        graphComponentRenderer->initialise(_graphModel, componentId,
-                                           _selectionManager,
-                                           this);
+        graphComponentRenderer->initialise(_graphModel, componentId, _selectionManager, this);
     }, "GraphRenderer::onComponentAdded");
 }
 
@@ -404,25 +718,26 @@ void GraphRenderer::onComponentWillBeRemoved(const Graph*, ComponentId component
 
 void GraphRenderer::onSelectionChanged(const SelectionManager*)
 {
-    for(auto componentId : _graphModel->graph().componentIds())
+    executeOnRendererThread([this]
     {
-        auto graphComponentRenderer = componentRendererForId(componentId);
-        executeOnRendererThread([graphComponentRenderer]
-        {
-            graphComponentRenderer->updateVisualData();
-        }, QString("GraphRenderer::onSelectionChanged component %1").arg((int)componentId));
-    }
+        updateGPUData(When::Later);
+    }, "GraphRenderer::onSelectionChanged");
 }
 
 void GraphRenderer::onCommandWillExecuteAsynchronously(const Command*)
 {
-    _sceneUpdateEnabled = false;
+    disableSceneUpdate();
 }
 
 void GraphRenderer::onCommandCompleted(const Command*, const QString&)
 {
-    _sceneUpdateEnabled = true;
+    enableSceneUpdate();
     update();
+}
+
+void GraphRenderer::onLayoutChanged()
+{
+    _layoutChanged = true;
 }
 
 void GraphRenderer::resetView()
@@ -442,9 +757,97 @@ bool GraphRenderer::viewIsReset() const
     return true;
 }
 
+static void setShaderADSParameters(QOpenGLShaderProgram& program)
+{
+    struct Light
+    {
+        Light() {}
+        Light(const QVector4D& _position, const QVector3D& _intensity) :
+            position(_position), intensity(_intensity)
+        {}
+
+        QVector4D position;
+        QVector3D intensity;
+    };
+
+    std::vector<Light> lights;
+    lights.emplace_back(QVector4D(-20.0f, 0.0f, 3.0f, 1.0f), QVector3D(0.6f, 0.6f, 0.6f));
+    lights.emplace_back(QVector4D(0.0f, 0.0f, 0.0f, 1.0f), QVector3D(0.2f, 0.2f, 0.2f));
+    lights.emplace_back(QVector4D(10.0f, -10.0f, -10.0f, 1.0f), QVector3D(0.4f, 0.4f, 0.4f));
+
+    int numberOfLights = static_cast<int>(lights.size());
+
+    program.setUniformValue("numberOfLights", numberOfLights);
+
+    for(int i = 0; i < numberOfLights; i++)
+    {
+        QByteArray positionId = QString("lights[%1].position").arg(i).toLatin1();
+        program.setUniformValue(positionId.data(), lights[i].position);
+
+        QByteArray intensityId = QString("lights[%1].intensity").arg(i).toLatin1();
+        program.setUniformValue(intensityId.data(), lights[i].intensity);
+    }
+
+    program.setUniformValue("material.ks", QVector3D(1.0f, 1.0f, 1.0f));
+    program.setUniformValue("material.ka", QVector3D(0.1f, 0.1f, 0.1f));
+    program.setUniformValue("material.shininess", 50.0f);
+}
+
+void GraphRenderer::renderNodes(GPUGraphData& gpuGraphData)
+{
+    _nodesShader.bind();
+    setShaderADSParameters(_nodesShader);
+
+    gpuGraphData._nodeVBO.bind();
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
+    _nodesShader.setUniformValue("componentData", 0);
+
+    gpuGraphData._sphere.vertexArrayObject()->bind();
+    glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._sphere.indexCount(),
+                            GL_UNSIGNED_INT, 0, gpuGraphData.numNodes());
+    gpuGraphData._sphere.vertexArrayObject()->release();
+
+    glBindTexture(GL_TEXTURE_BUFFER, 0);
+    gpuGraphData._nodeVBO.release();
+    _nodesShader.release();
+}
+
+void GraphRenderer::renderEdges(GPUGraphData& gpuGraphData)
+{
+    _edgesShader.bind();
+    setShaderADSParameters(_edgesShader);
+
+    gpuGraphData._edgeVBO.bind();
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
+    _edgesShader.setUniformValue("componentData", 0);
+
+    gpuGraphData._cylinder.vertexArrayObject()->bind();
+    glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._cylinder.indexCount(),
+                            GL_UNSIGNED_INT, 0, gpuGraphData.numEdges());
+    gpuGraphData._cylinder.vertexArrayObject()->release();
+
+    glBindTexture(GL_TEXTURE_BUFFER, 0);
+    gpuGraphData._edgeVBO.release();
+    _edgesShader.release();
+}
+
+void GraphRenderer::renderGraph(GPUGraphData& gpuGraphData)
+{
+    GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+    glDrawBuffers(2, drawBuffers);
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    renderNodes(gpuGraphData);
+    renderEdges(gpuGraphData);
+}
+
 void GraphRenderer::renderScene()
 {
-    if(_sceneUpdateEnabled)
+    ifSceneUpdateEnabled([this]
     {
         if(_modeTransitionInProgress)
         {
@@ -466,42 +869,57 @@ void GraphRenderer::renderScene()
         }
 
         _preUpdateExecutor.execute();
-    }
+    });
 
     if(_scene == nullptr || !_scene->initialised())
         return;
 
     if(_resized)
     {
-        _scene->setSize(_width, _height);
+        _scene->setViewportSize(_width, _height);
         _resized = false;
     }
 
-    if(_sceneUpdateEnabled)
+    ifSceneUpdateEnabled([this]
     {
-        _graphModel->nodePositions().executeIfUpdated([this]
-        {
-            for(auto componentId : _graphModel->graph().componentIds())
-            {
-                auto graphComponentRenderer = componentRendererForId(componentId);
+        // _synchronousLayoutChanged can only ever be (atomically) true in this scope
+        _synchronousLayoutChanged = _layoutChanged.exchange(false);
 
-                if(graphComponentRenderer->visible())
-                    graphComponentRenderer->updatePositionalData();
-            }
-        });
+        bool transitionActive = _transition.active() || _scene->transitionActive() ||
+                _modeTransitionInProgress;
 
         // If there is a transition active then we'll need another
         // frame once we're finished with this one
-        if(_transition.active() || _scene->transitionActive() || _modeTransitionInProgress)
-            update();
+        if(transitionActive)
+            update(); // QQuickFramebufferObject::Renderer::update
 
-        //FIXME should be passing a delta around?
-        float time = _time.elapsed() / 1000.0f;
-        _transition.update(time);
-        _scene->update(time);
+        float dTime = secondsElapsed();
+        _transition.update(dTime);
+        _scene->update(dTime);
+
+        if(layoutChanged() || transitionActive)
+            updateGPUData(When::Later);
+
+        updateGPUDataIfRequired();
+        updateComponentGPUData();
+
+        _synchronousLayoutChanged = false;
+    });
+
+    if(!_FBOcomplete)
+    {
+        qWarning() << "Attempting to render without a complete FBO";
+        return;
     }
 
-    _scene->render();
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glDisable(GL_BLEND);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _visualFBO);
+
+    renderGraph(_gpuGraphDataAlpha); // Alpha blended first...
+    renderGraph(_gpuGraphData);      // ...then opaque
 }
 
 void GraphRenderer::render2D()
@@ -608,28 +1026,31 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
     if(graphQuickItem->overviewModeSwitchPending())
         switchToOverviewMode();
 
-    if(_scene != nullptr && _sceneUpdateEnabled)
+    ifSceneUpdateEnabled([this, &graphQuickItem]
     {
-        //FIXME try delivering these events by queued connection instead
-        while(graphQuickItem->eventsPending())
+        if(_scene != nullptr)
         {
-            auto e = std::move(graphQuickItem->nextEvent());
-            auto mouseEvent = dynamic_cast<QMouseEvent*>(e.get());
-            auto wheelEvent = dynamic_cast<QWheelEvent*>(e.get());
-            auto nativeGestureEvent = dynamic_cast<QNativeGestureEvent*>(e.get());
-
-            switch(e->type())
+            //FIXME try delivering these events by queued connection instead
+            while(graphQuickItem->eventsPending())
             {
-            case QEvent::Type::MouseButtonPress:    _interactor->mousePressEvent(mouseEvent);               break;
-            case QEvent::Type::MouseButtonRelease:  _interactor->mouseReleaseEvent(mouseEvent);             break;
-            case QEvent::Type::MouseMove:           _interactor->mouseMoveEvent(mouseEvent);                break;
-            case QEvent::Type::MouseButtonDblClick: _interactor->mouseDoubleClickEvent(mouseEvent);         break;
-            case QEvent::Type::Wheel:               _interactor->wheelEvent(wheelEvent);                    break;
-            case QEvent::Type::NativeGesture:       _interactor->nativeGestureEvent(nativeGestureEvent);    break;
-            default: break;
+                auto e = std::move(graphQuickItem->nextEvent());
+                auto mouseEvent = dynamic_cast<QMouseEvent*>(e.get());
+                auto wheelEvent = dynamic_cast<QWheelEvent*>(e.get());
+                auto nativeGestureEvent = dynamic_cast<QNativeGestureEvent*>(e.get());
+
+                switch(e->type())
+                {
+                case QEvent::Type::MouseButtonPress:    _interactor->mousePressEvent(mouseEvent);               break;
+                case QEvent::Type::MouseButtonRelease:  _interactor->mouseReleaseEvent(mouseEvent);             break;
+                case QEvent::Type::MouseMove:           _interactor->mouseMoveEvent(mouseEvent);                break;
+                case QEvent::Type::MouseButtonDblClick: _interactor->mouseDoubleClickEvent(mouseEvent);         break;
+                case QEvent::Type::Wheel:               _interactor->wheelEvent(wheelEvent);                    break;
+                case QEvent::Type::NativeGesture:       _interactor->nativeGestureEvent(nativeGestureEvent);    break;
+                default: break;
+                }
             }
         }
-    }
+    });
 
     // Tell the QuickItem what we're doing
     graphQuickItem->setViewIsReset(viewIsReset());
@@ -780,4 +1201,39 @@ void GraphRenderer::prepareQuad()
 
     _screenQuadDataBuffer.release();
     _screenQuadVAO.release();
+}
+
+void GraphRenderer::prepareComponentDataTexture()
+{
+    if(_componentDataTexture == 0)
+        glGenTextures(1, &_componentDataTexture);
+
+    if(_componentDataTBO == 0)
+        glGenBuffers(1, &_componentDataTBO);
+
+    glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
+    glBindBuffer(GL_TEXTURE_BUFFER, _componentDataTBO);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, _componentDataTBO);
+    glBindBuffer(GL_TEXTURE_BUFFER, 0);
+    glBindTexture(GL_TEXTURE_BUFFER, 0);
+}
+
+void GraphRenderer::enableSceneUpdate()
+{
+    std::unique_lock<std::mutex> lock(_sceneUpdateMutex);
+    _sceneUpdateEnabled = true;
+    resetTime();
+}
+
+void GraphRenderer::disableSceneUpdate()
+{
+    std::unique_lock<std::mutex> lock(_sceneUpdateMutex);
+    _sceneUpdateEnabled = false;
+}
+
+void GraphRenderer::ifSceneUpdateEnabled(const std::function<void ()>& f)
+{
+    std::unique_lock<std::mutex> lock(_sceneUpdateMutex);
+    if(_sceneUpdateEnabled)
+        f();
 }

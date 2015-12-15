@@ -41,43 +41,11 @@ void GraphOverviewScene::update(float t)
 {
     for(auto componentId : _componentIds)
     {
-        auto renderer = _graphRenderer->componentRendererForId(componentId);
+        auto* renderer = _graphRenderer->componentRendererForId(componentId);
+        auto& layoutData = _componentLayout[componentId];
+        renderer->setDimensions(layoutData._rect);
+        renderer->setAlpha(layoutData._alpha);
         renderer->update(t);
-    }
-}
-
-void GraphOverviewScene::render()
-{
-    // Alpha blended first...
-    for(auto componentId : _componentIds)
-    {
-        if(_componentLayout[componentId]._alpha >= 1.0f)
-            continue;
-
-        auto renderer = _graphRenderer->componentRendererForId(componentId);
-        auto layoutData = _componentLayout[componentId];
-
-        renderer->render(layoutData._rect.x(),
-                         layoutData._rect.y(),
-                         layoutData._rect.width(),
-                         layoutData._rect.height(),
-                         layoutData._alpha);
-    }
-
-    //...then opaque
-    for(auto componentId : _componentIds)
-    {
-        if(_componentLayout[componentId]._alpha < 1.0f)
-            continue;
-
-        auto renderer = _graphRenderer->componentRendererForId(componentId);
-        auto layoutData = _componentLayout[componentId];
-
-        renderer->render(layoutData._rect.x(),
-                         layoutData._rect.y(),
-                         layoutData._rect.width(),
-                         layoutData._rect.height(),
-                         layoutData._alpha);
     }
 }
 
@@ -114,7 +82,7 @@ void GraphOverviewScene::setRenderSizeDivisor(int divisor)
 
     _renderSizeDivisor = divisor;
 
-    setSize(_width, _height);
+    setViewportSize(_width, _height);
 }
 
 void GraphOverviewScene::startTransitionFromComponentMode(ComponentId focusComponentId,
@@ -159,7 +127,6 @@ void GraphOverviewScene::layoutComponents()
     std::stack<QPoint> coords;
 
     std::vector<ComponentId> sortedComponentIds = _componentIds;
-
     std::sort(sortedComponentIds.begin(), sortedComponentIds.end(),
               [this](const ComponentId& a, const ComponentId& b)
     {
@@ -228,7 +195,7 @@ void GraphOverviewScene::layoutComponents()
     }
 }
 
-void GraphOverviewScene::setSize(int width, int height)
+void GraphOverviewScene::setViewportSize(int width, int height)
 {
     _width = width;
     _height = height;
@@ -238,10 +205,9 @@ void GraphOverviewScene::setSize(int width, int height)
     for(auto componentId : _componentIds)
     {
         auto renderer = _graphRenderer->componentRendererForId(componentId);
-        auto layoutData = _componentLayout[componentId];
-        renderer->setSize(_width, _height,
-                          layoutData._rect.width(),
-                          layoutData._rect.height());
+        auto& layoutData = _componentLayout[componentId];
+        renderer->setViewportSize(_width, _height);
+        renderer->setDimensions(layoutData._rect);
     }
 }
 
@@ -310,6 +276,8 @@ void GraphOverviewScene::startTransition(float duration,
             renderer->thaw();
         }
 
+        _graphRenderer->thaw();
+
         // Subtract the removed ComponentIds, no we no longer need to render them
         std::vector<ComponentId> postTransitionComponentIds;
         std::sort(_componentIds.begin(), _componentIds.end());
@@ -375,6 +343,7 @@ void GraphOverviewScene::onComponentWillBeRemoved(const Graph*, ComponentId comp
         {
             auto renderer = _graphRenderer->componentRendererForId(componentId);
             renderer->freeze();
+            _graphRenderer->freeze();
 
             _removedComponentIds.emplace_back(componentId);
             _componentLayout[componentId]._alpha = 0.0f;
@@ -421,6 +390,8 @@ void GraphOverviewScene::onComponentsWillMerge(const Graph*, const ComponentMerg
             if(merger != componentMergeSet.newComponentId())
                 _removedComponentIds.emplace_back(merger);
         }
+
+        _graphRenderer->freeze();
     }, "GraphOverviewScene::onComponentsWillMerge (freeze renderers)");
 }
 
@@ -452,7 +423,7 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph)
         if(visible())
         {
             onShow();
-            setSize(_width, _height);
+            setViewportSize(_width, _height);
 
             startTransition(1.0f, Transition::Type::EaseInEaseOut,
             [this, graph]

@@ -1,5 +1,7 @@
 #include "graphquickitem.h"
 
+#include "../graph/graphmodel.h"
+
 #include "../rendering/graphrenderer.h"
 
 #include "../commands/commandmanager.h"
@@ -22,6 +24,9 @@ void GraphQuickItem::initialise(std::shared_ptr<GraphModel> graphModel,
     _selectionManager = selectionManager;
 
     setFlag(Flag::ItemHasContents, true);
+
+    connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphQuickItem::graphChanged);
+    emit graphChanged();
 }
 
 void GraphQuickItem::resetView()
@@ -98,6 +103,7 @@ QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const
     connect(this, &GraphQuickItem::commandWillExecuteAsynchronously, graphRenderer, &GraphRenderer::onCommandWillExecuteAsynchronously, Qt::DirectConnection);
     connect(this, &GraphQuickItem::commandCompleted, graphRenderer, &GraphRenderer::onCommandCompleted, Qt::DirectConnection);
     connect(this, &GraphQuickItem::commandCompleted, this, &GraphQuickItem::update);
+    connect(this, &GraphQuickItem::layoutChanged, graphRenderer, &GraphRenderer::onLayoutChanged);
 
     connect(graphRenderer, &GraphRenderer::modeChanged, this, &GraphQuickItem::update);
     connect(graphRenderer, &GraphRenderer::userInteractionStarted, this, &GraphQuickItem::userInteractionStarted);
@@ -154,6 +160,7 @@ bool GraphQuickItem::event(QEvent* e)
 void GraphQuickItem::onLayoutChanged()
 {
     update();
+    emit layoutChanged();
 }
 
 void GraphQuickItem::mousePressEvent(QMouseEvent* e)        { enqueueEvent(e); }
@@ -161,3 +168,27 @@ void GraphQuickItem::mouseReleaseEvent(QMouseEvent* e)      { enqueueEvent(e); }
 void GraphQuickItem::mouseMoveEvent(QMouseEvent* e)         { enqueueEvent(e); }
 void GraphQuickItem::mouseDoubleClickEvent(QMouseEvent* e)  { enqueueEvent(e); }
 void GraphQuickItem::wheelEvent(QWheelEvent* e)             { enqueueEvent(e); }
+
+int GraphQuickItem::numNodes() const
+{
+    if(_graphModel != nullptr)
+        return _graphModel->graph().numNodes();
+
+    return -1;
+}
+
+int GraphQuickItem::numEdges() const
+{
+    if(_graphModel != nullptr)
+        return _graphModel->graph().numEdges();
+
+    return -1;
+}
+
+int GraphQuickItem::numComponents() const
+{
+    if(_graphModel != nullptr)
+        return _graphModel->graph().numComponents();
+
+    return -1;
+}

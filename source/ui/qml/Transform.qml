@@ -9,6 +9,19 @@ Item
     width: rows.width
     height: rows.height
 
+    property string formattedFieldValue:
+    {
+        if(type === GraphTransformType.Float)
+        {
+            // Format the number for human consumption; don't question it, just accept it
+            return parseFloat(parseFloat(fieldValue).toFixed(3)).toString();
+        }
+        else if(type === GraphTransformType.String)
+            return "\"" + fieldValue + "\"";
+        else
+            return fieldValue;
+    }
+
     RowLayout
     {
         id: rows
@@ -22,8 +35,9 @@ Item
             defaultText: qsTr("Add Transform")
 
             model: availableTransformNames
-            visible: creationState === GraphTransformCreationState.Uncreated ||
-                     creationState === GraphTransformCreationState.TransformSelected
+            visible: !locked &&
+                     (creationState === GraphTransformCreationState.Uncreated ||
+                     creationState === GraphTransformCreationState.TransformSelected)
             enabled: transformEnabled
             exclusiveGroup: buttonMenuGroup
             onSelectedValueChanged:
@@ -37,6 +51,9 @@ Item
         {
             text:
             {
+                if(locked)
+                    return qsTr("%1 where %2 %3 %4").arg(name).arg(fieldName).arg(op).arg(formattedFieldValue);
+
                 switch(creationState)
                 {
                 case GraphTransformCreationState.TransformSelected:
@@ -46,8 +63,6 @@ Item
                 case GraphTransformCreationState.OperationSelected:
                 case GraphTransformCreationState.Created:
                     return qsTr("%1 where %2").arg(name).arg(fieldName);
-                case GraphTransformCreationState.Fixed:
-                    return qsTr("%1 where %2 %3 %4").arg(name).arg(fieldName).arg(op).arg(fieldValue);
                 default:
                     return "";
                 }
@@ -64,8 +79,9 @@ Item
             defaultText: qsTr("Select Field")
 
             model: availableDataFields
-            visible: creationState === GraphTransformCreationState.TransformSelected ||
-                     creationState === GraphTransformCreationState.FieldSelected
+            visible: !locked &&
+                     (creationState === GraphTransformCreationState.TransformSelected ||
+                     creationState === GraphTransformCreationState.FieldSelected)
             enabled: transformEnabled
             exclusiveGroup: buttonMenuGroup
             onSelectedValueChanged:
@@ -79,12 +95,13 @@ Item
         {
             id: opMenu
 
-            defaultText: qsTr("Select Operation")
+            defaultText: qsTr("Operation")
 
             model: avaliableConditionFnOps
-            visible: creationState === GraphTransformCreationState.FieldSelected ||
+            visible: !locked &&
+                     (creationState === GraphTransformCreationState.FieldSelected ||
                      creationState === GraphTransformCreationState.OperationSelected ||
-                     creationState === GraphTransformCreationState.Created
+                     creationState === GraphTransformCreationState.Created)
             enabled: transformEnabled
             exclusiveGroup: buttonMenuGroup
             onSelectedValueChanged:
@@ -97,9 +114,10 @@ Item
         Slider
         {
             id: valueSlider
-            Layout.preferredWidth: 75
+            Layout.preferredWidth: 100
             visible: type !== GraphTransformType.String &&
                      hasFieldRange &&
+                     !locked &&
                      (creationState === GraphTransformCreationState.OperationSelected ||
                      creationState === GraphTransformCreationState.Created)
             enabled: transformEnabled
@@ -129,9 +147,10 @@ Item
         {
             id: valueTextField
 
-            Layout.preferredWidth: 50
-            visible: creationState === GraphTransformCreationState.OperationSelected ||
-                     creationState === GraphTransformCreationState.Created
+            Layout.preferredWidth: 70
+            visible: !locked &&
+                     (creationState === GraphTransformCreationState.OperationSelected ||
+                     creationState === GraphTransformCreationState.Created)
             enabled: transformEnabled
 
             onEditingFinished:
@@ -205,27 +224,38 @@ Item
             }
         }
 
-        CheckBox
+        ToolButton
         {
             id: enabledCheckBox
+            iconName: transformEnabled ? "list-remove" : "list-add"
+            text: qsTr("Enable Transform")
+            visible: (creationState === GraphTransformCreationState.Created)
 
-            visible: creationState === GraphTransformCreationState.Created
-
-            onCheckedStateChanged:
+            onClicked:
             {
                 valueTextField.unfocusAndReset();
-                transformEnabled = checked;
+                transformEnabled = !transformEnabled;
             }
         }
 
-        Button
+        ToolButton
         {
             id: removeButton
-            text: "X"
-
-            visible: creationState > GraphTransformCreationState.Uncreated
+            iconName: "emblem-unreadable"
+            text: qsTr("Remove Transform")
+            visible: !locked && (creationState > GraphTransformCreationState.Uncreated)
 
             onClicked: { document.removeGraphTransform(index); }
+        }
+
+        ToolButton
+        {
+            id: lockedCheckBox
+            iconName: "emblem-readonly"
+            text: qsTr("Lock Transform")
+            visible: creationState === GraphTransformCreationState.Created
+
+            onClicked: { locked = !locked; }
         }
     }
 
@@ -241,5 +271,6 @@ Item
 
         valueTextField.setTextAndFormat(fieldValue);
         enabledCheckBox.checked = transformEnabled;
+        lockedCheckBox.checked = locked;
     }
 }

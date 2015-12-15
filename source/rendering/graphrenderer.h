@@ -21,6 +21,7 @@
 #include <functional>
 #include <memory>
 #include <atomic>
+#include <vector>
 
 class GraphQuickItem;
 class GraphModel;
@@ -46,6 +47,52 @@ public:
 protected:
     virtual void onGraphChanged(const Graph*) = 0;
     virtual void onComponentAdded(const Graph*, ComponentId, bool) = 0;
+};
+
+struct GPUGraphData : protected OpenGLFunctions
+{
+    GPUGraphData();
+
+    void initialise(QOpenGLShaderProgram& nodesShader,
+                    QOpenGLShaderProgram& edgesShader);
+    void prepareVertexBuffers();
+    void prepareNodeVAO(QOpenGLShaderProgram& shader);
+    void prepareEdgeVAO(QOpenGLShaderProgram& shader);
+
+    void reset(const Graph& graph);
+
+    void upload();
+
+    int numNodes() const;
+    int numEdges() const;
+
+    Sphere _sphere;
+    Cylinder _cylinder;
+
+    struct NodeData
+    {
+        float _position[3];
+        int _component;
+        float _size;
+        float _color[3];
+        float _outlineColor[3];
+    };
+
+    struct EdgeData
+    {
+        float _sourcePosition[3];
+        float _targetPosition[3];
+        int _component;
+        float _size;
+        float _color[3];
+        float _outlineColor[3];
+    };
+
+    std::vector<NodeData> _nodeData;
+    QOpenGLBuffer _nodeVBO;
+
+    std::vector<EdgeData> _edgeData;
+    QOpenGLBuffer _edgeVBO;
 };
 
 class GraphRenderer :
@@ -85,6 +132,11 @@ public:
     void rendererFinishedTransition();
     void executeOnRendererThread(DeferredExecutor::TaskFn task, const QString& description);
 
+    void freeze();
+    void thaw();
+
+    bool layoutChanged() const { return _synchronousLayoutChanged; }
+
 private slots:
     void onGraphChanged(const Graph* graph);
     void onComponentAdded(const Graph*, ComponentId componentId, bool);
@@ -94,6 +146,7 @@ private slots:
 public slots:
     void onCommandWillExecuteAsynchronously(const Command*);
     void onCommandCompleted(const Command*, const QString&);
+    void onLayoutChanged();
 
 private:
     std::shared_ptr<GraphModel> _graphModel;
@@ -153,10 +206,26 @@ private:
     QOpenGLBuffer _selectionMarkerDataBuffer;
     QOpenGLVertexArrayObject _selectionMarkerDataVAO;
 
+    GPUGraphData _gpuGraphData;
+    GPUGraphData _gpuGraphDataAlpha;
+    bool _gpuDataRequiresUpdate = false;
+
+    bool _frozen = false;
+    bool _updateGPUDataWhenThawed = false;
+
+    GLuint _componentDataTexture = 0;
+    GLuint _componentDataTBO = 0;
+    std::vector<ComponentId> _componentIdsOnGPU;
+
     QRect _selectionRect;
 
     QTime _time;
-    std::atomic<bool> _sceneUpdateEnabled;
+    float _lastTime = 0.0f;
+    bool _sceneUpdateEnabled = false;
+    std::mutex _sceneUpdateMutex;
+
+    std::atomic<bool> _layoutChanged;
+    bool _synchronousLayoutChanged = false;
 
     bool _modeTransitionInProgress = false;
 
@@ -166,10 +235,25 @@ private:
     void prepareSelectionMarkerVAO();
     void prepareQuad();
 
+    void prepareComponentDataTexture();
+
+    void enableSceneUpdate();
+    void disableSceneUpdate();
+    void ifSceneUpdateEnabled(const std::function<void()>& f);
+
+    void updateGPUDataIfRequired();
+    enum class When { Later, Now };
+    void updateGPUData(When when);
+    void updateComponentGPUData();
+
     void resize(int width, int height);
 
     void clear();
     void finishRender();
+
+    void renderNodes(GPUGraphData& gpuGraphData);
+    void renderEdges(GPUGraphData& gpuGraphData);
+    void renderGraph(GPUGraphData& gpuGraphData);
     void renderScene();
     void render2D();
 
@@ -187,6 +271,9 @@ private:
 
     Mode mode() const;
     void setMode(Mode mode);
+
+    void resetTime();
+    float secondsElapsed();
 
 signals:
     void modeChanged() const;

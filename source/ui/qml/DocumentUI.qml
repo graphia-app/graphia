@@ -88,6 +88,7 @@ Item
             Column
             {
                 anchors.right: parent.right
+                anchors.top: parent.top
 
                 Repeater
                 {
@@ -100,6 +101,17 @@ Item
                         anchors.right: parent ? parent.right : undefined
                     }
                 }
+            }
+
+            Text
+            {
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+
+                horizontalAlignment: Text.AlignRight
+                text: (graph.numNodes >= 0 ? graph.numNodes + " nodes" : "") +
+                      (graph.numEdges >= 0 ? "\n" + graph.numEdges + " edges" : "") +
+                      (graph.numComponents >= 0 ? "\n" + graph.numComponents + " components" : "");
             }
         }
 

@@ -264,11 +264,12 @@ void Document::onGraphTransformsConfigurationDataChanged(const QModelIndex& inde
     auto& graphTransformConfiguration = _graphTransformConfigurations.vector().at(index.row());
     auto& roleName = _graphTransformConfigurations.roleNames().value(roles.at(0));
     bool enabledChanging = (roleName == "transformEnabled");
+    bool lockedChanging = (roleName == "locked");
 
     // Don't apply any changes when not enabled, as they will have no effect
     bool enabled = graphTransformConfiguration.enabled() || enabledChanging;
 
-    if(graphTransformConfiguration.valid() && enabled)
+    if(graphTransformConfiguration.valid() && enabled &&!lockedChanging)
         applyTransforms();
 }
 
