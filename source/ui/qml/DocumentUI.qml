@@ -102,6 +102,8 @@ Item
 
             Text
             {
+                visible: toggleGraphMetricsAction.checked
+
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
 
@@ -114,6 +116,8 @@ Item
             Column
             {
                 id: layoutSettings
+
+                visible: toggleLayoutSettingsAction.checked
 
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom

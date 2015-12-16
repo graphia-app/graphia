@@ -208,6 +208,13 @@ ApplicationWindow
 
     Action
     {
+        id: toggleLayoutSettingsAction
+        text: qsTr("Show Layout Settings")
+        checkable: true
+    }
+
+    Action
+    {
         id: overviewModeAction
         iconName: "view-fullscreen"
         text: qsTr("&Overview Mode")
@@ -224,6 +231,13 @@ ApplicationWindow
         shortcut: "Ctrl+R"
         enabled: currentDocument ? currentDocument.canResetView : false
         onTriggered: currentDocument && currentDocument.resetView()
+    }
+
+    Action
+    {
+        id: toggleGraphMetricsAction
+        text: qsTr("Show Graph Metrics")
+        checkable: true
     }
 
     Action
@@ -283,11 +297,14 @@ ApplicationWindow
             title: qsTr("&View")
             MenuItem { action: overviewModeAction }
             MenuItem { action: resetViewAction }
+            MenuSeparator {}
+            MenuItem { action: toggleGraphMetricsAction }
         }
         Menu
         {
             title: qsTr("&Layout")
             MenuItem { action: pauseLayoutAction }
+            MenuItem { action: toggleLayoutSettingsAction }
         }
         Menu
         {
