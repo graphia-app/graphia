@@ -69,8 +69,7 @@ public:
         _graph(graph),
         _positions(positions),
         _settings(settings)
-    {
-    }
+    {}
 
     float scaling() const { return _scaling; }
     int smoothing() const { return _smoothing; }
@@ -104,8 +103,7 @@ protected:
 public:
     LayoutFactory(std::shared_ptr<GraphModel> graphModel) :
         _graphModel(graphModel)
-    {
-    }
+    {}
 
     virtual ~LayoutFactory() {}
 
@@ -125,7 +123,6 @@ class LayoutThread : public QObject
 
 private:
     GraphModel* _graphModel;
-
     std::mutex _mutex;
     std::thread _thread;
     bool _started = false;

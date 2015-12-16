@@ -255,15 +255,6 @@ ApplicationWindow
         onTriggered: currentDocument && currentDocument.debugResume()
     }
 
-    Action
-    {
-        id: preferencesLayoutAction
-        text: qsTr("&Preferences")
-        shortcut: ""
-       // enabled: application.debugEnabled()
-        onTriggered: currentDocument.preferencesform.visible = !currentDocument.preferencesform.visible;
-    }
-
     menuBar: MenuBar
     {
         Menu
@@ -297,7 +288,6 @@ ApplicationWindow
         {
             title: qsTr("&Layout")
             MenuItem { action: pauseLayoutAction }
-            MenuItem { action: preferencesLayoutAction }
         }
         Menu
         {
@@ -433,5 +423,4 @@ ApplicationWindow
     {
         id: application
     }
-
 }

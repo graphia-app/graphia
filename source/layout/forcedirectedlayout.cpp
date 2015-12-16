@@ -99,7 +99,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
                 const QVector3D difference = positions().get(edge.targetId()) - positions().get(edge.sourceId());
                 float distanceSq = difference.lengthSquared();
                 const float SPRING_LENGTH = 10.0f;
-                float force = ATTRACTIVE_FORCE * distanceSq / (SPRING_LENGTH * SPRING_LENGTH * SPRING_LENGTH);
+                const float force = ATTRACTIVE_FORCE * distanceSq / (SPRING_LENGTH * SPRING_LENGTH * SPRING_LENGTH);
 
                 _displacements[edge.targetId()] -= (force * difference);
                 _displacements[edge.sourceId()] += (force * difference);

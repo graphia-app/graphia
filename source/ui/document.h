@@ -112,11 +112,10 @@ private:
     CommandManager _commandManager;
     std::unique_ptr<GraphFileParserThread> _graphFileParserThread;
     std::unique_ptr<LayoutThread> _layoutThread;
+    QmlContainerWrapper<LayoutSetting> _layoutSettings;
 
     std::vector<GraphTransformConfiguration> _previousGraphTransformConfigurations;
     QmlContainerWrapper<GraphTransformConfiguration> _graphTransformConfigurations;
-
-    QmlContainerWrapper<LayoutSetting> _layoutSettings;
 
     std::recursive_mutex _autoResumeMutex;
     int _autoResume = 0;

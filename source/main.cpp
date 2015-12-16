@@ -50,7 +50,6 @@ int main(int argc, char *argv[])
     qmlRegisterType<LayoutSetting>(uri, maj, min, "LayoutSetting");
 
     ThreadPool threadPool;
-
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
 
