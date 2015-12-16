@@ -250,7 +250,8 @@ void GraphCommonInteractor::leftMouseUp()
                 bool toggling = modifiers() & Qt::ShiftModifier;
                 auto previousSelection = _selectionManager->selectedNodes();
                 auto toggleNodeId = _clickedNodeId;
-                _commandManager.executeSynchronous(nodeSelected ? tr("Deselect Node") : tr("Select Node"),
+                _commandManager.execute(nodeSelected ? tr("Deselect Node") : tr("Select Node"),
+                                        nodeSelected ? tr("Deselecting Node") : tr("Selecting Node"),
                     [this, nodeSelected, toggling, toggleNodeId](Command& command)
                     {
                         if(!toggling)
@@ -266,7 +267,7 @@ void GraphCommonInteractor::leftMouseUp()
             else
             {
                 auto previousSelection = _selectionManager->selectedNodes();
-                _commandManager.executeSynchronous(tr("Select None"),
+                _commandManager.execute(tr("Select None"), tr("Selecting None"),
                     [this](Command&) { return _selectionManager->clearNodeSelection(); },
                     [this, previousSelection](Command&) { _selectionManager->setSelectedNodes(previousSelection); });
             }
