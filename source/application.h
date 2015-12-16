@@ -38,6 +38,10 @@ public slots:
     QStringList fileTypesOf(const QUrl& url) const;
 
     static QString name() { return _name; }
+    static const char* uri() { return _uri; }
+    static int majorVersion() { return _majorVersion; }
+    static int minorVersion() { return _minorVersion; }
+
     QString baseFileNameForUrl(const QUrl& url) const { return url.fileName(); }
     QUrl urlForFileName(const QString& fileName) const { return QUrl::fromLocalFile(fileName); }
 
@@ -52,6 +56,10 @@ public slots:
 
 private:
     static const char* _name;
+    static const char* _uri;
+    static const int _majorVersion = 1;
+    static const int _minorVersion = 0;
+
     FileIdentifier _fileIdentifier;
 };
 

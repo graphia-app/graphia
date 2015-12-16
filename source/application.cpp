@@ -14,6 +14,7 @@
 #include <memory>
 
 const char* Application::_name = "GraphTool";
+const char* Application::_uri = "com.kajeka";
 
 Application::Application(QObject *parent) :
     QObject(parent)

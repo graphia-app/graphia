@@ -3,6 +3,7 @@
 
 #include "../transform/datafield.h"
 
+#include "../application.h"
 #include "../utils/qmlenum.h"
 
 #include <QObject>
@@ -10,10 +11,12 @@
 
 class Document;
 
-DEFINE_QML_ENUM(com.kajeka, 1, 0, GraphTransformType,
+DEFINE_QML_ENUM(Application::uri(), Application::majorVersion(), Application::minorVersion(),
+                GraphTransformType,
                 Unknown, Int, Float, String);
 
-DEFINE_QML_ENUM(com.kajeka, 1, 0, GraphTransformCreationState,
+DEFINE_QML_ENUM(Application::uri(), Application::majorVersion(), Application::minorVersion(),
+                GraphTransformCreationState,
                 Uncreated,
                 TransformSelected,
                 FieldSelected,

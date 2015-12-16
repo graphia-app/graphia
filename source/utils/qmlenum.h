@@ -13,7 +13,7 @@
         Q_GADGET \
         Q_ENUMS(Enum) \
         struct Constructor \
-        { Constructor() { qmlRegisterUncreatableType<ENUM_NAME>(#MODULE, MAJOR, MINOR, #ENUM_NAME, QString()); } }; \
+        { Constructor() { qmlRegisterUncreatableType<ENUM_NAME>(MODULE, MAJOR, MINOR, #ENUM_NAME, QString()); } }; \
         static Constructor constructor; \
     public: \
         enum Enum \

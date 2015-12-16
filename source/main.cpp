@@ -39,15 +39,15 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    const char* uri = "com.kajeka";
-    const int maj = 1;
-    const int min = 0;
+    const char* uri = Application::uri();
+    const int maj = Application::majorVersion();
+    const int min = Application::minorVersion();
 
-    qmlRegisterType<Application>(uri, maj, min, "Application");
-    qmlRegisterType<Document>(uri, maj, min, "Document");
-    qmlRegisterType<GraphQuickItem>(uri, maj, min, "Graph");
+    qmlRegisterType<Application>                (uri, maj, min, "Application");
+    qmlRegisterType<Document>                   (uri, maj, min, "Document");
+    qmlRegisterType<GraphQuickItem>             (uri, maj, min, "Graph");
     qmlRegisterType<GraphTransformConfiguration>(uri, maj, min, "GraphTransform");
-    qmlRegisterType<LayoutSetting>(uri, maj, min, "LayoutSetting");
+    qmlRegisterType<LayoutSetting>              (uri, maj, min, "LayoutSetting");
 
     ThreadPool threadPool;
     QQmlApplicationEngine engine;
