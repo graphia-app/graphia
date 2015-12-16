@@ -87,7 +87,6 @@ HEADERS += \
     source/ui/graphtransformconfiguration.h \
     source/utils/qmlenum.h \
     source/utils/qmlcontainerwrapper.h \
-    source/utils/settings.h \
     source/layout/layoutsettings.h
 
 SOURCES += \
@@ -151,7 +150,6 @@ SOURCES += \
     source/graph/graphconsistencychecker.cpp \
     source/transform/datafield.cpp \
     source/ui/graphtransformconfiguration.cpp \
-    source/utils/settings.cpp \
     source/layout/layoutsettings.cpp
 
 RESOURCES += \

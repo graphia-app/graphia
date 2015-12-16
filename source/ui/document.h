@@ -18,7 +18,6 @@
 #include <vector>
 #include <memory>
 #include <mutex>
-#include "../utils/settings.h"
 
 class Application;
 class GraphQuickItem;
@@ -99,7 +98,6 @@ public:
 private:
     Application* _application = nullptr;
     GraphQuickItem* _graphQuickItem = nullptr;
-    std::unique_ptr<Settings> _settings;
 
     QString _title;
     QString _status;

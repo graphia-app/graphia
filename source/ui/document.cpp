@@ -19,7 +19,6 @@
 Document::Document(QObject* parent) :
     QObject(parent)
 {
-    _settings = std::make_unique<Settings>();
 }
 
 bool Document::commandInProgress() const
