@@ -21,6 +21,7 @@ enum class ConditionFnOp
     LessThanOrEqual,
     GreaterThanOrEqual,
     Contains,
+    DoesntContain,
     StartsWith,
     EndsWith,
     MatchesRegex
@@ -123,6 +124,8 @@ private:
         {
         case ConditionFnOp::Contains:
             return [this, value](E elementId) { return valueOf<QString>(elementId).contains(value); };
+        case ConditionFnOp::DoesntContain:
+            return [this, value](E elementId) { return !valueOf<QString>(elementId).contains(value); };
         case ConditionFnOp::StartsWith:
             return [this, value](E elementId) { return valueOf<QString>(elementId).startsWith(value); };
         case ConditionFnOp::EndsWith:

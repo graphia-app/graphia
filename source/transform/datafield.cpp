@@ -9,6 +9,7 @@ DEFINE_REFLECTED_ENUM(ConditionFnOp,
     "≤",
     "≥",
     "Contains",
+    "Doesn't Contain",
     "Starts With",
     "Ends With",
     "Matches Regex"
@@ -158,6 +159,7 @@ std::vector<ConditionFnOp> DataField::validConditionFnOps() const
             ConditionFnOp::Equal,
             ConditionFnOp::NotEqual,
             ConditionFnOp::Contains,
+            ConditionFnOp::DoesntContain,
             ConditionFnOp::StartsWith,
             ConditionFnOp::EndsWith,
             ConditionFnOp::MatchesRegex
