@@ -2,17 +2,17 @@
 
 DEFINE_REFLECTED_ENUM(ConditionFnOp,
     "",
-    "=",
-    "≠",
-    "<",
-    ">",
-    "≤",
-    "≥",
-    "Contains",
-    "Doesn't Contain",
-    "Starts With",
-    "Ends With",
-    "Matches Regex"
+    QObject::tr("="),
+    QObject::tr("≠"),
+    QObject::tr("<"),
+    QObject::tr(">"),
+    QObject::tr("≤"),
+    QObject::tr("≥"),
+    QObject::tr("Contains"),
+    QObject::tr("Doesn't Contain"),
+    QObject::tr("Starts With"),
+    QObject::tr("Ends With"),
+    QObject::tr("Matches Regex")
 )
 
 void DataField::clearFunctions()
