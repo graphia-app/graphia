@@ -6,8 +6,8 @@ import com.kajeka 1.0
 Item
 {
     id: root
-    width: rows.width
-    height: rows.height
+    width: row.width
+    height: row.height
 
     property string formattedFieldValue:
     {
@@ -24,7 +24,7 @@ Item
 
     RowLayout
     {
-        id: rows
+        id: row
 
         ExclusiveGroup { id: buttonMenuGroup }
 
