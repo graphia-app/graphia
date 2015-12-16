@@ -29,7 +29,9 @@ class GraphQuickItem : public QQuickFramebufferObject
     Q_PROPERTY(bool canEnterOverviewMode MEMBER _canEnterOverviewMode NOTIFY canEnterOverviewModeChanged)
 
     Q_PROPERTY(int numNodes READ numNodes NOTIFY graphChanged)
+    Q_PROPERTY(int numVisibleNodes READ numVisibleNodes NOTIFY graphChanged)
     Q_PROPERTY(int numEdges READ numEdges NOTIFY graphChanged)
+    Q_PROPERTY(int numVisibleEdges READ numVisibleEdges NOTIFY graphChanged)
     Q_PROPERTY(int numComponents READ numComponents NOTIFY graphChanged)
 
 public:
@@ -89,7 +91,9 @@ private:
     }
 
     int numNodes() const;
+    int numVisibleNodes() const;
     int numEdges() const;
+    int numVisibleEdges() const;
     int numComponents() const;
 
 public slots:

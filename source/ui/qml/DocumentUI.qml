@@ -108,9 +108,54 @@ Item
                 anchors.bottom: parent.bottom
 
                 horizontalAlignment: Text.AlignRight
-                text: (graph.numNodes >= 0 ? graph.numNodes + " nodes" : "") +
-                      (graph.numEdges >= 0 ? "\n" + graph.numEdges + " edges" : "") +
-                      (graph.numComponents >= 0 ? "\n" + graph.numComponents + " components" : "");
+                text:
+                {
+                    // http://stackoverflow.com/questions/9461621
+                    function nFormatter(num, digits)
+                    {
+                        var si =
+                            [
+                                { value: 1E9,  symbol: "G" },
+                                { value: 1E6,  symbol: "M" },
+                                { value: 1E3,  symbol: "k" }
+                            ], i;
+
+                        for(i = 0; i < si.length; i++)
+                        {
+                            if(num >= si[i].value)
+                                return (num / si[i].value).toFixed(digits).replace(/\.?0+$/, "") + si[i].symbol;
+                        }
+
+                        return num;
+                    }
+
+                    var s = "";
+                    var numNodes = graph.numNodes;
+                    var numEdges = graph.numEdges;
+                    var numVisibleNodes = graph.numVisibleNodes;
+                    var numVisibleEdges = graph.numVisibleEdges;
+
+                    if(numNodes >= 0)
+                    {
+                        s += nFormatter(numNodes, 1);
+                        if(numVisibleNodes !== numNodes)
+                            s += " (" + nFormatter(numVisibleNodes, 1) + ")";
+                        s += " nodes";
+                    }
+
+                    if(numEdges >= 0)
+                    {
+                        s += "\n" + nFormatter(numEdges, 1);
+                        if(numVisibleEdges !== numEdges)
+                            s += " (" + nFormatter(numVisibleEdges, 1) + ")";
+                        s += " edges";
+                    }
+
+                    if(graph.numComponents >= 0)
+                        s += "\n" + nFormatter(graph.numComponents, 1) + " components";
+
+                    return s;
+                }
             }
 
             Column

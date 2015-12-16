@@ -177,10 +177,38 @@ int GraphQuickItem::numNodes() const
     return -1;
 }
 
+int GraphQuickItem::numVisibleNodes() const
+{
+    if(_graphModel != nullptr)
+    {
+        return std::count_if(_graphModel->graph().nodeIds().begin(), _graphModel->graph().nodeIds().end(),
+        [this](NodeId nodeId)
+        {
+            return _graphModel->graph().typeOf(nodeId) != NodeIdDistinctSetCollection::Type::Tail;
+        });
+    }
+
+    return -1;
+}
+
 int GraphQuickItem::numEdges() const
 {
     if(_graphModel != nullptr)
         return _graphModel->graph().numEdges();
+
+    return -1;
+}
+
+int GraphQuickItem::numVisibleEdges() const
+{
+    if(_graphModel != nullptr)
+    {
+        return std::count_if(_graphModel->graph().edgeIds().begin(), _graphModel->graph().edgeIds().end(),
+        [this](EdgeId edgeId)
+        {
+            return _graphModel->graph().typeOf(edgeId) != EdgeIdDistinctSetCollection::Type::Tail;
+        });
+    }
 
     return -1;
 }
