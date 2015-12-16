@@ -33,7 +33,9 @@ protected slots:
 template<class T> class QmlContainerWrapper : public QmlContainerWrapperBase
 {
 private:
+    // We can either own the vector, or store a pointer to an external vector
     std::vector<T> _vector;
+    std::vector<T>* _vectorPtr = nullptr;
 
     QMetaObject _metaObject;
     QMetaMethod _handler;
@@ -77,7 +79,7 @@ public:
     int rowCount(const QModelIndex& parent = QModelIndex()) const
     {
         Q_UNUSED(parent);
-        return static_cast<int>(_vector.size());
+        return static_cast<int>(vector().size());
     }
 
     QHash<int, QByteArray> roleNames() const
@@ -93,7 +95,7 @@ public:
 
         if(row < rowCount() && u::contains(_roles, role))
         {
-            auto& item = _vector.at(row);
+            auto& item = vector().at(row);
             auto& roleName = _roles.value(role);
             variant.setValue(role != Qt::UserRole ? item.property(roleName) : "");
         }
@@ -107,7 +109,7 @@ public:
 
         if(row < rowCount() && u::contains(_roles, role))
         {
-            auto& item = _vector.at(row);
+            auto& item = vector().at(row);
             auto& roleName = _roles.value(role);
             return item.setProperty(roleName, value);
         }
@@ -117,6 +119,17 @@ public:
 
     const std::vector<T>& vector() const
     {
+        if(_vectorPtr)
+            return *_vectorPtr;
+
+        return _vector;
+    }
+
+    std::vector<T>& vector()
+    {
+        if(_vectorPtr)
+            return *_vectorPtr;
+
         return _vector;
     }
 
@@ -125,6 +138,17 @@ public:
         beginResetModel();
         disconnectNotifiers();
         _vector = vector;
+        _vectorPtr = nullptr;
+        connectNotifiers();
+        endResetModel();
+    }
+
+    void setVectorPtr(std::vector<T>* vectorPtr)
+    {
+        beginResetModel();
+        disconnectNotifiers();
+        _vector.clear();
+        _vectorPtr = vectorPtr;
         connectNotifiers();
         endResetModel();
     }
@@ -132,7 +156,7 @@ public:
 private:
     void connectNotifiers()
     {
-        for(auto& item : _vector)
+        for(auto& item : vector())
         {
             for(auto signalIndex : _signalIndexToRole)
             {
@@ -144,7 +168,7 @@ private:
 
     void disconnectNotifiers()
     {
-        for(auto& item : _vector)
+        for(auto& item : vector())
         {
             disconnect(this, nullptr, &item, nullptr);
             disconnect(&item, nullptr, this, nullptr);
@@ -156,7 +180,7 @@ private:
         int row = -1;
         int i = 0;
 
-        for(auto& item : _vector)
+        for(auto& item : vector())
         {
             if(&item == sender())
             {

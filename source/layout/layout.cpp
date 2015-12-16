@@ -4,7 +4,7 @@
 #include "../graph/componentmanager.h"
 
 LayoutThread::LayoutThread(GraphModel& graphModel,
-                           std::unique_ptr<const LayoutFactory> layoutFactory,
+                           std::unique_ptr<LayoutFactory> layoutFactory,
                            bool repeating) :
     _graphModel(&graphModel),
     _repeating(repeating),
@@ -23,11 +23,6 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
     connect(&graphModel.graph(), &Graph::componentSplit, this, &LayoutThread::onComponentSplit, Qt::DirectConnection);
     connect(&graphModel.graph(), &Graph::componentAdded, this, &LayoutThread::onComponentAdded, Qt::DirectConnection);
     connect(&graphModel.graph(), &Graph::componentWillBeRemoved, this, &LayoutThread::onComponentWillBeRemoved, Qt::DirectConnection);
-}
-
-std::map<QString, std::shared_ptr<LayoutParam>>& LayoutThread::layoutParams() const
-{
-   return _layoutFactory->getSettings()->paramMap();
 }
 
 void LayoutThread::pause()
@@ -252,4 +247,9 @@ void LayoutThread::onComponentAdded(const Graph*, ComponentId componentId, bool)
 void LayoutThread::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool)
 {
     removeComponent(componentId);
+}
+
+std::vector<LayoutSetting>& LayoutThread::settingsVector()
+{
+   return _layoutFactory->settings().vector();
 }

@@ -50,14 +50,14 @@ private:
 
 protected:
     bool shouldCancel() const { return _atomicCancel; }
-    std::shared_ptr<LayoutSettings> _settings;
+    const LayoutSettings* _settings;
 
     NodePositions& positions() { return _positions; }
 
 public:
     Layout(const Graph& graph,
            NodePositions& positions,
-           std::shared_ptr<LayoutSettings> settings = nullptr,
+           const LayoutSettings* settings = nullptr,
            Iterative iterative = Iterative::No,
            float scaling = 1.0f,
            int smoothing = 1) :
@@ -99,17 +99,18 @@ class LayoutFactory
 {
 protected:
     std::shared_ptr<GraphModel> _graphModel;
-    std::shared_ptr<LayoutSettings> _layoutSettings;
+    LayoutSettings _layoutSettings;
 
 public:
     LayoutFactory(std::shared_ptr<GraphModel> graphModel) :
         _graphModel(graphModel)
     {
-
     }
+
     virtual ~LayoutFactory() {}
 
-    std::shared_ptr<LayoutSettings> getSettings() const {
+    LayoutSettings& settings()
+    {
         return _layoutSettings;
     }
 
@@ -135,7 +136,7 @@ private:
     std::condition_variable _waitForPause;
     std::condition_variable _waitForResume;
 
-    std::unique_ptr<const LayoutFactory> _layoutFactory;
+    std::unique_ptr<LayoutFactory> _layoutFactory;
     std::map<ComponentId, std::shared_ptr<Layout>> _layouts;
     ComponentArray<bool> _executedAtLeastOnce;
 
@@ -143,10 +144,9 @@ private:
 
     PerformanceCounter _performanceCounter;
 
-
 public:
     LayoutThread(GraphModel& graphModel,
-                 std::unique_ptr<const LayoutFactory> layoutFactory,
+                 std::unique_ptr<LayoutFactory> layoutFactory,
                  bool repeating = false);
 
     virtual ~LayoutThread()
@@ -156,8 +156,6 @@ public:
         if(_thread.joinable())
             _thread.join();
     }
-
-    std::map<QString, std::shared_ptr<LayoutParam>>& layoutParams() const;
 
     void pause();
     void pauseAndWait();
@@ -169,8 +167,7 @@ public:
 
     void addAllComponents();
 
-protected:
-
+    std::vector<LayoutSetting>& settingsVector();
 
 private:
     bool iterative();

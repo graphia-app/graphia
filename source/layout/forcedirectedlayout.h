@@ -18,13 +18,11 @@ private:
 public:
     ForceDirectedLayout(const Graph& graph,
                         NodePositions& positions,
-                        std::shared_ptr<LayoutSettings> settings) :
+                        const LayoutSettings* settings) :
         Layout(graph, positions, settings, Iterative::Yes, 0.4f, 4),
         _prevDisplacements(graph.numNodes()),
         _displacements(graph.numNodes())
-    {
-
-    }
+    {}
 
     void executeReal(bool firstIteration);
 };
@@ -35,16 +33,14 @@ public:
     ForceDirectedLayoutFactory(std::shared_ptr<GraphModel> graphModel) :
         LayoutFactory(graphModel)
     {
-        _layoutSettings = std::make_shared<LayoutSettings>();
-        _layoutSettings->registerParam("Spring Length",1,200,10);
-        _layoutSettings->registerParam("Repulsive Force",0.01f,100,1);
-        _layoutSettings->registerParam("Attractive Force",0.01f,100,1);
+        _layoutSettings.registerSetting("RepulsiveForce",  QObject::tr("Repulsive Force"),  1.0f, 100.0f, 1.0f);
+        _layoutSettings.registerSetting("AttractiveForce", QObject::tr("Attractive Force"), 1.0f, 100.0f, 1.0f);
     }
 
     std::shared_ptr<Layout> create(ComponentId componentId, NodePositions& nodePositions) const
     {
         auto component = this->_graphModel->graph().componentById(componentId);
-        return std::make_shared<ForceDirectedLayout>(*component, nodePositions, _layoutSettings);
+        return std::make_shared<ForceDirectedLayout>(*component, nodePositions, &_layoutSettings);
     }
 };
 

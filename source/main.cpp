@@ -16,8 +16,6 @@
 
 #include "rendering/openglfunctions.h"
 
-#include "ui/preferences.h"
-
 int main(int argc, char *argv[])
 {
     QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
@@ -49,10 +47,9 @@ int main(int argc, char *argv[])
     qmlRegisterType<Document>(uri, maj, min, "Document");
     qmlRegisterType<GraphQuickItem>(uri, maj, min, "Graph");
     qmlRegisterType<GraphTransformConfiguration>(uri, maj, min, "GraphTransform");
-    qmlRegisterType<LayoutParam>(uri, maj, min, "LayoutParam");
+    qmlRegisterType<LayoutSetting>(uri, maj, min, "LayoutSetting");
 
     ThreadPool threadPool;
-    Preferences preferences;
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));

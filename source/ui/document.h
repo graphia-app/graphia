@@ -59,7 +59,7 @@ class Document : public QObject
     Q_PROPERTY(bool debugPaused READ debugPaused NOTIFY debugPausedChanged)
     Q_PROPERTY(QString debugResumeAction READ debugResumeAction NOTIFY debugResumeActionChanged)
 
-    Q_PROPERTY(QQmlListProperty<LayoutParam> layoutParams READ layoutParams NOTIFY layoutParamChanged)
+    Q_PROPERTY(QmlContainerWrapperBase* layoutSettings READ layoutSettings CONSTANT)
 
 public:
     explicit Document(QObject* parent = nullptr);
@@ -90,13 +90,9 @@ public:
     void setTitle(const QString& status);
     void setStatus(const QString& status);
 
-    QQmlListProperty<LayoutParam> layoutParams();
-
-    static int count(QQmlListProperty<LayoutParam> *list);
-
-    static LayoutParam* at(QQmlListProperty<LayoutParam> *list, int index);
-
     QmlContainerWrapper<GraphTransformConfiguration>* transforms() { return &_graphTransformConfigurations; }
+
+    QmlContainerWrapper<LayoutSetting>* layoutSettings() { return &_layoutSettings; }
 
     QString contentQmlPath() const;
 
@@ -119,6 +115,8 @@ private:
 
     std::vector<GraphTransformConfiguration> _previousGraphTransformConfigurations;
     QmlContainerWrapper<GraphTransformConfiguration> _graphTransformConfigurations;
+
+    QmlContainerWrapper<LayoutSetting> _layoutSettings;
 
     std::recursive_mutex _autoResumeMutex;
     int _autoResume = 0;
@@ -155,7 +153,6 @@ signals:
     void commandVerbChanged();
 
     void layoutIsPausedChanged();
-    void layoutParamChanged();
 
     void canUndoChanged();
     void nextUndoActionChanged();
@@ -171,7 +168,6 @@ signals:
 
 public slots:
     bool openFile(const QUrl& fileUrl, const QString& fileType);
-    void updateLayoutParams(QString key, float value);
 
     void toggleLayout();
 

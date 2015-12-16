@@ -1,43 +1,48 @@
 #include "layoutsettings.h"
 #include "../utils/utils.h"
 
-LayoutParam::LayoutParam(QString inname, float inmin, float inmax, float invalue){
-    name = inname;
-    min = inmin;
-    max = inmax;
-    value = invalue;
-}
-
-LayoutParam::LayoutParam(){
-}
-
-LayoutSettings::LayoutSettings()
+LayoutSetting::LayoutSetting(const QString& name, const QString& displayName,
+                             float minimumValue, float maximumValue, float defaultValue) :
+    _name(name),
+    _displayName(displayName),
+    _minimumValue(minimumValue),
+    _maximumValue(maximumValue),
+    _value(defaultValue)
 {
-
 }
 
-bool LayoutSettings::setParamValue(QString key, float value)
+LayoutSetting::LayoutSetting(const LayoutSetting& other) :
+    QObject(),
+    _name(other._name),
+    _displayName(other._displayName),
+    _minimumValue(other._minimumValue),
+    _maximumValue(other._maximumValue),
+    _value(other._value)
 {
-    if ( u::contains(_params, key)){
-        _params[key]->value = value;
-        return true;
-    } else {
-        return false;
+}
+
+LayoutSetting& LayoutSetting::operator=(const LayoutSetting& other)
+{
+    if(this != &other)
+    {
+        _name = other._name;
+        _displayName = other._displayName;
+        _minimumValue = other._minimumValue;
+        _maximumValue = other._maximumValue;
+        _value = other._value;
     }
+
+    return *this;
 }
 
-std::shared_ptr<LayoutParam> LayoutSettings::getParam(QString key)
+float LayoutSettings::valueOf(const QString& name) const
 {
-    return _params[key];
-}
+    for(auto& setting : _settings)
+    {
+        if(setting.name() == name)
+            return setting.value();
+    }
 
-std::map<QString, std::shared_ptr<LayoutParam>>& LayoutSettings::paramMap()
-{
-    return _params;
-}
-
-bool LayoutSettings::registerParam(QString name, float min, float max, float value)
-{
-    _params.emplace(name, std::make_shared<LayoutParam>(name, min, max, value));
-    return true;
+    Q_ASSERT(!"Setting not found");
+    return 0.0f;
 }

@@ -4,7 +4,6 @@
 
 #include "../utils/utils.h"
 #include "../utils/threadpool.h"
-#include "../ui/preferences.h"
 
 static QVector3D normalized(const QVector3D& v)
 {
@@ -70,13 +69,12 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
     BarnesHutTree barnesHutTree;
     barnesHutTree.build(graph(), positions());
 
-    float SPRING_LENGTH = _settings->getParam("Spring Length")->value;
-    float REPULSIVE_FORCE = _settings->getParam("Repulsive Force")->value;
-    float ATTRACTIVE_FORCE = _settings->getParam("Attractive Force")->value;
+    float REPULSIVE_FORCE = _settings->valueOf("RepulsiveForce");
+    float ATTRACTIVE_FORCE = _settings->valueOf("AttractiveForce");
 
     // Repulsive forces
     auto repulsiveResults = concurrent_for(nodeIds().begin(), nodeIds().end(),
-        [this, &barnesHutTree, REPULSIVE_FORCE ](const NodeId nodeId)
+        [this, &barnesHutTree, REPULSIVE_FORCE](const NodeId nodeId)
         {
             if(shouldCancel())
                 return;
@@ -90,7 +88,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
 
     // Attractive forces
     auto attractiveResults = concurrent_for(edgeIds().begin(), edgeIds().end(),
-        [this, SPRING_LENGTH, ATTRACTIVE_FORCE](const EdgeId edgeId)
+        [this, ATTRACTIVE_FORCE](const EdgeId edgeId)
         {
             if(shouldCancel())
                 return;
@@ -100,7 +98,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
             {
                 const QVector3D difference = positions().get(edge.targetId()) - positions().get(edge.sourceId());
                 float distanceSq = difference.lengthSquared();
-                //const float SPRING_LENGTH = 10.0f;
+                const float SPRING_LENGTH = 10.0f;
                 float force = ATTRACTIVE_FORCE * distanceSq / (SPRING_LENGTH * SPRING_LENGTH * SPRING_LENGTH);
 
                 _displacements[edge.targetId()] -= (force * difference);

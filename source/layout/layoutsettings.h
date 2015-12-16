@@ -1,30 +1,42 @@
 #ifndef LAYOUTSETTINGS_H
 #define LAYOUTSETTINGS_H
 
-#include <map>
 #include <QObject>
 #include <QString>
-#include <QQmlListProperty>
-#include <memory>
 
-class LayoutParam : public QObject {
+#include <vector>
+
+class LayoutSetting : public QObject
+{
     Q_OBJECT
-    Q_PROPERTY(QString name MEMBER name NOTIFY nameChanged)
-    Q_PROPERTY(float val MEMBER value NOTIFY valueChanged)
-    Q_PROPERTY(float min MEMBER min NOTIFY minChanged)
-    Q_PROPERTY(float max MEMBER max NOTIFY maxChanged)
+    Q_PROPERTY(QString settingName MEMBER _displayName NOTIFY nameChanged)
+    Q_PROPERTY(float settingValue MEMBER _value NOTIFY valueChanged)
+    Q_PROPERTY(float settingMinimumValue MEMBER _minimumValue NOTIFY minimumChanged)
+    Q_PROPERTY(float settingMaximumValue MEMBER _maximumValue NOTIFY maximumChanged)
+
 public:
-    LayoutParam(QString inname, float inmin, float inmax, float invalue);
-    LayoutParam();
-    QString name;
-    float value;
-    float min;
-    float max;
+    LayoutSetting() {}
+    LayoutSetting(const QString& name, const QString& displayName,
+                  float minimumValue, float maximumValue, float defaultValue);
+
+    LayoutSetting(const LayoutSetting& other);
+    LayoutSetting& operator=(const LayoutSetting& other);
+
+    float value() const { return _value; }
+    const QString& name() const { return _name; }
+
+private:
+    QString _name;
+    QString _displayName;
+    float _minimumValue = 0.0f;
+    float _maximumValue = 1.0f;
+    float _value = 0.0f;
+
 signals:
     void nameChanged();
     void valueChanged();
-    void minChanged();
-    void maxChanged();
+    void minimumChanged();
+    void maximumChanged();
 };
 
 class LayoutSettings : public QObject
@@ -32,22 +44,17 @@ class LayoutSettings : public QObject
     Q_OBJECT
 
 public:
+    float valueOf(const QString& name) const;
+    std::vector<LayoutSetting>& vector() { return _settings; }
 
-    LayoutSettings();
-
-    bool setParamValue(QString key, float value);
-
-    std::shared_ptr<LayoutParam> getParam(QString key);
-
-    std::map<QString, std::shared_ptr<LayoutParam>>& paramMap();
-
-    bool registerParam(QString name, float min, float max, float value);
-
-protected:
-
+    template<typename... Args>
+    void registerSetting(Args&&... args)
+    {
+        _settings.emplace_back(std::forward<Args>(args)...);
+    }
 
 private:
-    std::map<QString, std::shared_ptr<LayoutParam>> _params;
+    std::vector<LayoutSetting> _settings;
 };
 
 #endif // LAYOUTSETTINGS_H

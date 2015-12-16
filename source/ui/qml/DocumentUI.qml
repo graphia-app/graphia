@@ -37,9 +37,6 @@ Item
     property bool debugPaused: document.debugPaused
     property string debugResumeAction: document.debugResumeAction
 
-    property alias preferencesform: preferencesform
-
-
     function openFile(fileUrl, fileType)
     {
         if(document.openFile(fileUrl, fileType))
@@ -113,6 +110,20 @@ Item
                       (graph.numEdges >= 0 ? "\n" + graph.numEdges + " edges" : "") +
                       (graph.numComponents >= 0 ? "\n" + graph.numComponents + " components" : "");
             }
+
+            Column
+            {
+                id: layoutSettings
+
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
+
+                Repeater
+                {
+                    model: document.layoutSettings
+                    LayoutSettingUI { }
+                }
+            }
         }
 
         Item
@@ -145,12 +156,4 @@ Item
             }
         }
     }
-
-    PreferencesForm {
-        id: preferencesform
-        paramList.model: document.layoutParams
-        //sldrTension.onValueChanged: document.updatePreferences(sldrTension.value);
-    }
-
-
 }
