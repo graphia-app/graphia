@@ -276,8 +276,6 @@ void GraphOverviewScene::startTransition(float duration,
             renderer->thaw();
         }
 
-        _graphRenderer->thaw();
-
         // Subtract the removed ComponentIds, no we no longer need to render them
         std::vector<ComponentId> postTransitionComponentIds;
         std::sort(_componentIds.begin(), _componentIds.end());
@@ -343,7 +341,6 @@ void GraphOverviewScene::onComponentWillBeRemoved(const Graph*, ComponentId comp
         {
             auto renderer = _graphRenderer->componentRendererForId(componentId);
             renderer->freeze();
-            _graphRenderer->freeze();
 
             _removedComponentIds.emplace_back(componentId);
             _componentLayout[componentId]._alpha = 0.0f;
@@ -390,8 +387,6 @@ void GraphOverviewScene::onComponentsWillMerge(const Graph*, const ComponentMerg
             if(merger != componentMergeSet.newComponentId())
                 _removedComponentIds.emplace_back(merger);
         }
-
-        _graphRenderer->freeze();
     }, "GraphOverviewScene::onComponentsWillMerge (freeze renderers)");
 }
 

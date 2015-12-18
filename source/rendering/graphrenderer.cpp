@@ -86,9 +86,6 @@ void GPUGraphData::prepareVertexBuffers()
 
     _edgeVBO.create();
     _edgeVBO.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-
-    /*_debugLinesDataBuffer.create();
-    _debugLinesDataBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);*/
 }
 
 void GPUGraphData::prepareNodeVAO(QOpenGLShaderProgram& shader)
@@ -150,12 +147,9 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     _cylinder.vertexArrayObject()->release();
 }
 
-void GPUGraphData::reset(const Graph& graph)
+void GPUGraphData::reset()
 {
-    _nodeData.reserve(graph.numNodes());
     _nodeData.clear();
-
-    _edgeData.reserve(graph.numEdges());
     _edgeData.clear();
 }
 
@@ -311,16 +305,9 @@ void GraphRenderer::updateGPUDataIfRequired()
 
     _gpuDataRequiresUpdate = false;
 
-    if(_frozen)
-    {
-        _updateGPUDataWhenThawed = true;
-        return;
-    }
-
     std::unique_lock<std::recursive_mutex> lock(_graphModel->nodePositions().mutex());
 
     int componentIndex = 0;
-    _componentIdsOnGPU.clear();
 
     auto& nodePositions = _graphModel->nodePositions();
     auto& nodeVisuals = _graphModel->nodeVisuals();
@@ -328,24 +315,20 @@ void GraphRenderer::updateGPUDataIfRequired()
     const QColor selectedOutLineColor = Qt::GlobalColor::white;
     const QColor deselectedOutLineColor = Qt::GlobalColor::black;
 
-    _gpuGraphData.reset(_graphModel->graph());
-    _gpuGraphDataAlpha.reset(_graphModel->graph());
+    _gpuGraphData.reset();
+    _gpuGraphDataAlpha.reset();
 
     NodeArray<QVector3D> scaledAndSmoothedNodePositions(_graphModel->graph());
 
-    for(ComponentId componentId : _graphModel->graph().componentIds())
+    for(auto& componentRendererRef : _componentRenderers)
     {
-        auto* componentRenderer = componentRendererForId(componentId);
-
-        Q_ASSERT(componentRenderer->initialised());
-
-        if(!componentRenderer->visible())
+        GraphComponentRenderer* componentRenderer = componentRendererRef;
+        if(!componentRenderer->initialised() || !componentRenderer->visible())
             continue;
 
-        auto component = _graphModel->graph().componentById(componentId);
-        auto& gpuGraphData = componentRenderer->alpha() >= 1.0f ? _gpuGraphData : _gpuGraphDataAlpha;
+        auto& gpuGraphData = componentRenderer->fading() ? _gpuGraphDataAlpha : _gpuGraphData;
 
-        for(NodeId nodeId : component->nodeIds())
+        for(auto nodeId : componentRenderer->nodeIds())
         {
             const QVector3D nodePosition = nodePositions.getScaledAndSmoothed(nodeId);
             scaledAndSmoothedNodePositions[nodeId] = nodePosition;
@@ -371,11 +354,10 @@ void GraphRenderer::updateGPUDataIfRequired()
             gpuGraphData._nodeData.push_back(nodeData);
         }
 
-        for(EdgeId edgeId : component->edgeIds())
+        for(auto& edge : componentRenderer->edges())
         {
-            const Edge& edge = _graphModel->graph().edgeById(edgeId);
-            const QVector3D sourcePosition = scaledAndSmoothedNodePositions[edge.sourceId()];
-            const QVector3D targetPosition = scaledAndSmoothedNodePositions[edge.targetId()];
+            const QVector3D& sourcePosition = scaledAndSmoothedNodePositions[edge.sourceId()];
+            const QVector3D& targetPosition = scaledAndSmoothedNodePositions[edge.targetId()];
 
             GPUGraphData::EdgeData edgeData;
             edgeData._sourcePosition[0] = sourcePosition.x();
@@ -385,10 +367,10 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._targetPosition[1] = targetPosition.y();
             edgeData._targetPosition[2] = targetPosition.z();
             edgeData._component = componentIndex;
-            edgeData._size = edgeVisuals[edgeId]._size;
-            edgeData._color[0] = edgeVisuals[edgeId]._color.redF();
-            edgeData._color[1] = edgeVisuals[edgeId]._color.greenF();
-            edgeData._color[2] = edgeVisuals[edgeId]._color.blueF();
+            edgeData._size = edgeVisuals[edge.id()]._size;
+            edgeData._color[0] = edgeVisuals[edge.id()]._color.redF();
+            edgeData._color[1] = edgeVisuals[edge.id()]._color.greenF();
+            edgeData._color[2] = edgeVisuals[edge.id()]._color.blueF();
             edgeData._outlineColor[0] = deselectedOutLineColor.redF();
             edgeData._outlineColor[1] = deselectedOutLineColor.greenF();
             edgeData._outlineColor[2] = deselectedOutLineColor.blueF();
@@ -396,7 +378,6 @@ void GraphRenderer::updateGPUDataIfRequired()
             gpuGraphData._edgeData.push_back(edgeData);
         }
 
-        _componentIdsOnGPU.push_back(componentId);
         componentIndex++;
     }
 
@@ -421,11 +402,10 @@ void GraphRenderer::updateComponentGPUData()
     // here transfering the buffer, when there are lots of components
     std::vector<GLfloat> componentData;
 
-    for(auto componentId : _componentIdsOnGPU)
+    for(auto& componentRendererRef : _componentRenderers)
     {
-        auto* componentRenderer = componentRendererForId(componentId);
-
-        if(!componentRenderer->visible())
+        GraphComponentRenderer* componentRenderer = componentRendererRef;
+        if(!componentRenderer->initialised() || !componentRenderer->visible())
             continue;
 
         for(int i = 0; i < 16; i++)
@@ -444,22 +424,6 @@ void GraphRenderer::updateComponentGPUData()
     glBindBuffer(GL_TEXTURE_BUFFER, _componentDataTBO);
     glBufferData(GL_TEXTURE_BUFFER, componentData.size() * sizeof(GLfloat), componentData.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_TEXTURE_BUFFER, 0);
-}
-
-void GraphRenderer::freeze()
-{
-    _frozen = true;
-}
-
-void GraphRenderer::thaw()
-{
-    _frozen = false;
-
-    if(_updateGPUDataWhenThawed)
-    {
-        updateGPUData(When::Now);
-        _updateGPUDataWhenThawed = false;
-    }
 }
 
 void GraphRenderer::clear()
@@ -740,6 +704,16 @@ void GraphRenderer::onLayoutChanged()
     _layoutChanged = true;
 }
 
+void GraphRenderer::onComponentFadingChanged(ComponentId)
+{
+    updateGPUData(When::Later);
+}
+
+void GraphRenderer::onComponentCleanup(ComponentId)
+{
+    updateGPUData(When::Later);
+}
+
 void GraphRenderer::resetView()
 {
     if(_graphComponentScene != nullptr && mode() == GraphRenderer::Mode::Component)
@@ -897,7 +871,7 @@ void GraphRenderer::renderScene()
         _transition.update(dTime);
         _scene->update(dTime);
 
-        if(layoutChanged() || transitionActive)
+        if(layoutChanged())
             updateGPUData(When::Later);
 
         updateGPUDataIfRequired();

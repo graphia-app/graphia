@@ -36,7 +36,10 @@ void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, 
                                         GraphRenderer* graphRenderer)
 {
     if(_initialised)
+    {
+        synchronise();
         return;
+    }
 
     _graphModel = graphModel;
     _componentId = componentId;
@@ -47,6 +50,8 @@ void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, 
 
     _targetZoomDistance = _viewData._zoomDistance;
     _viewData._focusNodeId.setToNull();
+
+    synchronise();
 
     _initialised = true;
 }
@@ -64,12 +69,34 @@ void GraphComponentRenderer::cleanup()
         return;
     }
 
+    _graphRenderer->onComponentCleanup(_componentId);
+
+    _nodeIds.clear();
+    _edges.clear();
+
     _graphModel = nullptr;
     _componentId.setToNull();
     _selectionManager = nullptr;
     _graphRenderer = nullptr;
 
     _initialised = false;
+}
+
+void GraphComponentRenderer::synchronise()
+{
+    if(_frozen)
+    {
+        _synchroniseWhenThawed = true;
+        return;
+    }
+
+    _nodeIds.clear();
+    _edges.clear();
+
+    auto component = _graphModel->graph().componentById(_componentId);
+    _nodeIds = component->nodeIds();
+    for(auto edgeId : component->edgeIds())
+        _edges.emplace_back(_graphModel->graph().edgeById(edgeId));
 }
 
 void GraphComponentRenderer::cloneViewDataFrom(const GraphComponentRenderer& other)
@@ -98,6 +125,12 @@ void GraphComponentRenderer::freeze()
 void GraphComponentRenderer::thaw()
 {
     _frozen = false;
+
+    if(_synchroniseWhenThawed && !_cleanupWhenThawed)
+    {
+        synchronise();
+        _synchroniseWhenThawed = false;
+    }
 
     if(_cleanupWhenThawed)
     {
@@ -235,7 +268,13 @@ bool GraphComponentRenderer::transitionActive()
 
 void GraphComponentRenderer::setAlpha(float alpha)
 {
-    _alpha = alpha;
+    if(_alpha != alpha)
+    {
+        if(_alpha >= 1.0f || alpha >= 1.0f)
+            _graphRenderer->onComponentFadingChanged(_componentId);
+
+        _alpha = alpha;
+    }
 }
 
 void GraphComponentRenderer::zoom(float delta, bool doTransition)

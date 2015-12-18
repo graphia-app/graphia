@@ -22,6 +22,7 @@
 #include <memory>
 #include <atomic>
 #include <vector>
+#include <tuple>
 
 class GraphQuickItem;
 class GraphModel;
@@ -59,7 +60,7 @@ struct GPUGraphData : protected OpenGLFunctions
     void prepareNodeVAO(QOpenGLShaderProgram& shader);
     void prepareEdgeVAO(QOpenGLShaderProgram& shader);
 
-    void reset(const Graph& graph);
+    void reset();
 
     void upload();
 
@@ -132,9 +133,6 @@ public:
     void rendererFinishedTransition();
     void executeOnRendererThread(DeferredExecutor::TaskFn task, const QString& description);
 
-    void freeze();
-    void thaw();
-
     bool layoutChanged() const { return _synchronousLayoutChanged; }
 
 private slots:
@@ -147,6 +145,8 @@ public slots:
     void onCommandWillExecuteAsynchronously(const Command*);
     void onCommandCompleted(const Command*, const QString&);
     void onLayoutChanged();
+    void onComponentFadingChanged(ComponentId componentId);
+    void onComponentCleanup(ComponentId componentId);
 
 private:
     std::shared_ptr<GraphModel> _graphModel;
@@ -210,12 +210,8 @@ private:
     GPUGraphData _gpuGraphDataAlpha;
     bool _gpuDataRequiresUpdate = false;
 
-    bool _frozen = false;
-    bool _updateGPUDataWhenThawed = false;
-
     GLuint _componentDataTexture = 0;
     GLuint _componentDataTBO = 0;
-    std::vector<ComponentId> _componentIdsOnGPU;
 
     QRect _selectionRect;
 

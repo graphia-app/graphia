@@ -41,6 +41,7 @@ public:
     void setVisible(bool visible);
 
     void cleanup();
+    void synchronise();
     void update(float t);
     void setViewportSize(int viewportWidth, int viewportHeight);
     void setDimensions(const QRect& dimensions);
@@ -54,6 +55,7 @@ public:
     int height() const { return _dimensions.height(); }
 
     float alpha() const { return _alpha; }
+    bool fading() const { return _alpha < 1.0f; }
     void setAlpha(float alpha);
 
     QMatrix4x4 modelViewMatrix() const;
@@ -66,7 +68,10 @@ public:
                                             std::vector<NodeId> nodeIds,
                                             const QQuaternion& rotation);
 
-    ComponentId componentId() { return _componentId; }
+    ComponentId componentId() const { return _componentId; }
+    const std::vector<NodeId>& nodeIds() const { return _nodeIds; }
+    const std::vector<Edge> edges() const { return _edges; }
+
     NodeId focusNodeId();
     QVector3D focusPosition();
     void enableFocusTracking() { _trackFocus = true; }
@@ -103,6 +108,7 @@ private:
 
     bool _frozen = false;
     bool _cleanupWhenThawed = false;
+    bool _synchroniseWhenThawed = false;
 
     struct ViewData
     {
@@ -133,6 +139,8 @@ private:
     Transition _zoomTransition;
 
     ComponentId _componentId;
+    std::vector<NodeId> _nodeIds;
+    std::vector<Edge> _edges;
 
     float _fovx = 0.0f;
     float _fovy = 0.0f;
