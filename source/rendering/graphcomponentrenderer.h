@@ -31,7 +31,7 @@ public:
                     std::shared_ptr<SelectionManager> selectionManager,
                     GraphRenderer* graphRenderer);
 
-    bool visible() { return _visible; }
+    bool visible() { return _initialised && _visible; }
     void setVisible(bool visible);
 
     void cleanup();

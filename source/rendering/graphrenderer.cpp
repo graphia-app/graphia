@@ -323,7 +323,7 @@ void GraphRenderer::updateGPUDataIfRequired()
     for(auto& componentRendererRef : _componentRenderers)
     {
         GraphComponentRenderer* componentRenderer = componentRendererRef;
-        if(!componentRenderer->initialised() || !componentRenderer->visible())
+        if(!componentRenderer->visible())
             continue;
 
         auto& gpuGraphData = componentRenderer->fading() ? _gpuGraphDataAlpha : _gpuGraphData;
@@ -405,7 +405,7 @@ void GraphRenderer::updateComponentGPUData()
     for(auto& componentRendererRef : _componentRenderers)
     {
         GraphComponentRenderer* componentRenderer = componentRendererRef;
-        if(!componentRenderer->initialised() || !componentRenderer->visible())
+        if(!componentRenderer->visible())
             continue;
 
         for(int i = 0; i < 16; i++)
