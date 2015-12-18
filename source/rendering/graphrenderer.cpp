@@ -493,6 +493,11 @@ float GraphRenderer::secondsElapsed()
     return dTime;
 }
 
+bool GraphRenderer::transitionActive() const
+{
+    return _transition.active() || _scene->transitionActive() || _modeTransitionInProgress;
+}
+
 //FIXME this reference counting thing is rubbish, and gives rise to hacks
 void GraphRenderer::rendererStartedTransition()
 {
@@ -859,12 +864,9 @@ void GraphRenderer::renderScene()
         // _synchronousLayoutChanged can only ever be (atomically) true in this scope
         _synchronousLayoutChanged = _layoutChanged.exchange(false);
 
-        bool transitionActive = _transition.active() || _scene->transitionActive() ||
-                _modeTransitionInProgress;
-
         // If there is a transition active then we'll need another
         // frame once we're finished with this one
-        if(transitionActive)
+        if(transitionActive())
             update(); // QQuickFramebufferObject::Renderer::update
 
         float dTime = secondsElapsed();
@@ -1061,13 +1063,16 @@ void GraphRenderer::finishRender()
     glDrawArrays(GL_TRIANGLES, 0, 6);
     _screenShader.release();
 
-    // Selection texture
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture);
+    if(!transitionActive())
+    {
+        // Selection texture
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture);
 
-    _selectionShader.bind();
-    _selectionShader.setUniformValue("projectionMatrix", m);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    _selectionShader.release();
+        _selectionShader.bind();
+        _selectionShader.setUniformValue("projectionMatrix", m);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        _selectionShader.release();
+    }
 
     _screenQuadVAO.release();
     _screenQuadDataBuffer.release();

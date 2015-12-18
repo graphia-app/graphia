@@ -270,6 +270,8 @@ private:
     void resetTime();
     float secondsElapsed();
 
+    bool transitionActive() const;
+
 signals:
     void modeChanged() const;
 
