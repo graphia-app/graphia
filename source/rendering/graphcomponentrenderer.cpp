@@ -26,11 +26,6 @@
 #include <cmath>
 #include <mutex>
 
-GraphComponentRenderer::GraphComponentRenderer() :
-    OpenGLFunctions()
-{
-}
-
 void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, ComponentId componentId,
                                         std::shared_ptr<SelectionManager> selectionManager,
                                         GraphRenderer* graphRenderer)
@@ -45,8 +40,6 @@ void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, 
     _componentId = componentId;
     _selectionManager = selectionManager;
     _graphRenderer = graphRenderer;
-
-    resolveOpenGLFunctions();
 
     _targetZoomDistance = _viewData._zoomDistance;
     _viewData._focusNodeId.setToNull();

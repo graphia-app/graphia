@@ -1,7 +1,6 @@
 #ifndef GRAPHCOMPONENTRENDERER_H
 #define GRAPHCOMPONENTRENDERER_H
 
-#include "openglfunctions.h"
 #include "camera.h"
 #include "primitives/cylinder.h"
 #include "primitives/sphere.h"
@@ -10,9 +9,6 @@
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
 
-#include <QOpenGLBuffer>
-#include <QOpenGLVertexArrayObject>
-#include <QOpenGLShaderProgram>
 #include <QMatrix4x4>
 #include <QVector3D>
 #include <QQuaternion>
@@ -28,11 +24,9 @@ class SelectionManager;
 class Camera;
 class Octree;
 
-class GraphComponentRenderer : protected OpenGLFunctions
+class GraphComponentRenderer
 {
 public:
-    GraphComponentRenderer();
-
     void initialise(std::shared_ptr<GraphModel> graphModel, ComponentId componentId,
                     std::shared_ptr<SelectionManager> selectionManager,
                     GraphRenderer* graphRenderer);
