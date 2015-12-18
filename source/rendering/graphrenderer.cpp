@@ -650,16 +650,14 @@ void GraphRenderer::onGraphChanged(const Graph* graph)
     // interaction phases
     rendererStartedTransition();
 
-    for(auto componentId : graph->componentIds())
-    {
-        executeOnRendererThread([this, componentId]
-        {
-            componentRendererForId(componentId)->initialise(_graphModel, componentId, _selectionManager, this);
-        }, QString("GraphRenderer::onGraphChanged (initialise) component %1").arg((int)componentId));
-    }
-
     executeOnRendererThread([this]
     {
+        for(ComponentId componentId : _graphModel->graph().componentIds())
+        {
+            componentRendererForId(componentId)->initialise(_graphModel, componentId,
+                                                            _selectionManager, this);
+        }
+
         updateGPUData(When::Later);
 
         // Partner to the hack described above
@@ -669,19 +667,18 @@ void GraphRenderer::onGraphChanged(const Graph* graph)
 
 void GraphRenderer::onComponentAdded(const Graph*, ComponentId componentId, bool)
 {
-    auto graphComponentRenderer = componentRendererForId(componentId);
-    executeOnRendererThread([this, graphComponentRenderer, componentId]
+    executeOnRendererThread([this, componentId]
     {
-        graphComponentRenderer->initialise(_graphModel, componentId, _selectionManager, this);
+        componentRendererForId(componentId)->initialise(_graphModel, componentId,
+                                                        _selectionManager, this);
     }, "GraphRenderer::onComponentAdded");
 }
 
 void GraphRenderer::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool)
 {
-    auto graphComponentRenderer = componentRendererForId(componentId);
-    executeOnRendererThread([this, graphComponentRenderer]
+    executeOnRendererThread([this, componentId]
     {
-        graphComponentRenderer->cleanup();
+        componentRendererForId(componentId)->cleanup();
     }, QString("GraphRenderer::onComponentWillBeRemoved (cleanup) component %1").arg((int)componentId));
 }
 
