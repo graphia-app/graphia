@@ -43,7 +43,6 @@ public:
     void set(NodeId nodeId, const QVector3D& position);
 
     void update(const NodePositions& other);
-    void executeIfUpdated(std::function<void()> f);
 
     static QVector3D centreOfMass(const NodePositions& nodePositions,
                                   const std::vector<NodeId>& nodeIds);

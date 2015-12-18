@@ -40,16 +40,6 @@ void NodePositions::update(const NodePositions& other)
     _updated = true;
 }
 
-void NodePositions::executeIfUpdated(std::function<void()> f)
-{
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
-    if(_updated)
-    {
-        f();
-        _updated = false;
-    }
-}
-
 QVector3D NodePositions::centreOfMass(const NodePositions& nodePositions,
                                       const std::vector<NodeId>& nodeIds)
 {
