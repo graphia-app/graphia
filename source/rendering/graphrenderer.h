@@ -22,7 +22,6 @@
 #include <memory>
 #include <atomic>
 #include <vector>
-#include <tuple>
 
 class GraphQuickItem;
 class GraphModel;
