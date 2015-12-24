@@ -452,12 +452,6 @@ void GraphRenderer::setScene(Scene* scene)
 
     _scene = scene;
 
-    if(!_scene->initialised())
-    {
-        _scene->initialise();
-        _scene->setInitialised();
-    }
-
     _scene->setVisible(true);
     _scene->onShow();
 
@@ -847,7 +841,7 @@ void GraphRenderer::renderScene()
         _preUpdateExecutor.execute();
     });
 
-    if(_scene == nullptr || !_scene->initialised())
+    if(_scene == nullptr)
         return;
 
     if(_resized)

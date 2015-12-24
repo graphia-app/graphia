@@ -9,7 +9,6 @@
 
 GraphComponentScene::GraphComponentScene(GraphRenderer* graphRenderer) :
     Scene(graphRenderer),
-    OpenGLFunctions(),
     _graphRenderer(graphRenderer)
 {
     connect(&_graphRenderer->graphModel()->graph(), &Graph::componentSplit, this, &GraphComponentScene::onComponentSplit, Qt::DirectConnection);
@@ -20,11 +19,6 @@ GraphComponentScene::GraphComponentScene(GraphRenderer* graphRenderer) :
     connect(&_graphRenderer->graphModel()->graph(), &Graph::nodeWillBeRemoved, this, &GraphComponentScene::onNodeWillBeRemoved, Qt::DirectConnection);
 
     _defaultComponentId = _graphRenderer->graphModel()->graph().componentIdOfLargestComponent();
-}
-
-void GraphComponentScene::initialise()
-{
-    resolveOpenGLFunctions();
 }
 
 void GraphComponentScene::update(float t)

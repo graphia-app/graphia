@@ -3,7 +3,6 @@
 
 #include "scene.h"
 #include "graphrenderer.h"
-#include "openglfunctions.h"
 #include "transition.h"
 
 #include "../graph/graph.h"
@@ -20,15 +19,13 @@ class GraphModel;
 
 class GraphOverviewScene :
         public Scene,
-        public GraphInitialiser,
-        protected OpenGLFunctions
+        public GraphInitialiser
 {
     Q_OBJECT
 
 public:
     GraphOverviewScene(GraphRenderer* graphRenderer);
 
-    void initialise();
     void update(float t);
     void setViewportSize(int width, int height);
 

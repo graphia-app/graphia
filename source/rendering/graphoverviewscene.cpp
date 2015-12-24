@@ -17,7 +17,6 @@
 
 GraphOverviewScene::GraphOverviewScene(GraphRenderer* graphRenderer) :
     Scene(graphRenderer),
-    OpenGLFunctions(),
     _graphRenderer(graphRenderer),
     _graphModel(graphRenderer->graphModel()),
     _renderSizeDivisors(_graphModel->graph()),
@@ -30,11 +29,6 @@ GraphOverviewScene::GraphOverviewScene(GraphRenderer* graphRenderer) :
     connect(&_graphModel->graph(), &Graph::componentsWillMerge, this, &GraphOverviewScene::onComponentsWillMerge, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphWillChange, this, &GraphOverviewScene::onGraphWillChange, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphOverviewScene::onGraphChanged, Qt::DirectConnection);
-}
-
-void GraphOverviewScene::initialise()
-{
-    resolveOpenGLFunctions();
 }
 
 void GraphOverviewScene::update(float t)

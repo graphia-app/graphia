@@ -17,10 +17,6 @@ public:
     {}
     virtual ~Scene() {}
 
-    bool initialised() { return _initialised; }
-    void setInitialised() { _initialised = true; }
-
-    virtual void initialise() = 0;
     virtual void cleanup() {}
     virtual void update(float t) = 0;
     virtual void setViewportSize(int width, int height) = 0;

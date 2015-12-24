@@ -3,7 +3,6 @@
 
 #include "scene.h"
 #include "graphrenderer.h"
-#include "openglfunctions.h"
 
 #include "../graph/graph.h"
 #include "../graph/componentmanager.h"
@@ -14,15 +13,13 @@ class GraphComponentRenderer;
 
 class GraphComponentScene :
         public Scene,
-        public GraphInitialiser,
-        protected OpenGLFunctions
+        public GraphInitialiser
 {
     Q_OBJECT
 
 public:
     GraphComponentScene(GraphRenderer* graphRenderer);
 
-    void initialise();
     void update(float t);
     void setViewportSize(int width, int height);
 
