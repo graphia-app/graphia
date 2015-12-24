@@ -561,6 +561,28 @@ void GraphRenderer::finishTransitionToComponentMode()
     updateGPUData(When::Later);
 }
 
+void GraphRenderer::finishModeTransition()
+{
+    if(_modeTransitionInProgress)
+    {
+        switch(mode())
+        {
+            case GraphRenderer::Mode::Overview:
+                finishTransitionToOverviewMode();
+                break;
+
+            case GraphRenderer::Mode::Component:
+                finishTransitionToComponentMode();
+                break;
+
+            default:
+                break;
+        }
+
+        _modeTransitionInProgress = false;
+    }
+}
+
 void GraphRenderer::switchToOverviewMode(bool doTransition)
 {
     executeOnRendererThread([this, doTransition]
@@ -819,25 +841,7 @@ void GraphRenderer::renderScene()
 {
     ifSceneUpdateEnabled([this]
     {
-        if(_modeTransitionInProgress)
-        {
-            switch(mode())
-            {
-                case GraphRenderer::Mode::Overview:
-                    finishTransitionToOverviewMode();
-                    break;
-
-                case GraphRenderer::Mode::Component:
-                    finishTransitionToComponentMode();
-                    break;
-
-                default:
-                    break;
-            }
-
-            _modeTransitionInProgress = false;
-        }
-
+        finishModeTransition();
         _preUpdateExecutor.execute();
     });
 

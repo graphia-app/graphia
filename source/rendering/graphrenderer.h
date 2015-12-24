@@ -261,6 +261,7 @@ private:
 
     void finishTransitionToOverviewMode();
     void finishTransitionToComponentMode();
+    void finishModeTransition();
     void setScene(Scene* scene);
     void setInteractor(Interactor* interactor) { _interactor = interactor; }
 
