@@ -38,7 +38,7 @@ bool Transition::update(float dTime)
 
     if(!active())
     {
-        for(auto finishedFunction : _finishedFunctions)
+        for(auto& finishedFunction : _finishedFunctions)
             finishedFunction();
 
         return false;
