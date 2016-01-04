@@ -155,5 +155,6 @@ SOURCES += \
 RESOURCES += \
     source/rendering/shaders.qrc \
     source/ui/qml.qrc \
-    source/icon-themes/icons.qrc
+    source/icon-themes/icons.qrc \
+    source/icon/mainicon.qrc
 

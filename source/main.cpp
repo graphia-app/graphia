@@ -21,6 +21,15 @@ int main(int argc, char *argv[])
     QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
     QApplication app(argc, argv);
 
+    QIcon mainIcon;
+    mainIcon.addFile(":/icon/Icon512x512.png");
+    mainIcon.addFile(":/icon/Icon256x256.png");
+    mainIcon.addFile(":/icon/Icon128x128.png");
+    mainIcon.addFile(":/icon/Icon64x64.png");
+    mainIcon.addFile(":/icon/Icon32x32.png");
+    mainIcon.addFile(":/icon/Icon16x16.png");
+    app.setWindowIcon(mainIcon);
+
     // Since Qt is responsible for managing OpenGL, we need
     // to give it a hint that we want a debug context
     if(qgetenv("OPENGL_DEBUG").toInt() > 0)
