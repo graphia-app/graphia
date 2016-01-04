@@ -38,13 +38,13 @@ void DeferredExecutor::execute()
     {
         qDebug() << "execute() thread" << u::currentThreadName();
 
-        for(auto task : _tasks)
+        for(auto& task : _tasks)
             qDebug() << "\t" << task._description;
     }
 
     while(!_tasks.empty())
     {
-        auto task = _tasks.front();
+        auto& task = _tasks.front();
 
         if(_debug > 2)
             qDebug() << "Executing" << task._description;

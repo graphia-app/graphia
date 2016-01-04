@@ -132,29 +132,34 @@ void GraphComponentRenderer::thaw()
     }
 }
 
+float GraphComponentRenderer::maxNodeDistanceFromPoint(const GraphModel& graphModel,
+                                                       const QVector3D& centre,
+                                                       const std::vector<NodeId>& nodeIds)
+{
+    float maxDistance = std::numeric_limits<float>::min();
+    for(auto nodeId : nodeIds)
+    {
+        QVector3D nodePosition = graphModel.nodePositions().getScaledAndSmoothed(nodeId);
+        auto& nodeVisual = graphModel.nodeVisuals().at(nodeId);
+        float distance = (centre - nodePosition).length() + nodeVisual._size;
+
+        if(distance > maxDistance)
+            maxDistance = distance;
+    }
+
+    return maxDistance;
+}
+
 const float MINIMUM_ZOOM_DISTANCE = 2.5f;
 
-float GraphComponentRenderer::zoomDistanceForNodeIds(const QVector3D& centre, std::vector<NodeId> nodeIds)
+float GraphComponentRenderer::zoomDistanceForRadius(float radius)
 {
     float minHalfFov = qDegreesToRadians(std::min(_fovx, _fovy) * 0.5f);
 
     if(minHalfFov > 0.0f)
-    {
-        float maxDistance = std::numeric_limits<float>::min();
-        for(auto nodeId : nodeIds)
-        {
-            QVector3D nodePosition = _graphModel->nodePositions().getScaledAndSmoothed(nodeId);
-            auto& nodeVisual = _graphModel->nodeVisuals().at(nodeId);
-            float distance = (centre - nodePosition).length() + nodeVisual._size;
+        return std::max(radius / std::sin(minHalfFov), MINIMUM_ZOOM_DISTANCE);
 
-            if(distance > maxDistance)
-                maxDistance = distance;
-        }
-
-        return std::max(maxDistance / std::sin(minHalfFov), MINIMUM_ZOOM_DISTANCE);
-    }
-    else
-        return MINIMUM_ZOOM_DISTANCE;
+    return MINIMUM_ZOOM_DISTANCE;
 }
 
 void GraphComponentRenderer::updateFocusPosition()
@@ -167,7 +172,8 @@ void GraphComponentRenderer::updateFocusPosition()
 void GraphComponentRenderer::updateEntireComponentZoomDistance()
 {
     auto component = _graphModel->graph().componentById(_componentId);
-    _entireComponentZoomDistance = zoomDistanceForNodeIds(focusPosition(), component->nodeIds());
+    auto maxDistance = maxNodeDistanceFromPoint(*_graphModel, focusPosition(), component->nodeIds());
+    _entireComponentZoomDistance = zoomDistanceForRadius(maxDistance);
 }
 
 void GraphComponentRenderer::update(float t)
@@ -445,16 +451,15 @@ void GraphComponentRenderer::moveFocusToNodeClosestCameraVector()
         moveFocusToNode(closestNodeId);
 }
 
-void GraphComponentRenderer::moveFocusToPositionContainingNodes(const QVector3D& position,
-                                                                std::vector<NodeId> nodeIds,
-                                                                const QQuaternion& rotation)
+void GraphComponentRenderer::moveFocusToPositionAndRadius(const QVector3D& position, float radius,
+                                                          const QQuaternion& rotation)
 {
     if(_componentId.isNull())
         return;
 
     _viewData._focusNodeId.setToNull();
     _viewData._focusPosition = position;
-    _entireComponentZoomDistance = zoomDistanceForNodeIds(position, nodeIds);
+    _entireComponentZoomDistance = zoomDistanceForRadius(radius);
     zoomToDistance(_entireComponentZoomDistance);
 
     centrePositionInViewport(_viewData._focusPosition, _viewData._zoomDistance, rotation);

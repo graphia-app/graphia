@@ -294,21 +294,24 @@ void GraphOverviewScene::startTransition(float duration,
         renderer->resetView();
     }
 
-    for(auto componentMergeSet : _componentMergeSets)
+    for(auto& componentMergeSet : _componentMergeSets)
     {
         auto mergedComponent = _graphModel->graph().componentById(componentMergeSet.newComponentId());
-        auto mergedNodeIds = mergedComponent->nodeIds();
+        auto& mergedNodeIds = mergedComponent->nodeIds();
         auto mergedFocusPosition = NodePositions::centreOfMassScaledAndSmoothed(_graphModel->nodePositions(),
                                                                                 mergedNodeIds);
 
         // Use the rotation of the new component
         auto renderer = _graphRenderer->componentRendererForId(componentMergeSet.newComponentId());
         QQuaternion rotation = renderer->camera()->rotation();
+        auto maxDistance = GraphComponentRenderer::maxNodeDistanceFromPoint(*_graphModel,
+                                                                            mergedFocusPosition,
+                                                                            mergedNodeIds);
 
         for(auto merger : componentMergeSet.mergers())
         {
             auto renderer = _graphRenderer->componentRendererForId(merger);
-            renderer->moveFocusToPositionContainingNodes(mergedFocusPosition, mergedNodeIds, rotation);
+            renderer->moveFocusToPositionAndRadius(mergedFocusPosition, maxDistance, rotation);
         }
     }
 }

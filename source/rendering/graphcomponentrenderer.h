@@ -58,9 +58,8 @@ public:
     void moveFocusToNode(NodeId nodeId);
     void moveFocusToCentreOfComponent();
     void moveFocusToNodeClosestCameraVector();
-    void moveFocusToPositionContainingNodes(const QVector3D& position,
-                                            std::vector<NodeId> nodeIds,
-                                            const QQuaternion& rotation);
+    void moveFocusToPositionAndRadius(const QVector3D& position, float radius,
+                                      const QQuaternion& rotation);
 
     ComponentId componentId() const { return _componentId; }
     const std::vector<NodeId>& nodeIds() const { return _nodeIds; }
@@ -93,6 +92,10 @@ public:
     void thaw();
 
     void updateTransition(float f);
+
+    static float maxNodeDistanceFromPoint(const GraphModel& graphModel,
+                                          const QVector3D& centre,
+                                          const std::vector<NodeId>& nodeIds);
 
 private:
     GraphRenderer* _graphRenderer;
@@ -151,7 +154,7 @@ private:
                                   const QQuaternion rotation = QQuaternion(QVector4D()));
 
     float _entireComponentZoomDistance;
-    float zoomDistanceForNodeIds(const QVector3D& centre, std::vector<NodeId> nodeIds);
+    float zoomDistanceForRadius(float radius);
     void updateFocusPosition();
     void updateEntireComponentZoomDistance();
 };
