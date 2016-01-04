@@ -42,9 +42,9 @@ int main(int argc, char *argv[])
     if(!OpenGLFunctions::hasOpenGLSupport())
     {
         QMessageBox::critical(nullptr, QObject::tr("OpenGL support"),
-                              QObject::tr("The version of OpenGL found is insufficient to run %1. "
+                              QObject::tr("The installed version of OpenGL is insufficient to run %1. "
                                           "Please install the latest video drivers available from "
-                                          "your vendor.").arg(Application::name()), QMessageBox::Close);
+                                          "your vendor and try again.").arg(Application::name()), QMessageBox::Close);
         return 1;
     }
 
