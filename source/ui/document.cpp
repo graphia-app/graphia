@@ -49,8 +49,11 @@ int Document::commandProgress() const
 
 QString Document::commandVerb() const
 {
-    auto& phase = _graphModel->graph().phase();
-    auto& subPhase = _graphModel->graph().subPhase();
+    if(_graphModel == nullptr)
+        return {};
+
+    auto phase = _graphModel->graph().phase();
+    auto subPhase = _graphModel->graph().subPhase();
 
     if(!_loadComplete)
     {

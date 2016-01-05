@@ -211,6 +211,8 @@ ComponentId Graph::componentIdOfLargestComponent() const
 
 void Graph::setPhase(const QString& phase) const
 {
+    std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
+
     clearSubPhase();
 
     if(phase != _phase)
@@ -222,17 +224,22 @@ void Graph::setPhase(const QString& phase) const
 
 void Graph::clearPhase() const
 {
+    std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
+
     setPhase("");
     clearSubPhase();
 }
 
-const QString& Graph::phase() const
+QString Graph::phase() const
 {
+    std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
     return _phase;
 }
 
 void Graph::setSubPhase(const QString& subPhase) const
 {
+    std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
+
     if(subPhase != _subPhase)
     {
         _subPhase = subPhase;
@@ -242,10 +249,13 @@ void Graph::setSubPhase(const QString& subPhase) const
 
 void Graph::clearSubPhase() const
 {
+    std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
+
     setSubPhase("");
 }
 
-const QString& Graph::subPhase() const
+QString Graph::subPhase() const
 {
+    std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
     return _subPhase;
 }

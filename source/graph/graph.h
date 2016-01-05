@@ -200,11 +200,11 @@ public:
 
     void setPhase(const QString& phase) const;
     void clearPhase() const;
-    const QString& phase() const;
+    QString phase() const;
 
     void setSubPhase(const QString& subPhase) const;
     void clearSubPhase() const;
-    const QString& subPhase() const;
+    QString subPhase() const;
 
     mutable DebugPauser debugPauser;
     void dumpToQDebug(int detail) const;
@@ -222,6 +222,7 @@ private:
 
     std::unique_ptr<ComponentManager> _componentManager;
 
+    mutable std::recursive_mutex _phaseMutex;
     mutable QString _phase;
     mutable QString _subPhase;
     GraphConsistencyChecker _graphConsistencyChecker;
