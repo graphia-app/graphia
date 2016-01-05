@@ -15,6 +15,7 @@ GraphComponentScene::GraphComponentScene(GraphRenderer* graphRenderer) :
     connect(&_graphRenderer->graphModel()->graph(), &Graph::componentsWillMerge, this, &GraphComponentScene::onComponentsWillMerge, Qt::DirectConnection);
     connect(&_graphRenderer->graphModel()->graph(), &Graph::componentAdded, this, &GraphComponentScene::onComponentAdded, Qt::DirectConnection);
     connect(&_graphRenderer->graphModel()->graph(), &Graph::componentWillBeRemoved, this, &GraphComponentScene::onComponentWillBeRemoved, Qt::DirectConnection);
+    connect(&_graphRenderer->graphModel()->graph(), &Graph::graphWillChange, this, &GraphComponentScene::onGraphWillChange, Qt::DirectConnection);
     connect(&_graphRenderer->graphModel()->graph(), &Graph::graphChanged, this, &GraphComponentScene::onGraphChanged, Qt::DirectConnection);
     connect(&_graphRenderer->graphModel()->graph(), &Graph::nodeWillBeRemoved, this, &GraphComponentScene::onNodeWillBeRemoved, Qt::DirectConnection);
 
@@ -206,6 +207,11 @@ void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId com
     }
 }
 
+void GraphComponentScene::onGraphWillChange(const Graph* graph)
+{
+    _numComponentsPriorToChange = graph->numComponents();
+}
+
 void GraphComponentScene::onGraphChanged(const Graph* graph)
 {
     _graphRenderer->executeOnRendererThread([this, graph]
@@ -219,7 +225,14 @@ void GraphComponentScene::onGraphChanged(const Graph* graph)
             // Graph changes may significantly alter the centre; ease the transition
             if(componentRenderer() != nullptr && componentRenderer()->trackingCentreOfComponent())
             {
-                startTransition();
+                startTransition(0.3f, Transition::Type::EaseInEaseOut,
+                [this, graph]
+                {
+                    // If graph change has resulted in multiple components, switch
+                    // to overview mode once the transition had completed
+                    if(_numComponentsPriorToChange == 1 && graph->numComponents() > 1)
+                        _graphRenderer->switchToOverviewMode();
+                });
                 componentRenderer()->moveFocusToCentreOfComponent();
             }
         }

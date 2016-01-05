@@ -55,11 +55,14 @@ private:
     ComponentId _defaultComponentId;
     ComponentId _componentId;
 
+    int _numComponentsPriorToChange = 0;
+
 private slots:
     void onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet);
     void onComponentsWillMerge(const Graph* graph, const ComponentMergeSet& componentMergeSet);
     void onComponentAdded(const Graph* graph, ComponentId componentId, bool);
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool);
+    void onGraphWillChange(const Graph* graph);
     void onGraphChanged(const Graph* graph);
     void onNodeWillBeRemoved(const Graph* graph, const Node* node);
 };
