@@ -355,8 +355,8 @@ public:
             return i;
         }
 
-        bool operator!=(const self_type& other) { return _p != other._p; }
-        bool operator==(const self_type& other) { return _p == other._p; }
+        bool operator!=(const self_type& other) const { return _p != other._p; }
+        bool operator==(const self_type& other) const { return _p == other._p; }
     };
 
     class iterator : public iterator_base
@@ -369,7 +369,7 @@ public:
         iterator(const ElementIdDistinctSet* set) : iterator_base(set) {}
 #endif
 
-        typename iterator_base::reference operator*() { return this->_p; }
+        typename iterator_base::reference operator*() const { return this->_p; }
     };
 
     class const_iterator : public iterator_base
@@ -529,8 +529,8 @@ public:
             return i;
         }
 
-        bool operator!=(const self_type& other) { return _p != other._p; }
-        bool operator==(const self_type& other) { return _p == other._p; }
+        bool operator!=(const self_type& other) const { return _p != other._p; }
+        bool operator==(const self_type& other) const { return _p == other._p; }
     };
 
     class iterator : public iterator_base
@@ -543,7 +543,7 @@ public:
         iterator(const ElementIdDistinctSets* sets) : iterator_base(sets) {}
 #endif
 
-        typename iterator_base::reference operator*() { return this->_p; }
+        typename iterator_base::reference operator*() const { return this->_p; }
     };
 
     class const_iterator : public iterator_base

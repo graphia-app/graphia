@@ -47,7 +47,6 @@ float u::fast_rsqrt(float number)
     {
         float f;
         int i;
-        unsigned int ui;
     } floatint_t;
 
     floatint_t t;

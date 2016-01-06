@@ -456,7 +456,7 @@ void MutableGraph::update()
 
     _nodeIds.clear();
     _unusedNodeIds.clear();
-    for(NodeId nodeId(0); nodeId < nextNodeId(); nodeId++)
+    for(NodeId nodeId(0); nodeId < nextNodeId(); ++nodeId)
     {
         if(_n._nodeIdsInUse[nodeId])
             _nodeIds.emplace_back(nodeId);
@@ -466,7 +466,7 @@ void MutableGraph::update()
 
     _edgeIds.clear();
     _unusedEdgeIds.clear();
-    for(EdgeId edgeId(0); edgeId < nextEdgeId(); edgeId++)
+    for(EdgeId edgeId(0); edgeId < nextEdgeId(); ++edgeId)
     {
         if(_e._edgeIdsInUse[edgeId])
             _edgeIds.emplace_back(edgeId);

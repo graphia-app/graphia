@@ -44,12 +44,14 @@ public:
 
     GenericGraphArray(const GenericGraphArray& other) :
         _graph(other._graph),
-        _array(other._array)
+        _array(other._array),
+        _mutex()
     {}
 
     GenericGraphArray(GenericGraphArray&& other) :
         _graph(other._graph),
-        _array(std::move(other._array))
+        _array(std::move(other._array)),
+        _mutex()
     {}
 
     virtual ~GenericGraphArray() {}

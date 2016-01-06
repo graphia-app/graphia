@@ -14,7 +14,7 @@ private:
     std::vector<EdgeConditionFn> _edgeFilters;
 
     template<typename ElementId>
-    bool elementIdFiltered(const std::vector<ElementConditionFn<ElementId>>& filters, ElementId elementId) const
+    static bool elementIdFiltered(const std::vector<ElementConditionFn<ElementId>>& filters, ElementId elementId)
     {
         for(auto& filter : filters)
         {

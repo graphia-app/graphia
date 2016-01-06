@@ -64,7 +64,7 @@ public:
     ConicalFrustum conicalFrustumForViewportCoordinates(int x, int y, int radius);
 
 private:
-    bool unproject(int x, int y, int z, QVector3D& result);
+    bool unproject(int x, int y, int z, QVector3D& result) const;
 
     void updatePerspectiveProjection();
     void updateOrthogonalProjection();

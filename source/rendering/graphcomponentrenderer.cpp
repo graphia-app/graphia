@@ -475,12 +475,12 @@ void GraphComponentRenderer::updateTransition(float f)
                                                      _viewData._transitionEnd.rotation(), f));
 }
 
-NodeId GraphComponentRenderer::focusNodeId()
+NodeId GraphComponentRenderer::focusNodeId() const
 {
     return _viewData._focusNodeId;
 }
 
-QVector3D GraphComponentRenderer::focusPosition()
+QVector3D GraphComponentRenderer::focusPosition() const
 {
     if(_viewData._focusNodeId.isNull())
         return _viewData._focusPosition;
@@ -488,12 +488,12 @@ QVector3D GraphComponentRenderer::focusPosition()
         return _graphModel->nodePositions().getScaledAndSmoothed(_viewData._focusNodeId);
 }
 
-bool GraphComponentRenderer::trackingCentreOfComponent()
+bool GraphComponentRenderer::trackingCentreOfComponent() const
 {
     return _viewData._focusNodeId.isNull();
 }
 
-bool GraphComponentRenderer::autoZooming()
+bool GraphComponentRenderer::autoZooming() const
 {
     return _viewData._autoZooming;
 }

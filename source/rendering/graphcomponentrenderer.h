@@ -27,11 +27,13 @@ class Octree;
 class GraphComponentRenderer
 {
 public:
+    GraphComponentRenderer() {}
+
     void initialise(std::shared_ptr<GraphModel> graphModel, ComponentId componentId,
                     std::shared_ptr<SelectionManager> selectionManager,
                     GraphRenderer* graphRenderer);
 
-    bool visible() { return _initialised && _visible; }
+    bool visible() const { return _initialised && _visible; }
     void setVisible(bool visible);
 
     void cleanup();
@@ -65,16 +67,16 @@ public:
     const std::vector<NodeId>& nodeIds() const { return _nodeIds; }
     const std::vector<Edge> edges() const { return _edges; }
 
-    NodeId focusNodeId();
-    QVector3D focusPosition();
+    NodeId focusNodeId() const;
+    QVector3D focusPosition() const;
     void enableFocusTracking() { _trackFocus = true; }
     void disableFocusTracking() { _trackFocus = false; }
 
-    bool trackingCentreOfComponent();
-    bool autoZooming();
+    bool trackingCentreOfComponent() const;
+    bool autoZooming() const;
 
     void resetView();
-    bool viewIsReset() { return _viewData.isReset(); }
+    bool viewIsReset() const { return _viewData.isReset(); }
 
     Camera* camera() { return &_viewData._camera; }
     const Camera* camera() const { return &_viewData._camera; }
@@ -86,7 +88,7 @@ public:
     bool savedViewIsReset() { return _savedViewData.isReset(); }
     void restoreViewData();
 
-    bool initialised() { return _initialised; }
+    bool initialised() const { return _initialised; }
 
     void freeze();
     void thaw();
@@ -109,7 +111,7 @@ private:
 
     struct ViewData
     {
-        bool isReset() { return _focusNodeId.isNull() && _autoZooming; }
+        bool isReset() const { return _focusNodeId.isNull() && _autoZooming; }
 
         Camera _camera;
         float _zoomDistance = 1.0f;

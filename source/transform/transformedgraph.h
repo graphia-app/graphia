@@ -75,8 +75,8 @@ private:
         void add()     { state = state == Value::Removed ? Value::Unchanged : Value::Added; }
         void remove()  { state = state == Value::Added ?   Value::Unchanged : Value::Removed; }
 
-        bool added()   { return state == Value::Added; }
-        bool removed() { return state == Value::Removed; }
+        bool added() const   { return state == Value::Added; }
+        bool removed() const { return state == Value::Removed; }
     };
 
     NodeArray<State> _nodesState;

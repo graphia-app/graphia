@@ -195,7 +195,7 @@ QMatrix4x4 Camera::viewProjectionMatrix() const
     return _viewProjectionMatrix;
 }
 
-bool Camera::unproject(int x, int y, int z, QVector3D& result)
+bool Camera::unproject(int x, int y, int z, QVector3D& result) const
 {
     QMatrix4x4 A = projectionMatrix() * viewMatrix();
 
