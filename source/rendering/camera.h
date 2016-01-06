@@ -86,8 +86,8 @@ private:
     float _bottom = -0.5f;
     float _top = 0.5f;
 
-    int _viewportWidth;
-    int _viewportHeight;
+    int _viewportWidth = 0;
+    int _viewportHeight = 0;
 
     mutable QMatrix4x4 _viewMatrix;
     mutable QMatrix4x4 _projectionMatrix;

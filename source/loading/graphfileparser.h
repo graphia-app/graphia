@@ -52,9 +52,9 @@ public:
             boost::spirit::istream_iterator>
     {
      private:
-        GraphFileParser* _parser;
-        int64_t _position;
-        const progress_iterator* _end;
+        GraphFileParser* _parser = nullptr;
+        int64_t _position  = 0;
+        const progress_iterator* _end = nullptr;
         struct enabler {};
 
      public:
@@ -65,7 +65,6 @@ public:
                                   GraphFileParser* parser, const progress_iterator* end) :
             progress_iterator::iterator_adaptor_(iterator),
               _parser(parser),
-              _position(0),
               _end(end) {}
 
      private:

@@ -35,7 +35,7 @@ void GraphFileParserThread::run()
 
     connect(_graphFileParser.get(), &GraphFileParser::progress, this, &GraphFileParserThread::progress);
 
-    bool result;
+    bool result = false;
 
     _graph.performTransaction(
         [this, &result](MutableGraph& graph)
