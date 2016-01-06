@@ -157,13 +157,13 @@ namespace u
     // A lock that does nothing if the second parameter isn't Locking
     template<typename Mutex, typename L> struct MaybeLock
     {
-        MaybeLock(Mutex&) {}
+        explicit MaybeLock(Mutex&) {}
     };
 
     template<typename Mutex> struct MaybeLock<Mutex, Locking>
     {
         std::unique_lock<Mutex> _lock;
-        MaybeLock(Mutex& mutex) : _lock(mutex) {}
+        explicit MaybeLock(Mutex& mutex) : _lock(mutex) {}
     };
 
     template<typename C> int count(const C& c)

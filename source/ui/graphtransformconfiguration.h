@@ -64,7 +64,7 @@ private:
 public:
     GraphTransformConfiguration();
 
-    GraphTransformConfiguration(Document* document);
+    explicit GraphTransformConfiguration(Document* document);
 
     GraphTransformConfiguration(Document* document,
                                 bool enabled,

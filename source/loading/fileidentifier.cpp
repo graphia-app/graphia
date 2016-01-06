@@ -6,7 +6,7 @@ FileIdentifier::FileIdentifier()
 {
 }
 
-void FileIdentifier::registerFileType(const std::shared_ptr<Type> fileType)
+void FileIdentifier::registerFileType(const std::shared_ptr<Type>& fileType)
 {
     _fileTypes.push_back(fileType);
 

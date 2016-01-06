@@ -73,7 +73,6 @@ public:
     void disableFocusTracking() { _trackFocus = false; }
 
     bool trackingCentreOfComponent() const;
-    bool autoZooming() const;
 
     void resetView();
     bool viewIsReset() const { return _viewData.isReset(); }
@@ -85,7 +84,7 @@ public:
 
     void cloneViewDataFrom(const GraphComponentRenderer& other);
     void saveViewData() { _savedViewData = _viewData; }
-    bool savedViewIsReset() { return _savedViewData.isReset(); }
+    bool savedViewIsReset() const { return _savedViewData.isReset(); }
     void restoreViewData();
 
     bool initialised() const { return _initialised; }
@@ -100,7 +99,7 @@ public:
                                           const std::vector<NodeId>& nodeIds);
 
 private:
-    GraphRenderer* _graphRenderer;
+    GraphRenderer* _graphRenderer = nullptr;
 
     bool _initialised = false;
     bool _visible = false;
@@ -155,7 +154,7 @@ private:
                                   // Odd constructor makes a null quaternion
                                   const QQuaternion rotation = QQuaternion(QVector4D()));
 
-    float _entireComponentZoomDistance;
+    float _entireComponentZoomDistance = 0.0f;
     float zoomDistanceForRadius(float radius);
     void updateFocusPosition();
     void updateEntireComponentZoomDistance();

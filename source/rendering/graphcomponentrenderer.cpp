@@ -492,8 +492,3 @@ bool GraphComponentRenderer::trackingCentreOfComponent() const
 {
     return _viewData._focusNodeId.isNull();
 }
-
-bool GraphComponentRenderer::autoZooming() const
-{
-    return _viewData._autoZooming;
-}

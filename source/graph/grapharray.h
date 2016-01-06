@@ -32,7 +32,7 @@ protected:
     mutable std::recursive_mutex _mutex;
 
 public:
-    GenericGraphArray(const Graph& graph) :
+    explicit GenericGraphArray(const Graph& graph) :
         _graph(&graph)
     {}
 
@@ -60,6 +60,7 @@ public:
     {
         Q_ASSERT(_graph == other._graph);
         _array = other._array;
+        _mutex.unlock();
 
         return *this;
     }
@@ -68,6 +69,7 @@ public:
     {
         Q_ASSERT(_graph == other._graph);
         _array = std::move(other._array);
+        _mutex.unlock();
 
         return *this;
     }
@@ -172,7 +174,7 @@ template<typename Element, typename Locking = void>
 class NodeArray : public GenericGraphArray<NodeId, Element, Locking>
 {
 public:
-    NodeArray(const Graph& graph) :
+    explicit NodeArray(const Graph& graph) :
         GenericGraphArray<NodeId, Element, Locking>(graph)
     {
         this->resize(graph.nextNodeId());
@@ -221,7 +223,7 @@ template<typename Element, typename Locking = void>
 class EdgeArray : public GenericGraphArray<EdgeId, Element, Locking>
 {
 public:
-    EdgeArray(const Graph& graph) :
+    explicit EdgeArray(const Graph& graph) :
         GenericGraphArray<EdgeId, Element, Locking>(graph)
     {
         this->resize(graph.nextEdgeId());
@@ -270,7 +272,7 @@ template<typename Element, typename Locking = void>
 class ComponentArray : public GenericGraphArray<ComponentId, Element, Locking>
 {
 public:
-    ComponentArray(const Graph& graph) :
+    explicit ComponentArray(const Graph& graph) :
         GenericGraphArray<ComponentId, Element, Locking>(graph)
     {
         Q_ASSERT(graph._componentManager != nullptr);

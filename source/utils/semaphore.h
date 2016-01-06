@@ -12,7 +12,7 @@ private:
     unsigned int _count;
 
 public:
-    semaphore(int count = 0);
+    explicit semaphore(int count = 0);
 
     void notify();
     void wait();

@@ -10,7 +10,7 @@ class GraphConsistencyChecker : public QObject
     Q_OBJECT
 
 public:
-    GraphConsistencyChecker(const Graph& graph);
+    explicit GraphConsistencyChecker(const Graph& graph);
 
     void toggle();
     void enable();

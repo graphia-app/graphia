@@ -223,7 +223,7 @@ public:
     class ScopedTransaction
     {
     public:
-        ScopedTransaction(MutableGraph& graph);
+        explicit ScopedTransaction(MutableGraph& graph);
         ~ScopedTransaction();
 
     private:

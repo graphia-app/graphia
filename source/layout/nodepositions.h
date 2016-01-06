@@ -29,7 +29,7 @@ private:
     int _smoothing = 1;
 
 public:
-    NodePositions(const Graph& graph);
+    explicit NodePositions(const Graph& graph);
 
 public:
     std::recursive_mutex& mutex() { return _mutex; }

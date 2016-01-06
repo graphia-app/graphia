@@ -43,7 +43,7 @@ private:
     std::map<int, int> _signalIndexToRole;
 
 public:
-    QmlContainerWrapper(QObject* parent = nullptr) :
+    explicit QmlContainerWrapper(QObject* parent = nullptr) :
         QmlContainerWrapperBase(parent),
         _metaObject(T::staticMetaObject)
     {

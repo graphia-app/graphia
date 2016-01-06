@@ -58,7 +58,7 @@ class GraphModel : public QObject
 {
     Q_OBJECT
 public:
-    GraphModel(const QString& name);
+    explicit GraphModel(const QString& name);
 
 private:
     MutableGraph _graph;

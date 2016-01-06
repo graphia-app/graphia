@@ -101,7 +101,7 @@ protected:
     LayoutSettings _layoutSettings;
 
 public:
-    LayoutFactory(std::shared_ptr<GraphModel> graphModel) :
+    explicit LayoutFactory(std::shared_ptr<GraphModel> graphModel) :
         _graphModel(graphModel)
     {}
 

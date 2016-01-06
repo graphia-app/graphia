@@ -28,7 +28,7 @@ public:
         initialise();
     }
 
-    Ray(const Line3D& line) :
+    explicit Ray(const Line3D& line) :
         _origin(line.start()), _dir(line.dir())
     {
         initialise();

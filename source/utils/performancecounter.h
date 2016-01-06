@@ -9,7 +9,7 @@ class PerformanceCounter
 {
 public:
     using ReportFn = std::function<void(float)>;
-    PerformanceCounter(std::chrono::seconds interval);
+    explicit PerformanceCounter(std::chrono::seconds interval);
 
     void setReportFn(ReportFn f) { _f = f; }
 

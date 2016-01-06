@@ -47,7 +47,7 @@ class GraphComponent : public Graph
 
     Q_OBJECT
 public:
-    GraphComponent(const Graph* graph) : _graph(graph) {}
+    explicit GraphComponent(const Graph* graph) : _graph(graph) {}
     GraphComponent(const GraphComponent& other) :
         Graph(),
         _graph(other._graph),

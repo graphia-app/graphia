@@ -7,7 +7,7 @@ class WeightedEdgeGraphModel : public GraphModel
 {
     Q_OBJECT
 public:
-    WeightedEdgeGraphModel(const QString& name);
+    explicit WeightedEdgeGraphModel(const QString& name);
 
 private:
     EdgeArray<float> _edgeWeights;

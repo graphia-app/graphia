@@ -30,7 +30,7 @@ public:
 class ForceDirectedLayoutFactory : public LayoutFactory
 {
 public:
-    ForceDirectedLayoutFactory(std::shared_ptr<GraphModel> graphModel) :
+    explicit ForceDirectedLayoutFactory(std::shared_ptr<GraphModel> graphModel) :
         LayoutFactory(graphModel)
     {
         _layoutSettings.registerSetting("RepulsiveForce",  QObject::tr("Repulsive Force"),  1.0f, 100.0f, 1.0f);

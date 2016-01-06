@@ -101,7 +101,7 @@ public:
         initialiseExecuteFn(executeFn);
     }
 
-    Command(bool asynchronous = true);
+    explicit Command(bool asynchronous = true);
 
     virtual ~Command() {}
 

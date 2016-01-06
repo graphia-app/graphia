@@ -278,7 +278,7 @@ public:
     ElementIdDistinctSet() : _size(0)
     {}
 
-    ElementIdDistinctSet(C* collection) :
+    explicit ElementIdDistinctSet(C* collection) :
         _collection(collection),
         _size(0)
     {}
@@ -342,7 +342,7 @@ public:
     public:
         iterator_base() {}
 
-        iterator_base(const ElementIdDistinctSet* set) :
+        explicit iterator_base(const ElementIdDistinctSet* set) :
              _set(set)
         {
             _p = _set->_head;
@@ -366,7 +366,7 @@ public:
         using iterator_base::iterator_base;
 #else
         iterator() : iterator_base() {}
-        iterator(const ElementIdDistinctSet* set) : iterator_base(set) {}
+        explicit iterator(const ElementIdDistinctSet* set) : iterator_base(set) {}
 #endif
 
         typename iterator_base::reference operator*() const { return this->_p; }
@@ -379,7 +379,7 @@ public:
         using iterator_base::iterator_base;
 #else
         const_iterator() : iterator_base() {}
-        const_iterator(const ElementIdDistinctSet* set) : iterator_base(set) {}
+        explicit const_iterator(const ElementIdDistinctSet* set) : iterator_base(set) {}
 #endif
 
         const typename iterator_base::reference operator*() const { return this->_p; }
@@ -516,7 +516,7 @@ public:
     public:
         iterator_base() {}
 
-        iterator_base(const ElementIdDistinctSets* sets) :
+        explicit iterator_base(const ElementIdDistinctSets* sets) :
              _sets(sets)
         {
             _p = nextHead();
@@ -540,7 +540,7 @@ public:
         using iterator_base::iterator_base;
 #else
         iterator() : iterator_base() {}
-        iterator(const ElementIdDistinctSets* sets) : iterator_base(sets) {}
+        explicit iterator(const ElementIdDistinctSets* sets) : iterator_base(sets) {}
 #endif
 
         typename iterator_base::reference operator*() const { return this->_p; }
@@ -553,7 +553,7 @@ public:
         using iterator_base::iterator_base;
 #else
         const_iterator() : iterator_base() {}
-        const_iterator(const ElementIdDistinctSets* sets) : iterator_base(sets) {}
+        explicit const_iterator(const ElementIdDistinctSets* sets) : iterator_base(sets) {}
 #endif
 
         const typename iterator_base::reference operator*() const { return this->_p; }

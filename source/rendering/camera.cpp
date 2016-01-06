@@ -245,14 +245,14 @@ void Camera::updateOrthogonalProjection()
     _viewProjectionMatrixDirty = true;
 }
 
-const Ray Camera::rayForViewportCoordinates(int x, int y)
+const Ray Camera::rayForViewportCoordinates(int x, int y) const
 {
     Line3D line = lineForViewportCoordinates(x, y);
 
     return Ray(line.start(), line.dir());
 }
 
-Line3D Camera::lineForViewportCoordinates(int x, int y)
+Line3D Camera::lineForViewportCoordinates(int x, int y) const
 {
     QVector3D start;
     QVector3D end;
@@ -263,7 +263,7 @@ Line3D Camera::lineForViewportCoordinates(int x, int y)
     return Line3D(start, end);
 }
 
-Frustum Camera::frustumForViewportCoordinates(int x1, int y1, int x2, int y2)
+Frustum Camera::frustumForViewportCoordinates(int x1, int y1, int x2, int y2) const
 {
     int minX, maxX, minY, maxY;
 
@@ -298,7 +298,7 @@ Frustum Camera::frustumForViewportCoordinates(int x1, int y1, int x2, int y2)
     return Frustum(line1, line2, line3, line4);
 }
 
-ConicalFrustum Camera::conicalFrustumForViewportCoordinates(int x, int y, int radius)
+ConicalFrustum Camera::conicalFrustumForViewportCoordinates(int x, int y, int radius) const
 {
     Line3D centreLine = lineForViewportCoordinates(x, y);
     Line3D surfaceLine = lineForViewportCoordinates(x + radius, y);

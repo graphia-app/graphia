@@ -39,7 +39,7 @@ public:
 
     FileIdentifier();
 
-    void registerFileType(const std::shared_ptr<Type> fileType);
+    void registerFileType(const std::shared_ptr<Type>& fileType);
     std::vector<const Type*> identify(const QString& filename) const;
     const QStringList nameFilters() const { return _nameFilters; }
     const QStringList fileTypeNames() const;

@@ -16,7 +16,7 @@ class TransformedGraph : public Graph
     Q_OBJECT
 
 public:
-    TransformedGraph(const Graph& source);
+    explicit TransformedGraph(const Graph& source);
 
     void setTransform(std::unique_ptr<GraphTransform> graphTransform);
 

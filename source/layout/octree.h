@@ -31,16 +31,16 @@ template<typename TreeType> struct SubVolume
 template<typename TreeType, typename SubVolumeType = SubVolume<TreeType>> class BaseOctree
 {
 protected:
-    const NodePositions* _nodePositions;
+    const NodePositions* _nodePositions = nullptr;
     BoundingBox3D _boundingBox;
     QVector3D _centre;
-    size_t _depth;
-    SubVolumeType _subVolumes[8];
+    size_t _depth = 0;
+    SubVolumeType _subVolumes[8] = {};
 
-    const SubVolumeType* _nonEmptyLeaves[8];
+    const SubVolumeType* _nonEmptyLeaves[8] = {};
     int _numNonEmptyLeaves = 0;
 
-    const SubVolumeType* _internalNodes[8];
+    const SubVolumeType* _internalNodes[8] = {};
     int _numInternalNodes = 0;
 
     std::vector<NodeId> _nodeIds;
@@ -277,28 +277,6 @@ public:
             });
 
         qDebug() << dump << "Total nodes:" << totalNodes;
-    }
-
-    void debugRenderOctree(std::function<void(bool, const BoundingBox3D&, const QColor)> render)
-    {
-        visitVolumes(
-            [&render](const SubVolumeType& subVolume, int)
-            {
-                int r = std::abs(static_cast<int>(subVolume._boundingBox.centre().x() * 10) % 255);
-                int g = std::abs(static_cast<int>(subVolume._boundingBox.centre().y() * 10) % 255);
-                int b = std::abs(static_cast<int>(subVolume._boundingBox.centre().z() * 10) % 255);
-                int mean = std::max((r + g + b) / 3, 1);
-                const int TARGET = 192;
-                r = std::min((r * TARGET) / mean, 255);
-                g = std::min((g * TARGET) / mean, 255);
-                b = std::min((b * TARGET) / mean, 255);
-
-                QColor color(r, g, b);
-
-                render(subVolume._nodeIds.empty(), subVolume._boundingBox, color);
-
-                return true;
-            });
     }
 };
 

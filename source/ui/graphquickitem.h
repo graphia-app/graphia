@@ -35,7 +35,7 @@ class GraphQuickItem : public QQuickFramebufferObject
     Q_PROPERTY(int numComponents READ numComponents NOTIFY graphChanged)
 
 public:
-    GraphQuickItem(QQuickItem* parent = nullptr);
+    explicit GraphQuickItem(QQuickItem* parent = nullptr);
 
     void initialise(std::shared_ptr<GraphModel> graphModel,
                     CommandManager& commandManager,
@@ -72,7 +72,7 @@ private:
     void wheelEvent(QWheelEvent* e);
 
     std::shared_ptr<GraphModel> _graphModel;
-    CommandManager* _commandManager;
+    CommandManager* _commandManager = nullptr;
     std::shared_ptr<SelectionManager> _selectionManager;
 
     bool _viewResetPending = false;

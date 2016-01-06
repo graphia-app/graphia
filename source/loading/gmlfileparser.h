@@ -22,7 +22,7 @@ private:
     int _percentage = 0;
 
 public:
-    GmlFileParser(const QString& filename) :
+    explicit GmlFileParser(const QString& filename) :
         GraphFileParser(),
         _filename(filename)
     {}

@@ -12,7 +12,7 @@ private:
     int _top = -1;
 
 public:
-    FixedSizeStack(size_t size) :
+    explicit FixedSizeStack(size_t size) :
         _vector(size),
         _size(size)
     {}

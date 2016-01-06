@@ -297,7 +297,7 @@ void ComponentManager::onGraphChanged(const Graph* graph)
 template<typename T> class unique_lock_with_warning
 {
 public:
-    unique_lock_with_warning(T& mutex) :
+    explicit unique_lock_with_warning(T& mutex) :
         _lock(mutex, std::try_to_lock)
     {
         if(!_lock.owns_lock())

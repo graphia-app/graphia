@@ -12,7 +12,7 @@ class Scene : public QObject
     friend class GraphRenderer;
 
 public:
-    Scene(QObject* parent = nullptr) :
+    explicit Scene(QObject* parent = nullptr) :
         QObject(parent)
     {}
     virtual ~Scene() {}

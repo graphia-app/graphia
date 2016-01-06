@@ -24,7 +24,7 @@ class GraphOverviewScene :
     Q_OBJECT
 
 public:
-    GraphOverviewScene(GraphRenderer* graphRenderer);
+    explicit GraphOverviewScene(GraphRenderer* graphRenderer);
 
     void update(float t);
     void setViewportSize(int width, int height);

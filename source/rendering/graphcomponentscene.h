@@ -18,7 +18,7 @@ class GraphComponentScene :
     Q_OBJECT
 
 public:
-    GraphComponentScene(GraphRenderer* graphRenderer);
+    explicit GraphComponentScene(GraphRenderer* graphRenderer);
 
     void update(float t);
     void setViewportSize(int width, int height);
