@@ -414,6 +414,8 @@ void MutableGraph::cloneFrom(const Graph& other)
     for(auto& connection : _e._connections)
         connection.second.setCollection(&_e._mergedEdgeIds);
 
+    //FIXME: we should perhaps be emitting [node|edge][Added|WillBeRemoved] signals here?
+
     _updateRequired = true;
     endTransaction();
 }
