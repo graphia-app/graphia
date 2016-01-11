@@ -170,7 +170,7 @@ public:
 
     virtual const std::vector<ComponentId>& componentIds() const;
     int numComponents() const;
-    const Graph* componentById(ComponentId componentId) const;
+    const GraphComponent* componentById(ComponentId componentId) const;
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
     ComponentId componentIdOfLargestComponent() const;

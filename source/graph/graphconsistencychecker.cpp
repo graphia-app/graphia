@@ -1,5 +1,6 @@
 #include "graphconsistencychecker.h"
 #include "graph.h"
+#include "componentmanager.h"
 
 #include "../utils/utils.h"
 

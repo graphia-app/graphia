@@ -4,6 +4,7 @@
 #include "camera.h"
 
 #include "../graph/graphmodel.h"
+#include "../graph/componentmanager.h"
 #include "../layout/layout.h"
 #include "../layout/collision.h"
 

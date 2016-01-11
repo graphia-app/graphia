@@ -179,7 +179,7 @@ int Graph::numComponents() const
     return static_cast<int>(componentIds().size());
 }
 
-const Graph* Graph::componentById(ComponentId componentId) const
+const GraphComponent* Graph::componentById(ComponentId componentId) const
 {
     if(_componentManager)
         return _componentManager->componentById(componentId);

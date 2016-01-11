@@ -3,6 +3,7 @@
 
 #include "layout.h"
 #include "../graph/graphmodel.h"
+#include "../graph/componentmanager.h"
 
 #include <QVector3D>
 
