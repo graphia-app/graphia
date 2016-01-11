@@ -176,6 +176,30 @@ void ComponentManager::update(const Graph* graph)
     auto componentIdsToBeAdded = u::setDifference(componentIds, _componentIds);
     auto componentIdsToBeRemoved = u::setDifference(_componentIds, componentIds);
 
+    // Find nodes and edges that have been added or removed
+    std::map<ComponentId, std::vector<NodeId>> nodeIdAdds;
+    std::map<ComponentId, std::vector<EdgeId>> edgeIdAdds;
+    std::map<ComponentId, std::vector<NodeId>> nodeIdRemoves;
+    std::map<ComponentId, std::vector<EdgeId>> edgeIdRemoves;
+
+    auto maxNumNodes = std::max(_nodesComponentId.size(), newNodesComponentId.size());
+    for(NodeId nodeId(0); nodeId < maxNumNodes; ++nodeId)
+    {
+        if(_nodesComponentId[nodeId].isNull() && !newNodesComponentId[nodeId].isNull())
+            nodeIdAdds[newNodesComponentId[nodeId]].emplace_back(nodeId);
+        else if(!_nodesComponentId[nodeId].isNull() && newNodesComponentId[nodeId].isNull())
+            nodeIdRemoves[_nodesComponentId[nodeId]].emplace_back(nodeId);
+    }
+
+    auto maxNumEdges = std::max(_edgesComponentId.size(), newEdgesComponentId.size());
+    for(EdgeId edgeId(0); edgeId < maxNumEdges; ++edgeId)
+    {
+        if(_edgesComponentId[edgeId].isNull() && !newEdgesComponentId[edgeId].isNull())
+            edgeIdAdds[newEdgesComponentId[edgeId]].emplace_back(edgeId);
+        else if(!_edgesComponentId[edgeId].isNull() && newEdgesComponentId[edgeId].isNull())
+            edgeIdRemoves[_edgesComponentId[edgeId]].emplace_back(edgeId);
+    }
+
     // Notify all the merges
     for(auto& mergee : mergedComponents)
     {
@@ -187,7 +211,14 @@ void ComponentManager::update(const Graph* graph)
     for(auto componentId : componentIdsToBeRemoved)
     {
         if(_debug) qDebug() << "componentWillBeRemoved" << componentId;
-        emit componentWillBeRemoved(graph, componentId, u::contains(mergedComponentIds, componentId));
+        bool hasMerged = u::contains(mergedComponentIds, componentId);
+        emit componentWillBeRemoved(graph, componentId, hasMerged);
+
+        if(!hasMerged)
+        {
+            nodeIdRemoves.erase(componentId);
+            edgeIdRemoves.erase(componentId);
+        }
 
         u::removeByValue(_componentIds, componentId);
         removeGraphComponent(componentId);
@@ -205,7 +236,14 @@ void ComponentManager::update(const Graph* graph)
     {
         if(_debug) qDebug() << "componentAdded" << componentId;
         _componentIds.push_back(componentId);
-        emit componentAdded(graph, componentId, u::contains(splitComponentIds, componentId));
+        bool hasSplit = u::contains(splitComponentIds, componentId);
+        emit componentAdded(graph, componentId, hasSplit);
+
+        if(!hasSplit)
+        {
+            nodeIdAdds.erase(componentId);
+            edgeIdAdds.erase(componentId);
+        }
     }
 
     // Notify all the splits
@@ -213,6 +251,31 @@ void ComponentManager::update(const Graph* graph)
     {
         if(_debug) qDebug() << "componentSplit" << splitee.first << "->" << splitee.second;
         emit componentSplit(graph, ComponentSplitSet(splitee.first, std::move(splitee.second)));
+    }
+
+    // Notify node adds and removes
+    for(auto& nodeIdAdd : nodeIdAdds)
+    {
+        for(auto nodeId : nodeIdAdd.second)
+            emit nodeAddedToComponent(graph, nodeId, nodeIdAdd.first);
+    }
+
+    for(auto& edgeIdAdd : edgeIdAdds)
+    {
+        for(auto edgeId : edgeIdAdd.second)
+            emit edgeAddedToComponent(graph, edgeId, edgeIdAdd.first);
+    }
+
+    for(auto& nodeIdRemove : nodeIdRemoves)
+    {
+        for(auto nodeId : nodeIdRemove.second)
+            emit nodeRemovedFromComponent(graph, nodeId, nodeIdRemove.first);
+    }
+
+    for(auto& edgeIdRemove : edgeIdRemoves)
+    {
+        for(auto edgeId : edgeIdRemove.second)
+            emit edgeRemovedFromComponent(graph, edgeId, edgeIdRemove.first);
     }
 }
 

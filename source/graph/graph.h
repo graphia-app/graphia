@@ -253,6 +253,11 @@ signals:
     void componentAdded(const Graph*, ComponentId, bool) const;
     void componentSplit(const Graph*, const ComponentSplitSet&) const;
 
+    void nodeRemovedFromComponent(const Graph*, NodeId, ComponentId) const;
+    void edgeRemovedFromComponent(const Graph*, EdgeId, ComponentId) const;
+    void nodeAddedToComponent(const Graph*, NodeId, ComponentId) const;
+    void edgeAddedToComponent(const Graph*, EdgeId, ComponentId) const;
+
     void graphChanged(const Graph*) const;
 
     void phaseChanged() const;
