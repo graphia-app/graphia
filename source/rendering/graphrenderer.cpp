@@ -182,6 +182,8 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
     _graphModel(graphModel),
     _selectionManager(selectionManager),
     _componentRenderers(_graphModel->graph()),
+    _hiddenNodes(_graphModel->graph()),
+    _hiddenEdges(_graphModel->graph()),
     _layoutChanged(true)
 {
     resolveOpenGLFunctions();
@@ -204,6 +206,11 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
     prepareComponentDataTexture();
 
     auto graph = &_graphModel->graph();
+
+    connect(graph, &Graph::nodeAdded, this, &GraphRenderer::onNodeAdded, Qt::DirectConnection);
+    connect(graph, &Graph::edgeAdded, this, &GraphRenderer::onEdgeAdded, Qt::DirectConnection);
+    connect(graph, &Graph::nodeAddedToComponent, this, &GraphRenderer::onNodeAddedToComponent, Qt::DirectConnection);
+    connect(graph, &Graph::edgeAddedToComponent, this, &GraphRenderer::onEdgeAddedToComponent, Qt::DirectConnection);
 
     connect(graph, &Graph::graphChanged, this, &GraphRenderer::onGraphChanged, Qt::DirectConnection);
     connect(graph, &Graph::componentAdded, this, &GraphRenderer::onComponentAdded, Qt::DirectConnection);
@@ -330,6 +337,9 @@ void GraphRenderer::updateGPUDataIfRequired()
 
         for(auto nodeId : componentRenderer->nodeIds())
         {
+            if(_hiddenNodes.get(nodeId))
+                continue;
+
             const QVector3D nodePosition = nodePositions.getScaledAndSmoothed(nodeId);
             scaledAndSmoothedNodePositions[nodeId] = nodePosition;
 
@@ -356,6 +366,9 @@ void GraphRenderer::updateGPUDataIfRequired()
 
         for(auto& edge : componentRenderer->edges())
         {
+            if(_hiddenEdges.get(edge.id()) || _hiddenNodes.get(edge.sourceId()) || _hiddenNodes.get(edge.targetId()))
+                continue;
+
             const QVector3D& sourcePosition = scaledAndSmoothedNodePositions[edge.sourceId()];
             const QVector3D& targetPosition = scaledAndSmoothedNodePositions[edge.targetId()];
 
@@ -516,10 +529,36 @@ void GraphRenderer::rendererFinishedTransition()
         emit userInteractionFinished();
 }
 
+void GraphRenderer::sceneFinishedTransition()
+{
+    clearHiddenElements();
+    updateGPUData(When::Later);
+}
+
 void GraphRenderer::executeOnRendererThread(DeferredExecutor::TaskFn task, const QString& description)
 {
     _preUpdateExecutor.enqueue(task, description);
     emit taskAddedToExecutor();
+}
+
+void GraphRenderer::onNodeAdded(const Graph*, const Node* node)
+{
+    _hiddenNodes.set(node->id(), true);
+}
+
+void GraphRenderer::onEdgeAdded(const Graph*, const Edge* edge)
+{
+    _hiddenEdges.set(edge->id(), true);
+}
+
+void GraphRenderer::onNodeAddedToComponent(const Graph*, NodeId nodeId, ComponentId)
+{
+    _hiddenNodes.set(nodeId, true);
+}
+
+void GraphRenderer::onEdgeAddedToComponent(const Graph*, EdgeId edgeId, ComponentId)
+{
+    _hiddenEdges.set(edgeId, true);
 }
 
 void GraphRenderer::finishTransitionToOverviewMode()
@@ -1210,4 +1249,10 @@ void GraphRenderer::ifSceneUpdateEnabled(const std::function<void ()>& f)
     std::unique_lock<std::mutex> lock(_sceneUpdateMutex);
     if(_sceneUpdateEnabled)
         f();
+}
+
+void GraphRenderer::clearHiddenElements()
+{
+    _hiddenNodes.resetElements();
+    _hiddenEdges.resetElements();
 }

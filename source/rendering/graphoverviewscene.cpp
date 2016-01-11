@@ -284,6 +284,7 @@ void GraphOverviewScene::startTransition(float duration,
         _componentMergeSets.clear();
 
         _graphRenderer->rendererFinishedTransition();
+        _graphRenderer->sceneFinishedTransition();
     },
     finishedFunction);
 

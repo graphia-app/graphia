@@ -127,6 +127,7 @@ void GraphComponentScene::startTransition(float duration, Transition::Type trans
     [this]
     {
         _graphRenderer->rendererFinishedTransition();
+        _graphRenderer->sceneFinishedTransition();
     },
     finishedFunction);
 }

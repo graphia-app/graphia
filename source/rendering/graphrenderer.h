@@ -130,11 +130,17 @@ public:
     void switchToComponentMode(bool doTransition = true, ComponentId componentId = ComponentId());
     void rendererStartedTransition();
     void rendererFinishedTransition();
+    void sceneFinishedTransition();
     void executeOnRendererThread(DeferredExecutor::TaskFn task, const QString& description);
 
     bool layoutChanged() const { return _synchronousLayoutChanged; }
 
 private slots:
+    void onNodeAdded(const Graph*, const Node* node);
+    void onEdgeAdded(const Graph*, const Edge* edge);
+    void onNodeAddedToComponent(const Graph*, NodeId nodeId, ComponentId);
+    void onEdgeAddedToComponent(const Graph*, EdgeId edgeId, ComponentId);
+
     void onGraphChanged(const Graph* graph);
     void onComponentAdded(const Graph*, ComponentId componentId, bool);
     void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
@@ -205,6 +211,9 @@ private:
     QOpenGLBuffer _selectionMarkerDataBuffer;
     QOpenGLVertexArrayObject _selectionMarkerDataVAO;
 
+    NodeArray<bool> _hiddenNodes;
+    EdgeArray<bool> _hiddenEdges;
+
     GPUGraphData _gpuGraphData;
     GPUGraphData _gpuGraphDataAlpha;
     bool _gpuDataRequiresUpdate = false;
@@ -235,6 +244,8 @@ private:
     void enableSceneUpdate();
     void disableSceneUpdate();
     void ifSceneUpdateEnabled(const std::function<void()>& f);
+
+    void clearHiddenElements();
 
     void updateGPUDataIfRequired();
     enum class When { Later, Now };
