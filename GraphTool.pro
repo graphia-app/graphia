@@ -10,10 +10,13 @@ CONFIG(debug,debug|release) {
 
 gcc|clang {
     QMAKE_CXXFLAGS += -Wpedantic -Wall -Wextra -Wcast-align -Wcast-qual \
-        -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op \
-        -Wmissing-declarations -Wmissing-include-dirs -Wold-style-cast \
-        -Woverloaded-virtual -Wnon-virtual-dtor -Wredundant-decls -Wshadow \
-        -Wstrict-null-sentinel -Wundef -Wno-unused
+        -Wdisabled-optimization -Wformat=2 -Winit-self -Wmissing-declarations \
+        -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual \
+        -Wnon-virtual-dtor -Wredundant-decls -Wshadow -Wundef -Wno-unused
+}
+
+gcc {
+    QMAKE_CXXFLAGS += -Wlogical-op -Wstrict-null-sentinel
 }
 
 HEADERS += \
