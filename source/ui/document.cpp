@@ -233,7 +233,7 @@ void Document::applyTransforms()
     auto nextGraphTransformConfigurations = _graphTransformConfigurations.vector();
     auto previousGraphTransformConfigurations = _previousGraphTransformConfigurations;
 
-    auto command = Command(tr("Apply Transformations"), tr("Applying Transformations"),
+    auto transformCommand = Command(tr("Apply Transformations"), tr("Applying Transformations"),
     [this, nextGraphTransformConfigurations](Command& command)
     {
         _graphModel->buildTransforms(nextGraphTransformConfigurations);
@@ -254,7 +254,7 @@ void Document::applyTransforms()
         });
     });
 
-    _commandManager.execute(command);
+    _commandManager.execute(transformCommand);
 }
 
 void Document::onGraphTransformsConfigurationDataChanged(const QModelIndex& index,

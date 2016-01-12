@@ -10,7 +10,7 @@
 
 #include <tuple>
 
-void registerQtTypes()
+static void registerQtTypes()
 {
     static bool registered = false;
     if(!registered)

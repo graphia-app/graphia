@@ -289,7 +289,7 @@ void GraphRenderer::resize(int width, int height)
 
     GLfloat w = static_cast<GLfloat>(_width);
     GLfloat h = static_cast<GLfloat>(_height);
-    GLfloat data[] =
+    GLfloat quadData[] =
     {
         0, 0,
         w, 0,
@@ -301,7 +301,7 @@ void GraphRenderer::resize(int width, int height)
     };
 
     _screenQuadDataBuffer.bind();
-    _screenQuadDataBuffer.allocate(data, static_cast<int>(sizeof(data)));
+    _screenQuadDataBuffer.allocate(quadData, static_cast<int>(sizeof(quadData)));
     _screenQuadDataBuffer.release();
 }
 
@@ -734,7 +734,7 @@ void GraphRenderer::onComponentWillBeRemoved(const Graph*, ComponentId component
     executeOnRendererThread([this, componentId]
     {
         componentRendererForId(componentId)->cleanup();
-    }, QString("GraphRenderer::onComponentWillBeRemoved (cleanup) component %1").arg((int)componentId));
+    }, QString("GraphRenderer::onComponentWillBeRemoved (cleanup) component %1").arg(static_cast<int>(componentId)));
 }
 
 void GraphRenderer::onSelectionChanged(const SelectionManager*)
@@ -950,26 +950,26 @@ void GraphRenderer::render2D()
         r.setTop(_height - _selectionRect.top());
         r.setBottom(_height - _selectionRect.bottom());
 
-        std::vector<GLfloat> data;
+        std::vector<GLfloat> quadData;
 
-        data.push_back(r.left()); data.push_back(r.bottom());
-        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
-        data.push_back(r.right()); data.push_back(r.bottom());
-        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
-        data.push_back(r.right()); data.push_back(r.top());
-        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
+        quadData.push_back(r.left()); quadData.push_back(r.bottom());
+        quadData.push_back(color.redF()); quadData.push_back(color.blueF()); quadData.push_back(color.greenF());
+        quadData.push_back(r.right()); quadData.push_back(r.bottom());
+        quadData.push_back(color.redF()); quadData.push_back(color.blueF()); quadData.push_back(color.greenF());
+        quadData.push_back(r.right()); quadData.push_back(r.top());
+        quadData.push_back(color.redF()); quadData.push_back(color.blueF()); quadData.push_back(color.greenF());
 
-        data.push_back(r.right()); data.push_back(r.top());
-        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
-        data.push_back(r.left());  data.push_back(r.top());
-        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
-        data.push_back(r.left());  data.push_back(r.bottom());
-        data.push_back(color.redF()); data.push_back(color.blueF()); data.push_back(color.greenF());
+        quadData.push_back(r.right()); quadData.push_back(r.top());
+        quadData.push_back(color.redF()); quadData.push_back(color.blueF()); quadData.push_back(color.greenF());
+        quadData.push_back(r.left());  quadData.push_back(r.top());
+        quadData.push_back(color.redF()); quadData.push_back(color.blueF()); quadData.push_back(color.greenF());
+        quadData.push_back(r.left());  quadData.push_back(r.bottom());
+        quadData.push_back(color.redF()); quadData.push_back(color.blueF()); quadData.push_back(color.greenF());
 
         glDrawBuffer(GL_COLOR_ATTACHMENT1);
 
         _selectionMarkerDataBuffer.bind();
-        _selectionMarkerDataBuffer.allocate(data.data(), static_cast<int>(data.size()) * sizeof(GLfloat));
+        _selectionMarkerDataBuffer.allocate(quadData.data(), static_cast<int>(quadData.size()) * sizeof(GLfloat));
 
         _selectionMarkerShader.bind();
         _selectionMarkerShader.setUniformValue("projectionMatrix", m);
@@ -1007,7 +1007,7 @@ void GraphRenderer::render()
     render2D();
     finishRender();
 
-    std::unique_lock<std::mutex>(_resetOpenGLStateMutex);
+    std::unique_lock<std::mutex> lock(_resetOpenGLStateMutex);
     resetOpenGLState();
 }
 
@@ -1023,7 +1023,7 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
 
         connect(item, &QObject::destroyed, this, [this]
         {
-            std::unique_lock<std::mutex>(_resetOpenGLStateMutex);
+            std::unique_lock<std::mutex> lock(_resetOpenGLStateMutex);
             resetOpenGLState = []{};
         }, Qt::DirectConnection);
     }

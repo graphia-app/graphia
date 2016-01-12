@@ -47,7 +47,7 @@ void TransformedGraph::rebuild()
     setPhase(tr("Transforming"));
     _target.performTransaction([this](MutableGraph&)
     {
-        _graphTransform->apply(*_source, *this);
+        _graphTransform->applyFromSource(*_source, *this);
     });
 
     emit graphChanged(this);

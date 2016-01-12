@@ -311,7 +311,7 @@ void GraphOverviewScene::startTransition(float duration,
 
         for(auto merger : componentMergeSet.mergers())
         {
-            auto renderer = _graphRenderer->componentRendererForId(merger);
+            renderer = _graphRenderer->componentRendererForId(merger);
             renderer->moveFocusToPositionAndRadius(mergedFocusPosition, maxDistance, rotation);
         }
     }

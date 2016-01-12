@@ -207,8 +207,8 @@ bool Camera::unproject(int x, int y, int z, QVector3D& result) const
     y = _viewportHeight - y;
 
     QVector4D normalisedCoordinates;
-    normalisedCoordinates.setX((x / (float)_viewportWidth) * 2.0f - 1.0f);
-    normalisedCoordinates.setY((y / (float)_viewportHeight) * 2.0f - 1.0f);
+    normalisedCoordinates.setX((x / static_cast<float>(_viewportWidth)) * 2.0f - 1.0f);
+    normalisedCoordinates.setY((y / static_cast<float>(_viewportHeight)) * 2.0f - 1.0f);
     normalisedCoordinates.setZ(2.0f * z - 1.0f);
     normalisedCoordinates.setW(1.0f);
 

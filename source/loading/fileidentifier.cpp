@@ -6,9 +6,9 @@ FileIdentifier::FileIdentifier()
 {
 }
 
-void FileIdentifier::registerFileType(const std::shared_ptr<Type>& fileType)
+void FileIdentifier::registerFileType(const std::shared_ptr<Type>& newFileType)
 {
-    _fileTypes.push_back(fileType);
+    _fileTypes.push_back(newFileType);
 
     // Sort by collective description
     std::sort(_fileTypes.begin(), _fileTypes.end(),

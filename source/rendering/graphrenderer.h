@@ -42,6 +42,8 @@ class Command;
 class GraphInitialiser
 {
 public:
+    virtual ~GraphInitialiser() {}
+
     void initialiseFromGraph(const Graph* graph);
 
 protected:

@@ -13,6 +13,8 @@
 class GraphArray
 {
 public:
+    virtual ~GraphArray() {}
+
     virtual void resize(int size) = 0;
     virtual void invalidate() = 0;
 };

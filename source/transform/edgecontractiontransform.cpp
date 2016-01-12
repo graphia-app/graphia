@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-bool edgeIdContracted(const std::vector<EdgeConditionFn>& filters, EdgeId value)
+static bool edgeIdContracted(const std::vector<EdgeConditionFn>& filters, EdgeId value)
 {
     for(auto& filter : filters)
     {

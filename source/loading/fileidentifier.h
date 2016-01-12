@@ -25,6 +25,8 @@ public:
             _extensions(extensions)
         {}
 
+        virtual ~Type() {}
+
         const QString& name() const { return _name; }
         const QString& collectiveDescription() const { return _collectiveDescription; }
         const std::vector<QString> extensions() const { return _extensions; }
@@ -39,7 +41,7 @@ public:
 
     FileIdentifier();
 
-    void registerFileType(const std::shared_ptr<Type>& fileType);
+    void registerFileType(const std::shared_ptr<Type>& newFileType);
     std::vector<const Type*> identify(const QString& filename) const;
     const QStringList nameFilters() const { return _nameFilters; }
     const QStringList fileTypeNames() const;

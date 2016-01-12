@@ -6,7 +6,7 @@
 MutableGraph::~MutableGraph()
 {
     // Ensure no transactions are in progress
-    std::unique_lock<std::mutex>(_mutex);
+    std::unique_lock<std::mutex> lock(_mutex);
 }
 
 void MutableGraph::clear()
