@@ -15,7 +15,7 @@ gcc|clang {
         -Wnon-virtual-dtor -Wredundant-decls -Wshadow -Wundef -Wno-unused
 }
 
-gcc {
+gcc:!clang {
     QMAKE_CXXFLAGS += -Wlogical-op -Wstrict-null-sentinel
 }
 
