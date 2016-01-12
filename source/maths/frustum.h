@@ -9,7 +9,7 @@
 class BaseFrustum
 {
 public:
-    // virtual ~BaseFrustum() {}
+    virtual ~BaseFrustum() {}
 
     virtual bool containsPoint(const QVector3D& point) const = 0;
     bool containsLine(const Line3D& line) const;
