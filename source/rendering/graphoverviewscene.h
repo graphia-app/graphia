@@ -34,17 +34,7 @@ public:
     void onShow();
     void onHide();
 
-    struct LayoutData
-    {
-        LayoutData() {}
-        LayoutData(const QRect& rect, float alpha) :
-            _rect(rect), _alpha(alpha) {}
-
-        QRect _rect;
-        float _alpha = 1.0f;
-    };
-
-    const ComponentArray<LayoutData, u::Locking>& componentLayout() { return _componentLayout; }
+    const ComponentArray<QRect, u::Locking>& componentLayout() { return _componentLayout; }
 
     void zoom(float delta);
     int renderSizeDivisor() { return _renderSizeDivisor; }
@@ -68,8 +58,11 @@ private:
 
     int _renderSizeDivisor = 1;
 
-    ComponentArray<LayoutData, u::Locking> _previousComponentLayout;
-    ComponentArray<LayoutData, u::Locking> _componentLayout;
+    ComponentArray<float, u::Locking> _previousComponentAlpha;
+    ComponentArray<float, u::Locking> _componentAlpha;
+
+    ComponentArray<QRect, u::Locking> _previousComponentLayout;
+    ComponentArray<QRect, u::Locking> _componentLayout;
     void layoutComponents();
 
     std::vector<ComponentId> _removedComponentIds;

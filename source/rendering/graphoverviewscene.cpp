@@ -19,6 +19,8 @@ GraphOverviewScene::GraphOverviewScene(GraphRenderer* graphRenderer) :
     Scene(graphRenderer),
     _graphRenderer(graphRenderer),
     _graphModel(graphRenderer->graphModel()),
+    _previousComponentAlpha(_graphModel->graph(), 1.0f),
+    _componentAlpha(_graphModel->graph(), 1.0f),
     _previousComponentLayout(_graphModel->graph()),
     _componentLayout(_graphModel->graph())
 {
@@ -35,9 +37,8 @@ void GraphOverviewScene::update(float t)
     for(auto componentId : _componentIds)
     {
         auto* renderer = _graphRenderer->componentRendererForId(componentId);
-        auto& layoutData = _componentLayout[componentId];
-        renderer->setDimensions(layoutData._rect);
-        renderer->setAlpha(layoutData._alpha);
+        renderer->setDimensions(_componentLayout[componentId]);
+        renderer->setAlpha(_componentAlpha[componentId]);
         renderer->update(t);
     }
 }
@@ -89,11 +90,11 @@ void GraphOverviewScene::startTransitionFromComponentMode(ComponentId focusCompo
     for(auto componentId : _componentIds)
     {
         if(componentId != focusComponentId)
-            _previousComponentLayout[componentId]._alpha = 0.0f;
+            _previousComponentAlpha[componentId] = 0.0f;
     }
 
     int left = (_width * 0.5f) - (_height * 0.5f);
-    _previousComponentLayout[focusComponentId]._rect = QRect(left, 0, _height, _height);
+    _previousComponentLayout[focusComponentId] = QRect(left, 0, _height, _height);
 }
 
 void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusComponentId,
@@ -106,11 +107,11 @@ void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusCompone
     for(auto componentId : _componentIds)
     {
         if(componentId != focusComponentId)
-            _componentLayout[componentId]._alpha = 0.0f;
+            _componentAlpha[componentId] = 0.0f;
     }
 
     int left = (_width * 0.5f) - (_height * 0.5f);
-    _componentLayout[focusComponentId]._rect = QRect(left, 0, _height, _height);
+    _componentLayout[focusComponentId] = QRect(left, 0, _height, _height);
 
     startTransition(duration, transitionType, finishedFunction);
 }
@@ -173,7 +174,8 @@ void GraphOverviewScene::layoutComponents()
         }
 
         auto rect = QRect(coord.x(), coord.y(), dividedSize, dividedSize);
-        _componentLayout[componentId] = LayoutData(rect, 1.0f);
+        _componentLayout[componentId] = rect;
+        _componentAlpha[componentId] = 1.0f;
 
         QPoint right(coord.x() + dividedSize, coord.y());
         QPoint down(coord.x(), coord.y() + dividedSize);
@@ -188,22 +190,26 @@ void GraphOverviewScene::layoutComponents()
     // If the component is fading in, keep it in a fixed position
     for(auto componentId : _componentIds)
     {
-        if(_previousComponentLayout[componentId]._alpha == 0.0f)
+        if(_previousComponentAlpha[componentId] == 0.0f)
         {
-            _previousComponentLayout[componentId]._rect =
-                    _componentLayout[componentId]._rect;
+            _previousComponentLayout[componentId] = _componentLayout[componentId];
+            _previousComponentAlpha[componentId] = _componentAlpha[componentId];
 
             auto renderer = _graphRenderer->componentRendererForId(componentId);
             renderer->resetView();
         }
     }
 
+    // Give the mergers the same layout as the new component
     for(auto componentMergeSet : _componentMergeSets)
     {
         auto newComponentId = componentMergeSet.newComponentId();
 
         for(auto merger : componentMergeSet.mergers())
+        {
             _componentLayout[merger] = _componentLayout[newComponentId];
+            _componentAlpha[merger] = _componentAlpha[newComponentId];
+        }
     }
 }
 
@@ -217,9 +223,8 @@ void GraphOverviewScene::setViewportSize(int width, int height)
     for(auto componentId : _componentIds)
     {
         auto renderer = _graphRenderer->componentRendererForId(componentId);
-        auto& layoutData = _componentLayout[componentId];
         renderer->setViewportSize(_width, _height);
-        renderer->setDimensions(layoutData._rect);
+        renderer->setDimensions(_componentLayout[componentId]);
     }
 }
 
@@ -236,16 +241,14 @@ bool GraphOverviewScene::transitionActive() const
     return false;
 }
 
-static GraphOverviewScene::LayoutData interpolateLayout(const GraphOverviewScene::LayoutData& a,
-                                                        const GraphOverviewScene::LayoutData& b,
-                                                        float f)
+static QRect interpolateRect(const QRect& a, const QRect& b, float f)
 {
-    return GraphOverviewScene::LayoutData(QRect(
-        u::interpolate(a._rect.left(),   b._rect.left(),   f),
-        u::interpolate(a._rect.top(),    b._rect.top(),    f),
-        u::interpolate(a._rect.width(),  b._rect.width(),  f),
-        u::interpolate(a._rect.height(), b._rect.height(), f)
-        ), u::interpolate(a._alpha, b._alpha, f));
+    return QRect(
+        u::interpolate(a.left(),   b.left(),   f),
+        u::interpolate(a.top(),    b.top(),    f),
+        u::interpolate(a.width(),  b.width(),  f),
+        u::interpolate(a.height(), b.height(), f)
+        );
 }
 
 void GraphOverviewScene::startTransition(float duration,
@@ -253,18 +256,20 @@ void GraphOverviewScene::startTransition(float duration,
                                          std::function<void()> finishedFunction)
 {
     auto targetComponentLayout = _componentLayout;
+    auto targetComponentAlpha = _componentAlpha;
 
     if(!_graphRenderer->transition().active())
         _graphRenderer->rendererStartedTransition();
 
     _graphRenderer->transition().start(duration, transitionType,
-    [this, targetComponentLayout /*FIXME C++14 move capture*/](float f)
+    [this, targetComponentLayout, targetComponentAlpha /*FIXME C++14 move capture*/](float f)
     {
         auto interpolate = [&](const ComponentId componentId)
         {
-            _componentLayout[componentId] = interpolateLayout(
-                    _previousComponentLayout[componentId],
-                    targetComponentLayout[componentId], f);
+            _componentLayout[componentId] = interpolateRect(_previousComponentLayout[componentId],
+                                                            targetComponentLayout[componentId], f);
+            _componentAlpha[componentId] = u::interpolate(_previousComponentAlpha[componentId],
+                                                          targetComponentAlpha[componentId], f);
 
             _graphRenderer->componentRendererForId(componentId)->updateTransition(f);
         };
@@ -275,6 +280,7 @@ void GraphOverviewScene::startTransition(float duration,
     [this]
     {
         _previousComponentLayout = _componentLayout;
+        _previousComponentAlpha = _componentAlpha;
 
         for(auto componentId : _removedComponentIds)
         {
@@ -341,7 +347,7 @@ void GraphOverviewScene::onComponentAdded(const Graph*, ComponentId componentId,
     {
         _graphRenderer->executeOnRendererThread([this, componentId]
         {
-            _previousComponentLayout[componentId]._alpha = 0.0f;
+            _previousComponentAlpha[componentId] = 0.0f;
         }, "GraphOverviewScene::onComponentAdded (set source alpha to 0)");
     }
 }
@@ -359,7 +365,7 @@ void GraphOverviewScene::onComponentWillBeRemoved(const Graph*, ComponentId comp
             renderer->freeze();
 
             _removedComponentIds.emplace_back(componentId);
-            _componentLayout[componentId]._alpha = 0.0f;
+            _componentAlpha[componentId] = 0.0f;
         }, "GraphOverviewScene::onComponentWillBeRemoved (freeze renderer, set target alpha to 0)");
     }
 }
@@ -381,6 +387,7 @@ void GraphOverviewScene::onComponentSplit(const Graph*, const ComponentSplitSet&
                 auto renderer = _graphRenderer->componentRendererForId(splitter);
                 renderer->cloneViewDataFrom(*oldGraphComponentRenderer);
                 _previousComponentLayout[splitter] = _componentLayout[oldComponentId];
+                _previousComponentAlpha[splitter] = _componentAlpha[oldComponentId];
             }
         }
     }, "GraphOverviewScene::onComponentSplit (cloneCameraDataFrom, component layout)");

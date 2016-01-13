@@ -28,9 +28,7 @@ void GraphOverviewInteractor::leftDoubleClick()
 
     for(auto componentId : _graphModel->graph().componentIds())
     {
-        auto& layoutData = componentLayout[componentId];
-
-        if(layoutData._rect.contains(cursorPosition()))
+        if(componentLayout[componentId].contains(cursorPosition()))
         {
             _graphRenderer->switchToComponentMode(true, componentId);
             break;
@@ -59,9 +57,7 @@ GraphComponentRenderer* GraphOverviewInteractor::rendererAtPosition(const QPoint
 
     for(auto componentId : _graphModel->graph().componentIds())
     {
-        auto& layoutData = componentLayout[componentId];
-
-        if(layoutData._rect.contains(pos))
+        if(componentLayout[componentId].contains(pos))
             return _graphRenderer->componentRendererForId(componentId);
     }
 
@@ -71,9 +67,9 @@ GraphComponentRenderer* GraphOverviewInteractor::rendererAtPosition(const QPoint
 QPoint GraphOverviewInteractor::componentLocalCursorPosition(const ComponentId& componentId, const QPoint& pos)
 {
     auto& componentLayout = _scene->componentLayout();
-    auto& layoutData = componentLayout[componentId];
+    auto& rect = componentLayout[componentId];
 
-    QPoint transformedPos(pos.x() - layoutData._rect.x(), pos.y() - layoutData._rect.y());
+    QPoint transformedPos(pos.x() - rect.x(), pos.y() - rect.y());
     return transformedPos;
 }
 
@@ -85,12 +81,12 @@ NodeIdSet GraphOverviewInteractor::selectionForRect(const QRect& rect)
 
     for(auto componentId : _graphModel->graph().componentIds())
     {
-        auto& layoutData = componentLayout[componentId];
+        auto& layoutRect = componentLayout[componentId];
 
-        if(rect.intersects((layoutData._rect)))
+        if(rect.intersects((layoutRect)))
         {
             auto renderer = _graphRenderer->componentRendererForId(componentId);
-            auto subRect = rect.intersected(layoutData._rect).translated(-layoutData._rect.topLeft());
+            auto subRect = rect.intersected(layoutRect).translated(-layoutRect.topLeft());
 
             Frustum frustum = renderer->camera()->frustumForViewportCoordinates(
                         subRect.topLeft().x(), subRect.topLeft().y(),
