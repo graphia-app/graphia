@@ -19,7 +19,6 @@ GraphOverviewScene::GraphOverviewScene(GraphRenderer* graphRenderer) :
     Scene(graphRenderer),
     _graphRenderer(graphRenderer),
     _graphModel(graphRenderer->graphModel()),
-    _renderSizeDivisors(_graphModel->graph()),
     _previousComponentLayout(_graphModel->graph()),
     _componentLayout(_graphModel->graph())
 {
@@ -120,11 +119,30 @@ void GraphOverviewScene::layoutComponents()
 {
     std::stack<QPoint> coords;
 
+    // Find the number of nodes in the largest component
+    int maxNumNodes = 0;
+
+    auto& graph = _graphModel->graph();
+    if(graph.numComponents() > 0)
+    {
+        auto largestComponentId = graph.componentIdOfLargestComponent();
+        maxNumNodes = graph.componentById(largestComponentId)->numNodes();
+    }
+
+    ComponentArray<int> renderSizeDivisors(graph);
+
+    for(auto componentId : _componentIds)
+    {
+        auto component = graph.componentById(componentId);
+        int divisor = maxNumNodes / component->numNodes();
+        renderSizeDivisors[componentId] = u::smallestPowerOf2GreaterThan(divisor);
+    }
+
     std::vector<ComponentId> sortedComponentIds = _componentIds;
     std::sort(sortedComponentIds.begin(), sortedComponentIds.end(),
-              [this](const ComponentId& a, const ComponentId& b)
+              [&renderSizeDivisors](const ComponentId& a, const ComponentId& b)
     {
-        return _renderSizeDivisors[a] < _renderSizeDivisors[b];
+        return renderSizeDivisors[a] < renderSizeDivisors[b];
     });
 
     //FIXME this is a mess
@@ -134,7 +152,7 @@ void GraphOverviewScene::layoutComponents()
         auto coord = coords.top();
         coords.pop();
 
-        int divisor = _renderSizeDivisors[componentId];
+        int divisor = renderSizeDivisors[componentId];
         int dividedSize = _height / (divisor * _renderSizeDivisor);
 
         const int MINIMUM_SIZE = 32;
@@ -399,19 +417,6 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph)
     _graphRenderer->executeOnRendererThread([this, graph]
     {
         _componentIds = graph->componentIds();
-
-        // Find the number of nodes in the largest component
-        int maxNumNodes = 0;
-
-        if(graph->numComponents() > 0)
-            maxNumNodes = graph->componentById(graph->componentIdOfLargestComponent())->numNodes();
-
-        for(auto componentId : _componentIds)
-        {
-            auto component = graph->componentById(componentId);
-            int divisor = maxNumNodes / component->numNodes();
-            _renderSizeDivisors[componentId] = u::smallestPowerOf2GreaterThan(divisor);
-        }
 
         if(visible())
         {

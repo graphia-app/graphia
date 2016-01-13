@@ -67,7 +67,6 @@ private:
     int _height = 0;
 
     int _renderSizeDivisor = 1;
-    ComponentArray<int> _renderSizeDivisors;
 
     ComponentArray<LayoutData, u::Locking> _previousComponentLayout;
     ComponentArray<LayoutData, u::Locking> _componentLayout;
