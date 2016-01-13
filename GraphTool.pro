@@ -8,7 +8,7 @@ CONFIG(debug,debug|release) {
   DEFINES += _DEBUG
 }
 
-gcc|clang {
+gcc {
     QMAKE_CXXFLAGS += -Wpedantic -Wall -Wextra -Wcast-align -Wcast-qual \
         -Wdisabled-optimization -Wformat=2 -Winit-self -Wmissing-declarations \
         -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual \
