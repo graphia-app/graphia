@@ -22,6 +22,25 @@ GraphOverviewInteractor::GraphOverviewInteractor(std::shared_ptr<GraphModel> gra
 {
 }
 
+void GraphOverviewInteractor::rightMouseDown()
+{
+    _panStartPosition = cursorPosition();
+}
+
+void GraphOverviewInteractor::rightMouseUp()
+{
+    emit userInteractionFinished();
+}
+
+void GraphOverviewInteractor::rightDrag()
+{
+    if(!mouseMoving())
+        emit userInteractionStarted();
+
+    QPoint delta = cursorPosition() - prevCursorPosition();
+    _scene->pan(delta.x(), delta.y());
+}
+
 void GraphOverviewInteractor::leftDoubleClick()
 {
     auto& componentLayout = _scene->componentLayout();
@@ -73,7 +92,7 @@ QPoint GraphOverviewInteractor::componentLocalCursorPosition(const ComponentId& 
     return transformedPos;
 }
 
-NodeIdSet GraphOverviewInteractor::selectionForRect(const QRect& rect)
+NodeIdSet GraphOverviewInteractor::selectionForRect(const QRectF& rect)
 {
     NodeIdSet selection;
 

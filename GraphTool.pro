@@ -98,7 +98,9 @@ HEADERS += \
     source/ui/graphtransformconfiguration.h \
     source/utils/qmlenum.h \
     source/utils/qmlcontainerwrapper.h \
-    source/layout/layoutsettings.h
+    source/layout/layoutsettings.h \
+    source/layout/componentlayout.h \
+    source/layout/powerof2gridcomponentlayout.h
 
 SOURCES += \
     source/main.cpp \
@@ -161,7 +163,8 @@ SOURCES += \
     source/graph/graphconsistencychecker.cpp \
     source/transform/datafield.cpp \
     source/ui/graphtransformconfiguration.cpp \
-    source/layout/layoutsettings.cpp
+    source/layout/layoutsettings.cpp \
+    source/layout/powerof2gridcomponentlayout.cpp
 
 RESOURCES += \
     source/rendering/shaders.qrc \

@@ -81,7 +81,7 @@ private:
 
     virtual GraphComponentRenderer* rendererAtPosition(const QPoint& position) = 0;
     virtual QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) = 0;
-    virtual NodeIdSet selectionForRect(const QRect& rect) = 0;
+    virtual NodeIdSet selectionForRect(const QRectF& rect) = 0;
 
 protected:
     QPoint cursorPosition();

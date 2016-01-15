@@ -137,7 +137,7 @@ QPoint GraphComponentInteractor::componentLocalCursorPosition(const ComponentId&
     return position;
 }
 
-NodeIdSet GraphComponentInteractor::selectionForRect(const QRect& rect)
+NodeIdSet GraphComponentInteractor::selectionForRect(const QRectF& rect)
 {
     Frustum frustum = _scene->componentRenderer()->camera()->frustumForViewportCoordinates(
                 rect.topLeft().x(), rect.topLeft().y(),

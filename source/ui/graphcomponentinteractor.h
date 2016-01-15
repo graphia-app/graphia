@@ -38,7 +38,7 @@ private:
 
     GraphComponentRenderer* rendererAtPosition(const QPoint& position);
     QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position);
-    NodeIdSet selectionForRect(const QRect& rect);
+    NodeIdSet selectionForRect(const QRectF& rect);
 };
 
 #endif // GRAPHCOMPONENTINTERACTOR_H

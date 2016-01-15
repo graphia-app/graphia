@@ -4,6 +4,8 @@
 
 #include "../graph/graphmodel.h"
 
+#include "../layout/powerof2gridcomponentlayout.h"
+
 #include "../ui/graphquickitem.h"
 
 #include "../utils/utils.h"
@@ -19,10 +21,13 @@ GraphOverviewScene::GraphOverviewScene(GraphRenderer* graphRenderer) :
     Scene(graphRenderer),
     _graphRenderer(graphRenderer),
     _graphModel(graphRenderer->graphModel()),
+    _offset(0.0f, 0.0f),
     _previousComponentAlpha(_graphModel->graph(), 1.0f),
     _componentAlpha(_graphModel->graph(), 1.0f),
-    _previousComponentLayout(_graphModel->graph()),
-    _componentLayout(_graphModel->graph())
+    _componentLayoutData(_graphModel->graph()),
+    _previousZoomedComponentLayoutData(_graphModel->graph()),
+    _zoomedComponentLayoutData(_graphModel->graph()),
+    _componentLayout(std::make_shared<PowerOf2GridComponentLayout>())
 {
     connect(&_graphModel->graph(), &Graph::componentAdded, this, &GraphOverviewScene::onComponentAdded, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::componentWillBeRemoved, this, &GraphOverviewScene::onComponentWillBeRemoved, Qt::DirectConnection);
@@ -37,7 +42,7 @@ void GraphOverviewScene::update(float t)
     for(auto componentId : _componentIds)
     {
         auto* renderer = _graphRenderer->componentRendererForId(componentId);
-        renderer->setDimensions(_componentLayout[componentId]);
+        renderer->setDimensions(_zoomedComponentLayoutData[componentId]);
         renderer->setAlpha(_componentAlpha[componentId]);
         renderer->update(t);
     }
@@ -61,12 +66,40 @@ void GraphOverviewScene::onHide()
     }
 }
 
+void GraphOverviewScene::pan(float dx, float dy)
+{
+    float scaledDx = dx / (_width * _zoomFactor);
+    float scaledDy = dy / (_height * _zoomFactor);
+
+    _offset.setX(_offset.x() + scaledDx);
+    _offset.setY(_offset.y() + scaledDy);
+
+    updateZoomedComponentLayoutData();
+}
+
 void GraphOverviewScene::zoom(float delta)
 {
     if(delta > 0.0f)
-        setRenderSizeDivisor(_renderSizeDivisor / 2);
-    else if(_renderSizeDivisor < 64)
-        setRenderSizeDivisor(_renderSizeDivisor * 2);
+        _zoomFactor *= 1.25f;
+    else
+        _zoomFactor *= 0.8f;
+
+    updateZoomedComponentLayoutData();
+}
+
+QRectF GraphOverviewScene::zoomedRect(const QRectF& rect)
+{
+    QRectF newRect(rect);
+
+    float scaledOffsetX = _offset.x() * _width;
+    float scaledOffsetY = _offset.y() * _height;
+    newRect.translate(scaledOffsetX, scaledOffsetY);
+    newRect.setLeft(newRect.left() * _zoomFactor);
+    newRect.setRight(newRect.right() * _zoomFactor);
+    newRect.setTop(newRect.top() * _zoomFactor);
+    newRect.setBottom(newRect.bottom() * _zoomFactor);
+
+    return newRect;
 }
 
 void GraphOverviewScene::setRenderSizeDivisor(int divisor)
@@ -85,7 +118,7 @@ void GraphOverviewScene::startTransitionFromComponentMode(ComponentId focusCompo
                                                           std::function<void()> finishedFunction)
 {
     startTransition(duration, transitionType, finishedFunction);
-    _previousComponentLayout = _componentLayout;
+    _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
 
     for(auto componentId : _componentIds)
     {
@@ -93,8 +126,8 @@ void GraphOverviewScene::startTransitionFromComponentMode(ComponentId focusCompo
             _previousComponentAlpha[componentId] = 0.0f;
     }
 
-    int left = (_width * 0.5f) - (_height * 0.5f);
-    _previousComponentLayout[focusComponentId] = QRect(left, 0, _height, _height);
+    float left = (_width * 0.5f) - (_height * 0.5f);
+    _previousZoomedComponentLayoutData[focusComponentId] = QRectF(left, 0.0f, _height, _height);
 }
 
 void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusComponentId,
@@ -102,7 +135,7 @@ void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusCompone
                                                         Transition::Type transitionType,
                                                         std::function<void()> finishedFunction)
 {
-    _previousComponentLayout = _componentLayout;
+    _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
 
     for(auto componentId : _componentIds)
     {
@@ -110,89 +143,33 @@ void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusCompone
             _componentAlpha[componentId] = 0.0f;
     }
 
-    int left = (_width * 0.5f) - (_height * 0.5f);
-    _componentLayout[focusComponentId] = QRect(left, 0, _height, _height);
+    float left = (_width * 0.5f) - (_height * 0.5f);
+    _zoomedComponentLayoutData[focusComponentId] = QRectF(left, 0, _height, _height);
 
     startTransition(duration, transitionType, finishedFunction);
 }
 
+void GraphOverviewScene::updateZoomedComponentLayoutData()
+{
+    for(auto componentId : _componentIds)
+        _zoomedComponentLayoutData[componentId] = zoomedRect(_componentLayoutData[componentId]);
+}
+
 void GraphOverviewScene::layoutComponents()
 {
-    std::stack<QPoint> coords;
+    _componentLayout->execute(_graphModel->graph(), _componentIds,
+                              _width, _height, _componentLayoutData);
 
-    // Find the number of nodes in the largest component
-    int maxNumNodes = 0;
-
-    auto& graph = _graphModel->graph();
-    if(graph.numComponents() > 0)
-    {
-        auto largestComponentId = graph.componentIdOfLargestComponent();
-        maxNumNodes = graph.componentById(largestComponentId)->numNodes();
-    }
-
-    ComponentArray<int> renderSizeDivisors(graph);
+    updateZoomedComponentLayoutData();
 
     for(auto componentId : _componentIds)
     {
-        auto component = graph.componentById(componentId);
-        int divisor = maxNumNodes / component->numNodes();
-        renderSizeDivisors[componentId] = u::smallestPowerOf2GreaterThan(divisor);
-    }
-
-    std::vector<ComponentId> sortedComponentIds = _componentIds;
-    std::sort(sortedComponentIds.begin(), sortedComponentIds.end(),
-              [&renderSizeDivisors](const ComponentId& a, const ComponentId& b)
-    {
-        return renderSizeDivisors[a] < renderSizeDivisors[b];
-    });
-
-    //FIXME this is a mess
-    coords.emplace(0, 0);
-    for(auto componentId : sortedComponentIds)
-    {
-        auto coord = coords.top();
-        coords.pop();
-
-        int divisor = renderSizeDivisors[componentId];
-        int dividedSize = _height / (divisor * _renderSizeDivisor);
-
-        const int MINIMUM_SIZE = 32;
-        if(_height > MINIMUM_SIZE)
-        {
-            while(dividedSize < MINIMUM_SIZE && divisor > 1)
-            {
-                divisor /= 2;
-                dividedSize = _height / (divisor * _renderSizeDivisor);
-            }
-        }
-
-        if(!coords.empty() && (coord.x() + dividedSize > coords.top().x() ||
-            coord.y() + dividedSize > _height))
-        {
-            coord = coords.top();
-            coords.pop();
-        }
-
-        auto rect = QRect(coord.x(), coord.y(), dividedSize, dividedSize);
-        _componentLayout[componentId] = rect;
         _componentAlpha[componentId] = 1.0f;
 
-        QPoint right(coord.x() + dividedSize, coord.y());
-        QPoint down(coord.x(), coord.y() + dividedSize);
-
-        if(coords.empty() || right.x() < coords.top().x())
-            coords.emplace(right);
-
-        if(down.y() < _height)
-            coords.emplace(down);
-    }
-
-    // If the component is fading in, keep it in a fixed position
-    for(auto componentId : _componentIds)
-    {
+        // If the component is fading in, keep it in a fixed position
         if(_previousComponentAlpha[componentId] == 0.0f)
         {
-            _previousComponentLayout[componentId] = _componentLayout[componentId];
+            _previousZoomedComponentLayoutData[componentId] = _zoomedComponentLayoutData[componentId];
             _previousComponentAlpha[componentId] = _componentAlpha[componentId];
 
             auto renderer = _graphRenderer->componentRendererForId(componentId);
@@ -207,7 +184,7 @@ void GraphOverviewScene::layoutComponents()
 
         for(auto merger : componentMergeSet.mergers())
         {
-            _componentLayout[merger] = _componentLayout[newComponentId];
+            _zoomedComponentLayoutData[merger] = _zoomedComponentLayoutData[newComponentId];
             _componentAlpha[merger] = _componentAlpha[newComponentId];
         }
     }
@@ -224,7 +201,7 @@ void GraphOverviewScene::setViewportSize(int width, int height)
     {
         auto renderer = _graphRenderer->componentRendererForId(componentId);
         renderer->setViewportSize(_width, _height);
-        renderer->setDimensions(_componentLayout[componentId]);
+        renderer->setDimensions(_zoomedComponentLayoutData[componentId]);
     }
 }
 
@@ -241,9 +218,9 @@ bool GraphOverviewScene::transitionActive() const
     return false;
 }
 
-static QRect interpolateRect(const QRect& a, const QRect& b, float f)
+static QRectF interpolateRect(const QRectF& a, const QRectF& b, float f)
 {
-    return QRect(
+    return QRectF(
         u::interpolate(a.left(),   b.left(),   f),
         u::interpolate(a.top(),    b.top(),    f),
         u::interpolate(a.width(),  b.width(),  f),
@@ -255,7 +232,7 @@ void GraphOverviewScene::startTransition(float duration,
                                          Transition::Type transitionType,
                                          std::function<void()> finishedFunction)
 {
-    auto targetComponentLayout = _componentLayout;
+    auto targetComponentLayout = _zoomedComponentLayoutData;
     auto targetComponentAlpha = _componentAlpha;
 
     if(!_graphRenderer->transition().active())
@@ -266,7 +243,7 @@ void GraphOverviewScene::startTransition(float duration,
     {
         auto interpolate = [&](const ComponentId componentId)
         {
-            _componentLayout[componentId] = interpolateRect(_previousComponentLayout[componentId],
+            _zoomedComponentLayoutData[componentId] = interpolateRect(_previousZoomedComponentLayoutData[componentId],
                                                             targetComponentLayout[componentId], f);
             _componentAlpha[componentId] = u::interpolate(_previousComponentAlpha[componentId],
                                                           targetComponentAlpha[componentId], f);
@@ -279,7 +256,7 @@ void GraphOverviewScene::startTransition(float duration,
     },
     [this]
     {
-        _previousComponentLayout = _componentLayout;
+        _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
         _previousComponentAlpha = _componentAlpha;
 
         for(auto componentId : _removedComponentIds)
@@ -386,7 +363,7 @@ void GraphOverviewScene::onComponentSplit(const Graph*, const ComponentSplitSet&
             {
                 auto renderer = _graphRenderer->componentRendererForId(splitter);
                 renderer->cloneViewDataFrom(*oldGraphComponentRenderer);
-                _previousComponentLayout[splitter] = _componentLayout[oldComponentId];
+                _previousZoomedComponentLayoutData[splitter] = _zoomedComponentLayoutData[oldComponentId];
                 _previousComponentAlpha[splitter] = _componentAlpha[oldComponentId];
             }
         }
@@ -416,7 +393,7 @@ void GraphOverviewScene::onComponentsWillMerge(const Graph*, const ComponentMerg
 void GraphOverviewScene::onGraphWillChange(const Graph*)
 {
     // Take a copy of the existing layout before the graph is changed
-    _previousComponentLayout = _componentLayout;
+    _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
 }
 
 void GraphOverviewScene::onGraphChanged(const Graph* graph)

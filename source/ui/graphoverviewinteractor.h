@@ -3,6 +3,8 @@
 
 #include "graphcommoninteractor.h"
 
+#include <QPoint>
+
 #include <memory>
 
 class GraphModel;
@@ -23,6 +25,11 @@ public:
 
 private:
     GraphOverviewScene* _scene;
+    QPoint _panStartPosition;
+
+    void rightMouseDown();
+    void rightMouseUp();
+    void rightDrag();
 
     void leftDoubleClick();
 
@@ -32,7 +39,7 @@ private:
 
     GraphComponentRenderer* rendererAtPosition(const QPoint& position);
     QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position);
-    NodeIdSet selectionForRect(const QRect& rect);
+    NodeIdSet selectionForRect(const QRectF& rect);
 };
 
 #endif // GRAPHOVERVIEWINTERACTOR_H

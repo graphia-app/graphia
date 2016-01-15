@@ -245,13 +245,13 @@ void GraphComponentRenderer::setViewportSize(int viewportWidth, int viewportHeig
     }
 }
 
-void GraphComponentRenderer::setDimensions(const QRect& dimensions)
+void GraphComponentRenderer::setDimensions(const QRectF& dimensions)
 {
     if(_dimensions != dimensions)
     {
         _dimensions = dimensions;
 
-        float aspectRatio = static_cast<float>(_dimensions.width()) / static_cast<float>(_dimensions.height());
+        float aspectRatio = _dimensions.width() / _dimensions.height();
         _fovy = 60.0f;
         _fovx = _fovy * aspectRatio;
 

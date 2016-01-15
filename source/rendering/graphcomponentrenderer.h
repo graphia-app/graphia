@@ -40,7 +40,7 @@ public:
     void synchronise();
     void update(float t);
     void setViewportSize(int viewportWidth, int viewportHeight);
-    void setDimensions(const QRect& dimensions);
+    void setDimensions(const QRectF& dimensions);
 
     bool transitionActive();
 
@@ -128,7 +128,7 @@ private:
     int _viewportWidth = 0;
     int _viewportHeight = 0;
 
-    QRect _dimensions;
+    QRectF _dimensions;
 
     float _alpha = 1.0f;
 

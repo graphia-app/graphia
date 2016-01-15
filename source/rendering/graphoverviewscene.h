@@ -9,11 +9,14 @@
 #include "../graph/componentmanager.h"
 #include "../graph/grapharray.h"
 
+#include "../layout/componentlayout.h"
+
 #include <vector>
 #include <mutex>
 #include <memory>
 
 #include <QRect>
+#include <QPointF>
 
 class GraphModel;
 
@@ -34,8 +37,9 @@ public:
     void onShow();
     void onHide();
 
-    const ComponentArray<QRect, u::Locking>& componentLayout() { return _componentLayout; }
+    const ComponentLayoutData& componentLayout() { return _zoomedComponentLayoutData; }
 
+    void pan(float dx, float dy);
     void zoom(float delta);
     int renderSizeDivisor() { return _renderSizeDivisor; }
     void setRenderSizeDivisor(int divisor);
@@ -57,12 +61,17 @@ private:
     int _height = 0;
 
     int _renderSizeDivisor = 1;
+    float _zoomFactor = 1.0f;
+    QPointF _offset;
 
     ComponentArray<float, u::Locking> _previousComponentAlpha;
     ComponentArray<float, u::Locking> _componentAlpha;
 
-    ComponentArray<QRect, u::Locking> _previousComponentLayout;
-    ComponentArray<QRect, u::Locking> _componentLayout;
+    ComponentLayoutData _componentLayoutData;
+    ComponentLayoutData _previousZoomedComponentLayoutData;
+    ComponentLayoutData _zoomedComponentLayoutData;
+    std::shared_ptr<ComponentLayout> _componentLayout;
+    void updateZoomedComponentLayoutData();
     void layoutComponents();
 
     std::vector<ComponentId> _removedComponentIds;
@@ -72,6 +81,8 @@ private:
                          std::function<void()> finishedFunction = []{});
 
     std::vector<ComponentId> _componentIds;
+
+    QRectF zoomedRect(const QRectF& rect);
 
 private slots:
     void onGraphWillChange(const Graph* graph);
