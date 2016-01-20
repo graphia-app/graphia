@@ -166,6 +166,14 @@ void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusCompone
     startTransition(duration, transitionType, finishedFunction);
 }
 
+void GraphOverviewScene::updateComponentLayoutBoundingBox()
+{
+    _componentsBoundingBox = QRectF();
+
+    for(auto componentId : _componentIds)
+        _componentsBoundingBox = _componentsBoundingBox.united(_componentLayoutData[componentId]);
+}
+
 void GraphOverviewScene::updateZoomedComponentLayoutData()
 {
     for(auto componentId : _componentIds)
@@ -177,6 +185,7 @@ void GraphOverviewScene::layoutComponents()
     _componentLayout->execute(_graphModel->graph(), _componentIds,
                               _width, _height, _componentLayoutData);
 
+    updateComponentLayoutBoundingBox();
     updateZoomedComponentLayoutData();
 
     for(auto componentId : _componentIds)

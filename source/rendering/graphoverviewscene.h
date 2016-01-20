@@ -72,6 +72,9 @@ private:
     ComponentLayoutData _previousZoomedComponentLayoutData;
     ComponentLayoutData _zoomedComponentLayoutData;
     std::shared_ptr<ComponentLayout> _componentLayout;
+    QRectF _componentsBoundingBox;
+
+    void updateComponentLayoutBoundingBox();
     void updateZoomedComponentLayoutData();
     void layoutComponents();
 
