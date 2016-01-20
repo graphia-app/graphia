@@ -55,19 +55,21 @@ void GraphOverviewInteractor::leftDoubleClick()
     }
 }
 
-void GraphOverviewInteractor::wheelMove(float angle)
+void GraphOverviewInteractor::wheelMove(float angle, float x, float y)
 {
-    _scene->zoom(angle);
+    _scene->zoom(angle, x, y);
 }
 
-void GraphOverviewInteractor::trackpadScrollGesture(float pixels)
+void GraphOverviewInteractor::trackpadScrollGesture(float x, float y)
 {
-    _scene->zoom(pixels);
+    //FIXME test
+    _scene->pan(x, y);
 }
 
-void GraphOverviewInteractor::trackpadZoomGesture(float value)
+void GraphOverviewInteractor::trackpadZoomGesture(float value, float x, float y)
 {
-    _scene->zoom(value);
+    //FIXME test
+    _scene->zoom(value, x, y);
 }
 
 GraphComponentRenderer* GraphOverviewInteractor::rendererAtPosition(const QPoint& pos)

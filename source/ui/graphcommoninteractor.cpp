@@ -404,9 +404,9 @@ void GraphCommonInteractor::wheelEvent(QWheelEvent* wheelEvent)
     _rendererUnderCursor = rendererAtPosition(wheelEvent->pos());
 
     if(wheelEvent->source() == Qt::MouseEventSynthesizedBySystem)
-        trackpadScrollGesture(wheelEvent->pixelDelta().y());
+        trackpadScrollGesture(wheelEvent->pixelDelta().x(), wheelEvent->pixelDelta().y());
     else
-        wheelMove(wheelEvent->angleDelta().y());
+        wheelMove(wheelEvent->angleDelta().y(), wheelEvent->x(), wheelEvent->y());
 }
 
 void GraphCommonInteractor::nativeGestureEvent(QNativeGestureEvent* nativeEvent)
@@ -414,5 +414,5 @@ void GraphCommonInteractor::nativeGestureEvent(QNativeGestureEvent* nativeEvent)
     _rendererUnderCursor = rendererAtPosition(nativeEvent->pos());
 
     if(nativeEvent->gestureType() == Qt::ZoomNativeGesture)
-        trackpadZoomGesture(nativeEvent->value());
+        trackpadZoomGesture(nativeEvent->value(), nativeEvent->pos().x(), nativeEvent->pos().y());
 }

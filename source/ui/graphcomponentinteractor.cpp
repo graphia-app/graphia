@@ -108,21 +108,19 @@ void GraphComponentInteractor::leftDoubleClick()
     }
 }
 
-void GraphComponentInteractor::wheelMove(float angle)
+void GraphComponentInteractor::wheelMove(float angle, float, float)
 {
     const float WHEEL_STEP_TRANSITION_SIZE = 0.2f / 120.0f;
 
     rendererUnderCursor()->zoom(angle * WHEEL_STEP_TRANSITION_SIZE, true);
 }
 
-void GraphComponentInteractor::trackpadScrollGesture(float pixels)
+void GraphComponentInteractor::trackpadScrollGesture(float, float)
 {
-    const float PIXELS_ZOOM_SCALING = 0.0015f;
-
-    rendererUnderCursor()->zoom(pixels * PIXELS_ZOOM_SCALING, false);
+    //FIXME Should do a pan
 }
 
-void GraphComponentInteractor::trackpadZoomGesture(float value)
+void GraphComponentInteractor::trackpadZoomGesture(float value, float, float)
 {
     rendererUnderCursor()->zoom(value, false);
 }

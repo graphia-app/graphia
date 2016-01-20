@@ -75,9 +75,9 @@ private:
     virtual void leftDoubleClick() {}
     virtual void rightDoubleClick() {}
 
-    virtual void wheelMove(float) {}
-    virtual void trackpadScrollGesture(float) {}
-    virtual void trackpadZoomGesture(float) {}
+    virtual void wheelMove(float, float, float) {}
+    virtual void trackpadScrollGesture(float, float) {}
+    virtual void trackpadZoomGesture(float, float, float) {}
 
     virtual GraphComponentRenderer* rendererAtPosition(const QPoint& position) = 0;
     virtual QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) = 0;

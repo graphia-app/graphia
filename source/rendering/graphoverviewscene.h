@@ -40,7 +40,7 @@ public:
     const ComponentLayoutData& componentLayout() { return _zoomedComponentLayoutData; }
 
     void pan(float dx, float dy);
-    void zoom(float delta);
+    void zoom(float delta, float x, float y);
     int renderSizeDivisor() { return _renderSizeDivisor; }
     void setRenderSizeDivisor(int divisor);
 
@@ -62,6 +62,7 @@ private:
 
     int _renderSizeDivisor = 1;
     float _zoomFactor = 1.0f;
+    QPointF _zoomCentre;
     QPointF _offset;
 
     ComponentArray<float, u::Locking> _previousComponentAlpha;

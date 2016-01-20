@@ -21,7 +21,6 @@ GraphOverviewScene::GraphOverviewScene(GraphRenderer* graphRenderer) :
     Scene(graphRenderer),
     _graphRenderer(graphRenderer),
     _graphModel(graphRenderer->graphModel()),
-    _offset(0.0f, 0.0f),
     _previousComponentAlpha(_graphModel->graph(), 1.0f),
     _componentAlpha(_graphModel->graph(), 1.0f),
     _componentLayoutData(_graphModel->graph()),
@@ -68,21 +67,36 @@ void GraphOverviewScene::onHide()
 
 void GraphOverviewScene::pan(float dx, float dy)
 {
-    float scaledDx = dx / (_width * _zoomFactor);
-    float scaledDy = dy / (_height * _zoomFactor);
+    float scaledDx = dx / (_zoomFactor);
+    float scaledDy = dy / (_zoomFactor);
 
-    _offset.setX(_offset.x() + scaledDx);
-    _offset.setY(_offset.y() + scaledDy);
+    _offset.setX(_offset.x() - scaledDx);
+    _offset.setY(_offset.y() - scaledDy);
 
     updateZoomedComponentLayoutData();
 }
 
-void GraphOverviewScene::zoom(float delta)
+void GraphOverviewScene::zoom(float delta, float x, float y)
 {
+    float nx = x / _width;
+    float ny = y / _height;
+
+    float oldCentreX = (nx * _width) / _zoomFactor;
+    float oldCentreY = (ny * _height) / _zoomFactor;
+
     if(delta > 0.0f)
         _zoomFactor *= 1.25f;
     else
         _zoomFactor *= 0.8f;
+
+    float newCentreX = (nx * _width) / _zoomFactor;
+    float newCentreY = (ny * _height) / _zoomFactor;
+
+    _offset.setX(_offset.x() + (oldCentreX - newCentreX));
+    _offset.setY(_offset.y() + (oldCentreY - newCentreY));
+
+    _zoomCentre.setX(newCentreX);
+    _zoomCentre.setY(newCentreY);
 
     updateZoomedComponentLayoutData();
 }
@@ -91,13 +105,16 @@ QRectF GraphOverviewScene::zoomedRect(const QRectF& rect)
 {
     QRectF newRect(rect);
 
-    float scaledOffsetX = _offset.x() * _width;
-    float scaledOffsetY = _offset.y() * _height;
-    newRect.translate(scaledOffsetX, scaledOffsetY);
+    newRect.translate(-_offset.x(), -_offset.y());
+
+    newRect.translate(-_zoomCentre.x(), -_zoomCentre.y());
+
     newRect.setLeft(newRect.left() * _zoomFactor);
     newRect.setRight(newRect.right() * _zoomFactor);
     newRect.setTop(newRect.top() * _zoomFactor);
     newRect.setBottom(newRect.bottom() * _zoomFactor);
+
+    newRect.translate(_zoomCentre.x() * _zoomFactor, _zoomCentre.y() * _zoomFactor);
 
     return newRect;
 }
