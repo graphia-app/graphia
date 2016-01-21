@@ -40,7 +40,7 @@ public:
     const ComponentLayoutData& componentLayout() { return _zoomedComponentLayoutData; }
 
     void pan(float dx, float dy);
-    void zoom(float delta, float x, float y);
+    void zoom(float delta, float x, float y, bool doTransition);
     int renderSizeDivisor() { return _renderSizeDivisor; }
     void setRenderSizeDivisor(int divisor);
 
@@ -83,6 +83,7 @@ private:
     void startTransition(float duration = 1.0f,
                          Transition::Type transitionType = Transition::Type::EaseInEaseOut,
                          std::function<void()> finishedFunction = []{});
+    void startZoomTransition(float duration = 0.3f);
 
     std::vector<ComponentId> _componentIds;
 

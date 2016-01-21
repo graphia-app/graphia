@@ -57,7 +57,7 @@ void GraphOverviewInteractor::leftDoubleClick()
 
 void GraphOverviewInteractor::wheelMove(float angle, float x, float y)
 {
-    _scene->zoom(angle, x, y);
+    _scene->zoom(angle, x, y, true);
 }
 
 void GraphOverviewInteractor::trackpadScrollGesture(float x, float y)
@@ -69,7 +69,7 @@ void GraphOverviewInteractor::trackpadScrollGesture(float x, float y)
 void GraphOverviewInteractor::trackpadZoomGesture(float value, float x, float y)
 {
     //FIXME test
-    _scene->zoom(value, x, y);
+    _scene->zoom(value, x, y, false);
 }
 
 GraphComponentRenderer* GraphOverviewInteractor::rendererAtPosition(const QPoint& pos)

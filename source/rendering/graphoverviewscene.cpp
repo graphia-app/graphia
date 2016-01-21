@@ -76,7 +76,7 @@ void GraphOverviewScene::pan(float dx, float dy)
     updateZoomedComponentLayoutData();
 }
 
-void GraphOverviewScene::zoom(float delta, float x, float y)
+void GraphOverviewScene::zoom(float delta, float x, float y, bool doTransition)
 {
     float nx = x / _width;
     float ny = y / _height;
@@ -98,7 +98,10 @@ void GraphOverviewScene::zoom(float delta, float x, float y)
     _zoomCentre.setX(newCentreX);
     _zoomCentre.setY(newCentreY);
 
-    updateZoomedComponentLayoutData();
+    if(doTransition)
+        startZoomTransition();
+    else
+        updateZoomedComponentLayoutData();
 }
 
 QRectF GraphOverviewScene::zoomedRect(const QRectF& rect)
@@ -258,19 +261,19 @@ void GraphOverviewScene::startTransition(float duration,
                                          Transition::Type transitionType,
                                          std::function<void()> finishedFunction)
 {
-    auto targetComponentLayout = _zoomedComponentLayoutData;
+    auto targetComponentLayoutData = _zoomedComponentLayoutData;
     auto targetComponentAlpha = _componentAlpha;
 
     if(!_graphRenderer->transition().active())
         _graphRenderer->rendererStartedTransition();
 
     _graphRenderer->transition().start(duration, transitionType,
-    [this, targetComponentLayout, targetComponentAlpha /*FIXME C++14 move capture*/](float f)
+    [this, targetComponentLayoutData, targetComponentAlpha /*FIXME C++14 move capture*/](float f)
     {
         auto interpolate = [&](const ComponentId componentId)
         {
             _zoomedComponentLayoutData[componentId] = interpolateRect(_previousZoomedComponentLayoutData[componentId],
-                                                            targetComponentLayout[componentId], f);
+                                                                       targetComponentLayoutData[componentId], f);
             _componentAlpha[componentId] = u::interpolate(_previousComponentAlpha[componentId],
                                                           targetComponentAlpha[componentId], f);
 
@@ -342,6 +345,34 @@ void GraphOverviewScene::startTransition(float duration,
             renderer->moveFocusToPositionAndRadius(mergedFocusPosition, maxDistance, rotation);
         }
     }
+}
+
+void GraphOverviewScene::startZoomTransition(float duration)
+{
+    ComponentLayoutData targetZoomedComponentLayoutData(_graphModel->graph());
+
+    _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
+
+    for(auto componentId : _componentIds)
+        targetZoomedComponentLayoutData[componentId] = zoomedRect(_componentLayoutData[componentId]);
+
+    if(!_graphRenderer->transition().active())
+        _graphRenderer->rendererStartedTransition();
+
+    _graphRenderer->transition().start(duration, Transition::Type::InversePower,
+    [this, targetZoomedComponentLayoutData](float f)
+    {
+        for(auto componentId : _componentIds)
+        {
+            _zoomedComponentLayoutData[componentId] =
+                    interpolateRect(_previousZoomedComponentLayoutData[componentId],
+                                    targetZoomedComponentLayoutData[componentId], f);
+        }
+    },
+    [this]
+    {
+        _graphRenderer->rendererFinishedTransition();
+    });
 }
 
 void GraphOverviewScene::onComponentAdded(const Graph*, ComponentId componentId, bool hasSplit)
