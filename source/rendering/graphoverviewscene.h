@@ -90,6 +90,7 @@ private:
     QRectF zoomedRect(const QRectF& rect);
 
     bool setZoomFactor(float zoomFactor);
+    void setOffset(float x, float y);
 
 private slots:
     void onGraphWillChange(const Graph* graph);

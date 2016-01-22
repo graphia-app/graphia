@@ -70,8 +70,8 @@ void GraphOverviewScene::pan(float dx, float dy)
     float scaledDx = dx / (_zoomFactor);
     float scaledDy = dy / (_zoomFactor);
 
-    _offset.setX(_offset.x() - scaledDx);
-    _offset.setY(_offset.y() - scaledDy);
+    setOffset(_offset.x() - scaledDx,
+              _offset.y() - scaledDy);
 
     updateZoomedComponentLayoutData();
 }
@@ -96,8 +96,8 @@ void GraphOverviewScene::zoom(float delta, float x, float y, bool doTransition)
     float newCentreX = (nx * _width) / _zoomFactor;
     float newCentreY = (ny * _height) / _zoomFactor;
 
-    _offset.setX(_offset.x() + (oldCentreX - newCentreX));
-    _offset.setY(_offset.y() + (oldCentreY - newCentreY));
+    setOffset(_offset.x() + (oldCentreX - newCentreX),
+              _offset.y() + (oldCentreY - newCentreY));
 
     _zoomCentre.setX(newCentreX);
     _zoomCentre.setY(newCentreY);
@@ -137,6 +137,25 @@ bool GraphOverviewScene::setZoomFactor(float zoomFactor)
     _zoomFactor = zoomFactor;
 
     return changed;
+}
+
+void GraphOverviewScene::setOffset(float x, float y)
+{
+    float scaledBoundingWidth = _componentsBoundingBox.width() * _zoomFactor;
+    float scaledBoundingHeight = _componentsBoundingBox.height() * _zoomFactor;
+
+    float xDiff = (scaledBoundingWidth - _width) / _zoomFactor;
+    float yDiff = (scaledBoundingHeight - _height) / _zoomFactor;
+    float xMin = std::min(xDiff, 0.0f);
+    float xMax = std::max(xDiff, 0.0f);
+    float yMin = std::min(yDiff, 0.0f);
+    float yMax = std::max(yDiff, 0.0f);
+
+    x = u::clamp(xMin, xMax, x);
+    y = u::clamp(yMin, yMax, y);
+
+    _offset.setX(x);
+    _offset.setY(y);
 }
 
 void GraphOverviewScene::setRenderSizeDivisor(int divisor)
