@@ -84,10 +84,14 @@ void GraphOverviewScene::zoom(float delta, float x, float y, bool doTransition)
     float oldCentreX = (nx * _width) / _zoomFactor;
     float oldCentreY = (ny * _height) / _zoomFactor;
 
+    bool zoomChanged;
     if(delta > 0.0f)
-        _zoomFactor *= 1.25f;
+        zoomChanged = setZoomFactor(_zoomFactor * 1.25f);
     else
-        _zoomFactor *= 0.8f;
+        zoomChanged = setZoomFactor(_zoomFactor * 0.8f);
+
+    if(!zoomChanged)
+        return;
 
     float newCentreX = (nx * _width) / _zoomFactor;
     float newCentreY = (ny * _height) / _zoomFactor;
@@ -120,6 +124,19 @@ QRectF GraphOverviewScene::zoomedRect(const QRectF& rect)
     newRect.translate(_zoomCentre.x() * _zoomFactor, _zoomCentre.y() * _zoomFactor);
 
     return newRect;
+}
+
+bool GraphOverviewScene::setZoomFactor(float zoomFactor)
+{
+    float minWidthZoomFactor = _width / _componentsBoundingBox.width();
+    float minHeightZoomFactor = _height / _componentsBoundingBox.height();
+    float minZoomFactor = std::min(minWidthZoomFactor, minHeightZoomFactor);
+
+    zoomFactor = std::max(minZoomFactor, zoomFactor);
+    bool changed = _zoomFactor != zoomFactor;
+    _zoomFactor = zoomFactor;
+
+    return changed;
 }
 
 void GraphOverviewScene::setRenderSizeDivisor(int divisor)
