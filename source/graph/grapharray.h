@@ -62,7 +62,6 @@ public:
     {
         Q_ASSERT(_graph == other._graph);
         _array = other._array;
-        _mutex.unlock();
 
         return *this;
     }
@@ -71,7 +70,6 @@ public:
     {
         Q_ASSERT(_graph == other._graph);
         _array = std::move(other._array);
-        _mutex.unlock();
 
         return *this;
     }
