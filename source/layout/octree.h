@@ -37,10 +37,10 @@ protected:
     size_t _depth = 0;
     SubVolumeType _subVolumes[8] = {};
 
-    const SubVolumeType* _nonEmptyLeaves[8] = {0};
+    const SubVolumeType* _nonEmptyLeaves[8] = {};
     int _numNonEmptyLeaves = 0;
 
-    const SubVolumeType* _internalNodes[8] = {0};
+    const SubVolumeType* _internalNodes[8] = {};
     int _numInternalNodes = 0;
 
     std::vector<NodeId> _nodeIds;
