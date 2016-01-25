@@ -233,6 +233,9 @@ void GraphOverviewScene::layoutComponents()
                               _width, _height, _componentLayoutData);
 
     updateComponentLayoutBoundingBox();
+    setZoomFactor(_zoomFactor);
+    setOffset(_offset.x(), _offset.y());
+
     updateZoomedComponentLayoutData();
 
     for(auto componentId : _componentIds)
