@@ -57,12 +57,14 @@ void GraphOverviewInteractor::leftDoubleClick()
 
 void GraphOverviewInteractor::wheelMove(float angle, float x, float y)
 {
-    _scene->zoom(angle, x, y, true);
+    if(angle > 0.0f)
+        _scene->zoom(GraphOverviewScene::ZoomType::In, x, y, true);
+    else
+        _scene->zoom(GraphOverviewScene::ZoomType::Out, x, y, true);
 }
 
 void GraphOverviewInteractor::trackpadScrollGesture(float x, float y)
 {
-    //FIXME test
     _scene->pan(x, y);
 }
 

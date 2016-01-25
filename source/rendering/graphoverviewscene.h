@@ -40,6 +40,14 @@ public:
     const ComponentLayoutData& componentLayout() { return _zoomedComponentLayoutData; }
 
     void pan(float dx, float dy);
+
+    enum class ZoomType
+    {
+        In,
+        Out
+    };
+
+    void zoom(ZoomType zoomType, float x, float y, bool doTransition);
     void zoom(float delta, float x, float y, bool doTransition);
     int renderSizeDivisor() { return _renderSizeDivisor; }
     void setRenderSizeDivisor(int divisor);
