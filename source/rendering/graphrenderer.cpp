@@ -166,12 +166,12 @@ void GPUGraphData::upload()
 
 int GPUGraphData::numNodes() const
 {
-    return _nodeData.size();
+    return static_cast<int>(_nodeData.size());
 }
 
 int GPUGraphData::numEdges() const
 {
-    return _edgeData.size();
+    return static_cast<int>(_edgeData.size());
 }
 
 GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
