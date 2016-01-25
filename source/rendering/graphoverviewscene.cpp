@@ -145,14 +145,22 @@ void GraphOverviewScene::setOffset(float x, float y)
     float scaledBoundingHeight = _componentsBoundingBox.height() * _zoomFactor;
 
     float xDiff = (scaledBoundingWidth - _width) / _zoomFactor;
-    float yDiff = (scaledBoundingHeight - _height) / _zoomFactor;
     float xMin = std::min(xDiff, 0.0f);
     float xMax = std::max(xDiff, 0.0f);
+
+    if(scaledBoundingWidth > _width)
+        x = u::clamp(xMin, xMax, x);
+    else
+        x = (xMin + xMax) * 0.5f;
+
+    float yDiff = (scaledBoundingHeight - _height) / _zoomFactor;
     float yMin = std::min(yDiff, 0.0f);
     float yMax = std::max(yDiff, 0.0f);
 
-    x = u::clamp(xMin, xMax, x);
-    y = u::clamp(yMin, yMax, y);
+    if(scaledBoundingHeight > _height)
+        y = u::clamp(yMin, yMax, y);
+    else
+        y = (yMin + yMax) * 0.5f;
 
     _offset.setX(x);
     _offset.setY(y);
