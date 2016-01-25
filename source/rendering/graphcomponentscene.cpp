@@ -108,6 +108,28 @@ bool GraphComponentScene::viewIsReset() const
     return componentRenderer()->viewIsReset();
 }
 
+void GraphComponentScene::pan(NodeId clickedNodeId, QPoint start, QPoint end)
+{
+    if(!clickedNodeId.isNull())
+    {
+        Camera* camera = componentRenderer()->camera();
+
+        const QVector3D clickedNodePosition =
+                _graphRenderer->graphModel()->nodePositions().getScaledAndSmoothed(clickedNodeId);
+
+        Plane translationPlane(clickedNodePosition, camera->viewVector());
+
+        QVector3D prevPoint = translationPlane.rayIntersection(
+                    camera->rayForViewportCoordinates(start.x(), start.y()));
+        QVector3D curPoint = translationPlane.rayIntersection(
+                    camera->rayForViewportCoordinates(end.x(), end.y()));
+        QVector3D translation = prevPoint - curPoint;
+
+        camera->translate(translation);
+    }
+
+}
+
 GraphComponentRenderer* GraphComponentScene::componentRenderer() const
 {
     return _graphRenderer->componentRendererForId(_componentId);

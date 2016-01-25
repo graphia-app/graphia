@@ -40,6 +40,8 @@ public:
     void resetView();
     bool viewIsReset() const;
 
+    void pan(NodeId clickedNodeId, QPoint start, QPoint end);
+
     GraphComponentRenderer* componentRenderer() const;
 
     void startTransition(float duration = 0.3f,

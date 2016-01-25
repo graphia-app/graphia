@@ -67,24 +67,10 @@ void GraphComponentInteractor::rightDrag()
 {
     if(clickedRenderer() != nullptr && !clickedNodeId().isNull())
     {
-        Camera* camera = clickedRenderer()->camera();
-
         if(!mouseMoving())
             emit userInteractionStarted();
 
-        const QVector3D clickedNodePosition = _graphModel->nodePositions().getScaledAndSmoothed(clickedNodeId());
-
-        Plane translationPlane(clickedNodePosition, camera->viewVector());
-
-        QVector3D prevPoint = translationPlane.rayIntersection(
-                    camera->rayForViewportCoordinates(localPrevCursorPosition().x(),
-                                                      localPrevCursorPosition().y()));
-        QVector3D curPoint = translationPlane.rayIntersection(
-                    camera->rayForViewportCoordinates(localCursorPosition().x(),
-                                                      localCursorPosition().y()));
-        QVector3D translation = prevPoint - curPoint;
-
-        camera->translate(translation);
+        _scene->pan(clickedNodeId(), localPrevCursorPosition(), localCursorPosition());
     }
 }
 
