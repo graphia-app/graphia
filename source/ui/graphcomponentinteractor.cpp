@@ -111,17 +111,17 @@ void GraphComponentInteractor::trackpadZoomGesture(float value, float, float)
     rendererUnderCursor()->zoom(value, false);
 }
 
-GraphComponentRenderer* GraphComponentInteractor::rendererAtPosition(const QPoint&)
+GraphComponentRenderer* GraphComponentInteractor::rendererAtPosition(const QPoint&) const
 {
     return _scene->componentRenderer();
 }
 
-QPoint GraphComponentInteractor::componentLocalCursorPosition(const ComponentId&, const QPoint& position)
+QPoint GraphComponentInteractor::componentLocalCursorPosition(const ComponentId&, const QPoint& position) const
 {
     return position;
 }
 
-NodeIdSet GraphComponentInteractor::selectionForRect(const QRectF& rect)
+NodeIdSet GraphComponentInteractor::selectionForRect(const QRectF& rect) const
 {
     Frustum frustum = _scene->componentRenderer()->camera()->frustumForViewportCoordinates(
                 rect.topLeft().x(), rect.topLeft().y(),

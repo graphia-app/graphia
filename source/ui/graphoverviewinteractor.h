@@ -37,9 +37,9 @@ private:
     void trackpadScrollGesture(float x, float y);
     void trackpadZoomGesture(float value, float x, float y);
 
-    GraphComponentRenderer* rendererAtPosition(const QPoint& position);
-    QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position);
-    NodeIdSet selectionForRect(const QRectF& rect);
+    GraphComponentRenderer* rendererAtPosition(const QPoint& position) const;
+    QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) const;
+    NodeIdSet selectionForRect(const QRectF& rect) const;
 };
 
 #endif // GRAPHOVERVIEWINTERACTOR_H

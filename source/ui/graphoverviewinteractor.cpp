@@ -74,7 +74,7 @@ void GraphOverviewInteractor::trackpadZoomGesture(float value, float x, float y)
     _scene->zoom(value, x, y, false);
 }
 
-GraphComponentRenderer* GraphOverviewInteractor::rendererAtPosition(const QPoint& pos)
+GraphComponentRenderer* GraphOverviewInteractor::rendererAtPosition(const QPoint& pos) const
 {
     auto& componentLayout = _scene->componentLayout();
 
@@ -87,7 +87,7 @@ GraphComponentRenderer* GraphOverviewInteractor::rendererAtPosition(const QPoint
     return nullptr;
 }
 
-QPoint GraphOverviewInteractor::componentLocalCursorPosition(const ComponentId& componentId, const QPoint& pos)
+QPoint GraphOverviewInteractor::componentLocalCursorPosition(const ComponentId& componentId, const QPoint& pos) const
 {
     auto& componentLayout = _scene->componentLayout();
     auto& rect = componentLayout[componentId];
@@ -96,7 +96,7 @@ QPoint GraphOverviewInteractor::componentLocalCursorPosition(const ComponentId& 
     return transformedPos;
 }
 
-NodeIdSet GraphOverviewInteractor::selectionForRect(const QRectF& rect)
+NodeIdSet GraphOverviewInteractor::selectionForRect(const QRectF& rect) const
 {
     NodeIdSet selection;
 

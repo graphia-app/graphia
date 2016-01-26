@@ -372,29 +372,29 @@ void GraphCommonInteractor::leftDrag()
     }
 }
 
-QPoint GraphCommonInteractor::cursorPosition()
+QPoint GraphCommonInteractor::cursorPosition() const
 {
     return _cursorPosition;
 }
 
-QPoint GraphCommonInteractor::prevCursorPosition()
+QPoint GraphCommonInteractor::prevCursorPosition() const
 {
     return _prevCursorPosition;
 }
 
-QPoint GraphCommonInteractor::localCursorPosition()
+QPoint GraphCommonInteractor::localCursorPosition() const
 {
     Q_ASSERT(clickedRenderer() != nullptr);
     return componentLocalCursorPosition(clickedRenderer()->componentId(), _cursorPosition);
 }
 
-QPoint GraphCommonInteractor::localPrevCursorPosition()
+QPoint GraphCommonInteractor::localPrevCursorPosition() const
 {
     Q_ASSERT(clickedRenderer() != nullptr);
     return componentLocalCursorPosition(clickedRenderer()->componentId(), _prevCursorPosition);
 }
 
-Qt::KeyboardModifiers GraphCommonInteractor::modifiers()
+Qt::KeyboardModifiers GraphCommonInteractor::modifiers() const
 {
     return _modifiers;
 }

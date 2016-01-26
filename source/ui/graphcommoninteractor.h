@@ -79,23 +79,23 @@ private:
     virtual void trackpadScrollGesture(float, float) {}
     virtual void trackpadZoomGesture(float, float, float) {}
 
-    virtual GraphComponentRenderer* rendererAtPosition(const QPoint& position) = 0;
-    virtual QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) = 0;
-    virtual NodeIdSet selectionForRect(const QRectF& rect) = 0;
+    virtual GraphComponentRenderer* rendererAtPosition(const QPoint& position) const = 0;
+    virtual QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) const = 0;
+    virtual NodeIdSet selectionForRect(const QRectF& rect) const = 0;
 
 protected:
-    QPoint cursorPosition();
-    QPoint prevCursorPosition();
-    QPoint localCursorPosition();
-    QPoint localPrevCursorPosition();
+    QPoint cursorPosition() const;
+    QPoint prevCursorPosition() const;
+    QPoint localCursorPosition() const;
+    QPoint localPrevCursorPosition() const;
 
-    Qt::KeyboardModifiers modifiers();
+    Qt::KeyboardModifiers modifiers() const;
 
-    bool mouseMoving() { return _mouseMoving; }
-    NodeId clickedNodeId() { return _nearClickNodeId; }
+    bool mouseMoving() const { return _mouseMoving; }
+    NodeId clickedNodeId() const { return _nearClickNodeId; }
 
-    GraphComponentRenderer* clickedRenderer() { return _clickedRenderer; }
-    GraphComponentRenderer* rendererUnderCursor() { return _rendererUnderCursor; }
+    GraphComponentRenderer* clickedRenderer() const { return _clickedRenderer; }
+    GraphComponentRenderer* rendererUnderCursor() const { return _rendererUnderCursor; }
 };
 
 #endif // GRAPHCOMMONINTERACTOR_H
