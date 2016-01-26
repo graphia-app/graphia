@@ -37,7 +37,7 @@ void GraphOverviewInteractor::rightDrag()
     if(!mouseMoving())
         emit userInteractionStarted();
 
-    QPoint delta = cursorPosition() - prevCursorPosition();
+    auto delta = cursorPosition() - prevCursorPosition();
     _scene->pan(delta.x(), delta.y());
 }
 
@@ -63,14 +63,14 @@ void GraphOverviewInteractor::wheelMove(float angle, float x, float y)
         _scene->zoom(GraphOverviewScene::ZoomType::Out, x, y, true);
 }
 
-void GraphOverviewInteractor::trackpadScrollGesture(float x, float y)
+void GraphOverviewInteractor::trackpadScrollGesture()
 {
-    _scene->pan(x, y);
+    auto delta = cursorPosition() - prevCursorPosition();
+    _scene->pan(delta.x(), delta.y());
 }
 
 void GraphOverviewInteractor::trackpadZoomGesture(float value, float x, float y)
 {
-    //FIXME test
     _scene->zoom(value, x, y, false);
 }
 
@@ -111,7 +111,7 @@ NodeIdSet GraphOverviewInteractor::selectionForRect(const QRectF& rect) const
             auto renderer = _graphRenderer->componentRendererForId(componentId);
             auto subRect = rect.intersected(layoutRect).translated(-layoutRect.topLeft());
 
-            Frustum frustum = renderer->camera()->frustumForViewportCoordinates(
+            auto frustum = renderer->camera()->frustumForViewportCoordinates(
                         subRect.topLeft().x(), subRect.topLeft().y(),
                         subRect.bottomRight().x(), subRect.bottomRight().y());
 

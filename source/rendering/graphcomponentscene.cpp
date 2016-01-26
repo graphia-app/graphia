@@ -108,7 +108,7 @@ bool GraphComponentScene::viewIsReset() const
     return componentRenderer()->viewIsReset();
 }
 
-void GraphComponentScene::pan(NodeId clickedNodeId, QPoint start, QPoint end)
+void GraphComponentScene::pan(NodeId clickedNodeId, const QPoint& start, const QPoint& end)
 {
     if(!clickedNodeId.isNull())
     {
@@ -127,7 +127,6 @@ void GraphComponentScene::pan(NodeId clickedNodeId, QPoint start, QPoint end)
 
         camera->translate(translation);
     }
-
 }
 
 GraphComponentRenderer* GraphComponentScene::componentRenderer() const

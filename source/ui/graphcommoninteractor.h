@@ -39,6 +39,7 @@ private:
     QPoint _prevCursorPosition;
     bool _rightMouseButtonHeld = false;
     bool _leftMouseButtonHeld = false;
+    bool _trackPadPanning = false;
 
     Qt::KeyboardModifiers _modifiers;
 
@@ -55,6 +56,8 @@ private:
     GraphComponentRenderer* _clickedRenderer = nullptr;
     GraphComponentRenderer* _rendererUnderCursor = nullptr;
 
+    void mouseDown(const QPoint &position);
+    void mouseUp();
     void mousePressEvent(QMouseEvent* e) final;
     void mouseReleaseEvent(QMouseEvent* e) final;
     void mouseMoveEvent(QMouseEvent* e) final;
@@ -76,7 +79,7 @@ private:
     virtual void rightDoubleClick() {}
 
     virtual void wheelMove(float, float, float) {}
-    virtual void trackpadScrollGesture(float, float) {}
+    virtual void trackpadScrollGesture() {}
     virtual void trackpadZoomGesture(float, float, float) {}
 
     virtual GraphComponentRenderer* rendererAtPosition(const QPoint& position) const = 0;
@@ -92,10 +95,13 @@ protected:
     Qt::KeyboardModifiers modifiers() const;
 
     bool mouseMoving() const { return _mouseMoving; }
-    NodeId clickedNodeId() const { return _nearClickNodeId; }
+    NodeId nearClickNodeId() const { return _nearClickNodeId; }
 
     GraphComponentRenderer* clickedRenderer() const { return _clickedRenderer; }
     GraphComponentRenderer* rendererUnderCursor() const { return _rendererUnderCursor; }
+
+    NodeId nodeIdAtPosition(const QPoint& position) const;
+    NodeId nodeIdNearPosition(const QPoint& position) const;
 };
 
 #endif // GRAPHCOMMONINTERACTOR_H

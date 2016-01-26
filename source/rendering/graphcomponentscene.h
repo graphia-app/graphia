@@ -40,7 +40,7 @@ public:
     void resetView();
     bool viewIsReset() const;
 
-    void pan(NodeId clickedNodeId, QPoint start, QPoint end);
+    void pan(NodeId clickedNodeId, const QPoint &start, const QPoint &end);
 
     GraphComponentRenderer* componentRenderer() const;
 

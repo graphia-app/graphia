@@ -80,34 +80,36 @@ GraphCommonInteractor::GraphCommonInteractor(std::shared_ptr<GraphModel> graphMo
     connect(this, &Interactor::userInteractionFinished, graphRenderer, &GraphRenderer::userInteractionFinished);
 }
 
-void GraphCommonInteractor::mousePressEvent(QMouseEvent* mouseEvent)
+void GraphCommonInteractor::mouseDown(const QPoint& position)
 {
-    _clickedRenderer = rendererAtPosition(mouseEvent->pos());
-    _clickPosition = mouseEvent->pos();
-    _modifiers = mouseEvent->modifiers();
+    _clickedRenderer = rendererAtPosition(position);
+    _clickPosition = position;
 
     _cursorPosition = _prevCursorPosition = _clickPosition;
 
     if(clickedRenderer() != nullptr)
     {
-        Ray ray = clickedRenderer()->camera()->rayForViewportCoordinates(localCursorPosition().x(),
-                                                                         localCursorPosition().y());
-
-        Collision collision(*_graphModel, clickedRenderer()->componentId());
-        _clickedNodeId = collision.nearestNodeIntersectingLine(ray.origin(), ray.dir());
+        _clickedNodeId = nodeIdAtPosition(localCursorPosition());
 
         if(_clickedNodeId.isNull())
-        {
-            const int PICK_RADIUS = 40;
-            ConicalFrustum frustum = clickedRenderer()->camera()->conicalFrustumForViewportCoordinates(
-                        localCursorPosition().x(), localCursorPosition().y(), PICK_RADIUS);
-
-            _nearClickNodeId = nodeIdInsideFrustumNearestPoint(*_graphModel, clickedRenderer()->componentId(),
-                                                               frustum, ray.origin());
-        }
+            _nearClickNodeId = nodeIdNearPosition(localCursorPosition());
         else
             _nearClickNodeId = _clickedNodeId;
     }
+}
+
+void GraphCommonInteractor::mouseUp()
+{
+    _clickedNodeId.setToNull();
+    _nearClickNodeId.setToNull();
+    _clickedRenderer = nullptr;
+    _mouseMoving = false;
+}
+
+void GraphCommonInteractor::mousePressEvent(QMouseEvent* mouseEvent)
+{
+    mouseDown(mouseEvent->pos());
+    _modifiers = mouseEvent->modifiers();
 
     switch(mouseEvent->button())
     {
@@ -146,12 +148,7 @@ void GraphCommonInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
     }
 
     if(!_rightMouseButtonHeld && !_leftMouseButtonHeld)
-    {
-        _clickedNodeId.setToNull();
-        _nearClickNodeId.setToNull();
-        _clickedRenderer = nullptr;
-        _mouseMoving = false;
-    }
+        mouseUp();
 }
 
 void GraphCommonInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
@@ -399,12 +396,68 @@ Qt::KeyboardModifiers GraphCommonInteractor::modifiers() const
     return _modifiers;
 }
 
+NodeId GraphCommonInteractor::nodeIdAtPosition(const QPoint& position) const
+{
+    auto renderer = rendererAtPosition(position);
+    if(renderer == nullptr)
+        return {};
+
+    auto ray = renderer->camera()->rayForViewportCoordinates(position.x(), position.y());
+
+    Collision collision(*_graphModel, renderer->componentId());
+    return collision.nearestNodeIntersectingLine(ray.origin(), ray.dir());
+}
+
+NodeId GraphCommonInteractor::nodeIdNearPosition(const QPoint& position) const
+{
+    const int PICK_RADIUS = 40;
+
+    auto renderer = rendererAtPosition(position);
+    if(renderer == nullptr)
+        return {};
+
+    auto frustum = renderer->camera()->conicalFrustumForViewportCoordinates(
+                position.x(), position.y(), PICK_RADIUS);
+    auto ray = renderer->camera()->rayForViewportCoordinates(position.x(), position.y());
+
+    return nodeIdInsideFrustumNearestPoint(*_graphModel, renderer->componentId(),
+                                           frustum, ray.origin());
+}
+
 void GraphCommonInteractor::wheelEvent(QWheelEvent* wheelEvent)
 {
     _rendererUnderCursor = rendererAtPosition(wheelEvent->pos());
 
     if(wheelEvent->source() == Qt::MouseEventSynthesizedBySystem)
-        trackpadScrollGesture(wheelEvent->pixelDelta().x(), wheelEvent->pixelDelta().y());
+    {
+        switch(wheelEvent->phase())
+        {
+        case Qt::ScrollUpdate:
+            if(!_trackPadPanning)
+            {
+                mouseDown(wheelEvent->pos());
+                emit userInteractionStarted();
+                _trackPadPanning = true;
+            }
+
+            _cursorPosition += wheelEvent->pixelDelta();
+            trackpadScrollGesture();
+            _prevCursorPosition = _cursorPosition;
+            break;
+
+        case Qt::ScrollEnd:
+            if(_trackPadPanning)
+            {
+                mouseUp();
+                emit userInteractionFinished();
+                _trackPadPanning = false;
+            }
+            break;
+
+        default:
+            break;
+        }
+    }
     else
         wheelMove(wheelEvent->angleDelta().y(), wheelEvent->x(), wheelEvent->y());
 }

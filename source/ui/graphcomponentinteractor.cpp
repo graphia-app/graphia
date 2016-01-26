@@ -37,7 +37,7 @@ GraphComponentInteractor::GraphComponentInteractor(std::shared_ptr<GraphModel> g
 
 void GraphComponentInteractor::rightMouseDown()
 {
-    if(clickedRenderer() != nullptr && !clickedNodeId().isNull())
+    if(clickedRenderer() != nullptr && !nearClickNodeId().isNull())
         clickedRenderer()->disableFocusTracking();
 }
 
@@ -54,7 +54,7 @@ void GraphComponentInteractor::rightMouseUp()
 
     emit userInteractionFinished();
 
-    if(!clickedNodeId().isNull() && mouseMoving())
+    if(!nearClickNodeId().isNull() && mouseMoving())
     {
         _scene->startTransition();
         clickedRenderer()->moveFocusToNodeClosestCameraVector();
@@ -65,12 +65,12 @@ void GraphComponentInteractor::rightMouseUp()
 
 void GraphComponentInteractor::rightDrag()
 {
-    if(clickedRenderer() != nullptr && !clickedNodeId().isNull())
+    if(clickedRenderer() != nullptr && !nearClickNodeId().isNull())
     {
         if(!mouseMoving())
             emit userInteractionStarted();
 
-        _scene->pan(clickedNodeId(), localPrevCursorPosition(), localCursorPosition());
+        _scene->pan(nearClickNodeId(), localPrevCursorPosition(), localCursorPosition());
     }
 }
 
@@ -79,12 +79,12 @@ void GraphComponentInteractor::leftDoubleClick()
     if(clickedRenderer() == nullptr)
         return;
 
-    if(!clickedNodeId().isNull())
+    if(!nearClickNodeId().isNull())
     {
-        if(clickedNodeId() != clickedRenderer()->focusNodeId())
+        if(nearClickNodeId() != clickedRenderer()->focusNodeId())
         {
             _scene->startTransition();
-            clickedRenderer()->moveFocusToNode(clickedNodeId());
+            clickedRenderer()->moveFocusToNode(nearClickNodeId());
         }
     }
     else if(!clickedRenderer()->viewIsReset())
@@ -101,9 +101,10 @@ void GraphComponentInteractor::wheelMove(float angle, float, float)
     rendererUnderCursor()->zoom(angle * WHEEL_STEP_TRANSITION_SIZE, true);
 }
 
-void GraphComponentInteractor::trackpadScrollGesture(float, float)
+void GraphComponentInteractor::trackpadScrollGesture()
 {
-    //FIXME Should do a pan
+    if(clickedRenderer() != nullptr && !nearClickNodeId().isNull())
+        _scene->pan(nearClickNodeId(), localPrevCursorPosition(), localCursorPosition());
 }
 
 void GraphComponentInteractor::trackpadZoomGesture(float value, float, float)
