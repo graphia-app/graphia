@@ -72,7 +72,7 @@ private:
     float _zoomFactor = 1.0f;
     QPointF _zoomCentre;
     Transition _zoomTransition;
-    bool _autoZooming = false;
+    bool _autoZooming = true;
     QPointF _offset;
 
     ComponentArray<float, u::Locking> _previousComponentAlpha;
