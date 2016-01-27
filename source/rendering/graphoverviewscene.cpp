@@ -38,6 +38,8 @@ GraphOverviewScene::GraphOverviewScene(GraphRenderer* graphRenderer) :
 
 void GraphOverviewScene::update(float t)
 {
+    _zoomTransition.update(t);
+
     for(auto componentId : _componentIds)
     {
         auto* renderer = _graphRenderer->componentRendererForId(componentId);
@@ -83,7 +85,7 @@ void GraphOverviewScene::zoom(GraphOverviewScene::ZoomType zoomType, float x, fl
     switch(zoomType)
     {
     case ZoomType::In:  zoom( ZOOM_INCREMENT, x, y, doTransition); break;
-    case ZoomType::Out: zoom(-ZOOM_INCREMENT, x, y, doTransition);  break;
+    case ZoomType::Out: zoom(-ZOOM_INCREMENT, x, y, doTransition); break;
     default: break;
     }
 }
@@ -289,6 +291,9 @@ void GraphOverviewScene::setViewportSize(int width, int height)
 
 bool GraphOverviewScene::transitionActive() const
 {
+    if(_zoomTransition.active())
+        return true;
+
     for(auto componentId : _componentIds)
     {
         auto renderer = _graphRenderer->componentRendererForId(componentId);
@@ -409,10 +414,10 @@ void GraphOverviewScene::startZoomTransition(float duration)
     for(auto componentId : _componentIds)
         targetZoomedComponentLayoutData[componentId] = zoomedRect(_componentLayoutData[componentId]);
 
-    if(!_graphRenderer->transition().active())
+    if(!_zoomTransition.active())
         _graphRenderer->rendererStartedTransition();
 
-    _graphRenderer->transition().start(duration, Transition::Type::InversePower,
+    _zoomTransition.start(duration, Transition::Type::InversePower,
     [this, targetZoomedComponentLayoutData](float f)
     {
         for(auto componentId : _componentIds)

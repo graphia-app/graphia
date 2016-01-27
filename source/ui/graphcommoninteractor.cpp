@@ -153,11 +153,10 @@ void GraphCommonInteractor::mouseReleaseEvent(QMouseEvent* mouseEvent)
 
 void GraphCommonInteractor::mouseMoveEvent(QMouseEvent* mouseEvent)
 {
-    _rendererUnderCursor = rendererAtPosition(mouseEvent->pos());
-
     if(_graphRenderer->transition().active())
         return;
 
+    _rendererUnderCursor = rendererAtPosition(mouseEvent->pos());
     _cursorPosition = mouseEvent->pos();
     _modifiers = mouseEvent->modifiers();
 
@@ -426,6 +425,9 @@ NodeId GraphCommonInteractor::nodeIdNearPosition(const QPoint& position) const
 
 void GraphCommonInteractor::wheelEvent(QWheelEvent* wheelEvent)
 {
+    if(_graphRenderer->transition().active())
+        return;
+
     _rendererUnderCursor = rendererAtPosition(wheelEvent->pos());
 
     if(wheelEvent->source() == Qt::MouseEventSynthesizedBySystem)
@@ -464,6 +466,9 @@ void GraphCommonInteractor::wheelEvent(QWheelEvent* wheelEvent)
 
 void GraphCommonInteractor::nativeGestureEvent(QNativeGestureEvent* nativeEvent)
 {
+    if(_graphRenderer->transition().active())
+        return;
+
     _rendererUnderCursor = rendererAtPosition(nativeEvent->pos());
 
     if(nativeEvent->gestureType() == Qt::ZoomNativeGesture)

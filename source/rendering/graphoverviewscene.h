@@ -71,6 +71,7 @@ private:
     int _renderSizeDivisor = 1;
     float _zoomFactor = 1.0f;
     QPointF _zoomCentre;
+    Transition _zoomTransition;
     QPointF _offset;
 
     ComponentArray<float, u::Locking> _previousComponentAlpha;
