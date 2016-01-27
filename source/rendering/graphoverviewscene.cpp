@@ -134,15 +134,20 @@ QRectF GraphOverviewScene::zoomedRect(const QRectF& rect)
     return newRect;
 }
 
-bool GraphOverviewScene::setZoomFactor(float zoomFactor)
+float GraphOverviewScene::minZoomFactor() const
 {
     float minWidthZoomFactor = _width / _componentsBoundingBox.width();
     float minHeightZoomFactor = _height / _componentsBoundingBox.height();
-    float minZoomFactor = std::min(minWidthZoomFactor, minHeightZoomFactor);
 
-    zoomFactor = std::max(minZoomFactor, zoomFactor);
+    return std::min(minWidthZoomFactor, minHeightZoomFactor);
+}
+
+bool GraphOverviewScene::setZoomFactor(float zoomFactor)
+{
+    zoomFactor = std::max(minZoomFactor(), zoomFactor);
     bool changed = _zoomFactor != zoomFactor;
     _zoomFactor = zoomFactor;
+    _autoZooming = (_zoomFactor == minZoomFactor());
 
     return changed;
 }
@@ -241,7 +246,7 @@ void GraphOverviewScene::layoutComponents()
                               _width, _height, _componentLayoutData);
 
     updateComponentLayoutBoundingBox();
-    setZoomFactor(_zoomFactor);
+    setZoomFactor(_autoZooming ? minZoomFactor() : _zoomFactor);
     setOffset(_offset.x(), _offset.y());
 
     updateZoomedComponentLayoutData();

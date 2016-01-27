@@ -72,6 +72,7 @@ private:
     float _zoomFactor = 1.0f;
     QPointF _zoomCentre;
     Transition _zoomTransition;
+    bool _autoZooming = false;
     QPointF _offset;
 
     ComponentArray<float, u::Locking> _previousComponentAlpha;
@@ -98,6 +99,7 @@ private:
 
     QRectF zoomedRect(const QRectF& rect);
 
+    float minZoomFactor() const;
     bool setZoomFactor(float zoomFactor);
     void setOffset(float x, float y);
 
