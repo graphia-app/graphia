@@ -259,7 +259,6 @@ void GraphOverviewScene::layoutComponents()
         if(_previousComponentAlpha[componentId] == 0.0f)
         {
             _previousZoomedComponentLayoutData[componentId] = _zoomedComponentLayoutData[componentId];
-            _previousComponentAlpha[componentId] = _componentAlpha[componentId];
 
             auto renderer = _graphRenderer->componentRendererForId(componentId);
             renderer->resetView();
