@@ -196,6 +196,7 @@ void GraphOverviewScene::startTransitionFromComponentMode(ComponentId focusCompo
 {
     startTransition(duration, transitionType, finishedFunction);
     _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
+    _previousComponentAlpha = _componentAlpha;
 
     for(auto componentId : _componentIds)
     {
@@ -213,6 +214,7 @@ void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusCompone
                                                         std::function<void()> finishedFunction)
 {
     _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
+    _previousComponentAlpha = _componentAlpha;
 
     for(auto componentId : _componentIds)
     {
