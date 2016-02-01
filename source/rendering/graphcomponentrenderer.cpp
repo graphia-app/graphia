@@ -237,6 +237,8 @@ void GraphComponentRenderer::setViewportSize(int viewportWidth, int viewportHeig
     {
         _viewportWidth = viewportWidth;
         _viewportHeight = viewportHeight;
+
+        updateEntireComponentZoomDistance();
     }
     else
     {
