@@ -4,10 +4,9 @@
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
 #include "../utils/utils.h"
+#include "../maths/circle.h"
 
-#include <QRectF>
-
-using ComponentLayoutData = ComponentArray<QRectF, u::Locking>;
+using ComponentLayoutData = ComponentArray<Circle, u::Locking>;
 
 class ComponentLayout
 {

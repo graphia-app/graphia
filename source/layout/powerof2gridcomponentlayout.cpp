@@ -65,8 +65,8 @@ void PowerOf2GridComponentLayout::execute(const Graph& graph, const std::vector<
             coords.pop();
         }
 
-        auto rect = QRectF(coord.x(), coord.y(), dividedSize, dividedSize);
-        componentLayoutData[componentId] = rect;
+        float radius = dividedSize * 0.5f;
+        componentLayoutData[componentId].set(coord.x() + radius, coord.y() + radius, radius);
 
         QPointF right(coord.x() + dividedSize, coord.y());
         QPointF down(coord.x(), coord.y() + dividedSize);

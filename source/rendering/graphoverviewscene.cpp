@@ -43,7 +43,7 @@ void GraphOverviewScene::update(float t)
     for(auto componentId : _componentIds)
     {
         auto* renderer = _graphRenderer->componentRendererForId(componentId);
-        renderer->setDimensions(_zoomedComponentLayoutData[componentId]);
+        renderer->setDimensions(_zoomedComponentLayoutData[componentId].boundingBox());
         renderer->setAlpha(_componentAlpha[componentId]);
         renderer->update(t);
     }
@@ -116,22 +116,15 @@ void GraphOverviewScene::zoom(float delta, float x, float y, bool doTransition)
         updateZoomedComponentLayoutData();
 }
 
-QRectF GraphOverviewScene::zoomedRect(const QRectF& rect)
+Circle GraphOverviewScene::zoomedLayoutData(const Circle& data)
 {
-    QRectF newRect(rect);
+    Circle newData(data);
 
-    newRect.translate(-_offset.x(), -_offset.y());
+    newData.translate(-_offset - _zoomCentre);
+    newData.scale(_zoomFactor);
+    newData.translate(_zoomCentre * _zoomFactor);
 
-    newRect.translate(-_zoomCentre.x(), -_zoomCentre.y());
-
-    newRect.setLeft(newRect.left() * _zoomFactor);
-    newRect.setRight(newRect.right() * _zoomFactor);
-    newRect.setTop(newRect.top() * _zoomFactor);
-    newRect.setBottom(newRect.bottom() * _zoomFactor);
-
-    newRect.translate(_zoomCentre.x() * _zoomFactor, _zoomCentre.y() * _zoomFactor);
-
-    return newRect;
+    return newData;
 }
 
 float GraphOverviewScene::minZoomFactor() const
@@ -204,8 +197,10 @@ void GraphOverviewScene::startTransitionFromComponentMode(ComponentId focusCompo
             _previousComponentAlpha[componentId] = 0.0f;
     }
 
-    float left = (_width * 0.5f) - (_height * 0.5f);
-    _previousZoomedComponentLayoutData[focusComponentId] = QRectF(left, 0.0f, _height, _height);
+    float halfWidth = _width * 0.5f;
+    float halfHeight = _height * 0.5f;
+    _previousZoomedComponentLayoutData[focusComponentId].set(halfWidth, halfHeight,
+                                                             std::min(halfWidth, halfHeight));
 }
 
 void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusComponentId,
@@ -222,8 +217,10 @@ void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusCompone
             _componentAlpha[componentId] = 0.0f;
     }
 
-    float left = (_width * 0.5f) - (_height * 0.5f);
-    _zoomedComponentLayoutData[focusComponentId] = QRectF(left, 0, _height, _height);
+    float halfWidth = _width * 0.5f;
+    float halfHeight = _height * 0.5f;
+    _zoomedComponentLayoutData[focusComponentId].set(halfWidth, halfHeight,
+                                                     std::min(halfWidth, halfHeight));
 
     startTransition(duration, transitionType, finishedFunction);
 }
@@ -233,13 +230,13 @@ void GraphOverviewScene::updateComponentLayoutBoundingBox()
     _componentsBoundingBox = QRectF();
 
     for(auto componentId : _componentIds)
-        _componentsBoundingBox = _componentsBoundingBox.united(_componentLayoutData[componentId]);
+        _componentsBoundingBox = _componentsBoundingBox.united(_componentLayoutData[componentId].boundingBox());
 }
 
 void GraphOverviewScene::updateZoomedComponentLayoutData()
 {
     for(auto componentId : _componentIds)
-        _zoomedComponentLayoutData[componentId] = zoomedRect(_componentLayoutData[componentId]);
+        _zoomedComponentLayoutData[componentId] = zoomedLayoutData(_componentLayoutData[componentId]);
 }
 
 void GraphOverviewScene::layoutComponents()
@@ -291,7 +288,7 @@ void GraphOverviewScene::setViewportSize(int width, int height)
     {
         auto renderer = _graphRenderer->componentRendererForId(componentId);
         renderer->setViewportSize(_width, _height);
-        renderer->setDimensions(_zoomedComponentLayoutData[componentId]);
+        renderer->setDimensions(_zoomedComponentLayoutData[componentId].boundingBox());
     }
 }
 
@@ -311,13 +308,12 @@ bool GraphOverviewScene::transitionActive() const
     return false;
 }
 
-static QRectF interpolateRect(const QRectF& a, const QRectF& b, float f)
+static Circle interpolateCircle(const Circle& a, const Circle& b, float f)
 {
-    return QRectF(
-        u::interpolate(a.left(),   b.left(),   f),
-        u::interpolate(a.top(),    b.top(),    f),
-        u::interpolate(a.width(),  b.width(),  f),
-        u::interpolate(a.height(), b.height(), f)
+    return Circle(
+        u::interpolate(a.x(),       b.x(),      f),
+        u::interpolate(a.y(),       b.y(),      f),
+        u::interpolate(a.radius(),  b.radius(), f)
         );
 }
 
@@ -336,8 +332,8 @@ void GraphOverviewScene::startTransition(float duration,
     {
         auto interpolate = [&](const ComponentId componentId)
         {
-            _zoomedComponentLayoutData[componentId] = interpolateRect(_previousZoomedComponentLayoutData[componentId],
-                                                                       targetComponentLayoutData[componentId], f);
+            _zoomedComponentLayoutData[componentId] = interpolateCircle(_previousZoomedComponentLayoutData[componentId],
+                                                                        targetComponentLayoutData[componentId], f);
             _componentAlpha[componentId] = u::interpolate(_previousComponentAlpha[componentId],
                                                           targetComponentAlpha[componentId], f);
 
@@ -418,7 +414,7 @@ void GraphOverviewScene::startZoomTransition(float duration)
     _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
 
     for(auto componentId : _componentIds)
-        targetZoomedComponentLayoutData[componentId] = zoomedRect(_componentLayoutData[componentId]);
+        targetZoomedComponentLayoutData[componentId] = zoomedLayoutData(_componentLayoutData[componentId]);
 
     if(!_zoomTransition.active())
         _graphRenderer->rendererStartedTransition();
@@ -429,8 +425,8 @@ void GraphOverviewScene::startZoomTransition(float duration)
         for(auto componentId : _componentIds)
         {
             _zoomedComponentLayoutData[componentId] =
-                    interpolateRect(_previousZoomedComponentLayoutData[componentId],
-                                    targetZoomedComponentLayoutData[componentId], f);
+                    interpolateCircle(_previousZoomedComponentLayoutData[componentId],
+                                      targetZoomedComponentLayoutData[componentId], f);
         }
     },
     [this]

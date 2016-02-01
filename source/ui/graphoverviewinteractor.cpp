@@ -74,8 +74,8 @@ ComponentId GraphOverviewInteractor::componentIdAtPosition(const QPoint& positio
 
     for(auto componentId : _graphModel->graph().componentIds())
     {
-        auto radius = componentLayout[componentId].width() * 0.5f;
-        auto separation = componentLayout[componentId].center() - position;
+        auto radius = componentLayout[componentId].radius();
+        auto separation = componentLayout[componentId].centre() - position;
         float lengthSq = (separation.x() * separation.x()) + (separation.y() * separation.y());
 
         if(lengthSq < (radius * radius))
@@ -98,7 +98,7 @@ GraphComponentRenderer* GraphOverviewInteractor::rendererAtPosition(const QPoint
 QPoint GraphOverviewInteractor::componentLocalCursorPosition(const ComponentId& componentId, const QPoint& pos) const
 {
     auto& componentLayout = _scene->componentLayout();
-    auto& rect = componentLayout[componentId];
+    auto rect = componentLayout[componentId].boundingBox();
 
     QPoint transformedPos(pos.x() - rect.x(), pos.y() - rect.y());
     return transformedPos;
@@ -112,7 +112,7 @@ NodeIdSet GraphOverviewInteractor::selectionForRect(const QRectF& rect) const
 
     for(auto componentId : _graphModel->graph().componentIds())
     {
-        auto& layoutRect = componentLayout[componentId];
+        auto layoutRect = componentLayout[componentId].boundingBox();
 
         if(rect.intersects((layoutRect)))
         {

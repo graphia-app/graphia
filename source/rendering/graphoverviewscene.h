@@ -97,7 +97,7 @@ private:
 
     std::vector<ComponentId> _componentIds;
 
-    QRectF zoomedRect(const QRectF& rect);
+    Circle zoomedLayoutData(const Circle& data);
 
     float minZoomFactor() const;
     bool setZoomFactor(float zoomFactor);
