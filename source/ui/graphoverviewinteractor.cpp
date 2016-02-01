@@ -43,16 +43,10 @@ void GraphOverviewInteractor::rightDrag()
 
 void GraphOverviewInteractor::leftDoubleClick()
 {
-    auto& componentLayout = _scene->componentLayout();
+    auto componentId = componentIdAtPosition(cursorPosition());
 
-    for(auto componentId : _graphModel->graph().componentIds())
-    {
-        if(componentLayout[componentId].contains(cursorPosition()))
-        {
-            _graphRenderer->switchToComponentMode(true, componentId);
-            break;
-        }
-    }
+    if(!componentId.isNull())
+        _graphRenderer->switchToComponentMode(true, componentId);
 }
 
 void GraphOverviewInteractor::wheelMove(float angle, float x, float y)
@@ -74,15 +68,29 @@ void GraphOverviewInteractor::trackpadZoomGesture(float value, float x, float y)
     _scene->zoom(value, x, y, false);
 }
 
-GraphComponentRenderer* GraphOverviewInteractor::rendererAtPosition(const QPoint& pos) const
+ComponentId GraphOverviewInteractor::componentIdAtPosition(const QPoint& position) const
 {
     auto& componentLayout = _scene->componentLayout();
 
     for(auto componentId : _graphModel->graph().componentIds())
     {
-        if(componentLayout[componentId].contains(pos))
-            return _graphRenderer->componentRendererForId(componentId);
+        auto radius = componentLayout[componentId].width() * 0.5f;
+        auto separation = componentLayout[componentId].center() - position;
+        float lengthSq = (separation.x() * separation.x()) + (separation.y() * separation.y());
+
+        if(lengthSq < (radius * radius))
+            return componentId;
     }
+
+    return {};
+}
+
+GraphComponentRenderer* GraphOverviewInteractor::rendererAtPosition(const QPoint& position) const
+{
+    auto componentId = componentIdAtPosition(position);
+
+    if(!componentId.isNull())
+        return _graphRenderer->componentRendererForId(componentId);
 
     return nullptr;
 }

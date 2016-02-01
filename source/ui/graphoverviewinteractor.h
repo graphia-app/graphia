@@ -37,6 +37,7 @@ private:
     void trackpadScrollGesture();
     void trackpadZoomGesture(float value, float x, float y);
 
+    ComponentId componentIdAtPosition(const QPoint& position) const;
     GraphComponentRenderer* rendererAtPosition(const QPoint& position) const;
     QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) const;
     NodeIdSet selectionForRect(const QRectF& rect) const;
