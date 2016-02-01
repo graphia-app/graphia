@@ -100,7 +100,9 @@ HEADERS += \
     source/utils/qmlcontainerwrapper.h \
     source/layout/layoutsettings.h \
     source/layout/componentlayout.h \
-    source/layout/powerof2gridcomponentlayout.h
+    source/layout/powerof2gridcomponentlayout.h \
+    source/layout/circlepackcomponentlayout.h \
+    source/maths/circle.h
 
 SOURCES += \
     source/main.cpp \
@@ -164,7 +166,8 @@ SOURCES += \
     source/transform/datafield.cpp \
     source/ui/graphtransformconfiguration.cpp \
     source/layout/layoutsettings.cpp \
-    source/layout/powerof2gridcomponentlayout.cpp
+    source/layout/powerof2gridcomponentlayout.cpp \
+    source/layout/circlepackcomponentlayout.cpp
 
 RESOURCES += \
     source/rendering/shaders.qrc \
