@@ -395,29 +395,29 @@ Qt::KeyboardModifiers GraphCommonInteractor::modifiers() const
     return _modifiers;
 }
 
-NodeId GraphCommonInteractor::nodeIdAtPosition(const QPoint& position) const
+NodeId GraphCommonInteractor::nodeIdAtPosition(const QPoint& localPosition) const
 {
-    auto renderer = rendererAtPosition(position);
+    auto renderer = clickedRenderer();
     if(renderer == nullptr)
         return {};
 
-    auto ray = renderer->camera()->rayForViewportCoordinates(position.x(), position.y());
+    auto ray = renderer->camera()->rayForViewportCoordinates(localPosition.x(), localPosition.y());
 
     Collision collision(*_graphModel, renderer->componentId());
     return collision.nearestNodeIntersectingLine(ray.origin(), ray.dir());
 }
 
-NodeId GraphCommonInteractor::nodeIdNearPosition(const QPoint& position) const
+NodeId GraphCommonInteractor::nodeIdNearPosition(const QPoint& localPosition) const
 {
     const int PICK_RADIUS = 40;
 
-    auto renderer = rendererAtPosition(position);
+    auto renderer = clickedRenderer();
     if(renderer == nullptr)
         return {};
 
     auto frustum = renderer->camera()->conicalFrustumForViewportCoordinates(
-                position.x(), position.y(), PICK_RADIUS);
-    auto ray = renderer->camera()->rayForViewportCoordinates(position.x(), position.y());
+                localPosition.x(), localPosition.y(), PICK_RADIUS);
+    auto ray = renderer->camera()->rayForViewportCoordinates(localPosition.x(), localPosition.y());
 
     return nodeIdInsideFrustumNearestPoint(*_graphModel, renderer->componentId(),
                                            frustum, ray.origin());

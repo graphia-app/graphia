@@ -100,8 +100,8 @@ protected:
     GraphComponentRenderer* clickedRenderer() const { return _clickedRenderer; }
     GraphComponentRenderer* rendererUnderCursor() const { return _rendererUnderCursor; }
 
-    NodeId nodeIdAtPosition(const QPoint& position) const;
-    NodeId nodeIdNearPosition(const QPoint& position) const;
+    NodeId nodeIdAtPosition(const QPoint& localPosition) const;
+    NodeId nodeIdNearPosition(const QPoint& localPosition) const;
 };
 
 #endif // GRAPHCOMMONINTERACTOR_H
