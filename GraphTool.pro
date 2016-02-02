@@ -165,7 +165,8 @@ SOURCES += \
     source/transform/datafield.cpp \
     source/ui/graphtransformconfiguration.cpp \
     source/layout/layoutsettings.cpp \
-    source/layout/powerof2gridcomponentlayout.cpp
+    source/layout/powerof2gridcomponentlayout.cpp \
+    source/layout/componentlayout.cpp
 
 RESOURCES += \
     source/rendering/shaders.qrc \

@@ -5,9 +5,9 @@
 
 class PowerOf2GridComponentLayout : public ComponentLayout
 {
-public:
-    void execute(const Graph &graph, const std::vector<ComponentId>& componentIds,
-                 int width, int height, ComponentLayoutData &componentLayoutData);
+private:
+    void executeReal(const Graph &graph, const std::vector<ComponentId>& componentIds,
+                     ComponentLayoutData &componentLayoutData);
 };
 
 #endif // POWEROF2GRIDCOMPONENTLAYOUT_H

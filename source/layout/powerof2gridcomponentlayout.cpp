@@ -8,19 +8,15 @@
 
 #include <QPointF>
 
-void PowerOf2GridComponentLayout::execute(const Graph& graph, const std::vector<ComponentId> &componentIds,
-                                          int, int height, ComponentLayoutData& componentLayoutData)
+void PowerOf2GridComponentLayout::executeReal(const Graph& graph, const std::vector<ComponentId> &componentIds,
+                                              ComponentLayoutData& componentLayoutData)
 {
-    std::stack<QPointF> coords;
+    if(graph.numComponents() == 0)
+        return;
 
     // Find the number of nodes in the largest component
-    int maxNumNodes = 0;
-
-    if(graph.numComponents() > 0)
-    {
-        auto largestComponentId = graph.componentIdOfLargestComponent();
-        maxNumNodes = graph.componentById(largestComponentId)->numNodes();
-    }
+    auto largestComponentId = graph.componentIdOfLargestComponent();
+    int maxNumNodes = graph.componentById(largestComponentId)->numNodes();
 
     ComponentArray<int> renderSizeDivisors(graph);
 
@@ -38,28 +34,26 @@ void PowerOf2GridComponentLayout::execute(const Graph& graph, const std::vector<
         return renderSizeDivisors[a] < renderSizeDivisors[b];
     });
 
-    //FIXME this is a mess
+    std::stack<QPointF> coords;
     coords.emplace(0, 0);
     for(auto componentId : sortedComponentIds)
     {
         auto coord = coords.top();
         coords.pop();
 
-        int divisor = renderSizeDivisors[componentId];
-        int dividedSize = height / (divisor * 2);
-
+        const int MAX_SIZE = 1024;
         const int MINIMUM_SIZE = 32;
-        if(height > MINIMUM_SIZE)
+        int divisor = renderSizeDivisors[componentId];
+        int dividedSize = MAX_SIZE / (divisor * 2);
+
+        while(dividedSize < MINIMUM_SIZE && divisor > 1)
         {
-            while(dividedSize < MINIMUM_SIZE && divisor > 1)
-            {
-                divisor /= 2;
-                dividedSize = height / (divisor * 2);
-            }
+            divisor /= 2;
+            dividedSize = MAX_SIZE / (divisor * 2);
         }
 
         if(!coords.empty() && (coord.x() + dividedSize > coords.top().x() ||
-            coord.y() + dividedSize > height))
+            coord.y() + dividedSize > MAX_SIZE))
         {
             coord = coords.top();
             coords.pop();
@@ -74,7 +68,7 @@ void PowerOf2GridComponentLayout::execute(const Graph& graph, const std::vector<
         if(coords.empty() || right.x() < coords.top().x())
             coords.emplace(right);
 
-        if(down.y() < height)
+        if(down.y() < MAX_SIZE)
             coords.emplace(down);
     }
 }

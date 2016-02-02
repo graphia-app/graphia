@@ -6,6 +6,8 @@
 #include "../utils/utils.h"
 #include "../maths/circle.h"
 
+#include <QRectF>
+
 using ComponentLayoutData = ComponentArray<Circle, u::Locking>;
 
 class ComponentLayout
@@ -13,8 +15,17 @@ class ComponentLayout
 public:
     virtual ~ComponentLayout() {}
 
-    virtual void execute(const Graph &graph, const std::vector<ComponentId>& componentIds,
-                         int width, int height, ComponentLayoutData &componentLayoutData) = 0;
+    void execute(const Graph &graph, const std::vector<ComponentId>& componentIds,
+                 ComponentLayoutData &componentLayoutData);
+
+    float boundingWidth() const { return _boundingBox.width(); }
+    float boundingHeight() const { return _boundingBox.height(); }
+
+private:
+    virtual void executeReal(const Graph &graph, const std::vector<ComponentId>& componentIds,
+                             ComponentLayoutData &componentLayoutData) = 0;
+
+    QRectF _boundingBox;
 };
 
 #endif // COMPONENTLAYOUT_H

@@ -129,8 +129,8 @@ Circle GraphOverviewScene::zoomedLayoutData(const Circle& data)
 
 float GraphOverviewScene::minZoomFactor() const
 {
-    float minWidthZoomFactor = _width / _componentsBoundingBox.width();
-    float minHeightZoomFactor = _height / _componentsBoundingBox.height();
+    float minWidthZoomFactor = _width / _componentLayout->boundingWidth();
+    float minHeightZoomFactor = _height / _componentLayout->boundingHeight();
 
     return std::min(minWidthZoomFactor, minHeightZoomFactor);
 }
@@ -147,8 +147,8 @@ bool GraphOverviewScene::setZoomFactor(float zoomFactor)
 
 void GraphOverviewScene::setOffset(float x, float y)
 {
-    float scaledBoundingWidth = _componentsBoundingBox.width() * _zoomFactor;
-    float scaledBoundingHeight = _componentsBoundingBox.height() * _zoomFactor;
+    float scaledBoundingWidth = _componentLayout->boundingWidth() * _zoomFactor;
+    float scaledBoundingHeight = _componentLayout->boundingHeight() * _zoomFactor;
 
     float xDiff = (scaledBoundingWidth - _width) / _zoomFactor;
     float xMin = std::min(xDiff, 0.0f);
@@ -225,14 +225,6 @@ void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusCompone
     startTransition(duration, transitionType, finishedFunction);
 }
 
-void GraphOverviewScene::updateComponentLayoutBoundingBox()
-{
-    _componentsBoundingBox = QRectF();
-
-    for(auto componentId : _componentIds)
-        _componentsBoundingBox = _componentsBoundingBox.united(_componentLayoutData[componentId].boundingBox());
-}
-
 void GraphOverviewScene::updateZoomedComponentLayoutData()
 {
     for(auto componentId : _componentIds)
@@ -242,9 +234,8 @@ void GraphOverviewScene::updateZoomedComponentLayoutData()
 void GraphOverviewScene::layoutComponents()
 {
     _componentLayout->execute(_graphModel->graph(), _componentIds,
-                              _width, _height, _componentLayoutData);
+                              _componentLayoutData);
 
-    updateComponentLayoutBoundingBox();
     setZoomFactor(_autoZooming ? minZoomFactor() : _zoomFactor);
     setOffset(_offset.x(), _offset.y());
 
