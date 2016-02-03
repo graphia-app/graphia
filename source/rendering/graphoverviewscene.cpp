@@ -24,6 +24,7 @@ GraphOverviewScene::GraphOverviewScene(GraphRenderer* graphRenderer) :
     _graphModel(graphRenderer->graphModel()),
     _previousComponentAlpha(_graphModel->graph(), 1.0f),
     _componentAlpha(_graphModel->graph(), 1.0f),
+    _nextComponentLayoutData(_graphModel->graph()),
     _componentLayoutData(_graphModel->graph()),
     _previousZoomedComponentLayoutData(_graphModel->graph()),
     _zoomedComponentLayoutData(_graphModel->graph()),
@@ -222,10 +223,9 @@ void GraphOverviewScene::updateZoomedComponentLayoutData()
         _zoomedComponentLayoutData[componentId] = zoomedLayoutData(_componentLayoutData[componentId]);
 }
 
-void GraphOverviewScene::layoutComponents()
+void GraphOverviewScene::applyComponentLayout()
 {
-    _componentLayout->execute(_graphModel->graph(), _componentIds,
-                              _componentLayoutData);
+    _componentLayoutData = _nextComponentLayoutData;
 
     setZoomFactor(_autoZooming ? minZoomFactor() : _zoomFactor);
     setOffset(_offset.x(), _offset.y());
@@ -264,7 +264,7 @@ void GraphOverviewScene::setViewportSize(int width, int height)
     _width = width;
     _height = height;
 
-    layoutComponents();
+    applyComponentLayout();
 
     for(auto componentId : _componentIds)
     {
@@ -497,6 +497,8 @@ void GraphOverviewScene::onGraphWillChange(const Graph*)
 
 void GraphOverviewScene::onGraphChanged(const Graph* graph)
 {
+    _componentLayout->execute(*graph, graph->componentIds(), _nextComponentLayoutData);
+
     _graphRenderer->executeOnRendererThread([this, graph]
     {
         _componentIds = graph->componentIds();

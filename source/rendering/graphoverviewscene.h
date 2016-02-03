@@ -75,13 +75,14 @@ private:
     ComponentArray<float, u::Locking> _previousComponentAlpha;
     ComponentArray<float, u::Locking> _componentAlpha;
 
+    ComponentLayoutData _nextComponentLayoutData;
     ComponentLayoutData _componentLayoutData;
     ComponentLayoutData _previousZoomedComponentLayoutData;
     ComponentLayoutData _zoomedComponentLayoutData;
     std::shared_ptr<ComponentLayout> _componentLayout;
 
     void updateZoomedComponentLayoutData();
-    void layoutComponents();
+    void applyComponentLayout();
 
     std::vector<ComponentId> _removedComponentIds;
     std::vector<ComponentMergeSet> _componentMergeSets;
