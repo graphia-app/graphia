@@ -80,6 +80,35 @@ public:
         _radius *= f;
     }
 
+    float distanceToCentreSq(const Circle& other) const
+    {
+        float dx = other._x - _x;
+        float dy = other._y - _y;
+
+        return dx * dx + dy * dy;
+    }
+
+    float distanceToSq(const Circle& other) const
+    {
+        float radii = _radius + other._radius;
+        float radiiSq = radii * radii;
+
+        return distanceToCentreSq(other) - radiiSq;
+    }
+
+    float distanceTo(const Circle& other) const
+    {
+        return std::sqrt(distanceToCentreSq(other)) - (_radius + other._radius);
+    }
+
+    bool intersects(const Circle& other) const
+    {
+        float radii = _radius + other._radius;
+        float radiiSq = radii * radii;
+
+        return radiiSq > distanceToCentreSq(other);
+    }
+
 private:
     float _x = 0.0f;
     float _y = 0.0f;
