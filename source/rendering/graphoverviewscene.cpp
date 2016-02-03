@@ -497,6 +497,7 @@ void GraphOverviewScene::onGraphWillChange(const Graph*)
 
 void GraphOverviewScene::onGraphChanged(const Graph* graph)
 {
+    graph->setPhase(tr("Component Layout"));
     _componentLayout->execute(*graph, graph->componentIds(), _nextComponentLayoutData);
 
     _graphRenderer->executeOnRendererThread([this, graph]
