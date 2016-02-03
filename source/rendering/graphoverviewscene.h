@@ -49,8 +49,6 @@ public:
 
     void zoom(ZoomType zoomType, float x, float y, bool doTransition);
     void zoom(float delta, float x, float y, bool doTransition);
-    int renderSizeDivisor() { return _renderSizeDivisor; }
-    void setRenderSizeDivisor(int divisor);
 
     void startTransitionFromComponentMode(ComponentId focusComponentId,
                                           float duration = 0.3f,
@@ -68,7 +66,6 @@ private:
     int _width = 0;
     int _height = 0;
 
-    int _renderSizeDivisor = 1;
     float _zoomFactor = 1.0f;
     QPointF _zoomCentre;
     Transition _zoomTransition;

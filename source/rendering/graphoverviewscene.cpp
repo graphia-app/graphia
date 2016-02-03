@@ -173,16 +173,6 @@ void GraphOverviewScene::setOffset(float x, float y)
     _offset.setY(y);
 }
 
-void GraphOverviewScene::setRenderSizeDivisor(int divisor)
-{
-    if(divisor < 1)
-        divisor = 1;
-
-    _renderSizeDivisor = divisor;
-
-    setViewportSize(_width, _height);
-}
-
 void GraphOverviewScene::startTransitionFromComponentMode(ComponentId focusComponentId,
                                                           float duration,
                                                           Transition::Type transitionType,
