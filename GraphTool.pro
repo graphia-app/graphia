@@ -101,6 +101,7 @@ HEADERS += \
     source/layout/layoutsettings.h \
     source/layout/componentlayout.h \
     source/layout/powerof2gridcomponentlayout.h \
+    source/layout/circlepackcomponentlayout.h \
     source/maths/circle.h
 
 SOURCES += \
@@ -166,6 +167,7 @@ SOURCES += \
     source/ui/graphtransformconfiguration.cpp \
     source/layout/layoutsettings.cpp \
     source/layout/powerof2gridcomponentlayout.cpp \
+    source/layout/circlepackcomponentlayout.cpp \
     source/layout/componentlayout.cpp
 
 RESOURCES += \

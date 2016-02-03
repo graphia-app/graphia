@@ -5,6 +5,7 @@
 #include "../graph/graphmodel.h"
 
 #include "../layout/powerof2gridcomponentlayout.h"
+#include "../layout/circlepackcomponentlayout.h"
 
 #include "../ui/graphquickitem.h"
 
@@ -26,7 +27,7 @@ GraphOverviewScene::GraphOverviewScene(GraphRenderer* graphRenderer) :
     _componentLayoutData(_graphModel->graph()),
     _previousZoomedComponentLayoutData(_graphModel->graph()),
     _zoomedComponentLayoutData(_graphModel->graph()),
-    _componentLayout(std::make_shared<PowerOf2GridComponentLayout>())
+    _componentLayout(std::make_shared<CirclePackComponentLayout>())
 {
     connect(&_graphModel->graph(), &Graph::componentAdded, this, &GraphOverviewScene::onComponentAdded, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::componentWillBeRemoved, this, &GraphOverviewScene::onComponentWillBeRemoved, Qt::DirectConnection);
