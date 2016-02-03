@@ -183,7 +183,7 @@ void GraphComponentRenderer::update(float t)
 
     if(_graphModel)
     {
-        if(!_frozen && _graphRenderer->layoutChanged())
+        if(!_frozen)
         {
             updateFocusPosition();
             updateEntireComponentZoomDistance();
@@ -237,8 +237,6 @@ void GraphComponentRenderer::setViewportSize(int viewportWidth, int viewportHeig
     {
         _viewportWidth = viewportWidth;
         _viewportHeight = viewportHeight;
-
-        updateEntireComponentZoomDistance();
     }
     else
     {
