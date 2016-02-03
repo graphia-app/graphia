@@ -357,20 +357,29 @@ void ComponentManager::onGraphChanged(const Graph* graph)
     graph->debugPauser.pause("Signal Graph::onGraphChanged", &_debugPaused);
 }
 
+#include <chrono>
+
 template<typename T> class unique_lock_with_warning
 {
 public:
     explicit unique_lock_with_warning(T& mutex) :
-        _lock(mutex, std::try_to_lock)
+        _lock(mutex, std::defer_lock)
     {
-        if(!_lock.owns_lock())
-        {
-            qWarning() << "Needed to acquire lock when reading from ComponentManager; "
-                          "this implies inappropriate concurrent access which is bad "
-                          "because it means the thread" << u::currentThreadName() <<
-                          "is blocked until the update completes";
+        const int MIN_WARNING_MILLISECONDS = 100;
+        std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
 
+        if(!_lock.try_lock())
+        {
             _lock.lock();
+
+            std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
+            auto timeToAcquireLock = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+            if(timeToAcquireLock > MIN_WARNING_MILLISECONDS)
+            {
+                qWarning() << "WARNING: thread" << u::currentThreadName() <<
+                              "was blocked for" << timeToAcquireLock << "ms";
+            }
         }
     }
 
