@@ -1094,16 +1094,13 @@ void GraphRenderer::finishRender()
     glDrawArrays(GL_TRIANGLES, 0, 6);
     _screenShader.release();
 
-    if(!transitionActive())
-    {
-        // Selection texture
-        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture);
+    // Selection texture
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture);
 
-        _selectionShader.bind();
-        _selectionShader.setUniformValue("projectionMatrix", m);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        _selectionShader.release();
-    }
+    _selectionShader.bind();
+    _selectionShader.setUniformValue("projectionMatrix", m);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    _selectionShader.release();
 
     _screenQuadVAO.release();
     _screenQuadDataBuffer.release();
