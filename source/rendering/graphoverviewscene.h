@@ -75,6 +75,7 @@ private:
     ComponentArray<float, u::Locking> _previousComponentAlpha;
     ComponentArray<float, u::Locking> _componentAlpha;
 
+    std::atomic<bool> _nextComponentLayoutDataChanged;
     ComponentLayoutData _nextComponentLayoutData;
     ComponentLayoutData _componentLayoutData;
     ComponentLayoutData _previousZoomedComponentLayoutData;

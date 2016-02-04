@@ -225,7 +225,8 @@ void GraphOverviewScene::updateZoomedComponentLayoutData()
 
 void GraphOverviewScene::applyComponentLayout()
 {
-    _componentLayoutData = _nextComponentLayoutData;
+    if(_nextComponentLayoutDataChanged.exchange(false))
+        _componentLayoutData = _nextComponentLayoutData;
 
     setZoomFactor(_autoZooming ? minZoomFactor() : _zoomFactor);
     setOffset(_offset.x(), _offset.y());
@@ -499,6 +500,7 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph)
 {
     graph->setPhase(tr("Component Layout"));
     _componentLayout->execute(*graph, graph->componentIds(), _nextComponentLayoutData);
+    _nextComponentLayoutDataChanged = true;
 
     _graphRenderer->executeOnRendererThread([this, graph]
     {
