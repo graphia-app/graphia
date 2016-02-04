@@ -26,6 +26,9 @@ public:
     virtual void onShow() {}
     virtual void onHide() {}
 
+    virtual void resetView(bool doTransition = true) = 0;
+    virtual bool viewIsReset() const = 0;
+
 protected:
     bool visible() { return _visible; }
 

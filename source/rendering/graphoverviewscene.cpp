@@ -69,6 +69,22 @@ void GraphOverviewScene::onHide()
     }
 }
 
+void GraphOverviewScene::resetView(bool doTransition)
+{
+    setZoomFactor(minZoomFactor());
+    setOffset(0.0f, 0.0f);
+
+    if(doTransition)
+        startZoomTransition();
+    else
+        updateZoomedComponentLayoutData();
+}
+
+bool GraphOverviewScene::viewIsReset() const
+{
+    return _autoZooming;
+}
+
 void GraphOverviewScene::pan(float dx, float dy)
 {
     float scaledDx = dx / (_zoomFactor);

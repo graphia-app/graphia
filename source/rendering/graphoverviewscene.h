@@ -39,6 +39,9 @@ public:
 
     const ComponentLayoutData& componentLayout() { return _zoomedComponentLayoutData; }
 
+    void resetView(bool doTransition);
+    bool viewIsReset() const;
+
     void pan(float dx, float dy);
 
     enum class ZoomType

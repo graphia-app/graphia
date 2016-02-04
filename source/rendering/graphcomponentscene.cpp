@@ -94,10 +94,15 @@ void GraphComponentScene::restoreViewData()
         componentRenderer()->restoreViewData();
 }
 
-void GraphComponentScene::resetView()
+void GraphComponentScene::resetView(bool doTransition)
 {
     if(componentRenderer() != nullptr)
+    {
+        if(doTransition)
+            startTransition();
+
         componentRenderer()->resetView();
+    }
 }
 
 bool GraphComponentScene::viewIsReset() const

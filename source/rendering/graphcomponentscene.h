@@ -37,7 +37,7 @@ public:
     bool savedViewIsReset() const;
     void restoreViewData();
 
-    void resetView();
+    void resetView(bool doTransition);
     bool viewIsReset() const;
 
     void pan(NodeId clickedNodeId, const QPoint &start, const QPoint &end);

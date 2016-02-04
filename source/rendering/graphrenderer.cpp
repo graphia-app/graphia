@@ -649,7 +649,7 @@ void GraphRenderer::switchToOverviewMode(bool doTransition)
                     rendererFinishedTransition(); // *
                 });
 
-                _graphComponentScene->resetView();
+                _graphComponentScene->resetView(false);
             }
             else
             {
@@ -773,17 +773,14 @@ void GraphRenderer::onComponentCleanup(ComponentId)
 
 void GraphRenderer::resetView()
 {
-    if(_graphComponentScene != nullptr && mode() == GraphRenderer::Mode::Component)
-    {
-        _graphComponentScene->startTransition();
-        _graphComponentScene->resetView();
-    }
+    if(_scene != nullptr)
+        _scene->resetView();
 }
 
 bool GraphRenderer::viewIsReset() const
 {
-    if(_graphComponentScene != nullptr && mode() == GraphRenderer::Mode::Component)
-        return _graphComponentScene->viewIsReset();
+    if(_scene != nullptr)
+        return _scene->viewIsReset();
 
     return true;
 }
