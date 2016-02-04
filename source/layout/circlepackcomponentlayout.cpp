@@ -94,7 +94,7 @@ static void circlePack(const std::vector<ComponentId>& componentIds,
     if(componentIds.empty())
         return;
 
-    int numComponents = componentIds.size();
+    int numComponents = static_cast<int>(componentIds.size());
 
     ComponentId a = componentIds[0];
     ComponentId b;
