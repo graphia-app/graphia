@@ -185,8 +185,16 @@ void GraphComponentRenderer::update(float t)
     {
         if(!_frozen)
         {
-            updateFocusPosition();
-            updateEntireComponentZoomDistance();
+            if(_graphRenderer->layoutChanged())
+            {
+                updateFocusPosition();
+                updateEntireComponentZoomDistance();
+            }
+            else if(_entireComponentZoomDistanceRequiresUpdate)
+            {
+                updateEntireComponentZoomDistance();
+                _entireComponentZoomDistanceRequiresUpdate = false;
+            }
         }
 
         _zoomTransition.update(t);
@@ -258,6 +266,8 @@ void GraphComponentRenderer::setDimensions(const QRectF& dimensions)
         _viewData._camera.setPerspectiveProjection(_fovy, aspectRatio, 0.3f, 50000.0f);
         _viewData._camera.setViewportWidth(_dimensions.width());
         _viewData._camera.setViewportHeight(_dimensions.height());
+
+        _entireComponentZoomDistanceRequiresUpdate = true;
     }
 }
 
