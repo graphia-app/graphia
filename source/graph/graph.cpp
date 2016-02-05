@@ -81,6 +81,9 @@ void Graph::enableComponentManagement()
         connect(_componentManager.get(), &ComponentManager::nodeRemovedFromComponent,   this, &Graph::nodeRemovedFromComponent, Qt::DirectConnection);
         connect(_componentManager.get(), &ComponentManager::edgeAddedToComponent,       this, &Graph::edgeAddedToComponent,     Qt::DirectConnection);
         connect(_componentManager.get(), &ComponentManager::edgeRemovedFromComponent,   this, &Graph::edgeRemovedFromComponent, Qt::DirectConnection);
+
+        if(qgetenv("COMPONENTS_DEBUG").toInt())
+            _componentManager->enableDebug();
     }
 }
 

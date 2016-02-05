@@ -129,6 +129,9 @@ public:
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
 
+    void enableDebug() { _debug = true; }
+    void disbleDebug() { _debug = false; }
+
 signals:
     void componentAdded(const Graph*, ComponentId, bool) const;
     void componentWillBeRemoved(const Graph*, ComponentId, bool) const;

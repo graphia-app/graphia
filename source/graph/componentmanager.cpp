@@ -32,9 +32,6 @@ ComponentManager::ComponentManager(Graph& graph,
     _nodesComponentId(graph),
     _edgesComponentId(graph)
 {
-    if(qgetenv("COMPONENTS_DEBUG").toInt())
-        _debug = true;
-
     // Ignore all multi-elements
     addNodeFilter([&graph](NodeId nodeId) { return graph.typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Tail; });
     addEdgeFilter([&graph](EdgeId edgeId) { return graph.typeOf(edgeId) == EdgeIdDistinctSetCollection::Type::Tail; });
@@ -99,6 +96,8 @@ ComponentIdSet ComponentManager::assignConnectedElementsComponentId(const Graph*
 
 void ComponentManager::update(const Graph* graph)
 {
+    if(_debug) qDebug() << "ComponentManager::update begins" << this;
+
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
     std::map<ComponentId, ComponentIdSet> splitComponents;
@@ -277,6 +276,8 @@ void ComponentManager::update(const Graph* graph)
         for(auto edgeId : edgeIdRemove.second)
             emit edgeRemovedFromComponent(graph, edgeId, edgeIdRemove.first);
     }
+
+    if(_debug) qDebug() << "ComponentManager::update ends" << this;
 }
 
 ComponentId ComponentManager::generateComponentId()
