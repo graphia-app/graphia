@@ -10,6 +10,7 @@
 #include "graph/weightededgegraphmodel.h"
 
 #include "utils/cpp1x_hacks.h"
+#include "utils/preferences.h"
 
 #include <memory>
 
@@ -82,4 +83,20 @@ QStringList Application::fileTypesOf(const QUrl& url) const
         fileTypes.append(fileType->name());
 
     return fileTypes;
+}
+
+bool Application::windowMaximisedWhenClosed() const
+{
+    return u::pref("window/maximised", "false").toBool();
+}
+
+QRect Application::windowGeometryWhenClosed() const
+{
+    return u::pref("window/geometry", QRect(0, 0, 800, 600)).toRect();
+}
+
+void Application::setWindowGeometry(int x, int y, int width, int height, bool maximised)
+{
+    u::setPref("window/geometry", QRect(x, y, width, height));
+    u::setPref("window/maximised", maximised);
 }

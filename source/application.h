@@ -7,6 +7,7 @@
 #include <QString>
 #include <QStringList>
 #include <QUrl>
+#include <QRect>
 
 #include <tuple>
 #include <memory>
@@ -55,6 +56,10 @@ public slots:
         return false;
 #endif
     }
+
+    bool windowMaximisedWhenClosed() const;
+    QRect windowGeometryWhenClosed() const;
+    void setWindowGeometry(int x, int y, int width, int height, bool maximised);
 
 private:
     static const char* _uri;

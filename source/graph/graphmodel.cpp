@@ -7,6 +7,7 @@
 
 #include "../utils/utils.h"
 #include "../utils/enumreflection.h"
+#include "../utils/preferences.h"
 
 #include <utility>
 
@@ -175,24 +176,25 @@ const DataField& GraphModel::dataFieldByName(const QString& name) const
     return u::contains(_dataFields, name) ? _dataFields.at(name) : nullDataField;
 }
 
-const float NODE_SIZE = 0.6f;
-const float EDGE_SIZE = 0.2f;
-
 void GraphModel::onGraphChanged(const Graph* graph)
 {
+    auto nodeColor = u::pref("visualDefaults/nodeColor", "#0000FF").value<QColor>();
+    auto edgeColor = u::pref("visualDefaults/edgeColor", "#FFFFFF").value<QColor>();
+    auto multiColor = u::pref("visualDefaults/multiElementColor", "#FF0000").value<QColor>();
+
     for(auto nodeId : graph->nodeIds())
     {
-        _nodeVisuals[nodeId]._size = NODE_SIZE;
+        _nodeVisuals[nodeId]._size = u::pref("visualDefaults/nodeSize", "0.6").toFloat();
         _nodeVisuals[nodeId]._color = graph->typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Not ?
-                    Qt::GlobalColor::blue : Qt::GlobalColor::red;
+                    nodeColor : multiColor;
         _nodeVisuals[nodeId]._initialised = true;
     }
 
     for(auto edgeId : graph->edgeIds())
     {
-        _edgeVisuals[edgeId]._size = EDGE_SIZE;
+        _edgeVisuals[edgeId]._size = u::pref("visualDefaults/edgeSize", "0.2").toFloat();
         _edgeVisuals[edgeId]._color = graph->typeOf(edgeId) == EdgeIdDistinctSetCollection::Type::Not ?
-                    Qt::GlobalColor::white : Qt::GlobalColor::red;
+                    edgeColor : multiColor;
         _edgeVisuals[edgeId]._initialised = true;
     }
 }

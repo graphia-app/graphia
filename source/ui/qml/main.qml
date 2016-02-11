@@ -23,11 +23,25 @@ ApplicationWindow
 
     Component.onCompleted:
     {
+        visibility = application.windowMaximisedWhenClosed() ? Window.Maximized : Window.Windowed;
+
+        var windowGeometryWhenClosed = application.windowGeometryWhenClosed();
+
+        x = windowGeometryWhenClosed.x;
+        y = windowGeometryWhenClosed.y;
+        width = windowGeometryWhenClosed.width;
+        height = windowGeometryWhenClosed.height;
+
         for(var i = 1; i < Qt.application.arguments.length; i++)
         {
             var fileUrl = application.urlForFileName(Qt.application.arguments[i]);
             openFile(fileUrl, true);
         }
+    }
+
+    onClosing:
+    {
+        application.setWindowGeometry(x, y, width, height, visibility == Window.Maximized);
     }
 
     MessageDialog
