@@ -102,7 +102,8 @@ HEADERS += \
     source/layout/componentlayout.h \
     source/layout/powerof2gridcomponentlayout.h \
     source/layout/circlepackcomponentlayout.h \
-    source/maths/circle.h
+    source/maths/circle.h \
+    source/utils/preferences.h
 
 SOURCES += \
     source/main.cpp \
@@ -168,7 +169,8 @@ SOURCES += \
     source/layout/layoutsettings.cpp \
     source/layout/powerof2gridcomponentlayout.cpp \
     source/layout/circlepackcomponentlayout.cpp \
-    source/layout/componentlayout.cpp
+    source/layout/componentlayout.cpp \
+    source/utils/preferences.cpp
 
 RESOURCES += \
     source/rendering/shaders.qrc \
