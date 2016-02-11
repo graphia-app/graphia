@@ -14,6 +14,7 @@
 #include "../commands/command.h"
 
 #include "../utils/cpp1x_hacks.h"
+#include "../utils/preferences.h"
 
 #include <QObject>
 #include <QOpenGLFramebufferObjectFormat>
@@ -817,7 +818,7 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
     }
 
     program.setUniformValue("material.ks", QVector3D(1.0f, 1.0f, 1.0f));
-    program.setUniformValue("material.ka", QVector3D(0.1f, 0.1f, 0.1f));
+    program.setUniformValue("material.ka", QVector3D(0.02f, 0.02f, 0.02f));
     program.setUniformValue("material.shininess", 50.0f);
 }
 
@@ -1071,7 +1072,12 @@ void GraphRenderer::finishRender()
 
     glViewport(0, 0, framebufferObject()->width(), framebufferObject()->height());
 
-    glClearColor(0.75f, 0.75f, 0.75f, 1.0f);
+    auto backgroundColor = u::pref("visualDefaults/backgroundColor", "#C0C0C0").value<QColor>();
+
+    glClearColor(backgroundColor.redF(),
+                 backgroundColor.greenF(),
+                 backgroundColor.blueF(), 1.0f);
+
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     glDisable(GL_DEPTH_TEST);
