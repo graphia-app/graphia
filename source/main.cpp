@@ -16,10 +16,16 @@
 
 #include "rendering/openglfunctions.h"
 
+#include <QCoreApplication>
+
 int main(int argc, char *argv[])
 {
     QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
     QApplication app(argc, argv);
+
+    QCoreApplication::setOrganizationName("Kajeka");
+    QCoreApplication::setOrganizationDomain("kajeka.com");
+    QCoreApplication::setApplicationName("GraphTool");
 
     QIcon mainIcon;
     mainIcon.addFile(":/icon/Icon512x512.png");

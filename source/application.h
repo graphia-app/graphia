@@ -11,6 +11,8 @@
 #include <tuple>
 #include <memory>
 
+#include <QCoreApplication>
+
 class GraphModel;
 class GraphFileParser;
 
@@ -37,7 +39,7 @@ public slots:
     bool canOpenAnyOf(const QStringList& fileTypeNames) const;
     QStringList fileTypesOf(const QUrl& url) const;
 
-    static QString name() { return _name; }
+    static QString name() { return QCoreApplication::applicationName(); }
     static const char* uri() { return _uri; }
     static int majorVersion() { return _majorVersion; }
     static int minorVersion() { return _minorVersion; }
@@ -55,7 +57,6 @@ public slots:
     }
 
 private:
-    static const char* _name;
     static const char* _uri;
     static const int _majorVersion = 1;
     static const int _minorVersion = 0;
