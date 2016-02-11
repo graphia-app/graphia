@@ -6,5 +6,6 @@
         <file>qml/Transform.qml</file>
         <file>qml/ButtonMenu.qml</file>
         <file>qml/DebugRectangle.qml</file>
+        <file>qml/OptionsDialog.qml</file>
     </qresource>
 </RCC>

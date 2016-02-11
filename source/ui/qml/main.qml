@@ -66,6 +66,11 @@ ApplicationWindow
         title: qsTr("Can't Open File")
     }
 
+    OptionsDialog
+    {
+        id: optionsDialog
+    }
+
     function openFile(fileUrl, inNewTab)
     {
         var fileTypes = application.fileTypesOf(fileUrl);
@@ -212,6 +217,14 @@ ApplicationWindow
 
     Action
     {
+        id: optionsAction
+        text: qsTr("&Options...")
+        enabled: currentDocument ? currentDocument.idle : false
+        onTriggered: optionsDialog.show();
+    }
+
+    Action
+    {
         id: pauseLayoutAction
         iconName: currentDocument && currentDocument.layoutIsPaused ? "media-playback-start" : "media-playback-pause"
         text: currentDocument && currentDocument.layoutIsPaused ? qsTr("&Resume Layout") : qsTr("&Pause Layout")
@@ -305,6 +318,8 @@ ApplicationWindow
             MenuItem { action: selectAllAction }
             MenuItem { action: selectNoneAction }
             MenuItem { action: invertSelectionAction }
+            MenuSeparator {}
+            MenuItem { action: optionsAction }
         }
         Menu
         {
