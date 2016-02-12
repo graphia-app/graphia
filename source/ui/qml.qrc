@@ -7,5 +7,7 @@
         <file>qml/ButtonMenu.qml</file>
         <file>qml/DebugRectangle.qml</file>
         <file>qml/OptionsDialog.qml</file>
+        <file>qml/OptionsAppearance.qml</file>
+        <file>qml/Constants.js</file>
     </qresource>
 </RCC>
