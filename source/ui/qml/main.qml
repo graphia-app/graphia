@@ -4,6 +4,7 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.0
+import Qt.labs.settings 1.0
 
 import com.kajeka 1.0
 
@@ -13,6 +14,8 @@ ApplicationWindow
     visible: true
     width: 800
     height: 600
+    property bool maximised: visibility === Window.Maximized
+
     minimumWidth: mainToolBar.implicitWidth
     minimumHeight: 480
 
@@ -23,25 +26,11 @@ ApplicationWindow
 
     Component.onCompleted:
     {
-        visibility = application.windowMaximisedWhenClosed() ? Window.Maximized : Window.Windowed;
-
-        var windowGeometryWhenClosed = application.windowGeometryWhenClosed();
-
-        x = windowGeometryWhenClosed.x;
-        y = windowGeometryWhenClosed.y;
-        width = windowGeometryWhenClosed.width;
-        height = windowGeometryWhenClosed.height;
-
         for(var i = 1; i < Qt.application.arguments.length; i++)
         {
             var fileUrl = application.urlForFileName(Qt.application.arguments[i]);
             openFile(fileUrl, true);
         }
-    }
-
-    onClosing:
-    {
-        application.setWindowGeometry(x, y, width, height, visibility == Window.Maximized);
     }
 
     MessageDialog
@@ -69,6 +58,17 @@ ApplicationWindow
     OptionsDialog
     {
         id: optionsDialog
+    }
+
+    Settings
+    {
+        id: windowSettings
+        category: "window"
+        property alias x: mainWindow.x
+        property alias y: mainWindow.y
+        property alias width: mainWindow.width
+        property alias height: mainWindow.height
+        property alias maximised: mainWindow.maximised
     }
 
     function openFile(fileUrl, inNewTab)
