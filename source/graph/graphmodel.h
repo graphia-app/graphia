@@ -26,12 +26,10 @@ struct NodeVisual
 {
     NodeVisual() noexcept {}
     NodeVisual(NodeVisual&& other) noexcept :
-        _initialised(other._initialised),
         _size(other._size),
         _color(other._color)
     {}
 
-    bool _initialised = false;
     float _size = 1.0f;
     QColor _color;
 };
@@ -42,12 +40,10 @@ struct EdgeVisual
 {
     EdgeVisual() noexcept {}
     EdgeVisual(EdgeVisual&& other) noexcept :
-        _initialised(other._initialised),
         _size(other._size),
         _color(other._color)
     {}
 
-    bool _initialised = false;
     float _size = 1.0f;
     QColor _color;
 };
