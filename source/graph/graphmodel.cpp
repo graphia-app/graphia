@@ -181,17 +181,19 @@ void GraphModel::onGraphChanged(const Graph* graph)
     auto nodeColor = u::pref("visualDefaults/nodeColor", "#0000FF").value<QColor>();
     auto edgeColor = u::pref("visualDefaults/edgeColor", "#FFFFFF").value<QColor>();
     auto multiColor = u::pref("visualDefaults/multiElementColor", "#FF0000").value<QColor>();
+    auto nodeSize = u::pref("visualDefaults/nodeSize", "0.6").toFloat();
+    auto edgeSize = u::pref("visualDefaults/edgeSize", "0.2").toFloat();
 
     for(auto nodeId : graph->nodeIds())
     {
-        _nodeVisuals[nodeId]._size = u::pref("visualDefaults/nodeSize", "0.6").toFloat();
+        _nodeVisuals[nodeId]._size = nodeSize;
         _nodeVisuals[nodeId]._color = graph->typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Not ?
                     nodeColor : multiColor;
     }
 
     for(auto edgeId : graph->edgeIds())
     {
-        _edgeVisuals[edgeId]._size = u::pref("visualDefaults/edgeSize", "0.2").toFloat();
+        _edgeVisuals[edgeId]._size = edgeSize;
         _edgeVisuals[edgeId]._color = graph->typeOf(edgeId) == EdgeIdDistinctSetCollection::Type::Not ?
                     edgeColor : multiColor;
     }
