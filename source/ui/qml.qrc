@@ -9,5 +9,7 @@
         <file>qml/OptionsDialog.qml</file>
         <file>qml/OptionsAppearance.qml</file>
         <file>qml/Constants.js</file>
+        <file>qml/ColorPickButton.qml</file>
+        <file>qml/Utils.js</file>
     </qresource>
 </RCC>
