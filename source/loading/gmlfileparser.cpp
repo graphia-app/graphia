@@ -1,203 +1,148 @@
 #include "gmlfileparser.h"
-
-#include "../utils/utils.h"
 #include "../graph/mutablegraph.h"
 
-#include <QFileInfo>
+#include "../thirdparty/axe/include/axe.h"
 
-#include <vector>
-#include <map>
-#include <string>
+#include <QTime>
+#include <QFile>
+#include <QFileInfo>
+#include <QDebug>
 #include <fstream>
 
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/support_istream_iterator.hpp>
-#include <boost/spirit/include/qi_parse_auto.hpp>
-#include <boost/spirit/include/qi_real.hpp>
-
-namespace fusion = boost::fusion;
-namespace spirit = boost::spirit;
-namespace qi = boost::spirit::qi;
-namespace ascii = boost::spirit::ascii;
-
-namespace boost { namespace spirit { namespace traits
+template<class It> bool GmlFileParser::parse(MutableGraph &graph, It begin, It end)
 {
-    // Make Qi recognize QString as a container
-    template <> struct is_container<QString> : mpl::true_ {};
+    int size = std::distance(begin, end);
 
-    // Expose the container's (QString's) value_type
-    template <> struct container_value<QString> : mpl::identity<QChar> {};
-
-    // Define how to insert a new element at the end of the container (QString)
-    template <>
-    struct push_back_container<QString, QChar>
+    // Progress Capture event (Fired on gml_value rule match)
+    auto captureCount = axe::e_ref([&size, &begin, this](It, It i2)
     {
-        static bool call(QString& c, QChar const& val)
+        int lengthLeft = (std::distance(begin, i2)) * 100 / size;
+        int newPercentage = lengthLeft;
+        if (_percentage < newPercentage)
         {
-            c.append(val);
-            return true;
+            _percentage = newPercentage;
+            emit progress(_percentage);
         }
+    });
+
+    // General GML structure rules
+    axe::r_rule<It> keyValue;
+    double d;
+    auto whitespace = *axe::r_any(" \t\n\r");
+
+    // If this is declared and initialised on the same line, the move constructor for
+    // axe::r_rule is called which (for some reason) infinitely recurses, whereas using
+    // operator= doesn't
+    axe::r_rule<It> quotedString;
+    quotedString = '"' & *("\\\"" | (axe::r_any() - '"')) & '"';
+
+    auto key = (+axe::r_alnum());
+    auto value = axe::r_double(d) | quotedString;
+
+    auto keyValueList = whitespace & key & whitespace & '[' & whitespace &
+            axe::r_many(keyValue - axe::r_char(']'), axe::r_any(" \t\n\r"), 0) & whitespace & ']';
+    auto keyValuePair = (whitespace & key & whitespace & value);
+
+    // Node State
+    int id;
+    bool isIdSet = false;
+    std::map<int, NodeId> nodeIndexMap;
+
+    // Node Capture Events
+    auto captureNodeId = axe::e_ref([&id, &isIdSet](It i1, It i2)
+    {
+        id = std::stoi(std::string(i1, i2));
+        isIdSet = true;
+    });
+    auto captureNode = axe::e_ref([&nodeIndexMap, &id, &graph, &isIdSet](It, It)
+    {
+        if(isIdSet)
+        {
+            nodeIndexMap[id] = graph.addNode();
+            isIdSet = false;
+        }
+    });
+
+    // Node Rules
+    axe::r_rule<It> nodeKeyValuePair;
+    auto nodeKeyValueList = (whitespace & "node" & whitespace & '[' & whitespace &
+                           axe::r_many(nodeKeyValuePair - axe::r_char(']'), axe::r_any(" \t\n\r"), 0) & whitespace
+                           & ']') >> captureNode;
+    auto nodeId = whitespace & "id" & whitespace & value >> captureNodeId;
+    nodeKeyValuePair = nodeId | keyValuePair | keyValueList;
+
+    // Edge State
+    int source, target;
+    bool isSourceSet = false, isTargetSet = false;
+
+    // Edge Capture Events
+    auto captureEdgeSource = axe::e_ref([&source, &isSourceSet](It i1, It i2)
+    {
+        source = std::stoi(std::string(i1,i2));
+        isSourceSet = true;
+    });
+    auto captureEdgeTarget = axe::e_ref([&target, &isTargetSet](It i1, It i2)
+    {
+        target = std::stoi(std::string(i1,i2));
+        isTargetSet = true;
+    });
+    auto captureEdge = axe::e_ref([&source, &target, &nodeIndexMap, &graph, &isSourceSet, &isTargetSet](It, It)
+    {
+        // Check if Target and Source values are set
+        if(isTargetSet && isSourceSet)
+        {
+            NodeId sourceId = nodeIndexMap[source];
+            NodeId targetId = nodeIndexMap[target];
+            graph.addEdge(sourceId, targetId);
+            isTargetSet = false;
+            isSourceSet = false;
+        }
+    });
+
+    // Edge Rules
+    axe::r_rule<It> edgeKeyValuePair;
+    auto edgeKeyValueList =  (whitespace & "edge" & whitespace & '[' & whitespace &
+                            axe::r_many(edgeKeyValuePair - axe::r_char(']'), axe::r_any(" \t\n\r"), 0) & whitespace &
+                            ']' ) >> captureEdge;
+    auto edgeSource = (whitespace & "source" & whitespace & value >> captureEdgeSource);
+    auto edgeTarget = (whitespace & "target" & whitespace & value >> captureEdgeTarget);
+    edgeKeyValuePair = edgeSource | edgeTarget | keyValuePair | keyValueList;
+
+    // Full GML file rule
+    auto file = +(keyValue & axe::r_any(" \t\n\r"));
+    bool succeeded = true;
+
+    // Failure capture event
+    auto onFail = [&succeeded, &begin](It, It)
+    {
+        succeeded = false;
     };
 
-    // The following specializations are required for debugging to work
-    template <>
-    struct is_empty_container<QString>
+    // All GML keyValue options
+    keyValue = ((edgeKeyValueList | nodeKeyValueList | keyValueList | keyValuePair | +axe::r_any(" \t\n\r") |
+              axe::r_end() | axe::r_fail(onFail)) >> captureCount);
+
+    // Perform file rule against begin & end iterators
+    (file >> axe::e_ref([this](It, It)
     {
-        static bool call(QString const& c)
-        {
-            return c.isEmpty();
-        }
-    };
+        emit progress(100);
+    }) & axe::r_end())(begin, end);
 
-    template <typename Out, typename Enable>
-    struct print_attribute_debug<Out, QString, Enable>
-    {
-        static void call(Out& out, QString const& val)
-        {
-            out << val.toStdString();
-        }
-    };
-}}}
-
-template <typename Iterator>
-struct GmlGrammar : qi::grammar<Iterator, GmlFileParser::KeyValuePairList(), ascii::space_type>
-{
-    GmlGrammar() : GmlGrammar::base_type(list)
-    {
-        using qi::char_;
-        using qi::int_;
-        qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
-        using qi::lexeme;
-
-        instring %= lexeme["" >> (char_ - char_("&\"")) | '&' >> *(char_ - char_(";")) >> ';'];
-        string %= lexeme['"' >> *instring >> '"'];
-
-        value %= strict_double | int_ | string | '[' >> list >> ']';
-        key %= lexeme[char_("a-zA-Z") >> *(char_("a-zA-Z0-9"))];
-        list %= *(key >> value);
-
-        //debug(list);
-    }
-
-    qi::rule<Iterator, GmlFileParser::KeyValuePairList(), ascii::space_type> list;
-    qi::rule<Iterator, GmlFileParser::Value(), ascii::space_type> value;
-    qi::rule<Iterator, QString(), ascii::space_type> key;
-    qi::rule<Iterator, QString(), ascii::space_type> string;
-    qi::rule<Iterator, QString()> instring;
-};
-
-bool GmlFileParser::parseGmlList(MutableGraph& graph, const GmlFileParser::KeyValuePairList& keyValuePairList, GmlList listType)
-{
-    static std::map<int, NodeId> nodeIdMap;
-    NodeId sourceId;
-
-    for(unsigned int i = 0; i < keyValuePairList.size(); i++)
-    {
-        if(cancelled())
-            return false;
-
-        const KeyValuePair& keyValuePair = keyValuePairList[i];
-        QString key = fusion::at_c<0>(keyValuePair);
-        Value value = fusion::at_c<1>(keyValuePair);
-        KeyValuePairList* subKeyValuePairList = boost::get<KeyValuePairList>(&value);
-        int* intValue = boost::get<int>(&value);
-
-        switch(listType)
-        {
-        case GmlList::File:
-            nodeIdMap.clear();
-            if(!key.compare("graph") && subKeyValuePairList != nullptr)
-                return parseGmlList(graph, *subKeyValuePairList, GmlList::Graph);
-            break;
-
-        case GmlList::Graph:
-        {
-            if(subKeyValuePairList != nullptr)
-            {
-                bool result = false;
-
-                if(!key.compare("node"))
-                    result = parseGmlList(graph, *subKeyValuePairList, GmlList::Node);
-                else if(!key.compare("edge"))
-                    result = parseGmlList(graph, *subKeyValuePairList, GmlList::Edge);
-
-                if(!result)
-                    return false;
-            }
-
-            int newPercentage = ((i * 50) / static_cast<int>(keyValuePairList.size())) + 50;
-            if(newPercentage > _percentage)
-            {
-                _percentage = newPercentage;
-                emit progress(_percentage);
-            }
-
-            break;
-        }
-
-        case GmlList::Node:
-            if(intValue != nullptr)
-            {
-                if(!key.compare("id"))
-                    nodeIdMap.emplace(*intValue, graph.addNode());
-                else
-                {
-                    // Unhandled node data
-                }
-            }
-            break;
-
-        case GmlList::Edge:
-            if(intValue != nullptr)
-            {
-                if(!key.compare("source") && u::contains(nodeIdMap, *intValue))
-                    sourceId = nodeIdMap[*intValue];
-                else if(!key.compare("target") && !sourceId.isNull() && u::contains(nodeIdMap, *intValue))
-                    graph.addEdge(sourceId, nodeIdMap[*intValue]);
-                else
-                {
-                    // Unhandled edge data
-                }
-            }
-            break;
-        }
-    }
-
-    return true;
+    return succeeded;
 }
 
-void GmlFileParser::onParsePositionIncremented(int64_t position)
+bool GmlFileParser::parse(MutableGraph &graph)
 {
-    int64_t newPercentage = (position * 50) / _fileSize;
-
-    if(newPercentage > _percentage)
-    {
-        _percentage = newPercentage;
-        emit progress(_percentage);
-    }
-}
-
-bool GmlFileParser::parse(MutableGraph& graph)
-{
-    QFileInfo info(_filename);
-
-    if(!info.exists())
-        return false;
-
     std::ifstream stream(_filename.toStdString());
     stream.unsetf(std::ios::skipws);
 
-    _fileSize = info.size();
+    std::istreambuf_iterator<char> startIt(stream.rdbuf());
 
-    spirit::istream_iterator begin(stream);
-    progress_iterator endp;
-    progress_iterator beginp(begin, this, &endp);
+    QFileInfo info(_filename);
 
-    GmlGrammar<progress_iterator> grammar;
-    KeyValuePairList keyValuePairList;
+    std::vector<char> vec(startIt, std::istreambuf_iterator<char>());
+    if(!info.exists())
+        return false;
 
-    if(qi::phrase_parse(beginp, endp, grammar, boost::spirit::ascii::space, keyValuePairList))
-        return parseGmlList(graph, keyValuePairList);
-
-    return false;
+    return parse(graph, vec.begin(), vec.end());;
 }

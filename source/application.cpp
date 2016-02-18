@@ -13,6 +13,7 @@
 #include "utils/preferences.h"
 
 #include <memory>
+#include "loading/gmlfileparser.h"
 
 const char* Application::_uri = "com.kajeka";
 

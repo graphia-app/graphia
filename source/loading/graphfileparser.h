@@ -5,8 +5,6 @@
 
 #ifndef Q_MOC_RUN
 #include <iostream>
-#include <boost/iterator/iterator_adaptor.hpp>
-#include <boost/spirit/include/support_istream_iterator.hpp>
 #endif
 
 #include <memory>
@@ -44,47 +42,6 @@ public:
     {
         return _cancelAtomic;
     }
-
-public:
-    virtual void onParsePositionIncremented(int64_t /*position*/) {}
-
-    class progress_iterator : public boost::iterator_adaptor<progress_iterator,
-            boost::spirit::istream_iterator>
-    {
-     private:
-        GraphFileParser* _parser = nullptr;
-        int64_t _position  = 0;
-        const progress_iterator* _end = nullptr;
-        struct enabler {};
-
-     public:
-        progress_iterator() :
-            progress_iterator::iterator_adaptor_() {}
-
-        explicit progress_iterator(const boost::spirit::istream_iterator iterator,
-                                  GraphFileParser* parser, const progress_iterator* end) :
-            progress_iterator::iterator_adaptor_(iterator),
-              _parser(parser),
-              _end(end) {}
-
-     private:
-        friend class boost::iterator_core_access;
-
-        bool equal(progress_iterator const& x) const
-        {
-            // If the parse has been cancelled and x is the end iterator
-            if(_parser->cancelled() && x.base_reference() == _end->base_reference())
-                return true;
-
-            return this->base_reference() == x.base_reference();
-        }
-
-        void increment()
-        {
-            _parser->onParsePositionIncremented(_position++);
-            this->base_reference()++;
-        }
-    };
 };
 
 class GraphFileParserThread : public QObject

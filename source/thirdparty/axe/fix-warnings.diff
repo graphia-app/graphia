@@ -1,0 +1,532 @@
+diff --git include/axe_composite.h include/axe_composite.h
+--- include/axe_composite.h
++++ include/axe_composite.h
+@@ -55,8 +55,8 @@ public:
+     result<Iterator> operator() (Iterator i1, Iterator i2) const
+     {
+         result<Iterator> i = r1_(i1, i2);
+-        if(i.matched)
+-            i = r2_(i.position, i2);
++        if(i.matched_)
++            i = r2_(i.position_, i2);
+         return i;
+     }
+ };
+@@ -78,8 +78,8 @@ public:
+     result<Iterator> operator() (Iterator i1, Iterator i2) const
+     {
+         result<Iterator> i = t1_(i1, i2);
+-        index = i.matched ? 0 : 1;
+-        if(!i.matched)
++        index = i.matched_ ? 0 : 1;
++        if(!i.matched_)
+             i = t2_(i1, i2);
+         return i;
+     }
+@@ -103,18 +103,18 @@ public:
+     result<Iterator> operator() (Iterator i1, Iterator i2) const
+     {
+         result<Iterator> rslt = t1_(i1, i2);
+-        if(rslt.matched)
++        if(rslt.matched_)
+         {
+-            result<Iterator> rslt2 = t2_(rslt.position, i2);
+-            return make_result(true, rslt2.matched ? rslt2.position : rslt.position);
++            result<Iterator> rslt2 = t2_(rslt.position_, i2);
++            return make_result(true, rslt2.matched_ ? rslt2.position_ : rslt.position_);
+         }
+         else
+         {
+             rslt = t2_(i1, i2);
+-            if(rslt.matched)
++            if(rslt.matched_)
+             {
+-                result<Iterator> rslt2 = t1_(rslt.position, i2);
+-                return make_result(true, rslt2.matched ? rslt2.position : rslt.position);
++                result<Iterator> rslt2 = t1_(rslt.position_, i2);
++                return make_result(true, rslt2.matched_ ? rslt2.position_ : rslt.position_);
+             }
+         }
+ 
+@@ -137,7 +137,7 @@ public:
+     result<Iterator> operator() (Iterator i1, Iterator i2) const
+     {
+         result<Iterator> i = r_(i1, i2);
+-        return make_result(!i.matched, i1, i.position);
++        return make_result(!i.matched_, i1, i.position_);
+     }
+ };
+ 
+@@ -158,7 +158,7 @@ public:
+     result<Iterator> operator() (Iterator i1, Iterator i2) const
+     {
+         result<Iterator> match = r1_(i1, i2);
+-        return match.matched ? r2_(match.position, i2) : r3_(i1, i2);
++        return match.matched_ ? r2_(match.position_, i2) : r3_(i1, i2);
+     }
+ };
+ 
+@@ -184,25 +184,25 @@ public:
+     {
+         auto i_match = r_(i1, i2);
+         
+-        if(!i_match.matched)
+-            return make_result(!min_occurrence_, i1, i_match.position);
++        if(!i_match.matched_)
++            return make_result(!min_occurrence_, i1, i_match.position_);
+ 
+ 		size_t count = 1;
+ 		auto match = i_match;
+ 
+-		while(match.matched && count < max_occurrence_)
++                while(match.matched_ && count < max_occurrence_)
+ 		{
+-			match = separator_(match.position, i2);
+-			if(match.matched)
+-				match = r_(match.position, i2);
+-			if(match.matched)
++                        match = separator_(match.position_, i2);
++                        if(match.matched_)
++                                match = r_(match.position_, i2);
++                        if(match.matched_)
+ 			{
+ 				i_match = match;
+ 				++count;
+ 			}
+ 		}
+ 
+-        return make_result(count >= min_occurrence_, i_match.position, match.position);
++        return make_result(count >= min_occurrence_, i_match.position_, match.position_);
+     }
+ };
+ 
+@@ -220,7 +220,7 @@ public:
+     result<Iterator> operator() (Iterator i1, Iterator i2)  const
+     {
+         result<Iterator> i = r_(i1, i2);
+-        return make_result(true, i.matched ? i.position : i1);
++        return make_result(true, i.matched_ ? i.position_ : i1);
+     }
+ };
+ 
+@@ -256,7 +256,7 @@ public:
+     {
+         result<Iterator> match = make_result(false, i1);
+ 
+-        for(; i1 != i2 && !match.matched; ++i1)
++        for(; i1 != i2 && !match.matched_; ++i1)
+         {
+             match = r_(i1, i2);
+         }
+@@ -280,8 +280,8 @@ public:
+     result<Iterator> operator() (Iterator i1, Iterator i2)  const
+     {
+         result<Iterator> match = r_(i1, i2);
+-        if(!match.matched)
+-            f_(match.position, i2);
++        if(!match.matched_)
++            f_(match.position_, i2);
+ 
+         return match;
+     }
+@@ -305,14 +305,14 @@ public:
+ //-----------------------------------------------------------------------------
+ class throw_fail_t
+ {
+-    std::string str;
++    std::string str_;
+ public:
+-    throw_fail_t(std::string str) : str(std::move(str)) {}
++    throw_fail_t(std::string str) : str_(std::move(str)) {}
+ 
+     template<class Iterator>
+     void operator() (Iterator i1, Iterator i2)  const
+     {
+-        throw_failure(std::move(str), i1, i2);
++        throw_failure(std::move(str_), i1, i2);
+     }
+ };
+ 
+diff --git include/axe_composite_function.h include/axe_composite_function.h
+--- include/axe_composite_function.h
++++ include/axe_composite_function.h
+@@ -343,9 +343,9 @@ namespace axe {
+         template<class charT>
+         struct toupper 
+         { 
+-            std::locale loc;
+-            toupper(std::locale loc) : loc(std::move(loc)) {}
+-            charT operator()(charT c) const { return std::toupper(c, loc); } 
++            std::locale loc_;
++            toupper(std::locale loc) : loc_(std::move(loc)) {}
++            charT operator()(charT c) const { return std::toupper(c, loc_); }
+         };
+ 
+         template<class charT>
+@@ -359,9 +359,9 @@ namespace axe {
+         template<class charT>
+         struct tolower 
+         { 
+-            std::locale loc;
+-            tolower(std::locale loc) : loc(std::move(loc)) {}
+-            charT operator()(charT c) const { return std::tolower(c, loc); }
++            std::locale loc_;
++            tolower(std::locale loc) : loc_(std::move(loc)) {}
++            charT operator()(charT c) const { return std::tolower(c, loc_); }
+ 
+         };
+ 
+diff --git include/axe_exception.h include/axe_exception.h
+--- include/axe_exception.h
++++ include/axe_exception.h
+@@ -39,12 +39,12 @@ namespace axe {
+     template<class charT>
+     class failure : public std::exception
+     {
+-        std::string msg;
++        std::string msg_;
+         std::array<charT, 40> str; // buffer
+     public:
+         ~failure() throw() {}
+         template<class T, class I>
+-        failure(T&& msg, I i1, I i2) : msg(std::forward<T>(msg))
++        failure(T&& msg, I i1, I i2) : msg_(std::forward<T>(msg))
+         {
+             str.fill(0);
+             for(size_t i = 0; i1 != i2 && i < str.size() - 1; ++i, ++i1)
+@@ -52,19 +52,19 @@ namespace axe {
+         }
+ 
+         template<class T>
+-        explicit failure(T&& msg) : msg(std::forward<T>(msg))
++        explicit failure(T&& msg) : msg_(std::forward<T>(msg))
+         {
+             str.fill(0);
+         }
+ 
+-        virtual const char* what() const throw() { return msg.c_str(); }
++        virtual const char* what() const throw() { return msg_.c_str(); }
+ 
+         std::basic_string<charT> message() const
+         {
+             std::basic_stringstream<charT> ss;
+             ss << "parser exception ";
+-            if(!msg.empty())
+-                ss << ":\n   " << msg << "\n   ";
++            if(!msg_.empty())
++                ss << ":\n   " << msg_ << "\n   ";
+             ss << "when parsing: \"";
+             ss << str.data();
+             ss << "\"";
+diff --git include/axe_extractor.h include/axe_extractor.h
+--- include/axe_extractor.h
++++ include/axe_extractor.h
+@@ -56,8 +56,8 @@ namespace axe {
+         {
+             result<Iterator> i = r_(i1, i2);
+             
+-            if(i.matched)
+-                e_(i1, i.position);
++            if(i.matched_)
++                e_(i1, i.position_);
+ 
+             return i;
+         }
+@@ -86,14 +86,14 @@ namespace axe {
+     template<class C, class T, class A>
+     class e_value_t<std::basic_string<C, T, A>> AXE_EXTRACTOR
+     {
+-        std::basic_string<C, T, A>& str;
++        std::basic_string<C, T, A>& str_;
+     public:
+-        explicit e_value_t(std::basic_string<C, T, A>& str) : str(str) {}
++        explicit e_value_t(std::basic_string<C, T, A>& str) : str_(str) {}
+ 
+         template<class Iterator>
+         void operator() (Iterator i1, Iterator i2) const
+         {
+-            str.assign(i1, i2);
++            str_.assign(i1, i2);
+         }
+     };
+ 
+@@ -103,9 +103,9 @@ namespace axe {
+     template<>
+     class e_value_t<char> AXE_EXTRACTOR
+     {
+-        char& c;
++        char& c_;
+     public:
+-        explicit e_value_t(char& c) : c(c) {}
++        explicit e_value_t(char& c) : c_(c) {}
+ 
+         template<class Iterator>
+         void operator() (Iterator i1, Iterator i2) const
+@@ -113,7 +113,7 @@ namespace axe {
+             static_assert(std::is_convertible<decltype(*i1), char>::value, 
+                 "iterator value_type must be convertible to char");
+             if(i1 != i2)
+-                c = char(*i1);
++                c_ = char(*i1);
+         }
+     };
+ 
+@@ -140,16 +140,16 @@ namespace axe {
+     template<class S>
+     class e_length_t AXE_EXTRACTOR
+     {
+-        S& length;
++        S& length_;
+     public:
+-        explicit e_length_t(S& length) : length(length) {}
++        explicit e_length_t(S& length) : length_(length) {}
+ 
+         template<class Iterator>
+         void operator() (Iterator i1, Iterator i2) const
+         {
+             static_assert(std::is_convertible<size_t, S>::value,
+                 "iterator distance must be convertible to length type");
+-            length = S(std::distance(i1, i2));
++            length_ = S(std::distance(i1, i2));
+         }
+     };
+ 
+@@ -159,10 +159,10 @@ namespace axe {
+     template<class C>
+     class e_push_back_t AXE_EXTRACTOR
+     {
+-        C& c;
++        C& c_;
+         typedef typename C::value_type value_type;
+     public:
+-        explicit e_push_back_t(C& c) : c(c) {}
++        explicit e_push_back_t(C& c) : c_(c) {}
+ 
+         template<class Iterator>
+         void operator() (Iterator i1, Iterator i2) const
+@@ -170,7 +170,7 @@ namespace axe {
+             value_type value;
+             e_value_t<value_type> ex(value);
+             ex(i1, i2);
+-            c.push_back(std::move(value));
++            c_.push_back(std::move(value));
+         }
+     };
+ }
+diff --git include/axe_numeric.h include/axe_numeric.h
+--- include/axe_numeric.h
++++ include/axe_numeric.h
+@@ -51,11 +51,11 @@ namespace axe {
+         {
+             auto match = r_numstr()(i1, i2);
+ 
+-            if(match.matched)
++            if(match.matched_)
+             {
+                 number_ = 0;
+                 
+-                for(;i1 != match.position; ++i1)
++                for(;i1 != match.position_; ++i1)
+                     number_ = number_ * 10 + *i1 - '0';
+             }
+             return match;
+@@ -97,7 +97,7 @@ namespace axe {
+                 & r_udecimal_t<T>(number_)
+                 )(i1, i2);
+ 
+-            if(match.matched && sign == '-')
++            if(match.matched_ && sign == '-')
+                 number_ *= -1;
+ 
+             return match;
+@@ -234,12 +234,12 @@ namespace axe {
+                 | '.' & r_udecimal_t<unsigned>(u2) >> e_length(length)
+                 )(i1, i2);
+ 
+-            if(result.matched)
++            if(result.matched_)
+             {
+                 number_ = u1 + u2 / pow(T(10), T(length));
+             }
+ 
+-            return make_result(result.matched, result.position, i1);
++            return make_result(result.matched_, result.position_, i1);
+         }
+     };
+ 
+@@ -283,7 +283,7 @@ namespace axe {
+                 & r_ufixed_t<T>(number_)
+                 )(i1, i2);
+             
+-            if(result.matched && sign == '-')
++            if(result.matched_ && sign == '-')
+                 number_ *= -1;
+ 
+             return result;
+@@ -334,13 +334,13 @@ namespace axe {
+                 & ~r_predstr(is_space()) 
+                 & 
+                 (
+-                r_udecimal_t<unsigned>(i) & ~('.' & ~r_udecimal_t<unsigned>(frac) >> e_length(flen))
+-                | '.' & r_udecimal_t<unsigned>(frac) >> e_length(flen)
++                (r_udecimal_t<unsigned>(i) & ~('.' & ~r_udecimal_t<unsigned>(frac) >> e_length(flen)))
++                | ('.' & r_udecimal_t<unsigned>(frac) >> e_length(flen))
+                 )
+                 & ~(r_any("eE") & r_decimal_t<int>(e))
+                 )(i1, i2);
+ 
+-            if(result.matched)
++            if(result.matched_)
+                 d_ = (sign == '-' ? -1 : 1) * (T(i) + frac / pow(T(10), T(flen))) * pow(T(10), T(e));
+ 
+             return result;
+diff --git include/axe_predicate.h include/axe_predicate.h
+--- include/axe_predicate.h
++++ include/axe_predicate.h
+@@ -40,7 +40,7 @@ namespace axe {
+     struct is_alpha AXE_PREDICATE
+     {
+         template<class C>
+-        bool operator() (C c) const { return c >= C('A') && c <= C('Z') || c >= C('a') && c <= C('z') || c == C('_'); }
++        bool operator() (C c) const { return (c >= C('A') && c <= C('Z')) || (c >= C('a') && c <= C('z')) || c == C('_'); }
+     };
+ 
+     //-------------------------------------------------------------------------
+diff --git include/axe_result.h include/axe_result.h
+--- include/axe_result.h
++++ include/axe_result.h
+@@ -37,10 +37,10 @@ namespace axe {
+     template<class Iterator>
+     struct result
+     {
+-        bool matched;
+-        Iterator position;
++        bool matched_;
++        Iterator position_;
+ 
+-        result(bool matched, Iterator position) : matched(matched), position(position) {}
++        result(bool matched, Iterator position) : matched_(matched), position_(position) {}
+     };
+ 
+     //-------------------------------------------------------------------------
+diff --git include/axe_terminal.h include/axe_terminal.h
+--- include/axe_terminal.h
++++ include/axe_terminal.h
+@@ -98,16 +98,16 @@ namespace axe {
+     template<class CharT>
+     class r_char_t AXE_RULE
+     {
+-        CharT t;
++        CharT t_;
+ 
+     public:
+-        explicit r_char_t(CharT t) : t(t) {}
++        explicit r_char_t(CharT t) : t_(t) {}
+ 
+         template<class Iterator>
+         result<Iterator> operator() (Iterator i1, Iterator i2) const
+         {
+             static_assert(std::is_convertible<decltype(*i1), CharT>::value, "*i1 must be convertible to CharT");
+-            return i1 != i2 && t == *i1 ? make_result(true, ++i1) : make_result(false, i1);
++            return i1 != i2 && t_ == *i1 ? make_result(true, ++i1) : make_result(false, i1);
+         }
+ 
+         const char* name() const { return "r_char"; }
+@@ -139,10 +139,10 @@ namespace axe {
+     template<class T>
+     class r_bin_t AXE_RULE
+     {
+-        T t;
++        T t_;
+ 
+     public:
+-        explicit r_bin_t(T&& t) : t(std::forward<T>(t)) {}
++        explicit r_bin_t(T&& t) : t_(std::forward<T>(t)) {}
+ 
+         template<class Iterator>
+         result<Iterator> operator() (Iterator i1, Iterator i2) const
+@@ -151,7 +151,7 @@ namespace axe {
+ 
+             bool matched =  i1 != i2;
+             Iterator i = i1;
+-            const unsigned char* p = reinterpret_cast<const unsigned char*>(&t);
++            const unsigned char* p = reinterpret_cast<const unsigned char*>(&t_);
+             size_t s = 0;
+             // compare each byte
+             for(; matched && s < sizeof(T) && i != i2; ++i, ++s)
+@@ -319,17 +319,17 @@ namespace axe {
+     template<class T>
+     class r_var_t AXE_RULE
+     {
+-        T& t;
++        T& t_;
+ 
+     public:
+-        explicit r_var_t(T& t) : t(t) {}
++        explicit r_var_t(T& t) : t_(t) {}
+ 
+         template<class Iterator>
+         result<Iterator> operator() (Iterator i1, Iterator i2) const
+         {
+             static_assert(sizeof(*i1) == 1, "iterator must be byte size for binary match");
+ 
+-            unsigned char* c = reinterpret_cast<unsigned char*>(&t);
++            unsigned char* c = reinterpret_cast<unsigned char*>(&t_);
+             unsigned s = 0;
+             for(; s < sizeof(T) && i1 != i2; ++i1, ++s)
+                 c[s] = *i1;
+@@ -362,8 +362,8 @@ namespace axe {
+       
+                 result<Iterator> result = tmp(i1, i2);
+ 
+-                i1 = result.position;
+-                matched = result.matched;
++                i1 = result.position_;
++                matched = result.matched_;
+             }
+ 
+             return make_result(s == N, i1);
+@@ -401,8 +401,8 @@ namespace axe {
+             {
+                 T t;
+                 result<Iterator> r = r_var_t<T>(t)(i1, i2);
+-                i1 = r.position;
+-                matched = r.matched;
++                i1 = r.position_;
++                matched = r.matched_;
+                 if(matched)
+                     buf_.push_back(std::move(t));
+             }
+@@ -422,8 +422,8 @@ namespace axe {
+         result<Iterator> operator() (Iterator i1, Iterator i2) const
+         {
+             result<Iterator> r = r_pred_t<is_alpha>(is_alpha())(i1, i2);
+-            if(r.matched)
+-                r = r_predstr_t<is_alnum>(is_alnum())(r.position, i2);
++            if(r.matched_)
++                r = r_predstr_t<is_alnum>(is_alnum())(r.position_, i2);
+             return r;
+         }
+ 
+@@ -480,16 +480,16 @@ namespace axe {
+     template<class Iterator>
+     class r_range_t AXE_RULE
+     {
+-       Iterator begin, end;
++       Iterator begin_, end_;
+     public:
+-        r_range_t(Iterator begin, Iterator end): begin(begin), end(end) {}
++        r_range_t(Iterator begin, Iterator end): begin_(begin), end_(end) {}
+ 
+         template<class I>
+         result<I> operator() (I i1, I i2) const
+         {
+-            Iterator i = begin;
+-            for(; i1 != i2 && i != end && *i1 == *i; ++i, ++i1);
+-            return make_result(i == end, i1);
++            Iterator i = begin_;
++            for(; i1 != i2 && i != end_ && *i1 == *i; ++i, ++i1);
++            return make_result(i == end_, i1);
+         }
+ 
+         const char* name() const { return "r_range"; }

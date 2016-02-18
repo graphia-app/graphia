@@ -37,7 +37,6 @@ HEADERS += \
     source/layout/scalinglayout.h \
     source/layout/sequencelayout.h \
     source/loading/fileidentifier.h \
-    source/loading/gmlfileparser.h \
     source/loading/gmlfiletype.h \
     source/loading/graphfileparser.h \
     source/loading/pairwisetxtfileparser.h \
@@ -103,7 +102,8 @@ HEADERS += \
     source/layout/powerof2gridcomponentlayout.h \
     source/layout/circlepackcomponentlayout.h \
     source/maths/circle.h \
-    source/utils/preferences.h
+    source/utils/preferences.h \
+    source/loading/gmlfileparser.h
 
 SOURCES += \
     source/main.cpp \
@@ -120,7 +120,6 @@ SOURCES += \
     source/layout/randomlayout.cpp \
     source/layout/scalinglayout.cpp \
     source/loading/fileidentifier.cpp \
-    source/loading/gmlfileparser.cpp \
     source/loading/gmlfiletype.cpp \
     source/loading/graphfileparser.cpp \
     source/loading/pairwisetxtfileparser.cpp \
@@ -170,7 +169,8 @@ SOURCES += \
     source/layout/powerof2gridcomponentlayout.cpp \
     source/layout/circlepackcomponentlayout.cpp \
     source/layout/componentlayout.cpp \
-    source/utils/preferences.cpp
+    source/utils/preferences.cpp \
+    source/loading/gmlfileparser.cpp
 
 RESOURCES += \
     source/rendering/shaders.qrc \
