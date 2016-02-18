@@ -21,6 +21,7 @@ GraphModel::GraphModel(const QString &name) :
     _name(name)
 {
     connect(&_transformedGraph, &Graph::graphChanged, this, &GraphModel::onGraphChanged, Qt::DirectConnection);
+    connect(Preferences::instance(), &Preferences::preferenceChanged, this, &GraphModel::onPreferenceChanged);
 
     addDataField(tr("Node Degree"))
         .setIntValueFn(INT_NODE_FN([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).degree(); }))
@@ -176,26 +177,36 @@ const DataField& GraphModel::dataFieldByName(const QString& name) const
     return u::contains(_dataFields, name) ? _dataFields.at(name) : nullDataField;
 }
 
-void GraphModel::onGraphChanged(const Graph* graph)
+void GraphModel::updateVisuals()
 {
     auto nodeColor = u::pref("visualDefaults/nodeColor", "#0000FF").value<QColor>();
     auto edgeColor = u::pref("visualDefaults/edgeColor", "#FFFFFF").value<QColor>();
     auto multiColor = u::pref("visualDefaults/multiElementColor", "#FF0000").value<QColor>();
-    auto nodeSize = u::pref("visualDefaults/nodeSize", "0.6").toFloat();
-    auto edgeSize = u::pref("visualDefaults/edgeSize", "0.2").toFloat();
+    auto nodeSize = u::clamp(0.1f, 2.0f, u::pref("visualDefaults/nodeSize", "0.6").toFloat());
+    auto edgeSize = u::clamp(0.05f, nodeSize, u::pref("visualDefaults/edgeSize", "0.2").toFloat());
 
-    for(auto nodeId : graph->nodeIds())
+    for(auto nodeId : _graph.nodeIds())
     {
         _nodeVisuals[nodeId]._size = nodeSize;
-        _nodeVisuals[nodeId]._color = graph->typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Not ?
+        _nodeVisuals[nodeId]._color = _graph.typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Not ?
                     nodeColor : multiColor;
     }
 
-    for(auto edgeId : graph->edgeIds())
+    for(auto edgeId : _graph.edgeIds())
     {
         _edgeVisuals[edgeId]._size = edgeSize;
-        _edgeVisuals[edgeId]._color = graph->typeOf(edgeId) == EdgeIdDistinctSetCollection::Type::Not ?
+        _edgeVisuals[edgeId]._color = _graph.typeOf(edgeId) == EdgeIdDistinctSetCollection::Type::Not ?
                     edgeColor : multiColor;
     }
+}
+
+void GraphModel::onGraphChanged(const Graph*)
+{
+    updateVisuals();
+}
+
+void GraphModel::onPreferenceChanged(const QString&, const QVariant&)
+{
+    updateVisuals();
 }
 

@@ -13,6 +13,7 @@
 #include "ui/graphtransformconfiguration.h"
 
 #include "utils/threadpool.h"
+#include "utils/preferences.h"
 
 #include "rendering/openglfunctions.h"
 
@@ -63,8 +64,10 @@ int main(int argc, char *argv[])
     qmlRegisterType<GraphQuickItem>             (uri, maj, min, "Graph");
     qmlRegisterType<GraphTransformConfiguration>(uri, maj, min, "GraphTransform");
     qmlRegisterType<LayoutSetting>              (uri, maj, min, "LayoutSetting");
+    qmlRegisterType<QmlPreferences>             (uri, maj, min, "Preferences");
 
     ThreadPool threadPool;
+    Preferences preferences;
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
 

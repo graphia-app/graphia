@@ -101,8 +101,11 @@ protected:
     DataField& addDataField(const QString& name);
     DataField& mutableDataFieldByName(const QString& name);
 
+    void updateVisuals();
+
 private slots:
-    void onGraphChanged(const Graph* graph);
+    void onGraphChanged(const Graph*);
+    void onPreferenceChanged(const QString& key, const QVariant& value);
 };
 
 #endif // GRAPHMODEL_H

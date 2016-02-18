@@ -235,6 +235,8 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
 
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &GraphRenderer::onSelectionChanged, Qt::DirectConnection);
 
+    connect(Preferences::instance(), &Preferences::preferenceChanged, this, &GraphRenderer::onPreferenceChanged, Qt::DirectConnection);
+
     enableSceneUpdate();
 }
 
@@ -744,6 +746,11 @@ void GraphRenderer::onSelectionChanged(const SelectionManager*)
     {
         updateGPUData(When::Later);
     }, "GraphRenderer::onSelectionChanged");
+}
+
+void GraphRenderer::onPreferenceChanged(const QString&, const QVariant&)
+{
+    update(); // QQuickFramebufferObject::Renderer::update
 }
 
 void GraphRenderer::onCommandWillExecuteAsynchronously(const Command*)

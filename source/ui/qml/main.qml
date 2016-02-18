@@ -4,7 +4,6 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.0
-import Qt.labs.settings 1.0
 
 import com.kajeka 1.0
 
@@ -60,10 +59,9 @@ ApplicationWindow
         id: optionsDialog
     }
 
-    Settings
+    Preferences
     {
-        id: windowSettings
-        category: "window"
+        section: "window"
         property alias x: mainWindow.x
         property alias y: mainWindow.y
         property alias width: mainWindow.width
