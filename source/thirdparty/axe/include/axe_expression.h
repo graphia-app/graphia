@@ -57,7 +57,7 @@ namespace axe {
         e_plus_t(T& t1, const T& t2) : t1_(t1), t2_(t2) {}
 
         template<class It>
-        void operator()(It i1, It i2) const
+        void operator()(It, It) const
         {
             t1_ += t2_;
         }
@@ -75,7 +75,7 @@ namespace axe {
         e_minus_t(T& t1, const T& t2) : t1_(t1), t2_(t2) {}
 
         template<class It>
-        void operator()(It i1, It i2) const
+        void operator()(It, It) const
         {
             t1_ -= t2_;
         }
@@ -92,7 +92,7 @@ namespace axe {
         e_mult_t(T& t1, const T& t2) : t1_(t1), t2_(t2) {}
 
         template<class It>
-        void operator()(It i1, It i2) const
+        void operator()(It, It) const
         {
             t1_ *= t2_;
         }
@@ -109,7 +109,7 @@ namespace axe {
         e_div_t(T& t1, const T& t2) : t1_(t1), t2_(t2) {}
 
         template<class It>
-        void operator()(It i1, It i2) const
+        void operator()(It, It) const
         {
             t1_ /= t2_;
         }

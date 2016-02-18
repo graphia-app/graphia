@@ -69,7 +69,7 @@ namespace axe {
         template<class C>
         bool operator() (C c) const
         { 
-            return is_num()(c) || c >= C('a') && c <= C('f') || c >= C('A') && c <= C('F');
+            return is_num()(c) || (c >= C('a') && c <= C('f')) || (c >= C('A') && c <= C('F'));
         }
     };
 

@@ -54,7 +54,7 @@ namespace axe {
         explicit r_bool_t(BoolT&& b) : b_(b) {}
 
         template<class Iterator>
-        result<Iterator> operator() (Iterator i1, Iterator i2) const
+        result<Iterator> operator() (Iterator i1, Iterator) const
         {
             return make_result(b_(), i1);
         }
@@ -70,7 +70,7 @@ namespace axe {
         explicit r_bool_t(BoolT&& b) : b_(b) {}
 
         template<class Iterator>
-        result<Iterator> operator() (Iterator i1, Iterator i2) const
+        result<Iterator> operator() (Iterator i1, Iterator) const
         {
             return make_result(b_, i1);
         }
