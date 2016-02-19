@@ -7,6 +7,8 @@
 #include "../layout/powerof2gridcomponentlayout.h"
 #include "../layout/circlepackcomponentlayout.h"
 
+#include "../commands/commandmanager.h"
+
 #include "../ui/graphquickitem.h"
 
 #include "../utils/utils.h"
@@ -19,9 +21,10 @@
 #include <functional>
 #include <algorithm>
 
-GraphOverviewScene::GraphOverviewScene(GraphRenderer* graphRenderer) :
+GraphOverviewScene::GraphOverviewScene(CommandManager& commandManager, GraphRenderer* graphRenderer) :
     Scene(graphRenderer),
     _graphRenderer(graphRenderer),
+    _commandManager(&commandManager),
     _graphModel(graphRenderer->graphModel()),
     _previousComponentAlpha(_graphModel->graph(), 1.0f),
     _componentAlpha(_graphModel->graph(), 1.0f),
@@ -37,6 +40,8 @@ GraphOverviewScene::GraphOverviewScene(GraphRenderer* graphRenderer) :
     connect(&_graphModel->graph(), &Graph::componentsWillMerge, this, &GraphOverviewScene::onComponentsWillMerge, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphWillChange, this, &GraphOverviewScene::onGraphWillChange, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphOverviewScene::onGraphChanged, Qt::DirectConnection);
+
+    connect(Preferences::instance(), &Preferences::preferenceChanged, this, &GraphOverviewScene::onPreferenceChanged, Qt::DirectConnection);
 }
 
 void GraphOverviewScene::update(float t)
@@ -513,31 +518,37 @@ void GraphOverviewScene::onGraphWillChange(const Graph*)
     _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
 }
 
+void GraphOverviewScene::startComponentLayoutTransition()
+{
+    if(visible())
+    {
+        onShow();
+        setViewportSize(_width, _height);
+
+        startTransition(u::clamp(0.1f, 5.0f, u::pref("visualDefaults/transitionTime", 1.0f).toFloat()),
+                        Transition::Type::EaseInEaseOut,
+        [this]
+        {
+            // If a graph change has resulted in a single component, switch
+            // to component mode once the transition had completed
+            if(_graphModel->graph().numComponents() == 1)
+                _graphRenderer->switchToComponentMode();
+        });
+    }
+}
+
 void GraphOverviewScene::onGraphChanged(const Graph* graph)
 {
     graph->setPhase(tr("Component Layout"));
     _componentLayout->execute(*graph, graph->componentIds(), _nextComponentLayoutData);
     _nextComponentLayoutDataChanged = true;
+    graph->clearPhase();
 
     _graphRenderer->executeOnRendererThread([this, graph]
     {
         _componentIds = graph->componentIds();
 
-        if(visible())
-        {
-            onShow();
-            setViewportSize(_width, _height);
-
-            startTransition(u::clamp(0.1f, 5.0f, u::pref("visualDefaults/transitionTime", 1.0f).toFloat()),
-                            Transition::Type::EaseInEaseOut,
-            [this, graph]
-            {
-                // If graph change has resulted in a single component, switch
-                // to component mode once the transition had completed
-                if(graph->numComponents() == 1)
-                    _graphRenderer->switchToComponentMode();
-            });
-        }
+        startComponentLayoutTransition();
 
         // We still need to render any components that have been removed, while they
         // transition away
@@ -545,4 +556,26 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph)
                              _removedComponentIds.begin(),
                              _removedComponentIds.end());
     }, "GraphOverviewScene::onGraphChanged");
+}
+
+void GraphOverviewScene::onPreferenceChanged(const QString& key, const QVariant&)
+{
+    if(key == "visualDefaults/minimumComponentRadius")
+    {
+        _commandManager->executeOnce(tr("Component Layout"),
+        [this](Command&)
+        {
+            auto* graph = &_graphModel->graph();
+
+            _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
+
+            _componentLayout->execute(*graph, graph->componentIds(), _nextComponentLayoutData);
+            _nextComponentLayoutDataChanged = true;
+
+            _graphRenderer->executeOnRendererThread([this, graph]
+            {
+                startComponentLayoutTransition();
+            }, "GraphOverviewScene::onPreferenceChanged");
+        });
+    }
 }

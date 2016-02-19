@@ -216,7 +216,7 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
     connect(graph, &Graph::graphChanged, this, &GraphRenderer::onGraphChanged, Qt::DirectConnection);
     connect(graph, &Graph::componentAdded, this, &GraphRenderer::onComponentAdded, Qt::DirectConnection);
 
-    _graphOverviewScene = new GraphOverviewScene(this);
+    _graphOverviewScene = new GraphOverviewScene(commandManager, this);
     _graphComponentScene = new GraphComponentScene(this);
 
     connect(graph, &Graph::componentWillBeRemoved, this, &GraphRenderer::onComponentWillBeRemoved, Qt::DirectConnection);

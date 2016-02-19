@@ -22,6 +22,7 @@ Item
         property alias edgeSize: edgeSizeSlider.value
 
         property alias transitionTime: transitionTimeSlider.value
+        property alias minimumComponentRadius: minimumComponentRadiusSlider.value
     }
 
     Column
@@ -92,6 +93,14 @@ Item
                 id: transitionTimeSlider
                 minimumValue: 0.1
                 maximumValue: 5.0
+            }
+
+            Label { text: qsTr("Minimum Component Radius") }
+            Slider
+            {
+                id: minimumComponentRadiusSlider
+                minimumValue: 0.1
+                maximumValue: 10.0
             }
         }
 

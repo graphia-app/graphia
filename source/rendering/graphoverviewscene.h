@@ -19,6 +19,7 @@
 #include <QPointF>
 
 class GraphModel;
+class CommandManager;
 
 class GraphOverviewScene :
         public Scene,
@@ -27,7 +28,8 @@ class GraphOverviewScene :
     Q_OBJECT
 
 public:
-    explicit GraphOverviewScene(GraphRenderer* graphRenderer);
+    explicit GraphOverviewScene(CommandManager& commandManager,
+                                GraphRenderer* graphRenderer);
 
     void update(float t);
     void setViewportSize(int width, int height);
@@ -64,6 +66,7 @@ public:
 
 private:
     GraphRenderer* _graphRenderer;
+    CommandManager* _commandManager;
     std::shared_ptr<GraphModel> _graphModel;
 
     int _width = 0;
@@ -103,6 +106,8 @@ private:
     bool setZoomFactor(float zoomFactor);
     void setOffset(float x, float y);
 
+    void startComponentLayoutTransition();
+
 private slots:
     void onGraphWillChange(const Graph* graph);
     void onGraphChanged(const Graph* graph);
@@ -110,6 +115,8 @@ private slots:
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool hasMerged);
     void onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet);
     void onComponentsWillMerge(const Graph* graph, const ComponentMergeSet& componentMergeSet);
+
+    void onPreferenceChanged(const QString& key, const QVariant& value);
 };
 
 #endif // GRAPHOVERVIEWSCENE_H

@@ -34,6 +34,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../graph/componentmanager.h"
 
+#include "../utils/preferences.h"
+
 #include <algorithm>
 #include <cmath>
 
@@ -204,9 +206,11 @@ void CirclePackComponentLayout::executeReal(const Graph& graph, const std::vecto
 
     ComponentArray<Links> links(graph);
 
+    auto minimumComponentRadius = u::pref("visualDefaults/minimumComponentRadius", 2.0f).toFloat();
     for(auto componentId : sortedComponentIds)
     {
-        componentLayoutData[componentId].setRadius(std::max(componentLayoutData[componentId].radius(), 2.0f));
+        componentLayoutData[componentId].setRadius(std::max(componentLayoutData[componentId].radius(),
+                                                            minimumComponentRadius));
         links[componentId]._prev = links[componentId]._next = componentId;
     }
 
