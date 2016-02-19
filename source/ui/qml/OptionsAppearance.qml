@@ -31,17 +31,18 @@ Item
         anchors.margins: Constants.margin
         spacing: Constants.spacing
 
-        Label
-        {
-            font.bold: true
-            text: qsTr("Colours")
-        }
-
         GridLayout
         {
             columns: 2
             rowSpacing: Constants.spacing
             columnSpacing: Constants.spacing
+
+            Label
+            {
+                font.bold: true
+                text: qsTr("Colours")
+                Layout.columnSpan: 2
+            }
 
             Label { text: qsTr("Nodes") }
             ColorPickButton { id: nodeColorPickButton }
@@ -54,19 +55,13 @@ Item
 
             Label { text: qsTr("Background") }
             ColorPickButton { id: backgroundColorPickButton }
-        }
 
-        Label
-        {
-            font.bold: true
-            text: qsTr("Sizes")
-        }
-
-        GridLayout
-        {
-            columns: 2
-            rowSpacing: Constants.spacing
-            columnSpacing: Constants.spacing
+            Label
+            {
+                font.bold: true
+                text: qsTr("Sizes")
+                Layout.columnSpan: 2
+            }
 
             Label { text: qsTr("Nodes") }
             Slider
@@ -83,19 +78,13 @@ Item
                 minimumValue: 0.05
                 maximumValue: 2.0
             }
-        }
 
-        Label
-        {
-            font.bold: true
-            text: qsTr("Miscellaneous")
-        }
-
-        GridLayout
-        {
-            columns: 2
-            rowSpacing: Constants.spacing
-            columnSpacing: Constants.spacing
+            Label
+            {
+                font.bold: true
+                text: qsTr("Miscellaneous")
+                Layout.columnSpan: 2
+            }
 
             Label { text: qsTr("Transition Time") }
             Slider
@@ -105,6 +94,7 @@ Item
                 maximumValue: 5.0
             }
         }
+
     }
 }
 
