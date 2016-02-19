@@ -94,6 +94,7 @@ public:
             CommandFn undoFn = defaultCommandFn,
             bool asynchronous = true) :
         _description(description),
+        _verb(description),
         _undoFn(undoFn),
         _asynchronous(asynchronous)
     {
