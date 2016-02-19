@@ -72,7 +72,7 @@ GraphCommonInteractor::GraphCommonInteractor(std::shared_ptr<GraphModel> graphMo
                                              GraphRenderer* graphRenderer) :
     Interactor(graphRenderer),
     _graphModel(graphModel),
-    _commandManager(commandManager),
+    _commandManager(&commandManager),
     _selectionManager(selectionManager),
     _graphRenderer(graphRenderer)
 {
@@ -225,7 +225,7 @@ void GraphCommonInteractor::leftMouseUp()
             auto selection = selectionForRect(QRect(_frustumSelectStart, frustumSelectEnd));
 
             auto previousSelection = _selectionManager->selectedNodes();
-            _commandManager.execute(tr("Select Nodes"), tr("Selecting Nodes"),
+            _commandManager->execute(tr("Select Nodes"), tr("Selecting Nodes"),
                 [this, selection](Command& command)
                 {
                     bool nodesSelected = _selectionManager->selectNodes(selection);
@@ -246,7 +246,7 @@ void GraphCommonInteractor::leftMouseUp()
                 bool toggling = modifiers() & Qt::ShiftModifier;
                 auto previousSelection = _selectionManager->selectedNodes();
                 auto toggleNodeId = _clickedNodeId;
-                _commandManager.execute(nodeSelected ? tr("Deselect Node") : tr("Select Node"),
+                _commandManager->execute(nodeSelected ? tr("Deselect Node") : tr("Select Node"),
                                         nodeSelected ? tr("Deselecting Node") : tr("Selecting Node"),
                     [this, nodeSelected, toggling, toggleNodeId](Command& command)
                     {
@@ -263,7 +263,7 @@ void GraphCommonInteractor::leftMouseUp()
             else
             {
                 auto previousSelection = _selectionManager->selectedNodes();
-                _commandManager.execute(tr("Select None"), tr("Selecting None"),
+                _commandManager->execute(tr("Select None"), tr("Selecting None"),
                     [this](Command&) { return _selectionManager->clearNodeSelection(); },
                     [this, previousSelection](Command&) { _selectionManager->setSelectedNodes(previousSelection); });
             }

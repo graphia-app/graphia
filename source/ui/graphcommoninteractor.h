@@ -30,7 +30,7 @@ public:
 
 protected:
     std::shared_ptr<GraphModel> _graphModel;
-    CommandManager& _commandManager;
+    CommandManager* _commandManager;
     std::shared_ptr<SelectionManager> _selectionManager;
     GraphRenderer* _graphRenderer;
 
