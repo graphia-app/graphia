@@ -41,14 +41,25 @@ public:
     {
         QMetaObject::invokeMethod(this, "executeReal",
                                   Q_ARG(std::shared_ptr<Command>,
-                                        std::make_shared<Command>(std::forward<Args>(args)...)));
+                                        std::make_shared<Command>(std::forward<Args>(args)...)),
+                                  Q_ARG(bool, false));
+    }
+
+    // Execute only once, i.e. so that it can't be undone
+    template<typename... Args> void executeOnce(Args&&... args)
+    {
+        QMetaObject::invokeMethod(this, "executeReal",
+                                  Q_ARG(std::shared_ptr<Command>,
+                                        std::make_shared<Command>(std::forward<Args>(args)...)),
+                                  Q_ARG(bool, true));
     }
 
     template<typename... Args> void executeSynchronous(Args&&... args)
     {
         QMetaObject::invokeMethod(this, "executeReal",
                                   Q_ARG(std::shared_ptr<Command>,
-                                        std::make_shared<Command>(std::forward<Args>(args)..., false)));
+                                        std::make_shared<Command>(std::forward<Args>(args)..., false)),
+                                  Q_ARG(bool, false));
     }
 
     void undo();
@@ -96,7 +107,7 @@ private:
     QString _commandVerb;
 
 private slots:
-    void executeReal(std::shared_ptr<Command> command);
+    void executeReal(std::shared_ptr<Command> command, bool irreversible);
 
     void undoReal();
     void redoReal();

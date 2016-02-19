@@ -45,7 +45,7 @@ static void checkForRecursiveExecution(const char* function, const std::unique_l
                QString("Recursive execution! (Already executing '%1')").arg(verb).toLatin1());
 }
 
-void CommandManager::executeReal(std::shared_ptr<Command> command)
+void CommandManager::executeReal(std::shared_ptr<Command> command, bool irreversible)
 {
     checkForRecursiveExecution("CommandManager::executeReal", _lock, _commandVerb);
 
@@ -53,12 +53,12 @@ void CommandManager::executeReal(std::shared_ptr<Command> command)
 
     command->setProgressFn([this](int progress) { _commandProgress = progress; emit commandProgressChanged(); });
 
-    auto executeCommand = [this, command]()
+    auto executeCommand = [this, command, irreversible]()
     {
         if(command->asynchronous())
             u::setCurrentThreadName(command->description());
 
-        if(!command->execute())
+        if(!command->execute() || irreversible)
         {
             _busy = false;
             emit commandCompleted(nullptr, QString(), CommandAction::None);
