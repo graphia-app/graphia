@@ -17,6 +17,9 @@ Item
         property alias edgeColor: edgeColorPickButton.color
         property alias multiElementColor: multiElementColorPickButton.color
         property alias backgroundColor: backgroundColorPickButton.color
+
+        property alias nodeSize: nodeSizeSlider.value
+        property alias edgeSize: edgeSizeSlider.value
     }
 
     Column
@@ -49,6 +52,35 @@ Item
 
             Label { text: qsTr("Background") }
             ColorPickButton { id: backgroundColorPickButton }
+        }
+
+        Label
+        {
+            font.bold: true
+            text: qsTr("Sizes")
+        }
+
+        GridLayout
+        {
+            columns: 2
+            rowSpacing: Constants.spacing
+            columnSpacing: Constants.spacing
+
+            Label { text: qsTr("Nodes") }
+            Slider
+            {
+                id: nodeSizeSlider
+                minimumValue: 0.1
+                maximumValue: 2.0
+            }
+
+            Label { text: qsTr("Edges") }
+            Slider
+            {
+                id: edgeSizeSlider
+                minimumValue: 0.05
+                maximumValue: 2.0
+            }
         }
     }
 }
