@@ -15,6 +15,10 @@ class GraphArray
 public:
     virtual ~GraphArray() {}
 
+protected:
+    friend Graph;
+    friend ComponentManager;
+
     virtual void resize(int size) = 0;
     virtual void invalidate() = 0;
 };
@@ -32,6 +36,7 @@ protected:
     const Graph* _graph;
     std::vector<Element> _array;
     mutable std::recursive_mutex _mutex;
+    Element _defaultValue;
 
 public:
     explicit GenericGraphArray(const Graph& graph) :
@@ -39,7 +44,7 @@ public:
     {}
 
     GenericGraphArray(const Graph& graph, const Element& defaultValue) :
-        _graph(&graph)
+        _graph(&graph), _defaultValue(defaultValue)
     {
         fill(defaultValue);
     }
@@ -47,13 +52,15 @@ public:
     GenericGraphArray(const GenericGraphArray& other) :
         _graph(other._graph),
         _array(other._array),
-        _mutex()
+        _mutex(),
+        _defaultValue(other._defaultValue)
     {}
 
     GenericGraphArray(GenericGraphArray&& other) :
         _graph(other._graph),
         _array(std::move(other._array)),
-        _mutex()
+        _mutex(),
+        _defaultValue(other._defaultValue)
     {}
 
     virtual ~GenericGraphArray() {}
@@ -63,6 +70,7 @@ public:
         Q_ASSERT(_graph == other._graph);
         _array = other._array;
         _mutex.native_handle();
+        _defaultValue = other._defaultValue;
 
         return *this;
     }
@@ -72,14 +80,9 @@ public:
         Q_ASSERT(_graph == other._graph);
         _array = std::move(other._array);
         _mutex.native_handle();
+        _defaultValue = std::move(other._defaultValue);
 
         return *this;
-    }
-
-    void invalidate()
-    {
-        MaybeLock lock(_mutex);
-        _graph = nullptr;
     }
 
     Element& operator[](Index index)
@@ -142,12 +145,6 @@ public:
         return _array.empty();
     }
 
-    void resize(int size)
-    {
-        MaybeLock lock(_mutex);
-        _array.resize(size);
-    }
-
     void fill(const Element& value)
     {
         MaybeLock lock(_mutex);
@@ -169,6 +166,32 @@ public:
             for(Element e : _array)
                 qDebug() << e;
         }
+    }
+
+protected:
+    void resize(int size)
+    {
+        resize_(size);
+    }
+
+    template<typename T = Element> typename std::enable_if<std::is_copy_constructible<T>::value>::type
+    resize_(int size)
+    {
+        MaybeLock lock(_mutex);
+        _array.resize(size, _defaultValue);
+    }
+
+    template<typename T = Element> typename std::enable_if<!std::is_copy_constructible<T>::value>::type
+    resize_(int size)
+    {
+        MaybeLock lock(_mutex);
+        _array.resize(size);
+    }
+
+    void invalidate()
+    {
+        MaybeLock lock(_mutex);
+        _graph = nullptr;
     }
 };
 
