@@ -10,6 +10,7 @@
 #include "../ui/graphquickitem.h"
 
 #include "../utils/utils.h"
+#include "../utils/preferences.h"
 
 #include <QPoint>
 
@@ -527,7 +528,8 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph)
             onShow();
             setViewportSize(_width, _height);
 
-            startTransition(1.0f, Transition::Type::EaseInEaseOut,
+            startTransition(u::clamp(0.1f, 5.0f, u::pref("visualDefaults/transitionTime", 1.0f).toFloat()),
+                            Transition::Type::EaseInEaseOut,
             [this, graph]
             {
                 // If graph change has resulted in a single component, switch

@@ -20,6 +20,8 @@ Item
 
         property alias nodeSize: nodeSizeSlider.value
         property alias edgeSize: edgeSizeSlider.value
+
+        property alias transitionTime: transitionTimeSlider.value
     }
 
     Column
@@ -80,6 +82,27 @@ Item
                 id: edgeSizeSlider
                 minimumValue: 0.05
                 maximumValue: 2.0
+            }
+        }
+
+        Label
+        {
+            font.bold: true
+            text: qsTr("Miscellaneous")
+        }
+
+        GridLayout
+        {
+            columns: 2
+            rowSpacing: Constants.spacing
+            columnSpacing: Constants.spacing
+
+            Label { text: qsTr("Transition Time") }
+            Slider
+            {
+                id: transitionTimeSlider
+                minimumValue: 0.1
+                maximumValue: 5.0
             }
         }
     }
