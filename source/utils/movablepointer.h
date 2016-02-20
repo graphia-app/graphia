@@ -16,6 +16,9 @@ public:
 
     explicit MovablePointer(MovablePointer&& other) noexcept : std::unique_ptr<T>(std::move(other)) {}
 
+    MovablePointer(const MovablePointer& other) = delete;
+    void operator=(const MovablePointer& other) = delete;
+
     inline operator T*() const { return this->get(); }
 };
 
