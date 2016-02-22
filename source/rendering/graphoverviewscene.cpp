@@ -561,7 +561,7 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph)
 
 void GraphOverviewScene::onPreferenceChanged(const QString& key, const QVariant&)
 {
-    if(key == "visualDefaults/minimumComponentRadius")
+    if(visible() && key == "visualDefaults/minimumComponentRadius")
     {
         _commandManager->executeOnce(tr("Component Layout"),
         [this](Command&)
