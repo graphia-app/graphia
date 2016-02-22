@@ -185,17 +185,17 @@ void GraphModel::updateVisuals()
     auto nodeSize = u::clamp(0.1f, 2.0f, u::pref("visualDefaults/nodeSize", "0.6").toFloat());
     auto edgeSize = u::clamp(0.05f, nodeSize, u::pref("visualDefaults/edgeSize", "0.2").toFloat());
 
-    for(auto nodeId : _graph.nodeIds())
+    for(auto nodeId : graph().nodeIds())
     {
         _nodeVisuals[nodeId]._size = nodeSize;
-        _nodeVisuals[nodeId]._color = _graph.typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Not ?
+        _nodeVisuals[nodeId]._color = graph().typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Not ?
                     nodeColor : multiColor;
     }
 
-    for(auto edgeId : _graph.edgeIds())
+    for(auto edgeId : graph().edgeIds())
     {
         _edgeVisuals[edgeId]._size = edgeSize;
-        _edgeVisuals[edgeId]._color = _graph.typeOf(edgeId) == EdgeIdDistinctSetCollection::Type::Not ?
+        _edgeVisuals[edgeId]._color = graph().typeOf(edgeId) == EdgeIdDistinctSetCollection::Type::Not ?
                     edgeColor : multiColor;
     }
 }
