@@ -40,7 +40,7 @@ protected:
 
 public:
     explicit GenericGraphArray(const Graph& graph) :
-        _graph(&graph)
+        _graph(&graph), _defaultValue()
     {}
 
     GenericGraphArray(const Graph& graph, const Element& defaultValue) :
@@ -154,7 +154,7 @@ public:
     void resetElements()
     {
         MaybeLock lock(_mutex);
-        fill(Element());
+        fill(_defaultValue);
     }
 
     void dumpToQDebug(int detail) const
