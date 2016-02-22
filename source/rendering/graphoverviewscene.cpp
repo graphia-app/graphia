@@ -446,7 +446,8 @@ void GraphOverviewScene::onComponentAdded(const Graph*, ComponentId componentId,
     {
         _graphRenderer->executeOnRendererThread([this, componentId]
         {
-            _previousComponentAlpha[componentId] = 0.0f;
+            if(visible())
+                _previousComponentAlpha[componentId] = 0.0f;
         }, "GraphOverviewScene::onComponentAdded (set source alpha to 0)");
     }
 }
