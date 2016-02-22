@@ -34,7 +34,8 @@ public:
 
     template<typename T> typename std::enable_if<std::is_base_of<Command, T>::value, void>::type execute(std::shared_ptr<T> command)
     {
-        QMetaObject::invokeMethod(this, "executeReal", Q_ARG(std::shared_ptr<Command>, command));
+        QMetaObject::invokeMethod(this, "executeReal", Q_ARG(std::shared_ptr<Command>, command),
+                                                       Q_ARG(bool, false));
     }
 
     template<typename... Args> void execute(Args&&... args)
