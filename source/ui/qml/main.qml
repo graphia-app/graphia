@@ -217,7 +217,6 @@ ApplicationWindow
     {
         id: optionsAction
         text: qsTr("&Options...")
-        enabled: currentDocument ? currentDocument.idle : false
         onTriggered: optionsDialog.show();
     }
 
