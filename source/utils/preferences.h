@@ -17,15 +17,26 @@ class Preferences : public QObject, public Singleton<Preferences>
 
 private:
     QSettings _settings;
+    std::map<QString, QVariant> _minimumValue;
+    std::map<QString, QVariant> _maximumValue;
 
 public:
-    QVariant get(const QString& key, const QVariant& defaultValue = QVariant());
-    void set(const QString& key, const QVariant& value);
+    void define(const QString& key, const QVariant& defaultValue = QVariant(),
+                const QVariant& minimumValue = QVariant(), const QVariant& maximumValue = QVariant());
+
+    QVariant get(const QString& key);
+
+    QVariant minimum(const QString& key) const;
+    QVariant maximum(const QString& key) const;
+
+    void set(const QString& key, QVariant value);
 
     bool exists(const QString& key);
 
 signals:
     void preferenceChanged(const QString& key, const QVariant& value);
+    void minimumChanged(const QString& key, const QVariant& value);
+    void maximumChanged(const QString& key, const QVariant& value);
 };
 
 class QmlPreferences : public QObject, public QQmlParserStatus
@@ -52,8 +63,12 @@ private:
     void classBegin() {}
     void componentComplete();
 
-    QString preferenceNameFrom(const QString& propertyName);
-    QMetaProperty propertyFrom(const QString& preferenceName);
+    QString preferenceNameByPropertyName(const QString& propertyName);
+    QMetaProperty propertyByName(const QString& propertyName);
+
+    QMetaProperty valuePropertyFrom(const QString& preferenceName);
+    QMetaProperty minimumPropertyFrom(const QString& preferenceName);
+    QMetaProperty maximumPropertyFrom(const QString& preferenceName);
 
     void setProperty(QMetaProperty property, const QVariant& value);
 
@@ -65,14 +80,18 @@ private:
 
 private slots:
     void onPreferenceChanged(const QString& key, const QVariant& value);
+    void onMinimumChanged(const QString& key, const QVariant& value);
+    void onMaximumChanged(const QString& key, const QVariant& value);
+
     void onPropertyChanged();
 };
 
 namespace u
 {
-    QVariant pref(const QString& key, const QVariant& defaultValue = QVariant());
-    void setPref(const QString& key, const QVariant& value);
-    bool prefExists(const QString& key);
+    template<typename... Args> void definePref(Args&&... args) { return Preferences::instance()->define(std::forward<Args>(args)...); }
+    template<typename... Args> QVariant pref(Args&&... args) { return Preferences::instance()->get(std::forward<Args>(args)...); }
+    template<typename... Args> void setPref(Args&&... args) { return Preferences::instance()->set(std::forward<Args>(args)...); }
+    template<typename... Args> bool prefExists(Args&&... args) { return Preferences::instance()->exists(std::forward<Args>(args)...); }
 }
 
 #endif // PREFERENCES_H

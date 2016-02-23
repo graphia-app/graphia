@@ -1080,7 +1080,7 @@ void GraphRenderer::finishRender()
 
     glViewport(0, 0, framebufferObject()->width(), framebufferObject()->height());
 
-    auto backgroundColor = u::pref("visualDefaults/backgroundColor", "#C0C0C0").value<QColor>();
+    auto backgroundColor = u::pref("visualDefaults/backgroundColor").value<QColor>();
 
     glClearColor(backgroundColor.redF(),
                  backgroundColor.greenF(),

@@ -206,7 +206,7 @@ void CirclePackComponentLayout::executeReal(const Graph& graph, const std::vecto
 
     ComponentArray<Links> links(graph);
 
-    auto minimumComponentRadius = u::pref("visualDefaults/minimumComponentRadius", 2.0f).toFloat();
+    auto minimumComponentRadius = u::pref("visualDefaults/minimumComponentRadius").toFloat();
     for(auto componentId : sortedComponentIds)
     {
         componentLayoutData[componentId].setRadius(std::max(componentLayoutData[componentId].radius(),

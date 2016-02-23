@@ -526,7 +526,7 @@ void GraphOverviewScene::startComponentLayoutTransition()
         onShow();
         setViewportSize(_width, _height);
 
-        startTransition(u::clamp(0.1f, 5.0f, u::pref("visualDefaults/transitionTime", 1.0f).toFloat()),
+        startTransition(u::pref("visualDefaults/transitionTime").toFloat(),
                         Transition::Type::EaseInEaseOut,
         [this]
         {

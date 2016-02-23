@@ -19,10 +19,20 @@ Item
         property alias backgroundColor: backgroundColorPickButton.color
 
         property alias nodeSize: nodeSizeSlider.value
+        property alias nodeSizeMinimumValue: nodeSizeSlider.minimumValue
+        property alias nodeSizeMaximumValue: nodeSizeSlider.maximumValue
+
         property alias edgeSize: edgeSizeSlider.value
+        property alias edgeSizeMinimumValue: edgeSizeSlider.minimumValue
+        property alias edgeSizeMaximumValue: edgeSizeSlider.maximumValue
 
         property alias transitionTime: transitionTimeSlider.value
+        property alias transitionTimeMinimumValue : transitionTimeSlider.minimumValue
+        property alias transitionTimeMaximumValue : transitionTimeSlider.maximumValue
+
         property alias minimumComponentRadius: minimumComponentRadiusSlider.value
+        property alias minimumComponentRadiusMinimumValue : minimumComponentRadiusSlider.minimumValue
+        property alias minimumComponentRadiusMaximumValue : minimumComponentRadiusSlider.maximumValue
     }
 
     Column
@@ -65,20 +75,10 @@ Item
             }
 
             Label { text: qsTr("Nodes") }
-            Slider
-            {
-                id: nodeSizeSlider
-                minimumValue: 0.1
-                maximumValue: 2.0
-            }
+            Slider { id: nodeSizeSlider }
 
             Label { text: qsTr("Edges") }
-            Slider
-            {
-                id: edgeSizeSlider
-                minimumValue: 0.05
-                maximumValue: 2.0
-            }
+            Slider { id: edgeSizeSlider }
 
             Label
             {
@@ -88,22 +88,11 @@ Item
             }
 
             Label { text: qsTr("Transition Time") }
-            Slider
-            {
-                id: transitionTimeSlider
-                minimumValue: 0.1
-                maximumValue: 5.0
-            }
+            Slider { id: transitionTimeSlider }
 
             Label { text: qsTr("Minimum Component Radius") }
-            Slider
-            {
-                id: minimumComponentRadiusSlider
-                minimumValue: 0.1
-                maximumValue: 10.0
-            }
+            Slider { id: minimumComponentRadiusSlider }
         }
-
     }
 }
 

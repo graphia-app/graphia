@@ -179,11 +179,11 @@ const DataField& GraphModel::dataFieldByName(const QString& name) const
 
 void GraphModel::updateVisuals()
 {
-    auto nodeColor = u::pref("visualDefaults/nodeColor", "#0000FF").value<QColor>();
-    auto edgeColor = u::pref("visualDefaults/edgeColor", "#FFFFFF").value<QColor>();
-    auto multiColor = u::pref("visualDefaults/multiElementColor", "#FF0000").value<QColor>();
-    auto nodeSize = u::clamp(0.1f, 2.0f, u::pref("visualDefaults/nodeSize", "0.6").toFloat());
-    auto edgeSize = u::clamp(0.05f, nodeSize, u::pref("visualDefaults/edgeSize", "0.2").toFloat());
+    auto nodeColor = u::pref("visualDefaults/nodeColor").value<QColor>();
+    auto edgeColor = u::pref("visualDefaults/edgeColor").value<QColor>();
+    auto multiColor = u::pref("visualDefaults/multiElementColor").value<QColor>();
+    auto nodeSize = u::pref("visualDefaults/nodeSize").toFloat();
+    auto edgeSize = u::pref("visualDefaults/edgeSize").toFloat();
 
     for(auto nodeId : graph().nodeIds())
     {
@@ -194,7 +194,12 @@ void GraphModel::updateVisuals()
 
     for(auto edgeId : graph().edgeIds())
     {
-        _edgeVisuals[edgeId]._size = edgeSize;
+        // Restrict edgeSize to be no larger than the source or target size
+        auto& edge = graph().edgeById(edgeId);
+        auto minNodeSize = std::min(_nodeVisuals[edge.sourceId()]._size,
+                                    _nodeVisuals[edge.targetId()]._size);
+        _edgeVisuals[edgeId]._size = std::min(edgeSize, minNodeSize);
+
         _edgeVisuals[edgeId]._color = graph().typeOf(edgeId) == EdgeIdDistinctSetCollection::Type::Not ?
                     edgeColor : multiColor;
     }
