@@ -1113,6 +1113,8 @@ void GraphRenderer::finishRender()
 
     _selectionShader.bind();
     _selectionShader.setUniformValue("projectionMatrix", m);
+    _selectionShader.setUniformValue("highlightColor",
+                                     u::pref("visualDefaults/highlightColor").value<QColor>());
     glDrawArrays(GL_TRIANGLES, 0, 6);
     _selectionShader.release();
 

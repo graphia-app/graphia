@@ -17,6 +17,7 @@ Item
         property alias edgeColor: edgeColorPickButton.color
         property alias multiElementColor: multiElementColorPickButton.color
         property alias backgroundColor: backgroundColorPickButton.color
+        property alias highlightColor: highlightColorPickButton.color
 
         property alias nodeSize: nodeSizeSlider.value
         property alias nodeSizeMinimumValue: nodeSizeSlider.minimumValue
@@ -66,6 +67,9 @@ Item
 
             Label { text: qsTr("Background") }
             ColorPickButton { id: backgroundColorPickButton }
+
+            Label { text: qsTr("Selection") }
+            ColorPickButton { id: highlightColorPickButton }
 
             Label
             {

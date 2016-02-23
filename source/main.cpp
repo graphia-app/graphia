@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
     preferences.define("visualDefaults/edgeColor",               "#FFFFFF");
     preferences.define("visualDefaults/multiElementColor",       "#FF0000");
     preferences.define("visualDefaults/backgroundColor",         "#C0C0C0");
+    preferences.define("visualDefaults/highlightColor",          "#FFFFFF");
 
     preferences.define("visualDefaults/nodeSize",                0.6, 0.1, 2.0);
     preferences.define("visualDefaults/edgeSize",                0.2, 0.1, 2.0);
