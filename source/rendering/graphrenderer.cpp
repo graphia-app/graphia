@@ -750,6 +750,7 @@ void GraphRenderer::onSelectionChanged(const SelectionManager*)
 
 void GraphRenderer::onPreferenceChanged(const QString&, const QVariant&)
 {
+    updateGPUData(When::Later);
     update(); // QQuickFramebufferObject::Renderer::update
 }
 
