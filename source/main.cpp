@@ -81,6 +81,9 @@ int main(int argc, char *argv[])
     preferences.define("visualDefaults/minimumComponentRadius",  2.0, 0.05, 15.0);
     preferences.define("visualDefaults/transitionTime",          1.0, 0.1, 5.0);
 
+    preferences.define("misc/showGraphMetrics",             false);
+    preferences.define("misc/showLayoutSettings",           false);
+
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
 

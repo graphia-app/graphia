@@ -69,6 +69,13 @@ ApplicationWindow
         property alias maximised: mainWindow.maximised
     }
 
+    Preferences
+    {
+        section: "misc"
+        property alias showGraphMetrics: toggleGraphMetricsAction.checked
+        property alias showLayoutSettings: toggleLayoutSettingsAction.checked
+    }
+
     function openFile(fileUrl, inNewTab)
     {
         var fileTypes = application.fileTypesOf(fileUrl);
