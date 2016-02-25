@@ -242,20 +242,19 @@ void QmlPreferences::load()
     [this](const QMetaProperty& property, PropertyType propertyType)
     {
         auto preferenceName = preferenceNameByPropertyName(property.name());
-        if(Preferences::instance()->exists(preferenceName))
+        switch(propertyType)
         {
-            switch(propertyType)
-            {
-            case PropertyType::Value:
-                setProperty(property, Preferences::instance()->get(preferenceName));
-                break;
-            case PropertyType::Minimum:
+        case PropertyType::Value:
+            setProperty(property, Preferences::instance()->get(preferenceName));
+            break;
+        case PropertyType::Minimum:
+            if(Preferences::instance()->exists(preferenceName))
                 setProperty(property, Preferences::instance()->minimum(preferenceName));
-                break;
-            case PropertyType::Maximum:
+            break;
+        case PropertyType::Maximum:
+            if(Preferences::instance()->exists(preferenceName))
                 setProperty(property, Preferences::instance()->maximum(preferenceName));
-                break;
-            }
+            break;
         }
     });
 }
