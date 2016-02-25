@@ -168,6 +168,7 @@ DataField& GraphModel::addDataField(const QString& name)
 
 DataField& GraphModel::mutableDataFieldByName(const QString& name)
 {
+    Q_ASSERT(u::contains(_dataFields, name));
     return _dataFields.at(name);
 }
 

@@ -8,14 +8,24 @@ WeightedEdgeGraphModel::WeightedEdgeGraphModel(const QString &name) :
     _edgeWeights(mutableGraph())
 {
     connect(&transformedGraph(), &Graph::graphChanged, this, &WeightedEdgeGraphModel::onGraphChanged, Qt::DirectConnection);
+}
 
-    addDataField(tr("Edge Weight"))
-            .setFloatValueFn(FLOAT_EDGE_FN([this](EdgeId edgeId) { return _edgeWeights[edgeId]; }));
+void WeightedEdgeGraphModel::setEdgeWeight(EdgeId edgeId, float weight)
+{
+    if(!_hasEdgeWeights)
+    {
+        addDataField(tr("Edge Weight"))
+                .setFloatValueFn(FLOAT_EDGE_FN([this](EdgeId edgeId_) { return _edgeWeights[edgeId_]; }));
+
+        _hasEdgeWeights = true;
+    }
+
+    _edgeWeights[edgeId] = weight;
 }
 
 void WeightedEdgeGraphModel::onGraphChanged(const Graph*)
 {
-    if(!_edgeWeights.empty())
+    if(!_edgeWeights.empty() && _hasEdgeWeights)
     {
         float min = *std::min_element(_edgeWeights.begin(), _edgeWeights.end());
         float max = *std::max_element(_edgeWeights.begin(), _edgeWeights.end());

@@ -11,10 +11,11 @@ public:
 
 private:
     EdgeArray<float> _edgeWeights;
+    bool _hasEdgeWeights = false;
 
 public:
     const EdgeArray<float>& edgeWeights() const { return _edgeWeights; }
-    void setEdgeWeight(EdgeId edgeId, float weight) { _edgeWeights[edgeId] = weight; }
+    void setEdgeWeight(EdgeId edgeId, float weight);
 
 private slots:
     void onGraphChanged(const Graph*);
