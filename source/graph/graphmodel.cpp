@@ -180,11 +180,11 @@ const DataField& GraphModel::dataFieldByName(const QString& name) const
 
 void GraphModel::updateVisuals()
 {
-    auto nodeColor = u::pref("visualDefaults/nodeColor").value<QColor>();
-    auto edgeColor = u::pref("visualDefaults/edgeColor").value<QColor>();
-    auto multiColor = u::pref("visualDefaults/multiElementColor").value<QColor>();
-    auto nodeSize = u::pref("visualDefaults/nodeSize").toFloat();
-    auto edgeSize = u::pref("visualDefaults/edgeSize").toFloat();
+    auto nodeColor = u::pref("visuals/defaultNodeColor").value<QColor>();
+    auto edgeColor = u::pref("visuals/defaultEdgeColor").value<QColor>();
+    auto multiColor = u::pref("visuals/multiElementColor").value<QColor>();
+    auto nodeSize = u::pref("visuals/defaultNodeSize").toFloat();
+    auto edgeSize = u::pref("visuals/defaultEdgeSize").toFloat();
 
     for(auto nodeId : graph().nodeIds())
     {

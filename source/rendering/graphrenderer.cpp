@@ -1080,7 +1080,7 @@ void GraphRenderer::finishRender()
 
     glViewport(0, 0, framebufferObject()->width(), framebufferObject()->height());
 
-    auto backgroundColor = u::pref("visualDefaults/backgroundColor").value<QColor>();
+    auto backgroundColor = u::pref("visuals/backgroundColor").value<QColor>();
 
     glClearColor(backgroundColor.redF(),
                  backgroundColor.greenF(),
@@ -1114,7 +1114,7 @@ void GraphRenderer::finishRender()
     _selectionShader.bind();
     _selectionShader.setUniformValue("projectionMatrix", m);
     _selectionShader.setUniformValue("highlightColor",
-                                     u::pref("visualDefaults/highlightColor").value<QColor>());
+                                     u::pref("visuals/highlightColor").value<QColor>());
     glDrawArrays(GL_TRIANGLES, 0, 6);
     _selectionShader.release();
 

@@ -46,7 +46,7 @@ Item
 
     property color textColor:
     {
-        var backgroundBrightness = brightness(visualDefaults.backgroundColor);
+        var backgroundBrightness = brightness(visuals.backgroundColor);
         var blackDiff = Math.abs(backgroundBrightness - 0);
         var whiteDiff = Math.abs(backgroundBrightness - 1);
 
@@ -68,8 +68,8 @@ Item
 
     Preferences
     {
-        id: visualDefaults
-        section: "visualDefaults"
+        id: visuals
+        section: "visuals"
         property color backgroundColor
     }
 

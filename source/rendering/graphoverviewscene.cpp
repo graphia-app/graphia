@@ -526,7 +526,7 @@ void GraphOverviewScene::startComponentLayoutTransition()
         onShow();
         setViewportSize(_width, _height);
 
-        startTransition(u::pref("visualDefaults/transitionTime").toFloat(),
+        startTransition(u::pref("visuals/transitionTime").toFloat(),
                         Transition::Type::EaseInEaseOut,
         [this]
         {
@@ -561,7 +561,7 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph)
 
 void GraphOverviewScene::onPreferenceChanged(const QString& key, const QVariant&)
 {
-    if(visible() && key == "visualDefaults/minimumComponentRadius")
+    if(visible() && key == "visuals/minimumComponentRadius")
     {
         _commandManager->executeOnce(tr("Component Layout"),
         [this](Command&)

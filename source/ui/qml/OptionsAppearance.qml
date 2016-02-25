@@ -11,21 +11,21 @@ Item
 {
     Preferences
     {
-        section: "visualDefaults"
+        section: "visuals"
 
-        property alias nodeColor: nodeColorPickButton.color
-        property alias edgeColor: edgeColorPickButton.color
+        property alias defaultNodeColor: nodeColorPickButton.color
+        property alias defaultEdgeColor: edgeColorPickButton.color
         property alias multiElementColor: multiElementColorPickButton.color
         property alias backgroundColor: backgroundColorPickButton.color
         property alias highlightColor: highlightColorPickButton.color
 
-        property alias nodeSize: nodeSizeSlider.value
-        property alias nodeSizeMinimumValue: nodeSizeSlider.minimumValue
-        property alias nodeSizeMaximumValue: nodeSizeSlider.maximumValue
+        property alias defaultNodeSize: nodeSizeSlider.value
+        property alias defaultNodeSizeMinimumValue: nodeSizeSlider.minimumValue
+        property alias defaultNodeSizeMaximumValue: nodeSizeSlider.maximumValue
 
-        property alias edgeSize: edgeSizeSlider.value
-        property alias edgeSizeMinimumValue: edgeSizeSlider.minimumValue
-        property alias edgeSizeMaximumValue: edgeSizeSlider.maximumValue
+        property alias defaultEdgeSize: edgeSizeSlider.value
+        property alias defaultEdgeSizeMinimumValue: edgeSizeSlider.minimumValue
+        property alias defaultEdgeSizeMaximumValue: edgeSizeSlider.maximumValue
 
         property alias transitionTime: transitionTimeSlider.value
         property alias transitionTimeMinimumValue : transitionTimeSlider.minimumValue
