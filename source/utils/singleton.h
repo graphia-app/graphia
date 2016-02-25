@@ -21,12 +21,21 @@ public:
   Singleton(const Singleton&) = delete;
   Singleton& operator=(const Singleton&) = delete;
 
-  static T* instance() { return _singletonPtr; }
+  static T* instance()
+  {
+      // An instance of T needs to be created somewhere
+      Q_ASSERT(_singletonPtr != nullptr);
+
+      return _singletonPtr;
+  }
 
 private:
   static T* _singletonPtr;
 };
 
 template<typename T> T* Singleton <T>::_singletonPtr = nullptr;
+
+// Allows access to a singleton via $(Class)->... instead of Class::instance()->...
+#define $(S) S::instance()
 
 #endif

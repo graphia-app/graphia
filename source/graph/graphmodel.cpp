@@ -21,7 +21,7 @@ GraphModel::GraphModel(const QString &name) :
     _name(name)
 {
     connect(&_transformedGraph, &Graph::graphChanged, this, &GraphModel::onGraphChanged, Qt::DirectConnection);
-    connect(Preferences::instance(), &Preferences::preferenceChanged, this, &GraphModel::onPreferenceChanged);
+    connect($(Preferences), &Preferences::preferenceChanged, this, &GraphModel::onPreferenceChanged);
 
     addDataField(tr("Node Degree"))
         .setIntValueFn(INT_NODE_FN([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).degree(); }))

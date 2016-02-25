@@ -41,7 +41,7 @@ GraphOverviewScene::GraphOverviewScene(CommandManager& commandManager, GraphRend
     connect(&_graphModel->graph(), &Graph::graphWillChange, this, &GraphOverviewScene::onGraphWillChange, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphOverviewScene::onGraphChanged, Qt::DirectConnection);
 
-    connect(Preferences::instance(), &Preferences::preferenceChanged, this, &GraphOverviewScene::onPreferenceChanged, Qt::DirectConnection);
+    connect($(Preferences), &Preferences::preferenceChanged, this, &GraphOverviewScene::onPreferenceChanged, Qt::DirectConnection);
 }
 
 void GraphOverviewScene::update(float t)

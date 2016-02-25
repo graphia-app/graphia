@@ -81,12 +81,9 @@ bool Preferences::exists(const QString& key)
 QmlPreferences::QmlPreferences(QObject* parent) :
     QObject(parent)
 {
-    connect(Preferences::instance(), &Preferences::preferenceChanged,
-            this, &QmlPreferences::onPreferenceChanged);
-    connect(Preferences::instance(), &Preferences::minimumChanged,
-            this, &QmlPreferences::onMinimumChanged);
-    connect(Preferences::instance(), &Preferences::maximumChanged,
-            this, &QmlPreferences::onMaximumChanged);
+    connect($(Preferences), &Preferences::preferenceChanged, this, &QmlPreferences::onPreferenceChanged);
+    connect($(Preferences), &Preferences::minimumChanged, this, &QmlPreferences::onMinimumChanged);
+    connect($(Preferences), &Preferences::maximumChanged, this, &QmlPreferences::onMaximumChanged);
 }
 
 QmlPreferences::~QmlPreferences()
@@ -245,15 +242,15 @@ void QmlPreferences::load()
         switch(propertyType)
         {
         case PropertyType::Value:
-            setProperty(property, Preferences::instance()->get(preferenceName));
+            setProperty(property, $(Preferences)->get(preferenceName));
             break;
         case PropertyType::Minimum:
-            if(Preferences::instance()->exists(preferenceName))
-                setProperty(property, Preferences::instance()->minimum(preferenceName));
+            if($(Preferences)->exists(preferenceName))
+                setProperty(property, $(Preferences)->minimum(preferenceName));
             break;
         case PropertyType::Maximum:
-            if(Preferences::instance()->exists(preferenceName))
-                setProperty(property, Preferences::instance()->maximum(preferenceName));
+            if($(Preferences)->exists(preferenceName))
+                setProperty(property, $(Preferences)->maximum(preferenceName));
             break;
         }
     });
@@ -263,7 +260,7 @@ void QmlPreferences::save()
 {
     for(auto& pendingPreferenceChange : _pendingPreferenceChanges)
     {
-        Preferences::instance()->set(preferenceNameByPropertyName(pendingPreferenceChange.first),
+        $(Preferences)->set(preferenceNameByPropertyName(pendingPreferenceChange.first),
                    pendingPreferenceChange.second);
     }
 
