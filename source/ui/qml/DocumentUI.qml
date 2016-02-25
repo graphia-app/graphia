@@ -39,6 +39,40 @@ Item
     property bool debugPaused: document.debugPaused
     property string debugResumeAction: document.debugResumeAction
 
+    function brightness(c)
+    {
+        return 0.299 * c.r + 0.587 * c.g + 0.114 * c.b
+    }
+
+    property color textColor:
+    {
+        var backgroundBrightness = brightness(visualDefaults.backgroundColor);
+        var blackDiff = Math.abs(backgroundBrightness - 0);
+        var whiteDiff = Math.abs(backgroundBrightness - 1);
+
+        if(blackDiff > whiteDiff)
+            return "black";
+
+        return "white";
+    }
+
+    property color disabledTextColor:
+    {
+        if(textColor === "black")
+            return Qt.lighter("black");
+        else if(textColor === "white")
+            return Qt.darker("white");
+
+        return "grey";
+    }
+
+    Preferences
+    {
+        id: visualDefaults
+        section: "visualDefaults"
+        property color backgroundColor
+    }
+
     function openFile(fileUrl, fileType)
     {
         if(document.openFile(fileUrl, fileType))
@@ -95,6 +129,8 @@ Item
                     model: document.transforms
                     Transform
                     {
+                        color: root.textColor
+                        disabledColor: root.disabledTextColor
                         enabled: document.idle
 
                         // Not entirely sure why parent is ever null, but it is
@@ -107,7 +143,7 @@ Item
             {
                 visible: toggleGraphMetricsAction.checked
 
-                color: application ? application.textColor : "#000"
+                color: root.textColor
 
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
@@ -177,7 +213,10 @@ Item
                 Repeater
                 {
                     model: document.layoutSettings
-                    LayoutSettingUI { }
+                    LayoutSettingUI
+                    {
+                        textColor: root.textColor
+                    }
                 }
             }
         }

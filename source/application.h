@@ -23,7 +23,6 @@ class Application : public QObject
     Q_OBJECT
 
     Q_PROPERTY(QStringList nameFilters READ nameFilters NOTIFY nameFiltersChanged)
-    Q_PROPERTY(QColor textColor READ textColor NOTIFY textColorChanged)
 
 public:
     explicit Application(QObject *parent = nullptr);
@@ -34,7 +33,6 @@ public:
 
 signals:
     void nameFiltersChanged();
-    void textColorChanged();
 
 public slots:
     bool canOpen(const QString& fileTypeName) const;

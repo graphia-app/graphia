@@ -7,13 +7,16 @@ Item
     width: row.width
     height: row.height
 
+    property color textColor
+
     RowLayout
     {
         id: row
 
-        Text
+        Label
         {
             text: settingName
+            color: textColor
         }
 
         Slider
@@ -30,9 +33,10 @@ Item
             }
         }
 
-        Text
+        Label
         {
             text: settingValue.toPrecision(3)
+            color: textColor
         }
     }
 

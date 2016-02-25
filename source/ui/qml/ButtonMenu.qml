@@ -1,6 +1,10 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
+import QtQuick.Controls.Styles 1.4
+import QtQuick.Layouts 1.1
 import QtQml 2.2
+
+import "Constants.js" as Constants
 
 Item
 {
@@ -12,6 +16,7 @@ Item
 
     property string defaultText: ""
     property string selectedValue: ""
+    property color textColor
 
     property alias model: instantiator.model
 
@@ -58,6 +63,53 @@ Item
 
                 onObjectAdded: menu.insertItem(index, object)
                 onObjectRemoved: menu.removeItem(object)
+            }
+        }
+
+        style: ButtonStyle
+        {
+
+            background: Item
+            {
+                anchors.fill: parent
+
+                Rectangle
+                {
+                    anchors.fill: parent
+                    border.color: control.hovered ? "#888" : "transparent"
+                    radius: 4
+
+                    gradient: Gradient
+                    {
+                        GradientStop
+                        {
+                            position: 0
+                            color: control.hovered ? (control.pressed ? "#77cccccc" : "#77eeeeee") :
+                                                     "transparent"
+                        }
+
+                        GradientStop
+                        {
+                            position: 1
+                            color: control.hovered ? (control.pressed ? "#77aaaaaa" : "#77cccccc") :
+                                                     "transparent"
+                        }
+                    }
+                }
+            }
+
+            label: Label
+            {
+                text: control.text
+                color: textColor
+            }
+
+            padding
+            {
+                top: Constants.padding
+                left: Constants.padding
+                right: Constants.padding
+                bottom: Constants.padding
             }
         }
     }

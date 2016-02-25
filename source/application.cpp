@@ -23,7 +23,6 @@ Application::Application(QObject *parent) :
     QObject(parent)
 {
     connect(&_fileIdentifier, &FileIdentifier::nameFiltersChanged, this, &Application::nameFiltersChanged);
-    connect(Preferences::instance(), &Preferences::preferenceChanged, this, &Application::textColorChanged);
 
     _fileIdentifier.registerFileType(std::make_shared<GmlFileType>());
     _fileIdentifier.registerFileType(std::make_shared<PairwiseTxtFileType>());
@@ -87,24 +86,4 @@ QStringList Application::fileTypesOf(const QUrl& url) const
         fileTypes.append(fileType->name());
 
     return fileTypes;
-}
-
-QColor Application::textColor() const
-{
-    auto diff = [](const QColor& a, const QColor& b)
-    {
-        auto ay = 0.299f * a.redF() + 0.587f * a.greenF() + 0.114f * a.blueF();
-        auto by = 0.299f * b.redF() + 0.587f * b.greenF() + 0.114f * b.blueF();
-
-        return std::abs(ay - by);
-    };
-
-    auto background = u::pref("visualDefaults/backgroundColor").value<QColor>();
-    auto blackDiff = diff(background, Qt::GlobalColor::black);
-    auto whiteDiff = diff(background, Qt::GlobalColor::white);
-
-    if(blackDiff > whiteDiff)
-        return Qt::GlobalColor::black;
-
-    return Qt::GlobalColor::white;
 }

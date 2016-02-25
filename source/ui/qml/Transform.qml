@@ -9,6 +9,10 @@ Item
     width: row.width
     height: row.height
 
+    property color color
+    property color disabledColor
+    property color textColor: transformEnabled ? color : disabledColor
+
     property string formattedFieldValue:
     {
         if(type === GraphTransformType.Float)
@@ -32,6 +36,7 @@ Item
         {
             id: transformMenu
 
+            textColor: root.textColor
             defaultText: qsTr("Add Transform")
 
             model: availableTransformNames
@@ -47,8 +52,10 @@ Item
             }
         }
 
-        Text
+        Label
         {
+            color: textColor
+
             text:
             {
                 if(locked)
@@ -59,7 +66,10 @@ Item
                 case GraphTransformCreationState.TransformSelected:
                     return qsTr("where");
                 case GraphTransformCreationState.FieldSelected:
-                    return qsTr("%1 where").arg(name);
+                    if(availableDataFields.length > 1)
+                        return qsTr("%1 where").arg(name);
+                    else
+                        return qsTr("%1 where %2").arg(name).arg(fieldName);
                 case GraphTransformCreationState.OperationSelected:
                 case GraphTransformCreationState.Created:
                     return qsTr("%1 where %2").arg(name).arg(fieldName);
@@ -76,12 +86,14 @@ Item
         {
             id: fieldMenu
 
+            textColor: root.textColor
             defaultText: qsTr("Select Field")
 
             model: availableDataFields
             visible: !locked &&
                      (creationState === GraphTransformCreationState.TransformSelected ||
-                     creationState === GraphTransformCreationState.FieldSelected)
+                     creationState === GraphTransformCreationState.FieldSelected) &&
+                     availableDataFields.length > 1
             enabled: transformEnabled
             exclusiveGroup: buttonMenuGroup
             onSelectedValueChanged:
@@ -95,6 +107,7 @@ Item
         {
             id: opMenu
 
+            textColor: root.textColor
             defaultText: qsTr("Operation")
 
             model: avaliableConditionFnOps

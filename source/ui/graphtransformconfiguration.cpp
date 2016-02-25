@@ -229,6 +229,9 @@ void GraphTransformConfiguration::setName(const QString& name)
         emit nameChanged();
         emit availableDataFieldsChanged();
 
+        if(availableDataFields().size() == 1)
+            setFieldName(availableDataFields().front());
+
         updateCreationState();
     }
 }
