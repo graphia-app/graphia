@@ -8,6 +8,7 @@
 #include <QStringList>
 #include <QUrl>
 #include <QRect>
+#include <QColor>
 
 #include <tuple>
 #include <memory>
@@ -22,11 +23,10 @@ class Application : public QObject
     Q_OBJECT
 
     Q_PROPERTY(QStringList nameFilters READ nameFilters NOTIFY nameFiltersChanged)
+    Q_PROPERTY(QColor textColor READ textColor NOTIFY textColorChanged)
 
 public:
     explicit Application(QObject *parent = nullptr);
-
-    const QStringList nameFilters() const { return _fileIdentifier.nameFilters(); }
 
     bool parserAndModelForFile(const QUrl& url, const QString& fileTypeName,
                                std::unique_ptr<GraphFileParser>& graphFileParser,
@@ -34,6 +34,7 @@ public:
 
 signals:
     void nameFiltersChanged();
+    void textColorChanged();
 
 public slots:
     bool canOpen(const QString& fileTypeName) const;
@@ -63,6 +64,9 @@ private:
     static const int _minorVersion = 0;
 
     FileIdentifier _fileIdentifier;
+
+    QColor textColor() const;
+    QStringList nameFilters() const { return _fileIdentifier.nameFilters(); }
 };
 
 #endif // APPLICATION_H

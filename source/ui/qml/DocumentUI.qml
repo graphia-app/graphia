@@ -4,6 +4,8 @@ import QtQuick.Layouts 1.1
 
 import com.kajeka 1.0
 
+import "Constants.js" as Constants
+
 Item
 {
     id: root
@@ -86,6 +88,7 @@ Item
             {
                 anchors.right: parent.right
                 anchors.top: parent.top
+                anchors.margins: Constants.margin
 
                 Repeater
                 {
@@ -100,12 +103,15 @@ Item
                 }
             }
 
-            Text
+            Label
             {
                 visible: toggleGraphMetricsAction.checked
 
+                color: application ? application.textColor : "#000"
+
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
+                anchors.margins: Constants.margin
 
                 horizontalAlignment: Text.AlignRight
                 text:
@@ -166,6 +172,7 @@ Item
 
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
+                anchors.margins: Constants.margin
 
                 Repeater
                 {
