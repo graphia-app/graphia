@@ -102,6 +102,7 @@ Item
             {
                 text: control.text
                 color: textColor
+                font.bold: true
             }
 
             padding
