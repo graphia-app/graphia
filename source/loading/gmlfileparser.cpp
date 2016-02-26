@@ -1,6 +1,10 @@
 #include "gmlfileparser.h"
 #include "../graph/mutablegraph.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable:4503) // AXE makes a lot of these
+#endif
+
 #include "../thirdparty/axe/include/axe.h"
 
 #include <QTime>
