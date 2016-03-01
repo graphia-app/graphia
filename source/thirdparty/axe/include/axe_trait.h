@@ -35,12 +35,10 @@
 
 namespace axe {
 
-#ifdef _MSC_VER
-#if _MSC_VER >= 1600
-    #define AXE_USE_CUSTOM_TRAITS
-#else
+#if defined(_MSC_VER) && _MSC_VER < 1600
     #error Visual C++ 2010 or later required
-#endif
+#elif defined(_MSC_VER) && _MSC_VER >= 1600 && _MSC_VER < 1900
+    #define AXE_USE_CUSTOM_TRAITS
 #else
     #define AXE_USE_LIT_TRAITS
 #endif
