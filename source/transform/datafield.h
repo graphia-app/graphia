@@ -155,8 +155,8 @@ public:
     DataField& setStringValueFn(ValueFn<QString, EdgeId> valueFn);
     DataField& setStringValueFn(ValueFn<QString, const GraphComponent&> valueFn);
 
-#if defined(_MSC_FULL_VER)
-#if _MSC_FULL_VER <= 180031101
+#if defined(_MSC_VER)
+#if _MSC_VER <= 1900
 #define INT_NODE_FN(x) DataField::ValueFn<int, NodeId>(x)
 #define STRING_NODE_FN(x) DataField::ValueFn<QString, NodeId>(x)
 #define FLOAT_EDGE_FN(x) DataField::ValueFn<float, EdgeId>(x)
