@@ -81,9 +81,9 @@ bool Preferences::exists(const QString& key)
 QmlPreferences::QmlPreferences(QObject* parent) :
     QObject(parent)
 {
-    connect($(Preferences), &Preferences::preferenceChanged, this, &QmlPreferences::onPreferenceChanged);
-    connect($(Preferences), &Preferences::minimumChanged, this, &QmlPreferences::onMinimumChanged);
-    connect($(Preferences), &Preferences::maximumChanged, this, &QmlPreferences::onMaximumChanged);
+    connect(S(Preferences), &Preferences::preferenceChanged, this, &QmlPreferences::onPreferenceChanged);
+    connect(S(Preferences), &Preferences::minimumChanged, this, &QmlPreferences::onMinimumChanged);
+    connect(S(Preferences), &Preferences::maximumChanged, this, &QmlPreferences::onMaximumChanged);
 }
 
 QmlPreferences::~QmlPreferences()
@@ -242,15 +242,15 @@ void QmlPreferences::load()
         switch(propertyType)
         {
         case PropertyType::Value:
-            setProperty(property, $(Preferences)->get(preferenceName));
+            setProperty(property, S(Preferences)->get(preferenceName));
             break;
         case PropertyType::Minimum:
-            if($(Preferences)->exists(preferenceName))
-                setProperty(property, $(Preferences)->minimum(preferenceName));
+            if(S(Preferences)->exists(preferenceName))
+                setProperty(property, S(Preferences)->minimum(preferenceName));
             break;
         case PropertyType::Maximum:
-            if($(Preferences)->exists(preferenceName))
-                setProperty(property, $(Preferences)->maximum(preferenceName));
+            if(S(Preferences)->exists(preferenceName))
+                setProperty(property, S(Preferences)->maximum(preferenceName));
             break;
         }
     });
@@ -260,7 +260,7 @@ void QmlPreferences::save()
 {
     for(auto& pendingPreferenceChange : _pendingPreferenceChanges)
     {
-        $(Preferences)->set(preferenceNameByPropertyName(pendingPreferenceChange.first),
+        S(Preferences)->set(preferenceNameByPropertyName(pendingPreferenceChange.first),
                    pendingPreferenceChange.second);
     }
 

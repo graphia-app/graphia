@@ -167,13 +167,13 @@ public:
 
 template<typename Fn, typename... Args> std::future<ThreadPool::ReturnType<Fn, Args...>> execute_on_threadpool(Fn&& f, Args&&... args)
 {
-    return $(ThreadPool)->execute_on_threadpool(std::move(f), args...);
+    return S(ThreadPool)->execute_on_threadpool(std::move(f), args...);
 }
 
 template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn&& f, bool blocking = true) ->
     ThreadPool::Results<It, Fn>
 {
-    return $(ThreadPool)->concurrent_for(first, last, std::move(f), blocking);
+    return S(ThreadPool)->concurrent_for(first, last, std::move(f), blocking);
 }
 
 #endif // THREADPOOL_H

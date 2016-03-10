@@ -235,7 +235,7 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
 
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &GraphRenderer::onSelectionChanged, Qt::DirectConnection);
 
-    connect($(Preferences), &Preferences::preferenceChanged, this, &GraphRenderer::onPreferenceChanged, Qt::DirectConnection);
+    connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphRenderer::onPreferenceChanged, Qt::DirectConnection);
 
     enableSceneUpdate();
 }

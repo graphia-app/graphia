@@ -88,10 +88,10 @@ private slots:
 
 namespace u
 {
-    template<typename... Args> void definePref(Args&&... args) { return $(Preferences)->define(std::forward<Args>(args)...); }
-    template<typename... Args> QVariant pref(Args&&... args)   { return $(Preferences)->get(std::forward<Args>(args)...); }
-    template<typename... Args> void setPref(Args&&... args)    { return $(Preferences)->set(std::forward<Args>(args)...); }
-    template<typename... Args> bool prefExists(Args&&... args) { return $(Preferences)->exists(std::forward<Args>(args)...); }
+    template<typename... Args> void definePref(Args&&... args) { return S(Preferences)->define(std::forward<Args>(args)...); }
+    template<typename... Args> QVariant pref(Args&&... args)   { return S(Preferences)->get(std::forward<Args>(args)...); }
+    template<typename... Args> void setPref(Args&&... args)    { return S(Preferences)->set(std::forward<Args>(args)...); }
+    template<typename... Args> bool prefExists(Args&&... args) { return S(Preferences)->exists(std::forward<Args>(args)...); }
 }
 
 #endif // PREFERENCES_H

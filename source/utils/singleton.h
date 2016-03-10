@@ -35,7 +35,7 @@ private:
 
 template<typename T> T* Singleton <T>::_singletonPtr = nullptr;
 
-// Allows access to a singleton via $(Class)->... instead of Class::instance()->...
-#define $(S) S::instance()
+// Allows access to a singleton via S(Class)->... instead of Class::instance()->...
+#define S(X) X::instance()
 
 #endif
