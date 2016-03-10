@@ -155,6 +155,7 @@ public:
     DataField& setStringValueFn(ValueFn<QString, EdgeId> valueFn);
     DataField& setStringValueFn(ValueFn<QString, const GraphComponent&> valueFn);
 
+// This may go away with C++14
 #if defined(_MSC_VER)
 #if _MSC_VER <= 1900
 #define INT_NODE_FN(x) DataField::ValueFn<int, NodeId>(x)

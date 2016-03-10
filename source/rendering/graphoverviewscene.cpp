@@ -333,7 +333,8 @@ void GraphOverviewScene::startTransition(float duration,
         _graphRenderer->rendererStartedTransition();
 
     _graphRenderer->transition().start(duration, transitionType,
-    [this, targetComponentLayoutData, targetComponentAlpha /*FIXME C++14 move capture*/](float f)
+    [this, targetComponentLayoutData = std::move(targetComponentLayoutData),
+           targetComponentAlpha = std::move(targetComponentAlpha)](float f)
     {
         auto interpolate = [&](const ComponentId componentId)
         {
