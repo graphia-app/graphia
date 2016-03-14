@@ -58,7 +58,6 @@ public:
     bool overviewModeSwitchPending();
 
     Renderer* createRenderer() const;
-    QSGNode* updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData);
 
     bool eventsPending();
     std::unique_ptr<QEvent> nextEvent();

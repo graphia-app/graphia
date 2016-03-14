@@ -12,6 +12,7 @@ GraphQuickItem::GraphQuickItem(QQuickItem* parent) :
     // Prevent updates until we're properly initialised
     setFlag(Flag::ItemHasContents, false);
 
+    setMirrorVertically(true);
     setAcceptedMouseButtons(Qt::AllButtons);
 }
 
@@ -113,23 +114,6 @@ QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const
     connect(graphRenderer, &GraphRenderer::taskAddedToExecutor, this, &GraphQuickItem::update);
 
     return graphRenderer;
-}
-
-// FIXME this is a hack to undo/cancel out, the Y flip that's applied to our target FBO
-// when the QQ scene graph is rendered. See https://bugreports.qt.io/browse/QTBUG-41073
-#include <QSGSimpleTextureNode>
-QSGNode* GraphQuickItem::updatePaintNode(QSGNode* node, UpdatePaintNodeData* nodeData)
-{
-    if(!node)
-    {
-        node = QQuickFramebufferObject::updatePaintNode(node, nodeData);
-        QSGSimpleTextureNode* n = static_cast<QSGSimpleTextureNode*>(node);
-        if(n)
-            n->setTextureCoordinatesTransform(QSGSimpleTextureNode::MirrorVertically);
-        return node;
-    }
-
-    return QQuickFramebufferObject::updatePaintNode(node, nodeData);
 }
 
 bool GraphQuickItem::eventsPending() { return !_eventQueue.empty(); }
