@@ -15,7 +15,7 @@ void WeightedEdgeGraphModel::setEdgeWeight(EdgeId edgeId, float weight)
     if(!_hasEdgeWeights)
     {
         addDataField(tr("Edge Weight"))
-                .setFloatValueFn(FLOAT_EDGE_FN([this](EdgeId edgeId_) { return _edgeWeights[edgeId_]; }));
+                .setFloatValueFn([this](EdgeId edgeId_) { return _edgeWeights[edgeId_]; });
 
         _hasEdgeWeights = true;
     }

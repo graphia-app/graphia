@@ -24,14 +24,14 @@ GraphModel::GraphModel(const QString &name) :
     connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphModel::onPreferenceChanged);
 
     addDataField(tr("Node Degree"))
-        .setIntValueFn(INT_NODE_FN([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).degree(); }))
+        .setIntValueFn([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).degree(); })
         .setIntMin(0);
 
     addDataField(tr("Node Name"))
-        .setStringValueFn(STRING_NODE_FN([this](NodeId nodeId) { return _nodeNames[nodeId]; }));
+        .setStringValueFn([this](NodeId nodeId) { return _nodeNames[nodeId]; });
 
     addDataField(tr("Component Size"))
-        .setIntValueFn(INT_COMPONENT_FN([this](const GraphComponent& component) { return component.numNodes(); }))
+        .setIntValueFn([this](const GraphComponent& component) { return component.numNodes(); })
         .setIntMin(1);
 
     _graphTransformFactories.emplace(tr("Filter Nodes"),

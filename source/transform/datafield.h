@@ -155,23 +155,6 @@ public:
     DataField& setStringValueFn(ValueFn<QString, EdgeId> valueFn);
     DataField& setStringValueFn(ValueFn<QString, const GraphComponent&> valueFn);
 
-// This may go away with C++14
-#if defined(_MSC_VER)
-#if _MSC_VER <= 1900
-#define INT_NODE_FN(x) DataField::ValueFn<int, NodeId>(x)
-#define STRING_NODE_FN(x) DataField::ValueFn<QString, NodeId>(x)
-#define FLOAT_EDGE_FN(x) DataField::ValueFn<float, EdgeId>(x)
-#define INT_COMPONENT_FN(x) DataField::ValueFn<int, const GraphComponent&>(x)
-#else
-#error This hack can hopefully be removed now
-#endif
-#else
-#define INT_NODE_FN(x) (x)
-#define STRING_NODE_FN(x) (x)
-#define FLOAT_EDGE_FN(x) (x)
-#define INT_COMPONENT_FN(x) (x)
-#endif
-
     DataFieldType type() const;
     DataFieldElementType elementType() const;
 
