@@ -38,7 +38,10 @@ GraphComponentInteractor::GraphComponentInteractor(std::shared_ptr<GraphModel> g
 void GraphComponentInteractor::rightMouseDown()
 {
     if(clickedRenderer() != nullptr && !nearClickNodeId().isNull())
+    {
         clickedRenderer()->disableFocusTracking();
+        emit userInteractionStarted();
+    }
 }
 
 void GraphComponentInteractor::rightMouseUp()
@@ -66,12 +69,7 @@ void GraphComponentInteractor::rightMouseUp()
 void GraphComponentInteractor::rightDrag()
 {
     if(clickedRenderer() != nullptr && !nearClickNodeId().isNull())
-    {
-        if(!mouseMoving())
-            emit userInteractionStarted();
-
         _scene->pan(nearClickNodeId(), localPrevCursorPosition(), localCursorPosition());
-    }
 }
 
 void GraphComponentInteractor::leftDoubleClick()
