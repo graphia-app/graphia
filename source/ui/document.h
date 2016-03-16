@@ -116,7 +116,7 @@ private:
     QmlContainerWrapper<GraphTransformConfiguration> _graphTransformConfigurations;
 
     std::recursive_mutex _autoResumeMutex;
-    int _autoResume = 0;
+    int _autoResume = 0; // A count of the number of things which want the layout to pause
 
     template<typename... Args>
     void addGraphTransform(Args&&... args)
