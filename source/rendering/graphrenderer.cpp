@@ -544,14 +544,14 @@ void GraphRenderer::executeOnRendererThread(DeferredExecutor::TaskFn task, const
     emit taskAddedToExecutor();
 }
 
-void GraphRenderer::onNodeAdded(const Graph*, const Node* node)
+void GraphRenderer::onNodeAdded(const Graph*, NodeId nodeId)
 {
-    _hiddenNodes.set(node->id(), true);
+    _hiddenNodes.set(nodeId, true);
 }
 
-void GraphRenderer::onEdgeAdded(const Graph*, const Edge* edge)
+void GraphRenderer::onEdgeAdded(const Graph*, EdgeId edgeId)
 {
-    _hiddenEdges.set(edge->id(), true);
+    _hiddenEdges.set(edgeId, true);
 }
 
 void GraphRenderer::onNodeAddedToComponent(const Graph*, NodeId nodeId, ComponentId)

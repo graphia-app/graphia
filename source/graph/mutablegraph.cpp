@@ -100,7 +100,7 @@ NodeId MutableGraph::addNode(NodeId nodeId)
     node._inEdgeIds.setCollection(&_e._inEdgeIdsCollection);
     node._outEdgeIds.setCollection(&_e._outEdgeIdsCollection);
 
-    emit nodeAdded(this, &node);
+    emit nodeAdded(this, nodeId);
     _updateRequired = true;
     endTransaction();
 
@@ -126,12 +126,11 @@ void MutableGraph::removeNode(NodeId nodeId)
     for(auto edgeId : outEdgeIdsForNodeId(nodeId).copy())
         removeEdge(edgeId);
 
-    emit nodeWillBeRemoved(this, &_n._nodes[nodeId]);
-
     _n._mergedNodeIds.remove(NodeIdDistinctSetCollection::SetId(), nodeId);
     _n._nodeIdsInUse[nodeId] = false;
     _unusedNodeIds.push_back(nodeId);
 
+    emit nodeRemoved(this, nodeId);
     _updateRequired = true;
     endTransaction();
 }
@@ -250,7 +249,7 @@ EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
 
     _e._connections[undirectedEdge].add(edgeId);
 
-    emit edgeAdded(this, &edge);
+    emit edgeAdded(this, edgeId);
     _updateRequired = true;
     endTransaction();
 
@@ -271,8 +270,6 @@ void MutableGraph::removeEdge(EdgeId edgeId)
     // Remove all node references to this edge
     const auto& edge = _e._edges[edgeId];
 
-    emit edgeWillBeRemoved(this, &edge);
-
     _n._nodes[edge.sourceId()]._outEdgeIds.remove(edgeId);
     _n._nodes[edge.targetId()]._inEdgeIds.remove(edgeId);
 
@@ -287,6 +284,7 @@ void MutableGraph::removeEdge(EdgeId edgeId)
     _e._edgeIdsInUse[edgeId] = false;
     _unusedEdgeIds.push_back(edgeId);
 
+    emit edgeRemoved(this, edgeId);
     _updateRequired = true;
     endTransaction();
 }
@@ -414,7 +412,7 @@ void MutableGraph::cloneFrom(const Graph& other)
     for(auto& connection : _e._connections)
         connection.second.setCollection(&_e._mergedEdgeIds);
 
-    //FIXME: we should perhaps be emitting [node|edge][Added|WillBeRemoved] signals here?
+    //FIXME: we should perhaps be emitting [node|edge][Added|Removed] signals here?
 
     _updateRequired = true;
     endTransaction();

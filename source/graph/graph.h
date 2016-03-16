@@ -243,10 +243,10 @@ signals:
     // The signals are listed here in the order in which they are emitted
     void graphWillChange(const Graph*) const;
 
-    void nodeAdded(const Graph*, const Node*) const;
-    void nodeWillBeRemoved(const Graph*, const Node*) const;
-    void edgeAdded(const Graph*, const Edge*) const;
-    void edgeWillBeRemoved(const Graph*, const Edge*) const;
+    void nodeAdded(const Graph*, NodeId) const;
+    void nodeRemoved(const Graph*, NodeId) const;
+    void edgeAdded(const Graph*, EdgeId) const;
+    void edgeRemoved(const Graph*, EdgeId) const;
 
     void componentsWillMerge(const Graph*, const ComponentMergeSet&) const;
     void componentWillBeRemoved(const Graph*, ComponentId, bool) const;

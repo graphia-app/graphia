@@ -32,8 +32,8 @@ Graph::Graph() :
 {
     registerQtTypes();
 
-    connect(this, &Graph::nodeAdded, [this](const Graph*, const Node* node) { reserveNodeId(node->id()); });
-    connect(this, &Graph::edgeAdded, [this](const Graph*, const Edge* edge) { reserveEdgeId(edge->id()); });
+    connect(this, &Graph::nodeAdded, [this](const Graph*, NodeId nodeId) { reserveNodeId(nodeId); });
+    connect(this, &Graph::edgeAdded, [this](const Graph*, EdgeId edgeId) { reserveEdgeId(edgeId); });
 }
 
 Graph::~Graph()

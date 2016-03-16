@@ -17,7 +17,7 @@ GraphComponentScene::GraphComponentScene(GraphRenderer* graphRenderer) :
     connect(&_graphRenderer->graphModel()->graph(), &Graph::componentWillBeRemoved, this, &GraphComponentScene::onComponentWillBeRemoved, Qt::DirectConnection);
     connect(&_graphRenderer->graphModel()->graph(), &Graph::graphWillChange, this, &GraphComponentScene::onGraphWillChange, Qt::DirectConnection);
     connect(&_graphRenderer->graphModel()->graph(), &Graph::graphChanged, this, &GraphComponentScene::onGraphChanged, Qt::DirectConnection);
-    connect(&_graphRenderer->graphModel()->graph(), &Graph::nodeWillBeRemoved, this, &GraphComponentScene::onNodeWillBeRemoved, Qt::DirectConnection);
+    connect(&_graphRenderer->graphModel()->graph(), &Graph::nodeRemoved, this, &GraphComponentScene::onNodeRemoved, Qt::DirectConnection);
 
     _defaultComponentId = _graphRenderer->graphModel()->graph().componentIdOfLargestComponent();
 }
@@ -268,14 +268,14 @@ void GraphComponentScene::onGraphChanged(const Graph* graph)
     }, "GraphComponentScene::onGraphChanged (setSize/moveFocusToCentreOfComponent)");
 }
 
-void GraphComponentScene::onNodeWillBeRemoved(const Graph*, const Node* node)
+void GraphComponentScene::onNodeRemoved(const Graph*, NodeId nodeId)
 {
-    if(visible() && componentRenderer()->focusNodeId() == node->id())
+    if(visible() && componentRenderer()->focusNodeId() == nodeId)
     {
         _graphRenderer->executeOnRendererThread([this]
         {
             startTransition();
             componentRenderer()->moveFocusToCentreOfComponent();
-        }, "GraphWidget::onNodeWillBeRemoved");
+        }, "GraphWidget::onNodeRemoved");
     }
 }

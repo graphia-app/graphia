@@ -138,8 +138,8 @@ public:
     bool layoutChanged() const { return _synchronousLayoutChanged; }
 
 private slots:
-    void onNodeAdded(const Graph*, const Node* node);
-    void onEdgeAdded(const Graph*, const Edge* edge);
+    void onNodeAdded(const Graph*, NodeId nodeId);
+    void onEdgeAdded(const Graph*, EdgeId edgeId);
     void onNodeAddedToComponent(const Graph*, NodeId nodeId, ComponentId);
     void onEdgeAddedToComponent(const Graph*, EdgeId edgeId, ComponentId);
 
