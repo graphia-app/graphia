@@ -24,6 +24,33 @@ template<typename TreeType> struct SubVolume
     bool _empty = true;
 
     bool _passesPredicate = true;
+
+    // Floating point precision means that it becomes impossible to
+    // divide a bounding box beyond a certain minimum size. We don't
+    // want to allow that to happen, obviously, so this is a means
+    // to detect whether it would and avoid subdivision if so
+    bool divisible() const
+    {
+        const auto cx = _boundingBox.centre().x();
+        const auto xh = _boundingBox.xLength() * 0.5f;
+
+        if(cx + xh == cx || cx - xh == cx)
+            return false;
+
+        const auto cy = _boundingBox.centre().y();
+        const auto yh = _boundingBox.yLength() * 0.5f;
+
+        if(cy + yh == cy || cy - yh == cy)
+            return false;
+
+        const auto cz = _boundingBox.centre().z();
+        const auto zh = _boundingBox.zLength() * 0.5f;
+
+        if(cz + zh == cz || cz - zh == cz)
+            return false;
+
+        return true;
+    }
 };
 
 // Use the CRT pattern so we can create instances of subclasses by default constructor
@@ -79,7 +106,8 @@ private:
             if(!subVolume._passesPredicate || subVolume._nodeIds.empty())
                 continue;
 
-            if(subVolume._nodeIds.size() > _maxNodesPerLeaf && distinctPositions)
+            if(subVolume._nodeIds.size() > _maxNodesPerLeaf &&
+               subVolume.divisible() && distinctPositions)
             {
                 // Subdivide
                 subVolume._subTree = std::make_unique<TreeType>();
@@ -129,12 +157,12 @@ public:
             subTree->_centre = subTree->_boundingBox.centre();
             subTree->_nodePositions = &nodePositions;
 
-            const float cx = subTree->_centre.x();
-            const float cy = subTree->_centre.y();
-            const float cz = subTree->_centre.z();
-            const float xh = subTree->_boundingBox.xLength() * 0.5f;
-            const float yh = subTree->_boundingBox.yLength() * 0.5f;
-            const float zh = subTree->_boundingBox.zLength() * 0.5f;
+            const auto cx = subTree->_centre.x();
+            const auto cy = subTree->_centre.y();
+            const auto cz = subTree->_centre.z();
+            const auto xh = subTree->_boundingBox.xLength() * 0.5f;
+            const auto yh = subTree->_boundingBox.yLength() * 0.5f;
+            const auto zh = subTree->_boundingBox.zLength() * 0.5f;
 
             subTree->_subVolumes[0]._boundingBox = {{cx - xh, cy - yh, cz - zh}, {cx,      cy,      cz     }};
             subTree->_subVolumes[1]._boundingBox = {{cx,      cy - yh, cz - zh}, {cx + xh, cy,      cz     }};
@@ -148,10 +176,6 @@ public:
 
             for(auto& subVolume : subTree->_subVolumes)
             {
-                //FIXME the subVolumes can legitimately get to zero volume when one of the bounding box
-                // dimensions added to the centre equals the centre, due to floating point precision limits,
-                // so I think we just need to accept that the subVolumes can be zero volume and deal with
-                // it some way
                 Q_ASSERT(subVolume._boundingBox.valid() &&
                          (nodeIds.size() == 1 || subVolume._boundingBox.volume() > 0.0f));
 
