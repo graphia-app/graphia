@@ -475,6 +475,26 @@ void GraphComponentRenderer::moveFocusToPositionAndRadius(const QVector3D& posit
     centrePositionInViewport(_viewData._focusPosition, _viewData._zoomDistance, rotation);
 }
 
+bool GraphComponentRenderer::transitionRequired()
+{
+    if(trackingCentreOfComponent())
+        return true;
+
+    updateEntireComponentZoomDistance();
+    if(_viewData._camera.distance() > _entireComponentZoomDistance)
+        return true;
+
+    return false;
+}
+
+void GraphComponentRenderer::computeTransition()
+{
+    if(trackingCentreOfComponent())
+        moveFocusToCentreOfComponent();
+    else
+        moveFocusToNode(focusNodeId());
+}
+
 void GraphComponentRenderer::updateTransition(float f)
 {
     _viewData._camera.setDistance(u::interpolate(_viewData._transitionStart.distance(),

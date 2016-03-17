@@ -92,6 +92,8 @@ public:
     void freeze();
     void thaw();
 
+    bool transitionRequired();
+    void computeTransition();
     void updateTransition(float f);
 
     static float maxNodeDistanceFromPoint(const GraphModel& graphModel,

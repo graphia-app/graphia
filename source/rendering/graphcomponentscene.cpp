@@ -252,7 +252,7 @@ void GraphComponentScene::onGraphChanged(const Graph* graph)
             setViewportSize(_width, _height);
 
             // Graph changes may significantly alter the centre; ease the transition
-            if(componentRenderer() != nullptr && componentRenderer()->trackingCentreOfComponent())
+            if(componentRenderer() != nullptr && componentRenderer()->transitionRequired())
             {
                 startTransition(0.3f, Transition::Type::EaseInEaseOut,
                 [this, graph]
@@ -262,7 +262,8 @@ void GraphComponentScene::onGraphChanged(const Graph* graph)
                     if(_numComponentsPriorToChange == 1 && graph->numComponents() > 1)
                         _graphRenderer->switchToOverviewMode();
                 });
-                componentRenderer()->moveFocusToCentreOfComponent();
+
+                componentRenderer()->computeTransition();
             }
             else
             {
