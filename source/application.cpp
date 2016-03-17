@@ -9,7 +9,6 @@
 #include "graph/graphmodel.h"
 #include "graph/weightededgegraphmodel.h"
 
-#include "utils/cpp1x_hacks.h"
 #include "utils/preferences.h"
 
 #include <memory>

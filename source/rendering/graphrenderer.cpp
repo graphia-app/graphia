@@ -13,7 +13,6 @@
 
 #include "../commands/command.h"
 
-#include "../utils/cpp1x_hacks.h"
 #include "../utils/preferences.h"
 
 #include <QObject>

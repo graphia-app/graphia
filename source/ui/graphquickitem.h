@@ -3,8 +3,6 @@
 
 #include "../graph/graph.h"
 
-#include "../utils/cpp1x_hacks.h"
-
 #include <QQuickFramebufferObject>
 #include <QTimer>
 #include <QString>

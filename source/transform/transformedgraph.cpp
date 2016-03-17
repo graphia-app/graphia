@@ -3,7 +3,6 @@
 #include "../graph/componentmanager.h"
 
 #include "../utils/utils.h"
-#include "../utils/cpp1x_hacks.h"
 
 #include <functional>
 

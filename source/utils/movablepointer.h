@@ -1,7 +1,6 @@
 #ifndef MOVABLEPOINTER_H
 #define MOVABLEPOINTER_H
 
-#include "cpp1x_hacks.h"
 #include <memory>
 
 // Helper template that allows you to maintain a vector of

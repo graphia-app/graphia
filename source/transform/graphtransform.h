@@ -3,7 +3,6 @@
 
 #include "datafield.h"
 
-#include "../utils/cpp1x_hacks.h"
 #include <memory>
 
 class Graph;

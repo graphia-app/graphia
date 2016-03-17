@@ -14,8 +14,6 @@
 #include "selectionmanager.h"
 #include "graphquickitem.h"
 
-#include "../utils/cpp1x_hacks.h"
-
 Document::Document(QObject* parent) :
     QObject(parent)
 {

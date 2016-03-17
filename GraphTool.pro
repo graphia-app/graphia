@@ -65,7 +65,6 @@ HEADERS += \
     source/ui/interactor.h \
     source/ui/selectionmanager.h \
     source/utils/circularbuffer.h \
-    source/utils/cpp1x_hacks.h \
     source/utils/deferredexecutor.h \
     source/utils/fixedsizestack.h \
     source/utils/performancecounter.h \

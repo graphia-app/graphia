@@ -11,7 +11,6 @@
 #include "../ui/graphtransformconfiguration.h"
 
 #include "../layout/nodepositions.h"
-#include "../utils/cpp1x_hacks.h"
 
 #include <QQuickItem>
 #include <QString>
