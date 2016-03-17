@@ -264,6 +264,12 @@ void GraphComponentScene::onGraphChanged(const Graph* graph)
                 });
                 componentRenderer()->moveFocusToCentreOfComponent();
             }
+            else
+            {
+                // If we don't start a transition, we still want the renderer to do the things
+                // it would have when the transition finished
+                _graphRenderer->sceneFinishedTransition();
+            }
         }
     }, "GraphComponentScene::onGraphChanged (setSize/moveFocusToCentreOfComponent)");
 }
