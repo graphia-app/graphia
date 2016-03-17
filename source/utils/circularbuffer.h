@@ -29,6 +29,8 @@ public:
     const T& front() const { return at(0); }
 
     size_t size() const { return _size; }
+
+    bool full() const { return _size >= Size; }
 };
 
 #endif // CIRCULARBUFFER_H
