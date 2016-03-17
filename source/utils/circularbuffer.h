@@ -17,8 +17,9 @@ public:
     {
         _array[_next] = t;
         _current = _next;
-        _next = (_next + 1) % Size;
+        _next++;
         _size = std::max(_size, _next);
+        _next = _next % Size;
     }
 
     T& at(int index) { return _array[(_current + Size + index) % Size]; }
