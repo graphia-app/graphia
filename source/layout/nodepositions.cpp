@@ -44,7 +44,7 @@ QVector3D NodePositions::centreOfMass(const NodePositions& nodePositions,
                                       const std::vector<NodeId>& nodeIds)
 {
     float reciprocal = 1.0f / nodeIds.size();
-    QVector3D centreOfMass = QVector3D();
+    QVector3D centreOfMass;
 
     for(auto nodeId : nodeIds)
         centreOfMass += (nodePositions.get(nodeId) * reciprocal);
