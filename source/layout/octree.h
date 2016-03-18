@@ -227,7 +227,7 @@ public:
     void visitVolumes(std::function<bool(const SubVolumeType&, int treeDepth)> visitor = [](const SubVolumeType&, int){}) const
     {
         std::stack<std::tuple<const BaseOctree*, int>> stack;
-        stack.push(std::make_tuple(this, 0));
+        stack.emplace(this, 0);
 
         while(!stack.empty())
         {
@@ -242,7 +242,7 @@ public:
                     continue;
 
                 if(!subVolume._leaf)
-                    stack.push(std::make_tuple(subVolume._subTree.get(), treeDepth + 1));
+                    stack.emplace(subVolume._subTree.get(), treeDepth + 1);
             }
         }
     }

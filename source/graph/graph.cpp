@@ -7,8 +7,6 @@
 #include <QMetaType>
 #include <QDebug>
 
-#include <tuple>
-
 static void registerQtTypes()
 {
     static bool registered = false;

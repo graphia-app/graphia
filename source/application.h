@@ -10,7 +10,6 @@
 #include <QRect>
 #include <QColor>
 
-#include <tuple>
 #include <memory>
 
 #include <QCoreApplication>
