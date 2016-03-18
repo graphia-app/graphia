@@ -136,8 +136,7 @@ public:
     template<typename It, typename Fn> using Results =
         ResultsType<typename FnExecutor<It, Fn>::ValueType>;
 
-    template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn&& f, bool blocking = true) ->
-        Results<It, Fn>
+    template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn&& f, bool blocking = true)
     {
         const int numElements = std::distance(first, last);
         const int numThreads = static_cast<int>(_threads.size());
@@ -170,8 +169,7 @@ template<typename Fn, typename... Args> std::future<ThreadPool::ReturnType<Fn, A
     return S(ThreadPool)->execute_on_threadpool(std::move(f), args...);
 }
 
-template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn&& f, bool blocking = true) ->
-    ThreadPool::Results<It, Fn>
+template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn&& f, bool blocking = true)
 {
     return S(ThreadPool)->concurrent_for(first, last, std::move(f), blocking);
 }
