@@ -36,8 +36,8 @@ public:
                int numThreads = std::thread::hardware_concurrency());
     ~ThreadPool();
 
-    bool saturated() { return _activeThreads >= static_cast<int>(_threads.size()); }
-    bool idle() { return _activeThreads == 0; }
+    bool saturated() const { return _activeThreads >= static_cast<int>(_threads.size()); }
+    bool idle() const { return _activeThreads == 0; }
 
     template<typename Fn, typename... Args> using ReturnType = typename std::result_of<Fn(Args...)>::type;
 
@@ -71,7 +71,7 @@ private:
     private:
         std::vector<std::future<ValueType>> _futures;
 
-        ResultsType(std::vector<std::future<ValueType>>& futures) :
+        explicit ResultsType(std::vector<std::future<ValueType>>& futures) :
             _futures(std::move(futures))
         {}
 
@@ -80,14 +80,14 @@ private:
             _futures(std::move(other._futures))
         {}
 
-        void wait()
+        void wait() const
         {
             for(auto& future : _futures)
                 future.wait();
         }
 
         template<typename T = ValueType> typename std::enable_if<!std::is_void<T>::value, T>::type
-        get()
+        get() const
         {
             //FIXME: profile this
             ValueType values;
@@ -122,7 +122,7 @@ private:
     {
         using ValueType = void;
 
-        ValueType operator()(It it, It last, Fn&& f)
+        ValueType operator()(It it, It last, Fn&& f) const
         {
             for(; it != last; ++it)
                 f(*it);
@@ -141,7 +141,7 @@ public:
         const int numElements = std::distance(first, last);
         const int numThreads = static_cast<int>(_threads.size());
         const int numElementsPerThread = numElements / numThreads +
-                (numElements % numThreads ? 1 : 0);
+                ((numElements % numThreads) ? 1 : 0);
 
         FnExecutor<It, Fn> executor;
         std::vector<std::future<typename FnExecutor<It, Fn>::ValueType>> futures;
