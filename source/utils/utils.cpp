@@ -107,7 +107,7 @@ const QString u::currentThreadName()
     return threadName;
 }
 
-#elif _WIN32
+#elif defined(_WIN32)
 #include <windows.h>
 const DWORD MS_VC_EXCEPTION  =0x406D1388;
 
