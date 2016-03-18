@@ -134,7 +134,6 @@ static void circlePack(const std::vector<ComponentId>& componentIds,
         const float EPSILON = 0.01f;
         bool intersects = false;
         int s1 = 1;
-        int s2 = 1;
         ComponentId j, k;
 
         for(j = links[b]._next;
@@ -150,6 +149,8 @@ static void circlePack(const std::vector<ComponentId>& componentIds,
 
         if(intersects)
         {
+            int s2 = 1;
+
             for(k = links[a]._prev;
                 k != links[j]._prev;
                 k = links[k]._prev, s2++)
