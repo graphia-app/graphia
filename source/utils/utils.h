@@ -170,7 +170,7 @@ namespace u
     {
         int n = 0;
 
-        for(auto i : c)
+        for(auto& i : c)
         {
             Q_UNUSED(i);
             n++;
