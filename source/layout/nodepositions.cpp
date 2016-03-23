@@ -1,25 +1,12 @@
 #include "nodepositions.h"
 
-QVector3D MeanPosition::mean(int samples) const
-{
-    samples = std::min(samples, static_cast<int>(size()));
-
-    QVector3D result;
-    float reciprocal = 1.0f / samples;
-
-    for(int i = 0; i > -samples; i--)
-        result += at(i) * reciprocal;
-
-    return result;
-}
-
 NodePositions::NodePositions(const Graph& graph) :
     NodeArray<MeanPosition>(graph)
 {}
 
 const QVector3D& NodePositions::get(NodeId nodeId) const
 {
-    return _array[nodeId].front();
+    return _array[nodeId].newest();
 }
 
 const QVector3D NodePositions::getScaledAndSmoothed(NodeId nodeId) const

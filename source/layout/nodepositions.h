@@ -14,11 +14,7 @@
 
 static const int MAX_SMOOTHING = 8;
 
-class MeanPosition : public CircularBuffer<QVector3D, MAX_SMOOTHING>
-{
-public:
-    QVector3D mean(int samples) const;
-};
+using MeanPosition = CircularBuffer<QVector3D, MAX_SMOOTHING>;
 
 class NodePositions : public NodeArray<MeanPosition>
 {
