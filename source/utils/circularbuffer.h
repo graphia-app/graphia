@@ -27,7 +27,7 @@ public:
     const T& at(int index) const
     {
         Q_ASSERT(_size > 0);
-        int base = _current - _size + 1;
+        int base = _current - static_cast<int>(_size) + 1;
         return _array[(base + Size + index) % Size];
     }
 
