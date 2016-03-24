@@ -24,10 +24,10 @@ public:
 
     // An index of 0 will get the oldest T
     // An index of size() - 1 will get the newest T
-    const T& at(int index) const
+    const T& at(size_t index) const
     {
         Q_ASSERT(_size > 0);
-        int base = _current - static_cast<int>(_size) + 1;
+        auto base = _current - _size + 1;
         return _array[(base + Size + index) % Size];
     }
 
@@ -43,14 +43,14 @@ public:
         return at(0);
     }
 
-    T mean(int samples) const
+    T mean(size_t samples) const
     {
-        samples = std::min(samples, static_cast<int>(_size));
+        samples = std::min(samples, _size);
 
         T result;
         float reciprocal = 1.0f / samples;
 
-        for(int i = static_cast<int>(_size) - samples; i < static_cast<int>(_size); i++)
+        for(auto i = _size - samples; i < _size; i++)
             result += at(i) * reciprocal;
 
         return result;
