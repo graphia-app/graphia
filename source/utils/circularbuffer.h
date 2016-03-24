@@ -61,6 +61,13 @@ public:
     size_t size() const { return _size; }
 
     bool full() const { return _size >= Size; }
+
+    void clear()
+    {
+        _size = 0;
+        _next = 0;
+        _current = 0;
+    }
 };
 
 #endif // CIRCULARBUFFER_H
