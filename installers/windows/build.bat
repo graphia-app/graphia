@@ -1,6 +1,6 @@
 rmdir /s /q build
 mkdir build
-copy release\GraphTool.exe build\%PRODUCT_NAME%.exe
+copy release\%PRODUCT_NAME%.exe build\
 
 windeployqt --qmldir source\ui\qml --no-angle --no-compiler-runtime --no-opengl-sw build\%PRODUCT_NAME%.exe || EXIT /B 1
 xcopy "%CRTDIRECTORY%*.*" build || EXIT /B 1

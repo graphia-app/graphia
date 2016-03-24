@@ -96,12 +96,12 @@ Section "-Main Component"
 
 	!insertmacro MUI_STARTMENU_WRITE_BEGIN ${PRODUCT_NAME}
 		CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER\"
-		CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\${PRODUCT_NAME}.lnk" "$INSTDIR\GraphTool.exe"
+		CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_NAME}.exe"
 	!insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 
 Section "Desktop shortcut"
-	CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\GraphTool.exe"
+	CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_NAME}.exe"
 SectionEnd
 
 Section "Uninstall"
