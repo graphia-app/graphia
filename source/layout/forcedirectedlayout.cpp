@@ -21,9 +21,9 @@ template<typename T> float meanWeightedAvgBuffer(int start, int end, const T& bu
 static QVector3D normalized(const QVector3D& v)
 {
     float lengthSq = v.lengthSquared();
-    if (qFuzzyIsNull(lengthSq - 1.0f))
+    if(qFuzzyIsNull(lengthSq - 1.0f))
         return v;
-    else if (!qIsNull(lengthSq))
+    else if(!qIsNull(lengthSq))
         return v / std::sqrt(lengthSq);
 
     return QVector3D();
@@ -191,15 +191,16 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
 // FineTune. If the std dev oscillates enough, will move the phase onto Oscillate
 void ForceDirectedLayout::initialChangeDetection()
 {
-    if(_forceStdDeviation < MINIMUM_STDDEV_THRESHOLD && _forceMean < 1)
+    if(_forceStdDeviation < MINIMUM_STDDEV_THRESHOLD && _forceMean < MAXIMUM_AVG_FORCE_FOR_STOP)
         _changeDetectionPhase = ChangeDetectionPhase::FineTune;
 
-    if (_prevCaptureStdDevs.full()){
+    if(_prevCaptureStdDevs.full())
+    {
         float currentSmoothedStdDev = meanWeightedAvgBuffer(static_cast<int>(_prevCaptureStdDevs.size()) - INITIAL_SMOOTHING_SIZE,
                                                     static_cast<int>(_prevCaptureStdDevs.size()),
                                                     _prevCaptureStdDevs);
 
-        float previousSmoothedStdDev = meanWeightedAvgBuffer(static_cast<int>(_prevCaptureStdDevs.size()) - (2*INITIAL_SMOOTHING_SIZE),
+        float previousSmoothedStdDev = meanWeightedAvgBuffer(static_cast<int>(_prevCaptureStdDevs.size()) - (2 * INITIAL_SMOOTHING_SIZE),
                                                      static_cast<int>(_prevCaptureStdDevs.size()) - INITIAL_SMOOTHING_SIZE,
                                                      _prevCaptureStdDevs);
 
@@ -209,7 +210,6 @@ void ForceDirectedLayout::initialChangeDetection()
 
         if(currentSmoothedStdDev > previousSmoothedStdDev)
             _increasingStdDevIterationCount++;
-
     }
 }
 
@@ -228,10 +228,9 @@ void ForceDirectedLayout::fineTuneChangeDetection()
                                            _prevStdDevs);
 
         float delta = (prevAvgStdDev - curAvgStdDev);
-        if (delta < FINETUNE_STDDEV_DELTA && delta >= 0)
-        {
+        if(delta < FINETUNE_STDDEV_DELTA && delta >= 0.0f)
             _changeDetectionPhase = ChangeDetectionPhase::Finished;
-        }
+
     }
 }
 
@@ -246,10 +245,11 @@ void ForceDirectedLayout::oscillateChangeDetection()
 
         auto deltaStdDev = _prevUnstableStdDev - averageCap;
         auto percentDelta = OSCILLATE_STDDEV_DELTA_PERCENT;
-        if (_prevUnstableStdDev != 0.0f)
+        if(_prevUnstableStdDev != 0.0f)
             percentDelta = (deltaStdDev / _prevUnstableStdDev) * 100.0f;
 
-        if(std::abs(percentDelta) < OSCILLATE_STDDEV_DELTA_PERCENT){
+        if(std::abs(percentDelta) < OSCILLATE_STDDEV_DELTA_PERCENT)
+        {
             _changeDetectionPhase = ChangeDetectionPhase::Finished;
             _increasingStdDevIterationCount = 0;
             _unstableIterationCount = 0;

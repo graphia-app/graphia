@@ -17,6 +17,7 @@ private:
     const float MINIMUM_STDDEV_THRESHOLD = 0.008f;
     const float FINETUNE_STDDEV_DELTA = 0.000005f;
     const float OSCILLATE_STDDEV_DELTA_PERCENT = 1.0f;
+    const float MAXIMUM_AVG_FORCE_FOR_STOP = 1.0f;
     static const int OSCILLATE_DELTA_SAMPLE_SIZE = 500;
     static const int OSCILLATE_RUN_COUNT = 5;
     static const int STDDEV_INCREASES_BEFORE_SWITCH_TO_OSCILLATE = 500;
