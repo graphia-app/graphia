@@ -1,5 +1,19 @@
 TEMPLATE = app
 
+_PRODUCT_NAME=$$(PRODUCT_NAME)
+!isEmpty(_PRODUCT_NAME) {
+TARGET = $$_PRODUCT_NAME
+}
+
+DEFINES += "PRODUCT_NAME=\\\"$$TARGET\\\""
+
+_VERSION=$$(VERSION)
+isEmpty(_VERSION) {
+_VERSION = "development"
+}
+
+DEFINES += "VERSION=\\\"$$_VERSION\\\""
+
 CONFIG += c++14
 
 QT += qml quick opengl openglextensions

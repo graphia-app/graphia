@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setOrganizationName("Kajeka");
     QCoreApplication::setOrganizationDomain("kajeka.com");
-    QCoreApplication::setApplicationName("GraphTool");
+    QCoreApplication::setApplicationName(PRODUCT_NAME);
 
     QIcon mainIcon;
     mainIcon.addFile(":/icon/Icon512x512.png");
