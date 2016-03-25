@@ -40,7 +40,7 @@ public slots:
 
     static QString name() { return QCoreApplication::applicationName(); }
     static QString version() { return QCoreApplication::applicationVersion(); }
-    static QString copyright() { return COPYRIGHT; }
+    static QString copyright() { return QString(COPYRIGHT).replace("(c)", "©"); }
     static const char* uri() { return _uri; }
     static int majorVersion() { return _majorVersion; }
     static int minorVersion() { return _minorVersion; }
