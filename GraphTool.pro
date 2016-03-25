@@ -5,14 +5,21 @@ _PRODUCT_NAME=$$(PRODUCT_NAME)
 TARGET = $$_PRODUCT_NAME
 }
 
-DEFINES += "PRODUCT_NAME=\\\"$$TARGET\\\""
+DEFINES += "PRODUCT_NAME=\"\\\"$$TARGET\\\"\""
 
 _VERSION=$$(VERSION)
 isEmpty(_VERSION) {
 _VERSION = "development"
 }
 
-DEFINES += "VERSION=\\\"$$_VERSION\\\""
+DEFINES += "VERSION=\"\\\"$$_VERSION\\\"\""
+
+_COPYRIGHT=$$(COPYRIGHT)
+isEmpty(_COPYRIGHT) {
+_COPYRIGHT = "Copyright notice"
+}
+
+DEFINES += "COPYRIGHT=\"\\\"$$_COPYRIGHT\\\"\""
 
 CONFIG += c++14
 

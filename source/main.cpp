@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("Kajeka");
     QCoreApplication::setOrganizationDomain("kajeka.com");
     QCoreApplication::setApplicationName(PRODUCT_NAME);
+    QCoreApplication::setApplicationVersion(VERSION);
 
     QIcon mainIcon;
     mainIcon.addFile(":/icon/Icon512x512.png");
