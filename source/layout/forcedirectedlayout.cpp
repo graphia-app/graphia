@@ -159,7 +159,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
 
     // Calculate Standard Deviation
     float variance = 0.0f;
-    for(int i = 0; i < _displacements.size(); ++i)
+    for(int i = 0; i < static_cast<int>(_displacements.size()); ++i)
          variance += std::pow(_displacements[i].length() - _forceMean, 2.0f);
 
     _forceStdDeviation = std::sqrt(variance / static_cast<float>(_displacements.size()));
