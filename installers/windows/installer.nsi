@@ -12,13 +12,13 @@ Var INSTDIR_BASE
 
 Name "${PRODUCT_NAME}"
 
-VIProductVersion "${VERSION}.0"
+VIProductVersion "1.0.0.0"
 VIAddVersionKey ProductName "${PRODUCT_NAME}"
 VIAddVersionKey Comments "${PRODUCT_NAME}"
 VIAddVersionKey LegalCopyright "${COPYRIGHT}"
 VIAddVersionKey FileDescription "${PRODUCT_NAME}"
-VIAddVersionKey FileVersion "${VERSION}.0"
-VIAddVersionKey ProductVersion "${VERSION}.0"
+VIAddVersionKey FileVersion "1.0.0.0"
+VIAddVersionKey ProductVersion "1.0.0.0"
 
 InstallDir ""
 
