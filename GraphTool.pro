@@ -21,6 +21,9 @@ _COPYRIGHT = "Copyright notice"
 
 DEFINES += "COPYRIGHT=\"\\\"$$_COPYRIGHT\\\"\""
 
+RC_ICONS = source/icon/Icon.ico
+ICON = source/icon/Icon.icns
+
 CONFIG += c++14
 
 QT += qml quick opengl openglextensions
