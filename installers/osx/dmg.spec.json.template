@@ -1,0 +1,10 @@
+{
+	"title": "_PRODUCT_NAME_",
+	"background": "_SCRIPT_DIR_/background.png",
+	"icon-size": 128,
+	"contents":
+	[
+		{ "x": 144, "y": 192, "type": "file", "path": "_PRODUCT_NAME_.app" },
+		{ "x": 576, "y": 192, "type": "link", "path": "/Applications" }
+	]
+}
