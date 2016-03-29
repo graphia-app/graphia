@@ -22,7 +22,10 @@ _COPYRIGHT = "Copyright notice"
 DEFINES += "COPYRIGHT=\"\\\"$$_COPYRIGHT\\\"\""
 
 RC_ICONS = source/icon/Icon.ico
+
+# These influence the OSX Info.plist
 ICON = source/icon/Icon.icns
+QMAKE_TARGET_BUNDLE_PREFIX = com.kajeka
 
 CONFIG += c++14
 
