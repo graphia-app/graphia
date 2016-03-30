@@ -1,3 +1,6 @@
+; makensis would normally be invoked from the root of the source tree
+!addincludedir "installers\windows"
+
 !include "MUI2.nsh"
 !include "fileassoc.nsh"
 
