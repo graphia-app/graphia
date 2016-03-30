@@ -1,4 +1,5 @@
 !include "MUI2.nsh"
+!include "fileassoc.nsh"
 
 !ifndef PRODUCT_NAME
 !define PRODUCT_NAME "unspecified-product"
@@ -124,7 +125,18 @@ Section "-Main Component"
 		CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER\"
 		CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_NAME}.exe"
 	!insertmacro MUI_STARTMENU_WRITE_END
+
+	!insertmacro UPDATEFILEASSOC
 SectionEnd
+
+; File Associations
+SectionGroup "File associations"
+    Section "${PRODUCT_NAME} Graph Modelling Language file (.gml)"
+        !insertmacro APP_ASSOCIATE "gml" "${PRODUCT_NAME}.gml" "${PRODUCT_NAME} GML File" \
+            "$INSTDIR\${PRODUCT_NAME}.exe,0" "Open with ${PRODUCT_NAME}" \
+						"$INSTDIR\${PRODUCT_NAME}.exe $\"%1$\""
+    SectionEnd
+SectionGroupEnd
 
 Section "Desktop shortcut"
 	CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_NAME}.exe"
@@ -142,4 +154,7 @@ Section "Uninstall"
 	DeleteRegKey /ifempty SHCTX "Software\${PRODUCT_NAME}"
 
 	DeleteRegKey SHCTX "${UNINSTALL_KEY}"
+
+	!insertmacro APP_UNASSOCIATE "gml" "${PRODUCT_NAME}.gml"
+	!insertmacro UPDATEFILEASSOC
 SectionEnd
