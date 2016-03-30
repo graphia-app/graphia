@@ -9,6 +9,8 @@
 !define PRODUCT_NAME "unspecified-product"
 !endif
 
+!define EXE "${PRODUCT_NAME}.exe"
+
 !ifndef VERSION
 !define VERSION "unspecified-version"
 !endif
@@ -26,7 +28,6 @@
 !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 
 Var INSTDIR_BASE
-Var EXE
 
 Name "${PRODUCT_NAME}"
 
@@ -71,8 +72,6 @@ RequestExecutionLevel highest
 				StrCpy $INSTDIR "$INSTDIR_BASE\${PRODUCT_NAME}"
 			${Endif}
 		${Endif}
-
-		StrCpy $EXE "$INSTDIR\${PRODUCT_NAME}.exe"
 	FunctionEnd
 !macroend
 
@@ -125,7 +124,7 @@ Section "-Main Component"
 	; These registry entries are necessary for the program to show up in the Add/Remove programs dialog
 	WriteRegStr SHCTX "${UNINSTALL_KEY}" "DisplayName" "${PRODUCT_NAME}"
 	WriteRegStr SHCTX "${UNINSTALL_KEY}" "DisplayVersion" "${VERSION}"
-	WriteRegStr SHCTX "${UNINSTALL_KEY}" "DisplayIcon" "${EXE}"
+	WriteRegStr SHCTX "${UNINSTALL_KEY}" "DisplayIcon" "$INSTDIR\${EXE}"
 	WriteRegStr SHCTX "${UNINSTALL_KEY}" "Publisher" "${PUBLISHER}"
 	WriteRegDWORD SHCTX "${UNINSTALL_KEY}" "EstimatedSize" "${BUILD_SIZE}"
 	WriteRegStr SHCTX "${UNINSTALL_KEY}" "InstallLocation" "$INSTDIR"
@@ -137,7 +136,7 @@ Section "-Main Component"
 
 	!insertmacro MUI_STARTMENU_WRITE_BEGIN ${PRODUCT_NAME}
 		CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER\"
-		CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\${PRODUCT_NAME}.lnk" "${EXE}"
+		CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\${PRODUCT_NAME}.lnk" "$INSTDIR\${EXE}"
 	!insertmacro MUI_STARTMENU_WRITE_END
 
 	!insertmacro UPDATEFILEASSOC
@@ -147,18 +146,18 @@ SectionEnd
 SectionGroup "File associations"
 	Section "Graph Modelling Language file (.gml)"
 		!insertmacro APP_ASSOCIATE "gml" "${PRODUCT_NAME}.gml" "${PRODUCT_NAME} GML File" \
-				"${EXE},0" "Open with ${PRODUCT_NAME}" \
-				"${EXE} $\"%1$\""
+				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
+				"$INSTDIR\${EXE} $\"%1$\""
 	SectionEnd
 SectionGroupEnd
 
 Section "Desktop shortcut"
-	CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "${EXE}"
+	CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${EXE}"
 SectionEnd
 
 ;Launch function
 Function Launch
-	ShellExecAsUser::ShellExecAsUser "" "${EXE}"
+	ShellExecAsUser::ShellExecAsUser "" "$INSTDIR\${EXE}"
 FunctionEnd
 
 Section "Uninstall"
