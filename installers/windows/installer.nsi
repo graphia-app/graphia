@@ -8,6 +8,16 @@
 !define VERSION "unspecified-version"
 !endif
 
+!ifndef PUBLISHER
+!define PUBLISHER "unspecified-publisher"
+!endif
+
+!ifndef COPYRIGHT
+!define COPYRIGHT "unspecified-copyright"
+!endif
+
+!define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
+
 Var INSTDIR_BASE
 
 Name "${PRODUCT_NAME}"
@@ -96,10 +106,14 @@ Section "-Main Component"
 	WriteRegStr SHCTX "Software\${PRODUCT_NAME}" "" $INSTDIR
 
 	; These registry entries are necessary for the program to show up in the Add/Remove programs dialog
-	WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "DisplayName" "${PRODUCT_NAME}"
-	WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "UninstallString" '"$INSTDIR\Uninstall.exe"'
-	WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "NoModify" 1
-	WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "NoRepair" 1
+	WriteRegStr SHCTX "${UNINSTALL_KEY}" "DisplayName" "${PRODUCT_NAME}"
+	WriteRegStr SHCTX "${UNINSTALL_KEY}" "DisplayVersion" "${VERSION}"
+	WriteRegStr SHCTX "${UNINSTALL_KEY}" "DisplayIcon" "$INSTDIR\${PRODUCT_VERSION}.exe"
+	WriteRegStr SHCTX "${UNINSTALL_KEY}" "Publisher" "${PUBLISHER}"
+	WriteRegStr SHCTX "${UNINSTALL_KEY}" "InstallLocation" "$INSTDIR"
+	WriteRegStr SHCTX "${UNINSTALL_KEY}" "UninstallString" '"$INSTDIR\Uninstall.exe"'
+	WriteRegDWORD SHCTX "${UNINSTALL_KEY}" "NoModify" 1
+	WriteRegDWORD SHCTX "${UNINSTALL_KEY}" "NoRepair" 1
 
 	WriteUninstaller "$INSTDIR\Uninstall.exe"
 
@@ -124,5 +138,5 @@ Section "Uninstall"
 
 	DeleteRegKey /ifempty SHCTX "Software\${PRODUCT_NAME}"
 
-	DeleteRegKey SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
+	DeleteRegKey SHCTX "${UNINSTALL_KEY}"
 SectionEnd
