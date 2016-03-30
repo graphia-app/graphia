@@ -134,7 +134,7 @@ SectionEnd
 
 ; File Associations
 SectionGroup "File associations"
-    Section "${PRODUCT_NAME} Graph Modelling Language file (.gml)"
+    Section "Graph Modelling Language file (.gml)"
         !insertmacro APP_ASSOCIATE "gml" "${PRODUCT_NAME}.gml" "${PRODUCT_NAME} GML File" \
             "$INSTDIR\${PRODUCT_NAME}.exe,0" "Open with ${PRODUCT_NAME}" \
 						"$INSTDIR\${PRODUCT_NAME}.exe $\"%1$\""
