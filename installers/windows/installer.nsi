@@ -16,6 +16,8 @@
 !define COPYRIGHT "unspecified-copyright"
 !endif
 
+!searchreplace COPYRIGHT "${COPYRIGHT}" "(c)" "©"
+
 !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 
 Var INSTDIR_BASE
