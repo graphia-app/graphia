@@ -88,8 +88,6 @@ UninstallIcon "${MUI_UNICON}"
 
 WindowIcon on
 
-!define MUI_ABORTWARNING
-
 !define MUI_COMPONENTSPAGE_NODESC
 !insertmacro MUI_PAGE_COMPONENTS
 
@@ -102,8 +100,17 @@ Var STARTMENU_FOLDER
 !insertmacro MUI_PAGE_STARTMENU ${PRODUCT_NAME} $STARTMENU_FOLDER
 
 !insertmacro MUI_PAGE_INSTFILES
+
+!define MUI_FINISHPAGE_RUN
+!define MUI_FINISHPAGE_RUN_CHECKED
+!define MUI_FINISHPAGE_RUN_TEXT "Start ${PRODUCT_NAME}"
+!define MUI_FINISHPAGE_RUN_FUNCTION "Launch"
+
+!insertmacro MUI_PAGE_FINISH
+
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
+!insertmacro MUI_UNPAGE_FINISH
 
 !insertmacro MUI_LANGUAGE "English"
 
@@ -147,6 +154,11 @@ SectionGroupEnd
 Section "Desktop shortcut"
 	CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "${EXE}"
 SectionEnd
+
+;Launch function
+Function Launch
+	ShellExecAsUser::ShellExecAsUser "" "${EXE}"
+FunctionEnd
 
 Section "Uninstall"
 	RMDir /r "$INSTDIR"
