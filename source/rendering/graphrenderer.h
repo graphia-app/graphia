@@ -235,8 +235,6 @@ private:
     std::atomic<bool> _layoutChanged;
     bool _synchronousLayoutChanged = false;
 
-    bool _modeTransitionInProgress = false;
-
     Transition _transition;
 
     bool prepareRenderBuffers(int width, int height);
@@ -274,9 +272,11 @@ private:
     std::mutex _resetOpenGLStateMutex;
     std::function<void()> resetOpenGLState;
 
-    void finishTransitionToOverviewMode();
-    void finishTransitionToComponentMode();
-    void finishModeTransition();
+    void finishTransitionToOverviewMode(bool doTransition);
+    void finishTransitionToOverviewModeOnRendererThread(bool doTransition);
+    void finishTransitionToComponentMode(bool doTransition);
+    void finishTransitionToComponentModeOnRendererThread(bool doTransition);
+
     void setScene(Scene* scene);
     void setInteractor(Interactor* interactor) { _interactor = interactor; }
 

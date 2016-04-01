@@ -504,7 +504,7 @@ float GraphRenderer::secondsElapsed()
 
 bool GraphRenderer::transitionActive() const
 {
-    return _transition.active() || _scene->transitionActive() || _modeTransitionInProgress;
+    return _transition.active() || _scene->transitionActive();
 }
 
 //FIXME this reference counting thing is rubbish, and gives rise to hacks
@@ -563,12 +563,13 @@ void GraphRenderer::onEdgeAddedToComponent(const Graph*, EdgeId edgeId, Componen
     _hiddenEdges.set(edgeId, true);
 }
 
-void GraphRenderer::finishTransitionToOverviewMode()
+void GraphRenderer::finishTransitionToOverviewMode(bool doTransition)
 {
+    setMode(GraphRenderer::Mode::Overview);
     setScene(_graphOverviewScene);
     setInteractor(_graphOverviewInteractor);
 
-    if(_modeTransitionInProgress)
+    if(doTransition)
     {
         // When we first change to overview mode we want all
         // the renderers to be in their reset state
@@ -585,43 +586,38 @@ void GraphRenderer::finishTransitionToOverviewMode()
     updateGPUData(When::Later);
 }
 
-void GraphRenderer::finishTransitionToComponentMode()
+void GraphRenderer::finishTransitionToOverviewModeOnRendererThread(bool doTransition)
 {
+    setMode(GraphRenderer::Mode::Overview);
+    executeOnRendererThread([this, doTransition]
+    {
+        finishTransitionToOverviewMode(doTransition);
+    }, "GraphRenderer::finishTransitionToOverviewMode");
+}
+
+void GraphRenderer::finishTransitionToComponentMode(bool doTransition)
+{
+    setMode(GraphRenderer::Mode::Component);
     setScene(_graphComponentScene);
     setInteractor(_graphComponentInteractor);
 
-    if(!_graphComponentScene->savedViewIsReset())
+    if(doTransition && !_graphComponentScene->savedViewIsReset())
     {
         // Go back to where we were before
-        if(_modeTransitionInProgress)
-            _graphComponentScene->startTransition(0.3f, Transition::Type::EaseInEaseOut);
-
+        _graphComponentScene->startTransition(0.3f, Transition::Type::EaseInEaseOut);
         _graphComponentScene->restoreViewData();
     }
 
     updateGPUData(When::Later);
 }
 
-void GraphRenderer::finishModeTransition()
+void GraphRenderer::finishTransitionToComponentModeOnRendererThread(bool doTransition)
 {
-    if(_modeTransitionInProgress)
+    setMode(GraphRenderer::Mode::Component);
+    executeOnRendererThread([this, doTransition]
     {
-        switch(mode())
-        {
-            case GraphRenderer::Mode::Overview:
-                finishTransitionToOverviewMode();
-                break;
-
-            case GraphRenderer::Mode::Component:
-                finishTransitionToComponentMode();
-                break;
-
-            default:
-                break;
-        }
-
-        _modeTransitionInProgress = false;
-    }
+        finishTransitionToComponentMode(doTransition);
+    }, "GraphRenderer::finishTransitionToComponentMode");
 }
 
 void GraphRenderer::switchToOverviewMode(bool doTransition)
@@ -646,24 +642,17 @@ void GraphRenderer::switchToOverviewMode(bool doTransition)
                 _graphComponentScene->startTransition(0.3f, Transition::Type::EaseInEaseOut,
                 [this]
                 {
-                    _modeTransitionInProgress = true;
-                    setMode(GraphRenderer::Mode::Overview);
                     rendererFinishedTransition(); // *
+                    finishTransitionToOverviewModeOnRendererThread(true);
                 });
 
                 _graphComponentScene->resetView(false);
             }
             else
-            {
-                _modeTransitionInProgress = true;
-                setMode(GraphRenderer::Mode::Overview);
-            }
+                finishTransitionToOverviewModeOnRendererThread(true);
         }
         else
-        {
-            setMode(GraphRenderer::Mode::Overview);
-            finishTransitionToOverviewMode();
-        }
+            finishTransitionToOverviewMode(false);
 
     }, "GraphRenderer::switchToOverviewMode");
 }
@@ -683,16 +672,12 @@ void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId compone
                                                                 0.3f, Transition::Type::EaseInEaseOut,
             [this]
             {
-                _modeTransitionInProgress = true;
-                setMode(GraphRenderer::Mode::Component);
+                finishTransitionToComponentModeOnRendererThread(true);
                 rendererFinishedTransition();
             });
         }
         else
-        {
-            setMode(GraphRenderer::Mode::Component);
-            finishTransitionToComponentMode();
-        }
+            finishTransitionToComponentMode(false);
 
     }, "GraphRenderer::switchToComponentMode");
 }
@@ -885,7 +870,6 @@ void GraphRenderer::renderScene()
 {
     ifSceneUpdateEnabled([this]
     {
-        finishModeTransition();
         _preUpdateExecutor.execute();
     });
 
