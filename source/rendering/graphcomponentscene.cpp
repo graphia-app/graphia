@@ -251,18 +251,19 @@ void GraphComponentScene::onGraphChanged(const Graph* graph)
         {
             setViewportSize(_width, _height);
 
+            auto maybeSwitchToOverviewMode =
+            [this, graph]
+            {
+                // If graph change has resulted in multiple components, switch
+                // to overview mode once the transition had completed
+                if(_numComponentsPriorToChange == 1 && graph->numComponents() > 1)
+                    _graphRenderer->switchToOverviewMode();
+            };
+
             // Graph changes may significantly alter the centre; ease the transition
             if(componentRenderer() != nullptr && componentRenderer()->transitionRequired())
             {
-                startTransition(0.3f, Transition::Type::EaseInEaseOut,
-                [this, graph]
-                {
-                    // If graph change has resulted in multiple components, switch
-                    // to overview mode once the transition had completed
-                    if(_numComponentsPriorToChange == 1 && graph->numComponents() > 1)
-                        _graphRenderer->switchToOverviewMode();
-                });
-
+                startTransition(0.3f, Transition::Type::EaseInEaseOut, maybeSwitchToOverviewMode);
                 componentRenderer()->computeTransition();
             }
             else
@@ -270,6 +271,7 @@ void GraphComponentScene::onGraphChanged(const Graph* graph)
                 // If we don't start a transition, we still want the renderer to do the things
                 // it would have when the transition finished
                 _graphRenderer->sceneFinishedTransition();
+                maybeSwitchToOverviewMode();
             }
         }
     }, "GraphComponentScene::onGraphChanged (setSize/moveFocusToCentreOfComponent)");
