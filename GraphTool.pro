@@ -2,21 +2,21 @@ TEMPLATE = app
 
 _PRODUCT_NAME=$$(PRODUCT_NAME)
 !isEmpty(_PRODUCT_NAME) {
-TARGET = $$_PRODUCT_NAME
+    TARGET = $$_PRODUCT_NAME
 }
 
 DEFINES += "PRODUCT_NAME=\"\\\"$$TARGET\\\"\""
 
 _VERSION=$$(VERSION)
 isEmpty(_VERSION) {
-_VERSION = "development"
+    _VERSION = "development"
 }
 
 DEFINES += "VERSION=\"\\\"$$_VERSION\\\"\""
 
 _COPYRIGHT=$$(COPYRIGHT)
 isEmpty(_COPYRIGHT) {
-_COPYRIGHT = "Copyright notice"
+    _COPYRIGHT = "Copyright notice"
 }
 
 DEFINES += "COPYRIGHT=\"\\\"$$_COPYRIGHT\\\"\""
@@ -32,7 +32,7 @@ CONFIG += c++14
 QT += qml quick opengl openglextensions
 
 CONFIG(debug,debug|release) {
-  DEFINES += _DEBUG
+    DEFINES += _DEBUG
 }
 
 gcc {
