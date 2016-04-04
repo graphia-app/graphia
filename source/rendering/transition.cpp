@@ -41,9 +41,17 @@ bool Transition::update(float dTime)
         for(auto& finishedFunction : _finishedFunctions)
             finishedFunction();
 
+        if(!_suppressSignals)
+            emit finished();
+
         return false;
     }
 
     return true;
+}
+
+void Transition::willBeImmediatelyReused()
+{
+    _suppressSignals = true;
 }
 

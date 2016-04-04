@@ -26,21 +26,38 @@ private:
     float _elapsed = 0.0f;
     std::function<void(float)> _function;
     std::vector<std::function<void()>> _finishedFunctions;
+    bool _suppressSignals = false;
 
 public:
     template<typename... Args> void start(float duration, Type type,
                                           std::function<void(float)> function,
                                           Args... finishedFunctions)
     {
+        if(!active() && !_suppressSignals)
+            emit started();
+
         _duration = duration;
         _elapsed = 0.0f;
         _type = type;
         _function = function;
         _finishedFunctions = {finishedFunctions...};
+        _suppressSignals = false;
     }
 
     bool update(float dTime);
     bool active() const { return _elapsed < _duration; }
+
+    // The idea behind this is that when you have a chain of transitions, you
+    // don't necessarily want to signal when each starts and finishes, so by
+    // calling this from a finishedFunction, the finished signal of the current
+    // transition is not emitted, nor is the started signal of the subsequent
+    // transition, the net result being the entire chain of transitions has a
+    // single started and single finished signal emitted
+    void willBeImmediatelyReused();
+
+signals:
+    void started() const;
+    void finished() const;
 };
 
 #endif // TRANSITION_H
