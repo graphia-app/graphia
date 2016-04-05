@@ -46,6 +46,11 @@ void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, 
 
     synchronise();
 
+    QObject::connect(&_zoomTransition, &Transition::started, graphRenderer,
+                     &GraphRenderer::rendererStartedTransition, Qt::DirectConnection);
+    QObject::connect(&_zoomTransition, &Transition::finished, graphRenderer,
+                     &GraphRenderer::rendererFinishedTransition, Qt::DirectConnection);
+
     _initialised = true;
 }
 
@@ -61,6 +66,8 @@ void GraphComponentRenderer::cleanup()
         _cleanupWhenThawed = true;
         return;
     }
+
+    _zoomTransition.disconnect();
 
     _graphRenderer->onComponentCleanup(_componentId);
 
@@ -323,18 +330,11 @@ void GraphComponentRenderer::zoom(float delta, bool doTransition)
     {
         if(doTransition)
         {
-            if(!_zoomTransition.active())
-                _graphRenderer->rendererStartedTransition();
-
             _zoomTransition.start(0.1f, Transition::Type::Linear,
-                [=](float f)
-                {
-                    _viewData._zoomDistance = startZoomDistance + ((_targetZoomDistance - startZoomDistance) * f);
-                },
-                [this]
-                {
-                    _graphRenderer->rendererFinishedTransition();
-                });
+            [this, startZoomDistance](float f)
+            {
+                _viewData._zoomDistance = startZoomDistance + ((_targetZoomDistance - startZoomDistance) * f);
+            });
         }
         else
             _viewData._zoomDistance = _targetZoomDistance;

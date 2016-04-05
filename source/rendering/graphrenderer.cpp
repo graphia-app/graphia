@@ -215,6 +215,9 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
     connect(graph, &Graph::graphChanged, this, &GraphRenderer::onGraphChanged, Qt::DirectConnection);
     connect(graph, &Graph::componentAdded, this, &GraphRenderer::onComponentAdded, Qt::DirectConnection);
 
+    connect(&_transition, &Transition::started, this, &GraphRenderer::rendererStartedTransition, Qt::DirectConnection);
+    connect(&_transition, &Transition::finished, this, &GraphRenderer::rendererFinishedTransition, Qt::DirectConnection);
+
     _graphOverviewScene = new GraphOverviewScene(commandManager, this);
     _graphComponentScene = new GraphComponentScene(this);
 
@@ -601,7 +604,7 @@ void GraphRenderer::finishTransitionToComponentMode(bool doTransition)
     setScene(_graphComponentScene);
     setInteractor(_graphComponentInteractor);
 
-    if(doTransition && !_graphComponentScene->savedViewIsReset())
+    if(doTransition)
     {
         // Go back to where we were before
         _graphComponentScene->startTransition(0.3f, Transition::Type::EaseInEaseOut);
@@ -636,13 +639,10 @@ void GraphRenderer::switchToOverviewMode(bool doTransition)
         {
             if(!_graphComponentScene->viewIsReset())
             {
-                if(!_transition.active())
-                    rendererStartedTransition(); // Partner to * below
-
                 _graphComponentScene->startTransition(0.3f, Transition::Type::EaseInEaseOut,
                 [this]
                 {
-                    rendererFinishedTransition(); // *
+                    _transition.willBeImmediatelyReused();
                     finishTransitionToOverviewModeOnRendererThread(true);
                 });
 
@@ -665,15 +665,17 @@ void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId compone
 
         if(mode() != GraphRenderer::Mode::Component && doTransition)
         {
-            if(!_transition.active())
-                rendererStartedTransition();
-
             _graphOverviewScene->startTransitionToComponentMode(_graphComponentScene->componentId(),
                                                                 0.3f, Transition::Type::EaseInEaseOut,
             [this]
             {
-                finishTransitionToComponentModeOnRendererThread(true);
-                rendererFinishedTransition();
+                if(!_graphComponentScene->savedViewIsReset())
+                {
+                    _transition.willBeImmediatelyReused();
+                    finishTransitionToComponentModeOnRendererThread(true);
+                }
+                else
+                    finishTransitionToComponentModeOnRendererThread(false);
             });
         }
         else
@@ -686,12 +688,6 @@ void GraphRenderer::onGraphChanged(const Graph* graph)
 {
     _numComponents = graph->numComponents();
 
-    //FIXME: this makes me feel dirty
-    // This is a slight hack to prevent there being a gap in which
-    // layout can occur, inbetween the graph change and user
-    // interaction phases
-    rendererStartedTransition();
-
     executeOnRendererThread([this]
     {
         for(ComponentId componentId : _graphModel->graph().componentIds())
@@ -702,8 +698,6 @@ void GraphRenderer::onGraphChanged(const Graph* graph)
 
         updateGPUData(When::Later);
 
-        // Partner to the hack described above
-        rendererFinishedTransition();
     }, "GraphRenderer::onGraphChanged update");
 }
 

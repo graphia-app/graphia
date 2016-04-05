@@ -41,6 +41,9 @@ GraphOverviewScene::GraphOverviewScene(CommandManager& commandManager, GraphRend
     connect(&_graphModel->graph(), &Graph::graphWillChange, this, &GraphOverviewScene::onGraphWillChange, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphOverviewScene::onGraphChanged, Qt::DirectConnection);
 
+    connect(&_zoomTransition, &Transition::started, _graphRenderer, &GraphRenderer::rendererStartedTransition, Qt::DirectConnection);
+    connect(&_zoomTransition, &Transition::finished, _graphRenderer, &GraphRenderer::rendererFinishedTransition, Qt::DirectConnection);
+
     connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphOverviewScene::onPreferenceChanged, Qt::DirectConnection);
 }
 
@@ -329,9 +332,6 @@ void GraphOverviewScene::startTransition(float duration,
     auto targetComponentLayoutData = _zoomedComponentLayoutData;
     auto targetComponentAlpha = _componentAlpha;
 
-    if(!_graphRenderer->transition().active())
-        _graphRenderer->rendererStartedTransition();
-
     _graphRenderer->transition().start(duration, transitionType,
     [this, targetComponentLayoutData = std::move(targetComponentLayoutData),
            targetComponentAlpha = std::move(targetComponentAlpha)](float f)
@@ -379,7 +379,6 @@ void GraphOverviewScene::startTransition(float duration,
         _removedComponentIds.clear();
         _componentMergeSets.clear();
 
-        _graphRenderer->rendererFinishedTransition();
         _graphRenderer->sceneFinishedTransition();
     },
     finishedFunction);
@@ -422,9 +421,6 @@ void GraphOverviewScene::startZoomTransition(float duration)
     for(auto componentId : _componentIds)
         targetZoomedComponentLayoutData[componentId] = zoomedLayoutData(_componentLayoutData[componentId]);
 
-    if(!_zoomTransition.active())
-        _graphRenderer->rendererStartedTransition();
-
     _zoomTransition.start(duration, Transition::Type::InversePower,
     [this, targetZoomedComponentLayoutData](float f)
     {
@@ -434,10 +430,6 @@ void GraphOverviewScene::startZoomTransition(float duration)
                     interpolateCircle(_previousZoomedComponentLayoutData[componentId],
                                       targetZoomedComponentLayoutData[componentId], f);
         }
-    },
-    [this]
-    {
-        _graphRenderer->rendererFinishedTransition();
     });
 }
 
@@ -534,13 +526,22 @@ void GraphOverviewScene::startComponentLayoutTransition()
             // If a graph change has resulted in a single component, switch
             // to component mode once the transition had completed
             if(_graphModel->graph().numComponents() == 1)
+            {
+                _graphRenderer->transition().willBeImmediatelyReused();
                 _graphRenderer->switchToComponentMode();
+            }
         });
     }
 }
 
 void GraphOverviewScene::onGraphChanged(const Graph* graph)
 {
+    // A renderer transition isn't occurring here (yet); we
+    // pretend one is to avoid there being a gap between the
+    // graph change and renderer transition phases in which
+    // the layout thread would be unpaused without it
+    _graphRenderer->rendererStartedTransition();
+
     graph->setPhase(tr("Component Layout"));
     _componentLayout->execute(*graph, graph->componentIds(), _nextComponentLayoutData);
     _nextComponentLayoutDataChanged = true;
@@ -557,6 +558,8 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph)
         _componentIds.insert(_componentIds.end(),
                              _removedComponentIds.begin(),
                              _removedComponentIds.end());
+
+        _graphRenderer->rendererFinishedTransition();
     }, "GraphOverviewScene::onGraphChanged");
 }
 
