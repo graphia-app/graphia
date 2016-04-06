@@ -25,7 +25,7 @@ Item
     property int commandProgress: document.commandProgress
     property string commandVerb: document.commandVerb
 
-    property bool layoutIsPaused: document.layoutIsPaused
+    property int layoutPauseState: document.layoutPauseState
 
     property bool canUndo : document.canUndo
     property string nextUndoAction: document.nextUndoAction

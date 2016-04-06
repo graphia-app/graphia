@@ -3,6 +3,11 @@
 
 #include "../graph/componentmanager.h"
 
+static bool layoutIsFinished(const Layout& layout)
+{
+    return layout.finished() || layout.graph().numNodes() == 1;
+}
+
 LayoutThread::LayoutThread(GraphModel& graphModel,
                            std::unique_ptr<LayoutFactory> layoutFactory,
                            bool repeating) :
@@ -11,13 +16,24 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
     _layoutFactory(std::move(layoutFactory)),
     _executedAtLeastOnce(graphModel.graph()),
     _intermediatePositions(graphModel.graph()),
-    _performanceCounter(std::chrono::seconds(3))
+    _performanceCounter(std::chrono::seconds(1))
 {
-    bool debug = qgetenv("LAYOUT_DEBUG").toInt();
-    _performanceCounter.setReportFn([debug](float ticksPerSecond)
+    _debug = qgetenv("LAYOUT_DEBUG").toInt();
+    _performanceCounter.setReportFn([this](float ticksPerSecond)
     {
-        if(debug)
-            qDebug() << "Layout" << ticksPerSecond << "ips";
+        if(_debug)
+        {
+            auto activeLayouts = std::count_if(_layouts.begin(), _layouts.end(),
+                                               [](auto& layout) { return !layoutIsFinished(*layout.second); });
+            qDebug() << activeLayouts << "layouts\t" << ticksPerSecond << "ips";
+        }
+    });
+
+    connect(&graphModel.graph(), &Graph::graphChanged,
+    [this]
+    {
+        std::unique_lock<std::mutex> lock(_mutex);
+        _graphChanged = true;
     });
 
     connect(&graphModel.graph(), &Graph::componentSplit, this, &LayoutThread::onComponentSplit, Qt::DirectConnection);
@@ -37,7 +53,6 @@ void LayoutThread::pause()
         layout.second->cancel();
 
     lock.unlock();
-    emit pausedChanged();
 }
 
 void LayoutThread::pauseAndWait()
@@ -54,7 +69,6 @@ void LayoutThread::pauseAndWait()
     _waitForPause.wait(lock);
 
     lock.unlock();
-    emit pausedChanged();
 }
 
 bool LayoutThread::paused()
@@ -76,19 +90,34 @@ void LayoutThread::resume()
         return;
 
     _pause = false;
-    _paused = false;
+
 
     _waitForResume.notify_all();
 
     lock.unlock();
-    emit pausedChanged();
+}
+
+void LayoutThread::resumeIfGraphChanged()
+{
+    std::unique_lock<std::mutex> lock(_mutex);
+    if(_graphChanged)
+    {
+        _graphChanged = false;
+
+        for(auto& layout : _layouts)
+        {
+            if(layout.second->finished())
+                layout.second->unfinish();
+        }
+
+        lock.unlock();
+        resume();
+    }
 }
 
 void LayoutThread::start()
 {
     _started = true;
-    _paused = false;
-    emit pausedChanged();
 
     if(_thread.joinable())
         _thread.join();
@@ -125,11 +154,11 @@ void LayoutThread::uncancel()
         layout.second->uncancel();
 }
 
-bool LayoutThread::allLayoutsShouldPause()
+bool LayoutThread::allLayoutsFinished()
 {
     for(auto& layout : _layouts)
     {
-        if(!layout.second->shouldPause())
+        if(!layoutIsFinished(*layout.second))
             return false;
     }
 
@@ -144,7 +173,7 @@ void LayoutThread::run()
 
         for(auto& layout : _layouts)
         {
-            if(layout.second->shouldPause() || layout.second->graph().numNodes() == 1)
+            if(layoutIsFinished(*layout.second))
                 continue;
 
             layout.second->execute(!_executedAtLeastOnce.get(layout.first));
@@ -157,27 +186,43 @@ void LayoutThread::run()
 
         std::unique_lock<std::mutex> lock(_mutex);
 
+        _graphChanged = false;
+
+        if(_paused)
+        {
+            _paused = false;
+            emit pausedChanged();
+        }
+
         if(_stop)
             break;
 
-        if(!_stop && (_pause || allLayoutsShouldPause() || (!iterative() && _repeating)))
+        if(!_stop && (_pause || allLayoutsFinished() || (!iterative() && _repeating)))
         {
             _paused = true;
+            emit pausedChanged();
+
+            if(_debug) qDebug() << "Layout paused";
+
             u::setCurrentThreadName("Layout ||");
             uncancel();
             _waitForPause.notify_all();
             _waitForResume.wait(lock);
+
+            if(_debug) qDebug() << "Layout resumed";
         }
 
         std::this_thread::yield();
     }
-    while(iterative() || _repeating || allLayoutsShouldPause());
+    while(iterative() || _repeating || allLayoutsFinished());
 
     std::unique_lock<std::mutex> lock(_mutex);
     _layouts.clear();
     _started = false;
     _paused = true;
     _waitForPause.notify_all();
+
+    if(_debug) qDebug() << "Layout stopped";
 }
 
 

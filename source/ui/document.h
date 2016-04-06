@@ -24,6 +24,10 @@ class GraphQuickItem;
 class GraphModel;
 class SelectionManager;
 
+DEFINE_QML_ENUM(Application::uri(), Application::majorVersion(), Application::minorVersion(),
+                LayoutPauseState,
+                Running, RunningFinished, Paused);
+
 class Document : public QObject
 {
     Q_OBJECT
@@ -42,7 +46,7 @@ class Document : public QObject
     Q_PROPERTY(int commandProgress READ commandProgress NOTIFY commandProgressChanged)
     Q_PROPERTY(QString commandVerb READ commandVerb NOTIFY commandVerbChanged)
 
-    Q_PROPERTY(bool layoutIsPaused READ layoutIsPaused NOTIFY layoutIsPausedChanged)
+    Q_PROPERTY(LayoutPauseState::Enum layoutPauseState READ layoutPauseState NOTIFY layoutPauseStateChanged)
 
     Q_PROPERTY(bool canUndo READ canUndo NOTIFY canUndoChanged)
     Q_PROPERTY(QString nextUndoAction READ nextUndoAction NOTIFY nextUndoActionChanged)
@@ -70,9 +74,9 @@ public:
     int commandProgress() const;
     QString commandVerb() const;
 
-    void pauseLayout(bool autoResume = false);
-    bool layoutIsPaused();
-    void resumeLayout(bool autoResume = false);
+    void pauseLayout();
+    void resumeLayout();
+    LayoutPauseState::Enum layoutPauseState();
 
     bool canUndo() const;
     QString nextUndoAction() const;
@@ -115,8 +119,9 @@ private:
     std::vector<GraphTransformConfiguration> _previousGraphTransformConfigurations;
     QmlContainerWrapper<GraphTransformConfiguration> _graphTransformConfigurations;
 
-    std::recursive_mutex _autoResumeMutex;
-    int _autoResume = 0; // A count of the number of things which want the layout to pause
+    std::recursive_mutex _numLayoutPausersMutex;
+    int _numLayoutPausers = 0; // A count of the number of things which want the layout to pause
+    bool _userLayoutPaused = false; // true if the user wants the layout to pause
 
     template<typename... Args>
     void addGraphTransform(Args&&... args)
@@ -134,6 +139,8 @@ private slots:
     void onGraphTransformsConfigurationDataChanged(const QModelIndex& index, const QModelIndex&,
                                                    const QVector<int>& roles);
 
+    void resumeLayoutIfGraphChanged();
+
 signals:
     void applicationChanged();
     void graphQuickItemChanged();
@@ -149,7 +156,7 @@ signals:
     void commandProgressChanged();
     void commandVerbChanged();
 
-    void layoutIsPausedChanged();
+    void layoutPauseStateChanged();
 
     void canUndoChanged();
     void nextUndoActionChanged();

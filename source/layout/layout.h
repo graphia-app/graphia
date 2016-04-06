@@ -84,7 +84,10 @@ public:
     virtual void uncancel() { setCancel(false); }
 
     // Indicates that the algorithm is doing no useful work
-    virtual bool shouldPause() { return false; }
+    virtual bool finished() const { return false; }
+
+    // Resets the state of the algorithm such that finished() no longer returns true
+    virtual void unfinish() { Q_ASSERT(!"unfinish not implemented"); }
 
     virtual bool iterative() const { return _iterative == Iterative::Yes; }
 
@@ -141,6 +144,10 @@ private:
 
     PerformanceCounter _performanceCounter;
 
+    bool _graphChanged = false;
+
+    bool _debug = false;
+
 public:
     LayoutThread(GraphModel& graphModel,
                  std::unique_ptr<LayoutFactory> layoutFactory,
@@ -158,6 +165,7 @@ public:
     void pauseAndWait();
     bool paused();
     void resume();
+    void resumeIfGraphChanged();
 
     void start();
     void stop();
@@ -168,7 +176,7 @@ public:
 
 private:
     bool iterative();
-    bool allLayoutsShouldPause();
+    bool allLayoutsFinished();
     void uncancel();
     void run();
 

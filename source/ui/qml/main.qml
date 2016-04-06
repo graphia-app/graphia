@@ -233,8 +233,21 @@ ApplicationWindow
     Action
     {
         id: pauseLayoutAction
-        iconName: currentDocument && currentDocument.layoutIsPaused ? "media-playback-start" : "media-playback-pause"
-        text: currentDocument && currentDocument.layoutIsPaused ? qsTr("&Resume Layout") : qsTr("&Pause Layout")
+        iconName:
+        {
+            var layoutPauseState = currentDocument ? currentDocument.layoutPauseState : -1;
+
+            switch(layoutPauseState)
+            {
+            case LayoutPauseState.Paused:          return "media-playback-start";
+            case LayoutPauseState.RunningFinished: return "media-skip-forward";
+            default:
+            case LayoutPauseState.Running:         return "media-playback-pause";
+            }
+        }
+
+        text: currentDocument && currentDocument.layoutPauseState === LayoutPauseState.Paused ?
+                  qsTr("&Resume Layout") : qsTr("&Pause Layout")
         shortcut: "Pause"
         enabled: currentDocument ? currentDocument.idle : false
         onTriggered: currentDocument && currentDocument.toggleLayout()

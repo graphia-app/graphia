@@ -56,7 +56,8 @@ public:
         _displacements(graph.numNodes())
     {}
 
-    bool shouldPause();
+    bool finished() const { return _changeDetectionPhase == ChangeDetectionPhase::Finished; }
+    void unfinish() { _changeDetectionPhase = ChangeDetectionPhase::Initial; }
 
     void executeReal(bool firstIteration);
 };

@@ -41,10 +41,16 @@ public:
             subLayout->uncancel();
     }
 
-    bool shouldPause()
+    bool finished() const
     {
         return std::any_of(_subLayouts.begin(), _subLayouts.end(),
-                           [](Layout* layout) { return layout->shouldPause(); });
+                           [](Layout* layout) { return layout->finished(); });
+    }
+
+    void unfinish()
+    {
+        for(auto subLayout : _subLayouts)
+            subLayout->unfinish();
     }
 
     bool iterative() const

@@ -268,8 +268,3 @@ void ForceDirectedLayout::oscillateChangeDetection()
         }
     }
 }
-
-bool ForceDirectedLayout::shouldPause()
-{
-    return _changeDetectionPhase == ChangeDetectionPhase::Finished;
-}
