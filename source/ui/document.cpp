@@ -31,6 +31,15 @@ bool Document::idle() const
     return !commandInProgress() && !_graphQuickItem->interacting();
 }
 
+void Document::maybeEmitIdleChanged()
+{
+    if(idle() != _previousIdle)
+    {
+        _previousIdle = idle();
+        emit idleChanged();
+    }
+}
+
 bool Document::canDelete() const
 {
     if(_selectionManager != nullptr)
@@ -84,39 +93,12 @@ QString Document::commandVerb() const
     return _commandManager.commandVerb();
 }
 
-void Document::pauseLayout()
+void Document::updateLayoutState()
 {
-    std::unique_lock<std::recursive_mutex> lock(_numLayoutPausersMutex);
-
-    if(_layoutThread)
-    {
-        if(_numLayoutPausers > 0 || !_layoutThread->paused())
-        {
-            _numLayoutPausers++;
-            emit layoutPauseStateChanged();
-        }
-
-        if(_numLayoutPausers == 1)
-            _layoutThread->pauseAndWait();
-    }
-
-}
-
-void Document::resumeLayout()
-{
-    std::unique_lock<std::recursive_mutex> lock(_numLayoutPausersMutex);
-
-    if(_layoutThread)
-    {
-        if(_numLayoutPausers == 1)
-            _layoutThread->resume();
-
-        if(_numLayoutPausers > 0)
-        {
-            _numLayoutPausers--;
-            emit layoutPauseStateChanged();
-        }
-    }
+    if(idle() && !_userLayoutPaused)
+        _layoutThread->resume();
+    else
+        _layoutThread->pauseAndWait();
 }
 
 LayoutPauseState::Enum Document::layoutPauseState()
@@ -141,14 +123,7 @@ void Document::toggleLayout()
     _userLayoutPaused = !_userLayoutPaused;
     emit layoutPauseStateChanged();
 
-    if(!_userLayoutPaused)
-        resumeLayoutIfGraphChanged();
-}
-
-void Document::resumeLayoutIfGraphChanged()
-{
-    if(idle() && !_userLayoutPaused)
-        _layoutThread->resumeIfGraphChanged();
+    updateLayoutState();
 }
 
 bool Document::canUndo() const
@@ -299,8 +274,6 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType)
 
     _graphModel = graphModel;
 
-    connect(&_graphModel->graph(), &Graph::graphWillChange, this, &Document::onGraphWillChange, Qt::DirectConnection);
-    connect(&_graphModel->graph(), &Graph::graphChanged, this, &Document::onGraphChanged, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
 
     connect(&_graphModel->graph().debugPauser, &DebugPauser::enabledChanged, this, &Document::debugPauserEnabledChanged);
@@ -339,15 +312,13 @@ void Document::onLoadComplete(bool /*success FIXME hmm*/)
     _selectionManager = std::make_shared<SelectionManager>(*_graphModel);
     _graphQuickItem->initialise(_graphModel, _commandManager, _selectionManager);
 
-    connect(_graphQuickItem, &GraphQuickItem::userInteractionStarted, [this] { pauseLayout(); });
-    connect(_graphQuickItem, &GraphQuickItem::userInteractionFinished, [this] { resumeLayout(); });
-    connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::idleChanged);
-
+    connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::maybeEmitIdleChanged);
     connect(_graphQuickItem, &GraphQuickItem::viewIsResetChanged, this, &Document::canResetViewChanged);
-
     connect(_graphQuickItem, &GraphQuickItem::canEnterOverviewModeChanged, this, &Document::canEnterOverviewModeChanged);
 
-    connect(&_commandManager, &CommandManager::busyChanged, this, &Document::idleChanged);
+    connect(&_commandManager, &CommandManager::busyChanged, this, &Document::maybeEmitIdleChanged);
+
+    connect(this, &Document::idleChanged, this, &Document::updateLayoutState);
 
     connect(this, &Document::idleChanged, this, &Document::canDeleteChanged);
     connect(this, &Document::idleChanged, this, &Document::canUndoChanged);
@@ -355,9 +326,6 @@ void Document::onLoadComplete(bool /*success FIXME hmm*/)
     connect(this, &Document::idleChanged, this, &Document::canEnterOverviewModeChanged);
     connect(this, &Document::idleChanged, this, &Document::canResetViewChanged);
 
-    connect(this, &Document::idleChanged, this, &Document::resumeLayoutIfGraphChanged);
-
-    connect(&_commandManager, &CommandManager::commandWillExecuteAsynchronously, [this] { pauseLayout(); });
     connect(&_commandManager, &CommandManager::commandWillExecuteAsynchronously, _graphQuickItem, &GraphQuickItem::commandWillExecuteAsynchronously);
     connect(&_commandManager, &CommandManager::commandWillExecuteAsynchronously, this, &Document::commandInProgressChanged);
 
@@ -371,7 +339,6 @@ void Document::onLoadComplete(bool /*success FIXME hmm*/)
     connect(&_commandManager, &CommandManager::commandCompleted, [this](const Command*, const QString& pastParticiple)
     {
         setStatus(pastParticiple);
-        resumeLayout();
     });
 
     connect(&_commandManager, &CommandManager::commandCompleted, _graphQuickItem, &GraphQuickItem::commandCompleted);
@@ -540,15 +507,4 @@ void Document::removeGraphTransform(int index)
 void Document::dumpGraph()
 {
     _graphModel->graph().dumpToQDebug(2);
-}
-
-void Document::onGraphWillChange(const Graph*)
-{
-    // Graph is about to change so suspend any active layout process
-    pauseLayout();
-}
-
-void Document::onGraphChanged(const Graph*)
-{
-    resumeLayout();
 }

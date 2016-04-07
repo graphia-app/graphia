@@ -74,8 +74,7 @@ public:
     int commandProgress() const;
     QString commandVerb() const;
 
-    void pauseLayout();
-    void resumeLayout();
+    void updateLayoutState();
     LayoutPauseState::Enum layoutPauseState();
 
     bool canUndo() const;
@@ -119,9 +118,9 @@ private:
     std::vector<GraphTransformConfiguration> _previousGraphTransformConfigurations;
     QmlContainerWrapper<GraphTransformConfiguration> _graphTransformConfigurations;
 
-    std::recursive_mutex _numLayoutPausersMutex;
-    int _numLayoutPausers = 0; // A count of the number of things which want the layout to pause
     bool _userLayoutPaused = false; // true if the user wants the layout to pause
+
+    bool _previousIdle = true;
 
     template<typename... Args>
     void addGraphTransform(Args&&... args)
@@ -135,11 +134,11 @@ private:
             const std::vector<GraphTransformConfiguration>& graphTransformConfigurations);
     void applyTransforms();
 
+    void maybeEmitIdleChanged();
+
 private slots:
     void onGraphTransformsConfigurationDataChanged(const QModelIndex& index, const QModelIndex&,
                                                    const QVector<int>& roles);
-
-    void resumeLayoutIfGraphChanged();
 
 signals:
     void applicationChanged();
@@ -202,9 +201,6 @@ public slots:
     void dumpGraph();
 
 private slots:
-    void onGraphWillChange(const Graph*);
-    void onGraphChanged(const Graph* graph);
-
     void onLoadProgress(int percentage);
     void onLoadComplete(bool success);
 };

@@ -146,7 +146,7 @@ private:
 
     bool _graphChanged = false;
 
-    bool _debug = false;
+    int _debug = 0;
 
 public:
     LayoutThread(GraphModel& graphModel,
@@ -165,7 +165,6 @@ public:
     void pauseAndWait();
     bool paused();
     void resume();
-    void resumeIfGraphChanged();
 
     void start();
     void stop();

@@ -21,7 +21,7 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
     _debug = qgetenv("LAYOUT_DEBUG").toInt();
     _performanceCounter.setReportFn([this](float ticksPerSecond)
     {
-        if(_debug)
+        if(_debug > 1)
         {
             auto activeLayouts = std::count_if(_layouts.begin(), _layouts.end(),
                                                [](auto& layout) { return !layoutIsFinished(*layout.second); });
@@ -89,30 +89,21 @@ void LayoutThread::resume()
     if(!_paused)
         return;
 
-    _pause = false;
+    // Don't resume if there is nothing to do
+    if(allLayoutsFinished() && !_graphChanged)
+        return;
 
+    for(auto& layout : _layouts)
+    {
+        if(layout.second->finished())
+            layout.second->unfinish();
+    }
+
+    _pause = false;
 
     _waitForResume.notify_all();
 
     lock.unlock();
-}
-
-void LayoutThread::resumeIfGraphChanged()
-{
-    std::unique_lock<std::mutex> lock(_mutex);
-    if(_graphChanged)
-    {
-        _graphChanged = false;
-
-        for(auto& layout : _layouts)
-        {
-            if(layout.second->finished())
-                layout.second->unfinish();
-        }
-
-        lock.unlock();
-        resume();
-    }
 }
 
 void LayoutThread::start()

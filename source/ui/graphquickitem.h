@@ -97,9 +97,6 @@ public slots:
     void onLayoutChanged();
 
 signals:
-    void userInteractionStarted() const;
-    void userInteractionFinished() const;
-
     void interactingChanged() const;
     void viewIsResetChanged() const;
     void canEnterOverviewModeChanged() const;

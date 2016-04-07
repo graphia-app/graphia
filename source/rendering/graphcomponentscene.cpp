@@ -147,10 +147,6 @@ void GraphComponentScene::startTransition(float duration, Transition::Type trans
     {
         componentRenderer()->updateTransition(f);
     },
-    [this]
-    {
-        _graphRenderer->sceneFinishedTransition();
-    },
     finishedFunction);
 }
 
@@ -239,9 +235,6 @@ void GraphComponentScene::onGraphWillChange(const Graph* graph)
 
 void GraphComponentScene::onGraphChanged(const Graph* graph)
 {
-    // See the comment in GraphOverviewScene::onGraphChanged
-    _graphRenderer->rendererStartedTransition();
-
     _graphRenderer->executeOnRendererThread([this, graph]
     {
         _defaultComponentId = graph->componentIdOfLargestComponent();
@@ -250,9 +243,10 @@ void GraphComponentScene::onGraphChanged(const Graph* graph)
         {
             setViewportSize(_width, _height);
 
-            auto maybeSwitchToOverviewMode =
-            [this, graph](bool fromTransition = true)
+            auto finishTransition = [this, graph](bool fromTransition = true)
             {
+                _graphRenderer->sceneFinishedTransition();
+
                 // If graph change has resulted in multiple components, switch
                 // to overview mode once the transition had completed
                 if(_numComponentsPriorToChange == 1 && graph->numComponents() > 1)
@@ -261,25 +255,27 @@ void GraphComponentScene::onGraphChanged(const Graph* graph)
                         _graphRenderer->transition().willBeImmediatelyReused();
 
                     _graphRenderer->switchToOverviewMode();
+
+                    return true;
                 }
+
+                return false;
             };
 
             // Graph changes may significantly alter the centre; ease the transition
             if(componentRenderer() != nullptr && componentRenderer()->transitionRequired())
             {
-                startTransition(0.3f, Transition::Type::EaseInEaseOut, maybeSwitchToOverviewMode);
+                startTransition(0.3f, Transition::Type::EaseInEaseOut, finishTransition);
                 componentRenderer()->computeTransition();
             }
             else
             {
                 // If we don't start a transition, we still want the renderer to do the things
                 // it would have when the transition finished
-                _graphRenderer->sceneFinishedTransition();
-                maybeSwitchToOverviewMode(false);
+                if(!finishTransition(false))
+                    _graphRenderer->rendererFinishedTransition();
             }
         }
-
-        _graphRenderer->rendererFinishedTransition();
     }, "GraphComponentScene::onGraphChanged (setSize/moveFocusToCentreOfComponent)");
 }
 

@@ -536,12 +536,6 @@ void GraphOverviewScene::startComponentLayoutTransition()
 
 void GraphOverviewScene::onGraphChanged(const Graph* graph)
 {
-    // A renderer transition isn't occurring here (yet); we
-    // pretend one is to avoid there being a gap between the
-    // graph change and renderer transition phases in which
-    // the layout thread would be unpaused without it
-    _graphRenderer->rendererStartedTransition();
-
     graph->setPhase(tr("Component Layout"));
     _componentLayout->execute(*graph, graph->componentIds(), _nextComponentLayoutData);
     _nextComponentLayoutDataChanged = true;
@@ -558,8 +552,6 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph)
         _componentIds.insert(_componentIds.end(),
                              _removedComponentIds.begin(),
                              _removedComponentIds.end());
-
-        _graphRenderer->rendererFinishedTransition();
     }, "GraphOverviewScene::onGraphChanged");
 }
 

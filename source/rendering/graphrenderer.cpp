@@ -510,28 +510,21 @@ bool GraphRenderer::transitionActive() const
     return _transition.active() || _scene->transitionActive();
 }
 
-//FIXME this reference counting thing is rubbish, and gives rise to hacks
 void GraphRenderer::rendererStartedTransition()
 {
-    Q_ASSERT(_numTransitioningRenderers >= 0);
-
-    if(_numTransitioningRenderers == 0)
+    if(!_transitionInProgress)
     {
+        _transitionInProgress = true;
+
         emit userInteractionStarted();
         resetTime();
     }
-
-    _numTransitioningRenderers++;
 }
 
 void GraphRenderer::rendererFinishedTransition()
 {
-    _numTransitioningRenderers--;
-
-    Q_ASSERT(_numTransitioningRenderers >= 0);
-
-    if(_numTransitioningRenderers == 0)
-        emit userInteractionFinished();
+    _transitionInProgress = false;
+    emit userInteractionFinished();
 }
 
 void GraphRenderer::sceneFinishedTransition()
@@ -642,6 +635,7 @@ void GraphRenderer::switchToOverviewMode(bool doTransition)
                 _graphComponentScene->startTransition(0.3f, Transition::Type::EaseInEaseOut,
                 [this]
                 {
+                    sceneFinishedTransition();
                     _transition.willBeImmediatelyReused();
                     finishTransitionToOverviewModeOnRendererThread(true);
                 });
@@ -688,6 +682,12 @@ void GraphRenderer::onGraphChanged(const Graph* graph)
 {
     _numComponents = graph->numComponents();
 
+    // We may not, in fact, subsequently actually start a transition here, but we
+    // speculatively pretend we do so that if a command is currently in progress
+    // there is some overlap between it and the renderer transition. This ensures
+    // that Document::idle() returns false for the duration of the transaction.
+    rendererStartedTransition();
+
     executeOnRendererThread([this]
     {
         for(ComponentId componentId : _graphModel->graph().componentIds())
@@ -697,7 +697,6 @@ void GraphRenderer::onGraphChanged(const Graph* graph)
         }
 
         updateGPUData(When::Later);
-
     }, "GraphRenderer::onGraphChanged update");
 }
 

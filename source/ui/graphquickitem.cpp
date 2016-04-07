@@ -107,8 +107,6 @@ QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const
     connect(this, &GraphQuickItem::layoutChanged, graphRenderer, &GraphRenderer::onLayoutChanged);
 
     connect(graphRenderer, &GraphRenderer::modeChanged, this, &GraphQuickItem::update);
-    connect(graphRenderer, &GraphRenderer::userInteractionStarted, this, &GraphQuickItem::userInteractionStarted);
-    connect(graphRenderer, &GraphRenderer::userInteractionFinished, this, &GraphQuickItem::userInteractionFinished);
     connect(graphRenderer, &GraphRenderer::userInteractionStarted, [this] { setInteracting(true); });
     connect(graphRenderer, &GraphRenderer::userInteractionFinished, [this] { setInteracting(false); });
     connect(graphRenderer, &GraphRenderer::taskAddedToExecutor, this, &GraphQuickItem::update);
