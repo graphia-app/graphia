@@ -189,6 +189,14 @@ void Document::setStatus(const QString& status)
     }
 }
 
+float Document::fps() const
+{
+    if(_graphQuickItem != nullptr)
+        return _graphQuickItem->fps();
+
+    return 0.0f;
+}
+
 QString Document::contentQmlPath() const
 {
     return _graphModel != nullptr ? _graphModel->contentQmlPath() : QString();
@@ -315,6 +323,7 @@ void Document::onLoadComplete(bool /*success FIXME hmm*/)
     connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::maybeEmitIdleChanged);
     connect(_graphQuickItem, &GraphQuickItem::viewIsResetChanged, this, &Document::canResetViewChanged);
     connect(_graphQuickItem, &GraphQuickItem::canEnterOverviewModeChanged, this, &Document::canEnterOverviewModeChanged);
+    connect(_graphQuickItem, &GraphQuickItem::fpsChanged, this, &Document::fpsChanged);
 
     connect(&_commandManager, &CommandManager::busyChanged, this, &Document::maybeEmitIdleChanged);
 

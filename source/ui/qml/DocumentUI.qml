@@ -118,6 +118,20 @@ Item
                 anchors.fill: parent
             }
 
+            Label
+            {
+                visible: toggleFpsMeterAction.checked
+
+                color: root.textColor
+
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.margins: Constants.margin
+
+                horizontalAlignment: Text.AlignLeft
+                text: document.fps.toFixed(1) + " fps"
+            }
+
             Column
             {
                 anchors.right: parent.right

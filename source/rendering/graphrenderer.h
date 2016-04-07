@@ -10,6 +10,7 @@
 
 #include "../utils/movablepointer.h"
 #include "../utils/deferredexecutor.h"
+#include "../utils/performancecounter.h"
 
 #include <QObject>
 #include <QTime>
@@ -237,6 +238,8 @@ private:
 
     Transition _transition;
 
+    PerformanceCounter _performanceCounter;
+
     bool prepareRenderBuffers(int width, int height);
     void prepareSelectionMarkerVAO();
     void prepareQuad();
@@ -295,6 +298,8 @@ signals:
     void userInteractionFinished() const;
 
     void taskAddedToExecutor() const;
+
+    void fpsChanged(float fps) const;
 };
 
 #endif // GRAPHRENDERER_H

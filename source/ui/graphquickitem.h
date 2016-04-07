@@ -32,6 +32,8 @@ class GraphQuickItem : public QQuickFramebufferObject
     Q_PROPERTY(int numVisibleEdges READ numVisibleEdges NOTIFY graphChanged)
     Q_PROPERTY(int numComponents READ numComponents NOTIFY graphChanged)
 
+    Q_PROPERTY(float fps READ fps NOTIFY fpsChanged)
+
 public:
     explicit GraphQuickItem(QQuickItem* parent = nullptr);
 
@@ -60,6 +62,8 @@ public:
     bool eventsPending();
     std::unique_ptr<QEvent> nextEvent();
 
+    float fps() const { return _fps; }
+
 private:
     bool event(QEvent* e);
     void mousePressEvent(QMouseEvent* e);
@@ -80,6 +84,8 @@ private:
     bool _canEnterOverviewMode = false;
 
     std::queue<std::unique_ptr<QEvent>> _eventQueue;
+
+    mutable float _fps = 0.0f;
 
     template<typename T> void enqueueEvent(const T* event)
     {
@@ -107,6 +113,8 @@ signals:
     void layoutChanged() const;
 
     void graphChanged() const;
+
+    void fpsChanged() const;
 };
 
 #endif // GRAPHQUICKITEM_H

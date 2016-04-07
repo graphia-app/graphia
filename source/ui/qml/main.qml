@@ -79,6 +79,12 @@ ApplicationWindow
         property alias showLayoutSettings: toggleLayoutSettingsAction.checked
     }
 
+    Preferences
+    {
+        section: "debug"
+        property alias showFpsMeter: toggleFpsMeterAction.checked
+    }
+
     function openFile(fileUrl, inNewTab)
     {
         var fileTypes = application.fileTypesOf(fileUrl);
@@ -316,6 +322,13 @@ ApplicationWindow
         onTriggered: currentDocument && currentDocument.debugResume()
     }
 
+    Action
+    {
+        id: toggleFpsMeterAction
+        text: qsTr("Show FPS Meter")
+        checkable: true
+    }
+
     menuBar: MenuBar
     {
         Menu
@@ -367,6 +380,7 @@ ApplicationWindow
                 visible: currentDocument && currentDocument.debugPaused
             }
             MenuItem { action: dumpGraphAction }
+            MenuItem { action: toggleFpsMeterAction }
         }
         Menu
         {

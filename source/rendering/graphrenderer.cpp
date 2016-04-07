@@ -184,7 +184,8 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
     _componentRenderers(_graphModel->graph()),
     _hiddenNodes(_graphModel->graph()),
     _hiddenEdges(_graphModel->graph()),
-    _layoutChanged(true)
+    _layoutChanged(true),
+    _performanceCounter(std::chrono::seconds(1))
 {
     resolveOpenGLFunctions();
 
@@ -240,6 +241,11 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
     connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphRenderer::onPreferenceChanged, Qt::DirectConnection);
 
     enableSceneUpdate();
+
+    _performanceCounter.setReportFn([this](float ticksPerSecond)
+    {
+        emit fpsChanged(ticksPerSecond);
+    });
 }
 
 GraphRenderer::~GraphRenderer()
@@ -988,6 +994,8 @@ void GraphRenderer::render()
 
     std::unique_lock<std::mutex> lock(_resetOpenGLStateMutex);
     resetOpenGLState();
+
+    _performanceCounter.tick();
 }
 
 void GraphRenderer::synchronize(QQuickFramebufferObject* item)

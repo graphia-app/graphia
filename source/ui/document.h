@@ -64,6 +64,8 @@ class Document : public QObject
 
     Q_PROPERTY(QmlContainerWrapperBase* layoutSettings READ layoutSettings CONSTANT)
 
+    Q_PROPERTY(float fps READ fps NOTIFY fpsChanged)
+
 public:
     explicit Document(QObject* parent = nullptr);
 
@@ -95,6 +97,8 @@ public:
     QmlContainerWrapper<GraphTransformConfiguration>* transforms() { return &_graphTransformConfigurations; }
 
     QmlContainerWrapper<LayoutSetting>* layoutSettings() { return &_layoutSettings; }
+
+    float fps() const;
 
     QString contentQmlPath() const;
 
@@ -168,6 +172,8 @@ signals:
     void debugPauserEnabledChanged();
     void debugPausedChanged();
     void debugResumeActionChanged();
+
+    void fpsChanged();
 
 public slots:
     bool openFile(const QUrl& fileUrl, const QString& fileType);
