@@ -202,6 +202,9 @@ void CirclePackComponentLayout::executeReal(const Graph& graph, const std::vecto
     std::stable_sort(sortedComponentIds.begin(), sortedComponentIds.end(),
                      [&componentLayoutData](const ComponentId& a, const ComponentId& b)
     {
+        if(componentLayoutData[a].radius() == componentLayoutData[b].radius())
+            return a < b;
+
         return componentLayoutData[a].radius() > componentLayoutData[b].radius();
     });
 
