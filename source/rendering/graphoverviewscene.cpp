@@ -200,11 +200,11 @@ void GraphOverviewScene::setOffset(float x, float y)
 }
 
 void GraphOverviewScene::startTransitionFromComponentMode(ComponentId focusComponentId,
+                                                          std::function<void()> finishedFunction,
                                                           float duration,
-                                                          Transition::Type transitionType,
-                                                          std::function<void()> finishedFunction)
+                                                          Transition::Type transitionType)
 {
-    startTransition(duration, transitionType, finishedFunction);
+    startTransition(finishedFunction, duration, transitionType);
     _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
     _previousComponentAlpha = _componentAlpha;
 
@@ -221,9 +221,9 @@ void GraphOverviewScene::startTransitionFromComponentMode(ComponentId focusCompo
 }
 
 void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusComponentId,
+                                                        std::function<void()> finishedFunction,
                                                         float duration,
-                                                        Transition::Type transitionType,
-                                                        std::function<void()> finishedFunction)
+                                                        Transition::Type transitionType)
 {
     _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
     _previousComponentAlpha = _componentAlpha;
@@ -239,7 +239,7 @@ void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusCompone
     _zoomedComponentLayoutData[focusComponentId].set(halfWidth, halfHeight,
                                                      std::min(halfWidth, halfHeight));
 
-    startTransition(duration, transitionType, finishedFunction);
+    startTransition(finishedFunction, duration, transitionType);
 }
 
 void GraphOverviewScene::updateZoomedComponentLayoutData()
@@ -325,9 +325,8 @@ static Circle interpolateCircle(const Circle& a, const Circle& b, float f)
         );
 }
 
-void GraphOverviewScene::startTransition(float duration,
-                                         Transition::Type transitionType,
-                                         std::function<void()> finishedFunction)
+void GraphOverviewScene::startTransition(std::function<void()> finishedFunction, float duration,
+                                         Transition::Type transitionType)
 {
     auto targetComponentLayoutData = _zoomedComponentLayoutData;
     auto targetComponentAlpha = _componentAlpha;
@@ -519,9 +518,7 @@ void GraphOverviewScene::startComponentLayoutTransition()
         onShow();
         setViewportSize(_width, _height);
 
-        startTransition(u::pref("visuals/transitionTime").toFloat(),
-                        Transition::Type::EaseInEaseOut,
-        [this]
+        startTransition([this]
         {
             // If a graph change has resulted in a single component, switch
             // to component mode once the transition had completed
@@ -530,7 +527,7 @@ void GraphOverviewScene::startComponentLayoutTransition()
                 _graphRenderer->transition().willBeImmediatelyReused();
                 _graphRenderer->switchToComponentMode();
             }
-        });
+        }, u::pref("visuals/transitionTime").toFloat(), Transition::Type::EaseInEaseOut);
     }
 }
 

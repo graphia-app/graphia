@@ -139,8 +139,8 @@ GraphComponentRenderer* GraphComponentScene::componentRenderer() const
     return _graphRenderer->componentRendererForId(_componentId);
 }
 
-void GraphComponentScene::startTransition(float duration, Transition::Type transitionType,
-                                          std::function<void()> finishedFunction)
+void GraphComponentScene::startTransition(std::function<void()> finishedFunction,
+                                          float duration, Transition::Type transitionType)
 {
     _graphRenderer->transition().start(duration, transitionType,
     [this](float f)
@@ -265,7 +265,7 @@ void GraphComponentScene::onGraphChanged(const Graph* graph)
             // Graph changes may significantly alter the centre; ease the transition
             if(componentRenderer() != nullptr && componentRenderer()->transitionRequired())
             {
-                startTransition(0.3f, Transition::Type::EaseInEaseOut, finishTransition);
+                startTransition(finishTransition);
                 componentRenderer()->computeTransition();
             }
             else

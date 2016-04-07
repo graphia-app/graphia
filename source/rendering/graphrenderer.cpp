@@ -575,8 +575,7 @@ void GraphRenderer::finishTransitionToOverviewMode(bool doTransition)
             renderer->resetView();
         }
 
-        _graphOverviewScene->startTransitionFromComponentMode(_graphComponentScene->componentId(),
-                                                              0.3f, Transition::Type::EaseInEaseOut);
+        _graphOverviewScene->startTransitionFromComponentMode(_graphComponentScene->componentId());
     }
 
     updateGPUData(When::Later);
@@ -600,7 +599,7 @@ void GraphRenderer::finishTransitionToComponentMode(bool doTransition)
     if(doTransition)
     {
         // Go back to where we were before
-        _graphComponentScene->startTransition(0.3f, Transition::Type::EaseInEaseOut);
+        _graphComponentScene->startTransition();
         _graphComponentScene->restoreViewData();
     }
 
@@ -632,8 +631,7 @@ void GraphRenderer::switchToOverviewMode(bool doTransition)
         {
             if(!_graphComponentScene->viewIsReset())
             {
-                _graphComponentScene->startTransition(0.3f, Transition::Type::EaseInEaseOut,
-                [this]
+                _graphComponentScene->startTransition([this]
                 {
                     sceneFinishedTransition();
                     _transition.willBeImmediatelyReused();
@@ -660,7 +658,6 @@ void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId compone
         if(mode() != GraphRenderer::Mode::Component && doTransition)
         {
             _graphOverviewScene->startTransitionToComponentMode(_graphComponentScene->componentId(),
-                                                                0.3f, Transition::Type::EaseInEaseOut,
             [this]
             {
                 if(!_graphComponentScene->savedViewIsReset())
