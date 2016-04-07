@@ -235,15 +235,13 @@ void QmlPreferences::setProperty(QMetaProperty property, const QVariant& value)
 
 void QmlPreferences::load()
 {
+    // Set the minimum and maximum first, if they exist...
     forEachProperty(this,
     [this](const QMetaProperty& property, PropertyType propertyType)
     {
         auto preferenceName = preferenceNameByPropertyName(property.name());
         switch(propertyType)
         {
-        case PropertyType::Value:
-            setProperty(property, S(Preferences)->get(preferenceName));
-            break;
         case PropertyType::Minimum:
             if(S(Preferences)->exists(preferenceName))
                 setProperty(property, S(Preferences)->minimum(preferenceName));
@@ -252,6 +250,18 @@ void QmlPreferences::load()
             if(S(Preferences)->exists(preferenceName))
                 setProperty(property, S(Preferences)->maximum(preferenceName));
             break;
+        default: break;
+        }
+    });
+
+    // ...then the value
+    forEachProperty(this,
+    [this](const QMetaProperty& property, PropertyType propertyType)
+    {
+        if(propertyType == PropertyType::Value)
+        {
+            setProperty(property, S(Preferences)->get(
+                        preferenceNameByPropertyName(property.name())));
         }
     });
 }
