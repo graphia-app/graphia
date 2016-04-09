@@ -9,8 +9,11 @@ POSTAMBLE=" \t</qresource>\n\
 </RCC>"
 
 THEME_FILES=$(find * -name "*.theme")
-ICON_NAMES=$(grep "iconName:" ../ui/qml/*.qml | \
-  sed -e "s/[^\"]*\"\([^\"]*\)\"/\1 /g")
+ICON_NAMES=$(find ../ui/qml/ -iname "*.qml" | \
+  xargs perl -pe 's/\n/\$/g' | \
+  perl -ne 'print "$1\n" while /iconName:[\s\$]*(({([^{}]|(?2))*})|([^\$]*))\$/gm' | \
+  perl -pe 's/[^\"]*\"([^\"]*)\"[^\"]*/$1\n/g' | \
+  sort)
 
 echo ${PREAMBLE} > icons.qrc
 
