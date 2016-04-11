@@ -24,7 +24,7 @@ done
 
 for ICON_NAME in ${ICON_NAMES};
 do
-  ICON_FILES=$(find * -iname "${ICON_NAME}.*")
+  ICON_FILES=$(find * -iname "${ICON_NAME}.*" | sort)
   for ICON_FILE in ${ICON_FILES};
   do
     echo "\t\t<file>${ICON_FILE}</file>" >> icons.qrc
