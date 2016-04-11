@@ -57,12 +57,6 @@ void GraphOverviewInteractor::wheelMove(float angle, float x, float y)
         _scene->zoom(GraphOverviewScene::ZoomType::Out, x, y, true);
 }
 
-void GraphOverviewInteractor::trackpadScrollGesture()
-{
-    auto delta = cursorPosition() - prevCursorPosition();
-    _scene->pan(delta.x(), delta.y());
-}
-
 void GraphOverviewInteractor::trackpadZoomGesture(float value, float x, float y)
 {
     _scene->zoom(value, x, y, false);

@@ -99,12 +99,6 @@ void GraphComponentInteractor::wheelMove(float angle, float, float)
     rendererUnderCursor()->zoom(angle * WHEEL_STEP_TRANSITION_SIZE, true);
 }
 
-void GraphComponentInteractor::trackpadScrollGesture()
-{
-    if(clickedRenderer() != nullptr && !nearClickNodeId().isNull())
-        _scene->pan(nearClickNodeId(), localPrevCursorPosition(), localCursorPosition());
-}
-
 void GraphComponentInteractor::trackpadZoomGesture(float value, float, float)
 {
     rendererUnderCursor()->zoom(value, false);

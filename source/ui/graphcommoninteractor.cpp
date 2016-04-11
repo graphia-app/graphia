@@ -434,24 +434,32 @@ void GraphCommonInteractor::wheelEvent(QWheelEvent* wheelEvent)
     {
         switch(wheelEvent->phase())
         {
-        case Qt::ScrollUpdate:
+        case Qt::ScrollBegin:
             if(!_trackPadPanning)
             {
-                mouseDown(wheelEvent->pos());
-                emit userInteractionStarted();
+                QMouseEvent fakeRightDown(QEvent::Type::MouseButtonPress, wheelEvent->pos(),
+                    Qt::MouseButton::RightButton, Qt::NoButton, Qt::NoModifier);
+                mousePressEvent(&fakeRightDown);
                 _trackPadPanning = true;
             }
+            break;
 
-            _cursorPosition += wheelEvent->pixelDelta();
-            trackpadScrollGesture();
-            _prevCursorPosition = _cursorPosition;
+        case Qt::ScrollUpdate:
+            if(_trackPadPanning)
+            {
+                QMouseEvent fakeMouseMove(QEvent::Type::MouseMove,
+                    cursorPosition() + wheelEvent->pixelDelta(),
+                    Qt::MouseButton::RightButton, Qt::NoButton, Qt::NoModifier);
+                mouseMoveEvent(&fakeMouseMove);
+            }
             break;
 
         case Qt::ScrollEnd:
             if(_trackPadPanning)
             {
-                mouseUp();
-                emit userInteractionFinished();
+                QMouseEvent fakeRightUp(QEvent::Type::MouseButtonRelease, wheelEvent->pos(),
+                    Qt::MouseButton::RightButton, Qt::NoButton, Qt::NoModifier);
+                mouseReleaseEvent(&fakeRightUp);
                 _trackPadPanning = false;
             }
             break;

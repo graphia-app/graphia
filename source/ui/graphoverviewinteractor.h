@@ -34,7 +34,6 @@ private:
     void leftDoubleClick();
 
     void wheelMove(float angle, float x, float y);
-    void trackpadScrollGesture();
     void trackpadZoomGesture(float value, float x, float y);
 
     ComponentId componentIdAtPosition(const QPoint& position) const;
