@@ -246,7 +246,7 @@ ApplicationWindow
             switch(layoutPauseState)
             {
             case LayoutPauseState.Paused:          return "media-playback-start";
-            case LayoutPauseState.RunningFinished: return "media-skip-forward";
+            case LayoutPauseState.RunningFinished: return "media-playback-stop";
             default:
             case LayoutPauseState.Running:         return "media-playback-pause";
             }

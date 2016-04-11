@@ -31,9 +31,9 @@
 		<file>Tango/16x16/actions/media-playback-start.png</file>
 		<file>Tango/22x22/actions/media-playback-start.png</file>
 		<file>Tango/32x32/actions/media-playback-start.png</file>
-		<file>Tango/16x16/actions/media-skip-forward.png</file>
-		<file>Tango/22x22/actions/media-skip-forward.png</file>
-		<file>Tango/32x32/actions/media-skip-forward.png</file>
+		<file>Tango/16x16/actions/media-playback-stop.png</file>
+		<file>Tango/22x22/actions/media-playback-stop.png</file>
+		<file>Tango/32x32/actions/media-playback-stop.png</file>
 		<file>Tango/16x16/actions/tab-new.png</file>
 		<file>Tango/22x22/actions/tab-new.png</file>
 		<file>Tango/32x32/actions/tab-new.png</file>
