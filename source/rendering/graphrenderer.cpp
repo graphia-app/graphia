@@ -1030,7 +1030,7 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
             //FIXME try delivering these events by queued connection instead
             while(graphQuickItem->eventsPending())
             {
-                auto e = std::move(graphQuickItem->nextEvent());
+                auto e = graphQuickItem->nextEvent();
                 auto mouseEvent = dynamic_cast<QMouseEvent*>(e.get());
                 auto wheelEvent = dynamic_cast<QWheelEvent*>(e.get());
                 auto nativeGestureEvent = dynamic_cast<QNativeGestureEvent*>(e.get());
