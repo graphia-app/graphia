@@ -545,6 +545,11 @@ void GraphRenderer::executeOnRendererThread(DeferredExecutor::TaskFn task, const
     emit taskAddedToExecutor();
 }
 
+bool GraphRenderer::visible() const
+{
+    return _graphOverviewScene->visible() || _graphComponentScene->visible();
+}
+
 void GraphRenderer::onNodeAdded(const Graph*, NodeId nodeId)
 {
     _hiddenNodes.set(nodeId, true);
@@ -689,7 +694,8 @@ void GraphRenderer::onGraphChanged(const Graph* graph)
     // speculatively pretend we do so that if a command is currently in progress
     // there is some overlap between it and the renderer transition. This ensures
     // that Document::idle() returns false for the duration of the transaction.
-    rendererStartedTransition();
+    if(visible())
+        rendererStartedTransition();
 
     executeOnRendererThread([this]
     {

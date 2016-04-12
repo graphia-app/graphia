@@ -138,6 +138,8 @@ public:
 
     bool layoutChanged() const { return _synchronousLayoutChanged; }
 
+    bool visible() const;
+
 private slots:
     void onNodeAdded(const Graph*, NodeId nodeId);
     void onEdgeAdded(const Graph*, EdgeId edgeId);
