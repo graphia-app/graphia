@@ -77,6 +77,8 @@ ApplicationWindow
         section: "misc"
         property alias showGraphMetrics: toggleGraphMetricsAction.checked
         property alias showLayoutSettings: toggleLayoutSettingsAction.checked
+
+        property alias fileOpenInitialFolder: fileOpenDialog.folder
     }
 
     Preferences
