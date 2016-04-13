@@ -314,6 +314,7 @@ void Document::onLoadComplete(bool /*success FIXME hmm*/)
 
     _layoutThread = std::make_unique<LayoutThread>(*_graphModel, std::make_unique<ForceDirectedLayoutFactory>(_graphModel));
     connect(_layoutThread.get(), &LayoutThread::pausedChanged, this, &Document::layoutPauseStateChanged);
+    connect(_layoutThread.get(), &LayoutThread::settingChanged, this, &Document::updateLayoutState);
     _layoutThread->addAllComponents();
     _layoutSettings.setVectorPtr(&_layoutThread->settingsVector());
 

@@ -50,11 +50,16 @@ public:
     template<typename... Args>
     void registerSetting(Args&&... args)
     {
-        _settings.emplace_back(std::forward<Args>(args)...);
+        _settings.emplace_back(args...);
     }
+
+    void finishRegistration();
 
 private:
     std::vector<LayoutSetting> _settings;
+
+signals:
+    void settingChanged();
 };
 
 #endif // LAYOUTSETTINGS_H

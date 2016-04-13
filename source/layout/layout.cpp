@@ -33,7 +33,7 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
     [this]
     {
         std::unique_lock<std::mutex> lock(_mutex);
-        _graphChanged = true;
+        _layoutPotentiallyRequired = true;
     });
 
     connect(&graphModel.graph(), &Graph::componentSplit, this, &LayoutThread::onComponentSplit, Qt::DirectConnection);
@@ -90,7 +90,7 @@ void LayoutThread::resume()
         return;
 
     // Don't resume if there is nothing to do
-    if(allLayoutsFinished() && !_graphChanged)
+    if(allLayoutsFinished() && !_layoutPotentiallyRequired)
         return;
 
     for(auto& layout : _layouts)
@@ -177,7 +177,7 @@ void LayoutThread::run()
 
         std::unique_lock<std::mutex> lock(_mutex);
 
-        _graphChanged = false;
+        _layoutPotentiallyRequired = false;
 
         if(_paused)
         {
@@ -224,6 +224,16 @@ void LayoutThread::addComponent(ComponentId componentId)
         std::unique_lock<std::mutex> lock(_mutex);
 
         auto layout = _layoutFactory->create(componentId, _intermediatePositions);
+
+        connect(&_layoutFactory->settings(), &LayoutSettings::settingChanged,
+        [this]
+        {
+            std::unique_lock<std::mutex> innerLock(_mutex);
+            _layoutPotentiallyRequired = true;
+            innerLock.unlock();
+
+            emit settingChanged();
+        });
 
         _layouts.emplace(componentId, layout);
         _graphModel->nodePositions().setScale(layout->scaling());

@@ -46,3 +46,9 @@ float LayoutSettings::valueOf(const QString& name) const
     Q_ASSERT(!"Setting not found");
     return 0.0f;
 }
+
+void LayoutSettings::finishRegistration()
+{
+    for(auto& setting : _settings)
+        connect(&setting, &LayoutSetting::valueChanged, this, &LayoutSettings::settingChanged);
+}

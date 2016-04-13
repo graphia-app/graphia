@@ -144,7 +144,7 @@ private:
 
     PerformanceCounter _performanceCounter;
 
-    bool _graphChanged = false;
+    bool _layoutPotentiallyRequired = false;
 
     int _debug = 0;
 
@@ -190,6 +190,7 @@ private slots:
 signals:
     void executed();
     void pausedChanged();
+    void settingChanged();
 };
 
 #endif // LAYOUT_H

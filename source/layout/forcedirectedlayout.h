@@ -70,6 +70,7 @@ public:
     {
         _layoutSettings.registerSetting("RepulsiveForce",  QObject::tr("Repulsive Force"),  1.0f, 100.0f, 1.0f);
         _layoutSettings.registerSetting("AttractiveForce", QObject::tr("Attractive Force"), 1.0f, 100.0f, 1.0f);
+        _layoutSettings.finishRegistration();
     }
 
     std::shared_ptr<Layout> create(ComponentId componentId, NodePositions& nodePositions) const
