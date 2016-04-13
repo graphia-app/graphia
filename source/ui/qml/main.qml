@@ -121,18 +121,9 @@ ApplicationWindow
     {
         id: fileOpenDialog
         modality: Qt.WindowModal
-        title: qsTr("Open File...")
         nameFilters: application.nameFilters
-        onAccepted: openFile(fileUrl, false)
-    }
-
-    FileDialog
-    {
-        id: fileOpenInTabDialog
-        modality: Qt.WindowModal
-        title: qsTr("Open File In New Tab...")
-        nameFilters: application.nameFilters
-        onAccepted: openFile(fileUrl, true)
+        onAccepted: openFile(fileUrl, inTab)
+        property bool inTab: false
     }
 
     Action
@@ -141,7 +132,12 @@ ApplicationWindow
         iconName: "document-open"
         text: qsTr("&Open...")
         shortcut: "Ctrl+O"
-        onTriggered: fileOpenDialog.open()
+        onTriggered:
+        {
+            fileOpenDialog.title = qsTr("Open File...");
+            fileOpenDialog.inTab = false;
+            fileOpenDialog.open()
+        }
     }
 
     Action
@@ -150,7 +146,12 @@ ApplicationWindow
         iconName: "tab-new"
         text: qsTr("Open In New &Tab...")
         shortcut: "Ctrl+T"
-        onTriggered: fileOpenInTabDialog.open()
+        onTriggered:
+        {
+            fileOpenDialog.title = qsTr("Open File In New Tab...");
+            fileOpenDialog.inTab = true;
+            fileOpenDialog.open()
+        }
     }
 
     Action
