@@ -178,8 +178,13 @@ Item
             {
                 if(type === GraphTransformType.Float)
                 {
-                    // Format the number for human consumption; don't question it, just accept it
-                    text = parseFloat(parseFloat(newText).toFixed(3)).toString();
+                    if(!isNaN(parseFloat(newText)))
+                    {
+                        // Format the number for human consumption; don't question it, just accept it
+                        text = parseFloat(parseFloat(newText).toFixed(3)).toString();
+                    }
+                    else
+                        text = "";
                 }
                 else
                     text = newText;

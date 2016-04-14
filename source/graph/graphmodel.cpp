@@ -74,7 +74,7 @@ void GraphModel::buildTransforms(const std::vector<GraphTransformConfiguration>&
 
     for(auto& graphTransformConfiguration : graphTransformConfigurations)
     {
-        if(!graphTransformConfiguration.enabled())
+        if(!graphTransformConfiguration.enabled() || !graphTransformConfiguration.valid())
             continue;
 
         if(!u::contains(_graphTransformFactories, graphTransformConfiguration.name()))
