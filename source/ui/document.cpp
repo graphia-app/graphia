@@ -226,7 +226,7 @@ void Document::applyTransforms()
 
     bool valid = std::all_of(_graphTransformConfigurations.vector().begin(),
                              _graphTransformConfigurations.vector().end(),
-    [](const GraphTransformConfiguration& graphTransformConfiguration)
+    [](auto& graphTransformConfiguration)
     {
         return graphTransformConfiguration.valid() ||
                graphTransformConfiguration.creationState() == GraphTransformCreationState::Enum::Uncreated;
