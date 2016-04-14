@@ -263,7 +263,7 @@ void Document::onGraphTransformsConfigurationDataChanged(const QModelIndex& inde
     // Don't apply any changes when not enabled, as they will have no effect
     bool enabled = graphTransformConfiguration.enabled() || enabledChanging;
 
-    if(graphTransformConfiguration.valid() && enabled &&!lockedChanging)
+    if(graphTransformConfiguration.valid() && enabled && !lockedChanging)
         applyTransforms();
 }
 
