@@ -224,6 +224,17 @@ void Document::applyTransforms()
     if(_graphModel == nullptr)
         return;
 
+    bool valid = std::all_of(_graphTransformConfigurations.vector().begin(),
+                             _graphTransformConfigurations.vector().end(),
+    [](const GraphTransformConfiguration& graphTransformConfiguration)
+    {
+        return graphTransformConfiguration.valid() ||
+               graphTransformConfiguration.creationState() == GraphTransformCreationState::Enum::Uncreated;
+    });
+
+    if(!valid)
+        return;
+
     auto nextGraphTransformConfigurations = _graphTransformConfigurations.vector();
     auto previousGraphTransformConfigurations = _previousGraphTransformConfigurations;
 
