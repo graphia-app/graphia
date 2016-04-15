@@ -20,7 +20,7 @@ private:
         QString _description;
     };
 
-    std::recursive_mutex _mutex;
+    mutable std::recursive_mutex _mutex;
     std::deque<Task> _tasks;
     int _debug;
     std::atomic<bool> _executing;
@@ -32,7 +32,10 @@ public:
     void enqueue(TaskFn function, const QString& description = QString());
 
     void execute();
+    void executeOne();
     void cancel();
+
+    bool hasTasks() const;
 };
 
 #endif // DEFERREDEXECUTOR_H

@@ -43,17 +43,22 @@ void DeferredExecutor::execute()
     }
 
     while(!_tasks.empty())
-    {
-        auto& task = _tasks.front();
+        executeOne();
+}
 
-        if(_debug > 2)
-            qDebug() << "Executing" << task._description;
+void DeferredExecutor::executeOne()
+{
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
 
-        _executing = true;
-        task._function();
-        _executing = false;
-        _tasks.pop_front();
-    }
+    auto& task = _tasks.front();
+
+    if(_debug > 2)
+        qDebug() << "Executing" << task._description;
+
+    _executing = true;
+    task._function();
+    _executing = false;
+    _tasks.pop_front();
 }
 
 void DeferredExecutor::cancel()
@@ -62,4 +67,11 @@ void DeferredExecutor::cancel()
 
     while(!_tasks.empty())
         _tasks.pop_front();
+}
+
+bool DeferredExecutor::hasTasks() const
+{
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
+
+    return !_tasks.empty();
 }
