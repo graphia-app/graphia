@@ -430,6 +430,12 @@ void GraphRenderer::updateComponentGPUData()
     for(auto& componentRendererRef : _componentRenderers)
     {
         GraphComponentRenderer* componentRenderer = componentRendererRef;
+        if(componentRenderer == nullptr)
+        {
+            qWarning() << "null component renderer";
+            continue;
+        }
+
         if(!componentRenderer->visible())
             continue;
 
