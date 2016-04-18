@@ -230,11 +230,15 @@ void ComponentManager::update(const Graph* graph)
 
     _updatesRequired.clear();
 
+    for(auto componentId : componentIdsToBeAdded)
+        _componentIds.push_back(componentId);
+
+    lock.unlock();
+
     // Notify all the new components
     for(auto componentId : componentIdsToBeAdded)
     {
         if(_debug) qDebug() << "componentAdded" << componentId;
-        _componentIds.push_back(componentId);
         bool hasSplit = u::contains(splitComponentIds, componentId);
         emit componentAdded(graph, componentId, hasSplit);
 
