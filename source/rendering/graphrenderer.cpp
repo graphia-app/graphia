@@ -213,6 +213,7 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
     connect(graph, &Graph::nodeAddedToComponent, this, &GraphRenderer::onNodeAddedToComponent, Qt::DirectConnection);
     connect(graph, &Graph::edgeAddedToComponent, this, &GraphRenderer::onEdgeAddedToComponent, Qt::DirectConnection);
 
+    connect(graph, &Graph::graphWillChange, this, &GraphRenderer::onGraphWillChange, Qt::DirectConnection);
     connect(graph, &Graph::graphChanged, this, &GraphRenderer::onGraphChanged, Qt::DirectConnection);
     connect(graph, &Graph::componentAdded, this, &GraphRenderer::onComponentAdded, Qt::DirectConnection);
 
@@ -545,6 +546,18 @@ void GraphRenderer::executeOnRendererThread(DeferredExecutor::TaskFn task, const
     emit taskAddedToExecutor();
 }
 
+// Stop the renderer thread executing any tasks until...
+void GraphRenderer::pauseRendererThreadExecution()
+{
+    _preUpdateExecutor.pause();
+}
+
+// ...this is called
+void GraphRenderer::resumeRendererThreadExecution()
+{
+    _preUpdateExecutor.resume();
+}
+
 bool GraphRenderer::visible() const
 {
     return _graphOverviewScene->visible() || _graphComponentScene->visible();
@@ -684,6 +697,11 @@ void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId compone
             finishTransitionToComponentMode(false);
 
     }, "GraphRenderer::switchToComponentMode");
+}
+
+void GraphRenderer::onGraphWillChange(const Graph*)
+{
+    pauseRendererThreadExecution();
 }
 
 void GraphRenderer::onGraphChanged(const Graph* graph)

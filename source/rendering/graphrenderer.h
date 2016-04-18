@@ -135,6 +135,8 @@ public:
     void rendererFinishedTransition();
     void sceneFinishedTransition();
     void executeOnRendererThread(DeferredExecutor::TaskFn task, const QString& description);
+    void pauseRendererThreadExecution();
+    void resumeRendererThreadExecution();
 
     bool layoutChanged() const { return _synchronousLayoutChanged; }
 
@@ -146,6 +148,7 @@ private slots:
     void onNodeAddedToComponent(const Graph*, NodeId nodeId, ComponentId);
     void onEdgeAddedToComponent(const Graph*, EdgeId edgeId, ComponentId);
 
+    void onGraphWillChange(const Graph* graph);
     void onGraphChanged(const Graph* graph);
     void onComponentAdded(const Graph*, ComponentId componentId, bool);
     void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);

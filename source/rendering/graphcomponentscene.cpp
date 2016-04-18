@@ -277,6 +277,8 @@ void GraphComponentScene::onGraphChanged(const Graph* graph)
             }
         }
     }, "GraphComponentScene::onGraphChanged (setSize/moveFocusToCentreOfComponent)");
+
+    _graphRenderer->resumeRendererThreadExecution();
 }
 
 void GraphComponentScene::onNodeRemoved(const Graph*, NodeId nodeId)

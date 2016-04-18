@@ -550,6 +550,8 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph)
                              _removedComponentIds.begin(),
                              _removedComponentIds.end());
     }, "GraphOverviewScene::onGraphChanged");
+
+    _graphRenderer->resumeRendererThreadExecution();
 }
 
 void GraphOverviewScene::onPreferenceChanged(const QString& key, const QVariant&)
