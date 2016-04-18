@@ -24,6 +24,7 @@ private:
     std::deque<Task> _tasks;
     int _debug;
     std::atomic<bool> _executing;
+    bool _paused = false;
 
 public:
     DeferredExecutor();
@@ -34,6 +35,9 @@ public:
     void execute();
     void executeOne();
     void cancel();
+
+    void pause();
+    void resume();
 
     bool hasTasks() const;
 };

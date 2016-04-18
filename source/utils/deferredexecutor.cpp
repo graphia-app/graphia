@@ -34,6 +34,9 @@ void DeferredExecutor::execute()
 {
     std::unique_lock<std::recursive_mutex> lock(_mutex);
 
+    if(_paused)
+        return;
+
     if(!_tasks.empty() && _debug > 0)
     {
         qDebug() << "execute() thread" << u::currentThreadName();
@@ -49,6 +52,9 @@ void DeferredExecutor::execute()
 void DeferredExecutor::executeOne()
 {
     std::unique_lock<std::recursive_mutex> lock(_mutex);
+
+    if(_paused)
+        return;
 
     auto& task = _tasks.front();
 
@@ -67,6 +73,18 @@ void DeferredExecutor::cancel()
 
     while(!_tasks.empty())
         _tasks.pop_front();
+}
+
+void DeferredExecutor::pause()
+{
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    _paused = true;
+}
+
+void DeferredExecutor::resume()
+{
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    _paused = false;
 }
 
 bool DeferredExecutor::hasTasks() const
