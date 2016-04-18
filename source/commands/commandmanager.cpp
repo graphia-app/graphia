@@ -35,19 +35,14 @@ void CommandManager::redo()
     QMetaObject::invokeMethod(this, "redoReal");
 }
 
-static void checkForRecursiveExecution(const char* function, const std::unique_lock<std::mutex>& lock,
-                                       const QString& verb)
-{
-    Q_UNUSED(function);
-    Q_UNUSED(lock);
-    Q_UNUSED(verb);
-    Q_ASSERT_X(!lock.owns_lock(), function,
-               QString("Recursive execution! (Already executing '%1')").arg(verb).toLatin1());
-}
-
 void CommandManager::executeReal(std::shared_ptr<Command> command, bool irreversible)
 {
-    checkForRecursiveExecution("CommandManager::executeReal", _lock, _commandVerb);
+    if(_lock.owns_lock())
+    {
+        // Something is already executing, do the new command once that is finished
+        _deferredExecutor.enqueue([this, command, irreversible] { executeReal(command, irreversible); });
+        return;
+    }
 
     _lock.lock();
 
@@ -87,7 +82,11 @@ void CommandManager::executeReal(std::shared_ptr<Command> command, bool irrevers
 
 void CommandManager::undoReal()
 {
-    checkForRecursiveExecution("CommandManager::undoReal", _lock, _commandVerb);
+    if(_lock.owns_lock())
+    {
+        _deferredExecutor.enqueue([this] { undoReal(); });
+        return;
+    }
 
     _lock.lock();
 
@@ -119,7 +118,11 @@ void CommandManager::undoReal()
 
 void CommandManager::redoReal()
 {
-    checkForRecursiveExecution("CommandManager::redoReal", _lock, _commandVerb);
+    if(_lock.owns_lock())
+    {
+        _deferredExecutor.enqueue([this] { redoReal(); });
+        return;
+    }
 
     _lock.lock();
 
@@ -249,5 +252,8 @@ void CommandManager::onCommandCompleted(Command* command, const QString&, Comman
     if(command != nullptr)
         command->postExecute();
 
-    emit busyChanged();
+    if(_deferredExecutor.hasTasks())
+        _deferredExecutor.executeOne();
+    else
+        emit busyChanged();
 }

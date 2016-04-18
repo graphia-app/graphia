@@ -2,6 +2,7 @@
 #define COMMANDMANAGER_H
 
 #include "../utils/utils.h"
+#include "../utils/deferredexecutor.h"
 #include "command.h"
 
 #include <QtGlobal>
@@ -106,6 +107,8 @@ private:
     std::shared_ptr<Command> _currentCommand;
     int _commandProgress = 0;
     QString _commandVerb;
+
+    DeferredExecutor _deferredExecutor;
 
 private slots:
     void executeReal(std::shared_ptr<Command> command, bool irreversible);
