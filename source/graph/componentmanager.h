@@ -77,6 +77,8 @@ public:
 
     EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const { return _graph->edgeIdsForNodeId(nodeId); }
 
+    const Graph& graph() const { return *_graph; }
+
     void reserve(const Graph& other);
     void cloneFrom(const Graph& other);
 };
