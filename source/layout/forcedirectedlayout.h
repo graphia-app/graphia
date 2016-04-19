@@ -48,12 +48,12 @@ private:
     void initialChangeDetection();
 
 public:
-    ForceDirectedLayout(const Graph& graph,
+    ForceDirectedLayout(const GraphComponent& graphComponent,
                         NodePositions& positions,
                         const LayoutSettings* settings) :
-        Layout(graph, positions, settings, Iterative::Yes, 0.4f, 4),
-        _prevDisplacements(graph.numNodes()),
-        _displacements(graph.numNodes())
+        Layout(graphComponent, positions, settings, Iterative::Yes, 0.4f, 4),
+        _prevDisplacements(graphComponent.numNodes()),
+        _displacements(graphComponent.numNodes())
     {}
 
     bool finished() const { return _changeDetectionPhase == ChangeDetectionPhase::Finished; }
@@ -75,7 +75,7 @@ public:
 
     std::shared_ptr<Layout> create(ComponentId componentId, NodePositions& nodePositions) const
     {
-        auto component = this->_graphModel->graph().componentById(componentId);
+        auto component = _graphModel->graph().componentById(componentId);
         return std::make_shared<ForceDirectedLayout>(*component, nodePositions, &_layoutSettings);
     }
 };

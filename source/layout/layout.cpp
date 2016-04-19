@@ -5,7 +5,7 @@
 
 static bool layoutIsFinished(const Layout& layout)
 {
-    return layout.finished() || layout.graph().numNodes() == 1;
+    return layout.finished() || layout.graphComponent().numNodes() == 1;
 }
 
 LayoutThread::LayoutThread(GraphModel& graphModel,

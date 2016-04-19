@@ -67,7 +67,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
 
     if(firstIteration)
     {
-        RandomLayout randomLayout(graph(), positions());
+        RandomLayout randomLayout(graphComponent(), positions());
 
         randomLayout.setSpread(10.0f);
         randomLayout.execute(firstIteration);
@@ -80,7 +80,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
         _displacements[nodeId] = QVector3D(0.0f, 0.0f, 0.0f);
 
     BarnesHutTree barnesHutTree;
-    barnesHutTree.build(graph(), positions());
+    barnesHutTree.build(graphComponent(), positions());
 
     float REPULSIVE_FORCE = _settings->valueOf("RepulsiveForce");
     float ATTRACTIVE_FORCE = _settings->valueOf("AttractiveForce");
@@ -106,7 +106,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
             if(shouldCancel())
                 return;
 
-            const Edge& edge = graph().edgeById(edgeId);
+            const Edge& edge = graphComponent().edgeById(edgeId);
             if(!edge.isLoop())
             {
                 const QVector3D difference = positions().get(edge.targetId()) - positions().get(edge.sourceId());

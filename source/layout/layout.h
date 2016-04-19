@@ -4,6 +4,7 @@
 #include "../graph/graph.h"
 #include "../graph/grapharray.h"
 #include "../graph/graphmodel.h"
+#include "../graph/componentmanager.h"
 #include "nodepositions.h"
 
 #include "../utils/performancecounter.h"
@@ -41,7 +42,7 @@ private:
     Iterative _iterative;
     float _scaling;
     int _smoothing;
-    const Graph& _graph;
+    const GraphComponent& _graphComponent;
     NodePositions& _positions;
 
     void setCancel(bool cancel) { _atomicCancel = cancel; }
@@ -55,7 +56,7 @@ protected:
     NodePositions& positions() { return _positions; }
 
 public:
-    Layout(const Graph& graph,
+    Layout(const GraphComponent& graphComponent,
            NodePositions& positions,
            const LayoutSettings* settings = nullptr,
            Iterative iterative = Iterative::No,
@@ -66,7 +67,7 @@ public:
         _iterative(iterative),
         _scaling(scaling),
         _smoothing(smoothing),
-        _graph(graph),
+        _graphComponent(graphComponent),
         _positions(positions),
         _settings(settings)
     {}
@@ -74,9 +75,9 @@ public:
     float scaling() const { return _scaling; }
     int smoothing() const { return _smoothing; }
 
-    const Graph& graph() const { return _graph; }
-    const std::vector<NodeId>& nodeIds() const { return _graph.nodeIds(); }
-    const std::vector<EdgeId>& edgeIds() const { return _graph.edgeIds(); }
+    const GraphComponent& graphComponent() const { return _graphComponent; }
+    const std::vector<NodeId>& nodeIds() const { return _graphComponent.nodeIds(); }
+    const std::vector<EdgeId>& edgeIds() const { return _graphComponent.edgeIds(); }
 
     void execute(bool firstIteration) { executeReal(firstIteration); }
 

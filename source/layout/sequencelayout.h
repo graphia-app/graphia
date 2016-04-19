@@ -14,14 +14,14 @@ private:
     std::vector<Layout*> _subLayouts;
 
 public:
-    SequenceLayout(const Graph& graph, NodePositions& positions) :
-        Layout(graph, positions)
+    SequenceLayout(const GraphComponent& graphComponent, NodePositions& positions) :
+        Layout(graphComponent, positions)
     {}
 
-    SequenceLayout(const Graph& graph,
+    SequenceLayout(const GraphComponent& graphComponent,
                    NodePositions& positions,
                    std::vector<Layout*> subLayouts) :
-        Layout(graph, positions), _subLayouts(subLayouts)
+        Layout(graphComponent, positions), _subLayouts(subLayouts)
     {}
 
     virtual ~SequenceLayout()

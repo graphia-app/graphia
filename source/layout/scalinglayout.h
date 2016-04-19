@@ -10,8 +10,8 @@ private:
     float _scale = 1.0f;
 
 public:
-    ScalingLayout(const Graph& graph, NodePositions& positions) :
-        Layout(graph, positions)
+    ScalingLayout(const GraphComponent& graphComponent, NodePositions& positions) :
+        Layout(graphComponent, positions)
     {}
 
     void setScale(float scale) { _scale = scale; }

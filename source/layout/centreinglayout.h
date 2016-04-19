@@ -7,9 +7,9 @@ class CentreingLayout : public Layout
 {
     Q_OBJECT
 public:
-    CentreingLayout(const Graph& graph,
+    CentreingLayout(const GraphComponent& graphComponent,
                     NodePositions& positions) :
-        Layout(graph, positions)
+        Layout(graphComponent, positions)
     {}
 
     void executeReal(bool);
