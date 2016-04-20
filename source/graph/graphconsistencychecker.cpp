@@ -7,7 +7,6 @@
 GraphConsistencyChecker::GraphConsistencyChecker(const Graph& graph) :
     _graph(&graph)
 {
-    enable();
 }
 
 void GraphConsistencyChecker::toggle()
