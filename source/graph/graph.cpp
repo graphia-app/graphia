@@ -84,24 +84,29 @@ void Graph::enableComponentManagement()
     }
 }
 
-void Graph::dumpToQDebug(int detail) const
+template<typename G, typename C> void dumpGraphToQDebug(const G& graph, const C& component, const int detail)
 {
-    qDebug() << numNodes() << "nodes" << numEdges() << "edges";
+    qDebug() << component.numNodes() << "nodes" << component.numEdges() << "edges";
 
     if(detail > 0)
     {
-        for(auto nodeId : nodeIds())
+        for(auto nodeId : component.nodeIds())
         {
-            auto edgeIds = edgeIdsForNodeId(nodeId);
+            auto edgeIds = graph.edgeIdsForNodeId(nodeId);
             qDebug() << "Node" << nodeId << edgeIds;
         }
 
-        for(auto edgeId : edgeIds())
+        for(auto edgeId : component.edgeIds())
         {
-            auto& edge = edgeById(edgeId);
+            auto& edge = graph.edgeById(edgeId);
             qDebug() << "Edge" << edgeId << "(" << edge.sourceId() << "->" << edge.targetId() << ")";
         }
     }
+}
+
+void Graph::dumpToQDebug(int detail) const
+{
+    dumpGraphToQDebug(*this, *this, detail);
 
     if(detail > 1)
     {
@@ -111,7 +116,7 @@ void Graph::dumpToQDebug(int detail) const
             {
                 auto component = _componentManager->componentById(componentId);
                 qDebug() << "component" << componentId;
-                component->dumpToQDebug(detail);
+                dumpGraphToQDebug(*this, *component, detail);
             }
         }
     }

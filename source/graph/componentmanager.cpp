@@ -5,26 +5,6 @@
 #include <queue>
 #include <map>
 
-void GraphComponent::reserve(const Graph& other)
-{
-    const GraphComponent* otherGraphComponent = dynamic_cast<const GraphComponent*>(&other);
-    Q_ASSERT(otherGraphComponent != nullptr);
-
-    Q_ASSERT(_graph == otherGraphComponent->_graph);
-    _nodeIds.reserve(otherGraphComponent->_nodeIds.size());
-    _edgeIds.reserve(otherGraphComponent->_edgeIds.size());
-}
-
-void GraphComponent::cloneFrom(const Graph& other)
-{
-    const GraphComponent* otherGraphComponent = dynamic_cast<const GraphComponent*>(&other);
-    Q_ASSERT(otherGraphComponent != nullptr);
-
-    Q_ASSERT(_graph == otherGraphComponent->_graph);
-    _nodeIds = otherGraphComponent->_nodeIds;
-    _edgeIds = otherGraphComponent->_edgeIds;
-}
-
 ComponentManager::ComponentManager(Graph& graph,
                                    const NodeConditionFn& nodeFilter,
                                    const EdgeConditionFn& edgeFilter) :

@@ -41,15 +41,13 @@ public:
     ComponentId newComponentId() const { return _newComponentId; }
 };
 
-class GraphComponent : public Graph
+class GraphComponent
 {
     friend class ComponentManager;
 
-    Q_OBJECT
 public:
     explicit GraphComponent(const Graph* graph) : _graph(graph) {}
     GraphComponent(const GraphComponent& other) :
-        Graph(),
         _graph(other._graph),
         _nodeIds(other._nodeIds),
         _edgeIds(other._edgeIds)
@@ -63,24 +61,11 @@ private:
 public:
     const std::vector<NodeId>& nodeIds() const { return _nodeIds; }
     int numNodes() const { return static_cast<int>(_nodeIds.size()); }
-    const Node& nodeById(NodeId nodeId) const { return _graph->nodeById(nodeId); }
-    bool containsNodeId(NodeId nodeId) const { return _graph->containsNodeId(nodeId); }
-    NodeIdDistinctSetCollection::Type typeOf(NodeId) const { return NodeIdDistinctSetCollection::Type::Not; }
-    ConstNodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const { return _graph->mergedNodeIdsForNodeId(nodeId); }
 
     const std::vector<EdgeId>& edgeIds() const { return _edgeIds; }
     int numEdges() const { return static_cast<int>(_edgeIds.size()); }
-    const Edge& edgeById(EdgeId edgeId) const { return _graph->edgeById(edgeId); }
-    bool containsEdgeId(EdgeId edgeId) const { return _graph->containsEdgeId(edgeId); }
-    EdgeIdDistinctSetCollection::Type typeOf(EdgeId) const { return EdgeIdDistinctSetCollection::Type::Not; }
-    ConstEdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const { return _graph->mergedEdgeIdsForEdgeId(edgeId); }
-
-    EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const { return _graph->edgeIdsForNodeId(nodeId); }
 
     const Graph& graph() const { return *_graph; }
-
-    void reserve(const Graph& other);
-    void cloneFrom(const Graph& other);
 };
 
 class ComponentManager : public QObject, public Filter
