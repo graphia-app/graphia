@@ -204,3 +204,4 @@ RESOURCES += \
     source/icon-themes/icons.qrc \
     source/icon/mainicon.qrc
 
+include(source/thirdparty/qtsingleapplication/qtsingleapplication.pri)
