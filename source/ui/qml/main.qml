@@ -23,13 +23,20 @@ ApplicationWindow
 
     title: (currentDocument ? currentDocument.title + qsTr(" - ") : "") + application.name()
 
-    Component.onCompleted:
+    // This is called when the app is started, but it also receives the arguments
+    // of a second instance when it starts then immediately exits
+    function processArguments(arguments)
     {
-        for(var i = 1; i < Qt.application.arguments.length; i++)
+        for(var i = 1; i < arguments.length; i++)
         {
-            var fileUrl = application.urlForFileName(Qt.application.arguments[i]);
+            var fileUrl = application.urlForFileName(arguments[i]);
             openFile(fileUrl, true);
         }
+    }
+
+    Component.onCompleted:
+    {
+        processArguments(Qt.application.arguments);
     }
 
     MessageDialog

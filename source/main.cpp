@@ -1,4 +1,3 @@
-#include <QApplication>
 #include <QObject>
 #include <QQmlComponent>
 #include <QQmlEngine>
@@ -17,12 +16,28 @@
 
 #include "rendering/openglfunctions.h"
 
+#include "thirdparty/qtsingleapplication/qtsingleapplication.h"
+
 #include <QCoreApplication>
 
 int main(int argc, char *argv[])
 {
-    QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
-    QApplication app(argc, argv);
+    SharedTools::QtSingleApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
+    SharedTools::QtSingleApplication app(PRODUCT_NAME, argc, argv);
+
+    if(app.isRunning())
+    {
+        if(app.sendMessage(app.arguments().join("\n")))
+            return 0;
+    }
+
+    // Wait until the application is active before setting the focus window
+    QObject::connect(&app, &SharedTools::QtSingleApplication::applicationStateChanged,
+    [&app]
+    {
+        if(app.activationWindow() == nullptr)
+            app.setActivationWindow(QApplication::focusWindow());
+    });
 
     QCoreApplication::setOrganizationName("Kajeka");
     QCoreApplication::setOrganizationDomain("kajeka.com");
@@ -87,6 +102,13 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
+
+    QObject* mainWindow = engine.rootObjects().first();
+    QObject::connect(&app, &SharedTools::QtSingleApplication::messageReceived,
+    [mainWindow](const QString& message, QObject*)
+    {
+        QMetaObject::invokeMethod(mainWindow, "processArguments", Q_ARG(QVariant, message.split("\n")));
+    });
 
     return app.exec();
 }
