@@ -121,14 +121,7 @@ typedef struct tagTHREADNAME_INFO
 } THREADNAME_INFO;
 #pragma pack(pop)
 
-static EXCEPTION_DISPOSITION NTAPI ignore_handler(EXCEPTION_RECORD *,
-                                                  void *, CONTEXT *,
-                                                  void *)
-{
-    return ExceptionContinueExecution;
-}
-
-static void SetThreadName(char* threadName)
+void SetThreadName(char* threadName)
 {
     THREADNAME_INFO info;
     info.dwType = 0x1000;
@@ -136,19 +129,13 @@ static void SetThreadName(char* threadName)
     info.dwThreadID = -1;
     info.dwFlags = 0;
 
-    // Push an exception handler to ignore all following exceptions
-    NT_TIB *tib = reinterpret_cast<NT_TIB*>(NtCurrentTeb());
-    EXCEPTION_REGISTRATION_RECORD rec;
-    rec.Next = tib->ExceptionList;
-    rec.Handler = ignore_handler;
-    tib->ExceptionList = &rec;
-
-    RaiseException(MS_VC_EXCEPTION, 0,
-                   sizeof(info)/sizeof(ULONG_PTR),
-                   reinterpret_cast<ULONG_PTR*>(&info));
-
-    // Pop exception handler
-    tib->ExceptionList = tib->ExceptionList->Next;
+    __try
+    {
+        RaiseException(MS_VC_EXCEPTION, 0, sizeof(info)/sizeof(ULONG_PTR), (ULONG_PTR*)&info);
+    }
+    __except(EXCEPTION_EXECUTE_HANDLER)
+    {
+    }
 }
 
 void u::setCurrentThreadName(const QString& name)
