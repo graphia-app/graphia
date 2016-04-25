@@ -90,7 +90,7 @@ void LayoutThread::resume()
         return;
 
     // Don't resume if there is nothing to do
-    if(allLayoutsFinished() && !_layoutPotentiallyRequired)
+    if(!workToDo())
         return;
 
     for(auto& layout : _layouts)
@@ -128,6 +128,13 @@ void LayoutThread::stop()
     _waitForResume.notify_all();
 }
 
+bool LayoutThread::finished()
+{
+    std::unique_lock<std::mutex> lock(_mutex);
+
+    return !workToDo();
+}
+
 bool LayoutThread::iterative()
 {
     for(auto& layout : _layouts)
@@ -154,6 +161,11 @@ bool LayoutThread::allLayoutsFinished()
     }
 
     return true;
+}
+
+bool LayoutThread::workToDo()
+{
+    return _layoutPotentiallyRequired || !allLayoutsFinished();
 }
 
 void LayoutThread::run()

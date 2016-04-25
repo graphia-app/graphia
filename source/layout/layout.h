@@ -170,6 +170,8 @@ public:
     void start();
     void stop();
 
+    bool finished();
+
     void addAllComponents();
 
     std::vector<LayoutSetting>& settingsVector();
@@ -177,6 +179,7 @@ public:
 private:
     bool iterative();
     bool allLayoutsFinished();
+    bool workToDo();
     void uncancel();
     void run();
 

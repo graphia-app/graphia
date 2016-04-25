@@ -109,7 +109,7 @@ LayoutPauseState::Enum Document::layoutPauseState()
     if(_userLayoutPaused)
         return LayoutPauseState::Enum::Paused;
 
-    if(_layoutThread->paused())
+    if(_layoutThread->finished())
         return LayoutPauseState::Enum::RunningFinished;
 
     return LayoutPauseState::Enum::Running;
