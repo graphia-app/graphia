@@ -8,9 +8,9 @@
 
 template<typename T> float meanWeightedAvgBuffer(int start, int end, const T& buffer)
 {
-    float average = 0;
+    float average = 0.0f;
     int size = end - start;
-    float gaussSum = (size) * (size + 1) / 2;
+    float gaussSum = (size) * (size + 1) / 2.0f;
 
     for(int i = start; i < end; ++i)
         average += buffer.at(i) * ((i - start) + 1) / gaussSum;
