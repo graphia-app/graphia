@@ -150,19 +150,29 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
     // Finished  - Finish layout
     //
 
+    NodeArray<float> displacementSizes(graphComponent().graph());
+    concurrent_for(nodeIds().begin(), nodeIds().end(),
+        [this, &displacementSizes](const NodeId& nodeId)
+        {
+            displacementSizes[nodeId] = _displacements[nodeId].length();
+        });
+
     // Calculate force averages
     float deltaForceTotal = 0.0f;
     for(auto nodeId : nodeIds())
-        deltaForceTotal += _displacements[nodeId].length();
+        deltaForceTotal += displacementSizes[nodeId];
 
     _forceMean = deltaForceTotal / nodeIds().size();
 
     // Calculate Standard Deviation
     float variance = 0.0f;
-    for(int i = 0; i < static_cast<int>(_displacements.size()); ++i)
-         variance += std::pow(_displacements[i].length() - _forceMean, 2.0f);
+    for(auto nodeId : nodeIds())
+    {
+        float d = displacementSizes[nodeId] - _forceMean;
+        variance += (d * d);
+    }
 
-    _forceStdDeviation = std::sqrt(variance / static_cast<float>(_displacements.size()));
+    _forceStdDeviation = std::sqrt(variance / nodeIds().size());
     switch(_changeDetectionPhase)
     {
         case ChangeDetectionPhase::Initial:
