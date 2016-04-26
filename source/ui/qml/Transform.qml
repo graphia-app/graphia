@@ -13,12 +13,25 @@ Item
     property color disabledColor
     property color textColor: transformEnabled ? color : disabledColor
 
+    function to3dp(value)
+    {
+        return parseFloat(parseFloat(value).toFixed(3)).toString();
+    }
+
+    function clampToRange(value)
+    {
+        if(hasFieldRange)
+            return Math.min(Math.max(value, minFieldValue), maxFieldValue);
+
+        return value;
+    }
+
     property string formattedFieldValue:
     {
         if(type === GraphTransformType.Float)
         {
             // Format the number for human consumption; don't question it, just accept it
-            return parseFloat(parseFloat(fieldValue).toFixed(3)).toString();
+            return to3dp(fieldValue);
         }
         else if(type === GraphTransformType.String)
             return "\"" + fieldValue + "\"";
@@ -179,10 +192,7 @@ Item
                 if(type === GraphTransformType.Float)
                 {
                     if(!isNaN(parseFloat(newText)))
-                    {
-                        // Format the number for human consumption; don't question it, just accept it
-                        text = parseFloat(parseFloat(newText).toFixed(3)).toString();
-                    }
+                        text = to3dp(clampToRange(newText));
                     else
                         text = "";
                 }
@@ -239,6 +249,32 @@ Item
                 }
 
                 return validator;
+            }
+
+            property var keypressQuantum:
+            {
+                if(hasFieldRange)
+                    return (maxFieldValue - minFieldValue) / 100.0;
+
+                return 1.0;
+            }
+
+            Keys.onUpPressed:
+            {
+                if(type != GraphTransformType.Int && type != GraphTransformType.Float)
+                    return;
+
+                text = to3dp(clampToRange((+text) + (+keypressQuantum)));
+                fieldValue = text;
+            }
+
+            Keys.onDownPressed:
+            {
+                if(type != GraphTransformType.Int && type != GraphTransformType.Float)
+                    return;
+
+                text = to3dp(clampToRange((+text) - (+keypressQuantum)));
+                fieldValue = text;
             }
         }
 
