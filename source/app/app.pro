@@ -26,8 +26,8 @@ DEFINES += \
     "VERSION=\"\\\"$$_VERSION\\\"\"" \
     "COPYRIGHT=\"\\\"$$_COPYRIGHT\\\"\""
 
-RC_ICONS = source/icon/Icon.ico # Windows
-ICON = source/icon/Icon.icns # OSX
+RC_ICONS = icon/Icon.ico # Windows
+ICON = icon/Icon.icns # OSX
 
 QT += qml quick opengl openglextensions
 
