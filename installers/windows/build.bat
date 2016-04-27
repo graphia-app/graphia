@@ -1,6 +1,6 @@
 rmdir /s /q build
 mkdir build
-copy release\%PRODUCT_NAME%.exe build\
+copy %PRODUCT_NAME%.exe build\
 
 windeployqt --qmldir source\ui\qml --no-angle --no-compiler-runtime ^
 	--no-opengl-sw build\%PRODUCT_NAME%.exe || EXIT /B 1
