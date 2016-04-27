@@ -5,10 +5,11 @@ include(../thirdparty/qtsingleapplication/qtsingleapplication.pri)
 
 # Put the binary in the root of the build directory
 DESTDIR = ../..
+TARGET = "GraphTool"
 
 _PRODUCT_NAME=$$(PRODUCT_NAME)
-isEmpty(_PRODUCT_NAME) {
-    TARGET = "GraphTool"
+!isEmpty(_PRODUCT_NAME) {
+    TARGET = $$_PRODUCT_NAME
 }
 
 _VERSION=$$(VERSION)
