@@ -80,8 +80,8 @@ RequestExecutionLevel highest
 !insertmacro ONINIT "un"
 
 ; Installer Icons
-!insertmacro MUI_DEFAULT MUI_ICON "icon\Icon.ico"
-!insertmacro MUI_DEFAULT MUI_UNICON "icon\Icon.ico"
+!insertmacro MUI_DEFAULT MUI_ICON "source\app\icon\Icon.ico"
+!insertmacro MUI_DEFAULT MUI_UNICON "source\app\icon\Icon.ico"
 
 Icon "${MUI_ICON}"
 UninstallIcon "${MUI_UNICON}"
