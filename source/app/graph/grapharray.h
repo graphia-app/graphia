@@ -172,14 +172,7 @@ protected:
     void resize(int size)
     {
         MaybeLock lock(_mutex);
-#if defined(_MSC_FULL_VER) && _MSC_FULL_VER <= 180031101
-        // This means that on Windows the arrays won't be correctly initialised
-        // when they're resized, but Qt 5.6 which builds with MSVC 2015 is right
-        // around the corner and should fix this
-        _array.resize(size);
-#else
         resize_(size);
-#endif
     }
 
     template<typename T = Element> typename std::enable_if<std::is_copy_constructible<T>::value>::type
