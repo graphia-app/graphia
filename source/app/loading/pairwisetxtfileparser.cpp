@@ -48,7 +48,13 @@ bool PairwiseTxtFileParser::parse(MutableGraph& graph)
 
         for(size_t i = 0; i < line.length(); i++)
         {
-            if(line[i] == '\"')
+            if((i + 1) < line.length() &&
+               line[i] == '/' && line[i + 1] == '/')
+            {
+                // Ignore C++ style comments
+                break;
+            }
+            else if(line[i] == '\"')
             {
                 if(inQuotes)
                 {
