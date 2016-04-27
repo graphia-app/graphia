@@ -16,7 +16,7 @@
 
 #include "rendering/openglfunctions.h"
 
-#include "thirdparty/qtsingleapplication/qtsingleapplication.h"
+#include "../thirdparty/qtsingleapplication/qtsingleapplication.h"
 
 #include <QCoreApplication>
 
