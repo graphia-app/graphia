@@ -2,7 +2,9 @@ rmdir /s /q build
 mkdir build
 copy %PRODUCT_NAME%.exe build\
 
-windeployqt --qmldir source\ui\qml --no-angle --no-compiler-runtime ^
+set QML_DIR=source\app\ui\qml
+IF NOT EXIST %QML_DIR%\NUL EXIT /B 1
+windeployqt --qmldir %QML_DIR% --no-angle --no-compiler-runtime ^
 	--no-opengl-sw build\%PRODUCT_NAME%.exe || EXIT /B 1
 
 xcopy "%CRTDIRECTORY%*.*" build || EXIT /B 1
