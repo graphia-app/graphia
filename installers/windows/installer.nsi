@@ -47,6 +47,14 @@ RequestExecutionLevel highest
 
 !macro ONINIT un
 	Function ${un}.onInit
+		; Make sure we're not still running first
+		FindProcDLL::FindProc "${EXE}"
+		IntCmp $R0 1 0 notRunning
+			MessageBox MB_OK|MB_ICONEXCLAMATION \
+				"${PRODUCT_NAME} is still running. Please close it before making changes." /SD IDOK
+			Abort
+		notRunning:
+
 		; The value of SetShellVarContext detetmines whether SHCTX is HKLM or HKCU
 		; and whether SMPROGRAMS refers to all users or just the current user
 		UserInfo::GetAccountType
