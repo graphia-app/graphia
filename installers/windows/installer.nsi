@@ -48,8 +48,13 @@ RequestExecutionLevel highest
 !macro ONINIT un
 	Function ${un}.onInit
 		; Make sure we're not still running first
-		FindProcDLL::FindProc "${EXE}"
-		IntCmp $R0 1 0 notRunning
+		ExecCmd::exec "%SystemRoot%\System32\tasklist /NH /FI \
+			$\"IMAGENAME eq ${EXE}$\" | \
+			%SystemRoot%\System32\find /I $\"${EXE}$\""
+		Pop $0
+		ExecCmd::wait $0
+		Pop $0
+		IntCmp $0 1 notRunning
 			MessageBox MB_OK|MB_ICONEXCLAMATION \
 				"${PRODUCT_NAME} is still running. Please close it before making changes." /SD IDOK
 			Abort
