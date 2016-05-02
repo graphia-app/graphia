@@ -13,6 +13,7 @@
 
 #include "utils/threadpool.h"
 #include "utils/preferences.h"
+#include "utils/exceptionhandler.h"
 
 #include "rendering/openglfunctions.h"
 

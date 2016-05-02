@@ -17,3 +17,17 @@ gcc:!clang {
 
 # OSX Info.plist
 QMAKE_TARGET_BUNDLE_PREFIX = com.kajeka
+
+_VERSION=$$(VERSION)
+isEmpty(_VERSION) {
+    _VERSION = "development"
+}
+
+_COPYRIGHT=$$(COPYRIGHT)
+isEmpty(_COPYRIGHT) {
+    _COPYRIGHT = "Copyright notice"
+}
+
+DEFINES += \
+    "VERSION=\"\\\"$$_VERSION\\\"\"" \
+    "COPYRIGHT=\"\\\"$$_COPYRIGHT\\\"\""

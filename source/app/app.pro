@@ -2,6 +2,7 @@ TEMPLATE = app
 
 include(../common.pri)
 include(../thirdparty/qtsingleapplication/qtsingleapplication.pri)
+include(../thirdparty/breakpad/breakpad.pri)
 
 # Put the binary in the root of the build directory
 DESTDIR = ../..
@@ -12,25 +13,12 @@ _PRODUCT_NAME=$$(PRODUCT_NAME)
     TARGET = $$_PRODUCT_NAME
 }
 
-_VERSION=$$(VERSION)
-isEmpty(_VERSION) {
-    _VERSION = "development"
-}
-
-_COPYRIGHT=$$(COPYRIGHT)
-isEmpty(_COPYRIGHT) {
-    _COPYRIGHT = "Copyright notice"
-}
-
-DEFINES += \
-    "PRODUCT_NAME=\"\\\"$$TARGET\\\"\"" \
-    "VERSION=\"\\\"$$_VERSION\\\"\"" \
-    "COPYRIGHT=\"\\\"$$_COPYRIGHT\\\"\""
+DEFINES += "PRODUCT_NAME=\"\\\"$$TARGET\\\"\""
 
 RC_ICONS = icon/Icon.ico # Windows
 ICON = icon/Icon.icns # OSX
 
-QT += qml quick opengl openglextensions
+QT += qml quick widgets opengl openglextensions
 
 HEADERS += \
     application.h \
@@ -115,7 +103,8 @@ HEADERS += \
     utils/semaphore.h \
     utils/singleton.h \
     utils/threadpool.h \
-    utils/utils.h
+    utils/utils.h \
+    utils/exceptionhandler.h
 
 SOURCES += \
     application.cpp \
@@ -182,7 +171,8 @@ SOURCES += \
     utils/preferences.cpp \
     utils/semaphore.cpp \
     utils/threadpool.cpp \
-    utils/utils.cpp
+    utils/utils.cpp \
+    utils/exceptionhandler.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \
