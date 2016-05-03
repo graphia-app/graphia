@@ -5,18 +5,22 @@
 
 #include <iostream>
 
+#if defined(Q_OS_WIN32)
+#include "../thirdparty/breakpad/src/client/windows/handler/exception_handler.h"
+#else
+
 #include <unistd.h>
 
 #if defined(Q_OS_MAC)
 #include "../thirdparty/breakpad/src/client/mac/handler/exception_handler.h"
 #elif defined(Q_OS_LINUX)
 #include "../thirdparty/breakpad/src/client/linux/handler/exception_handler.h"
-#elif defined(Q_OS_WIN32)
-#include "../thirdparty/breakpad/src/client/windows/handler/exception_handler.h"
+#endif
+
 #endif
 
 #ifdef Q_OS_WIN
-static void launch(wchar_t* program, wchar_t* path)
+static void launch(const wchar_t* program, const wchar_t* path)
 {
     static STARTUPINFO si = {0};
     static PROCESS_INFORMATION pi = {0};
@@ -27,20 +31,12 @@ static void launch(wchar_t* program, wchar_t* path)
     wcsncat(commandLine, L" ", sizeof(commandLine) - 1);
     wcsncat(commandLine, path, sizeof(commandLine) - 1);
 
-    if(!CreateProcess(NULL, commandLine, 0, FALSE, 0,
-                      CREATE_DEFAULT_ERROR_MODE|CREATE_NO_WINDOW|DETACHED_PROCESS,
-                      0, 0, &si, &pi))
+    if(!CreateProcess(nullptr, commandLine, nullptr, nullptr, FALSE,
+                      CREATE_DEFAULT_ERROR_MODE,
+                      nullptr, nullptr, &si, &pi))
     {
         std::cerr << "CreateProcess failed (" << GetLastError() << ")\n";
-        return;
     }
-
-    //FIXME huh?
-    /*if(PostThreadMessage(pi.dwThreadId, WM_QUIT, 0, 0))
-        std::cout << "Request to terminate process has been sent!";
-
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);*/
 }
 #else
 static void launch(const char* program, const char* path)
@@ -117,13 +113,19 @@ ExceptionHandler::ExceptionHandler()
 
 #if defined(Q_OS_WIN32)
     crashReporterExecutableName.append(".exe");
-    wcsncpy(_crashReporterExecutableName,
-            static_cast<const wchar_t*>(crashReporterExecutableName.utf16()),
-            sizeof(_crashReporterExecutableName) - 1);
+    int length = crashReporterExecutableName.toWCharArray(_crashReporterExecutableName);
+    _crashReporterExecutableName[length] = 0;
+    wchar_t tempPath[1024] = {0};
+    length = path.toWCharArray(tempPath);
+    tempPath[length] = 0;
 
     _handler = std::make_unique<google_breakpad::ExceptionHandler>(
-                static_cast<const wchar_t*>(path.utf16()), nullptr,
+                tempPath, nullptr,
                 minidumpCallback, this, true);
+
+    // This disables the default Windows crash handler
+    DWORD dwMode = SetErrorMode(SEM_NOGPFAULTERRORBOX);
+    SetErrorMode(dwMode|SEM_NOGPFAULTERRORBOX);
 #else
     strncpy(_crashReporterExecutableName,
             static_cast<const char*>(crashReporterExecutableName.toLatin1()),

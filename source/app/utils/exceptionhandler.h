@@ -25,7 +25,7 @@ public:
 
 private:
     std::unique_ptr<google_breakpad::ExceptionHandler> _handler;
-    platform_char _crashReporterExecutableName[1024];
+    platform_char _crashReporterExecutableName[1024] = {0};
 };
 
 #endif // EXECEPTIONHANDLER_H

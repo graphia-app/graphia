@@ -24,3 +24,10 @@ unix {
         ../thirdparty/breakpad/src/common/linux/memory_mapped_file.cc \
         ../thirdparty/breakpad/src/common/linux/safe_readlink.cc
 }
+
+win32 {
+    SOURCES += \
+        ../thirdparty/breakpad/src/client/windows/crash_generation/crash_generation_client.cc \
+        ../thirdparty/breakpad/src/common/windows/guid_string.cc \
+        ../thirdparty/breakpad/src/client/windows/handler/exception_handler.cc
+}
