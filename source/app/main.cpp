@@ -13,7 +13,7 @@
 
 #include "utils/threadpool.h"
 #include "utils/preferences.h"
-#include "utils/exceptionhandler.h"
+#include "utils/crashhandler.h"
 
 #include "rendering/openglfunctions.h"
 
@@ -110,6 +110,9 @@ int main(int argc, char *argv[])
     {
         QMetaObject::invokeMethod(mainWindow, "processArguments", Q_ARG(QVariant, message.split("\n")));
     });
+
+    CrashHandler c;
+    Q_UNUSED(c);
 
     return app.exec();
 }

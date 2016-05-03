@@ -15,11 +15,11 @@ using platform_char =
 #endif
 ;
 
-class ExceptionHandler
+class CrashHandler
 {
 public:
-    ExceptionHandler();
-    virtual ~ExceptionHandler();
+    CrashHandler();
+    virtual ~CrashHandler();
 
     const platform_char* crashReporterExecutableName() { return _crashReporterExecutableName; }
 

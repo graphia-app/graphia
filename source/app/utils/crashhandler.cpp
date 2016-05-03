@@ -1,4 +1,4 @@
-#include "exceptionhandler.h"
+#include "crashhandler.h"
 
 #include <QDir>
 #include <QCoreApplication>
@@ -77,7 +77,7 @@ static bool minidumpCallback(
         return false;
     }
 
-    ExceptionHandler* exceptionHandler = reinterpret_cast<ExceptionHandler*>(context);
+    CrashHandler* exceptionHandler = reinterpret_cast<CrashHandler*>(context);
     const auto* exe = exceptionHandler->crashReporterExecutableName();
 
     // static to avoid stack allocation
@@ -97,12 +97,18 @@ static bool minidumpCallback(
     strncat(path, ".dmp", sizeof(path) - 1);
 #endif
 
+    std::cerr << "Starting " << exe << " " << path << std::endl;
     launch(exe, path);
+
+#ifdef Q_OS_MAC
+    // This prevents the OSX CrashReporter having a chance to kick in
+    _exit(-1);
+#endif
 
     return false;
 }
 
-ExceptionHandler::ExceptionHandler()
+CrashHandler::CrashHandler()
 {
     QString path = QDir::tempPath();
 
@@ -139,11 +145,13 @@ ExceptionHandler::ExceptionHandler()
                 minidumpCallback, this, true, -1);
 
 #elif defined(Q_OS_MAC)
+
     _handler = std::make_unique<google_breakpad::ExceptionHandler>(
                 path.toStdString(), nullptr,
                 minidumpCallback, this, true, nullptr);
+
 #endif
 #endif
 }
 
-ExceptionHandler::~ExceptionHandler() {}
+CrashHandler::~CrashHandler() {}

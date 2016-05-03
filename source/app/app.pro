@@ -104,7 +104,7 @@ HEADERS += \
     utils/singleton.h \
     utils/threadpool.h \
     utils/utils.h \
-    utils/exceptionhandler.h
+    utils/crashhandler.h
 
 SOURCES += \
     application.cpp \
@@ -172,7 +172,7 @@ SOURCES += \
     utils/semaphore.cpp \
     utils/threadpool.cpp \
     utils/utils.cpp \
-    utils/exceptionhandler.cpp
+    utils/crashhandler.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \
