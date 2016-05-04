@@ -100,12 +100,8 @@ static bool minidumpCallback(
     std::cerr << "Starting " << exe << " " << path << std::endl;
     launch(exe, path);
 
-#ifdef Q_OS_MAC
-    // This prevents the OSX CrashReporter having a chance to kick in
-    _exit(-1);
-#endif
-
-    return false;
+    // Do not pass on the exception
+    return true;
 }
 
 CrashHandler::CrashHandler()
@@ -128,10 +124,6 @@ CrashHandler::CrashHandler()
     _handler = std::make_unique<google_breakpad::ExceptionHandler>(
                 tempPath, nullptr,
                 minidumpCallback, this, true);
-
-    // This disables the default Windows crash handler
-    DWORD dwMode = SetErrorMode(SEM_NOGPFAULTERRORBOX);
-    SetErrorMode(dwMode|SEM_NOGPFAULTERRORBOX);
 #else
     strncpy(_crashReporterExecutableName,
             static_cast<const char*>(crashReporterExecutableName.toLatin1()),
