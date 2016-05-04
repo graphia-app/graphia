@@ -1,3 +1,5 @@
 TEMPLATE = subdirs
 
-SUBDIRS = source/app
+SUBDIRS = \
+    source/app \
+    source/crashreporter

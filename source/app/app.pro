@@ -8,7 +8,7 @@ include(../thirdparty/breakpad/breakpad.pri)
 DESTDIR = ../..
 TARGET = "GraphTool"
 
-_PRODUCT_NAME=$$(PRODUCT_NAME)
+_PRODUCT_NAME = $$(PRODUCT_NAME)
 !isEmpty(_PRODUCT_NAME) {
     TARGET = $$_PRODUCT_NAME
 }
