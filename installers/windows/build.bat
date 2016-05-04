@@ -1,11 +1,17 @@
 rmdir /s /q build
 mkdir build
 copy %PRODUCT_NAME%.exe build\
+copy CrashReporter.exe build\
 
 set QML_DIR=source\app\ui\qml
 IF NOT EXIST %QML_DIR%\NUL EXIT /B 1
 windeployqt --qmldir %QML_DIR% --no-angle --no-compiler-runtime ^
 	--no-opengl-sw build\%PRODUCT_NAME%.exe || EXIT /B 1
+
+set QML_DIR=source\crashreporter
+IF NOT EXIST %QML_DIR%\NUL EXIT /B 1
+windeployqt --qmldir %QML_DIR% --no-angle --no-compiler-runtime ^
+	--no-opengl-sw build\CrashReporter.exe || EXIT /B 1
 
 xcopy "%CRTDIRECTORY%*.*" build || EXIT /B 1
 xcopy "%UniversalCRTSdkDir%redist\ucrt\DLLs\x64\*.*" build || EXIT /B 1

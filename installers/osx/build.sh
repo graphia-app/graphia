@@ -4,7 +4,13 @@
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 
 security unlock-keychain -p ${SIGN_BUILD_USER_PASSWORD}
-macdeployqt ${PRODUCT_NAME}.app -qmldir=source/ui/qml \
+
+cp CrashReporter.app/Contents/MacOS/CrashReporter \
+  ${PRODUCT_NAME}.app/Contents/MacOS/
+
+macdeployqt ${PRODUCT_NAME}.app \
+  -qmldir=source/app/ui/qml \
+  -qmldir=source/crashreporter \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} \
   -codesign="${SIGN_APPLE_KEYCHAIN_ID}"
 
