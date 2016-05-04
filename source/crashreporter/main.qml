@@ -10,7 +10,7 @@ ApplicationWindow
     visible: true
     flags: Qt.Window|Qt.Dialog
 
-    title: Qt.application.name + qsTr("Crash Reporter")
+    title: Qt.application.name + " " + qsTr("Crash Reporter")
 
     width: 640
     height: 480
