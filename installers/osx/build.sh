@@ -12,6 +12,7 @@ macdeployqt ${PRODUCT_NAME}.app \
   -qmldir=source/app/ui/qml \
   -qmldir=source/crashreporter \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} \
+  -executable=${PRODUCT_NAME}.app/Contents/MacOS/CrashReporter \
   -codesign="${SIGN_APPLE_KEYCHAIN_ID}"
 
 # Need to sign again because macdeployqt won't sign the CrashReporter
