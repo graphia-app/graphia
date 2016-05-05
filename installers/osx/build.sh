@@ -14,6 +14,10 @@ macdeployqt ${PRODUCT_NAME}.app \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} \
   -codesign="${SIGN_APPLE_KEYCHAIN_ID}"
 
+# Need to sign again because macdeployqt won't sign the CrashReporter
+codesign --verbose --sign "${SIGN_APPLE_KEYCHAIN_ID}" ${PRODUCT_NAME}.app
+codesign --verbose --verify ${PRODUCT_NAME}.app || exit $?
+
 cat ${SCRIPT_DIR}/dmg.spec.json.template | sed \
   -e "s/_PRODUCT_NAME_/${PRODUCT_NAME}/g" \
   -e "s|_SCRIPT_DIR_|${SCRIPT_DIR}|g" > \
