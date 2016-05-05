@@ -68,7 +68,12 @@ ApplicationWindow
             text: qsTr("Send Report")
             Layout.columnSpan: 2
             anchors.right: grid.right
-            onClicked: Qt.quit()
+            onClicked:
+            {
+                report.email = email.text;
+                report.text = description.text;
+                Qt.quit();
+            }
         }
     }
 }

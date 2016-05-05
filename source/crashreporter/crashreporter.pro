@@ -16,4 +16,5 @@ DEFINES += "PRODUCT_NAME=\"\\\"$$_PRODUCT_NAME\\\"\""
 QT += qml quick widgets
 
 SOURCES += main.cpp
+HEADERS += report.h
 RESOURCES += resources.qrc

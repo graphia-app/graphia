@@ -5,6 +5,7 @@ import QtQuick.Controls.Styles 1.4
 Item
 {
     property alias placeholderText: placeholder.text
+    property alias text: textArea.text
 
     property bool __shouldShowPlaceholderText:
         !textArea.text.length && !textArea.activeFocus
