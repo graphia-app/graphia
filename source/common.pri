@@ -10,11 +10,18 @@ gcc {
         -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual \
         -Wnon-virtual-dtor -Wredundant-decls -Wshadow -Wundef
 
+    # Debug symbols
     QMAKE_CXXFLAGS += -g
 }
 
 gcc:!clang {
     QMAKE_CXXFLAGS += -Wlogical-op -Wstrict-null-sentinel
+}
+
+win32 {
+    # Debug symbols
+    QMAKE_CFLAGS_RELEASE += /Zi
+    QMAKE_LFLAGS_RELEASE += /MAP /debug /opt:ref
 }
 
 # OSX Info.plist
