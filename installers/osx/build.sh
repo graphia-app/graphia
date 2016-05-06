@@ -26,7 +26,5 @@ cat ${SCRIPT_DIR}/dmg.spec.json.template | sed \
 rm -f ${PRODUCT_NAME}-${VERSION}.dmg && appdmg dmg.spec.json \
   ${PRODUCT_NAME}-${VERSION}.dmg
 
-rm -rf build
-mkdir build
 cp -a ${PRODUCT_NAME}.app build
 cp -a ${PRODUCT_NAME}-${VERSION}.dmg build

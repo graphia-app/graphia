@@ -1,5 +1,3 @@
-rmdir /s /q build
-mkdir build
 copy %PRODUCT_NAME%.exe build\
 copy CrashReporter.exe build\
 
