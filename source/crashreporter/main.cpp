@@ -31,6 +31,11 @@ static void uploadReport(const QString& email, const QString& text, const QStrin
     textPart.setBody(text.toLatin1());
     multiPart->append(textPart);
 
+    QHttpPart versionPart;
+    versionPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"version\""));
+    versionPart.setBody(VERSION);
+    multiPart->append(versionPart);
+
     QHttpPart dmpPart;
     dmpPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
     dmpPart.setHeader(QNetworkRequest::ContentDispositionHeader,
