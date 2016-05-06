@@ -9,6 +9,8 @@ gcc {
         -Wdisabled-optimization -Wformat=2 -Winit-self -Wmissing-declarations \
         -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual \
         -Wnon-virtual-dtor -Wredundant-decls -Wshadow -Wundef
+
+    QMAKE_CXXFLAGS += -g
 }
 
 gcc:!clang {
