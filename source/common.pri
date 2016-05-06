@@ -20,7 +20,7 @@ gcc:!clang {
 
 win32 {
     # Debug symbols
-    QMAKE_CFLAGS_RELEASE += /Zi
+    QMAKE_CXXFLAGS_RELEASE += -Zi
     QMAKE_LFLAGS_RELEASE += /MAP /debug /opt:ref
 }
 
