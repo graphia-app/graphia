@@ -13,8 +13,10 @@ isEmpty(_PRODUCT_NAME) {
 
 DEFINES += "PRODUCT_NAME=\"\\\"$$_PRODUCT_NAME\\\"\""
 
-QT += qml quick widgets
+QT += qml quick widgets opengl openglextensions
 
-SOURCES += main.cpp
-HEADERS += report.h
+SOURCES += main.cpp \
+    ../app/rendering/openglfunctions.cpp
+HEADERS += report.h \
+    ../app/rendering/openglfunctions.h
 RESOURCES += resources.qrc

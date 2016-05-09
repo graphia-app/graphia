@@ -6,41 +6,60 @@
 #include <QHttpMultiPart>
 #include <QNetworkReply>
 #include <QUrl>
+#include <QSysInfo>
+#include <QMessageBox>
+#include <QCryptographicHash>
+#include <QDebug>
+
+#include <map>
+#include <iostream>
 
 #include "report.h"
+#include "../app/rendering/openglfunctions.h"
 
 static void uploadReport(const QString& email, const QString& text, const QString& dmpFile)
 {
-    QFile* file = new QFile(dmpFile);
-
-    if(!file->exists())
-    {
-        delete file;
-        return;
-    }
-
     QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
-    QHttpPart emailPart;
-    emailPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"email\""));
-    emailPart.setBody(email.toLatin1());
-    multiPart->append(emailPart);
+    std::map<const char*, QString> fields =
+    {
+        {"email",   email},
+        {"text",    text},
+        {"product", PRODUCT_NAME},
+        {"version", VERSION},
+        {"os",      QString("%1 %2 %3 %4").arg(QSysInfo::kernelType())
+                        .arg(QSysInfo::kernelVersion())
+                        .arg(QSysInfo::productType())
+                        .arg(QSysInfo::productVersion())},
+        {"gl",      OpenGLFunctions::info()},
+    };
 
-    QHttpPart textPart;
-    textPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"text\""));
-    textPart.setBody(text.toLatin1());
-    multiPart->append(textPart);
+    QCryptographicHash checksum(QCryptographicHash::Algorithm::Md5);
 
-    QHttpPart versionPart;
-    versionPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"version\""));
-    versionPart.setBody(VERSION);
-    multiPart->append(versionPart);
+    for(auto& field : fields)
+    {
+        QHttpPart part;
+        part.setHeader(QNetworkRequest::ContentDispositionHeader,
+                       QVariant(QString("form-data; name=\"%1\"").arg(field.first)));
+        part.setBody(field.second.toLatin1());
+        multiPart->append(part);
+
+        checksum.addData(field.second.toLatin1());
+    }
+
+    // Send a hash of the contents of the report as a (crude) means of filtering bots/crawlers/etc.
+    QHttpPart checksumPart;
+    checksumPart.setHeader(QNetworkRequest::ContentDispositionHeader,
+                           QVariant(QString("form-data; name=\"checksum\"")));
+    checksumPart.setBody(checksum.result().toHex());
+    multiPart->append(checksumPart);
 
     QHttpPart dmpPart;
     dmpPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
     dmpPart.setHeader(QNetworkRequest::ContentDispositionHeader,
                       QVariant("form-data; name=\"dmp\"; filename=\"" +
-                               QFileInfo(dmpFile).completeBaseName() + "\""));
+                               QFileInfo(dmpFile).fileName() + "\""));
+    QFile* file = new QFile(dmpFile);
     file->open(QIODevice::ReadOnly);
     dmpPart.setBodyDevice(file);
     file->setParent(multiPart);
