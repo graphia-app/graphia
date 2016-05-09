@@ -15,38 +15,77 @@ void OpenGLFunctions::resolveOpenGLFunctions()
     }
 }
 
+class Functions
+{
+private:
+    bool _valid = false;
+    QOpenGLContext _context;
+    QOffscreenSurface _surface;
+    OpenGLFunctions* _f;
+
+public:
+    Functions()
+    {
+        QSurfaceFormat format;
+        format.setMajorVersion(3);
+        format.setMinorVersion(3);
+        format.setProfile(QSurfaceFormat::CoreProfile);
+
+        QSurfaceFormat::setDefaultFormat(format);
+
+        _context.setFormat(format);
+        _context.create();
+
+        QOffscreenSurface surface;
+        _surface.setFormat(format);
+        _surface.create();
+
+        if(!_surface.isValid())
+            return;
+
+        _context.makeCurrent(&_surface);
+
+        if(!_context.isValid())
+            return;
+
+        _f = _context.versionFunctions<OpenGLFunctions>();
+
+        if(_f == nullptr)
+            return;
+
+        if(!_f->initializeOpenGLFunctions())
+            return;
+
+        _valid = true;
+    }
+
+    bool valid() const { return _valid; }
+
+    OpenGLFunctions* operator()() { return _f; }
+};
+
 bool OpenGLFunctions::hasOpenGLSupport()
 {
-    QSurfaceFormat format;
-    format.setMajorVersion(3);
-    format.setMinorVersion(3);
-    format.setProfile(QSurfaceFormat::CoreProfile);
+    return Functions().valid();
+}
 
-    QSurfaceFormat::setDefaultFormat(format);
+QString OpenGLFunctions::info()
+{
+    Functions f;
 
-    QOpenGLContext context;
-    context.setFormat(format);
-    context.create();
+    QString extensions;
+    GLint numExtensions;
+    f()->glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+    for(int i = 0; i < numExtensions; i++)
+    {
+        extensions.append(reinterpret_cast<const char*>(f()->glGetStringi(GL_EXTENSIONS, i)));
+        extensions.append(" ");
+    }
 
-    QOffscreenSurface surface;
-    surface.setFormat(format);
-    surface.create();
-
-    if(!surface.isValid())
-        return false;
-
-    context.makeCurrent(&surface);
-
-    if(!context.isValid())
-        return false;
-
-    auto f = context.versionFunctions<OpenGLFunctions>();
-
-    if(f == nullptr)
-        return false;
-
-    if(!f->initializeOpenGLFunctions())
-        return false;
-
-    return true;
+    return QString("%1\n%2\n%3\n%4\n%5")
+        .arg(reinterpret_cast<const char*>(f()->glGetString(GL_VENDOR)))
+        .arg(reinterpret_cast<const char*>(f()->glGetString(GL_RENDERER)))
+        .arg(reinterpret_cast<const char*>(f()->glGetString(GL_VERSION)))
+        .arg(reinterpret_cast<const char*>(f()->glGetString(GL_SHADING_LANGUAGE_VERSION)))
+        .arg(extensions);
 }

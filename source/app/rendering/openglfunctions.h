@@ -2,7 +2,7 @@
 #define OPENGLFUNCTIONS_H
 
 #include <QOpenGLFunctions_3_3_Core>
-#include <QDebug>
+#include <QString>
 
 class OpenGLFunctions : public QOpenGLFunctions_3_3_Core
 {
@@ -14,6 +14,7 @@ public:
     void resolveOpenGLFunctions();
 
     static bool hasOpenGLSupport();
+    static QString info();
 };
 
 #endif // OPENGLFUNCTIONS_H
