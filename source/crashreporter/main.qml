@@ -7,6 +7,7 @@ import "../app/ui/qml/Constants.js" as Constants
 
 ApplicationWindow
 {
+    id: window
     visible: true
     flags: Qt.Window|Qt.Dialog
 
@@ -16,6 +17,8 @@ ApplicationWindow
     height: 480
     minimumWidth: 640
     minimumHeight: 480
+
+    property bool enabled: true
 
     GridLayout
     {
@@ -49,6 +52,7 @@ ApplicationWindow
         TextField
         {
             id: email
+            enabled: window.enabled
             placeholderText: qsTr("Email address (optional)")
             validator: RegExpValidator { regExp:/\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/ }
             Layout.fillWidth: true
@@ -57,6 +61,7 @@ ApplicationWindow
         PlaceholderTextArea
         {
             id: description
+            enabled: window.enabled
             placeholderText: qsTr("A detailed explanation of what you were doing immediately prior to the crash (optional)")
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -65,11 +70,13 @@ ApplicationWindow
 
         Button
         {
+            enabled: window.enabled
             text: qsTr("Send Report")
             Layout.columnSpan: 2
             anchors.right: grid.right
             onClicked:
             {
+                window.enabled = false;
                 report.email = email.text;
                 report.text = description.text;
                 Qt.quit();
