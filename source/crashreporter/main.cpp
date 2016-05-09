@@ -70,6 +70,15 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName(PRODUCT_NAME);
     QCoreApplication::setApplicationVersion(VERSION);
 
+    if(app.arguments().size() != 2 || !QFileInfo(app.arguments().at(1)).exists())
+    {
+        QMessageBox::critical(nullptr, app.applicationName(),
+                              QObject::tr("This program is intended for automatically "
+                                          "reporting crashes and should not be invoked directly."),
+                              QMessageBox::Close);
+        return 1;
+    }
+
     QIcon mainIcon;
     mainIcon.addFile(":/icon.svg");
     app.setWindowIcon(mainIcon);
