@@ -59,12 +59,12 @@ Q_SIGNALS:
 private:
     QString instancesFileName(const QString &appId);
 
-    qint64 firstPeer;
-    QSharedMemory *instances;
-    QtLocalPeer *pidPeer;
-    QWindow *actWin;
+    qint64 firstPeer = -1;
+    QSharedMemory *instances = nullptr;
+    QtLocalPeer *pidPeer = nullptr;
+    QWindow *actWin = nullptr;
     QString appId;
-    bool block;
+    bool block = false;
 };
 
 } // namespace SharedTools

@@ -48,17 +48,12 @@ static QString instancesLockFilename(const QString &appSessionId)
 
 QtSingleApplication::QtSingleApplication(const QString &localAppId, int &argc, char **argv)
     : QApplication(argc, argv),
-      firstPeer(-1),
-      pidPeer(0)
+      appId(localAppId)
 {
-    this->appId = localAppId;
-
     const QString appSessionId = QtLocalPeer::appSessionId(appId);
 
     // This shared memory holds a zero-terminated array of active (or crashed) instances
     instances = new QSharedMemory(appSessionId, this);
-    actWin = 0;
-    block = false;
 
     // First instance creates the shared memory, later instances attach to it
     const bool created = instances->create(instancesSize);
