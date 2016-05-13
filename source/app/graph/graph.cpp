@@ -237,7 +237,6 @@ void Graph::clearPhase() const
     std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
 
     setPhase("");
-    clearSubPhase();
 }
 
 QString Graph::phase() const
