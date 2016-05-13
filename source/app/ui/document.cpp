@@ -332,14 +332,14 @@ void Document::onLoadComplete(bool /*success FIXME hmm*/)
     _selectionManager = std::make_shared<SelectionManager>(*_graphModel);
     _graphQuickItem->initialise(_graphModel, _commandManager, _selectionManager);
 
-    connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::maybeEmitIdleChanged);
+    connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::maybeEmitIdleChanged, Qt::DirectConnection);
     connect(_graphQuickItem, &GraphQuickItem::viewIsResetChanged, this, &Document::canResetViewChanged);
     connect(_graphQuickItem, &GraphQuickItem::canEnterOverviewModeChanged, this, &Document::canEnterOverviewModeChanged);
     connect(_graphQuickItem, &GraphQuickItem::fpsChanged, this, &Document::fpsChanged);
 
-    connect(&_commandManager, &CommandManager::busyChanged, this, &Document::maybeEmitIdleChanged);
+    connect(&_commandManager, &CommandManager::busyChanged, this, &Document::maybeEmitIdleChanged, Qt::DirectConnection);
 
-    connect(this, &Document::idleChanged, this, &Document::updateLayoutState);
+    connect(this, &Document::idleChanged, this, &Document::updateLayoutState, Qt::DirectConnection);
 
     connect(this, &Document::idleChanged, this, &Document::canDeleteChanged);
     connect(this, &Document::idleChanged, this, &Document::canUndoChanged);
