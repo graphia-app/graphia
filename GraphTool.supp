@@ -1,27 +1,194 @@
+# vim command to replace all hard coded paths to libs with wildcards
+# :%s/obj:.*\/\([^\/]*\.so\).*/obj:\*\1\*/
+
 {
-   /usr/lib/nvidia-346/libGL.so.346.35[Memcheck:Cond]
+   <insert_a_suppression_name_here>
    Memcheck:Cond
-   obj:/usr/lib/nvidia-346/libGL.so.346.35
-   obj:/usr/lib/nvidia-346/libnvidia-glcore.so.346.35
-   obj:/usr/lib/nvidia-346/libGL.so.346.35
-   obj:/home/tim/sdks/Qt/5.4/gcc_64/plugins/platforms/libqxcb.so
-   fun:_ZN14QOpenGLContext11swapBuffersEP8QSurface
-   fun:_ZN12OpenGLWindow6renderEv
-   fun:_ZN12OpenGLWindow6updateEv
-   fun:_ZN11GraphWidget8onUpdateEv
-   fun:_ZN9QtPrivate11FunctorCallINS_11IndexesListIIEEENS_4ListIIEEEvM11GraphWidgetFvvEE4callES7_PS5_PPv
-   fun:_ZN9QtPrivate15FunctionPointerIM11GraphWidgetFvvEE4callINS_4ListIIEEEvEEvS3_PS1_PPv
-   fun:_ZN9QtPrivate11QSlotObjectIM11GraphWidgetFvvENS_4ListIIEEEvE4implEiPNS_15QSlotObjectBaseEP7QObjectPPvPb
-   fun:_ZN11QMetaObject8activateEP7QObjectiiPPv
-   fun:_ZN6QTimer10timerEventEP11QTimerEvent
+   obj:*libgtk-x11-2.0.so*
+   obj:*libgobject-2.0.so*
+   fun:g_signal_emit_valist
+   fun:g_signal_emit_by_name
+   fun:g_object_set_valist
+   fun:g_object_set
+   obj:*libQt5Widgets.so*
+   fun:_ZN13QStyleFactory6createERK7QString
+   fun:_ZN12QApplication5styleEv
+   fun:_ZN19QApplicationPrivate10initializeEv
+   fun:_ZN19QApplicationPrivate9constructEv
+   fun:_ZN11SharedTools19QtSingleApplicationC1ERK7QStringRiPPc
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:g_utf8_offset_to_pointer
+   obj:*libgtk-x11-2.0.so*
+   obj:*libgtk-x11-2.0.so*
+   obj:*libgtk-x11-2.0.so*
+   fun:g_closure_invoke
+   obj:*libgobject-2.0.so*
+   fun:g_signal_emit_valist
+   fun:g_signal_emit
+   fun:gtk_widget_realize
+   fun:gtk_widget_set_parent
+   fun:gtk_fixed_put
+   fun:g_cclosure_marshal_VOID__OBJECTv
+   obj:*libgobject-2.0.so*
+   fun:g_signal_emit_valist
+   fun:g_signal_emit
+   obj:*libQt5Widgets.so*
+   obj:*libQt5Widgets.so*
+   obj:*libQt5Widgets.so*
+   fun:_ZN13QStyleFactory6createERK7QString
+   fun:_ZN12QApplication5styleEv
+   fun:_ZN19QApplicationPrivate10initializeEv
+   fun:_ZN19QApplicationPrivate9constructEv
+   fun:_ZN11SharedTools19QtSingleApplicationC1ERK7QStringRiPPc
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:g_utf8_offset_to_pointer
+   obj:*libgtk-x11-2.0.so*
+   obj:*libgtk-x11-2.0.so*
+   obj:*libgtk-x11-2.0.so*
+   fun:g_closure_invoke
+   obj:*libgobject-2.0.so*
+   fun:g_signal_emit_valist
+   fun:g_signal_emit
+   fun:gtk_widget_realize
+   fun:gtk_widget_set_parent
+   fun:gtk_fixed_put
+   fun:g_cclosure_marshal_VOID__OBJECTv
+   obj:*libgobject-2.0.so*
+   fun:g_signal_emit_valist
+   fun:g_signal_emit
+   obj:*libQt5Widgets.so*
+   obj:*libQt5Widgets.so*
+   obj:*libQt5Widgets.so*
+   fun:_ZN13QStyleFactory6createERK7QString
+   fun:_ZN12QApplication5styleEv
+   fun:_ZN19QApplicationPrivate10initializeEv
+   fun:_ZN19QApplicationPrivate9constructEv
+   fun:_ZN11SharedTools19QtSingleApplicationC1ERK7QStringRiPPc
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:g_utf8_offset_to_pointer
+   obj:*libgtk-x11-2.0.so*
+   obj:*libgtk-x11-2.0.so*
+   obj:*libgtk-x11-2.0.so*
+   obj:*libgdk-x11-2.0.so*
+   fun:g_main_context_dispatch
+   obj:*libglib-2.0.so*
+   fun:g_main_context_iteration
+   fun:_ZN20QEventDispatcherGlib13processEventsE6QFlagsIN10QEventLoop17ProcessEventsFlagEE
+   fun:_ZN10QEventLoop4execE6QFlagsINS_17ProcessEventsFlagEE
+   fun:_ZN16QCoreApplication4execEv
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:g_utf8_offset_to_pointer
+   obj:*libgtk-x11-2.0.so*
+   obj:*libgtk-x11-2.0.so*
+   obj:*libgdk-x11-2.0.so*
+   fun:g_main_context_dispatch
+   obj:*libglib-2.0.so*
+   fun:g_main_context_iteration
+   fun:_ZN20QEventDispatcherGlib13processEventsE6QFlagsIN10QEventLoop17ProcessEventsFlagEE
+   fun:_ZN10QEventLoop4execE6QFlagsINS_17ProcessEventsFlagEE
+   fun:_ZN16QCoreApplication4execEv
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   writev(vector[...])
+   obj:*libc-2.23.so*
+   fun:_xcb_conn_wait
+   fun:_xcb_out_send
+   fun:_xcb_out_flush_to
+   fun:wait_for_reply
+   fun:xcb_wait_for_reply
+   fun:_ZN14QXcbConnection4syncEv
+   fun:_ZN10QXcbWindow21requestActivateWindowEv
+   fun:_ZN7QWindow15requestActivateEv
+   fun:_ZN10QXcbWindow22handleButtonPressEventEiiiii6QFlagsIN2Qt16KeyboardModifierEEj
+   fun:_ZN10QXcbWindow18handleXIMouseEventEP14xcb_ge_event_t
+   fun:_ZN14QXcbConnection14xi2HandleEventEP14xcb_ge_event_t
+   fun:_ZN14QXcbConnection14handleXcbEventEP19xcb_generic_event_t
+   fun:_ZN14QXcbConnection16processXcbEventsEv
    fun:_ZN7QObject5eventEP6QEvent
    fun:_ZN19QApplicationPrivate13notify_helperEP7QObjectP6QEvent
    fun:_ZN12QApplication6notifyEP7QObjectP6QEvent
-   fun:_ZN16QCoreApplication14notifyInternalEP7QObjectP6QEvent
-   fun:_ZN14QTimerInfoList14activateTimersEv
-   obj:/home/tim/sdks/Qt/5.4/gcc_64/lib/libQt5Core.so.5.4.0
+   fun:_ZN16QCoreApplication15notifyInternal2EP7QObjectP6QEvent
+   fun:_ZN23QCoreApplicationPrivate16sendPostedEventsEP7QObjectiP11QThreadData
+   obj:*libQt5Core.so*
    fun:g_main_context_dispatch
-   obj:/lib/x86_64-linux-gnu/libglib-2.0.so.0.4200.1
+   obj:*libglib-2.0.so*
+   fun:g_main_context_iteration
+   fun:_ZN20QEventDispatcherGlib13processEventsE6QFlagsIN10QEventLoop17ProcessEventsFlagEE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   writev(vector[...])
+   obj:*libc-2.23.so*
+   fun:_xcb_conn_wait
+   fun:_xcb_out_send
+   fun:_xcb_out_flush_to
+   fun:xcb_flush
+   fun:_ZN10QXcbWindow4hideEv
+   fun:_ZN7QWindow10setVisibleEb
+   fun:_ZN7QWindow7destroyEv
+   fun:_ZN7QWindow5eventEP6QEvent
+   fun:_ZN12QQuickWindow5eventEP6QEvent
+   fun:_ZN19QApplicationPrivate13notify_helperEP7QObjectP6QEvent
+   fun:_ZN12QApplication6notifyEP7QObjectP6QEvent
+   fun:_ZN16QCoreApplication15notifyInternal2EP7QObjectP6QEvent
+   fun:_ZN22QGuiApplicationPrivate17processCloseEventEPN29QWindowSystemInterfacePrivate10CloseEventE
+   fun:_ZN22QGuiApplicationPrivate24processWindowSystemEventEPN29QWindowSystemInterfacePrivate17WindowSystemEventE
+   fun:_ZN22QWindowSystemInterface22sendWindowSystemEventsE6QFlagsIN10QEventLoop17ProcessEventsFlagEE
+   obj:*libQt5XcbQpa.so*
+   fun:g_main_context_dispatch
+   obj:*libglib-2.0.so*
+   fun:g_main_context_iteration
+   fun:_ZN20QEventDispatcherGlib13processEventsE6QFlagsIN10QEventLoop17ProcessEventsFlagEE
+   fun:_ZN10QEventLoop4execE6QFlagsINS_17ProcessEventsFlagEE
+   fun:_ZN16QCoreApplication4execEv
+   fun:main
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   writev(vector[...])
+   obj:*libc-2.23.so*
+   fun:_xcb_conn_wait
+   fun:_xcb_out_send
+   fun:_xcb_out_flush_to
+   fun:xcb_flush
+   fun:_ZN10QXcbWindow4hideEv
+   fun:_ZN7QWindow10setVisibleEb
+   fun:_ZN14QWidgetPrivate8hide_sysEv
+   fun:_ZN14QWidgetPrivate11hide_helperEv
+   fun:_ZN7QWidget10setVisibleEb
+   fun:_ZN14QWidgetPrivate12close_helperENS_9CloseModeE
+   obj:*libQt5Widgets.so*
+   fun:_ZN7QObject5eventEP6QEvent
+   fun:_ZN7QWidget5eventEP6QEvent
+   fun:_ZN6QFrame5eventEP6QEvent
+   fun:_ZN19QApplicationPrivate13notify_helperEP7QObjectP6QEvent
+   fun:_ZN12QApplication6notifyEP7QObjectP6QEvent
+   fun:_ZN16QCoreApplication15notifyInternal2EP7QObjectP6QEvent
+   fun:_ZN14QTimerInfoList14activateTimersEv
+   obj:*libQt5Core.so*
+   fun:g_main_context_dispatch
+   obj:*libglib-2.0.so*
    fun:g_main_context_iteration
    fun:_ZN20QEventDispatcherGlib13processEventsE6QFlagsIN10QEventLoop17ProcessEventsFlagEE
 }
