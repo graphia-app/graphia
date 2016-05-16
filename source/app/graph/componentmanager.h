@@ -91,6 +91,7 @@ private:
     mutable std::recursive_mutex _updateMutex;
     bool _debugPaused = false;
 
+    std::mutex _componentArraysMutex;
     std::unordered_set<GraphArray*> _componentArrays;
 
     bool _debug = false;
@@ -105,6 +106,9 @@ private:
     ComponentIdSet assignConnectedElementsComponentId(const Graph* graph, NodeId rootId, ComponentId componentId,
                                                       NodeArray<ComponentId>& nodesComponentId,
                                                       EdgeArray<ComponentId>& edgesComponentId);
+
+    void insertComponentArray(GraphArray* componentArray);
+    void eraseComponentArray(GraphArray* componentArray);
 
 private slots:
     void onGraphChanged(const Graph* graph);

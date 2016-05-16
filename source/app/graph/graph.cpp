@@ -122,6 +122,30 @@ void Graph::dumpToQDebug(int detail) const
     }
 }
 
+void Graph::insertNodeArray(GraphArray* nodeArray) const
+{
+    std::unique_lock<std::mutex> lock(_nodeArraysMutex);
+    _nodeArrays.insert(nodeArray);
+}
+
+void Graph::eraseNodeArray(GraphArray* nodeArray) const
+{
+    std::unique_lock<std::mutex> lock(_nodeArraysMutex);
+    _nodeArrays.erase(nodeArray);
+}
+
+void Graph::insertEdgeArray(GraphArray* edgeArray) const
+{
+    std::unique_lock<std::mutex> lock(_edgeArraysMutex);
+    _edgeArrays.insert(edgeArray);
+}
+
+void Graph::eraseEdgeArray(GraphArray* edgeArray) const
+{
+    std::unique_lock<std::mutex> lock(_edgeArraysMutex);
+    _edgeArrays.erase(edgeArray);
+}
+
 int Graph::numComponentArrays() const
 {
     if(_componentManager)
@@ -133,13 +157,13 @@ int Graph::numComponentArrays() const
 void Graph::insertComponentArray(GraphArray* componentArray) const
 {
     if(_componentManager)
-        _componentManager->_componentArrays.insert(componentArray);
+        _componentManager->insertComponentArray(componentArray);
 }
 
 void Graph::eraseComponentArray(GraphArray* componentArray) const
 {
     if(_componentManager)
-        _componentManager->_componentArrays.erase(componentArray);
+        _componentManager->eraseComponentArray(componentArray);
 }
 
 NodeId Graph::nextNodeId() const

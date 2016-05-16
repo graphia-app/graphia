@@ -217,7 +217,9 @@ private:
     NodeId _nextNodeId;
     EdgeId _nextEdgeId;
 
+    mutable std::mutex _nodeArraysMutex;
     mutable std::unordered_set<GraphArray*> _nodeArrays;
+    mutable std::mutex _edgeArraysMutex;
     mutable std::unordered_set<GraphArray*> _edgeArrays;
 
     std::unique_ptr<ComponentManager> _componentManager;
@@ -226,6 +228,12 @@ private:
     mutable QString _phase;
     mutable QString _subPhase;
     GraphConsistencyChecker _graphConsistencyChecker;
+
+    void insertNodeArray(GraphArray* nodeArray) const;
+    void eraseNodeArray(GraphArray* nodeArray) const;
+
+    void insertEdgeArray(GraphArray* edgeArray) const;
+    void eraseEdgeArray(GraphArray* edgeArray) const;
 
     int numComponentArrays() const;
     void insertComponentArray(GraphArray* componentArray) const;

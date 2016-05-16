@@ -202,26 +202,26 @@ public:
         GenericGraphArray<NodeId, Element, Locking>(graph)
     {
         this->resize(graph.nextNodeId());
-        graph._nodeArrays.insert(this);
+        graph.insertNodeArray(this);
     }
 
     NodeArray(const Graph& graph, const Element& defaultValue) :
         GenericGraphArray<NodeId, Element, Locking>(graph, defaultValue)
     {
         this->resize(graph.nextNodeId());
-        graph._nodeArrays.insert(this);
+        graph.insertNodeArray(this);
     }
 
     NodeArray(const NodeArray& other) :
         GenericGraphArray<NodeId, Element, Locking>(other)
     {
-        this->_graph->_nodeArrays.insert(this);
+        this->_graph->insertNodeArray(this);
     }
 
     NodeArray(NodeArray&& other) :
         GenericGraphArray<NodeId, Element, Locking>(std::move(other))
     {
-        this->_graph->_nodeArrays.insert(this);
+        this->_graph->insertNodeArray(this);
     }
 
     NodeArray& operator=(const NodeArray& other)
@@ -239,7 +239,7 @@ public:
     ~NodeArray()
     {
         if(this->_graph != nullptr)
-            this->_graph->_nodeArrays.erase(this);
+            this->_graph->eraseNodeArray(this);
     }
 };
 
@@ -251,26 +251,26 @@ public:
         GenericGraphArray<EdgeId, Element, Locking>(graph)
     {
         this->resize(graph.nextEdgeId());
-        graph._edgeArrays.insert(this);
+        graph.insertEdgeArray(this);
     }
 
     EdgeArray(const Graph& graph, const Element& defaultValue) :
         GenericGraphArray<EdgeId, Element, Locking>(graph, defaultValue)
     {
         this->resize(graph.nextEdgeId());
-        graph._edgeArrays.insert(this);
+        graph.insertEdgeArray(this);
     }
 
     EdgeArray(const EdgeArray& other) :
         GenericGraphArray<EdgeId, Element, Locking>(other)
     {
-        this->_graph->_edgeArrays.insert(this);
+        this->_graph->insertEdgeArray(this);
     }
 
     EdgeArray(EdgeArray&& other) :
         GenericGraphArray<EdgeId, Element, Locking>(std::move(other))
     {
-        this->_graph->_edgeArrays.insert(this);
+        this->_graph->insertEdgeArray(this);
     }
 
     EdgeArray& operator=(const EdgeArray& other)
@@ -288,7 +288,7 @@ public:
     ~EdgeArray()
     {
         if(this->_graph != nullptr)
-            this->_graph->_edgeArrays.erase(this);
+            this->_graph->eraseEdgeArray(this);
     }
 };
 

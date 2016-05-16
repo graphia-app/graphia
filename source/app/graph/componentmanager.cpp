@@ -74,6 +74,18 @@ ComponentIdSet ComponentManager::assignConnectedElementsComponentId(const Graph*
     return oldComponentIdsAffected;
 }
 
+void ComponentManager::insertComponentArray(GraphArray* componentArray)
+{
+    std::unique_lock<std::mutex> lock(_componentArraysMutex);
+    _componentArrays.insert(componentArray);
+}
+
+void ComponentManager::eraseComponentArray(GraphArray* componentArray)
+{
+    std::unique_lock<std::mutex> lock(_componentArraysMutex);
+    _componentArrays.erase(componentArray);
+}
+
 void ComponentManager::update(const Graph* graph)
 {
     if(_debug) qDebug() << "ComponentManager::update begins" << this;
