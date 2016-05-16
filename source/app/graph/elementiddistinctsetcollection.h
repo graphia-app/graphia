@@ -362,26 +362,14 @@ public:
     class iterator : public iterator_base
     {
     public:
-#if __cplusplus >= 201103L
         using iterator_base::iterator_base;
-#else
-        iterator() : iterator_base() {}
-        explicit iterator(const ElementIdDistinctSet* set) : iterator_base(set) {}
-#endif
-
         typename iterator_base::reference operator*() const { return this->_p; }
     };
 
     class const_iterator : public iterator_base
     {
     public:
-#if __cplusplus >= 201103L
         using iterator_base::iterator_base;
-#else
-        const_iterator() : iterator_base() {}
-        explicit const_iterator(const ElementIdDistinctSet* set) : iterator_base(set) {}
-#endif
-
         const typename iterator_base::reference operator*() const { return this->_p; }
     };
 
@@ -536,26 +524,14 @@ public:
     class iterator : public iterator_base
     {
     public:
-#if __cplusplus >= 201103L
         using iterator_base::iterator_base;
-#else
-        iterator() : iterator_base() {}
-        explicit iterator(const ElementIdDistinctSets* sets) : iterator_base(sets) {}
-#endif
-
         typename iterator_base::reference operator*() const { return this->_p; }
     };
 
     class const_iterator : public iterator_base
     {
     public:
-#if __cplusplus >= 201103L
         using iterator_base::iterator_base;
-#else
-        const_iterator() : iterator_base() {}
-        explicit const_iterator(const ElementIdDistinctSets* sets) : iterator_base(sets) {}
-#endif
-
         const typename iterator_base::reference operator*() const { return this->_p; }
     };
 

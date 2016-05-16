@@ -54,38 +54,9 @@ template<typename T> QDebug operator<<(QDebug d, const ElementId<T>& id)
     return d;
 }
 
-class NodeId : public ElementId<NodeId>
-{
-#if __cplusplus >= 201103L
-    using ElementId::ElementId;
-#else
-public:
-    NodeId() : ElementId() {}
-    NodeId(int value) : ElementId(value) {}
-#endif
-};
-
-class EdgeId : public ElementId<EdgeId>
-{
-#if __cplusplus >= 201103L
-    using ElementId::ElementId;
-#else
-public:
-    EdgeId() : ElementId() {}
-    EdgeId(int value) : ElementId(value) {}
-#endif
-};
-
-class ComponentId : public ElementId<ComponentId>
-{
-#if __cplusplus >= 201103L
-    using ElementId::ElementId;
-#else
-public:
-    ComponentId() : ElementId() {}
-    ComponentId(int value) : ElementId(value) {}
-#endif
-};
+class NodeId :      public ElementId<NodeId>      { using ElementId::ElementId; };
+class EdgeId :      public ElementId<EdgeId>      { using ElementId::ElementId; };
+class ComponentId : public ElementId<ComponentId> { using ElementId::ElementId; };
 
 namespace std
 {
