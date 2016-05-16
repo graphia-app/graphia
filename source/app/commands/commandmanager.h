@@ -110,6 +110,8 @@ private:
 
     DeferredExecutor _deferredExecutor;
 
+    int _debug = 0;
+
 private slots:
     void executeReal(std::shared_ptr<Command> command, bool irreversible);
 

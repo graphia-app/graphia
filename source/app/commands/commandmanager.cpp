@@ -2,6 +2,8 @@
 
 #include "../utils/utils.h"
 
+#include <QDebug>
+
 #include <thread>
 
 CommandManager::CommandManager() :
@@ -11,6 +13,8 @@ CommandManager::CommandManager() :
     qRegisterMetaType<std::shared_ptr<Command>>("std::shared_ptr<Command>");
     qRegisterMetaType<CommandAction>("CommandAction");
     connect(this, &CommandManager::commandCompleted, this, &CommandManager::onCommandCompleted);
+
+    _debug = qgetenv("COMMAND_DEBUG").toInt();
 }
 
 CommandManager::~CommandManager()
@@ -39,6 +43,9 @@ void CommandManager::executeReal(std::shared_ptr<Command> command, bool irrevers
 {
     if(_lock.owns_lock())
     {
+        if(_debug > 0)
+            qDebug() << "enqueuing command" << command->description();
+
         // Something is already executing, do the new command once that is finished
         _deferredExecutor.enqueue([this, command, irreversible] { executeReal(command, irreversible); });
         return;
@@ -73,6 +80,8 @@ void CommandManager::executeReal(std::shared_ptr<Command> command, bool irrevers
 
     _busy = true;
     emit busyChanged();
+    if(_debug > 0)
+        qDebug() << "Command started" << command->description();
 
     if(command->asynchronous())
         executeAsynchronous(command, command->verb(), executeCommand);
@@ -249,8 +258,16 @@ void CommandManager::onCommandCompleted(Command* command, const QString&, Comman
     Q_ASSERT(_lock.owns_lock());
     _lock.unlock();
 
+    QString description;
+
     if(command != nullptr)
+    {
         command->postExecute();
+        description = command->description();
+    }
+
+    if(_debug > 0)
+        qDebug() << "Command completed" << description;
 
     if(_deferredExecutor.hasTasks())
         _deferredExecutor.executeOne();
