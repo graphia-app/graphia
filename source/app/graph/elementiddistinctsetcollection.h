@@ -93,6 +93,22 @@ public:
             highListNode._next = highId;
             highListNode._opposite = lowId;
         }
+        else if(lowListNode.isHead(lowId) && highListNode.isHead(highId))
+        {
+            // Merge two existing lists together
+            auto& tailOne = _list[lowListNode._opposite];
+            tailOne._opposite.setToNull();
+            tailOne._next = highId;
+
+            auto& tailTwo = _list[highListNode._opposite];
+            tailTwo._opposite = lowId;
+
+            lowListNode._opposite = highListNode._opposite;
+
+            highListNode._opposite.setToNull();
+            highListNode._prev = lowListNode._opposite;
+
+        }
         else if(highListNode.isHead(highId))
         {
             Q_ASSERT(!highListNode._opposite.isNull());
