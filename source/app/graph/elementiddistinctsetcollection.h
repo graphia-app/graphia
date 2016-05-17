@@ -103,11 +103,10 @@ public:
             auto& tailTwo = _list[highListNode._opposite];
             tailTwo._opposite = lowId;
 
+            highListNode._prev = lowListNode._opposite;
             lowListNode._opposite = highListNode._opposite;
 
             highListNode._opposite.setToNull();
-            highListNode._prev = lowListNode._opposite;
-
         }
         else if(highListNode.isHead(highId))
         {
