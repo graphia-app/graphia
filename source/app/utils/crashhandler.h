@@ -21,7 +21,7 @@ public:
     CrashHandler();
     virtual ~CrashHandler();
 
-    const platform_char* crashReporterExecutableName() { return _crashReporterExecutableName; }
+    const platform_char* crashReporterExecutableName() const { return _crashReporterExecutableName; }
 
 private:
     std::unique_ptr<google_breakpad::ExceptionHandler> _handler;

@@ -47,7 +47,7 @@ public:
     {
         samples = std::min(samples, _size);
 
-        T result;
+        T result = T();
         float reciprocal = 1.0f / samples;
 
         for(auto i = _size - samples; i < _size; i++)

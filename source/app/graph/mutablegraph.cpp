@@ -88,7 +88,7 @@ NodeId MutableGraph::addNode(NodeId nodeId)
     beginTransaction();
 
     // The requested ID is not available or is out of range, so resize and append
-    if(nodeId >= nextNodeId() || (nodeId < nextNodeId() && _n._nodeIdsInUse[nodeId]))
+    if(nodeId >= nextNodeId() || nextNodeId() && _n._nodeIdsInUse[nodeId])
     {
         nodeId = nextNodeId();
         reserveNodeId(nodeId);
@@ -228,7 +228,7 @@ EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     beginTransaction();
 
     // The requested ID is not available or is out of range, so resize and append
-    if(edgeId >= nextEdgeId() || (edgeId < nextEdgeId() && _e._edgeIdsInUse[edgeId]))
+    if(edgeId >= nextEdgeId() || _e._edgeIdsInUse[edgeId])
     {
         edgeId = nextEdgeId();
         reserveEdgeId(edgeId);
