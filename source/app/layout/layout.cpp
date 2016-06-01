@@ -109,6 +109,7 @@ void LayoutThread::resume()
 void LayoutThread::start()
 {
     _started = true;
+    _paused = false;
 
     if(_thread.joinable())
         _thread.join();
@@ -191,12 +192,6 @@ void LayoutThread::run()
 
         _layoutPotentiallyRequired = false;
 
-        if(_paused)
-        {
-            _paused = false;
-            emit pausedChanged();
-        }
-
         if(_stop)
             break;
 
@@ -211,6 +206,9 @@ void LayoutThread::run()
             uncancel();
             _waitForPause.notify_all();
             _waitForResume.wait(lock);
+
+            _paused = false;
+            emit pausedChanged();
 
             if(_debug) qDebug() << "Layout resumed";
         }
