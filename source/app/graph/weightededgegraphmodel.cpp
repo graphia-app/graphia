@@ -7,7 +7,7 @@ WeightedEdgeGraphModel::WeightedEdgeGraphModel(const QString &name) :
     GraphModel(name),
     _edgeWeights(mutableGraph())
 {
-    connect(&transformedGraph(), &Graph::graphChanged, this, &WeightedEdgeGraphModel::onGraphChanged, Qt::DirectConnection);
+    connect(&graph(), &Graph::graphChanged, this, &WeightedEdgeGraphModel::onGraphChanged, Qt::DirectConnection);
 }
 
 void WeightedEdgeGraphModel::setEdgeWeight(EdgeId edgeId, float weight)

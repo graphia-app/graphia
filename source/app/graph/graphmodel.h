@@ -95,8 +95,6 @@ public:
     QStringList avaliableConditionFnOps(const QString& dataFieldName) const;
 
 protected:
-    TransformedGraph& transformedGraph() { return _transformedGraph; }
-
     DataField& addDataField(const QString& name);
     DataField& mutableDataFieldByName(const QString& name);
 
