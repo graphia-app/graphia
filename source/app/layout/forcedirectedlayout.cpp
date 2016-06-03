@@ -106,7 +106,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
             if(shouldCancel())
                 return;
 
-            const Edge& edge = graphComponent().graph().edgeById(edgeId);
+            const IEdge& edge = graphComponent().graph().edgeById(edgeId);
             if(!edge.isLoop())
             {
                 const QVector3D difference = positions().get(edge.targetId()) - positions().get(edge.sourceId());

@@ -1,5 +1,5 @@
 #include "graph.h"
-#include "grapharray.h"
+#include "igrapharray.h"
 #include "componentmanager.h"
 #include "../utils/utils.h"
 
@@ -122,25 +122,25 @@ void Graph::dumpToQDebug(int detail) const
     }
 }
 
-void Graph::insertNodeArray(GraphArray* nodeArray) const
+void Graph::insertNodeArray(IGraphArray* nodeArray) const
 {
     std::unique_lock<std::mutex> lock(_nodeArraysMutex);
     _nodeArrays.insert(nodeArray);
 }
 
-void Graph::eraseNodeArray(GraphArray* nodeArray) const
+void Graph::eraseNodeArray(IGraphArray* nodeArray) const
 {
     std::unique_lock<std::mutex> lock(_nodeArraysMutex);
     _nodeArrays.erase(nodeArray);
 }
 
-void Graph::insertEdgeArray(GraphArray* edgeArray) const
+void Graph::insertEdgeArray(IGraphArray* edgeArray) const
 {
     std::unique_lock<std::mutex> lock(_edgeArraysMutex);
     _edgeArrays.insert(edgeArray);
 }
 
-void Graph::eraseEdgeArray(GraphArray* edgeArray) const
+void Graph::eraseEdgeArray(IGraphArray* edgeArray) const
 {
     std::unique_lock<std::mutex> lock(_edgeArraysMutex);
     _edgeArrays.erase(edgeArray);
@@ -154,13 +154,13 @@ int Graph::numComponentArrays() const
     return 0;
 }
 
-void Graph::insertComponentArray(GraphArray* componentArray) const
+void Graph::insertComponentArray(IGraphArray* componentArray) const
 {
     if(_componentManager)
         _componentManager->insertComponentArray(componentArray);
 }
 
-void Graph::eraseComponentArray(GraphArray* componentArray) const
+void Graph::eraseComponentArray(IGraphArray* componentArray) const
 {
     if(_componentManager)
         _componentManager->eraseComponentArray(componentArray);

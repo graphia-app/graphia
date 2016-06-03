@@ -92,7 +92,7 @@ private:
     bool _debugPaused = false;
 
     std::mutex _componentArraysMutex;
-    std::unordered_set<GraphArray*> _componentArrays;
+    std::unordered_set<IGraphArray*> _componentArrays;
 
     bool _debug = false;
 
@@ -107,8 +107,8 @@ private:
                                                       NodeArray<ComponentId>& nodesComponentId,
                                                       EdgeArray<ComponentId>& edgesComponentId);
 
-    void insertComponentArray(GraphArray* componentArray);
-    void eraseComponentArray(GraphArray* componentArray);
+    void insertComponentArray(IGraphArray* componentArray);
+    void eraseComponentArray(IGraphArray* componentArray);
 
 private slots:
     void onGraphChanged(const Graph* graph);

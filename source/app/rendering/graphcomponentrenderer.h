@@ -65,7 +65,7 @@ public:
 
     ComponentId componentId() const { return _componentId; }
     const std::vector<NodeId>& nodeIds() const { return _nodeIds; }
-    const std::vector<Edge> edges() const { return _edges; }
+    const std::vector<const IEdge*> edges() const { return _edges; }
 
     NodeId focusNodeId() const;
     QVector3D focusPosition() const;
@@ -141,7 +141,7 @@ private:
 
     ComponentId _componentId;
     std::vector<NodeId> _nodeIds;
-    std::vector<Edge> _edges;
+    std::vector<const IEdge*> _edges;
 
     float _fovx = 0.0f;
     float _fovy = 0.0f;

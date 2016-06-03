@@ -33,7 +33,7 @@ struct NodeVisual
     QColor _color;
 };
 
-typedef NodeArray<NodeVisual> NodeVisuals;
+using NodeVisuals = NodeArray<NodeVisual>;
 
 struct EdgeVisual
 {
@@ -47,7 +47,7 @@ struct EdgeVisual
     QColor _color;
 };
 
-typedef EdgeArray<EdgeVisual> EdgeVisuals;
+using EdgeVisuals = EdgeArray<EdgeVisual>;
 
 class GraphModel : public QObject
 {

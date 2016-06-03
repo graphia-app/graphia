@@ -1,30 +1,14 @@
 #ifndef GRAPHARRAY_H
 #define GRAPHARRAY_H
 
-#include "graph.h"
-#include "../utils/utils.h"
+#include "igrapharray.h"
+#include "igraph.h"
 
-#include <QObject>
-
-#include <memory>
 #include <vector>
 #include <mutex>
 
-class GraphArray
-{
-public:
-    virtual ~GraphArray() {}
-
-protected:
-    friend Graph;
-    friend ComponentManager;
-
-    virtual void resize(int size) = 0;
-    virtual void invalidate() = 0;
-};
-
 template<typename Index, typename Element, typename Locking = void>
-class GenericGraphArray : public GraphArray
+class GenericGraphArray : public IGraphArray
 {
 private:
     static_assert(std::is_nothrow_move_constructible<Element>::value,
@@ -33,17 +17,17 @@ private:
     using MaybeLock = u::MaybeLock<std::recursive_mutex, Locking>;
 
 protected:
-    const Graph* _graph;
+    const IGraph* _graph;
     std::vector<Element> _array;
     mutable std::recursive_mutex _mutex;
     Element _defaultValue;
 
 public:
-    explicit GenericGraphArray(const Graph& graph) :
+    explicit GenericGraphArray(const IGraph& graph) :
         _graph(&graph), _defaultValue()
     {}
 
-    GenericGraphArray(const Graph& graph, const Element& defaultValue) :
+    GenericGraphArray(const IGraph& graph, const Element& defaultValue) :
         _graph(&graph), _defaultValue(defaultValue)
     {
         fill(defaultValue);
@@ -198,14 +182,14 @@ template<typename Element, typename Locking = void>
 class NodeArray : public GenericGraphArray<NodeId, Element, Locking>
 {
 public:
-    explicit NodeArray(const Graph& graph) :
+    explicit NodeArray(const IGraph& graph) :
         GenericGraphArray<NodeId, Element, Locking>(graph)
     {
         this->resize(graph.nextNodeId());
         graph.insertNodeArray(this);
     }
 
-    NodeArray(const Graph& graph, const Element& defaultValue) :
+    NodeArray(const IGraph& graph, const Element& defaultValue) :
         GenericGraphArray<NodeId, Element, Locking>(graph, defaultValue)
     {
         this->resize(graph.nextNodeId());
@@ -247,14 +231,14 @@ template<typename Element, typename Locking = void>
 class EdgeArray : public GenericGraphArray<EdgeId, Element, Locking>
 {
 public:
-    explicit EdgeArray(const Graph& graph) :
+    explicit EdgeArray(const IGraph& graph) :
         GenericGraphArray<EdgeId, Element, Locking>(graph)
     {
         this->resize(graph.nextEdgeId());
         graph.insertEdgeArray(this);
     }
 
-    EdgeArray(const Graph& graph, const Element& defaultValue) :
+    EdgeArray(const IGraph& graph, const Element& defaultValue) :
         GenericGraphArray<EdgeId, Element, Locking>(graph, defaultValue)
     {
         this->resize(graph.nextEdgeId());
@@ -296,18 +280,18 @@ template<typename Element, typename Locking = void>
 class ComponentArray : public GenericGraphArray<ComponentId, Element, Locking>
 {
 public:
-    explicit ComponentArray(const Graph& graph) :
+    explicit ComponentArray(const IGraph& graph) :
         GenericGraphArray<ComponentId, Element, Locking>(graph)
     {
-        Q_ASSERT(graph._componentManager != nullptr);
+        Q_ASSERT(graph.isComponentManaged());
         this->resize(graph.numComponentArrays());
         graph.insertComponentArray(this);
     }
 
-    ComponentArray(const Graph& graph, const Element& defaultValue) :
+    ComponentArray(const IGraph& graph, const Element& defaultValue) :
         GenericGraphArray<ComponentId, Element, Locking>(graph, defaultValue)
     {
-        Q_ASSERT(graph._componentManager != nullptr);
+        Q_ASSERT(graph.isComponentManaged());
         this->resize(graph.numComponentArrays());
         graph.insertComponentArray(this);
     }
@@ -315,14 +299,14 @@ public:
     ComponentArray(const ComponentArray& other) :
         GenericGraphArray<ComponentId, Element, Locking>(other)
     {
-        Q_ASSERT(this->_graph->_componentManager != nullptr);
+        Q_ASSERT(this->_graph->isComponentManaged());
         this->_graph->insertComponentArray(this);
     }
 
     ComponentArray(ComponentArray&& other) :
         GenericGraphArray<ComponentId, Element, Locking>(std::move(other))
     {
-        Q_ASSERT(this->_graph->_componentManager != nullptr);
+        Q_ASSERT(this->_graph->isComponentManaged());
         this->_graph->insertComponentArray(this);
     }
 

@@ -96,7 +96,7 @@ void GraphComponentRenderer::synchronise()
     auto component = _graphModel->graph().componentById(_componentId);
     _nodeIds = component->nodeIds();
     for(auto edgeId : component->edgeIds())
-        _edges.emplace_back(_graphModel->graph().edgeById(edgeId));
+        _edges.emplace_back(&_graphModel->graph().edgeById(edgeId));
 }
 
 void GraphComponentRenderer::cloneViewDataFrom(const GraphComponentRenderer& other)

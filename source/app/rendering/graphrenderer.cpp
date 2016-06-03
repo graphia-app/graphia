@@ -378,11 +378,11 @@ void GraphRenderer::updateGPUDataIfRequired()
 
         for(auto& edge : componentRenderer->edges())
         {
-            if(_hiddenEdges.get(edge.id()) || _hiddenNodes.get(edge.sourceId()) || _hiddenNodes.get(edge.targetId()))
+            if(_hiddenEdges.get(edge->id()) || _hiddenNodes.get(edge->sourceId()) || _hiddenNodes.get(edge->targetId()))
                 continue;
 
-            const QVector3D& sourcePosition = scaledAndSmoothedNodePositions[edge.sourceId()];
-            const QVector3D& targetPosition = scaledAndSmoothedNodePositions[edge.targetId()];
+            const QVector3D& sourcePosition = scaledAndSmoothedNodePositions[edge->sourceId()];
+            const QVector3D& targetPosition = scaledAndSmoothedNodePositions[edge->targetId()];
 
             GPUGraphData::EdgeData edgeData;
             edgeData._sourcePosition[0] = sourcePosition.x();
@@ -392,10 +392,10 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._targetPosition[1] = targetPosition.y();
             edgeData._targetPosition[2] = targetPosition.z();
             edgeData._component = componentIndex;
-            edgeData._size = edgeVisuals[edge.id()]._size;
-            edgeData._color[0] = edgeVisuals[edge.id()]._color.redF();
-            edgeData._color[1] = edgeVisuals[edge.id()]._color.greenF();
-            edgeData._color[2] = edgeVisuals[edge.id()]._color.blueF();
+            edgeData._size = edgeVisuals[edge->id()]._size;
+            edgeData._color[0] = edgeVisuals[edge->id()]._color.redF();
+            edgeData._color[1] = edgeVisuals[edge->id()]._color.greenF();
+            edgeData._color[2] = edgeVisuals[edge->id()]._color.blueF();
             edgeData._outlineColor[0] = deselectedOutLineColor.redF();
             edgeData._outlineColor[1] = deselectedOutLineColor.greenF();
             edgeData._outlineColor[2] = deselectedOutLineColor.blueF();

@@ -22,14 +22,14 @@ public:
 
     const std::vector<NodeId>& nodeIds() const { return _target.nodeIds(); }
     int numNodes() const { return _target.numNodes(); }
-    const Node& nodeById(NodeId nodeId) const { return _target.nodeById(nodeId); }
+    const INode& nodeById(NodeId nodeId) const { return _target.nodeById(nodeId); }
     bool containsNodeId(NodeId nodeId) const { return _target.containsNodeId(nodeId); }
     NodeIdDistinctSetCollection::Type typeOf(NodeId nodeId) const { return _target.typeOf(nodeId); }
     ConstNodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const { return _target.mergedNodeIdsForNodeId(nodeId); }
 
     const std::vector<EdgeId>& edgeIds() const { return _target.edgeIds(); }
     int numEdges() const { return _target.numEdges(); }
-    const Edge& edgeById(EdgeId edgeId) const { return _target.edgeById(edgeId); }
+    const IEdge& edgeById(EdgeId edgeId) const { return _target.edgeById(edgeId); }
     bool containsEdgeId(EdgeId edgeId) const { return _target.containsEdgeId(edgeId); }
     EdgeIdDistinctSetCollection::Type typeOf(EdgeId edgeId) const { return _target.typeOf(edgeId); }
     ConstEdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const { return _target.mergedEdgeIdsForEdgeId(edgeId); }
@@ -38,7 +38,7 @@ public:
 
     NodeId addNode() { return _target.addNode(); }
     NodeId addNode(NodeId nodeId) { return _target.addNode(nodeId); }
-    NodeId addNode(const Node& node) { return _target.addNode(node); }
+    NodeId addNode(const INode& node) { return _target.addNode(node); }
     template<typename C> void addNodes(const C& nodeIds) { addNodes(nodeIds); }
 
     void removeNode(NodeId nodeId) { _target.removeNode(nodeId); }
@@ -46,7 +46,7 @@ public:
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId) { return _target.addEdge(sourceId, targetId); }
     EdgeId addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId) { return _target.addEdge(edgeId, sourceId, targetId); }
-    EdgeId addEdge(const Edge& edge) { return _target.addEdge(edge); }
+    EdgeId addEdge(const IEdge& edge) { return _target.addEdge(edge); }
     template<typename C> void addEdges(const C& edges) { _target.addEdges(edges); }
 
     void removeEdge(EdgeId edgeId) { _target.removeEdge(edgeId); }

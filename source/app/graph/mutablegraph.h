@@ -2,6 +2,7 @@
 #define MUTABLEGRAPH_H
 
 #include "graph.h"
+#include "imutablegraph.h"
 
 #include <deque>
 #include <mutex>
@@ -30,7 +31,7 @@ public:
     }
 };
 
-class MutableGraph : public Graph
+class MutableGraph : public Graph, public IMutableGraph
 {
     Q_OBJECT
 
@@ -109,14 +110,14 @@ public:
 
     const std::vector<NodeId>& nodeIds() const;
     int numNodes() const;
-    const Node& nodeById(NodeId nodeId) const;
+    const INode& nodeById(NodeId nodeId) const;
     bool containsNodeId(NodeId nodeId) const;
     NodeIdDistinctSetCollection::Type typeOf(NodeId nodeId) const;
     ConstNodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const;
 
     NodeId addNode();
     NodeId addNode(NodeId nodeId);
-    NodeId addNode(const Node& node);
+    NodeId addNode(const INode& node);
     template<typename C> void addNodes(const C& nodeIds)
     {
         if(nodeIds.empty())
@@ -146,7 +147,7 @@ public:
 
     const std::vector<EdgeId>& edgeIds() const;
     int numEdges() const;
-    const Edge& edgeById(EdgeId edgeId) const;
+    const IEdge& edgeById(EdgeId edgeId) const;
     bool containsEdgeId(EdgeId edgeId) const;
     EdgeIdDistinctSetCollection::Type typeOf(EdgeId edgeId) const;
     ConstEdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const;
@@ -176,7 +177,7 @@ public:
 
     EdgeId addEdge(NodeId sourceId, NodeId targetId);
     EdgeId addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId);
-    EdgeId addEdge(const Edge& edge);
+    EdgeId addEdge(const IEdge& edge);
     template<typename C> void addEdges(const C& edges)
     {
         if(edges.empty())

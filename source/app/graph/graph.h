@@ -1,6 +1,7 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+#include "igraph.h"
 #include "elementid.h"
 #include "elementiddistinctsetcollection.h"
 #include "graphconsistencychecker.h"
@@ -13,13 +14,12 @@
 #include <unordered_set>
 #include <memory>
 
-class GraphArray;
 class GraphComponent;
 class ComponentManager;
 class ComponentSplitSet;
 class ComponentMergeSet;
 
-class Node
+class Node : public INode
 {
     friend class MutableGraph;
 
@@ -29,38 +29,11 @@ private:
     EdgeIdDistinctSet _outEdgeIds;
 
 public:
-    Node() {}
-
-    Node(const Node& other) :
-        _id(other._id),
-        _inEdgeIds(other._inEdgeIds),
-        _outEdgeIds(other._outEdgeIds)
-    {}
-
-    Node(Node&& other) noexcept :
-        _id(other._id),
-        _inEdgeIds(other._inEdgeIds),
-        _outEdgeIds(other._outEdgeIds)
-    {}
-
-    Node& operator=(const Node& other)
-    {
-        if(this != &other)
-        {
-            _id                 = other._id;
-            _inEdgeIds          = other._inEdgeIds;
-            _outEdgeIds         = other._outEdgeIds;
-        }
-
-        return *this;
-    }
-
     int degree() const { return _inEdgeIds.size() + _outEdgeIds.size(); }
-
     NodeId id() const { return _id; }
 };
 
-class Edge
+class Edge : public IEdge
 {
     friend class MutableGraph;
 
@@ -72,25 +45,25 @@ private:
 public:
     Edge() {}
 
-    Edge(const Edge& other) :
-        _id(other._id),
-        _sourceId(other._sourceId),
-        _targetId(other._targetId)
+    Edge(const IEdge& other) :
+        _id(other.id()),
+        _sourceId(other.sourceId()),
+        _targetId(other.targetId())
     {}
 
-    Edge(Edge&& other) noexcept :
-        _id(other._id),
-        _sourceId(other._sourceId),
-        _targetId(other._targetId)
+    Edge(IEdge&& other) noexcept :
+        _id(other.id()),
+        _sourceId(other.sourceId()),
+        _targetId(other.targetId())
     {}
 
-    Edge& operator=(const Edge& other)
+    Edge& operator=(const IEdge& other)
     {
         if(this != &other)
         {
-            _id         = other._id;
-            _sourceId   = other._sourceId;
-            _targetId   = other._targetId;
+            _id         = other.id();
+            _sourceId   = other.sourceId();
+            _targetId   = other.targetId();
         }
 
         return *this;
@@ -113,7 +86,7 @@ public:
     EdgeId id() const { return _id; }
 };
 
-class Graph : public QObject
+class Graph : public QObject, public IGraph
 {
     Q_OBJECT
 
@@ -121,19 +94,15 @@ public:
     Graph();
     virtual ~Graph();
 
-    virtual const std::vector<NodeId>& nodeIds() const = 0;
-    virtual int numNodes() const = 0;
-    virtual const Node& nodeById(NodeId nodeId) const = 0;
     NodeId firstNodeId() const;
-    virtual bool containsNodeId(NodeId nodeId) const;
+    bool containsNodeId(NodeId nodeId) const;
+
     virtual NodeIdDistinctSetCollection::Type typeOf(NodeId nodeId) const = 0;
     virtual ConstNodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const = 0;
 
-    virtual const std::vector<EdgeId>& edgeIds() const = 0;
-    virtual int numEdges() const = 0;
-    virtual const Edge& edgeById(EdgeId edgeId) const = 0;
     EdgeId firstEdgeId() const;
-    virtual bool containsEdgeId(EdgeId edgeId) const;
+    bool containsEdgeId(EdgeId edgeId) const;
+
     virtual EdgeIdDistinctSetCollection::Type typeOf(EdgeId edgeId) const = 0;
     virtual ConstEdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const = 0;
 
@@ -218,9 +187,9 @@ private:
     EdgeId _nextEdgeId;
 
     mutable std::mutex _nodeArraysMutex;
-    mutable std::unordered_set<GraphArray*> _nodeArrays;
+    mutable std::unordered_set<IGraphArray*> _nodeArrays;
     mutable std::mutex _edgeArraysMutex;
-    mutable std::unordered_set<GraphArray*> _edgeArrays;
+    mutable std::unordered_set<IGraphArray*> _edgeArrays;
 
     std::unique_ptr<ComponentManager> _componentManager;
 
@@ -229,15 +198,17 @@ private:
     mutable QString _subPhase;
     GraphConsistencyChecker _graphConsistencyChecker;
 
-    void insertNodeArray(GraphArray* nodeArray) const;
-    void eraseNodeArray(GraphArray* nodeArray) const;
+    void insertNodeArray(IGraphArray* nodeArray) const;
+    void eraseNodeArray(IGraphArray* nodeArray) const;
 
-    void insertEdgeArray(GraphArray* edgeArray) const;
-    void eraseEdgeArray(GraphArray* edgeArray) const;
+    void insertEdgeArray(IGraphArray* edgeArray) const;
+    void eraseEdgeArray(IGraphArray* edgeArray) const;
 
     int numComponentArrays() const;
-    void insertComponentArray(GraphArray* componentArray) const;
-    void eraseComponentArray(GraphArray* componentArray) const;
+    void insertComponentArray(IGraphArray* componentArray) const;
+    void eraseComponentArray(IGraphArray* componentArray) const;
+
+    bool isComponentManaged() const { return _componentManager != nullptr; }
 
 protected:
     NodeId nextNodeId() const;

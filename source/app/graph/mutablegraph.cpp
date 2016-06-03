@@ -38,7 +38,7 @@ int MutableGraph::numNodes() const
     return static_cast<int>(_nodeIds.size());
 }
 
-const Node& MutableGraph::nodeById(NodeId nodeId) const
+const INode& MutableGraph::nodeById(NodeId nodeId) const
 {
     Q_ASSERT(_n._nodeIdsInUse[nodeId]);
     return _n._nodes[nodeId];
@@ -107,9 +107,9 @@ NodeId MutableGraph::addNode(NodeId nodeId)
     return nodeId;
 }
 
-NodeId MutableGraph::addNode(const Node& node)
+NodeId MutableGraph::addNode(const INode& node)
 {
-    return addNode(node._id);
+    return addNode(node.id());
 }
 
 void MutableGraph::removeNode(NodeId nodeId)
@@ -145,7 +145,7 @@ int MutableGraph::numEdges() const
     return static_cast<int>(_edgeIds.size());
 }
 
-const Edge& MutableGraph::edgeById(EdgeId edgeId) const
+const IEdge& MutableGraph::edgeById(EdgeId edgeId) const
 {
     Q_ASSERT(_e._edgeIdsInUse[edgeId]);
     return _e._edges[edgeId];
@@ -256,9 +256,9 @@ EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
     return edgeId;
 }
 
-EdgeId MutableGraph::addEdge(const Edge& edge)
+EdgeId MutableGraph::addEdge(const IEdge& edge)
 {
-    return addEdge(edge._id, edge._sourceId, edge._targetId);
+    return addEdge(edge.id(), edge.sourceId(), edge.targetId());
 }
 
 void MutableGraph::removeEdge(EdgeId edgeId)

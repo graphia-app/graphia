@@ -35,6 +35,9 @@ HEADERS += \
     graph/graphmodel.h \
     graph/mutablegraph.h \
     graph/weightededgegraphmodel.h \
+    graph/igraph.h \
+    graph/igrapharray.h \
+    graph/imutablegraph.h \
     layout/barneshuttree.h \
     layout/centreinglayout.h \
     layout/circlepackcomponentlayout.h \

@@ -74,13 +74,13 @@ ComponentIdSet ComponentManager::assignConnectedElementsComponentId(const Graph*
     return oldComponentIdsAffected;
 }
 
-void ComponentManager::insertComponentArray(GraphArray* componentArray)
+void ComponentManager::insertComponentArray(IGraphArray* componentArray)
 {
     std::unique_lock<std::mutex> lock(_componentArraysMutex);
     _componentArrays.insert(componentArray);
 }
 
-void ComponentManager::eraseComponentArray(GraphArray* componentArray)
+void ComponentManager::eraseComponentArray(IGraphArray* componentArray)
 {
     std::unique_lock<std::mutex> lock(_componentArraysMutex);
     _componentArrays.erase(componentArray);
