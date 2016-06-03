@@ -10,12 +10,14 @@
 #include <QRect>
 #include <QColor>
 
+#include <vector>
 #include <memory>
 
 #include <QCoreApplication>
 
 class GraphModel;
 class GraphFileParser;
+class IPlugin;
 
 class Application : public QObject
 {
@@ -62,9 +64,13 @@ private:
     static const int _majorVersion = 1;
     static const int _minorVersion = 0;
 
+    QString _localPluginsDir;
+    std::vector<IPlugin*> _plugins;
+
     FileIdentifier _fileIdentifier;
 
-    QColor textColor() const;
+    void loadPlugins();
+
     QStringList nameFilters() const { return _fileIdentifier.nameFilters(); }
 };
 

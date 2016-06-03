@@ -11,9 +11,15 @@
 
 #include "utils/preferences.h"
 
-#include <memory>
 #include "loading/gmlfileparser.h"
 
+#include "../plugins/iplugin.h"
+
+#include <QPluginLoader>
+#include <QDir>
+#include <QStandardPaths>
+
+#include <memory>
 #include <cmath>
 
 const char* Application::_uri = "com.kajeka";
@@ -21,10 +27,16 @@ const char* Application::_uri = "com.kajeka";
 Application::Application(QObject *parent) :
     QObject(parent)
 {
+    _localPluginsDir = QStandardPaths::writableLocation(
+                QStandardPaths::StandardLocation::AppDataLocation) + "/plugins";
+    QDir().mkpath(_localPluginsDir);
+
     connect(&_fileIdentifier, &FileIdentifier::nameFiltersChanged, this, &Application::nameFiltersChanged);
 
     _fileIdentifier.registerFileType(std::make_shared<GmlFileType>());
     _fileIdentifier.registerFileType(std::make_shared<PairwiseTxtFileType>());
+
+    loadPlugins();
 }
 
 bool Application::parserAndModelForFile(const QUrl& url, const QString& fileTypeName,
@@ -85,4 +97,36 @@ QStringList Application::fileTypesOf(const QUrl& url) const
         fileTypes.append(fileType->name());
 
     return fileTypes;
+}
+
+void Application::loadPlugins()
+{
+    std::vector<QString> pluginsDirs =
+    {
+        qApp->applicationDirPath() + "/plugins",
+        _localPluginsDir
+    };
+
+    for(auto& pluginsDir : pluginsDirs)
+    {
+        if(pluginsDir.isEmpty())
+            continue;
+
+        QDir pluginsQDir(pluginsDir);
+
+        for(auto& fileName : pluginsQDir.entryList(QDir::Files))
+        {
+            QPluginLoader pluginLoader(pluginsQDir.absoluteFilePath(fileName));
+            QObject* plugin = pluginLoader.instance();
+            if(!pluginLoader.isLoaded())
+                qDebug() << pluginLoader.errorString();
+
+            if(plugin)
+            {
+                auto* iplugin = qobject_cast<IPlugin*>(plugin);
+                if(iplugin)
+                    _plugins.push_back(iplugin);
+            }
+        }
+    }
 }
