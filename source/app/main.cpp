@@ -111,8 +111,10 @@ int main(int argc, char *argv[])
         QMetaObject::invokeMethod(mainWindow, "processArguments", Q_ARG(QVariant, message.split("\n")));
     });
 
+#ifndef _DEBUG
     CrashHandler c;
     Q_UNUSED(c);
+#endif
 
     return app.exec();
 }
