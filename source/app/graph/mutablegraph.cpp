@@ -1,7 +1,7 @@
 #include "mutablegraph.h"
 #include "componentmanager.h"
 
-#include "../utils/utils.h"
+#include "shared/utils/utils.h"
 
 MutableGraph::~MutableGraph()
 {

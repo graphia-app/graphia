@@ -1,8 +1,8 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-#include "igraph.h"
-#include "elementid.h"
+#include "shared/graph/igraph.h"
+#include "shared/graph/elementid.h"
 #include "elementiddistinctsetcollection.h"
 #include "graphconsistencychecker.h"
 

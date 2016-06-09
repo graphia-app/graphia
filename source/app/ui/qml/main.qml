@@ -64,6 +64,13 @@ ApplicationWindow
         title: qsTr("Can't Open File")
     }
 
+    MessageDialog
+    {
+        id: errorOpeningFileMessageDialog
+        icon: StandardIcon.Critical
+        title: qsTr("Error Opening File")
+    }
+
     OptionsDialog
     {
         id: optionsDialog
@@ -96,7 +103,7 @@ ApplicationWindow
 
     function openFile(fileUrl, inNewTab)
     {
-        var fileTypes = application.fileTypesOf(fileUrl);
+        var fileTypes = application.urlTypesOf(fileUrl);
 
         if(fileTypes.length === 0)
         {
@@ -463,7 +470,12 @@ ApplicationWindow
         function openInCurrentTab(fileUrl, fileType)
         {
             currentDocument.application = application;
-            currentDocument.openFile(fileUrl, fileType);
+            if(!currentDocument.openFile(fileUrl, fileType))
+            {
+                errorOpeningFileMessageDialog.text = application.baseFileNameForUrl(fileUrl) +
+                        qsTr(" could not be opened due to an error.");
+                errorOpeningFileMessageDialog.open();
+            }
         }
 
         Component

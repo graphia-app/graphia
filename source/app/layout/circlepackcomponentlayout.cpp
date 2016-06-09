@@ -34,7 +34,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../graph/componentmanager.h"
 
-#include "../utils/preferences.h"
+#include "shared/utils/preferences.h"
 
 #include <algorithm>
 #include <cmath>

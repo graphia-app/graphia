@@ -1,9 +1,8 @@
 #ifndef IGRAPH_H
 #define IGRAPH_H
 
-#include "elementid.h"
-
-class IGraphArray;
+#include "shared/graph/elementid.h"
+#include "igrapharrayclient.h"
 
 class INode
 {
@@ -28,7 +27,7 @@ public:
     virtual EdgeId id() const = 0;
 };
 
-class IGraph
+class IGraph : public virtual IGraphArrayClient
 {
 public:
     virtual ~IGraph() = default;
@@ -42,22 +41,6 @@ public:
     virtual int numEdges() const = 0;
     virtual const IEdge& edgeById(EdgeId edgeId) const = 0;
     virtual bool containsEdgeId(EdgeId edgeId) const = 0;
-
-    // GraphArray support
-    virtual NodeId nextNodeId() const = 0;
-    virtual EdgeId nextEdgeId() const = 0;
-
-    virtual void insertNodeArray(IGraphArray* nodeArray) const = 0;
-    virtual void eraseNodeArray(IGraphArray* nodeArray) const = 0;
-
-    virtual void insertEdgeArray(IGraphArray* edgeArray) const = 0;
-    virtual void eraseEdgeArray(IGraphArray* edgeArray) const = 0;
-
-    virtual int numComponentArrays() const = 0;
-    virtual void insertComponentArray(IGraphArray* componentArray) const = 0;
-    virtual void eraseComponentArray(IGraphArray* componentArray) const = 0;
-
-    virtual bool isComponentManaged() const = 0;
 };
 
 #endif // IGRAPH_H

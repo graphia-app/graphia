@@ -11,8 +11,8 @@
 
 #include "../ui/graphquickitem.h"
 
-#include "../utils/utils.h"
-#include "../utils/preferences.h"
+#include "shared/utils/utils.h"
+#include "shared/utils/preferences.h"
 
 #include <QPoint>
 

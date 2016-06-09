@@ -2,12 +2,12 @@
 #define LAYOUT_H
 
 #include "../graph/graph.h"
-#include "../graph/grapharray.h"
+#include "shared/graph/grapharray.h"
 #include "../graph/graphmodel.h"
 #include "../graph/componentmanager.h"
 #include "nodepositions.h"
 
-#include "../utils/performancecounter.h"
+#include "shared/utils/performancecounter.h"
 #include "layoutsettings.h"
 
 #include <QVector2D>

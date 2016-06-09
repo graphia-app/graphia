@@ -4,7 +4,7 @@
 #include "graphtransformconfiguration.h"
 
 #include "../graph/graph.h"
-#include "../loading/graphfileparser.h"
+#include "../loading/parserthread.h"
 #include "../commands/commandmanager.h"
 #include "../layout/layout.h"
 
@@ -115,7 +115,7 @@ private:
     std::shared_ptr<GraphModel> _graphModel;
     std::shared_ptr<SelectionManager> _selectionManager;
     CommandManager _commandManager;
-    std::unique_ptr<GraphFileParserThread> _graphFileParserThread;
+    std::unique_ptr<ParserThread> _graphFileParserThread;
     std::unique_ptr<LayoutThread> _layoutThread;
     QmlContainerWrapper<LayoutSetting> _layoutSettings;
 

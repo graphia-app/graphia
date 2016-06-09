@@ -5,32 +5,33 @@
 #include "../transform/filtertransform.h"
 #include "../transform/edgecontractiontransform.h"
 
-#include "../utils/utils.h"
+#include "shared/utils/utils.h"
 #include "../utils/enumreflection.h"
-#include "../utils/preferences.h"
+#include "shared/utils/preferences.h"
 
 #include <utility>
 
-GraphModel::GraphModel(const QString &name) :
+GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
     _graph(),
     _transformedGraph(_graph),
     _nodePositions(_graph),
     _nodeVisuals(_graph),
     _edgeVisuals(_graph),
     _nodeNames(_graph),
-    _name(name)
+    _name(name),
+    _plugin(plugin)
 {
     connect(&_transformedGraph, &Graph::graphChanged, this, &GraphModel::onGraphChanged, Qt::DirectConnection);
     connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphModel::onPreferenceChanged);
 
-    addDataField(tr("Node Degree"))
+    dataField(tr("Node Degree"))
         .setIntValueFn([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).degree(); })
         .setIntMin(0);
 
-    addDataField(tr("Node Name"))
+    dataField(tr("Node Name"))
         .setStringValueFn([this](NodeId nodeId) { return _nodeNames[nodeId]; });
 
-    addDataField(tr("Component Size"))
+    dataField(tr("Component Size"))
         .setIntValueFn([this](const GraphComponent& component) { return component.numNodes(); })
         .setIntMin(1);
 
@@ -161,15 +162,9 @@ QStringList GraphModel::avaliableConditionFnOps(const QString& dataFieldName) co
     return stringList;
 }
 
-DataField& GraphModel::addDataField(const QString& name)
+IDataField& GraphModel::dataField(const QString& name)
 {
     return _dataFields[name];
-}
-
-DataField& GraphModel::mutableDataFieldByName(const QString& name)
-{
-    Q_ASSERT(u::contains(_dataFields, name));
-    return _dataFields.at(name);
 }
 
 const DataField& GraphModel::dataFieldByName(const QString& name) const

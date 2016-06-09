@@ -2,7 +2,7 @@
 #define COMPONENTMANAGER_H
 
 #include "graph.h"
-#include "grapharray.h"
+#include "shared/graph/grapharray.h"
 #include "filter.h"
 
 #include <map>

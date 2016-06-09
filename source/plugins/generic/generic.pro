@@ -1,6 +1,7 @@
 TEMPLATE = lib
 
 include(../../common.pri)
+include(../../shared/shared.pri)
 
 QT += core gui qml quick
 
@@ -10,9 +11,13 @@ DESTDIR = ../../../plugins
 CONFIG += plugin
 
 SOURCES += \
-    genericplugin.cpp
+    genericplugin.cpp \
+    loading/gmlfileparser.cpp \
+    loading/pairwisetxtfileparser.cpp
 
 HEADERS += \
-    genericplugin.h
+    genericplugin.h \
+    loading/gmlfileparser.h \
+    loading/pairwisetxtfileparser.h
 
 DISTFILES += genericplugin.json

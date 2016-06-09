@@ -2,7 +2,7 @@
 #define BARNESHUTTREE_H
 
 #include "octree.h"
-#include "../utils/fixedsizestack.h"
+#include "shared/utils/fixedsizestack.h"
 
 #include <QVector3D>
 

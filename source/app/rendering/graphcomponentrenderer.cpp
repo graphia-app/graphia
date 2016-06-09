@@ -15,7 +15,7 @@
 #include "../ui/graphquickitem.h"
 #include "../ui/selectionmanager.h"
 
-#include "../utils/utils.h"
+#include "shared/utils/utils.h"
 
 #include <QObject>
 

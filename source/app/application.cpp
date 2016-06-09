@@ -1,23 +1,13 @@
 #include "application.h"
 
-#include "loading/gmlfiletype.h"
-#include "loading/pairwisetxtfiletype.h"
-
-#include "loading/gmlfileparser.h"
-#include "loading/pairwisetxtfileparser.h"
-
-#include "graph/graphmodel.h"
-#include "graph/weightededgegraphmodel.h"
-
-#include "utils/preferences.h"
-
-#include "loading/gmlfileparser.h"
-
-#include "../plugins/iplugin.h"
+#include "loading/parserthread.h"
+#include "shared/interfaces/iplugin.h"
+#include "shared/loading/iparser.h"
 
 #include <QPluginLoader>
 #include <QDir>
 #include <QStandardPaths>
+#include <QDebug>
 
 #include <memory>
 #include <cmath>
@@ -27,76 +17,66 @@ const char* Application::_uri = "com.kajeka";
 Application::Application(QObject *parent) :
     QObject(parent)
 {
-    _localPluginsDir = QStandardPaths::writableLocation(
-                QStandardPaths::StandardLocation::AppDataLocation) + "/plugins";
-    QDir().mkpath(_localPluginsDir);
-
-    connect(&_fileIdentifier, &FileIdentifier::nameFiltersChanged, this, &Application::nameFiltersChanged);
-
-    _fileIdentifier.registerFileType(std::make_shared<GmlFileType>());
-    _fileIdentifier.registerFileType(std::make_shared<PairwiseTxtFileType>());
-
     loadPlugins();
 }
 
-bool Application::parserAndModelForFile(const QUrl& url, const QString& fileTypeName,
-                                        std::unique_ptr<GraphFileParser>& graphFileParser,
-                                        std::shared_ptr<GraphModel>& graphModel) const
+IPlugin* Application::pluginForUrlTypeName(const QString& urlTypeName) const
 {
-    //FIXME what we should be doing:
-    // query which plugins can load fileTypeName
-    // allow the user to choose which plugin to use if there is more than 1
-    // then something like:
-    // graphModel = plugin->graphModelForFilename(filename);
-    // graphFileParser = plugin->parserForFilename(filename);
+    std::vector<IPlugin*> viablePlugins;
 
-    QString fileName = url.toLocalFile();
-    QString baseFileName = baseFileNameForUrl(url);
-
-    if(fileTypeName.compare("GML") == 0)
+    for(auto plugin : _plugins)
     {
-        graphFileParser = std::make_unique<GmlFileParser>(fileName);
-        graphModel = std::make_shared<GraphModel>(baseFileName);
+        auto urlTypeNames = plugin->loadableUrlTypeNames();
+        bool willLoad = std::any_of(urlTypeNames.begin(), urlTypeNames.end(),
+        [&urlTypeName](const QString& loadableUrlTypeName)
+        {
+            return loadableUrlTypeName.compare(urlTypeName) == 0;
+        });
 
-        return true;
-    }
-    else if(fileTypeName.compare("PairwiseTXT") == 0)
-    {
-        auto weightedEdgeGraphModel = std::make_shared<WeightedEdgeGraphModel>(baseFileName);
-        graphFileParser = std::make_unique<PairwiseTxtFileParser>(fileName, weightedEdgeGraphModel);
-        graphModel = weightedEdgeGraphModel;
-
-        return true;
+        if(willLoad)
+            viablePlugins.push_back(plugin);
     }
 
-    return false;
+    if(viablePlugins.size() == 0)
+        return nullptr;
+
+    //FIXME: Allow the user to choose which plugin to use if there is more than 1
+    Q_ASSERT(viablePlugins.size() == 1);
+
+    auto* plugin = viablePlugins.at(0);
+
+    return plugin;
+
 }
 
-bool Application::canOpen(const QString& fileTypeName) const
+bool Application::canOpen(const QString& urlTypeName) const
 {
-    //FIXME This is temporary (...probably)
-    return _fileIdentifier.fileTypeNames().contains(fileTypeName);
-}
-
-bool Application::canOpenAnyOf(const QStringList& fileTypeNames) const
-{
-    for(auto fileTypeName : fileTypeNames)
+    return std::any_of(_plugins.begin(), _plugins.end(),
+    [&urlTypeName](auto plugin)
     {
-        if(canOpen(fileTypeName))
-            return true;
-    }
-
-    return false;
+        return plugin->loadableUrlTypeNames().contains(urlTypeName);
+    });
 }
 
-QStringList Application::fileTypesOf(const QUrl& url) const
+bool Application::canOpenAnyOf(const QStringList& urlTypeNames) const
 {
-    QStringList fileTypes;
+    return std::any_of(urlTypeNames.begin(), urlTypeNames.end(),
+    [this](const QString& urlTypeName)
+    {
+        return canOpen(urlTypeName);
+    });
+}
 
-    for(auto fileType : _fileIdentifier.identify(url.toLocalFile()))
-        fileTypes.append(fileType->name());
+QStringList Application::urlTypesOf(const QUrl& url) const
+{
+    QStringList urlTypeNames;
 
-    return fileTypes;
+    for(auto plugin : _plugins)
+        urlTypeNames.append(plugin->identifyUrl(url));
+
+    urlTypeNames.removeDuplicates();
+
+    return urlTypeNames;
 }
 
 void Application::loadPlugins()
@@ -104,12 +84,26 @@ void Application::loadPlugins()
     std::vector<QString> pluginsDirs =
     {
         qApp->applicationDirPath() + "/plugins",
-        _localPluginsDir
+        QStandardPaths::writableLocation(
+            QStandardPaths::StandardLocation::AppDataLocation) + "/plugins"
     };
+
+#ifdef Q_OS_MAC
+    QDir dotAppDir(qApp->applicationDirPath());
+
+    // Within the bundle itself
+    dotAppDir.cdUp();
+    pluginsDirs.emplace_back(dotAppDir.absolutePath() + "/plugins");
+
+    // Adjacent to the .app file
+    dotAppDir.cdUp();
+    dotAppDir.cdUp();
+    pluginsDirs.emplace_back(dotAppDir.absolutePath() + "/plugins");
+#endif
 
     for(auto& pluginsDir : pluginsDirs)
     {
-        if(pluginsDir.isEmpty())
+        if(pluginsDir.isEmpty() || !QDir(pluginsDir).exists())
             continue;
 
         QDir pluginsQDir(pluginsDir);
@@ -125,8 +119,79 @@ void Application::loadPlugins()
             {
                 auto* iplugin = qobject_cast<IPlugin*>(plugin);
                 if(iplugin)
-                    _plugins.push_back(iplugin);
+                    initialisePlugin(iplugin);
+
             }
         }
     }
+
+    updateNameFilters();
+}
+
+void Application::initialisePlugin(IPlugin* plugin)
+{
+    _plugins.push_back(plugin);
+}
+
+void Application::updateNameFilters()
+{
+    struct FileType
+    {
+        QString _collectiveDescription;
+        QStringList _extensions;
+    };
+
+    std::vector<FileType> fileTypes;
+
+    for(auto plugin : _plugins)
+    {
+        for(auto& urlTypeName : plugin->loadableUrlTypeNames())
+        {
+            FileType fileType = {plugin->collectiveDescriptionForUrlTypeName(urlTypeName),
+                                 plugin->extensionsForUrlTypeName(urlTypeName)};
+            fileTypes.emplace_back(fileType);
+        }
+    }
+
+    // Sort by collective description
+    std::sort(fileTypes.begin(), fileTypes.end(),
+    [](const auto& a, const auto& b)
+    {
+        return a._collectiveDescription.compare(b._collectiveDescription, Qt::CaseInsensitive) < 0;
+    });
+
+    QString description = QObject::tr("All Files (");
+    bool second = false;
+
+    for(auto fileType : fileTypes)
+    {
+        for(auto extension : fileType._extensions)
+        {
+            if(second)
+                description += " ";
+            else
+                second = true;
+
+            description += "*." + extension;
+        }
+    }
+
+    description += ")";
+
+    _nameFilters.clear();
+    _nameFilters.append(description);
+
+    for(auto fileType : fileTypes)
+    {
+        description = fileType._collectiveDescription + " (";
+
+        for(auto extension : fileType._extensions)
+            description += "*." + extension;
+
+        description += ")";
+
+        _nameFilters.append(description);
+    }
+
+    emit nameFiltersChanged();
 }

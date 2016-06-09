@@ -5,7 +5,7 @@
 
 #include "../graph/graph.h"
 #include "../graph/mutablegraph.h"
-#include "../graph/grapharray.h"
+#include "shared/graph/grapharray.h"
 
 #include <QObject>
 

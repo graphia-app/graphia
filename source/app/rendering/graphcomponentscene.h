@@ -6,7 +6,7 @@
 
 #include "../graph/graph.h"
 #include "../graph/componentmanager.h"
-#include "../graph/grapharray.h"
+#include "shared/graph/grapharray.h"
 #include "transition.h"
 
 class GraphComponentRenderer;

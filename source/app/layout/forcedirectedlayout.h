@@ -4,7 +4,7 @@
 #include "layout.h"
 #include "../graph/graphmodel.h"
 #include "../graph/componentmanager.h"
-#include "../utils/circularbuffer.h"
+#include "shared/utils/circularbuffer.h"
 
 #include <QVector3D>
 

@@ -7,8 +7,6 @@
 #include <unordered_map>
 #include <functional>
 
-class MutableGraph;
-
 template<typename T> class ElementId
 {
     friend std::hash<ElementId<T>>;

@@ -1,8 +1,8 @@
 #ifndef ELEMENTIDDISTINCTSETCOLLECTION
 #define ELEMENTIDDISTINCTSETCOLLECTION
 
-#include "elementid.h"
-#include "../utils/utils.h"
+#include "shared/graph/elementid.h"
+#include "shared/utils/utils.h"
 
 #include <QDebug>
 

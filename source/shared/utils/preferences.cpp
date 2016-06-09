@@ -5,7 +5,7 @@
 #include <QTimerEvent>
 #include <QRegularExpression>
 
-#include "../utils/utils.h"
+#include "shared/utils/utils.h"
 
 void Preferences::define(const QString& key, const QVariant& defaultValue,
                          const QVariant& minimumValue, const QVariant& maximumValue)

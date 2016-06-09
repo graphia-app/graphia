@@ -2,9 +2,9 @@
 #include "randomlayout.h"
 #include "barneshuttree.h"
 
-#include "../utils/utils.h"
-#include "../utils/threadpool.h"
-#include "../utils/preferences.h"
+#include "shared/utils/utils.h"
+#include "shared/utils/threadpool.h"
+#include "shared/utils/preferences.h"
 
 template<typename T> float meanWeightedAvgBuffer(int start, int end, const T& buffer)
 {

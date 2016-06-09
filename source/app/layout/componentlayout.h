@@ -2,8 +2,8 @@
 #define COMPONENTLAYOUT_H
 
 #include "../graph/graph.h"
-#include "../graph/grapharray.h"
-#include "../utils/utils.h"
+#include "shared/graph/grapharray.h"
+#include "shared/utils/utils.h"
 #include "../maths/circle.h"
 
 #include <QRectF>

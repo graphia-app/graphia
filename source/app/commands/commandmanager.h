@@ -1,8 +1,8 @@
 #ifndef COMMANDMANAGER_H
 #define COMMANDMANAGER_H
 
-#include "../utils/utils.h"
-#include "../utils/deferredexecutor.h"
+#include "shared/utils/utils.h"
+#include "shared/utils/deferredexecutor.h"
 #include "command.h"
 
 #include <QtGlobal>

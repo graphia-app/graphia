@@ -1,8 +1,10 @@
 #ifndef GRAPHARRAY_H
 #define GRAPHARRAY_H
 
-#include "igrapharray.h"
-#include "igraph.h"
+#include "shared/graph/igrapharray.h"
+#include "shared/graph/igrapharrayclient.h"
+
+#include "shared/utils/utils.h"
 
 #include <vector>
 #include <mutex>
@@ -17,17 +19,17 @@ private:
     using MaybeLock = u::MaybeLock<std::recursive_mutex, Locking>;
 
 protected:
-    const IGraph* _graph;
+    const IGraphArrayClient* _graph;
     std::vector<Element> _array;
     mutable std::recursive_mutex _mutex;
     Element _defaultValue;
 
 public:
-    explicit GenericGraphArray(const IGraph& graph) :
+    explicit GenericGraphArray(const IGraphArrayClient& graph) :
         _graph(&graph), _defaultValue()
     {}
 
-    GenericGraphArray(const IGraph& graph, const Element& defaultValue) :
+    GenericGraphArray(const IGraphArrayClient& graph, const Element& defaultValue) :
         _graph(&graph), _defaultValue(defaultValue)
     {
         fill(defaultValue);
@@ -182,14 +184,14 @@ template<typename Element, typename Locking = void>
 class NodeArray : public GenericGraphArray<NodeId, Element, Locking>
 {
 public:
-    explicit NodeArray(const IGraph& graph) :
+    explicit NodeArray(const IGraphArrayClient& graph) :
         GenericGraphArray<NodeId, Element, Locking>(graph)
     {
         this->resize(graph.nextNodeId());
         graph.insertNodeArray(this);
     }
 
-    NodeArray(const IGraph& graph, const Element& defaultValue) :
+    NodeArray(const IGraphArrayClient& graph, const Element& defaultValue) :
         GenericGraphArray<NodeId, Element, Locking>(graph, defaultValue)
     {
         this->resize(graph.nextNodeId());
@@ -231,14 +233,14 @@ template<typename Element, typename Locking = void>
 class EdgeArray : public GenericGraphArray<EdgeId, Element, Locking>
 {
 public:
-    explicit EdgeArray(const IGraph& graph) :
+    explicit EdgeArray(const IGraphArrayClient& graph) :
         GenericGraphArray<EdgeId, Element, Locking>(graph)
     {
         this->resize(graph.nextEdgeId());
         graph.insertEdgeArray(this);
     }
 
-    EdgeArray(const IGraph& graph, const Element& defaultValue) :
+    EdgeArray(const IGraphArrayClient& graph, const Element& defaultValue) :
         GenericGraphArray<EdgeId, Element, Locking>(graph, defaultValue)
     {
         this->resize(graph.nextEdgeId());
@@ -280,7 +282,7 @@ template<typename Element, typename Locking = void>
 class ComponentArray : public GenericGraphArray<ComponentId, Element, Locking>
 {
 public:
-    explicit ComponentArray(const IGraph& graph) :
+    explicit ComponentArray(const IGraphArrayClient& graph) :
         GenericGraphArray<ComponentId, Element, Locking>(graph)
     {
         Q_ASSERT(graph.isComponentManaged());
@@ -288,7 +290,7 @@ public:
         graph.insertComponentArray(this);
     }
 
-    ComponentArray(const IGraph& graph, const Element& defaultValue) :
+    ComponentArray(const IGraphArrayClient& graph, const Element& defaultValue) :
         GenericGraphArray<ComponentId, Element, Locking>(graph, defaultValue)
     {
         Q_ASSERT(graph.isComponentManaged());

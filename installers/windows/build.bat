@@ -1,4 +1,6 @@
 copy %PRODUCT_NAME%.exe build\
+mkdir build\plugins
+xcopy "plugins\*.dll" build\plugins
 copy CrashReporter.exe build\
 
 set QML_DIR=source\app\ui\qml

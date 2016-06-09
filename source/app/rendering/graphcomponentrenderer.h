@@ -7,7 +7,7 @@
 #include "transition.h"
 #include "../maths/boundingbox.h"
 #include "../graph/graph.h"
-#include "../graph/grapharray.h"
+#include "shared/graph/grapharray.h"
 
 #include <QMatrix4x4>
 #include <QVector3D>

@@ -1,7 +1,7 @@
 #ifndef QMLCONTAINERWRAPPER_H
 #define QMLCONTAINERWRAPPER_H
 
-#include "utils.h"
+#include "shared/utils/utils.h"
 
 #include <QAbstractListModel>
 #include <QObject>

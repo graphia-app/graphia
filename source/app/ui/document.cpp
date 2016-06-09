@@ -2,7 +2,9 @@
 
 #include "../application.h"
 
-#include "../loading/graphfileparser.h"
+#include "shared/interfaces/iplugin.h"
+
+#include "../loading/parserthread.h"
 #include "../graph/graphmodel.h"
 
 #include "../layout/layout.h"
@@ -280,10 +282,8 @@ void Document::onGraphTransformsConfigurationDataChanged(const QModelIndex& inde
 
 bool Document::openFile(const QUrl& fileUrl, const QString& fileType)
 {
-    std::unique_ptr<GraphFileParser> graphFileParser;
-    std::shared_ptr<GraphModel> graphModel;
-
-    if(!_application->parserAndModelForFile(fileUrl, fileType, graphFileParser, graphModel))
+    auto* plugin = _application->pluginForUrlTypeName(fileType);
+    if(plugin == nullptr)
         return false;
 
     setTitle(fileUrl.fileName());
@@ -291,7 +291,8 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType)
     emit idleChanged();
     emit commandVerbChanged(); // Show Loading message
 
-    _graphModel = graphModel;
+    _graphModel = std::make_shared<GraphModel>(fileUrl.fileName(), plugin);
+    plugin->setGraphModel(_graphModel.get());
 
     connect(&_graphModel->graph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
 
@@ -301,9 +302,16 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType)
 
     emit contentQmlPathChanged();
 
-    _graphFileParserThread = std::make_unique<GraphFileParserThread>(_graphModel->mutableGraph(), std::move(graphFileParser));
-    connect(_graphFileParserThread.get(), &GraphFileParserThread::progress, this, &Document::onLoadProgress);
-    connect(_graphFileParserThread.get(), &GraphFileParserThread::complete, this, &Document::onLoadComplete);
+    auto* parser = plugin->parserForUrlTypeName(fileType);
+    if(parser == nullptr)
+    {
+        qDebug() << "Plugin does not provide parser";
+        return false;
+    }
+
+    _graphFileParserThread = std::make_unique<ParserThread>(_graphModel->mutableGraph(), fileUrl, parser);
+    connect(_graphFileParserThread.get(), &ParserThread::progress, this, &Document::onLoadProgress);
+    connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::onLoadComplete);
     _graphFileParserThread->start();
 
     return true;

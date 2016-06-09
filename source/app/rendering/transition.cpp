@@ -1,7 +1,7 @@
 #include "transition.h"
 
 #include "../maths/interpolation.h"
-#include "../utils/utils.h"
+#include "shared/utils/utils.h"
 
 #include <QDebug>
 

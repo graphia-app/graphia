@@ -1,6 +1,6 @@
 #include "deferredexecutor.h"
 
-#include "../utils/utils.h"
+#include "shared/utils/utils.h"
 
 #include <QDebug>
 #include <QtGlobal>

@@ -19,6 +19,9 @@ gcc:!clang {
 }
 
 win32 {
+    # Disable silly inherits via dominance warning
+    QMAKE_CXXFLAGS += -wd4250
+
     # Debug symbols
     QMAKE_CXXFLAGS_RELEASE += -Zi
     QMAKE_LFLAGS_RELEASE += /MAP /debug /opt:ref
@@ -40,3 +43,5 @@ isEmpty(_COPYRIGHT) {
 DEFINES += \
     "VERSION=\"\\\"$$_VERSION\\\"\"" \
     "COPYRIGHT=\"\\\"$$_COPYRIGHT\\\"\""
+
+INCLUDEPATH += $$PWD

@@ -1,8 +1,6 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include "loading/fileidentifier.h"
-
 #include <QObject>
 #include <QString>
 #include <QStringList>
@@ -11,12 +9,13 @@
 #include <QColor>
 
 #include <vector>
+#include <map>
 #include <memory>
 
 #include <QCoreApplication>
 
 class GraphModel;
-class GraphFileParser;
+class IParser;
 class IPlugin;
 
 class Application : public QObject
@@ -28,17 +27,15 @@ class Application : public QObject
 public:
     explicit Application(QObject *parent = nullptr);
 
-    bool parserAndModelForFile(const QUrl& url, const QString& fileTypeName,
-                               std::unique_ptr<GraphFileParser>& graphFileParser,
-                               std::shared_ptr<GraphModel>& graphModel) const;
+    IPlugin* pluginForUrlTypeName(const QString& urlTypeName) const;
 
 signals:
     void nameFiltersChanged();
 
 public slots:
-    bool canOpen(const QString& fileTypeName) const;
-    bool canOpenAnyOf(const QStringList& fileTypeNames) const;
-    QStringList fileTypesOf(const QUrl& url) const;
+    bool canOpen(const QString& urlTypeName) const;
+    bool canOpenAnyOf(const QStringList& urlTypeNames) const;
+    QStringList urlTypesOf(const QUrl& url) const;
 
     static QString name() { return QCoreApplication::applicationName(); }
     static QString version() { return QCoreApplication::applicationVersion(); }
@@ -64,14 +61,14 @@ private:
     static const int _majorVersion = 1;
     static const int _minorVersion = 0;
 
-    QString _localPluginsDir;
     std::vector<IPlugin*> _plugins;
 
-    FileIdentifier _fileIdentifier;
-
     void loadPlugins();
+    void initialisePlugin(IPlugin* plugin);
+    void updateNameFilters();
 
-    QStringList nameFilters() const { return _fileIdentifier.nameFilters(); }
+    QStringList _nameFilters;
+    QStringList nameFilters() const { return _nameFilters; }
 };
 
 #endif // APPLICATION_H

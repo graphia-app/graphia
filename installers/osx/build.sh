@@ -5,6 +5,9 @@ SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 
 security unlock-keychain -p ${SIGN_BUILD_USER_PASSWORD}
 
+mkdir -p ${PRODUCT_NAME}.app/plugins/
+cp -r plugins/*.dylib ${PRODUCT_NAME}.app/plugins/
+
 cp CrashReporter.app/Contents/MacOS/CrashReporter \
   ${PRODUCT_NAME}.app/Contents/MacOS/
 

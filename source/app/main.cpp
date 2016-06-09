@@ -11,8 +11,8 @@
 #include "ui/graphquickitem.h"
 #include "ui/graphtransformconfiguration.h"
 
-#include "utils/threadpool.h"
-#include "utils/preferences.h"
+#include "shared/utils/threadpool.h"
+#include "shared/utils/preferences.h"
 #include "utils/crashhandler.h"
 
 #include "rendering/openglfunctions.h"

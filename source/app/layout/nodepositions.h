@@ -2,8 +2,8 @@
 #define NODEPOSITIONS_H
 
 #include "../graph/graph.h"
-#include "../graph/grapharray.h"
-#include "../utils/circularbuffer.h"
+#include "shared/graph/grapharray.h"
+#include "shared/utils/circularbuffer.h"
 #include "../maths/boundingbox.h"
 #include "../maths/boundingsphere.h"
 

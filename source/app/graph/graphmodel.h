@@ -3,7 +3,7 @@
 
 #include "../graph/graph.h"
 #include "../graph/mutablegraph.h"
-#include "../graph/grapharray.h"
+#include "shared/graph/grapharray.h"
 
 #include "../transform/transformedgraph.h"
 #include "../transform/datafield.h"
@@ -11,6 +11,9 @@
 #include "../ui/graphtransformconfiguration.h"
 
 #include "../layout/nodepositions.h"
+
+#include "shared/interfaces/iplugin.h"
+#include "shared/graph/igraphmodel.h"
 
 #include <QQuickItem>
 #include <QString>
@@ -49,11 +52,11 @@ struct EdgeVisual
 
 using EdgeVisuals = EdgeArray<EdgeVisual>;
 
-class GraphModel : public QObject
+class GraphModel : public QObject, public IGraphModel
 {
     Q_OBJECT
 public:
-    explicit GraphModel(const QString& name);
+    GraphModel(const QString& name, IPlugin* plugin);
 
 private:
     MutableGraph _graph;
@@ -65,9 +68,12 @@ private:
     NodeArray<QString> _nodeNames;
 
     QString _name;
+    IPlugin* _plugin;
 
     std::map<QString, DataField> _dataFields;
     std::map<QString, std::pair<DataFieldElementType, std::unique_ptr<GraphTransformFactory>>> _graphTransformFactories;
+
+    void updateVisuals();
 
 public:
     MutableGraph& mutableGraph() { return _graph; }
@@ -79,12 +85,14 @@ public:
     const EdgeVisuals& edgeVisuals() const { return _edgeVisuals; }
 
     const NodeArray<QString>& nodeNames() const { return _nodeNames; }
+
+    QString nodeName(NodeId nodeId) const { return _nodeNames[nodeId]; }
     void setNodeName(NodeId nodeId, const QString& name) { _nodeNames[nodeId] = name; }
 
     const QString& name() const { return _name; }
 
-    virtual bool editable() const { return true; }
-    virtual QString contentQmlPath() const { return {}; }
+    bool editable() const { return _plugin->editable(); }
+    QString contentQmlPath() const { return _plugin->contentQmlPath(); }
 
     void buildTransforms(const std::vector<GraphTransformConfiguration>& graphTransformConfigurations);
 
@@ -94,11 +102,7 @@ public:
     const DataField& dataFieldByName(const QString& name) const;
     QStringList avaliableConditionFnOps(const QString& dataFieldName) const;
 
-protected:
-    DataField& addDataField(const QString& name);
-    DataField& mutableDataFieldByName(const QString& name);
-
-    void updateVisuals();
+    IDataField& dataField(const QString& name);
 
 private slots:
     void onGraphChanged(const Graph*);

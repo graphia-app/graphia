@@ -1,10 +1,12 @@
 #ifndef IMUTABLEGRAPH_H
 #define IMUTABLEGRAPH_H
 
-#include "elementid.h"
-#include "igraph.h"
+#include "shared/graph/elementid.h"
+#include "shared/graph/igraph.h"
 
-class IMutableGraph
+#include "igrapharrayclient.h"
+
+class IMutableGraph : public virtual IGraphArrayClient
 {
 public:
     virtual ~IMutableGraph() = default;

@@ -1,5 +1,5 @@
 #include "layoutsettings.h"
-#include "../utils/utils.h"
+#include "shared/utils/utils.h"
 
 LayoutSetting::LayoutSetting(const QString& name, const QString& displayName,
                              float minimumValue, float maximumValue, float defaultValue) :

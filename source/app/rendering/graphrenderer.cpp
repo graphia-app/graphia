@@ -13,7 +13,7 @@
 
 #include "../commands/command.h"
 
-#include "../utils/preferences.h"
+#include "shared/utils/preferences.h"
 
 #include <QObject>
 #include <QOpenGLFramebufferObjectFormat>

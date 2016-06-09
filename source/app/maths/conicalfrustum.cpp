@@ -1,6 +1,6 @@
 #include "conicalfrustum.h"
 
-#include "../utils/utils.h"
+#include "shared/utils/utils.h"
 
 ConicalFrustum::ConicalFrustum(const Line3D& centreLine, const Line3D& surfaceLine) :
     _centreLine(centreLine)

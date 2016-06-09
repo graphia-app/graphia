@@ -1,31 +1,36 @@
 #include "gmlfileparser.h"
-#include "../graph/mutablegraph.h"
+#include "shared/graph/imutablegraph.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable:4503) // AXE makes a lot of these
 #endif
 
-#include "../thirdparty/axe/include/axe.h"
+#include "thirdparty/axe/include/axe.h"
 
 #include <QTime>
 #include <QFile>
 #include <QFileInfo>
+#include <QUrl>
 #include <QDebug>
+
 #include <fstream>
 
-template<class It> bool GmlFileParser::parse(MutableGraph &graph, It begin, It end)
+template<class It> bool parseGml(IMutableGraph &graph,
+                                 const IParser::ProgressFn& progress,
+                                 It begin, It end)
 {
+    int percentage = 0;
     int size = std::distance(begin, end);
 
     // Progress Capture event (Fired on gml_value rule match)
-    auto captureCount = axe::e_ref([&size, &begin, this](It, It i2)
+    auto captureCount = axe::e_ref([&percentage, &size, &begin, progress](It, It i2)
     {
         int lengthLeft = (std::distance(begin, i2)) * 100 / size;
         int newPercentage = lengthLeft;
-        if (_percentage < newPercentage)
+        if(percentage < newPercentage)
         {
-            _percentage = newPercentage;
-            emit progress(_percentage);
+            percentage = newPercentage;
+            progress(percentage);
         }
     });
 
@@ -58,6 +63,7 @@ template<class It> bool GmlFileParser::parse(MutableGraph &graph, It begin, It e
         id = std::stoi(std::string(i1, i2));
         isIdSet = true;
     });
+
     auto captureNode = axe::e_ref([&nodeIndexMap, &id, &graph, &isIdSet](It, It)
     {
         if(isIdSet)
@@ -85,11 +91,13 @@ template<class It> bool GmlFileParser::parse(MutableGraph &graph, It begin, It e
         source = std::stoi(std::string(i1,i2));
         isSourceSet = true;
     });
+
     auto captureEdgeTarget = axe::e_ref([&target, &isTargetSet](It i1, It i2)
     {
         target = std::stoi(std::string(i1,i2));
         isTargetSet = true;
     });
+
     auto captureEdge = axe::e_ref([&source, &target, &nodeIndexMap, &graph, &isSourceSet, &isTargetSet](It, It)
     {
         // Check if Target and Source values are set
@@ -127,26 +135,26 @@ template<class It> bool GmlFileParser::parse(MutableGraph &graph, It begin, It e
               axe::r_end() | axe::r_fail(onFail)) >> captureCount);
 
     // Perform file rule against begin & end iterators
-    (file >> axe::e_ref([this](It, It)
+    (file >> axe::e_ref([progress](It, It)
     {
-        emit progress(100);
+        progress(100);
     }) & axe::r_end())(begin, end);
 
     return succeeded;
 }
 
-bool GmlFileParser::parse(MutableGraph &graph)
+bool GmlFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress)
 {
-    std::ifstream stream(_filename.toStdString());
+    QString localFile = url.toLocalFile();
+    std::ifstream stream(localFile.toStdString());
     stream.unsetf(std::ios::skipws);
 
     std::istreambuf_iterator<char> startIt(stream.rdbuf());
 
-    QFileInfo info(_filename);
-
-    std::vector<char> vec(startIt, std::istreambuf_iterator<char>());
-    if(!info.exists())
+    if(!QFileInfo(localFile).exists())
         return false;
 
-    return parse(graph, vec.begin(), vec.end());;
+    std::vector<char> vec(startIt, std::istreambuf_iterator<char>());
+
+    return parseGml(graph, progress, vec.begin(), vec.end());;
 }

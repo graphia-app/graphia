@@ -6,11 +6,11 @@
 #include "graphcomponentrenderer.h"
 #include "transition.h"
 
-#include "../graph/grapharray.h"
+#include "shared/graph/grapharray.h"
 
-#include "../utils/movablepointer.h"
-#include "../utils/deferredexecutor.h"
-#include "../utils/performancecounter.h"
+#include "shared/utils/movablepointer.h"
+#include "shared/utils/deferredexecutor.h"
+#include "shared/utils/performancecounter.h"
 
 #include <QObject>
 #include <QTime>

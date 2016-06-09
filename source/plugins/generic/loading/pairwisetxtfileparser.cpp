@@ -1,14 +1,15 @@
 #include "pairwisetxtfileparser.h"
 
-#include "../utils/utils.h"
-#include "../graph/mutablegraph.h"
-#include "../graph/weightededgegraphmodel.h"
+#include "shared/utils/utils.h"
+#include "shared/graph/imutablegraph.h"
+
+#include "../genericplugin.h"
 
 #include <QFile>
 #include <QTextStream>
 #include <QFileInfo>
 #include <QStringList>
-
+#include <QUrl>
 #include <QDebug>
 
 #include <unordered_map>
@@ -19,9 +20,13 @@
 #include <fstream>
 #include <cctype>
 
-bool PairwiseTxtFileParser::parse(MutableGraph& graph)
+PairwiseTxtFileParser::PairwiseTxtFileParser(GenericPlugin* genericPlugin) :
+    _genericPlugin(genericPlugin)
+{}
+
+bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const IParser::ProgressFn& progress)
 {
-    std::ifstream file(_filename.toStdString());
+    std::ifstream file(url.toLocalFile().toStdString());
     if(!file)
         return false;
 
@@ -97,7 +102,7 @@ bool PairwiseTxtFileParser::parse(MutableGraph& graph)
             {
                 firstNodeId = graph.addNode();
                 nodeIdHash.emplace(firstToken, firstNodeId);
-                _graphModel->setNodeName(firstNodeId, QString::fromStdString(firstToken));
+                _genericPlugin->setNodeName(firstNodeId, QString::fromStdString(firstToken));
             }
             else
                 firstNodeId = nodeIdHash[firstToken];
@@ -106,7 +111,7 @@ bool PairwiseTxtFileParser::parse(MutableGraph& graph)
             {
                 secondNodeId = graph.addNode();
                 nodeIdHash.emplace(secondToken, secondNodeId);
-                _graphModel->setNodeName(secondNodeId, QString::fromStdString(secondToken));
+                _genericPlugin->setNodeName(secondNodeId, QString::fromStdString(secondToken));
             }
             else
                 secondNodeId = nodeIdHash[secondToken];
@@ -117,7 +122,7 @@ bool PairwiseTxtFileParser::parse(MutableGraph& graph)
             {
                 // We have an edge weight too
                 auto& thirdToken = tokens.at(2);
-                _graphModel->setEdgeWeight(edgeId, std::atof(thirdToken.c_str()));
+                _genericPlugin->setEdgeWeight(edgeId, std::atof(thirdToken.c_str()));
             }
         }
 
@@ -126,7 +131,7 @@ bool PairwiseTxtFileParser::parse(MutableGraph& graph)
         if(newPercentComplete > percentComplete)
         {
             percentComplete = newPercentComplete;
-            emit progress(newPercentComplete);
+            progress(newPercentComplete);
         }
     }
 

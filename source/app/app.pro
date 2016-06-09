@@ -1,6 +1,7 @@
 TEMPLATE = app
 
 include(../common.pri)
+include(../shared/shared.pri)
 include(../thirdparty/qtsingleapplication/qtsingleapplication.pri)
 include(../thirdparty/breakpad/breakpad.pri)
 
@@ -27,17 +28,11 @@ HEADERS += \
     commands/deleteselectednodescommand.h \
     graph/componentmanager.h \
     graph/elementiddistinctsetcollection.h \
-    graph/elementid.h \
     graph/filter.h \
-    graph/grapharray.h \
     graph/graphconsistencychecker.h \
     graph/graph.h \
     graph/graphmodel.h \
     graph/mutablegraph.h \
-    graph/weightededgegraphmodel.h \
-    graph/igraph.h \
-    graph/igrapharray.h \
-    graph/imutablegraph.h \
     layout/barneshuttree.h \
     layout/centreinglayout.h \
     layout/circlepackcomponentlayout.h \
@@ -52,12 +47,7 @@ HEADERS += \
     layout/randomlayout.h \
     layout/scalinglayout.h \
     layout/sequencelayout.h \
-    loading/fileidentifier.h \
-    loading/gmlfileparser.h \
-    loading/gmlfiletype.h \
-    loading/graphfileparser.h \
-    loading/pairwisetxtfileparser.h \
-    loading/pairwisetxtfiletype.h \
+    loading/parserthread.h \
     maths/boundingbox.h \
     maths/boundingsphere.h \
     maths/circle.h \
@@ -93,20 +83,10 @@ HEADERS += \
     ui/graphtransformconfiguration.h \
     ui/interactor.h \
     ui/selectionmanager.h \
-    utils/circularbuffer.h \
     utils/debugpauser.h \
-    utils/deferredexecutor.h \
     utils/enumreflection.h \
-    utils/fixedsizestack.h \
-    utils/movablepointer.h \
-    utils/performancecounter.h \
-    utils/preferences.h \
     utils/qmlcontainerwrapper.h \
     utils/qmlenum.h \
-    utils/semaphore.h \
-    utils/singleton.h \
-    utils/threadpool.h \
-    utils/utils.h \
     utils/crashhandler.h
 
 SOURCES += \
@@ -119,7 +99,6 @@ SOURCES += \
     graph/graph.cpp \
     graph/graphmodel.cpp \
     graph/mutablegraph.cpp \
-    graph/weightededgegraphmodel.cpp \
     layout/barneshuttree.cpp \
     layout/centreinglayout.cpp \
     layout/circlepackcomponentlayout.cpp \
@@ -132,12 +111,7 @@ SOURCES += \
     layout/powerof2gridcomponentlayout.cpp \
     layout/randomlayout.cpp \
     layout/scalinglayout.cpp \
-    loading/fileidentifier.cpp \
-    loading/gmlfileparser.cpp \
-    loading/gmlfiletype.cpp \
-    loading/graphfileparser.cpp \
-    loading/pairwisetxtfileparser.cpp \
-    loading/pairwisetxtfiletype.cpp \
+    loading/parserthread.cpp \
     main.cpp \
     maths/boundingbox.cpp \
     maths/boundingsphere.cpp \
@@ -169,12 +143,6 @@ SOURCES += \
     ui/graphtransformconfiguration.cpp \
     ui/selectionmanager.cpp \
     utils/debugpauser.cpp \
-    utils/deferredexecutor.cpp \
-    utils/performancecounter.cpp \
-    utils/preferences.cpp \
-    utils/semaphore.cpp \
-    utils/threadpool.cpp \
-    utils/utils.cpp \
     utils/crashhandler.cpp
 
 RESOURCES += \

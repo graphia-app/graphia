@@ -1,7 +1,7 @@
 #include "graph.h"
-#include "igrapharray.h"
+#include "shared/graph/igrapharray.h"
 #include "componentmanager.h"
-#include "../utils/utils.h"
+#include "shared/utils/utils.h"
 
 #include <QtGlobal>
 #include <QMetaType>

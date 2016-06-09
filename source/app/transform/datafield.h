@@ -1,7 +1,8 @@
 #ifndef DATAFIELD_H
 #define DATAFIELD_H
 
-#include "../graph/elementid.h"
+#include "shared/graph/elementid.h"
+#include "shared/transform/idatafield.h"
 
 #include "../utils/enumreflection.h"
 
@@ -51,11 +52,8 @@ enum class DataFieldElementType
     Component
 };
 
-class DataField
+class DataField : public IDataField
 {
-public:
-    template<typename T, typename E> using ValueFn = std::function<T(E)>;
-
 private:
     ValueFn<int, NodeId> _intNodeIdFn;
     ValueFn<int, EdgeId> _intEdgeIdFn;

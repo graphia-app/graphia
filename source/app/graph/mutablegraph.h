@@ -2,7 +2,7 @@
 #define MUTABLEGRAPH_H
 
 #include "graph.h"
-#include "imutablegraph.h"
+#include "shared/graph/imutablegraph.h"
 
 #include <deque>
 #include <mutex>
