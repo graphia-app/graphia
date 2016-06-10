@@ -5,7 +5,7 @@
 #include "shared/utils/utils.h"
 
 ParserThread::ParserThread(MutableGraph& graph, const QUrl& url,
-                                             IParser* parser) :
+                           std::unique_ptr<IParser> parser) :
     _graph(graph),
     _url(url),
     _parser(std::move(parser))

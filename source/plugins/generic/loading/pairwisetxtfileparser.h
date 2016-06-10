@@ -4,17 +4,15 @@
 #include "shared/loading/iparser.h"
 #include "shared/loading/cancellableparser.h"
 
-class IGraphModel;
-class GenericPlugin;
+class GenericPluginInstance;
 
 class PairwiseTxtFileParser : public IParser, public CancellableParser
 {
 private:
-    IGraphModel* _graphModel;
-    GenericPlugin* _genericPlugin;
+    GenericPluginInstance* _genericPluginInstance;
 
 public:
-    PairwiseTxtFileParser(GenericPlugin* genericPlugin);
+    PairwiseTxtFileParser(GenericPluginInstance* genericPluginInstance);
 
     bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress);
 };

@@ -16,11 +16,11 @@ class ParserThread : public QObject
 private:
     MutableGraph& _graph;
     QUrl _url;
-    IParser* _parser;
+    std::unique_ptr<IParser> _parser;
     std::thread _thread;
 
 public:
-    ParserThread(MutableGraph& graph, const QUrl& url, IParser* parser);
+    ParserThread(MutableGraph& graph, const QUrl& url, std::unique_ptr<IParser> parser);
     virtual ~ParserThread();
 
     void start();

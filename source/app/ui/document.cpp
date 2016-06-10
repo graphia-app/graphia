@@ -3,6 +3,7 @@
 #include "../application.h"
 
 #include "shared/interfaces/iplugin.h"
+#include "shared/interfaces/iplugininstance.h"
 
 #include "../loading/parserthread.h"
 #include "../graph/graphmodel.h"
@@ -292,7 +293,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType)
     emit commandVerbChanged(); // Show Loading message
 
     _graphModel = std::make_shared<GraphModel>(fileUrl.fileName(), plugin);
-    plugin->setGraphModel(_graphModel.get());
+    _pluginInstance = plugin->createInstance(_graphModel.get());
 
     connect(&_graphModel->graph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
 
@@ -302,14 +303,14 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType)
 
     emit contentQmlPathChanged();
 
-    auto* parser = plugin->parserForUrlTypeName(fileType);
+    auto parser = _pluginInstance->parserForUrlTypeName(fileType);
     if(parser == nullptr)
     {
         qDebug() << "Plugin does not provide parser";
         return false;
     }
 
-    _graphFileParserThread = std::make_unique<ParserThread>(_graphModel->mutableGraph(), fileUrl, parser);
+    _graphFileParserThread = std::make_unique<ParserThread>(_graphModel->mutableGraph(), fileUrl, std::move(parser));
     connect(_graphFileParserThread.get(), &ParserThread::progress, this, &Document::onLoadProgress);
     connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::onLoadComplete);
     _graphFileParserThread->start();

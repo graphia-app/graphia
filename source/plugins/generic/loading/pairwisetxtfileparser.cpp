@@ -20,8 +20,8 @@
 #include <fstream>
 #include <cctype>
 
-PairwiseTxtFileParser::PairwiseTxtFileParser(GenericPlugin* genericPlugin) :
-    _genericPlugin(genericPlugin)
+PairwiseTxtFileParser::PairwiseTxtFileParser(GenericPluginInstance* genericPluginInstance) :
+    _genericPluginInstance(genericPluginInstance)
 {}
 
 bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const IParser::ProgressFn& progress)
@@ -102,7 +102,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
             {
                 firstNodeId = graph.addNode();
                 nodeIdHash.emplace(firstToken, firstNodeId);
-                _genericPlugin->setNodeName(firstNodeId, QString::fromStdString(firstToken));
+                _genericPluginInstance->setNodeName(firstNodeId, QString::fromStdString(firstToken));
             }
             else
                 firstNodeId = nodeIdHash[firstToken];
@@ -111,7 +111,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
             {
                 secondNodeId = graph.addNode();
                 nodeIdHash.emplace(secondToken, secondNodeId);
-                _genericPlugin->setNodeName(secondNodeId, QString::fromStdString(secondToken));
+                _genericPluginInstance->setNodeName(secondNodeId, QString::fromStdString(secondToken));
             }
             else
                 secondNodeId = nodeIdHash[secondToken];
@@ -122,7 +122,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
             {
                 // We have an edge weight too
                 auto& thirdToken = tokens.at(2);
-                _genericPlugin->setEdgeWeight(edgeId, std::atof(thirdToken.c_str()));
+                _genericPluginInstance->setEdgeWeight(edgeId, std::atof(thirdToken.c_str()));
             }
         }
 

@@ -1,37 +1,29 @@
 #include "genericplugin.h"
 
-GenericPlugin::GenericPlugin() :
-    _gmlFileParser(),
-    _pairwiseTxtFileParser(this)
-{
-    registerUrlType("GML", QObject::tr("GML Files"), {"gml"});
-    registerUrlType("PairwiseTXT", QObject::tr("Pairwise Text Files"), {"txt"});
+#include "loading/gmlfileparser.h"
+#include "loading/pairwisetxtfileparser.h"
 
-    connect(this, &GenericPlugin::graphChanged, this, &GenericPlugin::onGraphChanged);
+GenericPluginInstance::GenericPluginInstance()
+{
+    connect(this, &GenericPluginInstance::graphChanged, this, &GenericPluginInstance::onGraphChanged);
 }
 
-QStringList GenericPlugin::identifyUrl(const QUrl& url) const
-{
-    //FIXME actually look at the file contents
-    return identifyByExtension(url);
-}
-
-IParser* GenericPlugin::parserForUrlTypeName(const QString& urlTypeName)
+std::unique_ptr<IParser> GenericPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
 {
     if(urlTypeName == "GML")
-        return &_gmlFileParser;
+        return std::make_unique<GmlFileParser>();
     else if(urlTypeName == "PairwiseTXT")
-        return &_pairwiseTxtFileParser;
+        return std::make_unique<PairwiseTxtFileParser>(this);
 
     return nullptr;
 }
 
-void GenericPlugin::setNodeName(NodeId nodeId, const QString& name)
+void GenericPluginInstance::setNodeName(NodeId nodeId, const QString& name)
 {
     graphModel()->setNodeName(nodeId, name);
 }
 
-void GenericPlugin::setEdgeWeight(EdgeId edgeId, float weight)
+void GenericPluginInstance::setEdgeWeight(EdgeId edgeId, float weight)
 {
     if(_edgeWeights == nullptr)
     {
@@ -44,7 +36,7 @@ void GenericPlugin::setEdgeWeight(EdgeId edgeId, float weight)
     _edgeWeights->set(edgeId, weight);
 }
 
-void GenericPlugin::onGraphChanged()
+void GenericPluginInstance::onGraphChanged()
 {
     if(_edgeWeights != nullptr)
     {
@@ -53,4 +45,24 @@ void GenericPlugin::onGraphChanged()
 
         graphModel()->dataField(tr("Edge Weight")).setFloatMin(min).setFloatMax(max);
     }
+}
+
+GenericPlugin::GenericPlugin()
+{
+    registerUrlType("GML", QObject::tr("GML Files"), {"gml"});
+    registerUrlType("PairwiseTXT", QObject::tr("Pairwise Text Files"), {"txt"});
+}
+
+QStringList GenericPlugin::identifyUrl(const QUrl& url) const
+{
+    //FIXME actually look at the file contents
+    return identifyByExtension(url);
+}
+
+std::unique_ptr<IPluginInstance> GenericPlugin::createInstance(IGraphModel* graphModel)
+{
+    auto instance = std::make_unique<GenericPluginInstance>();
+    instance->setGraphModel(graphModel);
+
+    return instance;
 }

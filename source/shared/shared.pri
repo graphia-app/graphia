@@ -19,9 +19,7 @@ HEADERS += \
     $$PWD/utils/threadpool.h \
     $$PWD/utils/utils.h \
     $$PWD/graph/igraphmodel.h \
-    $$PWD/graph/igraphmodelprovider.h \
     $$PWD/loading/iurltypes.h \
-    $$PWD/graph/graphmodelprovider.h \
     $$PWD/interfaces/baseplugin.h \
     $$PWD/graph/igrapharrayclient.h \
     $$PWD/transform/idatafield.h

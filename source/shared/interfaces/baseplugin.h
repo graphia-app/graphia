@@ -3,8 +3,8 @@
 
 #include "shared/interfaces/iplugin.h"
 #include "shared/graph/igraph.h"
+#include "shared/graph/igraphmodel.h"
 #include "shared/loading/urltypes.h"
-#include "shared/graph/graphmodelprovider.h"
 
 #include <QObject>
 
@@ -12,15 +12,21 @@ class Graph;
 
 // Provide some default implementations that most plugins will require, to avoid
 // them having to repetitively implement the same functionality themselves
-class BasePlugin : public QObject, public IPlugin, public UrlTypes, public GraphModelProvider
+class BasePluginInstance : public QObject, public IPluginInstance
 {
     Q_OBJECT
-    Q_INTERFACES(IPlugin)
 
 private:
-    void onGraphModelChanged()
+    IGraphModel* _graphModel = nullptr;
+
+public:
+    IGraphModel* graphModel() { return _graphModel; }
+
+    void setGraphModel(IGraphModel* graphModel)
     {
-        auto qObject = dynamic_cast<const QObject*>(&graphModel()->graph());
+        _graphModel = graphModel;
+
+        auto qObject = dynamic_cast<const QObject*>(&graphModel->graph());
         Q_ASSERT(qObject != nullptr);
 
         connect(qObject, SIGNAL(graphWillChange(const Graph*)), this, SIGNAL(graphWillChange()), Qt::DirectConnection);
@@ -34,7 +40,7 @@ private:
         connect(qObject, SIGNAL(edgeRemoved(const Graph*, EdgeId)), this,
                 SLOT(onEdgeRemoved(const Graph*, EdgeId)), Qt::DirectConnection);
 
-        connect(qObject, SIGNAL(graphChanged(const Graph*)), this, SIGNAL(graphChanged()),    Qt::DirectConnection);
+        connect(qObject, SIGNAL(graphChanged(const Graph*)), this, SIGNAL(graphChanged()), Qt::DirectConnection);
     }
 
 private slots:
@@ -52,6 +58,12 @@ signals:
     void edgeRemoved(EdgeId) const;
 
     void graphChanged() const;
+};
+
+class BasePlugin : public QObject, public IPlugin, public UrlTypes
+{
+    Q_OBJECT
+    Q_INTERFACES(IPlugin)
 };
 
 #endif // BASEPLUGIN_H

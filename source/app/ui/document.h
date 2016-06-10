@@ -8,6 +8,8 @@
 #include "../commands/commandmanager.h"
 #include "../layout/layout.h"
 
+#include "shared/interfaces/iplugin.h"
+
 #include "../utils/qmlenum.h"
 #include "../utils/qmlcontainerwrapper.h"
 
@@ -113,6 +115,7 @@ private:
     bool _loadComplete = false;
 
     std::shared_ptr<GraphModel> _graphModel;
+    std::unique_ptr<IPluginInstance> _pluginInstance;
     std::shared_ptr<SelectionManager> _selectionManager;
     CommandManager _commandManager;
     std::unique_ptr<ParserThread> _graphFileParserThread;
