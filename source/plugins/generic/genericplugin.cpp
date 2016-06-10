@@ -61,10 +61,8 @@ QStringList GenericPlugin::identifyUrl(const QUrl& url) const
 
 std::unique_ptr<IPluginInstance> GenericPlugin::createInstance(IGraphModel* graphModel)
 {
-    auto* instance = new GenericPluginInstance;
+    auto instance = std::make_unique<GenericPluginInstance>();
     instance->setGraphModel(graphModel);
 
-    std::unique_ptr<IPluginInstance> ptr(instance);
-
-    return ptr;
+    return std::move(instance);
 }
