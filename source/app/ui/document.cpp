@@ -3,7 +3,6 @@
 #include "../application.h"
 
 #include "shared/interfaces/iplugin.h"
-#include "shared/interfaces/iplugininstance.h"
 
 #include "../loading/parserthread.h"
 #include "../graph/graphmodel.h"
