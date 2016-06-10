@@ -5,8 +5,8 @@ SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 
 security unlock-keychain -p ${SIGN_BUILD_USER_PASSWORD}
 
-#mkdir -p ${PRODUCT_NAME}.app/plugins/
-#cp -r plugins/*.dylib ${PRODUCT_NAME}.app/plugins/
+mkdir -p ${PRODUCT_NAME}.app/Contents/PlugIns/
+cp -r plugins/*.dylib ${PRODUCT_NAME}.app/PlugIns/
 
 cp CrashReporter.app/Contents/MacOS/CrashReporter \
   ${PRODUCT_NAME}.app/Contents/MacOS/
@@ -19,8 +19,10 @@ macdeployqt ${PRODUCT_NAME}.app \
   -codesign="${SIGN_APPLE_KEYCHAIN_ID}"
 
 # Need to sign again because macdeployqt won't sign the CrashReporter
+echo "Resigning..."
 codesign --verbose --sign "${SIGN_APPLE_KEYCHAIN_ID}" ${PRODUCT_NAME}.app
 codesign --verbose --verify ${PRODUCT_NAME}.app || exit $?
+echo "OK"
 
 cat ${SCRIPT_DIR}/dmg.spec.json.template | sed \
   -e "s/_PRODUCT_NAME_/${PRODUCT_NAME}/g" \
