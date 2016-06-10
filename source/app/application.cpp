@@ -93,7 +93,7 @@ void Application::loadPlugins()
 
     // Within the bundle itself
     dotAppDir.cdUp();
-    pluginsDirs.emplace_back(dotAppDir.absolutePath() + "/plugins");
+    pluginsDirs.emplace_back(dotAppDir.absolutePath() + "/PlugIns");
 
     // Adjacent to the .app file
     dotAppDir.cdUp();
