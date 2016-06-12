@@ -64,5 +64,6 @@ std::unique_ptr<IPluginInstance> GenericPlugin::createInstance(IGraphModel* grap
     auto instance = std::make_unique<GenericPluginInstance>();
     instance->setGraphModel(graphModel);
 
+    //FIXME Need the move becuase of a clang bug https://llvm.org/bugs/show_bug.cgi?id=23849
     return std::move(instance);
 }
