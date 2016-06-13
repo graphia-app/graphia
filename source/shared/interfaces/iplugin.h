@@ -10,6 +10,7 @@
 #include <memory>
 
 class IGraphModel;
+class ISelectionManager;
 class IParser;
 class QUrl;
 
@@ -18,6 +19,7 @@ class IPluginInstance
 public:
     virtual ~IPluginInstance() = default;
 
+    virtual void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager) = 0;
     virtual std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) = 0;
 };
 
@@ -27,7 +29,7 @@ public:
     virtual ~IPlugin() = default;
 
     virtual QStringList identifyUrl(const QUrl& url) const = 0;
-    virtual std::unique_ptr<IPluginInstance> createInstance(IGraphModel* graphModel) = 0;
+    virtual std::unique_ptr<IPluginInstance> createInstance() = 0;
 
     virtual bool editable() const = 0;
     virtual QString contentQmlPath() const = 0;

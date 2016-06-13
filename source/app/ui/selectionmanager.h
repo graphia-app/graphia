@@ -2,13 +2,14 @@
 #define SELECTIONMANAGER_H
 
 #include "../graph/graphmodel.h"
+#include "shared/ui/iselectionmanager.h"
 #include "shared/utils/utils.h"
 
 #include <QObject>
 
 #include <memory>
 
-class SelectionManager : public QObject
+class SelectionManager : public QObject, public ISelectionManager
 {
     Q_OBJECT
 public:
@@ -49,9 +50,9 @@ public:
         return selectionWillChange;
     }
 
-    bool selectNodes(const NodeIdDistinctSet& nodeIds)
+    bool selectNodes(const NodeIdSet& nodeIds)
     {
-        return selectNodes(nodeIds, false);
+        return selectNodes(nodeIds, true);
     }
 
     bool deselectNode(NodeId nodeId);
@@ -82,9 +83,9 @@ public:
         return selectionWillChange;
     }
 
-    bool deselectNodes(const NodeIdDistinctSet& nodeIds)
+    bool deselectNodes(const NodeIdSet& nodeIds)
     {
-        return deselectNodes(nodeIds, false);
+        return deselectNodes(nodeIds, true);
     }
 
     void toggleNode(NodeId nodeId);
@@ -92,9 +93,8 @@ public:
     template<typename C> void toggleNodes(const C& nodeIds)
     {
         NodeIdSet difference;
-        for(auto i = nodeIds.begin(); i != nodeIds.end(); ++i)
+        for(auto nodeId : nodeIds)
         {
-            auto nodeId = *i;
             if(!u::contains(_selectedNodeIds, nodeId))
                 difference.insert(nodeId);
         }
@@ -106,7 +106,7 @@ public:
 
     bool nodeIsSelected(NodeId nodeId) const;
 
-    template<typename C> bool setSelectedNodes(const C& nodeIds)
+    bool setSelectedNodes(const NodeIdSet& nodeIds)
     {
         bool selectionWillChange = u::setsDiffer(_selectedNodeIds, nodeIds);
         _selectedNodeIds = std::move(nodeIds);

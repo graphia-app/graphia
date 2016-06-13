@@ -35,7 +35,7 @@ public:
     GenericPlugin();
 
     QStringList identifyUrl(const QUrl& url) const;
-    std::unique_ptr<IPluginInstance> createInstance(IGraphModel* graphModel);
+    std::unique_ptr<IPluginInstance> createInstance();
 
     bool editable() const { return true; }
     QString contentQmlPath() const { return {}; }

@@ -22,7 +22,8 @@ HEADERS += \
     $$PWD/loading/iurltypes.h \
     $$PWD/interfaces/baseplugin.h \
     $$PWD/graph/igrapharrayclient.h \
-    $$PWD/transform/idatafield.h
+    $$PWD/transform/idatafield.h \
+    $$PWD/ui/iselectionmanager.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \

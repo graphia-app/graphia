@@ -59,11 +59,7 @@ QStringList GenericPlugin::identifyUrl(const QUrl& url) const
     return identifyByExtension(url);
 }
 
-std::unique_ptr<IPluginInstance> GenericPlugin::createInstance(IGraphModel* graphModel)
+std::unique_ptr<IPluginInstance> GenericPlugin::createInstance()
 {
-    auto instance = std::make_unique<GenericPluginInstance>();
-    instance->setGraphModel(graphModel);
-
-    //FIXME Need the move becuase of a clang bug https://llvm.org/bugs/show_bug.cgi?id=23849
-    return std::move(instance);
+    return std::make_unique<GenericPluginInstance>();
 }

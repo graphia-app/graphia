@@ -292,7 +292,10 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType)
     emit commandVerbChanged(); // Show Loading message
 
     _graphModel = std::make_shared<GraphModel>(fileUrl.fileName(), plugin);
-    _pluginInstance = plugin->createInstance(_graphModel.get());
+    _selectionManager = std::make_shared<SelectionManager>(*_graphModel);
+
+    _pluginInstance = plugin->createInstance();
+    _pluginInstance->initialise(_graphModel.get(), _selectionManager.get());
 
     connect(&_graphModel->graph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
 
@@ -337,7 +340,6 @@ void Document::onLoadComplete(bool /*success FIXME hmm*/)
     _layoutThread->addAllComponents();
     _layoutSettings.setVectorPtr(&_layoutThread->settingsVector());
 
-    _selectionManager = std::make_shared<SelectionManager>(*_graphModel);
     _graphQuickItem->initialise(_graphModel, _commandManager, _selectionManager);
 
     connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::maybeEmitIdleChanged, Qt::DirectConnection);
