@@ -6,15 +6,7 @@
 class QUrl;
 class IMutableGraph;
 
-class ICancellableParser
-{
-public:
-    virtual ~ICancellableParser() = default;
-    virtual void reset() = 0;
-    virtual void cancel() = 0;
-};
-
-class IParser : public virtual ICancellableParser
+class IParser
 {
 public:
     virtual ~IParser() = default;
@@ -24,6 +16,7 @@ public:
     virtual bool parse(const QUrl& url,
                        IMutableGraph& mutableGraph,
                        const ProgressFn& progressReportFn) = 0;
+    virtual void cancel() = 0;
 };
 
 #endif // IPARSER_H

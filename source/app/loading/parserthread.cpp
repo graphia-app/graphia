@@ -39,7 +39,6 @@ void ParserThread::run()
     _graph.performTransaction(
         [this, &result](MutableGraph& graph)
         {
-            _parser->reset();
             result = _parser->parse(_url, graph, [this](int percentage) { emit progress(percentage); });
 
             // Extra processing may occur after the actual parsing, so we emit this here

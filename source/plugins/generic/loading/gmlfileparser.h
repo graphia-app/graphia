@@ -1,10 +1,9 @@
 #ifndef GMLFILEPARSER_H
 #define GMLFILEPARSER_H
 
-#include "shared/loading/iparser.h"
-#include "shared/loading/cancellableparser.h"
+#include "shared/loading/baseparser.h"
 
-class GmlFileParser: public IParser, public CancellableParser
+class GmlFileParser: public BaseParser
 {
 public:
     bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress);

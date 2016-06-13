@@ -6,7 +6,6 @@ HEADERS += \
     $$PWD/graph/imutablegraph.h \
     $$PWD/graph/elementid.h \
     $$PWD/graph/grapharray.h \
-    $$PWD/loading/cancellableparser.h \
     $$PWD/loading/urltypes.h \
     $$PWD/utils/circularbuffer.h \
     $$PWD/utils/deferredexecutor.h \
@@ -23,7 +22,8 @@ HEADERS += \
     $$PWD/interfaces/baseplugin.h \
     $$PWD/graph/igrapharrayclient.h \
     $$PWD/transform/idatafield.h \
-    $$PWD/ui/iselectionmanager.h
+    $$PWD/ui/iselectionmanager.h \
+    $$PWD/loading/baseparser.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \

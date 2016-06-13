@@ -1,23 +1,20 @@
-#ifndef CANCELLABLEPARSER_H
-#define CANCELLABLEPARSER_H
+#ifndef BASEPARSER_H
+#define BASEPARSER_H
 
 #include "../loading/iparser.h"
 
-#include <QDebug>
-
 #include <atomic>
 
-class CancellableParser : public virtual ICancellableParser
+class BaseParser : public IParser
 {
 private:
     std::atomic_bool _cancelAtomic;
 
 public:
-    void reset() { _cancelAtomic = false; }
     void cancel() { _cancelAtomic = true; }
 
 protected:
     bool cancelled() { return _cancelAtomic; }
 };
 
-#endif // CANCELLABLEPARSER_H
+#endif // BASEPARSER_H
