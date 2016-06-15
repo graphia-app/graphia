@@ -103,6 +103,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
+    Q_ASSERT(!engine.rootObjects().empty());
 
     QObject* mainWindow = engine.rootObjects().first();
     QObject::connect(&app, &SharedTools::QtSingleApplication::messageReceived,
