@@ -56,7 +56,9 @@ public:
     }
 
     IGraphModel* graphModel() { return _graphModel; }
+    const IGraphModel* graphModel() const { return _graphModel; }
     ISelectionManager* selectionManager() { return _selectionManager; }
+    const ISelectionManager* selectionManager() const { return _selectionManager; }
 
 private slots:
     void onNodeAdded(const Graph*, NodeId nodeId) const   { emit nodeAdded(nodeId); }

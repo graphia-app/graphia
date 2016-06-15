@@ -237,9 +237,11 @@ Item
 
         Item
         {
-            id: contentItem
+            id: plugin
             Layout.minimumHeight: 100
-            visible: document.contentQmlPath
+            visible: document.pluginQmlPath
+
+            property var model: document.plugin
         }
     }
 
@@ -249,19 +251,19 @@ Item
         application: root.application
         graph: graph
 
-        onContentQmlPathChanged:
+        onPluginQmlPathChanged:
         {
-            if(document.contentQmlPath)
+            if(document.pluginQmlPath)
             {
                 // Destroy anything already there
-                while(contentItem.children.length > 0)
-                    contentItem.children[0].destroy();
+                while(plugin.children.length > 0)
+                    plugin.children[0].destroy();
 
-                var contentComponent = Qt.createComponent(document.contentQmlPath);
-                var contentObject = contentComponent.createObject(contentItem);
+                var contentComponent = Qt.createComponent(document.pluginQmlPath);
+                var contentObject = contentComponent.createObject(plugin);
 
                 if(contentObject === null)
-                    console.log(document.contentQmlPath + " failed to load");
+                    console.log(document.pluginQmlPath + " failed to load");
             }
         }
     }

@@ -11,6 +11,9 @@ class GenericPluginInstance : public BasePluginInstance
 {
     Q_OBJECT
 
+    Q_PROPERTY(QString selectedNodeNames READ selectedNodeNames NOTIFY selectedNodeNamesChanged)
+    Q_PROPERTY(float selectedNodeMeanDegree READ selectedNodeMeanDegree NOTIFY selectedNodeMeanDegreeChanged)
+
 private:
     std::unique_ptr<EdgeArray<float>> _edgeWeights;
 
@@ -22,8 +25,17 @@ public:
     void setNodeName(NodeId nodeId, const QString& name);
     void setEdgeWeight(EdgeId edgeId, float weight);
 
+private:
+    QString selectedNodeNames() const;
+    float selectedNodeMeanDegree() const;
+
 private slots:
     void onGraphChanged();
+    void onSelectionChanged(const ISelectionManager*);
+
+signals:
+    void selectedNodeNamesChanged();
+    void selectedNodeMeanDegreeChanged();
 };
 
 class GenericPlugin : public BasePlugin
@@ -38,7 +50,7 @@ public:
     std::unique_ptr<IPluginInstance> createInstance();
 
     bool editable() const { return true; }
-    QString contentQmlPath() const { return {}; }
+    QString qmlPath() const { return "qrc:///qml/genericplugin.qml"; }
 };
 
 #endif // GENERICPLUGIN_H

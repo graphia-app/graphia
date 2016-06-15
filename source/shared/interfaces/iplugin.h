@@ -32,7 +32,7 @@ public:
     virtual std::unique_ptr<IPluginInstance> createInstance() = 0;
 
     virtual bool editable() const = 0;
-    virtual QString contentQmlPath() const = 0;
+    virtual QString qmlPath() const = 0;
 };
 
 #define IPluginIID "com.kajeka.IPlugin/" VERSION

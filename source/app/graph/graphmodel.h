@@ -92,7 +92,7 @@ public:
     const QString& name() const { return _name; }
 
     bool editable() const { return _plugin->editable(); }
-    QString contentQmlPath() const { return _plugin->contentQmlPath(); }
+    QString pluginQmlPath() const { return _plugin->qmlPath(); }
 
     void buildTransforms(const std::vector<GraphTransformConfiguration>& graphTransformConfigurations);
 

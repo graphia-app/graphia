@@ -36,7 +36,8 @@ class Document : public QObject
 
     Q_PROPERTY(Application* application MEMBER _application NOTIFY applicationChanged)
     Q_PROPERTY(GraphQuickItem* graph MEMBER _graphQuickItem NOTIFY graphQuickItemChanged)
-    Q_PROPERTY(QString contentQmlPath READ contentQmlPath NOTIFY contentQmlPathChanged)
+    Q_PROPERTY(QObject* plugin READ pluginInstance NOTIFY pluginInstanceChanged)
+    Q_PROPERTY(QString pluginQmlPath READ pluginQmlPath NOTIFY pluginQmlPathChanged)
 
     Q_PROPERTY(QString title MEMBER _title WRITE setTitle NOTIFY titleChanged)
     Q_PROPERTY(QString status MEMBER _status WRITE setStatus NOTIFY statusChanged)
@@ -102,7 +103,8 @@ public:
 
     float fps() const;
 
-    QString contentQmlPath() const;
+    QObject* pluginInstance();
+    QString pluginQmlPath() const;
 
 private:
     Application* _application = nullptr;
@@ -150,7 +152,8 @@ private slots:
 signals:
     void applicationChanged();
     void graphQuickItemChanged();
-    void contentQmlPathChanged();
+    void pluginInstanceChanged();
+    void pluginQmlPathChanged();
 
     void titleChanged();
     void statusChanged();

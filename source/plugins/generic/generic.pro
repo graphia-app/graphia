@@ -20,4 +20,7 @@ HEADERS += \
     loading/gmlfileparser.h \
     loading/pairwisetxtfileparser.h
 
+RESOURCES += \
+    ui/qml.qrc
+
 DISTFILES += genericplugin.json

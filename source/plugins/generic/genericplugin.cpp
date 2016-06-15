@@ -6,6 +6,7 @@
 GenericPluginInstance::GenericPluginInstance()
 {
     connect(this, &GenericPluginInstance::graphChanged, this, &GenericPluginInstance::onGraphChanged);
+    connect(this, &GenericPluginInstance::selectionChanged, this, &GenericPluginInstance::onSelectionChanged);
 }
 
 std::unique_ptr<IParser> GenericPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
@@ -36,6 +37,34 @@ void GenericPluginInstance::setEdgeWeight(EdgeId edgeId, float weight)
     _edgeWeights->set(edgeId, weight);
 }
 
+QString GenericPluginInstance::selectedNodeNames() const
+{
+    QString s;
+
+    for(auto nodeId : selectionManager()->selectedNodes())
+    {
+        if(!s.isEmpty())
+            s += ", ";
+
+        s += graphModel()->nodeName(nodeId);
+    }
+
+    return s;
+}
+
+float GenericPluginInstance::selectedNodeMeanDegree() const
+{
+    if(selectionManager()->selectedNodes().empty())
+        return 0.0f;
+
+    float d = 0.0f;
+
+    for(auto nodeId : selectionManager()->selectedNodes())
+        d += static_cast<float>(graphModel()->graph().nodeById(nodeId).degree());
+
+    return d / selectionManager()->selectedNodes().size();
+}
+
 void GenericPluginInstance::onGraphChanged()
 {
     if(_edgeWeights != nullptr)
@@ -45,6 +74,12 @@ void GenericPluginInstance::onGraphChanged()
 
         graphModel()->dataField(tr("Edge Weight")).setFloatMin(min).setFloatMax(max);
     }
+}
+
+void GenericPluginInstance::onSelectionChanged(const ISelectionManager*)
+{
+    emit selectedNodeNamesChanged();
+    emit selectedNodeMeanDegreeChanged();
 }
 
 GenericPlugin::GenericPlugin()

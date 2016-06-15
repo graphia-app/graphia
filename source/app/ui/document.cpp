@@ -199,9 +199,16 @@ float Document::fps() const
     return 0.0f;
 }
 
-QString Document::contentQmlPath() const
+QObject* Document::pluginInstance()
 {
-    return _graphModel != nullptr ? _graphModel->contentQmlPath() : QString();
+    // This will return nullptr if _pluginInstance is not a QObject, which is
+    // allowed, but means that the UI can't interact with it
+    return dynamic_cast<QObject*>(_pluginInstance.get());
+}
+
+QString Document::pluginQmlPath() const
+{
+    return _graphModel != nullptr ? _graphModel->pluginQmlPath() : QString();
 }
 
 std::vector<GraphTransformConfiguration> Document::transformsWithEmptyAppended(
@@ -303,7 +310,8 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType)
     connect(&_graphModel->graph().debugPauser, &DebugPauser::pausedChanged, this, &Document::debugPausedChanged);
     connect(&_graphModel->graph().debugPauser, &DebugPauser::resumeActionChanged, this, &Document::debugResumeActionChanged);
 
-    emit contentQmlPathChanged();
+    emit pluginQmlPathChanged();
+    emit pluginInstanceChanged();
 
     auto parser = _pluginInstance->parserForUrlTypeName(fileType);
     if(parser == nullptr)
