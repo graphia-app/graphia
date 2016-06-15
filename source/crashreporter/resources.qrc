@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>../app/ui/qml/Constants.js</file>
+        <file>../shared/ui/qml/Constants.js</file>
         <file>PlaceholderTextArea.qml</file>
         <file>icon.svg</file>
     </qresource>

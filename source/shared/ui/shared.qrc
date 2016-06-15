@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/Constants.js</file>
+        <file>qml/Utils.js</file>
+    </qresource>
+</RCC>

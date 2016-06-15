@@ -33,3 +33,6 @@ SOURCES += \
     $$PWD/utils/semaphore.cpp \
     $$PWD/utils/threadpool.cpp \
     $$PWD/utils/utils.cpp
+
+RESOURCES += \
+    $$PWD/ui/shared.qrc
