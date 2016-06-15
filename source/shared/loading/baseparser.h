@@ -8,7 +8,7 @@
 class BaseParser : public IParser
 {
 private:
-    std::atomic_bool _cancelAtomic;
+    std::atomic_bool _cancelAtomic{false};
 
 public:
     void cancel() { _cancelAtomic = true; }
