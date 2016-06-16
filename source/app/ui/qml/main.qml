@@ -21,7 +21,7 @@ ApplicationWindow
     property DocumentUI currentDocument: tabView.currentIndex < tabView.count ?
                                              tabView.getTab(tabView.currentIndex).item : null
 
-    title: (currentDocument ? currentDocument.title + qsTr(" - ") : "") + application.name()
+    title: (currentDocument ? currentDocument.title + qsTr(" - ") : "") + application.name
 
     // This is called when the app is started, but it also receives the arguments
     // of a second instance when it starts then immediately exits
@@ -43,11 +43,11 @@ ApplicationWindow
     {
         id: aboutMessageDialog
         icon: StandardIcon.Information
-        title: "About " + application.name()
-        text: application.name() + qsTr("\n\n") +
-              application.name() + qsTr(" version ") + application.version() +
+        title: "About " + application.name
+        text: application.name + qsTr("\n\n") +
+              application.name + qsTr(" version ") + application.version +
               qsTr(" is a tool for the visualisation and analysis of graphs.\n\n") +
-              application.copyright()
+              application.copyright
     }
 
     MessageDialog
@@ -417,7 +417,7 @@ ApplicationWindow
         {
             title: qsTr("&Help")
             MenuItem { text: qsTr("About Plugins...") ; onTriggered: pluginsDialog.show() }
-            MenuItem { text: qsTr("About " + application.name() + "...") ; onTriggered: aboutMessageDialog.open() }
+            MenuItem { text: qsTr("About " + application.name + "...") ; onTriggered: aboutMessageDialog.open() }
         }
     }
 

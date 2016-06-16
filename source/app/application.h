@@ -22,6 +22,9 @@ class Application : public QObject
 {
     Q_OBJECT
 
+    Q_PROPERTY(QString name READ name CONSTANT)
+    Q_PROPERTY(QString version READ version CONSTANT)
+    Q_PROPERTY(QString copyright READ copyright CONSTANT)
     Q_PROPERTY(QStringList nameFilters READ nameFilters NOTIFY nameFiltersChanged)
     Q_PROPERTY(QStringList pluginNames READ pluginNames NOTIFY pluginNamesChanged)
 
@@ -29,6 +32,10 @@ public:
     explicit Application(QObject *parent = nullptr);
 
     IPlugin* pluginForUrlTypeName(const QString& urlTypeName) const;
+
+    static QString name() { return QCoreApplication::applicationName(); }
+    static QString version() { return QCoreApplication::applicationVersion(); }
+    static QString copyright() { return QString(COPYRIGHT).replace("(c)", "©"); }
 
 signals:
     void nameFiltersChanged();
@@ -39,9 +46,6 @@ public slots:
     bool canOpenAnyOf(const QStringList& urlTypeNames) const;
     QStringList urlTypesOf(const QUrl& url) const;
 
-    static QString name() { return QCoreApplication::applicationName(); }
-    static QString version() { return QCoreApplication::applicationVersion(); }
-    static QString copyright() { return QString(COPYRIGHT).replace("(c)", "©"); }
     static const char* uri() { return _uri; }
     static int majorVersion() { return _majorVersion; }
     static int minorVersion() { return _minorVersion; }
