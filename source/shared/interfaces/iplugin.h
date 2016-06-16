@@ -28,6 +28,10 @@ class IPlugin : public virtual IUrlTypes
 public:
     virtual ~IPlugin() = default;
 
+    virtual QString name() const = 0;
+    virtual QString description() const = 0;
+    virtual QString imageSource() const = 0; // Displayed in the about dialog
+
     virtual QStringList identifyUrl(const QUrl& url) const = 0;
     virtual std::unique_ptr<IPluginInstance> createInstance() = 0;
 

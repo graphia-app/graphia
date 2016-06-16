@@ -76,6 +76,20 @@ ApplicationWindow
         id: optionsDialog
     }
 
+    PluginsDialog
+    {
+        id: pluginsDialog
+        pluginNames: application.pluginNames
+
+        onSelectedPluginNameChanged:
+        {
+            pluginsDialog.pluginDescription =
+                    application.descriptionForPluginName(pluginsDialog.selectedPluginName);
+            pluginsDialog.pluginImageSource =
+                    application.imageSourceForPluginName(pluginsDialog.selectedPluginName);
+        }
+    }
+
     Preferences
     {
         section: "window"
@@ -402,7 +416,8 @@ ApplicationWindow
         Menu
         {
             title: qsTr("&Help")
-            MenuItem { text: qsTr("About...") ; onTriggered: aboutMessageDialog.open() }
+            MenuItem { text: qsTr("About Plugins...") ; onTriggered: pluginsDialog.show() }
+            MenuItem { text: qsTr("About " + application.name() + "...") ; onTriggered: aboutMessageDialog.open() }
         }
     }
 

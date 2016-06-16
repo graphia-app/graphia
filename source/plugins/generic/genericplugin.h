@@ -46,6 +46,14 @@ class GenericPlugin : public BasePlugin
 public:
     GenericPlugin();
 
+    QString name() const { return "Generic"; }
+    QString description() const
+    {
+        return tr("A plugin that loads generic graphs from a variety "
+                  "of file formats.");
+    }
+    QString imageSource() const { return "qrc:///tools.svg"; }
+
     QStringList identifyUrl(const QUrl& url) const;
     std::unique_ptr<IPluginInstance> createInstance();
 

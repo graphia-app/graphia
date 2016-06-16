@@ -23,6 +23,7 @@ class Application : public QObject
     Q_OBJECT
 
     Q_PROPERTY(QStringList nameFilters READ nameFilters NOTIFY nameFiltersChanged)
+    Q_PROPERTY(QStringList pluginNames READ pluginNames NOTIFY pluginNamesChanged)
 
 public:
     explicit Application(QObject *parent = nullptr);
@@ -31,6 +32,7 @@ public:
 
 signals:
     void nameFiltersChanged();
+    void pluginNamesChanged();
 
 public slots:
     bool canOpen(const QString& urlTypeName) const;
@@ -47,6 +49,9 @@ public slots:
     QString baseFileNameForUrl(const QUrl& url) const { return url.fileName(); }
     QUrl urlForFileName(const QString& fileName) const { return QUrl::fromLocalFile(fileName); }
 
+    QString descriptionForPluginName(const QString& pluginName) const;
+    QString imageSourceForPluginName(const QString& pluginName) const;
+
     bool debugEnabled() const
     {
 #ifdef _DEBUG
@@ -61,7 +66,7 @@ private:
     static const int _majorVersion = 1;
     static const int _minorVersion = 0;
 
-    std::vector<IPlugin*> _plugins;
+    std::map<QString, IPlugin*> _plugins;
 
     void loadPlugins();
     void initialisePlugin(IPlugin* plugin);
@@ -69,6 +74,8 @@ private:
 
     QStringList _nameFilters;
     QStringList nameFilters() const { return _nameFilters; }
+
+    QStringList pluginNames() const;
 };
 
 #endif // APPLICATION_H

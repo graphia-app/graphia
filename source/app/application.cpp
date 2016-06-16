@@ -4,6 +4,8 @@
 #include "shared/interfaces/iplugin.h"
 #include "shared/loading/iparser.h"
 
+#include "shared/utils/utils.h"
+
 #include <QPluginLoader>
 #include <QDir>
 #include <QStandardPaths>
@@ -26,7 +28,7 @@ IPlugin* Application::pluginForUrlTypeName(const QString& urlTypeName) const
 
     for(auto plugin : _plugins)
     {
-        auto urlTypeNames = plugin->loadableUrlTypeNames();
+        auto urlTypeNames = plugin.second->loadableUrlTypeNames();
         bool willLoad = std::any_of(urlTypeNames.begin(), urlTypeNames.end(),
         [&urlTypeName](const QString& loadableUrlTypeName)
         {
@@ -34,7 +36,7 @@ IPlugin* Application::pluginForUrlTypeName(const QString& urlTypeName) const
         });
 
         if(willLoad)
-            viablePlugins.push_back(plugin);
+            viablePlugins.push_back(plugin.second);
     }
 
     if(viablePlugins.size() == 0)
@@ -54,7 +56,7 @@ bool Application::canOpen(const QString& urlTypeName) const
     return std::any_of(_plugins.begin(), _plugins.end(),
     [&urlTypeName](auto plugin)
     {
-        return plugin->loadableUrlTypeNames().contains(urlTypeName);
+        return plugin.second->loadableUrlTypeNames().contains(urlTypeName);
     });
 }
 
@@ -72,11 +74,44 @@ QStringList Application::urlTypesOf(const QUrl& url) const
     QStringList urlTypeNames;
 
     for(auto plugin : _plugins)
-        urlTypeNames.append(plugin->identifyUrl(url));
+        urlTypeNames.append(plugin.second->identifyUrl(url));
 
     urlTypeNames.removeDuplicates();
 
     return urlTypeNames;
+}
+
+QString Application::descriptionForPluginName(const QString& pluginName) const
+{
+    if(!u::contains(_plugins, pluginName))
+        return {};
+
+    auto plugin = _plugins.at(pluginName);
+
+    QString urlTypes;
+    for(auto& loadbleUrlTypeName : plugin->loadableUrlTypeNames())
+    {
+        if(!urlTypes.isEmpty())
+            urlTypes += tr(", ");
+
+        urlTypes += plugin->collectiveDescriptionForUrlTypeName(loadbleUrlTypeName);
+    }
+
+    if(urlTypes.isEmpty())
+        urlTypes = tr("None");
+
+    return QString(tr("%1\n\nSupported data types: %2"))
+            .arg(plugin->description()).arg(urlTypes);
+}
+
+QString Application::imageSourceForPluginName(const QString& pluginName) const
+{
+    if(!u::contains(_plugins, pluginName))
+        return {};
+
+    auto plugin = _plugins.at(pluginName);
+
+    return plugin->imageSource();
 }
 
 void Application::loadPlugins()
@@ -125,12 +160,15 @@ void Application::loadPlugins()
         }
     }
 
+    //FIXME: avoid loading plugins with the same name
+
     updateNameFilters();
 }
 
 void Application::initialisePlugin(IPlugin* plugin)
 {
-    _plugins.push_back(plugin);
+    _plugins.emplace(plugin->name(), plugin);
+    emit pluginNamesChanged();
 }
 
 void Application::updateNameFilters()
@@ -145,10 +183,10 @@ void Application::updateNameFilters()
 
     for(auto plugin : _plugins)
     {
-        for(auto& urlTypeName : plugin->loadableUrlTypeNames())
+        for(auto& urlTypeName : plugin.second->loadableUrlTypeNames())
         {
-            FileType fileType = {plugin->collectiveDescriptionForUrlTypeName(urlTypeName),
-                                 plugin->extensionsForUrlTypeName(urlTypeName)};
+            FileType fileType = {plugin.second->collectiveDescriptionForUrlTypeName(urlTypeName),
+                                 plugin.second->extensionsForUrlTypeName(urlTypeName)};
             fileTypes.emplace_back(fileType);
         }
     }
@@ -194,4 +232,14 @@ void Application::updateNameFilters()
     }
 
     emit nameFiltersChanged();
+}
+
+QStringList Application::pluginNames() const
+{
+    QStringList l;
+
+    for(auto plugin : _plugins)
+        l.append(plugin.first);
+
+    return l;
 }

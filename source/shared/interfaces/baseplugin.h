@@ -85,6 +85,9 @@ class BasePlugin : public QObject, public IPlugin, public UrlTypes
 {
     Q_OBJECT
     Q_INTERFACES(IPlugin)
+
+    // Default empty image
+    QString imageSource() const { return {}; }
 };
 
 #endif // BASEPLUGIN_H
