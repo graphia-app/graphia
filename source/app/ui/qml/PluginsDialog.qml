@@ -9,12 +9,13 @@ Window
 {
     id: pluginsWindow
 
-    property var pluginNames
-    readonly property var selectedPluginName:
-        pluginNamesList.currentRow >= 0 && pluginNamesList.currentRow < pluginNames.length ?
-            pluginNames[pluginNamesList.currentRow] : ""
-    property string pluginDescription
-    property string pluginImageSource
+    property var pluginDetails
+
+    // These data members are undocumented, so this could break in future
+    property string pluginDescription: pluginNamesList.contentItem.currentItem ?
+        pluginNamesList.contentItem.currentItem.rowItem.itemModel.description : ""
+    property string pluginImageSource: pluginNamesList.contentItem.currentItem ?
+        pluginNamesList.contentItem.currentItem.rowItem.itemModel.imageSource : ""
 
     onVisibleChanged:
     {
@@ -50,10 +51,10 @@ Window
             Layout.rowSpan: pluginImageSource.length > 0 ? 3 : 2
             Layout.fillHeight: true
 
-            TableViewColumn {}
+            TableViewColumn { role: "name" }
             headerDelegate: Item {}
 
-            model: pluginNames
+            model: pluginDetails
         }
 
         Image

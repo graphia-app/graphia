@@ -7,9 +7,9 @@
 #include <QUrl>
 #include <QRect>
 #include <QColor>
+#include <QAbstractListModel>
 
 #include <vector>
-#include <map>
 #include <memory>
 
 #include <QCoreApplication>
@@ -17,6 +17,30 @@
 class GraphModel;
 class IParser;
 class IPlugin;
+
+class PluginDetailsModel : public QAbstractListModel
+{
+    Q_OBJECT
+
+public:
+    explicit PluginDetailsModel(const std::vector<IPlugin*>* plugins) :
+        _plugins(plugins)
+    {}
+
+    enum Roles
+    {
+        Name = Qt::UserRole + 1,
+        Description,
+        ImageSource
+    };
+
+    int rowCount(const QModelIndex&) const;
+    QVariant data(const QModelIndex& index, int role) const;
+    QHash<int, QByteArray> roleNames() const;
+
+private:
+    const std::vector<IPlugin*>* _plugins;
+};
 
 class Application : public QObject
 {
@@ -26,7 +50,7 @@ class Application : public QObject
     Q_PROPERTY(QString version READ version CONSTANT)
     Q_PROPERTY(QString copyright READ copyright CONSTANT)
     Q_PROPERTY(QStringList nameFilters READ nameFilters NOTIFY nameFiltersChanged)
-    Q_PROPERTY(QStringList pluginNames READ pluginNames NOTIFY pluginNamesChanged)
+    Q_PROPERTY(QAbstractListModel* pluginDetails READ pluginDetails NOTIFY pluginDetailsChanged)
 
 public:
     explicit Application(QObject *parent = nullptr);
@@ -39,7 +63,7 @@ public:
 
 signals:
     void nameFiltersChanged();
-    void pluginNamesChanged();
+    void pluginDetailsChanged();
 
 public slots:
     bool canOpen(const QString& urlTypeName) const;
@@ -52,9 +76,6 @@ public slots:
 
     QString baseFileNameForUrl(const QUrl& url) const { return url.fileName(); }
     QUrl urlForFileName(const QString& fileName) const { return QUrl::fromLocalFile(fileName); }
-
-    QString descriptionForPluginName(const QString& pluginName) const;
-    QString imageSourceForPluginName(const QString& pluginName) const;
 
     bool debugEnabled() const
     {
@@ -70,7 +91,8 @@ private:
     static const int _majorVersion = 1;
     static const int _minorVersion = 0;
 
-    std::map<QString, IPlugin*> _plugins;
+    std::vector<IPlugin*> _plugins;
+    PluginDetailsModel _pluginDetails;
 
     void loadPlugins();
     void initialisePlugin(IPlugin* plugin);
@@ -79,7 +101,7 @@ private:
     QStringList _nameFilters;
     QStringList nameFilters() const { return _nameFilters; }
 
-    QStringList pluginNames() const;
+    QAbstractListModel* pluginDetails();
 };
 
 #endif // APPLICATION_H

@@ -79,15 +79,7 @@ ApplicationWindow
     PluginsDialog
     {
         id: pluginsDialog
-        pluginNames: application.pluginNames
-
-        onSelectedPluginNameChanged:
-        {
-            pluginsDialog.pluginDescription =
-                    application.descriptionForPluginName(pluginsDialog.selectedPluginName);
-            pluginsDialog.pluginImageSource =
-                    application.imageSourceForPluginName(pluginsDialog.selectedPluginName);
-        }
+        pluginDetails: application.pluginDetails
     }
 
     Preferences

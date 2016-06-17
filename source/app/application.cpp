@@ -17,7 +17,8 @@
 const char* Application::_uri = "com.kajeka";
 
 Application::Application(QObject *parent) :
-    QObject(parent)
+    QObject(parent),
+    _pluginDetails(&_plugins)
 {
     loadPlugins();
 }
@@ -28,7 +29,7 @@ IPlugin* Application::pluginForUrlTypeName(const QString& urlTypeName) const
 
     for(auto plugin : _plugins)
     {
-        auto urlTypeNames = plugin.second->loadableUrlTypeNames();
+        auto urlTypeNames = plugin->loadableUrlTypeNames();
         bool willLoad = std::any_of(urlTypeNames.begin(), urlTypeNames.end(),
         [&urlTypeName](const QString& loadableUrlTypeName)
         {
@@ -36,7 +37,7 @@ IPlugin* Application::pluginForUrlTypeName(const QString& urlTypeName) const
         });
 
         if(willLoad)
-            viablePlugins.push_back(plugin.second);
+            viablePlugins.push_back(plugin);
     }
 
     if(viablePlugins.size() == 0)
@@ -56,7 +57,7 @@ bool Application::canOpen(const QString& urlTypeName) const
     return std::any_of(_plugins.begin(), _plugins.end(),
     [&urlTypeName](auto plugin)
     {
-        return plugin.second->loadableUrlTypeNames().contains(urlTypeName);
+        return plugin->loadableUrlTypeNames().contains(urlTypeName);
     });
 }
 
@@ -74,44 +75,11 @@ QStringList Application::urlTypesOf(const QUrl& url) const
     QStringList urlTypeNames;
 
     for(auto plugin : _plugins)
-        urlTypeNames.append(plugin.second->identifyUrl(url));
+        urlTypeNames.append(plugin->identifyUrl(url));
 
     urlTypeNames.removeDuplicates();
 
     return urlTypeNames;
-}
-
-QString Application::descriptionForPluginName(const QString& pluginName) const
-{
-    if(!u::contains(_plugins, pluginName))
-        return {};
-
-    auto plugin = _plugins.at(pluginName);
-
-    QString urlTypes;
-    for(auto& loadbleUrlTypeName : plugin->loadableUrlTypeNames())
-    {
-        if(!urlTypes.isEmpty())
-            urlTypes += tr(", ");
-
-        urlTypes += plugin->collectiveDescriptionForUrlTypeName(loadbleUrlTypeName);
-    }
-
-    if(urlTypes.isEmpty())
-        urlTypes = tr("None");
-
-    return QString(tr("%1\n\nSupported data types: %2"))
-            .arg(plugin->description()).arg(urlTypes);
-}
-
-QString Application::imageSourceForPluginName(const QString& pluginName) const
-{
-    if(!u::contains(_plugins, pluginName))
-        return {};
-
-    auto plugin = _plugins.at(pluginName);
-
-    return plugin->imageSource();
 }
 
 void Application::loadPlugins()
@@ -154,21 +122,34 @@ void Application::loadPlugins()
             {
                 auto* iplugin = qobject_cast<IPlugin*>(plugin);
                 if(iplugin)
-                    initialisePlugin(iplugin);
+                {
+                    bool pluginNameAlreadyUsed = std::any_of(_plugins.begin(), _plugins.end(),
+                    [pluginName = iplugin->name()](auto loadedPlugin)
+                    {
+                        return loadedPlugin->name().compare(pluginName, Qt::CaseInsensitive) == 0;
+                    });
 
+                    if(pluginNameAlreadyUsed)
+                    {
+                        qDebug() << "WARNING: not loading plugin" << iplugin->name() <<
+                                    "as a plugin of the same name is already loaded";
+                        pluginLoader.unload();
+                        continue;
+                    }
+
+                    initialisePlugin(iplugin);
+                }
             }
         }
     }
-
-    //FIXME: avoid loading plugins with the same name
 
     updateNameFilters();
 }
 
 void Application::initialisePlugin(IPlugin* plugin)
 {
-    _plugins.emplace(plugin->name(), plugin);
-    emit pluginNamesChanged();
+    _plugins.push_back(plugin);
+    emit pluginDetailsChanged();
 }
 
 void Application::updateNameFilters()
@@ -183,10 +164,10 @@ void Application::updateNameFilters()
 
     for(auto plugin : _plugins)
     {
-        for(auto& urlTypeName : plugin.second->loadableUrlTypeNames())
+        for(auto& urlTypeName : plugin->loadableUrlTypeNames())
         {
-            FileType fileType = {plugin.second->collectiveDescriptionForUrlTypeName(urlTypeName),
-                                 plugin.second->extensionsForUrlTypeName(urlTypeName)};
+            FileType fileType = {plugin->collectiveDescriptionForUrlTypeName(urlTypeName),
+                                 plugin->extensionsForUrlTypeName(urlTypeName)};
             fileTypes.emplace_back(fileType);
         }
     }
@@ -234,12 +215,63 @@ void Application::updateNameFilters()
     emit nameFiltersChanged();
 }
 
-QStringList Application::pluginNames() const
+QAbstractListModel* Application::pluginDetails()
 {
-    QStringList l;
+    return &_pluginDetails;
+}
 
-    for(auto plugin : _plugins)
-        l.append(plugin.first);
+int PluginDetailsModel::rowCount(const QModelIndex&) const
+{
+    return static_cast<int>(_plugins->size());
+}
 
-    return l;
+QVariant PluginDetailsModel::data(const QModelIndex& index, int role) const
+{
+    int row = index.row();
+
+    if(row < 0 || row >= rowCount(index))
+        return QVariant(QVariant::Invalid);
+
+    auto* plugin = _plugins->at(row);
+
+    switch(role)
+    {
+    case Name:
+        return plugin->name();
+
+    case Description:
+    {
+        QString urlTypes;
+        for(auto& loadbleUrlTypeName : plugin->loadableUrlTypeNames())
+        {
+            if(!urlTypes.isEmpty())
+                urlTypes += tr(", ");
+
+            urlTypes += plugin->collectiveDescriptionForUrlTypeName(loadbleUrlTypeName);
+        }
+
+        if(urlTypes.isEmpty())
+            urlTypes = tr("None");
+
+        return QString(tr("%1\n\nSupported data types: %2"))
+                .arg(plugin->description()).arg(urlTypes);
+    }
+
+    case ImageSource:
+        return plugin->imageSource();
+
+    default:
+        break;
+    }
+
+    return QVariant(QVariant::Invalid);
+}
+
+QHash<int, QByteArray> PluginDetailsModel::roleNames() const
+{
+    QHash<int, QByteArray> roles;
+    roles[Name] = "name";
+    roles[Description] = "description";
+    roles[ImageSource] = "imageSource";
+    return roles;
 }
