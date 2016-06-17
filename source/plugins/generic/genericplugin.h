@@ -2,12 +2,13 @@
 #define GENERICPLUGIN_H
 
 #include "shared/interfaces/baseplugin.h"
+#include "shared/interfaces/igenericplugininstance.h"
 
 #include "shared/graph/grapharray.h"
 
 #include <memory>
 
-class GenericPluginInstance : public BasePluginInstance
+class GenericPluginInstance : public BasePluginInstance, public IGenericPluginInstance
 {
     Q_OBJECT
 

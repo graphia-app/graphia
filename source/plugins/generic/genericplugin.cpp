@@ -1,7 +1,7 @@
 #include "genericplugin.h"
 
-#include "loading/gmlfileparser.h"
-#include "loading/pairwisetxtfileparser.h"
+#include "shared/loading/gmlfileparser.h"
+#include "shared/loading/pairwisetxtfileparser.h"
 
 GenericPluginInstance::GenericPluginInstance()
 {

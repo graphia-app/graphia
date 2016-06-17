@@ -11,14 +11,10 @@ DESTDIR = ../../../plugins
 CONFIG += plugin
 
 SOURCES += \
-    genericplugin.cpp \
-    loading/gmlfileparser.cpp \
-    loading/pairwisetxtfileparser.cpp
+    genericplugin.cpp
 
 HEADERS += \
-    genericplugin.h \
-    loading/gmlfileparser.h \
-    loading/pairwisetxtfileparser.h
+    genericplugin.h
 
 RESOURCES += \
     ui/qml.qrc

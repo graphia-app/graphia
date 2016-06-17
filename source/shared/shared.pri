@@ -23,7 +23,10 @@ HEADERS += \
     $$PWD/graph/igrapharrayclient.h \
     $$PWD/transform/idatafield.h \
     $$PWD/ui/iselectionmanager.h \
-    $$PWD/loading/baseparser.h
+    $$PWD/loading/baseparser.h \
+    $$PWD/loading/gmlfileparser.h \
+    $$PWD/loading/pairwisetxtfileparser.h \
+    $$PWD/interfaces/igenericplugininstance.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \
@@ -32,7 +35,9 @@ SOURCES += \
     $$PWD/utils/preferences.cpp \
     $$PWD/utils/semaphore.cpp \
     $$PWD/utils/threadpool.cpp \
-    $$PWD/utils/utils.cpp
+    $$PWD/utils/utils.cpp \
+    $$PWD/loading/gmlfileparser.cpp \
+    $$PWD/loading/pairwisetxtfileparser.cpp
 
 RESOURCES += \
     $$PWD/ui/shared.qrc
