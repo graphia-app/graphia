@@ -23,33 +23,15 @@ Application::Application(QObject *parent) :
     loadPlugins();
 }
 
-IPlugin* Application::pluginForUrlTypeName(const QString& urlTypeName) const
+IPlugin* Application::pluginForName(const QString& pluginName) const
 {
-    std::vector<IPlugin*> viablePlugins;
-
     for(auto plugin : _plugins)
     {
-        auto urlTypeNames = plugin->loadableUrlTypeNames();
-        bool willLoad = std::any_of(urlTypeNames.begin(), urlTypeNames.end(),
-        [&urlTypeName](const QString& loadableUrlTypeName)
-        {
-            return loadableUrlTypeName.compare(urlTypeName) == 0;
-        });
-
-        if(willLoad)
-            viablePlugins.push_back(plugin);
+        if(plugin->name().compare(pluginName) == 0)
+            return plugin;
     }
 
-    if(viablePlugins.size() == 0)
-        return nullptr;
-
-    //FIXME: Allow the user to choose which plugin to use if there is more than 1
-    Q_ASSERT(viablePlugins.size() == 1);
-
-    auto* plugin = viablePlugins.at(0);
-
-    return plugin;
-
+    return nullptr;
 }
 
 bool Application::canOpen(const QString& urlTypeName) const
@@ -80,6 +62,26 @@ QStringList Application::urlTypesOf(const QUrl& url) const
     urlTypeNames.removeDuplicates();
 
     return urlTypeNames;
+}
+
+QStringList Application::pluginNames(const QString& urlTypeName) const
+{
+    QStringList viablePluginNames;
+
+    for(auto plugin : _plugins)
+    {
+        auto urlTypeNames = plugin->loadableUrlTypeNames();
+        bool willLoad = std::any_of(urlTypeNames.begin(), urlTypeNames.end(),
+        [&urlTypeName](const QString& loadableUrlTypeName)
+        {
+            return loadableUrlTypeName.compare(urlTypeName) == 0;
+        });
+
+        if(willLoad)
+            viablePluginNames.append(plugin->name());
+    }
+
+    return viablePluginNames;
 }
 
 void Application::loadPlugins()

@@ -55,7 +55,7 @@ class Application : public QObject
 public:
     explicit Application(QObject *parent = nullptr);
 
-    IPlugin* pluginForUrlTypeName(const QString& urlTypeName) const;
+    IPlugin* pluginForName(const QString& pluginName) const;
 
     static QString name() { return QCoreApplication::applicationName(); }
     static QString version() { return QCoreApplication::applicationVersion(); }
@@ -69,6 +69,8 @@ public slots:
     bool canOpen(const QString& urlTypeName) const;
     bool canOpenAnyOf(const QStringList& urlTypeNames) const;
     QStringList urlTypesOf(const QUrl& url) const;
+
+    QStringList pluginNames(const QString& urlTypeName) const;
 
     static const char* uri() { return _uri; }
     static int majorVersion() { return _majorVersion; }

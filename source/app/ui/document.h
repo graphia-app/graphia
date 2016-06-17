@@ -182,7 +182,9 @@ signals:
     void fpsChanged();
 
 public slots:
-    bool openFile(const QUrl& fileUrl, const QString& fileType);
+    bool openFile(const QUrl& fileUrl,
+                  const QString& fileType,
+                  const QString& pluginName);
 
     void toggleLayout();
 

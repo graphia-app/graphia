@@ -14,6 +14,7 @@ Item
 
     property url fileUrl
     property string fileType
+    property string pluginName
 
     property string title: document.title
     property string status: document.status
@@ -73,12 +74,13 @@ Item
         property color backgroundColor
     }
 
-    function openFile(fileUrl, fileType)
+    function openFile(fileUrl, fileType, pluginName)
     {
-        if(document.openFile(fileUrl, fileType))
+        if(document.openFile(fileUrl, fileType, pluginName))
         {
             this.fileUrl = fileUrl;
             this.fileType = fileType;
+            this.pluginName = pluginName;
 
             return true;
         }

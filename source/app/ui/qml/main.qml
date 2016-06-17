@@ -128,15 +128,21 @@ ApplicationWindow
         }
 
         //FIXME handle case where there are multiple possible file types (allow the user to choose one)
-        console.assert(fileTypes.length === 1)
+        console.assert(fileTypes.length === 1);
         var fileType = fileTypes[0];
+
+        var pluginNames = application.pluginNames(fileType);
+
+        //FIXME handle case where there are multiple possible plugins (allow the user to choose one)
+        console.assert(pluginNames.length === 1);
+        var pluginName = pluginNames[0];
 
         if(currentDocument != null && !inNewTab)
             tabView.replaceTab();
         else
             tabView.createTab();
 
-        tabView.openInCurrentTab(fileUrl, fileType);
+        tabView.openInCurrentTab(fileUrl, fileType, pluginName);
     }
 
     FileDialog
@@ -474,10 +480,10 @@ ApplicationWindow
             return insertTabAtIndex(oldIndex);
         }
 
-        function openInCurrentTab(fileUrl, fileType)
+        function openInCurrentTab(fileUrl, fileType, pluginName)
         {
             currentDocument.application = application;
-            if(!currentDocument.openFile(fileUrl, fileType))
+            if(!currentDocument.openFile(fileUrl, fileType, pluginName))
             {
                 errorOpeningFileMessageDialog.text = application.baseFileNameForUrl(fileUrl) +
                         qsTr(" could not be opened due to an error.");

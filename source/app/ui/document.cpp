@@ -287,9 +287,9 @@ void Document::onGraphTransformsConfigurationDataChanged(const QModelIndex& inde
         applyTransforms();
 }
 
-bool Document::openFile(const QUrl& fileUrl, const QString& fileType)
+bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QString& pluginName)
 {
-    auto* plugin = _application->pluginForUrlTypeName(fileType);
+    auto* plugin = _application->pluginForName(pluginName);
     if(plugin == nullptr)
         return false;
 
