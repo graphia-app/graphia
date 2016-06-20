@@ -127,16 +127,24 @@ ApplicationWindow
             return;
         }
 
-        //FIXME handle case where there are multiple possible file types (allow the user to choose one)
-        console.assert(fileTypes.length === 1);
-        var fileType = fileTypes[0];
+        if(fileTypes.length === 1)
+            openFileOfType(fileUrl, fileTypes[0], inNewTab)
+        /*else
+            //FIXME ask*/
+    }
 
+    function openFileOfType(fileUrl, fileType, inNewTab)
+    {
         var pluginNames = application.pluginNames(fileType);
 
-        //FIXME handle case where there are multiple possible plugins (allow the user to choose one)
-        console.assert(pluginNames.length === 1);
-        var pluginName = pluginNames[0];
+        if(pluginNames.length === 1)
+            openFileOfTypeWithPlugin(fileUrl, fileType, pluginNames[0], inNewTab)
+        /*else
+            //FIXME ask*/
+    }
 
+    function openFileOfTypeWithPlugin(fileUrl, fileType, pluginName, inNewTab)
+    {
         if(currentDocument != null && !inNewTab)
             tabView.replaceTab();
         else
