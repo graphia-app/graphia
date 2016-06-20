@@ -84,8 +84,8 @@ void GenericPluginInstance::onSelectionChanged(const ISelectionManager*)
 
 GenericPlugin::GenericPlugin()
 {
-    registerUrlType("GML", QObject::tr("GML Files"), {"gml"});
-    registerUrlType("PairwiseTXT", QObject::tr("Pairwise Text Files"), {"txt"});
+    registerUrlType("GML", QObject::tr("GML File"), QObject::tr("GML Files"), {"gml"});
+    registerUrlType("PairwiseTXT", QObject::tr("Pairwise Text File"), QObject::tr("Pairwise Text Files"), {"txt"});
 }
 
 QStringList GenericPlugin::identifyUrl(const QUrl& url) const

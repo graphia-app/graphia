@@ -5,9 +5,12 @@
 #include <QFileInfo>
 #include <QUrl>
 
-void UrlTypes::registerUrlType(const QString& urlTypeName, const QString& collectiveDescription, const QStringList& extensions)
+void UrlTypes::registerUrlType(const QString& urlTypeName,
+                               const QString& individualDescription,
+                               const QString& collectiveDescription,
+                               const QStringList& extensions)
 {
-    _urlTypes.emplace(urlTypeName, UrlType(collectiveDescription, extensions));
+    _urlTypes.emplace(urlTypeName, UrlType(individualDescription, collectiveDescription, extensions));
 }
 
 QStringList UrlTypes::identifyByExtension(const QUrl& url) const
@@ -38,6 +41,13 @@ QStringList UrlTypes::loadableUrlTypeNames() const
         urlTypeNames.append(urlType.first);
 
     return urlTypeNames;
+}
+
+QString UrlTypes::individualDescriptionForUrlTypeName(const QString& urlTypeName) const
+{
+    Q_ASSERT(u::contains(_urlTypes, urlTypeName));
+
+    return _urlTypes.at(urlTypeName).individualDescription();
 }
 
 QString UrlTypes::collectiveDescriptionForUrlTypeName(const QString& urlTypeName) const

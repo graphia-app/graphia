@@ -10,6 +10,7 @@ public:
     virtual ~IUrlTypes() = default;
 
     virtual QStringList loadableUrlTypeNames() const = 0;
+    virtual QString individualDescriptionForUrlTypeName(const QString& urlTypeName) const = 0;
     virtual QString collectiveDescriptionForUrlTypeName(const QString& urlTypeName) const = 0;
     virtual QStringList extensionsForUrlTypeName(const QString& urlTypeName) const = 0;
 };

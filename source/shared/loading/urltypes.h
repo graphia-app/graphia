@@ -16,16 +16,20 @@ private:
     class UrlType
     {
     public:
-        UrlType(const QString& collectiveDescription,
-             const QStringList& extensions) :
+        UrlType(const QString& individualDescription,
+                const QString& collectiveDescription,
+                const QStringList& extensions) :
+            _individualDescription(individualDescription),
             _collectiveDescription(collectiveDescription),
             _extensions(extensions)
         {}
 
+        const QString& individualDescription() const { return _individualDescription; }
         const QString& collectiveDescription() const { return _collectiveDescription; }
         const QStringList extensions() const { return _extensions; }
 
     private:
+        QString _individualDescription;
         QString _collectiveDescription;
         QStringList _extensions;
     };
@@ -34,6 +38,7 @@ private:
 
 protected:
     void registerUrlType(const QString& urlTypeName,
+                         const QString& individualDescription,
                          const QString& collectiveDescription,
                          const QStringList& extensions);
 
@@ -43,6 +48,7 @@ public:
     virtual ~UrlTypes() = default;
 
     QStringList loadableUrlTypeNames() const;
+    QString individualDescriptionForUrlTypeName(const QString& urlTypeName) const;
     QString collectiveDescriptionForUrlTypeName(const QString& urlTypeName) const;
     QStringList extensionsForUrlTypeName(const QString& urlTypeName) const;
 };
