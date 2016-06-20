@@ -310,8 +310,8 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
     connect(&_graphModel->graph().debugPauser, &DebugPauser::pausedChanged, this, &Document::debugPausedChanged);
     connect(&_graphModel->graph().debugPauser, &DebugPauser::resumeActionChanged, this, &Document::debugResumeActionChanged);
 
-    emit pluginQmlPathChanged();
     emit pluginInstanceChanged();
+    emit pluginQmlPathChanged();
 
     auto parser = _pluginInstance->parserForUrlTypeName(fileType);
     if(parser == nullptr)
