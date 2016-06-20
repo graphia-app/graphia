@@ -160,6 +160,12 @@ void Application::updateNameFilters()
     {
         QString _collectiveDescription;
         QStringList _extensions;
+
+        bool operator==(const FileType& other)
+        {
+            return _collectiveDescription == other._collectiveDescription &&
+                    _extensions == other._extensions;
+        }
     };
 
     std::vector<FileType> fileTypes;
@@ -180,6 +186,8 @@ void Application::updateNameFilters()
     {
         return a._collectiveDescription.compare(b._collectiveDescription, Qt::CaseInsensitive) < 0;
     });
+
+    fileTypes.erase(std::unique(fileTypes.begin(), fileTypes.end()), fileTypes.end());
 
     QString description = QObject::tr("All Files (");
     bool second = false;
