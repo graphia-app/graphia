@@ -62,6 +62,8 @@ Window
             Layout.margins: Constants.margin
             visible: pluginImageSource.length > 0
             source: pluginImageSource
+            sourceSize.width: 96
+            sourceSize.height: 96
         }
 
         Text
