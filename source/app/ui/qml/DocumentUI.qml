@@ -261,11 +261,18 @@ Item
                 while(plugin.children.length > 0)
                     plugin.children[0].destroy();
 
-                var contentComponent = Qt.createComponent(document.pluginQmlPath);
-                var contentObject = contentComponent.createObject(plugin);
+                var pluginComponent = Qt.createComponent(document.pluginQmlPath);
 
-                if(contentObject === null)
-                    console.log(document.pluginQmlPath + " failed to load");
+                if(pluginComponent.status !== Component.Ready)
+                {
+                    console.log(pluginComponent.errorString());
+                    return;
+                }
+
+                var pluginObject = pluginComponent.createObject(plugin);
+
+                if(pluginObject === null)
+                    console.log(document.pluginQmlPath + ": failed to create instance");
             }
         }
     }
