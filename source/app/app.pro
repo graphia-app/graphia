@@ -2,9 +2,7 @@ TEMPLATE = app
 
 include(../common.pri)
 include(../shared/shared.pri)
-include(../thirdparty/qtsingleapplication/qtsingleapplication.pri)
-include(../thirdparty/breakpad/breakpad.pri)
-include(../thirdparty/SortFilterProxyModel/SortFilterProxyModel.pri)
+include(../thirdparty/thirdparty.pri)
 
 # Put the binary in the root of the build directory
 DESTDIR = ../..
