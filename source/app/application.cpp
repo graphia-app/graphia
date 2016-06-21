@@ -161,7 +161,7 @@ void Application::updateNameFilters()
         QString _collectiveDescription;
         QStringList _extensions;
 
-        bool operator==(const FileType& other)
+        bool operator==(const FileType& other) const
         {
             return _collectiveDescription == other._collectiveDescription &&
                     _extensions == other._extensions;
