@@ -18,7 +18,7 @@ DEFINES += "PRODUCT_NAME=\"\\\"$$TARGET\\\"\""
 RC_ICONS = icon/Icon.ico # Windows
 ICON = icon/Icon.icns # OSX
 
-QT += qml quick widgets opengl openglextensions xml svg
+QT += qml quick widgets opengl openglextensions xml svg webengine
 
 HEADERS += \
     application.h \

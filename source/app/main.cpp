@@ -6,6 +6,8 @@
 #include <QIcon>
 #include <QMessageBox>
 
+#include <QtWebEngine/QtWebEngine>
+
 #include "application.h"
 #include "ui/document.h"
 #include "ui/graphquickitem.h"
@@ -100,6 +102,9 @@ int main(int argc, char *argv[])
 
     preferences.define("misc/showGraphMetrics",             false);
     preferences.define("misc/showLayoutSettings",           false);
+
+    // Plugins may use this, so we need to initialise it
+    QtWebEngine::initialize();
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
