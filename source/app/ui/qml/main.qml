@@ -127,20 +127,46 @@ ApplicationWindow
             return;
         }
 
-        if(fileTypes.length === 1)
+        if(fileTypes.length > 1)
+        {
+            fileTypeChooserDialog.fileUrl = fileUrl
+            fileTypeChooserDialog.fileTypes = fileTypes;
+            fileTypeChooserDialog.inNewTab = inNewTab;
+            fileTypeChooserDialog.open();
+        }
+        else
             openFileOfType(fileUrl, fileTypes[0], inNewTab)
-        /*else
-            //FIXME ask*/
+
+    }
+
+    FileTypeChooserDialog
+    {
+        id: fileTypeChooserDialog
+        model: application.urlTypeDetails
+        onAccepted: openFileOfType(fileUrl, fileType, inNewTab)
     }
 
     function openFileOfType(fileUrl, fileType, inNewTab)
     {
         var pluginNames = application.pluginNames(fileType);
 
-        if(pluginNames.length === 1)
+        if(pluginNames.length > 1)
+        {
+            pluginChooserDialog.fileUrl = fileUrl
+            pluginChooserDialog.fileType = fileType;
+            pluginChooserDialog.pluginNames = pluginNames;
+            pluginChooserDialog.inNewTab = inNewTab;
+            pluginChooserDialog.open();
+        }
+        else
             openFileOfTypeWithPlugin(fileUrl, fileType, pluginNames[0], inNewTab)
-        /*else
-            //FIXME ask*/
+    }
+
+    PluginChooserDialog
+    {
+        id: pluginChooserDialog
+        model: application.pluginDetails
+        onAccepted: openFileOfTypeWithPlugin(fileUrl, fileType, pluginName, inNewTab)
     }
 
     function openFileOfTypeWithPlugin(fileUrl, fileType, pluginName, inNewTab)
