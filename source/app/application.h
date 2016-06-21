@@ -18,6 +18,33 @@ class GraphModel;
 class IParser;
 class IPlugin;
 
+class UrlTypeDetailsModel : public QAbstractListModel
+{
+    Q_OBJECT
+
+public:
+    explicit UrlTypeDetailsModel(const std::vector<IPlugin*>* plugins) :
+        _plugins(plugins)
+    {}
+
+    enum Roles
+    {
+        Name = Qt::UserRole + 1,
+        IndividualDescription,
+        CollectiveDescription
+    };
+
+    int rowCount(const QModelIndex&) const;
+    QVariant data(const QModelIndex& index, int role) const;
+    QHash<int, QByteArray> roleNames() const;
+
+public slots:
+    QString nameAtIndex(int i) const { return data(index(i), Name).toString(); }
+
+private:
+    const std::vector<IPlugin*>* _plugins;
+};
+
 class PluginDetailsModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -38,6 +65,9 @@ public:
     QVariant data(const QModelIndex& index, int role) const;
     QHash<int, QByteArray> roleNames() const;
 
+public slots:
+    QString nameAtIndex(int i) const { return data(index(i), Name).toString(); }
+
 private:
     const std::vector<IPlugin*>* _plugins;
 };
@@ -50,6 +80,7 @@ class Application : public QObject
     Q_PROPERTY(QString version READ version CONSTANT)
     Q_PROPERTY(QString copyright READ copyright CONSTANT)
     Q_PROPERTY(QStringList nameFilters READ nameFilters NOTIFY nameFiltersChanged)
+    Q_PROPERTY(QAbstractListModel* urlTypeDetails READ urlTypeDetails NOTIFY urlTypeDetailsChanged)
     Q_PROPERTY(QAbstractListModel* pluginDetails READ pluginDetails NOTIFY pluginDetailsChanged)
 
 public:
@@ -64,6 +95,7 @@ public:
 signals:
     void nameFiltersChanged();
     void pluginDetailsChanged();
+    void urlTypeDetailsChanged();
 
 public slots:
     bool canOpen(const QString& urlTypeName) const;
@@ -93,6 +125,8 @@ private:
     static const int _majorVersion = 1;
     static const int _minorVersion = 0;
 
+    UrlTypeDetailsModel _urlTypeDetails;
+
     std::vector<IPlugin*> _plugins;
     PluginDetailsModel _pluginDetails;
 
@@ -103,6 +137,7 @@ private:
     QStringList _nameFilters;
     QStringList nameFilters() const { return _nameFilters; }
 
+    QAbstractListModel* urlTypeDetails();
     QAbstractListModel* pluginDetails();
 };
 

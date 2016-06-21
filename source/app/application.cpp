@@ -18,6 +18,7 @@ const char* Application::_uri = "com.kajeka";
 
 Application::Application(QObject *parent) :
     QObject(parent),
+    _urlTypeDetails(&_plugins),
     _pluginDetails(&_plugins)
 {
     loadPlugins();
@@ -151,31 +152,38 @@ void Application::loadPlugins()
 void Application::initialisePlugin(IPlugin* plugin)
 {
     _plugins.push_back(plugin);
+    emit urlTypeDetailsChanged();
     emit pluginDetailsChanged();
 }
 
-void Application::updateNameFilters()
+struct UrlType
 {
-    struct FileType
+    QString _name;
+    QString _individualDescription;
+    QString _collectiveDescription;
+    QStringList _extensions;
+
+    bool operator==(const UrlType& other) const
     {
-        QString _collectiveDescription;
-        QStringList _extensions;
+        return _name == other._name &&
+               _individualDescription == other._individualDescription &&
+               _collectiveDescription == other._collectiveDescription &&
+               _extensions == other._extensions;
+    }
+};
 
-        bool operator==(const FileType& other) const
-        {
-            return _collectiveDescription == other._collectiveDescription &&
-                    _extensions == other._extensions;
-        }
-    };
+static std::vector<UrlType> urlTypesForPlugins(const std::vector<IPlugin*>& plugins)
+{
+    std::vector<UrlType> fileTypes;
 
-    std::vector<FileType> fileTypes;
-
-    for(auto plugin : _plugins)
+    for(auto plugin : plugins)
     {
         for(auto& urlTypeName : plugin->loadableUrlTypeNames())
         {
-            FileType fileType = {plugin->collectiveDescriptionForUrlTypeName(urlTypeName),
-                                 plugin->extensionsForUrlTypeName(urlTypeName)};
+            UrlType fileType = {urlTypeName,
+                                plugin->individualDescriptionForUrlTypeName(urlTypeName),
+                                plugin->collectiveDescriptionForUrlTypeName(urlTypeName),
+                                plugin->extensionsForUrlTypeName(urlTypeName)};
             fileTypes.emplace_back(fileType);
         }
     }
@@ -188,6 +196,13 @@ void Application::updateNameFilters()
     });
 
     fileTypes.erase(std::unique(fileTypes.begin(), fileTypes.end()), fileTypes.end());
+
+    return fileTypes;
+}
+
+void Application::updateNameFilters()
+{
+    std::vector<UrlType> fileTypes = urlTypesForPlugins(_plugins);
 
     QString description = QObject::tr("All Files (");
     bool second = false;
@@ -225,9 +240,50 @@ void Application::updateNameFilters()
     emit nameFiltersChanged();
 }
 
+QAbstractListModel* Application::urlTypeDetails()
+{
+    return &_urlTypeDetails;
+}
+
 QAbstractListModel* Application::pluginDetails()
 {
     return &_pluginDetails;
+}
+
+int UrlTypeDetailsModel::rowCount(const QModelIndex&) const
+{
+    return static_cast<int>(urlTypesForPlugins(*_plugins).size());
+}
+
+QVariant UrlTypeDetailsModel::data(const QModelIndex& index, int role) const
+{
+    auto urlTypes = urlTypesForPlugins(*_plugins);
+
+    int row = index.row();
+
+    if(row < 0 || row >= static_cast<int>(urlTypes.size()))
+        return QVariant(QVariant::Invalid);
+
+    auto& urlType = urlTypes.at(row);
+
+    switch(role)
+    {
+    case Name:                  return urlType._name;
+    case IndividualDescription: return urlType._individualDescription;
+    case CollectiveDescription: return urlType._collectiveDescription;
+    default: break;
+    }
+
+    return QVariant(QVariant::Invalid);
+}
+
+QHash<int, QByteArray> UrlTypeDetailsModel::roleNames() const
+{
+    QHash<int, QByteArray> roles;
+    roles[Name] = "name";
+    roles[IndividualDescription] = "individualDescription";
+    roles[CollectiveDescription] = "collectiveDescription";
+    return roles;
 }
 
 int PluginDetailsModel::rowCount(const QModelIndex&) const
