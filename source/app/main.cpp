@@ -20,6 +20,7 @@
 #include "rendering/openglfunctions.h"
 
 #include "../thirdparty/qtsingleapplication/qtsingleapplication.h"
+#include "../thirdparty/SortFilterProxyModel/qqmlsortfilterproxymodel.h"
 
 #include <QCoreApplication>
 
@@ -105,6 +106,8 @@ int main(int argc, char *argv[])
 
     // Plugins may use this, so we need to initialise it
     QtWebEngine::initialize();
+
+    QQmlSortFilterProxyModel::initialize();
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));

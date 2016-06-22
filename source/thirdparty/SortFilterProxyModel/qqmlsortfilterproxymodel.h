@@ -55,6 +55,8 @@ public:
     const QQmlScriptString& sortExpression() const;
     void setSortExpression(const QQmlScriptString& compareScriptString);
 
+    static void initialize();
+
 signals:
     void countChanged();
 

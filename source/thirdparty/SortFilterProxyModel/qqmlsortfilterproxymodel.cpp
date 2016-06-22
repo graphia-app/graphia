@@ -164,6 +164,12 @@ void QQmlSortFilterProxyModel::setSortExpression(const QQmlScriptString& compare
     emit sortExpressionChanged();
 }
 
+void QQmlSortFilterProxyModel::initialize()
+{
+    qmlRegisterType<QAbstractItemModel>();
+    qmlRegisterType<QQmlSortFilterProxyModel>("SortFilterProxyModel", 0, 1, "SortFilterProxyModel");
+}
+
 bool QQmlSortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
 {
     QModelIndex modelIndex = sourceModel()->index(source_row, 0, source_parent);
@@ -246,12 +252,3 @@ QVariantMap QQmlSortFilterProxyModel::modelDataMap(const QModelIndex& modelIndex
         map.insert(it.value(), sourceModel()->data(modelIndex, it.key()));
     return map;
 }
-
-struct QQmlSortFilterProxyModelRegisterHelper {
-    QQmlSortFilterProxyModelRegisterHelper() {
-        qmlRegisterType<QAbstractItemModel>();
-        qmlRegisterType<QQmlSortFilterProxyModel>("SortFilterProxyModel", 0, 1, "SortFilterProxyModel");
-    }
-};
-
-static QQmlSortFilterProxyModelRegisterHelper registerHelper;
