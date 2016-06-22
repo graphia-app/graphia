@@ -11,9 +11,11 @@ cp -r plugins/*.dylib ${PRODUCT_NAME}.app/Contents/PlugIns/
 cp CrashReporter.app/Contents/MacOS/CrashReporter \
   ${PRODUCT_NAME}.app/Contents/MacOS/
 
+QML_DIRS=$(find source -name "*.qml" | xargs -n1 dirname | \
+  sort | uniq | sed -e 's/\(^.*$\)/-qmldir=\1/')
+
 macdeployqt ${PRODUCT_NAME}.app \
-  -qmldir=source/app/ui/qml \
-  -qmldir=source/crashreporter \
+  ${QML_DIRS} \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/CrashReporter \
   -codesign="${SIGN_APPLE_KEYCHAIN_ID}"
