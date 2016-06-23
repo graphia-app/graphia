@@ -3,15 +3,15 @@
 
 #include "shared/loading/baseparser.h"
 
-class IGenericPluginInstance;
+class BaseGenericPluginInstance;
 
 class PairwiseTxtFileParser : public BaseParser
 {
 private:
-    IGenericPluginInstance* _genericPluginInstance;
+    BaseGenericPluginInstance* _genericPluginInstance;
 
 public:
-    PairwiseTxtFileParser(IGenericPluginInstance* genericPluginInstance);
+    PairwiseTxtFileParser(BaseGenericPluginInstance* genericPluginInstance);
 
     bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress);
 };

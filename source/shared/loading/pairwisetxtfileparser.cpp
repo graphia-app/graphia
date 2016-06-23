@@ -3,7 +3,7 @@
 #include "shared/utils/utils.h"
 #include "shared/graph/imutablegraph.h"
 
-#include "../interfaces/igenericplugininstance.h"
+#include "../interfaces/basegenericplugin.h"
 
 #include <QFile>
 #include <QTextStream>
@@ -20,7 +20,7 @@
 #include <fstream>
 #include <cctype>
 
-PairwiseTxtFileParser::PairwiseTxtFileParser(IGenericPluginInstance* genericPluginInstance) :
+PairwiseTxtFileParser::PairwiseTxtFileParser(BaseGenericPluginInstance* genericPluginInstance) :
     _genericPluginInstance(genericPluginInstance)
 {}
 

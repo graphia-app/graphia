@@ -26,7 +26,7 @@ HEADERS += \
     $$PWD/loading/baseparser.h \
     $$PWD/loading/gmlfileparser.h \
     $$PWD/loading/pairwisetxtfileparser.h \
-    $$PWD/interfaces/igenericplugininstance.h
+    $$PWD/interfaces/basegenericplugin.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \
@@ -37,7 +37,8 @@ SOURCES += \
     $$PWD/utils/threadpool.cpp \
     $$PWD/utils/utils.cpp \
     $$PWD/loading/gmlfileparser.cpp \
-    $$PWD/loading/pairwisetxtfileparser.cpp
+    $$PWD/loading/pairwisetxtfileparser.cpp \
+    $$PWD/interfaces/basegenericplugin.cpp
 
 RESOURCES += \
     $$PWD/ui/shared.qrc
