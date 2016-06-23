@@ -1,5 +1,6 @@
 #include "gmlfileparser.h"
 #include "shared/graph/imutablegraph.h"
+#include "shared/plugins/basegenericplugin.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable:4503) // AXE makes a lot of these
@@ -16,6 +17,7 @@
 #include <fstream>
 
 template<class It> bool parseGml(IMutableGraph &graph,
+                                 BaseGenericPluginInstance* genericPluginInstance,
                                  const IParser::ProgressFn& progress,
                                  It begin, It end)
 {
@@ -53,23 +55,31 @@ template<class It> bool parseGml(IMutableGraph &graph,
     auto keyValuePair = (whitespace & key & whitespace & value);
 
     // Node State
-    int id;
-    bool isIdSet = false;
+    int id = -1;
+    std::string label;
     std::map<int, NodeId> nodeIndexMap;
 
     // Node Capture Events
-    auto captureNodeId = axe::e_ref([&id, &isIdSet](It i1, It i2)
+    auto captureNodeId = axe::e_ref([&id](It i1, It i2)
     {
         id = std::stoi(std::string(i1, i2));
-        isIdSet = true;
     });
 
-    auto captureNode = axe::e_ref([&nodeIndexMap, &id, &graph, &isIdSet](It, It)
+    auto captureLabel = axe::e_ref([&label](It i1, It i2)
     {
-        if(isIdSet)
+        label = std::string(i1, i2);
+    });
+
+    auto captureNode = axe::e_ref([&nodeIndexMap, &id, &graph, &label,
+                                  &genericPluginInstance](It, It)
+    {
+        if(id >= 0)
         {
             nodeIndexMap[id] = graph.addNode();
-            isIdSet = false;
+            genericPluginInstance->setNodeName(nodeIndexMap[id],
+                                               QString::fromStdString(label));
+            label.clear();
+            id = -1;
         }
     });
 
@@ -79,7 +89,8 @@ template<class It> bool parseGml(IMutableGraph &graph,
                            axe::r_many(nodeKeyValuePair - axe::r_char(']'), axe::r_any(" \t\n\r"), 0) & whitespace
                            & ']') >> captureNode;
     auto nodeId = whitespace & "id" & whitespace & value >> captureNodeId;
-    nodeKeyValuePair = nodeId | keyValuePair | keyValueList;
+    auto labelElement = whitespace & "label" & whitespace & value >> captureLabel;
+    nodeKeyValuePair = nodeId | labelElement | keyValuePair | keyValueList;
 
     // Edge State
     int source, target;
@@ -143,6 +154,10 @@ template<class It> bool parseGml(IMutableGraph &graph,
     return succeeded;
 }
 
+GmlFileParser::GmlFileParser(BaseGenericPluginInstance* genericPluginInstance) :
+    _genericPluginInstance(genericPluginInstance)
+{}
+
 bool GmlFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress)
 {
     QString localFile = url.toLocalFile();
@@ -156,5 +171,5 @@ bool GmlFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressF
 
     std::vector<char> vec(startIt, std::istreambuf_iterator<char>());
 
-    return parseGml(graph, progress, vec.begin(), vec.end());;
+    return parseGml(graph, _genericPluginInstance,  progress, vec.begin(), vec.end());;
 }

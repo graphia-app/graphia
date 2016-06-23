@@ -3,9 +3,16 @@
 
 #include "shared/loading/baseparser.h"
 
+class BaseGenericPluginInstance;
+
 class GmlFileParser: public BaseParser
 {
+private:
+    BaseGenericPluginInstance* _genericPluginInstance;
+
 public:
+    GmlFileParser(BaseGenericPluginInstance* genericPluginInstance);
+
     bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress);
 };
 

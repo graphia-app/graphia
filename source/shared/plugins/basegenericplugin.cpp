@@ -14,7 +14,7 @@ BaseGenericPluginInstance::BaseGenericPluginInstance()
 std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
 {
     if(urlTypeName == "GML")
-        return std::make_unique<GmlFileParser>();
+        return std::make_unique<GmlFileParser>(this);
     else if(urlTypeName == "PairwiseTXT")
         return std::make_unique<PairwiseTxtFileParser>(this);
 
