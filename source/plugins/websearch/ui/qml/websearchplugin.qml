@@ -47,15 +47,8 @@ Item
             id: webEngineView
             Layout.fillWidth: true
             Layout.fillHeight: true
-        }
-    }
-
-    Connections
-    {
-        target: plugin.model
-        onSelectionChanged:
-        {
-            webEngineView.url = urlTemplate.currentText.arg(plugin.model.selectedNodeNames)
+            url: urlTemplate.currentText.indexOf("%1") >= 0 ?
+                     urlTemplate.currentText.arg(plugin.model.selectedNodeNames) : ""
         }
     }
 }
