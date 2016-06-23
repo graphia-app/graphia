@@ -1,7 +1,7 @@
 #ifndef WEBSEARCHPLUGIN_H
 #define WEBSEARCHPLUGIN_H
 
-#include "shared/interfaces/basegenericplugin.h"
+#include "shared/plugins/basegenericplugin.h"
 
 class WebSearchPluginInstance : public BaseGenericPluginInstance
 {

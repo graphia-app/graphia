@@ -2,7 +2,7 @@
 
 #include "../application.h"
 
-#include "shared/interfaces/iplugin.h"
+#include "shared/plugins/iplugin.h"
 
 #include "../loading/parserthread.h"
 #include "../graph/graphmodel.h"

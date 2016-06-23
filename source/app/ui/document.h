@@ -8,7 +8,7 @@
 #include "../commands/commandmanager.h"
 #include "../layout/layout.h"
 
-#include "shared/interfaces/iplugin.h"
+#include "shared/plugins/iplugin.h"
 
 #include "../utils/qmlenum.h"
 #include "../utils/qmlcontainerwrapper.h"

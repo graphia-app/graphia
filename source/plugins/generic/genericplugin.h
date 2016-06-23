@@ -1,7 +1,7 @@
 #ifndef GENERICPLUGIN_H
 #define GENERICPLUGIN_H
 
-#include "shared/interfaces/basegenericplugin.h"
+#include "shared/plugins/basegenericplugin.h"
 
 class GenericPluginInstance : public BaseGenericPluginInstance
 {

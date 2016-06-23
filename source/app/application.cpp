@@ -1,7 +1,7 @@
 #include "application.h"
 
 #include "loading/parserthread.h"
-#include "shared/interfaces/iplugin.h"
+#include "shared/plugins/iplugin.h"
 #include "shared/loading/iparser.h"
 
 #include "shared/utils/utils.h"

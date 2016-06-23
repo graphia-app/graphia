@@ -1,6 +1,6 @@
 HEADERS += \
     $$PWD/loading/iparser.h \
-    $$PWD/interfaces/iplugin.h \
+    $$PWD/plugins/iplugin.h \
     $$PWD/graph/igraph.h \
     $$PWD/graph/igrapharray.h \
     $$PWD/graph/imutablegraph.h \
@@ -19,14 +19,14 @@ HEADERS += \
     $$PWD/utils/utils.h \
     $$PWD/graph/igraphmodel.h \
     $$PWD/loading/iurltypes.h \
-    $$PWD/interfaces/baseplugin.h \
+    $$PWD/plugins/baseplugin.h \
     $$PWD/graph/igrapharrayclient.h \
     $$PWD/transform/idatafield.h \
     $$PWD/ui/iselectionmanager.h \
     $$PWD/loading/baseparser.h \
     $$PWD/loading/gmlfileparser.h \
     $$PWD/loading/pairwisetxtfileparser.h \
-    $$PWD/interfaces/basegenericplugin.h
+    $$PWD/plugins/basegenericplugin.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \
@@ -38,7 +38,7 @@ SOURCES += \
     $$PWD/utils/utils.cpp \
     $$PWD/loading/gmlfileparser.cpp \
     $$PWD/loading/pairwisetxtfileparser.cpp \
-    $$PWD/interfaces/basegenericplugin.cpp
+    $$PWD/plugins/basegenericplugin.cpp
 
 RESOURCES += \
     $$PWD/ui/shared.qrc

@@ -1,7 +1,7 @@
 #ifndef SKELETONPLUGIN_H
 #define SKELETONPLUGIN_H
 
-#include "shared/interfaces/baseplugin.h"
+#include "shared/plugins/baseplugin.h"
 #include "shared/loading/iparser.h"
 
 #include <memory>

@@ -12,7 +12,7 @@
 
 #include "../layout/nodepositions.h"
 
-#include "shared/interfaces/iplugin.h"
+#include "shared/plugins/iplugin.h"
 #include "shared/graph/igraphmodel.h"
 
 #include <QQuickItem>

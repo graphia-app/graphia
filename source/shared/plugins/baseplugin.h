@@ -1,7 +1,7 @@
 #ifndef BASEPLUGIN_H
 #define BASEPLUGIN_H
 
-#include "shared/interfaces/iplugin.h"
+#include "shared/plugins/iplugin.h"
 #include "shared/graph/igraph.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/ui/iselectionmanager.h"
