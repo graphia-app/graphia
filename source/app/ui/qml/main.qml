@@ -392,6 +392,25 @@ ApplicationWindow
         checkable: true
     }
 
+    Action
+    {
+        id: togglePluginWindowAction
+        iconName: "preferences-system-windows"
+        text:
+        {
+            if(!currentDocument)
+                return "";
+
+            //FIXME need snappier text
+            if(currentDocument.poppedOut)
+                return qsTr("&Restore Plugin UI To Main Window");
+            else
+                return qsTr("Show Plugin UI In Separate &Window");
+        }
+        enabled: currentDocument && currentDocument.hasPluginUI
+        onTriggered: currentDocument && currentDocument.togglePop()
+    }
+
     menuBar: MenuBar
     {
         Menu
@@ -422,6 +441,11 @@ ApplicationWindow
             title: qsTr("&View")
             MenuItem { action: overviewModeAction }
             MenuItem { action: resetViewAction }
+            MenuItem
+            {
+                action: togglePluginWindowAction
+                visible: currentDocument && currentDocument.hasPluginUI
+            }
             MenuSeparator {}
             MenuItem { action: toggleGraphMetricsAction }
         }
@@ -473,6 +497,11 @@ ApplicationWindow
             {
                 action: debugResumeAction
                 visible: currentDocument && currentDocument.debugPaused
+            }
+            ToolButton
+            {
+                action: togglePluginWindowAction
+                visible: currentDocument && currentDocument.hasPluginUI
             }
 
             Item { Layout.fillWidth: true }

@@ -1,6 +1,7 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
+import QtQuick.Window 2.2
 
 import com.kajeka 1.0
 
@@ -39,6 +40,9 @@ Item
     property bool debugPauserEnabled: document.debugPauserEnabled
     property bool debugPaused: document.debugPaused
     property string debugResumeAction: document.debugResumeAction
+
+    property bool hasPluginUI: document.pluginQmlPath
+    property bool poppedOut: false
 
     function brightness(c)
     {
@@ -104,6 +108,8 @@ Item
 
     SplitView
     {
+        id: splitView
+
         anchors.fill: parent
         orientation: Qt.Vertical
 
@@ -236,15 +242,72 @@ Item
                 }
             }
         }
+    }
 
-        Item
+    Item
+    {
+        id: plugin
+        Layout.minimumHeight: 100
+        visible: loaded && document.pluginQmlPath
+
+        property var model: document.plugin
+        property bool loaded: false
+
+        onLoadedChanged:
         {
-            id: plugin
-            Layout.minimumHeight: 100
-            visible: document.pluginQmlPath
-
-            property var model: document.plugin
+            //FIXME: restore window geometry of pluginWindow and
+            //either pop in or pop out depending on preference
+            var rootCoords = root.mapToItem(null, 0, 0)
+            pluginWindow.x = rootCoords.x;
+            pluginWindow.y = rootCoords.y;
+            pluginWindow.width = 640;
+            pluginWindow.height = 480;
+            popInPlugin();
         }
+    }
+
+    property int pluginX: pluginWindow.x
+    property int pluginY: pluginWindow.y
+
+    Window
+    {
+        id: pluginWindow
+        title: application && root.pluginName.length > 0 ?
+                   root.pluginName + " - " + application.name : "";
+        visible: root.visible && root.poppedOut && plugin.loaded
+
+        //FIXME: window is always on top?
+        flags: Qt.Window
+
+        onClosing: popInPlugin();
+    }
+
+    function popOutPlugin()
+    {
+        splitView.removeItem(plugin);
+        plugin.parent = pluginWindow.contentItem;
+        plugin.anchors.fill = plugin.parent;
+
+        pluginWindow.x = pluginX;
+        pluginWindow.y = pluginY;
+        root.poppedOut = true;
+    }
+
+    function popInPlugin()
+    {
+        root.poppedOut = false;
+
+        plugin.parent = null;
+        plugin.anchors.fill = null;
+        splitView.addItem(plugin);
+    }
+
+    function togglePop()
+    {
+        if(pluginWindow.visible)
+            popInPlugin();
+        else
+            popOutPlugin();
     }
 
     Document
@@ -272,7 +335,12 @@ Item
                 var pluginObject = pluginComponent.createObject(plugin);
 
                 if(pluginObject === null)
+                {
                     console.log(document.pluginQmlPath + ": failed to create instance");
+                    return;
+                }
+
+                plugin.loaded = true;
             }
         }
     }
