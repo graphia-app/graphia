@@ -2,8 +2,7 @@
 
 #include "shared/utils/utils.h"
 #include "shared/graph/imutablegraph.h"
-
-#include "../interfaces/basegenericplugin.h"
+#include "shared/plugins/basegenericplugin.h"
 
 #include <QFile>
 #include <QTextStream>
