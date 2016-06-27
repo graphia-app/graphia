@@ -396,7 +396,7 @@ ApplicationWindow
     {
         id: togglePluginWindowAction
         iconName: "preferences-system-windows"
-        text: currentDocument && qsTr("Display " + currentDocument.pluginName + " In Separate &Window")
+        text: currentDocument ? qsTr("Display " + currentDocument.pluginName + " In Separate &Window") : ""
         checkable: true
         checked: currentDocument && currentDocument.poppedOut
         enabled: currentDocument && currentDocument.hasPluginUI
