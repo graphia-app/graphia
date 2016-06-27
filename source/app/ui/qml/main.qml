@@ -396,17 +396,9 @@ ApplicationWindow
     {
         id: togglePluginWindowAction
         iconName: "preferences-system-windows"
-        text:
-        {
-            if(!currentDocument)
-                return "";
-
-            //FIXME need snappier text
-            if(currentDocument.poppedOut)
-                return qsTr("&Restore Plugin UI To Main Window");
-            else
-                return qsTr("Show Plugin UI In Separate &Window");
-        }
+        text: currentDocument && qsTr("Display " + currentDocument.pluginName + " In Separate &Window")
+        checkable: true
+        checked: currentDocument && currentDocument.poppedOut
         enabled: currentDocument && currentDocument.hasPluginUI
         onTriggered: currentDocument && currentDocument.togglePop()
     }
