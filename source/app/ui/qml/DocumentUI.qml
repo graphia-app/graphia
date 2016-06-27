@@ -270,10 +270,13 @@ Item
     property int pluginY: pluginWindow.y
     property int pluginSplitSize:
     {
-        if(poppedOut)
-            return pluginSplitSize;
+        if(!poppedOut)
+        {
+            return splitView.orientation == Qt.Vertical ?
+                        plugin.height : plugin.width;
+        }
         else
-            return Qt.Vertical ? plugin.height : plugin.width;
+            return pluginSplitSize;
     }
 
     Window
