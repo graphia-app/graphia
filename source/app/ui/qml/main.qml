@@ -485,15 +485,11 @@ ApplicationWindow
             ToolButton { action: redoAction }
             ToolButton { action: overviewModeAction }
             ToolButton { action: resetViewAction }
+            ToolButton { action: togglePluginWindowAction }
             ToolButton
             {
                 action: debugResumeAction
                 visible: currentDocument && currentDocument.debugPaused
-            }
-            ToolButton
-            {
-                action: togglePluginWindowAction
-                visible: currentDocument && currentDocument.hasPluginUI
             }
 
             Item { Layout.fillWidth: true }
