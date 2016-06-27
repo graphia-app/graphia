@@ -268,6 +268,13 @@ Item
 
     property int pluginX: pluginWindow.x
     property int pluginY: pluginWindow.y
+    property int pluginSplitSize:
+    {
+        if(poppedOut)
+            return pluginSplitSize;
+        else
+            return Qt.Vertical ? plugin.height : plugin.width;
+    }
 
     Window
     {
@@ -284,22 +291,27 @@ Item
 
     function popOutPlugin()
     {
+        root.poppedOut = true;
         splitView.removeItem(plugin);
         plugin.parent = pluginWindow.contentItem;
         plugin.anchors.fill = plugin.parent;
 
         pluginWindow.x = pluginX;
         pluginWindow.y = pluginY;
-        root.poppedOut = true;
     }
 
     function popInPlugin()
     {
-        root.poppedOut = false;
-
         plugin.parent = null;
         plugin.anchors.fill = null;
+
+        if(splitView.orientation == Qt.Vertical)
+            plugin.height = pluginSplitSize;
+        else
+            plugin.width = pluginSplitSize;
+
         splitView.addItem(plugin);
+        root.poppedOut = false;
     }
 
     function togglePop()
