@@ -26,7 +26,8 @@ HEADERS += \
     $$PWD/loading/baseparser.h \
     $$PWD/loading/gmlfileparser.h \
     $$PWD/loading/pairwisetxtfileparser.h \
-    $$PWD/plugins/basegenericplugin.h
+    $$PWD/plugins/basegenericplugin.h \
+    $$PWD/loading/tabulardata.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \
@@ -38,7 +39,8 @@ SOURCES += \
     $$PWD/utils/utils.cpp \
     $$PWD/loading/gmlfileparser.cpp \
     $$PWD/loading/pairwisetxtfileparser.cpp \
-    $$PWD/plugins/basegenericplugin.cpp
+    $$PWD/plugins/basegenericplugin.cpp \
+    $$PWD/loading/tabulardata.cpp
 
 RESOURCES += \
     $$PWD/ui/shared.qrc
