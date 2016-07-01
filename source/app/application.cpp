@@ -1,8 +1,6 @@
 #include "application.h"
 
-#include "loading/parserthread.h"
 #include "shared/plugins/iplugin.h"
-#include "shared/loading/iparser.h"
 
 #include "shared/utils/utils.h"
 
@@ -33,6 +31,11 @@ IPlugin* Application::pluginForName(const QString& pluginName) const
     }
 
     return nullptr;
+}
+
+bool Application::fileUrlExists(const QUrl& url) const
+{
+    return QFileInfo(url.toLocalFile()).exists();
 }
 
 bool Application::canOpen(const QString& urlTypeName) const

@@ -335,8 +335,10 @@ void Document::onLoadProgress(int percentage)
     emit commandVerbChanged();
 }
 
-void Document::onLoadComplete(bool /*success FIXME hmm*/)
+void Document::onLoadComplete(bool success)
 {
+    Q_ASSERT(success);
+
     _loadComplete = true;
     emit commandInProgressChanged();
     emit idleChanged();

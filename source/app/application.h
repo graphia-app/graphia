@@ -98,6 +98,8 @@ signals:
     void urlTypeDetailsChanged();
 
 public slots:
+    bool fileUrlExists(const QUrl& url) const;
+
     bool canOpen(const QString& urlTypeName) const;
     bool canOpenAnyOf(const QStringList& urlTypeNames) const;
     QStringList urlTypesOf(const QUrl& url) const;

@@ -52,20 +52,6 @@ ApplicationWindow
 
     MessageDialog
     {
-        id: unknownFileMessageDialog
-        icon: StandardIcon.Critical
-        title: qsTr("Unknown File Type")
-    }
-
-    MessageDialog
-    {
-        id: cantOpenFileMessageDialog
-        icon: StandardIcon.Critical
-        title: qsTr("Can't Open File")
-    }
-
-    MessageDialog
-    {
         id: errorOpeningFileMessageDialog
         icon: StandardIcon.Critical
         title: qsTr("Error Opening File")
@@ -109,21 +95,32 @@ ApplicationWindow
 
     function openFile(fileUrl, inNewTab)
     {
+        if(!application.fileUrlExists(fileUrl))
+        {
+            errorOpeningFileMessageDialog.title = qsTr("File Not Found");
+            errorOpeningFileMessageDialog.text = application.baseFileNameForUrl(fileUrl) +
+                    qsTr(" does not exist.");
+            errorOpeningFileMessageDialog.open();
+            return;
+        }
+
         var fileTypes = application.urlTypesOf(fileUrl);
 
         if(fileTypes.length === 0)
         {
-            unknownFileMessageDialog.text = application.baseFileNameForUrl(fileUrl) +
+            errorOpeningFileMessageDialog.title = qsTr("Unknown File Type");
+            errorOpeningFileMessageDialog.text = application.baseFileNameForUrl(fileUrl) +
                     qsTr(" cannot be loaded as its file type is unknown.");
-            unknownFileMessageDialog.open();
+            errorOpeningFileMessageDialog.open();
             return;
         }
 
         if(!application.canOpenAnyOf(fileTypes))
         {
-            cantOpenFileMessageDialog.text = application.baseFileNameForUrl(fileUrl) +
+            errorOpeningFileMessageDialog.title = qsTr("Can't Open File");
+            errorOpeningFileMessageDialog.text = application.baseFileNameForUrl(fileUrl) +
                     qsTr(" cannot be loaded."); //FIXME more elaborate error message
-            cantOpenFileMessageDialog.open();
+            errorOpeningFileMessageDialog.open();
             return;
         }
 
