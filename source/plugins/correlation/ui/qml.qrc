@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/correlationplugin.qml</file>
+    </qresource>
+</RCC>
