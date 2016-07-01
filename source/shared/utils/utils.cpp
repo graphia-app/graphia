@@ -199,3 +199,17 @@ QQuaternion u::matrixToQuaternion(const QMatrix4x4& m)
 
     return QQuaternion(w, v[0], v[1], v[2]);
 }
+
+bool u::isNumeric(const std::string& string)
+{
+    try
+    {
+        std::stof(string);
+    }
+    catch(std::invalid_argument)
+    {
+        return false;
+    }
+
+    return true;
+}

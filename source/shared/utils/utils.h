@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <vector>
 #include <mutex>
+#include <string>
 
 namespace u
 {
@@ -178,6 +179,8 @@ namespace u
 
         return n;
     }
+
+    bool isNumeric(const std::string& string);
 }
 
 #define ARRAY_SIZEOF(x) (sizeof(x)/sizeof((x)[0]))
