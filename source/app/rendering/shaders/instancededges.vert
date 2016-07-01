@@ -42,7 +42,7 @@ void main()
 {
     float edgeLength = distance(sourcePosition, targetPosition);
     vec3 midpoint = mix(sourcePosition, targetPosition, 0.5);
-    mat4 modelMatrix = makeOrientationMatrix(normalize(targetPosition - sourcePosition));
+    mat4 orientationMatrix = makeOrientationMatrix(normalize(targetPosition - sourcePosition));
 
     vec3 scaledVertexPosition = vertexPosition;
     scaledVertexPosition.xz *= size;
@@ -50,10 +50,10 @@ void main()
 
     int index = component * 9;
 
-    mat4 viewMatrix = mat4(texelFetch(componentData, index + 0),
-                           texelFetch(componentData, index + 1),
-                           texelFetch(componentData, index + 2),
-                           texelFetch(componentData, index + 3));
+    mat4 modelViewMatrix = mat4(texelFetch(componentData, index + 0),
+                                texelFetch(componentData, index + 1),
+                                texelFetch(componentData, index + 2),
+                                texelFetch(componentData, index + 3));
 
     mat4 projectionMatrix = mat4(texelFetch(componentData, index + 4),
                                  texelFetch(componentData, index + 5),
@@ -62,10 +62,10 @@ void main()
 
     float alpha = texelFetch(componentData, index + 8).r;
 
-    position = (modelMatrix * vec4(scaledVertexPosition, 1.0)).xyz;
-    position = (viewMatrix * vec4(position + midpoint, 1.0)).xyz;
+    position = (orientationMatrix * vec4(scaledVertexPosition, 1.0)).xyz;
+    position = (modelViewMatrix * vec4(position + midpoint, 1.0)).xyz;
 
-    mat3 normalMatrix = transpose(inverse(mat3(viewMatrix * modelMatrix)));
+    mat3 normalMatrix = transpose(inverse(mat3(modelViewMatrix * orientationMatrix)));
     normal = normalMatrix * vertexNormal;
     vColor = color;
     vOutlineColor = outlineColor;
