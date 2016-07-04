@@ -41,6 +41,9 @@ public:
     virtual int numEdges() const = 0;
     virtual const IEdge& edgeById(EdgeId edgeId) const = 0;
     virtual bool containsEdgeId(EdgeId edgeId) const = 0;
+
+    virtual void setPhase(const QString& phase) const = 0;
+    virtual void clearPhase() const = 0;
 };
 
 #endif // IGRAPH_H

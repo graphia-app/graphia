@@ -31,7 +31,7 @@ public:
     }
 };
 
-class MutableGraph : public Graph, public IMutableGraph
+class MutableGraph : public Graph, public virtual IMutableGraph
 {
     Q_OBJECT
 

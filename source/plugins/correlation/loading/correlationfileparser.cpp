@@ -93,6 +93,9 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
     {
         auto& tabularData = csvFileParser.tabularData();
         int numDataPoints = tabularData.numColumns() * tabularData.numRows();
+
+        graph.setPhase(QObject::tr("Finding Data Points"));
+        progress(-1);
         auto dataRect = findLargestDataRect(tabularData);
 
         int numDataColumns = dataRect.width();
@@ -101,6 +104,7 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
         _correlationPluginInstance->_dataColumnNames.resize(dataRect.width());
         _correlationPluginInstance->_data.resize(dataRect.width() * dataRect.height());
 
+        graph.setPhase(QObject::tr("Attributes"));
         int percentComplete = 0;
 
         for(int row = 0; row < tabularData.numRows(); row++)
@@ -166,6 +170,8 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
                 }
             }
         }
+
+        graph.clearPhase();
 
         return true;
     }

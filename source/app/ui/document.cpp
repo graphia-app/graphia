@@ -68,18 +68,8 @@ QString Document::commandVerb() const
 
     if(!_loadComplete)
     {
-        if(_loadProgress < 0)
-        {
-            if(!phase.isEmpty())
-            {
-                if(!subPhase.isEmpty())
-                    return QString(tr("%1: %2")).arg(phase).arg(subPhase);
-
-                return phase;
-            }
-
-            return tr("Finishing");
-        }
+        if(!phase.isEmpty())
+            return QString(tr("Loading %1 (%2)").arg(_title).arg(phase));
 
         return QString(tr("Loading %1").arg(_title));
     }

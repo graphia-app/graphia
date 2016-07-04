@@ -86,7 +86,7 @@ public:
     EdgeId id() const { return _id; }
 };
 
-class Graph : public QObject, public IGraph
+class Graph : public QObject, public virtual IGraph
 {
     Q_OBJECT
 

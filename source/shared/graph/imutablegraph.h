@@ -6,7 +6,7 @@
 
 #include "igrapharrayclient.h"
 
-class IMutableGraph : public virtual IGraphArrayClient
+class IMutableGraph : public virtual IGraph, public virtual IGraphArrayClient
 {
 public:
     virtual ~IMutableGraph() = default;
