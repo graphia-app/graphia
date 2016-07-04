@@ -12,9 +12,7 @@ private:
 
 public:
     void cancel() { _cancelAtomic = true; }
-
-protected:
-    bool cancelled() { return _cancelAtomic; }
+    bool cancelled() const { return _cancelAtomic; }
 };
 
 #endif // BASEPARSER_H

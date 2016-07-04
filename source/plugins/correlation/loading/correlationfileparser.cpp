@@ -111,6 +111,12 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
         {
             for(int column = 0; column < tabularData.numColumns(); column++)
             {
+                if(cancelled())
+                {
+                    graph.clearPhase();
+                    return false;
+                }
+
                 int newPercentComplete = ((column + (row * tabularData.numColumns())) * 100) /
                         numDataPoints;
 

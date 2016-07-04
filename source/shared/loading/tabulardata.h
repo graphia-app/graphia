@@ -40,6 +40,7 @@ template<const char Delimiter> class TextDelimitedTabularDataParser : public Bas
 
 private:
     TabularData _tabularData;
+    const BaseParser* _parentParser = nullptr;
 
     template<typename TokenFn>
     bool parse(const QUrl& url, const ProgressFn& progress, TokenFn tokenFn)
@@ -61,7 +62,7 @@ private:
         file.seekg(0, std::ios::beg);
         while(std::getline(file, line))
         {
-            if(cancelled())
+            if(_parentParser != nullptr && _parentParser->cancelled())
                 return false;
 
             bool inQuotes = false;
@@ -144,6 +145,8 @@ public:
             _tabularData.setValueAt(column, row, std::move(token));
         });
     }
+
+    void setParentParser(const BaseParser* parentParser) { _parentParser = parentParser; }
 
     const TabularData& tabularData() const { return _tabularData; }
 };
