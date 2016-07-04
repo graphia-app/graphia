@@ -36,6 +36,14 @@ public:
 
     EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const { return _target.edgeIdsForNodeId(nodeId); }
 
+    void setPhase(const QString& phase) const { _source->setPhase(phase); }
+    void clearPhase() const { _source->clearPhase(); }
+    QString phase() const { return _source->phase(); }
+
+    void setSubPhase(const QString& subPhase) const { _source->setSubPhase(subPhase); }
+    void clearSubPhase() const { _source->clearSubPhase(); }
+    QString subPhase() const { return _source->subPhase(); }
+
     MutableGraph& mutableGraph() { return _target; }
 
     void reserve(const Graph& other) { _target.reserve(other); }

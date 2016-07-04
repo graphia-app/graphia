@@ -167,13 +167,14 @@ public:
     // been completed
     virtual void update() {}
 
-    void setPhase(const QString& phase) const;
-    void clearPhase() const;
-    QString phase() const;
+    // Informational messages to indicate progress
+    virtual void setPhase(const QString& phase) const;
+    virtual void clearPhase() const;
+    virtual QString phase() const;
 
-    void setSubPhase(const QString& subPhase) const;
-    void clearSubPhase() const;
-    QString subPhase() const;
+    virtual void setSubPhase(const QString& subPhase) const;
+    virtual void clearSubPhase() const;
+    virtual QString subPhase() const;
 
     mutable DebugPauser debugPauser;
     void dumpToQDebug(int detail) const;
