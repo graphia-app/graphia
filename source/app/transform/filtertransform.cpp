@@ -36,7 +36,7 @@ void FilterTransform::apply(TransformedGraph& target) const
         }
 
         for(auto edgeId : removees)
-            target.removeEdge(edgeId);
+            target.mutableGraph().removeEdge(edgeId);
     }
 
     if(hasNodeFilters())
@@ -50,7 +50,7 @@ void FilterTransform::apply(TransformedGraph& target) const
         }
 
         for(auto nodeId : removees)
-            target.removeNode(nodeId);
+            target.mutableGraph().removeNode(nodeId);
     }
 
     if(!_componentFilters.empty())
@@ -61,7 +61,7 @@ void FilterTransform::apply(TransformedGraph& target) const
         {
             auto component = componentManager.componentById(componentId);
             if(componentFiltered(_componentFilters, *component))
-                target.removeNodes(component->nodeIds());
+                target.mutableGraph().removeNodes(component->nodeIds());
         }
     }
 }

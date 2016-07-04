@@ -36,24 +36,7 @@ public:
 
     EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const { return _target.edgeIdsForNodeId(nodeId); }
 
-    NodeId addNode() { return _target.addNode(); }
-    NodeId addNode(NodeId nodeId) { return _target.addNode(nodeId); }
-    NodeId addNode(const INode& node) { return _target.addNode(node); }
-    template<typename C> void addNodes(const C& nodeIds) { addNodes(nodeIds); }
-
-    void removeNode(NodeId nodeId) { _target.removeNode(nodeId); }
-    template<typename C> void removeNodes(const C& nodeIds) { _target.removeNodes(nodeIds); }
-
-    EdgeId addEdge(NodeId sourceId, NodeId targetId) { return _target.addEdge(sourceId, targetId); }
-    EdgeId addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId) { return _target.addEdge(edgeId, sourceId, targetId); }
-    EdgeId addEdge(const IEdge& edge) { return _target.addEdge(edge); }
-    template<typename C> void addEdges(const C& edges) { _target.addEdges(edges); }
-
-    void removeEdge(EdgeId edgeId) { _target.removeEdge(edgeId); }
-    template<typename C> void removeEdges(const C& edgeIds) { _target.removeEdges(edgeIds); }
-
-    void contractEdge(EdgeId edgeId) { _target.contractEdge(edgeId); }
-    template<typename C> void contractEdges(const C& edgeIds) { _target.contractEdges(edgeIds); }
+    MutableGraph& mutableGraph() { return _target; }
 
     void reserve(const Graph& other) { _target.reserve(other); }
     void cloneFrom(const Graph& other) { _target.cloneFrom(other); }

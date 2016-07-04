@@ -26,7 +26,7 @@ void EdgeContractionTransform::apply(TransformedGraph& target) const
             edgeIdsToContract.insert(edgeId);
     }
 
-    target.contractEdges(edgeIdsToContract);
+    target.mutableGraph().contractEdges(edgeIdsToContract);
 }
 
 std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(const EdgeConditionFn& conditionFn) const
