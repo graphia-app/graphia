@@ -98,8 +98,8 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
         progress(-1);
         auto dataRect = findLargestDataRect(tabularData);
 
-        int numDataColumns = dataRect.width();
-        int numDataRows = dataRect.height();
+        _correlationPluginInstance->_numColumns = dataRect.width();
+        _correlationPluginInstance->_numRows = dataRect.height();
 
         _correlationPluginInstance->_dataColumnNames.resize(dataRect.width());
         _correlationPluginInstance->_data.resize(dataRect.width() * dataRect.height());
@@ -136,7 +136,7 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
                     {
                         // Row attribute names
                         _correlationPluginInstance->_rowAttributes.emplace(
-                                    value, std::vector<QString>(numDataRows));
+                                    value, std::vector<QString>(_correlationPluginInstance->_numRows));
                     }
                     else
                     {
@@ -150,7 +150,7 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
                     {
                         // Column attribute names
                         _correlationPluginInstance->_columnAttributes.emplace(
-                                    value, std::vector<QString>(numDataColumns));
+                                    value, std::vector<QString>(_correlationPluginInstance->_numColumns));
                     }
                     else if(dataColumn >= 0)
                     {
@@ -170,7 +170,7 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
                     else
                     {
                         // Data
-                        int dataIndex = dataColumn + (dataRow * numDataColumns);
+                        int dataIndex = dataColumn + (dataRow * _correlationPluginInstance->_numColumns);
                         _correlationPluginInstance->_data.at(dataIndex) = value.toDouble();
                     }
                 }

@@ -14,6 +14,9 @@ class CorrelationPluginInstance : public BasePluginInstance
     friend class CorrelationFileParser;
 
 private:
+    int _numColumns = 0;
+    int _numRows = 0;
+
     std::vector<QString> _dataColumnNames;
     std::map<QString, std::vector<QString>> _rowAttributes;
     std::map<QString, std::vector<QString>> _columnAttributes;
