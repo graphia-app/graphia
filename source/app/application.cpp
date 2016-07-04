@@ -231,9 +231,17 @@ void Application::updateNameFilters()
     for(auto fileType : fileTypes)
     {
         description = fileType._collectiveDescription + " (";
+        second = false;
 
         for(auto extension : fileType._extensions)
+        {
+            if(second)
+                description += " ";
+            else
+                second = true;
+
             description += "*." + extension;
+        }
 
         description += ")";
 
