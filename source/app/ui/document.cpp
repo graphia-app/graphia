@@ -338,6 +338,7 @@ void Document::onLoadProgress(int percentage)
 void Document::onLoadComplete(bool success)
 {
     Q_ASSERT(success);
+    Q_UNUSED(success);
 
     _loadComplete = true;
     emit commandInProgressChanged();
