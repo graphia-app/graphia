@@ -87,7 +87,7 @@ void BaseGenericPluginInstance::onSelectionChanged(const ISelectionManager*)
 BaseGenericPlugin::BaseGenericPlugin()
 {
     registerUrlType("GML", QObject::tr("GML File"), QObject::tr("GML Files"), {"gml"});
-    registerUrlType("PairwiseTXT", QObject::tr("Pairwise Text File"), QObject::tr("Pairwise Text Files"), {"txt"});
+    registerUrlType("PairwiseTXT", QObject::tr("Pairwise Text File"), QObject::tr("Pairwise Text Files"), {"txt", "layout"});
 }
 
 QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
