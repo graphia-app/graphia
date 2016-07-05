@@ -23,10 +23,9 @@ private:
 
     std::vector<double> _data;
 
-    using DataIterator = std::vector<double>::const_iterator;
-    using DataRow = std::pair<DataIterator, DataIterator>;
+    using DataOffset = std::vector<double>::size_type;
 
-    std::unique_ptr<NodeArray<DataRow>> _dataRows;
+    std::unique_ptr<NodeArray<DataOffset>> _dataRows;
     std::unique_ptr<EdgeArray<float>> _edgeWeights;
 
 public:
