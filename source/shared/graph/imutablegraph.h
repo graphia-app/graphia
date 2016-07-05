@@ -4,9 +4,7 @@
 #include "shared/graph/elementid.h"
 #include "shared/graph/igraph.h"
 
-#include "igrapharrayclient.h"
-
-class IMutableGraph : public virtual IGraph, public virtual IGraphArrayClient
+class IMutableGraph : public virtual IGraph
 {
 public:
     virtual ~IMutableGraph() = default;
