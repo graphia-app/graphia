@@ -21,12 +21,30 @@ private:
     std::map<QString, std::vector<QString>> _rowAttributes;
     std::map<QString, std::vector<QString>> _columnAttributes;
 
+    using DataIterator = std::vector<double>::const_iterator;
+
     std::vector<double> _data;
 
-    using DataOffset = std::vector<double>::size_type;
+    struct Row
+    {
+        DataIterator _begin;
+        DataIterator _end;
 
-    std::unique_ptr<NodeArray<DataOffset>> _dataRows;
-    std::unique_ptr<EdgeArray<float>> _edgeWeights;
+        DataIterator begin() { return _begin; }
+        DataIterator end() { return _end; }
+
+        double _sum = 0.0;
+        double _sumSq = 0.0;
+
+        double _mean = 0.0;
+        double _variance = 0.0;
+        double _stddev = 0.0;
+    };
+
+    std::vector<Row> _dataRows;
+
+    std::unique_ptr<NodeArray<int>> _dataRowIndexes;
+    std::unique_ptr<EdgeArray<double>> _edgeWeights;
 
 public:
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName);

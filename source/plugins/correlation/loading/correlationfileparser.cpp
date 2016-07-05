@@ -107,9 +107,9 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
         graph.setPhase(QObject::tr("Attributes"));
         int percentComplete = 0;
 
-        for(int row = 0; row < tabularData.numRows(); row++)
+        for(int rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
         {
-            for(int column = 0; column < tabularData.numColumns(); column++)
+            for(int columnIndex = 0; columnIndex < tabularData.numColumns(); columnIndex++)
             {
                 if(cancelled())
                 {
@@ -117,7 +117,7 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
                     return false;
                 }
 
-                int newPercentComplete = ((column + (row * tabularData.numColumns())) * 100) /
+                int newPercentComplete = ((columnIndex + (rowIndex * tabularData.numColumns())) * 100) /
                         numDataPoints;
 
                 if(newPercentComplete > percentComplete)
@@ -126,13 +126,13 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
                     progress(newPercentComplete);
                 }
 
-                QString value = tabularData.valueAtQString(column, row);
-                int dataColumn = column - dataRect.left();
-                int dataRow = row - dataRect.top();
+                QString value = tabularData.valueAtQString(columnIndex, rowIndex);
+                int dataColumnIndex = columnIndex - dataRect.left();
+                int dataRowIndex = rowIndex - dataRect.top();
 
-                if(row == 0)
+                if(rowIndex == 0)
                 {
-                    if(dataColumn < 0)
+                    if(dataColumnIndex < 0)
                     {
                         // Row attribute names
                         _correlationPluginInstance->_rowAttributes.emplace(
@@ -141,40 +141,80 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
                     else
                     {
                         // Data column names
-                        _correlationPluginInstance->_dataColumnNames.at(dataColumn) = value;
+                        _correlationPluginInstance->_dataColumnNames.at(dataColumnIndex) = value;
                     }
                 }
-                else if(dataRow < 0)
+                else if(dataRowIndex < 0)
                 {
-                    if(column == 0)
+                    if(columnIndex == 0)
                     {
                         // Column attribute names
                         _correlationPluginInstance->_columnAttributes.emplace(
                                     value, std::vector<QString>(_correlationPluginInstance->_numColumns));
                     }
-                    else if(dataColumn >= 0)
+                    else if(dataColumnIndex >= 0)
                     {
                         // Column attributes
-                        QString columnAttributeName = tabularData.valueAtQString(0, row);
-                        _correlationPluginInstance->_columnAttributes[columnAttributeName].at(dataColumn) = value;
+                        QString columnAttributeName = tabularData.valueAtQString(0, rowIndex);
+                        _correlationPluginInstance->_columnAttributes[columnAttributeName].at(dataColumnIndex) = value;
                     }
                 }
                 else
                 {
-                    if(dataColumn < 0)
+                    if(dataColumnIndex < 0)
                     {
                         // Row attributes
-                        QString rowAttributeName = tabularData.valueAtQString(column, 0);
-                        _correlationPluginInstance->_rowAttributes[rowAttributeName].at(dataRow) = value;
+                        QString rowAttributeName = tabularData.valueAtQString(columnIndex, 0);
+                        _correlationPluginInstance->_rowAttributes[rowAttributeName].at(dataRowIndex) = value;
                     }
                     else
                     {
                         // Data
-                        int dataIndex = dataColumn + (dataRow * _correlationPluginInstance->_numColumns);
+                        int dataIndex = dataColumnIndex + (dataRowIndex * _correlationPluginInstance->_numColumns);
+
+                        if(dataColumnIndex == 0)
+                        {
+                            CorrelationPluginInstance::Row dataRow;
+                            dataRow._begin = _correlationPluginInstance->_data.cbegin() + dataIndex;
+                            dataRow._end = _correlationPluginInstance->_data.cbegin() + dataIndex +
+                                    _correlationPluginInstance->_numColumns;
+
+                            _correlationPluginInstance->_dataRows.emplace_back(dataRow);
+                        }
+
                         _correlationPluginInstance->_data.at(dataIndex) = value.toDouble();
                     }
                 }
             }
+        }
+
+        // Calculate sums and mean
+        progress(-1);
+        graph.setPhase(QObject::tr("Summing"));
+        for(auto& row : _correlationPluginInstance->_dataRows)
+        {
+            for(auto value : row)
+            {
+                row._sum += value;
+                row._sumSq += value * value;
+                row._mean += value / _correlationPluginInstance->_numColumns;
+            }
+        }
+
+        // Calculate variance and stddev
+        graph.setPhase(QObject::tr("Standard Deviation"));
+        for(auto& row : _correlationPluginInstance->_dataRows)
+        {
+            double sum = 0.0;
+            for(auto value : row)
+            {
+                double x = (value - row._mean);
+                x *= x;
+                sum += x;
+            }
+
+            row._variance = sum / _correlationPluginInstance->_numColumns;
+            row._stddev = std::sqrt(row._variance);
         }
 
         graph.clearPhase();
