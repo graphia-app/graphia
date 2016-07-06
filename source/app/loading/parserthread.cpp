@@ -41,6 +41,13 @@ void ParserThread::run()
         {
             result = _parser->parse(_url, graph, [this](int percentage) { emit progress(percentage); });
 
+            if(!result)
+            {
+                // If the parsing failed, we shouldn't be wasting time updating a partially
+                // constructed graph, so just clear it out
+                graph.clear();
+            }
+
             // Extra processing may occur after the actual parsing, so we emit this here
             // in order that the progress indication doesn't just freeze
             emit progress(-1);
