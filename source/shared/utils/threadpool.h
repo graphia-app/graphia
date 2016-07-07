@@ -2,6 +2,7 @@
 #define THREADPOOL_H
 
 #include "singleton.h"
+#include "function_traits.h"
 
 #include <QString>
 
@@ -39,9 +40,9 @@ public:
     bool saturated() const { return _activeThreads >= static_cast<int>(_threads.size()); }
     bool idle() const { return _activeThreads == 0; }
 
-    template<typename Fn, typename... Args> using ReturnType = typename std::result_of<Fn(Args...)>::type;
+    template<typename Fn, typename... Args> using ReturnType = typename std::result_of_t<Fn(Args...)>;
 
-    template<typename Fn, typename... Args> std::future<ReturnType<Fn, Args...>> execute_on_threadpool(Fn&& f, Args&&... args)
+    template<typename Fn, typename... Args> std::future<ReturnType<Fn, Args...>> execute_on_threadpool(Fn f, Args&&... args)
     {
         if(_stop)
             return std::future<ReturnType<Fn, Args...>>();
@@ -86,7 +87,7 @@ private:
                 future.wait();
         }
 
-        template<typename T = ValueType> typename std::enable_if<!std::is_void<T>::value, T>::type
+        template<typename T = ValueType> typename std::enable_if_t<!std::is_void<T>::value, T>
         get()
         {
             //FIXME: profile this
@@ -103,45 +104,69 @@ private:
         }
     };
 
-    template<typename It, typename Fn, typename T> struct Executor
-    {
-        using ValueType = std::vector<T>;
+    template<typename Fn> using ArgumentType = typename function_traits<Fn>::template arg<0>::type;
 
-        ValueType operator()(It it, It last, Fn&& f)
+    // Fn may take a value/reference or an iterator; this template determines how to call it
+    template<typename It, typename Fn> struct Invoker
+    {
+        using ReturnType = std::result_of_t<Fn(ArgumentType<Fn>)>;
+
+        // Fn argument is an iterator
+        template<typename T = ReturnType>
+        typename std::enable_if_t<std::is_convertible<ArgumentType<Fn>, It>::value, T>
+        invoke(Fn& f, It& it) const { return f(it); }
+
+        // Fn argument is an value/reference
+        template<typename T = ReturnType>
+        typename std::enable_if_t<std::is_convertible<ArgumentType<Fn>, typename It::value_type>::value, T>
+        invoke(Fn f, It it) const { return f(*it); }
+    };
+
+    template<typename It, typename Fn, typename Result>
+    struct Executor : Invoker<It, Fn>
+    {
+        using ValueType = std::vector<Result>;
+
+        ValueType operator()(It it, It last, Fn f)
         {
             ValueType values;
 
             for(; it != last; ++it)
-                values.emplace_back(f(*it));
+                values.emplace_back(this->invoke(f, it));
 
             return values;
         }
     };
 
-    template<typename It, typename Fn> struct Executor<It, Fn, void>
+    template<typename It, typename Fn>
+    struct Executor<It, Fn, void> : Invoker<It, Fn>
     {
         using ValueType = void;
 
-        ValueType operator()(It it, It last, Fn&& f) const
+        ValueType operator()(It it, It last, Fn f) const
         {
             for(; it != last; ++it)
-                f(*it);
+                this->invoke(f, it);
         }
     };
 
     template<typename It, typename Fn> using FnExecutor =
-        Executor<It, Fn, typename std::result_of<Fn(const typename It::reference)>::type>;
+        Executor<It, Fn, typename std::result_of_t<Fn(ArgumentType<Fn>)>>;
 
 public:
     template<typename It, typename Fn> using Results =
         ResultsType<typename FnExecutor<It, Fn>::ValueType>;
 
-    template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn&& f, bool blocking = true)
+    template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn f, bool blocking = true)
     {
         const int numElements = std::distance(first, last);
         const int numThreads = static_cast<int>(_threads.size());
         const int numElementsPerThread = numElements / numThreads +
                 ((numElements % numThreads) ? 1 : 0);
+
+        static_assert(std::is_convertible<ArgumentType<Fn>, It>::value ||
+                      std::is_convertible<ArgumentType<Fn>, typename It::value_type>::value,
+                      "Fn's argument must be an It or an It::value_type");
 
         FnExecutor<It, Fn> executor;
         std::vector<std::future<typename FnExecutor<It, Fn>::ValueType>> futures;
@@ -151,7 +176,7 @@ public:
             It threadLast = incrementIterator(it, last, numElementsPerThread);
             futures.emplace_back(execute_on_threadpool([executor, it, threadLast, f]() mutable
             {
-                return executor(it, threadLast, std::move(f));
+                return executor(it, threadLast, f);
             }));
         }
 
