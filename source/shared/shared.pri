@@ -27,7 +27,8 @@ HEADERS += \
     $$PWD/loading/gmlfileparser.h \
     $$PWD/loading/pairwisetxtfileparser.h \
     $$PWD/plugins/basegenericplugin.h \
-    $$PWD/loading/tabulardata.h
+    $$PWD/loading/tabulardata.h \
+    $$PWD/utils/function_traits.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \
