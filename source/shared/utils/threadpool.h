@@ -130,7 +130,7 @@ private:
     };
 
     template<typename It, typename Fn> using FnExecutor =
-        Executor<It, Fn, typename std::result_of<Fn(typename It::value_type)>::type>;
+        Executor<It, Fn, typename std::result_of<Fn(const typename It::reference)>::type>;
 
 public:
     template<typename It, typename Fn> using Results =
