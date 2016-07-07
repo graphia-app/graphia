@@ -87,7 +87,7 @@ private:
         }
 
         template<typename T = ValueType> typename std::enable_if<!std::is_void<T>::value, T>::type
-        get() const
+        get()
         {
             //FIXME: profile this
             ValueType values;
