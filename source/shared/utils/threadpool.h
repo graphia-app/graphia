@@ -3,6 +3,7 @@
 
 #include "singleton.h"
 #include "function_traits.h"
+#include "has_member.h"
 
 #include <QString>
 
@@ -153,16 +154,69 @@ private:
     template<typename It, typename Fn> using FnExecutor =
         Executor<It, Fn, typename std::result_of_t<Fn(ArgumentType<Fn>)>>;
 
+    template<typename It>
+    class CosterBase
+    {
+    protected:
+        It _first;
+        It _last;
+
+    public:
+        CosterBase(It first, It last) :
+            _first(first), _last(last)
+        {}
+    };
+
+    // When It::value_type::cost() doesn't exist, we get
+    // this implementation, which gives every element each weight
+    template<typename It, typename Enable = void>
+    class Coster : public CosterBase<It>
+    {
+    public:
+        using CosterBase<It>::CosterBase;
+
+        int total() { return std::distance(this->_first, this->_last); }
+        int operator()(It) { return 1; }
+    };
+
+    GENERATE_HAS_MEMBER(computeCostHint)
+
+    // When It::value_type::cost() does exist, we get this implementation
+    // that allows elements to hint how much computing it will cost and
+    // balance the thread/work allocation accordingly
+    template<typename It>
+    class Coster<It,
+        std::enable_if_t<has_member_computeCostHint<typename It::value_type>::value>> :
+        public CosterBase<It>
+    {
+    public:
+        using CosterBase<It>::CosterBase;
+
+        int total()
+        {
+            int n = 0;
+
+            for(auto it = this->_first; it != this->_last; ++it)
+                n += it->computeCostHint();
+
+            return n;
+        }
+
+        int operator()(It it) { return it->computeCostHint(); }
+    };
+
 public:
     template<typename It, typename Fn> using Results =
         ResultsType<typename FnExecutor<It, Fn>::ValueType>;
 
     template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn f, bool blocking = true)
     {
-        const int numElements = std::distance(first, last);
+        Coster<It> coster(first, last);
+
+        const int totalCost = coster.total();
         const int numThreads = static_cast<int>(_threads.size());
-        const int numElementsPerThread = numElements / numThreads +
-                ((numElements % numThreads) ? 1 : 0);
+        const int costPerThread = totalCost / numThreads +
+                ((totalCost % numThreads) ? 1 : 0);
 
         static_assert(std::is_convertible<ArgumentType<Fn>, It>::value ||
                       std::is_convertible<ArgumentType<Fn>, typename It::value_type>::value,
@@ -171,13 +225,23 @@ public:
         FnExecutor<It, Fn> executor;
         std::vector<std::future<typename FnExecutor<It, Fn>::ValueType>> futures;
 
-        for(It it = first; it < last; it = incrementIterator(it, last, numElementsPerThread))
+        for(It it = first; it != last;)
         {
-            It threadLast = incrementIterator(it, last, numElementsPerThread);
+            It threadLast = it;
+            int cost = 0;
+            do
+            {
+                cost += coster(threadLast);
+                ++threadLast;
+            }
+            while(threadLast != last && cost < costPerThread);
+
             futures.emplace_back(execute_on_threadpool([executor, it, threadLast, f]() mutable
             {
                 return executor(it, threadLast, f);
             }));
+
+            it = threadLast;
         }
 
         auto results = Results<It, Fn>(futures);
