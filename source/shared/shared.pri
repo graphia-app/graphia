@@ -28,7 +28,8 @@ HEADERS += \
     $$PWD/loading/pairwisetxtfileparser.h \
     $$PWD/plugins/basegenericplugin.h \
     $$PWD/loading/tabulardata.h \
-    $$PWD/utils/function_traits.h
+    $$PWD/utils/function_traits.h \
+    $$PWD/utils/has_member.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \
