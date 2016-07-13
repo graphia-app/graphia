@@ -21,19 +21,12 @@ template<class It> bool parseGml(IMutableGraph &graph,
                                  const IParser::ProgressFn& progress,
                                  It begin, It end)
 {
-    int percentage = 0;
     int size = std::distance(begin, end);
 
     // Progress Capture event (Fired on gml_value rule match)
-    auto captureCount = axe::e_ref([&percentage, &size, &begin, progress](It, It i2)
+    auto captureCount = axe::e_ref([&size, &begin, progress](It, It i2)
     {
-        int lengthLeft = (std::distance(begin, i2)) * 100 / size;
-        int newPercentage = lengthLeft;
-        if(percentage < newPercentage)
-        {
-            percentage = newPercentage;
-            progress(percentage);
-        }
+        progress((std::distance(begin, i2)) * 100 / size);
     });
 
     // General GML structure rules

@@ -35,7 +35,6 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
 
     std::unordered_map<std::string, NodeId> nodeIdHash;
 
-    int percentComplete = 0;
     std::string line;
     std::string token;
     std::vector<std::string> tokens;
@@ -125,13 +124,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
             }
         }
 
-        int newPercentComplete = static_cast<int>(file.tellg() * 100 / fileSize);
-
-        if(newPercentComplete > percentComplete)
-        {
-            percentComplete = newPercentComplete;
-            progress(newPercentComplete);
-        }
+        progress(static_cast<int>(file.tellg() * 100 / fileSize));
     }
 
     return true;

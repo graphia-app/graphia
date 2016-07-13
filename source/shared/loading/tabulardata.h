@@ -53,7 +53,6 @@ private:
         file.seekg(0, std::ios::end);
         fileSize = file.tellg() - fileSize;
 
-        int percentComplete = 0;
         std::string line;
         std::string currentToken;
         int currentColumn = 0;
@@ -106,13 +105,7 @@ private:
             currentRow++;
             currentColumn = 0;
 
-            int newPercentComplete = static_cast<int>(file.tellg() * 100 / fileSize);
-
-            if(newPercentComplete > percentComplete)
-            {
-                percentComplete = newPercentComplete;
-                progress(newPercentComplete);
-            }
+            progress(static_cast<int>(file.tellg() * 100 / fileSize));
         }
 
         return true;
