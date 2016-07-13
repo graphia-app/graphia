@@ -178,8 +178,6 @@ private:
         int operator()(It) { return 1; }
     };
 
-    GENERATE_HAS_MEMBER(computeCostHint)
-
     // When It::value_type::cost() does exist, we get this implementation
     // that allows elements to hint how much computing it will cost and
     // balance the thread/work allocation accordingly
