@@ -3,7 +3,6 @@
 
 #include "singleton.h"
 #include "function_traits.h"
-#include "has_member.h"
 
 #include <QString>
 
@@ -186,7 +185,8 @@ private:
     // balance the thread/work allocation accordingly
     template<typename It>
     class Coster<It,
-        std::enable_if_t<has_member_computeCostHint<typename It::value_type>::value>> :
+        std::enable_if_t<std::is_member_function_pointer<
+            decltype(&It::value_type::computeCostHint)>::value>> :
         public CosterBase<It>
     {
     public:
