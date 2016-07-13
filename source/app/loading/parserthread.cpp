@@ -56,6 +56,10 @@ void ParserThread::run()
                 // If the parsing failed, we shouldn't be wasting time updating a partially
                 // constructed graph, so just clear it out
                 graph.clear();
+
+                // Also, we've already failed, so there is nothing else happening we should
+                // be telling the user about
+                graph.clearPhase();
             }
 
             // Extra processing may occur after the actual parsing, so we emit this here
