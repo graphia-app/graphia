@@ -10,6 +10,9 @@ gcc {
         -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual \
         -Wnon-virtual-dtor -Wredundant-decls -Wshadow -Wundef
 
+    # Surprisingly, this actually makes a difference to the pearson correlation code
+    QMAKE_CXXFLAGS += -funroll-loops
+
     # Debug symbols
     QMAKE_CXXFLAGS += -g
 }

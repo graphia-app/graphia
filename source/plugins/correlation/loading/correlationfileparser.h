@@ -8,7 +8,7 @@ class CorrelationPluginInstance;
 class CorrelationFileParser : public BaseParser
 {
 private:
-    CorrelationPluginInstance* _correlationPluginInstance;
+    CorrelationPluginInstance* _plugin;
 
 public:
     CorrelationFileParser(CorrelationPluginInstance* correlationPluginInstance);

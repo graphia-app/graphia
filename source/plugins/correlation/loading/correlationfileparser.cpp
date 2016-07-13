@@ -6,14 +6,15 @@
 #include "shared/loading/tabulardata.h"
 
 #include "shared/utils/utils.h"
+#include "shared/utils/threadpool.h"
 
 #include <QRect>
 
 #include <vector>
 #include <stack>
 
-CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* correlationPluginInstance) :
-    _correlationPluginInstance(correlationPluginInstance)
+CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin) :
+    _plugin(plugin)
 {}
 
 static QRect findLargestDataRect(const TabularData& tabularData)
@@ -89,138 +90,31 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
 {
     CsvFileParser csvFileParser;
 
-    if(csvFileParser.parse(url, graph, progress))
-    {
-        auto& tabularData = csvFileParser.tabularData();
-        int numDataPoints = tabularData.numColumns() * tabularData.numRows();
+    if(!csvFileParser.parse(url, graph, progress))
+        return false;
 
-        graph.setPhase(QObject::tr("Finding Data Points"));
-        progress(-1);
-        auto dataRect = findLargestDataRect(tabularData);
+    auto& tabularData = csvFileParser.tabularData();
 
-        _correlationPluginInstance->_numColumns = dataRect.width();
-        _correlationPluginInstance->_numRows = dataRect.height();
+    graph.setPhase(QObject::tr("Finding Data Points"));
+    progress(-1);
+    auto dataRect = findLargestDataRect(tabularData);
 
-        _correlationPluginInstance->_dataColumnNames.resize(dataRect.width());
-        _correlationPluginInstance->_data.resize(dataRect.width() * dataRect.height());
+    _plugin->setDimensions(dataRect.width(), dataRect.height());
 
-        graph.setPhase(QObject::tr("Attributes"));
-        int percentComplete = 0;
+    graph.setPhase(QObject::tr("Attributes"));
+    if(!_plugin->loadAttributes(tabularData, dataRect.left(), dataRect.top(), [this]{ return cancelled(); }, progress))
+        return false;
 
-        for(int rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
-        {
-            for(int columnIndex = 0; columnIndex < tabularData.numColumns(); columnIndex++)
-            {
-                if(cancelled())
-                {
-                    graph.clearPhase();
-                    return false;
-                }
+    graph.setPhase(QObject::tr("Pearson Correlation"));
+    auto edges = _plugin->pearsonCorrelation(0.7, [this]{ return cancelled(); }, progress);
 
-                int newPercentComplete = ((columnIndex + (rowIndex * tabularData.numColumns())) * 100) /
-                        numDataPoints;
+    if(cancelled())
+        return false;
 
-                if(newPercentComplete > percentComplete)
-                {
-                    percentComplete = newPercentComplete;
-                    progress(newPercentComplete);
-                }
+    graph.setPhase(QObject::tr("Building Graph"));
+    _plugin->createEdges(edges, progress);
 
-                QString value = tabularData.valueAtQString(columnIndex, rowIndex);
-                int dataColumnIndex = columnIndex - dataRect.left();
-                int dataRowIndex = rowIndex - dataRect.top();
+    graph.clearPhase();
 
-                if(rowIndex == 0)
-                {
-                    if(dataColumnIndex < 0)
-                    {
-                        // Row attribute names
-                        _correlationPluginInstance->_rowAttributes.emplace(
-                                    value, std::vector<QString>(_correlationPluginInstance->_numRows));
-                    }
-                    else
-                    {
-                        // Data column names
-                        _correlationPluginInstance->_dataColumnNames.at(dataColumnIndex) = value;
-                    }
-                }
-                else if(dataRowIndex < 0)
-                {
-                    if(columnIndex == 0)
-                    {
-                        // Column attribute names
-                        _correlationPluginInstance->_columnAttributes.emplace(
-                                    value, std::vector<QString>(_correlationPluginInstance->_numColumns));
-                    }
-                    else if(dataColumnIndex >= 0)
-                    {
-                        // Column attributes
-                        QString columnAttributeName = tabularData.valueAtQString(0, rowIndex);
-                        _correlationPluginInstance->_columnAttributes[columnAttributeName].at(dataColumnIndex) = value;
-                    }
-                }
-                else
-                {
-                    if(dataColumnIndex < 0)
-                    {
-                        // Row attributes
-                        QString rowAttributeName = tabularData.valueAtQString(columnIndex, 0);
-                        _correlationPluginInstance->_rowAttributes[rowAttributeName].at(dataRowIndex) = value;
-                    }
-                    else
-                    {
-                        // Data
-                        int dataIndex = dataColumnIndex + (dataRowIndex * _correlationPluginInstance->_numColumns);
-
-                        if(dataColumnIndex == 0)
-                        {
-                            CorrelationPluginInstance::Row dataRow;
-                            dataRow._begin = _correlationPluginInstance->_data.cbegin() + dataIndex;
-                            dataRow._end = _correlationPluginInstance->_data.cbegin() + dataIndex +
-                                    _correlationPluginInstance->_numColumns;
-
-                            _correlationPluginInstance->_dataRows.emplace_back(dataRow);
-                        }
-
-                        _correlationPluginInstance->_data.at(dataIndex) = value.toDouble();
-                    }
-                }
-            }
-        }
-
-        // Calculate sums and mean
-        progress(-1);
-        graph.setPhase(QObject::tr("Summing"));
-        for(auto& row : _correlationPluginInstance->_dataRows)
-        {
-            for(auto value : row)
-            {
-                row._sum += value;
-                row._sumSq += value * value;
-                row._mean += value / _correlationPluginInstance->_numColumns;
-            }
-        }
-
-        // Calculate variance and stddev
-        graph.setPhase(QObject::tr("Standard Deviation"));
-        for(auto& row : _correlationPluginInstance->_dataRows)
-        {
-            double sum = 0.0;
-            for(auto value : row)
-            {
-                double x = (value - row._mean);
-                x *= x;
-                sum += x;
-            }
-
-            row._variance = sum / _correlationPluginInstance->_numColumns;
-            row._stddev = std::sqrt(row._variance);
-        }
-
-        graph.clearPhase();
-
-        return true;
-    }
-
-    return false;
+    return true;
 }
