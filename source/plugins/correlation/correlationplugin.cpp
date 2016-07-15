@@ -159,7 +159,9 @@ void CorrelationPluginInstance::addRowAttribute(const QString& name)
     _rowAttributes.emplace(name, std::vector<QString>(_numRows));
 }
 
-void CorrelationPluginInstance::setRowAttribute(int row, const QString& name, const QString& attribute)
+void CorrelationPluginInstance::setRowAttribute(int row,
+                                                const QString& name,
+                                                const QString& attribute)
 {
     Q_ASSERT(row < _numRows);
     Q_ASSERT(u::contains(_rowAttributes, name));
@@ -172,7 +174,9 @@ void CorrelationPluginInstance::addColumnAttribute(const QString& name)
     _columnAttributes.emplace(name, std::vector<QString>(_numColumns));
 }
 
-void CorrelationPluginInstance::setColumnAttribute(int column, const QString& name, const QString& attribute)
+void CorrelationPluginInstance::setColumnAttribute(int column,
+                                                   const QString& name,
+                                                   const QString& attribute)
 {
     Q_ASSERT(column < _numColumns);
     Q_ASSERT(u::contains(_columnAttributes, name));

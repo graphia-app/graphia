@@ -6,7 +6,6 @@
 #include "shared/loading/tabulardata.h"
 
 #include "shared/utils/utils.h"
-#include "shared/utils/threadpool.h"
 
 #include <QRect>
 
