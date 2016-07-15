@@ -94,7 +94,7 @@ private:
 
             for(auto& future : _futures)
             {
-                auto& v = future.get();
+                auto v = std::move(future.get());
                 values.reserve(values.size() + v.size());
                 values.insert(values.end(), std::make_move_iterator(v.begin()),
                                             std::make_move_iterator(v.end()));
