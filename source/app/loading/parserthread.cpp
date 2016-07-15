@@ -39,15 +39,32 @@ void ParserThread::run()
     _graph.performTransaction(
         [this, &result](MutableGraph& graph)
         {
-            int newPercentage = -1;
+            std::atomic<int> percentage;
+            percentage = -1;
 
             result = _parser->parse(_url, graph,
-                [this, &newPercentage](int percentage)
+                [this, &percentage](int newPercentage)
                 {
-                    if(percentage <= 0 || percentage > newPercentage)
+                    if(newPercentage > 0)
                     {
-                        newPercentage = percentage;
-                        emit progress(percentage);
+                        bool percentageIncreased = false;
+                        int expected, desired;
+
+                        do
+                        {
+                            expected = percentage.load();
+                            desired = newPercentage > expected ? newPercentage : expected;
+                            percentageIncreased = desired != expected;
+                        }
+                        while(!percentage.compare_exchange_weak(expected, desired));
+
+                        if(percentageIncreased)
+                            emit progress(newPercentage);
+                    }
+                    else
+                    {
+                        percentage = newPercentage;
+                        emit progress(newPercentage);
                     }
                 });
 
