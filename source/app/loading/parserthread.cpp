@@ -4,6 +4,8 @@
 
 #include "shared/utils/utils.h"
 
+#include <atomic>
+
 ParserThread::ParserThread(MutableGraph& graph, const QUrl& url,
                            std::unique_ptr<IParser> parser) :
     _graph(graph),

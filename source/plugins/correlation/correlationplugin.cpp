@@ -131,7 +131,7 @@ void CorrelationPluginInstance::createEdges(const std::vector<std::tuple<NodeId,
     progress(0);
     for(auto edgeIt = edges.begin(); edgeIt != edges.end(); ++edgeIt)
     {
-        progress(std::distance(edges.begin(), edgeIt) * 100 / edges.size());
+        progress(std::distance(edges.begin(), edgeIt) * 100 / static_cast<int>(edges.size()));
 
         auto& edge = *edgeIt;
         auto edgeId = graphModel()->mutableGraph().addEdge(std::get<0>(edge), std::get<1>(edge));
