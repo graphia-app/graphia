@@ -78,8 +78,12 @@ std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pears
         const IParser::ProgressFn& progress)
 {
     progress(0);
-    const uint64_t numPairs = (_numRows * _numRows) / 2;
-    std::atomic<uint64_t> pair(0);
+
+    uint64_t totalCost = 0;
+    for(auto& row : _dataRows)
+        totalCost += row.computeCostHint();
+
+    std::atomic<uint64_t> cost(0);
 
     auto results = ThreadPool("PearsonCor").concurrent_for(_dataRows.begin(), _dataRows.end(),
     [&](std::vector<DataRow>::iterator rowAIt)
@@ -89,8 +93,6 @@ std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pears
 
         if(cancelled())
             return edges;
-
-        progress((pair * 100) / numPairs);
 
         for(auto rowBIt = rowAIt + 1; rowBIt != _dataRows.end(); rowBIt++)
         {
@@ -104,9 +106,10 @@ std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pears
 
             if(std::isfinite(r) && r > minimumThreshold)
                 edges.emplace_back(rowA._nodeId, rowB._nodeId, r);
-
-            pair++;
         }
+
+        cost += rowA.computeCostHint();
+        progress((cost * 100) / totalCost);
 
         return edges;
     });
