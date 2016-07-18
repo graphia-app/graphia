@@ -256,8 +256,7 @@ void LayoutThread::addAllComponents()
     for(ComponentId componentId : _graphModel->graph().componentIds())
         addComponent(componentId);
 
-    // The new components might need to be laid out so
-    // resume laying out in case we do
+    // The new components may need to be laid out so resume in case they do
     resume();
 }
 
