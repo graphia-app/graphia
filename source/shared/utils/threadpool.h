@@ -166,7 +166,7 @@ private:
         {}
     };
 
-    // When It::value_type::cost() doesn't exist, we get
+    // When It::value_type::computeCostHint() doesn't exist, we get
     // this implementation, which gives every element each weight
     template<typename It, typename Enable = void>
     class Coster : public CosterBase<It>
