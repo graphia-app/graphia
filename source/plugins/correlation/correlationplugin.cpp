@@ -192,7 +192,7 @@ void CorrelationPluginInstance::setDataColumnName(int column, const QString& nam
 void CorrelationPluginInstance::setData(int column, int row, double value)
 {
     int index = (row * _numColumns) + column;
-    Q_ASSERT(index < _data.size());
+    Q_ASSERT(index < static_cast<int>(_data.size()));
     _data.at(index) = value;
 }
 
