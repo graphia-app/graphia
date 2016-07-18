@@ -153,34 +153,101 @@ void CorrelationPluginInstance::setDimensions(int numColumns, int numRows)
     _data.resize(numColumns * numRows);
 }
 
+void CorrelationPluginInstance::Attribute::set(int index, const QString& value)
+{
+    Q_ASSERT(index < static_cast<int>(_values.size()));
+
+    bool conversionSucceeded = false;
+
+    int intValue = value.toInt(&conversionSucceeded);
+    bool isInt = conversionSucceeded;
+
+    double floatValue = value.toDouble(&conversionSucceeded);
+    bool isFloat = conversionSucceeded;
+
+    switch(_type)
+    {
+    default:
+    case Type::Unknown:
+        if(isInt)
+            _type = Type::Integer;
+        else if(isFloat)
+            _type = Type::Float;
+        else
+            _type = Type::String;
+
+        break;
+
+    case Type::Integer:
+        if(!isInt)
+        {
+            if(isFloat)
+                _type = Type::Float;
+            else
+                _type = Type::String;
+        }
+
+        break;
+
+    case Type::Float:
+        if(isFloat || isInt)
+            _type = Type::Float;
+        else
+            _type = Type::String;
+
+        break;
+
+    case Type::String:
+        _type = Type::String;
+
+        break;
+    }
+
+    _values.at(index) = value;
+
+    if(isInt)
+    {
+        _intValues.at(index) = intValue;
+        _intMin = std::min(_intMin, intValue);
+        _intMax = std::max(_intMax, intValue);
+    }
+
+    if(isFloat)
+    {
+        _floatValues.at(index) = floatValue;
+        _floatMin = std::min(_floatMin, floatValue);
+        _floatMax = std::max(_floatMax, floatValue);
+    }
+}
+
 void CorrelationPluginInstance::addRowAttribute(const QString& name)
 {
     Q_ASSERT(_numRows > 0);
-    _rowAttributes.emplace(name, std::vector<QString>(_numRows));
+    _rowAttributes.emplace(name, Attribute(_numRows));
 }
 
 void CorrelationPluginInstance::setRowAttribute(int row,
                                                 const QString& name,
-                                                const QString& attribute)
+                                                const QString& value)
 {
     Q_ASSERT(row < _numRows);
     Q_ASSERT(u::contains(_rowAttributes, name));
-    _rowAttributes[name].at(row) = attribute;
+    _rowAttributes[name].set(row, value);
 }
 
 void CorrelationPluginInstance::addColumnAttribute(const QString& name)
 {
     Q_ASSERT(_numColumns > 0);
-    _columnAttributes.emplace(name, std::vector<QString>(_numColumns));
+    _columnAttributes.emplace(name, Attribute(_numColumns));
 }
 
 void CorrelationPluginInstance::setColumnAttribute(int column,
                                                    const QString& name,
-                                                   const QString& attribute)
+                                                   const QString& value)
 {
     Q_ASSERT(column < _numColumns);
     Q_ASSERT(u::contains(_columnAttributes, name));
-    _columnAttributes[name].at(column) = attribute;
+    _columnAttributes[name].set(column, value);
 }
 
 void CorrelationPluginInstance::setDataColumnName(int column, const QString& name)
@@ -209,6 +276,7 @@ void CorrelationPluginInstance::finishDataRow(int row)
     auto computeCost = _numRows - row + 1;
 
     _dataRows.emplace_back(begin, end, nodeId, computeCost);
+    _dataRowIndexes->set(nodeId, row);
 }
 
 void CorrelationPluginInstance::onGraphChanged()
@@ -219,6 +287,45 @@ void CorrelationPluginInstance::onGraphChanged()
         float max = *std::max_element(_pearsonValues->begin(), _pearsonValues->end());
 
         graphModel()->dataField(tr("Pearson Correlation Value")).setFloatMin(min).setFloatMax(max);
+    }
+
+    for(auto& rowAttribute : _rowAttributes)
+    {
+        switch(rowAttribute.second._type)
+        {
+        case Attribute::Type::Float:
+            graphModel()->dataField(rowAttribute.first)
+                    .setFloatValueFn([this, &rowAttribute](NodeId nodeId)
+                    {
+                        int row = _dataRowIndexes->get(nodeId);
+                        return rowAttribute.second._values.at(row).toFloat();
+                    })
+                    .setFloatMin(rowAttribute.second._floatMin)
+                    .setFloatMax(rowAttribute.second._floatMax);
+            break;
+
+        case Attribute::Type::Integer:
+            graphModel()->dataField(rowAttribute.first)
+                    .setIntValueFn([this, &rowAttribute](NodeId nodeId)
+                    {
+                        int row = _dataRowIndexes->get(nodeId);
+                        return rowAttribute.second._values.at(row).toInt();
+                    })
+                    .setIntMin(rowAttribute.second._intMin)
+                    .setIntMax(rowAttribute.second._intMax);
+            break;
+
+        case Attribute::Type::String:
+            graphModel()->dataField(rowAttribute.first)
+                    .setStringValueFn([this, &rowAttribute](NodeId nodeId)
+                    {
+                        int row = _dataRowIndexes->get(nodeId);
+                        return rowAttribute.second._values.at(row);
+                    });
+            break;
+
+        default:;
+        }
     }
 }
 

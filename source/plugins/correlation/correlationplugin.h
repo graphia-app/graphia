@@ -9,6 +9,9 @@
 #include <vector>
 #include <map>
 #include <functional>
+#include <limits>
+
+#include <QString>
 
 class CorrelationPluginInstance : public BasePluginInstance
 {
@@ -21,9 +24,9 @@ private:
     void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager);
 
     void addRowAttribute(const QString& name);
-    void setRowAttribute(int row, const QString& name, const QString& attribute);
+    void setRowAttribute(int row, const QString& name, const QString& value);
     void addColumnAttribute(const QString& name);
-    void setColumnAttribute(int column, const QString& name, const QString& attribute);
+    void setColumnAttribute(int column, const QString& name, const QString& value);
 
     void setDataColumnName(int column, const QString& name);
     void setData(int column, int row, double value);
@@ -33,9 +36,43 @@ private:
     int _numColumns = 0;
     int _numRows = 0;
 
+    struct Attribute
+    {
+        Attribute() = default;
+        Attribute(const Attribute&) = default;
+        Attribute(Attribute&&) = default;
+
+        Attribute(int numRows) :
+            _values(numRows),
+            _intValues(numRows),
+            _floatValues(numRows)
+        {}
+
+        enum class Type
+        {
+            Unknown,
+            String,
+            Integer,
+            Float
+        };
+
+        Type _type = Type::Unknown;
+
+        std::vector<QString> _values;
+        std::vector<int> _intValues;
+        std::vector<double> _floatValues;
+
+        int _intMin = std::numeric_limits<int>::max();
+        int _intMax = std::numeric_limits<int>::min();
+        double _floatMin = std::numeric_limits<double>::max();
+        double _floatMax = std::numeric_limits<double>::min();
+
+        void set(int index, const QString& value);
+    };
+
     std::vector<QString> _dataColumnNames;
-    std::map<QString, std::vector<QString>> _rowAttributes;
-    std::map<QString, std::vector<QString>> _columnAttributes;
+    std::map<QString, Attribute> _rowAttributes;
+    std::map<QString, Attribute> _columnAttributes;
 
     using DataIterator = std::vector<double>::const_iterator;
     using DataOffset = std::vector<double>::size_type;
