@@ -169,9 +169,8 @@ private:
     // When It::value_type::computeCostHint() doesn't exist, we get
     // this implementation, which gives every element each weight
     template<typename It, typename Enable = void>
-    class Coster : public CosterBase<It>
+    struct Coster : public CosterBase<It>
     {
-    public:
         using CosterBase<It>::CosterBase;
 
         int total() { return std::distance(this->_first, this->_last); }
@@ -182,12 +181,11 @@ private:
     // that allows elements to hint how much computing it will cost and
     // balance the thread/work allocation accordingly
     template<typename It>
-    class Coster<It,
+    struct Coster<It,
         std::enable_if_t<std::is_member_function_pointer<
             decltype(&It::value_type::computeCostHint)>::value>> :
         public CosterBase<It>
     {
-    public:
         using CosterBase<It>::CosterBase;
 
         int total()
