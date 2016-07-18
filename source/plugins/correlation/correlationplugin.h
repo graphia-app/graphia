@@ -21,18 +21,6 @@ public:
     CorrelationPluginInstance();
 
 private:
-    void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager);
-
-    void addRowAttribute(const QString& name);
-    void setRowAttribute(int row, const QString& name, const QString& value);
-    void addColumnAttribute(const QString& name);
-    void setColumnAttribute(int column, const QString& name, const QString& value);
-
-    void setDataColumnName(int column, const QString& name);
-    void setData(int column, int row, double value);
-
-    void finishDataRow(int row);
-
     int _numColumns = 0;
     int _numRows = 0;
 
@@ -138,6 +126,18 @@ private:
 
     std::unique_ptr<NodeArray<int>> _dataRowIndexes;
     std::unique_ptr<EdgeArray<double>> _pearsonValues;
+
+    void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager);
+
+    void addRowAttribute(const QString& name);
+    void setRowAttribute(int row, const QString& name, const QString& value);
+    void addColumnAttribute(const QString& name);
+    void setColumnAttribute(int column, const QString& name, const QString& value);
+
+    void setDataColumnName(int column, const QString& name);
+    void setData(int column, int row, double value);
+
+    void finishDataRow(int row);
 
 public:
     void setDimensions(int numColumns, int numRows);
