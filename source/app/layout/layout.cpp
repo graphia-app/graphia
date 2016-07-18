@@ -248,13 +248,6 @@ void LayoutThread::addComponent(ComponentId componentId)
         _layouts.emplace(componentId, layout);
         _graphModel->nodePositions().setScale(layout->scaling());
         _graphModel->nodePositions().setSmoothing(layout->smoothing());
-
-        if(_layouts.size() == 1)
-        {
-            // If this is the first layout, resume
-            lock.unlock();
-            resume();
-        }
     }
 }
 
@@ -262,6 +255,10 @@ void LayoutThread::addAllComponents()
 {
     for(ComponentId componentId : _graphModel->graph().componentIds())
         addComponent(componentId);
+
+    // The new components might need to be laid out so
+    // resume laying out in case we do
+    resume();
 }
 
 void LayoutThread::removeComponent(ComponentId componentId)

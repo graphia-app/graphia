@@ -28,6 +28,10 @@ void GraphQuickItem::initialise(std::shared_ptr<GraphModel> graphModel,
 
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphQuickItem::graphChanged);
     emit graphChanged();
+
+    // Force an initial update; this will usually occur anyway for other reasons,
+    // but it can't hurt to do it unconditionally too
+    update();
 }
 
 void GraphQuickItem::resetView()
