@@ -95,8 +95,8 @@ int main(int argc, char *argv[])
     preferences.define("visuals/backgroundColor",           "#C0C0C0");
     preferences.define("visuals/highlightColor",            "#FFFFFF");
 
-    preferences.define("visuals/defaultNodeSize",           0.6, 0.1, 2.0);
-    preferences.define("visuals/defaultEdgeSize",           0.2, 0.1, 2.0);
+    preferences.define("visuals/defaultNodeSize",           0.6, 0.1,  2.0);
+    preferences.define("visuals/defaultEdgeSize",           0.2, 0.02, 2.0);
 
     preferences.define("visuals/minimumComponentRadius",    2.0, 0.05, 15.0);
     preferences.define("visuals/transitionTime",            1.0, 0.1, 5.0);
