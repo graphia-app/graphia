@@ -4,6 +4,8 @@
 #include "shared/graph/imutablegraph.h"
 #include "shared/plugins/basegenericplugin.h"
 
+#include "thirdparty/utf8/utf8.h"
+
 #include <QFile>
 #include <QTextStream>
 #include <QFileInfo>
@@ -49,15 +51,19 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
 
         bool inQuotes = false;
 
-        for(size_t i = 0; i < line.length(); i++)
+        auto it = line.begin();
+        auto end = line.end();
+        do
         {
-            if((i + 1) < line.length() &&
-               line[i] == '/' && line[i + 1] == '/')
+            uint32_t codePoint = utf8::next(it, end);
+
+            if((it + 1) < end &&
+               codePoint == '/' && utf8::peek_next(it, end) == '/')
             {
                 // Ignore C++ style comments
                 break;
             }
-            else if(line[i] == '\"')
+            else if(codePoint == '\"')
             {
                 if(inQuotes)
                 {
@@ -69,7 +75,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
             }
             else
             {
-                bool space = std::isspace(line[i]);
+                bool space = std::isspace(codePoint);
                 bool trailingSpace = space && !token.empty();
 
                 if(trailingSpace && !inQuotes)
@@ -78,9 +84,10 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
                     token.clear();
                 }
                 else if(!space || inQuotes)
-                    token += line[i];
+                    utf8::unchecked::append(codePoint, std::back_inserter(token));
             }
         }
+        while(it < end);
 
         if(!token.empty())
         {
