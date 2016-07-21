@@ -4,7 +4,7 @@
 #include "shared/graph/imutablegraph.h"
 #include "shared/plugins/basegenericplugin.h"
 
-#include "thirdparty/utf8/utf8.h"
+#include "thirdparty/utfcpp/utf8.h"
 
 #include <QFile>
 #include <QTextStream>
