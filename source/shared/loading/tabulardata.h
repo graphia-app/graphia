@@ -4,6 +4,8 @@
 #include "shared/graph/imutablegraph.h"
 #include "shared/loading/baseparser.h"
 
+#include "thirdparty/utfcpp/utf8.h"
+
 #include <QUrl>
 
 #include <string>
@@ -66,9 +68,13 @@ private:
 
             bool inQuotes = false;
 
-            for(size_t i = 0; i < line.length(); i++)
+            auto it = line.begin();
+            auto end = line.end();
+            do
             {
-                if(line[i] == '\"')
+                uint32_t codePoint = utf8::next(it, end);
+
+                if(codePoint == '\"')
                 {
                     if(inQuotes)
                     {
@@ -76,15 +82,15 @@ private:
                         currentToken.clear();
 
                         // Quote closed, but there is text before the delimiter
-                        while(i < line.length() && line[i] != Delimiter)
-                            i++;
+                        while(it < end && codePoint != Delimiter)
+                            codePoint = utf8::next(it, end);
                     }
 
                     inQuotes = !inQuotes;
                 }
                 else
                 {
-                    bool delimiter = (line[i] == Delimiter);
+                    bool delimiter = (codePoint == Delimiter);
 
                     if(delimiter && !inQuotes)
                     {
@@ -92,9 +98,10 @@ private:
                         currentToken.clear();
                     }
                     else
-                        currentToken += line[i];
+                        utf8::unchecked::append(codePoint, std::back_inserter(currentToken));
                 }
             }
+            while(it < end);
 
             if(!currentToken.empty())
             {
