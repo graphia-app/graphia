@@ -5,7 +5,7 @@
 
 #include "../graph/graph.h"
 
-#include <memory>
+#include <vector>
 
 class GraphModel;
 class SelectionManager;
@@ -13,15 +13,15 @@ class SelectionManager;
 class DeleteSelectedNodesCommand : public Command
 {
 private:
-    std::shared_ptr<GraphModel> _graphModel;
-    std::shared_ptr<SelectionManager> _selectionManager;
+    GraphModel* _graphModel;
+    SelectionManager* _selectionManager;
 
     const NodeIdSet _nodeIds;
     std::vector<Edge> _edges;
 
 public:
-    DeleteSelectedNodesCommand(std::shared_ptr<GraphModel> graphModel,
-                               std::shared_ptr<SelectionManager> selectionManager);
+    DeleteSelectedNodesCommand(GraphModel* graphModel,
+                               SelectionManager* selectionManager);
 
     bool execute();
     void undo();

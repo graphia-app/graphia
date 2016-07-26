@@ -6,8 +6,8 @@
 #include "../graph/graphmodel.h"
 #include "../ui/selectionmanager.h"
 
-DeleteSelectedNodesCommand::DeleteSelectedNodesCommand(std::shared_ptr<GraphModel> graphModel,
-                                                       std::shared_ptr<SelectionManager> selectionManager) :
+DeleteSelectedNodesCommand::DeleteSelectedNodesCommand(GraphModel* graphModel,
+                                                       SelectionManager* selectionManager) :
     Command(),
     _graphModel(graphModel),
     _selectionManager(selectionManager),

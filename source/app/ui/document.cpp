@@ -466,7 +466,7 @@ void Document::deleteSelectedNodes()
     if(_selectionManager->selectedNodes().empty())
         return;
 
-    _commandManager.execute(std::make_shared<DeleteSelectedNodesCommand>(_graphModel, _selectionManager));
+    _commandManager.execute(std::make_shared<DeleteSelectedNodesCommand>(_graphModel.get(), _selectionManager.get()));
 }
 
 void Document::resetView()
