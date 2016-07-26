@@ -53,11 +53,11 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
 
         auto it = line.begin();
         auto end = line.end();
-        do
+        while(it < end)
         {
             uint32_t codePoint = utf8::next(it, end);
 
-            if((it + 1) < end &&
+            if(it < end && it < (end - 1) &&
                codePoint == '/' && utf8::peek_next(it, end) == '/')
             {
                 // Ignore C++ style comments
@@ -87,7 +87,6 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
                     utf8::unchecked::append(codePoint, std::back_inserter(token));
             }
         }
-        while(it < end);
 
         if(!token.empty())
         {

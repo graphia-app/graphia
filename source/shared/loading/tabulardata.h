@@ -70,7 +70,7 @@ private:
 
             auto it = line.begin();
             auto end = line.end();
-            do
+            while(it < end)
             {
                 uint32_t codePoint = utf8::next(it, end);
 
@@ -101,7 +101,6 @@ private:
                         utf8::unchecked::append(codePoint, std::back_inserter(currentToken));
                 }
             }
-            while(it < end);
 
             if(!currentToken.empty())
             {
