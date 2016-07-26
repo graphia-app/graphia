@@ -6,6 +6,8 @@
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/iparser.h"
 
+#include "attributestablemodel.h"
+
 #include <vector>
 #include <map>
 #include <functional>
@@ -16,6 +18,8 @@
 class CorrelationPluginInstance : public BasePluginInstance
 {
     Q_OBJECT
+
+    Q_PROPERTY(QAbstractTableModel* rowAttributes READ attributesTableModel CONSTANT)
 
 public:
     CorrelationPluginInstance();
@@ -30,7 +34,8 @@ private:
         Attribute(const Attribute&) = default;
         Attribute(Attribute&&) = default;
 
-        Attribute(int numRows) :
+        Attribute(const QString& name, int numRows) :
+            _name(name),
             _values(numRows),
             _intValues(numRows),
             _floatValues(numRows)
@@ -44,6 +49,8 @@ private:
             Float
         };
 
+        QString _name;
+
         Type _type = Type::Unknown;
 
         std::vector<QString> _values;
@@ -56,11 +63,14 @@ private:
         double _floatMax = std::numeric_limits<double>::min();
 
         void set(int index, const QString& value);
+        const QString& get(int index) const;
     };
 
     std::vector<QString> _dataColumnNames;
-    std::map<QString, Attribute> _rowAttributes;
-    std::map<QString, Attribute> _columnAttributes;
+    std::vector<Attribute> _rowAttributes;
+    std::vector<Attribute> _columnAttributes;
+
+    AttributesTableModel _attributesTableModel;
 
     using DataIterator = std::vector<double>::const_iterator;
     using DataOffset = std::vector<double>::size_type;
@@ -129,8 +139,11 @@ private:
 
     void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager);
 
+    Attribute& rowAttributeByName(const QString& name);
     void addRowAttribute(const QString& name);
     void setRowAttribute(int row, const QString& name, const QString& value);
+
+    Attribute& columnAttributeByName(const QString& name);
     void addColumnAttribute(const QString& name);
     void setColumnAttribute(int column, const QString& name, const QString& value);
 
@@ -138,6 +151,8 @@ private:
     void setData(int column, int row, double value);
 
     void finishDataRow(int row);
+
+    QAbstractTableModel* attributesTableModel() { return &_attributesTableModel; }
 
 public:
     void setDimensions(int numColumns, int numRows);
@@ -152,6 +167,13 @@ public:
                      const IParser::ProgressFn& progress);
 
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName);
+
+    int numRows() const { return _numRows; }
+    int numColumns() const { return _numColumns; }
+
+    const std::vector<Attribute>& rowAttributes() const { return _rowAttributes; }
+    const QString& rowAttributeValue(int row, const QString& name);
+    int rowIndexForNodeId(NodeId nodeId) const { return _dataRowIndexes->get(nodeId); }
 
 private slots:
     void onGraphChanged();

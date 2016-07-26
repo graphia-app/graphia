@@ -3,7 +3,8 @@
 #include "loading/correlationfileparser.h"
 #include "shared/utils/threadpool.h"
 
-CorrelationPluginInstance::CorrelationPluginInstance()
+CorrelationPluginInstance::CorrelationPluginInstance() :
+    _attributesTableModel(this)
 {
     connect(this, &CorrelationPluginInstance::graphChanged,
             this, &CorrelationPluginInstance::onGraphChanged);
@@ -138,6 +139,7 @@ void CorrelationPluginInstance::createEdges(const std::vector<std::tuple<NodeId,
         _pearsonValues->set(edgeId, std::get<2>(edge));
     }
 
+    _attributesTableModel.initialise();
 }
 
 void CorrelationPluginInstance::setDimensions(int numColumns, int numRows)
@@ -220,10 +222,25 @@ void CorrelationPluginInstance::Attribute::set(int index, const QString& value)
     }
 }
 
+const QString& CorrelationPluginInstance::Attribute::get(int index) const
+{
+    Q_ASSERT(index < static_cast<int>(_values.size()));
+
+    return _values.at(index);
+}
+
+CorrelationPluginInstance::Attribute& CorrelationPluginInstance::rowAttributeByName(const QString& name)
+{
+    auto it = std::find_if(_rowAttributes.begin(), _rowAttributes.end(),
+                          [&name](auto& v) { return v._name == name; });
+    Q_ASSERT(it != _rowAttributes.end());
+    return *it;
+}
+
 void CorrelationPluginInstance::addRowAttribute(const QString& name)
 {
     Q_ASSERT(_numRows > 0);
-    _rowAttributes.emplace(name, Attribute(_numRows));
+    _rowAttributes.emplace_back(name, _numRows);
 }
 
 void CorrelationPluginInstance::setRowAttribute(int row,
@@ -231,14 +248,26 @@ void CorrelationPluginInstance::setRowAttribute(int row,
                                                 const QString& value)
 {
     Q_ASSERT(row < _numRows);
-    Q_ASSERT(u::contains(_rowAttributes, name));
-    _rowAttributes[name].set(row, value);
+    rowAttributeByName(name).set(row, value);
+}
+
+const QString& CorrelationPluginInstance::rowAttributeValue(int row, const QString& name)
+{
+    return rowAttributeByName(name).get(row);
+}
+
+CorrelationPluginInstance::Attribute& CorrelationPluginInstance::columnAttributeByName(const QString& name)
+{
+    auto it = std::find_if(_columnAttributes.begin(), _columnAttributes.end(),
+                          [&name](auto& v) { return v._name == name; });
+    Q_ASSERT(it != _columnAttributes.end());
+    return *it;
 }
 
 void CorrelationPluginInstance::addColumnAttribute(const QString& name)
 {
     Q_ASSERT(_numColumns > 0);
-    _columnAttributes.emplace(name, Attribute(_numColumns));
+    _columnAttributes.emplace_back(name, _numColumns);
 }
 
 void CorrelationPluginInstance::setColumnAttribute(int column,
@@ -246,8 +275,7 @@ void CorrelationPluginInstance::setColumnAttribute(int column,
                                                    const QString& value)
 {
     Q_ASSERT(column < _numColumns);
-    Q_ASSERT(u::contains(_columnAttributes, name));
-    _columnAttributes[name].set(column, value);
+    columnAttributeByName(name).set(column, value);
 }
 
 void CorrelationPluginInstance::setDataColumnName(int column, const QString& name)
@@ -281,7 +309,7 @@ void CorrelationPluginInstance::finishDataRow(int row)
 
 void CorrelationPluginInstance::onGraphChanged()
 {
-    if(_pearsonValues != nullptr)
+    if(_pearsonValues != nullptr && !_pearsonValues->empty())
     {
         float min = *std::min_element(_pearsonValues->begin(), _pearsonValues->end());
         float max = *std::max_element(_pearsonValues->begin(), _pearsonValues->end());
@@ -291,36 +319,36 @@ void CorrelationPluginInstance::onGraphChanged()
 
     for(auto& rowAttribute : _rowAttributes)
     {
-        switch(rowAttribute.second._type)
+        switch(rowAttribute._type)
         {
         case Attribute::Type::Float:
-            graphModel()->dataField(rowAttribute.first)
+            graphModel()->dataField(rowAttribute._name)
                     .setFloatValueFn([this, &rowAttribute](NodeId nodeId)
                     {
                         int row = _dataRowIndexes->get(nodeId);
-                        return rowAttribute.second._values.at(row).toFloat();
+                        return rowAttribute._values.at(row).toFloat();
                     })
-                    .setFloatMin(rowAttribute.second._floatMin)
-                    .setFloatMax(rowAttribute.second._floatMax);
+                    .setFloatMin(rowAttribute._floatMin)
+                    .setFloatMax(rowAttribute._floatMax);
             break;
 
         case Attribute::Type::Integer:
-            graphModel()->dataField(rowAttribute.first)
+            graphModel()->dataField(rowAttribute._name)
                     .setIntValueFn([this, &rowAttribute](NodeId nodeId)
                     {
                         int row = _dataRowIndexes->get(nodeId);
-                        return rowAttribute.second._values.at(row).toInt();
+                        return rowAttribute._values.at(row).toInt();
                     })
-                    .setIntMin(rowAttribute.second._intMin)
-                    .setIntMax(rowAttribute.second._intMax);
+                    .setIntMin(rowAttribute._intMin)
+                    .setIntMax(rowAttribute._intMax);
             break;
 
         case Attribute::Type::String:
-            graphModel()->dataField(rowAttribute.first)
+            graphModel()->dataField(rowAttribute._name)
                     .setStringValueFn([this, &rowAttribute](NodeId nodeId)
                     {
                         int row = _dataRowIndexes->get(nodeId);
-                        return rowAttribute.second._values.at(row);
+                        return rowAttribute._values.at(row);
                     });
             break;
 
