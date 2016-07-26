@@ -8,7 +8,26 @@
 SelectionManager::SelectionManager(const GraphModel& graphModel) :
     QObject(),
     _graphModel(graphModel)
-{}
+{
+    connect(&_graphModel.graph(), &Graph::nodeRemoved,
+    [this](const Graph*, NodeId nodeId)
+    {
+       _deletedNodes.push_back(nodeId);
+    });
+
+    connect(&graphModel.graph(), &Graph::graphChanged,
+    [this]
+    {
+        bool selectionChanged = deselectNodes(_deletedNodes);
+        if(selectionChanged)
+        {
+            qWarning("WARNING: SelectionManager auto-deselected removed nodes; whatever was "
+                     "responsible for the removal should be deselecting them itself");
+        }
+
+        _deletedNodes.clear();
+    });
+}
 
 NodeIdSet SelectionManager::selectedNodes() const
 {

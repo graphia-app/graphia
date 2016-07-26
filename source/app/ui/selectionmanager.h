@@ -128,6 +128,9 @@ private:
 
     NodeIdSet _selectedNodeIds;
 
+    // Temporary storage for NodeIds that have been deleted
+    std::vector<NodeId> _deletedNodes;
+
 signals:
     void selectionChanged(const SelectionManager* selectionManager) const;
 };
