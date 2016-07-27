@@ -104,6 +104,11 @@ public:
 
     explicit Command(bool asynchronous = true);
 
+    Command(const Command&) = delete;
+    Command(Command&&) = delete;
+    Command& operator=(const Command&) = delete;
+    Command& operator=(Command&&) = delete;
+
     virtual ~Command() {}
 
     const QString& description() const;
