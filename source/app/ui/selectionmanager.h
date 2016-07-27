@@ -20,6 +20,7 @@ public:
 
     bool selectNode(NodeId nodeId);
 
+    //FIXME http://en.cppreference.com/w/cpp/container/unordered_set/merge will be useful here
     template<typename C> bool selectNodes(const C& nodeIds, bool selectMergedNodes = true)
     {
         NodeIdSet newSelectedNodeIds;
