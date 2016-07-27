@@ -123,6 +123,8 @@ public:
 
     bool asynchronous() const { return _asynchronous; }
 
+    // Execute some function in the context of the CommandManager,
+    // after the command thread has joined
     void executeSynchronouslyOnCompletion(const CommandFn& postExecuteFn);
 
 private:
