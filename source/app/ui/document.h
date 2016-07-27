@@ -98,6 +98,7 @@ public:
     void setStatus(const QString& status);
 
     QmlContainerWrapper<GraphTransformConfiguration>* transforms() { return &_graphTransformConfigurations; }
+    void setTransforms(const std::vector<GraphTransformConfiguration>& transformations);
 
     QmlContainerWrapper<LayoutSetting>* layoutSettings() { return &_layoutSettings; }
 

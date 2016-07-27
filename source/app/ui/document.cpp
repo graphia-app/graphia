@@ -12,6 +12,7 @@
 #include "../layout/collision.h"
 
 #include "../commands/deleteselectednodescommand.h"
+#include "../commands/applytransformationscommand.h"
 
 #include "selectionmanager.h"
 #include "graphquickitem.h"
@@ -181,6 +182,12 @@ void Document::setStatus(const QString& status)
     }
 }
 
+void Document::setTransforms(const std::vector<GraphTransformConfiguration>& transformations)
+{
+    _graphTransformConfigurations.setVector(transformsWithEmptyAppended(transformations));
+    _previousGraphTransformConfigurations = transformations;
+}
+
 float Document::fps() const
 {
     if(_graphQuickItem != nullptr)
@@ -234,29 +241,9 @@ void Document::applyTransforms()
     if(!valid)
         return;
 
-    auto nextGraphTransformConfigurations = _graphTransformConfigurations.vector();
-    auto previousGraphTransformConfigurations = _previousGraphTransformConfigurations;
-
-    auto transformCommand = Command(tr("Apply Transformations"), tr("Applying Transformations"),
-    [this, nextGraphTransformConfigurations](Command& command)
-    {
-        _graphModel->buildTransforms(nextGraphTransformConfigurations);
-        _previousGraphTransformConfigurations = nextGraphTransformConfigurations;
-
-        command.executeSynchronouslyOnCompletion([&](Command&)
-        {
-            _graphTransformConfigurations.setVector(transformsWithEmptyAppended(nextGraphTransformConfigurations));
-        });
-    },
-    [this, previousGraphTransformConfigurations](Command& command)
-    {
-        _graphModel->buildTransforms(previousGraphTransformConfigurations);
-
-        command.executeSynchronouslyOnCompletion([&](Command&)
-        {
-            _graphTransformConfigurations.setVector(transformsWithEmptyAppended(previousGraphTransformConfigurations));
-        });
-    });
+    auto transformCommand = std::make_shared<ApplyTransformationsCommand>(_graphModel.get(), _selectionManager.get(), this,
+                                                                          _previousGraphTransformConfigurations,
+                                                                          _graphTransformConfigurations.vector());
 
     _commandManager.execute(transformCommand);
 }

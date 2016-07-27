@@ -86,7 +86,8 @@ HEADERS += \
     utils/enumreflection.h \
     utils/qmlcontainerwrapper.h \
     utils/qmlenum.h \
-    utils/crashhandler.h
+    utils/crashhandler.h \
+    commands/applytransformationscommand.h
 
 SOURCES += \
     application.cpp \
@@ -142,7 +143,8 @@ SOURCES += \
     ui/graphtransformconfiguration.cpp \
     ui/selectionmanager.cpp \
     utils/debugpauser.cpp \
-    utils/crashhandler.cpp
+    utils/crashhandler.cpp \
+    commands/applytransformationscommand.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \
