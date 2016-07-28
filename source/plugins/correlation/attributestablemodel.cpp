@@ -3,6 +3,7 @@
 #include "correlationplugin.h"
 
 AttributesTableModel::AttributesTableModel(CorrelationPluginInstance* correlationPluginInstance) :
+    QAbstractTableModel(),
     _correlationPluginInstance(correlationPluginInstance)
 {
     connect(correlationPluginInstance, &CorrelationPluginInstance::selectionChanged,
@@ -11,7 +12,7 @@ AttributesTableModel::AttributesTableModel(CorrelationPluginInstance* correlatio
 
 void AttributesTableModel::initialise()
 {
-    int role = Qt::UserRole;
+    int role = Qt::UserRole + 1;
     for(auto& rowAttribute : _correlationPluginInstance->rowAttributes())
         _roleNames.insert(role++, rowAttribute._name.toUtf8());
 
@@ -40,7 +41,8 @@ int AttributesTableModel::columnCount(const QModelIndex&) const
 
 QVariant AttributesTableModel::data(const QModelIndex& index, int role) const
 {
-    if(role >= Qt::UserRole)
+    int row = index.row();
+    if(row >= 0 && row < rowCount() && role >= Qt::UserRole)
     {
         int rowIndex = _selectedRowIndexes.at(index.row());
         return _correlationPluginInstance->rowAttributeValue(rowIndex, _roleNames[role]);
