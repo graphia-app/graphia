@@ -288,7 +288,6 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
     connect(&_graphModel->graph().debugPauser, &DebugPauser::resumeActionChanged, this, &Document::debugResumeActionChanged);
 
     emit pluginInstanceChanged();
-    emit pluginQmlPathChanged();
 
     auto parser = _pluginInstance->parserForUrlTypeName(fileType);
     if(parser == nullptr)
@@ -321,6 +320,9 @@ void Document::onLoadComplete(bool success)
     emit commandInProgressChanged();
     emit idleChanged();
     emit commandVerbChanged(); // Stop showing loading message
+
+    // This causes the plugin UI to be loaded
+    emit pluginQmlPathChanged();
 
     _layoutThread = std::make_unique<LayoutThread>(*_graphModel, std::make_unique<ForceDirectedLayoutFactory>(_graphModel));
     connect(_layoutThread.get(), &LayoutThread::pausedChanged, this, &Document::layoutPauseStateChanged);
