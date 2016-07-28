@@ -2,6 +2,8 @@ import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
 
+import SortFilterProxyModel 0.1
+
 import "Constants.js" as Constants
 
 Item
@@ -24,7 +26,16 @@ Item
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            model: plugin.model.rowAttributes;
+            sortIndicatorVisible: true
+            property string sortRoleName: columnNames[sortIndicatorColumn]
+
+            model: SortFilterProxyModel
+            {
+                property var columnNames: sourceModel.columnNames
+                sourceModel: plugin.model.rowAttributes
+                sortRoleName: tableView.sortRoleName
+                sortOrder: tableView.sortIndicatorOrder
+            }
 
             property var columnNames: model.columnNames
 
