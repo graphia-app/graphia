@@ -355,6 +355,14 @@ void CorrelationPluginInstance::onGraphChanged()
         default:;
         }
     }
+
+    if(!_rowAttributes.empty())
+    {
+        const auto& firstAttributeName = _rowAttributes.front()._name;
+
+        for(auto nodeId : graphModel()->graph().nodeIds())
+            graphModel()->setNodeName(nodeId, rowAttributeValue(rowIndexForNodeId(nodeId), firstAttributeName));
+    }
 }
 
 std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
