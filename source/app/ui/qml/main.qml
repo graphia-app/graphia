@@ -582,7 +582,10 @@ ApplicationWindow
                 property string currentCommandVerb
                 visible:
                 {
-                    if(!currentDocument || !currentDocument.commandProgress)
+                    if(!currentDocument)
+                        return false;
+
+                    if(!currentDocument.commandInProgress)
                         return false;
 
                     // Show the time remaining when it's above a threshold value
