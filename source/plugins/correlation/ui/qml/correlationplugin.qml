@@ -37,6 +37,8 @@ Item
                 sortOrder: tableView.sortIndicatorOrder
             }
 
+            selectionMode: SelectionMode.ExtendedSelection
+
             property var columnNames: model.columnNames
 
             onColumnNamesChanged:
