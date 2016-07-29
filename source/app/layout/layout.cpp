@@ -171,6 +171,8 @@ bool LayoutThread::workToDo()
 
 void LayoutThread::run()
 {
+    emit pausedChanged();
+
     do
     {
         u::setCurrentThreadName("Layout >");
