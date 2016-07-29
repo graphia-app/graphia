@@ -51,8 +51,10 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
 
         bool inQuotes = false;
 
-        auto it = line.begin();
-        auto end = line.end();
+        std::string validatedLine;
+        utf8::replace_invalid(line.begin(), line.end(), std::back_inserter(validatedLine));
+        auto it = validatedLine.begin();
+        auto end = validatedLine.end();
         while(it < end)
         {
             uint32_t codePoint = utf8::next(it, end);
