@@ -623,6 +623,23 @@ ApplicationWindow
         }
     }
 
+    function alertWhenCommandComplete()
+    {
+        alert(0);
+    }
+
+    onActiveChanged:
+    {
+        if(!currentDocument)
+            return;
+
+        // Notify the user that a command is complete when the window isn't active
+        if(active)
+            currentDocument.commandComplete.disconnect(alertWhenCommandComplete);
+        else if(currentDocument.commandInProgress)
+            currentDocument.commandComplete.connect(alertWhenCommandComplete);
+    }
+
     Application
     {
         id: application

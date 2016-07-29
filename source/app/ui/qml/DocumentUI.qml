@@ -397,4 +397,12 @@ Item
 
         commandSecondsRemaining = percentRemaining * timeDelta / percentDelta;
     }
+
+    signal commandComplete()
+
+    onCommandInProgressChanged:
+    {
+        if(!commandInProgress)
+            commandComplete();
+    }
 }
