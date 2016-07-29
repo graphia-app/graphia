@@ -359,4 +359,42 @@ Item
             }
         }
     }
+
+    property var comandProgressSamples: []
+    property int commandSecondsRemaining
+
+    onCommandProgressChanged:
+    {
+        // Reset the sample buffer if the command progress is less than the latest sample (i.e. new command)
+        if(comandProgressSamples.length > 0 && commandProgress < comandProgressSamples[comandProgressSamples.length - 1].progress)
+            comandProgressSamples.length = 0;
+
+        if(commandProgress < 0)
+        {
+            commandSecondsRemaining = 0;
+            return;
+        }
+
+        var sample = {progress: commandProgress, seconds: new Date().getTime() / 1000.0};
+        comandProgressSamples.push(sample);
+
+        // Only keep this many samples
+        while(comandProgressSamples.length > 10)
+            comandProgressSamples.shift();
+
+        // Require a few samples before making the calculation
+        if(comandProgressSamples.length < 5)
+        {
+            commandSecondsRemaining = 0;
+            return;
+        }
+
+        var earliestSample = comandProgressSamples[0];
+        var latestSample = comandProgressSamples[comandProgressSamples.length - 1];
+        var percentDelta = latestSample.progress - earliestSample.progress;
+        var timeDelta = latestSample.seconds - earliestSample.seconds;
+        var percentRemaining = 100.0 - currentDocument.commandProgress;
+
+        commandSecondsRemaining = percentRemaining * timeDelta / percentDelta;
+    }
 }

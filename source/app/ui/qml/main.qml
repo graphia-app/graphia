@@ -577,6 +577,44 @@ ApplicationWindow
                 indeterminate: currentDocument ? currentDocument.commandProgress < 0.0 : false
             }
 
+            Label
+            {
+                property string currentCommandVerb
+                visible:
+                {
+                    if(!currentDocument || !currentDocument.commandProgress)
+                        return false;
+
+                    // Show the time remaining when it's above a threshold value
+                    if(currentDocument.commandSecondsRemaining > 10)
+                    {
+                        currentCommandVerb = currentDocument.commandVerb;
+                        return true;
+                    }
+
+                    // We've dropped below the time threshold, but we're still doing the
+                    // same thing, so keep showing the timer
+                    if(currentCommandVerb === currentDocument.commandVerb)
+                        return true;
+
+                    currentCommandVerb = "";
+                    return false;
+                }
+
+                text:
+                {
+                    if(!currentDocument)
+                        return "";
+
+                    var minutes = Math.floor(currentDocument.commandSecondsRemaining / 60);
+                    var seconds = String(currentDocument.commandSecondsRemaining % 60);
+                    if(seconds.length < 2)
+                        seconds = "0" + seconds;
+
+                    return minutes + ":" + seconds;
+                }
+            }
+
             // Hack to force the RowLayout height to be the maximum of its children
             Rectangle { height: rowLayout.childrenRect.height }
         }
