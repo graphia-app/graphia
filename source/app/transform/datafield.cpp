@@ -30,17 +30,17 @@ void DataField::clearFunctions()
     _stringComponentFn = nullptr;
 }
 
-int DataField::valueOf(Helper<int>, NodeId nodeId) const { return _intNodeIdFn(nodeId); }
-int DataField::valueOf(Helper<int>, EdgeId edgeId) const { return _intEdgeIdFn(edgeId); }
-int DataField::valueOf(Helper<int>, const GraphComponent& component) const { return _intComponentFn(component); }
+int DataField::valueOf(Helper<int>, NodeId nodeId) const { Q_ASSERT(_intNodeIdFn != nullptr); return _intNodeIdFn(nodeId); }
+int DataField::valueOf(Helper<int>, EdgeId edgeId) const { Q_ASSERT(_intEdgeIdFn != nullptr); return _intEdgeIdFn(edgeId); }
+int DataField::valueOf(Helper<int>, const GraphComponent& component) const { Q_ASSERT(_intComponentFn != nullptr); return _intComponentFn(component); }
 
-float DataField::valueOf(Helper<float>, NodeId nodeId) const { return _floatNodeIdFn(nodeId); }
-float DataField::valueOf(Helper<float>, EdgeId edgeId) const { return _floatEdgeIdFn(edgeId); }
-float DataField::valueOf(Helper<float>, const GraphComponent& component) const { return _floatComponentFn(component); }
+float DataField::valueOf(Helper<float>, NodeId nodeId) const { Q_ASSERT(_floatNodeIdFn != nullptr); return _floatNodeIdFn(nodeId); }
+float DataField::valueOf(Helper<float>, EdgeId edgeId) const { Q_ASSERT(_floatEdgeIdFn != nullptr); return _floatEdgeIdFn(edgeId); }
+float DataField::valueOf(Helper<float>, const GraphComponent& component) const { Q_ASSERT(_floatComponentFn != nullptr); return _floatComponentFn(component); }
 
-QString DataField::valueOf(Helper<QString>, NodeId nodeId) const { return _stringNodeIdFn(nodeId); }
-QString DataField::valueOf(Helper<QString>, EdgeId edgeId) const { return _stringEdgeIdFn(edgeId); }
-QString DataField::valueOf(Helper<QString>, const GraphComponent& component) const { return _stringComponentFn(component); }
+QString DataField::valueOf(Helper<QString>, NodeId nodeId) const { Q_ASSERT(_stringNodeIdFn != nullptr); return _stringNodeIdFn(nodeId); }
+QString DataField::valueOf(Helper<QString>, EdgeId edgeId) const { Q_ASSERT(_stringEdgeIdFn != nullptr); return _stringEdgeIdFn(edgeId); }
+QString DataField::valueOf(Helper<QString>, const GraphComponent& component) const { Q_ASSERT(_stringComponentFn != nullptr); return _stringComponentFn(component); }
 
 DataField& DataField::setIntValueFn(ValueFn<int, NodeId> valueFn) { clearFunctions(); _intNodeIdFn = valueFn; return *this; }
 DataField& DataField::setIntValueFn(ValueFn<int, EdgeId> valueFn) { clearFunctions(); _intEdgeIdFn = valueFn; return *this; }
