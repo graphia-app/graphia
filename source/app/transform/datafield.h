@@ -11,6 +11,7 @@
 #include <vector>
 
 #include <QString>
+#include <QRegularExpression>
 
 enum class ConditionFnOp
 {
@@ -102,6 +103,19 @@ private:
         return valueOf(Helper<T>(), elementId);
     }
 
+    template<typename E> QString stringValueOf(E elementId) const
+    {
+        switch(valueType())
+        {
+        case DataFieldValueType::Int:    return QString::number(valueOf<int>(elementId));
+        case DataFieldValueType::Float:  return QString::number(valueOf<float>(elementId));
+        case DataFieldValueType::String: return valueOf<QString>(elementId);
+        default: break;
+        }
+
+        return {};
+    }
+
     template<typename T, typename E> ElementConditionFn<E> createConditionFn(Helper<E>, ConditionFnOp op, T value) const
     {
         switch(op)
@@ -137,10 +151,18 @@ private:
         case ConditionFnOp::EndsWith:
             return [this, value](E elementId) { return valueOf<QString>(elementId).endsWith(value); };
         case ConditionFnOp::MatchesRegex:
-            return [this, value](E elementId) { return valueOf<QString>(elementId).contains(QRegExp(value)); };
+            return [this, value](E elementId) { return valueOf<QString>(elementId).contains(QRegularExpression(value)); };
         default:
             return createConditionFn<QString, E>(Helper<E>(), op, value);
         }
+    }
+
+    template<typename E> ElementConditionFn<E> createConditionFn(Helper<E>, ConditionFnOp op, const QRegularExpression& regex) const
+    {
+        if(op == ConditionFnOp::MatchesRegex)
+            return [this, regex](E elementId) { return stringValueOf(elementId).contains(regex); };
+
+        return nullptr;
     }
 
     template<typename E> ElementConditionFn<E> createConditionFn(Helper<E>, ConditionFnOp op, const char* value) const
