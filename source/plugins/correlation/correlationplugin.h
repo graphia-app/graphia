@@ -190,8 +190,11 @@ public:
     QString name() const { return "Correlation"; }
     QString description() const
     {
-        return tr("Correlations.");
+        return tr("Calculate pearson correlations between rows of data, and create "
+                  "a graph based on the resultant matrix.");
     }
+
+    QString imageSource() const { return "qrc:///plots.svg"; }
 
     QStringList identifyUrl(const QUrl& url) const;
 

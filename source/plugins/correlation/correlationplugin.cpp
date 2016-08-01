@@ -352,7 +352,7 @@ void CorrelationPluginInstance::onGraphChanged()
                     });
             break;
 
-        default:;
+        default: break;
         }
     }
 
