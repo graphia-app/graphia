@@ -289,7 +289,11 @@ Item
         //FIXME: window is always on top?
         flags: Qt.Window
 
-        onClosing: popInPlugin();
+        onClosing:
+        {
+            if(visible)
+                popInPlugin();
+        }
     }
 
     function popOutPlugin()
