@@ -23,8 +23,6 @@ public:
     QString imageSource() const { return "qrc:///tools.svg"; }
 
     std::unique_ptr<IPluginInstance> createInstance();
-
-    QString qmlPath() const { return {}; }
 };
 
 #endif // GENERICPLUGIN_H
