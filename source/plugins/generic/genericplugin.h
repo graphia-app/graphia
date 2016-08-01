@@ -24,7 +24,7 @@ public:
 
     std::unique_ptr<IPluginInstance> createInstance();
 
-    QString qmlPath() const { return "qrc:///qml/genericplugin.qml"; }
+    QString qmlPath() const { return {}; }
 };
 
 #endif // GENERICPLUGIN_H
