@@ -179,7 +179,7 @@ private slots:
     void onGraphChanged();
 };
 
-class CorrelationPlugin : public BasePlugin
+class CorrelationPlugin : public BasePlugin, public PluginInstanceProvider<CorrelationPluginInstance>
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID IPluginIID FILE "correlationplugin.json")
@@ -199,8 +199,6 @@ public:
     QStringList identifyUrl(const QUrl& url) const;
 
     bool editable() const { return false; }
-
-    std::unique_ptr<IPluginInstance> createInstance();
 
     QString qmlPath() const { return "qrc:///qml/correlationplugin.qml"; }
 };

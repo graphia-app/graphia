@@ -16,7 +16,7 @@ public:
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName);
 };
 
-class SkeletonPlugin : public BasePlugin
+class SkeletonPlugin : public BasePlugin, public PluginInstanceProvider<SkeletonPluginInstance>
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID IPluginIID FILE "skeletonplugin.json")
@@ -32,7 +32,6 @@ public:
     }
 
     QStringList identifyUrl(const QUrl& url) const;
-    std::unique_ptr<IPluginInstance> createInstance();
 
     bool editable() const { return true; }
     QString qmlPath() const { return "qrc:///qml/skeletonplugin.qml"; }

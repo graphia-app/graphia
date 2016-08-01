@@ -7,6 +7,8 @@
 #include "shared/ui/iselectionmanager.h"
 #include "shared/loading/urltypes.h"
 
+#include <memory>
+
 #include <QObject>
 
 // The plugins never see these types; they only need to know they exist
@@ -79,6 +81,17 @@ signals:
     void graphChanged() const;
 
     void selectionChanged(const ISelectionManager* selectionManager) const;
+};
+
+// Plugins can inherit from this to avoid having to reimplement the same createInstance member function
+// over and over again, in the case where the instance class constructor takes no parameters
+template<typename T>
+class PluginInstanceProvider : public virtual IPluginInstanceProvider
+{
+public:
+    virtual ~PluginInstanceProvider() = default;
+
+    std::unique_ptr<IPluginInstance> createInstance() { return std::make_unique<T>(); }
 };
 
 class BasePlugin : public QObject, public IPlugin, public UrlTypes

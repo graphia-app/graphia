@@ -10,8 +10,7 @@ DESTDIR = ../../../plugins
 
 CONFIG += plugin
 
-SOURCES += \
-    genericplugin.cpp
+SOURCES +=
 
 HEADERS += \
     genericplugin.h

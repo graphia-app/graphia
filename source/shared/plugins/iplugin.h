@@ -23,7 +23,15 @@ public:
     virtual std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) = 0;
 };
 
-class IPlugin : public virtual IUrlTypes
+class IPluginInstanceProvider
+{
+public:
+    virtual ~IPluginInstanceProvider() = default;
+
+    virtual std::unique_ptr<IPluginInstance> createInstance() = 0;
+};
+
+class IPlugin : public virtual IUrlTypes, public virtual IPluginInstanceProvider
 {
 public:
     virtual ~IPlugin() = default;
@@ -33,7 +41,6 @@ public:
     virtual QString imageSource() const = 0; // Displayed in the about dialog
 
     virtual QStringList identifyUrl(const QUrl& url) const = 0;
-    virtual std::unique_ptr<IPluginInstance> createInstance() = 0;
 
     virtual bool editable() const = 0;
     virtual QString qmlPath() const = 0;

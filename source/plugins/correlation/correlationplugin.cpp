@@ -383,8 +383,3 @@ QStringList CorrelationPlugin::identifyUrl(const QUrl& url) const
     //FIXME actually look at the file contents
     return identifyByExtension(url);
 }
-
-std::unique_ptr<IPluginInstance> CorrelationPlugin::createInstance()
-{
-    return std::make_unique<CorrelationPluginInstance>();
-}

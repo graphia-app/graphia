@@ -10,8 +10,7 @@ DESTDIR = ../../../plugins
 
 CONFIG += plugin
 
-SOURCES += \
-    websearchplugin.cpp
+SOURCES +=
 
 HEADERS += \
     websearchplugin.h

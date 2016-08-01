@@ -8,7 +8,7 @@ class WebSearchPluginInstance : public BaseGenericPluginInstance
     Q_OBJECT
 };
 
-class WebSearchPlugin : public BaseGenericPlugin
+class WebSearchPlugin : public BaseGenericPlugin, PluginInstanceProvider<WebSearchPluginInstance>
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID IPluginIID FILE "websearchplugin.json")
@@ -21,8 +21,6 @@ public:
                   "node selection using a URL template.");
     }
     QString imageSource() const { return "qrc:///globe.svg"; }
-
-    std::unique_ptr<IPluginInstance> createInstance();
 
     QString qmlPath() const { return "qrc:///qml/websearchplugin.qml"; }
 };

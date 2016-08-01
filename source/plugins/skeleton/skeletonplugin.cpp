@@ -18,8 +18,3 @@ QStringList SkeletonPlugin::identifyUrl(const QUrl& url) const
 {
     return identifyByExtension(url);
 }
-
-std::unique_ptr<IPluginInstance> SkeletonPlugin::createInstance()
-{
-    return std::make_unique<SkeletonPluginInstance>();
-}

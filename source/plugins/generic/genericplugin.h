@@ -8,7 +8,7 @@ class GenericPluginInstance : public BaseGenericPluginInstance
     Q_OBJECT
 };
 
-class GenericPlugin : public BaseGenericPlugin
+class GenericPlugin : public BaseGenericPlugin, public PluginInstanceProvider<GenericPluginInstance>
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID IPluginIID FILE "genericplugin.json")
@@ -21,8 +21,6 @@ public:
                   "of file formats.");
     }
     QString imageSource() const { return "qrc:///tools.svg"; }
-
-    std::unique_ptr<IPluginInstance> createInstance();
 };
 
 #endif // GENERICPLUGIN_H
