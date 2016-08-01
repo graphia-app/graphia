@@ -94,6 +94,8 @@ public:
     bool editable() const { return _plugin->editable(); }
     QString pluginQmlPath() const { return _plugin->qmlPath(); }
 
+    std::vector<NodeId> findNodes(const QString& regex, std::vector<QString> dataFieldNames = {}) const;
+
     void buildTransforms(const std::vector<GraphTransformConfiguration>& graphTransformConfigurations);
 
     QStringList availableTransformNames() const;

@@ -9,6 +9,8 @@
 #include "../utils/enumreflection.h"
 #include "shared/utils/preferences.h"
 
+#include <QRegularExpression>
+
 #include <utility>
 
 GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
@@ -199,6 +201,50 @@ void GraphModel::updateVisuals()
         _edgeVisuals[edgeId]._color = graph().typeOf(edgeId) == EdgeIdDistinctSetCollection::Type::Not ?
                     edgeColor : multiColor;
     }
+}
+
+std::vector<NodeId> GraphModel::findNodes(const QString& regex, std::vector<QString> dataFieldNames) const
+{
+    std::vector<NodeId> nodeIds;
+
+    // If no data fields are specified, search them all
+    if(dataFieldNames.empty())
+    {
+        for(auto& dataField : _dataFields)
+            dataFieldNames.emplace_back(dataField.first);
+    }
+
+    std::vector<const DataField*> dataFields;
+    for(auto& dataFieldName : dataFieldNames)
+    {
+        const auto* dataField = &dataFieldByName(dataFieldName);
+
+        if(dataField->elementType() == DataFieldElementType::Node)
+            dataFields.emplace_back(dataField);
+    }
+
+    QRegularExpression re(regex, QRegularExpression::CaseInsensitiveOption);
+
+    for(auto nodeId : graph().nodeIds())
+    {
+        bool match = false;
+        match = re.match(_nodeNames[nodeId]).hasMatch();
+
+        if(!match)
+        {
+            for(auto& dataField : dataFields)
+            {
+                match = dataField->createNodeConditionFn(ConditionFnOp::MatchesRegex, re)(nodeId);
+                if(match)
+                    break;
+            }
+        }
+
+        if(match)
+            nodeIds.emplace_back(nodeId);
+    }
+
+    return nodeIds;
 }
 
 void GraphModel::onGraphChanged(const Graph*)
