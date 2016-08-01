@@ -71,6 +71,26 @@ DataFieldType DataField::type() const
     return DataFieldType::Unknown;
 }
 
+DataFieldValueType DataField::valueType() const
+{
+    switch(type())
+    {
+    case DataFieldType::IntNode:            return DataFieldValueType::Int;
+    case DataFieldType::IntEdge:            return DataFieldValueType::Int;
+    case DataFieldType::IntComponent:       return DataFieldValueType::Int;
+
+    case DataFieldType::FloatNode:          return DataFieldValueType::Float;
+    case DataFieldType::FloatEdge:          return DataFieldValueType::Float;
+    case DataFieldType::FloatComponent:     return DataFieldValueType::Float;
+
+    case DataFieldType::StringNode:         return DataFieldValueType::String;
+    case DataFieldType::StringEdge:         return DataFieldValueType::String;
+    case DataFieldType::StringComponent:    return DataFieldValueType::String;
+
+    default: return DataFieldValueType::Unknown;
+    }
+}
+
 DataFieldElementType DataField::elementType() const
 {
     switch(type())

@@ -44,6 +44,14 @@ enum class DataFieldType
     StringComponent
 };
 
+enum class DataFieldValueType
+{
+    Unknown,
+    Int,
+    Float,
+    String
+};
+
 enum class DataFieldElementType
 {
     Unknown,
@@ -154,6 +162,7 @@ public:
     DataField& setStringValueFn(ValueFn<QString, const GraphComponent&> valueFn);
 
     DataFieldType type() const;
+    DataFieldValueType valueType() const;
     DataFieldElementType elementType() const;
 
     bool hasIntMin() const;
