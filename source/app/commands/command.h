@@ -102,6 +102,15 @@ public:
         initialiseExecuteFn(executeFn);
     }
 
+    template<typename ExecuteFn>
+    Command(ExecuteFn executeFn,
+            bool asynchronous = true) :
+        _asynchronous(asynchronous)
+    {
+        initialise();
+        initialiseExecuteFn(executeFn);
+    }
+
     explicit Command(bool asynchronous = true);
 
     Command(const Command&) = delete;

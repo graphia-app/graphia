@@ -64,6 +64,14 @@ public:
                                   Q_ARG(bool, false));
     }
 
+    template<typename... Args> void executeSynchronousOnce(Args&&... args)
+    {
+        QMetaObject::invokeMethod(this, "executeReal",
+                                  Q_ARG(std::shared_ptr<Command>,
+                                        std::make_shared<Command>(std::forward<Args>(args)..., false)),
+                                  Q_ARG(bool, true));
+    }
+
     void undo();
     void redo();
 
