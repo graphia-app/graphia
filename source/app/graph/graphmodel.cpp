@@ -225,23 +225,26 @@ std::vector<NodeId> GraphModel::findNodes(const QString& regex, std::vector<QStr
 
     QRegularExpression re(regex, QRegularExpression::CaseInsensitiveOption);
 
-    for(auto nodeId : graph().nodeIds())
+    if(re.isValid())
     {
-        bool match = false;
-        match = re.match(_nodeNames[nodeId]).hasMatch();
-
-        if(!match)
+        for(auto nodeId : graph().nodeIds())
         {
-            for(auto& dataField : dataFields)
-            {
-                match = dataField->createNodeConditionFn(ConditionFnOp::MatchesRegex, re)(nodeId);
-                if(match)
-                    break;
-            }
-        }
+            bool match = false;
+            match = re.match(_nodeNames[nodeId]).hasMatch();
 
-        if(match)
-            nodeIds.emplace_back(nodeId);
+            if(!match)
+            {
+                for(auto& dataField : dataFields)
+                {
+                    match = dataField->createNodeConditionFn(ConditionFnOp::MatchesRegex, re)(nodeId);
+                    if(match)
+                        break;
+                }
+            }
+
+            if(match)
+                nodeIds.emplace_back(nodeId);
+        }
     }
 
     return nodeIds;
