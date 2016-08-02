@@ -387,15 +387,13 @@ void Document::selectAll()
 
     if(_selectionManager)
     {
-        auto previousSelection = _selectionManager->selectedNodes();
-        _commandManager.executeSynchronous(tr("Select All"),
+        _commandManager.executeSynchronousOnce(
             [this](Command& command)
             {
                 bool nodesSelected = _selectionManager->selectAllNodes();
                 command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
                 return nodesSelected;
-            },
-            [this, previousSelection](Command&) { _selectionManager->setSelectedNodes(previousSelection); });
+            });
     }
 }
 
@@ -406,10 +404,8 @@ void Document::selectNone()
 
     if(_selectionManager)
     {
-        auto previousSelection = _selectionManager->selectedNodes();
-        _commandManager.executeSynchronous(tr("Select None"),
-            [this](Command&) { return _selectionManager->clearNodeSelection(); },
-            [this, previousSelection](Command&) { _selectionManager->setSelectedNodes(previousSelection); });
+        _commandManager.executeSynchronousOnce(
+            [this](Command&) { return _selectionManager->clearNodeSelection(); });
     }
 }
 
@@ -420,14 +416,12 @@ void Document::invertSelection()
 
     if(_selectionManager)
     {
-        auto previousSelection = _selectionManager->selectedNodes();
-        _commandManager.execute(tr("Invert Selection"), tr("Inverting Selection"),
+        _commandManager.executeOnce(tr("Invert Selection"), tr("Inverting Selection"),
             [this](Command& command)
             {
                 _selectionManager->invertNodeSelection();
                 command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
-            },
-            [this, previousSelection](Command&) { _selectionManager->setSelectedNodes(previousSelection); });
+            });
     }
 }
 
