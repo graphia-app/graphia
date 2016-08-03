@@ -7,9 +7,9 @@
 
 SelectionManager::SelectionManager(const GraphModel& graphModel) :
     QObject(),
-    _graphModel(graphModel)
+    _graphModel(&graphModel)
 {
-    connect(&_graphModel.graph(), &Graph::nodeRemoved,
+    connect(&_graphModel->graph(), &Graph::nodeRemoved,
     [this](const Graph*, NodeId nodeId)
     {
        _deletedNodes.push_back(nodeId);
@@ -30,7 +30,7 @@ NodeIdSet SelectionManager::selectedNodes() const
     Q_ASSERT(std::all_of(_selectedNodes.begin(), _selectedNodes.end(),
         [this](ElementId<NodeId> nodeId)
         {
-            auto& nodeIds = _graphModel.graph().nodeIds();
+            auto& nodeIds = _graphModel->graph().nodeIds();
             return u::contains(nodeIds, nodeId);
         }));
 #endif
@@ -40,7 +40,7 @@ NodeIdSet SelectionManager::selectedNodes() const
 
 NodeIdSet SelectionManager::unselectedNodes() const
 {
-    auto& nodeIds = _graphModel.graph().nodeIds();
+    auto& nodeIds = _graphModel->graph().nodeIds();
     auto unselectedNodeIds = NodeIdSet(nodeIds.begin(), nodeIds.end());
     unselectedNodeIds.erase(_selectedNodeIds.begin(), _selectedNodeIds.end());
 
@@ -49,12 +49,12 @@ NodeIdSet SelectionManager::unselectedNodes() const
 
 bool SelectionManager::selectNode(NodeId nodeId)
 {
-    return selectNodes(_graphModel.graph().mergedNodeIdsForNodeId(nodeId));
+    return selectNodes(_graphModel->graph().mergedNodeIdsForNodeId(nodeId));
 }
 
 bool SelectionManager::deselectNode(NodeId nodeId)
 {
-    return deselectNodes(_graphModel.graph().mergedNodeIdsForNodeId(nodeId));
+    return deselectNodes(_graphModel->graph().mergedNodeIdsForNodeId(nodeId));
 }
 
 void SelectionManager::toggleNode(NodeId nodeId)
@@ -68,14 +68,14 @@ void SelectionManager::toggleNode(NodeId nodeId)
 bool SelectionManager::nodeIsSelected(NodeId nodeId) const
 {
 #ifdef EXPENSIVE_DEBUG_CHECKS
-    Q_ASSERT(u::contains(_graphModel.graph().nodeIds(), nodeId));
+    Q_ASSERT(u::contains(_graphModel->graph().nodeIds(), nodeId));
 #endif
     return u::contains(_selectedNodeIds, nodeId);
 }
 
 bool SelectionManager::selectAllNodes()
 {
-    return selectNodes(_graphModel.graph().nodeIds(), false);
+    return selectNodes(_graphModel->graph().nodeIds(), false);
 }
 
 bool SelectionManager::clearNodeSelection()
@@ -91,7 +91,7 @@ bool SelectionManager::clearNodeSelection()
 
 void SelectionManager::invertNodeSelection()
 {
-    toggleNodes(_graphModel.graph().nodeIds());
+    toggleNodes(_graphModel->graph().nodeIds());
 }
 
 const QString SelectionManager::numNodesSelectedAsString() const
@@ -101,7 +101,7 @@ const QString SelectionManager::numNodesSelectedAsString() const
     if(selectionSize == 1)
     {
         auto nodeId = *selectedNodes().begin();
-        auto& nodeName = _graphModel.nodeNames()[nodeId];
+        auto& nodeName = _graphModel->nodeNames()[nodeId];
 
         if(!nodeName.isEmpty())
             return QString(tr("Selected %1")).arg(nodeName);

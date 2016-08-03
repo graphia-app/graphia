@@ -29,7 +29,7 @@ public:
         {
             for(auto nodeId : nodeIds)
             {
-                auto mergedNodeIds = _graphModel.graph().mergedNodeIdsForNodeId(nodeId);
+                auto mergedNodeIds = _graphModel->graph().mergedNodeIdsForNodeId(nodeId);
 
                 for(auto mergedNodeId : mergedNodeIds)
                     newSelectedNodeIds.insert(mergedNodeId);
@@ -66,7 +66,7 @@ public:
         {
             for(auto nodeId : nodeIds)
             {
-                auto mergedNodeIds = _graphModel.graph().mergedNodeIdsForNodeId(nodeId);
+                auto mergedNodeIds = _graphModel->graph().mergedNodeIdsForNodeId(nodeId);
 
                 for(auto mergedNodeId : mergedNodeIds)
                     selectionWillChange |= (_selectedNodeIds.erase(mergedNodeId) > 0);
@@ -125,7 +125,7 @@ public:
     const QString numNodesSelectedAsString() const;
 
 private:
-    const GraphModel& _graphModel;
+    const GraphModel* _graphModel;
 
     NodeIdSet _selectedNodeIds;
 
