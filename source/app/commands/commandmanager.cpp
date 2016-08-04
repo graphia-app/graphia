@@ -60,19 +60,22 @@ void CommandManager::executeReal(std::shared_ptr<Command> command, bool irrevers
         if(command->asynchronous())
             u::setCurrentThreadName(command->description());
 
-        if(!command->execute() || irreversible)
+        if(!command->execute())
         {
             _busy = false;
             emit commandCompleted(nullptr, QString(), CommandAction::None);
             return;
         }
 
-        // There are commands on the stack ahead of us; throw them away
-        while(canRedoNoLocking())
-            _stack.pop_back();
+        if(!irreversible)
+        {
+            // There are commands on the stack ahead of us; throw them away
+            while(canRedoNoLocking())
+                _stack.pop_back();
 
-        _stack.push_back(command);
-        _lastExecutedIndex = static_cast<int>(_stack.size()) - 1;
+            _stack.push_back(command);
+            _lastExecutedIndex = static_cast<int>(_stack.size()) - 1;
+        }
 
         _busy = false;
         emit commandCompleted(command.get(), command->pastParticiple(), CommandAction::Execute);
