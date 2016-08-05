@@ -49,7 +49,7 @@ QVariant Preferences::maximum(const QString& key) const
     return {};
 }
 
-void Preferences::set(const QString& key, QVariant value)
+void Preferences::set(const QString& key, QVariant value, bool notify)
 {
     bool changed = (value != _settings.value(key));
 
@@ -69,7 +69,7 @@ void Preferences::set(const QString& key, QVariant value)
 
     _settings.setValue(key, value);
 
-    if(changed)
+    if(changed && notify)
         emit preferenceChanged(key, value);
 }
 
@@ -88,7 +88,7 @@ QmlPreferences::QmlPreferences(QObject* parent) :
 
 QmlPreferences::~QmlPreferences()
 {
-    flush();
+    flush(false);
 }
 
 QString QmlPreferences::section() const
@@ -266,21 +266,21 @@ void QmlPreferences::load()
     });
 }
 
-void QmlPreferences::save()
+void QmlPreferences::save(bool notify)
 {
     for(auto& pendingPreferenceChange : _pendingPreferenceChanges)
     {
         S(Preferences)->set(preferenceNameByPropertyName(pendingPreferenceChange.first),
-                   pendingPreferenceChange.second);
+                            pendingPreferenceChange.second, notify);
     }
 
     _pendingPreferenceChanges.clear();
 }
 
-void QmlPreferences::flush()
+void QmlPreferences::flush(bool notify)
 {
     if(_initialised && !_pendingPreferenceChanges.empty())
-        save();
+        save(notify);
 }
 
 void QmlPreferences::onPreferenceChanged(const QString& key, const QVariant& value)

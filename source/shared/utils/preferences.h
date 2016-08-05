@@ -29,7 +29,7 @@ public:
     QVariant minimum(const QString& key) const;
     QVariant maximum(const QString& key) const;
 
-    void set(const QString& key, QVariant value);
+    void set(const QString& key, QVariant value, bool notify = true);
 
     bool exists(const QString& key);
 
@@ -73,8 +73,8 @@ private:
     void setProperty(QMetaProperty property, const QVariant& value);
 
     void load();
-    void save();
-    void flush();
+    void save(bool notify = true);
+    void flush(bool notify = true);
 
     Q_DISABLE_COPY(QmlPreferences)
 
