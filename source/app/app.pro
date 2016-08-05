@@ -87,7 +87,9 @@ HEADERS += \
     utils/qmlcontainerwrapper.h \
     utils/qmlenum.h \
     utils/crashhandler.h \
-    commands/applytransformationscommand.h
+    commands/applytransformationscommand.h \
+    ui/searchmanager.h \
+    commands/selectnodescommand.h
 
 SOURCES += \
     application.cpp \
@@ -144,7 +146,8 @@ SOURCES += \
     ui/selectionmanager.cpp \
     utils/debugpauser.cpp \
     utils/crashhandler.cpp \
-    commands/applytransformationscommand.cpp
+    commands/applytransformationscommand.cpp \
+    ui/searchmanager.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \

@@ -39,6 +39,12 @@ public:
                                                        Q_ARG(bool, false));
     }
 
+    template<typename T> typename std::enable_if<std::is_base_of<Command, T>::value, void>::type executeOnce(std::shared_ptr<T> command)
+    {
+        QMetaObject::invokeMethod(this, "executeReal", Q_ARG(std::shared_ptr<Command>, command),
+                                                       Q_ARG(bool, true));
+    }
+
     template<typename... Args> void execute(Args&&... args)
     {
         QMetaObject::invokeMethod(this, "executeReal",

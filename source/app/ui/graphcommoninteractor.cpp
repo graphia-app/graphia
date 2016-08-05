@@ -3,6 +3,7 @@
 #include "graphquickitem.h"
 
 #include "../commands/commandmanager.h"
+#include "../commands/selectnodescommand.h"
 
 #include "../rendering/graphrenderer.h"
 #include "../rendering/graphcomponentscene.h"
@@ -224,13 +225,7 @@ void GraphCommonInteractor::leftMouseUp()
             QPoint frustumSelectEnd = cursorPosition();
             auto selection = selectionForRect(QRect(_frustumSelectStart, frustumSelectEnd));
 
-            _commandManager->executeOnce(tr("Select Nodes"), tr("Selecting Nodes"),
-                [this, selection](Command& command)
-                {
-                    bool nodesSelected = _selectionManager->selectNodes(selection);
-                    command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
-                    return nodesSelected;
-                });
+            _commandManager->executeOnce(makeSelectNodesCommand(_selectionManager.get(), selection));
 
             _frustumSelectStart = QPoint();
             _frustumSelecting = false;
@@ -240,21 +235,8 @@ void GraphCommonInteractor::leftMouseUp()
         {
             if(!_clickedNodeId.isNull())
             {
-                bool nodeSelected = _selectionManager->nodeIsSelected(_clickedNodeId);
-                bool toggling = modifiers() & Qt::ShiftModifier;
-                auto toggleNodeId = _clickedNodeId;
-                _commandManager->executeOnce(nodeSelected ? tr("Deselect Node") : tr("Select Node"),
-                                             nodeSelected ? tr("Deselecting Node") : tr("Selecting Node"),
-                    [this, nodeSelected, toggling, toggleNodeId](Command& command)
-                    {
-                        if(!toggling)
-                            _selectionManager->clearNodeSelection();
-
-                        _selectionManager->toggleNode(toggleNodeId);
-
-                        if(!nodeSelected)
-                            command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
-                    });
+                _commandManager->executeOnce(makeSelectNodeCommand(_selectionManager.get(), _clickedNodeId,
+                                                                   modifiers() & Qt::ShiftModifier));
             }
             else
             {
