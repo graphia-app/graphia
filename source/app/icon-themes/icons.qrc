@@ -19,6 +19,15 @@
 		<file>Tango/16x16/emblems/emblem-unreadable.png</file>
 		<file>Tango/22x22/emblems/emblem-unreadable.png</file>
 		<file>Tango/32x32/emblems/emblem-unreadable.png</file>
+		<file>Tango/16x16/emblems/emblem-unreadable.png</file>
+		<file>Tango/22x22/emblems/emblem-unreadable.png</file>
+		<file>Tango/32x32/emblems/emblem-unreadable.png</file>
+		<file>Tango/16x16/actions/go-next.png</file>
+		<file>Tango/22x22/actions/go-next.png</file>
+		<file>Tango/32x32/actions/go-next.png</file>
+		<file>Tango/16x16/actions/go-previous.png</file>
+		<file>Tango/22x22/actions/go-previous.png</file>
+		<file>Tango/32x32/actions/go-previous.png</file>
 		<file>Tango/16x16/actions/list-add.png</file>
 		<file>Tango/22x22/actions/list-add.png</file>
 		<file>Tango/32x32/actions/list-add.png</file>
@@ -46,5 +55,8 @@
 		<file>Tango/16x16/actions/view-refresh.png</file>
 		<file>Tango/22x22/actions/view-refresh.png</file>
 		<file>Tango/32x32/actions/view-refresh.png</file>
+		<file>Tango/16x16/status/weather-clear.png</file>
+		<file>Tango/22x22/status/weather-clear.png</file>
+		<file>Tango/32x32/status/weather-clear.png</file>
 	</qresource>
 </RCC>
