@@ -237,9 +237,21 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
     else
         switchToOverviewMode(false);
 
-    connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &GraphRenderer::onSelectionChanged, Qt::DirectConnection);
+    connect(_graphModel.get(), &GraphModel::visualsWillChange, [this]
+    {
+        disableSceneUpdate();
+    });
 
-    connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphRenderer::onPreferenceChanged, Qt::DirectConnection);
+    connect(_graphModel.get(), &GraphModel::visualsChanged, [this]
+    {
+        executeOnRendererThread([this]
+        {
+            updateGPUData(When::Later);
+            update(); // QQuickFramebufferObject::Renderer::update
+        }, "GraphModel::visualsChanged");
+
+        enableSceneUpdate();
+    });
 
     enableSceneUpdate();
 
@@ -331,8 +343,6 @@ void GraphRenderer::updateGPUDataIfRequired()
     auto& nodePositions = _graphModel->nodePositions();
     auto& nodeVisuals = _graphModel->nodeVisuals();
     auto& edgeVisuals = _graphModel->edgeVisuals();
-    const QColor selectedOutLineColor = Qt::GlobalColor::white;
-    const QColor deselectedOutLineColor = Qt::GlobalColor::black;
 
     _gpuGraphData.reset();
     _gpuGraphDataAlpha.reset();
@@ -349,7 +359,7 @@ void GraphRenderer::updateGPUDataIfRequired()
 
         for(auto nodeId : componentRenderer->nodeIds())
         {
-            if(_hiddenNodes.get(nodeId))
+            if(_hiddenNodes.get(nodeId) || nodeVisuals[nodeId]._state.testFlag(VisualFlags::NotFound))
                 continue;
 
             const QVector3D nodePosition = nodePositions.getScaledAndSmoothed(nodeId);
@@ -365,9 +375,8 @@ void GraphRenderer::updateGPUDataIfRequired()
             nodeData._color[1] = nodeVisuals[nodeId]._color.greenF();
             nodeData._color[2] = nodeVisuals[nodeId]._color.blueF();
 
-            QColor outlineColor = _selectionManager && _selectionManager->nodeIsSelected(nodeId) ?
-                selectedOutLineColor :
-                deselectedOutLineColor;
+            QColor outlineColor = nodeVisuals[nodeId]._state.testFlag(VisualFlags::Selected) ?
+                Qt::GlobalColor::white : Qt::GlobalColor::black;
 
             nodeData._outlineColor[0] = outlineColor.redF();
             nodeData._outlineColor[1] = outlineColor.greenF();
@@ -378,8 +387,12 @@ void GraphRenderer::updateGPUDataIfRequired()
 
         for(auto& edge : componentRenderer->edges())
         {
-            if(_hiddenEdges.get(edge->id()) || _hiddenNodes.get(edge->sourceId()) || _hiddenNodes.get(edge->targetId()))
+            if(_hiddenEdges.get(edge->id()) ||
+               _hiddenNodes.get(edge->sourceId()) || _hiddenNodes.get(edge->targetId()) ||
+               edgeVisuals[edge->id()]._state.testFlag(VisualFlags::NotFound))
+            {
                 continue;
+            }
 
             const QVector3D& sourcePosition = scaledAndSmoothedNodePositions[edge->sourceId()];
             const QVector3D& targetPosition = scaledAndSmoothedNodePositions[edge->targetId()];
@@ -396,9 +409,9 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._color[0] = edgeVisuals[edge->id()]._color.redF();
             edgeData._color[1] = edgeVisuals[edge->id()]._color.greenF();
             edgeData._color[2] = edgeVisuals[edge->id()]._color.blueF();
-            edgeData._outlineColor[0] = deselectedOutLineColor.redF();
-            edgeData._outlineColor[1] = deselectedOutLineColor.greenF();
-            edgeData._outlineColor[2] = deselectedOutLineColor.blueF();
+            edgeData._outlineColor[0] = 0.0f;
+            edgeData._outlineColor[1] = 0.0f;
+            edgeData._outlineColor[2] = 0.0f;
 
             gpuGraphData._edgeData.push_back(edgeData);
         }
@@ -748,20 +761,6 @@ void GraphRenderer::onComponentWillBeRemoved(const Graph*, ComponentId component
     {
         componentRendererForId(componentId)->cleanup();
     }, QString("GraphRenderer::onComponentWillBeRemoved (cleanup) component %1").arg(static_cast<int>(componentId)));
-}
-
-void GraphRenderer::onSelectionChanged(const SelectionManager*)
-{
-    executeOnRendererThread([this]
-    {
-        updateGPUData(When::Later);
-    }, "GraphRenderer::onSelectionChanged");
-}
-
-void GraphRenderer::onPreferenceChanged(const QString&, const QVariant&)
-{
-    updateGPUData(When::Later);
-    update(); // QQuickFramebufferObject::Renderer::update
 }
 
 void GraphRenderer::onCommandWillExecuteAsynchronously(const Command*)

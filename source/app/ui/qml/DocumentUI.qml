@@ -126,18 +126,29 @@ Item
                 anchors.fill: parent
             }
 
-            Label
+            Column
             {
-                visible: toggleFpsMeterAction.checked
-
-                color: root.textColor
-
                 anchors.left: parent.left
                 anchors.top: parent.top
                 anchors.margins: Constants.margin
+                spacing: Constants.spacing
 
-                horizontalAlignment: Text.AlignLeft
-                text: document.fps.toFixed(1) + " fps"
+                Find
+                {
+                    id: find
+                    visible: false
+                    document: document
+                }
+
+                Label
+                {
+                    visible: toggleFpsMeterAction.checked
+
+                    color: root.textColor
+
+                    horizontalAlignment: Text.AlignLeft
+                    text: document.fps.toFixed(1) + " fps"
+                }
             }
 
             Column
@@ -327,6 +338,12 @@ Item
             popInPlugin();
         else
             popOutPlugin();
+    }
+
+    property bool findVisible: find.visible
+    function showFind()
+    {
+        find.visible = true;
     }
 
     Document

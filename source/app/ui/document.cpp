@@ -13,8 +13,10 @@
 
 #include "../commands/deleteselectednodescommand.h"
 #include "../commands/applytransformationscommand.h"
+#include "../commands/selectnodescommand.h"
 
 #include "selectionmanager.h"
+#include "searchmanager.h"
 #include "graphquickitem.h"
 
 REGISTER_QML_ENUM(LayoutPauseState);
@@ -277,6 +279,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
 
     _graphModel = std::make_shared<GraphModel>(fileUrl.fileName(), plugin);
     _selectionManager = std::make_shared<SelectionManager>(*_graphModel);
+    _searchManager = std::make_shared<SearchManager>(*_graphModel);
 
     _pluginInstance = plugin->createInstance();
     _pluginInstance->initialise(_graphModel.get(), _selectionManager.get());
@@ -366,6 +369,11 @@ void Document::onLoadComplete(bool success)
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::commandInProgressChanged);
 
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::canDeleteChanged);
+    connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::onSelectionChanged);
+    connect(_selectionManager.get(), &SelectionManager::selectionChanged, _graphModel.get(), &GraphModel::onSelectionChanged);
+
+    connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, this, &Document::onFoundNodeIdsChanged);
+    connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, _graphModel.get(), &GraphModel::onFoundNodeIdsChanged);
 
     connect(_layoutThread.get(), &LayoutThread::executed, _graphQuickItem, &GraphQuickItem::onLayoutChanged);
 
@@ -466,6 +474,148 @@ void Document::switchToOverviewMode(bool doTransition)
         return;
 
     _graphQuickItem->switchToOverviewMode(doTransition);
+}
+
+void Document::find(const QString& regex)
+{
+    int previousNumNodesFound = numNodesFound();
+
+    _searchManager->findNodes(regex);
+
+    if(previousNumNodesFound != numNodesFound())
+        emit numNodesFoundChanged();
+}
+
+void Document::selectFirstFound()
+{
+    setFoundIt(_foundNodeIds.begin());
+    _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), *_foundIt));
+}
+
+void Document::selectNextFound()
+{
+    incrementFoundIt();
+    _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), *_foundIt));
+}
+
+void Document::selectPrevFound()
+{
+    decrementFoundIt();
+    _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), *_foundIt));
+}
+
+void Document::selectAllFound()
+{
+    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), _searchManager->foundNodeIds()));
+}
+
+void Document::updateFoundIndex(bool reselectIfInvalidated)
+{
+    if(_selectionManager->selectedNodes().size() == 1)
+    {
+        auto nodeId = *_selectionManager->selectedNodes().begin();
+        auto foundIt = std::find(_foundNodeIds.begin(), _foundNodeIds.end(), nodeId);
+
+        if(reselectIfInvalidated && _foundItValid && foundIt == _foundNodeIds.end())
+        {
+            // If the previous found NodeId /was/ in our found list, but isn't anymore,
+            // grab a new one
+            selectFirstFound();
+        }
+        else
+        {
+            // If the selected NodeId is still in the found NodeIds, then
+            // adjust the index appropriately
+            setFoundIt(foundIt);
+        }
+    }
+    else
+    {
+        _foundItValid = false;
+        emit foundIndexChanged();
+    }
+}
+
+void Document::onSelectionChanged(const SelectionManager*)
+{
+    updateFoundIndex(false);
+}
+
+void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
+{
+    _foundNodeIds.clear();
+
+    if(searchManager->foundNodeIds().empty())
+    {
+        if(_foundItValid)
+            _selectionManager->clearNodeSelection();
+
+        _foundItValid = false;
+        emit foundIndexChanged();
+
+        return;
+    }
+
+    for(auto nodeId : searchManager->foundNodeIds())
+        _foundNodeIds.emplace_back(nodeId);
+
+    std::sort(_foundNodeIds.begin(), _foundNodeIds.end(), [](auto& a, auto& b) { return a < b; });
+
+    if(_selectionManager->selectedNodes().empty())
+        selectFirstFound();
+    else
+        updateFoundIndex(true);
+}
+
+int Document::foundIndex() const
+{
+    if(!_foundNodeIds.empty() && _foundItValid)
+        return static_cast<int>(std::distance(_foundNodeIds.begin(), _foundIt));
+
+    return -1;
+}
+
+int Document::numNodesFound() const
+{
+    if(_searchManager != nullptr)
+        return static_cast<int>(_searchManager->foundNodeIds().size());
+
+    return 0;
+}
+
+void Document::setFoundIt(std::vector<NodeId>::const_iterator foundIt)
+{
+    bool changed = (_foundIt != foundIt);
+    _foundIt = foundIt;
+
+    bool oldFoundItValid = _foundItValid;
+    _foundItValid = (_foundIt != _foundNodeIds.end());
+
+    if(!changed)
+        changed = (_foundItValid != oldFoundItValid);
+
+    if(changed)
+        emit foundIndexChanged();
+}
+
+void Document::incrementFoundIt()
+{
+    if(_foundItValid && std::next(_foundIt) != _foundNodeIds.end())
+        ++_foundIt;
+    else
+        _foundIt = _foundNodeIds.begin();
+
+    emit foundIndexChanged();
+}
+
+void Document::decrementFoundIt()
+{
+    if(_foundItValid && _foundIt != _foundNodeIds.begin())
+        --_foundIt;
+    else
+        _foundIt = std::prev(_foundNodeIds.end());
+
+    emit foundIndexChanged();
 }
 
 void Document::toggleDebugPauser()

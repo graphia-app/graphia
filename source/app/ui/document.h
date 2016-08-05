@@ -25,6 +25,7 @@ class Application;
 class GraphQuickItem;
 class GraphModel;
 class SelectionManager;
+class SearchManager;
 
 DEFINE_QML_ENUM(Application::uri(), Application::majorVersion(), Application::minorVersion(),
                 LayoutPauseState,
@@ -68,6 +69,9 @@ class Document : public QObject
     Q_PROPERTY(QmlContainerWrapperBase* layoutSettings READ layoutSettings CONSTANT)
 
     Q_PROPERTY(float fps READ fps NOTIFY fpsChanged)
+
+    Q_PROPERTY(int foundIndex READ foundIndex NOTIFY foundIndexChanged)
+    Q_PROPERTY(int numNodesFound READ numNodesFound NOTIFY numNodesFoundChanged)
 
 public:
     explicit Document(QObject* parent = nullptr);
@@ -120,10 +124,16 @@ private:
     std::shared_ptr<GraphModel> _graphModel;
     std::unique_ptr<IPluginInstance> _pluginInstance;
     std::shared_ptr<SelectionManager> _selectionManager;
+    std::shared_ptr<SearchManager> _searchManager;
     CommandManager _commandManager;
     std::unique_ptr<ParserThread> _graphFileParserThread;
+
     std::unique_ptr<LayoutThread> _layoutThread;
     QmlContainerWrapper<LayoutSetting> _layoutSettings;
+
+    std::vector<NodeId> _foundNodeIds;
+    bool _foundItValid = false;
+    std::vector<NodeId>::const_iterator _foundIt = _foundNodeIds.begin();
 
     std::vector<GraphTransformConfiguration> _previousGraphTransformConfigurations;
     QmlContainerWrapper<GraphTransformConfiguration> _graphTransformConfigurations;
@@ -145,6 +155,12 @@ private:
     void applyTransforms();
 
     void maybeEmitIdleChanged();
+
+    int foundIndex() const;
+    int numNodesFound() const;
+    void setFoundIt(std::vector<NodeId>::const_iterator it);
+    void incrementFoundIt();
+    void decrementFoundIt();
 
 private slots:
     void onGraphTransformsConfigurationDataChanged(const QModelIndex& index, const QModelIndex&,
@@ -182,6 +198,9 @@ signals:
 
     void fpsChanged();
 
+    void foundIndexChanged();
+    void numNodesFoundChanged();
+
 public slots:
     bool openFile(const QUrl& fileUrl,
                   const QString& fileType,
@@ -202,6 +221,13 @@ public slots:
 
     void switchToOverviewMode(bool doTransition = true);
 
+    void find(const QString& regex);
+    void selectFirstFound();
+    void selectNextFound();
+    void selectPrevFound();
+    void selectAllFound();
+    void updateFoundIndex(bool reselectIfInvalidated);
+
     void toggleDebugPauser();
     void debugResume();
 
@@ -218,6 +244,9 @@ public slots:
 private slots:
     void onLoadProgress(int percentage);
     void onLoadComplete(bool success);
+
+    void onSelectionChanged(const SelectionManager* selectionManager);
+    void onFoundNodeIdsChanged(const SearchManager* searchManager);
 };
 
 #endif // DOCUMENT_H

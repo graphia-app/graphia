@@ -19,35 +19,39 @@
 #include <QString>
 #include <QStringList>
 #include <QColor>
+#include <QFlags>
 
 #include <memory>
 #include <utility>
 #include <map>
 
+class SelectionManager;
+class SearchManager;
+
+enum VisualFlags
+{
+    None     = 0x0,
+    Selected = 0x1,
+    NotFound = 0x2
+};
+
+Q_DECLARE_FLAGS(VisualState, VisualFlags)
+Q_DECLARE_OPERATORS_FOR_FLAGS(VisualState)
+
 struct NodeVisual
 {
-    NodeVisual() noexcept {}
-    NodeVisual(NodeVisual&& other) noexcept :
-        _size(other._size),
-        _color(other._color)
-    {}
-
     float _size = 1.0f;
     QColor _color;
+    VisualState _state;
 };
 
 using NodeVisuals = NodeArray<NodeVisual>;
 
 struct EdgeVisual
 {
-    EdgeVisual() noexcept {}
-    EdgeVisual(EdgeVisual&& other) noexcept :
-        _size(other._size),
-        _color(other._color)
-    {}
-
     float _size = 1.0f;
     QColor _color;
+    VisualState _state;
 };
 
 using EdgeVisuals = EdgeArray<EdgeVisual>;
@@ -94,8 +98,6 @@ public:
     bool editable() const { return _plugin->editable(); }
     QString pluginQmlPath() const { return _plugin->qmlPath(); }
 
-    std::vector<NodeId> findNodes(const QString& regex, std::vector<QString> dataFieldNames = {}) const;
-
     void buildTransforms(const std::vector<GraphTransformConfiguration>& graphTransformConfigurations);
 
     QStringList availableTransformNames() const;
@@ -104,11 +106,17 @@ public:
     const DataField& dataFieldByName(const QString& name) const;
     QStringList avaliableConditionFnOps(const QString& dataFieldName) const;
 
+    QStringList dataFieldNames(DataFieldElementType elementType) const;
+
     IDataField& dataField(const QString& name);
 
-private slots:
-    void onGraphChanged(const Graph*);
-    void onPreferenceChanged(const QString& key, const QVariant& value);
+public slots:
+    void onSelectionChanged(const SelectionManager* selectionManager);
+    void onFoundNodeIdsChanged(const SearchManager* searchManager);
+
+signals:
+    void visualsWillChange();
+    void visualsChanged();
 };
 
 #endif // GRAPHMODEL_H

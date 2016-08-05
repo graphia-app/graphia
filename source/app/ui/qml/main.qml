@@ -291,6 +291,14 @@ ApplicationWindow
 
     Action
     {
+        id: findAction
+        text: qsTr("&Find")
+        shortcut: "Ctrl+F"
+        onTriggered: currentDocument && currentDocument.showFind()
+    }
+
+    Action
+    {
         id: optionsAction
         text: qsTr("&Options...")
         onTriggered: optionsDialog.show();
@@ -331,7 +339,7 @@ ApplicationWindow
         id: overviewModeAction
         iconName: "view-fullscreen"
         text: qsTr("&Overview Mode")
-        shortcut: "Esc"
+        shortcut: currentDocument && currentDocument.findVisible ? "" : "Esc"
         enabled: currentDocument ? currentDocument.canEnterOverviewMode : false
         onTriggered: currentDocument && currentDocument.switchToOverviewMode()
     }
@@ -422,6 +430,8 @@ ApplicationWindow
             MenuItem { action: selectAllAction }
             MenuItem { action: selectNoneAction }
             MenuItem { action: invertSelectionAction }
+            MenuSeparator {}
+            MenuItem { action: findAction }
             MenuSeparator {}
             MenuItem { action: optionsAction }
         }

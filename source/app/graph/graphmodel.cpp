@@ -1,6 +1,9 @@
 #include "graphmodel.h"
 #include "componentmanager.h"
 
+#include "../ui/selectionmanager.h"
+#include "../ui/searchmanager.h"
+
 #include "../transform/compoundtransform.h"
 #include "../transform/filtertransform.h"
 #include "../transform/edgecontractiontransform.h"
@@ -23,8 +26,9 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
     _name(name),
     _plugin(plugin)
 {
-    connect(&_transformedGraph, &Graph::graphChanged, this, &GraphModel::onGraphChanged, Qt::DirectConnection);
-    connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphModel::onPreferenceChanged);
+    connect(&_transformedGraph, &Graph::graphChanged, [this] { updateVisuals(); });
+    connect(S(Preferences), &Preferences::preferenceChanged, [this] { updateVisuals(); });
+
 
     dataField(tr("Node Degree"))
         .setIntValueFn([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).degree(); })
@@ -164,6 +168,19 @@ QStringList GraphModel::avaliableConditionFnOps(const QString& dataFieldName) co
     return stringList;
 }
 
+QStringList GraphModel::dataFieldNames(DataFieldElementType elementType) const
+{
+    QStringList dataFieldNames;
+
+    for(auto& dataField : _dataFields)
+    {
+        if(dataField.second.elementType() == elementType)
+            dataFieldNames.append(dataField.first);
+    }
+
+    return dataFieldNames;
+}
+
 IDataField& GraphModel::dataField(const QString& name)
 {
     return _dataFields[name];
@@ -177,6 +194,8 @@ const DataField& GraphModel::dataFieldByName(const QString& name) const
 
 void GraphModel::updateVisuals()
 {
+    emit visualsWillChange();
+
     auto nodeColor = u::pref("visuals/defaultNodeColor").value<QColor>();
     auto edgeColor = u::pref("visuals/defaultEdgeColor").value<QColor>();
     auto multiColor = u::pref("visuals/multiElementColor").value<QColor>();
@@ -201,62 +220,43 @@ void GraphModel::updateVisuals()
         _edgeVisuals[edgeId]._color = graph().typeOf(edgeId) == EdgeIdDistinctSetCollection::Type::Not ?
                     edgeColor : multiColor;
     }
+
+    emit visualsChanged();
 }
 
-std::vector<NodeId> GraphModel::findNodes(const QString& regex, std::vector<QString> dataFieldNames) const
+void GraphModel::onSelectionChanged(const SelectionManager* selectionManager)
 {
-    std::vector<NodeId> nodeIds;
+    emit visualsWillChange();
 
-    // If no data fields are specified, search them all
-    if(dataFieldNames.empty())
+    for(auto nodeId : graph().nodeIds())
     {
-        for(auto& dataField : _dataFields)
-            dataFieldNames.emplace_back(dataField.first);
+        _nodeVisuals[nodeId]._state.setFlag(VisualFlags::Selected,
+                                            selectionManager->nodeIsSelected(nodeId));
     }
 
-    std::vector<const DataField*> dataFields;
-    for(auto& dataFieldName : dataFieldNames)
+    emit visualsChanged();
+}
+
+void GraphModel::onFoundNodeIdsChanged(const SearchManager* searchManager)
+{
+    emit visualsWillChange();
+
+    for(auto edgeId : graph().edgeIds())
+        _edgeVisuals[edgeId]._state.setFlag(VisualFlags::NotFound, false);
+
+    for(auto nodeId : graph().nodeIds())
     {
-        const auto* dataField = &dataFieldByName(dataFieldName);
-
-        if(dataField->elementType() == DataFieldElementType::Node)
-            dataFields.emplace_back(dataField);
-    }
-
-    QRegularExpression re(regex, QRegularExpression::CaseInsensitiveOption);
-
-    if(re.isValid())
-    {
-        for(auto nodeId : graph().nodeIds())
+        if(!searchManager->foundNodeIds().empty() && !searchManager->nodeWasFound(nodeId))
         {
-            bool match = false;
-            match = re.match(_nodeNames[nodeId]).hasMatch();
+            _nodeVisuals[nodeId]._state.setFlag(VisualFlags::NotFound, true);
 
-            if(!match)
-            {
-                for(auto& dataField : dataFields)
-                {
-                    match = dataField->createNodeConditionFn(ConditionFnOp::MatchesRegex, re)(nodeId);
-                    if(match)
-                        break;
-                }
-            }
-
-            if(match)
-                nodeIds.emplace_back(nodeId);
+            for(auto edgeId : graph().edgeIdsForNodeId(nodeId))
+                _edgeVisuals[edgeId]._state.setFlag(VisualFlags::NotFound, true);
         }
+        else
+            _nodeVisuals[nodeId]._state.setFlag(VisualFlags::NotFound, false);
     }
 
-    return nodeIds;
-}
-
-void GraphModel::onGraphChanged(const Graph*)
-{
-    updateVisuals();
-}
-
-void GraphModel::onPreferenceChanged(const QString&, const QVariant&)
-{
-    updateVisuals();
+    emit visualsChanged();
 }
 

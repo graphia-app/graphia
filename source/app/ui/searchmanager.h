@@ -1,0 +1,30 @@
+#ifndef SEARCHMANAGER_H
+#define SEARCHMANAGER_H
+
+#include "shared/graph/elementid.h"
+
+#include <QObject>
+
+class GraphModel;
+
+class SearchManager : public QObject
+{
+    Q_OBJECT
+public:
+    explicit SearchManager(const GraphModel& graphModel);
+
+    void findNodes(const QString& regex, std::vector<QString> dataFieldNames = {});
+    void clearFoundNodeIds();
+
+    const NodeIdSet& foundNodeIds() const { return _foundNodeIds; }
+    bool nodeWasFound(NodeId nodeId) const;
+
+private:
+    const GraphModel* _graphModel;
+    NodeIdSet _foundNodeIds;
+
+signals:
+    void foundNodeIdsChanged(const SearchManager*);
+};
+
+#endif // SEARCHMANAGER_H

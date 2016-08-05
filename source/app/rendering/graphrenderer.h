@@ -152,9 +152,6 @@ private slots:
     void onGraphChanged(const Graph* graph);
     void onComponentAdded(const Graph*, ComponentId componentId, bool);
     void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
-    void onSelectionChanged(const SelectionManager*);
-
-    void onPreferenceChanged(const QString& key, const QVariant& value);
 
 public slots:
     void onCommandWillExecuteAsynchronously(const Command*);

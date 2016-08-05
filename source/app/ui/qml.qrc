@@ -12,5 +12,6 @@
         <file>qml/PluginsDialog.qml</file>
         <file>qml/PluginChooserDialog.qml</file>
         <file>qml/FileTypeChooserDialog.qml</file>
+        <file>qml/Find.qml</file>
     </qresource>
 </RCC>
