@@ -1,14 +1,14 @@
 #ifndef OPENGLFUNCTIONS_H
 #define OPENGLFUNCTIONS_H
 
-#include <QOpenGLFunctions_3_3_Core>
+#include <QOpenGLFunctions_4_0_Core>
 #include <QString>
 
-class OpenGLFunctions : public QOpenGLFunctions_3_3_Core
+class OpenGLFunctions : public QOpenGLFunctions_4_0_Core
 {
 public:
     OpenGLFunctions() :
-        QOpenGLFunctions_3_3_Core()
+        QOpenGLFunctions_4_0_Core()
     {}
 
     void resolveOpenGLFunctions();
