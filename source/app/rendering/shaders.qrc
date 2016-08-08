@@ -3,7 +3,6 @@
         <file>shaders/instancednodes.vert</file>
         <file>shaders/ads.frag</file>
         <file>shaders/instancededges.vert</file>
-        <file>shaders/instancedmarkers.vert</file>
         <file>shaders/marker.frag</file>
         <file>shaders/debuglines.frag</file>
         <file>shaders/debuglines.vert</file>
