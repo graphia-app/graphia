@@ -225,7 +225,8 @@ void GraphCommonInteractor::leftMouseUp()
             QPoint frustumSelectEnd = cursorPosition();
             auto selection = selectionForRect(QRect(_frustumSelectStart, frustumSelectEnd));
 
-            _commandManager->executeOnce(makeSelectNodesCommand(_selectionManager.get(), selection));
+            if(!selection.empty())
+                _commandManager->executeOnce(makeSelectNodesCommand(_selectionManager.get(), selection));
 
             _frustumSelectStart = QPoint();
             _frustumSelecting = false;
