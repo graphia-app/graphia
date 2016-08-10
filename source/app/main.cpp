@@ -25,7 +25,12 @@
 int main(int argc, char *argv[])
 {
     SharedTools::QtSingleApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
-    SharedTools::QtSingleApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+
+    if(qEnvironmentVariableIsSet("VOGL_CMD_LINE"))
+        qDebug() << "Vogl detected; disabling shared OpenGL context (QtWebEngine will not function!)";
+    else
+        SharedTools::QtSingleApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+
     SharedTools::QtSingleApplication app(PRODUCT_NAME, argc, argv);
 
     if(app.isRunning())
