@@ -6,8 +6,6 @@
 #include <QIcon>
 #include <QMessageBox>
 
-#include <QtWebEngine/QtWebEngine>
-
 #include "application.h"
 #include "ui/document.h"
 #include "ui/graphquickitem.h"
@@ -27,6 +25,7 @@
 int main(int argc, char *argv[])
 {
     SharedTools::QtSingleApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
+    SharedTools::QtSingleApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     SharedTools::QtSingleApplication app(PRODUCT_NAME, argc, argv);
 
     if(app.isRunning())
@@ -103,9 +102,6 @@ int main(int argc, char *argv[])
 
     preferences.define("misc/showGraphMetrics",             false);
     preferences.define("misc/showLayoutSettings",           false);
-
-    // Plugins may use this, so we need to initialise it
-    QtWebEngine::initialize();
 
     QQmlSortFilterProxyModel::initialize();
 
