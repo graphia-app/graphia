@@ -286,10 +286,8 @@ void GraphComponentRenderer::setAlpha(float alpha)
 {
     if(_alpha != alpha)
     {
-        if(_alpha >= 1.0f || alpha >= 1.0f)
-            _graphRenderer->onComponentFadingChanged(_componentId);
-
         _alpha = alpha;
+        _graphRenderer->onComponentAlphaChanged(_componentId);
     }
 }
 

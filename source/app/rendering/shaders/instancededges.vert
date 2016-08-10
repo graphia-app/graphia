@@ -10,14 +10,13 @@ layout (location = 4) in vec3  targetPosition; // The position of the target nod
 layout (location = 5) in int   component; // The component index
 
 layout (location = 6) in float size; // The size of the edge
-layout (location = 7) in vec3  color; // The color of the edge
+layout (location = 7) in vec4  color; // The color of the edge
 layout (location = 8) in vec3  outlineColor; // The outline color of the node
 
 out vec3 position;
 out vec3 normal;
-out vec3 vColor;
+out vec4 vColor;
 out vec3 vOutlineColor;
-out float vAlpha;
 
 uniform samplerBuffer componentData;
 
@@ -48,7 +47,7 @@ void main()
     scaledVertexPosition.xz *= size;
     scaledVertexPosition.y *= edgeLength;
 
-    int index = component * 9;
+    int index = component * 8;
 
     mat4 modelViewMatrix = mat4(texelFetch(componentData, index + 0),
                                 texelFetch(componentData, index + 1),
@@ -60,8 +59,6 @@ void main()
                                  texelFetch(componentData, index + 6),
                                  texelFetch(componentData, index + 7));
 
-    float alpha = texelFetch(componentData, index + 8).r;
-
     position = (orientationMatrix * vec4(scaledVertexPosition, 1.0)).xyz;
     position = (modelViewMatrix * vec4(position + midpoint, 1.0)).xyz;
 
@@ -69,6 +66,5 @@ void main()
     normal = normalMatrix * vertexNormal;
     vColor = color;
     vOutlineColor = outlineColor;
-    vAlpha = alpha;
     gl_Position = projectionMatrix * vec4(position, 1.0);
 }

@@ -21,9 +21,8 @@ uniform MaterialInfo material;
 
 in vec3 position;
 in vec3 normal;
-in vec3 vColor;
+in vec4 vColor;
 in vec3 vOutlineColor;
-in float vAlpha;
 
 layout (location = 0) out vec4 outColor;
 layout (location = 1) out vec4 outSelection;
@@ -63,7 +62,7 @@ vec3 adsModel(const in vec3 pos, const in vec3 n)
         attenuation = clamp(attenuation, 0.7, 1.0);
 
         // Combine the ambient, diffuse and specular contributions
-        result += attenuation * light.intensity * (material.ka + vColor * diffuse + material.ks * specular);
+        result += attenuation * light.intensity * (material.ka + vColor.rgb * diffuse + material.ks * specular);
     }
 
     return result;
@@ -72,6 +71,6 @@ vec3 adsModel(const in vec3 pos, const in vec3 n)
 void main()
 {
     vec3 color = adsModel(position, normalize(normal));
-    outColor = vec4(color, vAlpha);
-    outSelection = vec4(vOutlineColor, vAlpha);
+    outColor = vec4(color, vColor.a);
+    outSelection = vec4(vOutlineColor, vColor.a);
 }

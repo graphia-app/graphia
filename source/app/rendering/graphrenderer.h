@@ -77,7 +77,7 @@ struct GPUGraphData : protected OpenGLFunctions
         float _position[3];
         int _component;
         float _size;
-        float _color[3];
+        float _color[4];
         float _outlineColor[3];
     };
 
@@ -87,7 +87,7 @@ struct GPUGraphData : protected OpenGLFunctions
         float _targetPosition[3];
         int _component;
         float _size;
-        float _color[3];
+        float _color[4];
         float _outlineColor[3];
     };
 
@@ -157,7 +157,7 @@ public slots:
     void onCommandWillExecuteAsynchronously(const Command*);
     void onCommandCompleted(const Command*, const QString&);
     void onLayoutChanged();
-    void onComponentFadingChanged(ComponentId componentId);
+    void onComponentAlphaChanged(ComponentId componentId);
     void onComponentCleanup(ComponentId componentId);
 
 private:
@@ -208,8 +208,14 @@ private:
 
     GLuint _colorTexture = 0;
     GLuint _selectionTexture = 0;
+
+    GLuint _transparentTexture = 0;
+    GLuint _transparentSelectionTexture = 0;
+
     GLuint _depthTexture = 0;
+
     GLuint _visualFBO = 0;
+    GLuint _transparencyFBO = 0;
     bool _FBOcomplete = false;
 
     QOpenGLVertexArrayObject _screenQuadVAO;
@@ -221,8 +227,8 @@ private:
     NodeArray<bool> _hiddenNodes;
     EdgeArray<bool> _hiddenEdges;
 
-    GPUGraphData _gpuGraphData;
-    GPUGraphData _gpuGraphDataAlpha;
+    GPUGraphData _gpuGraphDataOpaque;
+    GPUGraphData _gpuGraphDataTransparent;
     bool _gpuDataRequiresUpdate = false;
 
     GLuint _componentDataTexture = 0;
@@ -242,6 +248,7 @@ private:
 
     PerformanceCounter _performanceCounter;
 
+    void setupTexture(GLuint& texture, int width, int height, GLint format);
     bool prepareRenderBuffers(int width, int height);
     void prepareSelectionMarkerVAO();
     void prepareQuad();
@@ -261,12 +268,13 @@ private:
 
     void resize(int width, int height);
 
-    void clear();
+    void render2DComposite(QOpenGLShaderProgram& shader, GLuint texture);
     void finishRender();
 
     void renderNodes(GPUGraphData& gpuGraphData);
     void renderEdges(GPUGraphData& gpuGraphData);
-    void renderGraph(GPUGraphData& gpuGraphData);
+    void renderGraphOpaque();
+    void renderGraphTransparent();
     void renderScene();
     void render2D();
 

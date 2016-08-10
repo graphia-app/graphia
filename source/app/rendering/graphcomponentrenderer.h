@@ -51,7 +51,6 @@ public:
     int height() const { return _dimensions.height(); }
 
     float alpha() const { return _alpha; }
-    bool fading() const { return _alpha < 1.0f; }
     void setAlpha(float alpha);
 
     QMatrix4x4 modelViewMatrix() const;
