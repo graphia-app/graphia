@@ -8,9 +8,9 @@
 #include "../layout/layout.h"
 #include "../layout/collision.h"
 
+#include "../maths/boundingsphere.h"
 #include "../maths/frustum.h"
 #include "../maths/plane.h"
-#include "../maths/boundingsphere.h"
 
 #include "../ui/graphquickitem.h"
 #include "../ui/selectionmanager.h"

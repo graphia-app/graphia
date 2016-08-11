@@ -4,19 +4,19 @@
 
 #include "shared/plugins/iplugin.h"
 
-#include "../loading/parserthread.h"
 #include "../graph/graphmodel.h"
+#include "../loading/parserthread.h"
 
-#include "../layout/layout.h"
 #include "../layout/forcedirectedlayout.h"
+#include "../layout/layout.h"
 #include "../layout/collision.h"
 
 #include "../commands/deleteselectednodescommand.h"
 #include "../commands/applytransformationscommand.h"
 #include "../commands/selectnodescommand.h"
 
-#include "selectionmanager.h"
 #include "searchmanager.h"
+#include "selectionmanager.h"
 #include "graphquickitem.h"
 
 REGISTER_QML_ENUM(LayoutPauseState);

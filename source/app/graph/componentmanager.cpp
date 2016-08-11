@@ -2,8 +2,8 @@
 
 #include "shared/utils/utils.h"
 
-#include <queue>
 #include <map>
+#include <queue>
 
 ComponentManager::ComponentManager(Graph& graph,
                                    const NodeConditionFn& nodeFilter,

@@ -11,8 +11,8 @@
 #include <QCryptographicHash>
 #include <QDebug>
 
-#include <map>
 #include <iostream>
+#include <map>
 
 #include "report.h"
 #include "../app/rendering/openglfunctions.h"

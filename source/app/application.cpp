@@ -9,8 +9,8 @@
 #include <QStandardPaths>
 #include <QDebug>
 
-#include <memory>
 #include <cmath>
+#include <memory>
 
 const char* Application::_uri = "com.kajeka";
 

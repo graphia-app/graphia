@@ -8,9 +8,9 @@
 #include "../transform/filtertransform.h"
 #include "../transform/edgecontractiontransform.h"
 
-#include "shared/utils/utils.h"
 #include "../utils/enumreflection.h"
 #include "shared/utils/preferences.h"
+#include "shared/utils/utils.h"
 
 #include <QRegularExpression>
 

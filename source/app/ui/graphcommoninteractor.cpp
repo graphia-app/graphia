@@ -1,14 +1,14 @@
 #include "graphcommoninteractor.h"
-#include "selectionmanager.h"
 #include "graphquickitem.h"
+#include "selectionmanager.h"
 
 #include "../commands/commandmanager.h"
 #include "../commands/selectnodescommand.h"
 
 #include "../rendering/graphrenderer.h"
 #include "../rendering/graphcomponentscene.h"
-#include "../rendering/graphcomponentrenderer.h"
 #include "../rendering/camera.h"
+#include "../rendering/graphcomponentrenderer.h"
 
 #include "../graph/graph.h"
 #include "../graph/graphmodel.h"

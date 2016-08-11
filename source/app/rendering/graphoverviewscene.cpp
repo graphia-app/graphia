@@ -17,9 +17,9 @@
 #include <QPoint>
 
 #include <stack>
-#include <vector>
-#include <functional>
 #include <algorithm>
+#include <functional>
+#include <vector>
 
 GraphOverviewScene::GraphOverviewScene(CommandManager& commandManager, GraphRenderer* graphRenderer) :
     Scene(graphRenderer),

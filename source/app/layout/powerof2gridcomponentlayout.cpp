@@ -2,8 +2,8 @@
 
 #include "../graph/componentmanager.h"
 
-#include <vector>
 #include <stack>
+#include <vector>
 #include <algorithm>
 
 #include <QPointF>

@@ -2,8 +2,8 @@
 
 #include "ray.h"
 
-#include <vector>
 #include <cmath>
+#include <vector>
 
 BoundingSphere::BoundingSphere() :
     _centre()

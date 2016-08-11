@@ -2,8 +2,8 @@
 #include "ray.h"
 
 #include <algorithm>
-#include <limits>
 #include <cmath>
+#include <limits>
 
 BoundingBox2D::BoundingBox2D() :
     _min(), _max()
