@@ -1,7 +1,14 @@
 TEMPLATE = subdirs
 
 SUBDIRS = \
-    source/app \
-    source/thirdparty \
-    source/plugins \
-    source/crashreporter
+    app \
+    crashreporter \
+    plugins \
+    thirdparty
+
+app.subdir = source/app
+crashreporter.subdir = source/crashreporter
+plugins.subdir = source/plugins
+thirdparty.subdir = source/thirdparty
+
+app.depends = thirdparty
