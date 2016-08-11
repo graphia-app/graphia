@@ -329,7 +329,8 @@ void CorrelationPluginInstance::onGraphChanged()
                         return rowAttribute._values.at(row).toFloat();
                     })
                     .setFloatMin(rowAttribute._floatMin)
-                    .setFloatMax(rowAttribute._floatMax);
+                    .setFloatMax(rowAttribute._floatMax)
+                    .setSearchable(true);
             break;
 
         case Attribute::Type::Integer:
@@ -340,7 +341,8 @@ void CorrelationPluginInstance::onGraphChanged()
                         return rowAttribute._values.at(row).toInt();
                     })
                     .setIntMin(rowAttribute._intMin)
-                    .setIntMax(rowAttribute._intMax);
+                    .setIntMax(rowAttribute._intMax)
+                    .setSearchable(true);
             break;
 
         case Attribute::Type::String:
@@ -349,7 +351,8 @@ void CorrelationPluginInstance::onGraphChanged()
                     {
                         int row = _dataRowIndexes->get(nodeId);
                         return rowAttribute._values.at(row);
-                    });
+                    })
+                    .setSearchable(true);
             break;
 
         default: break;

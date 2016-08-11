@@ -35,7 +35,8 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
         .setIntMin(0);
 
     dataField(tr("Node Name"))
-        .setStringValueFn([this](NodeId nodeId) { return _nodeNames[nodeId]; });
+        .setStringValueFn([this](NodeId nodeId) { return _nodeNames[nodeId]; })
+        .setSearchable(true);
 
     dataField(tr("Component Size"))
         .setIntValueFn([this](const GraphComponent& component) { return component.numNodes(); })

@@ -84,6 +84,8 @@ private:
     float _floatMin = std::numeric_limits<float>::max();
     float _floatMax = std::numeric_limits<float>::min();
 
+    bool _searchable = false;
+
     template<typename T> struct Helper {};
 
     int valueOf(Helper<int>, NodeId nodeId) const;
@@ -208,6 +210,9 @@ public:
     DataField& setFloatMax(float floatMax);
 
     bool floatValueInRange(float value) const;
+
+    DataField& setSearchable(bool searchable) { _searchable = searchable; return *this; }
+    bool searchable() const { return _searchable; }
 
     std::vector<ConditionFnOp> validConditionFnOps() const;
 

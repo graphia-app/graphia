@@ -45,6 +45,9 @@ public:
     virtual IDataField& setFloatMax(float floatMax) = 0;
 
     virtual bool floatValueInRange(float value) const = 0;
+
+    virtual IDataField& setSearchable(bool searchable) = 0;
+    virtual bool searchable() const = 0;
 };
 
 #endif // IDATAFIELD_H

@@ -32,7 +32,7 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> dataFie
     {
         const auto* dataField = &_graphModel->dataFieldByName(dataFieldName);
 
-        if(dataField->elementType() == DataFieldElementType::Node)
+        if(dataField->searchable() && dataField->elementType() == DataFieldElementType::Node)
             dataFields.emplace_back(dataField);
     }
 
