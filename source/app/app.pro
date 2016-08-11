@@ -2,7 +2,6 @@ TEMPLATE = app
 
 include(../common.pri)
 include(../shared/shared.pri)
-include(../thirdparty/thirdparty.pri)
 
 # Put the binary in the root of the build directory
 DESTDIR = ../..
@@ -19,6 +18,8 @@ RC_ICONS = icon/Icon.ico # Windows
 ICON = icon/Icon.icns # OSX
 
 QT += qml quick widgets opengl openglextensions xml svg
+
+LIBS += -L../thirdparty -lthirdparty
 
 HEADERS += \
     application.h \
@@ -86,7 +87,6 @@ HEADERS += \
     utils/enumreflection.h \
     utils/qmlcontainerwrapper.h \
     utils/qmlenum.h \
-    utils/crashhandler.h \
     commands/applytransformationscommand.h \
     ui/searchmanager.h \
     commands/selectnodescommand.h
@@ -145,7 +145,6 @@ SOURCES += \
     ui/graphtransformconfiguration.cpp \
     ui/selectionmanager.cpp \
     utils/debugpauser.cpp \
-    utils/crashhandler.cpp \
     commands/applytransformationscommand.cpp \
     ui/searchmanager.cpp
 

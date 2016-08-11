@@ -13,12 +13,12 @@
 
 #include "shared/utils/threadpool.h"
 #include "shared/utils/preferences.h"
-#include "utils/crashhandler.h"
 
 #include "rendering/openglfunctions.h"
 
 #include "../thirdparty/qtsingleapplication/qtsingleapplication.h"
 #include "../thirdparty/SortFilterProxyModel/qqmlsortfilterproxymodel.h"
+#include "../thirdparty/breakpad/crashhandler.h"
 
 #include <QCoreApplication>
 

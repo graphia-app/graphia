@@ -1,3 +1,5 @@
+QT += qml
+
 INCLUDEPATH += $$PWD
 
 HEADERS += $$PWD/qqmlsortfilterproxymodel.h
