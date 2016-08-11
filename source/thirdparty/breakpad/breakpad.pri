@@ -46,8 +46,6 @@ mac {
 
     OBJECTIVE_SOURCES += \
         breakpad/src/common/mac/MachIPC.mm
-
-    LIBS += -framework CoreFoundation
 }
 
 win32 {
