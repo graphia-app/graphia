@@ -849,7 +849,7 @@ void GraphRenderer::renderNodes(GPUGraphData& gpuGraphData)
 
     gpuGraphData._sphere.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._sphere.indexCount(),
-                            GL_UNSIGNED_INT, 0, gpuGraphData.numNodes());
+                            GL_UNSIGNED_INT, nullptr, gpuGraphData.numNodes());
     gpuGraphData._sphere.vertexArrayObject()->release();
 
     glBindTexture(GL_TEXTURE_BUFFER, 0);
@@ -870,7 +870,7 @@ void GraphRenderer::renderEdges(GPUGraphData& gpuGraphData)
 
     gpuGraphData._cylinder.vertexArrayObject()->bind();
     glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._cylinder.indexCount(),
-                            GL_UNSIGNED_INT, 0, gpuGraphData.numEdges());
+                            GL_UNSIGNED_INT, nullptr, gpuGraphData.numEdges());
     gpuGraphData._cylinder.vertexArrayObject()->release();
 
     glBindTexture(GL_TEXTURE_BUFFER, 0);

@@ -17,9 +17,9 @@ bool Frustum::containsPoint(const QVector3D& point) const
 {
     //FIXME: optimise this
 
-    for(int i = 0; i < 6; i++)
+    for(auto& plane : _planes)
     {
-        if(_planes[i].sideForPoint(point) == Plane::Side::Front)
+        if(plane.sideForPoint(point) == Plane::Side::Front)
             return false;
     }
 

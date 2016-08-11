@@ -19,7 +19,7 @@
 
 static void uploadReport(const QString& email, const QString& text, const QString& dmpFile)
 {
-    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    auto *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
     std::map<const char*, QString> fields =
     {
@@ -59,7 +59,7 @@ static void uploadReport(const QString& email, const QString& text, const QStrin
     dmpPart.setHeader(QNetworkRequest::ContentDispositionHeader,
                       QVariant("form-data; name=\"dmp\"; filename=\"" +
                                QFileInfo(dmpFile).fileName() + "\""));
-    QFile* file = new QFile(dmpFile);
+    auto* file = new QFile(dmpFile);
     file->open(QIODevice::ReadOnly);
     dmpPart.setBodyDevice(file);
     file->setParent(multiPart);
