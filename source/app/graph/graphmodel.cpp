@@ -27,6 +27,15 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
     _plugin(plugin)
 {
     connect(&_transformedGraph, &Graph::graphChanged, [this] { updateVisuals(); });
+    connect(&_transformedGraph, &Graph::nodeRemoved, [this](const Graph*, NodeId nodeId)
+    {
+       _nodeVisuals[nodeId]._state = 0;
+    });
+    connect(&_transformedGraph, &Graph::edgeRemoved, [this](const Graph*, EdgeId edgeId)
+    {
+       _edgeVisuals[edgeId]._state = 0;
+    });
+
     connect(S(Preferences), &Preferences::preferenceChanged, [this] { updateVisuals(); });
 
 
