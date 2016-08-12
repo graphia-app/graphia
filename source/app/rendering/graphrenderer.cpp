@@ -1283,20 +1283,21 @@ void GraphRenderer::prepareComponentDataTexture()
 void GraphRenderer::enableSceneUpdate()
 {
     std::unique_lock<std::mutex> lock(_sceneUpdateMutex);
-    _sceneUpdateEnabled = true;
+    Q_ASSERT(_sceneUpdateDisabled > 0);
+    _sceneUpdateDisabled--;
     resetTime();
 }
 
 void GraphRenderer::disableSceneUpdate()
 {
     std::unique_lock<std::mutex> lock(_sceneUpdateMutex);
-    _sceneUpdateEnabled = false;
+    _sceneUpdateDisabled++;
 }
 
 void GraphRenderer::ifSceneUpdateEnabled(const std::function<void ()>& f)
 {
     std::unique_lock<std::mutex> lock(_sceneUpdateMutex);
-    if(_sceneUpdateEnabled)
+    if(!_sceneUpdateDisabled)
         f();
 }
 

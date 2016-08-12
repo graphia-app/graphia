@@ -238,7 +238,7 @@ private:
 
     QTime _time;
     float _lastTime = 0.0f;
-    bool _sceneUpdateEnabled = false;
+    int _sceneUpdateDisabled = 1;
     std::mutex _sceneUpdateMutex;
 
     std::atomic<bool> _layoutChanged;
