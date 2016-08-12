@@ -154,7 +154,7 @@ private slots:
     void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
 
 public slots:
-    void onCommandWillExecuteAsynchronously(const Command*);
+    void onCommandWillExecute(const Command*);
     void onCommandCompleted(const Command*, const QString&);
     void onLayoutChanged();
     void onComponentAlphaChanged(ComponentId componentId);

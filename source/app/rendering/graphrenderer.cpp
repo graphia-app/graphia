@@ -760,7 +760,7 @@ void GraphRenderer::onComponentWillBeRemoved(const Graph*, ComponentId component
     }, QString("GraphRenderer::onComponentWillBeRemoved (cleanup) component %1").arg(static_cast<int>(componentId)));
 }
 
-void GraphRenderer::onCommandWillExecuteAsynchronously(const Command*)
+void GraphRenderer::onCommandWillExecute(const Command*)
 {
     disableSceneUpdate();
 }

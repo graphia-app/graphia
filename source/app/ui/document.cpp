@@ -350,8 +350,8 @@ void Document::onLoadComplete(bool success)
     connect(this, &Document::idleChanged, this, &Document::canEnterOverviewModeChanged);
     connect(this, &Document::idleChanged, this, &Document::canResetViewChanged);
 
-    connect(&_commandManager, &CommandManager::commandWillExecuteAsynchronously, _graphQuickItem, &GraphQuickItem::commandWillExecuteAsynchronously);
-    connect(&_commandManager, &CommandManager::commandWillExecuteAsynchronously, this, &Document::commandInProgressChanged);
+    connect(&_commandManager, &CommandManager::commandWillExecute, _graphQuickItem, &GraphQuickItem::commandWillExecute);
+    connect(&_commandManager, &CommandManager::commandWillExecute, this, &Document::commandInProgressChanged);
 
     connect(&_commandManager, &CommandManager::commandProgressChanged, this, &Document::commandProgressChanged);
     connect(&_commandManager, &CommandManager::commandVerbChanged, this, &Document::commandVerbChanged);

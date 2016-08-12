@@ -86,10 +86,7 @@ void CommandManager::executeReal(std::shared_ptr<Command> command, bool irrevers
     if(_debug > 0)
         qDebug() << "Command started" << command->description();
 
-    if(command->asynchronous())
-        executeAsynchronous(command, command->verb(), executeCommand);
-    else
-        executeCommand();
+    doCommand(command, command->verb(), executeCommand);
 }
 
 void CommandManager::undoReal()
@@ -122,10 +119,7 @@ void CommandManager::undoReal()
     _busy = true;
     emit busyChanged();
 
-    if(command->asynchronous())
-        executeAsynchronous(command, command->undoVerb(), undoCommand);
-    else
-        undoCommand();
+    doCommand(command, command->undoVerb(), undoCommand);
 }
 
 void CommandManager::redoReal()
@@ -157,10 +151,7 @@ void CommandManager::redoReal()
     _busy = true;
     emit busyChanged();
 
-    if(command->asynchronous())
-        executeAsynchronous(command, command->redoVerb(), redoCommand);
-    else
-        redoCommand();
+    doCommand(command, command->redoVerb(), redoCommand);
 }
 
 bool CommandManager::canUndo() const

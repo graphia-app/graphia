@@ -96,15 +96,19 @@ public:
     bool busy() const;
 
 private:
-    template<typename... Args> void executeAsynchronous(std::shared_ptr<Command> command, QString verb, Args&&... args)
+    template<typename Fn> void doCommand(std::shared_ptr<Command> command, QString verb, const Fn& fn)
     {
         _currentCommand = command;
         _commandProgress = -1;
         _commandVerb = verb;
         emit commandProgressChanged();
         emit commandVerbChanged();
-        emit commandWillExecuteAsynchronously(command.get());
-        _thread = std::thread(std::forward<Args>(args)...);
+        emit commandWillExecute(command.get());
+
+        if(command->asynchronous())
+            _thread = std::thread(fn);
+        else
+            fn();
     }
 
     bool canUndoNoLocking() const;
@@ -135,7 +139,7 @@ private slots:
     void onCommandCompleted(Command* command, const QString& pastParticiple, CommandAction action);
 
 signals:
-    void commandWillExecuteAsynchronously(const Command* command) const;
+    void commandWillExecute(const Command* command) const;
     void commandProgressChanged() const;
     void commandVerbChanged() const;
     void commandCompleted(Command* command, const QString& pastParticiple, CommandAction action) const;
