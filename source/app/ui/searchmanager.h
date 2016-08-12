@@ -15,11 +15,15 @@ public:
 
     void findNodes(const QString& regex, std::vector<QString> dataFieldNames = {});
     void clearFoundNodeIds();
+    void refresh();
 
     const NodeIdSet& foundNodeIds() const { return _foundNodeIds; }
     bool nodeWasFound(NodeId nodeId) const;
 
 private:
+    QString _regex;
+    std::vector<QString> _dataFieldNames;
+
     const GraphModel* _graphModel;
     NodeIdSet _foundNodeIds;
 

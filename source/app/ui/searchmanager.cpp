@@ -66,12 +66,20 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> dataFie
 
     if(changed)
         emit foundNodeIdsChanged(this);
+
+    _regex = regex;
+    _dataFieldNames = dataFieldNames;
 }
 
 void SearchManager::clearFoundNodeIds()
 {
     _foundNodeIds.clear();
     emit foundNodeIdsChanged(this);
+}
+
+void SearchManager::refresh()
+{
+    findNodes(_regex, _dataFieldNames);
 }
 
 bool SearchManager::SearchManager::nodeWasFound(NodeId nodeId) const
