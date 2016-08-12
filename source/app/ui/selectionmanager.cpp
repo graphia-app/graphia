@@ -18,8 +18,11 @@ SelectionManager::SelectionManager(const GraphModel& graphModel) :
     connect(&graphModel.graph(), &Graph::graphChanged,
     [this]
     {
-        deselectNodes(_deletedNodes);
-        _deletedNodes.clear();
+        if(!_deletedNodes.empty())
+        {
+            deselectNodes(_deletedNodes);
+            _deletedNodes.clear();
+        }
     });
 }
 
