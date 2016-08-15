@@ -343,7 +343,7 @@ Item
     property bool findVisible: find.visible
     function showFind()
     {
-        find.visible = true;
+        find.show();
     }
 
     Document

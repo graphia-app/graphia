@@ -4,6 +4,8 @@ import QtQuick.Layouts 1.1
 
 Item
 {
+    id: root
+
     property var document
 
     width: row.width
@@ -87,5 +89,12 @@ Item
     onVisibleChanged:
     {
         findField.forceActiveFocus();
+    }
+
+    function show()
+    {
+        root.visible = true;
+        findField.focus = true;
+        findField.selectAll();
     }
 }
