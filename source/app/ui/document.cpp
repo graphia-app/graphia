@@ -562,7 +562,16 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
     for(auto nodeId : searchManager->foundNodeIds())
         _foundNodeIds.emplace_back(nodeId);
 
-    std::sort(_foundNodeIds.begin(), _foundNodeIds.end(), [](auto& a, auto& b) { return a < b; });
+    std::sort(_foundNodeIds.begin(), _foundNodeIds.end(), [this](auto a, auto b)
+    {
+        auto componentIdA = _graphModel->graph().componentIdOfNode(a);
+        auto componentIdB = _graphModel->graph().componentIdOfNode(b);
+
+        if(componentIdA == componentIdB)
+            return a < b;
+        else
+            return componentIdA < componentIdB;
+    });
 
     if(_selectionManager->selectedNodes().empty())
         selectFirstFound();
