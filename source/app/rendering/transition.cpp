@@ -38,8 +38,10 @@ bool Transition::update(float dTime)
 
     if(!active())
     {
+        _finishing = true;
         for(auto& finishedFunction : _finishedFunctions)
             finishedFunction();
+        _finishing = false;
 
         if(!_suppressSignals)
             emit finished();

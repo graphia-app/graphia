@@ -26,6 +26,7 @@ private:
     float _elapsed = 0.0f;
     std::function<void(float)> _function;
     std::vector<std::function<void()>> _finishedFunctions;
+    bool _finishing = false;
     bool _suppressSignals = false;
 
 public:
@@ -33,6 +34,8 @@ public:
                                           std::function<void(float)> function,
                                           Args... finishedFunctions)
     {
+        Q_ASSERT(!_finishing);
+
         if(!active() && !_suppressSignals)
             emit started();
 
