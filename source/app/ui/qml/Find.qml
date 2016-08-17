@@ -73,15 +73,17 @@ Item
 
         Text
         {
-            visible: document.numNodesFound > 0
+            visible: findField.length > 0
             text:
             {
                 var index = document.foundIndex + 1;
 
                 if(index > 0)
                     return index + qsTr(" of ") + document.numNodesFound;
-                else
+                else if(document.numNodesFound > 0)
                     return document.numNodesFound + qsTr(" found");
+                else
+                    return qsTr("Not Found");
             }
         }
     }
