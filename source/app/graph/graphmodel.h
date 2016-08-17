@@ -113,6 +113,7 @@ public:
 public slots:
     void onSelectionChanged(const SelectionManager* selectionManager);
     void onFoundNodeIdsChanged(const SearchManager* searchManager);
+    void onPreferenceChanged();
 
 signals:
     void visualsWillChange();

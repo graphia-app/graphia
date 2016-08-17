@@ -35,8 +35,7 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
        _edgeVisuals[edgeId]._state = 0;
     });
 
-    connect(S(Preferences), &Preferences::preferenceChanged, [this] { updateVisuals(); });
-
+    connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphModel::onPreferenceChanged);
 
     dataField(tr("Node Degree"))
         .setIntValueFn([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).degree(); })
@@ -268,5 +267,10 @@ void GraphModel::onSelectionChanged(const SelectionManager* selectionManager)
 void GraphModel::onFoundNodeIdsChanged(const SearchManager* searchManager)
 {
     updateVisuals(nullptr, searchManager);
+}
+
+void GraphModel::onPreferenceChanged()
+{
+    updateVisuals();
 }
 
