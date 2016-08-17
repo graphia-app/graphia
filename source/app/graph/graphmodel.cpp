@@ -26,7 +26,6 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
     _name(name),
     _plugin(plugin)
 {
-    connect(&_transformedGraph, &Graph::graphChanged, [this] { updateVisuals(); });
     connect(&_transformedGraph, &Graph::nodeRemoved, [this](const Graph*, NodeId nodeId)
     {
        _nodeVisuals[nodeId]._state = 0;
@@ -202,21 +201,48 @@ const DataField& GraphModel::dataFieldByName(const QString& name) const
     return u::contains(_dataFields, name) ? _dataFields.at(name) : nullDataField;
 }
 
-void GraphModel::updateVisuals()
+void GraphModel::updateVisuals(const SelectionManager* selectionManager, const SearchManager* searchManager)
 {
     emit visualsWillChange();
 
-    auto nodeColor = u::pref("visuals/defaultNodeColor").value<QColor>();
-    auto edgeColor = u::pref("visuals/defaultEdgeColor").value<QColor>();
+    auto nodeColor  = u::pref("visuals/defaultNodeColor").value<QColor>();
+    auto edgeColor  = u::pref("visuals/defaultEdgeColor").value<QColor>();
     auto multiColor = u::pref("visuals/multiElementColor").value<QColor>();
-    auto nodeSize = u::pref("visuals/defaultNodeSize").toFloat();
-    auto edgeSize = u::pref("visuals/defaultEdgeSize").toFloat();
+    auto nodeSize   = u::pref("visuals/defaultNodeSize").toFloat();
+    auto edgeSize   = u::pref("visuals/defaultEdgeSize").toFloat();
+
+    if(searchManager != nullptr)
+    {
+        // Clear all edge NotFound flags as we can't know what to change unless
+        // we have the previous search state to hand
+        for(auto edgeId : graph().edgeIds())
+            _edgeVisuals[edgeId]._state.setFlag(VisualFlags::NotFound, false);
+    }
 
     for(auto nodeId : graph().nodeIds())
     {
         _nodeVisuals[nodeId]._size = nodeSize;
         _nodeVisuals[nodeId]._color = graph().typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Not ?
                     nodeColor : multiColor;
+
+        if(selectionManager != nullptr)
+        {
+            _nodeVisuals[nodeId]._state.setFlag(VisualFlags::Selected,
+                                                selectionManager->nodeIsSelected(nodeId));
+        }
+
+        if(searchManager != nullptr)
+        {
+            if(!searchManager->foundNodeIds().empty() && !searchManager->nodeWasFound(nodeId))
+            {
+                _nodeVisuals[nodeId]._state.setFlag(VisualFlags::NotFound, true);
+
+                for(auto edgeId : graph().edgeIdsForNodeId(nodeId))
+                    _edgeVisuals[edgeId]._state.setFlag(VisualFlags::NotFound, true);
+            }
+            else
+                _nodeVisuals[nodeId]._state.setFlag(VisualFlags::NotFound, false);
+        }
     }
 
     for(auto edgeId : graph().edgeIds())
@@ -236,37 +262,11 @@ void GraphModel::updateVisuals()
 
 void GraphModel::onSelectionChanged(const SelectionManager* selectionManager)
 {
-    emit visualsWillChange();
-
-    for(auto nodeId : graph().nodeIds())
-    {
-        _nodeVisuals[nodeId]._state.setFlag(VisualFlags::Selected,
-                                            selectionManager->nodeIsSelected(nodeId));
-    }
-
-    emit visualsChanged();
+    updateVisuals(selectionManager, nullptr);
 }
 
 void GraphModel::onFoundNodeIdsChanged(const SearchManager* searchManager)
 {
-    emit visualsWillChange();
-
-    for(auto edgeId : graph().edgeIds())
-        _edgeVisuals[edgeId]._state.setFlag(VisualFlags::NotFound, false);
-
-    for(auto nodeId : graph().nodeIds())
-    {
-        if(!searchManager->foundNodeIds().empty() && !searchManager->nodeWasFound(nodeId))
-        {
-            _nodeVisuals[nodeId]._state.setFlag(VisualFlags::NotFound, true);
-
-            for(auto edgeId : graph().edgeIdsForNodeId(nodeId))
-                _edgeVisuals[edgeId]._state.setFlag(VisualFlags::NotFound, true);
-        }
-        else
-            _nodeVisuals[nodeId]._state.setFlag(VisualFlags::NotFound, false);
-    }
-
-    emit visualsChanged();
+    updateVisuals(nullptr, searchManager);
 }
 

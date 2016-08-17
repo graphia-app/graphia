@@ -284,7 +284,12 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
     _pluginInstance = plugin->createInstance();
     _pluginInstance->initialise(_graphModel.get(), _selectionManager.get());
 
-    connect(&_graphModel->graph(), &Graph::graphChanged, [this] { _searchManager->refresh(); });
+    connect(&_graphModel->graph(), &Graph::graphChanged, [this]
+    {
+        _searchManager->refresh();
+        _graphModel->updateVisuals(_selectionManager.get(), _searchManager.get());
+    });
+
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, this, &Document::numNodesFoundChanged);
 
     connect(&_graphModel->graph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
@@ -373,10 +378,12 @@ void Document::onLoadComplete(bool success)
 
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::canDeleteChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::onSelectionChanged);
-    connect(_selectionManager.get(), &SelectionManager::selectionChanged, _graphModel.get(), &GraphModel::onSelectionChanged, Qt::DirectConnection);
+    connect(_selectionManager.get(), &SelectionManager::selectionChanged,
+            _graphModel.get(), &GraphModel::onSelectionChanged, Qt::DirectConnection);
 
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, this, &Document::onFoundNodeIdsChanged);
-    connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, _graphModel.get(), &GraphModel::onFoundNodeIdsChanged);
+    connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged,
+            _graphModel.get(), &GraphModel::onFoundNodeIdsChanged, Qt::DirectConnection);
 
     connect(_layoutThread.get(), &LayoutThread::executed, _graphQuickItem, &GraphQuickItem::onLayoutChanged);
 

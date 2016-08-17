@@ -77,8 +77,6 @@ private:
     std::map<QString, DataField> _dataFields;
     std::map<QString, std::pair<DataFieldElementType, std::unique_ptr<GraphTransformFactory>>> _graphTransformFactories;
 
-    void updateVisuals();
-
 public:
     MutableGraph& mutableGraph() { return _graph; }
     const Graph& graph() const { return _transformedGraph; }
@@ -109,6 +107,8 @@ public:
     QStringList dataFieldNames(DataFieldElementType elementType) const;
 
     IDataField& dataField(const QString& name);
+
+    void updateVisuals(const SelectionManager* selectionManager = nullptr, const SearchManager* searchManager = nullptr);
 
 public slots:
     void onSelectionChanged(const SelectionManager* selectionManager);
