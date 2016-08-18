@@ -33,6 +33,12 @@ Window
                 title: qsTr("Appearance")
                 OptionsAppearance {}
             }
+
+            Tab
+            {
+                title: qsTr("Misc")
+                OptionsMisc {}
+            }
         }
 
         Button

@@ -108,6 +108,8 @@ int main(int argc, char *argv[])
     preferences.define("misc/showGraphMetrics",             false);
     preferences.define("misc/showLayoutSettings",           false);
 
+    preferences.define("misc/focusFoundNodes",              true);
+
     QQmlSortFilterProxyModel::initialize();
 
     QQmlApplicationEngine engine;

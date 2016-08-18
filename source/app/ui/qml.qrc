@@ -8,6 +8,7 @@
         <file>qml/DebugRectangle.qml</file>
         <file>qml/OptionsDialog.qml</file>
         <file>qml/OptionsAppearance.qml</file>
+        <file>qml/OptionsMisc.qml</file>
         <file>qml/ColorPickButton.qml</file>
         <file>qml/PluginsDialog.qml</file>
         <file>qml/PluginChooserDialog.qml</file>

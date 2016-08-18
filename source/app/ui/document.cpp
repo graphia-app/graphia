@@ -3,6 +3,7 @@
 #include "../application.h"
 
 #include "shared/plugins/iplugin.h"
+#include "shared/utils/preferences.h"
 
 #include "../graph/graphmodel.h"
 #include "../loading/parserthread.h"
@@ -500,21 +501,27 @@ void Document::selectFirstFound()
 {
     setFoundIt(_foundNodeIds.begin());
     _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), *_foundIt));
-    _graphQuickItem->moveFocusToNode(*_foundIt);
+
+    if(u::pref("misc/focusFoundNodes").toBool())
+        _graphQuickItem->moveFocusToNode(*_foundIt);
 }
 
 void Document::selectNextFound()
 {
     incrementFoundIt();
     _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), *_foundIt));
-    _graphQuickItem->moveFocusToNode(*_foundIt);
+
+    if(u::pref("misc/focusFoundNodes").toBool())
+        _graphQuickItem->moveFocusToNode(*_foundIt);
 }
 
 void Document::selectPrevFound()
 {
     decrementFoundIt();
     _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), *_foundIt));
-    _graphQuickItem->moveFocusToNode(*_foundIt);
+
+    if(u::pref("misc/focusFoundNodes").toBool())
+        _graphQuickItem->moveFocusToNode(*_foundIt);
 }
 
 void Document::selectAllFound()
