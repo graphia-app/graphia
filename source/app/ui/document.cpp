@@ -536,17 +536,22 @@ void Document::updateFoundIndex(bool reselectIfInvalidated)
         auto nodeId = *_selectionManager->selectedNodes().begin();
         auto foundIt = std::find(_foundNodeIds.begin(), _foundNodeIds.end(), nodeId);
 
-        if(reselectIfInvalidated && _foundItValid && foundIt == _foundNodeIds.end())
+        if(reselectIfInvalidated && foundIt == _foundNodeIds.end())
         {
             // If the previous found NodeId /was/ in our found list, but isn't anymore,
             // grab a new one
             selectFirstFound();
         }
-        else
+        else if(foundIt != _foundNodeIds.end())
         {
             // If the selected NodeId is still in the found NodeIds, then
             // adjust the index appropriately
             setFoundIt(foundIt);
+        }
+        else
+        {
+            _foundItValid = false;
+            emit foundIndexChanged();
         }
     }
     else
@@ -590,6 +595,10 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
             return componentIdA < componentIdB;
     });
 
+    // _foundNodeIds is potentially in a different memory location,
+    // so the iterator is now invalid
+    _foundItValid = false;
+
     if(_selectionManager->selectedNodes().empty())
         selectFirstFound();
     else
@@ -614,7 +623,7 @@ int Document::numNodesFound() const
 
 void Document::setFoundIt(std::vector<NodeId>::const_iterator foundIt)
 {
-    bool changed = (_foundIt != foundIt);
+    bool changed = !_foundItValid || (_foundIt != foundIt);
     _foundIt = foundIt;
 
     bool oldFoundItValid = _foundItValid;
