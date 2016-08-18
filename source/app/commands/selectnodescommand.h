@@ -54,7 +54,10 @@ public:
         else
         {
             if(!_toggle)
+            {
+                _selectionManager->suppressSignals();
                 _selectionManager->clearNodeSelection();
+            }
 
             _selectionManager->toggleNode(nodeId());
 

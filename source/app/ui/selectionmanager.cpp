@@ -86,7 +86,7 @@ bool SelectionManager::clearNodeSelection()
     bool selectionWillChange = !_selectedNodeIds.empty();
     _selectedNodeIds.clear();
 
-    if(selectionWillChange)
+    if(selectionWillChange && !signalsSuppressed())
         emit selectionChanged(this);
 
     return selectionWillChange;
@@ -115,4 +115,16 @@ const QString SelectionManager::numNodesSelectedAsString() const
         return QString(tr("%1 Nodes Selected")).arg(selectionSize);
 
     return QString();
+}
+
+void SelectionManager::suppressSignals()
+{
+    _suppressSignals = true;
+}
+
+bool SelectionManager::signalsSuppressed()
+{
+    bool suppressSignals = _suppressSignals;
+    _suppressSignals = false;
+    return suppressSignals;
 }

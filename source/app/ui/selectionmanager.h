@@ -45,7 +45,7 @@ public:
         _selectedNodeIds.insert(newSelectedNodeIds.begin(), newSelectedNodeIds.end());
         bool selectionWillChange = _selectedNodeIds.size() > oldSize;
 
-        if(selectionWillChange)
+        if(selectionWillChange && !signalsSuppressed())
             emit selectionChanged(this);
 
         return selectionWillChange;
@@ -78,7 +78,7 @@ public:
                 selectionWillChange |= (_selectedNodeIds.erase(nodeId) > 0);
         }
 
-        if(selectionWillChange)
+        if(selectionWillChange && !signalsSuppressed())
             emit selectionChanged(this);
 
         return selectionWillChange;
@@ -102,7 +102,8 @@ public:
 
         _selectedNodeIds = std::move(difference);
 
-        emit selectionChanged(this);
+        if(!signalsSuppressed())
+            emit selectionChanged(this);
     }
 
     bool nodeIsSelected(NodeId nodeId) const;
@@ -112,7 +113,7 @@ public:
         bool selectionWillChange = u::setsDiffer(_selectedNodeIds, nodeIds);
         _selectedNodeIds = std::move(nodeIds);
 
-        if(selectionWillChange)
+        if(selectionWillChange && !signalsSuppressed())
             emit selectionChanged(this);
 
         return selectionWillChange;
@@ -124,6 +125,9 @@ public:
 
     const QString numNodesSelectedAsString() const;
 
+    void suppressSignals();
+    bool signalsSuppressed();
+
 private:
     const GraphModel* _graphModel;
 
@@ -131,6 +135,8 @@ private:
 
     // Temporary storage for NodeIds that have been deleted
     std::vector<NodeId> _deletedNodes;
+
+    bool _suppressSignals = false;
 
 signals:
     void selectionChanged(const SelectionManager* selectionManager) const;
