@@ -157,7 +157,7 @@ bool GraphComponentScene::componentTransitionActive() const
 void GraphComponentScene::setComponentId(ComponentId componentId, bool doTransition)
 {
     // Do nothing if component already focused
-    if(componentId == _componentId)
+    if(!componentId.isNull() && componentId == _componentId)
         return;
 
     saveViewData();
