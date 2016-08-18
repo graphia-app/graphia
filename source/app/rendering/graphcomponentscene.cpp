@@ -24,11 +24,41 @@ GraphComponentScene::GraphComponentScene(GraphRenderer* graphRenderer) :
 
 void GraphComponentScene::update(float t)
 {
+    float offset = 0.0f;
+    float outOffset = 0.0f;
+
+    switch(_transitionDirection)
+    {
+    case Direction::Left:
+        offset = (1.0f - _transitionValue) * _width;
+        outOffset = offset - _width;
+        break;
+
+    case Direction::Right:
+        offset = -(1.0f - _transitionValue) * _width;
+        outOffset = offset + _width;
+        break;
+
+    case Direction::NotSliding:
+    default:
+        break;
+    }
+
+    // The static component, or the one sliding in
     if(componentRenderer() != nullptr)
     {
-        componentRenderer()->setDimensions(QRect(0, 0, _width, _height));
+        componentRenderer()->setDimensions(QRect(offset, 0, _width, _height));
         componentRenderer()->setAlpha(1.0f);
         componentRenderer()->update(t);
+    }
+
+    // The component sliding out
+    if(transitioningComponentRenderer() != nullptr &&
+       transitioningComponentRenderer() != componentRenderer())
+    {
+        transitioningComponentRenderer()->setDimensions(QRect(outOffset, 0, _width, _height));
+        transitioningComponentRenderer()->setAlpha(1.0f);
+        transitioningComponentRenderer()->update(t);
     }
 }
 
@@ -54,24 +84,102 @@ bool GraphComponentScene::transitionActive() const
 
 void GraphComponentScene::onShow()
 {
-    _graphRenderer->executeOnRendererThread([this]
-    {
-        if(visible())
-        {
-            for(GraphComponentRenderer* componentRenderer : _graphRenderer->componentRenderers())
-                componentRenderer->setVisible(componentRenderer->componentId() == _componentId);
-        }
-    }, "GraphComponentScene::onShow (setVisible)");
+    updateRendererVisibility();
 }
 
-void GraphComponentScene::setComponentId(ComponentId componentId)
+void GraphComponentScene::finishComponentTransition(ComponentId componentId, bool doTransition)
 {
+    auto transitionDirection = componentId < _componentId ? Direction::Right : Direction::Left;
+
     if(componentId.isNull())
         _componentId = _defaultComponentId;
     else
         _componentId = componentId;
 
-    onShow();
+    if(doTransition)
+    {
+        _transitionDirection = transitionDirection;
+        _graphRenderer->transition().start(0.3f, Transition::Type::InversePower,
+        [this](float f)
+        {
+            _transitionValue = f;
+        },
+        [this]
+        {
+            _transitionValue = 0.0f;
+            _transitionDirection = Direction::NotSliding;
+            _transitioningComponentId.setToNull();
+            updateRendererVisibility();
+
+            if(!savedViewIsReset() && _queuedTransitionNodeId.isNull())
+            {
+                _graphRenderer->executeOnRendererThread([this]
+                {
+                    _graphRenderer->transition().willBeImmediatelyReused();
+                    startTransition([this] { performQueuedTransition(); });
+                    restoreViewData();
+                }, "GraphComponentScene::finishComponentTransition (restoreViewData)");
+            }
+            else
+                performQueuedTransition();
+        });
+    }
+
+    updateRendererVisibility();
+}
+
+void GraphComponentScene::finishComponentTransitionOnRendererThread(ComponentId componentId, bool doTransition)
+{
+    _graphRenderer->executeOnRendererThread([this, componentId, doTransition]
+    {
+        finishComponentTransition(componentId, doTransition);
+    }, "GraphComponentScene::finishComponentTransition");
+}
+
+void GraphComponentScene::performQueuedTransition()
+{
+    if(!_queuedTransitionNodeId.isNull())
+    {
+        _graphRenderer->executeOnRendererThread([this, nodeId = _queuedTransitionNodeId]
+        {
+            moveFocusToNode(nodeId);
+        }, "GraphComponentScene::performQueuedTransition");
+
+        _queuedTransitionNodeId.setToNull();
+    }
+}
+
+bool GraphComponentScene::componentTransitionActive() const
+{
+    return transitionActive() && !_transitioningComponentId.isNull();
+}
+
+void GraphComponentScene::setComponentId(ComponentId componentId, bool doTransition)
+{
+    // Do nothing if component already focused
+    if(componentId == _componentId)
+        return;
+
+    saveViewData();
+
+    if(doTransition)
+    {
+        _transitioningComponentId = _componentId;
+        if(!viewIsReset())
+        {
+            startTransition([this, componentId]
+            {
+                _graphRenderer->transition().willBeImmediatelyReused();
+                finishComponentTransitionOnRendererThread(componentId, true);
+            });
+
+            resetView(false);
+        }
+        else
+            finishComponentTransitionOnRendererThread(componentId, true);
+    }
+    else
+        finishComponentTransition(componentId, false);
 }
 
 void GraphComponentScene::saveViewData()
@@ -134,9 +242,48 @@ void GraphComponentScene::pan(NodeId clickedNodeId, const QPoint& start, const Q
     }
 }
 
+void GraphComponentScene::moveFocusToNode(NodeId nodeId)
+{
+    // Do nothing if node already focused
+    if(componentRenderer()->focusNodeId() == nodeId)
+        return;
+
+    ComponentId componentId = _graphRenderer->graphModel()->graph().componentIdOfNode(nodeId);
+    bool componentTransitionRequired = (componentId != _componentId);
+
+    if(componentTransitionRequired && !transitionActive())
+    {
+        // This node is in a different component, so focus it directly there,
+        // and transition to the component itself
+        auto* newComponentRenderer = _graphRenderer->componentRendererForId(componentId);
+        newComponentRenderer->moveFocusToNode(nodeId);
+        newComponentRenderer->saveViewData();
+        newComponentRenderer->resetView();
+
+        setComponentId(componentId, true);
+    }
+    else if(!componentTransitionRequired && !componentTransitionActive())
+    {
+        _queuedTransitionNodeId.setToNull();
+        startTransition([this] { performQueuedTransition(); });
+        componentRenderer()->moveFocusToNode(nodeId);
+    }
+    else
+    {
+        // A component transition is already in progress,
+        // so queue the refocus up for later
+        _queuedTransitionNodeId = nodeId;
+    }
+}
+
 GraphComponentRenderer* GraphComponentScene::componentRenderer() const
 {
     return _graphRenderer->componentRendererForId(_componentId);
+}
+
+GraphComponentRenderer* GraphComponentScene::transitioningComponentRenderer() const
+{
+    return _graphRenderer->componentRendererForId(_transitioningComponentId);
 }
 
 void GraphComponentScene::startTransition(std::function<void()> finishedFunction,
@@ -148,6 +295,26 @@ void GraphComponentScene::startTransition(std::function<void()> finishedFunction
         componentRenderer()->updateTransition(f);
     },
     finishedFunction);
+}
+
+void GraphComponentScene::updateRendererVisibility()
+{
+    _graphRenderer->executeOnRendererThread([this]
+    {
+        if(visible())
+        {
+            for(GraphComponentRenderer* componentRenderer : _graphRenderer->componentRenderers())
+            {
+                if(!componentRenderer->initialised())
+                    continue;
+
+                bool isTransitioningRenderer = componentRenderer->componentId() == _transitioningComponentId;
+                bool isMainRenderer = componentRenderer->componentId() == _componentId;
+
+                componentRenderer->setVisible(isTransitioningRenderer || isMainRenderer);
+            }
+        }
+    }, "GraphComponentScene::onShow (setVisible)");
 }
 
 void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet)

@@ -57,6 +57,7 @@ void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, 
 void GraphComponentRenderer::setVisible(bool visible)
 {
     _visible = visible;
+    _graphRenderer->updateGPUData(GraphRenderer::When::Later);
 }
 
 void GraphComponentRenderer::cleanup()

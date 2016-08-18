@@ -533,6 +533,12 @@ bool GraphRenderer::transitionActive() const
     return _transition.active() || _scene->transitionActive();
 }
 
+void GraphRenderer::moveFocusToNode(NodeId nodeId)
+{
+    if(mode() == GraphRenderer::Mode::Component)
+        _graphComponentScene->moveFocusToNode(nodeId);
+}
+
 void GraphRenderer::rendererStartedTransition()
 {
     if(!_transitionInProgress)
@@ -1067,6 +1073,10 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
 
     if(graphQuickItem->overviewModeSwitchPending())
         switchToOverviewMode();
+
+    NodeId focusNodeId = graphQuickItem->desiredFocusNodeId();
+    if(!focusNodeId.isNull())
+        moveFocusToNode(focusNodeId);
 
     ifSceneUpdateEnabled([this, &graphQuickItem]
     {

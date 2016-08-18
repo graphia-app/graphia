@@ -500,18 +500,21 @@ void Document::selectFirstFound()
 {
     setFoundIt(_foundNodeIds.begin());
     _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), *_foundIt));
+    _graphQuickItem->moveFocusToNode(*_foundIt);
 }
 
 void Document::selectNextFound()
 {
     incrementFoundIt();
     _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), *_foundIt));
+    _graphQuickItem->moveFocusToNode(*_foundIt);
 }
 
 void Document::selectPrevFound()
 {
     decrementFoundIt();
     _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), *_foundIt));
+    _graphQuickItem->moveFocusToNode(*_foundIt);
 }
 
 void Document::selectAllFound()

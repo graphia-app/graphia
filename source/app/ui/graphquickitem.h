@@ -12,7 +12,6 @@
 #include <queue>
 #include <memory>
 
-class GraphRenderer;
 class GraphModel;
 class Command;
 class CommandManager;
@@ -57,6 +56,9 @@ public:
     void switchToOverviewMode(bool doTransition = true);
     bool overviewModeSwitchPending();
 
+    void moveFocusToNode(NodeId nodeId);
+    NodeId desiredFocusNodeId();
+
     Renderer* createRenderer() const;
 
     bool eventsPending();
@@ -78,6 +80,7 @@ private:
 
     bool _viewResetPending = false;
     bool _overviewModeSwitchPending = false;
+    NodeId _desiredFocusNodeId;
 
     mutable bool _interacting = false;
     bool _viewIsReset = true;

@@ -80,10 +80,7 @@ void GraphComponentInteractor::leftDoubleClick()
     if(!nearClickNodeId().isNull())
     {
         if(nearClickNodeId() != clickedRenderer()->focusNodeId())
-        {
-            _scene->startTransition();
-            clickedRenderer()->moveFocusToNode(nearClickNodeId());
-        }
+            _scene->moveFocusToNode(nearClickNodeId());
     }
     else if(!clickedRenderer()->viewIsReset())
     {

@@ -102,6 +102,19 @@ bool GraphQuickItem::overviewModeSwitchPending()
     return b;
 }
 
+void GraphQuickItem::moveFocusToNode(NodeId nodeId)
+{
+    _desiredFocusNodeId = nodeId;
+    update();
+}
+
+NodeId GraphQuickItem::desiredFocusNodeId()
+{
+    NodeId nodeId = _desiredFocusNodeId;
+    _desiredFocusNodeId.setToNull();
+    return nodeId;
+}
+
 QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const
 {
     auto graphRenderer = new GraphRenderer(_graphModel, *_commandManager, _selectionManager);

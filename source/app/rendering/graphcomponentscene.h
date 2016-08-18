@@ -28,7 +28,7 @@ public:
     void onShow();
 
     ComponentId componentId() const { return _componentId; }
-    void setComponentId(ComponentId componentId);
+    void setComponentId(ComponentId componentId, bool doTransition = false);
 
     int width() const { return _width; }
     int height() const { return _height; }
@@ -42,7 +42,10 @@ public:
 
     void pan(NodeId clickedNodeId, const QPoint &start, const QPoint &end);
 
+    void moveFocusToNode(NodeId nodeId);
+
     GraphComponentRenderer* componentRenderer() const;
+    GraphComponentRenderer* transitioningComponentRenderer() const;
 
     void startTransition(std::function<void()> finishedFunction = []{}, float duration = 0.3f,
                          Transition::Type transitionType = Transition::Type::EaseInEaseOut);
@@ -56,7 +59,20 @@ private:
     ComponentId _defaultComponentId;
     ComponentId _componentId;
 
+    ComponentId _transitioningComponentId;
+    float _transitionValue = 0.0f;
+    enum class Direction { NotSliding, Left, Right } _transitionDirection = Direction::NotSliding;
+    NodeId _queuedTransitionNodeId;
+
     int _numComponentsPriorToChange = 0;
+
+    void updateRendererVisibility();
+
+    void finishComponentTransition(ComponentId componentId, bool doTransition);
+    void finishComponentTransitionOnRendererThread(ComponentId componentId, bool doTransition);
+    void performQueuedTransition();
+
+    bool componentTransitionActive() const;
 
 private slots:
     void onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet);

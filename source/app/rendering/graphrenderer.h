@@ -301,6 +301,8 @@ private:
 
     bool transitionActive() const;
 
+    void moveFocusToNode(NodeId nodeId);
+
 signals:
     void modeChanged() const;
 
