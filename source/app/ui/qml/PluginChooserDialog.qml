@@ -25,12 +25,6 @@ Dialog
     // Mapping from the ComboBox currentIndex to the model
     property var mapping: []
 
-    onVisibleChanged:
-    {
-        if(!visible)
-            mapping.length = 0;
-    }
-
     GridLayout
     {
         columns: 2
@@ -82,9 +76,14 @@ Dialog
 
     standardButtons: StandardButton.Ok | StandardButton.Cancel
 
+    function clearMapping() { mapping.length = 0; }
+
     onAccepted:
     {
         var i = mapping[pluginChoice.currentIndex];
         pluginName = model.nameAtIndex(i);
+        clearMapping();
     }
+
+    onRejected: { clearMapping(); }
 }
