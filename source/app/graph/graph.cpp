@@ -198,6 +198,12 @@ void Graph::reserveEdgeId(EdgeId edgeId)
         edgeArray->resize(_nextEdgeId);
 }
 
+void Graph::clear()
+{
+    _nextNodeId = 0;
+    _nextEdgeId = 0;
+}
+
 const std::vector<ComponentId>& Graph::componentIds() const
 {
     if(_componentManager)

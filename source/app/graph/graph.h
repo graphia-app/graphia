@@ -219,6 +219,8 @@ protected:
     EdgeId largestEdgeId() const { return nextEdgeId() - 1; }
     virtual void reserveEdgeId(EdgeId edgeId);
 
+    void clear();
+
 signals:
     // The signals are listed here in the order in which they are emitted
     void graphWillChange(const Graph*) const;
