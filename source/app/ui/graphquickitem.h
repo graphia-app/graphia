@@ -104,6 +104,9 @@ private:
 
 public slots:
     void onLayoutChanged();
+    void onFPSChanged(int fps);
+    void onUserInteractionStarted();
+    void onUserInteractionFinished();
 
 signals:
     void interactingChanged() const;

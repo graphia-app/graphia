@@ -124,11 +124,11 @@ QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const
     connect(this, &GraphQuickItem::layoutChanged, graphRenderer, &GraphRenderer::onLayoutChanged);
 
     connect(graphRenderer, &GraphRenderer::modeChanged, this, &GraphQuickItem::update);
-    connect(graphRenderer, &GraphRenderer::userInteractionStarted, [this] { setInteracting(true); });
-    connect(graphRenderer, &GraphRenderer::userInteractionFinished, [this] { setInteracting(false); });
+    connect(graphRenderer, &GraphRenderer::userInteractionStarted, this, &GraphQuickItem::onUserInteractionStarted);
+    connect(graphRenderer, &GraphRenderer::userInteractionFinished, this, &GraphQuickItem::onUserInteractionFinished);
     connect(graphRenderer, &GraphRenderer::taskAddedToExecutor, this, &GraphQuickItem::update);
 
-    connect(graphRenderer, &GraphRenderer::fpsChanged, [this](float fps) { _fps = fps; emit fpsChanged(); });
+    connect(graphRenderer, &GraphRenderer::fpsChanged, this, &GraphQuickItem::onFPSChanged);
 
     return graphRenderer;
 }
@@ -162,6 +162,22 @@ void GraphQuickItem::onLayoutChanged()
 {
     update();
     emit layoutChanged();
+}
+
+void GraphQuickItem::onFPSChanged(int fps)
+{
+    _fps = fps;
+    emit fpsChanged();
+}
+
+void GraphQuickItem::onUserInteractionStarted()
+{
+    setInteracting(true);
+}
+
+void GraphQuickItem::onUserInteractionFinished()
+{
+    setInteracting(false);
 }
 
 void GraphQuickItem::mousePressEvent(QMouseEvent* e)        { enqueueEvent(e); }
