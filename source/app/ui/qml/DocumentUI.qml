@@ -44,6 +44,9 @@ Item
     property bool hasPluginUI: document.pluginQmlPath
     property bool poppedOut: false
 
+    property int foundIndex: document.foundIndex
+    property int numNodesFound: document.numNodesFound
+
     function brightness(c)
     {
         return 0.299 * c.r + 0.587 * c.g + 0.114 * c.b
@@ -101,6 +104,10 @@ Item
     function deleteSelectedNodes() { document.deleteSelectedNodes(); }
     function resetView() { document.resetView(); }
     function switchToOverviewMode() { document.switchToOverviewMode(); }
+    function selectAllFound() { document.selectAllFound(); }
+    function selectNextFound() { document.selectNextFound(); }
+    function selectPrevFound() { document.selectNextFound(); }
+    function find(text) { document.find(text); }
 
     function toggleDebugPauser() { document.toggleDebugPauser(); }
     function debugResume() { document.debugResume(); }
@@ -137,7 +144,7 @@ Item
                 {
                     id: find
                     visible: false
-                    document: document
+                    document: root
                 }
 
                 Label
