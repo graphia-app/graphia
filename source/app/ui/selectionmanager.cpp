@@ -86,7 +86,7 @@ bool SelectionManager::clearNodeSelection()
     bool selectionWillChange = !_selectedNodeIds.empty();
     _selectedNodeIds.clear();
 
-    if(selectionWillChange && !signalsSuppressed())
+    if(!signalsSuppressed() && selectionWillChange)
         emit selectionChanged(this);
 
     return selectionWillChange;
