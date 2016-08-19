@@ -221,6 +221,9 @@ public slots:
 
     void switchToOverviewMode(bool doTransition = true);
 
+    void gotoPrevComponent();
+    void gotoNextComponent();
+
     void find(const QString& regex);
     void selectFirstFound();
     void selectNextFound();

@@ -539,6 +539,12 @@ void GraphRenderer::moveFocusToNode(NodeId nodeId)
         _graphComponentScene->moveFocusToNode(nodeId);
 }
 
+void GraphRenderer::moveFocusToComponent(ComponentId componentId)
+{
+    if(mode() == GraphRenderer::Mode::Component)
+        _graphComponentScene->setComponentId(componentId, true);
+}
+
 void GraphRenderer::rendererStartedTransition()
 {
     if(!_transitionInProgress)
@@ -788,6 +794,11 @@ void GraphRenderer::onComponentAlphaChanged(ComponentId)
 }
 
 void GraphRenderer::onComponentCleanup(ComponentId)
+{
+    updateGPUData(When::Later);
+}
+
+void GraphRenderer::onVisibilityChanged()
 {
     updateGPUData(When::Later);
 }
@@ -1075,8 +1086,17 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
         switchToOverviewMode();
 
     NodeId focusNodeId = graphQuickItem->desiredFocusNodeId();
+    ComponentId focusComponentId = graphQuickItem->desiredFocusComponentId();
+
     if(!focusNodeId.isNull())
         moveFocusToNode(focusNodeId);
+    else if(!focusComponentId.isNull())
+    {
+        if(mode() == Mode::Overview)
+            switchToComponentMode(true, focusComponentId);
+        else
+            moveFocusToComponent(focusComponentId);
+    }
 
     ifSceneUpdateEnabled([this, &graphQuickItem]
     {
@@ -1107,6 +1127,9 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
     // Tell the QuickItem what we're doing
     graphQuickItem->setViewIsReset(viewIsReset());
     graphQuickItem->setCanEnterOverviewMode(mode() != Mode::Overview && _numComponents > 1);
+
+    ComponentId focusedComponentId = mode() != Mode::Overview ? _graphComponentScene->componentId() : ComponentId();
+    graphQuickItem->setFocusedComponentId(focusedComponentId);
 }
 
 void GraphRenderer::render2DComposite(QOpenGLShaderProgram& shader, GLuint texture)

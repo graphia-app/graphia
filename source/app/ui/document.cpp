@@ -487,6 +487,59 @@ void Document::switchToOverviewMode(bool doTransition)
     _graphQuickItem->switchToOverviewMode(doTransition);
 }
 
+static auto componentIdIterator(ComponentId componentId, const std::vector<ComponentId>& componentIds)
+{
+    Q_ASSERT(!componentId.isNull());
+    Q_ASSERT(std::is_sorted(componentIds.begin(), componentIds.end()));
+    return std::lower_bound(componentIds.begin(), componentIds.end(), componentId);
+}
+
+void Document::gotoPrevComponent()
+{
+    const auto& componentIds = _graphModel->graph().componentIds();
+    auto focusedComponentId = _graphQuickItem->focusedComponentId();
+
+    if(!idle() || componentIds.empty())
+        return;
+
+    if(!focusedComponentId.isNull())
+    {
+        auto it = componentIdIterator(focusedComponentId, componentIds);
+
+        if(it != componentIds.begin())
+            --it;
+        else
+            it = std::prev(componentIds.end());
+
+        _graphQuickItem->moveFocusToComponent(*it);
+    }
+    else
+        _graphQuickItem->moveFocusToComponent(componentIds.back());
+}
+
+void Document::gotoNextComponent()
+{
+    const auto& componentIds = _graphModel->graph().componentIds();
+    auto focusedComponentId = _graphQuickItem->focusedComponentId();
+
+    if(!idle() || componentIds.empty())
+        return;
+
+    if(!focusedComponentId.isNull())
+    {
+        auto it = componentIdIterator(focusedComponentId, componentIds);
+
+        if(std::next(it) != componentIds.end())
+            ++it;
+        else
+            it = componentIds.begin();
+
+        _graphQuickItem->moveFocusToComponent(*it);
+    }
+    else
+        _graphQuickItem->moveFocusToComponent(componentIds.front());
+}
+
 void Document::find(const QString& regex)
 {
     int previousNumNodesFound = numNodesFound();

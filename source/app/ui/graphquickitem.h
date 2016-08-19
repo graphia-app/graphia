@@ -49,9 +49,7 @@ public:
     bool interacting() const;
     void setInteracting(bool interacting) const;
     bool viewIsReset() const;
-    void setViewIsReset(bool viewIsReset);
     bool canEnterOverviewMode() const;
-    void setCanEnterOverviewMode(bool canEnterOverviewMode);
 
     void switchToOverviewMode(bool doTransition = true);
     bool overviewModeSwitchPending();
@@ -59,12 +57,22 @@ public:
     void moveFocusToNode(NodeId nodeId);
     NodeId desiredFocusNodeId();
 
+    void moveFocusToComponent(ComponentId componentId);
+    ComponentId desiredFocusComponentId();
+    ComponentId focusedComponentId() const;
+
     Renderer* createRenderer() const;
 
     bool eventsPending();
     std::unique_ptr<QEvent> nextEvent();
 
     float fps() const { return _fps; }
+
+    // These are only called by GraphRenderer so that it can tell
+    // interested parties what it's doing
+    void setViewIsReset(bool viewIsReset);
+    void setCanEnterOverviewMode(bool canEnterOverviewMode);
+    void setFocusedComponentId(ComponentId componentId);
 
 private:
     bool event(QEvent* e);
@@ -81,10 +89,12 @@ private:
     bool _viewResetPending = false;
     bool _overviewModeSwitchPending = false;
     NodeId _desiredFocusNodeId;
+    ComponentId _desiredFocusComponentId;
 
     mutable bool _interacting = false;
     bool _viewIsReset = true;
     bool _canEnterOverviewMode = false;
+    ComponentId _focusedComponentId;
 
     std::queue<std::unique_ptr<QEvent>> _eventQueue;
 
@@ -112,6 +122,7 @@ signals:
     void interactingChanged() const;
     void viewIsResetChanged() const;
     void canEnterOverviewModeChanged() const;
+    void focusedComponentIdChanged() const;
 
     void commandWillExecute(const Command* command) const;
     void commandCompleted(const Command* command, const QString& pastParticiple) const;

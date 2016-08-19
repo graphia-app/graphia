@@ -313,6 +313,8 @@ void GraphComponentScene::updateRendererVisibility()
 
                 componentRenderer->setVisible(isTransitioningRenderer || isMainRenderer);
             }
+
+            _graphRenderer->onVisibilityChanged();
         }
     }, "GraphComponentScene::onShow (setVisible)");
 }

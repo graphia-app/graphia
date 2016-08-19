@@ -89,6 +89,15 @@ void GraphQuickItem::setCanEnterOverviewMode(bool canEnterOverviewMode)
     }
 }
 
+void GraphQuickItem::setFocusedComponentId(ComponentId componentId)
+{
+    if(_focusedComponentId != componentId)
+    {
+        _focusedComponentId = componentId;
+        emit focusedComponentIdChanged();
+    }
+}
+
 void GraphQuickItem::switchToOverviewMode(bool)
 {
     _overviewModeSwitchPending = true;
@@ -113,6 +122,24 @@ NodeId GraphQuickItem::desiredFocusNodeId()
     NodeId nodeId = _desiredFocusNodeId;
     _desiredFocusNodeId.setToNull();
     return nodeId;
+}
+
+void GraphQuickItem::moveFocusToComponent(ComponentId componentId)
+{
+    _desiredFocusComponentId = componentId;
+    update();
+}
+
+ComponentId GraphQuickItem::desiredFocusComponentId()
+{
+    ComponentId componentId = _desiredFocusComponentId;
+    _desiredFocusComponentId.setToNull();
+    return componentId;
+}
+
+ComponentId GraphQuickItem::focusedComponentId() const
+{
+    return _focusedComponentId;
 }
 
 QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const

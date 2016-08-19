@@ -67,6 +67,8 @@ void GraphOverviewScene::onShow()
         auto renderer = _graphRenderer->componentRendererForId(componentId);
         renderer->setVisible(true);
     }
+
+    _graphRenderer->onVisibilityChanged();
 }
 
 void GraphOverviewScene::onHide()
@@ -76,6 +78,8 @@ void GraphOverviewScene::onHide()
         auto renderer = _graphRenderer->componentRendererForId(componentId);
         renderer->setVisible(false);
     }
+
+    _graphRenderer->onVisibilityChanged();
 }
 
 void GraphOverviewScene::resetView(bool doTransition)

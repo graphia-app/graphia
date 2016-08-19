@@ -104,6 +104,9 @@ Item
     function deleteSelectedNodes() { document.deleteSelectedNodes(); }
     function resetView() { document.resetView(); }
     function switchToOverviewMode() { document.switchToOverviewMode(); }
+    function gotoNextComponent() { document.gotoNextComponent(); }
+    function gotoPrevComponent() { document.gotoPrevComponent(); }
+
     function selectAllFound() { document.selectAllFound(); }
     function selectNextFound() { document.selectNextFound(); }
     function selectPrevFound() { document.selectNextFound(); }

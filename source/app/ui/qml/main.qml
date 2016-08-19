@@ -19,7 +19,7 @@ ApplicationWindow
     minimumHeight: 480
 
     property DocumentUI currentDocument: tabView.currentIndex < tabView.count ?
-                                             tabView.getTab(tabView.currentIndex).item : null
+                                         tabView.getTab(tabView.currentIndex).item : null
 
     title: (currentDocument ? currentDocument.title + qsTr(" - ") : "") + application.name
 
@@ -299,6 +299,22 @@ ApplicationWindow
 
     Action
     {
+        id: prevComponentAction
+        text: qsTr("Goto &Previous Component")
+        shortcut: "PgUp"
+        onTriggered: currentDocument && currentDocument.gotoPrevComponent()
+    }
+
+    Action
+    {
+        id: nextComponentAction
+        text: qsTr("Goto &Next Component")
+        shortcut: "PgDown"
+        onTriggered: currentDocument && currentDocument.gotoNextComponent()
+    }
+
+    Action
+    {
         id: optionsAction
         text: qsTr("&Options...")
         onTriggered: optionsDialog.show();
@@ -432,6 +448,9 @@ ApplicationWindow
             MenuItem { action: invertSelectionAction }
             MenuSeparator {}
             MenuItem { action: findAction }
+            MenuSeparator {}
+            MenuItem { action: prevComponentAction }
+            MenuItem { action: nextComponentAction }
             MenuSeparator {}
             MenuItem { action: optionsAction }
         }

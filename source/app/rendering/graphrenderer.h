@@ -159,6 +159,7 @@ public slots:
     void onLayoutChanged();
     void onComponentAlphaChanged(ComponentId componentId);
     void onComponentCleanup(ComponentId componentId);
+    void onVisibilityChanged();
 
 private:
     std::shared_ptr<GraphModel> _graphModel;
@@ -302,6 +303,7 @@ private:
     bool transitionActive() const;
 
     void moveFocusToNode(NodeId nodeId);
+    void moveFocusToComponent(ComponentId componentId);
 
 signals:
     void modeChanged() const;

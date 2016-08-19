@@ -225,6 +225,8 @@ void ComponentManager::update(const Graph* graph)
     for(auto componentId : componentIdsToBeAdded)
         _componentIds.push_back(componentId);
 
+    std::sort(_componentIds.begin(), _componentIds.end(), [](auto a, auto b) { return a < b; });
+
     lock.unlock();
 
     // Notify all the new components
