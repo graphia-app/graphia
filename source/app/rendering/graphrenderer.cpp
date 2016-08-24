@@ -627,6 +627,7 @@ void GraphRenderer::finishTransitionToOverviewMode(bool doTransition)
             renderer->resetView();
         }
 
+        _graphOverviewScene->resetView(false);
         _graphOverviewScene->startTransitionFromComponentMode(_graphComponentScene->componentId());
     }
 
