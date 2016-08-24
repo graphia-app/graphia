@@ -672,7 +672,7 @@ void GraphRenderer::switchToOverviewMode(bool doTransition)
     executeOnRendererThread([this, doTransition]
     {
         // Refuse to switch to overview mode if there is nothing to display
-        if(_graphModel->graph().numComponents() == 0)
+        if(_graphModel->graph().numComponents() <= 1)
             return;
 
         // So that we can return to the current view parameters later
