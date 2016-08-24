@@ -108,6 +108,7 @@ void GraphComponentScene::finishComponentTransition(ComponentId componentId, boo
         {
             _transitionValue = 0.0f;
             _transitionDirection = Direction::NotSliding;
+            transitioningComponentRenderer()->thaw();
             _transitioningComponentId.setToNull();
             updateRendererVisibility();
 
@@ -156,6 +157,8 @@ bool GraphComponentScene::componentTransitionActive() const
 
 void GraphComponentScene::setComponentId(ComponentId componentId, bool doTransition)
 {
+    _beingRemoved = false;
+
     // Do nothing if component already focused
     if(!componentId.isNull() && componentId == _componentId)
         return;
@@ -388,12 +391,11 @@ void GraphComponentScene::onComponentAdded(const Graph*, ComponentId componentId
 
 void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool hasMerged)
 {
-    if(componentId == _componentId)
+    if(componentId == _componentId && visible() && !hasMerged)
     {
-        if(visible() && !hasMerged)
-            _graphRenderer->switchToOverviewMode();
-
-        _componentId.setToNull();
+        // Keep the component alive until any transitions have finished
+        _beingRemoved = true;
+        componentRenderer()->freeze();
     }
 }
 
@@ -427,12 +429,17 @@ void GraphComponentScene::onGraphChanged(const Graph* graph)
 
                     return true;
                 }
+                else if(_beingRemoved)
+                {
+                    setComponentId(_defaultComponentId, true);
+                    return true;
+                }
 
                 return false;
             };
 
             // Graph changes may significantly alter the centre; ease the transition
-            if(componentRenderer() != nullptr && componentRenderer()->transitionRequired())
+            if(!_beingRemoved && componentRenderer() != nullptr && componentRenderer()->transitionRequired())
             {
                 startTransition(finishTransition);
                 componentRenderer()->computeTransition();

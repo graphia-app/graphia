@@ -124,6 +124,9 @@ void GraphComponentRenderer::freeze()
 
 void GraphComponentRenderer::thaw()
 {
+    if(!_frozen)
+        return;
+
     _frozen = false;
 
     if(_synchroniseWhenThawed && !_cleanupWhenThawed)

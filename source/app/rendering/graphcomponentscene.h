@@ -64,6 +64,8 @@ private:
     enum class Direction { NotSliding, Left, Right } _transitionDirection = Direction::NotSliding;
     NodeId _queuedTransitionNodeId;
 
+    bool _beingRemoved = false;
+
     int _numComponentsPriorToChange = 0;
 
     void updateRendererVisibility();
