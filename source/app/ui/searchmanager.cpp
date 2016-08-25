@@ -12,7 +12,10 @@ SearchManager::SearchManager(const GraphModel& graphModel) :
 
 void SearchManager::findNodes(const QString& regex, std::vector<QString> dataFieldNames)
 {
-    if(regex.isEmpty())
+    _regex = regex;
+    _dataFieldNames = dataFieldNames;
+
+    if(_regex.isEmpty())
     {
         clearFoundNodeIds();
         return;
@@ -21,14 +24,14 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> dataFie
     NodeIdSet foundNodeIds;
 
     // If no data fields are specified, search them all
-    if(dataFieldNames.empty())
+    if(_dataFieldNames.empty())
     {
         for(auto& dataFieldName : _graphModel->dataFieldNames(DataFieldElementType::Node))
-            dataFieldNames.emplace_back(dataFieldName);
+            _dataFieldNames.emplace_back(dataFieldName);
     }
 
     std::vector<const DataField*> dataFields;
-    for(auto& dataFieldName : dataFieldNames)
+    for(auto& dataFieldName : _dataFieldNames)
     {
         const auto* dataField = &_graphModel->dataFieldByName(dataFieldName);
 
@@ -36,7 +39,7 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> dataFie
             dataFields.emplace_back(dataField);
     }
 
-    QRegularExpression re(regex, QRegularExpression::CaseInsensitiveOption);
+    QRegularExpression re(_regex, QRegularExpression::CaseInsensitiveOption);
 
     if(re.isValid())
     {
@@ -66,9 +69,6 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> dataFie
 
     if(changed)
         emit foundNodeIdsChanged(this);
-
-    _regex = regex;
-    _dataFieldNames = dataFieldNames;
 }
 
 void SearchManager::clearFoundNodeIds()
