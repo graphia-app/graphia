@@ -48,6 +48,7 @@ Item
         shortcut: visible ? "Esc" : ""
         onTriggered:
         {
+            findField.focus = false;
             findField.text = "";
             visible = false;
         }
@@ -89,15 +90,10 @@ Item
         }
     }
 
-    onVisibleChanged:
-    {
-        findField.forceActiveFocus();
-    }
-
     function show()
     {
         root.visible = true;
-        findField.focus = true;
+        findField.forceActiveFocus();
         findField.selectAll();
     }
 }
