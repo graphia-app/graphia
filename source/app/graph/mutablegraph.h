@@ -211,6 +211,16 @@ public:
     void reserve(const Graph& other);
     void cloneFrom(const Graph& other);
 
+    struct Diff
+    {
+        std::vector<NodeId> _nodesAdded;
+        std::vector<NodeId> _nodesRemoved;
+        std::vector<EdgeId> _edgesAdded;
+        std::vector<EdgeId> _edgesRemoved;
+    };
+
+    Diff diffTo(const MutableGraph& other);
+
     void update();
 
 private:

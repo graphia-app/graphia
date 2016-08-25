@@ -394,6 +394,9 @@ void MutableGraph::cloneFrom(const Graph& other)
     const auto* mutableOther = dynamic_cast<const MutableGraph*>(&other);
     Q_ASSERT(mutableOther != nullptr);
 
+    // Store the differences between the graphs
+    auto diff = diffTo(*mutableOther);
+
     _n             = mutableOther->_n;
     _nodeIds       = mutableOther->_nodeIds;
     _unusedNodeIds = mutableOther->_unusedNodeIds;
@@ -414,10 +417,60 @@ void MutableGraph::cloneFrom(const Graph& other)
     for(auto& connection : _e._connections)
         connection.second.setCollection(&_e._mergedEdgeIds);
 
-    //FIXME: we should perhaps be emitting [node|edge][Added|Removed] signals here?
+    // Signal all the changes based on the diff before we cloned
+    for(NodeId nodeId : diff._nodesAdded)
+        emit nodeAdded(this, nodeId);
+
+    for(EdgeId edgeId : diff._edgesAdded)
+        emit edgeAdded(this, edgeId);
+
+    for(EdgeId edgeId : diff._edgesRemoved)
+        emit edgeRemoved(this, edgeId);
+
+    for(NodeId nodeId : diff._nodesRemoved)
+        emit nodeRemoved(this, nodeId);
 
     _updateRequired = true;
     endTransaction();
+}
+
+MutableGraph::Diff MutableGraph::diffTo(const MutableGraph& other)
+{
+    MutableGraph::Diff diff;
+
+    auto maxNodeId = std::max(nextNodeId(), other.nextNodeId());
+    for(NodeId nodeId(0); nodeId < maxNodeId; ++nodeId)
+    {
+        if(nodeId < nextNodeId() && nodeId < other.nextNodeId())
+        {
+            if(_n._nodeIdsInUse[nodeId] && !other._n._nodeIdsInUse[nodeId])
+                diff._nodesRemoved.push_back(nodeId);
+            else if(!_n._nodeIdsInUse[nodeId] && other._n._nodeIdsInUse[nodeId])
+                diff._nodesAdded.push_back(nodeId);
+        }
+        else if(nodeId < nextNodeId() && _n._nodeIdsInUse[nodeId])
+            diff._nodesRemoved.push_back(nodeId);
+        else if(nodeId < other.nextNodeId() && other._n._nodeIdsInUse[nodeId])
+            diff._nodesAdded.push_back(nodeId);
+    }
+
+    auto maxEdgeId = std::max(nextEdgeId(), other.nextEdgeId());
+    for(EdgeId edgeId(0); edgeId < maxEdgeId; ++edgeId)
+    {
+        if(edgeId < nextEdgeId() && edgeId < other.nextEdgeId())
+        {
+            if(_e._edgeIdsInUse[edgeId] && !other._e._edgeIdsInUse[edgeId])
+                diff._edgesRemoved.push_back(edgeId);
+            else if(!_e._edgeIdsInUse[edgeId] && other._e._edgeIdsInUse[edgeId])
+                diff._edgesAdded.push_back(edgeId);
+        }
+        else if(edgeId < nextEdgeId() && _e._edgeIdsInUse[edgeId])
+            diff._edgesRemoved.push_back(edgeId);
+        else if(edgeId < other.nextEdgeId() && other._e._edgeIdsInUse[edgeId])
+            diff._edgesAdded.push_back(edgeId);
+    }
+
+    return diff;
 }
 
 void MutableGraph::beginTransaction()
