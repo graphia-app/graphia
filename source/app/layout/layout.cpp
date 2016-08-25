@@ -202,7 +202,13 @@ void LayoutThread::run()
             _paused = true;
             emit pausedChanged();
 
-            if(_debug) qDebug() << "Layout paused";
+            if(_debug)
+            {
+                auto* reason = _pause ?               "manually" :
+                               allLayoutsFinished() ? "because all layouts finished" :
+                               "";
+                qDebug() << "Layout paused" << reason;
+            }
 
             u::setCurrentThreadName("Layout ||");
             uncancel();
