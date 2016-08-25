@@ -858,6 +858,13 @@ void GraphRenderer::onGraphChanged(const Graph* graph)
 
 void GraphRenderer::onComponentAdded(const Graph*, ComponentId componentId, bool)
 {
+    // If the component is entirely new, we shouldn't be hiding any of it
+    auto* component = _graphModel->graph().componentById(componentId);
+    for(NodeId nodeId : component->nodeIds())
+        _hiddenNodes.set(nodeId, false);
+    for(EdgeId edgeId : component->edgeIds())
+        _hiddenEdges.set(edgeId, false);
+
     executeOnRendererThread([this, componentId]
     {
         componentRendererForId(componentId)->initialise(_graphModel, componentId,
