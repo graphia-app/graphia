@@ -53,7 +53,7 @@ protected:
     virtual void onComponentAdded(const Graph*, ComponentId, bool) = 0;
 };
 
-struct GPUGraphData : public OpenGLFunctions
+struct GPUGraphData : OpenGLFunctions
 {
     GPUGraphData();
     virtual ~GPUGraphData();
