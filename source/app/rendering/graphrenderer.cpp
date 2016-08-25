@@ -48,6 +48,17 @@ static bool loadShaderProgram(QOpenGLShaderProgram& program, const QString& vert
     return true;
 }
 
+template<typename T>
+void setupTexture(T t, GLuint& texture, int width, int height, GLint format)
+{
+    if(texture == 0)
+        t->glGenTextures(1, &texture);
+    t->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
+    t->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, GraphRenderer::NUM_MULTISAMPLES, format, width, height, GL_FALSE);
+    t->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
+    t->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+}
+
 void GraphInitialiser::initialiseFromGraph(const Graph *graph)
 {
     for(auto componentId : graph->componentIds())
@@ -59,6 +70,27 @@ void GraphInitialiser::initialiseFromGraph(const Graph *graph)
 GPUGraphData::GPUGraphData()
 {
     resolveOpenGLFunctions();
+}
+
+GPUGraphData::~GPUGraphData()
+{
+    if(_fbo != 0)
+    {
+        glDeleteFramebuffers(1, &_fbo);
+        _fbo = 0;
+    }
+
+    if(_colorTexture != 0)
+    {
+        glDeleteTextures(1, &_colorTexture);
+        _colorTexture = 0;
+    }
+
+    if(_selectionTexture != 0)
+    {
+        glDeleteTextures(1, &_selectionTexture);
+        _selectionTexture = 0;
+    }
 }
 
 void GPUGraphData::initialise(QOpenGLShaderProgram& nodesShader,
@@ -81,11 +113,17 @@ void GPUGraphData::initialise(QOpenGLShaderProgram& nodesShader,
 
 void GPUGraphData::prepareVertexBuffers()
 {
-    _nodeVBO.create();
-    _nodeVBO.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    if(!_nodeVBO.isCreated())
+    {
+        _nodeVBO.create();
+        _nodeVBO.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    }
 
-    _edgeVBO.create();
-    _edgeVBO.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    if(!_edgeVBO.isCreated())
+    {
+        _edgeVBO.create();
+        _edgeVBO.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    }
 }
 
 void GPUGraphData::prepareNodeVAO(QOpenGLShaderProgram& shader)
@@ -147,10 +185,56 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     _cylinder.vertexArrayObject()->release();
 }
 
+bool GPUGraphData::prepareRenderBuffers(int width, int height, GLuint depthTexture)
+{
+    setupTexture(this, _colorTexture,     width, height, GL_RGBA);
+    setupTexture(this, _selectionTexture, width, height, GL_RGBA);
+
+    if(_fbo == 0)
+        glGenFramebuffers(1, &_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _colorTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,  GL_TEXTURE_2D_MULTISAMPLE, depthTexture, 0);
+
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    bool fboValid = (status == GL_FRAMEBUFFER_COMPLETE);
+    Q_ASSERT(fboValid);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    return fboValid;
+}
+
 void GPUGraphData::reset()
 {
+    _alpha1 = 0.0f;
+    _alpha2 = 0.0f;
     _nodeData.clear();
     _edgeData.clear();
+}
+
+void GPUGraphData::clearFramebuffer()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+
+    GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+    glDrawBuffers(2, drawBuffers);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void GPUGraphData::clearDepthbuffer()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void GPUGraphData::upload()
@@ -172,6 +256,16 @@ int GPUGraphData::numNodes() const
 int GPUGraphData::numEdges() const
 {
     return static_cast<int>(_edgeData.size());
+}
+
+float GPUGraphData::alpha() const
+{
+    return _alpha1 * _alpha2;
+}
+
+bool GPUGraphData::unused() const
+{
+    return _alpha1 == 0.0f && _alpha2 == 0.0f;
 }
 
 GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
@@ -201,8 +295,8 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
     prepareSelectionMarkerVAO();
     prepareQuad();
 
-    _gpuGraphDataOpaque.initialise(_nodesShader, _edgesShader);
-    _gpuGraphDataTransparent.initialise(_nodesShader, _edgesShader);
+    for(auto& gpuGraphData : _gpuGraphData)
+        gpuGraphData.initialise(_nodesShader, _edgesShader);
 
     prepareComponentDataTexture();
 
@@ -275,37 +369,7 @@ GraphRenderer::~GraphRenderer()
         _componentDataTexture = 0;
     }
 
-    if(_visualFBO != 0)
-    {
-        glDeleteFramebuffers(1, &_visualFBO);
-        _visualFBO = 0;
-    }
-
     _FBOcomplete = false;
-
-    if(_colorTexture != 0)
-    {
-        glDeleteTextures(1, &_colorTexture);
-        _colorTexture = 0;
-    }
-
-    if(_selectionTexture != 0)
-    {
-        glDeleteTextures(1, &_selectionTexture);
-        _selectionTexture = 0;
-    }
-
-    if(_transparentTexture != 0)
-    {
-        glDeleteTextures(1, &_transparentTexture);
-        _transparentTexture = 0;
-    }
-
-    if(_transparentSelectionTexture != 0)
-    {
-        glDeleteTextures(1, &_transparentSelectionTexture);
-        _transparentSelectionTexture = 0;
-    }
 
     if(_depthTexture != 0)
     {
@@ -321,7 +385,21 @@ void GraphRenderer::resize(int width, int height)
     _resized = true;
 
     if(width > 0 && height > 0)
-        _FBOcomplete = prepareRenderBuffers(width, height);
+    {
+        setupTexture(this, _depthTexture, width, height, GL_DEPTH_COMPONENT);
+
+        if(!_gpuGraphData.empty())
+        {
+            _FBOcomplete = true;
+            for(auto& gpuGraphData : _gpuGraphData)
+            {
+                _FBOcomplete = _FBOcomplete &&
+                        gpuGraphData.prepareRenderBuffers(width, height, _depthTexture);
+            }
+        }
+        else
+            _FBOcomplete = false;
+    }
 
     GLfloat w = static_cast<GLfloat>(_width);
     GLfloat h = static_cast<GLfloat>(_height);
@@ -341,6 +419,27 @@ void GraphRenderer::resize(int width, int height)
     _screenQuadDataBuffer.release();
 }
 
+GPUGraphData* GraphRenderer::gpuGraphDataForAlpha(float alpha1, float alpha2)
+{
+    for(auto& gpuGraphData : _gpuGraphData)
+    {
+        if(gpuGraphData.unused())
+        {
+            gpuGraphData._alpha1 = alpha1;
+            gpuGraphData._alpha2 = alpha2;
+            return &gpuGraphData;
+        }
+        else if(gpuGraphData._alpha1 == alpha1 && gpuGraphData._alpha2 == alpha2)
+            return &gpuGraphData;
+    }
+
+    qWarning() << "Not enough gpuGraphData instances for" << alpha1 << alpha2;
+    for(auto& gpuGraphData : _gpuGraphData)
+        qWarning() << "  " << gpuGraphData._alpha1 << gpuGraphData._alpha2;
+
+    return nullptr;
+}
+
 void GraphRenderer::updateGPUDataIfRequired()
 {
     if(!_gpuDataRequiresUpdate)
@@ -356,8 +455,8 @@ void GraphRenderer::updateGPUDataIfRequired()
     auto& nodeVisuals = _graphModel->nodeVisuals();
     auto& edgeVisuals = _graphModel->edgeVisuals();
 
-    _gpuGraphDataOpaque.reset();
-    _gpuGraphDataTransparent.reset();
+    for(auto& gpuGraphData : _gpuGraphData)
+        gpuGraphData.reset();
 
     NodeArray<QVector3D> scaledAndSmoothedNodePositions(_graphModel->graph());
 
@@ -377,6 +476,8 @@ void GraphRenderer::updateGPUDataIfRequired()
             const QVector3D nodePosition = nodePositions.getScaledAndSmoothed(nodeId);
             scaledAndSmoothedNodePositions[nodeId] = nodePosition;
 
+            float notFoundAlpha = nodeVisuals[nodeId]._state.testFlag(VisualFlags::NotFound) ? NotFoundAlpha : 1.0f;
+
             GPUGraphData::NodeData nodeData;
             nodeData._position[0] = nodePosition.x();
             nodeData._position[1] = nodePosition.y();
@@ -386,10 +487,7 @@ void GraphRenderer::updateGPUDataIfRequired()
             nodeData._color[0] = nodeVisuals[nodeId]._color.redF();
             nodeData._color[1] = nodeVisuals[nodeId]._color.greenF();
             nodeData._color[2] = nodeVisuals[nodeId]._color.blueF();
-            nodeData._color[3] = componentRenderer->alpha();
-
-            if(nodeVisuals[nodeId]._state.testFlag(VisualFlags::NotFound))
-                nodeData._color[3] *= NotFoundAlpha;
+            nodeData._color[3] = componentRenderer->alpha() * notFoundAlpha;
 
             QColor outlineColor = nodeVisuals[nodeId]._state.testFlag(VisualFlags::Selected) ?
                 Qt::GlobalColor::white : Qt::GlobalColor::black;
@@ -398,8 +496,9 @@ void GraphRenderer::updateGPUDataIfRequired()
             nodeData._outlineColor[1] = outlineColor.greenF();
             nodeData._outlineColor[2] = outlineColor.blueF();
 
-            auto& gpuGraphData = nodeData._color[3] < 1.0f ? _gpuGraphDataTransparent : _gpuGraphDataOpaque;
-            gpuGraphData._nodeData.push_back(nodeData);
+            auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(), notFoundAlpha);
+            if(gpuGraphData != nullptr)
+                gpuGraphData->_nodeData.push_back(nodeData);
         }
 
         for(auto& edge : componentRenderer->edges())
@@ -409,6 +508,8 @@ void GraphRenderer::updateGPUDataIfRequired()
 
             const QVector3D& sourcePosition = scaledAndSmoothedNodePositions[edge->sourceId()];
             const QVector3D& targetPosition = scaledAndSmoothedNodePositions[edge->targetId()];
+
+            float notFoundAlpha = edgeVisuals[edge->id()]._state.testFlag(VisualFlags::NotFound) ? NotFoundAlpha : 1.0f;
 
             GPUGraphData::EdgeData edgeData;
             edgeData._sourcePosition[0] = sourcePosition.x();
@@ -422,24 +523,25 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._color[0] = edgeVisuals[edge->id()]._color.redF();
             edgeData._color[1] = edgeVisuals[edge->id()]._color.greenF();
             edgeData._color[2] = edgeVisuals[edge->id()]._color.blueF();
-            edgeData._color[3] = componentRenderer->alpha();
-
-            if(edgeVisuals[edge->id()]._state.testFlag(VisualFlags::NotFound))
-                edgeData._color[3] *= NotFoundAlpha;
+            edgeData._color[3] = componentRenderer->alpha() * notFoundAlpha;
 
             edgeData._outlineColor[0] = 0.0f;
             edgeData._outlineColor[1] = 0.0f;
             edgeData._outlineColor[2] = 0.0f;
 
-            auto& gpuGraphData = edgeData._color[3] < 1.0f ? _gpuGraphDataTransparent : _gpuGraphDataOpaque;
-            gpuGraphData._edgeData.push_back(edgeData);
+            auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(), notFoundAlpha);
+            if(gpuGraphData != nullptr)
+                gpuGraphData->_edgeData.push_back(edgeData);
         }
 
         componentIndex++;
     }
 
-    _gpuGraphDataOpaque.upload();
-    _gpuGraphDataTransparent.upload();
+    for(auto& gpuGraphData : _gpuGraphData)
+    {
+        if(gpuGraphData.alpha() > 0.0f)
+            gpuGraphData.upload();
+    }
 }
 
 void GraphRenderer::updateGPUData(GraphRenderer::When when)
@@ -854,6 +956,27 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
     program.setUniformValue("material.shininess", 50.0f);
 }
 
+std::vector<int> GraphRenderer::gpuGraphDataRenderOrder() const
+{
+    std::vector<int> renderOrder;
+
+    for(int i = 0; i < static_cast<int>(_gpuGraphData.size()); i++)
+        renderOrder.push_back(i);
+
+    std::sort(renderOrder.begin(), renderOrder.end(), [this](auto a, auto b)
+    {
+        if(_gpuGraphData[a]._alpha1 == _gpuGraphData[b]._alpha1)
+            return _gpuGraphData[a]._alpha2 > _gpuGraphData[b]._alpha2;
+
+        return _gpuGraphData[a]._alpha1 > _gpuGraphData[b]._alpha1;
+    });
+
+    while(_gpuGraphData[renderOrder.back()].alpha() <= 0.0f)
+        renderOrder.pop_back();
+
+    return renderOrder;
+}
+
 void GraphRenderer::renderNodes(GPUGraphData& gpuGraphData)
 {
     _nodesShader.bind();
@@ -896,23 +1019,9 @@ void GraphRenderer::renderEdges(GPUGraphData& gpuGraphData)
     _edgesShader.release();
 }
 
-void GraphRenderer::renderGraphOpaque()
+void GraphRenderer::renderGraph(GPUGraphData& gpuGraphData)
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, _visualFBO);
-
-    GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-    glDrawBuffers(2, drawBuffers);
-
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-    renderNodes(_gpuGraphDataOpaque);
-    renderEdges(_gpuGraphDataOpaque);
-}
-
-void GraphRenderer::renderGraphTransparent()
-{
-    glBindFramebuffer(GL_FRAMEBUFFER, _transparencyFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, gpuGraphData._fbo);
 
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
     glDrawBuffers(2, drawBuffers);
@@ -920,8 +1029,8 @@ void GraphRenderer::renderGraphTransparent()
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    renderNodes(_gpuGraphDataTransparent);
-    renderEdges(_gpuGraphDataTransparent);
+    renderNodes(gpuGraphData);
+    renderEdges(gpuGraphData);
 }
 
 void GraphRenderer::renderScene()
@@ -973,13 +1082,31 @@ void GraphRenderer::renderScene()
     glEnable(GL_CULL_FACE);
     glDisable(GL_BLEND);
 
-    renderGraphOpaque();
-    renderGraphTransparent();
+    for(auto& gpuGraphData : _gpuGraphData)
+        gpuGraphData.clearFramebuffer();
+
+    for(auto i : gpuGraphDataRenderOrder())
+    {
+        auto& gpuGraphData = _gpuGraphData[i];
+
+        // Clear the depth buffer, but only when we're about to render graph elements
+        // that are found, so that subsequent render passes of not found elements
+        // use the existing depth information
+        if(gpuGraphData._alpha2 >= 1.0f)
+            gpuGraphData.clearDepthbuffer();
+
+        renderGraph(gpuGraphData);
+    }
 }
 
 void GraphRenderer::render2D()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, _visualFBO);
+    auto& gpuGraphData = _gpuGraphData[0];
+
+    if(gpuGraphData.unused())
+        return;
+
+    glBindFramebuffer(GL_FRAMEBUFFER, gpuGraphData._fbo);
 
     glDisable(GL_DEPTH_TEST);
     glViewport(0, 0, _width, _height);
@@ -1178,10 +1305,11 @@ void GraphRenderer::finishRender()
     _screenQuadDataBuffer.bind();
     _screenQuadVAO.bind();
 
-    render2DComposite(_screenShader,    _colorTexture);
-    render2DComposite(_selectionShader, _selectionTexture);
-    render2DComposite(_screenShader,    _transparentTexture);
-    render2DComposite(_selectionShader, _transparentSelectionTexture);
+    for(auto i : gpuGraphDataRenderOrder())
+    {
+        render2DComposite(_screenShader,    _gpuGraphData[i]._colorTexture);
+        render2DComposite(_selectionShader, _gpuGraphData[i]._selectionTexture);
+    }
 
     _screenQuadDataBuffer.release();
     _screenQuadVAO.release();
@@ -1195,57 +1323,6 @@ GraphComponentRenderer* GraphRenderer::componentRendererForId(ComponentId compon
     GraphComponentRenderer* renderer = _componentRenderers.at(componentId);
     Q_ASSERT(renderer != nullptr);
     return renderer;
-}
-
-void GraphRenderer::setupTexture(GLuint& texture, int width, int height, GLint format)
-{
-    if(texture == 0)
-        glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, GraphRenderer::NUM_MULTISAMPLES, format, width, height, GL_FALSE);
-    glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
-    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-}
-
-bool GraphRenderer::prepareRenderBuffers(int width, int height)
-{
-    setupTexture(_colorTexture,                width, height, GL_RGBA);
-    setupTexture(_selectionTexture,            width, height, GL_RGBA);
-    setupTexture(_transparentTexture,          width, height, GL_RGBA);
-    setupTexture(_transparentSelectionTexture, width, height, GL_RGBA);
-    setupTexture(_depthTexture,                width, height, GL_DEPTH_COMPONENT);
-
-    GLenum status;
-
-    // Visual FBO
-    if(_visualFBO == 0)
-        glGenFramebuffers(1, &_visualFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, _visualFBO);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _colorTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_MULTISAMPLE, _selectionTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,  GL_TEXTURE_2D_MULTISAMPLE, _depthTexture, 0);
-
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    bool visualFBOValid = (status == GL_FRAMEBUFFER_COMPLETE);
-    Q_ASSERT(visualFBOValid);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    // Transparency FBO
-    if(_transparencyFBO == 0)
-        glGenFramebuffers(1, &_transparencyFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, _transparencyFBO);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _transparentTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_MULTISAMPLE, _transparentSelectionTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,  GL_TEXTURE_2D_MULTISAMPLE, _depthTexture, 0);
-
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    bool transparencyFBOValid = (status == GL_FRAMEBUFFER_COMPLETE);
-    Q_ASSERT(transparencyFBOValid);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    return visualFBOValid && transparencyFBOValid;
 }
 
 void GraphRenderer::prepareSelectionMarkerVAO()

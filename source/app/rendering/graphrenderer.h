@@ -23,6 +23,7 @@
 #include <memory>
 #include <atomic>
 #include <vector>
+#include <array>
 
 class GraphQuickItem;
 class GraphModel;
@@ -52,9 +53,10 @@ protected:
     virtual void onComponentAdded(const Graph*, ComponentId, bool) = 0;
 };
 
-struct GPUGraphData : protected OpenGLFunctions
+struct GPUGraphData : public OpenGLFunctions
 {
     GPUGraphData();
+    virtual ~GPUGraphData();
 
     void initialise(QOpenGLShaderProgram& nodesShader,
                     QOpenGLShaderProgram& edgesShader);
@@ -62,12 +64,20 @@ struct GPUGraphData : protected OpenGLFunctions
     void prepareNodeVAO(QOpenGLShaderProgram& shader);
     void prepareEdgeVAO(QOpenGLShaderProgram& shader);
 
+    bool prepareRenderBuffers(int width, int height, GLuint depthTexture);
+
     void reset();
+    void clearFramebuffer();
+    void clearDepthbuffer();
 
     void upload();
 
     int numNodes() const;
     int numEdges() const;
+
+    float alpha() const;
+
+    bool unused() const;
 
     Sphere _sphere;
     Cylinder _cylinder;
@@ -91,16 +101,27 @@ struct GPUGraphData : protected OpenGLFunctions
         float _outlineColor[3];
     };
 
+    // There are two alpha values so that we can split the alpha blended layers
+    // depending on their purpose. The rendering occurs in order based on _alpha1,
+    // going from opaque to transparent, then resorting to _alpha2 in the same order,
+    // when the values of _alpha1 match
+    float _alpha1 = 0.0f;
+    float _alpha2 = 0.0f;
+
     std::vector<NodeData> _nodeData;
     QOpenGLBuffer _nodeVBO;
 
     std::vector<EdgeData> _edgeData;
     QOpenGLBuffer _edgeVBO;
+
+    GLuint _fbo = 0;
+    GLuint _colorTexture = 0;
+    GLuint _selectionTexture = 0;
 };
 
 class GraphRenderer :
         public QObject,
-        protected OpenGLFunctions,
+        public OpenGLFunctions,
         public GraphInitialiser,
         public QQuickFramebufferObject::Renderer
 {
@@ -207,17 +228,9 @@ private:
     int _height = 0;
     bool _resized = false;
 
-    GLuint _colorTexture = 0;
-    GLuint _selectionTexture = 0;
-
-    GLuint _transparentTexture = 0;
-    GLuint _transparentSelectionTexture = 0;
+    bool _FBOcomplete = false;
 
     GLuint _depthTexture = 0;
-
-    GLuint _visualFBO = 0;
-    GLuint _transparencyFBO = 0;
-    bool _FBOcomplete = false;
 
     QOpenGLVertexArrayObject _screenQuadVAO;
     QOpenGLBuffer _screenQuadDataBuffer;
@@ -225,11 +238,14 @@ private:
     QOpenGLBuffer _selectionMarkerDataBuffer;
     QOpenGLVertexArrayObject _selectionMarkerDataVAO;
 
+    // When elements are added to the scene, it may be that they would lie
+    // outside the confines of where they should be rendered, until a transition
+    // is completed, so these arrays allow us to hide the elements until such
+    // transitions are complete
     NodeArray<bool> _hiddenNodes;
     EdgeArray<bool> _hiddenEdges;
 
-    GPUGraphData _gpuGraphDataOpaque;
-    GPUGraphData _gpuGraphDataTransparent;
+    std::array<GPUGraphData, 6> _gpuGraphData;
     bool _gpuDataRequiresUpdate = false;
 
     GLuint _componentDataTexture = 0;
@@ -249,8 +265,6 @@ private:
 
     PerformanceCounter _performanceCounter;
 
-    void setupTexture(GLuint& texture, int width, int height, GLint format);
-    bool prepareRenderBuffers(int width, int height);
     void prepareSelectionMarkerVAO();
     void prepareQuad();
 
@@ -262,6 +276,7 @@ private:
 
     void clearHiddenElements();
 
+    GPUGraphData* gpuGraphDataForAlpha(float alpha1, float alpha2);
     void updateGPUDataIfRequired();
     enum class When { Later, Now };
     void updateGPUData(When when);
@@ -272,10 +287,11 @@ private:
     void render2DComposite(QOpenGLShaderProgram& shader, GLuint texture);
     void finishRender();
 
+    std::vector<int> gpuGraphDataRenderOrder() const;
+
     void renderNodes(GPUGraphData& gpuGraphData);
     void renderEdges(GPUGraphData& gpuGraphData);
-    void renderGraphOpaque();
-    void renderGraphTransparent();
+    void renderGraph(GPUGraphData& gpuGraphData);
     void renderScene();
     void render2D();
 
