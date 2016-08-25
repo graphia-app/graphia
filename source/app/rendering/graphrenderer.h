@@ -87,7 +87,7 @@ struct GPUGraphData : public OpenGLFunctions
         float _position[3];
         int _component;
         float _size;
-        float _color[4];
+        float _color[3];
         float _outlineColor[3];
     };
 
@@ -97,7 +97,7 @@ struct GPUGraphData : public OpenGLFunctions
         float _targetPosition[3];
         int _component;
         float _size;
-        float _color[4];
+        float _color[3];
         float _outlineColor[3];
     };
 
@@ -284,7 +284,7 @@ private:
 
     void resize(int width, int height);
 
-    void render2DComposite(QOpenGLShaderProgram& shader, GLuint texture);
+    void render2DComposite(QOpenGLShaderProgram& shader, GLuint texture, float alpha);
     void finishRender();
 
     std::vector<int> gpuGraphDataRenderOrder() const;

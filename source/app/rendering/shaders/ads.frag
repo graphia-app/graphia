@@ -21,7 +21,7 @@ uniform MaterialInfo material;
 
 in vec3 position;
 in vec3 normal;
-in vec4 vColor;
+in vec3 vColor;
 in vec3 vOutlineColor;
 
 layout (location = 0) out vec4 outColor;
@@ -71,6 +71,6 @@ vec3 adsModel(const in vec3 pos, const in vec3 n)
 void main()
 {
     vec3 color = adsModel(position, normalize(normal));
-    outColor = vec4(color, vColor.a);
-    outSelection = vec4(vOutlineColor, vColor.a);
+    outColor = vec4(color, 1.0);
+    outSelection = vec4(vOutlineColor, 1.0);
 }

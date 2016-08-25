@@ -6,6 +6,7 @@ layout (location = 0) out vec4 fragColor;
 
 uniform sampler2DMS frameBufferTexture;
 uniform int multisamples;
+uniform float alpha;
 
 vec4 multisampledValue(ivec2 coord)
 {
@@ -25,6 +26,7 @@ vec4 multisampledValue(ivec2 coord)
     }
 
     vec4 color = vec4(rgb / numTexels, a / multisamples);
+    color.a *= alpha;
 
     return color;
 }

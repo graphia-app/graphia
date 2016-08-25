@@ -141,7 +141,7 @@ void GPUGraphData::prepareNodeVAO(QOpenGLShaderProgram& shader)
     glVertexAttribIPointer(shader.attributeLocation("component"),                          1, GL_INT, sizeof(NodeData),
                           reinterpret_cast<const void*>(offsetof(NodeData, _component)));
     shader.setAttributeBuffer("size",         GL_FLOAT, offsetof(NodeData, _size),         1,         sizeof(NodeData));
-    shader.setAttributeBuffer("color",        GL_FLOAT, offsetof(NodeData, _color),        4,         sizeof(NodeData));
+    shader.setAttributeBuffer("color",        GL_FLOAT, offsetof(NodeData, _color),        3,         sizeof(NodeData));
     shader.setAttributeBuffer("outlineColor", GL_FLOAT, offsetof(NodeData, _outlineColor), 3,         sizeof(NodeData));
     glVertexAttribDivisor(shader.attributeLocation("nodePosition"), 1);
     glVertexAttribDivisor(shader.attributeLocation("component"), 1);
@@ -171,7 +171,7 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     glVertexAttribIPointer(shader.attributeLocation("component"),                              1, GL_INT, sizeof(EdgeData),
                             reinterpret_cast<const void*>(offsetof(EdgeData, _component)));
     shader.setAttributeBuffer("size",           GL_FLOAT, offsetof(EdgeData, _size),           1,         sizeof(EdgeData));
-    shader.setAttributeBuffer("color",          GL_FLOAT, offsetof(EdgeData, _color),          4,         sizeof(EdgeData));
+    shader.setAttributeBuffer("color",          GL_FLOAT, offsetof(EdgeData, _color),          3,         sizeof(EdgeData));
     shader.setAttributeBuffer("outlineColor",   GL_FLOAT, offsetof(EdgeData, _outlineColor),   3,         sizeof(EdgeData));
     glVertexAttribDivisor(shader.attributeLocation("sourcePosition"), 1);
     glVertexAttribDivisor(shader.attributeLocation("targetPosition"), 1);
@@ -476,8 +476,6 @@ void GraphRenderer::updateGPUDataIfRequired()
             const QVector3D nodePosition = nodePositions.getScaledAndSmoothed(nodeId);
             scaledAndSmoothedNodePositions[nodeId] = nodePosition;
 
-            float notFoundAlpha = nodeVisuals[nodeId]._state.testFlag(VisualFlags::NotFound) ? NotFoundAlpha : 1.0f;
-
             GPUGraphData::NodeData nodeData;
             nodeData._position[0] = nodePosition.x();
             nodeData._position[1] = nodePosition.y();
@@ -487,7 +485,6 @@ void GraphRenderer::updateGPUDataIfRequired()
             nodeData._color[0] = nodeVisuals[nodeId]._color.redF();
             nodeData._color[1] = nodeVisuals[nodeId]._color.greenF();
             nodeData._color[2] = nodeVisuals[nodeId]._color.blueF();
-            nodeData._color[3] = componentRenderer->alpha() * notFoundAlpha;
 
             QColor outlineColor = nodeVisuals[nodeId]._state.testFlag(VisualFlags::Selected) ?
                 Qt::GlobalColor::white : Qt::GlobalColor::black;
@@ -496,7 +493,9 @@ void GraphRenderer::updateGPUDataIfRequired()
             nodeData._outlineColor[1] = outlineColor.greenF();
             nodeData._outlineColor[2] = outlineColor.blueF();
 
-            auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(), notFoundAlpha);
+            auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(),
+                nodeVisuals[nodeId]._state.testFlag(VisualFlags::NotFound) ? NotFoundAlpha : 1.0f);
+
             if(gpuGraphData != nullptr)
                 gpuGraphData->_nodeData.push_back(nodeData);
         }
@@ -508,8 +507,6 @@ void GraphRenderer::updateGPUDataIfRequired()
 
             const QVector3D& sourcePosition = scaledAndSmoothedNodePositions[edge->sourceId()];
             const QVector3D& targetPosition = scaledAndSmoothedNodePositions[edge->targetId()];
-
-            float notFoundAlpha = edgeVisuals[edge->id()]._state.testFlag(VisualFlags::NotFound) ? NotFoundAlpha : 1.0f;
 
             GPUGraphData::EdgeData edgeData;
             edgeData._sourcePosition[0] = sourcePosition.x();
@@ -523,13 +520,14 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._color[0] = edgeVisuals[edge->id()]._color.redF();
             edgeData._color[1] = edgeVisuals[edge->id()]._color.greenF();
             edgeData._color[2] = edgeVisuals[edge->id()]._color.blueF();
-            edgeData._color[3] = componentRenderer->alpha() * notFoundAlpha;
 
             edgeData._outlineColor[0] = 0.0f;
             edgeData._outlineColor[1] = 0.0f;
             edgeData._outlineColor[2] = 0.0f;
 
-            auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(), notFoundAlpha);
+            auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(),
+                edgeVisuals[edge->id()]._state.testFlag(VisualFlags::NotFound) ? NotFoundAlpha : 1.0f);
+
             if(gpuGraphData != nullptr)
                 gpuGraphData->_edgeData.push_back(edgeData);
         }
@@ -1260,9 +1258,10 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
     graphQuickItem->setFocusedComponentId(focusedComponentId);
 }
 
-void GraphRenderer::render2DComposite(QOpenGLShaderProgram& shader, GLuint texture)
+void GraphRenderer::render2DComposite(QOpenGLShaderProgram& shader, GLuint texture, float alpha)
 {
     shader.bind();
+    shader.setUniformValue("alpha", alpha);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -1307,8 +1306,8 @@ void GraphRenderer::finishRender()
 
     for(auto i : gpuGraphDataRenderOrder())
     {
-        render2DComposite(_screenShader,    _gpuGraphData[i]._colorTexture);
-        render2DComposite(_selectionShader, _gpuGraphData[i]._selectionTexture);
+        render2DComposite(_screenShader,    _gpuGraphData[i]._colorTexture,     _gpuGraphData[i].alpha());
+        render2DComposite(_selectionShader, _gpuGraphData[i]._selectionTexture, _gpuGraphData[i].alpha());
     }
 
     _screenQuadDataBuffer.release();

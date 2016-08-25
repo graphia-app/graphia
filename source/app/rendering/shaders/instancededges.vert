@@ -10,12 +10,12 @@ layout (location = 4) in vec3  targetPosition; // The position of the target nod
 layout (location = 5) in int   component; // The component index
 
 layout (location = 6) in float size; // The size of the edge
-layout (location = 7) in vec4  color; // The color of the edge
+layout (location = 7) in vec3  color; // The color of the edge
 layout (location = 8) in vec3  outlineColor; // The outline color of the node
 
 out vec3 position;
 out vec3 normal;
-out vec4 vColor;
+out vec3 vColor;
 out vec3 vOutlineColor;
 
 uniform samplerBuffer componentData;
