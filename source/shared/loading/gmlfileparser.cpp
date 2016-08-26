@@ -15,24 +15,25 @@
 #include <QDebug>
 
 #include <fstream>
+#include <cstring>
 
 template<class It> bool parseGml(IMutableGraph &graph,
                                  BaseGenericPluginInstance* genericPluginInstance,
+                                 const std::function<bool ()>& cancelled,
                                  const IParser::ProgressFn& progress,
                                  It begin, It end)
 {
-    int size = std::distance(begin, end);
-
-    // Progress Capture event (Fired on gml_value rule match)
-    auto captureCount = axe::e_ref([&size, &begin, progress](It, It i2)
-    {
-        progress((std::distance(begin, i2)) * 100 / size);
-    });
-
     // General GML structure rules
     axe::r_rule<It> keyValue;
     double d;
-    auto whitespace = *axe::r_any(" \t\n\r");
+    //auto whitespace = *axe::r_any(" \t\n\r");
+    auto whitespace = axe::r_ref([&cancelled](It i1, It i2)
+    {
+        if(!cancelled())
+            return axe::make_result(i1 != i2 && std::strchr(" \t\n\r", *i1), i1 + 1, i1);
+        else
+            return axe::make_result(false, i2);
+    });
 
     // If this is declared and initialised on the same line, the move constructor for
     // axe::r_rule is called which (for some reason) infinitely recurses, whereas using
@@ -43,9 +44,9 @@ template<class It> bool parseGml(IMutableGraph &graph,
     auto key = (+axe::r_alnum());
     auto value = axe::r_double(d) | quotedString;
 
-    auto keyValueList = whitespace & key & whitespace & '[' & whitespace &
-            axe::r_many(keyValue - axe::r_char(']'), axe::r_any(" \t\n\r"), 0) & whitespace & ']';
-    auto keyValuePair = (whitespace & key & whitespace & value);
+    auto keyValueList = *whitespace & key & *whitespace & '[' & *whitespace &
+            axe::r_many(keyValue - axe::r_char(']'), axe::r_any(" \t\n\r"), 0) & *whitespace & ']';
+    auto keyValuePair = (*whitespace & key & *whitespace & value);
 
     // Node State
     int id = -1;
@@ -78,11 +79,11 @@ template<class It> bool parseGml(IMutableGraph &graph,
 
     // Node Rules
     axe::r_rule<It> nodeKeyValuePair;
-    auto nodeKeyValueList = (whitespace & "node" & whitespace & '[' & whitespace &
-                           axe::r_many(nodeKeyValuePair - axe::r_char(']'), axe::r_any(" \t\n\r"), 0) & whitespace
+    auto nodeKeyValueList = (*whitespace & "node" & *whitespace & '[' & *whitespace &
+                           axe::r_many(nodeKeyValuePair - axe::r_char(']'), axe::r_any(" \t\n\r"), 0) & *whitespace
                            & ']') >> captureNode;
-    auto nodeId = whitespace & "id" & whitespace & value >> captureNodeId;
-    auto labelElement = whitespace & "label" & whitespace & value >> captureLabel;
+    auto nodeId = *whitespace & "id" & *whitespace & value >> captureNodeId;
+    auto labelElement = *whitespace & "label" & *whitespace & value >> captureLabel;
     nodeKeyValuePair = nodeId | labelElement | keyValuePair | keyValueList;
 
     // Edge State
@@ -117,11 +118,11 @@ template<class It> bool parseGml(IMutableGraph &graph,
 
     // Edge Rules
     axe::r_rule<It> edgeKeyValuePair;
-    auto edgeKeyValueList =  (whitespace & "edge" & whitespace & '[' & whitespace &
-                            axe::r_many(edgeKeyValuePair - axe::r_char(']'), axe::r_any(" \t\n\r"), 0) & whitespace &
+    auto edgeKeyValueList = (*whitespace & "edge" & *whitespace & '[' & *whitespace &
+                            axe::r_many(edgeKeyValuePair - axe::r_char(']'), axe::r_any(" \t\n\r"), 0) & *whitespace &
                             ']' ) >> captureEdge;
-    auto edgeSource = (whitespace & "source" & whitespace & value >> captureEdgeSource);
-    auto edgeTarget = (whitespace & "target" & whitespace & value >> captureEdgeTarget);
+    auto edgeSource = (*whitespace & "source" & *whitespace & value >> captureEdgeSource);
+    auto edgeTarget = (*whitespace & "target" & *whitespace & value >> captureEdgeTarget);
     edgeKeyValuePair = edgeSource | edgeTarget | keyValuePair | keyValueList;
 
     // Full GML file rule
@@ -134,12 +135,18 @@ template<class It> bool parseGml(IMutableGraph &graph,
         succeeded = false;
     };
 
+    // Progress Capture event (Fired on keyValue rule match)
+    auto captureCount = axe::e_ref([&begin, &end, &cancelled, &progress](It, It i2)
+    {
+        progress((std::distance(begin, i2)) * 100 / std::distance(begin, end));
+    });
+
     // All GML keyValue options
-    keyValue = ((edgeKeyValueList | nodeKeyValueList | keyValueList | keyValuePair | +axe::r_any(" \t\n\r") |
-              axe::r_end() | axe::r_fail(onFail)) >> captureCount);
+    keyValue = (edgeKeyValueList | nodeKeyValueList | keyValueList | keyValuePair | +whitespace |
+        axe::r_end() | axe::r_fail(onFail)) >> captureCount;
 
     // Perform file rule against begin & end iterators
-    (file >> axe::e_ref([progress](It, It)
+    (file >> axe::e_ref([&progress](It, It)
     {
         progress(100);
     }) & axe::r_end())(begin, end);
@@ -164,5 +171,6 @@ bool GmlFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressF
 
     std::vector<char> vec(startIt, std::istreambuf_iterator<char>());
 
-    return parseGml(graph, _genericPluginInstance,  progress, vec.begin(), vec.end());;
+    return parseGml(graph, _genericPluginInstance, [this] { return cancelled(); },
+                    progress, vec.begin(), vec.end());;
 }

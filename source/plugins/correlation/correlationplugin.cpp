@@ -22,7 +22,7 @@ void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionMa
 }
 
 bool CorrelationPluginInstance::loadAttributes(const TabularData& tabularData, int firstDataColumn, int firstDataRow,
-                                               const std::function<bool ()>& cancelled, const IParser::ProgressFn& progress)
+                                               const std::function<bool()>& cancelled, const IParser::ProgressFn& progress)
 {
     progress(0);
 
