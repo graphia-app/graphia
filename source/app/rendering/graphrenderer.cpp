@@ -976,7 +976,7 @@ std::vector<int> GraphRenderer::gpuGraphDataRenderOrder() const
         return _gpuGraphData[a]._alpha1 > _gpuGraphData[b]._alpha1;
     });
 
-    while(_gpuGraphData[renderOrder.back()].alpha() <= 0.0f)
+    while(!renderOrder.empty() && _gpuGraphData[renderOrder.back()].alpha() <= 0.0f)
         renderOrder.pop_back();
 
     return renderOrder;
