@@ -39,6 +39,15 @@ ApplicationWindow
         processArguments(Qt.application.arguments);
     }
 
+    DropArea
+    {
+        anchors.fill: parent;
+        onDropped:
+        {
+            openFile(drop.text, true)
+        }
+    }
+
     MessageDialog
     {
         id: aboutMessageDialog
