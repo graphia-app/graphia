@@ -115,6 +115,7 @@ struct GPUGraphData : OpenGLFunctions
     {
         int _component;
         float _texturePosition[2];
+        int _textureLayer;
         float _targetPosition[3];
         float _positionOffset[2];
         float _glyphSize[2];

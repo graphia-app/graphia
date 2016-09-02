@@ -121,6 +121,7 @@ void GPUGraphData::prepareTextVAO(QOpenGLShaderProgram& shader)
 
     shader.enableAttributeArray("component");
     shader.enableAttributeArray("texturePosition");
+    shader.enableAttributeArray("textureLayer");
     shader.enableAttributeArray("targetPosition");
     shader.enableAttributeArray("positionOffset");
     shader.enableAttributeArray("glyphSize");
@@ -129,9 +130,11 @@ void GPUGraphData::prepareTextVAO(QOpenGLShaderProgram& shader)
     shader.enableAttributeArray("stringWidth");
     shader.enableAttributeArray("targetOffset");
 
-    glVertexAttribIPointer(shader.attributeLocation("component"), 1, GL_INT, sizeof(GlyphData),
-                          reinterpret_cast<const void*>(offsetof(GlyphData, _component)));
+    glVertexAttribIPointer(shader.attributeLocation("component"),                                 1, GL_INT, sizeof(GlyphData),
+                             reinterpret_cast<const void*>(offsetof(GlyphData, _component)));
     shader.setAttributeBuffer("texturePosition", GL_FLOAT, offsetof(GlyphData, _texturePosition), 2, sizeof(GlyphData));
+    glVertexAttribIPointer(shader.attributeLocation("textureLayer"),                              1, GL_INT, sizeof(GlyphData),
+                             reinterpret_cast<const void*>(offsetof(GlyphData, _textureLayer)));
     shader.setAttributeBuffer("targetPosition",  GL_FLOAT, offsetof(GlyphData, _targetPosition),  3, sizeof(GlyphData));
     shader.setAttributeBuffer("positionOffset",  GL_FLOAT, offsetof(GlyphData, _positionOffset),  2, sizeof(GlyphData));
     shader.setAttributeBuffer("glyphSize",       GL_FLOAT, offsetof(GlyphData, _glyphSize),       2, sizeof(GlyphData));
@@ -142,6 +145,7 @@ void GPUGraphData::prepareTextVAO(QOpenGLShaderProgram& shader)
 
     glVertexAttribDivisor(shader.attributeLocation("component"), 1);
     glVertexAttribDivisor(shader.attributeLocation("texturePosition"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("textureLayer"), 1);
     glVertexAttribDivisor(shader.attributeLocation("targetPosition"), 1);
     glVertexAttribDivisor(shader.attributeLocation("positionOffset"), 1);
     glVertexAttribDivisor(shader.attributeLocation("glyphSize"), 1);
@@ -579,6 +583,7 @@ void GraphRenderer::updateGPUDataIfRequired()
 
                 glyphData._texturePosition[0] = textureGlyph._u;
                 glyphData._texturePosition[1] = textureGlyph._v;
+                glyphData._textureLayer = textureGlyph._layer;
 
                 glyphData._positionOffset[0] = glyph._advance;
                 glyphData._positionOffset[1] = 0.0f;

@@ -1,20 +1,21 @@
 #version 330 core
 
 // Instanced Data
-in vec3 vertexPosition;
-in vec3 vertexNormal;
-in vec2 vertexTexCoord;
-in vec4 vertexTangent;
+layout (location = 0) in vec3 vertexPosition;
+layout (location = 1) in vec3 vertexNormal;
+layout (location = 2) in vec2 vertexTexCoord;
+
 // VBO Data
-in int component; // The component index
-in vec2 texturePosition; // Y index in the atlas
-in vec3 targetPosition;
-in vec2 positionOffset;
-in vec2 glyphSize;
-in vec3 color;
-in float textScale;
-in float stringWidth;
-in vec2 targetOffset;
+layout (location = 3) in int component; // The component index
+layout (location = 4) in vec2 texturePosition;
+layout (location = 5) in int textureLayer;
+layout (location = 6) in vec3 targetPosition;
+layout (location = 7) in vec2 positionOffset;
+layout (location = 8) in vec2 glyphSize;
+layout (location = 9) in vec3 color;
+layout (location = 10) in float textScale;
+layout (location = 11) in float stringWidth;
+layout (location = 12) in vec2 targetOffset;
 
 uniform samplerBuffer componentData;
 uniform sampler2DArray tex;
@@ -86,20 +87,17 @@ void main()
   }
 
   vec3 billboardVertPosition = (cameraRight * vertexPosition.x * quadSize.x) + (cameraUp * vertexPosition.y * quadSize.y);
-
   vec3 scaledGlyphOffset = positionOffset.x * scaleRatio * aspectRatio * cameraRight * textSizeScale;
-
   vec3 position = targetPosition + offset + billboardVertPosition + scaledGlyphOffset;
 
   position = (modelViewMatrix * vec4(position, 1.0)).xyz;
   gl_Position = projectionMatrix * vec4(position, 1.0);
 
-
   float distance = -position.z;
 
   idcolor = vec4(0.0, texturePosition.y, 0.0, 1.0);
 
-  layer = 0; //FIXME Only ever using the first texture layer?
+  layer = textureLayer;
 
   texcoord = vec2(texturePosition.x + (vertexPosition.x * glyphSize.x), (((1.0 - texturePosition.y)) + (vertexPosition.y * glyphSize.y))) ;
   textColor = color;

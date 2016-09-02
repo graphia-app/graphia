@@ -140,6 +140,5 @@ void Rectangle::generateVertexData(std::vector<float>& vertices, std::vector<flo
     indices[3] = 2;
     indices[4] = 3;
     indices[5] = 0;
-
 }
 }

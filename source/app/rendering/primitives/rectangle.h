@@ -5,6 +5,7 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
+
 namespace Primitive
 {
 class Rectangle  : public QObject

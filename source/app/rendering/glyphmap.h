@@ -32,6 +32,8 @@ public:
 
         struct TextureGlyph
         {
+            int _layer = -1;
+
             float _u = -1.0f;
             float _v = -1.0f;
             float _width = -1.0f;

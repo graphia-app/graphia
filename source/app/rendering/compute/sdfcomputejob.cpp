@@ -16,12 +16,6 @@ SDFComputeJob::SDFComputeJob(GLuint sdfTexture, std::shared_ptr<GlyphMap> glyphM
 
 void SDFComputeJob::run()
 {
-    resolveOpenGLFunctions();
-
-    int textureSize;
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &textureSize);
-    _glyphMap->setMaxTextureSize(textureSize);
-
     _glyphMap->update();
     generateSDF();
 }
@@ -95,6 +89,7 @@ void SDFComputeJob::generateSDF()
     if(_glyphMap->images().empty())
         return;
 
+    resolveOpenGLFunctions();
     QOpenGLVertexArrayObject screenQuadVAO;
     QOpenGLBuffer screenQuadDataBuffer;
     QOpenGLShaderProgram sdfShader;
@@ -110,7 +105,6 @@ void SDFComputeJob::generateSDF()
     const int renderHeight = _glyphMap->images().at(0).height() / scaleFactor;
     const int numImages = static_cast<int>(_glyphMap->images().size());
 
-    //QOpenGLBuffer screenQuadDataBuffer;
     prepareScreenQuadDataBuffer(screenQuadDataBuffer, renderWidth, renderHeight);
 
     sdfShader.bind();
@@ -188,7 +182,7 @@ void SDFComputeJob::generateSDF()
         glBindTexture(GL_TEXTURE_2D_ARRAY, _sdfTexture);
         glGetTexImage(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
 
-        // Save each layer as it's own image for debug
+        // Save each layer as its own image for debug
         for(int layer = 0; layer < numImages; ++layer)
         {
             int offset = (_glyphMap->images().at(0).byteCount() / (scaleFactor * scaleFactor)) * layer;

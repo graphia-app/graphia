@@ -203,18 +203,20 @@ void GlyphMap::renderImages()
         auto path = rawFont.pathForGlyph(glyph);
         int glyphWidth = path.boundingRect().width() * 2;
 
-        // If Y exceeds maxTexture Size
+        // If X exceeds maxTexture Size
         if(x + glyphWidth + padding >= _maxTextureSize)
         {
             // New row layer if exceed x size
             y += glyphHeight + padding;
             x = padding;
             // If Y exceeds maxTexture Size
-            if(y >= _maxTextureSize)
+            if(y + glyphHeight + padding >= _maxTextureSize)
             {
                 // New image layer if exceed rowcount
-                y = glyphHeight + padding;
                 layer++;
+                x = padding;
+                y = padding;
+
                 // Remake the painter with the new image++
                 textPainter = std::make_unique<QPainter>(&_images[layer]);
                 textPainter->setFont(font);
@@ -230,7 +232,7 @@ void GlyphMap::renderImages()
         float w = static_cast<float>(glyphWidth) / imageWidth;
         float h = static_cast<float>(glyphHeight) / imageHeight;
 
-        _results._glyphs[glyph] = {u, v, w, h};
+        _results._glyphs[glyph] = {layer, u, v, w, h};
 
         x += glyphWidth + padding;
     }
