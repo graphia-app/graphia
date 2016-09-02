@@ -69,6 +69,10 @@ private:
     NodeVisuals _nodeVisuals;
     EdgeVisuals _edgeVisuals;
 
+    // While loading there may be lots of initial changes, and
+    // we don't want to do many visual updates, so disable them
+    bool _visualUpdatesEnabled = false;
+
     NodeArray<QString> _nodeNames;
 
     QString _name;
@@ -89,7 +93,7 @@ public:
     const NodeArray<QString>& nodeNames() const { return _nodeNames; }
 
     QString nodeName(NodeId nodeId) const { return _nodeNames[nodeId]; }
-    void setNodeName(NodeId nodeId, const QString& name) { _nodeNames[nodeId] = name; }
+    void setNodeName(NodeId nodeId, const QString& name);
 
     const QString& name() const { return _name; }
 
@@ -108,6 +112,7 @@ public:
 
     IDataField& dataField(const QString& name);
 
+    void enableVisualUpdates();
     void updateVisuals(const SelectionManager* selectionManager = nullptr, const SearchManager* searchManager = nullptr);
 
 public slots:

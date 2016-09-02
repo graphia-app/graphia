@@ -61,6 +61,12 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
         std::make_pair(DataFieldElementType::Component, std::make_unique<FilterTransformFactory>()));
 }
 
+void GraphModel::setNodeName(NodeId nodeId, const QString& name)
+{
+    _nodeNames[nodeId] = name;
+    updateVisuals();
+}
+
 static std::unique_ptr<GraphTransform> createGraphTransform(const GraphTransformConfiguration& config,
                                                             const GraphTransformFactory& factory,
                                                             const DataField& field)
@@ -200,8 +206,17 @@ const DataField& GraphModel::dataFieldByName(const QString& name) const
     return u::contains(_dataFields, name) ? _dataFields.at(name) : nullDataField;
 }
 
+void GraphModel::enableVisualUpdates()
+{
+    _visualUpdatesEnabled = true;
+    updateVisuals();
+}
+
 void GraphModel::updateVisuals(const SelectionManager* selectionManager, const SearchManager* searchManager)
 {
+    if(!_visualUpdatesEnabled)
+        return;
+
     emit visualsWillChange();
 
     auto nodeColor  = u::pref("visuals/defaultNodeColor").value<QColor>();

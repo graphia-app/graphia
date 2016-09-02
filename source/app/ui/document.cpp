@@ -392,6 +392,8 @@ void Document::onLoadComplete(bool success)
             this, &Document::onGraphTransformsConfigurationDataChanged);
     addGraphTransform();
 
+    _graphModel->enableVisualUpdates();
+
     setStatus(QString(tr("Loaded %1 (%2 nodes, %3 edges, %4 components)")).arg(
                 _graphModel->name()).arg(
                 _graphModel->graph().numNodes()).arg(
