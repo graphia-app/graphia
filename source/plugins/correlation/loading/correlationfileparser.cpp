@@ -112,6 +112,7 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
 
     graph.setPhase(QObject::tr("Building Graph"));
     _plugin->createEdges(edges, progress);
+    _plugin->setNodeNamesToFirstRowAttribute();
 
     graph.clearPhase();
 

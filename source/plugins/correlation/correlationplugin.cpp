@@ -142,6 +142,20 @@ void CorrelationPluginInstance::createEdges(const std::vector<std::tuple<NodeId,
     _attributesTableModel.initialise();
 }
 
+void CorrelationPluginInstance::setNodeNamesToFirstRowAttribute()
+{
+    if(!_rowAttributes.empty())
+    {
+        const auto& firstAttributeName = _rowAttributes.front()._name;
+
+        for(auto& dataRow : _dataRows)
+        {
+             graphModel()->setNodeName(dataRow._nodeId, rowAttributeValue(
+                rowIndexForNodeId(dataRow._nodeId), firstAttributeName));
+        }
+    }
+}
+
 void CorrelationPluginInstance::setDimensions(int numColumns, int numRows)
 {
     Q_ASSERT(_dataColumnNames.empty());
@@ -357,14 +371,6 @@ void CorrelationPluginInstance::onGraphChanged()
 
         default: break;
         }
-    }
-
-    if(!_rowAttributes.empty())
-    {
-        const auto& firstAttributeName = _rowAttributes.front()._name;
-
-        for(auto nodeId : graphModel()->graph().nodeIds())
-            graphModel()->setNodeName(nodeId, rowAttributeValue(rowIndexForNodeId(nodeId), firstAttributeName));
     }
 }
 

@@ -166,6 +166,8 @@ public:
     void createEdges(const std::vector<std::tuple<NodeId, NodeId, double>>& edges,
                      const IParser::ProgressFn& progress);
 
+    void setNodeNamesToFirstRowAttribute();
+
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName);
 
     int numRows() const { return _numRows; }
