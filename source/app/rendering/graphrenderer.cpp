@@ -1,19 +1,18 @@
 #include "graphrenderer.h"
 
+#include "glyphmap.h"
 #include "graphcomponentscene.h"
 #include "graphoverviewscene.h"
-
+#include "compute/sdfcomputejob.h"
+#include "shared/utils/preferences.h"
+#include "../commands/command.h"
+#include "../graph/graphmodel.h"
 #include "../ui/graphcomponentinteractor.h"
 #include "../ui/graphoverviewinteractor.h"
-
-#include "../graph/graphmodel.h"
-
+#include "../ui/document.h"
 #include "../ui/graphquickitem.h"
 #include "../ui/selectionmanager.h"
-
-#include "../commands/command.h"
-
-#include "shared/utils/preferences.h"
+#include "../utils/shadertools.h"
 
 #include <QObject>
 #include <QOpenGLFramebufferObjectFormat>
@@ -22,31 +21,9 @@
 #include <QQuickWindow>
 #include <QEvent>
 #include <QNativeGestureEvent>
+#include <QTextLayout>
 
 #include <cstddef>
-
-static bool loadShaderProgram(QOpenGLShaderProgram& program, const QString& vertexShader, const QString& fragmentShader)
-{
-    if(!program.addShaderFromSourceFile(QOpenGLShader::Vertex, vertexShader))
-    {
-        qCritical() << QObject::tr("Could not compile vertex shader. Log:") << program.log();
-        return false;
-    }
-
-    if(!program.addShaderFromSourceFile(QOpenGLShader::Fragment, fragmentShader))
-    {
-        qCritical() << QObject::tr("Could not compile fragment shader. Log:") << program.log();
-        return false;
-    }
-
-    if(!program.link())
-    {
-        qCritical() << QObject::tr("Could not link shader program. Log:") << program.log();
-        return false;
-    }
-
-    return true;
-}
 
 template<typename T>
 void setupTexture(T t, GLuint& texture, int width, int height, GLint format)
@@ -72,6 +49,28 @@ GPUGraphData::GPUGraphData()
     resolveOpenGLFunctions();
 }
 
+void GPUGraphData::initialise(QOpenGLShaderProgram& nodesShader,
+                              QOpenGLShaderProgram& edgesShader,
+                              QOpenGLShaderProgram& textShader)
+{
+    _sphere.setRadius(1.0f);
+    _sphere.setRings(16);
+    _sphere.setSlices(16);
+    _sphere.create(nodesShader);
+
+    _cylinder.setRadius(1.0f);
+    _cylinder.setLength(1.0f);
+    _cylinder.setSlices(8);
+    _cylinder.create(edgesShader);
+
+    _rectangle.create(textShader);
+
+    prepareVertexBuffers();
+    prepareNodeVAO(nodesShader);
+    prepareEdgeVAO(edgesShader);
+    prepareTextVAO(textShader);
+}
+
 GPUGraphData::~GPUGraphData()
 {
     if(_fbo != 0)
@@ -93,24 +92,6 @@ GPUGraphData::~GPUGraphData()
     }
 }
 
-void GPUGraphData::initialise(QOpenGLShaderProgram& nodesShader,
-                              QOpenGLShaderProgram& edgesShader)
-{
-    _sphere.setRadius(1.0f);
-    _sphere.setRings(16);
-    _sphere.setSlices(16);
-    _sphere.create(nodesShader);
-
-    _cylinder.setRadius(1.0f);
-    _cylinder.setLength(1.0f);
-    _cylinder.setSlices(8);
-    _cylinder.create(edgesShader);
-
-    prepareVertexBuffers();
-    prepareNodeVAO(nodesShader);
-    prepareEdgeVAO(edgesShader);
-}
-
 void GPUGraphData::prepareVertexBuffers()
 {
     if(!_nodeVBO.isCreated())
@@ -119,11 +100,59 @@ void GPUGraphData::prepareVertexBuffers()
         _nodeVBO.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     }
 
+    if(!_textVBO.isCreated())
+    {
+        _textVBO.create();
+        _textVBO.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    }
+
     if(!_edgeVBO.isCreated())
     {
         _edgeVBO.create();
         _edgeVBO.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     }
+}
+
+void GPUGraphData::prepareTextVAO(QOpenGLShaderProgram& shader)
+{
+    _rectangle.vertexArrayObject()->bind();
+    shader.bind();
+    _textVBO.bind();
+
+    shader.enableAttributeArray("component");
+    shader.enableAttributeArray("texturePosition");
+    shader.enableAttributeArray("targetPosition");
+    shader.enableAttributeArray("positionOffset");
+    shader.enableAttributeArray("glyphSize");
+    shader.enableAttributeArray("color");
+    shader.enableAttributeArray("textScale");
+    shader.enableAttributeArray("stringWidth");
+    shader.enableAttributeArray("targetOffset");
+
+    glVertexAttribIPointer(shader.attributeLocation("component"), 1, GL_INT, sizeof(GlyphData),
+                          reinterpret_cast<const void*>(offsetof(GlyphData, _component)));
+    shader.setAttributeBuffer("texturePosition", GL_FLOAT, offsetof(GlyphData, _texturePosition), 2, sizeof(GlyphData));
+    shader.setAttributeBuffer("targetPosition",  GL_FLOAT, offsetof(GlyphData, _targetPosition),  3, sizeof(GlyphData));
+    shader.setAttributeBuffer("positionOffset",  GL_FLOAT, offsetof(GlyphData, _positionOffset),  2, sizeof(GlyphData));
+    shader.setAttributeBuffer("glyphSize",       GL_FLOAT, offsetof(GlyphData, _glyphSize),       2, sizeof(GlyphData));
+    shader.setAttributeBuffer("color",           GL_FLOAT, offsetof(GlyphData, _color),           3, sizeof(GlyphData));
+    shader.setAttributeBuffer("textScale",       GL_FLOAT, offsetof(GlyphData, _textScale),       1, sizeof(GlyphData));
+    shader.setAttributeBuffer("stringWidth",     GL_FLOAT, offsetof(GlyphData, _stringWidth),     1, sizeof(GlyphData));
+    shader.setAttributeBuffer("targetOffset",    GL_FLOAT, offsetof(GlyphData, _targetOffset),    2, sizeof(GlyphData));
+
+    glVertexAttribDivisor(shader.attributeLocation("component"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("texturePosition"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("targetPosition"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("positionOffset"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("glyphSize"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("color"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("textScale"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("stringWidth"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("targetOffset"), 1);
+
+    _textVBO.release();
+    shader.release();
+    _rectangle.vertexArrayObject()->release();
 }
 
 void GPUGraphData::prepareNodeVAO(QOpenGLShaderProgram& shader)
@@ -212,6 +241,7 @@ void GPUGraphData::reset()
     _alpha2 = 0.0f;
     _nodeData.clear();
     _edgeData.clear();
+    _glyphData.clear();
 }
 
 void GPUGraphData::clearFramebuffer()
@@ -246,6 +276,10 @@ void GPUGraphData::upload()
     _edgeVBO.bind();
     _edgeVBO.allocate(_edgeData.data(), static_cast<int>(_edgeData.size()) * sizeof(EdgeData));
     _edgeVBO.release();
+
+    _textVBO.bind();
+    _textVBO.allocate(_glyphData.data(), static_cast<int>(_glyphData.size()) * sizeof(GlyphData));
+    _textVBO.release();
 }
 
 int GPUGraphData::numNodes() const
@@ -270,11 +304,13 @@ bool GPUGraphData::unused() const
 
 GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
                              CommandManager& commandManager,
-                             std::shared_ptr<SelectionManager> selectionManager) :
+                             std::shared_ptr<SelectionManager> selectionManager,
+                             std::shared_ptr<GPUComputeThread> gpuComputeThread) :
     QObject(),
     OpenGLFunctions(),
     _graphModel(graphModel),
     _selectionManager(selectionManager),
+    _gpuComputeThread(gpuComputeThread),
     _componentRenderers(_graphModel->graph()),
     _hiddenNodes(_graphModel->graph()),
     _hiddenEdges(_graphModel->graph()),
@@ -283,22 +319,28 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
 {
     resolveOpenGLFunctions();
 
-    loadShaderProgram(_screenShader, ":/shaders/screen.vert", ":/shaders/screen.frag");
-    loadShaderProgram(_selectionShader, ":/shaders/screen.vert", ":/shaders/selection.frag");
+    ShaderTools::loadShaderProgram(_screenShader, ":/shaders/screen.vert", ":/shaders/screen.frag");
+    ShaderTools::loadShaderProgram(_selectionShader, ":/shaders/screen.vert", ":/shaders/selection.frag");
+    ShaderTools::loadShaderProgram(_sdfShader, ":/shaders/screen.vert", ":/shaders/sdf.frag");
 
-    loadShaderProgram(_nodesShader, ":/shaders/instancednodes.vert", ":/shaders/ads.frag");
-    loadShaderProgram(_edgesShader, ":/shaders/instancededges.vert", ":/shaders/ads.frag");
+    ShaderTools::loadShaderProgram(_nodesShader, ":/shaders/instancednodes.vert", ":/shaders/ads.frag");
+    ShaderTools::loadShaderProgram(_edgesShader, ":/shaders/instancededges.vert", ":/shaders/ads.frag");
 
-    loadShaderProgram(_selectionMarkerShader, ":/shaders/2d.vert", ":/shaders/selectionMarker.frag");
-    loadShaderProgram(_debugLinesShader, ":/shaders/debuglines.vert", ":/shaders/debuglines.frag");
+    ShaderTools::loadShaderProgram(_selectionMarkerShader, ":/shaders/2d.vert", ":/shaders/selectionMarker.frag");
+    ShaderTools::loadShaderProgram(_debugLinesShader, ":/shaders/debuglines.vert", ":/shaders/debuglines.frag");
+
+    ShaderTools::loadShaderProgram(_textShader, ":/shaders/textrender.vert", ":/shaders/textrender.frag");
 
     prepareSelectionMarkerVAO();
     prepareQuad();
 
     for(auto& gpuGraphData : _gpuGraphData)
-        gpuGraphData.initialise(_nodesShader, _edgesShader);
+        gpuGraphData.initialise(_nodesShader, _edgesShader, _textShader);
 
     prepareComponentDataTexture();
+
+    _glyphMap = std::make_shared<GlyphMap>(u::pref("visuals/textFont").toString());
+    prepareSDFTextures();
 
     auto graph = &_graphModel->graph();
 
@@ -331,6 +373,7 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
     else
         switchToOverviewMode(false);
 
+    connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphRenderer::onPreferenceChanged, Qt::DirectConnection);
     connect(_graphModel.get(), &GraphModel::visualsWillChange, [this]
     {
         disableSceneUpdate();
@@ -338,6 +381,8 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
 
     connect(_graphModel.get(), &GraphModel::visualsChanged, [this]
     {
+        updateText();
+
         executeOnRendererThread([this]
         {
             updateGPUData(When::Later);
@@ -347,12 +392,13 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
         enableSceneUpdate();
     });
 
-    enableSceneUpdate();
-
     _performanceCounter.setReportFn([this](float ticksPerSecond)
     {
         emit fpsChanged(ticksPerSecond);
     });
+
+    updateText(true);
+    enableSceneUpdate();
 }
 
 GraphRenderer::~GraphRenderer()
@@ -375,6 +421,12 @@ GraphRenderer::~GraphRenderer()
     {
         glDeleteTextures(1, &_depthTexture);
         _depthTexture = 0;
+    }
+
+    if(_sdfTextures[0] != 0)
+    {
+        glDeleteTextures(2, &_sdfTextures[0]);
+        _sdfTextures = {};
     }
 }
 
@@ -447,7 +499,8 @@ void GraphRenderer::updateGPUDataIfRequired()
 
     _gpuDataRequiresUpdate = false;
 
-    std::unique_lock<std::recursive_mutex> lock(_graphModel->nodePositions().mutex());
+    std::unique_lock<std::recursive_mutex> nodePositionsLock(_graphModel->nodePositions().mutex());
+    std::unique_lock<std::recursive_mutex> glyphMapLock(_glyphMap->mutex());
 
     int componentIndex = 0;
 
@@ -468,6 +521,9 @@ void GraphRenderer::updateGPUDataIfRequired()
 
         const float NotFoundAlpha = 0.2f;
 
+        float textScale = u::pref("visuals/textSize").toFloat();
+        auto textColor = Document::textColorForBackground();
+
         for(auto nodeId : componentRenderer->nodeIds())
         {
             if(_hiddenNodes.get(nodeId))
@@ -476,17 +532,20 @@ void GraphRenderer::updateGPUDataIfRequired()
             const QVector3D nodePosition = nodePositions.getScaledAndSmoothed(nodeId);
             scaledAndSmoothedNodePositions[nodeId] = nodePosition;
 
+            auto& nodeVisual = nodeVisuals[nodeId];
+
+            // Create and Add NodeData
             GPUGraphData::NodeData nodeData;
             nodeData._position[0] = nodePosition.x();
             nodeData._position[1] = nodePosition.y();
             nodeData._position[2] = nodePosition.z();
             nodeData._component = componentIndex;
-            nodeData._size = nodeVisuals[nodeId]._size;
-            nodeData._color[0] = nodeVisuals[nodeId]._color.redF();
-            nodeData._color[1] = nodeVisuals[nodeId]._color.greenF();
-            nodeData._color[2] = nodeVisuals[nodeId]._color.blueF();
+            nodeData._size = nodeVisual._size;
+            nodeData._color[0] = nodeVisual._color.redF();
+            nodeData._color[1] = nodeVisual._color.greenF();
+            nodeData._color[2] = nodeVisual._color.blueF();
 
-            QColor outlineColor = nodeVisuals[nodeId]._state.testFlag(VisualFlags::Selected) ?
+            QColor outlineColor = nodeVisual._state.testFlag(VisualFlags::Selected) ?
                 Qt::GlobalColor::white : Qt::GlobalColor::black;
 
             nodeData._outlineColor[0] = outlineColor.redF();
@@ -494,10 +553,46 @@ void GraphRenderer::updateGPUDataIfRequired()
             nodeData._outlineColor[2] = outlineColor.blueF();
 
             auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(),
-                nodeVisuals[nodeId]._state.testFlag(VisualFlags::NotFound) ? NotFoundAlpha : 1.0f);
+                nodeVisual._state.testFlag(VisualFlags::NotFound) ? NotFoundAlpha : 1.0f);
 
             if(gpuGraphData != nullptr)
                 gpuGraphData->_nodeData.push_back(nodeData);
+
+            auto& textLayout = _textLayoutResults._layouts[nodeVisual._text];
+            for(auto glyph : textLayout._glyphs)
+            {
+                GPUGraphData::GlyphData glyphData;
+
+                auto textureGlyph = _textLayoutResults._glyphs[glyph._index];
+
+                glyphData._component = componentIndex;
+
+                glyphData._glyphSize[0] = textureGlyph._width;
+                glyphData._glyphSize[1] = textureGlyph._height;
+
+                glyphData._textScale = textScale;
+                glyphData._stringWidth = textLayout._width;
+
+                // Offset By Node Size
+                glyphData._targetOffset[0] = nodeVisual._size;
+                glyphData._targetOffset[1] = nodeVisual._size;
+
+                glyphData._texturePosition[0] = textureGlyph._u;
+                glyphData._texturePosition[1] = textureGlyph._v;
+
+                glyphData._positionOffset[0] = glyph._advance;
+                glyphData._positionOffset[1] = 0.0f;
+
+                glyphData._targetPosition[0] = nodePosition.x();
+                glyphData._targetPosition[1] = nodePosition.y();
+                glyphData._targetPosition[2] = nodePosition.z();
+
+                glyphData._color[0] = textColor.redF();
+                glyphData._color[1] = textColor.greenF();
+                glyphData._color[2] = textColor.blueF();
+
+                gpuGraphData->_glyphData.push_back(glyphData);
+            }
         }
 
         for(auto& edge : componentRenderer->edges())
@@ -851,7 +946,6 @@ void GraphRenderer::onGraphChanged(const Graph* graph)
             componentRendererForId(componentId)->initialise(_graphModel, componentId,
                                                             _selectionManager, this);
         }
-
         updateGPUData(When::Later);
     }, "GraphRenderer::onGraphChanged update");
 }
@@ -878,6 +972,15 @@ void GraphRenderer::onComponentWillBeRemoved(const Graph*, ComponentId component
     {
         componentRendererForId(componentId)->cleanup();
     }, QString("GraphRenderer::onComponentWillBeRemoved (cleanup) component %1").arg(static_cast<int>(componentId)));
+}
+
+void GraphRenderer::onPreferenceChanged(const QString& key, const QVariant& value)
+{
+    if(key == "visuals/textFont")
+    {
+        _glyphMap->setFontName(value.toString());
+        updateText();
+    }
 }
 
 void GraphRenderer::onCommandWillExecute(const Command*)
@@ -909,6 +1012,51 @@ void GraphRenderer::onComponentCleanup(ComponentId)
 void GraphRenderer::onVisibilityChanged()
 {
     updateGPUData(When::Later);
+}
+
+GLuint GraphRenderer::sdfTextureCurrent() const
+{
+    return _sdfTextures[_currentSDFTextureIndex];
+}
+
+GLuint GraphRenderer::sdfTextureOffscreen() const
+{
+    return _sdfTextures[1 - _currentSDFTextureIndex];
+}
+
+void GraphRenderer::swapSdfTexture()
+{
+    _currentSDFTextureIndex = 1 - _currentSDFTextureIndex;
+}
+
+void GraphRenderer::updateText(bool waitForCompletion)
+{
+    std::unique_lock<std::recursive_mutex> glyphMapLock(_glyphMap->mutex());
+
+    for(auto nodeId : _graphModel->graph().nodeIds())
+        _glyphMap->addText(_graphModel->nodeVisuals()[nodeId]._text);
+
+    if(_glyphMap->updateRequired())
+    {
+        auto job = std::make_shared<SDFComputeJob>(sdfTextureOffscreen(), _glyphMap);
+        job->executeWhenComplete([this]
+        {
+            executeOnRendererThread([this]
+            {
+                swapSdfTexture();
+                _textLayoutResults = _glyphMap->results();
+
+                updateGPUData(When::Later);
+                update(); // QQuickFramebufferObject::Renderer::update
+            }, "GraphRenderer::updateText");
+        });
+
+        _gpuComputeThread->enqueue(job);
+
+        glyphMapLock.unlock();
+        if(waitForCompletion)
+            _gpuComputeThread->wait();
+    }
 }
 
 void GraphRenderer::resetView()
@@ -1024,6 +1172,44 @@ void GraphRenderer::renderEdges(GPUGraphData& gpuGraphData)
     _edgesShader.release();
 }
 
+void GraphRenderer::renderText(GPUGraphData& gpuGraphData)
+{
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+    _textShader.bind();
+    gpuGraphData._textVBO.bind();
+
+     // Bind SDF Textures
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, sdfTextureCurrent());
+
+    // Set to Linear filtering for SDF text
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    _textShader.setUniformValue("tex", 0);
+    _textShader.setUniformValue("textAlignment", u::pref("visuals/textAlignment").toInt());
+
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
+    _textShader.setUniformValue("componentData", 1);
+
+    gpuGraphData._rectangle.vertexArrayObject()->bind();
+    glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._rectangle.indexCount(),
+                            GL_UNSIGNED_INT, nullptr, static_cast<int>(gpuGraphData._glyphData.size())) ;
+    gpuGraphData._rectangle.vertexArrayObject()->release();
+
+    glBindTexture(GL_TEXTURE_BUFFER, 0);
+
+    gpuGraphData._textVBO.release();
+    _textShader.release();
+    glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+}
+
 void GraphRenderer::renderGraph(GPUGraphData& gpuGraphData)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, gpuGraphData._fbo);
@@ -1036,6 +1222,9 @@ void GraphRenderer::renderGraph(GPUGraphData& gpuGraphData)
 
     renderNodes(gpuGraphData);
     renderEdges(gpuGraphData);
+
+    if(u::pref("visuals/showNodeNames").toBool())
+        renderText(gpuGraphData);
 }
 
 void GraphRenderer::renderScene()
@@ -1331,6 +1520,13 @@ GraphComponentRenderer* GraphRenderer::componentRendererForId(ComponentId compon
     return renderer;
 }
 
+void GraphRenderer::prepareSDFTextures()
+{
+    // Generate SDF textures
+    if(_sdfTextures[0] == 0)
+        glGenTextures(2, &_sdfTextures[0]);
+}
+
 void GraphRenderer::prepareSelectionMarkerVAO()
 {
     _selectionMarkerDataVAO.create();
@@ -1370,6 +1566,11 @@ void GraphRenderer::prepareQuad()
     _screenShader.setUniformValue("frameBufferTexture", 0);
     _screenShader.setUniformValue("multisamples", NUM_MULTISAMPLES);
     _screenShader.release();
+
+    _sdfShader.bind();
+    _sdfShader.enableAttributeArray("position");
+    _sdfShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));
+    _sdfShader.release();
 
     _selectionShader.bind();
     _selectionShader.enableAttributeArray("position");

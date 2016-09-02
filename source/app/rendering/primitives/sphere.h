@@ -8,7 +8,8 @@
 #include <QOpenGLBuffer>
 
 #include <vector>
-
+namespace Primitive
+{
 class Sphere : public QObject
 {
     Q_OBJECT
@@ -52,5 +53,6 @@ private:
 
     QOpenGLVertexArrayObject _vao;
 };
+}
 
 #endif // SPHERE_H

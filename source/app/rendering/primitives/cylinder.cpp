@@ -5,13 +5,16 @@
 #include <cmath>
 #include <QOpenGLShaderProgram>
 
+namespace Primitive
+{
+
 Cylinder::Cylinder(QObject* parent) :
-      QObject(parent),
-      _positionBuffer(QOpenGLBuffer::VertexBuffer),
-      _normalBuffer(QOpenGLBuffer::VertexBuffer),
-      _textureCoordBuffer(QOpenGLBuffer::VertexBuffer),
-      _indexBuffer(QOpenGLBuffer::IndexBuffer),
-      _vao()
+    QObject(parent),
+    _positionBuffer(QOpenGLBuffer::VertexBuffer),
+    _normalBuffer(QOpenGLBuffer::VertexBuffer),
+    _textureCoordBuffer(QOpenGLBuffer::VertexBuffer),
+    _indexBuffer(QOpenGLBuffer::IndexBuffer),
+    _vao()
 {
 }
 
@@ -170,4 +173,5 @@ void Cylinder::generateVertexData(std::vector<float>& vertices, std::vector<floa
 
         index += 6;
     }
+}
 }

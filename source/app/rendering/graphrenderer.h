@@ -5,6 +5,11 @@
 #include "openglfunctions.h"
 #include "graphcomponentrenderer.h"
 #include "transition.h"
+#include "glyphmap.h"
+
+#include "primitives/cylinder.h"
+#include "primitives/sphere.h"
+#include "primitives/rectangle.h"
 
 #include "shared/graph/grapharray.h"
 
@@ -18,17 +23,19 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
 #include <QQuickFramebufferObject>
+#include <array>
 
 #include <functional>
 #include <memory>
 #include <atomic>
 #include <vector>
-#include <array>
+#include <QImage>
 
 class GraphQuickItem;
 class GraphModel;
 class CommandManager;
 class SelectionManager;
+class GPUComputeThread;
 class QOpenGLDebugMessage;
 
 class Scene;
@@ -59,10 +66,12 @@ struct GPUGraphData : OpenGLFunctions
     virtual ~GPUGraphData();
 
     void initialise(QOpenGLShaderProgram& nodesShader,
-                    QOpenGLShaderProgram& edgesShader);
+                    QOpenGLShaderProgram& edgesShader,
+                    QOpenGLShaderProgram& textShader);
     void prepareVertexBuffers();
     void prepareNodeVAO(QOpenGLShaderProgram& shader);
     void prepareEdgeVAO(QOpenGLShaderProgram& shader);
+    void prepareTextVAO(QOpenGLShaderProgram &shader);
 
     bool prepareRenderBuffers(int width, int height, GLuint depthTexture);
 
@@ -75,12 +84,13 @@ struct GPUGraphData : OpenGLFunctions
     int numNodes() const;
     int numEdges() const;
 
+    Primitive::Sphere _sphere;
+    Primitive::Cylinder _cylinder;
+    Primitive::Rectangle _rectangle;
+
     float alpha() const;
 
     bool unused() const;
-
-    Sphere _sphere;
-    Cylinder _cylinder;
 
     struct NodeData
     {
@@ -101,6 +111,19 @@ struct GPUGraphData : OpenGLFunctions
         float _outlineColor[3];
     };
 
+    struct GlyphData
+    {
+        int _component;
+        float _texturePosition[2];
+        float _targetPosition[3];
+        float _positionOffset[2];
+        float _glyphSize[2];
+        float _color[3];
+        float _textScale;
+        float _stringWidth;
+        float _targetOffset[2];
+    };
+
     // There are two alpha values so that we can split the alpha blended layers
     // depending on their purpose. The rendering occurs in order based on _alpha1,
     // going from opaque to transparent, then resorting to _alpha2 in the same order,
@@ -111,6 +134,9 @@ struct GPUGraphData : OpenGLFunctions
     std::vector<NodeData> _nodeData;
     QOpenGLBuffer _nodeVBO;
 
+    std::vector<GlyphData> _glyphData;
+    QOpenGLBuffer _textVBO;
+
     std::vector<EdgeData> _edgeData;
     QOpenGLBuffer _edgeVBO;
 
@@ -118,6 +144,16 @@ struct GPUGraphData : OpenGLFunctions
     GLuint _colorTexture = 0;
     GLuint _selectionTexture = 0;
 };
+
+enum class TextAlignment
+{
+    Right,
+    Left,
+    Center,
+    TopCenter,
+    BottomCenter
+};
+Q_DECLARE_METATYPE(TextAlignment)
 
 class GraphRenderer :
         public QObject,
@@ -132,7 +168,8 @@ class GraphRenderer :
 public:
     GraphRenderer(std::shared_ptr<GraphModel> graphModel,
                   CommandManager& commandManager,
-                  std::shared_ptr<SelectionManager> selectionManager);
+                  std::shared_ptr<SelectionManager> selectionManager,
+                  std::shared_ptr<GPUComputeThread> gpuComputeThread);
     virtual ~GraphRenderer();
 
     static const int NUM_MULTISAMPLES = 4;
@@ -149,6 +186,7 @@ public:
 
     void resetView();
     bool viewIsReset() const;
+    void setTextColor(QColor textColor);
 
     void switchToOverviewMode(bool doTransition = true);
     void switchToComponentMode(bool doTransition = true, ComponentId componentId = ComponentId());
@@ -178,6 +216,7 @@ public slots:
     void onCommandWillExecute(const Command*);
     void onCommandCompleted(const Command*, const QString&);
     void onLayoutChanged();
+    void onPreferenceChanged(const QString& key, const QVariant& value);
     void onComponentAlphaChanged(ComponentId componentId);
     void onComponentCleanup(ComponentId componentId);
     void onVisibilityChanged();
@@ -187,6 +226,14 @@ private:
     int _numComponents = 0;
 
     std::shared_ptr<SelectionManager> _selectionManager;
+
+    std::shared_ptr<GPUComputeThread> _gpuComputeThread;
+    std::shared_ptr<GlyphMap> _glyphMap;
+
+    // Store a copy of the text layout results as its computation is a long running
+    // process that occurs in a separate thread; we don't want to be rendering from
+    // a set of results that is currently changing
+    GlyphMap::Results _textLayoutResults;
 
     // It's important that these are pointers and not values, because the array will
     // be resized during ComponentManager::updateComponents, and we still want to be
@@ -217,20 +264,28 @@ private:
 
     QOpenGLShaderProgram _screenShader;
     QOpenGLShaderProgram _selectionShader;
+    QOpenGLShaderProgram _sdfShader;
 
     QOpenGLShaderProgram _nodesShader;
     QOpenGLShaderProgram _edgesShader;
 
     QOpenGLShaderProgram _selectionMarkerShader;
+    QOpenGLShaderProgram _textShader;
     QOpenGLShaderProgram _debugLinesShader;
 
     int _width = 0;
     int _height = 0;
     bool _resized = false;
 
-    bool _FBOcomplete = false;
+    GLuint _colorTexture = 0;
+
+    // The SDF textures are double buffered to prevent flicker when updating
+    int _currentSDFTextureIndex = 0;
+    std::array<GLuint, 2> _sdfTextures = {};
 
     GLuint _depthTexture = 0;
+
+    bool _FBOcomplete = false;
 
     QOpenGLVertexArrayObject _screenQuadVAO;
     QOpenGLBuffer _screenQuadDataBuffer;
@@ -265,8 +320,15 @@ private:
 
     PerformanceCounter _performanceCounter;
 
+    void prepareSDFTextures();
     void prepareSelectionMarkerVAO();
     void prepareQuad();
+
+    GLuint sdfTextureCurrent() const;
+    GLuint sdfTextureOffscreen() const;
+    void swapSdfTexture();
+
+    void updateText(bool waitForCompletion = false);
 
     void prepareComponentDataTexture();
 
@@ -291,6 +353,7 @@ private:
 
     void renderNodes(GPUGraphData& gpuGraphData);
     void renderEdges(GPUGraphData& gpuGraphData);
+    void renderText(GPUGraphData& gpuGraphData);
     void renderGraph(GPUGraphData& gpuGraphData);
     void renderScene();
     void render2D();

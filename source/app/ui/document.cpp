@@ -20,11 +20,31 @@
 #include "selectionmanager.h"
 #include "graphquickitem.h"
 
+
 REGISTER_QML_ENUM(LayoutPauseState);
+
+QColor Document::textColorForBackground()
+{
+    auto backColor = u::pref("visuals/backgroundColor").value<QColor>();
+    float brightness = 0.299f * backColor.redF()
+                       + 0.587f * backColor.greenF()
+                       + 0.114f * backColor.blueF();
+    float blackDiff = std::abs(brightness - 0.0f);
+    float whiteDiff = std::abs(brightness - 1.0f);
+
+    return (blackDiff > whiteDiff) ? Qt::black : Qt::white;
+}
 
 Document::Document(QObject* parent) :
     QObject(parent)
 {
+
+}
+
+Document::~Document()
+{
+    // This must be called from the main thread before deletion
+    _gpuComputeThread->destroySurface();
 }
 
 bool Document::commandInProgress() const
@@ -279,18 +299,21 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
     emit commandVerbChanged(); // Show Loading message
 
     _graphModel = std::make_shared<GraphModel>(fileUrl.fileName(), plugin);
+
+    _gpuComputeThread = std::make_shared<GPUComputeThread>();
+
     _selectionManager = std::make_shared<SelectionManager>(*_graphModel);
     _searchManager = std::make_shared<SearchManager>(*_graphModel);
 
     _pluginInstance = plugin->createInstance();
     _pluginInstance->initialise(_graphModel.get(), _selectionManager.get());
 
+    connect(S(Preferences), &Preferences::preferenceChanged, this, &Document::onPreferenceChanged, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphChanged, [this]
     {
         _searchManager->refresh();
         _graphModel->updateVisuals(_selectionManager.get(), _searchManager.get());
     });
-
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, this, &Document::numNodesFoundChanged);
 
     connect(&_graphModel->graph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
@@ -314,6 +337,12 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
     _graphFileParserThread->start();
 
     return true;
+}
+
+void Document::onPreferenceChanged(const QString &key, const QVariant &)
+{
+    if(key == "visuals/backgroundColor")
+        emit textColorChanged();
 }
 
 void Document::onLoadProgress(int percentage)
@@ -342,7 +371,7 @@ void Document::onLoadComplete(bool success)
     _layoutThread->addAllComponents();
     _layoutSettings.setVectorPtr(&_layoutThread->settingsVector());
 
-    _graphQuickItem->initialise(_graphModel, _commandManager, _selectionManager);
+    _graphQuickItem->initialise(_graphModel, _commandManager, _selectionManager, _gpuComputeThread);
 
     connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::maybeEmitIdleChanged, Qt::DirectConnection);
     connect(_graphQuickItem, &GraphQuickItem::viewIsResetChanged, this, &Document::canResetViewChanged);

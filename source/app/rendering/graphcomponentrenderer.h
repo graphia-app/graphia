@@ -2,8 +2,6 @@
 #define GRAPHCOMPONENTRENDERER_H
 
 #include "camera.h"
-#include "primitives/cylinder.h"
-#include "primitives/sphere.h"
 #include "transition.h"
 #include "../maths/boundingbox.h"
 #include "../graph/graph.h"

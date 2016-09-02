@@ -11,6 +11,7 @@ Item
 {
     Preferences
     {
+        id: visuals;
         section: "visuals"
 
         property alias defaultNodeColor: nodeColorPickButton.color
@@ -34,6 +35,10 @@ Item
         property alias minimumComponentRadius: minimumComponentRadiusSlider.value
         property alias minimumComponentRadiusMinimumValue : minimumComponentRadiusSlider.minimumValue
         property alias minimumComponentRadiusMaximumValue : minimumComponentRadiusSlider.maximumValue
+
+        property string textFont
+        property var textSize
+        property int textAlignment
     }
 
     Column
@@ -42,61 +47,117 @@ Item
         anchors.fill: parent
         anchors.margins: Constants.margin
         spacing: Constants.spacing
-
         GridLayout
         {
             columns: 2
             rowSpacing: Constants.spacing
             columnSpacing: Constants.spacing
-
-            Label
+            Column
             {
-                font.bold: true
-                text: qsTr("Colours")
-                Layout.columnSpan: 2
+                GridLayout
+                {
+                    columns: 2
+                    rowSpacing: Constants.spacing
+                    columnSpacing: Constants.spacing
+
+                    Label
+                    {
+                        font.bold: true
+                        text: qsTr("Colours")
+                        Layout.columnSpan: 2
+                    }
+
+                    Label { text: qsTr("Nodes") }
+                    ColorPickButton { id: nodeColorPickButton }
+
+                    Label { text: qsTr("Edges") }
+                    ColorPickButton { id: edgeColorPickButton }
+
+                    Label { text: qsTr("Multi Elements") }
+                    ColorPickButton { id: multiElementColorPickButton }
+
+                    Label { text: qsTr("Background") }
+                    ColorPickButton { id: backgroundColorPickButton }
+
+                    Label { text: qsTr("Selection") }
+                    ColorPickButton { id: highlightColorPickButton }
+
+                    Label
+                    {
+                        font.bold: true
+                        text: qsTr("Sizes")
+                        Layout.columnSpan: 2
+                    }
+
+                    Label { text: qsTr("Nodes") }
+                    Slider { id: nodeSizeSlider }
+
+                    Label { text: qsTr("Edges") }
+                    Slider { id: edgeSizeSlider }
+
+                    Label
+                    {
+                        font.bold: true
+                        text: qsTr("Miscellaneous")
+                        Layout.columnSpan: 2
+                    }
+
+                    Label { text: qsTr("Transition Time") }
+                    Slider { id: transitionTimeSlider }
+
+                    Label { text: qsTr("Minimum Component Radius") }
+                    Slider { id: minimumComponentRadiusSlider }
+                }
             }
-
-            Label { text: qsTr("Nodes") }
-            ColorPickButton { id: nodeColorPickButton }
-
-            Label { text: qsTr("Edges") }
-            ColorPickButton { id: edgeColorPickButton }
-
-            Label { text: qsTr("Multi Elements") }
-            ColorPickButton { id: multiElementColorPickButton }
-
-            Label { text: qsTr("Background") }
-            ColorPickButton { id: backgroundColorPickButton }
-
-            Label { text: qsTr("Selection") }
-            ColorPickButton { id: highlightColorPickButton }
-
-            Label
+            Column
             {
-                font.bold: true
-                text: qsTr("Sizes")
-                Layout.columnSpan: 2
+                spacing: Constants.spacing
+                anchors.top: parent.top
+                GridLayout
+                {
+                    columns: 2
+                    rowSpacing: Constants.spacing
+                    columnSpacing: Constants.spacing
+                    Label
+                    {
+                        font.bold: true
+                        text: qsTr("Graph Text")
+                        Layout.columnSpan: 2
+                    }
+
+                    Label { text: qsTr("Font") }
+                    Button
+                    {
+                        text: visuals.textFont + " " + visuals.textSize + "pt";
+                        onClicked: { fontDialog.visible = true }
+                    }
+
+                    Label { text: qsTr("Alignment") }
+                    ComboBox
+                    {
+                        width: 200
+                        model: [ "Right", "Left", "Center", "Top", "Bottom" ]
+                        currentIndex: visuals.textAlignment
+                        onCurrentIndexChanged: visuals.textAlignment = currentIndex;
+                    }
+                }
             }
-
-            Label { text: qsTr("Nodes") }
-            Slider { id: nodeSizeSlider }
-
-            Label { text: qsTr("Edges") }
-            Slider { id: edgeSizeSlider }
-
-            Label
-            {
-                font.bold: true
-                text: qsTr("Miscellaneous")
-                Layout.columnSpan: 2
-            }
-
-            Label { text: qsTr("Transition Time") }
-            Slider { id: transitionTimeSlider }
-
-            Label { text: qsTr("Minimum Component Radius") }
-            Slider { id: minimumComponentRadiusSlider }
         }
     }
+
+    FontDialog
+    {
+        id: fontDialog
+        title: "Please choose a font"
+        currentFont: Qt.font({ family: visuals.textFont, pointSize: visuals.textSize, weight: Font.Normal })
+        font: Qt.font({ family: visuals.textFont, pointSize: visuals.textSize, weight: Font.Normal })
+        onAccepted: {
+            visuals.textFont = fontDialog.font.family;
+            visuals.textSize = fontDialog.font.pointSize;
+        }
+        visible: false
+    }
 }
+
+
 

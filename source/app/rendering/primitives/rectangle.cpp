@@ -1,0 +1,145 @@
+#include "rectangle.h"
+namespace Primitive
+{
+
+Rectangle::Rectangle(QObject* parent) :
+    QObject(parent),
+    _positionBuffer(QOpenGLBuffer::VertexBuffer),
+    _normalBuffer(QOpenGLBuffer::VertexBuffer),
+    _textureCoordBuffer(QOpenGLBuffer::VertexBuffer),
+    _indexBuffer(QOpenGLBuffer::IndexBuffer),
+    _vao()
+{
+}
+
+void Rectangle::create(QOpenGLShaderProgram &shader)
+{
+    std::vector<float> vertices;
+    std::vector<float> normals;
+    std::vector<float> texCoords;
+    std::vector<float> tangents;
+    std::vector<unsigned int> indices;
+
+    generateVertexData(vertices, normals, texCoords, tangents, indices);
+
+    _positionBuffer.create();
+    _positionBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    _positionBuffer.bind();
+    _positionBuffer.allocate(vertices.data(), static_cast<int>(vertices.size()) * sizeof(float));
+
+    _normalBuffer.create();
+    _normalBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    _normalBuffer.bind();
+    _normalBuffer.allocate(normals.data(), static_cast<int>(normals.size()) * sizeof(float));
+
+    _textureCoordBuffer.create();
+    _textureCoordBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    _textureCoordBuffer.bind();
+    _textureCoordBuffer.allocate(texCoords.data(), static_cast<int>(texCoords.size()) * sizeof(float));
+
+    _tangentBuffer.create();
+    _tangentBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    _tangentBuffer.bind();
+    _tangentBuffer.allocate(tangents.data(), static_cast<int>(tangents.size()) * sizeof(float));
+
+    _indexBuffer.create();
+    _indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    _indexBuffer.bind();
+    _indexBuffer.allocate(indices.data(), static_cast<int>(indices.size()) * sizeof(unsigned int));
+
+    if(!_vao.isCreated())
+        _vao.create();
+
+    _vao.bind();
+
+    shader.bind();
+
+    _positionBuffer.bind();
+    shader.enableAttributeArray("vertexPosition");
+    shader.setAttributeBuffer("vertexPosition", GL_FLOAT, 0, 3);
+
+    _normalBuffer.bind();
+    shader.enableAttributeArray("vertexNormal");
+    shader.setAttributeBuffer("vertexNormal", GL_FLOAT, 0, 3);
+
+    _textureCoordBuffer.bind();
+    shader.enableAttributeArray("vertexTexCoord");
+    shader.setAttributeBuffer("vertexTexCoord", GL_FLOAT, 0, 2);
+
+    _tangentBuffer.bind();
+    shader.enableAttributeArray("vertexTangent");
+    shader.setAttributeBuffer("vertexTangent", GL_FLOAT, 0, 4);
+
+    _indexBuffer.bind();
+
+    _vao.release();
+
+    _indexBuffer.release();
+    _tangentBuffer.release();
+    _textureCoordBuffer.release();
+    _normalBuffer.release();
+    _positionBuffer.release();
+
+    shader.release();
+}
+
+void Rectangle::generateVertexData(std::vector<float>& vertices, std::vector<float>& normals,
+                                   std::vector<float>& texCoords, std::vector<float>& tangents,
+                                   std::vector<unsigned int>& indices)
+{
+    vertices.resize(3 * 4);
+    normals.resize(3 * 4);
+    tangents.resize(4 * 4);
+    texCoords.resize(2 * 4);
+    indices.resize(3 * 2);
+
+    float verts[] = {
+        1.0f, 0.0f, 0.0f,
+        1.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f,
+    };
+
+    float norm[] = {
+        0.0f, 0.0f, 1.0f
+    };
+
+    float tangs[] = {
+        1.0f, 0.0f, 0.0f, 1.0f
+    };
+
+    // Copy Verts
+    vertices.assign(std::begin(verts), std::end(verts));
+    for(int i = 0; i < 4; ++i)
+    {
+        int index = i*3;
+        vertices[index] = verts[index];
+        vertices[index+1] = verts[index+1];
+        vertices[index+2] = verts[index+2];
+
+        normals[index] = norm[0];
+        normals[index+1] = norm[1];
+        normals[index+2] = norm[2];
+
+        int tindex = i*4;
+        tangents[tindex] = tangs[0];
+        tangents[tindex+1] = tangs[1];
+        tangents[tindex+2] = tangs[2];
+        tangents[tindex+3] = tangs[3];
+
+        int texIndex = i*2;
+        texCoords[texIndex] = verts[i*3];
+        texCoords[texIndex+1] = verts[(i*3)+1];
+    }
+
+    // Build two triangles
+    indices[0] = 0;
+    indices[1] = 1;
+    indices[2] = 2;
+
+    indices[3] = 2;
+    indices[4] = 3;
+    indices[5] = 0;
+
+}
+}

@@ -11,5 +11,8 @@
         <file>shaders/selection.frag</file>
         <file>shaders/selectionMarker.frag</file>
         <file>shaders/2d.vert</file>
+        <file>shaders/textrender.frag</file>
+        <file>shaders/textrender.vert</file>
+        <file>shaders/sdf.frag</file>
     </qresource>
 </RCC>

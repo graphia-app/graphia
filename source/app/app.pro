@@ -21,14 +21,16 @@ QT += qml quick widgets opengl openglextensions xml svg
 
 HEADERS += \
     application.h \
+    commands/applytransformationscommand.h \
     commands/command.h \
     commands/commandmanager.h \
     commands/deleteselectednodescommand.h \
+    commands/selectnodescommand.h \
     graph/componentmanager.h \
     graph/elementiddistinctsetcollection.h \
     graph/filter.h \
-    graph/graphconsistencychecker.h \
     graph/graph.h \
+    graph/graphconsistencychecker.h \
     graph/graphmodel.h \
     graph/mutablegraph.h \
     layout/barneshuttree.h \
@@ -57,6 +59,10 @@ HEADERS += \
     maths/plane.h \
     maths/ray.h \
     rendering/camera.h \
+    rendering/compute/gpucomputejob.h \
+    rendering/compute/gpucomputethread.h \
+    rendering/compute/sdfcomputejob.h \
+    rendering/glyphmap.h \
     rendering/graphcomponentrenderer.h \
     rendering/graphcomponentscene.h \
     rendering/graphoverviewscene.h \
@@ -64,6 +70,7 @@ HEADERS += \
     rendering/opengldebuglogger.h \
     rendering/openglfunctions.h \
     rendering/primitives/cylinder.h \
+    rendering/primitives/rectangle.h \
     rendering/primitives/sphere.h \
     rendering/scene.h \
     rendering/transition.h \
@@ -80,23 +87,23 @@ HEADERS += \
     ui/graphquickitem.h \
     ui/graphtransformconfiguration.h \
     ui/interactor.h \
+    ui/searchmanager.h \
     ui/selectionmanager.h \
     utils/debugpauser.h \
     utils/enumreflection.h \
     utils/qmlcontainerwrapper.h \
     utils/qmlenum.h \
-    commands/applytransformationscommand.h \
-    ui/searchmanager.h \
-    commands/selectnodescommand.h
+    utils/shadertools.h
 
 SOURCES += \
     application.cpp \
+    commands/applytransformationscommand.cpp \
     commands/command.cpp \
     commands/commandmanager.cpp \
     commands/deleteselectednodescommand.cpp \
     graph/componentmanager.cpp \
-    graph/graphconsistencychecker.cpp \
     graph/graph.cpp \
+    graph/graphconsistencychecker.cpp \
     graph/graphmodel.cpp \
     graph/mutablegraph.cpp \
     layout/barneshuttree.cpp \
@@ -120,6 +127,9 @@ SOURCES += \
     maths/plane.cpp \
     maths/ray.cpp \
     rendering/camera.cpp \
+    rendering/compute/gpucomputethread.cpp \
+    rendering/compute/sdfcomputejob.cpp \
+    rendering/glyphmap.cpp \
     rendering/graphcomponentrenderer.cpp \
     rendering/graphcomponentscene.cpp \
     rendering/graphoverviewscene.cpp \
@@ -127,6 +137,7 @@ SOURCES += \
     rendering/opengldebuglogger.cpp \
     rendering/openglfunctions.cpp \
     rendering/primitives/cylinder.cpp \
+    rendering/primitives/rectangle.cpp \
     rendering/primitives/sphere.cpp \
     rendering/transition.cpp \
     transform/compoundtransform.cpp \
@@ -141,10 +152,9 @@ SOURCES += \
     ui/graphoverviewinteractor.cpp \
     ui/graphquickitem.cpp \
     ui/graphtransformconfiguration.cpp \
+    ui/searchmanager.cpp \
     ui/selectionmanager.cpp \
-    utils/debugpauser.cpp \
-    commands/applytransformationscommand.cpp \
-    ui/searchmanager.cpp
+    utils/debugpauser.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \

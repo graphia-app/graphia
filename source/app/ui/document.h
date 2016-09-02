@@ -3,13 +3,12 @@
 
 #include "graphtransformconfiguration.h"
 
+#include "shared/plugins/iplugin.h"
+#include "../rendering/compute/gpucomputethread.h"
 #include "../graph/graph.h"
 #include "../loading/parserthread.h"
 #include "../commands/commandmanager.h"
 #include "../layout/layout.h"
-
-#include "shared/plugins/iplugin.h"
-
 #include "../utils/qmlenum.h"
 #include "../utils/qmlcontainerwrapper.h"
 
@@ -39,6 +38,8 @@ class Document : public QObject
     Q_PROPERTY(GraphQuickItem* graph MEMBER _graphQuickItem NOTIFY graphQuickItemChanged)
     Q_PROPERTY(QObject* plugin READ pluginInstance NOTIFY pluginInstanceChanged)
     Q_PROPERTY(QString pluginQmlPath READ pluginQmlPath NOTIFY pluginQmlPathChanged)
+
+    Q_PROPERTY(QColor textColor READ textColorForBackground NOTIFY textColorChanged)
 
     Q_PROPERTY(QString title MEMBER _title WRITE setTitle NOTIFY titleChanged)
     Q_PROPERTY(QString status MEMBER _status WRITE setStatus NOTIFY statusChanged)
@@ -75,6 +76,9 @@ class Document : public QObject
 
 public:
     explicit Document(QObject* parent = nullptr);
+    ~Document();
+
+    static QColor textColorForBackground();
 
     bool commandInProgress() const;
     bool idle() const;
@@ -122,6 +126,7 @@ private:
     bool _loadComplete = false;
 
     std::shared_ptr<GraphModel> _graphModel;
+    std::shared_ptr<GPUComputeThread> _gpuComputeThread;
     std::unique_ptr<IPluginInstance> _pluginInstance;
     std::shared_ptr<SelectionManager> _selectionManager;
     std::shared_ptr<SearchManager> _searchManager;
@@ -137,6 +142,7 @@ private:
 
     std::vector<GraphTransformConfiguration> _previousGraphTransformConfigurations;
     QmlContainerWrapper<GraphTransformConfiguration> _graphTransformConfigurations;
+
 
     bool _userLayoutPaused = false; // true if the user wants the layout to pause
 
@@ -172,7 +178,9 @@ signals:
     void pluginInstanceChanged();
     void pluginQmlPathChanged();
 
+
     void titleChanged();
+    void textColorChanged();
     void statusChanged();
 
     void idleChanged();
@@ -205,6 +213,8 @@ public slots:
     bool openFile(const QUrl& fileUrl,
                   const QString& fileType,
                   const QString& pluginName);
+
+    void onPreferenceChanged(const QString& key, const QVariant& value);
 
     void toggleLayout();
 

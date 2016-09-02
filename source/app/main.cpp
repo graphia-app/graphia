@@ -15,6 +15,7 @@
 #include "shared/utils/preferences.h"
 
 #include "rendering/openglfunctions.h"
+#include "rendering/graphrenderer.h"
 
 #include "../thirdparty/qtsingleapplication/qtsingleapplication.h"
 #include "../thirdparty/SortFilterProxyModel/qqmlsortfilterproxymodel.h"
@@ -102,11 +103,17 @@ int main(int argc, char *argv[])
     preferences.define("visuals/defaultNodeSize",           0.6, 0.1,  2.0);
     preferences.define("visuals/defaultEdgeSize",           0.2, 0.02, 2.0);
 
+    preferences.define("visuals/showNodeNames",             false);
+    preferences.define("visuals/textFont",                  SharedTools::QtSingleApplication::font().family());
+    preferences.define("visuals/textSize",                  24.0f);
+    preferences.define("visuals/textAlignment",             QVariant::fromValue(TextAlignment::Right));
+
     preferences.define("visuals/minimumComponentRadius",    2.0, 0.05, 15.0);
     preferences.define("visuals/transitionTime",            1.0, 0.1, 5.0);
 
     preferences.define("misc/showGraphMetrics",             false);
     preferences.define("misc/showLayoutSettings",           false);
+    preferences.define("misc/showNodeText",                 true);
 
     preferences.define("misc/focusFoundNodes",              true);
 

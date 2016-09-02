@@ -5,13 +5,16 @@
 #include <cmath>
 #include <QOpenGLShaderProgram>
 
+namespace Primitive
+{
+
 Sphere::Sphere(QObject* parent) :
-      QObject(parent),
-      _positionBuffer(QOpenGLBuffer::VertexBuffer),
-      _normalBuffer(QOpenGLBuffer::VertexBuffer),
-      _textureCoordBuffer(QOpenGLBuffer::VertexBuffer),
-      _indexBuffer(QOpenGLBuffer::IndexBuffer),
-      _vao()
+    QObject(parent),
+    _positionBuffer(QOpenGLBuffer::VertexBuffer),
+    _normalBuffer(QOpenGLBuffer::VertexBuffer),
+    _textureCoordBuffer(QOpenGLBuffer::VertexBuffer),
+    _indexBuffer(QOpenGLBuffer::IndexBuffer),
+    _vao()
 {
 }
 
@@ -91,7 +94,7 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
                                 std::vector<unsigned int>& indices)
 {
     int faces = (_slices - 2) * _rings + // Number of "rectangular" faces
-                (_rings * 2); // and one ring for the top and bottom caps
+            (_rings * 2); // and one ring for the top and bottom caps
     int numVerts  = (_slices + 1) *(_rings + 1); // One extra line of latitude
 
     // Resize vector to hold our data
@@ -191,4 +194,6 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
             index += 3;
         }
     }
+}
+
 }

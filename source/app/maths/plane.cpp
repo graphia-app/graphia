@@ -27,7 +27,7 @@ Plane::Side Plane::sideForPoint(const QVector3D& point) const
             _normal.y() * point.y() +
             _normal.z() * point.z() + distance();
 
-    if (result >= 0.0f)
+    if(result >= 0.0f)
         return Plane::Side::Front;
 
     return Plane::Side::Back;

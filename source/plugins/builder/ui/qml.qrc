@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/builderplugin.qml</file>
+    </qresource>
+</RCC>

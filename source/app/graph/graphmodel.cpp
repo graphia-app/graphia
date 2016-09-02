@@ -238,6 +238,7 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
         _nodeVisuals[nodeId]._size = nodeSize;
         _nodeVisuals[nodeId]._color = graph().typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Not ?
                     nodeColor : multiColor;
+        _nodeVisuals[nodeId]._text = nodeName(nodeId);
 
         if(selectionManager != nullptr)
         {
@@ -284,7 +285,7 @@ void GraphModel::onFoundNodeIdsChanged(const SearchManager* searchManager)
     updateVisuals(nullptr, searchManager);
 }
 
-void GraphModel::onPreferenceChanged()
+void GraphModel::onPreferenceChanged(const QString&, const QVariant&)
 {
     updateVisuals();
 }

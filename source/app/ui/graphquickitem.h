@@ -2,6 +2,7 @@
 #define GRAPHQUICKITEM_H
 
 #include "../graph/graph.h"
+#include "../rendering/compute/gpucomputethread.h"
 
 #include <QQuickFramebufferObject>
 #include <QTimer>
@@ -38,7 +39,8 @@ public:
 
     void initialise(std::shared_ptr<GraphModel> graphModel,
                     CommandManager& commandManager,
-                    std::shared_ptr<SelectionManager> selectionManager);
+                    std::shared_ptr<SelectionManager> selectionManager,
+                    std::shared_ptr<GPUComputeThread> gpuComputeThread);
 
     std::shared_ptr<GraphModel> graphModel() { return _graphModel; }
     std::shared_ptr<SelectionManager> selectionManager() { return _selectionManager; }
@@ -83,6 +85,7 @@ private:
     void wheelEvent(QWheelEvent* e);
 
     std::shared_ptr<GraphModel> _graphModel;
+    std::shared_ptr<GPUComputeThread> _gpuComputeThread;
     CommandManager* _commandManager = nullptr;
     std::shared_ptr<SelectionManager> _selectionManager;
 

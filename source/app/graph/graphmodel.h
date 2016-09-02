@@ -42,6 +42,8 @@ struct NodeVisual
 {
     float _size = 1.0f;
     QColor _color;
+    QColor _textColor;
+    QString _text;
     VisualState _state;
 };
 
@@ -118,7 +120,7 @@ public:
 public slots:
     void onSelectionChanged(const SelectionManager* selectionManager);
     void onFoundNodeIdsChanged(const SearchManager* searchManager);
-    void onPreferenceChanged();
+    void onPreferenceChanged(const QString&, const QVariant&);
 
 signals:
     void visualsWillChange();

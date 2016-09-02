@@ -98,8 +98,15 @@ ApplicationWindow
 
     Preferences
     {
+        section: "visuals"
+        property alias showNodeNames: toggleNodeNamesAction.checked
+    }
+
+    Preferences
+    {
         section: "debug"
         property alias showFpsMeter: toggleFpsMeterAction.checked
+        property alias saveGlyphMaps: toggleGlyphmapSaveAction.checked
     }
 
     function openFile(fileUrl, inNewTab)
@@ -388,6 +395,13 @@ ApplicationWindow
 
     Action
     {
+        id: toggleNodeNamesAction
+        text: qsTr("Show Node Names")
+        checkable: true
+    }
+
+    Action
+    {
         id: toggleDebugPauserAction
         text: qsTr("Debug Pauser")
         shortcut: "Ctrl+P"
@@ -419,6 +433,13 @@ ApplicationWindow
     {
         id: toggleFpsMeterAction
         text: qsTr("Show FPS Meter")
+        checkable: true
+    }
+
+    Action
+    {
+        id: toggleGlyphmapSaveAction
+        text: qsTr("Save Glyphmaps on Regeneration")
         checkable: true
     }
 
@@ -475,6 +496,7 @@ ApplicationWindow
             }
             MenuSeparator {}
             MenuItem { action: toggleGraphMetricsAction }
+            MenuItem { action: toggleNodeNamesAction }
         }
         Menu
         {
@@ -495,6 +517,7 @@ ApplicationWindow
             }
             MenuItem { action: dumpGraphAction }
             MenuItem { action: toggleFpsMeterAction }
+            MenuItem { action: toggleGlyphmapSaveAction }
         }
         Menu
         {

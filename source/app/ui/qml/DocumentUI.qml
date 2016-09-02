@@ -39,6 +39,7 @@ Item
 
     property bool debugPauserEnabled: document.debugPauserEnabled
     property bool debugPaused: document.debugPaused
+
     property string debugResumeAction: document.debugResumeAction
 
     property bool hasPluginUI: document.pluginQmlPath
@@ -54,14 +55,7 @@ Item
 
     property color textColor:
     {
-        var backgroundBrightness = brightness(visuals.backgroundColor);
-        var blackDiff = Math.abs(backgroundBrightness - 0);
-        var whiteDiff = Math.abs(backgroundBrightness - 1);
-
-        if(blackDiff > whiteDiff)
-            return "black";
-
-        return "white";
+        return document.textColor;
     }
 
     property color disabledTextColor:
@@ -88,7 +82,6 @@ Item
             this.fileUrl = fileUrl;
             this.fileType = fileType;
             this.pluginName = pluginName;
-
             return true;
         }
 
