@@ -102,7 +102,7 @@ Item
 
     function selectAllFound() { document.selectAllFound(); }
     function selectNextFound() { document.selectNextFound(); }
-    function selectPrevFound() { document.selectNextFound(); }
+    function selectPrevFound() { document.selectPrevFound(); }
     function find(text) { document.find(text); }
 
     function toggleDebugPauser() { document.toggleDebugPauser(); }
