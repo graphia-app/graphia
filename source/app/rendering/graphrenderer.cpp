@@ -550,7 +550,7 @@ void GraphRenderer::updateGPUDataIfRequired()
             nodeData._color[2] = nodeVisual._color.blueF();
 
             QColor outlineColor = nodeVisual._state.testFlag(VisualFlags::Selected) ?
-                Qt::GlobalColor::white : Qt::GlobalColor::black;
+                Qt::white : Qt::black;
 
             nodeData._outlineColor[0] = outlineColor.redF();
             nodeData._outlineColor[1] = outlineColor.greenF();
@@ -1315,7 +1315,7 @@ void GraphRenderer::render2D()
 
     if(!_selectionRect.isNull())
     {
-        const QColor color(Qt::GlobalColor::white);
+        const QColor color(Qt::white);
 
         QRect r;
         r.setLeft(_selectionRect.left());

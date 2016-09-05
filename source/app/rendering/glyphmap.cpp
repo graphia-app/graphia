@@ -224,8 +224,8 @@ void GlyphMap::renderImages(const QFont &font)
 
     std::unique_ptr<QPainter> textPainter = std::make_unique<QPainter>(&_images[0]);
     textPainter->setFont(font);
-    textPainter->setPen(Qt::GlobalColor::white);
-    auto fillBrush = QBrush(Qt::GlobalColor::white);
+    textPainter->setPen(Qt::white);
+    auto fillBrush = QBrush(Qt::white);
 
     for(auto& glyphPair : _results._glyphs)
     {
