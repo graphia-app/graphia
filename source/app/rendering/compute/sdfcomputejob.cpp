@@ -177,7 +177,8 @@ void SDFComputeJob::generateSDF()
     if(u::prefExists("debug/saveGlyphMaps") &&
        u::pref("debug/saveGlyphMaps").toBool())
     {
-        int pixelCount = (_glyphMap->images().at(0).byteCount() / (scaleFactor * scaleFactor)) * _glyphMap->images().size();
+        int pixelCount = static_cast<int>((_glyphMap->images().at(0).byteCount() / (scaleFactor * scaleFactor)) *
+                                          _glyphMap->images().size());
         std::vector<uchar> pixels(pixelCount);
         glBindTexture(GL_TEXTURE_2D_ARRAY, _sdfTexture);
         glGetTexImage(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
