@@ -16,6 +16,7 @@
 
 #include <fstream>
 #include <cstring>
+#include <iterator>
 
 template<class It> bool parseGml(IMutableGraph &graph,
                                  BaseGenericPluginInstance* genericPluginInstance,
@@ -26,11 +27,14 @@ template<class It> bool parseGml(IMutableGraph &graph,
     // General GML structure rules
     axe::r_rule<It> keyValue;
     double d;
-    //auto whitespace = *axe::r_any(" \t\n\r");
+
     auto whitespace = axe::r_ref([&cancelled](It i1, It i2)
     {
         if(!cancelled())
-            return axe::make_result(i1 != i2 && std::strchr(" \t\n\r", *i1), i1 + 1, i1);
+        {
+            return axe::make_result(i1 != i2 && std::strchr(" \t\n\r", *i1),
+                                    i1 != i2 ? std::next(i1) : i1, i1);
+        }
         else
             return axe::make_result(false, i2);
     });
