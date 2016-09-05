@@ -27,7 +27,6 @@ private:
     bool _shouldStop = false;
 
     QOpenGLContext* _mainGLContext = nullptr;
-    std::shared_ptr<QOpenGLContext> _computeGLContext;
     std::unique_ptr<QOffscreenSurface> _surface;
     std::unique_ptr<QSurfaceFormat> _format;
 

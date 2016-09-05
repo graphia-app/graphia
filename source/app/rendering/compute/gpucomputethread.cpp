@@ -15,7 +15,9 @@ GPUComputeThread::GPUComputeThread()
 
 GPUComputeThread::~GPUComputeThread()
 {
+    std::unique_lock<std::mutex> lock(_mutex);
     _shouldStop = true;
+    lock.unlock();
     _jobsPending.notify_one();
 
     if(_thread.joinable())
@@ -63,13 +65,13 @@ void GPUComputeThread::run()
 
     u::setCurrentThreadName("ComputeThread");
 
-    _computeGLContext = std::make_shared<QOpenGLContext>();
-    _computeGLContext->setShareContext(_mainGLContext);
+    QOpenGLContext computeGLContext;
+    computeGLContext.setShareContext(_mainGLContext);
 
-    _computeGLContext->setFormat(*_format);
-    _computeGLContext->create();
+    computeGLContext.setFormat(*_format);
+    computeGLContext.create();
 
-    _computeGLContext->makeCurrent(_surface.get());
+    computeGLContext.makeCurrent(_surface.get());
 
     _initialised.notify_one();
 
