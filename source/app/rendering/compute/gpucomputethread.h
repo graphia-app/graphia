@@ -20,7 +20,7 @@ class GPUComputeThread
 private:
     std::thread _thread;
     std::mutex _mutex;
-    std::deque<std::shared_ptr<GPUComputeJob>> _jobs;
+    std::deque<std::unique_ptr<GPUComputeJob>> _jobs;
     std::condition_variable _jobsPending;
     std::condition_variable _jobCompleted;
     std::condition_variable _initialised;
@@ -39,10 +39,10 @@ public:
     void run();
 
     template<typename T> typename std::enable_if<std::is_base_of<GPUComputeJob, T>::value, void>::type
-    enqueue(std::shared_ptr<T> computeJob)
+    enqueue(std::unique_ptr<T>& computeJob)
     {
         std::unique_lock<std::mutex> lock(_mutex);
-        _jobs.push_back(computeJob);
+        _jobs.push_back(std::move(computeJob));
         _jobsPending.notify_one();
     }
 

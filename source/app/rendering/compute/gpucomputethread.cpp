@@ -85,7 +85,7 @@ void GPUComputeThread::run()
 
         while(!_jobs.empty())
         {
-            auto job = _jobs.front();
+            auto& job = _jobs.front();
             job->run();
             _jobs.pop_front();
             _jobCompleted.notify_one();

@@ -1043,7 +1043,7 @@ void GraphRenderer::updateText(bool waitForCompletion)
 
     if(_glyphMap->updateRequired())
     {
-        auto job = std::make_shared<SDFComputeJob>(sdfTextureOffscreen(), _glyphMap);
+        auto job = std::make_unique<SDFComputeJob>(sdfTextureOffscreen(), _glyphMap);
         job->executeWhenComplete([this]
         {
             executeOnRendererThread([this]
