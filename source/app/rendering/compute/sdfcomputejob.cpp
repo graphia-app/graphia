@@ -89,7 +89,6 @@ void SDFComputeJob::generateSDF()
     if(_glyphMap->images().empty())
         return;
 
-    resolveOpenGLFunctions();
     QOpenGLVertexArrayObject screenQuadVAO;
     QOpenGLBuffer screenQuadDataBuffer;
     QOpenGLShaderProgram sdfShader;
