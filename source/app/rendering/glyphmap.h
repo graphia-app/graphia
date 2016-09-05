@@ -81,8 +81,9 @@ public:
     std::recursive_mutex& mutex() { return _mutex; }
 
 private:
-    void layoutStrings();
-    void renderImages();
+    void layoutStrings(const QFont& font);
+    bool stringsAreRenderable(const QFont& font);
+    void renderImages(const QFont& font);
 };
 
 #endif // GLYPHMAP_H

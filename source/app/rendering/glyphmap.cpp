@@ -35,8 +35,23 @@ void GlyphMap::update()
     if(!updateRequired())
         return;
 
-    layoutStrings();
-    renderImages();
+    QFont font(_fontName, _fontSize);
+
+    layoutStrings(font);
+
+    if(!stringsAreRenderable(font))
+    {
+        auto defaultFontName = QGuiApplication::font().family();
+
+        qWarning() << "Font" << _fontName << "is not renderable; "
+                      "falling back to" << defaultFontName;
+
+        font = QFont(defaultFontName, _fontSize);
+        setFontName(defaultFontName);
+        layoutStrings(font);
+    }
+
+    renderImages(font);
 
     _updateTypeRequired = UpdateType::None;
 }
@@ -73,9 +88,8 @@ void GlyphMap::setFontName(const QString& fontName)
     _fontName = fontName;
 }
 
-void GlyphMap::layoutStrings()
+void GlyphMap::layoutStrings(const QFont& font)
 {
-    QFont font(_fontName, _fontSize);
     QFontMetrics fontMetrics(font);
 
     bool relayoutAllStrings = (_updateTypeRequired >= UpdateType::Images);
@@ -136,12 +150,29 @@ void GlyphMap::layoutStrings()
     }
 }
 
-void GlyphMap::renderImages()
+bool GlyphMap::stringsAreRenderable(const QFont &font)
+{
+    auto rawFont = QRawFont::fromFont(font);
+
+    // If there are zero glyphs whose paths are non-empty paths, this
+    // is not something we want to use to render with
+    for(auto& glyphPair : _results._glyphs)
+    {
+        auto glyph = glyphPair.first;
+        auto path = rawFont.pathForGlyph(glyph);
+        auto boundingRect = path.boundingRect();
+        if(!boundingRect.isEmpty())
+            return true;
+    }
+
+    return false;
+}
+
+void GlyphMap::renderImages(const QFont &font)
 {
     if(_results._glyphs.empty() || _updateTypeRequired < UpdateType::Images)
         return;
 
-    QFont font(_fontName, _fontSize);
     QFontMetrics fontMetrics(font);
     auto rawFont = QRawFont::fromFont(font);
 
