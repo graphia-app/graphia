@@ -183,7 +183,7 @@ void GlyphMap::renderImages()
     // Generate Blank Images
     for(int i = 0; i < imageCount; i++)
     {
-       _images.push_back(QImage(imageWidth, imageHeight, QImage::Format_ARGB32));
+       _images.emplace_back(imageWidth, imageHeight, QImage::Format_ARGB32);
        _images.back().fill(Qt::transparent);
     }
 
@@ -232,7 +232,12 @@ void GlyphMap::renderImages()
         float w = static_cast<float>(glyphWidth) / imageWidth;
         float h = static_cast<float>(glyphHeight) / imageHeight;
 
-        _results._glyphs[glyph] = {layer, u, v, w, h};
+        auto& textureGlyph = _results._glyphs[glyph];
+        textureGlyph._layer = layer;
+        textureGlyph._u = u;
+        textureGlyph._v = v;
+        textureGlyph._width = w;
+        textureGlyph._height = h;
 
         x += glyphWidth + padding;
     }
