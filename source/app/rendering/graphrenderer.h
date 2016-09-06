@@ -382,7 +382,7 @@ private:
 
     bool transitionActive() const;
 
-    void moveFocusToNode(NodeId nodeId);
+    void moveFocusToNode(NodeId nodeId, float cameraDistance = -1.0f);
     void moveFocusToComponent(ComponentId componentId);
 
 signals:

@@ -413,7 +413,7 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
     }
 }
 
-void GraphComponentRenderer::moveFocusToNode(NodeId nodeId)
+void GraphComponentRenderer::moveFocusToNode(NodeId nodeId, float cameraDistance)
 {
     if(_componentId.isNull())
         return;
@@ -422,7 +422,7 @@ void GraphComponentRenderer::moveFocusToNode(NodeId nodeId)
     _viewData._autoZooming = false;
     updateEntireComponentZoomDistance();
 
-    centreNodeInViewport(nodeId, -1.0f);
+    centreNodeInViewport(nodeId, cameraDistance);
 }
 
 void GraphComponentRenderer::resetView()

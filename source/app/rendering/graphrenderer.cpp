@@ -733,10 +733,10 @@ bool GraphRenderer::transitionActive() const
     return _transition.active() || _scene->transitionActive();
 }
 
-void GraphRenderer::moveFocusToNode(NodeId nodeId)
+void GraphRenderer::moveFocusToNode(NodeId nodeId, float cameraDistance)
 {
     if(mode() == GraphRenderer::Mode::Component)
-        _graphComponentScene->moveFocusToNode(nodeId);
+        _graphComponentScene->moveFocusToNode(nodeId, cameraDistance);
 }
 
 void GraphRenderer::moveFocusToComponent(ComponentId componentId)

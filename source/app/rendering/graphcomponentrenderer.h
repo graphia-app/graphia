@@ -54,7 +54,7 @@ public:
     QMatrix4x4 modelViewMatrix() const;
     QMatrix4x4 projectionMatrix() const;
 
-    void moveFocusToNode(NodeId nodeId);
+    void moveFocusToNode(NodeId nodeId, float cameraDistance = -1.0f);
     void moveFocusToCentreOfComponent();
     void moveFocusToNodeClosestCameraVector();
     void moveFocusToPositionAndRadius(const QVector3D& position, float radius,

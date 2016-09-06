@@ -245,7 +245,7 @@ void GraphComponentScene::pan(NodeId clickedNodeId, const QPoint& start, const Q
     }
 }
 
-void GraphComponentScene::moveFocusToNode(NodeId nodeId)
+void GraphComponentScene::moveFocusToNode(NodeId nodeId, float cameraDistance)
 {
     // Do nothing if node already focused
     if(componentRenderer()->focusNodeId() == nodeId)
@@ -259,7 +259,7 @@ void GraphComponentScene::moveFocusToNode(NodeId nodeId)
         // This node is in a different component, so focus it directly there,
         // and transition to the component itself
         auto* newComponentRenderer = _graphRenderer->componentRendererForId(componentId);
-        newComponentRenderer->moveFocusToNode(nodeId);
+        newComponentRenderer->moveFocusToNode(nodeId, cameraDistance);
         newComponentRenderer->saveViewData();
         newComponentRenderer->resetView();
 
@@ -269,7 +269,7 @@ void GraphComponentScene::moveFocusToNode(NodeId nodeId)
     {
         _queuedTransitionNodeId.setToNull();
         startTransition([this] { performQueuedTransition(); });
-        componentRenderer()->moveFocusToNode(nodeId);
+        componentRenderer()->moveFocusToNode(nodeId, cameraDistance);
     }
     else
     {
