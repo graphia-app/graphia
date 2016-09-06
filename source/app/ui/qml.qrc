@@ -14,5 +14,6 @@
         <file>qml/PluginChooserDialog.qml</file>
         <file>qml/FileTypeChooserDialog.qml</file>
         <file>qml/Find.qml</file>
+        <file>qml/HiddenSwitch.qml</file>
     </qresource>
 </RCC>

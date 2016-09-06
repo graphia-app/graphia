@@ -75,6 +75,8 @@ ApplicationWindow
     {
         id: pluginsDialog
         pluginDetails: application.pluginDetails
+
+        onHiddenSwitchActivated: debugCrash.trigger();
     }
 
     Preferences
