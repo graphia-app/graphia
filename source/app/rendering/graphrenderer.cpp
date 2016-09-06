@@ -1416,7 +1416,7 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
     ComponentId focusComponentId = graphQuickItem->desiredFocusComponentId();
 
     if(!focusNodeId.isNull())
-        moveFocusToNode(focusNodeId);
+        moveFocusToNode(focusNodeId, GraphComponentRenderer::COMFORTABLE_ZOOM_DISTANCE);
     else if(!focusComponentId.isNull())
     {
         if(mode() == Mode::Overview)

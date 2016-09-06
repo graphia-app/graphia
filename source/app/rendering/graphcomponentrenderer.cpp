@@ -26,6 +26,9 @@
 #include <cmath>
 #include <mutex>
 
+const float GraphComponentRenderer::MINIMUM_ZOOM_DISTANCE = 2.5f;
+const float GraphComponentRenderer::COMFORTABLE_ZOOM_DISTANCE = MINIMUM_ZOOM_DISTANCE * 7.0f;
+
 void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, ComponentId componentId,
                                         std::shared_ptr<SelectionManager> selectionManager,
                                         GraphRenderer* graphRenderer)
@@ -159,8 +162,6 @@ float GraphComponentRenderer::maxNodeDistanceFromPoint(const GraphModel& graphMo
 
     return maxDistance;
 }
-
-const float MINIMUM_ZOOM_DISTANCE = 2.5f;
 
 float GraphComponentRenderer::zoomDistanceForRadius(float radius)
 {

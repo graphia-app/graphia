@@ -25,6 +25,9 @@ class Octree;
 class GraphComponentRenderer
 {
 public:
+    static const float MINIMUM_ZOOM_DISTANCE;
+    static const float COMFORTABLE_ZOOM_DISTANCE;
+
     GraphComponentRenderer() {}
 
     void initialise(std::shared_ptr<GraphModel> graphModel, ComponentId componentId,
