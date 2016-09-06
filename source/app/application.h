@@ -83,6 +83,8 @@ class Application : public QObject
     Q_PROPERTY(QAbstractListModel* urlTypeDetails READ urlTypeDetails NOTIFY urlTypeDetailsChanged)
     Q_PROPERTY(QAbstractListModel* pluginDetails READ pluginDetails NOTIFY pluginDetailsChanged)
 
+    Q_PROPERTY(bool debugEnabled READ debugEnabled CONSTANT)
+
 public:
     explicit Application(QObject *parent = nullptr);
 
@@ -113,15 +115,6 @@ public slots:
     QString baseFileNameForUrl(const QUrl& url) const { return url.fileName(); }
     QUrl urlForFileName(const QString& fileName) const { return QUrl::fromLocalFile(fileName); }
 
-    bool debugEnabled() const
-    {
-#ifdef _DEBUG
-        return true;
-#else
-        return false;
-#endif
-    }
-
     void crash();
 
 private:
@@ -143,6 +136,15 @@ private:
 
     QAbstractListModel* urlTypeDetails();
     QAbstractListModel* pluginDetails();
+
+    bool debugEnabled() const
+    {
+#ifdef _DEBUG
+        return true;
+#else
+        return false;
+#endif
+    }
 };
 
 #endif // APPLICATION_H

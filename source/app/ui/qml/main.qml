@@ -407,7 +407,7 @@ ApplicationWindow
         id: toggleDebugPauserAction
         text: qsTr("Debug Pauser")
         shortcut: "Ctrl+P"
-        enabled: application.debugEnabled()
+        enabled: application.debugEnabled
         onTriggered: currentDocument && currentDocument.toggleDebugPauser()
         checkable: true
         checked: currentDocument && currentDocument.debugPauserEnabled
@@ -418,7 +418,7 @@ ApplicationWindow
         id: dumpGraphAction
         text: qsTr("Dump graph to qDebug")
         shortcut: "Ctrl+D"
-        enabled: application.debugEnabled()
+        enabled: application.debugEnabled
         onTriggered: currentDocument && currentDocument.dumpGraph()
     }
 
@@ -427,7 +427,7 @@ ApplicationWindow
         id: debugResumeAction
         text: currentDocument ? currentDocument.debugResumeAction : qsTr("&Resume")
         shortcut: "Ctrl+N"
-        enabled: application.debugEnabled()
+        enabled: application.debugEnabled
         onTriggered: currentDocument && currentDocument.debugResume()
     }
 
@@ -516,8 +516,8 @@ ApplicationWindow
         Menu
         {
             title: qsTr("&Debug")
-            enabled: application.debugEnabled()
-            visible: application.debugEnabled()
+            enabled: application.debugEnabled
+            visible: application.debugEnabled
             MenuItem { action: debugCrash }
             MenuItem { action: toggleDebugPauserAction }
             MenuItem
