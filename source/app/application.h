@@ -122,6 +122,8 @@ public slots:
 #endif
     }
 
+    void crash();
+
 private:
     static const char* _uri;
     static const int _majorVersion = 1;

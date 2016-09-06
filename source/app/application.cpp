@@ -88,6 +88,12 @@ QStringList Application::pluginNames(const QString& urlTypeName) const
     return viablePluginNames;
 }
 
+void Application::crash()
+{
+    int* p = 0x0;
+    *p = 123;
+}
+
 void Application::loadPlugins()
 {
     std::vector<QString> pluginsDirs =

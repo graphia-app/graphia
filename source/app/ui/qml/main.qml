@@ -431,6 +431,13 @@ ApplicationWindow
 
     Action
     {
+        id: debugCrash
+        text: qsTr("&Crash")
+        onTriggered: application.crash()
+    }
+
+    Action
+    {
         id: toggleFpsMeterAction
         text: qsTr("Show FPS Meter")
         checkable: true
@@ -509,6 +516,7 @@ ApplicationWindow
             title: qsTr("&Debug")
             enabled: application.debugEnabled()
             visible: application.debugEnabled()
+            MenuItem { action: debugCrash }
             MenuItem { action: toggleDebugPauserAction }
             MenuItem
             {
