@@ -81,6 +81,8 @@ void GraphComponentInteractor::leftDoubleClick()
     {
         if(nearClickNodeId() != clickedRenderer()->focusNodeId())
             _scene->moveFocusToNode(nearClickNodeId());
+        else
+            _scene->moveFocusToNode(nearClickNodeId(), GraphComponentRenderer::COMFORTABLE_ZOOM_DISTANCE);
     }
     else if(!clickedRenderer()->viewIsReset())
     {

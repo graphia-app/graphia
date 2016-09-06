@@ -248,8 +248,11 @@ void GraphComponentScene::pan(NodeId clickedNodeId, const QPoint& start, const Q
 void GraphComponentScene::moveFocusToNode(NodeId nodeId, float cameraDistance)
 {
     // Do nothing if node already focused
-    if(componentRenderer()->focusNodeId() == nodeId)
+    if(componentRenderer()->focusNodeId() == nodeId &&
+       cameraDistance == componentRenderer()->camera()->distance())
+    {
         return;
+    }
 
     ComponentId componentId = _graphRenderer->graphModel()->graph().componentIdOfNode(nodeId);
     bool componentTransitionRequired = (componentId != _componentId);
