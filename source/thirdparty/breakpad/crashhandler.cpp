@@ -71,6 +71,8 @@ static bool minidumpCallback(
 #endif
 )
 {
+    std::cerr << "Handling crash...\n";
+
     if(!success)
     {
         std::cerr << "Failed to generate minidump\n";
@@ -144,6 +146,8 @@ CrashHandler::CrashHandler()
 
 #endif
 #endif
+
+    std::cerr << "CrashHandler installed " << _handler.get() << "\n";
 }
 
 CrashHandler::~CrashHandler() {}
