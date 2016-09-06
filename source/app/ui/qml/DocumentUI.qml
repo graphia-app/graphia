@@ -48,11 +48,6 @@ Item
     property int foundIndex: document.foundIndex
     property int numNodesFound: document.numNodesFound
 
-    function brightness(c)
-    {
-        return 0.299 * c.r + 0.587 * c.g + 0.114 * c.b
-    }
-
     property color textColor:
     {
         return document.textColor;
@@ -66,13 +61,6 @@ Item
             return Qt.darker("white");
 
         return "grey";
-    }
-
-    Preferences
-    {
-        id: visuals
-        section: "visuals"
-        property color backgroundColor
     }
 
     function openFile(fileUrl, fileType, pluginName)
