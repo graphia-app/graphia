@@ -36,6 +36,7 @@ private:
 public:
     Functions()
     {
+        OpenGLFunctions::setDefaultFormat();
         _context.setFormat(QSurfaceFormat::defaultFormat());
         _context.create();
 
