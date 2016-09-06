@@ -385,10 +385,12 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
         }
 
         cameraDistance = newPosition.distanceToPoint(focus);
-        zoomToDistance(cameraDistance);
     }
 
     cameraDistance = u::clamp(MINIMUM_ZOOM_DISTANCE, _entireComponentZoomDistance, cameraDistance);
+
+    if(!_zoomTransition.active())
+        zoomToDistance(cameraDistance);
 
     if(!_graphRenderer->transition().active())
     {
