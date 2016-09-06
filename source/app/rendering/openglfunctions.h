@@ -13,6 +13,7 @@ public:
 
     void resolveOpenGLFunctions();
 
+    static void setDefaultFormat();
     static bool hasOpenGLSupport();
     static QString info();
 };

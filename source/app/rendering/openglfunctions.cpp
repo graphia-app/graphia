@@ -15,6 +15,16 @@ void OpenGLFunctions::resolveOpenGLFunctions()
     }
 }
 
+void OpenGLFunctions::setDefaultFormat()
+{
+    QSurfaceFormat format;
+    format.setMajorVersion(4);
+    format.setMinorVersion(0);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+
+    QSurfaceFormat::setDefaultFormat(format);
+}
+
 class Functions
 {
 private:
@@ -26,18 +36,11 @@ private:
 public:
     Functions()
     {
-        QSurfaceFormat format;
-        format.setMajorVersion(4);
-        format.setMinorVersion(0);
-        format.setProfile(QSurfaceFormat::CoreProfile);
-
-        QSurfaceFormat::setDefaultFormat(format);
-
-        _context.setFormat(format);
+        _context.setFormat(QSurfaceFormat::defaultFormat());
         _context.create();
 
         QOffscreenSurface surface;
-        _surface.setFormat(format);
+        _surface.setFormat(QSurfaceFormat::defaultFormat());
         _surface.create();
 
         if(!_surface.isValid())
