@@ -125,6 +125,9 @@ void Application::loadPlugins()
 
         for(auto& fileName : pluginsQDir.entryList(QDir::Files))
         {
+            if(!QLibrary::isLibrary(fileName))
+                continue;
+
             QPluginLoader pluginLoader(pluginsQDir.absoluteFilePath(fileName));
             QObject* plugin = pluginLoader.instance();
             if(!pluginLoader.isLoaded())
