@@ -128,7 +128,8 @@ CrashHandler::CrashHandler()
 
     _handler = std::make_unique<google_breakpad::ExceptionHandler>(
                 tempPath, nullptr,
-                minidumpCallback, this, true);
+                minidumpCallback, this,
+                google_breakpad::ExceptionHandler::HANDLER_EXCEPTION);
 #else
     strncpy(_crashReporterExecutableName,
             static_cast<const char*>(crashReporterExecutableName.toLatin1()),
