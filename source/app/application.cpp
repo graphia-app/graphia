@@ -90,8 +90,10 @@ QStringList Application::pluginNames(const QString& urlTypeName) const
 
 void Application::crash()
 {
-    int* p = 0x0;
+#ifndef __clang_analyzer__
+    int* p = nullptr;
     *p = 123;
+#endif
 }
 
 void Application::loadPlugins()
