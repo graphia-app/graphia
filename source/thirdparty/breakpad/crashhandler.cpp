@@ -123,6 +123,9 @@ CrashHandler::CrashHandler()
     length = path.toWCharArray(tempPath);
     tempPath[length] = 0;
 
+    // Prevent the default Windows handler kicking in
+    SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOGPFAULTERRORBOX);
+
     _handler = std::make_unique<google_breakpad::ExceptionHandler>(
                 tempPath, nullptr,
                 minidumpCallback, this, true);
