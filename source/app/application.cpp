@@ -11,6 +11,7 @@
 
 #include <cmath>
 #include <memory>
+#include <iostream>
 
 const char* Application::_uri = "com.kajeka";
 
@@ -91,6 +92,8 @@ QStringList Application::pluginNames(const QString& urlTypeName) const
 void Application::crash()
 {
 #ifndef __clang_analyzer__
+    std::cerr << "Application::crash() invoked!\n";
+
     int* p = nullptr;
     *p = 123;
 #endif
