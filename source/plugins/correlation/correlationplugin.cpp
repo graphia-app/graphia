@@ -342,8 +342,8 @@ void CorrelationPluginInstance::onGraphChanged()
                         int row = _dataRowIndexes->get(nodeId);
                         return rowAttribute._values.at(row).toFloat();
                     })
-                    .setFloatMin(rowAttribute._floatMin)
-                    .setFloatMax(rowAttribute._floatMax)
+                    .setFloatMin(static_cast<float>(rowAttribute._floatMin))
+                    .setFloatMax(static_cast<float>(rowAttribute._floatMax))
                     .setSearchable(true);
             break;
 
