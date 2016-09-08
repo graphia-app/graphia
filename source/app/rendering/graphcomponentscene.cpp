@@ -64,13 +64,19 @@ void GraphComponentScene::update(float t)
 
 void GraphComponentScene::setViewportSize(int width, int height)
 {
-    _width = width;
-    _height = height;
+    if(width > 0)
+        _width = width;
+
+    if(height > 0)
+        _height = height;
+
+    if(_width <= 0 || _height <= 0)
+        return;
 
     if(componentRenderer() != nullptr)
     {
-        componentRenderer()->setDimensions(QRect(0, 0, width, height));
-        componentRenderer()->setViewportSize(width, height);
+        componentRenderer()->setDimensions(QRect(0, 0, _width, _height));
+        componentRenderer()->setViewportSize(_width, _height);
     }
 }
 
@@ -95,6 +101,8 @@ void GraphComponentScene::finishComponentTransition(ComponentId componentId, boo
         _componentId = _defaultComponentId;
     else
         _componentId = componentId;
+
+    setViewportSize();
 
     if(doTransition)
     {
