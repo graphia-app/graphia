@@ -33,7 +33,7 @@ bool GraphMLHandler::endDocument()
     // Finally populate graph with Edges from tempEdges
     for(auto tempEdge : _temporaryEdges)
     {
-        EdgeId& edgeId = _graph.addEdge(_nodeMap.at(tempEdge._source), _nodeMap.at(tempEdge._target));
+        const EdgeId& edgeId = _graph.addEdge(_nodeMap.at(tempEdge._source), _nodeMap.at(tempEdge._target));
         _edgeIdMap[tempEdge] = edgeId;
     }
 
