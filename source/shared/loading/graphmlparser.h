@@ -1,0 +1,120 @@
+#ifndef GRAPHMLPARSER_H
+#define GRAPHMLPARSER_H
+
+#include "shared/loading/baseparser.h"
+#include "shared/plugins/basegenericplugin.h"
+#include "shared/graph/imutablegraph.h"
+#include <QXmlDefaultHandler>
+#include <stack>
+
+class BaseGenericPluginInstance;
+
+struct AttributeKey
+{
+    QString _name;
+    QVariant _default;
+    QString _type;
+    friend bool operator<(const AttributeKey& l, const AttributeKey& r)
+    {
+        return std::tie(l._name, l._default, l._type)
+             < std::tie(r._name, r._default, r._type);
+    }
+};
+
+struct Attribute
+{
+    QString _name;
+    QVariant _default;
+    QString _type;
+    QVariant _value;
+    Attribute(AttributeKey key, QVariant value)
+    {
+        _name = key._name;
+        _default = key._default;
+        _type = key._type;
+        _value = value;
+    }
+    Attribute(AttributeKey key)
+    {
+        _name = key._name;
+        _default = key._default;
+        _type = key._type;
+        _value = key._default;
+    }
+    Attribute() = default;
+};
+
+template<typename T>
+using AttributeData = std::map<AttributeKey, std::map<T, Attribute>>;
+
+class GraphMLHandler : public QXmlDefaultHandler
+{
+private:
+
+    struct TemporaryEdge
+    {
+        QString _source;
+        QString _target;
+        friend bool operator<(const TemporaryEdge& l, const TemporaryEdge& r)
+        {
+            return std::tie(l._source, l._target)
+                 < std::tie(r._source, r._target);
+        }
+    };
+
+    const IParser::ProgressFn& _progress;
+    QString _errorString = "";
+
+    BaseGenericPluginInstance* _genericPluginInstance;
+    IMutableGraph& _graph;
+
+    AttributeData<NodeId> _nodeAttributes;
+    AttributeData<EdgeId> _edgeAttributes;
+    AttributeData<TemporaryEdge> _tempEdgeAttributes;
+
+    // Key = AttributeKeyID
+    std::map<QString, TemporaryEdge> _temporaryEdgeMap;
+    std::vector<TemporaryEdge> _temporaryEdges;
+    std::map<QString, NodeId> _nodeMap;
+    std::map<TemporaryEdge, EdgeId> _edgeIdMap;
+    // Key = pair(Attribute Key ID, 'For' element name)
+    std::map<std::pair<QString, QString>, AttributeKey> _attributeKeyMap;
+
+    std::stack<NodeId> _activeNodes;
+    std::stack<TemporaryEdge*> _activeTemporaryEdges;
+    std::stack<QString> _activeElements;
+    std::stack<AttributeKey*> _activeAttributeKeys;
+    std::stack<Attribute*> _activeAttributes;
+
+    QXmlLocator* _locator;
+    int _lineCount;
+
+public:
+    GraphMLHandler(IMutableGraph& mutableGraph, const IParser::ProgressFn& progress, BaseGenericPluginInstance* genericPluginInstance, int lineCount);
+    bool startDocument();
+    bool endDocument();
+    bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts);
+    bool endElement(const QString &namespaceURI, const QString &localName, const QString &qName);
+    bool characters(const QString &ch);
+    void setDocumentLocator(QXmlLocator *locator);
+
+    QString errorString() const;
+    bool warning(const QXmlParseException &exception);
+    bool error(const QXmlParseException &exception);
+    bool fatalError(const QXmlParseException &exception);
+
+};
+
+class GraphMLParser: public BaseParser
+{
+private:
+    BaseGenericPluginInstance* _genericPluginInstance;
+    AttributeData<NodeId> _nodeAttributeData;
+    AttributeData<EdgeId> _edgeAttributeData;
+public:
+    GraphMLParser();
+    GraphMLParser(BaseGenericPluginInstance *genericPluginInstance);
+    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress);
+};
+
+#endif // GRAPHMLPARSER_H

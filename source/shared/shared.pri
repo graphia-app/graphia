@@ -1,3 +1,5 @@
+QT += xml core
+
 HEADERS += \
     $$PWD/loading/iparser.h \
     $$PWD/plugins/iplugin.h \
@@ -28,7 +30,8 @@ HEADERS += \
     $$PWD/loading/pairwisetxtfileparser.h \
     $$PWD/plugins/basegenericplugin.h \
     $$PWD/loading/tabulardata.h \
-    $$PWD/utils/function_traits.h
+    $$PWD/utils/function_traits.h \
+    $$PWD/loading/graphmlparser.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \
@@ -41,7 +44,8 @@ SOURCES += \
     $$PWD/loading/gmlfileparser.cpp \
     $$PWD/loading/pairwisetxtfileparser.cpp \
     $$PWD/plugins/basegenericplugin.cpp \
-    $$PWD/loading/tabulardata.cpp
+    $$PWD/loading/tabulardata.cpp \
+    $$PWD/loading/graphmlparser.cpp
 
 RESOURCES += \
     $$PWD/ui/shared.qrc

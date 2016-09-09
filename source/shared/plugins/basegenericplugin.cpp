@@ -2,6 +2,7 @@
 
 #include "shared/loading/gmlfileparser.h"
 #include "shared/loading/pairwisetxtfileparser.h"
+#include "shared/loading/graphmlparser.h"
 
 BaseGenericPluginInstance::BaseGenericPluginInstance()
 {
@@ -17,6 +18,8 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
         return std::make_unique<GmlFileParser>(this);
     else if(urlTypeName == "PairwiseTXT")
         return std::make_unique<PairwiseTxtFileParser>(this);
+    else if(urlTypeName == "GraphML")
+        return std::make_unique<GraphMLParser>(this);
 
     return nullptr;
 }
@@ -88,6 +91,8 @@ BaseGenericPlugin::BaseGenericPlugin()
 {
     registerUrlType("GML", QObject::tr("GML File"), QObject::tr("GML Files"), {"gml"});
     registerUrlType("PairwiseTXT", QObject::tr("Pairwise Text File"), QObject::tr("Pairwise Text Files"), {"txt", "layout"});
+    registerUrlType("GraphML", QObject::tr("GraphML File"), QObject::tr("GraphML Files"), {"graphml"});
+
 }
 
 QStringList BaseGenericPlugin::identifyUrl(const QUrl& url) const
