@@ -62,11 +62,10 @@ private:
         }
     };
 
+    IMutableGraph& _graph;
+
     const IParser::ProgressFn& _progress;
     QString _errorString = "";
-
-    BaseGenericPluginInstance* _genericPluginInstance;
-    IMutableGraph& _graph;
 
     AttributeData<NodeId> _nodeAttributes;
     AttributeData<EdgeId> _edgeAttributes;

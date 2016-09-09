@@ -8,11 +8,9 @@
 class BaseGenericPluginInstance;
 
 GraphMLHandler::GraphMLHandler(IMutableGraph &mutableGraph, const IParser::ProgressFn &progress,
-                               BaseGenericPluginInstance* genericPluginInstance, int lineCount)
-                               : _graph(mutableGraph), _genericPluginInstance(genericPluginInstance),
-                                 _progress(progress), _lineCount(lineCount)
+                               BaseGenericPluginInstance*, int lineCount)
+                               : _graph(mutableGraph), _progress(progress), _lineCount(lineCount)
 {
-
 }
 
 bool GraphMLHandler::startDocument()
