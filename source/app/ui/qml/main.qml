@@ -1,3 +1,4 @@
+import QtQml 2.2
 import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
@@ -21,6 +22,8 @@ ApplicationWindow
     property DocumentUI currentDocument: tabView.currentIndex < tabView.count ?
                                          tabView.getTab(tabView.currentIndex).item : null
 
+    property var recentFiles;
+
     title: (currentDocument ? currentDocument.title + qsTr(" - ") : "") + application.name
 
     // This is called when the app is started, but it also receives the arguments
@@ -36,6 +39,8 @@ ApplicationWindow
 
     Component.onCompleted:
     {
+        if (recentFiles === undefined)
+            recentFiles = [];
         processArguments(Qt.application.arguments);
     }
 
@@ -91,11 +96,13 @@ ApplicationWindow
 
     Preferences
     {
+        id: misc
         section: "misc"
         property alias showGraphMetrics: toggleGraphMetricsAction.checked
         property alias showLayoutSettings: toggleLayoutSettingsAction.checked
 
         property alias fileOpenInitialFolder: fileOpenDialog.folder
+        property alias recentFilesList: mainWindow.recentFiles;
     }
 
     Preferences
@@ -110,6 +117,36 @@ ApplicationWindow
         property alias showFpsMeter: toggleFpsMeterAction.checked
         property alias saveGlyphMaps: toggleGlyphmapSaveAction.checked
     }
+
+    function addToRecentFiles(fileUrl)
+    {
+        var RECENT_FILES_LENGTH = 5;
+
+        var fileName = application.pathForUrl(fileUrl);
+
+        // Perform a copy and assign back as it's a var element
+        var copyRecentFiles = mainWindow.recentFiles;
+
+        // Remove any duplicates
+        for(var i=0; i<copyRecentFiles.length; i++)
+        {
+            if (copyRecentFiles[i] === fileName)
+            {
+                copyRecentFiles.splice(i, 1);
+                break;
+            }
+        }
+
+        // Add to the top
+        copyRecentFiles.unshift(fileName);
+
+        if (copyRecentFiles.length > RECENT_FILES_LENGTH)
+            copyRecentFiles.pop();
+
+        mainWindow.recentFiles = copyRecentFiles;
+
+    }
+
 
     function openFile(fileUrl, inNewTab)
     {
@@ -152,6 +189,7 @@ ApplicationWindow
         else
             openFileOfType(fileUrl, fileTypes[0], inNewTab)
 
+        addToRecentFiles(fileUrl);
     }
 
     FileTypeChooserDialog
@@ -228,6 +266,15 @@ ApplicationWindow
             fileOpenDialog.title = qsTr("Open File In New Tab...");
             fileOpenDialog.inTab = true;
             fileOpenDialog.open()
+        }
+    }
+
+    Action
+    {
+        id: recentFileOpen
+        onTriggered:
+        {
+            openFile(application.urlForFileName(source.text), true);
         }
     }
 
@@ -471,6 +518,27 @@ ApplicationWindow
             MenuItem { action: fileOpenAction }
             MenuItem { action: fileOpenInTabAction }
             MenuItem { action: closeTabAction }
+            Menu {
+                id: recentFileMenu;
+                title: "Recent Files..."
+
+                Instantiator
+                {
+                    model: mainWindow.recentFiles
+                    delegate: Component
+                    {
+                        MenuItem
+                        {
+                            // FIXME: This fires with a -1 index onOpenFile
+                            text: if (index > -1) mainWindow.recentFiles[index];
+                                  else "";
+                            action: recentFileOpen
+                        }
+                    }
+                    onObjectAdded: recentFileMenu.insertItem(index, object)
+                    onObjectRemoved: recentFileMenu.removeItem(object)
+                }
+            }
             MenuSeparator {}
             MenuItem { action: quitAction }
         }

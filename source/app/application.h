@@ -113,6 +113,7 @@ public slots:
     static int minorVersion() { return _minorVersion; }
 
     QString baseFileNameForUrl(const QUrl& url) const { return url.fileName(); }
+    QString pathForUrl(const QUrl& url) const { return url.toLocalFile(); }
     QUrl urlForFileName(const QString& fileName) const { return QUrl::fromLocalFile(fileName); }
 
     void crash();
