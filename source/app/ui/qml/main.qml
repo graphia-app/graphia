@@ -520,7 +520,7 @@ ApplicationWindow
             MenuItem { action: closeTabAction }
             Menu {
                 id: recentFileMenu;
-                title: "Recent Files..."
+                title: "Recent Files"
 
                 Instantiator
                 {
