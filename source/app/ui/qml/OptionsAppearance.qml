@@ -136,7 +136,15 @@ Item
                     ComboBox
                     {
                         width: 200
-                        model: [ "Right", "Left", "Center", "Top", "Bottom" ]
+                        model:
+                        [
+                            // Must stay synced with TextAlignment in graphrenderer.h
+                            qsTr("Right"),
+                            qsTr("Left"),
+                            qsTr("Centre"),
+                            qsTr("Top"),
+                            qsTr("Bottom")
+                        ]
                         currentIndex: visuals.textAlignment
                         onCurrentIndexChanged: visuals.textAlignment = currentIndex;
                     }
