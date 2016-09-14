@@ -7,6 +7,7 @@
 #include <QPluginLoader>
 #include <QDir>
 #include <QStandardPaths>
+#include <QMessageBox>
 #include <QDebug>
 
 #include <cmath>
@@ -136,7 +137,12 @@ void Application::loadPlugins()
             QPluginLoader pluginLoader(pluginsQDir.absoluteFilePath(fileName));
             QObject* plugin = pluginLoader.instance();
             if(!pluginLoader.isLoaded())
-                qDebug() << pluginLoader.errorString();
+            {
+                QMessageBox::warning(nullptr, QObject::tr("Plugin Load Failed"),
+                    QObject::tr("The plugin \"%1\" failed to load. The reported error is:\n%2")
+                                     .arg(fileName)
+                                     .arg(pluginLoader.errorString()), QMessageBox::Ok);
+            }
 
             if(plugin)
             {

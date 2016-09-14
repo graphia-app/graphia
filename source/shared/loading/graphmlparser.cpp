@@ -1,6 +1,6 @@
 #include "graphmlparser.h"
 
-#include <QXmlInputSource>
+#include <QtXml/QXmlInputSource>
 #include <QDebug>
 #include <QUrl>
 #include <shared/utils/utils.h>

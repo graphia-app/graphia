@@ -4,7 +4,7 @@
 #include "shared/loading/baseparser.h"
 #include "shared/plugins/basegenericplugin.h"
 #include "shared/graph/imutablegraph.h"
-#include <QXmlDefaultHandler>
+#include <QtXml/QXmlDefaultHandler>
 #include <stack>
 
 class BaseGenericPluginInstance;
