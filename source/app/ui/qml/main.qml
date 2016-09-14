@@ -41,6 +41,7 @@ ApplicationWindow
     {
         if (recentFiles === undefined)
             recentFiles = [];
+        fileOpenDialog.folder = misc.fileOpenInitialFolder;
         processArguments(Qt.application.arguments);
     }
 
@@ -101,7 +102,7 @@ ApplicationWindow
         property alias showGraphMetrics: toggleGraphMetricsAction.checked
         property alias showLayoutSettings: toggleLayoutSettingsAction.checked
 
-        property alias fileOpenInitialFolder: fileOpenDialog.folder
+        property var fileOpenInitialFolder
         property alias recentFilesList: mainWindow.recentFiles;
     }
 
@@ -238,6 +239,7 @@ ApplicationWindow
         modality: Qt.WindowModal
         nameFilters: application.nameFilters
         onAccepted: openFile(fileUrl, inTab)
+        onFolderChanged: misc.fileOpenInitialFolder = folder.toString();
         property bool inTab: false
     }
 
@@ -530,6 +532,8 @@ ApplicationWindow
                         MenuItem
                         {
                             // FIXME: This fires with a -1 index onOpenFile
+                            // BUG: Text overflows MenuItems on Windows
+                            // https://bugreports.qt.io/browse/QTBUG-50849
                             text: if (index > -1) mainWindow.recentFiles[index];
                                   else "";
                             action: recentFileOpen
