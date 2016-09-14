@@ -3,7 +3,7 @@ TEMPLATE = lib
 include(../../common.pri)
 include(../../shared/shared.pri)
 
-QT += core gui qml quick webengine
+QT += core gui qml quick webengine xml
 
 TARGET = websearch
 DESTDIR = ../../../plugins

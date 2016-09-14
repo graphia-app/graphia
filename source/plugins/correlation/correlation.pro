@@ -3,7 +3,7 @@ TEMPLATE = lib
 include(../../common.pri)
 include(../../shared/shared.pri)
 
-QT += core gui qml quick
+QT += core gui qml quick xml
 
 TARGET = correlation
 DESTDIR = ../../../plugins
