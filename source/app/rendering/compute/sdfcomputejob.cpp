@@ -173,8 +173,7 @@ void SDFComputeJob::generateSDF()
     glFlush();
 
     // Debug code to pull out the SDF texture
-    if(u::prefExists("debug/saveGlyphMaps") &&
-       u::pref("debug/saveGlyphMaps").toBool())
+    if(u::pref("debug/saveGlyphMaps").toBool())
     {
         int pixelCount = static_cast<int>((_glyphMap->images().at(0).byteCount() / (scaleFactor * scaleFactor)) *
                                           _glyphMap->images().size());

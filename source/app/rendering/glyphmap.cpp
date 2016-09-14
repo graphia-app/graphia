@@ -73,9 +73,9 @@ const std::vector<QImage>& GlyphMap::images() const
     return _images;
 }
 
-void GlyphMap::setMaxTextureSize(int maxTextureSize)
+void GlyphMap::setTextureSize(int textureSize)
 {
-    _maxTextureSize = maxTextureSize;
+    _textureSize = textureSize;
 }
 
 void GlyphMap::setFontName(const QString& fontName)
@@ -129,12 +129,14 @@ void GlyphMap::layoutStrings(const QFont& font)
             for(int i = 0; i < glyphRuns[0].glyphIndexes().size(); i++)
             {
                 auto index = glyphRuns[0].glyphIndexes().at(i);
-                auto advance = glyphRuns[0].positions().at(i).x() / _maxTextureSize;
+                auto advance = glyphRuns[0].positions().at(i).x() / _textureSize;
                 textLayoutPair.second._glyphs.push_back({index, advance});
             }
 
             textLayoutPair.second._width = static_cast<float>(fontMetrics.width(text)) /
-                    static_cast<float>(_maxTextureSize);
+                    static_cast<float>(_textureSize);
+            textLayoutPair.second._xHeight = static_cast<float>(fontMetrics.xHeight()) /
+                    static_cast<float>(_textureSize);
 
             for(auto glyph : textLayoutPair.second._glyphs)
             {
@@ -154,7 +156,7 @@ bool GlyphMap::stringsAreRenderable(const QFont &font)
 {
     auto rawFont = QRawFont::fromFont(font);
 
-    // If there are zero glyphs whose paths are non-empty paths, this
+    // If there are zero glyphs whose paths are non-empty, this
     // is not something we want to use to render with
     for(auto& glyphPair : _results._glyphs)
     {
@@ -173,95 +175,88 @@ void GlyphMap::renderImages(const QFont &font)
     if(_results._glyphs.empty() || _updateTypeRequired < UpdateType::Images)
         return;
 
-    QFontMetrics fontMetrics(font);
     auto rawFont = QRawFont::fromFont(font);
-
-    int imageCount = 1;
-
-    int fontHeight = fontMetrics.height();
-    int padding = std::max(fontHeight / 10, 1);
 
     _images.clear();
 
-    // Calculate Image Width
-    int imageWidth = _maxTextureSize;
-    int imageHeight = fontHeight + (2 * padding);
-    int x = padding;
-
-    for(auto& glyphPair : _results._glyphs)
-    {
-        auto glyph = glyphPair.first;
-
-        auto path = rawFont.pathForGlyph(glyph);
-        x += path.boundingRect().width() * 2 + padding;
-        if(x >= _maxTextureSize)
-        {
-            x = path.boundingRect().width() * 2;
-            imageHeight += fontHeight + padding;
-            if(imageHeight >= _maxTextureSize)
-            {
-                imageCount++;
-                imageHeight = fontHeight + (2 * padding);
-            }
-        }
-    }
-
-    if(imageCount > 1)
-        imageHeight = _maxTextureSize;
-
-    x = padding;
-
-    // Generate Blank Images
-    for(int i = 0; i < imageCount; i++)
-    {
-       _images.emplace_back(imageWidth, imageHeight, QImage::Format_ARGB32);
-       _images.back().fill(Qt::transparent);
-    }
-
     // Render Glyphs
-    int glyphHeight = fontMetrics.height();
-    int y = padding, layer = 0;
+    float maxGlyphHeight = 0.0f;
+    float padding = std::max(QFontMetrics(font).height() * 0.1f, 1.0f);
+    float x = padding;
+    float y = padding;
+    int layer = 0;
 
-    std::unique_ptr<QPainter> textPainter = std::make_unique<QPainter>(&_images[0]);
-    textPainter->setFont(font);
-    textPainter->setPen(Qt::white);
-    auto fillBrush = QBrush(Qt::white);
+    std::unique_ptr<QPainter> textPainter;
 
     for(auto& glyphPair : _results._glyphs)
     {
         auto glyph = glyphPair.first;
-
         auto path = rawFont.pathForGlyph(glyph);
-        int glyphWidth = path.boundingRect().width() * 2;
+        auto boundingRect = path.boundingRect();
+        float glyphWidth = boundingRect.x() + boundingRect.width();
+        float glyphAscent = boundingRect.y();
+        float glyphHeight = boundingRect.height();
+        float right = x + glyphWidth + padding;
 
-        // If X exceeds maxTexture Size
-        if(x + glyphWidth + padding >= _maxTextureSize)
+        maxGlyphHeight = std::max(glyphHeight, maxGlyphHeight);
+
+        if(right >= _textureSize)
         {
-            // New row layer if exceed x size
-            y += glyphHeight + padding;
+            // Move down onto a new row
+            y += maxGlyphHeight + padding;
             x = padding;
-            // If Y exceeds maxTexture Size
-            if(y + glyphHeight + padding >= _maxTextureSize)
-            {
-                // New image layer if exceed rowcount
-                layer++;
-                x = padding;
-                y = padding;
+            maxGlyphHeight = glyphHeight;
 
-                // Remake the painter with the new image++
-                textPainter = std::make_unique<QPainter>(&_images[layer]);
-                textPainter->setFont(font);
-                textPainter->setPen(Qt::white);
+            float bottom = y + maxGlyphHeight + padding;
+
+            if(bottom >= _textureSize)
+            {
+                // Spill onto a new image
+                textPainter = nullptr;
+                layer++;
             }
         }
 
-        path.translate(x, y + fontMetrics.ascent());
-        textPainter->fillPath(path, fillBrush);
+        if(textPainter == nullptr)
+        {
+            _images.emplace_back(_textureSize, _textureSize, QImage::Format_ARGB32);
+            auto& image = _images.back();
 
-        float u = static_cast<float>(x) / imageWidth;
-        float v = static_cast<float>(y + glyphHeight) / imageHeight;
-        float w = static_cast<float>(glyphWidth) / imageWidth;
-        float h = static_cast<float>(glyphHeight) / imageHeight;
+            image.fill(Qt::transparent);
+
+            textPainter = std::make_unique<QPainter>(&image);
+            textPainter->setFont(font);
+            textPainter->setPen(Qt::white);
+
+            // Reset paint coordinates
+            x = padding;
+            y = padding;
+        }
+
+        path.translate(x, y - glyphAscent);
+        textPainter->fillPath(path, QBrush(Qt::white));
+
+        if(u::pref("debug/saveGlyphMaps").toBool())
+        {
+            textPainter->setPen(Qt::red);
+            textPainter->drawLine(x, y, x, y + glyphHeight);
+            textPainter->drawLine(x, y, x + glyphWidth, y);
+
+            textPainter->setPen(Qt::green);
+            textPainter->drawLine(x, y - glyphAscent, x + glyphWidth, y - glyphAscent);
+
+            textPainter->setPen(Qt::yellow);
+            textPainter->drawLine(x + glyphWidth, y, x + glyphWidth, y + glyphHeight);
+            textPainter->drawLine(x, y + glyphHeight, x + glyphWidth, y + glyphHeight);
+        }
+
+        auto& image = _images.back();
+
+        float u = static_cast<float>(x) / image.width();
+        float v = static_cast<float>(y + glyphHeight) / image.height();
+        float w = static_cast<float>(glyphWidth) / image.width();
+        float h = static_cast<float>(glyphHeight) / image.height();
+        float a = static_cast<float>(glyphAscent) / image.height();
 
         auto& textureGlyph = _results._glyphs[glyph];
         textureGlyph._layer = layer;
@@ -269,13 +264,13 @@ void GlyphMap::renderImages(const QFont &font)
         textureGlyph._v = v;
         textureGlyph._width = w;
         textureGlyph._height = h;
+        textureGlyph._ascent = a;
 
         x += glyphWidth + padding;
     }
 
     // Save Glyphmap for debug purposes if needed
-    if(u::prefExists("debug/saveGlyphMaps") &&
-       u::pref("debug/saveGlyphMaps").toBool())
+    if(u::pref("debug/saveGlyphMaps").toBool())
     {
         for(int i = 0; i < static_cast<int>(_images.size()); i++)
             _images[i].save(QDir::currentPath() + "/GlyphMap" + QString::number(i) + ".png");

@@ -28,6 +28,7 @@ public:
 
             std::vector<Glyph> _glyphs;
             float _width = -1.0f;
+            float _xHeight = -1.0f;
         };
 
         struct TextureGlyph
@@ -38,6 +39,8 @@ public:
             float _v = -1.0f;
             float _width = -1.0f;
             float _height = -1.0f;
+
+            float _ascent = -1.0f;
         };
 
         std::map<QString, StringLayout> _layouts;
@@ -50,7 +53,7 @@ private:
     Results _results;
 
     QString _fontName;
-    int _maxTextureSize = 2048;
+    int _textureSize = 2048;
     int _fontSize = 200;
 
     enum class UpdateType
@@ -74,7 +77,7 @@ public:
 
     const std::vector<QImage>& images() const;
 
-    void setMaxTextureSize(int maxTextureSize);
+    void setTextureSize(int textureSize);
 
     void setFontName(const QString& fontName);
 

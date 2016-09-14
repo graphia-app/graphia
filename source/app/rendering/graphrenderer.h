@@ -114,15 +114,12 @@ struct GPUGraphData : OpenGLFunctions
     struct GlyphData
     {
         int _component;
-        float _texturePosition[2];
+        float _textureCoord[2];
         int _textureLayer;
-        float _targetPosition[3];
-        float _positionOffset[2];
+        float _basePosition[3];
+        float _glyphOffset[2];
         float _glyphSize[2];
         float _color[3];
-        float _textScale;
-        float _stringWidth;
-        float _targetOffset[2];
     };
 
     // There are two alpha values so that we can split the alpha blended layers
@@ -150,9 +147,9 @@ enum class TextAlignment
 {
     Right,
     Left,
-    Center,
-    TopCenter,
-    BottomCenter
+    Centre,
+    Top,
+    Bottom
 };
 Q_DECLARE_METATYPE(TextAlignment)
 

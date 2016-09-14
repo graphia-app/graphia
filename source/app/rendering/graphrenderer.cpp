@@ -120,39 +120,30 @@ void GPUGraphData::prepareTextVAO(QOpenGLShaderProgram& shader)
     _textVBO.bind();
 
     shader.enableAttributeArray("component");
-    shader.enableAttributeArray("texturePosition");
+    shader.enableAttributeArray("textureCoord");
     shader.enableAttributeArray("textureLayer");
-    shader.enableAttributeArray("targetPosition");
-    shader.enableAttributeArray("positionOffset");
+    shader.enableAttributeArray("basePosition");
+    shader.enableAttributeArray("glyphOffset");
     shader.enableAttributeArray("glyphSize");
     shader.enableAttributeArray("color");
-    shader.enableAttributeArray("textScale");
-    shader.enableAttributeArray("stringWidth");
-    shader.enableAttributeArray("targetOffset");
 
     glVertexAttribIPointer(shader.attributeLocation("component"),                                 1, GL_INT, sizeof(GlyphData),
                              reinterpret_cast<const void*>(offsetof(GlyphData, _component)));
-    shader.setAttributeBuffer("texturePosition", GL_FLOAT, offsetof(GlyphData, _texturePosition), 2, sizeof(GlyphData));
+    shader.setAttributeBuffer("textureCoord",    GL_FLOAT, offsetof(GlyphData, _textureCoord),    2, sizeof(GlyphData));
     glVertexAttribIPointer(shader.attributeLocation("textureLayer"),                              1, GL_INT, sizeof(GlyphData),
                              reinterpret_cast<const void*>(offsetof(GlyphData, _textureLayer)));
-    shader.setAttributeBuffer("targetPosition",  GL_FLOAT, offsetof(GlyphData, _targetPosition),  3, sizeof(GlyphData));
-    shader.setAttributeBuffer("positionOffset",  GL_FLOAT, offsetof(GlyphData, _positionOffset),  2, sizeof(GlyphData));
+    shader.setAttributeBuffer("basePosition",    GL_FLOAT, offsetof(GlyphData, _basePosition),    3, sizeof(GlyphData));
+    shader.setAttributeBuffer("glyphOffset",     GL_FLOAT, offsetof(GlyphData, _glyphOffset),     2, sizeof(GlyphData));
     shader.setAttributeBuffer("glyphSize",       GL_FLOAT, offsetof(GlyphData, _glyphSize),       2, sizeof(GlyphData));
     shader.setAttributeBuffer("color",           GL_FLOAT, offsetof(GlyphData, _color),           3, sizeof(GlyphData));
-    shader.setAttributeBuffer("textScale",       GL_FLOAT, offsetof(GlyphData, _textScale),       1, sizeof(GlyphData));
-    shader.setAttributeBuffer("stringWidth",     GL_FLOAT, offsetof(GlyphData, _stringWidth),     1, sizeof(GlyphData));
-    shader.setAttributeBuffer("targetOffset",    GL_FLOAT, offsetof(GlyphData, _targetOffset),    2, sizeof(GlyphData));
 
     glVertexAttribDivisor(shader.attributeLocation("component"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("texturePosition"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("textureCoord"), 1);
     glVertexAttribDivisor(shader.attributeLocation("textureLayer"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("targetPosition"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("positionOffset"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("basePosition"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("glyphOffset"), 1);
     glVertexAttribDivisor(shader.attributeLocation("glyphSize"), 1);
     glVertexAttribDivisor(shader.attributeLocation("color"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("textScale"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("stringWidth"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("targetOffset"), 1);
 
     _textVBO.release();
     shader.release();
@@ -526,6 +517,7 @@ void GraphRenderer::updateGPUDataIfRequired()
         const float NotFoundAlpha = 0.2f;
 
         float textScale = u::pref("visuals/textSize").toFloat();
+        auto textAlignment = static_cast<TextAlignment>(u::pref("visuals/textAlignment").toInt());
         auto textColor = Document::textColorForBackground();
 
         for(auto nodeId : componentRenderer->nodeIds())
@@ -563,6 +555,15 @@ void GraphRenderer::updateGPUDataIfRequired()
                 gpuGraphData->_nodeData.push_back(nodeData);
 
             auto& textLayout = _textLayoutResults._layouts[nodeVisual._text];
+
+            auto verticalCentre = -textLayout._xHeight * textScale * 0.5f;
+            auto top = nodeVisual._size;
+            auto bottom = (-nodeVisual._size) - (textLayout._xHeight * textScale);
+
+            auto horizontalCentre = -textLayout._width * textScale * 0.5f;
+            auto right = nodeVisual._size;
+            auto left = (-nodeVisual._size) - (textLayout._width * textScale);
+
             for(auto glyph : textLayout._glyphs)
             {
                 GPUGraphData::GlyphData glyphData;
@@ -571,26 +572,29 @@ void GraphRenderer::updateGPUDataIfRequired()
 
                 glyphData._component = componentIndex;
 
+                std::array<float, 2> baseOffset;
+                switch(textAlignment)
+                {
+                default:
+                case TextAlignment::Right:  baseOffset = {right,            verticalCentre}; break;
+                case TextAlignment::Left:   baseOffset = {left,             verticalCentre}; break;
+                case TextAlignment::Centre: baseOffset = {horizontalCentre, verticalCentre}; break;
+                case TextAlignment::Top:    baseOffset = {horizontalCentre, top};            break;
+                case TextAlignment::Bottom: baseOffset = {horizontalCentre, bottom};         break;
+                }
+
+                glyphData._glyphOffset[0] = baseOffset[0] + (glyph._advance * textScale);
+                glyphData._glyphOffset[1] = baseOffset[1] - ((textureGlyph._height + textureGlyph._ascent) * textScale);
                 glyphData._glyphSize[0] = textureGlyph._width;
                 glyphData._glyphSize[1] = textureGlyph._height;
 
-                glyphData._textScale = textScale;
-                glyphData._stringWidth = textLayout._width;
-
-                // Offset By Node Size
-                glyphData._targetOffset[0] = nodeVisual._size;
-                glyphData._targetOffset[1] = nodeVisual._size;
-
-                glyphData._texturePosition[0] = textureGlyph._u;
-                glyphData._texturePosition[1] = textureGlyph._v;
+                glyphData._textureCoord[0] = textureGlyph._u;
+                glyphData._textureCoord[1] = textureGlyph._v;
                 glyphData._textureLayer = textureGlyph._layer;
 
-                glyphData._positionOffset[0] = glyph._advance;
-                glyphData._positionOffset[1] = 0.0f;
-
-                glyphData._targetPosition[0] = nodePosition.x();
-                glyphData._targetPosition[1] = nodePosition.y();
-                glyphData._targetPosition[2] = nodePosition.z();
+                glyphData._basePosition[0] = nodePosition.x();
+                glyphData._basePosition[1] = nodePosition.y();
+                glyphData._basePosition[2] = nodePosition.z();
 
                 glyphData._color[0] = textColor.redF();
                 glyphData._color[1] = textColor.greenF();
@@ -1195,7 +1199,7 @@ void GraphRenderer::renderText(GPUGraphData& gpuGraphData)
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     _textShader.setUniformValue("tex", 0);
-    _textShader.setUniformValue("textAlignment", u::pref("visuals/textAlignment").toInt());
+    _textShader.setUniformValue("textScale", u::pref("visuals/textSize").toFloat());
 
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);

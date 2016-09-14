@@ -41,9 +41,9 @@ void main()
     bool fragIsIn = isIn(uv);
     float squaredDistanceToEdge = (scaledHalfRange * scaledHalfRange) * 2.0;
 
-    for(int dx=0; dx < scalediRange; dx++)
+    for(int dx = 0; dx < scalediRange; dx++)
     {
-        for(int dy=0; dy < scalediRange; dy++)
+        for(int dy = 0; dy < scalediRange; dy++)
         {
             vec2 scanPosition = startPosition + vec2(dx, dy);
 
@@ -57,10 +57,10 @@ void main()
         }
     }
 
-    float normalised = squaredDistanceToEdge / (scaledHalfRange*scaledHalfRange) * 2.0;
+    float normalised = squaredDistanceToEdge / (scaledHalfRange * scaledHalfRange) * 2.0;
     float distanceToEdge = sqrt(normalised);
     if(fragIsIn)
-        normalised = -normalised ;
+        normalised = -normalised;
     normalised = 0.5 - (normalised / 2.0);
 
     // Uncomment for outline

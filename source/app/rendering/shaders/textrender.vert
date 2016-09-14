@@ -7,24 +7,20 @@ layout (location = 2) in vec2 vertexTexCoord;
 
 // VBO Data
 layout (location = 3) in int component; // The component index
-layout (location = 4) in vec2 texturePosition;
+layout (location = 4) in vec2 textureCoord;
 layout (location = 5) in int textureLayer;
-layout (location = 6) in vec3 targetPosition;
-layout (location = 7) in vec2 positionOffset;
+layout (location = 6) in vec3 basePosition;
+layout (location = 7) in vec2 glyphOffset;
 layout (location = 8) in vec2 glyphSize;
 layout (location = 9) in vec3 color;
-layout (location = 10) in float textScale;
-layout (location = 11) in float stringWidth;
-layout (location = 12) in vec2 targetOffset;
 
 uniform samplerBuffer componentData;
 uniform sampler2DArray tex;
-uniform int textAlignment;
+uniform float textScale;
 
-out vec2 texcoord;
+out vec2 texCoord;
+flat out int texLayer;
 out vec3 textColor;
-out vec4 idcolor;
-flat out int layer;
 
 void main()
 {
@@ -40,65 +36,22 @@ void main()
                                 texelFetch(componentData, index + 6),
                                 texelFetch(componentData, index + 7));
 
-  const int ALIGN_RIGHT = 0;
-  const int ALIGN_LEFT = 1;
-  const int ALIGN_CENTER = 2;
-  const int ALIGN_TOP_CENTER = 3;
-  const int ALIGN_BOTTOM_CENTER = 4;
-
-  // 3D Text
-  const float glyphHeight = 1.0;
-  float textSizeScale = textScale / 12.0;
-  ivec3 texSize = textureSize(tex, 0);
-
-  float aspectRatio = float(texSize.x) / float(texSize.y);
-  float scaleRatio = glyphHeight / glyphSize.y;
-
-  vec2 quadSize = vec2(glyphSize.x * scaleRatio * aspectRatio, glyphHeight) * textSizeScale;
-
-  vec3 cameraUp = normalize(vec3(modelViewMatrix[0].y, modelViewMatrix[1].y, modelViewMatrix[2].y));
+  vec3 cameraUp =    normalize(vec3(modelViewMatrix[0].y, modelViewMatrix[1].y, modelViewMatrix[2].y));
   vec3 cameraRight = normalize(vec3(modelViewMatrix[0].x, modelViewMatrix[1].x, modelViewMatrix[2].x));
 
-  vec3 offset;
-  switch(textAlignment)
-  {
-  case ALIGN_RIGHT:
-      offset = (cameraRight * targetOffset.x) + (cameraUp * -quadSize.y * 0.5);
-      break;
-  case ALIGN_LEFT:
-      offset = (-cameraRight * targetOffset.x) +
-              (-cameraRight * stringWidth * scaleRatio * aspectRatio * textSizeScale) +
-              (cameraUp * -quadSize.y * 0.5);
-      break;
-  case ALIGN_CENTER:
-      offset = (-cameraRight * stringWidth * scaleRatio * aspectRatio * textSizeScale * 0.5) +
-              (cameraUp * -quadSize.y * 0.5);
-      break;
-  case ALIGN_TOP_CENTER:
-      offset = (-cameraRight * stringWidth * scaleRatio * aspectRatio * textSizeScale * 0.5) +
-              (cameraUp * targetOffset.y);
-      break;
-  case ALIGN_BOTTOM_CENTER:
-      offset = (-cameraRight * stringWidth * scaleRatio * aspectRatio * textSizeScale * 0.5) +
-              (cameraUp * -targetOffset.y) + (cameraUp * -glyphSize.y);
-      break;
-  default:
-      break;
-  }
+  vec2 scaledGlyphSize = glyphSize * textScale;
+  vec3 billboardPosition = (cameraRight * vertexPosition.x * scaledGlyphSize.x) +
+                           (cameraUp *    vertexPosition.y * scaledGlyphSize.y);
+  vec3 billboardOffset = (cameraRight * glyphOffset.x) + (cameraUp * glyphOffset.y);
+  vec3 position = basePosition + billboardPosition + billboardOffset;
 
-  vec3 billboardVertPosition = (cameraRight * vertexPosition.x * quadSize.x) + (cameraUp * vertexPosition.y * quadSize.y);
-  vec3 scaledGlyphOffset = positionOffset.x * scaleRatio * aspectRatio * cameraRight * textSizeScale;
-  vec3 position = targetPosition + offset + billboardVertPosition + scaledGlyphOffset;
+  gl_Position = projectionMatrix * vec4((modelViewMatrix * vec4(position, 1.0)).xyz, 1.0);
 
-  position = (modelViewMatrix * vec4(position, 1.0)).xyz;
-  gl_Position = projectionMatrix * vec4(position, 1.0);
+  texLayer = textureLayer;
 
-  float distance = -position.z;
+  float u = textureCoord.x + (vertexPosition.x * glyphSize.x);
+  float v = (1.0 - textureCoord.y) + (vertexPosition.y * glyphSize.y);
+  texCoord = vec2(u, v);
 
-  idcolor = vec4(0.0, texturePosition.y, 0.0, 1.0);
-
-  layer = textureLayer;
-
-  texcoord = vec2(texturePosition.x + (vertexPosition.x * glyphSize.x), (((1.0 - texturePosition.y)) + (vertexPosition.y * glyphSize.y))) ;
   textColor = color;
 }
