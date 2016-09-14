@@ -22,7 +22,7 @@ template<typename It> static It incrementIterator(It it, It last, const int n)
     return it + std::min(n, static_cast<const int>(std::distance(it, last)));
 }
 
-class ThreadPool : public Singleton<ThreadPool>
+class ThreadPool
 {
 private:
     std::vector<std::thread> _threads;
@@ -167,7 +167,7 @@ private:
     };
 
     // When It::value_type::computeCostHint() doesn't exist, we get
-    // this implementation, which gives every element each weight
+    // this implementation, which gives every element equal weight
     template<typename It, typename Enable = void>
     struct Coster : public CosterBase<It>
     {
@@ -177,9 +177,9 @@ private:
         int operator()(It) { return 1; }
     };
 
-    // When It::value_type::cost() does exist, we get this implementation
-    // that allows elements to hint how much computing it will cost and
-    // balance the thread/work allocation accordingly
+    // When It::value_type::computeCostHint() does exist, we get this
+    // implementation, that allows elements to hint how much computation
+    // it will cost and balance the thread/work allocation accordingly
     template<typename It>
     struct Coster<It,
         std::enable_if_t<std::is_member_function_pointer<
@@ -249,14 +249,16 @@ public:
     }
 };
 
+class ThreadPoolSingleton : public ThreadPool, public Singleton<ThreadPoolSingleton> {};
+
 template<typename Fn, typename... Args> std::future<ThreadPool::ReturnType<Fn, Args...>> execute_on_threadpool(Fn&& f, Args&&... args)
 {
-    return S(ThreadPool)->execute_on_threadpool(std::move(f), args...);
+    return S(ThreadPoolSingleton)->execute_on_threadpool(std::move(f), args...);
 }
 
 template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn&& f, bool blocking = true)
 {
-    return S(ThreadPool)->concurrent_for(first, last, std::move(f), blocking);
+    return S(ThreadPoolSingleton)->concurrent_for(first, last, std::move(f), blocking);
 }
 
 #endif // THREADPOOL_H

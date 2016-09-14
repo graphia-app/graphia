@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<LayoutSetting>              (uri, maj, min, "LayoutSetting");
     qmlRegisterType<QmlPreferences>             (uri, maj, min, "Preferences");
 
-    ThreadPool threadPool;
+    ThreadPoolSingleton threadPool;
     Preferences preferences;
 
     preferences.define("visuals/defaultNodeColor",          "#0000FF");
