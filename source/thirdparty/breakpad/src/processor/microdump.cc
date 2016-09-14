@@ -104,12 +104,15 @@ namespace google_breakpad {
 
 void MicrodumpModules::Add(const CodeModule* module) {
   linked_ptr<const CodeModule> module_ptr(module);
-  if (!map_->StoreRange(module->base_address(), module->size(), module_ptr)) {
+  if (!map_.StoreRange(module->base_address(), module->size(), module_ptr)) {
     BPLOG(ERROR) << "Module " << module->code_file() <<
                     " could not be stored";
   }
 }
 
+void MicrodumpModules::SetEnableModuleShrink(bool is_enabled) {
+  map_.SetEnableShrinkDown(is_enabled);
+}
 
 //
 // MicrodumpContext
@@ -133,9 +136,9 @@ void MicrodumpContext::SetContextX86(MDRawContextX86* x86) {
   valid_ = true;
 }
 
-void MicrodumpContext::SetContextMIPS(MDRawContextMIPS* mips) {
+void MicrodumpContext::SetContextMIPS(MDRawContextMIPS* mips32) {
   DumpContext::SetContextFlags(MD_CONTEXT_MIPS);
-  DumpContext::SetContextMIPS(mips);
+  DumpContext::SetContextMIPS(mips32);
   valid_ = true;
 }
 
@@ -262,6 +265,7 @@ Microdump::Microdump(const string& contents)
       } else if (os_id == "A") {
         system_info_->os = "Android";
         system_info_->os_short = "android";
+        modules_->SetEnableModuleShrink(true);
       }
 
       // OS line also contains release and version for future use.
@@ -330,9 +334,9 @@ Microdump::Microdump(const string& contents)
                     << std::endl;
           continue;
         }
-        MDRawContextMIPS* mips = new MDRawContextMIPS();
-        memcpy(mips, &cpu_state_raw[0], cpu_state_raw.size());
-        context_->SetContextMIPS(mips);
+        MDRawContextMIPS* mips32 = new MDRawContextMIPS();
+        memcpy(mips32, &cpu_state_raw[0], cpu_state_raw.size());
+        context_->SetContextMIPS(mips32);
       } else if (strcmp(arch.c_str(), kMips64Architecture) == 0) {
         if (cpu_state_raw.size() != sizeof(MDRawContextMIPS)) {
           std::cerr << "Malformed CPU context. Got " << cpu_state_raw.size()

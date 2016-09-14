@@ -31,7 +31,7 @@
 
 // Author: Jim Blandy <jimb@mozilla.com> <jimb@red-bean.com>
 
-// dump_syms.mm: Create a symbol file for use with minidumps
+// dump_syms.cc: Create a symbol file for use with minidumps
 
 #include "common/mac/dump_syms.h"
 
@@ -437,7 +437,8 @@ bool DumpSymbols::ReadDwarf(google_breakpad::Module *module,
     // Make a Dwarf2Handler that drives our DIEHandler.
     dwarf2reader::DIEDispatcher die_dispatcher(&root_handler);
     // Make a DWARF parser for the compilation unit at OFFSET.
-    dwarf2reader::CompilationUnit dwarf_reader(file_context.section_map(),
+    dwarf2reader::CompilationUnit dwarf_reader(selected_object_name_,
+                                               file_context.section_map(),
                                                offset,
                                                &byte_reader,
                                                &die_dispatcher);

@@ -58,6 +58,9 @@ class MicrodumpModules : public BasicCodeModules {
  public:
   // Takes over ownership of |module|.
   void Add(const CodeModule* module);
+
+  // Enables/disables module address range shrink.
+  void SetEnableModuleShrink(bool is_enabled);
 };
 
 // MicrodumpContext carries a CPU-specific context.
@@ -67,7 +70,7 @@ class MicrodumpContext : public DumpContext {
   virtual void SetContextARM(MDRawContextARM* arm);
   virtual void SetContextARM64(MDRawContextARM64* arm64);
   virtual void SetContextX86(MDRawContextX86* x86);
-  virtual void SetContextMIPS(MDRawContextMIPS* mips);
+  virtual void SetContextMIPS(MDRawContextMIPS* mips32);
   virtual void SetContextMIPS64(MDRawContextMIPS* mips64);
 };
 

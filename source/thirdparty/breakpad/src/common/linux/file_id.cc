@@ -45,9 +45,8 @@
 #include "common/linux/elfutils.h"
 #include "common/linux/linux_libc_support.h"
 #include "common/linux/memory_mapped_file.h"
+#include "common/using_std_string.h"
 #include "third_party/lss/linux_syscall_support.h"
-
-using std::string;
 
 namespace google_breakpad {
 
@@ -164,8 +163,18 @@ bool FileID::ElfFileIdentifier(wasteful_vector<uint8_t>& identifier) {
   return ElfFileIdentifierFromMappedFile(mapped_file.data(), identifier);
 }
 
-// This function is not ever called in an unsafe context, so it's OK
+// These three functions are not ever called in an unsafe context, so it's OK
 // to allocate memory and use libc.
+static string bytes_to_hex_string(const uint8_t* bytes, size_t count) {
+  string result;
+  for (unsigned int idx = 0; idx < count; ++idx) {
+    char buf[3];
+    snprintf(buf, sizeof(buf), "%02X", bytes[idx]);
+    result.append(buf);
+  }
+  return result;
+}
+
 // static
 string FileID::ConvertIdentifierToUUIDString(
     const wasteful_vector<uint8_t>& identifier) {
@@ -181,13 +190,13 @@ string FileID::ConvertIdentifierToUUIDString(
   uint16_t* data3 = reinterpret_cast<uint16_t*>(identifier_swapped + 6);
   *data3 = htons(*data3);
 
-  string result;
-  for (unsigned int idx = 0; idx < kMDGUIDSize; ++idx) {
-    char buf[3];
-    snprintf(buf, sizeof(buf), "%02X", identifier_swapped[idx]);
-    result.append(buf);
-  }
-  return result;
+  return bytes_to_hex_string(identifier_swapped, kMDGUIDSize);
+}
+
+// static
+string FileID::ConvertIdentifierToString(
+    const wasteful_vector<uint8_t>& identifier) {
+  return bytes_to_hex_string(&identifier[0], identifier.size());
 }
 
 }  // namespace google_breakpad
