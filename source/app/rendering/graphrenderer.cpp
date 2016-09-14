@@ -580,11 +580,11 @@ void GraphRenderer::updateGPUDataIfRequired()
                 switch(textAlignment)
                 {
                 default:
-                case TextAlignment::Right:  baseOffset = {right,            verticalCentre}; break;
-                case TextAlignment::Left:   baseOffset = {left,             verticalCentre}; break;
-                case TextAlignment::Centre: baseOffset = {horizontalCentre, verticalCentre}; break;
-                case TextAlignment::Top:    baseOffset = {horizontalCentre, top};            break;
-                case TextAlignment::Bottom: baseOffset = {horizontalCentre, bottom};         break;
+                case TextAlignment::Right:  baseOffset = {{right,            verticalCentre}}; break;
+                case TextAlignment::Left:   baseOffset = {{left,             verticalCentre}}; break;
+                case TextAlignment::Centre: baseOffset = {{horizontalCentre, verticalCentre}}; break;
+                case TextAlignment::Top:    baseOffset = {{horizontalCentre, top           }}; break;
+                case TextAlignment::Bottom: baseOffset = {{horizontalCentre, bottom        }}; break;
                 }
 
                 glyphData._glyphOffset[0] = baseOffset[0] + (glyph._advance * textScale);
