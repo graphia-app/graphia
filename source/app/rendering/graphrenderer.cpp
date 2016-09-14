@@ -508,6 +508,11 @@ void GraphRenderer::updateGPUDataIfRequired()
 
     NodeArray<QVector3D> scaledAndSmoothedNodePositions(_graphModel->graph());
 
+    float textScale = u::pref("visuals/textSize").toFloat();
+    auto textAlignment = static_cast<TextAlignment>(u::pref("visuals/textAlignment").toInt());
+    auto textColor = Document::textColorForBackground();
+    auto showNodeNames = u::pref("visuals/showNodeNames").toBool();
+
     for(auto& componentRendererRef : _componentRenderers)
     {
         GraphComponentRenderer* componentRenderer = componentRendererRef;
@@ -515,10 +520,6 @@ void GraphRenderer::updateGPUDataIfRequired()
             continue;
 
         const float NotFoundAlpha = 0.2f;
-
-        float textScale = u::pref("visuals/textSize").toFloat();
-        auto textAlignment = static_cast<TextAlignment>(u::pref("visuals/textAlignment").toInt());
-        auto textColor = Document::textColorForBackground();
 
         for(auto nodeId : componentRenderer->nodeIds())
         {
@@ -553,6 +554,9 @@ void GraphRenderer::updateGPUDataIfRequired()
 
             if(gpuGraphData != nullptr)
                 gpuGraphData->_nodeData.push_back(nodeData);
+
+            if(!showNodeNames || nodeVisual._state.testFlag(VisualFlags::NotFound))
+                continue;
 
             auto& textLayout = _textLayoutResults._layouts[nodeVisual._text];
 
@@ -1190,11 +1194,11 @@ void GraphRenderer::renderText(GPUGraphData& gpuGraphData)
     _textShader.bind();
     gpuGraphData._textVBO.bind();
 
-     // Bind SDF Textures
+     // Bind SDF textures
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, sdfTextureCurrent());
 
-    // Set to Linear filtering for SDF text
+    // Set to linear filtering for SDF text
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -1231,9 +1235,7 @@ void GraphRenderer::renderGraph(GPUGraphData& gpuGraphData)
 
     renderNodes(gpuGraphData);
     renderEdges(gpuGraphData);
-
-    if(u::pref("visuals/showNodeNames").toBool())
-        renderText(gpuGraphData);
+    renderText(gpuGraphData);
 }
 
 void GraphRenderer::renderScene()
