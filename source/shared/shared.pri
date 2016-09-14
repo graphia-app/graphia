@@ -1,5 +1,3 @@
-QT += xml core
-
 HEADERS += \
     $$PWD/loading/iparser.h \
     $$PWD/plugins/iplugin.h \
