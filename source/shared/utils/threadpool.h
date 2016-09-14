@@ -251,7 +251,7 @@ public:
 
 class ThreadPoolSingleton : public ThreadPool, public Singleton<ThreadPoolSingleton> {};
 
-template<typename Fn, typename... Args> std::future<ThreadPool::ReturnType<Fn, Args...>> execute_on_threadpool(Fn&& f, Args&&... args)
+template<typename Fn, typename... Args> auto execute_on_threadpool(Fn&& f, Args&&... args)
 {
     return S(ThreadPoolSingleton)->execute_on_threadpool(std::move(f), args...);
 }
