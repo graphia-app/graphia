@@ -12,7 +12,9 @@ for /d /r %%i in (*) do @if exist %%i\*.qml (set QML_DIRS=--qmldir %%i !QML_DIRS
 cd ..
 
 windeployqt %QML_DIRS% --no-angle --no-compiler-runtime ^
-	--no-opengl-sw build\%PRODUCT_NAME%.exe || EXIT /B 1
+	--no-opengl-sw --dir build build\%PRODUCT_NAME%.exe || EXIT /B 1
+
+for %%i in (build\plugins\*.dll) do windeployqt --dir build %%i
 
 set QML_DIR=source\crashreporter
 IF NOT EXIST %QML_DIR%\NUL EXIT /B 1
