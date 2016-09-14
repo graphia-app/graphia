@@ -27,7 +27,7 @@
 #include <mutex>
 
 const float GraphComponentRenderer::MINIMUM_ZOOM_DISTANCE = 2.5f;
-const float GraphComponentRenderer::COMFORTABLE_ZOOM_DISTANCE = MINIMUM_ZOOM_DISTANCE * 7.0f;
+const float GraphComponentRenderer::COMFORTABLE_ZOOM_DISTANCE = MINIMUM_ZOOM_DISTANCE * 10.0f;
 
 void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, ComponentId componentId,
                                         std::shared_ptr<SelectionManager> selectionManager,
