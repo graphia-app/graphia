@@ -46,6 +46,7 @@ private:
     void fineTuneChangeDetection();
     void oscillateChangeDetection();
     void initialChangeDetection();
+    void finishChangeDetection();
 
 public:
     ForceDirectedLayout(const GraphComponent& graphComponent,

@@ -223,6 +223,17 @@ void ForceDirectedLayout::initialChangeDetection()
     }
 }
 
+// Set change detection phase to Finished. Clear previous data
+void ForceDirectedLayout::finishChangeDetection()
+{
+    _changeDetectionPhase = ChangeDetectionPhase::Finished;
+    _increasingStdDevIterationCount = 0;
+    _unstableIterationCount = 0;
+    _prevCaptureStdDevs.clear();
+    _prevStdDevs.clear();
+    _prevAvgForces.clear();
+}
+
 // Allows the layout algorithm to further calculate small layout changes until the change amount
 // falls below FINETUNE_STDDEV_DELTA, where it moves the phase to Finished
 void ForceDirectedLayout::fineTuneChangeDetection()
@@ -239,8 +250,7 @@ void ForceDirectedLayout::fineTuneChangeDetection()
 
         float delta = (prevAvgStdDev - curAvgStdDev);
         if(delta < FINETUNE_STDDEV_DELTA && delta >= 0.0f)
-            _changeDetectionPhase = ChangeDetectionPhase::Finished;
-
+            finishChangeDetection();
     }
 }
 
@@ -259,12 +269,7 @@ void ForceDirectedLayout::oscillateChangeDetection()
             percentDelta = (deltaStdDev / _prevUnstableStdDev) * 100.0f;
 
         if(std::abs(percentDelta) < OSCILLATE_STDDEV_DELTA_PERCENT)
-        {
-            _changeDetectionPhase = ChangeDetectionPhase::Finished;
-            _increasingStdDevIterationCount = 0;
-            _unstableIterationCount = 0;
-            _prevCaptureStdDevs.clear();
-        }
+            finishChangeDetection();
 
         _prevUnstableStdDev = averageCap;
         _prevCaptureStdDevs.clear();
