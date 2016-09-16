@@ -68,6 +68,14 @@ ApplicationWindow
             Layout.columnSpan: 2
         }
 
+        MessageDialog
+        {
+            id: invalidEmailDialog
+            icon: StandardIcon.Critical
+            title: qsTr("Invalid Email Address")
+            text: qsTr("Please enter a valid email address.")
+        }
+
         Button
         {
             enabled: window.enabled
@@ -76,10 +84,15 @@ ApplicationWindow
             anchors.right: grid.right
             onClicked:
             {
-                window.enabled = false;
-                report.email = email.text;
-                report.text = description.text;
-                Qt.quit();
+                if(email.text.length == 0 || email.acceptableInput)
+                {
+                    window.enabled = false;
+                    report.email = email.text;
+                    report.text = description.text;
+                    Qt.quit();
+                }
+                else
+                    invalidEmailDialog.open();
             }
         }
     }
