@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QCryptographicHash>
 #include <QDebug>
+#include <QTimer>
 
 #include <iostream>
 #include <map>
@@ -72,10 +73,37 @@ static void uploadReport(const QString& email, const QString& text, const QStrin
     QNetworkReply *reply = manager.post(request, multiPart);
     multiPart->setParent(reply);
 
+    QTimer timer;
+    timer.setSingleShot(true);
+
     // Need a QEventLoop to drive upload
     QEventLoop loop;
     QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    QObject::connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    timer.start(60000);
     loop.exec();
+
+    if(timer.isActive())
+    {
+        timer.stop();
+
+        if(reply->error() > 0)
+        {
+            QMessageBox::warning(nullptr, QApplication::applicationName(),
+                                 QObject::tr("There was an error while uploading the crash "
+                                             "report:\n%1").arg(reply->errorString()),
+                                 QMessageBox::Close);
+        }
+    }
+    else
+    {
+        QObject::disconnect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+        reply->abort();
+        QMessageBox::warning(nullptr, QApplication::applicationName(),
+                             QObject::tr("Timed out while uploading the crash report. "
+                                         "Please check your internet connection."),
+                             QMessageBox::Close);
+    }
 
     delete multiPart;
 }
