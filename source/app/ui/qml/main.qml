@@ -58,7 +58,7 @@ ApplicationWindow
     {
         id: aboutMessageDialog
         icon: StandardIcon.Information
-        title: "About " + application.name
+        title: qsTr("About ") + application.name
         text: application.name + qsTr("\n\n") +
               application.name + qsTr(" version ") + application.version +
               qsTr(" is a tool for the visualisation and analysis of graphs.\n\n") +
