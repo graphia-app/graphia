@@ -14,7 +14,8 @@ cd ..
 windeployqt %QML_DIRS% --no-angle --no-compiler-runtime ^
 	--no-opengl-sw --dir build build\%PRODUCT_NAME%.exe || EXIT /B 1
 
-for %%i in (build\plugins\*.dll) do windeployqt --dir build %%i
+for %%i in (build\plugins\*.dll) do windeployqt --no-angle --no-compiler-runtime ^
+	--no-opengl-sw --dir build %%i
 
 set QML_DIR=source\crashreporter
 IF NOT EXIST %QML_DIR%\NUL EXIT /B 1
