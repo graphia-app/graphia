@@ -21,8 +21,6 @@
 #include "../thirdparty/SortFilterProxyModel/qqmlsortfilterproxymodel.h"
 #include "../thirdparty/breakpad/crashhandler.h"
 
-#include <QCoreApplication>
-
 int main(int argc, char *argv[])
 {
     SharedTools::QtSingleApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
