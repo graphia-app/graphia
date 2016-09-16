@@ -45,8 +45,7 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> dataFie
     {
         for(auto nodeId : _graphModel->graph().nodeIds())
         {
-            bool match = false;
-            match = re.match(_graphModel->nodeNames().at(nodeId)).hasMatch();
+            bool match = re.match(_graphModel->nodeNames().at(nodeId)).hasMatch();
 
             if(!match)
             {

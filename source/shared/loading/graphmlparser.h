@@ -27,20 +27,23 @@ struct Attribute
     QVariant _default;
     QString _type;
     QVariant _value;
-    Attribute(AttributeKey key, QVariant value)
+
+    Attribute(const AttributeKey& key, const QVariant& value)
     {
         _name = key._name;
         _default = key._default;
         _type = key._type;
         _value = value;
     }
-    Attribute(AttributeKey key)
+
+    Attribute(const AttributeKey& key)
     {
         _name = key._name;
         _default = key._default;
         _type = key._type;
         _value = key._default;
     }
+
     Attribute() = default;
 };
 
@@ -65,7 +68,7 @@ private:
     IMutableGraph& _graph;
 
     const IParser::ProgressFn& _progress;
-    QString _errorString = "";
+    QString _errorString = QString();
 
     AttributeData<NodeId> _nodeAttributes;
     AttributeData<EdgeId> _edgeAttributes;
@@ -85,8 +88,8 @@ private:
     std::stack<AttributeKey*> _activeAttributeKeys;
     std::stack<Attribute*> _activeAttributes;
 
-    QXmlLocator* _locator;
-    int _lineCount;
+    QXmlLocator* _locator = nullptr;
+    int _lineCount = 0;
 
 public:
     GraphMLHandler(IMutableGraph& mutableGraph, const IParser::ProgressFn& progress, BaseGenericPluginInstance* genericPluginInstance, int lineCount);

@@ -11,7 +11,7 @@ private:
     CorrelationPluginInstance* _plugin;
 
 public:
-    CorrelationFileParser(CorrelationPluginInstance* correlationPluginInstance);
+    explicit CorrelationFileParser(CorrelationPluginInstance* correlationPluginInstance);
 
     bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress);
 };

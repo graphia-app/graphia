@@ -11,7 +11,7 @@ private:
     BaseGenericPluginInstance* _genericPluginInstance;
 
 public:
-    GmlFileParser(BaseGenericPluginInstance* genericPluginInstance);
+    explicit GmlFileParser(BaseGenericPluginInstance* genericPluginInstance);
 
     bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress);
 };

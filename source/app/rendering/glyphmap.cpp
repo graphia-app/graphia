@@ -152,7 +152,7 @@ void GlyphMap::layoutStrings(const QFont& font)
     }
 }
 
-bool GlyphMap::stringsAreRenderable(const QFont &font)
+bool GlyphMap::stringsAreRenderable(const QFont &font) const
 {
     auto rawFont = QRawFont::fromFont(font);
 

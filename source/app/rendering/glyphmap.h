@@ -68,7 +68,7 @@ private:
     mutable std::recursive_mutex _mutex;
 
 public:
-    GlyphMap(const QString& fontName);
+    explicit GlyphMap(const QString& fontName);
 
     void addText(const QString& text);
     void update();
@@ -85,7 +85,7 @@ public:
 
 private:
     void layoutStrings(const QFont& font);
-    bool stringsAreRenderable(const QFont& font);
+    bool stringsAreRenderable(const QFont& font) const;
     void renderImages(const QFont& font);
 };
 

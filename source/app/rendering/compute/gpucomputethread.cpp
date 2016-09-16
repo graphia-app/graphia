@@ -2,11 +2,10 @@
 
 #include "shared/utils/utils.h"
 
-GPUComputeThread::GPUComputeThread()
+GPUComputeThread::GPUComputeThread() :
+    _surface(std::make_unique<QOffscreenSurface>()),
+    _format(std::make_unique<QSurfaceFormat>(QSurfaceFormat::defaultFormat()))
 {
-    _format = std::make_unique<QSurfaceFormat>(QSurfaceFormat::defaultFormat());
-
-    _surface = std::make_unique<QOffscreenSurface>();
     _surface->setFormat(*_format);
 
     // GUI main

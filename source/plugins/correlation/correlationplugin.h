@@ -88,8 +88,8 @@ private:
         DataIterator _begin;
         DataIterator _end;
 
-        DataIterator begin() { return _begin; }
-        DataIterator end() { return _end; }
+        DataIterator begin() const { return _begin; }
+        DataIterator end() const { return _end; }
 
         NodeId _nodeId;
 

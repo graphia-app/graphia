@@ -11,7 +11,7 @@ private:
     BaseGenericPluginInstance* _genericPluginInstance;
 
 public:
-    PairwiseTxtFileParser(BaseGenericPluginInstance* genericPluginInstance);
+    explicit PairwiseTxtFileParser(BaseGenericPluginInstance* genericPluginInstance);
 
     bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress);
 };
