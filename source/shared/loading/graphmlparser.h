@@ -28,14 +28,6 @@ struct Attribute
     QString _type;
     QVariant _value;
 
-    Attribute(const AttributeKey& key, const QVariant& value)
-    {
-        _name = key._name;
-        _default = key._default;
-        _type = key._type;
-        _value = value;
-    }
-
     Attribute(const AttributeKey& key)
     {
         _name = key._name;
@@ -113,9 +105,9 @@ private:
     BaseGenericPluginInstance* _genericPluginInstance;
     AttributeData<NodeId> _nodeAttributeData;
     AttributeData<EdgeId> _edgeAttributeData;
+
 public:
-    GraphMLParser();
-    GraphMLParser(BaseGenericPluginInstance *genericPluginInstance);
+    explicit GraphMLParser(BaseGenericPluginInstance *genericPluginInstance);
     bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress);
 };
 
