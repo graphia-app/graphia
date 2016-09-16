@@ -318,6 +318,13 @@ class ExceptionHandler {
   // Signals the exception handler thread to handle the exception.
   static LONG WINAPI HandleException(EXCEPTION_POINTERS* exinfo);
 
+  bool AttemptToWriteCrashReport(EXCEPTION_POINTERS* exinfo);
+
+#if defined(_WIN64)
+  // Called on the exception thread when an exception occurs.
+  static LONG WINAPI PreExceptionVectoredHandler(EXCEPTION_POINTERS* exinfo);
+#endif // _WIN64
+
 #if _MSC_VER >= 1400  // MSVC 2005/8
   // This function will be called by some CRT functions when they detect
   // that they were passed an invalid parameter.  Note that in _DEBUG builds,
