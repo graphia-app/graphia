@@ -665,9 +665,6 @@ ApplicationWindow
             var oldIndex = tabView.currentIndex;
             removeTab(tabView.currentIndex);
 
-            //FIXME for some reason the DocumentUI doesn't get destroyed here
-            // This is a suspected Qt bug
-
             return insertTabAtIndex(oldIndex);
         }
 
