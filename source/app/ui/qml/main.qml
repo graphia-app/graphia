@@ -511,6 +511,13 @@ ApplicationWindow
         onTriggered: currentDocument && currentDocument.togglePop()
     }
 
+    Action
+    {
+        // A do nothing action that we use when there
+        // is no other valid action available
+        id: nullAction
+    }
+
     menuBar: MenuBar
     {
         Menu
@@ -560,12 +567,12 @@ ApplicationWindow
             MenuItem { action: findAction }
             MenuItem
             {
-                action: currentDocument && currentDocument.selectPreviousFoundAction
+                action: currentDocument ? currentDocument.selectPreviousFoundAction : nullAction
                 visible: currentDocument
             }
             MenuItem
             {
-                action: currentDocument && currentDocument.selectNextFoundAction
+                action: currentDocument ? currentDocument.selectNextFoundAction : nullAction
                 visible: currentDocument
             }
             MenuSeparator {}
