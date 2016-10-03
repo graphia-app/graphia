@@ -526,9 +526,10 @@ ApplicationWindow
             MenuItem { action: fileOpenAction }
             MenuItem { action: fileOpenInTabAction }
             MenuItem { action: closeTabAction }
-            Menu {
+            Menu
+            {
                 id: recentFileMenu;
-                title: "Recent Files"
+                title: qsTr("&Recent Files")
 
                 Instantiator
                 {
@@ -540,8 +541,7 @@ ApplicationWindow
                             // FIXME: This fires with a -1 index onOpenFile
                             // BUG: Text overflows MenuItems on Windows
                             // https://bugreports.qt.io/browse/QTBUG-50849
-                            text: if (index > -1) mainWindow.recentFiles[index];
-                                  else "";
+                            text: index > -1 ? mainWindow.recentFiles[index] : "";
                             action: recentFileOpen
                         }
                     }
