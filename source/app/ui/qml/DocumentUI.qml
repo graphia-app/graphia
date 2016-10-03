@@ -48,6 +48,9 @@ Item
     property int foundIndex: document.foundIndex
     property int numNodesFound: document.numNodesFound
 
+    property var selectPreviousFoundAction: find.selectPreviousAction
+    property var selectNextFoundAction: find.selectNextAction
+
     property color textColor:
     {
         return document.textColor;

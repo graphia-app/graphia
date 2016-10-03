@@ -8,6 +8,9 @@ Item
 
     property var document
 
+    property var selectPreviousAction: _selectPreviousAction
+    property var selectNextAction: _selectNextAction
+
     width: row.width
     height: row.height
 
@@ -22,8 +25,8 @@ Item
 
     Action
     {
-        id: selectPreviousAction
-        text: qsTr("Previous")
+        id: _selectPreviousAction
+        text: qsTr("Find Previous")
         iconName: "go-previous"
         shortcut: "Ctrl+Shift+G"
         enabled: document.numNodesFound > 0
@@ -32,8 +35,8 @@ Item
 
     Action
     {
-        id: selectNextAction
-        text: qsTr("Next")
+        id: _selectNextAction
+        text: qsTr("Find Next")
         iconName: "go-next"
         shortcut: "Ctrl+G"
         enabled: document.numNodesFound > 0
@@ -67,8 +70,8 @@ Item
             onAccepted: { selectAllAction.trigger(); }
         }
 
-        ToolButton { action: selectPreviousAction }
-        ToolButton { action: selectNextAction }
+        ToolButton { action: _selectPreviousAction }
+        ToolButton { action: _selectNextAction }
         ToolButton { action: selectAllAction }
         ToolButton { action: closeAction }
 

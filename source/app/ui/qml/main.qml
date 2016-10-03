@@ -131,7 +131,7 @@ ApplicationWindow
         // Remove any duplicates
         for(var i=0; i<copyRecentFiles.length; i++)
         {
-            if (copyRecentFiles[i] === fileName)
+            if(copyRecentFiles[i] === fileName)
             {
                 copyRecentFiles.splice(i, 1);
                 break;
@@ -141,11 +141,10 @@ ApplicationWindow
         // Add to the top
         copyRecentFiles.unshift(fileName);
 
-        if (copyRecentFiles.length > RECENT_FILES_LENGTH)
+        if(copyRecentFiles.length > RECENT_FILES_LENGTH)
             copyRecentFiles.pop();
 
         mainWindow.recentFiles = copyRecentFiles;
-
     }
 
 
@@ -559,6 +558,16 @@ ApplicationWindow
             MenuItem { action: invertSelectionAction }
             MenuSeparator {}
             MenuItem { action: findAction }
+            MenuItem
+            {
+                action: currentDocument && currentDocument.selectPreviousFoundAction
+                visible: currentDocument
+            }
+            MenuItem
+            {
+                action: currentDocument && currentDocument.selectNextFoundAction
+                visible: currentDocument
+            }
             MenuSeparator {}
             MenuItem { action: prevComponentAction }
             MenuItem { action: nextComponentAction }
