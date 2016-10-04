@@ -120,6 +120,7 @@ int main(int argc, char *argv[])
     QQmlSortFilterProxyModel::initialize();
 
     QQmlApplicationEngine engine;
+    engine.addImportPath("qrc:///qml");
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
     Q_ASSERT(!engine.rootObjects().empty());
 

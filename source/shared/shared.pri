@@ -47,3 +47,5 @@ SOURCES += \
 
 RESOURCES += \
     $$PWD/ui/shared.qrc
+
+DISTFILES +=
