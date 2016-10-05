@@ -6,8 +6,8 @@
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/iparser.h"
 
-#include "attribute.h"
-#include "attributestablemodel.h"
+#include "shared/plugins/attribute.h"
+#include "shared/plugins/attributestablemodel.h"
 
 #include <vector>
 #include <functional>

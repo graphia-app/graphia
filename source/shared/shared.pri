@@ -29,7 +29,9 @@ HEADERS += \
     $$PWD/plugins/basegenericplugin.h \
     $$PWD/loading/tabulardata.h \
     $$PWD/utils/function_traits.h \
-    $$PWD/loading/graphmlparser.h
+    $$PWD/loading/graphmlparser.h \
+    $$PWD/plugins/attribute.h \
+    $$PWD/plugins/attributestablemodel.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \
@@ -43,7 +45,9 @@ SOURCES += \
     $$PWD/loading/pairwisetxtfileparser.cpp \
     $$PWD/plugins/basegenericplugin.cpp \
     $$PWD/loading/tabulardata.cpp \
-    $$PWD/loading/graphmlparser.cpp
+    $$PWD/loading/graphmlparser.cpp \
+    $$PWD/plugins/attribute.cpp \
+    $$PWD/plugins/attributestablemodel.cpp
 
 RESOURCES += \
     $$PWD/ui/shared.qrc

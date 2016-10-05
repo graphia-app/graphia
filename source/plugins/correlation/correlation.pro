@@ -12,15 +12,11 @@ CONFIG += plugin
 
 SOURCES += \
     correlationplugin.cpp \
-    loading/correlationfileparser.cpp \
-    attributestablemodel.cpp \
-    attribute.cpp
+    loading/correlationfileparser.cpp
 
 HEADERS += \
     correlationplugin.h \
-    loading/correlationfileparser.h \
-    attributestablemodel.h \
-    attribute.h
+    loading/correlationfileparser.h
 
 RESOURCES += \
     ui/qml.qrc
