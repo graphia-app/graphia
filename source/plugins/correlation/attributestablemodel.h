@@ -1,17 +1,13 @@
 #ifndef ATTRIBUTESTABLEMODEL_H
 #define ATTRIBUTESTABLEMODEL_H
 
-#include "shared/ui/iselectionmanager.h"
-#include "shared/graph/elementid.h"
-
-#include "attribute.h"
-
 #include <QAbstractTableModel>
 #include <QStringList>
+#include <QHash>
 
 #include <vector>
 
-class CorrelationPluginInstance;
+class Attributes;
 
 class AttributesTableModel : public QAbstractTableModel
 {

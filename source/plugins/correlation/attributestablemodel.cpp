@@ -1,6 +1,6 @@
 #include "attributestablemodel.h"
 
-#include "correlationplugin.h"
+#include "attribute.h"
 
 AttributesTableModel::AttributesTableModel(Attributes* attributes) :
     QAbstractTableModel(),
