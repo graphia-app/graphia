@@ -4,10 +4,13 @@
 #include "shared/utils/threadpool.h"
 
 CorrelationPluginInstance::CorrelationPluginInstance() :
-    _attributesTableModel(this)
+    _attributesTableModel(&_rowAttributes)
 {
     connect(this, &CorrelationPluginInstance::graphChanged,
             this, &CorrelationPluginInstance::onGraphChanged);
+
+    connect(this, &CorrelationPluginInstance::selectionChanged,
+            this, &CorrelationPluginInstance::onSelectionChanged);
 }
 
 void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionManager* selectionManager)
@@ -44,16 +47,16 @@ bool CorrelationPluginInstance::loadAttributes(const TabularData& tabularData, i
             if(rowIndex == 0)
             {
                 if(dataColumnIndex < 0)
-                    addRowAttribute(value);
+                    _rowAttributes.add(value);
                 else
                     setDataColumnName(dataColumnIndex, value);
             }
             else if(dataRowIndex < 0)
             {
                 if(columnIndex == 0)
-                    addColumnAttribute(value);
+                    _columnAttributes.add(value);
                 else if(dataColumnIndex >= 0)
-                    setColumnAttribute(dataColumnIndex, tabularData.valueAtQString(0, rowIndex), value);
+                    _columnAttributes.setValue(dataColumnIndex, tabularData.valueAtQString(0, rowIndex), value);
             }
             else
             {
@@ -65,7 +68,7 @@ bool CorrelationPluginInstance::loadAttributes(const TabularData& tabularData, i
                         finishDataRow(dataRowIndex);
                 }
                 else
-                    setRowAttribute(dataRowIndex, tabularData.valueAtQString(columnIndex, 0), value);
+                    _rowAttributes.setValue(dataRowIndex, tabularData.valueAtQString(columnIndex, 0), value);
             }
         }
     }
@@ -146,11 +149,11 @@ void CorrelationPluginInstance::setNodeNamesToFirstRowAttribute()
 {
     if(!_rowAttributes.empty())
     {
-        const auto& firstAttributeName = _rowAttributes.front()._name;
+        const auto& firstAttributeName = _rowAttributes.firstAttributeName();
 
         for(auto& dataRow : _dataRows)
         {
-             graphModel()->setNodeName(dataRow._nodeId, rowAttributeValue(
+             graphModel()->setNodeName(dataRow._nodeId, _rowAttributes.value(
                 rowIndexForNodeId(dataRow._nodeId), firstAttributeName));
         }
     }
@@ -159,137 +162,17 @@ void CorrelationPluginInstance::setNodeNamesToFirstRowAttribute()
 void CorrelationPluginInstance::setDimensions(int numColumns, int numRows)
 {
     Q_ASSERT(_dataColumnNames.empty());
-    Q_ASSERT(_rowAttributes.empty());
     Q_ASSERT(_columnAttributes.empty());
+    Q_ASSERT(_rowAttributes.empty());
 
     _numColumns = numColumns;
     _numRows = numRows;
 
+    _columnAttributes.setSize(numColumns);
+    _rowAttributes.setSize(numRows);
+
     _dataColumnNames.resize(numColumns);
     _data.resize(numColumns * numRows);
-}
-
-void CorrelationPluginInstance::Attribute::set(int index, const QString& value)
-{
-    Q_ASSERT(index < static_cast<int>(_values.size()));
-
-    bool conversionSucceeded = false;
-
-    int intValue = value.toInt(&conversionSucceeded);
-    bool isInt = conversionSucceeded;
-
-    double floatValue = value.toDouble(&conversionSucceeded);
-    bool isFloat = conversionSucceeded;
-
-    switch(_type)
-    {
-    default:
-    case Type::Unknown:
-        if(isInt)
-            _type = Type::Integer;
-        else if(isFloat)
-            _type = Type::Float;
-        else
-            _type = Type::String;
-
-        break;
-
-    case Type::Integer:
-        if(!isInt)
-        {
-            if(isFloat)
-                _type = Type::Float;
-            else
-                _type = Type::String;
-        }
-
-        break;
-
-    case Type::Float:
-        if(isFloat || isInt)
-            _type = Type::Float;
-        else
-            _type = Type::String;
-
-        break;
-
-    case Type::String:
-        _type = Type::String;
-
-        break;
-    }
-
-    _values.at(index) = value;
-
-    if(isInt)
-    {
-        _intValues.at(index) = intValue;
-        _intMin = std::min(_intMin, intValue);
-        _intMax = std::max(_intMax, intValue);
-    }
-
-    if(isFloat)
-    {
-        _floatValues.at(index) = floatValue;
-        _floatMin = std::min(_floatMin, floatValue);
-        _floatMax = std::max(_floatMax, floatValue);
-    }
-}
-
-const QString& CorrelationPluginInstance::Attribute::get(int index) const
-{
-    Q_ASSERT(index < static_cast<int>(_values.size()));
-
-    return _values.at(index);
-}
-
-CorrelationPluginInstance::Attribute& CorrelationPluginInstance::rowAttributeByName(const QString& name)
-{
-    auto it = std::find_if(_rowAttributes.begin(), _rowAttributes.end(),
-                          [&name](auto& v) { return v._name == name; });
-    Q_ASSERT(it != _rowAttributes.end());
-    return *it;
-}
-
-void CorrelationPluginInstance::addRowAttribute(const QString& name)
-{
-    Q_ASSERT(_numRows > 0);
-    _rowAttributes.emplace_back(name, _numRows);
-}
-
-void CorrelationPluginInstance::setRowAttribute(int row,
-                                                const QString& name,
-                                                const QString& value)
-{
-    Q_ASSERT(row < _numRows);
-    rowAttributeByName(name).set(row, value);
-}
-
-const QString& CorrelationPluginInstance::rowAttributeValue(int row, const QString& name)
-{
-    return rowAttributeByName(name).get(row);
-}
-
-CorrelationPluginInstance::Attribute& CorrelationPluginInstance::columnAttributeByName(const QString& name)
-{
-    auto it = std::find_if(_columnAttributes.begin(), _columnAttributes.end(),
-                          [&name](auto& v) { return v._name == name; });
-    Q_ASSERT(it != _columnAttributes.end());
-    return *it;
-}
-
-void CorrelationPluginInstance::addColumnAttribute(const QString& name)
-{
-    Q_ASSERT(_numColumns > 0);
-    _columnAttributes.emplace_back(name, _numColumns);
-}
-
-void CorrelationPluginInstance::setColumnAttribute(int column,
-                                                   const QString& name,
-                                                   const QString& value)
-{
-    Q_ASSERT(column < _numColumns);
-    columnAttributeByName(name).set(column, value);
 }
 
 void CorrelationPluginInstance::setDataColumnName(int column, const QString& name)
@@ -333,38 +216,38 @@ void CorrelationPluginInstance::onGraphChanged()
 
     for(auto& rowAttribute : _rowAttributes)
     {
-        switch(rowAttribute._type)
+        switch(rowAttribute.type())
         {
         case Attribute::Type::Float:
-            graphModel()->dataField(rowAttribute._name)
+            graphModel()->dataField(rowAttribute.name())
                     .setFloatValueFn([this, &rowAttribute](NodeId nodeId)
                     {
                         int row = _dataRowIndexes->get(nodeId);
-                        return rowAttribute._values.at(row).toFloat();
+                        return rowAttribute.get(row).toFloat();
                     })
-                    .setFloatMin(static_cast<float>(rowAttribute._floatMin))
-                    .setFloatMax(static_cast<float>(rowAttribute._floatMax))
+                    .setFloatMin(static_cast<float>(rowAttribute.floatMin()))
+                    .setFloatMax(static_cast<float>(rowAttribute.floatMax()))
                     .setSearchable(true);
             break;
 
         case Attribute::Type::Integer:
-            graphModel()->dataField(rowAttribute._name)
+            graphModel()->dataField(rowAttribute.name())
                     .setIntValueFn([this, &rowAttribute](NodeId nodeId)
                     {
                         int row = _dataRowIndexes->get(nodeId);
-                        return rowAttribute._values.at(row).toInt();
+                        return rowAttribute.get(row).toInt();
                     })
-                    .setIntMin(rowAttribute._intMin)
-                    .setIntMax(rowAttribute._intMax)
+                    .setIntMin(rowAttribute.intMin())
+                    .setIntMax(rowAttribute.intMax())
                     .setSearchable(true);
             break;
 
         case Attribute::Type::String:
-            graphModel()->dataField(rowAttribute._name)
+            graphModel()->dataField(rowAttribute.name())
                     .setStringValueFn([this, &rowAttribute](NodeId nodeId)
                     {
                         int row = _dataRowIndexes->get(nodeId);
-                        return rowAttribute._values.at(row);
+                        return rowAttribute.get(row);
                     })
                     .setSearchable(true);
             break;
@@ -372,6 +255,19 @@ void CorrelationPluginInstance::onGraphChanged()
         default: break;
         }
     }
+}
+
+void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager* selectionManager)
+{
+    const auto& selectedNodes = selectionManager->selectedNodes();
+
+    std::vector<int> selectedRowIndexes;
+    selectedRowIndexes.reserve(selectedNodes.size());
+
+    for(auto& nodeId : selectedNodes)
+        selectedRowIndexes.emplace_back(rowIndexForNodeId(nodeId));
+
+    _attributesTableModel.setSelectedRowIndexes(std::move(selectedRowIndexes));
 }
 
 std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const QString& urlTypeName)

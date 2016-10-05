@@ -4,6 +4,8 @@
 #include "shared/ui/iselectionmanager.h"
 #include "shared/graph/elementid.h"
 
+#include "attribute.h"
+
 #include <QAbstractTableModel>
 #include <QStringList>
 
@@ -18,16 +20,17 @@ class AttributesTableModel : public QAbstractTableModel
     Q_PROPERTY(QStringList columnNames READ columnNames NOTIFY columnNamesChanged)
 
 private:
-    CorrelationPluginInstance* _correlationPluginInstance;
+    const Attributes* _rowAttributes;
     std::vector<int> _selectedRowIndexes;
     QHash<int, QByteArray> _roleNames;
 
     QStringList columnNames() const;
 
 public:
-    explicit AttributesTableModel(CorrelationPluginInstance* correlationPluginInstance);
+    explicit AttributesTableModel(Attributes* attributes);
 
     void initialise();
+    void setSelectedRowIndexes(std::vector<int>&& selectedRowIndexes);
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
@@ -35,9 +38,6 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
 
     QHash<int, QByteArray> roleNames() const { return _roleNames; }
-
-private slots:
-    void onSelectionChanged(const ISelectionManager* selectionManager);
 
 signals:
     void columnNamesChanged();

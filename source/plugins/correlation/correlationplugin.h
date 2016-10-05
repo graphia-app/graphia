@@ -6,12 +6,11 @@
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/iparser.h"
 
+#include "attribute.h"
 #include "attributestablemodel.h"
 
 #include <vector>
-#include <map>
 #include <functional>
-#include <limits>
 
 #include <QString>
 
@@ -28,47 +27,10 @@ private:
     int _numColumns = 0;
     int _numRows = 0;
 
-    struct Attribute
-    {
-        Attribute() = default;
-        Attribute(const Attribute&) = default;
-        Attribute(Attribute&&) = default;
-
-        Attribute(const QString& name, int numRows) :
-            _name(name),
-            _values(numRows),
-            _intValues(numRows),
-            _floatValues(numRows)
-        {}
-
-        enum class Type
-        {
-            Unknown,
-            String,
-            Integer,
-            Float
-        };
-
-        QString _name;
-
-        Type _type = Type::Unknown;
-
-        std::vector<QString> _values;
-        std::vector<int> _intValues;
-        std::vector<double> _floatValues;
-
-        int _intMin = std::numeric_limits<int>::max();
-        int _intMax = std::numeric_limits<int>::min();
-        double _floatMin = std::numeric_limits<double>::max();
-        double _floatMax = std::numeric_limits<double>::min();
-
-        void set(int index, const QString& value);
-        const QString& get(int index) const;
-    };
-
     std::vector<QString> _dataColumnNames;
-    std::vector<Attribute> _rowAttributes;
-    std::vector<Attribute> _columnAttributes;
+
+    Attributes _rowAttributes;
+    Attributes _columnAttributes;
 
     AttributesTableModel _attributesTableModel;
 
@@ -139,14 +101,6 @@ private:
 
     void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager);
 
-    Attribute& rowAttributeByName(const QString& name);
-    void addRowAttribute(const QString& name);
-    void setRowAttribute(int row, const QString& name, const QString& value);
-
-    Attribute& columnAttributeByName(const QString& name);
-    void addColumnAttribute(const QString& name);
-    void setColumnAttribute(int column, const QString& name, const QString& value);
-
     void setDataColumnName(int column, const QString& name);
     void setData(int column, int row, double value);
 
@@ -170,15 +124,11 @@ public:
 
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName);
 
-    int numRows() const { return _numRows; }
-    int numColumns() const { return _numColumns; }
-
-    const std::vector<Attribute>& rowAttributes() const { return _rowAttributes; }
-    const QString& rowAttributeValue(int row, const QString& name);
     int rowIndexForNodeId(NodeId nodeId) const { return _dataRowIndexes->get(nodeId); }
 
 private slots:
     void onGraphChanged();
+    void onSelectionChanged(const ISelectionManager* selectionManager);
 };
 
 class CorrelationPlugin : public BasePlugin, public PluginInstanceProvider<CorrelationPluginInstance>

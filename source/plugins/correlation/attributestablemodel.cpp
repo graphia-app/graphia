@@ -2,29 +2,33 @@
 
 #include "correlationplugin.h"
 
-AttributesTableModel::AttributesTableModel(CorrelationPluginInstance* correlationPluginInstance) :
+AttributesTableModel::AttributesTableModel(Attributes* attributes) :
     QAbstractTableModel(),
-    _correlationPluginInstance(correlationPluginInstance)
-{
-    connect(correlationPluginInstance, &CorrelationPluginInstance::selectionChanged,
-            this, &AttributesTableModel::onSelectionChanged);
-}
+    _rowAttributes(attributes)
+{}
 
 void AttributesTableModel::initialise()
 {
     int role = Qt::UserRole + 1;
-    for(auto& rowAttribute : _correlationPluginInstance->rowAttributes())
-        _roleNames.insert(role++, rowAttribute._name.toUtf8());
+    for(auto& rowAttribute : *_rowAttributes)
+        _roleNames.insert(role++, rowAttribute.name().toUtf8());
 
     emit columnNamesChanged();
+}
+
+void AttributesTableModel::setSelectedRowIndexes(std::vector<int>&& selectedRowIndexes)
+{
+    emit layoutAboutToBeChanged();
+    _selectedRowIndexes = selectedRowIndexes;
+    emit layoutChanged();
 }
 
 QStringList AttributesTableModel::columnNames() const
 {
     QStringList list;
 
-    for(auto& rowAttribute : _correlationPluginInstance->rowAttributes())
-        list.append(rowAttribute._name);
+    for(auto& rowAttribute : *_rowAttributes)
+        list.append(rowAttribute.name());
 
     return list;
 }
@@ -36,7 +40,7 @@ int AttributesTableModel::rowCount(const QModelIndex&) const
 
 int AttributesTableModel::columnCount(const QModelIndex&) const
 {
-    return static_cast<int>(_correlationPluginInstance->rowAttributes().size());
+    return static_cast<int>(_rowAttributes->size());
 }
 
 QVariant AttributesTableModel::data(const QModelIndex& index, int role) const
@@ -45,26 +49,8 @@ QVariant AttributesTableModel::data(const QModelIndex& index, int role) const
     if(row >= 0 && row < rowCount() && role >= Qt::UserRole)
     {
         int rowIndex = _selectedRowIndexes.at(index.row());
-        return _correlationPluginInstance->rowAttributeValue(rowIndex, _roleNames[role]);
+        return _rowAttributes->value(rowIndex, _roleNames[role]);
     }
 
     return QVariant();
-}
-
-void AttributesTableModel::onSelectionChanged(const ISelectionManager* selectionManager)
-{
-    emit layoutAboutToBeChanged();
-
-    const auto& selectedNodes = selectionManager->selectedNodes();
-
-    _selectedRowIndexes.reserve(selectedNodes.size());
-    _selectedRowIndexes.clear();
-
-    for(auto& nodeId : selectedNodes)
-    {
-        int rowIndex = _correlationPluginInstance->rowIndexForNodeId(nodeId);
-        _selectedRowIndexes.emplace_back(rowIndex);
-    }
-
-    emit layoutChanged();
 }
