@@ -9,43 +9,43 @@
 
 class BaseGenericPluginInstance;
 
-struct AttributeKey
-{
-    QString _name;
-    QVariant _default;
-    QString _type;
-    friend bool operator<(const AttributeKey& l, const AttributeKey& r)
-    {
-        return std::tie(l._name, l._default, l._type)
-             < std::tie(r._name, r._default, r._type);
-    }
-};
-
-struct Attribute
-{
-    QString _name;
-    QVariant _default;
-    QString _type;
-    QVariant _value;
-
-    Attribute(const AttributeKey& key)
-    {
-        _name = key._name;
-        _default = key._default;
-        _type = key._type;
-        _value = key._default;
-    }
-
-    Attribute() = default;
-};
-
-template<typename T>
-using AttributeData = std::map<AttributeKey, std::map<T, Attribute>>;
-
 class GraphMLHandler : public QXmlDefaultHandler
 {
-private:
+public:
+    struct AttributeKey
+    {
+        QString _name;
+        QVariant _default;
+        QString _type;
+        friend bool operator<(const AttributeKey& l, const AttributeKey& r)
+        {
+            return std::tie(l._name, l._default, l._type)
+                 < std::tie(r._name, r._default, r._type);
+        }
+    };
 
+    struct Attribute
+    {
+        QString _name;
+        QVariant _default;
+        QString _type;
+        QVariant _value;
+
+        Attribute(const AttributeKey& key)
+        {
+            _name = key._name;
+            _default = key._default;
+            _type = key._type;
+            _value = key._default;
+        }
+
+        Attribute() = default;
+    };
+
+    template<typename T>
+    using AttributeData = std::map<AttributeKey, std::map<T, Attribute>>;
+
+private:
     struct TemporaryEdge
     {
         QString _source;
@@ -96,15 +96,14 @@ public:
     bool warning(const QXmlParseException &exception);
     bool error(const QXmlParseException &exception);
     bool fatalError(const QXmlParseException &exception);
-
 };
 
 class GraphMLParser: public BaseParser
 {
 private:
     BaseGenericPluginInstance* _genericPluginInstance;
-    AttributeData<NodeId> _nodeAttributeData;
-    AttributeData<EdgeId> _edgeAttributeData;
+    GraphMLHandler::AttributeData<NodeId> _nodeAttributeData;
+    GraphMLHandler::AttributeData<EdgeId> _edgeAttributeData;
 
 public:
     explicit GraphMLParser(BaseGenericPluginInstance *genericPluginInstance);
