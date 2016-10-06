@@ -6,6 +6,8 @@ import SortFilterProxyModel 0.1
 
 Item
 {
+    enabled: plugin.model.rowAttributes.columnNames.length > 0
+
     anchors.fill: parent
 
     ColumnLayout

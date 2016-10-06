@@ -1,6 +1,7 @@
 #ifndef ATTRIBUTE_H
 #define ATTRIBUTE_H
 
+#include <QObject>
 #include <QString>
 
 #include <vector>
@@ -50,8 +51,10 @@ public:
     const QString& get(int index) const;
 };
 
-class Attributes
+class Attributes : public QObject
 {
+    Q_OBJECT
+
 private:
     using Vector = std::vector<Attribute>;
 
@@ -75,6 +78,9 @@ public:
     void add(const QString& name);
     void setValue(int index, const QString& name, const QString& value);
     const QString& value(int index, const QString& name) const;
+
+signals:
+    void attributeAdded(const QString& name);
 };
 
 #endif // ATTRIBUTE_H

@@ -253,7 +253,7 @@ Item
     {
         id: plugin
         Layout.minimumHeight: 100
-        visible: loaded && document.pluginQmlPath
+        visible: loaded && enabledChildren
 
         property var model: document.plugin
         property bool loaded: false
@@ -268,6 +268,18 @@ Item
             pluginWindow.width = 640;
             pluginWindow.height = 480;
             popInPlugin();
+        }
+
+        // At least one enabled direct child
+        property bool enabledChildren:
+        {
+            for(var i = 0; i < children.length; i++)
+            {
+                if(children[i].enabled)
+                    return true;
+            }
+
+            return false;
         }
     }
 

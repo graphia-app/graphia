@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>tools.svg</file>
+        <file>qml/genericplugin.qml</file>
     </qresource>
 </RCC>

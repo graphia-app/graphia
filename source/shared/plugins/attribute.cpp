@@ -91,6 +91,8 @@ void Attributes::add(const QString& name)
 {
     Q_ASSERT(_size > 0);
     _attributes.emplace_back(name, _size);
+
+    emit attributeAdded(name);
 }
 
 void Attributes::setValue(int index, const QString& name, const QString& value)

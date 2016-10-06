@@ -18,6 +18,8 @@ class AttributesTableModel : public QAbstractTableModel
 private:
     const Attributes* _rowAttributes;
     std::vector<int> _selectedRowIndexes;
+
+    int _nextRole = Qt::UserRole + 1;
     QHash<int, QByteArray> _roleNames;
 
     QStringList columnNames() const;
@@ -25,7 +27,6 @@ private:
 public:
     explicit AttributesTableModel(Attributes* attributes);
 
-    void initialise();
     void setSelectedRowIndexes(std::vector<int>&& selectedRowIndexes);
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const;

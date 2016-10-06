@@ -16,7 +16,7 @@ TableView
     id: tableView
 
     sortIndicatorVisible: true
-    property string sortRoleName: columnNames[sortIndicatorColumn]
+    property string sortRoleName: columnNames.length > 0 ? columnNames[sortIndicatorColumn] : ""
 
     model: SortFilterProxyModel
     {

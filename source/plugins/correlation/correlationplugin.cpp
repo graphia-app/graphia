@@ -141,8 +141,6 @@ void CorrelationPluginInstance::createEdges(const std::vector<std::tuple<NodeId,
         auto edgeId = graphModel()->mutableGraph().addEdge(std::get<0>(edge), std::get<1>(edge));
         _pearsonValues->set(edgeId, std::get<2>(edge));
     }
-
-    _attributesTableModel.initialise();
 }
 
 void CorrelationPluginInstance::setNodeNamesToFirstRowAttribute()

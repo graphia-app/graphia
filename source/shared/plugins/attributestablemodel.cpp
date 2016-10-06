@@ -5,15 +5,15 @@
 AttributesTableModel::AttributesTableModel(Attributes* attributes) :
     QAbstractTableModel(),
     _rowAttributes(attributes)
-{}
-
-void AttributesTableModel::initialise()
 {
-    int role = Qt::UserRole + 1;
-    for(auto& rowAttribute : *_rowAttributes)
-        _roleNames.insert(role++, rowAttribute.name().toUtf8());
+    connect(attributes, &Attributes::attributeAdded,
+    [this](const QString& name)
+    {
+        _roleNames.insert(_nextRole, name.toUtf8());
+        _nextRole++;
 
-    emit columnNamesChanged();
+        emit columnNamesChanged();
+    });
 }
 
 void AttributesTableModel::setSelectedRowIndexes(std::vector<int>&& selectedRowIndexes)
