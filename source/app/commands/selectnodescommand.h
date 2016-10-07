@@ -16,7 +16,7 @@ class SelectNodesCommand : public Command
 private:
     SelectionManager* _selectionManager;
     C _nodeIds;
-    bool _toggle;
+    bool _clearSelectionFirst;
     bool _nodeWasSelected;
 
     NodeId nodeId() const
@@ -26,8 +26,10 @@ private:
     }
 
 public:
-    SelectNodesCommand(SelectionManager* selectionManager, C nodeIds, bool toggle = false) :
-        Command(), _selectionManager(selectionManager), _nodeIds(nodeIds), _toggle(toggle)
+    SelectNodesCommand(SelectionManager* selectionManager, C nodeIds,
+                       bool clearSelectionFirst = true) :
+        Command(), _selectionManager(selectionManager), _nodeIds(nodeIds),
+        _clearSelectionFirst(clearSelectionFirst)
     {
         if(_nodeIds.size() > 1)
         {
@@ -45,6 +47,12 @@ public:
 
     bool execute()
     {
+        if(_clearSelectionFirst)
+        {
+            _selectionManager->suppressSignals();
+            _selectionManager->clearNodeSelection();
+        }
+
         if(_nodeIds.size() > 1)
         {
             bool nodesSelected = _selectionManager->selectNodes(_nodeIds);
@@ -53,12 +61,6 @@ public:
         }
         else
         {
-            if(!_toggle)
-            {
-                _selectionManager->suppressSignals();
-                _selectionManager->clearNodeSelection();
-            }
-
             _selectionManager->toggleNode(nodeId());
 
             if(!_nodeWasSelected)
@@ -70,18 +72,18 @@ public:
 };
 
 template<typename C>
-auto makeSelectNodesCommand(SelectionManager* selectionManager, C nodeIds, bool toggle = false)
+auto makeSelectNodesCommand(SelectionManager* selectionManager, C nodeIds, bool clearSelectionFirst = true)
 {
-    return std::make_shared<SelectNodesCommand<C>>(selectionManager, nodeIds, toggle);
+    return std::make_shared<SelectNodesCommand<C>>(selectionManager, nodeIds, clearSelectionFirst);
 }
 
 // This doesn't really need to be a template, but the alternative is defining it in its own
 // compilation unit, which gets a bit awkward
 template<typename T>
-auto makeSelectNodeCommand(SelectionManager* selectionManager, T nodeId, bool toggle = false)
+auto makeSelectNodeCommand(SelectionManager* selectionManager, T nodeId, bool clearSelectionFirst = true)
 {
     std::vector<T> nodeIds{nodeId};
-    return makeSelectNodesCommand(selectionManager, nodeIds, toggle);
+    return makeSelectNodesCommand(selectionManager, nodeIds, clearSelectionFirst);
 }
 
 #endif // SELECTNODESCOMMAND_H
