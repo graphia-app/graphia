@@ -3,25 +3,9 @@
 
 #include "shared/plugins/basegenericplugin.h"
 
-#include "shared/plugins/attribute.h"
-#include "shared/plugins/attributestablemodel.h"
-
 class GenericPluginInstance : public BaseGenericPluginInstance
 {
     Q_OBJECT
-
-    Q_PROPERTY(QAbstractTableModel* rowAttributes READ attributesTableModel CONSTANT)
-
-public:
-    GenericPluginInstance() :
-        _attributesTableModel(&_rowAttributes)
-    {}
-
-private:
-    Attributes _rowAttributes;
-
-    AttributesTableModel _attributesTableModel;
-    QAbstractTableModel* attributesTableModel() { return &_attributesTableModel; }
 };
 
 class GenericPlugin : public BaseGenericPlugin, public PluginInstanceProvider<GenericPluginInstance>

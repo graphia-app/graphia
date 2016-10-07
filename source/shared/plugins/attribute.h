@@ -1,7 +1,6 @@
 #ifndef ATTRIBUTE_H
 #define ATTRIBUTE_H
 
-#include <QObject>
 #include <QString>
 
 #include <vector>
@@ -35,12 +34,14 @@ public:
     Attribute(const Attribute&) = default;
     Attribute(Attribute&&) = default;
 
-    Attribute(const QString& name, int numRows) :
-        _name(name), _values(numRows)
+    Attribute(const QString& name) :
+        _name(name)
     {}
 
     Type type() const { return _type; }
     const QString& name() const { return _name; }
+    int size() const { return static_cast<int>(_values.size()); }
+    void reserve(int size) { _values.reserve(size); }
 
     int intMin() const { return _intMin; }
     int intMax() const { return _intMax; }
@@ -49,38 +50,6 @@ public:
 
     void set(int index, const QString& value);
     const QString& get(int index) const;
-};
-
-class Attributes : public QObject
-{
-    Q_OBJECT
-
-private:
-    using Vector = std::vector<Attribute>;
-
-    Vector _attributes;
-    int _size = 0;
-
-    Attribute& attributeByName(const QString& name);
-    const Attribute& attributeByName(const QString& name) const;
-
-public:
-    int size() const { return _size; }
-    void setSize(int size) { _size = size; }
-
-    bool empty() const { return _attributes.empty(); }
-
-    Vector::const_iterator begin() const { return _attributes.begin(); }
-    Vector::const_iterator end() const { return _attributes.end(); }
-
-    const QString& firstAttributeName() const { return _attributes.front().name(); }
-
-    void add(const QString& name);
-    void setValue(int index, const QString& name, const QString& value);
-    const QString& value(int index, const QString& name) const;
-
-signals:
-    void attributeAdded(const QString& name);
 };
 
 #endif // ATTRIBUTE_H

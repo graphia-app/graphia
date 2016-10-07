@@ -1,5 +1,7 @@
-#ifndef ATTRIBUTESTABLEMODEL_H
-#define ATTRIBUTESTABLEMODEL_H
+#ifndef NODEATTRIBUTESTABLEMODEL_H
+#define NODEATTRIBUTESTABLEMODEL_H
+
+#include "shared/graph/elementid.h"
 
 #include <QAbstractTableModel>
 #include <QStringList>
@@ -7,17 +9,17 @@
 
 #include <vector>
 
-class Attributes;
+class NodeAttributes;
 
-class AttributesTableModel : public QAbstractTableModel
+class NodeAttributesTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 
     Q_PROPERTY(QStringList columnNames READ columnNames NOTIFY columnNamesChanged)
 
 private:
-    const Attributes* _rowAttributes;
-    std::vector<int> _selectedRowIndexes;
+    const NodeAttributes* _nodeAttributes;
+    std::vector<NodeId> _selectedNodeIds;
 
     int _nextRole = Qt::UserRole + 1;
     QHash<int, QByteArray> _roleNames;
@@ -25,9 +27,9 @@ private:
     QStringList columnNames() const;
 
 public:
-    explicit AttributesTableModel(Attributes* attributes);
+    explicit NodeAttributesTableModel(NodeAttributes* attributes);
 
-    void setSelectedRowIndexes(std::vector<int>&& selectedRowIndexes);
+    void setSelectedNodes(const NodeIdSet& selectedNodeIds);
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
@@ -40,4 +42,4 @@ signals:
     void columnNamesChanged();
 };
 
-#endif // ATTRIBUTESTABLEMODEL_H
+#endif // NODEATTRIBUTESTABLEMODEL_H

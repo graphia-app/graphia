@@ -6,7 +6,7 @@ import SortFilterProxyModel 0.1
 
 Item
 {
-    enabled: plugin.model.rowAttributes.columnNames.length > 0
+    enabled: plugin.model.nodeAttributes.columnNames.length > 0
 
     anchors.fill: parent
 
@@ -14,12 +14,12 @@ Item
     {
         anchors.fill: parent
 
-        RowAttributeTableView
+        NodeAttributeTableView
         {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            rowAttributesModel: plugin.model.rowAttributes
+            nodeAttributesModel: plugin.model.nodeAttributes
         }
     }
 }

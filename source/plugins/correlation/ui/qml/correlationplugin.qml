@@ -12,12 +12,12 @@ Item
     {
         anchors.fill: parent
 
-        RowAttributeTableView
+        NodeAttributeTableView
         {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            rowAttributesModel: plugin.model.rowAttributes
+            nodeAttributesModel: plugin.model.nodeAttributes
         }
     }
 }

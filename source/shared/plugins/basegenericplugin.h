@@ -3,6 +3,9 @@
 
 #include "baseplugin.h"
 
+#include "shared/plugins/nodeattributes.h"
+#include "shared/plugins/nodeattributestablemodel.h"
+
 #include "shared/graph/grapharray.h"
 
 #include <memory>
@@ -15,32 +18,34 @@ class BaseGenericPluginInstance : public BasePluginInstance
     Q_OBJECT
 
     Q_PROPERTY(QString selectedNodeNames READ selectedNodeNames NOTIFY selectedNodeNamesChanged)
-    Q_PROPERTY(float selectedNodeMeanDegree READ selectedNodeMeanDegree NOTIFY selectedNodeMeanDegreeChanged)
+    Q_PROPERTY(QAbstractTableModel* nodeAttributes READ nodeAttributesTableModel CONSTANT)
 
 private:
     std::unique_ptr<EdgeArray<float>> _edgeWeights;
+
+    NodeAttributes _nodeAttributes;
+
+    NodeAttributesTableModel _nodeAttributesTableModel;
+    QAbstractTableModel* nodeAttributesTableModel() { return &_nodeAttributesTableModel; }
 
 public:
     BaseGenericPluginInstance();
 
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName);
 
-    void setNodeName(NodeId nodeId, const QString& name);
     void setEdgeWeight(EdgeId edgeId, float weight);
 
 private:
-    QString selectedNodeNames() const;
+    void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager);
 
-    float selectedNodeMeanDegree() const;
+    QString selectedNodeNames() const;
 
 private slots:
     void onGraphChanged();
-
-    void onSelectionChanged(const ISelectionManager*);
+    void onSelectionChanged(const ISelectionManager* selectionManager);
 
 signals:
     void selectedNodeNamesChanged();
-    void selectedNodeMeanDegreeChanged();
 };
 
 class BaseGenericPlugin : public BasePlugin

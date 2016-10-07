@@ -4,7 +4,7 @@
 #include "shared/utils/threadpool.h"
 
 CorrelationPluginInstance::CorrelationPluginInstance() :
-    _attributesTableModel(&_rowAttributes)
+    _nodeAttributesTableModel(&_nodeAttributes)
 {
     connect(this, &CorrelationPluginInstance::graphChanged,
             this, &CorrelationPluginInstance::onGraphChanged);
@@ -17,7 +17,7 @@ void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionMa
 {
     BasePluginInstance::initialise(graphModel, selectionManager);
 
-    _dataRowIndexes = std::make_unique<NodeArray<int>>(graphModel->mutableGraph());
+    _nodeAttributes.initialise(graphModel->mutableGraph());
     _pearsonValues = std::make_unique<EdgeArray<double>>(graphModel->mutableGraph());
 
     graphModel->dataField(tr("Pearson Correlation Value"))
@@ -47,7 +47,7 @@ bool CorrelationPluginInstance::loadAttributes(const TabularData& tabularData, i
             if(rowIndex == 0)
             {
                 if(dataColumnIndex < 0)
-                    _rowAttributes.add(value);
+                    _nodeAttributes.add(value);
                 else
                     setDataColumnName(dataColumnIndex, value);
             }
@@ -68,7 +68,7 @@ bool CorrelationPluginInstance::loadAttributes(const TabularData& tabularData, i
                         finishDataRow(dataRowIndex);
                 }
                 else
-                    _rowAttributes.setValue(dataRowIndex, tabularData.valueAtQString(columnIndex, 0), value);
+                    _nodeAttributes.setValue(dataRowIndex, tabularData.valueAtQString(columnIndex, 0), value);
             }
         }
     }
@@ -143,31 +143,17 @@ void CorrelationPluginInstance::createEdges(const std::vector<std::tuple<NodeId,
     }
 }
 
-void CorrelationPluginInstance::setNodeNamesToFirstRowAttribute()
-{
-    if(!_rowAttributes.empty())
-    {
-        const auto& firstAttributeName = _rowAttributes.firstAttributeName();
-
-        for(auto& dataRow : _dataRows)
-        {
-             graphModel()->setNodeName(dataRow._nodeId, _rowAttributes.value(
-                rowIndexForNodeId(dataRow._nodeId), firstAttributeName));
-        }
-    }
-}
-
 void CorrelationPluginInstance::setDimensions(int numColumns, int numRows)
 {
     Q_ASSERT(_dataColumnNames.empty());
     Q_ASSERT(_columnAttributes.empty());
-    Q_ASSERT(_rowAttributes.empty());
+    Q_ASSERT(_nodeAttributes.empty());
 
     _numColumns = numColumns;
     _numRows = numRows;
 
-    _columnAttributes.setSize(numColumns);
-    _rowAttributes.setSize(numRows);
+    _columnAttributes.reserve(numColumns);
+    _nodeAttributes.reserve(numRows);
 
     _dataColumnNames.resize(numColumns);
     _data.resize(numColumns * numRows);
@@ -199,11 +185,19 @@ void CorrelationPluginInstance::finishDataRow(int row)
     auto computeCost = _numRows - row + 1;
 
     _dataRows.emplace_back(begin, end, nodeId, computeCost);
-    _dataRowIndexes->set(nodeId, row);
+    _nodeAttributes.setNodeIdForRowIndex(nodeId, row);
 }
 
 void CorrelationPluginInstance::onGraphChanged()
 {
+    const auto& firstAttributeName = _nodeAttributes.firstAttributeName();
+
+    for(NodeId nodeId : graphModel()->graph().nodeIds())
+    {
+         graphModel()->setNodeName(nodeId, _nodeAttributes.valueByNodeId(
+            nodeId, firstAttributeName));
+    }
+
     if(_pearsonValues != nullptr && !_pearsonValues->empty())
     {
         float min = *std::min_element(_pearsonValues->begin(), _pearsonValues->end());
@@ -212,60 +206,12 @@ void CorrelationPluginInstance::onGraphChanged()
         graphModel()->dataField(tr("Pearson Correlation Value")).setFloatMin(min).setFloatMax(max);
     }
 
-    for(auto& rowAttribute : _rowAttributes)
-    {
-        switch(rowAttribute.type())
-        {
-        case Attribute::Type::Float:
-            graphModel()->dataField(rowAttribute.name())
-                    .setFloatValueFn([this, &rowAttribute](NodeId nodeId)
-                    {
-                        int row = _dataRowIndexes->get(nodeId);
-                        return rowAttribute.get(row).toFloat();
-                    })
-                    .setFloatMin(static_cast<float>(rowAttribute.floatMin()))
-                    .setFloatMax(static_cast<float>(rowAttribute.floatMax()))
-                    .setSearchable(true);
-            break;
-
-        case Attribute::Type::Integer:
-            graphModel()->dataField(rowAttribute.name())
-                    .setIntValueFn([this, &rowAttribute](NodeId nodeId)
-                    {
-                        int row = _dataRowIndexes->get(nodeId);
-                        return rowAttribute.get(row).toInt();
-                    })
-                    .setIntMin(rowAttribute.intMin())
-                    .setIntMax(rowAttribute.intMax())
-                    .setSearchable(true);
-            break;
-
-        case Attribute::Type::String:
-            graphModel()->dataField(rowAttribute.name())
-                    .setStringValueFn([this, &rowAttribute](NodeId nodeId)
-                    {
-                        int row = _dataRowIndexes->get(nodeId);
-                        return rowAttribute.get(row);
-                    })
-                    .setSearchable(true);
-            break;
-
-        default: break;
-        }
-    }
+    _nodeAttributes.exposeToGraphModel(*graphModel());
 }
 
 void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager* selectionManager)
 {
-    const auto& selectedNodes = selectionManager->selectedNodes();
-
-    std::vector<int> selectedRowIndexes;
-    selectedRowIndexes.reserve(selectedNodes.size());
-
-    for(auto& nodeId : selectedNodes)
-        selectedRowIndexes.emplace_back(rowIndexForNodeId(nodeId));
-
-    _attributesTableModel.setSelectedRowIndexes(std::move(selectedRowIndexes));
+    _nodeAttributesTableModel.setSelectedNodes(selectionManager->selectedNodes());
 }
 
 std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const QString& urlTypeName)

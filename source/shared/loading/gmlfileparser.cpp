@@ -1,6 +1,6 @@
 #include "gmlfileparser.h"
 #include "shared/graph/imutablegraph.h"
-#include "shared/plugins/basegenericplugin.h"
+#include "shared/plugins/nodeattributes.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable:4503) // AXE makes a lot of these
@@ -19,7 +19,7 @@
 #include <iterator>
 
 template<class It> bool parseGml(IMutableGraph &graph,
-                                 BaseGenericPluginInstance* genericPluginInstance,
+                                 NodeAttributes* nodeAttributes,
                                  const std::function<bool ()>& cancelled,
                                  const IParser::ProgressFn& progress,
                                  It begin, It end)
@@ -69,13 +69,19 @@ template<class It> bool parseGml(IMutableGraph &graph,
     });
 
     auto captureNode = axe::e_ref([&nodeIndexMap, &id, &graph, &label,
-                                  &genericPluginInstance](It, It)
+                                  &nodeAttributes](It, It)
     {
         if(id >= 0)
         {
             nodeIndexMap[id] = graph.addNode();
-            genericPluginInstance->setNodeName(nodeIndexMap[id],
-                                               QString::fromStdString(label));
+
+            if(nodeAttributes != nullptr)
+            {
+                nodeAttributes->addNodeId(nodeIndexMap[id]);
+                nodeAttributes->setValueByNodeId(nodeIndexMap[id], QObject::tr("Node Name"),
+                                                 QString::fromStdString(label));
+            }
+
             label.clear();
             id = -1;
         }
@@ -158,8 +164,8 @@ template<class It> bool parseGml(IMutableGraph &graph,
     return succeeded;
 }
 
-GmlFileParser::GmlFileParser(BaseGenericPluginInstance* genericPluginInstance) :
-    _genericPluginInstance(genericPluginInstance)
+GmlFileParser::GmlFileParser(NodeAttributes* nodeAttributes) :
+    _nodeAttributes(nodeAttributes)
 {}
 
 bool GmlFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress)
@@ -175,6 +181,6 @@ bool GmlFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressF
 
     std::vector<char> vec(startIt, std::istreambuf_iterator<char>());
 
-    return parseGml(graph, _genericPluginInstance, [this] { return cancelled(); },
+    return parseGml(graph, _nodeAttributes, [this] { return cancelled(); },
                     progress, vec.begin(), vec.end());;
 }

@@ -11,7 +11,7 @@ TableView
         TableViewColumn { width: 200 }
     }
 
-    property var rowAttributesModel
+    property var nodeAttributesModel
 
     id: tableView
 
@@ -21,7 +21,7 @@ TableView
     model: SortFilterProxyModel
     {
         property var columnNames: sourceModel.columnNames
-        sourceModel: rowAttributesModel
+        sourceModel: nodeAttributesModel
         sortRoleName: tableView.sortRoleName
         sortOrder: tableView.sortIndicatorOrder
     }

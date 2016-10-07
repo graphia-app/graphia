@@ -2,7 +2,8 @@
 
 void Attribute::set(int index, const QString& value)
 {
-    Q_ASSERT(index < static_cast<int>(_values.size()));
+    if(index >= static_cast<int>(_values.size()))
+        _values.resize(index + 1);
 
     bool conversionSucceeded = false;
 
@@ -69,39 +70,4 @@ const QString& Attribute::get(int index) const
 {
     Q_ASSERT(index < static_cast<int>(_values.size()));
     return _values.at(index);
-}
-
-Attribute& Attributes::attributeByName(const QString& name)
-{
-    auto it = std::find_if(_attributes.begin(), _attributes.end(),
-                           [&name](auto& v) { return v.name() == name; });
-    Q_ASSERT(it != _attributes.end());
-    return *it;
-}
-
-const Attribute& Attributes::attributeByName(const QString& name) const
-{
-    auto it = std::find_if(_attributes.begin(), _attributes.end(),
-                           [&name](auto& v) { return v.name() == name; });
-    Q_ASSERT(it != _attributes.end());
-    return *it;
-}
-
-void Attributes::add(const QString& name)
-{
-    Q_ASSERT(_size > 0);
-    _attributes.emplace_back(name, _size);
-
-    emit attributeAdded(name);
-}
-
-void Attributes::setValue(int index, const QString& name, const QString& value)
-{
-    Q_ASSERT(index < _size);
-    attributeByName(name).set(index, value);
-}
-
-const QString& Attributes::value(int index, const QString& name) const
-{
-    return attributeByName(name).get(index);
 }

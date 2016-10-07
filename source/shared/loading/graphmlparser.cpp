@@ -8,10 +8,9 @@
 class BaseGenericPluginInstance;
 
 GraphMLHandler::GraphMLHandler(IMutableGraph &mutableGraph, const IParser::ProgressFn &progress,
-                               BaseGenericPluginInstance*, int lineCount)
+                               NodeAttributes*, int lineCount)
                                : _graph(mutableGraph), _progress(progress), _lineCount(lineCount)
-{
-}
+{}
 
 bool GraphMLHandler::startDocument()
 {
@@ -21,8 +20,9 @@ bool GraphMLHandler::startDocument()
 bool GraphMLHandler::endDocument()
 {
     // Stacks should be empty
-    if(!_activeAttributes.empty() || !_activeAttributeKeys.empty() || !_activeNodes.empty()
-            || !_activeTemporaryEdges.empty() || !_activeElements.empty())
+    if(!_activeAttributes.empty() || !_activeAttributeKeys.empty() ||
+       !_activeNodes.empty() || !_activeTemporaryEdges.empty() ||
+       !_activeElements.empty())
     {
         _errorString = "Not all GraphML Elements are terminated. Stack not empty";
         return false;
@@ -242,8 +242,8 @@ bool GraphMLHandler::fatalError(const QXmlParseException &)
     return true;
 }
 
-GraphMLParser::GraphMLParser(BaseGenericPluginInstance* genericPluginInstance) :
-    _genericPluginInstance(genericPluginInstance)
+GraphMLParser::GraphMLParser(NodeAttributes* nodeAttributes) :
+    _nodeAttributes(nodeAttributes)
 {}
 
 bool GraphMLParser::parse(const QUrl &url, IMutableGraph &graph, const IParser::ProgressFn &progress)
@@ -265,7 +265,7 @@ bool GraphMLParser::parse(const QUrl &url, IMutableGraph &graph, const IParser::
         return false;
     }
 
-    GraphMLHandler handler(graph, progress, _genericPluginInstance, lineCount);
+    GraphMLHandler handler(graph, progress, _nodeAttributes, lineCount);
     QXmlInputSource *source = new QXmlInputSource(&file);
     QXmlSimpleReader xmlReader;
     xmlReader.setContentHandler(&handler);

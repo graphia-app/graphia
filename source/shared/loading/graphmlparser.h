@@ -7,7 +7,7 @@
 #include <QtXml/QXmlDefaultHandler>
 #include <stack>
 
-class BaseGenericPluginInstance;
+class NodeAttributes;
 
 class GraphMLHandler : public QXmlDefaultHandler
 {
@@ -84,7 +84,7 @@ private:
     int _lineCount = 0;
 
 public:
-    GraphMLHandler(IMutableGraph& mutableGraph, const IParser::ProgressFn& progress, BaseGenericPluginInstance* genericPluginInstance, int lineCount);
+    GraphMLHandler(IMutableGraph& mutableGraph, const IParser::ProgressFn& progress, NodeAttributes* nodeAttributes, int lineCount);
     bool startDocument();
     bool endDocument();
     bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts);
@@ -101,12 +101,12 @@ public:
 class GraphMLParser: public BaseParser
 {
 private:
-    BaseGenericPluginInstance* _genericPluginInstance;
+    NodeAttributes* _nodeAttributes;
     GraphMLHandler::AttributeData<NodeId> _nodeAttributeData;
     GraphMLHandler::AttributeData<EdgeId> _edgeAttributeData;
 
 public:
-    explicit GraphMLParser(BaseGenericPluginInstance *genericPluginInstance);
+    explicit GraphMLParser(NodeAttributes *nodeAttributes = nullptr);
     bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress);
 };
 

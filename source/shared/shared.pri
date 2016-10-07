@@ -31,7 +31,9 @@ HEADERS += \
     $$PWD/utils/function_traits.h \
     $$PWD/loading/graphmlparser.h \
     $$PWD/plugins/attribute.h \
-    $$PWD/plugins/attributestablemodel.h
+    $$PWD/plugins/nodeattributestablemodel.h \
+    $$PWD/plugins/attributes.h \
+    $$PWD/plugins/nodeattributes.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \
@@ -47,7 +49,9 @@ SOURCES += \
     $$PWD/loading/tabulardata.cpp \
     $$PWD/loading/graphmlparser.cpp \
     $$PWD/plugins/attribute.cpp \
-    $$PWD/plugins/attributestablemodel.cpp
+    $$PWD/plugins/nodeattributestablemodel.cpp \
+    $$PWD/plugins/attributes.cpp \
+    $$PWD/plugins/nodeattributes.cpp
 
 RESOURCES += \
     $$PWD/ui/shared.qrc

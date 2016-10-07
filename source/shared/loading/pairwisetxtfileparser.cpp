@@ -3,6 +3,7 @@
 #include "shared/utils/utils.h"
 #include "shared/graph/imutablegraph.h"
 #include "shared/plugins/basegenericplugin.h"
+#include "shared/plugins/attribute.h"
 
 #include "thirdparty/utfcpp/utf8.h"
 
@@ -21,8 +22,9 @@
 #include <fstream>
 #include <cctype>
 
-PairwiseTxtFileParser::PairwiseTxtFileParser(BaseGenericPluginInstance* genericPluginInstance) :
-    _genericPluginInstance(genericPluginInstance)
+PairwiseTxtFileParser::PairwiseTxtFileParser(BaseGenericPluginInstance* genericPluginInstance,
+                                             NodeAttributes* nodeAttributes) :
+    _genericPluginInstance(genericPluginInstance), _nodeAttributes(nodeAttributes)
 {}
 
 bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const IParser::ProgressFn& progress)
@@ -108,7 +110,13 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
             {
                 firstNodeId = graph.addNode();
                 nodeIdHash.emplace(firstToken, firstNodeId);
-                _genericPluginInstance->setNodeName(firstNodeId, QString::fromStdString(firstToken));
+
+                if(_nodeAttributes != nullptr)
+                {
+                    _nodeAttributes->addNodeId(firstNodeId);
+                    _nodeAttributes->setValueByNodeId(firstNodeId, QObject::tr("Node Name"),
+                                                      QString::fromStdString(firstToken));
+                }
             }
             else
                 firstNodeId = nodeIdHash[firstToken];
@@ -117,7 +125,13 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
             {
                 secondNodeId = graph.addNode();
                 nodeIdHash.emplace(secondToken, secondNodeId);
-                _genericPluginInstance->setNodeName(secondNodeId, QString::fromStdString(secondToken));
+
+                if(_nodeAttributes != nullptr)
+                {
+                    _nodeAttributes->addNodeId(secondNodeId);
+                    _nodeAttributes->setValueByNodeId(secondNodeId, QObject::tr("Node Name"),
+                                                      QString::fromStdString(secondToken));
+                }
             }
             else
                 secondNodeId = nodeIdHash[secondToken];

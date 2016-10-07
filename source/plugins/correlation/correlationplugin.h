@@ -6,8 +6,9 @@
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/iparser.h"
 
-#include "shared/plugins/attribute.h"
-#include "shared/plugins/attributestablemodel.h"
+#include "shared/plugins/attributes.h"
+#include "shared/plugins/nodeattributes.h"
+#include "shared/plugins/nodeattributestablemodel.h"
 
 #include <vector>
 #include <functional>
@@ -18,7 +19,7 @@ class CorrelationPluginInstance : public BasePluginInstance
 {
     Q_OBJECT
 
-    Q_PROPERTY(QAbstractTableModel* rowAttributes READ attributesTableModel CONSTANT)
+    Q_PROPERTY(QAbstractTableModel* nodeAttributes READ nodeAttributesTableModel CONSTANT)
 
 public:
     CorrelationPluginInstance();
@@ -29,10 +30,10 @@ private:
 
     std::vector<QString> _dataColumnNames;
 
-    Attributes _rowAttributes;
+    NodeAttributes _nodeAttributes;
     Attributes _columnAttributes;
 
-    AttributesTableModel _attributesTableModel;
+    NodeAttributesTableModel _nodeAttributesTableModel;
 
     using DataIterator = std::vector<double>::const_iterator;
     using DataOffset = std::vector<double>::size_type;
@@ -96,7 +97,6 @@ private:
 
     std::vector<DataRow> _dataRows;
 
-    std::unique_ptr<NodeArray<int>> _dataRowIndexes;
     std::unique_ptr<EdgeArray<double>> _pearsonValues;
 
     void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager);
@@ -106,7 +106,7 @@ private:
 
     void finishDataRow(int row);
 
-    QAbstractTableModel* attributesTableModel() { return &_attributesTableModel; }
+    QAbstractTableModel* nodeAttributesTableModel() { return &_nodeAttributesTableModel; }
 
 public:
     void setDimensions(int numColumns, int numRows);
@@ -120,11 +120,7 @@ public:
     void createEdges(const std::vector<std::tuple<NodeId, NodeId, double>>& edges,
                      const IParser::ProgressFn& progress);
 
-    void setNodeNamesToFirstRowAttribute();
-
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName);
-
-    int rowIndexForNodeId(NodeId nodeId) const { return _dataRowIndexes->get(nodeId); }
 
 private slots:
     void onGraphChanged();
