@@ -166,7 +166,10 @@ template<class It> bool parseGml(IMutableGraph &graph,
 
 GmlFileParser::GmlFileParser(NodeAttributes* nodeAttributes) :
     _nodeAttributes(nodeAttributes)
-{}
+{
+    if(_nodeAttributes != nullptr)
+        _nodeAttributes->add(QObject::tr("Node Name"));
+}
 
 bool GmlFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress)
 {

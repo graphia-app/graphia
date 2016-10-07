@@ -3,7 +3,7 @@
 #include "shared/utils/utils.h"
 #include "shared/graph/imutablegraph.h"
 #include "shared/plugins/basegenericplugin.h"
-#include "shared/plugins/attribute.h"
+#include "shared/plugins/nodeattributes.h"
 
 #include "thirdparty/utfcpp/utf8.h"
 
@@ -25,7 +25,10 @@
 PairwiseTxtFileParser::PairwiseTxtFileParser(BaseGenericPluginInstance* genericPluginInstance,
                                              NodeAttributes* nodeAttributes) :
     _genericPluginInstance(genericPluginInstance), _nodeAttributes(nodeAttributes)
-{}
+{
+    if(_nodeAttributes != nullptr)
+        _nodeAttributes->add(QObject::tr("Node Name"));
+}
 
 bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const IParser::ProgressFn& progress)
 {

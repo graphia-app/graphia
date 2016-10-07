@@ -11,8 +11,6 @@ BaseGenericPluginInstance::BaseGenericPluginInstance() :
             this, &BaseGenericPluginInstance::onGraphChanged);
     connect(this, &BaseGenericPluginInstance::selectionChanged,
             this, &BaseGenericPluginInstance::onSelectionChanged);
-
-    _nodeAttributes.add(tr("Node Name"));
 }
 
 void BaseGenericPluginInstance::initialise(IGraphModel* graphModel, ISelectionManager* selectionManager)
@@ -64,12 +62,15 @@ QString BaseGenericPluginInstance::selectedNodeNames() const
 
 void BaseGenericPluginInstance::onGraphChanged()
 {
-    const auto& firstAttributeName = _nodeAttributes.firstAttributeName();
-
-    for(NodeId nodeId : graphModel()->graph().nodeIds())
+    if(!_nodeAttributes.empty())
     {
-         graphModel()->setNodeName(nodeId, _nodeAttributes.valueByNodeId(
-            nodeId, firstAttributeName));
+        const auto& firstAttributeName = _nodeAttributes.firstAttributeName();
+
+        for(NodeId nodeId : graphModel()->graph().nodeIds())
+        {
+             graphModel()->setNodeName(nodeId, _nodeAttributes.valueByNodeId(
+                nodeId, firstAttributeName));
+        }
     }
 
     if(_edgeWeights != nullptr)
