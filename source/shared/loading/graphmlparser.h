@@ -83,6 +83,8 @@ private:
     QXmlLocator* _locator = nullptr;
     int _lineCount = 0;
 
+    NodeAttributes* _otherNodeAttributes;
+
 public:
     GraphMLHandler(IMutableGraph& mutableGraph, const IParser::ProgressFn& progress, NodeAttributes* nodeAttributes, int lineCount);
     bool startDocument();

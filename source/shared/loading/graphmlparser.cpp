@@ -5,12 +5,14 @@
 #include <QUrl>
 #include <shared/utils/utils.h>
 
-class BaseGenericPluginInstance;
-
 GraphMLHandler::GraphMLHandler(IMutableGraph &mutableGraph, const IParser::ProgressFn &progress,
-                               NodeAttributes*, int lineCount)
-                               : _graph(mutableGraph), _progress(progress), _lineCount(lineCount)
-{}
+                               NodeAttributes* nodeAttributes, int lineCount)
+                               : _graph(mutableGraph), _progress(progress),
+                                 _lineCount(lineCount), _otherNodeAttributes(nodeAttributes)
+{
+    if(_otherNodeAttributes != nullptr)
+        _otherNodeAttributes->add(QObject::tr("Node Name"));
+}
 
 bool GraphMLHandler::startDocument()
 {
@@ -96,7 +98,8 @@ bool GraphMLHandler::startElement(const QString &, const QString &localName, con
             return false;
         }
 
-        _activeNodes.push(_graph.addNode());
+        auto nodeId = _graph.addNode();
+        _activeNodes.push(nodeId);
         // Check if id has already been used
         if(u::contains(_nodeMap, atts.value("id")))
         {
@@ -105,6 +108,13 @@ bool GraphMLHandler::startElement(const QString &, const QString &localName, con
             return false;
         }
         _nodeMap[atts.value("id")] = _activeNodes.top();
+
+        if(_otherNodeAttributes != nullptr)
+        {
+            _otherNodeAttributes->addNodeId(nodeId);
+            _otherNodeAttributes->setValueByNodeId(nodeId, QObject::tr("Node Name"),
+                                              atts.value("id"));
+        }
     }
     // New Attribute Type
     else if(localName == "key")
@@ -196,7 +206,17 @@ bool GraphMLHandler::endElement(const QString &, const QString &localName, const
     else if(localName == "key")
         _activeAttributeKeys.pop();
     else if(localName == "data" && (!_activeNodes.empty() || !_activeTemporaryEdges.empty()))
+    {
+        auto attribute = _activeAttributes.top();
+
+        if(_otherNodeAttributes != nullptr && !_activeNodes.empty() && !attribute->_name.isEmpty())
+        {
+            _otherNodeAttributes->add(attribute->_name);
+            _otherNodeAttributes->setValueByNodeId(_activeNodes.top(), attribute->_name, attribute->_value.toString());
+        }
+
         _activeAttributes.pop();
+    }
 
     _activeElements.pop();
     return true;
