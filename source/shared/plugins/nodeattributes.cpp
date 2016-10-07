@@ -30,7 +30,7 @@ void NodeAttributes::setValueByNodeId(NodeId nodeId, const QString& name, const 
     setValue(rowIndexForNodeId(nodeId), name, value);
 }
 
-const QString&NodeAttributes::valueByNodeId(NodeId nodeId, const QString& name) const
+QString NodeAttributes::valueByNodeId(NodeId nodeId, const QString& name) const
 {
     return value(rowIndexForNodeId(nodeId), name);
 }

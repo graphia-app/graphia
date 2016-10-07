@@ -33,7 +33,7 @@ public:
 
     void add(const QString& name);
     void setValue(int index, const QString& name, const QString& value);
-    const QString& value(int index, const QString& name) const;
+    QString value(int index, const QString& name) const;
 
 signals:
     void attributeAdded(const QString& name);

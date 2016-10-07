@@ -49,7 +49,7 @@ public:
     int floatMax() const { return _floatMax; }
 
     void set(int index, const QString& value);
-    const QString& get(int index) const;
+    QString get(int index) const;
 };
 
 #endif // ATTRIBUTE_H

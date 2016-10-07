@@ -23,7 +23,7 @@ public:
     int rowIndexForNodeId(NodeId nodeId) const;
 
     void setValueByNodeId(NodeId nodeId, const QString& name, const QString& value);
-    const QString& valueByNodeId(NodeId nodeId, const QString& name) const;
+    QString valueByNodeId(NodeId nodeId, const QString& name) const;
 
     void exposeToGraphModel(IGraphModel& graphModel);
 };

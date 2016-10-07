@@ -66,8 +66,10 @@ void Attribute::set(int index, const QString& value)
     }
 }
 
-const QString& Attribute::get(int index) const
+QString Attribute::get(int index) const
 {
-    Q_ASSERT(index < static_cast<int>(_values.size()));
+    if(index < 0 || index >= static_cast<int>(_values.size()))
+        return {};
+
     return _values.at(index);
 }
