@@ -14,7 +14,7 @@ public:
     auto& operator--() { return _it.operator--(); }
     auto operator--(int i) { return operator--(i); }
     bool operator==(const pair_iterator& other) const { return _it.operator==(other._it); }
-    bool operator!=(const pair_iterator& other) const { return _it.operator!=(other._it); }
+    bool operator!=(const pair_iterator& other) const { return !_it.operator==(other._it); }
     auto operator*() { return (*_it).*member; }
     auto operator->() { return &((*_it).*member); }
 
