@@ -7,6 +7,7 @@
 #include "shared/graph/grapharray.h"
 
 class IMutableGraph;
+class IGraphModel;
 
 class NodeAttributes : public Attributes
 {

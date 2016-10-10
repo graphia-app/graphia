@@ -37,7 +37,7 @@ QString NodeAttributes::valueByNodeId(NodeId nodeId, const QString& name) const
 
 void NodeAttributes::exposeToGraphModel(IGraphModel& graphModel)
 {
-    for(auto& nodeAttribute : *this)
+    for(const auto& nodeAttribute : *this)
     {
         QString nodeAttributeName = nodeAttribute.name();
 

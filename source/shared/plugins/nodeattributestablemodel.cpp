@@ -28,7 +28,7 @@ QStringList NodeAttributesTableModel::columnNames() const
 {
     QStringList list;
 
-    for(auto& rowAttribute : *_nodeAttributes)
+    for(const auto& rowAttribute : *_nodeAttributes)
         list.append(rowAttribute.name());
 
     return list;

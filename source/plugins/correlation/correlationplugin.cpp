@@ -152,9 +152,6 @@ void CorrelationPluginInstance::setDimensions(int numColumns, int numRows)
     _numColumns = numColumns;
     _numRows = numRows;
 
-    _columnAttributes.reserve(numColumns);
-    _nodeAttributes.reserve(numRows);
-
     _dataColumnNames.resize(numColumns);
     _data.resize(numColumns * numRows);
 }
