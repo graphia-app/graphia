@@ -33,7 +33,8 @@ HEADERS += \
     $$PWD/plugins/attribute.h \
     $$PWD/plugins/nodeattributestablemodel.h \
     $$PWD/plugins/attributes.h \
-    $$PWD/plugins/nodeattributes.h
+    $$PWD/plugins/nodeattributes.h \
+    $$PWD/utils/pair_iterator.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \
