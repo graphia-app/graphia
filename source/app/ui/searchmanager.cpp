@@ -51,7 +51,8 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> dataFie
             {
                 for(auto& dataField : dataFields)
                 {
-                    match = dataField->createNodeConditionFn(ConditionFnOp::MatchesRegex, re)(nodeId);
+                    auto conditionFn = dataField->createNodeConditionFn(ConditionFnOp::MatchesRegex, re);
+                    match = conditionFn(nodeId);
                     if(match)
                         break;
                 }

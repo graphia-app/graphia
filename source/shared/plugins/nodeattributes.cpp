@@ -39,14 +39,15 @@ void NodeAttributes::exposeToGraphModel(IGraphModel& graphModel)
 {
     for(auto& nodeAttribute : *this)
     {
+        QString nodeAttributeName = nodeAttribute.name();
+
         switch(nodeAttribute.type())
         {
         case Attribute::Type::Float:
             graphModel.dataField(nodeAttribute.name())
-                    .setFloatValueFn([this, &nodeAttribute](NodeId nodeId)
+                    .setFloatValueFn([this, nodeAttributeName](NodeId nodeId)
                     {
-                        int row = rowIndexForNodeId(nodeId);
-                        return nodeAttribute.get(row).toFloat();
+                        return valueByNodeId(nodeId, nodeAttributeName).toFloat();
                     })
                     .setFloatMin(static_cast<float>(nodeAttribute.floatMin()))
                     .setFloatMax(static_cast<float>(nodeAttribute.floatMax()))
@@ -55,10 +56,9 @@ void NodeAttributes::exposeToGraphModel(IGraphModel& graphModel)
 
         case Attribute::Type::Integer:
             graphModel.dataField(nodeAttribute.name())
-                    .setIntValueFn([this, &nodeAttribute](NodeId nodeId)
+                    .setIntValueFn([this, nodeAttributeName](NodeId nodeId)
                     {
-                        int row = rowIndexForNodeId(nodeId);
-                        return nodeAttribute.get(row).toInt();
+                        return valueByNodeId(nodeId, nodeAttributeName).toInt();
                     })
                     .setIntMin(nodeAttribute.intMin())
                     .setIntMax(nodeAttribute.intMax())
@@ -67,10 +67,9 @@ void NodeAttributes::exposeToGraphModel(IGraphModel& graphModel)
 
         case Attribute::Type::String:
             graphModel.dataField(nodeAttribute.name())
-                    .setStringValueFn([this, &nodeAttribute](NodeId nodeId)
+                    .setStringValueFn([this, nodeAttributeName](NodeId nodeId)
                     {
-                        int row = rowIndexForNodeId(nodeId);
-                        return nodeAttribute.get(row);
+                        return valueByNodeId(nodeId, nodeAttributeName);
                     })
                     .setSearchable(true);
             break;
