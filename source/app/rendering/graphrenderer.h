@@ -17,6 +17,8 @@
 #include "shared/utils/deferredexecutor.h"
 #include "shared/utils/performancecounter.h"
 
+#include "utils/qmlenum.h"
+
 #include <QObject>
 #include <QTime>
 #include <QOpenGLBuffer>
@@ -152,6 +154,9 @@ enum class TextAlignment
     Bottom
 };
 Q_DECLARE_METATYPE(TextAlignment)
+
+DEFINE_QML_ENUM(NodeTextState,
+                Off, Selected, All);
 
 class GraphRenderer :
         public QObject,

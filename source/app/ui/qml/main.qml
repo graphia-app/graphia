@@ -108,8 +108,18 @@ ApplicationWindow
 
     Preferences
     {
+        id: visuals
         section: "visuals"
-        property alias showNodeNames: toggleNodeNamesAction.checked
+        property int showNodeNames:
+        {
+            switch(nodeNameDisplay.current)
+            {
+            default:
+            case hideNodeNamesAction:         return NodeTextState.Off;
+            case showSelectedNodeNamesAction: return NodeTextState.Selected;
+            case showAllNodeNamesAction:      return NodeTextState.All;
+            }
+        }
     }
 
     Preferences
@@ -443,11 +453,24 @@ ApplicationWindow
         checkable: true
     }
 
-    Action
+    ExclusiveGroup
     {
-        id: toggleNodeNamesAction
-        text: qsTr("Show Node Names")
-        checkable: true
+        id: nodeNameDisplay
+
+        Action { id: hideNodeNamesAction; text: qsTr("None"); checkable: true; }
+        Action { id: showSelectedNodeNamesAction; text: qsTr("Selected"); checkable: true; }
+        Action { id: showAllNodeNamesAction; text: qsTr("All"); checkable: true; }
+
+        Component.onCompleted:
+        {
+            switch(visuals.showNodeNames)
+            {
+            default:
+            case NodeTextState.Off:      nodeNameDisplay.current = hideNodeNamesAction; break;
+            case NodeTextState.Selected: nodeNameDisplay.current = showSelectedNodeNamesAction; break;
+            case NodeTextState.All:      nodeNameDisplay.current = showAllNodeNamesAction; break;
+            }
+        }
     }
 
     Action
@@ -593,7 +616,13 @@ ApplicationWindow
             }
             MenuSeparator {}
             MenuItem { action: toggleGraphMetricsAction }
-            MenuItem { action: toggleNodeNamesAction }
+            Menu
+            {
+                title: qsTr("Show Node Names")
+                MenuItem { action: hideNodeNamesAction }
+                MenuItem { action: showSelectedNodeNamesAction }
+                MenuItem { action: showAllNodeNamesAction }
+            }
         }
         Menu
         {

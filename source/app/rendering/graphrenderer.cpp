@@ -25,6 +25,8 @@
 
 #include <cstddef>
 
+REGISTER_QML_ENUM(NodeTextState);
+
 template<typename T>
 void setupTexture(T t, GLuint& texture, int width, int height, GLint format)
 {
@@ -511,7 +513,7 @@ void GraphRenderer::updateGPUDataIfRequired()
     float textScale = u::pref("visuals/textSize").toFloat();
     auto textAlignment = static_cast<TextAlignment>(u::pref("visuals/textAlignment").toInt());
     auto textColor = Document::textColorForBackground();
-    auto showNodeNames = u::pref("visuals/showNodeNames").toBool();
+    auto showNodeNames = static_cast<NodeTextState::Enum>(u::pref("visuals/showNodeNames").toInt());
 
     for(auto& componentRendererRef : _componentRenderers)
     {
@@ -555,7 +557,10 @@ void GraphRenderer::updateGPUDataIfRequired()
             if(gpuGraphData != nullptr)
                 gpuGraphData->_nodeData.push_back(nodeData);
 
-            if(!showNodeNames || nodeVisual._state.testFlag(VisualFlags::NotFound))
+            if(showNodeNames == NodeTextState::Enum::Off || nodeVisual._state.testFlag(VisualFlags::NotFound))
+                continue;
+
+            if(showNodeNames == NodeTextState::Enum::Selected && !nodeVisual._state.testFlag(VisualFlags::Selected))
                 continue;
 
             auto& textLayout = _textLayoutResults._layouts[nodeVisual._text];
