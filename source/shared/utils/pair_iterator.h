@@ -1,7 +1,6 @@
 #ifndef PAIR_ITERATOR_H
 #define PAIR_ITERATOR_H
 
-#include <map>
 #include <iterator>
 
 template<typename It, typename T, T It::value_type::*member>
