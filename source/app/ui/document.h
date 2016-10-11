@@ -26,8 +26,7 @@ class GraphModel;
 class SelectionManager;
 class SearchManager;
 
-DEFINE_QML_ENUM(Application::uri(), Application::majorVersion(), Application::minorVersion(),
-                LayoutPauseState,
+DEFINE_QML_ENUM(LayoutPauseState,
                 Running, RunningFinished, Paused);
 
 class Document : public QObject

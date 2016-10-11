@@ -11,12 +11,10 @@
 
 class Document;
 
-DEFINE_QML_ENUM(Application::uri(), Application::majorVersion(), Application::minorVersion(),
-                GraphTransformType,
+DEFINE_QML_ENUM(GraphTransformType,
                 Unknown, Int, Float, String);
 
-DEFINE_QML_ENUM(Application::uri(), Application::majorVersion(), Application::minorVersion(),
-                GraphTransformCreationState,
+DEFINE_QML_ENUM(GraphTransformCreationState,
                 Uncreated,
                 TransformSelected,
                 FieldSelected,

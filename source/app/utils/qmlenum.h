@@ -3,17 +3,23 @@
 
 #include <QtQml>
 
+#include "../application.h"
+
 // Defining an enumeration that's usable in QML is awkward, so
 // here are a couple of macros to make it easier:
 
 // Stick this one in a header...
-#define DEFINE_QML_ENUM(MODULE, MAJOR, MINOR, ENUM_NAME, ...) \
+#define DEFINE_QML_ENUM(ENUM_NAME, ...) \
     class ENUM_NAME \
     { \
         Q_GADGET \
         Q_ENUMS(Enum) \
         struct Constructor \
-        { Constructor() { qmlRegisterUncreatableType<ENUM_NAME>(MODULE, MAJOR, MINOR, #ENUM_NAME, QString()); } }; \
+        { Constructor() { qmlRegisterUncreatableType<ENUM_NAME>( \
+            Application::uri(), \
+            Application::majorVersion(), \
+            Application::minorVersion(), \
+            #ENUM_NAME, QString()); } }; \
         static Constructor constructor; \
     public: \
         enum Enum \
