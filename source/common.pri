@@ -6,7 +6,7 @@ CONFIG(debug,debug|release) {
 
 gcc {
     QMAKE_CXXFLAGS += -Wpedantic -Wall -Wextra -Wcast-align -Wcast-qual \
-        -Wdisabled-optimization -Wformat=2 -Winit-self -Wmissing-declarations \
+        -Wdisabled-optimization -Wformat=2 -Winit-self \
         -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual \
         -Wnon-virtual-dtor -Wredundant-decls -Wshadow -Wundef
 
