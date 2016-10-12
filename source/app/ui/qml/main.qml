@@ -15,14 +15,13 @@ ApplicationWindow
     width: 800
     height: 600
     property bool maximised: visibility === Window.Maximized
+    property var recentFiles
 
     minimumWidth: mainToolBar.implicitWidth
     minimumHeight: 480
 
     property DocumentUI currentDocument: tabView.currentIndex < tabView.count ?
                                          tabView.getTab(tabView.currentIndex).item : null
-
-    property var recentFiles;
 
     title: (currentDocument ? currentDocument.title + qsTr(" - ") : "") + application.name
 
@@ -39,8 +38,7 @@ ApplicationWindow
 
     Component.onCompleted:
     {
-        if (recentFiles === undefined)
-            recentFiles = [];
+        mainWindow.recentFiles = JSON.parse(misc.recentFiles);
         fileOpenDialog.folder = misc.fileOpenInitialFolder;
         processArguments(Qt.application.arguments);
     }
@@ -103,7 +101,7 @@ ApplicationWindow
         property alias showLayoutSettings: toggleLayoutSettingsAction.checked
 
         property var fileOpenInitialFolder
-        property alias recentFilesList: mainWindow.recentFiles;
+        property string recentFiles
     }
 
     Preferences
@@ -131,30 +129,30 @@ ApplicationWindow
 
     function addToRecentFiles(fileUrl)
     {
-        var RECENT_FILES_LENGTH = 5;
-
-        var fileName = application.pathForUrl(fileUrl);
+        var fileUrlString = fileUrl.toString();
 
         // Perform a copy and assign back as it's a var element
-        var copyRecentFiles = mainWindow.recentFiles;
+        var localRecentFiles = mainWindow.recentFiles;
 
         // Remove any duplicates
-        for(var i=0; i<copyRecentFiles.length; i++)
+        for(var i = 0; i < localRecentFiles.length; i++)
         {
-            if(copyRecentFiles[i] === fileName)
+            if(localRecentFiles[i] === fileUrlString)
             {
-                copyRecentFiles.splice(i, 1);
+                localRecentFiles.splice(i, 1);
                 break;
             }
         }
 
         // Add to the top
-        copyRecentFiles.unshift(fileName);
+        localRecentFiles.unshift(fileUrlString);
 
-        if(copyRecentFiles.length > RECENT_FILES_LENGTH)
-            copyRecentFiles.pop();
+        var MAX_RECENT_FILES = 5;
+        while(localRecentFiles.length > MAX_RECENT_FILES)
+            localRecentFiles.pop();
 
-        mainWindow.recentFiles = copyRecentFiles;
+        mainWindow.recentFiles = localRecentFiles;
+        misc.recentFiles = JSON.stringify(localRecentFiles);
     }
 
 
@@ -197,9 +195,7 @@ ApplicationWindow
             fileTypeChooserDialog.open();
         }
         else
-            openFileOfType(fileUrl, fileTypes[0], inNewTab)
-
-        addToRecentFiles(fileUrl);
+            openFileOfType(fileUrl, fileTypes[0], inNewTab);
     }
 
     FileTypeChooserDialog
@@ -564,7 +560,7 @@ ApplicationWindow
                             // FIXME: This fires with a -1 index onOpenFile
                             // BUG: Text overflows MenuItems on Windows
                             // https://bugreports.qt.io/browse/QTBUG-50849
-                            text: index > -1 ? mainWindow.recentFiles[index] : "";
+                            text: index > -1 ? application.fileNameForUrl(mainWindow.recentFiles[index]) : "";
                             action: recentFileOpen
                         }
                     }
@@ -722,6 +718,8 @@ ApplicationWindow
                         qsTr(" could not be opened due to an error.");
                 errorOpeningFileMessageDialog.open();
             }
+            else
+                addToRecentFiles(fileUrl);
         }
 
         Component
