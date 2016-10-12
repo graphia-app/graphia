@@ -38,7 +38,11 @@ ApplicationWindow
 
     Component.onCompleted:
     {
-        mainWindow.recentFiles = JSON.parse(misc.recentFiles);
+        if(misc.recentFiles.length > 0)
+            mainWindow.recentFiles = JSON.parse(misc.recentFiles);
+        else
+            mainWindow.recentFiles = [];
+
         fileOpenDialog.folder = misc.fileOpenInitialFolder;
         processArguments(Qt.application.arguments);
     }
@@ -131,7 +135,9 @@ ApplicationWindow
     {
         var fileUrlString = fileUrl.toString();
 
-        // Perform a copy and assign back as it's a var element
+        if(mainWindow.recentFiles === undefined)
+            mainWindow.recentFiles = [];
+
         var localRecentFiles = mainWindow.recentFiles;
 
         // Remove any duplicates
