@@ -443,7 +443,7 @@ ApplicationWindow
         id: resetViewAction
         iconName: "view-refresh"
         text: qsTr("&Reset View")
-        shortcut: "Ctrl+R"
+        shortcut: currentDocument && (currentDocument.findVisible || currentDocument.canEnterOverviewMode) ? "" : "Esc"
         enabled: currentDocument ? currentDocument.canResetView : false
         onTriggered: currentDocument && currentDocument.resetView()
     }
