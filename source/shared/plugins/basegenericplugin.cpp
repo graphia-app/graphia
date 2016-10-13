@@ -7,6 +7,9 @@
 BaseGenericPluginInstance::BaseGenericPluginInstance() :
     _nodeAttributesTableModel(&_nodeAttributes)
 {
+    connect(this, &BaseGenericPluginInstance::loadComplete,
+            this, &BaseGenericPluginInstance::onLoadComplete);
+
     connect(this, &BaseGenericPluginInstance::graphChanged,
             this, &BaseGenericPluginInstance::onGraphChanged);
     connect(this, &BaseGenericPluginInstance::selectionChanged,
@@ -60,7 +63,7 @@ QString BaseGenericPluginInstance::selectedNodeNames() const
     return s;
 }
 
-void BaseGenericPluginInstance::onGraphChanged()
+void BaseGenericPluginInstance::onLoadComplete()
 {
     if(!_nodeAttributes.empty())
     {
@@ -73,6 +76,11 @@ void BaseGenericPluginInstance::onGraphChanged()
         }
     }
 
+    _nodeAttributes.exposeToGraphModel(*graphModel());
+}
+
+void BaseGenericPluginInstance::onGraphChanged()
+{
     if(_edgeWeights != nullptr)
     {
         float min = *std::min_element(_edgeWeights->begin(), _edgeWeights->end());
@@ -80,8 +88,6 @@ void BaseGenericPluginInstance::onGraphChanged()
 
         graphModel()->dataField(tr("Edge Weight")).setFloatMin(min).setFloatMax(max);
     }
-
-    _nodeAttributes.exposeToGraphModel(*graphModel());
 }
 
 void BaseGenericPluginInstance::onSelectionChanged(const ISelectionManager* selectionManager)

@@ -6,6 +6,9 @@
 CorrelationPluginInstance::CorrelationPluginInstance() :
     _nodeAttributesTableModel(&_nodeAttributes)
 {
+    connect(this, &CorrelationPluginInstance::loadComplete,
+            this, &CorrelationPluginInstance::onLoadComplete);
+
     connect(this, &CorrelationPluginInstance::graphChanged,
             this, &CorrelationPluginInstance::onGraphChanged);
 
@@ -185,7 +188,7 @@ void CorrelationPluginInstance::finishDataRow(int row)
     _nodeAttributes.setNodeIdForRowIndex(nodeId, row);
 }
 
-void CorrelationPluginInstance::onGraphChanged()
+void CorrelationPluginInstance::onLoadComplete()
 {
     const auto& firstAttributeName = _nodeAttributes.firstAttributeName();
 
@@ -195,6 +198,11 @@ void CorrelationPluginInstance::onGraphChanged()
             nodeId, firstAttributeName));
     }
 
+    _nodeAttributes.exposeToGraphModel(*graphModel());
+}
+
+void CorrelationPluginInstance::onGraphChanged()
+{
     if(_pearsonValues != nullptr && !_pearsonValues->empty())
     {
         float min = *std::min_element(_pearsonValues->begin(), _pearsonValues->end());
@@ -202,8 +210,6 @@ void CorrelationPluginInstance::onGraphChanged()
 
         graphModel()->dataField(tr("Pearson Correlation Value")).setFloatMin(min).setFloatMax(max);
     }
-
-    _nodeAttributes.exposeToGraphModel(*graphModel());
 }
 
 void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager* selectionManager)

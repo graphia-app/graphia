@@ -123,6 +123,8 @@ public:
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName);
 
 private slots:
+    void onLoadComplete();
+
     void onGraphChanged();
     void onSelectionChanged(const ISelectionManager* selectionManager);
 };

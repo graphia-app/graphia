@@ -41,6 +41,8 @@ private:
     QString selectedNodeNames() const;
 
 private slots:
+    void onLoadComplete();
+
     void onGraphChanged();
     void onSelectionChanged(const ISelectionManager* selectionManager);
 
