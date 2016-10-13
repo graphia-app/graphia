@@ -1,6 +1,7 @@
 #ifndef PARSERTHREAD_H
 #define PARSERTHREAD_H
 
+#include "shared/loading/iparserthread.h"
 #include "shared/loading/iparser.h"
 
 #include <QObject>
@@ -10,7 +11,7 @@
 
 class MutableGraph;
 
-class ParserThread : public QObject
+class ParserThread : public QObject, public IParserThread
 {
     Q_OBJECT
 private:
@@ -20,10 +21,10 @@ private:
     std::thread _thread;
 
 public:
-    ParserThread(MutableGraph& graph, const QUrl& url, std::unique_ptr<IParser> parser);
+    ParserThread(MutableGraph& graph, const QUrl& url);
     virtual ~ParserThread();
 
-    void start();
+    void start(std::unique_ptr<IParser> parser);
     void cancel();
 
 private:

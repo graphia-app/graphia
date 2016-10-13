@@ -13,9 +13,9 @@ BaseGenericPluginInstance::BaseGenericPluginInstance() :
             this, &BaseGenericPluginInstance::onSelectionChanged);
 }
 
-void BaseGenericPluginInstance::initialise(IGraphModel* graphModel, ISelectionManager* selectionManager)
+void BaseGenericPluginInstance::initialise(IGraphModel* graphModel, ISelectionManager* selectionManager, const IParserThread* parserThread)
 {
-    BasePluginInstance::initialise(graphModel, selectionManager);
+    BasePluginInstance::initialise(graphModel, selectionManager, parserThread);
 
     _nodeAttributes.initialise(graphModel->mutableGraph());
 }

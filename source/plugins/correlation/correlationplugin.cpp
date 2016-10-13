@@ -13,9 +13,9 @@ CorrelationPluginInstance::CorrelationPluginInstance() :
             this, &CorrelationPluginInstance::onSelectionChanged);
 }
 
-void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionManager* selectionManager)
+void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionManager* selectionManager, const IParserThread* parserThread)
 {
-    BasePluginInstance::initialise(graphModel, selectionManager);
+    BasePluginInstance::initialise(graphModel, selectionManager, parserThread);
 
     _nodeAttributes.initialise(graphModel->mutableGraph());
     _pearsonValues = std::make_unique<EdgeArray<double>>(graphModel->mutableGraph());

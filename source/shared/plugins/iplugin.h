@@ -11,6 +11,7 @@
 
 class IGraphModel;
 class ISelectionManager;
+class IParserThread;
 class IParser;
 class QUrl;
 
@@ -19,7 +20,7 @@ class IPluginInstance
 public:
     virtual ~IPluginInstance() = default;
 
-    virtual void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager) = 0;
+    virtual void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager, const IParserThread* parserThread) = 0;
     virtual std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) = 0;
 };
 

@@ -6,11 +6,9 @@
 
 #include <atomic>
 
-ParserThread::ParserThread(MutableGraph& graph, const QUrl& url,
-                           std::unique_ptr<IParser> parser) :
+ParserThread::ParserThread(MutableGraph& graph, const QUrl& url) :
     _graph(graph),
-    _url(url),
-    _parser(std::move(parser))
+    _url(url)
 {}
 
 ParserThread::~ParserThread()
@@ -21,8 +19,9 @@ ParserThread::~ParserThread()
         _thread.join();
 }
 
-void ParserThread::start()
+void ParserThread::start(std::unique_ptr<IParser> parser)
 {
+    _parser = std::move(parser);
     _thread = std::thread(&ParserThread::run, this);
 }
 

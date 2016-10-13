@@ -301,12 +301,13 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
     _graphModel = std::make_shared<GraphModel>(fileUrl.fileName(), plugin);
 
     _gpuComputeThread = std::make_shared<GPUComputeThread>();
+    _graphFileParserThread = std::make_unique<ParserThread>(_graphModel->mutableGraph(), fileUrl);
 
     _selectionManager = std::make_shared<SelectionManager>(*_graphModel);
     _searchManager = std::make_shared<SearchManager>(*_graphModel);
 
     _pluginInstance = plugin->createInstance();
-    _pluginInstance->initialise(_graphModel.get(), _selectionManager.get());
+    _pluginInstance->initialise(_graphModel.get(), _selectionManager.get(), _graphFileParserThread.get());
 
     connect(S(Preferences), &Preferences::preferenceChanged, this, &Document::onPreferenceChanged, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphChanged, [this]
@@ -331,10 +332,9 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
         return false;
     }
 
-    _graphFileParserThread = std::make_unique<ParserThread>(_graphModel->mutableGraph(), fileUrl, std::move(parser));
     connect(_graphFileParserThread.get(), &ParserThread::progress, this, &Document::onLoadProgress);
     connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::onLoadComplete);
-    _graphFileParserThread->start();
+    _graphFileParserThread->start(std::move(parser));
 
     return true;
 }

@@ -36,7 +36,7 @@ public:
     void setEdgeWeight(EdgeId edgeId, float weight);
 
 private:
-    void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager);
+    void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager, const IParserThread* parserThread);
 
     QString selectedNodeNames() const;
 

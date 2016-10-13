@@ -99,7 +99,7 @@ private:
 
     std::unique_ptr<EdgeArray<double>> _pearsonValues;
 
-    void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager);
+    void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager, const IParserThread* parserThread);
 
     void setDataColumnName(int column, const QString& name);
     void setData(int column, int row, double value);

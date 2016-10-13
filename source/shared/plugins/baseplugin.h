@@ -5,6 +5,7 @@
 #include "shared/graph/igraph.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/ui/iselectionmanager.h"
+#include "shared/loading/iparserthread.h"
 #include "shared/loading/urltypes.h"
 
 #include <memory>
@@ -27,7 +28,7 @@ private:
     ISelectionManager* _selectionManager = nullptr;
 
 public:
-    void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager)
+    void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager, const IParserThread* parserThread)
     {
         _graphModel = graphModel;
         _selectionManager = selectionManager;
@@ -55,6 +56,12 @@ public:
 
         connect(selectionManagerQObject, SIGNAL(selectionChanged(const SelectionManager*)),
                 this, SLOT(onSelectionChanged(const SelectionManager*)), Qt::DirectConnection);
+
+        auto parserThreadQObject = dynamic_cast<const QObject*>(parserThread);
+        Q_ASSERT(parserThreadQObject != nullptr);
+
+        connect(parserThreadQObject, SIGNAL(complete(bool)),
+                this, SLOT(onLoadComplete(bool)), Qt::DirectConnection);
     }
 
     IGraphModel* graphModel() { return _graphModel; }
@@ -70,6 +77,8 @@ private slots:
 
     void onSelectionChanged(const SelectionManager*) const { emit selectionChanged(_selectionManager); }
 
+    void onLoadComplete(bool success) const { if(success) emit loadComplete(); }
+
 signals:
     void graphWillChange() const;
 
@@ -81,6 +90,8 @@ signals:
     void graphChanged() const;
 
     void selectionChanged(const ISelectionManager* selectionManager) const;
+
+    void loadComplete() const;
 };
 
 // Plugins can inherit from this to avoid having to reimplement the same createInstance member function
