@@ -249,6 +249,18 @@ Item
         }
     }
 
+    Preferences
+    {
+        id: window
+        section: "window"
+        property alias pluginX: pluginWindow.x
+        property alias pluginY: pluginWindow.y
+        property alias pluginWidth: pluginWindow.width
+        property alias pluginHeight: pluginWindow.height
+        property alias pluginMaximised: pluginWindow.maximised
+        property alias poppedOut: root.poppedOut
+    }
+
     Item
     {
         id: plugin
@@ -260,14 +272,10 @@ Item
 
         onLoadedChanged:
         {
-            //FIXME: restore window geometry of pluginWindow and
-            //either pop in or pop out depending on preference
-            var rootCoords = root.mapToItem(null, 0, 0)
-            pluginWindow.x = rootCoords.x;
-            pluginWindow.y = rootCoords.y;
-            pluginWindow.width = 640;
-            pluginWindow.height = 480;
-            popInPlugin();
+            if(root.poppedOut)
+                popOutPlugin();
+            else
+                popInPlugin();
         }
 
         // At least one enabled direct child
@@ -302,6 +310,7 @@ Item
         title: application && root.pluginName.length > 0 ?
                    root.pluginName + " - " + application.name : "";
         visible: root.visible && root.poppedOut && plugin.loaded
+        property bool maximised: visibility === Window.Maximized
 
         //FIXME: window is always on top?
         flags: Qt.Window
@@ -319,9 +328,6 @@ Item
         splitView.removeItem(plugin);
         plugin.parent = pluginWindow.contentItem;
         plugin.anchors.fill = plugin.parent;
-
-        pluginWindow.x = pluginX;
-        pluginWindow.y = pluginY;
     }
 
     function popInPlugin()
