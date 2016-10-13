@@ -16,6 +16,7 @@ ApplicationWindow
     height: 600
     property bool maximised: visibility === Window.Maximized
     property var recentFiles
+    property bool debugMenuUnhidden: false
 
     minimumWidth: mainToolBar.implicitWidth
     minimumHeight: 480
@@ -84,7 +85,7 @@ ApplicationWindow
         id: pluginsDialog
         pluginDetails: application.pluginDetails
 
-        onHiddenSwitchActivated: debugCrash.trigger();
+        onHiddenSwitchActivated: { mainWindow.debugMenuUnhidden = true; }
     }
 
     Preferences
@@ -635,8 +636,8 @@ ApplicationWindow
         Menu
         {
             title: qsTr("&Debug")
-            enabled: application.debugEnabled
-            visible: application.debugEnabled
+            enabled: application.debugEnabled || mainWindow.debugMenuUnhidden
+            visible: application.debugEnabled || mainWindow.debugMenuUnhidden
             MenuItem { action: debugCrash }
             MenuItem { action: toggleDebugPauserAction }
             MenuItem
