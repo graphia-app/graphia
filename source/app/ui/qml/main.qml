@@ -220,6 +220,7 @@ ApplicationWindow
     FileTypeChooserDialog
     {
         id: fileTypeChooserDialog
+        application: application
         model: application.urlTypeDetails
         onAccepted: openFileOfType(fileUrl, fileType, inNewTab)
     }
@@ -243,6 +244,7 @@ ApplicationWindow
     PluginChooserDialog
     {
         id: pluginChooserDialog
+        application: application
         model: application.pluginDetails
         onAccepted: openFileOfTypeWithPlugin(fileUrl, fileType, pluginName, inNewTab)
     }

@@ -14,6 +14,7 @@ Dialog
     title: qsTr("File Type Ambiguous")
     width: 500
 
+    property var application
     property var model
 
     property string fileUrl
@@ -39,7 +40,8 @@ Dialog
 
         Text
         {
-            text: qsTr("The file you are opening may be interpreted as two or more possible formats. " +
+            text: application.baseFileNameForUrl(fileUrl) +
+                  qsTr(" may be interpreted as two or more possible formats. " +
                        "Please select how you wish to proceed below.")
             Layout.fillWidth: true
             Layout.columnSpan: 2
@@ -48,7 +50,7 @@ Dialog
 
         Text
         {
-            text: qsTr("Open File As:")
+            text: qsTr("Open As:")
             Layout.alignment: Qt.AlignRight
         }
 

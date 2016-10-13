@@ -14,6 +14,7 @@ Dialog
     title: qsTr("Multiple Plugins Applicable")
     width: 500
 
+    property var application
     property var model
 
     property string fileUrl
@@ -34,7 +35,8 @@ Dialog
 
         Text
         {
-            text: qsTr("The file you are opening may be loaded by two or more plugins. " +
+            text: application.baseFileNameForUrl(fileUrl) +
+                  qsTr(" may be loaded by two or more plugins. " +
                        "Please select how you wish to proceed below.")
             Layout.fillWidth: true
             Layout.columnSpan: 2
@@ -43,7 +45,7 @@ Dialog
 
         Text
         {
-            text: qsTr("Open File With Plugin:")
+            text: qsTr("Open With Plugin:")
             Layout.alignment: Qt.AlignRight
         }
 
