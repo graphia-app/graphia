@@ -34,7 +34,7 @@ public:
     Attribute(const Attribute&) = default;
     Attribute(Attribute&&) = default;
 
-    Attribute(const QString& name) :
+    explicit Attribute(const QString& name) :
         _name(name)
     {}
 
