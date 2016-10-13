@@ -26,6 +26,7 @@ public:
     void setValueByNodeId(NodeId nodeId, const QString& name, const QString& value);
     QString valueByNodeId(NodeId nodeId, const QString& name) const;
 
+    void setNodeNamesToFirstAttribute(IGraphModel& graphModel);
     void exposeToGraphModel(IGraphModel& graphModel);
 };
 

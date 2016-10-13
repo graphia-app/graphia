@@ -35,6 +35,15 @@ QString NodeAttributes::valueByNodeId(NodeId nodeId, const QString& name) const
     return value(rowIndexForNodeId(nodeId), name);
 }
 
+void NodeAttributes::setNodeNamesToFirstAttribute(IGraphModel& graphModel)
+{
+    if(empty())
+        return;
+
+    for(NodeId nodeId : graphModel.graph().nodeIds())
+         graphModel.setNodeName(nodeId, valueByNodeId(nodeId, firstAttributeName()));
+}
+
 void NodeAttributes::exposeToGraphModel(IGraphModel& graphModel)
 {
     for(const auto& nodeAttribute : *this)

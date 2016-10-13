@@ -190,14 +190,7 @@ void CorrelationPluginInstance::finishDataRow(int row)
 
 void CorrelationPluginInstance::onLoadComplete()
 {
-    const auto& firstAttributeName = _nodeAttributes.firstAttributeName();
-
-    for(NodeId nodeId : graphModel()->graph().nodeIds())
-    {
-         graphModel()->setNodeName(nodeId, _nodeAttributes.valueByNodeId(
-            nodeId, firstAttributeName));
-    }
-
+    _nodeAttributes.setNodeNamesToFirstAttribute(*graphModel());
     _nodeAttributes.exposeToGraphModel(*graphModel());
 }
 

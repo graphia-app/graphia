@@ -16,6 +16,9 @@ private:
     std::map<QString, Attribute> _attributes;
     QString _firstAttributeName;
 
+protected:
+    const QString& firstAttributeName() const { return _firstAttributeName; }
+
 public:
     int size() const;
 
@@ -23,8 +26,6 @@ public:
 
     auto begin() const { return make_map_value_iterator(_attributes.begin()); }
     auto end() const { return make_map_value_iterator(_attributes.end()); }
-
-    const QString& firstAttributeName() const { return _firstAttributeName; }
 
     void add(const QString& name);
     void setValue(int index, const QString& name, const QString& value);
