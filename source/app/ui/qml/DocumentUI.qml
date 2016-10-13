@@ -276,6 +276,8 @@ Item
                 popOutPlugin();
             else
                 popInPlugin();
+
+            loadComplete();
         }
 
         // At least one enabled direct child
@@ -290,6 +292,8 @@ Item
             return false;
         }
     }
+
+    signal loadComplete()
 
     property int pluginX: pluginWindow.x
     property int pluginY: pluginWindow.y

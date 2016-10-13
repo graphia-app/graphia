@@ -26,15 +26,27 @@ ApplicationWindow
 
     title: (currentDocument ? currentDocument.title + qsTr(" - ") : "") + application.name
 
+    property var pendingArguments
+
     // This is called when the app is started, but it also receives the arguments
     // of a second instance when it starts then immediately exits
     function processArguments(arguments)
     {
-        for(var i = 1; i < arguments.length; i++)
-        {
-            var fileUrl = application.urlForFileName(arguments[i]);
-            openFile(fileUrl, true);
-        }
+        pendingArguments = arguments.slice(1);
+        processOnePendingArgument();
+    }
+
+    function processOnePendingArgument()
+    {
+        if(pendingArguments.length === 0)
+            return;
+
+        // Pop
+        var argument = pendingArguments[0];
+        pendingArguments.shift();
+
+        var fileUrl = application.urlForFileName(argument);
+        openFile(fileUrl, true);
     }
 
     Component.onCompleted:
@@ -735,6 +747,12 @@ ApplicationWindow
             DocumentUI
             {
                 id: document
+
+                Component.onCompleted:
+                {
+                    // Continue processing arguments after the document is loaded
+                    document.loadComplete.connect(processOnePendingArgument);
+                }
             }
         }
     }
