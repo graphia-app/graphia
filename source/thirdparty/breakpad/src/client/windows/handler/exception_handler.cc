@@ -477,7 +477,9 @@ bool ExceptionHandler::AttemptToWriteCrashReport(EXCEPTION_POINTERS* exinfo) {
   // can be overridden by calling ExceptionHandler::set_handle_debug_exceptions.
   DWORD code = exinfo->ExceptionRecord->ExceptionCode;
   bool is_debug_exception = (code == EXCEPTION_BREAKPOINT) ||
-                            (code == EXCEPTION_SINGLE_STEP);
+                            (code == EXCEPTION_SINGLE_STEP) ||
+                            (code == DBG_PRINTEXCEPTION_C) ||
+                            (code == DBG_PRINTEXCEPTION_WIDE_C);
 
   if (code == EXCEPTION_INVALID_HANDLE &&
       consume_invalid_handle_exceptions_) {
