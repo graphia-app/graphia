@@ -546,7 +546,7 @@ ApplicationWindow
         iconName: "preferences-system-windows"
         text: currentDocument ? qsTr("Display " + currentDocument.pluginName + " In Separate &Window") : ""
         checkable: true
-        checked: currentDocument && currentDocument.poppedOut
+        checked: currentDocument && currentDocument.pluginPoppedOut
         enabled: currentDocument && currentDocument.hasPluginUI
         onTriggered: currentDocument && currentDocument.togglePop()
     }

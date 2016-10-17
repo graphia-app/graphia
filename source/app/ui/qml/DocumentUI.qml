@@ -43,7 +43,7 @@ Item
     property string debugResumeAction: document.debugResumeAction
 
     property bool hasPluginUI: document.pluginQmlPath
-    property bool poppedOut: false
+    property bool pluginPoppedOut: false
 
     property int foundIndex: document.foundIndex
     property int numNodesFound: document.numNodesFound
@@ -259,7 +259,7 @@ Item
         property alias pluginHeight: pluginWindow.height
         property alias pluginMaximised: pluginWindow.maximised
         property alias pluginSplitSize: root.pluginSplitSize
-        property alias poppedOut: root.poppedOut
+        property alias pluginPoppedOut: root.pluginPoppedOut
     }
 
     Item
@@ -273,7 +273,7 @@ Item
 
         onLoadedChanged:
         {
-            if(root.poppedOut)
+            if(root.pluginPoppedOut)
                 popOutPlugin();
             else
                 popInPlugin();
@@ -300,7 +300,7 @@ Item
     property int pluginY: pluginWindow.y
     property int pluginSplitSize:
     {
-        if(!poppedOut)
+        if(!pluginPoppedOut)
         {
             return splitView.orientation == Qt.Vertical ?
                         plugin.height : plugin.width;
@@ -314,7 +314,7 @@ Item
         id: pluginWindow
         title: application && root.pluginName.length > 0 ?
                    root.pluginName + " - " + application.name : "";
-        visible: root.visible && root.poppedOut && plugin.loaded
+        visible: root.visible && root.pluginPoppedOut && plugin.loaded
         property bool maximised: visibility === Window.Maximized
 
         //FIXME: window is always on top?
@@ -329,7 +329,7 @@ Item
 
     function popOutPlugin()
     {
-        root.poppedOut = true;
+        root.pluginPoppedOut = true;
         splitView.removeItem(plugin);
         plugin.parent = pluginWindow.contentItem;
         plugin.anchors.fill = plugin.parent;
@@ -346,7 +346,7 @@ Item
             plugin.width = pluginSplitSize;
 
         splitView.addItem(plugin);
-        root.poppedOut = false;
+        root.pluginPoppedOut = false;
     }
 
     function togglePop()
