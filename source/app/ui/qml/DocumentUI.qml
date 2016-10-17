@@ -312,6 +312,10 @@ Item
     Window
     {
         id: pluginWindow
+        width: 800
+        height: 600
+        minimumWidth: 480
+        minimumHeight: 480
         title: application && root.pluginName.length > 0 ?
                    root.pluginName + " - " + application.name : "";
         visible: root.visible && root.pluginPoppedOut && plugin.loaded
