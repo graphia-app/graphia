@@ -258,6 +258,7 @@ Item
         property alias pluginWidth: pluginWindow.width
         property alias pluginHeight: pluginWindow.height
         property alias pluginMaximised: pluginWindow.maximised
+        property alias pluginSplitSize: root.pluginSplitSize
         property alias poppedOut: root.poppedOut
     }
 
