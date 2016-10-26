@@ -5,7 +5,6 @@
 #include "shared/graph/grapharray.h"
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/iparser.h"
-
 #include "shared/plugins/attributes.h"
 #include "shared/plugins/nodeattributes.h"
 #include "shared/plugins/nodeattributestablemodel.h"
@@ -20,6 +19,12 @@ class CorrelationPluginInstance : public BasePluginInstance
     Q_OBJECT
 
     Q_PROPERTY(QAbstractTableModel* nodeAttributes READ nodeAttributesTableModel CONSTANT)
+    Q_PROPERTY(QVector<int> selectedRows READ selectionRows NOTIFY selectedRowsChanged)
+    Q_PROPERTY(QStringList columnNames READ columnNames NOTIFY columnNamesChanged)
+    Q_PROPERTY(QStringList rowNames READ rowNames NOTIFY rowNamesChanged)
+    Q_PROPERTY(QVector<double> dataset READ attributesDataset NOTIFY datasetChanged)
+    Q_PROPERTY(int columnCount MEMBER _numColumns NOTIFY columnCountChanged)
+    Q_PROPERTY(int rowCount MEMBER _numRows NOTIFY rowCountChanged)
 
 public:
     CorrelationPluginInstance();
@@ -29,6 +34,8 @@ private:
     int _numRows = 0;
 
     std::vector<QString> _dataColumnNames;
+    QVector<double> _selectedData;
+    QVector<int> _selectedRows;
 
     NodeAttributes _nodeAttributes;
     Attributes _columnAttributes;
@@ -107,6 +114,10 @@ private:
     void finishDataRow(int row);
 
     QAbstractTableModel* nodeAttributesTableModel() { return &_nodeAttributesTableModel; }
+    QStringList columnNames();
+    QStringList rowNames();
+    QVector<double> attributesDataset();
+    QVector<int> selectionRows();
 
 public:
     void setDimensions(int numColumns, int numRows);
@@ -127,6 +138,13 @@ private slots:
 
     void onGraphChanged();
     void onSelectionChanged(const ISelectionManager* selectionManager);
+signals:
+    QVector<int> selectedRowsChanged();
+    int rowCountChanged();
+    int columnCountChanged();
+    QVector<double> datasetChanged();
+    QStringList columnNamesChanged();
+    QStringList rowNamesChanged();
 };
 
 class CorrelationPlugin : public BasePlugin, public PluginInstanceProvider<CorrelationPluginInstance>

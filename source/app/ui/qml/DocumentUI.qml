@@ -337,6 +337,8 @@ Item
         splitView.removeItem(plugin);
         plugin.parent = pluginWindow.contentItem;
         plugin.anchors.fill = plugin.parent;
+        pluginWindow.x = pluginX;
+        pluginWindow.y = pluginY;
     }
 
     function popInPlugin()

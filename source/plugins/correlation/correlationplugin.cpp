@@ -1,5 +1,6 @@
 #include "correlationplugin.h"
 
+#include "customplotitem.h"
 #include "loading/correlationfileparser.h"
 #include "shared/utils/threadpool.h"
 
@@ -184,6 +185,7 @@ void CorrelationPluginInstance::finishDataRow(int row)
     auto nodeId = graphModel()->mutableGraph().addNode();
     auto computeCost = _numRows - row + 1;
 
+
     _dataRows.emplace_back(begin, end, nodeId, computeCost);
     _nodeAttributes.setNodeIdForRowIndex(nodeId, row);
 }
@@ -192,6 +194,32 @@ void CorrelationPluginInstance::onLoadComplete()
 {
     _nodeAttributes.setNodeNamesToFirstAttribute(*graphModel());
     _nodeAttributes.exposeToGraphModel(*graphModel());
+}
+
+QVector<double> CorrelationPluginInstance::attributesDataset()
+{
+    return QVector<double>::fromStdVector(_data);
+}
+
+QStringList CorrelationPluginInstance::columnNames()
+{
+    QStringList list;
+    for(QString name : _dataColumnNames)
+        list.append(name);
+    return list;
+}
+
+QStringList CorrelationPluginInstance::rowNames()
+{
+    QStringList list;
+    for(int i=0; i<_numRows; i++)
+        list.append(_nodeAttributes.begin()->get(i));
+    return list;
+}
+
+QVector<int> CorrelationPluginInstance::selectionRows()
+{
+    return _selectedRows;
 }
 
 void CorrelationPluginInstance::onGraphChanged()
@@ -208,6 +236,28 @@ void CorrelationPluginInstance::onGraphChanged()
 void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager* selectionManager)
 {
     _nodeAttributesTableModel.setSelectedNodes(selectionManager->selectedNodes());
+
+    const auto& selectedNodes = selectionManager->selectedNodes();
+
+    std::vector<int> selectedRowIndexes;
+    selectedRowIndexes.reserve(selectedNodes.size());
+
+    _selectedData.clear();
+
+    for(auto& nodeId : selectedNodes)
+    {
+        int row = _nodeAttributes.rowIndexForNodeId(nodeId);
+        selectedRowIndexes.emplace_back(row);
+        for(int column = 0; column < _numColumns; ++column)
+        {
+            int index = (row * _numColumns) + column;
+            _selectedData.push_back(_data[index]);
+        }
+    }
+
+    _selectedRows = QVector<int>::fromStdVector(selectedRowIndexes);
+
+    emit selectedRowsChanged();
 }
 
 std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
@@ -221,6 +271,7 @@ std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const Q
 CorrelationPlugin::CorrelationPlugin()
 {
     registerUrlType("Correlation", QObject::tr("Correlation CSV File"), QObject::tr("Correlation CSV Files"), {"csv"});
+    qmlRegisterType<CustomPlotItem>("CustomPlot", 1, 0, "CustomPlotItem");
 }
 
 QStringList CorrelationPlugin::identifyUrl(const QUrl& url) const
