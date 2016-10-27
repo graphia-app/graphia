@@ -11,9 +11,9 @@ import SortFilterProxyModel 0.1
 Item
 {
     anchors.fill: parent
-    height: 400;
 
     Component.onCompleted: {
+        parent.Layout.minimumHeight = 400;
         plugin.model.selectedRowsChanged.connect(onSelection);
     }
 
