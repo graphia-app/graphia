@@ -188,6 +188,7 @@ void CustomPlotItem::showTooltip()
     QCPGraph* graph = dynamic_cast<QCPGraph*>(_hoverPlottable);
 
     _itemTracer->setGraph(graph);
+    _itemTracer->setVisible(true);
 
     _itemTracer->setInterpolating(false);
     _itemTracer->setGraphKey(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
@@ -213,6 +214,7 @@ void CustomPlotItem::hideTooltip()
 {
     _textLabel->setVisible(false);
     _labelColor->setVisible(false);
+    _itemTracer->setVisible(false);
     _textLayer->replot();
     update();
 }

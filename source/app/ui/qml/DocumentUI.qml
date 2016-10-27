@@ -306,7 +306,7 @@ Item
                         plugin.height : plugin.width;
         }
         else
-            return pluginSplitSize;
+            return window.pluginSplitSize
     }
 
     Window
