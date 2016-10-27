@@ -46,6 +46,8 @@ private:
     QCPLayer* _textLayer;
     QColor _hoverColor;
     QCPItemText* _textLabel;
+    QCPItemRect* _labelColor;
+    QCPItemTracer* _itemTracer;
 
     QCustomPlot _customPlot;
     int _colCount;

@@ -10,6 +10,7 @@ CustomPlotItem::CustomPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent),
     _customPlot.setOpenGl(true);
     _customPlot.addLayer("textLayer");
 
+
     _textLayer = _customPlot.layer("textLayer");
     _textLayer->setMode(QCPLayer::LayerMode::lmBuffered);
 
@@ -20,6 +21,20 @@ CustomPlotItem::CustomPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent),
     _textLabel->setPen(QPen(Qt::black));
     _textLabel->setBrush(QBrush(Qt::white));
     _textLabel->setPadding(QMargins(3, 3, 3, 3));
+    _textLabel->setClipToAxisRect(false);
+    _textLabel->setVisible(false);
+
+    _labelColor = new QCPItemRect(&_customPlot);
+    _labelColor->setLayer(_textLayer);
+    _labelColor->bottomRight->setParentAnchor(_textLabel->bottomLeft);
+    _labelColor->setClipToAxisRect(false);
+    _labelColor->setVisible(false);
+
+    _itemTracer = new QCPItemTracer(&_customPlot);
+    _itemTracer->setLayer(_textLayer);
+    _itemTracer->setInterpolating(false);
+    _itemTracer->setVisible(true);
+    _itemTracer->setStyle(QCPItemTracer::TracerStyle::tsCircle);
 
     setFlag(QQuickItem::ItemHasContents, true);
 
@@ -169,19 +184,35 @@ void CustomPlotItem::updateCustomPlotSize()
 
 void CustomPlotItem::showTooltip()
 {
+
+    QCPGraph* graph = dynamic_cast<QCPGraph*>(_hoverPlottable);
+
+    _itemTracer->setGraph(graph);
+
+    _itemTracer->setInterpolating(false);
+    _itemTracer->setGraphKey(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
+
+
     _textLabel->setVisible(true);
     _textLabel->position->setCoords(
                 _customPlot.xAxis->pixelToCoord(_hoverPoint.x()),
                 _customPlot.yAxis->pixelToCoord(_hoverPoint.y()));
-    _textLabel->setText(_hoverPlottable->name());
-    _textLabel->setColor(_hoverPlottable->pen().color());
+    _textLabel->setText(_hoverPlottable->name() + " " + QString::number(_itemTracer->position->value()));
+
+    _labelColor->setVisible(true);
+    _labelColor->setBrush(QBrush(_hoverPlottable->pen().color()));
+    _labelColor->topLeft->setPixelPosition(QPointF(_textLabel->topLeft->pixelPosition().x() - 10,
+                                                   _textLabel->topLeft->pixelPosition().y()));
+
     _textLayer->replot();
+
     update();
 }
 
 void CustomPlotItem::hideTooltip()
 {
     _textLabel->setVisible(false);
+    _labelColor->setVisible(false);
     _textLayer->replot();
     update();
 }

@@ -11,6 +11,7 @@ import SortFilterProxyModel 0.1
 Item
 {
     anchors.fill: parent
+    height: 400;
 
     Component.onCompleted: {
         plugin.model.selectedRowsChanged.connect(onSelection);
@@ -28,6 +29,7 @@ Item
         SplitView
         {
             anchors.fill: parent
+
             NodeAttributeTableView
             {
                 Layout.fillHeight: true
@@ -36,6 +38,7 @@ Item
 
             CustomPlotItem
             {
+
 
                 id: customPlot
                 rowCount: plugin.model.rowCount
