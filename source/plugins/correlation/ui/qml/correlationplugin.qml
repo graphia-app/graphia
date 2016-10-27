@@ -38,8 +38,6 @@ Item
 
             CustomPlotItem
             {
-
-
                 id: customPlot
                 rowCount: plugin.model.rowCount
                 columnCount: plugin.model.columnCount

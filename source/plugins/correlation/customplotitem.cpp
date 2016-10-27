@@ -10,7 +10,6 @@ CustomPlotItem::CustomPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent),
     _customPlot.setOpenGl(true);
     _customPlot.addLayer("textLayer");
 
-
     _textLayer = _customPlot.layer("textLayer");
     _textLayer->setMode(QCPLayer::LayerMode::lmBuffered);
 
@@ -189,16 +188,15 @@ void CustomPlotItem::showTooltip()
 
     _itemTracer->setGraph(graph);
     _itemTracer->setVisible(true);
-
     _itemTracer->setInterpolating(false);
     _itemTracer->setGraphKey(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
-
 
     _textLabel->setVisible(true);
     _textLabel->position->setCoords(
                 _customPlot.xAxis->pixelToCoord(_hoverPoint.x()),
                 _customPlot.yAxis->pixelToCoord(_hoverPoint.y()));
-    _textLabel->setText(_hoverPlottable->name() + " " + QString::number(_itemTracer->position->value()));
+    _textLabel->setText(_hoverPlottable->name() +
+                        " " + QString::number(_itemTracer->position->value()));
 
     _labelColor->setVisible(true);
     _labelColor->setBrush(QBrush(_hoverPlottable->pen().color()));
