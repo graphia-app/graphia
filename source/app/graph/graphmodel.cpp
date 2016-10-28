@@ -8,7 +8,7 @@
 #include "../transform/filtertransform.h"
 #include "../transform/edgecontractiontransform.h"
 
-#include "../utils/enumreflection.h"
+#include "shared/utils/enumreflection.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/utils.h"
 

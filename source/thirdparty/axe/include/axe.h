@@ -29,6 +29,10 @@
 #ifndef AXE_H
 #define AXE_H
 
+#ifdef _MSC_VER
+#pragma warning(disable:4503) // AXE makes a lot of these
+#endif
+
 #include "axe_composite_function.h"
 #include "axe_terminal_function.h"
 #include "axe_extractor_function.h"

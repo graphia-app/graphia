@@ -35,7 +35,8 @@ HEADERS += \
     $$PWD/plugins/attributes.h \
     $$PWD/plugins/nodeattributes.h \
     $$PWD/utils/pair_iterator.h \
-    $$PWD/loading/iparserthread.h
+    $$PWD/loading/iparserthread.h \
+    $$PWD/utils/enumreflection.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \

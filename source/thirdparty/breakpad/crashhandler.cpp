@@ -116,6 +116,9 @@ CrashHandler::CrashHandler()
                 "CrashReporter");
 
 #if defined(Q_OS_WIN32)
+    if(IsDebuggerPresent())
+        return;
+
     crashReporterExecutableName.append(".exe");
     int length = crashReporterExecutableName.toWCharArray(_crashReporterExecutableName);
     _crashReporterExecutableName[length] = 0;

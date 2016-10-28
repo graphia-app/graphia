@@ -33,7 +33,7 @@
 // Example:
 //
 // file.h:
-// DEFINE_QML_ENUM(com.company, 1, 0, Enumeration,
+// DEFINE_QML_ENUM(Enumeration,
 //      First,
 //      Second,
 //      Third)

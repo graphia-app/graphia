@@ -3,8 +3,7 @@
 
 #include "shared/graph/elementid.h"
 #include "shared/transform/idatafield.h"
-
-#include "../utils/enumreflection.h"
+#include "shared/utils/enumreflection.h"
 
 #include <functional>
 #include <limits>

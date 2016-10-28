@@ -1,7 +1,7 @@
 #include "graphtransformconfiguration.h"
 #include "document.h"
 
-#include "../utils/enumreflection.h"
+#include "shared/utils/enumreflection.h"
 
 REGISTER_QML_ENUM(GraphTransformType);
 REGISTER_QML_ENUM(GraphTransformCreationState);

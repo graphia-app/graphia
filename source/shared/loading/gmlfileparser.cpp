@@ -2,10 +2,6 @@
 #include "shared/graph/imutablegraph.h"
 #include "shared/plugins/nodeattributes.h"
 
-#ifdef _MSC_VER
-#pragma warning(disable:4503) // AXE makes a lot of these
-#endif
-
 #include "thirdparty/axe/include/axe.h"
 
 #include <QTime>
@@ -18,7 +14,7 @@
 #include <cstring>
 #include <iterator>
 
-template<class It> bool parseGml(IMutableGraph &graph,
+template<typename It> bool parseGml(IMutableGraph &graph,
                                  NodeAttributes* nodeAttributes,
                                  const std::function<bool ()>& cancelled,
                                  const IParser::ProgressFn& progress,

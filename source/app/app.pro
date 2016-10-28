@@ -90,7 +90,6 @@ HEADERS += \
     ui/searchmanager.h \
     ui/selectionmanager.h \
     utils/debugpauser.h \
-    utils/enumreflection.h \
     utils/qmlcontainerwrapper.h \
     utils/qmlenum.h \
     utils/shadertools.h
