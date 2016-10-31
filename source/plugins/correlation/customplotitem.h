@@ -41,13 +41,16 @@ protected:
     void buildGraphs();
 
 private:
+    const int MAX_SELECTED_ROWS_BEFORE_MEAN = 1000;
+
+    QCPLayer* _textLayer;
     QCPAbstractPlottable* _hoverPlottable;
     QPointF _hoverPoint;
-    QCPLayer* _textLayer;
     QColor _hoverColor;
-    QCPItemText* _textLabel;
-    QCPItemRect* _labelColor;
+    QCPItemText* _hoverLabel;
+    QCPItemRect* _hoverColorRect;
     QCPItemTracer* _itemTracer;
+    QCPTextElement* _plotModeTextElement;
 
     QCustomPlot _customPlot;
     int _colCount;
@@ -57,6 +60,9 @@ private:
     QStringList _graphNames;
     QVector<double> _data;
     QVector<int> _selectedRows;
+
+    void populateMeanAvgGraphs();
+    void populateRawGraphs();
 
 private slots:
     void graphClicked( QCPAbstractPlottable* plottable );

@@ -13,27 +13,37 @@ CustomPlotItem::CustomPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent),
     _textLayer = _customPlot.layer("textLayer");
     _textLayer->setMode(QCPLayer::LayerMode::lmBuffered);
 
-    _textLabel = new QCPItemText(&_customPlot);
-    _textLabel->setLayer(_textLayer);
-    _textLabel->setPositionAlignment(Qt::AlignBottom|Qt::AlignHCenter);
-    _textLabel->setFont(QFont("Arial", 10));
-    _textLabel->setPen(QPen(Qt::black));
-    _textLabel->setBrush(QBrush(Qt::white));
-    _textLabel->setPadding(QMargins(3, 3, 3, 3));
-    _textLabel->setClipToAxisRect(false);
-    _textLabel->setVisible(false);
+    _hoverLabel = new QCPItemText(&_customPlot);
+    _hoverLabel->setLayer(_textLayer);
+    _hoverLabel->setPositionAlignment(Qt::AlignBottom|Qt::AlignHCenter);
+    _hoverLabel->setFont(QFont("Arial", 10));
+    _hoverLabel->setPen(QPen(Qt::black));
+    _hoverLabel->setBrush(QBrush(Qt::white));
+    _hoverLabel->setPadding(QMargins(3, 3, 3, 3));
+    _hoverLabel->setClipToAxisRect(false);
+    _hoverLabel->setVisible(false);
 
-    _labelColor = new QCPItemRect(&_customPlot);
-    _labelColor->setLayer(_textLayer);
-    _labelColor->bottomRight->setParentAnchor(_textLabel->bottomLeft);
-    _labelColor->setClipToAxisRect(false);
-    _labelColor->setVisible(false);
+    _hoverColorRect = new QCPItemRect(&_customPlot);
+    _hoverColorRect->setLayer(_textLayer);
+    _hoverColorRect->bottomRight->setParentAnchor(_hoverLabel->bottomLeft);
+    _hoverColorRect->setClipToAxisRect(false);
+    _hoverColorRect->setVisible(false);
 
     _itemTracer = new QCPItemTracer(&_customPlot);
     _itemTracer->setLayer(_textLayer);
     _itemTracer->setInterpolating(false);
     _itemTracer->setVisible(true);
     _itemTracer->setStyle(QCPItemTracer::TracerStyle::tsCircle);
+
+    _plotModeTextElement = new QCPTextElement(&_customPlot);
+    _plotModeTextElement->setLayer(_textLayer);
+    _plotModeTextElement->setTextFlags(Qt::AlignLeft);
+    _plotModeTextElement->setFont(QFont("Arial", 9));
+    _plotModeTextElement->setTextColor(Qt::black);
+    _plotModeTextElement->setVisible(false);
+
+    _customPlot.plotLayout()->insertRow(0);
+    _customPlot.plotLayout()->addElement(0,0, _plotModeTextElement);
 
     setFlag(QQuickItem::ItemHasContents, true);
 
@@ -109,11 +119,28 @@ void CustomPlotItem::mouseDoubleClickEvent(QMouseEvent* event)
 
 void CustomPlotItem::buildGraphs()
 {
+    _plotModeTextElement->setVisible(false);
     // If the legend is not cleared first this will cause a slowdown
     // when removing a large number of graphs
     _customPlot.legend->clear();
     _customPlot.clearGraphs();
 
+    if(_selectedRows.length() > MAX_SELECTED_ROWS_BEFORE_MEAN)
+        populateMeanAvgGraphs();
+    else
+        populateRawGraphs();
+
+    QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
+    _customPlot.xAxis->setTicker(categoryTicker);
+    _customPlot.xAxis->setTickLabelRotation(90);
+
+    // Populate Categories
+    for(int i = 0; i < _labelNames.count(); ++i)
+        categoryTicker->addTick(i, _labelNames[i]);
+}
+
+void CustomPlotItem::populateMeanAvgGraphs()
+{
     double maxX = _colCount;
     double maxY = 0;
 
@@ -121,6 +148,49 @@ void CustomPlotItem::buildGraphs()
     std::mt19937 mTwister(randomDevice());
     std::uniform_int_distribution<> randomColorDist(0, 255);
 
+    auto* graph = _customPlot.addGraph();
+    mTwister.seed(_selectedRows.count()*1000);
+    QColor randomColor = QColor::fromHsl(randomColorDist(mTwister), 210, 130);
+    graph->setPen(QPen(randomColor));
+    graph->setName("Mean Avg of Selection");
+
+    // Use Average Calculation
+    QVector<double> yDataAvg;
+    QVector<double> xData;
+
+    for(int col=0; col<_colCount; col++)
+    {
+        double runningTotal = 0.0f;
+        for(auto row : _selectedRows)
+        {
+            int index = (row * _colCount) + col;
+            runningTotal += _data[index];
+        }
+        xData.append(col);
+        yDataAvg.append(runningTotal / _selectedRows.length());
+
+        maxY = qMax(maxY, yDataAvg.back());
+    }
+    graph->setData(xData, yDataAvg, true);
+
+    _plotModeTextElement->setText("*Mean Avg plot of " + QString::number(_selectedRows.length()) +
+                            " nodes. Maximum node count for individual plots is " + QString::number(MAX_SELECTED_ROWS_BEFORE_MEAN));
+    _plotModeTextElement->setVisible(true);
+
+    _customPlot.xAxis->setRange(0, maxX);
+    _customPlot.yAxis->setRange(0, maxY);
+}
+
+void CustomPlotItem::populateRawGraphs()
+{
+    double maxX = _colCount;
+    double maxY = 0;
+
+    std::random_device randomDevice;
+    std::mt19937 mTwister(randomDevice());
+    std::uniform_int_distribution<> randomColorDist(0, 255);
+
+    // Plot each graph individually
     for(auto row : _selectedRows)
     {
         auto* graph = _customPlot.addGraph();
@@ -142,14 +212,6 @@ void CustomPlotItem::buildGraphs()
         }
         graph->setData(xData, yData, true);
     }
-
-    QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
-    _customPlot.xAxis->setTicker(categoryTicker);
-    _customPlot.xAxis->setTickLabelRotation(90);
-
-    // Populate Categories
-    for(int i = 0; i < _labelNames.count(); ++i)
-        categoryTicker->addTick(i, _labelNames[i]);
 
     _customPlot.xAxis->setRange(0, maxX);
     _customPlot.yAxis->setRange(0, maxY);
@@ -183,7 +245,6 @@ void CustomPlotItem::updateCustomPlotSize()
 
 void CustomPlotItem::showTooltip()
 {
-
     QCPGraph* graph = dynamic_cast<QCPGraph*>(_hoverPlottable);
 
     _itemTracer->setGraph(graph);
@@ -191,17 +252,17 @@ void CustomPlotItem::showTooltip()
     _itemTracer->setInterpolating(false);
     _itemTracer->setGraphKey(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
 
-    _textLabel->setVisible(true);
-    _textLabel->position->setCoords(
+    _hoverLabel->setVisible(true);
+    _hoverLabel->position->setCoords(
                 _customPlot.xAxis->pixelToCoord(_hoverPoint.x()),
                 _customPlot.yAxis->pixelToCoord(_hoverPoint.y()));
-    _textLabel->setText(_hoverPlottable->name() +
+    _hoverLabel->setText(_hoverPlottable->name() +
                         " " + QString::number(_itemTracer->position->value()));
 
-    _labelColor->setVisible(true);
-    _labelColor->setBrush(QBrush(_hoverPlottable->pen().color()));
-    _labelColor->topLeft->setPixelPosition(QPointF(_textLabel->topLeft->pixelPosition().x() - 10,
-                                                   _textLabel->topLeft->pixelPosition().y()));
+    _hoverColorRect->setVisible(true);
+    _hoverColorRect->setBrush(QBrush(_hoverPlottable->pen().color()));
+    _hoverColorRect->topLeft->setPixelPosition(QPointF(_hoverLabel->topLeft->pixelPosition().x() - 10,
+                                                   _hoverLabel->topLeft->pixelPosition().y()));
 
     _textLayer->replot();
 
@@ -210,8 +271,8 @@ void CustomPlotItem::showTooltip()
 
 void CustomPlotItem::hideTooltip()
 {
-    _textLabel->setVisible(false);
-    _labelColor->setVisible(false);
+    _hoverLabel->setVisible(false);
+    _hoverColorRect->setVisible(false);
     _itemTracer->setVisible(false);
     _textLayer->replot();
     update();
