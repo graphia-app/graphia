@@ -7,6 +7,7 @@ import QtWebEngine 1.3
 
 import CustomPlot 1.0
 import SortFilterProxyModel 0.1
+import QtQuick.Dialogs 1.2
 
 Item
 {
@@ -46,6 +47,7 @@ Item
                 rowNames: plugin.model.rowNames
                 selectedRows: plugin.model.selectedRows
                 elideLabelWidth: 120;
+                onRightClick: contextMenu.popup();
 
                 Component.onCompleted: {
                     customPlot.initCustomPlot();
@@ -53,4 +55,26 @@ Item
             }
         }
     }
+
+    Menu
+    {
+        id: contextMenu;
+        MenuItem
+        {
+            text: "Save plot as PNG"
+            onTriggered: imageSaveDialog.open();
+        }
+    }
+
+    FileDialog
+    {
+        id: imageSaveDialog
+        visible: false;
+        selectExisting: false;
+        title: "Save plot to .png"
+        nameFilters: [ "Image files (*.png)" ]
+        onAccepted: customPlot.saveGraphImage(imageSaveDialog.fileUrl);
+    }
 }
+
+

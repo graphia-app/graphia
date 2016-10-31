@@ -21,12 +21,11 @@ class CustomPlotItem : public QQuickPaintedItem
 
 public:
     CustomPlotItem( QQuickItem* parent = 0 );
-
     void paint( QPainter* painter );
+    void setLabelNames(const QStringList &labelNames);
 
     Q_INVOKABLE void initCustomPlot();
-
-    void setLabelNames(const QStringList &labelNames);
+    Q_INVOKABLE void saveGraphImage(QUrl path);
 
 protected:
     void routeMouseEvents( QMouseEvent* event );
@@ -61,6 +60,8 @@ private:
     QVector<double> _data;
     QVector<int> _selectedRows;
 
+    QMenu _contextMenu;
+
     void populateMeanAvgGraphs();
     void populateRawGraphs();
 
@@ -74,6 +75,7 @@ signals:
     void dataChanged();
     void selectedRowsChanged();
     void columnNamesChanged();
+    void rightClick();
 
 };
 #endif // CUSTOMPLOTITEM_H

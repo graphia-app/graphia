@@ -83,6 +83,8 @@ void CustomPlotItem::mouseReleaseEvent(QMouseEvent* event)
 {
     qDebug() << Q_FUNC_INFO;
     routeMouseEvents(event);
+    if (event->button() == Qt::RightButton)
+        emit rightClick();
 }
 
 void CustomPlotItem::mouseMoveEvent(QMouseEvent* event)
@@ -276,6 +278,11 @@ void CustomPlotItem::hideTooltip()
     _itemTracer->setVisible(false);
     _textLayer->replot();
     update();
+}
+
+void CustomPlotItem::saveGraphImage(QUrl path)
+{
+    _customPlot.savePng(path.toLocalFile());
 }
 
 void CustomPlotItem::onCustomReplot()
