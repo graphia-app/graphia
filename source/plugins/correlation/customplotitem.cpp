@@ -30,10 +30,12 @@ CustomPlotItem::CustomPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent),
     _hoverColorRect->setVisible(false);
 
     _itemTracer = new QCPItemTracer(&_customPlot);
+    _itemTracer->setBrush(QBrush(Qt::white));
     _itemTracer->setLayer(_textLayer);
     _itemTracer->setInterpolating(false);
     _itemTracer->setVisible(true);
     _itemTracer->setStyle(QCPItemTracer::TracerStyle::tsCircle);
+    _itemTracer->setClipToAxisRect(false);
 
     _plotModeTextElement = new QCPTextElement(&_customPlot);
     _plotModeTextElement->setLayer(_textLayer);
