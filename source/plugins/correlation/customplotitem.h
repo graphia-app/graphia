@@ -25,7 +25,7 @@ public:
     void setLabelNames(const QStringList &labelNames);
 
     Q_INVOKABLE void initCustomPlot();
-    Q_INVOKABLE void saveGraphImage(QUrl path);
+    Q_INVOKABLE void savePlotImage(QUrl path, QString format);
 
 protected:
     void routeMouseEvents( QMouseEvent* event );

@@ -282,9 +282,14 @@ void CustomPlotItem::hideTooltip()
     update();
 }
 
-void CustomPlotItem::saveGraphImage(QUrl path)
+void CustomPlotItem::savePlotImage(QUrl path, QString format)
 {
-    _customPlot.savePng(path.toLocalFile());
+    if (format == "PNG (*.png)")
+        _customPlot.savePng(path.toLocalFile());
+    else if (format == "PDF (*.pdf)")
+        _customPlot.savePdf(path.toLocalFile());
+    else if (format == "JPEG (*.jpg)")
+        _customPlot.saveJpg(path.toLocalFile());
 }
 
 void CustomPlotItem::onCustomReplot()

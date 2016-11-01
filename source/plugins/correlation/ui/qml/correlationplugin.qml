@@ -61,7 +61,7 @@ Item
         id: contextMenu;
         MenuItem
         {
-            text: "Save plot as PNG"
+            text: "Save plot as..."
             onTriggered: imageSaveDialog.open();
         }
     }
@@ -71,9 +71,9 @@ Item
         id: imageSaveDialog
         visible: false;
         selectExisting: false;
-        title: "Save plot to .png"
-        nameFilters: [ "Image files (*.png)" ]
-        onAccepted: customPlot.saveGraphImage(imageSaveDialog.fileUrl);
+        title: "Save plot as..."
+        nameFilters: [ "PNG (*.png)", "JPEG (*.jpg)", "PDF (*.pdf)"  ]
+        onAccepted: customPlot.savePlotImage(imageSaveDialog.fileUrl, imageSaveDialog.selectedNameFilter);
     }
 }
 
