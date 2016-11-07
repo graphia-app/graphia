@@ -44,9 +44,6 @@ CustomPlotItem::CustomPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent),
     _plotModeTextElement->setTextColor(Qt::black);
     _plotModeTextElement->setVisible(false);
 
-    _customPlot.plotLayout()->insertRow(0);
-    _customPlot.plotLayout()->addElement(0,0, _plotModeTextElement);
-
     setFlag(QQuickItem::ItemHasContents, true);
 
     setAcceptHoverEvents(true);
@@ -129,6 +126,9 @@ void CustomPlotItem::buildGraphs()
     _customPlot.legend->clear();
     _customPlot.clearGraphs();
 
+    _customPlot.plotLayout()->remove(_plotModeTextElement);
+    _customPlot.plotLayout()->simplify();
+
     if(_selectedRows.length() > MAX_SELECTED_ROWS_BEFORE_MEAN)
         populateMeanAvgGraphs();
     else
@@ -177,6 +177,8 @@ void CustomPlotItem::populateMeanAvgGraphs()
     }
     graph->setData(xData, yDataAvg, true);
 
+    _customPlot.plotLayout()->insertRow(1);
+    _customPlot.plotLayout()->addElement(1,0, _plotModeTextElement);
     _plotModeTextElement->setText("*Mean Avg plot of " + QString::number(_selectedRows.length()) +
                             " nodes. Maximum node count for individual plots is " + QString::number(MAX_SELECTED_ROWS_BEFORE_MEAN));
     _plotModeTextElement->setVisible(true);
