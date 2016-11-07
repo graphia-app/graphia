@@ -15,16 +15,18 @@ CONFIG += plugin
 SOURCES += \
     correlationplugin.cpp \
     loading/correlationfileparser.cpp \
-    thirdparty/qcustomplot.cpp \
     customplotitem.cpp
 
 HEADERS += \
     correlationplugin.h \
     loading/correlationfileparser.h \
-    thirdparty/qcustomplot.h \
     customplotitem.h
 
 RESOURCES += \
     ui/qml.qrc
 
 DISTFILES += correlationplugin.json
+
+win32:CONFIG(release, debug|release): LIBS += -L../../thirdparty/release/ -lthirdparty
+else:win32:CONFIG(debug, debug|release): LIBS += -L../../thirdparty/debug/ -lthirdparty
+else:unix: LIBS += -L../../thirdparty/ -lthirdparty

@@ -1,7 +1,7 @@
 #ifndef CUSTOMPLOTITEM_H
 #define CUSTOMPLOTITEM_H
 
-#include "thirdparty/qcustomplot.h"
+#include "thirdparty/qcustomplot/qcustomplot.h"
 
 #include <QtQuick>
 
