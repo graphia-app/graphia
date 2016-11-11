@@ -2,10 +2,7 @@
 
 #include <random>
 
-#include <QDebug>
-
-CustomPlotItem::CustomPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent),
-    _customPlot()
+CustomPlotItem::CustomPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent)
 {
     _customPlot.setOpenGl(true);
     _customPlot.addLayer("textLayer");
@@ -74,13 +71,11 @@ void CustomPlotItem::paint(QPainter* painter)
 
 void CustomPlotItem::mousePressEvent(QMouseEvent* event)
 {
-    qDebug() << Q_FUNC_INFO;
     routeMouseEvents(event);
 }
 
 void CustomPlotItem::mouseReleaseEvent(QMouseEvent* event)
 {
-    qDebug() << Q_FUNC_INFO;
     routeMouseEvents(event);
     if (event->button() == Qt::RightButton)
         emit rightClick();
@@ -114,7 +109,6 @@ void CustomPlotItem::hoverLeaveEvent(QHoverEvent *event)
 
 void CustomPlotItem::mouseDoubleClickEvent(QMouseEvent* event)
 {
-    qDebug() << Q_FUNC_INFO;
     routeMouseEvents(event);
 }
 
@@ -231,11 +225,6 @@ void CustomPlotItem::setLabelNames(const QStringList &labelNames)
 
     for(auto name : labelNames)
         _labelNames.append(arialMetrics.elidedText(name, Qt::ElideRight, _elideLabelSizePixels));
-}
-
-void CustomPlotItem::graphClicked(QCPAbstractPlottable* plottable)
-{
-    qDebug() << Q_FUNC_INFO << QString("Clicked on graph '%1 ").arg(plottable->name());
 }
 
 void CustomPlotItem::routeMouseEvents(QMouseEvent* event)

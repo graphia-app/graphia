@@ -66,7 +66,6 @@ private:
     void populateRawGraphs();
 
 private slots:
-    void graphClicked( QCPAbstractPlottable* plottable );
     void onCustomReplot();
     void updateCustomPlotSize();
     void showTooltip();
