@@ -93,7 +93,7 @@ template<typename Element> using ElementConditionFn = std::function<bool(const E
 using NodeConditionFn = ElementConditionFn<NodeId>;
 using EdgeConditionFn = ElementConditionFn<EdgeId>;
 
-class GraphComponent;
-using ComponentConditionFn = std::function<bool(const GraphComponent& component)>;
+class IGraphComponent;
+using ComponentConditionFn = std::function<bool(const IGraphComponent& component)>;
 
 #endif // ELEMENTID_H

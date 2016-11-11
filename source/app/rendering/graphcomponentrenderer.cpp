@@ -55,6 +55,7 @@ void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, 
                      &GraphRenderer::rendererFinishedTransition, Qt::DirectConnection);
 
     _initialised = true;
+    _visible = false;
 }
 
 void GraphComponentRenderer::setVisible(bool visible)
@@ -83,6 +84,7 @@ void GraphComponentRenderer::cleanup()
     _graphRenderer = nullptr;
 
     _initialised = false;
+    _visible = false;
 }
 
 void GraphComponentRenderer::synchronise()

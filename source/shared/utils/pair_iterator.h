@@ -36,4 +36,28 @@ auto make_map_key_iterator(const It& it) { return make_pair_first_iterator(it); 
 template<typename It>
 auto make_map_value_iterator(const It& it) { return make_pair_second_iterator(it); }
 
+template<typename C>
+class key_wrapper
+{
+public:
+    explicit key_wrapper(const C& c) : _c(&c) {}
+    auto begin() const { return make_map_key_iterator(_c->begin()); }
+    auto end() const   { return make_map_key_iterator(_c->end()); }
+
+protected:
+    const C* _c;
+};
+
+template<typename C>
+class value_wrapper
+{
+public:
+    explicit value_wrapper(const C& c) : _c(&c) {}
+    auto begin() { return make_map_value_iterator(_c->begin()); }
+    auto end()   { return make_map_value_iterator(_c->end()); }
+
+protected:
+    const C* _c;
+};
+
 #endif // PAIR_ITERATOR_H

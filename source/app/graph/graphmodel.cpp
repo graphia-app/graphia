@@ -46,7 +46,7 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
         .setSearchable(true);
 
     dataField(tr("Component Size"))
-        .setIntValueFn([this](const GraphComponent& component) { return component.numNodes(); })
+        .setIntValueFn([this](const IGraphComponent& component) { return component.numNodes(); })
         .setIntMin(1);
 
     _graphTransformFactories.emplace(tr("Filter Nodes"),

@@ -2,6 +2,7 @@
 #define COMPONENTMANAGER_H
 
 #include "graph.h"
+#include "graphcomponent.h"
 #include "shared/graph/grapharray.h"
 #include "filter.h"
 
@@ -39,33 +40,6 @@ public:
 
     const ComponentIdSet& mergers() const { return _mergers; }
     ComponentId newComponentId() const { return _newComponentId; }
-};
-
-class GraphComponent
-{
-    friend class ComponentManager;
-
-public:
-    explicit GraphComponent(const Graph* graph) : _graph(graph) {}
-    GraphComponent(const GraphComponent& other) :
-        _graph(other._graph),
-        _nodeIds(other._nodeIds),
-        _edgeIds(other._edgeIds)
-    {}
-
-private:
-    const Graph* _graph;
-    std::vector<NodeId> _nodeIds;
-    std::vector<EdgeId> _edgeIds;
-
-public:
-    const std::vector<NodeId>& nodeIds() const { return _nodeIds; }
-    int numNodes() const { return static_cast<int>(_nodeIds.size()); }
-
-    const std::vector<EdgeId>& edgeIds() const { return _edgeIds; }
-    int numEdges() const { return static_cast<int>(_edgeIds.size()); }
-
-    const Graph& graph() const { return *_graph; }
 };
 
 class ComponentManager : public QObject, public Filter

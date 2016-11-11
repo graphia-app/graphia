@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "pair_iterator.h"
+
 #include <QVector2D>
 #include <QVector3D>
 #include <QMatrix4x4>
@@ -78,22 +80,32 @@ namespace u
     }
 
     template<typename C, typename T>
-    auto contains(const C& container, T const& value, int)
+    auto contains(const C& container, const T& value, int)
     -> decltype(container.find(value), bool())
     {
         return container.find(value) != container.end();
     }
 
     template<typename C, typename T>
-    auto contains(const C& container, T const& value, long)
+    auto contains(const C& container, const T& value, long)
     -> decltype(std::find(container.begin(), container.end(), value), bool())
     {
         return std::find(container.begin(), container.end(), value) != container.end();
     }
 
-    template<typename C, typename T> bool contains(const C& container, T const& value)
+    template<typename C, typename T> bool contains(const C& container, const T& value)
     {
         return contains(container, value, 0);
+    }
+
+    template<typename C, typename T> bool containsKey(const C& container, const T& key)
+    {
+        return contains(key_wrapper<C>(container), key, 0);
+    }
+
+    template<typename C, typename T> bool containsValue(const C& container, const T& value)
+    {
+        return contains(value_wrapper<C>(container), value, 0);
     }
 
     template<typename T,

@@ -2,6 +2,7 @@
 #define IDATAFIELD_H
 
 #include "../graph/elementid.h"
+#include "../graph/igraphcomponent.h"
 
 #include <functional>
 
@@ -14,15 +15,15 @@ public:
 
     virtual IDataField& setIntValueFn(ValueFn<int, NodeId> valueFn) = 0;
     virtual IDataField& setIntValueFn(ValueFn<int, EdgeId> valueFn) = 0;
-    virtual IDataField& setIntValueFn(ValueFn<int, const GraphComponent&> valueFn) = 0;
+    virtual IDataField& setIntValueFn(ValueFn<int, const IGraphComponent&> valueFn) = 0;
 
     virtual IDataField& setFloatValueFn(ValueFn<float, NodeId> valueFn) = 0;
     virtual IDataField& setFloatValueFn(ValueFn<float, EdgeId> valueFn) = 0;
-    virtual IDataField& setFloatValueFn(ValueFn<float, const GraphComponent&> valueFn) = 0;
+    virtual IDataField& setFloatValueFn(ValueFn<float, const IGraphComponent&> valueFn) = 0;
 
     virtual IDataField& setStringValueFn(ValueFn<QString, NodeId> valueFn) = 0;
     virtual IDataField& setStringValueFn(ValueFn<QString, EdgeId> valueFn) = 0;
-    virtual IDataField& setStringValueFn(ValueFn<QString, const GraphComponent&> valueFn) = 0;
+    virtual IDataField& setStringValueFn(ValueFn<QString, const IGraphComponent&> valueFn) = 0;
 
     virtual bool hasIntMin() const = 0;
     virtual bool hasIntMax() const = 0;

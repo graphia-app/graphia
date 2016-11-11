@@ -211,6 +211,8 @@ void GraphOverviewScene::startTransitionFromComponentMode(ComponentId focusCompo
                                                           float duration,
                                                           Transition::Type transitionType)
 {
+    Q_ASSERT(!focusComponentId.isNull());
+
     startTransition(finishedFunction, duration, transitionType);
     _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
     _previousComponentAlpha = _componentAlpha;
@@ -232,6 +234,8 @@ void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusCompone
                                                         float duration,
                                                         Transition::Type transitionType)
 {
+    Q_ASSERT(!focusComponentId.isNull());
+
     _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
     _previousComponentAlpha = _componentAlpha;
 

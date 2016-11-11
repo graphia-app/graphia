@@ -92,7 +92,8 @@ HEADERS += \
     utils/debugpauser.h \
     utils/qmlcontainerwrapper.h \
     utils/qmlenum.h \
-    utils/shadertools.h
+    utils/shadertools.h \
+    graph/graphcomponent.h
 
 SOURCES += \
     application.cpp \

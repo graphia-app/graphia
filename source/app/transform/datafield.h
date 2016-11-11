@@ -3,6 +3,7 @@
 
 #include "shared/graph/elementid.h"
 #include "shared/transform/idatafield.h"
+#include "shared/graph/igraphcomponent.h"
 #include "shared/utils/enumreflection.h"
 
 #include <functional>
@@ -65,15 +66,15 @@ class DataField : public IDataField
 private:
     ValueFn<int, NodeId> _intNodeIdFn;
     ValueFn<int, EdgeId> _intEdgeIdFn;
-    ValueFn<int, const GraphComponent&> _intComponentFn;
+    ValueFn<int, const IGraphComponent&> _intComponentFn;
 
     ValueFn<float, NodeId> _floatNodeIdFn;
     ValueFn<float, EdgeId> _floatEdgeIdFn;
-    ValueFn<float, const GraphComponent&> _floatComponentFn;
+    ValueFn<float, const IGraphComponent&> _floatComponentFn;
 
     ValueFn<QString, NodeId> _stringNodeIdFn;
     ValueFn<QString, EdgeId> _stringEdgeIdFn;
-    ValueFn<QString, const GraphComponent&> _stringComponentFn;
+    ValueFn<QString, const IGraphComponent&> _stringComponentFn;
 
     void clearFunctions();
 
@@ -89,15 +90,15 @@ private:
 
     int valueOf(Helper<int>, NodeId nodeId) const;
     int valueOf(Helper<int>, EdgeId edgeId) const;
-    int valueOf(Helper<int>, const GraphComponent& component) const;
+    int valueOf(Helper<int>, const IGraphComponent& component) const;
 
     float valueOf(Helper<float>, NodeId nodeId) const;
     float valueOf(Helper<float>, EdgeId edgeId) const;
-    float valueOf(Helper<float>, const GraphComponent& component) const;
+    float valueOf(Helper<float>, const IGraphComponent& component) const;
 
     QString valueOf(Helper<QString>, NodeId nodeId) const;
     QString valueOf(Helper<QString>, EdgeId edgeId) const;
-    QString valueOf(Helper<QString>, const GraphComponent& component) const;
+    QString valueOf(Helper<QString>, const IGraphComponent& component) const;
 
     template<typename T, typename E> T valueOf(E elementId) const
     {
@@ -144,15 +145,15 @@ private:
         switch(op)
         {
         case ConditionFnOp::Contains:
-            return [this, value](E elementId) { return valueOf<QString>(elementId).contains(value); };
+            return [this, value](E elementId) { return valueOf<QString, E>(elementId).contains(value); };
         case ConditionFnOp::DoesntContain:
-            return [this, value](E elementId) { return !valueOf<QString>(elementId).contains(value); };
+            return [this, value](E elementId) { return !valueOf<QString, E>(elementId).contains(value); };
         case ConditionFnOp::StartsWith:
-            return [this, value](E elementId) { return valueOf<QString>(elementId).startsWith(value); };
+            return [this, value](E elementId) { return valueOf<QString, E>(elementId).startsWith(value); };
         case ConditionFnOp::EndsWith:
-            return [this, value](E elementId) { return valueOf<QString>(elementId).endsWith(value); };
+            return [this, value](E elementId) { return valueOf<QString, E>(elementId).endsWith(value); };
         case ConditionFnOp::MatchesRegex:
-            return [this, value](E elementId) { return valueOf<QString>(elementId).contains(QRegularExpression(value)); };
+            return [this, value](E elementId) { return valueOf<QString, E>(elementId).contains(QRegularExpression(value)); };
         default:
             return createConditionFn<QString, E>(Helper<E>(), op, value);
         }
@@ -174,15 +175,15 @@ private:
 public:
     DataField& setIntValueFn(ValueFn<int, NodeId> valueFn);
     DataField& setIntValueFn(ValueFn<int, EdgeId> valueFn);
-    DataField& setIntValueFn(ValueFn<int, const GraphComponent&> valueFn);
+    DataField& setIntValueFn(ValueFn<int, const IGraphComponent&> valueFn);
 
     DataField& setFloatValueFn(ValueFn<float, NodeId> valueFn);
     DataField& setFloatValueFn(ValueFn<float, EdgeId> valueFn);
-    DataField& setFloatValueFn(ValueFn<float, const GraphComponent&> valueFn);
+    DataField& setFloatValueFn(ValueFn<float, const IGraphComponent&> valueFn);
 
     DataField& setStringValueFn(ValueFn<QString, NodeId> valueFn);
     DataField& setStringValueFn(ValueFn<QString, EdgeId> valueFn);
-    DataField& setStringValueFn(ValueFn<QString, const GraphComponent&> valueFn);
+    DataField& setStringValueFn(ValueFn<QString, const IGraphComponent&> valueFn);
 
     DataFieldType type() const;
     DataFieldValueType valueType() const;
@@ -227,7 +228,7 @@ public:
 
     template<typename T> ComponentConditionFn createComponentConditionFn(ConditionFnOp op, T value) const
     {
-        return createConditionFn(Helper<const GraphComponent&>(), op, value);
+        return createConditionFn(Helper<const IGraphComponent&>(), op, value);
     }
 };
 

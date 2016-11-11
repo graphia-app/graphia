@@ -330,7 +330,7 @@ void GraphComponentScene::updateRendererVisibility()
 
             _graphRenderer->onVisibilityChanged();
         }
-    }, "GraphComponentScene::onShow (setVisible)");
+    }, "GraphComponentScene::updateRendererVisibility");
 }
 
 void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet)

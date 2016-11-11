@@ -36,7 +36,8 @@ HEADERS += \
     $$PWD/plugins/nodeattributes.h \
     $$PWD/utils/pair_iterator.h \
     $$PWD/loading/iparserthread.h \
-    $$PWD/utils/enumreflection.h
+    $$PWD/utils/enumreflection.h \
+    $$PWD/graph/igraphcomponent.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \
