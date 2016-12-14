@@ -171,6 +171,3 @@ mac {
     LIBS += -framework CoreFoundation
 }
 
-win32:CONFIG(release, debug|release): LIBS += -L../thirdparty/release/ -lthirdparty
-else:win32:CONFIG(debug, debug|release): LIBS += -L../thirdparty/debug/ -lthirdparty
-else:unix: LIBS += -L../thirdparty/ -lthirdparty

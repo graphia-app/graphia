@@ -1,1 +1,1 @@
-INCLUDEPATH += ../thirdparty/boost/spirit
+INCLUDEPATH += $$top_sourcedir/thirdparty/boost/spirit

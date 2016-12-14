@@ -2,10 +2,9 @@ TEMPLATE = lib
 
 include(../../common.pri)
 include(../../shared/shared.pri)
+include(../../thirdparty/thirdparty.pri)
 
-DEFINES += QCUSTOMPLOT_USE_OPENGL
-
-QT += core gui qml quick xml printsupport
+QT += core gui qml quick xml
 
 TARGET = correlation
 DESTDIR = ../../../plugins
@@ -26,7 +25,3 @@ RESOURCES += \
     ui/qml.qrc
 
 DISTFILES += correlationplugin.json
-
-win32:CONFIG(release, debug|release): LIBS += -L../../thirdparty/release/ -lthirdparty
-else:win32:CONFIG(debug, debug|release): LIBS += -L../../thirdparty/debug/ -lthirdparty
-else:unix: LIBS += -L../../thirdparty/ -lthirdparty
