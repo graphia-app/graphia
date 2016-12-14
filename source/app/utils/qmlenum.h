@@ -3,43 +3,46 @@
 
 #include <QtQml>
 
-#include "../application.h"
+#include "application.h"
+#include "shared/utils/utils.h"
 
 // Defining an enumeration that's usable in QML is awkward, so
-// here are a couple of macros to make it easier:
+// here is a macro to make it easier:
 
-// Stick this one in a header...
-#define DEFINE_QML_ENUM(ENUM_NAME, ...) \
-    class ENUM_NAME \
+#define _REFLECTOR(x) x ## _reflector
+#define QML_ENUM_PROPERTY(x) _REFLECTOR(x)::Enum
+
+#define DEFINE_QML_ENUM(_Q_GADGET, ENUM_NAME, ...) \
+    static_assert(u::static_strcmp(#_Q_GADGET, "Q_GADGET"), \
+        "First parameter to DEFINE_QML_ENUM must be Q_GADGET"); \
+    class _REFLECTOR(ENUM_NAME) \
     { \
-        Q_GADGET \
-        Q_ENUMS(Enum) \
+        _Q_GADGET \
+    public: \
+        enum class Enum {__VA_ARGS__}; Q_ENUM(Enum) \
         struct Constructor \
-        { Constructor() { qmlRegisterUncreatableType<ENUM_NAME>( \
+        { Constructor() { static bool initialised = false; \
+            if(initialised) return; \
+            initialised = true; \
+            qmlRegisterUncreatableType<_REFLECTOR(ENUM_NAME)>( \
             Application::uri(), \
             Application::majorVersion(), \
             Application::minorVersion(), \
             #ENUM_NAME, QString()); } }; \
-        static Constructor constructor; \
-    public: \
-        enum Enum \
-        {__VA_ARGS__}; \
-    }
+    }; const _REFLECTOR(ENUM_NAME)::Constructor ENUM_NAME ## _constructor; \
+    using ENUM_NAME = QML_ENUM_PROPERTY(ENUM_NAME)
 
-// ...and this one in a compilation unit
-#define REGISTER_QML_ENUM(ENUM_NAME) \
-    ENUM_NAME::Constructor ENUM_NAME::constructor
+/*
+Example:
 
-// Example:
-//
-// file.h:
-// DEFINE_QML_ENUM(Enumeration,
-//      First,
-//      Second,
-//      Third)
-//
-// file.cpp:
-// REGISTER_QML_ENUM(Enumeration)
+DEFINE_QML_ENUM(Q_GADGET, Enumeration,
+     First,
+     Second,
+     Third)
+
+Note: the first parameter must be Q_GADGET, so that qmake knows
+to generate a moc_ file
+*/
 
 #endif // QMLENUM_H
 

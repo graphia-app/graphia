@@ -1,19 +1,19 @@
 #ifndef DOCUMENT_H
 #define DOCUMENT_H
 
-#include "graphtransformconfiguration.h"
-
 #include "shared/plugins/iplugin.h"
-#include "../rendering/compute/gpucomputethread.h"
-#include "../graph/graph.h"
-#include "../loading/parserthread.h"
-#include "../commands/commandmanager.h"
-#include "../layout/layout.h"
-#include "../utils/qmlenum.h"
-#include "../utils/qmlcontainerwrapper.h"
+#include "rendering/compute/gpucomputethread.h"
+#include "graph/graph.h"
+#include "loading/parserthread.h"
+#include "commands/commandmanager.h"
+#include "layout/layout.h"
+#include "utils/qmlenum.h"
+#include "utils/qmlcontainerwrapper.h"
+#include "thirdparty/qt-qml-models/QQmlVariantListModel.h"
 
 #include <QQuickItem>
 #include <QString>
+#include <QStringList>
 #include <QUrl>
 
 #include <vector>
@@ -26,7 +26,7 @@ class GraphModel;
 class SelectionManager;
 class SearchManager;
 
-DEFINE_QML_ENUM(LayoutPauseState,
+DEFINE_QML_ENUM(Q_GADGET, LayoutPauseState,
                 Running, RunningFinished, Paused);
 
 class Document : public QObject
@@ -38,7 +38,7 @@ class Document : public QObject
     Q_PROPERTY(QObject* plugin READ pluginInstance NOTIFY pluginInstanceChanged)
     Q_PROPERTY(QString pluginQmlPath READ pluginQmlPath NOTIFY pluginQmlPathChanged)
 
-    Q_PROPERTY(QColor textColor READ textColorForBackground NOTIFY textColorChanged)
+    Q_PROPERTY(QColor contrastingColor READ contrastingColorForBackground NOTIFY contrastingColorChanged)
 
     Q_PROPERTY(QString title MEMBER _title WRITE setTitle NOTIFY titleChanged)
     Q_PROPERTY(QString status MEMBER _status WRITE setStatus NOTIFY statusChanged)
@@ -50,7 +50,7 @@ class Document : public QObject
     Q_PROPERTY(int commandProgress READ commandProgress NOTIFY commandProgressChanged)
     Q_PROPERTY(QString commandVerb READ commandVerb NOTIFY commandVerbChanged)
 
-    Q_PROPERTY(LayoutPauseState::Enum layoutPauseState READ layoutPauseState NOTIFY layoutPauseStateChanged)
+    Q_PROPERTY(QML_ENUM_PROPERTY(LayoutPauseState) layoutPauseState READ layoutPauseState NOTIFY layoutPauseStateChanged)
 
     Q_PROPERTY(bool canUndo READ canUndo NOTIFY canUndoChanged)
     Q_PROPERTY(QString nextUndoAction READ nextUndoAction NOTIFY nextUndoActionChanged)
@@ -60,7 +60,7 @@ class Document : public QObject
     Q_PROPERTY(bool canResetView READ canResetView NOTIFY canResetViewChanged)
     Q_PROPERTY(bool canEnterOverviewMode READ canEnterOverviewMode NOTIFY canEnterOverviewModeChanged)
 
-    Q_PROPERTY(QmlContainerWrapperBase* transforms READ transforms CONSTANT)
+    Q_PROPERTY(QQmlVariantListModel* transforms READ transformsModel CONSTANT)
 
     Q_PROPERTY(bool debugPauserEnabled READ debugPauserEnabled NOTIFY debugPauserEnabledChanged)
     Q_PROPERTY(bool debugPaused READ debugPaused NOTIFY debugPausedChanged)
@@ -77,7 +77,7 @@ public:
     explicit Document(QObject* parent = nullptr);
     ~Document();
 
-    static QColor textColorForBackground();
+    static QColor contrastingColorForBackground();
 
     bool commandInProgress() const;
     bool idle() const;
@@ -87,7 +87,7 @@ public:
     QString commandVerb() const;
 
     void updateLayoutState();
-    LayoutPauseState::Enum layoutPauseState();
+    LayoutPauseState layoutPauseState();
 
     bool canUndo() const;
     QString nextUndoAction() const;
@@ -104,8 +104,8 @@ public:
     void setTitle(const QString& status);
     void setStatus(const QString& status);
 
-    QmlContainerWrapper<GraphTransformConfiguration>* transforms() { return &_graphTransformConfigurations; }
-    void setTransforms(const std::vector<GraphTransformConfiguration>& transformations);
+    QQmlVariantListModel* transformsModel() { return &_graphTransformsModel; }
+    void setTransforms(const QStringList& transforms);
 
     QmlContainerWrapper<LayoutSetting>* layoutSettings() { return &_layoutSettings; }
 
@@ -139,25 +139,14 @@ private:
     bool _foundItValid = false;
     std::vector<NodeId>::const_iterator _foundIt = _foundNodeIds.begin();
 
-    std::vector<GraphTransformConfiguration> _previousGraphTransformConfigurations;
-    QmlContainerWrapper<GraphTransformConfiguration> _graphTransformConfigurations;
-
+    QQmlVariantListModel _graphTransformsModel;
+    QStringList _graphTransforms;
 
     bool _userLayoutPaused = false; // true if the user wants the layout to pause
 
     bool _previousIdle = true;
 
-    template<typename... Args>
-    void addGraphTransform(Args&&... args)
-    {
-        auto graphTransformConfigurations = _graphTransformConfigurations.vector();
-        graphTransformConfigurations.emplace_back(this, std::forward<Args>(args)...);
-        _graphTransformConfigurations.setVector(graphTransformConfigurations);
-    }
-
-    std::vector<GraphTransformConfiguration> transformsWithEmptyAppended(
-            const std::vector<GraphTransformConfiguration>& graphTransformConfigurations);
-    void applyTransforms();
+    QStringList graphTransformConfigurationsFromUI() const;
 
     void maybeEmitIdleChanged();
 
@@ -167,10 +156,6 @@ private:
     void incrementFoundIt();
     void decrementFoundIt();
 
-private slots:
-    void onGraphTransformsConfigurationDataChanged(const QModelIndex& index, const QModelIndex&,
-                                                   const QVector<int>& roles);
-
 signals:
     void applicationChanged();
     void graphQuickItemChanged();
@@ -179,7 +164,7 @@ signals:
 
 
     void titleChanged();
-    void textColorChanged();
+    void contrastingColorChanged();
     void statusChanged();
 
     void idleChanged();
@@ -245,11 +230,16 @@ public slots:
 
     QStringList availableTransformNames() const;
     QStringList availableDataFields(const QString& transformName) const;
-    const DataField& dataFieldByName(const QString& dataFieldName) const;
-    DataFieldType typeOfDataField(const QString& dataFieldName) const;
     QStringList avaliableConditionFnOps(const QString& dataFieldName) const;
 
+    QVariantMap findTransformParameter(const QString& transformName,
+                                       const QString& parameterName) const;
+
+    QVariantMap parseGraphTransform(const QString& transform) const;
+    bool graphTransformIsValid(const QString& transform) const;
+    void appendGraphTransform(const QString& transform);
     void removeGraphTransform(int index);
+    void updateGraphTransforms();
 
     void dumpGraph();
 

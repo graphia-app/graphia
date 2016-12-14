@@ -1,7 +1,7 @@
 #include "layout.h"
 #include "shared/utils/utils.h"
 
-#include "../graph/componentmanager.h"
+#include "graph/componentmanager.h"
 
 static bool layoutIsFinished(const Layout& layout)
 {

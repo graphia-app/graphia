@@ -56,6 +56,14 @@ class NodeId :      public ElementId<NodeId>      { using ElementId::ElementId; 
 class EdgeId :      public ElementId<EdgeId>      { using ElementId::ElementId; };
 class ComponentId : public ElementId<ComponentId> { using ElementId::ElementId; };
 
+enum class ElementType
+{
+    None,
+    Node,
+    Edge,
+    Component
+};
+
 namespace std
 {
     template<typename T> struct hash<ElementId<T>>

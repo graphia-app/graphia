@@ -1,11 +1,11 @@
 #ifndef NODEPOSITIONS_H
 #define NODEPOSITIONS_H
 
-#include "../graph/graph.h"
+#include "graph/graph.h"
 #include "shared/graph/grapharray.h"
 #include "shared/utils/circularbuffer.h"
-#include "../maths/boundingbox.h"
-#include "../maths/boundingsphere.h"
+#include "maths/boundingbox.h"
+#include "maths/boundingsphere.h"
 
 #include <array>
 #include <mutex>
@@ -14,7 +14,8 @@
 
 static const int MAX_SMOOTHING = 8;
 
-using MeanPosition = CircularBuffer<QVector3D, MAX_SMOOTHING>;
+class MeanPosition : public CircularBuffer<QVector3D, MAX_SMOOTHING>
+{ public: MeanPosition() { push_back(QVector3D()); } };
 
 class NodePositions : public NodeArray<MeanPosition>
 {

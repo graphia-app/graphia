@@ -6,14 +6,8 @@ NodeAttributesTableModel::NodeAttributesTableModel(NodeAttributes* attributes) :
     QAbstractTableModel(),
     _nodeAttributes(attributes)
 {
-    connect(attributes, &Attributes::attributeAdded,
-    [this](const QString& name)
-    {
-        _roleNames.insert(_nextRole, name.toUtf8());
-        _nextRole++;
-
-        emit columnNamesChanged();
-    });
+    connect(attributes, SIGNAL(attributeAdded(const QString&)),
+            this, SLOT(onAttributeAdded(const QString&)));
 }
 
 void NodeAttributesTableModel::setSelectedNodes(const NodeIdSet& selectedNodeIds)
@@ -32,6 +26,14 @@ QStringList NodeAttributesTableModel::columnNames() const
         list.append(rowAttribute.name());
 
     return list;
+}
+
+void NodeAttributesTableModel::onAttributeAdded(const QString& name)
+{
+    _roleNames.insert(_nextRole, name.toUtf8());
+    _nextRole++;
+
+    emit columnNamesChanged();
 }
 
 int NodeAttributesTableModel::rowCount(const QModelIndex&) const

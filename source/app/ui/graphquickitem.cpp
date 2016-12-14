@@ -1,10 +1,10 @@
 #include "graphquickitem.h"
 
-#include "../graph/graphmodel.h"
+#include "graph/graphmodel.h"
 
-#include "../rendering/graphrenderer.h"
+#include "rendering/graphrenderer.h"
 
-#include "../commands/commandmanager.h"
+#include "commands/commandmanager.h"
 #include <QOffscreenSurface>
 #include <QOpenGLContext>
 

@@ -2,21 +2,21 @@
 #include "selectionmanager.h"
 #include "graphquickitem.h"
 
-#include "../commands/commandmanager.h"
+#include "commands/commandmanager.h"
 
-#include "../rendering/camera.h"
-#include "../rendering/graphcomponentrenderer.h"
-#include "../rendering/graphcomponentscene.h"
-#include "../rendering/graphrenderer.h"
+#include "rendering/camera.h"
+#include "rendering/graphcomponentrenderer.h"
+#include "rendering/graphcomponentscene.h"
+#include "rendering/graphrenderer.h"
 
-#include "../graph/graph.h"
-#include "../graph/graphmodel.h"
+#include "graph/graph.h"
+#include "graph/graphmodel.h"
 
-#include "../maths/boundingsphere.h"
-#include "../maths/frustum.h"
-#include "../maths/plane.h"
+#include "maths/boundingsphere.h"
+#include "maths/frustum.h"
+#include "maths/plane.h"
 
-#include "../layout/collision.h"
+#include "layout/collision.h"
 
 #include "shared/utils/utils.h"
 

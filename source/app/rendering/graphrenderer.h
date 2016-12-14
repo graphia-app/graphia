@@ -155,7 +155,7 @@ enum class TextAlignment
 };
 Q_DECLARE_METATYPE(TextAlignment)
 
-DEFINE_QML_ENUM(NodeTextState,
+DEFINE_QML_ENUM(Q_GADGET, NodeTextState,
                 Off, Selected, All);
 
 class GraphRenderer :

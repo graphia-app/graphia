@@ -3,9 +3,9 @@
 
 #include "graphcomponentrenderer.h"
 
-#include "../graph/graphmodel.h"
+#include "graph/graphmodel.h"
 
-#include "../ui/graphquickitem.h"
+#include "ui/graphquickitem.h"
 
 GraphComponentScene::GraphComponentScene(GraphRenderer* graphRenderer) :
     Scene(graphRenderer),
@@ -263,6 +263,7 @@ void GraphComponentScene::moveFocusToNode(NodeId nodeId, float cameraDistance)
     }
 
     ComponentId componentId = _graphRenderer->graphModel()->graph().componentIdOfNode(nodeId);
+    Q_ASSERT(!componentId.isNull());
     bool componentTransitionRequired = (componentId != _componentId);
 
     if(componentTransitionRequired && !transitionActive())

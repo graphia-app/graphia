@@ -1,10 +1,13 @@
 #include "searchmanager.h"
 
-#include "../graph/graphmodel.h"
+#include "graph/graphmodel.h"
+#include "transform/conditionfncreator.h"
 
 #include "shared/utils/utils.h"
 
 #include <QRegularExpression>
+
+#include <algorithm>
 
 SearchManager::SearchManager(const GraphModel& graphModel) :
     _graphModel(&graphModel)
@@ -26,7 +29,7 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> dataFie
     // If no data fields are specified, search them all
     if(_dataFieldNames.empty())
     {
-        for(auto& dataFieldName : _graphModel->dataFieldNames(DataFieldElementType::Node))
+        for(auto& dataFieldName : _graphModel->dataFieldNames(ElementType::Node))
             _dataFieldNames.emplace_back(dataFieldName);
     }
 
@@ -35,7 +38,7 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> dataFie
     {
         const auto* dataField = &_graphModel->dataFieldByName(dataFieldName);
 
-        if(dataField->searchable() && dataField->elementType() == DataFieldElementType::Node)
+        if(dataField->searchable() && dataField->elementType() == ElementType::Node)
             dataFields.emplace_back(dataField);
     }
 
@@ -45,14 +48,30 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> dataFie
     {
         for(auto nodeId : _graphModel->graph().nodeIds())
         {
+            // From a search results point of view, we only care about head nodes...
+            if(_graphModel->graph().typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Tail)
+                continue;
+
             bool match = re.match(_graphModel->nodeNames().at(nodeId)).hasMatch();
 
             if(!match)
             {
                 for(auto& dataField : dataFields)
                 {
-                    auto conditionFn = dataField->createNodeConditionFn(ConditionFnOp::MatchesRegex, re);
-                    match = conditionFn(nodeId);
+                    auto conditionFn = CreateConditionFnFor::node(*dataField,
+                        GraphTransformConfig::StringOp::MatchesRegex, _regex);
+
+                    if(conditionFn == nullptr)
+                        continue;
+
+                    // ...but we still match against the tails
+                    const auto& mergedNodeIds = _graphModel->graph().mergedNodeIdsForNodeId(nodeId);
+                    match = std::any_of(mergedNodeIds.begin(), mergedNodeIds.end(),
+                    [&conditionFn](auto mergedNodeId)
+                    {
+                       return conditionFn(mergedNodeId);
+                    });
+
                     if(match)
                         break;
                 }

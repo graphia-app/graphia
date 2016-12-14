@@ -89,7 +89,7 @@ Item
                 else
                     return qsTr("Not Found");
             }
-            color: document.textColor
+            color: document.contrastingColor
         }
     }
 

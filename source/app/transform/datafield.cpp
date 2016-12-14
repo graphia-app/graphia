@@ -1,20 +1,5 @@
 #include "datafield.h"
 
-DEFINE_REFLECTED_ENUM(ConditionFnOp,
-    "",
-    QObject::tr("="),
-    QObject::tr("≠"),
-    QObject::tr("<"),
-    QObject::tr(">"),
-    QObject::tr("≤"),
-    QObject::tr("≥"),
-    QObject::tr("Contains"),
-    QObject::tr("Doesn't Contain"),
-    QObject::tr("Starts With"),
-    QObject::tr("Ends With"),
-    QObject::tr("Matches Regex")
-)
-
 void DataField::clearFunctions()
 {
     _intNodeIdFn = nullptr;
@@ -34,9 +19,9 @@ int DataField::valueOf(Helper<int>, NodeId nodeId) const { Q_ASSERT(_intNodeIdFn
 int DataField::valueOf(Helper<int>, EdgeId edgeId) const { Q_ASSERT(_intEdgeIdFn != nullptr); return _intEdgeIdFn(edgeId); }
 int DataField::valueOf(Helper<int>, const IGraphComponent& component) const { Q_ASSERT(_intComponentFn != nullptr); return _intComponentFn(component); }
 
-float DataField::valueOf(Helper<float>, NodeId nodeId) const { Q_ASSERT(_floatNodeIdFn != nullptr); return _floatNodeIdFn(nodeId); }
-float DataField::valueOf(Helper<float>, EdgeId edgeId) const { Q_ASSERT(_floatEdgeIdFn != nullptr); return _floatEdgeIdFn(edgeId); }
-float DataField::valueOf(Helper<float>, const IGraphComponent& component) const { Q_ASSERT(_floatComponentFn != nullptr); return _floatComponentFn(component); }
+double DataField::valueOf(Helper<double>, NodeId nodeId) const { Q_ASSERT(_floatNodeIdFn != nullptr); return _floatNodeIdFn(nodeId); }
+double DataField::valueOf(Helper<double>, EdgeId edgeId) const { Q_ASSERT(_floatEdgeIdFn != nullptr); return _floatEdgeIdFn(edgeId); }
+double DataField::valueOf(Helper<double>, const IGraphComponent& component) const { Q_ASSERT(_floatComponentFn != nullptr); return _floatComponentFn(component); }
 
 QString DataField::valueOf(Helper<QString>, NodeId nodeId) const { Q_ASSERT(_stringNodeIdFn != nullptr); return _stringNodeIdFn(nodeId); }
 QString DataField::valueOf(Helper<QString>, EdgeId edgeId) const { Q_ASSERT(_stringEdgeIdFn != nullptr); return _stringEdgeIdFn(edgeId); }
@@ -46,68 +31,68 @@ DataField& DataField::setIntValueFn(ValueFn<int, NodeId> valueFn) { clearFunctio
 DataField& DataField::setIntValueFn(ValueFn<int, EdgeId> valueFn) { clearFunctions(); _intEdgeIdFn = valueFn; return *this; }
 DataField& DataField::setIntValueFn(ValueFn<int, const IGraphComponent&> valueFn) { clearFunctions(); _intComponentFn = valueFn; return *this; }
 
-DataField& DataField::setFloatValueFn(ValueFn<float, NodeId> valueFn) { clearFunctions(); _floatNodeIdFn = valueFn; return *this; }
-DataField& DataField::setFloatValueFn(ValueFn<float, EdgeId> valueFn) { clearFunctions(); _floatEdgeIdFn = valueFn; return *this; }
-DataField& DataField::setFloatValueFn(ValueFn<float, const IGraphComponent&> valueFn) { clearFunctions(); _floatComponentFn = valueFn; return *this; }
+DataField& DataField::setFloatValueFn(ValueFn<double, NodeId> valueFn) { clearFunctions(); _floatNodeIdFn = valueFn; return *this; }
+DataField& DataField::setFloatValueFn(ValueFn<double, EdgeId> valueFn) { clearFunctions(); _floatEdgeIdFn = valueFn; return *this; }
+DataField& DataField::setFloatValueFn(ValueFn<double, const IGraphComponent&> valueFn) { clearFunctions(); _floatComponentFn = valueFn; return *this; }
 
 DataField& DataField::setStringValueFn(ValueFn<QString, NodeId> valueFn) { clearFunctions(); _stringNodeIdFn = valueFn; return *this; }
 DataField& DataField::setStringValueFn(ValueFn<QString, EdgeId> valueFn) { clearFunctions(); _stringEdgeIdFn = valueFn; return *this; }
 DataField& DataField::setStringValueFn(ValueFn<QString, const IGraphComponent&> valueFn) { clearFunctions(); _stringComponentFn = valueFn; return *this; }
 
-DataFieldType DataField::type() const
+DataField::Type DataField::type() const
 {
-    if(_intNodeIdFn != nullptr) return DataFieldType::IntNode;
-    if(_intEdgeIdFn != nullptr) return DataFieldType::IntEdge;
-    if(_intComponentFn != nullptr) return DataFieldType::IntComponent;
+    if(_intNodeIdFn != nullptr)         return Type::IntNode;
+    if(_intEdgeIdFn != nullptr)         return Type::IntEdge;
+    if(_intComponentFn != nullptr)      return Type::IntComponent;
 
-    if(_floatNodeIdFn != nullptr) return DataFieldType::FloatNode;
-    if(_floatEdgeIdFn != nullptr) return DataFieldType::FloatEdge;
-    if(_floatComponentFn != nullptr) return DataFieldType::FloatComponent;
+    if(_floatNodeIdFn != nullptr)       return Type::FloatNode;
+    if(_floatEdgeIdFn != nullptr)       return Type::FloatEdge;
+    if(_floatComponentFn != nullptr)    return Type::FloatComponent;
 
-    if(_stringNodeIdFn != nullptr) return DataFieldType::StringNode;
-    if(_stringEdgeIdFn != nullptr) return DataFieldType::StringEdge;
-    if(_stringComponentFn != nullptr) return DataFieldType::StringComponent;
+    if(_stringNodeIdFn != nullptr)      return Type::StringNode;
+    if(_stringEdgeIdFn != nullptr)      return Type::StringEdge;
+    if(_stringComponentFn != nullptr)   return Type::StringComponent;
 
-    return DataFieldType::Unknown;
+    return Type::Unknown;
 }
 
-DataFieldValueType DataField::valueType() const
+FieldType DataField::valueType() const
 {
     switch(type())
     {
-    case DataFieldType::IntNode:            return DataFieldValueType::Int;
-    case DataFieldType::IntEdge:            return DataFieldValueType::Int;
-    case DataFieldType::IntComponent:       return DataFieldValueType::Int;
+    case Type::IntNode:             return FieldType::Int;
+    case Type::IntEdge:             return FieldType::Int;
+    case Type::IntComponent:        return FieldType::Int;
 
-    case DataFieldType::FloatNode:          return DataFieldValueType::Float;
-    case DataFieldType::FloatEdge:          return DataFieldValueType::Float;
-    case DataFieldType::FloatComponent:     return DataFieldValueType::Float;
+    case Type::FloatNode:           return FieldType::Float;
+    case Type::FloatEdge:           return FieldType::Float;
+    case Type::FloatComponent:      return FieldType::Float;
 
-    case DataFieldType::StringNode:         return DataFieldValueType::String;
-    case DataFieldType::StringEdge:         return DataFieldValueType::String;
-    case DataFieldType::StringComponent:    return DataFieldValueType::String;
+    case Type::StringNode:          return FieldType::String;
+    case Type::StringEdge:          return FieldType::String;
+    case Type::StringComponent:     return FieldType::String;
 
-    default: return DataFieldValueType::Unknown;
+    default:                        return FieldType::Unknown;
     }
 }
 
-DataFieldElementType DataField::elementType() const
+ElementType DataField::elementType() const
 {
     switch(type())
     {
-    case DataFieldType::IntNode:            return DataFieldElementType::Node;
-    case DataFieldType::FloatNode:          return DataFieldElementType::Node;
-    case DataFieldType::StringNode:         return DataFieldElementType::Node;
+    case Type::IntNode:             return ElementType::Node;
+    case Type::FloatNode:           return ElementType::Node;
+    case Type::StringNode:          return ElementType::Node;
 
-    case DataFieldType::IntEdge:            return DataFieldElementType::Edge;
-    case DataFieldType::FloatEdge:          return DataFieldElementType::Edge;
-    case DataFieldType::StringEdge:         return DataFieldElementType::Edge;
+    case Type::IntEdge:             return ElementType::Edge;
+    case Type::FloatEdge:           return ElementType::Edge;
+    case Type::StringEdge:          return ElementType::Edge;
 
-    case DataFieldType::IntComponent:       return DataFieldElementType::Component;
-    case DataFieldType::FloatComponent:     return DataFieldElementType::Component;
-    case DataFieldType::StringComponent:    return DataFieldElementType::Component;
+    case Type::IntComponent:        return ElementType::Component;
+    case Type::FloatComponent:      return ElementType::Component;
+    case Type::StringComponent:     return ElementType::Component;
 
-    default: return DataFieldElementType::Unknown;
+    default:                        return ElementType::None;
     }
 }
 
@@ -131,16 +116,16 @@ bool DataField::intValueInRange(int value) const
     return true;
 }
 
-bool DataField::hasFloatMin() const { return _floatMin != std::numeric_limits<float>::max(); }
-bool DataField::hasFloatMax() const { return _floatMax != std::numeric_limits<float>::min(); }
+bool DataField::hasFloatMin() const { return _floatMin != std::numeric_limits<double>::max(); }
+bool DataField::hasFloatMax() const { return _floatMax != std::numeric_limits<double>::min(); }
 bool DataField::hasFloatRange() const { return hasFloatMin() && hasFloatMax(); }
 
-float DataField::floatMin() const { return hasFloatMin() ? _floatMin : std::numeric_limits<float>::min(); }
-float DataField::floatMax() const { return hasFloatMax() ? _floatMax : std::numeric_limits<float>::max(); }
-DataField& DataField::setFloatMin(float floatMin) { _floatMin = floatMin; return *this; }
-DataField& DataField::setFloatMax(float floatMax) { _floatMax = floatMax; return *this; }
+double DataField::floatMin() const { return hasFloatMin() ? _floatMin : std::numeric_limits<double>::min(); }
+double DataField::floatMax() const { return hasFloatMax() ? _floatMax : std::numeric_limits<double>::max(); }
+DataField& DataField::setFloatMin(double floatMin) { _floatMin = floatMin; return *this; }
+DataField& DataField::setFloatMax(double floatMax) { _floatMax = floatMax; return *this; }
 
-bool DataField::floatValueInRange(float value) const
+bool DataField::floatValueInRange(double value) const
 {
     if(hasFloatMin() && value < floatMin())
         return false;
@@ -149,43 +134,4 @@ bool DataField::floatValueInRange(float value) const
         return false;
 
     return true;
-}
-
-std::vector<ConditionFnOp> DataField::validConditionFnOps() const
-{
-    switch(type())
-    {
-    case DataFieldType::IntNode:
-    case DataFieldType::IntEdge:
-    case DataFieldType::IntComponent:
-    case DataFieldType::FloatNode:
-    case DataFieldType::FloatEdge:
-    case DataFieldType::FloatComponent:
-        return
-        {
-            ConditionFnOp::Equal,
-            ConditionFnOp::NotEqual,
-            ConditionFnOp::LessThan,
-            ConditionFnOp::GreaterThan,
-            ConditionFnOp::LessThanOrEqual,
-            ConditionFnOp::GreaterThanOrEqual
-        };
-
-    case DataFieldType::StringNode:
-    case DataFieldType::StringEdge:
-    case DataFieldType::StringComponent:
-        return
-        {
-            ConditionFnOp::Equal,
-            ConditionFnOp::NotEqual,
-            ConditionFnOp::Contains,
-            ConditionFnOp::DoesntContain,
-            ConditionFnOp::StartsWith,
-            ConditionFnOp::EndsWith,
-            ConditionFnOp::MatchesRegex
-        };
-
-    default:
-        return {};
-    }
 }

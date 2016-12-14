@@ -1,7 +1,7 @@
 #ifndef ISELECTIONMANAGER_H
 #define ISELECTIONMANAGER_H
 
-#include "../graph/elementid.h"
+#include "shared/graph/elementid.h"
 
 class ISelectionManager
 {

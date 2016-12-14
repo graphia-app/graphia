@@ -1,6 +1,6 @@
 #include "transformedgraph.h"
 
-#include "../graph/componentmanager.h"
+#include "graph/componentmanager.h"
 
 #include "shared/utils/utils.h"
 

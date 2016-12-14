@@ -5,6 +5,12 @@ void Attribute::set(int index, const QString& value)
     if(index >= static_cast<int>(_values.size()))
         _values.resize(index + 1);
 
+    _values.at(index) = value;
+
+    // If the value is empty we can't determine its type
+    if(value.isEmpty())
+        return;
+
     bool conversionSucceeded = false;
 
     int intValue = value.toInt(&conversionSucceeded);
@@ -50,8 +56,6 @@ void Attribute::set(int index, const QString& value)
 
         break;
     }
-
-    _values.at(index) = value;
 
     if(isInt)
     {

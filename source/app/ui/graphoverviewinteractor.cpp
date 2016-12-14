@@ -2,12 +2,12 @@
 #include "graphquickitem.h"
 
 #include "selectionmanager.h"
-#include "../commands/commandmanager.h"
+#include "commands/commandmanager.h"
 
-#include "../rendering/graphrenderer.h"
-#include "../rendering/graphoverviewscene.h"
+#include "rendering/graphrenderer.h"
+#include "rendering/graphoverviewscene.h"
 
-#include "../graph/graphmodel.h"
+#include "graph/graphmodel.h"
 
 #include <QMouseEvent>
 #include <QWheelEvent>

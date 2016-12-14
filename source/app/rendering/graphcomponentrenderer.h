@@ -3,8 +3,8 @@
 
 #include "camera.h"
 #include "transition.h"
-#include "../maths/boundingbox.h"
-#include "../graph/graph.h"
+#include "maths/boundingbox.h"
+#include "graph/graph.h"
 #include "shared/graph/grapharray.h"
 
 #include <QMatrix4x4>

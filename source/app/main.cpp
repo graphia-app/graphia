@@ -9,7 +9,6 @@
 #include "application.h"
 #include "ui/document.h"
 #include "ui/graphquickitem.h"
-#include "ui/graphtransformconfiguration.h"
 
 #include "shared/utils/threadpool.h"
 #include "shared/utils/preferences.h"
@@ -17,9 +16,9 @@
 #include "rendering/openglfunctions.h"
 #include "rendering/graphrenderer.h"
 
-#include "../thirdparty/qtsingleapplication/qtsingleapplication.h"
-#include "../thirdparty/SortFilterProxyModel/qqmlsortfilterproxymodel.h"
-#include "../thirdparty/breakpad/crashhandler.h"
+#include "thirdparty/qtsingleapplication/qtsingleapplication.h"
+#include "thirdparty/SortFilterProxyModel/qqmlsortfilterproxymodel.h"
+#include "thirdparty/breakpad/crashhandler.h"
 
 int main(int argc, char *argv[])
 {
@@ -87,7 +86,6 @@ int main(int argc, char *argv[])
     qmlRegisterType<Application>                (uri, maj, min, "Application");
     qmlRegisterType<Document>                   (uri, maj, min, "Document");
     qmlRegisterType<GraphQuickItem>             (uri, maj, min, "Graph");
-    qmlRegisterType<GraphTransformConfiguration>(uri, maj, min, "GraphTransform");
     qmlRegisterType<LayoutSetting>              (uri, maj, min, "LayoutSetting");
     qmlRegisterType<QmlPreferences>             (uri, maj, min, "Preferences");
 

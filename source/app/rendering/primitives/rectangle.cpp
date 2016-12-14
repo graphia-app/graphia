@@ -1,7 +1,7 @@
 #include "rectangle.h"
+
 namespace Primitive
 {
-
 Rectangle::Rectangle(QObject* parent) :
     QObject(parent),
     _positionBuffer(QOpenGLBuffer::VertexBuffer),
@@ -141,4 +141,4 @@ void Rectangle::generateVertexData(std::vector<float>& vertices, std::vector<flo
     indices[4] = 3;
     indices[5] = 0;
 }
-}
+} // namespace Primitive

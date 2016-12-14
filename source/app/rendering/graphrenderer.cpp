@@ -5,14 +5,14 @@
 #include "graphoverviewscene.h"
 #include "compute/sdfcomputejob.h"
 #include "shared/utils/preferences.h"
-#include "../commands/command.h"
-#include "../graph/graphmodel.h"
-#include "../ui/graphcomponentinteractor.h"
-#include "../ui/graphoverviewinteractor.h"
-#include "../ui/document.h"
-#include "../ui/graphquickitem.h"
-#include "../ui/selectionmanager.h"
-#include "../utils/shadertools.h"
+#include "commands/command.h"
+#include "graph/graphmodel.h"
+#include "ui/graphcomponentinteractor.h"
+#include "ui/graphoverviewinteractor.h"
+#include "ui/document.h"
+#include "ui/graphquickitem.h"
+#include "ui/selectionmanager.h"
+#include "utils/shadertools.h"
 
 #include <QObject>
 #include <QOpenGLFramebufferObjectFormat>
@@ -24,8 +24,6 @@
 #include <QTextLayout>
 
 #include <cstddef>
-
-REGISTER_QML_ENUM(NodeTextState);
 
 template<typename T>
 void setupTexture(T t, GLuint& texture, int width, int height, GLint format)
@@ -512,8 +510,8 @@ void GraphRenderer::updateGPUDataIfRequired()
 
     float textScale = u::pref("visuals/textSize").toFloat();
     auto textAlignment = static_cast<TextAlignment>(u::pref("visuals/textAlignment").toInt());
-    auto textColor = Document::textColorForBackground();
-    auto showNodeNames = static_cast<NodeTextState::Enum>(u::pref("visuals/showNodeNames").toInt());
+    auto textColor = Document::contrastingColorForBackground();
+    auto showNodeNames = static_cast<NodeTextState>(u::pref("visuals/showNodeNames").toInt());
 
     for(auto& componentRendererRef : _componentRenderers)
     {
@@ -557,10 +555,10 @@ void GraphRenderer::updateGPUDataIfRequired()
             if(gpuGraphData != nullptr)
                 gpuGraphData->_nodeData.push_back(nodeData);
 
-            if(showNodeNames == NodeTextState::Enum::Off || nodeVisual._state.testFlag(VisualFlags::NotFound))
+            if(showNodeNames == NodeTextState::Off || nodeVisual._state.testFlag(VisualFlags::NotFound))
                 continue;
 
-            if(showNodeNames == NodeTextState::Enum::Selected && !nodeVisual._state.testFlag(VisualFlags::Selected))
+            if(showNodeNames == NodeTextState::Selected && !nodeVisual._state.testFlag(VisualFlags::Selected))
                 continue;
 
             auto& textLayout = _textLayoutResults._layouts[nodeVisual._text];

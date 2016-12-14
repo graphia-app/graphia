@@ -1,6 +1,6 @@
 #include "transition.h"
 
-#include "../maths/interpolation.h"
+#include "maths/interpolation.h"
 #include "shared/utils/utils.h"
 
 #include <QDebug>

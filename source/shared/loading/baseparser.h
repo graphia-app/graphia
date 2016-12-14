@@ -1,7 +1,7 @@
 #ifndef BASEPARSER_H
 #define BASEPARSER_H
 
-#include "../loading/iparser.h"
+#include "shared/loading/iparser.h"
 
 #include <atomic>
 

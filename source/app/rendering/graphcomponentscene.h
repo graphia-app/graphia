@@ -4,8 +4,8 @@
 #include "scene.h"
 #include "graphrenderer.h"
 
-#include "../graph/graph.h"
-#include "../graph/componentmanager.h"
+#include "graph/graph.h"
+#include "graph/componentmanager.h"
 #include "shared/graph/grapharray.h"
 #include "transition.h"
 

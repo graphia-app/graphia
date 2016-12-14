@@ -2,6 +2,7 @@ TEMPLATE = app
 
 include(../common.pri)
 include(../shared/shared.pri)
+include(../thirdparty/thirdparty.pri)
 
 # Put the binary in the root of the build directory
 DESTDIR = ../..
@@ -85,7 +86,6 @@ HEADERS += \
     ui/graphcomponentinteractor.h \
     ui/graphoverviewinteractor.h \
     ui/graphquickitem.h \
-    ui/graphtransformconfiguration.h \
     ui/interactor.h \
     ui/searchmanager.h \
     ui/selectionmanager.h \
@@ -93,7 +93,11 @@ HEADERS += \
     utils/qmlcontainerwrapper.h \
     utils/qmlenum.h \
     utils/shadertools.h \
-    graph/graphcomponent.h
+    graph/graphcomponent.h \
+    transform/graphtransformconfig.h \
+    transform/graphtransformconfigparser.h \
+    transform/conditionfncreator.h \
+    utils/qmlenum.h
 
 SOURCES += \
     application.cpp \
@@ -151,10 +155,11 @@ SOURCES += \
     ui/graphcomponentinteractor.cpp \
     ui/graphoverviewinteractor.cpp \
     ui/graphquickitem.cpp \
-    ui/graphtransformconfiguration.cpp \
     ui/searchmanager.cpp \
     ui/selectionmanager.cpp \
-    utils/debugpauser.cpp
+    utils/debugpauser.cpp \
+    transform/graphtransformconfigparser.cpp \
+    transform/graphtransformconfig.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \

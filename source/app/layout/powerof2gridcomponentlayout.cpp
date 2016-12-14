@@ -1,6 +1,6 @@
 #include "powerof2gridcomponentlayout.h"
 
-#include "../graph/componentmanager.h"
+#include "graph/componentmanager.h"
 
 #include <stack>
 #include <vector>

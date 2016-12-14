@@ -1,6 +1,6 @@
 #include "parserthread.h"
 
-#include "../graph/mutablegraph.h"
+#include "graph/mutablegraph.h"
 
 #include "shared/utils/utils.h"
 

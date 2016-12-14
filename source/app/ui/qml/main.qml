@@ -60,15 +60,6 @@ ApplicationWindow
         processArguments(Qt.application.arguments);
     }
 
-    DropArea
-    {
-        anchors.fill: parent;
-        onDropped:
-        {
-            openFile(drop.text, true)
-        }
-    }
-
     MessageDialog
     {
         id: aboutMessageDialog
@@ -177,6 +168,8 @@ ApplicationWindow
 
     function openFile(fileUrl, inNewTab)
     {
+        fileUrl = fileUrl.toString().trim();
+
         if(!application.fileUrlExists(fileUrl))
         {
             errorOpeningFileMessageDialog.title = qsTr("File Not Found");
@@ -698,62 +691,73 @@ ApplicationWindow
         }
     }
 
-    TabView
+    DropArea
     {
-        id: tabView
-        anchors.fill: parent
-        tabsVisible: count > 1
-        frameVisible: count > 1
-
-        function insertTabAtIndex(index)
+        anchors.fill: parent;
+        onDropped:
         {
-            var tab = insertTab(index, "", tabComponent);
-            tab.active = true;
-            tabView.currentIndex = index;
-
-            // Make the tab title match the document title
-            tab.title = Qt.binding(function() { return tab.item.title });
-
-            return tab;
+            if(drop.text.length > 0)
+                openFile(drop.text, true)
         }
 
-        function createTab()
+        TabView
         {
-            return insertTabAtIndex(tabView.count);
-        }
+            id: tabView
+            anchors.fill: parent
+            tabsVisible: count > 1
+            frameVisible: count > 1
 
-        function replaceTab()
-        {
-            var oldIndex = tabView.currentIndex;
-            removeTab(tabView.currentIndex);
-
-            return insertTabAtIndex(oldIndex);
-        }
-
-        function openInCurrentTab(fileUrl, fileType, pluginName)
-        {
-            currentDocument.application = application;
-            if(!currentDocument.openFile(fileUrl, fileType, pluginName))
+            function insertTabAtIndex(index)
             {
-                errorOpeningFileMessageDialog.text = application.baseFileNameForUrl(fileUrl) +
-                        qsTr(" could not be opened due to an error.");
-                errorOpeningFileMessageDialog.open();
+                var tab = insertTab(index, "", tabComponent);
+                tab.active = true;
+                tabView.currentIndex = index;
+
+                // Make the tab title match the document title
+                tab.title = Qt.binding(function() { return tab.item.title });
+
+                return tab;
             }
-            else
-                addToRecentFiles(fileUrl);
-        }
 
-        Component
-        {
-            id: tabComponent
-            DocumentUI
+            function createTab()
             {
-                id: document
+                return insertTabAtIndex(tabView.count);
+            }
 
-                Component.onCompleted:
+            function replaceTab()
+            {
+                var oldIndex = tabView.currentIndex;
+                removeTab(tabView.currentIndex);
+
+                return insertTabAtIndex(oldIndex);
+            }
+
+            function openInCurrentTab(fileUrl, fileType, pluginName)
+            {
+                currentDocument.application = application;
+                if(!currentDocument.openFile(fileUrl, fileType, pluginName))
                 {
-                    // Continue processing arguments after the document is loaded
-                    document.loadComplete.connect(processOnePendingArgument);
+                    errorOpeningFileMessageDialog.text = application.baseFileNameForUrl(fileUrl) +
+                            qsTr(" could not be opened due to an error.");
+                    errorOpeningFileMessageDialog.open();
+                }
+                else
+                    addToRecentFiles(fileUrl);
+            }
+
+            Component
+            {
+                id: tabComponent
+
+                DocumentUI
+                {
+                    id: document
+
+                    Component.onCompleted:
+                    {
+                        // Continue processing arguments after the document is loaded
+                        document.loadComplete.connect(processOnePendingArgument);
+                    }
                 }
             }
         }

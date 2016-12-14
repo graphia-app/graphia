@@ -16,7 +16,7 @@
 #include <map>
 
 #include "report.h"
-#include "../app/rendering/openglfunctions.h"
+#include "app/rendering/openglfunctions.h"
 
 static void uploadReport(const QString& email, const QString& text, const QString& dmpFile)
 {

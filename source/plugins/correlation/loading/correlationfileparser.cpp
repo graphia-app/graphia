@@ -1,7 +1,7 @@
 #include "correlationfileparser.h"
 
 #include "shared/graph/imutablegraph.h"
-#include "../correlationplugin.h"
+#include "correlationplugin.h"
 
 #include "shared/loading/tabulardata.h"
 

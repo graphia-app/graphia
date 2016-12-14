@@ -1,6 +1,6 @@
 #include "sphere.h"
 
-#include "../../maths/constants.h"
+#include "maths/constants.h"
 
 #include <cmath>
 #include <QOpenGLShaderProgram>

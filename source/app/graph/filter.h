@@ -25,13 +25,12 @@ private:
         return false;
     }
 
-protected:
+public:
+    void addNodeFilter(const NodeConditionFn& f) { if(f != nullptr) _nodeFilters.emplace_back(f); }
+    void addEdgeFilter(const EdgeConditionFn& f) { if(f != nullptr) _edgeFilters.emplace_back(f); }
+
     bool hasNodeFilters() const { return !_nodeFilters.empty(); }
     bool hasEdgeFilters() const { return !_edgeFilters.empty(); }
-
-public:
-    void addNodeFilter(const NodeConditionFn& f) { _nodeFilters.emplace_back(f); }
-    void addEdgeFilter(const EdgeConditionFn& f) { _edgeFilters.emplace_back(f); }
 
     bool nodeIdFiltered(NodeId nodeId) const { return elementIdFiltered(_nodeFilters, nodeId); }
     bool edgeIdFiltered(EdgeId edgeId) const { return elementIdFiltered(_edgeFilters, edgeId); }

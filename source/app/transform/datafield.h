@@ -4,7 +4,7 @@
 #include "shared/graph/elementid.h"
 #include "shared/transform/idatafield.h"
 #include "shared/graph/igraphcomponent.h"
-#include "shared/utils/enumreflection.h"
+#include "utils/qmlenum.h"
 
 #include <functional>
 #include <limits>
@@ -13,53 +13,8 @@
 #include <QString>
 #include <QRegularExpression>
 
-enum class ConditionFnOp
-{
-    None,
-    Equal,
-    NotEqual,
-    LessThan,
-    GreaterThan,
-    LessThanOrEqual,
-    GreaterThanOrEqual,
-    Contains,
-    DoesntContain,
-    StartsWith,
-    EndsWith,
-    MatchesRegex
-};
-
-DECLARE_REFLECTED_ENUM(ConditionFnOp)
-
-enum class DataFieldType
-{
-    Unknown,
-    IntNode,
-    IntEdge,
-    IntComponent,
-    FloatNode,
-    FloatEdge,
-    FloatComponent,
-    StringNode,
-    StringEdge,
-    StringComponent
-};
-
-enum class DataFieldValueType
-{
-    Unknown,
-    Int,
-    Float,
-    String
-};
-
-enum class DataFieldElementType
-{
-    Unknown,
-    Node,
-    Edge,
-    Component
-};
+DEFINE_QML_ENUM(Q_GADGET, FieldType,
+                Unknown, Int, Float, String);
 
 class DataField : public IDataField
 {
@@ -68,9 +23,9 @@ private:
     ValueFn<int, EdgeId> _intEdgeIdFn;
     ValueFn<int, const IGraphComponent&> _intComponentFn;
 
-    ValueFn<float, NodeId> _floatNodeIdFn;
-    ValueFn<float, EdgeId> _floatEdgeIdFn;
-    ValueFn<float, const IGraphComponent&> _floatComponentFn;
+    ValueFn<double, NodeId> _floatNodeIdFn;
+    ValueFn<double, EdgeId> _floatEdgeIdFn;
+    ValueFn<double, const IGraphComponent&> _floatComponentFn;
 
     ValueFn<QString, NodeId> _stringNodeIdFn;
     ValueFn<QString, EdgeId> _stringEdgeIdFn;
@@ -81,8 +36,8 @@ private:
     int _intMin = std::numeric_limits<int>::max();
     int _intMax = std::numeric_limits<int>::min();
 
-    float _floatMin = std::numeric_limits<float>::max();
-    float _floatMax = std::numeric_limits<float>::min();
+    double _floatMin = std::numeric_limits<double>::max();
+    double _floatMax = std::numeric_limits<double>::min();
 
     bool _searchable = false;
 
@@ -92,102 +47,66 @@ private:
     int valueOf(Helper<int>, EdgeId edgeId) const;
     int valueOf(Helper<int>, const IGraphComponent& component) const;
 
-    float valueOf(Helper<float>, NodeId nodeId) const;
-    float valueOf(Helper<float>, EdgeId edgeId) const;
-    float valueOf(Helper<float>, const IGraphComponent& component) const;
+    double valueOf(Helper<double>, NodeId nodeId) const;
+    double valueOf(Helper<double>, EdgeId edgeId) const;
+    double valueOf(Helper<double>, const IGraphComponent& component) const;
 
     QString valueOf(Helper<QString>, NodeId nodeId) const;
     QString valueOf(Helper<QString>, EdgeId edgeId) const;
     QString valueOf(Helper<QString>, const IGraphComponent& component) const;
 
-    template<typename T, typename E> T valueOf(E elementId) const
+    enum class Type
+    {
+        Unknown,
+        IntNode,
+        IntEdge,
+        IntComponent,
+        FloatNode,
+        FloatEdge,
+        FloatComponent,
+        StringNode,
+        StringEdge,
+        StringComponent
+    };
+
+    Type type() const;
+
+public:
+    template<typename T, typename E> T valueOf(E& elementId) const
     {
         return valueOf(Helper<T>(), elementId);
     }
 
-    template<typename E> QString stringValueOf(E elementId) const
+    template<typename E> QString stringValueOf(E& elementId) const
     {
         switch(valueType())
         {
-        case DataFieldValueType::Int:    return QString::number(valueOf<int>(elementId));
-        case DataFieldValueType::Float:  return QString::number(valueOf<float>(elementId));
-        case DataFieldValueType::String: return valueOf<QString>(elementId);
+        case FieldType::Int:    return QString::number(valueOf<int>(elementId));
+        case FieldType::Float:  return QString::number(valueOf<double>(elementId));
+        case FieldType::String: return valueOf<QString>(elementId);
         default: break;
         }
 
         return {};
     }
 
-    template<typename T, typename E> ElementConditionFn<E> createConditionFn(Helper<E>, ConditionFnOp op, T value) const
-    {
-        switch(op)
-        {
-        case ConditionFnOp::Equal:
-            return [this, value](E elementId) { return valueOf<T, E>(elementId) == value; };
-        case ConditionFnOp::NotEqual:
-            return [this, value](E elementId) { return valueOf<T, E>(elementId) != value; };
-        case ConditionFnOp::LessThan:
-            return [this, value](E elementId) { return valueOf<T, E>(elementId) < value; };
-        case ConditionFnOp::GreaterThan:
-            return [this, value](E elementId) { return valueOf<T, E>(elementId) > value; };
-        case ConditionFnOp::LessThanOrEqual:
-            return [this, value](E elementId) { return valueOf<T, E>(elementId) <= value; };
-        case ConditionFnOp::GreaterThanOrEqual:
-            return [this, value](E elementId) { return valueOf<T, E>(elementId) >= value; };
-        default:
-            qFatal("Op is not implemented for T");
-            return nullptr;
-        }
-    }
+    template<typename T, typename E>
+    using ValueOfFn = T(DataField::*)(E&) const;
 
-    template<typename E> ElementConditionFn<E> createConditionFn(Helper<E>, ConditionFnOp op, const QString& value) const
-    {
-        switch(op)
-        {
-        case ConditionFnOp::Contains:
-            return [this, value](E elementId) { return valueOf<QString, E>(elementId).contains(value); };
-        case ConditionFnOp::DoesntContain:
-            return [this, value](E elementId) { return !valueOf<QString, E>(elementId).contains(value); };
-        case ConditionFnOp::StartsWith:
-            return [this, value](E elementId) { return valueOf<QString, E>(elementId).startsWith(value); };
-        case ConditionFnOp::EndsWith:
-            return [this, value](E elementId) { return valueOf<QString, E>(elementId).endsWith(value); };
-        case ConditionFnOp::MatchesRegex:
-            return [this, value](E elementId) { return valueOf<QString, E>(elementId).contains(QRegularExpression(value)); };
-        default:
-            return createConditionFn<QString, E>(Helper<E>(), op, value);
-        }
-    }
-
-    template<typename E> ElementConditionFn<E> createConditionFn(Helper<E>, ConditionFnOp op, const QRegularExpression& regex) const
-    {
-        if(op == ConditionFnOp::MatchesRegex)
-            return [this, regex](E elementId) { return stringValueOf(elementId).contains(regex); };
-
-        return nullptr;
-    }
-
-    template<typename E> ElementConditionFn<E> createConditionFn(Helper<E>, ConditionFnOp op, const char* value) const
-    {
-        return createConditionFn(Helper<E>(), op, QString(value));
-    }
-
-public:
     DataField& setIntValueFn(ValueFn<int, NodeId> valueFn);
     DataField& setIntValueFn(ValueFn<int, EdgeId> valueFn);
     DataField& setIntValueFn(ValueFn<int, const IGraphComponent&> valueFn);
 
-    DataField& setFloatValueFn(ValueFn<float, NodeId> valueFn);
-    DataField& setFloatValueFn(ValueFn<float, EdgeId> valueFn);
-    DataField& setFloatValueFn(ValueFn<float, const IGraphComponent&> valueFn);
+    DataField& setFloatValueFn(ValueFn<double, NodeId> valueFn);
+    DataField& setFloatValueFn(ValueFn<double, EdgeId> valueFn);
+    DataField& setFloatValueFn(ValueFn<double, const IGraphComponent&> valueFn);
 
     DataField& setStringValueFn(ValueFn<QString, NodeId> valueFn);
     DataField& setStringValueFn(ValueFn<QString, EdgeId> valueFn);
     DataField& setStringValueFn(ValueFn<QString, const IGraphComponent&> valueFn);
 
-    DataFieldType type() const;
-    DataFieldValueType valueType() const;
-    DataFieldElementType elementType() const;
+    FieldType valueType() const;
+    ElementType elementType() const;
 
     bool hasIntMin() const;
     bool hasIntMax() const;
@@ -204,32 +123,15 @@ public:
     bool hasFloatMax() const;
     bool hasFloatRange() const;
 
-    float floatMin() const;
-    float floatMax() const;
-    DataField& setFloatMin(float floatMin);
-    DataField& setFloatMax(float floatMax);
+    double floatMin() const;
+    double floatMax() const;
+    DataField& setFloatMin(double floatMin);
+    DataField& setFloatMax(double floatMax);
 
-    bool floatValueInRange(float value) const;
+    bool floatValueInRange(double value) const;
 
-    DataField& setSearchable(bool searchable) { _searchable = searchable; return *this; }
     bool searchable() const { return _searchable; }
-
-    std::vector<ConditionFnOp> validConditionFnOps() const;
-
-    template<typename T> NodeConditionFn createNodeConditionFn(ConditionFnOp op, T value) const
-    {
-        return createConditionFn(Helper<NodeId>(), op, value);
-    }
-
-    template<typename T> EdgeConditionFn createEdgeConditionFn(ConditionFnOp op, T value) const
-    {
-        return createConditionFn(Helper<EdgeId>(), op, value);
-    }
-
-    template<typename T> ComponentConditionFn createComponentConditionFn(ConditionFnOp op, T value) const
-    {
-        return createConditionFn(Helper<const IGraphComponent&>(), op, value);
-    }
+    DataField& setSearchable(bool searchable) { _searchable = searchable; return *this; }
 };
 
 #endif // DATAFIELD_H

@@ -1,7 +1,7 @@
 #ifndef GPUCOMPUTEJOB_H
 #define GPUCOMPUTEJOB_H
 
-#include "../openglfunctions.h"
+#include "rendering/openglfunctions.h"
 
 class GPUComputeJob : protected OpenGLFunctions
 {

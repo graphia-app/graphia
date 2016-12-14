@@ -130,6 +130,7 @@ public:
                      const IParser::ProgressFn& progress);
 
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName);
+    QStringList defaultTransforms() const;
 
 private slots:
     void onLoadComplete();

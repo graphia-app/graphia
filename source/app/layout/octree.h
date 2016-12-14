@@ -1,8 +1,8 @@
 #ifndef OCTREE_H
 #define OCTREE_H
 
-#include "../graph/graph.h"
-#include "../maths/boundingbox.h"
+#include "graph/graph.h"
+#include "maths/boundingbox.h"
 #include "layout.h"
 
 #include <QVector3D>
@@ -69,19 +69,18 @@ protected:
     const SubVolumeType* _internalNodes[8] = {};
     int _numInternalNodes = 0;
 
-    std::vector<NodeId> _nodeIds;
-
 private:
     unsigned int _maxNodesPerLeaf = 1;
     std::function<bool(const BoundingBox3D&)> _predicate;
 
-    void distributeNodesOverSubVolumes(std::stack<BaseOctree*>& stack)
+    void distributeNodesOverSubVolumes(const std::vector<NodeId>& nodeIds,
+                                       std::stack<std::tuple<BaseOctree*, std::vector<NodeId>>>& stack)
     {
         bool distinctPositions = false;
-        QVector3D lastPosition = _nodePositions->get(_nodeIds[0]);
+        QVector3D lastPosition = _nodePositions->get(nodeIds[0]);
 
         // Distribute NodeIds over SubVolumes
-        for(NodeId nodeId : _nodeIds)
+        for(NodeId nodeId : nodeIds)
         {
             const QVector3D& nodePosition = _nodePositions->get(nodeId);
             SubVolumeType& subVolume = subVolumeForPoint(nodePosition);
@@ -111,10 +110,9 @@ private:
             {
                 // Subdivide
                 subVolume._subTree = std::make_unique<TreeType>();
-                subVolume._subTree->_nodeIds = std::move(subVolume._nodeIds);
                 Q_ASSERT(subVolume._boundingBox.volume() > 0.0f);
                 subVolume._subTree->_boundingBox = subVolume._boundingBox;
-                stack.push(subVolume._subTree.get());
+                stack.emplace(subVolume._subTree.get(), std::move(subVolume._nodeIds));
 
                 subVolume._leaf = false;
                 _internalNodes[_numInternalNodes++] = &subVolume;
@@ -127,8 +125,8 @@ private:
         }
     }
 
-    // When this is called, _nodeIds and _subVolumes[x]._nodeIds contain the same data
-    virtual void initialiseTreeNode() {}
+    // The parameter and superset of _subVolumes[x]._nodeIds contain the same data, when this is called
+    virtual void initialiseTreeNode(const std::vector<NodeId>&) {}
 
 public:
     BaseOctree() : _predicate([](const BoundingBox3D&) { return true; }) {}
@@ -140,18 +138,18 @@ public:
     void build(const std::vector<NodeId>& nodeIds, const NodePositions& nodePositions,
                const BoundingBox3D &boundingBox)
     {
-        _nodeIds = nodeIds;
         _boundingBox = boundingBox;
         _depth = 0;
 
-        std::stack<BaseOctree*> stack;
-        stack.push(this);
+        std::stack<std::tuple<BaseOctree*, std::vector<NodeId>>> stack;
+        stack.emplace(this, nodeIds);
 
         while(!stack.empty())
         {
-            BaseOctree* subTree;
             _depth = std::max(_depth, stack.size());
-            subTree = stack.top();
+
+            BaseOctree* subTree = std::get<0>(stack.top());
+            std::vector<NodeId> nodeIdsToDistribute = std::move(std::get<1>(stack.top()));
             stack.pop();
 
             subTree->_centre = subTree->_boundingBox.centre();
@@ -176,24 +174,19 @@ public:
 
             for(auto& subVolume : subTree->_subVolumes)
             {
-                Q_ASSERT(subVolume._boundingBox.valid() &&
-                         (nodeIds.size() == 1 || subVolume._boundingBox.volume() > 0.0f));
-
+                Q_ASSERT(subVolume._boundingBox.valid());
                 subVolume._passesPredicate = _predicate(subVolume._boundingBox);
             }
 
-            subTree->distributeNodesOverSubVolumes(stack);
-            subTree->initialiseTreeNode();
-
-            // Nodes now distributed, don't need them any more
-            _nodeIds.clear();
+            subTree->distributeNodesOverSubVolumes(nodeIdsToDistribute, stack);
+            subTree->initialiseTreeNode(nodeIdsToDistribute);
         }
     }
 
     void build(const GraphComponent& graph, const NodePositions& nodePositions)
     {
         BoundingBox3D boundingBox = BoundingBox3D(NodePositions::positionsVector(nodePositions, graph.nodeIds()));
-        Q_ASSERT(boundingBox.valid() && (graph.numNodes() == 1 || boundingBox.volume() > 0.0f));
+        Q_ASSERT(boundingBox.valid());
         build(graph.nodeIds(), nodePositions, boundingBox);
     }
 

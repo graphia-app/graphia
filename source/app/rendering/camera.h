@@ -6,10 +6,10 @@
 #include <QVector3D>
 #include <QSharedPointer>
 
-#include "../maths/frustum.h"
-#include "../maths/conicalfrustum.h"
-#include "../maths/line.h"
-#include "../maths/ray.h"
+#include "maths/frustum.h"
+#include "maths/conicalfrustum.h"
+#include "maths/line.h"
+#include "maths/ray.h"
 
 class CameraPrivate;
 

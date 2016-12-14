@@ -3,10 +3,9 @@
 
 #include "command.h"
 
-#include "../graph/graph.h"
-#include "../ui/graphtransformconfiguration.h"
+#include "shared/graph/elementid.h"
 
-#include <vector>
+#include <QStringList>
 
 class GraphModel;
 class SelectionManager;
@@ -19,19 +18,19 @@ private:
     SelectionManager* _selectionManager;
     Document* _document;
 
-    std::vector<GraphTransformConfiguration> _previousTransformations;
-    std::vector<GraphTransformConfiguration> _transformations;
+    QStringList _previousTransformations;
+    QStringList _transformations;
 
     const NodeIdSet _selectedNodeIds;
 
-    void doTransform(const std::vector<GraphTransformConfiguration>& transformations);
+    void doTransform(const QStringList& transformations);
 
 public:
     ApplyTransformationsCommand(GraphModel* graphModel,
                                 SelectionManager* selectionManager,
                                 Document* document,
-                                const std::vector<GraphTransformConfiguration>& previousTransformations,
-                                const std::vector<GraphTransformConfiguration>& transformations);
+                                const QStringList& previousTransformations,
+                                const QStringList& transformations);
 
     bool execute();
     void undo();

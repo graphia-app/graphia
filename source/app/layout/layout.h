@@ -1,10 +1,10 @@
 #ifndef LAYOUT_H
 #define LAYOUT_H
 
-#include "../graph/graph.h"
+#include "graph/graph.h"
 #include "shared/graph/grapharray.h"
-#include "../graph/graphmodel.h"
-#include "../graph/componentmanager.h"
+#include "graph/graphmodel.h"
+#include "graph/componentmanager.h"
 #include "nodepositions.h"
 
 #include "shared/utils/performancecounter.h"

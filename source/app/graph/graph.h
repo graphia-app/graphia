@@ -6,7 +6,7 @@
 #include "elementiddistinctsetcollection.h"
 #include "graphconsistencychecker.h"
 
-#include "../utils/debugpauser.h"
+#include "utils/debugpauser.h"
 
 #include <QObject>
 
@@ -99,12 +99,36 @@ public:
 
     virtual NodeIdDistinctSetCollection::Type typeOf(NodeId nodeId) const = 0;
     virtual ConstNodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const = 0;
+    template<typename C> NodeIdSet mergedNodeIdsForNodeIds(const C& nodeIds) const
+    {
+        NodeIdSet mergedNodeIdSet;
+
+        for(auto nodeId : nodeIds)
+        {
+            const auto mergedNodeIds = mergedNodeIdsForNodeId(nodeId);
+            mergedNodeIdSet.insert(mergedNodeIds.begin(), mergedNodeIds.end());
+        }
+
+        return mergedNodeIdSet;
+    }
 
     EdgeId firstEdgeId() const;
     bool containsEdgeId(EdgeId edgeId) const;
 
     virtual EdgeIdDistinctSetCollection::Type typeOf(EdgeId edgeId) const = 0;
     virtual ConstEdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const = 0;
+    template<typename C> EdgeIdSet mergedEdgeIdsForEdgeIds(const C& edgeIds) const
+    {
+        EdgeIdSet mergedEdgeIdSet;
+
+        for(auto edgeId : edgeIds)
+        {
+            const auto mergedEdgeIds = mergedEdgeIdsForEdgeId(edgeId);
+            mergedEdgeIdSet.insert(mergedEdgeIds.begin(), mergedEdgeIds.end());
+        }
+
+        return mergedEdgeIdSet;
+    }
 
     virtual EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const = 0;
 

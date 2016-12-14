@@ -2,14 +2,14 @@
 
 #include <QObject>
 
-#include "../graph/graphmodel.h"
-#include "../ui/selectionmanager.h"
-#include "../ui/document.h"
+#include "graph/graphmodel.h"
+#include "ui/selectionmanager.h"
+#include "ui/document.h"
 
 ApplyTransformationsCommand::ApplyTransformationsCommand(GraphModel* graphModel,
                                                          SelectionManager* selectionManager, Document* document,
-                                                         const std::vector<GraphTransformConfiguration>& previousTransformations,
-                                                         const std::vector<GraphTransformConfiguration>& transformations) :
+                                                         const QStringList& previousTransformations,
+                                                         const QStringList& transformations) :
     Command(),
     _graphModel(graphModel),
     _selectionManager(selectionManager),
@@ -22,7 +22,7 @@ ApplyTransformationsCommand::ApplyTransformationsCommand(GraphModel* graphModel,
     setVerb(QObject::tr("Applying Transformations"));
 }
 
-void ApplyTransformationsCommand::doTransform(const std::vector<GraphTransformConfiguration>& transformations)
+void ApplyTransformationsCommand::doTransform(const QStringList& transformations)
 {
     _graphModel->buildTransforms(transformations);
     executeSynchronouslyOnCompletion([&](Command&) { _document->setTransforms(transformations); });

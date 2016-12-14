@@ -1,16 +1,14 @@
 #ifndef GRAPHMODEL_H
 #define GRAPHMODEL_H
 
-#include "../graph/graph.h"
-#include "../graph/mutablegraph.h"
+#include "graph/graph.h"
+#include "graph/mutablegraph.h"
 #include "shared/graph/grapharray.h"
 
-#include "../transform/transformedgraph.h"
-#include "../transform/datafield.h"
+#include "transform/transformedgraph.h"
+#include "transform/datafield.h"
 
-#include "../ui/graphtransformconfiguration.h"
-
-#include "../layout/nodepositions.h"
+#include "layout/nodepositions.h"
 
 #include "shared/plugins/iplugin.h"
 #include "shared/graph/igraphmodel.h"
@@ -81,7 +79,7 @@ private:
     IPlugin* _plugin;
 
     std::map<QString, DataField> _dataFields;
-    std::map<QString, std::pair<DataFieldElementType, std::unique_ptr<GraphTransformFactory>>> _graphTransformFactories;
+    std::map<QString, std::unique_ptr<GraphTransformFactory>> _graphTransformFactories;
 
 public:
     MutableGraph& mutableGraph() { return _graph; }
@@ -102,17 +100,17 @@ public:
     bool editable() const { return _plugin->editable(); }
     QString pluginQmlPath() const { return _plugin->qmlPath(); }
 
-    void buildTransforms(const std::vector<GraphTransformConfiguration>& graphTransformConfigurations);
+    bool graphTransformIsValid(const QString& transform) const;
+    void buildTransforms(const QStringList& transforms);
 
     QStringList availableTransformNames() const;
     QStringList availableDataFields(const QString& transformName) const;
-    DataFieldType typeOfDataField(const QString& dataFieldName) const;
-    const DataField& dataFieldByName(const QString& name) const;
     QStringList avaliableConditionFnOps(const QString& dataFieldName) const;
 
-    QStringList dataFieldNames(DataFieldElementType elementType) const;
+    QStringList dataFieldNames(ElementType elementType) const;
 
     IDataField& dataField(const QString& name);
+    const DataField& dataFieldByName(const QString& name) const;
 
     void enableVisualUpdates();
     void updateVisuals(const SelectionManager* selectionManager = nullptr, const SearchManager* searchManager = nullptr);

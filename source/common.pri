@@ -8,7 +8,7 @@ gcc {
     QMAKE_CXXFLAGS += -Wpedantic -Wall -Wextra -Wcast-align -Wcast-qual \
         -Wdisabled-optimization -Wformat=2 -Winit-self \
         -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual \
-        -Wnon-virtual-dtor -Wredundant-decls -Wshadow -Wundef
+        -Wnon-virtual-dtor -Wredundant-decls -Wshadow
 
     # Surprisingly, this actually makes a difference to the pearson correlation code
     QMAKE_CXXFLAGS += -funroll-loops

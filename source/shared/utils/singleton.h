@@ -9,7 +9,7 @@ public:
   Singleton()
   {
     Q_ASSERT(_singletonPtr == nullptr);
-    _singletonPtr = static_cast<T*>(this);
+    _singletonPtr = this;
   }
 
   virtual ~Singleton()
@@ -26,14 +26,14 @@ public:
       // An instance of T needs to be created somewhere
       Q_ASSERT(_singletonPtr != nullptr);
 
-      return _singletonPtr;
+      return static_cast<T*>(_singletonPtr);
   }
 
 private:
-  static T* _singletonPtr;
+  static Singleton<T>* _singletonPtr;
 };
 
-template<typename T> T* Singleton <T>::_singletonPtr = nullptr;
+template<typename T> Singleton<T>* Singleton<T>::_singletonPtr = nullptr;
 
 // Allows access to a singleton via S(Class)->... instead of Class::instance()->...
 #define S(X) X::instance()

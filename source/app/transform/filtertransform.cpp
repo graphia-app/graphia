@@ -1,7 +1,8 @@
 #include "filtertransform.h"
 #include "transformedgraph.h"
+#include "conditionfncreator.h"
 
-#include "../graph/componentmanager.h"
+#include "graph/componentmanager.h"
 
 #include <algorithm>
 
@@ -31,7 +32,7 @@ void FilterTransform::apply(TransformedGraph& target) const
 
         for(auto edgeId : target.edgeIds())
         {
-            if(edgeIdFiltered(edgeId))
+            if(!edgeIdFiltered(edgeId) != !_invert)
                 removees.push_back(edgeId);
         }
 
@@ -45,7 +46,7 @@ void FilterTransform::apply(TransformedGraph& target) const
 
         for(auto nodeId : target.nodeIds())
         {
-            if(nodeIdFiltered(nodeId))
+            if(!nodeIdFiltered(nodeId) != !_invert)
                 removees.push_back(nodeId);
         }
 
@@ -60,32 +61,37 @@ void FilterTransform::apply(TransformedGraph& target) const
         for(auto componentId : componentManager.componentIds())
         {
             auto component = componentManager.componentById(componentId);
-            if(componentFiltered(_componentFilters, *component))
-                target.mutableGraph().removeNodes(component->nodeIds());
+            if(!componentFiltered(_componentFilters, *component) != !_invert)
+                target.mutableGraph().removeNodes(target.mutableGraph().mergedNodeIdsForNodeIds(component->nodeIds()));
         }
     }
 }
 
-std::unique_ptr<GraphTransform> FilterTransformFactory::create(const NodeConditionFn& conditionFn) const
+std::unique_ptr<GraphTransform> FilterTransformFactory::create(const GraphTransformConfig& graphTransformConfig,
+                                                               const std::map<QString, DataField>& dataFields) const
 {
-    auto filterTransform = std::make_unique<FilterTransform>();
-    filterTransform->addNodeFilter(conditionFn);
+    auto filterTransform = std::make_unique<FilterTransform>(_invert);
 
-    return std::move(filterTransform);
-}
+    switch(elementType())
+    {
+    case ElementType::Node:
+        filterTransform->addNodeFilter(CreateConditionFnFor::node(dataFields, graphTransformConfig._condition));
+        break;
 
-std::unique_ptr<GraphTransform> FilterTransformFactory::create(const EdgeConditionFn& conditionFn) const
-{
-    auto filterTransform = std::make_unique<FilterTransform>();
-    filterTransform->addEdgeFilter(conditionFn);
+    case ElementType::Edge:
+        filterTransform->addEdgeFilter(CreateConditionFnFor::edge(dataFields, graphTransformConfig._condition));
+        break;
 
-    return std::move(filterTransform);
-}
+    case ElementType::Component:
+        filterTransform->addComponentFilter(CreateConditionFnFor::component(dataFields, graphTransformConfig._condition));
+        break;
 
-std::unique_ptr<GraphTransform> FilterTransformFactory::create(const ComponentConditionFn& conditionFn) const
-{
-    auto filterTransform = std::make_unique<FilterTransform>();
-    filterTransform->addComponentFilter(conditionFn);
+    default:
+        return nullptr;
+    }
 
-    return std::move(filterTransform);
+    if(!filterTransform->hasNodeFilters() && !filterTransform->hasEdgeFilters() && !filterTransform->hasComponentFilters())
+        return nullptr; // No filters defined
+
+    return std::move(filterTransform); //FIXME std::move required because of clang bug
 }

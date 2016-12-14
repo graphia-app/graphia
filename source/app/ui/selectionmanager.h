@@ -1,7 +1,7 @@
 #ifndef SELECTIONMANAGER_H
 #define SELECTIONMANAGER_H
 
-#include "../graph/graphmodel.h"
+#include "graph/graphmodel.h"
 #include "shared/ui/iselectionmanager.h"
 #include "shared/utils/utils.h"
 

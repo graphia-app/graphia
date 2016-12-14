@@ -5,11 +5,11 @@
 #include "graphrenderer.h"
 #include "transition.h"
 
-#include "../graph/graph.h"
-#include "../graph/componentmanager.h"
+#include "graph/graph.h"
+#include "graph/componentmanager.h"
 #include "shared/graph/grapharray.h"
 
-#include "../layout/componentlayout.h"
+#include "layout/componentlayout.h"
 
 #include <vector>
 #include <mutex>

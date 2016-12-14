@@ -19,7 +19,8 @@ template<typename T> class ElementIdDistinctSetCollection
 
     friend class ElementIdDistinctSet<ElementIdDistinctSetCollection<T>, T>;
     friend class ElementIdDistinctSet<const ElementIdDistinctSetCollection<T>, T>;
-    friend class ElementIdDistinctSets<T>;
+    friend class ElementIdDistinctSets<ElementIdDistinctSet<ElementIdDistinctSetCollection<T>, T>>;
+    friend class ElementIdDistinctSets<ElementIdDistinctSet<const ElementIdDistinctSetCollection<T>, T>>;
 
 private:
     struct ListNode
@@ -282,7 +283,8 @@ template<typename C, typename T> class ElementIdDistinctSet
     static_assert(std::is_same<ElementIdDistinctSetCollection<T>, typename std::remove_const<C>::type>::value,
                   "C must be an ElementIdDistinctSetCollection");
 
-    friend class ElementIdDistinctSets<T>;
+    friend class ElementIdDistinctSets<ElementIdDistinctSet<C, T>>;
+    friend class ElementIdDistinctSets<ElementIdDistinctSet<const C, T>>;
 
 private:
     T _head;
@@ -290,18 +292,24 @@ private:
     mutable int _size = -1;
 
 public:
+    using value_type = T;
+
     ElementIdDistinctSet() : _size(0)
     {}
 
+    // Construct empty set, with no head yet
     explicit ElementIdDistinctSet(C* collection) :
         _collection(collection),
         _size(0)
     {}
 
+    // Construct set from pre-existing head
     ElementIdDistinctSet(T head, C* collection) :
         _head(head),
         _collection(collection)
-    {}
+    {
+        Q_ASSERT(collection->typeOf(head) != C::Type::Tail);
+    }
 
     void setCollection(C* collection)
     {
@@ -405,6 +413,8 @@ public:
         return _size;
     }
 
+    bool empty() const { return size() <= 0; }
+
     std::vector<T> copy() const
     {
         std::vector<T> v;
@@ -436,12 +446,12 @@ template<typename T> class ElementIdDistinctSets
 {
 private:
     // Using a vector causes malloc overhead so for small numbers of sets use an array instead
-    std::array<const ElementIdDistinctSet<ElementIdDistinctSetCollection<T>, T>*, 8> _setsSmall;
-    std::vector<const ElementIdDistinctSet<ElementIdDistinctSetCollection<T>, T>*> _setsBig;
+    std::array<const T*, 8> _setsSmall;
+    std::vector<const T*> _setsBig;
     size_t _numSets = 0;
     mutable int _size = -1;
 
-    const ElementIdDistinctSet<ElementIdDistinctSetCollection<T>, T>* setAt(size_t index) const
+    const T* setAt(size_t index) const
     {
         if(index >= _numSets)
             return nullptr;
@@ -453,9 +463,11 @@ private:
 
 public:
     ElementIdDistinctSets() : _size(0)
-    {}
+    {
+        _setsSmall.fill(nullptr);
+    }
 
-    void add(const ElementIdDistinctSet<ElementIdDistinctSetCollection<T>, T>& set)
+    void add(const T& set)
     {
         if(_numSets < _setsSmall.size())
             _setsSmall[_numSets++] = &set;
@@ -472,9 +484,9 @@ public:
     {
     public:
         using self_type = iterator_base;
-        using value_type = T;
-        using reference = T;
-        using pointer = T;
+        using value_type = typename T::iterator_base::value_type;
+        using reference = typename T::iterator_base::reference;
+        using pointer = typename T::iterator_base::pointer;
         using iterator_category = std::forward_iterator_tag;
         using difference_type = int;
 
@@ -485,7 +497,7 @@ public:
         const ElementIdDistinctSets* _sets = nullptr;
         size_t _i = 0;
 
-        const typename ElementIdDistinctSetCollection<T>::ListNode& listNode() const
+        const typename ElementIdDistinctSetCollection<typename T::value_type>::ListNode& listNode() const
         {
             return _sets->setAt(_i)->_collection->_list[_p];
         }
@@ -567,9 +579,11 @@ public:
         return _size;
     }
 
-    std::vector<T> copy() const
+    bool empty() const { return size() <= 0; }
+
+    std::vector<typename T::value_type> copy() const
     {
-        std::vector<T> v;
+        std::vector<typename T::value_type> v;
         v.reserve(_size);
 
         std::copy(begin(), end(), std::back_inserter(v));
@@ -578,8 +592,11 @@ public:
     }
 };
 
-using NodeIdDistinctSets = ElementIdDistinctSets<NodeId>;
-using EdgeIdDistinctSets = ElementIdDistinctSets<EdgeId>;
+using NodeIdDistinctSets = ElementIdDistinctSets<NodeIdDistinctSet>;
+using EdgeIdDistinctSets = ElementIdDistinctSets<EdgeIdDistinctSet>;
+
+using ConstNodeIdDistinctSets = ElementIdDistinctSets<ConstNodeIdDistinctSet>;
+using ConstEdgeIdDistinctSets = ElementIdDistinctSets<ConstEdgeIdDistinctSet>;
 
 template<typename T> QDebug operator<<(QDebug d, const ElementIdDistinctSets<T>& set)
 {

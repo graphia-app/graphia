@@ -1,29 +1,28 @@
 #include "document.h"
 
-#include "../application.h"
+#include "application.h"
 
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/preferences.h"
 
-#include "../graph/graphmodel.h"
-#include "../loading/parserthread.h"
+#include "graph/graphmodel.h"
+#include "loading/parserthread.h"
 
-#include "../layout/forcedirectedlayout.h"
-#include "../layout/layout.h"
-#include "../layout/collision.h"
+#include "layout/forcedirectedlayout.h"
+#include "layout/layout.h"
+#include "layout/collision.h"
 
-#include "../commands/deleteselectednodescommand.h"
-#include "../commands/applytransformationscommand.h"
-#include "../commands/selectnodescommand.h"
+#include "commands/deleteselectednodescommand.h"
+#include "commands/applytransformationscommand.h"
+#include "commands/selectnodescommand.h"
+
+#include "transform/graphtransformconfigparser.h"
 
 #include "searchmanager.h"
 #include "selectionmanager.h"
 #include "graphquickitem.h"
 
-
-REGISTER_QML_ENUM(LayoutPauseState);
-
-QColor Document::textColorForBackground()
+QColor Document::contrastingColorForBackground()
 {
     auto backColor = u::pref("visuals/backgroundColor").value<QColor>();
     float brightness = 0.299f * backColor.redF()
@@ -36,10 +35,9 @@ QColor Document::textColorForBackground()
 }
 
 Document::Document(QObject* parent) :
-    QObject(parent)
-{
-
-}
+    QObject(parent),
+    _graphTransformsModel(this)
+{}
 
 Document::~Document()
 {
@@ -117,18 +115,18 @@ void Document::updateLayoutState()
         _layoutThread->pauseAndWait();
 }
 
-LayoutPauseState::Enum Document::layoutPauseState()
+LayoutPauseState Document::layoutPauseState()
 {
     if(_layoutThread == nullptr)
-        return LayoutPauseState::Enum::Paused;
+        return LayoutPauseState::Paused;
 
     if(_userLayoutPaused)
-        return LayoutPauseState::Enum::Paused;
+        return LayoutPauseState::Paused;
 
     if(_layoutThread->finished())
-        return LayoutPauseState::Enum::RunningFinished;
+        return LayoutPauseState::RunningFinished;
 
-    return LayoutPauseState::Enum::Running;
+    return LayoutPauseState::Running;
 }
 
 void Document::toggleLayout()
@@ -205,11 +203,17 @@ void Document::setStatus(const QString& status)
     }
 }
 
-void Document::setTransforms(const std::vector<GraphTransformConfiguration>& transformations)
+void Document::setTransforms(const QStringList& transforms)
 {
-    _graphTransformConfigurations.setVector(transformsWithEmptyAppended(transformations));
-    _previousGraphTransformConfigurations = transformations;
+    // This stores the current active configuration...
+    _graphTransforms = transforms;
+
+    // ...while the model has the state of the UI
+    _graphTransformsModel.clear();
+    for(const auto& transform : transforms)
+        appendGraphTransform(transform);
 }
+
 
 float Document::fps() const
 {
@@ -231,60 +235,37 @@ QString Document::pluginQmlPath() const
     return _graphModel != nullptr ? _graphModel->pluginQmlPath() : QString();
 }
 
-std::vector<GraphTransformConfiguration> Document::transformsWithEmptyAppended(
-        const std::vector<GraphTransformConfiguration>& graphTransformConfigurations)
+static bool transformIsPinned(const QString& transform)
 {
-    bool allValid = std::all_of(graphTransformConfigurations.begin(), graphTransformConfigurations.end(),
-    [](const GraphTransformConfiguration& graphTransformConfiguration)
-    {
-        return graphTransformConfiguration.valid();
-    });
+    GraphTransformConfigParser p;
 
-    std::vector<GraphTransformConfiguration> newGraphTransformConfigurations = graphTransformConfigurations;
-
-    if(allValid)
-        newGraphTransformConfigurations.emplace_back(this);
-
-    return newGraphTransformConfigurations;
+    if(!p.parse(transform)) return false;
+    return p.result().isMetaAttributeSet("pinned");
 }
 
-void Document::applyTransforms()
+QStringList Document::graphTransformConfigurationsFromUI() const
 {
-    if(_graphModel == nullptr)
-        return;
+    QStringList transforms;
 
-    bool valid = std::all_of(_graphTransformConfigurations.vector().begin(),
-                             _graphTransformConfigurations.vector().end(),
-    [](auto& graphTransformConfiguration)
+    for(const auto& variant : _graphTransformsModel.list())
+        transforms.append(variant.toString());
+
+    // Sort so that the pinned transforms go last
+    std::stable_sort(transforms.begin(), transforms.end(),
+    [](const QString& a, const QString& b)
     {
-        return graphTransformConfiguration.valid() ||
-               graphTransformConfiguration.creationState() == GraphTransformCreationState::Enum::Uncreated;
+        bool aPinned = transformIsPinned(a);
+        bool bPinned = transformIsPinned(b);
+
+        if(aPinned && !bPinned)
+            return false;
+        else if(!aPinned && bPinned)
+            return true;
+
+        return false;
     });
 
-    if(!valid)
-        return;
-
-    auto transformCommand = std::make_shared<ApplyTransformationsCommand>(_graphModel.get(), _selectionManager.get(), this,
-                                                                          _previousGraphTransformConfigurations,
-                                                                          _graphTransformConfigurations.vector());
-
-    _commandManager.execute(transformCommand);
-}
-
-void Document::onGraphTransformsConfigurationDataChanged(const QModelIndex& index,
-                                                         const QModelIndex&,
-                                                         const QVector<int>& roles)
-{
-    auto& graphTransformConfiguration = _graphTransformConfigurations.vector().at(index.row());
-    auto& roleName = _graphTransformConfigurations.roleNames().value(roles.at(0));
-    bool enabledChanging = (roleName == "transformEnabled");
-    bool lockedChanging = (roleName == "locked");
-
-    // Don't apply any changes when not enabled, as they will have no effect
-    bool enabled = graphTransformConfiguration.enabled() || enabledChanging;
-
-    if(graphTransformConfiguration.valid() && enabled && !lockedChanging)
-        applyTransforms();
+    return transforms;
 }
 
 bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QString& pluginName)
@@ -339,10 +320,10 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
     return true;
 }
 
-void Document::onPreferenceChanged(const QString &key, const QVariant &)
+void Document::onPreferenceChanged(const QString& key, const QVariant&)
 {
     if(key == "visuals/backgroundColor")
-        emit textColorChanged();
+        emit contrastingColorChanged();
 }
 
 void Document::onLoadProgress(int percentage)
@@ -364,6 +345,9 @@ void Document::onLoadComplete(bool success)
 
     // This causes the plugin UI to be loaded
     emit pluginQmlPathChanged();
+
+    setTransforms(_pluginInstance->defaultTransforms());
+    _graphModel->buildTransforms(_graphTransforms);
 
     _layoutThread = std::make_unique<LayoutThread>(*_graphModel, std::make_unique<ForceDirectedLayoutFactory>(_graphModel));
     connect(_layoutThread.get(), &LayoutThread::pausedChanged, this, &Document::layoutPauseStateChanged);
@@ -416,10 +400,6 @@ void Document::onLoadComplete(bool success)
             _graphModel.get(), &GraphModel::onFoundNodeIdsChanged, Qt::DirectConnection);
 
     connect(_layoutThread.get(), &LayoutThread::executed, _graphQuickItem, &GraphQuickItem::onLayoutChanged);
-
-    connect(&_graphTransformConfigurations, &QmlContainerWrapperBase::dataChanged,
-            this, &Document::onGraphTransformsConfigurationDataChanged);
-    addGraphTransform();
 
     _graphModel->enableVisualUpdates();
 
@@ -615,9 +595,18 @@ void Document::selectAllFound()
 
 void Document::updateFoundIndex(bool reselectIfInvalidated)
 {
-    if(_selectionManager->selectedNodes().size() == 1)
+    // For the purposes of updating the found index, we only care
+    // about the heads of merged node sets, so find them
+    std::vector<NodeId> selectedHeadNodes;
+    for(auto selectedNodeId : _selectionManager->selectedNodes())
     {
-        auto nodeId = *_selectionManager->selectedNodes().begin();
+        if(_graphModel->graph().typeOf(selectedNodeId) != NodeIdDistinctSetCollection::Type::Tail)
+            selectedHeadNodes.emplace_back(selectedNodeId);
+    }
+
+    if(selectedHeadNodes.size() == 1)
+    {
+        auto nodeId = *selectedHeadNodes.begin();
         auto foundIt = std::find(_foundNodeIds.begin(), _foundNodeIds.end(), nodeId);
 
         if(reselectIfInvalidated && foundIt == _foundNodeIds.end())
@@ -760,35 +749,129 @@ QStringList Document::availableDataFields(const QString& transformName) const
     return _graphModel != nullptr ? _graphModel->availableDataFields(transformName) : QStringList();
 }
 
-const DataField& Document::dataFieldByName(const QString& dataFieldName) const
-{
-    static DataField nullDataField;
-    return _graphModel != nullptr ? _graphModel->dataFieldByName(dataFieldName) : nullDataField;
-}
-
-DataFieldType Document::typeOfDataField(const QString& dataFieldName) const
-{
-    return _graphModel != nullptr ? _graphModel->typeOfDataField(dataFieldName) : DataFieldType::Unknown;
-}
-
 QStringList Document::avaliableConditionFnOps(const QString& dataFieldName) const
 {
     return _graphModel != nullptr ? _graphModel->avaliableConditionFnOps(dataFieldName) : QStringList();
 }
 
+QVariantMap Document::findTransformParameter(const QString& transformName, const QString& parameterName) const
+{
+    QVariantMap map;
+
+    if(_graphModel == nullptr)
+        return map;
+
+    if(u::contains(_graphModel->availableDataFields(transformName), parameterName))
+    {
+        // It's a DataField
+        const auto& dataField = _graphModel->dataFieldByName(parameterName);
+        map.insert("type", static_cast<int>(dataField.valueType()));
+
+        map.insert("hasRange", dataField.hasFloatRange() || dataField.hasIntRange());
+        map.insert("hasMinimumValue", dataField.hasFloatMin() || dataField.hasIntMin());
+        map.insert("hasMaximumValue", dataField.hasFloatMax() || dataField.hasIntMax());
+
+        if(dataField.hasFloatMin()) map.insert("minimumValue", dataField.floatMin());
+        if(dataField.hasFloatMax()) map.insert("maximumValue", dataField.floatMax());
+        if(dataField.hasIntMin()) map.insert("minimumValue", dataField.intMin());
+        if(dataField.hasIntMax()) map.insert("maximumValue", dataField.intMax());
+    }
+    /*else
+    {
+        //FIXME it's a with ... parameter
+    }*/
+
+    return map;
+}
+
+QVariantMap Document::parseGraphTransform(const QString& transform) const
+{
+    GraphTransformConfigParser p;
+    if(p.parse(transform))
+        return p.result().asVariantMap();
+
+    return {};
+}
+
+bool Document::graphTransformIsValid(const QString& transform) const
+{
+    return _graphModel != nullptr ? _graphModel->graphTransformIsValid(transform) : false;
+}
+
+void Document::appendGraphTransform(const QString& transform)
+{
+    if(!graphTransformIsValid(transform))
+    {
+        qDebug() << QString("Failed to parse transform '%1'").arg(transform);
+        return;
+    }
+
+    if(!transformIsPinned(transform))
+    {
+        // Insert before any existing pinned transforms
+        int index = 0;
+        while(index < _graphTransformsModel.count() && !transformIsPinned(_graphTransformsModel.get(index).toString()))
+            index++;
+
+        _graphTransformsModel.insert(index, transform);
+    }
+    else
+        _graphTransformsModel.append(transform);
+}
+
 void Document::removeGraphTransform(int index)
 {
-    auto graphTransformConfigurations = _graphTransformConfigurations.vector();
+    Q_ASSERT(index >= 0 && index < _graphTransformsModel.count());
+    _graphTransformsModel.remove(index);
+}
 
-    auto& graphTransformConfiguration = graphTransformConfigurations.at(index);
-    bool needToRebuildTransforms = graphTransformConfiguration.valid() && graphTransformConfiguration.enabled();
+// This tests two transform lists to determine if replacing one with the
+// other would actually result in a different transformation
+static bool transformsDiffer(const QStringList& a, const QStringList& b)
+{
+    if(a.length() != b.length())
+        return true;
 
-    graphTransformConfigurations.erase(graphTransformConfigurations.begin() + index);
+    GraphTransformConfigParser p;
 
-    _graphTransformConfigurations.setVector(transformsWithEmptyAppended(graphTransformConfigurations));
+    for(int i = 0; i < a.length(); i++)
+    {
+        GraphTransformConfig ai, bi;
 
-    if(needToRebuildTransforms)
-        applyTransforms();
+        if(p.parse(a[i]))
+            ai = p.result();
+
+        if(p.parse(b[i]))
+            bi = p.result();
+
+        bool aDisabled = ai.isMetaAttributeSet("disabled");
+        bool bDisabled = bi.isMetaAttributeSet("disabled");
+
+        if(aDisabled != bDisabled)
+            return true;
+
+        if(ai != bi)
+            return true;
+    }
+
+    return false;
+}
+
+void Document::updateGraphTransforms()
+{
+    if(_graphModel == nullptr)
+        return;
+
+    auto newGraphTransforms = graphTransformConfigurationsFromUI();
+
+    if(transformsDiffer(_graphTransforms, newGraphTransforms))
+    {
+        _commandManager.execute(std::make_shared<ApplyTransformationsCommand>(
+            _graphModel.get(), _selectionManager.get(), this,
+            _graphTransforms, newGraphTransforms));
+    }
+    else
+        setTransforms(newGraphTransforms);
 }
 
 void Document::dumpGraph()

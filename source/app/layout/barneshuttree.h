@@ -18,7 +18,7 @@ private:
     int _mass = 0;
     QVector3D _centreOfMass;
 
-    void initialiseTreeNode() override;
+    void initialiseTreeNode(const std::vector<NodeId> &nodeIds) override;
 
 public:
     BarnesHutTree();

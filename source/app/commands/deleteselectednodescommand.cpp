@@ -2,9 +2,9 @@
 
 #include <QObject>
 
-#include "../graph/mutablegraph.h"
-#include "../graph/graphmodel.h"
-#include "../ui/selectionmanager.h"
+#include "graph/mutablegraph.h"
+#include "graph/graphmodel.h"
+#include "ui/selectionmanager.h"
 
 DeleteSelectedNodesCommand::DeleteSelectedNodesCommand(GraphModel* graphModel,
                                                        SelectionManager* selectionManager) :

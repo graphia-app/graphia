@@ -40,5 +40,6 @@ const std::string& TabularData::valueAt(int column, int row) const
 
 QString TabularData::valueAtQString(int column, int row) const
 {
-    return QString::fromStdString(valueAt(column, row));
+    // Note that the whitespace is trimmed
+    return QString::fromStdString(valueAt(column, row)).trimmed();
 }

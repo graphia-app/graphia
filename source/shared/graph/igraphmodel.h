@@ -3,7 +3,7 @@
 
 #include "igraph.h"
 #include "imutablegraph.h"
-#include "../transform/idatafield.h"
+#include "shared/transform/idatafield.h"
 
 class QString;
 

@@ -1,12 +1,13 @@
 #include "graphmodel.h"
 #include "componentmanager.h"
 
-#include "../ui/selectionmanager.h"
-#include "../ui/searchmanager.h"
+#include "ui/selectionmanager.h"
+#include "ui/searchmanager.h"
 
-#include "../transform/compoundtransform.h"
-#include "../transform/filtertransform.h"
-#include "../transform/edgecontractiontransform.h"
+#include "transform/compoundtransform.h"
+#include "transform/filtertransform.h"
+#include "transform/edgecontractiontransform.h"
+#include "transform/graphtransformconfigparser.h"
 
 #include "shared/utils/enumreflection.h"
 #include "shared/utils/preferences.h"
@@ -49,16 +50,13 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
         .setIntValueFn([this](const IGraphComponent& component) { return component.numNodes(); })
         .setIntMin(1);
 
-    _graphTransformFactories.emplace(tr("Filter Nodes"),
-        std::make_pair(DataFieldElementType::Node, std::make_unique<FilterTransformFactory>()));
-
-    _graphTransformFactories.emplace(tr("Filter Edges"),
-        std::make_pair(DataFieldElementType::Edge, std::make_unique<FilterTransformFactory>()));
-    _graphTransformFactories.emplace(tr("Contract Edges"),
-        std::make_pair(DataFieldElementType::Edge, std::make_unique<EdgeContractionTransformFactory>()));
-
-    _graphTransformFactories.emplace(tr("Filter Components"),
-        std::make_pair(DataFieldElementType::Component, std::make_unique<FilterTransformFactory>()));
+    _graphTransformFactories.emplace(tr("Remove Nodes"),      std::make_unique<FilterTransformFactory>(ElementType::Node, false));
+    _graphTransformFactories.emplace(tr("Remove Edges"),      std::make_unique<FilterTransformFactory>(ElementType::Edge, false));
+    _graphTransformFactories.emplace(tr("Remove Components"), std::make_unique<FilterTransformFactory>(ElementType::Component, false));
+    _graphTransformFactories.emplace(tr("Keep Nodes"),        std::make_unique<FilterTransformFactory>(ElementType::Node, true));
+    _graphTransformFactories.emplace(tr("Keep Edges"),        std::make_unique<FilterTransformFactory>(ElementType::Edge, true));
+    _graphTransformFactories.emplace(tr("Keep Components"),   std::make_unique<FilterTransformFactory>(ElementType::Component, true));
+    _graphTransformFactories.emplace(tr("Contract Edges"),    std::make_unique<EdgeContractionTransformFactory>());
 }
 
 void GraphModel::setNodeName(NodeId nodeId, const QString& name)
@@ -67,46 +65,49 @@ void GraphModel::setNodeName(NodeId nodeId, const QString& name)
     updateVisuals();
 }
 
-static std::unique_ptr<GraphTransform> createGraphTransform(const GraphTransformConfiguration& config,
-                                                            const GraphTransformFactory& factory,
-                                                            const DataField& field)
+bool GraphModel::graphTransformIsValid(const QString& transform) const
 {
-    switch(field.type())
+    GraphTransformConfigParser p;
+    bool parsed = p.parse(transform);
+
+    if(parsed)
     {
-    case DataFieldType::IntNode:            return factory.create(field.createNodeConditionFn(config.opType(),      config.value().toInt()));
-    case DataFieldType::IntEdge:            return factory.create(field.createEdgeConditionFn(config.opType(),      config.value().toInt()));
-    case DataFieldType::IntComponent:       return factory.create(field.createComponentConditionFn(config.opType(), config.value().toInt()));
+        const auto& graphTransformConfig = p.result();
 
-    case DataFieldType::FloatNode:          return factory.create(field.createNodeConditionFn(config.opType(),      config.value().toFloat()));
-    case DataFieldType::FloatEdge:          return factory.create(field.createEdgeConditionFn(config.opType(),      config.value().toFloat()));
-    case DataFieldType::FloatComponent:     return factory.create(field.createComponentConditionFn(config.opType(), config.value().toFloat()));
+        if(!u::contains(_graphTransformFactories, graphTransformConfig._action))
+            return false;
 
-    case DataFieldType::StringNode:         return factory.create(field.createNodeConditionFn(config.opType(),      config.value()));
-    case DataFieldType::StringEdge:         return factory.create(field.createEdgeConditionFn(config.opType(),      config.value()));
-    case DataFieldType::StringComponent:    return factory.create(field.createComponentConditionFn(config.opType(), config.value()));
+        auto& factory = _graphTransformFactories.at(graphTransformConfig._action);
+        auto graphTransform = factory->create(graphTransformConfig, _dataFields);
 
-    default: return nullptr;
+        return graphTransform != nullptr;
     }
+
+    return false;
 }
 
-void GraphModel::buildTransforms(const std::vector<GraphTransformConfiguration>& graphTransformConfigurations)
+void GraphModel::buildTransforms(const QStringList& transforms)
 {
     auto compoundTransform = std::make_unique<CompoundTransform>();
 
-    for(auto& graphTransformConfiguration : graphTransformConfigurations)
+    for(const auto& transform : transforms)
     {
-        if(!graphTransformConfiguration.enabled() || !graphTransformConfiguration.valid())
+        GraphTransformConfigParser graphTransformConfigParser;
+
+        if(!graphTransformConfigParser.parse(transform))
             continue;
 
-        if(!u::contains(_graphTransformFactories, graphTransformConfiguration.name()))
+        const auto& graphTransformConfig = graphTransformConfigParser.result();
+        const auto& action = graphTransformConfig._action;
+
+        if(graphTransformConfig.isMetaAttributeSet("disabled"))
             continue;
 
-        if(!u::contains(_dataFields, graphTransformConfiguration.fieldName()))
+        if(!u::contains(_graphTransformFactories, action))
             continue;
 
-        auto& factory = _graphTransformFactories.at(graphTransformConfiguration.name()).second;
-        auto& field = _dataFields.at(graphTransformConfiguration.fieldName());
-        std::unique_ptr<GraphTransform> graphTransform = createGraphTransform(graphTransformConfiguration, *factory, field);
+        auto& factory = _graphTransformFactories.at(action);
+        auto graphTransform = factory->create(graphTransformConfig, _dataFields);
 
         if(graphTransform)
             compoundTransform->addTransform(std::move(graphTransform));
@@ -128,29 +129,13 @@ QStringList GraphModel::availableTransformNames() const
     return stringList;
 }
 
-template<typename Factories, typename Fields>
-static QStringList availableDataFieldsInFactories(const Factories& factories,
-                                                  const Fields& fields,
-                                                  const QString& transformName)
-{
-    QStringList stringList;
-
-    if(u::contains(factories, transformName))
-    {
-        for(auto& f : fields)
-            stringList.append(f.first);
-    }
-
-    return stringList;
-}
-
 QStringList GraphModel::availableDataFields(const QString& transformName) const
 {
     QStringList stringList;
 
     if(!transformName.isEmpty())
     {
-        auto elementType = _graphTransformFactories.at(transformName).first;
+        auto elementType = _graphTransformFactories.at(transformName)->elementType();
 
         for(auto& f : _dataFields)
         {
@@ -162,27 +147,15 @@ QStringList GraphModel::availableDataFields(const QString& transformName) const
     return stringList;
 }
 
-DataFieldType GraphModel::typeOfDataField(const QString& dataFieldName) const
-{
-    return _dataFields.at(dataFieldName).type();
-}
-
 QStringList GraphModel::avaliableConditionFnOps(const QString& dataFieldName) const
 {
-    QStringList stringList;
+    if(dataFieldName.isEmpty() || !u::contains(_dataFields, dataFieldName))
+        return {};
 
-    if(!dataFieldName.isEmpty())
-    {
-        auto validConditionFnOps = _dataFields.at(dataFieldName).validConditionFnOps();
-
-        for(auto& conditionFnOp : validConditionFnOps)
-            stringList.append(enumToString(conditionFnOp));
-    }
-
-    return stringList;
+    return GraphTransformConfigParser::ops(_dataFields.at(dataFieldName).valueType());
 }
 
-QStringList GraphModel::dataFieldNames(DataFieldElementType elementType) const
+QStringList GraphModel::dataFieldNames(ElementType elementType) const
 {
     QStringList dataFieldNames;
 

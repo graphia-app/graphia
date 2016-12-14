@@ -7,13 +7,10 @@
 BaseGenericPluginInstance::BaseGenericPluginInstance() :
     _nodeAttributesTableModel(&_nodeAttributes)
 {
-    connect(this, &BaseGenericPluginInstance::loadComplete,
-            this, &BaseGenericPluginInstance::onLoadComplete);
-
-    connect(this, &BaseGenericPluginInstance::graphChanged,
-            this, &BaseGenericPluginInstance::onGraphChanged);
-    connect(this, &BaseGenericPluginInstance::selectionChanged,
-            this, &BaseGenericPluginInstance::onSelectionChanged);
+    connect(this, SIGNAL(loadComplete()), this, SLOT(onLoadComplete()));
+    connect(this, SIGNAL(graphChanged()), this, SLOT(onGraphChanged()));
+    connect(this, SIGNAL(selectionChanged(const ISelectionManager*)),
+            this, SLOT(onSelectionChanged(const ISelectionManager*)));
 }
 
 void BaseGenericPluginInstance::initialise(IGraphModel* graphModel, ISelectionManager* selectionManager, const IParserThread* parserThread)

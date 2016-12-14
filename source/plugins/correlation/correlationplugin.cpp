@@ -7,14 +7,10 @@
 CorrelationPluginInstance::CorrelationPluginInstance() :
     _nodeAttributesTableModel(&_nodeAttributes)
 {
-    connect(this, &CorrelationPluginInstance::loadComplete,
-            this, &CorrelationPluginInstance::onLoadComplete);
-
-    connect(this, &CorrelationPluginInstance::graphChanged,
-            this, &CorrelationPluginInstance::onGraphChanged);
-
-    connect(this, &CorrelationPluginInstance::selectionChanged,
-            this, &CorrelationPluginInstance::onSelectionChanged);
+    connect(this, SIGNAL(loadComplete()), this, SLOT(onLoadComplete()));
+    connect(this, SIGNAL(graphChanged()), this, SLOT(onGraphChanged()));
+    connect(this, SIGNAL(selectionChanged(const ISelectionManager*)),
+            this, SLOT(onSelectionChanged(const ISelectionManager*)));
 }
 
 void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionManager* selectionManager, const IParserThread* parserThread)
@@ -255,6 +251,15 @@ std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const Q
         return std::make_unique<CorrelationFileParser>(this);
 
     return nullptr;
+}
+
+QStringList CorrelationPluginInstance::defaultTransforms() const
+{
+    return
+    {
+        "\"Remove Edges\" where \"Pearson Correlation Value\" < 0.85",
+        "[pinned] \"Remove Components\" where \"Component Size\" <= 1"
+    };
 }
 
 CorrelationPlugin::CorrelationPlugin()

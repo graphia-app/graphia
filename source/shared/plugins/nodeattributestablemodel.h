@@ -26,6 +26,9 @@ private:
 
     QStringList columnNames() const;
 
+private slots:
+    void onAttributeAdded(const QString& name);
+
 public:
     explicit NodeAttributesTableModel(NodeAttributes* attributes);
 

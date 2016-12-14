@@ -1,7 +1,7 @@
 #ifndef IPLUGIN_H
 #define IPLUGIN_H
 
-#include "../loading/iurltypes.h"
+#include "shared/loading/iurltypes.h"
 
 #include <QtPlugin>
 #include <QString>
@@ -22,6 +22,7 @@ public:
 
     virtual void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager, const IParserThread* parserThread) = 0;
     virtual std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) = 0;
+    virtual QStringList defaultTransforms() const { return {}; }
 };
 
 class IPluginInstanceProvider

@@ -50,20 +50,24 @@ ComponentIdSet ComponentManager::assignConnectedElementsComponentId(const Graph*
         auto nodeId = nodeIds.front();
         nodeIds.pop();
         oldComponentIdsAffected.insert(_nodesComponentId[nodeId]);
-        nodesComponentId[nodeId] = componentId;
+        for(auto mergedNodeId : graph->mergedNodeIdsForNodeId(nodeId))
+            nodesComponentId[mergedNodeId] = componentId;
 
         for(auto edgeId : graph->edgeIdsForNodeId(nodeId))
         {
             if(edgeIdFiltered(edgeId))
                 continue;
 
-            edgesComponentId[edgeId] = componentId;
+            for(auto mergedEdgeId : graph->mergedEdgeIdsForEdgeId(edgeId))
+                edgesComponentId[mergedEdgeId] = componentId;
+
             auto oppositeNodeId = graph->edgeById(edgeId).oppositeId(nodeId);
 
             if(nodesComponentId[oppositeNodeId] != componentId)
             {
                 nodeIds.push(oppositeNodeId);
-                nodesComponentId[oppositeNodeId] = componentId;
+                for(auto mergedNodeId : graph->mergedNodeIdsForNodeId(oppositeNodeId))
+                    nodesComponentId[mergedNodeId] = componentId;
             }
         }
     }
@@ -413,13 +417,17 @@ const GraphComponent* ComponentManager::componentById(ComponentId componentId) c
 ComponentId ComponentManager::componentIdOfNode(NodeId nodeId) const
 {
     if(nodeId.isNull())
-        return ComponentId();
+        return {};
 
     unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 
     auto componentId = _nodesComponentId.at(nodeId);
     auto i = std::find(_componentIds.begin(), _componentIds.end(), componentId);
-    return i != _componentIds.end() ? *i : ComponentId();
+    if(i != _componentIds.end())
+        return *i;
+
+    qDebug() << "Can't find componentId of nodeId" << nodeId;
+    return {};
 }
 
 ComponentId ComponentManager::componentIdOfEdge(EdgeId edgeId) const

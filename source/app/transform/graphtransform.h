@@ -1,13 +1,15 @@
 #ifndef GRAPHTRANSFORM_H
 #define GRAPHTRANSFORM_H
 
-#include "datafield.h"
+#include "shared/graph/elementid.h"
+#include "graphtransformconfig.h"
 
 #include <memory>
 
 class Graph;
 class GraphComponent;
 class TransformedGraph;
+class DataField;
 
 class GraphTransform
 {
@@ -26,9 +28,9 @@ class GraphTransformFactory
 public:
     virtual ~GraphTransformFactory() {}
 
-    virtual std::unique_ptr<GraphTransform> create(const NodeConditionFn& conditionFn) const = 0;
-    virtual std::unique_ptr<GraphTransform> create(const EdgeConditionFn& conditionFn) const = 0;
-    virtual std::unique_ptr<GraphTransform> create(const ComponentConditionFn& conditionFn) const = 0;
+    virtual ElementType elementType() const { return ElementType::None; }
+    virtual std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig,
+                                                   const std::map<QString, DataField>& dataFields) const = 0;
 };
 
 using IdentityTransform = GraphTransform;

@@ -1,10 +1,10 @@
 #ifndef COMPONENTLAYOUT_H
 #define COMPONENTLAYOUT_H
 
-#include "../graph/graph.h"
+#include "graph/graph.h"
 #include "shared/graph/grapharray.h"
 #include "shared/utils/utils.h"
-#include "../maths/circle.h"
+#include "maths/circle.h"
 
 #include <QRectF>
 

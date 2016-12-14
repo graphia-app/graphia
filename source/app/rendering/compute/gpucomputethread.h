@@ -1,7 +1,7 @@
 #ifndef GPUCOMPUTE_H
 #define GPUCOMPUTE_H
 
-#include "../openglfunctions.h"
+#include "rendering/openglfunctions.h"
 #include "gpucomputejob.h"
 
 #include <QObject>

@@ -2,7 +2,7 @@
 #define EDGECONTRACTIONTRANSFORM_H
 
 #include "graphtransform.h"
-#include "../graph/graph.h"
+#include "graph/graph.h"
 
 #include <vector>
 
@@ -12,6 +12,7 @@ public:
     void apply(TransformedGraph &target) const;
 
     void addEdgeContractionFilter(const EdgeConditionFn& f) { _edgeFilters.emplace_back(f); }
+    bool hasEdgeContractionFilters() const { return !_edgeFilters.empty(); }
 
 private:
     std::vector<EdgeConditionFn> _edgeFilters;
@@ -20,9 +21,9 @@ private:
 class EdgeContractionTransformFactory : public GraphTransformFactory
 {
 public:
-    std::unique_ptr<GraphTransform> create(const NodeConditionFn&) const { return nullptr; }
-    std::unique_ptr<GraphTransform> create(const EdgeConditionFn& conditionFn) const;
-    std::unique_ptr<GraphTransform> create(const ComponentConditionFn&) const { return nullptr; }
+    ElementType elementType() const { return ElementType::Edge; }
+    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig,
+                                           const std::map<QString, DataField>& dataFields) const;
 };
 
-#endif // FILTERTRANSFORM_H
+#endif // EDGECONTRACTIONTRANSFORM_H

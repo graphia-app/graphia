@@ -3,7 +3,7 @@
 
 #include "command.h"
 
-#include "../graph/graph.h"
+#include "graph/graph.h"
 
 #include <vector>
 

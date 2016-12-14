@@ -3,8 +3,8 @@
 
 #include "graphtransform.h"
 
-#include "../graph/graph.h"
-#include "../graph/mutablegraph.h"
+#include "graph/graph.h"
+#include "graph/mutablegraph.h"
 #include "shared/graph/grapharray.h"
 
 #include <QObject>

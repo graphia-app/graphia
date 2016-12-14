@@ -2,7 +2,7 @@
 #define GRAPHCOMPONENTINTERACTOR_H
 
 #include "graphcommoninteractor.h"
-#include "../rendering/graphcomponentscene.h"
+#include "rendering/graphcomponentscene.h"
 
 #include <QPoint>
 

@@ -3,7 +3,7 @@
 
 #include <QVector3D>
 
-#include "../maths/ray.h"
+#include "maths/ray.h"
 
 class Plane
 {

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <utility>
+#include <array>
 
 //#define EXPENSIVE_DEBUG_CHECKS
 
@@ -52,12 +53,12 @@ NodeIdSet SelectionManager::unselectedNodes() const
 
 bool SelectionManager::selectNode(NodeId nodeId)
 {
-    return selectNodes(_graphModel->graph().mergedNodeIdsForNodeId(nodeId));
+    return selectNodes(std::array<NodeId, 1>{nodeId});
 }
 
 bool SelectionManager::deselectNode(NodeId nodeId)
 {
-    return deselectNodes(_graphModel->graph().mergedNodeIdsForNodeId(nodeId));
+    return deselectNodes(std::array<NodeId, 1>{nodeId});
 }
 
 void SelectionManager::toggleNode(NodeId nodeId)

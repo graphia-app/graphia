@@ -3,7 +3,6 @@
         <file>qml/DocumentUI.qml</file>
         <file>qml/main.qml</file>
         <file>qml/LayoutSettingUI.qml</file>
-        <file>qml/Transform.qml</file>
         <file>qml/ButtonMenu.qml</file>
         <file>qml/DebugRectangle.qml</file>
         <file>qml/OptionsDialog.qml</file>
@@ -15,5 +14,12 @@
         <file>qml/FileTypeChooserDialog.qml</file>
         <file>qml/Find.qml</file>
         <file>qml/HiddenSwitch.qml</file>
+        <file>qml/Transform/CreateTransformDialog.qml</file>
+        <file>qml/Transform/Transforms.qml</file>
+        <file>qml/Transform/Transform.qml</file>
+        <file>qml/Transform/TransformConfig.js</file>
+        <file>qml/Transform/TransformParameter.qml</file>
+        <file>qml/Hamburger.qml</file>
+        <file>qml/ListBox.qml</file>
     </qresource>
 </RCC>

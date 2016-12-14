@@ -1,8 +1,8 @@
 #ifndef COLLISION_H
 #define COLLISION_H
 
-#include "../graph/graph.h"
-#include "../graph/graphmodel.h"
+#include "graph/graph.h"
+#include "graph/graphmodel.h"
 #include "layout.h"
 
 #include <QVector3D>

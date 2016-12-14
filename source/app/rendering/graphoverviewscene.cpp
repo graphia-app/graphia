@@ -2,14 +2,14 @@
 #include "graphrenderer.h"
 #include "graphcomponentrenderer.h"
 
-#include "../graph/graphmodel.h"
+#include "graph/graphmodel.h"
 
-#include "../layout/powerof2gridcomponentlayout.h"
-#include "../layout/circlepackcomponentlayout.h"
+#include "layout/powerof2gridcomponentlayout.h"
+#include "layout/circlepackcomponentlayout.h"
 
-#include "../commands/commandmanager.h"
+#include "commands/commandmanager.h"
 
-#include "../ui/graphquickitem.h"
+#include "ui/graphquickitem.h"
 
 #include "shared/utils/utils.h"
 #include "shared/utils/preferences.h"

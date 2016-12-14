@@ -6,15 +6,15 @@
 #include <iostream>
 
 #if defined(Q_OS_WIN32)
-#include "../thirdparty/breakpad/src/client/windows/handler/exception_handler.h"
+#include "thirdparty/breakpad/src/client/windows/handler/exception_handler.h"
 #else
 
 #include <unistd.h>
 
 #if defined(Q_OS_MAC)
-#include "../thirdparty/breakpad/src/client/mac/handler/exception_handler.h"
+#include "thirdparty/breakpad/src/client/mac/handler/exception_handler.h"
 #elif defined(Q_OS_LINUX)
-#include "../thirdparty/breakpad/src/client/linux/handler/exception_handler.h"
+#include "thirdparty/breakpad/src/client/linux/handler/exception_handler.h"
 #endif
 
 #endif

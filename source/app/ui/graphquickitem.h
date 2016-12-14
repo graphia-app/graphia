@@ -1,8 +1,8 @@
 #ifndef GRAPHQUICKITEM_H
 #define GRAPHQUICKITEM_H
 
-#include "../graph/graph.h"
-#include "../rendering/compute/gpucomputethread.h"
+#include "graph/graph.h"
+#include "rendering/compute/gpucomputethread.h"
 
 #include <QQuickFramebufferObject>
 #include <QTimer>

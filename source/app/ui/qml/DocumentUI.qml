@@ -2,10 +2,13 @@ import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
 import QtQuick.Window 2.2
+import QtQml.Models 2.2
 
 import com.kajeka 1.0
 
 import "Constants.js" as Constants
+
+import "Transform"
 
 Item
 {
@@ -51,20 +54,84 @@ Item
     property var selectPreviousFoundAction: find.selectPreviousAction
     property var selectNextFoundAction: find.selectNextAction
 
-    property color textColor:
+    property color contrastingColor:
     {
-        return document.textColor;
+        return document.contrastingColor;
     }
 
-    property color disabledTextColor:
+    Preferences
     {
-        if(textColor === "black")
-            return Qt.lighter("black");
-        else if(textColor === "white")
-            return Qt.darker("white");
-
-        return "grey";
+        id: visuals
+        section: "visuals"
+        property string backgroundColor
     }
+
+    property bool _darkBackground: { return Qt.colorEqual(contrastingColor, "white"); }
+    property bool _brightBackground: { return Qt.colorEqual(contrastingColor, "black"); }
+
+    function hexToRgb(hex)
+    {
+        hex = hex.replace("#", "");
+        var bigint = parseInt(hex, 16);
+        var r = ((bigint >> 16) & 255) / 255.0;
+        var g = ((bigint >> 8) & 255) / 255.0;
+        var b = (bigint & 255) / 255.0;
+
+        return { r: r, b: b, g: g };
+    }
+
+    function colorDiff(a, b)
+    {
+        if(a === undefined || a === null || a.length === 0)
+            return 1.0;
+
+        a = hexToRgb(a);
+
+        var ab = 0.299 * a.r + 0.587 * a.g + 0.114 * a.b;
+        var bb = 0.299 * b +   0.587 * b +   0.114 * b;
+
+        return ab - bb;
+    }
+
+    property var _lesserContrastingColors:
+    {
+        var colors = [];
+
+        if(_brightBackground)
+            colors = [0.0, 0.4, 0.8];
+
+        colors = [1.0, 0.6, 0.3];
+
+        var color1Diff = colorDiff(visuals.backgroundColor, colors[1]);
+        var color2Diff = colorDiff(visuals.backgroundColor, colors[2]);
+
+        // If either of the colors are very similar to the background color,
+        // move it towards one of the others, depending on whether it's
+        // lighter or darker
+        if(Math.abs(color1Diff) < 0.15)
+        {
+            if(color1Diff < 0.0)
+                colors[1] = (colors[0] + colors[1]) * 0.5;
+            else
+                colors[1] = (colors[1] + colors[2]) * 0.5;
+        }
+        else if(Math.abs(color2Diff) < 0.15)
+        {
+            if(color2Diff < 0.0)
+                colors[2] = (colors[2]) * 0.5;
+            else
+                colors[2] = (colors[1] + colors[2]) * 0.5;
+        }
+
+        return colors;
+    }
+
+    property color lessContrastingColor: { return Qt.rgba(_lesserContrastingColors[1],
+                                                          _lesserContrastingColors[1],
+                                                          _lesserContrastingColors[1], 1.0); }
+    property color leastContrastingColor: { return Qt.rgba(_lesserContrastingColors[2],
+                                                           _lesserContrastingColors[2],
+                                                           _lesserContrastingColors[2], 1.0); }
 
     function openFile(fileUrl, fileType, pluginName)
     {
@@ -138,39 +205,30 @@ Item
                 {
                     visible: toggleFpsMeterAction.checked
 
-                    color: root.textColor
+                    color: root.contrastingColor
 
                     horizontalAlignment: Text.AlignLeft
                     text: document.fps.toFixed(1) + " fps"
                 }
             }
 
-            Column
+            Transforms
             {
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.margins: Constants.margin
 
-                Repeater
-                {
-                    model: document.transforms
-                    Transform
-                    {
-                        color: root.textColor
-                        disabledColor: root.disabledTextColor
-                        enabled: document.idle
+                enabledTextColor: root.contrastingColor
+                disabledTextColor: root.lessContrastingColor
+                heldColor: root.leastContrastingColor
 
-                        // Not entirely sure why parent is ever null, but it is
-                        anchors.right: parent ? parent.right : undefined
-                    }
-                }
+                document: document
             }
 
             Label
             {
                 visible: toggleGraphMetricsAction.checked
 
-                color: root.textColor
+                color: root.contrastingColor
 
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
@@ -242,7 +300,7 @@ Item
                     model: document.layoutSettings
                     LayoutSettingUI
                     {
-                        textColor: root.textColor
+                        textColor: root.contrastingColor
                     }
                 }
             }

@@ -3,7 +3,7 @@
 
 #include "gpucomputejob.h"
 
-#include "../glyphmap.h"
+#include "rendering/glyphmap.h"
 
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>

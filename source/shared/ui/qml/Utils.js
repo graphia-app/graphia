@@ -7,3 +7,8 @@ function watchPropertyChanges(object, handler)
     }
 }
 
+function isNumeric(text)
+{
+    return !isNaN(parseFloat(text)) && isFinite(text);
+}
+
