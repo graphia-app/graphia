@@ -1,6 +1,6 @@
 #include "correlationplugin.h"
 
-#include "customplotitem.h"
+#include "correlationplotitem.h"
 #include "loading/correlationfileparser.h"
 #include "shared/utils/threadpool.h"
 
@@ -260,7 +260,7 @@ std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const Q
 CorrelationPlugin::CorrelationPlugin()
 {
     registerUrlType("Correlation", QObject::tr("Correlation CSV File"), QObject::tr("Correlation CSV Files"), {"csv"});
-    qmlRegisterType<CustomPlotItem>("CustomPlot", 1, 0, "CustomPlotItem");
+    qmlRegisterType<CorrelationPlotItem>("com.kajeka", 1, 0, "CorrelationPlot");
 }
 
 QStringList CorrelationPlugin::identifyUrl(const QUrl& url) const

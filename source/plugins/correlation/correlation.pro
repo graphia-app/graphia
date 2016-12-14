@@ -15,12 +15,12 @@ CONFIG += plugin
 SOURCES += \
     correlationplugin.cpp \
     loading/correlationfileparser.cpp \
-    customplotitem.cpp
+    correlationplotitem.cpp
 
 HEADERS += \
     correlationplugin.h \
     loading/correlationfileparser.h \
-    customplotitem.h
+    correlationplotitem.h
 
 RESOURCES += \
     ui/qml.qrc

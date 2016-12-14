@@ -1,11 +1,11 @@
-#ifndef CUSTOMPLOTITEM_H
-#define CUSTOMPLOTITEM_H
+#ifndef CORRELATIONPLOTITEM_H
+#define CORRELATIONPLOTITEM_H
 
 #include "thirdparty/qcustomplot/qcustomplot.h"
 
 #include <QtQuick>
 
-class CustomPlotItem : public QQuickPaintedItem
+class CorrelationPlotItem : public QQuickPaintedItem
 {
     Q_OBJECT
     Q_PROPERTY(QVector<double> data MEMBER _data NOTIFY dataChanged)
@@ -17,7 +17,7 @@ class CustomPlotItem : public QQuickPaintedItem
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelSizePixels)
 
 public:
-    CustomPlotItem(QQuickItem* parent = nullptr);
+    CorrelationPlotItem(QQuickItem* parent = nullptr);
     void paint(QPainter* painter);
     void setLabelNames(const QStringList& labelNames);
 
@@ -74,4 +74,4 @@ signals:
     void rightClick();
 
 };
-#endif // CUSTOMPLOTITEM_H
+#endif // CORRELATIONPLOTITEM_H

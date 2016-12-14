@@ -3,7 +3,7 @@ import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.2
 
-import CustomPlot 1.0
+import com.kajeka 1.0
 import SortFilterProxyModel 0.1
 
 Item
@@ -25,7 +25,7 @@ Item
             nodeAttributesModel: plugin.model.nodeAttributes
         }
 
-        CustomPlotItem
+        CorrelationPlot
         {
             id: plot
             rowCount: plugin.model.rowCount

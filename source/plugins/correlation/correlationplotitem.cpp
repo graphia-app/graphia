@@ -1,8 +1,8 @@
-#include "customplotitem.h"
+#include "correlationplotitem.h"
 
 #include <random>
 
-CustomPlotItem::CustomPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent)
+CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent)
 {
     _customPlot.setOpenGl(true);
     _customPlot.addLayer("textLayer");
@@ -51,19 +51,19 @@ CustomPlotItem::CustomPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent)
     setAcceptHoverEvents(true);
     setAcceptedMouseButtons(Qt::AllButtons);
 
-    connect(this, &QQuickPaintedItem::widthChanged, this, &CustomPlotItem::updateCustomPlotSize);
-    connect(this, &QQuickPaintedItem::heightChanged, this, &CustomPlotItem::updateCustomPlotSize);
-    connect(&_customPlot, &QCustomPlot::afterReplot, this, &CustomPlotItem::onCustomReplot);
+    connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::updateCustomPlotSize);
+    connect(this, &QQuickPaintedItem::heightChanged, this, &CorrelationPlotItem::updateCustomPlotSize);
+    connect(&_customPlot, &QCustomPlot::afterReplot, this, &CorrelationPlotItem::onCustomReplot);
 }
 
-void CustomPlotItem::refresh()
+void CorrelationPlotItem::refresh()
 {
     updateCustomPlotSize();
     buildGraphs();
     _customPlot.replot();
 }
 
-void CustomPlotItem::paint(QPainter* painter)
+void CorrelationPlotItem::paint(QPainter* painter)
 {
     QPixmap    picture(boundingRect().size().toSize());
     QCPPainter qcpPainter(&picture);
@@ -73,24 +73,24 @@ void CustomPlotItem::paint(QPainter* painter)
     painter->drawPixmap(QPoint(), picture);
 }
 
-void CustomPlotItem::mousePressEvent(QMouseEvent* event)
+void CorrelationPlotItem::mousePressEvent(QMouseEvent* event)
 {
     routeMouseEvents(event);
 }
 
-void CustomPlotItem::mouseReleaseEvent(QMouseEvent* event)
+void CorrelationPlotItem::mouseReleaseEvent(QMouseEvent* event)
 {
     routeMouseEvents(event);
     if (event->button() == Qt::RightButton)
         emit rightClick();
 }
 
-void CustomPlotItem::mouseMoveEvent(QMouseEvent* event)
+void CorrelationPlotItem::mouseMoveEvent(QMouseEvent* event)
 {
     routeMouseEvents(event);
 }
 
-void CustomPlotItem::hoverMoveEvent(QHoverEvent* event)
+void CorrelationPlotItem::hoverMoveEvent(QHoverEvent* event)
 {
     _hoverPoint = event->posF();
 
@@ -105,17 +105,17 @@ void CustomPlotItem::hoverMoveEvent(QHoverEvent* event)
         showTooltip();
 }
 
-void CustomPlotItem::hoverLeaveEvent(QHoverEvent*)
+void CorrelationPlotItem::hoverLeaveEvent(QHoverEvent*)
 {
     hideTooltip();
 }
 
-void CustomPlotItem::mouseDoubleClickEvent(QMouseEvent* event)
+void CorrelationPlotItem::mouseDoubleClickEvent(QMouseEvent* event)
 {
     routeMouseEvents(event);
 }
 
-void CustomPlotItem::buildGraphs()
+void CorrelationPlotItem::buildGraphs()
 {
     _plotModeTextElement->setVisible(false);
     // If the legend is not cleared first this will cause a slowdown
@@ -140,7 +140,7 @@ void CustomPlotItem::buildGraphs()
         categoryTicker->addTick(i, _labelNames[i]);
 }
 
-void CustomPlotItem::populateMeanAverageGraphs()
+void CorrelationPlotItem::populateMeanAverageGraphs()
 {
     double maxX = _columnCount;
     double maxY = 0.0;
@@ -186,7 +186,7 @@ void CustomPlotItem::populateMeanAverageGraphs()
     _customPlot.yAxis->setRange(0, maxY);
 }
 
-void CustomPlotItem::populateRawGraphs()
+void CorrelationPlotItem::populateRawGraphs()
 {
     double maxX = _columnCount;
     double maxY = 0.0;
@@ -222,7 +222,7 @@ void CustomPlotItem::populateRawGraphs()
     _customPlot.yAxis->setRange(0.0, maxY);
 }
 
-void CustomPlotItem::setLabelNames(const QStringList &labelNames)
+void CorrelationPlotItem::setLabelNames(const QStringList &labelNames)
 {
     QFontMetrics metrics(_defaultFont9Pt);
     _labelNames.clear();
@@ -231,18 +231,18 @@ void CustomPlotItem::setLabelNames(const QStringList &labelNames)
         _labelNames.append(metrics.elidedText(name, Qt::ElideRight, _elideLabelSizePixels));
 }
 
-void CustomPlotItem::routeMouseEvents(QMouseEvent* event)
+void CorrelationPlotItem::routeMouseEvents(QMouseEvent* event)
 {
     QMouseEvent* newEvent = new QMouseEvent(event->type(), event->localPos(), event->button(), event->buttons(), event->modifiers());
     QCoreApplication::postEvent(&_customPlot, newEvent);
 }
 
-void CustomPlotItem::updateCustomPlotSize()
+void CorrelationPlotItem::updateCustomPlotSize()
 {
     _customPlot.setGeometry(0, 0, width(), height());
 }
 
-void CustomPlotItem::showTooltip()
+void CorrelationPlotItem::showTooltip()
 {
     QCPGraph* graph = dynamic_cast<QCPGraph*>(_hoverPlottable);
 
@@ -269,7 +269,7 @@ void CustomPlotItem::showTooltip()
     update();
 }
 
-void CustomPlotItem::hideTooltip()
+void CorrelationPlotItem::hideTooltip()
 {
     _hoverLabel->setVisible(false);
     _hoverColorRect->setVisible(false);
@@ -278,7 +278,7 @@ void CustomPlotItem::hideTooltip()
     update();
 }
 
-void CustomPlotItem::savePlotImage(const QUrl& path, const QString& format)
+void CorrelationPlotItem::savePlotImage(const QUrl& path, const QString& format)
 {
     if(format == "PNG (*.png)")
         _customPlot.savePng(path.toLocalFile());
@@ -288,7 +288,7 @@ void CustomPlotItem::savePlotImage(const QUrl& path, const QString& format)
         _customPlot.saveJpg(path.toLocalFile());
 }
 
-void CustomPlotItem::onCustomReplot()
+void CorrelationPlotItem::onCustomReplot()
 {
     update();
 }
