@@ -22,7 +22,7 @@ public:
     void setLabelNames(const QStringList& labelNames);
 
     Q_INVOKABLE void refresh();
-    Q_INVOKABLE void savePlotImage(const QUrl& path, const QString& format);
+    Q_INVOKABLE void savePlotImage(const QUrl& url, const QString& format);
 
 protected:
     void routeMouseEvents(QMouseEvent* event);

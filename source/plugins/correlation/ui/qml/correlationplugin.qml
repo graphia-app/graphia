@@ -50,6 +50,8 @@ Item
 
     Menu
     {
+        id: contextMenu
+
         MenuItem
         {
             text: "Save plot as..."
@@ -63,7 +65,7 @@ Item
         visible: false
         selectExisting: false
         title: "Save plot as..."
-        nameFilters: [ "PNG (*.png)", "JPEG (*.jpg)", "PDF (*.pdf)" ]
+        nameFilters: [ "PDF Document (*.pdf)", "PNG Image (*.png)", "JPEG Image (*.jpg *.jpeg)" ]
         onAccepted: plot.savePlotImage(imageSaveDialog.fileUrl, imageSaveDialog.selectedNameFilter);
     }
 }

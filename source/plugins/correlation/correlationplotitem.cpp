@@ -1,5 +1,7 @@
 #include "correlationplotitem.h"
 
+#include <QDesktopServices>
+
 #include <random>
 
 CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent)
@@ -278,14 +280,16 @@ void CorrelationPlotItem::hideTooltip()
     update();
 }
 
-void CorrelationPlotItem::savePlotImage(const QUrl& path, const QString& format)
+void CorrelationPlotItem::savePlotImage(const QUrl& url, const QString& format)
 {
-    if(format == "PNG (*.png)")
-        _customPlot.savePng(path.toLocalFile());
-    else if(format == "PDF (*.pdf)")
-        _customPlot.savePdf(path.toLocalFile());
-    else if(format == "JPEG (*.jpg)")
-        _customPlot.saveJpg(path.toLocalFile());
+    if(format.contains("png"))
+        _customPlot.savePng(url.toLocalFile());
+    else if(format.contains("pdf"))
+        _customPlot.savePdf(url.toLocalFile());
+    else if(format.contains("jpg"))
+        _customPlot.saveJpg(url.toLocalFile());
+
+    QDesktopServices::openUrl(url);
 }
 
 void CorrelationPlotItem::onCustomReplot()
