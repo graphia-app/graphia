@@ -11,4 +11,5 @@
 
 #ifdef _MSC_VER
 // MSVC warnings
+#pragma warning( push )
 #endif
