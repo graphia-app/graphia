@@ -19,7 +19,7 @@ class CorrelationPluginInstance : public BasePluginInstance
     Q_OBJECT
 
     Q_PROPERTY(QAbstractTableModel* nodeAttributes READ nodeAttributesTableModel CONSTANT)
-    Q_PROPERTY(QVector<int> selectedRows READ selectionRows NOTIFY selectedRowsChanged)
+    Q_PROPERTY(QVector<int> selectedRows READ selectedRows NOTIFY selectedRowsChanged)
     Q_PROPERTY(QStringList columnNames READ columnNames NOTIFY columnNamesChanged)
     Q_PROPERTY(QStringList rowNames READ rowNames NOTIFY rowNamesChanged)
     Q_PROPERTY(QVector<double> dataset READ attributesDataset NOTIFY datasetChanged)
@@ -34,8 +34,6 @@ private:
     int _numRows = 0;
 
     std::vector<QString> _dataColumnNames;
-    QVector<double> _selectedData;
-    QVector<int> _selectedRows;
 
     NodeAttributes _nodeAttributes;
     Attributes _columnAttributes;
@@ -117,7 +115,7 @@ private:
     QStringList columnNames();
     QStringList rowNames();
     QVector<double> attributesDataset();
-    QVector<int> selectionRows();
+    QVector<int> selectedRows();
 
 public:
     void setDimensions(int numColumns, int numRows);

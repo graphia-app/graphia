@@ -218,9 +218,18 @@ QStringList CorrelationPluginInstance::rowNames()
     return list;
 }
 
-QVector<int> CorrelationPluginInstance::selectionRows()
+QVector<int> CorrelationPluginInstance::selectedRows()
 {
-    return _selectedRows;
+    QVector<int> selectedRowIndexes;
+    selectedRowIndexes.reserve(selectionManager()->selectedNodes().size());
+
+    for(auto nodeId : selectionManager()->selectedNodes())
+    {
+        int row = _nodeAttributes.rowIndexForNodeId(nodeId);
+        selectedRowIndexes.append(row);
+    }
+
+    return selectedRowIndexes;
 }
 
 void CorrelationPluginInstance::onGraphChanged()
@@ -237,27 +246,6 @@ void CorrelationPluginInstance::onGraphChanged()
 void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager* selectionManager)
 {
     _nodeAttributesTableModel.setSelectedNodes(selectionManager->selectedNodes());
-
-    const auto& selectedNodes = selectionManager->selectedNodes();
-
-    std::vector<int> selectedRowIndexes;
-    selectedRowIndexes.reserve(selectedNodes.size());
-
-    _selectedData.clear();
-
-    for(auto& nodeId : selectedNodes)
-    {
-        int row = _nodeAttributes.rowIndexForNodeId(nodeId);
-        selectedRowIndexes.emplace_back(row);
-        for(int column = 0; column < _numColumns; ++column)
-        {
-            int index = (row * _numColumns) + column;
-            _selectedData.push_back(_data[index]);
-        }
-    }
-
-    _selectedRows = QVector<int>::fromStdVector(selectedRowIndexes);
-
     emit selectedRowsChanged();
 }
 
