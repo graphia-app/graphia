@@ -241,7 +241,7 @@ void CorrelationPlotItem::routeMouseEvents(QMouseEvent* event)
 
 void CorrelationPlotItem::updateCustomPlotSize()
 {
-    _customPlot.setGeometry(0, 0, width(), height());
+    _customPlot.setGeometry(0, 0, static_cast<int>(width()), static_cast<int>(height()));
 }
 
 void CorrelationPlotItem::showTooltip()
