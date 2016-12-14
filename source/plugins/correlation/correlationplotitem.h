@@ -1,7 +1,9 @@
 #ifndef CORRELATIONPLOTITEM_H
 #define CORRELATIONPLOTITEM_H
 
+#include "thirdparty/qcustomplot/qcustomplot_disable_warnings.h"
 #include "thirdparty/qcustomplot/qcustomplot.h"
+#include "thirdparty/qcustomplot/qcustomplot_enable_warnings.h"
 
 #include <QtQuick>
 
