@@ -53,12 +53,12 @@ NodeIdSet SelectionManager::unselectedNodes() const
 
 bool SelectionManager::selectNode(NodeId nodeId)
 {
-    return selectNodes(std::array<NodeId, 1>{nodeId});
+    return selectNodes(std::array<NodeId, 1>({nodeId}));
 }
 
 bool SelectionManager::deselectNode(NodeId nodeId)
 {
-    return deselectNodes(std::array<NodeId, 1>{nodeId});
+    return deselectNodes(std::array<NodeId, 1>({nodeId}));
 }
 
 void SelectionManager::toggleNode(NodeId nodeId)
