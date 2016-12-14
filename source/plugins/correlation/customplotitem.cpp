@@ -10,10 +10,15 @@ CustomPlotItem::CustomPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent)
     _textLayer = _customPlot.layer("textLayer");
     _textLayer->setMode(QCPLayer::LayerMode::lmBuffered);
 
+    QFont defaultFont10Pt;
+    defaultFont10Pt.setPointSize(10);
+
+    _defaultFont9Pt.setPointSize(9);
+
     _hoverLabel = new QCPItemText(&_customPlot);
     _hoverLabel->setLayer(_textLayer);
     _hoverLabel->setPositionAlignment(Qt::AlignBottom|Qt::AlignHCenter);
-    _hoverLabel->setFont(QFont("Arial", 10));
+    _hoverLabel->setFont(defaultFont10Pt);
     _hoverLabel->setPen(QPen(Qt::black));
     _hoverLabel->setBrush(QBrush(Qt::white));
     _hoverLabel->setPadding(QMargins(3, 3, 3, 3));
@@ -37,7 +42,7 @@ CustomPlotItem::CustomPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent)
     _plotModeTextElement = new QCPTextElement(&_customPlot);
     _plotModeTextElement->setLayer(_textLayer);
     _plotModeTextElement->setTextFlags(Qt::AlignLeft);
-    _plotModeTextElement->setFont(QFont("Arial", 9));
+    _plotModeTextElement->setFont(_defaultFont9Pt);
     _plotModeTextElement->setTextColor(Qt::black);
     _plotModeTextElement->setVisible(false);
 
@@ -51,13 +56,12 @@ CustomPlotItem::CustomPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent)
     connect(&_customPlot, &QCustomPlot::afterReplot, this, &CustomPlotItem::onCustomReplot);
 }
 
-void CustomPlotItem::initCustomPlot()
+void CustomPlotItem::refresh()
 {
     updateCustomPlotSize();
     buildGraphs();
     _customPlot.replot();
 }
-
 
 void CustomPlotItem::paint(QPainter* painter)
 {
@@ -86,7 +90,7 @@ void CustomPlotItem::mouseMoveEvent(QMouseEvent* event)
     routeMouseEvents(event);
 }
 
-void CustomPlotItem::hoverMoveEvent(QHoverEvent *event)
+void CustomPlotItem::hoverMoveEvent(QHoverEvent* event)
 {
     _hoverPoint = event->posF();
 
@@ -101,9 +105,8 @@ void CustomPlotItem::hoverMoveEvent(QHoverEvent *event)
         showTooltip();
 }
 
-void CustomPlotItem::hoverLeaveEvent(QHoverEvent *event)
+void CustomPlotItem::hoverLeaveEvent(QHoverEvent*)
 {
-    Q_UNUSED(event);
     hideTooltip();
 }
 
@@ -124,7 +127,7 @@ void CustomPlotItem::buildGraphs()
     _customPlot.plotLayout()->simplify();
 
     if(_selectedRows.length() > MAX_SELECTED_ROWS_BEFORE_MEAN)
-        populateMeanAvgGraphs();
+        populateMeanAverageGraphs();
     else
         populateRawGraphs();
 
@@ -137,31 +140,31 @@ void CustomPlotItem::buildGraphs()
         categoryTicker->addTick(i, _labelNames[i]);
 }
 
-void CustomPlotItem::populateMeanAvgGraphs()
+void CustomPlotItem::populateMeanAverageGraphs()
 {
-    double maxX = _colCount;
-    double maxY = 0;
+    double maxX = _columnCount;
+    double maxY = 0.0;
 
     std::random_device randomDevice;
     std::mt19937 mTwister(randomDevice());
     std::uniform_int_distribution<> randomColorDist(0, 255);
 
     auto* graph = _customPlot.addGraph();
-    mTwister.seed(_selectedRows.count()*1000);
+    mTwister.seed(_selectedRows.count() * 1000);
     QColor randomColor = QColor::fromHsl(randomColorDist(mTwister), 210, 130);
     graph->setPen(QPen(randomColor));
-    graph->setName("Mean Avg of Selection");
+    graph->setName(tr("Mean average of selection"));
 
     // Use Average Calculation
     QVector<double> yDataAvg;
     QVector<double> xData;
 
-    for(int col=0; col<_colCount; col++)
+    for(int col = 0; col < _columnCount; col++)
     {
-        double runningTotal = 0.0f;
+        double runningTotal = 0.0;
         for(auto row : _selectedRows)
         {
-            int index = (row * _colCount) + col;
+            int index = (row * _columnCount) + col;
             runningTotal += _data[index];
         }
         xData.append(col);
@@ -172,9 +175,11 @@ void CustomPlotItem::populateMeanAvgGraphs()
     graph->setData(xData, yDataAvg, true);
 
     _customPlot.plotLayout()->insertRow(1);
-    _customPlot.plotLayout()->addElement(1,0, _plotModeTextElement);
-    _plotModeTextElement->setText("*Mean Avg plot of " + QString::number(_selectedRows.length()) +
-                            " nodes. Maximum node count for individual plots is " + QString::number(MAX_SELECTED_ROWS_BEFORE_MEAN));
+    _customPlot.plotLayout()->addElement(1, 0, _plotModeTextElement);
+    _plotModeTextElement->setText(
+        QString(tr("*Mean average plot of %1 rows (maximum row count for individual plots is %2)"))
+                .arg(_selectedRows.length())
+                .arg(MAX_SELECTED_ROWS_BEFORE_MEAN));
     _plotModeTextElement->setVisible(true);
 
     _customPlot.xAxis->setRange(0, maxX);
@@ -183,8 +188,8 @@ void CustomPlotItem::populateMeanAvgGraphs()
 
 void CustomPlotItem::populateRawGraphs()
 {
-    double maxX = _colCount;
-    double maxY = 0;
+    double maxX = _columnCount;
+    double maxY = 0.0;
 
     std::random_device randomDevice;
     std::mt19937 mTwister(randomDevice());
@@ -194,7 +199,7 @@ void CustomPlotItem::populateRawGraphs()
     for(auto row : _selectedRows)
     {
         auto* graph = _customPlot.addGraph();
-        mTwister.seed(row*1000);
+        mTwister.seed(row * 1000);
         QColor randomColor = QColor::fromHsl(randomColorDist(mTwister), 210, 130);
         graph->setPen(QPen(randomColor));
         graph->setName(_graphNames[row]);
@@ -202,9 +207,9 @@ void CustomPlotItem::populateRawGraphs()
         QVector<double> yData;
         QVector<double> xData;
 
-        for(int col=0; col<_colCount; col++)
+        for(int col = 0; col < _columnCount; col++)
         {
-            int index = (row * _colCount) + col;
+            int index = (row * _columnCount) + col;
             xData.append(col);
             yData.append(_data[index]);
 
@@ -213,18 +218,17 @@ void CustomPlotItem::populateRawGraphs()
         graph->setData(xData, yData, true);
     }
 
-    _customPlot.xAxis->setRange(0, maxX);
-    _customPlot.yAxis->setRange(0, maxY);
+    _customPlot.xAxis->setRange(0.0, maxX);
+    _customPlot.yAxis->setRange(0.0, maxY);
 }
 
 void CustomPlotItem::setLabelNames(const QStringList &labelNames)
 {
-    QFont arialFont("Arial", 9);
-    QFontMetrics arialMetrics(arialFont);
+    QFontMetrics metrics(_defaultFont9Pt);
     _labelNames.clear();
 
     for(auto name : labelNames)
-        _labelNames.append(arialMetrics.elidedText(name, Qt::ElideRight, _elideLabelSizePixels));
+        _labelNames.append(metrics.elidedText(name, Qt::ElideRight, _elideLabelSizePixels));
 }
 
 void CustomPlotItem::routeMouseEvents(QMouseEvent* event)
@@ -251,12 +255,13 @@ void CustomPlotItem::showTooltip()
     _hoverLabel->position->setCoords(
                 _customPlot.xAxis->pixelToCoord(_hoverPoint.x()),
                 _customPlot.yAxis->pixelToCoord(_hoverPoint.y()));
-    _hoverLabel->setText(_hoverPlottable->name() +
-                        " " + QString::number(_itemTracer->position->value()));
+    _hoverLabel->setText(QString("%1 %2")
+                         .arg(_hoverPlottable->name())
+                         .arg(_itemTracer->position->value()));
 
     _hoverColorRect->setVisible(true);
     _hoverColorRect->setBrush(QBrush(_hoverPlottable->pen().color()));
-    _hoverColorRect->topLeft->setPixelPosition(QPointF(_hoverLabel->topLeft->pixelPosition().x() - 10,
+    _hoverColorRect->topLeft->setPixelPosition(QPointF(_hoverLabel->topLeft->pixelPosition().x() - 10.0,
                                                    _hoverLabel->topLeft->pixelPosition().y()));
 
     _textLayer->replot();
@@ -273,13 +278,13 @@ void CustomPlotItem::hideTooltip()
     update();
 }
 
-void CustomPlotItem::savePlotImage(QUrl path, QString format)
+void CustomPlotItem::savePlotImage(const QUrl& path, const QString& format)
 {
-    if (format == "PNG (*.png)")
+    if(format == "PNG (*.png)")
         _customPlot.savePng(path.toLocalFile());
-    else if (format == "PDF (*.pdf)")
+    else if(format == "PDF (*.pdf)")
         _customPlot.savePdf(path.toLocalFile());
-    else if (format == "JPEG (*.jpg)")
+    else if(format == "JPEG (*.jpg)")
         _customPlot.saveJpg(path.toLocalFile());
 }
 

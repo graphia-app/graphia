@@ -265,7 +265,7 @@ Item
     Item
     {
         id: plugin
-        Layout.minimumHeight: 100;
+        Layout.minimumHeight: 100
         visible: loaded && enabledChildren
 
         property var model: document.plugin
@@ -392,7 +392,6 @@ Item
                 }
 
                 var pluginObject = pluginComponent.createObject(plugin);
-
 
                 if(pluginObject === null)
                 {

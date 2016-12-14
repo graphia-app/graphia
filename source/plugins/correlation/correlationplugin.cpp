@@ -185,7 +185,6 @@ void CorrelationPluginInstance::finishDataRow(int row)
     auto nodeId = graphModel()->mutableGraph().addNode();
     auto computeCost = _numRows - row + 1;
 
-
     _dataRows.emplace_back(begin, end, nodeId, computeCost);
     _nodeAttributes.setNodeIdForRowIndex(nodeId, row);
 }
@@ -212,8 +211,10 @@ QStringList CorrelationPluginInstance::columnNames()
 QStringList CorrelationPluginInstance::rowNames()
 {
     QStringList list;
-    for(int i=0; i<_numRows; i++)
+
+    for(int i = 0; i < _numRows; i++)
         list.append(_nodeAttributes.begin()->get(i));
+
     return list;
 }
 

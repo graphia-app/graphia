@@ -138,13 +138,14 @@ private slots:
 
     void onGraphChanged();
     void onSelectionChanged(const ISelectionManager* selectionManager);
+
 signals:
-    QVector<int> selectedRowsChanged();
-    int rowCountChanged();
-    int columnCountChanged();
-    QVector<double> datasetChanged();
-    QStringList columnNamesChanged();
-    QStringList rowNamesChanged();
+    void selectedRowsChanged();
+    void rowCountChanged();
+    void columnCountChanged();
+    void datasetChanged();
+    void columnNamesChanged();
+    void rowNamesChanged();
 };
 
 class CorrelationPlugin : public BasePlugin, public PluginInstanceProvider<CorrelationPluginInstance>
