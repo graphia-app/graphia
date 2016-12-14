@@ -4,7 +4,7 @@ include(../../common.pri)
 include(../../shared/shared.pri)
 include(../../thirdparty/thirdparty.pri)
 
-QT += core gui qml quick xml
+QT += core gui qml quick xml widgets
 
 TARGET = correlation
 DESTDIR = ../../../plugins
