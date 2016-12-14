@@ -16,4 +16,5 @@
 #ifdef _MSC_VER
 // MSVC warnings
 #pragma warning( push )
+#pragma warning( disable : 4251 ) // Class needs to have dll-interface to be used by clients of class
 #endif
