@@ -217,7 +217,8 @@ QStringList CorrelationPluginInstance::rowNames()
 QVector<int> CorrelationPluginInstance::selectedRows()
 {
     QVector<int> selectedRowIndexes;
-    selectedRowIndexes.reserve(selectionManager()->selectedNodes().size());
+    selectedRowIndexes.reserve(
+        static_cast<int>(selectionManager()->selectedNodes().size()));
 
     for(auto nodeId : selectionManager()->selectedNodes())
     {
