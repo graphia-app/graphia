@@ -135,28 +135,32 @@ GridLayout
 
         var floatValue = parseFloat(value);
 
-        if(hasMinimumValue)
+        if(!isNaN(floatValue))
         {
-            if(floatValue < minimumValue)
-                floatValue = minimumValue;
+            if(hasMinimumValue)
+            {
+                if(floatValue < minimumValue)
+                    floatValue = minimumValue;
 
-            spinBox.minimumValue = slider.minimumValue = minimumValue;
+                spinBox.minimumValue = slider.minimumValue = minimumValue;
+            }
+            else
+                spinBox.minimumValue = slider.minimumValue = Number.MIN_VALUE;
+
+            if(hasMaximumValue)
+            {
+                if(floatValue > maximumValue)
+                    floatValue = maximumValue;
+
+                spinBox.maximumValue = slider.maximumValue = maximumValue;
+            }
+            else
+                spinBox.maximumValue = slider.maximumValue = Number.MAX_VALUE;
+
+            spinBox.value = floatValue;
+            slider.value = floatValue;
         }
-        else
-            spinBox.minimumValue = slider.minimumValue = Number.MIN_VALUE;
 
-        if(hasMaximumValue)
-        {
-            if(floatValue > maximumValue)
-                floatValue = maximumValue;
-
-            spinBox.maximumValue = slider.maximumValue = maximumValue;
-        }
-        else
-            spinBox.maximumValue = slider.maximumValue = Number.MAX_VALUE;
-
-        spinBox.value = floatValue;
-        slider.value = floatValue;
         textField.text = initialValue;
     }
 
