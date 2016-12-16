@@ -12,3 +12,4 @@ plugins.subdir = source/plugins
 thirdparty.subdir = source/thirdparty
 
 app.depends = thirdparty
+plugins.depends = thirdparty
