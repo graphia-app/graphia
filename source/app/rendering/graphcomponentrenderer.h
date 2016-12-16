@@ -68,6 +68,7 @@ public:
     const std::vector<const IEdge*> edges() const { return _edges; }
 
     NodeId focusNodeId() const;
+    bool focusNodeIsVisible() const;
     QVector3D focusPosition() const;
     void enableFocusTracking() { _trackFocus = true; }
     void disableFocusTracking() { _trackFocus = false; }

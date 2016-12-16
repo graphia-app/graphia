@@ -483,7 +483,7 @@ void GraphComponentRenderer::moveFocusToPositionAndRadius(const QVector3D& posit
 
 bool GraphComponentRenderer::transitionRequired()
 {
-    if(trackingCentreOfComponent())
+    if(trackingCentreOfComponent() || !focusNodeIsVisible())
         return true;
 
     updateEntireComponentZoomDistance();
@@ -495,7 +495,7 @@ bool GraphComponentRenderer::transitionRequired()
 
 void GraphComponentRenderer::computeTransition()
 {
-    if(trackingCentreOfComponent())
+    if(trackingCentreOfComponent() || !focusNodeIsVisible())
         moveFocusToCentreOfComponent();
     else
         moveFocusToNode(focusNodeId());
@@ -514,6 +514,11 @@ void GraphComponentRenderer::updateTransition(float f)
 NodeId GraphComponentRenderer::focusNodeId() const
 {
     return _viewData._focusNodeId;
+}
+
+bool GraphComponentRenderer::focusNodeIsVisible() const
+{
+    return _graphModel->graph().typeOf(focusNodeId()) != NodeIdDistinctSetCollection::Type::Tail;
 }
 
 QVector3D GraphComponentRenderer::focusPosition() const
