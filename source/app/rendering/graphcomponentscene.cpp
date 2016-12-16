@@ -176,7 +176,7 @@ void GraphComponentScene::setComponentId(ComponentId componentId, bool doTransit
     if(doTransition)
     {
         _transitioningComponentId = _componentId;
-        if(!viewIsReset())
+        if(!componentId.isNull() && !viewIsReset())
         {
             startTransition([this, componentId]
             {
@@ -475,6 +475,10 @@ void GraphComponentScene::onNodeRemoved(const Graph*, NodeId nodeId)
     {
         _graphRenderer->executeOnRendererThread([this]
         {
+            // If the whole component is going away, we can't refocus
+            if(_beingRemoved)
+                return;
+
             startTransition();
             componentRenderer()->moveFocusToCentreOfComponent();
         }, "GraphWidget::onNodeRemoved");
