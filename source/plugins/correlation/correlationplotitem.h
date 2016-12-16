@@ -5,7 +5,7 @@
 #include "thirdparty/qcustomplot/qcustomplot.h"
 #include "thirdparty/qcustomplot/qcustomplot_enable_warnings.h"
 
-#include <QtQuick>
+#include <QQuickPaintedItem>
 
 class CorrelationPlotItem : public QQuickPaintedItem
 {
