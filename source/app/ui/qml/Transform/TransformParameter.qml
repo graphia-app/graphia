@@ -34,6 +34,8 @@ GridLayout
 
         if(type === FieldType.Int)
             return Math.round(n);
+        else if(type === FieldType.Float && Utils.isInt(n))
+            return n.toFixed(1);
 
         return n;
     }
