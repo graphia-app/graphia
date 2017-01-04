@@ -61,7 +61,7 @@ private:
 
     ComponentId _transitioningComponentId;
     float _transitionValue = 0.0f;
-    enum class Direction { NotSliding, Left, Right } _transitionDirection = Direction::NotSliding;
+    enum class TransitionStyle { None, SlideLeft, SlideRight, Fade } _transitionStyle = TransitionStyle::None;
     NodeId _queuedTransitionNodeId;
 
     bool _beingRemoved = false;

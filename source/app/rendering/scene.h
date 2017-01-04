@@ -30,7 +30,7 @@ public:
     virtual bool viewIsReset() const = 0;
 
 protected:
-    bool visible() { return _visible; }
+    bool visible() const { return _visible; }
 
 private:
     bool _interactionEnabled = true;

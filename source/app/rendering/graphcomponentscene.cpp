@@ -27,37 +27,46 @@ void GraphComponentScene::update(float t)
     float offset = 0.0f;
     float outOffset = 0.0f;
 
-    switch(_transitionDirection)
+    switch(_transitionStyle)
     {
-    case Direction::Left:
+    case TransitionStyle::SlideLeft:
         offset = (1.0f - _transitionValue) * _width;
         outOffset = offset - _width;
         break;
 
-    case Direction::Right:
+    case TransitionStyle::SlideRight:
         offset = -(1.0f - _transitionValue) * _width;
         outOffset = offset + _width;
         break;
 
-    case Direction::NotSliding:
     default:
         break;
     }
 
-    // The static component, or the one sliding in
+    // The static component, or the one transitioning in
     if(componentRenderer() != nullptr)
     {
         componentRenderer()->setDimensions(QRect(offset, 0, _width, _height));
-        componentRenderer()->setAlpha(1.0f);
+
+        if(_transitionStyle == TransitionStyle::Fade)
+            componentRenderer()->setAlpha(_transitionValue);
+        else
+            componentRenderer()->setAlpha(1.0f);
+
         componentRenderer()->update(t);
     }
 
-    // The component sliding out
+    // The component transitioning out
     if(transitioningComponentRenderer() != nullptr &&
        transitioningComponentRenderer() != componentRenderer())
     {
         transitioningComponentRenderer()->setDimensions(QRect(outOffset, 0, _width, _height));
-        transitioningComponentRenderer()->setAlpha(1.0f);
+
+        if(_transitionStyle == TransitionStyle::Fade)
+            transitioningComponentRenderer()->setAlpha(1.0f - _transitionValue);
+        else
+            transitioningComponentRenderer()->setAlpha(1.0f);
+
         transitioningComponentRenderer()->update(t);
     }
 }
@@ -95,19 +104,26 @@ void GraphComponentScene::onShow()
 
 void GraphComponentScene::finishComponentTransition(ComponentId componentId, bool doTransition)
 {
-    auto transitionDirection = componentId < _componentId ? Direction::Right : Direction::Left;
+    auto transitionType = Transition::Type::InversePower;
+    auto transitionStyle = componentId < _componentId ? TransitionStyle::SlideRight : TransitionStyle::SlideLeft;
 
     if(componentId.isNull())
         _componentId = _defaultComponentId;
     else
         _componentId = componentId;
 
+    if(_componentId.isNull() || _transitioningComponentId.isNull())
+    {
+        transitionType = Transition::Type::EaseInEaseOut;
+        transitionStyle = TransitionStyle::Fade;
+    }
+
     setViewportSize();
 
     if(doTransition)
     {
-        _transitionDirection = transitionDirection;
-        _graphRenderer->transition().start(0.3f, Transition::Type::InversePower,
+        _transitionStyle = transitionStyle;
+        _graphRenderer->transition().start(0.3f, transitionType,
         [this](float f)
         {
             _transitionValue = f;
@@ -115,8 +131,11 @@ void GraphComponentScene::finishComponentTransition(ComponentId componentId, boo
         [this]
         {
             _transitionValue = 0.0f;
-            _transitionDirection = Direction::NotSliding;
-            transitioningComponentRenderer()->thaw();
+            _transitionStyle = TransitionStyle::None;
+
+            if(transitioningComponentRenderer() != nullptr)
+                transitioningComponentRenderer()->thaw();
+
             _transitioningComponentId.setToNull();
             updateRendererVisibility();
 
@@ -398,7 +417,7 @@ void GraphComponentScene::onComponentsWillMerge(const Graph*, const ComponentMer
 void GraphComponentScene::onComponentAdded(const Graph*, ComponentId componentId, bool)
 {
     if(_componentId.isNull())
-        setComponentId(componentId);
+        setComponentId(componentId, visible());
 }
 
 void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool hasMerged)
@@ -451,7 +470,8 @@ void GraphComponentScene::onGraphChanged(const Graph* graph)
             };
 
             // Graph changes may significantly alter the centre; ease the transition
-            if(!_beingRemoved && componentRenderer() != nullptr && componentRenderer()->transitionRequired())
+            if(!_beingRemoved && _numComponentsPriorToChange > 0 &&
+               componentRenderer() != nullptr && componentRenderer()->transitionRequired())
             {
                 startTransition(finishTransition);
                 componentRenderer()->computeTransition();
