@@ -35,6 +35,8 @@ public:
     QQuaternion rotation() const;
     float distance() const;
 
+    bool valid() const { return _distance > 0.0f; }
+
     void setFocus(const QVector3D& focus);
     void setRotation(const QQuaternion& rotation);
     void setDistance(float distance);
@@ -71,7 +73,7 @@ private:
 
     QVector3D _focus;
     QQuaternion _rotation;
-    float _distance = 1.0f;
+    float _distance = -1.0f;
 
     Camera::ProjectionType _projectionType = Camera::OrthogonalProjection;
 

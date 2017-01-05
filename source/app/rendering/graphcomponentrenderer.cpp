@@ -172,6 +172,7 @@ float GraphComponentRenderer::zoomDistanceForRadius(float radius)
     if(minHalfFov > 0.0f)
         return std::max(radius / std::sin(minHalfFov), MINIMUM_ZOOM_DISTANCE);
 
+    qDebug() << "WARNING: ComponentId" << _componentId << "GraphComponentRenderer fov not set";
     return MINIMUM_ZOOM_DISTANCE;
 }
 
@@ -395,7 +396,7 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
     if(!_zoomTransition.active())
         zoomToDistance(cameraDistance);
 
-    if(!_graphRenderer->transition().active())
+    if(!_graphRenderer->transition().active() || !_viewData._camera.valid())
     {
         _viewData._camera.setDistance(cameraDistance);
         _viewData._camera.setFocus(focus);

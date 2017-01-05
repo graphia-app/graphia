@@ -275,12 +275,7 @@ void GraphOverviewScene::applyComponentLayout()
 
         // If the component is fading in, keep it in a fixed position
         if(_previousComponentAlpha[componentId] == 0.0f)
-        {
             _previousZoomedComponentLayoutData[componentId] = _zoomedComponentLayoutData[componentId];
-
-            auto renderer = _graphRenderer->componentRendererForId(componentId);
-            renderer->resetView();
-        }
     }
 
     // Give the mergers the same layout as the new component
