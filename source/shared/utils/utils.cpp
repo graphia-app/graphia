@@ -107,8 +107,13 @@ const QString u::currentThreadName()
     return threadName;
 }
 
+QString u::parentProcessName() { return {}; }
+
 #elif defined(_WIN32) && !defined(__MINGW32__)
 #include <windows.h>
+#include <tlhelp32.h>
+#include <Psapi.h>
+
 const DWORD MS_VC_EXCEPTION  =0x406D1388;
 
 #pragma pack(push,8)
@@ -121,7 +126,7 @@ typedef struct tagTHREADNAME_INFO
 } THREADNAME_INFO;
 #pragma pack(pop)
 
-void SetThreadName(char* threadName)
+static void SetThreadName(char* threadName)
 {
     THREADNAME_INFO info;
     info.dwType = 0x1000;
@@ -148,12 +153,50 @@ const QString u::currentThreadName()
     // Windows doesn't really have a concept of named threads (see above), so use the ID instead
     return QString::number(u::currentThreadId());
 }
+
+QString u::parentProcessName()
+{
+    HANDLE handle = NULL;
+    PROCESSENTRY32 pe = {0};
+    DWORD ppid = 0;
+    pe.dwSize = sizeof(PROCESSENTRY32);
+    handle = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if(Process32First(handle, &pe))
+    {
+        do
+        {
+            if(pe.th32ProcessID == GetCurrentProcessId())
+            {
+                ppid = pe.th32ParentProcessID;
+                break;
+            }
+        } while(Process32Next(handle, &pe));
+    }
+    CloseHandle(handle);
+
+    HANDLE processHandle = OpenProcess(
+        PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+        FALSE,
+        ppid);
+
+    if(processHandle)
+    {
+        TCHAR charBuffer[MAX_PATH];
+        if(GetModuleFileNameEx(processHandle, 0, charBuffer, MAX_PATH))
+            return QString::fromWCharArray(charBuffer);
+
+        CloseHandle(processHandle);
+    }
+
+    return {};
+}
 #else
 void u::setCurrentThreadName(const QString&) {}
 const QString u::currentThreadName()
 {
     return QString::number(u::currentThreadId());
 }
+QString u::parentProcessName() { return {}; }
 #endif
 
 QQuaternion u::matrixToQuaternion(const QMatrix4x4& m)

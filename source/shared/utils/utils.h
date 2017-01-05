@@ -58,6 +58,7 @@ namespace u
     int currentThreadId();
     void setCurrentThreadName(const QString& name);
     const QString currentThreadName();
+    QString parentProcessName();
 
     QQuaternion matrixToQuaternion(const QMatrix4x4& m);
 

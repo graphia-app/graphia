@@ -1,5 +1,7 @@
 #include "crashhandler.h"
 
+#include "shared/utils/utils.h"
+
 #include <QDir>
 #include <QCoreApplication>
 
@@ -115,9 +117,22 @@ CrashHandler::CrashHandler()
                 QDir::separator() +
                 "CrashReporter");
 
+    // Avoid using the CrashHandler if we're started by something that's probably an IDE
+    auto parentProcess = u::parentProcessName();
+    if(parentProcess.contains("qtcreator", Qt::CaseInsensitive) ||
+       parentProcess.contains("devenv", Qt::CaseInsensitive))
+    {
+        std::cerr << "Invoked by " << parentProcess.toStdString() <<
+                     ", not installing CrashHandler\n";
+        return;
+    }
+
 #if defined(Q_OS_WIN32)
     if(IsDebuggerPresent())
+    {
+        std::cerr << "Invoked by debugger, not installing CrashHandler\n";
         return;
+    }
 
     crashReporterExecutableName.append(".exe");
     int length = crashReporterExecutableName.toWCharArray(_crashReporterExecutableName);
