@@ -18,6 +18,7 @@ class TransformedGraph : public Graph
 public:
     explicit TransformedGraph(const Graph& source);
 
+    void enableAutoRebuild() { _autoRebuild = true; }
     void setTransform(std::unique_ptr<GraphTransform> graphTransform);
 
     const std::vector<NodeId>& nodeIds() const { return _target.nodeIds(); }
@@ -55,6 +56,7 @@ private:
     const Graph* _source;
     std::unique_ptr<GraphTransform> _graphTransform;
     MutableGraph _target;
+    bool _autoRebuild = false;
 
     class State
     {

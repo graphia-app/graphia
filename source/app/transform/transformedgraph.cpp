@@ -53,6 +53,9 @@ void TransformedGraph::cloneFrom(const Graph& other)
 
 void TransformedGraph::rebuild()
 {
+    if(!_autoRebuild)
+        return;
+
     emit graphWillChange(this);
 
     setPhase(tr("Transforming"));

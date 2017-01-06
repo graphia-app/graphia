@@ -113,6 +113,7 @@ void GraphModel::buildTransforms(const QStringList& transforms)
             compoundTransform->addTransform(std::move(graphTransform));
     }
 
+    _transformedGraph.enableAutoRebuild();
     _transformedGraph.setTransform(std::move(compoundTransform));
 }
 
