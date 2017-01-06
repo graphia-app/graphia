@@ -125,8 +125,11 @@ void CorrelationPlotItem::buildGraphs()
     _customPlot.legend->clear();
     _customPlot.clearGraphs();
 
-    _customPlot.plotLayout()->remove(_plotModeTextElement);
-    _customPlot.plotLayout()->simplify();
+    if(_customPlot.plotLayout()->rowCount() > 1)
+    {
+        _customPlot.plotLayout()->remove(_plotModeTextElement);
+        _customPlot.plotLayout()->simplify();
+    }
 
     if(_selectedRows.length() > MAX_SELECTED_ROWS_BEFORE_MEAN)
         populateMeanAverageGraphs();
