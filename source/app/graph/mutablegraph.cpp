@@ -378,15 +378,6 @@ void MutableGraph::contractEdges(const EdgeIdSet& edgeIds)
     endTransaction();
 }
 
-void MutableGraph::reserve(const Graph& other)
-{
-    const auto* mutableOther = dynamic_cast<const MutableGraph*>(&other);
-    Q_ASSERT(mutableOther != nullptr);
-
-    reserveNodeId(mutableOther->largestNodeId());
-    reserveEdgeId(mutableOther->largestEdgeId());
-}
-
 void MutableGraph::cloneFrom(const Graph& other)
 {
     beginTransaction();

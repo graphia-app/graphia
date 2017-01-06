@@ -63,6 +63,12 @@ bool Graph::containsEdgeId(EdgeId edgeId) const
     return u::contains(edgeIds(), edgeId);
 }
 
+void Graph::reserve(const Graph& other)
+{
+    reserveNodeId(other.largestNodeId());
+    reserveEdgeId(other.largestEdgeId());
+}
+
 void Graph::enableComponentManagement()
 {
     if(_componentManager == nullptr)

@@ -39,6 +39,18 @@ void TransformedGraph::setTransform(std::unique_ptr<GraphTransform> graphTransfo
     rebuild();
 }
 
+void TransformedGraph::reserve(const Graph& other)
+{
+    _target.reserve(other);
+    Graph::reserve(other);
+}
+
+void TransformedGraph::cloneFrom(const Graph& other)
+{
+    _target.cloneFrom(other);
+    Graph::reserve(other);
+}
+
 void TransformedGraph::rebuild()
 {
     emit graphWillChange(this);

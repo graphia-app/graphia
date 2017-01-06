@@ -46,8 +46,8 @@ public:
 
     MutableGraph& mutableGraph() { return _target; }
 
-    void reserve(const Graph& other) { _target.reserve(other); }
-    void cloneFrom(const Graph& other) { _target.cloneFrom(other); }
+    void reserve(const Graph& other);
+    void cloneFrom(const Graph& other);
 
     void update() { _target.update(); }
 
