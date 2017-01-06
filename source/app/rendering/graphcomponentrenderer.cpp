@@ -46,6 +46,7 @@ void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, 
 
     _targetZoomDistance = _viewData._zoomDistance;
     _viewData._focusNodeId.setToNull();
+    _viewData._camera = {};
 
     synchronise();
 
