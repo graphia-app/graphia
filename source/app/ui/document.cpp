@@ -315,7 +315,10 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
 
     connect(_graphFileParserThread.get(), &ParserThread::progress, this, &Document::onLoadProgress);
     connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::onLoadComplete);
-    _graphFileParserThread->start(std::move(parser));
+    _graphFileParserThread->start(std::move(parser), [this]
+    {
+        _graphModel->buildTransforms(_pluginInstance->defaultTransforms());
+    });
 
     return true;
 }
@@ -347,7 +350,6 @@ void Document::onLoadComplete(bool success)
     emit pluginQmlPathChanged();
 
     setTransforms(_pluginInstance->defaultTransforms());
-    _graphModel->buildTransforms(_graphTransforms);
 
     _layoutThread = std::make_unique<LayoutThread>(*_graphModel, std::make_unique<ForceDirectedLayoutFactory>(_graphModel));
     connect(_layoutThread.get(), &LayoutThread::pausedChanged, this, &Document::layoutPauseStateChanged);
