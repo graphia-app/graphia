@@ -93,6 +93,8 @@ int u::currentThreadId()
 #include <unistd.h>
 #include <sys/syscall.h>
 
+#include <QFile>
+
 void u::setCurrentThreadName(const QString& name)
 {
     if(syscall(SYS_gettid) != getpid()) // Avoid renaming main thread
@@ -107,7 +109,23 @@ const QString u::currentThreadName()
     return threadName;
 }
 
-QString u::parentProcessName() { return {}; }
+QString u::parentProcessName()
+{
+    auto ppid = getppid();
+
+    QFile procFile(QString("/proc/%1/cmdline").arg(ppid));
+    if(procFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QTextStream ts(&procFile);
+        QString commandLine = ts.readLine();
+        auto tokens = commandLine.split(QRegExp(QString(QChar(0))));
+
+        if(!tokens.empty())
+            return tokens.at(0);
+    }
+
+    return {};
+}
 
 #elif defined(_WIN32) && !defined(__MINGW32__)
 #include <windows.h>
