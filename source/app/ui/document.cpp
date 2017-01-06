@@ -298,7 +298,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
     });
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, this, &Document::numNodesFoundChanged);
 
-    connect(&_graphModel->graph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
+    connect(&_graphModel->mutableGraph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
 
     connect(&_graphModel->graph().debugPauser, &DebugPauser::enabledChanged, this, &Document::debugPauserEnabledChanged);
     connect(&_graphModel->graph().debugPauser, &DebugPauser::pausedChanged, this, &Document::debugPausedChanged);
