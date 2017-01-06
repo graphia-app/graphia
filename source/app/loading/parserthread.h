@@ -8,6 +8,7 @@
 #include <QUrl>
 
 #include <thread>
+#include <functional>
 
 class MutableGraph;
 
@@ -19,12 +20,14 @@ private:
     QUrl _url;
     std::unique_ptr<IParser> _parser;
     std::thread _thread;
+    std::function<void()> _loadSuccessFn;
 
 public:
     ParserThread(MutableGraph& graph, const QUrl& url);
     virtual ~ParserThread();
 
-    void start(std::unique_ptr<IParser> parser);
+    void start(std::unique_ptr<IParser> parser,
+               std::function<void()> loadSuccessFn = []{});
     void cancel();
 
 private:
