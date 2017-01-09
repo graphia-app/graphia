@@ -14,8 +14,8 @@ struct BarnesHutSubVolume : SubVolume<BarnesHutTree> { float _sSq; };
 class BarnesHutTree : public BaseOctree<BarnesHutTree, BarnesHutSubVolume>
 {
 private:
-    static constexpr QVector3D differenceEpsilon() { return QVector3D(0.0f, 0.0f, 0.0001f); }
-    static constexpr float distanceSqEpsilon()
+    static Q_DECL_CONSTEXPR QVector3D differenceEpsilon() { return QVector3D(0.0f, 0.0f, 0.0001f); }
+    static Q_DECL_CONSTEXPR float distanceSqEpsilon()
     {
         auto e = differenceEpsilon();
         return e.x() + e.x() + e.y() + e.y() + e.z() + e.z();
