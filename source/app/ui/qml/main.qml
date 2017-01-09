@@ -60,7 +60,9 @@ ApplicationWindow
         else
             mainWindow.recentFiles = [];
 
-        fileOpenDialog.folder = misc.fileOpenInitialFolder;
+        if(misc.fileOpenInitialFolder !== undefined)
+            fileOpenDialog.folder = misc.fileOpenInitialFolder;
+
         processArguments(Qt.application.arguments);
 
         if(!windowPreferences.maximised &&
