@@ -20,6 +20,10 @@ ApplicationWindow
 
     minimumWidth: mainToolBar.implicitWidth
     minimumHeight: 480
+    // To prevent storing maximised screen size, store previous size and reset
+    // if visibility == maximised;
+    property int previousWidth: width;
+    property int previousHeight: height;
 
     property DocumentUI currentDocument: tabView.currentIndex < tabView.count ?
                                          tabView.getTab(tabView.currentIndex).item : null
@@ -58,6 +62,14 @@ ApplicationWindow
 
         fileOpenDialog.folder = misc.fileOpenInitialFolder;
         processArguments(Qt.application.arguments);
+
+        if(!windowPreferences.maximised &&
+                windowPreferences.width !== undefined &&
+                windowPreferences.height !== undefined)
+        {
+            width = windowPreferences.width;
+            height = windowPreferences.height;
+        }
     }
 
     MessageDialog
@@ -93,12 +105,38 @@ ApplicationWindow
 
     Preferences
     {
+        id: windowPreferences
         section: "window"
+        property var height
+        property var width
         property alias x: mainWindow.x
         property alias y: mainWindow.y
-        property alias width: mainWindow.width
-        property alias height: mainWindow.height
         property alias maximised: mainWindow.maximised
+    }
+
+    onWidthChanged:
+    {
+        if(windowPreferences.width !== undefined)
+            previousWidth = windowPreferences.width;
+
+        windowPreferences.width = mainWindow.width;
+    }
+
+    onHeightChanged:
+    {
+        if(windowPreferences.height !== undefined)
+            previousHeight = windowPreferences.height;
+
+        windowPreferences.height = mainWindow.height;
+    }
+
+    onVisibilityChanged:
+    {
+        if(visibility == Window.Maximized)
+        {
+            windowPreferences.width = previousWidth
+            windowPreferences.height = previousHeight
+        }
     }
 
     Preferences
