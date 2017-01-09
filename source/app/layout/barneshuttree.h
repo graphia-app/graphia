@@ -14,6 +14,13 @@ struct BarnesHutSubVolume : SubVolume<BarnesHutTree> { float _sSq; };
 class BarnesHutTree : public BaseOctree<BarnesHutTree, BarnesHutSubVolume>
 {
 private:
+    static constexpr QVector3D differenceEpsilon() { return QVector3D(0.0f, 0.0f, 0.0001f); }
+    static constexpr float distanceSqEpsilon()
+    {
+        auto e = differenceEpsilon();
+        return e.x() + e.x() + e.y() + e.y() + e.z() + e.z();
+    }
+
     float _theta = 0.8f;
     int _mass = 0;
     QVector3D _centreOfMass;
@@ -42,8 +49,15 @@ public:
                 auto subVolume = subTree->_internalNodes[i];
 
                 const QVector3D& centreOfMass = subVolume->_subTree->_centreOfMass;
-                const QVector3D difference = centreOfMass - nodePosition;
-                const float distanceSq = difference.lengthSquared();
+                QVector3D difference = (centreOfMass - nodePosition);
+                float distanceSq = difference.lengthSquared();
+
+                if(distanceSq == 0.0f)
+                {
+                    difference = differenceEpsilon();
+                    distanceSq = distanceSqEpsilon();
+                }
+
                 const float sOverD = subVolume->_sSq / distanceSq;
 
                 if(sOverD > _theta)
@@ -60,8 +74,15 @@ public:
                 if(otherNodeId != nodeId)
                 {
                     const QVector3D& otherNodePosition = _nodePositions->get(otherNodeId);
-                    const QVector3D difference = otherNodePosition - nodePosition;
-                    const float distanceSq = difference.lengthSquared();
+                    QVector3D difference = otherNodePosition - nodePosition;
+                    float distanceSq = difference.lengthSquared();
+
+                    if(distanceSq == 0.0f)
+                    {
+                        difference = differenceEpsilon();
+                        distanceSq = distanceSqEpsilon();
+                    }
+
                     result += kernel(1, difference, distanceSq);
                 }
             }
