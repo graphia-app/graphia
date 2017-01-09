@@ -270,19 +270,17 @@ void GraphComponentRenderer::setViewportSize(int viewportWidth, int viewportHeig
 void GraphComponentRenderer::setDimensions(const QRectF& dimensions)
 {
     if(_dimensions != dimensions)
-    {
-        _dimensions = dimensions;
-
-        float aspectRatio = _dimensions.width() / _dimensions.height();
-        _fovy = 60.0f;
-        _fovx = _fovy * aspectRatio;
-
-        _viewData._camera.setPerspectiveProjection(_fovy, aspectRatio, 0.3f, 50000.0f);
-        _viewData._camera.setViewportWidth(_dimensions.width());
-        _viewData._camera.setViewportHeight(_dimensions.height());
-
         _entireComponentZoomDistanceRequiresUpdate = true;
-    }
+
+    _dimensions = dimensions;
+
+    float aspectRatio = _dimensions.width() / _dimensions.height();
+    _fovy = 60.0f;
+    _fovx = _fovy * aspectRatio;
+
+    _viewData._camera.setPerspectiveProjection(_fovy, aspectRatio, 0.3f, 50000.0f);
+    _viewData._camera.setViewportWidth(_dimensions.width());
+    _viewData._camera.setViewportHeight(_dimensions.height());
 }
 
 bool GraphComponentRenderer::transitionActive()
