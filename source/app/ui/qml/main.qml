@@ -16,10 +16,7 @@ ApplicationWindow
     property bool debugMenuUnhidden: false
     minimumWidth: mainToolBar.implicitWidth
     minimumHeight: 480
-    // To prevent storing maximised screen size, store previous size and reset
-    // if visibility == maximised;
-    property int previousWidth
-    property int previousHeight
+    property bool maximised: mainWindow.visibility === Window.Maximized
 
     property DocumentUI currentDocument: tabView.currentIndex < tabView.count ?
                                          tabView.getTab(tabView.currentIndex).item : null
@@ -59,26 +56,24 @@ ApplicationWindow
         if(misc.fileOpenInitialFolder !== undefined)
             fileOpenDialog.folder = misc.fileOpenInitialFolder;
 
-        processArguments(Qt.application.arguments);
-
         if(windowPreferences.width !== undefined &&
-                windowPreferences.height !== undefined)
+           windowPreferences.height !== undefined)
         {
             width = windowPreferences.width;
             height = windowPreferences.height;
-            previousWidth = windowPreferences.width;
-            previousHeight = windowPreferences.height;
         }
         else
         {
-            width = 800
-            height = 600
+            width = 800;
+            height = 600;
         }
 
-        if (windowPreferences.visibility !== undefined)
-            mainWindow.visibility = windowPreferences.visibility
+        if(windowPreferences.maximised !== undefined)
+            mainWindow.visibility = windowPreferences.maximised ? Window.Maximized : Window.Windowed;
 
-         mainWindow.visible = true
+        mainWindow.visible = true;
+
+        processArguments(Qt.application.arguments);
     }
 
     MessageDialog
@@ -118,7 +113,7 @@ ApplicationWindow
         section: "window"
         property var height
         property var width
-        property var visibility
+        property bool maximised
         property alias x: mainWindow.x
         property alias y: mainWindow.y
     }
@@ -876,37 +871,15 @@ ApplicationWindow
             currentDocument.commandComplete.connect(alertWhenCommandComplete);
     }
 
-    onWidthChanged:
-    {
-        if(windowPreferences.width !== undefined)
-            previousWidth = windowPreferences.width;
-
-        if(visibility != Window.Maximized)
-            windowPreferences.width = mainWindow.width;
-    }
-
-    onHeightChanged:
-    {
-        if(windowPreferences.height !== undefined)
-            previousHeight = windowPreferences.height;
-
-        if(visibility != Window.Maximized)
-            windowPreferences.height = mainWindow.height;
-    }
-
-    onVisibilityChanged:
-    {
-        // Prevent the maximised size overwriting previous windowed size
-        if(visibility == Window.Maximized)
-        {
-            windowPreferences.width = previousWidth
-            windowPreferences.height = previousHeight
-        }
-    }
-
     onClosing:
     {
-        windowPreferences.visibility = visibility;
+        windowPreferences.maximised = mainWindow.maximised;
+
+        if(!maximised)
+        {
+            windowPreferences.width = mainWindow.width;
+            windowPreferences.height = mainWindow.height;
+        }
     }
 
     Application
