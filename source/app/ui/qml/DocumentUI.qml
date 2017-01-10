@@ -313,9 +313,9 @@ Item
         section: "window"
         property alias pluginX: pluginWindow.x
         property alias pluginY: pluginWindow.y
-        property alias pluginWidth: pluginWindow.width
-        property alias pluginHeight: pluginWindow.height
-        property alias pluginMaximised: pluginWindow.maximised
+        property int pluginWidth
+        property int pluginHeight
+        property bool pluginMaximised
         property alias pluginSplitSize: root.pluginSplitSize
         property alias pluginPoppedOut: root.pluginPoppedOut
     }
@@ -367,6 +367,30 @@ Item
             return window.pluginSplitSize
     }
 
+    function loadPluginWindowState()
+    {
+        if(window.pluginWidth !== undefined &&
+           window.pluginHeight !== undefined)
+        {
+            pluginWindow.width = window.pluginWidth;
+            pluginWindow.height = window.pluginHeight;
+        }
+
+        if(window.pluginMaximised !== undefined)
+            pluginWindow.visibility = window.pluginMaximised ? Window.Maximized : Window.Windowed;
+    }
+
+    function savePluginWindowState()
+    {
+        window.pluginMaximised = pluginWindow.maximised;
+
+        if(!pluginWindow.maximised)
+        {
+            window.pluginWidth = pluginWindow.width;
+            window.pluginHeight = pluginWindow.height;
+        }
+    }
+
     Window
     {
         id: pluginWindow
@@ -382,11 +406,24 @@ Item
         //FIXME: window is always on top?
         flags: Qt.Window
 
+        onVisibleChanged:
+        {
+            if(visible)
+                loadPluginWindowState();
+            else
+                savePluginWindowState();
+        }
+
         onClosing:
         {
             if(visible)
                 popInPlugin();
         }
+    }
+
+    Component.onDestruction:
+    {
+        savePluginWindowState();
     }
 
     function popOutPlugin()
