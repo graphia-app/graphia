@@ -313,9 +313,9 @@ Item
         section: "window"
         property alias pluginX: pluginWindow.x
         property alias pluginY: pluginWindow.y
-        property int pluginWidth
-        property int pluginHeight
-        property bool pluginMaximised
+        property var pluginWidth
+        property var pluginHeight
+        property var pluginMaximised
         property alias pluginSplitSize: root.pluginSplitSize
         property alias pluginPoppedOut: root.pluginPoppedOut
     }
@@ -377,7 +377,10 @@ Item
         }
 
         if(window.pluginMaximised !== undefined)
-            pluginWindow.visibility = window.pluginMaximised ? Window.Maximized : Window.Windowed;
+        {
+            pluginWindow.visibility = window.pluginMaximised === "true" ?
+                Window.Maximized : Window.Windowed;
+        }
     }
 
     function savePluginWindowState()

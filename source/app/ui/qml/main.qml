@@ -14,6 +14,8 @@ ApplicationWindow
     visible: false
     property var recentFiles
     property bool debugMenuUnhidden: false
+    width: 1024
+    height: 768
     minimumWidth: mainToolBar.implicitWidth
     minimumHeight: 480
     property bool maximised: mainWindow.visibility === Window.Maximized
@@ -59,21 +61,30 @@ ApplicationWindow
         if(windowPreferences.width !== undefined &&
            windowPreferences.height !== undefined)
         {
-            width = windowPreferences.width;
-            height = windowPreferences.height;
-        }
-        else
-        {
-            width = 800;
-            height = 600;
+            mainWindow.width = windowPreferences.width;
+            mainWindow.height = windowPreferences.height;
         }
 
         if(windowPreferences.maximised !== undefined)
-            mainWindow.visibility = windowPreferences.maximised ? Window.Maximized : Window.Windowed;
+        {
+            mainWindow.visibility = windowPreferences.maximised === "true" ?
+                Window.Maximized : Window.Windowed;
+        }
 
         mainWindow.visible = true;
 
         processArguments(Qt.application.arguments);
+    }
+
+    onClosing:
+    {
+        windowPreferences.maximised = mainWindow.maximised;
+
+        if(!mainWindow.maximised)
+        {
+            windowPreferences.width = mainWindow.width;
+            windowPreferences.height = mainWindow.height;
+        }
     }
 
     MessageDialog
@@ -111,9 +122,9 @@ ApplicationWindow
     {
         id: windowPreferences
         section: "window"
-        property var height
         property var width
-        property bool maximised
+        property var height
+        property var maximised
         property alias x: mainWindow.x
         property alias y: mainWindow.y
     }
@@ -869,17 +880,6 @@ ApplicationWindow
             currentDocument.commandComplete.disconnect(alertWhenCommandComplete);
         else if(currentDocument.commandInProgress)
             currentDocument.commandComplete.connect(alertWhenCommandComplete);
-    }
-
-    onClosing:
-    {
-        windowPreferences.maximised = mainWindow.maximised;
-
-        if(!maximised)
-        {
-            windowPreferences.width = mainWindow.width;
-            windowPreferences.height = mainWindow.height;
-        }
     }
 
     Application
