@@ -939,9 +939,24 @@ void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId compone
     }, "GraphRenderer::switchToComponentMode");
 }
 
-void GraphRenderer::onGraphWillChange(const Graph*)
+void GraphRenderer::onGraphWillChange(const Graph* graph)
 {
     pauseRendererThreadExecution();
+
+    // Hide any graph elements that are merged; they aren't displayed normally,
+    // but during scene transitions they may become unmerged, and we don't want
+    // to show them until the scene transition is over
+    for(NodeId nodeId : graph->nodeIds())
+    {
+        if(graph->typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Tail)
+            _hiddenNodes.set(nodeId, true);
+    }
+
+    for(EdgeId edgeId : graph->edgeIds())
+    {
+        if(graph->typeOf(edgeId) == EdgeIdDistinctSetCollection::Type::Tail)
+            _hiddenEdges.set(edgeId, true);
+    }
 }
 
 void GraphRenderer::onGraphChanged(const Graph* graph)
