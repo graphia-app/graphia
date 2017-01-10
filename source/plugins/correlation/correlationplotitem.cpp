@@ -54,7 +54,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem
 void CorrelationPlotItem::refresh()
 {
     updateCustomPlotSize();
-    buildGraphs();
+    buildPlot();
     _customPlot.replot();
 }
 
@@ -110,7 +110,7 @@ void CorrelationPlotItem::mouseDoubleClickEvent(QMouseEvent* event)
     routeMouseEvents(event);
 }
 
-void CorrelationPlotItem::buildGraphs()
+void CorrelationPlotItem::buildPlot()
 {
     // If the legend is not cleared first this will cause a slowdown
     // when removing a large number of graphs
@@ -124,9 +124,9 @@ void CorrelationPlotItem::buildGraphs()
     }
 
     if(_selectedRows.length() > MAX_SELECTED_ROWS_BEFORE_MEAN)
-        populateMeanAverageGraphs();
+        populateMeanAveragePlot();
     else
-        populateRawGraphs();
+        populateRawPlot();
 
     QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
     _customPlot.xAxis->setTicker(categoryTicker);
@@ -137,7 +137,7 @@ void CorrelationPlotItem::buildGraphs()
         categoryTicker->addTick(i, _labelNames[i]);
 }
 
-void CorrelationPlotItem::populateMeanAverageGraphs()
+void CorrelationPlotItem::populateMeanAveragePlot()
 {
     double maxX = _columnCount;
     double maxY = 0.0;
@@ -190,7 +190,7 @@ void CorrelationPlotItem::populateMeanAverageGraphs()
     _customPlot.yAxis->setRange(0, maxY);
 }
 
-void CorrelationPlotItem::populateRawGraphs()
+void CorrelationPlotItem::populateRawPlot()
 {
     double maxX = _columnCount;
     double maxY = 0.0;

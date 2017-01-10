@@ -36,7 +36,7 @@ protected:
     virtual void hoverLeaveEvent(QHoverEvent* event);
     virtual void mouseDoubleClickEvent(QMouseEvent* event);
 
-    void buildGraphs();
+    void buildPlot();
 
 private:
     const int MAX_SELECTED_ROWS_BEFORE_MEAN = 1000;
@@ -59,8 +59,8 @@ private:
     QVector<double> _data;
     QVector<int> _selectedRows;
 
-    void populateMeanAverageGraphs();
-    void populateRawGraphs();
+    void populateMeanAveragePlot();
+    void populateRawPlot();
 
 private slots:
     void onCustomReplot();
