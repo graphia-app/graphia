@@ -11,19 +11,15 @@ import com.kajeka 1.0
 ApplicationWindow
 {
     id: mainWindow
-    visible: true
-    width: 800
-    height: 600
-    property bool maximised: visibility === Window.Maximized
+    visible: false
     property var recentFiles
     property bool debugMenuUnhidden: false
-
     minimumWidth: mainToolBar.implicitWidth
     minimumHeight: 480
     // To prevent storing maximised screen size, store previous size and reset
     // if visibility == maximised;
-    property int previousWidth: width;
-    property int previousHeight: height;
+    property int previousWidth
+    property int previousHeight
 
     property DocumentUI currentDocument: tabView.currentIndex < tabView.count ?
                                          tabView.getTab(tabView.currentIndex).item : null
@@ -65,13 +61,24 @@ ApplicationWindow
 
         processArguments(Qt.application.arguments);
 
-        if(!windowPreferences.maximised &&
-                windowPreferences.width !== undefined &&
+        if(windowPreferences.width !== undefined &&
                 windowPreferences.height !== undefined)
         {
             width = windowPreferences.width;
             height = windowPreferences.height;
+            previousWidth = windowPreferences.width;
+            previousHeight = windowPreferences.height;
         }
+        else
+        {
+            width = 800
+            height = 600
+        }
+
+        if (windowPreferences.visibility !== undefined)
+            mainWindow.visibility = windowPreferences.visibility
+
+         mainWindow.visible = true
     }
 
     MessageDialog
@@ -111,34 +118,9 @@ ApplicationWindow
         section: "window"
         property var height
         property var width
+        property var visibility
         property alias x: mainWindow.x
         property alias y: mainWindow.y
-        property alias maximised: mainWindow.maximised
-    }
-
-    onWidthChanged:
-    {
-        if(windowPreferences.width !== undefined)
-            previousWidth = windowPreferences.width;
-
-        windowPreferences.width = mainWindow.width;
-    }
-
-    onHeightChanged:
-    {
-        if(windowPreferences.height !== undefined)
-            previousHeight = windowPreferences.height;
-
-        windowPreferences.height = mainWindow.height;
-    }
-
-    onVisibilityChanged:
-    {
-        if(visibility == Window.Maximized)
-        {
-            windowPreferences.width = previousWidth
-            windowPreferences.height = previousHeight
-        }
     }
 
     Preferences
@@ -892,6 +874,39 @@ ApplicationWindow
             currentDocument.commandComplete.disconnect(alertWhenCommandComplete);
         else if(currentDocument.commandInProgress)
             currentDocument.commandComplete.connect(alertWhenCommandComplete);
+    }
+
+    onWidthChanged:
+    {
+        if(windowPreferences.width !== undefined)
+            previousWidth = windowPreferences.width;
+
+        if(visibility != Window.Maximized)
+            windowPreferences.width = mainWindow.width;
+    }
+
+    onHeightChanged:
+    {
+        if(windowPreferences.height !== undefined)
+            previousHeight = windowPreferences.height;
+
+        if(visibility != Window.Maximized)
+            windowPreferences.height = mainWindow.height;
+    }
+
+    onVisibilityChanged:
+    {
+        // Prevent the maximised size overwriting previous windowed size
+        if(visibility == Window.Maximized)
+        {
+            windowPreferences.width = previousWidth
+            windowPreferences.height = previousHeight
+        }
+    }
+
+    onClosing:
+    {
+        windowPreferences.visibility = visibility;
     }
 
     Application
