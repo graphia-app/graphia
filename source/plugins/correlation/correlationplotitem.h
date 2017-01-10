@@ -47,7 +47,6 @@ private:
     QCPItemText* _hoverLabel = nullptr;
     QCPItemRect* _hoverColorRect = nullptr;
     QCPItemTracer* _itemTracer = nullptr;
-    QCPTextElement* _plotModeTextElement = nullptr;
 
     QFont _defaultFont9Pt;
 

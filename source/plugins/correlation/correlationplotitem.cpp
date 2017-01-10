@@ -41,13 +41,6 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem
     _itemTracer->setStyle(QCPItemTracer::TracerStyle::tsCircle);
     _itemTracer->setClipToAxisRect(false);
 
-    _plotModeTextElement = new QCPTextElement(&_customPlot);
-    _plotModeTextElement->setLayer(_textLayer);
-    _plotModeTextElement->setTextFlags(Qt::AlignLeft);
-    _plotModeTextElement->setFont(_defaultFont9Pt);
-    _plotModeTextElement->setTextColor(Qt::black);
-    _plotModeTextElement->setVisible(false);
-
     setFlag(QQuickItem::ItemHasContents, true);
 
     setAcceptHoverEvents(true);
@@ -119,7 +112,6 @@ void CorrelationPlotItem::mouseDoubleClickEvent(QMouseEvent* event)
 
 void CorrelationPlotItem::buildGraphs()
 {
-    _plotModeTextElement->setVisible(false);
     // If the legend is not cleared first this will cause a slowdown
     // when removing a large number of graphs
     _customPlot.legend->clear();
@@ -127,7 +119,7 @@ void CorrelationPlotItem::buildGraphs()
 
     if(_customPlot.plotLayout()->rowCount() > 1)
     {
-        _customPlot.plotLayout()->remove(_plotModeTextElement);
+        _customPlot.plotLayout()->removeAt(_customPlot.plotLayout()->rowColToIndex(1, 0));
         _customPlot.plotLayout()->simplify();
     }
 
@@ -179,13 +171,20 @@ void CorrelationPlotItem::populateMeanAverageGraphs()
     }
     graph->setData(xData, yDataAvg, true);
 
-    _customPlot.plotLayout()->insertRow(1);
-    _customPlot.plotLayout()->addElement(1, 0, _plotModeTextElement);
-    _plotModeTextElement->setText(
+    auto* plotModeTextElement = new QCPTextElement(&_customPlot);
+    plotModeTextElement->setLayer(_textLayer);
+    plotModeTextElement->setTextFlags(Qt::AlignLeft);
+    plotModeTextElement->setFont(_defaultFont9Pt);
+    plotModeTextElement->setTextColor(Qt::black);
+    plotModeTextElement->setVisible(false);
+    plotModeTextElement->setText(
         QString(tr("*Mean average plot of %1 rows (maximum row count for individual plots is %2)"))
                 .arg(_selectedRows.length())
                 .arg(MAX_SELECTED_ROWS_BEFORE_MEAN));
-    _plotModeTextElement->setVisible(true);
+    plotModeTextElement->setVisible(true);
+
+    _customPlot.plotLayout()->insertRow(1);
+    _customPlot.plotLayout()->addElement(1, 0, plotModeTextElement);
 
     _customPlot.xAxis->setRange(0, maxX);
     _customPlot.yAxis->setRange(0, maxY);
