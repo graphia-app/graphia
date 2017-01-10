@@ -29,6 +29,9 @@ public:
         {
             for(auto nodeId : nodeIds)
             {
+                if(_graphModel->graph().typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Tail)
+                    continue;
+
                 auto mergedNodeIds = _graphModel->graph().mergedNodeIdsForNodeId(nodeId);
 
                 for(auto mergedNodeId : mergedNodeIds)
@@ -66,6 +69,9 @@ public:
         {
             for(auto nodeId : nodeIds)
             {
+                if(_graphModel->graph().typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Tail)
+                    continue;
+
                 auto mergedNodeIds = _graphModel->graph().mergedNodeIdsForNodeId(nodeId);
 
                 for(auto mergedNodeId : mergedNodeIds)
