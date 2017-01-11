@@ -394,6 +394,8 @@ Item
         }
     }
 
+    property bool destructing: false
+
     Window
     {
         id: pluginWindow
@@ -419,7 +421,7 @@ Item
 
         onClosing:
         {
-            if(visible)
+            if(visible & !destructing)
                 popInPlugin();
         }
     }
@@ -427,6 +429,10 @@ Item
     Component.onDestruction:
     {
         savePluginWindowState();
+
+        // Mild hack to get the plugin window to close before the main window
+        destructing = true;
+        pluginWindow.close();
     }
 
     function popOutPlugin()
