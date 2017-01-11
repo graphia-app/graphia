@@ -7,6 +7,7 @@ import QtQml.Models 2.2
 import com.kajeka 1.0
 
 import "Constants.js" as Constants
+import "Utils.js" as Utils
 
 import "Transform"
 
@@ -381,7 +382,7 @@ Item
 
         if(window.pluginMaximised !== undefined)
         {
-            pluginWindow.visibility = window.pluginMaximised === "true" ?
+            pluginWindow.visibility = Utils.castToBool(window.pluginMaximised) ?
                 Window.Maximized : Window.Windowed;
         }
     }

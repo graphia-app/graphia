@@ -7,6 +7,7 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.0
 
 import com.kajeka 1.0
+import "Utils.js" as Utils
 
 ApplicationWindow
 {
@@ -67,7 +68,7 @@ ApplicationWindow
 
         if(windowPreferences.maximised !== undefined)
         {
-            mainWindow.visibility = windowPreferences.maximised === "true" ?
+            mainWindow.visibility = Utils.castToBool(windowPreferences.maximised) ?
                 Window.Maximized : Window.Windowed;
         }
 

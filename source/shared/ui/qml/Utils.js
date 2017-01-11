@@ -20,3 +20,18 @@ function isInt(value)
     var x = parseFloat(value);
     return (x | 0) === x;
 }
+
+function castToBool(value)
+{
+    switch(typeof value)
+    {
+        case 'boolean':
+            return value;
+        case 'string':
+            return value.toLowerCase() === 'true';
+        case 'number':
+            return value !== 0;
+        default:
+            return false;
+    }
+}
