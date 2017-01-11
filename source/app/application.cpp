@@ -90,6 +90,16 @@ QStringList Application::pluginNames(const QString& urlTypeName) const
     return viablePluginNames;
 }
 
+QString Application::settingsQmlPathForPlugin(const QString& pluginName) const
+{
+    auto plugin = pluginForName(pluginName);
+
+    if(plugin != nullptr)
+        return plugin->settingsQmlPath();
+
+    return {};
+}
+
 void Application::crash()
 {
 #ifndef __clang_analyzer__

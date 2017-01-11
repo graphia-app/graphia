@@ -268,7 +268,7 @@ QStringList Document::graphTransformConfigurationsFromUI() const
     return transforms;
 }
 
-bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QString& pluginName)
+bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QString& pluginName, const QVariantMap& settings)
 {
     auto* plugin = _application->pluginForName(pluginName);
     if(plugin == nullptr)
@@ -303,6 +303,9 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
     connect(&_graphModel->graph().debugPauser, &DebugPauser::enabledChanged, this, &Document::debugPauserEnabledChanged);
     connect(&_graphModel->graph().debugPauser, &DebugPauser::pausedChanged, this, &Document::debugPausedChanged);
     connect(&_graphModel->graph().debugPauser, &DebugPauser::resumeActionChanged, this, &Document::debugResumeActionChanged);
+
+    for(const auto& name : settings.keys())
+        _pluginInstance->applySetting(name, settings.value(name).toString());
 
     emit pluginInstanceChanged();
 

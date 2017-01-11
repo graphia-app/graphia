@@ -273,12 +273,37 @@ ApplicationWindow
 
     function openFileOfTypeWithPlugin(fileUrl, fileType, pluginName, inNewTab)
     {
+        var settingsQmlPath = application.settingsQmlPathForPlugin(pluginName);
+
+        if(settingsQmlPath.length > 0)
+        {
+            pluginSettingsDialog.fileUrl = fileUrl
+            pluginSettingsDialog.fileType = fileType;
+            pluginSettingsDialog.pluginName = pluginName;
+            pluginSettingsDialog.inNewTab = inNewTab;
+
+            pluginSettingsDialog.qmlPath = settingsQmlPath;
+
+            pluginSettingsDialog.open();
+        }
+        else
+            openFileOfTypeWithPluginAndSettings(fileUrl, fileType, pluginName, {}, inNewTab);
+    }
+
+    PluginSettingsDialog
+    {
+        id: pluginSettingsDialog
+        onAccepted: openFileOfTypeWithPluginAndSettings(fileUrl, fileType, pluginName, settings, inNewTab)
+    }
+
+    function openFileOfTypeWithPluginAndSettings(fileUrl, fileType, pluginName, settings, inNewTab)
+    {
         if(currentDocument != null && !inNewTab)
             tabView.replaceTab();
         else
             tabView.createTab();
 
-        tabView.openInCurrentTab(fileUrl, fileType, pluginName);
+        tabView.openInCurrentTab(fileUrl, fileType, pluginName, settings);
     }
 
     FileDialog
@@ -761,10 +786,10 @@ ApplicationWindow
                 return insertTabAtIndex(oldIndex);
             }
 
-            function openInCurrentTab(fileUrl, fileType, pluginName)
+            function openInCurrentTab(fileUrl, fileType, pluginName, settings)
             {
                 currentDocument.application = application;
-                if(!currentDocument.openFile(fileUrl, fileType, pluginName))
+                if(!currentDocument.openFile(fileUrl, fileType, pluginName, settings))
                 {
                     errorOpeningFileMessageDialog.text = application.baseFileNameForUrl(fileUrl) +
                             qsTr(" could not be opened due to an error.");

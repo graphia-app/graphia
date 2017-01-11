@@ -64,6 +64,9 @@ public:
                 this, SLOT(onLoadComplete(bool)), Qt::DirectConnection);
     }
 
+    // Ignore all settings, by default
+    void applySetting(const QString&, const QString&) {}
+
     QStringList defaultTransforms() const { return {}; }
 
     IGraphModel* graphModel() { return _graphModel; }
@@ -114,6 +117,9 @@ class BasePlugin : public QObject, public IPlugin, public UrlTypes
 
     // Default empty image
     QString imageSource() const { return {}; }
+
+    // Default to no settings UI
+    QString settingsQmlPath() const { return {}; }
 
     // Default to no UI
     QString qmlPath() const { return {}; }

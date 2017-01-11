@@ -15,6 +15,7 @@
 #include <QString>
 #include <QStringList>
 #include <QUrl>
+#include <QVariantMap>
 
 #include <vector>
 #include <memory>
@@ -196,7 +197,8 @@ signals:
 public slots:
     bool openFile(const QUrl& fileUrl,
                   const QString& fileType,
-                  const QString& pluginName);
+                  const QString& pluginName,
+                  const QVariantMap& settings);
 
     void onPreferenceChanged(const QString& key, const QVariant& value);
 

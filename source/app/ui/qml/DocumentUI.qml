@@ -134,17 +134,16 @@ Item
                                                            _lesserContrastingColors[2],
                                                            _lesserContrastingColors[2], 1.0); }
 
-    function openFile(fileUrl, fileType, pluginName)
+    function openFile(fileUrl, fileType, pluginName, settings)
     {
-        if(document.openFile(fileUrl, fileType, pluginName))
-        {
-            this.fileUrl = fileUrl;
-            this.fileType = fileType;
-            this.pluginName = pluginName;
-            return true;
-        }
+        if(!document.openFile(fileUrl, fileType, pluginName, settings))
+            return false;
 
-        return false;
+        this.fileUrl = fileUrl;
+        this.fileType = fileType;
+        this.pluginName = pluginName;
+
+        return true;
     }
 
     function toggleLayout() { document.toggleLayout(); }
@@ -485,7 +484,7 @@ Item
 
         onPluginQmlPathChanged:
         {
-            if(document.pluginQmlPath)
+            if(document.pluginQmlPath.length > 0)
             {
                 // Destroy anything already there
                 while(plugin.children.length > 0)

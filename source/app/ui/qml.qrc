@@ -21,5 +21,6 @@
         <file>qml/Transform/TransformParameter.qml</file>
         <file>qml/Hamburger.qml</file>
         <file>qml/ListBox.qml</file>
+        <file>qml/PluginSettingsDialog.qml</file>
     </qresource>
 </RCC>
