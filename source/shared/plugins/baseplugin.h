@@ -64,6 +64,8 @@ public:
                 this, SLOT(onLoadComplete(bool)), Qt::DirectConnection);
     }
 
+    QStringList defaultTransforms() const { return {}; }
+
     IGraphModel* graphModel() { return _graphModel; }
     const IGraphModel* graphModel() const { return _graphModel; }
     ISelectionManager* selectionManager() { return _selectionManager; }

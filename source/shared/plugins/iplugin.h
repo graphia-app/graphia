@@ -22,7 +22,7 @@ public:
 
     virtual void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager, const IParserThread* parserThread) = 0;
     virtual std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) = 0;
-    virtual QStringList defaultTransforms() const { return {}; }
+    virtual QStringList defaultTransforms() const = 0;
 };
 
 class IPluginInstanceProvider
