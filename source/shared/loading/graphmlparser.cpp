@@ -33,7 +33,19 @@ bool GraphMLHandler::endDocument()
     // Finally populate graph with Edges from tempEdges
     for(auto tempEdge : _temporaryEdges)
     {
-        const EdgeId& edgeId = _graph.addEdge(_nodeMap.at(tempEdge._source), _nodeMap.at(tempEdge._target));
+        auto sourceNodeId = _nodeMap.find(tempEdge._source);
+        auto targetNodeId = _nodeMap.find(tempEdge._target);
+        if(sourceNodeId == _nodeMap.end())
+        {
+            _errorString = QString("Invalid Edge Source. Edge - Source: %1 Target: %2").arg(tempEdge._source).arg(tempEdge._target);
+            return false;
+        }
+        if(targetNodeId == _nodeMap.end())
+        {
+            _errorString = QString("Invalid Edge Target. Edge - Source: %1 Target: %2").arg(tempEdge._source).arg(tempEdge._target);
+            return false;
+        }
+        const EdgeId& edgeId = _graph.addEdge(sourceNodeId->second, targetNodeId->second);
         _edgeIdMap[tempEdge] = edgeId;
     }
 
