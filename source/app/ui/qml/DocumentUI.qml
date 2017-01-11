@@ -369,6 +369,9 @@ Item
 
     function loadPluginWindowState()
     {
+        if(!window.pluginPoppedOut)
+            return;
+
         if(window.pluginWidth !== undefined &&
            window.pluginHeight !== undefined)
         {
@@ -385,6 +388,9 @@ Item
 
     function savePluginWindowState()
     {
+        if(!window.pluginPoppedOut)
+            return;
+
         window.pluginMaximised = pluginWindow.maximised;
 
         if(!pluginWindow.maximised)
@@ -411,19 +417,16 @@ Item
         //FIXME: window is always on top?
         flags: Qt.Window
 
-        onVisibleChanged:
-        {
-            if(visible)
-                loadPluginWindowState();
-            else
-                savePluginWindowState();
-        }
-
         onClosing:
         {
             if(visible & !destructing)
                 popInPlugin();
         }
+    }
+
+    Component.onCompleted:
+    {
+        loadPluginWindowState();
     }
 
     Component.onDestruction:
