@@ -1,7 +1,6 @@
 import QtQuick 2.5
 import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
-import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.1
 import com.kajeka 1.0
 
@@ -15,6 +14,7 @@ Window
     id: root
 
     title: qsTr("Add Transform")
+    modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
     width: 700
     height: 200
@@ -142,7 +142,7 @@ Window
 
         Keys.onPressed:
         {
-            event.accepted = true
+            event.accepted = true;
             switch(event.key)
             {
             case Qt.Key_Escape:

@@ -254,11 +254,19 @@ std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const Q
     return nullptr;
 }
 
+void CorrelationPluginInstance::applySetting(const QString& name, const QString& value)
+{
+    if(name == "minimumCorrelation")
+        _minimumCorrelationValue = value.toDouble();
+}
+
 QStringList CorrelationPluginInstance::defaultTransforms() const
 {
+    double defaultCorrelationValue = (_minimumCorrelationValue + 1.0) * 0.5;
+
     return
     {
-        "\"Remove Edges\" where \"Pearson Correlation Value\" < 0.85",
+        QString("\"Remove Edges\" where \"Pearson Correlation Value\" < %1").arg(defaultCorrelationValue),
         "[pinned] \"Remove Components\" where \"Component Size\" <= 1"
     };
 }

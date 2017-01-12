@@ -103,6 +103,7 @@ private:
     std::vector<DataRow> _dataRows;
 
     std::unique_ptr<EdgeArray<double>> _pearsonValues;
+    double _minimumCorrelationValue = 0.7;
 
     void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager, const IParserThread* parserThread);
 
@@ -126,10 +127,12 @@ public:
             double minimumThreshold, const std::function<bool()>& cancelled,
             const IParser::ProgressFn& progress);
 
+    double minimumCorrelation() const { return _minimumCorrelationValue; }
     void createEdges(const std::vector<std::tuple<NodeId, NodeId, double>>& edges,
                      const IParser::ProgressFn& progress);
 
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName);
+    void applySetting(const QString& name, const QString& value2);
     QStringList defaultTransforms() const;
 
 private slots:
@@ -168,6 +171,7 @@ public:
 
     bool editable() const { return false; }
 
+    QString settingsQmlPath() const { return "qrc:///qml/settings.qml"; }
     QString qmlPath() const { return "qrc:///qml/correlationplugin.qml"; }
 };
 

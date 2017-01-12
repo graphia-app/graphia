@@ -105,7 +105,8 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
         return false;
 
     graph.setPhase(QObject::tr("Pearson Correlation"));
-    auto edges = _plugin->pearsonCorrelation(0.7, [this]{ return cancelled(); }, progress);
+    auto edges = _plugin->pearsonCorrelation(_plugin->minimumCorrelation(),
+                                             [this]{ return cancelled(); }, progress);
 
     if(cancelled())
         return false;

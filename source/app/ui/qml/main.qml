@@ -280,6 +280,7 @@ ApplicationWindow
             pluginSettingsDialog.fileUrl = fileUrl
             pluginSettingsDialog.fileType = fileType;
             pluginSettingsDialog.pluginName = pluginName;
+            pluginSettingsDialog.settings = {};
             pluginSettingsDialog.inNewTab = inNewTab;
 
             pluginSettingsDialog.qmlPath = settingsQmlPath;

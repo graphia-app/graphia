@@ -1,16 +1,22 @@
 import QtQuick 2.5
+import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
-import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.1
 
 import "Constants.js" as Constants
+import "Utils.js" as Utils
 
-Dialog
+Window
 {
-    id: pluginSettingsDialog
+    id: root
 
-    title: qsTr("Plugin Settings")
-    width: 500
+    title: pluginName + qsTr(" Plugin Settings")
+    modality: Qt.ApplicationModal
+    flags: Qt.Window|Qt.Dialog
+    width: minimumWidth
+    height: minimumHeight
+    minimumWidth: layout.implicitWidth + (Constants.margin * 2)
+    minimumHeight: layout.implicitHeight + (Constants.margin * 2)
 
     property string qmlPath
 
@@ -18,21 +24,17 @@ Dialog
     {
         if(qmlPath.length > 0)
         {
-            // Destroy anything already there
-            while(pluginSettingsDialog.children.length > 0)
-                pluginSettingsDialog.children[0].destroy();
+            var component = Qt.createComponent(qmlPath);
 
-            var pluginSettingsComponent = Qt.createComponent(qmlPath);
-
-            if(pluginSettingsComponent.status !== Component.Ready)
+            if(component.status !== Component.Ready)
             {
-                console.log(pluginSettingsComponent.errorString());
+                console.log(component.errorString());
                 return;
             }
 
-            var pluginSettingsObject = pluginSettingsComponent.createObject(contentItem);
+            var contentObject = component.createObject(contentItem);
 
-            if(pluginSettingsObject === null)
+            if(contentObject === null)
             {
                 console.log(settingsQmlPath + ": failed to create instance");
                 return;
@@ -46,11 +48,86 @@ Dialog
     property var settings
     property bool inNewTab
 
-    onVisibleChanged:
+    // The component that's loaded from qmlPath
+    property var content: contentItem.children && contentItem.children.length > 0 ?
+                          contentItem.children[0] : null
+
+    ColumnLayout
     {
-        if(visible)
-            settings = {};
+        id: layout
+
+        anchors.fill: parent
+        anchors.margins: Constants.margin
+        spacing: Constants.spacing
+
+        // The loaded component gets parented to this
+        Rectangle
+        {
+            id: contentItem
+            Layout.minimumWidth: content.width
+            Layout.minimumHeight: content.height
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+        }
+
+        RowLayout
+        {
+            Rectangle { Layout.fillWidth: true }
+
+            Button
+            {
+                text: qsTr("OK")
+                onClicked: { root.accept(); }
+            }
+
+            Button
+            {
+                text: qsTr("Cancel")
+                onClicked: { root.reject(); }
+            }
+        }
+
+        Keys.onPressed:
+        {
+            event.accepted = true;
+            switch(event.key)
+            {
+            case Qt.Key_Escape:
+            case Qt.Key_Back:
+                reject();
+                break;
+
+            case Qt.Key_Enter:
+            case Qt.Key_Return:
+                accept();
+                break;
+
+            default:
+                event.accepted = false;
+            }
+        }
     }
 
-    standardButtons: StandardButton.Ok | StandardButton.Cancel
+    function open()
+    {
+        visible = true;
+
+        if(content !== null && typeof content.initialise === 'function')
+            content.initialise();
+    }
+
+    function accept()
+    {
+        accepted();
+        root.close();
+    }
+
+    function reject()
+    {
+        rejected();
+        root.close();
+    }
+
+    signal accepted()
+    signal rejected()
 }

@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>qml/correlationplugin.qml</file>
         <file>plots.svg</file>
+        <file>qml/settings.qml</file>
     </qresource>
 </RCC>
