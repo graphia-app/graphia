@@ -35,3 +35,13 @@ function castToBool(value)
             return false;
     }
 }
+
+function printStackTrace()
+{
+    var err = new Error();
+    var elements = err.stack.split("\n");
+    elements.splice(0, 1);
+    elements = elements.map(function(e) { return "    " + e; });
+    var trace = "Stack trace:\n" + elements.join("\n");
+    console.log(trace);
+}
