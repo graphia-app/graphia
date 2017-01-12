@@ -170,9 +170,9 @@ function create(transform)
                 if(locked)
                 {
                     if(parameterData.type === FieldType.String)
-                        labelText += "\\\"" + parameter.rhs + "\\\"";
+                        labelText += " \\\"" + parameter.rhs + "\\\"";
                     else
-                        labelText += roundTo3dp(parameter.rhs);
+                        labelText += " " + roundTo3dp(parameter.rhs);
                 }
                 else
                     addLabel();

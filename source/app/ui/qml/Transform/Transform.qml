@@ -36,7 +36,7 @@ Item
             enabled: enabledMenuItem.checked
 
             // Hack to force the row to always be at least the height of a TextField
-            // (so that when the Transform is locked, it doesn't changed height)
+            // (so that when the Transform is locked, it doesn't change height)
             TextField { id: dummyField; visible: false }
             Rectangle { height: dummyField.height }
         }
