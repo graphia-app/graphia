@@ -254,7 +254,7 @@ std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const Q
     return nullptr;
 }
 
-void CorrelationPluginInstance::applySetting(const QString& name, const QString& value)
+void CorrelationPluginInstance::applyParameter(const QString& name, const QString& value)
 {
     if(name == "minimumCorrelation")
         _minimumCorrelationValue = value.toDouble();

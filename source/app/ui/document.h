@@ -198,7 +198,7 @@ public slots:
     bool openFile(const QUrl& fileUrl,
                   const QString& fileType,
                   const QString& pluginName,
-                  const QVariantMap& settings);
+                  const QVariantMap& parameters);
 
     void onPreferenceChanged(const QString& key, const QVariant& value);
 

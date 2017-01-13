@@ -22,7 +22,7 @@ public:
 
     virtual void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager, const IParserThread* parserThread) = 0;
     virtual std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) = 0;
-    virtual void applySetting(const QString& name, const QString& value) = 0;
+    virtual void applyParameter(const QString& name, const QString& value) = 0;
     virtual QStringList defaultTransforms() const = 0;
 };
 
@@ -47,7 +47,7 @@ public:
 
     virtual bool editable() const = 0;
 
-    virtual QString settingsQmlPath() const = 0;
+    virtual QString parametersQmlPath() const = 0;
     virtual QString qmlPath() const = 0;
 };
 

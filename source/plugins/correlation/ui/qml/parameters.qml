@@ -38,7 +38,7 @@ GridLayout
         decimals: 3
         stepSize: (maximumValue - minimumValue) / 100.0
 
-        onValueChanged: { settings.minimumCorrelation = value; }
+        onValueChanged: { parameters.minimumCorrelation = value; }
     }
 
     CheckBox
@@ -47,12 +47,12 @@ GridLayout
 
         Layout.alignment: Qt.AlignLeft
         text: qsTr("Transpose")
-        onCheckedChanged: { settings.transpose = checked; }
+        onCheckedChanged: { parameters.transpose = checked; }
     }
 
     function initialise()
     {
-        settings = {minimumCorrelation: 0.7, transpose: false};
+        parameters = {minimumCorrelation: 0.7, transpose: false};
 
         minimumCorrelationSpinBox.value = 0.7;
         transposeCheckBox.checked = false;

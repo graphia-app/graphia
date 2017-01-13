@@ -10,7 +10,7 @@ Window
 {
     id: root
 
-    title: pluginName + qsTr(" Plugin Settings")
+    title: pluginName + qsTr(" Plugin Parameters")
     modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
     width: minimumWidth
@@ -36,7 +36,7 @@ Window
 
             if(contentObject === null)
             {
-                console.log(settingsQmlPath + ": failed to create instance");
+                console.log(parametersQmlPath + ": failed to create instance");
                 return;
             }
         }
@@ -45,7 +45,7 @@ Window
     property string fileUrl
     property string fileType
     property string pluginName
-    property var settings
+    property var parameters
     property bool inNewTab
 
     // The component that's loaded from qmlPath

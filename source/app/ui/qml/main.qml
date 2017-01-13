@@ -273,38 +273,38 @@ ApplicationWindow
 
     function openFileOfTypeWithPlugin(fileUrl, fileType, pluginName, inNewTab)
     {
-        var settingsQmlPath = application.settingsQmlPathForPlugin(pluginName);
+        var parametersQmlPath = application.parametersQmlPathForPlugin(pluginName);
 
-        if(settingsQmlPath.length > 0)
+        if(parametersQmlPath.length > 0)
         {
-            pluginSettingsDialog.fileUrl = fileUrl
-            pluginSettingsDialog.fileType = fileType;
-            pluginSettingsDialog.pluginName = pluginName;
-            pluginSettingsDialog.settings = {};
-            pluginSettingsDialog.inNewTab = inNewTab;
+            pluginParametersDialog.fileUrl = fileUrl
+            pluginParametersDialog.fileType = fileType;
+            pluginParametersDialog.pluginName = pluginName;
+            pluginParametersDialog.parameters = {};
+            pluginParametersDialog.inNewTab = inNewTab;
 
-            pluginSettingsDialog.qmlPath = settingsQmlPath;
+            pluginParametersDialog.qmlPath = parametersQmlPath;
 
-            pluginSettingsDialog.open();
+            pluginParametersDialog.open();
         }
         else
-            openFileOfTypeWithPluginAndSettings(fileUrl, fileType, pluginName, {}, inNewTab);
+            openFileOfTypeWithPluginAndParameters(fileUrl, fileType, pluginName, {}, inNewTab);
     }
 
-    PluginSettingsDialog
+    PluginParametersDialog
     {
-        id: pluginSettingsDialog
-        onAccepted: openFileOfTypeWithPluginAndSettings(fileUrl, fileType, pluginName, settings, inNewTab)
+        id: pluginParametersDialog
+        onAccepted: openFileOfTypeWithPluginAndParameters(fileUrl, fileType, pluginName, parameters, inNewTab)
     }
 
-    function openFileOfTypeWithPluginAndSettings(fileUrl, fileType, pluginName, settings, inNewTab)
+    function openFileOfTypeWithPluginAndParameters(fileUrl, fileType, pluginName, parameters, inNewTab)
     {
         if(currentDocument != null && !inNewTab)
             tabView.replaceTab();
         else
             tabView.createTab();
 
-        tabView.openInCurrentTab(fileUrl, fileType, pluginName, settings);
+        tabView.openInCurrentTab(fileUrl, fileType, pluginName, parameters);
     }
 
     FileDialog
@@ -787,10 +787,10 @@ ApplicationWindow
                 return insertTabAtIndex(oldIndex);
             }
 
-            function openInCurrentTab(fileUrl, fileType, pluginName, settings)
+            function openInCurrentTab(fileUrl, fileType, pluginName, parameters)
             {
                 currentDocument.application = application;
-                if(!currentDocument.openFile(fileUrl, fileType, pluginName, settings))
+                if(!currentDocument.openFile(fileUrl, fileType, pluginName, parameters))
                 {
                     errorOpeningFileMessageDialog.text = application.baseFileNameForUrl(fileUrl) +
                             qsTr(" could not be opened due to an error.");

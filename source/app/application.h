@@ -107,7 +107,7 @@ public slots:
     QStringList urlTypesOf(const QUrl& url) const;
 
     QStringList pluginNames(const QString& urlTypeName) const;
-    QString settingsQmlPathForPlugin(const QString& pluginName) const;
+    QString parametersQmlPathForPlugin(const QString& pluginName) const;
 
     static const char* uri() { return _uri; }
     static int majorVersion() { return _majorVersion; }

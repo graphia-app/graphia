@@ -90,12 +90,12 @@ QStringList Application::pluginNames(const QString& urlTypeName) const
     return viablePluginNames;
 }
 
-QString Application::settingsQmlPathForPlugin(const QString& pluginName) const
+QString Application::parametersQmlPathForPlugin(const QString& pluginName) const
 {
     auto plugin = pluginForName(pluginName);
 
     if(plugin != nullptr)
-        return plugin->settingsQmlPath();
+        return plugin->parametersQmlPath();
 
     return {};
 }

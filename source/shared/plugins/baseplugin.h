@@ -65,7 +65,7 @@ public:
     }
 
     // Ignore all settings, by default
-    void applySetting(const QString&, const QString&) {}
+    void applyParameter(const QString&, const QString&) {}
 
     QStringList defaultTransforms() const { return {}; }
 
@@ -119,7 +119,7 @@ class BasePlugin : public QObject, public IPlugin, public UrlTypes
     QString imageSource() const { return {}; }
 
     // Default to no settings UI
-    QString settingsQmlPath() const { return {}; }
+    QString parametersQmlPath() const { return {}; }
 
     // Default to no UI
     QString qmlPath() const { return {}; }

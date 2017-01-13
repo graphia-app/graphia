@@ -134,9 +134,9 @@ Item
                                                            _lesserContrastingColors[2],
                                                            _lesserContrastingColors[2], 1.0); }
 
-    function openFile(fileUrl, fileType, pluginName, settings)
+    function openFile(fileUrl, fileType, pluginName, parameters)
     {
-        if(!document.openFile(fileUrl, fileType, pluginName, settings))
+        if(!document.openFile(fileUrl, fileType, pluginName, parameters))
             return false;
 
         this.fileUrl = fileUrl;

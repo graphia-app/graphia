@@ -135,7 +135,7 @@ public:
                      const IParser::ProgressFn& progress);
 
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName);
-    void applySetting(const QString& name, const QString& value2);
+    void applyParameter(const QString& name, const QString& value2);
     QStringList defaultTransforms() const;
 
 private slots:
@@ -174,7 +174,7 @@ public:
 
     bool editable() const { return false; }
 
-    QString settingsQmlPath() const { return "qrc:///qml/settings.qml"; }
+    QString parametersQmlPath() const { return "qrc:///qml/parameters.qml"; }
     QString qmlPath() const { return "qrc:///qml/correlationplugin.qml"; }
 };
 
