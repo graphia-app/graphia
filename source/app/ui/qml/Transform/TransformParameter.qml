@@ -24,8 +24,8 @@ GridLayout
 
     flow: (direction === Qt.Horizontal) ? GridLayout.LeftToRight : GridLayout.TopToBottom
 
-    property int _maxWidth: 100
-    property int _inputElementWidth: (direction === Qt.Horizontal) ? 70 : _maxWidth
+    property int _maxWidth: 120
+    property int _inputElementWidth: (direction === Qt.Horizontal) ? 90 : _maxWidth
 
     function typedValue(n)
     {
@@ -35,7 +35,7 @@ GridLayout
         if(type === FieldType.Int)
             return Math.round(n);
         else if(type === FieldType.Float && Utils.isInt(n))
-            return n.toFixed(1);
+            return Number(n).toFixed(1);
 
         return n;
     }
@@ -46,7 +46,21 @@ GridLayout
         Layout.preferredWidth: _inputElementWidth
         visible: (type === FieldType.Int || type === FieldType.Float)
 
-        decimals: type === FieldType.Float ? 3 : 0
+        decimals:
+        {
+            if(type === FieldType.Float)
+            {
+                if(stepSize <= 1.0)
+                    return 3;
+                else if(stepSize <= 10.0)
+                    return 2;
+                else if(stepSize <= 100.0)
+                    return 1;
+            }
+
+            return 0;
+        }
+
         stepSize: hasRange ? (maximumValue - minimumValue) / 100.0 : 1.0
 
         function updateValue()
@@ -131,6 +145,8 @@ GridLayout
             }
             else
                 value = initialValue;
+
+            value = typedValue(value);
         }
         else
             value = "\"" + initialValue + "\"";
