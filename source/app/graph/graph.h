@@ -31,6 +31,10 @@ private:
 public:
     int degree() const { return _inEdgeIds.size() + _outEdgeIds.size(); }
     NodeId id() const { return _id; }
+
+    std::vector<EdgeId> inEdgeIds() const;
+    std::vector<EdgeId> outEdgeIds() const;
+    std::vector<EdgeId> edgeIds() const;
 };
 
 class Edge : public IEdge

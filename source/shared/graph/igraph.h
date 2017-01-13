@@ -4,6 +4,8 @@
 #include "shared/graph/elementid.h"
 #include "igrapharrayclient.h"
 
+#include <vector>
+
 class INode
 {
 public:
@@ -11,6 +13,10 @@ public:
 
     virtual int degree() const = 0;
     virtual NodeId id() const = 0;
+
+    virtual std::vector<EdgeId> inEdgeIds() const = 0;
+    virtual std::vector<EdgeId> outEdgeIds() const = 0;
+    virtual std::vector<EdgeId> edgeIds() const = 0;
 };
 
 class IEdge

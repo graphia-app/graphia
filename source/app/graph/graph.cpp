@@ -23,6 +23,39 @@ static void registerQtTypes()
     }
 }
 
+std::vector<EdgeId> Node::inEdgeIds() const
+{
+    std::vector<EdgeId> edgeIds;
+
+    for(EdgeId edgeId : _inEdgeIds)
+        edgeIds.emplace_back(edgeId);
+
+    return edgeIds;
+}
+
+std::vector<EdgeId> Node::outEdgeIds() const
+{
+    std::vector<EdgeId> edgeIds;
+
+    for(EdgeId edgeId : _outEdgeIds)
+        edgeIds.emplace_back(edgeId);
+
+    return edgeIds;
+}
+
+std::vector<EdgeId> Node::edgeIds() const
+{
+    std::vector<EdgeId> edgeIds;
+
+    for(EdgeId edgeId : _inEdgeIds)
+        edgeIds.emplace_back(edgeId);
+
+    for(EdgeId edgeId : _outEdgeIds)
+        edgeIds.emplace_back(edgeId);
+
+    return edgeIds;
+}
+
 Graph::Graph() :
     _nextNodeId(0), _nextEdgeId(0),
     _graphConsistencyChecker(*this)
