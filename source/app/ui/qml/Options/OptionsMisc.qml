@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.1
 
 import com.kajeka 1.0
 
-import "Constants.js" as Constants
+import "../Constants.js" as Constants
 
 Item
 {

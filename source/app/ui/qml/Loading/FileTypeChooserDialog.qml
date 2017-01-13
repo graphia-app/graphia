@@ -5,26 +5,31 @@ import QtQuick.Layouts 1.1
 
 import SortFilterProxyModel 0.1
 
-import "Constants.js" as Constants
+import "../Constants.js" as Constants
 
 Dialog
 {
-    id: pluginChooserDialog
+    id: fileTypeChooserDialog
 
-    title: qsTr("Multiple Plugins Applicable")
+    title: qsTr("File Type Ambiguous")
     width: 500
 
     property var application
     property var model
 
     property string fileUrl
+    property var fileTypes: []
     property string fileType
-    property var pluginNames: []
-    property string pluginName
     property bool inNewTab
 
     // Mapping from the ComboBox currentIndex to the model
     property var mapping: []
+
+    onVisibleChanged:
+    {
+        if(!visible)
+            mapping.length = 0;
+    }
 
     GridLayout
     {
@@ -36,7 +41,7 @@ Dialog
         Text
         {
             text: application.baseFileNameForUrl(fileUrl) +
-                  qsTr(" may be loaded by two or more plugins. " +
+                  qsTr(" may be interpreted as two or more possible formats. " +
                        "Please select how you wish to proceed below.")
             Layout.fillWidth: true
             Layout.columnSpan: 2
@@ -45,13 +50,13 @@ Dialog
 
         Text
         {
-            text: qsTr("Open With Plugin:")
+            text: qsTr("Open As:")
             Layout.alignment: Qt.AlignRight
         }
 
         ComboBox
         {
-            id: pluginChoice
+            id: fileTypeChoice
             Layout.alignment: Qt.AlignLeft
             implicitWidth: 200
 
@@ -60,11 +65,11 @@ Dialog
                 sourceModel: model
                 filterExpression:
                 {
-                    var i = pluginChooserDialog.pluginNames.indexOf(model.name);
+                    var i = fileTypeChooserDialog.fileTypes.indexOf(model.name);
 
                     if(i > -1)
                     {
-                        pluginChooserDialog.mapping[i] = index;
+                        fileTypeChooserDialog.mapping[i] = index;
                         return true;
                     }
 
@@ -72,20 +77,15 @@ Dialog
                 }
             }
 
-            textRole: "name"
+            textRole: "individualDescription"
         }
     }
 
     standardButtons: StandardButton.Ok | StandardButton.Cancel
 
-    function clearMapping() { mapping.length = 0; }
-
     onAccepted:
     {
-        var i = mapping[pluginChoice.currentIndex];
-        pluginName = model.nameAtIndex(i);
-        clearMapping();
+        var i = mapping[fileTypeChoice.currentIndex];
+        fileType = model.nameAtIndex(i);
     }
-
-    onRejected: { clearMapping(); }
 }

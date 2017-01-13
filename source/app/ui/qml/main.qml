@@ -9,6 +9,9 @@ import QtQuick.Window 2.0
 import com.kajeka 1.0
 import "Utils.js" as Utils
 
+import "Loading"
+import "Options"
+
 ApplicationWindow
 {
     id: mainWindow

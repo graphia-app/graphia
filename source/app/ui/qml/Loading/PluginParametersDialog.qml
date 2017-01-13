@@ -3,8 +3,8 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
 
-import "Constants.js" as Constants
-import "Utils.js" as Utils
+import "../Constants.js" as Constants
+import "../Utils.js" as Utils
 
 Window
 {

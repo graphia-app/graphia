@@ -5,6 +5,8 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.1
 import "Constants.js" as Constants
 
+import "Controls"
+
 Window
 {
     id: pluginsWindow

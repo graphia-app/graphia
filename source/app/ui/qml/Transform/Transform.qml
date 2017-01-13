@@ -8,6 +8,8 @@ import "TransformConfig.js" as TransformConfig
 import "../Constants.js" as Constants
 import "../Utils.js" as Utils
 
+import "../Controls"
+
 Item
 {
     id: root

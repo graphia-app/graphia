@@ -4,7 +4,7 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.1
 import QtQml 2.2
 
-import "Constants.js" as Constants
+import "../Constants.js" as Constants
 
 Item
 {
