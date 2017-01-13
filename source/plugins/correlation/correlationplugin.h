@@ -73,6 +73,9 @@ private:
         double _variance = 0.0;
         double _stddev = 0.0;
 
+        double _minValue = std::numeric_limits<double>::max();
+        double _maxValue = std::numeric_limits<double>::min();
+
         void sum()
         {
             int numColumns = std::distance(_begin, _end);
@@ -82,6 +85,8 @@ private:
                 _sum += value;
                 _sumSq += value * value;
                 _mean += value / numColumns;
+                _minValue = std::min(_minValue, value);
+                _maxValue = std::max(_maxValue, value);
             }
 
             _sumAllSq = _sum * _sum;
@@ -119,6 +124,8 @@ private:
     QVector<double> attributesDataset();
     QVector<int> selectedRows();
 
+    const DataRow& dataRowForNodeId(NodeId nodeId) const;
+
 public:
     void setDimensions(int numColumns, int numRows);
     bool loadAttributes(const TabularData& tabularData, int firstDataColumn, int firstDataRow,
@@ -135,7 +142,7 @@ public:
                      const IParser::ProgressFn& progress);
 
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName);
-    void applyParameter(const QString& name, const QString& value2);
+    void applyParameter(const QString& name, const QString& value);
     QStringList defaultTransforms() const;
 
 private slots:

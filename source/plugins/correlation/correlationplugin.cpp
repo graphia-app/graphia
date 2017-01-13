@@ -73,6 +73,51 @@ bool CorrelationPluginInstance::loadAttributes(const TabularData& tabularData, i
         }
     }
 
+    double minMeanValue = std::numeric_limits<double>::max();
+    double maxMeanValue = std::numeric_limits<double>::min();
+    double minMinValue = std::numeric_limits<double>::max();
+    double maxMinValue = std::numeric_limits<double>::min();
+    double minMaxValue = std::numeric_limits<double>::max();
+    double maxMaxValue = std::numeric_limits<double>::min();
+    double minVariance = std::numeric_limits<double>::max();
+    double maxVariance = std::numeric_limits<double>::min();
+    double minStdDev = std::numeric_limits<double>::max();
+    double maxStdDev = std::numeric_limits<double>::min();
+
+    for(const auto& dataRow : _dataRows)
+    {
+        minMeanValue = std::min(minMeanValue, dataRow._mean);
+        maxMeanValue = std::max(maxMeanValue, dataRow._mean);
+        minMinValue = std::min(minMinValue, dataRow._minValue);
+        maxMinValue = std::max(maxMinValue, dataRow._minValue);
+        minMaxValue = std::min(minMaxValue, dataRow._maxValue);
+        maxMaxValue = std::max(maxMaxValue, dataRow._maxValue);
+        minVariance = std::min(minVariance, dataRow._variance);
+        maxVariance = std::max(maxVariance, dataRow._variance);
+        minStdDev = std::min(minStdDev, dataRow._stddev);
+        maxStdDev = std::max(maxStdDev, dataRow._stddev);
+    }
+
+    graphModel()->dataField(tr("Mean Data Value"))
+            .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._mean; })
+            .setFloatMin(minMeanValue).setFloatMax(maxMeanValue);
+
+    graphModel()->dataField(tr("Minimum Data Value"))
+            .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._minValue; })
+            .setFloatMin(minMinValue).setFloatMax(maxMinValue);
+
+    graphModel()->dataField(tr("Maximum Data Value"))
+            .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._maxValue; })
+            .setFloatMin(minMaxValue).setFloatMax(maxMaxValue);
+
+    graphModel()->dataField(tr("Variance"))
+            .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._variance; })
+            .setFloatMin(minVariance).setFloatMax(maxVariance);
+
+    graphModel()->dataField(tr("Standard Deviation"))
+            .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._stddev; })
+            .setFloatMin(minStdDev).setFloatMax(maxStdDev);
+
     return true;
 }
 
@@ -229,12 +274,17 @@ QVector<int> CorrelationPluginInstance::selectedRows()
     return selectedRowIndexes;
 }
 
+const CorrelationPluginInstance::DataRow& CorrelationPluginInstance::dataRowForNodeId(NodeId nodeId) const
+{
+    return _dataRows.at(_nodeAttributes.rowIndexForNodeId(nodeId));
+}
+
 void CorrelationPluginInstance::onGraphChanged()
 {
     if(_pearsonValues != nullptr && !_pearsonValues->empty())
     {
-        float min = *std::min_element(_pearsonValues->begin(), _pearsonValues->end());
-        float max = *std::max_element(_pearsonValues->begin(), _pearsonValues->end());
+        double min = *std::min_element(_pearsonValues->begin(), _pearsonValues->end());
+        double max = *std::max_element(_pearsonValues->begin(), _pearsonValues->end());
 
         graphModel()->dataField(tr("Pearson Correlation Value")).setFloatMin(min).setFloatMax(max);
     }
