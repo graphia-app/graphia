@@ -149,7 +149,7 @@ public:
 
     void setParentParser(const BaseParser* parentParser) { _parentParser = parentParser; }
 
-    const TabularData& tabularData() const { return _tabularData; }
+    TabularData& tabularData() { return _tabularData; }
 };
 
 using CsvFileParser = TextDelimitedTabularDataParser<','>;

@@ -10,12 +10,12 @@ void TabularData::initialise(int columns, int rows)
 
 size_t TabularData::index(int column, int row) const
 {
-    Q_ASSERT(column < _columns);
-    Q_ASSERT(row < _rows);
+    Q_ASSERT(column < numColumns());
+    Q_ASSERT(row < numRows());
 
     return !_transposed ?
                 column + (row * _columns) :
-                row + (column * _rows);
+                row + (column * _columns);
 }
 
 int TabularData::numColumns() const
