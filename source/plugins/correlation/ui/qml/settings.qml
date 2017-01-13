@@ -6,7 +6,7 @@ import "Constants.js" as Constants
 
 GridLayout
 {
-    columns: 2
+    columns: 3
 
     width: 500
     anchors.margins: Constants.margin
@@ -15,7 +15,7 @@ GridLayout
     {
         text: qsTr("Please select the parameters with which to build the correlation graph.")
         Layout.fillWidth: true
-        Layout.columnSpan: 2
+        Layout.columnSpan: 3
         wrapMode: Text.WordWrap
     }
 
@@ -30,7 +30,7 @@ GridLayout
         id: minimumCorrelationSpinBox
 
         Layout.alignment: Qt.AlignLeft
-        implicitWidth: 100
+        implicitWidth: 70
 
         minimumValue: 0.0
         maximumValue: 1.0
@@ -41,8 +41,20 @@ GridLayout
         onValueChanged: { settings.minimumCorrelation = value; }
     }
 
+    CheckBox
+    {
+        id: transposeCheckBox
+
+        Layout.alignment: Qt.AlignLeft
+        text: qsTr("Transpose")
+        onCheckedChanged: { settings.transpose = checked; }
+    }
+
     function initialise()
     {
+        settings = {minimumCorrelation: 0.7, transpose: false};
+
         minimumCorrelationSpinBox.value = 0.7;
+        transposeCheckBox.checked = false;
     }
 }

@@ -258,6 +258,8 @@ void CorrelationPluginInstance::applySetting(const QString& name, const QString&
 {
     if(name == "minimumCorrelation")
         _minimumCorrelationValue = value.toDouble();
+    else if(name == "transpose")
+        _transpose = (value == "true");
 }
 
 QStringList CorrelationPluginInstance::defaultTransforms() const

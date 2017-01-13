@@ -104,6 +104,7 @@ private:
 
     std::unique_ptr<EdgeArray<double>> _pearsonValues;
     double _minimumCorrelationValue = 0.7;
+    bool _transpose = false;
 
     void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager, const IParserThread* parserThread);
 
@@ -128,6 +129,8 @@ public:
             const IParser::ProgressFn& progress);
 
     double minimumCorrelation() const { return _minimumCorrelationValue; }
+    bool transpose() const { return _transpose; }
+
     void createEdges(const std::vector<std::tuple<NodeId, NodeId, double>>& edges,
                      const IParser::ProgressFn& progress);
 

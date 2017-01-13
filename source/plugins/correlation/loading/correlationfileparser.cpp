@@ -93,6 +93,7 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
         return false;
 
     auto& tabularData = csvFileParser.tabularData();
+    tabularData.setTransposed(_plugin->transpose());
 
     graph.setPhase(QObject::tr("Finding Data Points"));
     progress(-1);
