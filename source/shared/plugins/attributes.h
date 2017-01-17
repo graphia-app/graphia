@@ -8,24 +8,26 @@
 #include <QObject>
 #include <QString>
 
+#include <vector>
+
 class Attributes : public QObject
 {
     Q_OBJECT
 
 private:
-    std::map<QString, Attribute> _attributes;
+    std::vector<std::pair<QString, Attribute>> _attributes;
     QString _firstAttributeName;
 
 protected:
-    const QString& firstAttributeName() const { return _firstAttributeName; }
+    const QString firstAttributeName() const;
 
 public:
     int size() const;
 
     bool empty() const { return _attributes.empty(); }
 
-    auto begin() const { return make_map_value_iterator(_attributes.begin()); }
-    auto end() const { return make_map_value_iterator(_attributes.end()); }
+    auto begin() const { return make_pair_second_iterator(_attributes.begin()); }
+    auto end() const { return make_pair_second_iterator(_attributes.end()); }
 
     void add(const QString& name);
     void setValue(int index, const QString& name, const QString& value);
