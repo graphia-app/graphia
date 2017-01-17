@@ -1,5 +1,5 @@
 #include "forcedirectedlayout.h"
-#include "randomlayout.h"
+#include "fastinitiallayout.h"
 #include "barneshuttree.h"
 
 #include "shared/utils/threadpool.h"
@@ -67,10 +67,8 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
 
     if(firstIteration)
     {
-        RandomLayout randomLayout(graphComponent(), positions());
-
-        randomLayout.setSpread(10.0f);
-        randomLayout.execute(firstIteration);
+        FastInitialLayout initialLayout(graphComponent(), positions());
+        initialLayout.execute(firstIteration);
 
         for(NodeId nodeId : nodeIds())
             _prevDisplacements[nodeId] = QVector3D(0.0f, 0.0f, 0.0f);

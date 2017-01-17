@@ -97,7 +97,8 @@ HEADERS += \
     transform/graphtransformconfig.h \
     transform/graphtransformconfigparser.h \
     transform/conditionfncreator.h \
-    utils/qmlenum.h
+    utils/qmlenum.h \
+    layout/fastinitiallayout.h
 
 SOURCES += \
     application.cpp \
@@ -159,7 +160,8 @@ SOURCES += \
     ui/selectionmanager.cpp \
     utils/debugpauser.cpp \
     transform/graphtransformconfigparser.cpp \
-    transform/graphtransformconfig.cpp
+    transform/graphtransformconfig.cpp \
+    layout/fastinitiallayout.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \
