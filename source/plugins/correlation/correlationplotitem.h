@@ -10,20 +10,18 @@
 class CorrelationPlotItem : public QQuickPaintedItem
 {
     Q_OBJECT
-    Q_PROPERTY(QVector<double> data MEMBER _data NOTIFY dataChanged)
-    Q_PROPERTY(QVector<int> selectedRows MEMBER _selectedRows NOTIFY selectedRowsChanged)
-    Q_PROPERTY(QStringList columnNames MEMBER _labelNames WRITE setLabelNames NOTIFY columnNamesChanged)
+    Q_PROPERTY(QVector<double> data MEMBER _data)
+    Q_PROPERTY(QVector<int> selectedRows MEMBER _selectedRows WRITE setSelectedRows)
+    Q_PROPERTY(QStringList columnNames MEMBER _labelNames WRITE setLabelNames)
     Q_PROPERTY(QStringList rowNames MEMBER _graphNames)
     Q_PROPERTY(int columnCount MEMBER _columnCount)
     Q_PROPERTY(int rowCount MEMBER _rowCount)
-    Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelSizePixels)
+    Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
 
 public:
     CorrelationPlotItem(QQuickItem* parent = nullptr);
     void paint(QPainter* painter);
-    void setLabelNames(const QStringList& labelNames);
 
-    Q_INVOKABLE void refresh();
     Q_INVOKABLE void savePlotImage(const QUrl& url, const QString& format);
 
 protected:
@@ -53,7 +51,7 @@ private:
     QCustomPlot _customPlot;
     int _columnCount;
     int _rowCount;
-    int _elideLabelSizePixels = 120;
+    int _elideLabelWidth = 120;
     QStringList _labelNames;
     QStringList _graphNames;
     QVector<double> _data;
@@ -62,6 +60,12 @@ private:
     void populateMeanAveragePlot();
     void populateRawPlot();
 
+    void refresh();
+
+    void setSelectedRows(const QVector<int>& selectedRows);
+    void setLabelNames(const QStringList& labelNames);
+    void setElideLabelWidth(int elideLabelWidth);
+
 private slots:
     void onCustomReplot();
     void updateCustomPlotSize();
@@ -69,9 +73,6 @@ private slots:
     void hideTooltip();
 
 signals:
-    void dataChanged();
-    void selectedRowsChanged();
-    void columnNamesChanged();
     void rightClick();
 
 };

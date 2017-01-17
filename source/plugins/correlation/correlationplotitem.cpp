@@ -132,9 +132,14 @@ void CorrelationPlotItem::buildPlot()
     _customPlot.xAxis->setTicker(categoryTicker);
     _customPlot.xAxis->setTickLabelRotation(90);
 
-    // Populate Categories
-    for(int i = 0; i < _labelNames.count(); ++i)
-        categoryTicker->addTick(i, _labelNames[i]);
+    if(_elideLabelWidth > 0)
+    {
+        QFontMetrics metrics(_defaultFont9Pt);
+        int column = 0;
+
+        for(auto& labelName : _labelNames)
+            categoryTicker->addTick(column++, metrics.elidedText(labelName, Qt::ElideRight, _elideLabelWidth));
+    }
 }
 
 void CorrelationPlotItem::populateMeanAveragePlot()
@@ -226,18 +231,31 @@ void CorrelationPlotItem::populateRawPlot()
     _customPlot.yAxis->setRange(0.0, maxY);
 }
 
-void CorrelationPlotItem::setLabelNames(const QStringList &labelNames)
+void CorrelationPlotItem::setSelectedRows(const QVector<int>& selectedRows)
 {
-    QFontMetrics metrics(_defaultFont9Pt);
-    _labelNames.clear();
+    _selectedRows = selectedRows;
+    refresh();
+}
 
-    for(auto name : labelNames)
-        _labelNames.append(metrics.elidedText(name, Qt::ElideRight, _elideLabelSizePixels));
+void CorrelationPlotItem::setLabelNames(const QStringList& labelNames)
+{
+    _labelNames = labelNames;
+}
+
+void CorrelationPlotItem::setElideLabelWidth(int elideLabelWidth)
+{
+    bool changed = (_elideLabelWidth != elideLabelWidth);
+    _elideLabelWidth = elideLabelWidth;
+
+    if(changed)
+        refresh();
 }
 
 void CorrelationPlotItem::routeMouseEvents(QMouseEvent* event)
 {
-    QMouseEvent* newEvent = new QMouseEvent(event->type(), event->localPos(), event->button(), event->buttons(), event->modifiers());
+    QMouseEvent* newEvent = new QMouseEvent(event->type(), event->localPos(),
+                                            event->button(), event->buttons(),
+                                            event->modifiers());
     QCoreApplication::postEvent(&_customPlot, newEvent);
 }
 

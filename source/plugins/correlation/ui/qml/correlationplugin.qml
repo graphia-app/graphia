@@ -12,40 +12,49 @@ Item
 
     Component.onCompleted:
     {
-        parent.Layout.minimumHeight = 400;
+        parent.Layout.minimumHeight = 300;
+        plot.height = 150;
     }
 
     SplitView
     {
+        orientation: Qt.Vertical
+
         anchors.fill: parent
 
         NodeAttributeTableView
         {
             Layout.fillHeight: true
+            Layout.minimumHeight: 100
             nodeAttributesModel: plugin.model.nodeAttributes
         }
 
         CorrelationPlot
         {
             id: plot
+
+            Layout.minimumHeight: 100
+
             rowCount: plugin.model.rowCount
             columnCount: plugin.model.columnCount
             data: plugin.model.dataset
             columnNames: plugin.model.columnNames
             rowNames: plugin.model.rowNames
             selectedRows: plugin.model.selectedRows
-            elideLabelWidth: 120
+            elideLabelWidth:
+            {
+                var newHeight = height * 0.25;
+                var quant = 20;
+                var quantised = Math.floor(newHeight / quant) * quant;
+
+                if(quantised < 40)
+                    quantised = 0;
+
+                return quantised;
+            }
 
             onRightClick: { contextMenu.popup(); }
-
-            Component.onCompleted: { plot.refresh(); }
         }
-    }
-
-    Connections
-    {
-        target: plugin.model
-        onSelectedRowsChanged: { plot.refresh(); }
     }
 
     Menu
