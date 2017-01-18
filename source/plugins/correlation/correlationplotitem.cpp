@@ -70,19 +70,19 @@ void CorrelationPlotItem::paint(QPainter* painter)
 
 void CorrelationPlotItem::mousePressEvent(QMouseEvent* event)
 {
-    routeMouseEvents(event);
+    routeMouseEvent(event);
 }
 
 void CorrelationPlotItem::mouseReleaseEvent(QMouseEvent* event)
 {
-    routeMouseEvents(event);
-    if (event->button() == Qt::RightButton)
+    routeMouseEvent(event);
+    if(event->button() == Qt::RightButton)
         emit rightClick();
 }
 
 void CorrelationPlotItem::mouseMoveEvent(QMouseEvent* event)
 {
-    routeMouseEvents(event);
+    routeMouseEvent(event);
 }
 
 void CorrelationPlotItem::hoverMoveEvent(QHoverEvent* event)
@@ -107,7 +107,12 @@ void CorrelationPlotItem::hoverLeaveEvent(QHoverEvent*)
 
 void CorrelationPlotItem::mouseDoubleClickEvent(QMouseEvent* event)
 {
-    routeMouseEvents(event);
+    routeMouseEvent(event);
+}
+
+void CorrelationPlotItem::wheelEvent(QWheelEvent* event)
+{
+    routeWheelEvent(event);
 }
 
 void CorrelationPlotItem::buildPlot()
@@ -204,7 +209,7 @@ void CorrelationPlotItem::populateRawPlot()
     std::mt19937 mTwister(randomDevice());
     std::uniform_int_distribution<> randomColorDist(0, 255);
 
-    // Plot each graph individually
+    // Plot each row individually
     for(auto row : _selectedRows)
     {
         auto* graph = _customPlot.addGraph();
@@ -251,11 +256,19 @@ void CorrelationPlotItem::setElideLabelWidth(int elideLabelWidth)
         refresh();
 }
 
-void CorrelationPlotItem::routeMouseEvents(QMouseEvent* event)
+void CorrelationPlotItem::routeMouseEvent(QMouseEvent* event)
 {
-    QMouseEvent* newEvent = new QMouseEvent(event->type(), event->localPos(),
-                                            event->button(), event->buttons(),
-                                            event->modifiers());
+    auto* newEvent = new QMouseEvent(event->type(), event->localPos(),
+                                     event->button(), event->buttons(),
+                                     event->modifiers());
+    QCoreApplication::postEvent(&_customPlot, newEvent);
+}
+
+void CorrelationPlotItem::routeWheelEvent(QWheelEvent* event)
+{
+    auto* newEvent = new QWheelEvent(event->pos(), event->delta(),
+                                     event->buttons(), event->modifiers(),
+                                     event->orientation());
     QCoreApplication::postEvent(&_customPlot, newEvent);
 }
 

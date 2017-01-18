@@ -25,7 +25,8 @@ public:
     Q_INVOKABLE void savePlotImage(const QUrl& url, const QString& format);
 
 protected:
-    void routeMouseEvents(QMouseEvent* event);
+    void routeMouseEvent(QMouseEvent* event);
+    void routeWheelEvent(QWheelEvent* event);
 
     virtual void mousePressEvent(QMouseEvent* event);
     virtual void mouseReleaseEvent(QMouseEvent* event);
@@ -33,6 +34,7 @@ protected:
     virtual void hoverMoveEvent(QHoverEvent* event);
     virtual void hoverLeaveEvent(QHoverEvent* event);
     virtual void mouseDoubleClickEvent(QMouseEvent* event);
+    virtual void wheelEvent(QWheelEvent* event);
 
     void buildPlot();
 
