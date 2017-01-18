@@ -14,9 +14,10 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(QVector<int> selectedRows MEMBER _selectedRows WRITE setSelectedRows)
     Q_PROPERTY(QStringList columnNames MEMBER _labelNames WRITE setLabelNames)
     Q_PROPERTY(QStringList rowNames MEMBER _graphNames)
-    Q_PROPERTY(int columnCount MEMBER _columnCount)
+    Q_PROPERTY(int columnCount MEMBER _columnCount WRITE setColumnCount)
     Q_PROPERTY(int rowCount MEMBER _rowCount)
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
+    Q_PROPERTY(int minimumWidth READ minimumWidth NOTIFY minimumWidthChanged)
 
 public:
     CorrelationPlotItem(QQuickItem* parent = nullptr);
@@ -67,6 +68,9 @@ private:
     void setSelectedRows(const QVector<int>& selectedRows);
     void setLabelNames(const QStringList& labelNames);
     void setElideLabelWidth(int elideLabelWidth);
+    void setColumnCount(int columnCount);
+
+    int minimumWidth() const;
 
 private slots:
     void onCustomReplot();
@@ -76,6 +80,6 @@ private slots:
 
 signals:
     void rightClick();
-
+    void minimumWidthChanged();
 };
 #endif // CORRELATIONPLOTITEM_H

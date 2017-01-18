@@ -41,7 +41,7 @@ Item
             {
                 id: plot
 
-                width: scrollView.width
+                width: minimumWidth > scrollView.width ? minimumWidth : scrollView.width
                 height: scrollView.viewport.height
 
                 rowCount: plugin.model.rowCount

@@ -256,6 +256,22 @@ void CorrelationPlotItem::setElideLabelWidth(int elideLabelWidth)
         refresh();
 }
 
+void CorrelationPlotItem::setColumnCount(int columnCount)
+{
+    _columnCount = columnCount;
+    emit minimumWidthChanged();
+}
+
+int CorrelationPlotItem::minimumWidth() const
+{
+    QFontMetrics metrics(_defaultFont9Pt);
+    const auto& margins = _customPlot.axisRect()->margins();
+    const int axisPadding = margins.left() + margins.right();
+    const int columnPadding = 1;
+
+    return (_columnCount * (metrics.height() + columnPadding)) + axisPadding;
+}
+
 void CorrelationPlotItem::routeMouseEvent(QMouseEvent* event)
 {
     auto* newEvent = new QMouseEvent(event->type(), event->localPos(),
