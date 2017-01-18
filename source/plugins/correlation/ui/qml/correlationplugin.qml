@@ -12,8 +12,8 @@ Item
 
     Component.onCompleted:
     {
-        parent.Layout.minimumHeight = 300;
-        plot.height = 150;
+        parent.Layout.minimumHeight = 320;
+        scrollView.height = 160;
     }
 
     SplitView
@@ -29,31 +29,41 @@ Item
             nodeAttributesModel: plugin.model.nodeAttributes
         }
 
-        CorrelationPlot
+        ScrollView
         {
-            id: plot
+            id: scrollView
+            Layout.minimumHeight: 100 + (height - viewport.height)
 
-            Layout.minimumHeight: 100
+            horizontalScrollBarPolicy: Qt.ScrollBarAsNeeded
+            verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
 
-            rowCount: plugin.model.rowCount
-            columnCount: plugin.model.columnCount
-            data: plugin.model.dataset
-            columnNames: plugin.model.columnNames
-            rowNames: plugin.model.rowNames
-            selectedRows: plugin.model.selectedRows
-            elideLabelWidth:
+            CorrelationPlot
             {
-                var newHeight = height * 0.25;
-                var quant = 20;
-                var quantised = Math.floor(newHeight / quant) * quant;
+                id: plot
 
-                if(quantised < 40)
-                    quantised = 0;
+                width: scrollView.width
+                height: scrollView.viewport.height
 
-                return quantised;
+                rowCount: plugin.model.rowCount
+                columnCount: plugin.model.columnCount
+                data: plugin.model.dataset
+                columnNames: plugin.model.columnNames
+                rowNames: plugin.model.rowNames
+                selectedRows: plugin.model.selectedRows
+                elideLabelWidth:
+                {
+                    var newHeight = height * 0.25;
+                    var quant = 20;
+                    var quantised = Math.floor(newHeight / quant) * quant;
+
+                    if(quantised < 40)
+                        quantised = 0;
+
+                    return quantised;
+                }
+
+                onRightClick: { contextMenu.popup(); }
             }
-
-            onRightClick: { contextMenu.popup(); }
         }
     }
 
