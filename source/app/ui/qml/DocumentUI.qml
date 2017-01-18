@@ -305,6 +305,32 @@ Item
                 }
             }
         }
+
+        ColumnLayout
+        {
+            id: pluginContainer
+            visible: plugin.loaded
+
+            Layout.fillWidth: true
+
+            StatusBar
+            {
+                Layout.fillWidth: true
+
+                RowLayout
+                {
+                    width: parent.width
+
+                    Label
+                    {
+                        Layout.fillWidth: true
+                        text: pluginName
+                    }
+
+                    ToolButton { action: togglePluginWindowAction }
+                }
+            }
+        }
     }
 
     Preferences
@@ -322,6 +348,9 @@ Item
 
     Item
     {
+        Layout.fillHeight: true
+        Layout.fillWidth: true
+
         id: plugin
         Layout.minimumHeight: 100
         visible: loaded && enabledChildren
@@ -422,6 +451,13 @@ Item
             if(visible & !destructing)
                 popInPlugin();
         }
+
+        RowLayout
+        {
+            id: pluginWindowContent
+
+            anchors.fill: parent
+        }
     }
 
     Component.onCompleted:
@@ -441,24 +477,23 @@ Item
     function popOutPlugin()
     {
         root.pluginPoppedOut = true;
-        splitView.removeItem(plugin);
-        plugin.parent = pluginWindow.contentItem;
-        plugin.anchors.fill = plugin.parent;
+        pluginContainer.visible = false;
+        plugin.parent = pluginWindowContent;
+
         pluginWindow.x = pluginX;
         pluginWindow.y = pluginY;
     }
 
     function popInPlugin()
     {
-        plugin.parent = null;
-        plugin.anchors.fill = null;
+        plugin.parent = pluginContainer;
 
         if(splitView.orientation == Qt.Vertical)
-            plugin.height = pluginSplitSize;
+            pluginContainer.height = pluginSplitSize;
         else
-            plugin.width = pluginSplitSize;
+            pluginContainer.width = pluginSplitSize;
 
-        splitView.addItem(plugin);
+        pluginContainer.visible = true;
         root.pluginPoppedOut = false;
     }
 

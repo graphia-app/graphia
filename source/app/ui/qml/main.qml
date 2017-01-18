@@ -738,7 +738,6 @@ ApplicationWindow
             ToolButton { action: redoAction }
             ToolButton { action: overviewModeAction }
             ToolButton { action: resetViewAction }
-            ToolButton { action: togglePluginWindowAction }
             ToolButton
             {
                 action: debugResumeAction
