@@ -20,7 +20,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(int minimumWidth READ minimumWidth NOTIFY minimumWidthChanged)
 
 public:
-    CorrelationPlotItem(QQuickItem* parent = nullptr);
+    explicit CorrelationPlotItem(QQuickItem* parent = nullptr);
     void paint(QPainter* painter);
 
     Q_INVOKABLE void savePlotImage(const QUrl& url, const QString& format);

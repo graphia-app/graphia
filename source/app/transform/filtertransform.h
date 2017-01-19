@@ -10,7 +10,7 @@
 class FilterTransform : public GraphTransform, public Filter
 {
 public:
-    FilterTransform(bool invert) : _invert(invert) {}
+    explicit FilterTransform(bool invert) : _invert(invert) {}
 
     void apply(TransformedGraph &target) const;
 

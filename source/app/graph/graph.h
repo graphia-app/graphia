@@ -49,16 +49,16 @@ private:
 public:
     Edge() {}
 
-    Edge(const IEdge& other) :
-        _id(other.id()),
-        _sourceId(other.sourceId()),
-        _targetId(other.targetId())
+    explicit Edge(const IEdge& other) :
+                  _id(other.id()),
+                  _sourceId(other.sourceId()),
+                  _targetId(other.targetId())
     {}
 
-    Edge(IEdge&& other) noexcept :
-        _id(other.id()),
-        _sourceId(other.sourceId()),
-        _targetId(other.targetId())
+    explicit Edge(IEdge&& other) noexcept :
+                  _id(other.id()),
+                  _sourceId(other.sourceId()),
+                  _targetId(other.targetId())
     {}
 
     Edge& operator=(const IEdge& other)
