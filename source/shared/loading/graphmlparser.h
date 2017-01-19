@@ -31,7 +31,7 @@ public:
         QString _type;
         QVariant _value;
 
-        explicit Attribute(const AttributeKey& key)
+        Attribute(const AttributeKey& key)
         {
             _name = key._name;
             _default = key._default;
