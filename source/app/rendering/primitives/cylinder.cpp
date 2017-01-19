@@ -174,4 +174,4 @@ void Cylinder::generateVertexData(std::vector<float>& vertices, std::vector<floa
         index += 6;
     }
 }
-}
+} // namespace Primitive

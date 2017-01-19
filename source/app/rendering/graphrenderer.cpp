@@ -244,7 +244,7 @@ void GPUGraphData::clearFramebuffer()
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-    glDrawBuffers(2, drawBuffers);
+    glDrawBuffers(2, static_cast<GLenum*>(drawBuffers));
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -462,7 +462,7 @@ void GraphRenderer::resize(int width, int height)
     };
 
     _screenQuadDataBuffer.bind();
-    _screenQuadDataBuffer.allocate(quadData, static_cast<int>(sizeof(quadData)));
+    _screenQuadDataBuffer.allocate(static_cast<void*>(quadData), static_cast<int>(sizeof(quadData)));
     _screenQuadDataBuffer.release();
 }
 

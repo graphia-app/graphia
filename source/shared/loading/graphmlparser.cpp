@@ -298,7 +298,7 @@ bool GraphMLParser::parse(const QUrl &url, IMutableGraph &graph, const IParser::
     }
 
     GraphMLHandler handler(graph, progress, _nodeAttributes, lineCount);
-    QXmlInputSource *source = new QXmlInputSource(&file);
+    auto *source = new QXmlInputSource(&file);
     QXmlSimpleReader xmlReader;
     xmlReader.setContentHandler(&handler);
     xmlReader.setErrorHandler(&handler);

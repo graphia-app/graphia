@@ -180,6 +180,7 @@ float GraphComponentRenderer::zoomDistanceForRadius(float radius)
 void GraphComponentRenderer::updateFocusPosition()
 {
     auto component = _graphModel->graph().componentById(_componentId);
+    Q_ASSERT(component != nullptr);
     _viewData._focusPosition = NodePositions::centreOfMassScaledAndSmoothed(_graphModel->nodePositions(),
                                                                             component->nodeIds());
 }

@@ -80,7 +80,7 @@ void SDFComputeJob::prepareScreenQuadDataBuffer(QOpenGLBuffer& buffer, int width
     };
 
     buffer.bind();
-    buffer.allocate(quadData, static_cast<int>(sizeof(quadData)));
+    buffer.allocate(static_cast<void*>(quadData), static_cast<int>(sizeof(quadData)));
     buffer.release();
 }
 
@@ -147,7 +147,7 @@ void SDFComputeJob::generateSDF()
 
         // Set Frame draw buffers
         GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-        glDrawBuffers(1, DrawBuffers);
+        glDrawBuffers(1, static_cast<GLenum*>(DrawBuffers));
 
         // Check FrameBuffer is OK
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)

@@ -196,4 +196,4 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
     }
 }
 
-}
+} // namespace Primitive

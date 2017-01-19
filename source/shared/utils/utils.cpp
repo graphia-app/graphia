@@ -7,17 +7,20 @@
 #include <random>
 #include <thread>
 
-static std::random_device rd;
-static std::mt19937 gen(rd());
-
 float u::rand(float low, float high)
 {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+
     std::uniform_real_distribution<> distribution(low, high);
     return distribution(gen);
 }
 
 int u::rand(int low, int high)
 {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+
     std::uniform_int_distribution<> distribution(low, high);
     return distribution(gen);
 }
@@ -267,7 +270,7 @@ bool u::isNumeric(const std::string& string)
     {
         std::stof(string);
     }
-    catch(std::invalid_argument)
+    catch(std::invalid_argument&)
     {
         return false;
     }

@@ -143,7 +143,7 @@ const auto transform_def =
     -(x3::lit("where") >> condition);
 
 BOOST_SPIRIT_DEFINE(quotedString, identifier, transform, parameter, condition, terminalCondition);
-}
+} // namespace Parser
 
 bool GraphTransformConfigParser::parse(const QString& text)
 {
