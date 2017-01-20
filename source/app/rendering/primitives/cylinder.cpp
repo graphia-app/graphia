@@ -94,18 +94,20 @@ void Cylinder::generateVertexData(std::vector<float>& vertices, std::vector<floa
                                   std::vector<unsigned int>& indices)
 {
     int faces = (_slices);
-    int numVerts  = ((_slices + 1) * 2);
+    int numVerts  = ((_slices + 1) * 4) + 2;
 
     vertices.resize(3 * numVerts);
     normals.resize(3 * numVerts);
     tangents.resize(4 * numVerts);
     texCoords.resize(2 * numVerts);
-    indices.resize(6 * faces);
+    indices.resize(12 * faces);
 
     const float dTheta = Constants::TwoPi() / static_cast<float>(_slices);
     const float du = 1.0f / static_cast<float>(_slices);
 
     int index = 0, texCoordIndex = 0, tangentIndex = 0;
+
+    QVector3D coneTip(0.0, _length * 0.5f, 0.0);
 
     // Iterate over longitudes (slices)
     for(int slice = 0; slice < _slices + 1; slice++)
@@ -116,7 +118,7 @@ void Cylinder::generateVertexData(std::vector<float>& vertices, std::vector<floa
         const float u = static_cast<float>(slice) * du;
 
         vertices[index+0] = _radius * cosTheta;
-        vertices[index+1] = _length * 0.5f;
+        vertices[index+1] = _length * 0.25f;
         vertices[index+2] = _radius * sinTheta;
 
         normals[index+0] = cosTheta;
@@ -156,22 +158,132 @@ void Cylinder::generateVertexData(std::vector<float>& vertices, std::vector<floa
         texCoords[texCoordIndex+1] = 1.0f;
 
         texCoordIndex += 2;
+
+        // Make a cone for "arrow" mesh
+        // This is closely coupled to the instancedEdges Shader
+        // Bottom rim of cone (circle)
+        vertices[index+0] = (_radius * 2) * cosTheta;
+        vertices[index+1] = _length * 0.25f;
+        vertices[index+2] = (_radius * 2) * sinTheta;
+        QVector3D bottom(vertices[index+0],
+                         vertices[index+1],
+                         vertices[index+2]);
+
+        // Base to tip
+        QVector3D baseToTipTangent = coneTip - bottom;
+        bottom.setY(0);
+
+        QVector3D baseTangent = QVector3D::crossProduct(baseToTipTangent, bottom);
+        baseTangent.normalize();
+        QVector3D baseNormal = QVector3D::crossProduct(baseTangent, baseToTipTangent);
+        baseNormal.normalize();
+
+        // Cone surface normals
+        normals[index+0] = baseNormal.x();
+        normals[index+1] = baseNormal.y();
+        normals[index+2] = baseNormal.z();
+
+        index += 3;
+
+        tangents[tangentIndex] = baseTangent.x();
+        tangents[tangentIndex + 1] = baseTangent.y();
+        tangents[tangentIndex + 2] = baseTangent.z();
+        tangents[tangentIndex + 3] = 1.0;
+        tangentIndex += 4;
+
+        texCoords[texCoordIndex] = u;
+        texCoords[texCoordIndex+1] = 0.0f;
+
+        texCoordIndex += 2;
+
+        // Bottom rim of cone (for cap only)
+        vertices[index+0] = (_radius * 2) * cosTheta;
+        vertices[index+1] = _length * 0.25f;
+        vertices[index+2] = (_radius * 2) * sinTheta;
+
+        normals[index+0] = 0;
+        normals[index+1] = -1.0f;
+        normals[index+2] = 0;
+
+        index += 3;
+
+        tangents[tangentIndex] = sinTheta;
+        tangents[tangentIndex + 1] = 0.0;
+        tangents[tangentIndex + 2] = -cosTheta;
+        tangents[tangentIndex + 3] = 1.0;
+        tangentIndex += 4;
+
+        texCoords[texCoordIndex] = u;
+        texCoords[texCoordIndex+1] = 1.0f;
+
+        texCoordIndex += 2;
     }
+
+    // Bottom of cone - top of edge (tail)
+    int capIndex = index / 3;
+    vertices[index+0] = 0.0;
+    vertices[index+1] = _length * 0.25f;
+    vertices[index+2] = 0.0;
+
+    normals[index+0] = 0.0;
+    normals[index+1] = -1.0;
+    normals[index+2] = 0.0;
+
+    tangents[tangentIndex] = 1.0;
+    tangents[tangentIndex + 1] = 0.0;
+    tangents[tangentIndex + 2] = 0.0;
+    tangents[tangentIndex + 3] = 1.0;
+
+    texCoords[texCoordIndex] = 0.0f;
+    texCoords[texCoordIndex+1] = 0.0f;
+
+    index += 3;
+
+    int tipIndex = index / 3;
+    vertices[index+0] = coneTip.x();
+    vertices[index+1] = coneTip.y();
+    vertices[index+2] = coneTip.z();
+
+    // Tip normals (Clever hack. All 0's, allows blending with cone base normals
+    // which is then normalised to create a smoothly blended normal)
+    normals[index+0] = 0.0;
+    normals[index+1] = 0.0;
+    normals[index+2] = 0.0;
+
+    tangents[tangentIndex] = 0.0;
+    tangents[tangentIndex + 1] = 0.0;
+    tangents[tangentIndex + 2] = 0.0;
+    tangents[tangentIndex + 3] = 1.0;
+
+    texCoords[texCoordIndex] = 0.0f;
+    texCoords[texCoordIndex+1] = 0.0f;
 
     index = 0;
 
     for(int slice = 0; slice < _slices; slice++)
     {
-        int baseIndex = slice * 2;
+        int baseIndex = slice * 4;
 
-        indices[index+0] = baseIndex + 3;
+        // Tail (edge) indices
+        indices[index+0] = baseIndex + 5;
         indices[index+1] = baseIndex + 1;
         indices[index+2] = baseIndex + 0;
-        indices[index+3] = baseIndex + 0;
-        indices[index+4] = baseIndex + 2;
-        indices[index+5] = baseIndex + 3;
 
-        index += 6;
+        indices[index+3] = baseIndex + 0;
+        indices[index+4] = baseIndex + 4;
+        indices[index+5] = baseIndex + 5;
+
+        // Cone Indices
+        indices[index+6] = baseIndex + 2;
+        indices[index+7] = tipIndex;
+        indices[index+8] = baseIndex + 6;
+
+        // Cap
+        indices[index+9] = baseIndex + 7;
+        indices[index+10] = capIndex;
+        indices[index+11] = baseIndex + 3;
+
+        index += 12;
     }
 }
 } // namespace Primitive

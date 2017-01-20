@@ -107,6 +107,8 @@ struct GPUGraphData : OpenGLFunctions
     {
         float _sourcePosition[3];
         float _targetPosition[3];
+        float _sourceSize;
+        float _targetSize;
         int _component;
         float _size;
         float _color[3];

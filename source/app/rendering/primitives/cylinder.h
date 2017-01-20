@@ -27,7 +27,7 @@ public:
 
     QOpenGLVertexArrayObject* vertexArrayObject() { return &_vao; }
 
-    int indexCount() const { return 6 * _slices; }
+    int indexCount() const { return 12 * _slices; }
 
 public slots:
     void setRadius(float radius) { _radius = radius; }
