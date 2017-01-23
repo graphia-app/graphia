@@ -58,10 +58,10 @@ void GPUGraphData::initialise(QOpenGLShaderProgram& nodesShader,
     _sphere.setSlices(16);
     _sphere.create(nodesShader);
 
-    _cylinder.setRadius(1.0f);
-    _cylinder.setLength(1.0f);
-    _cylinder.setSlices(8);
-    _cylinder.create(edgesShader);
+    _arrow.setRadius(1.0f);
+    _arrow.setLength(1.0f);
+    _arrow.setSlices(8);
+    _arrow.create(edgesShader);
 
     _rectangle.create(textShader);
 
@@ -180,7 +180,7 @@ void GPUGraphData::prepareNodeVAO(QOpenGLShaderProgram& shader)
 
 void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
 {
-    _cylinder.vertexArrayObject()->bind();
+    _arrow.vertexArrayObject()->bind();
     shader.bind();
 
     _edgeVBO.bind();
@@ -216,7 +216,7 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     _edgeVBO.release();
 
     shader.release();
-    _cylinder.vertexArrayObject()->release();
+    _arrow.vertexArrayObject()->release();
 }
 
 bool GPUGraphData::prepareRenderBuffers(int width, int height, GLuint depthTexture)
@@ -522,6 +522,7 @@ void GraphRenderer::updateGPUDataIfRequired()
     auto textAlignment = static_cast<TextAlignment>(u::pref("visuals/textAlignment").toInt());
     auto textColor = Document::contrastingColorForBackground();
     auto showNodeNames = static_cast<NodeTextState>(u::pref("visuals/showNodeNames").toInt());
+    auto edgeVisualType = static_cast<EdgeVisualType>(u::pref("visuals/edgeVisualType").toInt());
 
     for(auto& componentRendererRef : _componentRenderers)
     {
@@ -638,7 +639,7 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._targetPosition[2] = targetPosition.z();
             edgeData._sourceSize = nodeVisuals[edge->sourceId()]._size;
             edgeData._targetSize = nodeVisuals[edge->targetId()]._size;
-            edgeData._edgeType = static_cast<int>(GPUGraphData::EdgeVisualType::Arrow);
+            edgeData._edgeType = static_cast<int>(edgeVisualType);
             edgeData._component = componentIndex;
             edgeData._size = edgeVisuals[edge->id()]._size;
             edgeData._color[0] = edgeVisuals[edge->id()]._color.redF();
@@ -1206,10 +1207,10 @@ void GraphRenderer::renderEdges(GPUGraphData& gpuGraphData)
     glBindTexture(GL_TEXTURE_BUFFER, _componentDataTexture);
     _edgesShader.setUniformValue("componentData", 0);
 
-    gpuGraphData._cylinder.vertexArrayObject()->bind();
-    glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._cylinder.indexCount(),
+    gpuGraphData._arrow.vertexArrayObject()->bind();
+    glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._arrow.indexCount(),
                             GL_UNSIGNED_INT, nullptr, gpuGraphData.numEdges());
-    gpuGraphData._cylinder.vertexArrayObject()->release();
+    gpuGraphData._arrow.vertexArrayObject()->release();
 
     glBindTexture(GL_TEXTURE_BUFFER, 0);
     gpuGraphData._edgeVBO.release();

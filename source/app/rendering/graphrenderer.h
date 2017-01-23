@@ -127,12 +127,6 @@ struct GPUGraphData : OpenGLFunctions
         float _color[3];
     };
 
-    enum class EdgeVisualType
-    {
-        Cylinder,
-        Arrow
-    };
-
     // There are two alpha values so that we can split the alpha blended layers
     // depending on their purpose. The rendering occurs in order based on _alpha1,
     // going from opaque to transparent, then resorting to _alpha2 in the same order,
@@ -166,6 +160,8 @@ Q_DECLARE_METATYPE(TextAlignment)
 
 DEFINE_QML_ENUM(Q_GADGET, NodeTextState,
                 Off, Selected, All);
+DEFINE_QML_ENUM(Q_GADGET, EdgeVisualType,
+                Cylinder, Arrow);
 
 class GraphRenderer :
         public QObject,

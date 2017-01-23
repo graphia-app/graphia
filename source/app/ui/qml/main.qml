@@ -148,6 +148,11 @@ ApplicationWindow
     {
         id: visuals
         section: "visuals"
+        property int edgeVisualType:
+        {
+            return toggleEdgeDirectionAction.checked ? EdgeVisualType.Arrow
+                                                   : EdgeVisualType.Cylinder;
+        }
         property int showNodeNames:
         {
             switch(nodeNameDisplay.current)
@@ -521,6 +526,18 @@ ApplicationWindow
         checkable: true
     }
 
+    Action
+    {
+        id: toggleEdgeDirectionAction
+        text: qsTr("Show Edge Direction")
+        checkable: true
+
+        Component.onCompleted:
+        {
+            toggleEdgeDirectionAction.checked = !(visuals.edgeVisualType == EdgeVisualType.Cylinder);
+        }
+    }
+
     ExclusiveGroup
     {
         id: nodeNameDisplay
@@ -691,6 +708,7 @@ ApplicationWindow
                 MenuItem { action: showSelectedNodeNamesAction }
                 MenuItem { action: showAllNodeNamesAction }
             }
+            MenuItem { action: toggleEdgeDirectionAction }
         }
         Menu
         {

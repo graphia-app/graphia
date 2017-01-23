@@ -104,6 +104,7 @@ int main(int argc, char *argv[])
     preferences.define("visuals/showNodeNames",             false);
     preferences.define("visuals/textFont",                  SharedTools::QtSingleApplication::font().family());
     preferences.define("visuals/textSize",                  24.0f);
+    preferences.define("visuals/edgeVisualType",            QVariant::fromValue(static_cast<int>(EdgeVisualType::Cylinder)));
     preferences.define("visuals/textAlignment",             QVariant::fromValue(static_cast<int>(TextAlignment::Right)));
 
     preferences.define("visuals/minimumComponentRadius",    2.0, 0.05, 15.0);
