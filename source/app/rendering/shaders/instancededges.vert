@@ -73,12 +73,12 @@ void main()
                                  texelFetch(componentData, index + 7));
 
     // Cylinder Edge
-    if (edgeType == 0 && !equals(length(vertexPosition.xz), 1.0))
+    if(edgeType == 0 && !equals(length(vertexPosition.xz), 1.0))
     {
         // Hide head vertices
         position = (modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
     }
-    else if (edgeType == 0 && vertexPosition.y > 0.0)
+    else if(edgeType == 0 && vertexPosition.y > 0.0)
     {
         // Reposition the top of the cylinder to the target
         vec3 scaledVertexPosition = vertexPosition;
@@ -90,7 +90,7 @@ void main()
         position = (modelViewMatrix * vec4(position + midpoint, 1.0)).xyz;
     }
     // Arrow Head Edge
-    else if (edgeType == 1 && vertexPosition.y > ARROW_HEAD_CUTOFF_Y)
+    else if(edgeType == 1 && vertexPosition.y > ARROW_HEAD_CUTOFF_Y)
     {
         vec3 conePosition = vertexPosition;
         // Position so it points to origin
@@ -101,7 +101,7 @@ void main()
         conePosition.y *= 16;
 
         // Limit the cone size to MAX_ARROW_HEAD_LENGTH * edge length
-        if (abs(conePosition.y) > edgeLength * MAX_ARROW_HEAD_LENGTH)
+        if(abs(conePosition.y) > edgeLength * MAX_ARROW_HEAD_LENGTH)
             conePosition.y = -edgeLength * MAX_ARROW_HEAD_LENGTH;
 
         // Offset cone position to point at edge of node
