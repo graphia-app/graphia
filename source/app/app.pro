@@ -70,7 +70,6 @@ HEADERS += \
     rendering/graphrenderer.h \
     rendering/opengldebuglogger.h \
     rendering/openglfunctions.h \
-    rendering/primitives/cylinder.h \
     rendering/primitives/rectangle.h \
     rendering/primitives/sphere.h \
     rendering/scene.h \
@@ -98,7 +97,8 @@ HEADERS += \
     transform/graphtransformconfigparser.h \
     transform/conditionfncreator.h \
     utils/qmlenum.h \
-    layout/fastinitiallayout.h
+    layout/fastinitiallayout.h \
+    rendering/primitives/arrow.h
 
 SOURCES += \
     application.cpp \
@@ -141,7 +141,6 @@ SOURCES += \
     rendering/graphrenderer.cpp \
     rendering/opengldebuglogger.cpp \
     rendering/openglfunctions.cpp \
-    rendering/primitives/cylinder.cpp \
     rendering/primitives/rectangle.cpp \
     rendering/primitives/sphere.cpp \
     rendering/transition.cpp \
@@ -161,7 +160,8 @@ SOURCES += \
     utils/debugpauser.cpp \
     transform/graphtransformconfigparser.cpp \
     transform/graphtransformconfig.cpp \
-    layout/fastinitiallayout.cpp
+    layout/fastinitiallayout.cpp \
+    rendering/primitives/arrow.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \

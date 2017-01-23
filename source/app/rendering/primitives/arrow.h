@@ -1,5 +1,5 @@
-#ifndef CYLINDER_H
-#define CYLINDER_H
+#ifndef ARROW_H
+#define ARROW_H
 
 #include <QObject>
 
@@ -10,7 +10,9 @@
 #include <vector>
 namespace Primitive
 {
-class Cylinder : public QObject
+// Consists of a cylinder and a cone. Edge shader hides the cone based on
+// edge type.
+class Arrow : public QObject
 {
     Q_OBJECT
 
@@ -19,7 +21,7 @@ class Cylinder : public QObject
     Q_PROPERTY(int slices READ slices WRITE setSlices)
 
 public:
-    explicit Cylinder(QObject* parent = nullptr);
+    explicit Arrow(QObject* parent = nullptr);
 
     float radius() const { return _radius; }
     int length() const { return _length; }
@@ -55,4 +57,4 @@ private:
 };
 }
 
-#endif // CYLINDER_H
+#endif // ARROW_H

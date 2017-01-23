@@ -67,7 +67,7 @@ void main()
     if(edgeType == 0 && length(vertexPosition.xz) != 1.0)
     {
         // Hide head vertices
-        if (vertexPosition.y > 0.25)
+        if(vertexPosition.y > 0.25)
             position = (modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
     }
     else if(edgeType == 0 && length(vertexPosition.xz) == 1.0 && vertexPosition.y > 0)
@@ -93,7 +93,7 @@ void main()
         conePosition.y *= 16;
 
         // Limit the cone size to 0.25 edge length
-        if (abs(conePosition.y) > edgeLength * 0.25)
+        if(abs(conePosition.y) > edgeLength * 0.25)
             conePosition.y = -edgeLength * 0.25 ;
 
         // Offset cone position to point at edge of node

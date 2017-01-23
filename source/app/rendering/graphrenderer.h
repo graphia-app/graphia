@@ -7,7 +7,7 @@
 #include "transition.h"
 #include "glyphmap.h"
 
-#include "primitives/cylinder.h"
+#include "primitives/arrow.h"
 #include "primitives/sphere.h"
 #include "primitives/rectangle.h"
 
@@ -87,7 +87,7 @@ struct GPUGraphData : OpenGLFunctions
     int numEdges() const;
 
     Primitive::Sphere _sphere;
-    Primitive::Cylinder _cylinder;
+    Primitive::Arrow _arrow;
     Primitive::Rectangle _rectangle;
 
     float alpha() const;

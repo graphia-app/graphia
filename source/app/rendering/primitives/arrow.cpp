@@ -1,4 +1,4 @@
-#include "cylinder.h"
+#include "arrow.h"
 
 #include "maths/constants.h"
 
@@ -8,7 +8,7 @@
 namespace Primitive
 {
 
-Cylinder::Cylinder(QObject* parent) :
+Arrow::Arrow(QObject* parent) :
     QObject(parent),
     _positionBuffer(QOpenGLBuffer::VertexBuffer),
     _normalBuffer(QOpenGLBuffer::VertexBuffer),
@@ -18,7 +18,7 @@ Cylinder::Cylinder(QObject* parent) :
 {
 }
 
-void Cylinder::create(QOpenGLShaderProgram& shader)
+void Arrow::create(QOpenGLShaderProgram& shader)
 {
     std::vector<float> vertices;
     std::vector<float> normals;
@@ -89,7 +89,7 @@ void Cylinder::create(QOpenGLShaderProgram& shader)
     shader.release();
 }
 
-void Cylinder::generateVertexData(std::vector<float>& vertices, std::vector<float>& normals,
+void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>& normals,
                                   std::vector<float>& texCoords, std::vector<float>& tangents,
                                   std::vector<unsigned int>& indices)
 {
