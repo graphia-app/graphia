@@ -1,18 +1,18 @@
 #version 330 core
 
-layout (location = 0) in vec3 vertexPosition;
-layout (location = 1) in vec3 vertexNormal;
-layout (location = 2) in vec2 vertexTexCoord;
+layout (location = 0) in vec3   vertexPosition;
+layout (location = 1) in vec3   vertexNormal;
+layout (location = 2) in vec2   vertexTexCoord;
 
-layout (location = 3) in vec3  sourcePosition; // The position of the source node
-layout (location = 4) in vec3  targetPosition; // The position of the target node
+layout (location = 3) in vec3   sourcePosition; // The position of the source node
+layout (location = 4) in vec3   targetPosition; // The position of the target node
 layout (location = 5) in float  sourceSize; // The size of the source node
 layout (location = 6) in float  targetSize; // The size of the target node
-layout (location = 7) in int  edgeType; // The size of the target node
+layout (location = 7) in int    edgeType; // The size of the target node
 
-layout (location = 8) in int   component; // The component index
+layout (location = 8) in int    component; // The component index
 
-layout (location = 9) in float size; // The size of the edge
+layout (location = 9)  in float size; // The size of the edge
 layout (location = 10) in vec3  color; // The color of the edge
 layout (location = 11) in vec3  outlineColor; // The outline color of the node
 
@@ -22,6 +22,15 @@ out vec3 vColor;
 out vec3 vOutlineColor;
 
 uniform samplerBuffer componentData;
+
+const float ARROW_HEAD_CUTOFF_Y = 0.24;
+const float MAX_ARROW_HEAD_LENGTH = 0.25;
+
+bool equals(float value, float target)
+{
+    const float EPSILON = 0.001;
+    return (abs(value - target) <= EPSILON);
+}
 
 mat4 makeOrientationMatrix(vec3 up)
 {
@@ -64,13 +73,12 @@ void main()
                                  texelFetch(componentData, index + 7));
 
     // Cylinder Edge
-    if(edgeType == 0 && length(vertexPosition.xz) != 1.0)
+    if (edgeType == 0 && !equals(length(vertexPosition.xz), 1.0))
     {
         // Hide head vertices
-        if(vertexPosition.y > 0.25)
-            position = (modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+        position = (modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
     }
-    else if(edgeType == 0 && length(vertexPosition.xz) == 1.0 && vertexPosition.y > 0)
+    else if (edgeType == 0 && vertexPosition.y > 0.0)
     {
         // Reposition the top of the cylinder to the target
         vec3 scaledVertexPosition = vertexPosition;
@@ -78,11 +86,11 @@ void main()
         scaledVertexPosition.xz *= size;
         scaledVertexPosition.y *= edgeLength;
 
-       position = (orientationMatrix * vec4(scaledVertexPosition, 1.0)).xyz;
-       position = (modelViewMatrix * vec4(position + midpoint, 1.0)).xyz;
+        position = (orientationMatrix * vec4(scaledVertexPosition, 1.0)).xyz;
+        position = (modelViewMatrix * vec4(position + midpoint, 1.0)).xyz;
     }
     // Arrow Head Edge
-    else if(edgeType == 1 && vertexPosition.y > 0.24)
+    else if (edgeType == 1 && vertexPosition.y > ARROW_HEAD_CUTOFF_Y)
     {
         vec3 conePosition = vertexPosition;
         // Position so it points to origin
@@ -92,9 +100,9 @@ void main()
         // Scale arrow head (cone) length
         conePosition.y *= 16;
 
-        // Limit the cone size to 0.25 edge length
-        if(abs(conePosition.y) > edgeLength * 0.25)
-            conePosition.y = -edgeLength * 0.25 ;
+        // Limit the cone size to MAX_ARROW_HEAD_LENGTH * edge length
+        if (abs(conePosition.y) > edgeLength * MAX_ARROW_HEAD_LENGTH)
+            conePosition.y = -edgeLength * MAX_ARROW_HEAD_LENGTH;
 
         // Offset cone position to point at edge of node
         conePosition.y -= targetSize;
