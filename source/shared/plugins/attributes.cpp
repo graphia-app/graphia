@@ -1,5 +1,7 @@
 #include "attributes.h"
 
+#include "shared/utils/utils.h"
+
 const QString Attributes::firstAttributeName() const
 {
     if(!_attributes.empty())
@@ -23,8 +25,11 @@ void Attributes::add(const QString& name)
     if(_attributes.empty())
         _firstAttributeName = name;
 
-    _attributes.emplace_back(std::make_pair(name, Attribute(name)));
-    emit attributeAdded(name);
+    if(!u::containsKey(_attributes, name))
+    {
+        _attributes.emplace_back(std::make_pair(name, Attribute(name)));
+        emit attributeAdded(name);
+    }
 }
 
 void Attributes::setValue(int index, const QString& name, const QString& value)
