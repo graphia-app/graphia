@@ -8,12 +8,13 @@ layout (location = 3) in vec3  sourcePosition; // The position of the source nod
 layout (location = 4) in vec3  targetPosition; // The position of the target node
 layout (location = 5) in float  sourceSize; // The size of the source node
 layout (location = 6) in float  targetSize; // The size of the target node
+layout (location = 7) in int  edgeType; // The size of the target node
 
-layout (location = 7) in int   component; // The component index
+layout (location = 8) in int   component; // The component index
 
-layout (location = 8) in float size; // The size of the edge
-layout (location = 9) in vec3  color; // The color of the edge
-layout (location = 10) in vec3  outlineColor; // The outline color of the node
+layout (location = 9) in float size; // The size of the edge
+layout (location = 10) in vec3  color; // The color of the edge
+layout (location = 11) in vec3  outlineColor; // The outline color of the node
 
 out vec3 position;
 out vec3 normal;
@@ -45,11 +46,6 @@ void main()
     vec3 midpoint = mix(sourcePosition, targetPosition, 0.5);
     mat4 orientationMatrix = makeOrientationMatrix(normalize(targetPosition - sourcePosition));
 
-    // Scale edge vertices
-    vec3 scaledVertexPosition = vertexPosition;
-    scaledVertexPosition.xz *= size;
-    scaledVertexPosition.y *= edgeLength;
-
     // Apply inverse to the normals
     vec3 scaledVertexNormal = vertexNormal;
     scaledVertexNormal.xz /= size;
@@ -67,7 +63,26 @@ void main()
                                  texelFetch(componentData, index + 6),
                                  texelFetch(componentData, index + 7));
 
-    if(vertexPosition.y > 0.24)
+    // Cylinder Edge
+    if(edgeType == 0 && length(vertexPosition.xz) != 1.0)
+    {
+        // Hide head vertices
+        if (vertexPosition.y > 0.25)
+            position = (modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+    }
+    else if(edgeType == 0 && length(vertexPosition.xz) == 1.0 && vertexPosition.y > 0)
+    {
+        // Reposition the top of the cylinder to the target
+        vec3 scaledVertexPosition = vertexPosition;
+        scaledVertexPosition.y = 0.5;
+        scaledVertexPosition.xz *= size;
+        scaledVertexPosition.y *= edgeLength;
+
+       position = (orientationMatrix * vec4(scaledVertexPosition, 1.0)).xyz;
+       position = (modelViewMatrix * vec4(position + midpoint, 1.0)).xyz;
+    }
+    // Arrow Head Edge
+    else if(edgeType == 1 && vertexPosition.y > 0.24)
     {
         vec3 conePosition = vertexPosition;
         // Position so it points to origin
@@ -89,6 +104,11 @@ void main()
     }
     else
     {
+        // Scale edge vertices
+        vec3 scaledVertexPosition = vertexPosition;
+        scaledVertexPosition.xz *= size;
+        scaledVertexPosition.y *= edgeLength;
+
         position = (orientationMatrix * vec4(scaledVertexPosition, 1.0)).xyz;
         position = (modelViewMatrix * vec4(position + midpoint, 1.0)).xyz;
     }

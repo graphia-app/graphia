@@ -188,6 +188,7 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     shader.enableAttributeArray("targetPosition");
     shader.enableAttributeArray("sourceSize");
     shader.enableAttributeArray("targetSize");
+    shader.enableAttributeArray("edgeType");
     shader.enableAttributeArray("component");
     shader.enableAttributeArray("size");
     shader.enableAttributeArray("color");
@@ -196,8 +197,10 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     shader.setAttributeBuffer("targetPosition", GL_FLOAT, offsetof(EdgeData, _targetPosition), 3,         sizeof(EdgeData));
     shader.setAttributeBuffer("sourceSize", GL_FLOAT, offsetof(EdgeData, _sourceSize), 1,         sizeof(EdgeData));
     shader.setAttributeBuffer("targetSize", GL_FLOAT, offsetof(EdgeData, _targetSize), 1,         sizeof(EdgeData));
+    glVertexAttribIPointer(shader.attributeLocation("edgeType"),                              1, GL_INT, sizeof(EdgeData),
+                            reinterpret_cast<const void*>(offsetof(EdgeData, _edgeType)));
     glVertexAttribIPointer(shader.attributeLocation("component"),                              1, GL_INT, sizeof(EdgeData),
-                            reinterpret_cast<const void*>(offsetof(EdgeData, _component)));
+                           reinterpret_cast<const void*>(offsetof(EdgeData, _component)));
     shader.setAttributeBuffer("size",           GL_FLOAT, offsetof(EdgeData, _size),           1,         sizeof(EdgeData));
     shader.setAttributeBuffer("color",          GL_FLOAT, offsetof(EdgeData, _color),          3,         sizeof(EdgeData));
     shader.setAttributeBuffer("outlineColor",   GL_FLOAT, offsetof(EdgeData, _outlineColor),   3,         sizeof(EdgeData));
@@ -205,6 +208,7 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     glVertexAttribDivisor(shader.attributeLocation("targetPosition"), 1);
     glVertexAttribDivisor(shader.attributeLocation("sourceSize"), 1);
     glVertexAttribDivisor(shader.attributeLocation("targetSize"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("edgeType"), 1);
     glVertexAttribDivisor(shader.attributeLocation("component"), 1);
     glVertexAttribDivisor(shader.attributeLocation("size"), 1);
     glVertexAttribDivisor(shader.attributeLocation("color"), 1);
@@ -634,6 +638,7 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._targetPosition[2] = targetPosition.z();
             edgeData._sourceSize = nodeVisuals[edge->sourceId()]._size;
             edgeData._targetSize = nodeVisuals[edge->targetId()]._size;
+            edgeData._edgeType = static_cast<int>(GPUGraphData::EdgeVisualType::Arrow);
             edgeData._component = componentIndex;
             edgeData._size = edgeVisuals[edge->id()]._size;
             edgeData._color[0] = edgeVisuals[edge->id()]._color.redF();

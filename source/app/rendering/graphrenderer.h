@@ -109,6 +109,7 @@ struct GPUGraphData : OpenGLFunctions
         float _targetPosition[3];
         float _sourceSize;
         float _targetSize;
+        int _edgeType;
         int _component;
         float _size;
         float _color[3];
@@ -124,6 +125,12 @@ struct GPUGraphData : OpenGLFunctions
         float _glyphOffset[2];
         float _glyphSize[2];
         float _color[3];
+    };
+
+    enum class EdgeVisualType
+    {
+        Cylinder,
+        Arrow
     };
 
     // There are two alpha values so that we can split the alpha blended layers
