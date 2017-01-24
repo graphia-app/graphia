@@ -152,9 +152,9 @@ std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pears
             double numerator = (_numColumns * productSum) - (rowA._sum * rowB._sum);
             double denominator = rowA._variability * rowB._variability;
 
-            double r = u::clamp(-1.0, 1.0, numerator / denominator);
+            double r = numerator / denominator;
 
-            if(std::isfinite(r) && r > minimumThreshold)
+            if(std::isfinite(r) && r >= minimumThreshold)
                 edges.emplace_back(rowA._nodeId, rowB._nodeId, r);
         }
 
