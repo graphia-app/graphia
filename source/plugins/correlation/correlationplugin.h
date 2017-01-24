@@ -178,7 +178,7 @@ public:
 
     QStringList identifyUrl(const QUrl& url) const;
 
-    bool editable() const { return false; }
+    bool editable() const { return true; }
 
     QString parametersQmlPath() const { return "qrc:///qml/parameters.qml"; }
     QString qmlPath() const { return "qrc:///qml/correlationplugin.qml"; }
