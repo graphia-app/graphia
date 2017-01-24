@@ -51,6 +51,7 @@ struct EdgeVisual
 {
     float _size = 1.0f;
     QColor _color;
+    QString _text;
     VisualState _state;
 };
 

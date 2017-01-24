@@ -497,6 +497,60 @@ GPUGraphData* GraphRenderer::gpuGraphDataForAlpha(float alpha1, float alpha2)
     return nullptr;
 }
 
+void GraphRenderer::createGPUGlyphData(const QString& text, const QColor& textColor, const TextAlignment& textAlignment,
+                                    float textScale, float elementSize, const QVector3D& elementPosition,
+                                    int componentIndex, GPUGraphData* gpuGraphData)
+{
+    auto& textLayout = _textLayoutResults._layouts[text];
+
+    auto verticalCentre = -textLayout._xHeight * textScale * 0.5f;
+    auto top = elementSize;
+    auto bottom = (-elementSize) - (textLayout._xHeight * textScale);
+
+    auto horizontalCentre = -textLayout._width * textScale * 0.5f;
+    auto right = elementSize;
+    auto left = (-elementSize) - (textLayout._width * textScale);
+
+    for(const auto& glyph : textLayout._glyphs)
+    {
+        GPUGraphData::GlyphData glyphData;
+
+        auto textureGlyph = _textLayoutResults._glyphs[glyph._index];
+
+        glyphData._component = componentIndex;
+
+        std::array<float, 2> baseOffset;
+        switch(textAlignment)
+        {
+        default:
+        case TextAlignment::Right:  baseOffset = {{right,            verticalCentre}}; break;
+        case TextAlignment::Left:   baseOffset = {{left,             verticalCentre}}; break;
+        case TextAlignment::Centre: baseOffset = {{horizontalCentre, verticalCentre}}; break;
+        case TextAlignment::Top:    baseOffset = {{horizontalCentre, top           }}; break;
+        case TextAlignment::Bottom: baseOffset = {{horizontalCentre, bottom        }}; break;
+        }
+
+        glyphData._glyphOffset[0] = baseOffset[0] + (glyph._advance * textScale);
+        glyphData._glyphOffset[1] = baseOffset[1] - ((textureGlyph._height + textureGlyph._ascent) * textScale);
+        glyphData._glyphSize[0] = textureGlyph._width;
+        glyphData._glyphSize[1] = textureGlyph._height;
+
+        glyphData._textureCoord[0] = textureGlyph._u;
+        glyphData._textureCoord[1] = textureGlyph._v;
+        glyphData._textureLayer = textureGlyph._layer;
+
+        glyphData._basePosition[0] = elementPosition.x();
+        glyphData._basePosition[1] = elementPosition.y();
+        glyphData._basePosition[2] = elementPosition.z();
+
+        glyphData._color[0] = textColor.redF();
+        glyphData._color[1] = textColor.greenF();
+        glyphData._color[2] = textColor.blueF();
+
+        gpuGraphData->_glyphData.push_back(glyphData);
+    }
+}
+
 void GraphRenderer::updateGPUDataIfRequired()
 {
     if(!_gpuDataRequiresUpdate)
@@ -572,54 +626,7 @@ void GraphRenderer::updateGPUDataIfRequired()
             if(showNodeNames == NodeTextState::Selected && !nodeVisual._state.testFlag(VisualFlags::Selected))
                 continue;
 
-            auto& textLayout = _textLayoutResults._layouts[nodeVisual._text];
-
-            auto verticalCentre = -textLayout._xHeight * textScale * 0.5f;
-            auto top = nodeVisual._size;
-            auto bottom = (-nodeVisual._size) - (textLayout._xHeight * textScale);
-
-            auto horizontalCentre = -textLayout._width * textScale * 0.5f;
-            auto right = nodeVisual._size;
-            auto left = (-nodeVisual._size) - (textLayout._width * textScale);
-
-            for(auto glyph : textLayout._glyphs)
-            {
-                GPUGraphData::GlyphData glyphData;
-
-                auto textureGlyph = _textLayoutResults._glyphs[glyph._index];
-
-                glyphData._component = componentIndex;
-
-                std::array<float, 2> baseOffset;
-                switch(textAlignment)
-                {
-                default:
-                case TextAlignment::Right:  baseOffset = {{right,            verticalCentre}}; break;
-                case TextAlignment::Left:   baseOffset = {{left,             verticalCentre}}; break;
-                case TextAlignment::Centre: baseOffset = {{horizontalCentre, verticalCentre}}; break;
-                case TextAlignment::Top:    baseOffset = {{horizontalCentre, top           }}; break;
-                case TextAlignment::Bottom: baseOffset = {{horizontalCentre, bottom        }}; break;
-                }
-
-                glyphData._glyphOffset[0] = baseOffset[0] + (glyph._advance * textScale);
-                glyphData._glyphOffset[1] = baseOffset[1] - ((textureGlyph._height + textureGlyph._ascent) * textScale);
-                glyphData._glyphSize[0] = textureGlyph._width;
-                glyphData._glyphSize[1] = textureGlyph._height;
-
-                glyphData._textureCoord[0] = textureGlyph._u;
-                glyphData._textureCoord[1] = textureGlyph._v;
-                glyphData._textureLayer = textureGlyph._layer;
-
-                glyphData._basePosition[0] = nodePosition.x();
-                glyphData._basePosition[1] = nodePosition.y();
-                glyphData._basePosition[2] = nodePosition.z();
-
-                glyphData._color[0] = textColor.redF();
-                glyphData._color[1] = textColor.greenF();
-                glyphData._color[2] = textColor.blueF();
-
-                gpuGraphData->_glyphData.push_back(glyphData);
-            }
+            createGPUGlyphData(nodeVisual._text, textColor, textAlignment, textScale, nodeVisual._size, nodePosition, componentIndex, gpuGraphData);
         }
 
         for(auto& edge : componentRenderer->edges())
@@ -629,6 +636,8 @@ void GraphRenderer::updateGPUDataIfRequired()
 
             const QVector3D& sourcePosition = scaledAndSmoothedNodePositions[edge->sourceId()];
             const QVector3D& targetPosition = scaledAndSmoothedNodePositions[edge->targetId()];
+
+            auto& edgeVisual = edgeVisuals[edge->id()];
 
             GPUGraphData::EdgeData edgeData;
             edgeData._sourcePosition[0] = sourcePosition.x();
@@ -641,20 +650,23 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._targetSize = nodeVisuals[edge->targetId()]._size;
             edgeData._edgeType = static_cast<int>(edgeVisualType);
             edgeData._component = componentIndex;
-            edgeData._size = edgeVisuals[edge->id()]._size;
-            edgeData._color[0] = edgeVisuals[edge->id()]._color.redF();
-            edgeData._color[1] = edgeVisuals[edge->id()]._color.greenF();
-            edgeData._color[2] = edgeVisuals[edge->id()]._color.blueF();
+            edgeData._size = edgeVisual._size;
+            edgeData._color[0] = edgeVisual._color.redF();
+            edgeData._color[1] = edgeVisual._color.greenF();
+            edgeData._color[2] = edgeVisual._color.blueF();
 
             edgeData._outlineColor[0] = 0.0f;
             edgeData._outlineColor[1] = 0.0f;
             edgeData._outlineColor[2] = 0.0f;
 
             auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(),
-                edgeVisuals[edge->id()]._state.testFlag(VisualFlags::NotFound) ? NotFoundAlpha : 1.0f);
+                edgeVisual._state.testFlag(VisualFlags::NotFound) ? NotFoundAlpha : 1.0f);
 
             if(gpuGraphData != nullptr)
                 gpuGraphData->_edgeData.push_back(edgeData);
+
+            QVector3D midPoint = (sourcePosition + targetPosition) * 0.5f;
+            createGPUGlyphData(edgeVisual._text, textColor, textAlignment, textScale, edgeVisual._size, midPoint, componentIndex, gpuGraphData);
         }
 
         componentIndex++;
@@ -1080,6 +1092,9 @@ void GraphRenderer::updateText(bool waitForCompletion)
 
     for(auto nodeId : _graphModel->graph().nodeIds())
         _glyphMap->addText(_graphModel->nodeVisuals()[nodeId]._text);
+
+    for(auto edgeId : _graphModel->graph().edgeIds())
+        _glyphMap->addText(_graphModel->edgeVisuals()[edgeId]._text);
 
     if(_glyphMap->updateRequired())
     {

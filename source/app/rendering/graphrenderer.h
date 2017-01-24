@@ -208,7 +208,6 @@ public:
     bool layoutChanged() const { return _synchronousLayoutChanged; }
 
     bool visible() const;
-
 private slots:
     void onNodeAdded(const Graph*, NodeId nodeId);
     void onEdgeAdded(const Graph*, EdgeId edgeId);
@@ -391,6 +390,10 @@ private:
 
     void moveFocusToNode(NodeId nodeId, float cameraDistance = -1.0f);
     void moveFocusToComponent(ComponentId componentId);
+
+    void createGPUGlyphData(const QString& text, const QColor& textColor, const TextAlignment& textAlignment,
+                         float textScale, float elementSize, const QVector3D& elementPosition,
+                         int componentIndex, GPUGraphData* gpuGraphData);
 
 signals:
     void modeChanged() const;
