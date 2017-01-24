@@ -15,12 +15,12 @@ void main()
     float distance = texColor.r;
     float smoothing = 0.015;
     float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
-    alpha = alpha;
 
     vec4 firstData = texColor;
     if(firstData.r < 0.5 - smoothing)
         discard;
 
-    outColor = vec4(textColor.rgb, alpha);
+
+    outColor = vec4(textColor.rgb * alpha, alpha);
     outSelection = vec4(0, 0, 0, 0);
 }
