@@ -10,12 +10,17 @@ const QString Attributes::firstAttributeName() const
     return {};
 }
 
-int Attributes::size() const
+int Attributes::numAttributes() const
+{
+    return static_cast<int>(_attributes.size());
+}
+
+int Attributes::numValues() const
 {
     int maxSize = 0;
 
     for(auto& attribute : _attributes)
-        maxSize = std::max(maxSize, attribute.second.size());
+        maxSize = std::max(maxSize, attribute.second.numValues());
 
     return maxSize;
 }

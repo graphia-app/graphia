@@ -4,7 +4,6 @@ import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.2
 
 import com.kajeka 1.0
-import SortFilterProxyModel 0.1
 
 Item
 {
@@ -24,9 +23,18 @@ Item
 
         NodeAttributeTableView
         {
+            id: tableView
             Layout.fillHeight: true
             Layout.minimumHeight: 100
             nodeAttributesModel: plugin.model.nodeAttributes
+
+            onVisibleRowsChanged:
+            {
+                selection.clear();
+
+                if(rowCount > 0)
+                    selection.selectAll();
+            }
         }
 
         ScrollView
@@ -49,7 +57,8 @@ Item
                 data: plugin.model.dataset
                 columnNames: plugin.model.columnNames
                 rowNames: plugin.model.rowNames
-                selectedRows: plugin.model.selectedRows
+                selectedRows: tableView.selectedRows
+
                 elideLabelWidth:
                 {
                     var newHeight = height * 0.25;

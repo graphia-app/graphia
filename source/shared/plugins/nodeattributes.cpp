@@ -10,12 +10,14 @@ void NodeAttributes::initialise(IMutableGraph& mutableGraph)
 
 void NodeAttributes::addNodeId(NodeId nodeId)
 {
-    _indexes->set(nodeId, size());
+    _indexes->set(nodeId, numValues());
+    _rowToNodeIdMap[numValues()] = nodeId;
 }
 
 void NodeAttributes::setNodeIdForRowIndex(NodeId nodeId, int row)
 {
     _indexes->set(nodeId, row);
+    _rowToNodeIdMap[row] = nodeId;
 }
 
 int NodeAttributes::rowIndexForNodeId(NodeId nodeId) const
@@ -23,6 +25,11 @@ int NodeAttributes::rowIndexForNodeId(NodeId nodeId) const
     int rowIndex = _indexes->get(nodeId);
     Q_ASSERT(rowIndex >= 0);
     return rowIndex;
+}
+
+NodeId NodeAttributes::nodeIdForRowIndex(int row) const
+{
+    return _rowToNodeIdMap.at(row);
 }
 
 void NodeAttributes::setValueByNodeId(NodeId nodeId, const QString& name, const QString& value)

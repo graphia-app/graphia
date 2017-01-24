@@ -6,16 +6,16 @@ NodeAttributesTableModel::NodeAttributesTableModel(NodeAttributes* attributes) :
     QAbstractTableModel(),
     _nodeAttributes(attributes)
 {
+    _roleNames.insert(_nodeIdRole, "nodeId");
+    _roleNames.insert(_nodeSelectedRole, "nodeSelected");
+
     connect(attributes, SIGNAL(attributeAdded(const QString&)),
             this, SLOT(onAttributeAdded(const QString&)));
 }
 
-void NodeAttributesTableModel::setSelectedNodes(const NodeIdSet& selectedNodeIds)
+void NodeAttributesTableModel::initialise(ISelectionManager* selectionManager)
 {
-    emit layoutAboutToBeChanged();
-    _selectedNodeIds.clear();
-    std::copy(selectedNodeIds.begin(), selectedNodeIds.end(), std::back_inserter(_selectedNodeIds));
-    emit layoutChanged();
+    _selectionManager = selectionManager;
 }
 
 QStringList NodeAttributesTableModel::columnNames() const
@@ -38,12 +38,12 @@ void NodeAttributesTableModel::onAttributeAdded(const QString& name)
 
 int NodeAttributesTableModel::rowCount(const QModelIndex&) const
 {
-    return static_cast<int>(_selectedNodeIds.size());
+    return static_cast<int>(_nodeAttributes->numValues());
 }
 
 int NodeAttributesTableModel::columnCount(const QModelIndex&) const
 {
-    return static_cast<int>(_nodeAttributes->size());
+    return static_cast<int>(_nodeAttributes->numAttributes());
 }
 
 QVariant NodeAttributesTableModel::data(const QModelIndex& index, int role) const
@@ -51,8 +51,25 @@ QVariant NodeAttributesTableModel::data(const QModelIndex& index, int role) cons
     int row = index.row();
     if(row >= 0 && row < rowCount() && role >= Qt::UserRole)
     {
-        return _nodeAttributes->valueByNodeId(_selectedNodeIds.at(index.row()), _roleNames[role]);
+        NodeId nodeId = _nodeAttributes->nodeIdForRowIndex(row);
+
+        if(role == _nodeIdRole)
+            return static_cast<int>(nodeId);
+        else if(role == _nodeSelectedRole)
+            return _selectionManager->nodeIsSelected(nodeId);
+
+        return _nodeAttributes->value(row, _roleNames[role]);
     }
 
     return QVariant();
+}
+
+int NodeAttributesTableModel::modelIndexRow(const QModelIndex& index) const
+{
+    return index.row();
+}
+
+void NodeAttributesTableModel::onSelectionChanged()
+{
+    emit layoutChanged();
 }

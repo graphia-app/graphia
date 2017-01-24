@@ -13,13 +13,14 @@
 #include <functional>
 
 #include <QString>
+#include <QStringList>
+#include <QVector>
 
 class CorrelationPluginInstance : public BasePluginInstance
 {
     Q_OBJECT
 
     Q_PROPERTY(QAbstractTableModel* nodeAttributes READ nodeAttributesTableModel CONSTANT)
-    Q_PROPERTY(QVector<int> selectedRows READ selectedRows NOTIFY selectedRowsChanged)
     Q_PROPERTY(QStringList columnNames READ columnNames NOTIFY columnNamesChanged)
     Q_PROPERTY(QStringList rowNames READ rowNames NOTIFY rowNamesChanged)
     Q_PROPERTY(QVector<double> dataset READ attributesDataset NOTIFY datasetChanged)
@@ -122,7 +123,6 @@ private:
     QStringList columnNames();
     QStringList rowNames();
     QVector<double> attributesDataset();
-    QVector<int> selectedRows();
 
     const DataRow& dataRowForNodeId(NodeId nodeId) const;
 
@@ -152,7 +152,6 @@ private slots:
     void onSelectionChanged(const ISelectionManager* selectionManager);
 
 signals:
-    void selectedRowsChanged();
     void rowCountChanged();
     void columnCountChanged();
     void datasetChanged();

@@ -18,6 +18,7 @@ void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionMa
     BasePluginInstance::initialise(graphModel, selectionManager, parserThread);
 
     _nodeAttributes.initialise(graphModel->mutableGraph());
+    _nodeAttributesTableModel.initialise(selectionManager);
     _pearsonValues = std::make_unique<EdgeArray<double>>(graphModel->mutableGraph());
 
     graphModel->dataField(tr("Pearson Correlation Value"))
@@ -259,21 +260,6 @@ QStringList CorrelationPluginInstance::rowNames()
     return list;
 }
 
-QVector<int> CorrelationPluginInstance::selectedRows()
-{
-    QVector<int> selectedRowIndexes;
-    selectedRowIndexes.reserve(
-        static_cast<int>(selectionManager()->selectedNodes().size()));
-
-    for(auto nodeId : selectionManager()->selectedNodes())
-    {
-        int row = _nodeAttributes.rowIndexForNodeId(nodeId);
-        selectedRowIndexes.append(row);
-    }
-
-    return selectedRowIndexes;
-}
-
 const CorrelationPluginInstance::DataRow& CorrelationPluginInstance::dataRowForNodeId(NodeId nodeId) const
 {
     return _dataRows.at(_nodeAttributes.rowIndexForNodeId(nodeId));
@@ -290,10 +276,9 @@ void CorrelationPluginInstance::onGraphChanged()
     }
 }
 
-void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager* selectionManager)
+void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager*)
 {
-    _nodeAttributesTableModel.setSelectedNodes(selectionManager->selectedNodes());
-    emit selectedRowsChanged();
+    _nodeAttributesTableModel.onSelectionChanged();
 }
 
 std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const QString& urlTypeName)

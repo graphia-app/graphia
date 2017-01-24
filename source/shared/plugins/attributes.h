@@ -22,7 +22,8 @@ protected:
     const QString firstAttributeName() const;
 
 public:
-    int size() const;
+    int numAttributes() const;
+    int numValues() const;
 
     bool empty() const { return _attributes.empty(); }
 

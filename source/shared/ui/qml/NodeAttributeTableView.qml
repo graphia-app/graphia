@@ -24,9 +24,42 @@ TableView
         sourceModel: nodeAttributesModel
         sortRoleName: tableView.sortRoleName
         sortOrder: tableView.sortIndicatorOrder
+
+        filterRoleName: 'nodeSelected'; filterValue: true
+
+        // NodeAttributeTableModel fires layoutChanged whenever the nodeSelected role
+        // changes which in turn affects which rows the model reflects. When the visible
+        // rows change, we emit a signal so that the owners of the TableView can react.
+        // Qt.callLater is used because otherwise the signal is emitted before the
+        // TableView has had a chance to update.
+        onLayoutChanged: { Qt.callLater(visibleRowsChanged); }
     }
 
+    signal visibleRowsChanged();
+
     selectionMode: SelectionMode.ExtendedSelection
+
+    property var selectedRows: []
+
+    // Implementing selectedRows using a binding results in a binding loop,
+    // for some reason, so do it by connection instead
+    Connections
+    {
+        target: selection
+        onSelectionChanged:
+        {
+            var rows = [];
+            tableView.selection.forEach(function(rowIndex)
+            {
+                var modelIndex = model.index(rowIndex, 0);
+                var sourceModelIndex = model.mapToSource(modelIndex);
+                var sourceRowIndex = nodeAttributesModel.modelIndexRow(sourceModelIndex);
+                rows.push(sourceRowIndex);
+            });
+
+            selectedRows = rows;
+        }
+    }
 
     property var columnNames: model.columnNames
 

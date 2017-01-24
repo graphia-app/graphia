@@ -64,8 +64,8 @@ Window
         Rectangle
         {
             id: contentItem
-            Layout.minimumWidth: content.width
-            Layout.minimumHeight: content.height
+            Layout.minimumWidth: content !== null ? content.width : 0
+            Layout.minimumHeight: content !== null ? content.height : 0
             Layout.fillWidth: true
             Layout.fillHeight: true
         }

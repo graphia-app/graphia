@@ -40,7 +40,7 @@ public:
 
     Type type() const { return _type; }
     const QString& name() const { return _name; }
-    int size() const { return static_cast<int>(_values.size()); }
+    int numValues() const { return static_cast<int>(_values.size()); }
     void reserve(int size) { _values.reserve(size); }
 
     int intMin() const { return _intMin; }

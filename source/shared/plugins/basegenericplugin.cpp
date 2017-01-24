@@ -18,6 +18,7 @@ void BaseGenericPluginInstance::initialise(IGraphModel* graphModel, ISelectionMa
     BasePluginInstance::initialise(graphModel, selectionManager, parserThread);
 
     _nodeAttributes.initialise(graphModel->mutableGraph());
+    _nodeAttributesTableModel.initialise(selectionManager);
 }
 
 std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
@@ -77,10 +78,10 @@ void BaseGenericPluginInstance::onGraphChanged()
     }
 }
 
-void BaseGenericPluginInstance::onSelectionChanged(const ISelectionManager* selectionManager)
+void BaseGenericPluginInstance::onSelectionChanged(const ISelectionManager*)
 {
     emit selectedNodeNamesChanged();
-    _nodeAttributesTableModel.setSelectedNodes(selectionManager->selectedNodes());
+    _nodeAttributesTableModel.onSelectionChanged();
 }
 
 BaseGenericPlugin::BaseGenericPlugin()
