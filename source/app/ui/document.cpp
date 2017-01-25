@@ -170,21 +170,6 @@ bool Document::canEnterOverviewMode() const
     return idle() && _graphQuickItem->canEnterOverviewMode();
 }
 
-bool Document::debugPauserEnabled() const
-{
-    return _graphModel != nullptr && _graphModel->graph().debugPauser.enabled();
-}
-
-bool Document::debugPaused() const
-{
-    return _graphModel != nullptr && _graphModel->graph().debugPauser.paused();
-}
-
-QString Document::debugResumeAction() const
-{
-    return _graphModel != nullptr ? _graphModel->graph().debugPauser.resumeAction() : tr("&Resume");
-}
-
 void Document::setTitle(const QString& title)
 {
     if(title != _title)
@@ -299,10 +284,6 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, this, &Document::numNodesFoundChanged);
 
     connect(&_graphModel->mutableGraph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
-
-    connect(&_graphModel->graph().debugPauser, &DebugPauser::enabledChanged, this, &Document::debugPauserEnabledChanged);
-    connect(&_graphModel->graph().debugPauser, &DebugPauser::pausedChanged, this, &Document::debugPausedChanged);
-    connect(&_graphModel->graph().debugPauser, &DebugPauser::resumeActionChanged, this, &Document::debugResumeActionChanged);
 
     for(const auto& name : parameters.keys())
         _pluginInstance->applyParameter(name, parameters.value(name).toString());
@@ -732,16 +713,6 @@ void Document::decrementFoundIt()
         _foundIt = std::prev(_foundNodeIds.end());
 
     emit foundIndexChanged();
-}
-
-void Document::toggleDebugPauser()
-{
-    _graphModel->graph().debugPauser.toggleEnabled();
-}
-
-void Document::debugResume()
-{
-    _graphModel->graph().debugPauser.resume();
 }
 
 QStringList Document::availableTransformNames() const

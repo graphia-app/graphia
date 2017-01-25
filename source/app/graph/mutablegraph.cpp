@@ -470,7 +470,6 @@ void MutableGraph::beginTransaction()
     {
         emit graphWillChange(this);
         _mutex.lock();
-        debugPauser.pause("Begin Graph Transaction");
     }
 }
 
@@ -481,7 +480,6 @@ void MutableGraph::endTransaction()
     {
         update();
         _mutex.unlock();
-        debugPauser.pause("End Graph Transaction");
         emit graphChanged(this);
         clearPhase();
     }

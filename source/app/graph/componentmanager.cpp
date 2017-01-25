@@ -354,10 +354,8 @@ void ComponentManager::removeGraphComponent(ComponentId componentId)
 
 void ComponentManager::onGraphChanged(const Graph* graph)
 {
-    graph->debugPauser.pause("Call updateComponents from ComponentManager::onGraphChanged", &_debugPaused);
     graph->setPhase(tr("Componentising"));
     update(graph);
-    graph->debugPauser.pause("Signal Graph::onGraphChanged", &_debugPaused);
 }
 
 #include <chrono>

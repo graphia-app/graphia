@@ -63,10 +63,6 @@ class Document : public QObject
 
     Q_PROPERTY(QQmlVariantListModel* transforms READ transformsModel CONSTANT)
 
-    Q_PROPERTY(bool debugPauserEnabled READ debugPauserEnabled NOTIFY debugPauserEnabledChanged)
-    Q_PROPERTY(bool debugPaused READ debugPaused NOTIFY debugPausedChanged)
-    Q_PROPERTY(QString debugResumeAction READ debugResumeAction NOTIFY debugResumeActionChanged)
-
     Q_PROPERTY(QmlContainerWrapperBase* layoutSettings READ layoutSettings CONSTANT)
 
     Q_PROPERTY(float fps READ fps NOTIFY fpsChanged)
@@ -97,10 +93,6 @@ public:
 
     bool canResetView() const;
     bool canEnterOverviewMode() const;
-
-    bool debugPauserEnabled() const;
-    bool debugPaused() const;
-    QString debugResumeAction() const;
 
     void setTitle(const QString& status);
     void setStatus(const QString& status);
@@ -185,10 +177,6 @@ signals:
     void canResetViewChanged();
     void canEnterOverviewModeChanged();
 
-    void debugPauserEnabledChanged();
-    void debugPausedChanged();
-    void debugResumeActionChanged();
-
     void fpsChanged();
 
     void foundIndexChanged();
@@ -226,9 +214,6 @@ public slots:
     void selectPrevFound();
     void selectAllFound();
     void updateFoundIndex(bool reselectIfInvalidated);
-
-    void toggleDebugPauser();
-    void debugResume();
 
     QStringList availableTransformNames() const;
     QStringList availableDataFields(const QString& transformName) const;

@@ -41,11 +41,6 @@ Item
     property bool canResetView: document.canResetView
     property bool canEnterOverviewMode: document.canEnterOverviewMode
 
-    property bool debugPauserEnabled: document.debugPauserEnabled
-    property bool debugPaused: document.debugPaused
-
-    property string debugResumeAction: document.debugResumeAction
-
     property bool hasPluginUI: document.pluginQmlPath
     property bool pluginPoppedOut: false
 
@@ -163,8 +158,6 @@ Item
     function selectPrevFound() { document.selectPrevFound(); }
     function find(text) { document.find(text); }
 
-    function toggleDebugPauser() { document.toggleDebugPauser(); }
-    function debugResume() { document.debugResume(); }
     function dumpGraph() { document.dumpGraph(); }
 
     SplitView

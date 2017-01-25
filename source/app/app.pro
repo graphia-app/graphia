@@ -88,7 +88,6 @@ HEADERS += \
     ui/interactor.h \
     ui/searchmanager.h \
     ui/selectionmanager.h \
-    utils/debugpauser.h \
     utils/qmlcontainerwrapper.h \
     utils/qmlenum.h \
     utils/shadertools.h \
@@ -157,7 +156,6 @@ SOURCES += \
     ui/graphquickitem.cpp \
     ui/searchmanager.cpp \
     ui/selectionmanager.cpp \
-    utils/debugpauser.cpp \
     transform/graphtransformconfigparser.cpp \
     transform/graphtransformconfig.cpp \
     layout/fastinitiallayout.cpp \

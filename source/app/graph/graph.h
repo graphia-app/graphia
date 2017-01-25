@@ -6,8 +6,6 @@
 #include "elementiddistinctsetcollection.h"
 #include "graphconsistencychecker.h"
 
-#include "utils/debugpauser.h"
-
 #include <QObject>
 
 #include <vector>
@@ -204,7 +202,6 @@ public:
     virtual void clearSubPhase() const;
     virtual QString subPhase() const;
 
-    mutable DebugPauser debugPauser;
     void dumpToQDebug(int detail) const;
 
 private:

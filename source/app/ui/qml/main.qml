@@ -585,31 +585,11 @@ ApplicationWindow
 
     Action
     {
-        id: toggleDebugPauserAction
-        text: qsTr("Debug Pauser")
-        shortcut: "Ctrl+P"
-        enabled: application.debugEnabled
-        onTriggered: currentDocument && currentDocument.toggleDebugPauser()
-        checkable: true
-        checked: currentDocument && currentDocument.debugPauserEnabled
-    }
-
-    Action
-    {
         id: dumpGraphAction
         text: qsTr("Dump graph to qDebug")
         shortcut: "Ctrl+D"
         enabled: application.debugEnabled
         onTriggered: currentDocument && currentDocument.dumpGraph()
-    }
-
-    Action
-    {
-        id: debugResumeAction
-        text: currentDocument ? currentDocument.debugResumeAction : qsTr("&Resume")
-        shortcut: "Ctrl+N"
-        enabled: application.debugEnabled
-        onTriggered: currentDocument && currentDocument.debugResume()
     }
 
     Action
@@ -747,12 +727,6 @@ ApplicationWindow
             enabled: application.debugEnabled || mainWindow.debugMenuUnhidden
             visible: application.debugEnabled || mainWindow.debugMenuUnhidden
             MenuItem { action: debugCrash }
-            MenuItem { action: toggleDebugPauserAction }
-            MenuItem
-            {
-                action: debugResumeAction
-                visible: currentDocument && currentDocument.debugPaused
-            }
             MenuItem { action: dumpGraphAction }
             MenuItem { action: toggleFpsMeterAction }
             MenuItem { action: toggleGlyphmapSaveAction }
@@ -797,11 +771,6 @@ ApplicationWindow
             ToolButton { action: redoAction }
             ToolButton { action: overviewModeAction }
             ToolButton { action: resetViewAction }
-            ToolButton
-            {
-                action: debugResumeAction
-                visible: currentDocument && currentDocument.debugPaused
-            }
 
             Item { Layout.fillWidth: true }
         }

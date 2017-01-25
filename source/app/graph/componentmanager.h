@@ -63,7 +63,6 @@ private:
     EdgeArray<ComponentId> _edgesComponentId;
 
     mutable std::recursive_mutex _updateMutex;
-    bool _debugPaused = false;
 
     std::mutex _componentArraysMutex;
     std::unordered_set<IGraphArray*> _componentArrays;
