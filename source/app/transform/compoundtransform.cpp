@@ -2,6 +2,8 @@
 
 #include "transformedgraph.h"
 
+#include "shared/utils/iterator_range.h"
+
 void CompoundTransform::applyFromSource(const Graph& source, TransformedGraph& target) const
 {
     if(_transforms.empty())
@@ -16,9 +18,8 @@ void CompoundTransform::applyFromSource(const Graph& source, TransformedGraph& t
     target.update();
 
     // ...thereafter we use the inplace one
-    for(auto i = _transforms.begin() + 1; i != _transforms.end(); i++)
+    for(const auto& transform : make_iterator_range(_transforms.begin() + 1, _transforms.end()))
     {
-        auto& transform = *i;
         transform->apply(target);
         target.update();
     }

@@ -3,6 +3,7 @@
 #include "correlationplotitem.h"
 #include "loading/correlationfileparser.h"
 #include "shared/utils/threadpool.h"
+#include "shared/utils/iterator_range.h"
 
 CorrelationPluginInstance::CorrelationPluginInstance() :
     _nodeAttributesTableModel(&_nodeAttributes)
@@ -144,10 +145,8 @@ std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pears
         if(cancelled())
             return edges;
 
-        for(auto rowBIt = rowAIt + 1; rowBIt != _dataRows.end(); rowBIt++)
+        for(auto rowB : make_iterator_range(rowAIt + 1, _dataRows.end()))
         {
-            auto& rowB = *rowBIt;
-
             double productSum = std::inner_product(rowA.begin(), rowA.end(), rowB.begin(), 0.0);
             double numerator = (_numColumns * productSum) - (rowA._sum * rowB._sum);
             double denominator = rowA._variability * rowB._variability;
