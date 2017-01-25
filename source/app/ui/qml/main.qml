@@ -63,10 +63,29 @@ ApplicationWindow
             fileOpenDialog.folder = misc.fileOpenInitialFolder;
 
         if(windowPreferences.width !== undefined &&
-           windowPreferences.height !== undefined)
+           windowPreferences.height !== undefined &&
+           windowPreferences.x !== undefined &&
+           windowPreferences.y !== undefined)
         {
             mainWindow.width = windowPreferences.width;
             mainWindow.height = windowPreferences.height;
+            mainWindow.x = windowPreferences.x;
+            mainWindow.y = windowPreferences.y;
+
+            // Make sure that the window doesn't appear off screen
+            // This is basically a workaround for QTBUG-58419
+            var rightEdge = mainWindow.x + mainWindow.width;
+            var bottomEdge = mainWindow.y + mainWindow.height;
+
+            if(mainWindow.x < 0)
+                mainWindow.x = 0;
+            else if(rightEdge > Screen.desktopAvailableWidth)
+                mainWindow.x -= (rightEdge - Screen.desktopAvailableWidth);
+
+            if(mainWindow.y < 0)
+                mainWindow.y = 0;
+            else if(bottomEdge > Screen.desktopAvailableHeight)
+                mainWindow.y -= (bottomEdge - Screen.desktopAvailableHeight);
         }
 
         if(windowPreferences.maximised !== undefined)
@@ -88,6 +107,8 @@ ApplicationWindow
         {
             windowPreferences.width = mainWindow.width;
             windowPreferences.height = mainWindow.height;
+            windowPreferences.x = mainWindow.x;
+            windowPreferences.y = mainWindow.y;
         }
     }
 
@@ -129,8 +150,8 @@ ApplicationWindow
         property var width
         property var height
         property var maximised
-        property alias x: mainWindow.x
-        property alias y: mainWindow.y
+        property var x
+        property var y
     }
 
     Preferences
