@@ -466,7 +466,11 @@ ApplicationWindow
     {
         id: optionsAction
         text: qsTr("&Options...")
-        onTriggered: optionsDialog.show();
+        onTriggered:
+        {
+            optionsDialog.raise();
+            optionsDialog.show();
+        }
     }
 
     Action
@@ -735,8 +739,24 @@ ApplicationWindow
         Menu
         {
             title: qsTr("&Help")
-            MenuItem { text: qsTr("About Plugins...") ; onTriggered: pluginsDialog.show() }
-            MenuItem { text: qsTr("About " + application.name + "...") ; onTriggered: aboutMessageDialog.open() }
+            MenuItem
+            {
+                text: qsTr("About Plugins...")
+                onTriggered:
+                {
+                    pluginsDialog.raise();
+                    pluginsDialog.show();
+                }
+            }
+
+            MenuItem
+            {
+                text: qsTr("About " + application.name + "...")
+                onTriggered:
+                {
+                    aboutMessageDialog.open();
+                }
+            }
         }
     }
 
