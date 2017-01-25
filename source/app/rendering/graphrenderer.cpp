@@ -324,6 +324,9 @@ GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
 {
     resolveOpenGLFunctions();
 
+    // Shade all samples in multi-sampling
+    glMinSampleShading(1.0);
+
     ShaderTools::loadShaderProgram(_screenShader, ":/shaders/screen.vert", ":/shaders/screen.frag");
     ShaderTools::loadShaderProgram(_selectionShader, ":/shaders/screen.vert", ":/shaders/selection.frag");
     ShaderTools::loadShaderProgram(_sdfShader, ":/shaders/screen.vert", ":/shaders/sdf.frag");
@@ -1236,6 +1239,8 @@ void GraphRenderer::renderText(GPUGraphData& gpuGraphData)
 {
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
+    // Enable per-sample shading, this makes small text look nice
+    glEnable(GL_SAMPLE_SHADING);
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
     _textShader.bind();
@@ -1266,6 +1271,7 @@ void GraphRenderer::renderText(GPUGraphData& gpuGraphData)
     gpuGraphData._textVBO.release();
     _textShader.release();
     glDisable(GL_BLEND);
+    glDisable(GL_SAMPLE_SHADING);
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
 }
