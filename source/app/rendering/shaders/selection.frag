@@ -53,6 +53,5 @@ void main()
     outlineAlpha *= 0.25;
 
     float interiorAlpha = I[1][1] * 0.5;
-    float frameBufferAlpha = multisampledValue(coord).a;
     fragColor = vec4(highlightColor.rgb, (interiorAlpha + outlineAlpha) * alpha);
 }
