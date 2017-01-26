@@ -38,7 +38,8 @@ HEADERS += \
     $$PWD/loading/iparserthread.h \
     $$PWD/utils/enumreflection.h \
     $$PWD/graph/igraphcomponent.h \
-    $$PWD/utils/iterator_range.h
+    $$PWD/utils/iterator_range.h \
+    $$PWD/utils/scope_exit.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \
