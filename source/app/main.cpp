@@ -17,7 +17,6 @@
 #include "rendering/graphrenderer.h"
 
 #include "thirdparty/qtsingleapplication/qtsingleapplication.h"
-#include "thirdparty/SortFilterProxyModel/qqmlsortfilterproxymodel.h"
 #include "thirdparty/breakpad/crashhandler.h"
 
 int main(int argc, char *argv[])
@@ -115,8 +114,6 @@ int main(int argc, char *argv[])
     preferences.define("misc/showNodeText",                 true);
 
     preferences.define("misc/focusFoundNodes",              true);
-
-    QQmlSortFilterProxyModel::initialize();
 
     QQmlApplicationEngine engine;
     engine.addImportPath("qrc:///qml");

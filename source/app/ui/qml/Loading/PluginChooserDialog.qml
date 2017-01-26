@@ -3,7 +3,7 @@ import QtQuick.Controls 1.4
 import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.1
 
-import SortFilterProxyModel 0.1
+import SortFilterProxyModel 0.2
 
 import "../Constants.js" as Constants
 
@@ -22,9 +22,6 @@ Dialog
     property var pluginNames: []
     property string pluginName
     property bool inNewTab
-
-    // Mapping from the ComboBox currentIndex to the model
-    property var mapping: []
 
     GridLayout
     {
@@ -57,19 +54,37 @@ Dialog
 
             model: SortFilterProxyModel
             {
-                sourceModel: model
-                filterExpression:
-                {
-                    var i = pluginChooserDialog.pluginNames.indexOf(model.name);
+                id: proxyModel
 
-                    if(i > -1)
+                sourceModel: pluginChooserDialog.model
+                filterRoleName: "name"
+                filterPattern:
+                {
+                    var s = "";
+
+                    for(var i = 0; i < pluginChooserDialog.pluginNames.length; i++)
                     {
-                        pluginChooserDialog.mapping[i] = index;
-                        return true;
+                        if(i != 0) s += "|";
+                        s += pluginChooserDialog.pluginNames[i];
                     }
 
-                    return false;
+                    return s;
                 }
+
+                onFilterPatternChanged:
+                {
+                    // Reset to first item
+                    pluginChoice.currentIndex = -1;
+                    pluginChoice.currentIndex = 0;
+                }
+            }
+
+            property var selectedPlugin:
+            {
+                var index = proxyModel.index(currentIndex, 0);
+                var mappedIndex = proxyModel.mapToSource(index);
+
+                return pluginChooserDialog.model.nameAtIndex(mappedIndex);
             }
 
             textRole: "name"
@@ -78,14 +93,8 @@ Dialog
 
     standardButtons: StandardButton.Ok | StandardButton.Cancel
 
-    function clearMapping() { mapping.length = 0; }
-
     onAccepted:
     {
-        var i = mapping[pluginChoice.currentIndex];
-        pluginName = model.nameAtIndex(i);
-        clearMapping();
+        pluginName = pluginChoice.selectedPlugin;
     }
-
-    onRejected: { clearMapping(); }
 }

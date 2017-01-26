@@ -1,10 +1,11 @@
 include(boost/boost.pri)
 
-# Things that use QCustomPlot need this define
+# Things that use QCustomPlot need these
 DEFINES += QCUSTOMPLOT_USE_OPENGL
+QT += printsupport
 
 THIRDPARTY_LIB_DIR = $$top_builddir/thirdparty
 
-win32:CONFIG(release, debug|release): LIBS += -L$$THIRDPARTY_LIB_DIR/release/ -lthirdparty
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$THIRDPARTY_LIB_DIR/debug/ -lthirdparty
-else:unix: LIBS += -L$$THIRDPARTY_LIB_DIR -lthirdparty
+win32:CONFIG(release, debug|release): LIBS += -L$$THIRDPARTY_LIB_DIR/release/ -lthirdparty -WHOLEARCHIVE:thirdparty
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$THIRDPARTY_LIB_DIR/debug/ -lthirdparty -WHOLEARCHIVE:thirdparty
+else:unix: LIBS += -L$$THIRDPARTY_LIB_DIR -Wl,-whole-archive -lthirdparty -Wl,-no-whole-archive

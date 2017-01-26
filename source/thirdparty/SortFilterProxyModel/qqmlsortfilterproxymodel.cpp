@@ -1,10 +1,13 @@
 #include "qqmlsortfilterproxymodel.h"
 #include <QtQml>
+#include <algorithm>
+#include "filter.h"
+#include "sorter.h"
+
+namespace qqsfpm {
 
 QQmlSortFilterProxyModel::QQmlSortFilterProxyModel(QObject *parent) :
-    QSortFilterProxyModel(parent),
-    m_filterExpression(0),
-    m_compareExpression(0)
+    QSortFilterProxyModel(parent)
 {
     connect(this, &QAbstractProxyModel::sourceModelChanged, this, &QQmlSortFilterProxyModel::updateRoles);
     connect(this, &QAbstractItemModel::modelReset, this, &QQmlSortFilterProxyModel::updateRoles);
@@ -32,7 +35,7 @@ void QQmlSortFilterProxyModel::setFilterRoleName(const QString& filterRoleName)
 
     m_filterRoleName = filterRoleName;
     updateFilterRole();
-    emit filterRoleNameChanged();
+    Q_EMIT filterRoleNameChanged();
 }
 
 QString QQmlSortFilterProxyModel::filterPattern() const
@@ -48,7 +51,7 @@ void QQmlSortFilterProxyModel::setFilterPattern(const QString& filterPattern)
 
     regExp.setPattern(filterPattern);
     QSortFilterProxyModel::setFilterRegExp(regExp);
-    emit filterPatternChanged();
+    Q_EMIT filterPatternChanged();
 }
 
 QQmlSortFilterProxyModel::PatternSyntax QQmlSortFilterProxyModel::filterPatternSyntax() const
@@ -65,7 +68,7 @@ void QQmlSortFilterProxyModel::setFilterPatternSyntax(QQmlSortFilterProxyModel::
 
     regExp.setPatternSyntax(patternSyntaxTmp);
     QSortFilterProxyModel::setFilterRegExp(regExp);
-    emit filterPatternSyntaxChanged();
+    Q_EMIT filterPatternSyntaxChanged();
 }
 
 const QVariant& QQmlSortFilterProxyModel::filterValue() const
@@ -80,36 +83,7 @@ void QQmlSortFilterProxyModel::setFilterValue(const QVariant& filterValue)
 
     m_filterValue = filterValue;
     invalidateFilter();
-    emit filterValueChanged();
-}
-
-const QQmlScriptString& QQmlSortFilterProxyModel::filterExpression() const
-{
-    return m_filterScriptString;
-}
-
-void QQmlSortFilterProxyModel::setFilterExpression(const QQmlScriptString& filterScriptString)
-{
-    if (m_filterScriptString == filterScriptString)
-        return;
-
-    m_filterScriptString = filterScriptString;
-    QQmlContext* context = new QQmlContext(qmlContext(this));
-
-    QVariantMap map;
-    Q_FOREACH (const QByteArray& roleName, roleNames().values())
-        map.insert(roleName, QVariant());
-
-    context->setContextProperty("model", map);
-    context->setContextProperty("index", -1);
-
-    delete(m_filterExpression);
-    m_filterExpression = new QQmlExpression(m_filterScriptString, context, 0, this);
-    connect(m_filterExpression, &QQmlExpression::valueChanged, this, &QQmlSortFilterProxyModel::invalidateFilter);
-    m_filterExpression->setNotifyOnValueChanged(true);
-    m_filterExpression->evaluate();
-
-    emit filterExpressionChanged();
+    Q_EMIT filterValueChanged();
 }
 
 const QString& QQmlSortFilterProxyModel::sortRoleName() const
@@ -124,99 +98,119 @@ void QQmlSortFilterProxyModel::setSortRoleName(const QString& sortRoleName)
 
     m_sortRoleName = sortRoleName;
     updateSortRole();
-    emit sortRoleNameChanged();
+    Q_EMIT sortRoleNameChanged();
 }
 
-void QQmlSortFilterProxyModel::setSortOrder(Qt::SortOrder sortOrder)
+bool QQmlSortFilterProxyModel::ascendingSortOrder() const
 {
-    if (!m_sortRoleName.isEmpty())
-        sort(0, sortOrder);
+    return m_ascendingSortOrder;
 }
 
-const QQmlScriptString& QQmlSortFilterProxyModel::sortExpression() const
+void QQmlSortFilterProxyModel::setAscendingSortOrder(bool ascendingSortOrder)
 {
-    return m_compareScriptString;
-}
-
-void QQmlSortFilterProxyModel::setSortExpression(const QQmlScriptString& compareScriptString)
-{
-    if (m_compareScriptString == compareScriptString)
+    if (m_ascendingSortOrder == ascendingSortOrder)
         return;
 
-    m_compareScriptString = compareScriptString;
-    QQmlContext* context = new QQmlContext(qmlContext(this));
-
-    QVariantMap map;
-    Q_FOREACH (const QByteArray& roleName, roleNames().values())
-        map.insert(roleName, QVariant());
-
-    context->setContextProperty("modelLeft", map);
-    context->setContextProperty("indexLeft", -1);
-    context->setContextProperty("modelRight", map);
-    context->setContextProperty("indexRight", -1);
-
-    delete(m_compareExpression);
-    m_compareExpression = new QQmlExpression(m_compareScriptString, context, 0, this);
-    connect(m_compareExpression, &QQmlExpression::valueChanged, this, &QQmlSortFilterProxyModel::invalidate);
-    m_compareExpression->setNotifyOnValueChanged(true);
-    m_compareExpression->evaluate();
-
-    emit sortExpressionChanged();
+    m_ascendingSortOrder = ascendingSortOrder;
+    Q_EMIT ascendingSortOrderChanged();
+    invalidate();
 }
 
-void QQmlSortFilterProxyModel::initialize()
+QQmlListProperty<Filter> QQmlSortFilterProxyModel::filters()
 {
-    qmlRegisterType<QAbstractItemModel>();
-    qmlRegisterType<QQmlSortFilterProxyModel>("SortFilterProxyModel", 0, 1, "SortFilterProxyModel");
+    return QQmlListProperty<Filter>(this, &m_filters,
+                                    &QQmlSortFilterProxyModel::append_filter,
+                                    &QQmlSortFilterProxyModel::count_filter,
+                                    &QQmlSortFilterProxyModel::at_filter,
+                                    &QQmlSortFilterProxyModel::clear_filters);
+}
+
+QQmlListProperty<Sorter> QQmlSortFilterProxyModel::sorters()
+{
+    return QQmlListProperty<Sorter>(this, &m_sorters,
+                                    &QQmlSortFilterProxyModel::append_sorter,
+                                    &QQmlSortFilterProxyModel::count_sorter,
+                                    &QQmlSortFilterProxyModel::at_sorter,
+                                    &QQmlSortFilterProxyModel::clear_sorters);
+}
+
+void QQmlSortFilterProxyModel::classBegin()
+{
+
+}
+
+void QQmlSortFilterProxyModel::componentComplete()
+{
+    m_completed = true;
+    for (const auto& filter : m_filters)
+        filter->proxyModelCompleted();
+    invalidate();
+    sort(0);
+}
+
+QVariant QQmlSortFilterProxyModel::sourceData(const QModelIndex& sourceIndex, const QString& roleName) const
+{
+    int role = sourceModel()->roleNames().key(roleName.toUtf8());
+    return sourceData(sourceIndex, role);
+}
+
+QVariant QQmlSortFilterProxyModel::sourceData(const QModelIndex &sourceIndex, int role) const
+{
+    return sourceModel()->data(sourceIndex, role);
 }
 
 bool QQmlSortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
 {
-    QModelIndex modelIndex = sourceModel()->index(source_row, 0, source_parent);
-    bool valueAccepted = !m_filterValue.isValid() || ( m_filterValue == sourceModel()->data(modelIndex, filterRole()) );
+    if (!m_completed)
+        return true;
+    QModelIndex sourceIndex = sourceModel()->index(source_row, 0, source_parent);
+    bool valueAccepted = !m_filterValue.isValid() || ( m_filterValue == sourceModel()->data(sourceIndex, filterRole()) );
     bool baseAcceptsRow = valueAccepted && QSortFilterProxyModel::filterAcceptsRow(source_row, source_parent);
-    if (baseAcceptsRow && !m_filterScriptString.isEmpty())
-    {
-        QVariantMap map = modelDataMap(modelIndex);
-
-        QQmlContext context(qmlContext(this));
-        context.setContextProperty("model", map);
-        context.setContextProperty("index", source_row);
-        QQmlExpression expression(m_filterScriptString, &context, 0);
-        QVariant result = expression.evaluate();
-
-        if (!expression.hasError())
-            return result.toBool();
-        else
-            qWarning() << expression.error();
-    }
+    baseAcceptsRow = baseAcceptsRow && std::all_of(m_filters.begin(), m_filters.end(),
+        [=, &source_parent] (Filter* filter) {
+            return filter->filterAcceptsRow(sourceIndex);
+        }
+    );
     return baseAcceptsRow;
 }
 
 bool QQmlSortFilterProxyModel::lessThan(const QModelIndex& source_left, const QModelIndex& source_right) const
 {
-    if (!m_compareScriptString.isEmpty())
-    {
-        QQmlContext context(qmlContext(this));
-        context.setContextProperty("modelLeft", modelDataMap(source_left));
-        context.setContextProperty("indexLeft", source_left.row());
-        context.setContextProperty("modelRight", modelDataMap(source_right));
-        context.setContextProperty("indexRight", source_right.row());
-
-        QQmlExpression expression(m_compareScriptString, &context, 0);
-        QVariant result = expression.evaluate();
-
-        if (!expression.hasError())
-            return result.toBool();
-        else
-            qWarning() << expression.error();
+    if (m_completed) {
+        if (!m_sortRoleName.isEmpty()) {
+            if (QSortFilterProxyModel::lessThan(source_left, source_right))
+                return m_ascendingSortOrder;
+            if (QSortFilterProxyModel::lessThan(source_right, source_left))
+                return !m_ascendingSortOrder;
+        }
+        for(auto sorter : m_sorters) {
+            if (sorter->enabled()) {
+                int comparison = sorter->compareRows(source_left, source_right);
+                if (comparison != 0)
+                    return comparison < 0;
+            }
+        }
     }
-    return QSortFilterProxyModel::lessThan(source_left, source_right);
+    return source_left.row() < source_right.row();
+}
+
+void QQmlSortFilterProxyModel::resetInternalData()
+{
+    QSortFilterProxyModel::resetInternalData();
+    if (roleNames().isEmpty()) // workaround for when a model has no roles and roles are added when the model is populated (ListModel)
+        connect(this, &QAbstractItemModel::rowsAboutToBeInserted, this, &QQmlSortFilterProxyModel::initRoles);
 }
 
 void QQmlSortFilterProxyModel::invalidateFilter()
 {
-    QSortFilterProxyModel::invalidateFilter();
+    if (m_completed)
+        QSortFilterProxyModel::invalidateFilter();
+}
+
+void QQmlSortFilterProxyModel::invalidate()
+{
+    if (m_completed)
+        QSortFilterProxyModel::invalidate();
 }
 
 void QQmlSortFilterProxyModel::updateFilterRole()
@@ -234,7 +228,7 @@ void QQmlSortFilterProxyModel::updateSortRole()
     if (!sortRoles.empty())
     {
         setSortRole(sortRoles.first());
-        sort(0, sortOrder());
+        invalidate();
     }
 }
 
@@ -244,6 +238,12 @@ void QQmlSortFilterProxyModel::updateRoles()
     updateSortRole();
 }
 
+void QQmlSortFilterProxyModel::initRoles()
+{
+    disconnect(this, &QAbstractItemModel::rowsAboutToBeInserted, this , &QQmlSortFilterProxyModel::initRoles);
+    resetInternalData();
+}
+
 QVariantMap QQmlSortFilterProxyModel::modelDataMap(const QModelIndex& modelIndex) const
 {
     QVariantMap map;
@@ -251,4 +251,74 @@ QVariantMap QQmlSortFilterProxyModel::modelDataMap(const QModelIndex& modelIndex
     for (QHash<int, QByteArray>::const_iterator it = roles.begin(); it != roles.end(); ++it)
         map.insert(it.value(), sourceModel()->data(modelIndex, it.key()));
     return map;
+}
+
+void QQmlSortFilterProxyModel::append_filter(QQmlListProperty<Filter>* list, Filter* filter)
+{
+    if (!filter)
+        return;
+
+    QQmlSortFilterProxyModel* that = static_cast<QQmlSortFilterProxyModel*>(list->object);
+    that->m_filters.append(filter);
+    connect(filter, &Filter::invalidate, that, &QQmlSortFilterProxyModel::invalidateFilter);
+    filter->m_proxyModel = that;
+    that->invalidateFilter();
+}
+
+int QQmlSortFilterProxyModel::count_filter(QQmlListProperty<Filter>* list)
+{
+    QList<Filter*>* filters = static_cast<QList<Filter*>*>(list->data);
+    return filters->count();
+}
+
+Filter* QQmlSortFilterProxyModel::at_filter(QQmlListProperty<Filter>* list, int index)
+{
+    QList<Filter*>* filters = static_cast<QList<Filter*>*>(list->data);
+    return filters->at(index);
+}
+
+void QQmlSortFilterProxyModel::clear_filters(QQmlListProperty<Filter> *list)
+{
+    QQmlSortFilterProxyModel* that = static_cast<QQmlSortFilterProxyModel*>(list->object);
+    that->m_filters.clear();
+    that->invalidateFilter();
+}
+
+void QQmlSortFilterProxyModel::append_sorter(QQmlListProperty<Sorter>* list, Sorter* sorter)
+{
+    if (!sorter)
+        return;
+
+    auto that = static_cast<QQmlSortFilterProxyModel*>(list->object);
+    that->m_sorters.append(sorter);
+    connect(sorter, &Sorter::invalidate, that, &QQmlSortFilterProxyModel::invalidate);
+    sorter->m_proxyModel = that;
+    that->invalidate();
+}
+
+int QQmlSortFilterProxyModel::count_sorter(QQmlListProperty<Sorter>* list)
+{
+    auto sorters = static_cast<QList<Sorter*>*>(list->data);
+    return sorters->count();
+}
+
+Sorter* QQmlSortFilterProxyModel::at_sorter(QQmlListProperty<Sorter>* list, int index)
+{
+    auto sorters = static_cast<QList<Sorter*>*>(list->data);
+    return sorters->at(index);
+}
+
+void QQmlSortFilterProxyModel::clear_sorters(QQmlListProperty<Sorter>* list)
+{
+    auto that = static_cast<QQmlSortFilterProxyModel*>(list->object);
+    that->m_sorters.clear();
+    that->invalidate();
+}
+
+void registerQQmlSortFilterProxyModelTypes() {
+    qmlRegisterType<QQmlSortFilterProxyModel>("SortFilterProxyModel", 0, 2, "SortFilterProxyModel");
+}
+
+Q_COREAPP_STARTUP_FUNCTION(registerQQmlSortFilterProxyModelTypes)
+
 }

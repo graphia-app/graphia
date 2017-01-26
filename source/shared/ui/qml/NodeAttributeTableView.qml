@@ -1,7 +1,7 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
 
-import SortFilterProxyModel 0.1
+import SortFilterProxyModel 0.2
 
 TableView
 {
@@ -23,7 +23,7 @@ TableView
         property var columnNames: sourceModel.columnNames
         sourceModel: nodeAttributesModel
         sortRoleName: tableView.sortRoleName
-        sortOrder: tableView.sortIndicatorOrder
+        ascendingSortOrder: tableView.sortIndicatorOrder === Qt.AscendingOrder
 
         filterRoleName: 'nodeSelected'; filterValue: true
 

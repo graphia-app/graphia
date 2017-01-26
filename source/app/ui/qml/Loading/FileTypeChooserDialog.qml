@@ -3,7 +3,7 @@ import QtQuick.Controls 1.4
 import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.1
 
-import SortFilterProxyModel 0.1
+import SortFilterProxyModel 0.2
 
 import "../Constants.js" as Constants
 
@@ -21,9 +21,6 @@ Dialog
     property var fileTypes: []
     property string fileType
     property bool inNewTab
-
-    // Mapping from the ComboBox currentIndex to the model
-    property var mapping: []
 
     onVisibleChanged:
     {
@@ -62,19 +59,37 @@ Dialog
 
             model: SortFilterProxyModel
             {
-                sourceModel: model
-                filterExpression:
-                {
-                    var i = fileTypeChooserDialog.fileTypes.indexOf(model.name);
+                id: proxyModel
 
-                    if(i > -1)
+                sourceModel: model
+                filterRoleName: "name"
+                filterPattern:
+                {
+                    var s = "";
+
+                    for(var i = 0; i < fileTypeChooserDialog.fileTypes.length; i++)
                     {
-                        fileTypeChooserDialog.mapping[i] = index;
-                        return true;
+                        if(i != 0) s += "|";
+                        s += fileTypeChooserDialog.fileTypes[i];
                     }
 
-                    return false;
+                    return s;
                 }
+
+                onFilterPatternChanged:
+                {
+                    // Reset to first item
+                    fileTypeChoice.currentIndex = -1;
+                    fileTypeChoice.currentIndex = 0;
+                }
+            }
+
+            property var selectedFileType:
+            {
+                var index = proxyModel.index(currentIndex, 0);
+                var mappedIndex = proxyModel.mapToSource(index);
+
+                return fileTypeChooserDialog.model.nameAtIndex(mappedIndex);
             }
 
             textRole: "individualDescription"
@@ -85,7 +100,6 @@ Dialog
 
     onAccepted:
     {
-        var i = mapping[fileTypeChoice.currentIndex];
-        fileType = model.nameAtIndex(i);
+        fileType = fileTypeChoice.selectedFileType;
     }
 }
