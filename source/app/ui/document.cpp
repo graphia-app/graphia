@@ -42,7 +42,8 @@ Document::Document(QObject* parent) :
 Document::~Document()
 {
     // This must be called from the main thread before deletion
-    _gpuComputeThread->destroySurface();
+    if(_gpuComputeThread != nullptr)
+        _gpuComputeThread->destroySurface();
 }
 
 bool Document::commandInProgress() const
