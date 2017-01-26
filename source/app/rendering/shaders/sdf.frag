@@ -60,8 +60,8 @@ void main()
     float normalised = squaredDistanceToEdge / (scaledHalfRange * scaledHalfRange) * 2.0;
     float distanceToEdge = sqrt(normalised);
     if(fragIsIn)
-        normalised = -normalised;
-    normalised = 0.5 - (normalised / 2.0);
+        distanceToEdge = -distanceToEdge;
+    normalised = 0.5 - (distanceToEdge / 2.0);
 
     // Uncomment for outline
     //if(normalised > 0.5)
