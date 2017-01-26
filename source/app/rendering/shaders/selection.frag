@@ -44,11 +44,13 @@ void main()
     for(int i = 0; i < 2; i++)
     {
         float dp3 = dot(G[i][0], I[0]) + dot(G[i][1], I[1]) + dot(G[i][2], I[2]);
-        cnv[i] = dp3 * dp3;
+        cnv[i] = dp3;
     }
 
-    float outlineAlpha = 0.5 * abs(cnv[0]) + abs(cnv[1]);
-    float interiorAlpha = I[1][1];
+    float outlineAlpha = abs(cnv[0]) + abs(cnv[1]);
+    outlineAlpha *= 0.25;
+
+    float interiorAlpha = I[1][1] * 0.5;
     float frameBufferAlpha = multisampledValue(coord).a;
-    fragColor = vec4(highlightColor.rgb, (outlineAlpha + interiorAlpha) * 0.5 * frameBufferAlpha);
+    fragColor = vec4(vec3(highlightColor.rgb), (interiorAlpha + outlineAlpha) * alpha);
 }
