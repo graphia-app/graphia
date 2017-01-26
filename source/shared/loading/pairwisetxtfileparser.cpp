@@ -40,7 +40,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
     file.seekg(0, std::ios::end);
     fileSize = file.tellg() - fileSize;
 
-    std::unordered_map<std::string, NodeId> nodeIdHash;
+    std::unordered_map<std::string, NodeId> nodeIdMap;
 
     std::string line;
     std::string token;
@@ -55,6 +55,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
         tokens.clear();
 
         bool inQuotes = false;
+        bool isComment = false;
 
         std::string validatedLine;
         utf8::replace_invalid(line.begin(), line.end(), std::back_inserter(validatedLine));
@@ -67,10 +68,14 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
             if(it < end && it < (end - 1) &&
                codePoint == '/' && utf8::peek_next(it, end) == '/')
             {
-                // Ignore C++ style comments
-                break;
+                isComment = true;
+
+                // Skip the second /
+                utf8::advance(it, 1, end);
+                codePoint = utf8::next(it, end);
             }
-            else if(codePoint == '\"')
+
+            if(codePoint == '\"')
             {
                 if(inQuotes)
                 {
@@ -101,7 +106,32 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
             token.clear();
         }
 
-        if(tokens.size() >= 2)
+        if(isComment)
+        {
+            if(tokens.size() >= 4 && _nodeAttributes != nullptr)
+            {
+                auto& firstToken = tokens.at(0);
+
+                if(firstToken.compare("NODECLASS") == 0)
+                {
+                    auto& secondToken = tokens.at(1);
+                    auto& thirdToken = tokens.at(2);
+                    auto& fourthToken = tokens.at(3);
+
+                    if(u::contains(nodeIdMap, secondToken))
+                    {
+                        QString nodeClass(QString::fromStdString(fourthToken));
+                        QString value(QString::fromStdString(thirdToken));
+
+                        auto nodeId = nodeIdMap.at(secondToken);
+
+                        _nodeAttributes->add(nodeClass);
+                        _nodeAttributes->setValueByNodeId(nodeId, nodeClass, value);
+                    }
+                }
+            }
+        }
+        else if(tokens.size() >= 2)
         {
             auto& firstToken = tokens.at(0);
             auto& secondToken = tokens.at(1);
@@ -109,10 +139,10 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
             NodeId firstNodeId;
             NodeId secondNodeId;
 
-            if(!u::contains(nodeIdHash, firstToken))
+            if(!u::contains(nodeIdMap, firstToken))
             {
                 firstNodeId = graph.addNode();
-                nodeIdHash.emplace(firstToken, firstNodeId);
+                nodeIdMap.emplace(firstToken, firstNodeId);
 
                 if(_nodeAttributes != nullptr)
                 {
@@ -122,12 +152,12 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
                 }
             }
             else
-                firstNodeId = nodeIdHash[firstToken];
+                firstNodeId = nodeIdMap[firstToken];
 
-            if(!u::contains(nodeIdHash, secondToken))
+            if(!u::contains(nodeIdMap, secondToken))
             {
                 secondNodeId = graph.addNode();
-                nodeIdHash.emplace(secondToken, secondNodeId);
+                nodeIdMap.emplace(secondToken, secondNodeId);
 
                 if(_nodeAttributes != nullptr)
                 {
@@ -137,7 +167,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
                 }
             }
             else
-                secondNodeId = nodeIdHash[secondToken];
+                secondNodeId = nodeIdMap[secondToken];
 
             auto edgeId = graph.addEdge(firstNodeId, secondNodeId);
 
