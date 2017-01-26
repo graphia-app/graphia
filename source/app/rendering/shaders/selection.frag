@@ -29,6 +29,7 @@ vec4 multisampledValue(ivec2 coord)
 
 void main()
 {
+    // Sobol edge detection
     ivec2 coord = ivec2(vPosition);
     mat3 I;
     float cnv[2];
@@ -47,10 +48,11 @@ void main()
         cnv[i] = dp3;
     }
 
+    // Approximate gradient (save a square root)
     float outlineAlpha = abs(cnv[0]) + abs(cnv[1]);
     outlineAlpha *= 0.25;
 
     float interiorAlpha = I[1][1] * 0.5;
     float frameBufferAlpha = multisampledValue(coord).a;
-    fragColor = vec4(vec3(highlightColor.rgb), (interiorAlpha + outlineAlpha) * alpha);
+    fragColor = vec4(highlightColor.rgb, (interiorAlpha + outlineAlpha) * alpha);
 }
