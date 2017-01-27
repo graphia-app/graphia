@@ -17,6 +17,8 @@ Item
 
     SplitView
     {
+        id: splitView
+
         orientation: Qt.Vertical
 
         anchors.fill: parent
@@ -24,8 +26,10 @@ Item
         NodeAttributeTableView
         {
             id: tableView
-            Layout.fillHeight: true
-            Layout.minimumHeight: 100
+            Layout.fillHeight: splitView.orientation === Qt.Vertical
+            Layout.minimumHeight: splitView.orientation === Qt.Vertical ? 100 + (height - viewport.height) : -1
+            Layout.minimumWidth: splitView.orientation === Qt.Horizontal ? 200 + (width - viewport.width) : -1
+
             nodeAttributesModel: plugin.model.nodeAttributes
 
             onVisibleRowsChanged:
@@ -40,7 +44,9 @@ Item
         ScrollView
         {
             id: scrollView
-            Layout.minimumHeight: 100 + (height - viewport.height)
+            Layout.fillWidth: splitView.orientation === Qt.Horizontal
+            Layout.minimumHeight: splitView.orientation === Qt.Vertical ? 100 + (height - viewport.height) : -1
+            Layout.minimumWidth: splitView.orientation === Qt.Horizontal ? 200 + (width - viewport.width) : -1
 
             horizontalScrollBarPolicy: Qt.ScrollBarAsNeeded
             verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
