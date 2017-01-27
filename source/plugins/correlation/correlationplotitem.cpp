@@ -19,7 +19,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem
 
     _hoverLabel = new QCPItemText(&_customPlot);
     _hoverLabel->setLayer(_textLayer);
-    _hoverLabel->setPositionAlignment(Qt::AlignBottom|Qt::AlignHCenter);
+    _hoverLabel->setPositionAlignment(Qt::AlignVCenter|Qt::AlignLeft);
     _hoverLabel->setFont(defaultFont10Pt);
     _hoverLabel->setPen(QPen(Qt::black));
     _hoverLabel->setBrush(QBrush(Qt::white));
@@ -29,7 +29,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem
 
     _hoverColorRect = new QCPItemRect(&_customPlot);
     _hoverColorRect->setLayer(_textLayer);
-    _hoverColorRect->bottomRight->setParentAnchor(_hoverLabel->bottomLeft);
+    _hoverColorRect->topLeft->setParentAnchor(_hoverLabel->topRight);
     _hoverColorRect->setClipToAxisRect(false);
     _hoverColorRect->setVisible(false);
 
@@ -303,17 +303,19 @@ void CorrelationPlotItem::showTooltip()
     _itemTracer->setGraphKey(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
 
     _hoverLabel->setVisible(true);
-    _hoverLabel->position->setCoords(
-                _customPlot.xAxis->pixelToCoord(_hoverPoint.x()),
-                _customPlot.yAxis->pixelToCoord(_hoverPoint.y()));
-    _hoverLabel->setText(QString("%1 %2")
+    _hoverLabel->position->setPixelPosition(QPointF(_itemTracer->anchor("position")->pixelPosition().x() + 10.0f,
+                                                    _itemTracer->anchor("position")->pixelPosition().y()));
+
+    _hoverLabel->setText(QString("%1, %2: %3")
                          .arg(_hoverPlottable->name())
-                         .arg(_itemTracer->position->value()));
+                         .arg(_labelNames[static_cast<int>(_itemTracer->position->key())])
+                         .arg(_itemTracer->position->value())
+                         );
 
     _hoverColorRect->setVisible(true);
     _hoverColorRect->setBrush(QBrush(_hoverPlottable->pen().color()));
-    _hoverColorRect->topLeft->setPixelPosition(QPointF(_hoverLabel->topLeft->pixelPosition().x() - 10.0,
-                                                   _hoverLabel->topLeft->pixelPosition().y()));
+    _hoverColorRect->bottomRight->setPixelPosition(QPointF(_hoverLabel->bottomRight->pixelPosition().x() + 10.0f,
+                                                   _hoverLabel->bottomRight->pixelPosition().y()));
 
     _textLayer->replot();
 
