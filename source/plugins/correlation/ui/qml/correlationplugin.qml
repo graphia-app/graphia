@@ -5,7 +5,7 @@ import QtQuick.Dialogs 1.2
 
 import com.kajeka 1.0
 
-Item
+PluginContent
 {
     anchors.fill: parent
 
@@ -15,11 +15,32 @@ Item
         scrollView.height = 160;
     }
 
+    toolStrip: RowLayout
+    {
+        anchors.fill: parent
+
+        ToolButton
+        {
+            id: uiOrientation
+
+            iconName: "add"
+            checkable: true
+        }
+
+        ToolButton
+        {
+            iconName: "format-justify-fill"
+            onClicked: tableView.resizeColumnsToContents();
+        }
+
+        Item { Layout.fillWidth: true}
+    }
+
     SplitView
     {
         id: splitView
 
-        orientation: Qt.Vertical
+        orientation: uiOrientation.checked ? Qt.Horizontal : Qt.Vertical
 
         anchors.fill: parent
 
