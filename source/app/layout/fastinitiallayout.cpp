@@ -1,6 +1,8 @@
 #include "fastinitiallayout.h"
 
-void FastInitialLayout::positionNode(QVector3D& offsetPosition, const QMatrix4x4& orientationMatrix, const QVector3D& parentNodePosition, NodeId childNodeId, NodeArray<QVector3D>& directionNodeVectors)
+void FastInitialLayout::positionNode(QVector3D& offsetPosition, const QMatrix4x4& orientationMatrix,
+                                     const QVector3D& parentNodePosition, NodeId childNodeId,
+                                     NodeArray<QVector3D>& directionNodeVectors)
 {
     offsetPosition = offsetPosition * SPHERE_RADIUS;
     offsetPosition = offsetPosition * orientationMatrix;
@@ -64,7 +66,7 @@ void FastInitialLayout::executeReal(bool)
             bool visited = visitedNodes.get(childNodeId);
             if(!visited)
             {
-                QVector3D offsetPosition(0.0, 0.0, 1.0);
+                QVector3D offsetPosition(1.0, 0.0, 0.0);
                 positionNode(offsetPosition,
                              orientationMatrix,
                              parentNodePosition,
@@ -107,7 +109,7 @@ void FastInitialLayout::executeReal(bool)
             {
                 nodeQueue.push(childNodeId);
 
-                QVector3D offsetPosition(0.0, 0.0, 1.0);
+                QVector3D offsetPosition(1.0, 0.0, 0.0);
 
                 positionNode(offsetPosition,
                              orientationMatrix,
@@ -139,9 +141,7 @@ void FastInitialLayout::executeReal(bool)
             phi = phi + 3.6 / (std::sqrt((static_cast<double>(edgeIds.size() + edgeCountOffset)) * (1.0 - h * h)));
             phi = std::fmod(phi, 2.0 * M_PI);
 
-            QVector3D offsetPosition(std::cos(phi) * std::sin(theta),
-                                     std::sin(phi) * std::sin(theta),
-                                     h);
+            QVector3D offsetPosition(h, std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta));
 
             positionNode(offsetPosition,
                          orientationMatrix,
