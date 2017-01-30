@@ -2,7 +2,7 @@ import QtQuick 2.5
 
 Rectangle
 {
-    property Item item
+    property Item item: parent
     property string backgroundColor: "transparent"
     property string borderColor: "blue"
 
