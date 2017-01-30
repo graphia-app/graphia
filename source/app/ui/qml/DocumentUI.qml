@@ -302,7 +302,7 @@ Item
         ColumnLayout
         {
             id: pluginContainer
-            visible: plugin.loaded
+            visible: plugin.loaded && !root.pluginPoppedOut
 
             Layout.fillWidth: true
 
@@ -312,12 +312,18 @@ Item
 
                 RowLayout
                 {
-                    width: parent.width
+                    anchors.fill: parent
 
                     Label
                     {
-                        Layout.fillWidth: true
                         text: pluginName
+                    }
+
+                    Item
+                    {
+                        id: pluginContainerToolStrip
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
                     }
 
                     ToolButton { action: togglePluginWindowAction }
@@ -349,6 +355,7 @@ Item
         visible: loaded && enabledChildren
 
         property var model: document.plugin
+        property var content
         property bool loaded: false
 
         onLoadedChanged:
@@ -424,7 +431,7 @@ Item
 
     property bool destructing: false
 
-    Window
+    ApplicationWindow
     {
         id: pluginWindow
         width: 800
@@ -436,19 +443,21 @@ Item
         visible: root.visible && root.pluginPoppedOut && plugin.loaded
         property bool maximised: visibility === Window.Maximized
 
-        //FIXME: window is always on top?
-        flags: Qt.Window
-
         onClosing:
         {
             if(visible & !destructing)
                 popInPlugin();
         }
 
+        toolBar: ToolBar
+        {
+            id: pluginWindowToolStrip
+            visible: plugin.content !== undefined && plugin.content.toolStrip !== undefined
+        }
+
         RowLayout
         {
             id: pluginWindowContent
-
             anchors.fill: parent
         }
     }
@@ -470,8 +479,10 @@ Item
     function popOutPlugin()
     {
         root.pluginPoppedOut = true;
-        pluginContainer.visible = false;
         plugin.parent = pluginWindowContent;
+
+        if(plugin.content.toolStrip !== undefined)
+            plugin.content.toolStrip.parent = pluginWindowToolStrip.contentItem;
 
         pluginWindow.x = pluginX;
         pluginWindow.y = pluginY;
@@ -481,12 +492,14 @@ Item
     {
         plugin.parent = pluginContainer;
 
+        if(plugin.content.toolStrip !== undefined)
+            plugin.content.toolStrip.parent = pluginContainerToolStrip;
+
         if(splitView.orientation == Qt.Vertical)
             pluginContainer.height = pluginSplitSize;
         else
             pluginContainer.width = pluginSplitSize;
 
-        pluginContainer.visible = true;
         root.pluginPoppedOut = false;
     }
 
@@ -526,9 +539,9 @@ Item
                     return;
                 }
 
-                var pluginObject = pluginComponent.createObject(plugin);
+                plugin.content = pluginComponent.createObject(plugin);
 
-                if(pluginObject === null)
+                if(plugin.content === null)
                 {
                     console.log(document.pluginQmlPath + ": failed to create instance");
                     return;

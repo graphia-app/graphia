@@ -3,5 +3,6 @@
         <file>qml/Constants.js</file>
         <file>qml/Utils.js</file>
         <file>qml/NodeAttributeTableView.qml</file>
+        <file>qml/PluginContent.qml</file>
     </qresource>
 </RCC>

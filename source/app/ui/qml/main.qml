@@ -758,7 +758,6 @@ ApplicationWindow
     toolBar: ToolBar
     {
         id: mainToolBar
-        width: parent.width
 
         RowLayout
         {
