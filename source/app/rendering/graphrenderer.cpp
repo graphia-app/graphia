@@ -307,10 +307,10 @@ bool GPUGraphData::unused() const
     return _alpha1 == 0.0f && _alpha2 == 0.0f;
 }
 
-GraphRenderer::GraphRenderer(std::shared_ptr<GraphModel> graphModel,
+GraphRenderer::GraphRenderer(const std::shared_ptr<GraphModel>& graphModel,
                              CommandManager& commandManager,
-                             std::shared_ptr<SelectionManager> selectionManager,
-                             std::shared_ptr<GPUComputeThread> gpuComputeThread) :
+                             const std::shared_ptr<SelectionManager>& selectionManager,
+                             const std::shared_ptr<GPUComputeThread>& gpuComputeThread) :
     QObject(),
     OpenGLFunctions(),
     _graphModel(graphModel),

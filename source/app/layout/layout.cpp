@@ -9,7 +9,7 @@ static bool layoutIsFinished(const Layout& layout)
 }
 
 LayoutThread::LayoutThread(GraphModel& graphModel,
-                           std::unique_ptr<LayoutFactory> layoutFactory,
+                           std::unique_ptr<LayoutFactory>&& layoutFactory,
                            bool repeating) :
     _graphModel(&graphModel),
     _repeating(repeating),

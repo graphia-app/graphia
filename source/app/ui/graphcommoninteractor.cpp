@@ -67,9 +67,9 @@ static NodeId nodeIdInsideFrustumNearestPoint(const GraphModel& graphModel,
     return closestNodeId;
 }
 
-GraphCommonInteractor::GraphCommonInteractor(std::shared_ptr<GraphModel> graphModel,
+GraphCommonInteractor::GraphCommonInteractor(const std::shared_ptr<GraphModel>& graphModel,
                                              CommandManager& commandManager,
-                                             std::shared_ptr<SelectionManager> selectionManager,
+                                             const std::shared_ptr<SelectionManager>& selectionManager,
                                              GraphRenderer* graphRenderer) :
     Interactor(graphRenderer),
     _graphModel(graphModel),

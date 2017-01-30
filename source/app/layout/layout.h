@@ -105,7 +105,7 @@ protected:
     LayoutSettings _layoutSettings;
 
 public:
-    explicit LayoutFactory(std::shared_ptr<GraphModel> graphModel) :
+    explicit LayoutFactory(const std::shared_ptr<GraphModel>& graphModel) :
         _graphModel(graphModel)
     {}
 
@@ -151,7 +151,7 @@ private:
 
 public:
     LayoutThread(GraphModel& graphModel,
-                 std::unique_ptr<LayoutFactory> layoutFactory,
+                 std::unique_ptr<LayoutFactory>&& layoutFactory,
                  bool repeating = false);
 
     virtual ~LayoutThread()

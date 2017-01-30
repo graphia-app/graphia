@@ -28,7 +28,7 @@ private:
     void generateSDF();
 
 public:
-    SDFComputeJob(GLuint sdfTexture, std::shared_ptr<GlyphMap> glyphMap);
+    SDFComputeJob(GLuint sdfTexture, const std::shared_ptr<GlyphMap>& glyphMap);
 
     void run();
     void executeWhenComplete(std::function<void()> onCompleteFn);

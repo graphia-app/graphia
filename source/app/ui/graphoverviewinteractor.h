@@ -17,10 +17,10 @@ class GraphOverviewInteractor : public GraphCommonInteractor
 {
     Q_OBJECT
 public:
-    GraphOverviewInteractor(std::shared_ptr<GraphModel> graphModel,
+    GraphOverviewInteractor(const std::shared_ptr<GraphModel>& graphModel,
                             GraphOverviewScene* graphOverviewScene,
                             CommandManager& commandManager,
-                            std::shared_ptr<SelectionManager> selectionManager,
+                            const std::shared_ptr<SelectionManager>& selectionManager,
                             GraphRenderer* graphRenderer);
 
 private:

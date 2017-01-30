@@ -17,10 +17,10 @@ class GraphComponentInteractor : public GraphCommonInteractor
 {
     Q_OBJECT
 public:
-    GraphComponentInteractor(std::shared_ptr<GraphModel> graphModel,
+    GraphComponentInteractor(const std::shared_ptr<GraphModel>& graphModel,
                              GraphComponentScene* graphComponentScene,
                              CommandManager& commandManager,
-                             std::shared_ptr<SelectionManager> selectionManager,
+                             const std::shared_ptr<SelectionManager>& selectionManager,
                              GraphRenderer* graphRenderer);
 
 private:

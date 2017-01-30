@@ -12,10 +12,10 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 
-GraphOverviewInteractor::GraphOverviewInteractor(std::shared_ptr<GraphModel> graphModel,
+GraphOverviewInteractor::GraphOverviewInteractor(const std::shared_ptr<GraphModel>& graphModel,
                                                  GraphOverviewScene* graphOverviewScene,
                                                  CommandManager& commandManager,
-                                                 std::shared_ptr<SelectionManager> selectionManager,
+                                                 const std::shared_ptr<SelectionManager>& selectionManager,
                                                  GraphRenderer* graphRenderer) :
     GraphCommonInteractor(graphModel, commandManager, selectionManager, graphRenderer),
     _scene(graphOverviewScene)

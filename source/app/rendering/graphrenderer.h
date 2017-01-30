@@ -174,10 +174,10 @@ class GraphRenderer :
     friend class GraphComponentRenderer;
 
 public:
-    GraphRenderer(std::shared_ptr<GraphModel> graphModel,
+    GraphRenderer(const std::shared_ptr<GraphModel>& graphModel,
                   CommandManager& commandManager,
-                  std::shared_ptr<SelectionManager> selectionManager,
-                  std::shared_ptr<GPUComputeThread> gpuComputeThread);
+                  const std::shared_ptr<SelectionManager>& selectionManager,
+                  const std::shared_ptr<GPUComputeThread>& gpuComputeThread);
     virtual ~GraphRenderer();
 
     static const int NUM_MULTISAMPLES = 4;
