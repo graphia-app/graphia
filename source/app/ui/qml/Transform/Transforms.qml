@@ -49,7 +49,7 @@ Item
 
             onReleased: { timer.stop(); held = false; }
 
-            onDoubleClicked: { transform.toggleLock(); }
+            onDoubleClicked: { transform.toggle(); }
 
             width: content.width
             height: content.height

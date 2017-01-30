@@ -114,6 +114,12 @@ Item
     property var metaAttributes: []
     property bool pinned: { return isMetaAttributeSet("pinned"); }
 
+    function toggle()
+    {
+        setMetaAttribute("disabled", !isMetaAttributeSet("disabled"));
+        updateExpression();
+    }
+
     function toggleLock()
     {
         setMetaAttribute("locked", !isMetaAttributeSet("locked"));
