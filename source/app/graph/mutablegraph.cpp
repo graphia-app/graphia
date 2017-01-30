@@ -520,12 +520,12 @@ void MutableGraph::update()
 }
 
 MutableGraph::ScopedTransaction::ScopedTransaction(MutableGraph& graph) :
-    _graph(graph)
+    _graph(&graph)
 {
-    _graph.beginTransaction();
+    _graph->beginTransaction();
 }
 
 MutableGraph::ScopedTransaction::~ScopedTransaction()
 {
-    _graph.endTransaction();
+    _graph->endTransaction();
 }

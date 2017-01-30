@@ -7,7 +7,7 @@
 
 GraphMLHandler::GraphMLHandler(IMutableGraph &mutableGraph, const IParser::ProgressFn &progress,
                                NodeAttributes* nodeAttributes, int lineCount)
-                               : _graph(mutableGraph), _progress(progress),
+                               : _graph(&mutableGraph), _progress(&progress),
                                  _lineCount(lineCount), _otherNodeAttributes(nodeAttributes)
 {
     if(_otherNodeAttributes != nullptr)
@@ -45,7 +45,7 @@ bool GraphMLHandler::endDocument()
             _errorString = QString("Invalid Edge Target. Edge - Source: %1 Target: %2").arg(tempEdge._source).arg(tempEdge._target);
             return false;
         }
-        const EdgeId& edgeId = _graph.addEdge(sourceNodeId->second, targetNodeId->second);
+        const EdgeId& edgeId = _graph->addEdge(sourceNodeId->second, targetNodeId->second);
         _edgeIdMap[tempEdge] = edgeId;
     }
 
@@ -110,7 +110,7 @@ bool GraphMLHandler::startElement(const QString &, const QString &localName, con
             return false;
         }
 
-        auto nodeId = _graph.addNode();
+        auto nodeId = _graph->addNode();
         _activeNodes.push(nodeId);
         // Check if id has already been used
         if(u::contains(_nodeMap, atts.value("id")))
@@ -209,7 +209,7 @@ bool GraphMLHandler::startElement(const QString &, const QString &localName, con
 
 bool GraphMLHandler::endElement(const QString &, const QString &localName, const QString &)
 {
-    _progress(_locator->lineNumber() * 100 / _lineCount );
+    (*_progress)(_locator->lineNumber() * 100 / _lineCount );
 
     if(localName == "node")
         _activeNodes.pop();

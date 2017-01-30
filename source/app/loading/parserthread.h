@@ -16,7 +16,7 @@ class ParserThread : public QObject, public IParserThread
 {
     Q_OBJECT
 private:
-    MutableGraph& _graph;
+    MutableGraph* _graph;
     QUrl _url;
     std::unique_ptr<IParser> _parser;
     std::thread _thread;

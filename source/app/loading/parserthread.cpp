@@ -7,7 +7,7 @@
 #include <atomic>
 
 ParserThread::ParserThread(MutableGraph& graph, const QUrl& url) :
-    _graph(graph),
+    _graph(&graph),
     _url(url)
 {}
 
@@ -39,7 +39,7 @@ void ParserThread::run()
 
     bool result = false;
 
-    _graph.performTransaction(
+    _graph->performTransaction(
         [this, &result](MutableGraph& graph)
         {
             std::atomic<int> percentage;

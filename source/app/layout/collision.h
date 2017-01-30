@@ -13,13 +13,13 @@
 class Collision
 {
 private:
-    const GraphModel& _graphModel;
+    const GraphModel* _graphModel;
     ComponentId _componentId;
     QVector3D _offset;
 
 public:
     Collision(const GraphModel& graphModel, ComponentId componentId) :
-        _graphModel(graphModel),
+        _graphModel(&graphModel),
         _componentId(componentId),
         _offset(0.0f, 0.0f, 0.0f)
     {}

@@ -57,9 +57,9 @@ private:
         }
     };
 
-    IMutableGraph& _graph;
+    IMutableGraph* _graph;
 
-    const IParser::ProgressFn& _progress;
+    const IParser::ProgressFn* _progress;
     QString _errorString = QString();
 
     AttributeData<NodeId> _nodeAttributes;

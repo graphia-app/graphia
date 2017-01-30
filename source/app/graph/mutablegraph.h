@@ -237,7 +237,7 @@ public:
         ~ScopedTransaction();
 
     private:
-        MutableGraph& _graph;
+        MutableGraph* _graph;
     };
 
     void performTransaction(std::function<void(MutableGraph& graph)> transaction);

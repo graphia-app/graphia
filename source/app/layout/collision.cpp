@@ -11,7 +11,7 @@ NodeId Collision::nodeClosestToLine(const std::vector<NodeId>& nodeIds, const QV
 
     for(NodeId nodeId : nodeIds)
     {
-        const QVector3D position = _graphModel.nodePositions().getScaledAndSmoothed(nodeId) + _offset;
+        const QVector3D position = _graphModel->nodePositions().getScaledAndSmoothed(nodeId) + _offset;
 
         if(plane.sideForPoint(position) != Plane::Side::Front)
             continue;
@@ -30,7 +30,7 @@ NodeId Collision::nodeClosestToLine(const std::vector<NodeId>& nodeIds, const QV
 
 NodeId Collision::nodeClosestToLine(const QVector3D &point, const QVector3D &direction)
 {
-    return nodeClosestToLine(_graphModel.graph().componentById(_componentId)->nodeIds(), point, direction);
+    return nodeClosestToLine(_graphModel->graph().componentById(_componentId)->nodeIds(), point, direction);
 }
 
 void Collision::nodesIntersectingLine(const QVector3D& point, const QVector3D& direction, std::vector<NodeId>& intersectingNodeIds)
@@ -42,17 +42,17 @@ void Collision::nodesInsideCylinder(const QVector3D &point, const QVector3D &dir
 {
     Plane plane(point, direction);
 
-    const std::vector<NodeId>& nodeIds = _graphModel.graph().componentById(_componentId)->nodeIds();
+    const std::vector<NodeId>& nodeIds = _graphModel->graph().componentById(_componentId)->nodeIds();
     for(NodeId nodeId : nodeIds)
     {
-        const QVector3D position = _graphModel.nodePositions().getScaledAndSmoothed(nodeId) + _offset;
+        const QVector3D position = _graphModel->nodePositions().getScaledAndSmoothed(nodeId) + _offset;
 
         if(plane.sideForPoint(position) != Plane::Side::Front)
             continue;
 
         float distance = position.distanceToLine(point, direction);
 
-        if(distance <= radius + _graphModel.nodeVisuals().at(nodeId)._size)
+        if(distance <= radius + _graphModel->nodeVisuals().at(nodeId)._size)
             containedNodeIds.push_back(nodeId);
     }
 }
@@ -73,7 +73,7 @@ NodeId Collision::nearestNodeInsideCylinder(const QVector3D& point, const QVecto
 
     for(NodeId nodeId : nodeIds)
     {
-        float distance = _graphModel.nodePositions().getScaledAndSmoothed(nodeId).distanceToPoint(point);
+        float distance = _graphModel->nodePositions().getScaledAndSmoothed(nodeId).distanceToPoint(point);
 
         if(distance < minimumDistance)
         {
