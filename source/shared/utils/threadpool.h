@@ -113,13 +113,13 @@ private:
 
         // Fn argument is an iterator
         template<typename T = ReturnType>
-        typename std::enable_if_t<std::is_convertible<ArgumentType<Fn>, It>::value, T>
-        invoke(Fn& f, It& it) const { return f(it); }
+        static typename std::enable_if_t<std::is_convertible<ArgumentType<Fn>, It>::value, T>
+        invoke(Fn& f, It& it) { return f(it); }
 
         // Fn argument is an value/reference
         template<typename T = ReturnType>
-        typename std::enable_if_t<std::is_convertible<ArgumentType<Fn>, typename It::value_type>::value, T>
-        invoke(Fn f, It it) const { return f(*it); }
+        static typename std::enable_if_t<std::is_convertible<ArgumentType<Fn>, typename It::value_type>::value, T>
+        invoke(Fn& f, It it) { return f(*it); }
     };
 
     template<typename It, typename Fn, typename Result>
@@ -127,7 +127,7 @@ private:
     {
         using ValueType = std::vector<Result>;
 
-        ValueType operator()(It it, It last, Fn f)
+        ValueType operator()(It it, It last, Fn& f)
         {
             ValueType values;
 
@@ -143,7 +143,7 @@ private:
     {
         using ValueType = void;
 
-        ValueType operator()(It it, It last, Fn f) const
+        ValueType operator()(It it, It last, Fn& f) const
         {
             for(; it != last; ++it)
                 this->invoke(f, it);

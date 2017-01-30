@@ -174,11 +174,10 @@ const QString u::currentThreadName()
 
 QString u::parentProcessName()
 {
-    HANDLE handle = NULL;
     PROCESSENTRY32 pe = {0};
     DWORD ppid = 0;
     pe.dwSize = sizeof(PROCESSENTRY32);
-    handle = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    HANDLE handle = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if(Process32First(handle, &pe))
     {
         do
@@ -265,7 +264,7 @@ bool u::isNumeric(const std::string& string)
 {
     try
     {
-        std::stof(string);
+        Q_UNUSED(std::stof(string));
     }
     catch(std::invalid_argument&)
     {
