@@ -135,9 +135,9 @@ ApplicationWindow
         id: optionsDialog
     }
 
-    PluginsDialog
+    AboutPluginsDialog
     {
-        id: pluginsDialog
+        id: aboutpluginsDialog
         pluginDetails: application.pluginDetails
 
         onHiddenSwitchActivated: { mainWindow.debugMenuUnhidden = true; }
@@ -739,8 +739,8 @@ ApplicationWindow
                 text: qsTr("About Plugins...")
                 onTriggered:
                 {
-                    pluginsDialog.raise();
-                    pluginsDialog.show();
+                    aboutpluginsDialog.raise();
+                    aboutpluginsDialog.show();
                 }
             }
 
