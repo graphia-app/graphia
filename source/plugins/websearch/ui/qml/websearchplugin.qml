@@ -4,12 +4,12 @@ import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.4
 import QtWebEngine 1.3
 
-Item
+PluginContent
 {
     anchors.fill: parent
     visible: true
 
-    ColumnLayout
+    toolStrip: RowLayout
     {
         anchors.fill: parent
 
@@ -32,6 +32,11 @@ Item
             ]
             Layout.fillWidth: true
         }
+    }
+
+    ColumnLayout
+    {
+        anchors.fill: parent
 
         ProgressBar
         {
