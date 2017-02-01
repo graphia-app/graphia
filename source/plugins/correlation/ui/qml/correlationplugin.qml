@@ -8,12 +8,7 @@ import com.kajeka 1.0
 PluginContent
 {
     anchors.fill: parent
-
-    Component.onCompleted:
-    {
-        parent.Layout.minimumHeight = 320;
-        scrollView.height = 160;
-    }
+    minimumHeight: 320
 
     Action
     {
@@ -83,6 +78,9 @@ PluginContent
         ScrollView
         {
             id: scrollView
+
+            height: 160
+
             Layout.fillWidth: splitView.orientation === Qt.Horizontal
             Layout.minimumHeight: splitView.orientation === Qt.Vertical ? 100 + (height - viewport.height) : -1
             Layout.minimumWidth: splitView.orientation === Qt.Horizontal ? 200 + (width - viewport.width) : -1

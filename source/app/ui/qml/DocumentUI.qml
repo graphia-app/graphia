@@ -351,13 +351,18 @@ Item
         property alias pluginPoppedOut: root.pluginPoppedOut
     }
 
+    // This is only here to get at the default values of its properties
+    PluginContent { id: defaultPluginContent }
+
     Item
     {
         Layout.fillHeight: true
         Layout.fillWidth: true
 
         id: plugin
-        Layout.minimumHeight: 100
+        Layout.minimumHeight: plugin.content !== undefined &&
+                              plugin.content.minimumHeight !== undefined ?
+                              plugin.content.minimumHeight : defaultPluginContent.minimumHeight
         visible: loaded && enabledChildren
 
         property var model: document.plugin
