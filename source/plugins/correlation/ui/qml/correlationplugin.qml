@@ -62,7 +62,7 @@ PluginContent
             id: tableView
             Layout.fillHeight: splitView.orientation === Qt.Vertical
             Layout.minimumHeight: splitView.orientation === Qt.Vertical ? 100 + (height - viewport.height) : -1
-            Layout.minimumWidth: splitView.orientation === Qt.Horizontal ? 200 + (width - viewport.width) : -1
+            Layout.minimumWidth: splitView.orientation === Qt.Horizontal ? 200 : -1
 
             nodeAttributesModel: plugin.model.nodeAttributes
 
@@ -83,7 +83,7 @@ PluginContent
 
             Layout.fillWidth: splitView.orientation === Qt.Horizontal
             Layout.minimumHeight: splitView.orientation === Qt.Vertical ? 100 + (height - viewport.height) : -1
-            Layout.minimumWidth: splitView.orientation === Qt.Horizontal ? 200 + (width - viewport.width) : -1
+            Layout.minimumWidth: splitView.orientation === Qt.Horizontal ? 200 : -1
 
             horizontalScrollBarPolicy: Qt.ScrollBarAsNeeded
             verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
