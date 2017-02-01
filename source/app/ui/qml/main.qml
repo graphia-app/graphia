@@ -731,6 +731,11 @@ ApplicationWindow
             MenuItem { action: toggleFpsMeterAction }
             MenuItem { action: toggleGlyphmapSaveAction }
         }
+        Menu { id: pluginMenu0; visible: false }
+        Menu { id: pluginMenu1; visible: false }
+        Menu { id: pluginMenu2; visible: false }
+        Menu { id: pluginMenu3; visible: false }
+        Menu { id: pluginMenu4; visible: false }
         Menu
         {
             title: qsTr("&Help")
@@ -753,6 +758,76 @@ ApplicationWindow
                 }
             }
         }
+    }
+
+    function clearMenu(menu)
+    {
+        menu.visible = false;
+        while(menu.items.length > 0)
+            menu.removeItem(menu.items[0]);
+    }
+
+    function clearMenus()
+    {
+        if(currentDocument !== null)
+        {
+            clearMenu(currentDocument.pluginMenu0);
+            clearMenu(currentDocument.pluginMenu1);
+            clearMenu(currentDocument.pluginMenu2);
+            clearMenu(currentDocument.pluginMenu3);
+            clearMenu(currentDocument.pluginMenu4);
+        }
+
+        clearMenu(pluginMenu0);
+        clearMenu(pluginMenu1);
+        clearMenu(pluginMenu2);
+        clearMenu(pluginMenu3);
+        clearMenu(pluginMenu4);
+    }
+
+    function updatePluginMenu(index, menu)
+    {
+        clearMenu(menu);
+
+        if(currentDocument !== null)
+        {
+            if(currentDocument.createPluginMenu(index, menu))
+                menu.visible = true;
+        }
+    }
+
+    function updatePluginMenus()
+    {
+        clearMenus();
+
+        if(currentDocument !== null && currentDocument.pluginPoppedOut)
+        {
+            updatePluginMenu(0, currentDocument.pluginMenu0);
+            updatePluginMenu(1, currentDocument.pluginMenu1);
+            updatePluginMenu(2, currentDocument.pluginMenu2);
+            updatePluginMenu(3, currentDocument.pluginMenu3);
+            updatePluginMenu(4, currentDocument.pluginMenu4);
+        }
+        else
+        {
+            updatePluginMenu(0, pluginMenu0);
+            updatePluginMenu(1, pluginMenu1);
+            updatePluginMenu(2, pluginMenu2);
+            updatePluginMenu(3, pluginMenu3);
+            updatePluginMenu(4, pluginMenu4);
+        }
+    }
+
+    onCurrentDocumentChanged:
+    {
+        updatePluginMenus();
+    }
+
+    Connections
+    {
+        target: currentDocument
+        onPluginLoaded: updatePluginMenus();
+        onPluginPoppedOutChanged: updatePluginMenus();
     }
 
     toolBar: ToolBar

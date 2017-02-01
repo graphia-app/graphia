@@ -15,24 +15,42 @@ PluginContent
         scrollView.height = 160;
     }
 
+    Action
+    {
+        id: toggleUiOrientationAction
+        text: qsTr("Display UI Horizontally")
+        iconName: "add"
+        checkable: true
+    }
+
+    Action
+    {
+        id: resizeColumnsToContentsAction
+        text: qsTr("&Resize Columns To Contents")
+        iconName: "format-justify-fill"
+        onTriggered: tableView.resizeColumnsToContents();
+    }
+
+    function createMenu(index, menu)
+    {
+        switch(index)
+        {
+        case 0:
+            menu.title = qsTr("&Correlation");
+            menu.addItem("").action = toggleUiOrientationAction;
+            menu.addItem("").action = resizeColumnsToContentsAction;
+            return true;
+        }
+
+        return false;
+    }
+
     toolStrip: RowLayout
     {
         anchors.fill: parent
 
-        ToolButton
-        {
-            id: uiOrientation
-
-            iconName: "add"
-            checkable: true
-        }
-
-        ToolButton
-        {
-            iconName: "format-justify-fill"
-            onClicked: tableView.resizeColumnsToContents();
-        }
-
+        ToolButton { action: toggleUiOrientationAction }
+        ToolButton { action: resizeColumnsToContentsAction }
         Item { Layout.fillWidth: true}
     }
 
@@ -40,7 +58,7 @@ PluginContent
     {
         id: splitView
 
-        orientation: uiOrientation.checked ? Qt.Horizontal : Qt.Vertical
+        orientation: toggleUiOrientationAction.checked ? Qt.Horizontal : Qt.Vertical
 
         anchors.fill: parent
 

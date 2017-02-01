@@ -44,6 +44,12 @@ Item
     property bool hasPluginUI: document.pluginQmlPath
     property bool pluginPoppedOut: false
 
+    property alias pluginMenu0: pluginMenu0
+    property alias pluginMenu1: pluginMenu1
+    property alias pluginMenu2: pluginMenu2
+    property alias pluginMenu3: pluginMenu3
+    property alias pluginMenu4: pluginMenu4
+
     property int foundIndex: document.foundIndex
     property int numNodesFound: document.numNodesFound
 
@@ -449,6 +455,15 @@ Item
                 popInPlugin();
         }
 
+        menuBar: MenuBar
+        {
+            Menu { id: pluginMenu0; visible: false }
+            Menu { id: pluginMenu1; visible: false }
+            Menu { id: pluginMenu2; visible: false }
+            Menu { id: pluginMenu3; visible: false }
+            Menu { id: pluginMenu4; visible: false }
+        }
+
         toolBar: ToolBar
         {
             id: pluginWindowToolStrip
@@ -511,6 +526,18 @@ Item
             popOutPlugin();
     }
 
+    function createPluginMenu(index, menu)
+    {
+        if(!plugin.loaded)
+            return false;
+
+        // Check the plugin implements createMenu
+        if(typeof plugin.content.createMenu === "function")
+            return plugin.content.createMenu(index, menu);
+
+        return false;
+    }
+
     property bool findVisible: find.visible
     function showFind()
     {
@@ -548,9 +575,12 @@ Item
                 }
 
                 plugin.loaded = true;
+                pluginLoaded();
             }
         }
     }
+
+    signal pluginLoaded()
 
     property var comandProgressSamples: []
     property int commandSecondsRemaining
