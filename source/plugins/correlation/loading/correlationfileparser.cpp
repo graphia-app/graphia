@@ -99,6 +99,9 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
     progress(-1);
     auto dataRect = findLargestDataRect(tabularData);
 
+    if(dataRect.isEmpty())
+        return false;
+
     _plugin->setDimensions(dataRect.width(), dataRect.height());
 
     graph.setPhase(QObject::tr("Attributes"));
