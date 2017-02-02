@@ -27,6 +27,11 @@ do
   ICON_FILES=$(find * -iname "${ICON_NAME}.*" | sort)
   for ICON_FILE in ${ICON_FILES};
   do
+    if [ -L ${ICON_FILE} ]
+    then
+      echo ${ICON_FILE} is symlink!
+    fi
+
     echo "\t\t<file>${ICON_FILE}</file>" >> icons.qrc
   done
 done
