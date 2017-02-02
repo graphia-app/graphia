@@ -23,7 +23,7 @@ PluginContent
         id: resizeColumnsToContentsAction
         text: qsTr("&Resize Columns To Contents")
         iconName: "format-justify-fill"
-        onTriggered: tableView.resizeColumnsToContents();
+        onTriggered: tableView.resizeColumnsToContentsBugWorkaround();
     }
 
     function createMenu(index, menu)

@@ -76,4 +76,21 @@ TableView
                 {"role": columnName, "title": columnName}));
         }
     }
+
+    // Work around for QTBUG-58594
+    function resizeColumnsToContentsBugWorkaround()
+    {
+        for(var i = 0; i < columnCount; ++i)
+        {
+            var col = getColumn(i);
+            var header = __listView.headerItem.headerRepeater.itemAt(i);
+            if(col)
+            {
+                col.__index = i;
+                col.resizeToContents();
+                if(col.width < header.implicitWidth)
+                    col.width = header.implicitWidth;
+            }
+        }
+    }
 }
