@@ -9,7 +9,7 @@ POSTAMBLE=" \t</qresource>\n\
 </RCC>"
 
 THEME_FILES=$(find * -name "*.theme")
-ICON_NAMES=$(find ../ui/qml/ -iname "*.qml" | \
+ICON_NAMES=$(find $(find ../../ -type d -name "qml") -name "*.qml" | \
   xargs perl -pe 's/\n/\$/g' | \
   perl -ne 'print "$1\n" while /iconName:[\s\$]*(({([^{}]|(?2))*})|([^\$]*))\$/gm' | \
   perl -pe 's/[^\"]*\"([^\"]*)\"[^\"]*/$1\n/g' | \
