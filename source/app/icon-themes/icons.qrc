@@ -1,6 +1,9 @@
 <RCC>
 	<qresource prefix="/icons">
 		<file>Tango/index.theme</file>
+		<file>Tango/16x16/actions/add.png</file>
+		<file>Tango/22x22/actions/add.png</file>
+		<file>Tango/32x32/actions/add.png</file>
 		<file>Tango/16x16/actions/document-open.png</file>
 		<file>Tango/22x22/actions/document-open.png</file>
 		<file>Tango/32x32/actions/document-open.png</file>
@@ -13,24 +16,21 @@
 		<file>Tango/16x16/actions/edit-undo.png</file>
 		<file>Tango/22x22/actions/edit-undo.png</file>
 		<file>Tango/32x32/actions/edit-undo.png</file>
-		<file>Tango/16x16/emblems/emblem-readonly.png</file>
-		<file>Tango/22x22/emblems/emblem-readonly.png</file>
-		<file>Tango/32x32/emblems/emblem-readonly.png</file>
 		<file>Tango/16x16/emblems/emblem-unreadable.png</file>
 		<file>Tango/22x22/emblems/emblem-unreadable.png</file>
 		<file>Tango/32x32/emblems/emblem-unreadable.png</file>
+		<file>Tango/16x16/actions/format-justify-fill.png</file>
+		<file>Tango/22x22/actions/format-justify-fill.png</file>
+		<file>Tango/32x32/actions/format-justify-fill.png</file>
+		<file>Tango/16x16/actions/format-text-bold.png</file>
+		<file>Tango/22x22/actions/format-text-bold.png</file>
+		<file>Tango/32x32/actions/format-text-bold.png</file>
 		<file>Tango/16x16/actions/go-next.png</file>
 		<file>Tango/22x22/actions/go-next.png</file>
 		<file>Tango/32x32/actions/go-next.png</file>
 		<file>Tango/16x16/actions/go-previous.png</file>
 		<file>Tango/22x22/actions/go-previous.png</file>
 		<file>Tango/32x32/actions/go-previous.png</file>
-		<file>Tango/16x16/actions/list-add.png</file>
-		<file>Tango/22x22/actions/list-add.png</file>
-		<file>Tango/32x32/actions/list-add.png</file>
-		<file>Tango/16x16/actions/list-remove.png</file>
-		<file>Tango/22x22/actions/list-remove.png</file>
-		<file>Tango/32x32/actions/list-remove.png</file>
 		<file>Tango/16x16/actions/media-playback-pause.png</file>
 		<file>Tango/22x22/actions/media-playback-pause.png</file>
 		<file>Tango/32x32/actions/media-playback-pause.png</file>
