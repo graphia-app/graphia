@@ -13,7 +13,7 @@ PluginContent
     Action
     {
         id: toggleUiOrientationAction
-        text: qsTr("Display UI Horizontally")
+        text: qsTr("Display UI &Horizontally")
         iconName: "add"
         checkable: true
     }
@@ -26,6 +26,15 @@ PluginContent
         onTriggered: tableView.resizeColumnsToContentsBugWorkaround();
     }
 
+    Action
+    {
+        id: toggleColumnNamesAction
+        text: qsTr("&Show Column Names")
+        iconName: "format-text-bold"
+        checkable: true
+        checked: true
+    }
+
     function createMenu(index, menu)
     {
         switch(index)
@@ -34,6 +43,7 @@ PluginContent
             menu.title = qsTr("&Correlation");
             menu.addItem("").action = toggleUiOrientationAction;
             menu.addItem("").action = resizeColumnsToContentsAction;
+            menu.addItem("").action = toggleColumnNamesAction;
             return true;
         }
 
@@ -46,6 +56,7 @@ PluginContent
 
         ToolButton { action: toggleUiOrientationAction }
         ToolButton { action: resizeColumnsToContentsAction }
+        ToolButton { action: toggleColumnNamesAction }
         Item { Layout.fillWidth: true}
     }
 
@@ -101,6 +112,7 @@ PluginContent
                 columnNames: plugin.model.columnNames
                 rowNames: plugin.model.rowNames
                 selectedRows: tableView.selectedRows
+                showColumnNames: toggleColumnNamesAction.checked
 
                 elideLabelWidth:
                 {

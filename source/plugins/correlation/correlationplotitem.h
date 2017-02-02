@@ -18,6 +18,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(int rowCount MEMBER _rowCount)
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
     Q_PROPERTY(int minimumWidth READ minimumWidth NOTIFY minimumWidthChanged)
+    Q_PROPERTY(bool showColumnNames MEMBER _showColumnNames WRITE setShowColumnNames)
 
 public:
     explicit CorrelationPlotItem(QQuickItem* parent = nullptr);
@@ -59,6 +60,7 @@ private:
     QStringList _graphNames;
     QVector<double> _data;
     QVector<int> _selectedRows;
+    bool _showColumnNames = true;
 
     void populateMeanAveragePlot();
     void populateRawPlot();
@@ -69,6 +71,7 @@ private:
     void setLabelNames(const QStringList& labelNames);
     void setElideLabelWidth(int elideLabelWidth);
     void setColumnCount(int columnCount);
+    void setShowColumnNames(bool showColumnNames);
 
     int minimumWidth() const;
 

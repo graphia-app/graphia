@@ -137,7 +137,7 @@ void CorrelationPlotItem::buildPlot()
     _customPlot.xAxis->setTicker(categoryTicker);
     _customPlot.xAxis->setTickLabelRotation(90);
 
-    if(_elideLabelWidth > 0)
+    if(_showColumnNames && _elideLabelWidth > 0)
     {
         QFontMetrics metrics(_defaultFont9Pt);
         int column = 0;
@@ -262,14 +262,29 @@ void CorrelationPlotItem::setColumnCount(int columnCount)
     emit minimumWidthChanged();
 }
 
+void CorrelationPlotItem::setShowColumnNames(bool showColumnNames)
+{
+    bool changed = (_showColumnNames != showColumnNames);
+    _showColumnNames = showColumnNames;
+
+    emit minimumWidthChanged();
+
+    if(changed)
+        refresh();
+}
+
 int CorrelationPlotItem::minimumWidth() const
 {
     QFontMetrics metrics(_defaultFont9Pt);
     const auto& margins = _customPlot.axisRect()->margins();
-    const int axisPadding = margins.left() + margins.right();
+    const int axisWidth = margins.left() + margins.right();
+
+    if(!_showColumnNames)
+        return axisWidth + 50;
+
     const int columnPadding = 1;
 
-    return (_columnCount * (metrics.height() + columnPadding)) + axisPadding;
+    return (_columnCount * (metrics.height() + columnPadding)) + axisWidth;
 }
 
 void CorrelationPlotItem::routeMouseEvent(QMouseEvent* event)
