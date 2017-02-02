@@ -14,7 +14,7 @@ PluginContent
     {
         id: toggleUiOrientationAction
         text: qsTr("Display UI &Horizontally")
-        iconName: "add"
+        iconName: "list-add"
         checkable: true
     }
 
