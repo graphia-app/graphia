@@ -95,6 +95,8 @@ public:
 
     bool busy() const;
 
+    void clearCommandStack();
+
 private:
     template<typename Fn> void doCommand(std::shared_ptr<Command> command, QString verb, const Fn& fn)
     {

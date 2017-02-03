@@ -20,6 +20,7 @@
 #include <vector>
 #include <memory>
 #include <mutex>
+#include <atomic>
 
 class Application;
 class GraphQuickItem;
@@ -116,6 +117,8 @@ private:
 
     int _loadProgress = 0;
     bool _loadComplete = false;
+
+    std::atomic_bool _graphChanging;
 
     std::shared_ptr<GraphModel> _graphModel;
     std::shared_ptr<GPUComputeThread> _gpuComputeThread;

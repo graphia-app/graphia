@@ -53,7 +53,7 @@ bool Document::commandInProgress() const
 
 bool Document::idle() const
 {
-    return !commandInProgress() && !_graphQuickItem->interacting();
+    return !commandInProgress() && !_graphChanging && !_graphQuickItem->interacting();
 }
 
 void Document::maybeEmitIdleChanged()
@@ -387,6 +387,23 @@ void Document::onLoadComplete(bool success)
             _graphModel.get(), &GraphModel::onFoundNodeIdsChanged, Qt::DirectConnection);
 
     connect(_layoutThread.get(), &LayoutThread::executed, _graphQuickItem, &GraphQuickItem::onLayoutChanged);
+
+    connect(&_graphModel->graph(), &Graph::graphWillChange, [this]
+    {
+        _graphChanging = true;
+        maybeEmitIdleChanged();
+    });
+
+    connect(&_graphModel->graph(), &Graph::graphChanged, [this]
+    {
+        _graphChanging = false;
+        maybeEmitIdleChanged();
+
+        // If the graph has changed outside of a Command, then our new state is
+        // inconsistent wrt the CommandManager, so throw away our undo history
+        if(!commandInProgress())
+            _commandManager.clearCommandStack();
+    });
 
     _graphModel->enableVisualUpdates();
 

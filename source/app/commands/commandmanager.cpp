@@ -233,6 +233,18 @@ bool CommandManager::busy() const
     return _busy;
 }
 
+void CommandManager::clearCommandStack()
+{
+    std::unique_lock<std::mutex> lock(_mutex);
+
+    // If a command is still in progress, wait until it's finished
+    if(_thread.joinable())
+        _thread.join();
+
+    _stack.clear();
+    _lastExecutedIndex = -1;
+}
+
 bool CommandManager::canUndoNoLocking() const
 {
     return _lastExecutedIndex >= 0;
