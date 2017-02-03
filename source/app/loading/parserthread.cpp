@@ -40,7 +40,7 @@ void ParserThread::run()
     bool result = false;
 
     _graph->performTransaction(
-        [this, &result](MutableGraph& graph)
+        [this, &result](IMutableGraph& graph)
         {
             std::atomic<int> percentage;
             percentage = -1;

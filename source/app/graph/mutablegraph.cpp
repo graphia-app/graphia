@@ -485,12 +485,6 @@ void MutableGraph::endTransaction()
     }
 }
 
-void MutableGraph::performTransaction(std::function<void(MutableGraph&)> transaction)
-{
-    ScopedTransaction lock(*this);
-    transaction(*this);
-}
-
 void MutableGraph::update()
 {
     if(!_updateRequired)
@@ -517,15 +511,4 @@ void MutableGraph::update()
         else
             _unusedEdgeIds.emplace_back(edgeId);
     }
-}
-
-MutableGraph::ScopedTransaction::ScopedTransaction(MutableGraph& graph) :
-    _graph(&graph)
-{
-    _graph->beginTransaction();
-}
-
-MutableGraph::ScopedTransaction::~ScopedTransaction()
-{
-    _graph->endTransaction();
 }

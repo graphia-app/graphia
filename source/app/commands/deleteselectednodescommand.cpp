@@ -40,7 +40,7 @@ bool DeleteSelectedNodesCommand::execute()
 void DeleteSelectedNodesCommand::undo()
 {
     _graphModel->mutableGraph().performTransaction(
-        [this](MutableGraph& graph)
+        [this](IMutableGraph& graph)
         {
             graph.addNodes(_nodeIds);
             graph.addEdges(_edges);
