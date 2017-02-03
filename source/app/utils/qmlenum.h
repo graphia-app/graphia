@@ -1,7 +1,7 @@
 #ifndef QMLENUM_H
 #define QMLENUM_H
 
-#include <QtQml>
+#include <QQmlEngine>
 
 #include "application.h"
 #include "shared/utils/utils.h"
