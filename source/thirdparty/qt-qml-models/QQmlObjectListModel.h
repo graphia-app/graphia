@@ -12,7 +12,7 @@
 #include <QMetaProperty>
 #include <QObject>
 #include <QString>
-#include <QStringBuilder>
+//#include <QStringBuilder> // See http://gitlab.unique-conception.org/qt-qml-tricks/qt-qml-models/issues/8
 #include <QVariant>
 #include <QVector>
 
