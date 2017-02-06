@@ -56,7 +56,8 @@ void DeferredExecutor::executeOne()
     if(_paused)
         return;
 
-    auto& task = _tasks.front();
+    auto task = _tasks.front();
+    _tasks.pop_front();
 
     if(_debug > 2)
         qDebug() << "Executing" << task._description;
@@ -64,7 +65,6 @@ void DeferredExecutor::executeOne()
     _executing = true;
     task._function();
     _executing = false;
-    _tasks.pop_front();
 }
 
 void DeferredExecutor::cancel()
