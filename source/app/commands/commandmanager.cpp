@@ -10,8 +10,8 @@ CommandManager::CommandManager() :
     _lock(_mutex, std::defer_lock),
     _busy(false)
 {
-    qRegisterMetaType<std::shared_ptr<Command>>("std::shared_ptr<Command>");
     qRegisterMetaType<CommandAction>("CommandAction");
+    connect(this, &CommandManager::commandQueued, this, &CommandManager::update);
     connect(this, &CommandManager::commandCompleted, this, &CommandManager::onCommandCompleted);
 
     _debug = qgetenv("COMMAND_DEBUG").toInt();
@@ -279,4 +279,9 @@ void CommandManager::onCommandCompleted(Command* command, const QString&, Comman
         _deferredExecutor.executeOne();
     else
         emit busyChanged();
+}
+
+void CommandManager::update()
+{
+    _deferredExecutor.execute();
 }

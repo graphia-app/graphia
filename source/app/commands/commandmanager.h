@@ -35,47 +35,35 @@ public:
 
     template<typename T> typename std::enable_if<std::is_base_of<Command, T>::value, void>::type execute(std::shared_ptr<T> command)
     {
-        QMetaObject::invokeMethod(this, "executeReal", Q_ARG(std::shared_ptr<Command>, command),
-                                                       Q_ARG(bool, false));
+        _deferredExecutor.enqueue([this, command] { executeReal(command, false); });
+        emit commandQueued();
     }
 
     template<typename T> typename std::enable_if<std::is_base_of<Command, T>::value, void>::type executeOnce(std::shared_ptr<T> command)
     {
-        QMetaObject::invokeMethod(this, "executeReal", Q_ARG(std::shared_ptr<Command>, command),
-                                                       Q_ARG(bool, true));
+        _deferredExecutor.enqueue([this, command] { executeReal(command, true); });
+        emit commandQueued();
     }
 
     template<typename... Args> void execute(Args&&... args)
     {
-        QMetaObject::invokeMethod(this, "executeReal",
-                                  Q_ARG(std::shared_ptr<Command>,
-                                        std::make_shared<Command>(std::forward<Args>(args)...)),
-                                  Q_ARG(bool, false));
+        execute(std::make_shared<Command>(std::forward<Args>(args)...));
     }
 
     // Execute only once, i.e. so that it can't be undone
     template<typename... Args> void executeOnce(Args&&... args)
     {
-        QMetaObject::invokeMethod(this, "executeReal",
-                                  Q_ARG(std::shared_ptr<Command>,
-                                        std::make_shared<Command>(std::forward<Args>(args)...)),
-                                  Q_ARG(bool, true));
+        executeOnce(std::make_shared<Command>(std::forward<Args>(args)...));
     }
 
     template<typename... Args> void executeSynchronous(Args&&... args)
     {
-        QMetaObject::invokeMethod(this, "executeReal",
-                                  Q_ARG(std::shared_ptr<Command>,
-                                        std::make_shared<Command>(std::forward<Args>(args)..., false)),
-                                  Q_ARG(bool, false));
+        execute(std::make_shared<Command>(std::forward<Args>(args)..., false));
     }
 
     template<typename... Args> void executeSynchronousOnce(Args&&... args)
     {
-        QMetaObject::invokeMethod(this, "executeReal",
-                                  Q_ARG(std::shared_ptr<Command>,
-                                        std::make_shared<Command>(std::forward<Args>(args)..., false)),
-                                  Q_ARG(bool, true));
+        executeOnce(std::make_shared<Command>(std::forward<Args>(args)..., false));
     }
 
     void undo();
@@ -140,10 +128,13 @@ private slots:
 
     void onCommandCompleted(Command* command, const QString& pastParticiple, CommandAction action);
 
+    void update();
+
 signals:
     void commandWillExecute(const Command* command) const;
     void commandProgressChanged() const;
     void commandVerbChanged() const;
+    void commandQueued();
     void commandCompleted(Command* command, const QString& pastParticiple, CommandAction action) const;
 
     void busyChanged() const;
