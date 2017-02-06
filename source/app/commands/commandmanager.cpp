@@ -55,10 +55,14 @@ void CommandManager::executeReal(std::shared_ptr<Command> command, bool irrevers
 
     command->setProgressFn([this](int progress) { _commandProgress = progress; emit commandProgressChanged(); });
 
-    auto executeCommand = [this, command, irreversible]()
+    _busy = true;
+    emit busyChanged();
+    if(_debug > 0)
+        qDebug() << "Command started" << command->description();
+
+    doCommand(command, command->verb(), [this, command, irreversible]
     {
-        if(command->asynchronous())
-            u::setCurrentThreadName(command->description());
+        u::setCurrentThreadName(command->description());
 
         if(!command->execute())
         {
@@ -79,14 +83,7 @@ void CommandManager::executeReal(std::shared_ptr<Command> command, bool irrevers
 
         _busy = false;
         emit commandCompleted(command.get(), command->pastParticiple(), CommandAction::Execute);
-    };
-
-    _busy = true;
-    emit busyChanged();
-    if(_debug > 0)
-        qDebug() << "Command started" << command->description();
-
-    doCommand(command, command->verb(), executeCommand);
+    });
 }
 
 void CommandManager::undoReal()
@@ -104,22 +101,19 @@ void CommandManager::undoReal()
 
     auto command = _stack.at(_lastExecutedIndex);
 
-    auto undoCommand = [this, command]()
+    _busy = true;
+    emit busyChanged();
+
+    doCommand(command, command->undoVerb(), [this, command]
     {
-        if(command->asynchronous())
-            u::setCurrentThreadName("(u) " + command->description());
+        u::setCurrentThreadName("(u) " + command->description());
 
         command->undo();
         _lastExecutedIndex--;
 
         _busy = false;
         emit commandCompleted(command.get(), QString(), CommandAction::Undo);
-    };
-
-    _busy = true;
-    emit busyChanged();
-
-    doCommand(command, command->undoVerb(), undoCommand);
+    });
 }
 
 void CommandManager::redoReal()
@@ -137,21 +131,18 @@ void CommandManager::redoReal()
 
     auto command = _stack.at(++_lastExecutedIndex);
 
-    auto redoCommand = [this, command]()
+    _busy = true;
+    emit busyChanged();
+
+    doCommand(command, command->redoVerb(), [this, command]
     {
-        if(command->asynchronous())
-            u::setCurrentThreadName("(r) " + command->description());
+        u::setCurrentThreadName("(r) " + command->description());
 
         command->execute();
 
         _busy = false;
         emit commandCompleted(command.get(), command->pastParticiple(), CommandAction::Redo);
-    };
-
-    _busy = true;
-    emit busyChanged();
-
-    doCommand(command, command->redoVerb(), redoCommand);
+    });
 }
 
 bool CommandManager::canUndo() const
@@ -257,7 +248,6 @@ bool CommandManager::canRedoNoLocking() const
 
 void CommandManager::onCommandCompleted(Command* command, const QString&, CommandAction)
 {
-    // If the command executed asynchronously, we need to join its thread
     if(_thread.joinable())
         _thread.join();
 

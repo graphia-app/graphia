@@ -56,16 +56,6 @@ public:
         executeOnce(std::make_shared<Command>(std::forward<Args>(args)...));
     }
 
-    template<typename... Args> void executeSynchronous(Args&&... args)
-    {
-        execute(std::make_shared<Command>(std::forward<Args>(args)..., false));
-    }
-
-    template<typename... Args> void executeSynchronousOnce(Args&&... args)
-    {
-        executeOnce(std::make_shared<Command>(std::forward<Args>(args)..., false));
-    }
-
     void undo();
     void redo();
 
@@ -95,10 +85,7 @@ private:
         emit commandVerbChanged();
         emit commandWillExecute(command.get());
 
-        if(command->asynchronous())
-            _thread = std::thread(fn);
-        else
-            fn();
+        _thread = std::thread(fn);
     }
 
     bool canUndoNoLocking() const;

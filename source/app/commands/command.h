@@ -62,13 +62,11 @@ public:
     Command(const QString& description, const QString& verb,
             const QString& pastParticiple,
             ExecuteFn executeFn,
-            CommandFn undoFn = defaultCommandFn,
-            bool asynchronous = true) :
+            CommandFn undoFn = defaultCommandFn) :
         _description(description),
         _verb(verb),
         _pastParticiple(pastParticiple),
-        _undoFn(undoFn),
-        _asynchronous(asynchronous)
+        _undoFn(undoFn)
     {
         initialise();
         initialiseExecuteFn(executeFn);
@@ -77,12 +75,10 @@ public:
     template<typename ExecuteFn>
     Command(const QString& description, const QString& verb,
             ExecuteFn executeFn,
-            CommandFn undoFn = defaultCommandFn,
-            bool asynchronous = true) :
+            CommandFn undoFn = defaultCommandFn) :
         _description(description),
         _verb(verb),
-        _undoFn(undoFn),
-        _asynchronous(asynchronous)
+        _undoFn(undoFn)
     {
         initialise();
         initialiseExecuteFn(executeFn);
@@ -91,27 +87,23 @@ public:
     template<typename ExecuteFn>
     Command(const QString& description,
             ExecuteFn executeFn,
-            CommandFn undoFn = defaultCommandFn,
-            bool asynchronous = true) :
+            CommandFn undoFn = defaultCommandFn) :
         _description(description),
         _verb(description),
-        _undoFn(undoFn),
-        _asynchronous(asynchronous)
+        _undoFn(undoFn)
     {
         initialise();
         initialiseExecuteFn(executeFn);
     }
 
     template<typename ExecuteFn>
-    Command(ExecuteFn executeFn,
-            bool asynchronous = true) :
-        _asynchronous(asynchronous)
+    Command(ExecuteFn executeFn)
     {
         initialise();
         initialiseExecuteFn(executeFn);
     }
 
-    explicit Command(bool asynchronous = true);
+    Command();
 
     Command(const Command&) = delete;
     Command(Command&&) = delete;
@@ -134,8 +126,6 @@ public:
     void setPastParticiple(const QString& pastParticiple);
 
     void setProgress(int progress);
-
-    bool asynchronous() const { return _asynchronous; }
 
     // Execute some function in the context of the CommandManager,
     // after the command thread has joined
@@ -166,7 +156,6 @@ private:
     CommandFn _undoFn;
     CommandFn _postExecuteFn;
     ProgressFn _progressFn;
-    bool _asynchronous;
 };
 
 #endif // COMMAND_H

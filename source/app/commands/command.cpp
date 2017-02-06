@@ -11,11 +11,10 @@ void Command::initialise()
     _progressFn = [](int){};
 }
 
-Command::Command(bool asynchronous) :
+Command::Command() :
     _failableExecuteFn(defaultFailableCommandFn),
     _executeFn(defaultCommandFn),
-    _undoFn(defaultCommandFn),
-    _asynchronous(asynchronous)
+    _undoFn(defaultCommandFn)
 {
     initialise();
 }

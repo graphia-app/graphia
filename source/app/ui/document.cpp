@@ -422,7 +422,7 @@ void Document::selectAll()
 
     if(_selectionManager)
     {
-        _commandManager.executeSynchronousOnce(
+        _commandManager.executeOnce(
             [this](Command& command)
             {
                 bool nodesSelected = _selectionManager->selectAllNodes();
@@ -439,7 +439,7 @@ void Document::selectNone()
 
     if(_selectionManager)
     {
-        _commandManager.executeSynchronousOnce(
+        _commandManager.executeOnce(
             [this](Command&) { return _selectionManager->clearNodeSelection(); });
     }
 }
