@@ -39,6 +39,7 @@ public:
         emit commandQueued();
     }
 
+    // Execute only once, i.e. so that it can't be undone
     template<typename T> typename std::enable_if<std::is_base_of<Command, T>::value, void>::type executeOnce(std::shared_ptr<T> command)
     {
         _deferredExecutor.enqueue([this, command] { executeReal(command, true); });
@@ -50,7 +51,6 @@ public:
         execute(std::make_shared<Command>(std::forward<Args>(args)...));
     }
 
-    // Execute only once, i.e. so that it can't be undone
     template<typename... Args> void executeOnce(Args&&... args)
     {
         executeOnce(std::make_shared<Command>(std::forward<Args>(args)...));
