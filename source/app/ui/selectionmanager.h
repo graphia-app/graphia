@@ -129,7 +129,7 @@ public:
     bool clearNodeSelection();
     void invertNodeSelection();
 
-    const QString numNodesSelectedAsString() const;
+    QString numNodesSelectedAsString() const;
 
     void suppressSignals();
     bool signalsSuppressed();

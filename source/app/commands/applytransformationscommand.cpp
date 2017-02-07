@@ -10,22 +10,30 @@ ApplyTransformationsCommand::ApplyTransformationsCommand(GraphModel* graphModel,
                                                          SelectionManager* selectionManager, Document* document,
                                                          const QStringList& previousTransformations,
                                                          const QStringList& transformations) :
-    Command(),
     _graphModel(graphModel),
     _selectionManager(selectionManager),
     _document(document),
     _previousTransformations(previousTransformations),
     _transformations(transformations),
     _selectedNodeIds(_selectionManager->selectedNodes())
+{}
+
+QString ApplyTransformationsCommand::description() const
 {
-    setDescription(QObject::tr("Apply Transformations"));
-    setVerb(QObject::tr("Applying Transformations"));
+    return QObject::tr("Apply Transformations");
+}
+
+QString ApplyTransformationsCommand::verb() const
+{
+    return QObject::tr("Applying Transformations");
 }
 
 void ApplyTransformationsCommand::doTransform(const QStringList& transformations)
 {
     _graphModel->buildTransforms(transformations);
-    executeSynchronouslyOnCompletion([&](Command&) { _document->setTransforms(transformations); });
+
+    // This needs to happen on the main thread
+    QMetaObject::invokeMethod(_document, "setTransforms", Q_ARG(const QStringList&, transformations));
 }
 
 bool ApplyTransformationsCommand::execute()

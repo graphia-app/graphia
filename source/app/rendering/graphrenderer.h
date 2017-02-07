@@ -48,7 +48,7 @@ class Interactor;
 class GraphOverviewInteractor;
 class GraphComponentInteractor;
 
-class Command;
+class ICommand;
 
 class GraphInitialiser
 {
@@ -220,8 +220,8 @@ private slots:
     void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
 
 public slots:
-    void onCommandWillExecute(const Command*);
-    void onCommandCompleted(const Command*, const QString&);
+    void onCommandWillExecute(const ICommand*);
+    void onCommandCompleted(const ICommand*, const QString&);
     void onLayoutChanged();
     void onPreferenceChanged(const QString& key, const QVariant& value);
     void onComponentAlphaChanged(ComponentId componentId);

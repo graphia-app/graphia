@@ -1043,12 +1043,12 @@ void GraphRenderer::onPreferenceChanged(const QString& key, const QVariant& valu
     }
 }
 
-void GraphRenderer::onCommandWillExecute(const Command*)
+void GraphRenderer::onCommandWillExecute(const ICommand*)
 {
     disableSceneUpdate();
 }
 
-void GraphRenderer::onCommandCompleted(const Command*, const QString&)
+void GraphRenderer::onCommandCompleted(const ICommand*, const QString&)
 {
     enableSceneUpdate();
     update();

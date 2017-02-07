@@ -370,7 +370,7 @@ void Document::onLoadComplete(bool success)
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::nextUndoActionChanged);
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::canRedoChanged);
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::nextRedoActionChanged);
-    connect(&_commandManager, &CommandManager::commandCompleted, [this](const Command*, const QString& pastParticiple)
+    connect(&_commandManager, &CommandManager::commandCompleted, [this](const ICommand*, const QString& pastParticiple)
     {
         setStatus(pastParticiple);
     });

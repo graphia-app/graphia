@@ -33,14 +33,14 @@ public:
 
     void clear();
 
-    template<typename T> typename std::enable_if<std::is_base_of<Command, T>::value, void>::type execute(std::shared_ptr<T> command)
+    template<typename T> typename std::enable_if<std::is_base_of<ICommand, T>::value, void>::type execute(std::shared_ptr<T> command)
     {
         _deferredExecutor.enqueue([this, command] { executeReal(command, false); });
         emit commandQueued();
     }
 
     // Execute only once, i.e. so that it can't be undone
-    template<typename T> typename std::enable_if<std::is_base_of<Command, T>::value, void>::type executeOnce(std::shared_ptr<T> command)
+    template<typename T> typename std::enable_if<std::is_base_of<ICommand, T>::value, void>::type executeOnce(std::shared_ptr<T> command)
     {
         _deferredExecutor.enqueue([this, command] { executeReal(command, true); });
         emit commandQueued();
@@ -76,7 +76,8 @@ public:
     void clearCommandStack();
 
 private:
-    template<typename Fn> void doCommand(std::shared_ptr<Command> command, QString verb, const Fn& fn)
+    template<typename Fn> void doCommand(std::shared_ptr<ICommand> command,
+                                         const QString& verb, const Fn& fn)
     {
         _currentCommand = command;
         _commandProgress = -1;
@@ -86,12 +87,21 @@ private:
         emit commandWillExecute(command.get());
 
         _thread = std::thread(fn);
+
+        command->setProgress(-1);
+        _commandProgressTimerId = startTimer(200);
     }
+
+    void timerEvent(QTimerEvent *event);
 
     bool canUndoNoLocking() const;
     bool canRedoNoLocking() const;
 
-    std::deque<std::shared_ptr<Command>> _stack;
+    void executeReal(std::shared_ptr<ICommand> command, bool irreversible);
+    void undoReal();
+    void redoReal();
+
+    std::deque<std::shared_ptr<ICommand>> _stack;
     int _lastExecutedIndex = -1;
 
     std::thread _thread;
@@ -99,7 +109,8 @@ private:
     std::unique_lock<std::mutex> _lock;
     std::atomic<bool> _busy;
 
-    std::shared_ptr<Command> _currentCommand;
+    std::shared_ptr<ICommand> _currentCommand;
+    int _commandProgressTimerId = -1;
     int _commandProgress = 0;
     QString _commandVerb;
 
@@ -108,21 +119,15 @@ private:
     int _debug = 0;
 
 private slots:
-    void executeReal(std::shared_ptr<Command> command, bool irreversible);
-
-    void undoReal();
-    void redoReal();
-
-    void onCommandCompleted(Command* command, const QString& pastParticiple, CommandAction action);
-
+    void onCommandCompleted(ICommand* command, const QString& pastParticiple, CommandAction action);
     void update();
 
 signals:
-    void commandWillExecute(const Command* command) const;
+    void commandWillExecute(const ICommand* command) const;
     void commandProgressChanged() const;
     void commandVerbChanged() const;
     void commandQueued();
-    void commandCompleted(Command* command, const QString& pastParticiple, CommandAction action) const;
+    void commandCompleted(ICommand* command, const QString& pastParticiple, CommandAction action) const;
 
     void busyChanged() const;
 };

@@ -1,7 +1,7 @@
 #ifndef DELETENODESCOMMAND_H
 #define DELETENODESCOMMAND_H
 
-#include "command.h"
+#include "shared/commands/icommand.h"
 
 #include "graph/graph.h"
 
@@ -10,18 +10,23 @@
 class GraphModel;
 class SelectionManager;
 
-class DeleteSelectedNodesCommand : public Command
+class DeleteSelectedNodesCommand : public ICommand
 {
 private:
     GraphModel* _graphModel;
     SelectionManager* _selectionManager;
 
+    int _numSelectedNodes = 0;
     const NodeIdSet _nodeIds;
     std::vector<Edge> _edges;
 
 public:
     DeleteSelectedNodesCommand(GraphModel* graphModel,
                                SelectionManager* selectionManager);
+
+    QString description() const;
+    QString verb() const;
+    QString pastParticiple() const;
 
     bool execute();
     void undo();

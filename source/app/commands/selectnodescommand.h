@@ -1,7 +1,7 @@
 #ifndef SELECTNODESCOMMAND_H
 #define SELECTNODESCOMMAND_H
 
-#include "command.h"
+#include "shared/commands/icommand.h"
 
 #include "shared/graph/elementid.h"
 
@@ -11,13 +11,14 @@
 #include <array>
 
 template<typename C>
-class SelectNodesCommand : public Command
+class SelectNodesCommand : public ICommand
 {
 private:
     SelectionManager* _selectionManager;
     C _nodeIds;
     bool _clearSelectionFirst;
     bool _nodeWasSelected;
+    QString _pastParticiple;
 
     NodeId nodeId() const
     {
@@ -28,22 +29,35 @@ private:
 public:
     SelectNodesCommand(SelectionManager* selectionManager, C nodeIds,
                        bool clearSelectionFirst = true) :
-        Command(), _selectionManager(selectionManager), _nodeIds(nodeIds),
+        _selectionManager(selectionManager), _nodeIds(nodeIds),
         _clearSelectionFirst(clearSelectionFirst)
-    {
-        if(_nodeIds.size() > 1)
-        {
-            setDescription(QObject::tr("Select Nodes"));
-            setVerb(QObject::tr("Selecting Nodes"));
-        }
-        else
-        {
-            _nodeWasSelected = _selectionManager->nodeIsSelected(nodeId());
+    {}
 
-            setDescription(_nodeWasSelected ? QObject::tr("Deselect Node") : QObject::tr("Select Node"));
-            setVerb(_nodeWasSelected ? QObject::tr("Deselecting Node") : QObject::tr("Selecting Node"));
+    QString description() const
+    {
+        if(_nodeIds.size() == 1)
+        {
+            return _selectionManager->nodeIsSelected(nodeId()) ?
+                        QObject::tr("Deselect Node") :
+                        QObject::tr("Select Node");
         }
+
+        return QObject::tr("Select Nodes");
     }
+
+    QString verb() const
+    {
+        if(_nodeIds.size() == 1)
+        {
+            return _selectionManager->nodeIsSelected(nodeId()) ?
+                        QObject::tr("Deselecting Node") :
+                        QObject::tr("Selecting Node");
+        }
+
+        return QObject::tr("Selecting Nodes");
+    }
+
+    QString pastParticiple() const { return _pastParticiple; }
 
     bool execute()
     {
@@ -56,7 +70,7 @@ public:
         if(_nodeIds.size() > 1)
         {
             bool nodesSelected = _selectionManager->selectNodes(_nodeIds);
-            setPastParticiple(_selectionManager->numNodesSelectedAsString());
+            _pastParticiple = _selectionManager->numNodesSelectedAsString();
             return nodesSelected;
         }
         else
@@ -64,7 +78,7 @@ public:
             _selectionManager->toggleNode(nodeId());
 
             if(!_nodeWasSelected)
-                setPastParticiple(_selectionManager->numNodesSelectedAsString());
+                _pastParticiple = _selectionManager->numNodesSelectedAsString();
 
             return true;
         }

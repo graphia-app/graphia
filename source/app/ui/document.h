@@ -99,7 +99,7 @@ public:
     void setStatus(const QString& status);
 
     QQmlVariantListModel* transformsModel() { return &_graphTransformsModel; }
-    void setTransforms(const QStringList& transforms);
+    Q_INVOKABLE void setTransforms(const QStringList& transforms);
 
     QmlContainerWrapper<LayoutSetting>* layoutSettings() { return &_layoutSettings; }
 

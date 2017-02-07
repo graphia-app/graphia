@@ -1,7 +1,7 @@
 #ifndef APPLYTRANSFORMATIONSCOMMAND_H
 #define APPLYTRANSFORMATIONSCOMMAND_H
 
-#include "command.h"
+#include "shared/commands/icommand.h"
 
 #include "shared/graph/elementid.h"
 
@@ -11,7 +11,7 @@ class GraphModel;
 class SelectionManager;
 class Document;
 
-class ApplyTransformationsCommand : public Command
+class ApplyTransformationsCommand : public ICommand
 {
 private:
     GraphModel* _graphModel;
@@ -31,6 +31,9 @@ public:
                                 Document* document,
                                 const QStringList& previousTransformations,
                                 const QStringList& transformations);
+
+    QString description() const;
+    QString verb() const;
 
     bool execute();
     void undo();

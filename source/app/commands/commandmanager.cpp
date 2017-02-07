@@ -31,15 +31,17 @@ CommandManager::~CommandManager()
 
 void CommandManager::undo()
 {
-    QMetaObject::invokeMethod(this, "undoReal");
+    _deferredExecutor.enqueue([this] { undoReal(); });
+    emit commandQueued();
 }
 
 void CommandManager::redo()
 {
-    QMetaObject::invokeMethod(this, "redoReal");
+    _deferredExecutor.enqueue([this] { redoReal(); });
+    emit commandQueued();
 }
 
-void CommandManager::executeReal(std::shared_ptr<Command> command, bool irreversible)
+void CommandManager::executeReal(std::shared_ptr<ICommand> command, bool irreversible)
 {
     if(_lock.owns_lock())
     {
@@ -52,8 +54,6 @@ void CommandManager::executeReal(std::shared_ptr<Command> command, bool irrevers
     }
 
     _lock.lock();
-
-    command->setProgressFn([this](int progress) { _commandProgress = progress; emit commandProgressChanged(); });
 
     _busy = true;
     emit busyChanged();
@@ -104,7 +104,11 @@ void CommandManager::undoReal()
     _busy = true;
     emit busyChanged();
 
-    doCommand(command, command->undoVerb(), [this, command]
+    QString undoVerb = !command->description().isEmpty() ?
+                QObject::tr("Undoing ") + command->description() :
+                QObject::tr("Undoing");
+
+    doCommand(command, undoVerb, [this, command]
     {
         u::setCurrentThreadName("(u) " + command->description());
 
@@ -134,7 +138,11 @@ void CommandManager::redoReal()
     _busy = true;
     emit busyChanged();
 
-    doCommand(command, command->redoVerb(), [this, command]
+    QString redoVerb = !command->description().isEmpty() ?
+                QObject::tr("Redoing ") + command->description() :
+                QObject::tr("Redoing");
+
+    doCommand(command, redoVerb, [this, command]
     {
         u::setCurrentThreadName("(r) " + command->description());
 
@@ -200,7 +208,8 @@ QString CommandManager::nextUndoAction() const
     if(lock.owns_lock() && canUndoNoLocking())
     {
         auto& command = _stack.at(_lastExecutedIndex);
-        return command->undoDescription();
+        if(!command->description().isEmpty())
+            return QObject::tr("Undo ") + command->description();
     }
 
     return tr("Undo");
@@ -213,7 +222,8 @@ QString CommandManager::nextRedoAction() const
     if(lock.owns_lock() && canRedoNoLocking())
     {
         auto& command = _stack.at(_lastExecutedIndex + 1);
-        return command->redoDescription();
+        if(!command->description().isEmpty())
+            return QObject::tr("Redo ") + command->description();
     }
 
     return tr("Redo");
@@ -236,6 +246,17 @@ void CommandManager::clearCommandStack()
     _lastExecutedIndex = -1;
 }
 
+void CommandManager::timerEvent(QTimerEvent*)
+{
+    int newCommandProgress = _currentCommand->progress();
+
+    if(newCommandProgress != _commandProgress)
+    {
+        _commandProgress = newCommandProgress;
+        emit commandProgressChanged();
+    }
+}
+
 bool CommandManager::canUndoNoLocking() const
 {
     return _lastExecutedIndex >= 0;
@@ -246,21 +267,18 @@ bool CommandManager::canRedoNoLocking() const
     return _lastExecutedIndex < static_cast<int>(_stack.size()) - 1;
 }
 
-void CommandManager::onCommandCompleted(Command* command, const QString&, CommandAction)
+void CommandManager::onCommandCompleted(ICommand* command, const QString&, CommandAction)
 {
+    killTimer(_commandProgressTimerId);
+    _commandProgressTimerId = -1;
+
     if(_thread.joinable())
         _thread.join();
 
     Q_ASSERT(_lock.owns_lock());
     _lock.unlock();
 
-    QString description;
-
-    if(command != nullptr)
-    {
-        command->postExecute();
-        description = command->description();
-    }
+    QString description = command != nullptr ? command->description() : "";
 
     if(_debug > 0)
         qDebug() << "Command completed" << description;

@@ -98,7 +98,7 @@ void SelectionManager::invertNodeSelection()
     toggleNodes(_graphModel->graph().nodeIds());
 }
 
-const QString SelectionManager::numNodesSelectedAsString() const
+QString SelectionManager::numNodesSelectedAsString() const
 {
     int selectionSize = static_cast<int>(selectedNodes().size());
 
@@ -115,7 +115,7 @@ const QString SelectionManager::numNodesSelectedAsString() const
     else if(selectionSize > 1)
         return QString(tr("%1 Nodes Selected")).arg(selectionSize);
 
-    return QString();
+    return {};
 }
 
 void SelectionManager::suppressSignals()

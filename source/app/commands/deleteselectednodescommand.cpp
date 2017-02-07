@@ -8,25 +8,27 @@
 
 DeleteSelectedNodesCommand::DeleteSelectedNodesCommand(GraphModel* graphModel,
                                                        SelectionManager* selectionManager) :
-    Command(),
     _graphModel(graphModel),
     _selectionManager(selectionManager),
     _nodeIds(_selectionManager->selectedNodes())
 {
-    int numSelectedNodes = static_cast<int>(_selectionManager->selectedNodes().size());
+    _numSelectedNodes = static_cast<int>(_selectionManager->selectedNodes().size());
+}
 
-    if(numSelectedNodes > 1)
-    {
-        setDescription(QObject::tr("Delete Nodes"));
-        setVerb(QObject::tr("Deleting Nodes"));
-        setPastParticiple(QString(QObject::tr("%1 Nodes Deleted")).arg(numSelectedNodes));
-    }
-    else
-    {
-        setDescription(QObject::tr("Delete Node"));
-        setVerb(QObject::tr("Deleting Node"));
-        setPastParticiple(QObject::tr("Node Deleted"));
-    }
+QString DeleteSelectedNodesCommand::description() const
+{
+    return _numSelectedNodes > 1 ? QObject::tr("Delete Nodes") : QObject::tr("Delete Node");
+}
+
+QString DeleteSelectedNodesCommand::verb() const
+{
+    return _numSelectedNodes > 1 ? QObject::tr("Deleting Nodes") : QObject::tr("Deleting Node");
+}
+
+QString DeleteSelectedNodesCommand::pastParticiple() const
+{
+    return _numSelectedNodes > 1 ? QString(QObject::tr("%1 Nodes Deleted")).arg(_numSelectedNodes) :
+                                   QObject::tr("Node Deleted");
 }
 
 bool DeleteSelectedNodesCommand::execute()

@@ -14,7 +14,7 @@
 #include <memory>
 
 class GraphModel;
-class Command;
+class ICommand;
 class CommandManager;
 class SelectionManager;
 
@@ -127,8 +127,8 @@ signals:
     void canEnterOverviewModeChanged() const;
     void focusedComponentIdChanged() const;
 
-    void commandWillExecute(const Command* command) const;
-    void commandCompleted(const Command* command, const QString& pastParticiple) const;
+    void commandWillExecute(const ICommand*) const;
+    void commandCompleted(const ICommand*, const QString&) const;
 
     void layoutChanged() const;
 
