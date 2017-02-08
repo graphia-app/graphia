@@ -43,12 +43,12 @@ public:
 
     void execute(const std::shared_ptr<ICommand>& command);
     void execute(const Command::CommandDescription& commandDescription,
-        CommandFn executeFn, CommandFn undoFn);
+        CommandFn&& executeFn, CommandFn&& undoFn);
 
     // Execute only once, i.e. so that it can't be undone
     void executeOnce(const std::shared_ptr<ICommand>& command);
     void executeOnce(const Command::CommandDescription& commandDescription,
-        CommandFn executeFn);
+        CommandFn&& executeFn);
 
     void executeOnce(CommandFn executeFn);
 

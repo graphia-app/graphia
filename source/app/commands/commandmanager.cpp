@@ -35,7 +35,8 @@ void CommandManager::execute(const std::shared_ptr<ICommand>& command)
     emit commandQueued();
 }
 
-void CommandManager::execute(const Command::CommandDescription& commandDescription, CommandFn executeFn, CommandFn undoFn)
+void CommandManager::execute(const Command::CommandDescription& commandDescription,
+                             CommandFn&& executeFn, CommandFn&& undoFn)
 {
     execute(std::make_shared<Command>(commandDescription, executeFn, undoFn));
 }
@@ -46,7 +47,8 @@ void CommandManager::executeOnce(const std::shared_ptr<ICommand>& command)
     emit commandQueued();
 }
 
-void CommandManager::executeOnce(const Command::CommandDescription& commandDescription, CommandFn executeFn)
+void CommandManager::executeOnce(const Command::CommandDescription& commandDescription,
+                                 CommandFn&& executeFn)
 {
     executeOnce(std::make_shared<Command>(commandDescription, executeFn));
 }

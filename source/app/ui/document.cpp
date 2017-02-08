@@ -36,8 +36,8 @@ QColor Document::contrastingColorForBackground()
 
 Document::Document(QObject* parent) :
     QObject(parent),
-    _graphTransformsModel(this),
-    _graphChanging(false)
+    _graphChanging(false),
+    _graphTransformsModel(this)
 {}
 
 Document::~Document()
