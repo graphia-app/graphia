@@ -118,7 +118,7 @@ private:
     int _loadProgress = 0;
     bool _loadComplete = false;
 
-    std::atomic_bool _graphChanging = false;
+    std::atomic_bool _graphChanging;
 
     std::shared_ptr<GraphModel> _graphModel;
     std::shared_ptr<GPUComputeThread> _gpuComputeThread;
