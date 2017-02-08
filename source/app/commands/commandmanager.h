@@ -18,6 +18,14 @@
 #include <atomic>
 #include <type_traits>
 
+enum class CommandAction
+{
+    None,
+    Execute,
+    Undo,
+    Redo
+};
+
 class CommandManager : public QObject
 {
     Q_OBJECT
@@ -33,28 +41,16 @@ public:
 
     void clear();
 
-    template<typename T> typename std::enable_if<std::is_base_of<ICommand, T>::value, void>::type execute(std::shared_ptr<T> command)
-    {
-        _deferredExecutor.enqueue([this, command] { executeReal(command, false); });
-        emit commandQueued();
-    }
+    void execute(const std::shared_ptr<ICommand>& command);
+    void execute(const Command::CommandDescription& commandDescription,
+        CommandFn executeFn, CommandFn undoFn);
 
     // Execute only once, i.e. so that it can't be undone
-    template<typename T> typename std::enable_if<std::is_base_of<ICommand, T>::value, void>::type executeOnce(std::shared_ptr<T> command)
-    {
-        _deferredExecutor.enqueue([this, command] { executeReal(command, true); });
-        emit commandQueued();
-    }
+    void executeOnce(const std::shared_ptr<ICommand>& command);
+    void executeOnce(const Command::CommandDescription& commandDescription,
+        CommandFn executeFn);
 
-    template<typename... Args> void execute(Args&&... args)
-    {
-        execute(std::make_shared<Command>(std::forward<Args>(args)...));
-    }
-
-    template<typename... Args> void executeOnce(Args&&... args)
-    {
-        executeOnce(std::make_shared<Command>(std::forward<Args>(args)...));
-    }
+    void executeOnce(CommandFn executeFn);
 
     void undo();
     void redo();

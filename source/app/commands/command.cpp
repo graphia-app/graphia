@@ -1,12 +1,14 @@
 #include "command.h"
 
-#include <QObject>
-#include <QDebug>
+#include <QtGlobal>
 
-Command::Command() :
-    _failableExecuteFn(defaultFailableCommandFn),
-    _executeFn(defaultCommandFn),
-    _undoFn(defaultCommandFn)
+Command::Command(const Command::CommandDescription& commandDescription,
+                 CommandFn executeFn, CommandFn undoFn) :
+    _description(commandDescription._description),
+    _verb(commandDescription._verb),
+    _pastParticiple(commandDescription._pastParticiple),
+    _executeFn(executeFn),
+    _undoFn(undoFn)
 {}
 
 void Command::setPastParticiple(const QString& pastParticiple)
@@ -14,22 +16,8 @@ void Command::setPastParticiple(const QString& pastParticiple)
     _pastParticiple = pastParticiple;
 }
 
-bool Command::execute()
-{
-    if(_failableExecuteFn != nullptr)
-        return _failableExecuteFn(*this);
-
-    _executeFn(*this);
-    return true;
-}
-
+bool Command::execute() { return _executeFn(*this); }
 void Command::undo() { _undoFn(*this); }
-
-FailableCommandFn Command::defaultFailableCommandFn = [](Command&)
-{
-    Q_ASSERT(!"failableCommandFn not implmented");
-    return false;
-};
 
 CommandFn Command::defaultCommandFn = [](Command&)
 {

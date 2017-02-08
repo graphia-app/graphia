@@ -241,7 +241,7 @@ void GraphCommonInteractor::leftMouseUp()
             }
             else
             {
-                _commandManager->executeOnce(tr("Select None"), tr("Selecting None"),
+                _commandManager->executeOnce({tr("Select None"), tr("Selecting None")},
                     [this](Command&) { return _selectionManager->clearNodeSelection(); });
             }
         }

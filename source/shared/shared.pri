@@ -40,7 +40,8 @@ HEADERS += \
     $$PWD/graph/igraphcomponent.h \
     $$PWD/utils/iterator_range.h \
     $$PWD/utils/scope_exit.h \
-    $$PWD/commands/icommand.h
+    $$PWD/commands/icommand.h \
+    $$PWD/commands/commandfn.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \

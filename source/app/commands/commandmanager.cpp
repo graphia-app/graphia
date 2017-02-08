@@ -29,6 +29,33 @@ CommandManager::~CommandManager()
         _lock.unlock();
 }
 
+void CommandManager::execute(const std::shared_ptr<ICommand>& command)
+{
+    _deferredExecutor.enqueue([this, command] { executeReal(command, false); });
+    emit commandQueued();
+}
+
+void CommandManager::execute(const Command::CommandDescription& commandDescription, CommandFn executeFn, CommandFn undoFn)
+{
+    execute(std::make_shared<Command>(commandDescription, executeFn, undoFn));
+}
+
+void CommandManager::executeOnce(const std::shared_ptr<ICommand>& command)
+{
+    _deferredExecutor.enqueue([this, command] { executeReal(command, true); });
+    emit commandQueued();
+}
+
+void CommandManager::executeOnce(const Command::CommandDescription& commandDescription, CommandFn executeFn)
+{
+    executeOnce(std::make_shared<Command>(commandDescription, executeFn));
+}
+
+void CommandManager::executeOnce(CommandFn executeFn)
+{
+    executeOnce(std::make_shared<Command>(Command::CommandDescription(), executeFn));
+}
+
 void CommandManager::undo()
 {
     _deferredExecutor.enqueue([this] { undoReal(); });

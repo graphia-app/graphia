@@ -451,7 +451,7 @@ void Document::invertSelection()
 
     if(_selectionManager)
     {
-        _commandManager.executeOnce(tr("Invert Selection"), tr("Inverting Selection"),
+        _commandManager.executeOnce({tr("Invert Selection"), tr("Inverting Selection")},
             [this](Command& command)
             {
                 _selectionManager->invertNodeSelection();
