@@ -283,5 +283,5 @@ void CommandManager::onCommandCompleted(Command* command, const QString&, Comman
 
 void CommandManager::update()
 {
-    _deferredExecutor.execute();
+    _deferredExecutor.executeOne();
 }
