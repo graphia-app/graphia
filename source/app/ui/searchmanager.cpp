@@ -92,8 +92,11 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> dataFie
 
 void SearchManager::clearFoundNodeIds()
 {
+    bool changed = !_foundNodeIds.empty();
     _foundNodeIds.clear();
-    emit foundNodeIdsChanged(this);
+
+    if(changed)
+        emit foundNodeIdsChanged(this);
 }
 
 void SearchManager::refresh()
