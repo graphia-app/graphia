@@ -239,7 +239,7 @@ void GraphCommonInteractor::leftMouseUp()
                 _commandManager->executeOnce(makeSelectNodeCommand(_selectionManager.get(), _clickedNodeId,
                                                                    !(modifiers() & Qt::ShiftModifier)));
             }
-            else
+            else if(!_selectionManager->selectedNodes().empty())
             {
                 _commandManager->executeOnce({tr("Select None"), tr("Selecting None")},
                     [this](Command&) { return _selectionManager->clearNodeSelection(); });

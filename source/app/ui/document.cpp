@@ -437,7 +437,7 @@ void Document::selectNone()
     if(!idle())
         return;
 
-    if(_selectionManager)
+    if(_selectionManager && !_selectionManager->selectedNodes().empty())
     {
         _commandManager.executeOnce(
             [this](Command&) { return _selectionManager->clearNodeSelection(); });
