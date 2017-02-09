@@ -118,6 +118,7 @@ signals:
     void commandVerbChanged() const;
     void commandQueued();
     void commandCompleted(ICommand* command, const QString& pastParticiple, CommandAction action) const;
+    void commandStackCleared();
 
     void busyChanged() const;
 };

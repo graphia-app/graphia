@@ -256,6 +256,9 @@ void CommandManager::clearCommandStack()
 
     _stack.clear();
     _lastExecutedIndex = -1;
+
+    // Force a UI update
+    emit commandStackCleared();
 }
 
 void CommandManager::timerEvent(QTimerEvent*)

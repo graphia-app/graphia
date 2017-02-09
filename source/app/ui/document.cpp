@@ -375,6 +375,11 @@ void Document::onLoadComplete(bool success)
         setStatus(pastParticiple);
     });
 
+    connect(&_commandManager, &CommandManager::commandStackCleared, this, &Document::canUndoChanged);
+    connect(&_commandManager, &CommandManager::commandStackCleared, this, &Document::nextUndoActionChanged);
+    connect(&_commandManager, &CommandManager::commandStackCleared, this, &Document::canRedoChanged);
+    connect(&_commandManager, &CommandManager::commandStackCleared, this, &Document::nextRedoActionChanged);
+
     connect(&_commandManager, &CommandManager::commandCompleted, _graphQuickItem, &GraphQuickItem::commandCompleted);
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::commandInProgressChanged);
 
