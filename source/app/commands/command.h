@@ -27,7 +27,14 @@ public:
     };
 
     Command(const CommandDescription& commandDescription,
-            CommandFn executeFn, CommandFn undoFn = defaultCommandFn);
+            CommandFn executeFn,
+            CommandFn undoFn = [](Command&) { Q_ASSERT(!"undoFn not implemented"); }) :
+        _description(commandDescription._description),
+        _verb(commandDescription._verb),
+        _pastParticiple(commandDescription._pastParticiple),
+        _executeFn(executeFn),
+        _undoFn(undoFn)
+    {}
 
     Command(const Command&) = delete;
     Command(Command&&) = delete;
@@ -40,20 +47,21 @@ public:
     QString verb() const { return _verb; }
 
     QString pastParticiple() const { return _pastParticiple; }
-    void setPastParticiple(const QString& pastParticiple);
+    void setPastParticiple(const QString& pastParticiple)
+    {
+        _pastParticiple = pastParticiple;
+    }
 
 private:
-    bool execute();
-    void undo();
+    bool execute() { return _executeFn(*this); }
+    void undo() { _undoFn(*this); }
 
     QString _description;
     QString _verb;
     QString _pastParticiple;
 
-    CommandFn _executeFn = defaultCommandFn;
-    CommandFn _undoFn = defaultCommandFn;
-
-    static CommandFn defaultCommandFn;
+    CommandFn _executeFn;
+    CommandFn _undoFn;
 };
 
 #endif // COMMAND_H

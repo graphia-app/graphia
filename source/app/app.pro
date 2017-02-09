@@ -102,7 +102,6 @@ HEADERS += \
 SOURCES += \
     application.cpp \
     commands/applytransformationscommand.cpp \
-    commands/command.cpp \
     commands/commandmanager.cpp \
     commands/deleteselectednodescommand.cpp \
     graph/componentmanager.cpp \
