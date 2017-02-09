@@ -468,8 +468,8 @@ void MutableGraph::beginTransaction()
 {
     if(_graphChangeDepth++ <= 0)
     {
-        emit graphWillChange(this);
         _mutex.lock();
+        emit graphWillChange(this);
     }
 }
 
@@ -479,8 +479,8 @@ void MutableGraph::endTransaction()
     if(--_graphChangeDepth <= 0)
     {
         update();
-        _mutex.unlock();
         emit graphChanged(this);
+        _mutex.unlock();
         clearPhase();
     }
 }
