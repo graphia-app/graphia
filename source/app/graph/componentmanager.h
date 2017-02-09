@@ -89,6 +89,7 @@ private slots:
 public:
     const std::vector<ComponentId>& componentIds() const;
     int numComponents() const { return static_cast<int>(componentIds().size()); }
+    bool containsComponentId(ComponentId componentId) const;
     const GraphComponent* componentById(ComponentId componentId) const;
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;

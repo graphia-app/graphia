@@ -243,7 +243,7 @@ private:
     GlyphMap::Results _textLayoutResults;
 
     // It's important that these are pointers and not values, because the array will
-    // be resized during ComponentManager::updateComponents, and we still want to be
+    // be resized during ComponentManager::update, and we still want to be
     // able to use the existing renderers while this occurs. If the array stored
     // values, then the storage for the renderers themselves would potentially be
     // moved around, as opposed to just the storage for the pointers.

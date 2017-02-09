@@ -401,6 +401,13 @@ const std::vector<ComponentId>& ComponentManager::componentIds() const
     return _componentIds;
 }
 
+bool ComponentManager::containsComponentId(ComponentId componentId) const
+{
+    unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
+
+    return u::contains(_componentsMap, componentId);
+}
+
 const GraphComponent* ComponentManager::componentById(ComponentId componentId) const
 {
     unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);

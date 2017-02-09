@@ -258,12 +258,21 @@ int Graph::numComponents() const
     return static_cast<int>(componentIds().size());
 }
 
+bool Graph::containsComponentId(ComponentId componentId) const
+{
+    if(_componentManager)
+        return _componentManager->containsComponentId(componentId);
+
+    Q_ASSERT(!"Graph::containsComponentId called with component management disabled");
+    return false;
+}
+
 const GraphComponent* Graph::componentById(ComponentId componentId) const
 {
     if(_componentManager)
         return _componentManager->componentById(componentId);
 
-    Q_ASSERT(!"Graph::componentById returning nullptr");
+    Q_ASSERT(!"Graph::componentById called with component management disabled");
     return nullptr;
 }
 
