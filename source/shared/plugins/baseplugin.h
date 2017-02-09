@@ -5,6 +5,7 @@
 #include "shared/graph/igraph.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/ui/iselectionmanager.h"
+#include "shared/commands/icommandmanager.h"
 #include "shared/loading/iparserthread.h"
 #include "shared/loading/urltypes.h"
 
@@ -26,12 +27,15 @@ class BasePluginInstance : public QObject, public IPluginInstance
 private:
     IGraphModel* _graphModel = nullptr;
     ISelectionManager* _selectionManager = nullptr;
+    ICommandManager* _commandManager = nullptr;
 
 public:
-    void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager, const IParserThread* parserThread)
+    void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager,
+                    ICommandManager* commandManager, const IParserThread* parserThread)
     {
         _graphModel = graphModel;
         _selectionManager = selectionManager;
+        _commandManager = commandManager;
 
         auto graphQObject = dynamic_cast<const QObject*>(&graphModel->graph());
         Q_ASSERT(graphQObject != nullptr);
@@ -73,6 +77,7 @@ public:
     const IGraphModel* graphModel() const { return _graphModel; }
     ISelectionManager* selectionManager() { return _selectionManager; }
     const ISelectionManager* selectionManager() const { return _selectionManager; }
+    ICommandManager* commandManager() { return _commandManager; }
 
 private slots:
     void onNodeAdded(const Graph*, NodeId nodeId) const   { emit nodeAdded(nodeId); }

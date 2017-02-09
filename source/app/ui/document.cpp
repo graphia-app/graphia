@@ -275,7 +275,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
     _searchManager = std::make_shared<SearchManager>(*_graphModel);
 
     _pluginInstance = plugin->createInstance();
-    _pluginInstance->initialise(_graphModel.get(), _selectionManager.get(), _graphFileParserThread.get());
+    _pluginInstance->initialise(_graphModel.get(), _selectionManager.get(), &_commandManager, _graphFileParserThread.get());
 
     connect(S(Preferences), &Preferences::preferenceChanged, this, &Document::onPreferenceChanged, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphChanged, [this]

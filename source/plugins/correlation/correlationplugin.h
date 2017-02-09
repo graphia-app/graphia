@@ -112,7 +112,8 @@ private:
     double _minimumCorrelationValue = 0.7;
     bool _transpose = false;
 
-    void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager, const IParserThread* parserThread);
+    void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager,
+                    ICommandManager* commandManager, const IParserThread* parserThread);
 
     void setDataColumnName(int column, const QString& name);
     void setData(int column, int row, double value);

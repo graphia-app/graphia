@@ -14,9 +14,10 @@ CorrelationPluginInstance::CorrelationPluginInstance() :
             this, SLOT(onSelectionChanged(const ISelectionManager*)));
 }
 
-void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionManager* selectionManager, const IParserThread* parserThread)
+void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionManager* selectionManager,
+                                           ICommandManager* commandManager, const IParserThread* parserThread)
 {
-    BasePluginInstance::initialise(graphModel, selectionManager, parserThread);
+    BasePluginInstance::initialise(graphModel, selectionManager, commandManager, parserThread);
 
     _nodeAttributes.initialise(graphModel->mutableGraph());
     _nodeAttributesTableModel.initialise(selectionManager);
