@@ -66,6 +66,9 @@ void GraphComponentRenderer::setVisible(bool visible)
 
 void GraphComponentRenderer::cleanup()
 {
+    if(!_initialised)
+        return;
+
     if(_frozen)
     {
         _cleanupWhenThawed = true;

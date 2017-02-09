@@ -54,6 +54,7 @@ void GraphOverviewScene::update(float t)
     for(auto componentId : _componentIds)
     {
         auto* renderer = _graphRenderer->componentRendererForId(componentId);
+        Q_ASSERT(renderer->initialised());
         renderer->setDimensions(_zoomedComponentLayoutData[componentId].boundingBox());
         renderer->setAlpha(_componentAlpha[componentId]);
         renderer->update(t);
