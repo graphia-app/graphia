@@ -3,7 +3,7 @@
 from stdtypes import qdump__std__vector
 
 def qdump__ElementId(d, value):
-    v = value["_value"]
+    v = value["_value"].integer()
 
     if v >= 0:
         d.putValue(v)
