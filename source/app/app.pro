@@ -23,7 +23,6 @@ QT += qml quick widgets opengl openglextensions xml svg
 HEADERS += \
     application.h \
     commands/applytransformationscommand.h \
-    commands/command.h \
     commands/commandmanager.h \
     commands/deleteselectednodescommand.h \
     commands/selectnodescommand.h \

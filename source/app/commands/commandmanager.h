@@ -1,9 +1,10 @@
 #ifndef COMMANDMANAGER_H
 #define COMMANDMANAGER_H
 
+#include "shared/commands/icommandmanager.h"
+
 #include "shared/utils/utils.h"
 #include "shared/utils/deferredexecutor.h"
-#include "command.h"
 
 #include <QtGlobal>
 #include <QObject>
@@ -16,7 +17,6 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
-#include <type_traits>
 
 enum class CommandAction
 {
@@ -26,7 +26,7 @@ enum class CommandAction
     Redo
 };
 
-class CommandManager : public QObject
+class CommandManager : public QObject, public ICommandManager
 {
     Q_OBJECT
 
@@ -42,15 +42,9 @@ public:
     void clear();
 
     void execute(const std::shared_ptr<ICommand>& command);
-    void execute(const Command::CommandDescription& commandDescription,
-        CommandFn&& executeFn, CommandFn&& undoFn);
-
-    // Execute only once, i.e. so that it can't be undone
+    using ICommandManager::execute;
     void executeOnce(const std::shared_ptr<ICommand>& command);
-    void executeOnce(const Command::CommandDescription& commandDescription,
-        CommandFn&& executeFn);
-
-    void executeOnce(CommandFn executeFn);
+    using ICommandManager::executeOnce;
 
     void undo();
     void redo();

@@ -41,7 +41,8 @@ HEADERS += \
     $$PWD/utils/iterator_range.h \
     $$PWD/utils/scope_exit.h \
     $$PWD/commands/icommand.h \
-    $$PWD/commands/commandfn.h
+    $$PWD/commands/command.h \
+    $$PWD/commands/icommandmanager.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \
