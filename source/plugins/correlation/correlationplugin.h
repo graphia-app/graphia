@@ -139,7 +139,8 @@ public:
     double minimumCorrelation() const { return _minimumCorrelationValue; }
     bool transpose() const { return _transpose; }
 
-    void createEdges(const std::vector<std::tuple<NodeId, NodeId, double>>& edges,
+    bool createEdges(const std::vector<std::tuple<NodeId, NodeId, double>>& edges,
+                     const std::function<bool()>& cancelled,
                      const IParser::ProgressFn& progress);
 
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName);

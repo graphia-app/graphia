@@ -175,18 +175,24 @@ std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pears
     return edges;
 }
 
-void CorrelationPluginInstance::createEdges(const std::vector<std::tuple<NodeId, NodeId, double>>& edges,
+bool CorrelationPluginInstance::createEdges(const std::vector<std::tuple<NodeId, NodeId, double>>& edges,
+                                            const std::function<bool()>& cancelled,
                                             const IParser::ProgressFn& progress)
 {
     progress(0);
     for(auto edgeIt = edges.begin(); edgeIt != edges.end(); ++edgeIt)
     {
+        if(cancelled())
+            return false;
+
         progress(std::distance(edges.begin(), edgeIt) * 100 / static_cast<int>(edges.size()));
 
         auto& edge = *edgeIt;
         auto edgeId = graphModel()->mutableGraph().addEdge(std::get<0>(edge), std::get<1>(edge));
         _pearsonValues->set(edgeId, std::get<2>(edge));
     }
+
+    return true;
 }
 
 void CorrelationPluginInstance::setDimensions(int numColumns, int numRows)

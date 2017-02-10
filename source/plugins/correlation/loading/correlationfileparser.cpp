@@ -116,7 +116,8 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
         return false;
 
     graph.setPhase(QObject::tr("Building Graph"));
-    _plugin->createEdges(edges, progress);
+    if(!_plugin->createEdges(edges, [this]{ return cancelled(); }, progress))
+        return false;
 
     graph.clearPhase();
 
