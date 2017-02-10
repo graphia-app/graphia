@@ -199,10 +199,6 @@ public:
     virtual void clearPhase() const;
     virtual QString phase() const;
 
-    virtual void setSubPhase(const QString& subPhase) const;
-    virtual void clearSubPhase() const;
-    virtual QString subPhase() const;
-
     void dumpToQDebug(int detail) const;
 
 private:

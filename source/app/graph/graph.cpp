@@ -301,8 +301,6 @@ void Graph::setPhase(const QString& phase) const
 {
     std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
 
-    clearSubPhase();
-
     if(phase != _phase)
     {
         _phase = phase;
@@ -321,28 +319,4 @@ QString Graph::phase() const
 {
     std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
     return _phase;
-}
-
-void Graph::setSubPhase(const QString& subPhase) const
-{
-    std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
-
-    if(subPhase != _subPhase)
-    {
-        _subPhase = subPhase;
-        emit phaseChanged();
-    }
-}
-
-void Graph::clearSubPhase() const
-{
-    std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
-
-    setSubPhase("");
-}
-
-QString Graph::subPhase() const
-{
-    std::unique_lock<std::recursive_mutex> lock(_phaseMutex);
-    return _subPhase;
 }

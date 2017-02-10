@@ -17,7 +17,7 @@ static bool edgeIdContracted(const std::vector<EdgeConditionFn>& filters, EdgeId
 
 void EdgeContractionTransform::apply(TransformedGraph& target) const
 {
-    target.setSubPhase(QObject::tr("Contracting"));
+    target.setPhase(QObject::tr("Contracting"));
 
     EdgeIdSet edgeIdsToContract;
 

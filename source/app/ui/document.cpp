@@ -88,7 +88,6 @@ QString Document::commandVerb() const
         return {};
 
     auto phase = _graphModel->graph().phase();
-    auto subPhase = _graphModel->graph().subPhase();
 
     if(!_loadComplete)
     {
@@ -99,12 +98,7 @@ QString Document::commandVerb() const
     }
 
     if(!phase.isEmpty())
-    {
-        if(!subPhase.isEmpty())
-            return QString(tr("%1 (%2: %3)")).arg(_commandManager.commandVerb()).arg(phase).arg(subPhase);
-
         return QString(tr("%1 (%2)")).arg(_commandManager.commandVerb()).arg(phase);
-    }
 
     return _commandManager.commandVerb();
 }

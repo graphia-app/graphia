@@ -21,7 +21,7 @@ static bool componentFiltered(const std::vector<ComponentConditionFn>& filters, 
 
 void FilterTransform::apply(TransformedGraph& target) const
 {
-    target.setSubPhase(QObject::tr("Filtering"));
+    target.setPhase(QObject::tr("Filtering"));
 
     // The elements to be filtered are calculated first and then removed, because
     // removing elements during the filtering could affect the result of filter functions
