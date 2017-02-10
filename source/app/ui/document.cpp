@@ -405,6 +405,9 @@ void Document::onLoadComplete(bool success)
             _commandManager.clearCommandStack();
     });
 
+    connect(&_graphModel->graph(), &Graph::graphChanged, &_commandManager,
+            &CommandManager::onGraphChanged, Qt::DirectConnection);
+
     _graphModel->enableVisualUpdates();
 
     setStatus(QString(tr("Loaded %1 (%2 nodes, %3 edges, %4 components)")).arg(

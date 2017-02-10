@@ -91,6 +91,8 @@ private:
     void undoReal();
     void redoReal();
 
+    void clearCommandStackNoLocking();
+
     std::deque<std::shared_ptr<ICommand>> _stack;
     int _lastExecutedIndex = -1;
 
@@ -98,6 +100,7 @@ private:
     mutable std::mutex _mutex;
     std::unique_lock<std::mutex> _lock;
     std::atomic<bool> _busy;
+    std::atomic<bool> _graphChanged;
 
     std::shared_ptr<ICommand> _currentCommand;
     int _commandProgressTimerId = -1;
@@ -111,6 +114,9 @@ private:
 private slots:
     void onCommandCompleted(ICommand* command, const QString& pastParticiple, CommandAction action);
     void update();
+
+public slots:
+    void onGraphChanged() { _graphChanged = true; }
 
 signals:
     void commandWillExecute(const ICommand* command) const;

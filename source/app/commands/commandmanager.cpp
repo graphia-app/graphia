@@ -8,7 +8,8 @@
 
 CommandManager::CommandManager() :
     _lock(_mutex, std::defer_lock),
-    _busy(false)
+    _busy(false),
+    _graphChanged(false)
 {
     qRegisterMetaType<CommandAction>("CommandAction");
     connect(this, &CommandManager::commandQueued, this, &CommandManager::update);
@@ -76,6 +77,8 @@ void CommandManager::executeReal(std::shared_ptr<ICommand> command, bool irrever
     {
         u::setCurrentThreadName(command->description());
 
+        _graphChanged = false;
+
         if(!command->execute())
         {
             _busy = false;
@@ -91,6 +94,13 @@ void CommandManager::executeReal(std::shared_ptr<ICommand> command, bool irrever
 
             _stack.push_back(command);
             _lastExecutedIndex = static_cast<int>(_stack.size()) - 1;
+        }
+        else if(_graphChanged)
+        {
+            // The graph changed during an irreversible command, so throw
+            // away our redo history as it is likely no longer coherent with
+            // the current state
+            clearCommandStackNoLocking();
         }
 
         _busy = false;
@@ -254,6 +264,11 @@ void CommandManager::clearCommandStack()
     if(_thread.joinable())
         _thread.join();
 
+    clearCommandStackNoLocking();
+}
+
+void CommandManager::clearCommandStackNoLocking()
+{
     _stack.clear();
     _lastExecutedIndex = -1;
 
