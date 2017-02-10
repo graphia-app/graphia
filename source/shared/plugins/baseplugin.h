@@ -52,7 +52,7 @@ public:
         connect(graphQObject, SIGNAL(edgeRemoved(const Graph*, EdgeId)),
                 this, SLOT(onEdgeRemoved(const Graph*, EdgeId)), Qt::DirectConnection);
 
-        connect(graphQObject, SIGNAL(graphChanged(const Graph*)),
+        connect(graphQObject, SIGNAL(graphChanged(const Graph*, bool)),
                 this, SIGNAL(graphChanged()), Qt::DirectConnection);
 
         auto selectionManagerQObject = dynamic_cast<const QObject*>(selectionManager);

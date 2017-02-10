@@ -78,7 +78,7 @@ public:
 
 protected:
     virtual void beginTransaction() = 0;
-    virtual void endTransaction() = 0;
+    virtual void endTransaction(bool graphChangeOccurred = true) = 0;
 
 public:
     class ScopedTransaction
@@ -86,7 +86,7 @@ public:
     public:
         explicit ScopedTransaction(IMutableGraph& graph) : _graph(&graph)
         { _graph->beginTransaction(); }
-        ~ScopedTransaction() { _graph->endTransaction(); }
+        ~ScopedTransaction() { _graph->endTransaction(false); }
 
     private:
         IMutableGraph* _graph;

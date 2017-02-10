@@ -262,7 +262,7 @@ signals:
     void nodeAddedToComponent(const Graph*, NodeId, ComponentId) const;
     void edgeAddedToComponent(const Graph*, EdgeId, ComponentId) const;
 
-    void graphChanged(const Graph*) const;
+    void graphChanged(const Graph*, bool changeOccurred) const;
 
     void phaseChanged() const;
 };

@@ -52,6 +52,7 @@ private:
     const Graph* _source;
     std::unique_ptr<GraphTransform> _graphTransform;
     MutableGraph _target;
+    bool _graphChangeOccurred = false;
     bool _autoRebuild = false;
 
     class State

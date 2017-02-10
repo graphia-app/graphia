@@ -60,10 +60,11 @@ void TransformedGraph::rebuild()
 
     _target.performTransaction([this](IMutableGraph&)
     {
+        _graphChangeOccurred = false;
         _graphTransform->applyFromSource(*_source, *this);
     });
 
-    emit graphChanged(this);
+    emit graphChanged(this, _graphChangeOccurred);
     clearPhase();
 }
 
@@ -75,21 +76,33 @@ void TransformedGraph::onTargetGraphChanged(const Graph*)
     for(NodeId nodeId(0); nodeId < _nodesState.size(); ++nodeId)
     {
         if(!_previousNodesState[nodeId].added() && _nodesState[nodeId].added())
+        {
             emit nodeAdded(this, nodeId);
+            _graphChangeOccurred = true;
+        }
     }
 
     for(EdgeId edgeId(0); edgeId < _edgesState.size(); ++edgeId)
     {
         if(!_previousEdgesState[edgeId].added() && _edgesState[edgeId].added())
+        {
             emit edgeAdded(this, edgeId);
+            _graphChangeOccurred = true;
+        }
         else if(!_previousEdgesState[edgeId].removed() && _edgesState[edgeId].removed())
+        {
             emit edgeRemoved(this, edgeId);
+            _graphChangeOccurred = true;
+        }
     }
 
     for(NodeId nodeId(0); nodeId < _nodesState.size(); ++nodeId)
     {
         if(!_previousNodesState[nodeId].removed() && _nodesState[nodeId].removed())
+        {
             emit nodeRemoved(this, nodeId);
+            _graphChangeOccurred = true;
+        }
     }
 
     _previousNodesState = _nodesState;

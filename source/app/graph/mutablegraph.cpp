@@ -13,11 +13,13 @@ void MutableGraph::clear()
 {
     beginTransaction();
 
+    bool changed = numNodes() > 0;
+
     for(auto nodeId : nodeIds())
         removeNode(nodeId);
 
     _updateRequired = true;
-    endTransaction();
+    endTransaction(changed);
 
     // Removing all the nodes should remove all the edges
     Q_ASSERT(numEdges() == 0);
@@ -422,7 +424,7 @@ void MutableGraph::cloneFrom(const Graph& other)
         emit nodeRemoved(this, nodeId);
 
     _updateRequired = true;
-    endTransaction();
+    endTransaction(!diff.empty());
 }
 
 MutableGraph::Diff MutableGraph::diffTo(const MutableGraph& other)
@@ -469,17 +471,20 @@ void MutableGraph::beginTransaction()
     if(_graphChangeDepth++ <= 0)
     {
         _mutex.lock();
+        _graphChangeOccurred = false;
         emit graphWillChange(this);
     }
 }
 
-void MutableGraph::endTransaction()
+void MutableGraph::endTransaction(bool graphChangeOccurred)
 {
+    _graphChangeOccurred = _graphChangeOccurred | graphChangeOccurred;
+
     Q_ASSERT(_graphChangeDepth > 0);
     if(--_graphChangeDepth <= 0)
     {
         update();
-        emit graphChanged(this);
+        emit graphChanged(this, _graphChangeOccurred);
         _mutex.unlock();
         clearPhase();
     }

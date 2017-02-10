@@ -165,6 +165,15 @@ public:
         std::vector<NodeId> _nodesRemoved;
         std::vector<EdgeId> _edgesAdded;
         std::vector<EdgeId> _edgesRemoved;
+
+        bool empty() const
+        {
+            return
+                _nodesAdded.empty() &&
+                _nodesRemoved.empty() &&
+                _edgesAdded.empty() &&
+                _edgesRemoved.empty();
+        }
     };
 
     Diff diffTo(const MutableGraph& other);
@@ -173,10 +182,11 @@ public:
 
 private:
     int _graphChangeDepth = 0;
+    bool _graphChangeOccurred = false;
     std::mutex _mutex;
 
     void beginTransaction();
-    void endTransaction();
+    void endTransaction(bool graphChangeOccurred = true);
 };
 
 #endif // MUTABLEGRAPH_H
