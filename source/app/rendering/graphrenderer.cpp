@@ -40,7 +40,7 @@ void GraphInitialiser::initialiseFromGraph(const Graph *graph)
     for(auto componentId : graph->componentIds())
         onComponentAdded(graph, componentId, false);
 
-    onGraphChanged(graph);
+    onGraphChanged(graph, true);
 }
 
 GPUGraphData::GPUGraphData()
@@ -987,8 +987,11 @@ void GraphRenderer::onGraphWillChange(const Graph* graph)
     }
 }
 
-void GraphRenderer::onGraphChanged(const Graph* graph)
+void GraphRenderer::onGraphChanged(const Graph* graph, bool changed)
 {
+    if(!changed)
+        return;
+
     _numComponents = graph->numComponents();
 
     // We may not, in fact, subsequently actually start a transition here, but we

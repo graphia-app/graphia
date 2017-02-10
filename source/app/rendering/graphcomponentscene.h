@@ -82,7 +82,7 @@ private slots:
     void onComponentAdded(const Graph* graph, ComponentId componentId, bool);
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool);
     void onGraphWillChange(const Graph* graph);
-    void onGraphChanged(const Graph* graph);
+    void onGraphChanged(const Graph* graph, bool changed);
     void onNodeRemoved(const Graph* graph, NodeId nodeId);
 };
 

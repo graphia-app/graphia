@@ -58,7 +58,7 @@ public:
     void initialiseFromGraph(const Graph* graph);
 
 protected:
-    virtual void onGraphChanged(const Graph*) = 0;
+    virtual void onGraphChanged(const Graph*, bool) = 0;
     virtual void onComponentAdded(const Graph*, ComponentId, bool) = 0;
 };
 
@@ -215,7 +215,7 @@ private slots:
     void onEdgeAddedToComponent(const Graph*, EdgeId edgeId, ComponentId);
 
     void onGraphWillChange(const Graph* graph);
-    void onGraphChanged(const Graph* graph);
+    void onGraphChanged(const Graph* graph, bool changed);
     void onComponentAdded(const Graph*, ComponentId componentId, bool);
     void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
 

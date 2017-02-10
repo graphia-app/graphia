@@ -109,7 +109,7 @@ private:
 
 private slots:
     void onGraphWillChange(const Graph* graph);
-    void onGraphChanged(const Graph* graph);
+    void onGraphChanged(const Graph* graph, bool changed);
     void onComponentAdded(const Graph* graph, ComponentId componentId, bool hasSplit);
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool hasMerged);
     void onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet);

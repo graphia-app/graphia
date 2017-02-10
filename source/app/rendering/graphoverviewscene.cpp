@@ -538,8 +538,11 @@ void GraphOverviewScene::startComponentLayoutTransition()
     }
 }
 
-void GraphOverviewScene::onGraphChanged(const Graph* graph)
+void GraphOverviewScene::onGraphChanged(const Graph* graph, bool changed)
 {
+    if(!changed)
+        return;
+
     graph->setPhase(tr("Component Layout"));
     _componentLayout->execute(*graph, graph->componentIds(), _nextComponentLayoutData);
     _nextComponentLayoutDataChanged = true;

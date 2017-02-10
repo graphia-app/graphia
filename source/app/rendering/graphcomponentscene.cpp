@@ -435,8 +435,11 @@ void GraphComponentScene::onGraphWillChange(const Graph* graph)
     _numComponentsPriorToChange = graph->numComponents();
 }
 
-void GraphComponentScene::onGraphChanged(const Graph* graph)
+void GraphComponentScene::onGraphChanged(const Graph* graph, bool changed)
 {
+    if(!changed)
+        return;
+
     _graphRenderer->executeOnRendererThread([this, graph]
     {
         _defaultComponentId = graph->componentIdOfLargestComponent();
