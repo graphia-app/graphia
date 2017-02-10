@@ -175,7 +175,12 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
             {
                 // We have an edge weight too
                 auto& thirdToken = tokens.at(2);
-                _genericPluginInstance->setEdgeWeight(edgeId, std::atof(thirdToken.c_str()));
+                float edgeWeight = std::atof(thirdToken.c_str());
+
+                if(std::isnan(edgeWeight) || !std::isfinite(edgeWeight))
+                    edgeWeight = 1.0f;
+
+                _genericPluginInstance->setEdgeWeight(edgeId, edgeWeight);
             }
         }
 
