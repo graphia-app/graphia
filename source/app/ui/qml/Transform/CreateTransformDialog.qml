@@ -18,10 +18,10 @@ Window
     title: qsTr("Add Transform")
     modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
-    width: 700
-    height: 200
-    minimumWidth: 700
-    minimumHeight: 200
+    width: 800
+    height: 250
+    minimumWidth: 800
+    minimumHeight: 250
 
     property var document
     property string transformExpression
@@ -33,9 +33,11 @@ Window
         anchors.fill: parent
         anchors.margins: Constants.margin
 
-        RowLayout
+        GridLayout
         {
-            id: row
+            columns: 5
+            rows: 2
+
             Layout.fillWidth: true
             Layout.fillHeight: true
 
@@ -44,6 +46,7 @@ Window
                 id: transformsList
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.rowSpan: 2
 
                 onSelectedValueChanged:
                 {
@@ -56,6 +59,7 @@ Window
             {
                 Layout.topMargin: Constants.margin
                 Layout.alignment: Qt.AlignTop
+                Layout.rowSpan: 2
                 text: qsTr("where")
             }
 
@@ -64,6 +68,7 @@ Window
                 id: fieldList
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.rowSpan: 2
 
                 onSelectedValueChanged:
                 {
@@ -75,9 +80,14 @@ Window
                                                                             fieldList.selectedValue);
                         parameterData.initialValue = "";
                         valueParameter.configure(parameterData);
+
+                        fieldDescription.text = parameterData.description;
                     }
                     else
+                    {
                         valueParameter.reset();
+                        fieldDescription.text = "";
+                    }
 
                     updateTransformExpression();
                 }
@@ -88,6 +98,7 @@ Window
                 id: opList
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.rowSpan: 2
                 Layout.preferredWidth: 120
 
                 onSelectedValueChanged: { updateTransformExpression(); }
@@ -117,6 +128,20 @@ Window
                 updateValueImmediately: true
                 direction: Qt.Vertical
                 onValueChanged: { updateTransformExpression(); }
+            }
+
+            Text
+            {
+                id: fieldDescription
+                Layout.preferredWidth: valueParameter.width
+                Layout.fillHeight: true
+
+                verticalAlignment: Text.AlignVCenter
+                textFormat: Text.RichText
+                wrapMode: Text.WordWrap
+                elide: Text.ElideRight
+
+                onLinkActivated: Qt.openUrlExternally(link);
             }
         }
 

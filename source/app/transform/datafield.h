@@ -41,6 +41,8 @@ private:
 
     bool _searchable = false;
 
+    QString _description;
+
     template<typename T> struct Helper {};
 
     int valueOf(Helper<int>, NodeId nodeId) const;
@@ -132,6 +134,9 @@ public:
 
     bool searchable() const { return _searchable; }
     DataField& setSearchable(bool searchable) { _searchable = searchable; return *this; }
+
+    QString description() const { return _description; }
+    DataField& setDescription(const QString& description) { _description = description; return *this; }
 };
 
 #endif // DATAFIELD_H

@@ -60,7 +60,7 @@ void NodeAttributes::exposeToGraphModel(IGraphModel& graphModel)
         switch(nodeAttribute.type())
         {
         case Attribute::Type::Float:
-            graphModel.dataField(nodeAttribute.name())
+            graphModel.dataField(nodeAttributeName)
                     .setFloatValueFn([this, nodeAttributeName](NodeId nodeId)
                     {
                         return valueByNodeId(nodeId, nodeAttributeName).toFloat();
@@ -71,7 +71,7 @@ void NodeAttributes::exposeToGraphModel(IGraphModel& graphModel)
             break;
 
         case Attribute::Type::Integer:
-            graphModel.dataField(nodeAttribute.name())
+            graphModel.dataField(nodeAttributeName)
                     .setIntValueFn([this, nodeAttributeName](NodeId nodeId)
                     {
                         return valueByNodeId(nodeId, nodeAttributeName).toInt();
@@ -82,7 +82,7 @@ void NodeAttributes::exposeToGraphModel(IGraphModel& graphModel)
             break;
 
         case Attribute::Type::String:
-            graphModel.dataField(nodeAttribute.name())
+            graphModel.dataField(nodeAttributeName)
                     .setStringValueFn([this, nodeAttributeName](NodeId nodeId)
                     {
                         return valueByNodeId(nodeId, nodeAttributeName);
@@ -92,5 +92,8 @@ void NodeAttributes::exposeToGraphModel(IGraphModel& graphModel)
 
         default: break;
         }
+
+        graphModel.dataField(nodeAttributeName)
+                .setDescription(QString(tr("%1 is a user defined attribute.")).arg(nodeAttributeName));
     }
 }

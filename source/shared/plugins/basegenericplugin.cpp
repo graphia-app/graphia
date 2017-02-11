@@ -41,7 +41,8 @@ void BaseGenericPluginInstance::setEdgeWeight(EdgeId edgeId, float weight)
         _edgeWeights = std::make_unique<EdgeArray<float>>(graphModel()->mutableGraph());
 
         graphModel()->dataField(tr("Edge Weight"))
-                .setFloatValueFn([this](EdgeId edgeId_) { return _edgeWeights->get(edgeId_); });
+            .setFloatValueFn([this](EdgeId edgeId_) { return _edgeWeights->get(edgeId_); })
+            .setDescription(tr("The Edge Weight is a generic value associated with the edge."));
     }
 
     _edgeWeights->set(edgeId, weight);

@@ -772,6 +772,8 @@ QVariantMap Document::findTransformParameter(const QString& transformName, const
         if(dataField.hasFloatMax()) map.insert("maximumValue", dataField.floatMax());
         if(dataField.hasIntMin()) map.insert("minimumValue", dataField.intMin());
         if(dataField.hasIntMax()) map.insert("maximumValue", dataField.intMax());
+
+        map.insert("description", dataField.description());
     }
     /*else
     {

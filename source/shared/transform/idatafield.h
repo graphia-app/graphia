@@ -49,6 +49,9 @@ public:
 
     virtual bool searchable() const = 0;
     virtual IDataField& setSearchable(bool searchable) = 0;
+
+    virtual QString description() const = 0;
+    virtual IDataField& setDescription(const QString& description) = 0;
 };
 
 #endif // IDATAFIELD_H

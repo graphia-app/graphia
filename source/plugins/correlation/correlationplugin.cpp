@@ -24,7 +24,10 @@ void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionMa
     _pearsonValues = std::make_unique<EdgeArray<double>>(graphModel->mutableGraph());
 
     graphModel->dataField(tr("Pearson Correlation Value"))
-            .setFloatValueFn([this](EdgeId edgeId) { return _pearsonValues->get(edgeId); });
+            .setFloatValueFn([this](EdgeId edgeId) { return _pearsonValues->get(edgeId); })
+            .setDescription(tr("The <a href=\"https://en.wikipedia.org/wiki/Pearson_correlation_coefficient\">"
+                               "Pearson Correlation Coefficient</a> is an indication of "
+                               "the linear relationship between two variables."));
 }
 
 bool CorrelationPluginInstance::loadAttributes(const TabularData& tabularData, int firstDataColumn, int firstDataRow,
@@ -103,23 +106,37 @@ bool CorrelationPluginInstance::loadAttributes(const TabularData& tabularData, i
 
     graphModel()->dataField(tr("Mean Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._mean; })
-            .setFloatMin(minMeanValue).setFloatMax(maxMeanValue);
+            .setFloatMin(minMeanValue).setFloatMax(maxMeanValue)
+            .setDescription(tr("The Mean Data Value is the mean of the values associated "
+                               "with the node."));
 
     graphModel()->dataField(tr("Minimum Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._minValue; })
-            .setFloatMin(minMinValue).setFloatMax(maxMinValue);
+            .setFloatMin(minMinValue).setFloatMax(maxMinValue)
+            .setDescription(tr("The Minimum Data Value is the minimum value associated "
+                               "with the node."));
 
     graphModel()->dataField(tr("Maximum Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._maxValue; })
-            .setFloatMin(minMaxValue).setFloatMax(maxMaxValue);
+            .setFloatMin(minMaxValue).setFloatMax(maxMaxValue)
+            .setDescription(tr("The Maximum Data Value is the maximum value associated "
+                               "with the node."));
 
     graphModel()->dataField(tr("Variance"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._variance; })
-            .setFloatMin(minVariance).setFloatMax(maxVariance);
+            .setFloatMin(minVariance).setFloatMax(maxVariance)
+            .setDescription(tr("The <a href=\"https://en.wikipedia.org/wiki/Variance\">Variance</a> "
+                               "is a measure of the spread of the values associated "
+                               "with the node. It is defined as ∑(x-μ)², where x is the value "
+                               "and μ is the mean."));
 
     graphModel()->dataField(tr("Standard Deviation"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._stddev; })
-            .setFloatMin(minStdDev).setFloatMax(maxStdDev);
+            .setFloatMin(minStdDev).setFloatMax(maxStdDev)
+            .setDescription(tr("The <a href=\"https://en.wikipedia.org/wiki/Standard_deviation\">"
+                               "Standard Deviation</a> is a measure of the spread of the values associated "
+                               "with the node. It is defined as √∑(x-μ)², where x is the value "
+                               "and μ is the mean."));
 
     return true;
 }

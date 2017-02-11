@@ -40,7 +40,8 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
 
     dataField(tr("Node Degree"))
         .setIntValueFn([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).degree(); })
-        .setIntMin(0);
+        .setIntMin(0)
+        .setDescription(tr("A node's degree is its number of incident edges."));
 
     dataField(tr("Node Name"))
         .setStringValueFn([this](NodeId nodeId) { return _nodeNames[nodeId]; })
@@ -48,7 +49,8 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
 
     dataField(tr("Component Size"))
         .setIntValueFn([this](const IGraphComponent& component) { return component.numNodes(); })
-        .setIntMin(1);
+        .setIntMin(1)
+        .setDescription(tr("Component Size refers to the number of nodes the component contains."));
 
     _graphTransformFactories.emplace(tr("Remove Nodes"),      std::make_unique<FilterTransformFactory>(ElementType::Node, false));
     _graphTransformFactories.emplace(tr("Remove Edges"),      std::make_unique<FilterTransformFactory>(ElementType::Edge, false));

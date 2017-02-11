@@ -18,13 +18,14 @@ GridLayout
     property real maximumValue
     property string initialValue
     property string value
+    property string description
 
     property bool updateValueImmediately: false
     property int direction: Qt.Horizontal
 
     flow: (direction === Qt.Horizontal) ? GridLayout.LeftToRight : GridLayout.TopToBottom
 
-    property int _maxWidth: 120
+    property int _maxWidth: 160
     property int _inputElementWidth: (direction === Qt.Horizontal) ? 90 : _maxWidth
 
     function typedValue(n)
