@@ -14,6 +14,7 @@ Item
         section: "misc"
 
         property alias focusFoundNodes: focusFoundNodesCheckbox.checked
+        property alias focusFoundComponents: focusFoundComponentsCheckbox.checked
     }
 
     Column
@@ -35,6 +36,12 @@ Item
             {
                 id: focusFoundNodesCheckbox
                 text: qsTr("Focus Found Nodes")
+            }
+
+            CheckBox
+            {
+                id: focusFoundComponentsCheckbox
+                text: qsTr("Switch To Component Mode When Searching")
             }
         }
     }

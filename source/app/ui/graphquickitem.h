@@ -25,6 +25,7 @@ class GraphQuickItem : public QQuickFramebufferObject
     Q_PROPERTY(bool interacting MEMBER _interacting NOTIFY interactingChanged)
     Q_PROPERTY(bool viewIsReset MEMBER _viewIsReset NOTIFY viewIsResetChanged)
     Q_PROPERTY(bool canEnterOverviewMode MEMBER _canEnterOverviewMode NOTIFY canEnterOverviewModeChanged)
+    Q_PROPERTY(bool inOverviewMode MEMBER _inOverviewMode NOTIFY inOverviewModeChanged)
 
     Q_PROPERTY(int numNodes READ numNodes NOTIFY graphChanged)
     Q_PROPERTY(int numVisibleNodes READ numVisibleNodes NOTIFY graphChanged)
@@ -51,6 +52,7 @@ public:
     bool interacting() const;
     void setInteracting(bool interacting) const;
     bool viewIsReset() const;
+    bool inOverviewMode() const;
     bool canEnterOverviewMode() const;
 
     void switchToOverviewMode(bool doTransition = true);
@@ -74,6 +76,7 @@ public:
     // interested parties what it's doing
     void setViewIsReset(bool viewIsReset);
     void setCanEnterOverviewMode(bool canEnterOverviewMode);
+    void setInOverviewMode(bool inOverviewMode);
     void setFocusedComponentId(ComponentId componentId);
 
 private:
@@ -97,6 +100,7 @@ private:
     mutable bool _interacting = false;
     bool _viewIsReset = true;
     bool _canEnterOverviewMode = false;
+    bool _inOverviewMode = true;
     ComponentId _focusedComponentId;
 
     std::queue<std::unique_ptr<QEvent>> _eventQueue;
@@ -125,6 +129,7 @@ signals:
     void interactingChanged() const;
     void viewIsResetChanged() const;
     void canEnterOverviewModeChanged() const;
+    void inOverviewModeChanged() const;
     void focusedComponentIdChanged() const;
 
     void commandWillExecute(const ICommand*) const;

@@ -114,6 +114,7 @@ int main(int argc, char *argv[])
     preferences.define("misc/showNodeText",                 true);
 
     preferences.define("misc/focusFoundNodes",              true);
+    preferences.define("misc/focusFoundComponents",         false);
 
     QQmlApplicationEngine engine;
     engine.addImportPath("qrc:///qml");

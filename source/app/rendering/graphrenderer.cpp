@@ -774,13 +774,24 @@ bool GraphRenderer::transitionActive() const
 
 void GraphRenderer::moveFocusToNode(NodeId nodeId, float cameraDistance)
 {
-    if(mode() == GraphRenderer::Mode::Component)
+    if(mode() == Mode::Component)
         _graphComponentScene->moveFocusToNode(nodeId, cameraDistance);
+    else if(mode() == Mode::Overview)
+    {
+        // To focus on a node, we need to be in component mode
+        auto componentId = _graphModel->graph().componentIdOfNode(nodeId);
+        auto* newComponentRenderer = componentRendererForId(componentId);
+        newComponentRenderer->moveFocusToNode(nodeId, cameraDistance);
+        newComponentRenderer->saveViewData();
+        newComponentRenderer->resetView();
+
+        switchToComponentMode(true, componentId);
+    }
 }
 
 void GraphRenderer::moveFocusToComponent(ComponentId componentId)
 {
-    if(mode() == GraphRenderer::Mode::Component)
+    if(mode() == Mode::Component)
         _graphComponentScene->setComponentId(componentId, true);
 }
 
@@ -1515,6 +1526,7 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
     // Tell the QuickItem what we're doing
     graphQuickItem->setViewIsReset(viewIsReset());
     graphQuickItem->setCanEnterOverviewMode(mode() != Mode::Overview && _numComponents > 1);
+    graphQuickItem->setInOverviewMode(mode() == Mode::Overview);
 
     ComponentId focusedComponentId = mode() != Mode::Overview ? _graphComponentScene->componentId() : ComponentId();
     graphQuickItem->setFocusedComponentId(focusedComponentId);

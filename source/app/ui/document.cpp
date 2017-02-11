@@ -568,12 +568,18 @@ void Document::find(const QString& regex)
         emit numNodesFoundChanged();
 }
 
+static bool shouldMoveFindFocus(bool inOverviewMode)
+{
+    return u::pref("misc/focusFoundNodes").toBool() &&
+        ((inOverviewMode && u::pref("misc/focusFoundComponents").toBool()) || !inOverviewMode);
+}
+
 void Document::selectFirstFound()
 {
     setFoundIt(_foundNodeIds.begin());
     _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), *_foundIt));
 
-    if(u::pref("misc/focusFoundNodes").toBool())
+    if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
         _graphQuickItem->moveFocusToNode(*_foundIt);
 }
 
@@ -582,7 +588,7 @@ void Document::selectNextFound()
     incrementFoundIt();
     _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), *_foundIt));
 
-    if(u::pref("misc/focusFoundNodes").toBool())
+    if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
         _graphQuickItem->moveFocusToNode(*_foundIt);
 }
 
@@ -591,7 +597,7 @@ void Document::selectPrevFound()
     decrementFoundIt();
     _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), *_foundIt));
 
-    if(u::pref("misc/focusFoundNodes").toBool())
+    if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
         _graphQuickItem->moveFocusToNode(*_foundIt);
 }
 

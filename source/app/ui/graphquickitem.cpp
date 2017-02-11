@@ -71,6 +71,11 @@ bool GraphQuickItem::viewIsReset() const
     return _viewIsReset;
 }
 
+bool GraphQuickItem::inOverviewMode() const
+{
+    return _inOverviewMode;
+}
+
 void GraphQuickItem::setViewIsReset(bool viewIsReset)
 {
     if(_viewIsReset != viewIsReset)
@@ -91,6 +96,15 @@ void GraphQuickItem::setCanEnterOverviewMode(bool canEnterOverviewMode)
     {
         _canEnterOverviewMode = canEnterOverviewMode;
         emit canEnterOverviewModeChanged();
+    }
+}
+
+void GraphQuickItem::setInOverviewMode(bool inOverviewMode)
+{
+    if(_inOverviewMode != inOverviewMode)
+    {
+        _inOverviewMode = inOverviewMode;
+        emit inOverviewModeChanged();
     }
 }
 
