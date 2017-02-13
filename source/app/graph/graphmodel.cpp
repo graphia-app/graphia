@@ -43,10 +43,6 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
         .setIntMin(0)
         .setDescription(tr("A node's degree is its number of incident edges."));
 
-    dataField(tr("Node Name"))
-        .setStringValueFn([this](NodeId nodeId) { return _nodeNames[nodeId]; })
-        .setSearchable(true);
-
     dataField(tr("Component Size"))
         .setIntValueFn([this](const IGraphComponent& component) { return component.numNodes(); })
         .setIntMin(1)
