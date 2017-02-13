@@ -3,8 +3,8 @@
 
 #include "graph/graph.h"
 
-void GraphTransform::applyFromSource(const Graph& source, TransformedGraph& target) const
+bool GraphTransform::applyFromSource(const Graph& source, TransformedGraph& target) const
 {
     target.cloneFrom(source);
-    apply(target);
+    return apply(target);
 }

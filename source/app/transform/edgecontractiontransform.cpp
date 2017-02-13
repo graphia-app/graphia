@@ -15,7 +15,7 @@ static bool edgeIdContracted(const std::vector<EdgeConditionFn>& filters, EdgeId
     return false;
 }
 
-void EdgeContractionTransform::apply(TransformedGraph& target) const
+bool EdgeContractionTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Contracting"));
 
@@ -28,6 +28,8 @@ void EdgeContractionTransform::apply(TransformedGraph& target) const
     }
 
     target.mutableGraph().contractEdges(edgeIdsToContract);
+
+    return !edgeIdsToContract.empty();
 }
 
 std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(const GraphTransformConfig& graphTransformConfig,

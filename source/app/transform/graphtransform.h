@@ -18,9 +18,9 @@ public:
 
     // In some circumstances it may be a performance win to reimplement this instead of going
     // for the inplace transform version
-    virtual void applyFromSource(const Graph& source, TransformedGraph& target) const;
+    virtual bool applyFromSource(const Graph& source, TransformedGraph& target) const;
 
-    virtual void apply(TransformedGraph&) const {}
+    virtual bool apply(TransformedGraph&) const { return false; }
 };
 
 class GraphTransformFactory

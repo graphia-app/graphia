@@ -19,8 +19,10 @@ static bool componentFiltered(const std::vector<ComponentConditionFn>& filters, 
     return false;
 }
 
-void FilterTransform::apply(TransformedGraph& target) const
+bool FilterTransform::apply(TransformedGraph& target) const
 {
+    bool changed = false;
+
     target.setPhase(QObject::tr("Filtering"));
 
     // The elements to be filtered are calculated first and then removed, because
@@ -36,6 +38,7 @@ void FilterTransform::apply(TransformedGraph& target) const
                 removees.push_back(edgeId);
         }
 
+        changed = !removees.empty();
         for(auto edgeId : removees)
             target.mutableGraph().removeEdge(edgeId);
     }
@@ -50,6 +53,7 @@ void FilterTransform::apply(TransformedGraph& target) const
                 removees.push_back(nodeId);
         }
 
+        changed = !removees.empty();
         for(auto nodeId : removees)
             target.mutableGraph().removeNode(nodeId);
     }
@@ -62,9 +66,14 @@ void FilterTransform::apply(TransformedGraph& target) const
         {
             auto component = componentManager.componentById(componentId);
             if(!componentFiltered(_componentFilters, *component) != !_invert)
+            {
+                changed = true;
                 target.mutableGraph().removeNodes(target.mutableGraph().mergedNodeIdsForNodeIds(component->nodeIds()));
+            }
         }
     }
+
+    return changed;
 }
 
 std::unique_ptr<GraphTransform> FilterTransformFactory::create(const GraphTransformConfig& graphTransformConfig,

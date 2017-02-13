@@ -12,7 +12,7 @@ class FilterTransform : public GraphTransform, public Filter
 public:
     explicit FilterTransform(bool invert) : _invert(invert) {}
 
-    void apply(TransformedGraph &target) const;
+    bool apply(TransformedGraph &target) const;
 
     void addComponentFilter(const ComponentConditionFn& f) { if(f != nullptr) _componentFilters.emplace_back(f); }
     bool hasComponentFilters() const { return !_componentFilters.empty(); }

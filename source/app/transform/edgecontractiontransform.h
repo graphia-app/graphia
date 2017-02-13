@@ -9,7 +9,7 @@
 class EdgeContractionTransform : public GraphTransform
 {
 public:
-    void apply(TransformedGraph &target) const;
+    bool apply(TransformedGraph &target) const;
 
     void addEdgeContractionFilter(const EdgeConditionFn& f) { _edgeFilters.emplace_back(f); }
     bool hasEdgeContractionFilters() const { return !_edgeFilters.empty(); }
