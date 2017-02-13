@@ -215,7 +215,7 @@ ApplicationWindow
         // Add to the top
         localRecentFiles.unshift(fileUrlString);
 
-        var MAX_RECENT_FILES = 5;
+        var MAX_RECENT_FILES = 10;
         while(localRecentFiles.length > MAX_RECENT_FILES)
             localRecentFiles.pop();
 
