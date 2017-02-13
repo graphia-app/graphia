@@ -60,6 +60,8 @@ private:
         int currentColumn = 0;
         int currentRow = 0;
 
+        progress(-1);
+
         file.seekg(0, std::ios::beg);
         while(std::getline(file, line))
         {

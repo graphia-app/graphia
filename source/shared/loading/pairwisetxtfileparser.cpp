@@ -46,6 +46,8 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
     std::string token;
     std::vector<std::string> tokens;
 
+    progress(-1);
+
     file.seekg(0, std::ios::beg);
     while(std::getline(file, line))
     {

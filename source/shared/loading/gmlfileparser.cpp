@@ -180,6 +180,8 @@ bool GmlFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressF
 
     std::vector<char> vec(startIt, std::istreambuf_iterator<char>());
 
+    progress(-1);
+
     return parseGml(graph, _nodeAttributes, [this] { return cancelled(); },
                     progress, vec.begin(), vec.end());;
 }

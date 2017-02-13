@@ -33,9 +33,9 @@ void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionMa
 bool CorrelationPluginInstance::loadAttributes(const TabularData& tabularData, int firstDataColumn, int firstDataRow,
                                                const std::function<bool()>& cancelled, const IParser::ProgressFn& progress)
 {
-    progress(0);
+    progress(-1);
 
-    int numDataPoints = tabularData.numColumns() * tabularData.numRows();
+    uint64_t numDataPoints = tabularData.numColumns() * tabularData.numRows();
 
     for(int rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
     {
@@ -44,7 +44,9 @@ bool CorrelationPluginInstance::loadAttributes(const TabularData& tabularData, i
             if(cancelled())
                 return false;
 
-            progress(((columnIndex + (rowIndex * tabularData.numColumns())) * 100) / numDataPoints);
+            uint64_t rowOffset = rowIndex * tabularData.numColumns();
+            uint64_t dataPoint = columnIndex + rowOffset;
+            progress(static_cast<int>((dataPoint * 100) / numDataPoints));
 
             QString value = tabularData.valueAtQString(columnIndex, rowIndex);
             int dataColumnIndex = columnIndex - firstDataColumn;
@@ -146,7 +148,7 @@ std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pears
         const std::function<bool()>& cancelled,
         const IParser::ProgressFn& progress)
 {
-    progress(0);
+    progress(-1);
 
     uint64_t totalCost = 0;
     for(auto& row : _dataRows)
@@ -196,7 +198,7 @@ bool CorrelationPluginInstance::createEdges(const std::vector<std::tuple<NodeId,
                                             const std::function<bool()>& cancelled,
                                             const IParser::ProgressFn& progress)
 {
-    progress(0);
+    progress(-1);
     for(auto edgeIt = edges.begin(); edgeIt != edges.end(); ++edgeIt)
     {
         if(cancelled())

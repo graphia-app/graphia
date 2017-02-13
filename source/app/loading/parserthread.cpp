@@ -48,7 +48,11 @@ void ParserThread::run()
             result = _parser->parse(_url, graph,
                 [this, &percentage](int newPercentage)
                 {
-                    if(newPercentage > 0)
+#ifdef _DEBUG
+                    if(newPercentage < -1 || newPercentage > 100)
+                        qDebug() << "progress called with unusual percentage" << newPercentage;
+#endif
+                    if(newPercentage >= 0)
                     {
                         bool percentageIncreased = false;
                         int expected, desired;
