@@ -41,24 +41,31 @@ private:
 
     NodeAttributesTableModel _nodeAttributesTableModel;
 
-    using DataIterator = std::vector<double>::const_iterator;
+    using ConstDataIterator = std::vector<double>::const_iterator;
+    using DataIterator = std::vector<double>::iterator;
     using DataOffset = std::vector<double>::size_type;
 
     std::vector<double> _data;
 
     struct DataRow
     {
-        DataRow(DataIterator begin, DataIterator end, NodeId nodeId, int computeCost) :
-            _begin(begin), _end(end), _nodeId(nodeId), _cost(computeCost)
+        DataRow(ConstDataIterator _begin, ConstDataIterator _end, NodeId nodeId, int computeCost) :
+            _data(_begin, _end), _nodeId(nodeId), _cost(computeCost)
         {
+            _sortedData = _data;
+            std::sort(_sortedData.begin(), _sortedData.end());
+
             sum();
         }
 
-        DataIterator _begin;
-        DataIterator _end;
+        std::vector<double> _data;
+        std::vector<double> _sortedData;
 
-        DataIterator begin() const { return _begin; }
-        DataIterator end() const { return _end; }
+        DataIterator begin() { return _data.begin(); }
+        DataIterator end() { return _data.end(); }
+
+        DataIterator sortedBegin() { return _sortedData.begin(); }
+        DataIterator sortedEnd() { return _sortedData.end(); }
 
         NodeId _nodeId;
 
@@ -79,7 +86,7 @@ private:
 
         void sum()
         {
-            int numColumns = std::distance(_begin, _end);
+            int numColumns = std::distance(begin(), end());
 
             for(auto value : *this)
             {
