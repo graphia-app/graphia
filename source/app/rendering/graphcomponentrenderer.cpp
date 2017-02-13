@@ -103,6 +103,8 @@ void GraphComponentRenderer::synchronise()
     _edges.clear();
 
     auto component = _graphModel->graph().componentById(_componentId);
+    Q_ASSERT(component != nullptr);
+
     _nodeIds = component->nodeIds();
     for(auto edgeId : component->edgeIds())
         _edges.emplace_back(&_graphModel->graph().edgeById(edgeId));
