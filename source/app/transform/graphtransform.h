@@ -21,7 +21,7 @@ public:
     virtual bool applyFromSource(const Graph& source, TransformedGraph& target) const;
 
     virtual bool apply(TransformedGraph&) const { return false; }
-    bool applyAndUpdate(TransformedGraph&target) const;
+    bool applyAndUpdate(TransformedGraph& target) const;
 
     bool repeating() const { return _repeating; }
     void setRepeating(bool repeating) { _repeating = repeating; }
