@@ -38,7 +38,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
                 removees.push_back(edgeId);
         }
 
-        changed = !removees.empty();
+        changed = !removees.empty() || changed;
         for(auto edgeId : removees)
             target.mutableGraph().removeEdge(edgeId);
     }
@@ -53,7 +53,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
                 removees.push_back(nodeId);
         }
 
-        changed = !removees.empty();
+        changed = !removees.empty() || changed;
         for(auto nodeId : removees)
             target.mutableGraph().removeNode(nodeId);
     }

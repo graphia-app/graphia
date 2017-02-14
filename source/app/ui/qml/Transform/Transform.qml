@@ -82,6 +82,20 @@ Item
 
                 MenuItem
                 {
+                    id: repeatingMenuItem
+
+                    text: qsTr("Apply Repeatedly")
+                    checkable: true
+
+                    onCheckedChanged:
+                    {
+                        setMetaAttribute("repeating", checked);
+                        updateExpression();
+                    }
+                }
+
+                MenuItem
+                {
                     id: pinnedMenuItem
 
                     text: qsTr("Pinned To Bottom")
@@ -203,6 +217,7 @@ Item
 
         enabledMenuItem.checked = !isMetaAttributeSet("disabled");
         lockedMenuItem.checked = isMetaAttributeSet("locked");
+        repeatingMenuItem.checked = isMetaAttributeSet("repeating");
         pinnedMenuItem.checked = isMetaAttributeSet("pinned");
         ready = true;
     }

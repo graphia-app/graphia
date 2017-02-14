@@ -830,6 +830,16 @@ void Document::removeGraphTransform(int index)
     _graphTransformsModel.remove(index);
 }
 
+static bool metaAttributesDiffer(const GraphTransformConfig& a,
+                                 const GraphTransformConfig& b,
+                                 const char* metaAttribute)
+{
+    bool aResult = a.isMetaAttributeSet(metaAttribute);
+    bool bResult = b.isMetaAttributeSet(metaAttribute);
+
+    return aResult != bResult;
+}
+
 // This tests two transform lists to determine if replacing one with the
 // other would actually result in a different transformation
 static bool transformsDiffer(const QStringList& a, const QStringList& b)
@@ -849,10 +859,10 @@ static bool transformsDiffer(const QStringList& a, const QStringList& b)
         if(p.parse(b[i]))
             bi = p.result();
 
-        bool aDisabled = ai.isMetaAttributeSet("disabled");
-        bool bDisabled = bi.isMetaAttributeSet("disabled");
+        if(metaAttributesDiffer(ai, bi, "disabled"))
+            return true;
 
-        if(aDisabled != bDisabled)
+        if(metaAttributesDiffer(ai, bi, "repeating"))
             return true;
 
         if(ai != bi)

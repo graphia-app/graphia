@@ -108,7 +108,10 @@ void GraphModel::buildTransforms(const QStringList& transforms)
         auto graphTransform = factory->create(graphTransformConfig, _dataFields);
 
         if(graphTransform)
+        {
+            graphTransform->setRepeating(graphTransformConfig.isMetaAttributeSet("repeating"));
             compoundTransform->addTransform(std::move(graphTransform));
+        }
     }
 
     _transformedGraph.enableAutoRebuild();
