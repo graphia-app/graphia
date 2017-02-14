@@ -248,7 +248,7 @@ private:
     // values, then the storage for the renderers themselves would potentially be
     // moved around, as opposed to just the storage for the pointers.
     ComponentArray<MovablePointer<GraphComponentRenderer>, u::Locking> _componentRenderers;
-    bool _transitionInProgress = false;
+    bool _transitionPotentiallyInProgress = false;
     DeferredExecutor _preUpdateExecutor;
 
     enum class Mode

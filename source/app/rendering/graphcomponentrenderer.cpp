@@ -44,9 +44,9 @@ void GraphComponentRenderer::initialise(std::shared_ptr<GraphModel> graphModel, 
     _selectionManager = selectionManager;
     _graphRenderer = graphRenderer;
 
+    _viewData = {};
     _targetZoomDistance = _viewData._zoomDistance;
-    _viewData._focusNodeId.setToNull();
-    _viewData._camera = {};
+    _moveFocusToCentreOfComponentLater = true;
 
     synchronise();
 
@@ -192,6 +192,8 @@ void GraphComponentRenderer::updateFocusPosition()
 
 void GraphComponentRenderer::updateEntireComponentZoomDistance()
 {
+    updateFocusPosition();
+
     auto component = _graphModel->graph().componentById(_componentId);
     auto maxDistance = maxNodeDistanceFromPoint(*_graphModel, focusPosition(), component->nodeIds());
     _entireComponentZoomDistance = zoomDistanceForRadius(maxDistance);
@@ -207,13 +209,12 @@ void GraphComponentRenderer::update(float t)
         {
             if(_graphRenderer->layoutChanged())
             {
-                updateFocusPosition();
                 updateEntireComponentZoomDistance();
             }
-            else if(_entireComponentZoomDistanceRequiresUpdate)
+            else if(_moveFocusToCentreOfComponentLater)
             {
-                updateEntireComponentZoomDistance();
-                _entireComponentZoomDistanceRequiresUpdate = false;
+                moveFocusToCentreOfComponent();
+                _moveFocusToCentreOfComponentLater = false;
             }
         }
 
@@ -275,9 +276,6 @@ void GraphComponentRenderer::setViewportSize(int viewportWidth, int viewportHeig
 
 void GraphComponentRenderer::setDimensions(const QRectF& dimensions)
 {
-    if(_dimensions != dimensions)
-        _entireComponentZoomDistanceRequiresUpdate = true;
-
     _dimensions = dimensions;
 
     float aspectRatio = _dimensions.width() / _dimensions.height();
@@ -450,7 +448,6 @@ void GraphComponentRenderer::moveFocusToCentreOfComponent()
         return;
 
     _viewData._focusNodeId.setToNull();
-    updateFocusPosition();
     updateEntireComponentZoomDistance();
 
     if(_viewData._autoZooming)

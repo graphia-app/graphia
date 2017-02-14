@@ -797,9 +797,9 @@ void GraphRenderer::moveFocusToComponent(ComponentId componentId)
 
 void GraphRenderer::rendererStartedTransition()
 {
-    if(!_transitionInProgress)
+    if(!_transitionPotentiallyInProgress)
     {
-        _transitionInProgress = true;
+        _transitionPotentiallyInProgress = true;
 
         emit userInteractionStarted();
         resetTime();
@@ -808,7 +808,10 @@ void GraphRenderer::rendererStartedTransition()
 
 void GraphRenderer::rendererFinishedTransition()
 {
-    _transitionInProgress = false;
+    if(transitionActive())
+        return;
+
+    _transitionPotentiallyInProgress = false;
     emit userInteractionFinished();
 }
 

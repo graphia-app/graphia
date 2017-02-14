@@ -138,7 +138,7 @@ private:
     bool _trackFocus = true;
     float _targetZoomDistance = 0.0f;
     Transition _zoomTransition;
-    bool _entireComponentZoomDistanceRequiresUpdate = false;
+    bool _moveFocusToCentreOfComponentLater = false;
 
     ComponentId _componentId;
     std::vector<NodeId> _nodeIds;
