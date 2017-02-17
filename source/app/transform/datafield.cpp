@@ -135,3 +135,33 @@ bool DataField::floatValueInRange(double value) const
 
     return true;
 }
+
+bool DataField::hasNumericRange() const
+{
+    switch(valueType())
+    {
+    case FieldType::Int: return hasIntRange();
+    case FieldType::Float: return hasFloatRange();
+    default: return false;
+    }
+}
+
+double DataField::numericMin() const
+{
+    switch(valueType())
+    {
+    case FieldType::Int: return static_cast<double>(intMin());
+    case FieldType::Float: return floatMin();
+    default: return false;
+    }
+}
+
+double DataField::numericMax() const
+{
+    switch(valueType())
+    {
+    case FieldType::Int: return static_cast<double>(intMax());
+    case FieldType::Float: return floatMax();
+    default: return false;
+    }
+}

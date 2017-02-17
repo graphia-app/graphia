@@ -9,6 +9,7 @@
 #include <functional>
 #include <limits>
 #include <vector>
+#include <tuple>
 
 #include <QString>
 #include <QRegularExpression>
@@ -92,6 +93,18 @@ public:
         return {};
     }
 
+    template<typename E> double numericValueOf(E& elementId) const
+    {
+        switch(valueType())
+        {
+        case FieldType::Int:    return static_cast<double>(valueOf<int>(elementId));
+        case FieldType::Float:  return valueOf<double>(elementId);
+        default: break;
+        }
+
+        return std::numeric_limits<double>::signaling_NaN();
+    }
+
     template<typename T, typename E>
     using ValueOfFn = T(DataField::*)(E&) const;
 
@@ -131,6 +144,27 @@ public:
     DataField& setFloatMax(double floatMax);
 
     bool floatValueInRange(double value) const;
+
+    bool hasNumericRange() const;
+
+    double numericMin() const;
+    double numericMax() const;
+
+    template<typename E>
+    auto findNumericRange(const std::vector<E>& elementIds) const
+    {
+        std::tuple<double, double> minMax(std::numeric_limits<double>::max(),
+                                          std::numeric_limits<double>::min());
+
+        for(auto elementId : elementIds)
+        {
+            double v = numericValueOf(elementId);
+            std::get<0>(minMax) = std::min(v, std::get<0>(minMax));
+            std::get<1>(minMax) = std::max(v, std::get<1>(minMax));
+        }
+
+        return minMax;
+    }
 
     bool searchable() const { return _searchable; }
     DataField& setSearchable(bool searchable) { _searchable = searchable; return *this; }
