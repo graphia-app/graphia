@@ -9,6 +9,8 @@
 #include "transform/edgecontractiontransform.h"
 #include "transform/graphtransformconfigparser.h"
 
+#include "ui/visualisations/colorvisualisationchannel.h"
+
 #include "shared/utils/enumreflection.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/utils.h"
@@ -23,6 +25,8 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
     _nodePositions(_graph),
     _nodeVisuals(_graph),
     _edgeVisuals(_graph),
+    _mappedNodeVisuals(_graph),
+    _mappedEdgeVisuals(_graph),
     _nodeNames(_graph),
     _name(name),
     _plugin(plugin)
@@ -55,6 +59,8 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
     _graphTransformFactories.emplace(tr("Keep Edges"),        std::make_unique<FilterTransformFactory>(ElementType::Edge, true));
     _graphTransformFactories.emplace(tr("Keep Components"),   std::make_unique<FilterTransformFactory>(ElementType::Component, true));
     _graphTransformFactories.emplace(tr("Contract Edges"),    std::make_unique<EdgeContractionTransformFactory>());
+
+    _visualisationChannels.emplace(tr("Colour"), std::make_unique<ColorVisualisationChannel>());
 }
 
 void GraphModel::setNodeName(NodeId nodeId, const QString& name)
@@ -157,6 +163,98 @@ QStringList GraphModel::avaliableConditionFnOps(const QString& dataFieldName) co
     return GraphTransformConfigParser::ops(_dataFields.at(dataFieldName).valueType());
 }
 
+template<typename ElementIds, typename Visuals>
+static void buildElementVisualisations(const ElementIds& elementIds,
+                                       const DataField& dataField,
+                                       const VisualisationChannel& channel,
+                                       bool invert,
+                                       Visuals& visuals)
+{
+    switch(dataField.valueType())
+    {
+    case FieldType::Int:
+    case FieldType::Float:
+    {
+        double min, max;
+        std::tie(min, max) = dataField.findNumericRange(elementIds);
+
+        for(auto elementId : elementIds)
+        {
+            double value = dataField.numericValueOf(elementId);
+            value = u::normalise(min, max, value);
+            if(invert) value = 1.0 - value;
+            channel.apply(value, visuals[elementId]);
+        }
+        break;
+    }
+
+    case FieldType::String:
+        for(auto elementId : elementIds)
+            channel.apply(dataField.stringValueOf(elementId), visuals[elementId]);
+        break;
+
+    default:
+        break;
+    }
+}
+
+void GraphModel::buildVisualisations(const QStringList& /*visualisations*/)
+{
+    _mappedNodeVisuals.resetElements();
+    _mappedEdgeVisuals.resetElements();
+
+    //for(auto& visulisation : visualisations)
+    for(bool b = true; b; b = !b)
+    {
+        QString dataFieldName = "";
+        QString channelName = "";
+        bool invert = false;
+
+        if(!u::contains(_dataFields, dataFieldName))
+            continue; //FIXME warn?
+
+        if(!u::contains(_visualisationChannels, channelName))
+            continue;
+
+        auto& dataField = dataFieldByName(dataFieldName);
+        auto& channel = _visualisationChannels.at(channelName);
+
+        if(!channel->supports(dataField.valueType()))
+            continue; //FIXME warn?
+
+        switch(dataField.elementType())
+        {
+        case ElementType::Node:
+            buildElementVisualisations(graph().nodeIds(), dataField,
+                                       *channel.get(), invert, _mappedNodeVisuals);
+            break;
+
+        case ElementType::Edge:
+            buildElementVisualisations(graph().edgeIds(), dataField,
+                                       *channel.get(), invert, _mappedEdgeVisuals);
+            break;
+
+        default:
+            break;
+        }
+    }
+}
+
+QStringList GraphModel::availableVisualisationChannelNames(const QString& dataFieldName) const
+{
+    QStringList stringList;
+
+    auto& dataField = dataFieldByName(dataFieldName);
+
+    for(auto& t : _visualisationChannels)
+    {
+        if(t.second->supports(dataField.valueType()))
+            stringList.append(t.first);
+    }
+
+    return stringList;
+}
+
 QStringList GraphModel::dataFieldNames(ElementType elementType) const
 {
     QStringList dataFieldNames;
@@ -211,8 +309,14 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
     for(auto nodeId : graph().nodeIds())
     {
         _nodeVisuals[nodeId]._size = nodeSize;
-        _nodeVisuals[nodeId]._color = graph().typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Not ?
-                    nodeColor : multiColor;
+        _nodeVisuals[nodeId]._color = _mappedNodeVisuals[nodeId]._color;
+
+        if(!_nodeVisuals[nodeId]._color.isValid())
+        {
+            _nodeVisuals[nodeId]._color = graph().typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Not ?
+                nodeColor : multiColor;
+        }
+
         _nodeVisuals[nodeId]._text = nodeName(nodeId);
 
         if(selectionManager != nullptr)
@@ -245,6 +349,14 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
 
         _edgeVisuals[edgeId]._color = graph().typeOf(edgeId) == EdgeIdDistinctSetCollection::Type::Not ?
                     edgeColor : multiColor;
+
+        _edgeVisuals[edgeId]._color = _mappedEdgeVisuals[edgeId]._color;
+
+        if(!_edgeVisuals[edgeId]._color.isValid())
+        {
+            _edgeVisuals[edgeId]._color = graph().typeOf(edgeId) == EdgeIdDistinctSetCollection::Type::Not ?
+                edgeColor : multiColor;
+        }
     }
 
     emit visualsChanged();

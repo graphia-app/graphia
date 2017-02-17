@@ -4,7 +4,8 @@
 #include "shared/graph/elementid.h"
 #include "shared/transform/idatafield.h"
 #include "shared/graph/igraphcomponent.h"
-#include "utils/qmlenum.h"
+
+#include "fieldtype.h"
 
 #include <functional>
 #include <limits>
@@ -13,9 +14,6 @@
 
 #include <QString>
 #include <QRegularExpression>
-
-DEFINE_QML_ENUM(Q_GADGET, FieldType,
-                Unknown, Int, Float, String);
 
 class DataField : public IDataField
 {

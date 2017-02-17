@@ -8,6 +8,9 @@
 #include "transform/transformedgraph.h"
 #include "transform/datafield.h"
 
+#include "ui/visualisations/elementvisual.h"
+#include "ui/visualisations/visualisationchannel.h"
+
 #include "layout/nodepositions.h"
 
 #include "shared/plugins/iplugin.h"
@@ -16,8 +19,6 @@
 #include <QQuickItem>
 #include <QString>
 #include <QStringList>
-#include <QColor>
-#include <QFlags>
 
 #include <memory>
 #include <utility>
@@ -26,36 +27,8 @@
 class SelectionManager;
 class SearchManager;
 
-enum VisualFlags
-{
-    None     = 0x0,
-    Selected = 0x1,
-    NotFound = 0x2
-};
-
-Q_DECLARE_FLAGS(VisualState, VisualFlags)
-Q_DECLARE_OPERATORS_FOR_FLAGS(VisualState)
-
-struct NodeVisual
-{
-    float _size = 1.0f;
-    QColor _color;
-    QColor _textColor;
-    QString _text;
-    VisualState _state;
-};
-
-using NodeVisuals = NodeArray<NodeVisual>;
-
-struct EdgeVisual
-{
-    float _size = 1.0f;
-    QColor _color;
-    QString _text;
-    VisualState _state;
-};
-
-using EdgeVisuals = EdgeArray<EdgeVisual>;
+using NodeVisuals = NodeArray<ElementVisual>;
+using EdgeVisuals = EdgeArray<ElementVisual>;
 
 class GraphModel : public QObject, public IGraphModel
 {
@@ -69,6 +42,8 @@ private:
     NodePositions _nodePositions;
     NodeVisuals _nodeVisuals;
     EdgeVisuals _edgeVisuals;
+    NodeVisuals _mappedNodeVisuals;
+    EdgeVisuals _mappedEdgeVisuals;
 
     // While loading there may be lots of initial changes, and
     // we don't want to do many visual updates, so disable them
@@ -81,6 +56,8 @@ private:
 
     std::map<QString, DataField> _dataFields;
     std::map<QString, std::unique_ptr<GraphTransformFactory>> _graphTransformFactories;
+
+    std::map<QString, std::unique_ptr<VisualisationChannel>> _visualisationChannels;
 
 public:
     MutableGraph& mutableGraph() { return _graph; }
@@ -107,6 +84,10 @@ public:
     QStringList availableTransformNames() const;
     QStringList availableDataFields(const QString& transformName) const;
     QStringList avaliableConditionFnOps(const QString& dataFieldName) const;
+
+    void buildVisualisations(const QStringList& visualisations);
+
+    QStringList availableVisualisationChannelNames(const QString& dataFieldName) const;
 
     QStringList dataFieldNames(ElementType elementType) const;
 

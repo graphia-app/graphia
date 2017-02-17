@@ -96,7 +96,11 @@ HEADERS += \
     transform/conditionfncreator.h \
     utils/qmlenum.h \
     layout/fastinitiallayout.h \
-    rendering/primitives/arrow.h
+    rendering/primitives/arrow.h \
+    ui/visualisations/colorvisualisationchannel.h \
+    ui/visualisations/elementvisual.h \
+    ui/visualisations/visualisationchannel.h \
+    transform/fieldtype.h
 
 SOURCES += \
     application.cpp \
@@ -157,7 +161,8 @@ SOURCES += \
     transform/graphtransformconfigparser.cpp \
     transform/graphtransformconfig.cpp \
     layout/fastinitiallayout.cpp \
-    rendering/primitives/arrow.cpp
+    rendering/primitives/arrow.cpp \
+    ui/visualisations/colorvisualisationchannel.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \
