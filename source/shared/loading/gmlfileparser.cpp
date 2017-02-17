@@ -74,6 +74,11 @@ template<typename It> bool parseGml(IMutableGraph &graph,
             if(nodeAttributes != nullptr)
             {
                 nodeAttributes->addNodeId(nodeIndexMap[id]);
+
+                // If we don't have a label, use the id
+                if(label.empty())
+                    label = std::to_string(id);
+
                 nodeAttributes->setValueByNodeId(nodeIndexMap[id], QObject::tr("Node Name"),
                                                  QString::fromStdString(label));
             }
