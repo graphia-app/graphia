@@ -48,6 +48,11 @@ namespace u
         return value;
     }
 
+    template<typename T> T normalise(T min, T max, T value)
+    {
+        return (value - min) / (max - min);
+    }
+
     template<typename T> bool signsMatch(T a, T b)
     {
         return (a > 0 && b > 0) || (a <= 0 && b <= 0);
