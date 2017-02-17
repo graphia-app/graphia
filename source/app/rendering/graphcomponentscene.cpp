@@ -3,6 +3,8 @@
 
 #include "graphcomponentrenderer.h"
 
+#include "shared/utils/scope_exit.h"
+
 #include "graph/graphmodel.h"
 
 #include "ui/graphquickitem.h"
@@ -437,6 +439,8 @@ void GraphComponentScene::onGraphWillChange(const Graph* graph)
 
 void GraphComponentScene::onGraphChanged(const Graph* graph, bool changed)
 {
+    std::experimental::make_scope_exit([this] { _graphRenderer->resumeRendererThreadExecution(); });
+
     if(!changed)
         return;
 
@@ -488,8 +492,6 @@ void GraphComponentScene::onGraphChanged(const Graph* graph, bool changed)
             }
         }
     }, "GraphComponentScene::onGraphChanged (setSize/moveFocusToCentreOfComponent)");
-
-    _graphRenderer->resumeRendererThreadExecution();
 }
 
 void GraphComponentScene::onNodeRemoved(const Graph*, NodeId nodeId)

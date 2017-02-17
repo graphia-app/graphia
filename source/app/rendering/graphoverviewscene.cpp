@@ -13,6 +13,7 @@
 
 #include "shared/utils/utils.h"
 #include "shared/utils/preferences.h"
+#include "shared/utils/scope_exit.h"
 
 #include <QPoint>
 
@@ -540,6 +541,8 @@ void GraphOverviewScene::startComponentLayoutTransition()
 
 void GraphOverviewScene::onGraphChanged(const Graph* graph, bool changed)
 {
+    std::experimental::make_scope_exit([this] { _graphRenderer->resumeRendererThreadExecution(); });
+
     if(!changed)
         return;
 
@@ -560,8 +563,6 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph, bool changed)
                              _removedComponentIds.begin(),
                              _removedComponentIds.end());
     }, "GraphOverviewScene::onGraphChanged");
-
-    _graphRenderer->resumeRendererThreadExecution();
 }
 
 void GraphOverviewScene::onPreferenceChanged(const QString& key, const QVariant&)
