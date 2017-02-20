@@ -10,6 +10,8 @@
 #include "transform/graphtransformconfigparser.h"
 
 #include "ui/visualisations/colorvisualisationchannel.h"
+#include "ui/visualisations/sizevisualisationchannel.h"
+#include "ui/visualisations/textvisualisationchannel.h"
 
 #include "shared/utils/enumreflection.h"
 #include "shared/utils/preferences.h"
@@ -61,6 +63,8 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
     _graphTransformFactories.emplace(tr("Contract Edges"),    std::make_unique<EdgeContractionTransformFactory>());
 
     _visualisationChannels.emplace(tr("Colour"), std::make_unique<ColorVisualisationChannel>());
+    _visualisationChannels.emplace(tr("Size"), std::make_unique<SizeVisualisationChannel>());
+    _visualisationChannels.emplace(tr("Text"), std::make_unique<TextVisualisationChannel>());
 }
 
 void GraphModel::setNodeName(NodeId nodeId, const QString& name)
@@ -285,6 +289,17 @@ void GraphModel::enableVisualUpdates()
     updateVisuals();
 }
 
+static float mappedSize(float min, float max, float user, float mapped)
+{
+    // The fraction of the mapped value that contributes to the final value
+    const float mappedRange = 0.5f;
+
+    auto normalised = u::normalise(min, max, user);
+    auto out = (mapped * mappedRange) + (normalised * (1.0f - mappedRange));
+
+    return min + (out * (max - min));
+}
+
 void GraphModel::updateVisuals(const SelectionManager* selectionManager, const SearchManager* searchManager)
 {
     if(!_visualUpdatesEnabled)
@@ -292,11 +307,15 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
 
     emit visualsWillChange();
 
-    auto nodeColor  = u::pref("visuals/defaultNodeColor").value<QColor>();
-    auto edgeColor  = u::pref("visuals/defaultEdgeColor").value<QColor>();
-    auto multiColor = u::pref("visuals/multiElementColor").value<QColor>();
-    auto nodeSize   = u::pref("visuals/defaultNodeSize").toFloat();
-    auto edgeSize   = u::pref("visuals/defaultEdgeSize").toFloat();
+    auto nodeColor      = u::pref("visuals/defaultNodeColor").value<QColor>();
+    auto edgeColor      = u::pref("visuals/defaultEdgeColor").value<QColor>();
+    auto multiColor     = u::pref("visuals/multiElementColor").value<QColor>();
+    auto nodeSize       = u::pref("visuals/defaultNodeSize").toFloat();
+    auto minNodeSize    = u::minPref("visuals/defaultNodeSize").toFloat();
+    auto maxNodeSize    = u::maxPref("visuals/defaultNodeSize").toFloat();
+    auto edgeSize       = u::pref("visuals/defaultEdgeSize").toFloat();
+    auto minEdgeSize    = u::minPref("visuals/defaultEdgeSize").toFloat();
+    auto maxEdgeSize    = u::maxPref("visuals/defaultEdgeSize").toFloat();
 
     if(searchManager != nullptr)
     {
@@ -308,16 +327,30 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
 
     for(auto nodeId : graph().nodeIds())
     {
-        _nodeVisuals[nodeId]._size = nodeSize;
-        _nodeVisuals[nodeId]._color = _mappedNodeVisuals[nodeId]._color;
+        // Size
+        if(_mappedNodeVisuals[nodeId]._size >= 0.0f)
+        {
+            _nodeVisuals[nodeId]._size = mappedSize(minNodeSize, maxNodeSize,
+                                         _nodeVisuals[nodeId]._size,
+                                         _mappedNodeVisuals[nodeId]._size);
+        }
+        else
+            _nodeVisuals[nodeId]._size = nodeSize;
 
-        if(!_nodeVisuals[nodeId]._color.isValid())
+        // Color
+        if(!_mappedNodeVisuals[nodeId]._color.isValid())
         {
             _nodeVisuals[nodeId]._color = graph().typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Not ?
                 nodeColor : multiColor;
         }
+        else
+            _nodeVisuals[nodeId]._color = _mappedNodeVisuals[nodeId]._color;
 
-        _nodeVisuals[nodeId]._text = nodeName(nodeId);
+        // Text
+        if(!_mappedNodeVisuals[nodeId]._text.isEmpty())
+            _nodeVisuals[nodeId]._text = _mappedNodeVisuals[nodeId]._text;
+        else
+            _nodeVisuals[nodeId]._text = nodeName(nodeId);
 
         if(selectionManager != nullptr)
         {
@@ -341,22 +374,34 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
 
     for(auto edgeId : graph().edgeIds())
     {
+        // Size
+        if(_mappedEdgeVisuals[edgeId]._size >= 0.0f)
+        {
+            _edgeVisuals[edgeId]._size = mappedSize(minEdgeSize, maxEdgeSize,
+                                         _edgeVisuals[edgeId]._size,
+                                         _mappedEdgeVisuals[edgeId]._size);
+        }
+        else
+            _edgeVisuals[edgeId]._size = edgeSize;
+
         // Restrict edgeSize to be no larger than the source or target size
         auto& edge = graph().edgeById(edgeId);
-        auto minNodeSize = std::min(_nodeVisuals[edge.sourceId()]._size,
-                                    _nodeVisuals[edge.targetId()]._size);
-        _edgeVisuals[edgeId]._size = std::min(edgeSize, minNodeSize);
+        auto minEdgeNodesSize = std::min(_nodeVisuals[edge.sourceId()]._size,
+                                         _nodeVisuals[edge.targetId()]._size);
+        _edgeVisuals[edgeId]._size = std::min(_edgeVisuals[edgeId]._size, minEdgeNodesSize);
 
-        _edgeVisuals[edgeId]._color = graph().typeOf(edgeId) == EdgeIdDistinctSetCollection::Type::Not ?
-                    edgeColor : multiColor;
-
-        _edgeVisuals[edgeId]._color = _mappedEdgeVisuals[edgeId]._color;
-
-        if(!_edgeVisuals[edgeId]._color.isValid())
+        // Color
+        if(!_mappedEdgeVisuals[edgeId]._color.isValid())
         {
             _edgeVisuals[edgeId]._color = graph().typeOf(edgeId) == EdgeIdDistinctSetCollection::Type::Not ?
                 edgeColor : multiColor;
         }
+        else
+            _edgeVisuals[edgeId]._color = _mappedEdgeVisuals[edgeId]._color;
+
+        // Text
+        if(!_mappedEdgeVisuals[edgeId]._text.isEmpty())
+            _edgeVisuals[edgeId]._text = _mappedEdgeVisuals[edgeId]._text;
     }
 
     emit visualsChanged();

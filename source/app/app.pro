@@ -100,7 +100,9 @@ HEADERS += \
     ui/visualisations/colorvisualisationchannel.h \
     ui/visualisations/elementvisual.h \
     ui/visualisations/visualisationchannel.h \
-    transform/fieldtype.h
+    transform/fieldtype.h \
+    ui/visualisations/sizevisualisationchannel.h \
+    ui/visualisations/textvisualisationchannel.h
 
 SOURCES += \
     application.cpp \
@@ -162,7 +164,9 @@ SOURCES += \
     transform/graphtransformconfig.cpp \
     layout/fastinitiallayout.cpp \
     rendering/primitives/arrow.cpp \
-    ui/visualisations/colorvisualisationchannel.cpp
+    ui/visualisations/colorvisualisationchannel.cpp \
+    ui/visualisations/sizevisualisationchannel.cpp \
+    ui/visualisations/textvisualisationchannel.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \
