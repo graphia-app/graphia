@@ -231,6 +231,8 @@ public slots:
     void removeGraphTransform(int index);
     void updateGraphTransforms();
 
+    QStringList availableVisualisationChannelNames(const QString& dataFieldName) const;
+
     void dumpGraph();
 
 private slots:

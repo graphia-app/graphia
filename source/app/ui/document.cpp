@@ -889,6 +889,11 @@ void Document::updateGraphTransforms()
         setTransforms(newGraphTransforms);
 }
 
+QStringList Document::availableVisualisationChannelNames(const QString& dataFieldName) const
+{
+    return _graphModel != nullptr ? _graphModel->availableVisualisationChannelNames(dataFieldName) : QStringList();
+}
+
 void Document::dumpGraph()
 {
     _graphModel->graph().dumpToQDebug(2);
