@@ -51,7 +51,7 @@ static bool checkComponents(const Graph& graph)
     return consistent;
 }
 
-static bool checkComponents(const GraphComponent&) { return true; }
+static bool checkComponents(const IGraphComponent&) { return true; }
 
 template<typename G, typename C> bool check(const G& graph, const C& component,
                                             ComponentId thisComponentId)

@@ -33,6 +33,8 @@ public:
     virtual EdgeId id() const = 0;
 };
 
+class IGraphComponent;
+
 class IGraph : public virtual IGraphArrayClient
 {
 public:
@@ -47,6 +49,11 @@ public:
     virtual int numEdges() const = 0;
     virtual const IEdge& edgeById(EdgeId edgeId) const = 0;
     virtual bool containsEdgeId(EdgeId edgeId) const = 0;
+
+    virtual const std::vector<ComponentId>& componentIds() const = 0;
+    virtual int numComponents() const = 0;
+    virtual const IGraphComponent* componentById(ComponentId componentId) const = 0;
+    virtual bool containsComponentId(ComponentId componentId) const = 0;
 
     virtual void setPhase(const QString& phase) const = 0;
     virtual void clearPhase() const = 0;

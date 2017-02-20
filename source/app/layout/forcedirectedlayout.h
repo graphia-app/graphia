@@ -49,7 +49,7 @@ private:
     void finishChangeDetection();
 
 public:
-    ForceDirectedLayout(const GraphComponent& graphComponent,
+    ForceDirectedLayout(const IGraphComponent& graphComponent,
                         NodePositions& positions,
                         const LayoutSettings* settings) :
         Layout(graphComponent, positions, settings, Iterative::Yes, 0.4f, 4),

@@ -42,7 +42,7 @@ private:
     Iterative _iterative;
     float _scaling;
     int _smoothing;
-    const GraphComponent* _graphComponent;
+    const IGraphComponent* _graphComponent;
     NodePositions* _positions;
 
     void setCancel(bool cancel) { _atomicCancel = cancel; }
@@ -56,7 +56,7 @@ protected:
     NodePositions& positions() { return *_positions; }
 
 public:
-    Layout(const GraphComponent& graphComponent,
+    Layout(const IGraphComponent& graphComponent,
            NodePositions& positions,
            const LayoutSettings* settings = nullptr,
            Iterative iterative = Iterative::No,
@@ -75,7 +75,7 @@ public:
     float scaling() const { return _scaling; }
     int smoothing() const { return _smoothing; }
 
-    const GraphComponent& graphComponent() const { return *_graphComponent; }
+    const IGraphComponent& graphComponent() const { return *_graphComponent; }
     const std::vector<NodeId>& nodeIds() const { return _graphComponent->nodeIds(); }
     const std::vector<EdgeId>& edgeIds() const { return _graphComponent->edgeIds(); }
 

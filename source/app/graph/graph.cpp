@@ -267,7 +267,7 @@ bool Graph::containsComponentId(ComponentId componentId) const
     return false;
 }
 
-const GraphComponent* Graph::componentById(ComponentId componentId) const
+const IGraphComponent* Graph::componentById(ComponentId componentId) const
 {
     if(_componentManager)
         return _componentManager->componentById(componentId);

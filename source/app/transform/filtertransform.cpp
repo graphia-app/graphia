@@ -8,7 +8,7 @@
 
 #include <QObject>
 
-static bool componentFiltered(const std::vector<ComponentConditionFn>& filters, const GraphComponent& component)
+static bool componentFiltered(const std::vector<ComponentConditionFn>& filters, const IGraphComponent& component)
 {
     for(auto& filter : filters)
     {

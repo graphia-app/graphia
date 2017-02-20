@@ -183,7 +183,7 @@ public:
         }
     }
 
-    void build(const GraphComponent& graph, const NodePositions& nodePositions)
+    void build(const IGraphComponent& graph, const NodePositions& nodePositions)
     {
         BoundingBox3D boundingBox = BoundingBox3D(NodePositions::positionsVector(nodePositions, graph.nodeIds()));
         Q_ASSERT(boundingBox.valid());
