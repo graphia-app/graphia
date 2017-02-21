@@ -51,7 +51,14 @@ public:
 private:
     const Graph* _source;
     std::unique_ptr<GraphTransform> _graphTransform;
+
+    // TransformedGraph has the target as a member rather than inheriting
+    // from MutableGraph for two reasons:
+    //   1. A TransformedGraph shouldn't be mutable
+    //   2. The signals the target emits must be intercepted before being
+    //      passed on to other parts of the application
     MutableGraph _target;
+
     bool _graphChangeOccurred = false;
     bool _autoRebuild = false;
 
