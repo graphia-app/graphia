@@ -14,9 +14,11 @@
 
 #include "commands/deleteselectednodescommand.h"
 #include "commands/applytransformationscommand.h"
+#include "commands/applyvisualisationscommand.h"
 #include "commands/selectnodescommand.h"
 
 #include "transform/graphtransformconfigparser.h"
+#include "ui/visualisations/visualisationconfigparser.h"
 
 #include "searchmanager.h"
 #include "selectionmanager.h"
@@ -195,6 +197,15 @@ void Document::setTransforms(const QStringList& transforms)
         appendGraphTransform(transform);
 }
 
+void Document::setVisualisations(const QStringList& visualisations)
+{
+    _visualisations = visualisations;
+
+    _visualisationsModel.clear();
+    for(const auto& visualisation : visualisations)
+        appendVisualisation(visualisation);
+}
+
 
 float Document::fps() const
 {
@@ -249,6 +260,16 @@ QStringList Document::graphTransformConfigurationsFromUI() const
     return transforms;
 }
 
+QStringList Document::visualisationsFromUI() const
+{
+    QStringList visualisations;
+
+    for(const auto& variant : _visualisationsModel.list())
+        visualisations.append(variant.toString());
+
+    return visualisations;
+}
+
 bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QString& pluginName, const QVariantMap& parameters)
 {
     auto* plugin = _application->pluginForName(pluginName);
@@ -298,6 +319,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
     _graphFileParserThread->start(std::move(parser), [this]
     {
         _graphModel->buildTransforms(_pluginInstance->defaultTransforms());
+        _graphModel->buildVisualisations(_pluginInstance->defaultVisualisations());
     });
 
     return true;
@@ -892,6 +914,74 @@ void Document::updateGraphTransforms()
 QStringList Document::availableVisualisationChannelNames(const QString& dataFieldName) const
 {
     return _graphModel != nullptr ? _graphModel->availableVisualisationChannelNames(dataFieldName) : QStringList();
+}
+
+QVariantMap Document::parseVisualisation(const QString& visualisation) const
+{
+    VisualisationConfigParser p;
+    if(p.parse(visualisation))
+        return p.result().asVariantMap();
+
+    return {};
+}
+
+bool Document::visualisationIsValid(const QString& visualisation) const
+{
+    return _graphModel != nullptr ? _graphModel->visualisationIsValid(visualisation) : false;
+}
+
+void Document::appendVisualisation(const QString& visualisation)
+{
+    _visualisationsModel.append(visualisation);
+}
+
+void Document::removeVisualisation(int index)
+{
+    Q_ASSERT(index >= 0 && index < _visualisationsModel.count());
+    _visualisationsModel.remove(index);
+}
+
+// This tests two transform lists to determine if replacing one with the
+// other would actually result in a different transformation
+static bool visualisationsDiffer(const QStringList& a, const QStringList& b)
+{
+    if(a.length() != b.length())
+        return true;
+
+    VisualisationConfigParser p;
+
+    for(int i = 0; i < a.length(); i++)
+    {
+        VisualisationConfig ai, bi;
+
+        if(p.parse(a[i]))
+            ai = p.result();
+
+        if(p.parse(b[i]))
+            bi = p.result();
+
+        if(ai != bi)
+            return true;
+    }
+
+    return false;
+}
+
+void Document::updateVisualisations()
+{
+    if(_graphModel == nullptr)
+        return;
+
+    auto newVisualisations = visualisationsFromUI();
+
+    if(visualisationsDiffer(_visualisations, newVisualisations))
+    {
+        _commandManager.execute(std::make_shared<ApplyVisualisationsCommand>(
+            _graphModel.get(), this,
+            _visualisations, newVisualisations));
+    }
+    else
+        setVisualisations(newVisualisations);
 }
 
 void Document::dumpGraph()

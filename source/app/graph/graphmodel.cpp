@@ -12,6 +12,7 @@
 #include "ui/visualisations/colorvisualisationchannel.h"
 #include "ui/visualisations/sizevisualisationchannel.h"
 #include "ui/visualisations/textvisualisationchannel.h"
+#include "ui/visualisations/visualisationconfigparser.h"
 
 #include "shared/utils/enumreflection.h"
 #include "shared/utils/preferences.h"
@@ -167,6 +168,28 @@ QStringList GraphModel::avaliableConditionFnOps(const QString& dataFieldName) co
     return GraphTransformConfigParser::ops(_dataFields.at(dataFieldName).valueType());
 }
 
+bool GraphModel::visualisationIsValid(const QString& visualisation) const
+{
+    VisualisationConfigParser p;
+    bool parsed = p.parse(visualisation);
+
+    if(parsed)
+    {
+        const auto& visualisationConfig = p.result();
+
+        if(!u::contains(_dataFields, visualisationConfig._dataFieldName))
+            return false;
+
+        if(!u::contains(_visualisationChannels, visualisationConfig._channelName))
+            return false;
+
+        return true;
+    }
+
+    return false;
+}
+
+
 template<typename ElementIds, typename Visuals>
 static void buildElementVisualisations(const ElementIds& elementIds,
                                        const DataField& dataField,
@@ -202,16 +225,21 @@ static void buildElementVisualisations(const ElementIds& elementIds,
     }
 }
 
-void GraphModel::buildVisualisations(const QStringList& /*visualisations*/)
+void GraphModel::buildVisualisations(const QStringList& visualisations)
 {
     _mappedNodeVisuals.resetElements();
     _mappedEdgeVisuals.resetElements();
 
-    //for(auto& visulisation : visualisations)
-    for(bool b = true; b; b = !b)
+    for(auto& visualisation : visualisations)
     {
-        QString dataFieldName = "";
-        QString channelName = "";
+        VisualisationConfigParser visualisationConfigParser;
+
+        if(!visualisationConfigParser.parse(visualisation))
+            continue;
+
+        const auto& visualisationConfig = visualisationConfigParser.result();
+        const auto& dataFieldName = visualisationConfig._dataFieldName;
+        const auto& channelName = visualisationConfig._channelName;
         bool invert = false;
 
         if(!u::contains(_dataFields, dataFieldName))
@@ -330,8 +358,7 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
         // Size
         if(_mappedNodeVisuals[nodeId]._size >= 0.0f)
         {
-            _nodeVisuals[nodeId]._size = mappedSize(minNodeSize, maxNodeSize,
-                                         _nodeVisuals[nodeId]._size,
+            _nodeVisuals[nodeId]._size = mappedSize(minNodeSize, maxNodeSize, nodeSize,
                                          _mappedNodeVisuals[nodeId]._size);
         }
         else
@@ -377,8 +404,7 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
         // Size
         if(_mappedEdgeVisuals[edgeId]._size >= 0.0f)
         {
-            _edgeVisuals[edgeId]._size = mappedSize(minEdgeSize, maxEdgeSize,
-                                         _edgeVisuals[edgeId]._size,
+            _edgeVisuals[edgeId]._size = mappedSize(minEdgeSize, maxEdgeSize, edgeSize,
                                          _mappedEdgeVisuals[edgeId]._size);
         }
         else

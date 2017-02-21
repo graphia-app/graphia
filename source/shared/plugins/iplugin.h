@@ -26,6 +26,7 @@ public:
     virtual std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) = 0;
     virtual void applyParameter(const QString& name, const QString& value) = 0;
     virtual QStringList defaultTransforms() const = 0;
+    virtual QStringList defaultVisualisations() const = 0;
 };
 
 class IPluginInstanceProvider

@@ -85,6 +85,7 @@ public:
     QStringList availableDataFields(const QString& transformName) const;
     QStringList avaliableConditionFnOps(const QString& dataFieldName) const;
 
+    bool visualisationIsValid(const QString& visualisation) const;
     void buildVisualisations(const QStringList& visualisations);
 
     QStringList availableVisualisationChannelNames(const QString& dataFieldName) const;

@@ -64,6 +64,8 @@ class Document : public QObject
 
     Q_PROPERTY(QQmlVariantListModel* transforms READ transformsModel CONSTANT)
 
+    Q_PROPERTY(QQmlVariantListModel* visualisations READ visualisationsModel CONSTANT)
+
     Q_PROPERTY(QmlContainerWrapperBase* layoutSettings READ layoutSettings CONSTANT)
 
     Q_PROPERTY(float fps READ fps NOTIFY fpsChanged)
@@ -100,6 +102,9 @@ public:
 
     QQmlVariantListModel* transformsModel() { return &_graphTransformsModel; }
     Q_INVOKABLE void setTransforms(const QStringList& transforms);
+
+    QQmlVariantListModel* visualisationsModel() { return &_visualisationsModel; }
+    Q_INVOKABLE void setVisualisations(const QStringList& visualisations);
 
     QmlContainerWrapper<LayoutSetting>* layoutSettings() { return &_layoutSettings; }
 
@@ -138,11 +143,15 @@ private:
     QQmlVariantListModel _graphTransformsModel;
     QStringList _graphTransforms;
 
+    QQmlVariantListModel _visualisationsModel;
+    QStringList _visualisations;
+
     bool _userLayoutPaused = false; // true if the user wants the layout to pause
 
     bool _previousIdle = true;
 
     QStringList graphTransformConfigurationsFromUI() const;
+    QStringList visualisationsFromUI() const;
 
     void maybeEmitIdleChanged();
 
@@ -232,6 +241,12 @@ public slots:
     void updateGraphTransforms();
 
     QStringList availableVisualisationChannelNames(const QString& dataFieldName) const;
+
+    QVariantMap parseVisualisation(const QString& visualisation) const;
+    bool visualisationIsValid(const QString& visualisation) const;
+    void appendVisualisation(const QString& visualisation);
+    void removeVisualisation(int index);
+    void updateVisualisations();
 
     void dumpGraph();
 

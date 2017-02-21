@@ -3,7 +3,7 @@
 void ColorVisualisationChannel::apply(double value, ElementVisual& elementVisual) const
 {
     QColor from(Qt::red);
-    QColor to(Qt::white);
+    QColor to(Qt::yellow);
     QColor diff;
 
     auto redDiff = to.redF() -     from.redF();

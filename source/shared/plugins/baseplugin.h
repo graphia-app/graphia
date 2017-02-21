@@ -72,6 +72,7 @@ public:
     void applyParameter(const QString&, const QString&) {}
 
     QStringList defaultTransforms() const { return {}; }
+    QStringList defaultVisualisations() const { return {}; }
 
     IGraphModel* graphModel() { return _graphModel; }
     const IGraphModel* graphModel() const { return _graphModel; }
