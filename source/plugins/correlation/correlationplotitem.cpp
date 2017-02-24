@@ -122,7 +122,7 @@ void CorrelationPlotItem::buildPlot()
     _customPlot.legend->clear();
     _customPlot.clearGraphs();
 
-    if(_customPlot.plotLayout()->rowCount() > 1)
+    while(_customPlot.plotLayout()->rowCount() > 1)
     {
         _customPlot.plotLayout()->removeAt(_customPlot.plotLayout()->rowColToIndex(1, 0));
         _customPlot.plotLayout()->simplify();
@@ -137,14 +137,46 @@ void CorrelationPlotItem::buildPlot()
     _customPlot.xAxis->setTicker(categoryTicker);
     _customPlot.xAxis->setTickLabelRotation(90);
 
-    if(_showColumnNames && _elideLabelWidth > 0)
-    {
-        QFontMetrics metrics(_defaultFont9Pt);
-        int column = 0;
+    bool columnNamesSuppressed = false;
 
-        for(auto& labelName : _labelNames)
-            categoryTicker->addTick(column++, metrics.elidedText(labelName, Qt::ElideRight, _elideLabelWidth));
+    if(_showColumnNames)
+    {
+        if(_elideLabelWidth > 0)
+        {
+            QFontMetrics metrics(_defaultFont9Pt);
+            int column = 0;
+
+            for(auto& labelName : _labelNames)
+                categoryTicker->addTick(column++, metrics.elidedText(labelName, Qt::ElideRight, _elideLabelWidth));
+        }
+        else
+        {
+            auto* text = new QCPTextElement(&_customPlot);
+            text->setLayer(_textLayer);
+            text->setTextFlags(Qt::AlignLeft);
+            text->setFont(_defaultFont9Pt);
+            text->setTextColor(Qt::gray);
+            text->setText(tr("Resize To Expose Column Names"));
+            text->setVisible(true);
+
+            _customPlot.plotLayout()->insertRow(1);
+            _customPlot.plotLayout()->addElement(1, 0, text);
+
+            columnNamesSuppressed = true;
+        }
     }
+
+    if(columnNamesSuppressed && _customPlot.plotLayout()->rowCount() > 1)
+    {
+        auto margins = _customPlot.axisRect()->margins();
+        margins.setBottom(0);
+        _customPlot.axisRect()->setAutoMargins(QCP::MarginSide::msLeft|
+                                               QCP::MarginSide::msRight|
+                                               QCP::MarginSide::msTop);
+        _customPlot.axisRect()->setMargins(margins);
+    }
+    else
+        _customPlot.axisRect()->setAutoMargins(QCP::MarginSide::msAll);
 }
 
 void CorrelationPlotItem::populateMeanAveragePlot()
@@ -185,8 +217,7 @@ void CorrelationPlotItem::populateMeanAveragePlot()
     plotModeTextElement->setLayer(_textLayer);
     plotModeTextElement->setTextFlags(Qt::AlignLeft);
     plotModeTextElement->setFont(_defaultFont9Pt);
-    plotModeTextElement->setTextColor(Qt::black);
-    plotModeTextElement->setVisible(false);
+    plotModeTextElement->setTextColor(Qt::gray);
     plotModeTextElement->setText(
         QString(tr("*Mean average plot of %1 rows (maximum row count for individual plots is %2)"))
                 .arg(_selectedRows.length())
