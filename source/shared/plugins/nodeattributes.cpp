@@ -47,7 +47,9 @@ void NodeAttributes::setNodeNamesToFirstAttribute(IGraphModel& graphModel)
     if(empty())
         return;
 
-    for(NodeId nodeId : graphModel.graph().nodeIds())
+    // We must use the mutable version of the graph here as the transformed one
+    // probably won't contain all of the node ids
+    for(NodeId nodeId : graphModel.mutableGraph().nodeIds())
          graphModel.setNodeName(nodeId, valueByNodeId(nodeId, firstAttributeName()));
 }
 
