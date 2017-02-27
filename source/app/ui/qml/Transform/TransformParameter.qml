@@ -11,6 +11,7 @@ GridLayout
     id: root
 
     property int type
+    property int elementType
     property bool hasRange
     property bool hasMinimumValue
     property bool hasMaximumValue

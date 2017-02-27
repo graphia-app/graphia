@@ -20,9 +20,9 @@ Item
 
     enabled: document.idle
 
-    CreateTransformDialog
+    CreateVisualisationDialog
     {
-        id: createTransformDialog
+        id: createVisualisationDialog
 
         document: root.document
     }
@@ -36,7 +36,7 @@ Item
         {
             component: Component
             {
-                Transform
+                Visualisation
                 {
                     property var document: root.document
 
@@ -48,13 +48,13 @@ Item
                 }
             }
 
-            model: document.transforms
+            model: document.visualisations
             heldColor: root.heldColor
             parentWhenDragging: root
 
-            alignment: Qt.AlignRight
+            alignment: Qt.AlignLeft
 
-            onOrderChanged: { document.updateGraphTransforms(); }
+            onOrderChanged: { document.updateVisualisations(); }
         }
 
         Item
@@ -64,7 +64,7 @@ Item
             // work, so instead we just pad out the button by the margin
             // size with a parent Item
 
-            anchors.right: parent.right
+            anchors.left: parent.left
 
             width: addButton.width + Constants.margin * 2
             height: addButton.height + Constants.margin * 2
@@ -81,8 +81,8 @@ Item
                     verticalCenter: parent.verticalCenter
                 }
 
-                text: qsTr("Add Transform")
-                onClicked: { createTransformDialog.show(); }
+                text: qsTr("Add Visualisation")
+                onClicked: { createVisualisationDialog.show(); }
             }
         }
     }

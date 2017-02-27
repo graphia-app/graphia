@@ -97,8 +97,8 @@ int main(int argc, char *argv[])
     preferences.define("visuals/backgroundColor",           "#C0C0C0");
     preferences.define("visuals/highlightColor",            "#FFFFFF");
 
-    preferences.define("visuals/defaultNodeSize",           0.6, 0.1,  2.0);
-    preferences.define("visuals/defaultEdgeSize",           0.2, 0.02, 2.0);
+    preferences.define("visuals/defaultNodeSize",           0.6, 0.1,  3.0);
+    preferences.define("visuals/defaultEdgeSize",           0.2, 0.01, 2.0);
 
     preferences.define("visuals/showNodeNames",             false);
     preferences.define("visuals/textFont",                  SharedTools::QtSingleApplication::font().family());

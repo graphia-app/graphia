@@ -10,6 +10,7 @@ import "Constants.js" as Constants
 import "Utils.js" as Utils
 
 import "Transform"
+import "Visualisation"
 
 Item
 {
@@ -207,7 +208,7 @@ Item
                     color: root.contrastingColor
 
                     horizontalAlignment: Text.AlignLeft
-                    text: document.fps.toFixed(1) + " fps"
+                    text: document.fps.toFixed(1) + qsTr(" fps")
                 }
             }
 
@@ -286,20 +287,36 @@ Item
 
             Column
             {
-                id: layoutSettings
-
-                visible: toggleLayoutSettingsAction.checked
+                spacing: 10
 
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
-                anchors.margins: Constants.margin
 
-                Repeater
+                Visualisations
                 {
-                    model: document.layoutSettings
-                    LayoutSettingUI
+                    anchors.left: parent.left
+
+                    enabledTextColor: root.contrastingColor
+                    disabledTextColor: root.lessContrastingColor
+                    heldColor: root.leastContrastingColor
+
+                    document: document
+                }
+
+                Column
+                {
+                    anchors.left: parent.left
+                    anchors.margins: Constants.margin
+
+                    visible: toggleLayoutSettingsAction.checked
+
+                    Repeater
                     {
-                        textColor: root.contrastingColor
+                        model: document.layoutSettings
+                        LayoutSettingUI
+                        {
+                            textColor: root.contrastingColor
+                        }
                     }
                 }
             }

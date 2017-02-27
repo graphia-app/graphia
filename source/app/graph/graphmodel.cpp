@@ -142,6 +142,27 @@ QStringList GraphModel::availableTransformNames() const
     return stringList;
 }
 
+QStringList GraphModel::availableDataFields(ElementType elementTypes) const
+{
+    QStringList stringList;
+
+    for(auto& f : _dataFields)
+    {
+        auto dataFieldElementType = static_cast<int>(f.second.elementType());
+        auto requestedElementTypes = static_cast<int>(elementTypes);
+
+        if(!(dataFieldElementType & requestedElementTypes))
+        {
+            // Don't want this type
+            continue;
+        }
+
+        stringList.append(f.first);
+    }
+
+    return stringList;
+}
+
 QStringList GraphModel::availableDataFields(const QString& transformName) const
 {
     QStringList stringList;
@@ -208,8 +229,16 @@ static void buildElementVisualisations(const ElementIds& elementIds,
         for(auto elementId : elementIds)
         {
             double value = dataField.numericValueOf(elementId);
-            value = u::normalise(min, max, value);
-            if(invert) value = 1.0 - value;
+
+            if(channel.requiresNormalisedValue())
+            {
+                value = u::normalise(min, max, value);
+
+                // FIXME only works with normalised values
+                if(invert)
+                    value = 1.0 - value;
+            }
+
             channel.apply(value, visuals[elementId]);
         }
         break;
@@ -238,9 +267,13 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
             continue;
 
         const auto& visualisationConfig = visualisationConfigParser.result();
+
+        if(visualisationConfig.isMetaAttributeSet("disabled"))
+            continue;
+
         const auto& dataFieldName = visualisationConfig._dataFieldName;
         const auto& channelName = visualisationConfig._channelName;
-        bool invert = false;
+        bool invert = visualisationConfig.isMetaAttributeSet("invert");
 
         if(!u::contains(_dataFields, dataFieldName))
             continue; //FIXME warn?
@@ -270,6 +303,8 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
             break;
         }
     }
+
+    updateVisuals();
 }
 
 QStringList GraphModel::availableVisualisationChannelNames(const QString& dataFieldName) const
@@ -285,6 +320,20 @@ QStringList GraphModel::availableVisualisationChannelNames(const QString& dataFi
     }
 
     return stringList;
+}
+
+QString GraphModel::visualisationDescription(const QString& dataFieldName, const QString& channelName) const
+{
+    if(!u::contains(_dataFields, dataFieldName) || !u::contains(_visualisationChannels, channelName))
+        return {};
+
+    auto& dataField = dataFieldByName(dataFieldName);
+    auto& channel = _visualisationChannels.at(channelName);
+
+    if(!channel->supports(dataField.valueType()))
+        return tr("This visualisation channel is not supported for the attribute type.");
+
+    return channel->description(dataField.elementType(), dataField.valueType());
 }
 
 QStringList GraphModel::dataFieldNames(ElementType elementType) const
@@ -428,6 +477,8 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
         // Text
         if(!_mappedEdgeVisuals[edgeId]._text.isEmpty())
             _edgeVisuals[edgeId]._text = _mappedEdgeVisuals[edgeId]._text;
+        else
+            _edgeVisuals[edgeId]._text.clear();
     }
 
     emit visualsChanged();

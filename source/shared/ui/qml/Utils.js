@@ -45,3 +45,9 @@ function printStackTrace()
     var trace = "Stack trace:\n" + elements.join("\n");
     console.log(trace);
 }
+
+function normaliseWhitespace(text)
+{
+    text = text.replace(/\\s+/g, " ");
+    return text;
+}

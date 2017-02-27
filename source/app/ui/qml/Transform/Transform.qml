@@ -21,6 +21,11 @@ Item
     property color disabledTextColor
     property color textColor: enabledMenuItem.checked ? enabledTextColor : disabledTextColor
 
+    function onDoubleClicked()
+    {
+        root.toggle();
+    }
+
     RowLayout
     {
         id: row
@@ -125,7 +130,6 @@ Item
 
     property bool ready: false
 
-    property var metaAttributes: []
     property bool pinned: { return isMetaAttributeSet("pinned"); }
 
     function toggle()
@@ -140,6 +144,7 @@ Item
         updateExpression();
     }
 
+    property var metaAttributes: []
     function setMetaAttribute(attribute, value)
     {
         if(!ready)
@@ -196,29 +201,34 @@ Item
             newExpression = newExpression.replace("%", parameter);
         }
 
-        modelData = newExpression;
+        value = newExpression;
         document.updateGraphTransforms();
     }
 
-    Component.onCompleted:
+    property int index
+    property string value
+    onValueChanged:
     {
-        var transformConfig = new TransformConfig.create(document.parseGraphTransform(modelData));
-        transformConfig.toComponents(document, expression);
-
-        metaAttributes = transformConfig.metaAttributes;
-        template = transformConfig.template;
-        parameters = transformConfig.parameters;
-
-        for(var i = 0; i < parameters.length; i++)
+        if(!ready)
         {
-            var parameter = parameters[i];
-            parameter.valueChanged.connect(updateExpression);
-        }
+            var transformConfig = new TransformConfig.create(document.parseGraphTransform(value));
+            transformConfig.toComponents(document, expression);
 
-        enabledMenuItem.checked = !isMetaAttributeSet("disabled");
-        lockedMenuItem.checked = isMetaAttributeSet("locked");
-        repeatingMenuItem.checked = isMetaAttributeSet("repeating");
-        pinnedMenuItem.checked = isMetaAttributeSet("pinned");
-        ready = true;
+            metaAttributes = transformConfig.metaAttributes;
+            template = transformConfig.template;
+            parameters = transformConfig.parameters;
+
+            for(var i = 0; i < parameters.length; i++)
+            {
+                var parameter = parameters[i];
+                parameter.valueChanged.connect(updateExpression);
+            }
+
+            enabledMenuItem.checked = !isMetaAttributeSet("disabled");
+            lockedMenuItem.checked = isMetaAttributeSet("locked");
+            repeatingMenuItem.checked = isMetaAttributeSet("repeating");
+            pinnedMenuItem.checked = isMetaAttributeSet("pinned");
+            ready = true;
+        }
     }
 }

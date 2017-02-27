@@ -2,6 +2,7 @@
 #define DATAFIELD_H
 
 #include "shared/graph/elementid.h"
+#include "graph/elementtype.h"
 #include "shared/transform/idatafield.h"
 #include "shared/graph/igraphcomponent.h"
 

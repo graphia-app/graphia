@@ -228,9 +228,12 @@ public slots:
     void updateFoundIndex(bool reselectIfInvalidated);
 
     QStringList availableTransformNames() const;
+    QStringList availableDataFields(int types) const;
     QStringList availableDataFields(const QString& transformName) const;
+    int dataFieldType(const QString& dataFieldName) const;
     QStringList avaliableConditionFnOps(const QString& dataFieldName) const;
 
+    QVariantMap dataFieldByName(const QString& dataFieldName) const;
     QVariantMap findTransformParameter(const QString& transformName,
                                        const QString& parameterName) const;
 
@@ -241,6 +244,7 @@ public slots:
     void updateGraphTransforms();
 
     QStringList availableVisualisationChannelNames(const QString& dataFieldName) const;
+    QString visualisationDescription(const QString& dataFieldName, const QString& channelName) const;
 
     QVariantMap parseVisualisation(const QString& visualisation) const;
     bool visualisationIsValid(const QString& visualisation) const;

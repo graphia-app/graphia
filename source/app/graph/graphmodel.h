@@ -82,6 +82,7 @@ public:
     void buildTransforms(const QStringList& transforms);
 
     QStringList availableTransformNames() const;
+    QStringList availableDataFields(ElementType elementTypes) const;
     QStringList availableDataFields(const QString& transformName) const;
     QStringList avaliableConditionFnOps(const QString& dataFieldName) const;
 
@@ -89,6 +90,7 @@ public:
     void buildVisualisations(const QStringList& visualisations);
 
     QStringList availableVisualisationChannelNames(const QString& dataFieldName) const;
+    QString visualisationDescription(const QString& dataFieldName, const QString& channelName) const;
 
     QStringList dataFieldNames(ElementType elementType) const;
 

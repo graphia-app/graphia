@@ -105,7 +105,8 @@ HEADERS += \
     ui/visualisations/textvisualisationchannel.h \
     commands/applyvisualisationscommand.h \
     ui/visualisations/visualisationconfig.h \
-    ui/visualisations/visualisationconfigparser.h
+    ui/visualisations/visualisationconfigparser.h \
+    graph/elementtype.h
 
 SOURCES += \
     application.cpp \
@@ -172,7 +173,8 @@ SOURCES += \
     ui/visualisations/textvisualisationchannel.cpp \
     commands/applyvisualisationscommand.cpp \
     ui/visualisations/visualisationconfig.cpp \
-    ui/visualisations/visualisationconfigparser.cpp
+    ui/visualisations/visualisationconfigparser.cpp \
+    graph/elementtype.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \

@@ -11,7 +11,9 @@ public:
     void apply(double value, ElementVisual& elementVisual) const;
     void apply(const QString& value, ElementVisual& elementVisual) const;
 
-    bool supports(FieldType) { return true; }
+    bool supports(FieldType fieldType) const { return fieldType != FieldType::Unknown; }
+
+    QString description(ElementType, FieldType) const;
 };
 
 #endif // COLORVISUALISATIONCHANNEL_H

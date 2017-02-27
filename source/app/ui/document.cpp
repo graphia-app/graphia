@@ -425,6 +425,9 @@ void Document::onLoadComplete(bool success)
         // inconsistent wrt the CommandManager, so throw away our undo history
         if(!commandInProgress())
             _commandManager.clearCommandStack();
+
+        // If the graph changes then so do our visualisations
+        _graphModel->buildVisualisations(_visualisations);
     });
 
     connect(&_graphModel->graph(), &Graph::graphChanged, &_commandManager,
@@ -769,9 +772,20 @@ QStringList Document::availableTransformNames() const
     return _graphModel != nullptr ? _graphModel->availableTransformNames() : QStringList();
 }
 
+QStringList Document::availableDataFields(int types) const
+{
+    return _graphModel != nullptr ? _graphModel->availableDataFields(static_cast<ElementType>(types)) : QStringList();
+}
+
 QStringList Document::availableDataFields(const QString& transformName) const
 {
     return _graphModel != nullptr ? _graphModel->availableDataFields(transformName) : QStringList();
+}
+
+int Document::dataFieldType(const QString& dataFieldName) const
+{
+    const auto& dataField = _graphModel->dataFieldByName(dataFieldName);
+    return static_cast<int>(dataField.valueType());
 }
 
 QStringList Document::avaliableConditionFnOps(const QString& dataFieldName) const
@@ -779,18 +793,19 @@ QStringList Document::avaliableConditionFnOps(const QString& dataFieldName) cons
     return _graphModel != nullptr ? _graphModel->avaliableConditionFnOps(dataFieldName) : QStringList();
 }
 
-QVariantMap Document::findTransformParameter(const QString& transformName, const QString& parameterName) const
+QVariantMap Document::dataFieldByName(const QString& dataFieldName) const
 {
     QVariantMap map;
 
     if(_graphModel == nullptr)
         return map;
 
-    if(u::contains(_graphModel->availableDataFields(transformName), parameterName))
+    if(u::contains(_graphModel->availableDataFields(ElementType::All), dataFieldName))
     {
         // It's a DataField
-        const auto& dataField = _graphModel->dataFieldByName(parameterName);
+        const auto& dataField = _graphModel->dataFieldByName(dataFieldName);
         map.insert("type", static_cast<int>(dataField.valueType()));
+        map.insert("elementType", static_cast<int>(dataField.elementType()));
 
         map.insert("hasRange", dataField.hasFloatRange() || dataField.hasIntRange());
         map.insert("hasMinimumValue", dataField.hasFloatMin() || dataField.hasIntMin());
@@ -803,12 +818,26 @@ QVariantMap Document::findTransformParameter(const QString& transformName, const
 
         map.insert("description", dataField.description());
     }
+
+    return map;
+}
+
+QVariantMap Document::findTransformParameter(const QString& transformName, const QString& parameterName) const
+{
+    if(_graphModel == nullptr)
+        return {};
+
+    if(u::contains(_graphModel->availableDataFields(transformName), parameterName))
+    {
+        // It's a DataField
+        return dataFieldByName(parameterName);
+    }
     /*else
     {
         //FIXME it's a with ... parameter
     }*/
 
-    return map;
+    return {};
 }
 
 QVariantMap Document::parseGraphTransform(const QString& transform) const
@@ -852,8 +881,9 @@ void Document::removeGraphTransform(int index)
     _graphTransformsModel.remove(index);
 }
 
-static bool metaAttributesDiffer(const GraphTransformConfig& a,
-                                 const GraphTransformConfig& b,
+template<typename Config>
+static bool metaAttributesDiffer(const Config& a,
+                                 const Config& b,
                                  const char* metaAttribute)
 {
     bool aResult = a.isMetaAttributeSet(metaAttribute);
@@ -916,6 +946,11 @@ QStringList Document::availableVisualisationChannelNames(const QString& dataFiel
     return _graphModel != nullptr ? _graphModel->availableVisualisationChannelNames(dataFieldName) : QStringList();
 }
 
+QString Document::visualisationDescription(const QString& dataFieldName, const QString& channelName) const
+{
+    return _graphModel != nullptr ? _graphModel->visualisationDescription(dataFieldName, channelName) : QString();
+}
+
 QVariantMap Document::parseVisualisation(const QString& visualisation) const
 {
     VisualisationConfigParser p;
@@ -959,6 +994,12 @@ static bool visualisationsDiffer(const QStringList& a, const QStringList& b)
 
         if(p.parse(b[i]))
             bi = p.result();
+
+        if(metaAttributesDiffer(ai, bi, "disabled"))
+            return true;
+
+        if(metaAttributesDiffer(ai, bi, "invert"))
+            return true;
 
         if(ai != bi)
             return true;

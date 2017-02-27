@@ -2,6 +2,7 @@
 #define GRAPHTRANSFORM_H
 
 #include "shared/graph/elementid.h"
+#include "graph/elementtype.h"
 #include "graphtransformconfig.h"
 
 #include <memory>

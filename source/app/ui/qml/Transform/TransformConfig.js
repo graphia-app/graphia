@@ -53,12 +53,6 @@ function sanitiseOp(text)
     return text;
 }
 
-function normaliseWhitespace(text)
-{
-    text = text.replace(/\\s+/g, " ");
-    return text;
-}
-
 function create(transform)
 {
     this.action = transform.action;
@@ -143,10 +137,10 @@ function create(transform)
         function addLabel()
         {
             labelText = labelText.trim();
-            Qt.createQmlObject(qsTr("import QtQuick 2.5;" +
+            Qt.createQmlObject(qsTr("import QtQuick 2.7;" +
                                     "import QtQuick.Controls 1.4;" +
                                     "Label { text: \"%1\"; color: root.textColor }")
-                                    .arg(normaliseWhitespace(labelText)), parent);
+                                    .arg(Utils.normaliseWhitespace(labelText)), parent);
 
             labelText = "";
         }
