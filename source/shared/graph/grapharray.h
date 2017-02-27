@@ -49,7 +49,7 @@ public:
         _defaultValue(other._defaultValue)
     {}
 
-    virtual ~GenericGraphArray() {}
+    virtual ~GenericGraphArray() = default;
 
     GenericGraphArray& operator=(const GenericGraphArray& other)
     {

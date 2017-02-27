@@ -8,7 +8,7 @@ class GPUComputeJob : protected OpenGLFunctions
 public:
     void initialise() { resolveOpenGLFunctions(); }
 
-    virtual ~GPUComputeJob() {}
+    virtual ~GPUComputeJob() = default;
     virtual void run() = 0;
 };
 

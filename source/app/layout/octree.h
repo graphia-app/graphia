@@ -130,7 +130,7 @@ private:
 
 public:
     BaseOctree() : _predicate([](const BoundingBox3D&) { return true; }) {}
-    virtual ~BaseOctree() {}
+    virtual ~BaseOctree() = default;
 
     void setMaxNodesPerLeaf(unsigned int maxNodesPerLeaf) { _maxNodesPerLeaf = maxNodesPerLeaf; }
     void setPredicate(std::function<bool(const BoundingBox3D&)> predicate) { _predicate = predicate; }

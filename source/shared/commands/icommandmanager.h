@@ -9,7 +9,7 @@
 class ICommandManager
 {
 public:
-    virtual ~ICommandManager() {}
+    virtual ~ICommandManager() = default;
 
     virtual void execute(const std::shared_ptr<ICommand>& command) = 0;
 

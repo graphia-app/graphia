@@ -15,7 +15,7 @@ public:
     explicit Scene(QObject* parent = nullptr) :
         QObject(parent)
     {}
-    virtual ~Scene() {}
+    virtual ~Scene() = default;
 
     virtual void cleanup() {}
     virtual void update(float t) = 0;

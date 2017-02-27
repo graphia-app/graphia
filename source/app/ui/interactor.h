@@ -17,7 +17,7 @@ public:
         QObject(parent)
     {}
 
-    virtual ~Interactor() {}
+    virtual ~Interactor() = default;
 
     virtual void mousePressEvent(QMouseEvent*) = 0;
     virtual void mouseReleaseEvent(QMouseEvent*) = 0;

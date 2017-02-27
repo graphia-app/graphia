@@ -53,7 +53,7 @@ class ICommand;
 class GraphInitialiser
 {
 public:
-    virtual ~GraphInitialiser() {}
+    virtual ~GraphInitialiser() = default;
 
     void initialiseFromGraph(const Graph* graph);
 

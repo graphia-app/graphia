@@ -14,7 +14,7 @@ class DataField;
 class GraphTransform
 {
 public:
-    virtual ~GraphTransform() {}
+    virtual ~GraphTransform() = default;
 
     // In some circumstances it may be a performance win to reimplement this instead of going
     // for the inplace transform version
@@ -33,7 +33,7 @@ private:
 class GraphTransformFactory
 {
 public:
-    virtual ~GraphTransformFactory() {}
+    virtual ~GraphTransformFactory() = default;
 
     virtual ElementType elementType() const { return ElementType::None; }
     virtual std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig,

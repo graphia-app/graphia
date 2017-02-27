@@ -13,7 +13,7 @@ using ComponentLayoutData = ComponentArray<Circle, u::Locking>;
 class ComponentLayout
 {
 public:
-    virtual ~ComponentLayout() {}
+    virtual ~ComponentLayout() = default;
 
     void execute(const Graph &graph, const std::vector<ComponentId>& componentIds,
                  ComponentLayoutData &componentLayoutData);

@@ -83,7 +83,7 @@ public:
     Command& operator=(const Command&) = delete;
     Command& operator=(Command&&) = delete;
 
-    virtual ~Command() {}
+    virtual ~Command() = default;
 
     QString description() const { return _description; }
     QString verb() const { return _verb; }

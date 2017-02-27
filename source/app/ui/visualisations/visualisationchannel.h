@@ -9,7 +9,7 @@
 class VisualisationChannel
 {
 public:
-    virtual ~VisualisationChannel() {}
+    virtual ~VisualisationChannel() = default;
 
     // Numerical value is normalised
     virtual void apply(double, ElementVisual&) const { Q_ASSERT(!"apply not implemented"); }

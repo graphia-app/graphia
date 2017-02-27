@@ -109,7 +109,7 @@ public:
         _graphModel(graphModel)
     {}
 
-    virtual ~LayoutFactory() {}
+    virtual ~LayoutFactory() = default;
 
     LayoutSettings& settings()
     {

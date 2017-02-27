@@ -11,7 +11,7 @@
 class ICommand
 {
 public:
-    virtual ~ICommand() {}
+    virtual ~ICommand() = default;
 
     virtual QString description() const = 0;
     virtual QString verb() const { return description(); }

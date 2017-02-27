@@ -9,7 +9,7 @@
 class IGraphComponent
 {
 public:
-    virtual ~IGraphComponent() {};
+    virtual ~IGraphComponent() = default;
 
     virtual const std::vector<NodeId>& nodeIds() const = 0;
     int numNodes() const { return static_cast<int>(nodeIds().size()); }
