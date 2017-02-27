@@ -2,6 +2,7 @@
 #define ELEMENTID_H
 
 #include <QDebug>
+#include <QString>
 
 #include <unordered_set>
 #include <unordered_map>
