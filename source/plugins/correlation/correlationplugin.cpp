@@ -129,16 +129,16 @@ bool CorrelationPluginInstance::loadAttributes(const TabularData& tabularData, i
             .setFloatMin(minVariance).setFloatMax(maxVariance)
             .setDescription(tr("The <a href=\"https://en.wikipedia.org/wiki/Variance\">Variance</a> "
                                "is a measure of the spread of the values associated "
-                               "with the node. It is defined as ∑(x-μ)², where x is the value "
-                               "and μ is the mean."));
+                               "with the node. It is defined as ∑(𝑥-𝜇)², where 𝑥 is the value "
+                               "and 𝜇 is the mean."));
 
     graphModel()->dataField(tr("Standard Deviation"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._stddev; })
             .setFloatMin(minStdDev).setFloatMax(maxStdDev)
             .setDescription(tr("The <a href=\"https://en.wikipedia.org/wiki/Standard_deviation\">"
                                "Standard Deviation</a> is a measure of the spread of the values associated "
-                               "with the node. It is defined as √∑(x-μ)², where x is the value "
-                               "and μ is the mean."));
+                               "with the node. It is defined as √∑(𝑥-𝜇)², where 𝑥 is the value "
+                               "and 𝜇 is the mean."));
 
     return true;
 }
