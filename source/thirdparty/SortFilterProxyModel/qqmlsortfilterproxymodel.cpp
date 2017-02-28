@@ -159,6 +159,53 @@ QVariant QQmlSortFilterProxyModel::sourceData(const QModelIndex &sourceIndex, in
     return sourceModel()->data(sourceIndex, role);
 }
 
+int QQmlSortFilterProxyModel::roleForName(const QString& roleName) const
+{
+    return roleNames().key(roleName.toUtf8(), -1);
+}
+
+QVariantMap QQmlSortFilterProxyModel::get(int row) const
+{
+    QVariantMap map;
+    QModelIndex modelIndex = index(row, 0);
+    QHash<int, QByteArray> roles = roleNames();
+    for (QHash<int, QByteArray>::const_iterator it = roles.begin(); it != roles.end(); ++it)
+        map.insert(it.value(), data(modelIndex, it.key()));
+    return map;
+}
+
+QVariant QQmlSortFilterProxyModel::get(int row, const QString& roleName) const
+{
+    return data(index(row, 0), roleForName(roleName));
+}
+
+QModelIndex QQmlSortFilterProxyModel::mapToSource(const QModelIndex& proxyIndex) const
+{
+    return QSortFilterProxyModel::mapToSource(proxyIndex);
+}
+
+int QQmlSortFilterProxyModel::mapToSource(int proxyRow) const
+{
+    QModelIndex proxyIndex = index(proxyRow, 0);
+    QModelIndex sourceIndex = mapToSource(proxyIndex);
+    return sourceIndex.isValid() ? sourceIndex.row() : -1;
+}
+
+QModelIndex QQmlSortFilterProxyModel::mapFromSource(const QModelIndex& sourceIndex) const
+{
+    return QSortFilterProxyModel::mapFromSource(sourceIndex);
+}
+
+int QQmlSortFilterProxyModel::mapFromSource(int sourceRow) const
+{
+    QModelIndex proxyIndex;
+    if (QAbstractItemModel* source = sourceModel()) {
+        QModelIndex sourceIndex = source->index(sourceRow, 0);
+        proxyIndex = mapFromSource(sourceIndex);
+    }
+    return proxyIndex.isValid() ? proxyIndex.row() : -1;
+}
+
 bool QQmlSortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
 {
     if (!m_completed)
