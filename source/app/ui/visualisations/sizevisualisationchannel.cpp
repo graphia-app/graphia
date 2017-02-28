@@ -2,9 +2,13 @@
 
 #include <QObject>
 
-void SizeVisualisationChannel::apply(double value, ElementVisual& elementVisual) const
+bool SizeVisualisationChannel::apply(double value, ElementVisual& elementVisual) const
 {
+    bool alreadySet = elementVisual._size >= 0.0f;
+
     elementVisual._size = value;
+
+    return alreadySet;
 }
 
 QString SizeVisualisationChannel::description(ElementType elementType, FieldType) const

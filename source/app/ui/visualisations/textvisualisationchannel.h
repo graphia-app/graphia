@@ -8,8 +8,8 @@ class TextVisualisationChannel : public VisualisationChannel
 public:
     using VisualisationChannel::VisualisationChannel;
 
-    void apply(double value, ElementVisual& elementVisual) const;
-    void apply(const QString& value, ElementVisual& elementVisual) const;
+    bool apply(double value, ElementVisual& elementVisual) const;
+    bool apply(const QString& value, ElementVisual& elementVisual) const;
 
     bool supports(FieldType fieldType) const { return fieldType != FieldType::Unknown; }
     bool requiresNormalisedValue() const { return false; }

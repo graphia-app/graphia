@@ -2,8 +2,10 @@
 
 #include <QObject>
 
-void ColorVisualisationChannel::apply(double value, ElementVisual& elementVisual) const
+bool ColorVisualisationChannel::apply(double value, ElementVisual& elementVisual) const
 {
+    bool alreadySet = elementVisual._color.isValid();
+
     QColor from(Qt::red);
     QColor to(Qt::yellow);
     QColor diff;
@@ -15,12 +17,16 @@ void ColorVisualisationChannel::apply(double value, ElementVisual& elementVisual
     elementVisual._color.setRedF(from.redF() +     (value * redDiff));
     elementVisual._color.setGreenF(from.greenF() + (value * greenDiff));
     elementVisual._color.setBlueF(from.blueF() +   (value * blueDiff));
+
+    return alreadySet;
 }
 
-void ColorVisualisationChannel::apply(const QString& value, ElementVisual& elementVisual) const
+bool ColorVisualisationChannel::apply(const QString& value, ElementVisual& elementVisual) const
 {
+    bool alreadySet = elementVisual._color.isValid();
+
     if(value.isEmpty())
-        return;
+        return false;
 
     auto hash = qHash(value);
     int value1 = static_cast<int>(hash % 65535);
@@ -31,6 +37,8 @@ void ColorVisualisationChannel::apply(const QString& value, ElementVisual& eleme
         255,                          // Saturation
         ((value2 * 127) / 65535) + 64 // Lightness
         );
+
+    return alreadySet;
 }
 
 QString ColorVisualisationChannel::description(ElementType elementType, FieldType fieldType) const
