@@ -44,8 +44,6 @@ public:
 
     QHash<int, QByteArray> roleNames() const { return _roleNames; }
 
-    Q_INVOKABLE int modelIndexRow(const QModelIndex& index) const;
-
     void onSelectionChanged();
 
 signals:

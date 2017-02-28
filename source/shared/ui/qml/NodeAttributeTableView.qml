@@ -51,10 +51,7 @@ TableView
             var rows = [];
             tableView.selection.forEach(function(rowIndex)
             {
-                var modelIndex = model.index(rowIndex, 0);
-                var sourceModelIndex = model.mapToSource(modelIndex);
-                var sourceRowIndex = nodeAttributesModel.modelIndexRow(sourceModelIndex);
-                rows.push(sourceRowIndex);
+                rows.push(model.mapToSource(rowIndex));
             });
 
             selectedRows = rows;

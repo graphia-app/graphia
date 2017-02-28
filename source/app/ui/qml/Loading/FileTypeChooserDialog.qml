@@ -86,9 +86,7 @@ Dialog
 
             property var selectedFileType:
             {
-                var index = proxyModel.index(currentIndex, 0);
-                var mappedIndex = proxyModel.mapToSource(index);
-
+                var mappedIndex = proxyModel.mapToSource(currentIndex);
                 return fileTypeChooserDialog.model.nameAtIndex(mappedIndex);
             }
 

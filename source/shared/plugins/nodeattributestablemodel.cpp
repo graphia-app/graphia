@@ -64,11 +64,6 @@ QVariant NodeAttributesTableModel::data(const QModelIndex& index, int role) cons
     return QVariant();
 }
 
-int NodeAttributesTableModel::modelIndexRow(const QModelIndex& index) const
-{
-    return index.row();
-}
-
 void NodeAttributesTableModel::onSelectionChanged()
 {
     emit layoutChanged();

@@ -81,9 +81,7 @@ Dialog
 
             property var selectedPlugin:
             {
-                var index = proxyModel.index(currentIndex, 0);
-                var mappedIndex = proxyModel.mapToSource(index);
-
+                var mappedIndex = proxyModel.mapToSource(currentIndex);
                 return pluginChooserDialog.model.nameAtIndex(mappedIndex);
             }
 
