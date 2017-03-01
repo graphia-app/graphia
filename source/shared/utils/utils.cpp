@@ -262,14 +262,21 @@ QQuaternion u::matrixToQuaternion(const QMatrix4x4& m)
 
 bool u::isNumeric(const std::string& string)
 {
+    std::size_t pos;
+    long double value = 0.0;
+
     try
     {
-        Q_UNUSED(std::stof(string));
+        value = std::stold(string, &pos);
     }
     catch(std::invalid_argument&)
     {
         return false;
     }
+    catch(std::out_of_range&)
+    {
+        return false;
+    }
 
-    return true;
+    return pos == string.size() && !std::isnan(value);
 }
