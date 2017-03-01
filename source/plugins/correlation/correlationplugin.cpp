@@ -33,6 +33,12 @@ void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionMa
 bool CorrelationPluginInstance::loadAttributes(const TabularData& tabularData, int firstDataColumn, int firstDataRow,
                                                const std::function<bool()>& cancelled, const IParser::ProgressFn& progress)
 {
+    Q_ASSERT(firstDataColumn > 0);
+    Q_ASSERT(firstDataRow > 0);
+
+    if(firstDataColumn <= 0 || firstDataRow <= 0)
+        return false;
+
     progress(-1);
 
     uint64_t numDataPoints = tabularData.numColumns() * tabularData.numRows();

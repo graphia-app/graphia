@@ -29,6 +29,7 @@ int NodeAttributes::rowIndexForNodeId(NodeId nodeId) const
 
 NodeId NodeAttributes::nodeIdForRowIndex(int row) const
 {
+    Q_ASSERT(u::contains(_rowToNodeIdMap, row));
     return _rowToNodeIdMap.at(row);
 }
 
