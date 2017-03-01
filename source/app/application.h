@@ -39,7 +39,7 @@ public:
     QHash<int, QByteArray> roleNames() const;
 
 public slots:
-    QString nameAtIndex(const QModelIndex& i) const { return data(i, Name).toString(); }
+    QString nameAtIndex(int row) const { return data(index(row, 0), Name).toString(); }
 
 private:
     const std::vector<IPlugin*>* _plugins;
@@ -66,7 +66,7 @@ public:
     QHash<int, QByteArray> roleNames() const;
 
 public slots:
-    QString nameAtIndex(const QModelIndex& i) const { return data(i, Name).toString(); }
+    QString nameAtIndex(int row) const { return data(index(row, 0), Name).toString(); }
 
 private:
     const std::vector<IPlugin*>* _plugins;
