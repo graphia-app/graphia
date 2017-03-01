@@ -212,14 +212,12 @@ bool GraphModel::visualisationIsValid(const QString& visualisation) const
 
 
 template<typename ElementIds, typename Visuals>
-static bool buildElementVisualisations(const ElementIds& elementIds,
+static void buildElementVisualisations(const ElementIds& elementIds,
                                        const DataField& dataField,
                                        const VisualisationChannel& channel,
                                        bool invert,
                                        Visuals& visuals)
 {
-    bool overiddenVisualisations = false;
-
     switch(dataField.valueType())
     {
     case FieldType::Int:
@@ -241,25 +239,19 @@ static bool buildElementVisualisations(const ElementIds& elementIds,
                     value = 1.0 - value;
             }
 
-            overiddenVisualisations = channel.apply(value, visuals[elementId]) || overiddenVisualisations;
+            channel.apply(value, visuals[elementId]);
         }
         break;
     }
 
     case FieldType::String:
         for(auto elementId : elementIds)
-        {
-            overiddenVisualisations =
-                    channel.apply(dataField.stringValueOf(elementId), visuals[elementId]) ||
-                    overiddenVisualisations;
-        }
+            channel.apply(dataField.stringValueOf(elementId), visuals[elementId]);
         break;
 
     default:
         break;
     }
-
-    return overiddenVisualisations;
 }
 
 void GraphModel::buildVisualisations(const QStringList& visualisations)
@@ -295,17 +287,16 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         if(!channel->supports(dataField.valueType()))
             continue; //FIXME warn?
 
-        bool overiddenVisualisations = false;
         switch(dataField.elementType())
         {
         case ElementType::Node:
-            overiddenVisualisations = buildElementVisualisations(graph().nodeIds(), dataField,
-                *channel.get(), invert, _mappedNodeVisuals);
+            buildElementVisualisations(graph().nodeIds(), dataField,
+                                       *channel.get(), invert, _mappedNodeVisuals);
             break;
 
         case ElementType::Edge:
-            overiddenVisualisations = buildElementVisualisations(graph().edgeIds(), dataField,
-                *channel.get(), invert, _mappedEdgeVisuals);
+            buildElementVisualisations(graph().edgeIds(), dataField,
+                                       *channel.get(), invert, _mappedEdgeVisuals);
             break;
 
         default:

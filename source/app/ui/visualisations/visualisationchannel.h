@@ -13,9 +13,8 @@ public:
     virtual ~VisualisationChannel() = default;
 
     // Numerical value is normalised
-    // The return value indicates whether or not application replaced an existing visualisation
-    virtual bool apply(double, ElementVisual&) const { Q_ASSERT(!"apply not implemented"); }
-    virtual bool apply(const QString&, ElementVisual&) const { Q_ASSERT(!"apply not implemented"); }
+    virtual void apply(double, ElementVisual&) const { Q_ASSERT(!"apply not implemented"); }
+    virtual void apply(const QString&, ElementVisual&) const { Q_ASSERT(!"apply not implemented"); }
 
     virtual bool supports(FieldType) const = 0;
     virtual bool requiresNormalisedValue() const { return true; }

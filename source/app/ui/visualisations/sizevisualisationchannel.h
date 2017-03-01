@@ -8,8 +8,8 @@ class SizeVisualisationChannel : public VisualisationChannel
 public:
     using VisualisationChannel::VisualisationChannel;
 
-    using VisualisationChannel::apply; // Avoid overloaded-virtual warning
-    bool apply(double value, ElementVisual& elementVisual) const;
+    void apply(double value, ElementVisual& elementVisual) const;
+    void apply(const QString&, ElementVisual&) const {} //FIXME
 
     bool supports(FieldType type) const { return type == FieldType::Int || type == FieldType::Float; }
 
