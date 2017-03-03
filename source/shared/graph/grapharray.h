@@ -331,4 +331,21 @@ public:
     }
 };
 
+template<typename ElementId, typename Element>
+class _ElementIdArray {};
+
+template<typename Element>
+struct _ElementIdArray<NodeId, Element> { using type = NodeArray<Element>; };
+
+template<typename Element>
+struct _ElementIdArray<EdgeId, Element> { using type = EdgeArray<Element>; };
+
+template<typename Element>
+struct _ElementIdArray<ComponentId, Element> { using type = ComponentArray<Element>; };
+
+// Use this to generically create Node/Edge/ComponentArrays
+// e.g. ElementIdArray<NodeId, Element> = NodeArray<Element>
+template<typename ElementId, typename Element>
+using ElementIdArray = typename _ElementIdArray<ElementId, Element>::type;
+
 #endif // GRAPHARRAY_H
