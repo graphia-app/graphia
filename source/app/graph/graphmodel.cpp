@@ -13,6 +13,7 @@
 #include "ui/visualisations/sizevisualisationchannel.h"
 #include "ui/visualisations/textvisualisationchannel.h"
 #include "ui/visualisations/visualisationconfigparser.h"
+#include "ui/visualisations/visualisationbuilder.h"
 
 #include "shared/utils/enumreflection.h"
 #include "shared/utils/preferences.h"
@@ -210,57 +211,20 @@ bool GraphModel::visualisationIsValid(const QString& visualisation) const
     return false;
 }
 
-
-template<typename ElementIds, typename Visuals>
-static void buildElementVisualisations(const ElementIds& elementIds,
-                                       const DataField& dataField,
-                                       const VisualisationChannel& channel,
-                                       bool invert,
-                                       Visuals& visuals)
-{
-    switch(dataField.valueType())
-    {
-    case FieldType::Int:
-    case FieldType::Float:
-    {
-        double min, max;
-        std::tie(min, max) = dataField.findNumericRange(elementIds);
-
-        for(auto elementId : elementIds)
-        {
-            double value = dataField.numericValueOf(elementId);
-
-            if(channel.requiresNormalisedValue())
-            {
-                value = u::normalise(min, max, value);
-
-                // FIXME only works with normalised values
-                if(invert)
-                    value = 1.0 - value;
-            }
-
-            channel.apply(value, visuals[elementId]);
-        }
-        break;
-    }
-
-    case FieldType::String:
-        for(auto elementId : elementIds)
-            channel.apply(dataField.stringValueOf(elementId), visuals[elementId]);
-        break;
-
-    default:
-        break;
-    }
-}
-
 void GraphModel::buildVisualisations(const QStringList& visualisations)
 {
     _mappedNodeVisuals.resetElements();
     _mappedEdgeVisuals.resetElements();
 
-    for(auto& visualisation : visualisations)
+    VisualisationsBuilder<NodeId> nodeVisualisationsBuilder(_graph, graph().nodeIds(), _mappedNodeVisuals);
+    VisualisationsBuilder<EdgeId> edgeVisualisationsBuilder(_graph, graph().edgeIds(), _mappedEdgeVisuals);
+
+    VisualisationAlertsMap alertsMap;
+
+    for(int index = 0; index < visualisations.size(); index++)
     {
+        auto& visualisation = visualisations.at(index);
+
         VisualisationConfigParser visualisationConfigParser;
 
         if(!visualisationConfigParser.parse(visualisation))
@@ -276,7 +240,11 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         bool invert = visualisationConfig.isMetaAttributeSet("invert");
 
         if(!u::contains(_dataFields, dataFieldName))
-            continue; //FIXME warn?
+        {
+            alertsMap[index].emplace_back(VisualisationAlert::Type::Error,
+                tr("Attribute doesn't exist"));
+            continue;
+        }
 
         if(!u::contains(_visualisationChannels, channelName))
             continue;
@@ -285,24 +253,29 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         auto& channel = _visualisationChannels.at(channelName);
 
         if(!channel->supports(dataField.valueType()))
-            continue; //FIXME warn?
+        {
+            alertsMap[index].emplace_back(VisualisationAlert::Type::Error,
+                tr("Visualisation doesn't support attribute type"));
+            continue;
+        }
 
         switch(dataField.elementType())
         {
         case ElementType::Node:
-            buildElementVisualisations(graph().nodeIds(), dataField,
-                                       *channel.get(), invert, _mappedNodeVisuals);
+            nodeVisualisationsBuilder.build(dataField, *channel.get(), invert, index);
             break;
 
         case ElementType::Edge:
-            buildElementVisualisations(graph().edgeIds(), dataField,
-                                       *channel.get(), invert, _mappedEdgeVisuals);
+            edgeVisualisationsBuilder.build(dataField, *channel.get(), invert, index);
             break;
 
         default:
             break;
         }
     }
+
+    nodeVisualisationsBuilder.findOverrideAlerts(alertsMap);
+    edgeVisualisationsBuilder.findOverrideAlerts(alertsMap);
 
     updateVisuals();
 }
