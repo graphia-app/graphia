@@ -13,6 +13,7 @@ Column
     property Item parentWhenDragging
     property int alignment
 
+    property bool _movingItem: false
     signal orderChanged()
 
     Component
@@ -130,6 +131,9 @@ Column
 
                     onLoaded:
                     {
+                        if(root._movingItem)
+                            return;
+
                         if(item.index !== undefined)
                             item.index = index;
 
@@ -174,10 +178,12 @@ Column
                 {
                     if(dragArea._dragStartIndex !== dragArea.DelegateModel.itemsIndex)
                     {
+                        root._movingItem = true;
                         // Reflect the drop in the actual model
                         root.model.move(
                             dragArea._dragStartIndex,
                             dragArea.DelegateModel.itemsIndex);
+                        root._movingItem = false;
                         root.orderChanged();
                     }
                 }
