@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.7
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.1
 import com.kajeka 1.0
@@ -91,6 +91,12 @@ Item
             id: expression
             enabled: enabledMenuItem.checked
         }
+
+        AlertIcon
+        {
+            id: alertIcon
+            visible: false
+        }
     }
 
     property bool ready: false
@@ -147,6 +153,30 @@ Item
         document.updateVisualisations();
     }
 
+    function setVisualisationAlert(visualisationAlert)
+    {
+        switch(visualisationAlert.type)
+        {
+        case VisualisationAlertType.Error:
+            alertIcon.type = "error";
+            alertIcon.text = visualisationAlert.text;
+            alertIcon.visible = true;
+            break;
+
+        case VisualisationAlertType.Warning:
+            alertIcon.type = "warning";
+            alertIcon.text = visualisationAlert.text;
+            alertIcon.visible = true;
+            break;
+
+        default:
+        case VisualisationAlertType.None:
+            alertIcon.visible = false;
+        }
+
+
+    }
+
     property int index
     property string value
     onValueChanged:
@@ -162,6 +192,10 @@ Item
 
             enabledMenuItem.checked = !isMetaAttributeSet("disabled");
             invertMenuItem.checked = isMetaAttributeSet("invert");
+
+            var visualisationAlert = document.visualisationAlertAtIndex(index);
+            setVisualisationAlert(visualisationAlert);
+
             ready = true;
         }
     }
