@@ -130,14 +130,14 @@ Column
 
                     onLoaded:
                     {
+                        if(item.index !== undefined)
+                            item.index = index;
+
                         if(item.value !== undefined)
                         {
                             item.value = modelData;
                             item.valueChanged.connect(function() { modelData = item.value; });
                         }
-
-                        if(item.index !== undefined)
-                            item.index = index;
                     }
                 }
             }
