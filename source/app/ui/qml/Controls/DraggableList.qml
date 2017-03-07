@@ -145,7 +145,14 @@ Column
             DropArea
             {
                 id: dropArea
-                anchors { fill: parent }
+                anchors
+                {
+                    top: parent.top
+                    bottom: parent.bottom
+                    left: alignment === Qt.AlignLeft ? parent.left : undefined
+                    right: alignment === Qt.AlignRight ? parent.right : undefined
+                }
+                width: root.width
 
                 onEntered:
                 {
