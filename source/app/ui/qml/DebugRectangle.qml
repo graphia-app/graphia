@@ -13,6 +13,6 @@ Rectangle
         color: borderColor
     }
 
-    anchors { fill : item }
+    anchors.fill: item
 }
 

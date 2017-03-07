@@ -27,5 +27,9 @@
         <file>qml/Visualisation/Visualisation.qml</file>
         <file>qml/Visualisation/VisualisationConfig.js</file>
         <file>qml/Controls/DraggableList.qml</file>
+        <file>qml/Controls/AlertIcon.qml</file>
+        <file>qml/Controls/warning.png</file>
+        <file>qml/Controls/error.png</file>
+        <file>qml/Controls/ToolTip.qml</file>
     </qresource>
 </RCC>
