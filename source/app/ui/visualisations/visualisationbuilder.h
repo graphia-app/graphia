@@ -93,7 +93,7 @@ public:
                         else
                         {
                             alerts[iv._index].emplace_back(VisualisationAlertType::Error,
-                                QObject::tr("Completely overriden by subsequent visualisations"));
+                                QObject::tr("Overriden by subsequent visualisations"));
                         }
                     }
                 }
