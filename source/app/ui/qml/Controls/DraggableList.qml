@@ -162,16 +162,24 @@ Column
                     // Must both be pinned or neither pinned
                     if(sourcePinned === targetPinned)
                     {
-                        root.model.move(
+                        // Do the move in the DelegateModel, so there is a visual change, but leave
+                        // the underlying model alone for now
+                        delegateModel.items.move(
                                 drag.source.DelegateModel.itemsIndex,
-                                dragArea.DelegateModel.itemsIndex);
+                                dragArea.DelegateModel.itemsIndex, 1);
                     }
                 }
 
                 onDropped:
                 {
                     if(dragArea._dragStartIndex !== dragArea.DelegateModel.itemsIndex)
+                    {
+                        // Reflect the drop in the actual model
+                        root.model.move(
+                            dragArea._dragStartIndex,
+                            dragArea.DelegateModel.itemsIndex);
                         root.orderChanged();
+                    }
                 }
             }
 
