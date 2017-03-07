@@ -245,6 +245,7 @@ public slots:
 
     QStringList availableVisualisationChannelNames(const QString& dataFieldName) const;
     QString visualisationDescription(const QString& dataFieldName, const QString& channelName) const;
+    QVariantMap visualisationAlertAtIndex(int index) const;
 
     QVariantMap parseVisualisation(const QString& visualisation) const;
     bool visualisationIsValid(const QString& visualisation) const;

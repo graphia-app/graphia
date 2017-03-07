@@ -215,11 +215,10 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 {
     _mappedNodeVisuals.resetElements();
     _mappedEdgeVisuals.resetElements();
+    _visualisationAlertsMap.clear();
 
     VisualisationsBuilder<NodeId> nodeVisualisationsBuilder(_graph, graph().nodeIds(), _mappedNodeVisuals);
     VisualisationsBuilder<EdgeId> edgeVisualisationsBuilder(_graph, graph().edgeIds(), _mappedEdgeVisuals);
-
-    VisualisationAlertsMap alertsMap;
 
     for(int index = 0; index < visualisations.size(); index++)
     {
@@ -241,7 +240,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 
         if(!u::contains(_dataFields, dataFieldName))
         {
-            alertsMap[index].emplace_back(VisualisationAlert::Type::Error,
+            _visualisationAlertsMap[index].emplace_back(VisualisationAlertType::Error,
                 tr("Attribute doesn't exist"));
             continue;
         }
@@ -254,7 +253,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 
         if(!channel->supports(dataField.valueType()))
         {
-            alertsMap[index].emplace_back(VisualisationAlert::Type::Error,
+            _visualisationAlertsMap[index].emplace_back(VisualisationAlertType::Error,
                 tr("Visualisation doesn't support attribute type"));
             continue;
         }
@@ -274,8 +273,8 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         }
     }
 
-    nodeVisualisationsBuilder.findOverrideAlerts(alertsMap);
-    edgeVisualisationsBuilder.findOverrideAlerts(alertsMap);
+    nodeVisualisationsBuilder.findOverrideAlerts(_visualisationAlertsMap);
+    edgeVisualisationsBuilder.findOverrideAlerts(_visualisationAlertsMap);
 
     updateVisuals();
 }
@@ -307,6 +306,14 @@ QString GraphModel::visualisationDescription(const QString& dataFieldName, const
         return tr("This visualisation channel is not supported for the attribute type.");
 
     return channel->description(dataField.elementType(), dataField.valueType());
+}
+
+std::vector<VisualisationAlert> GraphModel::visualisationAlertsAtIndex(int index) const
+{
+    if(u::contains(_visualisationAlertsMap, index))
+        return _visualisationAlertsMap.at(index);
+
+    return {};
 }
 
 QStringList GraphModel::dataFieldNames(ElementType elementType) const

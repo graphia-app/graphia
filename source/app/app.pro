@@ -107,7 +107,8 @@ HEADERS += \
     ui/visualisations/visualisationconfig.h \
     ui/visualisations/visualisationconfigparser.h \
     graph/elementtype.h \
-    ui/visualisations/visualisationbuilder.h
+    ui/visualisations/visualisationbuilder.h \
+    ui/visualisations/visualisationalert.h
 
 SOURCES += \
     application.cpp \

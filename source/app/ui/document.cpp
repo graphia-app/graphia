@@ -951,6 +951,35 @@ QString Document::visualisationDescription(const QString& dataFieldName, const Q
     return _graphModel != nullptr ? _graphModel->visualisationDescription(dataFieldName, channelName) : QString();
 }
 
+QVariantMap Document::visualisationAlertAtIndex(int index) const
+{
+    QVariantMap map;
+
+    map.insert("type", static_cast<int>(VisualisationAlertType::None));
+    map.insert("text", "");
+
+    if(_graphModel == nullptr)
+        return map;
+
+    auto visualisationAlerts = _graphModel->visualisationAlertsAtIndex(index);
+
+    if(visualisationAlerts.empty())
+        return map;
+
+    std::sort(visualisationAlerts.begin(), visualisationAlerts.end(),
+    [](auto& a, auto& b)
+    {
+        return a._type > b._type;
+    });
+
+    auto& visualisationAlert = visualisationAlerts.at(0);
+
+    map.insert("type", static_cast<int>(visualisationAlert._type));
+    map.insert("text", visualisationAlert._text);
+
+    return map;
+}
+
 QVariantMap Document::parseVisualisation(const QString& visualisation) const
 {
     VisualisationConfigParser p;

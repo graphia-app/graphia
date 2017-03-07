@@ -2,32 +2,15 @@
 #define VISUALISATIONBUILDER_H
 
 #include "visualisationchannel.h"
+#include "visualisationalert.h"
 
 #include "shared/graph/grapharray.h"
 #include "transform/datafield.h"
 
 #include <vector>
-#include <map>
 #include <array>
 
 #include <QtGlobal>
-
-struct VisualisationAlert
-{
-    enum class Type
-    {
-        Warning,
-        Error
-    } _type;
-
-    QString _text;
-
-    VisualisationAlert(Type type, const QString& text) :
-        _type(type), _text(text)
-    {}
-};
-
-using VisualisationAlertsMap = std::map<int, std::vector<VisualisationAlert>>;
 
 template<typename ElementId>
 class VisualisationsBuilder
@@ -104,12 +87,12 @@ public:
                     {
                         if(bothSet != sourceSet)
                         {
-                            alerts[iv._index].emplace_back(VisualisationAlert::Type::Warning,
+                            alerts[iv._index].emplace_back(VisualisationAlertType::Warning,
                                 QObject::tr("Partially overriden by subsequent visualisations"));
                         }
                         else
                         {
-                            alerts[iv._index].emplace_back(VisualisationAlert::Type::Error,
+                            alerts[iv._index].emplace_back(VisualisationAlertType::Error,
                                 QObject::tr("Completely overriden by subsequent visualisations"));
                         }
                     }

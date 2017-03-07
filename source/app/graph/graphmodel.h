@@ -10,6 +10,7 @@
 
 #include "ui/visualisations/elementvisual.h"
 #include "ui/visualisations/visualisationchannel.h"
+#include "ui/visualisations/visualisationalert.h"
 
 #include "layout/nodepositions.h"
 
@@ -40,10 +41,12 @@ private:
     MutableGraph _graph;
     TransformedGraph _transformedGraph;
     NodePositions _nodePositions;
+
     NodeVisuals _nodeVisuals;
     EdgeVisuals _edgeVisuals;
     NodeVisuals _mappedNodeVisuals;
     EdgeVisuals _mappedEdgeVisuals;
+    VisualisationAlertsMap _visualisationAlertsMap;
 
     // While loading there may be lots of initial changes, and
     // we don't want to do many visual updates, so disable them
@@ -91,6 +94,7 @@ public:
 
     QStringList availableVisualisationChannelNames(const QString& dataFieldName) const;
     QString visualisationDescription(const QString& dataFieldName, const QString& channelName) const;
+    std::vector<VisualisationAlert> visualisationAlertsAtIndex(int index) const;
 
     QStringList dataFieldNames(ElementType elementType) const;
 
