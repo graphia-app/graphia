@@ -8,7 +8,6 @@ BaseGenericPluginInstance::BaseGenericPluginInstance() :
     _userNodeDataTableModel(&_userNodeData)
 {
     connect(this, SIGNAL(loadSuccess()), this, SLOT(onLoadSuccess()));
-    connect(this, SIGNAL(graphChanged()), this, SLOT(onGraphChanged()));
     connect(this, SIGNAL(selectionChanged(const ISelectionManager*)),
             this, SLOT(onSelectionChanged(const ISelectionManager*)));
 }
@@ -67,17 +66,6 @@ void BaseGenericPluginInstance::onLoadSuccess()
 {
     _userNodeData.setNodeNamesToFirstUserDataVector(*graphModel());
     _userNodeData.exposeAsAttributes(*graphModel());
-}
-
-void BaseGenericPluginInstance::onGraphChanged()
-{
-    if(_edgeWeights != nullptr)
-    {
-        float min = *std::min_element(_edgeWeights->begin(), _edgeWeights->end());
-        float max = *std::max_element(_edgeWeights->begin(), _edgeWeights->end());
-
-        graphModel()->attribute(tr("Edge Weight")).setFloatMin(min).setFloatMax(max);
-    }
 }
 
 void BaseGenericPluginInstance::onSelectionChanged(const ISelectionManager*)

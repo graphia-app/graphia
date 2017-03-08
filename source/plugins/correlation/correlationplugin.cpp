@@ -9,7 +9,6 @@ CorrelationPluginInstance::CorrelationPluginInstance() :
     _userNodeDataTableModel(&_userNodeData)
 {
     connect(this, SIGNAL(loadSuccess()), this, SLOT(onLoadSuccess()));
-    connect(this, SIGNAL(graphChanged()), this, SLOT(onGraphChanged()));
     connect(this, SIGNAL(selectionChanged(const ISelectionManager*)),
             this, SLOT(onSelectionChanged(const ISelectionManager*)));
 }
@@ -87,52 +86,23 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, int
         }
     }
 
-    double minMeanValue = std::numeric_limits<double>::max();
-    double maxMeanValue = std::numeric_limits<double>::min();
-    double minMinValue = std::numeric_limits<double>::max();
-    double maxMinValue = std::numeric_limits<double>::min();
-    double minMaxValue = std::numeric_limits<double>::max();
-    double maxMaxValue = std::numeric_limits<double>::min();
-    double minVariance = std::numeric_limits<double>::max();
-    double maxVariance = std::numeric_limits<double>::min();
-    double minStdDev = std::numeric_limits<double>::max();
-    double maxStdDev = std::numeric_limits<double>::min();
-
-    for(const auto& dataRow : _dataRows)
-    {
-        minMeanValue = std::min(minMeanValue, dataRow._mean);
-        maxMeanValue = std::max(maxMeanValue, dataRow._mean);
-        minMinValue = std::min(minMinValue, dataRow._minValue);
-        maxMinValue = std::max(maxMinValue, dataRow._minValue);
-        minMaxValue = std::min(minMaxValue, dataRow._maxValue);
-        maxMaxValue = std::max(maxMaxValue, dataRow._maxValue);
-        minVariance = std::min(minVariance, dataRow._variance);
-        maxVariance = std::max(maxVariance, dataRow._variance);
-        minStdDev = std::min(minStdDev, dataRow._stddev);
-        maxStdDev = std::max(maxStdDev, dataRow._stddev);
-    }
-
     graphModel()->attribute(tr("Mean Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._mean; })
-            .setFloatMin(minMeanValue).setFloatMax(maxMeanValue)
             .setDescription(tr("The Mean Data Value is the mean of the values associated "
                                "with the node."));
 
     graphModel()->attribute(tr("Minimum Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._minValue; })
-            .setFloatMin(minMinValue).setFloatMax(maxMinValue)
             .setDescription(tr("The Minimum Data Value is the minimum value associated "
                                "with the node."));
 
     graphModel()->attribute(tr("Maximum Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._maxValue; })
-            .setFloatMin(minMaxValue).setFloatMax(maxMaxValue)
             .setDescription(tr("The Maximum Data Value is the maximum value associated "
                                "with the node."));
 
     graphModel()->attribute(tr("Variance"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._variance; })
-            .setFloatMin(minVariance).setFloatMax(maxVariance)
             .setDescription(tr("The <a href=\"https://en.wikipedia.org/wiki/Variance\">Variance</a> "
                                "is a measure of the spread of the values associated "
                                "with the node. It is defined as ∑(𝑥-𝜇)², where 𝑥 is the value "
@@ -140,7 +110,6 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, int
 
     graphModel()->attribute(tr("Standard Deviation"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._stddev; })
-            .setFloatMin(minStdDev).setFloatMax(maxStdDev)
             .setDescription(tr("The <a href=\"https://en.wikipedia.org/wiki/Standard_deviation\">"
                                "Standard Deviation</a> is a measure of the spread of the values associated "
                                "with the node. It is defined as √∑(𝑥-𝜇)², where 𝑥 is the value "
@@ -294,17 +263,6 @@ QStringList CorrelationPluginInstance::rowNames()
 const CorrelationPluginInstance::DataRow& CorrelationPluginInstance::dataRowForNodeId(NodeId nodeId) const
 {
     return _dataRows.at(_userNodeData.rowIndexForNodeId(nodeId));
-}
-
-void CorrelationPluginInstance::onGraphChanged()
-{
-    if(_pearsonValues != nullptr && !_pearsonValues->empty())
-    {
-        double min = *std::min_element(_pearsonValues->begin(), _pearsonValues->end());
-        double max = *std::max_element(_pearsonValues->begin(), _pearsonValues->end());
-
-        graphModel()->attribute(tr("Pearson Correlation Value")).setFloatMin(min).setFloatMax(max);
-    }
 }
 
 void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager*)

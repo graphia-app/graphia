@@ -109,6 +109,9 @@ public slots:
     void onFoundNodeIdsChanged(const SearchManager* searchManager);
     void onPreferenceChanged(const QString&, const QVariant&);
 
+private slots:
+    void onMutableGraphChanged(const IGraph* graph);
+
 signals:
     void visualsWillChange();
     void visualsChanged();

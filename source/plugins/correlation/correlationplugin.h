@@ -157,7 +157,6 @@ public:
 private slots:
     void onLoadSuccess();
 
-    void onGraphChanged();
     void onSelectionChanged(const ISelectionManager* selectionManager);
 
 signals:

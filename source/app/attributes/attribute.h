@@ -31,7 +31,15 @@ private:
     ValueFn<QString, EdgeId> _stringEdgeIdFn;
     ValueFn<QString, const IGraphComponent&> _stringComponentFn;
 
-    void clearFunctions();
+    void clearFunctions(bool setAutoRange = false);
+
+    enum class AutoRange
+    {
+        Unknown,
+        No,
+        Yes
+    }
+    _autoRange = AutoRange::Unknown;
 
     int _intMin = std::numeric_limits<int>::max();
     int _intMax = std::numeric_limits<int>::min();
@@ -163,6 +171,38 @@ public:
         }
 
         return minMax;
+    }
+
+    template<typename E>
+    void autoSetRange(const std::vector<E>& elementIds)
+    {
+        if(_autoRange == AutoRange::No)
+            return;
+
+        if(valueType() == FieldType::Float)
+        {
+            _floatMin = std::numeric_limits<double>::max();
+            _floatMax = std::numeric_limits<double>::min();
+
+            for(auto elementId : elementIds)
+            {
+                auto v = valueOf<double>(elementId);
+                _floatMin = std::min(v, _floatMin);
+                _floatMax = std::max(v, _floatMax);
+            }
+        }
+        else if(valueType() == FieldType::Int)
+        {
+            _intMin = std::numeric_limits<int>::max();
+            _intMax = std::numeric_limits<int>::min();
+
+            for(auto elementId : elementIds)
+            {
+                auto v = valueOf<int>(elementId);
+                _intMin = std::min(v, _intMin);
+                _intMax = std::max(v, _intMax);
+            }
+        }
     }
 
     bool searchable() const { return _searchable; }

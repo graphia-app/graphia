@@ -68,8 +68,6 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
                     {
                         return valueByNodeId(nodeId, userDataVectorName).toFloat();
                     })
-                    .setFloatMin(static_cast<float>(userDataVector.floatMin()))
-                    .setFloatMax(static_cast<float>(userDataVector.floatMax()))
                     .setSearchable(true);
             break;
 
@@ -79,8 +77,6 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
                     {
                         return valueByNodeId(nodeId, userDataVectorName).toInt();
                     })
-                    .setIntMin(userDataVector.intMin())
-                    .setIntMax(userDataVector.intMax())
                     .setSearchable(true);
             break;
 

@@ -18,6 +18,7 @@
 #include "shared/utils/enumreflection.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/utils.h"
+#include "shared/utils/pair_iterator.h"
 
 #include <QRegularExpression>
 
@@ -43,6 +44,8 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
     {
        _edgeVisuals[edgeId]._state = VisualFlags::None;
     });
+
+    connect(&_graph, &Graph::graphChanged, this, &GraphModel::onMutableGraphChanged, Qt::DirectConnection);
 
     connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphModel::onPreferenceChanged);
 
@@ -477,5 +480,16 @@ void GraphModel::onFoundNodeIdsChanged(const SearchManager* searchManager)
 void GraphModel::onPreferenceChanged(const QString&, const QVariant&)
 {
     updateVisuals();
+}
+
+void GraphModel::onMutableGraphChanged(const IGraph* graph)
+{
+    for(auto& attribute : make_value_wrapper(_attributes))
+    {
+        if(attribute.elementType() == ElementType::Node)
+            attribute.autoSetRange(graph->nodeIds());
+        else if(attribute.elementType() == ElementType::Edge)
+            attribute.autoSetRange(graph->edgeIds());
+    }
 }
 
