@@ -28,7 +28,7 @@ function create(visualisation)
         {
             labelText = labelText.trim();
             Qt.createQmlObject(qsTr("import QtQuick 2.7;" +
-                                    "import QtQuick.Controls 1.4;" +
+                                    "import QtQuick.Controls 1.5;" +
                                     "Label { text: \"%1\"; color: root.textColor }")
                                     .arg(Utils.normaliseWhitespace(labelText)), parent);
 
