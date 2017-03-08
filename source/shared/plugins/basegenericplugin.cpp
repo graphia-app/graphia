@@ -7,7 +7,7 @@
 BaseGenericPluginInstance::BaseGenericPluginInstance() :
     _nodeAttributesTableModel(&_nodeAttributes)
 {
-    connect(this, SIGNAL(loadComplete()), this, SLOT(onLoadComplete()));
+    connect(this, SIGNAL(loadSuccess()), this, SLOT(onLoadSuccess()));
     connect(this, SIGNAL(graphChanged()), this, SLOT(onGraphChanged()));
     connect(this, SIGNAL(selectionChanged(const ISelectionManager*)),
             this, SLOT(onSelectionChanged(const ISelectionManager*)));
@@ -63,7 +63,7 @@ QString BaseGenericPluginInstance::selectedNodeNames() const
     return s;
 }
 
-void BaseGenericPluginInstance::onLoadComplete()
+void BaseGenericPluginInstance::onLoadSuccess()
 {
     _nodeAttributes.setNodeNamesToFirstAttribute(*graphModel());
     _nodeAttributes.exposeToGraphModel(*graphModel());

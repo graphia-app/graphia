@@ -64,8 +64,8 @@ public:
         auto parserThreadQObject = dynamic_cast<const QObject*>(parserThread);
         Q_ASSERT(parserThreadQObject != nullptr);
 
-        connect(parserThreadQObject, SIGNAL(complete(bool)),
-                this, SLOT(onLoadComplete(bool)), Qt::DirectConnection);
+        connect(parserThreadQObject, SIGNAL(success()),
+                this, SLOT(onLoadSuccess()), Qt::DirectConnection);
     }
 
     // Ignore all settings, by default
@@ -88,7 +88,7 @@ private slots:
 
     void onSelectionChanged(const SelectionManager*) const { emit selectionChanged(_selectionManager); }
 
-    void onLoadComplete(bool success) const { if(success) emit loadComplete(); }
+    void onLoadSuccess() const { emit loadSuccess(); }
 
 signals:
     void graphWillChange() const;
@@ -102,7 +102,7 @@ signals:
 
     void selectionChanged(const ISelectionManager* selectionManager) const;
 
-    void loadComplete() const;
+    void loadSuccess() const;
 };
 
 // Plugins can inherit from this to avoid having to reimplement the same createInstance member function

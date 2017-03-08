@@ -155,7 +155,7 @@ public:
     QStringList defaultTransforms() const;
 
 private slots:
-    void onLoadComplete();
+    void onLoadSuccess();
 
     void onGraphChanged();
     void onSelectionChanged(const ISelectionManager* selectionManager);

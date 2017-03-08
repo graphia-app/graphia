@@ -8,7 +8,7 @@
 CorrelationPluginInstance::CorrelationPluginInstance() :
     _nodeAttributesTableModel(&_nodeAttributes)
 {
-    connect(this, SIGNAL(loadComplete()), this, SLOT(onLoadComplete()));
+    connect(this, SIGNAL(loadSuccess()), this, SLOT(onLoadSuccess()));
     connect(this, SIGNAL(graphChanged()), this, SLOT(onGraphChanged()));
     connect(this, SIGNAL(selectionChanged(const ISelectionManager*)),
             this, SLOT(onSelectionChanged(const ISelectionManager*)));
@@ -262,7 +262,7 @@ void CorrelationPluginInstance::finishDataRow(int row)
     _nodeAttributes.setNodeIdForRowIndex(nodeId, row);
 }
 
-void CorrelationPluginInstance::onLoadComplete()
+void CorrelationPluginInstance::onLoadSuccess()
 {
     _nodeAttributes.setNodeNamesToFirstAttribute(*graphModel());
     _nodeAttributes.exposeToGraphModel(*graphModel());

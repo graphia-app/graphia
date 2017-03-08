@@ -315,12 +315,13 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
     }
 
     connect(_graphFileParserThread.get(), &ParserThread::progress, this, &Document::onLoadProgress);
-    connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::onLoadComplete);
-    _graphFileParserThread->start(std::move(parser), [this]
+    connect(_graphFileParserThread.get(), &ParserThread::success, [this]
     {
         _graphModel->buildTransforms(_pluginInstance->defaultTransforms());
         _graphModel->buildVisualisations(_pluginInstance->defaultVisualisations());
     });
+    connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::onLoadComplete);
+    _graphFileParserThread->start(std::move(parser));
 
     return true;
 }

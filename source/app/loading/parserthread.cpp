@@ -19,11 +19,9 @@ ParserThread::~ParserThread()
         _thread.join();
 }
 
-void ParserThread::start(std::unique_ptr<IParser> parser,
-                         std::function<void()> loadSuccessFn)
+void ParserThread::start(std::unique_ptr<IParser> parser)
 {
     _parser = std::move(parser);
-    _loadSuccessFn = loadSuccessFn;
     _thread = std::thread(&ParserThread::run, this);
 }
 
@@ -91,8 +89,8 @@ void ParserThread::run()
             emit progress(-1);
         });
 
-    if(_loadSuccessFn != nullptr && result)
-        _loadSuccessFn();
+    if(result)
+        emit success();
 
     emit complete(result);
 }
