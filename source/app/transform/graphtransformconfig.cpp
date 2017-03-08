@@ -118,10 +118,10 @@ QVariantMap GraphTransformConfig::asVariantMap() const
 {
     QVariantMap map;
 
-    QVariantList metaAttributes;
-    for(const auto& metaAttribute : _metaAttributes)
-        metaAttributes.append(metaAttribute);
-    map.insert("metaAttributes", metaAttributes);
+    QVariantList flags;
+    for(const auto& flag : _flags)
+        flags.append(flag);
+    map.insert("flags", flags);
 
     map.insert("action", _action);
 
@@ -142,7 +142,7 @@ QVariantMap GraphTransformConfig::asVariantMap() const
 
 bool GraphTransformConfig::operator==(const GraphTransformConfig& other) const
 {
-    // Note: _metaAttributes is deliberately ignored
+    // Note: _flags is deliberately ignored
     // when comparing GraphTransformConfigs
     return _action == other._action &&
             _parameters == other._parameters &&
@@ -154,7 +154,7 @@ bool GraphTransformConfig::operator!=(const GraphTransformConfig& other) const
     return !operator==(other);
 }
 
-bool GraphTransformConfig::isMetaAttributeSet(const QString& metaAttribute) const
+bool GraphTransformConfig::isFlagSet(const QString& flag) const
 {
-    return u::contains(_metaAttributes, metaAttribute);
+    return u::contains(_flags, flag);
 }

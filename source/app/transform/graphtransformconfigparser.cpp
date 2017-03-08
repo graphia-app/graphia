@@ -44,7 +44,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
     GraphTransformConfig,
-    (std::vector<QString>, _metaAttributes),
+    (std::vector<QString>, _flags),
     (QString, _action),
     (std::vector<GraphTransformConfig::Parameter>, _parameters),
     (GraphTransformConfig::Condition, _condition)
@@ -132,12 +132,12 @@ const auto parameterName = quotedString | identifier;
 const auto parameter_def = parameterName >> x3::lit("=") >> (double_ | quotedString);
 
 const auto identifierList = identifier % x3::lit(",");
-const auto metaAttributes = x3::lit("[") >> -identifierList >> x3::lit("]");
+const auto flags = x3::lit("[") >> -identifierList >> x3::lit("]");
 
 const x3::rule<class Transform, GraphTransformConfig> transform = "transform";
 const auto transformName = quotedString | identifier;
 const auto transform_def =
-    -metaAttributes >>
+    -flags >>
     transformName >>
     -(x3::lit("with") >> +parameter) >>
     -(x3::lit("where") >> condition);

@@ -7,7 +7,7 @@
 
 BOOST_FUSION_ADAPT_STRUCT(
     VisualisationConfig,
-    (std::vector<QString>, _metaAttributes),
+    (std::vector<QString>, _flags),
     (QString, _dataFieldName),
     (QString, _channelName)
 )
@@ -29,13 +29,13 @@ const x3::rule<class Identifier, QString> identifier = "identifier";
 const auto identifier_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
 
 const auto identifierList = identifier % x3::lit(",");
-const auto metaAttributes = x3::lit("[") >> -identifierList >> x3::lit("]");
+const auto flags = x3::lit("[") >> -identifierList >> x3::lit("]");
 
 const x3::rule<class Visualisation, VisualisationConfig> visualisation = "visualisation";
 const auto dataFieldName = quotedString | identifier;
 const auto channelName = quotedString | identifier;
 const auto visualisation_def =
-    -metaAttributes >>
+    -flags >>
     dataFieldName >> channelName;
 
 BOOST_SPIRIT_DEFINE(quotedString, identifier, visualisation);

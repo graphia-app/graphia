@@ -8,7 +8,7 @@
 
 struct VisualisationConfig
 {
-    std::vector<QString> _metaAttributes;
+    std::vector<QString> _flags;
     QString _dataFieldName;
     QString _channelName;
 
@@ -16,7 +16,7 @@ struct VisualisationConfig
 
     bool operator==(const VisualisationConfig& other) const;
     bool operator!=(const VisualisationConfig& other) const;
-    bool isMetaAttributeSet(const QString& metaAttribute) const;
+    bool isFlagSet(const QString& flag) const;
 };
 
 #endif // VISUALISATIONCONFIG_H

@@ -110,7 +110,7 @@ void GraphModel::buildTransforms(const QStringList& transforms)
         const auto& graphTransformConfig = graphTransformConfigParser.result();
         const auto& action = graphTransformConfig._action;
 
-        if(graphTransformConfig.isMetaAttributeSet("disabled"))
+        if(graphTransformConfig.isFlagSet("disabled"))
             continue;
 
         if(!u::contains(_graphTransformFactories, action))
@@ -121,7 +121,7 @@ void GraphModel::buildTransforms(const QStringList& transforms)
 
         if(graphTransform)
         {
-            graphTransform->setRepeating(graphTransformConfig.isMetaAttributeSet("repeating"));
+            graphTransform->setRepeating(graphTransformConfig.isFlagSet("repeating"));
             compoundTransform->addTransform(std::move(graphTransform));
         }
     }
@@ -231,12 +231,12 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 
         const auto& visualisationConfig = visualisationConfigParser.result();
 
-        if(visualisationConfig.isMetaAttributeSet("disabled"))
+        if(visualisationConfig.isFlagSet("disabled"))
             continue;
 
         const auto& dataFieldName = visualisationConfig._dataFieldName;
         const auto& channelName = visualisationConfig._channelName;
-        bool invert = visualisationConfig.isMetaAttributeSet("invert");
+        bool invert = visualisationConfig.isFlagSet("invert");
 
         if(!u::contains(_dataFields, dataFieldName))
         {

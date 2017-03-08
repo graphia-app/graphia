@@ -56,7 +56,7 @@ function sanitiseOp(text)
 function create(transform)
 {
     this.action = transform.action;
-    this.metaAttributes = transform.metaAttributes;
+    this.flags = transform.flags;
     this.template = "\"" + transform.action + "\"";
 
     this._elements = [];
@@ -154,7 +154,7 @@ function create(transform)
             else if(typeof this._elements[i] === 'object')
             {
                 var parameter = this._elements[i];
-                var locked = this.metaAttributes.indexOf("locked") >= 0;
+                var locked = this.flags.indexOf("locked") >= 0;
 
                 labelText += parameter.lhs + " " + sanitiseOp(parameter.op);
 

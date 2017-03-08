@@ -95,7 +95,7 @@ struct GraphTransformConfig
         QString valueAsString() const;
     };
 
-    std::vector<QString> _metaAttributes;
+    std::vector<QString> _flags;
     QString _action;
     std::vector<Parameter> _parameters;
     Condition _condition;
@@ -105,7 +105,7 @@ struct GraphTransformConfig
 
     bool operator==(const GraphTransformConfig& other) const;
     bool operator!=(const GraphTransformConfig& other) const;
-    bool isMetaAttributeSet(const QString& metaAttribute) const;
+    bool isFlagSet(const QString& flag) const;
 };
 
 #endif // GRAPHTRANSFORMCONFIG_H

@@ -6,10 +6,10 @@ QVariantMap VisualisationConfig::asVariantMap() const
 {
     QVariantMap map;
 
-    QVariantList metaAttributes;
-    for(const auto& metaAttribute : _metaAttributes)
-        metaAttributes.append(metaAttribute);
-    map.insert("metaAttributes", metaAttributes);
+    QVariantList flags;
+    for(const auto& flag : _flags)
+        flags.append(flag);
+    map.insert("flags", flags);
 
     map.insert("dataField", _dataFieldName);
     map.insert("channel", _channelName);
@@ -28,7 +28,7 @@ bool VisualisationConfig::operator!=(const VisualisationConfig& other) const
     return !operator==(other);
 }
 
-bool VisualisationConfig::isMetaAttributeSet(const QString& metaAttribute) const
+bool VisualisationConfig::isFlagSet(const QString& flag) const
 {
-    return u::contains(_metaAttributes, metaAttribute);
+    return u::contains(_flags, flag);
 }

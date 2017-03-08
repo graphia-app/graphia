@@ -48,7 +48,7 @@ Item
 
                     onCheckedChanged:
                     {
-                        setMetaAttribute("disabled", !checked);
+                        setFlag("disabled", !checked);
                         updateExpression();
                     }
                 }
@@ -67,7 +67,7 @@ Item
 
                     onCheckedChanged:
                     {
-                        setMetaAttribute("invert", checked);
+                        setFlag("invert", checked);
                         updateExpression();
                     }
                 }
@@ -103,36 +103,36 @@ Item
 
     function toggle()
     {
-        setMetaAttribute("disabled", !isMetaAttributeSet("disabled"));
+        setFlag("disabled", !isFlagSet("disabled"));
         updateExpression();
     }
 
-    property var metaAttributes: []
-    function setMetaAttribute(attribute, value)
+    property var flags: []
+    function setFlag(flag, value)
     {
         if(!ready)
             return;
 
         if(value)
         {
-            metaAttributes.push(attribute);
-            metaAttributes = metaAttributes.filter(function(e, i)
+            flags.push(flag);
+            flags = flags.filter(function(e, i)
             {
-                return metaAttributes.lastIndexOf(e) === i;
+                return flags.lastIndexOf(e) === i;
             });
         }
         else
         {
-            metaAttributes = metaAttributes.filter(function(e)
+            flags = flags.filter(function(e)
             {
-                return e !== attribute;
+                return e !== flag;
             });
         }
     }
 
-    function isMetaAttributeSet(attribute)
+    function isFlagSet(flag)
     {
-        return metaAttributes.indexOf(attribute) >= 0;
+        return flags.indexOf(flag) >= 0;
     }
 
     property string dataField
@@ -143,11 +143,11 @@ Item
         if(!ready)
             return;
 
-        var metaAttributesString = "";
-        if(metaAttributes.length > 0)
-            metaAttributesString = "[" + metaAttributes.toString() + "] ";
+        var flagsString = "";
+        if(flags.length > 0)
+            flagsString = "[" + flags.toString() + "] ";
 
-        var newExpression = metaAttributesString + "\"" + dataField + "\" \"" + channel + "\"";
+        var newExpression = flagsString + "\"" + dataField + "\" \"" + channel + "\"";
 
         value = newExpression;
         document.updateVisualisations();
@@ -186,12 +186,12 @@ Item
             var visualisationConfig = new VisualisationConfig.create(document.parseVisualisation(value));
             visualisationConfig.toComponents(document, expression);
 
-            metaAttributes = visualisationConfig.metaAttributes;
+            flags = visualisationConfig.flags;
             dataField = visualisationConfig.dataField;
             channel = visualisationConfig.channel;
 
-            enabledMenuItem.checked = !isMetaAttributeSet("disabled");
-            invertMenuItem.checked = isMetaAttributeSet("invert");
+            enabledMenuItem.checked = !isFlagSet("disabled");
+            invertMenuItem.checked = isFlagSet("invert");
 
             var visualisationAlert = document.visualisationAlertAtIndex(index);
             setVisualisationAlert(visualisationAlert);

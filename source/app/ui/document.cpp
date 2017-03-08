@@ -232,7 +232,7 @@ static bool transformIsPinned(const QString& transform)
     GraphTransformConfigParser p;
 
     if(!p.parse(transform)) return false;
-    return p.result().isMetaAttributeSet("pinned");
+    return p.result().isFlagSet("pinned");
 }
 
 QStringList Document::graphTransformConfigurationsFromUI() const
@@ -897,12 +897,12 @@ void Document::removeGraphTransform(int index)
 }
 
 template<typename Config>
-static bool metaAttributesDiffer(const Config& a,
+static bool FlagsDiffer(const Config& a,
                                  const Config& b,
-                                 const char* metaAttribute)
+                                 const char* Flag)
 {
-    bool aResult = a.isMetaAttributeSet(metaAttribute);
-    bool bResult = b.isMetaAttributeSet(metaAttribute);
+    bool aResult = a.isFlagSet(Flag);
+    bool bResult = b.isFlagSet(Flag);
 
     return aResult != bResult;
 }
@@ -926,10 +926,10 @@ static bool transformsDiffer(const QStringList& a, const QStringList& b)
         if(p.parse(b[i]))
             bi = p.result();
 
-        if(metaAttributesDiffer(ai, bi, "disabled"))
+        if(FlagsDiffer(ai, bi, "disabled"))
             return true;
 
-        if(metaAttributesDiffer(ai, bi, "repeating"))
+        if(FlagsDiffer(ai, bi, "repeating"))
             return true;
 
         if(ai != bi)
@@ -1039,10 +1039,10 @@ static bool visualisationsDiffer(const QStringList& a, const QStringList& b)
         if(p.parse(b[i]))
             bi = p.result();
 
-        if(metaAttributesDiffer(ai, bi, "disabled"))
+        if(FlagsDiffer(ai, bi, "disabled"))
             return true;
 
-        if(metaAttributesDiffer(ai, bi, "invert"))
+        if(FlagsDiffer(ai, bi, "invert"))
             return true;
 
         if(ai != bi)

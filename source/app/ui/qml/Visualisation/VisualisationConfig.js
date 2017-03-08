@@ -1,6 +1,6 @@
 function create(visualisation)
 {
-    this.metaAttributes = visualisation.metaAttributes;
+    this.flags = visualisation.flags;
     this.dataField = visualisation.dataField;
     this.channel = visualisation.channel;
 

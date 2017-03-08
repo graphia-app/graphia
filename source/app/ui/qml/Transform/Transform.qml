@@ -66,7 +66,7 @@ Item
 
                     onCheckedChanged:
                     {
-                        setMetaAttribute("disabled", !checked);
+                        setFlag("disabled", !checked);
                         updateExpression();
                     }
                 }
@@ -80,7 +80,7 @@ Item
 
                     onCheckedChanged:
                     {
-                        setMetaAttribute("locked", checked);
+                        setFlag("locked", checked);
                         updateExpression();
                     }
                 }
@@ -94,7 +94,7 @@ Item
 
                     onCheckedChanged:
                     {
-                        setMetaAttribute("repeating", checked);
+                        setFlag("repeating", checked);
                         updateExpression();
                     }
                 }
@@ -108,7 +108,7 @@ Item
 
                     onCheckedChanged:
                     {
-                        setMetaAttribute("pinned", checked);
+                        setFlag("pinned", checked);
                         updateExpression();
                     }
                 }
@@ -130,46 +130,46 @@ Item
 
     property bool ready: false
 
-    property bool pinned: { return isMetaAttributeSet("pinned"); }
+    property bool pinned: { return isFlagSet("pinned"); }
 
     function toggle()
     {
-        setMetaAttribute("disabled", !isMetaAttributeSet("disabled"));
+        setFlag("disabled", !isFlagSet("disabled"));
         updateExpression();
     }
 
     function toggleLock()
     {
-        setMetaAttribute("locked", !isMetaAttributeSet("locked"));
+        setFlag("locked", !isFlagSet("locked"));
         updateExpression();
     }
 
-    property var metaAttributes: []
-    function setMetaAttribute(attribute, value)
+    property var flags: []
+    function setFlag(flag, value)
     {
         if(!ready)
             return;
 
         if(value)
         {
-            metaAttributes.push(attribute);
-            metaAttributes = metaAttributes.filter(function(e, i)
+            flags.push(flag);
+            flags = flags.filter(function(e, i)
             {
-                return metaAttributes.lastIndexOf(e) === i;
+                return flags.lastIndexOf(e) === i;
             });
         }
         else
         {
-            metaAttributes = metaAttributes.filter(function(e)
+            flags = flags.filter(function(e)
             {
-                return e !== attribute;
+                return e !== flag;
             });
         }
     }
 
-    function isMetaAttributeSet(attribute)
+    function isFlagSet(flag)
     {
-        return metaAttributes.indexOf(attribute) >= 0;
+        return flags.indexOf(flag) >= 0;
     }
 
     property string template
@@ -188,11 +188,11 @@ Item
             return;
         }
 
-        var metaAttributesString = "";
-        if(metaAttributes.length > 0)
-            metaAttributesString = "[" + metaAttributes.toString() + "] ";
+        var flagsString = "";
+        if(flags.length > 0)
+            flagsString = "[" + flags.toString() + "] ";
 
-        var newExpression = metaAttributesString + template;
+        var newExpression = flagsString + template;
 
         for(var i = 0; i < parameters.length; i++)
         {
@@ -214,7 +214,7 @@ Item
             var transformConfig = new TransformConfig.create(document.parseGraphTransform(value));
             transformConfig.toComponents(document, expression);
 
-            metaAttributes = transformConfig.metaAttributes;
+            flags = transformConfig.flags;
             template = transformConfig.template;
             parameters = transformConfig.parameters;
 
@@ -224,10 +224,10 @@ Item
                 parameter.valueChanged.connect(updateExpression);
             }
 
-            enabledMenuItem.checked = !isMetaAttributeSet("disabled");
-            lockedMenuItem.checked = isMetaAttributeSet("locked");
-            repeatingMenuItem.checked = isMetaAttributeSet("repeating");
-            pinnedMenuItem.checked = isMetaAttributeSet("pinned");
+            enabledMenuItem.checked = !isFlagSet("disabled");
+            lockedMenuItem.checked = isFlagSet("locked");
+            repeatingMenuItem.checked = isFlagSet("repeating");
+            pinnedMenuItem.checked = isFlagSet("pinned");
             ready = true;
         }
     }
