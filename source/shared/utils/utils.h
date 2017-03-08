@@ -106,12 +106,12 @@ namespace u
 
     template<typename C, typename T> bool containsKey(const C& container, const T& key)
     {
-        return contains(key_wrapper<C>(container), key, 0);
+        return contains(make_key_wrapper(container), key, 0);
     }
 
     template<typename C, typename T> bool containsValue(const C& container, const T& value)
     {
-        return contains(value_wrapper<C>(container), value, 0);
+        return contains(make_value_wrapper(container), value, 0);
     }
 
     template<typename T,

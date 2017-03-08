@@ -14,7 +14,7 @@ public:
     auto operator--(int i) { return operator--(i); }
     bool operator==(const pair_iterator& other) const { return _it == other._it; }
     bool operator!=(const pair_iterator& other) const { return _it != other._it; }
-    auto operator*() { return (*_it).*member; }
+    auto& operator*() { return (*_it).*member; }
     auto operator->() { return &((*_it).*member); }
 
 protected:
@@ -40,24 +40,30 @@ template<typename C>
 class key_wrapper
 {
 public:
-    explicit key_wrapper(const C& c) : _c(&c) {}
+    explicit key_wrapper(C& c) : _c(&c) {}
     auto begin() const { return make_map_key_iterator(_c->begin()); }
     auto end() const   { return make_map_key_iterator(_c->end()); }
 
 protected:
-    const C* _c;
+    C* _c;
 };
+
+template<typename C>
+auto make_key_wrapper(C& c) { return key_wrapper<C>(c); }
 
 template<typename C>
 class value_wrapper
 {
 public:
-    explicit value_wrapper(const C& c) : _c(&c) {}
-    auto begin() { return make_map_value_iterator(_c->begin()); }
-    auto end()   { return make_map_value_iterator(_c->end()); }
+    explicit value_wrapper(C& c) : _c(&c) {}
+    auto begin() const { return make_map_value_iterator(_c->begin()); }
+    auto end() const   { return make_map_value_iterator(_c->end()); }
 
 protected:
-    const C* _c;
+    C* _c;
 };
+
+template<typename C>
+auto make_value_wrapper(C& c) { return value_wrapper<C>(c); }
 
 #endif // PAIR_ITERATOR_H
