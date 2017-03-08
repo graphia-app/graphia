@@ -1,6 +1,6 @@
-#include "attribute.h"
+#include "userdatavector.h"
 
-void Attribute::set(int index, const QString& value)
+void UserDataVector::set(int index, const QString& value)
 {
     if(index >= static_cast<int>(_values.size()))
         _values.resize(index + 1);
@@ -70,7 +70,7 @@ void Attribute::set(int index, const QString& value)
     }
 }
 
-QString Attribute::get(int index) const
+QString UserDataVector::get(int index) const
 {
     if(index < 0 || index >= static_cast<int>(_values.size()))
         return {};

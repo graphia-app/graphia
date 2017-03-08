@@ -4,17 +4,17 @@
 #include "shared/loading/baseparser.h"
 
 class BaseGenericPluginInstance;
-class NodeAttributes;
+class UserNodeData;
 
 class PairwiseTxtFileParser : public BaseParser
 {
 private:
     BaseGenericPluginInstance* _genericPluginInstance;
-    NodeAttributes* _nodeAttributes;
+    UserNodeData* _userNodeData;
 
 public:
     explicit PairwiseTxtFileParser(BaseGenericPluginInstance* genericPluginInstance,
-                                   NodeAttributes* nodeAttributes = nullptr);
+                                   UserNodeData* userNodeData = nullptr);
 
     bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress);
 };

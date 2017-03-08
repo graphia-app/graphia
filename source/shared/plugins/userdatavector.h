@@ -1,12 +1,12 @@
-#ifndef ATTRIBUTE_H
-#define ATTRIBUTE_H
+#ifndef USERDATAVECTOR_H
+#define USERDATAVECTOR_H
 
 #include <QString>
 
 #include <vector>
 #include <limits>
 
-class Attribute
+class UserDataVector
 {
 public:
     enum class Type
@@ -30,11 +30,11 @@ private:
     double _floatMax = std::numeric_limits<double>::min();
 
 public:
-    Attribute() = default;
-    Attribute(const Attribute&) = default;
-    Attribute(Attribute&&) = default;
+    UserDataVector() = default;
+    UserDataVector(const UserDataVector&) = default;
+    UserDataVector(UserDataVector&&) = default;
 
-    explicit Attribute(const QString& name) :
+    explicit UserDataVector(const QString& name) :
         _name(name)
     {}
 
@@ -52,4 +52,4 @@ public:
     QString get(int index) const;
 };
 
-#endif // ATTRIBUTE_H
+#endif // USERDATAVECTOR_H

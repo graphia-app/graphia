@@ -3,15 +3,15 @@
 
 #include "shared/loading/baseparser.h"
 
-class NodeAttributes;
+class UserNodeData;
 
 class GmlFileParser: public BaseParser
 {
 private:
-    NodeAttributes* _nodeAttributes;
+    UserNodeData* _userNodeData;
 
 public:
-    explicit GmlFileParser(NodeAttributes* nodeAttributes = nullptr);
+    explicit GmlFileParser(UserNodeData* userNodeData = nullptr);
 
     bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress);
 };

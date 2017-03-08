@@ -76,7 +76,7 @@ PluginContent
             Layout.minimumHeight: splitView.orientation === Qt.Vertical ? 100 + (height - viewport.height) : -1
             Layout.minimumWidth: splitView.orientation === Qt.Horizontal ? 200 : -1
 
-            nodeAttributesModel: plugin.model.nodeAttributes
+            nodeAttributesModel: plugin.model.userNodeDataModel
 
             onVisibleRowsChanged:
             {
@@ -109,7 +109,7 @@ PluginContent
 
                 rowCount: plugin.model.rowCount
                 columnCount: plugin.model.columnCount
-                data: plugin.model.dataset
+                data: plugin.model.rawData
                 columnNames: plugin.model.columnNames
                 rowNames: plugin.model.rowNames
                 selectedRows: tableView.selectedRows

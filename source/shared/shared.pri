@@ -30,10 +30,6 @@ HEADERS += \
     $$PWD/loading/tabulardata.h \
     $$PWD/utils/function_traits.h \
     $$PWD/loading/graphmlparser.h \
-    $$PWD/plugins/attribute.h \
-    $$PWD/plugins/nodeattributestablemodel.h \
-    $$PWD/plugins/attributes.h \
-    $$PWD/plugins/nodeattributes.h \
     $$PWD/utils/pair_iterator.h \
     $$PWD/loading/iparserthread.h \
     $$PWD/utils/enumreflection.h \
@@ -42,7 +38,11 @@ HEADERS += \
     $$PWD/utils/scope_exit.h \
     $$PWD/commands/icommand.h \
     $$PWD/commands/command.h \
-    $$PWD/commands/icommandmanager.h
+    $$PWD/commands/icommandmanager.h \
+    $$PWD/plugins/usernodedatastablemodel.h \
+    $$PWD/plugins/userdatavector.h \
+    $$PWD/plugins/userdata.h \
+    $$PWD/plugins/usernodedata.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \
@@ -57,10 +57,10 @@ SOURCES += \
     $$PWD/plugins/basegenericplugin.cpp \
     $$PWD/loading/tabulardata.cpp \
     $$PWD/loading/graphmlparser.cpp \
-    $$PWD/plugins/attribute.cpp \
-    $$PWD/plugins/nodeattributestablemodel.cpp \
-    $$PWD/plugins/attributes.cpp \
-    $$PWD/plugins/nodeattributes.cpp
+    $$PWD/plugins/usersnodedatasmodel.cpp \
+    $$PWD/plugins/userdatavector.cpp \
+    $$PWD/plugins/userdata.cpp \
+    $$PWD/plugins/usernodedata.cpp
 
 RESOURCES += \
     $$PWD/ui/shared.qrc

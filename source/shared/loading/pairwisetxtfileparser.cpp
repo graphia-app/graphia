@@ -3,7 +3,7 @@
 #include "shared/utils/utils.h"
 #include "shared/graph/imutablegraph.h"
 #include "shared/plugins/basegenericplugin.h"
-#include "shared/plugins/nodeattributes.h"
+#include "shared/plugins/usernodedata.h"
 
 #include "thirdparty/utfcpp/utf8.h"
 
@@ -23,11 +23,11 @@
 #include <cctype>
 
 PairwiseTxtFileParser::PairwiseTxtFileParser(BaseGenericPluginInstance* genericPluginInstance,
-                                             NodeAttributes* nodeAttributes) :
-    _genericPluginInstance(genericPluginInstance), _nodeAttributes(nodeAttributes)
+                                             UserNodeData* userNodeData) :
+    _genericPluginInstance(genericPluginInstance), _userNodeData(userNodeData)
 {
-    if(_nodeAttributes != nullptr)
-        _nodeAttributes->add(QObject::tr("Node Name"));
+    if(_userNodeData != nullptr)
+        _userNodeData->add(QObject::tr("Node Name"));
 }
 
 bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const IParser::ProgressFn& progress)
@@ -110,7 +110,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
 
         if(isComment)
         {
-            if(tokens.size() >= 4 && _nodeAttributes != nullptr)
+            if(tokens.size() >= 4 && _userNodeData != nullptr)
             {
                 auto& firstToken = tokens.at(0);
 
@@ -127,8 +127,8 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
 
                         auto nodeId = nodeIdMap.at(secondToken);
 
-                        _nodeAttributes->add(nodeClass);
-                        _nodeAttributes->setValueByNodeId(nodeId, nodeClass, value);
+                        _userNodeData->add(nodeClass);
+                        _userNodeData->setValueByNodeId(nodeId, nodeClass, value);
                     }
                 }
             }
@@ -146,10 +146,10 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
                 firstNodeId = graph.addNode();
                 nodeIdMap.emplace(firstToken, firstNodeId);
 
-                if(_nodeAttributes != nullptr)
+                if(_userNodeData != nullptr)
                 {
-                    _nodeAttributes->addNodeId(firstNodeId);
-                    _nodeAttributes->setValueByNodeId(firstNodeId, QObject::tr("Node Name"),
+                    _userNodeData->addNodeId(firstNodeId);
+                    _userNodeData->setValueByNodeId(firstNodeId, QObject::tr("Node Name"),
                                                       QString::fromStdString(firstToken));
                 }
             }
@@ -161,10 +161,10 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
                 secondNodeId = graph.addNode();
                 nodeIdMap.emplace(secondToken, secondNodeId);
 
-                if(_nodeAttributes != nullptr)
+                if(_userNodeData != nullptr)
                 {
-                    _nodeAttributes->addNodeId(secondNodeId);
-                    _nodeAttributes->setValueByNodeId(secondNodeId, QObject::tr("Node Name"),
+                    _userNodeData->addNodeId(secondNodeId);
+                    _userNodeData->setValueByNodeId(secondNodeId, QObject::tr("Node Name"),
                                                       QString::fromStdString(secondToken));
                 }
             }

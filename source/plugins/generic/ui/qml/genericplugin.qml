@@ -6,7 +6,7 @@ import SortFilterProxyModel 0.2
 
 Item
 {
-    enabled: plugin.model.nodeAttributes.columnNames.length > 0
+    enabled: plugin.model.userNodeDataModel.columnNames.length > 0
 
     anchors.fill: parent
 
@@ -19,7 +19,7 @@ Item
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            nodeAttributesModel: plugin.model.nodeAttributes
+            nodeAttributesModel: plugin.model.userNodeDataModel
         }
     }
 }

@@ -6,7 +6,7 @@
 #include "shared/utils/iterator_range.h"
 
 CorrelationPluginInstance::CorrelationPluginInstance() :
-    _nodeAttributesTableModel(&_nodeAttributes)
+    _userNodeDataTableModel(&_userNodeData)
 {
     connect(this, SIGNAL(loadSuccess()), this, SLOT(onLoadSuccess()));
     connect(this, SIGNAL(graphChanged()), this, SLOT(onGraphChanged()));
@@ -19,8 +19,8 @@ void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionMa
 {
     BasePluginInstance::initialise(graphModel, selectionManager, commandManager, parserThread);
 
-    _nodeAttributes.initialise(graphModel->mutableGraph());
-    _nodeAttributesTableModel.initialise(selectionManager);
+    _userNodeData.initialise(graphModel->mutableGraph());
+    _userNodeDataTableModel.initialise(selectionManager);
     _pearsonValues = std::make_unique<EdgeArray<double>>(graphModel->mutableGraph());
 
     graphModel->dataField(tr("Pearson Correlation Value"))
@@ -30,8 +30,8 @@ void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionMa
                                "the linear relationship between two variables."));
 }
 
-bool CorrelationPluginInstance::loadAttributes(const TabularData& tabularData, int firstDataColumn, int firstDataRow,
-                                               const std::function<bool()>& cancelled, const IParser::ProgressFn& progress)
+bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, int firstDataColumn, int firstDataRow,
+                                             const std::function<bool()>& cancelled, const IParser::ProgressFn& progress)
 {
     Q_ASSERT(firstDataColumn > 0);
     Q_ASSERT(firstDataRow > 0);
@@ -61,16 +61,16 @@ bool CorrelationPluginInstance::loadAttributes(const TabularData& tabularData, i
             if(rowIndex == 0)
             {
                 if(dataColumnIndex < 0)
-                    _nodeAttributes.add(value);
+                    _userNodeData.add(value);
                 else
                     setDataColumnName(dataColumnIndex, value);
             }
             else if(dataRowIndex < 0)
             {
                 if(columnIndex == 0)
-                    _columnAttributes.add(value);
+                    _userColumnData.add(value);
                 else if(dataColumnIndex >= 0)
-                    _columnAttributes.setValue(dataColumnIndex, tabularData.valueAtQString(0, rowIndex), value);
+                    _userColumnData.setValue(dataColumnIndex, tabularData.valueAtQString(0, rowIndex), value);
             }
             else
             {
@@ -82,7 +82,7 @@ bool CorrelationPluginInstance::loadAttributes(const TabularData& tabularData, i
                         finishDataRow(dataRowIndex);
                 }
                 else
-                    _nodeAttributes.setValue(dataRowIndex, tabularData.valueAtQString(columnIndex, 0), value);
+                    _userNodeData.setValue(dataRowIndex, tabularData.valueAtQString(columnIndex, 0), value);
             }
         }
     }
@@ -223,8 +223,8 @@ bool CorrelationPluginInstance::createEdges(const std::vector<std::tuple<NodeId,
 void CorrelationPluginInstance::setDimensions(int numColumns, int numRows)
 {
     Q_ASSERT(_dataColumnNames.empty());
-    Q_ASSERT(_columnAttributes.empty());
-    Q_ASSERT(_nodeAttributes.empty());
+    Q_ASSERT(_userColumnData.empty());
+    Q_ASSERT(_userNodeData.empty());
 
     _numColumns = numColumns;
     _numRows = numRows;
@@ -259,16 +259,16 @@ void CorrelationPluginInstance::finishDataRow(int row)
     auto computeCost = _numRows - row + 1;
 
     _dataRows.emplace_back(begin, end, nodeId, computeCost);
-    _nodeAttributes.setNodeIdForRowIndex(nodeId, row);
+    _userNodeData.setNodeIdForRowIndex(nodeId, row);
 }
 
 void CorrelationPluginInstance::onLoadSuccess()
 {
-    _nodeAttributes.setNodeNamesToFirstAttribute(*graphModel());
-    _nodeAttributes.exposeToGraphModel(*graphModel());
+    _userNodeData.setNodeNamesToFirstUserDataVector(*graphModel());
+    _userNodeData.exposeToGraphModel(*graphModel());
 }
 
-QVector<double> CorrelationPluginInstance::attributesDataset()
+QVector<double> CorrelationPluginInstance::rawData()
 {
     return QVector<double>::fromStdVector(_data);
 }
@@ -286,14 +286,14 @@ QStringList CorrelationPluginInstance::rowNames()
     QStringList list;
 
     for(int i = 0; i < _numRows; i++)
-        list.append(_nodeAttributes.begin()->get(i));
+        list.append(_userNodeData.begin()->get(i));
 
     return list;
 }
 
 const CorrelationPluginInstance::DataRow& CorrelationPluginInstance::dataRowForNodeId(NodeId nodeId) const
 {
-    return _dataRows.at(_nodeAttributes.rowIndexForNodeId(nodeId));
+    return _dataRows.at(_userNodeData.rowIndexForNodeId(nodeId));
 }
 
 void CorrelationPluginInstance::onGraphChanged()
@@ -309,7 +309,7 @@ void CorrelationPluginInstance::onGraphChanged()
 
 void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager*)
 {
-    _nodeAttributesTableModel.onSelectionChanged();
+    _userNodeDataTableModel.onSelectionChanged();
 }
 
 std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const QString& urlTypeName)

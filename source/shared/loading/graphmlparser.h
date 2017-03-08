@@ -7,7 +7,7 @@
 #include <QtXml/QXmlDefaultHandler>
 #include <stack>
 
-class NodeAttributes;
+class UserNodeData;
 
 class GraphMLHandler : public QXmlDefaultHandler
 {
@@ -83,10 +83,10 @@ private:
     QXmlLocator* _locator = nullptr;
     int _lineCount = 0;
 
-    NodeAttributes* _otherNodeAttributes;
+    UserNodeData* _userNodeData;
 
 public:
-    GraphMLHandler(IMutableGraph& mutableGraph, const IParser::ProgressFn& progress, NodeAttributes* nodeAttributes, int lineCount);
+    GraphMLHandler(IMutableGraph& mutableGraph, const IParser::ProgressFn& progress, UserNodeData* userNodeData, int lineCount);
     bool startDocument();
     bool endDocument();
     bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts);
@@ -103,12 +103,12 @@ public:
 class GraphMLParser: public BaseParser
 {
 private:
-    NodeAttributes* _nodeAttributes;
+    UserNodeData* _userNodeData;
     GraphMLHandler::AttributeData<NodeId> _nodeAttributeData;
     GraphMLHandler::AttributeData<EdgeId> _edgeAttributeData;
 
 public:
-    explicit GraphMLParser(NodeAttributes *nodeAttributes = nullptr);
+    explicit GraphMLParser(UserNodeData *userNodeData = nullptr);
     bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress);
 };
 

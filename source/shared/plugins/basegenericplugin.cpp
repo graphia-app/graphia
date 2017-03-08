@@ -5,7 +5,7 @@
 #include "shared/loading/graphmlparser.h"
 
 BaseGenericPluginInstance::BaseGenericPluginInstance() :
-    _nodeAttributesTableModel(&_nodeAttributes)
+    _userNodeDataTableModel(&_userNodeData)
 {
     connect(this, SIGNAL(loadSuccess()), this, SLOT(onLoadSuccess()));
     connect(this, SIGNAL(graphChanged()), this, SLOT(onGraphChanged()));
@@ -18,18 +18,18 @@ void BaseGenericPluginInstance::initialise(IGraphModel* graphModel, ISelectionMa
 {
     BasePluginInstance::initialise(graphModel, selectionManager, commandManager, parserThread);
 
-    _nodeAttributes.initialise(graphModel->mutableGraph());
-    _nodeAttributesTableModel.initialise(selectionManager);
+    _userNodeData.initialise(graphModel->mutableGraph());
+    _userNodeDataTableModel.initialise(selectionManager);
 }
 
 std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
 {
     if(urlTypeName == "GML")
-        return std::make_unique<GmlFileParser>(&_nodeAttributes);
+        return std::make_unique<GmlFileParser>(&_userNodeData);
     else if(urlTypeName == "PairwiseTXT")
-        return std::make_unique<PairwiseTxtFileParser>(this, &_nodeAttributes);
+        return std::make_unique<PairwiseTxtFileParser>(this, &_userNodeData);
     else if(urlTypeName == "GraphML")
-        return std::make_unique<GraphMLParser>(&_nodeAttributes);
+        return std::make_unique<GraphMLParser>(&_userNodeData);
 
     return nullptr;
 }
@@ -65,8 +65,8 @@ QString BaseGenericPluginInstance::selectedNodeNames() const
 
 void BaseGenericPluginInstance::onLoadSuccess()
 {
-    _nodeAttributes.setNodeNamesToFirstAttribute(*graphModel());
-    _nodeAttributes.exposeToGraphModel(*graphModel());
+    _userNodeData.setNodeNamesToFirstUserDataVector(*graphModel());
+    _userNodeData.exposeToGraphModel(*graphModel());
 }
 
 void BaseGenericPluginInstance::onGraphChanged()
@@ -83,7 +83,7 @@ void BaseGenericPluginInstance::onGraphChanged()
 void BaseGenericPluginInstance::onSelectionChanged(const ISelectionManager*)
 {
     emit selectedNodeNamesChanged();
-    _nodeAttributesTableModel.onSelectionChanged();
+    _userNodeDataTableModel.onSelectionChanged();
 }
 
 BaseGenericPlugin::BaseGenericPlugin()

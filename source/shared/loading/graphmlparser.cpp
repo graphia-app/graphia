@@ -6,12 +6,12 @@
 #include <shared/utils/utils.h>
 
 GraphMLHandler::GraphMLHandler(IMutableGraph &mutableGraph, const IParser::ProgressFn &progress,
-                               NodeAttributes* nodeAttributes, int lineCount)
+                               UserNodeData* userNodeData, int lineCount)
                                : _graph(&mutableGraph), _progress(&progress),
-                                 _lineCount(lineCount), _otherNodeAttributes(nodeAttributes)
+                                 _lineCount(lineCount), _userNodeData(userNodeData)
 {
-    if(_otherNodeAttributes != nullptr)
-        _otherNodeAttributes->add(QObject::tr("Node Name"));
+    if(_userNodeData != nullptr)
+        _userNodeData->add(QObject::tr("Node Name"));
 }
 
 bool GraphMLHandler::startDocument()
@@ -121,10 +121,10 @@ bool GraphMLHandler::startElement(const QString &, const QString &localName, con
         }
         _nodeMap[atts.value("id")] = _activeNodes.top();
 
-        if(_otherNodeAttributes != nullptr)
+        if(_userNodeData != nullptr)
         {
-            _otherNodeAttributes->addNodeId(nodeId);
-            _otherNodeAttributes->setValueByNodeId(nodeId, QObject::tr("Node Name"),
+            _userNodeData->addNodeId(nodeId);
+            _userNodeData->setValueByNodeId(nodeId, QObject::tr("Node Name"),
                                               atts.value("id"));
         }
     }
@@ -221,10 +221,10 @@ bool GraphMLHandler::endElement(const QString &, const QString &localName, const
     {
         auto attribute = _activeAttributes.top();
 
-        if(_otherNodeAttributes != nullptr && !_activeNodes.empty() && !attribute->_name.isEmpty())
+        if(_userNodeData != nullptr && !_activeNodes.empty() && !attribute->_name.isEmpty())
         {
-            _otherNodeAttributes->add(attribute->_name);
-            _otherNodeAttributes->setValueByNodeId(_activeNodes.top(), attribute->_name, attribute->_value.toString());
+            _userNodeData->add(attribute->_name);
+            _userNodeData->setValueByNodeId(_activeNodes.top(), attribute->_name, attribute->_value.toString());
         }
 
         _activeAttributes.pop();
@@ -274,8 +274,8 @@ bool GraphMLHandler::fatalError(const QXmlParseException &)
     return true;
 }
 
-GraphMLParser::GraphMLParser(NodeAttributes* nodeAttributes) :
-    _nodeAttributes(nodeAttributes)
+GraphMLParser::GraphMLParser(UserNodeData* userNodeData) :
+    _userNodeData(userNodeData)
 {}
 
 bool GraphMLParser::parse(const QUrl &url, IMutableGraph &graph, const IParser::ProgressFn &progress)
@@ -299,7 +299,7 @@ bool GraphMLParser::parse(const QUrl &url, IMutableGraph &graph, const IParser::
 
     progress(-1);
 
-    GraphMLHandler handler(graph, progress, _nodeAttributes, lineCount);
+    GraphMLHandler handler(graph, progress, _userNodeData, lineCount);
     auto *source = new QXmlInputSource(&file);
     QXmlSimpleReader xmlReader;
     xmlReader.setContentHandler(&handler);

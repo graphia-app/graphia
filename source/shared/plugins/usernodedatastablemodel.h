@@ -1,5 +1,5 @@
-#ifndef NODEATTRIBUTESTABLEMODEL_H
-#define NODEATTRIBUTESTABLEMODEL_H
+#ifndef USERNODEDATASTABLEMODEL_H
+#define USERNODEDATASTABLEMODEL_H
 
 #include "shared/graph/elementid.h"
 #include "shared/ui/iselectionmanager.h"
@@ -10,9 +10,9 @@
 
 #include <set>
 
-class NodeAttributes;
+class UserNodeData;
 
-class NodeAttributesTableModel : public QAbstractTableModel
+class UserNodeDataTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 
@@ -20,7 +20,7 @@ class NodeAttributesTableModel : public QAbstractTableModel
 
 private:
     const ISelectionManager* _selectionManager = nullptr;
-    const NodeAttributes* _nodeAttributes = nullptr;
+    const UserNodeData* _userNodeData = nullptr;
 
     const int _nodeIdRole = Qt::UserRole + 1;
     const int _nodeSelectedRole = Qt::UserRole + 2;
@@ -30,10 +30,10 @@ private:
     QStringList columnNames() const;
 
 private slots:
-    void onAttributeAdded(const QString& name);
+    void onUserDataVectorAdded(const QString& name);
 
 public:
-    explicit NodeAttributesTableModel(NodeAttributes* attributes);
+    explicit UserNodeDataTableModel(UserNodeData* userNodeData);
 
     void initialise(ISelectionManager* selectionManager);
 
@@ -50,4 +50,4 @@ signals:
     void columnNamesChanged();
 };
 
-#endif // NODEATTRIBUTESTABLEMODEL_H
+#endif // USERNODEDATASTABLEMODEL_H

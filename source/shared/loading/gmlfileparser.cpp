@@ -1,6 +1,6 @@
 #include "gmlfileparser.h"
 #include "shared/graph/imutablegraph.h"
-#include "shared/plugins/nodeattributes.h"
+#include "shared/plugins/usernodedata.h"
 
 #include "thirdparty/axe/include/axe.h"
 
@@ -15,10 +15,10 @@
 #include <iterator>
 
 template<typename It> bool parseGml(IMutableGraph &graph,
-                                 NodeAttributes* nodeAttributes,
-                                 const std::function<bool ()>& cancelled,
-                                 const IParser::ProgressFn& progress,
-                                 It begin, It end)
+                                    UserNodeData* userNodeData,
+                                    const std::function<bool ()>& cancelled,
+                                    const IParser::ProgressFn& progress,
+                                    It begin, It end)
 {
     // General GML structure rules
     axe::r_rule<It> keyValue;
@@ -65,22 +65,22 @@ template<typename It> bool parseGml(IMutableGraph &graph,
     });
 
     auto captureNode = axe::e_ref([&nodeIndexMap, &id, &graph, &label,
-                                  &nodeAttributes](It, It)
+                                  &userNodeData](It, It)
     {
         if(id >= 0)
         {
             nodeIndexMap[id] = graph.addNode();
 
-            if(nodeAttributes != nullptr)
+            if(userNodeData != nullptr)
             {
-                nodeAttributes->addNodeId(nodeIndexMap[id]);
+                userNodeData->addNodeId(nodeIndexMap[id]);
 
                 // If we don't have a label, use the id
                 if(label.empty())
                     label = std::to_string(id);
 
-                nodeAttributes->setValueByNodeId(nodeIndexMap[id], QObject::tr("Node Name"),
-                                                 QString::fromStdString(label));
+                userNodeData->setValueByNodeId(nodeIndexMap[id], QObject::tr("Node Name"),
+                                               QString::fromStdString(label));
             }
 
             label.clear();
@@ -165,11 +165,11 @@ template<typename It> bool parseGml(IMutableGraph &graph,
     return succeeded;
 }
 
-GmlFileParser::GmlFileParser(NodeAttributes* nodeAttributes) :
-    _nodeAttributes(nodeAttributes)
+GmlFileParser::GmlFileParser(UserNodeData* userNodeData) :
+    _userNodeData(userNodeData)
 {
-    if(_nodeAttributes != nullptr)
-        _nodeAttributes->add(QObject::tr("Node Name"));
+    if(_userNodeData != nullptr)
+        _userNodeData->add(QObject::tr("Node Name"));
 }
 
 bool GmlFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress)
@@ -187,6 +187,6 @@ bool GmlFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressF
 
     progress(-1);
 
-    return parseGml(graph, _nodeAttributes, [this] { return cancelled(); },
+    return parseGml(graph, _userNodeData, [this] { return cancelled(); },
                     progress, vec.begin(), vec.end());;
 }

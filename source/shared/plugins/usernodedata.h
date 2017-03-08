@@ -1,7 +1,7 @@
-#ifndef NODEATTRIBUTES_H
-#define NODEATTRIBUTES_H
+#ifndef USERNODEDATA_H
+#define USERNODEDATA_H
 
-#include "attributes.h"
+#include "userdata.h"
 
 #include <map>
 #include <memory>
@@ -10,7 +10,7 @@
 class IMutableGraph;
 class IGraphModel;
 
-class NodeAttributes : public Attributes
+class UserNodeData : public UserData
 {
     Q_OBJECT
 
@@ -29,8 +29,8 @@ public:
     void setValueByNodeId(NodeId nodeId, const QString& name, const QString& value);
     QString valueByNodeId(NodeId nodeId, const QString& name) const;
 
-    void setNodeNamesToFirstAttribute(IGraphModel& graphModel);
+    void setNodeNamesToFirstUserDataVector(IGraphModel& graphModel);
     void exposeToGraphModel(IGraphModel& graphModel);
 };
 
-#endif // NODEATTRIBUTES_H
+#endif // USERNODEDATA_H

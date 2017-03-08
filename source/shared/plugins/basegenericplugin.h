@@ -3,8 +3,8 @@
 
 #include "baseplugin.h"
 
-#include "shared/plugins/nodeattributes.h"
-#include "shared/plugins/nodeattributestablemodel.h"
+#include "shared/plugins/usernodedata.h"
+#include "shared/plugins/usernodedatastablemodel.h"
 
 #include "shared/graph/grapharray.h"
 
@@ -18,15 +18,15 @@ class BaseGenericPluginInstance : public BasePluginInstance
     Q_OBJECT
 
     Q_PROPERTY(QString selectedNodeNames READ selectedNodeNames NOTIFY selectedNodeNamesChanged)
-    Q_PROPERTY(QAbstractTableModel* nodeAttributes READ nodeAttributesTableModel CONSTANT)
+    Q_PROPERTY(QAbstractTableModel* userNodeDataModel READ userNodeDataTableModel CONSTANT)
 
 private:
     std::unique_ptr<EdgeArray<float>> _edgeWeights;
 
-    NodeAttributes _nodeAttributes;
+    UserNodeData _userNodeData;
 
-    NodeAttributesTableModel _nodeAttributesTableModel;
-    QAbstractTableModel* nodeAttributesTableModel() { return &_nodeAttributesTableModel; }
+    UserNodeDataTableModel _userNodeDataTableModel;
+    QAbstractTableModel* userNodeDataTableModel() { return &_userNodeDataTableModel; }
 
 public:
     BaseGenericPluginInstance();

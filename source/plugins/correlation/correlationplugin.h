@@ -5,9 +5,9 @@
 #include "shared/graph/grapharray.h"
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/iparser.h"
-#include "shared/plugins/attributes.h"
-#include "shared/plugins/nodeattributes.h"
-#include "shared/plugins/nodeattributestablemodel.h"
+#include "shared/plugins/userdata.h"
+#include "shared/plugins/usernodedata.h"
+#include "shared/plugins/usernodedatastablemodel.h"
 
 #include <vector>
 #include <functional>
@@ -20,10 +20,10 @@ class CorrelationPluginInstance : public BasePluginInstance
 {
     Q_OBJECT
 
-    Q_PROPERTY(QAbstractTableModel* nodeAttributes READ nodeAttributesTableModel CONSTANT)
+    Q_PROPERTY(QAbstractTableModel* userNodeDataModel READ userNodeDataTableModel CONSTANT)
     Q_PROPERTY(QStringList columnNames READ columnNames NOTIFY columnNamesChanged)
     Q_PROPERTY(QStringList rowNames READ rowNames NOTIFY rowNamesChanged)
-    Q_PROPERTY(QVector<double> dataset READ attributesDataset NOTIFY datasetChanged)
+    Q_PROPERTY(QVector<double> rawData READ rawData NOTIFY rawDataChanged)
     Q_PROPERTY(int columnCount MEMBER _numColumns NOTIFY columnCountChanged)
     Q_PROPERTY(int rowCount MEMBER _numRows NOTIFY rowCountChanged)
 
@@ -36,10 +36,10 @@ private:
 
     std::vector<QString> _dataColumnNames;
 
-    NodeAttributes _nodeAttributes;
-    Attributes _columnAttributes;
+    UserNodeData _userNodeData;
+    UserData _userColumnData;
 
-    NodeAttributesTableModel _nodeAttributesTableModel;
+    UserNodeDataTableModel _userNodeDataTableModel;
 
     using ConstDataIterator = std::vector<double>::const_iterator;
     using DataIterator = std::vector<double>::iterator;
@@ -127,17 +127,17 @@ private:
 
     void finishDataRow(int row);
 
-    QAbstractTableModel* nodeAttributesTableModel() { return &_nodeAttributesTableModel; }
+    QAbstractTableModel* userNodeDataTableModel() { return &_userNodeDataTableModel; }
     QStringList columnNames();
     QStringList rowNames();
-    QVector<double> attributesDataset();
+    QVector<double> rawData();
 
     const DataRow& dataRowForNodeId(NodeId nodeId) const;
 
 public:
     void setDimensions(int numColumns, int numRows);
-    bool loadAttributes(const TabularData& tabularData, int firstDataColumn, int firstDataRow,
-                        const std::function<bool()>& cancelled, const IParser::ProgressFn& progress);
+    bool loadUserData(const TabularData& tabularData, int firstDataColumn, int firstDataRow,
+                      const std::function<bool()>& cancelled, const IParser::ProgressFn& progress);
 
     std::vector<std::tuple<NodeId, NodeId, double>> pearsonCorrelation(
             double minimumThreshold, const std::function<bool()>& cancelled,
@@ -163,7 +163,7 @@ private slots:
 signals:
     void rowCountChanged();
     void columnCountChanged();
-    void datasetChanged();
+    void rawDataChanged();
     void columnNamesChanged();
     void rowNamesChanged();
 };

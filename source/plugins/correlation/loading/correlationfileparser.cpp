@@ -105,7 +105,7 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
     _plugin->setDimensions(dataRect.width(), dataRect.height());
 
     graph.setPhase(QObject::tr("Attributes"));
-    if(!_plugin->loadAttributes(tabularData, dataRect.left(), dataRect.top(), [this]{ return cancelled(); }, progress))
+    if(!_plugin->loadUserData(tabularData, dataRect.left(), dataRect.top(), [this]{ return cancelled(); }, progress))
         return false;
 
     graph.setPhase(QObject::tr("Pearson Correlation"));
