@@ -2,7 +2,7 @@
 #define GRAPHTRANSFORMCONFIGPARSER_H
 
 #include "graphtransformconfig.h"
-#include "datafield.h"
+#include "attributes/fieldtype.h"
 
 #include <QString>
 #include <QStringList>
@@ -22,9 +22,9 @@ public:
     const QString& failedInput() const { return _failedInput; }
 
     static QStringList ops(FieldType fieldType);
-    static QString opToString(GraphTransformConfig::NumericalOp op);
-    static QString opToString(GraphTransformConfig::StringOp op);
-    static QString opToString(GraphTransformConfig::BinaryOp op);
+    static QString opToString(ConditionFnOp::Numerical op);
+    static QString opToString(ConditionFnOp::String op);
+    static QString opToString(ConditionFnOp::Binary op);
 };
 
 #endif // GRAPHTRANSFORMCONFIGPARSER_H

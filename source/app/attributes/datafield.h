@@ -3,7 +3,7 @@
 
 #include "shared/graph/elementid.h"
 #include "graph/elementtype.h"
-#include "shared/transform/idatafield.h"
+#include "shared/attributes/idatafield.h"
 #include "shared/graph/igraphcomponent.h"
 
 #include "fieldtype.h"

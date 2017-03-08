@@ -1,6 +1,8 @@
 #ifndef GRAPHTRANSFORMCONFIG_H
 #define GRAPHTRANSFORMCONFIG_H
 
+#include "attributes/condtionfnops.h"
+
 #include <QString>
 #include <QVariantMap>
 
@@ -13,30 +15,9 @@
 
 struct GraphTransformConfig
 {
-    enum class BinaryOp { Or, And };
-    enum class NumericalOp
-    {
-        Equal,
-        NotEqual,
-        LessThan,
-        GreaterThan,
-        LessThanOrEqual,
-        GreaterThanOrEqual
-    };
-    enum class StringOp
-    {
-        Equal,
-        NotEqual,
-        Includes,
-        Excludes,
-        Starts,
-        Ends,
-        MatchesRegex
-    };
-
     struct FloatOpValue
     {
-        NumericalOp _op;
+        ConditionFnOp::Numerical _op;
         double _value;
 
         bool operator==(const FloatOpValue& other) const;
@@ -44,7 +25,7 @@ struct GraphTransformConfig
 
     struct IntOpValue
     {
-        NumericalOp _op;
+        ConditionFnOp::Numerical _op;
         int _value;
 
         bool operator==(const IntOpValue& other) const;
@@ -52,7 +33,7 @@ struct GraphTransformConfig
 
     struct StringOpValue
     {
-        StringOp _op;
+        ConditionFnOp::String _op;
         QString _value;
 
         bool operator==(const StringOpValue& other) const;
@@ -78,7 +59,7 @@ struct GraphTransformConfig
     struct CompoundCondition
     {
         Condition _lhs;
-        BinaryOp _op;
+        ConditionFnOp::Binary _op;
         Condition _rhs;
 
         bool operator==(const CompoundCondition& other) const;

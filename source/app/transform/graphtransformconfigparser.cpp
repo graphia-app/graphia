@@ -7,19 +7,19 @@
 
 BOOST_FUSION_ADAPT_STRUCT(
     GraphTransformConfig::IntOpValue,
-    (GraphTransformConfig::NumericalOp, _op),
+    (ConditionFnOp::Numerical, _op),
     (int, _value)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     GraphTransformConfig::FloatOpValue,
-    (GraphTransformConfig::NumericalOp, _op),
+    (ConditionFnOp::Numerical, _op),
     (double, _value)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     GraphTransformConfig::StringOpValue,
-    (GraphTransformConfig::StringOp, _op),
+    (ConditionFnOp::String, _op),
     (QString, _value)
 )
 
@@ -32,7 +32,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
     GraphTransformConfig::CompoundCondition,
     (GraphTransformConfig::Condition, _lhs),
-    (GraphTransformConfig::BinaryOp, _op),
+    (ConditionFnOp::Binary, _op),
     (GraphTransformConfig::Condition, _rhs)
 )
 
@@ -71,33 +71,33 @@ const auto identifier_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
 
 const auto fieldName = quotedString | identifier;
 
-struct numerical_op_ : x3::symbols<GraphTransformConfig::NumericalOp>
+struct numerical_op_ : x3::symbols<ConditionFnOp::Numerical>
 {
     numerical_op_()
     {
         add
-        ("==", GraphTransformConfig::NumericalOp::Equal)
-        ("!=", GraphTransformConfig::NumericalOp::NotEqual)
-        ("<",  GraphTransformConfig::NumericalOp::LessThan)
-        (">",  GraphTransformConfig::NumericalOp::GreaterThan)
-        ("<=", GraphTransformConfig::NumericalOp::LessThanOrEqual)
-        (">=", GraphTransformConfig::NumericalOp::GreaterThanOrEqual)
+        ("==", ConditionFnOp::Numerical::Equal)
+        ("!=", ConditionFnOp::Numerical::NotEqual)
+        ("<",  ConditionFnOp::Numerical::LessThan)
+        (">",  ConditionFnOp::Numerical::GreaterThan)
+        ("<=", ConditionFnOp::Numerical::LessThanOrEqual)
+        (">=", ConditionFnOp::Numerical::GreaterThanOrEqual)
         ;
     }
 } numerical_op;
 
-struct string_op_ : x3::symbols<GraphTransformConfig::StringOp>
+struct string_op_ : x3::symbols<ConditionFnOp::String>
 {
     string_op_()
     {
         add
-        ("==",       GraphTransformConfig::StringOp::Equal)
-        ("!=",       GraphTransformConfig::StringOp::NotEqual)
-        ("includes", GraphTransformConfig::StringOp::Includes)
-        ("excludes", GraphTransformConfig::StringOp::Excludes)
-        ("starts",   GraphTransformConfig::StringOp::Starts)
-        ("ends",     GraphTransformConfig::StringOp::Ends)
-        ("matches",  GraphTransformConfig::StringOp::MatchesRegex)
+        ("==",       ConditionFnOp::String::Equal)
+        ("!=",       ConditionFnOp::String::NotEqual)
+        ("includes", ConditionFnOp::String::Includes)
+        ("excludes", ConditionFnOp::String::Excludes)
+        ("starts",   ConditionFnOp::String::Starts)
+        ("ends",     ConditionFnOp::String::Ends)
+        ("matches",  ConditionFnOp::String::MatchesRegex)
         ;
     }
 } string_op;
@@ -109,15 +109,15 @@ const auto stringCondition = string_op >> quotedString;
 const x3::rule<class TerminalCondition, GraphTransformConfig::TerminalCondition> terminalCondition = "terminalCondition";
 const auto terminalCondition_def = fieldName >> (floatCondition | intCondition | stringCondition);
 
-struct binary_op_ : x3::symbols<GraphTransformConfig::BinaryOp>
+struct binary_op_ : x3::symbols<ConditionFnOp::Binary>
 {
     binary_op_()
     {
         add
-        ("or",  GraphTransformConfig::BinaryOp::Or)
-        ("and", GraphTransformConfig::BinaryOp::And)
-        ("||",  GraphTransformConfig::BinaryOp::Or)
-        ("&&",  GraphTransformConfig::BinaryOp::And)
+        ("or",  ConditionFnOp::Binary::Or)
+        ("and", ConditionFnOp::Binary::And)
+        ("||",  ConditionFnOp::Binary::Or)
+        ("&&",  ConditionFnOp::Binary::And)
         ;
     }
 } binary_op;
@@ -184,7 +184,7 @@ QStringList GraphTransformConfigParser::ops(FieldType fieldType)
     return list;
 }
 
-QString GraphTransformConfigParser::opToString(GraphTransformConfig::NumericalOp op)
+QString GraphTransformConfigParser::opToString(ConditionFnOp::Numerical op)
 {
     QString result;
 
@@ -197,7 +197,7 @@ QString GraphTransformConfigParser::opToString(GraphTransformConfig::NumericalOp
     return result;
 }
 
-QString GraphTransformConfigParser::opToString(GraphTransformConfig::StringOp op)
+QString GraphTransformConfigParser::opToString(ConditionFnOp::String op)
 {
     QString result;
 
@@ -210,7 +210,7 @@ QString GraphTransformConfigParser::opToString(GraphTransformConfig::StringOp op
     return result;
 }
 
-QString GraphTransformConfigParser::opToString(GraphTransformConfig::BinaryOp op)
+QString GraphTransformConfigParser::opToString(ConditionFnOp::Binary op)
 {
     QString result;
 

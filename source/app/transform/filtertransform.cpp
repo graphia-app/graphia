@@ -1,6 +1,6 @@
 #include "filtertransform.h"
 #include "transformedgraph.h"
-#include "conditionfncreator.h"
+#include "attributes/conditionfncreator.h"
 
 #include "graph/componentmanager.h"
 

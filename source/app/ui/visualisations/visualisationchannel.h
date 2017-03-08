@@ -2,7 +2,7 @@
 #define VISUALISATIONCHANNEL_H
 
 #include "ui/visualisations/elementvisual.h"
-#include "transform/fieldtype.h"
+#include "attributes/fieldtype.h"
 #include "graph/elementtype.h"
 
 #include <QString>

@@ -1,11 +1,16 @@
 #ifndef CONDITIONFNCREATOR_H
 #define CONDITIONFNCREATOR_H
 
+#include "condtionfnops.h"
+
 #include "shared/graph/elementid.h"
 #include "shared/graph/igraphcomponent.h"
 #include "shared/utils/utils.h"
 #include "datafield.h"
-#include "graphtransformconfig.h"
+
+#include "thirdparty/boost/boost_disable_warnings.h"
+#include "boost/variant/static_visitor.hpp"
+#include "thirdparty/boost/boost_enable_warnings.h"
 
 class CreateConditionFnFor
 {
@@ -20,7 +25,7 @@ private:
         {}
 
         template<typename T>
-        ElementConditionFn<E> numericalFn(FieldType type, GraphTransformConfig::NumericalOp op, T value) const
+        ElementConditionFn<E> numericalFn(FieldType type, ConditionFnOp::Numerical op, T value) const
         {
             const auto* dataField = _dataField;
 
@@ -45,17 +50,17 @@ private:
 
             switch(op)
             {
-            case GraphTransformConfig::NumericalOp::Equal:
+            case ConditionFnOp::Numerical::Equal:
                 return [dataField, value](E elementId) { return dataField->template valueOf<T, E>(elementId) == value; };
-            case GraphTransformConfig::NumericalOp::NotEqual:
+            case ConditionFnOp::Numerical::NotEqual:
                 return [dataField, value](E elementId) { return dataField->template valueOf<T, E>(elementId) != value; };
-            case GraphTransformConfig::NumericalOp::LessThan:
+            case ConditionFnOp::Numerical::LessThan:
                 return [dataField, value](E elementId) { return dataField->template valueOf<T, E>(elementId) < value; };
-            case GraphTransformConfig::NumericalOp::GreaterThan:
+            case ConditionFnOp::Numerical::GreaterThan:
                 return [dataField, value](E elementId) { return dataField->template valueOf<T, E>(elementId) > value; };
-            case GraphTransformConfig::NumericalOp::LessThanOrEqual:
+            case ConditionFnOp::Numerical::LessThanOrEqual:
                 return [dataField, value](E elementId) { return dataField->template valueOf<T, E>(elementId) <= value; };
-            case GraphTransformConfig::NumericalOp::GreaterThanOrEqual:
+            case ConditionFnOp::Numerical::GreaterThanOrEqual:
                 return [dataField, value](E elementId) { return dataField->template valueOf<T, E>(elementId) >= value; };
             default:
                 qFatal("Unhandled NumericalOp");
@@ -63,7 +68,7 @@ private:
             }
         }
 
-        ElementConditionFn<E> stringFn(GraphTransformConfig::StringOp op, QString value) const
+        ElementConditionFn<E> stringFn(ConditionFnOp::String op, QString value) const
         {
             const auto* dataField = _dataField;
 
@@ -76,19 +81,19 @@ private:
 
             switch(op)
             {
-            case GraphTransformConfig::StringOp::Equal:
+            case ConditionFnOp::String::Equal:
                 return [dataField, valueOfFn, value](E elementId) { return (dataField->*valueOfFn)(elementId) == value; };
-            case GraphTransformConfig::StringOp::NotEqual:
+            case ConditionFnOp::String::NotEqual:
                 return [dataField, valueOfFn, value](E elementId) { return (dataField->*valueOfFn)(elementId) != value; };
-            case GraphTransformConfig::StringOp::Includes:
+            case ConditionFnOp::String::Includes:
                 return [dataField, valueOfFn, value](E elementId) { return (dataField->*valueOfFn)(elementId).contains(value); };
-            case GraphTransformConfig::StringOp::Excludes:
+            case ConditionFnOp::String::Excludes:
                 return [dataField, valueOfFn, value](E elementId) { return !(dataField->*valueOfFn)(elementId).contains(value); };
-            case GraphTransformConfig::StringOp::Starts:
+            case ConditionFnOp::String::Starts:
                 return [dataField, valueOfFn, value](E elementId) { return (dataField->*valueOfFn)(elementId).startsWith(value); };
-            case GraphTransformConfig::StringOp::Ends:
+            case ConditionFnOp::String::Ends:
                 return [dataField, valueOfFn, value](E elementId) { return (dataField->*valueOfFn)(elementId).endsWith(value); };
-            case GraphTransformConfig::StringOp::MatchesRegex:
+            case ConditionFnOp::String::MatchesRegex:
             {
                 QRegularExpression re(value);
                 if(!re.isValid())
@@ -122,14 +127,14 @@ private:
         {}
 
         ElementConditionFn<E> compoundConditionFn(const ElementConditionFn<E>& lhs,
-                                                  const GraphTransformConfig::BinaryOp& op,
+                                                  const ConditionFnOp::Binary& op,
                                                   const ElementConditionFn<E>& rhs) const
         {
             switch(op)
             {
-            case GraphTransformConfig::BinaryOp::And:
+            case ConditionFnOp::Binary::And:
                 return [lhs, rhs](E elementId) { return lhs(elementId) && rhs(elementId); };
-            case GraphTransformConfig::BinaryOp::Or:
+            case ConditionFnOp::Binary::Or:
                 return [lhs, rhs](E elementId) { return lhs(elementId) || rhs(elementId); };
             default:
                 qFatal("Unhandled BinaryOp");
@@ -164,17 +169,17 @@ private:
         }
     };
 
-    static GraphTransformConfig::OpValue createOpValue(GraphTransformConfig::NumericalOp op, int value)
+    static GraphTransformConfig::OpValue createOpValue(ConditionFnOp::Numerical op, int value)
     {
         GraphTransformConfig::IntOpValue opValue = {op, value}; return GraphTransformConfig::OpValue(opValue);
     }
 
-    static GraphTransformConfig::OpValue createOpValue(GraphTransformConfig::NumericalOp op, double value)
+    static GraphTransformConfig::OpValue createOpValue(ConditionFnOp::Numerical op, double value)
     {
         GraphTransformConfig::FloatOpValue opValue = {op, value}; return GraphTransformConfig::OpValue(opValue);
     }
 
-    static GraphTransformConfig::OpValue createOpValue(GraphTransformConfig::StringOp op, const QString& value)
+    static GraphTransformConfig::OpValue createOpValue(ConditionFnOp::String op, const QString& value)
     {
         GraphTransformConfig::StringOpValue opValue = {op, value}; return GraphTransformConfig::OpValue(opValue);
     }

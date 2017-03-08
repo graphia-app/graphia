@@ -6,7 +6,7 @@
 #include "shared/graph/grapharray.h"
 
 #include "transform/transformedgraph.h"
-#include "transform/datafield.h"
+#include "attributes/datafield.h"
 
 #include "ui/visualisations/elementvisual.h"
 #include "ui/visualisations/visualisationchannel.h"

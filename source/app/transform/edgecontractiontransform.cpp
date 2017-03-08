@@ -1,6 +1,6 @@
 #include "edgecontractiontransform.h"
 #include "transformedgraph.h"
-#include "conditionfncreator.h"
+#include "attributes/conditionfncreator.h"
 
 #include <QObject>
 

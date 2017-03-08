@@ -1,7 +1,7 @@
 #include "searchmanager.h"
 
 #include "graph/graphmodel.h"
-#include "transform/conditionfncreator.h"
+#include "attributes/conditionfncreator.h"
 
 #include "shared/utils/utils.h"
 
@@ -59,7 +59,7 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> dataFie
                 for(auto& dataField : dataFields)
                 {
                     auto conditionFn = CreateConditionFnFor::node(*dataField,
-                        GraphTransformConfig::StringOp::MatchesRegex, _regex);
+                        ConditionFnOp::String::MatchesRegex, _regex);
 
                     if(conditionFn == nullptr)
                         continue;

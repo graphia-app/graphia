@@ -21,7 +21,7 @@ HEADERS += \
     $$PWD/loading/iurltypes.h \
     $$PWD/plugins/baseplugin.h \
     $$PWD/graph/igrapharrayclient.h \
-    $$PWD/transform/idatafield.h \
+    $$PWD/attributes/idatafield.h \
     $$PWD/ui/iselectionmanager.h \
     $$PWD/loading/baseparser.h \
     $$PWD/loading/gmlfileparser.h \
