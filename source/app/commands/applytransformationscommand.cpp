@@ -32,8 +32,10 @@ void ApplyTransformationsCommand::doTransform(const QStringList& transformations
 {
     _graphModel->buildTransforms(transformations);
 
-    // This needs to happen on the main thread
-    QMetaObject::invokeMethod(_document, "setTransforms", Q_ARG(const QStringList&, transformations));
+    _document->executeOnMainThread([this, transformations]
+    {
+        _document->setTransforms(transformations);
+    }, "setTransforms");
 }
 
 bool ApplyTransformationsCommand::execute()

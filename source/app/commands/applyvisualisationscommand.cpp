@@ -29,8 +29,10 @@ void ApplyVisualisationsCommand::doTransform(const QStringList& visualisations)
 {
     _graphModel->buildVisualisations(visualisations);
 
-    // This needs to happen on the main thread
-    QMetaObject::invokeMethod(_document, "setVisualisations", Q_ARG(const QStringList&, visualisations));
+    _document->executeOnMainThread([this, visualisations]
+    {
+        _document->setVisualisations(visualisations);
+    }, "setVisualisations");
 }
 
 bool ApplyVisualisationsCommand::execute()

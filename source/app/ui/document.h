@@ -9,6 +9,7 @@
 #include "layout/layout.h"
 #include "utils/qmlenum.h"
 #include "utils/qmlcontainerwrapper.h"
+#include "shared/utils/deferredexecutor.h"
 #include "thirdparty/qt-qml-models/QQmlVariantListModel.h"
 
 #include <QQuickItem>
@@ -101,10 +102,10 @@ public:
     void setStatus(const QString& status);
 
     QQmlVariantListModel* transformsModel() { return &_graphTransformsModel; }
-    Q_INVOKABLE void setTransforms(const QStringList& transforms);
+    void setTransforms(const QStringList& transforms);
 
     QQmlVariantListModel* visualisationsModel() { return &_visualisationsModel; }
-    Q_INVOKABLE void setVisualisations(const QStringList& visualisations);
+    void setVisualisations(const QStringList& visualisations);
 
     QmlContainerWrapper<LayoutSetting>* layoutSettings() { return &_layoutSettings; }
 
@@ -112,6 +113,8 @@ public:
 
     QObject* pluginInstance();
     QString pluginQmlPath() const;
+
+    void executeOnMainThread(DeferredExecutor::TaskFn task, const QString& description);
 
 private:
     Application* _application = nullptr;
@@ -135,6 +138,8 @@ private:
 
     std::unique_ptr<LayoutThread> _layoutThread;
     QmlContainerWrapper<LayoutSetting> _layoutSettings;
+
+    DeferredExecutor _deferredExecutor;
 
     std::vector<NodeId> _foundNodeIds;
     bool _foundItValid = false;
@@ -261,6 +266,8 @@ private slots:
 
     void onSelectionChanged(const SelectionManager* selectionManager);
     void onFoundNodeIdsChanged(const SearchManager* searchManager);
+
+    void executeDeferred();
 };
 
 #endif // DOCUMENT_H
