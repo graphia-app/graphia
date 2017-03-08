@@ -199,66 +199,69 @@ signals:
     void foundIndexChanged();
     void numNodesFoundChanged();
 
-public slots:
-    bool openFile(const QUrl& fileUrl,
-                  const QString& fileType,
-                  const QString& pluginName,
-                  const QVariantMap& parameters);
+    void taskAddedToExecutor();
 
-    void onPreferenceChanged(const QString& key, const QVariant& value);
+public:
+    // Main QML interface
+    Q_INVOKABLE bool openFile(const QUrl& fileUrl,
+                              const QString& fileType,
+                              const QString& pluginName,
+                              const QVariantMap& parameters);
 
-    void toggleLayout();
+    Q_INVOKABLE void onPreferenceChanged(const QString& key, const QVariant& value);
 
-    void selectAll();
-    void selectNone();
-    void invertSelection();
+    Q_INVOKABLE void toggleLayout();
 
-    void undo();
-    void redo();
+    Q_INVOKABLE void selectAll();
+    Q_INVOKABLE void selectNone();
+    Q_INVOKABLE void invertSelection();
 
-    void deleteSelectedNodes();
+    Q_INVOKABLE void undo();
+    Q_INVOKABLE void redo();
 
-    void resetView();
+    Q_INVOKABLE void deleteSelectedNodes();
 
-    void switchToOverviewMode(bool doTransition = true);
+    Q_INVOKABLE void resetView();
 
-    void gotoPrevComponent();
-    void gotoNextComponent();
+    Q_INVOKABLE void switchToOverviewMode(bool doTransition = true);
 
-    void find(const QString& regex);
-    void selectFirstFound();
-    void selectNextFound();
-    void selectPrevFound();
-    void selectAllFound();
-    void updateFoundIndex(bool reselectIfInvalidated);
+    Q_INVOKABLE void gotoPrevComponent();
+    Q_INVOKABLE void gotoNextComponent();
 
-    QStringList availableTransformNames() const;
-    QStringList availableDataFields(int types) const;
-    QStringList availableDataFields(const QString& transformName) const;
-    int dataFieldType(const QString& dataFieldName) const;
-    QStringList avaliableConditionFnOps(const QString& dataFieldName) const;
+    Q_INVOKABLE void find(const QString& regex);
+    Q_INVOKABLE void selectFirstFound();
+    Q_INVOKABLE void selectNextFound();
+    Q_INVOKABLE void selectPrevFound();
+    Q_INVOKABLE void selectAllFound();
+    Q_INVOKABLE void updateFoundIndex(bool reselectIfInvalidated);
 
-    QVariantMap dataFieldByName(const QString& dataFieldName) const;
-    QVariantMap findTransformParameter(const QString& transformName,
+    Q_INVOKABLE QStringList availableTransformNames() const;
+    Q_INVOKABLE QStringList availableDataFields(int types) const;
+    Q_INVOKABLE QStringList availableDataFields(const QString& transformName) const;
+    Q_INVOKABLE int dataFieldType(const QString& dataFieldName) const;
+    Q_INVOKABLE QStringList avaliableConditionFnOps(const QString& dataFieldName) const;
+
+    Q_INVOKABLE QVariantMap dataFieldByName(const QString& dataFieldName) const;
+    Q_INVOKABLE QVariantMap findTransformParameter(const QString& transformName,
                                        const QString& parameterName) const;
 
-    QVariantMap parseGraphTransform(const QString& transform) const;
-    bool graphTransformIsValid(const QString& transform) const;
-    void appendGraphTransform(const QString& transform);
-    void removeGraphTransform(int index);
-    void updateGraphTransforms();
+    Q_INVOKABLE QVariantMap parseGraphTransform(const QString& transform) const;
+    Q_INVOKABLE bool graphTransformIsValid(const QString& transform) const;
+    Q_INVOKABLE void appendGraphTransform(const QString& transform);
+    Q_INVOKABLE void removeGraphTransform(int index);
+    Q_INVOKABLE void updateGraphTransforms();
 
-    QStringList availableVisualisationChannelNames(const QString& dataFieldName) const;
-    QString visualisationDescription(const QString& dataFieldName, const QString& channelName) const;
-    QVariantMap visualisationAlertAtIndex(int index) const;
+    Q_INVOKABLE QStringList availableVisualisationChannelNames(const QString& dataFieldName) const;
+    Q_INVOKABLE QString visualisationDescription(const QString& dataFieldName, const QString& channelName) const;
+    Q_INVOKABLE QVariantMap visualisationAlertAtIndex(int index) const;
 
-    QVariantMap parseVisualisation(const QString& visualisation) const;
-    bool visualisationIsValid(const QString& visualisation) const;
-    void appendVisualisation(const QString& visualisation);
-    void removeVisualisation(int index);
-    void updateVisualisations();
+    Q_INVOKABLE QVariantMap parseVisualisation(const QString& visualisation) const;
+    Q_INVOKABLE bool visualisationIsValid(const QString& visualisation) const;
+    Q_INVOKABLE void appendVisualisation(const QString& visualisation);
+    Q_INVOKABLE void removeVisualisation(int index);
+    Q_INVOKABLE void updateVisualisations();
 
-    void dumpGraph();
+    Q_INVOKABLE void dumpGraph();
 
 private slots:
     void onLoadProgress(int percentage);

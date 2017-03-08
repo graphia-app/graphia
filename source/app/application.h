@@ -38,8 +38,7 @@ public:
     QVariant data(const QModelIndex& index, int role) const;
     QHash<int, QByteArray> roleNames() const;
 
-public slots:
-    QString nameAtIndex(int row) const { return data(index(row, 0), Name).toString(); }
+    Q_INVOKABLE QString nameAtIndex(int row) const { return data(index(row, 0), Name).toString(); }
 
 private:
     const std::vector<IPlugin*>* _plugins;
@@ -65,8 +64,7 @@ public:
     QVariant data(const QModelIndex& index, int role) const;
     QHash<int, QByteArray> roleNames() const;
 
-public slots:
-    QString nameAtIndex(int row) const { return data(index(row, 0), Name).toString(); }
+    Q_INVOKABLE QString nameAtIndex(int row) const { return data(index(row, 0), Name).toString(); }
 
 private:
     const std::vector<IPlugin*>* _plugins;
@@ -94,30 +92,29 @@ public:
     static QString version() { return QCoreApplication::applicationVersion(); }
     static QString copyright() { return QString(COPYRIGHT).replace("(c)", "©"); }
 
-signals:
-    void nameFiltersChanged();
-    void pluginDetailsChanged();
-    void urlTypeDetailsChanged();
+    Q_INVOKABLE bool fileUrlExists(const QUrl& url) const;
 
-public slots:
-    bool fileUrlExists(const QUrl& url) const;
+    Q_INVOKABLE bool canOpen(const QString& urlTypeName) const;
+    Q_INVOKABLE bool canOpenAnyOf(const QStringList& urlTypeNames) const;
+    Q_INVOKABLE QStringList urlTypesOf(const QUrl& url) const;
 
-    bool canOpen(const QString& urlTypeName) const;
-    bool canOpenAnyOf(const QStringList& urlTypeNames) const;
-    QStringList urlTypesOf(const QUrl& url) const;
-
-    QStringList pluginNames(const QString& urlTypeName) const;
-    QString parametersQmlPathForPlugin(const QString& pluginName) const;
+    Q_INVOKABLE QStringList pluginNames(const QString& urlTypeName) const;
+    Q_INVOKABLE QString parametersQmlPathForPlugin(const QString& pluginName) const;
 
     static const char* uri() { return _uri; }
     static int majorVersion() { return _majorVersion; }
     static int minorVersion() { return _minorVersion; }
 
-    QString baseFileNameForUrl(const QUrl& url) const { return url.fileName(); }
-    QString fileNameForUrl(const QUrl& url) const { return url.toLocalFile(); }
-    QUrl urlForFileName(const QString& fileName) const { return QUrl::fromLocalFile(fileName); }
+    Q_INVOKABLE QString baseFileNameForUrl(const QUrl& url) const { return url.fileName(); }
+    Q_INVOKABLE QString fileNameForUrl(const QUrl& url) const { return url.toLocalFile(); }
+    Q_INVOKABLE QUrl urlForFileName(const QString& fileName) const { return QUrl::fromLocalFile(fileName); }
 
-    void crash();
+    Q_INVOKABLE void crash();
+
+signals:
+    void nameFiltersChanged();
+    void pluginDetailsChanged();
+    void urlTypeDetailsChanged();
 
 private:
     static const char* _uri;
