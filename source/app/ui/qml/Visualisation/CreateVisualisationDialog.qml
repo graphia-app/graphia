@@ -129,8 +129,8 @@ Window
 
         if(fieldList.selectedValue !== undefined && fieldList.selectedValue.length > 0)
         {
-            var dataField = document.dataFieldByName(fieldList.selectedValue);
-            description.text += dataField.description;
+            var attribute = document.attributeByName(fieldList.selectedValue);
+            description.text += attribute.description;
 
             if(channelList.selectedValue !== undefined && channelList.selectedValue.length > 0)
             {
@@ -154,6 +154,6 @@ Window
 
     onVisibleChanged:
     {
-        fieldList.model = document.availableDataFields(ElementType.Node|ElementType.Edge);
+        fieldList.model = document.availableAttributes(ElementType.Node|ElementType.Edge);
     }
 }

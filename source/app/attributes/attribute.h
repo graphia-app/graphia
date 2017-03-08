@@ -1,9 +1,9 @@
-#ifndef DATAFIELD_H
-#define DATAFIELD_H
+#ifndef ATTRIBUTE_H
+#define ATTRIBUTE_H
 
 #include "shared/graph/elementid.h"
 #include "graph/elementtype.h"
-#include "shared/attributes/idatafield.h"
+#include "shared/attributes/iattribute.h"
 #include "shared/graph/igraphcomponent.h"
 
 #include "fieldtype.h"
@@ -16,7 +16,7 @@
 #include <QString>
 #include <QRegularExpression>
 
-class DataField : public IDataField
+class Attribute : public IAttribute
 {
 private:
     ValueFn<int, NodeId> _intNodeIdFn;
@@ -105,19 +105,19 @@ public:
     }
 
     template<typename T, typename E>
-    using ValueOfFn = T(DataField::*)(E&) const;
+    using ValueOfFn = T(Attribute::*)(E&) const;
 
-    DataField& setIntValueFn(ValueFn<int, NodeId> valueFn);
-    DataField& setIntValueFn(ValueFn<int, EdgeId> valueFn);
-    DataField& setIntValueFn(ValueFn<int, const IGraphComponent&> valueFn);
+    Attribute& setIntValueFn(ValueFn<int, NodeId> valueFn);
+    Attribute& setIntValueFn(ValueFn<int, EdgeId> valueFn);
+    Attribute& setIntValueFn(ValueFn<int, const IGraphComponent&> valueFn);
 
-    DataField& setFloatValueFn(ValueFn<double, NodeId> valueFn);
-    DataField& setFloatValueFn(ValueFn<double, EdgeId> valueFn);
-    DataField& setFloatValueFn(ValueFn<double, const IGraphComponent&> valueFn);
+    Attribute& setFloatValueFn(ValueFn<double, NodeId> valueFn);
+    Attribute& setFloatValueFn(ValueFn<double, EdgeId> valueFn);
+    Attribute& setFloatValueFn(ValueFn<double, const IGraphComponent&> valueFn);
 
-    DataField& setStringValueFn(ValueFn<QString, NodeId> valueFn);
-    DataField& setStringValueFn(ValueFn<QString, EdgeId> valueFn);
-    DataField& setStringValueFn(ValueFn<QString, const IGraphComponent&> valueFn);
+    Attribute& setStringValueFn(ValueFn<QString, NodeId> valueFn);
+    Attribute& setStringValueFn(ValueFn<QString, EdgeId> valueFn);
+    Attribute& setStringValueFn(ValueFn<QString, const IGraphComponent&> valueFn);
 
     FieldType valueType() const;
     ElementType elementType() const;
@@ -128,8 +128,8 @@ public:
 
     int intMin() const;
     int intMax() const;
-    DataField& setIntMin(int intMin);
-    DataField& setIntMax(int intMax);
+    Attribute& setIntMin(int intMin);
+    Attribute& setIntMax(int intMax);
 
     bool intValueInRange(int value) const;
 
@@ -139,8 +139,8 @@ public:
 
     double floatMin() const;
     double floatMax() const;
-    DataField& setFloatMin(double floatMin);
-    DataField& setFloatMax(double floatMax);
+    Attribute& setFloatMin(double floatMin);
+    Attribute& setFloatMax(double floatMax);
 
     bool floatValueInRange(double value) const;
 
@@ -166,11 +166,11 @@ public:
     }
 
     bool searchable() const { return _searchable; }
-    DataField& setSearchable(bool searchable) { _searchable = searchable; return *this; }
+    Attribute& setSearchable(bool searchable) { _searchable = searchable; return *this; }
 
     QString description() const { return _description; }
-    DataField& setDescription(const QString& description) { _description = description; return *this; }
+    Attribute& setDescription(const QString& description) { _description = description; return *this; }
 };
 
-#endif // DATAFIELD_H
+#endif // ATTRIBUTE_H
 

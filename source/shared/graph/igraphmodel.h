@@ -3,7 +3,7 @@
 
 #include "igraph.h"
 #include "imutablegraph.h"
-#include "shared/attributes/idatafield.h"
+#include "shared/attributes/iattribute.h"
 
 class QString;
 
@@ -18,7 +18,7 @@ public:
     virtual QString nodeName(NodeId nodeId) const = 0;
     virtual void setNodeName(NodeId nodeId, const QString& name) = 0;
 
-    virtual IDataField& dataField(const QString& name) = 0;
+    virtual IAttribute& attribute(const QString& name) = 0;
 };
 
 #endif // IGRAPHMODEL_H

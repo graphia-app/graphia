@@ -236,12 +236,12 @@ public:
     Q_INVOKABLE void updateFoundIndex(bool reselectIfInvalidated);
 
     Q_INVOKABLE QStringList availableTransformNames() const;
-    Q_INVOKABLE QStringList availableDataFields(int types) const;
-    Q_INVOKABLE QStringList availableDataFields(const QString& transformName) const;
-    Q_INVOKABLE int dataFieldType(const QString& dataFieldName) const;
-    Q_INVOKABLE QStringList avaliableConditionFnOps(const QString& dataFieldName) const;
+    Q_INVOKABLE QStringList availableAttributes(int types) const;
+    Q_INVOKABLE QStringList availableAttributes(const QString& transformName) const;
+    Q_INVOKABLE int attributeType(const QString& attributeName) const;
+    Q_INVOKABLE QStringList avaliableConditionFnOps(const QString& attributeName) const;
 
-    Q_INVOKABLE QVariantMap dataFieldByName(const QString& dataFieldName) const;
+    Q_INVOKABLE QVariantMap attributeByName(const QString& attributeName) const;
     Q_INVOKABLE QVariantMap findTransformParameter(const QString& transformName,
                                        const QString& parameterName) const;
 
@@ -251,8 +251,8 @@ public:
     Q_INVOKABLE void removeGraphTransform(int index);
     Q_INVOKABLE void updateGraphTransforms();
 
-    Q_INVOKABLE QStringList availableVisualisationChannelNames(const QString& dataFieldName) const;
-    Q_INVOKABLE QString visualisationDescription(const QString& dataFieldName, const QString& channelName) const;
+    Q_INVOKABLE QStringList availableVisualisationChannelNames(const QString& attributeName) const;
+    Q_INVOKABLE QString visualisationDescription(const QString& attributeName, const QString& channelName) const;
     Q_INVOKABLE QVariantMap visualisationAlertAtIndex(int index) const;
 
     Q_INVOKABLE QVariantMap parseVisualisation(const QString& visualisation) const;

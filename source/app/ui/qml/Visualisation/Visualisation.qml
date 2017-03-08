@@ -61,7 +61,7 @@ Item
                     checkable: true
                     enabled:
                     {
-                        var fieldType = document.dataFieldType(dataField);
+                        var fieldType = document.attributeType(attribute);
                         return fieldType === FieldType.Float || fieldType === FieldType.Int;
                     }
 
@@ -135,7 +135,7 @@ Item
         return flags.indexOf(flag) >= 0;
     }
 
-    property string dataField
+    property string attribute
     property string channel
 
     function updateExpression()
@@ -147,7 +147,7 @@ Item
         if(flags.length > 0)
             flagsString = "[" + flags.toString() + "] ";
 
-        var newExpression = flagsString + "\"" + dataField + "\" \"" + channel + "\"";
+        var newExpression = flagsString + "\"" + attribute + "\" \"" + channel + "\"";
 
         value = newExpression;
         document.updateVisualisations();
@@ -187,7 +187,7 @@ Item
             visualisationConfig.toComponents(document, expression);
 
             flags = visualisationConfig.flags;
-            dataField = visualisationConfig.dataField;
+            attribute = visualisationConfig.attribute;
             channel = visualisationConfig.channel;
 
             enabledMenuItem.checked = !isFlagSet("disabled");

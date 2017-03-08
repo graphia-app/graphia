@@ -9,7 +9,7 @@
 struct VisualisationConfig
 {
     std::vector<QString> _flags;
-    QString _dataFieldName;
+    QString _attributeName;
     QString _channelName;
 
     QVariantMap asVariantMap() const;

@@ -10,7 +10,7 @@
 class Graph;
 class GraphComponent;
 class TransformedGraph;
-class DataField;
+class Attribute;
 
 class GraphTransform
 {
@@ -38,7 +38,7 @@ public:
 
     virtual ElementType elementType() const { return ElementType::None; }
     virtual std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig,
-                                                   const std::map<QString, DataField>& dataFields) const = 0;
+                                                   const std::map<QString, Attribute>& attributes) const = 0;
 };
 
 using IdentityTransform = GraphTransform;

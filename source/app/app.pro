@@ -74,7 +74,6 @@ HEADERS += \
     rendering/scene.h \
     rendering/transition.h \
     transform/compoundtransform.h \
-    attributes/datafield.h \
     transform/edgecontractiontransform.h \
     transform/filtertransform.h \
     transform/graphtransform.h \
@@ -111,7 +110,8 @@ HEADERS += \
     ui/visualisations/visualisationalert.h \
     attributes/conditionfncreator.h \
     attributes/fieldtype.h \
-    attributes/condtionfnops.h
+    attributes/condtionfnops.h \
+    attributes/attribute.h
 
 SOURCES += \
     application.cpp \
@@ -179,7 +179,7 @@ SOURCES += \
     ui/visualisations/visualisationconfig.cpp \
     ui/visualisations/visualisationconfigparser.cpp \
     graph/elementtype.cpp \
-    attributes/datafield.cpp
+    attributes/attribute.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \

@@ -40,7 +40,7 @@ void BaseGenericPluginInstance::setEdgeWeight(EdgeId edgeId, float weight)
     {
         _edgeWeights = std::make_unique<EdgeArray<float>>(graphModel()->mutableGraph());
 
-        graphModel()->dataField(tr("Edge Weight"))
+        graphModel()->attribute(tr("Edge Weight"))
             .setFloatValueFn([this](EdgeId edgeId_) { return _edgeWeights->get(edgeId_); })
             .setDescription(tr("The Edge Weight is a generic value associated with the edge."));
     }
@@ -66,7 +66,7 @@ QString BaseGenericPluginInstance::selectedNodeNames() const
 void BaseGenericPluginInstance::onLoadSuccess()
 {
     _userNodeData.setNodeNamesToFirstUserDataVector(*graphModel());
-    _userNodeData.exposeToGraphModel(*graphModel());
+    _userNodeData.exposeAsAttributes(*graphModel());
 }
 
 void BaseGenericPluginInstance::onGraphChanged()
@@ -76,7 +76,7 @@ void BaseGenericPluginInstance::onGraphChanged()
         float min = *std::min_element(_edgeWeights->begin(), _edgeWeights->end());
         float max = *std::max_element(_edgeWeights->begin(), _edgeWeights->end());
 
-        graphModel()->dataField(tr("Edge Weight")).setFloatMin(min).setFloatMax(max);
+        graphModel()->attribute(tr("Edge Weight")).setFloatMin(min).setFloatMax(max);
     }
 }
 

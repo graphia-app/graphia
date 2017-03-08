@@ -13,7 +13,7 @@ class SearchManager : public QObject
 public:
     explicit SearchManager(const GraphModel& graphModel);
 
-    void findNodes(const QString& regex, std::vector<QString> dataFieldNames = {});
+    void findNodes(const QString& regex, std::vector<QString> attributeNames = {});
     void clearFoundNodeIds();
     void refresh();
 
@@ -22,7 +22,7 @@ public:
 
 private:
     QString _regex;
-    std::vector<QString> _dataFieldNames;
+    std::vector<QString> _attributeNames;
 
     const GraphModel* _graphModel;
     NodeIdSet _foundNodeIds;

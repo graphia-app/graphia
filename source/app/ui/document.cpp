@@ -787,51 +787,51 @@ QStringList Document::availableTransformNames() const
     return _graphModel != nullptr ? _graphModel->availableTransformNames() : QStringList();
 }
 
-QStringList Document::availableDataFields(int types) const
+QStringList Document::availableAttributes(int types) const
 {
-    return _graphModel != nullptr ? _graphModel->availableDataFields(static_cast<ElementType>(types)) : QStringList();
+    return _graphModel != nullptr ? _graphModel->availableAttributes(static_cast<ElementType>(types)) : QStringList();
 }
 
-QStringList Document::availableDataFields(const QString& transformName) const
+QStringList Document::availableAttributes(const QString& transformName) const
 {
-    return _graphModel != nullptr ? _graphModel->availableDataFields(transformName) : QStringList();
+    return _graphModel != nullptr ? _graphModel->availableAttributes(transformName) : QStringList();
 }
 
-int Document::dataFieldType(const QString& dataFieldName) const
+int Document::attributeType(const QString& attributeName) const
 {
-    const auto& dataField = _graphModel->dataFieldByName(dataFieldName);
-    return static_cast<int>(dataField.valueType());
+    const auto& attribute = _graphModel->attributeByName(attributeName);
+    return static_cast<int>(attribute.valueType());
 }
 
-QStringList Document::avaliableConditionFnOps(const QString& dataFieldName) const
+QStringList Document::avaliableConditionFnOps(const QString& attributeName) const
 {
-    return _graphModel != nullptr ? _graphModel->avaliableConditionFnOps(dataFieldName) : QStringList();
+    return _graphModel != nullptr ? _graphModel->avaliableConditionFnOps(attributeName) : QStringList();
 }
 
-QVariantMap Document::dataFieldByName(const QString& dataFieldName) const
+QVariantMap Document::attributeByName(const QString& attributeName) const
 {
     QVariantMap map;
 
     if(_graphModel == nullptr)
         return map;
 
-    if(u::contains(_graphModel->availableDataFields(ElementType::All), dataFieldName))
+    if(u::contains(_graphModel->availableAttributes(ElementType::All), attributeName))
     {
-        // It's a DataField
-        const auto& dataField = _graphModel->dataFieldByName(dataFieldName);
-        map.insert("type", static_cast<int>(dataField.valueType()));
-        map.insert("elementType", static_cast<int>(dataField.elementType()));
+        // It's an Attribute
+        const auto& attribute = _graphModel->attributeByName(attributeName);
+        map.insert("type", static_cast<int>(attribute.valueType()));
+        map.insert("elementType", static_cast<int>(attribute.elementType()));
 
-        map.insert("hasRange", dataField.hasFloatRange() || dataField.hasIntRange());
-        map.insert("hasMinimumValue", dataField.hasFloatMin() || dataField.hasIntMin());
-        map.insert("hasMaximumValue", dataField.hasFloatMax() || dataField.hasIntMax());
+        map.insert("hasRange", attribute.hasFloatRange() || attribute.hasIntRange());
+        map.insert("hasMinimumValue", attribute.hasFloatMin() || attribute.hasIntMin());
+        map.insert("hasMaximumValue", attribute.hasFloatMax() || attribute.hasIntMax());
 
-        if(dataField.hasFloatMin()) map.insert("minimumValue", dataField.floatMin());
-        if(dataField.hasFloatMax()) map.insert("maximumValue", dataField.floatMax());
-        if(dataField.hasIntMin()) map.insert("minimumValue", dataField.intMin());
-        if(dataField.hasIntMax()) map.insert("maximumValue", dataField.intMax());
+        if(attribute.hasFloatMin()) map.insert("minimumValue", attribute.floatMin());
+        if(attribute.hasFloatMax()) map.insert("maximumValue", attribute.floatMax());
+        if(attribute.hasIntMin()) map.insert("minimumValue", attribute.intMin());
+        if(attribute.hasIntMax()) map.insert("maximumValue", attribute.intMax());
 
-        map.insert("description", dataField.description());
+        map.insert("description", attribute.description());
     }
 
     return map;
@@ -842,10 +842,10 @@ QVariantMap Document::findTransformParameter(const QString& transformName, const
     if(_graphModel == nullptr)
         return {};
 
-    if(u::contains(_graphModel->availableDataFields(transformName), parameterName))
+    if(u::contains(_graphModel->availableAttributes(transformName), parameterName))
     {
-        // It's a DataField
-        return dataFieldByName(parameterName);
+        // It's an Attribute
+        return attributeByName(parameterName);
     }
     /*else
     {
@@ -956,14 +956,14 @@ void Document::updateGraphTransforms()
         setTransforms(newGraphTransforms);
 }
 
-QStringList Document::availableVisualisationChannelNames(const QString& dataFieldName) const
+QStringList Document::availableVisualisationChannelNames(const QString& attributeName) const
 {
-    return _graphModel != nullptr ? _graphModel->availableVisualisationChannelNames(dataFieldName) : QStringList();
+    return _graphModel != nullptr ? _graphModel->availableVisualisationChannelNames(attributeName) : QStringList();
 }
 
-QString Document::visualisationDescription(const QString& dataFieldName, const QString& channelName) const
+QString Document::visualisationDescription(const QString& attributeName, const QString& channelName) const
 {
-    return _graphModel != nullptr ? _graphModel->visualisationDescription(dataFieldName, channelName) : QString();
+    return _graphModel != nullptr ? _graphModel->visualisationDescription(attributeName, channelName) : QString();
 }
 
 QVariantMap Document::visualisationAlertAtIndex(int index) const

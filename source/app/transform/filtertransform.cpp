@@ -77,22 +77,22 @@ bool FilterTransform::apply(TransformedGraph& target) const
 }
 
 std::unique_ptr<GraphTransform> FilterTransformFactory::create(const GraphTransformConfig& graphTransformConfig,
-                                                               const std::map<QString, DataField>& dataFields) const
+                                                               const std::map<QString, Attribute>& attributes) const
 {
     auto filterTransform = std::make_unique<FilterTransform>(_invert);
 
     switch(elementType())
     {
     case ElementType::Node:
-        filterTransform->addNodeFilter(CreateConditionFnFor::node(dataFields, graphTransformConfig._condition));
+        filterTransform->addNodeFilter(CreateConditionFnFor::node(attributes, graphTransformConfig._condition));
         break;
 
     case ElementType::Edge:
-        filterTransform->addEdgeFilter(CreateConditionFnFor::edge(dataFields, graphTransformConfig._condition));
+        filterTransform->addEdgeFilter(CreateConditionFnFor::edge(attributes, graphTransformConfig._condition));
         break;
 
     case ElementType::Component:
-        filterTransform->addComponentFilter(CreateConditionFnFor::component(dataFields, graphTransformConfig._condition));
+        filterTransform->addComponentFilter(CreateConditionFnFor::component(attributes, graphTransformConfig._condition));
         break;
 
     default:

@@ -6,7 +6,7 @@
 #include "shared/graph/grapharray.h"
 
 #include "transform/transformedgraph.h"
-#include "attributes/datafield.h"
+#include "attributes/attribute.h"
 
 #include "ui/visualisations/elementvisual.h"
 #include "ui/visualisations/visualisationchannel.h"
@@ -57,7 +57,7 @@ private:
     QString _name;
     IPlugin* _plugin;
 
-    std::map<QString, DataField> _dataFields;
+    std::map<QString, Attribute> _attributes;
     std::map<QString, std::unique_ptr<GraphTransformFactory>> _graphTransformFactories;
 
     std::map<QString, std::unique_ptr<VisualisationChannel>> _visualisationChannels;
@@ -85,21 +85,21 @@ public:
     void buildTransforms(const QStringList& transforms);
 
     QStringList availableTransformNames() const;
-    QStringList availableDataFields(ElementType elementTypes) const;
-    QStringList availableDataFields(const QString& transformName) const;
-    QStringList avaliableConditionFnOps(const QString& dataFieldName) const;
+    QStringList availableAttributes(ElementType elementTypes) const;
+    QStringList availableAttributes(const QString& transformName) const;
+    QStringList avaliableConditionFnOps(const QString& attributeName) const;
 
     bool visualisationIsValid(const QString& visualisation) const;
     void buildVisualisations(const QStringList& visualisations);
 
-    QStringList availableVisualisationChannelNames(const QString& dataFieldName) const;
-    QString visualisationDescription(const QString& dataFieldName, const QString& channelName) const;
+    QStringList availableVisualisationChannelNames(const QString& attributeName) const;
+    QString visualisationDescription(const QString& attributeName, const QString& channelName) const;
     std::vector<VisualisationAlert> visualisationAlertsAtIndex(int index) const;
 
-    QStringList dataFieldNames(ElementType elementType) const;
+    QStringList attributeNames(ElementType elementType) const;
 
-    IDataField& dataField(const QString& name);
-    const DataField& dataFieldByName(const QString& name) const;
+    IAttribute& attribute(const QString& name);
+    const Attribute& attributeByName(const QString& name) const;
 
     void enableVisualUpdates();
     void updateVisuals(const SelectionManager* selectionManager = nullptr, const SearchManager* searchManager = nullptr);

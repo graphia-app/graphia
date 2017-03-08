@@ -54,7 +54,7 @@ void UserNodeData::setNodeNamesToFirstUserDataVector(IGraphModel& graphModel)
          graphModel.setNodeName(nodeId, valueByNodeId(nodeId, firstUserDataVectorName()));
 }
 
-void UserNodeData::exposeToGraphModel(IGraphModel& graphModel)
+void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
 {
     for(const auto& userDataVector : *this)
     {
@@ -63,7 +63,7 @@ void UserNodeData::exposeToGraphModel(IGraphModel& graphModel)
         switch(userDataVector.type())
         {
         case UserDataVector::Type::Float:
-            graphModel.dataField(userDataVectorName)
+            graphModel.attribute(userDataVectorName)
                     .setFloatValueFn([this, userDataVectorName](NodeId nodeId)
                     {
                         return valueByNodeId(nodeId, userDataVectorName).toFloat();
@@ -74,7 +74,7 @@ void UserNodeData::exposeToGraphModel(IGraphModel& graphModel)
             break;
 
         case UserDataVector::Type::Integer:
-            graphModel.dataField(userDataVectorName)
+            graphModel.attribute(userDataVectorName)
                     .setIntValueFn([this, userDataVectorName](NodeId nodeId)
                     {
                         return valueByNodeId(nodeId, userDataVectorName).toInt();
@@ -85,7 +85,7 @@ void UserNodeData::exposeToGraphModel(IGraphModel& graphModel)
             break;
 
         case UserDataVector::Type::String:
-            graphModel.dataField(userDataVectorName)
+            graphModel.attribute(userDataVectorName)
                     .setStringValueFn([this, userDataVectorName](NodeId nodeId)
                     {
                         return valueByNodeId(nodeId, userDataVectorName);
@@ -96,7 +96,7 @@ void UserNodeData::exposeToGraphModel(IGraphModel& graphModel)
         default: break;
         }
 
-        graphModel.dataField(userDataVectorName)
+        graphModel.attribute(userDataVectorName)
                 .setDescription(QString(tr("%1 is a user defined attribute.")).arg(userDataVectorName));
     }
 }

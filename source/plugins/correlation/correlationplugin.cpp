@@ -23,7 +23,7 @@ void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionMa
     _userNodeDataTableModel.initialise(selectionManager);
     _pearsonValues = std::make_unique<EdgeArray<double>>(graphModel->mutableGraph());
 
-    graphModel->dataField(tr("Pearson Correlation Value"))
+    graphModel->attribute(tr("Pearson Correlation Value"))
             .setFloatValueFn([this](EdgeId edgeId) { return _pearsonValues->get(edgeId); })
             .setDescription(tr("The <a href=\"https://en.wikipedia.org/wiki/Pearson_correlation_coefficient\">"
                                "Pearson Correlation Coefficient</a> is an indication of "
@@ -112,25 +112,25 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, int
         maxStdDev = std::max(maxStdDev, dataRow._stddev);
     }
 
-    graphModel()->dataField(tr("Mean Data Value"))
+    graphModel()->attribute(tr("Mean Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._mean; })
             .setFloatMin(minMeanValue).setFloatMax(maxMeanValue)
             .setDescription(tr("The Mean Data Value is the mean of the values associated "
                                "with the node."));
 
-    graphModel()->dataField(tr("Minimum Data Value"))
+    graphModel()->attribute(tr("Minimum Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._minValue; })
             .setFloatMin(minMinValue).setFloatMax(maxMinValue)
             .setDescription(tr("The Minimum Data Value is the minimum value associated "
                                "with the node."));
 
-    graphModel()->dataField(tr("Maximum Data Value"))
+    graphModel()->attribute(tr("Maximum Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._maxValue; })
             .setFloatMin(minMaxValue).setFloatMax(maxMaxValue)
             .setDescription(tr("The Maximum Data Value is the maximum value associated "
                                "with the node."));
 
-    graphModel()->dataField(tr("Variance"))
+    graphModel()->attribute(tr("Variance"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._variance; })
             .setFloatMin(minVariance).setFloatMax(maxVariance)
             .setDescription(tr("The <a href=\"https://en.wikipedia.org/wiki/Variance\">Variance</a> "
@@ -138,7 +138,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, int
                                "with the node. It is defined as ∑(𝑥-𝜇)², where 𝑥 is the value "
                                "and 𝜇 is the mean."));
 
-    graphModel()->dataField(tr("Standard Deviation"))
+    graphModel()->attribute(tr("Standard Deviation"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._stddev; })
             .setFloatMin(minStdDev).setFloatMax(maxStdDev)
             .setDescription(tr("The <a href=\"https://en.wikipedia.org/wiki/Standard_deviation\">"
@@ -265,7 +265,7 @@ void CorrelationPluginInstance::finishDataRow(int row)
 void CorrelationPluginInstance::onLoadSuccess()
 {
     _userNodeData.setNodeNamesToFirstUserDataVector(*graphModel());
-    _userNodeData.exposeToGraphModel(*graphModel());
+    _userNodeData.exposeAsAttributes(*graphModel());
 }
 
 QVector<double> CorrelationPluginInstance::rawData()
@@ -303,7 +303,7 @@ void CorrelationPluginInstance::onGraphChanged()
         double min = *std::min_element(_pearsonValues->begin(), _pearsonValues->end());
         double max = *std::max_element(_pearsonValues->begin(), _pearsonValues->end());
 
-        graphModel()->dataField(tr("Pearson Correlation Value")).setFloatMin(min).setFloatMax(max);
+        graphModel()->attribute(tr("Pearson Correlation Value")).setFloatMin(min).setFloatMax(max);
     }
 }
 

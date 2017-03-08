@@ -50,7 +50,7 @@ Window
 
                 onSelectedValueChanged:
                 {
-                    fieldList.model = document.availableDataFields(selectedValue);
+                    fieldList.model = document.availableAttributes(selectedValue);
                     updateTransformExpression();
                 }
             }

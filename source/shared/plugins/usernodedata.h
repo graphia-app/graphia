@@ -30,7 +30,7 @@ public:
     QString valueByNodeId(NodeId nodeId, const QString& name) const;
 
     void setNodeNamesToFirstUserDataVector(IGraphModel& graphModel);
-    void exposeToGraphModel(IGraphModel& graphModel);
+    void exposeAsAttributes(IGraphModel& graphModel);
 };
 
 #endif // USERNODEDATA_H

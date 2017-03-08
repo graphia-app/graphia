@@ -5,7 +5,7 @@
 #include "visualisationalert.h"
 
 #include "shared/graph/grapharray.h"
-#include "attributes/datafield.h"
+#include "attributes/attribute.h"
 
 #include <vector>
 #include <array>
@@ -101,24 +101,24 @@ public:
         }
     }
 
-    void build(const DataField& dataField,
+    void build(const Attribute& attribute,
                const VisualisationChannel& channel,
                bool invert, int index)
     {
         for(int c = 0; c < NumChannels; c++)
             _applications[c].emplace_back(index, *_graph);
 
-        switch(dataField.valueType())
+        switch(attribute.valueType())
         {
         case FieldType::Int:
         case FieldType::Float:
         {
             double min, max;
-            std::tie(min, max) = dataField.findNumericRange(*_elementIds);
+            std::tie(min, max) = attribute.findNumericRange(*_elementIds);
 
             for(auto elementId : *_elementIds)
             {
-                double value = dataField.numericValueOf(elementId);
+                double value = attribute.numericValueOf(elementId);
 
                 if(channel.requiresNormalisedValue())
                 {
@@ -140,7 +140,7 @@ public:
 
         case FieldType::String:
             for(auto elementId : *_elementIds)
-                apply(dataField.stringValueOf(elementId), channel, elementId, _numAppliedVisualisations);
+                apply(attribute.stringValueOf(elementId), channel, elementId, _numAppliedVisualisations);
             break;
 
         default:

@@ -11,7 +11,7 @@ QVariantMap VisualisationConfig::asVariantMap() const
         flags.append(flag);
     map.insert("flags", flags);
 
-    map.insert("dataField", _dataFieldName);
+    map.insert("attribute", _attributeName);
     map.insert("channel", _channelName);
 
     return map;
@@ -19,7 +19,7 @@ QVariantMap VisualisationConfig::asVariantMap() const
 
 bool VisualisationConfig::operator==(const VisualisationConfig& other) const
 {
-    return _dataFieldName == other._dataFieldName &&
+    return _attributeName == other._attributeName &&
             _channelName == other._channelName;
 }
 

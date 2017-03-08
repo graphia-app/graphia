@@ -23,7 +23,7 @@ class EdgeContractionTransformFactory : public GraphTransformFactory
 public:
     ElementType elementType() const { return ElementType::Edge; }
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig,
-                                           const std::map<QString, DataField>& dataFields) const;
+                                           const std::map<QString, Attribute>& attributes) const;
 };
 
 #endif // EDGECONTRACTIONTRANSFORM_H

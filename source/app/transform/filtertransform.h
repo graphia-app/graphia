@@ -35,7 +35,7 @@ public:
 
     ElementType elementType() const { return _elementType; }
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig,
-                                           const std::map<QString, DataField>& dataFields) const;
+                                           const std::map<QString, Attribute>& attributes) const;
 };
 
 #endif // FILTERTRANSFORM_H

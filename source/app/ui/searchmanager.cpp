@@ -13,10 +13,10 @@ SearchManager::SearchManager(const GraphModel& graphModel) :
     _graphModel(&graphModel)
 {}
 
-void SearchManager::findNodes(const QString& regex, std::vector<QString> dataFieldNames)
+void SearchManager::findNodes(const QString& regex, std::vector<QString> attributeNames)
 {
     _regex = regex;
-    _dataFieldNames = dataFieldNames;
+    _attributeNames = attributeNames;
 
     if(_regex.isEmpty())
     {
@@ -27,19 +27,19 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> dataFie
     NodeIdSet foundNodeIds;
 
     // If no data fields are specified, search them all
-    if(_dataFieldNames.empty())
+    if(_attributeNames.empty())
     {
-        for(auto& dataFieldName : _graphModel->dataFieldNames(ElementType::Node))
-            _dataFieldNames.emplace_back(dataFieldName);
+        for(auto& attributeName : _graphModel->attributeNames(ElementType::Node))
+            _attributeNames.emplace_back(attributeName);
     }
 
-    std::vector<const DataField*> dataFields;
-    for(auto& dataFieldName : _dataFieldNames)
+    std::vector<const Attribute*> attributes;
+    for(auto& attributeName : _attributeNames)
     {
-        const auto* dataField = &_graphModel->dataFieldByName(dataFieldName);
+        const auto* attribute = &_graphModel->attributeByName(attributeName);
 
-        if(dataField->searchable() && dataField->elementType() == ElementType::Node)
-            dataFields.emplace_back(dataField);
+        if(attribute->searchable() && attribute->elementType() == ElementType::Node)
+            attributes.emplace_back(attribute);
     }
 
     QRegularExpression re(_regex, QRegularExpression::CaseInsensitiveOption);
@@ -56,9 +56,9 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> dataFie
 
             if(!match)
             {
-                for(auto& dataField : dataFields)
+                for(auto& attribute : attributes)
                 {
-                    auto conditionFn = CreateConditionFnFor::node(*dataField,
+                    auto conditionFn = CreateConditionFnFor::node(*attribute,
                         ConditionFnOp::String::MatchesRegex, _regex);
 
                     if(conditionFn == nullptr)
@@ -101,7 +101,7 @@ void SearchManager::clearFoundNodeIds()
 
 void SearchManager::refresh()
 {
-    findNodes(_regex, _dataFieldNames);
+    findNodes(_regex, _attributeNames);
 }
 
 bool SearchManager::SearchManager::nodeWasFound(NodeId nodeId) const

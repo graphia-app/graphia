@@ -46,12 +46,12 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
 
     connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphModel::onPreferenceChanged);
 
-    dataField(tr("Node Degree"))
+    attribute(tr("Node Degree"))
         .setIntValueFn([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).degree(); })
         .setIntMin(0)
         .setDescription(tr("A node's degree is its number of incident edges."));
 
-    dataField(tr("Component Size"))
+    attribute(tr("Component Size"))
         .setIntValueFn([this](const IGraphComponent& component) { return component.numNodes(); })
         .setIntMin(1)
         .setDescription(tr("Component Size refers to the number of nodes the component contains."));
@@ -88,7 +88,7 @@ bool GraphModel::graphTransformIsValid(const QString& transform) const
             return false;
 
         auto& factory = _graphTransformFactories.at(graphTransformConfig._action);
-        auto graphTransform = factory->create(graphTransformConfig, _dataFields);
+        auto graphTransform = factory->create(graphTransformConfig, _attributes);
 
         return graphTransform != nullptr;
     }
@@ -117,7 +117,7 @@ void GraphModel::buildTransforms(const QStringList& transforms)
             continue;
 
         auto& factory = _graphTransformFactories.at(action);
-        auto graphTransform = factory->create(graphTransformConfig, _dataFields);
+        auto graphTransform = factory->create(graphTransformConfig, _attributes);
 
         if(graphTransform)
         {
@@ -136,23 +136,23 @@ QStringList GraphModel::availableTransformNames() const
 
     for(auto& t : _graphTransformFactories)
     {
-        if(!availableDataFields(t.first).isEmpty())
+        if(!availableAttributes(t.first).isEmpty())
             stringList.append(t.first);
     }
 
     return stringList;
 }
 
-QStringList GraphModel::availableDataFields(ElementType elementTypes) const
+QStringList GraphModel::availableAttributes(ElementType elementTypes) const
 {
     QStringList stringList;
 
-    for(auto& f : _dataFields)
+    for(auto& f : _attributes)
     {
-        auto dataFieldElementType = static_cast<int>(f.second.elementType());
+        auto attributeElementType = static_cast<int>(f.second.elementType());
         auto requestedElementTypes = static_cast<int>(elementTypes);
 
-        if(!(dataFieldElementType & requestedElementTypes))
+        if(!(attributeElementType & requestedElementTypes))
         {
             // Don't want this type
             continue;
@@ -164,7 +164,7 @@ QStringList GraphModel::availableDataFields(ElementType elementTypes) const
     return stringList;
 }
 
-QStringList GraphModel::availableDataFields(const QString& transformName) const
+QStringList GraphModel::availableAttributes(const QString& transformName) const
 {
     QStringList stringList;
 
@@ -172,7 +172,7 @@ QStringList GraphModel::availableDataFields(const QString& transformName) const
     {
         auto elementType = _graphTransformFactories.at(transformName)->elementType();
 
-        for(auto& f : _dataFields)
+        for(auto& f : _attributes)
         {
             if(f.second.elementType() == elementType)
                 stringList.append(f.first);
@@ -182,12 +182,12 @@ QStringList GraphModel::availableDataFields(const QString& transformName) const
     return stringList;
 }
 
-QStringList GraphModel::avaliableConditionFnOps(const QString& dataFieldName) const
+QStringList GraphModel::avaliableConditionFnOps(const QString& attributeName) const
 {
-    if(dataFieldName.isEmpty() || !u::contains(_dataFields, dataFieldName))
+    if(attributeName.isEmpty() || !u::contains(_attributes, attributeName))
         return {};
 
-    return GraphTransformConfigParser::ops(_dataFields.at(dataFieldName).valueType());
+    return GraphTransformConfigParser::ops(_attributes.at(attributeName).valueType());
 }
 
 bool GraphModel::visualisationIsValid(const QString& visualisation) const
@@ -199,7 +199,7 @@ bool GraphModel::visualisationIsValid(const QString& visualisation) const
     {
         const auto& visualisationConfig = p.result();
 
-        if(!u::contains(_dataFields, visualisationConfig._dataFieldName))
+        if(!u::contains(_attributes, visualisationConfig._attributeName))
             return false;
 
         if(!u::contains(_visualisationChannels, visualisationConfig._channelName))
@@ -234,11 +234,11 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         if(visualisationConfig.isFlagSet("disabled"))
             continue;
 
-        const auto& dataFieldName = visualisationConfig._dataFieldName;
+        const auto& attributeName = visualisationConfig._attributeName;
         const auto& channelName = visualisationConfig._channelName;
         bool invert = visualisationConfig.isFlagSet("invert");
 
-        if(!u::contains(_dataFields, dataFieldName))
+        if(!u::contains(_attributes, attributeName))
         {
             _visualisationAlertsMap[index].emplace_back(VisualisationAlertType::Error,
                 tr("Attribute doesn't exist"));
@@ -248,24 +248,24 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         if(!u::contains(_visualisationChannels, channelName))
             continue;
 
-        auto& dataField = dataFieldByName(dataFieldName);
+        auto& attribute = attributeByName(attributeName);
         auto& channel = _visualisationChannels.at(channelName);
 
-        if(!channel->supports(dataField.valueType()))
+        if(!channel->supports(attribute.valueType()))
         {
             _visualisationAlertsMap[index].emplace_back(VisualisationAlertType::Error,
                 tr("Visualisation doesn't support attribute type"));
             continue;
         }
 
-        switch(dataField.elementType())
+        switch(attribute.elementType())
         {
         case ElementType::Node:
-            nodeVisualisationsBuilder.build(dataField, *channel.get(), invert, index);
+            nodeVisualisationsBuilder.build(attribute, *channel.get(), invert, index);
             break;
 
         case ElementType::Edge:
-            edgeVisualisationsBuilder.build(dataField, *channel.get(), invert, index);
+            edgeVisualisationsBuilder.build(attribute, *channel.get(), invert, index);
             break;
 
         default:
@@ -279,33 +279,33 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
     updateVisuals();
 }
 
-QStringList GraphModel::availableVisualisationChannelNames(const QString& dataFieldName) const
+QStringList GraphModel::availableVisualisationChannelNames(const QString& attributeName) const
 {
     QStringList stringList;
 
-    auto& dataField = dataFieldByName(dataFieldName);
+    auto& attribute = attributeByName(attributeName);
 
     for(auto& t : _visualisationChannels)
     {
-        if(t.second->supports(dataField.valueType()))
+        if(t.second->supports(attribute.valueType()))
             stringList.append(t.first);
     }
 
     return stringList;
 }
 
-QString GraphModel::visualisationDescription(const QString& dataFieldName, const QString& channelName) const
+QString GraphModel::visualisationDescription(const QString& attributeName, const QString& channelName) const
 {
-    if(!u::contains(_dataFields, dataFieldName) || !u::contains(_visualisationChannels, channelName))
+    if(!u::contains(_attributes, attributeName) || !u::contains(_visualisationChannels, channelName))
         return {};
 
-    auto& dataField = dataFieldByName(dataFieldName);
+    auto& attribute = attributeByName(attributeName);
     auto& channel = _visualisationChannels.at(channelName);
 
-    if(!channel->supports(dataField.valueType()))
+    if(!channel->supports(attribute.valueType()))
         return tr("This visualisation channel is not supported for the attribute type.");
 
-    return channel->description(dataField.elementType(), dataField.valueType());
+    return channel->description(attribute.elementType(), attribute.valueType());
 }
 
 std::vector<VisualisationAlert> GraphModel::visualisationAlertsAtIndex(int index) const
@@ -316,28 +316,28 @@ std::vector<VisualisationAlert> GraphModel::visualisationAlertsAtIndex(int index
     return {};
 }
 
-QStringList GraphModel::dataFieldNames(ElementType elementType) const
+QStringList GraphModel::attributeNames(ElementType elementType) const
 {
-    QStringList dataFieldNames;
+    QStringList attributeNames;
 
-    for(auto& dataField : _dataFields)
+    for(auto& attribute : _attributes)
     {
-        if(dataField.second.elementType() == elementType)
-            dataFieldNames.append(dataField.first);
+        if(attribute.second.elementType() == elementType)
+            attributeNames.append(attribute.first);
     }
 
-    return dataFieldNames;
+    return attributeNames;
 }
 
-IDataField& GraphModel::dataField(const QString& name)
+IAttribute& GraphModel::attribute(const QString& name)
 {
-    return _dataFields[name];
+    return _attributes[name];
 }
 
-const DataField& GraphModel::dataFieldByName(const QString& name) const
+const Attribute& GraphModel::attributeByName(const QString& name) const
 {
-    static DataField nullDataField;
-    return u::contains(_dataFields, name) ? _dataFields.at(name) : nullDataField;
+    static Attribute nullAttribute;
+    return u::contains(_attributes, name) ? _attributes.at(name) : nullAttribute;
 }
 
 void GraphModel::enableVisualUpdates()

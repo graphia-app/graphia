@@ -8,7 +8,7 @@
 BOOST_FUSION_ADAPT_STRUCT(
     VisualisationConfig,
     (std::vector<QString>, _flags),
-    (QString, _dataFieldName),
+    (QString, _attributeName),
     (QString, _channelName)
 )
 
@@ -32,11 +32,11 @@ const auto identifierList = identifier % x3::lit(",");
 const auto flags = x3::lit("[") >> -identifierList >> x3::lit("]");
 
 const x3::rule<class Visualisation, VisualisationConfig> visualisation = "visualisation";
-const auto dataFieldName = quotedString | identifier;
+const auto attributeName = quotedString | identifier;
 const auto channelName = quotedString | identifier;
 const auto visualisation_def =
     -flags >>
-    dataFieldName >> channelName;
+    attributeName >> channelName;
 
 BOOST_SPIRIT_DEFINE(quotedString, identifier, visualisation);
 } // namespace Parser

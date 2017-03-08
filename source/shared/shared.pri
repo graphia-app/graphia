@@ -21,7 +21,6 @@ HEADERS += \
     $$PWD/loading/iurltypes.h \
     $$PWD/plugins/baseplugin.h \
     $$PWD/graph/igrapharrayclient.h \
-    $$PWD/attributes/idatafield.h \
     $$PWD/ui/iselectionmanager.h \
     $$PWD/loading/baseparser.h \
     $$PWD/loading/gmlfileparser.h \
@@ -42,7 +41,8 @@ HEADERS += \
     $$PWD/plugins/usernodedatastablemodel.h \
     $$PWD/plugins/userdatavector.h \
     $$PWD/plugins/userdata.h \
-    $$PWD/plugins/usernodedata.h
+    $$PWD/plugins/usernodedata.h \
+    $$PWD/attributes/iattribute.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \

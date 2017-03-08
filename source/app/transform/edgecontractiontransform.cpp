@@ -33,11 +33,11 @@ bool EdgeContractionTransform::apply(TransformedGraph& target) const
 }
 
 std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(const GraphTransformConfig& graphTransformConfig,
-                                                                        const std::map<QString, DataField>& dataFields) const
+                                                                        const std::map<QString, Attribute>& attributes) const
 {
     auto edgeContractionTransform = std::make_unique<EdgeContractionTransform>();
 
-    edgeContractionTransform->addEdgeContractionFilter(CreateConditionFnFor::edge(dataFields, graphTransformConfig._condition));
+    edgeContractionTransform->addEdgeContractionFilter(CreateConditionFnFor::edge(attributes, graphTransformConfig._condition));
 
     if(!edgeContractionTransform->hasEdgeContractionFilters())
         return nullptr;

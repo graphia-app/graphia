@@ -1,7 +1,7 @@
 function create(visualisation)
 {
     this.flags = visualisation.flags;
-    this.dataField = visualisation.dataField;
+    this.attribute = visualisation.attribute;
     this.channel = visualisation.channel;
 
     this._elements = [];
@@ -15,7 +15,7 @@ function create(visualisation)
             elements.push(value);
     }
 
-    appendToElements(this._elements, visualisation.dataField);
+    appendToElements(this._elements, visualisation.attribute);
     appendToElements(this._elements, ": ");
     appendToElements(this._elements, visualisation.channel);
 
