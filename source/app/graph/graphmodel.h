@@ -85,7 +85,8 @@ public:
     void buildTransforms(const QStringList& transforms);
 
     QStringList availableTransformNames() const;
-    QStringList availableAttributes(ElementType elementTypes) const;
+    QStringList availableAttributes(ElementType elementTypes = ElementType::All,
+                                    FieldType fieldTypes = FieldType::All) const;
     QStringList availableAttributes(const QString& transformName) const;
     QStringList avaliableConditionFnOps(const QString& attributeName) const;
 

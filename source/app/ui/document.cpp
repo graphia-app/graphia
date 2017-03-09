@@ -796,9 +796,11 @@ QStringList Document::availableTransformNames() const
     return _graphModel != nullptr ? _graphModel->availableTransformNames() : QStringList();
 }
 
-QStringList Document::availableAttributes(int types) const
+QStringList Document::availableAttributes(int elementTypes, int fieldTypes) const
 {
-    return _graphModel != nullptr ? _graphModel->availableAttributes(static_cast<ElementType>(types)) : QStringList();
+    return _graphModel != nullptr ? _graphModel->availableAttributes(
+                                        static_cast<ElementType>(elementTypes),
+                                        static_cast<FieldType>(fieldTypes)) : QStringList();
 }
 
 QStringList Document::availableAttributes(const QString& transformName) const
@@ -824,9 +826,8 @@ QVariantMap Document::attributeByName(const QString& attributeName) const
     if(_graphModel == nullptr)
         return map;
 
-    if(u::contains(_graphModel->availableAttributes(ElementType::All), attributeName))
+    if(u::contains(_graphModel->availableAttributes(), attributeName))
     {
-        // It's an Attribute
         const auto& attribute = _graphModel->attributeByName(attributeName);
         map.insert("type", static_cast<int>(attribute.valueType()));
         map.insert("elementType", static_cast<int>(attribute.elementType()));
