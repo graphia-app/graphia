@@ -492,4 +492,3 @@ void GraphModel::onMutableGraphChanged(const IGraph* graph)
             attribute.autoSetRange(graph->edgeIds());
     }
 }
-

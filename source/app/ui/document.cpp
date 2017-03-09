@@ -437,6 +437,8 @@ void Document::onLoadComplete(bool success)
     connect(&_graphModel->graph(), &Graph::graphChanged, &_commandManager,
             &CommandManager::onGraphChanged, Qt::DirectConnection);
 
+    connect(&_graphModel->mutableGraph(), &Graph::graphChanged, this, &Document::onMutableGraphChanged);
+
     _graphModel->enableVisualUpdates();
 
     setStatus(QString(tr("Loaded %1 (%2 nodes, %3 edges, %4 components)")).arg(
@@ -718,6 +720,13 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
         selectFirstFound();
     else
         updateFoundIndex(true);
+}
+
+void Document::onMutableGraphChanged()
+{
+    // This is only called in order to force the UI to refresh the transform
+    // controls, in case the attribute ranges have changed
+    setTransforms(_graphTransforms);
 }
 
 void Document::executeDeferred()

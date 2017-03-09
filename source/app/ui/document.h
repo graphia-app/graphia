@@ -270,6 +270,8 @@ private slots:
     void onSelectionChanged(const SelectionManager* selectionManager);
     void onFoundNodeIdsChanged(const SearchManager* searchManager);
 
+    void onMutableGraphChanged();
+
     void executeDeferred();
 };
 
