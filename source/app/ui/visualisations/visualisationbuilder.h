@@ -110,8 +110,8 @@ public:
 
         switch(attribute.valueType())
         {
-        case FieldType::Int:
-        case FieldType::Float:
+        case ValueType::Int:
+        case ValueType::Float:
         {
             double min, max;
             std::tie(min, max) = attribute.findNumericRange(*_elementIds);
@@ -138,7 +138,7 @@ public:
             break;
         }
 
-        case FieldType::String:
+        case ValueType::String:
             for(auto elementId : *_elementIds)
                 apply(attribute.stringValueOf(elementId), channel, elementId, _numAppliedVisualisations);
             break;

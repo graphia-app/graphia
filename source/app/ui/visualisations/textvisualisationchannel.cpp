@@ -12,7 +12,7 @@ void TextVisualisationChannel::apply(const QString& value, ElementVisual& elemen
     elementVisual._text = value;
 }
 
-QString TextVisualisationChannel::description(ElementType, FieldType) const
+QString TextVisualisationChannel::description(ElementType, ValueType) const
 {
     return QObject::tr("The attribute will be visualised as text.");
 }

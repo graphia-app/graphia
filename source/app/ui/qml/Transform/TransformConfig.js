@@ -163,7 +163,7 @@ function create(transform)
 
                 if(locked)
                 {
-                    if(parameterData.type === FieldType.String)
+                    if(parameterData.type === ValueType.String)
                         labelText += " \\\"" + parameter.rhs + "\\\"";
                     else
                         labelText += " " + roundTo3dp(parameter.rhs);

@@ -796,11 +796,11 @@ QStringList Document::availableTransformNames() const
     return _graphModel != nullptr ? _graphModel->availableTransformNames() : QStringList();
 }
 
-QStringList Document::availableAttributes(int elementTypes, int fieldTypes) const
+QStringList Document::availableAttributes(int elementTypes, int valueTypes) const
 {
     return _graphModel != nullptr ? _graphModel->availableAttributes(
                                         static_cast<ElementType>(elementTypes),
-                                        static_cast<FieldType>(fieldTypes)) : QStringList();
+                                        static_cast<ValueType>(valueTypes)) : QStringList();
 }
 
 QStringList Document::availableAttributes(const QString& transformName) const

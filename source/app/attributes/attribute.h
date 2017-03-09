@@ -6,7 +6,7 @@
 #include "shared/attributes/iattribute.h"
 #include "shared/graph/igraphcomponent.h"
 
-#include "fieldtype.h"
+#include "valuetype.h"
 
 #include <functional>
 #include <limits>
@@ -91,9 +91,9 @@ public:
     {
         switch(valueType())
         {
-        case FieldType::Int:    return QString::number(valueOf<int>(elementId));
-        case FieldType::Float:  return QString::number(valueOf<double>(elementId));
-        case FieldType::String: return valueOf<QString>(elementId);
+        case ValueType::Int:    return QString::number(valueOf<int>(elementId));
+        case ValueType::Float:  return QString::number(valueOf<double>(elementId));
+        case ValueType::String: return valueOf<QString>(elementId);
         default: break;
         }
 
@@ -104,8 +104,8 @@ public:
     {
         switch(valueType())
         {
-        case FieldType::Int:    return static_cast<double>(valueOf<int>(elementId));
-        case FieldType::Float:  return valueOf<double>(elementId);
+        case ValueType::Int:    return static_cast<double>(valueOf<int>(elementId));
+        case ValueType::Float:  return valueOf<double>(elementId);
         default: break;
         }
 
@@ -127,7 +127,7 @@ public:
     Attribute& setStringValueFn(ValueFn<QString, EdgeId> valueFn);
     Attribute& setStringValueFn(ValueFn<QString, const IGraphComponent&> valueFn);
 
-    FieldType valueType() const;
+    ValueType valueType() const;
     ElementType elementType() const;
 
     bool hasIntMin() const;
@@ -179,7 +179,7 @@ public:
         if(_autoRange == AutoRange::No)
             return;
 
-        if(valueType() == FieldType::Float)
+        if(valueType() == ValueType::Float)
         {
             _floatMin = std::numeric_limits<double>::max();
             _floatMax = std::numeric_limits<double>::min();
@@ -191,7 +191,7 @@ public:
                 _floatMax = std::max(v, _floatMax);
             }
         }
-        else if(valueType() == FieldType::Int)
+        else if(valueType() == ValueType::Int)
         {
             _intMin = std::numeric_limits<int>::max();
             _intMax = std::numeric_limits<int>::min();

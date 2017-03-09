@@ -7,7 +7,7 @@ void SizeVisualisationChannel::apply(double value, ElementVisual& elementVisual)
     elementVisual._size = value;
 }
 
-QString SizeVisualisationChannel::description(ElementType elementType, FieldType) const
+QString SizeVisualisationChannel::description(ElementType elementType, ValueType) const
 {
     auto elementTypeString = elementTypeAsString(elementType).toLower();
     return QString(QObject::tr("The attribute will be visualised by "

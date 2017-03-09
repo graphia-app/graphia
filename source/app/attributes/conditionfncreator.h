@@ -25,7 +25,7 @@ private:
         {}
 
         template<typename T>
-        ElementConditionFn<E> numericalFn(FieldType type, ConditionFnOp::Numerical op, T value) const
+        ElementConditionFn<E> numericalFn(ValueType type, ConditionFnOp::Numerical op, T value) const
         {
             const auto* attribute = _attribute;
 
@@ -60,7 +60,7 @@ private:
 
             // If we don't have a string Attribute, then use the ValueOfFn that converts
             // the Attribute's value to a string
-            if(attribute->valueType() != FieldType::String)
+            if(attribute->valueType() != ValueType::String)
                 valueOfFn = &Attribute::stringValueOf<E>;
 
             switch(op)
@@ -92,9 +92,9 @@ private:
         }
 
         ElementConditionFn<E> operator()(const GraphTransformConfig::IntOpValue& opValue) const
-        { return numericalFn(FieldType::Int, opValue._op, opValue._value); }
+        { return numericalFn(ValueType::Int, opValue._op, opValue._value); }
         ElementConditionFn<E> operator()(const GraphTransformConfig::FloatOpValue& opValue) const
-        { return numericalFn(FieldType::Float, opValue._op, opValue._value); }
+        { return numericalFn(ValueType::Float, opValue._op, opValue._value); }
         ElementConditionFn<E> operator()(const GraphTransformConfig::StringOpValue& opValue) const
         { return stringFn(opValue._op, opValue._value); }
     };
@@ -128,12 +128,12 @@ private:
 
         ElementConditionFn<E> operator()(const GraphTransformConfig::TerminalCondition& terminalCondition) const
         {
-            const auto& fieldName = terminalCondition._field;
+            const auto& attributeName = terminalCondition._attributeName;
 
-            if(!u::contains(*_attributes, fieldName))
-                return nullptr; // Unknown field
+            if(!u::contains(*_attributes, attributeName))
+                return nullptr; // Unknown attribute
 
-            const auto& attribute = _attributes->at(fieldName);
+            const auto& attribute = _attributes->at(attributeName);
 
             if(attribute.elementType() != _elementType)
                 return nullptr; // Mismatched elementTypes

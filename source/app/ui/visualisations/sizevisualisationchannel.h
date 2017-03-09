@@ -11,9 +11,9 @@ public:
     void apply(double value, ElementVisual& elementVisual) const;
     void apply(const QString&, ElementVisual&) const {} //FIXME
 
-    bool supports(FieldType type) const { return type == FieldType::Int || type == FieldType::Float; }
+    bool supports(ValueType type) const { return type == ValueType::Int || type == ValueType::Float; }
 
-    QString description(ElementType, FieldType) const;
+    QString description(ElementType, ValueType) const;
 };
 
 #endif // SIZEVISUALISATIONCHANNEL_H

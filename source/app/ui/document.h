@@ -237,7 +237,7 @@ public:
 
     Q_INVOKABLE QStringList availableTransformNames() const;
     Q_INVOKABLE QStringList availableAttributes(int elementTypes = static_cast<int>(ElementType::All),
-                                                int fieldTypes = static_cast<int>(FieldType::All)) const;
+                                                int valueTypes = static_cast<int>(ValueType::All)) const;
     Q_INVOKABLE QStringList availableAttributes(const QString& transformName) const;
     Q_INVOKABLE int attributeType(const QString& attributeName) const;
     Q_INVOKABLE QStringList avaliableConditionFnOps(const QString& attributeName) const;

@@ -25,7 +25,7 @@ bool GraphTransformConfig::StringOpValue::operator==(const GraphTransformConfig:
 
 bool GraphTransformConfig::TerminalCondition::operator==(const GraphTransformConfig::TerminalCondition& other) const
 {
-    return _field == other._field &&
+    return _attributeName == other._attributeName &&
             _opValue == other._opValue;
 }
 
@@ -90,7 +90,7 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
         {
             QVariantMap map;
 
-            map.insert("lhs", terminalCondition._field);
+            map.insert("lhs", terminalCondition._attributeName);
             map.insert("op", terminalCondition.opAsString());
             map.insert("rhs", terminalCondition.valueAsString());
 

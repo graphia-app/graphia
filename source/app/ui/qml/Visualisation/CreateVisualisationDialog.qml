@@ -34,7 +34,7 @@ Window
         {
             ListBox
             {
-                id: fieldList
+                id: attributeList
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
@@ -60,7 +60,6 @@ Window
                 Layout.fillHeight: true
                 Layout.preferredWidth: 200
 
-                //verticalAlignment: Text.AlignVCenter
                 textFormat: Text.RichText
                 wrapMode: Text.WordWrap
                 elide: Text.ElideRight
@@ -127,20 +126,20 @@ Window
     {
         description.text = "";
 
-        if(fieldList.selectedValue !== undefined && fieldList.selectedValue.length > 0)
+        if(attributeList.selectedValue !== undefined && attributeList.selectedValue.length > 0)
         {
-            var attribute = document.attributeByName(fieldList.selectedValue);
+            var attribute = document.attributeByName(attributeList.selectedValue);
             description.text += attribute.description;
 
             if(channelList.selectedValue !== undefined && channelList.selectedValue.length > 0)
             {
                 var visualisationDescription = document.visualisationDescription(
-                    fieldList.selectedValue, channelList.selectedValue);
+                    attributeList.selectedValue, channelList.selectedValue);
                 description.text += "<br><br>" + visualisationDescription;
             }
         }
 
-        var expression = "\"" + fieldList.selectedValue + "\" \"" + channelList.selectedValue + "\"";
+        var expression = "\"" + attributeList.selectedValue + "\" \"" + channelList.selectedValue + "\"";
 
         visualisationExpression = expression;
     }
@@ -154,6 +153,6 @@ Window
 
     onVisibleChanged:
     {
-        fieldList.model = document.availableAttributes(ElementType.Node|ElementType.Edge);
+        attributeList.model = document.availableAttributes(ElementType.Node|ElementType.Edge);
     }
 }

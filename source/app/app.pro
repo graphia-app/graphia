@@ -109,9 +109,9 @@ HEADERS += \
     ui/visualisations/visualisationbuilder.h \
     ui/visualisations/visualisationalert.h \
     attributes/conditionfncreator.h \
-    attributes/fieldtype.h \
     attributes/condtionfnops.h \
-    attributes/attribute.h
+    attributes/attribute.h \
+    attributes/valuetype.h
 
 SOURCES += \
     application.cpp \

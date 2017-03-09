@@ -43,7 +43,7 @@ struct GraphTransformConfig
 
     struct TerminalCondition
     {
-        QString _field;
+        QString _attributeName;
         OpValue _opValue;
 
         bool operator==(const TerminalCondition& other) const;

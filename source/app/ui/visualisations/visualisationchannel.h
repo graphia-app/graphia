@@ -2,7 +2,7 @@
 #define VISUALISATIONCHANNEL_H
 
 #include "ui/visualisations/elementvisual.h"
-#include "attributes/fieldtype.h"
+#include "attributes/valuetype.h"
 #include "graph/elementtype.h"
 
 #include <QString>
@@ -16,10 +16,10 @@ public:
     virtual void apply(double, ElementVisual&) const { Q_ASSERT(!"apply not implemented"); }
     virtual void apply(const QString&, ElementVisual&) const { Q_ASSERT(!"apply not implemented"); }
 
-    virtual bool supports(FieldType) const = 0;
+    virtual bool supports(ValueType) const = 0;
     virtual bool requiresNormalisedValue() const { return true; }
 
-    virtual QString description(ElementType, FieldType) const { return {}; }
+    virtual QString description(ElementType, ValueType) const { return {}; }
 };
 
 #endif // VISUALISATIONCHANNEL_H

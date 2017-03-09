@@ -33,19 +33,19 @@ void ColorVisualisationChannel::apply(const QString& value, ElementVisual& eleme
         );
 }
 
-QString ColorVisualisationChannel::description(ElementType elementType, FieldType fieldType) const
+QString ColorVisualisationChannel::description(ElementType elementType, ValueType valueType) const
 {
     auto elementTypeString = elementTypeAsString(elementType).toLower();
 
-    switch(fieldType)
+    switch(valueType)
     {
-    case FieldType::Int:
-    case FieldType::Float:
+    case ValueType::Int:
+    case ValueType::Float:
         return QString(QObject::tr("The attribute will be visualised by "
                           "continuously varying the colour of the %1 "
                           "using a gradient.")).arg(elementTypeString);
 
-    case FieldType::String:
+    case ValueType::String:
         return QString(QObject::tr("This visualisation will be applied by "
                           "assigning a colour to the %1 which represents "
                           "unique values of the attribute.")).arg(elementTypeString);

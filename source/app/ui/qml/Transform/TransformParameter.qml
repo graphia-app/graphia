@@ -34,9 +34,9 @@ GridLayout
         if(!Utils.isNumeric(n))
             console.log("typedValue called with non-numeric: " + n);
 
-        if(type === FieldType.Int)
+        if(type === ValueType.Int)
             return Math.round(n);
-        else if(type === FieldType.Float && Utils.isInt(n))
+        else if(type === ValueType.Float && Utils.isInt(n))
             return Number(n).toFixed(1);
 
         return n;
@@ -46,11 +46,11 @@ GridLayout
     {
         id: spinBox
         Layout.preferredWidth: _inputElementWidth
-        visible: (type === FieldType.Int || type === FieldType.Float)
+        visible: (type === ValueType.Int || type === ValueType.Float)
 
         decimals:
         {
-            if(type === FieldType.Float)
+            if(type === ValueType.Float)
             {
                 if(stepSize <= 1.0)
                     return 3;
@@ -88,7 +88,7 @@ GridLayout
     {
         id: slider
         Layout.preferredWidth: _maxWidth
-        visible: ((type === FieldType.Int || type === FieldType.Float) && hasRange)
+        visible: ((type === ValueType.Int || type === ValueType.Float) && hasRange)
 
         onValueChanged:
         {
@@ -107,8 +107,8 @@ GridLayout
     {
         id: textField
         Layout.preferredWidth: _inputElementWidth
-        visible: (type === FieldType.String || type === FieldType.Unknown)
-        enabled: type !== FieldType.Unknown
+        visible: (type === ValueType.String || type === ValueType.Unknown)
+        enabled: type !== ValueType.Unknown
 
         function updateValue()
         {
@@ -129,9 +129,9 @@ GridLayout
         for(var property in data)
             this[property] = data[property];
 
-        if(type === FieldType.Unknown)
+        if(type === ValueType.Unknown)
             value = "";
-        else if(type !== FieldType.String)
+        else if(type !== ValueType.String)
         {
             if(initialValue.length === 0)
             {
@@ -186,7 +186,7 @@ GridLayout
 
     function reset()
     {
-        configure({type: FieldType.Unknown,
+        configure({type: ValueType.Unknown,
                    hasRange: false,
                    hasMinimumValue: false,
                    hasMaximumValue: false,

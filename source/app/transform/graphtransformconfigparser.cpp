@@ -25,7 +25,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
     GraphTransformConfig::TerminalCondition,
-    (QString, _field),
+    (QString, _attributeName),
     (GraphTransformConfig::OpValue, _opValue)
 )
 
@@ -69,7 +69,7 @@ const auto quotedString_def = lexeme['"' >> +(char_ - '"') >> '"'];
 const x3::rule<class Identifier, QString> identifier = "identifier";
 const auto identifier_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
 
-const auto fieldName = quotedString | identifier;
+const auto attributeName = quotedString | identifier;
 
 struct numerical_op_ : x3::symbols<ConditionFnOp::Numerical>
 {
@@ -107,7 +107,7 @@ const auto intCondition = numerical_op >> int_;
 const auto stringCondition = string_op >> quotedString;
 
 const x3::rule<class TerminalCondition, GraphTransformConfig::TerminalCondition> terminalCondition = "terminalCondition";
-const auto terminalCondition_def = fieldName >> (floatCondition | intCondition | stringCondition);
+const auto terminalCondition_def = attributeName >> (floatCondition | intCondition | stringCondition);
 
 struct binary_op_ : x3::symbols<ConditionFnOp::Binary>
 {
@@ -163,18 +163,18 @@ bool GraphTransformConfigParser::parse(const QString& text)
     return _success;
 }
 
-QStringList GraphTransformConfigParser::ops(FieldType fieldType)
+QStringList GraphTransformConfigParser::ops(ValueType valueType)
 {
     QStringList list;
 
-    switch(fieldType)
+    switch(valueType)
     {
-    case FieldType::Float:
-    case FieldType::Int:
+    case ValueType::Float:
+    case ValueType::Int:
         Parser::numerical_op.for_each([&list](auto& v, auto) { list.append(QString::fromStdString(v)); });
         break;
 
-    case FieldType::String:
+    case ValueType::String:
         Parser::string_op.for_each([&list](auto& v, auto) { list.append(QString::fromStdString(v)); });
         break;
 

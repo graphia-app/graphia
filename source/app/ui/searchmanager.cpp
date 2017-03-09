@@ -26,7 +26,7 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> attribu
 
     NodeIdSet foundNodeIds;
 
-    // If no data fields are specified, search them all
+    // If no attributes are specified, search them all
     if(_attributeNames.empty())
     {
         for(auto& attributeName : _graphModel->attributeNames(ElementType::Node))

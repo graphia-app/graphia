@@ -59,23 +59,23 @@ Attribute::Type Attribute::type() const
     return Type::Unknown;
 }
 
-FieldType Attribute::valueType() const
+ValueType Attribute::valueType() const
 {
     switch(type())
     {
-    case Type::IntNode:             return FieldType::Int;
-    case Type::IntEdge:             return FieldType::Int;
-    case Type::IntComponent:        return FieldType::Int;
+    case Type::IntNode:             return ValueType::Int;
+    case Type::IntEdge:             return ValueType::Int;
+    case Type::IntComponent:        return ValueType::Int;
 
-    case Type::FloatNode:           return FieldType::Float;
-    case Type::FloatEdge:           return FieldType::Float;
-    case Type::FloatComponent:      return FieldType::Float;
+    case Type::FloatNode:           return ValueType::Float;
+    case Type::FloatEdge:           return ValueType::Float;
+    case Type::FloatComponent:      return ValueType::Float;
 
-    case Type::StringNode:          return FieldType::String;
-    case Type::StringEdge:          return FieldType::String;
-    case Type::StringComponent:     return FieldType::String;
+    case Type::StringNode:          return ValueType::String;
+    case Type::StringEdge:          return ValueType::String;
+    case Type::StringComponent:     return ValueType::String;
 
-    default:                        return FieldType::Unknown;
+    default:                        return ValueType::Unknown;
     }
 }
 
@@ -143,8 +143,8 @@ bool Attribute::hasNumericRange() const
 {
     switch(valueType())
     {
-    case FieldType::Int: return hasIntRange();
-    case FieldType::Float: return hasFloatRange();
+    case ValueType::Int: return hasIntRange();
+    case ValueType::Float: return hasFloatRange();
     default: return false;
     }
 }
@@ -153,8 +153,8 @@ double Attribute::numericMin() const
 {
     switch(valueType())
     {
-    case FieldType::Int: return static_cast<double>(intMin());
-    case FieldType::Float: return floatMin();
+    case ValueType::Int: return static_cast<double>(intMin());
+    case ValueType::Float: return floatMin();
     default: return false;
     }
 }
@@ -163,8 +163,8 @@ double Attribute::numericMax() const
 {
     switch(valueType())
     {
-    case FieldType::Int: return static_cast<double>(intMax());
-    case FieldType::Float: return floatMax();
+    case ValueType::Int: return static_cast<double>(intMax());
+    case ValueType::Float: return floatMax();
     default: return false;
     }
 }

@@ -146,21 +146,21 @@ QStringList GraphModel::availableTransformNames() const
     return stringList;
 }
 
-QStringList GraphModel::availableAttributes(ElementType elementTypes, FieldType fieldTypes) const
+QStringList GraphModel::availableAttributes(ElementType elementTypes, ValueType valueTypes) const
 {
     QStringList stringList;
     auto requestedElementTypes = static_cast<int>(elementTypes);
-    auto requestedFieldTypes = static_cast<int>(fieldTypes);
+    auto requestedValueTypes = static_cast<int>(valueTypes);
 
     for(auto& f : _attributes)
     {
         auto attributeElementType = static_cast<int>(f.second.elementType());
-        auto attributeFieldType = static_cast<int>(f.second.valueType());
+        auto attributeValueType = static_cast<int>(f.second.valueType());
 
         if(!(attributeElementType & requestedElementTypes))
             continue;
 
-        if(!(attributeFieldType & requestedFieldTypes))
+        if(!(attributeValueType & requestedValueTypes))
             continue;
 
         stringList.append(f.first);
@@ -174,7 +174,7 @@ QStringList GraphModel::availableAttributes(const QString& transformName) const
     if(!transformName.isEmpty())
     {
         auto elementType = _graphTransformFactories.at(transformName)->elementType();
-        return availableAttributes(elementType, FieldType::All);
+        return availableAttributes(elementType, ValueType::All);
     }
 
     return {};

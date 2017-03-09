@@ -50,7 +50,7 @@ Window
 
                 onSelectedValueChanged:
                 {
-                    fieldList.model = document.availableAttributes(selectedValue);
+                    attributeList.model = document.availableAttributes(selectedValue);
                     updateTransformExpression();
                 }
             }
@@ -65,7 +65,7 @@ Window
 
             ListBox
             {
-                id: fieldList
+                id: attributeList
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.rowSpan: 2
@@ -74,19 +74,19 @@ Window
                 {
                     opList.updateModel(document.avaliableConditionFnOps(selectedValue));
 
-                    if(fieldList.selectedValue !== undefined)
+                    if(attributeList.selectedValue !== undefined)
                     {
                         var parameterData = document.findTransformParameter(transformsList.selectedValue,
-                                                                            fieldList.selectedValue);
+                                                                            attributeList.selectedValue);
                         parameterData.initialValue = "";
                         valueParameter.configure(parameterData);
 
-                        fieldDescription.text = parameterData.description;
+                        attributeDescription.text = parameterData.description;
                     }
                     else
                     {
                         valueParameter.reset();
-                        fieldDescription.text = "";
+                        attributeDescription.text = "";
                     }
 
                     updateTransformExpression();
@@ -132,7 +132,7 @@ Window
 
             Text
             {
-                id: fieldDescription
+                id: attributeDescription
                 Layout.preferredWidth: valueParameter.width
                 Layout.fillHeight: true
 
@@ -213,10 +213,10 @@ Window
             expression += "\"" + transformsList.selectedValue + "\"";
             displayExpression += transformsList.selectedValue;
 
-            if(fieldList.selectedValue !== undefined)
+            if(attributeList.selectedValue !== undefined)
             {
-                expression += " where \"" + fieldList.selectedValue + "\"";
-                displayExpression += " where " + fieldList.selectedValue;
+                expression += " where \"" + attributeList.selectedValue + "\"";
+                displayExpression += " where " + attributeList.selectedValue;
 
                 if(opList.selectedValue !== undefined)
                 {
