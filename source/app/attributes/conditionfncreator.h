@@ -32,22 +32,6 @@ private:
             if(attribute->valueType() != type)
                 return nullptr;
 
-            // Clamp the value if necessary
-            switch(attribute->valueType())
-            {
-            case FieldType::Int:
-                if(attribute->hasIntMin() && value < attribute->intMin()) value = attribute->intMin();
-                if(attribute->hasIntMax() && value > attribute->intMax()) value = attribute->intMax();
-                break;
-
-            case FieldType::Float:
-                if(attribute->hasFloatMin() && value < attribute->floatMin()) value = attribute->floatMin();
-                if(attribute->hasFloatMax() && value > attribute->floatMax()) value = attribute->floatMax();
-                break;
-
-            default: break;
-            }
-
             switch(op)
             {
             case ConditionFnOp::Numerical::Equal:
