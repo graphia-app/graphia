@@ -239,7 +239,7 @@ public:
     Q_INVOKABLE QStringList availableAttributes(int elementTypes = static_cast<int>(ElementType::All),
                                                 int valueTypes = static_cast<int>(ValueType::All)) const;
     Q_INVOKABLE QStringList availableAttributes(const QString& transformName) const;
-    Q_INVOKABLE int attributeType(const QString& attributeName) const;
+    Q_INVOKABLE int attributeValueType(const QString& attributeName) const;
     Q_INVOKABLE QStringList avaliableConditionFnOps(const QString& attributeName) const;
 
     Q_INVOKABLE QVariantMap attributeByName(const QString& attributeName) const;

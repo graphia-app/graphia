@@ -808,7 +808,7 @@ QStringList Document::availableAttributes(const QString& transformName) const
     return _graphModel != nullptr ? _graphModel->availableAttributes(transformName) : QStringList();
 }
 
-int Document::attributeType(const QString& attributeName) const
+int Document::attributeValueType(const QString& attributeName) const
 {
     const auto& attribute = _graphModel->attributeByName(attributeName);
     return static_cast<int>(attribute.valueType());
