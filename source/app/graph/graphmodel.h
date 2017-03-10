@@ -87,7 +87,7 @@ public:
     QStringList availableTransformNames() const;
     QStringList availableAttributes(ElementType elementTypes = ElementType::All,
                                     ValueType valueTypes = ValueType::All) const;
-    QStringList availableAttributes(const QString& transformName) const;
+    QStringList availableAttributesFor(const QString& transformName) const;
     QStringList avaliableConditionFnOps(const QString& attributeName) const;
 
     bool visualisationIsValid(const QString& visualisation) const;

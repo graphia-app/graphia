@@ -803,9 +803,24 @@ QStringList Document::availableAttributes(int elementTypes, int valueTypes) cons
                                         static_cast<ValueType>(valueTypes)) : QStringList();
 }
 
-QStringList Document::availableAttributes(const QString& transformName) const
+QStringList Document::availableAttributesFor(const QString& transformName) const
 {
-    return _graphModel != nullptr ? _graphModel->availableAttributes(transformName) : QStringList();
+    return _graphModel != nullptr ? _graphModel->availableAttributesFor(transformName) : QStringList();
+}
+
+QStringList Document::availableAttributesSimilarTo(const QString& attributeName) const
+{
+    if(_graphModel == nullptr)
+        return {};
+
+    const auto& attribute = _graphModel->attributeByName(attributeName);
+    return _graphModel->availableAttributes(attribute.elementType(), attribute.valueType());
+}
+
+int Document::attributeElementType(const QString& attributeName) const
+{
+    const auto& attribute = _graphModel->attributeByName(attributeName);
+    return static_cast<int>(attribute.elementType());
 }
 
 int Document::attributeValueType(const QString& attributeName) const
@@ -852,7 +867,7 @@ QVariantMap Document::findTransformParameter(const QString& transformName, const
     if(_graphModel == nullptr)
         return {};
 
-    if(u::contains(_graphModel->availableAttributes(transformName), parameterName))
+    if(u::contains(_graphModel->availableAttributesFor(transformName), parameterName))
     {
         // It's an Attribute
         return attributeByName(parameterName);

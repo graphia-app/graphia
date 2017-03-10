@@ -139,7 +139,7 @@ QStringList GraphModel::availableTransformNames() const
 
     for(auto& t : _graphTransformFactories)
     {
-        if(!availableAttributes(t.first).isEmpty())
+        if(!availableAttributesFor(t.first).isEmpty())
             stringList.append(t.first);
     }
 
@@ -169,7 +169,7 @@ QStringList GraphModel::availableAttributes(ElementType elementTypes, ValueType 
     return stringList;
 }
 
-QStringList GraphModel::availableAttributes(const QString& transformName) const
+QStringList GraphModel::availableAttributesFor(const QString& transformName) const
 {
     if(!transformName.isEmpty())
     {

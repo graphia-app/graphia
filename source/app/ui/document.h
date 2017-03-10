@@ -238,7 +238,9 @@ public:
     Q_INVOKABLE QStringList availableTransformNames() const;
     Q_INVOKABLE QStringList availableAttributes(int elementTypes = static_cast<int>(ElementType::All),
                                                 int valueTypes = static_cast<int>(ValueType::All)) const;
-    Q_INVOKABLE QStringList availableAttributes(const QString& transformName) const;
+    Q_INVOKABLE QStringList availableAttributesFor(const QString& transformName) const;
+    Q_INVOKABLE QStringList availableAttributesSimilarTo(const QString& attributeName) const;
+    Q_INVOKABLE int attributeElementType(const QString& attributeName) const;
     Q_INVOKABLE int attributeValueType(const QString& attributeName) const;
     Q_INVOKABLE QStringList avaliableConditionFnOps(const QString& attributeName) const;
 
