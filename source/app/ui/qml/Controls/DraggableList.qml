@@ -27,8 +27,6 @@ Column
             anchors.left: alignment === Qt.AlignLeft ? parent.left : undefined
             anchors.right: alignment === Qt.AlignRight ? parent.right : undefined
 
-            property bool held: false
-
             drag.target: held ? content : undefined
             drag.axis: Drag.YAxis
             drag.minimumY: 0
@@ -36,15 +34,9 @@ Column
 
             property int _dragStartIndex: -1
 
-            onPressed: { timer.start(); }
-            Timer
-            {
-                id: timer
-                interval: 200
-                onTriggered: { held = true; }
-            }
-
-            onReleased: { timer.stop(); held = false; }
+            property bool held
+            onPressAndHold: held = true;
+            onReleased: held = false;
 
             onClicked:
             {

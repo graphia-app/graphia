@@ -5,6 +5,7 @@
 #include <QtGlobal>
 #include <QIcon>
 #include <QMessageBox>
+#include <QStyleHints>
 
 #include "application.h"
 #include "ui/document.h"
@@ -50,6 +51,8 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("kajeka.com");
     QCoreApplication::setApplicationName(PRODUCT_NAME);
     QCoreApplication::setApplicationVersion(VERSION);
+
+    QGuiApplication::styleHints()->setMousePressAndHoldInterval(200);
 
     QIcon mainIcon;
     mainIcon.addFile(":/icon/Icon512x512.png");
