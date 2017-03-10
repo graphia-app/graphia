@@ -6,6 +6,7 @@ Item
     property real radius: height * 0.1
     property color color: "white"
     property color hoverColor: color
+    property bool propogatePresses: false
 
     property color _displayColor: mouseArea.containsMouse ? hoverColor : color
 
@@ -57,5 +58,7 @@ Item
             if(menu)
                 menu.__popup(parent.mapToItem(null, 0, parent.height + 4/*padding*/, 0, 0), 0);
         }
+
+        onPressed: { mouse.accepted = !propogatePresses; }
     }
 }

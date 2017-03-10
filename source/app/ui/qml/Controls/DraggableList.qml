@@ -38,16 +38,31 @@ Column
             onPressAndHold: held = true;
             onReleased: held = false;
 
-            onClicked:
-            {
-                if(loader.item.onClicked !== undefined)
-                    loader.item.onClicked();
-            }
+            // Pass click events on to the child item(s)
+            onClicked: { forwardEventToItem(mouse, "clicked"); }
+            onDoubleClicked: { forwardEventToItem(mouse, "doubleClicked"); }
 
-            onDoubleClicked:
+            function forwardEventToItem(event, eventType)
             {
-                if(loader.item.onDoubleClicked !== undefined)
-                    loader.item.onDoubleClicked();
+                function recurse(branch)
+                {
+                    var localPoint = mapToItem(branch, event.x, event.y);
+                    var item = branch.childAt(localPoint.x, localPoint.y);
+                    if(item !== null)
+                    {
+                        if(typeof(item[eventType]) == "function")
+                        {
+                            item[eventType](event);
+
+                            if(event.accepted)
+                                return;
+                        }
+
+                        recurse(item);
+                    }
+                }
+
+                recurse(loader.item);
             }
 
             width: content.width

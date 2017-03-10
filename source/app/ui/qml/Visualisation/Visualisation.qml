@@ -21,9 +21,13 @@ Item
     property color disabledTextColor
     property color textColor: enabledMenuItem.checked ? enabledTextColor : disabledTextColor
 
-    function onDoubleClicked()
+    MouseArea
     {
-        root.toggle();
+        anchors.fill: row
+        onDoubleClicked: { root.toggle(); }
+
+        // Pass presses on to parent (DraggableList)
+        onPressed: { mouse.accepted = false; }
     }
 
     RowLayout
@@ -36,6 +40,7 @@ Item
             height: 15
             color: disabledTextColor
             hoverColor: enabledTextColor
+            propogatePresses: true
 
             menu: Menu
             {
