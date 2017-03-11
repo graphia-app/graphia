@@ -57,6 +57,17 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, int
             int dataColumnIndex = columnIndex - firstDataColumn;
             int dataRowIndex = rowIndex - firstDataRow;
 
+            if(dataColumnIndex >= _numColumns || dataRowIndex >= _numRows)
+            {
+                qDebug() << QString("WARNING: Attempting to set data at coordinate (%1, %2) in "
+                                    "dataRect of dimensions (%3, %4)")
+                            .arg(dataColumnIndex)
+                            .arg(dataRowIndex)
+                            .arg(_numColumns)
+                            .arg(_numRows);
+                continue;
+            }
+
             if(rowIndex == 0)
             {
                 if(dataColumnIndex < 0)
