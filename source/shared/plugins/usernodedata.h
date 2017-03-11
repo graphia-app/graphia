@@ -27,7 +27,7 @@ public:
     NodeId nodeIdForRowIndex(int row) const;
 
     void setValueByNodeId(NodeId nodeId, const QString& name, const QString& value);
-    QString valueByNodeId(NodeId nodeId, const QString& name) const;
+    QVariant valueByNodeId(NodeId nodeId, const QString& name) const;
 
     void setNodeNamesToFirstUserDataVector(IGraphModel& graphModel);
     void exposeAsAttributes(IGraphModel& graphModel);

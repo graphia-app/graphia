@@ -7,6 +7,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QVariant>
 
 #include <vector>
 
@@ -32,7 +33,7 @@ public:
 
     void add(const QString& name);
     void setValue(int index, const QString& name, const QString& value);
-    QString value(int index, const QString& name) const;
+    QVariant value(int index, const QString& name) const;
 
 signals:
     void userDataVectorAdded(const QString& name);

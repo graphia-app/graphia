@@ -38,7 +38,7 @@ void UserNodeData::setValueByNodeId(NodeId nodeId, const QString& name, const QS
     setValue(rowIndexForNodeId(nodeId), name, value);
 }
 
-QString UserNodeData::valueByNodeId(NodeId nodeId, const QString& name) const
+QVariant UserNodeData::valueByNodeId(NodeId nodeId, const QString& name) const
 {
     return value(rowIndexForNodeId(nodeId), name);
 }
@@ -51,7 +51,7 @@ void UserNodeData::setNodeNamesToFirstUserDataVector(IGraphModel& graphModel)
     // We must use the mutable version of the graph here as the transformed one
     // probably won't contain all of the node ids
     for(NodeId nodeId : graphModel.mutableGraph().nodeIds())
-         graphModel.setNodeName(nodeId, valueByNodeId(nodeId, firstUserDataVectorName()));
+         graphModel.setNodeName(nodeId, valueByNodeId(nodeId, firstUserDataVectorName()).toString());
 }
 
 void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
@@ -84,7 +84,7 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
             graphModel.attribute(userDataVectorName)
                     .setStringValueFn([this, userDataVectorName](NodeId nodeId)
                     {
-                        return valueByNodeId(nodeId, userDataVectorName);
+                        return valueByNodeId(nodeId, userDataVectorName).toString();
                     })
                     .setSearchable(true);
             break;

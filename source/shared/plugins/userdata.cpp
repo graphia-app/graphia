@@ -46,13 +46,30 @@ void UserData::setValue(int index, const QString& name, const QString& value)
         it->second.set(index, value);
 }
 
-QString UserData::value(int index, const QString& name) const
+QVariant UserData::value(int index, const QString& name) const
 {
     auto it = std::find_if(_userDataVectors.begin(), _userDataVectors.end(),
                            [&name](const auto& it2) { return it2.first == name; });
 
     if(it != _userDataVectors.end())
-        return it->second.get(index);
+    {
+        const auto& userDataVector = it->second;
+        const auto& stringValue = userDataVector.get(index);
+
+        switch(userDataVector.type())
+        {
+        default:
+        case UserDataVector::Type::Unknown:
+        case UserDataVector::Type::String:
+            return stringValue;
+
+        case UserDataVector::Type::Float:
+            return stringValue.toFloat();
+
+        case UserDataVector::Type::Integer:
+            return stringValue.toInt();
+        }
+    }
 
     return {};
 }
