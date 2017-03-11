@@ -13,7 +13,7 @@ public:
     {
         Unknown,
         String,
-        Integer,
+        Int,
         Float
     };
 

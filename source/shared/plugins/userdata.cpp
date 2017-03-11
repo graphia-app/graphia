@@ -66,7 +66,7 @@ QVariant UserData::value(int index, const QString& name) const
         case UserDataVector::Type::Float:
             return stringValue.toFloat();
 
-        case UserDataVector::Type::Integer:
+        case UserDataVector::Type::Int:
             return stringValue.toInt();
         }
     }

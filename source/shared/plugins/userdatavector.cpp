@@ -24,7 +24,7 @@ void UserDataVector::set(int index, const QString& value)
     default:
     case Type::Unknown:
         if(isInt)
-            _type = Type::Integer;
+            _type = Type::Int;
         else if(isFloat)
             _type = Type::Float;
         else
@@ -32,7 +32,7 @@ void UserDataVector::set(int index, const QString& value)
 
         break;
 
-    case Type::Integer:
+    case Type::Int:
         if(!isInt)
         {
             if(isFloat)

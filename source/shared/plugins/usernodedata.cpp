@@ -71,7 +71,7 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
                     .setSearchable(true);
             break;
 
-        case UserDataVector::Type::Integer:
+        case UserDataVector::Type::Int:
             graphModel.attribute(userDataVectorName)
                     .setIntValueFn([this, userDataVectorName](NodeId nodeId)
                     {
