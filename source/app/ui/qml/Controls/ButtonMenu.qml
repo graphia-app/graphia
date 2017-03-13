@@ -16,6 +16,7 @@ Item
 
     property string defaultText: ""
     property string selectedValue: ""
+    property color pressedColor
     property color textColor
 
     property alias model: instantiator.model
@@ -48,8 +49,8 @@ Item
         {
             id: menu
 
-            onAboutToShow: root.checked = true
-            onAboutToHide: root.checked = false
+            onAboutToShow: root.checked = true;
+            onAboutToHide: root.checked = false;
 
             Instantiator
             {
@@ -68,34 +69,11 @@ Item
 
         style: ButtonStyle
         {
-
-            background: Item
+            background: Rectangle
             {
                 anchors.fill: parent
-
-                Rectangle
-                {
-                    anchors.fill: parent
-                    border.color: control.hovered ? "#888" : "transparent"
-                    radius: 4
-
-                    gradient: Gradient
-                    {
-                        GradientStop
-                        {
-                            position: 0
-                            color: control.hovered ? (control.pressed ? "#77cccccc" : "#77eeeeee") :
-                                                     "transparent"
-                        }
-
-                        GradientStop
-                        {
-                            position: 1
-                            color: control.hovered ? (control.pressed ? "#77aaaaaa" : "#77cccccc") :
-                                                     "transparent"
-                        }
-                    }
-                }
+                radius: 2
+                color: (control.hovered || root.checked) ? pressedColor : "transparent"
             }
 
             label: Label
