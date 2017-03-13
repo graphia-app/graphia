@@ -4,7 +4,6 @@ import QtQuick.Layouts 1.3
 import com.kajeka 1.0
 
 import ".."
-import "VisualisationConfig.js" as VisualisationConfig
 import "../Constants.js" as Constants
 import "../Utils.js" as Utils
 
