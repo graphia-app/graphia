@@ -19,6 +19,7 @@ Item
 
     property color enabledTextColor
     property color disabledTextColor
+    property color pressedColor
     property color textColor: enabledMenuItem.checked ? enabledTextColor : disabledTextColor
 
     MouseArea
@@ -91,10 +92,23 @@ Item
             }
         }
 
-        RowLayout
+        ButtonMenu
         {
-            id: expression
+            id: attributeList
+            selectedValue: attribute
+            model: document.availableAttributesSimilarTo(attribute);
+            textColor: root.textColor
+            pressedColor: root.pressedColor
+
+            onSelectedValueChanged: { updateExpression(); }
+        }
+
+        Label
+        {
+            id: channelLabel
+            text: channel
             enabled: enabledMenuItem.checked
+            color: root.textColor
         }
 
         AlertIcon
@@ -152,7 +166,7 @@ Item
         if(flags.length > 0)
             flagsString = "[" + flags.toString() + "] ";
 
-        var newExpression = flagsString + "\"" + attribute + "\" \"" + channel + "\"";
+        var newExpression = flagsString + "\"" + attributeList.selectedValue + "\" \"" + channel + "\"";
 
         value = newExpression;
         document.updateVisualisations();
@@ -188,8 +202,7 @@ Item
     {
         if(!ready)
         {
-            var visualisationConfig = new VisualisationConfig.create(document.parseVisualisation(value));
-            visualisationConfig.toComponents(document, expression);
+            var visualisationConfig = document.parseVisualisation(value);
 
             flags = visualisationConfig.flags;
             attribute = visualisationConfig.attribute;
