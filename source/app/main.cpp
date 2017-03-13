@@ -122,7 +122,13 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     engine.addImportPath("qrc:///qml");
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
-    Q_ASSERT(!engine.rootObjects().empty());
+    if(engine.rootObjects().empty())
+    {
+        QMessageBox::critical(nullptr, QObject::tr("Error"),
+                              QObject::tr("The user interface failed to load."),
+                              QMessageBox::Close);
+        return 2;
+    }
 
     QObject* mainWindow = engine.rootObjects().first();
     QObject::connect(&app, &SharedTools::QtSingleApplication::messageReceived,
