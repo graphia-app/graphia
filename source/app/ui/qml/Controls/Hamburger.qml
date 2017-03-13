@@ -8,7 +8,7 @@ Item
     property color hoverColor: color
     property bool propogatePresses: false
 
-    property color _displayColor: mouseArea.containsMouse ? hoverColor : color
+    property color _displayColor: (mouseArea.containsMouse || menuDropped) ? hoverColor : color
 
     property real _barToSpaceRatio: 1.0
     property real _d: 2.0 + 3.0 * _barToSpaceRatio
@@ -16,6 +16,15 @@ Item
     property real _spaceHeight: height / _d
 
     property Menu menu: null
+
+    property bool menuDropped: false
+    Connections
+    {
+        target: menu
+
+        onAboutToShow: menuDropped = true;
+        onAboutToHide: menuDropped = false;
+    }
 
     Rectangle
     {
