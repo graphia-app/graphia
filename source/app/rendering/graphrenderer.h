@@ -158,7 +158,7 @@ enum class TextAlignment
 };
 Q_DECLARE_METATYPE(TextAlignment)
 
-DEFINE_QML_ENUM(Q_GADGET, NodeTextState,
+DEFINE_QML_ENUM(Q_GADGET, TextState,
                 Off, Selected, All);
 DEFINE_QML_ENUM(Q_GADGET, EdgeVisualType,
                 Cylinder, Arrow);

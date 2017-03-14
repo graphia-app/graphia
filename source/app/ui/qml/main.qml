@@ -172,16 +172,16 @@ ApplicationWindow
         property int edgeVisualType:
         {
             return toggleEdgeDirectionAction.checked ? EdgeVisualType.Arrow
-                                                   : EdgeVisualType.Cylinder;
+                                                     : EdgeVisualType.Cylinder;
         }
-        property int showNodeNames:
+        property int showNodeText:
         {
             switch(nodeNameDisplay.current)
             {
             default:
-            case hideNodeNamesAction:         return NodeTextState.Off;
-            case showSelectedNodeNamesAction: return NodeTextState.Selected;
-            case showAllNodeNamesAction:      return NodeTextState.All;
+            case hideNodeTextAction:         return TextState.Off;
+            case showSelectedNodeTextAction: return TextState.Selected;
+            case showAllNodeTextAction:      return TextState.All;
             }
         }
     }
@@ -567,18 +567,18 @@ ApplicationWindow
     {
         id: nodeNameDisplay
 
-        Action { id: hideNodeNamesAction; text: qsTr("None"); checkable: true; }
-        Action { id: showSelectedNodeNamesAction; text: qsTr("Selected"); checkable: true; }
-        Action { id: showAllNodeNamesAction; text: qsTr("All"); checkable: true; }
+        Action { id: hideNodeTextAction; text: qsTr("None"); checkable: true; }
+        Action { id: showSelectedNodeTextAction; text: qsTr("Selected"); checkable: true; }
+        Action { id: showAllNodeTextAction; text: qsTr("All"); checkable: true; }
 
         Component.onCompleted:
         {
-            switch(visuals.showNodeNames)
+            switch(visuals.showNodeText)
             {
             default:
-            case NodeTextState.Off:      nodeNameDisplay.current = hideNodeNamesAction; break;
-            case NodeTextState.Selected: nodeNameDisplay.current = showSelectedNodeNamesAction; break;
-            case NodeTextState.All:      nodeNameDisplay.current = showAllNodeNamesAction; break;
+            case TextState.Off:      nodeNameDisplay.current = hideNodeTextAction; break;
+            case TextState.Selected: nodeNameDisplay.current = showSelectedNodeTextAction; break;
+            case TextState.All:      nodeNameDisplay.current = showAllNodeTextAction; break;
             }
         }
     }
@@ -708,10 +708,10 @@ ApplicationWindow
             MenuItem { action: toggleGraphMetricsAction }
             Menu
             {
-                title: qsTr("Show Node Names")
-                MenuItem { action: hideNodeNamesAction }
-                MenuItem { action: showSelectedNodeNamesAction }
-                MenuItem { action: showAllNodeNamesAction }
+                title: qsTr("Show Node Text")
+                MenuItem { action: hideNodeTextAction }
+                MenuItem { action: showSelectedNodeTextAction }
+                MenuItem { action: showAllNodeTextAction }
             }
             MenuItem { action: toggleEdgeDirectionAction }
         }

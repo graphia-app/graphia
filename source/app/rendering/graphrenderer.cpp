@@ -577,7 +577,7 @@ void GraphRenderer::updateGPUDataIfRequired()
     float textScale = u::pref("visuals/textSize").toFloat();
     auto textAlignment = static_cast<TextAlignment>(u::pref("visuals/textAlignment").toInt());
     auto textColor = Document::contrastingColorForBackground();
-    auto showNodeNames = static_cast<NodeTextState>(u::pref("visuals/showNodeNames").toInt());
+    auto showNodeText = static_cast<TextState>(u::pref("visuals/showNodeText").toInt());
     auto edgeVisualType = static_cast<EdgeVisualType>(u::pref("visuals/edgeVisualType").toInt());
 
     for(auto& componentRendererRef : _componentRenderers)
@@ -622,10 +622,10 @@ void GraphRenderer::updateGPUDataIfRequired()
             if(gpuGraphData != nullptr)
                 gpuGraphData->_nodeData.push_back(nodeData);
 
-            if(showNodeNames == NodeTextState::Off || nodeVisual._state.testFlag(VisualFlags::NotFound))
+            if(showNodeText == TextState::Off || nodeVisual._state.testFlag(VisualFlags::NotFound))
                 continue;
 
-            if(showNodeNames == NodeTextState::Selected && !nodeVisual._state.testFlag(VisualFlags::Selected))
+            if(showNodeText == TextState::Selected && !nodeVisual._state.testFlag(VisualFlags::Selected))
                 continue;
 
             createGPUGlyphData(nodeVisual._text, textColor, textAlignment, textScale, nodeVisual._size, nodePosition, componentIndex, gpuGraphData);
