@@ -18,7 +18,7 @@ Item
 
     property color enabledTextColor
     property color disabledTextColor
-    property color pressedColor
+    property color hoverColor
     property color textColor: enabledMenuItem.checked ? enabledTextColor : disabledTextColor
 
     MouseArea
@@ -97,9 +97,10 @@ Item
             selectedValue: attribute
             model: document.availableAttributesSimilarTo(attribute);
             enabled: enabledMenuItem.checked
+            propogatePresses: true
 
             textColor: root.textColor
-            pressedColor: root.pressedColor
+            hoverColor: root.hoverColor
 
             onSelectedValueChanged: { updateExpression(); }
         }

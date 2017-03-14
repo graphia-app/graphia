@@ -44,7 +44,7 @@ Item
                     {
                         enabledTextColor = Qt.binding(function() { return root.enabledTextColor; });
                         disabledTextColor = Qt.binding(function() { return root.disabledTextColor; });
-                        pressedColor = Qt.binding(function() { return root.heldColor; });
+                        hoverColor = Qt.binding(function() { return root.heldColor; });
                     }
                 }
             }

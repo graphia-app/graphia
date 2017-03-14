@@ -1,10 +1,6 @@
 import QtQuick 2.7
 import QtQuick.Controls 1.5
-import QtQuick.Controls.Styles 1.4
-import QtQuick.Layouts 1.3
 import QtQml 2.8
-
-import "../Constants.js" as Constants
 
 Item
 {
@@ -16,80 +12,73 @@ Item
 
     property string defaultText: ""
     property string selectedValue: ""
-    property color pressedColor
+    property color hoverColor
     property color textColor
+    property bool propogatePresses: false
 
     property alias model: instantiator.model
 
-    property bool checked: false
-    onCheckedChanged:
+    property bool menuDropped: false
+    Menu
     {
-        if(!checked)
+        id: menu
+
+        onAboutToShow: root.menuDropped = true;
+        onAboutToHide: root.menuDropped = false;
+
+        Instantiator
         {
-            // Calling things that have underscores in their name is probably
-            // not a good idea, but there doesn't appear to be a public API
-            // to programmatically close a menu
-            menu.__dismissAndDestroy();
+            id: instantiator
+            delegate: MenuItem
+            {
+                text: index >= 0 ? instantiator.model[index] : ""
+
+                onTriggered: { root.selectedValue = text; }
+            }
+
+            onObjectAdded: menu.insertItem(index, object)
+            onObjectRemoved: menu.removeItem(object)
         }
     }
 
-    property ExclusiveGroup exclusiveGroup: null
-
-    onExclusiveGroupChanged:
-    {
-        if(exclusiveGroup)
-            exclusiveGroup.bindCheckable(root);
-    }
-
-    Button
+    Rectangle
     {
         id: button
-        text: root.selectedValue != "" ? root.selectedValue : root.defaultText
-        menu: Menu
+
+        width: label.width + 2 * 4/*padding*/
+        height: label.height + 2 * 4/*padding*/
+        implicitWidth: width
+        implicitHeight: height
+        radius: 2
+        color: (mouseArea.containsMouse || root.menuDropped) ? root.hoverColor : "transparent"
+
+        Label
         {
-            id: menu
-
-            onAboutToShow: root.checked = true;
-            onAboutToHide: root.checked = false;
-
-            Instantiator
+            id: label
+            anchors
             {
-                id: instantiator
-                delegate: MenuItem
-                {
-                    text: index >= 0 ? instantiator.model[index] : ""
-
-                    onTriggered: { root.selectedValue = text; }
-                }
-
-                onObjectAdded: menu.insertItem(index, object)
-                onObjectRemoved: menu.removeItem(object)
+                horizontalCenter: parent.horizontalCenter
+                verticalCenter: parent.verticalCenter
             }
+
+            text: root.selectedValue != "" ? root.selectedValue : root.defaultText
+            color: root.textColor
+            font.bold: true
+        }
+    }
+
+    MouseArea
+    {
+        id: mouseArea
+
+        hoverEnabled: true
+        anchors.fill: parent
+        onClicked:
+        {
+            if(menu)
+                menu.__popup(parent.mapToItem(null, 0, parent.height + 4/*padding*/, 0, 0), 0);
         }
 
-        style: ButtonStyle
-        {
-            background: Rectangle
-            {
-                anchors.fill: parent
-                radius: 2
-                color: (control.hovered || root.checked) ? pressedColor : "transparent"
-            }
-
-            label: Label
-            {
-                text: control.text
-                color: textColor
-                font.bold: true
-            }
-
-            padding
-            {
-                top: Constants.padding
-                left: Constants.padding
-                right: Constants.padding
-                bottom: Constants.padding
-            }
-        }
+        onPressed: { mouse.accepted = !propogatePresses; }
     }
 }
