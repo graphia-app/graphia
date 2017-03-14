@@ -4,7 +4,7 @@
 #include "baseplugin.h"
 
 #include "shared/plugins/usernodedata.h"
-#include "shared/plugins/usernodedatastablemodel.h"
+#include "shared/plugins/usernodedatatablemodel.h"
 
 #include "shared/graph/grapharray.h"
 

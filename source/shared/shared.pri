@@ -38,11 +38,11 @@ HEADERS += \
     $$PWD/commands/icommand.h \
     $$PWD/commands/command.h \
     $$PWD/commands/icommandmanager.h \
-    $$PWD/plugins/usernodedatastablemodel.h \
     $$PWD/plugins/userdatavector.h \
     $$PWD/plugins/userdata.h \
     $$PWD/plugins/usernodedata.h \
-    $$PWD/attributes/iattribute.h
+    $$PWD/attributes/iattribute.h \
+    $$PWD/plugins/usernodedatatablemodel.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \
@@ -57,10 +57,10 @@ SOURCES += \
     $$PWD/plugins/basegenericplugin.cpp \
     $$PWD/loading/tabulardata.cpp \
     $$PWD/loading/graphmlparser.cpp \
-    $$PWD/plugins/usersnodedatasmodel.cpp \
     $$PWD/plugins/userdatavector.cpp \
     $$PWD/plugins/userdata.cpp \
-    $$PWD/plugins/usernodedata.cpp
+    $$PWD/plugins/usernodedata.cpp \
+    $$PWD/plugins/usernodedatatablemodel.cpp
 
 RESOURCES += \
     $$PWD/ui/shared.qrc

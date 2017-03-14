@@ -7,7 +7,7 @@
 #include "shared/loading/iparser.h"
 #include "shared/plugins/userdata.h"
 #include "shared/plugins/usernodedata.h"
-#include "shared/plugins/usernodedatastablemodel.h"
+#include "shared/plugins/usernodedatatablemodel.h"
 
 #include <vector>
 #include <functional>
