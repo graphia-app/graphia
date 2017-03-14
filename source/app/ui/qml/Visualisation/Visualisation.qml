@@ -66,7 +66,7 @@ Item
                     checkable: true
                     enabled:
                     {
-                        var valueType = document.attributeValueType(attribute);
+                        var valueType = document.attribute(attribute).valueType;
                         return valueType === ValueType.Float || valueType === ValueType.Int;
                     }
 

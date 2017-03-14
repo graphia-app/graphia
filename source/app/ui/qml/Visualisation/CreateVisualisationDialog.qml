@@ -128,7 +128,7 @@ Window
 
         if(attributeList.selectedValue !== undefined && attributeList.selectedValue.length > 0)
         {
-            var attribute = document.attributeByName(attributeList.selectedValue);
+            var attribute = document.attribute(attributeList.selectedValue);
             description.text += attribute.description;
 
             if(channelList.selectedValue !== undefined && channelList.selectedValue.length > 0)

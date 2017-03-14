@@ -240,11 +240,9 @@ public:
                                                 int valueTypes = static_cast<int>(ValueType::All)) const;
     Q_INVOKABLE QStringList availableAttributesFor(const QString& transformName) const;
     Q_INVOKABLE QStringList availableAttributesSimilarTo(const QString& attributeName) const;
-    Q_INVOKABLE int attributeElementType(const QString& attributeName) const;
-    Q_INVOKABLE int attributeValueType(const QString& attributeName) const;
     Q_INVOKABLE QStringList avaliableConditionFnOps(const QString& attributeName) const;
 
-    Q_INVOKABLE QVariantMap attributeByName(const QString& attributeName) const;
+    Q_INVOKABLE QVariantMap attribute(const QString& attributeName) const;
     Q_INVOKABLE QVariantMap findTransformParameter(const QString& transformName,
                                        const QString& parameterName) const;
 
