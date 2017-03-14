@@ -10,7 +10,7 @@ GridLayout
 {
     id: root
 
-    property int type
+    property int valueType
     property int elementType
     property bool hasRange
     property bool hasMinimumValue
@@ -34,9 +34,9 @@ GridLayout
         if(!Utils.isNumeric(n))
             console.log("typedValue called with non-numeric: " + n);
 
-        if(type === ValueType.Int)
+        if(valueType === ValueType.Int)
             return Math.round(n);
-        else if(type === ValueType.Float && Utils.isInt(n))
+        else if(valueType === ValueType.Float && Utils.isInt(n))
             return Number(n).toFixed(1);
 
         return n;
@@ -46,11 +46,11 @@ GridLayout
     {
         id: spinBox
         Layout.preferredWidth: _inputElementWidth
-        visible: (type === ValueType.Int || type === ValueType.Float)
+        visible: (valueType === ValueType.Int || valueType === ValueType.Float)
 
         decimals:
         {
-            if(type === ValueType.Float)
+            if(valueType === ValueType.Float)
             {
                 if(stepSize <= 1.0)
                     return 3;
@@ -88,7 +88,7 @@ GridLayout
     {
         id: slider
         Layout.preferredWidth: _maxWidth
-        visible: ((type === ValueType.Int || type === ValueType.Float) && hasRange)
+        visible: ((valueType === ValueType.Int || valueType === ValueType.Float) && hasRange)
 
         onValueChanged:
         {
@@ -107,8 +107,8 @@ GridLayout
     {
         id: textField
         Layout.preferredWidth: _inputElementWidth
-        visible: (type === ValueType.String || type === ValueType.Unknown)
-        enabled: type !== ValueType.Unknown
+        visible: (valueType === ValueType.String || valueType === ValueType.Unknown)
+        enabled: valueType !== ValueType.Unknown
 
         function updateValue()
         {
@@ -129,9 +129,9 @@ GridLayout
         for(var property in data)
             this[property] = data[property];
 
-        if(type === ValueType.Unknown)
+        if(valueType === ValueType.Unknown)
             value = "";
-        else if(type !== ValueType.String)
+        else if(valueType !== ValueType.String)
         {
             if(initialValue.length === 0)
             {
@@ -186,7 +186,7 @@ GridLayout
 
     function reset()
     {
-        configure({type: ValueType.Unknown,
+        configure({valueType: ValueType.Unknown,
                    hasRange: false,
                    hasMinimumValue: false,
                    hasMaximumValue: false,
