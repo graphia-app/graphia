@@ -44,25 +44,39 @@ Column
 
             function forwardEventToItem(event, eventType)
             {
-                function recurse(branch)
+                var receivers = [];
+
+                function recurse(item)
                 {
-                    var localPoint = mapToItem(branch, event.x, event.y);
-                    var item = branch.childAt(localPoint.x, localPoint.y);
-                    if(item !== null)
+                    if(typeof(item[eventType]) === "function")
+                        receivers.push(item);
+
+                    for(var i = 0; i < item.children.length; i++)
                     {
-                        if(typeof(item[eventType]) == "function")
-                        {
-                            item[eventType](event);
+                        var child = item.children[i];
 
-                            if(event.accepted)
-                                return;
-                        }
+                        if(!child.visible || !child.enabled)
+                            continue;
 
-                        recurse(item);
+                        var p = mapToItem(child, event.x, event.y);
+
+                        if(child.contains(p))
+                            recurse(child);
                     }
                 }
 
                 recurse(loader.item);
+
+                while(receivers.length > 0)
+                {
+                    var item = receivers[receivers.length - 1];
+
+                    item[eventType](event);
+                    if(event.accepted)
+                        break;
+
+                    receivers.pop();
+                }
             }
 
             width: content.width

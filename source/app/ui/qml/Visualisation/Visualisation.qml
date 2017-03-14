@@ -96,6 +96,8 @@ Item
             id: attributeList
             selectedValue: attribute
             model: document.availableAttributesSimilarTo(attribute);
+            enabled: enabledMenuItem.checked
+
             textColor: root.textColor
             pressedColor: root.pressedColor
 

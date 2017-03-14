@@ -7,6 +7,8 @@ Item
     id: root
     width: image.width
     height: image.height
+    implicitWidth: image.implicitWidth
+    implicitHeight: image.implicitHeight
 
     property string type
     property string text
