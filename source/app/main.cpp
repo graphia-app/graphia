@@ -104,6 +104,7 @@ int main(int argc, char *argv[])
     preferences.define("visuals/defaultEdgeSize",           0.2, 0.01, 2.0);
 
     preferences.define("visuals/showNodeText",              QVariant::fromValue(static_cast<int>(TextState::Selected)));
+    preferences.define("visuals/showEdgeText",              QVariant::fromValue(static_cast<int>(TextState::Selected)));
     preferences.define("visuals/textFont",                  SharedTools::QtSingleApplication::font().family());
     preferences.define("visuals/textSize",                  24.0f);
     preferences.define("visuals/edgeVisualType",            QVariant::fromValue(static_cast<int>(EdgeVisualType::Cylinder)));
@@ -114,7 +115,6 @@ int main(int argc, char *argv[])
 
     preferences.define("misc/showGraphMetrics",             false);
     preferences.define("misc/showLayoutSettings",           false);
-    preferences.define("misc/showNodeText",                 true);
 
     preferences.define("misc/focusFoundNodes",              true);
     preferences.define("misc/focusFoundComponents",         false);

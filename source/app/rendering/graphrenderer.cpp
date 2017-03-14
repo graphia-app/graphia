@@ -578,6 +578,7 @@ void GraphRenderer::updateGPUDataIfRequired()
     auto textAlignment = static_cast<TextAlignment>(u::pref("visuals/textAlignment").toInt());
     auto textColor = Document::contrastingColorForBackground();
     auto showNodeText = static_cast<TextState>(u::pref("visuals/showNodeText").toInt());
+    auto showEdgeText = static_cast<TextState>(u::pref("visuals/showEdgeText").toInt());
     auto edgeVisualType = static_cast<EdgeVisualType>(u::pref("visuals/edgeVisualType").toInt());
 
     for(auto& componentRendererRef : _componentRenderers)
@@ -666,6 +667,12 @@ void GraphRenderer::updateGPUDataIfRequired()
 
             if(gpuGraphData != nullptr)
                 gpuGraphData->_edgeData.push_back(edgeData);
+
+            if(showEdgeText == TextState::Off || edgeVisual._state.testFlag(VisualFlags::NotFound))
+                continue;
+
+            if(showEdgeText == TextState::Selected && !edgeVisual._state.testFlag(VisualFlags::Selected))
+                continue;
 
             QVector3D midPoint = (sourcePosition + targetPosition) * 0.5f;
             createGPUGlyphData(edgeVisual._text, textColor, textAlignment, textScale, edgeVisual._size, midPoint, componentIndex, gpuGraphData);

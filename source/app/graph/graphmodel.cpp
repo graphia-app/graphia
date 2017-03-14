@@ -372,6 +372,14 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
     auto minEdgeSize    = u::minPref("visuals/defaultEdgeSize").toFloat();
     auto maxEdgeSize    = u::maxPref("visuals/defaultEdgeSize").toFloat();
 
+    if(selectionManager != nullptr)
+    {
+        // Clear all edge Selected flags as we can't know what to change unless
+        // we have the previous selection state to hand
+        for(auto edgeId : graph().edgeIds())
+            _edgeVisuals[edgeId]._state.setFlag(VisualFlags::Selected, false);
+    }
+
     if(searchManager != nullptr)
     {
         // Clear all edge NotFound flags as we can't know what to change unless
@@ -408,21 +416,29 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
 
         if(selectionManager != nullptr)
         {
-            _nodeVisuals[nodeId]._state.setFlag(VisualFlags::Selected,
-                                                selectionManager->nodeIsSelected(nodeId));
+            auto nodeIsSelected = selectionManager->nodeIsSelected(nodeId);
+
+            _nodeVisuals[nodeId]._state.setFlag(VisualFlags::Selected, nodeIsSelected);
+
+            if(nodeIsSelected)
+            {
+                for(auto edgeId : graph().edgeIdsForNodeId(nodeId))
+                    _edgeVisuals[edgeId]._state.setFlag(VisualFlags::Selected, nodeIsSelected);
+            }
         }
 
         if(searchManager != nullptr)
         {
-            if(!searchManager->foundNodeIds().empty() && !searchManager->nodeWasFound(nodeId))
-            {
-                _nodeVisuals[nodeId]._state.setFlag(VisualFlags::NotFound, true);
+            auto nodeWasFound = !searchManager->foundNodeIds().empty() &&
+                    !searchManager->nodeWasFound(nodeId);
 
+            _nodeVisuals[nodeId]._state.setFlag(VisualFlags::NotFound, nodeWasFound);
+
+            if(nodeWasFound)
+            {
                 for(auto edgeId : graph().edgeIdsForNodeId(nodeId))
                     _edgeVisuals[edgeId]._state.setFlag(VisualFlags::NotFound, true);
             }
-            else
-                _nodeVisuals[nodeId]._state.setFlag(VisualFlags::NotFound, false);
         }
     }
 

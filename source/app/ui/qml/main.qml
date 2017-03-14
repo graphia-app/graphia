@@ -176,12 +176,22 @@ ApplicationWindow
         }
         property int showNodeText:
         {
-            switch(nodeNameDisplay.current)
+            switch(nodeTextDisplay.current)
             {
             default:
             case hideNodeTextAction:         return TextState.Off;
             case showSelectedNodeTextAction: return TextState.Selected;
             case showAllNodeTextAction:      return TextState.All;
+            }
+        }
+        property int showEdgeText:
+        {
+            switch(edgeTextDisplay.current)
+            {
+            default:
+            case hideEdgeTextAction:         return TextState.Off;
+            case showSelectedEdgeTextAction: return TextState.Selected;
+            case showAllEdgeTextAction:      return TextState.All;
             }
         }
     }
@@ -565,7 +575,7 @@ ApplicationWindow
 
     ExclusiveGroup
     {
-        id: nodeNameDisplay
+        id: nodeTextDisplay
 
         Action { id: hideNodeTextAction; text: qsTr("None"); checkable: true; }
         Action { id: showSelectedNodeTextAction; text: qsTr("Selected"); checkable: true; }
@@ -576,9 +586,29 @@ ApplicationWindow
             switch(visuals.showNodeText)
             {
             default:
-            case TextState.Off:      nodeNameDisplay.current = hideNodeTextAction; break;
-            case TextState.Selected: nodeNameDisplay.current = showSelectedNodeTextAction; break;
-            case TextState.All:      nodeNameDisplay.current = showAllNodeTextAction; break;
+            case TextState.Off:      nodeTextDisplay.current = hideNodeTextAction; break;
+            case TextState.Selected: nodeTextDisplay.current = showSelectedNodeTextAction; break;
+            case TextState.All:      nodeTextDisplay.current = showAllNodeTextAction; break;
+            }
+        }
+    }
+
+    ExclusiveGroup
+    {
+        id: edgeTextDisplay
+
+        Action { id: hideEdgeTextAction; text: qsTr("None"); checkable: true; }
+        Action { id: showSelectedEdgeTextAction; text: qsTr("Selected"); checkable: true; }
+        Action { id: showAllEdgeTextAction; text: qsTr("All"); checkable: true; }
+
+        Component.onCompleted:
+        {
+            switch(visuals.showEdgeText)
+            {
+            default:
+            case TextState.Off:      edgeTextDisplay.current = hideEdgeTextAction; break;
+            case TextState.Selected: edgeTextDisplay.current = showSelectedEdgeTextAction; break;
+            case TextState.All:      edgeTextDisplay.current = showAllEdgeTextAction; break;
             }
         }
     }
@@ -712,6 +742,13 @@ ApplicationWindow
                 MenuItem { action: hideNodeTextAction }
                 MenuItem { action: showSelectedNodeTextAction }
                 MenuItem { action: showAllNodeTextAction }
+            }
+            Menu
+            {
+                title: qsTr("Show Edge Text")
+                MenuItem { action: hideEdgeTextAction }
+                MenuItem { action: showSelectedEdgeTextAction }
+                MenuItem { action: showAllEdgeTextAction }
             }
             MenuItem { action: toggleEdgeDirectionAction }
         }
