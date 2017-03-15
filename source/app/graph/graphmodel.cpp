@@ -152,10 +152,10 @@ QStringList GraphModel::availableAttributes(ElementType elementTypes, ValueType 
     auto requestedElementTypes = static_cast<int>(elementTypes);
     auto requestedValueTypes = static_cast<int>(valueTypes);
 
-    for(auto& f : _attributes)
+    for(auto& attribute : _attributes)
     {
-        auto attributeElementType = static_cast<int>(f.second.elementType());
-        auto attributeValueType = static_cast<int>(f.second.valueType());
+        auto attributeElementType = static_cast<int>(attribute.second.elementType());
+        auto attributeValueType = static_cast<int>(attribute.second.valueType());
 
         if(!(attributeElementType & requestedElementTypes))
             continue;
@@ -163,7 +163,7 @@ QStringList GraphModel::availableAttributes(ElementType elementTypes, ValueType 
         if(!(attributeValueType & requestedValueTypes))
             continue;
 
-        stringList.append(f.first);
+        stringList.append(attribute.first);
     }
 
     return stringList;

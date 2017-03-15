@@ -814,7 +814,13 @@ QStringList Document::availableAttributesSimilarTo(const QString& attributeName)
         return {};
 
     const auto& attribute = _graphModel->attributeByName(attributeName);
-    return _graphModel->availableAttributes(attribute.elementType(), attribute.valueType());
+    auto valueType = attribute.valueType();
+
+    // For similarity purposes, treat Int and Float as the same
+    if(valueType == ValueType::Int || valueType == ValueType::Float)
+        valueType = static_cast<ValueType>(static_cast<int>(ValueType::Int)|static_cast<int>(ValueType::Float));
+
+    return _graphModel->availableAttributes(attribute.elementType(), valueType);
 }
 
 QStringList Document::avaliableConditionFnOps(const QString& attributeName) const
