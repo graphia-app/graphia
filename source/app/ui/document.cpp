@@ -4,6 +4,7 @@
 
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/preferences.h"
+#include "shared/utils/flags.h"
 
 #include "graph/graphmodel.h"
 #include "loading/parserthread.h"
@@ -814,13 +815,13 @@ QStringList Document::availableAttributesSimilarTo(const QString& attributeName)
         return {};
 
     const auto& attribute = _graphModel->attributeByName(attributeName);
-    auto valueType = attribute.valueType();
+    auto valueType = Flags<ValueType>(attribute.valueType());
 
     // For similarity purposes, treat Int and Float as the same
-    if(valueType == ValueType::Int || valueType == ValueType::Float)
-        valueType = static_cast<ValueType>(static_cast<int>(ValueType::Int)|static_cast<int>(ValueType::Float));
+    if(valueType.anyOf(ValueType::Int, ValueType::Float))
+        valueType.set(ValueType::Int, ValueType::Float);
 
-    return _graphModel->availableAttributes(attribute.elementType(), valueType);
+    return _graphModel->availableAttributes(attribute.elementType(), *valueType);
 }
 
 QStringList Document::avaliableConditionFnOps(const QString& attributeName) const

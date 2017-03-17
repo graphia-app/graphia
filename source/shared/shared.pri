@@ -42,7 +42,8 @@ HEADERS += \
     $$PWD/plugins/userdata.h \
     $$PWD/plugins/usernodedata.h \
     $$PWD/attributes/iattribute.h \
-    $$PWD/plugins/usernodedatatablemodel.h
+    $$PWD/plugins/usernodedatatablemodel.h \
+    $$PWD/utils/flags.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \

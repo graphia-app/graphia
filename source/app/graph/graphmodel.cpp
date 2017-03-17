@@ -19,6 +19,7 @@
 #include "shared/utils/preferences.h"
 #include "shared/utils/utils.h"
 #include "shared/utils/pair_iterator.h"
+#include "shared/utils/flags.h"
 
 #include <QRegularExpression>
 
@@ -149,18 +150,13 @@ QStringList GraphModel::availableTransformNames() const
 QStringList GraphModel::availableAttributes(ElementType elementTypes, ValueType valueTypes) const
 {
     QStringList stringList;
-    auto requestedElementTypes = static_cast<int>(elementTypes);
-    auto requestedValueTypes = static_cast<int>(valueTypes);
 
     for(auto& attribute : _attributes)
     {
-        auto attributeElementType = static_cast<int>(attribute.second.elementType());
-        auto attributeValueType = static_cast<int>(attribute.second.valueType());
-
-        if(!(attributeElementType & requestedElementTypes))
+        if(!Flags<ElementType>(elementTypes).test(attribute.second.elementType()))
             continue;
 
-        if(!(attributeValueType & requestedValueTypes))
+        if(!Flags<ValueType>(valueTypes).test(attribute.second.valueType()))
             continue;
 
         stringList.append(attribute.first);
