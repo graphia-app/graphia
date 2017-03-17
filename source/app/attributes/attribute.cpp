@@ -1,6 +1,6 @@
 #include "attribute.h"
 
-void Attribute::clearFunctions(bool setAutoRange)
+void Attribute::clearFunctions()
 {
     _intNodeIdFn = nullptr;
     _intEdgeIdFn = nullptr;
@@ -13,9 +13,6 @@ void Attribute::clearFunctions(bool setAutoRange)
     _stringNodeIdFn = nullptr;
     _stringEdgeIdFn = nullptr;
     _stringComponentFn = nullptr;
-
-    if(setAutoRange && _autoRange == AutoRange::Unknown)
-        _autoRange = AutoRange::Yes;
 }
 
 int Attribute::valueOf(Helper<int>, NodeId nodeId) const { Q_ASSERT(_intNodeIdFn != nullptr); return _intNodeIdFn(nodeId); }
@@ -30,12 +27,12 @@ QString Attribute::valueOf(Helper<QString>, NodeId nodeId) const { Q_ASSERT(_str
 QString Attribute::valueOf(Helper<QString>, EdgeId edgeId) const { Q_ASSERT(_stringEdgeIdFn != nullptr); return _stringEdgeIdFn(edgeId); }
 QString Attribute::valueOf(Helper<QString>, const IGraphComponent& component) const { Q_ASSERT(_stringComponentFn != nullptr); return _stringComponentFn(component); }
 
-Attribute& Attribute::setIntValueFn(ValueFn<int, NodeId> valueFn) { clearFunctions(true); _intNodeIdFn = valueFn; return *this; }
-Attribute& Attribute::setIntValueFn(ValueFn<int, EdgeId> valueFn) { clearFunctions(true); _intEdgeIdFn = valueFn; return *this; }
+Attribute& Attribute::setIntValueFn(ValueFn<int, NodeId> valueFn) { clearFunctions(); _intNodeIdFn = valueFn; return *this; }
+Attribute& Attribute::setIntValueFn(ValueFn<int, EdgeId> valueFn) { clearFunctions(); _intEdgeIdFn = valueFn; return *this; }
 Attribute& Attribute::setIntValueFn(ValueFn<int, const IGraphComponent&> valueFn) { clearFunctions(); _intComponentFn = valueFn; return *this; }
 
-Attribute& Attribute::setFloatValueFn(ValueFn<double, NodeId> valueFn) { clearFunctions(true); _floatNodeIdFn = valueFn; return *this; }
-Attribute& Attribute::setFloatValueFn(ValueFn<double, EdgeId> valueFn) { clearFunctions(true); _floatEdgeIdFn = valueFn; return *this; }
+Attribute& Attribute::setFloatValueFn(ValueFn<double, NodeId> valueFn) { clearFunctions(); _floatNodeIdFn = valueFn; return *this; }
+Attribute& Attribute::setFloatValueFn(ValueFn<double, EdgeId> valueFn) { clearFunctions(); _floatEdgeIdFn = valueFn; return *this; }
 Attribute& Attribute::setFloatValueFn(ValueFn<double, const IGraphComponent&> valueFn) { clearFunctions(); _floatComponentFn = valueFn; return *this; }
 
 Attribute& Attribute::setStringValueFn(ValueFn<QString, NodeId> valueFn) { clearFunctions(); _stringNodeIdFn = valueFn; return *this; }
@@ -57,6 +54,11 @@ Attribute::Type Attribute::type() const
     if(_stringComponentFn != nullptr)   return Type::StringComponent;
 
     return Type::Unknown;
+}
+
+void Attribute::disableAutoRange()
+{
+    _flags.reset(AttributeFlag::AutoRangeMutable, AttributeFlag::AutoRangeTransformed);
 }
 
 ValueType Attribute::valueType() const
@@ -105,8 +107,8 @@ bool Attribute::hasIntRange() const { return hasIntMin() && hasIntMax(); }
 
 int Attribute::intMin() const { return hasIntMin() ? _intMin : std::numeric_limits<int>::min(); }
 int Attribute::intMax() const { return hasIntMax() ? _intMax : std::numeric_limits<int>::max(); }
-Attribute& Attribute::setIntMin(int intMin) { _intMin = intMin; _autoRange = AutoRange::No; return *this; }
-Attribute& Attribute::setIntMax(int intMax) { _intMax = intMax; _autoRange = AutoRange::No; return *this; }
+Attribute& Attribute::setIntMin(int intMin) { _intMin = intMin; disableAutoRange(); return *this; }
+Attribute& Attribute::setIntMax(int intMax) { _intMax = intMax; disableAutoRange(); return *this; }
 
 bool Attribute::intValueInRange(int value) const
 {
@@ -125,8 +127,8 @@ bool Attribute::hasFloatRange() const { return hasFloatMin() && hasFloatMax(); }
 
 double Attribute::floatMin() const { return hasFloatMin() ? _floatMin : std::numeric_limits<double>::min(); }
 double Attribute::floatMax() const { return hasFloatMax() ? _floatMax : std::numeric_limits<double>::max(); }
-Attribute& Attribute::setFloatMin(double floatMin) { _floatMin = floatMin; _autoRange = AutoRange::No; return *this; }
-Attribute& Attribute::setFloatMax(double floatMax) { _floatMax = floatMax; _autoRange = AutoRange::No; return *this; }
+Attribute& Attribute::setFloatMin(double floatMin) { _floatMin = floatMin; disableAutoRange(); return *this; }
+Attribute& Attribute::setFloatMax(double floatMax) { _floatMax = floatMax; disableAutoRange(); return *this; }
 
 bool Attribute::floatValueInRange(double value) const
 {

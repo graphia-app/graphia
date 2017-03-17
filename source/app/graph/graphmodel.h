@@ -111,7 +111,7 @@ public slots:
     void onPreferenceChanged(const QString&, const QVariant&);
 
 private slots:
-    void onMutableGraphChanged(const IGraph* graph);
+    void onGraphChanged(const Graph* graph);
 
 signals:
     void visualsWillChange();

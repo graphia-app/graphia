@@ -46,7 +46,8 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
        _edgeVisuals[edgeId]._state = VisualFlags::None;
     });
 
-    connect(&_graph, &Graph::graphChanged, this, &GraphModel::onMutableGraphChanged, Qt::DirectConnection);
+    connect(&_graph, &Graph::graphChanged, this, &GraphModel::onGraphChanged, Qt::DirectConnection);
+    connect(&_transformedGraph, &Graph::graphChanged, this, &GraphModel::onGraphChanged, Qt::DirectConnection);
 
     connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphModel::onPreferenceChanged);
 
@@ -489,13 +490,72 @@ void GraphModel::onPreferenceChanged(const QString&, const QVariant&)
     updateVisuals();
 }
 
-void GraphModel::onMutableGraphChanged(const IGraph* graph)
+template<typename E>
+static void autoSetAttributeRange(const std::vector<E>& elementIds, Attribute& attribute)
 {
+    auto flags = attribute.flags();
+
+    if(attribute.valueType() == ValueType::Float)
+    {
+        double min = std::numeric_limits<double>::max();
+        double max = std::numeric_limits<double>::min();
+
+        for(auto elementId : elementIds)
+        {
+            auto v = attribute.valueOf<double>(elementId);
+            min = std::min(v, min);
+            max = std::max(v, max);
+        }
+
+        attribute.setFloatMin(min);
+        attribute.setFloatMax(max);
+        attribute.setFlag(flags);
+    }
+    else if(attribute.valueType() == ValueType::Int)
+    {
+        int min = std::numeric_limits<int>::max();
+        int max = std::numeric_limits<int>::min();
+
+        for(auto elementId : elementIds)
+        {
+            auto v = attribute.valueOf<int>(elementId);
+            min = std::min(v, min);
+            max = std::max(v, max);
+        }
+
+        attribute.setIntMin(min);
+        attribute.setIntMax(max);
+        attribute.setFlag(flags);
+    }
+}
+
+static void autoSetAttributeRange(const IGraph* graph, Attribute& attribute)
+{
+    if(attribute.elementType() == ElementType::Node)
+        autoSetAttributeRange(graph->nodeIds(), attribute);
+    else if(attribute.elementType() == ElementType::Edge)
+        autoSetAttributeRange(graph->edgeIds(), attribute);
+}
+
+void GraphModel::onGraphChanged(const Graph* graph)
+{
+    bool isMutableGraph = (dynamic_cast<const MutableGraph*>(graph) != nullptr);
+
     for(auto& attribute : make_value_wrapper(_attributes))
     {
-        if(attribute.elementType() == ElementType::Node)
-            attribute.autoSetRange(graph->nodeIds());
-        else if(attribute.elementType() == ElementType::Edge)
-            attribute.autoSetRange(graph->edgeIds());
+        if(!attribute.testFlag(AttributeFlag::AutoRangeMutable) &&
+           !attribute.testFlag(AttributeFlag::AutoRangeTransformed))
+        {
+            // No auto-ranging requested
+            continue;
+        }
+
+        if(attribute.testFlag(AttributeFlag::AutoRangeMutable) && !isMutableGraph)
+            continue;
+
+        if(attribute.testFlag(AttributeFlag::AutoRangeTransformed) && isMutableGraph)
+            continue;
+
+        autoSetAttributeRange(graph, attribute);
     }
 }

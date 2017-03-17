@@ -5,6 +5,7 @@
 #include "graph/elementtype.h"
 #include "shared/attributes/iattribute.h"
 #include "shared/graph/igraphcomponent.h"
+#include "shared/utils/flags.h"
 
 #include "valuetype.h"
 
@@ -31,15 +32,9 @@ private:
     ValueFn<QString, EdgeId> _stringEdgeIdFn;
     ValueFn<QString, const IGraphComponent&> _stringComponentFn;
 
-    void clearFunctions(bool setAutoRange = false);
+    void clearFunctions();
 
-    enum class AutoRange
-    {
-        Unknown,
-        No,
-        Yes
-    }
-    _autoRange = AutoRange::Unknown;
+    Flags<AttributeFlag> _flags = AttributeFlag::None;
 
     int _intMin = std::numeric_limits<int>::max();
     int _intMax = std::numeric_limits<int>::min();
@@ -80,6 +75,8 @@ private:
     };
 
     Type type() const;
+
+    void disableAutoRange();
 
 public:
     template<typename T, typename E> T valueOf(E& elementId) const
@@ -173,37 +170,10 @@ public:
         return minMax;
     }
 
-    template<typename E>
-    void autoSetRange(const std::vector<E>& elementIds)
-    {
-        if(_autoRange == AutoRange::No)
-            return;
-
-        if(valueType() == ValueType::Float)
-        {
-            _floatMin = std::numeric_limits<double>::max();
-            _floatMax = std::numeric_limits<double>::min();
-
-            for(auto elementId : elementIds)
-            {
-                auto v = valueOf<double>(elementId);
-                _floatMin = std::min(v, _floatMin);
-                _floatMax = std::max(v, _floatMax);
-            }
-        }
-        else if(valueType() == ValueType::Int)
-        {
-            _intMin = std::numeric_limits<int>::max();
-            _intMax = std::numeric_limits<int>::min();
-
-            for(auto elementId : elementIds)
-            {
-                auto v = valueOf<int>(elementId);
-                _intMin = std::min(v, _intMin);
-                _intMax = std::max(v, _intMax);
-            }
-        }
-    }
+    AttributeFlag flags() const { return *_flags; }
+    bool testFlag(AttributeFlag flag) const { return _flags.test(flag); }
+    Attribute& setFlag(AttributeFlag flag) { _flags.set(flag); return *this; }
+    Attribute& resetFlag(AttributeFlag flag) { _flags.reset(flag); return *this; }
 
     bool searchable() const { return _searchable; }
     Attribute& setSearchable(bool searchable) { _searchable = searchable; return *this; }

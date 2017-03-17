@@ -6,6 +6,15 @@
 
 #include <functional>
 
+enum class AttributeFlag
+{
+    None                    = 0x0,
+
+    // Automatically set the range...
+    AutoRangeMutable        = 0x1, // ...using the MutableGraph ElementIds
+    AutoRangeTransformed    = 0x2, // ...using the TransformedGraph ElementIds
+};
+
 class IAttribute
 {
 public:
@@ -46,6 +55,10 @@ public:
     virtual IAttribute& setFloatMax(double floatMax) = 0;
 
     virtual bool floatValueInRange(double value) const = 0;
+
+    virtual bool testFlag(AttributeFlag flag) const = 0;
+    virtual IAttribute& setFlag(AttributeFlag flag) = 0;
+    virtual IAttribute& resetFlag(AttributeFlag flag) = 0;
 
     virtual bool searchable() const = 0;
     virtual IAttribute& setSearchable(bool searchable) = 0;

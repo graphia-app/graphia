@@ -68,6 +68,7 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
                     {
                         return valueByNodeId(nodeId, userDataVectorName).toFloat();
                     })
+                    .setFlag(AttributeFlag::AutoRangeMutable)
                     .setSearchable(true);
             break;
 
@@ -77,6 +78,7 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
                     {
                         return valueByNodeId(nodeId, userDataVectorName).toInt();
                     })
+                    .setFlag(AttributeFlag::AutoRangeMutable)
                     .setSearchable(true);
             break;
 

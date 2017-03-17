@@ -24,6 +24,7 @@ void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionMa
 
     graphModel->attribute(tr("Pearson Correlation Value"))
             .setFloatValueFn([this](EdgeId edgeId) { return _pearsonValues->get(edgeId); })
+            .setFlag(AttributeFlag::AutoRangeMutable)
             .setDescription(tr("The <a href=\"https://en.wikipedia.org/wiki/Pearson_correlation_coefficient\">"
                                "Pearson Correlation Coefficient</a> is an indication of "
                                "the linear relationship between two variables."));
@@ -99,21 +100,25 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, int
 
     graphModel()->attribute(tr("Mean Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._mean; })
+            .setFlag(AttributeFlag::AutoRangeMutable)
             .setDescription(tr("The Mean Data Value is the mean of the values associated "
                                "with the node."));
 
     graphModel()->attribute(tr("Minimum Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._minValue; })
+            .setFlag(AttributeFlag::AutoRangeMutable)
             .setDescription(tr("The Minimum Data Value is the minimum value associated "
                                "with the node."));
 
     graphModel()->attribute(tr("Maximum Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._maxValue; })
+            .setFlag(AttributeFlag::AutoRangeMutable)
             .setDescription(tr("The Maximum Data Value is the maximum value associated "
                                "with the node."));
 
     graphModel()->attribute(tr("Variance"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._variance; })
+            .setFlag(AttributeFlag::AutoRangeMutable)
             .setDescription(tr("The <a href=\"https://en.wikipedia.org/wiki/Variance\">Variance</a> "
                                "is a measure of the spread of the values associated "
                                "with the node. It is defined as ∑(𝑥-𝜇)², where 𝑥 is the value "
@@ -121,6 +126,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, int
 
     graphModel()->attribute(tr("Standard Deviation"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._stddev; })
+            .setFlag(AttributeFlag::AutoRangeMutable)
             .setDescription(tr("The <a href=\"https://en.wikipedia.org/wiki/Standard_deviation\">"
                                "Standard Deviation</a> is a measure of the spread of the values associated "
                                "with the node. It is defined as √∑(𝑥-𝜇)², where 𝑥 is the value "

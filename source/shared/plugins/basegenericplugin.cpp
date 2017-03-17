@@ -41,6 +41,7 @@ void BaseGenericPluginInstance::setEdgeWeight(EdgeId edgeId, float weight)
 
         graphModel()->attribute(tr("Edge Weight"))
             .setFloatValueFn([this](EdgeId edgeId_) { return _edgeWeights->get(edgeId_); })
+            .setFlag(AttributeFlag::AutoRangeMutable)
             .setDescription(tr("The Edge Weight is a generic value associated with the edge."));
     }
 
