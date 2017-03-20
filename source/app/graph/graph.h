@@ -99,7 +99,7 @@ public:
     NodeId firstNodeId() const;
     bool containsNodeId(NodeId nodeId) const;
 
-    virtual NodeIdDistinctSetCollection::Type typeOf(NodeId nodeId) const = 0;
+    virtual MultiElementType typeOf(NodeId nodeId) const = 0;
     virtual ConstNodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const = 0;
     template<typename C> NodeIdSet mergedNodeIdsForNodeIds(const C& nodeIds) const
     {
@@ -117,7 +117,7 @@ public:
     EdgeId firstEdgeId() const;
     bool containsEdgeId(EdgeId edgeId) const;
 
-    virtual EdgeIdDistinctSetCollection::Type typeOf(EdgeId edgeId) const = 0;
+    virtual MultiElementType typeOf(EdgeId edgeId) const = 0;
     virtual ConstEdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const = 0;
     template<typename C> EdgeIdSet mergedEdgeIdsForEdgeIds(const C& edgeIds) const
     {

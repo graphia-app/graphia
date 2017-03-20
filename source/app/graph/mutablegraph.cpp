@@ -53,7 +53,7 @@ bool MutableGraph::containsNodeId(NodeId nodeId) const
     return _n._nodeIdsInUse[nodeId];
 }
 
-NodeIdDistinctSetCollection::Type MutableGraph::typeOf(NodeId nodeId) const
+MultiElementType MutableGraph::typeOf(NodeId nodeId) const
 {
     return _n._mergedNodeIds.typeOf(nodeId);
 }
@@ -160,7 +160,7 @@ bool MutableGraph::containsEdgeId(EdgeId edgeId) const
     return _e._edgeIdsInUse[edgeId];
 }
 
-EdgeIdDistinctSetCollection::Type MutableGraph::typeOf(EdgeId edgeId) const
+MultiElementType MutableGraph::typeOf(EdgeId edgeId) const
 {
     return _e._mergedEdgeIds.typeOf(edgeId);
 }

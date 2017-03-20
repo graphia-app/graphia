@@ -645,7 +645,7 @@ void Document::updateFoundIndex(bool reselectIfInvalidated)
     std::vector<NodeId> selectedHeadNodes;
     for(auto selectedNodeId : _selectionManager->selectedNodes())
     {
-        if(_graphModel->graph().typeOf(selectedNodeId) != NodeIdDistinctSetCollection::Type::Tail)
+        if(_graphModel->graph().typeOf(selectedNodeId) != MultiElementType::Tail)
             selectedHeadNodes.emplace_back(selectedNodeId);
     }
 

@@ -29,7 +29,7 @@ public:
         {
             for(auto nodeId : nodeIds)
             {
-                if(_graphModel->graph().typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Tail)
+                if(_graphModel->graph().typeOf(nodeId) == MultiElementType::Tail)
                     continue;
 
                 auto mergedNodeIds = _graphModel->graph().mergedNodeIdsForNodeId(nodeId);
@@ -69,7 +69,7 @@ public:
         {
             for(auto nodeId : nodeIds)
             {
-                if(_graphModel->graph().typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Tail)
+                if(_graphModel->graph().typeOf(nodeId) == MultiElementType::Tail)
                     continue;
 
                 auto mergedNodeIds = _graphModel->graph().mergedNodeIdsForNodeId(nodeId);

@@ -521,7 +521,7 @@ NodeId GraphComponentRenderer::focusNodeId() const
 
 bool GraphComponentRenderer::focusNodeIsVisible() const
 {
-    return _graphModel->graph().typeOf(focusNodeId()) != NodeIdDistinctSetCollection::Type::Tail;
+    return _graphModel->graph().typeOf(focusNodeId()) != MultiElementType::Tail;
 }
 
 QVector3D GraphComponentRenderer::focusPosition() const

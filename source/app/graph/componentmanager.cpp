@@ -13,8 +13,8 @@ ComponentManager::ComponentManager(Graph& graph,
     _edgesComponentId(graph)
 {
     // Ignore all multi-elements
-    addNodeFilter([&graph](NodeId nodeId) { return graph.typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Tail; });
-    addEdgeFilter([&graph](EdgeId edgeId) { return graph.typeOf(edgeId) == EdgeIdDistinctSetCollection::Type::Tail; });
+    addNodeFilter([&graph](NodeId nodeId) { return graph.typeOf(nodeId) == MultiElementType::Tail; });
+    addEdgeFilter([&graph](EdgeId edgeId) { return graph.typeOf(edgeId) == MultiElementType::Tail; });
 
     if(nodeFilter)
         addNodeFilter(nodeFilter);

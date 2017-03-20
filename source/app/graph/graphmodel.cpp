@@ -399,7 +399,7 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
         // Color
         if(!_mappedNodeVisuals[nodeId]._color.isValid())
         {
-            _nodeVisuals[nodeId]._color = graph().typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Not ?
+            _nodeVisuals[nodeId]._color = graph().typeOf(nodeId) == MultiElementType::Not ?
                 nodeColor : multiColor;
         }
         else
@@ -459,7 +459,7 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
         // Color
         if(!_mappedEdgeVisuals[edgeId]._color.isValid())
         {
-            _edgeVisuals[edgeId]._color = graph().typeOf(edgeId) == EdgeIdDistinctSetCollection::Type::Not ?
+            _edgeVisuals[edgeId]._color = graph().typeOf(edgeId) == MultiElementType::Not ?
                 edgeColor : multiColor;
         }
         else

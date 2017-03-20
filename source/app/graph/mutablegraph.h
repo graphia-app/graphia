@@ -111,7 +111,7 @@ public:
     int numNodes() const;
     const INode& nodeById(NodeId nodeId) const;
     bool containsNodeId(NodeId nodeId) const;
-    NodeIdDistinctSetCollection::Type typeOf(NodeId nodeId) const;
+    MultiElementType typeOf(NodeId nodeId) const;
     ConstNodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const;
 
     NodeId addNode();
@@ -123,7 +123,7 @@ public:
     int numEdges() const;
     const IEdge& edgeById(EdgeId edgeId) const;
     bool containsEdgeId(EdgeId edgeId) const;
-    EdgeIdDistinctSetCollection::Type typeOf(EdgeId edgeId) const;
+    MultiElementType typeOf(EdgeId edgeId) const;
     ConstEdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const;
     EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const;
     EdgeIdDistinctSet inEdgeIdsForNodeId(NodeId nodeId) const;

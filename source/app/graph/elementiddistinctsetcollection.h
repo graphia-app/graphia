@@ -10,6 +10,13 @@
 #include <array>
 #include <algorithm>
 
+enum class MultiElementType
+{
+    Not,
+    Head,
+    Tail
+};
+
 template<typename C, typename T> class ElementIdDistinctSet;
 template<typename T> class ElementIdDistinctSets;
 
@@ -45,13 +52,6 @@ private:
 
 public:
     using SetId = T;
-
-    enum class Type
-    {
-        Not,
-        Head,
-        Tail
-    };
 
     void resize(std::size_t size)
     {
@@ -258,7 +258,7 @@ public:
         return setId;
     }
 
-    Type typeOf(T elementId) const
+    MultiElementType typeOf(T elementId) const
     {
         Q_ASSERT(!elementId.isNull());
         auto& listNode = _list[elementId];
@@ -266,12 +266,12 @@ public:
         if(!listNode.isNull() && !listNode.isSingleton(elementId))
         {
             if(listNode.isHead(elementId))
-                return Type::Head;
+                return MultiElementType::Head;
 
-            return Type::Tail;
+            return MultiElementType::Tail;
         }
 
-        return Type::Not;
+        return MultiElementType::Not;
     }
 };
 
@@ -308,7 +308,7 @@ public:
         _head(head),
         _collection(collection)
     {
-        Q_ASSERT(collection->typeOf(head) != C::Type::Tail);
+        Q_ASSERT(collection->typeOf(head) != MultiElementType::Tail);
     }
 
     void setCollection(C* collection)

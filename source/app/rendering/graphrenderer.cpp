@@ -997,13 +997,13 @@ void GraphRenderer::onGraphWillChange(const Graph* graph)
     // to show them until the scene transition is over
     for(NodeId nodeId : graph->nodeIds())
     {
-        if(graph->typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Tail)
+        if(graph->typeOf(nodeId) == MultiElementType::Tail)
             _hiddenNodes.set(nodeId, true);
     }
 
     for(EdgeId edgeId : graph->edgeIds())
     {
-        if(graph->typeOf(edgeId) == EdgeIdDistinctSetCollection::Type::Tail)
+        if(graph->typeOf(edgeId) == MultiElementType::Tail)
             _hiddenEdges.set(edgeId, true);
     }
 }

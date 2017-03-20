@@ -49,7 +49,7 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> attribu
         for(auto nodeId : _graphModel->graph().nodeIds())
         {
             // From a search results point of view, we only care about head nodes...
-            if(_graphModel->graph().typeOf(nodeId) == NodeIdDistinctSetCollection::Type::Tail)
+            if(_graphModel->graph().typeOf(nodeId) == MultiElementType::Tail)
                 continue;
 
             bool match = re.match(_graphModel->nodeNames().at(nodeId)).hasMatch();
