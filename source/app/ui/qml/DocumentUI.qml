@@ -214,6 +214,8 @@ Item
 
             Transforms
             {
+                visible: plugin.loaded
+
                 anchors.right: parent.right
                 anchors.top: parent.top
 
@@ -294,6 +296,8 @@ Item
 
                 Visualisations
                 {
+                    visible: plugin.loaded
+
                     anchors.left: parent.left
 
                     enabledTextColor: root.contrastingColor
