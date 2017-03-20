@@ -185,6 +185,41 @@ Item
             {
                 id: graph
                 anchors.fill: parent
+
+                Label
+                {
+                    id: emptyGraphLabel
+                    text: "Empty Graph"
+                    font.pixelSize: 48
+                    color: root.contrastingColor
+                    opacity: 0.0
+
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    states: State
+                    {
+                        name: "showing"
+                        when: plugin.loaded && graph.numNodes <= 0
+                        PropertyChanges
+                        {
+                            target: emptyGraphLabel
+                            opacity: 1.0
+                        }
+                    }
+
+                    transitions: Transition
+                    {
+                        to: "showing"
+                        reversible: true
+                        NumberAnimation
+                        {
+                            properties: "opacity"
+                            duration: 1000
+                            easing.type: Easing.InOutSine
+                        }
+                    }
+                }
             }
 
             Column
