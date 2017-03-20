@@ -37,7 +37,11 @@ std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(const Gr
 {
     auto edgeContractionTransform = std::make_unique<EdgeContractionTransform>();
 
-    edgeContractionTransform->addEdgeContractionFilter(CreateConditionFnFor::edge(attributes, graphTransformConfig._condition));
+    auto conditionFn = CreateConditionFnFor::edge(attributes, graphTransformConfig._condition);
+    if(conditionFn == nullptr)
+        return nullptr;
+
+    edgeContractionTransform->addEdgeContractionFilter(conditionFn);
 
     if(!edgeContractionTransform->hasEdgeContractionFilters())
         return nullptr;

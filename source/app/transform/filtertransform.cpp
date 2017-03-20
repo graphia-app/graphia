@@ -84,16 +84,34 @@ std::unique_ptr<GraphTransform> FilterTransformFactory::create(const GraphTransf
     switch(elementType())
     {
     case ElementType::Node:
-        filterTransform->addNodeFilter(CreateConditionFnFor::node(attributes, graphTransformConfig._condition));
+    {
+        auto conditionFn = CreateConditionFnFor::node(attributes, graphTransformConfig._condition);
+        if(conditionFn == nullptr)
+            return nullptr;
+
+        filterTransform->addNodeFilter(conditionFn);
         break;
+    }
 
     case ElementType::Edge:
-        filterTransform->addEdgeFilter(CreateConditionFnFor::edge(attributes, graphTransformConfig._condition));
+    {
+        auto conditionFn = CreateConditionFnFor::edge(attributes, graphTransformConfig._condition);
+        if(conditionFn == nullptr)
+            return nullptr;
+
+        filterTransform->addEdgeFilter(conditionFn);
         break;
+    }
 
     case ElementType::Component:
-        filterTransform->addComponentFilter(CreateConditionFnFor::component(attributes, graphTransformConfig._condition));
+    {
+        auto conditionFn = CreateConditionFnFor::component(attributes, graphTransformConfig._condition);
+        if(conditionFn == nullptr)
+            return nullptr;
+
+        filterTransform->addComponentFilter(conditionFn);
         break;
+    }
 
     default:
         return nullptr;
