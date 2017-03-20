@@ -56,6 +56,32 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
         .setIntMin(0)
         .setDescription(tr("A node's degree is its number of incident edges."));
 
+    attribute(tr("Node Multiplicity"))
+        .setIntValueFn([this](NodeId nodeId)
+        {
+            Q_ASSERT(_transformedGraph.typeOf(nodeId) != MultiElementType::Tail);
+            if(_transformedGraph.typeOf(nodeId) != MultiElementType::Head)
+                return 1;
+
+            return _transformedGraph.mergedNodeIdsForNodeId(nodeId).size();
+        })
+        .setIntMin(0)
+        .setFlag(AttributeFlag::IgnoreTails)
+        .setDescription(tr("A node's multiplicity is how many nodes it represents."));
+
+    attribute(tr("Edge Multiplicity"))
+        .setIntValueFn([this](EdgeId edgeId)
+        {
+            Q_ASSERT(_transformedGraph.typeOf(edgeId) != MultiElementType::Tail);
+            if(_transformedGraph.typeOf(edgeId) != MultiElementType::Head)
+                return 1;
+
+            return _transformedGraph.mergedEdgeIdsForEdgeId(edgeId).size();
+        })
+        .setIntMin(0)
+        .setFlag(AttributeFlag::IgnoreTails)
+        .setDescription(tr("An edge's multiplicity is how many edges it represents."));
+
     attribute(tr("Component Size"))
         .setIntValueFn([this](const IGraphComponent& component) { return component.numNodes(); })
         .setIntMin(1)
