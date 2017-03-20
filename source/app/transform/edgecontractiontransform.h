@@ -14,7 +14,11 @@ public:
     void addEdgeContractionFilter(const EdgeConditionFn& f) { _edgeFilters.emplace_back(f); }
     bool hasEdgeContractionFilters() const { return !_edgeFilters.empty(); }
 
+    void setIgnoreTails(bool ignoreTails) { _ignoreTails = ignoreTails; }
+
 private:
+    bool _ignoreTails = false;
+
     std::vector<EdgeConditionFn> _edgeFilters;
 };
 

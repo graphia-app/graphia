@@ -4,11 +4,11 @@
 
 #include <QObject>
 
-static bool edgeIdContracted(const std::vector<EdgeConditionFn>& filters, EdgeId value)
+static bool edgeIdContracted(const std::vector<EdgeConditionFn>& filters, EdgeId edgeId)
 {
     for(auto& filter : filters)
     {
-        if(filter(value))
+        if(filter(edgeId))
             return true;
     }
 
@@ -23,6 +23,9 @@ bool EdgeContractionTransform::apply(TransformedGraph& target) const
 
     for(auto edgeId : target.edgeIds())
     {
+        if(_ignoreTails && target.typeOf(edgeId) == MultiElementType::Tail)
+            continue;
+
         if(edgeIdContracted(_edgeFilters, edgeId))
             edgeIdsToContract.insert(edgeId);
     }
@@ -45,6 +48,14 @@ std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(const Gr
 
     if(!edgeContractionTransform->hasEdgeContractionFilters())
         return nullptr;
+
+    auto attributeNames = graphTransformConfig.attributeNames();
+    edgeContractionTransform->setIgnoreTails(
+        std::any_of(attributeNames.begin(), attributeNames.end(),
+        [&attributes](const auto& attributeName)
+        {
+            return attributes.at(attributeName).testFlag(AttributeFlag::IgnoreTails);
+        }));
 
     return std::move(edgeContractionTransform); //FIXME std::move required because of clang bug
 }

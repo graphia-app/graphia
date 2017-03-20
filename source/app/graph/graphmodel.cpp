@@ -212,8 +212,8 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
     _mappedEdgeVisuals.resetElements();
     _visualisationAlertsMap.clear();
 
-    VisualisationsBuilder<NodeId> nodeVisualisationsBuilder(_graph, graph().nodeIds(), _mappedNodeVisuals);
-    VisualisationsBuilder<EdgeId> edgeVisualisationsBuilder(_graph, graph().edgeIds(), _mappedEdgeVisuals);
+    VisualisationsBuilder<NodeId> nodeVisualisationsBuilder(graph(), graph().nodeIds(), _mappedNodeVisuals);
+    VisualisationsBuilder<EdgeId> edgeVisualisationsBuilder(graph(), graph().edgeIds(), _mappedEdgeVisuals);
 
     for(int index = 0; index < visualisations.size(); index++)
     {

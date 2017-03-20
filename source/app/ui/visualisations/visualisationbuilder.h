@@ -4,7 +4,7 @@
 #include "visualisationchannel.h"
 #include "visualisationalert.h"
 
-#include "shared/graph/grapharray.h"
+#include "graph/graph.h"
 #include "attributes/attribute.h"
 
 #include <vector>
@@ -16,14 +16,14 @@ template<typename ElementId>
 class VisualisationsBuilder
 {
 public:
-    VisualisationsBuilder(const IGraphArrayClient& graph,
+    VisualisationsBuilder(const Graph& graph,
                           const std::vector<ElementId>& elementIds,
                           ElementIdArray<ElementId, ElementVisual>& visuals) :
         _graph(&graph), _elementIds(&elementIds), _visuals(&visuals)
     {}
 
 private:
-    const IGraphArrayClient* _graph;
+    const Graph* _graph;
     const std::vector<ElementId>* _elementIds;
     ElementIdArray<ElementId, ElementVisual>* _visuals;
     int _numAppliedVisualisations = 0;
@@ -114,10 +114,20 @@ public:
         case ValueType::Float:
         {
             double min, max;
-            std::tie(min, max) = attribute.findNumericRange(*_elementIds);
+            std::tie(min, max) = attribute.findNumericRange(*_elementIds,
+            [this](ElementId elementId)
+            {
+                return _graph->typeOf(elementId);
+            });
 
             for(auto elementId : *_elementIds)
             {
+                if(attribute.testFlag(AttributeFlag::IgnoreTails) &&
+                   _graph->typeOf(elementId) == MultiElementType::Tail)
+                {
+                    continue;
+                }
+
                 double value = attribute.numericValueOf(elementId);
 
                 if(channel.requiresNormalisedValue())

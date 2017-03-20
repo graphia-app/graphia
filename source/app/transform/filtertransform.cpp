@@ -34,6 +34,9 @@ bool FilterTransform::apply(TransformedGraph& target) const
 
         for(auto edgeId : target.edgeIds())
         {
+            if(_ignoreTails && target.typeOf(edgeId) == MultiElementType::Tail)
+                continue;
+
             if(!edgeIdFiltered(edgeId) != !_invert)
                 removees.push_back(edgeId);
         }
@@ -49,6 +52,9 @@ bool FilterTransform::apply(TransformedGraph& target) const
 
         for(auto nodeId : target.nodeIds())
         {
+            if(_ignoreTails && target.typeOf(nodeId) == MultiElementType::Tail)
+                continue;
+
             if(!nodeIdFiltered(nodeId) != !_invert)
                 removees.push_back(nodeId);
         }
@@ -119,6 +125,14 @@ std::unique_ptr<GraphTransform> FilterTransformFactory::create(const GraphTransf
 
     if(!filterTransform->hasNodeFilters() && !filterTransform->hasEdgeFilters() && !filterTransform->hasComponentFilters())
         return nullptr; // No filters defined
+
+    auto attributeNames = graphTransformConfig.attributeNames();
+    filterTransform->setIgnoreTails(
+        std::any_of(attributeNames.begin(), attributeNames.end(),
+        [&attributes](const auto& attributeName)
+        {
+            return attributes.at(attributeName).testFlag(AttributeFlag::IgnoreTails);
+        }));
 
     return std::move(filterTransform); //FIXME std::move required because of clang bug
 }

@@ -17,8 +17,11 @@ public:
     void addComponentFilter(const ComponentConditionFn& f) { if(f != nullptr) _componentFilters.emplace_back(f); }
     bool hasComponentFilters() const { return !_componentFilters.empty(); }
 
+    void setIgnoreTails(bool ignoreTails) { _ignoreTails = ignoreTails; }
+
 private:
     bool _invert = false;
+    bool _ignoreTails = false;
     std::vector<ComponentConditionFn> _componentFilters;
 };
 

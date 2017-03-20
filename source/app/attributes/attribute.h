@@ -3,6 +3,7 @@
 
 #include "shared/graph/elementid.h"
 #include "graph/elementtype.h"
+#include "graph/elementiddistinctsetcollection.h"
 #include "shared/attributes/iattribute.h"
 #include "shared/graph/igraphcomponent.h"
 #include "shared/utils/flags.h"
@@ -154,14 +155,20 @@ public:
     double numericMin() const;
     double numericMax() const;
 
-    template<typename E>
-    auto findNumericRange(const std::vector<E>& elementIds) const
+    template<typename E, typename TypeOfFn>
+    auto findNumericRange(const std::vector<E>& elementIds, TypeOfFn typeOf) const
     {
         std::tuple<double, double> minMax(std::numeric_limits<double>::max(),
                                           std::numeric_limits<double>::min());
 
         for(auto elementId : elementIds)
         {
+            if(testFlag(AttributeFlag::IgnoreTails) &&
+               typeOf(elementId) == MultiElementType::Tail)
+            {
+                continue;
+            }
+
             double v = numericValueOf(elementId);
             std::get<0>(minMax) = std::min(v, std::get<0>(minMax));
             std::get<1>(minMax) = std::max(v, std::get<1>(minMax));

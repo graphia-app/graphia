@@ -13,6 +13,9 @@ enum class AttributeFlag
     // Automatically set the range...
     AutoRangeMutable        = 0x1, // ...using the MutableGraph ElementIds
     AutoRangeTransformed    = 0x2, // ...using the TransformedGraph ElementIds
+
+    // With multielements, don't process the tails in transforms
+    IgnoreTails             = 0x4,
 };
 
 class IAttribute
