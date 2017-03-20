@@ -146,8 +146,8 @@ std::vector<QString> GraphTransformConfig::attributeNames() const
 
     struct ConditionVisitor
     {
-        explicit ConditionVisitor(std::vector<QString>* names) :
-            _names(names) {}
+        explicit ConditionVisitor(std::vector<QString>* innerNames) :
+            _names(innerNames) {}
 
         std::vector<QString>* _names;
 
