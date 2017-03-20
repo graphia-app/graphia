@@ -150,7 +150,15 @@ public:
 
         case ValueType::String:
             for(auto elementId : *_elementIds)
+            {
+                if(attribute.testFlag(AttributeFlag::IgnoreTails) &&
+                   _graph->typeOf(elementId) == MultiElementType::Tail)
+                {
+                    continue;
+                }
+
                 apply(attribute.stringValueOf(elementId), channel, elementId, _numAppliedVisualisations);
+            }
             break;
 
         default:
