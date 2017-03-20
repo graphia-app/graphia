@@ -84,6 +84,8 @@ struct GraphTransformConfig
     QVariantMap conditionAsVariantMap() const;
     QVariantMap asVariantMap() const;
 
+    std::vector<QString> attributeNames() const;
+
     bool operator==(const GraphTransformConfig& other) const;
     bool operator!=(const GraphTransformConfig& other) const;
     bool isFlagSet(const QString& flag) const;

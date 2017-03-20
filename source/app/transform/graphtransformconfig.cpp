@@ -140,6 +140,35 @@ QVariantMap GraphTransformConfig::asVariantMap() const
     return map;
 }
 
+std::vector<QString> GraphTransformConfig::attributeNames() const
+{
+    std::vector<QString> names;
+
+    struct ConditionVisitor
+    {
+        explicit ConditionVisitor(std::vector<QString>* names) :
+            _names(names) {}
+
+        std::vector<QString>* _names;
+
+        void operator()(const TerminalCondition& terminalCondition) const
+        {
+            if(!terminalCondition._attributeName.isEmpty())
+                _names->emplace_back(terminalCondition._attributeName);
+        }
+
+        void operator()(const CompoundCondition& compoundCondition) const
+        {
+            boost::apply_visitor(ConditionVisitor(_names), compoundCondition._lhs);
+            boost::apply_visitor(ConditionVisitor(_names), compoundCondition._rhs);
+        }
+    };
+
+    boost::apply_visitor(ConditionVisitor(&names), _condition);
+
+    return names;
+}
+
 bool GraphTransformConfig::operator==(const GraphTransformConfig& other) const
 {
     // Note: _flags is deliberately ignored
