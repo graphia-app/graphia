@@ -129,8 +129,7 @@ QVariantMap GraphTransformConfig::asVariantMap() const
     for(const auto& parameter : _parameters)
     {
         QVariantMap parameterObject;
-        parameterObject.insert("name", parameter._name);
-        parameterObject.insert("value", parameter.valueAsString());
+        parameterObject.insert(parameter._name, parameter.valueAsString());
         parameters.append(parameterObject);
     }
     map.insert("parameters", parameters);

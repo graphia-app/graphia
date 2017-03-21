@@ -5,6 +5,7 @@
 #include "visualisationalert.h"
 
 #include "graph/graph.h"
+#include "shared/graph/grapharray.h"
 #include "attributes/attribute.h"
 
 #include <vector>
