@@ -110,26 +110,64 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
 
         if(isComment)
         {
-            if(tokens.size() >= 4 && _userNodeData != nullptr)
+            if(tokens.size() >= 1 && _userNodeData != nullptr)
             {
+                NodeId nodeId;
+                QString attributeName;
+                QString value;
+
+                const std::string NODE("NODE");
                 auto& firstToken = tokens.at(0);
 
-                if(firstToken.compare("NODECLASS") == 0)
+                if(firstToken.compare(0, NODE.length(), NODE) == 0)
                 {
                     auto& secondToken = tokens.at(1);
-                    auto& thirdToken = tokens.at(2);
-                    auto& fourthToken = tokens.at(3);
-
                     if(u::contains(nodeIdMap, secondToken))
+                        nodeId = nodeIdMap.at(secondToken);
+
+                    std::string property = firstToken.substr(NODE.length(), std::string::npos);
+
+                    if(tokens.size() == 4 && property.compare("CLASS") == 0)
                     {
-                        QString nodeClass(QString::fromStdString(fourthToken));
-                        QString value(QString::fromStdString(thirdToken));
-
-                        auto nodeId = nodeIdMap.at(secondToken);
-
-                        _userNodeData->add(nodeClass);
-                        _userNodeData->setValueByNodeId(nodeId, nodeClass, value);
+                        attributeName = QString::fromStdString(tokens.at(3));
+                        value = QString::fromStdString(tokens.at(2));
                     }
+                    else if(tokens.size() == 3 && property.compare("SIZE") == 0)
+                    {
+                        attributeName = QObject::tr("BioLayout Node Size");
+                        value = QString::fromStdString(tokens.at(2));
+                    }
+                    else if(tokens.size() == 4 && property.compare("SHAPE") == 0)
+                    {
+                        attributeName = QObject::tr("BioLayout Node Shape");
+                        value = QString::fromStdString(tokens.at(3));
+                    }
+                    else if(tokens.size() == 3 && property.compare("ALPHA") == 0)
+                    {
+                        attributeName = QObject::tr("BioLayout Node Opacity");
+                        value = QString::fromStdString(tokens.at(2));
+                    }
+                    else if(tokens.size() == 3 && property.compare("COLOR") == 0)
+                    {
+                        attributeName = QObject::tr("BioLayout Node Colour");
+                        value = QString::fromStdString(tokens.at(2));
+                    }
+                    else if(tokens.size() == 3 && property.compare("DESC") == 0)
+                    {
+                        attributeName = QObject::tr("BioLayout Node Description");
+                        value = QString::fromStdString(tokens.at(2));
+                    }
+                    else if(tokens.size() == 3 && property.compare("URL") == 0)
+                    {
+                        attributeName = QObject::tr("BioLayout Node URL");
+                        value = QString::fromStdString(tokens.at(2));
+                    }
+                }
+
+                if(!nodeId.isNull())
+                {
+                    _userNodeData->add(attributeName);
+                    _userNodeData->setValueByNodeId(nodeId, attributeName, value);
                 }
             }
         }
