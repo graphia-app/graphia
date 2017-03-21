@@ -11,8 +11,8 @@ struct function_traits
 {};
 // For generic types, directly use the result of the signature of its 'operator()'
 
-template <typename ClassType, typename ReturnType, typename... Args>
-struct function_traits<ReturnType(ClassType::*)(Args...) const>
+template <typename ReturnType, typename... Args>
+struct _function_traits
 // we specialize for pointers to member function
 {
     enum { arity = sizeof...(Args) };
@@ -28,5 +28,15 @@ struct function_traits<ReturnType(ClassType::*)(Args...) const>
         // composed of those arguments.
     };
 };
+
+template <typename ClassType, typename ReturnType, typename... Args>
+struct function_traits<ReturnType(ClassType::*)(Args...) const> :
+    public _function_traits<ReturnType, Args...>
+{};
+
+template <typename ClassType, typename ReturnType, typename... Args>
+struct function_traits<ReturnType(ClassType::*)(Args...)> :
+    public _function_traits<ReturnType, Args...>
+{};
 
 #endif // FUNCTION_TRAITS_H
