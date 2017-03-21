@@ -279,6 +279,10 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
             continue;
         }
 
+        channel->resetParameters();
+        for(const auto& parameter : visualisationConfig._parameters)
+            channel->setParameter(parameter._name, parameter.valueAsString());
+
         switch(attribute.elementType())
         {
         case ElementType::Node:

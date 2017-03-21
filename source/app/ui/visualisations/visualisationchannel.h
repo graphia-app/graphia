@@ -20,6 +20,9 @@ public:
     virtual bool requiresNormalisedValue() const { return true; }
 
     virtual QString description(ElementType, ValueType) const { return {}; }
+
+    virtual void resetParameters() {}
+    virtual void setParameter(const QString& /*name*/, const QString& /*value*/) {}
 };
 
 #endif // VISUALISATIONCHANNEL_H
