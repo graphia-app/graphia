@@ -4,17 +4,7 @@
 
 void ColorVisualisationChannel::apply(double value, ElementVisual& elementVisual) const
 {
-    QColor from(Qt::red);
-    QColor to(Qt::yellow);
-    QColor diff;
-
-    auto redDiff = to.redF() -     from.redF();
-    auto greenDiff = to.greenF() - from.greenF();
-    auto blueDiff = to.blueF() -   from.blueF();
-
-    elementVisual._color.setRedF(from.redF() +     (value * redDiff));
-    elementVisual._color.setGreenF(from.greenF() + (value * greenDiff));
-    elementVisual._color.setBlueF(from.blueF() +   (value * blueDiff));
+    elementVisual._color = _colorGradient.get(value);
 }
 
 void ColorVisualisationChannel::apply(const QString& value, ElementVisual& elementVisual) const
@@ -55,4 +45,20 @@ QString ColorVisualisationChannel::description(ElementType elementType, ValueTyp
     }
 
     return {};
+}
+
+void ColorVisualisationChannel::resetParameters()
+{
+    setParameter("gradient",
+        "{"
+          "\"0\": \"Red\","
+          "\"0.66\": \"Yellow\","
+          "\"1\": \"White\""
+        "}");
+}
+
+void ColorVisualisationChannel::setParameter(const QString& name, const QString& value)
+{
+    if(name == "gradient")
+        _colorGradient = value;
 }

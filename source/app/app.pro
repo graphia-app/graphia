@@ -111,7 +111,8 @@ HEADERS += \
     attributes/conditionfncreator.h \
     attributes/condtionfnops.h \
     attributes/attribute.h \
-    attributes/valuetype.h
+    attributes/valuetype.h \
+    ui/visualisations/colorgradient.h
 
 SOURCES += \
     application.cpp \
@@ -179,7 +180,8 @@ SOURCES += \
     ui/visualisations/visualisationconfig.cpp \
     ui/visualisations/visualisationconfigparser.cpp \
     graph/elementtype.cpp \
-    attributes/attribute.cpp
+    attributes/attribute.cpp \
+    ui/visualisations/colorgradient.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \
