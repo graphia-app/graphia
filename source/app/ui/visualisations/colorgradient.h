@@ -14,7 +14,7 @@ private:
         double _value;
         QColor _color;
 
-        bool operator<(const Stop& other)
+        bool operator<(const Stop& other) const
         {
             if(_value < other._value)
                 return true;
