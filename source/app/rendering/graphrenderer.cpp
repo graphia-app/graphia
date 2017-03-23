@@ -521,7 +521,7 @@ void GraphRenderer::createGPUGlyphData(const QString& text, const QColor& textCo
 
         glyphData._component = componentIndex;
 
-        std::array<float, 2> baseOffset{0.0f, 0.0f};
+        std::array<float, 2> baseOffset{{0.0f, 0.0f}};
         switch(textAlignment)
         {
         default:
@@ -1124,7 +1124,7 @@ void GraphRenderer::updateText(bool waitForCompletion)
 
     if(_glyphMap->updateRequired())
     {
-        auto job = std::make_unique<SDFComputeJob>(sdfTextureOffscreen(), _glyphMap);
+        auto job = std::make_unique<SDFComputeJob>(sdfTextureOffscreen(), _glyphMap.get());
         job->executeWhenComplete([this]
         {
             executeOnRendererThread([this]

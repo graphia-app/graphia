@@ -8,7 +8,7 @@
 #include <QTime>
 #include <QDir>
 
-SDFComputeJob::SDFComputeJob(GLuint sdfTexture, std::shared_ptr<GlyphMap> glyphMap) :
+SDFComputeJob::SDFComputeJob(GLuint sdfTexture, GlyphMap* glyphMap) :
     GPUComputeJob(),
     _sdfTexture(sdfTexture),
     _glyphMap(glyphMap)

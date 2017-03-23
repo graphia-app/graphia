@@ -9,14 +9,13 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
 
-#include <memory>
 #include <functional>
 
 class SDFComputeJob : public GPUComputeJob
 {
 private:
     GLuint _sdfTexture = 0;
-    std::shared_ptr<GlyphMap> _glyphMap;
+    GlyphMap* _glyphMap;
 
     std::function<void()> _onCompleteFn;
 
@@ -28,7 +27,7 @@ private:
     void generateSDF();
 
 public:
-    SDFComputeJob(GLuint sdfTexture, std::shared_ptr<GlyphMap> glyphMap);
+    SDFComputeJob(GLuint sdfTexture, GlyphMap *glyphMap);
 
     void run();
     void executeWhenComplete(std::function<void()> onCompleteFn);

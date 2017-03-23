@@ -364,9 +364,9 @@ template<typename T> class unique_lock_with_warning
 {
 public:
     unique_lock_with_warning() = default;
-    unique_lock_with_warning(unique_lock_with_warning&&) = default;
+    unique_lock_with_warning(unique_lock_with_warning&&) noexcept = default;
     unique_lock_with_warning(const unique_lock_with_warning&) = delete;
-    unique_lock_with_warning& operator=(unique_lock_with_warning&&) = default;
+    unique_lock_with_warning& operator=(unique_lock_with_warning&&) noexcept = default;
     unique_lock_with_warning& operator=(const unique_lock_with_warning&) = delete;
 
     explicit unique_lock_with_warning(T& mutex) :
