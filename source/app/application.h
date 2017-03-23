@@ -109,7 +109,7 @@ public:
     Q_INVOKABLE QString fileNameForUrl(const QUrl& url) const { return url.toLocalFile(); }
     Q_INVOKABLE QUrl urlForFileName(const QString& fileName) const { return QUrl::fromLocalFile(fileName); }
 
-    Q_INVOKABLE void crash();
+    Q_INVOKABLE void crash(int crashType);
 
 signals:
     void nameFiltersChanged();

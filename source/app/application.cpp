@@ -1,4 +1,5 @@
 #include "application.h"
+#include "crashtype.h"
 
 #include "shared/plugins/iplugin.h"
 
@@ -100,14 +101,39 @@ QString Application::parametersQmlPathForPlugin(const QString& pluginName) const
     return {};
 }
 
-void Application::crash()
+#if defined(Q_OS_WIN32)
+#include <Windows.h>
+#endif
+
+void Application::crash(int crashType)
 {
-#ifndef __clang_analyzer__
     std::cerr << "Application::crash() invoked!\n";
 
-    int* p = nullptr;
-    *p = 123;
+    auto _crashType = static_cast<CrashType>(crashType);
+
+    switch(_crashType)
+    {
+    default:
+    case CrashType::NullPtrDereference:
+    {
+        int* p = nullptr;
+        *p = 123;
+        break;
+    }
+
+    case CrashType::CppException:
+        throw;
+        break;
+
+#if defined(Q_OS_WIN32)
+    case CrashType::Win32Exception:
+    case CrashType::Win32ExceptionNonContinuable:
+        RaiseException(EXCEPTION_ILLEGAL_INSTRUCTION,
+                       _crashType == CrashType::Win32ExceptionNonContinuable ?
+                       EXCEPTION_NONCONTINUABLE : 0, NULL, NULL);
+        break;
 #endif
+    }
 }
 
 void Application::loadPlugins()

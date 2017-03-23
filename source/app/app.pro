@@ -112,7 +112,8 @@ HEADERS += \
     attributes/condtionfnops.h \
     attributes/attribute.h \
     attributes/valuetype.h \
-    ui/visualisations/colorgradient.h
+    ui/visualisations/colorgradient.h \
+    crashtype.h
 
 SOURCES += \
     application.cpp \

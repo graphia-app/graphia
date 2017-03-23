@@ -624,13 +624,6 @@ ApplicationWindow
 
     Action
     {
-        id: debugCrash
-        text: qsTr("&Crash")
-        onTriggered: application.crash()
-    }
-
-    Action
-    {
         id: toggleFpsMeterAction
         text: qsTr("Show FPS Meter")
         checkable: true
@@ -763,7 +756,32 @@ ApplicationWindow
             title: qsTr("&Debug")
             enabled: application.debugEnabled || mainWindow.debugMenuUnhidden
             visible: application.debugEnabled || mainWindow.debugMenuUnhidden
-            MenuItem { action: debugCrash }
+            Menu
+            {
+                title: qsTr("&Crash")
+                MenuItem
+                {
+                    text: qsTr("Null Pointer Deference");
+                    onTriggered: application.crash(CrashType.NullPtrDereference);
+                }
+                MenuItem
+                {
+                    text: qsTr("C++ Exception");
+                    onTriggered: application.crash(CrashType.CppException);
+                }
+                MenuItem
+                {
+                    visible: Qt.platform.os === "windows"
+                    text: qsTr("Windows Exception");
+                    onTriggered: application.crash(CrashType.Win32Exception);
+                }
+                MenuItem
+                {
+                    visible: Qt.platform.os === "windows"
+                    text: qsTr("Windows Exception Non-Continuable");
+                    onTriggered: application.crash(CrashType.Win32ExceptionNonContinuable);
+                }
+            }
             MenuItem { action: dumpGraphAction }
             MenuItem { action: toggleFpsMeterAction }
             MenuItem { action: toggleGlyphmapSaveAction }
