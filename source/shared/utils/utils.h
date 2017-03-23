@@ -51,7 +51,10 @@ namespace u
     template<typename T> T normalise(T min, T max, T value)
     {
         if(max == min)
-            return static_cast<T>(0);
+        {
+            // There is no sensible way to normalise when the range is zero
+            return static_cast<T>(-1);
+        }
 
         return (value - min) / (max - min);
     }
