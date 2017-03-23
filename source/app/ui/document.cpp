@@ -362,7 +362,7 @@ void Document::onLoadComplete(bool success)
     _layoutThread->addAllComponents();
     _layoutSettings.setVectorPtr(&_layoutThread->settingsVector());
 
-    _graphQuickItem->initialise(_graphModel, _commandManager, _selectionManager, _gpuComputeThread);
+    _graphQuickItem->initialise(_graphModel, &_commandManager, _selectionManager, _gpuComputeThread);
 
     connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::maybeEmitIdleChanged, Qt::DirectConnection);
     connect(_graphQuickItem, &GraphQuickItem::viewIsResetChanged, this, &Document::canResetViewChanged);
@@ -430,10 +430,9 @@ void Document::onLoadComplete(bool success)
         // inconsistent wrt the CommandManager, so throw away our undo history
         if(!commandInProgress())
             _commandManager.clearCommandStack();
-
-        // If the graph changes then so do our visualisations
-        _graphModel->buildVisualisations(_visualisations);
     });
+
+    connect(&_graphModel->graph(), &Graph::graphChanged, this, &Document::onGraphChanged);
 
     connect(&_graphModel->graph(), &Graph::graphChanged, &_commandManager,
             &CommandManager::onGraphChanged, Qt::DirectConnection);
@@ -723,6 +722,13 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
         updateFoundIndex(true);
 }
 
+void Document::onGraphChanged()
+{
+    // If the graph changes then so do our visualisations
+    _graphModel->buildVisualisations(_visualisations);
+    setVisualisations(_visualisations);
+}
+
 void Document::onMutableGraphChanged()
 {
     // This is only called in order to force the UI to refresh the transform
@@ -788,7 +794,7 @@ void Document::decrementFoundIt()
 
 void Document::executeOnMainThread(DeferredExecutor::TaskFn task, const QString& description)
 {
-    _deferredExecutor.enqueue(task, description);
+    _deferredExecutor.enqueue(std::move(task), description);
     emit taskAddedToExecutor();
 }
 
