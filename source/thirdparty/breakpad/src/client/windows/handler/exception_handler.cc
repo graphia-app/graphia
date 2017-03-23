@@ -476,6 +476,7 @@ bool ExceptionHandler::AttemptToWriteCrashReport(EXCEPTION_POINTERS* exinfo) {
   // overhead transitioning to and from the handler thread.  This behavior
   // can be overridden by calling ExceptionHandler::set_handle_debug_exceptions.
   DWORD code = exinfo->ExceptionRecord->ExceptionCode;
+  DWORD flags = exinfo->ExceptionRecord->ExceptionFlags;
   bool is_debug_exception = (code == EXCEPTION_BREAKPOINT) ||
                             (code == EXCEPTION_SINGLE_STEP) ||
                             (code == DBG_PRINTEXCEPTION_C) ||
@@ -484,6 +485,10 @@ bool ExceptionHandler::AttemptToWriteCrashReport(EXCEPTION_POINTERS* exinfo) {
   if (code == EXCEPTION_INVALID_HANDLE &&
       consume_invalid_handle_exceptions_) {
     return EXCEPTION_CONTINUE_EXECUTION;
+  }
+
+  if (flags & EXCEPTION_NONCONTINUABLE) {
+    return false;
   }
 
   bool success = false;
