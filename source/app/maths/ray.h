@@ -39,7 +39,7 @@ public:
     const QVector3D& origin() const { return _origin; }
     const QVector3D& dir() const { return _dir; }
     const QVector3D& invDir() const { return _invDir; }
-    const auto sign() const { return _sign; }
+    auto sign() const { return _sign; }
 
     QVector3D closestPointTo(const QVector3D& point) const;
     QVector3D closestPointTo(const Ray& other) const;
