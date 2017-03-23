@@ -16,7 +16,7 @@ class LayoutSetting : public QObject
 
 public:
     LayoutSetting() {}
-    LayoutSetting(const QString& name, const QString& displayName,
+    LayoutSetting(QString name, QString displayName,
                   float minimumValue, float maximumValue, float defaultValue);
 
     LayoutSetting(const LayoutSetting& other);

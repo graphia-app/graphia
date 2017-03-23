@@ -6,9 +6,9 @@
 
 #include <atomic>
 
-ParserThread::ParserThread(MutableGraph& graph, const QUrl& url) :
+ParserThread::ParserThread(MutableGraph& graph, QUrl url) :
     _graph(&graph),
-    _url(url)
+    _url(std::move(url))
 {}
 
 ParserThread::~ParserThread()

@@ -341,7 +341,8 @@ void CorrelationPlotItem::updateCustomPlotSize()
 
 void CorrelationPlotItem::showTooltip()
 {
-    QCPGraph* graph = dynamic_cast<QCPGraph*>(_hoverPlottable);
+    auto graph = dynamic_cast<QCPGraph*>(_hoverPlottable);
+    Q_ASSERT(graph != nullptr);
 
     _itemTracer->setGraph(graph);
     _itemTracer->setVisible(true);

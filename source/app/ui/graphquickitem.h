@@ -39,7 +39,7 @@ public:
     explicit GraphQuickItem(QQuickItem* parent = nullptr);
 
     void initialise(std::shared_ptr<GraphModel> graphModel,
-                    CommandManager& commandManager,
+                    CommandManager* commandManager,
                     std::shared_ptr<SelectionManager> selectionManager,
                     std::shared_ptr<GPUComputeThread> gpuComputeThread);
 

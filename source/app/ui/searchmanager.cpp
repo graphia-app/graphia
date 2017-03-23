@@ -16,7 +16,7 @@ SearchManager::SearchManager(const GraphModel& graphModel) :
 void SearchManager::findNodes(const QString& regex, std::vector<QString> attributeNames)
 {
     _regex = regex;
-    _attributeNames = attributeNames;
+    _attributeNames = std::move(attributeNames);
 
     if(_regex.isEmpty())
     {

@@ -243,7 +243,7 @@ QString CommandManager::nextRedoAction() const
 
     if(lock.owns_lock() && canRedoNoLocking())
     {
-        auto& command = _stack.at(_lastExecutedIndex + 1);
+        auto& command = _stack.at(static_cast<size_t>(_lastExecutedIndex + 1));
         if(!command->description().isEmpty())
             return QObject::tr("Redo ") + command->description();
     }

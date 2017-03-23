@@ -266,9 +266,9 @@ void Application::updateNameFilters()
     QString description = QObject::tr("All Files (");
     bool second = false;
 
-    for(auto fileType : fileTypes)
+    for(const auto& fileType : fileTypes)
     {
-        for(auto extension : fileType._extensions)
+        for(const auto& extension : fileType._extensions)
         {
             if(second)
                 description += " ";
@@ -284,12 +284,12 @@ void Application::updateNameFilters()
     _nameFilters.clear();
     _nameFilters.append(description);
 
-    for(auto fileType : fileTypes)
+    for(const auto& fileType : fileTypes)
     {
         description = fileType._collectiveDescription + " (";
         second = false;
 
-        for(auto extension : fileType._extensions)
+        for(const auto& extension : fileType._extensions)
         {
             if(second)
                 description += " ";

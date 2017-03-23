@@ -330,7 +330,7 @@ void GraphComponentScene::startTransition(std::function<void()> finishedFunction
     {
         componentRenderer()->updateTransition(f);
     },
-    finishedFunction);
+    std::move(finishedFunction));
 }
 
 void GraphComponentScene::updateRendererVisibility()

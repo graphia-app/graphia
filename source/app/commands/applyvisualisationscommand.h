@@ -24,8 +24,8 @@ private:
 public:
     ApplyVisualisationsCommand(GraphModel* graphModel,
                                Document* document,
-                               const QStringList& previousVisualisations,
-                               const QStringList& visualisations);
+                               QStringList previousVisualisations,
+                               QStringList visualisations);
 
     QString description() const;
     QString verb() const;

@@ -7,12 +7,12 @@
 
 ApplyVisualisationsCommand::ApplyVisualisationsCommand(GraphModel* graphModel,
                                                        Document* document,
-                                                       const QStringList& previousVisualisations,
-                                                       const QStringList& visualisations) :
+                                                       QStringList previousVisualisations,
+                                                       QStringList visualisations) :
     _graphModel(graphModel),
     _document(document),
-    _previousVisualisations(previousVisualisations),
-    _visualisations(visualisations)
+    _previousVisualisations(std::move(previousVisualisations)),
+    _visualisations(std::move(visualisations))
 {}
 
 QString ApplyVisualisationsCommand::description() const

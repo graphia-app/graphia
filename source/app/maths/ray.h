@@ -5,13 +5,15 @@
 
 #include "line.h"
 
+#include <array>
+
 class Ray
 {
 private:
     QVector3D _origin;
     QVector3D _dir;
     QVector3D _invDir;
-    int _sign[3];
+    std::array<int, 3> _sign;
 
     void initialise()
     {
@@ -37,7 +39,7 @@ public:
     const QVector3D& origin() const { return _origin; }
     const QVector3D& dir() const { return _dir; }
     const QVector3D& invDir() const { return _invDir; }
-    const int* sign() const { return _sign; }
+    const auto sign() const { return _sign; }
 
     QVector3D closestPointTo(const QVector3D& point) const;
     QVector3D closestPointTo(const Ray& other) const;

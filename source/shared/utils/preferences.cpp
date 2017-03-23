@@ -192,7 +192,7 @@ QMetaProperty QmlPreferences::propertyByName(const QString& propertyName)
 
 static QString propertyNameFrom(const QString& preferenceName)
 {
-    auto sepRegex = QRegularExpression("\\/");
+    auto sepRegex = QRegularExpression(R"(\/)");
     if(preferenceName.contains(sepRegex))
     {
         auto stringList = preferenceName.split(sepRegex);
@@ -224,12 +224,11 @@ void QmlPreferences::setProperty(QMetaProperty property, const QVariant& value)
         return;
 
     const QVariant previousValue = property.read(this);
-    const QVariant currentValue = value;
 
-    if((previousValue != currentValue && currentValue.canConvert(previousValue.type())) ||
+    if((previousValue != value && value.canConvert(previousValue.type())) ||
        !previousValue.isValid())
     {
-        property.write(this, currentValue);
+        property.write(this, value);
     }
 }
 

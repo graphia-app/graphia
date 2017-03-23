@@ -21,7 +21,7 @@ void DeferredExecutor::enqueue(TaskFn function, const QString& description)
     std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     Task task;
-    task._function = function;
+    task._function = std::move(function);
     task._description = description;
 
     if(_debug > 1)

@@ -1,10 +1,10 @@
 #include "layoutsettings.h"
 #include "shared/utils/utils.h"
 
-LayoutSetting::LayoutSetting(const QString& name, const QString& displayName,
+LayoutSetting::LayoutSetting(QString name, QString displayName,
                              float minimumValue, float maximumValue, float defaultValue) :
-    _name(name),
-    _displayName(displayName),
+    _name(std::move(name)),
+    _displayName(std::move(displayName)),
     _minimumValue(minimumValue),
     _maximumValue(maximumValue),
     _value(defaultValue)

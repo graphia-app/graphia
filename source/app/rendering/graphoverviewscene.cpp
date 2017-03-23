@@ -22,10 +22,10 @@
 #include <functional>
 #include <vector>
 
-GraphOverviewScene::GraphOverviewScene(CommandManager& commandManager, GraphRenderer* graphRenderer) :
+GraphOverviewScene::GraphOverviewScene(CommandManager* commandManager, GraphRenderer* graphRenderer) :
     Scene(graphRenderer),
     _graphRenderer(graphRenderer),
-    _commandManager(&commandManager),
+    _commandManager(commandManager),
     _graphModel(graphRenderer->graphModel()),
     _previousComponentAlpha(_graphModel->graph(), 1.0f),
     _componentAlpha(_graphModel->graph(), 1.0f),
@@ -215,7 +215,7 @@ void GraphOverviewScene::startTransitionFromComponentMode(ComponentId focusCompo
 {
     Q_ASSERT(!focusComponentId.isNull());
 
-    startTransition(finishedFunction, duration, transitionType);
+    startTransition(std::move(finishedFunction), duration, transitionType);
     _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
     _previousComponentAlpha = _componentAlpha;
 
@@ -252,7 +252,7 @@ void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusCompone
     _zoomedComponentLayoutData[focusComponentId].set(halfWidth, halfHeight,
                                                      std::min(halfWidth, halfHeight));
 
-    startTransition(finishedFunction, duration, transitionType);
+    startTransition(std::move(finishedFunction), duration, transitionType);
 }
 
 void GraphOverviewScene::updateZoomedComponentLayoutData()
@@ -281,11 +281,11 @@ void GraphOverviewScene::applyComponentLayout()
     }
 
     // Give the mergers the same layout as the new component
-    for(auto componentMergeSet : _componentMergeSets)
+    for(const auto& componentMergeSet : _componentMergeSets)
     {
         auto newComponentId = componentMergeSet.newComponentId();
 
-        for(auto merger : componentMergeSet.mergers())
+        for(const auto& merger : componentMergeSet.mergers())
         {
             _zoomedComponentLayoutData[merger] = _zoomedComponentLayoutData[newComponentId];
             _componentAlpha[merger] = _componentAlpha[newComponentId];
@@ -367,7 +367,7 @@ void GraphOverviewScene::startTransition(std::function<void()> finishedFunction,
             renderer->thaw();
         }
 
-        for(auto componentMergeSet : _componentMergeSets)
+        for(const auto& componentMergeSet : _componentMergeSets)
         {
             auto renderer = _graphRenderer->componentRendererForId(componentMergeSet.newComponentId());
             renderer->thaw();
@@ -388,7 +388,7 @@ void GraphOverviewScene::startTransition(std::function<void()> finishedFunction,
 
         _graphRenderer->sceneFinishedTransition();
     },
-    finishedFunction);
+    std::move(finishedFunction));
 
     // Reset all components by default
     for(auto componentId : _componentIds)
@@ -397,7 +397,7 @@ void GraphOverviewScene::startTransition(std::function<void()> finishedFunction,
         renderer->resetView();
     }
 
-    for(auto& componentMergeSet : _componentMergeSets)
+    for(const auto& componentMergeSet : _componentMergeSets)
     {
         auto mergedComponent = _graphModel->graph().componentById(componentMergeSet.newComponentId());
         auto& mergedNodeIds = mergedComponent->nodeIds();

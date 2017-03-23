@@ -20,12 +20,12 @@ GraphQuickItem::GraphQuickItem(QQuickItem* parent) :
 }
 
 void GraphQuickItem::initialise(std::shared_ptr<GraphModel> graphModel,
-                                CommandManager& commandManager,
+                                CommandManager* commandManager,
                                 std::shared_ptr<SelectionManager> selectionManager,
                                 std::shared_ptr<GPUComputeThread> gpuComputeThread)
 {
     _graphModel = graphModel;
-    _commandManager = &commandManager;
+    _commandManager = commandManager;
     _selectionManager = selectionManager;
     _gpuComputeThread = gpuComputeThread;
 
@@ -167,7 +167,7 @@ QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const
     // context available, and this is as good a place as any for that
     _gpuComputeThread->initialise();
 
-    auto graphRenderer = new GraphRenderer(_graphModel, *_commandManager, _selectionManager, _gpuComputeThread);
+    auto graphRenderer = new GraphRenderer(_graphModel.get(), _commandManager, _selectionManager.get(), _gpuComputeThread.get());
     connect(this, &GraphQuickItem::commandWillExecute, graphRenderer, &GraphRenderer::onCommandWillExecute, Qt::DirectConnection);
     connect(this, &GraphQuickItem::commandCompleted, graphRenderer, &GraphRenderer::onCommandCompleted, Qt::DirectConnection);
     connect(this, &GraphQuickItem::commandCompleted, this, &GraphQuickItem::update);

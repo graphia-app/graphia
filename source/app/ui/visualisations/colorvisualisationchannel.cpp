@@ -13,8 +13,8 @@ void ColorVisualisationChannel::apply(const QString& value, ElementVisual& eleme
         return;
 
     auto hash = qHash(value);
-    int value1 = static_cast<int>(hash % 65535);
-    int value2 = static_cast<int>((hash >> 16) % 65535);
+    auto value1 = static_cast<int>(hash % 65535);
+    auto value2 = static_cast<int>((hash >> 16) % 65535);
 
     elementVisual._color.setHsl(
         (value1 * 255) / 65535,       // Hue
@@ -50,11 +50,11 @@ QString ColorVisualisationChannel::description(ElementType elementType, ValueTyp
 void ColorVisualisationChannel::resetParameters()
 {
     setParameter("gradient",
-        "{"
-          "\"0\": \"Red\","
-          "\"0.66\": \"Yellow\","
-          "\"1\": \"White\""
-        "}");
+        R"({
+          "0": "Red",
+          "0.66": "Yellow",
+          "1": "White"
+        })");
 }
 
 void ColorVisualisationChannel::setParameter(const QString& name, const QString& value)

@@ -127,37 +127,37 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
 
                     std::string property = firstToken.substr(NODE.length(), std::string::npos);
 
-                    if(tokens.size() == 4 && property.compare("CLASS") == 0)
+                    if(tokens.size() == 4 && property == "CLASS")
                     {
                         attributeName = QString::fromStdString(tokens.at(3));
                         value = QString::fromStdString(tokens.at(2));
                     }
-                    else if(tokens.size() == 3 && property.compare("SIZE") == 0)
+                    else if(tokens.size() == 3 && property == "SIZE")
                     {
                         attributeName = QObject::tr("BioLayout Node Size");
                         value = QString::fromStdString(tokens.at(2));
                     }
-                    else if(tokens.size() == 4 && property.compare("SHAPE") == 0)
+                    else if(tokens.size() == 4 && property == "SHAPE")
                     {
                         attributeName = QObject::tr("BioLayout Node Shape");
                         value = QString::fromStdString(tokens.at(3));
                     }
-                    else if(tokens.size() == 3 && property.compare("ALPHA") == 0)
+                    else if(tokens.size() == 3 && property == "ALPHA")
                     {
                         attributeName = QObject::tr("BioLayout Node Opacity");
                         value = QString::fromStdString(tokens.at(2));
                     }
-                    else if(tokens.size() == 3 && property.compare("COLOR") == 0)
+                    else if(tokens.size() == 3 && property == "COLOR")
                     {
                         attributeName = QObject::tr("BioLayout Node Colour");
                         value = QString::fromStdString(tokens.at(2));
                     }
-                    else if(tokens.size() == 3 && property.compare("DESC") == 0)
+                    else if(tokens.size() == 3 && property == "DESC")
                     {
                         attributeName = QObject::tr("BioLayout Node Description");
                         value = QString::fromStdString(tokens.at(2));
                     }
-                    else if(tokens.size() == 3 && property.compare("URL") == 0)
+                    else if(tokens.size() == 3 && property == "URL")
                     {
                         attributeName = QObject::tr("BioLayout Node URL");
                         value = QString::fromStdString(tokens.at(2));
@@ -215,7 +215,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
             {
                 // We have an edge weight too
                 auto& thirdToken = tokens.at(2);
-                float edgeWeight = std::atof(thirdToken.c_str());
+                float edgeWeight = std::stof(thirdToken);
 
                 if(std::isnan(edgeWeight) || !std::isfinite(edgeWeight))
                     edgeWeight = 1.0f;

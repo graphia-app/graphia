@@ -97,8 +97,8 @@ struct GPUGraphData : OpenGLFunctions
     struct NodeData
     {
         float _position[3];
-        int _component;
-        float _size;
+        int _component = -1;
+        float _size = -1.0f;
         float _color[3];
         float _outlineColor[3];
     };
@@ -107,20 +107,20 @@ struct GPUGraphData : OpenGLFunctions
     {
         float _sourcePosition[3];
         float _targetPosition[3];
-        float _sourceSize;
-        float _targetSize;
-        int _edgeType;
-        int _component;
-        float _size;
+        float _sourceSize = 0.0f;
+        float _targetSize = 0.0f;
+        int _edgeType = -1;
+        int _component = -1;
+        float _size = -1.0f;
         float _color[3];
         float _outlineColor[3];
     };
 
     struct GlyphData
     {
-        int _component;
+        int _component = -1;
         float _textureCoord[2];
-        int _textureLayer;
+        int _textureLayer = -1;
         float _basePosition[3];
         float _glyphOffset[2];
         float _glyphSize[2];
@@ -174,10 +174,10 @@ class GraphRenderer :
     friend class GraphComponentRenderer;
 
 public:
-    GraphRenderer(const std::shared_ptr<GraphModel>& graphModel,
-                  CommandManager& commandManager,
-                  const std::shared_ptr<SelectionManager>& selectionManager,
-                  const std::shared_ptr<GPUComputeThread>& gpuComputeThread);
+    GraphRenderer(GraphModel* graphModel,
+                  CommandManager* commandManager,
+                  SelectionManager* selectionManager,
+                  GPUComputeThread* gpuComputeThread);
     virtual ~GraphRenderer();
 
     static const int NUM_MULTISAMPLES = 4;
@@ -186,7 +186,7 @@ public:
     GraphComponentRenderer* componentRendererForId(ComponentId componentId) const;
     Transition& transition() { return _transition; }
 
-    std::shared_ptr<GraphModel> graphModel() { return _graphModel; }
+    GraphModel* graphModel() { return _graphModel; }
 
     QRect selectionRect() { return _selectionRect; }
     void setSelectionRect(const QRect& selectionRect) { _selectionRect = selectionRect; }
@@ -229,12 +229,12 @@ public slots:
     void onVisibilityChanged();
 
 private:
-    std::shared_ptr<GraphModel> _graphModel;
+    GraphModel* _graphModel;
     int _numComponents = 0;
 
-    std::shared_ptr<SelectionManager> _selectionManager;
+    SelectionManager* _selectionManager;
 
-    std::shared_ptr<GPUComputeThread> _gpuComputeThread;
+    GPUComputeThread* _gpuComputeThread;
     std::shared_ptr<GlyphMap> _glyphMap;
 
     // Store a copy of the text layout results as its computation is a long running

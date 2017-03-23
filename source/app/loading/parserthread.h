@@ -21,7 +21,7 @@ private:
     std::thread _thread;
 
 public:
-    ParserThread(MutableGraph& graph, const QUrl& url);
+    ParserThread(MutableGraph& graph, QUrl url);
     virtual ~ParserThread();
 
     void start(std::unique_ptr<IParser> parser);

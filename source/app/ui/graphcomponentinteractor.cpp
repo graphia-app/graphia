@@ -25,10 +25,10 @@
 #include <QtMath>
 #include <cmath>
 
-GraphComponentInteractor::GraphComponentInteractor(const std::shared_ptr<GraphModel>& graphModel,
+GraphComponentInteractor::GraphComponentInteractor(GraphModel* graphModel,
                                                    GraphComponentScene* graphComponentScene,
-                                                   CommandManager &commandManager,
-                                                   const std::shared_ptr<SelectionManager>& selectionManager,
+                                                   CommandManager* commandManager,
+                                                   SelectionManager* selectionManager,
                                                    GraphRenderer* graphRenderer) :
     GraphCommonInteractor(graphModel, commandManager, selectionManager, graphRenderer),
     _scene(graphComponentScene)

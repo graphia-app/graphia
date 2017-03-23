@@ -11,8 +11,8 @@
 
 #include <memory>
 
-GlyphMap::GlyphMap(const QString& fontName) :
-    _fontName(fontName)
+GlyphMap::GlyphMap(QString fontName) :
+    _fontName(std::move(fontName))
 {}
 
 void GlyphMap::addText(const QString& text)

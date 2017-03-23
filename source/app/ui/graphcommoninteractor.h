@@ -23,15 +23,15 @@ class GraphCommonInteractor : public Interactor
 {
     Q_OBJECT
 public:
-    GraphCommonInteractor(const std::shared_ptr<GraphModel>& graphModel,
-                          CommandManager& commandManager,
-                          const std::shared_ptr<SelectionManager>& selectionManager,
+    GraphCommonInteractor(GraphModel* graphModel,
+                          CommandManager* commandManager,
+                          SelectionManager* selectionManager,
                           GraphRenderer* graphRenderer);
 
 protected:
-    std::shared_ptr<GraphModel> _graphModel;
+    GraphModel* _graphModel;
     CommandManager* _commandManager;
-    std::shared_ptr<SelectionManager> _selectionManager;
+    SelectionManager* _selectionManager;
     GraphRenderer* _graphRenderer;
 
 private:

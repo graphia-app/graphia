@@ -30,8 +30,8 @@ public:
 
     GraphComponentRenderer() {}
 
-    void initialise(std::shared_ptr<GraphModel> graphModel, ComponentId componentId,
-                    std::shared_ptr<SelectionManager> selectionManager,
+    void initialise(GraphModel* graphModel, ComponentId componentId,
+                    SelectionManager* selectionManager,
                     GraphRenderer* graphRenderer);
 
     bool visible() const { return _initialised && _visible; }
@@ -147,8 +147,8 @@ private:
     float _fovx = 0.0f;
     float _fovy = 0.0f;
 
-    std::shared_ptr<GraphModel> _graphModel;
-    std::shared_ptr<SelectionManager> _selectionManager;
+    GraphModel* _graphModel;
+    SelectionManager* _selectionManager;
 
     QMatrix4x4 subViewportMatrix() const;
 

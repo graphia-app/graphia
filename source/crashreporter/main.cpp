@@ -41,7 +41,7 @@ static void uploadReport(const QString& email, const QString& text, const QStrin
     {
         QHttpPart part;
         part.setHeader(QNetworkRequest::ContentDispositionHeader,
-                       QVariant(QString("form-data; name=\"%1\"").arg(field.first)));
+                       QVariant(QString(R"(form-data; name="%1")").arg(field.first)));
         part.setBody(field.second.toLatin1());
         multiPart->append(part);
 
@@ -51,15 +51,15 @@ static void uploadReport(const QString& email, const QString& text, const QStrin
     // Send a hash of the contents of the report as a (crude) means of filtering bots/crawlers/etc.
     QHttpPart checksumPart;
     checksumPart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                           QVariant(QString("form-data; name=\"checksum\"")));
+                           QVariant(QString(R"(form-data; name="checksum")")));
     checksumPart.setBody(checksum.result().toHex());
     multiPart->append(checksumPart);
 
     QHttpPart dmpPart;
     dmpPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
     dmpPart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                      QVariant("form-data; name=\"dmp\"; filename=\"" +
-                               QFileInfo(dmpFile).fileName() + "\""));
+                      QVariant(R"(form-data; name="dmp"; filename=")" +
+                               QFileInfo(dmpFile).fileName() + R"(")"));
     auto* file = new QFile(dmpFile);
     file->open(QIODevice::ReadOnly);
     dmpPart.setBodyDevice(file);

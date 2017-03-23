@@ -58,7 +58,7 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
 {
     for(const auto& userDataVector : *this)
     {
-        QString userDataVectorName = userDataVector.name();
+        const auto& userDataVectorName = userDataVector.name();
 
         switch(userDataVector.type())
         {

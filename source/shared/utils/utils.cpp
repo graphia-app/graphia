@@ -46,7 +46,7 @@ float u::fast_rsqrt(float number)
     typedef union
     {
         float f;
-        int i;
+        int i = 0;
     } floatint_t;
 
     floatint_t t;

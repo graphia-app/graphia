@@ -27,7 +27,6 @@ namespace ascii = boost::spirit::x3::ascii;
 using x3::lit;
 // Only parse strict doubles (i.e. not integers)
 x3::real_parser<double, x3::strict_real_policies<double>> const double_ = {};
-using x3::string;
 using x3::lexeme;
 using ascii::char_;
 

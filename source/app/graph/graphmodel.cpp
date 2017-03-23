@@ -25,7 +25,7 @@
 
 #include <utility>
 
-GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
+GraphModel::GraphModel(QString name, IPlugin* plugin) :
     _graph(),
     _transformedGraph(_graph),
     _nodePositions(_graph),
@@ -34,7 +34,7 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
     _mappedNodeVisuals(_graph),
     _mappedEdgeVisuals(_graph),
     _nodeNames(_graph),
-    _name(name),
+    _name(std::move(name)),
     _plugin(plugin)
 {
     connect(&_transformedGraph, &Graph::nodeRemoved, [this](const Graph*, NodeId nodeId)
@@ -51,12 +51,12 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
 
     connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphModel::onPreferenceChanged);
 
-    attribute(tr("Node Degree"))
+    GraphModel::attribute(tr("Node Degree"))
         .setIntValueFn([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).degree(); })
         .setIntMin(0)
         .setDescription(tr("A node's degree is its number of incident edges."));
 
-    attribute(tr("Node Multiplicity"))
+    GraphModel::attribute(tr("Node Multiplicity"))
         .setIntValueFn([this](NodeId nodeId)
         {
             Q_ASSERT(_transformedGraph.typeOf(nodeId) != MultiElementType::Tail);
@@ -69,7 +69,7 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
         .setFlag(AttributeFlag::IgnoreTails)
         .setDescription(tr("A node's multiplicity is how many nodes it represents."));
 
-    attribute(tr("Edge Multiplicity"))
+    GraphModel::attribute(tr("Edge Multiplicity"))
         .setIntValueFn([this](EdgeId edgeId)
         {
             Q_ASSERT(_transformedGraph.typeOf(edgeId) != MultiElementType::Tail);
@@ -82,7 +82,7 @@ GraphModel::GraphModel(const QString &name, IPlugin* plugin) :
         .setFlag(AttributeFlag::IgnoreTails)
         .setDescription(tr("An edge's multiplicity is how many edges it represents."));
 
-    attribute(tr("Component Size"))
+    GraphModel::attribute(tr("Component Size"))
         .setIntValueFn([this](const IGraphComponent& component) { return component.numNodes(); })
         .setIntMin(1)
         .setDescription(tr("Component Size refers to the number of nodes the component contains."));

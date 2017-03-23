@@ -35,7 +35,7 @@ class GraphModel : public QObject, public IGraphModel
 {
     Q_OBJECT
 public:
-    GraphModel(const QString& name, IPlugin* plugin);
+    GraphModel(QString name, IPlugin* plugin);
 
 private:
     MutableGraph _graph;

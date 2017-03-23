@@ -8,13 +8,13 @@
 
 ApplyTransformationsCommand::ApplyTransformationsCommand(GraphModel* graphModel,
                                                          SelectionManager* selectionManager, Document* document,
-                                                         const QStringList& previousTransformations,
-                                                         const QStringList& transformations) :
+                                                         QStringList previousTransformations,
+                                                         QStringList transformations) :
     _graphModel(graphModel),
     _selectionManager(selectionManager),
     _document(document),
-    _previousTransformations(previousTransformations),
-    _transformations(transformations),
+    _previousTransformations(std::move(previousTransformations)),
+    _transformations(std::move(transformations)),
     _selectedNodeIds(_selectionManager->selectedNodes())
 {}
 

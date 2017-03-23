@@ -67,13 +67,13 @@ static NodeId nodeIdInsideFrustumNearestPoint(const GraphModel& graphModel,
     return closestNodeId;
 }
 
-GraphCommonInteractor::GraphCommonInteractor(const std::shared_ptr<GraphModel>& graphModel,
-                                             CommandManager& commandManager,
-                                             const std::shared_ptr<SelectionManager>& selectionManager,
+GraphCommonInteractor::GraphCommonInteractor(GraphModel* graphModel,
+                                             CommandManager* commandManager,
+                                             SelectionManager* selectionManager,
                                              GraphRenderer* graphRenderer) :
     Interactor(graphRenderer),
     _graphModel(graphModel),
-    _commandManager(&commandManager),
+    _commandManager(commandManager),
     _selectionManager(selectionManager),
     _graphRenderer(graphRenderer)
 {
@@ -226,7 +226,7 @@ void GraphCommonInteractor::leftMouseUp()
             auto selection = selectionForRect(QRect(_frustumSelectStart, frustumSelectEnd));
 
             if(!selection.empty())
-                _commandManager->executeOnce(makeSelectNodesCommand(_selectionManager.get(), selection, false));
+                _commandManager->executeOnce(makeSelectNodesCommand(_selectionManager, selection, false));
 
             _frustumSelectStart = QPoint();
             _frustumSelecting = false;
@@ -236,7 +236,7 @@ void GraphCommonInteractor::leftMouseUp()
         {
             if(!_clickedNodeId.isNull())
             {
-                _commandManager->executeOnce(makeSelectNodeCommand(_selectionManager.get(), _clickedNodeId,
+                _commandManager->executeOnce(makeSelectNodeCommand(_selectionManager, _clickedNodeId,
                                                                    !(modifiers() & Qt::ShiftModifier)));
             }
             else if(!_selectionManager->selectedNodes().empty())

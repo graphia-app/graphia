@@ -41,7 +41,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, int
 
     progress(-1);
 
-    uint64_t numDataPoints = tabularData.numColumns() * tabularData.numRows();
+    uint64_t numDataPoints = static_cast<uint64_t>(tabularData.numColumns()) * tabularData.numRows();
 
     for(int rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
     {
@@ -50,7 +50,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, int
             if(cancelled())
                 return false;
 
-            uint64_t rowOffset = rowIndex * tabularData.numColumns();
+            uint64_t rowOffset = static_cast<uint64_t>(rowIndex) * tabularData.numColumns();
             uint64_t dataPoint = columnIndex + rowOffset;
             progress(static_cast<int>((dataPoint * 100) / numDataPoints));
 
@@ -262,7 +262,7 @@ QVector<double> CorrelationPluginInstance::rawData()
 QStringList CorrelationPluginInstance::columnNames()
 {
     QStringList list;
-    for(QString name : _dataColumnNames)
+    for(const auto& name : _dataColumnNames)
         list.append(name);
     return list;
 }
@@ -309,8 +309,8 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
 
     return
     {
-        QString("\"Remove Edges\" where \"Pearson Correlation Value\" < %1").arg(defaultCorrelationValue),
-        "[pinned] \"Remove Components\" where \"Component Size\" <= 1"
+        QString(R"("Remove Edges" where "Pearson Correlation Value" < %1)").arg(defaultCorrelationValue),
+        R"([pinned] "Remove Components" where "Component Size" <= 1)",
     };
 }
 

@@ -53,8 +53,8 @@ private:
     QFont _defaultFont9Pt;
 
     QCustomPlot _customPlot;
-    int _columnCount;
-    int _rowCount;
+    int _columnCount = 0;
+    int _rowCount = 0;
     int _elideLabelWidth = 120;
     QStringList _labelNames;
     QStringList _graphNames;

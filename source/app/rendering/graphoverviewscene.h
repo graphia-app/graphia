@@ -28,7 +28,7 @@ class GraphOverviewScene :
     Q_OBJECT
 
 public:
-    explicit GraphOverviewScene(CommandManager& commandManager,
+    explicit GraphOverviewScene(CommandManager* commandManager,
                                 GraphRenderer* graphRenderer);
 
     void update(float t);
@@ -67,7 +67,7 @@ public:
 private:
     GraphRenderer* _graphRenderer;
     CommandManager* _commandManager;
-    std::shared_ptr<GraphModel> _graphModel;
+    GraphModel* _graphModel;
 
     int _width = 0;
     int _height = 0;

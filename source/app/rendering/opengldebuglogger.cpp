@@ -19,7 +19,7 @@ OpenGLDebugLogger::OpenGLDebugLogger(QObject* parent) :
 
             if(!startupMessages.isEmpty())
             {
-                for(auto startupMessage : startupMessages)
+                for(const auto& startupMessage : startupMessages)
                     onMessageLogged(startupMessage);
             }
 

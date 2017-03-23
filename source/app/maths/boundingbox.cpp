@@ -171,7 +171,7 @@ bool BoundingBox3D::containsLine(const Line3D& line) const
 bool BoundingBox3D::intersects(const Ray &ray, float t0, float t1) const
 {
     float tmin, tmax, tymin, tymax, tzmin, tzmax;
-    const QVector3D bounds[2] = { this->min(), this->max() };
+    const std::array<QVector3D, 2> bounds{this->min(), this->max()};
 
     tmin = (bounds[ray.sign()[0]].x() - ray.origin().x()) * ray.invDir().x();
     tmax = (bounds[1-ray.sign()[0]].x() - ray.origin().x()) * ray.invDir().x();

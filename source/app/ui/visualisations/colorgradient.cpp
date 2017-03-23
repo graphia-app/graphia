@@ -10,7 +10,7 @@
 
 ColorGradient::ColorGradient(const QString& descriptor)
 {
-    QJsonParseError error;
+    QJsonParseError error{0, QJsonParseError::ParseError::NoError};
     auto jsonDocument = QJsonDocument::fromJson(descriptor.toUtf8(), &error);
 
     if(jsonDocument.isNull())

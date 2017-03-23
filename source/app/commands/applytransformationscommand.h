@@ -29,8 +29,8 @@ public:
     ApplyTransformationsCommand(GraphModel* graphModel,
                                 SelectionManager* selectionManager,
                                 Document* document,
-                                const QStringList& previousTransformations,
-                                const QStringList& transformations);
+                                QStringList previousTransformations,
+                                QStringList transformations);
 
     QString description() const;
     QString verb() const;

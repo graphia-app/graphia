@@ -306,10 +306,10 @@ bool GPUGraphData::unused() const
     return _alpha1 == 0.0f && _alpha2 == 0.0f;
 }
 
-GraphRenderer::GraphRenderer(const std::shared_ptr<GraphModel>& graphModel,
-                             CommandManager& commandManager,
-                             const std::shared_ptr<SelectionManager>& selectionManager,
-                             const std::shared_ptr<GPUComputeThread>& gpuComputeThread) :
+GraphRenderer::GraphRenderer(GraphModel* graphModel,
+                             CommandManager* commandManager,
+                             SelectionManager* selectionManager,
+                             GPUComputeThread* gpuComputeThread) :
     QObject(),
     OpenGLFunctions(),
     _graphModel(graphModel),
@@ -381,12 +381,12 @@ GraphRenderer::GraphRenderer(const std::shared_ptr<GraphModel>& graphModel,
         switchToOverviewMode(false);
 
     connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphRenderer::onPreferenceChanged, Qt::DirectConnection);
-    connect(_graphModel.get(), &GraphModel::visualsWillChange, [this]
+    connect(_graphModel, &GraphModel::visualsWillChange, [this]
     {
         disableSceneUpdate();
     });
 
-    connect(_graphModel.get(), &GraphModel::visualsChanged, [this]
+    connect(_graphModel, &GraphModel::visualsChanged, [this]
     {
         updateText();
 
@@ -460,8 +460,8 @@ void GraphRenderer::resize(int width, int height)
             _FBOcomplete = false;
     }
 
-    GLfloat w = static_cast<GLfloat>(_width);
-    GLfloat h = static_cast<GLfloat>(_height);
+    auto w = static_cast<GLfloat>(_width);
+    auto h = static_cast<GLfloat>(_height);
     GLfloat quadData[] =
     {
         0, 0,
@@ -521,7 +521,7 @@ void GraphRenderer::createGPUGlyphData(const QString& text, const QColor& textCo
 
         glyphData._component = componentIndex;
 
-        std::array<float, 2> baseOffset;
+        std::array<float, 2> baseOffset{0.0f, 0.0f};
         switch(textAlignment)
         {
         default:
@@ -830,7 +830,7 @@ void GraphRenderer::sceneFinishedTransition()
 
 void GraphRenderer::executeOnRendererThread(DeferredExecutor::TaskFn task, const QString& description)
 {
-    _preUpdateExecutor.enqueue(task, description);
+    _preUpdateExecutor.enqueue(std::move(task), description);
     emit taskAddedToExecutor();
 }
 
@@ -1099,7 +1099,7 @@ void GraphRenderer::onVisibilityChanged()
 
 GLuint GraphRenderer::sdfTextureCurrent() const
 {
-    return _sdfTextures[_currentSDFTextureIndex];
+    return _sdfTextures.at(_currentSDFTextureIndex);
 }
 
 GLuint GraphRenderer::sdfTextureOffscreen() const
@@ -1163,7 +1163,7 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
 {
     struct Light
     {
-        Light() {}
+        Light() = default;
         Light(const QVector4D& _position, const QVector3D& _intensity) :
             position(_position), intensity(_intensity)
         {}
@@ -1177,7 +1177,7 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
     lights.emplace_back(QVector4D(0.0f, 0.0f, 0.0f, 1.0f), QVector3D(0.2f, 0.2f, 0.2f));
     lights.emplace_back(QVector4D(10.0f, -10.0f, -10.0f, 1.0f), QVector3D(0.4f, 0.4f, 0.4f));
 
-    int numberOfLights = static_cast<int>(lights.size());
+    auto numberOfLights = static_cast<int>(lights.size());
 
     program.setUniformValue("numberOfLights", numberOfLights);
 
@@ -1204,13 +1204,13 @@ std::vector<int> GraphRenderer::gpuGraphDataRenderOrder() const
 
     std::sort(renderOrder.begin(), renderOrder.end(), [this](auto a, auto b)
     {
-        if(_gpuGraphData[a]._alpha1 == _gpuGraphData[b]._alpha1)
-            return _gpuGraphData[a]._alpha2 > _gpuGraphData[b]._alpha2;
+        if(_gpuGraphData.at(a)._alpha1 == _gpuGraphData.at(b)._alpha1)
+            return _gpuGraphData.at(a)._alpha2 > _gpuGraphData.at(b)._alpha2;
 
-        return _gpuGraphData[a]._alpha1 > _gpuGraphData[b]._alpha1;
+        return _gpuGraphData.at(a)._alpha1 > _gpuGraphData.at(b)._alpha1;
     });
 
-    while(!renderOrder.empty() && _gpuGraphData[renderOrder.back()].alpha() <= 0.0f)
+    while(!renderOrder.empty() && _gpuGraphData.at(renderOrder.back()).alpha() <= 0.0f)
         renderOrder.pop_back();
 
     return renderOrder;
@@ -1304,7 +1304,7 @@ void GraphRenderer::renderGraph(GPUGraphData& gpuGraphData)
     glBindFramebuffer(GL_FRAMEBUFFER, gpuGraphData._fbo);
 
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-    glDrawBuffers(2, drawBuffers);
+    glDrawBuffers(2, static_cast<GLenum*>(drawBuffers));
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -1368,7 +1368,7 @@ void GraphRenderer::renderScene()
 
     for(auto i : gpuGraphDataRenderOrder())
     {
-        auto& gpuGraphData = _gpuGraphData[i];
+        auto& gpuGraphData = _gpuGraphData.at(i);
 
         // Clear the depth buffer, but only when we're about to render graph elements
         // that are found, so that subsequent render passes of not found elements

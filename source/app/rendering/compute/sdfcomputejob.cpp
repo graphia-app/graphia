@@ -8,7 +8,7 @@
 #include <QTime>
 #include <QDir>
 
-SDFComputeJob::SDFComputeJob(GLuint sdfTexture, const std::shared_ptr<GlyphMap>& glyphMap) :
+SDFComputeJob::SDFComputeJob(GLuint sdfTexture, std::shared_ptr<GlyphMap> glyphMap) :
     GPUComputeJob(),
     _sdfTexture(sdfTexture),
     _glyphMap(glyphMap)
@@ -66,8 +66,8 @@ void SDFComputeJob::prepareQuad(QOpenGLVertexArrayObject& screenQuadVAO,
 
 void SDFComputeJob::prepareScreenQuadDataBuffer(QOpenGLBuffer& buffer, int width, int height)
 {
-    GLfloat w = static_cast<GLfloat>(width);
-    GLfloat h = static_cast<GLfloat>(height);
+    auto w = static_cast<GLfloat>(width);
+    auto h = static_cast<GLfloat>(height);
     GLfloat quadData[] =
     {
         0, 0,
@@ -102,7 +102,7 @@ void SDFComputeJob::generateSDF()
     const int sourceHeight = _glyphMap->images().at(0).height();
     const int renderWidth = _glyphMap->images().at(0).width() / scaleFactor;
     const int renderHeight = _glyphMap->images().at(0).height() / scaleFactor;
-    const int numImages = static_cast<int>(_glyphMap->images().size());
+    const auto numImages = static_cast<int>(_glyphMap->images().size());
 
     prepareScreenQuadDataBuffer(screenQuadDataBuffer, renderWidth, renderHeight);
 
@@ -175,8 +175,8 @@ void SDFComputeJob::generateSDF()
     // Debug code to pull out the SDF texture
     if(u::pref("debug/saveGlyphMaps").toBool())
     {
-        int pixelCount = static_cast<int>((_glyphMap->images().at(0).byteCount() / (scaleFactor * scaleFactor)) *
-                                          _glyphMap->images().size());
+        auto pixelCount = static_cast<int>((_glyphMap->images().at(0).byteCount() / (scaleFactor * scaleFactor)) *
+                                           _glyphMap->images().size());
         std::vector<uchar> pixels(pixelCount);
         glBindTexture(GL_TEXTURE_2D_ARRAY, _sdfTexture);
         glGetTexImage(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
@@ -212,6 +212,5 @@ void SDFComputeJob::generateSDF()
 
 void SDFComputeJob::executeWhenComplete(std::function<void()> onCompleteFn)
 {
-    _onCompleteFn = onCompleteFn;
+    _onCompleteFn = std::move(onCompleteFn);
 }
-

@@ -30,7 +30,7 @@ static float maxDistanceFromCentre(const QVector3D centre, const std::vector<QVe
 }
 
 BoundingSphere::BoundingSphere(const std::vector<QVector3D>& points) :
-    _centre(), _radius(0.0f)
+    _centre()
 {
     // This is only an approximation; Welzl's algorithm will get a better result
 

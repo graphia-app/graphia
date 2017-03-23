@@ -39,7 +39,7 @@ template<typename It> bool parseGml(IMutableGraph &graph,
     // axe::r_rule is called which (for some reason) infinitely recurses, whereas using
     // operator= doesn't
     axe::r_rule<It> quotedString;
-    quotedString = '"' & *("\\\"" | (axe::r_any() - '"')) & '"';
+    quotedString = '"' & *(R"(\")" | (axe::r_any() - '"')) & '"';
 
     auto key = (+axe::r_alnum());
     auto value = axe::r_double(d) | quotedString;
