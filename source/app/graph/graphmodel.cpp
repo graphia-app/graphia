@@ -283,19 +283,24 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         for(const auto& parameter : visualisationConfig._parameters)
             channel->setParameter(parameter._name, parameter.valueAsString());
 
+        VisualisationAlert alert;
+
         switch(attribute.elementType())
         {
         case ElementType::Node:
-            nodeVisualisationsBuilder.build(attribute, *channel.get(), invert, index);
+            alert = nodeVisualisationsBuilder.build(attribute, *channel.get(), invert, index);
             break;
 
         case ElementType::Edge:
-            edgeVisualisationsBuilder.build(attribute, *channel.get(), invert, index);
+            alert = edgeVisualisationsBuilder.build(attribute, *channel.get(), invert, index);
             break;
 
         default:
             break;
         }
+
+        if(alert._type != VisualisationAlertType::None)
+            _visualisationAlertsMap[index].emplace_back(alert);
     }
 
     nodeVisualisationsBuilder.findOverrideAlerts(_visualisationAlertsMap);

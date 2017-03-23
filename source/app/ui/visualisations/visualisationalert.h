@@ -15,10 +15,10 @@ DEFINE_QML_ENUM(Q_GADGET, VisualisationAlertType,
 
 struct VisualisationAlert
 {
-    VisualisationAlertType _type;
-
+    VisualisationAlertType _type = VisualisationAlertType::None;
     QString _text;
 
+    VisualisationAlert() = default;
     VisualisationAlert(VisualisationAlertType type, const QString& text) :
         _type(type), _text(text)
     {}

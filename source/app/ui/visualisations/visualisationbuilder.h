@@ -102,9 +102,9 @@ public:
         }
     }
 
-    void build(const Attribute& attribute,
-               const VisualisationChannel& channel,
-               bool invert, int index)
+    VisualisationAlert build(const Attribute& attribute,
+                             const VisualisationChannel& channel,
+                             bool invert, int index)
     {
         for(int c = 0; c < NumChannels; c++)
             _applications[c].emplace_back(index, *_graph);
@@ -120,6 +120,9 @@ public:
             {
                 return _graph->typeOf(elementId);
             });
+
+            if(min == max)
+                return {VisualisationAlertType::Warning, QObject::tr("No Numeric Range To Map To")};
 
             for(auto elementId : *_elementIds)
             {
@@ -167,6 +170,8 @@ public:
         }
 
         _numAppliedVisualisations++;
+
+        return {};
     }
 };
 
