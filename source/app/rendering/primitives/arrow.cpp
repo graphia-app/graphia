@@ -93,8 +93,8 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
                                   std::vector<float>& texCoords, std::vector<float>& tangents,
                                   std::vector<unsigned int>& indices)
 {
-    int faces = (_slices);
-    int numVerts  = ((_slices + 1) * 4) + 2;
+    auto faces = _slices;
+    auto numVerts  = ((_slices + 1) * 4) + 2;
 
     vertices.resize(3 * numVerts);
     normals.resize(3 * numVerts);
@@ -105,12 +105,12 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
     const float dTheta = Constants::TwoPi() / static_cast<float>(_slices);
     const float du = 1.0f / static_cast<float>(_slices);
 
-    int index = 0, texCoordIndex = 0, tangentIndex = 0;
+    auto index = 0U, texCoordIndex = 0U, tangentIndex = 0U;
 
     QVector3D coneTip(0.0, _length * 0.5f, 0.0);
 
     // Iterate over longitudes (slices)
-    for(int slice = 0; slice < _slices + 1; slice++)
+    for(auto slice = 0U; slice < _slices + 1; slice++)
     {
         const float theta = static_cast<float>(slice) * dTheta;
         const float cosTheta = std::cos(theta);
@@ -220,7 +220,7 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
     }
 
     // Bottom of cone - top of edge (tail)
-    int capIndex = index / 3;
+    auto capIndex = index / 3;
     vertices[index+0] = 0.0;
     vertices[index+1] = _length * 0.25f;
     vertices[index+2] = 0.0;
@@ -239,7 +239,7 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
 
     index += 3;
 
-    int tipIndex = index / 3;
+    auto tipIndex = index / 3;
     vertices[index+0] = coneTip.x();
     vertices[index+1] = coneTip.y();
     vertices[index+2] = coneTip.z();
@@ -260,9 +260,9 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
 
     index = 0;
 
-    for(int slice = 0; slice < _slices; slice++)
+    for(auto slice = 0U; slice < _slices; slice++)
     {
-        int baseIndex = slice * 4;
+        auto baseIndex = slice * 4;
 
         // Tail (edge) indices
         indices[index+0] = baseIndex + 5;

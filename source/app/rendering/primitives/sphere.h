@@ -42,8 +42,8 @@ private:
                             std::vector<unsigned int>& indices);
 
     float _radius = 1.0f;
-    int _rings = 30;
-    int _slices = 30;
+    size_t _rings = 30;
+    size_t _slices = 30;
 
     QOpenGLBuffer _positionBuffer;
     QOpenGLBuffer _normalBuffer;

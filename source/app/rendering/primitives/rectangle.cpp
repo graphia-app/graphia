@@ -110,9 +110,9 @@ void Rectangle::generateVertexData(std::vector<float>& vertices, std::vector<flo
 
     // Copy Verts
     vertices.assign(std::begin(verts), std::end(verts));
-    for(int i = 0; i < 4; ++i)
+    for(auto i = 0U; i < 4U; ++i)
     {
-        int index = i*3;
+        auto index = i*3;
         vertices[index] = verts[index];
         vertices[index+1] = verts[index+1];
         vertices[index+2] = verts[index+2];
@@ -121,13 +121,13 @@ void Rectangle::generateVertexData(std::vector<float>& vertices, std::vector<flo
         normals[index+1] = norm[1];
         normals[index+2] = norm[2];
 
-        int tindex = i*4;
+        auto tindex = i*4;
         tangents[tindex] = tangs[0];
         tangents[tindex+1] = tangs[1];
         tangents[tindex+2] = tangs[2];
         tangents[tindex+3] = tangs[3];
 
-        int texIndex = i*2;
+        auto texIndex = i*2;
         texCoords[texIndex] = verts[i*3];
         texCoords[texIndex+1] = verts[(i*3)+1];
     }

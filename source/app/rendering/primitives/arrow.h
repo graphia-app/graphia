@@ -45,7 +45,7 @@ private:
 
     float _radius = 1.0f;
     float _length = 1.0f;
-    int _slices = 30;
+    size_t _slices = 30;
 
     QOpenGLBuffer _positionBuffer;
     QOpenGLBuffer _normalBuffer;

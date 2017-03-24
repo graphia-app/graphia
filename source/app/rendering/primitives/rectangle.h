@@ -8,7 +8,7 @@
 
 namespace Primitive
 {
-class Rectangle  : public QObject
+class Rectangle : public QObject
 {
     Q_OBJECT
 public:
