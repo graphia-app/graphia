@@ -81,6 +81,12 @@ namespace u
         Q_UNUSED(b);
     }
 
+    template<typename T>
+    bool exclusiveOr(T a, T b)
+    {
+        return !a != !b;
+    }
+
     template<typename C, typename T> void removeByValue(C& container, const T& value)
     {
         container.erase(std::remove(container.begin(), container.end(), value), container.end());

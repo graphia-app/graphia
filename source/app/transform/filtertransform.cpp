@@ -37,7 +37,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
             if(_ignoreTails && target.typeOf(edgeId) == MultiElementType::Tail)
                 continue;
 
-            if(!edgeIdFiltered(edgeId) != !_invert)
+            if(u::exclusiveOr(edgeIdFiltered(edgeId), _invert))
                 removees.push_back(edgeId);
         }
 
@@ -55,7 +55,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
             if(_ignoreTails && target.typeOf(nodeId) == MultiElementType::Tail)
                 continue;
 
-            if(!nodeIdFiltered(nodeId) != !_invert)
+            if(u::exclusiveOr(nodeIdFiltered(nodeId), _invert))
                 removees.push_back(nodeId);
         }
 
@@ -71,7 +71,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
         for(auto componentId : componentManager.componentIds())
         {
             auto component = componentManager.componentById(componentId);
-            if(!componentFiltered(_componentFilters, *component) != !_invert)
+            if(u::exclusiveOr(componentFiltered(_componentFilters, *component), _invert))
             {
                 changed = true;
                 target.mutableGraph().removeNodes(target.mutableGraph().mergedNodeIdsForNodeIds(component->nodeIds()));
