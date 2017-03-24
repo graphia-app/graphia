@@ -24,7 +24,7 @@ void Sphere::create(QOpenGLShaderProgram& shader)
     std::vector<float> normals;
     std::vector<float> texCoords;
     std::vector<float> tangents;
-    std::vector<unsigned int> indices;
+    std::vector<size_t> indices;
 
     generateVertexData(vertices, normals, texCoords, tangents, indices);
 
@@ -91,7 +91,7 @@ void Sphere::create(QOpenGLShaderProgram& shader)
 
 void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>& normals,
                                 std::vector<float>& texCoords, std::vector<float>& tangents,
-                                std::vector<unsigned int>& indices)
+                                std::vector<size_t>& indices)
 {
     auto faces = (_slices - 2) * _rings + // Number of "rectangular" faces
             (_rings * 2); // and one ring for the top and bottom caps
@@ -111,7 +111,7 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
 
     // Iterate over latitudes (rings)
     auto index = 0U, texCoordIndex = 0U, tangentIndex = 0U;
-    for(auto lat = 0U; lat < _rings + 1; ++lat)
+    for(auto lat = 0; lat < _rings + 1; ++lat)
     {
         const float phi = Constants::Pi() / 2.0f - static_cast<float>(lat) * dPhi;
         const float cosPhi = std::cos(phi);
@@ -119,7 +119,7 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
         const float v = 1.0f - static_cast<float>(lat) * dv;
 
         // Iterate over longitudes (slices)
-        for(auto lon = 0U; lon < _slices + 1; ++lon)
+        for(auto lon = 0; lon < _slices + 1; ++lon)
         {
             const float theta = static_cast<float>(lon) * dTheta;
             const float cosTheta = std::cos(theta);
@@ -154,7 +154,7 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
     // top cap
     {
         const auto nextRingStartIndex = _slices + 1;
-        for(auto j = 0U; j < _slices; ++j)
+        for(auto j = 0; j < _slices; ++j)
         {
             indices[index] = nextRingStartIndex + j;
             indices[index+1] = 0;
@@ -163,12 +163,12 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
         }
     }
 
-    for(auto i = 1U; i < (_rings - 1); ++i)
+    for(auto i = 1; i < (_rings - 1); ++i)
     {
         const auto ringStartIndex = i *(_slices + 1);
         const auto nextRingStartIndex = (i + 1) *(_slices + 1);
 
-        for(auto j = 0U; j < _slices; ++j)
+        for(auto j = 0; j < _slices; ++j)
         {
             // Split the quad into two triangles
             indices[index]   = ringStartIndex + j;
@@ -186,7 +186,7 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
     {
         const auto ringStartIndex = (_rings - 1) *(_slices + 1);
         const auto nextRingStartIndex = (_rings) *(_slices + 1);
-        for(auto j = 0U; j < _slices; ++j)
+        for(auto j = 0; j < _slices; ++j)
         {
             indices[index] = ringStartIndex + j + 1;
             indices[index+1] = nextRingStartIndex;

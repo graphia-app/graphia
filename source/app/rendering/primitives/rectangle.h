@@ -16,7 +16,7 @@ public:
 
     QOpenGLVertexArrayObject* vertexArrayObject() { return &_vao; }
 
-    int indexCount() const { return 6; }
+    GLsizei indexCount() const { return 6; }
 
 public slots:
     void create(QOpenGLShaderProgram& shader);

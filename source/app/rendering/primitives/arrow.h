@@ -24,12 +24,12 @@ public:
     explicit Arrow(QObject* parent = nullptr);
 
     float radius() const { return _radius; }
-    int length() const { return _length; }
-    int slices() const { return _slices; }
+    auto length() const { return _length; }
+    auto slices() const { return _slices; }
 
     QOpenGLVertexArrayObject* vertexArrayObject() { return &_vao; }
 
-    int indexCount() const { return 12 * _slices; }
+    auto indexCount() const { return 12 * _slices; }
 
 public slots:
     void setRadius(float radius) { _radius = radius; }
@@ -45,7 +45,7 @@ private:
 
     float _radius = 1.0f;
     float _length = 1.0f;
-    size_t _slices = 30;
+    GLsizei _slices = 30;
 
     QOpenGLBuffer _positionBuffer;
     QOpenGLBuffer _normalBuffer;

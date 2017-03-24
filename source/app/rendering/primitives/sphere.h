@@ -22,12 +22,12 @@ public:
     explicit Sphere(QObject* parent = nullptr);
 
     float radius() const { return _radius; }
-    int rings() const { return _rings; }
-    int slices() const { return _slices; }
+    auto rings() const { return _rings; }
+    auto slices() const { return _slices; }
 
     QOpenGLVertexArrayObject* vertexArrayObject() { return &_vao; }
 
-    int indexCount() const { return 6 * _slices * _rings; }
+    auto indexCount() const { return 6 * _slices * _rings; }
 
 public slots:
     void setRadius(float radius) { _radius = radius; }
@@ -39,11 +39,11 @@ public slots:
 private:
     void generateVertexData(std::vector<float>& vertices, std::vector<float>& normals,
                             std::vector<float>& texCoords, std::vector<float>& tangents,
-                            std::vector<unsigned int>& indices);
+                            std::vector<size_t> &indices);
 
     float _radius = 1.0f;
-    size_t _rings = 30;
-    size_t _slices = 30;
+    GLsizei _rings = 30;
+    GLsizei _slices = 30;
 
     QOpenGLBuffer _positionBuffer;
     QOpenGLBuffer _normalBuffer;
