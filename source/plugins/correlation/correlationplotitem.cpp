@@ -181,7 +181,7 @@ void CorrelationPlotItem::buildPlot()
 
 void CorrelationPlotItem::populateMeanAveragePlot()
 {
-    double maxX = static_cast<double>(_columnCount);
+    auto maxX = static_cast<double>(_columnCount);
     double maxY = 0.0;
 
     std::random_device randomDevice;
@@ -233,7 +233,7 @@ void CorrelationPlotItem::populateMeanAveragePlot()
 
 void CorrelationPlotItem::populateRawPlot()
 {
-    double maxX = static_cast<double>(_columnCount);
+    auto maxX = static_cast<double>(_columnCount);
     double maxY = 0.0;
 
     std::random_device randomDevice;

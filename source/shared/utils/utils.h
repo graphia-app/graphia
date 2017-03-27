@@ -35,9 +35,6 @@ namespace u
         return qFuzzyCompare(1, value + 1);
     }
 
-    float fast_rsqrt(float number);
-    QVector3D fastNormalize(const QVector3D& v);
-
     template<typename T> T clamp(T min, T max, T value)
     {
         if(value < min)
