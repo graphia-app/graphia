@@ -1,0 +1,16 @@
+OpenGL Vertex Shader
+    filter remove_matches ^\s*//
+    filter call_regexp_common C
+    filter remove_inline //.*$
+    extension vert
+    extension vs
+    3rd_gen_scale 1.00
+    end_of_line_continuation \\$
+OpenGL Fragment Shader
+    filter remove_matches ^\s*//
+    filter call_regexp_common C
+    filter remove_inline //.*$
+    extension frag
+    extension fs
+    3rd_gen_scale 1.00
+    end_of_line_continuation \\$
