@@ -1,6 +1,6 @@
 #! /bin/bash
 
-. defaults.sh
+. scripts/defaults.sh
 
 QMAKE_SPEC=$(qmake -query QMAKE_SPEC)
 BEAR=$(which bear)
@@ -20,7 +20,7 @@ qmake -version || exit $?
 qmake GraphTool.pro || exit $?
 make clean || exit $?
 
-if [ ! -z "${BEAR}" && ${QMAKE_SPEC} == "linux-clang" ]
+if [ ! -z "${BEAR}" ] && [ ${QMAKE_SPEC} = "linux-clang" ]
 then
   rm -f compile_command.json
   bear make -O -j2 || exit $?

@@ -1,6 +1,6 @@
 #! /bin/bash
 
-. defaults.sh
+. scripts/defaults.sh
 
 rm -rf build
 mkdir -p build
