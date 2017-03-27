@@ -173,10 +173,10 @@ bool BoundingBox3D::intersects(const Ray &ray, float t0, float t1) const
     float tmin, tmax, tymin, tymax, tzmin, tzmax;
     const std::array<QVector3D, 2> bounds{{this->min(), this->max()}};
 
-    tmin = (bounds[ray.sign()[0]].x() - ray.origin().x()) * ray.invDir().x();
-    tmax = (bounds[1-ray.sign()[0]].x() - ray.origin().x()) * ray.invDir().x();
-    tymin = (bounds[ray.sign()[1]].y() - ray.origin().y()) * ray.invDir().y();
-    tymax = (bounds[1-ray.sign()[1]].y() - ray.origin().y()) * ray.invDir().y();
+    tmin =  (bounds.at(    ray.sign().at(0)).x() - ray.origin().x()) * ray.invDir().x();
+    tmax =  (bounds.at(1 - ray.sign().at(0)).x() - ray.origin().x()) * ray.invDir().x();
+    tymin = (bounds.at(    ray.sign().at(1)).y() - ray.origin().y()) * ray.invDir().y();
+    tymax = (bounds.at(1 - ray.sign().at(1)).y() - ray.origin().y()) * ray.invDir().y();
 
     if((tmin > tymax) || (tymin > tmax))
         return false;
@@ -187,8 +187,8 @@ bool BoundingBox3D::intersects(const Ray &ray, float t0, float t1) const
     if(tymax < tmax)
         tmax = tymax;
 
-    tzmin = (bounds[ray.sign()[2]].z() - ray.origin().z()) * ray.invDir().z();
-    tzmax = (bounds[1-ray.sign()[2]].z() - ray.origin().z()) * ray.invDir().z();
+    tzmin = (bounds.at(    ray.sign().at(2)).z() - ray.origin().z()) * ray.invDir().z();
+    tzmax = (bounds.at(1 - ray.sign().at(2)).z() - ray.origin().z()) * ray.invDir().z();
 
     if((tmin > tzmax) || (tzmin > tmax))
         return false;

@@ -30,7 +30,7 @@ void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionMa
                                "the linear relationship between two variables."));
 }
 
-bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, int firstDataColumn, int firstDataRow,
+bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, size_t firstDataColumn, size_t firstDataRow,
                                              const std::function<bool()>& cancelled, const IParser::ProgressFn& progress)
 {
     Q_ASSERT(firstDataColumn > 0);
@@ -43,9 +43,9 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, int
 
     uint64_t numDataPoints = static_cast<uint64_t>(tabularData.numColumns()) * tabularData.numRows();
 
-    for(int rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
+    for(size_t rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
     {
-        for(int columnIndex = 0; columnIndex < tabularData.numColumns(); columnIndex++)
+        for(size_t columnIndex = 0; columnIndex < tabularData.numColumns(); columnIndex++)
         {
             if(cancelled())
                 return false;
@@ -55,10 +55,11 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, int
             progress(static_cast<int>((dataPoint * 100) / numDataPoints));
 
             QString value = tabularData.valueAtQString(columnIndex, rowIndex);
-            int dataColumnIndex = columnIndex - firstDataColumn;
-            int dataRowIndex = rowIndex - firstDataRow;
+            auto dataColumnIndex = static_cast<int>(columnIndex - firstDataColumn);
+            auto dataRowIndex = static_cast<int>(rowIndex - firstDataRow);
 
-            if(dataColumnIndex >= _numColumns || dataRowIndex >= _numRows)
+            if(dataColumnIndex >= static_cast<int>(_numColumns) ||
+               dataRowIndex >= static_cast<int>(_numRows))
             {
                 qDebug() << QString("WARNING: Attempting to set data at coordinate (%1, %2) in "
                                     "dataRect of dimensions (%3, %4)")
@@ -89,7 +90,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, int
                 {
                     setData(dataColumnIndex, dataRowIndex, value.toDouble());
 
-                    if(dataColumnIndex == _numColumns - 1)
+                    if(dataColumnIndex == static_cast<int>(_numColumns) - 1)
                         finishDataRow(dataRowIndex);
                 }
                 else
@@ -206,7 +207,7 @@ bool CorrelationPluginInstance::createEdges(const std::vector<std::tuple<NodeId,
     return true;
 }
 
-void CorrelationPluginInstance::setDimensions(int numColumns, int numRows)
+void CorrelationPluginInstance::setDimensions(size_t numColumns, size_t numRows)
 {
     Q_ASSERT(_dataColumnNames.empty());
     Q_ASSERT(_userColumnData.empty());
@@ -219,30 +220,30 @@ void CorrelationPluginInstance::setDimensions(int numColumns, int numRows)
     _data.resize(numColumns * numRows);
 }
 
-void CorrelationPluginInstance::setDataColumnName(int column, const QString& name)
+void CorrelationPluginInstance::setDataColumnName(size_t column, const QString& name)
 {
     Q_ASSERT(column < _numColumns);
     _dataColumnNames.at(column) = name;
 }
 
-void CorrelationPluginInstance::setData(int column, int row, double value)
+void CorrelationPluginInstance::setData(size_t column, size_t row, double value)
 {
-    int index = (row * _numColumns) + column;
-    Q_ASSERT(index < static_cast<int>(_data.size()));
+    auto index = (row * _numColumns) + column;
+    Q_ASSERT(index < _data.size());
     _data.at(index) = value;
 }
 
-void CorrelationPluginInstance::finishDataRow(int row)
+void CorrelationPluginInstance::finishDataRow(size_t row)
 {
     Q_ASSERT(row < _numRows);
 
-    int dataStartIndex = row * _numColumns;
-    int dataEndIndex = dataStartIndex + _numColumns;
+    auto dataStartIndex = row * _numColumns;
+    auto dataEndIndex = dataStartIndex + _numColumns;
 
     auto begin =_data.cbegin() + dataStartIndex;
     auto end = _data.cbegin() + dataEndIndex;
     auto nodeId = graphModel()->mutableGraph().addNode();
-    auto computeCost = _numRows - row + 1;
+    auto computeCost = static_cast<int>(_numRows - row + 1);
 
     _dataRows.emplace_back(begin, end, nodeId, computeCost);
     _userNodeData.setNodeIdForRowIndex(nodeId, row);
@@ -271,7 +272,7 @@ QStringList CorrelationPluginInstance::rowNames()
 {
     QStringList list;
 
-    for(int i = 0; i < _numRows; i++)
+    for(size_t i = 0; i < _numRows; i++)
         list.append(_userNodeData.begin()->get(i));
 
     return list;

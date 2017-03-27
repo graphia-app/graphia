@@ -8,8 +8,7 @@
 namespace Primitive
 {
 
-Arrow::Arrow(QObject* parent) :
-    QObject(parent),
+Arrow::Arrow() :
     _positionBuffer(QOpenGLBuffer::VertexBuffer),
     _normalBuffer(QOpenGLBuffer::VertexBuffer),
     _textureCoordBuffer(QOpenGLBuffer::VertexBuffer),
@@ -105,12 +104,12 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
     const float dTheta = Constants::TwoPi() / static_cast<float>(_slices);
     const float du = 1.0f / static_cast<float>(_slices);
 
-    auto index = 0U, texCoordIndex = 0U, tangentIndex = 0U;
+    size_t index = 0, texCoordIndex = 0, tangentIndex = 0;
 
-    QVector3D coneTip(0.0, _length * 0.5f, 0.0);
+    QVector3D coneTip(0.0f, _length * 0.5f, 0.0f);
 
     // Iterate over longitudes (slices)
-    for(auto slice = 0; slice < _slices + 1; slice++)
+    for(auto slice = 0U; slice < _slices + 1; slice++)
     {
         const float theta = static_cast<float>(slice) * dTheta;
         const float cosTheta = std::cos(theta);
@@ -128,9 +127,9 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
         index += 3;
 
         tangents[tangentIndex] = sinTheta;
-        tangents[tangentIndex + 1] = 0.0;
+        tangents[tangentIndex + 1] = 0.0f;
         tangents[tangentIndex + 2] = -cosTheta;
-        tangents[tangentIndex + 3] = 1.0;
+        tangents[tangentIndex + 3] = 1.0f;
         tangentIndex += 4;
 
         texCoords[texCoordIndex] = u;
@@ -149,9 +148,9 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
         index += 3;
 
         tangents[tangentIndex] = sinTheta;
-        tangents[tangentIndex + 1] = 0.0;
+        tangents[tangentIndex + 1] = 0.0f;
         tangents[tangentIndex + 2] = -cosTheta;
-        tangents[tangentIndex + 3] = 1.0;
+        tangents[tangentIndex + 3] = 1.0f;
         tangentIndex += 4;
 
         texCoords[texCoordIndex] = u;
@@ -188,7 +187,7 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
         tangents[tangentIndex] = baseTangent.x();
         tangents[tangentIndex + 1] = baseTangent.y();
         tangents[tangentIndex + 2] = baseTangent.z();
-        tangents[tangentIndex + 3] = 1.0;
+        tangents[tangentIndex + 3] = 1.0f;
         tangentIndex += 4;
 
         texCoords[texCoordIndex] = u;
@@ -197,20 +196,20 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
         texCoordIndex += 2;
 
         // Bottom rim of cone (for cap only)
-        vertices[index+0] = (_radius * 2) * cosTheta;
+        vertices[index+0] = (_radius * 2.0f) * cosTheta;
         vertices[index+1] = _length * 0.25f;
-        vertices[index+2] = (_radius * 2) * sinTheta;
+        vertices[index+2] = (_radius * 2.0f) * sinTheta;
 
-        normals[index+0] = 0;
+        normals[index+0] = 0.0f;
         normals[index+1] = -1.0f;
-        normals[index+2] = 0;
+        normals[index+2] = 0.0f;
 
         index += 3;
 
         tangents[tangentIndex] = sinTheta;
-        tangents[tangentIndex + 1] = 0.0;
+        tangents[tangentIndex + 1] = 0.0f;
         tangents[tangentIndex + 2] = -cosTheta;
-        tangents[tangentIndex + 3] = 1.0;
+        tangents[tangentIndex + 3] = 1.0f;
         tangentIndex += 4;
 
         texCoords[texCoordIndex] = u;
@@ -221,18 +220,18 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
 
     // Bottom of cone - top of edge (tail)
     auto capIndex = index / 3;
-    vertices[index+0] = 0.0;
+    vertices[index+0] = 0.0f;
     vertices[index+1] = _length * 0.25f;
-    vertices[index+2] = 0.0;
+    vertices[index+2] = 0.0f;
 
-    normals[index+0] = 0.0;
-    normals[index+1] = -1.0;
-    normals[index+2] = 0.0;
+    normals[index+0] = 0.0f;
+    normals[index+1] = -1.0f;
+    normals[index+2] = 0.0f;
 
-    tangents[tangentIndex] = 1.0;
-    tangents[tangentIndex + 1] = 0.0;
-    tangents[tangentIndex + 2] = 0.0;
-    tangents[tangentIndex + 3] = 1.0;
+    tangents[tangentIndex] = 1.0f;
+    tangents[tangentIndex + 1] = 0.0f;
+    tangents[tangentIndex + 2] = 0.0f;
+    tangents[tangentIndex + 3] = 1.0f;
 
     texCoords[texCoordIndex] = 0.0f;
     texCoords[texCoordIndex+1] = 0.0f;
@@ -246,21 +245,21 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
 
     // Tip normals (Clever hack. All 0's, allows blending with cone base normals
     // which is then normalised to create a smoothly blended normal)
-    normals[index+0] = 0.0;
-    normals[index+1] = 0.0;
-    normals[index+2] = 0.0;
+    normals[index+0] = 0.0f;
+    normals[index+1] = 0.0f;
+    normals[index+2] = 0.0f;
 
-    tangents[tangentIndex] = 0.0;
-    tangents[tangentIndex + 1] = 0.0;
-    tangents[tangentIndex + 2] = 0.0;
-    tangents[tangentIndex + 3] = 1.0;
+    tangents[tangentIndex] = 0.0f;
+    tangents[tangentIndex + 1] = 0.0f;
+    tangents[tangentIndex + 2] = 0.0f;
+    tangents[tangentIndex + 3] = 1.0f;
 
     texCoords[texCoordIndex] = 0.0f;
     texCoords[texCoordIndex+1] = 0.0f;
 
     index = 0;
 
-    for(auto slice = 0; slice < _slices; slice++)
+    for(auto slice = 0U; slice < _slices; slice++)
     {
         auto baseIndex = slice * 4;
 
@@ -275,12 +274,12 @@ void Arrow::generateVertexData(std::vector<float>& vertices, std::vector<float>&
 
         // Cone Indices
         indices[index+6] = baseIndex + 2;
-        indices[index+7] = tipIndex;
+        indices[index+7] = static_cast<unsigned int>(tipIndex);
         indices[index+8] = baseIndex + 6;
 
         // Cap
         indices[index+9] = baseIndex + 7;
-        indices[index+10] = capIndex;
+        indices[index+10] = static_cast<unsigned int>(capIndex);
         indices[index+11] = baseIndex + 3;
 
         index += 12;

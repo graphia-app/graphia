@@ -24,7 +24,7 @@ private:
     QString _regex;
     std::vector<QString> _attributeNames;
 
-    const GraphModel* _graphModel;
+    const GraphModel* _graphModel = nullptr;
     NodeIdSet _foundNodeIds;
 
 signals:

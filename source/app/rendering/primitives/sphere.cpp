@@ -8,8 +8,7 @@
 namespace Primitive
 {
 
-Sphere::Sphere(QObject* parent) :
-    QObject(parent),
+Sphere::Sphere() :
     _positionBuffer(QOpenGLBuffer::VertexBuffer),
     _normalBuffer(QOpenGLBuffer::VertexBuffer),
     _textureCoordBuffer(QOpenGLBuffer::VertexBuffer),
@@ -24,7 +23,7 @@ void Sphere::create(QOpenGLShaderProgram& shader)
     std::vector<float> normals;
     std::vector<float> texCoords;
     std::vector<float> tangents;
-    std::vector<size_t> indices;
+    std::vector<unsigned int> indices;
 
     generateVertexData(vertices, normals, texCoords, tangents, indices);
 
@@ -91,7 +90,7 @@ void Sphere::create(QOpenGLShaderProgram& shader)
 
 void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>& normals,
                                 std::vector<float>& texCoords, std::vector<float>& tangents,
-                                std::vector<size_t>& indices)
+                                std::vector<unsigned int>& indices)
 {
     auto faces = (_slices - 2) * _rings + // Number of "rectangular" faces
             (_rings * 2); // and one ring for the top and bottom caps
@@ -110,8 +109,8 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
     const float dv = 1.0f / static_cast<float>(_rings);
 
     // Iterate over latitudes (rings)
-    auto index = 0U, texCoordIndex = 0U, tangentIndex = 0U;
-    for(auto lat = 0; lat < _rings + 1; ++lat)
+    size_t index = 0, texCoordIndex = 0, tangentIndex = 0;
+    for(auto lat = 0U; lat < _rings + 1; ++lat)
     {
         const float phi = Constants::Pi() / 2.0f - static_cast<float>(lat) * dPhi;
         const float cosPhi = std::cos(phi);
@@ -119,7 +118,7 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
         const float v = 1.0f - static_cast<float>(lat) * dv;
 
         // Iterate over longitudes (slices)
-        for(auto lon = 0; lon < _slices + 1; ++lon)
+        for(auto lon = 0U; lon < _slices + 1; ++lon)
         {
             const float theta = static_cast<float>(lon) * dTheta;
             const float cosTheta = std::cos(theta);
@@ -154,29 +153,29 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
     // top cap
     {
         const auto nextRingStartIndex = _slices + 1;
-        for(auto j = 0; j < _slices; ++j)
+        for(auto j = 0U; j < _slices; ++j)
         {
-            indices[index] = nextRingStartIndex + j;
+            indices[index] = static_cast<unsigned int>(nextRingStartIndex + j);
             indices[index+1] = 0;
-            indices[index+2] = nextRingStartIndex + j + 1;
+            indices[index+2] = static_cast<unsigned int>(nextRingStartIndex + j + 1);
             index += 3;
         }
     }
 
-    for(auto i = 1; i < (_rings - 1); ++i)
+    for(auto i = 1U; i < (_rings - 1); ++i)
     {
         const auto ringStartIndex = i *(_slices + 1);
         const auto nextRingStartIndex = (i + 1) *(_slices + 1);
 
-        for(auto j = 0; j < _slices; ++j)
+        for(auto j = 0U; j < _slices; ++j)
         {
             // Split the quad into two triangles
-            indices[index]   = ringStartIndex + j;
-            indices[index+1] = ringStartIndex + j + 1;
-            indices[index+2] = nextRingStartIndex + j;
-            indices[index+3] = nextRingStartIndex + j;
-            indices[index+4] = ringStartIndex + j + 1;
-            indices[index+5] = nextRingStartIndex + j + 1;
+            indices[index]   = static_cast<unsigned int>(ringStartIndex + j);
+            indices[index+1] = static_cast<unsigned int>(ringStartIndex + j + 1);
+            indices[index+2] = static_cast<unsigned int>(nextRingStartIndex + j);
+            indices[index+3] = static_cast<unsigned int>(nextRingStartIndex + j);
+            indices[index+4] = static_cast<unsigned int>(ringStartIndex + j + 1);
+            indices[index+5] = static_cast<unsigned int>(nextRingStartIndex + j + 1);
 
             index += 6;
         }
@@ -186,11 +185,11 @@ void Sphere::generateVertexData(std::vector<float>& vertices, std::vector<float>
     {
         const auto ringStartIndex = (_rings - 1) *(_slices + 1);
         const auto nextRingStartIndex = (_rings) *(_slices + 1);
-        for(auto j = 0; j < _slices; ++j)
+        for(auto j = 0U; j < _slices; ++j)
         {
-            indices[index] = ringStartIndex + j + 1;
-            indices[index+1] = nextRingStartIndex;
-            indices[index+2] = ringStartIndex + j;
+            indices[index] = static_cast<unsigned int>(ringStartIndex + j + 1);
+            indices[index+1] = static_cast<unsigned int>(nextRingStartIndex);
+            indices[index+2] = static_cast<unsigned int>(ringStartIndex + j);
             index += 3;
         }
     }

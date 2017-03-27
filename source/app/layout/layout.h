@@ -101,11 +101,11 @@ class GraphModel;
 class LayoutFactory
 {
 protected:
-    std::shared_ptr<GraphModel> _graphModel;
+    GraphModel* _graphModel = nullptr;
     LayoutSettings _layoutSettings;
 
 public:
-    explicit LayoutFactory(const std::shared_ptr<GraphModel>& graphModel) :
+    explicit LayoutFactory(GraphModel* graphModel) :
         _graphModel(graphModel)
     {}
 
@@ -126,7 +126,7 @@ class LayoutThread : public QObject
     Q_PROPERTY(bool paused READ paused NOTIFY pausedChanged)
 
 private:
-    GraphModel* _graphModel;
+    GraphModel* _graphModel = nullptr;
     std::mutex _mutex;
     std::thread _thread;
     bool _started = false;

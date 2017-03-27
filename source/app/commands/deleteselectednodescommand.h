@@ -13,8 +13,8 @@ class SelectionManager;
 class DeleteSelectedNodesCommand : public ICommand
 {
 private:
-    GraphModel* _graphModel;
-    SelectionManager* _selectionManager;
+    GraphModel* _graphModel = nullptr;
+    SelectionManager* _selectionManager = nullptr;
 
     int _numSelectedNodes = 0;
     const NodeIdSet _nodeIds;

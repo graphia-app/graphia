@@ -91,6 +91,8 @@ int main(int argc, char *argv[])
     qmlRegisterType<LayoutSetting>              (uri, maj, min, "LayoutSetting");
     qmlRegisterType<QmlPreferences>             (uri, maj, min, "Preferences");
 
+    qRegisterMetaType<size_t>("size_t");
+
     ThreadPoolSingleton threadPool;
     Preferences preferences;
 

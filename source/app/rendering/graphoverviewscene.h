@@ -65,9 +65,9 @@ public:
                                         Transition::Type transitionType = Transition::Type::EaseInEaseOut);
 
 private:
-    GraphRenderer* _graphRenderer;
-    CommandManager* _commandManager;
-    GraphModel* _graphModel;
+    GraphRenderer* _graphRenderer = nullptr;
+    CommandManager* _commandManager = nullptr;
+    GraphModel* _graphModel = nullptr;
 
     int _width = 0;
     int _height = 0;

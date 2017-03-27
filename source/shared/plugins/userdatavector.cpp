@@ -1,8 +1,8 @@
 #include "userdatavector.h"
 
-void UserDataVector::set(int index, const QString& value)
+void UserDataVector::set(size_t index, const QString& value)
 {
-    if(index >= static_cast<int>(_values.size()))
+    if(index >= _values.size())
         _values.resize(index + 1);
 
     _values.at(index) = value;
@@ -70,9 +70,9 @@ void UserDataVector::set(int index, const QString& value)
     }
 }
 
-QString UserDataVector::get(int index) const
+QString UserDataVector::get(size_t index) const
 {
-    if(index < 0 || index >= static_cast<int>(_values.size()))
+    if(index >= _values.size())
         return {};
 
     return _values.at(index);

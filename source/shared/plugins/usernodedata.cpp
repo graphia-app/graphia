@@ -5,7 +5,7 @@
 
 void UserNodeData::initialise(IMutableGraph& mutableGraph)
 {
-    _indexes = std::make_unique<NodeArray<int>>(mutableGraph, -1);
+    _indexes = std::make_unique<NodeArray<size_t>>(mutableGraph, 0);
 }
 
 void UserNodeData::addNodeId(NodeId nodeId)
@@ -14,20 +14,18 @@ void UserNodeData::addNodeId(NodeId nodeId)
     _rowToNodeIdMap[numValues()] = nodeId;
 }
 
-void UserNodeData::setNodeIdForRowIndex(NodeId nodeId, int row)
+void UserNodeData::setNodeIdForRowIndex(NodeId nodeId, size_t row)
 {
     _indexes->set(nodeId, row);
     _rowToNodeIdMap[row] = nodeId;
 }
 
-int UserNodeData::rowIndexForNodeId(NodeId nodeId) const
+size_t UserNodeData::rowIndexForNodeId(NodeId nodeId) const
 {
-    int rowIndex = _indexes->get(nodeId);
-    Q_ASSERT(rowIndex >= 0);
-    return rowIndex;
+    return _indexes->get(nodeId);
 }
 
-NodeId UserNodeData::nodeIdForRowIndex(int row) const
+NodeId UserNodeData::nodeIdForRowIndex(size_t row) const
 {
     Q_ASSERT(u::contains(_rowToNodeIdMap, row));
     return _rowToNodeIdMap.at(row);

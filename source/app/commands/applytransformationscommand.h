@@ -14,9 +14,9 @@ class Document;
 class ApplyTransformationsCommand : public ICommand
 {
 private:
-    GraphModel* _graphModel;
-    SelectionManager* _selectionManager;
-    Document* _document;
+    GraphModel* _graphModel = nullptr;
+    SelectionManager* _selectionManager = nullptr;
+    Document* _document = nullptr;
 
     QStringList _previousTransformations;
     QStringList _transformations;

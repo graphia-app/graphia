@@ -15,16 +15,16 @@ class UserNodeData : public UserData
     Q_OBJECT
 
 private:
-    std::unique_ptr<NodeArray<int>> _indexes;
-    std::map<int, NodeId> _rowToNodeIdMap;
+    std::unique_ptr<NodeArray<size_t>> _indexes;
+    std::map<size_t, NodeId> _rowToNodeIdMap;
 
 public:
     void initialise(IMutableGraph& mutableGraph);
 
     void addNodeId(NodeId nodeId);
-    void setNodeIdForRowIndex(NodeId nodeId, int row);
-    int rowIndexForNodeId(NodeId nodeId) const;
-    NodeId nodeIdForRowIndex(int row) const;
+    void setNodeIdForRowIndex(NodeId nodeId, size_t row);
+    size_t rowIndexForNodeId(NodeId nodeId) const;
+    NodeId nodeIdForRowIndex(size_t row) const;
 
     void setValueByNodeId(NodeId nodeId, const QString& name, const QString& value);
     QVariant valueByNodeId(NodeId nodeId, const QString& name) const;

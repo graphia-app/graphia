@@ -33,6 +33,16 @@ private:
     QOffscreenSurface _surface;
     OpenGLFunctions* _f;
 
+    QString GLubyteToQString(const GLubyte* bytes) const
+    {
+        QString string;
+
+        while(*bytes != 0)
+            string += *bytes++;
+
+        return string;
+    }
+
 public:
     Functions()
     {
@@ -65,7 +75,17 @@ public:
 
     bool valid() const { return _valid; }
 
-    OpenGLFunctions* operator()() { return _f; }
+    QString getString(GLenum name) const
+    {
+        return GLubyteToQString(_f->glGetString(name));
+    }
+
+    QString getString(GLenum name, GLuint index) const
+    {
+        return GLubyteToQString(_f->glGetStringi(name, index));
+    }
+
+    OpenGLFunctions* operator->() { return _f; }
 };
 
 bool OpenGLFunctions::hasOpenGLSupport()
@@ -79,17 +99,17 @@ QString OpenGLFunctions::info()
 
     QString extensions;
     GLint numExtensions;
-    f()->glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+    f->glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
     for(int i = 0; i < numExtensions; i++)
     {
-        extensions.append(reinterpret_cast<const char*>(f()->glGetStringi(GL_EXTENSIONS, i)));
+        extensions.append(f.getString(GL_EXTENSIONS, i));
         extensions.append(" ");
     }
 
     return QString("%1\n%2\n%3\n%4\n%5")
-        .arg(reinterpret_cast<const char*>(f()->glGetString(GL_VENDOR)))
-        .arg(reinterpret_cast<const char*>(f()->glGetString(GL_RENDERER)))
-        .arg(reinterpret_cast<const char*>(f()->glGetString(GL_VERSION)))
-        .arg(reinterpret_cast<const char*>(f()->glGetString(GL_SHADING_LANGUAGE_VERSION)))
+        .arg(f.getString(GL_VENDOR))
+        .arg(f.getString(GL_RENDERER))
+        .arg(f.getString(GL_VERSION))
+        .arg(f.getString(GL_SHADING_LANGUAGE_VERSION))
         .arg(extensions);
 }

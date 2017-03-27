@@ -20,9 +20,9 @@ static QRect findLargestDataRect(const TabularData& tabularData)
 {
     std::vector<int> heightHistogram(tabularData.numColumns());
 
-    for(int column = 0; column < tabularData.numColumns(); column++)
+    for(size_t column = 0; column < tabularData.numColumns(); column++)
     {
-        for(int row = tabularData.numRows() - 1; row >= 0; row--)
+        for(size_t row = tabularData.numRows() - 1; row > 0; --row)
         {
             auto& value = tabularData.valueAt(column, row);
             if(u::isNumeric(value))
@@ -56,7 +56,7 @@ static QRect findLargestDataRect(const TabularData& tabularData)
                 if(area > (dataRect.width() * dataRect.height()))
                 {
                     dataRect.setLeft(lastIndex);
-                    dataRect.setTop(tabularData.numRows() - height);
+                    dataRect.setTop(static_cast<int>(tabularData.numRows()) - height);
                     dataRect.setWidth(width);
                     dataRect.setHeight(height);
                 }
@@ -76,7 +76,7 @@ static QRect findLargestDataRect(const TabularData& tabularData)
         if(area > (dataRect.width() * dataRect.height()))
         {
             dataRect.setLeft(lastIndex);
-            dataRect.setTop(tabularData.numRows() - height);
+            dataRect.setTop(static_cast<int>(tabularData.numRows()) - height);
             dataRect.setWidth(width);
             dataRect.setHeight(height);
         }

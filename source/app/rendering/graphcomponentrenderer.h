@@ -147,8 +147,8 @@ private:
     float _fovx = 0.0f;
     float _fovy = 0.0f;
 
-    GraphModel* _graphModel;
-    SelectionManager* _selectionManager;
+    GraphModel* _graphModel = nullptr;
+    SelectionManager* _selectionManager = nullptr;
 
     QMatrix4x4 subViewportMatrix() const;
 

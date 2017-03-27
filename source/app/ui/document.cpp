@@ -282,13 +282,13 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
     emit idleChanged();
     emit commandVerbChanged(); // Show Loading message
 
-    _graphModel = std::make_shared<GraphModel>(fileUrl.fileName(), plugin);
+    _graphModel = std::make_unique<GraphModel>(fileUrl.fileName(), plugin);
 
-    _gpuComputeThread = std::make_shared<GPUComputeThread>();
+    _gpuComputeThread = std::make_unique<GPUComputeThread>();
     _graphFileParserThread = std::make_unique<ParserThread>(_graphModel->mutableGraph(), fileUrl);
 
-    _selectionManager = std::make_shared<SelectionManager>(*_graphModel);
-    _searchManager = std::make_shared<SearchManager>(*_graphModel);
+    _selectionManager = std::make_unique<SelectionManager>(*_graphModel);
+    _searchManager = std::make_unique<SearchManager>(*_graphModel);
 
     _pluginInstance = plugin->createInstance();
     _pluginInstance->initialise(_graphModel.get(), _selectionManager.get(), &_commandManager, _graphFileParserThread.get());
@@ -356,13 +356,13 @@ void Document::onLoadComplete(bool success)
     setTransforms(_pluginInstance->defaultTransforms());
     setVisualisations(_pluginInstance->defaultVisualisations());
 
-    _layoutThread = std::make_unique<LayoutThread>(*_graphModel, std::make_unique<ForceDirectedLayoutFactory>(_graphModel));
+    _layoutThread = std::make_unique<LayoutThread>(*_graphModel, std::make_unique<ForceDirectedLayoutFactory>(_graphModel.get()));
     connect(_layoutThread.get(), &LayoutThread::pausedChanged, this, &Document::layoutPauseStateChanged);
     connect(_layoutThread.get(), &LayoutThread::settingChanged, this, &Document::updateLayoutState);
     _layoutThread->addAllComponents();
     _layoutSettings.setVectorPtr(&_layoutThread->settingsVector());
 
-    _graphQuickItem->initialise(_graphModel, &_commandManager, _selectionManager, _gpuComputeThread);
+    _graphQuickItem->initialise(_graphModel.get(), &_commandManager, _selectionManager.get(), _gpuComputeThread.get());
 
     connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::maybeEmitIdleChanged, Qt::DirectConnection);
     connect(_graphQuickItem, &GraphQuickItem::viewIsResetChanged, this, &Document::canResetViewChanged);

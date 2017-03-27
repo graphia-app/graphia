@@ -1104,7 +1104,7 @@ GLuint GraphRenderer::sdfTextureCurrent() const
 
 GLuint GraphRenderer::sdfTextureOffscreen() const
 {
-    return _sdfTextures[1 - _currentSDFTextureIndex];
+    return _sdfTextures.at(1 - _currentSDFTextureIndex);
 }
 
 void GraphRenderer::swapSdfTexture()
@@ -1228,7 +1228,7 @@ void GraphRenderer::renderNodes(GPUGraphData& gpuGraphData)
     _nodesShader.setUniformValue("componentData", 0);
 
     gpuGraphData._sphere.vertexArrayObject()->bind();
-    glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._sphere.indexCount(),
+    glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._sphere.glIndexCount(),
                             GL_UNSIGNED_INT, nullptr, gpuGraphData.numNodes());
     gpuGraphData._sphere.vertexArrayObject()->release();
 
@@ -1249,7 +1249,7 @@ void GraphRenderer::renderEdges(GPUGraphData& gpuGraphData)
     _edgesShader.setUniformValue("componentData", 0);
 
     gpuGraphData._arrow.vertexArrayObject()->bind();
-    glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._arrow.indexCount(),
+    glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._arrow.glIndexCount(),
                             GL_UNSIGNED_INT, nullptr, gpuGraphData.numEdges());
     gpuGraphData._arrow.vertexArrayObject()->release();
 
@@ -1285,7 +1285,7 @@ void GraphRenderer::renderText(GPUGraphData& gpuGraphData)
     _textShader.setUniformValue("componentData", 1);
 
     gpuGraphData._rectangle.vertexArrayObject()->bind();
-    glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._rectangle.indexCount(),
+    glDrawElementsInstanced(GL_TRIANGLES, gpuGraphData._rectangle.glIndexCount(),
                             GL_UNSIGNED_INT, nullptr, static_cast<int>(gpuGraphData._glyphData.size())) ;
     gpuGraphData._rectangle.vertexArrayObject()->release();
 
@@ -1590,8 +1590,8 @@ void GraphRenderer::finishRender()
 
     for(auto i : gpuGraphDataRenderOrder())
     {
-        render2DComposite(_screenShader,    _gpuGraphData[i]._colorTexture,     _gpuGraphData[i].alpha());
-        render2DComposite(_selectionShader, _gpuGraphData[i]._selectionTexture, _gpuGraphData[i].alpha());
+        render2DComposite(_screenShader,    _gpuGraphData.at(i)._colorTexture,     _gpuGraphData.at(i).alpha());
+        render2DComposite(_selectionShader, _gpuGraphData.at(i)._selectionTexture, _gpuGraphData.at(i).alpha());
     }
 
     _screenQuadDataBuffer.release();

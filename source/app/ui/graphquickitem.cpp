@@ -19,10 +19,10 @@ GraphQuickItem::GraphQuickItem(QQuickItem* parent) :
     setAcceptedMouseButtons(Qt::AllButtons);
 }
 
-void GraphQuickItem::initialise(std::shared_ptr<GraphModel> graphModel,
+void GraphQuickItem::initialise(GraphModel* graphModel,
                                 CommandManager* commandManager,
-                                std::shared_ptr<SelectionManager> selectionManager,
-                                std::shared_ptr<GPUComputeThread> gpuComputeThread)
+                                SelectionManager* selectionManager,
+                                GPUComputeThread* gpuComputeThread)
 {
     _graphModel = graphModel;
     _commandManager = commandManager;
@@ -167,7 +167,7 @@ QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const
     // context available, and this is as good a place as any for that
     _gpuComputeThread->initialise();
 
-    auto graphRenderer = new GraphRenderer(_graphModel.get(), _commandManager, _selectionManager.get(), _gpuComputeThread.get());
+    auto graphRenderer = new GraphRenderer(_graphModel, _commandManager, _selectionManager, _gpuComputeThread);
     connect(this, &GraphQuickItem::commandWillExecute, graphRenderer, &GraphRenderer::onCommandWillExecute, Qt::DirectConnection);
     connect(this, &GraphQuickItem::commandCompleted, graphRenderer, &GraphRenderer::onCommandCompleted, Qt::DirectConnection);
     connect(this, &GraphQuickItem::commandCompleted, this, &GraphQuickItem::update);

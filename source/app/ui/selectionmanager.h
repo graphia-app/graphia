@@ -135,7 +135,7 @@ public:
     bool signalsSuppressed();
 
 private:
-    const GraphModel* _graphModel;
+    const GraphModel* _graphModel = nullptr;
 
     NodeIdSet _selectedNodeIds;
 

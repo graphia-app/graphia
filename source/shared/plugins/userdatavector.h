@@ -48,8 +48,8 @@ public:
     int floatMin() const { return _floatMin; }
     int floatMax() const { return _floatMax; }
 
-    void set(int index, const QString& value);
-    QString get(int index) const;
+    void set(size_t index, const QString& value);
+    QString get(size_t index) const;
 };
 
 #endif // USERDATAVECTOR_H

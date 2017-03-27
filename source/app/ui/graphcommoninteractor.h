@@ -29,10 +29,10 @@ public:
                           GraphRenderer* graphRenderer);
 
 protected:
-    GraphModel* _graphModel;
-    CommandManager* _commandManager;
-    SelectionManager* _selectionManager;
-    GraphRenderer* _graphRenderer;
+    GraphModel* _graphModel = nullptr;
+    CommandManager* _commandManager = nullptr;
+    SelectionManager* _selectionManager = nullptr;
+    GraphRenderer* _graphRenderer = nullptr;
 
 private:
     QPoint _cursorPosition;

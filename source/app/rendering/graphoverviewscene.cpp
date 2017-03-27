@@ -29,6 +29,7 @@ GraphOverviewScene::GraphOverviewScene(CommandManager* commandManager, GraphRend
     _graphModel(graphRenderer->graphModel()),
     _previousComponentAlpha(_graphModel->graph(), 1.0f),
     _componentAlpha(_graphModel->graph(), 1.0f),
+    _nextComponentLayoutDataChanged(false),
     _nextComponentLayoutData(_graphModel->graph()),
     _componentLayoutData(_graphModel->graph()),
     _previousZoomedComponentLayoutData(_graphModel->graph()),

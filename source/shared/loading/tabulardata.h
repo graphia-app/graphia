@@ -17,23 +17,23 @@ class TabularData
 {
 private:
     std::vector<std::string> _data;
-    int _columns = 0;
-    int _rows = 0;
+    size_t _columns = 0;
+    size_t _rows = 0;
     bool _transposed = false;
 
-    size_t index(int column, int row) const;
+    size_t index(size_t column, size_t row) const;
 
 public:
-    void initialise(int numColumns, int numRows);
+    void initialise(size_t numColumns, size_t numRows);
 
-    int numColumns() const;
-    int numRows() const;
+    size_t numColumns() const;
+    size_t numRows() const;
     bool transposed() const { return _transposed; }
-    const std::string& valueAt(int column, int row) const;
-    QString valueAtQString(int column, int row) const;
+    const std::string& valueAt(size_t column, size_t row) const;
+    QString valueAtQString(size_t column, size_t row) const;
 
     void setTransposed(bool transposed) { _transposed = transposed; }
-    void setValueAt(int column, int row, std::string&& value);
+    void setValueAt(size_t column, size_t row, std::string&& value);
 };
 
 template<const char Delimiter> class TextDelimitedTabularDataParser : public BaseParser
@@ -57,8 +57,8 @@ private:
 
         std::string line;
         std::string currentToken;
-        int currentColumn = 0;
-        int currentRow = 0;
+        size_t currentColumn = 0;
+        size_t currentRow = 0;
 
         progress(-1);
 
@@ -124,13 +124,13 @@ private:
 public:
     bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress)
     {
-        int columns = 0;
-        int rows = 0;
+        size_t columns = 0;
+        size_t rows = 0;
 
         // First pass to determine the size of the table
         graph.setPhase(QObject::tr("Finding size"));
         bool success = parse(url, progress,
-        [&columns, &rows](int column, int row, auto)
+        [&columns, &rows](size_t column, size_t row, auto)
         {
             columns = std::max(columns, column + 1);
             rows = std::max(rows, row + 1);
@@ -143,7 +143,7 @@ public:
 
         graph.setPhase(QObject::tr("Parsing"));
         return parse(url, progress,
-        [this](int column, int row, auto&& token)
+        [this](size_t column, size_t row, auto&& token)
         {
             _tabularData.setValueAt(column, row, std::move(token));
         });

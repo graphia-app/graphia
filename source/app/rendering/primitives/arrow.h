@@ -1,8 +1,6 @@
 #ifndef ARROW_H
 #define ARROW_H
 
-#include <QObject>
-
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
@@ -12,16 +10,10 @@ namespace Primitive
 {
 // Consists of a cylinder and a cone. Edge shader hides the cone based on
 // edge type.
-class Arrow : public QObject
+class Arrow
 {
-    Q_OBJECT
-
-    Q_PROPERTY(float radius READ radius WRITE setRadius)
-    Q_PROPERTY(float length READ length WRITE setLength)
-    Q_PROPERTY(int slices READ slices WRITE setSlices)
-
 public:
-    explicit Arrow(QObject* parent = nullptr);
+    Arrow();
 
     float radius() const { return _radius; }
     auto length() const { return _length; }
@@ -29,7 +21,7 @@ public:
 
     QOpenGLVertexArrayObject* vertexArrayObject() { return &_vao; }
 
-    auto indexCount() const { return 12 * _slices; }
+    auto glIndexCount() const { return static_cast<GLsizei>(12 * _slices); }
 
 public slots:
     void setRadius(float radius) { _radius = radius; }
@@ -45,7 +37,7 @@ private:
 
     float _radius = 1.0f;
     float _length = 1.0f;
-    GLsizei _slices = 30;
+    size_t _slices = 30;
 
     QOpenGLBuffer _positionBuffer;
     QOpenGLBuffer _normalBuffer;

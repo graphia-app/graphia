@@ -1,22 +1,20 @@
 #ifndef RECTANGLE_H
 #define RECTANGLE_H
 
-#include <QObject>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
 
 namespace Primitive
 {
-class Rectangle : public QObject
+class Rectangle
 {
-    Q_OBJECT
 public:
-    explicit Rectangle(QObject* parent = nullptr);
+    Rectangle();
 
     QOpenGLVertexArrayObject* vertexArrayObject() { return &_vao; }
 
-    GLsizei indexCount() const { return 6; }
+    GLsizei glIndexCount() const { return 6; }
 
 public slots:
     void create(QOpenGLShaderProgram& shader);

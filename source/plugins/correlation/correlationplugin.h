@@ -24,15 +24,15 @@ class CorrelationPluginInstance : public BasePluginInstance
     Q_PROPERTY(QStringList columnNames READ columnNames NOTIFY columnNamesChanged)
     Q_PROPERTY(QStringList rowNames READ rowNames NOTIFY rowNamesChanged)
     Q_PROPERTY(QVector<double> rawData READ rawData NOTIFY rawDataChanged)
-    Q_PROPERTY(int columnCount MEMBER _numColumns NOTIFY columnCountChanged)
-    Q_PROPERTY(int rowCount MEMBER _numRows NOTIFY rowCountChanged)
+    Q_PROPERTY(size_t columnCount MEMBER _numColumns NOTIFY columnCountChanged)
+    Q_PROPERTY(size_t rowCount MEMBER _numRows NOTIFY rowCountChanged)
 
 public:
     CorrelationPluginInstance();
 
 private:
-    int _numColumns = 0;
-    int _numRows = 0;
+    size_t _numColumns = 0;
+    size_t _numRows = 0;
 
     std::vector<QString> _dataColumnNames;
 
@@ -122,10 +122,10 @@ private:
     void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager,
                     ICommandManager* commandManager, const IParserThread* parserThread);
 
-    void setDataColumnName(int column, const QString& name);
-    void setData(int column, int row, double value);
+    void setDataColumnName(size_t column, const QString& name);
+    void setData(size_t column, size_t row, double value);
 
-    void finishDataRow(int row);
+    void finishDataRow(size_t row);
 
     QAbstractTableModel* userNodeDataTableModel() { return &_userNodeDataTableModel; }
     QStringList columnNames();
@@ -135,8 +135,8 @@ private:
     const DataRow& dataRowForNodeId(NodeId nodeId) const;
 
 public:
-    void setDimensions(int numColumns, int numRows);
-    bool loadUserData(const TabularData& tabularData, int firstDataColumn, int firstDataRow,
+    void setDimensions(size_t numColumns, size_t numRows);
+    bool loadUserData(const TabularData& tabularData, size_t firstDataColumn, size_t firstDataRow,
                       const std::function<bool()>& cancelled, const IParser::ProgressFn& progress);
 
     std::vector<std::tuple<NodeId, NodeId, double>> pearsonCorrelation(

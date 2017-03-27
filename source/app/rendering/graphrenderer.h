@@ -229,12 +229,12 @@ public slots:
     void onVisibilityChanged();
 
 private:
-    GraphModel* _graphModel;
+    GraphModel* _graphModel = nullptr;
     int _numComponents = 0;
 
-    SelectionManager* _selectionManager;
+    SelectionManager* _selectionManager = nullptr;
 
-    GPUComputeThread* _gpuComputeThread;
+    GPUComputeThread* _gpuComputeThread = nullptr;
     std::shared_ptr<GlyphMap> _glyphMap;
 
     // Store a copy of the text layout results as its computation is a long running

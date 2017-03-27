@@ -128,11 +128,11 @@ private:
 
     std::atomic_bool _graphChanging;
 
-    std::shared_ptr<GraphModel> _graphModel;
-    std::shared_ptr<GPUComputeThread> _gpuComputeThread;
+    std::unique_ptr<GraphModel> _graphModel;
+    std::unique_ptr<GPUComputeThread> _gpuComputeThread;
     std::unique_ptr<IPluginInstance> _pluginInstance;
-    std::shared_ptr<SelectionManager> _selectionManager;
-    std::shared_ptr<SearchManager> _searchManager;
+    std::unique_ptr<SelectionManager> _selectionManager;
+    std::unique_ptr<SearchManager> _searchManager;
     CommandManager _commandManager;
     std::unique_ptr<ParserThread> _graphFileParserThread;
 

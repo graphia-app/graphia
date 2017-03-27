@@ -38,13 +38,13 @@ class GraphQuickItem : public QQuickFramebufferObject
 public:
     explicit GraphQuickItem(QQuickItem* parent = nullptr);
 
-    void initialise(std::shared_ptr<GraphModel> graphModel,
+    void initialise(GraphModel *graphModel,
                     CommandManager* commandManager,
-                    std::shared_ptr<SelectionManager> selectionManager,
-                    std::shared_ptr<GPUComputeThread> gpuComputeThread);
+                    SelectionManager *selectionManager,
+                    GPUComputeThread *gpuComputeThread);
 
-    std::shared_ptr<GraphModel> graphModel() { return _graphModel; }
-    std::shared_ptr<SelectionManager> selectionManager() { return _selectionManager; }
+    GraphModel* graphModel() { return _graphModel; }
+    SelectionManager* selectionManager() { return _selectionManager; }
 
     void resetView();
     bool viewResetPending();
@@ -87,10 +87,10 @@ private:
     void mouseDoubleClickEvent(QMouseEvent* e);
     void wheelEvent(QWheelEvent* e);
 
-    std::shared_ptr<GraphModel> _graphModel;
-    std::shared_ptr<GPUComputeThread> _gpuComputeThread;
+    GraphModel* _graphModel = nullptr;
+    GPUComputeThread* _gpuComputeThread = nullptr;
     CommandManager* _commandManager = nullptr;
-    std::shared_ptr<SelectionManager> _selectionManager;
+    SelectionManager* _selectionManager = nullptr;
 
     bool _viewResetPending = false;
     bool _overviewModeSwitchPending = false;

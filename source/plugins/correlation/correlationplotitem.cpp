@@ -181,7 +181,7 @@ void CorrelationPlotItem::buildPlot()
 
 void CorrelationPlotItem::populateMeanAveragePlot()
 {
-    double maxX = _columnCount;
+    double maxX = static_cast<double>(_columnCount);
     double maxY = 0.0;
 
     std::random_device randomDevice;
@@ -189,7 +189,7 @@ void CorrelationPlotItem::populateMeanAveragePlot()
     std::uniform_int_distribution<> randomColorDist(0, 255);
 
     auto* graph = _customPlot.addGraph();
-    mTwister.seed(_selectedRows.count() * 1000);
+    mTwister.seed(static_cast<unsigned int>(_selectedRows.count()));
     QColor randomColor = QColor::fromHsl(randomColorDist(mTwister), 210, 130);
     graph->setPen(QPen(randomColor));
     graph->setName(tr("Mean average of selection"));
@@ -198,18 +198,18 @@ void CorrelationPlotItem::populateMeanAveragePlot()
     QVector<double> yDataAvg;
     QVector<double> xData;
 
-    for(int col = 0; col < _columnCount; col++)
+    for(size_t col = 0; col < _columnCount; col++)
     {
         double runningTotal = 0.0;
         for(auto row : _selectedRows)
         {
-            int index = (row * _columnCount) + col;
-            runningTotal += _data[index];
+            auto index = (row * _columnCount) + col;
+            runningTotal += _data[static_cast<int>(index)];
         }
-        xData.append(col);
+        xData.append(static_cast<double>(col));
         yDataAvg.append(runningTotal / _selectedRows.length());
 
-        maxY = qMax(maxY, yDataAvg.back());
+        maxY = std::max(maxY, yDataAvg.back());
     }
     graph->setData(xData, yDataAvg, true);
 
@@ -233,7 +233,7 @@ void CorrelationPlotItem::populateMeanAveragePlot()
 
 void CorrelationPlotItem::populateRawPlot()
 {
-    double maxX = _columnCount;
+    double maxX = static_cast<double>(_columnCount);
     double maxY = 0.0;
 
     std::random_device randomDevice;
@@ -244,7 +244,7 @@ void CorrelationPlotItem::populateRawPlot()
     for(auto row : _selectedRows)
     {
         auto* graph = _customPlot.addGraph();
-        mTwister.seed(row * 1000);
+        mTwister.seed(static_cast<unsigned int>(row));
         QColor randomColor = QColor::fromHsl(randomColorDist(mTwister), 210, 130);
         graph->setPen(QPen(randomColor));
         graph->setName(_graphNames[row]);
@@ -252,13 +252,13 @@ void CorrelationPlotItem::populateRawPlot()
         QVector<double> yData;
         QVector<double> xData;
 
-        for(int col = 0; col < _columnCount; col++)
+        for(size_t col = 0; col < _columnCount; col++)
         {
-            int index = (row * _columnCount) + col;
-            xData.append(col);
-            yData.append(_data[index]);
+            auto index = (row * _columnCount) + col;
+            xData.append(static_cast<double>(col));
+            yData.append(_data[static_cast<int>(index)]);
 
-            maxY = qMax(maxY, _data[index]);
+            maxY = std::max(maxY, _data[static_cast<int>(index)]);
         }
         graph->setData(xData, yData, true);
     }
@@ -287,7 +287,7 @@ void CorrelationPlotItem::setElideLabelWidth(int elideLabelWidth)
         refresh();
 }
 
-void CorrelationPlotItem::setColumnCount(int columnCount)
+void CorrelationPlotItem::setColumnCount(size_t columnCount)
 {
     _columnCount = columnCount;
     emit minimumWidthChanged();
@@ -304,18 +304,19 @@ void CorrelationPlotItem::setShowColumnNames(bool showColumnNames)
         refresh();
 }
 
-int CorrelationPlotItem::minimumWidth() const
+unsigned int CorrelationPlotItem::minimumWidth() const
 {
     QFontMetrics metrics(_defaultFont9Pt);
     const auto& margins = _customPlot.axisRect()->margins();
-    const int axisWidth = margins.left() + margins.right();
+    const unsigned int axisWidth = margins.left() + margins.right();
 
     if(!_showColumnNames)
         return axisWidth + 50;
 
-    const int columnPadding = 1;
+    const unsigned int columnPadding = 1;
 
-    return (_columnCount * (metrics.height() + columnPadding)) + axisWidth;
+    return (static_cast<unsigned int>(_columnCount) *
+        (metrics.height() + columnPadding)) + axisWidth;
 }
 
 void CorrelationPlotItem::routeMouseEvent(QMouseEvent* event)

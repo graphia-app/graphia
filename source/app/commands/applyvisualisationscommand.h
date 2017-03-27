@@ -13,8 +13,8 @@ class Document;
 class ApplyVisualisationsCommand : public ICommand
 {
 private:
-    GraphModel* _graphModel;
-    Document* _document;
+    GraphModel* _graphModel = nullptr;
+    Document* _document = nullptr;
 
     QStringList _previousVisualisations;
     QStringList _visualisations;

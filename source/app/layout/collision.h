@@ -13,7 +13,7 @@
 class Collision
 {
 private:
-    const GraphModel* _graphModel;
+    const GraphModel* _graphModel = nullptr;
     ComponentId _componentId;
     QVector3D _offset;
 

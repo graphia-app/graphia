@@ -14,8 +14,8 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(QVector<int> selectedRows MEMBER _selectedRows WRITE setSelectedRows)
     Q_PROPERTY(QStringList columnNames MEMBER _labelNames WRITE setLabelNames)
     Q_PROPERTY(QStringList rowNames MEMBER _graphNames)
-    Q_PROPERTY(int columnCount MEMBER _columnCount WRITE setColumnCount)
-    Q_PROPERTY(int rowCount MEMBER _rowCount)
+    Q_PROPERTY(size_t columnCount MEMBER _columnCount WRITE setColumnCount)
+    Q_PROPERTY(size_t rowCount MEMBER _rowCount)
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
     Q_PROPERTY(int minimumWidth READ minimumWidth NOTIFY minimumWidthChanged)
     Q_PROPERTY(bool showColumnNames MEMBER _showColumnNames WRITE setShowColumnNames)
@@ -53,8 +53,8 @@ private:
     QFont _defaultFont9Pt;
 
     QCustomPlot _customPlot;
-    int _columnCount = 0;
-    int _rowCount = 0;
+    size_t _columnCount = 0;
+    size_t _rowCount = 0;
     int _elideLabelWidth = 120;
     QStringList _labelNames;
     QStringList _graphNames;
@@ -70,10 +70,10 @@ private:
     void setSelectedRows(const QVector<int>& selectedRows);
     void setLabelNames(const QStringList& labelNames);
     void setElideLabelWidth(int elideLabelWidth);
-    void setColumnCount(int columnCount);
+    void setColumnCount(size_t columnCount);
     void setShowColumnNames(bool showColumnNames);
 
-    int minimumWidth() const;
+    unsigned int minimumWidth() const;
 
 private slots:
     void onCustomReplot();

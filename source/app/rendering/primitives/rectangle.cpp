@@ -1,9 +1,10 @@
 #include "rectangle.h"
 
+#include <array>
+
 namespace Primitive
 {
-Rectangle::Rectangle(QObject* parent) :
-    QObject(parent),
+Rectangle::Rectangle() :
     _positionBuffer(QOpenGLBuffer::VertexBuffer),
     _normalBuffer(QOpenGLBuffer::VertexBuffer),
     _textureCoordBuffer(QOpenGLBuffer::VertexBuffer),
@@ -93,43 +94,43 @@ void Rectangle::generateVertexData(std::vector<float>& vertices, std::vector<flo
     texCoords.resize(2 * 4);
     indices.resize(3 * 2);
 
-    float verts[] = {
+    std::array<float, 12> verts{{
         1.0f, 0.0f, 0.0f,
         1.0f, 1.0f, 0.0f,
         0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 0.0f,
-    };
+    }};
 
-    float norm[] = {
+    std::array<float, 3> norm{{
         0.0f, 0.0f, 1.0f
-    };
+    }};
 
-    float tangs[] = {
+    std::array<float, 4> tangs{{
         1.0f, 0.0f, 0.0f, 1.0f
-    };
+    }};
 
     // Copy Verts
     vertices.assign(std::begin(verts), std::end(verts));
-    for(auto i = 0U; i < 4U; ++i)
+    for(size_t i = 0; i < 4; ++i)
     {
         auto index = i*3;
-        vertices[index] = verts[index];
-        vertices[index+1] = verts[index+1];
-        vertices[index+2] = verts[index+2];
+        vertices[index] = verts.at(index);
+        vertices[index+1] = verts.at(index+1);
+        vertices[index+2] = verts.at(index+2);
 
-        normals[index] = norm[0];
-        normals[index+1] = norm[1];
-        normals[index+2] = norm[2];
+        normals[index] = norm.at(0);
+        normals[index+1] = norm.at(1);
+        normals[index+2] = norm.at(2);
 
         auto tindex = i*4;
-        tangents[tindex] = tangs[0];
-        tangents[tindex+1] = tangs[1];
-        tangents[tindex+2] = tangs[2];
-        tangents[tindex+3] = tangs[3];
+        tangents[tindex] = tangs.at(0);
+        tangents[tindex+1] = tangs.at(1);
+        tangents[tindex+2] = tangs.at(2);
+        tangents[tindex+3] = tangs.at(3);
 
         auto texIndex = i*2;
-        texCoords[texIndex] = verts[i*3];
-        texCoords[texIndex+1] = verts[(i*3)+1];
+        texCoords[texIndex] = verts.at(i*3);
+        texCoords[texIndex+1] = verts.at((i*3)+1);
     }
 
     // Build two triangles

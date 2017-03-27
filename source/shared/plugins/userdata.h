@@ -32,8 +32,8 @@ public:
     auto end() const { return make_pair_second_iterator(_userDataVectors.end()); }
 
     void add(const QString& name);
-    void setValue(int index, const QString& name, const QString& value);
-    QVariant value(int index, const QString& name) const;
+    void setValue(size_t index, const QString& name, const QString& value);
+    QVariant value(size_t index, const QString& name) const;
 
 signals:
     void userDataVectorAdded(const QString& name);
