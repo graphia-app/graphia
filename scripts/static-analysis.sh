@@ -13,11 +13,11 @@ find source/app \
   --library=scripts/cppcheck.cfg 2> cppcheck.xml
 
 # clang-tidy (this works better when a compile_command.json has been created by bear)
-CHECKS="-checks=*, \
-  -*readability*, \
-  -llvm-*, \
-  -google-*, \
-  -clang-analyzer-alpha.deadcode.UnreachableCode"
+CHECKS="-checks=*,\
+-*readability*,\
+-llvm-*,\
+-google-*,\
+-clang-analyzer-alpha.deadcode.UnreachableCode"
 
 clang-tidy -list-checks ${CHECKS}
 find source/app \
