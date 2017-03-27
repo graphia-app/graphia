@@ -6,6 +6,7 @@
 #include <memory>
 #include <random>
 #include <thread>
+#include <array>
 
 static std::random_device rd;
 static std::mt19937 gen(rd());
