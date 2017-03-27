@@ -351,18 +351,43 @@ void CorrelationPlotItem::showTooltip()
     _itemTracer->setGraphKey(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
 
     _hoverLabel->setVisible(true);
-    _hoverLabel->position->setPixelPosition(QPointF(_itemTracer->anchor("position")->pixelPosition().x() + 10.0f,
-                                                    _itemTracer->anchor("position")->pixelPosition().y()));
-
     _hoverLabel->setText(QString("%1, %2: %3")
                          .arg(_hoverPlottable->name())
                          .arg(_labelNames[static_cast<int>(_itemTracer->position->key())])
                          .arg(_itemTracer->position->value())
                          );
 
+    const float COLOR_RECT_WIDTH = 10.0f;
+    const float HOVER_MARGIN = 10.0f;
+    auto hoverlabelWidth = _hoverLabel->right->pixelPosition().x() -
+            _hoverLabel->left->pixelPosition().x();
+    auto hoverlabelHeight = _hoverLabel->bottom->pixelPosition().y() -
+            _hoverLabel->top->pixelPosition().y();
+    auto hoverLabelRightX = _itemTracer->anchor("position")->pixelPosition().x() +
+            hoverlabelWidth + HOVER_MARGIN + COLOR_RECT_WIDTH;
+    auto xBounds = (_viewport != QRect()) ? _viewport.x() + _viewport.width() : clipRect().width();
+    // Even if viewport is not set, 0.0f is the minimum
+    auto yMin = _viewport.y();
+    QPointF targetPosition(_itemTracer->anchor("position")->pixelPosition().x() + HOVER_MARGIN,
+                           _itemTracer->anchor("position")->pixelPosition().y());
+
+    // If it falls out of bounds, clip to bounds and move label above marker
+    if (hoverLabelRightX > xBounds)
+    {
+        targetPosition.rx() = xBounds - hoverlabelWidth - COLOR_RECT_WIDTH - 1.0f;
+
+        // If moving the label above marker falls out of yMin, clip to yMin + labelHeight/2;
+        if (targetPosition.y() - hoverlabelHeight / 2.0f - HOVER_MARGIN * 2.0f < yMin)
+            targetPosition.setY(yMin + hoverlabelHeight / 2.0f);
+        else
+            targetPosition.ry() -= HOVER_MARGIN * 2.0f;
+    }
+
+    _hoverLabel->position->setPixelPosition(targetPosition);
+
     _hoverColorRect->setVisible(true);
     _hoverColorRect->setBrush(QBrush(_hoverPlottable->pen().color()));
-    _hoverColorRect->bottomRight->setPixelPosition(QPointF(_hoverLabel->bottomRight->pixelPosition().x() + 10.0f,
+    _hoverColorRect->bottomRight->setPixelPosition(QPointF(_hoverLabel->bottomRight->pixelPosition().x() + COLOR_RECT_WIDTH,
                                                    _hoverLabel->bottomRight->pixelPosition().y()));
 
     _textLayer->replot();

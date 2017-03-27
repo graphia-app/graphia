@@ -114,6 +114,8 @@ PluginContent
                 rowNames: plugin.model.rowNames
                 selectedRows: tableView.selectedRows
                 showColumnNames: toggleColumnNamesAction.checked
+                viewport: Qt.rect(scrollView.flickableItem.contentX, scrollView.flickableItem.contentY,
+                                  scrollView.flickableItem.width, scrollView.flickableItem.height);
 
                 elideLabelWidth:
                 {

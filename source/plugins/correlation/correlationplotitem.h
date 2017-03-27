@@ -19,6 +19,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
     Q_PROPERTY(int minimumWidth READ minimumWidth NOTIFY minimumWidthChanged)
     Q_PROPERTY(bool showColumnNames MEMBER _showColumnNames WRITE setShowColumnNames)
+    Q_PROPERTY(QRect viewport MEMBER _viewport)
 
 public:
     explicit CorrelationPlotItem(QQuickItem* parent = nullptr);
@@ -49,6 +50,7 @@ private:
     QCPItemText* _hoverLabel = nullptr;
     QCPItemRect* _hoverColorRect = nullptr;
     QCPItemTracer* _itemTracer = nullptr;
+    QRect _viewport;
 
     QFont _defaultFont9Pt;
 
