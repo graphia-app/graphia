@@ -990,31 +990,38 @@ QString Document::visualisationDescription(const QString& attributeName, const Q
     return _graphModel != nullptr ? _graphModel->visualisationDescription(attributeName, channelName) : QString();
 }
 
-QVariantMap Document::visualisationAlertAtIndex(int index) const
+QVariantMap Document::visualisationInfoAtIndex(int index) const
 {
     QVariantMap map;
 
-    map.insert("type", static_cast<int>(VisualisationAlertType::None));
-    map.insert("text", "");
+    map.insert("alertType", static_cast<int>(VisualisationAlertType::None));
+    map.insert("alertText", "");
+    map.insert("minimumNumericValue", 0.0);
+    map.insert("maximumNumericValue", 1.0);
 
     if(_graphModel == nullptr)
         return map;
 
-    auto visualisationAlerts = _graphModel->visualisationAlertsAtIndex(index);
+    const auto& visualisationInfo = _graphModel->visualisationInfoAtIndex(index);
 
-    if(visualisationAlerts.empty())
+    map.insert("minimumNumericValue", visualisationInfo.min());
+    map.insert("maximumNumericValue", visualisationInfo.max());
+
+    auto alerts = visualisationInfo.alerts();
+
+    if(alerts.empty())
         return map;
 
-    std::sort(visualisationAlerts.begin(), visualisationAlerts.end(),
+    std::sort(alerts.begin(), alerts.end(),
     [](auto& a, auto& b)
     {
         return a._type > b._type;
     });
 
-    auto& visualisationAlert = visualisationAlerts.at(0);
+    auto& visualisationAlert = alerts.at(0);
 
-    map.insert("type", static_cast<int>(visualisationAlert._type));
-    map.insert("text", visualisationAlert._text);
+    map.insert("alertType", static_cast<int>(visualisationAlert._type));
+    map.insert("alertText", visualisationAlert._text);
 
     return map;
 }
@@ -1026,6 +1033,12 @@ QVariantMap Document::parseVisualisation(const QString& visualisation) const
         return p.result().asVariantMap();
 
     return {};
+}
+
+QVariantMap Document::visualisationDefaultParameters(const QString& attributeName,
+                                                     const QString& channelName) const
+{
+    return _graphModel != nullptr ? _graphModel->visualisationDefaultParameters(attributeName, channelName) : QVariantMap();
 }
 
 bool Document::visualisationIsValid(const QString& visualisation) const

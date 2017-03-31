@@ -2,7 +2,7 @@
 #define VISUALISATIONBUILDER_H
 
 #include "visualisationchannel.h"
-#include "visualisationalert.h"
+#include "visualisationinfo.h"
 
 #include "graph/graph.h"
 #include "shared/graph/grapharray.h"
@@ -60,7 +60,7 @@ private:
     }
 
 public:
-    void findOverrideAlerts(VisualisationAlertsMap& alerts)
+    void findOverrideAlerts(VisualisationInfosMap& infos)
     {
         for(int c = 0; c < NumChannels; c++)
         {
@@ -88,12 +88,12 @@ public:
                     {
                         if(bothSet != sourceSet)
                         {
-                            alerts[iv._index].emplace_back(VisualisationAlertType::Warning,
+                            infos[iv._index].addAlert(VisualisationAlertType::Warning,
                                 QObject::tr("Partially overriden by subsequent visualisations"));
                         }
                         else
                         {
-                            alerts[iv._index].emplace_back(VisualisationAlertType::Error,
+                            infos[iv._index].addAlert(VisualisationAlertType::Error,
                                 QObject::tr("Overriden by subsequent visualisations"));
                         }
                     }
@@ -102,9 +102,9 @@ public:
         }
     }
 
-    VisualisationAlert build(const Attribute& attribute,
-                             const VisualisationChannel& channel,
-                             bool invert, int index)
+    void build(const Attribute& attribute,
+               const VisualisationChannel& channel,
+               bool invert, int index, VisualisationInfo& visualisationInfo)
     {
         for(int c = 0; c < NumChannels; c++)
             _applications[c].emplace_back(index, *_graph);
@@ -122,8 +122,14 @@ public:
                     _graph->typeOf(elementId) == MultiElementType::Tail;
             });
 
+            visualisationInfo.setMin(min);
+            visualisationInfo.setMax(max);
+
             if(min == max)
-                return {VisualisationAlertType::Warning, QObject::tr("No Numeric Range To Map To")};
+            {
+                visualisationInfo.addAlert(VisualisationAlertType::Warning, QObject::tr("No Numeric Range To Map To"));
+                return;
+            }
 
             for(auto elementId : *_elementIds)
             {
@@ -171,8 +177,6 @@ public:
         }
 
         _numAppliedVisualisations++;
-
-        return {};
     }
 };
 

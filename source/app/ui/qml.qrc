@@ -30,5 +30,6 @@
         <file>qml/Controls/warning.png</file>
         <file>qml/Controls/error.png</file>
         <file>qml/Controls/ToolTip.qml</file>
+        <file>qml/Controls/GradientKey.qml</file>
     </qresource>
 </RCC>

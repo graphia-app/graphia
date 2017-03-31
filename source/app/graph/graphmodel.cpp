@@ -238,7 +238,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 {
     _mappedNodeVisuals.resetElements();
     _mappedEdgeVisuals.resetElements();
-    _visualisationAlertsMap.clear();
+    _visualisationInfos.clear();
 
     VisualisationsBuilder<NodeId> nodeVisualisationsBuilder(graph(), graph().nodeIds(), _mappedNodeVisuals);
     VisualisationsBuilder<EdgeId> edgeVisualisationsBuilder(graph(), graph().edgeIds(), _mappedEdgeVisuals);
@@ -263,7 +263,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 
         if(!u::contains(_attributes, attributeName))
         {
-            _visualisationAlertsMap[index].emplace_back(VisualisationAlertType::Error,
+            _visualisationInfos[index].addAlert(VisualisationAlertType::Error,
                 tr("Attribute doesn't exist"));
             continue;
         }
@@ -276,37 +276,31 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 
         if(!channel->supports(attribute.valueType()))
         {
-            _visualisationAlertsMap[index].emplace_back(VisualisationAlertType::Error,
+            _visualisationInfos[index].addAlert(VisualisationAlertType::Error,
                 tr("Visualisation doesn't support attribute type"));
             continue;
         }
 
-        channel->resetParameters();
         for(const auto& parameter : visualisationConfig._parameters)
             channel->setParameter(parameter._name, parameter.valueAsString());
-
-        VisualisationAlert alert;
 
         switch(attribute.elementType())
         {
         case ElementType::Node:
-            alert = nodeVisualisationsBuilder.build(attribute, *channel.get(), invert, index);
+            nodeVisualisationsBuilder.build(attribute, *channel.get(), invert, index, _visualisationInfos[index]);
             break;
 
         case ElementType::Edge:
-            alert = edgeVisualisationsBuilder.build(attribute, *channel.get(), invert, index);
+            edgeVisualisationsBuilder.build(attribute, *channel.get(), invert, index, _visualisationInfos[index]);
             break;
 
         default:
             break;
         }
-
-        if(alert._type != VisualisationAlertType::None)
-            _visualisationAlertsMap[index].emplace_back(alert);
     }
 
-    nodeVisualisationsBuilder.findOverrideAlerts(_visualisationAlertsMap);
-    edgeVisualisationsBuilder.findOverrideAlerts(_visualisationAlertsMap);
+    nodeVisualisationsBuilder.findOverrideAlerts(_visualisationInfos);
+    edgeVisualisationsBuilder.findOverrideAlerts(_visualisationInfos);
 
     updateVisuals();
 }
@@ -340,12 +334,25 @@ QString GraphModel::visualisationDescription(const QString& attributeName, const
     return channel->description(attribute.elementType(), attribute.valueType());
 }
 
-std::vector<VisualisationAlert> GraphModel::visualisationAlertsAtIndex(int index) const
+const VisualisationInfo& GraphModel::visualisationInfoAtIndex(int index) const
 {
-    if(u::contains(_visualisationAlertsMap, index))
-        return _visualisationAlertsMap.at(index);
+    static VisualisationInfo nullVisualisationInfo;
 
-    return {};
+    if(u::contains(_visualisationInfos, index))
+        return _visualisationInfos.at(index);
+
+    return nullVisualisationInfo;
+}
+
+QVariantMap GraphModel::visualisationDefaultParameters(const QString& attributeName, const QString& channelName) const
+{
+    if(!u::contains(_attributes, attributeName) || !u::contains(_visualisationChannels, channelName))
+        return {};
+
+    auto& attribute = attributeByName(attributeName);
+    auto& channel = _visualisationChannels.at(channelName);
+
+    return channel->defaultParameters(attribute.valueType());
 }
 
 QStringList GraphModel::attributeNames(ElementType elementType) const

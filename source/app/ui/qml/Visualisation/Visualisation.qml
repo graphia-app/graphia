@@ -108,9 +108,23 @@ Item
         Label
         {
             id: channelLabel
+            visible: !gradientKey.visible
             text: channel
             enabled: enabledMenuItem.checked
             color: root.textColor
+        }
+
+        GradientKey
+        {
+            id: gradientKey
+            visible: false
+            keyWidth: 100
+
+            textColor: root.textColor
+            hoverColor: root.hoverColor
+
+            invert: isFlagSet("invert");
+            propogatePresses: true
         }
 
         AlertIcon
@@ -158,6 +172,7 @@ Item
 
     property string attribute
     property string channel
+    property var parameters
 
     function updateExpression()
     {
@@ -170,23 +185,29 @@ Item
 
         var newExpression = flagsString + "\"" + attributeList.selectedValue + "\" \"" + channel + "\"";
 
+        if(Object.keys(parameters).length !== 0)
+            newExpression += " with ";
+
+        for(var key in parameters)
+            newExpression += " " + key + " = " + parameters[key];
+
         value = newExpression;
         document.updateVisualisations();
     }
 
-    function setVisualisationAlert(visualisationAlert)
+    function setVisualisationInfo(visualisationInfo)
     {
-        switch(visualisationAlert.type)
+        switch(visualisationInfo.alertType)
         {
         case VisualisationAlertType.Error:
             alertIcon.type = "error";
-            alertIcon.text = visualisationAlert.text;
+            alertIcon.text = visualisationInfo.alertText;
             alertIcon.visible = true;
             break;
 
         case VisualisationAlertType.Warning:
             alertIcon.type = "warning";
-            alertIcon.text = visualisationAlert.text;
+            alertIcon.text = visualisationInfo.alertText;
             alertIcon.visible = true;
             break;
 
@@ -195,7 +216,28 @@ Item
             alertIcon.visible = false;
         }
 
+        gradientKey.minimum = visualisationInfo.minimumNumericValue;
+        gradientKey.maximum = visualisationInfo.maximumNumericValue;
+    }
 
+    function parseParameters()
+    {
+        gradientKey.visible = false;
+
+        for(var key in parameters)
+        {
+            var value = parameters[key];
+
+            switch(key)
+            {
+            case "gradient":
+                var unescaped = Utils.unescapeQuotes(value);
+                gradientKey.configuration = JSON.parse(unescaped);
+                gradientKey.visible = true;
+                gradientKey.showLabels = enabledMenuItem.checked;
+                break;
+            }
+        }
     }
 
     property int index
@@ -209,12 +251,15 @@ Item
             flags = visualisationConfig.flags;
             attribute = visualisationConfig.attribute;
             channel = visualisationConfig.channel;
+            parameters = visualisationConfig.parameters;
 
             enabledMenuItem.checked = !isFlagSet("disabled");
             invertMenuItem.checked = isFlagSet("invert");
 
-            var visualisationAlert = document.visualisationAlertAtIndex(index);
-            setVisualisationAlert(visualisationAlert);
+            var visualisationInfo = document.visualisationInfoAtIndex(index);
+            setVisualisationInfo(visualisationInfo);
+
+            parseParameters();
 
             ready = true;
         }

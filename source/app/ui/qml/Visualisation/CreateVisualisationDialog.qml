@@ -139,7 +139,16 @@ Window
             }
         }
 
-        var expression = "\"" + attributeList.selectedValue + "\" \"" + channelList.selectedValue + "\"";
+        var expression = "\"" + attributeList.selectedValue + "\" \"" + channelList.selectedValue +"\"";
+
+        var parameters = document.visualisationDefaultParameters(attributeList.selectedValue,
+                                                                 channelList.selectedValue);
+
+        if(Object.keys(parameters).length !== 0)
+            expression += " with ";
+
+        for(var key in parameters)
+            expression += " " + key + " = " + parameters[key];
 
         visualisationExpression = expression;
     }

@@ -6,6 +6,7 @@
 #include "graph/elementtype.h"
 
 #include <QString>
+#include <QVariantMap>
 
 class VisualisationChannel
 {
@@ -21,7 +22,7 @@ public:
 
     virtual QString description(ElementType, ValueType) const { return {}; }
 
-    virtual void resetParameters() {}
+    virtual QVariantMap defaultParameters(ValueType) const { return {}; }
     virtual void setParameter(const QString& /*name*/, const QString& /*value*/) {}
 };
 

@@ -16,7 +16,7 @@ public:
 
     QString description(ElementType, ValueType) const;
 
-    void resetParameters();
+    QVariantMap defaultParameters(ValueType valueType) const;
     void setParameter(const QString& name, const QString& value);
 
 private:

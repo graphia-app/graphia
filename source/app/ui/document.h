@@ -254,9 +254,11 @@ public:
 
     Q_INVOKABLE QStringList availableVisualisationChannelNames(const QString& attributeName) const;
     Q_INVOKABLE QString visualisationDescription(const QString& attributeName, const QString& channelName) const;
-    Q_INVOKABLE QVariantMap visualisationAlertAtIndex(int index) const;
+    Q_INVOKABLE QVariantMap visualisationInfoAtIndex(int index) const;
 
     Q_INVOKABLE QVariantMap parseVisualisation(const QString& visualisation) const;
+    Q_INVOKABLE QVariantMap visualisationDefaultParameters(const QString& attributeName,
+                                                           const QString& channelName) const;
     Q_INVOKABLE bool visualisationIsValid(const QString& visualisation) const;
     Q_INVOKABLE void appendVisualisation(const QString& visualisation);
     Q_INVOKABLE void removeVisualisation(int index);

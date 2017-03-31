@@ -15,7 +15,7 @@ ColorGradient::ColorGradient(const QString& descriptor)
 
     if(jsonDocument.isNull())
     {
-        qDebug() << "ColorGradient failed to parse:" << error.errorString();
+        qDebug() << "ColorGradient failed to parse:" << error.errorString() << descriptor;
         return;
     }
 

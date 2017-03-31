@@ -47,14 +47,27 @@ QString ColorVisualisationChannel::description(ElementType elementType, ValueTyp
     return {};
 }
 
-void ColorVisualisationChannel::resetParameters()
+QVariantMap ColorVisualisationChannel::defaultParameters(ValueType valueType) const
 {
-    setParameter("gradient",
-        R"({
-          "0": "Red",
-          "0.66": "Yellow",
-          "1": "White"
-        })");
+    QVariantMap parameters;
+
+    switch(valueType)
+    {
+    case ValueType::Int:
+    case ValueType::Float:
+        parameters.insert("gradient",
+            R"("{
+              \"0\":    \"Red\",
+              \"0.66\": \"Yellow\",
+              \"1\":    \"White\"
+            }")");
+
+    case ValueType::String:
+    default:
+        break;
+    }
+
+    return parameters;
 }
 
 void ColorVisualisationChannel::setParameter(const QString& name, const QString& value)
