@@ -61,6 +61,7 @@ QVariantMap ColorVisualisationChannel::defaultParameters(ValueType valueType) co
               \"0.66\": \"Yellow\",
               \"1\":    \"White\"
             }")");
+        break;
 
     case ValueType::String:
     default:
