@@ -19,7 +19,7 @@ BOOST_FUSION_ADAPT_STRUCT(
     (std::vector<VisualisationConfig::Parameter>, _parameters)
 )
 
-namespace Parser
+namespace SpiritVisualisationParser
 {
 namespace x3 = boost::spirit::x3;
 namespace ascii = boost::spirit::x3::ascii;
@@ -31,17 +31,18 @@ using x3::lexeme;
 using ascii::char_;
 
 const x3::rule<class QuotedString, QString> quotedString = "quotedString";
-const auto quotedString_def = lexeme['"' >> +(char_ - '"') >> '"'];
+const auto escapedQuote = x3::lit('\\') >> char_('"');
+const auto quotedString_def = lexeme['"' >> *(escapedQuote | ~char_('"')) >> '"'];
 
 const x3::rule<class Identifier, QString> identifier = "identifier";
 const auto identifier_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
 
 const x3::rule<class Parameter, VisualisationConfig::Parameter> parameter = "parameter";
 const auto parameterName = quotedString | identifier;
-const auto parameter_def = parameterName >> x3::lit("=") >> (double_ | quotedString);
+const auto parameter_def = parameterName >> x3::lit('=') >> (double_ | quotedString);
 
-const auto identifierList = identifier % x3::lit(",");
-const auto flags = x3::lit("[") >> -identifierList >> x3::lit("]");
+const auto identifierList = identifier % x3::lit(',');
+const auto flags = x3::lit('[') >> -identifierList >> x3::lit(']');
 
 const x3::rule<class Visualisation, VisualisationConfig> visualisation = "visualisation";
 const auto attributeName = quotedString | identifier;
@@ -52,7 +53,7 @@ const auto visualisation_def =
     -(x3::lit("with") >> +parameter);
 
 BOOST_SPIRIT_DEFINE(quotedString, identifier, visualisation, parameter);
-} // namespace Parser
+} // namespace SpiritVisualisationParser
 
 bool VisualisationConfigParser::parse(const QString& text)
 {
@@ -60,8 +61,9 @@ bool VisualisationConfigParser::parse(const QString& text)
     auto begin = stdString.begin();
     auto end = stdString.end();
     _result = {};
-    _success = Parser::x3::phrase_parse(begin, end, Parser::visualisation,
-                                        Parser::ascii::space, _result);
+    _success = SpiritVisualisationParser::x3::phrase_parse(begin, end,
+                    SpiritVisualisationParser::visualisation,
+                    SpiritVisualisationParser::ascii::space, _result);
 
     if(begin != end)
     {
