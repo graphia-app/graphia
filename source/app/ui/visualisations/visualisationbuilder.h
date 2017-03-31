@@ -115,10 +115,11 @@ public:
         case ValueType::Float:
         {
             double min, max;
-            std::tie(min, max) = attribute.findNumericRange(*_elementIds,
-            [this](ElementId elementId)
+            std::tie(min, max) = attribute.findRangeforElements(*_elementIds,
+            [this](const Attribute& _attribute, ElementId elementId)
             {
-                return _graph->typeOf(elementId);
+                return _attribute.testFlag(AttributeFlag::IgnoreTails) &&
+                    _graph->typeOf(elementId) == MultiElementType::Tail;
             });
 
             if(min == max)

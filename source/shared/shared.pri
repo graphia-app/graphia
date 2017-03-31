@@ -43,7 +43,8 @@ HEADERS += \
     $$PWD/plugins/usernodedata.h \
     $$PWD/attributes/iattribute.h \
     $$PWD/plugins/usernodedatatablemodel.h \
-    $$PWD/utils/flags.h
+    $$PWD/utils/flags.h \
+    $$PWD/attributes/iattributerange.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \

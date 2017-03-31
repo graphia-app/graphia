@@ -18,8 +18,74 @@
 #include <QString>
 #include <QRegularExpression>
 
+class Attribute;
+
+template<typename T> class AttributeRange
+{};
+
+class _AttributeRange
+{
+protected: Attribute& _attribute;
+public: _AttributeRange(Attribute& attribute) : _attribute(attribute) {}
+};
+
+template<>
+class AttributeRange<int> :
+        public IAttributeRange<int>,
+        public _AttributeRange
+{
+public:
+    using _AttributeRange::_AttributeRange;
+
+    bool hasMin() const;
+    bool hasMax() const;
+    bool hasRange() const;
+
+    int min() const;
+    int max() const;
+    IAttribute& setMin(int min);
+    IAttribute& setMax(int max);
+};
+
+template<>
+class AttributeRange<double> :
+        public IAttributeRange<double>,
+        public _AttributeRange
+{
+public:
+    using _AttributeRange::_AttributeRange;
+
+    bool hasMin() const;
+    bool hasMax() const;
+    bool hasRange() const;
+
+    double min() const;
+    double max() const;
+    IAttribute& setMin(double min);
+    IAttribute& setMax(double max);
+};
+
+class AttributeNumericRange :
+        public IAttributeRange<double>,
+        public _AttributeRange
+{
+public:
+    using _AttributeRange::_AttributeRange;
+
+    bool hasMin() const;
+    bool hasMax() const;
+    bool hasRange() const;
+
+    double min() const;
+    double max() const;
+};
+
 class Attribute : public IAttribute
 {
+    friend class AttributeRange<int>;
+    friend class AttributeRange<double>;
+    friend class AttributeNumericRange;
+
 private:
     ValueFn<int, NodeId> _intNodeIdFn;
     ValueFn<int, EdgeId> _intEdgeIdFn;
@@ -39,9 +105,13 @@ private:
 
     int _intMin = std::numeric_limits<int>::max();
     int _intMax = std::numeric_limits<int>::min();
+    AttributeRange<int> _intRange{*this};
 
     double _floatMin = std::numeric_limits<double>::max();
     double _floatMax = std::numeric_limits<double>::min();
+    AttributeRange<double> _floatRange{*this};
+
+    AttributeNumericRange _numericRange{*this};
 
     bool _searchable = false;
 
@@ -128,53 +198,81 @@ public:
     ValueType valueType() const;
     ElementType elementType() const;
 
-    bool hasIntMin() const;
-    bool hasIntMax() const;
-    bool hasIntRange() const;
+    template<typename T>
+    AttributeRange<T> range() { return AttributeRange<T>(*this); }
 
-    int intMin() const;
-    int intMax() const;
-    Attribute& setIntMin(int intMin);
-    Attribute& setIntMax(int intMax);
+    IAttributeRange<int>& intRange() { return _intRange; }
+    IAttributeRange<double>& floatRange() { return _floatRange; }
+    const IAttributeRange<double>& numericRange() const { return _numericRange; }
 
-    bool intValueInRange(int value) const;
-
-    bool hasFloatMin() const;
-    bool hasFloatMax() const;
-    bool hasFloatRange() const;
-
-    double floatMin() const;
-    double floatMax() const;
-    Attribute& setFloatMin(double floatMin);
-    Attribute& setFloatMax(double floatMax);
-
-    bool floatValueInRange(double value) const;
-
-    bool hasNumericRange() const;
-
-    double numericMin() const;
-    double numericMax() const;
-
-    template<typename E, typename TypeOfFn>
-    auto findNumericRange(const std::vector<E>& elementIds, TypeOfFn typeOf) const
+    template<typename T, typename E, typename Fn>
+    auto findRangeforElements(const std::vector<E>& elementIds, Fn&& skip) const
     {
-        std::tuple<double, double> minMax(std::numeric_limits<double>::max(),
-                                          std::numeric_limits<double>::min());
+        std::tuple<T, T> minMax(std::numeric_limits<T>::max(),
+                                std::numeric_limits<T>::min());
 
         for(auto elementId : elementIds)
         {
-            if(testFlag(AttributeFlag::IgnoreTails) &&
-               typeOf(elementId) == MultiElementType::Tail)
-            {
+            if(skip(*this, elementId))
                 continue;
-            }
 
-            double v = numericValueOf(elementId);
+            auto v = valueOf<T>(elementId);
             std::get<0>(minMax) = std::min(v, std::get<0>(minMax));
             std::get<1>(minMax) = std::max(v, std::get<1>(minMax));
         }
 
         return minMax;
+    }
+
+    template<typename T, typename E>
+    auto findRangeforElements(const std::vector<E>& elementIds) const
+    {
+        return findRangeforElements<T>(elementIds, [](const Attribute&, E){ return false; });
+    }
+
+    template<typename E, typename Fn>
+    auto findRangeforElements(const std::vector<E>& elementIds, Fn&& skip) const
+    {
+        std::tuple<double, double> minMax(std::numeric_limits<double>::max(),
+                                          std::numeric_limits<double>::min());
+
+        if(valueType() == ValueType::Float)
+            minMax = findRangeforElements<double>(elementIds, skip);
+        else if(valueType() == ValueType::Int)
+        {
+            auto intMinMax = findRangeforElements<int>(elementIds, skip);
+            std::get<0>(minMax) = static_cast<double>(std::get<0>(intMinMax));
+            std::get<1>(minMax) = static_cast<double>(std::get<1>(intMinMax));
+        }
+
+        return minMax;
+    }
+
+    template<typename E>
+    auto findRangeforElements(const std::vector<E>& elementIds) const
+    {
+        return findRangeforElements(elementIds, [](const Attribute&, E){ return false; });
+    }
+
+    template<typename T, typename E>
+    void autoSetRangeForElements(const std::vector<E>& elementIds)
+    {
+        auto previousFlags = flags();
+        auto minMax = findRangeforElements<T>(elementIds);
+
+        range<T>().setMin(std::get<0>(minMax));
+        range<T>().setMax(std::get<1>(minMax));
+
+        setFlag(previousFlags);
+    }
+
+    template<typename E>
+    void autoSetRangeForElements(const std::vector<E>& elementIds)
+    {
+        if(valueType() == ValueType::Float)
+            autoSetRangeForElements<double>(elementIds);
+        else if(valueType() == ValueType::Int)
+            autoSetRangeForElements<int>(elementIds);
     }
 
     AttributeFlag flags() const { return *_flags; }
@@ -190,4 +288,3 @@ public:
 };
 
 #endif // ATTRIBUTE_H
-

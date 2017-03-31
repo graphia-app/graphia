@@ -101,72 +101,70 @@ ElementType Attribute::elementType() const
     }
 }
 
-bool Attribute::hasIntMin() const { return _intMin != std::numeric_limits<int>::max(); }
-bool Attribute::hasIntMax() const { return _intMax != std::numeric_limits<int>::min(); }
-bool Attribute::hasIntRange() const { return hasIntMin() && hasIntMax(); }
+bool AttributeRange<int>::hasMin() const { return _attribute._intMin != std::numeric_limits<int>::max(); }
+bool AttributeRange<int>::hasMax() const { return _attribute._intMax != std::numeric_limits<int>::min(); }
+bool AttributeRange<int>::hasRange() const { return hasMin() && hasMax(); }
 
-int Attribute::intMin() const { return hasIntMin() ? _intMin : std::numeric_limits<int>::min(); }
-int Attribute::intMax() const { return hasIntMax() ? _intMax : std::numeric_limits<int>::max(); }
-Attribute& Attribute::setIntMin(int intMin) { _intMin = intMin; disableAutoRange(); return *this; }
-Attribute& Attribute::setIntMax(int intMax) { _intMax = intMax; disableAutoRange(); return *this; }
+int AttributeRange<int>::min() const { return hasMin() ? _attribute._intMin : std::numeric_limits<int>::min(); }
+int AttributeRange<int>::max() const { return hasMax() ? _attribute._intMax : std::numeric_limits<int>::max(); }
+IAttribute& AttributeRange<int>::setMin(int min) { _attribute._intMin = min; _attribute.disableAutoRange(); return _attribute; }
+IAttribute& AttributeRange<int>::setMax(int max) { _attribute._intMax = max; _attribute.disableAutoRange(); return _attribute; }
 
-bool Attribute::intValueInRange(int value) const
+bool AttributeRange<double>::hasMin() const { return _attribute._floatMin != std::numeric_limits<double>::max(); }
+bool AttributeRange<double>::hasMax() const { return _attribute._floatMax != std::numeric_limits<double>::min(); }
+bool AttributeRange<double>::hasRange() const { return hasMin() && hasMax(); }
+
+double AttributeRange<double>::min() const { return hasMin() ? _attribute._floatMin : std::numeric_limits<double>::min(); }
+double AttributeRange<double>::max() const { return hasMax() ? _attribute._floatMax : std::numeric_limits<double>::max(); }
+IAttribute& AttributeRange<double>::setMin(double min) { _attribute._floatMin = min; _attribute.disableAutoRange(); return _attribute; }
+IAttribute& AttributeRange<double>::setMax(double max) { _attribute._floatMax = max; _attribute.disableAutoRange(); return _attribute; }
+
+bool AttributeNumericRange::hasMin() const
 {
-    if(hasIntMin() && value < intMin())
-        return false;
-
-    if(hasIntMax() && value > intMax())
-        return false;
-
-    return true;
-}
-
-bool Attribute::hasFloatMin() const { return _floatMin != std::numeric_limits<double>::max(); }
-bool Attribute::hasFloatMax() const { return _floatMax != std::numeric_limits<double>::min(); }
-bool Attribute::hasFloatRange() const { return hasFloatMin() && hasFloatMax(); }
-
-double Attribute::floatMin() const { return hasFloatMin() ? _floatMin : std::numeric_limits<double>::min(); }
-double Attribute::floatMax() const { return hasFloatMax() ? _floatMax : std::numeric_limits<double>::max(); }
-Attribute& Attribute::setFloatMin(double floatMin) { _floatMin = floatMin; disableAutoRange(); return *this; }
-Attribute& Attribute::setFloatMax(double floatMax) { _floatMax = floatMax; disableAutoRange(); return *this; }
-
-bool Attribute::floatValueInRange(double value) const
-{
-    if(hasFloatMin() && value < floatMin())
-        return false;
-
-    if(hasFloatMax() && value > floatMax())
-        return false;
-
-    return true;
-}
-
-bool Attribute::hasNumericRange() const
-{
-    switch(valueType())
+    switch(_attribute.valueType())
     {
-    case ValueType::Int: return hasIntRange();
-    case ValueType::Float: return hasFloatRange();
+    case ValueType::Int: return _attribute._intRange.hasMin();
+    case ValueType::Float: return _attribute._floatRange.hasMin();
     default: return false;
     }
 }
 
-double Attribute::numericMin() const
+bool AttributeNumericRange::hasMax() const
 {
-    switch(valueType())
+    switch(_attribute.valueType())
     {
-    case ValueType::Int: return static_cast<double>(intMin());
-    case ValueType::Float: return floatMin();
+    case ValueType::Int: return _attribute._intRange.hasMax();
+    case ValueType::Float: return _attribute._floatRange.hasMax();
     default: return false;
     }
 }
 
-double Attribute::numericMax() const
+bool AttributeNumericRange::hasRange() const
 {
-    switch(valueType())
+    switch(_attribute.valueType())
     {
-    case ValueType::Int: return static_cast<double>(intMax());
-    case ValueType::Float: return floatMax();
+    case ValueType::Int: return _attribute._intRange.hasRange();
+    case ValueType::Float: return _attribute._floatRange.hasRange();
     default: return false;
+    }
+}
+
+double AttributeNumericRange::min() const
+{
+    switch(_attribute.valueType())
+    {
+    case ValueType::Int: return static_cast<double>(_attribute._intRange.min());
+    case ValueType::Float: return _attribute._floatRange.min();
+    default: return std::numeric_limits<double>::max();
+    }
+}
+
+double AttributeNumericRange::max() const
+{
+    switch(_attribute.valueType())
+    {
+    case ValueType::Int: return static_cast<double>(_attribute._floatRange.max());
+    case ValueType::Float: return _attribute._floatRange.max();
+    default: return std::numeric_limits<double>::min();
     }
 }

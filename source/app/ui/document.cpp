@@ -848,14 +848,12 @@ QVariantMap Document::attribute(const QString& attributeName) const
         map.insert("valueType", static_cast<int>(attribute.valueType()));
         map.insert("elementType", static_cast<int>(attribute.elementType()));
 
-        map.insert("hasRange", attribute.hasFloatRange() || attribute.hasIntRange());
-        map.insert("hasMinimumValue", attribute.hasFloatMin() || attribute.hasIntMin());
-        map.insert("hasMaximumValue", attribute.hasFloatMax() || attribute.hasIntMax());
+        map.insert("hasRange", attribute.numericRange().hasRange());
+        map.insert("hasMinimumValue", attribute.numericRange().hasMin());
+        map.insert("hasMaximumValue", attribute.numericRange().hasMax());
 
-        if(attribute.hasFloatMin()) map.insert("minimumValue", attribute.floatMin());
-        if(attribute.hasFloatMax()) map.insert("maximumValue", attribute.floatMax());
-        if(attribute.hasIntMin()) map.insert("minimumValue", attribute.intMin());
-        if(attribute.hasIntMax()) map.insert("maximumValue", attribute.intMax());
+        if(attribute.numericRange().hasMin()) map.insert("minimumValue", attribute.numericRange().min());
+        if(attribute.numericRange().hasMax()) map.insert("maximumValue", attribute.numericRange().max());
 
         map.insert("description", attribute.description());
     }

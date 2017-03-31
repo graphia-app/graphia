@@ -1,6 +1,8 @@
 #ifndef IATTRIBUTE_H
 #define IATTRIBUTE_H
 
+#include "iattributerange.h"
+
 #include "shared/graph/elementid.h"
 #include "shared/graph/igraphcomponent.h"
 
@@ -37,27 +39,9 @@ public:
     virtual IAttribute& setStringValueFn(ValueFn<QString, EdgeId> valueFn) = 0;
     virtual IAttribute& setStringValueFn(ValueFn<QString, const IGraphComponent&> valueFn) = 0;
 
-    virtual bool hasIntMin() const = 0;
-    virtual bool hasIntMax() const = 0;
-    virtual bool hasIntRange() const = 0;
-
-    virtual int intMin() const = 0;
-    virtual int intMax() const = 0;
-    virtual IAttribute& setIntMin(int intMin) = 0;
-    virtual IAttribute& setIntMax(int intMax) = 0;
-
-    virtual bool intValueInRange(int value) const = 0;
-
-    virtual bool hasFloatMin() const = 0;
-    virtual bool hasFloatMax() const = 0;
-    virtual bool hasFloatRange() const = 0;
-
-    virtual double floatMin() const = 0;
-    virtual double floatMax() const = 0;
-    virtual IAttribute& setFloatMin(double floatMin) = 0;
-    virtual IAttribute& setFloatMax(double floatMax) = 0;
-
-    virtual bool floatValueInRange(double value) const = 0;
+    virtual IAttributeRange<int>& intRange() = 0;
+    virtual IAttributeRange<double>& floatRange() = 0;
+    virtual const IAttributeRange<double>& numericRange() const = 0;
 
     virtual bool testFlag(AttributeFlag flag) const = 0;
     virtual IAttribute& setFlag(AttributeFlag flag) = 0;

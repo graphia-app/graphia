@@ -4,6 +4,8 @@
 #include "ui/selectionmanager.h"
 #include "ui/searchmanager.h"
 
+#include "attributes/attribute.h"
+
 #include "transform/compoundtransform.h"
 #include "transform/filtertransform.h"
 #include "transform/edgecontractiontransform.h"
@@ -53,7 +55,7 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
 
     GraphModel::attribute(tr("Node Degree"))
         .setIntValueFn([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).degree(); })
-        .setIntMin(0)
+        .intRange().setMin(0)
         .setDescription(tr("A node's degree is its number of incident edges."));
 
     GraphModel::attribute(tr("Node Multiplicity"))
@@ -65,7 +67,7 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
 
             return _transformedGraph.mergedNodeIdsForNodeId(nodeId).size();
         })
-        .setIntMin(0)
+        .intRange().setMin(0)
         .setFlag(AttributeFlag::IgnoreTails)
         .setDescription(tr("A node's multiplicity is how many nodes it represents."));
 
@@ -78,13 +80,13 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
 
             return _transformedGraph.mergedEdgeIdsForEdgeId(edgeId).size();
         })
-        .setIntMin(0)
+        .intRange().setMin(0)
         .setFlag(AttributeFlag::IgnoreTails)
         .setDescription(tr("An edge's multiplicity is how many edges it represents."));
 
     GraphModel::attribute(tr("Component Size"))
         .setIntValueFn([this](const IGraphComponent& component) { return component.numNodes(); })
-        .setIntMin(1)
+        .intRange().setMin(1)
         .setDescription(tr("Component Size refers to the number of nodes the component contains."));
 
     _graphTransformFactories.emplace(tr("Remove Nodes"),      std::make_unique<FilterTransformFactory>(ElementType::Node, false));
@@ -525,53 +527,6 @@ void GraphModel::onPreferenceChanged(const QString&, const QVariant&)
     updateVisuals();
 }
 
-template<typename E>
-static void autoSetAttributeRange(const std::vector<E>& elementIds, Attribute& attribute)
-{
-    auto flags = attribute.flags();
-
-    if(attribute.valueType() == ValueType::Float)
-    {
-        double min = std::numeric_limits<double>::max();
-        double max = std::numeric_limits<double>::min();
-
-        for(auto elementId : elementIds)
-        {
-            auto v = attribute.valueOf<double>(elementId);
-            min = std::min(v, min);
-            max = std::max(v, max);
-        }
-
-        attribute.setFloatMin(min);
-        attribute.setFloatMax(max);
-        attribute.setFlag(flags);
-    }
-    else if(attribute.valueType() == ValueType::Int)
-    {
-        int min = std::numeric_limits<int>::max();
-        int max = std::numeric_limits<int>::min();
-
-        for(auto elementId : elementIds)
-        {
-            auto v = attribute.valueOf<int>(elementId);
-            min = std::min(v, min);
-            max = std::max(v, max);
-        }
-
-        attribute.setIntMin(min);
-        attribute.setIntMax(max);
-        attribute.setFlag(flags);
-    }
-}
-
-static void autoSetAttributeRange(const IGraph* graph, Attribute& attribute)
-{
-    if(attribute.elementType() == ElementType::Node)
-        autoSetAttributeRange(graph->nodeIds(), attribute);
-    else if(attribute.elementType() == ElementType::Edge)
-        autoSetAttributeRange(graph->edgeIds(), attribute);
-}
-
 void GraphModel::onGraphChanged(const Graph* graph)
 {
     bool isMutableGraph = (dynamic_cast<const MutableGraph*>(graph) != nullptr);
@@ -591,6 +546,9 @@ void GraphModel::onGraphChanged(const Graph* graph)
         if(attribute.testFlag(AttributeFlag::AutoRangeTransformed) && isMutableGraph)
             continue;
 
-        autoSetAttributeRange(graph, attribute);
+        if(attribute.elementType() == ElementType::Node)
+            attribute.autoSetRangeForElements(graph->nodeIds());
+        else if(attribute.elementType() == ElementType::Edge)
+            attribute.autoSetRangeForElements(graph->edgeIds());
     }
 }
