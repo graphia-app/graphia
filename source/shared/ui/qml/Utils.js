@@ -51,3 +51,38 @@ function normaliseWhitespace(text)
     text = text.replace(/\\s+/g, " ");
     return text;
 }
+
+function unescapeQuotes(text)
+{
+    // [\s\S] is like . except it matches \n
+    var re = /^\s*"([\s\S]*)"\s*$/;
+
+    if(!text.match(re))
+        return text;
+
+    text = text.replace(re, "$1");
+    text = text.replace(/\\"/g, "\"");
+    return text;
+}
+
+function decimalPointsForRange(min, max)
+{
+    var range = max - min;
+
+    if(range <= 100.0)
+        return 3;
+    else if(range <= 1000.0)
+        return 2;
+    else if(range <= 10000.0)
+        return 1;
+
+    return 0;
+}
+
+function roundToDp(value, dp)
+{
+    if(!isNumeric(value))
+        return value;
+
+    return parseFloat(parseFloat(value).toFixed(dp)).toString();
+}
