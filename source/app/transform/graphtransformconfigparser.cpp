@@ -50,7 +50,7 @@ BOOST_FUSION_ADAPT_STRUCT(
     (GraphTransformConfig::Condition, _condition)
 )
 
-namespace Parser
+namespace SpiritGraphTranformConfigParser
 {
 namespace x3 = boost::spirit::x3;
 namespace ascii = boost::spirit::x3::ascii;
@@ -63,7 +63,8 @@ using x3::lexeme;
 using ascii::char_;
 
 const x3::rule<class QuotedString, QString> quotedString = "quotedString";
-const auto quotedString_def = lexeme['"' >> +(char_ - '"') >> '"'];
+const auto escapedQuote = x3::lit('\\') >> char_('"');
+const auto quotedString_def = lexeme['"' >> *(escapedQuote | ~char_('"')) >> '"'];
 
 const x3::rule<class Identifier, QString> identifier = "identifier";
 const auto identifier_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
@@ -123,15 +124,15 @@ struct binary_op_ : x3::symbols<ConditionFnOp::Binary>
 
 const x3::rule<class Condition, GraphTransformConfig::Condition> condition = "condition";
 
-const auto operand = terminalCondition | (x3::lit("(") >> condition >> x3::lit(")"));
+const auto operand = terminalCondition | (x3::lit('(') >> condition >> x3::lit(')'));
 const auto condition_def = (operand >> binary_op >> operand) | operand;
 
 const x3::rule<class Parameter, GraphTransformConfig::Parameter> parameter = "parameter";
 const auto parameterName = quotedString | identifier;
-const auto parameter_def = parameterName >> x3::lit("=") >> (double_ | quotedString);
+const auto parameter_def = parameterName >> x3::lit('=') >> (double_ | quotedString);
 
-const auto identifierList = identifier % x3::lit(",");
-const auto flags = x3::lit("[") >> -identifierList >> x3::lit("]");
+const auto identifierList = identifier % x3::lit(',');
+const auto flags = x3::lit('[') >> -identifierList >> x3::lit(']');
 
 const x3::rule<class Transform, GraphTransformConfig> transform = "transform";
 const auto transformName = quotedString | identifier;
@@ -142,7 +143,7 @@ const auto transform_def =
     -(x3::lit("where") >> condition);
 
 BOOST_SPIRIT_DEFINE(quotedString, identifier, transform, parameter, condition, terminalCondition);
-} // namespace Parser
+} // namespace SpiritGraphTranformConfigParser
 
 bool GraphTransformConfigParser::parse(const QString& text)
 {
@@ -150,8 +151,9 @@ bool GraphTransformConfigParser::parse(const QString& text)
     auto begin = stdString.begin();
     auto end = stdString.end();
     _result = {};
-    _success = Parser::x3::phrase_parse(begin, end, Parser::transform,
-                                        Parser::ascii::space, _result);
+    _success = SpiritGraphTranformConfigParser::x3::phrase_parse(begin, end,
+                    SpiritGraphTranformConfigParser::transform,
+                    SpiritGraphTranformConfigParser::ascii::space, _result);
 
     if(begin != end)
     {
@@ -170,11 +172,11 @@ QStringList GraphTransformConfigParser::ops(ValueType valueType)
     {
     case ValueType::Float:
     case ValueType::Int:
-        Parser::numerical_op.for_each([&list](auto& v, auto) { list.append(QString::fromStdString(v)); });
+        SpiritGraphTranformConfigParser::numerical_op.for_each([&list](auto& v, auto) { list.append(QString::fromStdString(v)); });
         break;
 
     case ValueType::String:
-        Parser::string_op.for_each([&list](auto& v, auto) { list.append(QString::fromStdString(v)); });
+        SpiritGraphTranformConfigParser::string_op.for_each([&list](auto& v, auto) { list.append(QString::fromStdString(v)); });
         break;
 
     default: break;
@@ -187,9 +189,9 @@ QString GraphTransformConfigParser::opToString(ConditionFnOp::Numerical op)
 {
     QString result;
 
-    Parser::numerical_op.for_each([&](auto& v, auto)
+    SpiritGraphTranformConfigParser::numerical_op.for_each([&](auto& v, auto)
     {
-        if(Parser::numerical_op.at(v) == op)
+        if(SpiritGraphTranformConfigParser::numerical_op.at(v) == op)
             result = QString::fromStdString(v);
     });
 
@@ -200,9 +202,9 @@ QString GraphTransformConfigParser::opToString(ConditionFnOp::String op)
 {
     QString result;
 
-    Parser::string_op.for_each([&](auto& v, auto)
+    SpiritGraphTranformConfigParser::string_op.for_each([&](auto& v, auto)
     {
-        if(Parser::string_op.at(v) == op)
+        if(SpiritGraphTranformConfigParser::string_op.at(v) == op)
             result = QString::fromStdString(v);
     });
 
@@ -213,9 +215,9 @@ QString GraphTransformConfigParser::opToString(ConditionFnOp::Binary op)
 {
     QString result;
 
-    Parser::binary_op.for_each([&](auto& v, auto)
+    SpiritGraphTranformConfigParser::binary_op.for_each([&](auto& v, auto)
     {
-        if(Parser::binary_op.at(v) == op)
+        if(SpiritGraphTranformConfigParser::binary_op.at(v) == op)
             result = QString::fromStdString(v);
     });
 
