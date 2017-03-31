@@ -22,14 +22,6 @@ function createTransformParameter(document, component, parent, parameterData)
     return object;
 }
 
-function roundTo3dp(text)
-{
-    if(!Utils.isNumeric(text))
-        return text;
-
-    return parseFloat(parseFloat(text).toFixed(3)).toString();
-}
-
 function sanitiseOp(text)
 {
     var replacements =
@@ -166,7 +158,7 @@ function create(transform)
                     if(parameterData.valueType === ValueType.String)
                         labelText += " \\\"" + parameter.rhs + "\\\"";
                     else
-                        labelText += " " + roundTo3dp(parameter.rhs);
+                        labelText += " " + Utils.roundToDp(parameter.rhs, 3);
                 }
                 else
                     addLabel();
