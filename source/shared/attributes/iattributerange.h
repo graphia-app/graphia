@@ -15,8 +15,8 @@ public:
 
     virtual T min() const = 0;
     virtual T max() const = 0;
-    virtual IAttribute& setMin(T) { Q_ASSERT(!"setMin not implemented!"); }
-    virtual IAttribute& setMax(T) { Q_ASSERT(!"setMax not implemented!"); }
+    virtual IAttribute& setMin(T) = 0;
+    virtual IAttribute& setMax(T) = 0;
 
     bool valueInRange(T value) const
     {

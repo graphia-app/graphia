@@ -78,6 +78,9 @@ public:
 
     double min() const;
     double max() const;
+
+    IAttribute& setMin(double min);
+    IAttribute& setMax(double max);
 };
 
 class Attribute : public IAttribute

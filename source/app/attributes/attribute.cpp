@@ -168,3 +168,27 @@ double AttributeNumericRange::max() const
     default: return std::numeric_limits<double>::min();
     }
 }
+
+IAttribute& AttributeNumericRange::setMin(double min)
+{
+    switch(_attribute.valueType())
+    {
+    case ValueType::Int: _attribute._intRange.setMin(static_cast<int>(min));
+    case ValueType::Float: _attribute._intRange.setMin(min);
+    default: break;
+    }
+
+    return _attribute;
+}
+
+IAttribute& AttributeNumericRange::setMax(double max)
+{
+    switch(_attribute.valueType())
+    {
+    case ValueType::Int: _attribute._intRange.setMax(static_cast<int>(max));
+    case ValueType::Float: _attribute._intRange.setMax(max);
+    default: break;
+    }
+
+    return _attribute;
+}
