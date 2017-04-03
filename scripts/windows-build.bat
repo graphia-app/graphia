@@ -12,6 +12,7 @@ qmake ..\GraphTool.pro || EXIT /B 1
 jom || EXIT /B 1
 jom clean || EXIT /B 1
 
+echo Installer
 call ..\installers\windows\build.bat || EXIT /B 1
 
 setlocal EnableDelayedExpansion
