@@ -31,5 +31,6 @@
         <file>qml/Controls/error.png</file>
         <file>qml/Controls/ToolTip.qml</file>
         <file>qml/Controls/GradientKey.qml</file>
+        <file>qml/Controls/GradientPicker.qml</file>
     </qresource>
 </RCC>

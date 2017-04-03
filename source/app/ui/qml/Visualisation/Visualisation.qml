@@ -21,6 +21,21 @@ Item
     property color hoverColor
     property color textColor: enabledMenuItem.checked ? enabledTextColor : disabledTextColor
 
+    property var gradientPicker
+    Connections
+    {
+        target: gradientPicker
+
+        onConfigurationChanged:
+        {
+            if(gradientPicker.visualisationIndex !== index)
+                return;
+
+            parameters["gradient"] = Utils.escapeQuotes(gradientPicker.configuration);
+            root.updateExpression();
+        }
+    }
+
     MouseArea
     {
         anchors.fill: row
@@ -127,6 +142,12 @@ Item
 
             invert: isFlagSet("invert");
             propogatePresses: true
+
+            onClicked:
+            {
+                gradientPicker.visualisationIndex = index;
+                gradientPicker.show();
+            }
         }
 
         AlertIcon

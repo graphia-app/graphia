@@ -52,6 +52,13 @@ function normaliseWhitespace(text)
     return text;
 }
 
+function escapeQuotes(text)
+{
+    text = text.replace(/\"/g, "\\\"");
+    text = "\"" + text + "\"";
+    return text;
+}
+
 function unescapeQuotes(text)
 {
     // [\s\S] is like . except it matches \n
