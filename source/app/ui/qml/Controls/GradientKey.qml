@@ -34,18 +34,36 @@ Item
         GradientStop {}
     }
 
-    property var configuration
-    onConfigurationChanged:
+    function updateGradient()
     {
+        if(configuration === undefined)
+            return;
+
         var stops = [];
 
         for(var prop in configuration)
         {
-            stops.push(stopComponent.createObject(rectangle,
-                { "position": prop, "color": configuration[prop] }));
+            var color = configuration[prop];
+
+            if(!root.enabled)
+                color = Utils.desaturate(color);
+
+            stops.push(stopComponent.createObject(rectangle.gradient,
+                { "position": prop, "color": color }));
         }
 
         rectangle.gradient.stops = stops;
+    }
+
+    onEnabledChanged:
+    {
+        updateGradient();
+    }
+
+    property var configuration
+    onConfigurationChanged:
+    {
+        updateGradient();
     }
 
     Rectangle

@@ -86,3 +86,9 @@ function roundToDp(value, dp)
 
     return parseFloat(parseFloat(value).toFixed(dp)).toString();
 }
+
+function desaturate(colorString)
+{
+    var c = Qt.darker(colorString, 1.0);
+    return Qt.hsla(c.hslHue, 0.0, c.hslLightness, c.a);
+}

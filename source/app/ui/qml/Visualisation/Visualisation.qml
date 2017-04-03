@@ -118,6 +118,8 @@ Item
         {
             id: gradientKey
             visible: false
+            enabled: enabledMenuItem.checked
+
             keyWidth: 100
 
             textColor: root.textColor
