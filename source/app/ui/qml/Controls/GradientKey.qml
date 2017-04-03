@@ -8,13 +8,12 @@ Item
 {
     id: root
 
-    width: layout.width
-    height: layout.height
+    implicitWidth: layout.implicitWidth + _padding
+    implicitHeight: minimumLabel.implicitHeight + _padding
 
-    implicitWidth: width
-    implicitHeight: height
+    property int _padding: 2 * 4
 
-    property alias keyWidth: item.width
+    property int keyWidth
 
     property double minimum
     property double maximum
@@ -71,10 +70,8 @@ Item
         id: button
 
         anchors.centerIn: parent
-        width: root.width + 2 * 4/*padding*/
-        height: root.height + 2 * 4/*padding*/
-        implicitWidth: width
-        implicitHeight: height
+        width: root.width
+        height: root.height
         radius: 2
         color: (mouseArea.containsMouse) ? root.hoverColor : "transparent"
     }
@@ -83,8 +80,15 @@ Item
     {
         id: layout
 
+        anchors.centerIn: parent
+
+        width: root.width !== undefined ? root.width - _padding : undefined
+        height: root.height !== undefined ? root.height - _padding : undefined
+
         Label
         {
+            id: minimumLabel
+
             visible: root.showLabels
             text: Utils.roundToDp(root.minimum, _decimalPoints)
             color: root.textColor
@@ -96,6 +100,8 @@ Item
             // rotated Rectangle something to fill
             id: item
 
+            width: root.keyWidth !== 0 ? root.keyWidth : 0
+            Layout.fillWidth: root.keyWidth === 0
             Layout.fillHeight: true
 
             Rectangle
@@ -117,6 +123,8 @@ Item
 
         Label
         {
+            id: maximumLabel
+
             visible: root.showLabels
             text: Utils.roundToDp(root.maximum, _decimalPoints)
             color: root.textColor
