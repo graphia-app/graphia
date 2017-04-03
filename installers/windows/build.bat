@@ -11,7 +11,8 @@ echo Find QML
 set QML_DIRS=
 cd ..\source
 for /d /r %%i in (*) do @if exist %%i\*.qml (set QML_DIRS=--qmldir %%i !QML_DIRS!)
-cd build
+echo %QML_DIRS%
+cd ..\build
 
 echo winedeployqt
 windeployqt %QML_DIRS% --no-angle --no-compiler-runtime ^
