@@ -43,6 +43,6 @@ signtool sign /f %SIGN_KEYSTORE_WINDOWS% /p %SIGN_PASSWORD% ^
 	/tr %SIGN_TSA% /td SHA256 ^
 	installer\%PRODUCT_NAME%-%VERSION%-installer.exe || EXIT /B 1
 
-copy installer\%PRODUCT_NAME%-%VERSION%-installer.exe build
+copy installer\%PRODUCT_NAME%-%VERSION%-installer.exe build\
 
 rmdir /s /q installer

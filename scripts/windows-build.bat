@@ -18,10 +18,10 @@ cd %BUILD_DIR%
 
 setlocal EnableDelayedExpansion
 
-source\thirdparty\breakpad\src\tools\windows\binaries\dump_syms.exe ^
+..\source\thirdparty\breakpad\src\tools\windows\binaries\dump_syms.exe ^
 	%PRODUCT_NAME%.exe > %PRODUCT_NAME%.sym
 
 FOR %%f IN (plugins\*.dll) DO (
-	source\thirdparty\breakpad\src\tools\windows\binaries\dump_syms.exe ^
+	..\source\thirdparty\breakpad\src\tools\windows\binaries\dump_syms.exe ^
 		%%f > %%~df%%~pf%%~nf.sym
 )
