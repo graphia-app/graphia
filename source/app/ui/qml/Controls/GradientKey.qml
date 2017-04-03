@@ -46,7 +46,7 @@ Item
             var color = object[prop];
 
             if(!root.enabled)
-                color = Utils.desaturate(color);
+                color = Utils.desaturate(color, 0.2);
 
             stops.push(stopComponent.createObject(rectangle.gradient,
                 { "position": prop, "color": color }));
