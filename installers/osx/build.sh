@@ -32,6 +32,3 @@ cat ${SCRIPT_DIR}/dmg.spec.json.template | sed \
   dmg.spec.json
 rm -f ${PRODUCT_NAME}-${VERSION}.dmg && appdmg dmg.spec.json \
   ${PRODUCT_NAME}-${VERSION}.dmg
-
-cp -a ${PRODUCT_NAME}.app build
-cp -a ${PRODUCT_NAME}-${VERSION}.dmg build

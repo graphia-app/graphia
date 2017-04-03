@@ -1,17 +1,18 @@
 call scripts\defaults.bat
 
-rmdir /s /q build
-mkdir build
-mkdir build\plugins
+set BUILD_DIR=build
+rmdir /s /q %BUILD_DIR%
+mkdir %BUILD_DIR%
 
-call C:\Jenkins\environment.bat
 jom distclean || echo "distclean failed"
-qmake -version || EXIT /B 1
-qmake GraphTool.pro || EXIT /B 1
-jom clean || EXIT /B 1
-jom || EXIT /B 1
 
-call installers\windows\build.bat || EXIT /B 1
+cd %BUILD_DIR%
+qmake -version || EXIT /B 1
+qmake ..\GraphTool.pro || EXIT /B 1
+jom || EXIT /B 1
+jom clean || EXIT /B 1
+
+call ..\installers\windows\build.bat || EXIT /B 1
 
 setlocal EnableDelayedExpansion
 
@@ -22,5 +23,3 @@ FOR %%f IN (plugins\*.dll) DO (
 	source\thirdparty\breakpad\src\tools\windows\binaries\dump_syms.exe ^
 		%%f > %%~df%%~pf%%~nf.sym
 )
-copy %PRODUCT_NAME%.sym build\
-xcopy plugins\*.sym build\plugins\

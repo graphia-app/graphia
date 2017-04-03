@@ -4,40 +4,43 @@
 
 QMAKE_SPEC=$(qmake -query QMAKE_SPEC)
 BEAR=$(which bear)
+BUILD_DIR="build/${QMAKE_SPEC}"
 
-rm -rf build
-mkdir -p build/plugins/
+rm -rf ${BUILD_DIR}
+mkdir -p ${BUILD_DIR}
+
+(
+  cd ${BUILD_DIR}
+  qmake -version || exit $?
+  qmake ../../GraphTool.pro || exit $?
+
+  if [ ! -z "${BEAR}" ] && [ ${QMAKE_SPEC} = "linux-clang" ]
+  then
+    rm -f compile_command.json
+    bear make -O -j2 || exit $?
+  else
+    make -O -j2 || exit $?
+  fi
+
+  # This just removes the intermediate build products
+  make clean || exit $?
+)
 
 # To get breakpad dump_syms
-mkdir -p breakpad-build
-cd breakpad-build
-../source/thirdparty/breakpad/configure
-make -O -j2
-cd ..
+(
+  mkdir -p breakpad-build
+  cd breakpad-build
+  ../source/thirdparty/breakpad/configure
+  make -O -j2
+)
 
-make distclean
-qmake -version || exit $?
-qmake GraphTool.pro || exit $?
-make clean || exit $?
-
-if [ ! -z "${BEAR}" ] && [ ${QMAKE_SPEC} = "linux-clang" ]
-then
-  rm -f compile_command.json
-  bear make -O -j2 || exit $?
-else
-  make -O -j2 || exit $?
-fi
-
-cp ${PRODUCT_NAME} build/${PRODUCT_NAME}.${QMAKE_SPEC}
 breakpad-build/src/tools/linux/dump_syms/dump_syms \
-  build/${PRODUCT_NAME}.${QMAKE_SPEC} > \
-  build/${PRODUCT_NAME}.${QMAKE_SPEC}.sym
+  ${BUILD_DIR}/${PRODUCT_NAME} > \
+  ${BUILD_DIR}/${PRODUCT_NAME}.sym
 
-for PLUGIN in $(find plugins -iname "*.so")
+for PLUGIN in $(find ${BUILD_DIR}/plugins -iname "*.so")
 do
-  cp ${PLUGIN} build/${PLUGIN}.${QMAKE_SPEC}
   breakpad-build/src/tools/linux/dump_syms/dump_syms \
-    build/${PLUGIN}.${QMAKE_SPEC} > \
-    build/${PLUGIN}.${QMAKE_SPEC}.sym
-
+    ${PLUGIN} > \
+    ${PLUGIN}.sym
 done

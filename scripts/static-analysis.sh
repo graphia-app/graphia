@@ -19,7 +19,7 @@ CHECKS="-checks=*,\
 -google-*,\
 -clang-analyzer-alpha.deadcode.UnreachableCode"
 
-clang-tidy -list-checks ${CHECKS}
+clang-tidy -p build/linux-clang -list-checks ${CHECKS}
 find source/app \
   source/shared \
   source/plugins \
