@@ -921,14 +921,21 @@ void Document::removeGraphTransform(int index)
 }
 
 template<typename Config>
-static bool FlagsDiffer(const Config& a,
-                                 const Config& b,
-                                 const char* Flag)
+static bool flagsDiffer(const Config& a,
+                        const Config& b,
+                        const char* Flag)
 {
     bool aResult = a.isFlagSet(Flag);
     bool bResult = b.isFlagSet(Flag);
 
     return aResult != bResult;
+}
+
+template<typename Config>
+static bool parametersDiffer(const Config& a,
+                             const Config& b)
+{
+    return a._parameters != b._parameters;
 }
 
 // This tests two transform lists to determine if replacing one with the
@@ -950,10 +957,13 @@ static bool transformsDiffer(const QStringList& a, const QStringList& b)
         if(p.parse(b[i]))
             bi = p.result();
 
-        if(FlagsDiffer(ai, bi, "disabled"))
+        if(flagsDiffer(ai, bi, "disabled"))
             return true;
 
-        if(FlagsDiffer(ai, bi, "repeating"))
+        if(flagsDiffer(ai, bi, "repeating"))
+            return true;
+
+        if(parametersDiffer(ai, bi))
             return true;
 
         if(ai != bi)
@@ -1076,10 +1086,13 @@ static bool visualisationsDiffer(const QStringList& a, const QStringList& b)
         if(p.parse(b[i]))
             bi = p.result();
 
-        if(FlagsDiffer(ai, bi, "disabled"))
+        if(flagsDiffer(ai, bi, "disabled"))
             return true;
 
-        if(FlagsDiffer(ai, bi, "invert"))
+        if(flagsDiffer(ai, bi, "invert"))
+            return true;
+
+        if(parametersDiffer(ai, bi))
             return true;
 
         if(ai != bi)
