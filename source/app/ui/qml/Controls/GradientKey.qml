@@ -35,14 +35,15 @@ Item
 
     function updateGradient()
     {
-        if(configuration === undefined)
+        if(configuration === undefined || configuration.length === 0)
             return;
 
         var stops = [];
 
-        for(var prop in configuration)
+        var object = JSON.parse(configuration);
+        for(var prop in object)
         {
-            var color = configuration[prop];
+            var color = object[prop];
 
             if(!root.enabled)
                 color = Utils.desaturate(color);
@@ -59,7 +60,7 @@ Item
         updateGradient();
     }
 
-    property var configuration
+    property string configuration
     onConfigurationChanged:
     {
         updateGradient();

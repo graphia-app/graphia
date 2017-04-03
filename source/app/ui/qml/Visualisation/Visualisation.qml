@@ -234,7 +234,7 @@ Item
             {
             case "gradient":
                 var unescaped = Utils.unescapeQuotes(value);
-                gradientKey.configuration = JSON.parse(unescaped);
+                gradientKey.configuration = unescaped;
                 gradientKey.visible = true;
                 gradientKey.showLabels = enabledMenuItem.checked;
                 break;
