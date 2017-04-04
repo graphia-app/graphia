@@ -72,26 +72,88 @@ function unescapeQuotes(text)
     return text;
 }
 
-function decimalPointsForRange(min, max)
+function decimalPointsForValue(value)
 {
-    var range = max - min;
-
-    if(range <= 100.0)
+    if(value <= 0.001)
+        return 5;
+    else if(value <= 0.01)
+        return 4;
+    else if(value <= 100.0)
         return 3;
-    else if(range <= 1000.0)
+    else if(value <= 1000.0)
         return 2;
-    else if(range <= 10000.0)
+    else if(value <= 10000.0)
         return 1;
 
     return 0;
 }
 
-function roundToDp(value, dp)
+function decimalPointsForRange(min, max)
+{
+    return decimalPointsForValue(max - min);
+}
+
+function superScriptValue(value)
 {
     if(!isNumeric(value))
         return value;
 
-    return parseFloat(parseFloat(value).toFixed(dp)).toString();
+    var superScriptDigits = "⁰¹²³⁴⁵⁶⁷⁸⁹";
+
+    // Make sure it's a string
+    value = value.toString();
+
+    // Give up if not an integer
+    if(!value.match(/[0-9]*/))
+        return value;
+
+    var superScriptString = "";
+
+    for(var i = 0; i < value.length; i++)
+    {
+        var index = parseInt(value[i]);
+        superScriptString += superScriptDigits[index];
+    }
+
+    return superScriptString;
+}
+
+function formatForDisplay(value, maxDecimalPlaces, scientificNotationDigitsThreshold)
+{
+    if(!isNumeric(value))
+        return value;
+
+    maxDecimalPlaces = (typeof maxDecimalPlaces !== "undefined") ?
+        maxDecimalPlaces : decimalPointsForValue(value);
+
+    scientificNotationDigitsThreshold = (typeof scientificNotationDigitsThreshold !== "undefined") ?
+        scientificNotationDigitsThreshold : 5;
+
+    // String to float
+    value = parseFloat(value);
+
+    var threshold = Math.pow(10, scientificNotationDigitsThreshold);
+    if(value >= threshold || value <= -threshold)
+    {
+        var exponential = value.toExponential(2);
+        var mantissaAndExponent = exponential.split("e");
+
+        // 1.20 -> 1.2
+        var mantissa = parseFloat(mantissaAndExponent[0]);
+
+        // +123 -> 123
+        var exponent = parseInt(mantissaAndExponent[1]);
+
+        return mantissa + "×10" + superScriptValue(exponent);
+    }
+
+    // 1.234567... -> 1.234
+    var truncated = value.toFixed(maxDecimalPlaces);
+
+    // 1.100 -> 1.1
+    var simplified = parseFloat(truncated);
+
+    return simplified.toString();
 }
 
 function desaturate(colorString, factor)

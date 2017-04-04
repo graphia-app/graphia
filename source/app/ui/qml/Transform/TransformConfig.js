@@ -158,7 +158,7 @@ function create(transform)
                     if(parameterData.valueType === ValueType.String)
                         labelText += " \\\"" + parameter.rhs + "\\\"";
                     else
-                        labelText += " " + Utils.roundToDp(parameter.rhs, 3);
+                        labelText += " " + Utils.formatForDisplay(parameter.rhs);
                 }
                 else
                     addLabel();

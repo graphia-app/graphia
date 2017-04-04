@@ -51,14 +51,7 @@ GridLayout
         decimals:
         {
             if(valueType === ValueType.Float)
-            {
-                if(stepSize <= 1.0)
-                    return 3;
-                else if(stepSize <= 10.0)
-                    return 2;
-                else if(stepSize <= 100.0)
-                    return 1;
-            }
+                return Utils.decimalPointsForRange(minimumValue, maximumValue);
 
             return 0;
         }

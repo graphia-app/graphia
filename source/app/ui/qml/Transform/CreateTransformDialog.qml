@@ -226,7 +226,7 @@ Window
                     if(valueParameter.value.length > 0)
                     {
                         expression += " " + valueParameter.value;
-                        displayExpression += " " + Utils.roundToDp(valueParameter.value, 3);
+                        displayExpression += " " + Utils.formatForDisplay(valueParameter.value);
                     }
                 }
             }

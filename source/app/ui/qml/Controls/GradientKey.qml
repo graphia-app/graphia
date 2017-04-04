@@ -91,7 +91,7 @@ Item
             id: minimumLabel
 
             visible: root.showLabels
-            text: Utils.roundToDp(root.minimum, _decimalPoints)
+            text: Utils.formatForDisplay(root.minimum)
             color: root.textColor
         }
 
@@ -127,7 +127,7 @@ Item
             id: maximumLabel
 
             visible: root.showLabels
-            text: Utils.roundToDp(root.maximum, _decimalPoints)
+            text: Utils.formatForDisplay(root.maximum)
             color: root.textColor
         }
     }
