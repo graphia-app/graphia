@@ -15,7 +15,7 @@ cp -r plugins/*.dylib ${PRODUCT_NAME}.app/Contents/PlugIns/
 cp CrashReporter.app/Contents/MacOS/CrashReporter \
   ${PRODUCT_NAME}.app/Contents/MacOS/
 
-QML_DIRS=$(find source -name "*.qml" | xargs -n1 dirname | \
+QML_DIRS=$(find ../source -name "*.qml" | xargs -n1 dirname | \
   sort | uniq | sed -e 's/\(^.*$\)/-qmldir=\1/')
 
 macdeployqt ${PRODUCT_NAME}.app \
