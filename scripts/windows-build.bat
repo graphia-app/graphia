@@ -12,10 +12,6 @@ qmake ..\GraphTool.pro || EXIT /B 1
 jom || EXIT /B 1
 jom clean || EXIT /B 1
 
-cd ..
-call installers\windows\build.bat || EXIT /B 1
-cd %BUILD_DIR%
-
 setlocal EnableDelayedExpansion
 
 ..\source\thirdparty\breakpad\src\tools\windows\binaries\dump_syms.exe ^

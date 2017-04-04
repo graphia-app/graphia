@@ -18,8 +18,6 @@ GCC_TREAT_WARNINGS_AS_ERRORS=NO xcodebuild -project \
 
   # This just removes the intermediate build products
   make clean || exit $?
-
-  ../installers/osx/build.sh || exit $?
 )
 
 source/thirdparty/breakpad/src/tools/mac/dump_syms/build/Release/dump_syms \

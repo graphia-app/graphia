@@ -1,10 +1,12 @@
 setLocal EnableDelayedExpansion
 
+set BUILD_DIR=build
+
 mkdir installer
-copy build\%PRODUCT_NAME%.exe installer\
+copy %BUILD_DIR%\%PRODUCT_NAME%.exe installer\
 mkdir installer\plugins
-xcopy "build\plugins\*.dll" installer\plugins
-copy build\CrashReporter.exe installer\
+xcopy "%BUILD_DIR%\plugins\*.dll" installer\plugins
+copy %BUILD_DIR%\CrashReporter.exe installer\
 
 set QML_DIRS=
 for /d /r %%i in (*) do @if exist %%i\*.qml (set QML_DIRS=--qmldir %%i !QML_DIRS!)
@@ -43,6 +45,6 @@ signtool sign /f %SIGN_KEYSTORE_WINDOWS% /p %SIGN_PASSWORD% ^
 	/tr %SIGN_TSA% /td SHA256 ^
 	installer\%PRODUCT_NAME%-%VERSION%-installer.exe || EXIT /B 1
 
-copy installer\%PRODUCT_NAME%-%VERSION%-installer.exe build\
+copy installer\%PRODUCT_NAME%-%VERSION%-installer.exe %BUILD_DIR%\
 
 rmdir /s /q installer

@@ -1,9 +1,13 @@
 #! /bin/bash
 
+BUILD_DIR=build
+
 # OSX doesn't have readlink, hence this hackery
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 
 security unlock-keychain -p ${SIGN_BUILD_USER_PASSWORD}
+
+cd ${BUILD_DIR}
 
 mkdir -p ${PRODUCT_NAME}.app/Contents/PlugIns/
 cp -r plugins/*.dylib ${PRODUCT_NAME}.app/Contents/PlugIns/

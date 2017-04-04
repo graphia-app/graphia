@@ -5,8 +5,9 @@
 QMAKE_SPEC=$(qmake -query QMAKE_SPEC)
 BEAR=$(which bear)
 BUILD_DIR="build/${QMAKE_SPEC}"
+TOP_BUILD_DIR=$(echo ${BUILD_DIR} | cut -d "/" -f1)
 
-rm -rf ${BUILD_DIR}
+rm -rf ${TOP_BUILD_DIR}
 mkdir -p ${BUILD_DIR}
 
 (
