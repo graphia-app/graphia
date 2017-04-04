@@ -130,7 +130,7 @@ Var STARTMENU_FOLDER
 Section "-Main Component"
 	SetOutPath "$INSTDIR"
 
-	File /r "build\*.*"
+	File /r "installer\*.*"
 
 	WriteRegStr SHCTX "Software\${PRODUCT_NAME}" "" $INSTDIR
 
