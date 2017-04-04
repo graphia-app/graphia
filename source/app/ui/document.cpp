@@ -204,7 +204,7 @@ void Document::setVisualisations(const QStringList& visualisations)
 
     _visualisationsModel.clear();
     for(const auto& visualisation : visualisations)
-        appendVisualisation(visualisation);
+        _visualisationsModel.append(visualisation);
 }
 
 
@@ -1063,6 +1063,7 @@ bool Document::visualisationIsValid(const QString& visualisation) const
 
 void Document::appendVisualisation(const QString& visualisation)
 {
+    _graphModel->clearVisualisationInfos();
     _visualisationsModel.append(visualisation);
 }
 
@@ -1116,7 +1117,6 @@ void Document::updateVisualisations()
 
     if(visualisationsDiffer(_visualisations, newVisualisations))
     {
-        _graphModel->clearVisualisationInfos();
         _commandManager.execute(std::make_shared<ApplyVisualisationsCommand>(
             _graphModel.get(), this,
             _visualisations, newVisualisations));
