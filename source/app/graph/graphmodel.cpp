@@ -238,7 +238,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 {
     _mappedNodeVisuals.resetElements();
     _mappedEdgeVisuals.resetElements();
-    _visualisationInfos.clear();
+    clearVisualisationInfos();
 
     VisualisationsBuilder<NodeId> nodeVisualisationsBuilder(graph(), graph().nodeIds(), _mappedNodeVisuals);
     VisualisationsBuilder<EdgeId> edgeVisualisationsBuilder(graph(), graph().edgeIds(), _mappedEdgeVisuals);
@@ -332,6 +332,16 @@ QString GraphModel::visualisationDescription(const QString& attributeName, const
         return tr("This visualisation channel is not supported for the attribute type.");
 
     return channel->description(attribute.elementType(), attribute.valueType());
+}
+
+void GraphModel::clearVisualisationInfos()
+{
+    _visualisationInfos.clear();
+}
+
+bool GraphModel::hasVisualisationInfo() const
+{
+    return !_visualisationInfos.empty();
 }
 
 const VisualisationInfo& GraphModel::visualisationInfoAtIndex(int index) const

@@ -1000,6 +1000,11 @@ QString Document::visualisationDescription(const QString& attributeName, const Q
     return _graphModel != nullptr ? _graphModel->visualisationDescription(attributeName, channelName) : QString();
 }
 
+bool Document::hasVisualisationInfo() const
+{
+    return _graphModel != nullptr ? _graphModel->hasVisualisationInfo() : false;
+}
+
 QVariantMap Document::visualisationInfoAtIndex(int index) const
 {
     QVariantMap map;
@@ -1067,8 +1072,8 @@ void Document::removeVisualisation(int index)
     _visualisationsModel.remove(index);
 }
 
-// This tests two transform lists to determine if replacing one with the
-// other would actually result in a different transformation
+// This tests two visualisation lists to determine if replacing one with the
+// other would actually result in a different visualisation
 static bool visualisationsDiffer(const QStringList& a, const QStringList& b)
 {
     if(a.length() != b.length())
@@ -1111,6 +1116,7 @@ void Document::updateVisualisations()
 
     if(visualisationsDiffer(_visualisations, newVisualisations))
     {
+        _graphModel->clearVisualisationInfos();
         _commandManager.execute(std::make_shared<ApplyVisualisationsCommand>(
             _graphModel.get(), this,
             _visualisations, newVisualisations));

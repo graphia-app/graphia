@@ -95,6 +95,8 @@ public:
 
     QStringList availableVisualisationChannelNames(const QString& attributeName) const;
     QString visualisationDescription(const QString& attributeName, const QString& channelName) const;
+    void clearVisualisationInfos();
+    bool hasVisualisationInfo() const;
     const VisualisationInfo& visualisationInfoAtIndex(int index) const;
     QVariantMap visualisationDefaultParameters(const QString& attributeName,
                                                const QString& channelName) const;

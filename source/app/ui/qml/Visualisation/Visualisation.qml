@@ -279,10 +279,13 @@ Item
             enabledMenuItem.checked = !isFlagSet("disabled");
             invertMenuItem.checked = isFlagSet("invert");
 
-            var visualisationInfo = document.visualisationInfoAtIndex(index);
-            setVisualisationInfo(visualisationInfo);
+            if(document.hasVisualisationInfo())
+            {
+                var visualisationInfo = document.visualisationInfoAtIndex(index);
+                setVisualisationInfo(visualisationInfo);
 
-            parseParameters();
+                parseParameters();
+            }
 
             ready = true;
         }

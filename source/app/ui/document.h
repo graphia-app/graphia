@@ -244,7 +244,7 @@ public:
 
     Q_INVOKABLE QVariantMap attribute(const QString& attributeName) const;
     Q_INVOKABLE QVariantMap findTransformParameter(const QString& transformName,
-                                       const QString& parameterName) const;
+                                                   const QString& parameterName) const;
 
     Q_INVOKABLE QVariantMap parseGraphTransform(const QString& transform) const;
     Q_INVOKABLE bool graphTransformIsValid(const QString& transform) const;
@@ -254,6 +254,7 @@ public:
 
     Q_INVOKABLE QStringList availableVisualisationChannelNames(const QString& attributeName) const;
     Q_INVOKABLE QString visualisationDescription(const QString& attributeName, const QString& channelName) const;
+    Q_INVOKABLE bool hasVisualisationInfo() const;
     Q_INVOKABLE QVariantMap visualisationInfoAtIndex(int index) const;
 
     Q_INVOKABLE QVariantMap parseVisualisation(const QString& visualisation) const;
