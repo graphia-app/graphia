@@ -271,7 +271,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         if(!u::contains(_visualisationChannels, channelName))
             continue;
 
-        auto& attribute = attributeByName(attributeName);
+        const auto& attribute = attributeByName(attributeName);
         auto& channel = _visualisationChannels.at(channelName);
 
         if(!channel->supports(attribute.valueType()))
@@ -309,7 +309,7 @@ QStringList GraphModel::availableVisualisationChannelNames(const QString& attrib
 {
     QStringList stringList;
 
-    auto& attribute = attributeByName(attributeName);
+    const auto& attribute = attributeByName(attributeName);
 
     for(auto& t : _visualisationChannels)
     {
@@ -325,7 +325,7 @@ QString GraphModel::visualisationDescription(const QString& attributeName, const
     if(!u::contains(_attributes, attributeName) || !u::contains(_visualisationChannels, channelName))
         return {};
 
-    auto& attribute = attributeByName(attributeName);
+    const auto& attribute = attributeByName(attributeName);
     auto& channel = _visualisationChannels.at(channelName);
 
     if(!channel->supports(attribute.valueType()))
@@ -359,7 +359,7 @@ QVariantMap GraphModel::visualisationDefaultParameters(const QString& attributeN
     if(!u::contains(_attributes, attributeName) || !u::contains(_visualisationChannels, channelName))
         return {};
 
-    auto& attribute = attributeByName(attributeName);
+    const auto& attribute = attributeByName(attributeName);
     auto& channel = _visualisationChannels.at(channelName);
 
     return channel->defaultParameters(attribute.valueType());
