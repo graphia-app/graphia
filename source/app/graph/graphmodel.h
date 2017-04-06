@@ -24,6 +24,7 @@
 #include <memory>
 #include <utility>
 #include <map>
+#include <atomic>
 
 class SelectionManager;
 class SearchManager;
@@ -52,6 +53,8 @@ private:
     // we don't want to do many visual updates, so disable them
     bool _visualUpdatesEnabled = false;
 
+    std::atomic_bool _transformedGraphIsChanging;
+
     NodeArray<QString> _nodeNames;
 
     QString _name;
@@ -61,6 +64,8 @@ private:
     std::map<QString, std::unique_ptr<GraphTransformFactory>> _graphTransformFactories;
 
     std::map<QString, std::unique_ptr<VisualisationChannel>> _visualisationChannels;
+
+    void removeDynamicAttributes();
 
 public:
     MutableGraph& mutableGraph() { return _graph; }
@@ -115,7 +120,9 @@ public slots:
     void onPreferenceChanged(const QString&, const QVariant&);
 
 private slots:
-    void onGraphChanged(const Graph* graph);
+    void onMutableGraphChanged(const Graph* graph);
+    void onTransformedGraphWillChange(const Graph* graph);
+    void onTransformedGraphChanged(const Graph* graph);
 
 signals:
     void visualsWillChange();

@@ -35,6 +35,7 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     _edgeVisuals(_graph),
     _mappedNodeVisuals(_graph),
     _mappedEdgeVisuals(_graph),
+    _transformedGraphIsChanging(false),
     _nodeNames(_graph),
     _name(std::move(name)),
     _plugin(plugin)
@@ -48,8 +49,10 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
        _edgeVisuals[edgeId]._state = VisualFlags::None;
     });
 
-    connect(&_graph, &Graph::graphChanged, this, &GraphModel::onGraphChanged, Qt::DirectConnection);
-    connect(&_transformedGraph, &Graph::graphChanged, this, &GraphModel::onGraphChanged, Qt::DirectConnection);
+    connect(&_graph, &Graph::graphChanged, this, &GraphModel::onMutableGraphChanged, Qt::DirectConnection);
+
+    connect(&_transformedGraph, &Graph::graphWillChange, this, &GraphModel::onTransformedGraphWillChange, Qt::DirectConnection);
+    connect(&_transformedGraph, &Graph::graphChanged, this, &GraphModel::onTransformedGraphChanged, Qt::DirectConnection);
 
     connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphModel::onPreferenceChanged);
 
@@ -100,6 +103,20 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     _visualisationChannels.emplace(tr("Colour"), std::make_unique<ColorVisualisationChannel>());
     _visualisationChannels.emplace(tr("Size"), std::make_unique<SizeVisualisationChannel>());
     _visualisationChannels.emplace(tr("Text"), std::make_unique<TextVisualisationChannel>());
+}
+
+void GraphModel::removeDynamicAttributes()
+{
+    QStringList dynamicAttributeNames;
+
+    for(const auto& attributePair : _attributes)
+    {
+        if(attributePair.second.testFlag(AttributeFlag::Dynamic))
+            dynamicAttributeNames.append(attributePair.first);
+    }
+
+    for(const auto& attributeName : dynamicAttributeNames)
+        _attributes.erase(attributeName);
 }
 
 void GraphModel::setNodeName(NodeId nodeId, const QString& name)
@@ -380,7 +397,17 @@ QStringList GraphModel::attributeNames(ElementType elementType) const
 
 Attribute& GraphModel::attribute(const QString& name)
 {
-    return _attributes[name];
+    bool attributeIsNew = !u::contains(_attributes, name);
+
+    Attribute& attribute = _attributes[name];
+
+    // If we're creating an attribute during the graph transform, it's
+    // a dynamically created attribute rather than a persistent one,
+    // so mark it as such
+    if(_transformedGraphIsChanging && attributeIsNew)
+        attribute.setFlag(AttributeFlag::Dynamic);
+
+    return attribute;
 }
 
 const Attribute& GraphModel::attribute(const QString& name) const
@@ -544,23 +571,33 @@ void GraphModel::onPreferenceChanged(const QString&, const QVariant&)
     updateVisuals();
 }
 
-void GraphModel::onGraphChanged(const Graph* graph)
+void GraphModel::onMutableGraphChanged(const Graph* graph)
 {
-    bool isMutableGraph = (dynamic_cast<const MutableGraph*>(graph) != nullptr);
+    for(auto& attribute : make_value_wrapper(_attributes))
+    {
+        if(!attribute.testFlag(AttributeFlag::AutoRangeMutable))
+            continue;
+
+        if(attribute.elementType() == ElementType::Node)
+            attribute.autoSetRangeForElements(graph->nodeIds());
+        else if(attribute.elementType() == ElementType::Edge)
+            attribute.autoSetRangeForElements(graph->edgeIds());
+    }
+}
+
+void GraphModel::onTransformedGraphWillChange(const Graph*)
+{
+    removeDynamicAttributes();
+    _transformedGraphIsChanging = true;
+}
+
+void GraphModel::onTransformedGraphChanged(const Graph* graph)
+{
+    _transformedGraphIsChanging = false;
 
     for(auto& attribute : make_value_wrapper(_attributes))
     {
-        if(!attribute.testFlag(AttributeFlag::AutoRangeMutable) &&
-           !attribute.testFlag(AttributeFlag::AutoRangeTransformed))
-        {
-            // No auto-ranging requested
-            continue;
-        }
-
-        if(attribute.testFlag(AttributeFlag::AutoRangeMutable) && !isMutableGraph)
-            continue;
-
-        if(attribute.testFlag(AttributeFlag::AutoRangeTransformed) && isMutableGraph)
+        if(!attribute.testFlag(AttributeFlag::AutoRangeTransformed))
             continue;
 
         if(attribute.elementType() == ElementType::Node)

@@ -18,6 +18,9 @@ enum class AttributeFlag
 
     // With multielements, don't process the tails in transforms
     IgnoreTails             = 0x4,
+
+    // Indicates this is a dynamically created attribute; set automatically
+    Dynamic                 = 0x8,
 };
 
 class IAttribute
