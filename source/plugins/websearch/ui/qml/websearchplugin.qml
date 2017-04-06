@@ -31,6 +31,8 @@ PluginContent
                 "http://www.ebay.co.uk/sch/i.html?_nkw=%1"
             ]
             Layout.fillWidth: true
+
+            onCurrentTextChanged: webEngineView.updateUrl();
         }
     }
 
@@ -54,8 +56,25 @@ PluginContent
             id: webEngineView
             Layout.fillWidth: true
             Layout.fillHeight: true
-            url: urlTemplate.currentText.indexOf("%1") >= 0 ?
-                     urlTemplate.currentText.arg(plugin.model.selectedNodeNames) : ""
+
+            function updateUrl()
+            {
+                // Prevent focus stealing (QTBUG-52999)
+                webEngineView.enabled = false;
+
+                webEngineView.url = urlTemplate.currentText.indexOf("%1") >= 0 ?
+                    urlTemplate.currentText.arg(plugin.model.selectedNodeNames) : "";
+
+                webEngineView.enabled = true;
+            }
         }
+    }
+
+
+
+    Connections
+    {
+        target: plugin.model
+        onSelectedNodeNamesChanged: webEngineView.updateUrl();
     }
 }
