@@ -25,7 +25,7 @@ void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionMa
     graphModel->attribute(tr("Pearson Correlation Value"))
             .setFloatValueFn([this](EdgeId edgeId) { return _pearsonValues->get(edgeId); })
             .setFlag(AttributeFlag::AutoRangeMutable)
-            .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">)"
+            .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">)" //
                                "Pearson Correlation Coefficient</a> is an indication of "
                                "the linear relationship between two variables."));
 }
@@ -120,7 +120,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
     graphModel()->attribute(tr("Variance"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._variance; })
             .setFlag(AttributeFlag::AutoRangeMutable)
-            .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Variance">Variance</a> )"
+            .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Variance">Variance</a> )" //
                                "is a measure of the spread of the values associated "
                                "with the node. It is defined as ∑(𝑥-𝜇)², where 𝑥 is the value "
                                "and 𝜇 is the mean."));
@@ -128,7 +128,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
     graphModel()->attribute(tr("Standard Deviation"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._stddev; })
             .setFlag(AttributeFlag::AutoRangeMutable)
-            .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Standard_deviation">)"
+            .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Standard_deviation">)" //
                                "Standard Deviation</a> is a measure of the spread of the values associated "
                                "with the node. It is defined as √∑(𝑥-𝜇)², where 𝑥 is the value "
                                "and 𝜇 is the mean."));
