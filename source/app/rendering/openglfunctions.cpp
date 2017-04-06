@@ -93,6 +93,11 @@ bool OpenGLFunctions::hasOpenGLSupport()
     return Functions().valid();
 }
 
+QString OpenGLFunctions::vendor()
+{
+    return Functions().getString(GL_VENDOR);
+}
+
 QString OpenGLFunctions::info()
 {
     Functions f;

@@ -74,10 +74,19 @@ int main(int argc, char *argv[])
 
     if(!OpenGLFunctions::hasOpenGLSupport())
     {
-        QMessageBox::critical(nullptr, QObject::tr("OpenGL support"),
-                              QObject::tr("The installed version of OpenGL is insufficient to run %1. "
-                                          "Please install the latest video drivers available from "
-                                          "your vendor and try again.").arg(Application::name()), QMessageBox::Close);
+        QString vendor = OpenGLFunctions::vendor();
+        vendor.replace(" ", "+");
+        QString driversUrl = QString(R"(http://www.google.com/search?q=%1+video+driver+download&btnI)").arg(vendor);
+
+        QMessageBox messageBox(QMessageBox::Critical, QObject::tr("OpenGL support"),
+            QObject::tr("The installed version of OpenGL is insufficient to run %1. "
+                        R"(Please install the latest <a href="%2">video drivers</a> available from )" //
+                        "your vendor and try again.").arg(Application::name()).arg(driversUrl),
+            QMessageBox::Close);
+
+        messageBox.setTextFormat(Qt::RichText);
+        messageBox.exec();
+
         return 1;
     }
 

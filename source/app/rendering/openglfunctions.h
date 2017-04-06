@@ -15,6 +15,7 @@ public:
 
     static void setDefaultFormat();
     static bool hasOpenGLSupport();
+    static QString vendor();
     static QString info();
 };
 
