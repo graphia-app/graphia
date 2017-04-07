@@ -186,7 +186,10 @@ QStringList GraphModel::availableTransformNames() const
 
     for(auto& t : _graphTransformFactories)
     {
-        if(!availableAttributesFor(t.first).isEmpty())
+        auto elementType = _graphTransformFactories.at(t.first)->elementType();
+        bool attributesAvailable = !availableAttributesFor(t.first).isEmpty();
+
+        if(elementType == ElementType::None || attributesAvailable)
             stringList.append(t.first);
     }
 

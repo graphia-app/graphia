@@ -4,10 +4,10 @@
 #include "utils/qmlenum.h"
 
 DEFINE_QML_ENUM(Q_GADGET, ValueType,
-                Unknown,
-                Int = 0x1,
-                Float = 0x2,
-                String = 0x4,
+                Unknown     = 0x1,
+                Int         = 0x2,
+                Float       = 0x4,
+                String      = 0x8,
                 All = Int|Float|String);
 
 #endif // VALUETYPE_H
