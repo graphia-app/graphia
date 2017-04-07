@@ -14,6 +14,7 @@
 #include <limits>
 #include <vector>
 #include <tuple>
+#include <map>
 
 #include <QString>
 #include <QRegularExpression>
@@ -289,5 +290,7 @@ public:
     QString description() const { return _description; }
     Attribute& setDescription(const QString& description) { _description = description; return *this; }
 };
+
+using NameAttributeMap = std::map<QString, Attribute>;
 
 #endif // ATTRIBUTE_H

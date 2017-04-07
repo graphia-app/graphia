@@ -30,8 +30,7 @@ public:
     {}
 
     ElementType elementType() const { return ElementType::Edge; }
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig,
-                                           const std::map<QString, Attribute>& attributes) const;
+    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const;
 };
 
 #endif // EDGECONTRACTIONTRANSFORM_H

@@ -45,8 +45,7 @@ public:
     virtual ~GraphTransformFactory() = default;
 
     virtual ElementType elementType() const { return ElementType::None; }
-    virtual std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig,
-                                                   const std::map<QString, Attribute>& attributes) const = 0;
+    virtual std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const = 0;
 
     GraphModel* graphModel() const { return _graphModel; }
 };

@@ -103,9 +103,9 @@ private:
     struct ConditionVisitor : public boost::static_visitor<ElementConditionFn<E>>
     {
         ElementType _elementType;
-        const std::map<QString, Attribute>* _attributes;
+        const NameAttributeMap* _attributes;
 
-        ConditionVisitor(ElementType elementType, const std::map<QString, Attribute>& attributes) :
+        ConditionVisitor(ElementType elementType, const NameAttributeMap& attributes) :
             _elementType(elementType),
             _attributes(&attributes)
         {}
@@ -169,19 +169,19 @@ private:
     }
 
 public:
-    static auto node(const std::map<QString, Attribute>& attributes,
+    static auto node(const NameAttributeMap& attributes,
                      const GraphTransformConfig::Condition& condition)
     {
         return boost::apply_visitor(ConditionVisitor<NodeId>(ElementType::Node, attributes), condition);
     }
 
-    static auto edge(const std::map<QString, Attribute>& attributes,
+    static auto edge(const NameAttributeMap& attributes,
                      const GraphTransformConfig::Condition& condition)
     {
         return boost::apply_visitor(ConditionVisitor<EdgeId>(ElementType::Edge, attributes), condition);
     }
 
-    static auto component(const std::map<QString, Attribute>& attributes,
+    static auto component(const NameAttributeMap& attributes,
                           const GraphTransformConfig::Condition& condition)
     {
         return boost::apply_visitor(ConditionVisitor<const IGraphComponent&>(ElementType::Component, attributes), condition);

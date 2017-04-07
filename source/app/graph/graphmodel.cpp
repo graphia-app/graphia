@@ -138,7 +138,7 @@ bool GraphModel::graphTransformIsValid(const QString& transform) const
             return false;
 
         auto& factory = _graphTransformFactories.at(graphTransformConfig._action);
-        auto graphTransform = factory->create(graphTransformConfig, _attributes);
+        auto graphTransform = factory->create(graphTransformConfig);
 
         return graphTransform != nullptr;
     }
@@ -167,7 +167,7 @@ void GraphModel::buildTransforms(const QStringList& transforms)
             continue;
 
         auto& factory = _graphTransformFactories.at(action);
-        auto graphTransform = factory->create(graphTransformConfig, _attributes);
+        auto graphTransform = factory->create(graphTransformConfig);
 
         if(graphTransform)
         {

@@ -1,6 +1,7 @@
 #include "edgecontractiontransform.h"
 #include "transformedgraph.h"
 #include "attributes/conditionfncreator.h"
+#include "graph/graphmodel.h"
 
 #include <QObject>
 
@@ -35,12 +36,11 @@ bool EdgeContractionTransform::apply(TransformedGraph& target) const
     return !edgeIdsToContract.empty();
 }
 
-std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(const GraphTransformConfig& graphTransformConfig,
-                                                                        const std::map<QString, Attribute>& attributes) const
+std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(const GraphTransformConfig& graphTransformConfig) const
 {
     auto edgeContractionTransform = std::make_unique<EdgeContractionTransform>();
 
-    auto conditionFn = CreateConditionFnFor::edge(attributes, graphTransformConfig._condition);
+    auto conditionFn = CreateConditionFnFor::edge(graphModel()->attributes(), graphTransformConfig._condition);
     if(conditionFn == nullptr)
         return nullptr;
 
@@ -52,9 +52,9 @@ std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(const Gr
     auto attributeNames = graphTransformConfig.attributeNames();
     edgeContractionTransform->setIgnoreTails(
         std::any_of(attributeNames.begin(), attributeNames.end(),
-        [&attributes](const auto& attributeName)
+        [this](const auto& attributeName)
         {
-            return attributes.at(attributeName).testFlag(AttributeFlag::IgnoreTails);
+            return this->graphModel()->attribute(attributeName).testFlag(AttributeFlag::IgnoreTails);
         }));
 
     return std::move(edgeContractionTransform); //FIXME std::move required because of clang bug

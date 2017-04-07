@@ -2,6 +2,7 @@
 #include "transformedgraph.h"
 #include "attributes/conditionfncreator.h"
 
+#include "graph/graphmodel.h"
 #include "graph/componentmanager.h"
 
 #include <algorithm>
@@ -82,8 +83,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
     return changed;
 }
 
-std::unique_ptr<GraphTransform> FilterTransformFactory::create(const GraphTransformConfig& graphTransformConfig,
-                                                               const std::map<QString, Attribute>& attributes) const
+std::unique_ptr<GraphTransform> FilterTransformFactory::create(const GraphTransformConfig& graphTransformConfig) const
 {
     auto filterTransform = std::make_unique<FilterTransform>(_invert);
 
@@ -91,7 +91,7 @@ std::unique_ptr<GraphTransform> FilterTransformFactory::create(const GraphTransf
     {
     case ElementType::Node:
     {
-        auto conditionFn = CreateConditionFnFor::node(attributes, graphTransformConfig._condition);
+        auto conditionFn = CreateConditionFnFor::node(graphModel()->attributes(), graphTransformConfig._condition);
         if(conditionFn == nullptr)
             return nullptr;
 
@@ -101,7 +101,7 @@ std::unique_ptr<GraphTransform> FilterTransformFactory::create(const GraphTransf
 
     case ElementType::Edge:
     {
-        auto conditionFn = CreateConditionFnFor::edge(attributes, graphTransformConfig._condition);
+        auto conditionFn = CreateConditionFnFor::edge(graphModel()->attributes(), graphTransformConfig._condition);
         if(conditionFn == nullptr)
             return nullptr;
 
@@ -111,7 +111,7 @@ std::unique_ptr<GraphTransform> FilterTransformFactory::create(const GraphTransf
 
     case ElementType::Component:
     {
-        auto conditionFn = CreateConditionFnFor::component(attributes, graphTransformConfig._condition);
+        auto conditionFn = CreateConditionFnFor::component(graphModel()->attributes(), graphTransformConfig._condition);
         if(conditionFn == nullptr)
             return nullptr;
 
@@ -129,9 +129,9 @@ std::unique_ptr<GraphTransform> FilterTransformFactory::create(const GraphTransf
     auto attributeNames = graphTransformConfig.attributeNames();
     filterTransform->setIgnoreTails(
         std::any_of(attributeNames.begin(), attributeNames.end(),
-        [&attributes](const auto& attributeName)
+        [this](const auto& attributeName)
         {
-            return attributes.at(attributeName).testFlag(AttributeFlag::IgnoreTails);
+            return this->graphModel()->attribute(attributeName).testFlag(AttributeFlag::IgnoreTails);
         }));
 
     return std::move(filterTransform); //FIXME std::move required because of clang bug
