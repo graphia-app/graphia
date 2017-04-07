@@ -243,7 +243,7 @@ Item
         gradientKey.maximum = visualisationInfo.maximumNumericValue;
     }
 
-    function parseParameters()
+    function parseParameters(valid)
     {
         gradientKey.visible = false;
 
@@ -254,10 +254,13 @@ Item
             switch(key)
             {
             case "gradient":
-                var unescaped = Utils.unescapeQuotes(value);
-                gradientKey.configuration = unescaped;
-                gradientKey.visible = true;
-                gradientKey.showLabels = enabledMenuItem.checked;
+                if(valid)
+                {
+                    var unescaped = Utils.unescapeQuotes(value);
+                    gradientKey.configuration = unescaped;
+                    gradientKey.visible = true;
+                    gradientKey.showLabels = enabledMenuItem.checked;
+                }
                 break;
             }
         }
@@ -284,7 +287,7 @@ Item
                 var visualisationInfo = document.visualisationInfoAtIndex(index);
                 setVisualisationInfo(visualisationInfo);
 
-                parseParameters();
+                parseParameters(visualisationInfo.alertType !== VisualisationAlertType.Error);
             }
 
             ready = true;
