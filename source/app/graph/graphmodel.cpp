@@ -92,13 +92,13 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
         .intRange().setMin(1)
         .setDescription(tr("Component Size refers to the number of nodes the component contains."));
 
-    _graphTransformFactories.emplace(tr("Remove Nodes"),      std::make_unique<FilterTransformFactory>(ElementType::Node, false));
-    _graphTransformFactories.emplace(tr("Remove Edges"),      std::make_unique<FilterTransformFactory>(ElementType::Edge, false));
-    _graphTransformFactories.emplace(tr("Remove Components"), std::make_unique<FilterTransformFactory>(ElementType::Component, false));
-    _graphTransformFactories.emplace(tr("Keep Nodes"),        std::make_unique<FilterTransformFactory>(ElementType::Node, true));
-    _graphTransformFactories.emplace(tr("Keep Edges"),        std::make_unique<FilterTransformFactory>(ElementType::Edge, true));
-    _graphTransformFactories.emplace(tr("Keep Components"),   std::make_unique<FilterTransformFactory>(ElementType::Component, true));
-    _graphTransformFactories.emplace(tr("Contract Edges"),    std::make_unique<EdgeContractionTransformFactory>());
+    _graphTransformFactories.emplace(tr("Remove Nodes"),      std::make_unique<FilterTransformFactory>(this, ElementType::Node, false));
+    _graphTransformFactories.emplace(tr("Remove Edges"),      std::make_unique<FilterTransformFactory>(this, ElementType::Edge, false));
+    _graphTransformFactories.emplace(tr("Remove Components"), std::make_unique<FilterTransformFactory>(this, ElementType::Component, false));
+    _graphTransformFactories.emplace(tr("Keep Nodes"),        std::make_unique<FilterTransformFactory>(this, ElementType::Node, true));
+    _graphTransformFactories.emplace(tr("Keep Edges"),        std::make_unique<FilterTransformFactory>(this, ElementType::Edge, true));
+    _graphTransformFactories.emplace(tr("Keep Components"),   std::make_unique<FilterTransformFactory>(this, ElementType::Component, true));
+    _graphTransformFactories.emplace(tr("Contract Edges"),    std::make_unique<EdgeContractionTransformFactory>(this));
 
     _visualisationChannels.emplace(tr("Colour"), std::make_unique<ColorVisualisationChannel>());
     _visualisationChannels.emplace(tr("Size"), std::make_unique<SizeVisualisationChannel>());

@@ -32,7 +32,8 @@ private:
     bool _invert = false;
 
 public:
-    FilterTransformFactory(ElementType elementType, bool invert) :
+    FilterTransformFactory(GraphModel* graphModel, ElementType elementType, bool invert) :
+        GraphTransformFactory(graphModel),
         _elementType(elementType), _invert(invert)
     {}
 

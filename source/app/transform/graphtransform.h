@@ -9,6 +9,7 @@
 
 class Graph;
 class GraphComponent;
+class GraphModel;
 class TransformedGraph;
 class Attribute;
 
@@ -33,12 +34,21 @@ private:
 
 class GraphTransformFactory
 {
+private:
+    GraphModel* _graphModel = nullptr;
+
 public:
+    GraphTransformFactory(GraphModel* graphModel) :
+        _graphModel(graphModel)
+    {}
+
     virtual ~GraphTransformFactory() = default;
 
     virtual ElementType elementType() const { return ElementType::None; }
     virtual std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig,
                                                    const std::map<QString, Attribute>& attributes) const = 0;
+
+    GraphModel* graphModel() const { return _graphModel; }
 };
 
 using IdentityTransform = GraphTransform;

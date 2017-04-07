@@ -25,6 +25,10 @@ private:
 class EdgeContractionTransformFactory : public GraphTransformFactory
 {
 public:
+    EdgeContractionTransformFactory(GraphModel* graphModel) :
+        GraphTransformFactory(graphModel)
+    {}
+
     ElementType elementType() const { return ElementType::Edge; }
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig,
                                            const std::map<QString, Attribute>& attributes) const;
