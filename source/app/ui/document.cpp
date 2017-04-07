@@ -5,6 +5,7 @@
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/flags.h"
+#include "shared/utils/utils.h"
 
 #include "graph/graphmodel.h"
 #include "loading/parserthread.h"
@@ -28,13 +29,7 @@
 QColor Document::contrastingColorForBackground()
 {
     auto backColor = u::pref("visuals/backgroundColor").value<QColor>();
-    float brightness = 0.299f * backColor.redF()
-                       + 0.587f * backColor.greenF()
-                       + 0.114f * backColor.blueF();
-    float blackDiff = std::abs(brightness - 0.0f);
-    float whiteDiff = std::abs(brightness - 1.0f);
-
-    return (blackDiff > whiteDiff) ? Qt::black : Qt::white;
+    return u::contrastingColor(backColor);
 }
 
 Document::Document(QObject* parent) :

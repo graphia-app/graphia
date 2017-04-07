@@ -253,3 +253,15 @@ bool u::isNumeric(const std::string& string)
 
     return pos == string.size() && !std::isnan(value);
 }
+
+QColor u::contrastingColor(const QColor& color)
+{
+
+    float brightness = 0.299f * color.redF() +
+                       0.587f * color.greenF() +
+                       0.114f * color.blueF();
+    float blackDiff = std::abs(brightness - 0.0f);
+    float whiteDiff = std::abs(brightness - 1.0f);
+
+    return (blackDiff > whiteDiff) ? Qt::black : Qt::white;
+}

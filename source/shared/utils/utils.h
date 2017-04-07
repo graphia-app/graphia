@@ -213,6 +213,8 @@ namespace u
     {
         return (*a && *b) ? (*a == *b && static_strcmp(a + 1, b + 1)) : (!*a && !*b);
     }
+
+    QColor contrastingColor(const QColor& color);
 }
 
 #define ARRAY_SIZEOF(x) (sizeof(x)/sizeof((x)[0]))
