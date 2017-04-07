@@ -82,6 +82,27 @@ QString GraphTransformConfig::Parameter::valueAsString() const
     return boost::apply_visitor(Visitor(), _value);
 }
 
+bool GraphTransformConfig::hasCondition() const
+{
+    struct ConditionVisitor
+    {
+        bool operator()(const TerminalCondition& terminalCondition) const
+        {
+            return !terminalCondition._attributeName.isEmpty();
+        }
+
+        bool operator()(const CompoundCondition& compoundCondition) const
+        {
+            auto lhs = boost::apply_visitor(ConditionVisitor(), compoundCondition._lhs);
+            auto rhs = boost::apply_visitor(ConditionVisitor(), compoundCondition._rhs);
+
+            return lhs && rhs;
+        }
+    };
+
+    return boost::apply_visitor(ConditionVisitor(), _condition);
+}
+
 QVariantMap GraphTransformConfig::conditionAsVariantMap() const
 {
     struct ConditionVisitor
@@ -134,7 +155,8 @@ QVariantMap GraphTransformConfig::asVariantMap() const
     }
     map.insert("parameters", parameters);
 
-    map.insert("condition", conditionAsVariantMap());
+    if(hasCondition())
+        map.insert("condition", conditionAsVariantMap());
 
     return map;
 }

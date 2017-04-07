@@ -81,6 +81,7 @@ struct GraphTransformConfig
     std::vector<Parameter> _parameters;
     Condition _condition;
 
+    bool hasCondition() const;
     QVariantMap conditionAsVariantMap() const;
     QVariantMap asVariantMap() const;
 
