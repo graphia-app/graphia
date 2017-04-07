@@ -158,18 +158,21 @@ void GPUGraphData::prepareNodeVAO(QOpenGLShaderProgram& shader)
     shader.enableAttributeArray("nodePosition");
     shader.enableAttributeArray("component");
     shader.enableAttributeArray("size");
-    shader.enableAttributeArray("color");
+    shader.enableAttributeArray("outerColor");
+    shader.enableAttributeArray("innerColor");
     shader.enableAttributeArray("outlineColor");
     shader.setAttributeBuffer("nodePosition", GL_FLOAT, offsetof(NodeData, _position),     3,         sizeof(NodeData));
     glVertexAttribIPointer(shader.attributeLocation("component"),                          1, GL_INT, sizeof(NodeData),
                           reinterpret_cast<const void*>(offsetof(NodeData, _component)));
     shader.setAttributeBuffer("size",         GL_FLOAT, offsetof(NodeData, _size),         1,         sizeof(NodeData));
-    shader.setAttributeBuffer("color",        GL_FLOAT, offsetof(NodeData, _color),        3,         sizeof(NodeData));
+    shader.setAttributeBuffer("outerColor",   GL_FLOAT, offsetof(NodeData, _outerColor),   3,         sizeof(NodeData));
+    shader.setAttributeBuffer("innerColor",   GL_FLOAT, offsetof(NodeData, _innerColor),   3,         sizeof(NodeData));
     shader.setAttributeBuffer("outlineColor", GL_FLOAT, offsetof(NodeData, _outlineColor), 3,         sizeof(NodeData));
     glVertexAttribDivisor(shader.attributeLocation("nodePosition"), 1);
     glVertexAttribDivisor(shader.attributeLocation("component"), 1);
     glVertexAttribDivisor(shader.attributeLocation("size"), 1);
-    glVertexAttribDivisor(shader.attributeLocation("color"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("innerColor"), 1);
+    glVertexAttribDivisor(shader.attributeLocation("outerColor"), 1);
     glVertexAttribDivisor(shader.attributeLocation("outlineColor"), 1);
     _nodeVBO.release();
 
@@ -330,7 +333,7 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
     ShaderTools::loadShaderProgram(_selectionShader, ":/shaders/screen.vert", ":/shaders/selection.frag");
     ShaderTools::loadShaderProgram(_sdfShader, ":/shaders/screen.vert", ":/shaders/sdf.frag");
 
-    ShaderTools::loadShaderProgram(_nodesShader, ":/shaders/instancednodes.vert", ":/shaders/ads.frag");
+    ShaderTools::loadShaderProgram(_nodesShader, ":/shaders/instancednodes.vert", ":/shaders/nodecolorads.frag");
     ShaderTools::loadShaderProgram(_edgesShader, ":/shaders/instancededges.vert", ":/shaders/ads.frag");
 
     ShaderTools::loadShaderProgram(_selectionMarkerShader, ":/shaders/2d.vert", ":/shaders/selectionMarker.frag");
@@ -606,9 +609,12 @@ void GraphRenderer::updateGPUDataIfRequired()
             nodeData._position[2] = nodePosition.z();
             nodeData._component = componentIndex;
             nodeData._size = nodeVisual._size;
-            nodeData._color[0] = nodeVisual._color.redF();
-            nodeData._color[1] = nodeVisual._color.greenF();
-            nodeData._color[2] = nodeVisual._color.blueF();
+            nodeData._outerColor[0] = nodeVisual._outerColor.redF();
+            nodeData._outerColor[1] = nodeVisual._outerColor.greenF();
+            nodeData._outerColor[2] = nodeVisual._outerColor.blueF();
+            nodeData._innerColor[0] = nodeVisual._innerColor.redF();
+            nodeData._innerColor[1] = nodeVisual._innerColor.greenF();
+            nodeData._innerColor[2] = nodeVisual._innerColor.blueF();
 
             QColor outlineColor = nodeVisual._state.testFlag(VisualFlags::Selected) ?
                 Qt::white : Qt::black;
@@ -654,9 +660,9 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._edgeType = static_cast<int>(edgeVisualType);
             edgeData._component = componentIndex;
             edgeData._size = edgeVisual._size;
-            edgeData._color[0] = edgeVisual._color.redF();
-            edgeData._color[1] = edgeVisual._color.greenF();
-            edgeData._color[2] = edgeVisual._color.blueF();
+            edgeData._color[0] = edgeVisual._outerColor.redF();
+            edgeData._color[1] = edgeVisual._outerColor.greenF();
+            edgeData._color[2] = edgeVisual._outerColor.blueF();
 
             edgeData._outlineColor[0] = 0.0f;
             edgeData._outlineColor[1] = 0.0f;
@@ -1218,6 +1224,9 @@ std::vector<int> GraphRenderer::gpuGraphDataRenderOrder() const
 
 void GraphRenderer::renderNodes(GPUGraphData& gpuGraphData)
 {
+    // Enable per-sample shading this makes the node color
+    // fragment shader have smooth edges
+    glEnable(GL_SAMPLE_SHADING);
     _nodesShader.bind();
     setShaderADSParameters(_nodesShader);
 
@@ -1235,6 +1244,7 @@ void GraphRenderer::renderNodes(GPUGraphData& gpuGraphData)
     glBindTexture(GL_TEXTURE_BUFFER, 0);
     gpuGraphData._nodeVBO.release();
     _nodesShader.release();
+    glDisable(GL_SAMPLE_SHADING);
 }
 
 void GraphRenderer::renderEdges(GPUGraphData& gpuGraphData)

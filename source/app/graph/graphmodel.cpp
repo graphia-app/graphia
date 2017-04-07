@@ -478,13 +478,13 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
             _nodeVisuals[nodeId]._size = nodeSize;
 
         // Color
-        if(!_mappedNodeVisuals[nodeId]._color.isValid())
-        {
-            _nodeVisuals[nodeId]._color = graph().typeOf(nodeId) == MultiElementType::Not ?
-                nodeColor : multiColor;
-        }
+        if(!_mappedNodeVisuals[nodeId]._outerColor.isValid())
+            _nodeVisuals[nodeId]._outerColor = nodeColor;
         else
-            _nodeVisuals[nodeId]._color = _mappedNodeVisuals[nodeId]._color;
+            _nodeVisuals[nodeId]._outerColor = _mappedNodeVisuals[nodeId]._outerColor;
+
+        _nodeVisuals[nodeId]._innerColor = graph().typeOf(nodeId) == MultiElementType::Not ?
+                    _nodeVisuals[nodeId]._outerColor : multiColor;
 
         // Text
         if(!_mappedNodeVisuals[nodeId]._text.isEmpty())
@@ -538,13 +538,13 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
         _edgeVisuals[edgeId]._size = std::min(_edgeVisuals[edgeId]._size, minEdgeNodesSize);
 
         // Color
-        if(!_mappedEdgeVisuals[edgeId]._color.isValid())
+        if(!_mappedEdgeVisuals[edgeId]._outerColor.isValid())
         {
-            _edgeVisuals[edgeId]._color = graph().typeOf(edgeId) == MultiElementType::Not ?
+            _edgeVisuals[edgeId]._outerColor = graph().typeOf(edgeId) == MultiElementType::Not ?
                 edgeColor : multiColor;
         }
         else
-            _edgeVisuals[edgeId]._color = _mappedEdgeVisuals[edgeId]._color;
+            _edgeVisuals[edgeId]._outerColor = _mappedEdgeVisuals[edgeId]._outerColor;
 
         // Text
         if(!_mappedEdgeVisuals[edgeId]._text.isEmpty())

@@ -4,7 +4,7 @@
 
 void ColorVisualisationChannel::apply(double value, ElementVisual& elementVisual) const
 {
-    elementVisual._color = _colorGradient.get(value);
+    elementVisual._outerColor = _colorGradient.get(value);
 }
 
 void ColorVisualisationChannel::apply(const QString& value, ElementVisual& elementVisual) const
@@ -16,7 +16,7 @@ void ColorVisualisationChannel::apply(const QString& value, ElementVisual& eleme
     auto value1 = static_cast<int>(hash % 65535);
     auto value2 = static_cast<int>((hash >> 16) % 65535);
 
-    elementVisual._color.setHsl(
+    elementVisual._outerColor.setHsl(
         (value1 * 255) / 65535,       // Hue
         255,                          // Saturation
         ((value2 * 127) / 65535) + 64 // Lightness

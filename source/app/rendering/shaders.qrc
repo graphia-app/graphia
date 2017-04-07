@@ -14,5 +14,6 @@
         <file>shaders/textrender.frag</file>
         <file>shaders/textrender.vert</file>
         <file>shaders/sdf.frag</file>
+        <file>shaders/nodecolorads.frag</file>
     </qresource>
 </RCC>

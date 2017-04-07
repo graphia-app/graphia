@@ -55,7 +55,8 @@ private:
 
         // Must not exceed NumChannels
         _applications[0].at(index)._array.set(elementId, oldVisual._size  != visual._size);
-        _applications[1].at(index)._array.set(elementId, oldVisual._color != visual._color);
+        _applications[1].at(index)._array.set(elementId, oldVisual._innerColor != visual._innerColor ||
+                oldVisual._outerColor != visual._outerColor);
         _applications[2].at(index)._array.set(elementId, oldVisual._text  != visual._text);
     }
 

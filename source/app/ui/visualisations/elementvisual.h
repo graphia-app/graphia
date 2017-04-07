@@ -17,7 +17,8 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(VisualState)
 struct ElementVisual
 {
     float _size = -1.0f;
-    QColor _color;
+    QColor _outerColor;
+    QColor _innerColor;
     QString _text;
     VisualState _state;
 };

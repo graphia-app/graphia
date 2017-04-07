@@ -194,4 +194,3 @@ RESOURCES += \
 mac {
     LIBS += -framework CoreFoundation
 }
-
