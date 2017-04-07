@@ -61,7 +61,7 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
         switch(userDataVector.type())
         {
         case UserDataVector::Type::Float:
-            graphModel.attribute(userDataVectorName)
+            graphModel.createAttribute(userDataVectorName)
                     .setFloatValueFn([this, userDataVectorName](NodeId nodeId)
                     {
                         return valueByNodeId(nodeId, userDataVectorName).toFloat();
@@ -71,7 +71,7 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
             break;
 
         case UserDataVector::Type::Int:
-            graphModel.attribute(userDataVectorName)
+            graphModel.createAttribute(userDataVectorName)
                     .setIntValueFn([this, userDataVectorName](NodeId nodeId)
                     {
                         return valueByNodeId(nodeId, userDataVectorName).toInt();
@@ -81,7 +81,7 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
             break;
 
         case UserDataVector::Type::String:
-            graphModel.attribute(userDataVectorName)
+            graphModel.createAttribute(userDataVectorName)
                     .setStringValueFn([this, userDataVectorName](NodeId nodeId)
                     {
                         return valueByNodeId(nodeId, userDataVectorName).toString();
@@ -92,7 +92,7 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
         default: break;
         }
 
-        graphModel.attribute(userDataVectorName)
+        graphModel.createAttribute(userDataVectorName)
                 .setDescription(QString(tr("%1 is a user defined attribute.")).arg(userDataVectorName));
     }
 }

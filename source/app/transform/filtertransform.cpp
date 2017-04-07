@@ -131,7 +131,7 @@ std::unique_ptr<GraphTransform> FilterTransformFactory::create(const GraphTransf
         std::any_of(attributeNames.begin(), attributeNames.end(),
         [this](const auto& attributeName)
         {
-            return this->graphModel()->attribute(attributeName).testFlag(AttributeFlag::IgnoreTails);
+            return this->graphModel()->attributeByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
         }));
 
     return std::move(filterTransform); //FIXME std::move required because of clang bug

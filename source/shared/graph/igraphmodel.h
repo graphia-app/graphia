@@ -18,7 +18,7 @@ public:
     virtual QString nodeName(NodeId nodeId) const = 0;
     virtual void setNodeName(NodeId nodeId, const QString& name) = 0;
 
-    virtual IAttribute& attribute(const QString& name) = 0;
+    virtual IAttribute& createAttribute(const QString& name) = 0;
 };
 
 #endif // IGRAPHMODEL_H

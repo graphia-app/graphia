@@ -54,7 +54,7 @@ std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(const Gr
         std::any_of(attributeNames.begin(), attributeNames.end(),
         [this](const auto& attributeName)
         {
-            return this->graphModel()->attribute(attributeName).testFlag(AttributeFlag::IgnoreTails);
+            return this->graphModel()->attributeByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
         }));
 
     return std::move(edgeContractionTransform); //FIXME std::move required because of clang bug

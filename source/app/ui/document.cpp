@@ -820,7 +820,7 @@ QStringList Document::availableAttributesSimilarTo(const QString& attributeName)
     if(_graphModel == nullptr)
         return {};
 
-    const auto& attribute = _graphModel->attribute(attributeName);
+    const auto& attribute = _graphModel->attributeByName(attributeName);
     auto valueType = Flags<ValueType>(attribute.valueType());
 
     // For similarity purposes, treat Int and Float as the same
@@ -844,7 +844,7 @@ QVariantMap Document::attribute(const QString& attributeName) const
 
     if(u::contains(_graphModel->availableAttributes(), attributeName))
     {
-        const auto& attribute = _graphModel->attribute(attributeName);
+        const auto& attribute = _graphModel->attributeByName(attributeName);
         map.insert("valueType", static_cast<int>(attribute.valueType()));
         map.insert("elementType", static_cast<int>(attribute.elementType()));
 

@@ -108,8 +108,8 @@ public:
 
     QStringList attributeNames(ElementType elementType) const;
 
-    Attribute& attribute(const QString& name);
-    const Attribute& attribute(const QString& name) const;
+    Attribute& createAttribute(const QString& name);
+    const Attribute& attributeByName(const QString& name) const;
 
     const NameAttributeMap& attributes() const { return _attributes; }
 

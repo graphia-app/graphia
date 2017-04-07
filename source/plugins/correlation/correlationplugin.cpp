@@ -22,7 +22,7 @@ void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionMa
     _userNodeDataTableModel.initialise(selectionManager);
     _pearsonValues = std::make_unique<EdgeArray<double>>(graphModel->mutableGraph());
 
-    graphModel->attribute(tr("Pearson Correlation Value"))
+    graphModel->createAttribute(tr("Pearson Correlation Value"))
             .setFloatValueFn([this](EdgeId edgeId) { return _pearsonValues->get(edgeId); })
             .setFlag(AttributeFlag::AutoRangeMutable)
             .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">)" //
@@ -99,25 +99,25 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
         }
     }
 
-    graphModel()->attribute(tr("Mean Data Value"))
+    graphModel()->createAttribute(tr("Mean Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._mean; })
             .setFlag(AttributeFlag::AutoRangeMutable)
             .setDescription(tr("The Mean Data Value is the mean of the values associated "
                                "with the node."));
 
-    graphModel()->attribute(tr("Minimum Data Value"))
+    graphModel()->createAttribute(tr("Minimum Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._minValue; })
             .setFlag(AttributeFlag::AutoRangeMutable)
             .setDescription(tr("The Minimum Data Value is the minimum value associated "
                                "with the node."));
 
-    graphModel()->attribute(tr("Maximum Data Value"))
+    graphModel()->createAttribute(tr("Maximum Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._maxValue; })
             .setFlag(AttributeFlag::AutoRangeMutable)
             .setDescription(tr("The Maximum Data Value is the maximum value associated "
                                "with the node."));
 
-    graphModel()->attribute(tr("Variance"))
+    graphModel()->createAttribute(tr("Variance"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._variance; })
             .setFlag(AttributeFlag::AutoRangeMutable)
             .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Variance">Variance</a> )" //
@@ -125,7 +125,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
                                "with the node. It is defined as ∑(𝑥-𝜇)², where 𝑥 is the value "
                                "and 𝜇 is the mean."));
 
-    graphModel()->attribute(tr("Standard Deviation"))
+    graphModel()->createAttribute(tr("Standard Deviation"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._stddev; })
             .setFlag(AttributeFlag::AutoRangeMutable)
             .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Standard_deviation">)" //
