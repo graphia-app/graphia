@@ -183,7 +183,8 @@ SOURCES += \
     ui/visualisations/visualisationconfigparser.cpp \
     graph/elementtype.cpp \
     attributes/attribute.cpp \
-    ui/visualisations/colorgradient.cpp
+    ui/visualisations/colorgradient.cpp \
+    attributes/conditionfncreator.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \
