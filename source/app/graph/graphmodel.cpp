@@ -542,12 +542,12 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
 
         // Color
         if(!_mappedEdgeVisuals[edgeId]._outerColor.isValid())
-        {
-            _edgeVisuals[edgeId]._outerColor = graph().typeOf(edgeId) == MultiElementType::Not ?
-                edgeColor : multiColor;
-        }
+            _edgeVisuals[edgeId]._outerColor = edgeColor;
         else
             _edgeVisuals[edgeId]._outerColor = _mappedEdgeVisuals[edgeId]._outerColor;
+
+        _edgeVisuals[edgeId]._innerColor = graph().typeOf(edgeId) == MultiElementType::Not ?
+            _edgeVisuals[edgeId]._outerColor : multiColor;
 
         // Text
         if(!_mappedEdgeVisuals[edgeId]._text.isEmpty())

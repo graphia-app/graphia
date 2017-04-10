@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>shaders/instancednodes.vert</file>
-        <file>shaders/ads.frag</file>
         <file>shaders/instancededges.vert</file>
         <file>shaders/marker.frag</file>
         <file>shaders/debuglines.frag</file>
@@ -15,5 +14,6 @@
         <file>shaders/textrender.vert</file>
         <file>shaders/sdf.frag</file>
         <file>shaders/nodecolorads.frag</file>
+        <file>shaders/edgecolorads.frag</file>
     </qresource>
 </RCC>

@@ -13,13 +13,16 @@ layout (location = 7) in int    edgeType; // The size of the target node
 layout (location = 8) in int    component; // The component index
 
 layout (location = 9)  in float size; // The size of the edge
-layout (location = 10) in vec3  color; // The color of the edge
-layout (location = 11) in vec3  outlineColor; // The outline color of the node
+layout (location = 10) in vec3  outerColor; // The outside color of the edge
+layout (location = 11) in vec3  innerColor; // The inside color of the edge (used for multi edges)
+layout (location = 12) in vec3  outlineColor; // The outline color of the node
 
 out vec3 position;
 out vec3 normal;
-out vec3 vColor;
+out vec3 innerVColor;
+out vec3 outerVColor;
 out vec3 vOutlineColor;
+out vec2 uv;
 
 uniform samplerBuffer componentData;
 
@@ -52,6 +55,7 @@ mat4 makeOrientationMatrix(vec3 up)
 void main()
 {
     float edgeLength = distance(sourcePosition, targetPosition);
+    float realLength = edgeLength - (sourceSize + targetSize);
     vec3 midpoint = mix(sourcePosition, targetPosition, 0.5);
     mat4 orientationMatrix = makeOrientationMatrix(normalize(targetPosition - sourcePosition));
 
@@ -85,6 +89,7 @@ void main()
         scaledVertexPosition.y = 0.5;
         scaledVertexPosition.xz *= size;
         scaledVertexPosition.y *= edgeLength;
+        uv = vec2(0.0, (scaledVertexPosition.y / realLength) + 0.5);
 
         position = (orientationMatrix * vec4(scaledVertexPosition, 1.0)).xyz;
         position = (modelViewMatrix * vec4(position + midpoint, 1.0)).xyz;
@@ -104,6 +109,8 @@ void main()
         if(abs(conePosition.y) > edgeLength * MAX_ARROW_HEAD_LENGTH)
             conePosition.y = -edgeLength * MAX_ARROW_HEAD_LENGTH;
 
+        uv = vec2(0.0, 1.0 + ((conePosition.y) / realLength));
+
         // Offset cone position to point at edge of node
         conePosition.y -= targetSize;
 
@@ -117,13 +124,16 @@ void main()
         scaledVertexPosition.xz *= size;
         scaledVertexPosition.y *= edgeLength;
 
+        uv = vec2(0.0, -sourceSize / realLength);
+
         position = (orientationMatrix * vec4(scaledVertexPosition, 1.0)).xyz;
         position = (modelViewMatrix * vec4(position + midpoint, 1.0)).xyz;
     }
 
     mat3 normalMatrix = transpose(inverse(mat3(modelViewMatrix * orientationMatrix)));
     normal = normalMatrix * scaledVertexNormal;
-    vColor = color;
+    innerVColor = innerColor;
+    outerVColor = outerColor;
     vOutlineColor = outlineColor;
     gl_Position = projectionMatrix * vec4(position, 1.0);
 }

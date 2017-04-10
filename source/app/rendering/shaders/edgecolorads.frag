@@ -21,13 +21,15 @@ uniform MaterialInfo material;
 
 in vec3 position;
 in vec3 normal;
-in vec3 vColor;
+in vec3 innerVColor;
+in vec3 outerVColor;
 in vec3 vOutlineColor;
+in vec2 uv;
 
 layout (location = 0) out vec4 outColor;
 layout (location = 1) out vec4 outSelection;
 
-vec3 adsModel(const in vec3 pos, const in vec3 n)
+vec3 adsModel(const in vec3 pos, const in vec3 n, const in vec4 diffuseColor)
 {
     vec3 result = vec3(0.0);
     vec3 v = normalize(-pos);
@@ -62,7 +64,7 @@ vec3 adsModel(const in vec3 pos, const in vec3 n)
         attenuation = clamp(attenuation, 0.7, 1.0);
 
         // Combine the ambient, diffuse and specular contributions
-        result += attenuation * light.intensity * (material.ka + vColor.rgb * diffuse + material.ks * specular);
+        result += attenuation * light.intensity * (material.ka + diffuseColor.rgb * diffuse + material.ks * specular);
     }
 
     return result;
@@ -70,7 +72,14 @@ vec3 adsModel(const in vec3 pos, const in vec3 n)
 
 void main()
 {
-    vec3 color = adsModel(position, normalize(normal));
+    // Only the UV y is set since that's all we're interested in
+    // Used to set the size of the center stripe
+    const float bounds = 0.375;
+
+    float stepMix = step(bounds, uv.y) * step(uv.y, 1.0 - bounds);
+    vec3 fragColor = mix(innerVColor, outerVColor, 1.0 - stepMix);
+    vec3 color = adsModel(position, normalize(normal), vec4(fragColor, 1.0));
+
     outColor = vec4(color, 1.0);
     outSelection = vec4(vOutlineColor, 1.0);
 }

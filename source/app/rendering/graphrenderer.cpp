@@ -193,7 +193,8 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     shader.enableAttributeArray("edgeType");
     shader.enableAttributeArray("component");
     shader.enableAttributeArray("size");
-    shader.enableAttributeArray("color");
+    shader.enableAttributeArray("outerColor");
+    shader.enableAttributeArray("innerColor");
     shader.enableAttributeArray("outlineColor");
     shader.setAttributeBuffer("sourcePosition", GL_FLOAT, offsetof(EdgeData, _sourcePosition),  3,         sizeof(EdgeData));
     shader.setAttributeBuffer("targetPosition", GL_FLOAT, offsetof(EdgeData, _targetPosition),  3,         sizeof(EdgeData));
@@ -204,7 +205,8 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     glVertexAttribIPointer(shader.attributeLocation("component"),                               1, GL_INT, sizeof(EdgeData),
                            reinterpret_cast<const void*>(offsetof(EdgeData, _component)));
     shader.setAttributeBuffer("size",           GL_FLOAT, offsetof(EdgeData, _size),            1,         sizeof(EdgeData));
-    shader.setAttributeBuffer("color",          GL_FLOAT, offsetof(EdgeData, _color),           3,         sizeof(EdgeData));
+    shader.setAttributeBuffer("outerColor",     GL_FLOAT, offsetof(EdgeData, _outerColor),      3,         sizeof(EdgeData));
+    shader.setAttributeBuffer("innerColor",     GL_FLOAT, offsetof(EdgeData, _innerColor),      3,         sizeof(EdgeData));
     shader.setAttributeBuffer("outlineColor",   GL_FLOAT, offsetof(EdgeData, _outlineColor),    3,         sizeof(EdgeData));
     glVertexAttribDivisor(shader.attributeLocation("sourcePosition"),   1);
     glVertexAttribDivisor(shader.attributeLocation("targetPosition"),   1);
@@ -213,7 +215,8 @@ void GPUGraphData::prepareEdgeVAO(QOpenGLShaderProgram& shader)
     glVertexAttribDivisor(shader.attributeLocation("edgeType"),         1);
     glVertexAttribDivisor(shader.attributeLocation("component"),        1);
     glVertexAttribDivisor(shader.attributeLocation("size"),             1);
-    glVertexAttribDivisor(shader.attributeLocation("color"),            1);
+    glVertexAttribDivisor(shader.attributeLocation("outerColor"),       1);
+    glVertexAttribDivisor(shader.attributeLocation("innerColor"),       1);
     glVertexAttribDivisor(shader.attributeLocation("outlineColor"),     1);
     _edgeVBO.release();
 
@@ -334,7 +337,7 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
     ShaderTools::loadShaderProgram(_sdfShader, ":/shaders/screen.vert", ":/shaders/sdf.frag");
 
     ShaderTools::loadShaderProgram(_nodesShader, ":/shaders/instancednodes.vert", ":/shaders/nodecolorads.frag");
-    ShaderTools::loadShaderProgram(_edgesShader, ":/shaders/instancededges.vert", ":/shaders/ads.frag");
+    ShaderTools::loadShaderProgram(_edgesShader, ":/shaders/instancededges.vert", ":/shaders/edgecolorads.frag");
 
     ShaderTools::loadShaderProgram(_selectionMarkerShader, ":/shaders/2d.vert", ":/shaders/selectionMarker.frag");
     ShaderTools::loadShaderProgram(_debugLinesShader, ":/shaders/debuglines.vert", ":/shaders/debuglines.frag");
@@ -660,9 +663,13 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._edgeType = static_cast<int>(edgeVisualType);
             edgeData._component = componentIndex;
             edgeData._size = edgeVisual._size;
-            edgeData._color[0] = edgeVisual._outerColor.redF();
-            edgeData._color[1] = edgeVisual._outerColor.greenF();
-            edgeData._color[2] = edgeVisual._outerColor.blueF();
+            edgeData._outerColor[0] = edgeVisual._outerColor.redF();
+            edgeData._outerColor[1] = edgeVisual._outerColor.greenF();
+            edgeData._outerColor[2] = edgeVisual._outerColor.blueF();
+            edgeData._innerColor[0] = edgeVisual._innerColor.redF();
+            edgeData._innerColor[1] = edgeVisual._innerColor.greenF();
+            edgeData._innerColor[2] = edgeVisual._innerColor.blueF();
+
 
             edgeData._outlineColor[0] = 0.0f;
             edgeData._outlineColor[1] = 0.0f;
