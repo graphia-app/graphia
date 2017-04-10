@@ -3,23 +3,23 @@
 
 #include "graphtransform.h"
 #include "graph/graph.h"
+#include "attributes/attribute.h"
 
 #include <vector>
 
 class EdgeContractionTransform : public GraphTransform
 {
 public:
+    EdgeContractionTransform(const NameAttributeMap& attributes,
+                             const GraphTransformConfig& graphTransformConfig) :
+        _attributes(&attributes), _graphTransformConfig(graphTransformConfig)
+    {}
+
     bool apply(TransformedGraph &target) const;
 
-    void addEdgeContractionFilter(const EdgeConditionFn& f) { _edgeFilters.emplace_back(f); }
-    bool hasEdgeContractionFilters() const { return !_edgeFilters.empty(); }
-
-    void setIgnoreTails(bool ignoreTails) { _ignoreTails = ignoreTails; }
-
 private:
-    bool _ignoreTails = false;
-
-    std::vector<EdgeConditionFn> _edgeFilters;
+    const NameAttributeMap* _attributes;
+    GraphTransformConfig _graphTransformConfig;
 };
 
 class EdgeContractionTransformFactory : public GraphTransformFactory

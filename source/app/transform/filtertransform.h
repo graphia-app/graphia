@@ -3,26 +3,30 @@
 
 #include "graphtransform.h"
 #include "graph/graph.h"
-#include "graph/filter.h"
+#include "attributes/attribute.h"
 
 #include <vector>
 
-class FilterTransform : public GraphTransform, public Filter
+class FilterTransform : public GraphTransform
 {
 public:
-    explicit FilterTransform(bool invert) : _invert(invert) {}
+    explicit FilterTransform(ElementType elementType,
+                             const NameAttributeMap& attributes,
+                             const GraphTransformConfig& graphTransformConfig,
+                             bool invert) :
+        _elementType(elementType),
+        _attributes(&attributes),
+        _graphTransformConfig(graphTransformConfig),
+        _invert(invert)
+    {}
 
     bool apply(TransformedGraph &target) const;
 
-    void addComponentFilter(const ComponentConditionFn& f) { if(f != nullptr) _componentFilters.emplace_back(f); }
-    bool hasComponentFilters() const { return !_componentFilters.empty(); }
-
-    void setIgnoreTails(bool ignoreTails) { _ignoreTails = ignoreTails; }
-
 private:
+    ElementType _elementType;
+    const NameAttributeMap* _attributes;
+    GraphTransformConfig _graphTransformConfig;
     bool _invert = false;
-    bool _ignoreTails = false;
-    std::vector<ComponentConditionFn> _componentFilters;
 };
 
 class FilterTransformFactory : public GraphTransformFactory

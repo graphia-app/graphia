@@ -5,29 +5,41 @@
 
 #include <QObject>
 
-static bool edgeIdContracted(const std::vector<EdgeConditionFn>& filters, EdgeId edgeId)
-{
-    for(auto& filter : filters)
-    {
-        if(filter(edgeId))
-            return true;
-    }
-
-    return false;
-}
-
 bool EdgeContractionTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Contracting"));
+
+    auto attributeNames = _graphTransformConfig.attributeNames();
+
+    bool unknownAttributes =
+        std::any_of(attributeNames.begin(), attributeNames.end(),
+        [this](const auto& attributeName)
+        {
+            return !u::contains(*_attributes, attributeName);
+        });
+
+    if(unknownAttributes)
+        return false;
+
+    bool ignoreTails =
+        std::any_of(attributeNames.begin(), attributeNames.end(),
+        [this](const auto& attributeName)
+        {
+            return _attributes->at(attributeName).testFlag(AttributeFlag::IgnoreTails);
+        });
+
+    auto conditionFn = CreateConditionFnFor::edge(*_attributes, _graphTransformConfig._condition);
+    if(conditionFn == nullptr)
+        return false;
 
     EdgeIdSet edgeIdsToContract;
 
     for(auto edgeId : target.edgeIds())
     {
-        if(_ignoreTails && target.typeOf(edgeId) == MultiElementType::Tail)
+        if(ignoreTails && target.typeOf(edgeId) == MultiElementType::Tail)
             continue;
 
-        if(edgeIdContracted(_edgeFilters, edgeId))
+        if(conditionFn(edgeId))
             edgeIdsToContract.insert(edgeId);
     }
 
@@ -38,24 +50,10 @@ bool EdgeContractionTransform::apply(TransformedGraph& target) const
 
 std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(const GraphTransformConfig& graphTransformConfig) const
 {
-    auto edgeContractionTransform = std::make_unique<EdgeContractionTransform>();
+    auto edgeContractionTransform = std::make_unique<EdgeContractionTransform>(graphModel()->attributes(), graphTransformConfig);
 
-    auto conditionFn = CreateConditionFnFor::edge(graphModel()->attributes(), graphTransformConfig._condition);
-    if(conditionFn == nullptr)
+    if(!conditionIsValid(elementType(), graphModel()->attributes(), graphTransformConfig._condition))
         return nullptr;
-
-    edgeContractionTransform->addEdgeContractionFilter(conditionFn);
-
-    if(!edgeContractionTransform->hasEdgeContractionFilters())
-        return nullptr;
-
-    auto attributeNames = graphTransformConfig.attributeNames();
-    edgeContractionTransform->setIgnoreTails(
-        std::any_of(attributeNames.begin(), attributeNames.end(),
-        [this](const auto& attributeName)
-        {
-            return this->graphModel()->attributeByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
-        }));
 
     return std::move(edgeContractionTransform); //FIXME std::move required because of clang bug
 }
