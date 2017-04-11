@@ -280,7 +280,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 
         if(!u::contains(_attributes, attributeName))
         {
-            _visualisationInfos[index].addAlert(VisualisationAlertType::Error,
+            _visualisationInfos[index].addAlert(AlertType::Error,
                 tr("Attribute doesn't exist"));
             continue;
         }
@@ -293,7 +293,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 
         if(!channel->supports(attribute.valueType()))
         {
-            _visualisationInfos[index].addAlert(VisualisationAlertType::Error,
+            _visualisationInfos[index].addAlert(AlertType::Error,
                 tr("Visualisation doesn't support attribute type"));
             continue;
         }

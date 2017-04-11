@@ -113,7 +113,8 @@ HEADERS += \
     attributes/valuetype.h \
     ui/visualisations/colorgradient.h \
     crashtype.h \
-    ui/visualisations/visualisationinfo.h
+    ui/visualisations/visualisationinfo.h \
+    ui/alert.h
 
 SOURCES += \
     application.cpp \

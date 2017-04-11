@@ -89,12 +89,12 @@ public:
                     {
                         if(bothSet != sourceSet)
                         {
-                            infos[iv._index].addAlert(VisualisationAlertType::Warning,
+                            infos[iv._index].addAlert(AlertType::Warning,
                                 QObject::tr("Partially overriden by subsequent visualisations"));
                         }
                         else
                         {
-                            infos[iv._index].addAlert(VisualisationAlertType::Error,
+                            infos[iv._index].addAlert(AlertType::Error,
                                 QObject::tr("Overriden by subsequent visualisations"));
                         }
                     }
@@ -128,7 +128,7 @@ public:
 
             if(min == max)
             {
-                visualisationInfo.addAlert(VisualisationAlertType::Warning, QObject::tr("No Numeric Range To Map To"));
+                visualisationInfo.addAlert(AlertType::Warning, QObject::tr("No Numeric Range To Map To"));
                 return;
             }
 

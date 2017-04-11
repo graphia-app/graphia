@@ -1,7 +1,7 @@
 #ifndef VISUALISATIONINFO_H
 #define VISUALISATIONINFO_H
 
-#include "visualisationalert.h"
+#include "ui/alert.h"
 
 #include <vector>
 #include <limits>
@@ -9,7 +9,7 @@
 class VisualisationInfo
 {
 private:
-    std::vector<VisualisationAlert> _alerts;
+    std::vector<Alert> _alerts;
     double _min = std::numeric_limits<double>::max();
     double _max = std::numeric_limits<double>::min();
 

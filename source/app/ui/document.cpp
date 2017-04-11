@@ -1004,7 +1004,7 @@ QVariantMap Document::visualisationInfoAtIndex(int index) const
 {
     QVariantMap map;
 
-    map.insert("alertType", static_cast<int>(VisualisationAlertType::None));
+    map.insert("alertType", static_cast<int>(AlertType::None));
     map.insert("alertText", "");
     map.insert("minimumNumericValue", 0.0);
     map.insert("maximumNumericValue", 1.0);
