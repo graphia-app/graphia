@@ -18,8 +18,9 @@ class TransformedGraph : public Graph
 public:
     explicit TransformedGraph(const Graph& source);
 
-    void enableAutoRebuild() { _autoRebuild = true; }
-    void setTransform(std::unique_ptr<GraphTransform> graphTransform);
+    void enableAutoRebuild() { _autoRebuild = true; rebuild(); }
+    void addTransform(std::unique_ptr<const GraphTransform> t) { _transforms.emplace_back(std::move(t)); }
+    void clearTransforms() { _transforms.clear(); }
 
     const std::vector<NodeId>& nodeIds() const { return _target.nodeIds(); }
     int numNodes() const { return _target.numNodes(); }
@@ -50,7 +51,7 @@ public:
 
 private:
     const Graph* _source;
-    std::unique_ptr<GraphTransform> _graphTransform;
+    std::vector<std::unique_ptr<const GraphTransform>> _transforms;
 
     // TransformedGraph has the target as a member rather than inheriting
     // from MutableGraph for two reasons:

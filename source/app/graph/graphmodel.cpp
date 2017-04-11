@@ -6,7 +6,6 @@
 
 #include "attributes/attribute.h"
 
-#include "transform/compoundtransform.h"
 #include "transform/filtertransform.h"
 #include "transform/edgecontractiontransform.h"
 #include "transform/graphtransformconfigparser.h"
@@ -148,8 +147,7 @@ bool GraphModel::graphTransformIsValid(const QString& transform) const
 
 void GraphModel::buildTransforms(const QStringList& transforms)
 {
-    auto compoundTransform = std::make_unique<CompoundTransform>();
-
+    _transformedGraph.clearTransforms();
     for(const auto& transform : transforms)
     {
         GraphTransformConfigParser graphTransformConfigParser;
@@ -172,12 +170,11 @@ void GraphModel::buildTransforms(const QStringList& transforms)
         if(graphTransform)
         {
             graphTransform->setRepeating(graphTransformConfig.isFlagSet("repeating"));
-            compoundTransform->addTransform(std::move(graphTransform));
+            _transformedGraph.addTransform(std::move(graphTransform));
         }
     }
 
     _transformedGraph.enableAutoRebuild();
-    _transformedGraph.setTransform(std::move(compoundTransform));
 }
 
 QStringList GraphModel::availableTransformNames() const

@@ -3,6 +3,7 @@
 #include "graph/componentmanager.h"
 
 #include "shared/utils/utils.h"
+#include "shared/utils/iterator_range.h"
 
 #include <functional>
 
@@ -30,13 +31,7 @@ TransformedGraph::TransformedGraph(const Graph& source) :
     connect(&_target, &Graph::edgeRemoved, [this](const Graph*, EdgeId edgeId) { _edgesState[edgeId].remove(); });
     connect(&_target, &Graph::edgeAdded,   [this](const Graph*, EdgeId edgeId) { _edgesState[edgeId].add(); });
 
-    setTransform(std::make_unique<IdentityTransform>());
-}
-
-void TransformedGraph::setTransform(std::unique_ptr<GraphTransform> graphTransform)
-{
-    _graphTransform = std::move(graphTransform);
-    rebuild();
+    addTransform(std::make_unique<IdentityTransform>());
 }
 
 void TransformedGraph::reserve(const Graph& other)
@@ -61,7 +56,22 @@ void TransformedGraph::rebuild()
     _target.performTransaction([this](IMutableGraph&)
     {
         _graphChangeOccurred = false;
-        _graphTransform->applyFromSource(*_source, *this);
+
+        if(_transforms.empty())
+        {
+            // Effectively behave like an identity transform
+            cloneFrom(*_source);
+            return false;
+        }
+
+        // We can only use applyFromSource for the first transformation...
+        bool changed = _transforms.front()->applyFromSource(*_source, *this);
+
+        // ...thereafter we use the inplace one
+        for(const auto& transform : make_iterator_range(_transforms.begin() + 1, _transforms.end()))
+            changed = transform->applyAndUpdate(*this) || changed;
+
+        return changed;
     });
 
     emit graphChanged(this, _graphChangeOccurred);

@@ -73,7 +73,6 @@ HEADERS += \
     rendering/primitives/sphere.h \
     rendering/scene.h \
     rendering/transition.h \
-    transform/compoundtransform.h \
     transform/edgecontractiontransform.h \
     transform/filtertransform.h \
     transform/graphtransform.h \
@@ -159,7 +158,6 @@ SOURCES += \
     rendering/primitives/rectangle.cpp \
     rendering/primitives/sphere.cpp \
     rendering/transition.cpp \
-    transform/compoundtransform.cpp \
     transform/edgecontractiontransform.cpp \
     transform/filtertransform.cpp \
     transform/graphtransform.cpp \
