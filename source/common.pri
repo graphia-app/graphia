@@ -4,6 +4,9 @@ CONFIG(debug,debug|release) {
     DEFINES += _DEBUG
 }
 
+# https://www.kdab.com/disabling-narrowing-conversions-in-signal-slot-connections/
+DEFINES += QT_NO_NARROWING_CONVERSIONS_IN_CONNECT
+
 gcc {
     QMAKE_CXXFLAGS += -Wpedantic -Wall -Wextra -Wcast-align -Wcast-qual \
         -Wdisabled-optimization -Wformat=2 -Winit-self \

@@ -214,7 +214,7 @@ void GraphQuickItem::onLayoutChanged()
     emit layoutChanged();
 }
 
-void GraphQuickItem::onFPSChanged(int fps)
+void GraphQuickItem::onFPSChanged(float fps)
 {
     _fps = fps;
     emit fpsChanged();

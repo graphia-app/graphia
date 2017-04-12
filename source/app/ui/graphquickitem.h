@@ -121,7 +121,7 @@ private:
 
 public slots:
     void onLayoutChanged();
-    void onFPSChanged(int fps);
+    void onFPSChanged(float fps);
     void onUserInteractionStarted();
     void onUserInteractionFinished();
 
