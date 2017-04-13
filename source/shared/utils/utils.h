@@ -180,6 +180,15 @@ namespace u
         return result;
     }
 
+    template<typename T, template<typename, typename...> class C, typename... Args>
+    std::vector<T> keysFor(const C<T, Args...>& container)
+    {
+        std::vector<T> keys;
+        for(const auto& key : make_key_wrapper(container))
+            keys.emplace_back(key);
+        return keys;
+    }
+
     struct Locking {};
 
     // A lock that does nothing if the second parameter isn't Locking
