@@ -11,6 +11,7 @@
 #include <mutex>
 #include <vector>
 #include <functional>
+#include <algorithm>
 
 class ComponentSplitSet
 {
@@ -21,7 +22,11 @@ private:
 public:
     ComponentSplitSet(ComponentId oldComponentId, ComponentIdSet&& splitters) :
         _oldComponentId(oldComponentId), _splitters(splitters)
-    {}
+    {
+        Q_ASSERT(!oldComponentId.isNull());
+        Q_ASSERT(!std::any_of(_splitters.begin(), _splitters.end(),
+                 [](const auto& splitter) { return splitter.isNull(); }));
+    }
 
     ComponentId oldComponentId() const { return _oldComponentId; }
     const ComponentIdSet& splitters() const { return _splitters; }
@@ -36,7 +41,11 @@ private:
 public:
     ComponentMergeSet(ComponentIdSet&& mergers, ComponentId newComponentId) :
         _mergers(mergers), _newComponentId(newComponentId)
-    {}
+    {
+        Q_ASSERT(!newComponentId.isNull());
+        Q_ASSERT(!std::any_of(_mergers.begin(), _mergers.end(),
+                 [](const auto& merger) { return merger.isNull(); }));
+    }
 
     const ComponentIdSet& mergers() const { return _mergers; }
     ComponentId newComponentId() const { return _newComponentId; }

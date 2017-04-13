@@ -1048,6 +1048,8 @@ void GraphRenderer::onGraphChanged(const Graph* graph, bool changed)
 
 void GraphRenderer::onComponentAdded(const Graph*, ComponentId componentId, bool)
 {
+    Q_ASSERT(!componentId.isNull());
+
     // If the component is entirely new, we shouldn't be hiding any of it
     auto* component = _graphModel->graph().componentById(componentId);
     for(NodeId nodeId : component->nodeIds())

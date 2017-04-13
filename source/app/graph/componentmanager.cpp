@@ -205,6 +205,7 @@ void ComponentManager::update(const Graph* graph)
     // Removed components
     for(auto componentId : componentIdsToBeRemoved)
     {
+        Q_ASSERT(!componentId.isNull());
         if(_debug) qDebug() << "componentWillBeRemoved" << componentId;
         bool hasMerged = u::contains(mergedComponentIds, componentId);
         emit componentWillBeRemoved(graph, componentId, hasMerged);
@@ -236,6 +237,7 @@ void ComponentManager::update(const Graph* graph)
     // Notify all the new components
     for(auto componentId : componentIdsToBeAdded)
     {
+        Q_ASSERT(!componentId.isNull());
         if(_debug) qDebug() << "componentAdded" << componentId;
         bool hasSplit = u::contains(splitComponentIds, componentId);
         emit componentAdded(graph, componentId, hasSplit);
