@@ -148,8 +148,10 @@ bool GraphModel::graphTransformIsValid(const QString& transform) const
 void GraphModel::buildTransforms(const QStringList& transforms)
 {
     _transformedGraph.clearTransforms();
-    for(const auto& transform : transforms)
+    _transformInfos.clear();
+    for(int index = 0; index < transforms.size(); index++)
     {
+        const auto& transform = transforms.at(index);
         GraphTransformConfigParser graphTransformConfigParser;
 
         if(!graphTransformConfigParser.parse(transform))
@@ -170,6 +172,7 @@ void GraphModel::buildTransforms(const QStringList& transforms)
         if(graphTransform)
         {
             graphTransform->setRepeating(graphTransformConfig.isFlagSet("repeating"));
+            graphTransform->setInfo(&_transformInfos[index]);
             _transformedGraph.addTransform(std::move(graphTransform));
         }
     }
@@ -228,6 +231,21 @@ QStringList GraphModel::avaliableConditionFnOps(const QString& attributeName) co
         return {};
 
     return GraphTransformConfigParser::ops(_attributes.at(attributeName).valueType());
+}
+
+bool GraphModel::hasTransformInfo() const
+{
+    return !_transformInfos.empty();
+}
+
+const TransformInfo& GraphModel::transformInfoAtIndex(int index) const
+{
+    static TransformInfo nullTransformInfo;
+
+    if(u::contains(_transformInfos, index))
+        return _transformInfos.at(index);
+
+    return nullTransformInfo;
 }
 
 bool GraphModel::visualisationIsValid(const QString& visualisation) const

@@ -259,7 +259,7 @@ Item
                     var unescaped = Utils.unescapeQuotes(value);
                     gradientKey.configuration = unescaped;
                     gradientKey.visible = true;
-                    gradientKey.showLabels = enabledMenuItem.checked;
+                    gradientKey.showLabels = !isFlagSet("disabled");
                 }
                 break;
             }
@@ -279,16 +279,19 @@ Item
             channel = visualisationConfig.channel;
             parameters = visualisationConfig.parameters;
 
-            enabledMenuItem.checked = !isFlagSet("disabled");
-            invertMenuItem.checked = isFlagSet("invert");
-
+            var error = false;
             if(document.hasVisualisationInfo())
             {
                 var visualisationInfo = document.visualisationInfoAtIndex(index);
                 setVisualisationInfo(visualisationInfo);
 
-                parseParameters(visualisationInfo.alertType !== AlertType.Error);
+                error = visualisationInfo.alertType === AlertType.Error;
+                parseParameters(!error);
             }
+
+            enabledMenuItem.enabled = invertMenuItem.enabled = !error
+            enabledMenuItem.checked = !isFlagSet("disabled") && !error;
+            invertMenuItem.checked = isFlagSet("invert");
 
             ready = true;
         }

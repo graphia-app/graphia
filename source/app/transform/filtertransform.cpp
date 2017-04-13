@@ -15,19 +15,9 @@ bool FilterTransform::apply(TransformedGraph& target) const
 
     target.setPhase(QObject::tr("Filtering"));
 
-    // The elements to be filtered are calculated first and then removed, because
-    // removing elements during the filtering could affect the result of filter functions
-
     auto attributeNames = _graphTransformConfig.attributeNames();
 
-    bool unknownAttributes =
-        std::any_of(attributeNames.begin(), attributeNames.end(),
-        [this](const auto& attributeName)
-        {
-            return !u::contains(*_attributes, attributeName);
-        });
-
-    if(unknownAttributes)
+    if(hasUnknownAttributes(attributeNames, u::keysFor(*_attributes)))
         return false;
 
     bool ignoreTails =
@@ -37,13 +27,19 @@ bool FilterTransform::apply(TransformedGraph& target) const
             return _attributes->at(attributeName).testFlag(AttributeFlag::IgnoreTails);
         });
 
+    // The elements to be filtered are calculated first and then removed, because
+    // removing elements during the filtering could affect the result of filter functions
+
     switch(_elementType)
     {
     case ElementType::Node:
     {
         auto conditionFn = CreateConditionFnFor::node(*_attributes, _graphTransformConfig._condition);
         if(conditionFn == nullptr)
+        {
+            addAlert(AlertType::Error, QObject::tr("Invalid condition"));
             return false;
+        }
 
         std::vector<NodeId> removees;
 
@@ -66,7 +62,10 @@ bool FilterTransform::apply(TransformedGraph& target) const
     {
         auto conditionFn = CreateConditionFnFor::edge(*_attributes, _graphTransformConfig._condition);
         if(conditionFn == nullptr)
+        {
+            addAlert(AlertType::Error, QObject::tr("Invalid condition"));
             return false;
+        }
 
         std::vector<EdgeId> removees;
 
@@ -89,7 +88,10 @@ bool FilterTransform::apply(TransformedGraph& target) const
     {
         auto conditionFn = CreateConditionFnFor::component(*_attributes, _graphTransformConfig._condition);
         if(conditionFn == nullptr)
+        {
+            addAlert(AlertType::Error, QObject::tr("Invalid condition"));
             return false;
+        }
 
         ComponentManager componentManager(target);
 

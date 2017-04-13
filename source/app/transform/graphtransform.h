@@ -3,6 +3,7 @@
 
 #include "shared/graph/elementid.h"
 #include "graph/elementtype.h"
+#include "transforminfo.h"
 #include "graphtransformconfig.h"
 
 #include <memory>
@@ -28,7 +29,22 @@ public:
     bool repeating() const { return _repeating; }
     void setRepeating(bool repeating) { _repeating = repeating; }
 
+    template<typename... Args>
+    void addAlert(Args&&... args) const
+    {
+        if(_info != nullptr)
+            _info->addAlert(std::forward<Args>(args)...);
+    }
+
+    const TransformInfo* info() const { return _info; }
+    void setInfo(TransformInfo* info) { _info = info; }
+
+protected:
+    bool hasUnknownAttributes(const std::vector<QString>& referencedAttributes,
+                               const std::vector<QString>& availableAttributes) const;
+
 private:
+    mutable TransformInfo* _info = nullptr;
     bool _repeating = false;
 };
 

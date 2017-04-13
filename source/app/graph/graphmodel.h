@@ -6,6 +6,7 @@
 #include "shared/graph/grapharray.h"
 
 #include "transform/transformedgraph.h"
+#include "transform/transforminfo.h"
 #include "attributes/attribute.h"
 
 #include "ui/visualisations/elementvisual.h"
@@ -41,6 +42,7 @@ public:
 private:
     MutableGraph _graph;
     TransformedGraph _transformedGraph;
+    TransformInfosMap _transformInfos;
     NodePositions _nodePositions;
 
     NodeVisuals _nodeVisuals;
@@ -94,6 +96,8 @@ public:
                                     ValueType valueTypes = ValueType::All) const;
     QStringList availableAttributesFor(const QString& transformName) const;
     QStringList avaliableConditionFnOps(const QString& attributeName) const;
+    bool hasTransformInfo() const;
+    const TransformInfo& transformInfoAtIndex(int index) const;
 
     bool visualisationIsValid(const QString& visualisation) const;
     void buildVisualisations(const QStringList& visualisations);

@@ -64,8 +64,10 @@ void TransformedGraph::rebuild()
             return false;
         }
 
+        const auto& firstTransform = _transforms.front();
+
         // We can only use applyFromSource for the first transformation...
-        bool changed = _transforms.front()->applyFromSource(*_source, *this);
+        bool changed = firstTransform->applyFromSource(*_source, *this);
 
         // ...thereafter we use the inplace one
         for(const auto& transform : make_iterator_range(_transforms.begin() + 1, _transforms.end()))

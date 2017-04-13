@@ -122,7 +122,7 @@ function create(transform)
     }
 
     this.toComponents =
-    function(document, parent)
+    function(document, parent, locked)
     {
         var labelText = "";
 
@@ -146,7 +146,6 @@ function create(transform)
             else if(typeof this._elements[i] === 'object')
             {
                 var parameter = this._elements[i];
-                var locked = this.flags.indexOf("locked") >= 0;
 
                 labelText += parameter.lhs + " " + sanitiseOp(parameter.op);
 

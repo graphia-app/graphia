@@ -241,6 +241,8 @@ public:
     Q_INVOKABLE QStringList availableAttributesFor(const QString& transformName) const;
     Q_INVOKABLE QStringList availableAttributesSimilarTo(const QString& attributeName) const;
     Q_INVOKABLE QStringList avaliableConditionFnOps(const QString& attributeName) const;
+    Q_INVOKABLE bool hasTransformInfo() const;
+    Q_INVOKABLE QVariantMap transformInfoAtIndex(int index) const;
 
     Q_INVOKABLE QVariantMap attribute(const QString& attributeName) const;
     Q_INVOKABLE QVariantMap findTransformParameter(const QString& transformName,

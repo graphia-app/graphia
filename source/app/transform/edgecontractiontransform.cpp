@@ -11,14 +11,7 @@ bool EdgeContractionTransform::apply(TransformedGraph& target) const
 
     auto attributeNames = _graphTransformConfig.attributeNames();
 
-    bool unknownAttributes =
-        std::any_of(attributeNames.begin(), attributeNames.end(),
-        [this](const auto& attributeName)
-        {
-            return !u::contains(*_attributes, attributeName);
-        });
-
-    if(unknownAttributes)
+    if(hasUnknownAttributes(attributeNames, u::keysFor(*_attributes)))
         return false;
 
     bool ignoreTails =
@@ -30,7 +23,10 @@ bool EdgeContractionTransform::apply(TransformedGraph& target) const
 
     auto conditionFn = CreateConditionFnFor::edge(*_attributes, _graphTransformConfig._condition);
     if(conditionFn == nullptr)
+    {
+        addAlert(AlertType::Error, QObject::tr("Invalid condition"));
         return false;
+    }
 
     EdgeIdSet edgeIdsToContract;
 

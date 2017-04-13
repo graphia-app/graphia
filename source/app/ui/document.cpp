@@ -830,6 +830,42 @@ QStringList Document::avaliableConditionFnOps(const QString& attributeName) cons
     return _graphModel != nullptr ? _graphModel->avaliableConditionFnOps(attributeName) : QStringList();
 }
 
+bool Document::hasTransformInfo() const
+{
+    return _graphModel != nullptr ? _graphModel->hasTransformInfo() : false;
+}
+
+QVariantMap Document::transformInfoAtIndex(int index) const
+{
+    QVariantMap map;
+
+    map.insert("alertType", static_cast<int>(AlertType::None));
+    map.insert("alertText", "");
+
+    if(_graphModel == nullptr)
+        return map;
+
+    const auto& transformInfo = _graphModel->transformInfoAtIndex(index);
+
+    auto alerts = transformInfo.alerts();
+
+    if(alerts.empty())
+        return map;
+
+    std::sort(alerts.begin(), alerts.end(),
+    [](auto& a, auto& b)
+    {
+        return a._type > b._type;
+    });
+
+    auto& transformAlert = alerts.at(0);
+
+    map.insert("alertType", static_cast<int>(transformAlert._type));
+    map.insert("alertText", transformAlert._text);
+
+    return map;
+}
+
 QVariantMap Document::attribute(const QString& attributeName) const
 {
     QVariantMap map;

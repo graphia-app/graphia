@@ -34,6 +34,12 @@ Item
     {
         id: row
 
+        AlertIcon
+        {
+            id: alertIcon
+            visible: false
+        }
+
         Label
         {
             text: "📌"
@@ -210,17 +216,47 @@ Item
         document.updateGraphTransforms();
     }
 
+    function setAlertIcon(transformInfo)
+    {
+        switch(transformInfo.alertType)
+        {
+        case AlertType.Error:
+            alertIcon.type = "error";
+            alertIcon.text = transformInfo.alertText;
+            alertIcon.visible = true;
+            break;
+
+        case AlertType.Warning:
+            alertIcon.type = "warning";
+            alertIcon.text = transformInfo.alertText;
+            alertIcon.visible = true;
+            break;
+
+        default:
+        case AlertType.None:
+            alertIcon.visible = false;
+        }
+    }
+
     property int index
     property string value
     onValueChanged:
     {
         if(!ready)
         {
-            var transformConfig = new TransformConfig.create(document.parseGraphTransform(value));
-            transformConfig.toComponents(document, expression);
+            var error = false;
+            if(document.hasTransformInfo())
+            {
+                var transformInfo = document.transformInfoAtIndex(index);
+                setAlertIcon(transformInfo);
+                error = transformInfo.alertType === AlertType.Error;
+            }
 
+            var transformConfig = new TransformConfig.create(document.parseGraphTransform(value));
             flags = transformConfig.flags;
             template = transformConfig.template;
+
+            transformConfig.toComponents(document, expression, isFlagSet("locked") || error);
             parameters = transformConfig.parameters;
 
             for(var i = 0; i < parameters.length; i++)
@@ -229,8 +265,14 @@ Item
                 parameter.valueChanged.connect(updateExpression);
             }
 
-            enabledMenuItem.checked = !isFlagSet("disabled");
-            lockedMenuItem.checked = isFlagSet("locked");
+            enabledMenuItem.enabled =
+                    lockedMenuItem.enabled =
+                    repeatingMenuItem.enabled =
+                    pinnedMenuItem.enabled =
+                    !error;
+
+            enabledMenuItem.checked = !isFlagSet("disabled") && !error;
+            lockedMenuItem.checked = isFlagSet("locked") || error;
             repeatingMenuItem.checked = isFlagSet("repeating");
             pinnedMenuItem.checked = isFlagSet("pinned");
             ready = true;
