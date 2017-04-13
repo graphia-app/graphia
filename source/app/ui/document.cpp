@@ -1028,10 +1028,10 @@ QVariantMap Document::visualisationInfoAtIndex(int index) const
         return a._type > b._type;
     });
 
-    auto& visualisationAlert = alerts.at(0);
+    auto& alert = alerts.at(0);
 
-    map.insert("alertType", static_cast<int>(visualisationAlert._type));
-    map.insert("alertText", visualisationAlert._text);
+    map.insert("alertType", static_cast<int>(alert._type));
+    map.insert("alertText", alert._text);
 
     return map;
 }

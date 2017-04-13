@@ -222,20 +222,20 @@ Item
     {
         switch(visualisationInfo.alertType)
         {
-        case VisualisationAlertType.Error:
+        case AlertType.Error:
             alertIcon.type = "error";
             alertIcon.text = visualisationInfo.alertText;
             alertIcon.visible = true;
             break;
 
-        case VisualisationAlertType.Warning:
+        case AlertType.Warning:
             alertIcon.type = "warning";
             alertIcon.text = visualisationInfo.alertText;
             alertIcon.visible = true;
             break;
 
         default:
-        case VisualisationAlertType.None:
+        case AlertType.None:
             alertIcon.visible = false;
         }
 
@@ -287,7 +287,7 @@ Item
                 var visualisationInfo = document.visualisationInfoAtIndex(index);
                 setVisualisationInfo(visualisationInfo);
 
-                parseParameters(visualisationInfo.alertType !== VisualisationAlertType.Error);
+                parseParameters(visualisationInfo.alertType !== AlertType.Error);
             }
 
             ready = true;

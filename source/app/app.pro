@@ -106,7 +106,6 @@ HEADERS += \
     ui/visualisations/visualisationconfigparser.h \
     graph/elementtype.h \
     ui/visualisations/visualisationbuilder.h \
-    ui/visualisations/visualisationalert.h \
     attributes/conditionfncreator.h \
     attributes/condtionfnops.h \
     attributes/attribute.h \
