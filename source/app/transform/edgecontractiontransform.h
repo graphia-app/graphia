@@ -25,7 +25,7 @@ private:
 class EdgeContractionTransformFactory : public GraphTransformFactory
 {
 public:
-    EdgeContractionTransformFactory(GraphModel* graphModel) :
+    explicit EdgeContractionTransformFactory(GraphModel* graphModel) :
         GraphTransformFactory(graphModel)
     {}
 

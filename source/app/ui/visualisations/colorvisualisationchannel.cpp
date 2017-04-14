@@ -74,5 +74,5 @@ QVariantMap ColorVisualisationChannel::defaultParameters(ValueType valueType) co
 void ColorVisualisationChannel::setParameter(const QString& name, const QString& value)
 {
     if(name == "gradient")
-        _colorGradient = value;
+        _colorGradient = ColorGradient(value);
 }

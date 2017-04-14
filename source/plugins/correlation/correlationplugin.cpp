@@ -36,7 +36,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
     Q_ASSERT(firstDataColumn > 0);
     Q_ASSERT(firstDataRow > 0);
 
-    if(firstDataColumn <= 0 || firstDataRow <= 0)
+    if(firstDataColumn == 0 || firstDataRow == 0)
         return false;
 
     progress(-1);

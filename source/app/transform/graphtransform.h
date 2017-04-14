@@ -17,6 +17,7 @@ class Attribute;
 class GraphTransform
 {
 public:
+    GraphTransform() = default;
     virtual ~GraphTransform() = default;
 
     // In some circumstances it may be a performance win to reimplement this instead of going
@@ -54,7 +55,7 @@ private:
     GraphModel* _graphModel = nullptr;
 
 public:
-    GraphTransformFactory(GraphModel* graphModel) :
+    explicit GraphTransformFactory(GraphModel* graphModel) :
         _graphModel(graphModel)
     {}
 

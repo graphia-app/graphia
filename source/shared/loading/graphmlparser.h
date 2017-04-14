@@ -31,6 +31,7 @@ public:
         QString _type;
         QVariant _value;
 
+        //cppcheck-suppress noExplicitConstructor
         Attribute(const AttributeKey& key)
         {
             _name = key._name;

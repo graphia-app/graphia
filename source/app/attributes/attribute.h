@@ -26,8 +26,11 @@ template<typename T> class AttributeRange
 
 class _AttributeRange
 {
-protected: Attribute& _attribute;
-public: _AttributeRange(Attribute& attribute) : _attribute(attribute) {}
+protected:
+    Attribute& _attribute;
+
+public:
+    explicit _AttributeRange(Attribute& attribute) : _attribute(attribute) {}
 };
 
 template<>

@@ -14,7 +14,7 @@ QString VisualisationConfig::Parameter::valueAsString(bool addQuotes) const
     {
         bool _addQuotes;
 
-        Visitor(bool addQuotes_) : _addQuotes(addQuotes_) {}
+        explicit Visitor(bool addQuotes_) : _addQuotes(addQuotes_) {}
 
         QString operator()(double d) const { return QString::number(d); }
         QString operator()(const QString& s) const

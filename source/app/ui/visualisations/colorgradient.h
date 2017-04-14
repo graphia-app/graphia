@@ -31,7 +31,7 @@ public:
     ColorGradient() = default;
     ColorGradient(const ColorGradient&) = default;
     ColorGradient& operator=(const ColorGradient&) = default;
-    ColorGradient(const QString& descriptor);
+    explicit ColorGradient(const QString& descriptor);
 
     QColor get(double value) const;
 };
