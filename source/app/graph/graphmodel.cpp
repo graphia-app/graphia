@@ -214,6 +214,14 @@ QStringList GraphModel::availableAttributes(ElementType elementTypes, ValueType 
     return stringList;
 }
 
+QString GraphModel::descriptionFor(const QString& transformName) const
+{
+    if(!transformName.isEmpty())
+        return _graphTransformFactories.at(transformName)->description();
+
+    return {};
+}
+
 QStringList GraphModel::availableAttributesFor(const QString& transformName) const
 {
     if(!transformName.isEmpty())

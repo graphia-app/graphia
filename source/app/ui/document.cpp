@@ -805,6 +805,11 @@ QStringList Document::availableAttributes(int elementTypes, int valueTypes) cons
                                         static_cast<ValueType>(valueTypes)) : QStringList();
 }
 
+QString Document::descriptionFor(const QString& transformName) const
+{
+    return _graphModel != nullptr ? _graphModel->descriptionFor(transformName) : "";
+}
+
 QStringList Document::availableAttributesFor(const QString& transformName) const
 {
     return _graphModel != nullptr ? _graphModel->availableAttributesFor(transformName) : QStringList();

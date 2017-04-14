@@ -41,6 +41,12 @@ public:
         _elementType(elementType), _invert(invert)
     {}
 
+    QString description() const
+    {
+        return QObject::tr("%1 all the %2s which match the specified condition.")
+                .arg(_invert ? QObject::tr("Keep") : QObject::tr("Remove"))
+                .arg(elementTypeAsString(_elementType).toLower());
+    }
     ElementType elementType() const { return _elementType; }
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const;
 };

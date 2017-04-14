@@ -29,6 +29,12 @@ public:
         GraphTransformFactory(graphModel)
     {}
 
+    QString description() const
+    {
+        return QObject::tr(R"(<a href="https://en.wikipedia.org/wiki/Edge_contraction">Remove edges</a> )" //
+                           "which match the specified condition while simultaneously "
+                           "merging the pairs of nodes that they previously joined.");
+    }
     ElementType elementType() const { return ElementType::Edge; }
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const;
 };

@@ -41,6 +41,7 @@ Window
                 onSelectedValueChanged:
                 {
                     channelList.model = document.availableVisualisationChannelNames(selectedValue);
+                    description.update();
                     updateVisualisationExpression();
                 }
             }
@@ -51,7 +52,11 @@ Window
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                onSelectedValueChanged: { updateVisualisationExpression(); }
+                onSelectedValueChanged:
+                {
+                    description.update();
+                    updateVisualisationExpression();
+                }
             }
 
             Text
@@ -65,6 +70,24 @@ Window
                 elide: Text.ElideRight
 
                 onLinkActivated: Qt.openUrlExternally(link);
+
+                function update()
+                {
+                    text = "";
+
+                    if(attributeList.selectedValue !== undefined && attributeList.selectedValue.length > 0)
+                    {
+                        var attribute = document.attribute(attributeList.selectedValue);
+                        text += attribute.description;
+
+                        if(channelList.selectedValue !== undefined && channelList.selectedValue.length > 0)
+                        {
+                            var visualisationDescription = document.visualisationDescription(
+                                attributeList.selectedValue, channelList.selectedValue);
+                            text += "<br><br>" + visualisationDescription;
+                        }
+                    }
+                }
             }
         }
 
@@ -124,21 +147,6 @@ Window
 
     function updateVisualisationExpression()
     {
-        description.text = "";
-
-        if(attributeList.selectedValue !== undefined && attributeList.selectedValue.length > 0)
-        {
-            var attribute = document.attribute(attributeList.selectedValue);
-            description.text += attribute.description;
-
-            if(channelList.selectedValue !== undefined && channelList.selectedValue.length > 0)
-            {
-                var visualisationDescription = document.visualisationDescription(
-                    attributeList.selectedValue, channelList.selectedValue);
-                description.text += "<br><br>" + visualisationDescription;
-            }
-        }
-
         var expression = "\"" + attributeList.selectedValue + "\" \"" + channelList.selectedValue +"\"";
 
         var parameters = document.visualisationDefaultParameters(attributeList.selectedValue,

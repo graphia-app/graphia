@@ -19,9 +19,9 @@ Window
     modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
     width: 800
-    height: 250
+    height: 350
     minimumWidth: 800
-    minimumHeight: 250
+    minimumHeight: 350
 
     property var document
     property string transformExpression
@@ -51,6 +51,7 @@ Window
                 onSelectedValueChanged:
                 {
                     attributeList.model = document.availableAttributesFor(selectedValue);
+                    description.update();
                     updateTransformExpression();
                 }
             }
@@ -80,15 +81,11 @@ Window
                                                                             attributeList.selectedValue);
                         parameterData.initialValue = "";
                         valueParameter.configure(parameterData);
-
-                        attributeDescription.text = parameterData.description;
                     }
                     else
-                    {
                         valueParameter.reset();
-                        attributeDescription.text = "";
-                    }
 
+                    description.update();
                     updateTransformExpression();
                 }
             }
@@ -122,6 +119,7 @@ Window
             TransformParameter
             {
                 id: valueParameter
+                Layout.preferredWidth: 150
                 Layout.topMargin: Constants.margin
                 Layout.alignment: Qt.AlignTop
 
@@ -132,7 +130,7 @@ Window
 
             Text
             {
-                id: attributeDescription
+                id: description
                 Layout.preferredWidth: valueParameter.width
                 Layout.fillHeight: true
 
@@ -142,6 +140,24 @@ Window
                 elide: Text.ElideRight
 
                 onLinkActivated: Qt.openUrlExternally(link);
+
+                function update()
+                {
+                    text = "";
+
+                    if(transformsList.selectedValue !== undefined)
+                    {
+                        text += document.descriptionFor(transformsList.selectedValue);
+
+                        if(attributeList.selectedValue !== undefined)
+                        {
+                            var parameterData = document.findTransformParameter(transformsList.selectedValue,
+                                                                                attributeList.selectedValue);
+
+                            text += "<br><br>" + parameterData.description;
+                        }
+                    }
+                }
             }
         }
 

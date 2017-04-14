@@ -61,6 +61,8 @@ public:
 
     virtual ~GraphTransformFactory() = default;
 
+    virtual QString description() const = 0;
+
     virtual ElementType elementType() const { return ElementType::None; }
     virtual std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const = 0;
 
