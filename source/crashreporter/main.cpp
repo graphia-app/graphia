@@ -73,6 +73,11 @@ static void uploadReport(const QString& email, const QString& text,
     while(dirIterator.hasNext())
     {
         QString fileName = dirIterator.next();
+        QFileInfo fileInfo(fileName);
+
+        // Skip . and ..
+        if(!fileInfo.exists() || !fileInfo.isFile())
+            continue;
 
         QHttpPart extraPart;
         extraPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
