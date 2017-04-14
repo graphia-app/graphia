@@ -11,6 +11,7 @@
 #include <QCryptographicHash>
 #include <QDebug>
 #include <QTimer>
+#include <QDirIterator>
 
 #include <iostream>
 #include <map>
@@ -18,7 +19,8 @@
 #include "report.h"
 #include "app/rendering/openglfunctions.h"
 
-static void uploadReport(const QString& email, const QString& text, const QString& dmpFile)
+static void uploadReport(const QString& email, const QString& text,
+                         const QString& dmpFile, const QString& extraDir)
 {
     auto *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
@@ -58,13 +60,31 @@ static void uploadReport(const QString& email, const QString& text, const QStrin
     QHttpPart dmpPart;
     dmpPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
     dmpPart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                      QVariant(R"(form-data; name="dmp"; filename=")" +
-                               QFileInfo(dmpFile).fileName() + R"(")"));
+                      QVariant(QString(R"(form-data; name="dmp"; filename="%1")")
+                               .arg(QFileInfo(dmpFile).fileName())));
     auto* file = new QFile(dmpFile);
     file->open(QIODevice::ReadOnly);
     dmpPart.setBodyDevice(file);
     file->setParent(multiPart);
     multiPart->append(dmpPart);
+
+    QDirIterator dirIterator(extraDir);
+    int fileIndex = 0;
+    while(dirIterator.hasNext())
+    {
+        QString fileName = dirIterator.next();
+
+        QHttpPart extraPart;
+        extraPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
+        extraPart.setHeader(QNetworkRequest::ContentDispositionHeader,
+                            QVariant(QString(R"(form-data; name="extra%1"; filename="%2")")
+                                     .arg(fileIndex++).arg(QFileInfo(fileName).fileName())));
+        auto* extraFile = new QFile(fileName);
+        extraFile->open(QIODevice::ReadOnly);
+        extraPart.setBodyDevice(extraFile);
+        extraFile->setParent(multiPart);
+        multiPart->append(extraPart);
+    }
 
     QUrl url("http://crashreports.kajeka.com/");
     QNetworkRequest request(url);
@@ -117,7 +137,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName(PRODUCT_NAME);
     QCoreApplication::setApplicationVersion(VERSION);
 
-    if(app.arguments().size() != 2 || !QFileInfo(app.arguments().at(1)).exists())
+    if(app.arguments().size() < 2 || !QFileInfo(app.arguments().at(1)).exists())
     {
         QMessageBox::critical(nullptr, app.applicationName(),
                               QObject::tr("This program is intended for automatically "
@@ -125,6 +145,10 @@ int main(int argc, char *argv[])
                               QMessageBox::Close);
         return 1;
     }
+
+    QString extraDir;
+    if(app.arguments().size() == 3 && QFileInfo(app.arguments().at(2)).isDir())
+        extraDir = app.arguments().at(2);
 
     QIcon mainIcon;
     mainIcon.addFile(":/icon.svg");
@@ -137,7 +161,7 @@ int main(int argc, char *argv[])
 
     int exitCode = app.exec();
 
-    uploadReport(report._email, report._text, app.arguments().at(1));
+    uploadReport(report._email, report._text, app.arguments().at(1), extraDir);
 
     return exitCode;
 }

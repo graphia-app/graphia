@@ -2,8 +2,12 @@
 
 #include "shared/utils/utils.h"
 
+#include <QGuiApplication>
+#include <QWidget>
+#include <QWindow>
+#include <QScreen>
 #include <QDir>
-#include <QCoreApplication>
+#include <QTemporaryDir>
 
 #include <iostream>
 
@@ -22,7 +26,7 @@
 #endif
 
 #ifdef Q_OS_WIN
-static void launch(const wchar_t* program, const wchar_t* path)
+static void launch(const wchar_t* program, const wchar_t* dmpFile, const wchar_t* dir)
 {
     static STARTUPINFO si = {0};
     static PROCESS_INFORMATION pi = {0};
@@ -31,7 +35,9 @@ static void launch(const wchar_t* program, const wchar_t* path)
     static wchar_t commandLine[1024] = {0};
     wcsncat(commandLine, program, sizeof(commandLine) - 1);
     wcsncat(commandLine, L" ", sizeof(commandLine) - 1);
-    wcsncat(commandLine, path, sizeof(commandLine) - 1);
+    wcsncat(commandLine, dmpFile, sizeof(commandLine) - 1);
+    wcsncat(commandLine, L" ", sizeof(commandLine) - 1);
+    wcsncat(commandLine, dir, sizeof(commandLine) - 1);
 
     if(!CreateProcess(nullptr, commandLine, nullptr, nullptr, FALSE,
                       CREATE_DEFAULT_ERROR_MODE,
@@ -41,7 +47,7 @@ static void launch(const wchar_t* program, const wchar_t* path)
     }
 }
 #else
-static void launch(const char* program, const char* path)
+static void launch(const char* program, const char* dmpFile, const char* dir)
 {
     pid_t pid = fork();
 
@@ -52,7 +58,7 @@ static void launch(const char* program, const char* path)
         exit(1);
 
     case 0: // Child
-        execl(program, program, path, static_cast<char*>(nullptr));
+        execl(program, program, dmpFile, dir, static_cast<char*>(nullptr));
 
         std::cerr << "execl() failed\n";
         exit(1);
@@ -62,6 +68,32 @@ static void launch(const char* program, const char* path)
     }
 }
 #endif
+
+static QString dumpWindowScreenshots()
+{
+    QTemporaryDir tempDir;
+    tempDir.setAutoRemove(false);
+
+    for(auto* window : QGuiApplication::allWindows())
+    {
+        if(!window->isVisible())
+            continue;
+
+        QString fileName = QDir(tempDir.path()).filePath(
+            QString("%1.png").arg(window->title().replace(" ", "_")));
+
+        std::cerr << "Writing " << fileName.toStdString() << "\n";
+
+        auto screen = window->screen();
+        if(screen == nullptr)
+            continue;
+
+        auto pixmap = screen->grabWindow(window->winId());
+        pixmap.save(fileName, "PNG");
+    }
+
+    return tempDir.path();
+}
 
 static bool minidumpCallback(
 #if defined(Q_OS_WIN32)
@@ -86,23 +118,29 @@ static bool minidumpCallback(
 
     // static to avoid stack allocation
     static platform_char path[1024] = {0};
+    static platform_char dir[1024] = {0};
+
+    auto screenshotPath = dumpWindowScreenshots();
 
 #if defined(Q_OS_WIN32)
     wcsncat(path, dumpDir, sizeof(path) - 1);
     wcsncat(path, L"\\", sizeof(path) - 1);
     wcsncat(path, minidumpId, sizeof(path) - 1);
     wcsncat(path, L".dmp", sizeof(path) - 1);
+    screenshotPath.toWCharArray(dir);
 #elif defined(Q_OS_LINUX)
     strncpy(path, md.path(), sizeof(path) - 1);
+    strncpy(dir, screenshotPath.toUtf8(), sizeof(dir) - 1);
 #elif defined(Q_OS_MAC)
     strncat(path, dumpDir, sizeof(path) - 1);
     strncat(path, "/", sizeof(path) - 1);
     strncat(path, minidumpId, sizeof(path) - 1);
     strncat(path, ".dmp", sizeof(path) - 1);
+    strncat(dir, screenshotPath.toUtf8(), sizeof(path) - 1);
 #endif
 
-    std::cerr << "Starting " << exe << " " << path << std::endl;
-    launch(exe, path);
+    std::cerr << "Starting " << exe << " " << path << " " << dir << std::endl;
+    launch(exe, path, dir);
 
     // Do not pass on the exception
     return true;
@@ -113,7 +151,7 @@ CrashHandler::CrashHandler()
     QString path = QDir::tempPath();
 
     QString crashReporterExecutableName(
-                QCoreApplication::applicationDirPath() +
+                QGuiApplication::applicationDirPath() +
                 QDir::separator() +
                 "CrashReporter");
 
