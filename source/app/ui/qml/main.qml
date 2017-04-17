@@ -649,6 +649,17 @@ ApplicationWindow
 
     Action
     {
+        id: aboutPluginsAction
+        text: qsTr("About Plugins...")
+        onTriggered:
+        {
+            aboutpluginsDialog.raise();
+            aboutpluginsDialog.show();
+        }
+    }
+
+    Action
+    {
         // A do nothing action that we use when there
         // is no other valid action available
         id: nullAction
@@ -744,6 +755,12 @@ ApplicationWindow
                 MenuItem { action: showAllEdgeTextAction }
             }
             MenuItem { action: toggleEdgeDirectionAction }
+            MenuSeparator { visible: Qt.platform.os === "osx" }
+            MenuItem
+            {
+                visible: Qt.platform.os === "osx"
+                action: aboutPluginsAction
+            }
         }
         Menu
         {
@@ -794,15 +811,7 @@ ApplicationWindow
         Menu
         {
             title: qsTr("&Help")
-            MenuItem
-            {
-                text: qsTr("About Plugins...")
-                onTriggered:
-                {
-                    aboutpluginsDialog.raise();
-                    aboutpluginsDialog.show();
-                }
-            }
+            MenuItem { action: aboutPluginsAction }
 
             MenuItem
             {
