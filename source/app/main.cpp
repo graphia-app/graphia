@@ -9,6 +9,7 @@
 #include <QGuiApplication>
 #include <QWidget>
 #include <QWindow>
+#include <QQuickWindow>
 #include <QScreen>
 #include <QDir>
 
@@ -165,16 +166,16 @@ int main(int argc, char *argv[])
             if(!window->isVisible())
                 continue;
 
+            auto* quickWindow = dynamic_cast<QQuickWindow*>(window);
+            if(quickWindow == nullptr)
+                continue;
+
             QString fileName = QDir(directory).filePath(
                 QString("%1.png").arg(window->title().replace(" ", "_")));
 
             std::cerr << "Writing " << fileName.toStdString() << "\n";
 
-            auto screen = window->screen();
-            if(screen == nullptr)
-                continue;
-
-            auto pixmap = screen->grabWindow(window->winId());
+            auto pixmap = QPixmap::fromImage(quickWindow->grabWindow());
             pixmap.save(fileName, "PNG");
         }
     });
