@@ -650,7 +650,8 @@ ApplicationWindow
     Action
     {
         id: aboutPluginsAction
-        text: qsTr("About Plugins...")
+        // Don't ask...
+        text: Qt.platform.os === "osx" ? qsTr("Plugins...") : qsTr("About Plugins...")
         onTriggered:
         {
             aboutpluginsDialog.raise();
@@ -755,12 +756,6 @@ ApplicationWindow
                 MenuItem { action: showAllEdgeTextAction }
             }
             MenuItem { action: toggleEdgeDirectionAction }
-            MenuSeparator { visible: Qt.platform.os === "osx" }
-            MenuItem
-            {
-                visible: Qt.platform.os === "osx"
-                action: aboutPluginsAction
-            }
         }
         Menu
         {
