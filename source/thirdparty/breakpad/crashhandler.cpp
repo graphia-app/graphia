@@ -2,12 +2,9 @@
 
 #include "shared/utils/utils.h"
 
-#include <QGuiApplication>
-#include <QWidget>
-#include <QWindow>
-#include <QScreen>
-#include <QDir>
+#include <QCoreApplication>
 #include <QTemporaryDir>
+#include <QDir>
 
 #include <iostream>
 
@@ -69,32 +66,6 @@ static void launch(const char* program, const char* dmpFile, const char* dir)
 }
 #endif
 
-static QString dumpWindowScreenshots()
-{
-    QTemporaryDir tempDir;
-    tempDir.setAutoRemove(false);
-
-    for(auto* window : QGuiApplication::allWindows())
-    {
-        if(!window->isVisible())
-            continue;
-
-        QString fileName = QDir(tempDir.path()).filePath(
-            QString("%1.png").arg(window->title().replace(" ", "_")));
-
-        std::cerr << "Writing " << fileName.toStdString() << "\n";
-
-        auto screen = window->screen();
-        if(screen == nullptr)
-            continue;
-
-        auto pixmap = screen->grabWindow(window->winId());
-        pixmap.save(fileName, "PNG");
-    }
-
-    return tempDir.path();
-}
-
 static bool minidumpCallback(
 #if defined(Q_OS_WIN32)
     const wchar_t* dumpDir, const wchar_t* minidumpId, void* context, EXCEPTION_POINTERS*, MDRawAssertionInfo*, bool success
@@ -120,23 +91,31 @@ static bool minidumpCallback(
     static platform_char path[1024] = {0};
     static platform_char dir[1024] = {0};
 
-    auto screenshotPath = dumpWindowScreenshots();
+    if(exceptionHandler->userHandler() != nullptr)
+    {
+        QTemporaryDir tempDir;
+        tempDir.setAutoRemove(false);
+        exceptionHandler->userHandler()(tempDir.path());
+
+#if defined(Q_OS_WIN32)
+        tempDir.path().toWCharArray(dir);
+#else
+        strncpy(dir, tempDir.path().toUtf8(), sizeof(dir) - 1);
+#endif
+    }
 
 #if defined(Q_OS_WIN32)
     wcsncat(path, dumpDir, sizeof(path) - 1);
     wcsncat(path, L"\\", sizeof(path) - 1);
     wcsncat(path, minidumpId, sizeof(path) - 1);
     wcsncat(path, L".dmp", sizeof(path) - 1);
-    screenshotPath.toWCharArray(dir);
 #elif defined(Q_OS_LINUX)
     strncpy(path, md.path(), sizeof(path) - 1);
-    strncpy(dir, screenshotPath.toUtf8(), sizeof(dir) - 1);
 #elif defined(Q_OS_MAC)
     strncat(path, dumpDir, sizeof(path) - 1);
     strncat(path, "/", sizeof(path) - 1);
     strncat(path, minidumpId, sizeof(path) - 1);
     strncat(path, ".dmp", sizeof(path) - 1);
-    strncat(dir, screenshotPath.toUtf8(), sizeof(path) - 1);
 #endif
 
     std::cerr << "Starting " << exe << " " << path << " " << dir << std::endl;
@@ -151,7 +130,7 @@ CrashHandler::CrashHandler()
     QString path = QDir::tempPath();
 
     QString crashReporterExecutableName(
-                QGuiApplication::applicationDirPath() +
+                QCoreApplication::applicationDirPath() +
                 QDir::separator() +
                 "CrashReporter");
 

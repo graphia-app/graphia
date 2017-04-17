@@ -6,6 +6,13 @@
 #include <QIcon>
 #include <QMessageBox>
 #include <QStyleHints>
+#include <QGuiApplication>
+#include <QWidget>
+#include <QWindow>
+#include <QScreen>
+#include <QDir>
+
+#include <iostream>
 
 #include "application.h"
 #include "ui/document.h"
@@ -150,7 +157,27 @@ int main(int argc, char *argv[])
 
 #ifndef _DEBUG
     CrashHandler c;
-    Q_UNUSED(c);
+    c.onCrash([](const QString& directory)
+    {
+        // Take screenshots of all the open windows
+        for(auto* window : QGuiApplication::allWindows())
+        {
+            if(!window->isVisible())
+                continue;
+
+            QString fileName = QDir(directory).filePath(
+                QString("%1.png").arg(window->title().replace(" ", "_")));
+
+            std::cerr << "Writing " << fileName.toStdString() << "\n";
+
+            auto screen = window->screen();
+            if(screen == nullptr)
+                continue;
+
+            auto pixmap = screen->grabWindow(window->winId());
+            pixmap.save(fileName, "PNG");
+        }
+    });
 #endif
 
     return app.exec();

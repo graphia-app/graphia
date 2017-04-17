@@ -20,7 +20,7 @@
 #include "app/rendering/openglfunctions.h"
 
 static void uploadReport(const QString& email, const QString& text,
-                         const QString& dmpFile, const QString& extraDir)
+                         const QString& dmpFile, const QString& attachmentDir)
 {
     auto *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
@@ -68,7 +68,7 @@ static void uploadReport(const QString& email, const QString& text,
     file->setParent(multiPart);
     multiPart->append(dmpPart);
 
-    QDirIterator dirIterator(extraDir);
+    QDirIterator dirIterator(attachmentDir);
     int fileIndex = 0;
     while(dirIterator.hasNext())
     {
@@ -79,16 +79,16 @@ static void uploadReport(const QString& email, const QString& text,
         if(!fileInfo.exists() || !fileInfo.isFile())
             continue;
 
-        QHttpPart extraPart;
-        extraPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
-        extraPart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                            QVariant(QString(R"(form-data; name="extra%1"; filename="%2")")
-                                     .arg(fileIndex++).arg(QFileInfo(fileName).fileName())));
-        auto* extraFile = new QFile(fileName);
-        extraFile->open(QIODevice::ReadOnly);
-        extraPart.setBodyDevice(extraFile);
-        extraFile->setParent(multiPart);
-        multiPart->append(extraPart);
+        QHttpPart attachmentPart;
+        attachmentPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
+        attachmentPart.setHeader(QNetworkRequest::ContentDispositionHeader,
+                                 QVariant(QString(R"(form-data; name="attachment%1"; filename="%2")")
+                                    .arg(fileIndex++).arg(QFileInfo(fileName).fileName())));
+        auto* attachment = new QFile(fileName);
+        attachment->open(QIODevice::ReadOnly);
+        attachmentPart.setBodyDevice(attachment);
+        attachment->setParent(multiPart);
+        multiPart->append(attachmentPart);
     }
 
     QUrl url("http://crashreports.kajeka.com/");
@@ -151,9 +151,9 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    QString extraDir;
+    QString attachmentsDir;
     if(app.arguments().size() == 3 && QFileInfo(app.arguments().at(2)).isDir())
-        extraDir = app.arguments().at(2);
+        attachmentsDir = app.arguments().at(2);
 
     QIcon mainIcon;
     mainIcon.addFile(":/icon.svg");
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 
     int exitCode = app.exec();
 
-    uploadReport(report._email, report._text, app.arguments().at(1), extraDir);
+    uploadReport(report._email, report._text, app.arguments().at(1), attachmentsDir);
 
     return exitCode;
 }
