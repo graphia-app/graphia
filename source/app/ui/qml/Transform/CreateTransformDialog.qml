@@ -50,7 +50,7 @@ Window
 
                 onSelectedValueChanged:
                 {
-                    attributeList.model = document.availableAttributesFor(selectedValue);
+                    attributeList.model = document.transform(selectedValue).attributes;
                     description.update();
                     updateTransformExpression();
                 }
@@ -73,10 +73,10 @@ Window
 
                 onSelectedValueChanged:
                 {
-                    opList.updateModel(document.avaliableConditionFnOps(selectedValue));
-
-                    if(attributeList.selectedValue !== undefined)
+                    if(selectedValue !== undefined)
                     {
+                        opList.updateModel(document.attribute(selectedValue).ops);
+
                         var parameterData = document.findTransformParameter(transformsList.selectedValue,
                                                                             attributeList.selectedValue);
                         parameterData.initialValue = "";
@@ -147,7 +147,7 @@ Window
 
                     if(transformsList.selectedValue !== undefined)
                     {
-                        text += document.descriptionFor(transformsList.selectedValue);
+                        text += document.transform(transformsList.selectedValue).description;
 
                         if(attributeList.selectedValue !== undefined)
                         {

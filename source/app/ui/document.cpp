@@ -805,34 +805,24 @@ QStringList Document::availableAttributes(int elementTypes, int valueTypes) cons
                                         static_cast<ValueType>(valueTypes)) : QStringList();
 }
 
-QString Document::descriptionFor(const QString& transformName) const
+QVariantMap Document::transform(const QString& transformName) const
 {
-    return _graphModel != nullptr ? _graphModel->descriptionFor(transformName) : "";
-}
+    QVariantMap map;
 
-QStringList Document::availableAttributesFor(const QString& transformName) const
-{
-    return _graphModel != nullptr ? _graphModel->availableAttributesFor(transformName) : QStringList();
-}
+    if(_graphModel != nullptr)
+    {
+        const auto* transformFactory = _graphModel->transformFactory(transformName);
 
-QStringList Document::availableAttributesSimilarTo(const QString& attributeName) const
-{
-    if(_graphModel == nullptr)
-        return {};
+        if(transformFactory == nullptr)
+            return map;
 
-    const auto& attribute = _graphModel->attributeByName(attributeName);
-    auto valueType = Flags<ValueType>(attribute.valueType());
+        auto elementType = transformFactory->elementType();
 
-    // For similarity purposes, treat Int and Float as the same
-    if(valueType.anyOf(ValueType::Int, ValueType::Float))
-        valueType.set(ValueType::Int, ValueType::Float);
+        map.insert("description", transformFactory->description());
+        map.insert("attributes", _graphModel->availableAttributes(elementType, ValueType::All));
+    }
 
-    return _graphModel->availableAttributes(attribute.elementType(), *valueType);
-}
-
-QStringList Document::avaliableConditionFnOps(const QString& attributeName) const
-{
-    return _graphModel != nullptr ? _graphModel->avaliableConditionFnOps(attributeName) : QStringList();
+    return map;
 }
 
 bool Document::hasTransformInfo() const
@@ -892,6 +882,14 @@ QVariantMap Document::attribute(const QString& attributeName) const
         if(attribute.numericRange().hasMax()) map.insert("maximumValue", attribute.numericRange().max());
 
         map.insert("description", attribute.description());
+        auto valueType = Flags<ValueType>(attribute.valueType());
+
+        // For similarity purposes, treat Int and Float as the same
+        if(valueType.anyOf(ValueType::Int, ValueType::Float))
+            valueType.set(ValueType::Int, ValueType::Float);
+
+        map.insert("similar", _graphModel->availableAttributes(attribute.elementType(), *valueType));
+        map.insert("ops", _graphModel->avaliableConditionFnOps(attributeName));
     }
 
     return map;
@@ -902,7 +900,14 @@ QVariantMap Document::findTransformParameter(const QString& transformName, const
     if(_graphModel == nullptr)
         return {};
 
-    if(u::contains(_graphModel->availableAttributesFor(transformName), parameterName))
+    const auto* transformFactory = _graphModel->transformFactory(transformName);
+
+    if(transformFactory == nullptr)
+        return {};
+
+    auto elementType = transformFactory->elementType();
+
+    if(u::contains(_graphModel->availableAttributes(elementType, ValueType::All), parameterName))
     {
         // It's an Attribute
         return attribute(parameterName);

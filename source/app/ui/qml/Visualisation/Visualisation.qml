@@ -110,7 +110,7 @@ Item
         {
             id: attributeList
             selectedValue: attribute
-            model: document.availableAttributesSimilarTo(attribute);
+            model: document.attributes(attribute).similar;
             enabled: enabledMenuItem.checked
             propogatePresses: true
 

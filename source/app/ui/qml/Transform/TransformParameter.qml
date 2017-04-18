@@ -20,6 +20,8 @@ GridLayout
     property string initialValue
     property string value
     property string description
+    property var similar
+    property var ops
 
     property bool updateValueImmediately: false
     property int direction: Qt.Horizontal

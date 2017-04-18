@@ -187,13 +187,21 @@ QStringList GraphModel::availableTransformNames() const
     for(auto& t : _graphTransformFactories)
     {
         auto elementType = _graphTransformFactories.at(t.first)->elementType();
-        bool attributesAvailable = !availableAttributesFor(t.first).isEmpty();
+        bool attributesAvailable = !availableAttributes(elementType, ValueType::All).isEmpty();
 
         if(elementType == ElementType::None || attributesAvailable)
             stringList.append(t.first);
     }
 
     return stringList;
+}
+
+const GraphTransformFactory* GraphModel::transformFactory(const QString& transformName) const
+{
+    if(!transformName.isEmpty() && u::contains(_graphTransformFactories, transformName))
+        return _graphTransformFactories.at(transformName).get();
+
+    return nullptr;
 }
 
 QStringList GraphModel::availableAttributes(ElementType elementTypes, ValueType valueTypes) const
@@ -212,25 +220,6 @@ QStringList GraphModel::availableAttributes(ElementType elementTypes, ValueType 
     }
 
     return stringList;
-}
-
-QString GraphModel::descriptionFor(const QString& transformName) const
-{
-    if(!transformName.isEmpty())
-        return _graphTransformFactories.at(transformName)->description();
-
-    return {};
-}
-
-QStringList GraphModel::availableAttributesFor(const QString& transformName) const
-{
-    if(!transformName.isEmpty())
-    {
-        auto elementType = _graphTransformFactories.at(transformName)->elementType();
-        return availableAttributes(elementType, ValueType::All);
-    }
-
-    return {};
 }
 
 QStringList GraphModel::avaliableConditionFnOps(const QString& attributeName) const

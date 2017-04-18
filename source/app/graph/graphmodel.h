@@ -92,10 +92,9 @@ public:
     void buildTransforms(const QStringList& transforms);
 
     QStringList availableTransformNames() const;
+    const GraphTransformFactory* transformFactory(const QString& transformName) const;
     QStringList availableAttributes(ElementType elementTypes = ElementType::All,
                                     ValueType valueTypes = ValueType::All) const;
-    QString descriptionFor(const QString& transformName) const;
-    QStringList availableAttributesFor(const QString& transformName) const;
     QStringList avaliableConditionFnOps(const QString& attributeName) const;
     bool hasTransformInfo() const;
     const TransformInfo& transformInfoAtIndex(int index) const;
