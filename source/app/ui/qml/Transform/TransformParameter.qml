@@ -19,9 +19,6 @@ GridLayout
     property real maximumValue
     property string initialValue
     property string value
-    property string description
-    property var similar
-    property var ops
 
     property bool updateValueImmediately: false
     property int direction: Qt.Horizontal
@@ -122,7 +119,10 @@ GridLayout
     function configure(data)
     {
         for(var property in data)
-            this[property] = data[property];
+        {
+            if(this[property] !== undefined)
+                this[property] = data[property];
+        }
 
         if(valueType === ValueType.Unknown)
             value = "";
