@@ -1,6 +1,8 @@
 #ifndef FLAGS_H
 #define FLAGS_H
 
+#include <utility>
+
 template<typename Enum>
 class Flags
 {
@@ -57,6 +59,15 @@ public:
     }
 
     Enum operator*() const { return _value; }
+
+    //FIXME: Should be able to replace this with a C++17 template deduction constructor
+    template<typename... Args>
+    static Enum combine(Args... values)
+    {
+        Flags<Enum> flags;
+        flags.set(std::forward<Args>(values)...);
+        return *flags;
+    }
 };
 
 #endif // FLAGS_H
