@@ -1,13 +1,10 @@
-function createTransformParameter(document, component, parent, parameterData)
+function createTransformParameter(document, parent, parameterData, onParameterChanged)
 {
+    var component = Qt.createComponent("TransformParameter.qml");
     if(component === null)
     {
-        component = Qt.createComponent("TransformParameter.qml");
-        if(component === null)
-        {
-            console.log("Failed to create parameterComponent");
-            return null;
-        }
+        console.log("Failed to create parameterComponent");
+        return null;
     }
 
     var object = component.createObject(parent);
@@ -18,6 +15,9 @@ function createTransformParameter(document, component, parent, parameterData)
     }
 
     object.configure(parameterData);
+
+    if(onParameterChanged !== null)
+        object.valueChanged.connect(onParameterChanged);
 
     return object;
 }
@@ -99,16 +99,23 @@ function create(transform)
     appendToElements(this._elements, transform.action);
 
     // Parameters
-    if(transform.parameters.length > 0)
+    if(Object.keys(transform.parameters).length > 0)
     {
         this.template += " with";
         appendToElements(this._elements, " with ");
 
-        for(var i = 0; i < transform.parameters.length; i++)
+        var firstParam = true;
+
+        for(var parameterName in transform.parameters)
         {
-            var parameter = transform.parameters[i];
-            this.template += " \"" + parameter.name + "\" = %";
-            appendConditionToElements(this._elements, {lhs: parameter.name, op:"=", rhs: parameter.value});
+            // Put whitespace between the parameters
+            if(!firstParam)
+                appendToElements(this._elements, " ");
+            firstParam = false;
+
+            var parameterValue = transform.parameters[parameterName];
+            this.template += " \"" + parameterName + "\" = %";
+            appendConditionToElements(this._elements, {lhs: parameterName, op:"=", rhs: parameterValue});
         }
     }
 
@@ -122,16 +129,16 @@ function create(transform)
     }
 
     this.toComponents =
-    function(document, parent, locked)
+    function(document, parent, locked, onParameterChanged)
     {
         var labelText = "";
 
         function addLabel()
         {
             labelText = labelText.trim();
-            Qt.createQmlObject(qsTr("import QtQuick 2.7;" +
-                                    "import QtQuick.Controls 1.5;" +
-                                    "Label { text: \"%1\"; color: root.textColor }")
+            Qt.createQmlObject(qsTr("import QtQuick 2.7\n\
+                                    import QtQuick.Controls 1.5\n\
+                                    Label { text: \"%1\"; color: root.textColor }")
                                     .arg(Utils.normaliseWhitespace(labelText)), parent);
 
             labelText = "";
@@ -162,9 +169,9 @@ function create(transform)
                 else
                     addLabel();
 
-                var parameterObject = createTransformParameter(document, null,
+                var parameterObject = createTransformParameter(document,
                     locked ? null : parent, // If locked, still create the object, but don't display it
-                    parameterData);
+                    parameterData, onParameterChanged);
 
                 this.parameters.push(parameterObject);
             }

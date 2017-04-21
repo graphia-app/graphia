@@ -3,8 +3,14 @@
 
 #include "shared/graph/elementid.h"
 #include "graph/elementtype.h"
+
+#include "utils/qmlenum.h"
+
 #include "transforminfo.h"
+#include "graphtransformparameter.h"
 #include "graphtransformconfig.h"
+
+#include <QString>
 
 #include <memory>
 
@@ -42,12 +48,17 @@ public:
 
 protected:
     bool hasUnknownAttributes(const std::vector<QString>& referencedAttributes,
-                               const std::vector<QString>& availableAttributes) const;
+                              const std::vector<QString>& availableAttributes) const;
 
 private:
     mutable TransformInfo* _info = nullptr;
     bool _repeating = false;
 };
+
+DEFINE_QML_ENUM(Q_GADGET, TransformRequirements,
+                None        = 0x1,
+                Parameters  = 0x2,
+                Condition   = 0x4);
 
 class GraphTransformFactory
 {
@@ -62,8 +73,10 @@ public:
     virtual ~GraphTransformFactory() = default;
 
     virtual QString description() const = 0;
-
     virtual ElementType elementType() const { return ElementType::None; }
+    virtual TransformRequirements requirements() const { return TransformRequirements::None; }
+    virtual GraphTransformParameters parameters() const { return {}; }
+
     virtual std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const = 0;
 
     GraphModel* graphModel() const { return _graphModel; }

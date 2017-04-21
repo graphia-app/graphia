@@ -26,6 +26,8 @@ Window
     property var document
     property string transformExpression
 
+    property var _transform: undefined
+
     ColumnLayout
     {
         id: layout
@@ -33,11 +35,8 @@ Window
         anchors.fill: parent
         anchors.margins: Constants.margin
 
-        GridLayout
+        RowLayout
         {
-            columns: 5
-            rows: 2
-
             Layout.fillWidth: true
             Layout.fillHeight: true
 
@@ -46,95 +45,214 @@ Window
                 id: transformsList
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.rowSpan: 2
-
-                onSelectedValueChanged:
-                {
-                    attributeList.model = document.transform(selectedValue).attributes;
-                    description.update();
-                    updateTransformExpression();
-                }
-            }
-
-            Label
-            {
-                Layout.topMargin: Constants.margin
-                Layout.alignment: Qt.AlignTop
-                Layout.rowSpan: 2
-                text: qsTr("where")
-            }
-
-            ListBox
-            {
-                id: attributeList
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.rowSpan: 2
 
                 onSelectedValueChanged:
                 {
                     if(selectedValue !== undefined)
                     {
-                        opList.updateModel(document.attribute(selectedValue).ops);
+                        parametersRepeater.model = [];
+                        root._transform = document.transform(selectedValue);
+                        attributeList.model = _transform.attributes;
 
-                        var parameterData = document.findTransformParameter(transformsList.selectedValue,
-                                                                            attributeList.selectedValue);
-                        parameterData.initialValue = "";
-                        valueParameter.configure(parameterData);
+                        if(_transform.parameters !== undefined)
+                            parametersRepeater.model = Object.keys(_transform.parameters);
                     }
-                    else
-                        valueParameter.reset();
 
                     description.update();
                     updateTransformExpression();
                 }
             }
 
-            ListBox
+            ColumnLayout
             {
-                id: opList
-                Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.rowSpan: 2
-                Layout.preferredWidth: 120
+                Layout.alignment: Qt.AlignTop
+                Layout.preferredWidth: 512
+                spacing: 20
 
-                onSelectedValueChanged: { updateTransformExpression(); }
-
-                Component { id: modelComponent; ListModel {} }
-
-                function updateModel(ops)
+                Label
                 {
-                    var newModel = modelComponent.createObject();
+                    visible: !parameters.visible && !condition.visible
+                    Layout.fillWidth: visible
+                    Layout.fillHeight: visible
 
-                    for(var i = 0; i < ops.length; i++)
+                    horizontalAlignment: Qt.AlignCenter
+                    verticalAlignment: Qt.AlignVCenter
+                    font.pixelSize: 16
+                    font.italic: true
+
+                    text: _transform !== undefined && _transform.requirements === TransformRequirements.None ?
+                              qsTr("No Parameters") : qsTr("Select A Transform")
+                }
+
+                ColumnLayout
+                {
+                    id: parameters
+                    visible: _transform !== undefined &&
+                             _transform.requirements & TransformRequirements.Parameters
+
+                    Layout.fillWidth: visible
+                    spacing: 20
+
+                    property var _values
+
+                    Repeater
                     {
-                        var item = { display: TransformConfig.sanitiseOp(ops[i]), value: ops[i] };
-                        newModel.append(item);
+                        id: parametersRepeater
+
+                        delegate: Component
+                        {
+                            ColumnLayout
+                            {
+                                property var parameterData: _transform.parameters[modelData]
+
+                                RowLayout
+                                {
+                                    id: parameterRowLayout
+                                    Layout.fillWidth: true
+
+                                    Label
+                                    {
+                                        Layout.alignment: Qt.AlignTop
+                                        font.italic: true
+                                        font.bold: true
+                                        text: modelData
+                                    }
+
+                                    Item { Layout.fillWidth: true }
+                                }
+
+                                Text
+                                {
+                                    Layout.fillWidth: true
+                                    text: parameterData.description
+                                    textFormat: Text.RichText
+                                    wrapMode: Text.WordWrap
+                                    elide: Text.ElideRight
+                                    onLinkActivated: Qt.openUrlExternally(link);
+                                }
+
+                                Component.onCompleted:
+                                {
+                                    var transformParameter = TransformConfig.createTransformParameter(document,
+                                        parameterRowLayout, parameterData, updateTransformExpression);
+                                    transformParameter.direction = Qt.Vertical;
+                                    parameters._values[modelData] = transformParameter;
+                                }
+                            }
+                        }
+
+                        onModelChanged:
+                        {
+                            parameters._values = {};
+                        }
                     }
 
-                    opList.model = newModel;
+                    function valueOf(parameterName)
+                    {
+                        if(_values === undefined)
+                            return "\"\"";
+
+                        var transformParameter = _values[parameterName];
+
+                        if(transformParameter === undefined)
+                            return "\"\"";
+
+                        return transformParameter.value;
+                    }
+                }
+
+                RowLayout
+                {
+                    id: condition
+                    visible: _transform !== undefined &&
+                             _transform.requirements & TransformRequirements.Condition
+
+                    Layout.fillWidth: visible
+                    Layout.fillHeight: visible
+                    Layout.minimumHeight: 128
+
+                    Label
+                    {
+                        Layout.topMargin: Constants.margin
+                        Layout.alignment: Qt.AlignTop
+                        text: qsTr("where")
+                    }
+
+                    ListBox
+                    {
+                        id: attributeList
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+
+                        onSelectedValueChanged:
+                        {
+                            if(selectedValue !== undefined)
+                            {
+                                opList.updateModel(document.attribute(selectedValue).ops);
+
+                                var parameterData = document.findTransformParameter(transformsList.selectedValue,
+                                                                                    attributeList.selectedValue);
+                                parameterData.initialValue = "";
+                                valueParameter.configure(parameterData);
+                            }
+                            else
+                                valueParameter.reset();
+
+                            description.update();
+                            updateTransformExpression();
+                        }
+                    }
+
+                    ListBox
+                    {
+                        id: opList
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: 120
+
+                        onSelectedValueChanged: { updateTransformExpression(); }
+
+                        Component { id: modelComponent; ListModel {} }
+
+                        function updateModel(ops)
+                        {
+                            var newModel = modelComponent.createObject();
+
+                            for(var i = 0; i < ops.length; i++)
+                            {
+                                var item = { display: TransformConfig.sanitiseOp(ops[i]), value: ops[i] };
+                                newModel.append(item);
+                            }
+
+                            opList.model = newModel;
+                        }
+                    }
+
+                    TransformParameter
+                    {
+                        id: valueParameter
+                        Layout.topMargin: Constants.margin
+                        Layout.alignment: Qt.AlignTop
+
+                        updateValueImmediately: true
+                        direction: Qt.Vertical
+                        onValueChanged: { updateTransformExpression(); }
+                    }
                 }
             }
+        }
 
-            TransformParameter
-            {
-                id: valueParameter
-                Layout.preferredWidth: 150
-                Layout.topMargin: Constants.margin
-                Layout.alignment: Qt.AlignTop
-
-                updateValueImmediately: true
-                direction: Qt.Vertical
-                onValueChanged: { updateTransformExpression(); }
-            }
+        RowLayout
+        {
+            Layout.fillHeight: true
+            Layout.preferredHeight: 64
 
             Text
             {
                 id: description
-                Layout.preferredWidth: valueParameter.width
-                Layout.fillHeight: true
+                Layout.fillWidth: true
 
-                verticalAlignment: Text.AlignVCenter
                 textFormat: Text.RichText
                 wrapMode: Text.WordWrap
                 elide: Text.ElideRight
@@ -145,9 +263,9 @@ Window
                 {
                     text = "";
 
-                    if(transformsList.selectedValue !== undefined)
+                    if(_transform !== undefined)
                     {
-                        text += document.transform(transformsList.selectedValue).description;
+                        text += _transform.description;
 
                         if(attributeList.selectedValue !== undefined)
                         {
@@ -159,18 +277,10 @@ Window
                     }
                 }
             }
-        }
-
-        RowLayout
-        {
-            Label
-            {
-                id: transformExpressionDisplay
-                Layout.fillWidth: true
-            }
 
             Button
             {
+                Layout.alignment: Qt.AlignBottom
                 text: qsTr("OK")
                 enabled: { return document.graphTransformIsValid(transformExpression); }
                 onClicked: { root.accept(); }
@@ -178,6 +288,7 @@ Window
 
             Button
             {
+                Layout.alignment: Qt.AlignBottom
                 text: qsTr("Cancel")
                 onClicked: { root.reject(); }
             }
@@ -222,34 +333,34 @@ Window
     function updateTransformExpression()
     {
         var expression = "";
-        var displayExpression = "";
 
         if(transformsList.selectedValue !== undefined)
         {
             expression += "\"" + transformsList.selectedValue + "\"";
-            displayExpression += transformsList.selectedValue;
+
+            if(Object.keys(_transform.parameters).length > 0)
+            {
+                expression += " with";
+
+                for(var parameterName in _transform.parameters)
+                    expression += " " + parameterName + " = " + parameters.valueOf(parameterName);
+            }
 
             if(attributeList.selectedValue !== undefined)
             {
                 expression += " where \"" + attributeList.selectedValue + "\"";
-                displayExpression += " where " + attributeList.selectedValue;
 
                 if(opList.selectedValue !== undefined)
                 {
                     expression += " " + opList.selectedValue.value;
-                    displayExpression += " " + TransformConfig.sanitiseOp(opList.selectedValue.value);
 
                     if(valueParameter.value.length > 0)
-                    {
                         expression += " " + valueParameter.value;
-                        displayExpression += " " + Utils.formatForDisplay(valueParameter.value);
-                    }
                 }
             }
         }
 
         transformExpression = expression;
-        transformExpressionDisplay.text = displayExpression;
     }
 
     onAccepted:
@@ -263,5 +374,7 @@ Window
     {
         transformExpression.text = "";
         transformsList.model = document.availableTransformNames();
+        parametersRepeater.model = undefined;
+        _transform = undefined;
     }
 }

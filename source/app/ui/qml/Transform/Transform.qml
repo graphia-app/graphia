@@ -256,14 +256,8 @@ Item
             flags = transformConfig.flags;
             template = transformConfig.template;
 
-            transformConfig.toComponents(document, expression, isFlagSet("locked") || error);
+            transformConfig.toComponents(document, expression, isFlagSet("locked") || error, updateExpression);
             parameters = transformConfig.parameters;
-
-            for(var i = 0; i < parameters.length; i++)
-            {
-                var parameter = parameters[i];
-                parameter.valueChanged.connect(updateExpression);
-            }
 
             enabledMenuItem.enabled =
                     lockedMenuItem.enabled =

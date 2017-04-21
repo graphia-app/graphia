@@ -166,6 +166,8 @@ private:
     void incrementFoundIt();
     void decrementFoundIt();
 
+    QVariantMap transformParameter(const QString& transformName, const QString& parameterName) const;
+
 signals:
     void applicationChanged();
     void graphQuickItemChanged();
@@ -236,15 +238,15 @@ public:
     Q_INVOKABLE void updateFoundIndex(bool reselectIfInvalidated);
 
     Q_INVOKABLE QStringList availableTransformNames() const;
-    Q_INVOKABLE QStringList availableAttributes(int elementTypes = static_cast<int>(ElementType::All),
-                                                int valueTypes = static_cast<int>(ValueType::All)) const;
     Q_INVOKABLE QVariantMap transform(const QString& transformName) const;
+    Q_INVOKABLE QVariantMap findTransformParameter(const QString& transformName,
+                                                   const QString& parameterName) const;
     Q_INVOKABLE bool hasTransformInfo() const;
     Q_INVOKABLE QVariantMap transformInfoAtIndex(int index) const;
 
+    Q_INVOKABLE QStringList availableAttributes(int elementTypes = static_cast<int>(ElementType::All),
+                                                int valueTypes = static_cast<int>(ValueType::All)) const;
     Q_INVOKABLE QVariantMap attribute(const QString& attributeName) const;
-    Q_INVOKABLE QVariantMap findTransformParameter(const QString& transformName,
-                                                   const QString& parameterName) const;
 
     Q_INVOKABLE QVariantMap parseGraphTransform(const QString& transform) const;
     Q_INVOKABLE bool graphTransformIsValid(const QString& transform) const;

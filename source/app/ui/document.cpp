@@ -819,6 +819,16 @@ QVariantMap Document::transform(const QString& transformName) const
         auto elementType = transformFactory->elementType();
 
         map.insert("description", transformFactory->description());
+        map.insert("requirements", static_cast<int>(transformFactory->requirements()));
+
+        QVariantMap parameters;
+        for(const auto& parameter : transformFactory->parameters())
+        {
+            QVariantMap parameterMap = transformParameter(transformName, parameter.first);
+            parameters.insert(parameter.first, parameterMap);
+        }
+        map.insert("parameters", parameters);
+
         map.insert("attributes", _graphModel->availableAttributes(elementType, ValueType::All));
     }
 
@@ -857,6 +867,36 @@ QVariantMap Document::transformInfoAtIndex(int index) const
 
     map.insert("alertType", static_cast<int>(transformAlert._type));
     map.insert("alertText", transformAlert._text);
+
+    return map;
+}
+
+QVariantMap Document::transformParameter(const QString& transformName, const QString& parameterName) const
+{
+    QVariantMap map;
+
+    if(_graphModel == nullptr)
+        return map;
+
+    const auto* transformFactory = _graphModel->transformFactory(transformName);
+
+    if(transformFactory == nullptr)
+        return map;
+
+    if(u::contains(transformFactory->parameters(), parameterName))
+    {
+        auto parameter = transformFactory->parameters().at(parameterName);
+        map.insert("valueType", static_cast<int>(parameter.type()));
+
+        map.insert("hasRange", parameter.hasRange());
+        map.insert("hasMinimumValue", parameter.hasMin());
+        map.insert("hasMaximumValue", parameter.hasMax());
+
+        if(parameter.hasMin()) map.insert("minimumValue", parameter.min());
+        if(parameter.hasMax()) map.insert("maximumValue", parameter.max());
+
+        map.insert("description", parameter.description());
+    }
 
     return map;
 }
@@ -912,10 +952,11 @@ QVariantMap Document::findTransformParameter(const QString& transformName, const
         // It's an Attribute
         return attribute(parameterName);
     }
-    /*else
+    else
     {
-        //FIXME it's a with ... parameter
-    }*/
+        // It's a with ... parameter
+        return transformParameter(transformName, parameterName);
+    }
 
     return {};
 }

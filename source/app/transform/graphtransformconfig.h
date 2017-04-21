@@ -66,7 +66,7 @@ struct GraphTransformConfig
         QString opAsString() const;
     };
 
-    using ParameterValue = boost::variant<double, QString>;
+    using ParameterValue = boost::variant<double, int, QString>;
     struct Parameter
     {
         QString _name;

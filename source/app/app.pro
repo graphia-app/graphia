@@ -114,7 +114,8 @@ HEADERS += \
     crashtype.h \
     ui/visualisations/visualisationinfo.h \
     ui/alert.h \
-    transform/transforminfo.h
+    transform/transforminfo.h \
+    transform/graphtransformparameter.h
 
 SOURCES += \
     application.cpp \

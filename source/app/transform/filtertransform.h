@@ -48,6 +48,8 @@ public:
                 .arg(elementTypeAsString(_elementType).toLower());
     }
     ElementType elementType() const { return _elementType; }
+    TransformRequirements requirements() const { return TransformRequirements::Condition; }
+
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const;
 };
 

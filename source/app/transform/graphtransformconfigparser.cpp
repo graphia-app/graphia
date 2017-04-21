@@ -129,7 +129,7 @@ const auto condition_def = (operand >> binary_op >> operand) | operand;
 
 const x3::rule<class Parameter, GraphTransformConfig::Parameter> parameter = "parameter";
 const auto parameterName = quotedString | identifier;
-const auto parameter_def = parameterName >> x3::lit('=') >> (double_ | quotedString);
+const auto parameter_def = parameterName >> x3::lit('=') >> (double_ | int_ | quotedString);
 
 const auto identifierList = identifier % x3::lit(',');
 const auto flags = x3::lit('[') >> -identifierList >> x3::lit(']');
