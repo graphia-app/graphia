@@ -168,6 +168,7 @@ void GraphModel::buildTransforms(const QStringList& transforms)
 
         auto& factory = _graphTransformFactories.at(action);
         auto graphTransform = factory->create(graphTransformConfig);
+        graphTransform->setConfig(graphTransformConfig);
 
         if(graphTransform)
         {

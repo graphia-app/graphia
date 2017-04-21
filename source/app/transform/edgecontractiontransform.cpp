@@ -9,7 +9,7 @@ bool EdgeContractionTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Contracting"));
 
-    auto attributeNames = _graphTransformConfig.attributeNames();
+    auto attributeNames = config().attributeNames();
 
     if(hasUnknownAttributes(attributeNames, u::keysFor(*_attributes)))
         return false;
@@ -21,7 +21,7 @@ bool EdgeContractionTransform::apply(TransformedGraph& target) const
             return _attributes->at(attributeName).testFlag(AttributeFlag::IgnoreTails);
         });
 
-    auto conditionFn = CreateConditionFnFor::edge(*_attributes, _graphTransformConfig._condition);
+    auto conditionFn = CreateConditionFnFor::edge(*_attributes, config()._condition);
     if(conditionFn == nullptr)
     {
         addAlert(AlertType::Error, QObject::tr("Invalid condition"));
@@ -46,7 +46,7 @@ bool EdgeContractionTransform::apply(TransformedGraph& target) const
 
 std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(const GraphTransformConfig& graphTransformConfig) const
 {
-    auto edgeContractionTransform = std::make_unique<EdgeContractionTransform>(graphModel()->attributes(), graphTransformConfig);
+    auto edgeContractionTransform = std::make_unique<EdgeContractionTransform>(graphModel()->attributes());
 
     if(!conditionIsValid(elementType(), graphModel()->attributes(), graphTransformConfig._condition))
         return nullptr;

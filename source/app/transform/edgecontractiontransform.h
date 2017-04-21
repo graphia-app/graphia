@@ -10,16 +10,14 @@
 class EdgeContractionTransform : public GraphTransform
 {
 public:
-    EdgeContractionTransform(const NameAttributeMap& attributes,
-                             const GraphTransformConfig& graphTransformConfig) :
-        _attributes(&attributes), _graphTransformConfig(graphTransformConfig)
+    EdgeContractionTransform(const NameAttributeMap& attributes) :
+        _attributes(&attributes)
     {}
 
     bool apply(TransformedGraph &target) const;
 
 private:
     const NameAttributeMap* _attributes;
-    GraphTransformConfig _graphTransformConfig;
 };
 
 class EdgeContractionTransformFactory : public GraphTransformFactory

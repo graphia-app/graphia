@@ -12,11 +12,9 @@ class FilterTransform : public GraphTransform
 public:
     explicit FilterTransform(ElementType elementType,
                              const NameAttributeMap& attributes,
-                             const GraphTransformConfig& graphTransformConfig,
                              bool invert) :
         _elementType(elementType),
         _attributes(&attributes),
-        _graphTransformConfig(graphTransformConfig),
         _invert(invert)
     {}
 
@@ -25,7 +23,6 @@ public:
 private:
     ElementType _elementType;
     const NameAttributeMap* _attributes;
-    GraphTransformConfig _graphTransformConfig;
     bool _invert = false;
 };
 

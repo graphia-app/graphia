@@ -15,7 +15,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
 
     target.setPhase(QObject::tr("Filtering"));
 
-    auto attributeNames = _graphTransformConfig.attributeNames();
+    auto attributeNames = config().attributeNames();
 
     if(hasUnknownAttributes(attributeNames, u::keysFor(*_attributes)))
         return false;
@@ -34,7 +34,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
     {
     case ElementType::Node:
     {
-        auto conditionFn = CreateConditionFnFor::node(*_attributes, _graphTransformConfig._condition);
+        auto conditionFn = CreateConditionFnFor::node(*_attributes, config()._condition);
         if(conditionFn == nullptr)
         {
             addAlert(AlertType::Error, QObject::tr("Invalid condition"));
@@ -60,7 +60,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
 
     case ElementType::Edge:
     {
-        auto conditionFn = CreateConditionFnFor::edge(*_attributes, _graphTransformConfig._condition);
+        auto conditionFn = CreateConditionFnFor::edge(*_attributes, config()._condition);
         if(conditionFn == nullptr)
         {
             addAlert(AlertType::Error, QObject::tr("Invalid condition"));
@@ -86,7 +86,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
 
     case ElementType::Component:
     {
-        auto conditionFn = CreateConditionFnFor::component(*_attributes, _graphTransformConfig._condition);
+        auto conditionFn = CreateConditionFnFor::component(*_attributes, config()._condition);
         if(conditionFn == nullptr)
         {
             addAlert(AlertType::Error, QObject::tr("Invalid condition"));
@@ -116,8 +116,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
 
 std::unique_ptr<GraphTransform> FilterTransformFactory::create(const GraphTransformConfig& graphTransformConfig) const
 {
-    auto filterTransform = std::make_unique<FilterTransform>(elementType(), graphModel()->attributes(),
-                                                             graphTransformConfig, _invert);
+    auto filterTransform = std::make_unique<FilterTransform>(elementType(), graphModel()->attributes(), _invert);
 
     if(!conditionIsValid(elementType(), graphModel()->attributes(), graphTransformConfig._condition))
         return nullptr;

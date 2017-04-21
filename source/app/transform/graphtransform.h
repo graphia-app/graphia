@@ -46,6 +46,11 @@ public:
     const TransformInfo* info() const { return _info; }
     void setInfo(TransformInfo* info) { _info = info; }
 
+    // This is so that subclasses can access the config
+    // Specifically, it is not a means to reconfigure an existing transform
+    const GraphTransformConfig& config() const { return _config; }
+    void setConfig(const GraphTransformConfig& config) { _config = config; }
+
 protected:
     bool hasUnknownAttributes(const std::vector<QString>& referencedAttributes,
                               const std::vector<QString>& availableAttributes) const;
@@ -53,6 +58,7 @@ protected:
 private:
     mutable TransformInfo* _info = nullptr;
     bool _repeating = false;
+    GraphTransformConfig _config;
 };
 
 DEFINE_QML_ENUM(Q_GADGET, TransformRequirements,
