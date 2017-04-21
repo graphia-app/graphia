@@ -51,6 +51,7 @@ Window
                     if(selectedValue !== undefined)
                     {
                         parametersRepeater.model = [];
+                        parameters._values = {};
                         root._transform = document.transform(selectedValue);
                         attributeList.model = _transform.attributes;
 
@@ -140,11 +141,6 @@ Window
                                     parameters._values[modelData] = transformParameter;
                                 }
                             }
-                        }
-
-                        onModelChanged:
-                        {
-                            parameters._values = {};
                         }
                     }
 
