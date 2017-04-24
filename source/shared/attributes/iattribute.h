@@ -42,6 +42,10 @@ public:
     virtual IAttribute& setStringValueFn(ValueFn<QString, EdgeId> valueFn) = 0;
     virtual IAttribute& setStringValueFn(ValueFn<QString, const IGraphComponent&> valueFn) = 0;
 
+    virtual IAttribute& setValueMissingFn(ValueFn<bool, NodeId> missingFn) = 0;
+    virtual IAttribute& setValueMissingFn(ValueFn<bool, EdgeId> missingFn) = 0;
+    virtual IAttribute& setValueMissingFn(ValueFn<bool, const IGraphComponent&> missingFn) = 0;
+
     virtual IAttributeRange<int>& intRange() = 0;
     virtual IAttributeRange<double>& floatRange() = 0;
     virtual const IAttributeRange<double>& numericRange() const = 0;

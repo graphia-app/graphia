@@ -106,7 +106,12 @@ private:
     ValueFn<QString, EdgeId> _stringEdgeIdFn;
     ValueFn<QString, const IGraphComponent&> _stringComponentFn;
 
-    void clearFunctions();
+    ValueFn<bool, NodeId> _valueMissingNodeIdFn;
+    ValueFn<bool, EdgeId> _valueMissingEdgeIdFn;
+    ValueFn<bool, const IGraphComponent&> _valueMissingComponentFn;
+
+    void clearValueFunctions();
+    void clearMissingFunctions();
 
     Flags<AttributeFlag> _flags = AttributeFlag::None;
 
@@ -137,6 +142,10 @@ private:
     QString valueOf(Helper<QString>, NodeId nodeId) const;
     QString valueOf(Helper<QString>, EdgeId edgeId) const;
     QString valueOf(Helper<QString>, const IGraphComponent& component) const;
+
+    bool valueMissingOf(NodeId nodeId) const;
+    bool valueMissingOf(EdgeId edgeId) const;
+    bool valueMissingOf(const IGraphComponent& component) const;
 
     enum class Type
     {
@@ -187,6 +196,13 @@ public:
         return std::numeric_limits<double>::signaling_NaN();
     }
 
+    template<typename E> bool valueMissingOf(E& elementId) const
+    {
+        return valueMissingOf(elementId);
+    }
+
+    bool hasMissingValues() const;
+
     template<typename T, typename E>
     using ValueOfFn = T(Attribute::*)(E&) const;
 
@@ -201,6 +217,10 @@ public:
     Attribute& setStringValueFn(ValueFn<QString, NodeId> valueFn);
     Attribute& setStringValueFn(ValueFn<QString, EdgeId> valueFn);
     Attribute& setStringValueFn(ValueFn<QString, const IGraphComponent&> valueFn);
+
+    Attribute& setValueMissingFn(ValueFn<bool, NodeId> missingFn);
+    Attribute& setValueMissingFn(ValueFn<bool, EdgeId> missingFn);
+    Attribute& setValueMissingFn(ValueFn<bool, const IGraphComponent&> missingFn);
 
     ValueType valueType() const;
     ElementType elementType() const;

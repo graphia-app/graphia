@@ -36,6 +36,7 @@ QString GraphTransformConfig::TerminalCondition::opAsString() const
         QString operator()(const FloatOpValue& v) const     { return GraphTransformConfigParser::opToString(v._op); }
         QString operator()(const IntOpValue& v) const       { return GraphTransformConfigParser::opToString(v._op); }
         QString operator()(const StringOpValue& v) const    { return GraphTransformConfigParser::opToString(v._op); }
+        QString operator()(const UnaryOp& v) const          { return GraphTransformConfigParser::opToString(v); }
     };
 
     return boost::apply_visitor(Visitor(), _opValue);
@@ -48,6 +49,7 @@ QString GraphTransformConfig::TerminalCondition::valueAsString() const
         QString operator()(const FloatOpValue& v) const     { return QString::number(v._value); }
         QString operator()(const IntOpValue& v) const       { return QString::number(v._value); }
         QString operator()(const StringOpValue& v) const    { return v._value; }
+        QString operator()(const UnaryOp&) const            { return {}; }
     };
 
     return boost::apply_visitor(Visitor(), _opValue);
@@ -76,6 +78,7 @@ QString GraphTransformConfig::Parameter::valueAsString() const
     struct Visitor
     {
         QString operator()(double d) const { return QString::number(d); }
+        QString operator()(int i) const { return QString::number(i); }
         QString operator()(const QString& s) const { return s; }
     };
 

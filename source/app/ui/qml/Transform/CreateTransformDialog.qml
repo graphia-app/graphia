@@ -193,7 +193,10 @@ Window
                                 valueParameter.configure(parameterData);
                             }
                             else
+                            {
+                                opList.updateModel();
                                 valueParameter.reset();
+                            }
 
                             description.update();
                             updateTransformExpression();
@@ -213,11 +216,23 @@ Window
 
                         function updateModel(ops)
                         {
+                            if(ops === undefined)
+                            {
+                                opList.model = undefined;
+                                return;
+                            }
+
                             var newModel = modelComponent.createObject();
 
                             for(var i = 0; i < ops.length; i++)
                             {
-                                var item = { display: TransformConfig.sanitiseOp(ops[i]), value: ops[i] };
+                                var item =
+                                    {
+                                        display: TransformConfig.sanitiseOp(ops[i]),
+                                        value: ops[i],
+                                        unary: document.opIsUnary(ops[i])
+                                    };
+
                                 newModel.append(item);
                             }
 
@@ -228,6 +243,7 @@ Window
                     TransformParameter
                     {
                         id: valueParameter
+                        enabled: opList.selectedValue !== undefined && !opList.selectedValue.unary
                         Layout.topMargin: Constants.margin
                         Layout.alignment: Qt.AlignTop
 
@@ -350,7 +366,7 @@ Window
                 {
                     expression += " " + opList.selectedValue.value;
 
-                    if(valueParameter.value.length > 0)
+                    if(!opList.selectedValue.unary && valueParameter.value.length > 0)
                         expression += " " + valueParameter.value;
                 }
             }

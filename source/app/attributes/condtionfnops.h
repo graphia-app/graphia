@@ -29,6 +29,11 @@ namespace ConditionFnOp
         Ends,
         MatchesRegex
     };
+
+    enum class Unary
+    {
+        HasValue
+    };
 }
 
 #endif // CONDTIONFNOPS_H

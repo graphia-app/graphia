@@ -244,6 +244,8 @@ public:
     Q_INVOKABLE bool hasTransformInfo() const;
     Q_INVOKABLE QVariantMap transformInfoAtIndex(int index) const;
 
+    Q_INVOKABLE bool opIsUnary(const QString& op) const;
+
     Q_INVOKABLE QStringList availableAttributes(int elementTypes = static_cast<int>(ElementType::All),
                                                 int valueTypes = static_cast<int>(ValueType::All)) const;
     Q_INVOKABLE QVariantMap attribute(const QString& attributeName) const;

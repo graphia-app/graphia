@@ -1,6 +1,6 @@
 #include "attribute.h"
 
-void Attribute::clearFunctions()
+void Attribute::clearValueFunctions()
 {
     _intNodeIdFn = nullptr;
     _intEdgeIdFn = nullptr;
@@ -15,6 +15,13 @@ void Attribute::clearFunctions()
     _stringComponentFn = nullptr;
 }
 
+void Attribute::clearMissingFunctions()
+{
+    _valueMissingNodeIdFn = nullptr;
+    _valueMissingEdgeIdFn = nullptr;
+    _valueMissingComponentFn = nullptr;
+}
+
 int Attribute::valueOf(Helper<int>, NodeId nodeId) const { Q_ASSERT(_intNodeIdFn != nullptr); return _intNodeIdFn(nodeId); }
 int Attribute::valueOf(Helper<int>, EdgeId edgeId) const { Q_ASSERT(_intEdgeIdFn != nullptr); return _intEdgeIdFn(edgeId); }
 int Attribute::valueOf(Helper<int>, const IGraphComponent& component) const { Q_ASSERT(_intComponentFn != nullptr); return _intComponentFn(component); }
@@ -27,17 +34,45 @@ QString Attribute::valueOf(Helper<QString>, NodeId nodeId) const { Q_ASSERT(_str
 QString Attribute::valueOf(Helper<QString>, EdgeId edgeId) const { Q_ASSERT(_stringEdgeIdFn != nullptr); return _stringEdgeIdFn(edgeId); }
 QString Attribute::valueOf(Helper<QString>, const IGraphComponent& component) const { Q_ASSERT(_stringComponentFn != nullptr); return _stringComponentFn(component); }
 
-Attribute& Attribute::setIntValueFn(ValueFn<int, NodeId> valueFn) { clearFunctions(); _intNodeIdFn = valueFn; return *this; }
-Attribute& Attribute::setIntValueFn(ValueFn<int, EdgeId> valueFn) { clearFunctions(); _intEdgeIdFn = valueFn; return *this; }
-Attribute& Attribute::setIntValueFn(ValueFn<int, const IGraphComponent&> valueFn) { clearFunctions(); _intComponentFn = valueFn; return *this; }
+bool Attribute::valueMissingOf(NodeId nodeId) const
+{
+    if(_valueMissingNodeIdFn != nullptr)
+        return _valueMissingNodeIdFn(nodeId);
 
-Attribute& Attribute::setFloatValueFn(ValueFn<double, NodeId> valueFn) { clearFunctions(); _floatNodeIdFn = valueFn; return *this; }
-Attribute& Attribute::setFloatValueFn(ValueFn<double, EdgeId> valueFn) { clearFunctions(); _floatEdgeIdFn = valueFn; return *this; }
-Attribute& Attribute::setFloatValueFn(ValueFn<double, const IGraphComponent&> valueFn) { clearFunctions(); _floatComponentFn = valueFn; return *this; }
+    return false;
+}
 
-Attribute& Attribute::setStringValueFn(ValueFn<QString, NodeId> valueFn) { clearFunctions(); _stringNodeIdFn = valueFn; return *this; }
-Attribute& Attribute::setStringValueFn(ValueFn<QString, EdgeId> valueFn) { clearFunctions(); _stringEdgeIdFn = valueFn; return *this; }
-Attribute& Attribute::setStringValueFn(ValueFn<QString, const IGraphComponent&> valueFn) { clearFunctions(); _stringComponentFn = valueFn; return *this; }
+bool Attribute::valueMissingOf(EdgeId edgeId) const
+{
+    if(_valueMissingEdgeIdFn != nullptr)
+        return _valueMissingEdgeIdFn(edgeId);
+
+    return false;
+}
+
+bool Attribute::valueMissingOf(const IGraphComponent& component) const
+{
+    if(_valueMissingComponentFn != nullptr)
+        return _valueMissingComponentFn(component);
+
+    return false;
+}
+
+Attribute& Attribute::setIntValueFn(ValueFn<int, NodeId> valueFn) { clearValueFunctions(); _intNodeIdFn = valueFn; return *this; }
+Attribute& Attribute::setIntValueFn(ValueFn<int, EdgeId> valueFn) { clearValueFunctions(); _intEdgeIdFn = valueFn; return *this; }
+Attribute& Attribute::setIntValueFn(ValueFn<int, const IGraphComponent&> valueFn) { clearValueFunctions(); _intComponentFn = valueFn; return *this; }
+
+Attribute& Attribute::setFloatValueFn(ValueFn<double, NodeId> valueFn) { clearValueFunctions(); _floatNodeIdFn = valueFn; return *this; }
+Attribute& Attribute::setFloatValueFn(ValueFn<double, EdgeId> valueFn) { clearValueFunctions(); _floatEdgeIdFn = valueFn; return *this; }
+Attribute& Attribute::setFloatValueFn(ValueFn<double, const IGraphComponent&> valueFn) { clearValueFunctions(); _floatComponentFn = valueFn; return *this; }
+
+Attribute& Attribute::setStringValueFn(ValueFn<QString, NodeId> valueFn) { clearValueFunctions(); _stringNodeIdFn = valueFn; return *this; }
+Attribute& Attribute::setStringValueFn(ValueFn<QString, EdgeId> valueFn) { clearValueFunctions(); _stringEdgeIdFn = valueFn; return *this; }
+Attribute& Attribute::setStringValueFn(ValueFn<QString, const IGraphComponent&> valueFn) { clearValueFunctions(); _stringComponentFn = valueFn; return *this; }
+
+Attribute&Attribute::setValueMissingFn(ValueFn<bool, NodeId> missingFn) { clearMissingFunctions(); _valueMissingNodeIdFn = missingFn; return *this; }
+Attribute&Attribute::setValueMissingFn(ValueFn<bool, EdgeId> missingFn) { clearMissingFunctions(); _valueMissingEdgeIdFn = missingFn; return *this; }
+Attribute&Attribute::setValueMissingFn(ValueFn<bool, const IGraphComponent&> missingFn) { clearMissingFunctions(); _valueMissingComponentFn = missingFn; return *this; }
 
 Attribute::Type Attribute::type() const
 {
@@ -59,6 +94,19 @@ Attribute::Type Attribute::type() const
 void Attribute::disableAutoRange()
 {
     _flags.reset(AttributeFlag::AutoRangeMutable, AttributeFlag::AutoRangeTransformed);
+}
+
+bool Attribute::hasMissingValues() const
+{
+    switch(elementType())
+    {
+    case ElementType::Node:         return _valueMissingNodeIdFn != nullptr;
+    case ElementType::Edge:         return _valueMissingEdgeIdFn != nullptr;
+    case ElementType::Component:    return _valueMissingComponentFn != nullptr;
+    default:                        return false;
+    }
+
+    return false;
 }
 
 ValueType Attribute::valueType() const

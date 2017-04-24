@@ -102,12 +102,23 @@ struct string_op_ : x3::symbols<ConditionFnOp::String>
     }
 } string_op;
 
+struct unary_op_ : x3::symbols<ConditionFnOp::Unary>
+{
+    unary_op_()
+    {
+        add
+        ("hasValue", ConditionFnOp::Unary::HasValue)
+        ;
+    }
+} unary_op;
+
 const auto floatCondition = numerical_op >> double_;
 const auto intCondition = numerical_op >> int_;
 const auto stringCondition = string_op >> quotedString;
+const auto unaryCondition = unary_op;
 
 const x3::rule<class TerminalCondition, GraphTransformConfig::TerminalCondition> terminalCondition = "terminalCondition";
-const auto terminalCondition_def = attributeName >> (floatCondition | intCondition | stringCondition);
+const auto terminalCondition_def = attributeName >> (floatCondition | intCondition | stringCondition | unaryCondition);
 
 struct binary_op_ : x3::symbols<ConditionFnOp::Binary>
 {
@@ -222,4 +233,22 @@ QString GraphTransformConfigParser::opToString(ConditionFnOp::Binary op)
     });
 
     return result;
+}
+
+QString GraphTransformConfigParser::opToString(ConditionFnOp::Unary op)
+{
+    QString result;
+
+    SpiritGraphTranformConfigParser::unary_op.for_each([&](auto& v, auto)
+    {
+        if(SpiritGraphTranformConfigParser::unary_op.at(v) == op)
+            result = QString::fromStdString(v);
+    });
+
+    return result;
+}
+
+bool GraphTransformConfigParser::opIsUnary(const QString& op)
+{
+    return SpiritGraphTranformConfigParser::unary_op.find(op.toStdString()) != nullptr;
 }

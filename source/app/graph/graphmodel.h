@@ -99,6 +99,8 @@ public:
     bool hasTransformInfo() const;
     const TransformInfo& transformInfoAtIndex(int index) const;
 
+    bool opIsUnary(const QString& op) const;
+
     bool visualisationIsValid(const QString& visualisation) const;
     void buildVisualisations(const QStringList& visualisations);
 

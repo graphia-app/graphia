@@ -48,7 +48,7 @@ private:
             case ConditionFnOp::Numerical::GreaterThanOrEqual:
                 return [attribute, value](E elementId) { return attribute->template valueOf<T, E>(elementId) >= value; };
             default:
-                qFatal("Unhandled NumericalOp");
+                qFatal("Unhandled ConditionFnOp::Numerical");
                 return nullptr;
             }
         }
@@ -87,7 +87,21 @@ private:
                 return [attribute, valueOfFn, re](E elementId) { return re.match((attribute->*valueOfFn)(elementId)).hasMatch(); };
             }
             default:
-                qFatal("Unhandled StringOp");
+                qFatal("Unhandled ConditionFnOp::String");
+                return nullptr;
+            }
+        }
+
+        ElementConditionFn<E> unaryFn(ConditionFnOp::Unary op) const
+        {
+            const auto* attribute = _attribute;
+
+            switch(op)
+            {
+            case ConditionFnOp::Unary::HasValue:
+                return [attribute](E elementId) { return !attribute->template valueMissingOf<E>(elementId); };
+            default:
+                qFatal("Unhandled ConditionFnOp::Unary");
                 return nullptr;
             }
         }
@@ -98,6 +112,8 @@ private:
         { return numericalFn(ValueType::Float, opValue._op, opValue._value); }
         ElementConditionFn<E> operator()(const GraphTransformConfig::StringOpValue& opValue) const
         { return stringFn(opValue._op, opValue._value); }
+        ElementConditionFn<E> operator()(const GraphTransformConfig::UnaryOp& op) const
+        { return unaryFn(op); }
     };
 
     template<typename E>

@@ -38,6 +38,9 @@ public:
         _name(name)
     {}
 
+    auto begin() const { return _values.begin(); }
+    auto end() const { return _values.end(); }
+
     Type type() const { return _type; }
     const QString& name() const { return _name; }
     int numValues() const { return static_cast<int>(_values.size()); }

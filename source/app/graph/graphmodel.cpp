@@ -225,10 +225,18 @@ QStringList GraphModel::availableAttributes(ElementType elementTypes, ValueType 
 
 QStringList GraphModel::avaliableConditionFnOps(const QString& attributeName) const
 {
-    if(attributeName.isEmpty() || !u::contains(_attributes, attributeName))
-        return {};
+    QStringList ops;
 
-    return GraphTransformConfigParser::ops(_attributes.at(attributeName).valueType());
+    if(attributeName.isEmpty() || !u::contains(_attributes, attributeName))
+        return ops;
+
+    const auto& attribute = _attributes.at(attributeName);
+    ops.append(GraphTransformConfigParser::ops(attribute.valueType()));
+
+    if(attribute.hasMissingValues())
+        ops.append(GraphTransformConfigParser::opToString(ConditionFnOp::Unary::HasValue));
+
+    return ops;
 }
 
 bool GraphModel::hasTransformInfo() const
@@ -244,6 +252,11 @@ const TransformInfo& GraphModel::transformInfoAtIndex(int index) const
         return _transformInfos.at(index);
 
     return nullTransformInfo;
+}
+
+bool GraphModel::opIsUnary(const QString& op) const
+{
+    return GraphTransformConfigParser::opIsUnary(op);
 }
 
 bool GraphModel::visualisationIsValid(const QString& visualisation) const

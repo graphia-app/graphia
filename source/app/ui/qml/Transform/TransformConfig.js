@@ -37,6 +37,7 @@ function sanitiseOp(text)
         "starts",   "Starts With",
         "ends",     "Ends With",
         "matches",  "Matches Regex",
+        "hasValue", "Has Value",
     ];
 
     for(var i = 0; i < replacements.length; i += 2)
@@ -89,7 +90,7 @@ function create(transform)
 
         if(typeof condition.rhs === "object")
             rhs = "(" + conditionToTemplate(condition.rhs) + ")";
-        else
+        else if(!document.opIsUnary(condition.op))
             rhs = "%";
 
         return lhs + " " + condition.op + " " + rhs;
@@ -155,6 +156,10 @@ function create(transform)
                 var parameter = this._elements[i];
 
                 labelText += parameter.lhs + " " + sanitiseOp(parameter.op);
+
+                // No parameter needed
+                if(document.opIsUnary(parameter.op))
+                    continue;
 
                 var parameterData = document.findTransformParameter(this.action, parameter.lhs);
                 parameterData.initialValue = parameter.rhs;

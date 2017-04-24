@@ -57,12 +57,12 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
     for(const auto& userDataVector : *this)
     {
         const auto& userDataVectorName = userDataVector.name();
+        auto& attribute = graphModel.createAttribute(userDataVectorName);
 
         switch(userDataVector.type())
         {
         case UserDataVector::Type::Float:
-            graphModel.createAttribute(userDataVectorName)
-                    .setFloatValueFn([this, userDataVectorName](NodeId nodeId)
+            attribute.setFloatValueFn([this, userDataVectorName](NodeId nodeId)
                     {
                         return valueByNodeId(nodeId, userDataVectorName).toFloat();
                     })
@@ -71,8 +71,7 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
             break;
 
         case UserDataVector::Type::Int:
-            graphModel.createAttribute(userDataVectorName)
-                    .setIntValueFn([this, userDataVectorName](NodeId nodeId)
+            attribute.setIntValueFn([this, userDataVectorName](NodeId nodeId)
                     {
                         return valueByNodeId(nodeId, userDataVectorName).toInt();
                     })
@@ -81,8 +80,7 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
             break;
 
         case UserDataVector::Type::String:
-            graphModel.createAttribute(userDataVectorName)
-                    .setStringValueFn([this, userDataVectorName](NodeId nodeId)
+            attribute.setStringValueFn([this, userDataVectorName](NodeId nodeId)
                     {
                         return valueByNodeId(nodeId, userDataVectorName).toString();
                     })
@@ -92,7 +90,17 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
         default: break;
         }
 
-        graphModel.createAttribute(userDataVectorName)
-                .setDescription(QString(tr("%1 is a user defined attribute.")).arg(userDataVectorName));
+        bool hasMissingValues = std::any_of(userDataVector.begin(), userDataVector.end(),
+                                            [](const auto& v) { return v.isEmpty(); });
+
+        if(hasMissingValues)
+        {
+            attribute.setValueMissingFn([this, userDataVectorName](NodeId nodeId)
+            {
+               return valueByNodeId(nodeId, userDataVectorName).toString().isEmpty();
+            });
+        }
+
+        attribute.setDescription(QString(tr("%1 is a user defined attribute.")).arg(userDataVectorName));
     }
 }

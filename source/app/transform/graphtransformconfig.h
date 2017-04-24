@@ -39,7 +39,9 @@ struct GraphTransformConfig
         bool operator==(const StringOpValue& other) const;
     };
 
-    using OpValue = boost::variant<FloatOpValue, IntOpValue, StringOpValue>;
+    using UnaryOp = ConditionFnOp::Unary;
+
+    using OpValue = boost::variant<FloatOpValue, IntOpValue, StringOpValue, UnaryOp>;
 
     struct TerminalCondition
     {

@@ -25,6 +25,9 @@ public:
     static QString opToString(ConditionFnOp::Numerical op);
     static QString opToString(ConditionFnOp::String op);
     static QString opToString(ConditionFnOp::Binary op);
+    static QString opToString(ConditionFnOp::Unary op);
+
+    static bool opIsUnary(const QString& op);
 };
 
 #endif // GRAPHTRANSFORMCONFIGPARSER_H
