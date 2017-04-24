@@ -49,7 +49,12 @@ GridLayout
         decimals:
         {
             if(valueType === ValueType.Float)
-                return Utils.decimalPointsForRange(minimumValue, maximumValue);
+            {
+                if(hasRange)
+                    return Utils.decimalPointsForRange(minimumValue, maximumValue);
+
+                return 3;
+            }
 
             return 0;
         }
@@ -159,7 +164,7 @@ GridLayout
                 spinBox.minimumValue = slider.minimumValue = minimumValue;
             }
             else
-                spinBox.minimumValue = slider.minimumValue = Number.MIN_VALUE;
+                spinBox.minimumValue = slider.minimumValue = Number.NEGATIVE_INFINITY;
 
             if(hasMaximumValue)
             {
@@ -169,7 +174,7 @@ GridLayout
                 spinBox.maximumValue = slider.maximumValue = maximumValue;
             }
             else
-                spinBox.maximumValue = slider.maximumValue = Number.MAX_VALUE;
+                spinBox.maximumValue = slider.maximumValue = Number.POSITIVE_INFINITY;
 
             spinBox.value = floatValue;
             slider.value = floatValue;
