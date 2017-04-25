@@ -86,7 +86,7 @@ function create(transform)
         if(typeof condition.lhs === "object")
             lhs = "(" + conditionToTemplate(condition.lhs) + ")";
         else
-            lhs = "\"" + condition.lhs + "\"";
+            lhs = /*FIXME*/"$\"" + condition.lhs + "\"";
 
         if(typeof condition.rhs === "object")
             rhs = "(" + conditionToTemplate(condition.rhs) + ")";
@@ -115,7 +115,7 @@ function create(transform)
             firstParam = false;
 
             var parameterValue = transform.parameters[parameterName];
-            this.template += " \"" + parameterName + "\" = %";
+            this.template += " $\"" + parameterName + "\" = %";
             appendConditionToElements(this._elements, {lhs: parameterName, op:"=", rhs: parameterValue});
         }
     }

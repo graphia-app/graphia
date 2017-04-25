@@ -360,7 +360,7 @@ Window
 
             if(attributeList.selectedValue !== undefined)
             {
-                expression += " where \"" + attributeList.selectedValue + "\"";
+                expression += " where $\"" + attributeList.selectedValue + "\"";
 
                 if(opList.selectedValue !== undefined)
                 {

@@ -69,7 +69,7 @@ const auto quotedString_def = lexeme['"' >> *(escapedQuote | ~char_('"')) >> '"'
 const x3::rule<class Identifier, QString> identifier = "identifier";
 const auto identifier_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
 
-const auto attributeName = quotedString | identifier;
+const auto attributeName = x3::lit('$') >> (quotedString | identifier);
 
 struct numerical_op_ : x3::symbols<ConditionFnOp::Numerical>
 {

@@ -310,8 +310,8 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
 
     return
     {
-        QString(R"("Remove Edges" where "Pearson Correlation Value" < %1)").arg(defaultCorrelationValue),
-        R"([pinned] "Remove Components" where "Component Size" <= 1)",
+        QString(R"("Remove Edges" where $"Pearson Correlation Value" < %1)").arg(defaultCorrelationValue),
+        R"([pinned] "Remove Components" where $"Component Size" <= 1)",
     };
 }
 
