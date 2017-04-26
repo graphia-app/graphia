@@ -16,6 +16,7 @@ bool GraphTransform::applyAndUpdate(TransformedGraph& target) const
 
     do
     {
+        target.clearPhase();
         change = apply(target);
         anyChange = anyChange || change;
         target.update();
