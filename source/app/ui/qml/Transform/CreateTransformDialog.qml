@@ -27,6 +27,7 @@ Window
     property string transformExpression
 
     property var _transform: undefined
+    property int _numParameters: _transform !== undefined ? Object.keys(_transform.parameters).length : 0
 
     ColumnLayout
     {
@@ -82,15 +83,14 @@ Window
                     font.pixelSize: 16
                     font.italic: true
 
-                    text: _transform !== undefined && _transform.requirements === TransformRequirements.None ?
+                    text: _transform !== undefined && _numParameters === 0 ?
                               qsTr("No Parameters") : qsTr("Select A Transform")
                 }
 
                 ColumnLayout
                 {
                     id: parameters
-                    visible: _transform !== undefined &&
-                             _transform.requirements & TransformRequirements.Parameters
+                    visible: _transform !== undefined && _numParameters > 0
 
                     Layout.fillWidth: visible
                     spacing: 20
@@ -161,8 +161,7 @@ Window
                 RowLayout
                 {
                     id: condition
-                    visible: _transform !== undefined &&
-                             _transform.requirements & TransformRequirements.Condition
+                    visible: _transform !== undefined && _transform.requiresCondition
 
                     Layout.fillWidth: visible
                     Layout.fillHeight: visible

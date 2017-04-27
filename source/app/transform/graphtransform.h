@@ -61,11 +61,6 @@ private:
     GraphTransformConfig _config;
 };
 
-DEFINE_QML_ENUM(Q_GADGET, TransformRequirements,
-                None        = 0x1,
-                Parameters  = 0x2,
-                Condition   = 0x4);
-
 class GraphTransformFactory
 {
 private:
@@ -80,7 +75,7 @@ public:
 
     virtual QString description() const = 0;
     virtual ElementType elementType() const { return ElementType::None; }
-    virtual TransformRequirements requirements() const { return TransformRequirements::None; }
+    virtual bool requiresCondition() const { return false; }
     virtual GraphTransformParameters parameters() const { return {}; }
 
     virtual std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const = 0;

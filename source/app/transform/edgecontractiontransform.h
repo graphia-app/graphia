@@ -34,7 +34,7 @@ public:
                            "merging the pairs of nodes that they previously joined.");
     }
     ElementType elementType() const { return ElementType::Edge; }
-    TransformRequirements requirements() const { return TransformRequirements::Condition; }
+    bool requiresCondition() const { return true; }
 
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const;
 };

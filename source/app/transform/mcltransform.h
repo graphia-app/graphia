@@ -81,7 +81,6 @@ public:
         return R"(<a href="https://micans.org/mcl/">MCL - Markov Clustering</a> )" //
                 " creates discrete groups (clusters) of nodes based on a flow simulation model"; }
     ElementType elementType() const { return ElementType::None; }
-    TransformRequirements requirements() const { return TransformRequirements::Parameters; }
     GraphTransformParameters parameters() const
     {
         GraphTransformParameters p;

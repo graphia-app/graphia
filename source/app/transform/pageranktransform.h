@@ -37,7 +37,6 @@ public:
     QString description() const { return R"(Calculates a <a href="https://en.wikipedia.org/wiki/PageRank">PageRank</a>)" //
                                          " centrality measurement for each node. This can be viewed as measure of a node's relative importance in the graph."; }
     ElementType elementType() const { return ElementType::None; }
-    TransformRequirements requirements() const { return TransformRequirements::Parameters; }
     GraphTransformParameters parameters() const
     {
         return {};

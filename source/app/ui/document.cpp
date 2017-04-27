@@ -819,7 +819,7 @@ QVariantMap Document::transform(const QString& transformName) const
         auto elementType = transformFactory->elementType();
 
         map.insert("description", transformFactory->description());
-        map.insert("requirements", static_cast<int>(transformFactory->requirements()));
+        map.insert("requiresCondition", transformFactory->requiresCondition());
 
         QVariantMap parameters;
         for(const auto& parameter : transformFactory->parameters())

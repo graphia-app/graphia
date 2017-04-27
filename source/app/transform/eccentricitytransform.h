@@ -26,9 +26,8 @@ public:
     QString description() const { return QObject::tr(
                     R"-(<a href="https://en.wikipedia.org/wiki/Eccentricity_(graph_theory)">Eccentricity</a>)-" //
                     " calculates the shortest path between every node and assigns the longest path length found for that node."
-                    " This is a measure of a node's position within the overall graph structrue"); }
+                    " This is a measure of a node's position within the overall graph structure."); }
     ElementType elementType() const { return ElementType::None; }
-    TransformRequirements requirements() const { return TransformRequirements::Parameters; }
     GraphTransformParameters parameters() const
     {
         return {};

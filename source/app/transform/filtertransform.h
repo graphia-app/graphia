@@ -45,7 +45,7 @@ public:
                 .arg(elementTypeAsString(_elementType).toLower());
     }
     ElementType elementType() const { return _elementType; }
-    TransformRequirements requirements() const { return TransformRequirements::Condition; }
+    bool requiresCondition() const { return true; }
 
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const;
 };
