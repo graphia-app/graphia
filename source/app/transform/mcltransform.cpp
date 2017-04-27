@@ -545,7 +545,8 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
 
     _graphModel->createAttribute(QObject::tr("MCL Cluster"))
         .setDescription("The MCL-calculated cluster in which the node resides.")
-        .setStringValueFn([clusters](NodeId nodeId) { return clusters[nodeId]; });
+        .setStringValueFn([clusters](NodeId nodeId) { return clusters[nodeId]; })
+        .setSearchable(true);
 }
 
 std::unique_ptr<GraphTransform> MCLTransformFactory::create(const GraphTransformConfig&) const
