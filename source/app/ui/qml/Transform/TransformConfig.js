@@ -85,31 +85,34 @@ function create(transform)
         appendToElements(elements, ")");
     }
 
-    function quoted(text)
-    {
-        if(text[0] === '$')
-        {
-            text = text.substring(1);
-            return "$\"" + text + "\"";
-        }
-
-        return "\"" + text + "\"";
-    }
-
     function conditionToTemplate(condition)
     {
+        function templated(text)
+        {
+            if(!text || text.length === 0)
+                return "";
+
+            if(text[0] === '$')
+            {
+                text = text.substring(1);
+                return "$\"" + text + "\"";
+            }
+
+            return "%";
+        }
+
         var lhs = "";
         var rhs = "";
 
         if(typeof condition.lhs === "object")
             lhs = "(" + conditionToTemplate(condition.lhs) + ")";
         else
-            lhs = quoted(condition.lhs);
+            lhs = templated(condition.lhs);
 
         if(typeof condition.rhs === "object")
             rhs = "(" + conditionToTemplate(condition.rhs) + ")";
-        else if(!document.opIsUnary(condition.op))
-            rhs = "%";
+        else
+            rhs = templated(condition.rhs);
 
         return lhs + " " + condition.op + " " + rhs;
     }
@@ -173,30 +176,53 @@ function create(transform)
             {
                 var parameter = this._elements[i];
 
-                labelText += sanitiseAttribute(parameter.lhs) + " " + sanitiseOp(parameter.op);
-
-                // No parameter needed
-                if(document.opIsUnary(parameter.op))
-                    continue;
-
-                var parameterData = document.findTransformParameter(this.action, parameter.lhs);
-                parameterData.initialValue = parameter.rhs;
-
-                if(locked)
+                var that = this;
+                function addOperand(operand, opposite)
                 {
-                    if(parameterData.valueType === ValueType.String)
-                        labelText += " \\\"" + parameter.rhs + "\\\"";
+                    if(!operand || operand.length === 0)
+                        return;
+
+                    if(operand[0] === '$')
+                        labelText += sanitiseAttribute(operand);
                     else
-                        labelText += " " + Utils.formatForDisplay(parameter.rhs);
+                    {
+                        var parameterData = {};
+
+                        if(opposite.length > 0 && opposite[0] === '$')
+                            parameterData = document.findTransformParameter(that.action, opposite);
+                        else
+                        {
+                            // We known nothing of the type, so just treat it as a string
+                            parameterData.valueType = ValueType.String;
+
+                            parameterData.hasRange = false;
+                            parameterData.hasMinimumValue = false;
+                            parameterData.hasMaximumValue = false;
+                        }
+
+                        parameterData.initialValue = operand;
+
+                        if(locked)
+                        {
+                            if(parameterData.valueType === ValueType.String)
+                                labelText += " \\\"" + operand + "\\\"";
+                            else
+                                labelText += " " + Utils.formatForDisplay(operand);
+                        }
+                        else
+                            addLabel();
+
+                        var parameterObject = createTransformParameter(document,
+                            locked ? null : parent, // If locked, still create the object, but don't display it
+                            parameterData, onParameterChanged);
+
+                        that.parameters.push(parameterObject);
+                    }
                 }
-                else
-                    addLabel();
 
-                var parameterObject = createTransformParameter(document,
-                    locked ? null : parent, // If locked, still create the object, but don't display it
-                    parameterData, onParameterChanged);
-
-                this.parameters.push(parameterObject);
+                addOperand(parameter.lhs, parameter.rhs);
+                labelText += " " + sanitiseOp(parameter.op) + " ";
+                addOperand(parameter.rhs, parameter.lhs);
             }
         }
 
