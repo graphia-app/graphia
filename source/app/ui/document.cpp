@@ -901,6 +901,7 @@ QVariantMap Document::transformParameter(const QString& transformName, const QSt
         if(parameter.hasMax()) map.insert("maximumValue", parameter.max());
 
         map.insert("description", parameter.description());
+        map.insert("initialValue", parameter.initialValue());
     }
 
     return map;

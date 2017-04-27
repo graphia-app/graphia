@@ -188,7 +188,6 @@ Window
 
                                 var parameterData = document.findTransformParameter(transformsList.selectedValue,
                                                                                     attributeList.selectedValue);
-                                parameterData.initialValue = "";
                                 valueParameter.configure(parameterData);
                             }
                             else
