@@ -50,7 +50,9 @@ void GraphComponentScene::update(float t)
     {
         componentRenderer()->setDimensions(QRect(offset, 0, _width, _height));
 
-        if(_transitionStyle == TransitionStyle::Fade)
+        if(_transitionStyle == TransitionStyle::Fade ||
+                _transitionStyle == TransitionStyle::SlideLeft ||
+                _transitionStyle == TransitionStyle::SlideRight)
             componentRenderer()->setAlpha(_transitionValue);
         else
             componentRenderer()->setAlpha(1.0f);
@@ -64,7 +66,9 @@ void GraphComponentScene::update(float t)
     {
         transitioningComponentRenderer()->setDimensions(QRect(outOffset, 0, _width, _height));
 
-        if(_transitionStyle == TransitionStyle::Fade)
+        if(_transitionStyle == TransitionStyle::Fade ||
+                _transitionStyle == TransitionStyle::SlideLeft ||
+                _transitionStyle == TransitionStyle::SlideRight)
             transitioningComponentRenderer()->setAlpha(1.0f - _transitionValue);
         else
             transitioningComponentRenderer()->setAlpha(1.0f);
