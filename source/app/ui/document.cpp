@@ -953,12 +953,10 @@ QVariantMap Document::findTransformParameter(const QString& transformName, const
 
     auto elementType = transformFactory->elementType();
 
-    auto attributeName = parameterName;
-    attributeName.replace(QRegularExpression("^\\$"), "");
-    if(u::contains(_graphModel->availableAttributes(elementType, ValueType::All), attributeName))
+    if(u::contains(_graphModel->availableAttributes(elementType, ValueType::All), parameterName))
     {
         // It's an Attribute
-        return attribute(attributeName);
+        return attribute(parameterName);
     }
     else
     {

@@ -137,7 +137,7 @@ function create(transform)
 
             var parameterValue = transform.parameters[parameterName];
             this.template += " \"" + parameterName + "\" = %";
-            appendConditionToElements(this._elements, {lhs: parameterName, op:"=", rhs: parameterValue});
+            appendConditionToElements(this._elements, {lhs: "$" + parameterName, op:"=", rhs: parameterValue});
         }
     }
 
@@ -189,7 +189,10 @@ function create(transform)
                         var parameterData = {};
 
                         if(opposite.length > 0 && opposite[0] === '$')
-                            parameterData = document.findTransformParameter(that.action, opposite);
+                        {
+                            var parameterName = opposite.substring(1);
+                            parameterData = document.findTransformParameter(that.action, parameterName);
+                        }
                         else
                         {
                             // We known nothing of the type, so just treat it as a string
