@@ -2,6 +2,7 @@
 #define GRAPHTRANSFORMCONFIG_H
 
 #include "attributes/condtionfnops.h"
+#include "attributes/valuetype.h"
 
 #include <QString>
 #include <QVariantMap>
@@ -15,53 +16,39 @@
 
 struct GraphTransformConfig
 {
-    struct FloatOpValue
-    {
-        ConditionFnOp::Numerical _op;
-        double _value;
-
-        bool operator==(const FloatOpValue& other) const;
-    };
-
-    struct IntOpValue
-    {
-        ConditionFnOp::Numerical _op;
-        int _value;
-
-        bool operator==(const IntOpValue& other) const;
-    };
-
-    struct StringOpValue
-    {
-        ConditionFnOp::String _op;
-        QString _value;
-
-        bool operator==(const StringOpValue& other) const;
-    };
-
-    using UnaryOp = ConditionFnOp::Unary;
-
-    using OpValue = boost::variant<FloatOpValue, IntOpValue, StringOpValue, UnaryOp>;
+    using TerminalValue = boost::variant<double, int, QString>;
+    using TerminalOp = boost::variant<ConditionFnOp::Equality, ConditionFnOp::Numerical, ConditionFnOp::String>;
 
     struct TerminalCondition
     {
-        QString _attributeName;
-        OpValue _opValue;
+        TerminalValue _lhs;
+        TerminalOp _op;
+        TerminalValue _rhs;
 
         bool operator==(const TerminalCondition& other) const;
         QString opAsString() const;
-        QString valueAsString() const;
+    };
+
+    struct UnaryCondition
+    {
+        TerminalValue _lhs;
+        ConditionFnOp::Unary _op;
+
+        bool operator==(const UnaryCondition& other) const;
+        QString opAsString() const;
     };
 
     struct CompoundCondition;
     using Condition = boost::variant<
+        int, // No condition
         TerminalCondition,
+        UnaryCondition,
         boost::recursive_wrapper<CompoundCondition>>;
 
     struct CompoundCondition
     {
         Condition _lhs;
-        ConditionFnOp::Binary _op;
+        ConditionFnOp::Logical _op;
         Condition _rhs;
 
         bool operator==(const CompoundCondition& other) const;

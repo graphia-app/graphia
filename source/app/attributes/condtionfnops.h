@@ -3,16 +3,20 @@
 
 namespace ConditionFnOp
 {
-    enum class Binary
+    enum class Logical
     {
         Or,
         And
     };
 
-    enum class Numerical
+    enum class Equality
     {
         Equal,
-        NotEqual,
+        NotEqual
+    };
+
+    enum class Numerical
+    {
         LessThan,
         GreaterThan,
         LessThanOrEqual,
@@ -21,8 +25,6 @@ namespace ConditionFnOp
 
     enum class String
     {
-        Equal,
-        NotEqual,
         Includes,
         Excludes,
         Starts,

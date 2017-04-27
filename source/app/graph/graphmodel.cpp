@@ -174,10 +174,10 @@ void GraphModel::buildTransforms(const QStringList& transforms)
 
         auto& factory = _graphTransformFactories.at(action);
         auto graphTransform = factory->create(graphTransformConfig);
-        graphTransform->setConfig(graphTransformConfig);
 
-        if(graphTransform)
+        if(graphTransform != nullptr)
         {
+            graphTransform->setConfig(graphTransformConfig);
             graphTransform->setRepeating(graphTransformConfig.isFlagSet("repeating"));
             graphTransform->setInfo(&_transformInfos[index]);
             _transformedGraph.addTransform(std::move(graphTransform));

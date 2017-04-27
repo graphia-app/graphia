@@ -22,6 +22,13 @@ function createTransformParameter(document, parent, parameterData, onParameterCh
     return object;
 }
 
+function sanitiseAttribute(text)
+{
+    // Remove the leading $, if present
+    text = text.replace(/^\$/, "");
+    return text;
+}
+
 function sanitiseOp(text)
 {
     var replacements =
@@ -78,6 +85,17 @@ function create(transform)
         appendToElements(elements, ")");
     }
 
+    function quoted(text)
+    {
+        if(text[0] === '$')
+        {
+            text = text.substring(1);
+            return "$\"" + text + "\"";
+        }
+
+        return "\"" + text + "\"";
+    }
+
     function conditionToTemplate(condition)
     {
         var lhs = "";
@@ -86,7 +104,7 @@ function create(transform)
         if(typeof condition.lhs === "object")
             lhs = "(" + conditionToTemplate(condition.lhs) + ")";
         else
-            lhs = "$\"" + condition.lhs + "\"";
+            lhs = quoted(condition.lhs);
 
         if(typeof condition.rhs === "object")
             rhs = "(" + conditionToTemplate(condition.rhs) + ")";
@@ -155,7 +173,7 @@ function create(transform)
             {
                 var parameter = this._elements[i];
 
-                labelText += parameter.lhs + " " + sanitiseOp(parameter.op);
+                labelText += sanitiseAttribute(parameter.lhs) + " " + sanitiseOp(parameter.op);
 
                 // No parameter needed
                 if(document.opIsUnary(parameter.op))

@@ -5,54 +5,35 @@
 
 #include <QVariantList>
 
-bool GraphTransformConfig::FloatOpValue::operator==(const GraphTransformConfig::FloatOpValue& other) const
-{
-    return _op == other._op &&
-            _value == other._value;
-}
-
-bool GraphTransformConfig::IntOpValue::operator==(const GraphTransformConfig::IntOpValue& other) const
-{
-    return _op == other._op &&
-            _value == other._value;
-}
-
-bool GraphTransformConfig::StringOpValue::operator==(const GraphTransformConfig::StringOpValue& other) const
-{
-    return _op == other._op &&
-            _value == other._value;
-}
-
 bool GraphTransformConfig::TerminalCondition::operator==(const GraphTransformConfig::TerminalCondition& other) const
 {
-    return _attributeName == other._attributeName &&
-            _opValue == other._opValue;
+    return _lhs == other._lhs &&
+            _op == other._op &&
+            _rhs == other._rhs;
+}
+
+
+bool GraphTransformConfig::UnaryCondition::operator==(const GraphTransformConfig::UnaryCondition& other) const
+{
+    return _lhs == other._lhs &&
+            _op == other._op;
 }
 
 QString GraphTransformConfig::TerminalCondition::opAsString() const
 {
     struct Visitor
     {
-        QString operator()(const FloatOpValue& v) const     { return GraphTransformConfigParser::opToString(v._op); }
-        QString operator()(const IntOpValue& v) const       { return GraphTransformConfigParser::opToString(v._op); }
-        QString operator()(const StringOpValue& v) const    { return GraphTransformConfigParser::opToString(v._op); }
-        QString operator()(const UnaryOp& v) const          { return GraphTransformConfigParser::opToString(v); }
+        QString operator()(ConditionFnOp::Equality v) const  { return GraphTransformConfigParser::opToString(v); }
+        QString operator()(ConditionFnOp::Numerical v) const { return GraphTransformConfigParser::opToString(v); }
+        QString operator()(ConditionFnOp::String v) const    { return GraphTransformConfigParser::opToString(v); }
     };
 
-    return boost::apply_visitor(Visitor(), _opValue);
+    return boost::apply_visitor(Visitor(), _op);
 }
 
-QString GraphTransformConfig::TerminalCondition::valueAsString() const
+QString GraphTransformConfig::UnaryCondition::opAsString() const
 {
-    struct Visitor
-    {
-        QString operator()(const FloatOpValue& v) const     { return QString::number(v._value); }
-        QString operator()(const IntOpValue& v) const       { return QString::number(v._value); }
-        QString operator()(const StringOpValue& v) const    { return v._value; }
-        QString operator()(const UnaryOp&) const            { return {}; }
-    };
-
-    return boost::apply_visitor(Visitor(), _opValue);
+    return GraphTransformConfigParser::opToString(_op);
 }
 
 bool GraphTransformConfig::CompoundCondition::operator==(const GraphTransformConfig::CompoundCondition& other) const
@@ -101,18 +82,10 @@ bool GraphTransformConfig::hasCondition() const
 {
     struct ConditionVisitor
     {
-        bool operator()(const TerminalCondition& terminalCondition) const
-        {
-            return !terminalCondition._attributeName.isEmpty();
-        }
-
-        bool operator()(const CompoundCondition& compoundCondition) const
-        {
-            auto lhs = boost::apply_visitor(ConditionVisitor(), compoundCondition._lhs);
-            auto rhs = boost::apply_visitor(ConditionVisitor(), compoundCondition._rhs);
-
-            return lhs && rhs;
-        }
+        bool operator()(int) const { return false; }
+        bool operator()(const TerminalCondition&) const { return true; }
+        bool operator()(const UnaryCondition&) const { return true; }
+        bool operator()(const CompoundCondition&) const { return true; }
     };
 
     return boost::apply_visitor(ConditionVisitor(), _condition);
@@ -122,13 +95,36 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
 {
     struct ConditionVisitor
     {
+        QString terminalValueAsString(const GraphTransformConfig::TerminalValue& terminalValue) const
+        {
+            struct Visitor
+            {
+                QString operator()(const double& v) const   { return QString::number(v); }
+                QString operator()(const int& v) const      { return QString::number(v); }
+                QString operator()(const QString& v) const  { return v; }
+            };
+
+            return boost::apply_visitor(Visitor(), terminalValue);
+        }
+
+        QVariantMap operator()(int) const { return {}; }
         QVariantMap operator()(const TerminalCondition& terminalCondition) const
         {
             QVariantMap map;
 
-            map.insert("lhs", terminalCondition._attributeName);
+            map.insert("lhs", terminalValueAsString(terminalCondition._lhs));
             map.insert("op", terminalCondition.opAsString());
-            map.insert("rhs", terminalCondition.valueAsString());
+            map.insert("rhs", terminalValueAsString(terminalCondition._rhs));
+
+            return map;
+        }
+
+        QVariantMap operator()(const UnaryCondition& unaryCondition) const
+        {
+            QVariantMap map;
+
+            map.insert("lhs", terminalValueAsString(unaryCondition._lhs));
+            map.insert("op", unaryCondition.opAsString());
 
             return map;
         }
@@ -183,10 +179,35 @@ std::vector<QString> GraphTransformConfig::attributeNames() const
 
         std::vector<QString>* _names;
 
+        void operator()(int) const {};
+
+        QString attributeFromTerminalValue(const TerminalValue& terminalValue) const
+        {
+            const QString* s = boost::get<QString>(&terminalValue);
+            if(s != nullptr)
+                return GraphTransformConfigParser::attributeNameFor(*s);
+
+            return {};
+        }
+
         void operator()(const TerminalCondition& terminalCondition) const
         {
-            if(!terminalCondition._attributeName.isEmpty())
-                _names->emplace_back(terminalCondition._attributeName);
+            auto lhs = attributeFromTerminalValue(terminalCondition._lhs);
+            auto rhs = attributeFromTerminalValue(terminalCondition._rhs);
+
+            if(!lhs.isEmpty())
+                _names->emplace_back(lhs);
+
+            if(!rhs.isEmpty())
+                _names->emplace_back(rhs);
+        }
+
+        void operator()(const UnaryCondition& unaryCondition) const
+        {
+            auto lhs = attributeFromTerminalValue(unaryCondition._lhs);
+
+            if(!lhs.isEmpty())
+                _names->emplace_back(lhs);
         }
 
         void operator()(const CompoundCondition& compoundCondition) const

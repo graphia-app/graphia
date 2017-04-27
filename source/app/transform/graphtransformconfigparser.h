@@ -22,12 +22,17 @@ public:
     const QString& failedInput() const { return _failedInput; }
 
     static QStringList ops(ValueType valueType);
+    static QString opToString(ConditionFnOp::Equality op);
     static QString opToString(ConditionFnOp::Numerical op);
     static QString opToString(ConditionFnOp::String op);
-    static QString opToString(ConditionFnOp::Binary op);
+    static QString opToString(ConditionFnOp::Logical op);
     static QString opToString(ConditionFnOp::Unary op);
 
+    static GraphTransformConfig::TerminalOp stringToOp(const QString& s);
+
     static bool opIsUnary(const QString& op);
+
+    static QString attributeNameFor(const QString& variable);
 };
 
 #endif // GRAPHTRANSFORMCONFIGPARSER_H

@@ -6,33 +6,22 @@
 #include "thirdparty/boost/boost_spirit_qstring_adapter.h"
 
 BOOST_FUSION_ADAPT_STRUCT(
-    GraphTransformConfig::IntOpValue,
-    (ConditionFnOp::Numerical, _op),
-    (int, _value)
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    GraphTransformConfig::FloatOpValue,
-    (ConditionFnOp::Numerical, _op),
-    (double, _value)
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    GraphTransformConfig::StringOpValue,
-    (ConditionFnOp::String, _op),
-    (QString, _value)
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
     GraphTransformConfig::TerminalCondition,
-    (QString, _attributeName),
-    (GraphTransformConfig::OpValue, _opValue)
+    (GraphTransformConfig::TerminalValue, _lhs),
+    (GraphTransformConfig::TerminalOp, _op),
+    (GraphTransformConfig::TerminalValue, _rhs)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    GraphTransformConfig::UnaryCondition,
+    (GraphTransformConfig::TerminalValue, _lhs),
+    (ConditionFnOp::Unary, _op)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
     GraphTransformConfig::CompoundCondition,
     (GraphTransformConfig::Condition, _lhs),
-    (ConditionFnOp::Binary, _op),
+    (ConditionFnOp::Logical, _op),
     (GraphTransformConfig::Condition, _rhs)
 )
 
@@ -69,15 +58,25 @@ const auto quotedString_def = lexeme['"' >> *(escapedQuote | ~char_('"')) >> '"'
 const x3::rule<class Identifier, QString> identifier = "identifier";
 const auto identifier_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
 
-const auto attributeName = x3::lit('$') >> (quotedString | identifier);
+const x3::rule<class AttributeName, QString> attributeName = "attributeName";
+const auto attributeName_def = char_('$') >> (quotedString | identifier);
+
+struct equality_op_ : x3::symbols<ConditionFnOp::Equality>
+{
+    equality_op_()
+    {
+        add
+        ("==", ConditionFnOp::Equality::Equal)
+        ("!=", ConditionFnOp::Equality::NotEqual)
+        ;
+    }
+} equality_op;
 
 struct numerical_op_ : x3::symbols<ConditionFnOp::Numerical>
 {
     numerical_op_()
     {
         add
-        ("==", ConditionFnOp::Numerical::Equal)
-        ("!=", ConditionFnOp::Numerical::NotEqual)
         ("<",  ConditionFnOp::Numerical::LessThan)
         (">",  ConditionFnOp::Numerical::GreaterThan)
         ("<=", ConditionFnOp::Numerical::LessThanOrEqual)
@@ -91,8 +90,6 @@ struct string_op_ : x3::symbols<ConditionFnOp::String>
     string_op_()
     {
         add
-        ("==",       ConditionFnOp::String::Equal)
-        ("!=",       ConditionFnOp::String::NotEqual)
         ("includes", ConditionFnOp::String::Includes)
         ("excludes", ConditionFnOp::String::Excludes)
         ("starts",   ConditionFnOp::String::Starts)
@@ -112,31 +109,32 @@ struct unary_op_ : x3::symbols<ConditionFnOp::Unary>
     }
 } unary_op;
 
-const auto floatCondition = numerical_op >> double_;
-const auto intCondition = numerical_op >> int_;
-const auto stringCondition = string_op >> quotedString;
-const auto unaryCondition = unary_op;
+const auto terminalBinaryOperator = equality_op | numerical_op | string_op;
+const auto valueOperand = (attributeName | double_ | int_ | quotedString);
 
 const x3::rule<class TerminalCondition, GraphTransformConfig::TerminalCondition> terminalCondition = "terminalCondition";
-const auto terminalCondition_def = attributeName >> (floatCondition | intCondition | stringCondition | unaryCondition);
+const auto terminalCondition_def = valueOperand >> terminalBinaryOperator >> valueOperand;
 
-struct binary_op_ : x3::symbols<ConditionFnOp::Binary>
+const x3::rule<class UnaryCondition, GraphTransformConfig::UnaryCondition> unaryCondition = "unaryCondition";
+const auto unaryCondition_def = valueOperand >> unary_op;
+
+struct logical_op_ : x3::symbols<ConditionFnOp::Logical>
 {
-    binary_op_()
+    logical_op_()
     {
         add
-        ("or",  ConditionFnOp::Binary::Or)
-        ("and", ConditionFnOp::Binary::And)
-        ("||",  ConditionFnOp::Binary::Or)
-        ("&&",  ConditionFnOp::Binary::And)
+        ("or",  ConditionFnOp::Logical::Or)
+        ("and", ConditionFnOp::Logical::And)
+        ("||",  ConditionFnOp::Logical::Or)
+        ("&&",  ConditionFnOp::Logical::And)
         ;
     }
-} binary_op;
+} logical_op;
 
 const x3::rule<class Condition, GraphTransformConfig::Condition> condition = "condition";
 
-const auto operand = terminalCondition | (x3::lit('(') >> condition >> x3::lit(')'));
-const auto condition_def = (operand >> binary_op >> operand) | operand;
+const auto operand = terminalCondition | unaryCondition | (x3::lit('(') >> condition >> x3::lit(')'));
+const auto condition_def = (operand >> logical_op >> operand) | operand;
 
 const x3::rule<class Parameter, GraphTransformConfig::Parameter> parameter = "parameter";
 const auto parameterName = quotedString | identifier;
@@ -153,7 +151,7 @@ const auto transform_def =
     -(x3::lit("with") >> +parameter) >>
     -(x3::lit("where") >> condition);
 
-BOOST_SPIRIT_DEFINE(quotedString, identifier, transform, parameter, condition, terminalCondition);
+BOOST_SPIRIT_DEFINE(quotedString, identifier, attributeName, transform, parameter, condition, terminalCondition, unaryCondition);
 } // namespace SpiritGraphTranformConfigParser
 
 bool GraphTransformConfigParser::parse(const QString& text)
@@ -179,6 +177,8 @@ QStringList GraphTransformConfigParser::ops(ValueType valueType)
 {
     QStringList list;
 
+    SpiritGraphTranformConfigParser::equality_op.for_each([&list](auto& v, auto) { list.append(QString::fromStdString(v)); });
+
     switch(valueType)
     {
     case ValueType::Float:
@@ -194,6 +194,19 @@ QStringList GraphTransformConfigParser::ops(ValueType valueType)
     }
 
     return list;
+}
+
+QString GraphTransformConfigParser::opToString(ConditionFnOp::Equality op)
+{
+    QString result;
+
+    SpiritGraphTranformConfigParser::equality_op.for_each([&](auto& v, auto)
+    {
+        if(SpiritGraphTranformConfigParser::equality_op.at(v) == op)
+            result = QString::fromStdString(v);
+    });
+
+    return result;
 }
 
 QString GraphTransformConfigParser::opToString(ConditionFnOp::Numerical op)
@@ -222,13 +235,13 @@ QString GraphTransformConfigParser::opToString(ConditionFnOp::String op)
     return result;
 }
 
-QString GraphTransformConfigParser::opToString(ConditionFnOp::Binary op)
+QString GraphTransformConfigParser::opToString(ConditionFnOp::Logical op)
 {
     QString result;
 
-    SpiritGraphTranformConfigParser::binary_op.for_each([&](auto& v, auto)
+    SpiritGraphTranformConfigParser::logical_op.for_each([&](auto& v, auto)
     {
-        if(SpiritGraphTranformConfigParser::binary_op.at(v) == op)
+        if(SpiritGraphTranformConfigParser::logical_op.at(v) == op)
             result = QString::fromStdString(v);
     });
 
@@ -248,7 +261,32 @@ QString GraphTransformConfigParser::opToString(ConditionFnOp::Unary op)
     return result;
 }
 
+GraphTransformConfig::TerminalOp GraphTransformConfigParser::stringToOp(const QString& s)
+{
+    auto* equalityOp = SpiritGraphTranformConfigParser::equality_op.find(s.toStdString());
+    if(equalityOp != nullptr)
+        return *equalityOp;
+
+    auto* numericalOp = SpiritGraphTranformConfigParser::numerical_op.find(s.toStdString());
+    if(numericalOp != nullptr)
+        return *numericalOp;
+
+    auto* stringOp = SpiritGraphTranformConfigParser::string_op.find(s.toStdString());
+    if(stringOp != nullptr)
+        return *stringOp;
+
+    return {};
+}
+
 bool GraphTransformConfigParser::opIsUnary(const QString& op)
 {
     return SpiritGraphTranformConfigParser::unary_op.find(op.toStdString()) != nullptr;
+}
+
+QString GraphTransformConfigParser::attributeNameFor(const QString& variable)
+{
+    if(!variable.isEmpty() && variable[0] == '$')
+        return variable.mid(1);
+
+    return {};
 }
