@@ -18,6 +18,7 @@
 
 #include <map>
 #include <set>
+#include <thread>
 
 using MatrixType = blaze::CompressedMatrix<float,blaze::columnMajor>;
 using VectorType = blaze::DynamicVector<float,blaze::columnVector>;
@@ -53,9 +54,9 @@ static void sumColumns(MatrixType &mclMatrix, VectorType &output)
 }
 
 static void expandAndPruneRow(MatrixType &mclMatrix,
-                       size_t columnId,
-                       std::vector<MCLTransform::SparseMatrixEntry>* matrixStorage,
-                       MCLTransform::MCLRowData& rowData, float minValueCutoff)
+                              size_t columnId,
+                              std::vector<MCLTransform::SparseMatrixEntry>* matrixStorage,
+                              MCLTransform::MCLRowData& rowData, float minValueCutoff)
 {
     const bool DEBUG = false;
 
@@ -96,9 +97,9 @@ static void expandAndPruneRow(MatrixType &mclMatrix,
         }
     }
 
-    if( nonzeros > 0UL )
+    if(nonzeros > 0UL)
     {
-        Q_ASSERT( minIndex <= maxIndex);
+        Q_ASSERT(minIndex <= maxIndex);
 
         size_t remainCount = nonzeros;
         float rowPruneSum = 0.0f;
@@ -215,9 +216,9 @@ static void expandAndPruneRow(MatrixType &mclMatrix,
         {
             std::sort(rowData.indices.begin(), rowData.indices.begin() + nonzeros);
 
-            for(size_t j=0UL; j<nonzeros; ++j)
+            for(size_t j = 0UL; j<nonzeros; ++j)
             {
-                const size_t index( rowData.indices[j] );
+                const size_t index = rowData.indices[j];
                 if(rowData.values[index] > EPSILON)
                 {
                     matrixStorage->emplace_back(index, columnId, rowData.values[index]);
@@ -228,7 +229,7 @@ static void expandAndPruneRow(MatrixType &mclMatrix,
         }
         else
         {
-            for(size_t j=minIndex; j<=maxIndex; ++j)
+            for(size_t j = minIndex; j <= maxIndex; ++j)
             {
                 if(rowData.values[j] > EPSILON)
                 {
@@ -277,7 +278,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
     }
 
     MatrixType clusterMatrix(nodeCount, nodeCount);
-    blaze::setNumThreads( 12 );
+    blaze::setNumThreads(std::thread::hardware_concurrency());
 
     clusterMatrix.reserve((graph.numEdges()*2) + nodeCount);
 
@@ -478,12 +479,13 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
     std::map<size_t, std::set<size_t>> clusterNodesLookup;
     std::vector<size_t> clusterGroups(nodeCount, 0);
     int clusterCount = 0;
-    for(size_t k=0; k<clusterMatrix.columns(); ++k)
+    for(size_t k = 0; k<clusterMatrix.columns(); ++k)
     {
-        for(MatrixType::ConstIterator it=clusterMatrix.cbegin(k); it!=clusterMatrix.cend(k); ++it )
+        for(auto it = clusterMatrix.cbegin(k); it != clusterMatrix.cend(k); ++it )
         {
             if(it->value() < MCL_PRUNE_LIMIT)
                 continue;
+
             auto rowCluster = clusterGroups[it->index()];
             auto columnCluster = clusterGroups[k];
 
@@ -533,6 +535,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
         // Remove singular clusters
         if(cluster.second.size() <= 1)
             continue;
+
         clusterCount++;
         for(auto mapid : cluster.second)
         {
@@ -540,9 +543,9 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
         }
     }
 
-    _graphModel->createAttribute(QObject::tr("MCL Cluster")).setDescription(
-                "The MCL-calculated cluster in which the node resides")
-                .setStringValueFn([clusters](NodeId nodeId) { return clusters[nodeId]; });
+    _graphModel->createAttribute(QObject::tr("MCL Cluster"))
+        .setDescription("The MCL-calculated cluster in which the node resides.")
+        .setStringValueFn([clusters](NodeId nodeId) { return clusters[nodeId]; });
 }
 
 std::unique_ptr<GraphTransform> MCLTransformFactory::create(const GraphTransformConfig&) const

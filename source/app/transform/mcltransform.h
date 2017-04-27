@@ -79,18 +79,12 @@ public:
 
     QString description() const {
         return R"(<a href="https://micans.org/mcl/">MCL - Markov Clustering</a> )" //
-                " creates discrete groups (clusters) of nodes based on a flow simulation model"; }
+                "finds discrete groups (clusters) of nodes based on a flow simulation model."; }
     ElementType elementType() const { return ElementType::None; }
     GraphTransformParameters parameters() const
     {
-        GraphTransformParameters p;
-        p.emplace("Granularity",
-                  GraphTransformParameter(ValueType::Float,
-                                          "Controls the size of the resultant clusters."
-                                          " A larger granularity value results in smaller clusters",
-                                          1.5, 1.5, 3.5));
-
-        return p;
+        return {{"Granularity", {ValueType::Float, "Controls the size of the resultant clusters. "
+            "A larger granularity value results in smaller clusters.", 1.5, 1.5, 3.5}}};
     }
 
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const;
