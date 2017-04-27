@@ -1,4 +1,5 @@
 include(boost/boost.pri)
+include(blaze/blaze.pri)
 
 # Things that use QCustomPlot need these
 DEFINES += QCUSTOMPLOT_USE_OPENGL

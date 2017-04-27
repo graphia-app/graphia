@@ -8,6 +8,9 @@
 
 #include "transform/filtertransform.h"
 #include "transform/edgecontractiontransform.h"
+#include "transform/mcltransform.h"
+#include "transform/pageranktransform.h"
+#include "transform/eccentricitytransform.h"
 #include "transform/graphtransformconfigparser.h"
 
 #include "ui/visualisations/colorvisualisationchannel.h"
@@ -98,6 +101,9 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     _graphTransformFactories.emplace(tr("Keep Edges"),        std::make_unique<FilterTransformFactory>(this, ElementType::Edge, true));
     _graphTransformFactories.emplace(tr("Keep Components"),   std::make_unique<FilterTransformFactory>(this, ElementType::Component, true));
     _graphTransformFactories.emplace(tr("Contract Edges"),    std::make_unique<EdgeContractionTransformFactory>(this));
+    _graphTransformFactories.emplace(tr("MCL Cluster"),       std::make_unique<MCLTransformFactory>(this));
+    _graphTransformFactories.emplace(tr("PageRank"),          std::make_unique<PageRankTransformFactory>(this));
+    _graphTransformFactories.emplace(tr("Eccentricity"),      std::make_unique<EccentricityTransformFactory>(this));
 
     _visualisationChannels.emplace(tr("Colour"), std::make_unique<ColorVisualisationChannel>());
     _visualisationChannels.emplace(tr("Size"), std::make_unique<SizeVisualisationChannel>());

@@ -130,6 +130,7 @@ private:
 
     std::unique_ptr<GraphModel> _graphModel;
     std::unique_ptr<GPUComputeThread> _gpuComputeThread;
+
     std::unique_ptr<IPluginInstance> _pluginInstance;
     std::unique_ptr<SelectionManager> _selectionManager;
     std::unique_ptr<SearchManager> _searchManager;
@@ -165,7 +166,6 @@ private:
     void setFoundIt(std::vector<NodeId>::const_iterator it);
     void incrementFoundIt();
     void decrementFoundIt();
-
     QVariantMap transformParameter(const QString& transformName, const QString& parameterName) const;
 
 signals:

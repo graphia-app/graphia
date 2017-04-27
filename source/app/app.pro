@@ -115,7 +115,10 @@ HEADERS += \
     ui/visualisations/visualisationinfo.h \
     ui/alert.h \
     transform/transforminfo.h \
-    transform/graphtransformparameter.h
+    transform/graphtransformparameter.h \
+    transform/mcltransform.h \
+    transform/pageranktransform.h \
+    transform/eccentricitytransform.h
 
 SOURCES += \
     application.cpp \
@@ -184,7 +187,10 @@ SOURCES += \
     graph/elementtype.cpp \
     attributes/attribute.cpp \
     ui/visualisations/colorgradient.cpp \
-    attributes/conditionfncreator.cpp
+    attributes/conditionfncreator.cpp \
+    transform/mcltransform.cpp \
+    transform/pageranktransform.cpp \
+    transform/eccentricitytransform.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \

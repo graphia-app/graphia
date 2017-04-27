@@ -73,6 +73,18 @@ bool GraphTransformConfig::Parameter::operator==(const GraphTransformConfig::Par
             _value == other._value;
 }
 
+const GraphTransformConfig::Parameter* GraphTransformConfig::parameterByName(const QString &name) const
+{
+    auto it = std::find_if(_parameters.begin(), _parameters.end(),
+        [&name](const auto& parameter) { return name == parameter._name; });
+
+    if(it != _parameters.end())
+        return &(*it);
+
+    Q_ASSERT(!"Parameter not found");
+    return nullptr;
+}
+
 QString GraphTransformConfig::Parameter::valueAsString() const
 {
     struct Visitor
