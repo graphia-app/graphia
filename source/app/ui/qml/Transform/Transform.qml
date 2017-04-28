@@ -238,14 +238,14 @@ Item
         }
     }
 
-    property int index
+    property int index: -1
     property string value
     onValueChanged:
     {
         if(!ready)
         {
             var error = false;
-            if(document.hasTransformInfo())
+            if(document.hasTransformInfo() && index >= 0)
             {
                 var transformInfo = document.transformInfoAtIndex(index);
                 setAlertIcon(transformInfo);

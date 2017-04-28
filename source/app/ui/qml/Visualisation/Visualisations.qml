@@ -61,7 +61,7 @@ Item
 
             alignment: Qt.AlignLeft
 
-            onOrderChanged: { document.updateVisualisations(); }
+            onItemMoved: { document.moveVisualisation(from, to); }
         }
 
         Item

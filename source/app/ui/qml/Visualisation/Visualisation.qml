@@ -266,7 +266,7 @@ Item
         }
     }
 
-    property int index
+    property int index: -1
     property string value
     onValueChanged:
     {
@@ -280,7 +280,7 @@ Item
             parameters = visualisationConfig.parameters;
 
             var error = false;
-            if(document.hasVisualisationInfo())
+            if(document.hasVisualisationInfo() && index >= 0)
             {
                 var visualisationInfo = document.visualisationInfoAtIndex(index);
                 setVisualisationInfo(visualisationInfo);

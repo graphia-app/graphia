@@ -1078,6 +1078,19 @@ void Document::updateGraphTransforms()
         setTransforms(newGraphTransforms);
 }
 
+void Document::moveGraphTransform(int from, int to)
+{
+    if(_graphModel == nullptr)
+        return;
+
+    QStringList newGraphTransforms = _graphTransforms;
+    newGraphTransforms.move(from, to);
+
+    _commandManager.execute(std::make_shared<ApplyTransformationsCommand>(
+        _graphModel.get(), _selectionManager.get(), this,
+        _graphTransforms, newGraphTransforms));
+}
+
 QStringList Document::availableVisualisationChannelNames(const QString& attributeName) const
 {
     return _graphModel != nullptr ? _graphModel->availableVisualisationChannelNames(attributeName) : QStringList();
@@ -1211,6 +1224,19 @@ void Document::updateVisualisations()
     }
     else
         setVisualisations(newVisualisations);
+}
+
+void Document::moveVisualisation(int from, int to)
+{
+    if(_graphModel == nullptr)
+        return;
+
+    QStringList newVisualisations = _visualisations;
+    newVisualisations.move(from, to);
+
+    _commandManager.execute(std::make_shared<ApplyVisualisationsCommand>(
+        _graphModel.get(), this,
+        _visualisations, newVisualisations));
 }
 
 void Document::dumpGraph()

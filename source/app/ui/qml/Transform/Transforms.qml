@@ -54,7 +54,7 @@ Item
 
             alignment: Qt.AlignRight
 
-            onOrderChanged: { document.updateGraphTransforms(); }
+            onItemMoved: { document.moveGraphTransform(from, to); }
         }
 
         Item
