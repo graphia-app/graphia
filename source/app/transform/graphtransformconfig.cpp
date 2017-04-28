@@ -184,7 +184,7 @@ std::vector<QString> GraphTransformConfig::attributeNames() const
         QString attributeFromTerminalValue(const TerminalValue& terminalValue) const
         {
             const QString* s = boost::get<QString>(&terminalValue);
-            if(s != nullptr)
+            if(s != nullptr && GraphTransformConfigParser::isAttributeName(*s))
                 return GraphTransformConfigParser::attributeNameFor(*s);
 
             return {};

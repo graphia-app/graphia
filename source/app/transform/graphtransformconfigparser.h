@@ -32,6 +32,7 @@ public:
 
     static bool opIsUnary(const QString& op);
 
+    static bool isAttributeName(const QString& variable);
     static QString attributeNameFor(const QString& variable);
 };
 

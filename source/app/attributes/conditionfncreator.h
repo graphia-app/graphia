@@ -445,9 +445,10 @@ private:
                 ResolvedTerminalValue operator()(int v) const { return v; }
                 ResolvedTerminalValue operator()(const QString& v) const
                 {
-                    QString attributeName = GraphTransformConfigParser::attributeNameFor(v);
-                    if(!attributeName.isEmpty())
+                    if(GraphTransformConfigParser::isAttributeName(v))
                     {
+                        QString attributeName = GraphTransformConfigParser::attributeNameFor(v);
+
                         if(!u::contains(*_attributes, attributeName))
                             return nullptr; // Unknown attribute
 

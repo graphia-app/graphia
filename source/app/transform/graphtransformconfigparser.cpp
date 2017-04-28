@@ -5,6 +5,8 @@
 #include "boost/fusion/include/adapt_struct.hpp"
 #include "thirdparty/boost/boost_spirit_qstring_adapter.h"
 
+#include <QRegularExpression>
+
 BOOST_FUSION_ADAPT_STRUCT(
     GraphTransformConfig::TerminalCondition,
     (GraphTransformConfig::TerminalValue, _lhs),
@@ -283,10 +285,15 @@ bool GraphTransformConfigParser::opIsUnary(const QString& op)
     return SpiritGraphTranformConfigParser::unary_op.find(op.toStdString()) != nullptr;
 }
 
+bool GraphTransformConfigParser::isAttributeName(const QString& variable)
+{
+    return !variable.isEmpty() && variable[0] == '$';
+}
+
 QString GraphTransformConfigParser::attributeNameFor(const QString& variable)
 {
-    if(!variable.isEmpty() && variable[0] == '$')
-        return variable.mid(1);
+    QString attributeName = variable;
+    attributeName.replace(QRegularExpression("^\\$"), "");
 
-    return {};
+    return attributeName;
 }
