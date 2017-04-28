@@ -546,6 +546,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
     _graphModel->createAttribute(QObject::tr("MCL Cluster"))
         .setDescription("The MCL-calculated cluster in which the node resides.")
         .setStringValueFn([clusters](NodeId nodeId) { return clusters[nodeId]; })
+        .setValueMissingFn([clusters](NodeId nodeId) { return clusters[nodeId].isEmpty(); })
         .setSearchable(true);
 }
 
