@@ -70,9 +70,32 @@ Attribute& Attribute::setStringValueFn(ValueFn<QString, NodeId> valueFn) { clear
 Attribute& Attribute::setStringValueFn(ValueFn<QString, EdgeId> valueFn) { clearValueFunctions(); _stringEdgeIdFn = valueFn; return *this; }
 Attribute& Attribute::setStringValueFn(ValueFn<QString, const IGraphComponent&> valueFn) { clearValueFunctions(); _stringComponentFn = valueFn; return *this; }
 
-Attribute&Attribute::setValueMissingFn(ValueFn<bool, NodeId> missingFn) { clearMissingFunctions(); _valueMissingNodeIdFn = missingFn; return *this; }
-Attribute&Attribute::setValueMissingFn(ValueFn<bool, EdgeId> missingFn) { clearMissingFunctions(); _valueMissingEdgeIdFn = missingFn; return *this; }
-Attribute&Attribute::setValueMissingFn(ValueFn<bool, const IGraphComponent&> missingFn) { clearMissingFunctions(); _valueMissingComponentFn = missingFn; return *this; }
+Attribute& Attribute::setValueMissingFn(ValueFn<bool, NodeId> missingFn)
+{
+    clearMissingFunctions();
+    _valueMissingNodeIdFn = missingFn;
+    if(elementType() != ElementType::Node)
+        qDebug() << "Setting value missing function with mismatched element type";
+    return *this;
+}
+
+Attribute& Attribute::setValueMissingFn(ValueFn<bool, EdgeId> missingFn)
+{
+    clearMissingFunctions();
+    _valueMissingEdgeIdFn = missingFn;
+    if(elementType() != ElementType::Edge)
+        qDebug() << "Setting value missing function with mismatched element type";
+    return *this;
+}
+
+Attribute& Attribute::setValueMissingFn(ValueFn<bool, const IGraphComponent&> missingFn)
+{
+    clearMissingFunctions();
+    _valueMissingComponentFn = missingFn;
+    if(elementType() != ElementType::Component)
+        qDebug() << "Setting value missing function with mismatched element type";
+    return *this;
+}
 
 Attribute::Type Attribute::type() const
 {
