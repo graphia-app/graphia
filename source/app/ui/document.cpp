@@ -983,12 +983,6 @@ bool Document::graphTransformIsValid(const QString& transform) const
 
 void Document::appendGraphTransform(const QString& transform)
 {
-    if(!graphTransformIsValid(transform))
-    {
-        qDebug() << QString("Failed to parse transform '%1'").arg(transform);
-        return;
-    }
-
     if(!transformIsPinned(transform))
     {
         // Insert before any existing pinned transforms

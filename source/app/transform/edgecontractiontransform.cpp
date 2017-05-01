@@ -44,12 +44,9 @@ bool EdgeContractionTransform::apply(TransformedGraph& target) const
     return !edgeIdsToContract.empty();
 }
 
-std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(const GraphTransformConfig& graphTransformConfig) const
+std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(const GraphTransformConfig&) const
 {
     auto edgeContractionTransform = std::make_unique<EdgeContractionTransform>(graphModel()->attributes());
-
-    if(!conditionIsValid(elementType(), graphModel()->attributes(), graphTransformConfig._condition))
-        return nullptr;
 
     return std::move(edgeContractionTransform); //FIXME std::move required because of clang bug
 }

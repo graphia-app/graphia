@@ -114,12 +114,9 @@ bool FilterTransform::apply(TransformedGraph& target) const
     return changed;
 }
 
-std::unique_ptr<GraphTransform> FilterTransformFactory::create(const GraphTransformConfig& graphTransformConfig) const
+std::unique_ptr<GraphTransform> FilterTransformFactory::create(const GraphTransformConfig&) const
 {
     auto filterTransform = std::make_unique<FilterTransform>(elementType(), graphModel()->attributes(), _invert);
-
-    if(!conditionIsValid(elementType(), graphModel()->attributes(), graphTransformConfig._condition))
-        return nullptr;
 
     return std::move(filterTransform); //FIXME std::move required because of clang bug
 }

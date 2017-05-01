@@ -175,6 +175,7 @@ void GraphModel::buildTransforms(const QStringList& transforms)
         auto& factory = _graphTransformFactories.at(action);
         auto graphTransform = factory->create(graphTransformConfig);
 
+        Q_ASSERT(graphTransform != nullptr);
         if(graphTransform != nullptr)
         {
             graphTransform->setConfig(graphTransformConfig);
