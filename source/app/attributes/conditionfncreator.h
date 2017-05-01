@@ -81,8 +81,8 @@ private:
     template<typename E>
     struct AttributesOpVistor : public boost::static_visitor<ElementConditionFn<E>>
     {
-        const Attribute& _lhs;
-        const Attribute& _rhs;
+        Attribute _lhs;
+        Attribute _rhs;
 
         AttributesOpVistor(const Attribute& lhs, const Attribute& rhs) :
             _lhs(lhs), _rhs(rhs)
@@ -90,14 +90,14 @@ private:
 
         ElementConditionFn<E> operator()(ConditionFnOp::Equality op) const
         {
-            auto comparisonFn = [this, op](const Attribute* lhs, auto valueOfFn, const Attribute* rhs) -> ElementConditionFn<E>
+            auto comparisonFn = [this, op](const Attribute& lhs, auto valueOfFn, const Attribute& rhs) -> ElementConditionFn<E>
             {
                 switch(op)
                 {
                 case ConditionFnOp::Equality::Equal:
-                    return [lhs, valueOfFn, rhs](E elementId) { return (lhs->*valueOfFn)(elementId) == (rhs->*valueOfFn)(elementId); };
+                    return [lhs, valueOfFn, rhs](E elementId) { return (lhs.*valueOfFn)(elementId) == (rhs.*valueOfFn)(elementId); };
                 case ConditionFnOp::Equality::NotEqual:
-                    return [lhs, valueOfFn, rhs](E elementId) { return (lhs->*valueOfFn)(elementId) != (rhs->*valueOfFn)(elementId); };
+                    return [lhs, valueOfFn, rhs](E elementId) { return (lhs.*valueOfFn)(elementId) != (rhs.*valueOfFn)(elementId); };
                 default:
                     qFatal("Unhandled ConditionFnOp::Equality");
                     return nullptr;
@@ -108,14 +108,14 @@ private:
             {
                 switch(_lhs.valueType())
                 {
-                case ValueType::Float:  return comparisonFn(&_lhs, &Attribute::valueOf<double, E>,  &_rhs);
-                case ValueType::Int:    return comparisonFn(&_lhs, &Attribute::valueOf<int, E>,     &_rhs);
-                case ValueType::String: return comparisonFn(&_lhs, &Attribute::valueOf<QString, E>, &_rhs);
+                case ValueType::Float:  return comparisonFn(_lhs, &Attribute::valueOf<double, E>,  _rhs);
+                case ValueType::Int:    return comparisonFn(_lhs, &Attribute::valueOf<int, E>,     _rhs);
+                case ValueType::String: return comparisonFn(_lhs, &Attribute::valueOf<QString, E>, _rhs);
                 default: return nullptr;
                 }
             }
 
-            return comparisonFn(&_lhs, &Attribute::stringValueOf<E>, &_rhs);
+            return comparisonFn(_lhs, &Attribute::stringValueOf<E>, _rhs);
         }
 
         ElementConditionFn<E> operator()(ConditionFnOp::Numerical op) const
@@ -123,19 +123,19 @@ private:
             if(_lhs.valueType() == ValueType::String || _rhs.valueType() == ValueType::String)
                 return nullptr; // Can't compare a string attribute numerically
 
-            auto comparisonFn = [this, op](const Attribute* lhs, auto lhsValueOfFn,
-                                           const Attribute* rhs, auto rhsValueOfFn) -> ElementConditionFn<E>
+            auto comparisonFn = [this, op](const Attribute& lhs, auto lhsValueOfFn,
+                                           const Attribute& rhs, auto rhsValueOfFn) -> ElementConditionFn<E>
             {
                 switch(op)
                 {
                 case ConditionFnOp::Numerical::LessThan:
-                    return [lhs, lhsValueOfFn, rhs, rhsValueOfFn](E elementId) { return (lhs->*lhsValueOfFn)(elementId) < (rhs->*rhsValueOfFn)(elementId); };
+                    return [lhs, lhsValueOfFn, rhs, rhsValueOfFn](E elementId) { return (lhs.*lhsValueOfFn)(elementId) < (rhs.*rhsValueOfFn)(elementId); };
                 case ConditionFnOp::Numerical::GreaterThan:
-                    return [lhs, lhsValueOfFn, rhs, rhsValueOfFn](E elementId) { return (lhs->*lhsValueOfFn)(elementId) > (rhs->*rhsValueOfFn)(elementId); };
+                    return [lhs, lhsValueOfFn, rhs, rhsValueOfFn](E elementId) { return (lhs.*lhsValueOfFn)(elementId) > (rhs.*rhsValueOfFn)(elementId); };
                 case ConditionFnOp::Numerical::LessThanOrEqual:
-                    return [lhs, lhsValueOfFn, rhs, rhsValueOfFn](E elementId) { return (lhs->*lhsValueOfFn)(elementId) <= (rhs->*rhsValueOfFn)(elementId); };
+                    return [lhs, lhsValueOfFn, rhs, rhsValueOfFn](E elementId) { return (lhs.*lhsValueOfFn)(elementId) <= (rhs.*rhsValueOfFn)(elementId); };
                 case ConditionFnOp::Numerical::GreaterThanOrEqual:
-                    return [lhs, lhsValueOfFn, rhs, rhsValueOfFn](E elementId) { return (lhs->*lhsValueOfFn)(elementId) >= (rhs->*rhsValueOfFn)(elementId); };
+                    return [lhs, lhsValueOfFn, rhs, rhsValueOfFn](E elementId) { return (lhs.*lhsValueOfFn)(elementId) >= (rhs.*rhsValueOfFn)(elementId); };
                 default:
                     qFatal("Unhandled ConditionFnOp::Numerical");
                     return nullptr;
@@ -143,13 +143,13 @@ private:
             };
 
             if(_lhs.valueType() == ValueType::Float && _rhs.valueType() == ValueType::Float)
-                return comparisonFn(&_lhs, &Attribute::valueOf<double, E>, &_rhs, &Attribute::valueOf<double, E>);
+                return comparisonFn(_lhs, &Attribute::valueOf<double, E>, _rhs, &Attribute::valueOf<double, E>);
             else if(_lhs.valueType() == ValueType::Float && _rhs.valueType() == ValueType::Int)
-                return comparisonFn(&_lhs, &Attribute::valueOf<double, E>, &_rhs, &Attribute::valueOf<int, E>);
+                return comparisonFn(_lhs, &Attribute::valueOf<double, E>, _rhs, &Attribute::valueOf<int, E>);
             else if(_lhs.valueType() == ValueType::Int && _rhs.valueType() == ValueType::Float)
-                return comparisonFn(&_lhs, &Attribute::valueOf<int, E>, &_rhs, &Attribute::valueOf<double, E>);
+                return comparisonFn(_lhs, &Attribute::valueOf<int, E>, _rhs, &Attribute::valueOf<double, E>);
             else if(_lhs.valueType() == ValueType::Int && _rhs.valueType() == ValueType::Int)
-                return comparisonFn(&_lhs, &Attribute::valueOf<int, E>, &_rhs, &Attribute::valueOf<int, E>);
+                return comparisonFn(_lhs, &Attribute::valueOf<int, E>, _rhs, &Attribute::valueOf<int, E>);
 
             qFatal("Shouldn't get here");
             return nullptr;
@@ -157,33 +157,33 @@ private:
 
         ElementConditionFn<E> operator()(ConditionFnOp::String op) const
         {
-            const auto* lhs = &_lhs;
-            const auto* rhs = &_lhs;
+            auto lhs = _lhs;
+            auto rhs = _lhs;
 
             Attribute::ValueOfFn<QString, E> valueOfFn = &Attribute::valueOf<QString, E>;
 
-            if(lhs->valueType() != ValueType::String || rhs->valueType() != ValueType::String)
+            if(lhs.valueType() != ValueType::String || rhs.valueType() != ValueType::String)
                 valueOfFn = &Attribute::stringValueOf<E>;
 
             switch(op)
             {
             case ConditionFnOp::String::Includes:
-                return [lhs, valueOfFn, rhs](E elementId) { return (lhs->*valueOfFn)(elementId).contains((rhs->*valueOfFn)(elementId)); };
+                return [lhs, valueOfFn, rhs](E elementId) { return (lhs.*valueOfFn)(elementId).contains((rhs.*valueOfFn)(elementId)); };
             case ConditionFnOp::String::Excludes:
-                return [lhs, valueOfFn, rhs](E elementId) { return !(lhs->*valueOfFn)(elementId).contains((rhs->*valueOfFn)(elementId)); };
+                return [lhs, valueOfFn, rhs](E elementId) { return !(lhs.*valueOfFn)(elementId).contains((rhs.*valueOfFn)(elementId)); };
             case ConditionFnOp::String::Starts:
-                return [lhs, valueOfFn, rhs](E elementId) { return (lhs->*valueOfFn)(elementId).startsWith((rhs->*valueOfFn)(elementId)); };
+                return [lhs, valueOfFn, rhs](E elementId) { return (lhs.*valueOfFn)(elementId).startsWith((rhs.*valueOfFn)(elementId)); };
             case ConditionFnOp::String::Ends:
-                return [lhs, valueOfFn, rhs](E elementId) { return (lhs->*valueOfFn)(elementId).endsWith((rhs->*valueOfFn)(elementId)); };
+                return [lhs, valueOfFn, rhs](E elementId) { return (lhs.*valueOfFn)(elementId).endsWith((rhs.*valueOfFn)(elementId)); };
             case ConditionFnOp::String::MatchesRegex:
             {
                 return [lhs, valueOfFn, rhs](E elementId)
                 {
-                    QRegularExpression re((rhs->*valueOfFn)(elementId));
+                    QRegularExpression re((rhs.*valueOfFn)(elementId));
                     if(!re.isValid())
                         return false; // Regex isn't valid
 
-                    return re.match((lhs->*valueOfFn)(elementId)).hasMatch();
+                    return re.match((lhs.*valueOfFn)(elementId)).hasMatch();
                 };
             }
             default:
@@ -196,8 +196,8 @@ private:
     template<typename E>
     struct AttributeValueOpVistor : public boost::static_visitor<ElementConditionFn<E>>
     {
-        const Attribute& _lhs;
-        const TerminalValueWrapper _rhs;
+        Attribute _lhs;
+        TerminalValueWrapper _rhs;
         bool _operandsAreSwitched;
 
         AttributeValueOpVistor(const Attribute& lhs, TerminalValueWrapper rhs,
@@ -207,14 +207,14 @@ private:
 
         ElementConditionFn<E> operator()(ConditionFnOp::Equality op) const
         {
-            auto comparisonFn = [this, op](const Attribute* attribute, auto valueOfFn, auto value) -> ElementConditionFn<E>
+            auto comparisonFn = [this, op](const Attribute& attribute, auto valueOfFn, auto value) -> ElementConditionFn<E>
             {
                 switch(op)
                 {
                 case ConditionFnOp::Equality::Equal:
-                    return [attribute, valueOfFn, value](E elementId) { return (attribute->*valueOfFn)(elementId) == value; };
+                    return [attribute, valueOfFn, value](E elementId) { return (attribute.*valueOfFn)(elementId) == value; };
                 case ConditionFnOp::Equality::NotEqual:
-                    return [attribute, valueOfFn, value](E elementId) { return (attribute->*valueOfFn)(elementId) != value; };
+                    return [attribute, valueOfFn, value](E elementId) { return (attribute.*valueOfFn)(elementId) != value; };
                 default:
                     qFatal("Unhandled ConditionFnOp::Equality");
                     return nullptr;
@@ -225,14 +225,14 @@ private:
             {
                 switch(_lhs.valueType())
                 {
-                case ValueType::Float:  return comparisonFn(&_lhs, &Attribute::valueOf<double, E>,  boost::get<double>(*_rhs));
-                case ValueType::Int:    return comparisonFn(&_lhs, &Attribute::valueOf<int, E>,     boost::get<int>(*_rhs));
-                case ValueType::String: return comparisonFn(&_lhs, &Attribute::valueOf<QString, E>, boost::get<QString>(*_rhs));
+                case ValueType::Float:  return comparisonFn(_lhs, &Attribute::valueOf<double, E>,  boost::get<double>(*_rhs));
+                case ValueType::Int:    return comparisonFn(_lhs, &Attribute::valueOf<int, E>,     boost::get<int>(*_rhs));
+                case ValueType::String: return comparisonFn(_lhs, &Attribute::valueOf<QString, E>, boost::get<QString>(*_rhs));
                 default: return nullptr;
                 }
             }
 
-            return comparisonFn(&_lhs, &Attribute::stringValueOf<E>, _rhs.toString());
+            return comparisonFn(_lhs, &Attribute::stringValueOf<E>, _rhs.toString());
         }
 
         ElementConditionFn<E> operator()(ConditionFnOp::Numerical op) const
@@ -251,18 +251,18 @@ private:
                 }
             }
 
-            auto comparisonFn = [this, op](const Attribute* attribute, auto value) -> ElementConditionFn<E>
+            auto comparisonFn = [this, op](const Attribute& attribute, auto value) -> ElementConditionFn<E>
             {
                 switch(op)
                 {
                 case ConditionFnOp::Numerical::LessThan:
-                    return [attribute, value](E elementId) { return attribute->template valueOf<decltype(value), E>(elementId) < value; };
+                    return [attribute, value](E elementId) { return attribute.template valueOf<decltype(value), E>(elementId) < value; };
                 case ConditionFnOp::Numerical::GreaterThan:
-                    return [attribute, value](E elementId) { return attribute->template valueOf<decltype(value), E>(elementId) > value; };
+                    return [attribute, value](E elementId) { return attribute.template valueOf<decltype(value), E>(elementId) > value; };
                 case ConditionFnOp::Numerical::LessThanOrEqual:
-                    return [attribute, value](E elementId) { return attribute->template valueOf<decltype(value), E>(elementId) <= value; };
+                    return [attribute, value](E elementId) { return attribute.template valueOf<decltype(value), E>(elementId) <= value; };
                 case ConditionFnOp::Numerical::GreaterThanOrEqual:
-                    return [attribute, value](E elementId) { return attribute->template valueOf<decltype(value), E>(elementId) >= value; };
+                    return [attribute, value](E elementId) { return attribute.template valueOf<decltype(value), E>(elementId) >= value; };
                 default:
                     qFatal("Unhandled ConditionFnOp::Numerical");
                     return nullptr;
@@ -275,8 +275,8 @@ private:
 
                 switch(_lhs.valueType())
                 {
-                case ValueType::Float:  return comparisonFn(&_lhs, numberValue);
-                case ValueType::Int:    return comparisonFn(&_lhs, static_cast<int>(numberValue));
+                case ValueType::Float:  return comparisonFn(_lhs, numberValue);
+                case ValueType::Int:    return comparisonFn(_lhs, static_cast<int>(numberValue));
                 default: return nullptr;
                 }
             }
@@ -284,8 +284,8 @@ private:
             {
                 switch(_lhs.valueType())
                 {
-                case ValueType::Float:  return comparisonFn(&_lhs, boost::get<double>(*_rhs));
-                case ValueType::Int:    return comparisonFn(&_lhs, boost::get<int>(*_rhs));
+                case ValueType::Float:  return comparisonFn(_lhs, boost::get<double>(*_rhs));
+                case ValueType::Int:    return comparisonFn(_lhs, boost::get<int>(*_rhs));
                 default: return nullptr;
                 }
             }
@@ -293,11 +293,11 @@ private:
 
         ElementConditionFn<E> operator()(ConditionFnOp::String op) const
         {
-            const auto* attribute = &_lhs;
+            auto attribute = _lhs;
 
             Attribute::ValueOfFn<QString, E> valueOfFn = &Attribute::valueOf<QString, E>;
 
-            if(attribute->valueType() != ValueType::String)
+            if(attribute.valueType() != ValueType::String)
                 valueOfFn = &Attribute::stringValueOf<E>;
 
             auto value = _rhs.toString();
@@ -305,20 +305,20 @@ private:
             switch(op)
             {
             case ConditionFnOp::String::Includes:
-                return [attribute, valueOfFn, value](E elementId) { return (attribute->*valueOfFn)(elementId).contains(value); };
+                return [attribute, valueOfFn, value](E elementId) { return (attribute.*valueOfFn)(elementId).contains(value); };
             case ConditionFnOp::String::Excludes:
-                return [attribute, valueOfFn, value](E elementId) { return !(attribute->*valueOfFn)(elementId).contains(value); };
+                return [attribute, valueOfFn, value](E elementId) { return !(attribute.*valueOfFn)(elementId).contains(value); };
             case ConditionFnOp::String::Starts:
-                return [attribute, valueOfFn, value](E elementId) { return (attribute->*valueOfFn)(elementId).startsWith(value); };
+                return [attribute, valueOfFn, value](E elementId) { return (attribute.*valueOfFn)(elementId).startsWith(value); };
             case ConditionFnOp::String::Ends:
-                return [attribute, valueOfFn, value](E elementId) { return (attribute->*valueOfFn)(elementId).endsWith(value); };
+                return [attribute, valueOfFn, value](E elementId) { return (attribute.*valueOfFn)(elementId).endsWith(value); };
             case ConditionFnOp::String::MatchesRegex:
             {
                 QRegularExpression re(value);
                 if(!re.isValid())
                     return nullptr; // Regex isn't valid
 
-                return [attribute, valueOfFn, re](E elementId) { return re.match((attribute->*valueOfFn)(elementId)).hasMatch(); };
+                return [attribute, valueOfFn, re](E elementId) { return re.match((attribute.*valueOfFn)(elementId)).hasMatch(); };
             }
             default:
                 qFatal("Unhandled ConditionFnOp::String");
@@ -330,8 +330,8 @@ private:
     template<typename E>
     struct ValuesOpVistor
     {
-        const TerminalValueWrapper _lhs;
-        const TerminalValueWrapper _rhs;
+        TerminalValueWrapper _lhs;
+        TerminalValueWrapper _rhs;
 
         ValuesOpVistor(TerminalValueWrapper lhs, TerminalValueWrapper rhs) :
             _lhs(lhs), _rhs(rhs)
@@ -429,7 +429,7 @@ private:
             return nullptr;
         }
 
-        using ResolvedTerminalValue = boost::variant<double, int, QString, const Attribute*>;
+        using ResolvedTerminalValue = boost::variant<double, int, QString, Attribute>;
 
         ResolvedTerminalValue resolvedTerminalValue(const GraphTransformConfig::TerminalValue& terminalValue) const
         {
@@ -450,9 +450,9 @@ private:
                         QString attributeName = GraphTransformConfigParser::attributeNameFor(v);
 
                         if(!u::contains(*_attributes, attributeName))
-                            return nullptr; // Unknown attribute
+                            return Attribute(); // Unknown attribute
 
-                        return &_attributes->at(attributeName);
+                        return _attributes->at(attributeName);
                     }
 
                     return v;
@@ -462,14 +462,14 @@ private:
             return boost::apply_visitor(Visitor(_attributes), terminalValue);
         }
 
-        const Attribute* attributeFromValue(const ResolvedTerminalValue& resolvedTerminalValue) const
+        Attribute attributeFromValue(const ResolvedTerminalValue& resolvedTerminalValue) const
         {
-            const Attribute* const* attribute = boost::get<const Attribute*>(&resolvedTerminalValue);
+            auto attribute = boost::get<Attribute>(&resolvedTerminalValue);
 
-            if(attribute != nullptr && *attribute != nullptr)
+            if(attribute != nullptr)
                 return *attribute;
 
-            return nullptr;
+            return {}; // Not an attribute
         }
 
         ValueType typeOf(const ResolvedTerminalValue& resolvedTerminalValue) const
@@ -486,10 +486,9 @@ private:
                 ValueType operator()(int) const             { return ValueType::Int; }
                 ValueType operator()(const QString&) const  { return ValueType::String; }
 
-                ValueType operator()(const Attribute* attribute) const
+                ValueType operator()(const Attribute& attribute) const
                 {
-                    Q_ASSERT(attribute != nullptr);
-                    return attribute->valueType();
+                    return attribute.valueType();
                 }
             };
 
@@ -498,9 +497,9 @@ private:
 
         bool isUnknownAttribute(const ResolvedTerminalValue& resolvedTerminalValue) const
         {
-            const Attribute* const* attribute = boost::get<const Attribute*>(&resolvedTerminalValue);
+            const Attribute* attribute = boost::get<Attribute>(&resolvedTerminalValue);
 
-            if(attribute != nullptr && *attribute == nullptr)
+            if(attribute != nullptr && !attribute->isValid())
                 return true; // Unknown attribute
 
             // Not an attribute, or a valid attribute
@@ -534,31 +533,31 @@ private:
                     return nullptr; // Operator doesn't apply to the type of the operands
             }
 
-            const auto* lhsAttribute = attributeFromValue(lhs);
-            const auto* rhsAttribute = attributeFromValue(rhs);
+            auto lhsAttribute = attributeFromValue(lhs);
+            auto rhsAttribute = attributeFromValue(rhs);
 
-            if(lhsAttribute != nullptr && rhsAttribute != nullptr)
+            if(lhsAttribute.isValid() && rhsAttribute.isValid())
             {
                 // Both sides are attributes
-                AttributesOpVistor<E> visitor(*lhsAttribute, *rhsAttribute);
+                AttributesOpVistor<E> visitor(lhsAttribute, rhsAttribute);
                 return boost::apply_visitor(visitor, terminalCondition._op);
             }
-            else if(lhsAttribute == nullptr && rhsAttribute == nullptr)
+            else if(!lhsAttribute.isValid() && !rhsAttribute.isValid())
             {
                 // Neither side is an attribute
                 ValuesOpVistor<E> visitor(terminalCondition._lhs, terminalCondition._rhs);
                 return boost::apply_visitor(visitor, terminalCondition._op);
             }
-            else if(lhsAttribute != nullptr)
+            else if(lhsAttribute.isValid())
             {
                 // Left hand side is an attribute
-                AttributeValueOpVistor<E> visitor(*lhsAttribute, terminalCondition._rhs, false);
+                AttributeValueOpVistor<E> visitor(lhsAttribute, terminalCondition._rhs, false);
                 return boost::apply_visitor(visitor, terminalCondition._op);
             }
-            else if(rhsAttribute != nullptr)
+            else if(rhsAttribute.isValid())
             {
                 // Right hand side is an attribute
-                AttributeValueOpVistor<E> visitor(*rhsAttribute, terminalCondition._lhs, true);
+                AttributeValueOpVistor<E> visitor(rhsAttribute, terminalCondition._lhs, true);
                 return boost::apply_visitor(visitor, terminalCondition._op);
             }
 
@@ -573,15 +572,15 @@ private:
             if(isUnknownAttribute(lhs))
                 return nullptr; // Unknown attribute
 
-            const auto* attribute = attributeFromValue(lhs);
+            auto attribute = attributeFromValue(lhs);
 
-            if(attribute == nullptr)
+            if(!attribute.isValid())
                 return nullptr; // Not an attribute
 
             switch(unaryCondition._op)
             {
             case ConditionFnOp::Unary::HasValue:
-                return [attribute](E elementId) { return !attribute->template valueMissingOf<E>(elementId); };
+                return [attribute](E elementId) { return !attribute.template valueMissingOf<E>(elementId); };
             default:
                 qFatal("Unhandled ConditionFnOp::Unary");
                 return nullptr;

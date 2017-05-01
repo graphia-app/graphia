@@ -149,6 +149,11 @@ ElementType Attribute::elementType() const
     }
 }
 
+bool Attribute::isValid() const
+{
+    return type() != Type::Unknown;
+}
+
 bool AttributeRange<int>::hasMin() const { return _attribute._intMin != std::numeric_limits<int>::max(); }
 bool AttributeRange<int>::hasMax() const { return _attribute._intMax != std::numeric_limits<int>::min(); }
 bool AttributeRange<int>::hasRange() const { return hasMin() && hasMax(); }

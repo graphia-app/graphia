@@ -323,7 +323,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         if(!u::contains(_visualisationChannels, channelName))
             continue;
 
-        const auto& attribute = attributeByName(attributeName);
+        auto attribute = attributeByName(attributeName);
         auto& channel = _visualisationChannels.at(channelName);
 
         if(!channel->supports(attribute.valueType()))
@@ -361,7 +361,7 @@ QStringList GraphModel::availableVisualisationChannelNames(const QString& attrib
 {
     QStringList stringList;
 
-    const auto& attribute = attributeByName(attributeName);
+    auto attribute = attributeByName(attributeName);
 
     for(auto& t : _visualisationChannels)
     {
@@ -377,7 +377,7 @@ QString GraphModel::visualisationDescription(const QString& attributeName, const
     if(!u::contains(_attributes, attributeName) || !u::contains(_visualisationChannels, channelName))
         return {};
 
-    const auto& attribute = attributeByName(attributeName);
+    auto attribute = attributeByName(attributeName);
     auto& channel = _visualisationChannels.at(channelName);
 
     if(!channel->supports(attribute.valueType()))
@@ -411,7 +411,7 @@ QVariantMap GraphModel::visualisationDefaultParameters(const QString& attributeN
     if(!u::contains(_attributes, attributeName) || !u::contains(_visualisationChannels, channelName))
         return {};
 
-    const auto& attribute = attributeByName(attributeName);
+    auto attribute = attributeByName(attributeName);
     auto& channel = _visualisationChannels.at(channelName);
 
     return channel->defaultParameters(attribute.valueType());
@@ -445,10 +445,9 @@ Attribute& GraphModel::createAttribute(const QString& name)
     return attribute;
 }
 
-const Attribute& GraphModel::attributeByName(const QString& name) const
+Attribute GraphModel::attributeByName(const QString& name) const
 {
-    static Attribute nullAttribute;
-    return u::contains(_attributes, name) ? _attributes.at(name) : nullAttribute;
+    return u::contains(_attributes, name) ? _attributes.at(name) : Attribute();
 }
 
 void GraphModel::enableVisualUpdates()

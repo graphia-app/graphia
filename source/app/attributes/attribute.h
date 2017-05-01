@@ -110,6 +110,8 @@ private:
     ValueFn<bool, EdgeId> _valueMissingEdgeIdFn;
     ValueFn<bool, const IGraphComponent&> _valueMissingComponentFn;
 
+    bool _isValid = false;
+
     void clearValueFunctions();
     void clearMissingFunctions();
 
@@ -312,6 +314,8 @@ public:
 
     QString description() const { return _description; }
     Attribute& setDescription(const QString& description) { _description = description; return *this; }
+
+    bool isValid() const;
 };
 
 using NameAttributeMap = std::map<QString, Attribute>;
