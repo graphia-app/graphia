@@ -103,20 +103,20 @@ public:
         }
     }
 
-    void build(const Attribute& attribute,
+    void build(const Attribute* attribute,
                const VisualisationChannel& channel,
                bool invert, int index, VisualisationInfo& visualisationInfo)
     {
         for(int c = 0; c < NumChannels; c++)
             _applications[c].emplace_back(index, *_graph);
 
-        switch(attribute.valueType())
+        switch(attribute->valueType())
         {
         case ValueType::Int:
         case ValueType::Float:
         {
             double min, max;
-            std::tie(min, max) = attribute.findRangeforElements(*_elementIds,
+            std::tie(min, max) = attribute->findRangeforElements(*_elementIds,
             [this](const Attribute& _attribute, ElementId elementId)
             {
                 return _attribute.testFlag(AttributeFlag::IgnoreTails) &&
@@ -134,13 +134,13 @@ public:
 
             for(auto elementId : *_elementIds)
             {
-                if(attribute.testFlag(AttributeFlag::IgnoreTails) &&
+                if(attribute->testFlag(AttributeFlag::IgnoreTails) &&
                    _graph->typeOf(elementId) == MultiElementType::Tail)
                 {
                     continue;
                 }
 
-                double value = attribute.numericValueOf(elementId);
+                double value = attribute->numericValueOf(elementId);
 
                 if(channel.requiresNormalisedValue())
                 {
@@ -163,13 +163,13 @@ public:
         case ValueType::String:
             for(auto elementId : *_elementIds)
             {
-                if(attribute.testFlag(AttributeFlag::IgnoreTails) &&
+                if(attribute->testFlag(AttributeFlag::IgnoreTails) &&
                    _graph->typeOf(elementId) == MultiElementType::Tail)
                 {
                     continue;
                 }
 
-                apply(attribute.stringValueOf(elementId), channel, elementId, _numAppliedVisualisations);
+                apply(attribute->stringValueOf(elementId), channel, elementId, _numAppliedVisualisations);
             }
             break;
 

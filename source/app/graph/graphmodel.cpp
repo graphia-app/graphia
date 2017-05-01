@@ -327,7 +327,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         auto attribute = attributeByName(attributeName);
         auto& channel = _visualisationChannels.at(channelName);
 
-        if(!channel->supports(attribute.valueType()))
+        if(!channel->supports(attribute->valueType()))
         {
             _visualisationInfos[index].addAlert(AlertType::Error,
                 tr("Visualisation doesn't support attribute type"));
@@ -337,14 +337,14 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         for(const auto& parameter : visualisationConfig._parameters)
             channel->setParameter(parameter._name, parameter.valueAsString());
 
-        switch(attribute.elementType())
+        switch(attribute->elementType())
         {
         case ElementType::Node:
-            nodeVisualisationsBuilder.build(attribute, *channel.get(), invert, index, _visualisationInfos[index]);
+            nodeVisualisationsBuilder.build(attribute.get(), *channel.get(), invert, index, _visualisationInfos[index]);
             break;
 
         case ElementType::Edge:
-            edgeVisualisationsBuilder.build(attribute, *channel.get(), invert, index, _visualisationInfos[index]);
+            edgeVisualisationsBuilder.build(attribute.get(), *channel.get(), invert, index, _visualisationInfos[index]);
             break;
 
         default:
@@ -366,7 +366,7 @@ QStringList GraphModel::availableVisualisationChannelNames(const QString& attrib
 
     for(auto& t : _visualisationChannels)
     {
-        if(t.second->supports(attribute.valueType()))
+        if(t.second->supports(attribute->valueType()))
             stringList.append(t.first);
     }
 
@@ -381,10 +381,10 @@ QString GraphModel::visualisationDescription(const QString& attributeName, const
     auto attribute = attributeByName(attributeName);
     auto& channel = _visualisationChannels.at(channelName);
 
-    if(!channel->supports(attribute.valueType()))
+    if(!channel->supports(attribute->valueType()))
         return tr("This visualisation channel is not supported for the attribute type.");
 
-    return channel->description(attribute.elementType(), attribute.valueType());
+    return channel->description(attribute->elementType(), attribute->valueType());
 }
 
 void GraphModel::clearVisualisationInfos()
@@ -415,7 +415,7 @@ QVariantMap GraphModel::visualisationDefaultParameters(const QString& attributeN
     auto attribute = attributeByName(attributeName);
     auto& channel = _visualisationChannels.at(channelName);
 
-    return channel->defaultParameters(attribute.valueType());
+    return channel->defaultParameters(attribute->valueType());
 }
 
 QStringList GraphModel::attributeNames(ElementType elementType) const
@@ -446,9 +446,13 @@ Attribute& GraphModel::createAttribute(const QString& name)
     return attribute;
 }
 
-Attribute GraphModel::attributeByName(const QString& name) const
+AttributePtr GraphModel::attributeByName(const QString& name) const
 {
-    return u::contains(_attributes, name) ? _attributes.at(name) : Attribute();
+    if(u::contains(_attributes, name))
+        return std::make_shared<Attribute>(_attributes.at(name));
+
+    // Invalid attribute
+    return std::make_shared<Attribute>();
 }
 
 void GraphModel::enableVisualUpdates()
