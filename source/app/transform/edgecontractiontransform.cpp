@@ -11,17 +11,17 @@ bool EdgeContractionTransform::apply(TransformedGraph& target) const
 
     auto attributeNames = config().attributeNames();
 
-    if(hasUnknownAttributes(attributeNames, u::keysFor(*_attributes)))
+    if(hasUnknownAttributes(attributeNames, u::toQStringVector(_graphModel->availableAttributes())))
         return false;
 
     bool ignoreTails =
         std::any_of(attributeNames.begin(), attributeNames.end(),
         [this](const auto& attributeName)
         {
-            return _attributes->at(attributeName).testFlag(AttributeFlag::IgnoreTails);
+            return _graphModel->attributeByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
         });
 
-    auto conditionFn = CreateConditionFnFor::edge(*_attributes, config()._condition);
+    auto conditionFn = CreateConditionFnFor::edge(*_graphModel, config()._condition);
     if(conditionFn == nullptr)
     {
         addAlert(AlertType::Error, QObject::tr("Invalid condition"));
@@ -46,7 +46,7 @@ bool EdgeContractionTransform::apply(TransformedGraph& target) const
 
 std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(const GraphTransformConfig&) const
 {
-    auto edgeContractionTransform = std::make_unique<EdgeContractionTransform>(graphModel()->attributes());
+    auto edgeContractionTransform = std::make_unique<EdgeContractionTransform>(*graphModel());
 
     return std::move(edgeContractionTransform); //FIXME std::move required because of clang bug
 }

@@ -17,14 +17,14 @@ bool FilterTransform::apply(TransformedGraph& target) const
 
     auto attributeNames = config().attributeNames();
 
-    if(hasUnknownAttributes(attributeNames, u::keysFor(*_attributes)))
+    if(hasUnknownAttributes(attributeNames, u::toQStringVector(_graphModel->availableAttributes())))
         return false;
 
     bool ignoreTails =
         std::any_of(attributeNames.begin(), attributeNames.end(),
         [this](const auto& attributeName)
         {
-            return _attributes->at(attributeName).testFlag(AttributeFlag::IgnoreTails);
+            return _graphModel->attributeByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
         });
 
     // The elements to be filtered are calculated first and then removed, because
@@ -34,7 +34,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
     {
     case ElementType::Node:
     {
-        auto conditionFn = CreateConditionFnFor::node(*_attributes, config()._condition);
+        auto conditionFn = CreateConditionFnFor::node(*_graphModel, config()._condition);
         if(conditionFn == nullptr)
         {
             addAlert(AlertType::Error, QObject::tr("Invalid condition"));
@@ -60,7 +60,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
 
     case ElementType::Edge:
     {
-        auto conditionFn = CreateConditionFnFor::edge(*_attributes, config()._condition);
+        auto conditionFn = CreateConditionFnFor::edge(*_graphModel, config()._condition);
         if(conditionFn == nullptr)
         {
             addAlert(AlertType::Error, QObject::tr("Invalid condition"));
@@ -86,7 +86,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
 
     case ElementType::Component:
     {
-        auto conditionFn = CreateConditionFnFor::component(*_attributes, config()._condition);
+        auto conditionFn = CreateConditionFnFor::component(*_graphModel, config()._condition);
         if(conditionFn == nullptr)
         {
             addAlert(AlertType::Error, QObject::tr("Invalid condition"));
@@ -116,7 +116,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
 
 std::unique_ptr<GraphTransform> FilterTransformFactory::create(const GraphTransformConfig&) const
 {
-    auto filterTransform = std::make_unique<FilterTransform>(elementType(), graphModel()->attributes(), _invert);
+    auto filterTransform = std::make_unique<FilterTransform>(elementType(), *graphModel(), _invert);
 
     return std::move(filterTransform); //FIXME std::move required because of clang bug
 }

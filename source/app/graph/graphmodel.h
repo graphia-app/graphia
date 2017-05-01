@@ -62,7 +62,7 @@ private:
     QString _name;
     IPlugin* _plugin;
 
-    NameAttributeMap _attributes;
+    std::map<QString, Attribute> _attributes;
     std::map<QString, std::unique_ptr<GraphTransformFactory>> _graphTransformFactories;
 
     std::map<QString, std::unique_ptr<VisualisationChannel>> _visualisationChannels;
@@ -116,8 +116,6 @@ public:
 
     Attribute& createAttribute(const QString& name);
     Attribute attributeByName(const QString& name) const;
-
-    const NameAttributeMap& attributes() const { return _attributes; }
 
     void enableVisualUpdates();
     void updateVisuals(const SelectionManager* selectionManager = nullptr, const SearchManager* searchManager = nullptr);

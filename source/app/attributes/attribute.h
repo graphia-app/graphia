@@ -318,6 +318,4 @@ public:
     bool isValid() const;
 };
 
-using NameAttributeMap = std::map<QString, Attribute>;
-
 #endif // ATTRIBUTE_H

@@ -265,3 +265,13 @@ QColor u::contrastingColor(const QColor& color)
 
     return (blackDiff > whiteDiff) ? Qt::black : Qt::white;
 }
+
+std::vector<QString> u::toQStringVector(const QStringList& stringList)
+{
+    std::vector<QString> v;
+
+    for(const auto& string : stringList)
+        v.emplace_back(string);
+
+    return v;
+}

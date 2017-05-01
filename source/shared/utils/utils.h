@@ -9,6 +9,7 @@
 #include <QQuaternion>
 #include <QColor>
 #include <QString>
+#include <QStringList>
 
 #include <type_traits>
 #include <algorithm>
@@ -224,6 +225,8 @@ namespace u
     }
 
     QColor contrastingColor(const QColor& color);
+
+    std::vector<QString> toQStringVector(const QStringList& stringList);
 }
 
 #define ARRAY_SIZEOF(x) (sizeof(x)/sizeof((x)[0]))

@@ -5,6 +5,7 @@
 
 #include "shared/graph/elementid.h"
 #include "shared/graph/igraphcomponent.h"
+#include "graph/graphmodel.h"
 #include "shared/utils/utils.h"
 #include "transform/graphtransformconfig.h"
 #include "transform/graphtransformconfigparser.h"
@@ -414,12 +415,12 @@ private:
     struct ConditionVisitor : public boost::static_visitor<ElementConditionFn<E>>
     {
         ElementType _elementType;
-        const NameAttributeMap* _attributes;
+        const GraphModel* _graphModel;
         bool _strictTyping = false;
 
-        ConditionVisitor(ElementType elementType, const NameAttributeMap& attributes, bool strictTyping = false) :
+        ConditionVisitor(ElementType elementType, const GraphModel& graphModel, bool strictTyping = false) :
             _elementType(elementType),
-            _attributes(&attributes),
+            _graphModel(&graphModel),
             _strictTyping(strictTyping)
         {}
 
@@ -435,10 +436,10 @@ private:
         {
             struct Visitor
             {
-                const NameAttributeMap* _attributes;
+                const GraphModel* _graphModel;
 
-                Visitor(const NameAttributeMap* attributes) :
-                    _attributes(attributes)
+                Visitor(const GraphModel* graphModel) :
+                    _graphModel(graphModel)
                 {}
 
                 ResolvedTerminalValue operator()(double v) const { return v; }
@@ -449,17 +450,14 @@ private:
                     {
                         QString attributeName = GraphTransformConfigParser::attributeNameFor(v);
 
-                        if(!u::contains(*_attributes, attributeName))
-                            return Attribute(); // Unknown attribute
-
-                        return _attributes->at(attributeName);
+                        return _graphModel->attributeByName(attributeName);
                     }
 
                     return v;
                 }
             };
 
-            return boost::apply_visitor(Visitor(_attributes), terminalValue);
+            return boost::apply_visitor(Visitor(_graphModel), terminalValue);
         }
 
         Attribute attributeFromValue(const ResolvedTerminalValue& resolvedTerminalValue) const
@@ -476,10 +474,10 @@ private:
         {
             struct Visitor
             {
-                const NameAttributeMap* _attributes;
+                const GraphModel* _graphModel;
 
-                Visitor(const NameAttributeMap* attributes) :
-                    _attributes(attributes)
+                Visitor(const GraphModel* graphModel) :
+                    _graphModel(graphModel)
                 {}
 
                 ValueType operator()(double) const          { return ValueType::Float; }
@@ -492,7 +490,7 @@ private:
                 }
             };
 
-            return boost::apply_visitor(Visitor(_attributes), resolvedTerminalValue);
+            return boost::apply_visitor(Visitor(_graphModel), resolvedTerminalValue);
         }
 
         bool isUnknownAttribute(const ResolvedTerminalValue& resolvedTerminalValue) const
@@ -591,8 +589,8 @@ private:
 
         ElementConditionFn<E> operator()(const GraphTransformConfig::CompoundCondition& compoundCondition) const
         {
-            auto lhs = boost::apply_visitor(ConditionVisitor<E>(_elementType, *_attributes), compoundCondition._lhs);
-            auto rhs = boost::apply_visitor(ConditionVisitor<E>(_elementType, *_attributes), compoundCondition._rhs);
+            auto lhs = boost::apply_visitor(ConditionVisitor<E>(_elementType, *_graphModel), compoundCondition._lhs);
+            auto rhs = boost::apply_visitor(ConditionVisitor<E>(_elementType, *_graphModel), compoundCondition._rhs);
 
             if(lhs == nullptr || rhs == nullptr)
                 return nullptr;
@@ -613,22 +611,22 @@ private:
     };
 
 public:
-    static auto node(const NameAttributeMap& attributes,
+    static auto node(const GraphModel& graphModel,
                      const GraphTransformConfig::Condition& condition)
     {
-        return boost::apply_visitor(ConditionVisitor<NodeId>(ElementType::Node, attributes), condition);
+        return boost::apply_visitor(ConditionVisitor<NodeId>(ElementType::Node, graphModel), condition);
     }
 
-    static auto edge(const NameAttributeMap& attributes,
+    static auto edge(const GraphModel& graphModel,
                      const GraphTransformConfig::Condition& condition)
     {
-        return boost::apply_visitor(ConditionVisitor<EdgeId>(ElementType::Edge, attributes), condition);
+        return boost::apply_visitor(ConditionVisitor<EdgeId>(ElementType::Edge, graphModel), condition);
     }
 
-    static auto component(const NameAttributeMap& attributes,
+    static auto component(const GraphModel& graphModel,
                           const GraphTransformConfig::Condition& condition)
     {
-        return boost::apply_visitor(ConditionVisitor<const IGraphComponent&>(ElementType::Component, attributes), condition);
+        return boost::apply_visitor(ConditionVisitor<const IGraphComponent&>(ElementType::Component, graphModel), condition);
     }
 
     template<typename Op, typename Value>
@@ -656,7 +654,7 @@ public:
     }
 };
 
-bool conditionIsValid(ElementType elementType, const NameAttributeMap& attributes,
+bool conditionIsValid(ElementType elementType, const GraphModel& graphModel,
                       const GraphTransformConfig::Condition& condition);
 
 #endif // CONDITIONFNCREATOR_H
