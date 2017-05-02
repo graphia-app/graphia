@@ -84,7 +84,7 @@ Window
                     font.italic: true
 
                     text: _transform !== undefined && _numParameters === 0 ?
-                              qsTr("No Parameters") : qsTr("Select A Transform")
+                              qsTr("No Parameters Required") : qsTr("Select A Transform")
                 }
 
                 ColumnLayout
