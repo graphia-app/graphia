@@ -316,6 +316,17 @@ public:
     Attribute& setDescription(const QString& description) { _description = description; return *this; }
 
     bool isValid() const;
+
+    enum class EdgeNodeType { None, Source, Target };
+    struct Name
+    {
+        EdgeNodeType _type;
+        QString _name;
+    };
+
+    static Name parseAttributeName(const QString& name);
+    static Attribute edgeNodesAttribute(const IGraph& graph, const Attribute& nodeAttribute,
+                                        EdgeNodeType edgeNodeType);
 };
 
 #endif // ATTRIBUTE_H

@@ -1,6 +1,8 @@
 #include "graphtransformconfig.h"
 #include "graphtransformconfigparser.h"
 
+#include "attributes/attribute.h"
+
 #include "shared/utils/utils.h"
 
 #include <QVariantList>
@@ -196,10 +198,16 @@ std::vector<QString> GraphTransformConfig::attributeNames() const
             auto rhs = attributeFromTerminalValue(terminalCondition._rhs);
 
             if(!lhs.isEmpty())
-                _names->emplace_back(lhs);
+            {
+                auto attributeName = Attribute::parseAttributeName(lhs);
+                _names->emplace_back(attributeName._name);
+            }
 
             if(!rhs.isEmpty())
-                _names->emplace_back(rhs);
+            {
+                auto attributeName = Attribute::parseAttributeName(rhs);
+                _names->emplace_back(attributeName._name);
+            }
         }
 
         void operator()(const UnaryCondition& unaryCondition) const

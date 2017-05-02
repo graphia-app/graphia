@@ -1,5 +1,7 @@
 #include "attribute.h"
 
+#include <QRegularExpression>
+
 void Attribute::clearValueFunctions()
 {
     _intNodeIdFn = nullptr;
@@ -267,4 +269,75 @@ IAttribute& AttributeNumericRange::setMax(double max)
     }
 
     return _attribute;
+}
+
+Attribute::Name Attribute::parseAttributeName(const QString& name)
+{
+    QRegularExpression edgeNodeRe("^(source|target)\\.(.+)$");
+    auto match = edgeNodeRe.match(name);
+
+    if(match.hasMatch())
+    {
+        auto edgeNodeTypeString = match.captured(1);
+        auto resolvedName = match.captured(2);
+
+        EdgeNodeType edgeNodeType = EdgeNodeType::None;
+        if(edgeNodeTypeString == "source")
+            edgeNodeType = EdgeNodeType::Source;
+        else if(edgeNodeTypeString == "target")
+            edgeNodeType = EdgeNodeType::Target;
+
+        return {edgeNodeType, resolvedName};
+    }
+
+    return {Attribute::EdgeNodeType::None, name};
+}
+
+Attribute Attribute::edgeNodesAttribute(const IGraph& graph, const Attribute& nodeAttribute,
+                                        Attribute::EdgeNodeType edgeNodeType)
+{
+    if(nodeAttribute.elementType() != ElementType::Node)
+        return {};
+
+    Attribute attribute = nodeAttribute;
+
+    NodeId(IEdge::*pFn)() const = nullptr;
+
+    switch(edgeNodeType)
+    {
+    case Attribute::EdgeNodeType::None:   return {};
+    case Attribute::EdgeNodeType::Source: pFn = &IEdge::sourceId; break;
+    case Attribute::EdgeNodeType::Target: pFn = &IEdge::targetId; break;
+    }
+
+    switch(nodeAttribute.valueType())
+    {
+    case ValueType::Int:
+        attribute.setIntValueFn([nodeAttribute, pFn, &graph](EdgeId edgeId)
+        {
+            auto nodeId = (graph.edgeById(edgeId).*pFn)();
+            return nodeAttribute.valueOf<int>(nodeId);
+        });
+        break;
+
+    case ValueType::Float:
+        attribute.setFloatValueFn([nodeAttribute, pFn, &graph](EdgeId edgeId)
+        {
+            auto nodeId = (graph.edgeById(edgeId).*pFn)();
+            return nodeAttribute.valueOf<double>(nodeId);
+        });
+        break;
+
+    case ValueType::String:
+        attribute.setStringValueFn([nodeAttribute, pFn, &graph](EdgeId edgeId)
+        {
+            auto nodeId = (graph.edgeById(edgeId).*pFn)();
+            return nodeAttribute.valueOf<QString>(nodeId);
+        });
+        break;
+
+    default: return {};
+    }
+
+    return attribute;
 }

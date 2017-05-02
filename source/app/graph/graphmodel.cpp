@@ -448,7 +448,20 @@ Attribute& GraphModel::createAttribute(const QString& name)
 
 Attribute GraphModel::attributeByName(const QString& name) const
 {
-    return u::contains(_attributes, name) ? _attributes.at(name) : Attribute();
+    auto attributeName = Attribute::parseAttributeName(name);
+
+    if(!u::contains(_attributes, attributeName._name))
+        return {};
+
+    auto attribute = _attributes.at(attributeName._name);
+
+    if(attributeName._type != Attribute::EdgeNodeType::None)
+    {
+        return Attribute::edgeNodesAttribute(_transformedGraph,
+            attribute, attributeName._type);
+    }
+
+    return attribute;
 }
 
 void GraphModel::enableVisualUpdates()
