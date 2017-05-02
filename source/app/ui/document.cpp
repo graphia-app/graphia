@@ -916,25 +916,25 @@ QVariantMap Document::attribute(const QString& attributeName) const
 
     if(u::contains(_graphModel->availableAttributes(), attributeName))
     {
-        auto attribute = _graphModel->attributeByName(attributeName);
-        map.insert("valueType", static_cast<int>(attribute->valueType()));
-        map.insert("elementType", static_cast<int>(attribute->elementType()));
+        const auto& attribute = _graphModel->attributeByName(attributeName);
+        map.insert("valueType", static_cast<int>(attribute.valueType()));
+        map.insert("elementType", static_cast<int>(attribute.elementType()));
 
-        map.insert("hasRange", attribute->numericRange().hasRange());
-        map.insert("hasMinimumValue", attribute->numericRange().hasMin());
-        map.insert("hasMaximumValue", attribute->numericRange().hasMax());
+        map.insert("hasRange", attribute.numericRange().hasRange());
+        map.insert("hasMinimumValue", attribute.numericRange().hasMin());
+        map.insert("hasMaximumValue", attribute.numericRange().hasMax());
 
-        if(attribute->numericRange().hasMin()) map.insert("minimumValue", attribute->numericRange().min());
-        if(attribute->numericRange().hasMax()) map.insert("maximumValue", attribute->numericRange().max());
+        if(attribute.numericRange().hasMin()) map.insert("minimumValue", attribute.numericRange().min());
+        if(attribute.numericRange().hasMax()) map.insert("maximumValue", attribute.numericRange().max());
 
-        map.insert("description", attribute->description());
-        auto valueType = Flags<ValueType>(attribute->valueType());
+        map.insert("description", attribute.description());
+        auto valueType = Flags<ValueType>(attribute.valueType());
 
         // For similarity purposes, treat Int and Float as the same
         if(valueType.anyOf(ValueType::Int, ValueType::Float))
             valueType.set(ValueType::Int, ValueType::Float);
 
-        map.insert("similar", _graphModel->availableAttributes(attribute->elementType(), *valueType));
+        map.insert("similar", _graphModel->availableAttributes(attribute.elementType(), *valueType));
         map.insert("ops", _graphModel->avaliableConditionFnOps(attributeName));
     }
 

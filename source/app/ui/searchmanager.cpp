@@ -33,13 +33,13 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> attribu
             _attributeNames.emplace_back(attributeName);
     }
 
-    std::vector<AttributePtr> attributes;
+    std::vector<const Attribute*> attributes;
     for(auto& attributeName : _attributeNames)
     {
         auto attribute = _graphModel->attributeByName(attributeName);
 
-        if(attribute->searchable() && attribute->elementType() == ElementType::Node)
-            attributes.emplace_back(attribute);
+        if(attribute.searchable() && attribute.elementType() == ElementType::Node)
+            attributes.emplace_back(&attribute);
     }
 
     QRegularExpression re(_regex, QRegularExpression::CaseInsensitiveOption);
@@ -58,7 +58,7 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> attribu
             {
                 for(auto& attribute : attributes)
                 {
-                    auto conditionFn = CreateConditionFnFor::node(attribute,
+                    auto conditionFn = CreateConditionFnFor::node(*attribute,
                         ConditionFnOp::String::MatchesRegex, _regex);
 
                     if(conditionFn == nullptr)

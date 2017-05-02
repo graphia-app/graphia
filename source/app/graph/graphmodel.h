@@ -32,7 +32,6 @@ class SearchManager;
 
 using NodeVisuals = NodeArray<ElementVisual>;
 using EdgeVisuals = EdgeArray<ElementVisual>;
-using AttributePtr = std::shared_ptr<Attribute>;
 
 class GraphModel : public QObject, public IGraphModel
 {
@@ -116,7 +115,7 @@ public:
     QStringList attributeNames(ElementType elementType) const;
 
     Attribute& createAttribute(const QString& name);
-    AttributePtr attributeByName(const QString& name) const;
+    Attribute attributeByName(const QString& name) const;
 
     void enableVisualUpdates();
     void updateVisuals(const SelectionManager* selectionManager = nullptr, const SearchManager* searchManager = nullptr);
