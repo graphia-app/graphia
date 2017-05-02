@@ -231,13 +231,8 @@ static bool transformIsPinned(const QString& transform)
     return p.result().isFlagSet("pinned");
 }
 
-QStringList Document::graphTransformConfigurationsFromUI() const
+static QStringList sortedTransforms(QStringList transforms)
 {
-    QStringList transforms;
-
-    for(const auto& variant : _graphTransformsModel.list())
-        transforms.append(variant.toString());
-
     // Sort so that the pinned transforms go last
     std::stable_sort(transforms.begin(), transforms.end(),
     [](const QString& a, const QString& b)
@@ -254,6 +249,16 @@ QStringList Document::graphTransformConfigurationsFromUI() const
     });
 
     return transforms;
+}
+
+QStringList Document::graphTransformConfigurationsFromUI() const
+{
+    QStringList transforms;
+
+    for(const auto& variant : _graphTransformsModel.list())
+        transforms.append(variant.toString());
+
+    return sortedTransforms(transforms);
 }
 
 QStringList Document::visualisationsFromUI() const
@@ -313,7 +318,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
     connect(_graphFileParserThread.get(), &ParserThread::progress, this, &Document::onLoadProgress);
     connect(_graphFileParserThread.get(), &ParserThread::success, [this]
     {
-        _graphModel->buildTransforms(_pluginInstance->defaultTransforms());
+        _graphModel->buildTransforms(sortedTransforms(_pluginInstance->defaultTransforms()));
         _graphModel->buildVisualisations(_pluginInstance->defaultVisualisations());
     });
     connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::onLoadComplete);
@@ -348,7 +353,7 @@ void Document::onLoadComplete(bool success)
     // This causes the plugin UI to be loaded
     emit pluginQmlPathChanged();
 
-    setTransforms(_pluginInstance->defaultTransforms());
+    setTransforms(sortedTransforms(_pluginInstance->defaultTransforms()));
     setVisualisations(_pluginInstance->defaultVisualisations());
 
     _layoutThread = std::make_unique<LayoutThread>(*_graphModel, std::make_unique<ForceDirectedLayoutFactory>(_graphModel.get()));
