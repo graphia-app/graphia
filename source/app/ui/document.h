@@ -9,6 +9,7 @@
 #include "layout/layout.h"
 #include "utils/qmlenum.h"
 #include "utils/qmlcontainerwrapper.h"
+#include "attributes/availableattributesmodel.h"
 #include "shared/utils/deferredexecutor.h"
 #include "thirdparty/qt-qml-models/QQmlVariantListModel.h"
 
@@ -246,8 +247,8 @@ public:
 
     Q_INVOKABLE bool opIsUnary(const QString& op) const;
 
-    Q_INVOKABLE QStringList availableAttributes(int elementTypes = static_cast<int>(ElementType::All),
-                                                int valueTypes = static_cast<int>(ValueType::All)) const;
+    Q_INVOKABLE AvailableAttributesModel* availableAttributes(int elementTypes = static_cast<int>(ElementType::All),
+                                                              int valueTypes = static_cast<int>(ValueType::All)) const;
     Q_INVOKABLE QVariantMap attribute(const QString& attributeName) const;
 
     Q_INVOKABLE QVariantMap parseGraphTransform(const QString& transform) const;

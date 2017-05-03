@@ -54,7 +54,7 @@ Window
                         parametersRepeater.model = [];
                         parameters._values = {};
                         root._transform = document.transform(selectedValue);
-                        attributeList.model = _transform.attributes;
+                        attributeList.model = document.availableAttributes(root._transform.elementType);
 
                         if(_transform.parameters !== undefined)
                             parametersRepeater.model = Object.keys(_transform.parameters);

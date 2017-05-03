@@ -118,7 +118,8 @@ HEADERS += \
     transform/graphtransformparameter.h \
     transform/mcltransform.h \
     transform/pageranktransform.h \
-    transform/eccentricitytransform.h
+    transform/eccentricitytransform.h \
+    attributes/availableattributesmodel.h
 
 SOURCES += \
     application.cpp \
@@ -190,7 +191,8 @@ SOURCES += \
     attributes/conditionfncreator.cpp \
     transform/mcltransform.cpp \
     transform/pageranktransform.cpp \
-    transform/eccentricitytransform.cpp
+    transform/eccentricitytransform.cpp \
+    attributes/availableattributesmodel.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \

@@ -803,11 +803,17 @@ QStringList Document::availableTransformNames() const
     return _graphModel != nullptr ? _graphModel->availableTransformNames() : QStringList();
 }
 
-QStringList Document::availableAttributes(int elementTypes, int valueTypes) const
+AvailableAttributesModel* Document::availableAttributes(int elementTypes, int valueTypes) const
 {
-    return _graphModel != nullptr ? _graphModel->availableAttributes(
-                                        static_cast<ElementType>(elementTypes),
-                                        static_cast<ValueType>(valueTypes)) : QStringList();
+    if(_graphModel != nullptr)
+    {
+        // The caller takes ownership and is responsible for deleting the model
+        return new AvailableAttributesModel(*_graphModel, nullptr,
+                                            static_cast<ElementType>(elementTypes),
+                                            static_cast<ValueType>(valueTypes));
+    }
+
+    return nullptr;
 }
 
 QVariantMap Document::transform(const QString& transformName) const
@@ -823,6 +829,7 @@ QVariantMap Document::transform(const QString& transformName) const
 
         auto elementType = transformFactory->elementType();
 
+        map.insert("elementType", static_cast<int>(elementType));
         map.insert("description", transformFactory->description());
         map.insert("requiresCondition", transformFactory->requiresCondition());
 
@@ -833,8 +840,6 @@ QVariantMap Document::transform(const QString& transformName) const
             parameters.insert(parameter.first, parameterMap);
         }
         map.insert("parameters", parameters);
-
-        map.insert("attributes", _graphModel->availableAttributes(elementType, ValueType::All));
     }
 
     return map;
