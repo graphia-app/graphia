@@ -48,7 +48,7 @@ function printStackTrace()
 
 function normaliseWhitespace(text)
 {
-    text = text.replace(/\\s+/g, " ");
+    text = text.replace(/\s+/g, " ");
     return text;
 }
 

@@ -26,6 +26,11 @@ function sanitiseAttribute(text)
 {
     // Remove the leading $, if present
     text = text.replace(/^\$/, "");
+
+    // Replace edge node syntax with human readable text
+    text = text.replace(/^source\./, "Source ");
+    text = text.replace(/^target\./, "Target ");
+
     return text;
 }
 
