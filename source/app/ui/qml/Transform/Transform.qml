@@ -145,12 +145,18 @@ Item
 
     function toggle()
     {
+        if(!enabledMenuItem.enabled)
+            return;
+
         setFlag("disabled", !isFlagSet("disabled"));
         updateExpression();
     }
 
     function toggleLock()
     {
+        if(!lockedMenuItem.enabled)
+            return;
+
         setFlag("locked", !isFlagSet("locked"));
         updateExpression();
     }
