@@ -134,7 +134,6 @@ struct logical_op_ : x3::symbols<ConditionFnOp::Logical>
 } logical_op;
 
 const x3::rule<class Condition, GraphTransformConfig::Condition> condition = "condition";
-
 const auto operand = terminalCondition | unaryCondition | (x3::lit('(') >> condition >> x3::lit(')'));
 const auto condition_def = (operand >> logical_op >> operand) | operand;
 
