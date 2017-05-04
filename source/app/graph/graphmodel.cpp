@@ -143,6 +143,10 @@ bool GraphModel::graphTransformIsValid(const QString& transform) const
             return false;
 
         auto& factory = _graphTransformFactories.at(graphTransformConfig._action);
+
+        if(factory->requiresCondition() && !graphTransformConfig.hasCondition())
+            return false;
+
         auto graphTransform = factory->create(graphTransformConfig);
 
         return graphTransform != nullptr;
