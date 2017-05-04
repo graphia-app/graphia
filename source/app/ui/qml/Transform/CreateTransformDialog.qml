@@ -174,7 +174,7 @@ Window
                         text: qsTr("where")
                     }
 
-                    ListBox
+                    TreeBox
                     {
                         id: attributeList
                         Layout.fillWidth: true

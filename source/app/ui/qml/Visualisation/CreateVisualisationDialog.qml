@@ -32,7 +32,7 @@ Window
 
         RowLayout
         {
-            ListBox
+            TreeBox
             {
                 id: attributeList
                 Layout.fillWidth: true

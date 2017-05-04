@@ -924,9 +924,10 @@ QVariantMap Document::attribute(const QString& attributeName) const
     if(_graphModel == nullptr)
         return map;
 
-    if(u::contains(_graphModel->availableAttributes(), attributeName))
+    auto parsedAttributeName = Attribute::parseAttributeName(attributeName);
+    if(u::contains(_graphModel->availableAttributes(), parsedAttributeName._name))
     {
-        const auto& attribute = _graphModel->attributeByName(attributeName);
+        const auto& attribute = _graphModel->attributeByName(parsedAttributeName._name);
         map.insert("valueType", static_cast<int>(attribute.valueType()));
         map.insert("elementType", static_cast<int>(attribute.elementType()));
 
@@ -945,7 +946,7 @@ QVariantMap Document::attribute(const QString& attributeName) const
             valueType.set(ValueType::Int, ValueType::Float);
 
         map.insert("similar", _graphModel->availableAttributes(attribute.elementType(), *valueType));
-        map.insert("ops", _graphModel->avaliableConditionFnOps(attributeName));
+        map.insert("ops", _graphModel->avaliableConditionFnOps(parsedAttributeName._name));
     }
 
     return map;
@@ -956,25 +957,21 @@ QVariantMap Document::findTransformParameter(const QString& transformName, const
     if(_graphModel == nullptr)
         return {};
 
-    const auto* transformFactory = _graphModel->transformFactory(transformName);
-
-    if(transformFactory == nullptr)
+    if(_graphModel->transformFactory(transformName) == nullptr)
+    {
+        // Unrecognised transform
         return {};
+    }
 
-    auto elementType = transformFactory->elementType();
-
-    if(u::contains(_graphModel->availableAttributes(elementType, ValueType::All), parameterName))
+    auto attributeObject = attribute(parameterName);
+    if(!attributeObject.isEmpty())
     {
         // It's an Attribute
-        return attribute(parameterName);
-    }
-    else
-    {
-        // It's a with ... parameter
-        return transformParameter(transformName, parameterName);
+        return attributeObject;
     }
 
-    return {};
+    // It's a with ... parameter
+    return transformParameter(transformName, parameterName);
 }
 
 QVariantMap Document::parseGraphTransform(const QString& transform) const
