@@ -194,6 +194,7 @@ ApplicationWindow
             case showAllEdgeTextAction:      return TextState.All;
             }
         }
+        property alias showMultiElementIndicators: toggleMultiElementIndicatorsAction.checked
     }
 
     Preferences
@@ -572,7 +573,7 @@ ApplicationWindow
 
         Component.onCompleted:
         {
-            toggleEdgeDirectionAction.checked = !(visuals.edgeVisualType == EdgeVisualType.Cylinder);
+            toggleEdgeDirectionAction.checked = !(visuals.edgeVisualType === EdgeVisualType.Cylinder);
         }
     }
 
@@ -614,6 +615,13 @@ ApplicationWindow
             case TextState.All:      edgeTextDisplay.current = showAllEdgeTextAction; break;
             }
         }
+    }
+
+    Action
+    {
+        id: toggleMultiElementIndicatorsAction
+        text: qsTr("Show Multi-Element Indicators")
+        checkable: true
     }
 
     Action
@@ -759,6 +767,7 @@ ApplicationWindow
                 MenuItem { action: showAllEdgeTextAction }
             }
             MenuItem { action: toggleEdgeDirectionAction }
+            MenuItem { action: toggleMultiElementIndicatorsAction }
         }
         Menu
         {

@@ -501,6 +501,7 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
     auto edgeSize       = u::pref("visuals/defaultEdgeSize").toFloat();
     auto minEdgeSize    = u::minPref("visuals/defaultEdgeSize").toFloat();
     auto maxEdgeSize    = u::maxPref("visuals/defaultEdgeSize").toFloat();
+    auto meIndicators   = u::pref("visuals/showMultiElementIndicators").toBool();
 
     if(selectionManager != nullptr)
     {
@@ -535,7 +536,7 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
         else
             _nodeVisuals[nodeId]._outerColor = _mappedNodeVisuals[nodeId]._outerColor;
 
-        _nodeVisuals[nodeId]._innerColor = graph().typeOf(nodeId) == MultiElementType::Not ?
+        _nodeVisuals[nodeId]._innerColor = !meIndicators || graph().typeOf(nodeId) == MultiElementType::Not ?
                     _nodeVisuals[nodeId]._outerColor : multiColor;
 
         // Text
@@ -595,7 +596,7 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
         else
             _edgeVisuals[edgeId]._outerColor = _mappedEdgeVisuals[edgeId]._outerColor;
 
-        _edgeVisuals[edgeId]._innerColor = graph().typeOf(edgeId) == MultiElementType::Not ?
+        _edgeVisuals[edgeId]._innerColor = !meIndicators || graph().typeOf(edgeId) == MultiElementType::Not ?
             _edgeVisuals[edgeId]._outerColor : multiColor;
 
         // Text

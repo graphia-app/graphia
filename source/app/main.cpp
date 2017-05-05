@@ -112,30 +112,31 @@ int main(int argc, char *argv[])
     ThreadPoolSingleton threadPool;
     Preferences preferences;
 
-    preferences.define("visuals/defaultNodeColor",          "#0000FF");
-    preferences.define("visuals/defaultEdgeColor",          "#FFFFFF");
-    preferences.define("visuals/multiElementColor",         "#FF0000");
-    preferences.define("visuals/backgroundColor",           "#C0C0C0");
-    preferences.define("visuals/highlightColor",            "#FFFFFF");
+    preferences.define("visuals/defaultNodeColor",              "#0000FF");
+    preferences.define("visuals/defaultEdgeColor",              "#FFFFFF");
+    preferences.define("visuals/multiElementColor",             "#FF0000");
+    preferences.define("visuals/backgroundColor",               "#C0C0C0");
+    preferences.define("visuals/highlightColor",                "#FFFFFF");
 
-    preferences.define("visuals/defaultNodeSize",           0.6, 0.1,  3.0);
-    preferences.define("visuals/defaultEdgeSize",           0.2, 0.01, 2.0);
+    preferences.define("visuals/defaultNodeSize",               0.6, 0.1,  3.0);
+    preferences.define("visuals/defaultEdgeSize",               0.2, 0.01, 2.0);
 
-    preferences.define("visuals/showNodeText",              QVariant::fromValue(static_cast<int>(TextState::Selected)));
-    preferences.define("visuals/showEdgeText",              QVariant::fromValue(static_cast<int>(TextState::Selected)));
-    preferences.define("visuals/textFont",                  SharedTools::QtSingleApplication::font().family());
-    preferences.define("visuals/textSize",                  24.0f);
-    preferences.define("visuals/edgeVisualType",            QVariant::fromValue(static_cast<int>(EdgeVisualType::Cylinder)));
-    preferences.define("visuals/textAlignment",             QVariant::fromValue(static_cast<int>(TextAlignment::Right)));
+    preferences.define("visuals/showNodeText",                  QVariant::fromValue(static_cast<int>(TextState::Selected)));
+    preferences.define("visuals/showEdgeText",                  QVariant::fromValue(static_cast<int>(TextState::Selected)));
+    preferences.define("visuals/textFont",                      SharedTools::QtSingleApplication::font().family());
+    preferences.define("visuals/textSize",                      24.0f);
+    preferences.define("visuals/edgeVisualType",                QVariant::fromValue(static_cast<int>(EdgeVisualType::Cylinder)));
+    preferences.define("visuals/textAlignment",                 QVariant::fromValue(static_cast<int>(TextAlignment::Right)));
+    preferences.define("visuals/showMultiElementIndicators",    true);
 
-    preferences.define("visuals/minimumComponentRadius",    2.0, 0.05, 15.0);
-    preferences.define("visuals/transitionTime",            1.0, 0.1, 5.0);
+    preferences.define("visuals/minimumComponentRadius",        2.0, 0.05, 15.0);
+    preferences.define("visuals/transitionTime",                1.0, 0.1, 5.0);
 
-    preferences.define("misc/showGraphMetrics",             false);
-    preferences.define("misc/showLayoutSettings",           false);
+    preferences.define("misc/showGraphMetrics",                 false);
+    preferences.define("misc/showLayoutSettings",               false);
 
-    preferences.define("misc/focusFoundNodes",              true);
-    preferences.define("misc/focusFoundComponents",         false);
+    preferences.define("misc/focusFoundNodes",                  true);
+    preferences.define("misc/focusFoundComponents",             false);
 
     QQmlApplicationEngine engine;
     engine.addImportPath("qrc:///qml");
