@@ -474,6 +474,7 @@ ApplicationWindow
         id: findAction
         text: qsTr("&Find")
         shortcut: "Ctrl+F"
+        enabled: currentDocument ? currentDocument.idle : false
         onTriggered: currentDocument && currentDocument.showFind()
     }
 
@@ -482,6 +483,7 @@ ApplicationWindow
         id: prevComponentAction
         text: qsTr("Goto &Previous Component")
         shortcut: "PgUp"
+        enabled: currentDocument ? currentDocument.idle : false
         onTriggered: currentDocument && currentDocument.gotoPrevComponent()
     }
 
@@ -490,6 +492,7 @@ ApplicationWindow
         id: nextComponentAction
         text: qsTr("Goto &Next Component")
         shortcut: "PgDown"
+        enabled: currentDocument ? currentDocument.idle : false
         onTriggered: currentDocument && currentDocument.gotoNextComponent()
     }
 
