@@ -24,8 +24,8 @@ GridLayout
 
     flow: (direction === Qt.Horizontal) ? GridLayout.LeftToRight : GridLayout.TopToBottom
 
-    property int _maxWidth: 160
-    property int _inputElementWidth: (direction === Qt.Horizontal) ? 90 : _maxWidth
+    property bool _fillWidth: root.direction === Qt.Vertical
+    property int _preferredWidth: (root.direction === Qt.Horizontal) ? 90 : 160
 
     function typedValue(n)
     {
@@ -43,7 +43,8 @@ GridLayout
     SpinBox
     {
         id: spinBox
-        Layout.preferredWidth: _inputElementWidth
+        Layout.fillWidth: root._fillWidth
+        Layout.preferredWidth: root._preferredWidth
         visible: (valueType === ValueType.Int || valueType === ValueType.Float)
 
         decimals:
@@ -83,7 +84,8 @@ GridLayout
     Slider
     {
         id: slider
-        Layout.preferredWidth: _maxWidth
+        Layout.fillWidth: root._fillWidth
+        Layout.preferredWidth: root._preferredWidth
         visible: ((valueType === ValueType.Int || valueType === ValueType.Float) && hasRange)
 
         onValueChanged:
@@ -102,7 +104,8 @@ GridLayout
     TextField
     {
         id: textField
-        Layout.preferredWidth: _inputElementWidth
+        Layout.fillWidth: root._fillWidth
+        Layout.preferredWidth: root._preferredWidth
         visible: (valueType === ValueType.String || valueType === ValueType.Unknown)
         enabled: valueType !== ValueType.Unknown
 
