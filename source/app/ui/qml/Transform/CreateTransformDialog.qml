@@ -44,7 +44,7 @@ Window
             ListBox
             {
                 id: transformsList
-                Layout.fillWidth: true
+                Layout.preferredWidth: 192
                 Layout.fillHeight: true
 
                 onSelectedValueChanged:
@@ -54,7 +54,9 @@ Window
                         parametersRepeater.model = [];
                         parameters._values = {};
                         root._transform = document.transform(selectedValue);
-                        attributeList.model = document.availableAttributes(root._transform.elementType);
+                        lhsAttributeList.model = document.availableAttributes(root._transform.elementType);
+                        valueRadioButton.checked = true;
+                        rhsAttributeList.model = undefined;
 
                         if(_transform.parameters !== undefined)
                             parametersRepeater.model = Object.keys(_transform.parameters);
@@ -67,9 +69,10 @@ Window
 
             ColumnLayout
             {
+                Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.alignment: Qt.AlignTop
-                Layout.preferredWidth: 512
+
                 spacing: 20
 
                 Label
@@ -176,7 +179,7 @@ Window
 
                     TreeBox
                     {
-                        id: attributeList
+                        id: lhsAttributeList
                         Layout.fillWidth: true
                         Layout.fillHeight: true
 
@@ -187,8 +190,8 @@ Window
                                 opList.updateModel(document.attribute(selectedValue).ops);
 
                                 var parameterData = document.findTransformParameter(transformsList.selectedValue,
-                                                                                    attributeList.selectedValue);
-                                valueParameter.configure(parameterData);
+                                                                                    lhsAttributeList.selectedValue);
+                                rhs.configure(parameterData);
                             }
                             else
                             {
@@ -238,17 +241,81 @@ Window
                         }
                     }
 
-                    TransformParameter
+                    GridLayout
                     {
-                        id: valueParameter
-                        enabled: opList.selectedValue !== undefined && !opList.selectedValue.unary
-                        Layout.topMargin: Constants.margin
-                        Layout.alignment: Qt.AlignTop
+                        id: rhs
 
-                        updateValueImmediately: true
-                        direction: Qt.Vertical
-                        onValueChanged: { updateTransformExpression(); }
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+
+                        enabled: opList.selectedValue !== undefined &&
+                                 !opList.selectedValue.unary
+
+                        columns: 2
+                        ExclusiveGroup { id: rhsGroup }
+
+                        RadioButton
+                        {
+                            id: valueRadioButton
+                            Layout.alignment: Qt.AlignTop
+
+                            checked: true
+                            exclusiveGroup: rhsGroup
+                        }
+
+                        TransformParameter
+                        {
+                            id: valueParameter
+                            Layout.fillWidth: true
+
+                            enabled: valueRadioButton.checked
+                            updateValueImmediately: true
+                            direction: Qt.Vertical
+                            onValueChanged: { updateTransformExpression(); }
+                        }
+
+                        RadioButton
+                        {
+                            id: attributeRadioButton
+                            Layout.alignment: Qt.AlignTop
+
+                            exclusiveGroup: rhsGroup
+                        }
+
+                        TreeBox
+                        {
+                            id: rhsAttributeList
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+
+                            enabled: attributeRadioButton.checked
+                            onSelectedValueChanged: { updateTransformExpression(); }
+                        }
+
+                        function configure(parameterData)
+                        {
+                            valueParameter.configure(parameterData);
+
+                            if(parameterData.valueType !== undefined)
+                            {
+                                rhsAttributeList.model = document.availableAttributes(
+                                            root._transform.elementType, parameterData.valueType);
+                            }
+                            else
+                                rhsAttributeList.model = undefined;
+                        }
+
+                        function value()
+                        {
+                            if(valueRadioButton.checked)
+                                return valueParameter.value;
+                            else if(attributeRadioButton.checked)
+                                return "$\"" + rhsAttributeList.selectedValue + "\"";
+
+                            return "";
+                        }
                     }
+
                 }
             }
         }
@@ -277,12 +344,13 @@ Window
                     {
                         text += _transform.description;
 
-                        if(attributeList.selectedValue !== undefined)
+                        if(lhsAttributeList.selectedValue !== undefined)
                         {
                             var parameterData = document.findTransformParameter(transformsList.selectedValue,
-                                                                                attributeList.selectedValue);
+                                                                                lhsAttributeList.selectedValue);
 
-                            text += "<br><br>" + parameterData.description;
+                            if(parameterData.description !== undefined)
+                                text += "<br><br>" + parameterData.description;
                         }
                     }
                 }
@@ -356,16 +424,17 @@ Window
                     expression += " " + parameterName + " = " + parameters.valueOf(parameterName);
             }
 
-            if(attributeList.selectedValue !== undefined)
+            if(lhsAttributeList.selectedValue !== undefined)
             {
-                expression += " where $\"" + attributeList.selectedValue + "\"";
+                expression += " where $\"" + lhsAttributeList.selectedValue + "\"";
 
                 if(opList.selectedValue !== undefined)
                 {
                     expression += " " + opList.selectedValue.value;
+                    var rhsValue = rhs.value();
 
-                    if(!opList.selectedValue.unary && valueParameter.value.length > 0)
-                        expression += " " + valueParameter.value;
+                    if(!opList.selectedValue.unary && rhsValue.length > 0)
+                        expression += " " + rhsValue;
                 }
             }
         }
