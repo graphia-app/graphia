@@ -380,25 +380,22 @@ void MutableGraph::contractEdges(const EdgeIdSet& edgeIds)
     endTransaction();
 }
 
-void MutableGraph::cloneFrom(const Graph& other)
+MutableGraph& MutableGraph::operator=(const MutableGraph& other)
 {
     beginTransaction();
 
-    const auto* mutableOther = dynamic_cast<const MutableGraph*>(&other);
-    Q_ASSERT(mutableOther != nullptr);
-
     // Store the differences between the graphs
-    auto diff = diffTo(*mutableOther);
+    auto diff = diffTo(other);
 
-    _n             = mutableOther->_n;
-    _nodeIds       = mutableOther->_nodeIds;
-    _unusedNodeIds = mutableOther->_unusedNodeIds;
-    reserveNodeId(mutableOther->largestNodeId());
+    _n             = other._n;
+    _nodeIds       = other._nodeIds;
+    _unusedNodeIds = other._unusedNodeIds;
+    reserveNodeId(other.largestNodeId());
 
-    _e             = mutableOther->_e;
-    _edgeIds       = mutableOther->_edgeIds;
-    _unusedEdgeIds = mutableOther->_unusedEdgeIds;
-    reserveEdgeId(mutableOther->largestEdgeId());
+    _e             = other._e;
+    _edgeIds       = other._edgeIds;
+    _unusedEdgeIds = other._unusedEdgeIds;
+    reserveEdgeId(other.largestEdgeId());
 
     // Reset collection pointers to collections in this
     for(auto& node : _n._nodes)
@@ -425,6 +422,8 @@ void MutableGraph::cloneFrom(const Graph& other)
 
     _updateRequired = true;
     endTransaction(!diff.empty());
+
+    return *this;
 }
 
 MutableGraph::Diff MutableGraph::diffTo(const MutableGraph& other)

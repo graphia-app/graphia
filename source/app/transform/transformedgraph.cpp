@@ -8,7 +8,7 @@
 
 #include <functional>
 
-TransformedGraph::TransformedGraph(const GraphModel& graphModel, const Graph& source) :
+TransformedGraph::TransformedGraph(const GraphModel& graphModel, const MutableGraph& source) :
     Graph(),
     _graphModel(&graphModel),
     _source(&source),
@@ -42,10 +42,12 @@ void TransformedGraph::reserve(const Graph& other)
     Graph::reserve(other);
 }
 
-void TransformedGraph::cloneFrom(const Graph& other)
+MutableGraph& TransformedGraph::operator=(const MutableGraph& other)
 {
-    _target.cloneFrom(other);
+    _target = other;
     Graph::reserve(other);
+
+    return _target;
 }
 
 void TransformedGraph::rebuild()
@@ -61,7 +63,7 @@ void TransformedGraph::rebuild()
 
         bool changed = false;
         std::vector<Result> newCache;
-        cloneFrom(*_source);
+        *this = *_source;
 
         for(const auto& transform : _transforms)
         {
@@ -73,7 +75,7 @@ void TransformedGraph::rebuild()
             if(transform->applyAndUpdate(*this))
             {
                 result._graph = std::make_unique<MutableGraph>();
-                result._graph->cloneFrom(_target);
+                *result._graph = _target;
                 changed = true;
             }
 

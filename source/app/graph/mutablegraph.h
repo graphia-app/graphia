@@ -157,7 +157,7 @@ public:
     void contractEdge(EdgeId edgeId);
     void contractEdges(const EdgeIdSet& edgeIds);
 
-    void cloneFrom(const Graph& other);
+    MutableGraph& operator=(const MutableGraph& other);
 
     struct Diff
     {

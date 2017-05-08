@@ -20,7 +20,7 @@ class TransformedGraph : public Graph
     Q_OBJECT
 
 public:
-    explicit TransformedGraph(const GraphModel& graphModel, const Graph& source);
+    explicit TransformedGraph(const GraphModel& graphModel, const MutableGraph& source);
 
     void enableAutoRebuild() { _autoRebuild = true; rebuild(); }
     void addTransform(std::unique_ptr<const GraphTransform> t) { _transforms.emplace_back(std::move(t)); }
@@ -49,14 +49,14 @@ public:
     MutableGraph& mutableGraph() { return _target; }
 
     void reserve(const Graph& other);
-    void cloneFrom(const Graph& other);
+    MutableGraph& operator=(const MutableGraph& other);
 
     void update() { _target.update(); }
 
 private:
     const GraphModel* _graphModel = nullptr;
 
-    const Graph* _source;
+    const MutableGraph* _source;
     std::vector<std::unique_ptr<const GraphTransform>> _transforms;
 
     // TransformedGraph has the target as a member rather than inheriting

@@ -159,7 +159,6 @@ public:
     }
 
     virtual void reserve(const Graph& other);
-    virtual void cloneFrom(const Graph& other) = 0;
 
     void enableComponentManagement();
 
