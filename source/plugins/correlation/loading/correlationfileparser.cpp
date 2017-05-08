@@ -12,8 +12,8 @@
 #include <vector>
 #include <stack>
 
-CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin) :
-    _plugin(plugin)
+CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, const QString& urlTypeName) :
+    _plugin(plugin), _urlTypeName(urlTypeName)
 {}
 
 static QRect findLargestDataRect(const TabularData& tabularData)
@@ -88,16 +88,32 @@ static QRect findLargestDataRect(const TabularData& tabularData)
 bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const IParser::ProgressFn& progress)
 {
     CsvFileParser csvFileParser;
+    TsvFileParser tsvFileParser;
 
-    if(!csvFileParser.parse(url, graph, progress))
+    TabularData* tabularData = nullptr;
+    if(_urlTypeName == "CorrelationCSV")
+    {
+        if(!csvFileParser.parse(url, graph, progress))
+            return false;
+
+        tabularData = &(csvFileParser.tabularData());
+    }
+    else if(_urlTypeName == "CorrelationTSV")
+    {
+        if(!tsvFileParser.parse(url, graph, progress))
+            return false;
+
+        tabularData = &(tsvFileParser.tabularData());
+    }
+
+    if(tabularData == nullptr)
         return false;
 
-    auto& tabularData = csvFileParser.tabularData();
-    tabularData.setTransposed(_plugin->transpose());
+    tabularData->setTransposed(_plugin->transpose());
 
     graph.setPhase(QObject::tr("Finding Data Points"));
     progress(-1);
-    auto dataRect = findLargestDataRect(tabularData);
+    auto dataRect = findLargestDataRect(*tabularData);
 
     if(dataRect.isEmpty())
         return false;
@@ -105,7 +121,7 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
     _plugin->setDimensions(dataRect.width(), dataRect.height());
 
     graph.setPhase(QObject::tr("Attributes"));
-    if(!_plugin->loadUserData(tabularData, dataRect.left(), dataRect.top(), [this]{ return cancelled(); }, progress))
+    if(!_plugin->loadUserData(*tabularData, dataRect.left(), dataRect.top(), [this]{ return cancelled(); }, progress))
         return false;
 
     graph.setPhase(QObject::tr("Pearson Correlation"));

@@ -290,8 +290,8 @@ void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager*)
 
 std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
 {
-    if(urlTypeName == "Correlation")
-        return std::make_unique<CorrelationFileParser>(this);
+    if(urlTypeName == "CorrelationCSV" || urlTypeName == "CorrelationTSV")
+        return std::make_unique<CorrelationFileParser>(this, urlTypeName);
 
     return nullptr;
 }
@@ -317,7 +317,8 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
 
 CorrelationPlugin::CorrelationPlugin()
 {
-    registerUrlType("Correlation", QObject::tr("Correlation CSV File"), QObject::tr("Correlation CSV Files"), {"csv"});
+    registerUrlType("CorrelationCSV", QObject::tr("Correlation CSV File"), QObject::tr("Correlation CSV Files"), {"csv"});
+    registerUrlType("CorrelationTSV", QObject::tr("Correlation TSV File"), QObject::tr("Correlation TSV Files"), {"tsv"});
     qmlRegisterType<CorrelationPlotItem>("com.kajeka", 1, 0, "CorrelationPlot");
 }
 
