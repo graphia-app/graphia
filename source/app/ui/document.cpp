@@ -1009,17 +1009,6 @@ void Document::removeGraphTransform(int index)
     _graphTransformsModel.remove(index);
 }
 
-template<typename Config>
-static bool flagsDiffer(const Config& a,
-                        const Config& b,
-                        const char* Flag)
-{
-    bool aResult = a.isFlagSet(Flag);
-    bool bResult = b.isFlagSet(Flag);
-
-    return aResult != bResult;
-}
-
 // This tests two transform lists to determine if replacing one with the
 // other would actually result in a different transformation
 static bool transformsDiffer(const QStringList& a, const QStringList& b)
@@ -1038,12 +1027,6 @@ static bool transformsDiffer(const QStringList& a, const QStringList& b)
 
         if(p.parse(b[i]))
             bi = p.result();
-
-        if(flagsDiffer(ai, bi, "disabled"))
-            return true;
-
-        if(flagsDiffer(ai, bi, "repeating"))
-            return true;
 
         if(ai != bi)
             return true;
@@ -1183,12 +1166,6 @@ static bool visualisationsDiffer(const QStringList& a, const QStringList& b)
 
         if(p.parse(b[i]))
             bi = p.result();
-
-        if(flagsDiffer(ai, bi, "disabled"))
-            return true;
-
-        if(flagsDiffer(ai, bi, "invert"))
-            return true;
 
         if(ai != bi)
             return true;

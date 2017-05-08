@@ -112,7 +112,7 @@ public:
     QVariantMap visualisationDefaultParameters(const QString& attributeName,
                                                const QString& channelName) const;
 
-    QStringList attributeNames(ElementType elementType = ElementType::All) const;
+    std::vector<QString> attributeNames(ElementType elementType = ElementType::All) const;
 
     Attribute& createAttribute(const QString& name);
     Attribute attributeByName(const QString& name) const;

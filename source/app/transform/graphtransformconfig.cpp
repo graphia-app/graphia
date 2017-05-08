@@ -232,10 +232,16 @@ std::vector<QString> GraphTransformConfig::attributeNames() const
 
 bool GraphTransformConfig::operator==(const GraphTransformConfig& other) const
 {
-    // Note: _flags is deliberately ignored
-    // when comparing GraphTransformConfigs
+    // These flags do not cause a change in a transform's effect,
+    // so ignore them for comparison purposes
+    const std::vector<QString> flagsToIgnore = {"locked", "pinned"};
+
+    auto flags = u::setDifference(_flags, flagsToIgnore);
+    auto otherFlags = u::setDifference(other._flags, flagsToIgnore);
+
     return _action == other._action &&
-            _parameters == other._parameters &&
+            !u::setsDiffer(_parameters, other._parameters) &&
+            !u::setsDiffer(flags, otherFlags) &&
             _condition == other._condition;
 }
 

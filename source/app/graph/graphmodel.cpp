@@ -422,14 +422,14 @@ QVariantMap GraphModel::visualisationDefaultParameters(const QString& attributeN
     return channel->defaultParameters(attribute.valueType());
 }
 
-QStringList GraphModel::attributeNames(ElementType elementType) const
+std::vector<QString> GraphModel::attributeNames(ElementType elementType) const
 {
-    QStringList attributeNames;
+    std::vector<QString> attributeNames;
 
     for(auto& attribute : _attributes)
     {
         if(Flags<ElementType>(elementType).test(attribute.second.elementType()))
-            attributeNames.append(attribute.first);
+            attributeNames.emplace_back(attribute.first);
     }
 
     return attributeNames;
