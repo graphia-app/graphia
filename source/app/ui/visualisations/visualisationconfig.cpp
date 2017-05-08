@@ -58,7 +58,8 @@ bool VisualisationConfig::operator==(const VisualisationConfig& other) const
 {
     return _attributeName == other._attributeName &&
            _channelName == other._channelName &&
-           !u::setsDiffer(_parameters, other._parameters);
+           !u::setsDiffer(_parameters, other._parameters) &&
+           !u::setsDiffer(_flags, other._flags);
 }
 
 bool VisualisationConfig::operator!=(const VisualisationConfig& other) const
