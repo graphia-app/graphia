@@ -1020,13 +1020,6 @@ static bool flagsDiffer(const Config& a,
     return aResult != bResult;
 }
 
-template<typename Config>
-static bool parametersDiffer(const Config& a,
-                             const Config& b)
-{
-    return a._parameters != b._parameters;
-}
-
 // This tests two transform lists to determine if replacing one with the
 // other would actually result in a different transformation
 static bool transformsDiffer(const QStringList& a, const QStringList& b)
@@ -1050,9 +1043,6 @@ static bool transformsDiffer(const QStringList& a, const QStringList& b)
             return true;
 
         if(flagsDiffer(ai, bi, "repeating"))
-            return true;
-
-        if(parametersDiffer(ai, bi))
             return true;
 
         if(ai != bi)
@@ -1198,9 +1188,6 @@ static bool visualisationsDiffer(const QStringList& a, const QStringList& b)
             return true;
 
         if(flagsDiffer(ai, bi, "invert"))
-            return true;
-
-        if(parametersDiffer(ai, bi))
             return true;
 
         if(ai != bi)

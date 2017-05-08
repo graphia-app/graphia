@@ -57,7 +57,8 @@ QVariantMap VisualisationConfig::asVariantMap() const
 bool VisualisationConfig::operator==(const VisualisationConfig& other) const
 {
     return _attributeName == other._attributeName &&
-            _channelName == other._channelName;
+           _channelName == other._channelName &&
+           _parameters == other._parameters;
 }
 
 bool VisualisationConfig::operator!=(const VisualisationConfig& other) const
