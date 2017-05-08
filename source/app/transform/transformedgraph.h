@@ -7,16 +7,20 @@
 #include "graph/mutablegraph.h"
 #include "shared/graph/grapharray.h"
 
+#include "attributes/attribute.h"
+
 #include <QObject>
 
 #include <functional>
+
+class GraphModel;
 
 class TransformedGraph : public Graph
 {
     Q_OBJECT
 
 public:
-    explicit TransformedGraph(const Graph& source);
+    explicit TransformedGraph(const GraphModel& graphModel, const Graph& source);
 
     void enableAutoRebuild() { _autoRebuild = true; rebuild(); }
     void addTransform(std::unique_ptr<const GraphTransform> t) { _transforms.emplace_back(std::move(t)); }
@@ -50,6 +54,8 @@ public:
     void update() { _target.update(); }
 
 private:
+    const GraphModel* _graphModel = nullptr;
+
     const Graph* _source;
     std::vector<std::unique_ptr<const GraphTransform>> _transforms;
 
@@ -59,6 +65,22 @@ private:
     //   2. The signals the target emits must be intercepted before being
     //      passed on to other parts of the application
     MutableGraph _target;
+
+    struct Result
+    {
+        Result() = default;
+        Result(Result&& other) :
+            _config(std::move(other._config)),
+            _graph(std::move(other._graph)),
+            _newAttributes(std::move(other._newAttributes))
+        {}
+
+        GraphTransformConfig _config;
+        std::unique_ptr<MutableGraph> _graph;
+        std::vector<Attribute> _newAttributes;
+    };
+
+    std::vector<Result> _cache;
 
     bool _graphChangeOccurred = false;
     bool _autoRebuild = false;

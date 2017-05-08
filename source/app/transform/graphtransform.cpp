@@ -3,12 +3,6 @@
 
 #include "graph/graph.h"
 
-bool GraphTransform::applyFromSource(const Graph& source, TransformedGraph& target) const
-{
-    target.cloneFrom(source);
-    return applyAndUpdate(target);
-}
-
 bool GraphTransform::applyAndUpdate(TransformedGraph& target) const
 {
     bool anyChange = false;

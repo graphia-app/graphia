@@ -140,6 +140,20 @@ namespace u
         return result;
     }
 
+    template<typename C>
+    C setDifference(const C& a, const C& b)
+    {
+        C result;
+
+        for(const auto& value : a)
+        {
+            if(!contains(b, value))
+                result.push_back(value);
+        }
+
+        return result;
+    }
+
     template<typename T,
              template<typename, typename...> class C1, typename... Args1,
              template<typename, typename...> class C2, typename... Args2>

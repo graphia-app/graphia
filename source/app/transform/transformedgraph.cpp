@@ -1,14 +1,16 @@
 #include "transformedgraph.h"
 
 #include "graph/componentmanager.h"
+#include "graph/graphmodel.h"
 
 #include "shared/utils/utils.h"
 #include "shared/utils/iterator_range.h"
 
 #include <functional>
 
-TransformedGraph::TransformedGraph(const Graph& source) :
+TransformedGraph::TransformedGraph(const GraphModel& graphModel, const Graph& source) :
     Graph(),
+    _graphModel(&graphModel),
     _source(&source),
     _nodesState(source),
     _edgesState(source),
@@ -57,21 +59,31 @@ void TransformedGraph::rebuild()
     {
         _graphChangeOccurred = false;
 
-        if(_transforms.empty())
+        bool changed = false;
+        std::vector<Result> newCache;
+        cloneFrom(*_source);
+
+        for(const auto& transform : _transforms)
         {
-            // Effectively behave like an identity transform
-            cloneFrom(*_source);
-            return false;
+            Result result;
+            result._config = transform->config();
+
+            auto attributeNames = _graphModel->attributeNames();
+
+            if(transform->applyAndUpdate(*this))
+            {
+                result._graph = std::make_unique<MutableGraph>();
+                result._graph->cloneFrom(_target);
+                changed = true;
+            }
+
+            for(const auto& attributeName : u::setDifference(_graphModel->attributeNames(), attributeNames))
+                result._newAttributes.emplace_back(_graphModel->attributeByName(attributeName));
+
+            newCache.emplace_back(std::move(result));
         }
 
-        const auto& firstTransform = _transforms.front();
-
-        // We can only use applyFromSource for the first transformation...
-        bool changed = firstTransform->applyFromSource(*_source, *this);
-
-        // ...thereafter we use the inplace one
-        for(const auto& transform : make_iterator_range(_transforms.begin() + 1, _transforms.end()))
-            changed = transform->applyAndUpdate(*this) || changed;
+        _cache = std::move(newCache);
 
         return changed;
     });

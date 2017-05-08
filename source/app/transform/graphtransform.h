@@ -26,10 +26,6 @@ public:
     GraphTransform() = default;
     virtual ~GraphTransform() = default;
 
-    // In some circumstances it may be a performance win to reimplement this instead of going
-    // for the inplace transform version
-    virtual bool applyFromSource(const Graph& source, TransformedGraph& target) const;
-
     virtual bool apply(TransformedGraph&) const { return false; }
     bool applyAndUpdate(TransformedGraph& target) const;
 

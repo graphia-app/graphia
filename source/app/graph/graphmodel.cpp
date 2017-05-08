@@ -31,7 +31,7 @@
 
 GraphModel::GraphModel(QString name, IPlugin* plugin) :
     _graph(),
-    _transformedGraph(_graph),
+    _transformedGraph(*this, _graph),
     _nodePositions(_graph),
     _nodeVisuals(_graph),
     _edgeVisuals(_graph),
@@ -428,7 +428,7 @@ QStringList GraphModel::attributeNames(ElementType elementType) const
 
     for(auto& attribute : _attributes)
     {
-        if(attribute.second.elementType() == elementType)
+        if(Flags<ElementType>(elementType).test(attribute.second.elementType()))
             attributeNames.append(attribute.first);
     }
 
