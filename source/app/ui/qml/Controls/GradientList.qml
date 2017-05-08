@@ -31,7 +31,7 @@ Window
     minimumWidth: 250 + 2 * Constants.margin
     maximumWidth: 500
 
-    height: 500 + 2 * Constants.margin
+    height: 520 + 2 * Constants.margin
     minimumHeight: height
     maximumHeight: height
 
@@ -92,11 +92,15 @@ Window
                     gradientListRepeater.model.insert(0, {"gradientObj": gradientPickerItem.currentGradient});
                 }
             }
+
             Text
             {
-                visible: gradientListRepeater.count >= 32;
-                text: qsTr("Reached saved gradients limit");
+                visible: true
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                text: qsTr("Left click bar to add a stop. Right click a stop to delete.\nDouble click a stop to choose colour.");
             }
+
         }
 
         ScrollView
@@ -163,13 +167,20 @@ Window
                     }
                 }
             }
-
         }
 
         RowLayout
         {
             Layout.alignment: Qt.AlignRight
             anchors.right: parent.right
+            Text
+            {
+                visible: gradientListRepeater.count >= 32
+                Layout.alignment: Qt.AlignLeft
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                text: qsTr("Saved gradients limit reached");
+            }
             Button
             {
                 Layout.alignment: Qt.AlignRight
