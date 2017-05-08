@@ -11,6 +11,7 @@ import "Utils.js" as Utils
 
 import "Loading"
 import "Options"
+import "Controls"
 
 ApplicationWindow
 {

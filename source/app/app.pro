@@ -119,6 +119,7 @@ HEADERS += \
     transform/mcltransform.h \
     transform/pageranktransform.h \
     transform/eccentricitytransform.h \
+    ui/visualisations/defaultgradients.h \
     attributes/availableattributesmodel.h
 
 SOURCES += \

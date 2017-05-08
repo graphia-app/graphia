@@ -21,17 +21,17 @@ Item
     property color hoverColor
     property color textColor: enabledMenuItem.checked ? enabledTextColor : disabledTextColor
 
-    property var gradientPicker
+    property var gradientList
     Connections
     {
-        target: gradientPicker
+        target: gradientList
 
         onConfigurationChanged:
         {
-            if(gradientPicker.visualisationIndex !== index)
+            if(gradientList.visualisationIndex !== index)
                 return;
 
-            parameters["gradient"] = Utils.escapeQuotes(gradientPicker.configuration);
+            parameters["gradient"] = Utils.escapeQuotes(gradientList.configuration);
             root.updateExpression();
         }
     }
@@ -145,8 +145,9 @@ Item
 
             onClicked:
             {
-                gradientPicker.visualisationIndex = index;
-                gradientPicker.show();
+                gradientList.visualisationIndex = index;
+                gradientList.selected = gradientKey.configuration;
+                gradientList.show();
             }
         }
 

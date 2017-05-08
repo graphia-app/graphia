@@ -17,6 +17,7 @@
 #include "application.h"
 #include "ui/document.h"
 #include "ui/graphquickitem.h"
+#include "ui/visualisations/defaultgradients.h"
 
 #include "shared/utils/threadpool.h"
 #include "shared/utils/preferences.h"
@@ -128,6 +129,7 @@ int main(int argc, char *argv[])
     preferences.define("visuals/edgeVisualType",                QVariant::fromValue(static_cast<int>(EdgeVisualType::Cylinder)));
     preferences.define("visuals/textAlignment",                 QVariant::fromValue(static_cast<int>(TextAlignment::Right)));
     preferences.define("visuals/showMultiElementIndicators",    true);
+   preferences.define("visuals/savedGradients",                 DEFAULT_GRADIENTS);
 
     preferences.define("visuals/minimumComponentRadius",        2.0, 0.05, 15.0);
     preferences.define("visuals/transitionTime",                1.0, 0.1, 5.0);
@@ -137,7 +139,6 @@ int main(int argc, char *argv[])
 
     preferences.define("misc/focusFoundNodes",                  true);
     preferences.define("misc/focusFoundComponents",             false);
-
     QQmlApplicationEngine engine;
     engine.addImportPath("qrc:///qml");
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));

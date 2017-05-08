@@ -9,9 +9,10 @@ Item
     id: root
 
     implicitWidth: layout.implicitWidth + _padding
-    implicitHeight: minimumLabel.implicitHeight + _padding
+    implicitHeight: minimumLabel.implicitHeight + _paddingTopBottom
 
     property int _padding: 2 * 4
+    property int _paddingTopBottom: 2 * 4
 
     property int keyWidth
 
@@ -23,9 +24,14 @@ Item
     property color hoverColor
     property color textColor
 
+    property bool selected: false
+
+
     property bool showLabels: true
     property bool invert: false
     property bool propogatePresses: false
+
+    property alias hoverEnabled: mouseArea.hoverEnabled
 
     Component
     {
@@ -74,7 +80,14 @@ Item
         width: root.width
         height: root.height
         radius: 2
-        color: (mouseArea.containsMouse) ? root.hoverColor : "transparent"
+        color:
+        {
+            if(mouseArea.containsMouse && hoverEnabled)
+                return root.hoverColor;
+            else if(selected)
+                return systemPalette.highlight
+            return "transparent";
+        }
     }
 
     RowLayout
@@ -84,7 +97,7 @@ Item
         anchors.centerIn: parent
 
         width: root.width !== undefined ? root.width - _padding : undefined
-        height: root.height !== undefined ? root.height - _padding : undefined
+        height: root.height !== undefined ? root.height - _paddingTopBottom : undefined
 
         Label
         {
