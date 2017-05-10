@@ -450,6 +450,16 @@ Attribute& GraphModel::createAttribute(const QString& name)
     return attribute;
 }
 
+void GraphModel::addAttribute(const QString& name, const Attribute& attribute)
+{
+    _attributes.emplace(name, attribute);
+}
+
+void GraphModel::addAttributes(const std::map<QString, Attribute>& attributes)
+{
+    _attributes.insert(attributes.begin(), attributes.end());
+}
+
 Attribute GraphModel::attributeByName(const QString& name) const
 {
     auto attributeName = Attribute::parseAttributeName(name);

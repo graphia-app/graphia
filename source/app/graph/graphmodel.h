@@ -115,6 +115,8 @@ public:
     std::vector<QString> attributeNames(ElementType elementType = ElementType::All) const;
 
     Attribute& createAttribute(const QString& name);
+    void addAttribute(const QString& name, const Attribute& attribute);
+    void addAttributes(const std::map<QString, Attribute>& attributes);
     Attribute attributeByName(const QString& name) const;
 
     void enableVisualUpdates();

@@ -120,7 +120,8 @@ HEADERS += \
     transform/pageranktransform.h \
     transform/eccentricitytransform.h \
     ui/visualisations/defaultgradients.h \
-    attributes/availableattributesmodel.h
+    attributes/availableattributesmodel.h \
+    transform/transformcache.h
 
 SOURCES += \
     application.cpp \
@@ -193,7 +194,8 @@ SOURCES += \
     transform/mcltransform.cpp \
     transform/pageranktransform.cpp \
     transform/eccentricitytransform.cpp \
-    attributes/availableattributesmodel.cpp
+    attributes/availableattributesmodel.cpp \
+    transform/transformcache.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \

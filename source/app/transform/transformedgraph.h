@@ -2,6 +2,7 @@
 #define TRANSFORMEDGRAPH_H
 
 #include "graphtransform.h"
+#include "transformcache.h"
 
 #include "graph/graph.h"
 #include "graph/mutablegraph.h"
@@ -20,7 +21,7 @@ class TransformedGraph : public Graph
     Q_OBJECT
 
 public:
-    explicit TransformedGraph(const GraphModel& graphModel, const MutableGraph& source);
+    explicit TransformedGraph(GraphModel& graphModel, const MutableGraph& source);
 
     void enableAutoRebuild() { _autoRebuild = true; rebuild(); }
     void addTransform(std::unique_ptr<const GraphTransform> t) { _transforms.emplace_back(std::move(t)); }
@@ -54,7 +55,7 @@ public:
     void update() { _target.update(); }
 
 private:
-    const GraphModel* _graphModel = nullptr;
+    GraphModel* _graphModel = nullptr;
 
     const MutableGraph* _source;
     std::vector<std::unique_ptr<const GraphTransform>> _transforms;
@@ -66,21 +67,7 @@ private:
     //      passed on to other parts of the application
     MutableGraph _target;
 
-    struct Result
-    {
-        Result() = default;
-        Result(Result&& other) :
-            _config(std::move(other._config)),
-            _graph(std::move(other._graph)),
-            _newAttributes(std::move(other._newAttributes))
-        {}
-
-        GraphTransformConfig _config;
-        std::unique_ptr<MutableGraph> _graph;
-        std::vector<Attribute> _newAttributes;
-    };
-
-    std::vector<Result> _cache;
+    TransformCache _cache;
 
     bool _graphChangeOccurred = false;
     bool _autoRebuild = false;

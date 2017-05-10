@@ -8,16 +8,23 @@
 
 #include <functional>
 
-TransformedGraph::TransformedGraph(const GraphModel& graphModel, const MutableGraph& source) :
+TransformedGraph::TransformedGraph(GraphModel& graphModel, const MutableGraph& source) :
     Graph(),
     _graphModel(&graphModel),
     _source(&source),
+    _cache(graphModel),
     _nodesState(source),
     _edgesState(source),
     _previousNodesState(source),
     _previousEdgesState(source)
 {
-    connect(_source, &Graph::graphChanged, [this] { rebuild(); });
+    connect(_source, &Graph::graphChanged, [this]
+    {
+        // If the source graph changes at all, our cache is invalid
+        _cache.clear();
+        rebuild();
+    });
+
     connect(&_target, &Graph::graphChanged, this, &TransformedGraph::onTargetGraphChanged, Qt::DirectConnection);
     enableComponentManagement();
 
@@ -62,14 +69,25 @@ void TransformedGraph::rebuild()
         _graphChangeOccurred = false;
 
         bool changed = false;
-        std::vector<Result> newCache;
+        TransformCache newCache(*_graphModel);
         *this = *_source;
 
         for(const auto& transform : _transforms)
         {
-            Result result;
+            auto& result = newCache.createEntry();
             result._config = transform->config();
 
+            result = _cache.apply(result._config, *this);
+            if(result.isApplicable())
+            {
+                if(result.changesGraph())
+                    changed = true;
+
+                continue;
+            }
+
+            // Save the attribute names before the transform application
+            // so we can see which attributes are created
             auto attributeNames = _graphModel->attributeNames();
 
             if(transform->applyAndUpdate(*this))
@@ -77,12 +95,13 @@ void TransformedGraph::rebuild()
                 result._graph = std::make_unique<MutableGraph>();
                 *result._graph = _target;
                 changed = true;
+
+                // Graph has changed, so the cache is now invalid
+                _cache.clear();
             }
 
             for(const auto& attributeName : u::setDifference(_graphModel->attributeNames(), attributeNames))
-                result._newAttributes.emplace_back(_graphModel->attributeByName(attributeName));
-
-            newCache.emplace_back(std::move(result));
+                result._newAttributes.emplace(attributeName, _graphModel->attributeByName(attributeName));
         }
 
         _cache = std::move(newCache);
