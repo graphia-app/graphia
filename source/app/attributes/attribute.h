@@ -27,10 +27,10 @@ template<typename T> class AttributeRange
 class _AttributeRange
 {
 protected:
-    Attribute& _attribute;
+    Attribute* _attribute = nullptr;
 
 public:
-    explicit _AttributeRange(Attribute& attribute) : _attribute(attribute) {}
+    void setAttribute(Attribute& attribute) { _attribute = &attribute; }
 };
 
 template<>
@@ -94,42 +94,43 @@ class Attribute : public IAttribute
     friend class AttributeNumericRange;
 
 private:
-    ValueFn<int, NodeId> _intNodeIdFn;
-    ValueFn<int, EdgeId> _intEdgeIdFn;
-    ValueFn<int, const IGraphComponent&> _intComponentFn;
+    // Wrap most of the data members in a struct to make it easier to
+    // write/maintain a copy constructor
+    struct
+    {
+        ValueFn<int, NodeId> intNodeIdFn;
+        ValueFn<int, EdgeId> intEdgeIdFn;
+        ValueFn<int, const IGraphComponent&> intComponentFn;
 
-    ValueFn<double, NodeId> _floatNodeIdFn;
-    ValueFn<double, EdgeId> _floatEdgeIdFn;
-    ValueFn<double, const IGraphComponent&> _floatComponentFn;
+        ValueFn<double, NodeId> floatNodeIdFn;
+        ValueFn<double, EdgeId> floatEdgeIdFn;
+        ValueFn<double, const IGraphComponent&> floatComponentFn;
 
-    ValueFn<QString, NodeId> _stringNodeIdFn;
-    ValueFn<QString, EdgeId> _stringEdgeIdFn;
-    ValueFn<QString, const IGraphComponent&> _stringComponentFn;
+        ValueFn<QString, NodeId> stringNodeIdFn;
+        ValueFn<QString, EdgeId> stringEdgeIdFn;
+        ValueFn<QString, const IGraphComponent&> stringComponentFn;
 
-    ValueFn<bool, NodeId> _valueMissingNodeIdFn;
-    ValueFn<bool, EdgeId> _valueMissingEdgeIdFn;
-    ValueFn<bool, const IGraphComponent&> _valueMissingComponentFn;
+        ValueFn<bool, NodeId> valueMissingNodeIdFn;
+        ValueFn<bool, EdgeId> valueMissingEdgeIdFn;
+        ValueFn<bool, const IGraphComponent&> valueMissingComponentFn;
 
-    bool _isValid = false;
+        int intMin = std::numeric_limits<int>::max();
+        int intMax = std::numeric_limits<int>::min();
+        double floatMin = std::numeric_limits<double>::max();
+        double floatMax = std::numeric_limits<double>::min();
+
+        bool isValid = false;
+        Flags<AttributeFlag> flags = AttributeFlag::None;
+        bool searchable = false;
+        QString description;
+    } _;
+
+    AttributeRange<int> _intRange;
+    AttributeRange<double> _floatRange;
+    AttributeNumericRange _numericRange;
 
     void clearValueFunctions();
     void clearMissingFunctions();
-
-    Flags<AttributeFlag> _flags = AttributeFlag::None;
-
-    int _intMin = std::numeric_limits<int>::max();
-    int _intMax = std::numeric_limits<int>::min();
-    AttributeRange<int> _intRange{*this};
-
-    double _floatMin = std::numeric_limits<double>::max();
-    double _floatMax = std::numeric_limits<double>::min();
-    AttributeRange<double> _floatRange{*this};
-
-    AttributeNumericRange _numericRange{*this};
-
-    bool _searchable = false;
-
-    QString _description;
 
     template<typename T> struct Helper {};
 
@@ -168,6 +169,24 @@ private:
     void disableAutoRange();
 
 public:
+    Attribute()
+    {
+        _intRange.setAttribute(*this);
+        _floatRange.setAttribute(*this);
+        _numericRange.setAttribute(*this);
+    }
+
+    Attribute(const Attribute& other) :
+        _(other._),
+        _intRange(other._intRange),
+        _floatRange(other._floatRange),
+        _numericRange(other._numericRange)
+    {
+        _intRange.setAttribute(*this);
+        _floatRange.setAttribute(*this);
+        _numericRange.setAttribute(*this);
+    }
+
     template<typename T, typename E> T valueOf(E& elementId) const
     {
         return valueOf(Helper<T>(), elementId);
@@ -228,7 +247,13 @@ public:
     ElementType elementType() const;
 
     template<typename T>
-    AttributeRange<T> range() { return AttributeRange<T>(*this); }
+    AttributeRange<T> range()
+    {
+        AttributeRange<T> r;
+        r.setAttribute(*this);
+
+        return r;
+    }
 
     IAttributeRange<int>& intRange() { return _intRange; }
     IAttributeRange<double>& floatRange() { return _floatRange; }
@@ -304,16 +329,16 @@ public:
             autoSetRangeForElements<int>(elementIds);
     }
 
-    AttributeFlag flags() const { return *_flags; }
-    bool testFlag(AttributeFlag flag) const { return _flags.test(flag); }
-    Attribute& setFlag(AttributeFlag flag) { _flags.set(flag); return *this; }
-    Attribute& resetFlag(AttributeFlag flag) { _flags.reset(flag); return *this; }
+    AttributeFlag flags() const { return *_.flags; }
+    bool testFlag(AttributeFlag flag) const { return _.flags.test(flag); }
+    Attribute& setFlag(AttributeFlag flag) { _.flags.set(flag); return *this; }
+    Attribute& resetFlag(AttributeFlag flag) { _.flags.reset(flag); return *this; }
 
-    bool searchable() const { return _searchable; }
-    Attribute& setSearchable(bool searchable) { _searchable = searchable; return *this; }
+    bool searchable() const { return _.searchable; }
+    Attribute& setSearchable(bool searchable) { _.searchable = searchable; return *this; }
 
-    QString description() const { return _description; }
-    Attribute& setDescription(const QString& description) { _description = description; return *this; }
+    QString description() const { return _.description; }
+    Attribute& setDescription(const QString& description) { _.description = description; return *this; }
 
     bool isValid() const;
 
