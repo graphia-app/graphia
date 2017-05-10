@@ -33,17 +33,21 @@ Item
 
         alternatingRowColors: false
 
-        onCurrentIndexChanged:
+        Connections
         {
-            if(!root.model)
-                return;
+            target: treeView.selection
+            onSelectionChanged:
+            {
+                if(!root.model)
+                    return;
 
-            if(typeof root.model.get === 'function')
-                root.selectedValue = root.model.get(currentIndex);
-            else if(typeof root.model.data === 'function')
-                root.selectedValue = root.model.data(currentIndex);
-            else
-                root.selectedValue = undefined;
+                if(typeof root.model.get === 'function')
+                    root.selectedValue = root.model.get(target.currentIndex);
+                else if(typeof root.model.data === 'function')
+                    root.selectedValue = root.model.data(target.currentIndex);
+                else
+                    root.selectedValue = undefined;
+            }
         }
     }
 }
