@@ -32,6 +32,11 @@ template<typename T> class ElementIdDistinctSetCollection
 private:
     struct ListNode
     {
+        // Null: none of prev, next or opposite is set
+        // Tail: next is self, opposite set to the head
+        // Head: prev is not set, has an opposite and (next isn't self or opposite is self)
+        // Singleton: prev, next and opposite are self
+
         T _prev;
         T _next;
         T _opposite;
@@ -94,82 +99,87 @@ public:
             highListNode._next = highId;
             highListNode._opposite = lowId;
         }
-        else if(lowListNode.isHead(lowId) && highListNode.isHead(highId))
+        else if(lowId != highId)
         {
-            // Merge two existing lists together
-            auto& tailOne = _list[lowListNode._opposite];
-            tailOne._opposite.setToNull();
-            tailOne._next = highId;
+            // Don't merge if they're the same list
 
-            auto& tailTwo = _list[highListNode._opposite];
-            tailTwo._opposite = lowId;
-
-            highListNode._prev = lowListNode._opposite;
-            lowListNode._opposite = highListNode._opposite;
-
-            highListNode._opposite.setToNull();
-        }
-        else if(highListNode.isHead(highId))
-        {
-            Q_ASSERT(!highListNode._opposite.isNull());
-            Q_ASSERT(lowListNode.isNull());
-            Q_ASSERT(lowListNode._prev.isNull());
-            Q_ASSERT(lowListNode._opposite.isNull());
-
-            // Adding to the head
-            auto& tail = _list[highListNode._opposite];
-            tail._opposite = lowId;
-
-            lowListNode._next = highId;
-            lowListNode._opposite = highListNode._opposite;
-
-            highListNode._prev = lowId;
-            highListNode._opposite.setToNull();
-        }
-        else if(lowListNode.isTail(lowId))
-        {
-            Q_ASSERT(!lowListNode._opposite.isNull());
-            Q_ASSERT(highListNode.isNull());
-            Q_ASSERT(highListNode._prev.isNull());
-            Q_ASSERT(highListNode._opposite.isNull());
-
-            // Adding to the tail
-            auto& head = _list[lowListNode._opposite];
-            head._opposite = highId;
-
-            highListNode._prev = lowId;
-            highListNode._next = highId;
-            highListNode._opposite = lowListNode._opposite;
-
-            lowListNode._next = highId;
-            lowListNode._opposite.setToNull();
-        }
-        else
-        {
-            // Adding in the middle
-            if(!lowListNode.isNull())
+            if(lowListNode.isHead(lowId) && highListNode.isHead(highId))
             {
-                Q_ASSERT(highListNode.isNull());
-                Q_ASSERT(!lowListNode._next.isNull());
-                auto& next = _list[lowListNode._next];
+                // Merge two existing lists together
+                auto& tailOne = _list[lowListNode._opposite];
+                tailOne._opposite.setToNull();
+                tailOne._next = highId;
 
-                highListNode._prev = lowId;
-                highListNode._next = lowListNode._next;
+                auto& tailTwo = _list[highListNode._opposite];
+                tailTwo._opposite = lowId;
 
-                lowListNode._next = highId;
-                next._prev = highId;
+                highListNode._prev = lowListNode._opposite;
+                lowListNode._opposite = highListNode._opposite;
+
+                highListNode._opposite.setToNull();
             }
-            else if(!highListNode.isNull())
+            else if(highListNode.isHead(highId))
             {
+                Q_ASSERT(!highListNode._opposite.isNull());
                 Q_ASSERT(lowListNode.isNull());
-                Q_ASSERT(!highListNode._prev.isNull());
-                auto& prev = _list[highListNode._prev];
+                Q_ASSERT(lowListNode._prev.isNull());
+                Q_ASSERT(lowListNode._opposite.isNull());
 
-                lowListNode._prev = highListNode._prev;
+                // Adding to the head
+                auto& tail = _list[highListNode._opposite];
+                tail._opposite = lowId;
+
                 lowListNode._next = highId;
+                lowListNode._opposite = highListNode._opposite;
 
                 highListNode._prev = lowId;
-                prev._next = lowId;
+                highListNode._opposite.setToNull();
+            }
+            else if(lowListNode.isTail(lowId))
+            {
+                Q_ASSERT(!lowListNode._opposite.isNull());
+                Q_ASSERT(highListNode.isNull());
+                Q_ASSERT(highListNode._prev.isNull());
+                Q_ASSERT(highListNode._opposite.isNull());
+
+                // Adding to the tail
+                auto& head = _list[lowListNode._opposite];
+                head._opposite = highId;
+
+                highListNode._prev = lowId;
+                highListNode._next = highId;
+                highListNode._opposite = lowListNode._opposite;
+
+                lowListNode._next = highId;
+                lowListNode._opposite.setToNull();
+            }
+            else
+            {
+                // Adding in the middle
+                if(!lowListNode.isNull())
+                {
+                    Q_ASSERT(highListNode.isNull());
+                    Q_ASSERT(!lowListNode._next.isNull());
+                    auto& next = _list[lowListNode._next];
+
+                    highListNode._prev = lowId;
+                    highListNode._next = lowListNode._next;
+
+                    lowListNode._next = highId;
+                    next._prev = highId;
+                }
+                else if(!highListNode.isNull())
+                {
+                    Q_ASSERT(lowListNode.isNull());
+                    Q_ASSERT(!highListNode._prev.isNull());
+                    auto& prev = _list[highListNode._prev];
+
+                    lowListNode._prev = highListNode._prev;
+                    lowListNode._next = highId;
+
+                    highListNode._prev = lowId;
+                    prev._next = lowId;
+                }
             }
         }
 
