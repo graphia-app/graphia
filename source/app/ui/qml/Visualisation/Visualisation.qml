@@ -162,6 +162,9 @@ Item
 
     function toggle()
     {
+        if(!enabledMenuItem.enabled)
+            return;
+
         setFlag("disabled", !isFlagSet("disabled"));
         updateExpression();
     }
