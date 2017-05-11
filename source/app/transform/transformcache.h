@@ -53,6 +53,7 @@ public:
     bool empty() const { return _cache.empty(); }
     void clear() { _cache.clear(); }
     void add(Result&& result);
+    void attributeAdded(const QString& attributeName);
     Result apply(const GraphTransformConfig& config, TransformedGraph& graph);
 };
 
