@@ -93,7 +93,7 @@ private:
     void eraseComponentArray(IGraphArray* componentArray);
 
 private slots:
-    void onGraphChanged(const Graph* graph);
+    void onGraphChanged(const Graph* graph, bool changeOccurred);
 
 public:
     const std::vector<ComponentId>& componentIds() const;

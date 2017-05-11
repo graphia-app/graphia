@@ -354,10 +354,13 @@ void ComponentManager::removeGraphComponent(ComponentId componentId)
     }
 }
 
-void ComponentManager::onGraphChanged(const Graph* graph)
+void ComponentManager::onGraphChanged(const Graph* graph, bool changeOccurred)
 {
-    graph->setPhase(tr("Componentising"));
-    update(graph);
+    if(changeOccurred)
+    {
+        graph->setPhase(tr("Componentising"));
+        update(graph);
+    }
 }
 
 #include <chrono>
