@@ -4,7 +4,6 @@
 #include "graph/graphmodel.h"
 
 #include "shared/utils/utils.h"
-#include "shared/utils/iterator_range.h"
 
 #include <functional>
 
@@ -74,7 +73,7 @@ void TransformedGraph::rebuild()
 
         for(const auto& transform : _transforms)
         {
-            auto& result = newCache.createEntry();
+            TransformCache::Result result;
             result._config = transform->config();
 
             result = _cache.apply(result._config, *this);
@@ -83,6 +82,7 @@ void TransformedGraph::rebuild()
                 if(result.changesGraph())
                     changed = true;
 
+                newCache.add(std::move(result));
                 continue;
             }
 
@@ -102,6 +102,8 @@ void TransformedGraph::rebuild()
 
             for(const auto& attributeName : u::setDifference(_graphModel->attributeNames(), attributeNames))
                 result._newAttributes.emplace(attributeName, _graphModel->attributeByName(attributeName));
+
+            newCache.add(std::move(result));
         }
 
         _cache = std::move(newCache);

@@ -11,7 +11,7 @@ class TransformedGraph;
 
 class TransformCache
 {
-private:
+public:
     struct Result
     {
         Result() = default;
@@ -39,7 +39,6 @@ private:
         std::map<QString, Attribute> _newAttributes;
     };
 
-public:
     using ResultSet = std::vector<Result>;
 
 private:
@@ -52,10 +51,8 @@ public:
     TransformCache& operator=(TransformCache&& other);
 
     bool empty() const { return _cache.empty(); }
-
-    Result& createEntry();
     void clear() { _cache.clear(); }
-
+    void add(Result&& result);
     Result apply(const GraphTransformConfig& config, TransformedGraph& graph);
 };
 

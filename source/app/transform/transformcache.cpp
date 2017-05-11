@@ -4,6 +4,8 @@
 #include "graph/mutablegraph.h"
 #include "transform/transformedgraph.h"
 
+#include "shared/utils/iterator_range.h"
+
 #include <algorithm>
 
 TransformCache::TransformCache(GraphModel& graphModel) :
@@ -30,15 +32,13 @@ static bool setChangesGraph(const TransformCache::ResultSet& entrySet)
     });
 }
 
-TransformCache::Result& TransformCache::createEntry()
+void TransformCache::add(TransformCache::Result&& result)
 {
     if(_cache.empty() || setChangesGraph(_cache.back()))
         _cache.emplace_back();
 
-    TransformCache::ResultSet& entrySet = _cache.back();
-    entrySet.emplace_back();
-
-    return entrySet.back();
+    TransformCache::ResultSet& resultSet = _cache.back();
+    resultSet.emplace_back(std::move(result));
 }
 
 TransformCache::Result TransformCache::apply(const GraphTransformConfig& config, TransformedGraph& graph)
@@ -49,19 +49,19 @@ TransformCache::Result TransformCache::apply(const GraphTransformConfig& config,
     if(_cache.empty())
         return result;
 
-    auto& entrySet = _cache.front();
+    auto& resultSet = _cache.front();
 
-    for(auto it = entrySet.begin(); it != entrySet.end(); it++)
+    auto it = resultSet.begin();
+    for(auto& cachedResult : make_iterator_range(it, resultSet.end()))
     {
-        if(it->_config == config)
+        if(cachedResult._config == config)
         {
             // Apply the cached result
-            _graphModel->addAttributes(it->_newAttributes);
-            if(it->_graph != nullptr)
-                graph = *(it->_graph);
+            _graphModel->addAttributes(cachedResult._newAttributes);
+            if(cachedResult._graph != nullptr)
+                graph = *(cachedResult._graph);
 
-            // Assign the result to the new cache
-            result = std::move(*it);
+            result = std::move(cachedResult);
 
             if(result._graph != nullptr)
             {
@@ -71,7 +71,7 @@ TransformCache::Result TransformCache::apply(const GraphTransformConfig& config,
             else
             {
                 // ...otherwise just remove the specific entry
-                entrySet.erase(it);
+                resultSet.erase(it);
             }
 
             break;
