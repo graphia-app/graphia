@@ -453,6 +453,8 @@ Window
     {
         transformExpression.text = "";
         transformsList.model = document.availableTransformNames();
+        lhsAttributeList.model = rhsAttributeList.model = undefined;
+        opList.model = undefined;
         parametersRepeater.model = undefined;
         _transform = undefined;
     }
