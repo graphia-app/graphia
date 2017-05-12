@@ -30,7 +30,7 @@ QString ApplyTransformationsCommand::verb() const
 
 void ApplyTransformationsCommand::doTransform(const QStringList& transformations)
 {
-    _graphModel->buildTransforms(transformations);
+    _graphModel->buildTransforms(transformations, this);
 
     _document->executeOnMainThread([this, transformations]
     {

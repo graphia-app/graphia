@@ -3,6 +3,8 @@
 #include "graph/componentmanager.h"
 #include "graph/graphmodel.h"
 
+#include "shared/commands/icommand.h"
+
 #include "shared/utils/utils.h"
 
 #include <functional>
@@ -42,6 +44,12 @@ TransformedGraph::TransformedGraph(GraphModel& graphModel, const MutableGraph& s
     addTransform(std::make_unique<IdentityTransform>());
 }
 
+void TransformedGraph::setProgress(int progress)
+{
+    if(_command != nullptr)
+        _command->setProgress(progress);
+}
+
 void TransformedGraph::reserve(const Graph& other)
 {
     _target.reserve(other);
@@ -73,6 +81,8 @@ void TransformedGraph::rebuild()
 
         for(const auto& transform : _transforms)
         {
+            setProgress(-1); // Indetermindate by default
+
             TransformCache::Result result;
             result._config = transform->config();
 

@@ -29,6 +29,7 @@
 
 class SelectionManager;
 class SearchManager;
+class ICommand;
 
 using NodeVisuals = NodeArray<ElementVisual>;
 using EdgeVisuals = EdgeArray<ElementVisual>;
@@ -89,7 +90,7 @@ public:
     QString pluginQmlPath() const { return _plugin->qmlPath(); }
 
     bool graphTransformIsValid(const QString& transform) const;
-    void buildTransforms(const QStringList& transforms);
+    void buildTransforms(const QStringList& transforms, ICommand* command = nullptr);
 
     QStringList availableTransformNames() const;
     const GraphTransformFactory* transformFactory(const QString& transformName) const;

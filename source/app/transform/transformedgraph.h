@@ -15,6 +15,7 @@
 #include <functional>
 
 class GraphModel;
+class ICommand;
 
 class TransformedGraph : public Graph
 {
@@ -26,6 +27,8 @@ public:
     void enableAutoRebuild() { _autoRebuild = true; rebuild(); }
     void addTransform(std::unique_ptr<const GraphTransform> t) { _transforms.emplace_back(std::move(t)); }
     void clearTransforms() { _transforms.clear(); }
+
+    void setCommand(ICommand* command) { _command = command; }
 
     const std::vector<NodeId>& nodeIds() const { return _target.nodeIds(); }
     int numNodes() const { return _target.numNodes(); }
@@ -46,6 +49,8 @@ public:
     void setPhase(const QString& phase) const { _source->setPhase(phase); }
     void clearPhase() const { _source->clearPhase(); }
     QString phase() const { return _source->phase(); }
+
+    void setProgress(int progress);
 
     MutableGraph& mutableGraph() { return _target; }
 
@@ -71,6 +76,7 @@ private:
 
     bool _graphChangeOccurred = false;
     bool _autoRebuild = false;
+    ICommand* _command = nullptr;
 
     class State
     {

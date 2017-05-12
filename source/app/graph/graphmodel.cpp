@@ -19,6 +19,8 @@
 #include "ui/visualisations/visualisationconfigparser.h"
 #include "ui/visualisations/visualisationbuilder.h"
 
+#include "shared/commands/icommand.h"
+
 #include "shared/utils/enumreflection.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/utils.h"
@@ -155,9 +157,10 @@ bool GraphModel::graphTransformIsValid(const QString& transform) const
     return false;
 }
 
-void GraphModel::buildTransforms(const QStringList& transforms)
+void GraphModel::buildTransforms(const QStringList& transforms, ICommand* command)
 {
     _transformedGraph.clearTransforms();
+    _transformedGraph.setCommand(command);
     _transformInfos.clear();
     for(int index = 0; index < transforms.size(); index++)
     {
@@ -190,6 +193,7 @@ void GraphModel::buildTransforms(const QStringList& transforms)
     }
 
     _transformedGraph.enableAutoRebuild();
+    _transformedGraph.setCommand(nullptr);
 }
 
 QStringList GraphModel::availableTransformNames() const
