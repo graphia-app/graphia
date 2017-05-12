@@ -258,13 +258,13 @@ public:
     Q_INVOKABLE void updateGraphTransforms();
     Q_INVOKABLE void moveGraphTransform(int from, int to);
 
-    Q_INVOKABLE QStringList availableVisualisationChannelNames(const QString& attributeName) const;
+    Q_INVOKABLE QStringList availableVisualisationChannelNames(int valueType) const;
     Q_INVOKABLE QString visualisationDescription(const QString& attributeName, const QString& channelName) const;
     Q_INVOKABLE bool hasVisualisationInfo() const;
     Q_INVOKABLE QVariantMap visualisationInfoAtIndex(int index) const;
 
     Q_INVOKABLE QVariantMap parseVisualisation(const QString& visualisation) const;
-    Q_INVOKABLE QVariantMap visualisationDefaultParameters(const QString& attributeName,
+    Q_INVOKABLE QVariantMap visualisationDefaultParameters(int valueType,
                                                            const QString& channelName) const;
     Q_INVOKABLE bool visualisationIsValid(const QString& visualisation) const;
     Q_INVOKABLE void appendVisualisation(const QString& visualisation);

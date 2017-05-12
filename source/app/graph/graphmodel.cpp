@@ -366,15 +366,13 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
     updateVisuals();
 }
 
-QStringList GraphModel::availableVisualisationChannelNames(const QString& attributeName) const
+QStringList GraphModel::availableVisualisationChannelNames(ValueType valueType) const
 {
     QStringList stringList;
 
-    auto attribute = attributeByName(attributeName);
-
     for(auto& t : _visualisationChannels)
     {
-        if(t.second->supports(attribute.valueType()))
+        if(t.second->supports(valueType))
             stringList.append(t.first);
     }
 
@@ -415,15 +413,14 @@ const VisualisationInfo& GraphModel::visualisationInfoAtIndex(int index) const
     return nullVisualisationInfo;
 }
 
-QVariantMap GraphModel::visualisationDefaultParameters(const QString& attributeName, const QString& channelName) const
+QVariantMap GraphModel::visualisationDefaultParameters(ValueType valueType, const QString& channelName) const
 {
-    if(!u::contains(_attributes, attributeName) || !u::contains(_visualisationChannels, channelName))
+    if(!u::contains(_visualisationChannels, channelName))
         return {};
 
-    auto attribute = attributeByName(attributeName);
     auto& channel = _visualisationChannels.at(channelName);
 
-    return channel->defaultParameters(attribute.valueType());
+    return channel->defaultParameters(valueType);
 }
 
 std::vector<QString> GraphModel::attributeNames(ElementType elementType) const

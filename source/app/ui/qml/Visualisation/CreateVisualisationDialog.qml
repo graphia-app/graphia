@@ -40,7 +40,8 @@ Window
 
                 onSelectedValueChanged:
                 {
-                    channelList.model = document.availableVisualisationChannelNames(selectedValue);
+                    var attribute = document.attribute(selectedValue);
+                    channelList.model = document.availableVisualisationChannelNames(attribute.valueType);
                     description.update();
                     updateVisualisationExpression();
                 }
@@ -149,7 +150,8 @@ Window
     {
         var expression = "\"" + attributeList.selectedValue + "\" \"" + channelList.selectedValue +"\"";
 
-        var parameters = document.visualisationDefaultParameters(attributeList.selectedValue,
+        var attribute = document.attribute(attributeList.selectedValue);
+        var parameters = document.visualisationDefaultParameters(attribute.valueType,
                                                                  channelList.selectedValue);
 
         if(Object.keys(parameters).length !== 0)

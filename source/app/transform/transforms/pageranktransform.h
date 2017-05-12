@@ -41,6 +41,10 @@ public:
     {
         return {};
     }
+    DeclaredAttributes declaredAttributes() const
+    {
+        return {{"Node PageRank", {ValueType::Float, QObject::tr("Colour")}}};
+    }
 
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const;
 };

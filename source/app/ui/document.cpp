@@ -840,6 +840,16 @@ QVariantMap Document::transform(const QString& transformName) const
             parameters.insert(parameter.first, parameterMap);
         }
         map.insert("parameters", parameters);
+
+        QVariantMap declaredAttributes;
+        for(const auto& declaredAttribute : transformFactory->declaredAttributes())
+        {
+            QVariantMap declaredAttributeMap;
+            declaredAttributeMap.insert("valueType", static_cast<int>(declaredAttribute.second._valueType));
+            declaredAttributeMap.insert("defaultVisualisation", declaredAttribute.second._defaultVisualisation);
+            declaredAttributes.insert(declaredAttribute.first, declaredAttributeMap);
+        }
+        map.insert("declaredAttributes", declaredAttributes);
     }
 
     return map;
@@ -1065,9 +1075,10 @@ void Document::moveGraphTransform(int from, int to)
         _graphTransforms, newGraphTransforms));
 }
 
-QStringList Document::availableVisualisationChannelNames(const QString& attributeName) const
+QStringList Document::availableVisualisationChannelNames(int valueType) const
 {
-    return _graphModel != nullptr ? _graphModel->availableVisualisationChannelNames(attributeName) : QStringList();
+    return _graphModel != nullptr ? _graphModel->availableVisualisationChannelNames(
+                                        static_cast<ValueType>(valueType)) : QStringList();
 }
 
 QString Document::visualisationDescription(const QString& attributeName, const QString& channelName) const
@@ -1125,10 +1136,11 @@ QVariantMap Document::parseVisualisation(const QString& visualisation) const
     return {};
 }
 
-QVariantMap Document::visualisationDefaultParameters(const QString& attributeName,
+QVariantMap Document::visualisationDefaultParameters(int valueType,
                                                      const QString& channelName) const
 {
-    return _graphModel != nullptr ? _graphModel->visualisationDefaultParameters(attributeName, channelName) : QVariantMap();
+    return _graphModel != nullptr ? _graphModel->visualisationDefaultParameters(
+        static_cast<ValueType>(valueType), channelName) : QVariantMap();
 }
 
 bool Document::visualisationIsValid(const QString& visualisation) const

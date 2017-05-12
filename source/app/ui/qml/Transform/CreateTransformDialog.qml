@@ -25,9 +25,12 @@ Window
 
     property var document
     property string transformExpression
+    property var defaultVisualisations
 
     property var _transform: undefined
     property int _numParameters: _transform !== undefined ? Object.keys(_transform.parameters).length : 0
+    property int _numDeclaredAttributes: _transform !== undefined ?
+                                         Object.keys(_transform.declaredAttributes).length : 0
 
     ColumnLayout
     {
@@ -53,6 +56,10 @@ Window
                     {
                         parametersRepeater.model = [];
                         parameters._values = {};
+
+                        declaredAttributesRepeater.model = [];
+                        declaredAttributes._visualisations = {};
+
                         root._transform = document.transform(selectedValue);
                         lhsAttributeList.model = document.availableAttributes(root._transform.elementType);
                         valueRadioButton.checked = true;
@@ -60,6 +67,9 @@ Window
 
                         if(_transform.parameters !== undefined)
                             parametersRepeater.model = Object.keys(_transform.parameters);
+
+                        if(_transform.declaredAttributes !== undefined)
+                            declaredAttributesRepeater.model = Object.keys(_transform.declaredAttributes);
                     }
 
                     description.update();
@@ -77,7 +87,7 @@ Window
 
                 Label
                 {
-                    visible: !parameters.visible && !condition.visible
+                    visible: !parameters.visible && !declaredAttributes.visible && !condition.visible
                     Layout.fillWidth: visible
                     Layout.fillHeight: visible
 
@@ -158,6 +168,86 @@ Window
                             return "\"\"";
 
                         return transformParameter.value;
+                    }
+                }
+
+                ColumnLayout
+                {
+                    id: declaredAttributes
+                    visible: _transform !== undefined && _numDeclaredAttributes > 0
+
+                    Layout.fillWidth: visible
+                    spacing: 20
+
+                    property var _visualisations
+
+                    Label
+                    {
+                        Layout.alignment: Qt.AlignTop
+                        font.italic: true
+                        font.bold: true
+                        text: qsTr("Visualisations")
+                    }
+
+                    Repeater
+                    {
+                        id: declaredAttributesRepeater
+
+                        delegate: Component
+                        {
+                            ColumnLayout
+                            {
+                                property var declaredAttribute: _transform !== undefined ?
+                                    _transform.declaredAttributes[modelData] : undefined
+
+                                RowLayout
+                                {
+                                    Layout.fillWidth: true
+
+                                    Label
+                                    {
+                                        text: modelData
+                                    }
+
+                                    ComboBox
+                                    {
+                                        id: visualisationsComboBox
+                                        editable: false
+                                        onCurrentIndexChanged:
+                                        {
+                                            var value = currentText;
+                                            if(value === "None")
+                                                value = "";
+
+                                            declaredAttributes._visualisations[modelData] = value;
+                                        }
+                                    }
+
+                                    Item { Layout.fillWidth: true }
+                                }
+
+                                Component.onCompleted:
+                                {
+                                    var visualisationChannelNames = document.availableVisualisationChannelNames(declaredAttribute.valueType);
+                                    visualisationsComboBox.model = ["None"].concat(visualisationChannelNames);
+                                    visualisationsComboBox.currentIndex = visualisationsComboBox.model.indexOf(declaredAttribute.defaultVisualisation);
+                                    declaredAttributes._visualisations[modelData] = declaredAttribute.defaultVisualisation;
+                                }
+                            }
+                        }
+                    }
+
+                    function selectedVisualisation(attributeName)
+                    {
+                        if(_visualisations === undefined)
+                            return "";
+
+                        var visualisationChannelName = _visualisations[attributeName];
+
+                        if(visualisationChannelName === undefined)
+                            return "";
+
+                        return visualisationChannelName;
                     }
                 }
 
@@ -416,7 +506,7 @@ Window
         {
             expression += "\"" + transformsList.selectedValue + "\"";
 
-            if(Object.keys(_transform.parameters).length > 0)
+            if(parameters !== undefined && Object.keys(_transform.parameters).length > 0)
             {
                 expression += " with";
 
@@ -442,16 +532,50 @@ Window
         transformExpression = expression;
     }
 
+    function updateDefaultVisualisations()
+    {
+        defaultVisualisations = [];
+
+        Object.keys(_transform.declaredAttributes).forEach(function(attributeName)
+        {
+            var channelName = declaredAttributes.selectedVisualisation(attributeName);
+
+            if(channelName.length > 0)
+            {
+                var expression = "\"" + attributeName + "\" \"" + channelName + "\"";
+
+                var valueType = _transform.declaredAttributes[attributeName].valueType;
+                var parameters = document.visualisationDefaultParameters(valueType,
+                                                                         channelName);
+
+                if(Object.keys(parameters).length !== 0)
+                    expression += " with ";
+
+                for(var key in parameters)
+                    expression += " " + key + " = " + parameters[key];
+
+                defaultVisualisations.push(expression);
+            }
+        });
+    }
+
     onAccepted:
     {
         updateTransformExpression();
         document.appendGraphTransform(transformExpression);
+
+        updateDefaultVisualisations();
+        for(var i = 0; i < defaultVisualisations.length; i++)
+            document.appendVisualisation(defaultVisualisations[i]);
+
         document.updateGraphTransforms();
+        document.updateVisualisations();
     }
 
     onVisibleChanged:
     {
         transformExpression.text = "";
+        defaultVisualisations = [];
         transformsList.model = document.availableTransformNames();
         lhsAttributeList.model = rhsAttributeList.model = undefined;
         opList.model = undefined;

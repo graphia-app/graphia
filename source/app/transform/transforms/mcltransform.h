@@ -86,6 +86,10 @@ public:
         return {{"Granularity", {ValueType::Float, "Controls the size of the resultant clusters. "
             "A larger granularity value results in smaller clusters.", 1.5, 1.5, 3.5}}};
     }
+    DeclaredAttributes declaredAttributes() const
+    {
+        return {{"MCL Cluster", {ValueType::String, QObject::tr("Colour")}}};
+    }
 
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const;
 };

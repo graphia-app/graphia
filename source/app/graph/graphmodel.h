@@ -105,12 +105,12 @@ public:
     bool visualisationIsValid(const QString& visualisation) const;
     void buildVisualisations(const QStringList& visualisations);
 
-    QStringList availableVisualisationChannelNames(const QString& attributeName) const;
+    QStringList availableVisualisationChannelNames(ValueType valueType) const;
     QString visualisationDescription(const QString& attributeName, const QString& channelName) const;
     void clearVisualisationInfos();
     bool hasVisualisationInfo() const;
     const VisualisationInfo& visualisationInfoAtIndex(int index) const;
-    QVariantMap visualisationDefaultParameters(const QString& attributeName,
+    QVariantMap visualisationDefaultParameters(ValueType valueType,
                                                const QString& channelName) const;
 
     std::vector<QString> attributeNames(ElementType elementType = ElementType::All) const;
