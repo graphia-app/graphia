@@ -31,9 +31,8 @@ Window
     minimumWidth: 250 + 2 * Constants.margin
     maximumWidth: 500
 
-    height: 520 + 2 * Constants.margin
-    minimumHeight: height
-    maximumHeight: height
+    height: minimumHeight
+    minimumHeight: 520 + 2 * Constants.margin
 
     onSelectedChanged:
     {
@@ -98,7 +97,9 @@ Window
                 visible: true
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
-                text: qsTr("Left click bar to add a stop. Right click a stop to delete.\nDouble click a stop to choose colour.");
+                text: qsTr("Left click bar to add a stop.\n" +
+                           "Right click a stop to delete it.\n" +
+                           "Double click a stop to choose its colour.");
             }
 
         }
