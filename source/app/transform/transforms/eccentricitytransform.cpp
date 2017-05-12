@@ -1,4 +1,5 @@
 #include "eccentricitytransform.h"
+#include "transform/transformedgraph.h"
 #include "graph/graphmodel.h"
 #include "shared/utils/threadpool.h"
 

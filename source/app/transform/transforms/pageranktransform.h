@@ -1,7 +1,7 @@
 #ifndef PAGERANKTRANSFORM_H
 #define PAGERANKTRANSFORM_H
 
-#include "graphtransform.h"
+#include "transform/graphtransform.h"
 #include "graph/graph.h"
 #include "shared/utils/flags.h"
 

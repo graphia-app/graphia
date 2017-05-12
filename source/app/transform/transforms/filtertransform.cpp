@@ -1,5 +1,5 @@
 #include "filtertransform.h"
-#include "transformedgraph.h"
+#include "transform/transformedgraph.h"
 #include "attributes/conditionfncreator.h"
 
 #include "graph/graphmodel.h"

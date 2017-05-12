@@ -1,7 +1,7 @@
 #ifndef EDGECONTRACTIONTRANSFORM_H
 #define EDGECONTRACTIONTRANSFORM_H
 
-#include "graphtransform.h"
+#include "transform/graphtransform.h"
 #include "graph/graph.h"
 #include "attributes/attribute.h"
 

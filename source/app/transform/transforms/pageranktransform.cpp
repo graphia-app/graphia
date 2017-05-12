@@ -1,4 +1,5 @@
 #include "pageranktransform.h"
+#include "transform/transformedgraph.h"
 #include "graph/graphmodel.h"
 #ifdef _MSC_VER
 #if _MSC_VER > 1900

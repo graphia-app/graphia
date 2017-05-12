@@ -1,7 +1,7 @@
 #ifndef MCLTRANSFORM_H
 #define MCLTRANSFORM_H
 
-#include "graphtransform.h"
+#include "transform/graphtransform.h"
 #include "graph/graph.h"
 #include "shared/utils/flags.h"
 

@@ -73,8 +73,6 @@ HEADERS += \
     rendering/primitives/sphere.h \
     rendering/scene.h \
     rendering/transition.h \
-    transform/edgecontractiontransform.h \
-    transform/filtertransform.h \
     transform/graphtransform.h \
     transform/transformedgraph.h \
     ui/document.h \
@@ -91,14 +89,12 @@ HEADERS += \
     graph/graphcomponent.h \
     transform/graphtransformconfig.h \
     transform/graphtransformconfigparser.h \
-    transform/conditionfncreator.h \
     utils/qmlenum.h \
     layout/fastinitiallayout.h \
     rendering/primitives/arrow.h \
     ui/visualisations/colorvisualisationchannel.h \
     ui/visualisations/elementvisual.h \
     ui/visualisations/visualisationchannel.h \
-    transform/fieldtype.h \
     ui/visualisations/sizevisualisationchannel.h \
     ui/visualisations/textvisualisationchannel.h \
     commands/applyvisualisationscommand.h \
@@ -116,12 +112,14 @@ HEADERS += \
     ui/alert.h \
     transform/transforminfo.h \
     transform/graphtransformparameter.h \
-    transform/mcltransform.h \
-    transform/pageranktransform.h \
-    transform/eccentricitytransform.h \
     ui/visualisations/defaultgradients.h \
     attributes/availableattributesmodel.h \
-    transform/transformcache.h
+    transform/transformcache.h \
+    transform/transforms/eccentricitytransform.h \
+    transform/transforms/edgecontractiontransform.h \
+    transform/transforms/filtertransform.h \
+    transform/transforms/mcltransform.h \
+    transform/transforms/pageranktransform.h
 
 SOURCES += \
     application.cpp \
@@ -166,8 +164,6 @@ SOURCES += \
     rendering/primitives/rectangle.cpp \
     rendering/primitives/sphere.cpp \
     rendering/transition.cpp \
-    transform/edgecontractiontransform.cpp \
-    transform/filtertransform.cpp \
     transform/graphtransform.cpp \
     transform/transformedgraph.cpp \
     ui/document.cpp \
@@ -191,11 +187,13 @@ SOURCES += \
     attributes/attribute.cpp \
     ui/visualisations/colorgradient.cpp \
     attributes/conditionfncreator.cpp \
-    transform/mcltransform.cpp \
-    transform/pageranktransform.cpp \
-    transform/eccentricitytransform.cpp \
     attributes/availableattributesmodel.cpp \
-    transform/transformcache.cpp
+    transform/transformcache.cpp \
+    transform/transforms/eccentricitytransform.cpp \
+    transform/transforms/edgecontractiontransform.cpp \
+    transform/transforms/filtertransform.cpp \
+    transform/transforms/mcltransform.cpp \
+    transform/transforms/pageranktransform.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \

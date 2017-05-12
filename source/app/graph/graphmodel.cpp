@@ -6,11 +6,11 @@
 
 #include "attributes/attribute.h"
 
-#include "transform/filtertransform.h"
-#include "transform/edgecontractiontransform.h"
-#include "transform/mcltransform.h"
-#include "transform/pageranktransform.h"
-#include "transform/eccentricitytransform.h"
+#include "transform/transforms/filtertransform.h"
+#include "transform/transforms/edgecontractiontransform.h"
+#include "transform/transforms/mcltransform.h"
+#include "transform/transforms/pageranktransform.h"
+#include "transform/transforms/eccentricitytransform.h"
 #include "transform/graphtransformconfigparser.h"
 
 #include "ui/visualisations/colorvisualisationchannel.h"
