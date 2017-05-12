@@ -201,12 +201,18 @@ Item
                     if(rightItem === null)
                         rightItem = closestMarker;
 
-                    var mixcolor = Qt.rgba((leftItem.color.r + rightItem.color.r) * 0.5,
-                                           (leftItem.color.g + rightItem.color.g) * 0.5,
-                                           (leftItem.color.b + rightItem.color.b) * 0.5,
+                    var leftPos = picker.markerToValue(leftItem);
+                    var rightPos = picker.markerToValue(rightItem);
+                    var clickPos = parseFloat(snapValue);
+                    var blend = (clickPos - leftPos) / (rightPos - leftPos);
+                    var oneMinusBlend = 1.0 - blend;
+
+                    var mixcolor = Qt.rgba((leftItem.color.r * oneMinusBlend) + (rightItem.color.r * blend),
+                                           (leftItem.color.g * oneMinusBlend) + (rightItem.color.g * blend),
+                                           (leftItem.color.b * oneMinusBlend) + (rightItem.color.b * blend),
                                            1.0);
                     var newItem = {};
-                    newItem.gradientValue = parseFloat(snapValue);
+                    newItem.gradientValue = clickPos;
                     newItem.gradientColor = mixcolor.toString();
                     markerRepeater.model.append(newItem);
                     markerRepeater.generateGradientString();
