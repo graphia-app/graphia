@@ -52,9 +52,14 @@ bool FilterTransform::apply(TransformedGraph& target) const
                 removees.push_back(nodeId);
         }
 
+        uint64_t numRemovees = static_cast<uint64_t>(removees.size());
+        uint64_t progress = 0;
         changed = !removees.empty() || changed;
         for(auto nodeId : removees)
+        {
             target.mutableGraph().removeNode(nodeId);
+            target.setProgress((progress++ * 100) / numRemovees);
+        }
         break;
     }
 
@@ -78,9 +83,14 @@ bool FilterTransform::apply(TransformedGraph& target) const
                 removees.push_back(edgeId);
         }
 
+        uint64_t numRemovees = static_cast<uint64_t>(removees.size());
+        uint64_t progress = 0;
         changed = !removees.empty() || changed;
         for(auto edgeId : removees)
+        {
             target.mutableGraph().removeEdge(edgeId);
+            target.setProgress((progress++ * 100) / numRemovees);
+        }
         break;
     }
 
@@ -94,15 +104,25 @@ bool FilterTransform::apply(TransformedGraph& target) const
         }
 
         ComponentManager componentManager(target);
+        std::vector<NodeId> removees;
 
         for(auto componentId : componentManager.componentIds())
         {
             auto component = componentManager.componentById(componentId);
             if(u::exclusiveOr(conditionFn(*component), _invert))
             {
-                changed = true;
-                target.mutableGraph().removeNodes(target.mutableGraph().mergedNodeIdsForNodeIds(component->nodeIds()));
+                auto nodeIds = target.mutableGraph().mergedNodeIdsForNodeIds(component->nodeIds());
+                removees.insert(removees.end(), nodeIds.begin(), nodeIds.end());
             }
+        }
+
+        uint64_t numRemovees = static_cast<uint64_t>(removees.size());
+        uint64_t progress = 0;
+        changed = !removees.empty() || changed;
+        for(auto nodeId : removees)
+        {
+            target.mutableGraph().removeNode(nodeId);
+            target.setProgress((progress++ * 100) / numRemovees);
         }
         break;
     }
