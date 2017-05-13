@@ -424,7 +424,7 @@ private:
             _strictTyping(strictTyping)
         {}
 
-        ElementConditionFn<E> operator()(int) const
+        ElementConditionFn<E> operator()(GraphTransformConfig::NoCondition) const
         {
             // Not a condition
             return nullptr;

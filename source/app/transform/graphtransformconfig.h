@@ -38,9 +38,10 @@ struct GraphTransformConfig
         QString opAsString() const;
     };
 
+    struct NoCondition { bool operator==(const NoCondition) const { return true; } };
     struct CompoundCondition;
     using Condition = boost::variant<
-        int, // No condition
+        NoCondition,
         TerminalCondition,
         UnaryCondition,
         boost::recursive_wrapper<CompoundCondition>>;

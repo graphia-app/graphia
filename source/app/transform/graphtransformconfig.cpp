@@ -84,7 +84,7 @@ bool GraphTransformConfig::hasCondition() const
 {
     struct ConditionVisitor
     {
-        bool operator()(int) const { return false; }
+        bool operator()(GraphTransformConfig::NoCondition) const { return false; }
         bool operator()(const TerminalCondition&) const { return true; }
         bool operator()(const UnaryCondition&) const { return true; }
         bool operator()(const CompoundCondition&) const { return true; }
@@ -109,7 +109,7 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
             return boost::apply_visitor(Visitor(), terminalValue);
         }
 
-        QVariantMap operator()(int) const { return {}; }
+        QVariantMap operator()(GraphTransformConfig::NoCondition) const { return {}; }
         QVariantMap operator()(const TerminalCondition& terminalCondition) const
         {
             QVariantMap map;
@@ -181,7 +181,7 @@ std::vector<QString> GraphTransformConfig::attributeNames() const
 
         std::vector<QString>* _names;
 
-        void operator()(int) const {};
+        void operator()(GraphTransformConfig::NoCondition) const {};
 
         QString attributeFromTerminalValue(const TerminalValue& terminalValue) const
         {
