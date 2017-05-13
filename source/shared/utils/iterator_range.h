@@ -1,24 +1,37 @@
 #ifndef ITERATOR_RANGE_H
 #define ITERATOR_RANGE_H
 
-template<typename It> class iterator_range
+#include <type_traits>
+
+template<typename BeginIt, typename EndIt>
+class iterator_range
 {
 public:
-    iterator_range(It begin, It end) :
+    iterator_range(BeginIt begin, EndIt end) :
         _begin(begin), _end(end) {}
 
-    It begin() const { return _begin; }
-    It end() const { return _end; }
+    BeginIt& begin() const { return _begin; }
+    EndIt& end() const { return _end; }
 
 private:
-    It _begin;
-    It _end;
+    BeginIt _begin;
+    EndIt _end;
 };
 
-template<typename It>
-iterator_range<It> make_iterator_range(It begin, It end)
+// This converts an rvalue reference to a value,
+// and everything else to an lvalue reference
+template<typename T>
+using rv2v = std::conditional_t
+<
+    std::is_rvalue_reference<T>::value,
+    std::remove_reference_t<T>,
+    std::add_lvalue_reference_t<std::decay_t<T>>
+>;
+
+template<typename BeginIt, typename EndIt>
+auto make_iterator_range(BeginIt&& begin, EndIt&& end)
 {
-    return iterator_range<It>(begin, end);
+    return iterator_range<rv2v<BeginIt>, rv2v<EndIt>>(begin, end);
 }
 
 #endif // ITERATOR_RANGE_H
