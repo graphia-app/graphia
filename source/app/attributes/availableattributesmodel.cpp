@@ -61,16 +61,20 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
 
     if(elementTypes == ElementType::Edge)
     {
-        _sourceNode = new AvailableAttributesModel::Item(QObject::tr("Source Node"));
-        _targetNode = new AvailableAttributesModel::Item(QObject::tr("Target Node"));
-        _root->addChild(_sourceNode);
-        _root->addChild(_targetNode);
-
         attributeList = graphModel.availableAttributes(ElementType::Node, valueTypes);
-        for(const auto& attribute : attributeList)
+
+        if(!attributeList.empty())
         {
-            _sourceNode->addChild(new AvailableAttributesModel::Item(attribute));
-            _targetNode->addChild(new AvailableAttributesModel::Item(attribute));
+            _sourceNode = new AvailableAttributesModel::Item(QObject::tr("Source Node"));
+            _targetNode = new AvailableAttributesModel::Item(QObject::tr("Target Node"));
+            _root->addChild(_sourceNode);
+            _root->addChild(_targetNode);
+
+            for(const auto& attribute : attributeList)
+            {
+                _sourceNode->addChild(new AvailableAttributesModel::Item(attribute));
+                _targetNode->addChild(new AvailableAttributesModel::Item(attribute));
+            }
         }
     }
 }
