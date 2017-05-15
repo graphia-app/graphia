@@ -8,50 +8,10 @@
 class MCLTransform : public GraphTransform
 {
 public:
-    struct SparseMatrixEntry
-    {
-        size_t _row; size_t _column; float _value;
-        SparseMatrixEntry(size_t row, size_t column, float value)
-            : _row(row), _column(column), _value(value){}
-    };
-
-    struct MCLRowData
-    {
-        std::vector<float> values;
-        std::vector<char> valid;
-        std::vector<size_t> indices;
-        explicit MCLRowData(size_t columnCount) : values(columnCount, 0.0f),
-            valid(columnCount, 0), indices(columnCount, 0UL) {}
-    };
-    template<class MatrixType>
-    class ColumnsIterator
-    {
-    public:
-        class iterator: public std::iterator<
-                std::input_iterator_tag,
-                size_t,
-                size_t,
-                const size_t*,
-                size_t
-                >{
-            size_t _num = 0;
-        public:
-            explicit iterator(size_t num = 0) : _num(num) {}
-            iterator& operator++() { _num = _num + 1; return *this; }
-            iterator operator++(int) { iterator retval = *this; ++(*this); return retval; }
-            bool operator==(iterator other) const { return _num == other._num; }
-            bool operator!=(iterator other) const { return !(*this == other); }
-            reference operator*() const { return _num; }
-        };
-        MatrixType& matrix;
-        ColumnsIterator(MatrixType& _matrix) : matrix(_matrix) {}
-        iterator begin() { return iterator(0); }
-        iterator end() { return iterator(matrix.columns()); }
-    };
-
     explicit MCLTransform(GraphModel* graphModel) : _graphModel(graphModel) {}
     bool apply(TransformedGraph &target) const;
 
+private:
     void enableDebugIteration(){ _debugIteration = true; }
     void enableDebugMatrices(){ _debugMatrices = true; }
     void disableDebugIteration(){ _debugIteration = false; }
@@ -77,9 +37,11 @@ public:
         GraphTransformFactory(graphModel)
     {}
 
-    QString description() const {
+    QString description() const
+    {
         return R"(<a href="https://micans.org/mcl/">MCL - Markov Clustering</a> )" //
-                "finds discrete groups (clusters) of nodes based on a flow simulation model."; }
+                "finds discrete groups (clusters) of nodes based on a flow simulation model.";
+    }
     ElementType elementType() const { return ElementType::None; }
     GraphTransformParameters parameters() const
     {

@@ -84,8 +84,8 @@ void EccentricityTransform::calculateDistances() const
 
 std::unique_ptr<GraphTransform> EccentricityTransformFactory::create(const GraphTransformConfig&) const
 {
-    auto testTransform = std::make_unique<EccentricityTransform>(graphModel());
+    auto eccentricityTransform = std::make_unique<EccentricityTransform>(graphModel());
 
-    return std::move(testTransform); //FIXME std::move required because of clang bug
+    return std::move(eccentricityTransform); //FIXME std::move required because of clang bug
 }
 

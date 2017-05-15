@@ -54,10 +54,26 @@ static void sumColumns(MatrixType &mclMatrix, VectorType &output)
     }
 }
 
+struct SparseMatrixEntry
+{
+    size_t _row; size_t _column; float _value;
+    SparseMatrixEntry(size_t row, size_t column, float value)
+        : _row(row), _column(column), _value(value){}
+};
+
+struct MCLRowData
+{
+    std::vector<float> values;
+    std::vector<char> valid;
+    std::vector<size_t> indices;
+    explicit MCLRowData(size_t columnCount) : values(columnCount, 0.0f),
+        valid(columnCount, 0), indices(columnCount, 0UL) {}
+};
+
 static void expandAndPruneRow(MatrixType &mclMatrix,
                               size_t columnId,
-                              std::vector<MCLTransform::SparseMatrixEntry>* matrixStorage,
-                              MCLTransform::MCLRowData& rowData, float minValueCutoff)
+                              std::vector<SparseMatrixEntry>* matrixStorage,
+                              MCLRowData& rowData, float minValueCutoff)
 {
     const bool DEBUG = false;
 
@@ -260,6 +276,32 @@ bool MCLTransform::apply(TransformedGraph& target) const
 
     return false;
 }
+
+template<class MatrixType>
+class ColumnsIterator
+{
+public:
+    class iterator: public std::iterator<
+            std::input_iterator_tag,
+            size_t,
+            size_t,
+            const size_t*,
+            size_t
+            >{
+        size_t _num = 0;
+    public:
+        explicit iterator(size_t num = 0) : _num(num) {}
+        iterator& operator++() { _num = _num + 1; return *this; }
+        iterator operator++(int) { iterator retval = *this; ++(*this); return retval; }
+        bool operator==(iterator other) const { return _num == other._num; }
+        bool operator!=(iterator other) const { return !(*this == other); }
+        reference operator*() const { return _num; }
+    };
+    MatrixType& matrix;
+    ColumnsIterator(MatrixType& _matrix) : matrix(_matrix) {}
+    iterator begin() { return iterator(0); }
+    iterator end() { return iterator(matrix.columns()); }
+};
 
 void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
 {
@@ -553,8 +595,8 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
 
 std::unique_ptr<GraphTransform> MCLTransformFactory::create(const GraphTransformConfig&) const
 {
-    auto testTransform = std::make_unique<MCLTransform>(graphModel());
+    auto mclTransform = std::make_unique<MCLTransform>(graphModel());
 
-    return std::move(testTransform); //FIXME std::move required because of clang bug
+    return std::move(mclTransform); //FIXME std::move required because of clang bug
 }
 
