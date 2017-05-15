@@ -108,7 +108,7 @@ TransformCache::Result TransformCache::apply(const GraphTransformConfig& config,
     auto& resultSet = _cache.front();
 
     auto it = resultSet.begin();
-    for(auto& cachedResult : make_iterator_range(it, resultSet.end()))
+    for(auto& cachedResult : resultSet)
     {
         if(cachedResult._config == config)
         {
@@ -136,6 +136,8 @@ TransformCache::Result TransformCache::apply(const GraphTransformConfig& config,
 
             break;
         }
+
+        ++it;
     }
 
     return result;
