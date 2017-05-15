@@ -64,6 +64,7 @@ private:
     IPlugin* _plugin;
 
     std::map<QString, Attribute> _attributes;
+    QStringList _previousDynamicAttributeNames;
     std::map<QString, std::unique_ptr<GraphTransformFactory>> _graphTransformFactories;
 
     std::map<QString, std::unique_ptr<VisualisationChannel>> _visualisationChannels;
@@ -114,11 +115,15 @@ public:
                                                const QString& channelName) const;
 
     std::vector<QString> attributeNames(ElementType elementType = ElementType::All) const;
+    std::vector<QString> nodeAttributeNames() const;
 
     Attribute& createAttribute(const QString& name);
+
     void addAttribute(const QString& name, const Attribute& attribute);
     void addAttributes(const std::map<QString, Attribute>& attributes);
-    Attribute attributeByName(const QString& name) const;
+
+    const Attribute* attributeByName(const QString& name) const;
+    Attribute attributeValueByName(const QString& name) const;
 
     void enableVisualUpdates();
     void updateVisuals(const SelectionManager* selectionManager = nullptr, const SearchManager* searchManager = nullptr);
@@ -136,6 +141,8 @@ private slots:
 signals:
     void visualsWillChange();
     void visualsChanged();
+    void attributeAdded(QString name);
+    void attributeRemoved(QString name);
 };
 
 #endif // GRAPHMODEL_H

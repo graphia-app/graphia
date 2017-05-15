@@ -48,7 +48,8 @@ HEADERS += \
     $$PWD/utils/qmlenum.h \
     $$PWD/attributes/valuetype.h \
     $$PWD/graph/elementtype.h \
-    $$PWD/ui/visualisations/elementvisual.h
+    $$PWD/ui/visualisations/elementvisual.h \
+    $$PWD/plugins/nodeattributetablemodel.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \
@@ -67,7 +68,8 @@ SOURCES += \
     $$PWD/plugins/userdata.cpp \
     $$PWD/plugins/usernodedata.cpp \
     $$PWD/plugins/usernodedatatablemodel.cpp \
-    $$PWD/graph/elementtype.cpp
+    $$PWD/graph/elementtype.cpp \
+    $$PWD/plugins/nodeattributetablemodel.cpp
 
 RESOURCES += \
     $$PWD/ui/shared.qrc

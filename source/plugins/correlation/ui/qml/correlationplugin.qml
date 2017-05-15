@@ -36,6 +36,15 @@ PluginContent
         checked: true
     }
 
+    Action
+    {
+        id: toggleCalculatedAttributes
+        text: qsTr("&Show Calculated Attributes")
+        iconName: "computer"
+        checkable: true
+        checked: true
+    }
+
     function createMenu(index, menu)
     {
         switch(index)
@@ -45,6 +54,7 @@ PluginContent
             menu.addItem("").action = toggleUiOrientationAction;
             menu.addItem("").action = resizeColumnsToContentsAction;
             menu.addItem("").action = toggleColumnNamesAction;
+            menu.addItem("").action = toggleCalculatedAttributes;
             return true;
         }
 
@@ -58,7 +68,8 @@ PluginContent
         ToolButton { action: toggleUiOrientationAction }
         ToolButton { action: resizeColumnsToContentsAction }
         ToolButton { action: toggleColumnNamesAction }
-        Item { Layout.fillWidth: true}
+        ToolButton { action: toggleCalculatedAttributes }
+        Item { Layout.fillWidth: true }
     }
 
     SplitView
@@ -77,6 +88,7 @@ PluginContent
             Layout.minimumWidth: splitView.orientation === Qt.Horizontal ? 200 : -1
 
             nodeAttributesModel: plugin.model.userNodeDataModel
+            showCalculatedAttributes: toggleCalculatedAttributes.checked
 
             onVisibleRowsChanged:
             {

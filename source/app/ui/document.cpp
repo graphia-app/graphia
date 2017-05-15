@@ -937,7 +937,7 @@ QVariantMap Document::attribute(const QString& attributeName) const
     auto parsedAttributeName = Attribute::parseAttributeName(attributeName);
     if(u::contains(_graphModel->availableAttributes(), parsedAttributeName._name))
     {
-        const auto& attribute = _graphModel->attributeByName(parsedAttributeName._name);
+        const auto& attribute = _graphModel->attributeValueByName(parsedAttributeName._name);
         map.insert("valueType", static_cast<int>(attribute.valueType()));
         map.insert("elementType", static_cast<int>(attribute.elementType()));
 

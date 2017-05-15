@@ -112,7 +112,7 @@ void TransformedGraph::rebuild()
 
             for(const auto& attributeName : u::setDifference(_graphModel->attributeNames(), attributeNames))
             {
-                result._newAttributes.emplace(attributeName, _graphModel->attributeByName(attributeName));
+                result._newAttributes.emplace(attributeName, _graphModel->attributeValueByName(attributeName));
                 _cache.attributeAdded(attributeName);
             }
 

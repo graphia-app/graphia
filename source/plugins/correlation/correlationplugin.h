@@ -7,7 +7,7 @@
 #include "shared/loading/iparser.h"
 #include "shared/plugins/userdata.h"
 #include "shared/plugins/usernodedata.h"
-#include "shared/plugins/usernodedatatablemodel.h"
+#include "shared/plugins/nodeattributetablemodel.h"
 
 #include <vector>
 #include <functional>
@@ -20,7 +20,7 @@ class CorrelationPluginInstance : public BasePluginInstance
 {
     Q_OBJECT
 
-    Q_PROPERTY(QAbstractTableModel* userNodeDataModel READ userNodeDataTableModel CONSTANT)
+    Q_PROPERTY(QAbstractTableModel* userNodeDataModel READ nodeAttributeTableModel NOTIFY modelChanged)
     Q_PROPERTY(QStringList columnNames READ columnNames NOTIFY columnNamesChanged)
     Q_PROPERTY(QStringList rowNames READ rowNames NOTIFY rowNamesChanged)
     Q_PROPERTY(QVector<double> rawData READ rawData NOTIFY rawDataChanged)
@@ -39,7 +39,7 @@ private:
     UserNodeData _userNodeData;
     UserData _userColumnData;
 
-    UserNodeDataTableModel _userNodeDataTableModel;
+    NodeAttributeTableModel _nodeAttributeTableModel;
 
     using ConstDataIterator = std::vector<double>::const_iterator;
     using DataIterator = std::vector<double>::iterator;
@@ -127,7 +127,7 @@ private:
 
     void finishDataRow(size_t row);
 
-    QAbstractTableModel* userNodeDataTableModel() { return &_userNodeDataTableModel; }
+    QAbstractTableModel* nodeAttributeTableModel() { return &_nodeAttributeTableModel; }
     QStringList columnNames();
     QStringList rowNames();
     QVector<double> rawData();
@@ -156,7 +156,6 @@ public:
 
 private slots:
     void onLoadSuccess();
-
     void onSelectionChanged(const ISelectionManager* selectionManager);
 
 signals:
@@ -165,6 +164,7 @@ signals:
     void rawDataChanged();
     void columnNamesChanged();
     void rowNamesChanged();
+    void modelChanged();
 };
 
 class CorrelationPlugin : public BasePlugin, public PluginInstanceProvider<CorrelationPluginInstance>

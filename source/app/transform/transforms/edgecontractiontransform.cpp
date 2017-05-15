@@ -18,7 +18,7 @@ bool EdgeContractionTransform::apply(TransformedGraph& target) const
         std::any_of(attributeNames.begin(), attributeNames.end(),
         [this](const auto& attributeName)
         {
-            return _graphModel->attributeByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
+            return _graphModel->attributeValueByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
         });
 
     auto conditionFn = CreateConditionFnFor::edge(*_graphModel, config()._condition);

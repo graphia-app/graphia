@@ -5,8 +5,7 @@
 #include "shared/utils/threadpool.h"
 #include "shared/utils/iterator_range.h"
 
-CorrelationPluginInstance::CorrelationPluginInstance() :
-    _userNodeDataTableModel(&_userNodeData)
+CorrelationPluginInstance::CorrelationPluginInstance()
 {
     connect(this, SIGNAL(loadSuccess()), this, SLOT(onLoadSuccess()));
     connect(this, SIGNAL(selectionChanged(const ISelectionManager*)),
@@ -19,7 +18,7 @@ void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionMa
     BasePluginInstance::initialise(graphModel, selectionManager, commandManager, parserThread);
 
     _userNodeData.initialise(graphModel->mutableGraph());
-    _userNodeDataTableModel.initialise(selectionManager);
+    _nodeAttributeTableModel.initialise(selectionManager, graphModel, &_userNodeData);
     _pearsonValues = std::make_unique<EdgeArray<double>>(graphModel->mutableGraph());
 
     graphModel->createAttribute(tr("Pearson Correlation Value"))
@@ -253,6 +252,7 @@ void CorrelationPluginInstance::onLoadSuccess()
 {
     _userNodeData.setNodeNamesToFirstUserDataVector(*graphModel());
     _userNodeData.exposeAsAttributes(*graphModel());
+    _nodeAttributeTableModel.refreshRoleNames();
 }
 
 QVector<double> CorrelationPluginInstance::rawData()
@@ -285,7 +285,7 @@ const CorrelationPluginInstance::DataRow& CorrelationPluginInstance::dataRowForN
 
 void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager*)
 {
-    _userNodeDataTableModel.onSelectionChanged();
+    _nodeAttributeTableModel.onSelectionChanged();
 }
 
 std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const QString& urlTypeName)

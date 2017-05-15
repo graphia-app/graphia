@@ -159,6 +159,7 @@ bool GraphModel::graphTransformIsValid(const QString& transform) const
 
 void GraphModel::buildTransforms(const QStringList& transforms, ICommand* command)
 {
+
     _transformedGraph.clearTransforms();
     _transformedGraph.setCommand(command);
     _transformInfos.clear();
@@ -332,7 +333,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         if(!u::contains(_visualisationChannels, channelName))
             continue;
 
-        auto attribute = attributeByName(attributeName);
+        auto attribute = attributeValueByName(attributeName);
         auto& channel = _visualisationChannels.at(channelName);
 
         if(!channel->supports(attribute.valueType()))
@@ -384,7 +385,7 @@ QString GraphModel::visualisationDescription(const QString& attributeName, const
     if(!u::contains(_attributes, attributeName) || !u::contains(_visualisationChannels, channelName))
         return {};
 
-    auto attribute = attributeByName(attributeName);
+    auto attribute = attributeValueByName(attributeName);
     auto& channel = _visualisationChannels.at(channelName);
 
     if(!channel->supports(attribute.valueType()))
@@ -436,6 +437,11 @@ std::vector<QString> GraphModel::attributeNames(ElementType elementType) const
     return attributeNames;
 }
 
+std::vector<QString> GraphModel::nodeAttributeNames() const
+{
+    return attributeNames(ElementType::Node);
+}
+
 Attribute& GraphModel::createAttribute(const QString& name)
 {
     bool attributeIsNew = !u::contains(_attributes, name);
@@ -461,7 +467,20 @@ void GraphModel::addAttributes(const std::map<QString, Attribute>& attributes)
     _attributes.insert(attributes.begin(), attributes.end());
 }
 
-Attribute GraphModel::attributeByName(const QString& name) const
+const Attribute* GraphModel::attributeByName(const QString& name) const
+{
+    auto attributeName = Attribute::parseAttributeName(name);
+
+    if(!u::contains(_attributes, attributeName._name))
+        return nullptr;
+
+    if (_attributes.at(attributeName._name).elementType() != ElementType::Node)
+        return nullptr;
+
+    return &_attributes.at(attributeName._name);
+}
+
+Attribute GraphModel::attributeValueByName(const QString& name) const
 {
     auto attributeName = Attribute::parseAttributeName(name);
 
@@ -651,7 +670,13 @@ void GraphModel::onMutableGraphChanged(const Graph* graph)
 
 void GraphModel::onTransformedGraphWillChange(const Graph*)
 {
+    // Store previous dynamic attributes for comparison
+    _previousDynamicAttributeNames.clear();
+    for(const auto& attributePair : _attributes)
+        _previousDynamicAttributeNames.append(attributePair.first);
+
     removeDynamicAttributes();
+
     _transformedGraphIsChanging = true;
 }
 
@@ -668,5 +693,24 @@ void GraphModel::onTransformedGraphChanged(const Graph* graph)
             attribute.autoSetRangeForElements(graph->nodeIds());
         else if(attribute.elementType() == ElementType::Edge)
             attribute.autoSetRangeForElements(graph->edgeIds());
+    }
+    // Compare with previous Dynamic attributes
+    for(auto& pair : _attributes)
+    {
+        // Check if new attribute
+        if(!u::contains(_previousDynamicAttributeNames, pair.first))
+            emit attributeAdded(pair.first);
+    }
+    // Check if one has been removed
+    for(auto& prevName: _previousDynamicAttributeNames)
+    {
+        bool removed = true;
+        for(auto& pair : _attributes)
+        {
+            if (pair.first == prevName)
+                removed = false;
+        }
+        if (removed)
+            emit attributeRemoved(prevName);
     }
 }

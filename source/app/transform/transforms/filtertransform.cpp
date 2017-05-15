@@ -24,7 +24,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
         std::any_of(attributeNames.begin(), attributeNames.end(),
         [this](const auto& attributeName)
         {
-            return _graphModel->attributeByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
+            return _graphModel->attributeValueByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
         });
 
     // The elements to be filtered are calculated first and then removed, because

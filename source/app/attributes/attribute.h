@@ -227,6 +227,9 @@ public:
     template<typename T, typename E>
     using ValueOfFn = T(Attribute::*)(E&) const;
 
+    QString stringValueOf(NodeId nodeId) const { return stringValueOf<NodeId>(nodeId); }
+    QString stringValueOf(EdgeId edgeId) const { return stringValueOf<EdgeId>(edgeId); }
+
     Attribute& setIntValueFn(ValueFn<int, NodeId> valueFn);
     Attribute& setIntValueFn(ValueFn<int, EdgeId> valueFn);
     Attribute& setIntValueFn(ValueFn<int, const IGraphComponent&> valueFn);

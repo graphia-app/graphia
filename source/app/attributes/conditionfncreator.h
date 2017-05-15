@@ -450,7 +450,7 @@ private:
                     {
                         QString attributeName = GraphTransformConfigParser::attributeNameFor(v);
 
-                        return _graphModel->attributeByName(attributeName);
+                        return _graphModel->attributeValueByName(attributeName);
                     }
 
                     return v;

@@ -32,6 +32,9 @@ public:
 
     template<typename T, typename E> using ValueFn = std::function<T(E)>;
 
+    virtual QString stringValueOf(NodeId nodeId) const = 0;
+    virtual QString stringValueOf(EdgeId edgeId) const = 0;
+
     virtual IAttribute& setIntValueFn(ValueFn<int, NodeId> valueFn) = 0;
     virtual IAttribute& setIntValueFn(ValueFn<int, EdgeId> valueFn) = 0;
     virtual IAttribute& setIntValueFn(ValueFn<int, const IGraphComponent&> valueFn) = 0;

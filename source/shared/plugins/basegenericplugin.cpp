@@ -4,8 +4,7 @@
 #include "shared/loading/pairwisetxtfileparser.h"
 #include "shared/loading/graphmlparser.h"
 
-BaseGenericPluginInstance::BaseGenericPluginInstance() :
-    _userNodeDataTableModel(&_userNodeData)
+BaseGenericPluginInstance::BaseGenericPluginInstance()
 {
     connect(this, SIGNAL(loadSuccess()), this, SLOT(onLoadSuccess()));
     connect(this, SIGNAL(selectionChanged(const ISelectionManager*)),
@@ -18,7 +17,7 @@ void BaseGenericPluginInstance::initialise(IGraphModel* graphModel, ISelectionMa
     BasePluginInstance::initialise(graphModel, selectionManager, commandManager, parserThread);
 
     _userNodeData.initialise(graphModel->mutableGraph());
-    _userNodeDataTableModel.initialise(selectionManager);
+    _nodeAttributeTableModel.initialise(selectionManager, graphModel, &_userNodeData);
 }
 
 std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
@@ -67,12 +66,13 @@ void BaseGenericPluginInstance::onLoadSuccess()
 {
     _userNodeData.setNodeNamesToFirstUserDataVector(*graphModel());
     _userNodeData.exposeAsAttributes(*graphModel());
+    _nodeAttributeTableModel.refreshRoleNames();
 }
 
 void BaseGenericPluginInstance::onSelectionChanged(const ISelectionManager*)
 {
     emit selectedNodeNamesChanged();
-    _userNodeDataTableModel.onSelectionChanged();
+    _nodeAttributeTableModel.onSelectionChanged();
 }
 
 BaseGenericPlugin::BaseGenericPlugin()

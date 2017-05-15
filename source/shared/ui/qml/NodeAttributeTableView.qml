@@ -5,6 +5,8 @@ import SortFilterProxyModel 0.2
 
 TableView
 {
+    id: tableView
+
     Component
     {
         id: columnComponent
@@ -12,14 +14,42 @@ TableView
     }
 
     property var nodeAttributesModel
-
-    id: tableView
+    property var showCalculatedAttributes: true
+    onShowCalculatedAttributesChanged:
+    {
+        if(nodeAttributesModel !== null)
+            nodeAttributesModel.showCalculatedAttributes = showCalculatedAttributes;
+    }
 
     sortIndicatorVisible: true
-    property string sortRoleName: columnNames.length > 0 ? columnNames[sortIndicatorColumn] : ""
+    property string sortRoleName:
+    {
+        if(columnNames.length > 0 && columnNames[sortIndicatorColumn] !== undefined)
+            return columnNames[sortIndicatorColumn];
+        else
+            return "";
+    }
+
+    Connections
+    {
+        target: nodeAttributesModel
+        onColumnNamesChanged:
+        {
+            // Hack - TableView doesn't respond to rolenames changes
+            // so we need to set to null and reset the model + proxy
+            columnNames = proxyModel.columnNames
+            model = null
+            proxyModel.columnNames = nodeAttributesModel.columnNames
+            proxyModel.sourceModel = null
+            proxyModel.sourceModel = nodeAttributesModel
+            model = proxyModel
+            columnNames = proxyModel.columnNames
+        }
+    }
 
     model: SortFilterProxyModel
     {
+        id: proxyModel
         property var columnNames: sourceModel.columnNames
         sourceModel: nodeAttributesModel
         sortRoleName: tableView.sortRoleName
@@ -72,6 +102,10 @@ TableView
             tableView.addColumn(columnComponent.createObject(tableView,
                 {"role": columnName, "title": columnName}));
         }
+
+        // Snap the view back to the start
+        // Tableview can be left scrolled out of bounds if column count reduces
+        tableView.flickableItem.contentX = 0;
     }
 
     // Work around for QTBUG-58594
