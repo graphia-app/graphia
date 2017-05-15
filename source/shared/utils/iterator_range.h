@@ -1,24 +1,24 @@
 #ifndef ITERATOR_RANGE_H
 #define ITERATOR_RANGE_H
 
-template<typename It> class iterator_range
+template<typename BeginIt, typename EndIt> class iterator_range
 {
 public:
-    iterator_range(It begin, It end) :
+    iterator_range(BeginIt begin, EndIt end) :
         _begin(begin), _end(end) {}
 
-    It begin() const { return _begin; }
-    It end() const { return _end; }
+    BeginIt& begin() { return _begin; }
+    EndIt& end() { return _end; }
 
 private:
-    It _begin;
-    It _end;
+    BeginIt _begin;
+    EndIt _end;
 };
 
-template<typename It>
-iterator_range<It> make_iterator_range(It begin, It end)
+template<typename BeginIt, typename EndIt>
+auto make_iterator_range(BeginIt&& begin, EndIt&& end)
 {
-    return iterator_range<It>(begin, end);
+    return iterator_range<BeginIt, EndIt>(begin, end);
 }
 
 #endif // ITERATOR_RANGE_H
