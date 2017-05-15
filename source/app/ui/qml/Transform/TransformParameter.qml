@@ -24,8 +24,9 @@ GridLayout
 
     flow: (direction === Qt.Horizontal) ? GridLayout.LeftToRight : GridLayout.TopToBottom
 
-    property bool _fillWidth: root.direction === Qt.Vertical
+    property bool fillWidth: false
     property int _preferredWidth: (root.direction === Qt.Horizontal) ? 90 : 160
+    implicitWidth: !fillWidth ? _preferredWidth : 0.0
 
     function typedValue(n)
     {
@@ -43,7 +44,7 @@ GridLayout
     SpinBox
     {
         id: spinBox
-        Layout.fillWidth: root._fillWidth
+        Layout.fillWidth: root.fillWidth
         Layout.preferredWidth: root._preferredWidth
         visible: (valueType === ValueType.Int || valueType === ValueType.Float)
 
@@ -84,7 +85,7 @@ GridLayout
     Slider
     {
         id: slider
-        Layout.fillWidth: root._fillWidth
+        Layout.fillWidth: root.fillWidth
         Layout.preferredWidth: root._preferredWidth
         visible: ((valueType === ValueType.Int || valueType === ValueType.Float) && hasRange)
 
@@ -104,7 +105,7 @@ GridLayout
     TextField
     {
         id: textField
-        Layout.fillWidth: root._fillWidth
+        Layout.fillWidth: root.fillWidth
         Layout.preferredWidth: root._preferredWidth
         visible: (valueType === ValueType.String || valueType === ValueType.Unknown)
         enabled: valueType !== ValueType.Unknown
