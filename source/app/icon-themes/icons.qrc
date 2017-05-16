@@ -1,6 +1,9 @@
 <RCC>
 	<qresource prefix="/icons">
 		<file>Tango/index.theme</file>
+		<file>Tango/16x16/categories/applications-system.png</file>
+		<file>Tango/22x22/categories/applications-system.png</file>
+		<file>Tango/32x32/categories/applications-system.png</file>
 		<file>Tango/16x16/actions/document-open.png</file>
 		<file>Tango/22x22/actions/document-open.png</file>
 		<file>Tango/32x32/actions/document-open.png</file>

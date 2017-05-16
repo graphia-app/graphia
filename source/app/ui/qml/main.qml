@@ -501,6 +501,7 @@ ApplicationWindow
     Action
     {
         id: optionsAction
+        iconName: "applications-system"
         text: qsTr("&Options...")
         onTriggered:
         {
@@ -917,6 +918,7 @@ ApplicationWindow
             ToolButton { action: redoAction }
             ToolButton { action: overviewModeAction }
             ToolButton { action: resetViewAction }
+            ToolButton { action: optionsAction }
 
             Item { Layout.fillWidth: true }
         }
