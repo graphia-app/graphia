@@ -118,8 +118,8 @@ signals:
 
 private:
     static const char* _uri;
-    static const int _majorVersion = 1;
-    static const int _minorVersion = 0;
+    static const int _majorVersion = APP_MAJOR_VERSION;
+    static const int _minorVersion = APP_MINOR_VERSION;
 
     UrlTypeDetailsModel _urlTypeDetails;
 

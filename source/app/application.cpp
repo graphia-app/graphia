@@ -15,7 +15,7 @@
 #include <memory>
 #include <iostream>
 
-const char* Application::_uri = "com.kajeka";
+const char* Application::_uri = APP_URI;
 
 Application::Application(QObject *parent) :
     QObject(parent),

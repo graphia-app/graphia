@@ -47,6 +47,9 @@ isEmpty(_COPYRIGHT) {
 }
 
 DEFINES += \
+    "APP_URI=\"\\\"com.kajeka\\\"\"" \
+    "APP_MINOR_VERSION=0" \
+    "APP_MAJOR_VERSION=1" \
     "VERSION=\"\\\"$$_VERSION\\\"\"" \
     "COPYRIGHT=\"\\\"$$_COPYRIGHT\\\"\""
 
