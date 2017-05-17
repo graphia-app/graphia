@@ -84,12 +84,10 @@ HEADERS += \
     ui/searchmanager.h \
     ui/selectionmanager.h \
     utils/qmlcontainerwrapper.h \
-    utils/qmlenum.h \
     utils/shadertools.h \
     graph/graphcomponent.h \
     transform/graphtransformconfig.h \
     transform/graphtransformconfigparser.h \
-    utils/qmlenum.h \
     layout/fastinitiallayout.h \
     rendering/primitives/arrow.h \
     ui/visualisations/colorvisualisationchannel.h \

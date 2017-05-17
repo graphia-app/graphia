@@ -1,7 +1,7 @@
 #ifndef CRASHTYPE_H
 #define CRASHTYPE_H
 
-#include "utils/qmlenum.h"
+#include "shared/utils/qmlenum.h"
 
 DEFINE_QML_ENUM(Q_GADGET, CrashType,
                 NullPtrDereference,

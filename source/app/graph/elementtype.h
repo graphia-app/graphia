@@ -1,7 +1,7 @@
 #ifndef ELEMENTTYPE_H
 #define ELEMENTTYPE_H
 
-#include "utils/qmlenum.h"
+#include "shared/utils/qmlenum.h"
 
 DEFINE_QML_ENUM(Q_GADGET, ElementType,
                 None        = 0x1,

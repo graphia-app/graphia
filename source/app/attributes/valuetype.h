@@ -1,7 +1,7 @@
 #ifndef VALUETYPE_H
 #define VALUETYPE_H
 
-#include "utils/qmlenum.h"
+#include "shared/utils/qmlenum.h"
 
 DEFINE_QML_ENUM(Q_GADGET, ValueType,
                 Unknown     = 0x1,

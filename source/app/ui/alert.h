@@ -1,7 +1,7 @@
 #ifndef ALERT_H
 #define ALERT_H
 
-#include "utils/qmlenum.h"
+#include "shared/utils/qmlenum.h"
 
 #include <QString>
 

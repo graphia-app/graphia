@@ -17,7 +17,7 @@
 #include "shared/utils/deferredexecutor.h"
 #include "shared/utils/performancecounter.h"
 
-#include "utils/qmlenum.h"
+#include "shared/utils/qmlenum.h"
 
 #include <QObject>
 #include <QTime>

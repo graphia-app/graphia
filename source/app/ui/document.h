@@ -7,7 +7,7 @@
 #include "loading/parserthread.h"
 #include "commands/commandmanager.h"
 #include "layout/layout.h"
-#include "utils/qmlenum.h"
+#include "shared/utils/qmlenum.h"
 #include "utils/qmlcontainerwrapper.h"
 #include "attributes/availableattributesmodel.h"
 #include "shared/utils/deferredexecutor.h"
