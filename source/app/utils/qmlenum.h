@@ -3,7 +3,6 @@
 
 #include <QQmlEngine>
 
-#include "application.h"
 #include "shared/utils/utils.h"
 
 // Defining an enumeration that's usable in QML is awkward, so
@@ -25,9 +24,9 @@
             if(initialised) return; \
             initialised = true; \
             qmlRegisterUncreatableType<_REFLECTOR(ENUM_NAME)>( \
-            Application::uri(), \
-            Application::majorVersion(), \
-            Application::minorVersion(), \
+            APP_URI, \
+            APP_MAJOR_VERSION, \
+            APP_MINOR_VERSION, \
             #ENUM_NAME, QString()); } }; \
     }; const _REFLECTOR(ENUM_NAME)::Constructor ENUM_NAME ## _constructor; \
     using ENUM_NAME = QML_ENUM_PROPERTY(ENUM_NAME)
