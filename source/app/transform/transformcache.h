@@ -8,6 +8,7 @@
 
 class MutableGraph;
 class TransformedGraph;
+class GraphModel;
 
 class TransformCache
 {
