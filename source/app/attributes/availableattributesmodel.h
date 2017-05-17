@@ -2,7 +2,7 @@
 #define AVAILABLEATTRIBUTESMODEL_H
 
 #include "graph/elementtype.h"
-#include "attributes/valuetype.h"
+#include "shared/attributes/valuetype.h"
 
 #include <QAbstractItemModel>
 #include <QList>

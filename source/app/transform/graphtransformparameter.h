@@ -1,7 +1,7 @@
 #ifndef GRAPHTRANSFORMPARAMETER_H
 #define GRAPHTRANSFORMPARAMETER_H
 
-#include "attributes/valuetype.h"
+#include "shared/attributes/valuetype.h"
 
 #include <QString>
 

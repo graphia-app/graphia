@@ -2,7 +2,7 @@
 #define GRAPHTRANSFORMCONFIG_H
 
 #include "attributes/condtionfnops.h"
-#include "attributes/valuetype.h"
+#include "shared/attributes/valuetype.h"
 
 #include <QString>
 #include <QVariantMap>

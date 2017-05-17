@@ -45,7 +45,8 @@ HEADERS += \
     $$PWD/plugins/usernodedatatablemodel.h \
     $$PWD/utils/flags.h \
     $$PWD/attributes/iattributerange.h \
-    $$PWD/utils/qmlenum.h
+    $$PWD/utils/qmlenum.h \
+    $$PWD/attributes/valuetype.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \

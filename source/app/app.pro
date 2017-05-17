@@ -103,7 +103,6 @@ HEADERS += \
     attributes/conditionfncreator.h \
     attributes/condtionfnops.h \
     attributes/attribute.h \
-    attributes/valuetype.h \
     ui/visualisations/colorgradient.h \
     crashtype.h \
     ui/visualisations/visualisationinfo.h \

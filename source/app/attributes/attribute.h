@@ -8,7 +8,7 @@
 #include "shared/graph/igraphcomponent.h"
 #include "shared/utils/flags.h"
 
-#include "valuetype.h"
+#include "shared/attributes/valuetype.h"
 
 #include <functional>
 #include <limits>

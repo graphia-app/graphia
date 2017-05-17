@@ -2,7 +2,7 @@
 #define GRAPHTRANSFORMCONFIGPARSER_H
 
 #include "graphtransformconfig.h"
-#include "attributes/valuetype.h"
+#include "shared/attributes/valuetype.h"
 
 #include <QString>
 #include <QStringList>
