@@ -2,7 +2,7 @@
 #define GRAPHTRANSFORM_H
 
 #include "shared/graph/elementid.h"
-#include "graph/elementtype.h"
+#include "shared/graph/elementtype.h"
 
 #include "shared/utils/qmlenum.h"
 

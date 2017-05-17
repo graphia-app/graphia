@@ -46,7 +46,8 @@ HEADERS += \
     $$PWD/utils/flags.h \
     $$PWD/attributes/iattributerange.h \
     $$PWD/utils/qmlenum.h \
-    $$PWD/attributes/valuetype.h
+    $$PWD/attributes/valuetype.h \
+    $$PWD/graph/elementtype.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \
@@ -64,7 +65,8 @@ SOURCES += \
     $$PWD/plugins/userdatavector.cpp \
     $$PWD/plugins/userdata.cpp \
     $$PWD/plugins/usernodedata.cpp \
-    $$PWD/plugins/usernodedatatablemodel.cpp
+    $$PWD/plugins/usernodedatatablemodel.cpp \
+    $$PWD/graph/elementtype.cpp
 
 RESOURCES += \
     $$PWD/ui/shared.qrc

@@ -98,7 +98,6 @@ HEADERS += \
     commands/applyvisualisationscommand.h \
     ui/visualisations/visualisationconfig.h \
     ui/visualisations/visualisationconfigparser.h \
-    graph/elementtype.h \
     ui/visualisations/visualisationbuilder.h \
     attributes/conditionfncreator.h \
     attributes/condtionfnops.h \
@@ -180,7 +179,6 @@ SOURCES += \
     commands/applyvisualisationscommand.cpp \
     ui/visualisations/visualisationconfig.cpp \
     ui/visualisations/visualisationconfigparser.cpp \
-    graph/elementtype.cpp \
     attributes/attribute.cpp \
     ui/visualisations/colorgradient.cpp \
     attributes/conditionfncreator.cpp \

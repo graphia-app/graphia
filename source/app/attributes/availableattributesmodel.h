@@ -1,7 +1,7 @@
 #ifndef AVAILABLEATTRIBUTESMODEL_H
 #define AVAILABLEATTRIBUTESMODEL_H
 
-#include "graph/elementtype.h"
+#include "shared/graph/elementtype.h"
 #include "shared/attributes/valuetype.h"
 
 #include <QAbstractItemModel>

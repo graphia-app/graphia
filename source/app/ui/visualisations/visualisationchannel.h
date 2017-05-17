@@ -3,7 +3,7 @@
 
 #include "ui/visualisations/elementvisual.h"
 #include "shared/attributes/valuetype.h"
-#include "graph/elementtype.h"
+#include "shared/graph/elementtype.h"
 
 #include <QString>
 #include <QVariantMap>

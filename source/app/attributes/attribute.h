@@ -2,7 +2,7 @@
 #define ATTRIBUTE_H
 
 #include "shared/graph/elementid.h"
-#include "graph/elementtype.h"
+#include "shared/graph/elementtype.h"
 #include "graph/elementiddistinctsetcollection.h"
 #include "shared/attributes/iattribute.h"
 #include "shared/graph/igraphcomponent.h"
