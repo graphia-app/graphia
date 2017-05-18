@@ -14,6 +14,10 @@
 
 #include <QCoreApplication>
 
+#if !defined(APP_URI) || !defined(APP_MAJOR_VERSION) || !defined(APP_MINOR_VERSION)
+#error Required preprocessor values not defined
+#endif
+
 class GraphModel;
 class IParser;
 class IPlugin;

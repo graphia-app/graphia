@@ -5,6 +5,10 @@
 
 #include "shared/utils/utils.h"
 
+#if !defined(APP_URI) || !defined(APP_MAJOR_VERSION) || !defined(APP_MINOR_VERSION)
+#error Required preprocessor values not defined
+#endif
+
 // Defining an enumeration that's usable in QML is awkward, so
 // here is a macro to make it easier:
 
