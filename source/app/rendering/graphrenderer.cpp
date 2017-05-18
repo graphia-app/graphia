@@ -572,8 +572,6 @@ void GraphRenderer::updateGPUDataIfRequired()
     int componentIndex = 0;
 
     auto& nodePositions = _graphModel->nodePositions();
-    auto& nodeVisuals = _graphModel->nodeVisuals();
-    auto& edgeVisuals = _graphModel->edgeVisuals();
 
     for(auto& gpuGraphData : _gpuGraphData)
         gpuGraphData.reset();
@@ -603,7 +601,7 @@ void GraphRenderer::updateGPUDataIfRequired()
             const QVector3D nodePosition = nodePositions.getScaledAndSmoothed(nodeId);
             scaledAndSmoothedNodePositions[nodeId] = nodePosition;
 
-            auto& nodeVisual = nodeVisuals[nodeId];
+            auto& nodeVisual = _graphModel->nodeVisual(nodeId);
 
             // Create and Add NodeData
             GPUGraphData::NodeData nodeData;
@@ -649,7 +647,7 @@ void GraphRenderer::updateGPUDataIfRequired()
             const QVector3D& sourcePosition = scaledAndSmoothedNodePositions[edge->sourceId()];
             const QVector3D& targetPosition = scaledAndSmoothedNodePositions[edge->targetId()];
 
-            auto& edgeVisual = edgeVisuals[edge->id()];
+            auto& edgeVisual = _graphModel->edgeVisual(edge->id());
 
             GPUGraphData::EdgeData edgeData;
             edgeData._sourcePosition[0] = sourcePosition.x();
@@ -658,8 +656,8 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._targetPosition[0] = targetPosition.x();
             edgeData._targetPosition[1] = targetPosition.y();
             edgeData._targetPosition[2] = targetPosition.z();
-            edgeData._sourceSize = nodeVisuals[edge->sourceId()]._size;
-            edgeData._targetSize = nodeVisuals[edge->targetId()]._size;
+            edgeData._sourceSize = _graphModel->nodeVisual(edge->sourceId())._size;
+            edgeData._targetSize = _graphModel->nodeVisual(edge->targetId())._size;
             edgeData._edgeType = static_cast<int>(edgeVisualType);
             edgeData._component = componentIndex;
             edgeData._size = edgeVisual._size;
@@ -1132,10 +1130,10 @@ void GraphRenderer::updateText(bool waitForCompletion)
     std::unique_lock<std::recursive_mutex> glyphMapLock(_glyphMap->mutex());
 
     for(auto nodeId : _graphModel->graph().nodeIds())
-        _glyphMap->addText(_graphModel->nodeVisuals()[nodeId]._text);
+        _glyphMap->addText(_graphModel->nodeVisual(nodeId)._text);
 
     for(auto edgeId : _graphModel->graph().edgeIds())
-        _glyphMap->addText(_graphModel->edgeVisuals()[edgeId]._text);
+        _glyphMap->addText(_graphModel->edgeVisual(edgeId)._text);
 
     if(_glyphMap->updateRequired())
     {

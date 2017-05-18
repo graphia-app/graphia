@@ -52,7 +52,7 @@ void Collision::nodesInsideCylinder(const QVector3D &point, const QVector3D &dir
 
         float distance = position.distanceToLine(point, direction);
 
-        if(distance <= radius + _graphModel->nodeVisuals().at(nodeId)._size)
+        if(distance <= radius + _graphModel->nodeVisual(nodeId)._size)
             containedNodeIds.push_back(nodeId);
     }
 }

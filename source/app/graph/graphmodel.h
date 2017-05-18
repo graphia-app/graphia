@@ -76,8 +76,8 @@ public:
     NodePositions& nodePositions() { return _nodePositions; }
     const NodePositions& nodePositions() const { return _nodePositions; }
 
-    const NodeVisuals& nodeVisuals() const { return _nodeVisuals; }
-    const EdgeVisuals& edgeVisuals() const { return _edgeVisuals; }
+    const ElementVisual& nodeVisual(NodeId nodeId) const { return _nodeVisuals.at(nodeId); }
+    const ElementVisual& edgeVisual(EdgeId edgeId) const { return _edgeVisuals.at(edgeId); }
 
     const NodeArray<QString>& nodeNames() const { return _nodeNames; }
 

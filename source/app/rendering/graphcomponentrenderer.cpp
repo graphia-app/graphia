@@ -161,7 +161,7 @@ float GraphComponentRenderer::maxNodeDistanceFromPoint(const GraphModel& graphMo
     for(auto nodeId : nodeIds)
     {
         QVector3D nodePosition = graphModel.nodePositions().getScaledAndSmoothed(nodeId);
-        auto& nodeVisual = graphModel.nodeVisuals().at(nodeId);
+        auto& nodeVisual = graphModel.nodeVisual(nodeId);
         float distance = (centre - nodePosition).length() + nodeVisual._size;
 
         if(distance > maxDistance)
@@ -315,7 +315,7 @@ void GraphComponentRenderer::zoom(float delta, bool doTransition)
     _viewData._autoZooming = false;
 
     if(!_viewData._focusNodeId.isNull())
-        size = _graphModel->nodeVisuals().at(_viewData._focusNodeId)._size;
+        size = _graphModel->nodeVisual(_viewData._focusNodeId)._size;
 
     const float INTERSECTION_AVOIDANCE_OFFSET = 1.0f;
     delta *= (_targetZoomDistance - size - INTERSECTION_AVOIDANCE_OFFSET);
