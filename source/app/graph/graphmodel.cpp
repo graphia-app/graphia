@@ -69,7 +69,6 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     GraphModel::createAttribute(tr("Node Multiplicity"))
         .setIntValueFn([this](NodeId nodeId)
         {
-            Q_ASSERT(_transformedGraph.typeOf(nodeId) != MultiElementType::Tail);
             if(_transformedGraph.typeOf(nodeId) != MultiElementType::Head)
                 return 1;
 
@@ -82,7 +81,6 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     GraphModel::createAttribute(tr("Edge Multiplicity"))
         .setIntValueFn([this](EdgeId edgeId)
         {
-            Q_ASSERT(_transformedGraph.typeOf(edgeId) != MultiElementType::Tail);
             if(_transformedGraph.typeOf(edgeId) != MultiElementType::Head)
                 return 1;
 
