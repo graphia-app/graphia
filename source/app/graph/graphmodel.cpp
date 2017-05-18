@@ -159,7 +159,6 @@ bool GraphModel::graphTransformIsValid(const QString& transform) const
 
 void GraphModel::buildTransforms(const QStringList& transforms, ICommand* command)
 {
-
     _transformedGraph.clearTransforms();
     _transformedGraph.setCommand(command);
     _transformInfos.clear();
@@ -437,11 +436,6 @@ std::vector<QString> GraphModel::attributeNames(ElementType elementType) const
     return attributeNames;
 }
 
-std::vector<QString> GraphModel::nodeAttributeNames() const
-{
-    return attributeNames(ElementType::Node);
-}
-
 Attribute& GraphModel::createAttribute(const QString& name)
 {
     bool attributeIsNew = !u::contains(_attributes, name);
@@ -472,9 +466,6 @@ const Attribute* GraphModel::attributeByName(const QString& name) const
     auto attributeName = Attribute::parseAttributeName(name);
 
     if(!u::contains(_attributes, attributeName._name))
-        return nullptr;
-
-    if (_attributes.at(attributeName._name).elementType() != ElementType::Node)
         return nullptr;
 
     return &_attributes.at(attributeName._name);
@@ -672,8 +663,9 @@ void GraphModel::onTransformedGraphWillChange(const Graph*)
 {
     // Store previous dynamic attributes for comparison
     _previousDynamicAttributeNames.clear();
-    for(const auto& attributePair : _attributes)
-        _previousDynamicAttributeNames.append(attributePair.first);
+
+    for(auto& name : u::keysFor(_attributes))
+        _previousDynamicAttributeNames.append(name);
 
     removeDynamicAttributes();
 
@@ -695,22 +687,13 @@ void GraphModel::onTransformedGraphChanged(const Graph* graph)
             attribute.autoSetRangeForElements(graph->edgeIds());
     }
     // Compare with previous Dynamic attributes
-    for(auto& pair : _attributes)
-    {
-        // Check if new attribute
-        if(!u::contains(_previousDynamicAttributeNames, pair.first))
-            emit attributeAdded(pair.first);
-    }
-    // Check if one has been removed
-    for(auto& prevName: _previousDynamicAttributeNames)
-    {
-        bool removed = true;
-        for(auto& pair : _attributes)
-        {
-            if (pair.first == prevName)
-                removed = false;
-        }
-        if (removed)
-            emit attributeRemoved(prevName);
-    }
+    // Check for added
+    auto addedAttributeNames = u::setDifference(u::keysFor(_attributes), _previousDynamicAttributeNames);
+    for(auto& name : addedAttributeNames)
+        emit attributeAdded(name);
+
+    // Check for removed
+    auto removedAttributeNames = u::setDifference(_previousDynamicAttributeNames, u::keysFor(_attributes));
+    for(auto& name : removedAttributeNames)
+        emit attributeRemoved(name);
 }

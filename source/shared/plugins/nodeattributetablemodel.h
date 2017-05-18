@@ -48,8 +48,8 @@ public:
     void refreshRoleNames();
     void showCalculatedAttributes(bool shouldShow);
 public slots:
-    void onAttributeAdded(QString name);
-    void onAttributeRemoved(QString name);
+    void onAttributeAdded(const QString& name);
+    void onAttributeRemoved(const QString& name);
 signals:
     void columnNamesChanged();
 };

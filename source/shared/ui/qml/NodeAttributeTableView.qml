@@ -14,7 +14,7 @@ TableView
     }
 
     property var nodeAttributesModel
-    property var showCalculatedAttributes: true
+    property bool showCalculatedAttributes: true
     onShowCalculatedAttributesChanged:
     {
         if(nodeAttributesModel !== null)
@@ -26,8 +26,8 @@ TableView
     {
         if(columnNames.length > 0 && columnNames[sortIndicatorColumn] !== undefined)
             return columnNames[sortIndicatorColumn];
-        else
-            return "";
+
+        return "";
     }
 
     Connections
@@ -37,13 +37,13 @@ TableView
         {
             // Hack - TableView doesn't respond to rolenames changes
             // so we need to set to null and reset the model + proxy
-            columnNames = proxyModel.columnNames
-            model = null
-            proxyModel.columnNames = nodeAttributesModel.columnNames
-            proxyModel.sourceModel = null
-            proxyModel.sourceModel = nodeAttributesModel
-            model = proxyModel
-            columnNames = proxyModel.columnNames
+            columnNames = proxyModel.columnNames;
+            model = null;
+            proxyModel.columnNames = nodeAttributesModel.columnNames;
+            proxyModel.sourceModel = null;
+            proxyModel.sourceModel = nodeAttributesModel;
+            model = proxyModel;
+            columnNames = proxyModel.columnNames;
         }
     }
 

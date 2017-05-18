@@ -229,6 +229,10 @@ public:
 
     QString stringValueOf(NodeId nodeId) const { return stringValueOf<NodeId>(nodeId); }
     QString stringValueOf(EdgeId edgeId) const { return stringValueOf<EdgeId>(edgeId); }
+    QString stringValueOf(const IGraphComponent& graphComponent) const
+    {
+        return stringValueOf<const IGraphComponent&>(graphComponent);
+    }
 
     Attribute& setIntValueFn(ValueFn<int, NodeId> valueFn);
     Attribute& setIntValueFn(ValueFn<int, EdgeId> valueFn);

@@ -19,10 +19,10 @@ void NodeAttributeTableModel::initialise(ISelectionManager* selectionManager, IG
     emit columnNamesChanged();
 
     auto modelQObject = dynamic_cast<const QObject*>(graphModel);
-    connect(modelQObject, SIGNAL(attributeAdded(QString)),
-            this, SLOT(onAttributeAdded(QString)));
-    connect(modelQObject, SIGNAL(attributeRemoved(QString)),
-            this, SLOT(onAttributeRemoved(QString)));
+    connect(modelQObject, SIGNAL(attributeAdded(const QString&)),
+            this, SLOT(onAttributeAdded(const QString&)));
+    connect(modelQObject, SIGNAL(attributeRemoved(const QString&)),
+            this, SLOT(onAttributeRemoved(const QString&)));
 }
 
 QStringList NodeAttributeTableModel::columnNames() const
@@ -30,11 +30,15 @@ QStringList NodeAttributeTableModel::columnNames() const
     QStringList list;
 
     if(_showCalculatedAttributes)
-        for(auto& attributeName : _graphModel->nodeAttributeNames())
+    {
+        for(auto& attributeName : _graphModel->attributeNames(ElementType::Node))
             list.append(attributeName);
+    }
     else
+    {
         for(const auto& userDataVector : *_userNodeData)
             list.append(userDataVector.name());
+    }
 
     return list;
 }
@@ -42,12 +46,13 @@ QStringList NodeAttributeTableModel::columnNames() const
 void NodeAttributeTableModel::refreshRoleNames()
 {
     // Regenerate rolenames
+    // +3 because we added _nodeIdRole + _nodeSelectedRole on init
     _nextRole = Qt::UserRole + 3;
     _roleNames.clear();
     _roleNames.insert(_nodeIdRole, "nodeId");
     _roleNames.insert(_nodeSelectedRole, "nodeSelected");
 
-    for(const auto& name : _graphModel->nodeAttributeNames())
+    for(const auto& name : _graphModel->attributeNames(ElementType::Node))
     {
         _roleNames.insert(_nextRole, name.toUtf8());
         _nextRole++;
@@ -61,7 +66,7 @@ void NodeAttributeTableModel::showCalculatedAttributes(bool shouldShow)
     emit columnNamesChanged();
 }
 
-void NodeAttributeTableModel::onAttributeAdded(QString name)
+void NodeAttributeTableModel::onAttributeAdded(const QString& name)
 {
     // Recreate rolenames in the model if the attribute is new
     if(!u::contains(_roleNames.values(), name.toUtf8()))
@@ -71,7 +76,7 @@ void NodeAttributeTableModel::onAttributeAdded(QString name)
     }
 }
 
-void NodeAttributeTableModel::onAttributeRemoved(QString name)
+void NodeAttributeTableModel::onAttributeRemoved(const QString& name)
 {
     if(u::contains(_roleNames.values(), name.toUtf8()))
     {
@@ -104,10 +109,10 @@ QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
 
         auto* attribute = _graphModel->attributeByName(_roleNames[role]);
         if(attribute != nullptr)
-            return QVariant(attribute->stringValueOf(_userNodeData->nodeIdForRowIndex(row)));
+            return attribute->stringValueOf(_userNodeData->nodeIdForRowIndex(row));
     }
 
-    return QVariant();
+    return {};
 }
 
 void NodeAttributeTableModel::onSelectionChanged()

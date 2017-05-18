@@ -87,7 +87,7 @@ PluginContent
             Layout.minimumHeight: splitView.orientation === Qt.Vertical ? 100 + (height - viewport.height) : -1
             Layout.minimumWidth: splitView.orientation === Qt.Horizontal ? 200 : -1
 
-            nodeAttributesModel: plugin.model.userNodeDataModel
+            nodeAttributesModel: plugin.model.nodeAttributeTableModel
             showCalculatedAttributes: toggleCalculatedAttributes.checked
 
             onVisibleRowsChanged:

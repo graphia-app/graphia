@@ -115,7 +115,6 @@ public:
                                                const QString& channelName) const;
 
     std::vector<QString> attributeNames(ElementType elementType = ElementType::All) const;
-    std::vector<QString> nodeAttributeNames() const;
 
     Attribute& createAttribute(const QString& name);
 
@@ -141,8 +140,8 @@ private slots:
 signals:
     void visualsWillChange();
     void visualsChanged();
-    void attributeAdded(QString name);
-    void attributeRemoved(QString name);
+    void attributeAdded(const QString& name);
+    void attributeRemoved(const QString& name);
 };
 
 #endif // GRAPHMODEL_H

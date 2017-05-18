@@ -34,6 +34,7 @@ public:
 
     virtual QString stringValueOf(NodeId nodeId) const = 0;
     virtual QString stringValueOf(EdgeId edgeId) const = 0;
+    virtual QString stringValueOf(const IGraphComponent& graphComponent) const = 0;
 
     virtual IAttribute& setIntValueFn(ValueFn<int, NodeId> valueFn) = 0;
     virtual IAttribute& setIntValueFn(ValueFn<int, EdgeId> valueFn) = 0;
