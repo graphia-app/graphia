@@ -26,6 +26,7 @@
 #include "shared/utils/utils.h"
 #include "shared/utils/pair_iterator.h"
 #include "shared/utils/flags.h"
+#include "shared/utils/utils.h"
 
 #include <QRegularExpression>
 
@@ -665,7 +666,7 @@ void GraphModel::onTransformedGraphWillChange(const Graph*)
     _previousDynamicAttributeNames.clear();
 
     for(auto& name : u::keysFor(_attributes))
-        _previousDynamicAttributeNames.append(name);
+        _previousDynamicAttributeNames.emplace_back(name);
 
     removeDynamicAttributes();
 
@@ -686,6 +687,7 @@ void GraphModel::onTransformedGraphChanged(const Graph* graph)
         else if(attribute.elementType() == ElementType::Edge)
             attribute.autoSetRangeForElements(graph->edgeIds());
     }
+
     // Compare with previous Dynamic attributes
     // Check for added
     auto addedAttributeNames = u::setDifference(u::keysFor(_attributes), _previousDynamicAttributeNames);

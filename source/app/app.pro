@@ -114,8 +114,7 @@ HEADERS += \
     transform/transforms/edgecontractiontransform.h \
     transform/transforms/filtertransform.h \
     transform/transforms/mcltransform.h \
-    transform/transforms/pageranktransform.h \
-    graph/elementtype.h
+    transform/transforms/pageranktransform.h
 
 SOURCES += \
     application.cpp \

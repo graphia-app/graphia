@@ -64,7 +64,7 @@ private:
     IPlugin* _plugin;
 
     std::map<QString, Attribute> _attributes;
-    QStringList _previousDynamicAttributeNames;
+    std::vector<QString> _previousDynamicAttributeNames;
     std::map<QString, std::unique_ptr<GraphTransformFactory>> _graphTransformFactories;
 
     std::map<QString, std::unique_ptr<VisualisationChannel>> _visualisationChannels;
