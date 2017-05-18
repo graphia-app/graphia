@@ -24,10 +24,34 @@ TableView
     sortIndicatorVisible: true
     property string sortRoleName:
     {
-        if(columnNames.length > 0 && columnNames[sortIndicatorColumn] !== undefined)
-            return columnNames[sortIndicatorColumn];
+        if(nodeAttributesModel.columnNames.length > 0 &&
+           nodeAttributesModel.columnNames[sortIndicatorColumn] !== undefined)
+        {
+            return nodeAttributesModel.columnNames[sortIndicatorColumn];
+        }
 
         return "";
+    }
+
+    function createModel()
+    {
+        model = proxyModelComponent.createObject(tableView,
+            {"columnNames": nodeAttributesModel.columnNames});
+
+        // Dynamically create the columns
+        while(columnCount > 0)
+            tableView.removeColumn(0);
+
+        for(var i = 0; i < nodeAttributesModel.columnNames.length; i++)
+        {
+            var columnName  = nodeAttributesModel.columnNames[i];
+            tableView.addColumn(columnComponent.createObject(tableView,
+                {"role": columnName, "title": columnName}));
+        }
+
+        // Snap the view back to the start
+        // Tableview can be left scrolled out of bounds if column count reduces
+        tableView.flickableItem.contentX = 0;
     }
 
     Connections
@@ -36,33 +60,32 @@ TableView
         onColumnNamesChanged:
         {
             // Hack - TableView doesn't respond to rolenames changes
-            // so we need to set to null and reset the model + proxy
-            columnNames = proxyModel.columnNames;
-            model = null;
-            proxyModel.columnNames = nodeAttributesModel.columnNames;
-            proxyModel.sourceModel = null;
-            proxyModel.sourceModel = nodeAttributesModel;
-            model = proxyModel;
-            columnNames = proxyModel.columnNames;
+            // so instead we recreate the model to force an update
+            createModel();
         }
     }
 
-    model: SortFilterProxyModel
+    Component.onCompleted: { createModel(); }
+
+    Component
     {
-        id: proxyModel
-        property var columnNames: sourceModel.columnNames
-        sourceModel: nodeAttributesModel
-        sortRoleName: tableView.sortRoleName
-        ascendingSortOrder: tableView.sortIndicatorOrder === Qt.AscendingOrder
+        id: proxyModelComponent
 
-        filterRoleName: 'nodeSelected'; filterValue: true
+        SortFilterProxyModel
+        {
+            sourceModel: nodeAttributesModel
+            sortRoleName: tableView.sortRoleName
+            ascendingSortOrder: tableView.sortIndicatorOrder === Qt.AscendingOrder
 
-        // NodeAttributeTableModel fires layoutChanged whenever the nodeSelected role
-        // changes which in turn affects which rows the model reflects. When the visible
-        // rows change, we emit a signal so that the owners of the TableView can react.
-        // Qt.callLater is used because otherwise the signal is emitted before the
-        // TableView has had a chance to update.
-        onLayoutChanged: { Qt.callLater(visibleRowsChanged); }
+            filterRoleName: 'nodeSelected'; filterValue: true
+
+            // NodeAttributeTableModel fires layoutChanged whenever the nodeSelected role
+            // changes which in turn affects which rows the model reflects. When the visible
+            // rows change, we emit a signal so that the owners of the TableView can react.
+            // Qt.callLater is used because otherwise the signal is emitted before the
+            // TableView has had a chance to update.
+            onLayoutChanged: { Qt.callLater(visibleRowsChanged); }
+        }
     }
 
     signal visibleRowsChanged();
@@ -86,26 +109,6 @@ TableView
 
             selectedRows = rows;
         }
-    }
-
-    property var columnNames: model.columnNames
-
-    onColumnNamesChanged:
-    {
-        // Dynamically create the columns
-        while(columnCount > 0)
-            tableView.removeColumn(0);
-
-        for(var i = 0; i < columnNames.length; i++)
-        {
-            var columnName  = columnNames[i];
-            tableView.addColumn(columnComponent.createObject(tableView,
-                {"role": columnName, "title": columnName}));
-        }
-
-        // Snap the view back to the start
-        // Tableview can be left scrolled out of bounds if column count reduces
-        tableView.flickableItem.contentX = 0;
     }
 
     // Work around for QTBUG-58594
