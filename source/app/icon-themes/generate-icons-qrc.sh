@@ -15,11 +15,11 @@ ICON_NAMES=$(find $(find ../../ -type d -name "qml") -name "*.qml" | \
   perl -pe 's/[^\"]*\"([^\"]*)\"[^\"]*/$1\n/g' | \
   sort | uniq)
 
-echo ${PREAMBLE} > icons.qrc
+echo -e ${PREAMBLE} > icons.qrc
 
 for THEME_FILE in ${THEME_FILES};
 do
-  echo "\t\t<file>${THEME_FILE}</file>" >> icons.qrc
+  echo -e "\t\t<file>${THEME_FILE}</file>" >> icons.qrc
 done
 
 for ICON_NAME in ${ICON_NAMES};
@@ -32,8 +32,8 @@ do
       echo ${ICON_FILE} is symlink!
     fi
 
-    echo "\t\t<file>${ICON_FILE}</file>" >> icons.qrc
+    echo -e "\t\t<file>${ICON_FILE}</file>" >> icons.qrc
   done
 done
 
-echo ${POSTAMBLE} >> icons.qrc
+echo -e ${POSTAMBLE} >> icons.qrc
