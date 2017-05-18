@@ -1,7 +1,7 @@
 #ifndef VISUALISATIONCHANNEL_H
 #define VISUALISATIONCHANNEL_H
 
-#include "ui/visualisations/elementvisual.h"
+#include "shared/ui/visualisations/elementvisual.h"
 #include "shared/attributes/valuetype.h"
 #include "shared/graph/elementtype.h"
 

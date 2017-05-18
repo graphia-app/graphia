@@ -91,7 +91,6 @@ HEADERS += \
     layout/fastinitiallayout.h \
     rendering/primitives/arrow.h \
     ui/visualisations/colorvisualisationchannel.h \
-    ui/visualisations/elementvisual.h \
     ui/visualisations/visualisationchannel.h \
     ui/visualisations/sizevisualisationchannel.h \
     ui/visualisations/textvisualisationchannel.h \

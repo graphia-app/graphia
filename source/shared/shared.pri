@@ -47,7 +47,8 @@ HEADERS += \
     $$PWD/attributes/iattributerange.h \
     $$PWD/utils/qmlenum.h \
     $$PWD/attributes/valuetype.h \
-    $$PWD/graph/elementtype.h
+    $$PWD/graph/elementtype.h \
+    $$PWD/ui/visualisations/elementvisual.h
 
 SOURCES += \
     $$PWD/loading/urltypes.cpp \
