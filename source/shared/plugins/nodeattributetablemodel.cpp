@@ -29,15 +29,16 @@ QStringList NodeAttributeTableModel::columnNames() const
 {
     QStringList list;
 
+    for(const auto& userDataVector : *_userNodeData)
+        list.append(userDataVector.name());
+
     if(_showCalculatedAttributes)
     {
         for(auto& attributeName : _graphModel->attributeNames(ElementType::Node))
-            list.append(attributeName);
-    }
-    else
-    {
-        for(const auto& userDataVector : *_userNodeData)
-            list.append(userDataVector.name());
+        {
+            if(!u::contains(list, attributeName))
+                list.append(attributeName);
+        }
     }
 
     return list;
@@ -52,7 +53,7 @@ void NodeAttributeTableModel::refreshRoleNames()
     _roleNames.insert(_nodeIdRole, "nodeId");
     _roleNames.insert(_nodeSelectedRole, "nodeSelected");
 
-    for(const auto& name : _graphModel->attributeNames(ElementType::Node))
+    for(const auto& name : columnNames())
     {
         _roleNames.insert(_nextRole, name.toUtf8());
         _nextRole++;
