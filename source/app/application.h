@@ -14,8 +14,14 @@
 
 #include <QCoreApplication>
 
-#if !defined(APP_URI) || !defined(APP_MAJOR_VERSION) || !defined(APP_MINOR_VERSION)
-#error Required preprocessor values not defined
+#ifndef APP_URI
+#define APP_URI "uri.missing"
+#endif
+#ifndef APP_MAJOR_VERSION
+#define APP_MAJOR_VERSION -1
+#endif
+#ifndef APP_MINOR_VERSION
+#define APP_MINOR_VERSION -1
 #endif
 
 class GraphModel;
