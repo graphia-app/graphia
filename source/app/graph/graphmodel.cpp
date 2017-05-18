@@ -519,7 +519,7 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
         // Clear all edge Selected flags as we can't know what to change unless
         // we have the previous selection state to hand
         for(auto edgeId : graph().edgeIds())
-            _edgeVisuals[edgeId]._state.setFlag(VisualFlags::Selected, false);
+            _edgeVisuals[edgeId]._state.reset(VisualFlags::Selected);
     }
 
     if(searchManager != nullptr)
@@ -527,7 +527,7 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
         // Clear all edge NotFound flags as we can't know what to change unless
         // we have the previous search state to hand
         for(auto edgeId : graph().edgeIds())
-            _edgeVisuals[edgeId]._state.setFlag(VisualFlags::NotFound, false);
+            _edgeVisuals[edgeId]._state.reset(VisualFlags::NotFound);
     }
 
     for(auto nodeId : graph().nodeIds())
@@ -560,12 +560,12 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
         {
             auto nodeIsSelected = selectionManager->nodeIsSelected(nodeId);
 
-            _nodeVisuals[nodeId]._state.setFlag(VisualFlags::Selected, nodeIsSelected);
+            _nodeVisuals[nodeId]._state.setState(VisualFlags::Selected, nodeIsSelected);
 
             if(nodeIsSelected)
             {
                 for(auto edgeId : graph().edgeIdsForNodeId(nodeId))
-                    _edgeVisuals[edgeId]._state.setFlag(VisualFlags::Selected, nodeIsSelected);
+                    _edgeVisuals[edgeId]._state.setState(VisualFlags::Selected, nodeIsSelected);
             }
         }
 
@@ -574,12 +574,12 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
             auto nodeWasFound = !searchManager->foundNodeIds().empty() &&
                     !searchManager->nodeWasFound(nodeId);
 
-            _nodeVisuals[nodeId]._state.setFlag(VisualFlags::NotFound, nodeWasFound);
+            _nodeVisuals[nodeId]._state.setState(VisualFlags::NotFound, nodeWasFound);
 
             if(nodeWasFound)
             {
                 for(auto edgeId : graph().edgeIdsForNodeId(nodeId))
-                    _edgeVisuals[edgeId]._state.setFlag(VisualFlags::NotFound, true);
+                    _edgeVisuals[edgeId]._state.set(VisualFlags::NotFound);
             }
         }
     }

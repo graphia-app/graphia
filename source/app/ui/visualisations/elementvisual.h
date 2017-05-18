@@ -1,7 +1,8 @@
 #ifndef ELEMENTVISUAL_H
 #define ELEMENTVISUAL_H
 
-#include <QFlags>
+#include "shared/utils/flags.h"
+
 #include <QColor>
 
 enum VisualFlags
@@ -11,16 +12,13 @@ enum VisualFlags
     NotFound = 0x2
 };
 
-Q_DECLARE_FLAGS(VisualState, VisualFlags)
-Q_DECLARE_OPERATORS_FOR_FLAGS(VisualState)
-
 struct ElementVisual
 {
     float _size = -1.0f;
     QColor _outerColor;
     QColor _innerColor;
     QString _text;
-    VisualState _state;
+    Flags<VisualFlags> _state = VisualFlags::None;
 };
 
 #endif // ELEMENTVISUAL_H

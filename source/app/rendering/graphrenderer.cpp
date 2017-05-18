@@ -619,7 +619,7 @@ void GraphRenderer::updateGPUDataIfRequired()
             nodeData._innerColor[1] = nodeVisual._innerColor.greenF();
             nodeData._innerColor[2] = nodeVisual._innerColor.blueF();
 
-            QColor outlineColor = nodeVisual._state.testFlag(VisualFlags::Selected) ?
+            QColor outlineColor = nodeVisual._state.test(VisualFlags::Selected) ?
                 Qt::white : Qt::black;
 
             nodeData._outlineColor[0] = outlineColor.redF();
@@ -627,15 +627,15 @@ void GraphRenderer::updateGPUDataIfRequired()
             nodeData._outlineColor[2] = outlineColor.blueF();
 
             auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(),
-                nodeVisual._state.testFlag(VisualFlags::NotFound) ? NotFoundAlpha : 1.0f);
+                nodeVisual._state.test(VisualFlags::NotFound) ? NotFoundAlpha : 1.0f);
 
             if(gpuGraphData != nullptr)
                 gpuGraphData->_nodeData.push_back(nodeData);
 
-            if(showNodeText == TextState::Off || nodeVisual._state.testFlag(VisualFlags::NotFound))
+            if(showNodeText == TextState::Off || nodeVisual._state.test(VisualFlags::NotFound))
                 continue;
 
-            if(showNodeText == TextState::Selected && !nodeVisual._state.testFlag(VisualFlags::Selected))
+            if(showNodeText == TextState::Selected && !nodeVisual._state.test(VisualFlags::Selected))
                 continue;
 
             createGPUGlyphData(nodeVisual._text, textColor, textAlignment, textScale, nodeVisual._size, nodePosition, componentIndex, gpuGraphData);
@@ -676,15 +676,15 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._outlineColor[2] = 0.0f;
 
             auto* gpuGraphData = gpuGraphDataForAlpha(componentRenderer->alpha(),
-                edgeVisual._state.testFlag(VisualFlags::NotFound) ? NotFoundAlpha : 1.0f);
+                edgeVisual._state.test(VisualFlags::NotFound) ? NotFoundAlpha : 1.0f);
 
             if(gpuGraphData != nullptr)
                 gpuGraphData->_edgeData.push_back(edgeData);
 
-            if(showEdgeText == TextState::Off || edgeVisual._state.testFlag(VisualFlags::NotFound))
+            if(showEdgeText == TextState::Off || edgeVisual._state.test(VisualFlags::NotFound))
                 continue;
 
-            if(showEdgeText == TextState::Selected && !edgeVisual._state.testFlag(VisualFlags::Selected))
+            if(showEdgeText == TextState::Selected && !edgeVisual._state.test(VisualFlags::Selected))
                 continue;
 
             QVector3D midPoint = (sourcePosition + targetPosition) * 0.5f;

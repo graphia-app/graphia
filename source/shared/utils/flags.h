@@ -39,6 +39,14 @@ public:
         reset(values...);
     }
 
+    void setState(Enum value, bool state)
+    {
+        if(state)
+            set(value);
+        else
+            reset(value);
+    }
+
     bool test(Enum value) const
     {
         return static_cast<int>(_value) & static_cast<int>(value);
