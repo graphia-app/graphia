@@ -29,7 +29,7 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
     NodeArray<float> maxDistances(_graphModel->graph());
 
     const auto& nodeIds = _graphModel->graph().nodeIds();
-    std::atomic_int progress = 0;
+    std::atomic_int progress(0);
     concurrent_for(nodeIds.begin(), nodeIds.end(),
                    [this, &maxDistances, &progress, &target](const NodeId source)
     {
