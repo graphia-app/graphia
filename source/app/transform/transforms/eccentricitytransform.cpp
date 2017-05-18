@@ -9,11 +9,12 @@
 bool EccentricityTransform::apply(TransformedGraph& target) const
 {
     target.setPhase("Eccentricity");
-    calculateDistances();
+    target.setProgress(0);
+    calculateDistances(target);
     return false;
 }
 
-void EccentricityTransform::calculateDistances() const
+void EccentricityTransform::calculateDistances(TransformedGraph& target) const
 {
     // Setup the contiguous ids
     std::map<NodeId, int> nodeIdToMatrixIndex;
@@ -28,8 +29,9 @@ void EccentricityTransform::calculateDistances() const
     NodeArray<float> maxDistances(_graphModel->graph());
 
     const auto& nodeIds = _graphModel->graph().nodeIds();
+    std::atomic_int progress = 0;
     concurrent_for(nodeIds.begin(), nodeIds.end(),
-                   [this, &maxDistances](const NodeId source)
+                   [this, &maxDistances, &progress, &target](const NodeId source)
     {
         NodeArray<float> distance(_graphModel->graph());
         NodeArray<bool> visited(_graphModel->graph());
@@ -74,7 +76,8 @@ void EccentricityTransform::calculateDistances() const
         }
 
         maxDistances[source] = maxDistance;
-
+        progress++;
+        target.setProgress(progress.load() * 100 / static_cast<int>(target.numNodes()));
     }, true);
 
     _graphModel->createAttribute(QObject::tr("Node Eccentricity"))

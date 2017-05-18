@@ -13,7 +13,7 @@ public:
 
 private:
     GraphModel* _graphModel = nullptr;
-    void calculateDistances() const;
+    void calculateDistances(TransformedGraph& target) const;
 };
 
 class EccentricityTransformFactory : public GraphTransformFactory
