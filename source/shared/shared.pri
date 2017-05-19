@@ -42,7 +42,6 @@ HEADERS += \
     $$PWD/plugins/userdata.h \
     $$PWD/plugins/usernodedata.h \
     $$PWD/attributes/iattribute.h \
-    $$PWD/plugins/usernodedatatablemodel.h \
     $$PWD/utils/flags.h \
     $$PWD/attributes/iattributerange.h \
     $$PWD/utils/qmlenum.h \
@@ -67,7 +66,6 @@ SOURCES += \
     $$PWD/plugins/userdatavector.cpp \
     $$PWD/plugins/userdata.cpp \
     $$PWD/plugins/usernodedata.cpp \
-    $$PWD/plugins/usernodedatatablemodel.cpp \
     $$PWD/graph/elementtype.cpp \
     $$PWD/plugins/nodeattributetablemodel.cpp
 
