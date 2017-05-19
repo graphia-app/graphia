@@ -192,6 +192,32 @@ public:
         return valueOf(Helper<T>(), elementId);
     }
 
+    template<typename E> int intValueOf(E& elementId) const
+    {
+        switch(valueType())
+        {
+        case ValueType::Int:    return valueOf<int>(elementId);
+        case ValueType::Float:  return static_cast<int>(valueOf<double>(elementId));
+        case ValueType::String: return valueOf<QString>(elementId).toInt();
+        default: break;
+        }
+
+        return {};
+    }
+
+    template<typename E> double floatValueOf(E& elementId) const
+    {
+        switch(valueType())
+        {
+        case ValueType::Int:    return static_cast<double>(valueOf<int>(elementId));
+        case ValueType::Float:  return valueOf<double>(elementId);
+        case ValueType::String: return valueOf<QString>(elementId).toDouble();
+        default: break;
+        }
+
+        return {};
+    }
+
     template<typename E> QString stringValueOf(E& elementId) const
     {
         switch(valueType())
@@ -226,6 +252,20 @@ public:
 
     template<typename T, typename E>
     using ValueOfFn = T(Attribute::*)(E&) const;
+
+    int intValueOf(NodeId nodeId) const { return intValueOf<NodeId>(nodeId); }
+    int intValueOf(EdgeId edgeId) const { return intValueOf<EdgeId>(edgeId); }
+    int intValueOf(const IGraphComponent& graphComponent) const
+    {
+        return intValueOf<const IGraphComponent&>(graphComponent);
+    }
+
+    double floatValueOf(NodeId nodeId) const { return floatValueOf<NodeId>(nodeId); }
+    double floatValueOf(EdgeId edgeId) const { return floatValueOf<EdgeId>(edgeId); }
+    double floatValueOf(const IGraphComponent& graphComponent) const
+    {
+        return floatValueOf<const IGraphComponent&>(graphComponent);
+    }
 
     QString stringValueOf(NodeId nodeId) const { return stringValueOf<NodeId>(nodeId); }
     QString stringValueOf(EdgeId edgeId) const { return stringValueOf<EdgeId>(edgeId); }

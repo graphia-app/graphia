@@ -10,6 +10,8 @@
 
 #include <functional>
 
+#include <QVariant>
+
 enum class AttributeFlag
 {
     None                    = 0x0,
@@ -32,9 +34,29 @@ public:
 
     template<typename T, typename E> using ValueFn = std::function<T(E)>;
 
+    virtual int intValueOf(NodeId nodeId) const = 0;
+    virtual int intValueOf(EdgeId edgeId) const = 0;
+    virtual int intValueOf(const IGraphComponent& graphComponent) const = 0;
+
+    virtual double floatValueOf(NodeId nodeId) const = 0;
+    virtual double floatValueOf(EdgeId edgeId) const = 0;
+    virtual double floatValueOf(const IGraphComponent& graphComponent) const = 0;
+
     virtual QString stringValueOf(NodeId nodeId) const = 0;
     virtual QString stringValueOf(EdgeId edgeId) const = 0;
     virtual QString stringValueOf(const IGraphComponent& graphComponent) const = 0;
+
+    template<typename E>
+    QVariant valueOf(E elementId) const
+    {
+        switch(valueType())
+        {
+        case ValueType::Int:    return intValueOf(elementId);
+        case ValueType::Float:  return floatValueOf(elementId);
+        case ValueType::String: return stringValueOf(elementId);
+        default:                return {};
+        }
+    }
 
     virtual IAttribute& setIntValueFn(ValueFn<int, NodeId> valueFn) = 0;
     virtual IAttribute& setIntValueFn(ValueFn<int, EdgeId> valueFn) = 0;

@@ -110,7 +110,7 @@ QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
 
         auto* attribute = _graphModel->attributeByName(_roleNames[role]);
         if(attribute != nullptr)
-            return attribute->stringValueOf(_userNodeData->nodeIdForRowIndex(row));
+            return attribute->valueOf(_userNodeData->nodeIdForRowIndex(row));
     }
 
     return {};
