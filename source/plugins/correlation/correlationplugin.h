@@ -15,6 +15,7 @@
 #include <QString>
 #include <QStringList>
 #include <QVector>
+#include <QColor>
 
 class CorrelationPluginInstance : public BasePluginInstance
 {
@@ -24,6 +25,7 @@ class CorrelationPluginInstance : public BasePluginInstance
     Q_PROPERTY(QStringList columnNames READ columnNames NOTIFY columnNamesChanged)
     Q_PROPERTY(QStringList rowNames READ rowNames NOTIFY rowNamesChanged)
     Q_PROPERTY(QVector<double> rawData READ rawData NOTIFY rawDataChanged)
+    Q_PROPERTY(QVector<QColor> nodeColors READ nodeColors NOTIFY nodeColorsChanged)
     Q_PROPERTY(size_t columnCount MEMBER _numColumns NOTIFY columnCountChanged)
     Q_PROPERTY(size_t rowCount MEMBER _numRows NOTIFY rowCountChanged)
 
@@ -131,6 +133,7 @@ private:
     QStringList columnNames();
     QStringList rowNames();
     QVector<double> rawData();
+    QVector<QColor> nodeColors();
 
     const DataRow& dataRowForNodeId(NodeId nodeId) const;
 
@@ -162,6 +165,7 @@ signals:
     void rowCountChanged();
     void columnCountChanged();
     void rawDataChanged();
+    void nodeColorsChanged();
     void columnNamesChanged();
     void rowNamesChanged();
 };

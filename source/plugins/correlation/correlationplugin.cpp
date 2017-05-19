@@ -10,6 +10,7 @@ CorrelationPluginInstance::CorrelationPluginInstance()
     connect(this, SIGNAL(loadSuccess()), this, SLOT(onLoadSuccess()));
     connect(this, SIGNAL(selectionChanged(const ISelectionManager*)),
             this, SLOT(onSelectionChanged(const ISelectionManager*)));
+    connect(this, SIGNAL(visualsChanged()), this, SIGNAL(nodeColorsChanged()));
 }
 
 void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionManager* selectionManager,
@@ -258,6 +259,19 @@ void CorrelationPluginInstance::onLoadSuccess()
 QVector<double> CorrelationPluginInstance::rawData()
 {
     return QVector<double>::fromStdVector(_data);
+}
+
+QVector<QColor> CorrelationPluginInstance::nodeColors()
+{
+    QVector<QColor> colors;
+
+    for(size_t i = 0; i < _numRows; i++)
+    {
+        auto nodeId = _userNodeData.nodeIdForRowIndex(i);
+        colors.append(graphModel()->nodeVisual(nodeId).outerColor());
+    }
+
+    return colors;
 }
 
 QStringList CorrelationPluginInstance::columnNames()
