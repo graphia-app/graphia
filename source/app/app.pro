@@ -22,15 +22,22 @@ QT += qml quick widgets opengl openglextensions xml svg
 
 HEADERS += \
     application.h \
+    attributes/attribute.h \
+    attributes/availableattributesmodel.h \
+    attributes/conditionfncreator.h \
+    attributes/condtionfnops.h \
     commands/applytransformationscommand.h \
+    commands/applyvisualisationscommand.h \
     commands/commandmanager.h \
     commands/deleteselectednodescommand.h \
     commands/selectnodescommand.h \
+    crashtype.h \
     graph/componentmanager.h \
     graph/elementiddistinctsetcollection.h \
     graph/filter.h \
-    graph/graph.h \
+    graph/graphcomponent.h \
     graph/graphconsistencychecker.h \
+    graph/graph.h \
     graph/graphmodel.h \
     graph/mutablegraph.h \
     layout/barneshuttree.h \
@@ -38,6 +45,7 @@ HEADERS += \
     layout/circlepackcomponentlayout.h \
     layout/collision.h \
     layout/componentlayout.h \
+    layout/fastinitiallayout.h \
     layout/forcedirectedlayout.h \
     layout/layout.h \
     layout/layoutsettings.h \
@@ -69,12 +77,24 @@ HEADERS += \
     rendering/graphrenderer.h \
     rendering/opengldebuglogger.h \
     rendering/openglfunctions.h \
+    rendering/primitives/arrow.h \
     rendering/primitives/rectangle.h \
     rendering/primitives/sphere.h \
     rendering/scene.h \
     rendering/transition.h \
+    transform/graphtransformconfig.h \
+    transform/graphtransformconfigparser.h \
     transform/graphtransform.h \
+    transform/graphtransformparameter.h \
+    transform/transformcache.h \
     transform/transformedgraph.h \
+    transform/transforminfo.h \
+    transform/transforms/eccentricitytransform.h \
+    transform/transforms/edgecontractiontransform.h \
+    transform/transforms/filtertransform.h \
+    transform/transforms/mcltransform.h \
+    transform/transforms/pageranktransform.h \
+    ui/alert.h \
     ui/document.h \
     ui/graphcommoninteractor.h \
     ui/graphcomponentinteractor.h \
@@ -83,47 +103,31 @@ HEADERS += \
     ui/interactor.h \
     ui/searchmanager.h \
     ui/selectionmanager.h \
-    utils/qmlcontainerwrapper.h \
-    utils/shadertools.h \
-    graph/graphcomponent.h \
-    transform/graphtransformconfig.h \
-    transform/graphtransformconfigparser.h \
-    layout/fastinitiallayout.h \
-    rendering/primitives/arrow.h \
+    ui/visualisations/colorgradient.h \
     ui/visualisations/colorvisualisationchannel.h \
-    ui/visualisations/visualisationchannel.h \
+    ui/visualisations/defaultgradients.h \
     ui/visualisations/sizevisualisationchannel.h \
     ui/visualisations/textvisualisationchannel.h \
-    commands/applyvisualisationscommand.h \
+    ui/visualisations/visualisationbuilder.h \
+    ui/visualisations/visualisationchannel.h \
     ui/visualisations/visualisationconfig.h \
     ui/visualisations/visualisationconfigparser.h \
-    ui/visualisations/visualisationbuilder.h \
-    attributes/conditionfncreator.h \
-    attributes/condtionfnops.h \
-    attributes/attribute.h \
-    ui/visualisations/colorgradient.h \
-    crashtype.h \
     ui/visualisations/visualisationinfo.h \
-    ui/alert.h \
-    transform/transforminfo.h \
-    transform/graphtransformparameter.h \
-    ui/visualisations/defaultgradients.h \
-    attributes/availableattributesmodel.h \
-    transform/transformcache.h \
-    transform/transforms/eccentricitytransform.h \
-    transform/transforms/edgecontractiontransform.h \
-    transform/transforms/filtertransform.h \
-    transform/transforms/mcltransform.h \
-    transform/transforms/pageranktransform.h
+    utils/qmlcontainerwrapper.h \
+    utils/shadertools.h
 
 SOURCES += \
     application.cpp \
+    attributes/attribute.cpp \
+    attributes/availableattributesmodel.cpp \
+    attributes/conditionfncreator.cpp \
     commands/applytransformationscommand.cpp \
+    commands/applyvisualisationscommand.cpp \
     commands/commandmanager.cpp \
     commands/deleteselectednodescommand.cpp \
     graph/componentmanager.cpp \
-    graph/graph.cpp \
     graph/graphconsistencychecker.cpp \
+    graph/graph.cpp \
     graph/graphmodel.cpp \
     graph/mutablegraph.cpp \
     layout/barneshuttree.cpp \
@@ -131,6 +135,7 @@ SOURCES += \
     layout/circlepackcomponentlayout.cpp \
     layout/collision.cpp \
     layout/componentlayout.cpp \
+    layout/fastinitiallayout.cpp \
     layout/forcedirectedlayout.cpp \
     layout/layout.cpp \
     layout/layoutsettings.cpp \
@@ -156,11 +161,20 @@ SOURCES += \
     rendering/graphrenderer.cpp \
     rendering/opengldebuglogger.cpp \
     rendering/openglfunctions.cpp \
+    rendering/primitives/arrow.cpp \
     rendering/primitives/rectangle.cpp \
     rendering/primitives/sphere.cpp \
     rendering/transition.cpp \
+    transform/graphtransformconfig.cpp \
+    transform/graphtransformconfigparser.cpp \
     transform/graphtransform.cpp \
+    transform/transformcache.cpp \
     transform/transformedgraph.cpp \
+    transform/transforms/eccentricitytransform.cpp \
+    transform/transforms/edgecontractiontransform.cpp \
+    transform/transforms/filtertransform.cpp \
+    transform/transforms/mcltransform.cpp \
+    transform/transforms/pageranktransform.cpp \
     ui/document.cpp \
     ui/graphcommoninteractor.cpp \
     ui/graphcomponentinteractor.cpp \
@@ -168,26 +182,12 @@ SOURCES += \
     ui/graphquickitem.cpp \
     ui/searchmanager.cpp \
     ui/selectionmanager.cpp \
-    transform/graphtransformconfigparser.cpp \
-    transform/graphtransformconfig.cpp \
-    layout/fastinitiallayout.cpp \
-    rendering/primitives/arrow.cpp \
+    ui/visualisations/colorgradient.cpp \
     ui/visualisations/colorvisualisationchannel.cpp \
     ui/visualisations/sizevisualisationchannel.cpp \
     ui/visualisations/textvisualisationchannel.cpp \
-    commands/applyvisualisationscommand.cpp \
     ui/visualisations/visualisationconfig.cpp \
-    ui/visualisations/visualisationconfigparser.cpp \
-    attributes/attribute.cpp \
-    ui/visualisations/colorgradient.cpp \
-    attributes/conditionfncreator.cpp \
-    attributes/availableattributesmodel.cpp \
-    transform/transformcache.cpp \
-    transform/transforms/eccentricitytransform.cpp \
-    transform/transforms/edgecontractiontransform.cpp \
-    transform/transforms/filtertransform.cpp \
-    transform/transforms/mcltransform.cpp \
-    transform/transforms/pageranktransform.cpp
+    ui/visualisations/visualisationconfigparser.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \
