@@ -25,9 +25,13 @@ private:
     const UserNodeData* _userNodeData = nullptr;
     const IGraphModel* _graphModel = nullptr;
 
-    const int _nodeIdRole = Qt::UserRole + 1;
-    const int _nodeSelectedRole = Qt::UserRole + 2;
-    int _nextRole = Qt::UserRole + 3;
+    enum Roles
+    {
+        NodeIdRole = Qt::UserRole + 1,
+        NodeSelectedRole,
+        FirstAttributeRole
+    };
+
     QHash<int, QByteArray> _roleNames;
     bool _showCalculatedAttributes = true;
 

@@ -4,10 +4,7 @@
 
 NodeAttributeTableModel::NodeAttributeTableModel() :
     QAbstractTableModel()
-{
-    _roleNames.insert(_nodeIdRole, "nodeId");
-    _roleNames.insert(_nodeSelectedRole, "nodeSelected");
-}
+{}
 
 void NodeAttributeTableModel::initialise(ISelectionManager* selectionManager, IGraphModel* graphModel, UserNodeData* userNodeData)
 {
@@ -47,16 +44,15 @@ QStringList NodeAttributeTableModel::columnNames() const
 void NodeAttributeTableModel::refreshRoleNames()
 {
     // Regenerate rolenames
-    // +3 because we added _nodeIdRole + _nodeSelectedRole on init
-    _nextRole = Qt::UserRole + 3;
     _roleNames.clear();
-    _roleNames.insert(_nodeIdRole, "nodeId");
-    _roleNames.insert(_nodeSelectedRole, "nodeSelected");
+    _roleNames.insert(Roles::NodeIdRole, "nodeId");
+    _roleNames.insert(Roles::NodeSelectedRole, "nodeSelected");
 
+    int nextRole = Roles::FirstAttributeRole;
     for(const auto& name : columnNames())
     {
-        _roleNames.insert(_nextRole, name.toUtf8());
-        _nextRole++;
+        _roleNames.insert(nextRole, name.toUtf8());
+        nextRole++;
     }
 }
 
@@ -99,13 +95,13 @@ int NodeAttributeTableModel::columnCount(const QModelIndex&) const
 QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
 {
     int row = index.row();
-    if(row >= 0 && row < rowCount() && role >= Qt::UserRole && role < _nextRole)
+    if(row >= 0 && row < rowCount() && role >= Qt::UserRole && role < (Qt::UserRole + _roleNames.size() + 1))
     {
         NodeId nodeId = _userNodeData->nodeIdForRowIndex(row);
 
-        if(role == _nodeIdRole)
+        if(role == Roles::NodeIdRole)
             return static_cast<int>(nodeId);
-        else if(role == _nodeSelectedRole)
+        else if(role == Roles::NodeSelectedRole)
             return _selectionManager->nodeIsSelected(nodeId);
 
         auto* attribute = _graphModel->attributeByName(_roleNames[role]);
