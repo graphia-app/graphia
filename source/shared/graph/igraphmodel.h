@@ -4,7 +4,7 @@
 #include "igraph.h"
 #include "imutablegraph.h"
 #include "shared/attributes/iattribute.h"
-#include "shared/ui/visualisations/elementvisual.h"
+#include "shared/ui/visualisations/ielementvisual.h"
 
 class QString;
 
@@ -16,8 +16,8 @@ public:
     virtual const IGraph& graph() const = 0;
     virtual IMutableGraph& mutableGraph() = 0;
 
-    virtual const ElementVisual& nodeVisual(NodeId nodeId) const = 0;
-    virtual const ElementVisual& edgeVisual(EdgeId edgeId) const = 0;
+    virtual const IElementVisual& nodeVisual(NodeId nodeId) const = 0;
+    virtual const IElementVisual& edgeVisual(EdgeId edgeId) const = 0;
 
     virtual QString nodeName(NodeId nodeId) const = 0;
     virtual void setNodeName(NodeId nodeId, const QString& name) = 0;

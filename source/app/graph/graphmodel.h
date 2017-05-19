@@ -9,7 +9,7 @@
 #include "transform/transforminfo.h"
 #include "attributes/attribute.h"
 
-#include "shared/ui/visualisations/elementvisual.h"
+#include "shared/ui/visualisations/ielementvisual.h"
 #include "ui/visualisations/visualisationchannel.h"
 #include "ui/visualisations/visualisationinfo.h"
 

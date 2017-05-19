@@ -31,7 +31,7 @@ HEADERS += \
     $$PWD/plugins/userdatavector.h \
     $$PWD/plugins/usernodedata.h \
     $$PWD/ui/iselectionmanager.h \
-    $$PWD/ui/visualisations/elementvisual.h \
+    $$PWD/ui/visualisations/ielementvisual.h \
     $$PWD/utils/circularbuffer.h \
     $$PWD/utils/deferredexecutor.h \
     $$PWD/utils/enumreflection.h \

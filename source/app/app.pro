@@ -106,6 +106,7 @@ HEADERS += \
     ui/visualisations/colorgradient.h \
     ui/visualisations/colorvisualisationchannel.h \
     ui/visualisations/defaultgradients.h \
+    ui/visualisations/elementvisual.h \
     ui/visualisations/sizevisualisationchannel.h \
     ui/visualisations/textvisualisationchannel.h \
     ui/visualisations/visualisationbuilder.h \
