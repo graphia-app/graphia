@@ -6,12 +6,16 @@
 #include "thirdparty/qcustomplot/qcustomplot_enable_warnings.h"
 
 #include <QQuickPaintedItem>
+#include <QVector>
+#include <QStringList>
+#include <QVector>
 
 class CorrelationPlotItem : public QQuickPaintedItem
 {
     Q_OBJECT
     Q_PROPERTY(QVector<double> data MEMBER _data)
     Q_PROPERTY(QVector<int> selectedRows MEMBER _selectedRows WRITE setSelectedRows)
+    Q_PROPERTY(QVector<QColor> rowColors MEMBER _rowColors WRITE setRowColors)
     Q_PROPERTY(QStringList columnNames MEMBER _labelNames WRITE setLabelNames)
     Q_PROPERTY(QStringList rowNames MEMBER _graphNames)
     Q_PROPERTY(size_t columnCount MEMBER _columnCount WRITE setColumnCount)
@@ -62,6 +66,7 @@ private:
     QStringList _graphNames;
     QVector<double> _data;
     QVector<int> _selectedRows;
+    QVector<QColor> _rowColors;
     bool _showColumnNames = true;
 
     void populateMeanAveragePlot();
@@ -70,6 +75,7 @@ private:
     void refresh();
 
     void setSelectedRows(const QVector<int>& selectedRows);
+    void setRowColors(const QVector<QColor>& rowColors);
     void setLabelNames(const QStringList& labelNames);
     void setElideLabelWidth(int elideLabelWidth);
     void setColumnCount(size_t columnCount);

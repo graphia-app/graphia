@@ -2,8 +2,6 @@
 
 #include <QDesktopServices>
 
-#include <random>
-
 CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent)
 {
     _customPlot.setOpenGl(true);
@@ -184,14 +182,8 @@ void CorrelationPlotItem::populateMeanAveragePlot()
     auto maxX = static_cast<double>(_columnCount);
     double maxY = 0.0;
 
-    std::random_device randomDevice;
-    std::mt19937 mTwister(randomDevice());
-    std::uniform_int_distribution<> randomColorDist(0, 255);
-
     auto* graph = _customPlot.addGraph();
-    mTwister.seed(static_cast<unsigned int>(_selectedRows.count()));
-    QColor randomColor = QColor::fromHsl(randomColorDist(mTwister), 210, 130);
-    graph->setPen(QPen(randomColor));
+    graph->setPen(QPen(Qt::black));
     graph->setName(tr("Mean average of selection"));
 
     // Use Average Calculation
@@ -236,17 +228,11 @@ void CorrelationPlotItem::populateRawPlot()
     auto maxX = static_cast<double>(_columnCount);
     double maxY = 0.0;
 
-    std::random_device randomDevice;
-    std::mt19937 mTwister(randomDevice());
-    std::uniform_int_distribution<> randomColorDist(0, 255);
-
     // Plot each row individually
     for(auto row : _selectedRows)
     {
         auto* graph = _customPlot.addGraph();
-        mTwister.seed(static_cast<unsigned int>(row));
-        QColor randomColor = QColor::fromHsl(randomColorDist(mTwister), 210, 130);
-        graph->setPen(QPen(randomColor));
+        graph->setPen(_rowColors.at(row));
         graph->setName(_graphNames[row]);
 
         QVector<double> yData;
@@ -270,6 +256,12 @@ void CorrelationPlotItem::populateRawPlot()
 void CorrelationPlotItem::setSelectedRows(const QVector<int>& selectedRows)
 {
     _selectedRows = selectedRows;
+    refresh();
+}
+
+void CorrelationPlotItem::setRowColors(const QVector<QColor>& rowColors)
+{
+    _rowColors = rowColors;
     refresh();
 }
 

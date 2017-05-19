@@ -123,6 +123,7 @@ PluginContent
                 columnCount: plugin.model.columnCount
                 data: plugin.model.rawData
                 columnNames: plugin.model.columnNames
+                rowColors: plugin.model.nodeColors
                 rowNames: plugin.model.rowNames
                 selectedRows: tableView.selectedRows
                 showColumnNames: toggleColumnNamesAction.checked
