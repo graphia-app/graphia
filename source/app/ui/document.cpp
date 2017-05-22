@@ -35,6 +35,7 @@ QColor Document::contrastingColorForBackground()
 Document::Document(QObject* parent) :
     QObject(parent),
     _graphChanging(false),
+    _layoutRequired(true),
     _graphTransformsModel(this)
 {}
 
@@ -103,8 +104,11 @@ QString Document::commandVerb() const
 
 void Document::updateLayoutState()
 {
-    if(idle() && !_userLayoutPaused)
+    if(idle() && !_userLayoutPaused && _layoutRequired)
+    {
         _layoutThread->resume();
+        _layoutRequired = false;
+    }
     else
         _layoutThread->pauseAndWait();
 }
@@ -129,6 +133,7 @@ void Document::toggleLayout()
         return;
 
     _userLayoutPaused = !_userLayoutPaused;
+    _layoutRequired = true;
     emit layoutPauseStateChanged();
 
     updateLayoutState();
@@ -429,8 +434,10 @@ void Document::onLoadComplete(bool success)
     });
 
     connect(&_graphModel->graph(), &Graph::graphChanged, [this]
+    (const Graph*, bool changeOccurred)
     {
         _graphChanging = false;
+        _layoutRequired = changeOccurred;
         maybeEmitIdleChanged();
 
         // If the graph has changed outside of a Command, then our new state is

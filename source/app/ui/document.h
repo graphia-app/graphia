@@ -125,6 +125,7 @@ private:
     bool _loadComplete = false;
 
     std::atomic_bool _graphChanging;
+    std::atomic_bool _layoutRequired;
 
     std::unique_ptr<GraphModel> _graphModel;
     std::unique_ptr<GPUComputeThread> _gpuComputeThread;
