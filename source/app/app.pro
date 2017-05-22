@@ -114,7 +114,6 @@ HEADERS += \
     ui/visualisations/visualisationconfig.h \
     ui/visualisations/visualisationconfigparser.h \
     ui/visualisations/visualisationinfo.h \
-    utils/qmlcontainerwrapper.h \
     utils/shadertools.h
 
 SOURCES += \
