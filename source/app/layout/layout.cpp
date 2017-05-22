@@ -309,7 +309,17 @@ void LayoutThread::onComponentWillBeRemoved(const Graph*, ComponentId componentI
     removeComponent(componentId);
 }
 
-std::vector<LayoutSetting>& LayoutThread::settingsVector()
+std::vector<LayoutSetting>& LayoutThread::settings()
 {
-   return _layoutFactory->settings().vector();
+    return _layoutFactory->settings().vector();
+}
+
+const LayoutSetting* LayoutThread::setting(const QString& name) const
+{
+    return _layoutFactory->setting(name);
+}
+
+void LayoutThread::setSettingValue(const QString& name, float value)
+{
+    _layoutFactory->setSettingValue(name, value);
 }

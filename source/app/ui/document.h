@@ -8,7 +8,6 @@
 #include "commands/commandmanager.h"
 #include "layout/layout.h"
 #include "shared/utils/qmlenum.h"
-#include "utils/qmlcontainerwrapper.h"
 #include "attributes/availableattributesmodel.h"
 #include "shared/utils/deferredexecutor.h"
 #include "thirdparty/qt-qml-models/QQmlVariantListModel.h"
@@ -65,10 +64,8 @@ class Document : public QObject
     Q_PROPERTY(bool canEnterOverviewMode READ canEnterOverviewMode NOTIFY canEnterOverviewModeChanged)
 
     Q_PROPERTY(QQmlVariantListModel* transforms READ transformsModel CONSTANT)
-
     Q_PROPERTY(QQmlVariantListModel* visualisations READ visualisationsModel CONSTANT)
-
-    Q_PROPERTY(QmlContainerWrapperBase* layoutSettings READ layoutSettings CONSTANT)
+    Q_PROPERTY(QQmlVariantListModel* layoutSettings READ settingsModel CONSTANT)
 
     Q_PROPERTY(float fps READ fps NOTIFY fpsChanged)
 
@@ -108,7 +105,7 @@ public:
     QQmlVariantListModel* visualisationsModel() { return &_visualisationsModel; }
     void setVisualisations(const QStringList& visualisations);
 
-    QmlContainerWrapper<LayoutSetting>* layoutSettings() { return &_layoutSettings; }
+    QQmlVariantListModel* settingsModel() { return &_layoutSettingsModel; }
 
     float fps() const;
 
@@ -139,7 +136,7 @@ private:
     std::unique_ptr<ParserThread> _graphFileParserThread;
 
     std::unique_ptr<LayoutThread> _layoutThread;
-    QmlContainerWrapper<LayoutSetting> _layoutSettings;
+    QQmlVariantListModel _layoutSettingsModel;
 
     DeferredExecutor _deferredExecutor;
 
@@ -167,6 +164,9 @@ private:
     void setFoundIt(std::vector<NodeId>::const_iterator it);
     void incrementFoundIt();
     void decrementFoundIt();
+
+    void initialiseLayoutSettingsModel();
+
     QVariantMap transformParameter(const QString& transformName, const QString& parameterName) const;
 
 signals:
@@ -271,6 +271,9 @@ public:
     Q_INVOKABLE void removeVisualisation(int index);
     Q_INVOKABLE void updateVisualisations();
     Q_INVOKABLE void moveVisualisation(int from, int to);
+
+    Q_INVOKABLE QVariantMap layoutSetting(const QString& name) const;
+    Q_INVOKABLE void setLayoutSettingValue(const QString& name, float value);
 
     Q_INVOKABLE void dumpGraph();
 

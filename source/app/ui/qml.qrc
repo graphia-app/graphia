@@ -8,7 +8,6 @@
         <file>qml/DebugRectangle.qml</file>
         <file>qml/DocumentUI.qml</file>
         <file>qml/Find.qml</file>
-        <file>qml/LayoutSettingUI.qml</file>
         <file>qml/Loading/FileTypeChooserDialog.qml</file>
         <file>qml/Loading/PluginChooserDialog.qml</file>
         <file>qml/Loading/PluginParametersDialog.qml</file>
@@ -34,5 +33,6 @@
         <file>qml/Controls/GradientList.qml</file>
         <file>qml/Controls/GradientPickerItem.qml</file>
         <file>qml/Controls/TreeBox.qml</file>
+        <file>qml/LayoutSettings.qml</file>
     </qresource>
 </RCC>

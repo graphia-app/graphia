@@ -342,21 +342,15 @@ Item
                     document: document
                 }
 
-                Column
+                LayoutSettings
                 {
                     anchors.left: parent.left
                     anchors.margins: Constants.margin
 
                     visible: toggleLayoutSettingsAction.checked
 
-                    Repeater
-                    {
-                        model: document.layoutSettings
-                        LayoutSettingUI
-                        {
-                            textColor: root.contrastingColor
-                        }
-                    }
+                    document: document
+                    textColor: root.contrastingColor
                 }
             }
         }

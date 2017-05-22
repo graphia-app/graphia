@@ -80,8 +80,8 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
     BarnesHutTree barnesHutTree;
     barnesHutTree.build(graphComponent(), positions());
 
-    float REPULSIVE_FORCE = _settings->valueOf("RepulsiveForce");
-    float ATTRACTIVE_FORCE = _settings->valueOf("AttractiveForce");
+    float REPULSIVE_FORCE = _settings->value("RepulsiveForce");
+    float ATTRACTIVE_FORCE = _settings->value("AttractiveForce");
 
     // Repulsive forces
     auto repulsiveResults = concurrent_for(nodeIds().begin(), nodeIds().end(),

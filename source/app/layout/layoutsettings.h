@@ -1,29 +1,31 @@
 #ifndef LAYOUTSETTINGS_H
 #define LAYOUTSETTINGS_H
 
+#include "shared/utils/utils.h"
+
 #include <QObject>
 #include <QString>
 
 #include <vector>
 
-class LayoutSetting : public QObject
+class LayoutSetting
 {
-    Q_OBJECT
-    Q_PROPERTY(QString settingName MEMBER _displayName NOTIFY nameChanged)
-    Q_PROPERTY(float settingValue MEMBER _value NOTIFY valueChanged)
-    Q_PROPERTY(float settingMinimumValue MEMBER _minimumValue NOTIFY minimumChanged)
-    Q_PROPERTY(float settingMaximumValue MEMBER _maximumValue NOTIFY maximumChanged)
-
 public:
-    LayoutSetting() {}
-    LayoutSetting(QString name, QString displayName,
-                  float minimumValue, float maximumValue, float defaultValue);
-
-    LayoutSetting(const LayoutSetting& other);
-    LayoutSetting& operator=(const LayoutSetting& other);
+    LayoutSetting(const QString& name, const QString& displayName,
+                  float minimumValue, float maximumValue, float defaultValue) :
+        _name(name),
+        _displayName(displayName),
+        _minimumValue(minimumValue),
+        _maximumValue(maximumValue),
+        _value(defaultValue)
+    {}
 
     float value() const { return _value; }
+    float minimumValue() const { return _minimumValue; }
+    float maximumValue() const { return _maximumValue; }
+    void setValue(float value) { _value = u::clamp(_minimumValue, _maximumValue, value); }
     const QString& name() const { return _name; }
+    const QString& displayName() const { return _displayName; }
 
 private:
     QString _name;
@@ -31,20 +33,22 @@ private:
     float _minimumValue = 0.0f;
     float _maximumValue = 1.0f;
     float _value = 0.0f;
-
-signals:
-    void nameChanged();
-    void valueChanged();
-    void minimumChanged();
-    void maximumChanged();
 };
 
 class LayoutSettings : public QObject
 {
     Q_OBJECT
 
+private:
+    std::vector<LayoutSetting> _settings;
+
 public:
-    float valueOf(const QString& name) const;
+    float value(const QString& name) const;
+    void setValue(const QString& name, float value);
+
+    const LayoutSetting* setting(const QString& name) const;
+    LayoutSetting* setting(const QString& name);
+
     std::vector<LayoutSetting>& vector() { return _settings; }
 
     template<typename... Args>
@@ -52,11 +56,6 @@ public:
     {
         _settings.emplace_back(args...);
     }
-
-    void finishRegistration();
-
-private:
-    std::vector<LayoutSetting> _settings;
 
 signals:
     void settingChanged();

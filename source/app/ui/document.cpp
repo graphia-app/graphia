@@ -271,6 +271,13 @@ QStringList Document::visualisationsFromUI() const
     return visualisations;
 }
 
+void Document::initialiseLayoutSettingsModel()
+{
+    _layoutSettingsModel.clear();
+    for(const auto& setting : _layoutThread->settings())
+        _layoutSettingsModel.append(setting.name());
+}
+
 bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QString& pluginName, const QVariantMap& parameters)
 {
     auto* plugin = _application->pluginForName(pluginName);
@@ -360,7 +367,7 @@ void Document::onLoadComplete(bool success)
     connect(_layoutThread.get(), &LayoutThread::pausedChanged, this, &Document::layoutPauseStateChanged);
     connect(_layoutThread.get(), &LayoutThread::settingChanged, this, &Document::updateLayoutState);
     _layoutThread->addAllComponents();
-    _layoutSettings.setVectorPtr(&_layoutThread->settingsVector());
+    initialiseLayoutSettingsModel();
 
     _graphQuickItem->initialise(_graphModel.get(), &_commandManager, _selectionManager.get(), _gpuComputeThread.get());
 
@@ -1214,6 +1221,28 @@ void Document::moveVisualisation(int from, int to)
     _commandManager.execute(std::make_shared<ApplyVisualisationsCommand>(
         _graphModel.get(), this,
         _visualisations, newVisualisations));
+}
+
+QVariantMap Document::layoutSetting(const QString& name) const
+{
+    QVariantMap map;
+
+    const auto* setting = _layoutThread->setting(name);
+    if(setting != nullptr)
+    {
+        map.insert("name", setting->name());
+        map.insert("displayName", setting->displayName());
+        map.insert("value", setting->value());
+        map.insert("minimumValue", setting->minimumValue());
+        map.insert("maximumValue", setting->maximumValue());
+    }
+
+    return map;
+}
+
+void Document::setLayoutSettingValue(const QString& name, float value)
+{
+    _layoutThread->setSettingValue(name, value);
 }
 
 void Document::dumpGraph()

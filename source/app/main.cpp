@@ -105,7 +105,6 @@ int main(int argc, char *argv[])
     qmlRegisterType<Application>                (uri, maj, min, "Application");
     qmlRegisterType<Document>                   (uri, maj, min, "Document");
     qmlRegisterType<GraphQuickItem>             (uri, maj, min, "Graph");
-    qmlRegisterType<LayoutSetting>              (uri, maj, min, "LayoutSetting");
     qmlRegisterType<QmlPreferences>             (uri, maj, min, "Preferences");
 
     qRegisterMetaType<size_t>("size_t");

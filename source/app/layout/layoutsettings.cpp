@@ -1,54 +1,45 @@
 #include "layoutsettings.h"
 #include "shared/utils/utils.h"
 
-LayoutSetting::LayoutSetting(QString name, QString displayName,
-                             float minimumValue, float maximumValue, float defaultValue) :
-    _name(std::move(name)),
-    _displayName(std::move(displayName)),
-    _minimumValue(minimumValue),
-    _maximumValue(maximumValue),
-    _value(defaultValue)
+float LayoutSettings::value(const QString& name) const
 {
-}
-
-LayoutSetting::LayoutSetting(const LayoutSetting& other) :
-    QObject(),
-    _name(other._name),
-    _displayName(other._displayName),
-    _minimumValue(other._minimumValue),
-    _maximumValue(other._maximumValue),
-    _value(other._value)
-{
-}
-
-LayoutSetting& LayoutSetting::operator=(const LayoutSetting& other)
-{
-    if(this != &other)
-    {
-        _name = other._name;
-        _displayName = other._displayName;
-        _minimumValue = other._minimumValue;
-        _maximumValue = other._maximumValue;
-        _value = other._value;
-    }
-
-    return *this;
-}
-
-float LayoutSettings::valueOf(const QString& name) const
-{
-    for(auto& setting : _settings)
-    {
-        if(setting.name() == name)
-            return setting.value();
-    }
+    auto* v = setting(name);
+    if(v != nullptr)
+        return v->value();
 
     Q_ASSERT(!"Setting not found");
     return 0.0f;
 }
 
-void LayoutSettings::finishRegistration()
+void LayoutSettings::setValue(const QString& name, float value)
 {
-    for(auto& setting : _settings)
-        connect(&setting, &LayoutSetting::valueChanged, this, &LayoutSettings::settingChanged);
+    auto* v = setting(name);
+    if(v != nullptr)
+    {
+        v->setValue(value);
+        emit settingChanged();
+        return;
+    }
+
+    Q_ASSERT(!"Setting not found");
+}
+
+const LayoutSetting* LayoutSettings::setting(const QString& name) const
+{
+    auto* mutableThis = const_cast<LayoutSettings*>(this);
+    return mutableThis->setting(name);
+}
+
+LayoutSetting* LayoutSettings::setting(const QString& name)
+{
+    auto setting = std::find_if(_settings.begin(), _settings.end(),
+    [name](const auto& v)
+    {
+        return v.name() == name;
+    });
+
+    if(setting != _settings.end())
+        return &(*setting);
+
+    return nullptr;
 }

@@ -116,6 +116,16 @@ public:
         return _layoutSettings;
     }
 
+    const LayoutSetting* setting(const QString& name) const
+    {
+        return _layoutSettings.setting(name);
+    }
+
+    void setSettingValue(const QString& name, float value)
+    {
+        _layoutSettings.setValue(name, value);
+    }
+
     virtual std::shared_ptr<Layout> create(ComponentId componentId, NodePositions& results) const = 0;
 };
 
@@ -174,7 +184,10 @@ public:
 
     void addAllComponents();
 
-    std::vector<LayoutSetting>& settingsVector();
+    std::vector<LayoutSetting>& settings();
+    const LayoutSetting* setting(const QString& name) const;
+
+    void setSettingValue(const QString& name, float value);
 
 private:
     bool iterative();
