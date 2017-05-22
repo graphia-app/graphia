@@ -11,7 +11,7 @@
 #include "ui/document.h"
 #include "ui/graphquickitem.h"
 #include "ui/selectionmanager.h"
-#include "utils/shadertools.h"
+#include "shadertools.h"
 
 #include <QObject>
 #include <QOpenGLFramebufferObjectFormat>

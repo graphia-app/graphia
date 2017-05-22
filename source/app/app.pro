@@ -81,6 +81,7 @@ HEADERS += \
     rendering/primitives/rectangle.h \
     rendering/primitives/sphere.h \
     rendering/scene.h \
+    rendering/shadertools.h \
     rendering/transition.h \
     transform/graphtransformconfig.h \
     transform/graphtransformconfigparser.h \
@@ -113,8 +114,7 @@ HEADERS += \
     ui/visualisations/visualisationchannel.h \
     ui/visualisations/visualisationconfig.h \
     ui/visualisations/visualisationconfigparser.h \
-    ui/visualisations/visualisationinfo.h \
-    utils/shadertools.h
+    ui/visualisations/visualisationinfo.h
 
 SOURCES += \
     application.cpp \

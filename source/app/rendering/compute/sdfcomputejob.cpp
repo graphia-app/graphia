@@ -1,6 +1,6 @@
 #include "sdfcomputejob.h"
 
-#include "utils/shadertools.h"
+#include "rendering/shadertools.h"
 #include "shared/utils/preferences.h"
 
 #include <QImage>
