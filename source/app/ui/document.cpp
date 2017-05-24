@@ -110,7 +110,12 @@ void Document::updateLayoutState()
         _layoutRequired = false;
     }
     else
+    {
+        if(!_userLayoutPaused && !_layoutThread->paused())
+            _layoutRequired = true;
+
         _layoutThread->pauseAndWait();
+    }
 }
 
 LayoutPauseState Document::layoutPauseState()
