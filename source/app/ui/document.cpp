@@ -375,6 +375,7 @@ void Document::onLoadComplete(bool success)
 
     _layoutThread = std::make_unique<LayoutThread>(*_graphModel, std::make_unique<ForceDirectedLayoutFactory>(_graphModel.get()));
     connect(_layoutThread.get(), &LayoutThread::pausedChanged, this, &Document::layoutPauseStateChanged);
+    connect(_layoutThread.get(), &LayoutThread::settingChanged, [this] { _layoutRequired = true; });
     connect(_layoutThread.get(), &LayoutThread::settingChanged, this, &Document::updateLayoutState);
     _layoutThread->addAllComponents();
     initialiseLayoutSettingsModel();
