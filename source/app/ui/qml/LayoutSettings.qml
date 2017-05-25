@@ -13,6 +13,8 @@ Column
 
         RowLayout
         {
+            anchors.right: parent.right
+
             Label
             {
                 id: label

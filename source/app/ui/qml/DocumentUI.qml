@@ -261,97 +261,96 @@ Item
                 document: document
             }
 
-            Label
+            Column
             {
-                visible: toggleGraphMetricsAction.checked
-
-                color: root.contrastingColor
+                spacing: 10
 
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 anchors.margins: Constants.margin
 
-                horizontalAlignment: Text.AlignRight
-                text:
+                Label
                 {
-                    // http://stackoverflow.com/questions/9461621
-                    function nFormatter(num, digits)
-                    {
-                        var si =
-                            [
-                                { value: 1E9,  symbol: "G" },
-                                { value: 1E6,  symbol: "M" },
-                                { value: 1E3,  symbol: "k" }
-                            ], i;
+                    visible: toggleGraphMetricsAction.checked
 
-                        for(i = 0; i < si.length; i++)
+                    color: root.contrastingColor
+
+                    anchors.right: parent.right
+
+                    horizontalAlignment: Text.AlignRight
+                    text:
+                    {
+                        // http://stackoverflow.com/questions/9461621
+                        function nFormatter(num, digits)
                         {
-                            if(num >= si[i].value)
-                                return (num / si[i].value).toFixed(digits).replace(/\.?0+$/, "") + si[i].symbol;
+                            var si =
+                                [
+                                    { value: 1E9,  symbol: "G" },
+                                    { value: 1E6,  symbol: "M" },
+                                    { value: 1E3,  symbol: "k" }
+                                ], i;
+
+                            for(i = 0; i < si.length; i++)
+                            {
+                                if(num >= si[i].value)
+                                    return (num / si[i].value).toFixed(digits).replace(/\.?0+$/, "") + si[i].symbol;
+                            }
+
+                            return num;
                         }
 
-                        return num;
+                        var s = "";
+                        var numNodes = graph.numNodes;
+                        var numEdges = graph.numEdges;
+                        var numVisibleNodes = graph.numVisibleNodes;
+                        var numVisibleEdges = graph.numVisibleEdges;
+
+                        if(numNodes >= 0)
+                        {
+                            s += nFormatter(numNodes, 1);
+                            if(numVisibleNodes !== numNodes)
+                                s += " (" + nFormatter(numVisibleNodes, 1) + ")";
+                            s += " nodes";
+                        }
+
+                        if(numEdges >= 0)
+                        {
+                            s += "\n" + nFormatter(numEdges, 1);
+                            if(numVisibleEdges !== numEdges)
+                                s += " (" + nFormatter(numVisibleEdges, 1) + ")";
+                            s += " edges";
+                        }
+
+                        if(graph.numComponents >= 0)
+                            s += "\n" + nFormatter(graph.numComponents, 1) + " components";
+
+                        return s;
                     }
-
-                    var s = "";
-                    var numNodes = graph.numNodes;
-                    var numEdges = graph.numEdges;
-                    var numVisibleNodes = graph.numVisibleNodes;
-                    var numVisibleEdges = graph.numVisibleEdges;
-
-                    if(numNodes >= 0)
-                    {
-                        s += nFormatter(numNodes, 1);
-                        if(numVisibleNodes !== numNodes)
-                            s += " (" + nFormatter(numVisibleNodes, 1) + ")";
-                        s += " nodes";
-                    }
-
-                    if(numEdges >= 0)
-                    {
-                        s += "\n" + nFormatter(numEdges, 1);
-                        if(numVisibleEdges !== numEdges)
-                            s += " (" + nFormatter(numVisibleEdges, 1) + ")";
-                        s += " edges";
-                    }
-
-                    if(graph.numComponents >= 0)
-                        s += "\n" + nFormatter(graph.numComponents, 1) + " components";
-
-                    return s;
                 }
-            }
-
-            Column
-            {
-                spacing: 10
-
-                anchors.left: parent.left
-                anchors.bottom: parent.bottom
 
                 LayoutSettings
                 {
-                    anchors.left: parent.left
-                    anchors.margins: Constants.margin
+                    anchors.right: parent.right
 
                     visible: toggleLayoutSettingsAction.checked
 
                     document: document
                     textColor: root.contrastingColor
                 }
+            }
 
-                Visualisations
-                {
-                    visible: plugin.loaded
+            Visualisations
+            {
+                visible: plugin.loaded
 
-                    anchors.left: parent.left
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
 
-                    enabledTextColor: root.contrastingColor
-                    disabledTextColor: root.lessContrastingColor
-                    heldColor: root.leastContrastingColor
+                enabledTextColor: root.contrastingColor
+                disabledTextColor: root.lessContrastingColor
+                heldColor: root.leastContrastingColor
 
-                    document: document
-                }
+                document: document
             }
         }
 
