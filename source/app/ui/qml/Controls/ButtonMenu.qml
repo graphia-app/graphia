@@ -10,13 +10,15 @@ Item
     implicitWidth: button.implicitWidth
     implicitHeight: button.implicitHeight
 
-    property string defaultText: ""
+    property string text: ""
     property string selectedValue: ""
     property color hoverColor
     property color textColor
     property bool propogatePresses: false
 
     property alias model: instantiator.model
+
+    property bool _modelIsUnset: instantiator.model === 1 // wtf?
 
     property bool menuDropped: false
     Menu
@@ -31,7 +33,7 @@ Item
             id: instantiator
             delegate: MenuItem
             {
-                text: index >= 0 ? instantiator.model[index] : ""
+                text: index >= 0 && !_modelIsUnset ? instantiator.model[index] : ""
 
                 onTriggered: { root.selectedValue = text; }
             }
@@ -61,7 +63,7 @@ Item
                 verticalCenter: parent.verticalCenter
             }
 
-            text: root.selectedValue != "" ? root.selectedValue : root.defaultText
+            text: root.selectedValue != "" ? root.selectedValue : root.text
             color: root.textColor
             font.bold: true
         }
@@ -75,10 +77,14 @@ Item
         anchors.fill: parent
         onClicked:
         {
-            if(menu)
+            if(menu && !_modelIsUnset)
                 menu.__popup(parent.mapToItem(null, 0, parent.height + 4/*padding*/, 0, 0), 0);
+
+            root.clicked();
         }
 
         onPressed: { mouse.accepted = !propogatePresses; }
     }
+
+    signal clicked()
 }
