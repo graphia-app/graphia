@@ -167,7 +167,7 @@ Window
     {
         updateVisualisationExpression();
         document.appendVisualisation(visualisationExpression);
-        document.updateVisualisations();
+        document.update();
     }
 
     onVisibleChanged:

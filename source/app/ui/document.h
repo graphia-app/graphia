@@ -256,7 +256,6 @@ public:
     Q_INVOKABLE bool graphTransformIsValid(const QString& transform) const;
     Q_INVOKABLE void appendGraphTransform(const QString& transform);
     Q_INVOKABLE void removeGraphTransform(int index);
-    Q_INVOKABLE void updateGraphTransforms();
     Q_INVOKABLE void moveGraphTransform(int from, int to);
 
     Q_INVOKABLE QStringList availableVisualisationChannelNames(int valueType) const;
@@ -270,8 +269,10 @@ public:
     Q_INVOKABLE bool visualisationIsValid(const QString& visualisation) const;
     Q_INVOKABLE void appendVisualisation(const QString& visualisation);
     Q_INVOKABLE void removeVisualisation(int index);
-    Q_INVOKABLE void updateVisualisations();
     Q_INVOKABLE void moveVisualisation(int from, int to);
+
+    // Execute commands to apply transform and/or visualisation changes
+    Q_INVOKABLE void update();
 
     Q_INVOKABLE QVariantMap layoutSetting(const QString& name) const;
     Q_INVOKABLE void setLayoutSettingValue(const QString& name, float value);

@@ -1065,23 +1065,6 @@ static bool transformsDiffer(const QStringList& a, const QStringList& b)
     return false;
 }
 
-void Document::updateGraphTransforms()
-{
-    if(_graphModel == nullptr)
-        return;
-
-    auto newGraphTransforms = graphTransformConfigurationsFromUI();
-
-    if(transformsDiffer(_graphTransforms, newGraphTransforms))
-    {
-        _commandManager.execute(std::make_shared<ApplyTransformationsCommand>(
-            _graphModel.get(), _selectionManager.get(), this,
-            _graphTransforms, newGraphTransforms));
-    }
-    else
-        setTransforms(newGraphTransforms);
-}
-
 void Document::moveGraphTransform(int from, int to)
 {
     if(_graphModel == nullptr)
@@ -1206,23 +1189,6 @@ static bool visualisationsDiffer(const QStringList& a, const QStringList& b)
     return false;
 }
 
-void Document::updateVisualisations()
-{
-    if(_graphModel == nullptr)
-        return;
-
-    auto newVisualisations = visualisationsFromUI();
-
-    if(visualisationsDiffer(_visualisations, newVisualisations))
-    {
-        _commandManager.execute(std::make_shared<ApplyVisualisationsCommand>(
-            _graphModel.get(), this,
-            _visualisations, newVisualisations));
-    }
-    else
-        setVisualisations(newVisualisations);
-}
-
 void Document::moveVisualisation(int from, int to)
 {
     if(_graphModel == nullptr)
@@ -1234,6 +1200,34 @@ void Document::moveVisualisation(int from, int to)
     _commandManager.execute(std::make_shared<ApplyVisualisationsCommand>(
         _graphModel.get(), this,
         _visualisations, newVisualisations));
+}
+
+void Document::update()
+{
+    if(_graphModel == nullptr)
+        return;
+
+    auto newGraphTransforms = graphTransformConfigurationsFromUI();
+
+    if(transformsDiffer(_graphTransforms, newGraphTransforms))
+    {
+        _commandManager.execute(std::make_shared<ApplyTransformationsCommand>(
+            _graphModel.get(), _selectionManager.get(), this,
+            _graphTransforms, newGraphTransforms));
+    }
+    else
+        setTransforms(newGraphTransforms);
+
+    auto newVisualisations = visualisationsFromUI();
+
+    if(visualisationsDiffer(_visualisations, newVisualisations))
+    {
+        _commandManager.execute(std::make_shared<ApplyVisualisationsCommand>(
+            _graphModel.get(), this,
+            _visualisations, newVisualisations));
+    }
+    else
+        setVisualisations(newVisualisations);
 }
 
 QVariantMap Document::layoutSetting(const QString& name) const

@@ -100,7 +100,7 @@ Item
                     onTriggered:
                     {
                         document.removeVisualisation(index);
-                        document.updateVisualisations();
+                        document.update();
                     }
                 }
             }
@@ -219,7 +219,7 @@ Item
             newExpression += " " + key + " = " + parameters[key];
 
         value = newExpression;
-        document.updateVisualisations();
+        document.update();
     }
 
     function setVisualisationInfo(visualisationInfo)

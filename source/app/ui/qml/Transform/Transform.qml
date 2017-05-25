@@ -132,7 +132,7 @@ Item
                     onTriggered:
                     {
                         document.removeGraphTransform(index);
-                        document.updateGraphTransforms();
+                        document.update();
                     }
                 }
             }
@@ -219,7 +219,7 @@ Item
         }
 
         value = newExpression;
-        document.updateGraphTransforms();
+        document.update();
     }
 
     function setAlertIcon(transformInfo)

@@ -595,8 +595,7 @@ Window
         for(var i = 0; i < defaultVisualisations.length; i++)
             document.appendVisualisation(defaultVisualisations[i]);
 
-        document.updateGraphTransforms();
-        document.updateVisualisations();
+        document.update();
     }
 
     onVisibleChanged:
