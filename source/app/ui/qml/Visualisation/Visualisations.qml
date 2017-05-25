@@ -3,6 +3,7 @@ import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 
 import "../Constants.js" as Constants
+import "../Utils.js" as Utils
 
 import "../Controls"
 
@@ -69,7 +70,12 @@ Item
                     enabled: list.count > 0
                     visible: panel.hidden || list.count === 0
 
-                    text: list.count + qsTr(" visualisations")
+                    text:
+                    {
+                        return Utils.pluralise(list.count,
+                                               qsTr("visualisation"),
+                                               qsTr("visualisations"));
+                    }
 
                     textColor: enabled ? enabledTextColor : disabledTextColor
                     hoverColor: heldColor

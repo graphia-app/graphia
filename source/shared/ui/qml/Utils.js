@@ -161,3 +161,11 @@ function desaturate(colorString, factor)
     var c = Qt.darker(colorString, 1.0);
     return Qt.hsla(c.hslHue, c.hslSaturation * factor, c.hslLightness, c.a);
 }
+
+function pluralise(count, singular, plural)
+{
+    if(count === 1)
+        return "1 " + singular;
+
+    return count + " " + plural;
+}
