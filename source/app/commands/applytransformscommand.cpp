@@ -1,4 +1,4 @@
-#include "applytransformationscommand.h"
+#include "applytransformscommand.h"
 
 #include <QObject>
 
@@ -6,10 +6,10 @@
 #include "ui/selectionmanager.h"
 #include "ui/document.h"
 
-ApplyTransformationsCommand::ApplyTransformationsCommand(GraphModel* graphModel,
-                                                         SelectionManager* selectionManager, Document* document,
-                                                         QStringList previousTransformations,
-                                                         QStringList transformations) :
+ApplyTransformsCommand::ApplyTransformsCommand(GraphModel* graphModel,
+                                               SelectionManager* selectionManager, Document* document,
+                                               QStringList previousTransformations,
+                                               QStringList transformations) :
     _graphModel(graphModel),
     _selectionManager(selectionManager),
     _document(document),
@@ -18,17 +18,17 @@ ApplyTransformationsCommand::ApplyTransformationsCommand(GraphModel* graphModel,
     _selectedNodeIds(_selectionManager->selectedNodes())
 {}
 
-QString ApplyTransformationsCommand::description() const
+QString ApplyTransformsCommand::description() const
 {
-    return QObject::tr("Apply Transformations");
+    return QObject::tr("Apply Transforms");
 }
 
-QString ApplyTransformationsCommand::verb() const
+QString ApplyTransformsCommand::verb() const
 {
-    return QObject::tr("Applying Transformations");
+    return QObject::tr("Applying Transforms");
 }
 
-void ApplyTransformationsCommand::doTransform(const QStringList& transformations)
+void ApplyTransformsCommand::doTransform(const QStringList& transformations)
 {
     _graphModel->buildTransforms(transformations, this);
 
@@ -38,13 +38,13 @@ void ApplyTransformationsCommand::doTransform(const QStringList& transformations
     }, "setTransforms");
 }
 
-bool ApplyTransformationsCommand::execute()
+bool ApplyTransformsCommand::execute()
 {
     doTransform(_transformations);
     return true;
 }
 
-void ApplyTransformationsCommand::undo()
+void ApplyTransformsCommand::undo()
 {
     doTransform(_previousTransformations);
 

@@ -15,7 +15,7 @@
 #include "layout/collision.h"
 
 #include "commands/deleteselectednodescommand.h"
-#include "commands/applytransformationscommand.h"
+#include "commands/applytransformscommand.h"
 #include "commands/applyvisualisationscommand.h"
 #include "commands/selectnodescommand.h"
 
@@ -1073,7 +1073,7 @@ void Document::moveGraphTransform(int from, int to)
     QStringList newGraphTransforms = _graphTransforms;
     newGraphTransforms.move(from, to);
 
-    _commandManager.execute(std::make_shared<ApplyTransformationsCommand>(
+    _commandManager.execute(std::make_shared<ApplyTransformsCommand>(
         _graphModel.get(), _selectionManager.get(), this,
         _graphTransforms, newGraphTransforms));
 }
@@ -1211,7 +1211,7 @@ void Document::update()
 
     if(transformsDiffer(_graphTransforms, newGraphTransforms))
     {
-        _commandManager.execute(std::make_shared<ApplyTransformationsCommand>(
+        _commandManager.execute(std::make_shared<ApplyTransformsCommand>(
             _graphModel.get(), _selectionManager.get(), this,
             _graphTransforms, newGraphTransforms));
     }

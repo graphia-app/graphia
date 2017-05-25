@@ -1,5 +1,5 @@
-#ifndef APPLYTRANSFORMATIONSCOMMAND_H
-#define APPLYTRANSFORMATIONSCOMMAND_H
+#ifndef APPLYTRANSFORMSCOMMAND_H
+#define APPLYTRANSFORMSCOMMAND_H
 
 #include "shared/commands/icommand.h"
 
@@ -11,7 +11,7 @@ class GraphModel;
 class SelectionManager;
 class Document;
 
-class ApplyTransformationsCommand : public ICommand
+class ApplyTransformsCommand : public ICommand
 {
 private:
     GraphModel* _graphModel = nullptr;
@@ -26,11 +26,11 @@ private:
     void doTransform(const QStringList& transformations);
 
 public:
-    ApplyTransformationsCommand(GraphModel* graphModel,
-                                SelectionManager* selectionManager,
-                                Document* document,
-                                QStringList previousTransformations,
-                                QStringList transformations);
+    ApplyTransformsCommand(GraphModel* graphModel,
+                           SelectionManager* selectionManager,
+                           Document* document,
+                           QStringList previousTransformations,
+                           QStringList transformations);
 
     QString description() const;
     QString verb() const;
@@ -39,4 +39,4 @@ public:
     void undo();
 };
 
-#endif // APPLYTRANSFORMATIONSCOMMAND_H
+#endif // APPLYTRANSFORMSCOMMAND_H

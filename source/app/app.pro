@@ -26,7 +26,7 @@ HEADERS += \
     attributes/availableattributesmodel.h \
     attributes/conditionfncreator.h \
     attributes/condtionfnops.h \
-    commands/applytransformationscommand.h \
+    commands/applytransformscommand.h \
     commands/applyvisualisationscommand.h \
     commands/commandmanager.h \
     commands/deleteselectednodescommand.h \
@@ -121,7 +121,7 @@ SOURCES += \
     attributes/attribute.cpp \
     attributes/availableattributesmodel.cpp \
     attributes/conditionfncreator.cpp \
-    commands/applytransformationscommand.cpp \
+    commands/applytransformscommand.cpp \
     commands/applyvisualisationscommand.cpp \
     commands/commandmanager.cpp \
     commands/deleteselectednodescommand.cpp \
