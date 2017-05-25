@@ -12,6 +12,7 @@ Column
     property color heldColor
     property Item parentWhenDragging
     property int alignment
+    property int count: repeater.count
 
     signal itemMoved(int from, int to)
 
