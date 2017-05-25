@@ -27,7 +27,7 @@ Item
         document: root.document
     }
 
-    ColumnLayout
+    RowLayout
     {
         id: layout
         spacing: 0
@@ -35,6 +35,8 @@ Item
         SlidingPanel
         {
             id: panel
+
+            Layout.alignment: Qt.AlignTop
             alignment: Qt.AlignTop
 
             item: DraggableList
@@ -65,33 +67,25 @@ Item
             }
         }
 
-        Item
+        ColumnLayout
         {
-            // This is a bit of a hack to get margins around the add button:
-            // As the button has no top anchor, anchors.topMargin doesn't
-            // work, so instead we just pad out the button by the margin
-            // size with a parent Item
-
-            anchors.right: parent.right
-
-            implicitWidth: controls.width// + Constants.margin * 2
-            implicitHeight: controls.height// + Constants.margin * 2
+            Layout.alignment: Qt.AlignTop
 
             RowLayout
             {
-                id: controls
-                anchors
-                {
-                    horizontalCenter: parent.horizontalCenter
-                    verticalCenter: parent.verticalCenter
-                }
+                spacing: 0
 
-                Label
+                ButtonMenu
                 {
-                    Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
-                    opacity: panel.hidden || list.count === 0 ? 1.0 : 0.0
+                    enabled: list.count > 0
+                    visible: panel.hidden || list.count === 0
 
                     text: list.count + qsTr(" transforms")
+
+                    textColor: enabled ? enabledTextColor : disabledTextColor
+                    hoverColor: heldColor
+
+                    onClicked: { panel.show(); }
                 }
 
                 ToolButton
@@ -100,15 +94,20 @@ Item
                     tooltip: qsTr("Add Transform")
                     onClicked: { createTransformDialog.show(); }
                 }
+            }
 
-                ToolButton
-                {
-                    enabled: list.count > 0
-                    iconName: panel.hidden ? "bottom" : "top"
-                    tooltip: panel.hidden ? qsTr("Show") : qsTr("Hide")
+            ToolButton
+            {
+                Layout.alignment: Qt.AlignRight
 
-                    onClicked: { panel.toggle(); }
-                }
+                enabled: !panel.hidden && list.count > 0
+                iconName: "top"
+                tooltip: qsTr("Hide")
+
+                Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
+                opacity: enabled ? 1.0 : 0.0
+
+                onClicked: { panel.hide(); }
             }
         }
     }

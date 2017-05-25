@@ -32,40 +32,30 @@ Item
         id: _gradientList
     }
 
-    ColumnLayout
+    RowLayout
     {
         id: layout
         spacing: 0
 
-        Item
+        ColumnLayout
         {
-            // This is a bit of a hack to get margins around the add button:
-            // As the button has no top anchor, anchors.topMargin doesn't
-            // work, so instead we just pad out the button by the margin
-            // size with a parent Item
+            Layout.alignment: Qt.AlignBottom
 
-            anchors.left: parent.left
+            ToolButton
+            {
+                enabled: !panel.hidden && list.count > 0
+                iconName: "bottom"
+                tooltip: qsTr("Hide")
 
-            implicitWidth: controls.width// + Constants.margin * 2
-            implicitHeight: controls.height// + Constants.margin * 2
+                Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
+                opacity: enabled ? 1.0 : 0.0
+
+                onClicked: { panel.hide(); }
+            }
 
             RowLayout
             {
-                id: controls
-                anchors
-                {
-                    horizontalCenter: parent.horizontalCenter
-                    verticalCenter: parent.verticalCenter
-                }
-
-                ToolButton
-                {
-                    enabled: list.count > 0
-                    iconName: panel.hidden ? "top" : "bottom"
-                    tooltip: panel.hidden ? qsTr("Show") : qsTr("Hide")
-
-                    onClicked: { panel.toggle(); }
-                }
+                spacing: 0
 
                 ToolButton
                 {
@@ -74,12 +64,17 @@ Item
                     onClicked: { createVisualisationDialog.show(); }
                 }
 
-                Label
+                ButtonMenu
                 {
-                    Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
-                    opacity: panel.hidden || list.count === 0 ? 1.0 : 0.0
+                    enabled: list.count > 0
+                    visible: panel.hidden || list.count === 0
 
                     text: list.count + qsTr(" visualisations")
+
+                    textColor: enabled ? enabledTextColor : disabledTextColor
+                    hoverColor: heldColor
+
+                    onClicked: { panel.show(); }
                 }
             }
         }
@@ -87,6 +82,8 @@ Item
         SlidingPanel
         {
             id: panel
+
+            Layout.alignment: Qt.AlignBottom
             alignment: Qt.AlignBottom
 
             item: DraggableList
