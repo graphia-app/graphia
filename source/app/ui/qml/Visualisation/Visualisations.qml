@@ -37,33 +37,6 @@ Item
         id: layout
         spacing: 0
 
-        DraggableList
-        {
-            component: Component
-            {
-                Visualisation
-                {
-                    property var document: root.document
-                    gradientList: _gradientList
-
-                    Component.onCompleted:
-                    {
-                        enabledTextColor = Qt.binding(function() { return root.enabledTextColor; });
-                        disabledTextColor = Qt.binding(function() { return root.disabledTextColor; });
-                        hoverColor = Qt.binding(function() { return root.heldColor; });
-                    }
-                }
-            }
-
-            model: document.visualisations
-            heldColor: root.heldColor
-            parentWhenDragging: root
-
-            alignment: Qt.AlignLeft
-
-            onItemMoved: { document.moveVisualisation(from, to); }
-        }
-
         Item
         {
             // This is a bit of a hack to get margins around the add button:
@@ -73,23 +46,76 @@ Item
 
             anchors.left: parent.left
 
-            width: addButton.width + Constants.margin * 2
-            height: addButton.height + Constants.margin * 2
+            implicitWidth: controls.width// + Constants.margin * 2
+            implicitHeight: controls.height// + Constants.margin * 2
 
-            Button
+            RowLayout
             {
-                id: addButton
-
-                enabled: root.document.idle
-
+                id: controls
                 anchors
                 {
                     horizontalCenter: parent.horizontalCenter
                     verticalCenter: parent.verticalCenter
                 }
 
-                text: qsTr("Add Visualisation")
-                onClicked: { createVisualisationDialog.show(); }
+                ToolButton
+                {
+                    enabled: list.count > 0
+                    iconName: panel.hidden ? "top" : "bottom"
+                    tooltip: panel.hidden ? qsTr("Show") : qsTr("Hide")
+
+                    onClicked: { panel.toggle(); }
+                }
+
+                ToolButton
+                {
+                    iconName: "add"
+                    tooltip: qsTr("Add Visualisation")
+                    onClicked: { createVisualisationDialog.show(); }
+                }
+
+                Label
+                {
+                    Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
+                    opacity: panel.hidden || list.count === 0 ? 1.0 : 0.0
+
+                    text: list.count + qsTr(" visualisations")
+                }
+            }
+        }
+
+        SlidingPanel
+        {
+            id: panel
+            alignment: Qt.AlignBottom
+
+            item: DraggableList
+            {
+                id: list
+
+                component: Component
+                {
+                    Visualisation
+                    {
+                        property var document: root.document
+                        gradientList: _gradientList
+
+                        Component.onCompleted:
+                        {
+                            enabledTextColor = Qt.binding(function() { return root.enabledTextColor; });
+                            disabledTextColor = Qt.binding(function() { return root.disabledTextColor; });
+                            hoverColor = Qt.binding(function() { return root.heldColor; });
+                        }
+                    }
+                }
+
+                model: document.visualisations
+                heldColor: root.heldColor
+                parentWhenDragging: root
+
+                alignment: Qt.AlignLeft
+
+                onItemMoved: { document.moveVisualisation(from, to); }
             }
         }
     }

@@ -329,6 +329,17 @@ Item
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
 
+                LayoutSettings
+                {
+                    anchors.left: parent.left
+                    anchors.margins: Constants.margin
+
+                    visible: toggleLayoutSettingsAction.checked
+
+                    document: document
+                    textColor: root.contrastingColor
+                }
+
                 Visualisations
                 {
                     visible: plugin.loaded
@@ -340,17 +351,6 @@ Item
                     heldColor: root.leastContrastingColor
 
                     document: document
-                }
-
-                LayoutSettings
-                {
-                    anchors.left: parent.left
-                    anchors.margins: Constants.margin
-
-                    visible: toggleLayoutSettingsAction.checked
-
-                    document: document
-                    textColor: root.contrastingColor
                 }
             }
         }
