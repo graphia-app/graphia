@@ -55,9 +55,8 @@ Item
 
     function _onAnimationComplete()
     {
-        if(hidden)
+        if(implicitHeight >= item.height)
         {
-            hidden = false;
             _resetDimensionBindings();
             item.enabled = true;
         }
@@ -83,8 +82,9 @@ Item
 
     function show()
     {
-        if(hidden)
+        if(implicitHeight < item.height)
         {
+            hidden = false;
             animation.easing.type = Easing.OutBack;
             drop.enabled = true;
             implicitHeight = item.height;
@@ -94,7 +94,7 @@ Item
 
     function hide()
     {
-        if(!hidden)
+        if(implicitHeight >= item.height)
         {
             animation.easing.type = Easing.InBack;
             drop.enabled = true;
