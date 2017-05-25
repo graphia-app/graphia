@@ -34,5 +34,6 @@
         <file>qml/Controls/GradientPickerItem.qml</file>
         <file>qml/Controls/TreeBox.qml</file>
         <file>qml/LayoutSettings.qml</file>
+        <file>qml/Controls/SlidingPanel.qml</file>
     </qresource>
 </RCC>
