@@ -48,7 +48,8 @@ HEADERS += \
     $$PWD/utils/semaphore.h \
     $$PWD/utils/singleton.h \
     $$PWD/utils/threadpool.h \
-    $$PWD/utils/utils.h
+    $$PWD/utils/utils.h \
+    $$PWD/commands/compoundcommand.h
 
 SOURCES += \
     $$PWD/graph/elementtype.cpp \
