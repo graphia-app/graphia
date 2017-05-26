@@ -166,8 +166,7 @@ Window
     onAccepted:
     {
         updateVisualisationExpression();
-        document.appendVisualisation(visualisationExpression);
-        document.update();
+        document.update([], [visualisationExpression]);
     }
 
     onVisibleChanged:

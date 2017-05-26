@@ -589,13 +589,9 @@ Window
     onAccepted:
     {
         updateTransformExpression();
-        document.appendGraphTransform(transformExpression);
-
         updateDefaultVisualisations();
-        for(var i = 0; i < defaultVisualisations.length; i++)
-            document.appendVisualisation(defaultVisualisations[i]);
 
-        document.update();
+        document.update([transformExpression], defaultVisualisations);
     }
 
     onVisibleChanged:
