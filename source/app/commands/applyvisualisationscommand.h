@@ -19,7 +19,7 @@ private:
     QStringList _previousVisualisations;
     QStringList _visualisations;
 
-    void doTransform(const QStringList& visualisations);
+    void apply(const QStringList& visualisations);
 
 public:
     ApplyVisualisationsCommand(GraphModel* graphModel,

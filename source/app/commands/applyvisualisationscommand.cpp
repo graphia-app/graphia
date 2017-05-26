@@ -25,7 +25,7 @@ QString ApplyVisualisationsCommand::verb() const
     return QObject::tr("Applying Visualisations");
 }
 
-void ApplyVisualisationsCommand::doTransform(const QStringList& visualisations)
+void ApplyVisualisationsCommand::apply(const QStringList& visualisations)
 {
     _graphModel->buildVisualisations(visualisations);
 
@@ -37,11 +37,11 @@ void ApplyVisualisationsCommand::doTransform(const QStringList& visualisations)
 
 bool ApplyVisualisationsCommand::execute()
 {
-    doTransform(_visualisations);
+    apply(_visualisations);
     return true;
 }
 
 void ApplyVisualisationsCommand::undo()
 {
-    doTransform(_previousVisualisations);
+    apply(_previousVisualisations);
 }
