@@ -759,6 +759,7 @@ void Document::onMutableGraphChanged()
 void Document::executeDeferred()
 {
     _deferredExecutor.execute();
+    _executed.notify();
 }
 
 int Document::foundIndex() const
@@ -812,10 +813,19 @@ void Document::decrementFoundIt()
     emit foundIndexChanged();
 }
 
-void Document::executeOnMainThread(DeferredExecutor::TaskFn task, const QString& description)
+void Document::executeOnMainThread(DeferredExecutor::TaskFn task,
+                                   const QString& description)
 {
     _deferredExecutor.enqueue(std::move(task), description);
     emit taskAddedToExecutor();
+}
+
+void Document::executeOnMainThreadAndWait(DeferredExecutor::TaskFn task,
+                                          const QString& description)
+{
+    executeOnMainThread(std::move(task), description);
+    _executed.wait();
+
 }
 
 QStringList Document::availableTransformNames() const

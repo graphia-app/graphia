@@ -10,6 +10,7 @@
 #include "shared/utils/qmlenum.h"
 #include "attributes/availableattributesmodel.h"
 #include "shared/utils/deferredexecutor.h"
+#include "shared/utils/semaphore.h"
 #include "thirdparty/qt-qml-models/QQmlVariantListModel.h"
 
 #include <QQuickItem>
@@ -112,7 +113,11 @@ public:
     QObject* pluginInstance();
     QString pluginQmlPath() const;
 
-    void executeOnMainThread(DeferredExecutor::TaskFn task, const QString& description);
+    void executeOnMainThread(DeferredExecutor::TaskFn task,
+                             const QString& description);
+
+    void executeOnMainThreadAndWait(DeferredExecutor::TaskFn task,
+                                    const QString& description);
 
 private:
     Application* _application = nullptr;
@@ -140,6 +145,7 @@ private:
     QQmlVariantListModel _layoutSettingsModel;
 
     DeferredExecutor _deferredExecutor;
+    semaphore _executed;
 
     std::vector<NodeId> _foundNodeIds;
     bool _foundItValid = false;
