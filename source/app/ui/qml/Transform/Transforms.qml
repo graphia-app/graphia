@@ -106,12 +106,16 @@ Item
             {
                 Layout.alignment: Qt.AlignRight
 
-                enabled: !panel.hidden && list.count > 0
+                // enabled may be changed externally, so have an
+                // internal visibility property that we control
+                property bool _visible: !panel.hidden && list.count > 0
+
+                enabled: _visible
                 iconName: "top"
                 tooltip: qsTr("Hide")
 
                 Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
-                opacity: enabled ? 1.0 : 0.0
+                opacity: _visible ? 1.0 : 0.0
 
                 onClicked: { panel.hide(); }
             }
