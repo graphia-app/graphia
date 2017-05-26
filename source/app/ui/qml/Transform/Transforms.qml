@@ -96,7 +96,7 @@ Item
 
                 ToolButton
                 {
-                    iconName: "add"
+                    iconName: "list-add"
                     tooltip: qsTr("Add Transform")
                     onClicked: { createTransformDialog.show(); }
                 }
@@ -111,7 +111,7 @@ Item
                 property bool _visible: !panel.hidden && list.count > 0
 
                 enabled: _visible
-                iconName: "top"
+                iconName: "go-top"
                 tooltip: qsTr("Hide")
 
                 Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }

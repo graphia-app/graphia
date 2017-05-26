@@ -49,7 +49,7 @@ Item
                 property bool _visible: !panel.hidden && list.count > 0
 
                 enabled: _visible
-                iconName: "bottom"
+                iconName: "go-bottom"
                 tooltip: qsTr("Hide")
 
                 Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
@@ -64,7 +64,7 @@ Item
 
                 ToolButton
                 {
-                    iconName: "add"
+                    iconName: "list-add"
                     tooltip: qsTr("Add Visualisation")
                     onClicked: { createVisualisationDialog.show(); }
                 }
