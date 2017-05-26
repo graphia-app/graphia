@@ -742,7 +742,7 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
         updateFoundIndex(true);
 }
 
-void Document::onGraphChanged()
+void Document::onGraphChanged(/*FIXME bool changeOccurred*/)
 {
     // If the graph changes then so do our visualisations
     _graphModel->buildVisualisations(_visualisations);
@@ -1217,11 +1217,13 @@ void Document::update()
     if(_graphModel == nullptr)
         return;
 
+    std::vector<std::shared_ptr<ICommand>> commands;
+
     auto newGraphTransforms = graphTransformConfigurationsFromUI();
 
     if(transformsDiffer(_graphTransforms, newGraphTransforms))
     {
-        _commandManager.execute(std::make_shared<ApplyTransformsCommand>(
+        commands.emplace_back(std::make_shared<ApplyTransformsCommand>(
             _graphModel.get(), _selectionManager.get(), this,
             _graphTransforms, newGraphTransforms));
     }
@@ -1232,12 +1234,21 @@ void Document::update()
 
     if(visualisationsDiffer(_visualisations, newVisualisations))
     {
-        _commandManager.execute(std::make_shared<ApplyVisualisationsCommand>(
+        commands.emplace_back(std::make_shared<ApplyVisualisationsCommand>(
             _graphModel.get(), this,
             _visualisations, newVisualisations));
     }
     else
         setVisualisations(newVisualisations);
+
+    if(commands.size() > 1)
+    {
+        _commandManager.execute({tr("Apply Transforms and Visualisations"),
+                                 tr("Applying Transforms and Visualisations")},
+                                commands);
+    }
+    else if(commands.size() == 1)
+        _commandManager.execute(commands.at(0));
 }
 
 QVariantMap Document::layoutSetting(const QString& name) const

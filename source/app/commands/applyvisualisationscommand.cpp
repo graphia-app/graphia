@@ -29,7 +29,7 @@ void ApplyVisualisationsCommand::apply(const QStringList& visualisations)
 {
     _graphModel->buildVisualisations(visualisations);
 
-    _document->executeOnMainThread([this, visualisations]
+    _document->executeOnMainThreadAndWait([this, visualisations]
     {
         _document->setVisualisations(visualisations);
     }, "setVisualisations");
