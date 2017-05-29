@@ -51,7 +51,11 @@ Item
 
     clip: true
 
-    readonly property bool hidden: false
+    // Public
+    readonly property bool hidden: _hidden
+
+    // Internal
+    property bool _hidden: false
 
     function _onAnimationComplete()
     {
@@ -61,7 +65,7 @@ Item
             item.enabled = true;
         }
         else
-            hidden = true;
+            _hidden = true;
     }
 
     Behavior on implicitHeight
@@ -84,7 +88,7 @@ Item
     {
         if(implicitHeight < item.height)
         {
-            hidden = false;
+            _hidden = false;
             animation.easing.type = Easing.OutBack;
             drop.enabled = true;
             implicitHeight = item.height;
