@@ -11,7 +11,7 @@ class VisualisationInfo
 private:
     std::vector<Alert> _alerts;
     double _min = std::numeric_limits<double>::max();
-    double _max = std::numeric_limits<double>::min();
+    double _max = std::numeric_limits<double>::lowest();
 
 public:
     template<typename... Args>

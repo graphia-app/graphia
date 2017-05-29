@@ -115,9 +115,9 @@ private:
         ValueFn<bool, const IGraphComponent&> valueMissingComponentFn;
 
         int intMin = std::numeric_limits<int>::max();
-        int intMax = std::numeric_limits<int>::min();
+        int intMax = std::numeric_limits<int>::lowest();
         double floatMin = std::numeric_limits<double>::max();
-        double floatMax = std::numeric_limits<double>::min();
+        double floatMax = std::numeric_limits<double>::lowest();
 
         bool isValid = false;
         Flags<AttributeFlag> flags = AttributeFlag::None;
@@ -310,7 +310,7 @@ public:
     auto findRangeforElements(const std::vector<E>& elementIds, Fn&& skip) const
     {
         std::tuple<T, T> minMax(std::numeric_limits<T>::max(),
-                                std::numeric_limits<T>::min());
+                                std::numeric_limits<T>::lowest());
 
         for(auto elementId : elementIds)
         {
@@ -335,7 +335,7 @@ public:
     auto findRangeforElements(const std::vector<E>& elementIds, Fn&& skip) const
     {
         std::tuple<double, double> minMax(std::numeric_limits<double>::max(),
-                                          std::numeric_limits<double>::min());
+                                          std::numeric_limits<double>::lowest());
 
         if(valueType() == ValueType::Float)
             minMax = findRangeforElements<double>(elementIds, skip);

@@ -84,7 +84,7 @@ private:
         double _stddev = 0.0;
 
         double _minValue = std::numeric_limits<double>::max();
-        double _maxValue = std::numeric_limits<double>::min();
+        double _maxValue = std::numeric_limits<double>::lowest();
 
         void sum()
         {

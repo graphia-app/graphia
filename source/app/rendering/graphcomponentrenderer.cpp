@@ -157,7 +157,7 @@ float GraphComponentRenderer::maxNodeDistanceFromPoint(const GraphModel& graphMo
                                                        const QVector3D& centre,
                                                        const std::vector<NodeId>& nodeIds)
 {
-    float maxDistance = std::numeric_limits<float>::min();
+    float maxDistance = std::numeric_limits<float>::lowest();
     for(auto nodeId : nodeIds)
     {
         QVector3D nodePosition = graphModel.nodePositions().getScaledAndSmoothed(nodeId);

@@ -25,9 +25,9 @@ private:
     std::vector<QString> _values;
 
     int _intMin = std::numeric_limits<int>::max();
-    int _intMax = std::numeric_limits<int>::min();
+    int _intMax = std::numeric_limits<int>::lowest();
     double _floatMin = std::numeric_limits<double>::max();
-    double _floatMax = std::numeric_limits<double>::min();
+    double _floatMax = std::numeric_limits<double>::lowest();
 
 public:
     UserDataVector() = default;

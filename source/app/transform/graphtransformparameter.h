@@ -14,7 +14,7 @@ public:
     GraphTransformParameter(ValueType type, const QString& description,
                             QVariant initialValue = QVariant(""),
                             double min = std::numeric_limits<double>::max(),
-                            double max = std::numeric_limits<double>::min()) :
+                            double max = std::numeric_limits<double>::lowest()) :
         _type(type), _description(description), _min(min), _max(max), _initialValue(initialValue)
     {}
 
@@ -22,7 +22,7 @@ public:
     QString description() const { return _description; }
 
     bool hasMin() const { return _min != std::numeric_limits<double>::max(); }
-    bool hasMax() const { return _max != std::numeric_limits<double>::min(); }
+    bool hasMax() const { return _max != std::numeric_limits<double>::lowest(); }
     bool hasRange() const { return hasMin() && hasMax(); }
 
     double min() const { return _min; }

@@ -180,19 +180,19 @@ bool Attribute::isValid() const
 }
 
 bool AttributeRange<int>::hasMin() const { return _attribute->_.intMin != std::numeric_limits<int>::max(); }
-bool AttributeRange<int>::hasMax() const { return _attribute->_.intMax != std::numeric_limits<int>::min(); }
+bool AttributeRange<int>::hasMax() const { return _attribute->_.intMax != std::numeric_limits<int>::lowest(); }
 bool AttributeRange<int>::hasRange() const { return hasMin() && hasMax(); }
 
-int AttributeRange<int>::min() const { return hasMin() ? _attribute->_.intMin : std::numeric_limits<int>::min(); }
+int AttributeRange<int>::min() const { return hasMin() ? _attribute->_.intMin : std::numeric_limits<int>::lowest(); }
 int AttributeRange<int>::max() const { return hasMax() ? _attribute->_.intMax : std::numeric_limits<int>::max(); }
 IAttribute& AttributeRange<int>::setMin(int min) { _attribute->_.intMin = min; _attribute->disableAutoRange(); return *_attribute; }
 IAttribute& AttributeRange<int>::setMax(int max) { _attribute->_.intMax = max; _attribute->disableAutoRange(); return *_attribute; }
 
 bool AttributeRange<double>::hasMin() const { return _attribute->_.floatMin != std::numeric_limits<double>::max(); }
-bool AttributeRange<double>::hasMax() const { return _attribute->_.floatMax != std::numeric_limits<double>::min(); }
+bool AttributeRange<double>::hasMax() const { return _attribute->_.floatMax != std::numeric_limits<double>::lowest(); }
 bool AttributeRange<double>::hasRange() const { return hasMin() && hasMax(); }
 
-double AttributeRange<double>::min() const { return hasMin() ? _attribute->_.floatMin : std::numeric_limits<double>::min(); }
+double AttributeRange<double>::min() const { return hasMin() ? _attribute->_.floatMin : std::numeric_limits<double>::lowest(); }
 double AttributeRange<double>::max() const { return hasMax() ? _attribute->_.floatMax : std::numeric_limits<double>::max(); }
 IAttribute& AttributeRange<double>::setMin(double min) { _attribute->_.floatMin = min; _attribute->disableAutoRange(); return *_attribute; }
 IAttribute& AttributeRange<double>::setMax(double max) { _attribute->_.floatMax = max; _attribute->disableAutoRange(); return *_attribute; }
@@ -243,7 +243,7 @@ double AttributeNumericRange::max() const
     {
     case ValueType::Int: return static_cast<double>(_attribute->_floatRange.max());
     case ValueType::Float: return _attribute->_floatRange.max();
-    default: return std::numeric_limits<double>::min();
+    default: return std::numeric_limits<double>::lowest();
     }
 }
 
