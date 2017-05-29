@@ -742,14 +742,11 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
         updateFoundIndex(true);
 }
 
-void Document::onGraphChanged(const Graph*, bool changeOccurred)
+void Document::onGraphChanged(const Graph*, bool)
 {
-    if(changeOccurred)
-    {
-        // If the graph changes then so do our visualisations
-        _graphModel->buildVisualisations(_visualisations);
-        setVisualisations(_visualisations);
-    }
+    // If the graph changes then so do our visualisations
+    _graphModel->buildVisualisations(_visualisations);
+    setVisualisations(_visualisations);
 }
 
 void Document::onMutableGraphChanged()
