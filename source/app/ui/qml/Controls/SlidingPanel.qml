@@ -65,7 +65,10 @@ Item
             item.enabled = true;
         }
         else
+        {
+            implicitWidth = 0;
             _hidden = true;
+        }
     }
 
     Behavior on implicitHeight
@@ -91,7 +94,9 @@ Item
             _hidden = false;
             animation.easing.type = Easing.OutBack;
             drop.enabled = true;
-            implicitHeight = item.height;
+
+            _resetDimensionBindings();
+
             drop.enabled = false;
         }
     }
@@ -103,7 +108,9 @@ Item
             animation.easing.type = Easing.InBack;
             drop.enabled = true;
             item.enabled = false;
+
             implicitHeight = 0;
+
             drop.enabled = false;
         }
     }
