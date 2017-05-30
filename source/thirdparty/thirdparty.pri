@@ -5,6 +5,11 @@ include(blaze/blaze.pri)
 DEFINES += QCUSTOMPLOT_USE_OPENGL
 QT += printsupport
 
+win32 {
+    # For crypto++
+    LIBS += -lws2_32
+}
+
 THIRDPARTY_LIB_DIR = $$top_builddir/thirdparty
 
 win32:CONFIG(release, debug|release): LIBS += -L$$THIRDPARTY_LIB_DIR/release/ -lthirdparty -WHOLEARCHIVE:thirdparty

@@ -31,6 +31,13 @@ win32 {
     # Debug symbols
     QMAKE_CXXFLAGS_RELEASE += -Zi
     QMAKE_LFLAGS_RELEASE += /MAP /debug /opt:ref
+
+    QMAKE_EXTRA_COMPILERS += ml64
+    ML_FLAGS = /c /nologo /D_M_X64 /W3 /Zi
+    OTHER_FILES += $$MASM_SOURCES
+    ml64.output = ${QMAKE_FILE_BASE}.obj
+    ml64.commands = ml64 $$ML_FLAGS /Fo ${QMAKE_FILE_BASE}.obj ${QMAKE_FILE_NAME}
+    ml64.input = MASM_SOURCES
 }
 
 # OSX Info.plist

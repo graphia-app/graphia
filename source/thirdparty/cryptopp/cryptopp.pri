@@ -103,7 +103,6 @@ SOURCES += \
     cryptopp/sha3.cpp \
     cryptopp/panama.cpp \
     cryptopp/nbtheory.cpp \
-    #cryptopp/md5.cpp \
     cryptopp/socketft.cpp \
     cryptopp/twofish.cpp \
     cryptopp/rdtables.cpp \
@@ -122,3 +121,13 @@ SOURCES += \
     cryptopp/zdeflate.cpp \
     cryptopp/wake.cpp \
     cryptopp/skipjack.cpp
+
+win32 {
+    SOURCES += \
+        cryptopp/winpipes.cpp
+
+    MASM_SOURCES += \
+        cryptopp/rdrand.asm \
+        cryptopp/x64dll.asm \
+        cryptopp/x64masm.asm
+}
