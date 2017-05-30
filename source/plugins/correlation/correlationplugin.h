@@ -17,6 +17,17 @@
 #include <QVector>
 #include <QColor>
 
+DEFINE_QML_ENUM(Q_GADGET, ScalingType,
+                None,
+                Log2,
+                Log10,
+                AntiLog2,
+                AntiLog10);
+
+DEFINE_QML_ENUM(Q_GADGET, NormaliseType,
+                None,
+                MinMax);
+
 class CorrelationPluginInstance : public BasePluginInstance
 {
     Q_OBJECT
@@ -48,6 +59,50 @@ private:
     using DataOffset = std::vector<double>::size_type;
 
     std::vector<double> _data;
+
+    class Normaliser
+    {
+    public:
+        virtual double value(size_t column, size_t row) = 0;
+    };
+
+    class MinMaxNormaliser : public Normaliser
+    {
+    private:
+        std::vector<double> _minColumn;
+        std::vector<double> _maxColumn;
+        const TabularData& _data;
+        size_t _firstDataColumn;
+        size_t _firstDataRow;
+    public:
+        MinMaxNormaliser(const TabularData& data, size_t firstDataColumn, size_t firstDataRow)
+            : _data(data), _firstDataColumn(firstDataColumn), _firstDataRow(firstDataRow)
+        {
+            _minColumn.resize(data.numColumns() - firstDataColumn, std::numeric_limits<double>::max());
+            _maxColumn.resize(data.numColumns() - firstDataColumn, std::numeric_limits<double>::lowest());
+            for(size_t column=firstDataColumn; column<_data.numColumns(); column++)
+            {
+                size_t index = column - firstDataColumn;
+                for(size_t row=firstDataRow; row<_data.numRows(); row++)
+                {
+                    if(u::isNumeric(_data.valueAt(column, row)))
+                    {
+                        _minColumn[index] = std::min(_minColumn[index], data.valueAsQString(column, row).toDouble());
+                        _maxColumn[index] = std::max(_maxColumn[index], data.valueAsQString(column, row).toDouble());
+                    }
+                }
+            }
+        }
+        double value(size_t column, size_t row)
+        {
+            double value = _data.valueAsQString(column, row).toDouble();
+            size_t index = column - _firstDataColumn;
+            if(_maxColumn[index] - _minColumn[index] != 0)
+                return (value - _minColumn[index]) / (_maxColumn[index] - _minColumn[index]);
+            else
+                return _maxColumn[index];
+        }
+    };
 
     struct DataRow
     {
@@ -120,6 +175,8 @@ private:
     std::unique_ptr<EdgeArray<double>> _pearsonValues;
     double _minimumCorrelationValue = 0.7;
     bool _transpose = false;
+    ScalingType _scaling = ScalingType::None;
+    NormaliseType _normaliseType = NormaliseType::None;
 
     void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager,
                     ICommandManager* commandManager, const IParserThread* parserThread);
@@ -128,6 +185,8 @@ private:
     void setData(size_t column, size_t row, double value);
 
     void finishDataRow(size_t row);
+
+    double scaleValue(double value);
 
     QAbstractTableModel* nodeAttributeTableModel() { return &_nodeAttributeTableModel; }
     QStringList columnNames();

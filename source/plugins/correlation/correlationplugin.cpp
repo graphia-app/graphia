@@ -4,6 +4,7 @@
 #include "loading/correlationfileparser.h"
 #include "shared/utils/threadpool.h"
 #include "shared/utils/iterator_range.h"
+#include "shared/utils/qmlenum.h"
 
 CorrelationPluginInstance::CorrelationPluginInstance()
 {
@@ -43,6 +44,18 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
 
     uint64_t numDataPoints = static_cast<uint64_t>(tabularData.numColumns()) * tabularData.numRows();
 
+    TabularData scaledData = tabularData;
+
+    for(size_t column=firstDataColumn; column<tabularData.numColumns(); column++)
+    {
+        for(size_t row=firstDataRow; row<tabularData.numRows(); row++)
+            scaledData.setValueAt(column, row, std::to_string(scaleValue(tabularData.valueAsQString(column, row).toDouble())));
+    }
+    std::unique_ptr<Normaliser> normaliser = nullptr;
+
+    if (_normaliseType == NormaliseType::MinMax)
+        normaliser = std::make_unique<MinMaxNormaliser>(scaledData, firstDataColumn, firstDataRow);
+
     for(size_t rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
     {
         for(size_t columnIndex = 0; columnIndex < tabularData.numColumns(); columnIndex++)
@@ -54,7 +67,8 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
             uint64_t dataPoint = columnIndex + rowOffset;
             progress(static_cast<int>((dataPoint * 100) / numDataPoints));
 
-            QString value = tabularData.valueAtQString(columnIndex, rowIndex);
+            QString value = tabularData.valueAsQString(columnIndex, rowIndex);
+
             auto dataColumnIndex = static_cast<int>(columnIndex - firstDataColumn);
             auto dataRowIndex = static_cast<int>(rowIndex - firstDataRow);
 
@@ -82,19 +96,23 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
                 if(columnIndex == 0)
                     _userColumnData.add(value);
                 else if(dataColumnIndex >= 0)
-                    _userColumnData.setValue(dataColumnIndex, tabularData.valueAtQString(0, rowIndex), value);
+                    _userColumnData.setValue(dataColumnIndex, tabularData.valueAsQString(0, rowIndex), value);
             }
             else
             {
                 if(dataColumnIndex >= 0)
                 {
-                    setData(dataColumnIndex, dataRowIndex, value.toDouble());
+                    double transformedValue = scaledData.valueAsQString(columnIndex, rowIndex).toDouble();
+                    if (normaliser)
+                        transformedValue = normaliser->value(columnIndex, rowIndex);
+
+                    setData(dataColumnIndex, dataRowIndex, transformedValue);
 
                     if(dataColumnIndex == static_cast<int>(_numColumns) - 1)
                         finishDataRow(dataRowIndex);
                 }
                 else
-                    _userNodeData.setValue(dataRowIndex, tabularData.valueAtQString(columnIndex, 0), value);
+                    _userNodeData.setValue(dataRowIndex, tabularData.valueAsQString(columnIndex, 0), value);
             }
         }
     }
@@ -249,6 +267,28 @@ void CorrelationPluginInstance::finishDataRow(size_t row)
     _userNodeData.setNodeIdForRowIndex(nodeId, row);
 }
 
+double CorrelationPluginInstance::scaleValue(double value)
+{
+    // LogY(x+c) where c is EPSILON
+    // This prevents LogY(0) which is -inf
+    // Log2(0+c) = -1057
+    // Document this!
+    const double EPSILON = std::nextafter(0.0, 1.0);
+
+    switch(_scaling)
+    {
+    case ScalingType::Log2:
+        return std::log2(value + EPSILON);
+    case ScalingType::Log10:
+        return std::log10(value + EPSILON);
+    case ScalingType::AntiLog2:
+        return std::pow(2.0, value);
+    case ScalingType::AntiLog10:
+        return std::pow(10.0, value);
+    }
+    return value;
+}
+
 void CorrelationPluginInstance::onLoadSuccess()
 {
     _userNodeData.setNodeNamesToFirstUserDataVector(*graphModel());
@@ -316,6 +356,10 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QStrin
         _minimumCorrelationValue = value.toDouble();
     else if(name == "transpose")
         _transpose = (value == "true");
+    else if(name == "scaling")
+        _scaling = static_cast<ScalingType>(value.toInt());
+    else if(name == "normalise")
+        _normaliseType = static_cast<NormaliseType>(value.toInt());
 }
 
 QStringList CorrelationPluginInstance::defaultTransforms() const

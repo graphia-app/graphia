@@ -30,7 +30,7 @@ public:
     size_t numRows() const;
     bool transposed() const { return _transposed; }
     const std::string& valueAt(size_t column, size_t row) const;
-    QString valueAtQString(size_t column, size_t row) const;
+    QString valueAsQString(size_t column, size_t row) const;
 
     void setTransposed(bool transposed) { _transposed = transposed; }
     void setValueAt(size_t column, size_t row, std::string&& value);

@@ -1,6 +1,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
+import com.kajeka 1.0
 
 import "Constants.js" as Constants
 
@@ -41,20 +42,83 @@ GridLayout
         onValueChanged: { parameters.minimumCorrelation = value; }
     }
 
-    CheckBox
+    RowLayout
     {
-        id: transposeCheckBox
+        Text
+        {
+            text: qsTr("Scaling:")
+            Layout.alignment: Qt.AlignLeft
+        }
+        ComboBox
+        {
+            id: scaling
+            Layout.alignment: Qt.AlignRight
+            model: [ qsTr("None"), qsTr("Log2(x+c)"), qsTr("Log10(x+c)"), qsTr("AntiLog2(x)"), qsTr("AntiLog10(x)")]
+            onCurrentIndexChanged:
+            {
+                parameters.scaling = scalingStringToEnum(currentText);
+            }
+        }
 
-        Layout.alignment: Qt.AlignLeft
-        text: qsTr("Transpose")
-        onCheckedChanged: { parameters.transpose = checked; }
+        Text
+        {
+            text: qsTr("Normalisation:")
+            Layout.alignment: Qt.AlignLeft
+        }
+        ComboBox
+        {
+            id: normalise
+            Layout.alignment: Qt.AlignRight
+            model: [ qsTr("None"), qsTr("MinMax")]
+            onCurrentIndexChanged:
+            {
+                parameters.normalise = normaliseStringToEnum(currentText);
+            }
+        }
+
+
+        CheckBox
+        {
+            id: transposeCheckBox
+
+            Layout.alignment: Qt.AlignLeft
+            text: qsTr("Transpose")
+            onCheckedChanged: { parameters.transpose = checked; }
+        }
     }
+
 
     function initialise()
     {
-        parameters = {minimumCorrelation: 0.7, transpose: false};
+        parameters = {minimumCorrelation: 0.7, transpose: false, scaling: ScalingType.None, normalise: NormaliseType.None};
 
         minimumCorrelationSpinBox.value = 0.7;
         transposeCheckBox.checked = false;
+    }
+
+    function scalingStringToEnum(scalingString)
+    {
+        switch(scalingString)
+        {
+        case qsTr("Log2(x+c)"):
+            return ScalingType.Log2
+        case qsTr("Log10(x+c)"):
+            return ScalingType.Log10
+        case qsTr("AntiLog2(x)"):
+            return ScalingType.AntiLog2
+        case qsTr("AntiLog10(x)"):
+            return ScalingType.AntiLog10
+        }
+        return ScalingType.None
+    }
+
+    function normaliseStringToEnum(normaliseString)
+    {
+        switch(normaliseString)
+        {
+        case qsTr("MinMax"):
+            return NormaliseType.MinMax
+        }
+        return NormaliseType.None;
     }
 }

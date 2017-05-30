@@ -38,7 +38,7 @@ const std::string& TabularData::valueAt(size_t column, size_t row) const
     return _data.at(index(column, row));
 }
 
-QString TabularData::valueAtQString(size_t column, size_t row) const
+QString TabularData::valueAsQString(size_t column, size_t row) const
 {
     // Note that the whitespace is trimmed
     return QString::fromStdString(valueAt(column, row)).trimmed();
