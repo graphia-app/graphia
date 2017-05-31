@@ -22,7 +22,8 @@ DEFINE_QML_ENUM(Q_GADGET, ScalingType,
                 Log2,
                 Log10,
                 AntiLog2,
-                AntiLog10);
+                AntiLog10,
+                ArcSin);
 
 DEFINE_QML_ENUM(Q_GADGET, NormaliseType,
                 None,
@@ -80,10 +81,10 @@ private:
         {
             _minColumn.resize(data.numColumns() - firstDataColumn, std::numeric_limits<double>::max());
             _maxColumn.resize(data.numColumns() - firstDataColumn, std::numeric_limits<double>::lowest());
-            for(size_t column=firstDataColumn; column<_data.numColumns(); column++)
+            for(size_t column = firstDataColumn; column < _data.numColumns(); column++)
             {
                 size_t index = column - firstDataColumn;
-                for(size_t row=firstDataRow; row<_data.numRows(); row++)
+                for(size_t row = firstDataRow; row < _data.numRows(); row++)
                 {
                     if(u::isNumeric(_data.valueAt(column, row)))
                     {

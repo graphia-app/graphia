@@ -46,14 +46,18 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
 
     TabularData scaledData = tabularData;
 
-    for(size_t column=firstDataColumn; column<tabularData.numColumns(); column++)
+    for(size_t column = firstDataColumn; column < tabularData.numColumns(); column++)
     {
-        for(size_t row=firstDataRow; row<tabularData.numRows(); row++)
-            scaledData.setValueAt(column, row, std::to_string(scaleValue(tabularData.valueAsQString(column, row).toDouble())));
+        for(size_t row = firstDataRow; row < tabularData.numRows(); row++)
+        {
+            double value = tabularData.valueAsQString(column, row).toDouble();
+            value = scaleValue(value);
+            scaledData.setValueAt(column, row, std::to_string(value));
+        }
     }
     std::unique_ptr<Normaliser> normaliser = nullptr;
 
-    if (_normaliseType == NormaliseType::MinMax)
+    if(_normaliseType == NormaliseType::MinMax)
         normaliser = std::make_unique<MinMaxNormaliser>(scaledData, firstDataColumn, firstDataRow);
 
     for(size_t rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
@@ -103,7 +107,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
                 if(dataColumnIndex >= 0)
                 {
                     double transformedValue = scaledData.valueAsQString(columnIndex, rowIndex).toDouble();
-                    if (normaliser)
+                    if(normaliser != nullptr)
                         transformedValue = normaliser->value(columnIndex, rowIndex);
 
                     setData(dataColumnIndex, dataRowIndex, transformedValue);
@@ -285,6 +289,8 @@ double CorrelationPluginInstance::scaleValue(double value)
         return std::pow(2.0, value);
     case ScalingType::AntiLog10:
         return std::pow(10.0, value);
+    case ScalingType::ArcSin:
+        return std::asin(value);
     }
     return value;
 }

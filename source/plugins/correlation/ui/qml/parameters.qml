@@ -20,70 +20,81 @@ GridLayout
         wrapMode: Text.WordWrap
     }
 
-    Text
+    ColumnLayout
     {
-        text: qsTr("Minimum Correlation:")
-        Layout.alignment: Qt.AlignRight
-    }
-
-    SpinBox
-    {
-        id: minimumCorrelationSpinBox
-
-        Layout.alignment: Qt.AlignLeft
-        implicitWidth: 70
-
-        minimumValue: 0.0
-        maximumValue: 1.0
-
-        decimals: 3
-        stepSize: (maximumValue - minimumValue) / 100.0
-
-        onValueChanged: { parameters.minimumCorrelation = value; }
-    }
-
-    RowLayout
-    {
-        Text
+        RowLayout
         {
-            text: qsTr("Scaling:")
-            Layout.alignment: Qt.AlignLeft
-        }
-        ComboBox
-        {
-            id: scaling
-            Layout.alignment: Qt.AlignRight
-            model: [ qsTr("None"), qsTr("Log2(x+c)"), qsTr("Log10(x+c)"), qsTr("AntiLog2(x)"), qsTr("AntiLog10(x)")]
-            onCurrentIndexChanged:
+            Text
             {
-                parameters.scaling = scalingStringToEnum(currentText);
+                text: qsTr("Scaling:")
+                Layout.alignment: Qt.AlignLeft
+            }
+            ComboBox
+            {
+                id: scaling
+                Layout.alignment: Qt.AlignRight
+                model: [ qsTr("None"), qsTr("Log2(x+c)"), qsTr("Log10(x+c)"), qsTr("AntiLog2(x)"), qsTr("AntiLog10(x)"), qsTr("Arcsin(x)")]
+                onCurrentIndexChanged:
+                {
+                    parameters.scaling = scalingStringToEnum(currentText);
+                }
+            }
+
+            Text
+            {
+                text: qsTr("Normalisation:")
+                Layout.alignment: Qt.AlignLeft
+            }
+            ComboBox
+            {
+                id: normalise
+                Layout.alignment: Qt.AlignRight
+                model: [ qsTr("None"), qsTr("MinMax")]
+                onCurrentIndexChanged:
+                {
+                    parameters.normalise = normaliseStringToEnum(currentText);
+                }
+            }
+
+            CheckBox
+            {
+                id: transposeCheckBox
+
+                Layout.alignment: Qt.AlignLeft
+                text: qsTr("Transpose")
+                onCheckedChanged: { parameters.transpose = checked; }
             }
         }
-
-        Text
+        RowLayout
         {
-            text: qsTr("Normalisation:")
-            Layout.alignment: Qt.AlignLeft
-        }
-        ComboBox
-        {
-            id: normalise
-            Layout.alignment: Qt.AlignRight
-            model: [ qsTr("None"), qsTr("MinMax")]
-            onCurrentIndexChanged:
+            Text
             {
-                parameters.normalise = normaliseStringToEnum(currentText);
+                text: qsTr("Minimum Correlation:")
+                Layout.alignment: Qt.AlignRight
             }
-        }
 
+            SpinBox
+            {
+                id: minimumCorrelationSpinBox
 
-        CheckBox
-        {
-            id: transposeCheckBox
+                Layout.alignment: Qt.AlignLeft
+                implicitWidth: 70
 
-            Layout.alignment: Qt.AlignLeft
-            text: qsTr("Transpose")
-            onCheckedChanged: { parameters.transpose = checked; }
+                minimumValue: 0.0
+                maximumValue: 1.0
+
+                decimals: 3
+                stepSize: (maximumValue - minimumValue) / 100.0
+
+                onValueChanged: { parameters.minimumCorrelation = value; slider.value = value; }
+            }
+            Slider
+            {
+                id: slider
+                minimumValue: 0.0
+                maximumValue: 1.0
+                onValueChanged: minimumCorrelationSpinBox.value = value;
+            }
         }
     }
 
@@ -108,6 +119,8 @@ GridLayout
             return ScalingType.AntiLog2
         case qsTr("AntiLog10(x)"):
             return ScalingType.AntiLog10
+        case qsTr("Arcsin(x)"):
+            return ScalingType.ArcSin
         }
         return ScalingType.None
     }
