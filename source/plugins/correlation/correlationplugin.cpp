@@ -57,8 +57,15 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
     }
     std::unique_ptr<Normaliser> normaliser = nullptr;
 
-    if(_normaliseType == NormaliseType::MinMax)
+    switch(_normaliseType)
+    {
+    case NormaliseType::MinMax:
         normaliser = std::make_unique<MinMaxNormaliser>(scaledData, firstDataColumn, firstDataRow);
+        break;
+    case NormaliseType::Quantile:
+        normaliser = std::make_unique<QuantileNormaliser>(scaledData, firstDataColumn, firstDataRow);
+        break;
+    }
 
     for(size_t rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
     {

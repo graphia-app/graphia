@@ -9,8 +9,12 @@
 #include "shared/plugins/usernodedata.h"
 #include "shared/plugins/nodeattributetablemodel.h"
 
+#include "minmaxnormaliser.h"
+#include "quantilenormaliser.h"
+
 #include <vector>
 #include <functional>
+#include <algorithm>
 
 #include <QString>
 #include <QStringList>
@@ -27,7 +31,8 @@ DEFINE_QML_ENUM(Q_GADGET, ScalingType,
 
 DEFINE_QML_ENUM(Q_GADGET, NormaliseType,
                 None,
-                MinMax);
+                MinMax,
+                Quantile);
 
 class CorrelationPluginInstance : public BasePluginInstance
 {
@@ -60,50 +65,6 @@ private:
     using DataOffset = std::vector<double>::size_type;
 
     std::vector<double> _data;
-
-    class Normaliser
-    {
-    public:
-        virtual double value(size_t column, size_t row) = 0;
-    };
-
-    class MinMaxNormaliser : public Normaliser
-    {
-    private:
-        std::vector<double> _minColumn;
-        std::vector<double> _maxColumn;
-        const TabularData& _data;
-        size_t _firstDataColumn;
-        size_t _firstDataRow;
-    public:
-        MinMaxNormaliser(const TabularData& data, size_t firstDataColumn, size_t firstDataRow)
-            : _data(data), _firstDataColumn(firstDataColumn), _firstDataRow(firstDataRow)
-        {
-            _minColumn.resize(data.numColumns() - firstDataColumn, std::numeric_limits<double>::max());
-            _maxColumn.resize(data.numColumns() - firstDataColumn, std::numeric_limits<double>::lowest());
-            for(size_t column = firstDataColumn; column < _data.numColumns(); column++)
-            {
-                size_t index = column - firstDataColumn;
-                for(size_t row = firstDataRow; row < _data.numRows(); row++)
-                {
-                    if(u::isNumeric(_data.valueAt(column, row)))
-                    {
-                        _minColumn[index] = std::min(_minColumn[index], data.valueAsQString(column, row).toDouble());
-                        _maxColumn[index] = std::max(_maxColumn[index], data.valueAsQString(column, row).toDouble());
-                    }
-                }
-            }
-        }
-        double value(size_t column, size_t row)
-        {
-            double value = _data.valueAsQString(column, row).toDouble();
-            size_t index = column - _firstDataColumn;
-            if(_maxColumn[index] - _minColumn[index] != 0)
-                return (value - _minColumn[index]) / (_maxColumn[index] - _minColumn[index]);
-            else
-                return _maxColumn[index];
-        }
-    };
 
     struct DataRow
     {

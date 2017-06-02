@@ -49,7 +49,7 @@ GridLayout
             {
                 id: normalise
                 Layout.alignment: Qt.AlignRight
-                model: [ qsTr("None"), qsTr("MinMax")]
+                model: [ qsTr("None"), qsTr("MinMax"), qsTr("Quantile")]
                 onCurrentIndexChanged:
                 {
                     parameters.normalise = normaliseStringToEnum(currentText);
@@ -131,6 +131,8 @@ GridLayout
         {
         case qsTr("MinMax"):
             return NormaliseType.MinMax
+        case qsTr("Quantile"):
+            return NormaliseType.Quantile
         }
         return NormaliseType.None;
     }

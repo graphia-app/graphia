@@ -14,12 +14,17 @@ CONFIG += plugin
 SOURCES += \
     correlationplugin.cpp \
     loading/correlationfileparser.cpp \
-    correlationplotitem.cpp
+    correlationplotitem.cpp \
+    minmaxnormaliser.cpp \
+    quantilenormaliser.cpp
 
 HEADERS += \
     correlationplugin.h \
     loading/correlationfileparser.h \
-    correlationplotitem.h
+    correlationplotitem.h \
+    normaliser.h \
+    minmaxnormaliser.h \
+    quantilenormaliser.h
 
 RESOURCES += \
     ui/qml.qrc
