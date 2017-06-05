@@ -4,6 +4,7 @@
 class Normaliser
 {
 public:
+    virtual ~Normaliser() {}
     virtual double value(size_t column, size_t row) = 0;
 };
 
