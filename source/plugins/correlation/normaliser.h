@@ -1,6 +1,8 @@
 #ifndef NORMALISER_H
 #define NORMALISER_H
 
+#include <cstdlib>
+
 class Normaliser
 {
 public:
