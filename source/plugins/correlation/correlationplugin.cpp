@@ -65,6 +65,8 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
     case NormaliseType::Quantile:
         normaliser = std::make_unique<QuantileNormaliser>(scaledData, firstDataColumn, firstDataRow);
         break;
+    default:
+        break;
     }
 
     for(size_t rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
@@ -298,6 +300,8 @@ double CorrelationPluginInstance::scaleValue(double value)
         return std::pow(10.0, value);
     case ScalingType::ArcSin:
         return std::asin(value);
+    default:
+        break;
     }
     return value;
 }

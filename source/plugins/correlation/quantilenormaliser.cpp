@@ -1,5 +1,7 @@
 #include "quantilenormaliser.h"
 
+#include <set>
+
 QuantileNormaliser::QuantileNormaliser(const TabularData &data,
                                        size_t firstDataColumn, size_t firstDataRow)
     : _data(data), _firstDataColumn(firstDataColumn),
@@ -24,12 +26,13 @@ QuantileNormaliser::QuantileNormaliser(const TabularData &data,
         std::sort(sortedValues.begin(), sortedValues.end());
         std::set<double> uniqueSortedValues(sortedValues.begin(), sortedValues.end());
 
-        for (size_t row = 0; row < _numDataRows; row++)
+        for(size_t row = 0; row < _numDataRows; row++)
         {
             // Set the ranking
-            double dataValue = _data.valueAsQString(column + _firstDataColumn,row + firstDataRow).toDouble();
+            double dataValue = _data.valueAsQString(column + _firstDataColumn,
+                                                    row + firstDataRow).toDouble();
             int i = 0;
-            for (auto uniqueValue : uniqueSortedValues)
+            for(auto uniqueValue : uniqueSortedValues)
             {
                 if (uniqueValue == dataValue)
                     _ranking[column][row] = i;
@@ -41,10 +44,10 @@ QuantileNormaliser::QuantileNormaliser(const TabularData &data,
     }
 
     // Populate row means
-    for (size_t row = 0; row < _numDataRows; row++)
+    for(size_t row = 0; row < _numDataRows; row++)
     {
         double meanValue = 0;
-        for (size_t column = 0; column < _numDataColumns; column++)
+        for(size_t column = 0; column < _numDataColumns; column++)
             meanValue += sortedColumnValues[column][row];
         _rowMeans[row] = meanValue / static_cast<double>(_numDataColumns);
     }
@@ -52,5 +55,6 @@ QuantileNormaliser::QuantileNormaliser(const TabularData &data,
 
 double QuantileNormaliser::value(size_t column, size_t row)
 {
-    return _rowMeans[_ranking[column - _firstDataColumn][row - _firstDataRow]];
+    auto rank = _ranking[column - _firstDataColumn][row - _firstDataRow];
+    return _rowMeans[rank];
 }

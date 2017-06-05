@@ -7,7 +7,6 @@
 #include "shared/utils/utils.h"
 
 #include <vector>
-#include <set>
 
 #include <QString>
 
