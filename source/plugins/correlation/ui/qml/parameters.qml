@@ -254,7 +254,6 @@ Wizard
                         model: [ qsTr("None"), qsTr("MinMax"), qsTr("Quantile")]
                         onCurrentIndexChanged:
                         {
-                            console.log(parameters);
                             parameters.normalise = normaliseStringToEnum(currentText);
                         }
                     }
