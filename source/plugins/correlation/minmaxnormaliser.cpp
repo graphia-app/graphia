@@ -5,7 +5,7 @@ MinMaxNormaliser::MinMaxNormaliser(const TabularData &data, size_t firstDataColu
 {
     _minColumn.resize(data.numColumns() - _firstDataColumn, std::numeric_limits<double>::max());
     _maxColumn.resize(data.numColumns() - _firstDataColumn, std::numeric_limits<double>::lowest());
-    for(size_t column = _firstDataRow; column < _data.numColumns(); column++)
+    for(size_t column = _firstDataColumn; column < _data.numColumns(); column++)
     {
         size_t index = column - _firstDataColumn;
         for(size_t row = _firstDataRow; row < _data.numRows(); row++)

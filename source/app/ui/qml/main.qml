@@ -343,24 +343,48 @@ ApplicationWindow
 
         if(parametersQmlPath.length > 0)
         {
-            pluginParametersDialog.fileUrl = fileUrl
-            pluginParametersDialog.fileType = fileType;
-            pluginParametersDialog.pluginName = pluginName;
-            pluginParametersDialog.parameters = {};
-            pluginParametersDialog.inNewTab = inNewTab;
-
-            pluginParametersDialog.qmlPath = parametersQmlPath;
-
-            pluginParametersDialog.open();
+            var component = Qt.createComponent(parametersQmlPath);
+            var contentObject = component.createObject(this);
+            if(contentObject === null)
+            {
+                console.log(parametersQmlPath + ": failed to create instance");
+                return;
+            }
+            if(!isValidParameterDialog(contentObject))
+            {
+                console.log("Failed to load Parameters dialog for " + pluginName);
+                console.log("Parameters QML must use BaseParameterDialog as root object");
+                return;
+            }
+            contentObject.fileUrl = fileUrl
+            contentObject.fileType = fileType;
+            contentObject.pluginName = pluginName;
+            contentObject.inNewTab = inNewTab;
+            contentObject.accepted.connect(function()
+            {
+                openFileOfTypeWithPluginAndParameters(contentObject.fileUrl,
+                                                      contentObject.fileType,
+                                                      contentObject.pluginName,
+                                                      contentObject.parameters,
+                                                      contentObject.inNewTab);
+            });
+            contentObject.show();
         }
         else
             openFileOfTypeWithPluginAndParameters(fileUrl, fileType, pluginName, {}, inNewTab);
     }
 
-    PluginParametersDialog
+    function isValidParameterDialog(element)
     {
-        id: pluginParametersDialog
-        onAccepted: openFileOfTypeWithPluginAndParameters(fileUrl, fileType, pluginName, parameters, inNewTab)
+        if (element['parameters'] === undefined ||
+            element['fileUrl'] === undefined ||
+            element['fileType'] === undefined ||
+            element['pluginName'] === undefined ||
+            element['inNewTab'] === undefined ||
+            element['show'] === undefined ||
+            element['accepted'] === undefined)
+            return false;
+        return true;
     }
 
     function openFileOfTypeWithPluginAndParameters(fileUrl, fileType, pluginName, parameters, inNewTab)

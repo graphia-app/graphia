@@ -10,7 +10,6 @@
         <file>qml/Find.qml</file>
         <file>qml/Loading/FileTypeChooserDialog.qml</file>
         <file>qml/Loading/PluginChooserDialog.qml</file>
-        <file>qml/Loading/PluginParametersDialog.qml</file>
         <file>qml/main.qml</file>
         <file>qml/Options/OptionsAppearance.qml</file>
         <file>qml/Options/OptionsDialog.qml</file>

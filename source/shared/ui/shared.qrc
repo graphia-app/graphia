@@ -4,5 +4,7 @@
         <file>qml/Utils.js</file>
         <file>qml/NodeAttributeTableView.qml</file>
         <file>qml/PluginContent.qml</file>
+        <file>qml/Controls/Wizard.qml</file>
+        <file>qml/Controls/BaseParameterDialog.qml</file>
     </qresource>
 </RCC>
