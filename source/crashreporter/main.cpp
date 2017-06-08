@@ -5,6 +5,8 @@
 #include <QFileInfo>
 #include <QHttpMultiPart>
 #include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QNetworkAccessManager>
 #include <QUrl>
 #include <QSysInfo>
 #include <QMessageBox>
@@ -95,7 +97,7 @@ static void uploadReport(const QString& email, const QString& text,
     QNetworkRequest request(url);
 
     QNetworkAccessManager manager;
-    QNetworkReply *reply = manager.post(request, multiPart);
+    QNetworkReply* reply = manager.post(request, multiPart);
     multiPart->setParent(reply);
 
     QTimer timer;
