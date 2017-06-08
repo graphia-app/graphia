@@ -3,6 +3,7 @@
 
 #include "shared/graph/imutablegraph.h"
 #include "shared/loading/baseparser.h"
+#include "shared/utils/utils.h"
 
 #include "thirdparty/utfcpp/utf8.h"
 
@@ -63,7 +64,7 @@ private:
         progress(-1);
 
         file.seekg(0, std::ios::beg);
-        while(std::getline(file, line))
+        while(u::getline(file, line))
         {
             if(_parentParser != nullptr && _parentParser->cancelled())
                 return false;

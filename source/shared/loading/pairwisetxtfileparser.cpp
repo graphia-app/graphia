@@ -49,7 +49,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
     progress(-1);
 
     file.seekg(0, std::ios::beg);
-    while(std::getline(file, line))
+    while(u::getline(file, line))
     {
         if(cancelled())
             return false;
@@ -215,12 +215,16 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
             {
                 // We have an edge weight too
                 auto& thirdToken = tokens.at(2);
-                float edgeWeight = std::stof(thirdToken);
 
-                if(std::isnan(edgeWeight) || !std::isfinite(edgeWeight))
-                    edgeWeight = 1.0f;
+                if(u::isNumeric(thirdToken))
+                {
+                    float edgeWeight = std::stof(thirdToken);
 
-                _genericPluginInstance->setEdgeWeight(edgeId, edgeWeight);
+                    if(std::isnan(edgeWeight) || !std::isfinite(edgeWeight))
+                        edgeWeight = 1.0f;
+
+                    _genericPluginInstance->setEdgeWeight(edgeId, edgeWeight);
+                }
             }
         }
 

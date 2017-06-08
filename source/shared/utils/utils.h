@@ -227,6 +227,8 @@ namespace u
     QColor contrastingColor(const QColor& color);
 
     std::vector<QString> toQStringVector(const QStringList& stringList);
+
+    std::istream& getline(std::istream& is, std::string& t);
 }
 
 #define ARRAY_SIZEOF(x) (sizeof(x)/sizeof((x)[0]))
