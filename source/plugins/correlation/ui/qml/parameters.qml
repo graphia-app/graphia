@@ -264,7 +264,7 @@ Wizard
                     columns: 2
                     Text
                     {
-                        text: "<b>MinMax:</b> "
+                        text: "<b>MinMax:</b>"
                         textFormat: Text.StyledText
                         Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                     }

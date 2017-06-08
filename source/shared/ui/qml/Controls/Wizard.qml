@@ -17,7 +17,7 @@ BaseParameterDialog
     modality: Qt.ApplicationModal
 
     minimumWidth: 450
-    minimumHeight: spacing0
+    minimumHeight: 200
 
     onWidthChanged: { content.x = currentIndex * -view.width }
     onHeightChanged: { content.x = currentIndex * -view.width }
