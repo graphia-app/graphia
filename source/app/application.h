@@ -50,6 +50,8 @@ public:
 
     Q_INVOKABLE QString nameAtIndex(int row) const { return data(index(row, 0), Name).toString(); }
 
+    void update() { emit layoutChanged(); }
+
 private:
     const std::vector<IPlugin*>* _plugins;
 };
@@ -75,6 +77,8 @@ public:
     QHash<int, QByteArray> roleNames() const;
 
     Q_INVOKABLE QString nameAtIndex(int row) const { return data(index(row, 0), Name).toString(); }
+
+    void update() { emit layoutChanged(); }
 
 private:
     const std::vector<IPlugin*>* _plugins;

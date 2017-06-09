@@ -211,8 +211,8 @@ void Application::loadPlugins()
 void Application::initialisePlugin(IPlugin* plugin)
 {
     _plugins.push_back(plugin);
-    emit urlTypeDetailsChanged();
-    emit pluginDetailsChanged();
+    _urlTypeDetails.update();
+    _pluginDetails.update();
 }
 
 struct UrlType
