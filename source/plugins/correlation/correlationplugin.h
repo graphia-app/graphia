@@ -34,6 +34,12 @@ DEFINE_QML_ENUM(Q_GADGET, NormaliseType,
                 MinMax,
                 Quantile);
 
+DEFINE_QML_ENUM(Q_GADGET, MissingDataType,
+                None,
+                Constant,
+                ColumnAverage,
+                RowInterpolation);
+
 class CorrelationPluginInstance : public BasePluginInstance
 {
     Q_OBJECT
@@ -139,6 +145,8 @@ private:
     bool _transpose = false;
     ScalingType _scaling = ScalingType::None;
     NormaliseType _normaliseType = NormaliseType::None;
+    MissingDataType _missingDataType = MissingDataType::None;
+    double _missingDataReplacementValue = 0.0;
 
     void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager,
                     ICommandManager* commandManager, const IParserThread* parserThread);

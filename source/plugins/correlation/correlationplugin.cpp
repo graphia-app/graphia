@@ -50,7 +50,15 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
     {
         for(size_t row = firstDataRow; row < tabularData.numRows(); row++)
         {
-            double value = tabularData.valueAsQString(column, row).toDouble();
+            QString stringValue = tabularData.valueAsQString(column, row);
+            double value = 0.0;
+            // Replace missing values if required
+            if(_missingDataType == MissingDataType::Constant
+                    && stringValue == QString())
+                value = _missingDataReplacementValue;
+            else
+                value = stringValue.toDouble();
+
             value = scaleValue(value);
             scaledData.setValueAt(column, row, std::to_string(value));
         }
@@ -377,6 +385,10 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QStrin
         _scaling = static_cast<ScalingType>(value.toInt());
     else if(name == "normalise")
         _normaliseType = static_cast<NormaliseType>(value.toInt());
+    else if(name == "missingDataType")
+        _missingDataType = static_cast<MissingDataType>(value.toInt());
+    else if(name == "missingDataValue")
+        _missingDataReplacementValue = value.toDouble();
 }
 
 QStringList CorrelationPluginInstance::defaultTransforms() const

@@ -291,12 +291,92 @@ Wizard
             }
         }
     }
+    Item
+    {
+        ColumnLayout
+        {
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            Text
+            {
+                text: qsTr("<h2>Handling Missing Data</h2>")
+                Layout.alignment: Qt.AlignLeft
+                textFormat: Text.StyledText
+            }
+            ColumnLayout
+            {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                spacing: 20;
+
+                Text
+                {
+                    text: qsTr("Select how you would like to handle any missing data within " +
+                               "your dataset. By default missing values are replaced with 0.0")
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
+                RowLayout
+                {
+                    Text
+                    {
+                        text: qsTr("Replacement:")
+                        Layout.alignment: Qt.AlignLeft
+                    }
+                    ComboBox
+                    {
+                        id: missingDataMethod
+                        Layout.alignment: Qt.AlignRight
+                        model: [ qsTr("None"), qsTr("Constant") ]
+                        onCurrentIndexChanged:
+                        {
+                            parameters.missingDataType = missingDataStringToEnum(currentText);
+                        }
+                    }
+                }
+                RowLayout
+                {
+                    visible: missingDataMethod.currentText === qsTr("Constant")
+                    Text
+                    {
+                        text: qsTr("Value to replace with:")
+                        Layout.alignment: Qt.AlignLeft
+                    }
+                    TextField
+                    {
+                        id: replacementConstant
+                        validator: DoubleValidator{}
+                        onTextChanged: { parameters.missingDataValue = text; }
+                        text: "0.0"
+                    }
+                }
+                GridLayout
+                {
+                    columns: 2
+                    Text
+                    {
+                        text: "<b>Constant:</b>"
+                        textFormat: Text.StyledText
+                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                    }
+                    Text
+                    {
+                        text: qsTr("Replace all missing values with a numerical constant values");
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
+                    }
+                }
+            }
+        }
+    }
 
     Component.onCompleted: initialise();
     function initialise()
     {
         parameters = {minimumCorrelation: 0.7, transpose: false,
-            scaling: ScalingType.None, normalise: NormaliseType.None};
+            scaling: ScalingType.None, normalise: NormaliseType.None,
+            missingDataType: MissingDataType.None };
 
         minimumCorrelationSpinBox.value = 0.7;
         transposeCheckBox.checked = false;
@@ -330,5 +410,15 @@ Wizard
             return NormaliseType.Quantile
         }
         return NormaliseType.None;
+    }
+
+    function missingDataStringToEnum(missingDataString)
+    {
+        switch(missingDataString)
+        {
+        case qsTr("Constant"):
+            return MissingDataType.Constant
+        }
+        return MissingDataType.None;
     }
 }
