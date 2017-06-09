@@ -66,7 +66,7 @@ Window
                 Layout.fillHeight: true
                 Layout.preferredWidth: 200
 
-                textFormat: Text.RichText
+                textFormat: Text.StyledText
                 wrapMode: Text.WordWrap
                 elide: Text.ElideRight
 

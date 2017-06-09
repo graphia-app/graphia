@@ -321,7 +321,7 @@ Window
                                     {
                                         Layout.fillWidth: true
                                         text: parameterData.description
-                                        textFormat: Text.RichText
+                                        textFormat: Text.StyledText
                                         wrapMode: Text.WordWrap
                                         elide: Text.ElideRight
                                         onLinkActivated: Qt.openUrlExternally(link);
@@ -447,7 +447,7 @@ Window
                 id: description
                 Layout.fillWidth: true
 
-                textFormat: Text.RichText
+                textFormat: Text.StyledText
                 wrapMode: Text.WordWrap
                 elide: Text.ElideRight
 
