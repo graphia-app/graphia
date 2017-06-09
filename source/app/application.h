@@ -8,6 +8,7 @@
 #include <QRect>
 #include <QColor>
 #include <QAbstractListModel>
+#include <QPluginLoader>
 
 #include <vector>
 #include <memory>
@@ -28,13 +29,23 @@ class GraphModel;
 class IParser;
 class IPlugin;
 
+struct LoadedPlugin
+{
+    LoadedPlugin(IPlugin* instance, std::unique_ptr<QPluginLoader> loader) :
+        _instance(instance), _loader(std::move(loader))
+    {}
+
+    IPlugin* _instance;
+    std::unique_ptr<QPluginLoader> _loader;
+};
+
 class UrlTypeDetailsModel : public QAbstractListModel
 {
     Q_OBJECT
 
 public:
-    explicit UrlTypeDetailsModel(const std::vector<IPlugin*>* plugins) :
-        _plugins(plugins)
+    explicit UrlTypeDetailsModel(const std::vector<LoadedPlugin>* loadedPlugins) :
+        _loadedPlugins(loadedPlugins)
     {}
 
     enum Roles
@@ -53,7 +64,7 @@ public:
     void update() { emit layoutChanged(); }
 
 private:
-    const std::vector<IPlugin*>* _plugins;
+    const std::vector<LoadedPlugin>* _loadedPlugins;
 };
 
 class PluginDetailsModel : public QAbstractListModel
@@ -61,8 +72,8 @@ class PluginDetailsModel : public QAbstractListModel
     Q_OBJECT
 
 public:
-    explicit PluginDetailsModel(const std::vector<IPlugin*>* plugins) :
-        _plugins(plugins)
+    explicit PluginDetailsModel(const std::vector<LoadedPlugin>* loadedPlugins) :
+        _loadedPlugins(loadedPlugins)
     {}
 
     enum Roles
@@ -81,7 +92,7 @@ public:
     void update() { emit layoutChanged(); }
 
 private:
-    const std::vector<IPlugin*>* _plugins;
+    const std::vector<LoadedPlugin>* _loadedPlugins;
 };
 
 class Application : public QObject
@@ -137,12 +148,13 @@ private:
 
     UrlTypeDetailsModel _urlTypeDetails;
 
-    std::vector<IPlugin*> _plugins;
+    std::vector<LoadedPlugin> _loadedPlugins;
     PluginDetailsModel _pluginDetails;
 
     void loadPlugins();
-    void initialisePlugin(IPlugin* plugin);
+    void initialisePlugin(IPlugin* plugin, std::unique_ptr<QPluginLoader> pluginLoader);
     void updateNameFilters();
+    void unloadPlugins();
 
     QStringList _nameFilters;
     QStringList nameFilters() const { return _nameFilters; }
