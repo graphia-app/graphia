@@ -375,7 +375,7 @@ Qt::KeyboardModifiers GraphCommonInteractor::modifiers() const
 NodeId GraphCommonInteractor::nodeIdAtPosition(const QPoint& localPosition) const
 {
     auto renderer = clickedRenderer();
-    if(renderer == nullptr)
+    if(renderer == nullptr || renderer->componentId().isNull())
         return {};
 
     auto ray = renderer->camera()->rayForViewportCoordinates(localPosition.x(), localPosition.y());
@@ -389,7 +389,7 @@ NodeId GraphCommonInteractor::nodeIdNearPosition(const QPoint& localPosition) co
     const int PICK_RADIUS = 40;
 
     auto renderer = clickedRenderer();
-    if(renderer == nullptr)
+    if(renderer == nullptr || renderer->componentId().isNull())
         return {};
 
     auto frustum = renderer->camera()->conicalFrustumForViewportCoordinates(

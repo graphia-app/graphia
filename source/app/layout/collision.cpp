@@ -42,7 +42,9 @@ void Collision::nodesInsideCylinder(const QVector3D &point, const QVector3D &dir
 {
     Plane plane(point, direction);
 
-    const std::vector<NodeId>& nodeIds = _graphModel->graph().componentById(_componentId)->nodeIds();
+    Q_ASSERT(!_componentId.isNull());
+    const auto* component = _graphModel->graph().componentById(_componentId);
+    const std::vector<NodeId>& nodeIds = component->nodeIds();
     for(NodeId nodeId : nodeIds)
     {
         const QVector3D position = _graphModel->nodePositions().getScaledAndSmoothed(nodeId) + _offset;
