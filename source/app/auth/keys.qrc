@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/keys">
+        <file>public_auth_key.der</file>
+    </qresource>
+</RCC>
