@@ -110,18 +110,6 @@ Rectangle
 
         Text
         {
-            Layout.alignment: Qt.AlignCenter
-            text: qsTr("<a href=\"https://auth.kajeka.com/?lostPassword\">Lost Password</a>")
-
-            linkColor: "grey"
-            textFormat: Text.StyledText
-            wrapMode: Text.NoWrap
-
-            onLinkActivated: Qt.openUrlExternally(link);
-        }
-
-        Text
-        {
             id: messageText
 
             Layout.alignment: Qt.AlignCenter
@@ -137,6 +125,7 @@ Rectangle
                 root.refocus();
             }
 
+            linkColor: "grey"
             textFormat: Text.StyledText
             wrapMode: Text.WordWrap
 
