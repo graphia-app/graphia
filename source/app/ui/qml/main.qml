@@ -21,7 +21,7 @@ ApplicationWindow
     property bool debugMenuUnhidden: false
     width: 1024
     height: 768
-    minimumWidth: mainToolBar.implicitWidth
+    minimumWidth: mainToolBar.visible ? mainToolBar.implicitWidth : 640
     minimumHeight: 480
     property bool maximised: mainWindow.visibility === Window.Maximized
 
@@ -29,6 +29,31 @@ ApplicationWindow
                                          tabView.getTab(tabView.currentIndex).item : null
 
     title: (currentDocument ? currentDocument.title + qsTr(" - ") : "") + application.name
+
+    Application
+    {
+        id: application
+
+        onAuthenticatedChanged:
+        {
+            if(authenticated)
+                processArguments(Qt.application.arguments);
+        }
+    }
+
+    Auth
+    {
+        visible: !application.authenticated
+        anchors.fill: parent
+
+        message: application.authenticationMessage
+        busy: application.authenticating
+
+        onSignIn:
+        {
+            application.authenticate(email, password);
+        }
+    }
 
     property var pendingArguments
 
@@ -97,7 +122,7 @@ ApplicationWindow
 
         mainWindow.visible = true;
 
-        processArguments(Qt.application.arguments);
+        application.tryToAuthenticateWithCachedCredentials();
     }
 
     onClosing:
@@ -688,13 +713,54 @@ ApplicationWindow
 
     Action
     {
+        id: signOutAction
+        text: qsTr("&Sign Out")
+        onTriggered:
+        {
+            mainWindow.lastDocumentClosed.connect(function()
+            {
+                //FIXME if any file closes are cancelled, we shouldn't proceed
+                signOut();
+            });
+
+            closeAllTabsAction.trigger();
+        }
+
+        function signOut()
+        {
+            mainWindow.lastDocumentClosed.disconnect(signOut);
+            application.signOut();
+        }
+    }
+
+    Action
+    {
         // A do nothing action that we use when there
         // is no other valid action available
         id: nullAction
     }
 
-    menuBar: MenuBar
+    // Hack to hide the menu bar when we're not authenticated
+    Connections
     {
+        target: application
+
+        onAuthenticatedChanged:
+        {
+            if(application.authenticated)
+                menuBar = mainMenuBar;
+            else
+            {
+                menuBar = null;
+                mainMenuBar.__contentItem.parent = null;
+            }
+        }
+    }
+
+    MenuBar
+    {
+        id: mainMenuBar
+
         Menu
         {
             title: qsTr("&File")
@@ -795,7 +861,6 @@ ApplicationWindow
         Menu
         {
             title: qsTr("&Debug")
-            enabled: application.debugEnabled || mainWindow.debugMenuUnhidden
             visible: application.debugEnabled || mainWindow.debugMenuUnhidden
             Menu
             {
@@ -845,6 +910,9 @@ ApplicationWindow
                     aboutMessageDialog.open();
                 }
             }
+
+            MenuSeparator {}
+            MenuItem { action: signOutAction }
         }
     }
 
@@ -922,6 +990,8 @@ ApplicationWindow
     {
         id: mainToolBar
 
+        visible: application.authenticated
+
         RowLayout
         {
             anchors.fill: parent
@@ -941,7 +1011,7 @@ ApplicationWindow
 
     DropArea
     {
-        anchors.fill: parent;
+        anchors.fill: parent
         onDropped:
         {
             if(drop.text.length > 0)
@@ -951,9 +1021,18 @@ ApplicationWindow
         TabView
         {
             id: tabView
+
+            visible: application.authenticated
+
             anchors.fill: parent
             tabsVisible: count > 1
             frameVisible: count > 1
+
+            onCountChanged:
+            {
+                if(count === 0)
+                    lastDocumentClosed();
+            }
 
             function insertTabAtIndex(index)
             {
@@ -1011,8 +1090,12 @@ ApplicationWindow
         }
     }
 
+    signal lastDocumentClosed()
+
     statusBar: StatusBar
     {
+        visible: application.authenticated
+
         RowLayout
         {
             id: rowLayout
@@ -1100,10 +1183,5 @@ ApplicationWindow
             currentDocument.commandComplete.disconnect(alertWhenCommandComplete);
         else if(currentDocument.commandInProgress)
             currentDocument.commandComplete.connect(alertWhenCommandComplete);
-    }
-
-    Application
-    {
-        id: application
     }
 }

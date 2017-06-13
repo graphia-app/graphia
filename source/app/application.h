@@ -1,6 +1,8 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
+#include "auth/auth.h"
+
 #include <QObject>
 #include <QString>
 #include <QStringList>
@@ -106,6 +108,10 @@ class Application : public QObject
     Q_PROPERTY(QAbstractListModel* urlTypeDetails READ urlTypeDetails NOTIFY urlTypeDetailsChanged)
     Q_PROPERTY(QAbstractListModel* pluginDetails READ pluginDetails NOTIFY pluginDetailsChanged)
 
+    Q_PROPERTY(bool authenticated READ authenticated NOTIFY authenticatedChanged)
+    Q_PROPERTY(QString authenticationMessage READ authenticationMessage NOTIFY authenticationMessageChanged)
+    Q_PROPERTY(bool authenticating READ authenticating NOTIFY authenticatingChanged)
+
     Q_PROPERTY(bool debugEnabled READ debugEnabled CONSTANT)
 
 public:
@@ -134,6 +140,10 @@ public:
     Q_INVOKABLE QString fileNameForUrl(const QUrl& url) const { return url.toLocalFile(); }
     Q_INVOKABLE QUrl urlForFileName(const QString& fileName) const { return QUrl::fromLocalFile(fileName); }
 
+    Q_INVOKABLE void tryToAuthenticateWithCachedCredentials();
+    Q_INVOKABLE void authenticate(const QString& email, const QString& password);
+    Q_INVOKABLE void signOut();
+
     Q_INVOKABLE void crash(int crashType);
 
 signals:
@@ -141,10 +151,16 @@ signals:
     void pluginDetailsChanged();
     void urlTypeDetailsChanged();
 
+    void authenticatedChanged();
+    void authenticationMessageChanged();
+    void authenticatingChanged();
+
 private:
     static const char* _uri;
     static const int _majorVersion = APP_MAJOR_VERSION;
     static const int _minorVersion = APP_MINOR_VERSION;
+
+    Auth _auth;
 
     UrlTypeDetailsModel _urlTypeDetails;
 
@@ -161,6 +177,10 @@ private:
 
     QAbstractListModel* urlTypeDetails();
     QAbstractListModel* pluginDetails();
+
+    bool authenticated() const { return _auth.state(); }
+    QString authenticationMessage() const { return _auth.message(); }
+    bool authenticating() const { return _auth.busy(); }
 
     bool debugEnabled() const
     {

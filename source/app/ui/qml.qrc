@@ -35,5 +35,7 @@
         <file>qml/Controls/TreeBox.qml</file>
         <file>qml/LayoutSettings.qml</file>
         <file>qml/Controls/SlidingPanel.qml</file>
+        <file>qml/Auth.qml</file>
+        <file>qml/bubbles.png</file>
     </qresource>
 </RCC>

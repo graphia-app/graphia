@@ -26,6 +26,7 @@ HEADERS += \
     attributes/availableattributesmodel.h \
     attributes/conditionfncreator.h \
     attributes/condtionfnops.h \
+    auth/auth.h \
     commands/applytransformscommand.h \
     commands/applyvisualisationscommand.h \
     commands/commandmanager.h \
@@ -118,6 +119,7 @@ HEADERS += \
 
 SOURCES += \
     application.cpp \
+    auth/auth.cpp \
     attributes/attribute.cpp \
     attributes/availableattributesmodel.cpp \
     attributes/conditionfncreator.cpp \
@@ -192,6 +194,7 @@ SOURCES += \
 RESOURCES += \
     icon/mainicon.qrc \
     icon-themes/icons.qrc \
+    auth/keys.qrc \
     rendering/shaders.qrc \
     ui/qml.qrc
 

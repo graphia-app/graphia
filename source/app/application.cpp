@@ -2,8 +2,9 @@
 #include "crashtype.h"
 
 #include "shared/plugins/iplugin.h"
-
 #include "shared/utils/utils.h"
+
+#include "ui/document.h"
 
 #include <QDir>
 #include <QStandardPaths>
@@ -21,7 +22,15 @@ Application::Application(QObject *parent) :
     _urlTypeDetails(&_loadedPlugins),
     _pluginDetails(&_loadedPlugins)
 {
-    loadPlugins();
+    connect(&_auth, &Auth::stateChanged, [this]
+    {
+        if(_auth.state())
+            loadPlugins();
+    });
+
+    connect(&_auth, &Auth::stateChanged, this, &Application::authenticatedChanged);
+    connect(&_auth, &Auth::messageChanged, this, &Application::authenticationMessageChanged);
+    connect(&_auth, &Auth::busyChanged, this, &Application::authenticatingChanged);
 }
 
 IPlugin* Application::pluginForName(const QString& pluginName) const
@@ -42,6 +51,13 @@ bool Application::fileUrlExists(const QUrl& url) const
 
 bool Application::canOpen(const QString& urlTypeName) const
 {
+    if(!_auth.state())
+    {
+        // We should never get here unless somebody is trying to
+        // crack the auth system (by messing with the QML?)
+        return false;
+    }
+
     return std::any_of(_loadedPlugins.begin(), _loadedPlugins.end(),
     [&urlTypeName](const auto& loadedPlugin)
     {
@@ -98,6 +114,23 @@ QString Application::parametersQmlPathForPlugin(const QString& pluginName) const
         return plugin->parametersQmlPath();
 
     return {};
+}
+
+void Application::tryToAuthenticateWithCachedCredentials()
+{
+    if(_auth.expired())
+        _auth.sendRequestUsingCachedCredentials();
+}
+
+void Application::authenticate(const QString& email, const QString& password)
+{
+    _auth.sendRequest(email, password);
+}
+
+void Application::signOut()
+{
+    _auth.reset();
+    unloadPlugins();
 }
 
 #if defined(Q_OS_WIN32)
@@ -184,6 +217,12 @@ void Application::loadPlugins()
                 auto* iplugin = qobject_cast<IPlugin*>(plugin);
                 if(iplugin)
                 {
+                    if(!_auth.pluginAllowed(iplugin->name()))
+                    {
+                        pluginLoader->unload();
+                        continue;
+                    }
+
                     bool pluginNameAlreadyUsed = std::any_of(_loadedPlugins.begin(), _loadedPlugins.end(),
                     [pluginName = iplugin->name()](const auto& loadedPlugin)
                     {
