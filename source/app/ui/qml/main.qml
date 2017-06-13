@@ -407,6 +407,20 @@ ApplicationWindow
 
     Action
     {
+        id: closeAllTabsAction
+        iconName: "window-close"
+        text: qsTr("Close &All Tabs")
+        shortcut: "Ctrl+Shift+W"
+        enabled: currentDocument
+        onTriggered:
+        {
+            while(tabView.count > 0)
+                tabView.removeTab(0);
+        }
+    }
+
+    Action
+    {
         id: quitAction
         iconName: "application-exit"
         text: qsTr("&Quit")
@@ -687,6 +701,7 @@ ApplicationWindow
             MenuItem { action: fileOpenAction }
             MenuItem { action: fileOpenInTabAction }
             MenuItem { action: closeTabAction }
+            MenuItem { action: closeAllTabsAction }
             Menu
             {
                 id: recentFileMenu;
