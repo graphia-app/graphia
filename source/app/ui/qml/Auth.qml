@@ -77,6 +77,12 @@ Rectangle
                 regExp: /..*/ // At least 1 character
             }
             echoMode: TextInput.Password
+
+            onActiveFocusChanged:
+            {
+                if(activeFocus)
+                    selectAll();
+            }
         }
 
         RowLayout
@@ -173,10 +179,7 @@ Rectangle
         if(emailField.text.length === 0)
             emailField.forceActiveFocus();
         else
-        {
             passwordField.forceActiveFocus();
-            passwordField.selectAll();
-        }
     }
 
     onVisibleChanged:
