@@ -53,8 +53,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
             QString stringValue = tabularData.valueAsQString(column, row);
             double value = 0.0;
             // Replace missing values if required
-            if(_missingDataType == MissingDataType::Constant
-                    && stringValue == QString())
+            if(_missingDataType == MissingDataType::Constant && stringValue.isEmpty())
                 value = _missingDataReplacementValue;
             else
                 value = stringValue.toDouble();

@@ -350,24 +350,26 @@ ApplicationWindow
                 console.log(parametersQmlPath + ": failed to create instance");
                 return;
             }
+
             if(!isValidParameterDialog(contentObject))
             {
                 console.log("Failed to load Parameters dialog for " + pluginName);
                 console.log("Parameters QML must use BaseParameterDialog as root object");
                 return;
             }
+
             contentObject.fileUrl = fileUrl
             contentObject.fileType = fileType;
             contentObject.pluginName = pluginName;
             contentObject.inNewTab = inNewTab;
+
             contentObject.accepted.connect(function()
             {
                 openFileOfTypeWithPluginAndParameters(contentObject.fileUrl,
-                                                      contentObject.fileType,
-                                                      contentObject.pluginName,
-                                                      contentObject.parameters,
-                                                      contentObject.inNewTab);
+                    contentObject.fileType, contentObject.pluginName,
+                    contentObject.parameters, contentObject.inNewTab);
             });
+
             contentObject.show();
         }
         else

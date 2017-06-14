@@ -8,11 +8,13 @@ import "Controls"
 
 Wizard
 {
-    minimumWidth: 470
-    minimumHeight: 350
+    //FIXME These should be set automatically by Wizard
+    minimumWidth: 640
+    minimumHeight: 400
+
     Item
     {
-        anchors.fill: parent;
+        anchors.fill: parent
         ColumnLayout
         {
             width: parent.width
@@ -21,7 +23,7 @@ Wizard
 
             Text
             {
-                text: qsTr("<h2>Correlation Plugin</h2>")
+                text: qsTr("<h2>Correlation</h2>")
                 Layout.alignment: Qt.AlignLeft
                 textFormat: Text.StyledText
             }
@@ -30,13 +32,19 @@ Wizard
             {
                 Text
                 {
-                    text: qsTr("The correlation plugin creates graphs based on how similar row profiles are in a dataset.\n\n"
-                               + "If specified, the input data will be scaled and normalised and a Pearson Correlation will be performed. "
-                               + "Pearson Correlation provides a measure of correlation between nodes which will be used to create "
-                               + "an edge.\n\nCritera for edge creation can be set using Transforms once the graph is created\n\n")
+                    text: qsTr("The correlation plugin creates graphs based on how similar row profiles are in a dataset.<br>" +
+                               "<br>" +
+                               "If specified, the input data will be scaled and normalised and a Pearson Correlation will be performed. " +
+                               "The <a href=\"https://en.wikipedia.org/wiki/Pearson_correlation_coefficient\">Pearson Correlation coefficient</a> " +
+                               "is effectively a measure of similarity between rows of data. It is used to determine " +
+                               "whether or not an edge is created between rows.<br>" +
+                               "<br>" +
+                               "The edges may be filtered using transforms once the graph has been created.")
                     wrapMode: Text.WordWrap
+                    textFormat: Text.StyledText
                     Layout.fillWidth: true
                 }
+
                 Image
                 {
                     anchors.top: parent.top
@@ -49,12 +57,15 @@ Wizard
             }
         }
     }
+
     Item
     {
         ColumnLayout
         {
             anchors.left: parent.left
             anchors.right: parent.right
+
+            spacing: 20
 
             Text
             {
@@ -65,20 +76,15 @@ Wizard
 
             Text
             {
-                text: qsTr("Pearson Correlation will be performed on the dataset providing a measure of correlation between rows. "
-                           + "1.0 represents highly correlated rows and 0.0 represents no correlation. Negative correlation values are discarded. "
-                           + "All values below the Minimum correlation value will also be discarded and will not be in the generated graph.\n\n "
-                           + "By default a transform is created which will create edges for all values above the minimum correlation threshold. "
-                           + "Is is not possible to create edges using values below the minimum correlation value.\n")
+                text: qsTr("A Pearson Correlation will be performed on the dataset to provide a measure of correlation between rows of data. " +
+                           "1.0 represents highly correlated rows and 0.0 represents no correlation. Negative correlation values are discarded. " +
+                           "All values below the Minimum correlation value will also be discarded and will not create edges in the generated graph.<br>" +
+                           "<br>" +
+                           "By default a transform is created which will create edges for all values above the minimum correlation threshold. " +
+                           "Is is not possible to create edges using values below the minimum correlation value.")
                 wrapMode: Text.WordWrap
+                textFormat: Text.StyledText
                 Layout.fillWidth: true
-            }
-
-            Text
-            {
-                Layout.fillWidth: true
-                text: qsTr("Please select a minimum correlation value");
-                wrapMode: Text.WordWrap
             }
 
             RowLayout
@@ -88,6 +94,8 @@ Wizard
                     text: qsTr("Minimum Correlation:")
                     Layout.alignment: Qt.AlignRight
                 }
+
+                Item { Layout.fillWidth: true }
 
                 SpinBox
                 {
@@ -102,41 +110,51 @@ Wizard
                     decimals: 3
                     stepSize: (maximumValue - minimumValue) / 100.0
 
-                    onValueChanged: { parameters.minimumCorrelation = value; slider.value = value; }
+                    onValueChanged:
+                    {
+                        parameters.minimumCorrelation = value;
+                        slider.value = value;
+                    }
                 }
+
                 Slider
                 {
-                    Layout.fillWidth: true
                     id: slider
                     minimumValue: 0.0
                     maximumValue: 1.0
-                    onValueChanged: minimumCorrelationSpinBox.value = value;
+                    onValueChanged:
+                    {
+                        minimumCorrelationSpinBox.value = value;
+                    }
                 }
             }
         }
     }
+
     Item
     {
         ColumnLayout
         {
             anchors.left: parent.left
             anchors.right: parent.right
+
             Text
             {
-                text: qsTr("<h2>Data Transpose & Scaling</h2>")
+                text: qsTr("<h2>Data Transpose and Scaling</h2>")
                 Layout.alignment: Qt.AlignLeft
                 textFormat: Text.StyledText
             }
+
             ColumnLayout
             {
                 anchors.left: parent.left
                 anchors.right: parent.right
-                spacing: 20;
+                spacing: 20
 
                 Text
                 {
                     text: qsTr("Please select if the data should be transposed and the required method to " +
-                               "scale the data input. This will occur before normalisation")
+                               "scale the data input. This will occur before normalisation.")
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
@@ -147,7 +165,10 @@ Wizard
 
                     Layout.alignment: Qt.AlignLeft
                     text: qsTr("Transpose Dataset")
-                    onCheckedChanged: { parameters.transpose = checked; }
+                    onCheckedChanged:
+                    {
+                        parameters.transpose = checked;
+                    }
                 }
 
                 RowLayout
@@ -157,12 +178,14 @@ Wizard
                         text: qsTr("Scaling:")
                         Layout.alignment: Qt.AlignLeft
                     }
+
                     ComboBox
                     {
                         id: scaling
                         Layout.alignment: Qt.AlignRight
-                        model: [ qsTr("None"), qsTr("Log2(x+c)"), qsTr("Log10(x+c)"),
-                            qsTr("AntiLog2(x)"), qsTr("AntiLog10(x)"), qsTr("Arcsin(x)")]
+                        model: [ qsTr("None"), qsTr("Log2(𝒙 + ε)"), qsTr("Log10(𝒙 + ε)"),
+                            qsTr("AntiLog2(𝒙)"), qsTr("AntiLog10(𝒙)"), qsTr("Arcsin(𝒙)")]
+
                         onCurrentIndexChanged:
                         {
                             parameters.scaling = scalingStringToEnum(currentText);
@@ -173,40 +196,48 @@ Wizard
                 GridLayout
                 {
                     columns: 2
+                    rowSpacing: 20
+
                     Text
                     {
-                        text: "<b>Logb(x + c):</b>"
-                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                        text: "<b>Log</b>𝒃(𝒙 + ε):"
+                        Layout.alignment: Qt.AlignTop
                         textFormat: Text.StyledText
                     }
+
                     Text
                     {
-                        text: qsTr("Will perform a Log of x+c to base b. Where x is the input data and c is 4.96 x 10⁻³²⁴");
+                        text: qsTr("Will perform a Log of 𝒙 + ε to base 𝒃, where 𝒙 is the input data and ε is a very small constant.");
+                        wrapMode: Text.WordWrap
+                        Layout.alignment: Qt.AlignTop
+                        Layout.fillWidth: true
+                    }
+
+                    Text
+                    {
+                        text: "<b>AntiLog</b>𝒃(𝒙):"
+                        Layout.alignment: Qt.AlignTop
+                        textFormat: Text.StyledText
+                    }
+
+                    Text
+                    {
+                        text: qsTr("Will raise x to the power of 𝒃, where 𝒙 is the input data.");
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                     }
+
                     Text
                     {
-                        text: "<b>AntiLogb(x):</b>"
-                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                        text: "<b>Arcsin</b>(𝒙):"
+                        Layout.alignment: Qt.AlignTop
                         textFormat: Text.StyledText
                     }
+
                     Text
                     {
-                        text: qsTr("Will raise x to the power of b. Where x is the input data.");
-                        wrapMode: Text.WordWrap
-                        Layout.fillWidth: true
-                    }
-                    Text
-                    {
-                        text: "<b>Arcsin(x):</b>"
-                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                        textFormat: Text.StyledText
-                    }
-                    Text
-                    {
-                        text: qsTr("Will perform an inverse sine function of x. Where x is the input data. This is useful when "
-                                   + "you require a Log transform but the dataset contains negatives or zeros.");
+                        text: qsTr("Will perform an inverse sine function of 𝒙, where 𝒙 is the input data. This is useful when " +
+                                   "you require a log transform but the dataset contains negative numbers or zeros.");
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                     }
@@ -214,6 +245,7 @@ Wizard
             }
         }
     }
+
     Item
     {
         ColumnLayout
@@ -236,10 +268,11 @@ Wizard
                 Text
                 {
                     text: qsTr("Please select the required method to normalise the data input. " +
-                               "This will occur after scaling")
+                               "This will occur after scaling.")
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
+
                 RowLayout
                 {
                     Text
@@ -247,17 +280,20 @@ Wizard
                         text: qsTr("Normalisation:")
                         Layout.alignment: Qt.AlignLeft
                     }
+
                     ComboBox
                     {
                         id: normalise
                         Layout.alignment: Qt.AlignRight
                         model: [ qsTr("None"), qsTr("MinMax"), qsTr("Quantile")]
+
                         onCurrentIndexChanged:
                         {
                             parameters.normalise = normaliseStringToEnum(currentText);
                         }
                     }
                 }
+
                 GridLayout
                 {
                     columns: 2
@@ -267,6 +303,7 @@ Wizard
                         textFormat: Text.StyledText
                         Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                     }
+
                     Text
                     {
                         text: qsTr("Normalise the data so 1.0 is the maximum value of that column and 0.0 the minimum. " +
@@ -275,12 +312,14 @@ Wizard
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                     }
+
                     Text
                     {
                         text: "<b>Quantile:</b>"
                         textFormat: Text.StyledText
                         Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                     }
+
                     Text
                     {
                         text: qsTr("Normalise the data so that the columns have equal distributions.");
@@ -291,6 +330,7 @@ Wizard
             }
         }
     }
+
     Item
     {
         ColumnLayout
@@ -304,6 +344,7 @@ Wizard
                 Layout.alignment: Qt.AlignLeft
                 textFormat: Text.StyledText
             }
+
             ColumnLayout
             {
                 anchors.left: parent.left
@@ -313,10 +354,11 @@ Wizard
                 Text
                 {
                     text: qsTr("Select how you would like to handle any missing data within " +
-                               "your dataset. By default missing values are replaced with 0.0")
+                               "your dataset. By default missing values are zeroed.")
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
+
                 RowLayout
                 {
                     Text
@@ -324,45 +366,58 @@ Wizard
                         text: qsTr("Replacement:")
                         Layout.alignment: Qt.AlignLeft
                     }
+
                     ComboBox
                     {
                         id: missingDataMethod
                         Layout.alignment: Qt.AlignRight
                         model: [ qsTr("None"), qsTr("Constant") ]
+
                         onCurrentIndexChanged:
                         {
                             parameters.missingDataType = missingDataStringToEnum(currentText);
                         }
                     }
-                }
-                RowLayout
-                {
-                    visible: missingDataMethod.currentText === qsTr("Constant")
-                    Text
+
+                    RowLayout
                     {
-                        text: qsTr("Value to replace with:")
-                        Layout.alignment: Qt.AlignLeft
-                    }
-                    TextField
-                    {
-                        id: replacementConstant
-                        validator: DoubleValidator{}
-                        onTextChanged: { parameters.missingDataValue = text; }
-                        text: "0.0"
+                        visible: missingDataMethod.currentText === qsTr("Constant")
+
+                        Text
+                        {
+                            text: qsTr("Value:")
+                            Layout.alignment: Qt.AlignLeft
+                        }
+
+                        TextField
+                        {
+                            id: replacementConstant
+                            validator: DoubleValidator{}
+
+                            onTextChanged:
+                            {
+                                parameters.missingDataValue = text;
+                            }
+
+                            text: "0.0"
+                        }
                     }
                 }
+
                 GridLayout
                 {
                     columns: 2
+
                     Text
                     {
                         text: "<b>Constant:</b>"
                         textFormat: Text.StyledText
                         Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                     }
+
                     Text
                     {
-                        text: qsTr("Replace all missing values with a numerical constant values");
+                        text: qsTr("Replace all missing values with a constant.");
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                     }
@@ -374,7 +429,7 @@ Wizard
     Component.onCompleted: initialise();
     function initialise()
     {
-        parameters = {minimumCorrelation: 0.7, transpose: false,
+        parameters = { minimumCorrelation: 0.7, transpose: false,
             scaling: ScalingType.None, normalise: NormaliseType.None,
             missingDataType: MissingDataType.None };
 
@@ -386,17 +441,13 @@ Wizard
     {
         switch(scalingString)
         {
-        case qsTr("Log2(x+c)"):
-            return ScalingType.Log2
-        case qsTr("Log10(x+c)"):
-            return ScalingType.Log10
-        case qsTr("AntiLog2(x)"):
-            return ScalingType.AntiLog2
-        case qsTr("AntiLog10(x)"):
-            return ScalingType.AntiLog10
-        case qsTr("Arcsin(x)"):
-            return ScalingType.ArcSin
+        case qsTr("Log2(𝒙 + ε)"):    return ScalingType.Log2;
+        case qsTr("Log10(𝒙 + ε)"):   return ScalingType.Log10;
+        case qsTr("AntiLog2(𝒙)"):    return ScalingType.AntiLog2;
+        case qsTr("AntiLog10(𝒙)"):   return ScalingType.AntiLog10;
+        case qsTr("Arcsin(𝒙)"):      return ScalingType.ArcSin;
         }
+
         return ScalingType.None
     }
 
@@ -404,11 +455,10 @@ Wizard
     {
         switch(normaliseString)
         {
-        case qsTr("MinMax"):
-            return NormaliseType.MinMax
-        case qsTr("Quantile"):
-            return NormaliseType.Quantile
+        case qsTr("MinMax"):   return NormaliseType.MinMax;
+        case qsTr("Quantile"): return NormaliseType.Quantile;
         }
+
         return NormaliseType.None;
     }
 
@@ -416,9 +466,9 @@ Wizard
     {
         switch(missingDataString)
         {
-        case qsTr("Constant"):
-            return MissingDataType.Constant
+        case qsTr("Constant"): return MissingDataType.Constant;
         }
+
         return MissingDataType.None;
     }
 }
