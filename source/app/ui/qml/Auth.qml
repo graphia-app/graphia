@@ -151,14 +151,26 @@ Rectangle
         }
     }
 
-    BusyIndicator
+    ColumnLayout
     {
-        width: 128
-        height: 128
         anchors.centerIn: parent
-
         visible: root.busy
-        running: root.busy
+        spacing: 32
+
+        BusyIndicator
+        {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredWidth: 128
+            Layout.preferredHeight: 128
+        }
+
+        Text
+        {
+            Layout.alignment: Qt.AlignHCenter
+
+            text: qsTr("Authenticating")
+            font.pointSize: 22
+        }
     }
 
     signal signIn(var email, var password)
