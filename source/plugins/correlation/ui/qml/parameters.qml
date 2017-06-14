@@ -67,8 +67,6 @@ Wizard
             anchors.left: parent.left
             anchors.right: parent.right
 
-            spacing: 20
-
             Text
             {
                 text: qsTr("<h2>Pearson Correlation</h2>")
@@ -76,57 +74,64 @@ Wizard
                 textFormat: Text.StyledText
             }
 
-            Text
+            ColumnLayout
             {
-                text: qsTr("A Pearson Correlation will be performed on the dataset to provide a measure of correlation between rows of data. " +
-                           "1.0 represents highly correlated rows and 0.0 represents no correlation. Negative correlation values are discarded. " +
-                           "All values below the Minimum correlation value will also be discarded and will not create edges in the generated graph.<br>" +
-                           "<br>" +
-                           "By default a transform is created which will create edges for all values above the minimum correlation threshold. " +
-                           "Is is not possible to create edges using values below the minimum correlation value.")
-                wrapMode: Text.WordWrap
-                textFormat: Text.StyledText
-                Layout.fillWidth: true
-            }
+                anchors.left: parent.left
+                anchors.right: parent.right
+                spacing: 20
 
-            RowLayout
-            {
                 Text
                 {
-                    text: qsTr("Minimum Correlation:")
-                    Layout.alignment: Qt.AlignRight
+                    text: qsTr("A Pearson Correlation will be performed on the dataset to provide a measure of correlation between rows of data. " +
+                               "1.0 represents highly correlated rows and 0.0 represents no correlation. Negative correlation values are discarded. " +
+                               "All values below the Minimum correlation value will also be discarded and will not create edges in the generated graph.<br>" +
+                               "<br>" +
+                               "By default a transform is created which will create edges for all values above the minimum correlation threshold. " +
+                               "Is is not possible to create edges using values below the minimum correlation value.")
+                    wrapMode: Text.WordWrap
+                    textFormat: Text.StyledText
+                    Layout.fillWidth: true
                 }
 
-                Item { Layout.fillWidth: true }
-
-                SpinBox
+                RowLayout
                 {
-                    id: minimumCorrelationSpinBox
-
-                    Layout.alignment: Qt.AlignLeft
-                    implicitWidth: 70
-
-                    minimumValue: 0.0
-                    maximumValue: 1.0
-
-                    decimals: 3
-                    stepSize: (maximumValue - minimumValue) / 100.0
-
-                    onValueChanged:
+                    Text
                     {
-                        parameters.minimumCorrelation = value;
-                        slider.value = value;
+                        text: qsTr("Minimum Correlation:")
+                        Layout.alignment: Qt.AlignRight
                     }
-                }
 
-                Slider
-                {
-                    id: slider
-                    minimumValue: 0.0
-                    maximumValue: 1.0
-                    onValueChanged:
+                    Item { Layout.fillWidth: true }
+
+                    SpinBox
                     {
-                        minimumCorrelationSpinBox.value = value;
+                        id: minimumCorrelationSpinBox
+
+                        Layout.alignment: Qt.AlignLeft
+                        implicitWidth: 70
+
+                        minimumValue: 0.0
+                        maximumValue: 1.0
+
+                        decimals: 3
+                        stepSize: (maximumValue - minimumValue) / 100.0
+
+                        onValueChanged:
+                        {
+                            parameters.minimumCorrelation = value;
+                            slider.value = value;
+                        }
+                    }
+
+                    Slider
+                    {
+                        id: slider
+                        minimumValue: 0.0
+                        maximumValue: 1.0
+                        onValueChanged:
+                        {
+                            minimumCorrelationSpinBox.value = value;
+                        }
                     }
                 }
             }
