@@ -366,19 +366,23 @@ void Auth::sendRequestUsingEncryptedPassword(const QString& email, const QString
     _aesKey = generateKey();
     auto authReqJsonString = authRequest(_aesKey, email, encryptedPassword);
 
-    QUrl url("https://auth.kajeka.com/");
-    QNetworkRequest request(url);
+    // Work around for QTBUG-31652 to essentially call QNetworkAccessManager::post asynchronously
+    QTimer::singleShot(0, [this, authReqJsonString]
+    {
+        QUrl url("https://auth.kajeka.com/");
+        QNetworkRequest request(url);
 
-    auto *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+        auto *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
-    QHttpPart part;
-    part.setHeader(QNetworkRequest::ContentDispositionHeader,
-                   QVariant(R"(form-data; name="request")"));
-    part.setBody(authReqJsonString.data());
-    multiPart->append(part);
+        QHttpPart part;
+        part.setHeader(QNetworkRequest::ContentDispositionHeader,
+                       QVariant(R"(form-data; name="request")"));
+        part.setBody(authReqJsonString.data());
+        multiPart->append(part);
 
-    _reply = _networkManager.post(request, multiPart);
-    multiPart->setParent(_reply);
+        _reply = _networkManager.post(request, multiPart);
+        multiPart->setParent(_reply);
+    });
 }
 
 void Auth::sendRequest(const QString& email, const QString& password)
