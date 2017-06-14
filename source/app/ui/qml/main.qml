@@ -717,6 +717,12 @@ ApplicationWindow
         text: qsTr("&Sign Out")
         onTriggered:
         {
+            if(tabView.count === 0)
+            {
+                application.signOut();
+                return;
+            }
+
             mainWindow.lastDocumentClosed.connect(function()
             {
                 //FIXME if any file closes are cancelled, we shouldn't proceed
