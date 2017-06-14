@@ -20,7 +20,6 @@ SOURCES += \
     cryptopp/filters.cpp \
     cryptopp/eprecomp.cpp \
     cryptopp/md2.cpp \
-    cryptopp/fipstest.cpp \
     cryptopp/rc5.cpp \
     cryptopp/ida.cpp \
     cryptopp/xtrcrypt.cpp \
