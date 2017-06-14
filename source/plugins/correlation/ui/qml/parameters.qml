@@ -185,12 +185,20 @@ Wizard
                     {
                         id: scaling
                         Layout.alignment: Qt.AlignRight
-                        model: [ qsTr("None"), qsTr("Log2(𝒙 + ε)"), qsTr("Log10(𝒙 + ε)"),
-                            qsTr("AntiLog2(𝒙)"), qsTr("AntiLog10(𝒙)"), qsTr("Arcsin(𝒙)")]
+                        model: ListModel
+                        {
+                            ListElement { text: qsTr("None");          value: ScalingType.None }
+                            ListElement { text: qsTr("Log2(𝒙 + ε)");   value: ScalingType.Log2 }
+                            ListElement { text: qsTr("Log10(𝒙 + ε)");  value: ScalingType.Log10 }
+                            ListElement { text: qsTr("AntiLog2(𝒙)");   value: ScalingType.AntiLog2 }
+                            ListElement { text: qsTr("AntiLog10(𝒙)");  value: ScalingType.AntiLog10 }
+                            ListElement { text: qsTr("Arcsin(𝒙)");     value: ScalingType.ArcSin }
+                        }
+                        textRole: "text"
 
                         onCurrentIndexChanged:
                         {
-                            parameters.scaling = scalingStringToEnum(currentText);
+                            parameters.scaling = model.get(currentIndex).value;
                         }
                     }
                 }
@@ -287,11 +295,17 @@ Wizard
                     {
                         id: normalise
                         Layout.alignment: Qt.AlignRight
-                        model: [ qsTr("None"), qsTr("MinMax"), qsTr("Quantile")]
+                        model: ListModel
+                        {
+                            ListElement { text: qsTr("None");       value: NormaliseType.None }
+                            ListElement { text: qsTr("MinMax");     value: NormaliseType.MinMax }
+                            ListElement { text: qsTr("Quantile");   value: NormaliseType.Quantile }
+                        }
+                        textRole: "text"
 
                         onCurrentIndexChanged:
                         {
-                            parameters.normalise = normaliseStringToEnum(currentText);
+                            parameters.normalise = model.get(currentIndex).value;
                         }
                     }
                 }
@@ -373,11 +387,16 @@ Wizard
                     {
                         id: missingDataMethod
                         Layout.alignment: Qt.AlignRight
-                        model: [ qsTr("None"), qsTr("Constant") ]
+                        model: ListModel
+                        {
+                            ListElement { text: qsTr("None");       value: MissingDataType.None }
+                            ListElement { text: qsTr("Constant");   value: MissingDataType.Constant }
+                        }
+                        textRole: "text"
 
                         onCurrentIndexChanged:
                         {
-                            parameters.missingDataType = missingDataStringToEnum(currentText);
+                            parameters.missingDataType = model.get(currentIndex).value;
                         }
                     }
 
@@ -437,40 +456,5 @@ Wizard
 
         minimumCorrelationSpinBox.value = 0.7;
         transposeCheckBox.checked = false;
-    }
-
-    function scalingStringToEnum(scalingString)
-    {
-        switch(scalingString)
-        {
-        case qsTr("Log2(𝒙 + ε)"):    return ScalingType.Log2;
-        case qsTr("Log10(𝒙 + ε)"):   return ScalingType.Log10;
-        case qsTr("AntiLog2(𝒙)"):    return ScalingType.AntiLog2;
-        case qsTr("AntiLog10(𝒙)"):   return ScalingType.AntiLog10;
-        case qsTr("Arcsin(𝒙)"):      return ScalingType.ArcSin;
-        }
-
-        return ScalingType.None
-    }
-
-    function normaliseStringToEnum(normaliseString)
-    {
-        switch(normaliseString)
-        {
-        case qsTr("MinMax"):   return NormaliseType.MinMax;
-        case qsTr("Quantile"): return NormaliseType.Quantile;
-        }
-
-        return NormaliseType.None;
-    }
-
-    function missingDataStringToEnum(missingDataString)
-    {
-        switch(missingDataString)
-        {
-        case qsTr("Constant"): return MissingDataType.Constant;
-        }
-
-        return MissingDataType.None;
     }
 }
