@@ -43,6 +43,8 @@ Wizard
                     wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
                     Layout.fillWidth: true
+
+                    onLinkActivated: Qt.openUrlExternally(link);
                 }
 
                 Image
