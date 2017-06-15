@@ -236,6 +236,7 @@ class MinidumpMemoryRegion : public MinidumpObject,
 
   // Print a human-readable representation of the object to stdout.
   void Print() const;
+  void SetPrintMode(bool hexdump, unsigned int width);
 
  protected:
   explicit MinidumpMemoryRegion(Minidump* minidump);
@@ -251,6 +252,10 @@ class MinidumpMemoryRegion : public MinidumpObject,
   // Implementation for GetMemoryAtAddress
   template<typename T> bool GetMemoryAtAddressInternal(uint64_t address,
                                                        T*        value) const;
+
+  // Knobs for controlling display of memory printing.
+  bool hexdump_;
+  unsigned int hexdump_width_;
 
   // The largest memory region that will be read from a minidump.  The
   // default is 1MB.
@@ -350,7 +355,7 @@ class MinidumpThreadList : public MinidumpStream {
 
   static const uint32_t kStreamType = MD_THREAD_LIST_STREAM;
 
-  bool Read(uint32_t aExpectedSize);
+  bool Read(uint32_t aExpectedSize) override;
 
   // The largest number of threads that will be read from a minidump.  The
   // default is 256.
@@ -399,6 +404,7 @@ class MinidumpModule : public MinidumpObject,
   virtual string debug_identifier() const;
   virtual string version() const;
   virtual CodeModule* Copy() const;
+  virtual bool is_unloaded() const { return false; }
 
   // Getter and setter for shrink_down_delta.  This is used when the address
   // range for a module is shrunk down due to address range conflicts with
@@ -591,7 +597,7 @@ class MinidumpMemoryList : public MinidumpStream {
 
   explicit MinidumpMemoryList(Minidump* minidump);
 
-  bool Read(uint32_t expected_size);
+  bool Read(uint32_t expected_size) override;
 
   // The largest number of memory regions that will be read from a minidump.
   // The default is 256.
@@ -646,7 +652,7 @@ class MinidumpException : public MinidumpStream {
 
   explicit MinidumpException(Minidump* minidump);
 
-  bool Read(uint32_t expected_size);
+  bool Read(uint32_t expected_size) override;
 
   MDRawExceptionStream exception_;
   MinidumpContext*     context_;
@@ -686,7 +692,7 @@ class MinidumpAssertion : public MinidumpStream {
 
   explicit MinidumpAssertion(Minidump* minidump);
 
-  bool Read(uint32_t expected_size);
+  bool Read(uint32_t expected_size) override;
 
   MDRawAssertionInfo assertion_;
   string expression_;
@@ -743,12 +749,124 @@ class MinidumpSystemInfo : public MinidumpStream {
 
   static const uint32_t kStreamType = MD_SYSTEM_INFO_STREAM;
 
-  bool Read(uint32_t expected_size);
+  bool Read(uint32_t expected_size) override;
 
   // A string identifying the CPU vendor, if known.
   const string* cpu_vendor_;
 
   DISALLOW_COPY_AND_ASSIGN(MinidumpSystemInfo);
+};
+
+
+// MinidumpUnloadedModule wraps MDRawUnloadedModule
+class MinidumpUnloadedModule : public MinidumpObject,
+                               public CodeModule {
+ public:
+  ~MinidumpUnloadedModule() override;
+
+  const MDRawUnloadedModule* module() const {
+    return valid_ ? &unloaded_module_ : NULL;
+  }
+
+  // CodeModule implementation
+  uint64_t base_address() const override {
+    return valid_ ? unloaded_module_.base_of_image : 0;
+  }
+  uint64_t size() const override {
+    return valid_ ? unloaded_module_.size_of_image : 0;
+  }
+  string code_file() const override;
+  string code_identifier() const override;
+  string debug_file() const override;
+  string debug_identifier() const override;
+  string version() const override;
+  CodeModule* Copy() const override;
+  bool is_unloaded() const override { return true; }
+  uint64_t shrink_down_delta() const override;
+  void SetShrinkDownDelta(uint64_t shrink_down_delta) override;
+
+ protected:
+  explicit MinidumpUnloadedModule(Minidump* minidump);
+
+ private:
+  // These objects are managed by MinidumpUnloadedModuleList
+  friend class MinidumpUnloadedModuleList;
+
+  // This works like MinidumpStream::Read, but is driven by
+  // MinidumpUnloadedModuleList.
+  bool Read(uint32_t expected_size);
+
+  // Reads the module name. This is done separately from Read to
+  // allow contiguous reading of code modules by MinidumpUnloadedModuleList.
+  bool ReadAuxiliaryData();
+
+  // True after a successful Read. This is different from valid_, which
+  // is not set true until ReadAuxiliaryData also completes successfully.
+  // module_valid_ is only used by ReadAuxiliaryData and the functions it
+  // calls to determine whether the object is ready for auxiliary data to
+  // be read.
+  bool module_valid_;
+
+  MDRawUnloadedModule unloaded_module_;
+
+  // Cached module name
+  const string* name_;
+};
+
+
+// MinidumpUnloadedModuleList contains all the unloaded code modules for a
+// process in the form of MinidumpUnloadedModules. It maintains a map of
+// these modules so that it may easily provide a code module corresponding
+// to a specific address. If multiple modules in the list have identical
+// ranges, only the first module encountered is recorded in the range map.
+class MinidumpUnloadedModuleList : public MinidumpStream,
+                                   public CodeModules {
+ public:
+  ~MinidumpUnloadedModuleList() override;
+
+  static void set_max_modules(uint32_t max_modules) {
+    max_modules_ = max_modules;
+  }
+  static uint32_t max_modules() { return max_modules_; }
+
+  // CodeModules implementation.
+  unsigned int module_count() const override {
+    return valid_ ? module_count_ : 0;
+  }
+  const MinidumpUnloadedModule*
+      GetModuleForAddress(uint64_t address) const override;
+  const MinidumpUnloadedModule* GetMainModule() const override;
+  const MinidumpUnloadedModule*
+      GetModuleAtSequence(unsigned int sequence) const override;
+  const MinidumpUnloadedModule*
+      GetModuleAtIndex(unsigned int index) const override;
+  const CodeModules* Copy() const override;
+  vector<linked_ptr<const CodeModule>> GetShrunkRangeModules() const override;
+  bool IsModuleShrinkEnabled() const override;
+
+ protected:
+  explicit MinidumpUnloadedModuleList(Minidump* minidump_);
+
+ private:
+  friend class Minidump;
+
+  typedef vector<MinidumpUnloadedModule> MinidumpUnloadedModules;
+
+  static const uint32_t kStreamType = MD_UNLOADED_MODULE_LIST_STREAM;
+
+  bool Read(uint32_t expected_size_) override;
+
+  // The largest number of modules that will be read from a minidump.  The
+  // default is 1024.
+  static uint32_t max_modules_;
+
+  // Access to module indices using addresses as the key.
+  RangeMap<uint64_t, unsigned int> *range_map_;
+
+  MinidumpUnloadedModules *unloaded_modules_;
+  uint32_t module_count_;
+
+  DISALLOW_COPY_AND_ASSIGN(MinidumpUnloadedModuleList);
 };
 
 
@@ -772,7 +890,7 @@ class MinidumpMiscInfo : public MinidumpStream {
 
   explicit MinidumpMiscInfo(Minidump* minidump_);
 
-  bool Read(uint32_t expected_size_);
+  bool Read(uint32_t expected_size_) override;
 
   MDRawMiscInfo misc_info_;
 
@@ -813,7 +931,7 @@ class MinidumpBreakpadInfo : public MinidumpStream {
 
   explicit MinidumpBreakpadInfo(Minidump* minidump_);
 
-  bool Read(uint32_t expected_size_);
+  bool Read(uint32_t expected_size_) override;
 
   MDRawBreakpadInfo breakpad_info_;
 
@@ -881,7 +999,7 @@ class MinidumpMemoryInfoList : public MinidumpStream {
 
   explicit MinidumpMemoryInfoList(Minidump* minidump_);
 
-  bool Read(uint32_t expected_size);
+  bool Read(uint32_t expected_size) override;
 
   // Access to memory info using addresses as the key.
   RangeMap<uint64_t, unsigned int> *range_map_;
@@ -976,7 +1094,7 @@ class MinidumpLinuxMapsList : public MinidumpStream {
   // Read and load the contents of the process mapping data.
   // The stream should have data in the form of /proc/self/maps.
   // This method returns whether the stream was read successfully.
-  bool Read(uint32_t expected_size);
+  bool Read(uint32_t expected_size) override;
 
   // The list of individual mappings.
   MinidumpLinuxMappings *maps_;
@@ -991,7 +1109,9 @@ class MinidumpLinuxMapsList : public MinidumpStream {
 class Minidump {
  public:
   // path is the pathname of a file containing the minidump.
-  explicit Minidump(const string& path);
+  explicit Minidump(const string& path,
+                    bool hexdump=false,
+                    unsigned int hexdump_width=16);
   // input is an istream wrapping minidump data. Minidump holds a
   // weak pointer to input, and the caller must ensure that the stream
   // is valid as long as the Minidump object is.
@@ -1041,6 +1161,7 @@ class Minidump {
   virtual MinidumpException* GetException();
   virtual MinidumpAssertion* GetAssertion();
   virtual MinidumpSystemInfo* GetSystemInfo();
+  virtual MinidumpUnloadedModuleList* GetUnloadedModuleList();
   virtual MinidumpMiscInfo* GetMiscInfo();
   virtual MinidumpBreakpadInfo* GetBreakpadInfo();
   virtual MinidumpMemoryInfoList* GetMemoryInfoList();
@@ -1099,6 +1220,9 @@ class Minidump {
 
   // Is the OS Android.
   bool IsAndroid();
+
+  // Get current hexdump display settings.
+  unsigned int HexdumpMode() const { return hexdump_ ? hexdump_width_ : 0; }
 
  private:
   // MinidumpStreamInfo is used in the MinidumpStreamMap.  It lets
@@ -1160,6 +1284,10 @@ class Minidump {
   // construction or after a failed Read(); true following a successful
   // Read().
   bool                      valid_;
+
+  // Knobs for controlling display of memory printing.
+  bool                      hexdump_;
+  unsigned int              hexdump_width_;
 
   DISALLOW_COPY_AND_ASSIGN(Minidump);
 };

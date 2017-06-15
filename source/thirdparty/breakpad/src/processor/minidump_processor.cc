@@ -141,6 +141,12 @@ ProcessResult MinidumpProcessor::Process(
     }
   }
 
+  MinidumpUnloadedModuleList *unloaded_module_list =
+      dump->GetUnloadedModuleList();
+  if (unloaded_module_list) {
+    process_state->unloaded_modules_ = unloaded_module_list->Copy();
+  }
+
   MinidumpMemoryList *memory_list = dump->GetMemoryList();
   if (memory_list) {
     BPLOG(INFO) << "Found " << memory_list->region_count()
@@ -262,6 +268,7 @@ ProcessResult MinidumpProcessor::Process(
                                        context,
                                        thread_memory,
                                        process_state->modules_,
+                                       process_state->unloaded_modules_,
                                        frame_symbolizer_));
 
     scoped_ptr<CallStack> stack(new CallStack());
@@ -1028,6 +1035,9 @@ string MinidumpProcessor::GetCrashReason(Minidump *dump, uint64_t *address) {
           reason = "EXC_RPC_ALERT / ";
           reason.append(flags_string);
           break;
+        case MD_EXCEPTION_MAC_SIMULATED:
+          reason = "Simulated Exception";
+          break;
       }
       break;
     }
@@ -1177,6 +1187,9 @@ string MinidumpProcessor::GetCrashReason(Minidump *dump, uint64_t *address) {
         case MD_EXCEPTION_CODE_WIN_STACK_OVERFLOW:
           reason = "EXCEPTION_STACK_OVERFLOW";
           break;
+        case MD_EXCEPTION_CODE_WIN_BAD_FUNCTION_TABLE:
+          reason = "EXCEPTION_BAD_FUNCTION_TABLE";
+          break;
         case MD_EXCEPTION_CODE_WIN_POSSIBLE_DEADLOCK:
           reason = "EXCEPTION_POSSIBLE_DEADLOCK";
           break;
@@ -1191,6 +1204,9 @@ string MinidumpProcessor::GetCrashReason(Minidump *dump, uint64_t *address) {
           break;
         case MD_EXCEPTION_CODE_WIN_UNHANDLED_CPP_EXCEPTION:
           reason = "Unhandled C++ Exception";
+          break;
+        case MD_EXCEPTION_CODE_WIN_SIMULATED:
+          reason = "Simulated Exception";
           break;
         default:
           BPLOG(INFO) << "Unknown exception reason " << reason;

@@ -84,9 +84,14 @@ inline static bool IsMappedFileOpenUnsafe(
 
 namespace google_breakpad {
 
-#if defined(__CHROMEOS__)
-
 namespace {
+
+bool MappingContainsAddress(const MappingInfo& mapping, uintptr_t address) {
+  return mapping.system_mapping_info.start_addr <= address &&
+         address < mapping.system_mapping_info.end_addr;
+}
+
+#if defined(__CHROMEOS__)
 
 // Recover memory mappings before writing dump on ChromeOS
 //
@@ -248,8 +253,9 @@ void CrOSPostProcessMappings(wasteful_vector<MappingInfo*>& mappings) {
   mappings.resize(f);
 }
 
-}  // namespace
 #endif  // __CHROMEOS__
+
+}  // namespace
 
 // All interesting auvx entry types are below AT_SYSINFO_EHDR
 #define AT_MAX AT_SYSINFO_EHDR
@@ -346,17 +352,16 @@ bool ElfFileSoNameFromMappedFile(
 
   const void* segment_start;
   size_t segment_size;
-  int elf_class;
-  if (!FindElfSection(elf_base, ".dynamic", SHT_DYNAMIC,
-                      &segment_start, &segment_size, &elf_class)) {
+  if (!FindElfSection(elf_base, ".dynamic", SHT_DYNAMIC, &segment_start,
+                      &segment_size)) {
     // No dynamic section
     return false;
   }
 
   const void* dynstr_start;
   size_t dynstr_size;
-  if (!FindElfSection(elf_base, ".dynstr", SHT_STRTAB,
-                      &dynstr_start, &dynstr_size, &elf_class)) {
+  if (!FindElfSection(elf_base, ".dynstr", SHT_STRTAB, &dynstr_start,
+                      &dynstr_size)) {
     // No dynstr section
     return false;
   }
@@ -515,21 +520,28 @@ bool LinuxDumper::EnumerateMappings() {
             name = kLinuxGateLibraryName;
             offset = 0;
           }
-          // Merge adjacent mappings with the same name into one module,
-          // assuming they're a single library mapped by the dynamic linker
+          // Merge adjacent mappings into one module, assuming they're a single
+          // library mapped by the dynamic linker. Do this only if their name
+          // matches and either they have the same +x protection flag, or if the
+          // previous mapping is not executable and the new one is, to handle
+          // lld's output (see crbug.com/716484).
           if (name && !mappings_.empty()) {
             MappingInfo* module = mappings_.back();
             if ((start_addr == module->start_addr + module->size) &&
                 (my_strlen(name) == my_strlen(module->name)) &&
                 (my_strncmp(name, module->name, my_strlen(name)) == 0) &&
-                (exec == module->exec)) {
+                ((exec == module->exec) || (!module->exec && exec))) {
+              module->system_mapping_info.end_addr = end_addr;
               module->size = end_addr - module->start_addr;
+              module->exec |= exec;
               line_reader->PopLine(line_len);
               continue;
             }
           }
           MappingInfo* const module = new(allocator_) MappingInfo;
           my_memset(module, 0, sizeof(MappingInfo));
+          module->system_mapping_info.start_addr = start_addr;
+          module->system_mapping_info.end_addr = end_addr;
           module->start_addr = start_addr;
           module->size = end_addr - start_addr;
           module->offset = offset;
@@ -703,6 +715,126 @@ bool LinuxDumper::GetStackInfo(const void** stack, size_t* stack_len,
   return true;
 }
 
+void LinuxDumper::SanitizeStackCopy(uint8_t* stack_copy, size_t stack_len,
+                                    uintptr_t stack_pointer,
+                                    uintptr_t sp_offset) {
+  // We optimize the search for containing mappings in three ways:
+  // 1) We expect that pointers into the stack mapping will be common, so
+  //    we cache that address range.
+  // 2) The last referenced mapping is a reasonable predictor for the next
+  //    referenced mapping, so we test that first.
+  // 3) We precompute a bitfield based upon bits 32:32-n of the start and
+  //    stop addresses, and use that to short circuit any values that can
+  //    not be pointers. (n=11)
+  const uintptr_t defaced =
+#if defined(__LP64__)
+      0x0defaced0defaced;
+#else
+      0x0defaced;
+#endif
+  // the bitfield length is 2^test_bits long.
+  const unsigned int test_bits = 11;
+  // byte length of the corresponding array.
+  const unsigned int array_size = 1 << (test_bits - 3);
+  const unsigned int array_mask = array_size - 1;
+  // The amount to right shift pointers by. This captures the top bits
+  // on 32 bit architectures. On 64 bit architectures this would be
+  // uninformative so we take the same range of bits.
+  const unsigned int shift = 32 - 11;
+  const MappingInfo* last_hit_mapping = nullptr;
+  const MappingInfo* hit_mapping = nullptr;
+  const MappingInfo* stack_mapping = FindMappingNoBias(stack_pointer);
+  // The magnitude below which integers are considered to be to be
+  // 'small', and not constitute a PII risk. These are included to
+  // avoid eliding useful register values.
+  const ssize_t small_int_magnitude = 4096;
+
+  char could_hit_mapping[array_size];
+  my_memset(could_hit_mapping, 0, array_size);
+
+  // Initialize the bitfield such that if the (pointer >> shift)'th
+  // bit, modulo the bitfield size, is not set then there does not
+  // exist a mapping in mappings_ that would contain that pointer.
+  for (size_t i = 0; i < mappings_.size(); ++i) {
+    if (!mappings_[i]->exec) continue;
+    // For each mapping, work out the (unmodulo'ed) range of bits to
+    // set.
+    uintptr_t start = mappings_[i]->start_addr;
+    uintptr_t end = start + mappings_[i]->size;
+    start >>= shift;
+    end >>= shift;
+    for (size_t bit = start; bit <= end; ++bit) {
+      // Set each bit in the range, applying the modulus.
+      could_hit_mapping[(bit >> 3) & array_mask] |= 1 << (bit & 7);
+    }
+  }
+
+  // Zero memory that is below the current stack pointer.
+  const uintptr_t offset =
+      (sp_offset + sizeof(uintptr_t) - 1) & ~(sizeof(uintptr_t) - 1);
+  if (offset) {
+    my_memset(stack_copy, 0, offset);
+  }
+
+  // Apply sanitization to each complete pointer-aligned word in the
+  // stack.
+  uint8_t* sp;
+  for (sp = stack_copy + offset;
+       sp <= stack_copy + stack_len - sizeof(uintptr_t);
+       sp += sizeof(uintptr_t)) {
+    uintptr_t addr;
+    my_memcpy(&addr, sp, sizeof(uintptr_t));
+    if (static_cast<intptr_t>(addr) <= small_int_magnitude &&
+        static_cast<intptr_t>(addr) >= -small_int_magnitude) {
+      continue;
+    }
+    if (stack_mapping && MappingContainsAddress(*stack_mapping, addr)) {
+      continue;
+    }
+    if (last_hit_mapping && MappingContainsAddress(*last_hit_mapping, addr)) {
+      continue;
+    }
+    uintptr_t test = addr >> shift;
+    if (could_hit_mapping[(test >> 3) & array_mask] & (1 << (test & 7)) &&
+        (hit_mapping = FindMappingNoBias(addr)) != nullptr &&
+        hit_mapping->exec) {
+      last_hit_mapping = hit_mapping;
+      continue;
+    }
+    my_memcpy(sp, &defaced, sizeof(uintptr_t));
+  }
+  // Zero any partial word at the top of the stack, if alignment is
+  // such that that is required.
+  if (sp < stack_copy + stack_len) {
+    my_memset(sp, 0, stack_copy + stack_len - sp);
+  }
+}
+
+bool LinuxDumper::StackHasPointerToMapping(const uint8_t* stack_copy,
+                                           size_t stack_len,
+                                           uintptr_t sp_offset,
+                                           const MappingInfo& mapping) {
+  // Loop over all stack words that would have been on the stack in
+  // the target process (i.e. are word aligned, and at addresses >=
+  // the stack pointer).  Regardless of the alignment of |stack_copy|,
+  // the memory starting at |stack_copy| + |offset| represents an
+  // aligned word in the target process.
+  const uintptr_t low_addr = mapping.system_mapping_info.start_addr;
+  const uintptr_t high_addr = mapping.system_mapping_info.end_addr;
+  const uintptr_t offset =
+      (sp_offset + sizeof(uintptr_t) - 1) & ~(sizeof(uintptr_t) - 1);
+
+  for (const uint8_t* sp = stack_copy + offset;
+       sp <= stack_copy + stack_len - sizeof(uintptr_t);
+       sp += sizeof(uintptr_t)) {
+    uintptr_t addr;
+    my_memcpy(&addr, sp, sizeof(uintptr_t));
+    if (low_addr <= addr && addr <= high_addr)
+      return true;
+  }
+  return false;
+}
+
 // Find the mapping which the given memory address falls in.
 const MappingInfo* LinuxDumper::FindMapping(const void* address) const {
   const uintptr_t addr = (uintptr_t) address;
@@ -713,6 +845,19 @@ const MappingInfo* LinuxDumper::FindMapping(const void* address) const {
       return mappings_[i];
   }
 
+  return NULL;
+}
+
+// Find the mapping which the given memory address falls in. Uses the
+// unadjusted mapping address range from the kernel, rather than the
+// biased range.
+const MappingInfo* LinuxDumper::FindMappingNoBias(uintptr_t address) const {
+  for (size_t i = 0; i < mappings_.size(); ++i) {
+    if (address >= mappings_[i]->system_mapping_info.start_addr &&
+        address < mappings_[i]->system_mapping_info.end_addr) {
+      return mappings_[i];
+    }
+  }
   return NULL;
 }
 
