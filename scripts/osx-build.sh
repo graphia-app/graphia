@@ -22,11 +22,11 @@ GCC_TREAT_WARNINGS_AS_ERRORS=NO xcodebuild -project \
 
 source/thirdparty/breakpad/src/tools/mac/dump_syms/build/Release/dump_syms \
   ${BUILD_DIR}/${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} > \
-  ${BUILD_DIR}/${PRODUCT_NAME}.sym
+  ${BUILD_DIR}/${PRODUCT_NAME}.sym || exit $?
 
 for PLUGIN in $(find ${BUILD_DIR}/plugins -name "*.dylib")
 do
   source/thirdparty/breakpad/src/tools/mac/dump_syms/build/Release/dump_syms \
     ${PLUGIN} > \
-    ${PLUGIN}.sym
+    ${PLUGIN}.sym || exit $?
 done

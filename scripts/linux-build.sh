@@ -37,11 +37,11 @@ mkdir -p ${BUILD_DIR}
 
 breakpad-build/src/tools/linux/dump_syms/dump_syms \
   ${BUILD_DIR}/${PRODUCT_NAME} > \
-  ${BUILD_DIR}/${PRODUCT_NAME}.sym
+  ${BUILD_DIR}/${PRODUCT_NAME}.sym || exit $?
 
 for PLUGIN in $(find ${BUILD_DIR}/plugins -iname "*.so")
 do
   breakpad-build/src/tools/linux/dump_syms/dump_syms \
     ${PLUGIN} > \
-    ${PLUGIN}.sym
+    ${PLUGIN}.sym || exit $?
 done
