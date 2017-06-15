@@ -15,7 +15,7 @@
 #pragma GCC diagnostic ignored "-Wpedantic"
 #pragma GCC diagnostic ignored "-Wshadow"
 
-#ifdef __clang__
+#if defined(__clang__) && defined(__APPLE__)
 // clang specific warnings
 #pragma GCC diagnostic ignored "-Wundefined-var-template"
 #endif
