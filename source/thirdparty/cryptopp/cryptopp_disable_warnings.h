@@ -14,6 +14,12 @@
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #pragma GCC diagnostic ignored "-Wpedantic"
 #pragma GCC diagnostic ignored "-Wshadow"
+
+#ifdef __clang__
+// clang specific warnings
+#pragma GCC diagnostic ignored "-Wundefined-var-template"
+#endif
+
 #endif
 
 #ifdef _MSC_VER
