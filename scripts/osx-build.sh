@@ -26,6 +26,9 @@ function makeSymFile
   source/thirdparty/breakpad/src/tools/mac/dump_syms/build/Release/dump_syms \
     ${TARGET}.dsym > ${TARGET} || exit $?
   rm ${TARGET}.dsym
+
+  # Remove .sym.dsym from the MODULE name
+  sed -e '1s/\.dsym$//' -e '1s/\.sym$//' -i '' ${TARGET}
 }
 
 makeSymFile ${BUILD_DIR}/${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} \
