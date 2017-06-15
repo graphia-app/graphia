@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     preferences.define("visuals/edgeVisualType",                QVariant::fromValue(static_cast<int>(EdgeVisualType::Cylinder)));
     preferences.define("visuals/textAlignment",                 QVariant::fromValue(static_cast<int>(TextAlignment::Right)));
     preferences.define("visuals/showMultiElementIndicators",    true);
-   preferences.define("visuals/savedGradients",                 DEFAULT_GRADIENTS);
+    preferences.define("visuals/savedGradients",                DEFAULT_GRADIENTS);
 
     preferences.define("visuals/minimumComponentRadius",        2.0, 0.05, 15.0);
     preferences.define("visuals/transitionTime",                1.0, 0.1, 5.0);
