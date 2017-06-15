@@ -20,13 +20,21 @@ GCC_TREAT_WARNINGS_AS_ERRORS=NO xcodebuild -project \
   make clean || exit $?
 )
 
-source/thirdparty/breakpad/src/tools/mac/dump_syms/build/Release/dump_syms \
-  ${BUILD_DIR}/${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} > \
-  ${BUILD_DIR}/${PRODUCT_NAME}.sym || exit $?
+function makeSymFile
+{
+  SOURCE=$1
+  TARGET=$2
+
+  dsymutil ${SOURCE} -o ${TARGET}.dsym || exit $?
+  source/thirdparty/breakpad/src/tools/mac/dump_syms/build/Release/dump_syms \
+    ${TARGET}.dsym > ${TARGET} || exit $?
+  rm ${TARGET}.dsym
+}
+
+makeSymFile ${BUILD_DIR}/${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} \
+  ${BUILD_DIR}/${PRODUCT_NAME}.sym
 
 for PLUGIN in $(find ${BUILD_DIR}/plugins -name "*.dylib")
 do
-  source/thirdparty/breakpad/src/tools/mac/dump_syms/build/Release/dump_syms \
-    ${PLUGIN} > \
-    ${PLUGIN}.sym || exit $?
+  makeSymFile ${PLUGIN} ${PLUGIN}.sym || exit $?
 done
