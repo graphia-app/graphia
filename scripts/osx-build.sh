@@ -28,7 +28,7 @@ function makeSymFile
   dsymutil ${SOURCE} -o ${TARGET}.dsym || exit $?
   source/thirdparty/breakpad/src/tools/mac/dump_syms/build/Release/dump_syms \
     ${TARGET}.dsym > ${TARGET} || exit $?
-  rm ${TARGET}.dsym
+  rm -rf ${TARGET}.dsym
 }
 
 makeSymFile ${BUILD_DIR}/${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} \
