@@ -15,9 +15,6 @@ GCC_TREAT_WARNINGS_AS_ERRORS=NO xcodebuild -project \
   qmake -version || exit $?
   qmake ../GraphTool.pro || exit $?
   make -j2 || exit $?
-
-  # This just removes the intermediate build products
-  make clean || exit $?
 )
 
 function makeSymFile
@@ -25,10 +22,10 @@ function makeSymFile
   SOURCE=$1
   TARGET=$2
 
-  dsymutil ${SOURCE} -o ${TARGET}.dsym || exit $?
+  dsymutil ${SOURCE} -flat -o ${TARGET}.dsym || exit $?
   source/thirdparty/breakpad/src/tools/mac/dump_syms/build/Release/dump_syms \
     ${TARGET}.dsym > ${TARGET} || exit $?
-  rm -rf ${TARGET}.dsym
+  rm ${TARGET}.dsym
 }
 
 makeSymFile ${BUILD_DIR}/${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} \
@@ -38,3 +35,10 @@ for PLUGIN in $(find ${BUILD_DIR}/plugins -name "*.dylib")
 do
   makeSymFile ${PLUGIN} ${PLUGIN}.sym || exit $?
 done
+
+(
+  cd ${BUILD_DIR}
+
+  # This just removes the intermediate build products
+  make clean || exit $?
+)
