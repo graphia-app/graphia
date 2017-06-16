@@ -38,6 +38,13 @@ Client:
 Details
 =======
 
+A user's password is encrypted with the public RSA key before it's then
+encrypted again as part of the auth request. This is primarily so that it
+can be saved as a preference and reused when the user chooses to remember
+their sign in details. We can't use a conventional password hash here
+because the server side is a black box whose hashing scheme we don't
+necessarily know; it must be able to recover the plaintext at some point.
+
 The auth server returns an "auth token" to the client. This contains
 general permissions such as when the authorisation expires and what
 features the client is able to use. The token itself takes the following
