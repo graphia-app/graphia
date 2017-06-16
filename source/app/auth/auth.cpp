@@ -369,8 +369,8 @@ void Auth::sendRequestUsingEncryptedPassword(const QString& email, const QString
     // Work around for QTBUG-31652 to essentially call QNetworkAccessManager::post asynchronously
     QTimer::singleShot(0, [this, authReqJsonString]
     {
-        QUrl url("https://auth.kajeka.com/");
-        QNetworkRequest request(url);
+        QNetworkRequest request;
+        request.setUrl(QUrl("https://auth.kajeka.com/"));
 
         auto *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
@@ -454,38 +454,50 @@ void Auth::onReplyReceived()
         _timer.stop();
         emit busyChanged();
 
-        std::string authResponse = _reply->readAll().toStdString();
-        auto decodedRespose = decodeAuthResponse(_aesKey, authResponse);
-
-        bool authenticated = decodedRespose.contains("authenticated") &&
-            decodedRespose["authenticated"].toBool() &&
-            decodedRespose.contains("authToken");
-
-        if(_authenticated != authenticated)
+        if(_reply->error() == QNetworkReply::NetworkError::NoError)
         {
-            _authenticated = authenticated;
+            std::string authResponse = _reply->readAll().toStdString();
+            auto decodedRespose = decodeAuthResponse(_aesKey, authResponse);
 
-            u::setPref("auth/password", u::pref("auth/rememberMe").toBool() ?
-                _encryptedPassword : "");
+            bool authenticated = decodedRespose.contains("authenticated") &&
+                decodedRespose["authenticated"].toBool() &&
+                decodedRespose.contains("authToken");
 
-            if(_authenticated)
+            if(_authenticated != authenticated)
             {
-                u::setPref("auth/authToken", decodedRespose["authToken"].toString());
-                parseAuthToken();
+                _authenticated = authenticated;
+
+                u::setPref("auth/password", u::pref("auth/rememberMe").toBool() ?
+                    _encryptedPassword : "");
+
+                if(_authenticated)
+                {
+                    u::setPref("auth/authToken", decodedRespose["authToken"].toString());
+                    parseAuthToken();
+                }
+                else
+                    u::setPref("auth/authToken", "");
+
+                emit stateChanged();
             }
-            else
-                u::setPref("auth/authToken", "");
 
-            emit stateChanged();
+            auto message = decodedRespose.contains("message") ?
+                decodedRespose["message"].toString() : "";
+
+            if(_message != message)
+            {
+                _message = message;
+                emit messageChanged();
+            }
         }
-
-        auto message = decodedRespose.contains("message") ?
-            decodedRespose["message"].toString() : "";
-
-        if(_message != message)
+        else
         {
-            _message = message;
-            emit messageChanged();
+            auto message = QString("<b>NETWORK ERROR:</b> %1").arg(_reply->errorString());
+            if(_message != message)
+            {
+                _message = message;
+                emit messageChanged();
+            }
         }
     }
 
