@@ -30,14 +30,19 @@ ApplicationWindow
 
     title: (currentDocument ? currentDocument.title + qsTr(" - ") : "") + application.name
 
+    property bool _authenticatedAtLeastOnce: false
+
     Application
     {
         id: application
 
         onAuthenticatedChanged:
         {
-            if(authenticated)
+            if(authenticated && !_authenticatedAtLeastOnce)
+            {
+                _authenticatedAtLeastOnce = true;
                 processArguments(Qt.application.arguments);
+            }
         }
     }
 
@@ -55,24 +60,24 @@ ApplicationWindow
         }
     }
 
-    property var pendingArguments
+    property var _pendingArguments
 
     // This is called when the app is started, but it also receives the arguments
     // of a second instance when it starts then immediately exits
     function processArguments(arguments)
     {
-        pendingArguments = arguments.slice(1);
+        _pendingArguments = arguments.slice(1);
         processOnePendingArgument();
     }
 
     function processOnePendingArgument()
     {
-        if(pendingArguments.length === 0)
+        if(_pendingArguments.length === 0)
             return;
 
         // Pop
-        var argument = pendingArguments[0];
-        pendingArguments.shift();
+        var argument = _pendingArguments[0];
+        _pendingArguments.shift();
 
         var fileUrl = application.urlForFileName(argument);
         openFile(fileUrl, true);
@@ -779,19 +784,24 @@ ApplicationWindow
 
         onAuthenticatedChanged:
         {
-            if(application.authenticated)
-                menuBar = mainMenuBar;
-            else
-            {
-                menuBar = null;
-                mainMenuBar.__contentItem.parent = null;
-            }
+            mainMenuBar.updateVisibility();
         }
     }
 
     MenuBar
     {
         id: mainMenuBar
+
+        function updateVisibility()
+        {
+            if(application.authenticated)
+                mainWindow.menuBar = mainMenuBar;
+            else
+            {
+                mainWindow.menuBar = null;
+                __contentItem.parent = null;
+            }
+        }
 
         Menu
         {

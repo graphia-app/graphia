@@ -185,6 +185,7 @@ Rectangle
 
     onVisibleChanged:
     {
+        passwordField.text = "";
         refocus();
     }
 

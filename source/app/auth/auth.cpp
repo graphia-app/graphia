@@ -395,6 +395,10 @@ void Auth::sendRequest(const QString& email, const QString& password)
 
 void Auth::sendRequestUsingCachedCredentials()
 {
+#ifdef _DEBUG
+    _authenticated = true;
+    emit stateChanged();
+#else
     if(u::pref("auth/rememberMe").toBool())
     {
         auto email = u::pref("auth/emailAddress").toString();
@@ -402,6 +406,7 @@ void Auth::sendRequestUsingCachedCredentials()
 
         sendRequestUsingEncryptedPassword(email, _encryptedPassword);
     }
+#endif
 }
 
 void Auth::reset()

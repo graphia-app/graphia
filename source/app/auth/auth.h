@@ -106,6 +106,7 @@ private:
     QNetworkReply* _reply = nullptr;
     QString _encryptedPassword;
     bool _authenticated = false;
+
     QString _message;
 
     int _expiryTime = -1;

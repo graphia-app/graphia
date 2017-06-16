@@ -118,7 +118,7 @@ QString Application::parametersQmlPathForPlugin(const QString& pluginName) const
 
 void Application::tryToAuthenticateWithCachedCredentials()
 {
-    if(_auth.expired())
+    if(!_auth.state() && _auth.expired())
         _auth.sendRequestUsingCachedCredentials();
 }
 
