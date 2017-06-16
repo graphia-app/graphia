@@ -28,6 +28,10 @@ windeployqt --qmldir %QML_DIR% --no-angle --no-compiler-runtime ^
 xcopy "%CRTDIRECTORY%*.*" %INSTALLER_DIR% || EXIT /B 1
 xcopy "%UniversalCRTSdkDir%redist\ucrt\DLLs\x64\*.*" %INSTALLER_DIR% || EXIT /B 1
 
+IF EXIST %WINDOWS_EXTRA_FILES%\NUL (
+  xcopy "%WINDOWS_EXTRA_FILES%\*.*" %INSTALLER_DIR% || EXIT /B 1
+)
+
 signtool sign /f %SIGN_KEYSTORE_WINDOWS% /p %SIGN_PASSWORD% ^
 	/tr %SIGN_TSA% /td SHA256 %INSTALLER_DIR%\%PRODUCT_NAME%.exe || EXIT /B 1
 
