@@ -29,7 +29,7 @@ xcopy "%CRTDIRECTORY%*.*" %INSTALLER_DIR% || EXIT /B 1
 xcopy "%UniversalCRTSdkDir%redist\ucrt\DLLs\x64\*.*" %INSTALLER_DIR% || EXIT /B 1
 
 IF EXIST %WINDOWS_EXTRA_FILES%\NUL (
-  xcopy "%WINDOWS_EXTRA_FILES%\*.*" %INSTALLER_DIR% || EXIT /B 1
+  xcopy "%WINDOWS_EXTRA_FILES%*.*" %INSTALLER_DIR% || EXIT /B 1
 )
 
 signtool sign /f %SIGN_KEYSTORE_WINDOWS% /p %SIGN_PASSWORD% ^
