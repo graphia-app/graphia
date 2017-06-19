@@ -49,6 +49,7 @@ ApplicationWindow
     Auth
     {
         visible: !application.authenticated
+        enabled: visible
         anchors.fill: parent
 
         message: application.authenticationMessage
