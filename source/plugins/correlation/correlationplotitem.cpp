@@ -183,6 +183,7 @@ void CorrelationPlotItem::populateMeanAveragePlot()
 {
     auto maxX = static_cast<double>(_columnCount);
     double maxY = 0.0;
+    double minY = 0.0;
 
     auto* graph = _customPlot.addGraph();
     graph->setPen(QPen(Qt::black));
@@ -204,6 +205,7 @@ void CorrelationPlotItem::populateMeanAveragePlot()
         yDataAvg.append(runningTotal / _selectedRows.length());
 
         maxY = std::max(maxY, yDataAvg.back());
+        minY = std::min(minY, yDataAvg.back());
     }
     graph->setData(xData, yDataAvg, true);
 
@@ -222,13 +224,14 @@ void CorrelationPlotItem::populateMeanAveragePlot()
     _customPlot.plotLayout()->addElement(1, 0, plotModeTextElement);
 
     _customPlot.xAxis->setRange(0, maxX);
-    _customPlot.yAxis->setRange(0, maxY);
+    _customPlot.yAxis->setRange(minY, maxY);
 }
 
 void CorrelationPlotItem::populateRawPlot()
 {
     auto maxX = static_cast<double>(_columnCount);
     double maxY = 0.0;
+    double minY = 0.0;
 
     // Plot each row individually
     for(auto row : _selectedRows)
@@ -247,12 +250,13 @@ void CorrelationPlotItem::populateRawPlot()
             yData.append(_data[static_cast<int>(index)]);
 
             maxY = std::max(maxY, _data[static_cast<int>(index)]);
+            minY = std::min(minY, _data[static_cast<int>(index)]);
         }
         graph->setData(xData, yData, true);
     }
 
     _customPlot.xAxis->setRange(0.0, maxX);
-    _customPlot.yAxis->setRange(0.0, maxY);
+    _customPlot.yAxis->setRange(minY, maxY);
 }
 
 void CorrelationPlotItem::setSelectedRows(const QVector<int>& selectedRows)
