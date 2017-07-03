@@ -11,11 +11,11 @@ class CompoundCommand : public ICommand
 {
 public:
     CompoundCommand(const Command::CommandDescription& commandDescription,
-                    const std::vector<std::shared_ptr<ICommand>>& commands) :
+                    std::vector<std::unique_ptr<ICommand>>&& commands) :
         _description(commandDescription._description),
         _verb(commandDescription._verb),
         _pastParticiple(commandDescription._pastParticiple),
-        _commands(commands)
+        _commands(std::move(commands))
     {}
 
     CompoundCommand(const CompoundCommand&) = delete;
@@ -54,7 +54,7 @@ private:
     QString _verb;
     QString _pastParticiple;
 
-    std::vector<std::shared_ptr<ICommand>> _commands;
+    std::vector<std::unique_ptr<ICommand>> _commands;
 };
 
 #endif // COMPOUNDCOMMAND_H

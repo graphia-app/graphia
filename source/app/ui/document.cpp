@@ -409,7 +409,7 @@ void Document::onLoadComplete(bool success)
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::nextUndoActionChanged);
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::canRedoChanged);
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::nextRedoActionChanged);
-    connect(&_commandManager, &CommandManager::commandCompleted, [this](const ICommand*, const QString& pastParticiple)
+    connect(&_commandManager, &CommandManager::commandCompleted, [this](QString, QString pastParticiple)
     {
         setStatus(pastParticiple);
     });
@@ -537,7 +537,7 @@ void Document::deleteSelectedNodes()
     if(_selectionManager->selectedNodes().empty())
         return;
 
-    _commandManager.execute(std::make_shared<DeleteSelectedNodesCommand>(_graphModel.get(), _selectionManager.get()));
+    _commandManager.execute(std::make_unique<DeleteSelectedNodesCommand>(_graphModel.get(), _selectionManager.get()));
 }
 
 void Document::resetView()
@@ -1068,7 +1068,7 @@ void Document::moveGraphTransform(int from, int to)
     QStringList newGraphTransforms = _graphTransforms;
     newGraphTransforms.move(from, to);
 
-    _commandManager.execute(std::make_shared<ApplyTransformsCommand>(
+    _commandManager.execute(std::make_unique<ApplyTransformsCommand>(
         _graphModel.get(), _selectionManager.get(), this,
         _graphTransforms, newGraphTransforms));
 }
@@ -1186,7 +1186,7 @@ void Document::moveVisualisation(int from, int to)
     QStringList newVisualisations = _visualisations;
     newVisualisations.move(from, to);
 
-    _commandManager.execute(std::make_shared<ApplyVisualisationsCommand>(
+    _commandManager.execute(std::make_unique<ApplyVisualisationsCommand>(
         _graphModel.get(), this,
         _visualisations, newVisualisations));
 }
@@ -1196,7 +1196,7 @@ void Document::update(QStringList newGraphTransforms, QStringList newVisualisati
     if(_graphModel == nullptr)
         return;
 
-    std::vector<std::shared_ptr<ICommand>> commands;
+    std::vector<std::unique_ptr<ICommand>> commands;
 
     auto uiGraphTransforms = graphTransformConfigurationsFromUI();
 
@@ -1220,7 +1220,7 @@ void Document::update(QStringList newGraphTransforms, QStringList newVisualisati
 
     if(transformsDiffer(_graphTransforms, uiGraphTransforms))
     {
-        commands.emplace_back(std::make_shared<ApplyTransformsCommand>(
+        commands.emplace_back(std::make_unique<ApplyTransformsCommand>(
             _graphModel.get(), _selectionManager.get(), this,
             _graphTransforms, uiGraphTransforms));
     }
@@ -1237,7 +1237,7 @@ void Document::update(QStringList newGraphTransforms, QStringList newVisualisati
 
     if(visualisationsDiffer(_visualisations, uiVisualisations))
     {
-        commands.emplace_back(std::make_shared<ApplyVisualisationsCommand>(
+        commands.emplace_back(std::make_unique<ApplyVisualisationsCommand>(
             _graphModel.get(), this,
             _visualisations, uiVisualisations));
     }
@@ -1248,10 +1248,10 @@ void Document::update(QStringList newGraphTransforms, QStringList newVisualisati
     {
         _commandManager.execute({tr("Apply Transforms and Visualisations"),
                                  tr("Applying Transforms and Visualisations")},
-                                commands);
+                                std::move(commands));
     }
     else if(commands.size() == 1)
-        _commandManager.execute(commands.at(0));
+        _commandManager.execute(std::move(commands.front()));
 }
 
 QVariantMap Document::layoutSetting(const QString& name) const

@@ -11,7 +11,6 @@ CommandManager::CommandManager() :
     _busy(false),
     _graphChanged(false)
 {
-    qRegisterMetaType<CommandAction>("CommandAction");
     connect(this, &CommandManager::commandQueued, this, &CommandManager::update);
     connect(this, &CommandManager::commandCompleted, this, &CommandManager::onCommandCompleted);
 
@@ -30,31 +29,31 @@ CommandManager::~CommandManager()
         _lock.unlock();
 }
 
-void CommandManager::execute(const std::shared_ptr<ICommand>& command)
+void CommandManager::execute(std::unique_ptr<ICommand>&& command)
 {
-    _deferredExecutor.enqueue([this, command] { executeReal(command, false); });
+    _pendingCommands.emplace_back(CommandAction::Execute, std::move(command));
     emit commandQueued();
 }
 
-void CommandManager::executeOnce(const std::shared_ptr<ICommand>& command)
+void CommandManager::executeOnce(std::unique_ptr<ICommand>&& command)
 {
-    _deferredExecutor.enqueue([this, command] { executeReal(command, true); });
+    _pendingCommands.emplace_back(CommandAction::ExecuteOnce, std::move(command));
     emit commandQueued();
 }
 
 void CommandManager::undo()
 {
-    _deferredExecutor.enqueue([this] { undoReal(); });
+    _pendingCommands.emplace_back(CommandAction::Undo);
     emit commandQueued();
 }
 
 void CommandManager::redo()
 {
-    _deferredExecutor.enqueue([this] { redoReal(); });
+    _pendingCommands.emplace_back(CommandAction::Redo);
     emit commandQueued();
 }
 
-void CommandManager::executeReal(std::shared_ptr<ICommand> command, bool irreversible)
+void CommandManager::executeReal(std::unique_ptr<ICommand> command, bool irreversible)
 {
     if(_lock.owns_lock())
     {
@@ -62,7 +61,7 @@ void CommandManager::executeReal(std::shared_ptr<ICommand> command, bool irrever
             qDebug() << "enqueuing command" << command->description();
 
         // Something is already executing, do the new command once that is finished
-        _deferredExecutor.enqueue([this, command, irreversible] { executeReal(command, irreversible); });
+        _pendingCommands.emplace_back(irreversible ? CommandAction::ExecuteOnce : CommandAction::Execute, std::move(command));
         return;
     }
 
@@ -73,38 +72,44 @@ void CommandManager::executeReal(std::shared_ptr<ICommand> command, bool irrever
     if(_debug > 0)
         qDebug() << "Command started" << command->description();
 
-    doCommand(command, command->verb(), [this, command, irreversible]
+    auto commandPtr = command.get();
+    auto verb = command->verb();
+    doCommand(commandPtr, verb, [this, command = std::move(command), irreversible]() mutable
     {
         u::setCurrentThreadName(command->description());
 
         _graphChanged = false;
 
-        if(!command->execute())
+        QString description;
+        QString pastParticiple;
+
+        if(command->execute())
         {
-            _busy = false;
-            emit commandCompleted(nullptr, QString(), CommandAction::None);
-            return;
+            description = command->description();
+            pastParticiple = command->pastParticiple();
+
+            if(!irreversible)
+            {
+                // There are commands on the stack ahead of us; throw them away
+                while(canRedoNoLocking())
+                    _stack.pop_back();
+
+                _stack.push_back(std::move(command));
+                _lastExecutedIndex = static_cast<int>(_stack.size()) - 1;
+            }
+            else if(_graphChanged)
+            {
+                // The graph changed during an irreversible command, so throw
+                // away our redo history as it is likely no longer coherent with
+                // the current state
+                clearCommandStackNoLocking();
+            }
         }
 
-        if(!irreversible)
-        {
-            // There are commands on the stack ahead of us; throw them away
-            while(canRedoNoLocking())
-                _stack.pop_back();
-
-            _stack.push_back(command);
-            _lastExecutedIndex = static_cast<int>(_stack.size()) - 1;
-        }
-        else if(_graphChanged)
-        {
-            // The graph changed during an irreversible command, so throw
-            // away our redo history as it is likely no longer coherent with
-            // the current state
-            clearCommandStackNoLocking();
-        }
+        clearCurrentCommand();
 
         _busy = false;
-        emit commandCompleted(command.get(), command->pastParticiple(), CommandAction::Execute);
+        emit commandCompleted(description, pastParticiple);
     });
 }
 
@@ -112,7 +117,7 @@ void CommandManager::undoReal()
 {
     if(_lock.owns_lock())
     {
-        _deferredExecutor.enqueue([this] { undoReal(); });
+        _pendingCommands.emplace_back(CommandAction::Undo, nullptr);
         return;
     }
 
@@ -121,7 +126,7 @@ void CommandManager::undoReal()
     if(!canUndoNoLocking())
         return;
 
-    auto command = _stack.at(_lastExecutedIndex);
+    auto command = _stack.at(_lastExecutedIndex).get();
 
     _busy = true;
     emit busyChanged();
@@ -137,8 +142,10 @@ void CommandManager::undoReal()
         command->undo();
         _lastExecutedIndex--;
 
+        clearCurrentCommand();
+
         _busy = false;
-        emit commandCompleted(command.get(), QString(), CommandAction::Undo);
+        emit commandCompleted(command->description(), QString());
     });
 }
 
@@ -146,7 +153,7 @@ void CommandManager::redoReal()
 {
     if(_lock.owns_lock())
     {
-        _deferredExecutor.enqueue([this] { redoReal(); });
+        _pendingCommands.emplace_back(CommandAction::Redo, nullptr);
         return;
     }
 
@@ -155,7 +162,7 @@ void CommandManager::redoReal()
     if(!canRedoNoLocking())
         return;
 
-    auto command = _stack.at(++_lastExecutedIndex);
+    auto command = _stack.at(++_lastExecutedIndex).get();
 
     _busy = true;
     emit busyChanged();
@@ -170,8 +177,10 @@ void CommandManager::redoReal()
 
         command->execute();
 
+        clearCurrentCommand();
+
         _busy = false;
-        emit commandCompleted(command.get(), command->pastParticiple(), CommandAction::Redo);
+        emit commandCompleted(command->description(), command->pastParticiple());
     });
 }
 
@@ -276,8 +285,21 @@ void CommandManager::clearCommandStackNoLocking()
     emit commandStackCleared();
 }
 
+void CommandManager::clearCurrentCommand()
+{
+    // _currentCommand is a raw pointer, so we must ensure it is reset to null
+    // when the underlying unique_ptr is destroyed
+    std::unique_lock<std::mutex> lock(_progressMutex);
+    _currentCommand = nullptr;
+}
+
 void CommandManager::timerEvent(QTimerEvent*)
 {
+    std::unique_lock<std::mutex> lock(_progressMutex);
+
+    if(_currentCommand == nullptr)
+        return;
+
     int newCommandProgress = _currentCommand->progress();
 
     if(newCommandProgress != _commandProgress)
@@ -297,7 +319,7 @@ bool CommandManager::canRedoNoLocking() const
     return _lastExecutedIndex < static_cast<int>(_stack.size()) - 1;
 }
 
-void CommandManager::onCommandCompleted(ICommand* command, const QString&, CommandAction)
+void CommandManager::onCommandCompleted(QString description, QString)
 {
     killTimer(_commandProgressTimerId);
     _commandProgressTimerId = -1;
@@ -308,18 +330,29 @@ void CommandManager::onCommandCompleted(ICommand* command, const QString&, Comma
     Q_ASSERT(_lock.owns_lock());
     _lock.unlock();
 
-    QString description = command != nullptr ? command->description() : "";
-
     if(_debug > 0)
         qDebug() << "Command completed" << description;
 
-    if(_deferredExecutor.hasTasks())
-        _deferredExecutor.executeOne();
+    if(!_pendingCommands.empty())
+        update();
     else
         emit busyChanged();
 }
 
 void CommandManager::update()
 {
-    _deferredExecutor.executeOne();
+    if(!_pendingCommands.empty())
+    {
+        auto pendingCommand = std::move(_pendingCommands.front());
+        _pendingCommands.pop_front();
+
+        switch(pendingCommand._action)
+        {
+        case CommandAction::Execute:      executeReal(std::move(pendingCommand._command), false); break;
+        case CommandAction::ExecuteOnce:  executeReal(std::move(pendingCommand._command), true); break;
+        case CommandAction::Undo:         undoReal(); break;
+        case CommandAction::Redo:         redoReal(); break;
+        default: break;
+        }
+    }
 }

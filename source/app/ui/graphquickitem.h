@@ -132,8 +132,8 @@ signals:
     void inOverviewModeChanged() const;
     void focusedComponentIdChanged() const;
 
-    void commandWillExecute(const ICommand*) const;
-    void commandCompleted(const ICommand*, const QString&) const;
+    void commandWillExecute() const;
+    void commandCompleted() const;
 
     void layoutChanged() const;
 

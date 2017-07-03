@@ -13,38 +13,38 @@ class ICommandManager
 public:
     virtual ~ICommandManager() = default;
 
-    virtual void execute(const std::shared_ptr<ICommand>& command) = 0;
+    virtual void execute(std::unique_ptr<ICommand>&& command) = 0;
 
     void execute(const Command::CommandDescription& commandDescription,
                  CommandFn&& executeFn, CommandFn&& undoFn)
     {
-        execute(std::make_shared<Command>(commandDescription, executeFn, undoFn));
+        execute(std::make_unique<Command>(commandDescription, executeFn, undoFn));
     }
 
     void execute(const Command::CommandDescription& commandDescription,
-                 const std::vector<std::shared_ptr<ICommand>>& commands)
+                 std::vector<std::unique_ptr<ICommand>>&& commands)
     {
-        execute(std::make_shared<CompoundCommand>(commandDescription, commands));
+        execute(std::make_unique<CompoundCommand>(commandDescription, std::move(commands)));
     }
 
     // Execute only once, i.e. so that it can't be undone
-    virtual void executeOnce(const std::shared_ptr<ICommand>& command) = 0;
+    virtual void executeOnce(std::unique_ptr<ICommand>&& command) = 0;
 
     void executeOnce(const Command::CommandDescription& commandDescription,
                      CommandFn&& executeFn)
     {
-        executeOnce(std::make_shared<Command>(commandDescription, executeFn));
+        executeOnce(std::make_unique<Command>(commandDescription, executeFn));
     }
 
     void executeOnce(const Command::CommandDescription& commandDescription,
-                     const std::vector<std::shared_ptr<ICommand>>& commands)
+                     std::vector<std::unique_ptr<ICommand>>&& commands)
     {
-        executeOnce(std::make_shared<CompoundCommand>(commandDescription, commands));
+        executeOnce(std::make_unique<CompoundCommand>(commandDescription, std::move(commands)));
     }
 
     void executeOnce(CommandFn&& executeFn)
     {
-        executeOnce(std::make_shared<Command>(Command::CommandDescription(), executeFn));
+        executeOnce(std::make_unique<Command>(Command::CommandDescription(), executeFn));
     }
 };
 

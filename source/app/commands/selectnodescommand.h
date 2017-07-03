@@ -88,7 +88,7 @@ public:
 template<typename C>
 auto makeSelectNodesCommand(SelectionManager* selectionManager, C nodeIds, bool clearSelectionFirst = true)
 {
-    return std::make_shared<SelectNodesCommand<C>>(selectionManager, nodeIds, clearSelectionFirst);
+    return std::make_unique<SelectNodesCommand<C>>(selectionManager, nodeIds, clearSelectionFirst);
 }
 
 // This doesn't really need to be a template, but the alternative is defining it in its own
