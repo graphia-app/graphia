@@ -253,9 +253,9 @@ void LayoutThread::addComponent(ComponentId componentId)
             emit settingChanged();
         });
 
-        _layouts.emplace(componentId, layout);
         _graphModel->nodePositions().setScale(layout->scaling());
         _graphModel->nodePositions().setSmoothing(layout->smoothing());
+        _layouts.emplace(componentId, std::move(layout));
     }
 }
 

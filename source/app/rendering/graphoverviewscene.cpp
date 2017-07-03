@@ -34,7 +34,7 @@ GraphOverviewScene::GraphOverviewScene(CommandManager* commandManager, GraphRend
     _componentLayoutData(_graphModel->graph()),
     _previousZoomedComponentLayoutData(_graphModel->graph()),
     _zoomedComponentLayoutData(_graphModel->graph()),
-    _componentLayout(std::make_shared<CirclePackComponentLayout>())
+    _componentLayout(std::make_unique<CirclePackComponentLayout>())
 {
     connect(&_graphModel->graph(), &Graph::componentAdded, this, &GraphOverviewScene::onComponentAdded, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::componentWillBeRemoved, this, &GraphOverviewScene::onComponentWillBeRemoved, Qt::DirectConnection);

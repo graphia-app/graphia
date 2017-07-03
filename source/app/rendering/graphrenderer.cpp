@@ -352,7 +352,7 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
 
     prepareComponentDataTexture();
 
-    _glyphMap = std::make_shared<GlyphMap>(u::pref("visuals/textFont").toString());
+    _glyphMap = std::make_unique<GlyphMap>(u::pref("visuals/textFont").toString());
     prepareSDFTextures();
 
     auto graph = &_graphModel->graph();

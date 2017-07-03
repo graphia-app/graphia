@@ -126,7 +126,7 @@ public:
         _layoutSettings.setValue(name, value);
     }
 
-    virtual std::shared_ptr<Layout> create(ComponentId componentId, NodePositions& results) const = 0;
+    virtual std::unique_ptr<Layout> create(ComponentId componentId, NodePositions& results) const = 0;
 };
 
 class LayoutThread : public QObject
@@ -148,7 +148,7 @@ private:
     std::condition_variable _waitForResume;
 
     std::unique_ptr<LayoutFactory> _layoutFactory;
-    std::map<ComponentId, std::shared_ptr<Layout>> _layouts;
+    std::map<ComponentId, std::unique_ptr<Layout>> _layouts;
     ComponentArray<bool> _executedAtLeastOnce;
 
     NodePositions _intermediatePositions;

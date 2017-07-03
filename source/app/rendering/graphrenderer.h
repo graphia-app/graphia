@@ -237,7 +237,7 @@ private:
     SelectionManager* _selectionManager = nullptr;
 
     GPUComputeThread* _gpuComputeThread = nullptr;
-    std::shared_ptr<GlyphMap> _glyphMap;
+    std::unique_ptr<GlyphMap> _glyphMap;
 
     // Store a copy of the text layout results as its computation is a long running
     // process that occurs in a separate thread; we don't want to be rendering from

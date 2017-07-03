@@ -86,7 +86,7 @@ private:
     ComponentLayoutData _componentLayoutData;
     ComponentLayoutData _previousZoomedComponentLayoutData;
     ComponentLayoutData _zoomedComponentLayoutData;
-    std::shared_ptr<ComponentLayout> _componentLayout;
+    std::unique_ptr<ComponentLayout> _componentLayout;
 
     void updateZoomedComponentLayoutData();
     void applyComponentLayout();

@@ -73,10 +73,10 @@ public:
         _layoutSettings.registerSetting("AttractiveForce", QObject::tr("Attractive Force"), 1.0f, 100.0f, 1.0f);
     }
 
-    std::shared_ptr<Layout> create(ComponentId componentId, NodePositions& nodePositions) const
+    std::unique_ptr<Layout> create(ComponentId componentId, NodePositions& nodePositions) const
     {
         auto component = _graphModel->graph().componentById(componentId);
-        return std::make_shared<ForceDirectedLayout>(*component, nodePositions, &_layoutSettings);
+        return std::make_unique<ForceDirectedLayout>(*component, nodePositions, &_layoutSettings);
     }
 };
 

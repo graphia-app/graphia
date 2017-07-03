@@ -66,7 +66,7 @@ private:
     std::vector<ComponentId> _componentIds;
     ComponentId _nextComponentId;
     std::queue<ComponentId> _vacatedComponentIdQueue;
-    std::map<ComponentId, std::shared_ptr<GraphComponent>> _componentsMap;
+    std::map<ComponentId, std::unique_ptr<GraphComponent>> _componentsMap;
     ComponentIdSet _updatesRequired;
     NodeArray<ComponentId> _nodesComponentId;
     EdgeArray<ComponentId> _edgesComponentId;

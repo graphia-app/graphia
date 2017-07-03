@@ -305,8 +305,8 @@ void ComponentManager::queueGraphComponentUpdate(const Graph* graph, ComponentId
 
     if(!u::contains(_componentsMap, componentId))
     {
-        std::shared_ptr<GraphComponent> graphComponent = std::make_shared<GraphComponent>(graph);
-        _componentsMap.emplace(componentId, graphComponent);
+        auto graphComponent = std::make_unique<GraphComponent>(graph);
+        _componentsMap.emplace(componentId, std::move(graphComponent));
     }
 }
 
