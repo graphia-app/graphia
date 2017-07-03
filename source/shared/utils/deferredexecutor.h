@@ -30,7 +30,7 @@ public:
     DeferredExecutor();
     virtual ~DeferredExecutor();
 
-    void enqueue(TaskFn function, const QString& description = QString());
+    void enqueue(TaskFn&& function, const QString& description = QString());
 
     void execute();
     void executeOne();
