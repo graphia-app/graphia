@@ -69,7 +69,7 @@ private:
 
         _thread = std::thread(std::forward<Fn>(fn));
 
-        command->setProgress(-1);
+        command->initialise();
         _commandProgressTimerId = startTimer(200);
     }
 

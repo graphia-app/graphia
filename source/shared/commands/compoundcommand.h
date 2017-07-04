@@ -34,12 +34,42 @@ public:
         _pastParticiple = pastParticiple;
     }
 
+    void cancel()
+    {
+        ICommand::cancel();
+
+        for(const auto& command : _commands)
+            command->cancel();
+    }
+
+    void initialise()
+    {
+        ICommand::initialise();
+
+        for(const auto& command : _commands)
+            command->initialise();
+    }
+
+    void setProgress(int) {}
+    int progress() const
+    {
+        if(_executing != nullptr)
+            return _executing->progress();
+
+        return -1;
+    }
+
 private:
     bool execute()
     {
         bool anyExecuted = false;
         for(auto it = _commands.begin(); it != _commands.end(); ++it)
+        {
+            _executing = (*it).get();
             anyExecuted = (*it)->execute() || anyExecuted;
+        }
+
+        _executing = nullptr;
 
         return anyExecuted;
     }
@@ -47,7 +77,12 @@ private:
     void undo()
     {
         for(auto it = _commands.rbegin(); it != _commands.rend(); ++it)
+        {
+            _executing = (*it).get();
             (*it)->undo();
+        }
+
+        _executing = nullptr;
     }
 
     QString _description;
@@ -55,6 +90,8 @@ private:
     QString _pastParticiple;
 
     std::vector<std::unique_ptr<ICommand>> _commands;
+
+    const ICommand* _executing = nullptr;
 };
 
 #endif // COMPOUNDCOMMAND_H
