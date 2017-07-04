@@ -32,6 +32,9 @@ void ApplyTransformsCommand::doTransform(const QStringList& transformations)
 {
     _graphModel->buildTransforms(transformations, this);
 
+    if(cancelled())
+        return;
+
     _document->executeOnMainThreadAndWait([this, transformations]
     {
         _document->setTransforms(transformations);

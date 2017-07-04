@@ -41,6 +41,9 @@ Document::Document(QObject* parent) :
 
 Document::~Document()
 {
+    // Execute anything pending (primarily to avoid deadlock)
+    executeDeferred();
+
     // This must be called from the main thread before deletion
     if(_gpuComputeThread != nullptr)
         _gpuComputeThread->destroySurface();
@@ -825,7 +828,6 @@ void Document::executeOnMainThreadAndWait(DeferredExecutor::TaskFn task,
 {
     executeOnMainThread(std::move(task), description);
     _executed.wait();
-
 }
 
 QStringList Document::availableTransformNames() const

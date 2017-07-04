@@ -29,6 +29,9 @@ void ApplyVisualisationsCommand::apply(const QStringList& visualisations)
 {
     _graphModel->buildVisualisations(visualisations);
 
+    if(cancelled())
+        return;
+
     _document->executeOnMainThreadAndWait([this, visualisations]
     {
         _document->setVisualisations(visualisations);
