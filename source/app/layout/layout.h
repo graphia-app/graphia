@@ -8,6 +8,7 @@
 #include "nodepositions.h"
 
 #include "shared/utils/performancecounter.h"
+#include "shared/utils/cancellable.h"
 #include "layoutsettings.h"
 
 #include <QVector2D>
@@ -26,7 +27,7 @@
 #include <set>
 #include <map>
 
-class Layout : public QObject
+class Layout : public QObject, public Cancellable
 {
     Q_OBJECT
 
@@ -38,19 +39,15 @@ public:
     };
 
 private:
-    std::atomic<bool> _atomicCancel;
     Iterative _iterative;
     float _scaling;
     int _smoothing;
     const IGraphComponent* _graphComponent;
     NodePositions* _positions;
 
-    void setCancel(bool cancel) { _atomicCancel = cancel; }
-
     virtual void executeReal(bool firstIteration) = 0;
 
 protected:
-    bool shouldCancel() const { return _atomicCancel; }
     const LayoutSettings* _settings;
 
     NodePositions& positions() { return *_positions; }
@@ -63,7 +60,6 @@ public:
            float scaling = 1.0f,
            int smoothing = 1) :
         QObject(),
-        _atomicCancel(false),
         _iterative(iterative),
         _scaling(scaling),
         _smoothing(smoothing),
@@ -80,9 +76,6 @@ public:
     const std::vector<EdgeId>& edgeIds() const { return _graphComponent->edgeIds(); }
 
     void execute(bool firstIteration) { executeReal(firstIteration); }
-
-    virtual void cancel() { setCancel(true); }
-    virtual void uncancel() { setCancel(false); }
 
     // Indicates that the algorithm is doing no useful work
     virtual bool finished() const { return false; }

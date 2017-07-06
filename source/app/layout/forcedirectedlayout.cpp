@@ -87,7 +87,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
     auto repulsiveResults = concurrent_for(nodeIds().begin(), nodeIds().end(),
         [this, &barnesHutTree, REPULSIVE_FORCE](const NodeId nodeId)
         {
-            if(shouldCancel())
+            if(cancelled())
                 return;
 
             _displacements[nodeId] -= barnesHutTree.evaluateKernel(nodeId,
@@ -101,7 +101,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
     auto attractiveResults = concurrent_for(edgeIds().begin(), edgeIds().end(),
         [this, ATTRACTIVE_FORCE](const EdgeId edgeId)
         {
-            if(shouldCancel())
+            if(cancelled())
                 return;
 
             const IEdge& edge = graphComponent().graph().edgeById(edgeId);
@@ -120,7 +120,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
     repulsiveResults.wait();
     attractiveResults.wait();
 
-    if(shouldCancel())
+    if(cancelled())
         return;
 
     concurrent_for(nodeIds().begin(), nodeIds().end(),
