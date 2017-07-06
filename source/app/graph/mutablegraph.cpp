@@ -3,6 +3,11 @@
 
 #include "shared/utils/utils.h"
 
+MutableGraph::MutableGraph(const MutableGraph& other)
+{
+    clone(other);
+}
+
 MutableGraph::~MutableGraph()
 {
     // Ensure no transactions are in progress
@@ -380,7 +385,7 @@ void MutableGraph::contractEdges(const EdgeIdSet& edgeIds)
     endTransaction();
 }
 
-MutableGraph& MutableGraph::operator=(const MutableGraph& other)
+MutableGraph& MutableGraph::clone(const MutableGraph& other)
 {
     beginTransaction();
 
@@ -424,6 +429,11 @@ MutableGraph& MutableGraph::operator=(const MutableGraph& other)
     endTransaction(!diff.empty());
 
     return *this;
+}
+
+MutableGraph& MutableGraph::operator=(const MutableGraph& other)
+{
+    return clone(other);
 }
 
 MutableGraph::Diff MutableGraph::diffTo(const MutableGraph& other)

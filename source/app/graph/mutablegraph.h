@@ -35,6 +35,9 @@ class MutableGraph : public Graph, public virtual IMutableGraph
     Q_OBJECT
 
 public:
+    MutableGraph() = default;
+    MutableGraph(const MutableGraph& other);
+
     virtual ~MutableGraph();
 
 private:
@@ -103,6 +106,8 @@ private:
 
     NodeId mergeNodes(NodeId nodeIdA, NodeId nodeIdB);
     EdgeId mergeEdges(EdgeId edgeIdA, EdgeId edgeIdB);
+
+    MutableGraph& clone(const MutableGraph& other);
 
 public:
     void clear();
