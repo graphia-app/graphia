@@ -484,7 +484,7 @@ void Document::selectAll()
 
     if(_selectionManager)
     {
-        _commandManager.executeOnce(
+        _commandManager.executeOnce({tr("Select All"), tr("Selecting All")},
             [this](Command& command)
             {
                 bool nodesSelected = _selectionManager->selectAllNodes();
@@ -501,7 +501,7 @@ void Document::selectNone()
 
     if(_selectionManager && !_selectionManager->selectedNodes().empty())
     {
-        _commandManager.executeOnce(
+        _commandManager.executeOnce({tr("Select None"), tr("Selecting None")},
             [this](Command&) { return _selectionManager->clearNodeSelection(); });
     }
 }
