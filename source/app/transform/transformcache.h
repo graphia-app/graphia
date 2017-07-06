@@ -17,6 +17,12 @@ public:
     {
         Result() = default;
 
+        Result(const Result& other) :
+            _config(other._config),
+            _graph(other._graph ? std::make_unique<MutableGraph>(*other._graph) : nullptr),
+            _newAttributes(other._newAttributes)
+        {}
+
         Result(Result&& other) :
             _config(std::move(other._config)),
             _graph(std::move(other._graph)),
@@ -48,6 +54,7 @@ private:
 
 public:
     TransformCache(GraphModel& graphModel);
+    TransformCache(const TransformCache& other);
     TransformCache(TransformCache&& other);
     TransformCache& operator=(TransformCache&& other);
 

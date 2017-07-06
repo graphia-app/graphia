@@ -13,6 +13,11 @@ TransformCache::TransformCache(GraphModel& graphModel) :
     _graphModel(&graphModel)
 {}
 
+TransformCache::TransformCache(const TransformCache& other) :
+    _graphModel(other._graphModel),
+    _cache(other._cache)
+{}
+
 TransformCache::TransformCache(TransformCache&& other) :
     _graphModel(other._graphModel),
     _cache(std::move(other._cache))
