@@ -31,6 +31,7 @@ Item
     property bool commandInProgress: document.commandInProgress
     property int commandProgress: document.commandProgress
     property string commandVerb: document.commandVerb
+    property bool commandIsCancellable: document.commandIsCancellable
 
     property int layoutPauseState: document.layoutPauseState
 
@@ -164,6 +165,8 @@ Item
     function selectNextFound() { document.selectNextFound(); }
     function selectPrevFound() { document.selectPrevFound(); }
     function find(text) { document.find(text); }
+
+    function cancelCommand() { document.cancelCommand(); }
 
     function dumpGraph() { document.dumpGraph(); }
 

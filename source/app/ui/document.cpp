@@ -105,6 +105,11 @@ QString Document::commandVerb() const
     return _commandManager.commandVerb();
 }
 
+bool Document::commandIsCancellable() const
+{
+    return _commandManager.commandIsCancellable();
+}
+
 void Document::updateLayoutState()
 {
     if(idle() && !_userLayoutPaused && _layoutRequired)
@@ -407,12 +412,13 @@ void Document::onLoadComplete(bool success)
 
     connect(&_commandManager, &CommandManager::commandProgressChanged, this, &Document::commandProgressChanged);
     connect(&_commandManager, &CommandManager::commandVerbChanged, this, &Document::commandVerbChanged);
+    connect(&_commandManager, &CommandManager::commandIsCancellableChanged, this, &Document::commandIsCancellableChanged);
 
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::canUndoChanged);
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::nextUndoActionChanged);
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::canRedoChanged);
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::nextRedoActionChanged);
-    connect(&_commandManager, &CommandManager::commandCompleted, [this](QString, QString pastParticiple)
+    connect(&_commandManager, &CommandManager::commandCompleted, [this](bool, QString, QString pastParticiple)
     {
         setStatus(pastParticiple);
     });
@@ -446,7 +452,7 @@ void Document::onLoadComplete(bool success)
     (const Graph*, bool changeOccurred)
     {
         _graphChanging = false;
-        _layoutRequired = changeOccurred;
+        _layoutRequired = changeOccurred || _layoutRequired;
         maybeEmitIdleChanged();
 
         // If the graph has changed outside of a Command, then our new state is
@@ -1276,6 +1282,11 @@ QVariantMap Document::layoutSetting(const QString& name) const
 void Document::setLayoutSettingValue(const QString& name, float value)
 {
     _layoutThread->setSettingValue(name, value);
+}
+
+void Document::cancelCommand()
+{
+    _commandManager.cancel();
 }
 
 void Document::dumpGraph()

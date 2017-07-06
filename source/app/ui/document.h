@@ -53,6 +53,7 @@ class Document : public QObject
     Q_PROPERTY(bool commandInProgress READ commandInProgress NOTIFY commandInProgressChanged)
     Q_PROPERTY(int commandProgress READ commandProgress NOTIFY commandProgressChanged)
     Q_PROPERTY(QString commandVerb READ commandVerb NOTIFY commandVerbChanged)
+    Q_PROPERTY(bool commandIsCancellable READ commandIsCancellable NOTIFY commandIsCancellableChanged)
 
     Q_PROPERTY(QML_ENUM_PROPERTY(LayoutPauseState) layoutPauseState READ layoutPauseState NOTIFY layoutPauseStateChanged)
 
@@ -85,6 +86,7 @@ public:
 
     int commandProgress() const;
     QString commandVerb() const;
+    bool commandIsCancellable() const;
 
     void updateLayoutState();
     LayoutPauseState layoutPauseState();
@@ -192,6 +194,7 @@ signals:
     void commandInProgressChanged();
     void commandProgressChanged();
     void commandVerbChanged();
+    void commandIsCancellableChanged();
 
     void layoutPauseStateChanged();
 
@@ -280,6 +283,8 @@ public:
 
     Q_INVOKABLE QVariantMap layoutSetting(const QString& name) const;
     Q_INVOKABLE void setLayoutSettingValue(const QString& name, float value);
+
+    Q_INVOKABLE void cancelCommand();
 
     Q_INVOKABLE void dumpGraph();
 

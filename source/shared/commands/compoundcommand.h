@@ -42,6 +42,15 @@ public:
             command->cancel();
     }
 
+    bool cancellable() const
+    {
+        return std::any_of(_commands.begin(), _commands.end(),
+        [](const auto& command)
+        {
+            return command->cancellable();
+        });
+    }
+
     void initialise()
     {
         ICommand::initialise();

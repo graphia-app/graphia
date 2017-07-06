@@ -1160,9 +1160,45 @@ ApplicationWindow
 
             ProgressBar
             {
+                id: progressBar
                 value: currentDocument && currentDocument.commandProgress >= 0.0 ? currentDocument.commandProgress / 100.0 : 0.0
                 visible: currentDocument ? currentDocument.commandInProgress : false
                 indeterminate: currentDocument ? currentDocument.commandProgress < 0.0 : false
+            }
+
+            ToolButton
+            {
+                id: cancelButton
+
+                implicitHeight: progressBar.implicitHeight * 0.8
+                implicitWidth: implicitHeight
+
+                iconName: "stop"
+                visible: currentDocument ? currentDocument.commandIsCancellable && !cancelledIndicator.visible: false
+                onClicked:
+                {
+                    currentDocument.cancelCommand();
+                    cancelledIndicator.visible = true;
+                }
+            }
+
+            BusyIndicator
+            {
+                implicitWidth: cancelButton.implicitWidth
+                implicitHeight: cancelButton.implicitHeight
+
+                id: cancelledIndicator
+                visible: false
+            }
+
+            Connections
+            {
+                target: currentDocument
+                onCommandInProgressChanged:
+                {
+                    // Reset the cancellation indicator when a command starts
+                    cancelledIndicator.visible = false;
+                }
             }
 
             Label

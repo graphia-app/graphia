@@ -82,11 +82,13 @@ void CommandManager::executeReal(std::unique_ptr<ICommand> command, bool irrever
 
         QString description;
         QString pastParticiple;
+        bool success = false;
 
-        if(command->execute())
+        if(command->execute() && !command->cancelled())
         {
             description = command->description();
             pastParticiple = command->pastParticiple();
+            success = true;
 
             if(!irreversible)
             {
@@ -109,7 +111,7 @@ void CommandManager::executeReal(std::unique_ptr<ICommand> command, bool irrever
         clearCurrentCommand();
 
         _busy = false;
-        emit commandCompleted(description, pastParticiple);
+        emit commandCompleted(success, description, pastParticiple);
     });
 }
 
@@ -145,7 +147,7 @@ void CommandManager::undoReal()
         clearCurrentCommand();
 
         _busy = false;
-        emit commandCompleted(command->description(), QString());
+        emit commandCompleted(true, command->description(), QString());
     });
 }
 
@@ -180,7 +182,7 @@ void CommandManager::redoReal()
         clearCurrentCommand();
 
         _busy = false;
-        emit commandCompleted(command->description(), command->pastParticiple());
+        emit commandCompleted(true, command->description(), command->pastParticiple());
     });
 }
 
@@ -200,6 +202,16 @@ bool CommandManager::canRedo() const
 
     if(lock.owns_lock())
         return canRedoNoLocking();
+
+    return false;
+}
+
+bool CommandManager::commandIsCancellable() const
+{
+    std::unique_lock<std::mutex> lock(_currentCommandMutex);
+
+    if(_currentCommand != nullptr)
+        return _currentCommand->cancellable();
 
     return false;
 }
@@ -289,13 +301,27 @@ void CommandManager::clearCurrentCommand()
 {
     // _currentCommand is a raw pointer, so we must ensure it is reset to null
     // when the underlying unique_ptr is destroyed
-    std::unique_lock<std::mutex> lock(_progressMutex);
+    std::unique_lock<std::mutex> lock(_currentCommandMutex);
     _currentCommand = nullptr;
+}
+
+
+void CommandManager::cancel()
+{
+    std::unique_lock<std::mutex> lock(_currentCommandMutex);
+
+    if(_currentCommand != nullptr)
+    {
+        _currentCommand->cancel();
+
+        if(_debug > 0)
+            qDebug() << "Command cancel request" << _currentCommand->description();
+    }
 }
 
 void CommandManager::timerEvent(QTimerEvent*)
 {
-    std::unique_lock<std::mutex> lock(_progressMutex);
+    std::unique_lock<std::mutex> lock(_currentCommandMutex);
 
     if(_currentCommand == nullptr)
         return;
@@ -319,7 +345,7 @@ bool CommandManager::canRedoNoLocking() const
     return _lastExecutedIndex < static_cast<int>(_stack.size()) - 1;
 }
 
-void CommandManager::onCommandCompleted(QString description, QString)
+void CommandManager::onCommandCompleted(bool success, QString description, QString)
 {
     killTimer(_commandProgressTimerId);
     _commandProgressTimerId = -1;
@@ -331,12 +357,25 @@ void CommandManager::onCommandCompleted(QString description, QString)
     _lock.unlock();
 
     if(_debug > 0)
-        qDebug() << "Command completed" << description;
+    {
+        if(success)
+        {
+            if(!description.isEmpty())
+                qDebug() << "Command completed" << description;
+            else
+                qDebug() << "Command completed";
+        }
+        else
+            qDebug() << "Command failed/cancelled";
+    }
 
     if(!_pendingCommands.empty())
         update();
     else
+    {
         emit busyChanged();
+        emit commandIsCancellableChanged();
+    }
 }
 
 void CommandManager::update()

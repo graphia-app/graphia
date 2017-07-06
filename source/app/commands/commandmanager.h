@@ -23,6 +23,7 @@ class CommandManager : public QObject, public ICommandManager
 
     Q_PROPERTY(int commandProgress MEMBER _commandProgress NOTIFY commandProgressChanged)
     Q_PROPERTY(QString commandVerb MEMBER _commandVerb NOTIFY commandVerbChanged)
+    Q_PROPERTY(bool commandIsCancellable READ commandIsCancellable NOTIFY commandIsCancellableChanged)
 
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
 
@@ -45,6 +46,7 @@ public:
 
     int commandProgress() const { return _commandProgress; }
     QString commandVerb() const { return _commandVerb; }
+    bool commandIsCancellable() const;
 
     const std::vector<QString> undoableCommandDescriptions() const;
     const std::vector<QString> redoableCommandDescriptions() const;
@@ -56,6 +58,8 @@ public:
 
     void clearCommandStack();
 
+    void cancel();
+
 private:
     template<typename Fn> void doCommand(ICommand* command,
                                          const QString& verb, Fn&& fn)
@@ -65,6 +69,7 @@ private:
         _commandVerb = verb;
         emit commandProgressChanged();
         emit commandVerbChanged();
+        emit commandIsCancellableChanged();
         emit commandWillExecute(command);
 
         _thread = std::thread(std::forward<Fn>(fn));
@@ -116,8 +121,8 @@ private:
     std::atomic<bool> _busy;
     std::atomic<bool> _graphChanged;
 
-    std::mutex _progressMutex;
-    ICommand* _currentCommand;
+    mutable std::mutex _currentCommandMutex;
+    ICommand* _currentCommand = nullptr;
     int _commandProgressTimerId = -1;
     int _commandProgress = 0;
     QString _commandVerb;
@@ -125,7 +130,7 @@ private:
     int _debug = 0;
 
 private slots:
-    void onCommandCompleted(QString description, QString pastParticiple);
+    void onCommandCompleted(bool success, QString description, QString pastParticiple);
     void update();
 
 public slots:
@@ -135,8 +140,9 @@ signals:
     void commandWillExecute(const ICommand* command) const;
     void commandProgressChanged() const;
     void commandVerbChanged() const;
+    void commandIsCancellableChanged() const;
     void commandQueued();
-    void commandCompleted(QString description, QString pastParticiple) const;
+    void commandCompleted(bool success, QString description, QString pastParticiple) const;
     void commandStackCleared();
 
     void busyChanged() const;
