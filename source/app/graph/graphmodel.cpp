@@ -195,6 +195,11 @@ void GraphModel::buildTransforms(const QStringList& transforms, ICommand* comman
     _transformedGraph.setCommand(nullptr);
 }
 
+void GraphModel::cancelTransformBuild()
+{
+    _transformedGraph.cancelRebuild();
+}
+
 QStringList GraphModel::availableTransformNames() const
 {
     QStringList stringList;
@@ -458,6 +463,12 @@ void GraphModel::addAttribute(const QString& name, const Attribute& attribute)
 void GraphModel::addAttributes(const std::map<QString, Attribute>& attributes)
 {
     _attributes.insert(attributes.begin(), attributes.end());
+}
+
+void GraphModel::removeAttribute(const QString& name)
+{
+    if(u::contains(_attributes, name))
+        _attributes.erase(name);
 }
 
 const Attribute* GraphModel::attributeByName(const QString& name) const

@@ -14,6 +14,7 @@ TransformedGraph::TransformedGraph(GraphModel& graphModel, const MutableGraph& s
     _graphModel(&graphModel),
     _source(&source),
     _cache(graphModel),
+    _cancelled(false),
     _nodesState(source),
     _edgesState(source),
     _previousNodesState(source),
@@ -44,6 +45,15 @@ TransformedGraph::TransformedGraph(GraphModel& graphModel, const MutableGraph& s
     addTransform(std::make_unique<IdentityTransform>());
 }
 
+void TransformedGraph::cancelRebuild()
+{
+    std::unique_lock<std::mutex> lock(_currentTransformMutex);
+    _cancelled = true;
+
+    if(_currentTransform != nullptr)
+        _currentTransform->cancel();
+}
+
 void TransformedGraph::setProgress(int progress)
 {
     if(_command != nullptr)
@@ -69,6 +79,8 @@ void TransformedGraph::rebuild()
     if(!_autoRebuild)
         return;
 
+    _cancelled = false;
+
     emit graphWillChange(this);
 
     _target.performTransaction([this](IMutableGraph&)
@@ -79,7 +91,13 @@ void TransformedGraph::rebuild()
         TransformCache newCache(*_graphModel);
         *this = *_source;
 
-        for(const auto& transform : _transforms)
+        // Save previous state in case we get cancelled
+        auto oldCache = _cache;
+
+        // Save attributes of current graph so we can remove ones added if cancelled
+        auto fixedAttributeNames = _graphModel->attributeNames();
+
+        for(auto& transform : _transforms)
         {
             setProgress(-1); // Indetermindate by default
 
@@ -100,15 +118,22 @@ void TransformedGraph::rebuild()
             // so we can see which attributes are created
             auto attributeNames = _graphModel->attributeNames();
 
+            setCurrentTransform(transform.get());
+            transform->uncancel();
+
             if(transform->applyAndUpdate(*this))
             {
-                result._graph = std::make_unique<MutableGraph>();
-                *result._graph = _target;
+                result._graph = std::make_unique<MutableGraph>(_target);
                 changed = true;
 
                 // Graph has changed, so the cache is now invalid
                 _cache.clear();
             }
+
+            setCurrentTransform(nullptr);
+
+            if(_cancelled)
+                break;
 
             for(const auto& attributeName : u::setDifference(_graphModel->attributeNames(), attributeNames))
             {
@@ -119,6 +144,22 @@ void TransformedGraph::rebuild()
             newCache.add(std::move(result));
         }
 
+        if(_cancelled)
+        {
+            // We've been cancelled so rollback to our previous state
+            _cache = std::move(oldCache);
+            auto* cachedGraph = _cache.graph();
+            *this = (cachedGraph != nullptr ? *cachedGraph : *_source);
+
+            // Remove any attributes that were added before the cancel occurred
+            for(const auto& attributeName : u::setDifference(_graphModel->attributeNames(), fixedAttributeNames))
+                _graphModel->removeAttribute(attributeName);
+
+            _graphModel->addAttributes(_cache.attributes());
+
+            return false;
+        }
+
         _cache = std::move(newCache);
 
         return changed;
@@ -126,6 +167,12 @@ void TransformedGraph::rebuild()
 
     emit graphChanged(this, _graphChangeOccurred);
     clearPhase();
+}
+
+void TransformedGraph::setCurrentTransform(GraphTransform* currentTransform)
+{
+    std::unique_lock<std::mutex> lock(_currentTransformMutex);
+    _currentTransform = currentTransform;
 }
 
 void TransformedGraph::onTargetGraphChanged(const Graph*)

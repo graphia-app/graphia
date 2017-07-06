@@ -5,6 +5,7 @@
 #include "shared/graph/elementtype.h"
 
 #include "shared/utils/qmlenum.h"
+#include "shared/utils/cancellable.h"
 
 #include "transforminfo.h"
 #include "graphtransformparameter.h"
@@ -20,12 +21,13 @@ class GraphModel;
 class TransformedGraph;
 class Attribute;
 
-class GraphTransform
+class GraphTransform : public Cancellable
 {
 public:
     GraphTransform() = default;
     virtual ~GraphTransform() = default;
 
+    // Return value indicates that the graph changed
     virtual bool apply(TransformedGraph&) const { return false; }
     bool applyAndUpdate(TransformedGraph& target) const;
 

@@ -37,6 +37,10 @@ public:
 
     bool execute();
     void undo();
+
+    void cancel();
+
+    bool cancellable() const { return true; }
 };
 
 #endif // APPLYTRANSFORMSCOMMAND_H

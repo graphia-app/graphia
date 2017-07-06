@@ -54,3 +54,10 @@ void ApplyTransformsCommand::undo()
     // Restore the selection to what it was prior to the transformation
     _selectionManager->selectNodes(_selectedNodeIds);
 }
+
+void ApplyTransformsCommand::cancel()
+{
+    ICommand::cancel();
+
+    _graphModel->cancelTransformBuild();
+}

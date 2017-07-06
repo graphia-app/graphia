@@ -13,6 +13,8 @@
 #include <QObject>
 
 #include <functional>
+#include <atomic>
+#include <mutex>
 
 class GraphModel;
 class ICommand;
@@ -25,7 +27,8 @@ public:
     explicit TransformedGraph(GraphModel& graphModel, const MutableGraph& source);
 
     void enableAutoRebuild() { _autoRebuild = true; rebuild(); }
-    void addTransform(std::unique_ptr<const GraphTransform> t) { _transforms.emplace_back(std::move(t)); }
+    void cancelRebuild();
+    void addTransform(std::unique_ptr<GraphTransform> t) { _transforms.emplace_back(std::move(t)); }
     void clearTransforms() { _transforms.clear(); }
 
     void setCommand(ICommand* command) { _command = command; }
@@ -63,7 +66,7 @@ private:
     GraphModel* _graphModel = nullptr;
 
     const MutableGraph* _source;
-    std::vector<std::unique_ptr<const GraphTransform>> _transforms;
+    std::vector<std::unique_ptr<GraphTransform>> _transforms;
 
     // TransformedGraph has the target as a member rather than inheriting
     // from MutableGraph for two reasons:
@@ -77,6 +80,11 @@ private:
     bool _graphChangeOccurred = false;
     bool _autoRebuild = false;
     ICommand* _command = nullptr;
+
+    std::atomic_bool _cancelled;
+
+    std::mutex _currentTransformMutex;
+    GraphTransform* _currentTransform = nullptr;
 
     class State
     {
@@ -98,6 +106,8 @@ private:
     EdgeArray<State> _previousEdgesState;
 
     void rebuild();
+
+    void setCurrentTransform(GraphTransform* currentTransform);
 
 private slots:
     void onTargetGraphChanged(const Graph* graph);

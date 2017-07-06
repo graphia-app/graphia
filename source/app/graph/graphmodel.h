@@ -92,6 +92,7 @@ public:
 
     bool graphTransformIsValid(const QString& transform) const;
     void buildTransforms(const QStringList& transforms, ICommand* command = nullptr);
+    void cancelTransformBuild();
 
     QStringList availableTransformNames() const;
     const GraphTransformFactory* transformFactory(const QString& transformName) const;
@@ -120,6 +121,7 @@ public:
 
     void addAttribute(const QString& name, const Attribute& attribute);
     void addAttributes(const std::map<QString, Attribute>& attributes);
+    void removeAttribute(const QString& name);
 
     const Attribute* attributeByName(const QString& name) const;
     Attribute attributeValueByName(const QString& name) const;
