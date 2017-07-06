@@ -14,7 +14,6 @@ HEADERS += \
     $$PWD/graph/igraph.h \
     $$PWD/graph/igraphmodel.h \
     $$PWD/graph/imutablegraph.h \
-    $$PWD/loading/baseparser.h \
     $$PWD/loading/gmlfileparser.h \
     $$PWD/loading/graphmlparser.h \
     $$PWD/loading/iparser.h \

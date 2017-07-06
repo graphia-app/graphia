@@ -1,12 +1,12 @@
 #ifndef PAIRWISETXTFILEPARSER_H
 #define PAIRWISETXTFILEPARSER_H
 
-#include "shared/loading/baseparser.h"
+#include "shared/loading/iparser.h"
 
 class BaseGenericPluginInstance;
 class UserNodeData;
 
-class PairwiseTxtFileParser : public BaseParser
+class PairwiseTxtFileParser : public IParser
 {
 private:
     BaseGenericPluginInstance* _genericPluginInstance;

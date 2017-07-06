@@ -1,11 +1,11 @@
 #ifndef GMLFILEPARSER_H
 #define GMLFILEPARSER_H
 
-#include "shared/loading/baseparser.h"
+#include "shared/loading/iparser.h"
 
 class UserNodeData;
 
-class GmlFileParser: public BaseParser
+class GmlFileParser: public IParser
 {
 private:
     UserNodeData* _userNodeData;

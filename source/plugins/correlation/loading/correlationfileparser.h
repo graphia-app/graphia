@@ -1,12 +1,12 @@
 #ifndef CORRELATIONFILEPARSER_H
 #define CORRELATIONFILEPARSER_H
 
-#include "shared/loading/baseparser.h"
+#include "shared/loading/iparser.h"
 #include <QString>
 
 class CorrelationPluginInstance;
 
-class CorrelationFileParser : public BaseParser
+class CorrelationFileParser : public IParser
 {
 private:
     CorrelationPluginInstance* _plugin;

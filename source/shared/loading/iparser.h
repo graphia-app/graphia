@@ -3,10 +3,12 @@
 
 #include <functional>
 
+#include "shared/utils/cancellable.h"
+
 class QUrl;
 class IMutableGraph;
 
-class IParser
+class IParser : public Cancellable
 {
 public:
     virtual ~IParser() = default;
@@ -16,7 +18,6 @@ public:
     virtual bool parse(const QUrl& url,
                        IMutableGraph& mutableGraph,
                        const ProgressFn& progressReportFn) = 0;
-    virtual void cancel() = 0;
 };
 
 #endif // IPARSER_H

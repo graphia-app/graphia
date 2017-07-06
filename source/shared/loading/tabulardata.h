@@ -2,7 +2,7 @@
 #define TABULARDATA_H
 
 #include "shared/graph/imutablegraph.h"
-#include "shared/loading/baseparser.h"
+#include "shared/loading/iparser.h"
 #include "shared/utils/utils.h"
 
 #include "thirdparty/utfcpp/utf8.h"
@@ -37,13 +37,13 @@ public:
     void setValueAt(size_t column, size_t row, std::string&& value);
 };
 
-template<const char Delimiter> class TextDelimitedTabularDataParser : public BaseParser
+template<const char Delimiter> class TextDelimitedTabularDataParser : public IParser
 {
     static_assert(Delimiter != '\"', "Delimiter cannot be a quotemark");
 
 private:
     TabularData _tabularData;
-    const BaseParser* _parentParser = nullptr;
+    const IParser* _parentParser = nullptr;
 
     template<typename TokenFn>
     bool parse(const QUrl& url, const ProgressFn& progress, TokenFn tokenFn)
@@ -150,7 +150,7 @@ public:
         });
     }
 
-    void setParentParser(const BaseParser* parentParser) { _parentParser = parentParser; }
+    void setParentParser(const IParser* parentParser) { _parentParser = parentParser; }
 
     TabularData& tabularData() { return _tabularData; }
 };

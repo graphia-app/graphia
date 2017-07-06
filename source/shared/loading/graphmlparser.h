@@ -1,7 +1,7 @@
 #ifndef GRAPHMLPARSER_H
 #define GRAPHMLPARSER_H
 
-#include "shared/loading/baseparser.h"
+#include "shared/loading/iparser.h"
 #include "shared/plugins/basegenericplugin.h"
 #include "shared/graph/imutablegraph.h"
 #include <QtXml/QXmlDefaultHandler>
@@ -101,7 +101,7 @@ public:
     bool fatalError(const QXmlParseException &exception);
 };
 
-class GraphMLParser: public BaseParser
+class GraphMLParser: public IParser
 {
 private:
     UserNodeData* _userNodeData;
