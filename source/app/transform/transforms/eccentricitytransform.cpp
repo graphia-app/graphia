@@ -33,6 +33,9 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
     concurrent_for(nodeIds.begin(), nodeIds.end(),
                    [this, &maxDistances, &progress, &target](const NodeId source)
     {
+        if(cancelled())
+            return;
+
         NodeArray<float> distance(_graphModel->graph());
         NodeArray<bool> visited(_graphModel->graph());
 
@@ -47,6 +50,9 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
 
         while(!queue.empty())
         {
+            if(cancelled())
+                return;
+
             auto nodeId = queue.top();
             queue.pop();
 
@@ -79,6 +85,9 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
         progress++;
         target.setProgress(progress.load() * 100 / static_cast<int>(target.numNodes()));
     }, true);
+
+    if(cancelled())
+        return;
 
     _graphModel->createAttribute(QObject::tr("Node Eccentricity"))
         .setDescription("A node's eccentricity is the length of the shortest path to the furthest node.")

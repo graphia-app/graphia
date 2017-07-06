@@ -67,6 +67,9 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
               iterationCount < PAGERANK_ITERATION_LIMIT &&
               pagerankAcceleration > PAGERANK_ACCELERATION_MINIMUM)
         {
+            if(cancelled())
+                return;
+
             target.setPhase(QString("PageRank Iteration %1").arg(
                                 QString::number(totalIterationCount + 1)));
 

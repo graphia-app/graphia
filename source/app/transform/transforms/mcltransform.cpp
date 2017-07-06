@@ -388,6 +388,9 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
     int iter = 0;
     do
     {
+        if(cancelled())
+            return;
+
         target.setPhase(QString("MCL Iteration %1").arg(QString::number(iter + 1)));
         if(_debugMatrices)
         {
