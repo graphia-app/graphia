@@ -63,6 +63,9 @@ public:
     void add(Result&& result);
     void attributeAdded(const QString& attributeName);
     Result apply(const GraphTransformConfig& config, TransformedGraph& graph);
+
+    const MutableGraph* graph() const;
+    std::map<QString, Attribute> attributes() const;
 };
 
 #endif // TRANSFORMCACHE_H

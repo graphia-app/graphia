@@ -147,3 +147,34 @@ TransformCache::Result TransformCache::apply(const GraphTransformConfig& config,
 
     return result;
 }
+
+const MutableGraph* TransformCache::graph() const
+{
+    // Return the last graph in the cache
+    for(const auto& resultSet : make_iterator_range(_cache.rbegin(), _cache.rend()))
+    {
+        for(const auto& cachedResult : make_iterator_range(resultSet.rbegin(), resultSet.rend()))
+        {
+            if(cachedResult._graph != nullptr)
+                return cachedResult._graph.get();
+        }
+    }
+
+    return nullptr;
+}
+
+std::map<QString, Attribute> TransformCache::attributes() const
+{
+    std::map<QString, Attribute> map;
+
+    for(const auto& resultSet : _cache)
+    {
+        for(const auto& cachedResult : resultSet)
+        {
+            const auto& newAttributes = cachedResult._newAttributes;
+            map.insert(newAttributes.begin(), newAttributes.end());
+        }
+    }
+
+    return map;
+}
