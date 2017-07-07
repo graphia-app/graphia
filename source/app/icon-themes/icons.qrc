@@ -55,6 +55,9 @@
 		<file>Tango/16x16/apps/preferences-system-windows.png</file>
 		<file>Tango/22x22/apps/preferences-system-windows.png</file>
 		<file>Tango/32x32/apps/preferences-system-windows.png</file>
+		<file>Tango/16x16/actions/process-stop.png</file>
+		<file>Tango/22x22/actions/process-stop.png</file>
+		<file>Tango/32x32/actions/process-stop.png</file>
 		<file>Tango/16x16/actions/tab-new.png</file>
 		<file>Tango/22x22/actions/tab-new.png</file>
 		<file>Tango/32x32/actions/tab-new.png</file>

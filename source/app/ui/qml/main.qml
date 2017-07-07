@@ -1173,7 +1173,7 @@ ApplicationWindow
                 implicitHeight: progressBar.implicitHeight * 0.8
                 implicitWidth: implicitHeight
 
-                iconName: "stop"
+                iconName: "process-stop"
                 visible: currentDocument ? currentDocument.commandIsCancellable && !cancelledIndicator.visible: false
                 onClicked:
                 {
