@@ -25,26 +25,25 @@ QString ApplyVisualisationsCommand::verb() const
     return QObject::tr("Applying Visualisations");
 }
 
-void ApplyVisualisationsCommand::apply(const QStringList& visualisations)
+void ApplyVisualisationsCommand::apply(const QStringList& visualisations,
+                                       const QStringList& previousVisualisations)
 {
     _graphModel->buildVisualisations(visualisations);
 
-    if(cancelled())
-        return;
-
-    _document->executeOnMainThreadAndWait([this, visualisations]
+    _document->executeOnMainThreadAndWait(
+    [this, newVisualisations = cancelled() ? previousVisualisations : visualisations]
     {
-        _document->setVisualisations(visualisations);
+        _document->setVisualisations(newVisualisations);
     }, "setVisualisations");
 }
 
 bool ApplyVisualisationsCommand::execute()
 {
-    apply(_visualisations);
+    apply(_visualisations, _previousVisualisations);
     return true;
 }
 
 void ApplyVisualisationsCommand::undo()
 {
-    apply(_previousVisualisations);
+    apply(_previousVisualisations, _visualisations);
 }

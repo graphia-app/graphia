@@ -19,7 +19,8 @@ private:
     QStringList _previousVisualisations;
     QStringList _visualisations;
 
-    void apply(const QStringList& visualisations);
+    void apply(const QStringList& visualisations,
+               const QStringList& previousVisualisations);
 
 public:
     ApplyVisualisationsCommand(GraphModel* graphModel,

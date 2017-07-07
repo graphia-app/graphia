@@ -28,28 +28,26 @@ QString ApplyTransformsCommand::verb() const
     return QObject::tr("Applying Transforms");
 }
 
-void ApplyTransformsCommand::doTransform(const QStringList& transformations)
+void ApplyTransformsCommand::doTransform(const QStringList& transformations, const QStringList& previousTransformations)
 {
     _graphModel->buildTransforms(transformations, this);
 
-    if(cancelled())
-        return;
-
-    _document->executeOnMainThreadAndWait([this, transformations]
+    _document->executeOnMainThreadAndWait(
+    [this, newTransformations = cancelled() ? previousTransformations : transformations]
     {
-        _document->setTransforms(transformations);
+        _document->setTransforms(newTransformations);
     }, "setTransforms");
 }
 
 bool ApplyTransformsCommand::execute()
 {
-    doTransform(_transformations);
+    doTransform(_transformations, _previousTransformations);
     return true;
 }
 
 void ApplyTransformsCommand::undo()
 {
-    doTransform(_previousTransformations);
+    doTransform(_previousTransformations, _transformations);
 
     // Restore the selection to what it was prior to the transformation
     _selectionManager->selectNodes(_selectedNodeIds);

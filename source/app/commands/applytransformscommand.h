@@ -23,7 +23,8 @@ private:
 
     const NodeIdSet _selectedNodeIds;
 
-    void doTransform(const QStringList& transformations);
+    void doTransform(const QStringList& transformations,
+                     const QStringList& previousTransformations);
 
 public:
     ApplyTransformsCommand(GraphModel* graphModel,
