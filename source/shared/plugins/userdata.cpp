@@ -17,12 +17,7 @@ int UserData::numUserDataVectors() const
 
 int UserData::numValues() const
 {
-    int maxSize = 0;
-
-    for(auto& userDataVector : _userDataVectors)
-        maxSize = std::max(maxSize, userDataVector.second.numValues());
-
-    return maxSize;
+    return _numValues;
 }
 
 void UserData::add(const QString& name)
@@ -43,7 +38,10 @@ void UserData::setValue(size_t index, const QString& name, const QString& value)
                            [&name](const auto& it2) { return it2.first == name; });
 
     if(it != _userDataVectors.end())
+    {
         it->second.set(index, value);
+        _numValues = std::max(_numValues, it->second.numValues());
+    }
 }
 
 QVariant UserData::value(size_t index, const QString& name) const

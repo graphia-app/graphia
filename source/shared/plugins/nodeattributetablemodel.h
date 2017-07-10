@@ -34,6 +34,7 @@ private:
 
     QHash<int, QByteArray> _roleNames;
     bool _showCalculatedAttributes = true;
+    int _columnCount = 0;
 
     QStringList columnNames() const;
 public:

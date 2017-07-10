@@ -54,6 +54,8 @@ void NodeAttributeTableModel::refreshRoleNames()
         _roleNames.insert(nextRole, name.toUtf8());
         nextRole++;
     }
+
+    _columnCount = columnNames().size();
 }
 
 void NodeAttributeTableModel::showCalculatedAttributes(bool shouldShow)
@@ -89,7 +91,7 @@ int NodeAttributeTableModel::rowCount(const QModelIndex&) const
 
 int NodeAttributeTableModel::columnCount(const QModelIndex&) const
 {
-    return static_cast<int>(columnNames().size());
+    return _columnCount;
 }
 
 QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const

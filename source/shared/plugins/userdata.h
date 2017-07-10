@@ -18,6 +18,7 @@ class UserData : public QObject
 private:
     std::vector<std::pair<QString, UserDataVector>> _userDataVectors;
     QString _firstUserDataVectorName;
+    int _numValues = 0;
 
 protected:
     const QString firstUserDataVectorName() const;
