@@ -21,7 +21,9 @@ CommandManager::~CommandManager()
 {
     if(_thread.joinable())
     {
-        _currentCommand->cancel();
+        if(_currentCommand != nullptr)
+            _currentCommand->cancel();
+
         _thread.join();
     }
 
