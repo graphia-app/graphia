@@ -1174,6 +1174,8 @@ ApplicationWindow
                 implicitWidth: implicitHeight
 
                 iconName: "process-stop"
+                tooltip: qsTr("Cancel")
+
                 visible: currentDocument ? currentDocument.commandIsCancellable && !cancelledIndicator.visible: false
                 onClicked:
                 {
