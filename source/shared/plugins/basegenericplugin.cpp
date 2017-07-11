@@ -8,7 +8,7 @@ BaseGenericPluginInstance::BaseGenericPluginInstance()
 {
     connect(this, SIGNAL(loadSuccess()), this, SLOT(onLoadSuccess()));
     connect(this, SIGNAL(selectionChanged(const ISelectionManager*)),
-            this, SLOT(onSelectionChanged(const ISelectionManager*)));
+            this, SLOT(onSelectionChanged(const ISelectionManager*)), Qt::DirectConnection);
 }
 
 void BaseGenericPluginInstance::initialise(IGraphModel* graphModel, ISelectionManager* selectionManager,
@@ -66,7 +66,7 @@ void BaseGenericPluginInstance::onLoadSuccess()
 {
     _userNodeData.setNodeNamesToFirstUserDataVector(*graphModel());
     _userNodeData.exposeAsAttributes(*graphModel());
-    _nodeAttributeTableModel.refreshRoleNames();
+    _nodeAttributeTableModel.updateRoleNames();
 }
 
 void BaseGenericPluginInstance::onSelectionChanged(const ISelectionManager*)

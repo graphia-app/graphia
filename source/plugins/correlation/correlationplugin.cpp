@@ -10,7 +10,7 @@ CorrelationPluginInstance::CorrelationPluginInstance()
 {
     connect(this, SIGNAL(loadSuccess()), this, SLOT(onLoadSuccess()));
     connect(this, SIGNAL(selectionChanged(const ISelectionManager*)),
-            this, SLOT(onSelectionChanged(const ISelectionManager*)));
+            this, SLOT(onSelectionChanged(const ISelectionManager*)), Qt::DirectConnection);
     connect(this, SIGNAL(visualsChanged()), this, SIGNAL(nodeColorsChanged()));
 }
 
@@ -317,7 +317,7 @@ void CorrelationPluginInstance::onLoadSuccess()
 {
     _userNodeData.setNodeNamesToFirstUserDataVector(*graphModel());
     _userNodeData.exposeAsAttributes(*graphModel());
-    _nodeAttributeTableModel.refreshRoleNames();
+    _nodeAttributeTableModel.updateRoleNames();
 }
 
 QVector<double> CorrelationPluginInstance::rawData()

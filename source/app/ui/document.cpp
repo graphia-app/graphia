@@ -434,7 +434,7 @@ void Document::onLoadComplete(bool success)
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::canDeleteChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::onSelectionChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged,
-            _graphModel.get(), &GraphModel::onSelectionChanged, Qt::DirectConnection);
+            _graphModel.get(), &GraphModel::onSelectionChanged);
 
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, this, &Document::onFoundNodeIdsChanged);
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged,

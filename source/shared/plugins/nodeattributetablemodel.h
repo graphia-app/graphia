@@ -12,6 +12,7 @@
 #include <set>
 
 class UserNodeData;
+class Graph;
 
 class NodeAttributeTableModel : public QAbstractTableModel
 {
@@ -33,10 +34,19 @@ private:
     };
 
     QHash<int, QByteArray> _roleNames;
+    QVector<QVariant> _updatedData; // Update occurs here, before being moved to _cachedData
+    QVector<QVariant> _cachedData;
+
     bool _showCalculatedAttributes = true;
     int _columnCount = 0;
 
     QStringList columnNames() const;
+    void update();
+
+private slots:
+    void onUpdateComplete();
+    void onGraphChanged(const Graph*, bool);
+
 public:
     explicit NodeAttributeTableModel();
 
@@ -50,11 +60,13 @@ public:
     QHash<int, QByteArray> roleNames() const { return _roleNames; }
 
     void onSelectionChanged();
-    void refreshRoleNames();
+    void updateRoleNames();
     void showCalculatedAttributes(bool shouldShow);
+
 public slots:
     void onAttributeAdded(const QString& name);
     void onAttributeRemoved(const QString& name);
+
 signals:
     void columnNamesChanged();
 };
