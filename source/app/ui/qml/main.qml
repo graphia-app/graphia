@@ -163,6 +163,13 @@ ApplicationWindow
         title: qsTr("Error Opening File")
     }
 
+    MessageDialog
+    {
+        id: errorSavingFileMessageDialog
+        icon: StandardIcon.Critical
+        title: qsTr("Error Saving File")
+    }
+
     OptionsDialog
     {
         id: optionsDialog
@@ -405,6 +412,21 @@ ApplicationWindow
         tabView.openInCurrentTab(fileUrl, fileType, pluginName, parameters);
     }
 
+    function saveFile(fileUrl)
+    {
+        if(currentDocument === null)
+            return false;
+
+        if(!currentDocument.saveFile(fileUrl))
+        {
+            errorSavingFileMessageDialog.text = qmlUtils.baseFileNameForUrl(fileUrl) +
+                    qsTr(" could not be saved.");
+            errorSavingFileMessageDialog.open();
+        }
+        else
+            currentDocument.savedFileUrl = fileUrl;
+    }
+
     Labs.FileDialog
     {
         id: fileOpenDialog
@@ -416,6 +438,16 @@ ApplicationWindow
         }
 
         property bool inTab: false
+    }
+
+    Labs.FileDialog
+    {
+        id: fileSaveDialog
+        title: qsTr("Save File...")
+        fileMode: Labs.FileDialog.SaveFile
+        defaultSuffix: selectedNameFilter.extensions[0]
+        nameFilters: [ application.name + " files (*." + application.name.toLowerCase() + ")", "All files (*)" ]
+        onAccepted: { saveFile(file); }
     }
 
     Action
@@ -460,6 +492,40 @@ ApplicationWindow
         onTriggered:
         {
             openFile(qmlUtils.urlForFileName(source.text), true);
+        }
+    }
+
+    Action
+    {
+        id: fileSaveAction
+        iconName: "document-save"
+        text: qsTr("&Save...")
+        shortcut: "Ctrl+S"
+        enabled: currentDocument
+        onTriggered:
+        {
+            if(currentDocument === null)
+                return;
+
+            if(Qt.resolvedUrl(currentDocument.savedFileUrl).length === 0)
+            {
+                fileSaveAsAction.trigger();
+                return;
+            }
+
+            saveFile(currentDocument.savedFileUrl);
+        }
+    }
+
+    Action
+    {
+        id: fileSaveAsAction
+        iconName: "document-save"
+        text: qsTr("&Save As...")
+        enabled: currentDocument
+        onTriggered:
+        {
+            fileSaveDialog.open();
         }
     }
 
@@ -852,8 +918,6 @@ ApplicationWindow
             title: qsTr("&File")
             MenuItem { action: fileOpenAction }
             MenuItem { action: fileOpenInTabAction }
-            MenuItem { action: closeTabAction }
-            MenuItem { action: closeAllTabsAction }
             Menu
             {
                 id: recentFileMenu;
@@ -878,7 +942,12 @@ ApplicationWindow
                 }
             }
             MenuSeparator {}
+            MenuItem { action: fileSaveAction }
+            MenuItem { action: fileSaveAsAction }
             MenuItem { action: saveImageAction }
+            MenuSeparator {}
+            MenuItem { action: closeTabAction }
+            MenuItem { action: closeAllTabsAction }
             MenuSeparator {}
             MenuItem { action: quitAction }
         }

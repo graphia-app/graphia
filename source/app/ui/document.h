@@ -100,7 +100,7 @@ public:
     bool canResetView() const;
     bool canEnterOverviewMode() const;
 
-    void setTitle(const QString& status);
+    void setTitle(const QString& title);
     void setStatus(const QString& status);
 
     QQmlVariantListModel* transformsModel() { return &_graphTransformsModel; }
@@ -221,6 +221,8 @@ public:
                               const QString& fileType,
                               const QString& pluginName,
                               const QVariantMap& parameters);
+
+    Q_INVOKABLE bool saveFile(const QUrl& fileUrl);
 
     Q_INVOKABLE void onPreferenceChanged(const QString& key, const QVariant& value);
 

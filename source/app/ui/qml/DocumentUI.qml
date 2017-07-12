@@ -16,13 +16,23 @@ Item
 {
     id: root
 
+    QmlUtils { id: qmlUtils }
+
     property Application application
 
     property url fileUrl
+    property url savedFileUrl
     property string fileType
     property string pluginName
 
-    property string title: document.title
+    property string title:
+    {
+        if(Qt.resolvedUrl(savedFileUrl).length !== 0)
+            return qmlUtils.baseFileNameForUrl(savedFileUrl);
+        else
+            return qmlUtils.baseFileNameForUrl(fileUrl);
+    }
+
     property string status: document.status
 
     property bool idle: document.idle
@@ -147,6 +157,11 @@ Item
         this.pluginName = pluginName;
 
         return true;
+    }
+
+    function saveFile(fileUrl)
+    {
+        return document.saveFile(fileUrl);
     }
 
     function toggleLayout() { document.toggleLayout(); }

@@ -352,6 +352,17 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
     return true;
 }
 
+bool Document::saveFile(const QUrl& fileUrl)
+{
+    if(false/*success*/)
+    {
+        setTitle(fileUrl.fileName());
+        return true;
+    }
+
+    return false;
+}
+
 void Document::onPreferenceChanged(const QString& key, const QVariant&)
 {
     if(key == "visuals/backgroundColor")
