@@ -6,6 +6,8 @@ import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.2
 
+import Qt.labs.platform 1.0 as Labs
+
 import com.kajeka 1.0
 import "Utils.js" as Utils
 
@@ -405,12 +407,11 @@ ApplicationWindow
         tabView.openInCurrentTab(fileUrl, fileType, pluginName, parameters);
     }
 
-    FileDialog
+    Labs.FileDialog
     {
         id: fileOpenDialog
-        modality: Qt.WindowModal
         nameFilters: application.nameFilters
-        onAccepted: openFile(fileUrl, inTab)
+        onAccepted: openFile(file, inTab)
         onFolderChanged: misc.fileOpenInitialFolder = folder.toString();
         property bool inTab: false
     }

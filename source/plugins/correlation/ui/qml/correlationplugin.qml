@@ -3,6 +3,8 @@ import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 
+import Qt.labs.platform 1.0 as Labs
+
 import com.kajeka 1.0
 
 PluginContent
@@ -158,14 +160,16 @@ PluginContent
         }
     }
 
-    FileDialog
+    Labs.FileDialog
     {
         id: imageSaveDialog
         visible: false
-        selectExisting: false
+        fileMode: Labs.FileDialog.SaveFile
+        defaultSuffix: selectedNameFilter.extensions[0]
+        selectedNameFilter.index: 1
         title: "Save plot as…"
         nameFilters: [ "PDF Document (*.pdf)", "PNG Image (*.png)", "JPEG Image (*.jpg *.jpeg)" ]
-        onAccepted: plot.savePlotImage(imageSaveDialog.fileUrl, imageSaveDialog.selectedNameFilter);
+        onAccepted: { plot.savePlotImage(file, selectedNameFilter.extensions); }
     }
 }
 

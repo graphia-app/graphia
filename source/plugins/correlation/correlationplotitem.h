@@ -29,7 +29,7 @@ public:
     explicit CorrelationPlotItem(QQuickItem* parent = nullptr);
     void paint(QPainter* painter);
 
-    Q_INVOKABLE void savePlotImage(const QUrl& url, const QString& format);
+    Q_INVOKABLE void savePlotImage(const QUrl& url, const QStringList& extensions);
 
 protected:
     void routeMouseEvent(QMouseEvent* event);

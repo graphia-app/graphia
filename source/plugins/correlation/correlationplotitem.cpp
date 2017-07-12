@@ -402,13 +402,13 @@ void CorrelationPlotItem::hideTooltip()
     update();
 }
 
-void CorrelationPlotItem::savePlotImage(const QUrl& url, const QString& format)
+void CorrelationPlotItem::savePlotImage(const QUrl& url, const QStringList& extensions)
 {
-    if(format.contains("png"))
+    if(extensions.contains("png"))
         _customPlot.savePng(url.toLocalFile());
-    else if(format.contains("pdf"))
+    else if(extensions.contains("pdf"))
         _customPlot.savePdf(url.toLocalFile());
-    else if(format.contains("jpg"))
+    else if(extensions.contains("jpg"))
         _customPlot.saveJpg(url.toLocalFile());
 
     QDesktopServices::openUrl(url);
