@@ -25,13 +25,18 @@ Item
     property string fileType
     property string pluginName
 
+    property bool hasBeenSaved: { return Qt.resolvedUrl(savedFileUrl).length !== 0; }
+
     property string title:
     {
-        if(Qt.resolvedUrl(savedFileUrl).length !== 0)
+        if(hasBeenSaved)
             return qmlUtils.baseFileNameForUrl(savedFileUrl);
-        else
+        else if(Qt.resolvedUrl(fileUrl).length !== 0)
             return qmlUtils.baseFileNameForUrl(fileUrl);
+
+        return "";
     }
+
 
     property string status: document.status
 

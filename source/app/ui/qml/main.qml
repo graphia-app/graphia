@@ -507,7 +507,7 @@ ApplicationWindow
             if(currentDocument === null)
                 return;
 
-            if(Qt.resolvedUrl(currentDocument.savedFileUrl).length === 0)
+            if(!currentDocument.hasBeenSaved)
             {
                 fileSaveAsAction.trigger();
                 return;
@@ -525,6 +525,17 @@ ApplicationWindow
         enabled: currentDocument
         onTriggered:
         {
+            if(currentDocument === null)
+                return;
+
+            if(!currentDocument.hasBeenSaved)
+            {
+                fileSaveDialog.currentFile = qmlUtils.replaceExtension(currentDocument.fileUrl,
+                    application.name.toLowerCase());
+            }
+            else
+                fileSaveDialog.currentFile = currentDocument.savedFileUrl;
+
             fileSaveDialog.open();
         }
     }
