@@ -153,7 +153,7 @@ PluginContent
 
         MenuItem
         {
-            text: "Save plot as..."
+            text: "Save plot as…"
             onTriggered: imageSaveDialog.open();
         }
     }
@@ -163,7 +163,7 @@ PluginContent
         id: imageSaveDialog
         visible: false
         selectExisting: false
-        title: "Save plot as..."
+        title: "Save plot as…"
         nameFilters: [ "PDF Document (*.pdf)", "PNG Image (*.png)", "JPEG Image (*.jpg *.jpeg)" ]
         onAccepted: plot.savePlotImage(imageSaveDialog.fileUrl, imageSaveDialog.selectedNameFilter);
     }

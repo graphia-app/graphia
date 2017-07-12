@@ -419,11 +419,11 @@ ApplicationWindow
     {
         id: fileOpenAction
         iconName: "document-open"
-        text: qsTr("&Open...")
+        text: qsTr("&Open…")
         shortcut: "Ctrl+O"
         onTriggered:
         {
-            fileOpenDialog.title = qsTr("Open File...");
+            fileOpenDialog.title = qsTr("Open File…");
             fileOpenDialog.inTab = false;
             fileOpenDialog.open()
         }
@@ -433,11 +433,11 @@ ApplicationWindow
     {
         id: fileOpenInTabAction
         iconName: "tab-new"
-        text: qsTr("Open In New &Tab...")
+        text: qsTr("Open In New &Tab…")
         shortcut: "Ctrl+T"
         onTriggered:
         {
-            fileOpenDialog.title = qsTr("Open File In New Tab...");
+            fileOpenDialog.title = qsTr("Open File In New Tab…");
             fileOpenDialog.inTab = true;
             fileOpenDialog.open()
         }
@@ -573,7 +573,7 @@ ApplicationWindow
     {
         id: optionsAction
         iconName: "applications-system"
-        text: qsTr("&Options...")
+        text: qsTr("&Options…")
         onTriggered:
         {
             optionsDialog.raise();
@@ -735,7 +735,7 @@ ApplicationWindow
     {
         id: aboutPluginsAction
         // Don't ask...
-        text: Qt.platform.os === "osx" ? qsTr("Plugins...") : qsTr("About Plugins...")
+        text: Qt.platform.os === "osx" ? qsTr("Plugins…") : qsTr("About Plugins…")
         onTriggered:
         {
             aboutpluginsDialog.raise();
@@ -947,7 +947,7 @@ ApplicationWindow
 
             MenuItem
             {
-                text: qsTr("About " + application.name + "...")
+                text: qsTr("About " + application.name + "…")
                 onTriggered:
                 {
                     aboutMessageDialog.open();

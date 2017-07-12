@@ -168,7 +168,7 @@ Rectangle
         {
             Layout.alignment: Qt.AlignHCenter
 
-            text: qsTr("Signing In...")
+            text: qsTr("Signing In…")
             font.pointSize: 22
         }
     }
