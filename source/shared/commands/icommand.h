@@ -21,7 +21,7 @@ public:
 
     // Return false if the command failed, or did nothing
     virtual bool execute() = 0;
-    virtual void undo() { Q_ASSERT(!"undo() not implmented for this ICommand"); }
+    virtual void undo() { Q_ASSERT(!"undo() not implemented for this ICommand"); }
 
     virtual void setProgress(int progress) { _progress = progress; }
     virtual int progress() const { return _progress; }
