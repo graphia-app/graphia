@@ -3,6 +3,7 @@ import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.2
 import QtQml.Models 2.2
+import QtQuick.Dialogs 1.2
 
 import com.kajeka 1.0
 
@@ -662,6 +663,13 @@ Item
         find.show();
     }
 
+    MessageDialog
+    {
+        id: errorSavingFileMessageDialog
+        icon: StandardIcon.Critical
+        title: qsTr("Error Saving File")
+    }
+
     Document
     {
         id: document
@@ -695,6 +703,18 @@ Item
                 plugin.loaded = true;
                 loadComplete();
             }
+        }
+
+        onSaveComplete:
+        {
+            if(!success)
+            {
+                errorSavingFileMessageDialog.text = qmlUtils.baseFileNameForUrl(fileUrl) +
+                        qsTr(" could not be saved.");
+                errorSavingFileMessageDialog.open();
+            }
+            else
+                savedFileUrl = fileUrl;
         }
     }
 

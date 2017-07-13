@@ -215,6 +215,8 @@ signals:
 
     void taskAddedToExecutor();
 
+    void saveComplete(QUrl fileUrl, bool success);
+
 public:
     // Main QML interface
     Q_INVOKABLE bool openFile(const QUrl& fileUrl,
@@ -222,7 +224,7 @@ public:
                               const QString& pluginName,
                               const QVariantMap& parameters);
 
-    Q_INVOKABLE bool saveFile(const QUrl& fileUrl);
+    Q_INVOKABLE void saveFile(const QUrl& fileUrl);
 
     Q_INVOKABLE void onPreferenceChanged(const QString& key, const QVariant& value);
 

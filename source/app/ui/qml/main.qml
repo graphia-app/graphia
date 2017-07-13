@@ -163,13 +163,6 @@ ApplicationWindow
         title: qsTr("Error Opening File")
     }
 
-    MessageDialog
-    {
-        id: errorSavingFileMessageDialog
-        icon: StandardIcon.Critical
-        title: qsTr("Error Saving File")
-    }
-
     OptionsDialog
     {
         id: optionsDialog

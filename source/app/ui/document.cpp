@@ -8,7 +8,9 @@
 #include "shared/utils/utils.h"
 
 #include "graph/graphmodel.h"
+
 #include "loading/parserthread.h"
+#include "loading/saver.h"
 
 #include "layout/forcedirectedlayout.h"
 #include "layout/layout.h"
@@ -352,15 +354,26 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
     return true;
 }
 
-bool Document::saveFile(const QUrl& fileUrl)
+void Document::saveFile(const QUrl& fileUrl)
 {
-    if(false/*success*/)
-    {
-        setTitle(fileUrl.fileName());
-        return true;
-    }
+    Saver saver(fileUrl);
 
-    return false;
+    saver.addGraph(_graphModel->mutableGraph());
+    saver.addNodePositions(_graphModel->nodePositions());
+
+    _commandManager.executeOnce(
+        {
+            QString(tr("Save %1")).arg(fileUrl.fileName()),
+            QString(tr("Saving %1")).arg(fileUrl.fileName()),
+            QString(tr("Saved %1")).arg(fileUrl.fileName())
+        },
+    [this, fileUrl, saver = std::move(saver)](Command&) mutable
+    {
+        auto success = saver.encode();
+        emit saveComplete(fileUrl, success);
+
+        return success;
+    });
 }
 
 void Document::onPreferenceChanged(const QString& key, const QVariant&)
