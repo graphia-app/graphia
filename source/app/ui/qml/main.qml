@@ -1234,6 +1234,8 @@ ApplicationWindow
                 currentDocument.application = application;
                 if(!currentDocument.openFile(fileUrl, fileType, pluginName, parameters))
                 {
+                    removeTab(tabView.currentIndex);
+
                     errorOpeningFileMessageDialog.text = qmlUtils.baseFileNameForUrl(fileUrl) +
                             qsTr(" could not be opened due to an error.");
                     errorOpeningFileMessageDialog.open();
