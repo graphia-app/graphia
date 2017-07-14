@@ -2,6 +2,7 @@
 
 #include "graph/mutablegraph.h"
 
+#include "shared/plugins/iplugin.h"
 #include "shared/utils/utils.h"
 
 #include <atomic>
@@ -19,9 +20,10 @@ ParserThread::~ParserThread()
         _thread.join();
 }
 
-void ParserThread::start(std::unique_ptr<IParser> parser)
+void ParserThread::start(std::unique_ptr<IParser> parser, IPluginInstance* pluginInstance)
 {
     _parser = std::move(parser);
+    _pluginInstance = pluginInstance;
     _thread = std::thread(&ParserThread::run, this);
 }
 
@@ -43,7 +45,7 @@ void ParserThread::run()
             std::atomic<int> percentage;
             percentage = -1;
 
-            result = _parser->parse(_url, graph,
+            result = _parser->parse(_url, graph, *_pluginInstance,
                 [this, &percentage](int newPercentage)
                 {
 #ifdef _DEBUG

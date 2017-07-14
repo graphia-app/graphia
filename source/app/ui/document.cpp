@@ -349,7 +349,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
         _graphModel->buildVisualisations(_pluginInstance->defaultVisualisations());
     });
     connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::onLoadComplete);
-    _graphFileParserThread->start(std::move(parser));
+    _graphFileParserThread->start(std::move(parser), _pluginInstance.get());
 
     return true;
 }

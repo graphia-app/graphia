@@ -7,6 +7,7 @@
 
 class QUrl;
 class IMutableGraph;
+class IPluginInstance;
 
 class IParser : public Cancellable
 {
@@ -17,6 +18,7 @@ public:
 
     virtual bool parse(const QUrl& url,
                        IMutableGraph& mutableGraph,
+                       IPluginInstance& pluginInstance,
                        const ProgressFn& progressReportFn) = 0;
 };
 
