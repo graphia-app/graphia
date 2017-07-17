@@ -125,7 +125,7 @@ private:
     }
 
 public:
-    bool parse(const QUrl& url, IMutableGraph& graph, IPluginInstance&, const ProgressFn& progress)
+    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress)
     {
         size_t columns = 0;
         size_t rows = 0;

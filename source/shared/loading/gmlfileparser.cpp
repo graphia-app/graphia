@@ -172,7 +172,7 @@ GmlFileParser::GmlFileParser(UserNodeData* userNodeData) :
         _userNodeData->add(QObject::tr("Node Name"));
 }
 
-bool GmlFileParser::parse(const QUrl& url, IMutableGraph& graph, IPluginInstance&, const ProgressFn& progress)
+bool GmlFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress)
 {
     QString localFile = url.toLocalFile();
     std::ifstream stream(localFile.toStdString());

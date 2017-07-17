@@ -278,7 +278,7 @@ GraphMLParser::GraphMLParser(UserNodeData* userNodeData) :
     _userNodeData(userNodeData)
 {}
 
-bool GraphMLParser::parse(const QUrl &url, IMutableGraph &graph, IPluginInstance&, const IParser::ProgressFn &progress)
+bool GraphMLParser::parse(const QUrl &url, IMutableGraph &graph, const IParser::ProgressFn &progress)
 {
     QFile file(url.toLocalFile());
     int lineCount = 0;

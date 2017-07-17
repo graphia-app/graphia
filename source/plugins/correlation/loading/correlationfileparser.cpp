@@ -85,7 +85,7 @@ static QRect findLargestDataRect(const TabularData& tabularData)
     return dataRect;
 }
 
-bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, IPluginInstance& pluginInstance, const IParser::ProgressFn& progress)
+bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const IParser::ProgressFn& progress)
 {
     CsvFileParser csvFileParser;
     TsvFileParser tsvFileParser;
@@ -93,14 +93,14 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, IPlugin
     TabularData* tabularData = nullptr;
     if(_urlTypeName == "CorrelationCSV")
     {
-        if(!csvFileParser.parse(url, graph, pluginInstance, progress))
+        if(!csvFileParser.parse(url, graph, progress))
             return false;
 
         tabularData = &(csvFileParser.tabularData());
     }
     else if(_urlTypeName == "CorrelationTSV")
     {
-        if(!tsvFileParser.parse(url, graph, pluginInstance, progress))
+        if(!tsvFileParser.parse(url, graph, progress))
             return false;
 
         tabularData = &(tsvFileParser.tabularData());

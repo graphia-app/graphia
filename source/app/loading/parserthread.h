@@ -10,14 +10,12 @@
 #include <thread>
 
 class MutableGraph;
-class IPluginInstance;
 
 class ParserThread : public QObject, public IParserThread
 {
     Q_OBJECT
 private:
-    MutableGraph* _graph = nullptr;
-    IPluginInstance* _pluginInstance = nullptr;
+    MutableGraph* _graph;
     QUrl _url;
     std::unique_ptr<IParser> _parser;
     std::thread _thread;
@@ -26,8 +24,7 @@ public:
     ParserThread(MutableGraph& graph, QUrl url);
     virtual ~ParserThread();
 
-    void start(std::unique_ptr<IParser> parser,
-               IPluginInstance* pluginInstance);
+    void start(std::unique_ptr<IParser> parser);
     void cancel();
 
 private:

@@ -30,7 +30,7 @@ PairwiseTxtFileParser::PairwiseTxtFileParser(BaseGenericPluginInstance* genericP
         _userNodeData->add(QObject::tr("Node Name"));
 }
 
-bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, IPluginInstance&, const IParser::ProgressFn& progress)
+bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const IParser::ProgressFn& progress)
 {
     std::ifstream file(url.toLocalFile().toStdString());
     if(!file)
