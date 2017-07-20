@@ -80,6 +80,10 @@ public:
     QStringList defaultTransforms() const { return {}; }
     QStringList defaultVisualisations() const { return {}; }
 
+    // Save and restore no state, by default
+    QByteArray save(IMutableGraph&, const ProgressFn&) const { return {}; }
+    bool load(const QByteArray&, IMutableGraph&, const ProgressFn&) { return true; }
+
     IGraphModel* graphModel() { return _graphModel; }
     const IGraphModel* graphModel() const { return _graphModel; }
     ISelectionManager* selectionManager() { return _selectionManager; }
