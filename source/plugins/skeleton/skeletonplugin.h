@@ -31,6 +31,8 @@ public:
                   "a template for developers creating new plugins.");
     }
 
+    int dataVersion() const { return 1; }
+
     QStringList identifyUrl(const QUrl& url) const;
 
     bool editable() const { return true; }

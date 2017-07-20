@@ -21,7 +21,7 @@ public:
                   "node selection using a URL template.");
     }
     QString imageSource() const { return "qrc:///globe.svg"; }
-
+    int dataVersion() const { return 1; }
     QString qmlPath() const { return "qrc:///qml/websearchplugin.qml"; }
 };
 

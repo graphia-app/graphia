@@ -88,6 +88,8 @@ public:
     const QString& name() const { return _name; }
 
     bool editable() const { return _plugin->editable(); }
+    QString pluginName() const { return _plugin->name(); }
+    int pluginDataVersion() const { return _plugin->dataVersion(); }
     QString pluginQmlPath() const { return _plugin->qmlPath(); }
 
     bool graphTransformIsValid(const QString& transform) const;

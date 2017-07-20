@@ -46,6 +46,8 @@ public:
     virtual QString description() const = 0;
     virtual QString imageSource() const = 0; // Displayed in the about dialog
 
+    virtual int dataVersion() const = 0;
+
     virtual QStringList identifyUrl(const QUrl& url) const = 0;
 
     virtual bool editable() const = 0;

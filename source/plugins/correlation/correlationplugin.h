@@ -216,6 +216,8 @@ public:
 
     QString imageSource() const { return "qrc:///plots.svg"; }
 
+    int dataVersion() const { return 1; }
+
     QStringList identifyUrl(const QUrl& url) const;
 
     bool editable() const { return true; }
