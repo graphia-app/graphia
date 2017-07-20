@@ -10,6 +10,7 @@
 #include "graph/graphmodel.h"
 
 #include "loading/parserthread.h"
+#include "loading/loader.h"
 #include "loading/saver.h"
 
 #include "layout/forcedirectedlayout.h"
@@ -298,9 +299,20 @@ void Document::initialiseLayoutSettingsModel()
         _layoutSettingsModel.append(setting.name());
 }
 
-bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QString& pluginName, const QVariantMap& parameters)
+bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pluginName, const QVariantMap& parameters)
 {
+    std::unique_ptr<IParser> parser;
+    Loader* loader = nullptr;
+
+    if(fileType == Application::NativeFileType)
+    {
+        parser = std::make_unique<Loader>();
+        loader = dynamic_cast<Loader*>(parser.get());
+        pluginName = Loader::pluginNameFor(fileUrl);
+    }
+
     auto* plugin = _application->pluginForName(pluginName);
+
     if(plugin == nullptr)
         return false;
 
@@ -335,19 +347,31 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, const QStr
 
     emit pluginInstanceChanged();
 
-    auto parser = _pluginInstance->parserForUrlTypeName(fileType);
     if(parser == nullptr)
     {
-        qDebug() << "Plugin does not provide parser";
-        return false;
+        // If we don't yet have a parser, we need to ask the plugin for one
+        parser = _pluginInstance->parserForUrlTypeName(fileType);
+
+        if(parser == nullptr)
+        {
+            qDebug() << "Plugin does not provide parser";
+            return false;
+        }
     }
 
     connect(_graphFileParserThread.get(), &ParserThread::progress, this, &Document::onLoadProgress);
-    connect(_graphFileParserThread.get(), &ParserThread::success, [this]
+
+    if(loader != nullptr)
+        loader->setPluginInstance(_pluginInstance.get());
+    else
     {
-        _graphModel->buildTransforms(sortedTransforms(_pluginInstance->defaultTransforms()));
-        _graphModel->buildVisualisations(_pluginInstance->defaultVisualisations());
-    });
+        connect(_graphFileParserThread.get(), &ParserThread::success, [this]
+        {
+            _graphModel->buildTransforms(sortedTransforms(_pluginInstance->defaultTransforms()));
+            _graphModel->buildVisualisations(_pluginInstance->defaultVisualisations());
+        });
+    }
+
     connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::onLoadComplete);
     _graphFileParserThread->start(std::move(parser));
 

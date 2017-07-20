@@ -221,7 +221,7 @@ public:
     // Main QML interface
     Q_INVOKABLE bool openFile(const QUrl& fileUrl,
                               const QString& fileType,
-                              const QString& pluginName,
+                              QString pluginName,
                               const QVariantMap& parameters);
 
     Q_INVOKABLE void saveFile(const QUrl& fileUrl);

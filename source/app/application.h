@@ -118,6 +118,8 @@ class Application : public QObject
     Q_PROPERTY(bool debugEnabled READ debugEnabled CONSTANT)
 
 public:
+    static constexpr const char* NativeFileType = "Native";
+
     explicit Application(QObject *parent = nullptr);
 
     IPlugin* pluginForName(const QString& pluginName) const;

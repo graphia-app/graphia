@@ -4,6 +4,8 @@
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/utils.h"
 
+#include "loading/loader.h"
+
 #include "ui/document.h"
 
 #include <QDir>
@@ -55,6 +57,9 @@ bool Application::canOpen(const QString& urlTypeName) const
         return false;
     }
 
+    if(urlTypeName == NativeFileType)
+        return true;
+
     return std::any_of(_loadedPlugins.begin(), _loadedPlugins.end(),
     [&urlTypeName](const auto& loadedPlugin)
     {
@@ -73,6 +78,9 @@ bool Application::canOpenAnyOf(const QStringList& urlTypeNames) const
 
 QStringList Application::urlTypesOf(const QUrl& url) const
 {
+    if(Loader::canOpen(url))
+        return {NativeFileType};
+
     QStringList urlTypeNames;
 
     for(const auto& loadedPlugin : _loadedPlugins)
@@ -301,7 +309,12 @@ static std::vector<UrlType> urlTypesForPlugins(const std::vector<LoadedPlugin>& 
 
 void Application::updateNameFilters()
 {
-    std::vector<UrlType> fileTypes = urlTypesForPlugins(_loadedPlugins);
+    // Initialise with native file type
+    std::vector<UrlType> fileTypes{{NativeFileType, QString("%1 File").arg(name()),
+        QString("%1 Files").arg(name()), {nativeExtension()}}};
+
+    auto pluginFileTypes = urlTypesForPlugins(_loadedPlugins);
+    fileTypes.insert(fileTypes.end(), pluginFileTypes.begin(), pluginFileTypes.end());
 
     QString description = QObject::tr("All Files (");
     bool second = false;
