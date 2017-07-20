@@ -78,6 +78,40 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, const
     return true;
 }
 
+static QJsonObject graphAsJson(const IGraph& graph)
+{
+    QJsonObject jsonObject;
+
+    jsonObject["directed"] = true;
+
+    QJsonArray nodes;
+    for(auto nodeId : graph.nodeIds())
+    {
+        QJsonObject node;
+        node["id"] = QString::number(nodeId);
+
+        nodes.append(node);
+    }
+
+    jsonObject["nodes"] = nodes;
+
+    QJsonArray edges;
+    for(auto edgeId : graph.edgeIds())
+    {
+        const auto& edge = graph.edgeById(edgeId);
+
+        QJsonObject jsonEdge;
+        jsonEdge["source"] = QString::number(edge.sourceId());
+        jsonEdge["target"] = QString::number(edge.targetId());
+
+        edges.append(jsonEdge);
+    }
+
+    jsonObject["edges"] = edges;
+
+    return jsonObject;
+}
+
 bool Saver::encode(const ProgressFn& progressFn)
 {
     QJsonArray jsonArray;
@@ -93,7 +127,9 @@ bool Saver::encode(const ProgressFn& progressFn)
         return false;
 
     QJsonObject content;
+
     //FIXME Save real data
+    content["graph"] = graphAsJson(_graphModel->mutableGraph());
 
     _graphModel->mutableGraph().setPhase(_graphModel->pluginName());
     auto pluginData = _pluginInstance->save(_graphModel->mutableGraph(), progressFn);
