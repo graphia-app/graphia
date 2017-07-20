@@ -439,7 +439,7 @@ ApplicationWindow
         title: qsTr("Save File...")
         fileMode: Labs.FileDialog.SaveFile
         defaultSuffix: selectedNameFilter.extensions[0]
-        nameFilters: [ application.name + " files (*." + application.name.toLowerCase() + ")", "All files (*)" ]
+        nameFilters: [ application.name + " files (*." + application.nativeExtension + ")", "All files (*)" ]
         onAccepted: { saveFile(file); }
     }
 
@@ -524,7 +524,7 @@ ApplicationWindow
             if(!currentDocument.hasBeenSaved)
             {
                 fileSaveDialog.currentFile = qmlUtils.replaceExtension(currentDocument.fileUrl,
-                    application.name.toLowerCase());
+                    application.nativeExtension);
             }
             else
                 fileSaveDialog.currentFile = currentDocument.savedFileUrl;
