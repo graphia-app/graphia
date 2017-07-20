@@ -109,7 +109,7 @@ SOURCES += \
     cryptopp/eccrypto.cpp \
     cryptopp/rsa.cpp \
     cryptopp/tftables.cpp \
-    cryptopp/adler32.cpp \
+    cryptopp/cryptopp_adler32.cpp \
     cryptopp/sosemanuk.cpp \
     cryptopp/3way.cpp \
     cryptopp/gf2_32.cpp \
