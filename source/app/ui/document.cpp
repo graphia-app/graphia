@@ -358,8 +358,8 @@ void Document::saveFile(const QUrl& fileUrl)
 {
     Saver saver(fileUrl);
 
-    saver.addGraph(_graphModel->mutableGraph());
-    saver.addNodePositions(_graphModel->nodePositions());
+    saver.setGraphModel(_graphModel.get());
+    saver.setPluginInstance(_pluginInstance.get());
 
     _commandManager.executeOnce(
         {
@@ -367,9 +367,14 @@ void Document::saveFile(const QUrl& fileUrl)
             QString(tr("Saving %1")).arg(fileUrl.fileName()),
             QString(tr("Saved %1")).arg(fileUrl.fileName())
         },
-    [this, fileUrl, saver = std::move(saver)](Command&) mutable
+    [this, fileUrl, saver = std::move(saver)](Command& command) mutable
     {
-        auto success = saver.encode();
+        auto success = saver.encode(
+            [&command](int progress)
+            {
+                command.setProgress(progress);
+            });
+
         emit saveComplete(fileUrl, success);
 
         return success;

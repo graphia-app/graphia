@@ -1,43 +1,35 @@
 #ifndef SAVER_H
 #define SAVER_H
 
+#include "shared/loading/progressfn.h"
+
 #include <QUrl>
 #include <QStringList>
 #include <QString>
 #include <QByteArray>
 
-class IGraph;
-class NodePositions;
+class GraphModel;
+class IPluginInstance;
 
 class Saver
 {
 private:
     QUrl _fileUrl;
 
-    const IGraph* _graph = nullptr;
-    const NodePositions* _nodePositions = nullptr;
-
-    QStringList _transforms;
-    QStringList _visualisations;
-
-    QString _pluginName;
-    QByteArray _pluginData;
+    GraphModel* _graphModel = nullptr;
+    const IPluginInstance* _pluginInstance = nullptr;
 
 public:
+    static const int MaxHeaderSize = 1 << 12;
+
     Saver(const QUrl& fileUrl) { _fileUrl = fileUrl; }
 
     QUrl fileUrl() const { return _fileUrl; }
 
-    void addGraph(const IGraph& graph) { _graph = &graph; }
-    void addNodePositions(const NodePositions& nodePositions) { _nodePositions = &nodePositions; }
+    void setGraphModel(GraphModel* graphModel) { _graphModel = graphModel; }
+    void setPluginInstance(const IPluginInstance* pluginInstance) { _pluginInstance = pluginInstance; }
 
-    void addTransforms(const QStringList& transforms) { _transforms = transforms; }
-    void addVisualisations(const QStringList& visualisations) { _visualisations = visualisations; }
-
-    void setPlugin(const QString& pluginName) { _pluginName = pluginName; }
-    void addPluginData(const QByteArray& pluginData) { _pluginData = pluginData; }
-
-    bool encode();
+    bool encode(const ProgressFn& progressFn);
 };
 
 #endif // SAVER_H
