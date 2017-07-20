@@ -5,7 +5,7 @@
 #include <QUrl>
 #include <shared/utils/utils.h>
 
-GraphMLHandler::GraphMLHandler(IMutableGraph &mutableGraph, const IParser::ProgressFn &progress,
+GraphMLHandler::GraphMLHandler(IMutableGraph &mutableGraph, const ProgressFn &progress,
                                UserNodeData* userNodeData, int lineCount)
                                : _graph(&mutableGraph), _progress(&progress),
                                  _lineCount(lineCount), _userNodeData(userNodeData)
@@ -278,7 +278,7 @@ GraphMLParser::GraphMLParser(UserNodeData* userNodeData) :
     _userNodeData(userNodeData)
 {}
 
-bool GraphMLParser::parse(const QUrl &url, IMutableGraph &graph, const IParser::ProgressFn &progress)
+bool GraphMLParser::parse(const QUrl &url, IMutableGraph &graph, const ProgressFn &progress)
 {
     QFile file(url.toLocalFile());
     int lineCount = 0;

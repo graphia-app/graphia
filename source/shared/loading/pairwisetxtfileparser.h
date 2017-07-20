@@ -16,7 +16,7 @@ public:
     explicit PairwiseTxtFileParser(BaseGenericPluginInstance* genericPluginInstance,
                                    UserNodeData* userNodeData = nullptr);
 
-    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress);
+    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn);
 };
 
 #endif // PAIRWISETXTFILEPARSER_H

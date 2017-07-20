@@ -50,7 +50,8 @@ HEADERS += \
     $$PWD/utils/threadpool.h \
     $$PWD/utils/utils.h \
     $$PWD/commands/compoundcommand.h \
-    $$PWD/utils/qmlutils.h
+    $$PWD/utils/qmlutils.h \
+    $$PWD/loading/progressfn.h
 
 SOURCES += \
     $$PWD/graph/elementtype.cpp \

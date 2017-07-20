@@ -17,7 +17,7 @@
 template<typename It> bool parseGml(IMutableGraph &graph,
                                     UserNodeData* userNodeData,
                                     const std::function<bool ()>& cancelled,
-                                    const IParser::ProgressFn& progress,
+                                    const ProgressFn& progressFn,
                                     It begin, It end)
 {
     // General GML structure rules
@@ -147,9 +147,9 @@ template<typename It> bool parseGml(IMutableGraph &graph,
     };
 
     // Progress Capture event (Fired on keyValue rule match)
-    auto captureCount = axe::e_ref([&begin, &end, &cancelled, &progress](It, It i2)
+    auto captureCount = axe::e_ref([&begin, &end, &cancelled, &progressFn](It, It i2)
     {
-        progress((std::distance(begin, i2)) * 100 / std::distance(begin, end));
+        progressFn((std::distance(begin, i2)) * 100 / std::distance(begin, end));
     });
 
     // All GML keyValue options
@@ -157,9 +157,9 @@ template<typename It> bool parseGml(IMutableGraph &graph,
         axe::r_end() | axe::r_fail(onFail)) >> captureCount;
 
     // Perform file rule against begin & end iterators
-    (file >> axe::e_ref([&progress](It, It)
+    (file >> axe::e_ref([&progressFn](It, It)
     {
-        progress(100);
+        progressFn(100);
     }) & axe::r_end())(begin, end);
 
     return succeeded;
@@ -172,7 +172,7 @@ GmlFileParser::GmlFileParser(UserNodeData* userNodeData) :
         _userNodeData->add(QObject::tr("Node Name"));
 }
 
-bool GmlFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress)
+bool GmlFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn)
 {
     QString localFile = url.toLocalFile();
     std::ifstream stream(localFile.toStdString());
@@ -185,8 +185,8 @@ bool GmlFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressF
 
     std::vector<char> vec(startIt, std::istreambuf_iterator<char>());
 
-    progress(-1);
+    progressFn(-1);
 
     return parseGml(graph, _userNodeData, [this] { return cancelled(); },
-                    progress, vec.begin(), vec.end());;
+                    progressFn, vec.begin(), vec.end());;
 }

@@ -169,18 +169,18 @@ private:
 public:
     void setDimensions(size_t numColumns, size_t numRows);
     bool loadUserData(const TabularData& tabularData, size_t firstDataColumn, size_t firstDataRow,
-                      const std::function<bool()>& cancelled, const IParser::ProgressFn& progress);
+                      const std::function<bool()>& cancelled, const ProgressFn& progressFn);
 
     std::vector<std::tuple<NodeId, NodeId, double>> pearsonCorrelation(
             double minimumThreshold, const std::function<bool()>& cancelled,
-            const IParser::ProgressFn& progress);
+            const ProgressFn& progressFn);
 
     double minimumCorrelation() const { return _minimumCorrelationValue; }
     bool transpose() const { return _transpose; }
 
     bool createEdges(const std::vector<std::tuple<NodeId, NodeId, double>>& edges,
                      const std::function<bool()>& cancelled,
-                     const IParser::ProgressFn& progress);
+                     const ProgressFn& progressFn);
 
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName);
     void applyParameter(const QString& name, const QString& value);

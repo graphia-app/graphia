@@ -15,7 +15,7 @@ private:
 public:
     explicit CorrelationFileParser(CorrelationPluginInstance* correlationPluginInstance, const QString& urlTypeName);
 
-    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress);
+    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn);
 };
 
 #endif // CORRELATIONFILEPARSER_H

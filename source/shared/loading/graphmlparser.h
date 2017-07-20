@@ -60,7 +60,7 @@ private:
 
     IMutableGraph* _graph;
 
-    const IParser::ProgressFn* _progress;
+    const ProgressFn* _progress;
     QString _errorString = QString();
 
     AttributeData<NodeId> _nodeAttributes;
@@ -87,7 +87,7 @@ private:
     UserNodeData* _userNodeData;
 
 public:
-    GraphMLHandler(IMutableGraph& mutableGraph, const IParser::ProgressFn& progress, UserNodeData* userNodeData, int lineCount);
+    GraphMLHandler(IMutableGraph& mutableGraph, const ProgressFn& progressFn, UserNodeData* userNodeData, int lineCount);
     bool startDocument();
     bool endDocument();
     bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts);
@@ -110,7 +110,7 @@ private:
 
 public:
     explicit GraphMLParser(UserNodeData *userNodeData = nullptr);
-    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress);
+    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn);
 };
 
 #endif // GRAPHMLPARSER_H

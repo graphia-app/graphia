@@ -32,7 +32,7 @@ void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionMa
 }
 
 bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, size_t firstDataColumn, size_t firstDataRow,
-                                             const std::function<bool()>& cancelled, const IParser::ProgressFn& progress)
+                                             const std::function<bool()>& cancelled, const ProgressFn& progressFn)
 {
     Q_ASSERT(firstDataColumn > 0);
     Q_ASSERT(firstDataRow > 0);
@@ -40,7 +40,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
     if(firstDataColumn == 0 || firstDataRow == 0)
         return false;
 
-    progress(-1);
+    progressFn(-1);
 
     uint64_t numDataPoints = static_cast<uint64_t>(tabularData.numColumns()) * tabularData.numRows();
 
@@ -85,7 +85,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
 
             uint64_t rowOffset = static_cast<uint64_t>(rowIndex) * tabularData.numColumns();
             uint64_t dataPoint = columnIndex + rowOffset;
-            progress(static_cast<int>((dataPoint * 100) / numDataPoints));
+            progressFn(static_cast<int>((dataPoint * 100) / numDataPoints));
 
             QString value = tabularData.valueAsQString(columnIndex, rowIndex);
 
@@ -177,9 +177,9 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
 std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pearsonCorrelation(
         double minimumThreshold,
         const std::function<bool()>& cancelled,
-        const IParser::ProgressFn& progress)
+        const ProgressFn& progressFn)
 {
-    progress(-1);
+    progressFn(-1);
 
     uint64_t totalCost = 0;
     for(auto& row : _dataRows)
@@ -209,13 +209,13 @@ std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pears
         }
 
         cost += rowA.computeCostHint();
-        progress((cost * 100) / totalCost);
+        progressFn((cost * 100) / totalCost);
 
         return edges;
     });
 
     // Returning the results might take time
-    progress(-1);
+    progressFn(-1);
 
     std::vector<std::tuple<NodeId, NodeId, double>> edges;
 
@@ -227,15 +227,15 @@ std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pears
 
 bool CorrelationPluginInstance::createEdges(const std::vector<std::tuple<NodeId, NodeId, double>>& edges,
                                             const std::function<bool()>& cancelled,
-                                            const IParser::ProgressFn& progress)
+                                            const ProgressFn& progressFn)
 {
-    progress(-1);
+    progressFn(-1);
     for(auto edgeIt = edges.begin(); edgeIt != edges.end(); ++edgeIt)
     {
         if(cancelled())
             return false;
 
-        progress(std::distance(edges.begin(), edgeIt) * 100 / static_cast<int>(edges.size()));
+        progressFn(std::distance(edges.begin(), edgeIt) * 100 / static_cast<int>(edges.size()));
 
         auto& edge = *edgeIt;
         auto edgeId = graphModel()->mutableGraph().addEdge(std::get<0>(edge), std::get<1>(edge));

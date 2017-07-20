@@ -46,7 +46,7 @@ private:
     const IParser* _parentParser = nullptr;
 
     template<typename TokenFn>
-    bool parse(const QUrl& url, const ProgressFn& progress, TokenFn tokenFn)
+    bool parse(const QUrl& url, const ProgressFn& progressFn, TokenFn tokenFn)
     {
         std::ifstream file(url.toLocalFile().toStdString());
         if(!file)
@@ -61,7 +61,7 @@ private:
         size_t currentColumn = 0;
         size_t currentRow = 0;
 
-        progress(-1);
+        progressFn(-1);
 
         file.seekg(0, std::ios::beg);
         while(u::getline(file, line))
@@ -118,21 +118,21 @@ private:
 
             auto filePosition = file.tellg();
             if(filePosition >= 0)
-                progress(static_cast<int>(filePosition * 100 / fileSize));
+                progressFn(static_cast<int>(filePosition * 100 / fileSize));
         }
 
         return true;
     }
 
 public:
-    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress)
+    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn)
     {
         size_t columns = 0;
         size_t rows = 0;
 
         // First pass to determine the size of the table
         graph.setPhase(QObject::tr("Finding size"));
-        bool success = parse(url, progress,
+        bool success = parse(url, progressFn,
         [&columns, &rows](size_t column, size_t row, auto)
         {
             columns = std::max(columns, column + 1);
@@ -145,7 +145,7 @@ public:
         _tabularData.initialise(columns, rows);
 
         graph.setPhase(QObject::tr("Parsing"));
-        return parse(url, progress,
+        return parse(url, progressFn,
         [this](size_t column, size_t row, auto&& token)
         {
             _tabularData.setValueAt(column, row, std::move(token));

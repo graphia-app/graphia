@@ -85,7 +85,7 @@ static QRect findLargestDataRect(const TabularData& tabularData)
     return dataRect;
 }
 
-bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const IParser::ProgressFn& progress)
+bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn)
 {
     CsvFileParser csvFileParser;
     TsvFileParser tsvFileParser;
@@ -93,14 +93,14 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
     TabularData* tabularData = nullptr;
     if(_urlTypeName == "CorrelationCSV")
     {
-        if(!csvFileParser.parse(url, graph, progress))
+        if(!csvFileParser.parse(url, graph, progressFn))
             return false;
 
         tabularData = &(csvFileParser.tabularData());
     }
     else if(_urlTypeName == "CorrelationTSV")
     {
-        if(!tsvFileParser.parse(url, graph, progress))
+        if(!tsvFileParser.parse(url, graph, progressFn))
             return false;
 
         tabularData = &(tsvFileParser.tabularData());
@@ -112,7 +112,7 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
     tabularData->setTransposed(_plugin->transpose());
 
     graph.setPhase(QObject::tr("Finding Data Points"));
-    progress(-1);
+    progressFn(-1);
     auto dataRect = findLargestDataRect(*tabularData);
 
     if(dataRect.isEmpty())
@@ -121,18 +121,17 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
     _plugin->setDimensions(dataRect.width(), dataRect.height());
 
     graph.setPhase(QObject::tr("Attributes"));
-    if(!_plugin->loadUserData(*tabularData, dataRect.left(), dataRect.top(), [this]{ return cancelled(); }, progress))
+    if(!_plugin->loadUserData(*tabularData, dataRect.left(), dataRect.top(), [this]{ return cancelled(); }, progressFn))
         return false;
 
     graph.setPhase(QObject::tr("Pearson Correlation"));
-    auto edges = _plugin->pearsonCorrelation(_plugin->minimumCorrelation(),
-                                             [this]{ return cancelled(); }, progress);
+    auto edges = _plugin->pearsonCorrelation(_plugin->minimumCorrelation(), [this]{ return cancelled(); }, progressFn);
 
     if(cancelled())
         return false;
 
     graph.setPhase(QObject::tr("Building Graph"));
-    if(!_plugin->createEdges(edges, [this]{ return cancelled(); }, progress))
+    if(!_plugin->createEdges(edges, [this]{ return cancelled(); }, progressFn))
         return false;
 
     graph.clearPhase();

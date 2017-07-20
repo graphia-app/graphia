@@ -30,7 +30,7 @@ PairwiseTxtFileParser::PairwiseTxtFileParser(BaseGenericPluginInstance* genericP
         _userNodeData->add(QObject::tr("Node Name"));
 }
 
-bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const IParser::ProgressFn& progress)
+bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn)
 {
     std::ifstream file(url.toLocalFile().toStdString());
     if(!file)
@@ -46,7 +46,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
     std::string token;
     std::vector<std::string> tokens;
 
-    progress(-1);
+    progressFn(-1);
 
     file.seekg(0, std::ios::beg);
     while(u::getline(file, line))
@@ -230,7 +230,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
 
         auto filePosition = file.tellg();
         if(filePosition >= 0)
-            progress(static_cast<int>(filePosition * 100 / fileSize));
+            progressFn(static_cast<int>(filePosition * 100 / fileSize));
     }
 
     return true;
