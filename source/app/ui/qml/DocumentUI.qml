@@ -160,7 +160,7 @@ Item
 
         this.fileUrl = fileUrl;
         this.fileType = fileType;
-        this.pluginName = pluginName;
+        this.pluginName = pluginName !== undefined ? pluginName : "";
 
         return true;
     }
