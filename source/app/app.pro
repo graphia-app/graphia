@@ -117,7 +117,8 @@ HEADERS += \
     ui/visualisations/visualisationconfigparser.h \
     ui/visualisations/visualisationinfo.h \
     transform/availabletransformsmodel.h \
-    loading/saver.h
+    loading/saver.h \
+    loading/loader.h
 
 SOURCES += \
     application.cpp \
@@ -193,7 +194,8 @@ SOURCES += \
     ui/visualisations/visualisationconfig.cpp \
     ui/visualisations/visualisationconfigparser.cpp \
     transform/availabletransformsmodel.cpp \
-    loading/saver.cpp
+    loading/saver.cpp \
+    loading/loader.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \
