@@ -473,6 +473,9 @@ void Document::onLoadComplete(bool success)
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::nextRedoActionChanged);
     connect(&_commandManager, &CommandManager::commandCompleted, [this](bool, QString, QString pastParticiple)
     {
+        // Commands might set the phase and neglect to unset it
+        _graphModel->mutableGraph().clearPhase();
+
         setStatus(pastParticiple);
     });
 
