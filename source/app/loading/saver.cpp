@@ -120,6 +120,30 @@ static QJsonObject graphAsJson(const IGraph& graph, const ProgressFn& progressFn
     return jsonObject;
 }
 
+static QJsonArray nodePositionsAsJson(const IGraph& graph, const NodePositions& nodePositions,
+                                      const ProgressFn& progressFn)
+{
+    int i = 0;
+
+    graph.setPhase(QObject::tr("Positions"));
+    QJsonArray positions;
+    for(auto nodeId : graph.nodeIds())
+    {
+        QJsonObject position;
+        position["id"] = QString::number(nodeId);
+
+        const auto& nodePosition = nodePositions.get(nodeId);
+        QJsonArray vector({nodePosition.x(), nodePosition.y(), nodePosition.z()});
+
+        position["position"] = vector;
+
+        positions.append(position);
+        progressFn((i++ * 100) / graph.numNodes());
+    }
+
+    return positions;
+}
+
 static QJsonArray stringListToJsonArray(const QStringList& stringList)
 {
     QJsonArray jsonArray;
@@ -150,6 +174,9 @@ bool Saver::encode(const ProgressFn& progressFn)
 
     //FIXME Save real data
     content["graph"] = graphAsJson(graphModel->mutableGraph(), progressFn);
+    content["positions"] = nodePositionsAsJson(graphModel->mutableGraph(),
+                                               graphModel->nodePositions(),
+                                               progressFn);
     content["transforms"] = stringListToJsonArray(_document->transforms());
     content["visualisations"] = stringListToJsonArray(_document->visualisations());
 
