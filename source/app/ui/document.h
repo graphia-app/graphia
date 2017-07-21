@@ -79,6 +79,9 @@ public:
     explicit Document(QObject* parent = nullptr);
     ~Document();
 
+    const GraphModel* graphModel() const { return _graphModel.get(); }
+    GraphModel* graphModel() { return _graphModel.get(); }
+
     static QColor contrastingColorForBackground();
 
     bool commandInProgress() const;
@@ -104,9 +107,11 @@ public:
     void setStatus(const QString& status);
 
     QQmlVariantListModel* transformsModel() { return &_graphTransformsModel; }
+    QStringList transforms() const { return _graphTransforms; }
     void setTransforms(const QStringList& transforms);
 
     QQmlVariantListModel* visualisationsModel() { return &_visualisationsModel; }
+    QStringList visualisations() const { return _visualisations; }
     void setVisualisations(const QStringList& visualisations);
 
     QQmlVariantListModel* settingsModel() { return &_layoutSettingsModel; }
