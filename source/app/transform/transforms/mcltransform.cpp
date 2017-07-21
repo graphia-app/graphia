@@ -20,6 +20,7 @@
 #include <map>
 #include <set>
 #include <thread>
+#include <algorithm>
 
 using MatrixType = blaze::CompressedMatrix<float,blaze::columnMajor>;
 using VectorType = blaze::DynamicVector<float,blaze::columnVector>;
@@ -574,25 +575,42 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
         }
     }
 
-    NodeArray<QString> clusters(graph);
-    clusterCount = 0;
+    std::vector<std::set<size_t>> clusters;
     for(auto cluster : clusterNodesLookup)
     {
-        // Remove singular clusters
+        // Skip singular clusters
         if(cluster.second.size() <= 1)
             continue;
 
-        clusterCount++;
-        for(auto mapid : cluster.second)
+        clusters.emplace_back(std::move(cluster.second));
+    }
+
+    // Sort clusters descending by size
+    std::sort(clusters.begin(), clusters.end(),
+        [](const auto& a, const auto& b)
         {
-            clusters[indexToNodeMap.at(mapid)] = QString(QObject::tr("Cluster %1")).arg(QString::number(clusterCount));
+            return a.size() > b.size();
+        });
+
+    NodeArray<QString> clusterNames(graph);
+    int clusterNumber = 1;
+    for(const auto& cluster : clusters)
+    {
+        for(auto index : cluster)
+        {
+            auto nodeId = indexToNodeMap.at(index);
+            auto clusterName = QString(QObject::tr("Cluster %1")).arg(QString::number(clusterNumber));
+
+            clusterNames[nodeId] = clusterName;
         }
+
+        clusterNumber++;
     }
 
     _graphModel->createAttribute(QObject::tr("MCL Cluster"))
         .setDescription("The MCL-calculated cluster in which the node resides.")
-        .setStringValueFn([clusters](NodeId nodeId) { return clusters[nodeId]; })
-        .setValueMissingFn([clusters](NodeId nodeId) { return clusters[nodeId].isEmpty(); })
+        .setStringValueFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId]; })
+        .setValueMissingFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId].isEmpty(); })
         .setSearchable(true);
 }
 
