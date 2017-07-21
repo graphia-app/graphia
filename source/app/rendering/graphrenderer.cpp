@@ -21,6 +21,7 @@
 #include <QEvent>
 #include <QNativeGestureEvent>
 #include <QTextLayout>
+#include <QBuffer>
 
 #include <cstddef>
 
@@ -346,6 +347,8 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
 
     prepareSelectionMarkerVAO();
     prepareQuad();
+
+    prepareScreenshotFBO();
 
     for(auto& gpuGraphData : _gpuGraphData)
         gpuGraphData.initialise(_nodesShader, _edgesShader, _textShader);
@@ -707,6 +710,86 @@ void GraphRenderer::updateGPUData(GraphRenderer::When when)
         updateGPUDataIfRequired();
 }
 
+void GraphRenderer::onPreviewRequested(int width, int height, bool fillSize)
+{
+    _isPreview = true;
+
+    _screenshotWidth = width;
+    _screenshotHeight = height;
+
+    float viewportAspectRatio = static_cast<float>(_width) / static_cast<float>(_height);
+
+    if(!fillSize)
+        _screenshotHeight = static_cast<float>(width) / viewportAspectRatio;
+
+    int preScreenshotX = _width;
+    int preScreenshotY = _height;
+
+    resize(_screenshotWidth, _screenshotHeight);
+
+    glBindTexture(GL_TEXTURE_2D, _screenshotTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+    render();
+
+    resize(preScreenshotX, preScreenshotY);
+    _isPreview = false;
+}
+
+void GraphRenderer::onScreenshotRequested(int width, int height, QString path, int dpi, bool fillSize)
+{
+    _isScreenshot = true;
+
+    float viewportAspectRatio = static_cast<float>(_width) / static_cast<float>(_height);
+
+    _screenshotWidth = width;
+    _screenshotHeight = height;
+
+    if(!fillSize)
+    {
+        _screenshotHeight = static_cast<float>(width) / viewportAspectRatio;
+        if(_screenshotHeight > height)
+        {
+            _screenshotWidth = static_cast<float>(height) * viewportAspectRatio;
+            _screenshotHeight = height;
+        }
+    }
+
+    int preScreenshotX = _width;
+    int preScreenshotY = _height;
+
+    resize(TILE_SIZE, TILE_SIZE);
+
+    // Need a pixmap to construct the full image
+    _fullScreenshot = QPixmap(_screenshotWidth, _screenshotHeight);
+
+    glBindTexture(GL_TEXTURE_2D, _screenshotTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _width, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+    _tileXCount = std::ceil(static_cast<float>(_screenshotWidth) / _width);
+    _tileYCount = std::ceil(static_cast<float>(_screenshotHeight) / _height);
+    for(_currentTileX = 0; _currentTileX < _tileXCount; _currentTileX++)
+    {
+        for(_currentTileY = 0; _currentTileY < _tileYCount; _currentTileY++)
+        {
+            render();
+        }
+    }
+
+    auto image = _fullScreenshot.toImage();
+
+    // Destroy the pixmap, not needed anymore!
+    _fullScreenshot = {};
+
+    const double INCHES_PER_METER = 39.3700787;
+    image.setDotsPerMeterX(dpi * INCHES_PER_METER);
+    image.setDotsPerMeterY(dpi * INCHES_PER_METER);
+    emit screenshotComplete(image, path);
+
+    resize(preScreenshotX, preScreenshotY);
+    _isScreenshot = false;
+}
+
 void GraphRenderer::updateComponentGPUData()
 {
     //FIXME this doesn't necessarily need to be entirely regenerated and rebuffered
@@ -728,11 +811,35 @@ void GraphRenderer::updateComponentGPUData()
         if(!componentRenderer->visible())
             continue;
 
+        // Model View
         for(int i = 0; i < 16; i++)
             componentData.push_back(componentRenderer->modelViewMatrix().data()[i]);
 
-        for(int i = 0; i < 16; i++)
-            componentData.push_back(componentRenderer->projectionMatrix().data()[i]);
+        // Projection
+        if(_isScreenshot)
+        {
+            // Tile projection for high res screenshots
+            float tileWidthRatio = static_cast<float>(_width) / _screenshotWidth;
+            float tileHeightRatio = static_cast<float>(_height) / _screenshotHeight;
+
+            float tileTranslationX = ((1.0f / tileWidthRatio) - 1.0f) - (2.0f * _currentTileX);
+            float tileTranslationY = ((1.0f / tileHeightRatio) - 1.0f) - (2.0f * _currentTileY);
+
+            QMatrix4x4 projMatrix = componentRenderer->screenshotTileProjectionMatrix(TILE_SIZE);
+            QMatrix4x4 tileTranslation;
+
+            tileTranslation.translate(tileTranslationX, tileTranslationY, 0.0f);
+            projMatrix = tileTranslation * projMatrix;
+
+            for(int i = 0; i < 16; i++)
+                componentData.push_back(projMatrix.data()[i]);
+        }
+        else
+        {
+            // Normal projection
+            for(int i = 0; i < 16; i++)
+                componentData.push_back(componentRenderer->projectionMatrix().data()[i]);
+        }
     }
 
     glBindBuffer(GL_TEXTURE_BUFFER, _componentDataTBO);
@@ -1347,6 +1454,9 @@ void GraphRenderer::renderScene()
         _resized = false;
     }
 
+    if(_isScreenshot || _isPreview)
+        _scene->setViewportSize(_screenshotWidth, _screenshotHeight);
+
     ifSceneUpdateEnabled([this]
     {
         // _synchronousLayoutChanged can only ever be (atomically) true in this scope
@@ -1571,10 +1681,24 @@ void GraphRenderer::render2DComposite(QOpenGLShaderProgram& shader, GLuint textu
 
 void GraphRenderer::finishRender()
 {
-    if(!framebufferObject()->bind())
-        qWarning() << "QQuickFrameBufferobject::Renderer FBO not bound";
+    if(_isScreenshot || _isPreview)
+    {
+        // Bind to screenshot FBO
+        glBindFramebuffer(GL_FRAMEBUFFER, _screenshotFBO);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _screenshotTex, 0);
 
-    glViewport(0, 0, framebufferObject()->width(), framebufferObject()->height());
+        GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0};
+        glDrawBuffers(1, static_cast<GLenum*>(drawBuffers));
+    }
+    else
+    {
+        // Check the normal FBO
+        if(!framebufferObject()->bind())
+            qWarning() << "QQuickFrameBufferobject::Renderer FBO not bound";
+    }
+
+    glViewport(0, 0, _width, _height);
+
 
     auto backgroundColor = u::pref("visuals/backgroundColor").value<QColor>();
 
@@ -1594,7 +1718,7 @@ void GraphRenderer::finishRender()
 
     _screenShader.bind();
     _screenShader.setUniformValue("projectionMatrix", m);
-     _screenShader.release();
+    _screenShader.release();
 
     _selectionShader.bind();
     _selectionShader.setUniformValue("projectionMatrix", m);
@@ -1609,6 +1733,33 @@ void GraphRenderer::finishRender()
     {
         render2DComposite(_screenShader,    _gpuGraphData.at(i)._colorTexture,     _gpuGraphData.at(i).alpha());
         render2DComposite(_selectionShader, _gpuGraphData.at(i)._selectionTexture, _gpuGraphData.at(i).alpha());
+    }
+
+    if(_isScreenshot)
+    {
+        int pixelCount = _width * _height * 4;
+        std::vector<GLubyte> pixels(pixelCount);
+
+        glReadPixels(0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+        QImage screenTile(pixels.data(), _width, _height, QImage::Format_RGBA8888);
+
+        QPainter painter(&_fullScreenshot);
+        painter.drawImage(_currentTileX * TILE_SIZE,
+                         (_screenshotHeight - TILE_SIZE) - (_currentTileY * TILE_SIZE),
+                          screenTile.mirrored(false, true));
+    }
+    else if(_isPreview)
+    {
+        int pixelCount = _width * _height * 4;
+        std::vector<GLubyte> pixels(pixelCount);
+
+        glReadPixels(0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+        QImage screenTile(pixels.data(), _width, _height, QImage::Format_RGBA8888);
+        QByteArray byteArray;
+        QBuffer buffer(&byteArray);
+        screenTile.mirrored().save(&buffer, "PNG");
+        // QML Can't load raw QImages so as a hack we just base64 encode a png
+        emit previewComplete(QString::fromLatin1(byteArray.toBase64().data()));
     }
 
     _screenQuadDataBuffer.release();
@@ -1630,6 +1781,13 @@ void GraphRenderer::prepareSDFTextures()
     // Generate SDF textures
     if(_sdfTextures[0] == 0)
         glGenTextures(2, &_sdfTextures[0]);
+}
+
+void GraphRenderer::prepareScreenshotFBO()
+{
+    // Screenshot FBO
+    glGenFramebuffers(1, &_screenshotFBO);
+    glGenTextures(1, &_screenshotTex);
 }
 
 void GraphRenderer::prepareSelectionMarkerVAO()

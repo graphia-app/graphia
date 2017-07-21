@@ -44,11 +44,6 @@ IPlugin* Application::pluginForName(const QString& pluginName) const
     return nullptr;
 }
 
-bool Application::fileUrlExists(const QUrl& url) const
-{
-    return QFileInfo(url.toLocalFile()).exists();
-}
-
 bool Application::canOpen(const QString& urlTypeName) const
 {
     if(!_auth.state())

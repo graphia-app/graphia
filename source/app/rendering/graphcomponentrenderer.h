@@ -56,6 +56,7 @@ public:
 
     QMatrix4x4 modelViewMatrix() const;
     QMatrix4x4 projectionMatrix() const;
+    QMatrix4x4 screenshotTileProjectionMatrix(float tileSize) const;
 
     void moveFocusToNode(NodeId nodeId, float cameraDistance = -1.0f);
     void moveFocusToCentreOfComponent();

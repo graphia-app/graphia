@@ -36,5 +36,6 @@
         <file>qml/Controls/SlidingPanel.qml</file>
         <file>qml/Auth.qml</file>
         <file>qml/bubbles.png</file>
+        <file>qml/CaptureScreenshot.qml</file>
     </qresource>
 </RCC>

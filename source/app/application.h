@@ -123,8 +123,6 @@ public:
     static QString version() { return QCoreApplication::applicationVersion(); }
     static QString copyright() { return QString(COPYRIGHT).replace("(c)", "©"); }
 
-    Q_INVOKABLE bool fileUrlExists(const QUrl& url) const;
-
     Q_INVOKABLE bool canOpen(const QString& urlTypeName) const;
     Q_INVOKABLE bool canOpenAnyOf(const QStringList& urlTypeNames) const;
     Q_INVOKABLE QStringList urlTypesOf(const QUrl& url) const;
@@ -135,10 +133,6 @@ public:
     static const char* uri() { return _uri; }
     static int majorVersion() { return _majorVersion; }
     static int minorVersion() { return _minorVersion; }
-
-    Q_INVOKABLE QString baseFileNameForUrl(const QUrl& url) const { return url.fileName(); }
-    Q_INVOKABLE QString fileNameForUrl(const QUrl& url) const { return url.toLocalFile(); }
-    Q_INVOKABLE QUrl urlForFileName(const QString& fileName) const { return QUrl::fromLocalFile(fileName); }
 
     Q_INVOKABLE void tryToAuthenticateWithCachedCredentials();
     Q_INVOKABLE void authenticate(const QString& email, const QString& password);

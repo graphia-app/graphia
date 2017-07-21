@@ -257,7 +257,21 @@ QMatrix4x4 GraphComponentRenderer::modelViewMatrix() const
 
 QMatrix4x4 GraphComponentRenderer::projectionMatrix() const
 {
-    return subViewportMatrix() * _viewData._camera.projectionMatrix();;
+    return subViewportMatrix() * _viewData._camera.projectionMatrix();
+}
+
+QMatrix4x4 GraphComponentRenderer::screenshotTileProjectionMatrix(float tileSize) const
+{
+    QMatrix4x4 translation;
+    float xTranslation = (static_cast<float>(_dimensions.x() * 2.0 + _dimensions.width()) / tileSize) - (_viewportWidth / tileSize);
+    float yTranslation = (static_cast<float>(_dimensions.y() * 2.0 + _dimensions.height()) / tileSize) - (_viewportHeight / tileSize);
+
+    float xScale = static_cast<float>(_dimensions.width() / tileSize);
+    float yScale = static_cast<float>(_dimensions.height() / tileSize);
+    translation.translate(xTranslation, -yTranslation);
+    translation.scale(xScale, yScale);
+
+    return translation * _viewData._camera.projectionMatrix();
 }
 
 void GraphComponentRenderer::setViewportSize(int viewportWidth, int viewportHeight)

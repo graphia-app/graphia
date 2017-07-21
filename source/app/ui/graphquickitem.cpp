@@ -117,6 +117,18 @@ void GraphQuickItem::setFocusedComponentId(ComponentId componentId)
     }
 }
 
+void GraphQuickItem::captureScreenshot(int width, int height, QString path, int dpi, bool fillSize)
+{
+    emit screenshotRequested(width, height, path, dpi, fillSize);
+    update();
+}
+
+void GraphQuickItem::requestPreview(int width, int height, bool fillSize)
+{
+    emit previewRequested(width, height, fillSize);
+    update();
+}
+
 void GraphQuickItem::switchToOverviewMode(bool)
 {
     _overviewModeSwitchPending = true;
@@ -172,7 +184,11 @@ QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const
     connect(this, &GraphQuickItem::commandCompleted, graphRenderer, &GraphRenderer::onCommandCompleted, Qt::DirectConnection);
     connect(this, &GraphQuickItem::commandCompleted, this, &GraphQuickItem::update);
     connect(this, &GraphQuickItem::layoutChanged, graphRenderer, &GraphRenderer::onLayoutChanged);
+    connect(this, &GraphQuickItem::screenshotRequested, graphRenderer, &GraphRenderer::onScreenshotRequested);
+    connect(this, &GraphQuickItem::previewRequested, graphRenderer, &GraphRenderer::onPreviewRequested);
 
+    connect(graphRenderer, &GraphRenderer::previewComplete, this, &GraphQuickItem::previewComplete);
+    connect(graphRenderer, &GraphRenderer::screenshotComplete, this, &GraphQuickItem::onScreenshotComplete);
     connect(graphRenderer, &GraphRenderer::modeChanged, this, &GraphQuickItem::update);
     connect(graphRenderer, &GraphRenderer::userInteractionStarted, this, &GraphQuickItem::onUserInteractionStarted);
     connect(graphRenderer, &GraphRenderer::userInteractionFinished, this, &GraphQuickItem::onUserInteractionFinished);
@@ -228,6 +244,18 @@ void GraphQuickItem::onUserInteractionStarted()
 void GraphQuickItem::onUserInteractionFinished()
 {
     setInteracting(false);
+}
+
+void GraphQuickItem::onScreenshotComplete(QImage screenshot, QString path)
+{
+    _commandManager->executeOnce({tr("Save Screenshot"),
+                                 tr("Saving Screenshot")},
+                                 [screenshot, path](Command&)
+    {
+        // Ensure local filesystem path
+        screenshot.save(QUrl(path).toLocalFile());
+        QDesktopServices::openUrl(QUrl(path).toLocalFile());
+    });
 }
 
 void GraphQuickItem::mousePressEvent(QMouseEvent* e)        { enqueueEvent(e); }

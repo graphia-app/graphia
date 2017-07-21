@@ -11,6 +11,7 @@
 #include <QWindow>
 #include <QScreen>
 #include <QDir>
+#include <QStandardPaths>
 
 #include <iostream>
 
@@ -21,6 +22,7 @@
 
 #include "shared/utils/threadpool.h"
 #include "shared/utils/preferences.h"
+#include "shared/utils/qmlutils.h"
 
 #include "rendering/openglfunctions.h"
 #include "rendering/graphrenderer.h"
@@ -106,6 +108,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<Document>                   (uri, maj, min, "Document");
     qmlRegisterType<GraphQuickItem>             (uri, maj, min, "Graph");
     qmlRegisterType<QmlPreferences>             (uri, maj, min, "Preferences");
+    qmlRegisterType<QmlUtils>                   (uri, maj, min, "QmlUtils");
 
     qRegisterMetaType<size_t>("size_t");
 
@@ -138,6 +141,11 @@ int main(int argc, char *argv[])
 
     preferences.define("misc/focusFoundNodes",                  true);
     preferences.define("misc/focusFoundComponents",             false);
+
+    preferences.define("screenshot/width",                      1920);
+    preferences.define("screenshot/height",                     1080);
+    preferences.define("screenshot/path",                       QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)).toString());
+
     QQmlApplicationEngine engine;
     engine.addImportPath("qrc:///qml");
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));

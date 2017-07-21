@@ -8,6 +8,8 @@
 #include <QTimer>
 #include <QString>
 #include <QEvent>
+#include <QImage>
+#include <QDesktopServices>
 
 #include <vector>
 #include <queue>
@@ -78,6 +80,8 @@ public:
     void setCanEnterOverviewMode(bool canEnterOverviewMode);
     void setInOverviewMode(bool inOverviewMode);
     void setFocusedComponentId(ComponentId componentId);
+    Q_INVOKABLE void captureScreenshot(int width, int height, QString path, int dpi, bool fillSize);
+    Q_INVOKABLE void requestPreview(int width, int height, bool fillSize);
 
 private:
     bool event(QEvent* e);
@@ -124,6 +128,7 @@ public slots:
     void onFPSChanged(float fps);
     void onUserInteractionStarted();
     void onUserInteractionFinished();
+    void onScreenshotComplete(QImage screenshot, QString path);
 
 signals:
     void interactingChanged() const;
@@ -136,6 +141,10 @@ signals:
     void commandCompleted() const;
 
     void layoutChanged() const;
+
+    void screenshotRequested(int width, int height, QString path, int dpi, bool fillSize) const;
+    void previewRequested(int width, int height, bool fillSize) const;
+    void previewComplete(QString previewBase64) const;
 
     void graphChanged() const;
 

@@ -49,7 +49,8 @@ HEADERS += \
     $$PWD/utils/singleton.h \
     $$PWD/utils/threadpool.h \
     $$PWD/utils/utils.h \
-    $$PWD/commands/compoundcommand.h
+    $$PWD/commands/compoundcommand.h \
+    $$PWD/utils/qmlutils.h
 
 SOURCES += \
     $$PWD/graph/elementtype.cpp \

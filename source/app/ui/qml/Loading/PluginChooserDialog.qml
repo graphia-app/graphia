@@ -3,6 +3,8 @@ import QtQuick.Controls 1.5
 import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.3
 
+import com.kajeka 1.0
+
 import SortFilterProxyModel 0.2
 
 import "../Constants.js" as Constants
@@ -32,7 +34,7 @@ Dialog
 
         Text
         {
-            text: application.baseFileNameForUrl(fileUrl) +
+            text: qmlUtils.baseFileNameForUrl(fileUrl) +
                   qsTr(" may be loaded by two or more plugins. " +
                        "Please select how you wish to proceed below.")
             Layout.fillWidth: true

@@ -48,6 +48,8 @@ ApplicationWindow
         }
     }
 
+    QmlUtils { id: qmlUtils }
+
     Auth
     {
         visible: !application.authenticated
@@ -82,7 +84,7 @@ ApplicationWindow
         var argument = _pendingArguments[0];
         _pendingArguments.shift();
 
-        var fileUrl = application.urlForFileName(argument);
+        var fileUrl = qmlUtils.urlForFileName(argument);
         openFile(fileUrl, true);
     }
 
@@ -268,15 +270,14 @@ ApplicationWindow
         misc.recentFiles = JSON.stringify(localRecentFiles);
     }
 
-
     function openFile(fileUrl, inNewTab)
     {
         fileUrl = fileUrl.toString().trim();
 
-        if(!application.fileUrlExists(fileUrl))
+        if(!qmlUtils.fileUrlExists(fileUrl))
         {
             errorOpeningFileMessageDialog.title = qsTr("File Not Found");
-            errorOpeningFileMessageDialog.text = application.baseFileNameForUrl(fileUrl) +
+            errorOpeningFileMessageDialog.text = qmlUtils.baseFileNameForUrl(fileUrl) +
                     qsTr(" does not exist.");
             errorOpeningFileMessageDialog.open();
             return;
@@ -287,7 +288,7 @@ ApplicationWindow
         if(fileTypes.length === 0)
         {
             errorOpeningFileMessageDialog.title = qsTr("Unknown File Type");
-            errorOpeningFileMessageDialog.text = application.baseFileNameForUrl(fileUrl) +
+            errorOpeningFileMessageDialog.text = qmlUtils.baseFileNameForUrl(fileUrl) +
                     qsTr(" cannot be loaded as its file type is unknown.");
             errorOpeningFileMessageDialog.open();
             return;
@@ -296,7 +297,7 @@ ApplicationWindow
         if(!application.canOpenAnyOf(fileTypes))
         {
             errorOpeningFileMessageDialog.title = qsTr("Can't Open File");
-            errorOpeningFileMessageDialog.text = application.baseFileNameForUrl(fileUrl) +
+            errorOpeningFileMessageDialog.text = qmlUtils.baseFileNameForUrl(fileUrl) +
                     qsTr(" cannot be loaded."); //FIXME more elaborate error message
             errorOpeningFileMessageDialog.open();
             return;
@@ -449,7 +450,7 @@ ApplicationWindow
         id: recentFileOpen
         onTriggered:
         {
-            openFile(application.urlForFileName(source.text), true);
+            openFile(qmlUtils.urlForFileName(source.text), true);
         }
     }
 
@@ -709,6 +710,13 @@ ApplicationWindow
 
     Action
     {
+        id: saveImageAction
+        text: qsTr("Save As Image...")
+        onTriggered: currentDocument.screenshot()
+    }
+
+    Action
+    {
         id: toggleFpsMeterAction
         text: qsTr("Show FPS Meter")
         checkable: true
@@ -827,7 +835,7 @@ ApplicationWindow
                             // FIXME: This fires with a -1 index onOpenFile
                             // BUG: Text overflows MenuItems on Windows
                             // https://bugreports.qt.io/browse/QTBUG-50849
-                            text: index > -1 ? application.fileNameForUrl(mainWindow.recentFiles[index]) : "";
+                            text: index > -1 ? qmlUtils.fileNameForUrl(mainWindow.recentFiles[index]) : "";
                             action: recentFileOpen
                         }
                     }
@@ -835,6 +843,8 @@ ApplicationWindow
                     onObjectRemoved: recentFileMenu.removeItem(object)
                 }
             }
+            MenuSeparator {}
+            MenuItem { action: saveImageAction; enabled: currentDocument }
             MenuSeparator {}
             MenuItem { action: quitAction }
         }
@@ -1108,7 +1118,7 @@ ApplicationWindow
                 currentDocument.application = application;
                 if(!currentDocument.openFile(fileUrl, fileType, pluginName, parameters))
                 {
-                    errorOpeningFileMessageDialog.text = application.baseFileNameForUrl(fileUrl) +
+                    errorOpeningFileMessageDialog.text = qmlUtils.baseFileNameForUrl(fileUrl) +
                             qsTr(" could not be opened due to an error.");
                     errorOpeningFileMessageDialog.open();
                 }

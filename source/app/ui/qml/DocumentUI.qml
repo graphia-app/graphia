@@ -160,6 +160,7 @@ Item
     function switchToOverviewMode() { document.switchToOverviewMode(); }
     function gotoNextComponent() { document.gotoNextComponent(); }
     function gotoPrevComponent() { document.gotoPrevComponent(); }
+    function screenshot() { captureScreenshot.open(); }
 
     function selectAllFound() { document.selectAllFound(); }
     function selectNextFound() { document.selectNextFound(); }
@@ -169,6 +170,13 @@ Item
     function cancelCommand() { document.cancelCommand(); }
 
     function dumpGraph() { document.dumpGraph(); }
+
+    CaptureScreenshot
+    {
+        id: captureScreenshot;
+        graphView: graph
+        application: root.application
+    }
 
     SplitView
     {

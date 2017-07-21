@@ -32,6 +32,9 @@
 #include <atomic>
 #include <vector>
 #include <QImage>
+#include <QDir>
+#include <QPixmap>
+#include <QPainter>
 
 class GraphQuickItem;
 class GraphModel;
@@ -222,6 +225,7 @@ private slots:
     void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
 
 public slots:
+    void onScreenshotRequested(int width, int height, QString path, int dpi, bool fillSize);
     void onCommandWillExecute();
     void onCommandCompleted();
     void onLayoutChanged();
@@ -230,9 +234,25 @@ public slots:
     void onComponentCleanup(ComponentId componentId);
     void onVisibilityChanged();
 
+    void onPreviewRequested(int width, int height, bool fillSize);
 private:
     GraphModel* _graphModel = nullptr;
     int _numComponents = 0;
+
+    const int TILE_SIZE = 1024;
+
+    GLuint _screenshotFBO = 0;
+    GLuint _screenshotTex = 0;
+
+    bool _isScreenshot = false;
+    bool _isPreview = false;
+    int _screenshotHeight = 0;
+    int _screenshotWidth = 0;
+    int _currentTileX = 0;
+    int _currentTileY = 0;
+    int _tileXCount = 0;
+    int _tileYCount = 0;
+    QPixmap _fullScreenshot;
 
     SelectionManager* _selectionManager = nullptr;
 
@@ -332,6 +352,7 @@ private:
     void prepareSDFTextures();
     void prepareSelectionMarkerVAO();
     void prepareQuad();
+    void prepareScreenshotFBO();
 
     GLuint sdfTextureCurrent() const;
     GLuint sdfTextureOffscreen() const;
@@ -404,6 +425,10 @@ signals:
     void userInteractionFinished() const;
 
     void taskAddedToExecutor() const;
+    // Base64 encoded png image for QML...
+    void previewComplete(QString previewBase64) const;
+    // Screenshot doesn't go to QML so we can use QImage
+    void screenshotComplete(QImage screenshot, QString path) const;
 
     void fpsChanged(float fps) const;
 };

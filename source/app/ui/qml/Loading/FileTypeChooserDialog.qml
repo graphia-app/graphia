@@ -2,6 +2,7 @@ import QtQuick 2.7
 import QtQuick.Controls 1.5
 import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.3
+import com.kajeka 1.0
 
 import SortFilterProxyModel 0.2
 
@@ -28,6 +29,8 @@ Dialog
             mapping.length = 0;
     }
 
+    QmlUtils { id: qmlUtils }
+
     GridLayout
     {
         columns: 2
@@ -37,7 +40,7 @@ Dialog
 
         Text
         {
-            text: application.baseFileNameForUrl(fileUrl) +
+            text: qmlUtils.baseFileNameForUrl(fileUrl) +
                   qsTr(" may be interpreted as two or more possible formats. " +
                        "Please select how you wish to proceed below.")
             Layout.fillWidth: true
