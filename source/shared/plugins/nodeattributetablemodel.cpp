@@ -22,7 +22,7 @@ void NodeAttributeTableModel::initialise(ISelectionManager* selectionManager, IG
 
     auto graphQObject = dynamic_cast<const QObject*>(&graphModel->graph());
     connect(graphQObject, SIGNAL(graphChanged(const Graph*, bool)),
-            this, SLOT(onGraphChanged(const Graph*, bool)));
+            this, SLOT(onGraphChanged(const Graph*, bool)), Qt::DirectConnection);
 }
 
 QStringList NodeAttributeTableModel::columnNames() const
