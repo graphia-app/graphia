@@ -382,7 +382,7 @@ void Document::saveFile(const QUrl& fileUrl)
 {
     Saver saver(fileUrl);
 
-    saver.setGraphModel(_graphModel.get());
+    saver.setDocument(this);
     saver.setPluginInstance(_pluginInstance.get());
 
     _commandManager.executeOnce(

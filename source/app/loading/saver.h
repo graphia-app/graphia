@@ -8,7 +8,7 @@
 #include <QString>
 #include <QByteArray>
 
-class GraphModel;
+class Document;
 class IPluginInstance;
 
 class Saver
@@ -16,7 +16,7 @@ class Saver
 private:
     QUrl _fileUrl;
 
-    GraphModel* _graphModel = nullptr;
+    Document* _document = nullptr;
     const IPluginInstance* _pluginInstance = nullptr;
 
 public:
@@ -26,7 +26,7 @@ public:
 
     QUrl fileUrl() const { return _fileUrl; }
 
-    void setGraphModel(GraphModel* graphModel) { _graphModel = graphModel; }
+    void setDocument(Document* document) { _document = document; }
     void setPluginInstance(const IPluginInstance* pluginInstance) { _pluginInstance = pluginInstance; }
 
     bool encode(const ProgressFn& progressFn);

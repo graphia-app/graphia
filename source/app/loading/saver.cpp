@@ -3,7 +3,7 @@
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/scope_exit.h"
 
-#include "graph/graphmodel.h"
+#include "ui/document.h"
 
 #include <QFile>
 #include <QDataStream>
@@ -11,6 +11,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
+
+#include <QStringList>
 
 #include "thirdparty/zlib/zlib_disable_warnings.h"
 #include "thirdparty/zlib/zlib.h"
@@ -78,12 +80,15 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, const
     return true;
 }
 
-static QJsonObject graphAsJson(const IGraph& graph)
+static QJsonObject graphAsJson(const IGraph& graph, const ProgressFn& progressFn)
 {
     QJsonObject jsonObject;
 
     jsonObject["directed"] = true;
 
+    int i;
+
+    graph.setPhase(QObject::tr("Nodes")); i = 0;
     QJsonArray nodes;
     for(auto nodeId : graph.nodeIds())
     {
@@ -91,10 +96,12 @@ static QJsonObject graphAsJson(const IGraph& graph)
         node["id"] = QString::number(nodeId);
 
         nodes.append(node);
+        progressFn((i++ * 100) / graph.numNodes());
     }
 
     jsonObject["nodes"] = nodes;
 
+    graph.setPhase(QObject::tr("Edges")); i = 0;
     QJsonArray edges;
     for(auto edgeId : graph.edgeIds())
     {
@@ -105,6 +112,7 @@ static QJsonObject graphAsJson(const IGraph& graph)
         jsonEdge["target"] = QString::number(edge.targetId());
 
         edges.append(jsonEdge);
+        progressFn((i++ * 100) / graph.numEdges());
     }
 
     jsonObject["edges"] = edges;
@@ -112,14 +120,26 @@ static QJsonObject graphAsJson(const IGraph& graph)
     return jsonObject;
 }
 
+static QJsonArray stringListToJsonArray(const QStringList& stringList)
+{
+    QJsonArray jsonArray;
+
+    for(const auto& string : stringList)
+        jsonArray.append(string);
+
+    return jsonArray;
+}
+
 bool Saver::encode(const ProgressFn& progressFn)
 {
     QJsonArray jsonArray;
 
+    auto graphModel = _document->graphModel();
+
     QJsonObject header;
     header["version"] = 1;
-    header["pluginName"] = _graphModel->pluginName();
-    header["pluginDataVersion"] = _graphModel->pluginDataVersion();
+    header["pluginName"] = graphModel->pluginName();
+    header["pluginDataVersion"] = graphModel->pluginDataVersion();
     jsonArray.append(header);
 
     // The header must fit within a certain size, which is the maximum the loader will look at
@@ -129,10 +149,12 @@ bool Saver::encode(const ProgressFn& progressFn)
     QJsonObject content;
 
     //FIXME Save real data
-    content["graph"] = graphAsJson(_graphModel->mutableGraph());
+    content["graph"] = graphAsJson(graphModel->mutableGraph(), progressFn);
+    content["transforms"] = stringListToJsonArray(_document->transforms());
+    content["visualisations"] = stringListToJsonArray(_document->visualisations());
 
-    _graphModel->mutableGraph().setPhase(_graphModel->pluginName());
-    auto pluginData = _pluginInstance->save(_graphModel->mutableGraph(), progressFn);
+    graphModel->mutableGraph().setPhase(graphModel->pluginName());
+    auto pluginData = _pluginInstance->save(graphModel->mutableGraph(), progressFn);
 
     progressFn(-1);
 
@@ -147,7 +169,7 @@ bool Saver::encode(const ProgressFn& progressFn)
 
     jsonArray.append(content);
 
-    _graphModel->mutableGraph().setPhase(QObject::tr("Compressing"));
+    graphModel->mutableGraph().setPhase(QObject::tr("Compressing"));
     return compress(QJsonDocument(jsonArray).toJson(), _fileUrl.path(), progressFn);
 }
 
