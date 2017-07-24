@@ -11,6 +11,9 @@ Item
     property var selectPreviousAction: _selectPreviousAction
     property var selectNextAction: _selectNextAction
 
+    property bool _finding
+    property string _pendingFindText
+
     width: row.width
     height: row.height
 
@@ -66,7 +69,17 @@ Item
             id: findField
             width: 150
 
-            onTextChanged: document.find(text);
+            onTextChanged:
+            {
+                if(!_finding)
+                {
+                    _finding = true;
+                    document.find(text);
+                }
+                else
+                    _pendingFindText = text;
+            }
+
             onAccepted: { selectAllAction.trigger(); }
         }
 
@@ -90,6 +103,22 @@ Item
                     return qsTr("Not Found");
             }
             color: document.contrastingColor
+        }
+
+        Connections
+        {
+            target: document
+
+            onCommandComplete:
+            {
+                _finding = false;
+
+                if(_pendingFindText.length > 0)
+                {
+                    document.find(_pendingFindText);
+                    _pendingFindText = "";
+                }
+            }
         }
     }
 
