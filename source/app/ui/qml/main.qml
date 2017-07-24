@@ -1234,7 +1234,7 @@ ApplicationWindow
 
                     // We've dropped below the time threshold, but we're still doing the
                     // same thing, so keep showing the timer
-                    if(currentCommandVerb === currentDocument.commandVerb)
+                    if(currentCommandVerb.length > 0 && currentCommandVerb === currentDocument.commandVerb)
                         return true;
 
                     currentCommandVerb = "";
