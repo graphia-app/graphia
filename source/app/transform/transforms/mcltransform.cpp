@@ -523,10 +523,9 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
     target.setPhase(QString("MCL Interpreting"));
 
     // Interpret the matrix
-    std::map<size_t, std::set<size_t>> clusterNodesLookup;
+    std::vector<std::set<size_t>> clusters;
     std::vector<size_t> clusterGroups(nodeCount, 0);
-    int clusterCount = 0;
-    for(size_t k = 0; k<clusterMatrix.columns(); ++k)
+    for(size_t k = 0; k < clusterMatrix.columns(); ++k)
     {
         for(auto it = clusterMatrix.cbegin(k); it != clusterMatrix.cend(k); ++it )
         {
@@ -539,14 +538,14 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
             // If no cluster exists, make one
             if(rowCluster == 0 && columnCluster == 0)
             {
-                clusterCount++;
-                clusterGroups[it->index()] = clusterCount;
-                clusterGroups[k] = clusterCount;
-
                 std::set<size_t> newClusterNodeIndex;
                 newClusterNodeIndex.insert(it->index());
                 newClusterNodeIndex.insert(k);
-                clusterNodesLookup[clusterCount] = newClusterNodeIndex;
+                clusters.emplace_back(std::move(newClusterNodeIndex));
+
+                auto index = clusters.size() - 1;
+                clusterGroups[it->index()] = index;
+                clusterGroups[k] = index;
             }
             else if(rowCluster > 0)
             {
@@ -563,26 +562,16 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
                 {
                     // Add to row cluster
                     clusterGroups[k] = rowCluster;
-                    clusterNodesLookup[rowCluster].insert(k);
+                    clusters[rowCluster].insert(k);
                 }
             }
             else if(columnCluster > 0)
             {
                 // Add to Column Cluster
                 clusterGroups[it->index()] = columnCluster;
-                clusterNodesLookup[columnCluster].insert(it->index());
+                clusters[columnCluster].insert(it->index());
             }
         }
-    }
-
-    std::vector<std::set<size_t>> clusters;
-    for(auto cluster : clusterNodesLookup)
-    {
-        // Skip singular clusters
-        if(cluster.second.size() <= 1)
-            continue;
-
-        clusters.emplace_back(std::move(cluster.second));
     }
 
     // Sort clusters descending by size
@@ -596,6 +585,10 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
     int clusterNumber = 1;
     for(const auto& cluster : clusters)
     {
+        // Skip singular clusters
+        if(cluster.size() <= 1)
+            continue;
+
         for(auto index : cluster)
         {
             auto nodeId = indexToNodeMap.at(index);
