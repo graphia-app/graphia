@@ -46,6 +46,16 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> attribu
 
     if(re.isValid())
     {
+        std::vector<NodeConditionFn> conditionFns;
+        for(auto& attribute : attributes)
+        {
+            auto conditionFn = CreateConditionFnFor::node(attribute,
+                ConditionFnOp::String::MatchesRegex, _regex);
+
+            if(conditionFn != nullptr)
+                conditionFns.emplace_back(conditionFn);
+        }
+
         for(auto nodeId : _graphModel->graph().nodeIds())
         {
             // From a search results point of view, we only care about head nodes...
@@ -56,14 +66,8 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> attribu
 
             if(!match)
             {
-                for(auto& attribute : attributes)
+                for(const auto& conditionFn : conditionFns)
                 {
-                    auto conditionFn = CreateConditionFnFor::node(attribute,
-                        ConditionFnOp::String::MatchesRegex, _regex);
-
-                    if(conditionFn == nullptr)
-                        continue;
-
                     // ...but we still match against the tails
                     const auto& mergedNodeIds = _graphModel->graph().mergedNodeIdsForNodeId(nodeId);
                     match = std::any_of(mergedNodeIds.begin(), mergedNodeIds.end(),
