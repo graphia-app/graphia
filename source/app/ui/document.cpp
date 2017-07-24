@@ -637,31 +637,27 @@ static bool shouldMoveFindFocus(bool inOverviewMode)
         ((inOverviewMode && u::pref("misc/focusFoundComponents").toBool()) || !inOverviewMode);
 }
 
-void Document::selectFirstFound()
+void Document::selectFoundNode(NodeId newFound)
 {
-    setFoundIt(_foundNodeIds.begin());
-    _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), *_foundIt));
+    _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), newFound));
 
     if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
-        _graphQuickItem->moveFocusToNode(*_foundIt);
+        _graphQuickItem->moveFocusToNode(newFound);
+}
+
+void Document::selectFirstFound()
+{
+    selectFoundNode(*_foundNodeIds.begin());
 }
 
 void Document::selectNextFound()
 {
-    incrementFoundIt();
-    _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), *_foundIt));
-
-    if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
-        _graphQuickItem->moveFocusToNode(*_foundIt);
+    selectFoundNode(incrementFoundIt());
 }
 
 void Document::selectPrevFound()
 {
-    decrementFoundIt();
-    _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), *_foundIt));
-
-    if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
-        _graphQuickItem->moveFocusToNode(*_foundIt);
+    selectFoundNode(decrementFoundIt());
 }
 
 void Document::selectAllFound()
@@ -805,24 +801,28 @@ void Document::setFoundIt(std::vector<NodeId>::const_iterator foundIt)
         emit foundIndexChanged();
 }
 
-void Document::incrementFoundIt()
+NodeId Document::incrementFoundIt()
 {
-    if(_foundItValid && std::next(_foundIt) != _foundNodeIds.end())
-        ++_foundIt;
-    else
-        _foundIt = _foundNodeIds.begin();
+    NodeId newFound;
 
-    emit foundIndexChanged();
+    if(_foundItValid && std::next(_foundIt) != _foundNodeIds.end())
+        newFound = *(_foundIt + 1);
+    else
+        newFound = *_foundNodeIds.begin();
+
+    return newFound;
 }
 
-void Document::decrementFoundIt()
+NodeId Document::decrementFoundIt()
 {
-    if(_foundItValid && _foundIt != _foundNodeIds.begin())
-        --_foundIt;
-    else
-        _foundIt = std::prev(_foundNodeIds.end());
+    NodeId newFound;
 
-    emit foundIndexChanged();
+    if(_foundItValid && _foundIt != _foundNodeIds.begin())
+        newFound = *(_foundIt - 1);
+    else
+        newFound = *std::prev(_foundNodeIds.end());
+
+    return newFound;
 }
 
 void Document::executeOnMainThread(DeferredExecutor::TaskFn task,

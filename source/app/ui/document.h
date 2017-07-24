@@ -171,8 +171,9 @@ private:
     int foundIndex() const;
     int numNodesFound() const;
     void setFoundIt(std::vector<NodeId>::const_iterator it);
-    void incrementFoundIt();
-    void decrementFoundIt();
+    NodeId incrementFoundIt();
+    NodeId decrementFoundIt();
+    void selectFoundNode(NodeId newFound);
 
     void initialiseLayoutSettingsModel();
 
