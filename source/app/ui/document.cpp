@@ -620,12 +620,15 @@ void Document::gotoNextComponent()
 
 void Document::find(const QString& regex)
 {
-    int previousNumNodesFound = numNodesFound();
+    _commandManager.executeOnce([this, regex](Command&)
+    {
+        int previousNumNodesFound = numNodesFound();
 
-    _searchManager->findNodes(regex);
+        _searchManager->findNodes(regex);
 
-    if(previousNumNodesFound != numNodesFound())
-        emit numNodesFoundChanged();
+        if(previousNumNodesFound != numNodesFound())
+            emit numNodesFoundChanged();
+    });
 }
 
 static bool shouldMoveFindFocus(bool inOverviewMode)
