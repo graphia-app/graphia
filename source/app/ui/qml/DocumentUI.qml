@@ -28,10 +28,10 @@ Item
     property bool idle: document.idle
     property bool canDelete: document.canDelete
 
-    property bool commandInProgress: document.commandInProgress
+    property bool commandInProgress: document.commandInProgress && !commandTimer.running
     property int commandProgress: document.commandProgress
     property string commandVerb: document.commandVerb
-    property bool commandIsCancellable: document.commandIsCancellable
+    property bool commandIsCancellable: commandInProgress && document.commandIsCancellable
 
     property int layoutPauseState: document.layoutPauseState
 
@@ -685,11 +685,34 @@ Item
         commandSecondsRemaining = percentRemaining * timeDelta / percentDelta;
     }
 
-    signal commandComplete()
+    signal commandStarted();
+    signal commandComplete();
 
-    onCommandInProgressChanged:
+    Timer
     {
-        if(!commandInProgress)
-            commandComplete();
+        id: commandTimer
+        interval: 200
+
+        onTriggered:
+        {
+            stop();
+            commandStarted();
+        }
+    }
+
+    Connections
+    {
+        target: document
+
+        onCommandInProgressChanged:
+        {
+            if(document.commandInProgress)
+                commandTimer.start();
+            else
+            {
+                commandTimer.stop();
+                commandComplete();
+            }
+        }
     }
 }

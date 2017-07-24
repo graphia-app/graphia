@@ -1207,7 +1207,7 @@ ApplicationWindow
             Connections
             {
                 target: currentDocument
-                onCommandInProgressChanged:
+                onCommandStarted:
                 {
                     // Reset the cancellation indicator when a command starts
                     cancelledIndicator.visible = false;
