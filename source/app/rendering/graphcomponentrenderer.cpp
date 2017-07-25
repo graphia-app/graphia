@@ -205,6 +205,8 @@ void GraphComponentRenderer::update(float t)
 
     if(_graphModel)
     {
+        Q_ASSERT(_graphRenderer != nullptr);
+
         if(!_frozen)
         {
             if(_graphRenderer->layoutChanged())
@@ -311,12 +313,16 @@ void GraphComponentRenderer::setAlpha(float alpha)
     if(_alpha != alpha)
     {
         _alpha = alpha;
+
+        Q_ASSERT(_graphRenderer != nullptr);
         _graphRenderer->onComponentAlphaChanged(_componentId);
     }
 }
 
 void GraphComponentRenderer::zoom(float delta, bool doTransition)
 {
+    Q_ASSERT(_graphRenderer != nullptr);
+
     if(delta == 0.0f || _graphRenderer->transition().active())
         return;
 
@@ -412,6 +418,8 @@ void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
 
     if(!_zoomTransition.active())
         zoomToDistance(cameraDistance);
+
+    Q_ASSERT(_graphRenderer != nullptr);
 
     if(!_graphRenderer->transition().active() || !_viewData._camera.valid())
     {
