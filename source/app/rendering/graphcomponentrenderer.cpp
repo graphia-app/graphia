@@ -192,6 +192,11 @@ void GraphComponentRenderer::updateFocusPosition()
 
 void GraphComponentRenderer::updateEntireComponentZoomDistance()
 {
+    // If we're frozen then it's probably because the component is going away, and if
+    // this is the case then we won't be able to get at its nodeIds, so don't update
+    if(_frozen)
+        return;
+
     updateFocusPosition();
 
     auto component = _graphModel->graph().componentById(_componentId);
