@@ -16,9 +16,9 @@ void NodeAttributeTableModel::initialise(ISelectionManager* selectionManager, IG
 
     auto modelQObject = dynamic_cast<const QObject*>(graphModel);
     connect(modelQObject, SIGNAL(attributeAdded(const QString&)),
-            this, SLOT(onAttributeAdded(const QString&)));
+            this, SLOT(onAttributeAdded(const QString&)), Qt::DirectConnection);
     connect(modelQObject, SIGNAL(attributeRemoved(const QString&)),
-            this, SLOT(onAttributeRemoved(const QString&)));
+            this, SLOT(onAttributeRemoved(const QString&)), Qt::DirectConnection);
 
     auto graphQObject = dynamic_cast<const QObject*>(&graphModel->graph());
     connect(graphQObject, SIGNAL(graphChanged(const Graph*, bool)),
@@ -46,42 +46,47 @@ QStringList NodeAttributeTableModel::columnNames() const
 
 void NodeAttributeTableModel::update()
 {
+    std::unique_lock<std::mutex> lock;
     //FIXME depending on the precise reasons for calling update(), it isn't
     // necessarily required to regenerate all the data from scratch. e.g.
-    // if it's in response to a selection change, on the NodeSelectedRole
+    // if it's in response to a selection change, only the NodeSelectedRole
     // actually needs to change, and probably begin/endResetModel can be
     // avoided too
 
-    _updatedData.clear();
+    Table updatedData;
 
-    for(int roleNum = 0; roleNum < _roleNames.size(); roleNum++)
+    for(int row = 0; row < rowCount(); row++)
     {
-        int role = Qt::UserRole + 1 + roleNum;
+        updatedData.emplace_back(_roleNames.size());
+        auto& dataRow = updatedData.back();
 
-        for(int row = 0; row < rowCount(); row++)
+        NodeId nodeId = _userNodeData->nodeIdForRowIndex(row);
+
+        if(!_graphModel->graph().containsNodeId(nodeId))
         {
-            NodeId nodeId = _userNodeData->nodeIdForRowIndex(row);
+            // The graph doesn't necessarily have a node for every row since
+            // it may have been transformed, leaving empty rows
+            continue;
+        }
 
-            if(!_graphModel->graph().containsNodeId(nodeId))
-            {
-                // The graph doesn't necessarily have a node for every row since
-                // it may have been transformed, leaving empty rows
-                _updatedData.append(QVariant());
-                continue;
-            }
+        for(int roleNum = 0; roleNum < _roleNames.size(); roleNum++)
+        {
+            int role = Qt::UserRole + 1 + roleNum;
 
             if(role == Roles::NodeIdRole)
-                _updatedData.append(static_cast<int>(nodeId));
+                dataRow[roleNum] = static_cast<int>(nodeId);
             else if(role == Roles::NodeSelectedRole)
-                _updatedData.append(_selectionManager->nodeIsSelected(nodeId));
+                dataRow[roleNum] = _selectionManager->nodeIsSelected(nodeId);
             else
             {
                 auto* attribute = _graphModel->attributeByName(_roleNames[role]);
                 if(attribute != nullptr)
-                    _updatedData.append(attribute->valueOf(nodeId));
+                    dataRow[roleNum] = attribute->valueOf(nodeId);
             }
         }
     }
+
+    _updatedData.emplace_back(std::move(updatedData));
 
     // Notify the main thread that the data has changed
     QMetaObject::invokeMethod(this, "onUpdateComplete");
@@ -89,8 +94,11 @@ void NodeAttributeTableModel::update()
 
 void NodeAttributeTableModel::onUpdateComplete()
 {
+    std::unique_lock<std::mutex> lock;
+
     beginResetModel();
-    _cachedData = std::move(_updatedData);
+    _cachedData = std::move(_updatedData.front());
+    _updatedData.pop_front();
     endResetModel();
 }
 
@@ -129,13 +137,19 @@ void NodeAttributeTableModel::onAttributeAdded(const QString& name)
 {
     // Recreate rolenames in the model if the attribute is new
     if(!u::contains(_roleNames.values(), name.toUtf8()))
+    {
         updateRoleNames();
+        update();
+    }
 }
 
 void NodeAttributeTableModel::onAttributeRemoved(const QString& name)
 {
     if(u::contains(_roleNames.values(), name.toUtf8()))
+    {
         updateRoleNames();
+        update();
+    }
 }
 
 int NodeAttributeTableModel::rowCount(const QModelIndex&) const
@@ -150,10 +164,17 @@ int NodeAttributeTableModel::columnCount(const QModelIndex&) const
 
 QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
 {
-    int cacheIndex = ((role - Qt::UserRole - 1) * rowCount()) + index.row();
-    Q_ASSERT(cacheIndex < _cachedData.size());
-    auto cachedValue = _cachedData.at(cacheIndex);
+    size_t row = index.row();
+    if(row >= _cachedData.size())
+        return {};
 
+    const auto& dataRow = _cachedData.at(row);
+
+    size_t column = (role - Qt::UserRole - 1);
+    if(column >= dataRow.size())
+        return {};
+
+    auto cachedValue = dataRow.at(column);
     return cachedValue;
 }
 

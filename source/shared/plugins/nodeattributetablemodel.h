@@ -10,6 +10,8 @@
 #include <QHash>
 
 #include <set>
+#include <mutex>
+#include <deque>
 
 class UserNodeData;
 class Graph;
@@ -34,8 +36,13 @@ private:
     };
 
     QHash<int, QByteArray> _roleNames;
-    QVector<QVariant> _updatedData; // Update occurs here, before being moved to _cachedData
-    QVector<QVariant> _cachedData;
+    std::mutex _updateMutex;
+
+    using Row = std::vector<QVariant>;
+    using Table = std::vector<Row>;
+
+    std::deque<Table> _updatedData; // Update occurs here, before being moved to _cachedData
+    Table _cachedData;
 
     bool _showCalculatedAttributes = true;
     int _columnCount = 0;
