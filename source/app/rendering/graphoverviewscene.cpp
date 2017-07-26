@@ -374,7 +374,7 @@ void GraphOverviewScene::startTransition(std::function<void()> finishedFunction,
             renderer->thaw();
         }
 
-        // Subtract the removed ComponentIds, no we no longer need to render them
+        // Subtract the removed ComponentIds, as we no longer need to render them
         std::vector<ComponentId> postTransitionComponentIds;
         std::sort(_componentIds.begin(), _componentIds.end());
         std::sort(_removedComponentIds.begin(), _removedComponentIds.end());
