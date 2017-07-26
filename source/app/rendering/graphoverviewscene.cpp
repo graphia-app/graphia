@@ -216,20 +216,34 @@ void GraphOverviewScene::startTransitionFromComponentMode(ComponentId focusCompo
 {
     Q_ASSERT(!focusComponentId.isNull());
 
-    startTransition(std::move(finishedFunction), duration, transitionType);
-    _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
-    _previousComponentAlpha = _componentAlpha;
-
-    for(auto componentId : _componentIds)
-    {
-        if(componentId != focusComponentId)
-            _previousComponentAlpha[componentId] = 0.0f;
-    }
-
     float halfWidth = _width * 0.5f;
     float halfHeight = _height * 0.5f;
-    _previousZoomedComponentLayoutData[focusComponentId].set(halfWidth, halfHeight,
-                                                             std::min(halfWidth, halfHeight));
+    Circle focusComponentLayout(halfWidth, halfHeight, std::min(halfWidth, halfHeight));
+
+    // If the component that has focus isn't in the overview scene's component list then it's
+    // going away, in which case we need to deal with it
+    if(!u::contains(_componentIds, focusComponentId))
+    {
+        _removedComponentIds.emplace_back(focusComponentId);
+        _componentIds.emplace_back(focusComponentId);
+
+        // Target display properties
+        _zoomedComponentLayoutData[focusComponentId] = focusComponentLayout;
+        _componentAlpha[focusComponentId] = 0.0f;
+
+        // The renderer should have already been frozen by GraphComponentScene::onComponentWillBeRemoved,
+        // but let's make sure
+        auto renderer = _graphRenderer->componentRendererForId(focusComponentId);
+        renderer->freeze();
+    }
+
+    startTransition(std::move(finishedFunction), duration, transitionType);
+    _previousZoomedComponentLayoutData = _zoomedComponentLayoutData;
+    _previousComponentAlpha.fill(0.0f);
+
+    // The focus component always starts covering the viewport and fully opaque
+    _previousZoomedComponentLayoutData[focusComponentId] = focusComponentLayout;
+    _previousComponentAlpha[focusComponentId] = 1.0f;
 }
 
 void GraphOverviewScene::startTransitionToComponentMode(ComponentId focusComponentId,
