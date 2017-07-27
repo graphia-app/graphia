@@ -303,7 +303,7 @@ Item
 
                             for(i = 0; i < si.length; i++)
                             {
-                                if(num >= si[i].value)
+                                if(num >= si[i].value * 100)
                                     return (num / si[i].value).toFixed(digits).replace(/\.?0+$/, "") + si[i].symbol;
                             }
 
