@@ -46,7 +46,7 @@ public:
     GraphTransformParameters parameters() const
     {
         return {{"Granularity", {ValueType::Float, "Controls the size of the resultant clusters. "
-            "A larger granularity value results in smaller clusters.", 1.5, 1.5, 3.5}}};
+            "A larger granularity value results in smaller clusters.", 2.2, 1.1, 3.5}}};
     }
     DeclaredAttributes declaredAttributes() const
     {
