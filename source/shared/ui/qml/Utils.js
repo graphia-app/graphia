@@ -78,11 +78,11 @@ function decimalPointsForValue(value)
         return 5;
     else if(value <= 0.01)
         return 4;
-    else if(value <= 100.0)
+    else if(value <= 1.0)
         return 3;
-    else if(value <= 1000.0)
+    else if(value <= 100.0)
         return 2;
-    else if(value <= 10000.0)
+    else if(value <= 1000.0)
         return 1;
 
     return 0;
