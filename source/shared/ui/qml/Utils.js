@@ -93,6 +93,26 @@ function decimalPointsForRange(min, max)
     return decimalPointsForValue(max - min);
 }
 
+function incrementForRange(min, max)
+{
+    var range = max - min;
+
+    if(range <= 0.001)
+        return 0.0001;
+    else if(range <= 0.01)
+        return 0.001;
+    else if(range <= 1.0)
+        return 0.01;
+    else if(range <= 100.0)
+        return 0.1;
+    else if(range <= 1000.0)
+        return 10.0;
+    else if(range <= 100000.0)
+        return 1000.0;
+
+    return 100000.0;
+}
+
 function superScriptValue(value)
 {
     if(!isNumeric(value))

@@ -53,7 +53,7 @@ GridLayout
             if(valueType === ValueType.Float)
             {
                 if(hasRange)
-                    return Utils.decimalPointsForRange(minimumValue, maximumValue);
+                    return Utils.decimalPointsForRange(root.minimumValue, root.maximumValue);
 
                 return 3;
             }
@@ -61,7 +61,7 @@ GridLayout
             return 0;
         }
 
-        stepSize: hasRange ? (maximumValue - minimumValue) / 100.0 : 1.0
+        stepSize: hasRange ? Utils.incrementForRange(root.minimumValue, root.maximumValue) : 1.0
 
         function updateValue()
         {
@@ -88,6 +88,8 @@ GridLayout
         Layout.fillWidth: root.fillWidth
         Layout.preferredWidth: root._preferredWidth
         visible: ((valueType === ValueType.Int || valueType === ValueType.Float) && hasRange)
+
+        stepSize: Utils.incrementForRange(root.minimumValue, root.maximumValue);
 
         onValueChanged:
         {
