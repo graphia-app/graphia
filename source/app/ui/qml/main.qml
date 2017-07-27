@@ -711,8 +711,10 @@ ApplicationWindow
     Action
     {
         id: saveImageAction
-        text: qsTr("Save As Image...")
-        onTriggered: currentDocument.screenshot()
+        iconName: "camera-photo"
+        text: qsTr("Save As Image…")
+        enabled: application.debugEnabled
+        onTriggered: currentDocument && currentDocument.screenshot()
     }
 
     Action
@@ -844,7 +846,7 @@ ApplicationWindow
                 }
             }
             MenuSeparator {}
-            MenuItem { action: saveImageAction; enabled: currentDocument }
+            MenuItem { action: saveImageAction }
             MenuSeparator {}
             MenuItem { action: quitAction }
         }

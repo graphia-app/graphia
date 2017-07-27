@@ -173,7 +173,7 @@ Item
 
     CaptureScreenshot
     {
-        id: captureScreenshot;
+        id: captureScreenshot
         graphView: graph
         application: root.application
     }
