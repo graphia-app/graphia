@@ -22,7 +22,6 @@ Dialog
     property var graphView
     property var application
 
-    property string path: fileDialog.file
     property int screenshotWidth: pixelWidthSpin.value
     property int screenshotHeight: pixelHeightSpin.value
     property int dpi: dpiSpin.value
@@ -46,6 +45,13 @@ Dialog
 
     onAccepted:
     {
+        fileDialog.folder = screenshot.path;
+        var path = utils.fileNameForUrl(screenshot.path);
+
+        fileDialog.currentFile = utils.urlForFileName(path + "/" + application.name + "-capture-" +
+            new Date().toLocaleString(Qt.locale(), "yyyy-MM-dd-hhmmss"));
+
+        fileDialog.updateFileExtension();
         fileDialog.open();
     }
 
@@ -390,23 +396,38 @@ Dialog
             }
         }
     }
+
     Labs.FileDialog
     {
         id: fileDialog
         title: qsTr("Save As Image")
+
         onAccepted:
         {
-            // Seems redundant but folder likes to reset!
             screenshot.path = folder.toString();
-            folder = screenshot.path;
-            graphView.captureScreenshot(screenshotWidth, screenshotHeight, path, dpi, fill);
+            graphView.captureScreenshot(screenshotWidth, screenshotHeight, file, dpi, fill);
         }
+
         fileMode: Labs.FileDialog.SaveFile
-        onVisibleChanged:
+        defaultSuffix: selectedNameFilter.extensions[0]
+        selectedNameFilter.index: 0
+
+        function updateFileExtension()
         {
-            currentFile = utils.urlForFileName(application.name + "capture"
-                                               + new Date().toLocaleString(Qt.locale(), "yyyy-MM-dd-hhmmss"));
+            currentFile = utils.replaceExtension(currentFile, selectedNameFilter.extensions[0]);
         }
+
+        Connections
+        {
+            target: fileDialog.selectedNameFilter
+
+            onIndexChanged:
+            {
+                if(fileDialog.visible)
+                    fileDialog.updateFileExtension();
+            }
+        }
+
         nameFilters: ["PNG Image (*.png)" ,"JPEG Image (*.jpg)", "Bitmap Image (*.bmp)"]
     }
 
