@@ -713,7 +713,7 @@ ApplicationWindow
         id: saveImageAction
         iconName: "camera-photo"
         text: qsTr("Save As Image…")
-        enabled: application.debugEnabled
+        enabled: currentDocument
         onTriggered: currentDocument && currentDocument.screenshot()
     }
 
