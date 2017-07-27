@@ -291,25 +291,6 @@ Item
                     horizontalAlignment: Text.AlignRight
                     text:
                     {
-                        // http://stackoverflow.com/questions/9461621
-                        function nFormatter(num, digits)
-                        {
-                            var si =
-                                [
-                                    { value: 1E9,  symbol: "G" },
-                                    { value: 1E6,  symbol: "M" },
-                                    { value: 1E3,  symbol: "k" }
-                                ], i;
-
-                            for(i = 0; i < si.length; i++)
-                            {
-                                if(num >= si[i].value * 100)
-                                    return (num / si[i].value).toFixed(digits).replace(/\.?0+$/, "") + si[i].symbol;
-                            }
-
-                            return num;
-                        }
-
                         var s = "";
                         var numNodes = graph.numNodes;
                         var numEdges = graph.numEdges;
@@ -318,22 +299,22 @@ Item
 
                         if(numNodes >= 0)
                         {
-                            s += nFormatter(numNodes, 1);
+                            s += Utils.formatUsingSIPostfix(numNodes);
                             if(numVisibleNodes !== numNodes)
-                                s += " (" + nFormatter(numVisibleNodes, 1) + ")";
+                                s += " (" + Utils.formatUsingSIPostfix(numVisibleNodes) + ")";
                             s += " nodes";
                         }
 
                         if(numEdges >= 0)
                         {
-                            s += "\n" + nFormatter(numEdges, 1);
+                            s += "\n" + Utils.formatUsingSIPostfix(numEdges);
                             if(numVisibleEdges !== numEdges)
-                                s += " (" + nFormatter(numVisibleEdges, 1) + ")";
+                                s += " (" + Utils.formatUsingSIPostfix(numVisibleEdges) + ")";
                             s += " edges";
                         }
 
                         if(graph.numComponents >= 0)
-                            s += "\n" + nFormatter(graph.numComponents, 1) + " components";
+                            s += "\n" + Utils.formatUsingSIPostfix(graph.numComponents) + " components";
 
                         return s;
                     }

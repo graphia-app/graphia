@@ -176,6 +176,25 @@ function formatForDisplay(value, maxDecimalPlaces, scientificNotationDigitsThres
     return simplified.toString();
 }
 
+// http://stackoverflow.com/questions/9461621
+function formatUsingSIPostfix(num)
+{
+    var si =
+        [
+            { value: 1E9,  symbol: "G" },
+            { value: 1E6,  symbol: "M" },
+            { value: 1E3,  symbol: "k" }
+        ], i;
+
+    for(i = 0; i < si.length; i++)
+    {
+        if(num >= si[i].value * 100)
+            return (num / si[i].value).toFixed(1).replace(/\.?0+$/, "") + si[i].symbol;
+    }
+
+    return num;
+}
+
 function desaturate(colorString, factor)
 {
     var c = Qt.darker(colorString, 1.0);
