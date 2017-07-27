@@ -116,7 +116,7 @@ Dialog
                           printWidth: 297,
                          printHeight: 420});
 
-                        append({text: "A2 300 Paper Portrait (300DPI)",
+                        append({text: "A2 Paper Portrait (300DPI)",
                                  dpi: 72,
                           printWidth: 420,
                          printHeight: 594});
@@ -136,8 +136,8 @@ Dialog
                           printWidth: 420,
                          printHeight: 297});
 
-                        append({text: "A2 300 Paper Landscape (300DPI)",
-                                 dpi: 72,
+                        append({text: "A2 Paper Landscape (300DPI)",
+                                 dpi: 300,
                           printWidth: 594,
                          printHeight: 420});
 
