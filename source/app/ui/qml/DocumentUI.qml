@@ -167,7 +167,7 @@ Item
 
     function saveFile(fileUrl)
     {
-        return document.saveFile(fileUrl);
+        document.saveFile(fileUrl);
     }
 
     function toggleLayout() { document.toggleLayout(); }

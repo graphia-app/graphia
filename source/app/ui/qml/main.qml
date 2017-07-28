@@ -407,17 +407,8 @@ ApplicationWindow
 
     function saveFile(fileUrl)
     {
-        if(currentDocument === null)
-            return false;
-
-        if(!currentDocument.saveFile(fileUrl))
-        {
-            errorSavingFileMessageDialog.text = qmlUtils.baseFileNameForUrl(fileUrl) +
-                    qsTr(" could not be saved.");
-            errorSavingFileMessageDialog.open();
-        }
-        else
-            currentDocument.savedFileUrl = fileUrl;
+        if(currentDocument !== null)
+            currentDocument.saveFile(fileUrl);
     }
 
     Labs.FileDialog
