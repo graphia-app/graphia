@@ -45,14 +45,13 @@ Dialog
 
     onAccepted:
     {
-        fileDialog.folder = screenshot.path;
-        var path = utils.fileNameForUrl(screenshot.path);
+        var path = utils.fileNameForUrl(screenshot.path) + "/" + application.name + "-capture-" +
+            new Date().toLocaleString(Qt.locale(), "yyyy-MM-dd-hhmmss");
 
-        fileDialog.currentFile = utils.urlForFileName(path + "/" + application.name + "-capture-" +
-            new Date().toLocaleString(Qt.locale(), "yyyy-MM-dd-hhmmss"));
+        var fileDialogObject = fileDialogComponent.createObject(root,
+            {"folder": screenshot.path, "currentFile": utils.urlForFileName(path)});
 
-        fileDialog.updateFileExtension();
-        fileDialog.open();
+        fileDialogObject.open();
     }
 
     Timer
@@ -397,38 +396,54 @@ Dialog
         }
     }
 
-    Labs.FileDialog
+    Component
     {
-        id: fileDialog
-        title: qsTr("Save As Image")
+        // We use a Component here because for whatever reason, the Labs FileDialog only seems
+        // to allow you to set currentFile once. From looking at the source code it appears as
+        // if setting currentFile adds to the currently selected files, rather than replaces
+        // the currently selected files with a new one. Until this is fixed, we work around
+        // it by simply recreating the FileDialog everytime we need one.
 
-        onAccepted:
+        id: fileDialogComponent
+
+        Labs.FileDialog
         {
-            screenshot.path = folder.toString();
-            graphView.captureScreenshot(screenshotWidth, screenshotHeight, file, dpi, fill);
-        }
+            id: fileDialog
+            title: qsTr("Save As Image")
 
-        fileMode: Labs.FileDialog.SaveFile
-        defaultSuffix: selectedNameFilter.extensions[0]
-        selectedNameFilter.index: 0
-
-        function updateFileExtension()
-        {
-            currentFile = utils.replaceExtension(currentFile, selectedNameFilter.extensions[0]);
-        }
-
-        Connections
-        {
-            target: fileDialog.selectedNameFilter
-
-            onIndexChanged:
+            onAccepted:
             {
-                if(fileDialog.visible)
-                    fileDialog.updateFileExtension();
+                screenshot.path = folder.toString();
+                graphView.captureScreenshot(screenshotWidth, screenshotHeight, file, dpi, fill);
             }
-        }
 
-        nameFilters: ["PNG Image (*.png)" ,"JPEG Image (*.jpg)", "Bitmap Image (*.bmp)"]
+            fileMode: Labs.FileDialog.SaveFile
+            defaultSuffix: selectedNameFilter.extensions[0]
+            selectedNameFilter.index: 0
+
+            function updateFileExtension()
+            {
+                currentFile = utils.replaceExtension(currentFile, selectedNameFilter.extensions[0]);
+            }
+
+            Component.onCompleted:
+            {
+                updateFileExtension();
+            }
+
+            Connections
+            {
+                target: fileDialog.selectedNameFilter
+
+                onIndexChanged:
+                {
+                    if(fileDialog.visible)
+                        fileDialog.updateFileExtension();
+                }
+            }
+
+            nameFilters: ["PNG Image (*.png)" ,"JPEG Image (*.jpg)", "Bitmap Image (*.bmp)"]
+        }
     }
 
     QmlUtils { id: utils }
@@ -447,8 +462,6 @@ Dialog
         aspectRatio = screenshot.width / screenshot.height
         pixelWidthSpin.value = screenshot.width
         pixelHeightSpin.value = screenshot.height
-
-        fileDialog.folder = screenshot.path;
 
         loadPreset(presets.currentIndex);
     }
