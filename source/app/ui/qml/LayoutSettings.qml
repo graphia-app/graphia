@@ -13,7 +13,7 @@ Column
 
         RowLayout
         {
-            anchors.right: parent.right
+            anchors.left: parent.left
 
             Label
             {

@@ -38,57 +38,6 @@ Item
         id: layout
         spacing: 0
 
-        ColumnLayout
-        {
-            Layout.alignment: Qt.AlignBottom
-
-            ToolButton
-            {
-                // enabled may be changed externally, so have an
-                // internal visibility property that we control
-                property bool _visible: !panel.hidden && list.count > 0
-
-                enabled: _visible
-                iconName: "go-bottom"
-                tooltip: qsTr("Hide")
-
-                Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
-                opacity: _visible ? 1.0 : 0.0
-
-                onClicked: { panel.hide(); }
-            }
-
-            RowLayout
-            {
-                spacing: 0
-
-                ToolButton
-                {
-                    iconName: "list-add"
-                    tooltip: qsTr("Add Visualisation")
-                    onClicked: { createVisualisationDialog.show(); }
-                }
-
-                ButtonMenu
-                {
-                    enabled: list.count > 0
-                    visible: panel.hidden || list.count === 0
-
-                    text:
-                    {
-                        return Utils.pluralise(list.count,
-                                               qsTr("visualisation"),
-                                               qsTr("visualisations"));
-                    }
-
-                    textColor: enabled ? enabledTextColor : disabledTextColor
-                    hoverColor: heldColor
-
-                    onClicked: { panel.show(); }
-                }
-            }
-        }
-
         SlidingPanel
         {
             id: panel
@@ -120,9 +69,62 @@ Item
                 heldColor: root.heldColor
                 parentWhenDragging: root
 
-                alignment: Qt.AlignLeft
+                alignment: Qt.AlignRight
 
                 onItemMoved: { document.moveVisualisation(from, to); }
+            }
+        }
+
+        ColumnLayout
+        {
+            Layout.alignment: Qt.AlignBottom
+
+            ToolButton
+            {
+                Layout.alignment:  Qt.AlignRight
+
+                // enabled may be changed externally, so have an
+                // internal visibility property that we control
+                property bool _visible: !panel.hidden && list.count > 0
+
+                enabled: _visible
+                iconName: "go-bottom"
+                tooltip: qsTr("Hide")
+
+                Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
+                opacity: _visible ? 1.0 : 0.0
+
+                onClicked: { panel.hide(); }
+            }
+
+            RowLayout
+            {
+                spacing: 0
+
+                ButtonMenu
+                {
+                    enabled: list.count > 0
+                    visible: panel.hidden || list.count === 0
+
+                    text:
+                    {
+                        return Utils.pluralise(list.count,
+                                               qsTr("visualisation"),
+                                               qsTr("visualisations"));
+                    }
+
+                    textColor: enabled ? enabledTextColor : disabledTextColor
+                    hoverColor: heldColor
+
+                    onClicked: { panel.show(); }
+                }
+
+                ToolButton
+                {
+                    iconName: "list-add"
+                    tooltip: qsTr("Add Visualisation")
+                    onClicked: { createVisualisationDialog.show(); }
+                }
             }
         }
     }

@@ -49,6 +49,57 @@ Item
     {
         id: row
 
+        AlertIcon
+        {
+            id: alertIcon
+            visible: false
+        }
+
+        ButtonMenu
+        {
+            id: attributeList
+            selectedValue: attribute
+            model: document.attribute(attribute).similar;
+            enabled: enabledMenuItem.checked
+            propogatePresses: true
+
+            textColor: root.textColor
+            hoverColor: root.hoverColor
+
+            onSelectedValueChanged: { updateExpression(); }
+        }
+
+        Label
+        {
+            id: channelLabel
+            visible: !gradientKey.visible
+            text: channel
+            enabled: enabledMenuItem.checked
+            color: root.textColor
+        }
+
+        GradientKey
+        {
+            id: gradientKey
+            visible: false
+            enabled: enabledMenuItem.checked
+
+            keyWidth: 100
+
+            textColor: root.textColor
+            hoverColor: root.hoverColor
+
+            invert: isFlagSet("invert");
+            propogatePresses: true
+
+            onClicked:
+            {
+                gradientList.visualisationIndex = index;
+                gradientList.selected = gradientKey.configuration;
+                gradientList.show();
+            }
+        }
+
         Hamburger
         {
             width: 20
@@ -104,57 +155,6 @@ Item
                     }
                 }
             }
-        }
-
-        ButtonMenu
-        {
-            id: attributeList
-            selectedValue: attribute
-            model: document.attribute(attribute).similar;
-            enabled: enabledMenuItem.checked
-            propogatePresses: true
-
-            textColor: root.textColor
-            hoverColor: root.hoverColor
-
-            onSelectedValueChanged: { updateExpression(); }
-        }
-
-        Label
-        {
-            id: channelLabel
-            visible: !gradientKey.visible
-            text: channel
-            enabled: enabledMenuItem.checked
-            color: root.textColor
-        }
-
-        GradientKey
-        {
-            id: gradientKey
-            visible: false
-            enabled: enabledMenuItem.checked
-
-            keyWidth: 100
-
-            textColor: root.textColor
-            hoverColor: root.hoverColor
-
-            invert: isFlagSet("invert");
-            propogatePresses: true
-
-            onClicked:
-            {
-                gradientList.visualisationIndex = index;
-                gradientList.selected = gradientKey.configuration;
-                gradientList.show();
-            }
-        }
-
-        AlertIcon
-        {
-            id: alertIcon
-            visible: false
         }
     }
 

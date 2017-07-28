@@ -276,7 +276,7 @@ Item
             {
                 spacing: 10
 
-                anchors.right: parent.right
+                anchors.left: parent.left
                 anchors.bottom: parent.bottom
                 anchors.margins: Constants.margin
 
@@ -286,9 +286,9 @@ Item
 
                     color: root.contrastingColor
 
-                    anchors.right: parent.right
+                    anchors.left: parent.left
 
-                    horizontalAlignment: Text.AlignRight
+                    horizontalAlignment: Text.AlignLeft
                     text:
                     {
                         var s = "";
@@ -322,7 +322,7 @@ Item
 
                 LayoutSettings
                 {
-                    anchors.right: parent.right
+                    anchors.left: parent.left
 
                     visible: toggleLayoutSettingsAction.checked
 
@@ -335,7 +335,7 @@ Item
             {
                 visible: plugin.loaded
 
-                anchors.left: parent.left
+                anchors.right: parent.right
                 anchors.bottom: parent.bottom
 
                 enabledTextColor: root.contrastingColor
