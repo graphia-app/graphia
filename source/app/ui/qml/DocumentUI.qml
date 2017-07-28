@@ -280,43 +280,89 @@ Item
                 anchors.bottom: parent.bottom
                 anchors.margins: Constants.margin
 
-                Label
+                GridLayout
                 {
-                    visible: toggleGraphMetricsAction.checked
-
-                    color: root.contrastingColor
-
+                    visible: plugin.loaded && toggleGraphMetricsAction.checked
                     anchors.left: parent.left
 
-                    horizontalAlignment: Text.AlignLeft
-                    text:
+                    columns: 2
+                    rows: 3
+
+                    rowSpacing: 0
+
+                    Label
                     {
-                        var s = "";
-                        var numNodes = graph.numNodes;
-                        var numEdges = graph.numEdges;
-                        var numVisibleNodes = graph.numVisibleNodes;
-                        var numVisibleEdges = graph.numVisibleEdges;
+                        color: root.contrastingColor
+                        text: qsTr("Nodes:")
+                    }
 
-                        if(numNodes >= 0)
+                    Label
+                    {
+                        color: root.contrastingColor
+                        Layout.alignment: Qt.AlignRight
+                        text:
                         {
-                            s += Utils.formatUsingSIPostfix(numNodes);
-                            if(numVisibleNodes !== numNodes)
-                                s += " (" + Utils.formatUsingSIPostfix(numVisibleNodes) + ")";
-                            s += " nodes";
-                        }
+                            var s = "";
+                            var numNodes = graph.numNodes;
+                            var numVisibleNodes = graph.numVisibleNodes;
 
-                        if(numEdges >= 0)
+                            if(numNodes >= 0)
+                            {
+                                s += Utils.formatUsingSIPostfix(numNodes);
+                                if(numVisibleNodes !== numNodes)
+                                    s += " (" + Utils.formatUsingSIPostfix(numVisibleNodes) + ")";
+                            }
+
+                            return s;
+                        }
+                    }
+
+                    Label
+                    {
+                        color: root.contrastingColor
+                        text: qsTr("Edges:")
+                    }
+
+                    Label
+                    {
+                        color: root.contrastingColor
+                        Layout.alignment: Qt.AlignRight
+                        text:
                         {
-                            s += "\n" + Utils.formatUsingSIPostfix(numEdges);
-                            if(numVisibleEdges !== numEdges)
-                                s += " (" + Utils.formatUsingSIPostfix(numVisibleEdges) + ")";
-                            s += " edges";
+                            var s = "";
+                            var numEdges = graph.numEdges;
+                            var numVisibleEdges = graph.numVisibleEdges;
+
+                            if(numEdges >= 0)
+                            {
+                                s += Utils.formatUsingSIPostfix(numEdges);
+                                if(numVisibleEdges !== numEdges)
+                                    s += " (" + Utils.formatUsingSIPostfix(numVisibleEdges) + ")";
+                            }
+
+                            return s;
                         }
+                    }
 
-                        if(graph.numComponents >= 0)
-                            s += "\n" + Utils.formatUsingSIPostfix(graph.numComponents) + " components";
+                    Label
+                    {
+                        color: root.contrastingColor
+                        text: qsTr("Components:")
+                    }
 
-                        return s;
+                    Label
+                    {
+                        color: root.contrastingColor
+                        Layout.alignment: Qt.AlignRight
+                        text:
+                        {
+                            var s = "";
+
+                            if(graph.numComponents >= 0)
+                                s += Utils.formatUsingSIPostfix(graph.numComponents);
+
+                            return s;
+                        }
                     }
                 }
 
