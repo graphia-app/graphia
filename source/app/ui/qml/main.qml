@@ -433,14 +433,24 @@ ApplicationWindow
         property bool inTab: false
     }
 
-    Labs.FileDialog
+    Component
     {
-        id: fileSaveDialog
-        title: qsTr("Save File...")
-        fileMode: Labs.FileDialog.SaveFile
-        defaultSuffix: selectedNameFilter.extensions[0]
-        nameFilters: [ application.name + " files (*." + application.nativeExtension + ")", "All files (*)" ]
-        onAccepted: { saveFile(file); }
+        // We use a Component here because for whatever reason, the Labs FileDialog only seems
+        // to allow you to set currentFile once. From looking at the source code it appears as
+        // if setting currentFile adds to the currently selected files, rather than replaces
+        // the currently selected files with a new one. Until this is fixed, we work around
+        // it by simply recreating the FileDialog everytime we need one.
+
+        id: fileSaveDialogComponent
+
+        Labs.FileDialog
+        {
+            title: qsTr("Save File...")
+            fileMode: Labs.FileDialog.SaveFile
+            defaultSuffix: selectedNameFilter.extensions[0]
+            nameFilters: [ application.name + " files (*." + application.nativeExtension + ")", "All files (*)" ]
+            onAccepted: { saveFile(file); }
+        }
     }
 
     Action
@@ -521,15 +531,18 @@ ApplicationWindow
             if(currentDocument === null)
                 return;
 
+            var saveFile = "";
             if(!currentDocument.hasBeenSaved)
             {
-                fileSaveDialog.currentFile = qmlUtils.replaceExtension(currentDocument.fileUrl,
+                saveFile = qmlUtils.replaceExtension(currentDocument.fileUrl,
                     application.nativeExtension);
             }
             else
-                fileSaveDialog.currentFile = currentDocument.savedFileUrl;
+                saveFile = currentDocument.savedFileUrl;
 
-            fileSaveDialog.open();
+            var fileSaveDialogObject = fileSaveDialogComponent.createObject(
+                mainWindow, {"currentFile": saveFile});
+            fileSaveDialogObject.open();
         }
     }
 
