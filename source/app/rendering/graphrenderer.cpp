@@ -1732,7 +1732,8 @@ void GraphRenderer::finishRender()
     for(auto i : gpuGraphDataRenderOrder())
     {
         render2DComposite(_screenShader,    _gpuGraphData.at(i)._colorTexture,     _gpuGraphData.at(i).alpha());
-        render2DComposite(_selectionShader, _gpuGraphData.at(i)._selectionTexture, _gpuGraphData.at(i).alpha());
+        if(!(_isScreenshot || _isPreview))
+            render2DComposite(_selectionShader, _gpuGraphData.at(i)._selectionTexture, _gpuGraphData.at(i).alpha());
     }
 
     if(_isScreenshot)
