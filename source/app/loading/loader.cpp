@@ -249,7 +249,15 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
         return false;
 
     auto pluginData = jsonBody["pluginData"].toString().toUtf8();
-    _pluginInstance->load(pluginData, graph, progressFn);
+
+    if(QJsonDocument::fromJson(pluginData).isNull())
+    {
+        // If it's not JSON, it'll be hex encoded, so decode first
+        auto decoded = QByteArray::fromHex(pluginData);
+        _pluginInstance->load(decoded, graph, progressFn);
+    }
+    else
+        _pluginInstance->load(pluginData, graph, progressFn);
 
     return false;
 }
