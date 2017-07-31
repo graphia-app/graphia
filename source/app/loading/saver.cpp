@@ -191,6 +191,8 @@ bool Saver::encode(const ProgressFn& progressFn)
     // as is, but if it's not, hex encode it
     if(!pluginJson.isNull() && pluginJson.isObject())
         content["pluginData"] = pluginJson.object();
+    else if(!pluginJson.isNull() && pluginJson.isArray())
+        content["pluginData"] = pluginJson.array();
     else
         content["pluginData"] = QString(pluginData.toHex());
 
