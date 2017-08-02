@@ -15,6 +15,11 @@ void NodePositions::set(NodeId nodeId, const QVector3D& position)
     _array.at(nodeId).push_back(position);
 }
 
+void NodePositions::setExact(NodeId nodeId, const QVector3D& position)
+{
+    _array.at(nodeId).fill(position);
+}
+
 void NodePositions::update(const NodePositions& other)
 {
     std::unique_lock<std::recursive_mutex> lock(_mutex);

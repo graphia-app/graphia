@@ -36,6 +36,7 @@ public:
     const QVector3D& get(NodeId nodeId) const;
     const QVector3D getScaledAndSmoothed(NodeId nodeId) const;
     void set(NodeId nodeId, const QVector3D& position);
+    void setExact(NodeId nodeId, const QVector3D& position);
 
     void update(const NodePositions& other);
 
@@ -57,5 +58,6 @@ private:
     using NodeArray<MeanPosition>::at;
 };
 
+using ExactNodePositions = NodeArray<QVector3D>;
 
 #endif // NODEPOSITIONS_H
