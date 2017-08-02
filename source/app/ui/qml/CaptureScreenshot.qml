@@ -548,7 +548,7 @@ Dialog
             return;
 
         var preset = presetsListModel.get(currentIndex);
-        if(preset.dpi > 0)
+        if(preset !== undefined && preset.dpi > 0)
         {
             dpiSpin.value = preset.dpi;
 
