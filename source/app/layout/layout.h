@@ -177,6 +177,8 @@ public:
 
     void addAllComponents();
 
+    void setStartingNodePositions(const ExactNodePositions& nodePositions);
+
     std::vector<LayoutSetting>& settings();
     const LayoutSetting* setting(const QString& name) const;
 

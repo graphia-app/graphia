@@ -268,6 +268,15 @@ void LayoutThread::addAllComponents()
     resume();
 }
 
+void LayoutThread::setStartingNodePositions(const ExactNodePositions& nodePositions)
+{
+    for(auto nodeId : _graphModel->graph().nodeIds())
+        _intermediatePositions.setExact(nodeId, nodePositions.at(nodeId));
+
+    // Stop the layouts throwing away our newly set positions
+    _executedAtLeastOnce.fill(true);
+}
+
 void LayoutThread::removeComponent(ComponentId componentId)
 {
     bool resumeAfterRemoval = false;
