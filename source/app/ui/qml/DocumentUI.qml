@@ -160,7 +160,14 @@ Item
 
         this.fileUrl = fileUrl;
         this.fileType = fileType;
-        this.pluginName = pluginName !== undefined ? pluginName : "";
+
+        if(fileType === "Native")
+        {
+            this.pluginName = "";
+            this.savedFileUrl = fileUrl;
+        }
+        else
+            this.pluginName = pluginName;
 
         return true;
     }
