@@ -1,6 +1,10 @@
 #include "pageranktransform.h"
+
 #include "transform/transformedgraph.h"
+
 #include "graph/graphmodel.h"
+#include "graph/componentmanager.h"
+
 #ifdef _MSC_VER
 #if _MSC_VER > 1900
 #error Check if blaze is still giving strange unreferenced parameter warnings
@@ -31,14 +35,18 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
     // not use a matrix. This dramatically lowers the memory footprint.
     // http://www.dcs.bbk.ac.uk/~dell/teaching/cc/book/mmds/mmds_ch5_2.pdf
     // http://michaelnielsen.org/blog/using-your-laptop-to-compute-pagerank-for-millions-of-webpages/
-    NodeArray<float> pageRankScores(_graphModel->graph());
+    NodeArray<float> pageRankScores(target);
 
     target.setPhase(QString("PageRank"));
 
+    // We must do our own componentisation as the graph's set of components
+    // won't necessarily be up-to-date
+    ComponentManager componentManager(target);
+
     int totalIterationCount = 0;
-    for(auto componentId : _graphModel->graph().componentIds())
+    for(auto componentId : componentManager.componentIds())
     {        
-        const IGraphComponent* component = _graphModel->graph().componentById(componentId);
+        const IGraphComponent* component = componentManager.componentById(componentId);
         int componentNodeCount = static_cast<int>(component->nodeIds().size());
 
         // Map NodeIds to Matrix index
@@ -78,11 +86,11 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
             {
                 auto matrixId = nodeToIndexMap[nodeId];
                 float prSum = 0.0f;
-                for(auto edgeId : _graphModel->graph().edgeIdsForNodeId(nodeId))
+                for(auto edgeId : target.edgeIdsForNodeId(nodeId))
                 {
-                    auto oppositeNodeId = _graphModel->graph().edgeById(edgeId).oppositeId(nodeId);
+                    auto oppositeNodeId = target.edgeById(edgeId).oppositeId(nodeId);
                     prSum += pageRankVector[nodeToIndexMap[oppositeNodeId]] /
-                            _graphModel->graph().nodeById(oppositeNodeId).degree();
+                            target.nodeById(oppositeNodeId).degree();
                 }
                  newPageRankVector[matrixId] = (prSum * PAGERANK_DAMPING) +
                          ((1.0f - PAGERANK_DAMPING) / componentNodeCount);
