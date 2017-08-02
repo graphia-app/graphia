@@ -20,7 +20,6 @@ void NodePositions::update(const NodePositions& other)
     std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     _array = other._array;
-    _updated = true;
 }
 
 QVector3D NodePositions::centreOfMass(const NodePositions& nodePositions,

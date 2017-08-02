@@ -21,7 +21,6 @@ class NodePositions : public NodeArray<MeanPosition>
 {
 private:
     std::recursive_mutex _mutex;
-    bool _updated = false;
     float _scale = 1.0f;
     int _smoothing = 1;
 
