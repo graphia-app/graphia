@@ -89,7 +89,7 @@ QJsonObject UserData::save(const ProgressFn& progressFn) const
         vector["vector"] = jsonVector;
 
         vectors.append(vector);
-        progressFn((i++ * 100) / _userDataVectors.size());
+        progressFn((i++ * 100) / static_cast<int>(_userDataVectors.size()));
     }
 
     jsonObject["vectors"] = vectors;
