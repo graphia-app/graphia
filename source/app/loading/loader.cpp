@@ -3,6 +3,7 @@
 
 #include "application.h"
 
+#include "shared/graph/imutablegraph.h"
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/scope_exit.h"
 
@@ -42,9 +43,9 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
     if(!file.open(QIODevice::ReadOnly))
         return false;
 
-    auto totalBytes = file.size();
-    int bytesRead = 0;
-    int bytesDecompressed = 0;
+    uint64_t totalBytes = file.size();
+    uint64_t bytesRead = 0;
+    uint64_t bytesDecompressed = 0;
     QDataStream input(&file);
 
     z_stream zstream = {};
@@ -97,7 +98,7 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
             byteArray.append(reinterpret_cast<const char*>(outBuffer), numBytes);
 
             // Check if we've read more than we've been asked to
-            if(maxReadSize >= 0 && bytesDecompressed >= maxReadSize)
+            if(maxReadSize >= 0 && bytesDecompressed >= static_cast<uint64_t>(maxReadSize))
                 return true;
 
         } while (zstream.avail_out == 0);
@@ -107,10 +108,16 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
 }
 
 static bool load(const QString& filePath, QByteArray& byteArray,
-                 int maxReadSize = -1, ProgressFn progressFn = [](int){})
+                 int maxReadSize = -1, IGraph* graph = nullptr,
+                 ProgressFn progressFn = [](int){})
 {
     if(isCompressed(filePath))
+    {
+        if(graph != nullptr)
+            graph->setPhase(QObject::tr("Decompressing"));
+
         return decompress(filePath, byteArray, maxReadSize, progressFn);
+    }
 
     QFile file(filePath);
 
@@ -222,7 +229,7 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
 
     QByteArray byteArray;
 
-    if(!load(url.path(), byteArray, -1, progressFn))
+    if(!load(url.path(), byteArray, -1, &graph, progressFn))
         return false;
 
     progressFn(-1);
@@ -245,6 +252,87 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
 
     auto jsonBody = jsonArray.at(1).toObject();
 
+    if(!jsonBody.contains("graph") || !jsonBody["graph"].isObject())
+        return false;
+
+    const auto& jsonGraph = jsonBody["graph"].toObject();
+
+    if(!jsonGraph.contains("nodes") || !jsonGraph.contains("edges"))
+        return false;
+
+    if(!jsonGraph.contains("nodes") || !jsonGraph.contains("edges"))
+        return false;
+
+    const auto& jsonNodes = jsonGraph["nodes"].toArray();
+    const auto& jsonEdges = jsonGraph["edges"].toArray();
+
+    int i = 0;
+
+    graph.setPhase(QObject::tr("Nodes"));
+    for(const auto& jsonNode : jsonNodes)
+    {
+        NodeId nodeId = jsonNode.toObject()["id"].toInt(-1);
+
+        if(!nodeId.isNull())
+            graph.addNode(nodeId);
+
+        progressFn((i++ * 100) / jsonNodes.size());
+    }
+
+    progressFn(-1);
+
+    i = 0;
+
+    graph.setPhase(QObject::tr("Edges"));
+    for(const auto& jsonEdge : jsonEdges)
+    {
+        EdgeId edgeId = jsonEdge.toObject()["id"].toInt(-1);
+        NodeId sourceId = jsonEdge.toObject()["source"].toInt(-1);
+        NodeId targetId = jsonEdge.toObject()["target"].toInt(-1);
+
+        if(!edgeId.isNull() && !sourceId.isNull() && !targetId.isNull())
+            graph.addEdge(edgeId, sourceId, targetId);
+
+        progressFn((i++ * 100) / jsonEdges.size());
+    }
+
+    progressFn(-1);
+
+    if(jsonBody.contains("transforms"))
+    {
+        for(const auto& transform : jsonBody["transforms"].toArray())
+            _transforms.append(transform.toString());
+    }
+
+    if(jsonBody.contains("visualisations"))
+    {
+        for(const auto& visualisation : jsonBody["visualisations"].toArray())
+            _visualisations.append(visualisation.toString());
+    }
+
+    if(jsonBody.contains("layout"))
+    {
+        auto jsonLayout = jsonBody["layout"].toObject();
+
+        if(jsonLayout.contains("positions"))
+        {
+            _nodePositions = std::make_unique<ExactNodePositions>(graph);
+
+            for(const auto& jsonPosition : jsonLayout["positions"].toArray())
+            {
+                NodeId nodeId = jsonPosition.toObject()["id"].toInt(-1);
+                const auto& jsonPositionArray = jsonPosition.toObject()["position"].toArray();
+
+                _nodePositions->set(nodeId, QVector3D(
+                    jsonPositionArray.at(0).toDouble(),
+                    jsonPositionArray.at(1).toDouble(),
+                    jsonPositionArray.at(2).toDouble()));
+            }
+        }
+
+        _layoutPaused = jsonLayout["paused"].toBool();
+    }
+
     if(!jsonBody.contains("pluginData"))
         return false;
 
@@ -259,12 +347,17 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
     else
         return false;
 
-    return false;
+    return true;
 }
 
 void Loader::setPluginInstance(IPluginInstance* pluginInstance)
 {
     _pluginInstance = pluginInstance;
+}
+
+const ExactNodePositions* Loader::nodePositions() const
+{
+    return _nodePositions != nullptr ? _nodePositions.get() : nullptr;
 }
 
 QString Loader::pluginNameFor(const QUrl& url)

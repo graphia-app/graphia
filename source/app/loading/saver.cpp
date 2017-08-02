@@ -24,8 +24,8 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, const
     if(!file.open(QIODevice::WriteOnly))
         return false;
 
-    auto totalBytes = byteArray.size();
-    int bytePosition = 0;
+    uint64_t totalBytes = byteArray.size();
+    uint64_t bytePosition = 0;
     QDataStream input(byteArray);
     QDataStream output(&file);
 
@@ -93,11 +93,13 @@ static QJsonObject graphAsJson(const IGraph& graph, const ProgressFn& progressFn
     for(auto nodeId : graph.nodeIds())
     {
         QJsonObject node;
-        node["id"] = QString::number(nodeId);
+        node["id"] = static_cast<int>(nodeId);
 
         nodes.append(node);
         progressFn((i++ * 100) / graph.numNodes());
     }
+
+    progressFn(-1);
 
     jsonObject["nodes"] = nodes;
 
@@ -108,12 +110,15 @@ static QJsonObject graphAsJson(const IGraph& graph, const ProgressFn& progressFn
         const auto& edge = graph.edgeById(edgeId);
 
         QJsonObject jsonEdge;
-        jsonEdge["source"] = QString::number(edge.sourceId());
-        jsonEdge["target"] = QString::number(edge.targetId());
+        jsonEdge["id"] = static_cast<int>(edgeId);
+        jsonEdge["source"] = static_cast<int>(edge.sourceId());
+        jsonEdge["target"] = static_cast<int>(edge.targetId());
 
         edges.append(jsonEdge);
         progressFn((i++ * 100) / graph.numEdges());
     }
+
+    progressFn(-1);
 
     jsonObject["edges"] = edges;
 
@@ -130,7 +135,7 @@ static QJsonArray nodePositionsAsJson(const IGraph& graph, const NodePositions& 
     for(auto nodeId : graph.nodeIds())
     {
         QJsonObject position;
-        position["id"] = QString::number(nodeId);
+        position["id"] = static_cast<int>(nodeId);
 
         const auto& nodePosition = nodePositions.get(nodeId);
         QJsonArray vector({nodePosition.x(), nodePosition.y(), nodePosition.z()});
@@ -140,6 +145,8 @@ static QJsonArray nodePositionsAsJson(const IGraph& graph, const NodePositions& 
         positions.append(position);
         progressFn((i++ * 100) / graph.numNodes());
     }
+
+    progressFn(-1);
 
     return positions;
 }
@@ -172,11 +179,16 @@ bool Saver::encode(const ProgressFn& progressFn)
 
     QJsonObject content;
 
-    //FIXME Save real data
     content["graph"] = graphAsJson(graphModel->mutableGraph(), progressFn);
-    content["positions"] = nodePositionsAsJson(graphModel->mutableGraph(),
-                                               graphModel->nodePositions(),
-                                               progressFn);
+
+    QJsonObject layout;
+
+    layout["positions"] = nodePositionsAsJson(graphModel->mutableGraph(),
+                                              graphModel->nodePositions(),
+                                              progressFn);
+    layout["paused"] = _document->layoutPauseState() == LayoutPauseState::Paused;
+    content["layout"] = layout;
+
     content["transforms"] = stringListToJsonArray(_document->transforms());
     content["visualisations"] = stringListToJsonArray(_document->visualisations());
 

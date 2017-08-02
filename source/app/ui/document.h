@@ -165,6 +165,7 @@ private:
     QQmlVariantListModel _visualisationsModel;
     QStringList _visualisations;
 
+    std::unique_ptr<ExactNodePositions> _startingNodePositions;
     bool _userLayoutPaused = false; // true if the user wants the layout to pause
 
     bool _previousIdle = true;

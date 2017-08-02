@@ -361,14 +361,40 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
 
     connect(_graphFileParserThread.get(), &ParserThread::progress, this, &Document::onLoadProgress);
 
+    // Build the transforms and visualisations in the parser thread since they may
+    // take time to compute and we may as well roll them into the loading process
     if(loader != nullptr)
+    {
         loader->setPluginInstance(_pluginInstance.get());
+
+        connect(_graphFileParserThread.get(), &ParserThread::success,
+        [this](IParser* completedParser)
+        {
+            auto completedLoader = dynamic_cast<Loader*>(completedParser);
+            Q_ASSERT(completedLoader != nullptr);
+
+            _graphTransforms = completedLoader->transforms();
+            _visualisations = completedLoader->visualisations();
+
+            _graphModel->buildTransforms(_graphTransforms);
+            _graphModel->buildVisualisations(_visualisations);
+
+            auto nodePositions = completedLoader->nodePositions();
+            if(nodePositions != nullptr)
+                _startingNodePositions = std::make_unique<ExactNodePositions>(*nodePositions);
+
+            _userLayoutPaused = completedLoader->layoutPaused();
+        });
+    }
     else
     {
         connect(_graphFileParserThread.get(), &ParserThread::success, [this]
         {
-            _graphModel->buildTransforms(sortedTransforms(_pluginInstance->defaultTransforms()));
-            _graphModel->buildVisualisations(_pluginInstance->defaultVisualisations());
+            _graphTransforms = sortedTransforms(_pluginInstance->defaultTransforms());
+            _visualisations = _pluginInstance->defaultVisualisations();
+
+            _graphModel->buildTransforms(_graphTransforms);
+            _graphModel->buildVisualisations(_visualisations);
         });
     }
 
@@ -431,15 +457,23 @@ void Document::onLoadComplete(bool success)
     // This causes the plugin UI to be loaded
     emit pluginQmlPathChanged();
 
-    setTransforms(sortedTransforms(_pluginInstance->defaultTransforms()));
-    setVisualisations(_pluginInstance->defaultVisualisations());
+    setTransforms(_graphTransforms);
+    setVisualisations(_visualisations);
 
     _layoutThread = std::make_unique<LayoutThread>(*_graphModel, std::make_unique<ForceDirectedLayoutFactory>(_graphModel.get()));
+
+    if(_startingNodePositions != nullptr)
+    {
+        _layoutThread->setStartingNodePositions(*_startingNodePositions);
+        _startingNodePositions.reset();
+    }
+
     connect(_layoutThread.get(), &LayoutThread::pausedChanged, this, &Document::layoutPauseStateChanged);
     connect(_layoutThread.get(), &LayoutThread::settingChanged, [this] { _layoutRequired = true; });
     connect(_layoutThread.get(), &LayoutThread::settingChanged, this, &Document::updateLayoutState);
     _layoutThread->addAllComponents();
     initialiseLayoutSettingsModel();
+    updateLayoutState();
 
     _graphQuickItem->initialise(_graphModel.get(), &_commandManager, _selectionManager.get(), _gpuComputeThread.get());
 
