@@ -70,7 +70,7 @@ public:
         auto parserThreadQObject = dynamic_cast<const QObject*>(parserThread);
         Q_ASSERT(parserThreadQObject != nullptr);
 
-        connect(parserThreadQObject, SIGNAL(success()),
+        connect(parserThreadQObject, SIGNAL(success(IParser*)),
                 this, SLOT(onLoadSuccess()), Qt::DirectConnection);
     }
 

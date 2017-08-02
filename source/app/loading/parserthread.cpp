@@ -90,7 +90,7 @@ void ParserThread::run()
         });
 
     if(result)
-        emit success();
+        emit success(_parser.get());
 
     emit complete(result);
 }

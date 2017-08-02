@@ -32,7 +32,7 @@ private:
 
 signals:
     void progress(int percentage) const;
-    void success() const;
+    void success(IParser*) const;
     void complete(bool success) const;
 };
 
