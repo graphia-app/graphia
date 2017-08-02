@@ -2,6 +2,8 @@
 
 #include "shared/utils/utils.h"
 
+#include <QJsonArray>
+
 const QString UserData::firstUserDataVectorName() const
 {
     if(!_userDataVectors.empty())
@@ -22,9 +24,6 @@ int UserData::numValues() const
 
 void UserData::add(const QString& name)
 {
-    if(_userDataVectors.empty())
-        _firstUserDataVectorName = name;
-
     if(!u::containsKey(_userDataVectors, name))
     {
         _userDataVectors.emplace_back(std::make_pair(name, UserDataVector(name)));
@@ -70,4 +69,65 @@ QVariant UserData::value(size_t index, const QString& name) const
     }
 
     return {};
+}
+
+QJsonObject UserData::save(const ProgressFn& progressFn) const
+{
+    QJsonObject jsonObject;
+    int i = 0;
+
+    jsonObject["numValues"] = _numValues;
+
+    QJsonArray vectors;
+    for(const auto& userDataVector : _userDataVectors)
+    {
+        const auto& name = userDataVector.first;
+        auto jsonVector = userDataVector.second.save();
+
+        QJsonObject vector;
+        vector["name"] = name;
+        vector["vector"] = jsonVector;
+
+        vectors.append(vector);
+        progressFn((i++ * 100) / _userDataVectors.size());
+    }
+
+    jsonObject["vectors"] = vectors;
+
+    progressFn(-1);
+
+    return jsonObject;
+}
+
+bool UserData::load(const QJsonObject& jsonObject, const ProgressFn& progressFn)
+{
+    int i = 0;
+
+    if(!jsonObject["vectors"].isArray())
+        return false;
+
+    _userDataVectors.clear();
+    _numValues = 0;
+
+    const auto& vectorsArray = jsonObject["vectors"].toArray();
+    for(const auto& vector : vectorsArray)
+    {
+        const auto& name = vector.toObject()["name"].toString();
+        const auto& jsonVector = vector.toObject()["vector"].toObject();
+
+        UserDataVector userDataVector;
+        if(!userDataVector.load(jsonVector))
+            return false;
+
+        _userDataVectors.emplace_back(std::make_pair(name, userDataVector));
+
+        progressFn((i++ * 100) / vectorsArray.size());
+    }
+
+    progressFn(-1);
+
+    for(const auto& userDataVector : _userDataVectors)
+        _numValues = std::max(_numValues, userDataVector.second.numValues());
+
+    return true;
 }

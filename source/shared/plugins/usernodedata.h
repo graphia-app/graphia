@@ -31,6 +31,9 @@ public:
 
     void setNodeNamesToFirstUserDataVector(IGraphModel& graphModel);
     void exposeAsAttributes(IGraphModel& graphModel);
+
+    QJsonObject save(const IMutableGraph& graph, const ProgressFn& progressFn) const;
+    bool load(const QJsonObject& jsonObject, const ProgressFn& progressFn);
 };
 
 #endif // USERNODEDATA_H

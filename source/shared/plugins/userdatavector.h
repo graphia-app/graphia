@@ -2,6 +2,7 @@
 #define USERDATAVECTOR_H
 
 #include <QString>
+#include <QJsonObject>
 
 #include <vector>
 #include <limits>
@@ -53,6 +54,9 @@ public:
 
     void set(size_t index, const QString& value);
     QString get(size_t index) const;
+
+    QJsonObject save() const;
+    bool load(const QJsonObject& jsonObject);
 };
 
 #endif // USERDATAVECTOR_H
