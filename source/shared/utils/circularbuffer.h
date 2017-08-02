@@ -22,6 +22,14 @@ public:
         _next = _next % Size;
     }
 
+    void fill(const T& t)
+    {
+        _array.fill(t);
+        _size = Size;
+        _current = 0;
+        _next = 1;
+    }
+
     // An index of 0 will get the oldest T
     // An index of size() - 1 will get the newest T
     const T& at(size_t index) const
