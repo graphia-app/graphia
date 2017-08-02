@@ -191,6 +191,9 @@ public:
     // Usually it is called automatically and is generally only
     // necessary when accessing the Graph before changes have
     // been completed
+    // Note that this DOES NOT update components, so if this
+    // information is required a ComponentManager instance
+    // must be used directly
     virtual void update() {}
 
     // Informational messages to indicate progress
