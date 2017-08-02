@@ -183,7 +183,6 @@ void CorrelationPlotItem::buildPlot()
 
 void CorrelationPlotItem::populateMeanAveragePlot()
 {
-    auto maxX = static_cast<double>(_columnCount);
     double maxY = 0.0;
     double minY = 0.0;
 
@@ -331,7 +330,7 @@ void CorrelationPlotItem::scaleXAxis()
 double CorrelationPlotItem::rangeSize()
 {
     if(_showColumnNames)
-        return (columnAxisWidth() / columnLabelSize()) / _columnCount;
+        return (columnAxisWidth() / (columnLabelSize() * _columnCount));
     else
         return 1.0;
 }
@@ -399,9 +398,7 @@ void CorrelationPlotItem::showTooltip()
             _hoverLabel->top->pixelPosition().y();
     auto hoverLabelRightX = _itemTracer->anchor("position")->pixelPosition().x() +
             hoverlabelWidth + HOVER_MARGIN + COLOR_RECT_WIDTH;
-    auto xBounds = (_viewport != QRect()) ? _viewport.x() + _viewport.width() : clipRect().width();
-    // Even if viewport is not set, 0.0f is the minimum
-    auto yMin = _viewport.y();
+    auto xBounds = clipRect().width();
     QPointF targetPosition(_itemTracer->anchor("position")->pixelPosition().x() + HOVER_MARGIN,
                            _itemTracer->anchor("position")->pixelPosition().y());
 
@@ -410,9 +407,9 @@ void CorrelationPlotItem::showTooltip()
     {
         targetPosition.rx() = xBounds - hoverlabelWidth - COLOR_RECT_WIDTH - 1.0f;
 
-        // If moving the label above marker falls out of yMin, clip to yMin + labelHeight/2;
-        if(targetPosition.y() - hoverlabelHeight / 2.0f - HOVER_MARGIN * 2.0f < yMin)
-            targetPosition.setY(yMin + hoverlabelHeight / 2.0f);
+        // If moving the label above marker is less than 0, clip to 0 + labelHeight/2;
+        if(targetPosition.y() - hoverlabelHeight / 2.0f - HOVER_MARGIN * 2.0f < 0.0f)
+            targetPosition.setY(hoverlabelHeight / 2.0f);
         else
             targetPosition.ry() -= HOVER_MARGIN * 2.0f;
     }
