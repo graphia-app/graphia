@@ -4,6 +4,9 @@
 #include "shared/loading/pairwisetxtfileparser.h"
 #include "shared/loading/graphmlparser.h"
 
+#include <QJsonArray>
+#include <QJsonDocument>
+
 BaseGenericPluginInstance::BaseGenericPluginInstance()
 {
     connect(this, SIGNAL(loadSuccess()), this, SLOT(onLoadSuccess()));
@@ -46,6 +49,76 @@ void BaseGenericPluginInstance::setEdgeWeight(EdgeId edgeId, float weight)
     }
 
     _edgeWeights->set(edgeId, weight);
+}
+
+QByteArray BaseGenericPluginInstance::save(IMutableGraph& graph, const ProgressFn& progressFn) const
+{
+    int i = 0;
+    QJsonObject jsonObject;
+
+    if(_edgeWeights != nullptr)
+    {
+        graph.setPhase(QObject::tr("Edge Weights"));
+        QJsonArray weights;
+        for(auto edgeId : graph.edgeIds())
+        {
+            QJsonObject weight;
+            weight["id"] = QString::number(edgeId);
+            weight["weight"] = _edgeWeights->at(edgeId);
+
+            weights.append(weight);
+            progressFn((i++ * 100) / graph.numEdges());
+        }
+
+        jsonObject["edgeWeights"] = weights;
+    }
+
+    progressFn(-1);
+
+    jsonObject["userNodeData"] = _userNodeData.save(graph, progressFn);
+
+    QJsonDocument jsonDocument(jsonObject);
+    return jsonDocument.toJson();
+}
+
+bool BaseGenericPluginInstance::load(const QByteArray& data, IMutableGraph& graph, const ProgressFn& progressFn)
+{
+    QJsonDocument jsonDocument = QJsonDocument::fromJson(data);
+
+    if(jsonDocument.isNull() || !jsonDocument.isObject())
+        return false;
+
+    const auto& jsonObject = jsonDocument.object();
+
+    if(jsonObject.contains("edgeWeights") && jsonObject["edgeWeights"].isArray())
+    {
+        const auto& jsonEdgeWeights = jsonObject["edgeWeights"].toArray();
+
+        int i = 0;
+
+        graph.setPhase(QObject::tr("Edge Weights"));
+        for(const auto& edgeWeight : jsonEdgeWeights)
+        {
+            auto id = edgeWeight.toObject()["id"].toInt();
+            auto weight = edgeWeight.toObject()["weight"].toDouble();
+
+            setEdgeWeight(id, weight);
+
+            progressFn((i++ * 100) / jsonEdgeWeights.size());
+        }
+    }
+
+    progressFn(-1);
+
+    if(!jsonObject.contains("userNodeData") || !jsonObject["userNodeData"].isObject())
+        return false;
+
+    const auto& jsonUserNodeData = jsonObject["userNodeData"].toObject();
+
+    if(!_userNodeData.load(jsonUserNodeData, progressFn))
+        return false;
+
+    return true;
 }
 
 QString BaseGenericPluginInstance::selectedNodeNames() const
