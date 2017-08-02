@@ -101,25 +101,16 @@ PluginContent
             }
         }
 
-        ScrollView
+        ColumnLayout
         {
-            id: scrollView
-
-            height: 160
-
-            Layout.fillWidth: splitView.orientation === Qt.Horizontal
-            Layout.minimumHeight: splitView.orientation === Qt.Vertical ? 100 + (height - viewport.height) : -1
-            Layout.minimumWidth: splitView.orientation === Qt.Horizontal ? 200 : -1
-
-            horizontalScrollBarPolicy: Qt.ScrollBarAsNeeded
-            verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+            spacing: 0
 
             CorrelationPlot
             {
                 id: plot
 
-                width: minimumWidth > scrollView.width ? minimumWidth : scrollView.width
-                height: scrollView.viewport.height
+                Layout.fillWidth: true
+                Layout.fillHeight: true
 
                 rowCount: plugin.model.rowCount
                 columnCount: plugin.model.columnCount
@@ -144,7 +135,29 @@ PluginContent
                     return quantised;
                 }
 
+                scrollAmount:
+                {
+                    return (scrollView.flickableItem.contentX) /
+                            (scrollView.flickableItem.contentWidth - scrollView.viewport.width);
+                }
+
                 onRightClick: { contextMenu.popup(); }
+            }
+            ScrollView
+            {
+                visible: { return plot.rangeSize < 1.0 }
+                verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+                id: scrollView
+                implicitHeight: 15
+                Layout.fillWidth: true
+                Rectangle
+                {
+                    // This is a fake object to make native scrollbars appear
+                    // Prevent Qt opengl texture overflow (2^14 pixels)
+                    width: Math.min(plot.width / plot.rangeSize, 16383);
+                    height: 1
+                    color: "transparent"
+                }
             }
         }
     }

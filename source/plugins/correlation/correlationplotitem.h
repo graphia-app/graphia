@@ -14,6 +14,8 @@ class CorrelationPlotItem : public QQuickPaintedItem
 {
     Q_OBJECT
     Q_PROPERTY(QVector<double> data MEMBER _data)
+    Q_PROPERTY(double scrollAmount MEMBER _scrollAmount WRITE setScrollAmount NOTIFY scrollAmountChanged)
+    Q_PROPERTY(double rangeSize READ rangeSize NOTIFY scrollAmountChanged)
     Q_PROPERTY(QVector<int> selectedRows MEMBER _selectedRows WRITE setSelectedRows)
     Q_PROPERTY(QVector<QColor> rowColors MEMBER _rowColors WRITE setRowColors)
     Q_PROPERTY(QStringList columnNames MEMBER _labelNames WRITE setLabelNames)
@@ -21,7 +23,6 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(size_t columnCount MEMBER _columnCount WRITE setColumnCount)
     Q_PROPERTY(size_t rowCount MEMBER _rowCount)
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
-    Q_PROPERTY(int minimumWidth READ minimumWidth NOTIFY minimumWidthChanged)
     Q_PROPERTY(bool showColumnNames MEMBER _showColumnNames WRITE setShowColumnNames)
     Q_PROPERTY(QRect viewport MEMBER _viewport)
 
@@ -68,6 +69,7 @@ private:
     QVector<int> _selectedRows;
     QVector<QColor> _rowColors;
     bool _showColumnNames = true;
+    double _scrollAmount = 0.0f;
 
     void populateMeanAveragePlot();
     void populateRawPlot();
@@ -80,8 +82,12 @@ private:
     void setElideLabelWidth(int elideLabelWidth);
     void setColumnCount(size_t columnCount);
     void setShowColumnNames(bool showColumnNames);
+    void setScrollAmount(double scrollAmount);
 
-    unsigned int minimumWidth() const;
+    void scaleXAxis();
+    double rangeSize();
+    double columnLabelSize();
+    double columnAxisWidth();
 
 private slots:
     void onCustomReplot();
@@ -91,6 +97,6 @@ private slots:
 
 signals:
     void rightClick();
-    void minimumWidthChanged();
+    void scrollAmountChanged();
 };
 #endif // CORRELATIONPLOTITEM_H

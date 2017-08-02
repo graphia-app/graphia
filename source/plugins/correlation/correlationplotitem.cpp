@@ -4,6 +4,8 @@
 
 CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent)
 {
+    setRenderTarget(RenderTarget::FramebufferObject);
+
     _customPlot.setOpenGl(true);
     _customPlot.addLayer("textLayer");
 
@@ -223,13 +225,12 @@ void CorrelationPlotItem::populateMeanAveragePlot()
     _customPlot.plotLayout()->insertRow(1);
     _customPlot.plotLayout()->addElement(1, 0, plotModeTextElement);
 
-    _customPlot.xAxis->setRange(0, maxX);
+    scaleXAxis();
     _customPlot.yAxis->setRange(minY, maxY);
 }
 
 void CorrelationPlotItem::populateRawPlot()
 {
-    auto maxX = static_cast<double>(_columnCount);
     double maxY = 0.0;
     double minY = 0.0;
 
@@ -255,7 +256,7 @@ void CorrelationPlotItem::populateRawPlot()
         graph->setData(xData, yData, true);
     }
 
-    _customPlot.xAxis->setRange(0.0, maxX);
+    scaleXAxis();
     _customPlot.yAxis->setRange(minY, maxY);
 }
 
@@ -288,7 +289,6 @@ void CorrelationPlotItem::setElideLabelWidth(int elideLabelWidth)
 void CorrelationPlotItem::setColumnCount(size_t columnCount)
 {
     _columnCount = columnCount;
-    emit minimumWidthChanged();
 }
 
 void CorrelationPlotItem::setShowColumnNames(bool showColumnNames)
@@ -296,25 +296,59 @@ void CorrelationPlotItem::setShowColumnNames(bool showColumnNames)
     bool changed = (_showColumnNames != showColumnNames);
     _showColumnNames = showColumnNames;
 
-    emit minimumWidthChanged();
-
     if(changed)
         refresh();
 }
 
-unsigned int CorrelationPlotItem::minimumWidth() const
+void CorrelationPlotItem::setScrollAmount(double scrollAmount)
+{
+    _scrollAmount = scrollAmount;
+    scaleXAxis();
+    _customPlot.replot();
+}
+
+void CorrelationPlotItem::scaleXAxis()
+{
+    auto maxX = static_cast<double>(_columnCount);
+    if(_showColumnNames)
+    {
+        double visiblePlotWidth = columnAxisWidth();
+        double textHeight = columnLabelSize();
+
+        double position = (_columnCount - (visiblePlotWidth / textHeight)) * _scrollAmount;
+
+        if(position + (visiblePlotWidth / textHeight) < maxX)
+            _customPlot.xAxis->setRange(position, position + (visiblePlotWidth / textHeight));
+        else
+            _customPlot.xAxis->setRange(0, maxX);
+    }
+    else
+    {
+        _customPlot.xAxis->setRange(0, maxX);
+    }
+}
+
+double CorrelationPlotItem::rangeSize()
+{
+    if(_showColumnNames)
+        return (columnAxisWidth() / columnLabelSize()) / _columnCount;
+    else
+        return 1.0;
+}
+
+double CorrelationPlotItem::columnLabelSize()
 {
     QFontMetrics metrics(_defaultFont9Pt);
+    const unsigned int columnPadding = 1;
+    return metrics.height() + columnPadding;
+}
+
+double CorrelationPlotItem::columnAxisWidth()
+{
     const auto& margins = _customPlot.axisRect()->margins();
     const unsigned int axisWidth = margins.left() + margins.right();
 
-    if(!_showColumnNames)
-        return axisWidth + 50;
-
-    const unsigned int columnPadding = 1;
-
-    return (static_cast<unsigned int>(_columnCount) *
-        (metrics.height() + columnPadding)) + axisWidth;
+    return width() - axisWidth;
 }
 
 void CorrelationPlotItem::routeMouseEvent(QMouseEvent* event)
@@ -336,6 +370,8 @@ void CorrelationPlotItem::routeWheelEvent(QWheelEvent* event)
 void CorrelationPlotItem::updateCustomPlotSize()
 {
     _customPlot.setGeometry(0, 0, static_cast<int>(width()), static_cast<int>(height()));
+    scaleXAxis();
+    emit scrollAmountChanged();
 }
 
 void CorrelationPlotItem::showTooltip()
@@ -370,12 +406,12 @@ void CorrelationPlotItem::showTooltip()
                            _itemTracer->anchor("position")->pixelPosition().y());
 
     // If it falls out of bounds, clip to bounds and move label above marker
-    if (hoverLabelRightX > xBounds)
+    if(hoverLabelRightX > xBounds)
     {
         targetPosition.rx() = xBounds - hoverlabelWidth - COLOR_RECT_WIDTH - 1.0f;
 
         // If moving the label above marker falls out of yMin, clip to yMin + labelHeight/2;
-        if (targetPosition.y() - hoverlabelHeight / 2.0f - HOVER_MARGIN * 2.0f < yMin)
+        if(targetPosition.y() - hoverlabelHeight / 2.0f - HOVER_MARGIN * 2.0f < yMin)
             targetPosition.setY(yMin + hoverlabelHeight / 2.0f);
         else
             targetPosition.ry() -= HOVER_MARGIN * 2.0f;
