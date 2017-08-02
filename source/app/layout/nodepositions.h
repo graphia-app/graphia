@@ -26,9 +26,8 @@ private:
     int _smoothing = 1;
 
 public:
-    explicit NodePositions(const Graph& graph);
+    using NodeArray::NodeArray;
 
-public:
     std::recursive_mutex& mutex() { return _mutex; }
     void setScale(float scale) { _scale = scale; }
     float scale() const { return _scale; }

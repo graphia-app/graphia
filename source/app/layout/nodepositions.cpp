@@ -1,9 +1,5 @@
 #include "nodepositions.h"
 
-NodePositions::NodePositions(const Graph& graph) :
-    NodeArray<MeanPosition>(graph)
-{}
-
 const QVector3D& NodePositions::get(NodeId nodeId) const
 {
     return _array[nodeId].newest();
