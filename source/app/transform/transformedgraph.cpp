@@ -87,7 +87,6 @@ void TransformedGraph::rebuild()
     {
         _graphChangeOccurred = false;
 
-        bool changed = false;
         TransformCache newCache(*_graphModel);
         *this = *_source;
 
@@ -107,9 +106,6 @@ void TransformedGraph::rebuild()
             result = _cache.apply(result._config, *this);
             if(result.isApplicable())
             {
-                if(result.changesGraph())
-                    changed = true;
-
                 newCache.add(std::move(result));
                 continue;
             }
@@ -124,7 +120,6 @@ void TransformedGraph::rebuild()
             if(transform->applyAndUpdate(*this))
             {
                 result._graph = std::make_unique<MutableGraph>(_target);
-                changed = true;
 
                 // Graph has changed, so the cache is now invalid
                 _cache.clear();
@@ -156,13 +151,9 @@ void TransformedGraph::rebuild()
                 _graphModel->removeAttribute(attributeName);
 
             _graphModel->addAttributes(_cache.attributes());
-
-            return false;
         }
 
         _cache = std::move(newCache);
-
-        return changed;
     });
 
     emit graphChanged(this, _graphChangeOccurred);
