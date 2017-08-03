@@ -109,6 +109,7 @@ private:
 
     QString _message;
 
+    int _issueTime = -1;
     int _expiryTime = -1;
     std::vector<QRegularExpression> _allowedPluginRegexps;
 

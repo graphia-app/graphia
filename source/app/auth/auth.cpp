@@ -317,6 +317,9 @@ void Auth::parseAuthToken()
 
     auto jsonObject = QJsonDocument::fromJson(decryptedAuthToken.data()).object();
 
+    if(jsonObject.contains("issueTime"))
+        _issueTime = jsonObject["issueTime"].toInt();
+
     if(jsonObject.contains("expiryTime"))
         _expiryTime = jsonObject["expiryTime"].toInt();
 
@@ -334,7 +337,8 @@ bool Auth::expired()
     parseAuthToken();
 
     auto now = static_cast<int>(QDateTime::currentDateTime().toTime_t());
-    bool authenticated = (now < _expiryTime);
+    auto approximatelyNow = now + 3600; // Allow the system clock to be out by a little bit
+    bool authenticated = (approximatelyNow >= _issueTime) && (now < _expiryTime);
 
     if(_authenticated != authenticated)
     {
