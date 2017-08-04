@@ -44,6 +44,14 @@ private:
 
     Item* parentItem(const QModelIndex& index) const;
 
+    enum Roles
+    {
+        ElementTypeRole = Qt::UserRole + 1,
+        ValueTypeRole
+    };
+
+    const GraphModel* _graphModel = nullptr;
+
 public:
     AvailableAttributesModel() = default;
     AvailableAttributesModel(const GraphModel& graphModel,
@@ -63,6 +71,8 @@ public:
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
     Q_INVOKABLE QVariant get(const QModelIndex& index) const;
+
+    QHash<int, QByteArray> roleNames() const;
 };
 
 #endif // AVAILABLEATTRIBUTESMODEL_H

@@ -2,6 +2,7 @@
 
 #include "application.h"
 #include "graph/graphmodel.h"
+#include "shared/graph/elementtype.h"
 
 AvailableAttributesModel::Item::Item(const QVariant& value) :
     _value(value)
@@ -50,7 +51,8 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
                                                    QObject* parent,
                                                    ElementType elementTypes,
                                                    ValueType valueTypes) :
-    QAbstractItemModel(parent)
+    QAbstractItemModel(parent),
+    _graphModel(&graphModel)
 {
     _root = new AvailableAttributesModel::Item(QObject::tr("Attribute"));
 
@@ -89,12 +91,48 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
     if(!index.isValid())
         return {};
 
-    if(role != Qt::DisplayRole)
-        return {};
-
     auto* item = static_cast<AvailableAttributesModel::Item*>(index.internalPointer());
 
-    return item->value();
+    auto itemvalue = item->value().toString();
+
+    if(role != Qt::DisplayRole)
+    {
+        // Special case for source/target node items, which don't have sections
+        if(item->childCount() > 0)
+            return {};
+
+        auto attribute = _graphModel->attributeByName(itemvalue);
+
+        if(attribute == nullptr)
+            return {};
+
+        switch(role)
+        {
+        case Roles::ElementTypeRole:
+        {
+            auto asString = elementTypeAsString(attribute->elementType());
+            return asString;
+        }
+        case Roles::ValueTypeRole:
+        {
+            switch(attribute->valueType())
+            {
+            case ValueType::Int:
+            case ValueType::Float:
+                return "Numerical";
+            case ValueType::String:
+                return "Textual";
+            default: break;
+            }
+
+            return "Unknown Type";
+        }
+        default:
+            return {};
+        }
+    }
+
+    return itemvalue;
 }
 
 Qt::ItemFlags AvailableAttributesModel::flags(const QModelIndex& index) const
@@ -182,6 +220,16 @@ QVariant AvailableAttributesModel::get(const QModelIndex& index) const
         preamble = "target.";
 
     return preamble + data(index, Qt::DisplayRole).toString();
+}
+
+QHash<int, QByteArray> AvailableAttributesModel::roleNames() const
+{
+    auto names = QAbstractItemModel::roleNames();
+
+    names[Roles::ElementTypeRole] = "elementType";
+    names[Roles::ValueTypeRole] = "valueType";
+
+    return names;
 }
 
 void registerAvailableAttributesModelType()
