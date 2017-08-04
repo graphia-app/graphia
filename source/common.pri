@@ -42,7 +42,7 @@ win32 {
 
 mac {
     # Qt 5.9+ uses [[nodiscard]] which gets us a lot of warnings with mac clang
-    QMAKE_CXXFLAGS = += -Wno-c++1z-extensions
+    QMAKE_CXXFLAGS += -Wno-c++1z-extensions
 }
 
 # OSX Info.plist
