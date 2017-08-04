@@ -111,6 +111,8 @@ PluginContent
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.minimumHeight: splitView.orientation === Qt.Vertical ? 100 : -1
+                Layout.minimumWidth: splitView.orientation === Qt.Horizontal ? 200 : -1
 
                 rowCount: plugin.model.rowCount
                 columnCount: plugin.model.columnCount
