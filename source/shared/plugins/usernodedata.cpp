@@ -57,7 +57,9 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
     for(const auto& userDataVector : *this)
     {
         const auto& userDataVectorName = userDataVector.name();
-        auto& attribute = graphModel.createAttribute(userDataVectorName);
+        auto& attribute = graphModel.createAttribute(userDataVectorName)
+                .setSearchable(true)
+                .setUserDefined(true);
 
         switch(userDataVector.type())
         {
@@ -66,8 +68,7 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
                     {
                         return valueByNodeId(nodeId, userDataVectorName).toFloat();
                     })
-                    .setFlag(AttributeFlag::AutoRangeMutable)
-                    .setSearchable(true);
+                    .setFlag(AttributeFlag::AutoRangeMutable);
             break;
 
         case UserDataVector::Type::Int:
@@ -75,16 +76,14 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
                     {
                         return valueByNodeId(nodeId, userDataVectorName).toInt();
                     })
-                    .setFlag(AttributeFlag::AutoRangeMutable)
-                    .setSearchable(true);
+                    .setFlag(AttributeFlag::AutoRangeMutable);
             break;
 
         case UserDataVector::Type::String:
             attribute.setStringValueFn([this, userDataVectorName](NodeId nodeId)
                     {
                         return valueByNodeId(nodeId, userDataVectorName).toString();
-                    })
-                    .setSearchable(true);
+                    });
             break;
 
         default: break;

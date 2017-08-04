@@ -88,6 +88,9 @@ public:
     virtual bool searchable() const = 0;
     virtual IAttribute& setSearchable(bool searchable) = 0;
 
+    virtual bool userDefined() const = 0;
+    virtual IAttribute& setUserDefined(bool userDefined) = 0;
+
     virtual QString description() const = 0;
     virtual IAttribute& setDescription(const QString& description) = 0;
 };

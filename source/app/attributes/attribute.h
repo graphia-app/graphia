@@ -122,6 +122,10 @@ private:
         bool isValid = false;
         Flags<AttributeFlag> flags = AttributeFlag::None;
         bool searchable = false;
+
+        // Set if the attribute is derived from user data, i.e. not calculated
+        bool userDefined = false;
+
         QString description;
     } _;
 
@@ -383,6 +387,9 @@ public:
 
     bool searchable() const { return _.searchable; }
     Attribute& setSearchable(bool searchable) { _.searchable = searchable; return *this; }
+
+    bool userDefined() const { return _.userDefined; }
+    IAttribute& setUserDefined(bool userDefined) { _.userDefined = userDefined; return *this; }
 
     QString description() const { return _.description; }
     Attribute& setDescription(const QString& description) { _.description = description; return *this; }
