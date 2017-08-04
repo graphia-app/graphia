@@ -47,7 +47,8 @@ private:
     enum Roles
     {
         ElementTypeRole = Qt::UserRole + 1,
-        ValueTypeRole
+        ValueTypeRole,
+        UserDefinedRole
     };
 
     const GraphModel* _graphModel = nullptr;

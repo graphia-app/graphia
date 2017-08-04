@@ -127,6 +127,10 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
 
             return tr("Unknown Type");
         }
+        case Roles::UserDefinedRole:
+        {
+            return attribute->userDefined() ? tr("User Defined") : tr("Calculated");
+        }
         default:
             return {};
         }
@@ -228,6 +232,7 @@ QHash<int, QByteArray> AvailableAttributesModel::roleNames() const
 
     names[Roles::ElementTypeRole] = "elementType";
     names[Roles::ValueTypeRole] = "valueType";
+    names[Roles::UserDefinedRole] = "userDefined";
 
     return names;
 }
