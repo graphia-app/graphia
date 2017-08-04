@@ -54,7 +54,7 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
     QAbstractItemModel(parent),
     _graphModel(&graphModel)
 {
-    _root = new AvailableAttributesModel::Item(QObject::tr("Attribute"));
+    _root = new AvailableAttributesModel::Item(tr("Attribute"));
 
     auto attributeList = graphModel.availableAttributes(elementTypes, valueTypes);
 
@@ -67,8 +67,8 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
 
         if(!attributeList.empty())
         {
-            _sourceNode = new AvailableAttributesModel::Item(QObject::tr("Source Node"));
-            _targetNode = new AvailableAttributesModel::Item(QObject::tr("Target Node"));
+            _sourceNode = new AvailableAttributesModel::Item(tr("Source Node"));
+            _targetNode = new AvailableAttributesModel::Item(tr("Target Node"));
             _root->addChild(_sourceNode);
             _root->addChild(_targetNode);
 
@@ -119,13 +119,13 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
             {
             case ValueType::Int:
             case ValueType::Float:
-                return "Numerical";
+                return tr("Numerical");
             case ValueType::String:
-                return "Textual";
+                return tr("Textual");
             default: break;
             }
 
-            return "Unknown Type";
+            return tr("Unknown Type");
         }
         default:
             return {};
