@@ -1050,7 +1050,6 @@ ApplicationWindow
 
         RowLayout
         {
-            anchors.fill: parent
             ToolButton { action: fileOpenAction }
             ToolButton { action: fileOpenInTabAction }
             ToolButton { action: pauseLayoutAction }
@@ -1060,8 +1059,6 @@ ApplicationWindow
             ToolButton { action: overviewModeAction }
             ToolButton { action: resetViewAction }
             ToolButton { action: optionsAction }
-
-            Item { Layout.fillWidth: true }
         }
     }
 
