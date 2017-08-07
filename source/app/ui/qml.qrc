@@ -38,5 +38,6 @@
         <file>qml/bubbles.png</file>
         <file>qml/CaptureScreenshot.qml</file>
         <file>qml/Controls/AttributeListSortMenu.qml</file>
+        <file>qml/Controls/TransformListSortMenu.qml</file>
     </qresource>
 </RCC>
