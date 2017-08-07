@@ -32,6 +32,13 @@ Window
     property int _numDeclaredAttributes: _transform !== undefined ?
                                              Object.keys(_transform.declaredAttributes).length : 0
 
+    Preferences
+    {
+        section: "misc"
+        property alias transformAttributeSortOrder: lhsAttributeList.ascendingSortOrder
+        property alias transformAttributeSortBy: lhsAttributeList.sortRoleName
+    }
+
     ColumnLayout
     {
         id: layout
@@ -145,7 +152,7 @@ Window
                             Layout.fillHeight: true
 
                             showSections: sortRoleName !== "display"
-                            sortRoleName: "display"
+                            sortRoleName: "userDefined"
 
                             onSelectedValueChanged:
                             {

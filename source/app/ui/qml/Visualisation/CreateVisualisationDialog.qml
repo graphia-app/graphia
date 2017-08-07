@@ -25,6 +25,13 @@ Window
     property var document
     property string visualisationExpression
 
+    Preferences
+    {
+        section: "misc"
+        property alias visualisationAttributeSortOrder: attributeList.ascendingSortOrder
+        property alias visualisationAttributeSortBy: attributeList.sortRoleName
+    }
+
     ColumnLayout
     {
         anchors.fill: parent
@@ -39,7 +46,7 @@ Window
                 Layout.fillHeight: true
 
                 showSections: sortRoleName !== "display"
-                sortRoleName: "display"
+                sortRoleName: "elementType"
 
                 onSelectedValueChanged:
                 {
