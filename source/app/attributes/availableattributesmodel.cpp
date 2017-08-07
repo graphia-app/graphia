@@ -93,7 +93,7 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
 
     auto* item = static_cast<AvailableAttributesModel::Item*>(index.internalPointer());
 
-    auto itemvalue = item->value().toString();
+    auto itemValue = item->value().toString();
 
     if(role != Qt::DisplayRole)
     {
@@ -101,7 +101,7 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
         if(item->childCount() > 0)
             return {};
 
-        auto attribute = _graphModel->attributeByName(itemvalue);
+        auto attribute = _graphModel->attributeByName(itemValue);
 
         if(attribute == nullptr)
             return {};
@@ -136,7 +136,7 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
         }
     }
 
-    return itemvalue;
+    return itemValue;
 }
 
 Qt::ItemFlags AvailableAttributesModel::flags(const QModelIndex& index) const
