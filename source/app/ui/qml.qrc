@@ -37,5 +37,6 @@
         <file>qml/Auth.qml</file>
         <file>qml/bubbles.png</file>
         <file>qml/CaptureScreenshot.qml</file>
+        <file>qml/Controls/AttributeListSortMenu.qml</file>
     </qresource>
 </RCC>
