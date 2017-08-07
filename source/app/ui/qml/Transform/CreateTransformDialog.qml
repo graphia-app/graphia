@@ -459,7 +459,6 @@ Window
 
                 textFormat: Text.StyledText
                 wrapMode: Text.WordWrap
-                elide: Text.ElideRight
 
                 onLinkActivated: Qt.openUrlExternally(link);
 
