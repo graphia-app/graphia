@@ -115,7 +115,8 @@ HEADERS += \
     ui/visualisations/visualisationchannel.h \
     ui/visualisations/visualisationconfig.h \
     ui/visualisations/visualisationconfigparser.h \
-    ui/visualisations/visualisationinfo.h
+    ui/visualisations/visualisationinfo.h \
+    transform/availabletransformsmodel.h
 
 SOURCES += \
     application.cpp \
@@ -189,7 +190,8 @@ SOURCES += \
     ui/visualisations/sizevisualisationchannel.cpp \
     ui/visualisations/textvisualisationchannel.cpp \
     ui/visualisations/visualisationconfig.cpp \
-    ui/visualisations/visualisationconfigparser.cpp
+    ui/visualisations/visualisationconfigparser.cpp \
+    transform/availabletransformsmodel.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \
