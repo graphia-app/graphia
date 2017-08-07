@@ -38,6 +38,9 @@ Window
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
+                showSections: sortRoleName !== "display"
+                sortRoleName: "display"
+
                 onSelectedValueChanged:
                 {
                     var attribute = document.attribute(selectedValue);
@@ -45,6 +48,8 @@ Window
                     description.update();
                     updateVisualisationExpression();
                 }
+
+                AttributeListSortMenu { attributeList: attributeList }
             }
 
             ListBox

@@ -144,6 +144,9 @@ Window
                             Layout.fillWidth: true
                             Layout.fillHeight: true
 
+                            showSections: sortRoleName !== "display"
+                            sortRoleName: "display"
+
                             onSelectedValueChanged:
                             {
                                 if(selectedValue !== undefined)
@@ -163,6 +166,8 @@ Window
                                 description.update();
                                 updateTransformExpression();
                             }
+
+                            AttributeListSortMenu { attributeList: lhsAttributeList }
                         }
 
                         ListBox
@@ -250,8 +255,13 @@ Window
                                 Layout.fillWidth: true
                                 Layout.fillHeight: true
 
+                                showSections: lhsAttributeList.showSections
+                                sortRoleName: lhsAttributeList.sortRoleName
+
                                 enabled: attributeRadioButton.checked
                                 onSelectedValueChanged: { updateTransformExpression(); }
+
+                                AttributeListSortMenu { attributeList: rhsAttributeList }
                             }
 
                             function configure(parameterData)
