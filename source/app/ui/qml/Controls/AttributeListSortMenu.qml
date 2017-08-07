@@ -17,6 +17,7 @@ MouseArea
         {
             id: sortRoleMenu
             title: qsTr("Sort By")
+            ExclusiveGroup { id: sortByExclusiveGroup }
 
             Component.onCompleted:
             {
@@ -35,6 +36,7 @@ MouseArea
 
                     var menuItem = sortRoleMenu.addItem(qsTr(name));
                     menuItem.checkable = true;
+                    menuItem.exclusiveGroup = sortByExclusiveGroup;
                     menuItem.checked = Qt.binding(function()
                     {
                         return attributeList.sortRoleName === roleName;
@@ -51,6 +53,7 @@ MouseArea
         {
             id: sortAscendingMenu
             title: qsTr("Sort Order")
+            ExclusiveGroup { id: sortOrderExclusiveGroup }
 
             Component.onCompleted:
             {
@@ -67,6 +70,7 @@ MouseArea
 
                     var menuItem = sortAscendingMenu.addItem(qsTr(name));
                     menuItem.checkable = true;
+                    menuItem.exclusiveGroup = sortOrderExclusiveGroup;
                     menuItem.checked = Qt.binding(function()
                     {
                         return attributeList.ascendingSortOrder === ascendingSortOrder;
