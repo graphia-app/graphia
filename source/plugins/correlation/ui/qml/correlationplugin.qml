@@ -168,7 +168,7 @@ PluginContent
 
         MenuItem
         {
-            text: "Save plot as…"
+            text: qsTr("Save Plot As…")
             onTriggered: imageSaveDialog.open();
         }
     }
