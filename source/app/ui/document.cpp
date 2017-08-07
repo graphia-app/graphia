@@ -839,9 +839,15 @@ void Document::executeOnMainThreadAndWait(DeferredExecutor::TaskFn task,
     _executed.wait();
 }
 
-QStringList Document::availableTransformNames() const
+AvailableTransformsModel* Document::availableTransforms() const
 {
-    return _graphModel != nullptr ? _graphModel->availableTransformNames() : QStringList();
+    if(_graphModel != nullptr)
+    {
+        // The caller takes ownership and is responsible for deleting the model
+        return new AvailableTransformsModel(*_graphModel, nullptr);
+    }
+
+    return nullptr;
 }
 
 AvailableAttributesModel* Document::availableAttributes(int elementTypes, int valueTypes) const

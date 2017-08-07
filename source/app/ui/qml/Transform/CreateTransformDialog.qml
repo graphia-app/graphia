@@ -35,6 +35,8 @@ Window
     Preferences
     {
         section: "misc"
+        property alias transformSortOrder: transformsList.ascendingSortOrder
+        property alias transformSortBy: transformsList.sortRoleName
         property alias transformAttributeSortOrder: lhsAttributeList.ascendingSortOrder
         property alias transformAttributeSortBy: lhsAttributeList.sortRoleName
     }
@@ -51,11 +53,14 @@ Window
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            ListBox
+            TreeBox
             {
                 id: transformsList
                 Layout.preferredWidth: 192
                 Layout.fillHeight: true
+
+                showSections: sortRoleName !== "display"
+                sortRoleName: "type"
 
                 onSelectedValueChanged:
                 {
@@ -82,6 +87,8 @@ Window
                     description.update();
                     updateTransformExpression();
                 }
+
+                TransformListSortMenu { transformsList: transformsList }
             }
 
             Label
@@ -614,7 +621,7 @@ Window
     {
         transformExpression.text = "";
         defaultVisualisations = [];
-        transformsList.model = document.availableTransformNames();
+        transformsList.model = document.availableTransforms();
         lhsAttributeList.model = rhsAttributeList.model = undefined;
         opList.model = undefined;
         parametersRepeater.model = undefined;

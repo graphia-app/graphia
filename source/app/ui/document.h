@@ -9,6 +9,7 @@
 #include "layout/layout.h"
 #include "shared/utils/qmlenum.h"
 #include "attributes/availableattributesmodel.h"
+#include "transform/availabletransformsmodel.h"
 #include "shared/utils/deferredexecutor.h"
 #include "shared/utils/semaphore.h"
 #include "thirdparty/qt-qml-models/QQmlVariantListModel.h"
@@ -248,7 +249,7 @@ public:
     Q_INVOKABLE void selectAllFound();
     Q_INVOKABLE void updateFoundIndex(bool reselectIfInvalidated);
 
-    Q_INVOKABLE QStringList availableTransformNames() const;
+    Q_INVOKABLE AvailableTransformsModel* availableTransforms() const;
     Q_INVOKABLE QVariantMap transform(const QString& transformName) const;
     Q_INVOKABLE QVariantMap findTransformParameter(const QString& transformName,
                                                    const QString& parameterName) const;
