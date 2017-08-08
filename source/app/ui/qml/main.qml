@@ -793,6 +793,19 @@ ApplicationWindow
 
     Action
     {
+        id: copyImageToClipboardAction
+        text: qsTr("Copy Viewport To Clipboard")
+        shortcut: "Ctrl+C"
+        enabled: currentDocument
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.copyImageToClipboard();
+        }
+    }
+
+    Action
+    {
         // A do nothing action that we use when there
         // is no other valid action available
         id: nullAction
@@ -916,6 +929,8 @@ ApplicationWindow
             }
             MenuItem { action: toggleEdgeDirectionAction }
             MenuItem { action: toggleMultiElementIndicatorsAction }
+            MenuSeparator {}
+            MenuItem { action: copyImageToClipboardAction }
         }
         Menu
         {

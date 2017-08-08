@@ -11,6 +11,7 @@
 #include <QColor>
 #include <QAbstractListModel>
 #include <QPluginLoader>
+#include <QImage>
 
 #include <vector>
 #include <memory>
@@ -137,6 +138,8 @@ public:
     Q_INVOKABLE void tryToAuthenticateWithCachedCredentials();
     Q_INVOKABLE void authenticate(const QString& email, const QString& password);
     Q_INVOKABLE void signOut();
+
+    Q_INVOKABLE void copyImageToClipboard(const QImage& image);
 
     Q_INVOKABLE void crash(int crashType);
 

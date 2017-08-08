@@ -171,6 +171,15 @@ Item
 
     function dumpGraph() { document.dumpGraph(); }
 
+    function copyImageToClipboard()
+    {
+        graph.grabToImage(function(result)
+        {
+            application.copyImageToClipboard(result.image);
+            document.status = qsTr("Copied Viewport To Clipboard");
+        });
+    }
+
     CaptureScreenshot
     {
         id: captureScreenshot

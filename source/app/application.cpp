@@ -10,6 +10,8 @@
 #include <QStandardPaths>
 #include <QMessageBox>
 #include <QDebug>
+#include <QApplication>
+#include <QClipboard>
 
 #include <cmath>
 #include <memory>
@@ -126,6 +128,11 @@ void Application::signOut()
 {
     _auth.reset();
     unloadPlugins();
+}
+
+void Application::copyImageToClipboard(const QImage& image)
+{
+    QApplication::clipboard()->setImage(image, QClipboard::Clipboard);
 }
 
 #if defined(Q_OS_WIN32)
