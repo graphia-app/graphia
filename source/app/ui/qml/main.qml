@@ -95,9 +95,6 @@ ApplicationWindow
         else
             mainWindow.recentFiles = [];
 
-        if(misc.fileOpenInitialFolder !== undefined)
-            fileOpenDialog.folder = misc.fileOpenInitialFolder;
-
         if(windowPreferences.width !== undefined &&
            windowPreferences.height !== undefined &&
            windowPreferences.x !== undefined &&
@@ -412,8 +409,12 @@ ApplicationWindow
     {
         id: fileOpenDialog
         nameFilters: application.nameFilters
-        onAccepted: openFile(file, inTab)
-        onFolderChanged: misc.fileOpenInitialFolder = folder.toString();
+        onAccepted:
+        {
+            misc.fileOpenInitialFolder = folder.toString();
+            openFile(file, inTab);
+        }
+
         property bool inTab: false
     }
 
@@ -427,7 +428,11 @@ ApplicationWindow
         {
             fileOpenDialog.title = qsTr("Open File…");
             fileOpenDialog.inTab = false;
-            fileOpenDialog.open()
+
+            if(misc.fileOpenInitialFolder !== undefined)
+                fileOpenDialog.folder = misc.fileOpenInitialFolder;
+
+            fileOpenDialog.open();
         }
     }
 
@@ -441,7 +446,11 @@ ApplicationWindow
         {
             fileOpenDialog.title = qsTr("Open File In New Tab…");
             fileOpenDialog.inTab = true;
-            fileOpenDialog.open()
+
+            if(misc.fileOpenInitialFolder !== undefined)
+                fileOpenDialog.folder = misc.fileOpenInitialFolder;
+
+            fileOpenDialog.open();
         }
     }
 
