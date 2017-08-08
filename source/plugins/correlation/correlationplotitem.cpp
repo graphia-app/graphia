@@ -316,7 +316,7 @@ void CorrelationPlotItem::scaleXAxis()
 
         double position = (_columnCount - (visiblePlotWidth / textHeight)) * _scrollAmount;
 
-        if(position + (visiblePlotWidth / textHeight) < maxX)
+        if(position + (visiblePlotWidth / textHeight) <= maxX)
             _customPlot.xAxis->setRange(position, position + (visiblePlotWidth / textHeight));
         else
             _customPlot.xAxis->setRange(0, maxX);
