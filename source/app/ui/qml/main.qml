@@ -1059,6 +1059,10 @@ ApplicationWindow
 
         RowLayout
         {
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+
             ToolButton { action: fileOpenAction }
             ToolButton { action: fileOpenInTabAction }
             ToolButton { action: pauseLayoutAction }
