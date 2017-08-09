@@ -316,6 +316,9 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     if(plugin == nullptr)
         return false;
 
+    _pluginName = pluginName;
+    emit pluginNameChanged();
+
     setTitle(fileUrl.fileName());
     emit commandInProgressChanged();
     emit idleChanged();

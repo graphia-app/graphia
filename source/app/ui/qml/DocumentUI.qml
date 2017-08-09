@@ -24,7 +24,6 @@ Item
     property url fileUrl
     property url savedFileUrl
     property string fileType
-    property string pluginName
 
     property bool hasBeenSaved: { return Qt.resolvedUrl(savedFileUrl).length !== 0; }
 
@@ -162,12 +161,7 @@ Item
         this.fileType = fileType;
 
         if(fileType === "Native")
-        {
-            this.pluginName = "";
             this.savedFileUrl = fileUrl;
-        }
-        else
-            this.pluginName = pluginName;
 
         return true;
     }
@@ -447,7 +441,7 @@ Item
 
                     Label
                     {
-                        text: pluginName
+                        text: document.pluginName
                     }
 
                     Item
@@ -570,8 +564,8 @@ Item
         height: 600
         minimumWidth: 480
         minimumHeight: 480
-        title: application && root.pluginName.length > 0 ?
-                   root.pluginName + " - " + application.name : "";
+        title: application && document.pluginName.length > 0 ?
+                   document.pluginName + " - " + application.name : "";
         visible: root.visible && root.pluginPoppedOut && plugin.loaded
         property bool maximised: visibility === Window.Maximized
 

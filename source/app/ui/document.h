@@ -41,6 +41,7 @@ class Document : public QObject
     Q_PROPERTY(Application* application MEMBER _application NOTIFY applicationChanged)
     Q_PROPERTY(GraphQuickItem* graph MEMBER _graphQuickItem NOTIFY graphQuickItemChanged)
     Q_PROPERTY(QObject* plugin READ pluginInstance NOTIFY pluginInstanceChanged)
+    Q_PROPERTY(QString pluginName MEMBER _pluginName NOTIFY pluginNameChanged)
     Q_PROPERTY(QString pluginQmlPath READ pluginQmlPath NOTIFY pluginQmlPathChanged)
 
     Q_PROPERTY(QColor contrastingColor READ contrastingColorForBackground NOTIFY contrastingColorChanged)
@@ -144,6 +145,8 @@ private:
     std::unique_ptr<GPUComputeThread> _gpuComputeThread;
 
     std::unique_ptr<IPluginInstance> _pluginInstance;
+    QString _pluginName;
+
     std::unique_ptr<SelectionManager> _selectionManager;
     std::unique_ptr<SearchManager> _searchManager;
     CommandManager _commandManager;
@@ -191,6 +194,7 @@ signals:
     void graphQuickItemChanged();
     void pluginInstanceChanged();
     void pluginQmlPathChanged();
+    void pluginNameChanged();
 
     void titleChanged();
     void contrastingColorChanged();
