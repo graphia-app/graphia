@@ -14,10 +14,10 @@ CorrelationPluginInstance::CorrelationPluginInstance()
     connect(this, SIGNAL(visualsChanged()), this, SIGNAL(nodeColorsChanged()));
 }
 
-void CorrelationPluginInstance::initialise(IGraphModel* graphModel, ISelectionManager* selectionManager,
+void CorrelationPluginInstance::initialise(const IPlugin* plugin, IGraphModel* graphModel, ISelectionManager* selectionManager,
                                            ICommandManager* commandManager, const IParserThread* parserThread)
 {
-    BasePluginInstance::initialise(graphModel, selectionManager, commandManager, parserThread);
+    BasePluginInstance::initialise(plugin, graphModel, selectionManager, commandManager, parserThread);
 
     _userNodeData.initialise(graphModel->mutableGraph());
     _nodeAttributeTableModel.initialise(selectionManager, graphModel, &_userNodeData);

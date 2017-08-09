@@ -11,6 +11,7 @@
 
 #include <memory>
 
+class IPlugin;
 class IGraphModel;
 class ISelectionManager;
 class ICommandManager;
@@ -23,7 +24,7 @@ class IPluginInstance
 public:
     virtual ~IPluginInstance() = default;
 
-    virtual void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager,
+    virtual void initialise(const IPlugin* plugin, IGraphModel* graphModel, ISelectionManager* selectionManager,
                             ICommandManager* commandManager, const IParserThread* parserThread) = 0;
     virtual std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) = 0;
 
@@ -33,7 +34,8 @@ public:
     virtual QStringList defaultVisualisations() const = 0;
 
     virtual QByteArray save(IMutableGraph& mutableGraph, const ProgressFn& progressFn) const = 0;
-    virtual bool load(const QByteArray& data, IMutableGraph& mutableGraph, const ProgressFn& progressFn) = 0;
+    virtual bool load(const QByteArray& data, int dataVersion,
+                      IMutableGraph& mutableGraph, const ProgressFn& progressFn) = 0;
 };
 
 class IPluginInstanceProvider

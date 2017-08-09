@@ -148,7 +148,7 @@ private:
     MissingDataType _missingDataType = MissingDataType::None;
     double _missingDataReplacementValue = 0.0;
 
-    void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager,
+    void initialise(const IPlugin* plugin, IGraphModel* graphModel, ISelectionManager* selectionManager,
                     ICommandManager* commandManager, const IParserThread* parserThread);
 
     void setDataColumnName(size_t column, const QString& name);

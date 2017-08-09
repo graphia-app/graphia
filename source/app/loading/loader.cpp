@@ -338,16 +338,18 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
 
     const auto& pluginJsonValue = jsonBody["pluginData"];
 
+    QByteArray pluginData;
+
     if(pluginJsonValue.isObject())
-        _pluginInstance->load(QJsonDocument(pluginJsonValue.toObject()).toJson(), graph, progressFn);
+        pluginData = QJsonDocument(pluginJsonValue.toObject()).toJson();
     else if(pluginJsonValue.isArray())
-        _pluginInstance->load(QJsonDocument(pluginJsonValue.toArray()).toJson(), graph, progressFn);
+        pluginData = QJsonDocument(pluginJsonValue.toArray()).toJson();
     else if(pluginJsonValue.isString())
-        _pluginInstance->load(QByteArray::fromHex(pluginJsonValue.toString().toUtf8()), graph, progressFn);
+        pluginData = QByteArray::fromHex(pluginJsonValue.toString().toUtf8());
     else
         return false;
 
-    return true;
+    return _pluginInstance->load(pluginData, header._pluginDataVersion, graph, progressFn);
 }
 
 void Loader::setPluginInstance(IPluginInstance* pluginInstance)

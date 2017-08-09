@@ -25,14 +25,16 @@ class BasePluginInstance : public QObject, public IPluginInstance
     Q_OBJECT
 
 private:
+    const IPlugin* _plugin = nullptr;
     IGraphModel* _graphModel = nullptr;
     ISelectionManager* _selectionManager = nullptr;
     ICommandManager* _commandManager = nullptr;
 
 public:
-    void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager,
+    void initialise(const IPlugin* plugin, IGraphModel* graphModel, ISelectionManager* selectionManager,
                     ICommandManager* commandManager, const IParserThread* parserThread)
     {
+        _plugin = plugin;
         _graphModel = graphModel;
         _selectionManager = selectionManager;
         _commandManager = commandManager;
@@ -82,8 +84,9 @@ public:
 
     // Save and restore no state, by default
     QByteArray save(IMutableGraph&, const ProgressFn&) const { return {}; }
-    bool load(const QByteArray&, IMutableGraph&, const ProgressFn&) { return true; }
+    bool load(const QByteArray&, int, IMutableGraph&, const ProgressFn&) { return true; }
 
+    const IPlugin* plugin() { return _plugin; }
     IGraphModel* graphModel() { return _graphModel; }
     const IGraphModel* graphModel() const { return _graphModel; }
     ISelectionManager* selectionManager() { return _selectionManager; }

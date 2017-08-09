@@ -14,10 +14,10 @@ BaseGenericPluginInstance::BaseGenericPluginInstance()
             this, SLOT(onSelectionChanged(const ISelectionManager*)), Qt::DirectConnection);
 }
 
-void BaseGenericPluginInstance::initialise(IGraphModel* graphModel, ISelectionManager* selectionManager,
+void BaseGenericPluginInstance::initialise(const IPlugin* plugin, IGraphModel* graphModel, ISelectionManager* selectionManager,
                                            ICommandManager* commandManager, const IParserThread* parserThread)
 {
-    BasePluginInstance::initialise(graphModel, selectionManager, commandManager, parserThread);
+    BasePluginInstance::initialise(plugin, graphModel, selectionManager, commandManager, parserThread);
 
     _userNodeData.initialise(graphModel->mutableGraph());
     _nodeAttributeTableModel.initialise(selectionManager, graphModel, &_userNodeData);
@@ -81,8 +81,12 @@ QByteArray BaseGenericPluginInstance::save(IMutableGraph& graph, const ProgressF
     return jsonDocument.toJson();
 }
 
-bool BaseGenericPluginInstance::load(const QByteArray& data, IMutableGraph& graph, const ProgressFn& progressFn)
+bool BaseGenericPluginInstance::load(const QByteArray& data, int dataVersion,
+                                     IMutableGraph& graph, const ProgressFn& progressFn)
 {
+    if(dataVersion != plugin()->dataVersion())
+        return false;
+
     QJsonDocument jsonDocument = QJsonDocument::fromJson(data);
 
     if(jsonDocument.isNull() || !jsonDocument.isObject())

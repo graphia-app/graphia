@@ -330,7 +330,8 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     _searchManager = std::make_unique<SearchManager>(*_graphModel);
 
     _pluginInstance = plugin->createInstance();
-    _pluginInstance->initialise(_graphModel.get(), _selectionManager.get(), &_commandManager, _graphFileParserThread.get());
+    _pluginInstance->initialise(plugin, _graphModel.get(), _selectionManager.get(),
+                                &_commandManager, _graphFileParserThread.get());
 
     connect(S(Preferences), &Preferences::preferenceChanged, this, &Document::onPreferenceChanged, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphChanged, [this]

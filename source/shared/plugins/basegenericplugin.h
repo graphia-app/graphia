@@ -36,10 +36,10 @@ public:
     void setEdgeWeight(EdgeId edgeId, float weight);
 
     QByteArray save(IMutableGraph&, const ProgressFn&) const;
-    bool load(const QByteArray&, IMutableGraph&, const ProgressFn&);
+    bool load(const QByteArray&, int, IMutableGraph&, const ProgressFn&);
 
 private:
-    void initialise(IGraphModel* graphModel, ISelectionManager* selectionManager,
+    void initialise(const IPlugin* plugin, IGraphModel* graphModel, ISelectionManager* selectionManager,
                     ICommandManager* commandManager, const IParserThread* parserThread);
 
     QString selectedNodeNames() const;
