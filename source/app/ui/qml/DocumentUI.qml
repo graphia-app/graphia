@@ -168,7 +168,12 @@ Item
 
     function saveFile(fileUrl)
     {
-        document.saveFile(fileUrl);
+        var uiData = plugin.save();
+
+        if(typeof(uiData) === "object")
+            uiData = JSON.stringify(uiData);
+
+        document.saveFile(fileUrl, uiData);
     }
 
     function toggleLayout() { document.toggleLayout(); }
@@ -496,6 +501,30 @@ Item
                 popInPlugin();
         }
 
+        function save()
+        {
+            if(typeof(content.save) === "function")
+                return content.save();
+
+            return {};
+        }
+
+        function load(data, version)
+        {
+            // It might be JSON, or it might be a plain string; try both
+            try
+            {
+                data = JSON.parse(data);
+            }
+            catch(e)
+            {
+                data = data.toString();
+            }
+
+            if(typeof(content.load) === "function")
+                content.load(data, version);
+        }
+
         // At least one enabled direct child
         property bool enabledChildren:
         {
@@ -700,6 +729,10 @@ Item
                     console.log(document.pluginQmlPath + ": failed to create instance");
                     return;
                 }
+
+                // Restore saved data, if there is any
+                if(uiDataVersion >= 0)
+                    plugin.load(uiData, uiDataVersion);
 
                 plugin.loaded = true;
                 loadComplete();

@@ -77,8 +77,7 @@ QByteArray BaseGenericPluginInstance::save(IMutableGraph& graph, const ProgressF
 
     jsonObject["userNodeData"] = _userNodeData.save(graph, progressFn);
 
-    QJsonDocument jsonDocument(jsonObject);
-    return jsonDocument.toJson();
+    return QJsonDocument(jsonObject).toJson();
 }
 
 bool BaseGenericPluginInstance::load(const QByteArray& data, int dataVersion,

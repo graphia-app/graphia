@@ -387,6 +387,9 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
             if(nodePositions != nullptr)
                 _startingNodePositions = std::make_unique<ExactNodePositions>(*nodePositions);
 
+            _uiData = completedLoader->uiData();
+            _uiDataVersion = completedLoader->pluginDataVersion();
+
             _userLayoutPaused = completedLoader->layoutPaused();
         });
     }
@@ -408,12 +411,13 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     return true;
 }
 
-void Document::saveFile(const QUrl& fileUrl)
+void Document::saveFile(const QUrl& fileUrl, const QByteArray& uiData)
 {
     Saver saver(fileUrl);
 
     saver.setDocument(this);
     saver.setPluginInstance(_pluginInstance.get());
+    saver.setUiData(uiData);
 
     _commandManager.executeOnce(
         {
@@ -459,7 +463,7 @@ void Document::onLoadComplete(bool success)
     emit commandVerbChanged(); // Stop showing loading message
 
     // This causes the plugin UI to be loaded
-    emit pluginQmlPathChanged();
+    emit pluginQmlPathChanged(_uiData, _uiDataVersion);
 
     setTransforms(_graphTransforms);
     setVisualisations(_visualisations);

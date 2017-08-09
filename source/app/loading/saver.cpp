@@ -208,6 +208,15 @@ bool Saver::encode(const ProgressFn& progressFn)
     else
         content["pluginData"] = QString(pluginData.toHex());
 
+    auto uiDataJson = QJsonDocument::fromJson(_uiData);
+
+    if(!uiDataJson.isNull() && uiDataJson.isObject())
+        content["uiData"] = uiDataJson.object();
+    else if(!uiDataJson.isNull() && uiDataJson.isArray())
+        content["uiData"] = uiDataJson.array();
+    else
+        content["uiData"] = QString(_uiData.toHex());
+
     jsonArray.append(content);
 
     graphModel->mutableGraph().setPhase(QObject::tr("Compressing"));

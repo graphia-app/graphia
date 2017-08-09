@@ -32,11 +32,32 @@ PluginContent
 
         NodeAttributeTableView
         {
+            id: nodeAttributeTableView
+
             Layout.fillWidth: true
             Layout.fillHeight: true
 
             showCalculatedAttributes: toggleCalculatedAttributes.checked
             nodeAttributesModel: plugin.model.nodeAttributeTableModel
         }
+    }
+
+    function save()
+    {
+        var data =
+        {
+            "showCalculatedAttributes": toggleCalculatedAttributes.checked,
+            "sortColumn": nodeAttributeTableView.sortIndicatorColumn,
+            "sortOrder": nodeAttributeTableView.sortIndicatorOrder
+        };
+
+        return data;
+    }
+
+    function load(data, version)
+    {
+        toggleCalculatedAttributes.checked = data.showCalculatedAttributes;
+        nodeAttributeTableView.sortIndicatorColumn = data.sortColumn;
+        nodeAttributeTableView.sortIndicatorOrder = data.sortOrder;
     }
 }

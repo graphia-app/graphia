@@ -18,6 +18,7 @@ private:
 
     Document* _document = nullptr;
     const IPluginInstance* _pluginInstance = nullptr;
+    QByteArray _uiData;
 
 public:
     static const int MaxHeaderSize = 1 << 12;
@@ -28,6 +29,7 @@ public:
 
     void setDocument(Document* document) { _document = document; }
     void setPluginInstance(const IPluginInstance* pluginInstance) { _pluginInstance = pluginInstance; }
+    void setUiData(const QByteArray& uiData) { _uiData = uiData; }
 
     bool encode(const ProgressFn& progressFn);
 };

@@ -19,6 +19,7 @@
 #include <QStringList>
 #include <QUrl>
 #include <QVariantMap>
+#include <QByteArray>
 
 #include <vector>
 #include <memory>
@@ -168,6 +169,9 @@ private:
     QQmlVariantListModel _visualisationsModel;
     QStringList _visualisations;
 
+    QByteArray _uiData;
+    int _uiDataVersion = -1;
+
     std::unique_ptr<ExactNodePositions> _startingNodePositions;
     bool _userLayoutPaused = false; // true if the user wants the layout to pause
 
@@ -192,9 +196,10 @@ private:
 signals:
     void applicationChanged();
     void graphQuickItemChanged();
+
     void pluginInstanceChanged();
-    void pluginQmlPathChanged();
     void pluginNameChanged();
+    void pluginQmlPathChanged(const QByteArray& uiData, int uiDataVersion);
 
     void titleChanged();
     void contrastingColorChanged();
@@ -234,7 +239,7 @@ public:
                               QString pluginName,
                               const QVariantMap& parameters);
 
-    Q_INVOKABLE void saveFile(const QUrl& fileUrl);
+    Q_INVOKABLE void saveFile(const QUrl& fileUrl, const QByteArray& uiData);
 
     Q_INVOKABLE void onPreferenceChanged(const QString& key, const QVariant& value);
 

@@ -336,20 +336,39 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
     if(!jsonBody.contains("pluginData"))
         return false;
 
-    const auto& pluginJsonValue = jsonBody["pluginData"];
+    const auto& pluginDataJsonValue = jsonBody["pluginData"];
 
     QByteArray pluginData;
 
-    if(pluginJsonValue.isObject())
-        pluginData = QJsonDocument(pluginJsonValue.toObject()).toJson();
-    else if(pluginJsonValue.isArray())
-        pluginData = QJsonDocument(pluginJsonValue.toArray()).toJson();
-    else if(pluginJsonValue.isString())
-        pluginData = QByteArray::fromHex(pluginJsonValue.toString().toUtf8());
+    if(pluginDataJsonValue.isObject())
+        pluginData = QJsonDocument(pluginDataJsonValue.toObject()).toJson();
+    else if(pluginDataJsonValue.isArray())
+        pluginData = QJsonDocument(pluginDataJsonValue.toArray()).toJson();
+    else if(pluginDataJsonValue.isString())
+        pluginData = QByteArray::fromHex(pluginDataJsonValue.toString().toUtf8());
     else
         return false;
 
-    return _pluginInstance->load(pluginData, header._pluginDataVersion, graph, progressFn);
+    if(!_pluginInstance->load(pluginData, header._pluginDataVersion, graph, progressFn))
+        return false;
+
+    if(jsonBody.contains("uiData"))
+    {
+        const auto& uiDataJsonValue = jsonBody["uiData"];
+
+        if(uiDataJsonValue.isObject())
+            _uiData = QJsonDocument(uiDataJsonValue.toObject()).toJson();
+        else if(uiDataJsonValue.isArray())
+            _uiData = QJsonDocument(uiDataJsonValue.toArray()).toJson();
+        else if(uiDataJsonValue.isString())
+            _uiData = QByteArray::fromHex(uiDataJsonValue.toString().toUtf8());
+        else
+            return false;
+
+        _pluginDataVersion = header._pluginDataVersion;
+    }
+
+    return true;
 }
 
 void Loader::setPluginInstance(IPluginInstance* pluginInstance)
