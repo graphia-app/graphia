@@ -491,6 +491,29 @@ void Document::selectAll()
         });
 }
 
+void Document::selectAllVisible()
+{
+    if(!idle() || _selectionManager == nullptr)
+        return;
+
+    if(canEnterOverviewMode())
+    {
+        auto componentId = _graphQuickItem->focusedComponentId();
+        auto component = _graphModel->graph().componentById(componentId);
+        auto nodeIds = component->nodeIds();
+
+        _commandManager.executeOnce({tr("Select All Visible"), tr("Selecting All Visible")},
+            [this, nodeIds = std::move(nodeIds)](Command& command)
+            {
+                bool nodesSelected = _selectionManager->selectNodes(nodeIds);
+                command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
+                return nodesSelected;
+            });
+    }
+    else
+        selectAll();
+}
+
 void Document::selectNone()
 {
     if(!idle() || _selectionManager == nullptr)

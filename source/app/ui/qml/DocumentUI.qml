@@ -151,6 +151,7 @@ Item
 
     function toggleLayout() { document.toggleLayout(); }
     function selectAll() { document.selectAll(); }
+    function selectAllVisible() { document.selectAllVisible(); }
     function selectNone() { document.selectNone(); }
     function invertSelection() { document.invertSelection(); }
     function undo() { document.undo(); }

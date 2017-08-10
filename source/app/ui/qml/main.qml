@@ -530,16 +530,25 @@ ApplicationWindow
     {
         id: selectAllAction
         text: qsTr("Select &All")
-        shortcut: "Ctrl+A"
+        shortcut: "Ctrl+Shift+A"
         enabled: currentDocument ? currentDocument.idle : false
         onTriggered: currentDocument && currentDocument.selectAll()
     }
 
     Action
     {
+        id: selectAllVisibleAction
+        text: qsTr("Select All &Visible")
+        shortcut: "Ctrl+A"
+        enabled: currentDocument ? currentDocument.idle : false
+        onTriggered: currentDocument && currentDocument.selectAllVisible()
+    }
+
+    Action
+    {
         id: selectNoneAction
         text: qsTr("Select &None")
-        shortcut: "Ctrl+Shift+A"
+        shortcut: "Ctrl+N"
         enabled: currentDocument ? currentDocument.idle : false
         onTriggered: currentDocument && currentDocument.selectNone()
     }
@@ -881,6 +890,7 @@ ApplicationWindow
             MenuItem { action: deleteAction }
             MenuSeparator {}
             MenuItem { action: selectAllAction }
+            MenuItem { action: selectAllVisibleAction }
             MenuItem { action: selectNoneAction }
             MenuItem { action: invertSelectionAction }
             MenuSeparator {}

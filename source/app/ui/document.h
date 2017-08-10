@@ -227,6 +227,7 @@ public:
     Q_INVOKABLE void toggleLayout();
 
     Q_INVOKABLE void selectAll();
+    Q_INVOKABLE void selectAllVisible();
     Q_INVOKABLE void selectNone();
     Q_INVOKABLE void invertSelection();
 
