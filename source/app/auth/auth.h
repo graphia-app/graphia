@@ -109,8 +109,8 @@ private:
 
     QString _message;
 
-    int _issueTime = -1;
-    int _expiryTime = -1;
+    uint _issueTime = 0;
+    uint _expiryTime = 0;
     std::vector<QRegularExpression> _allowedPluginRegexps;
 
     void parseAuthToken();

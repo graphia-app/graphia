@@ -17,6 +17,7 @@
 #include <QRegularExpression>
 #include <QVariant>
 #include <QLocale>
+#include <QMessageBox>
 
 #include <QUrl>
 #include <QNetworkReply>
@@ -279,7 +280,8 @@ static std::string authRequest(const Auth::AesKey& aesKey, const QString& email,
 
 void Auth::parseAuthToken()
 {
-    _expiryTime = -1;
+    _issueTime = 0;
+    _expiryTime = 0;
     _allowedPluginRegexps.clear();
 
     auto authToken = u::pref("auth/authToken").toString();
@@ -336,8 +338,8 @@ bool Auth::expired()
 {
     parseAuthToken();
 
-    auto now = static_cast<int>(QDateTime::currentDateTime().toTime_t());
-    auto approximatelyNow = now + 3600; // Allow the system clock to be out by a little bit
+    auto now = static_cast<uint>(QDateTime::currentSecsSinceEpoch());
+    auto approximatelyNow = now + 600; // Allow the system clock to be out by a little bit
     bool authenticated = (approximatelyNow >= _issueTime) && (now < _expiryTime);
 
     if(_authenticated != authenticated)
@@ -417,7 +419,8 @@ void Auth::reset()
 {
     _authenticated = false;
     _message.clear();
-    _expiryTime = -1;
+    _issueTime = 0;
+    _expiryTime = 0;
     _allowedPluginRegexps.clear();
 
     emit stateChanged();
@@ -478,6 +481,17 @@ void Auth::onReplyReceived()
                 {
                     u::setPref("auth/authToken", decodedRespose["authToken"].toString());
                     parseAuthToken();
+
+                    auto issueTime = QDateTime::fromSecsSinceEpoch(_issueTime);
+                    auto now = QDateTime::currentDateTimeUtc();
+
+                    if(std::abs(issueTime.secsTo(now)) > 600)
+                    {
+                        QMessageBox::warning(nullptr, tr("Clock Not Set"),
+                            tr("Please ensure your system clock is accurately set and that the correct "
+                               "timezone has been selected.\n\nFailure to set the system clock correctly "
+                               "may prevent working offline."));
+                    }
                 }
                 else
                     u::setPref("auth/authToken", "");
