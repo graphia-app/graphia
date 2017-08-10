@@ -330,9 +330,6 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
 {
     resolveOpenGLFunctions();
 
-    // Shade all samples in multi-sampling
-    glMinSampleShading(1.0);
-
     ShaderTools::loadShaderProgram(_screenShader, ":/shaders/screen.vert", ":/shaders/screen.frag");
     ShaderTools::loadShaderProgram(_selectionShader, ":/shaders/screen.vert", ":/shaders/selection.frag");
     ShaderTools::loadShaderProgram(_sdfShader, ":/shaders/screen.vert", ":/shaders/sdf.frag");
@@ -1338,9 +1335,6 @@ std::vector<int> GraphRenderer::gpuGraphDataRenderOrder() const
 
 void GraphRenderer::renderNodes(GPUGraphData& gpuGraphData)
 {
-    // Enable per-sample shading this makes the node color
-    // fragment shader have smooth edges
-    glEnable(GL_SAMPLE_SHADING);
     _nodesShader.bind();
     setShaderADSParameters(_nodesShader);
 
@@ -1358,7 +1352,6 @@ void GraphRenderer::renderNodes(GPUGraphData& gpuGraphData)
     glBindTexture(GL_TEXTURE_BUFFER, 0);
     gpuGraphData._nodeVBO.release();
     _nodesShader.release();
-    glDisable(GL_SAMPLE_SHADING);
 }
 
 void GraphRenderer::renderEdges(GPUGraphData& gpuGraphData)
@@ -1386,8 +1379,6 @@ void GraphRenderer::renderText(GPUGraphData& gpuGraphData)
 {
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
-    // Enable per-sample shading, this makes small text look nice
-    glEnable(GL_SAMPLE_SHADING);
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
     _textShader.bind();
@@ -1418,13 +1409,17 @@ void GraphRenderer::renderText(GPUGraphData& gpuGraphData)
     gpuGraphData._textVBO.release();
     _textShader.release();
     glDisable(GL_BLEND);
-    glDisable(GL_SAMPLE_SHADING);
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
 }
 
 void GraphRenderer::renderGraph(GPUGraphData& gpuGraphData)
 {
+    // Shade all samples in multi-sampling
+    glMinSampleShading(1.0);
+    // Enable per-sample shading, this makes small text look nice
+    glEnable(GL_SAMPLE_SHADING);
+
     glBindFramebuffer(GL_FRAMEBUFFER, gpuGraphData._fbo);
 
     GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
@@ -1436,6 +1431,7 @@ void GraphRenderer::renderGraph(GPUGraphData& gpuGraphData)
     renderNodes(gpuGraphData);
     renderEdges(gpuGraphData);
     renderText(gpuGraphData);
+    glDisable(GL_SAMPLE_SHADING);
 }
 
 void GraphRenderer::renderScene()
@@ -1488,6 +1484,7 @@ void GraphRenderer::renderScene()
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
+    glEnable(GL_MULTISAMPLE);
     glDisable(GL_BLEND);
 
     for(auto& gpuGraphData : _gpuGraphData)
@@ -1505,6 +1502,8 @@ void GraphRenderer::renderScene()
 
         renderGraph(gpuGraphData);
     }
+
+    glDisable(GL_MULTISAMPLE);
 }
 
 void GraphRenderer::render2D()
@@ -1565,7 +1564,6 @@ void GraphRenderer::render2D()
     }
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_MULTISAMPLE);
 }
 
 QOpenGLFramebufferObject* GraphRenderer::createFramebufferObject(const QSize& size)

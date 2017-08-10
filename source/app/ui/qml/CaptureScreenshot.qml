@@ -510,14 +510,17 @@ Dialog
 
     function requestPreview()
     {
-        var previewWidth = Math.ceil(aspectRatio * canvas.height);
-        var previewHeight = canvas.height;
-        if(previewWidth > canvas.width)
+        if(root.visible)
         {
-            previewWidth = canvas.width;
-            previewHeight = Math.ceil(canvas.width / aspectRatio);
+            var previewWidth = Math.ceil(aspectRatio * canvas.height);
+            var previewHeight = canvas.height;
+            if(previewWidth > canvas.width)
+            {
+                previewWidth = canvas.width;
+                previewHeight = Math.ceil(canvas.width / aspectRatio);
+            }
+            graphView.requestPreview(previewWidth, previewHeight, fillSize.checked);
         }
-        graphView.requestPreview(previewWidth, previewHeight, fillSize.checked);
     }
 
     function previewWidth()
