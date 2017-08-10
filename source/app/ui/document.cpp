@@ -479,27 +479,24 @@ void Document::onLoadComplete(bool success)
 
 void Document::selectAll()
 {
-    if(!idle())
+    if(!idle() || _selectionManager == nullptr)
         return;
 
-    if(_selectionManager)
-    {
-        _commandManager.executeOnce({tr("Select All"), tr("Selecting All")},
-            [this](Command& command)
-            {
-                bool nodesSelected = _selectionManager->selectAllNodes();
-                command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
-                return nodesSelected;
-            });
-    }
+    _commandManager.executeOnce({tr("Select All"), tr("Selecting All")},
+        [this](Command& command)
+        {
+            bool nodesSelected = _selectionManager->selectAllNodes();
+            command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
+            return nodesSelected;
+        });
 }
 
 void Document::selectNone()
 {
-    if(!idle())
+    if(!idle() || _selectionManager == nullptr)
         return;
 
-    if(_selectionManager && !_selectionManager->selectedNodes().empty())
+    if(!_selectionManager->selectedNodes().empty())
     {
         _commandManager.executeOnce({tr("Select None"), tr("Selecting None")},
             [this](Command&) { return _selectionManager->clearNodeSelection(); });
@@ -508,18 +505,16 @@ void Document::selectNone()
 
 void Document::invertSelection()
 {
-    if(!idle())
+    if(!idle() || _selectionManager == nullptr)
         return;
 
-    if(_selectionManager)
-    {
-        _commandManager.executeOnce({tr("Invert Selection"), tr("Inverting Selection")},
-            [this](Command& command)
-            {
-                _selectionManager->invertNodeSelection();
-                command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
-            });
-    }
+    _commandManager.executeOnce({tr("Invert Selection"), tr("Inverting Selection")},
+        [this](Command& command)
+        {
+            _selectionManager->invertNodeSelection();
+            command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
+        });
+
 }
 
 void Document::undo()
