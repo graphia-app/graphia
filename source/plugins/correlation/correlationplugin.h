@@ -144,7 +144,7 @@ private:
     double _minimumCorrelationValue = 0.7;
     bool _transpose = false;
     ScalingType _scaling = ScalingType::None;
-    NormaliseType _normaliseType = NormaliseType::None;
+    NormaliseType _normalisation = NormaliseType::None;
     MissingDataType _missingDataType = MissingDataType::None;
     double _missingDataReplacementValue = 0.0;
 
@@ -185,6 +185,10 @@ public:
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName);
     void applyParameter(const QString& name, const QString& value);
     QStringList defaultTransforms() const;
+
+    QByteArray save(IMutableGraph& graph, const ProgressFn& progressFn) const;
+    bool load(const QByteArray& data, int dataVersion, IMutableGraph& graph,
+              const ProgressFn& progressFn);
 
 private slots:
     void onLoadSuccess();
