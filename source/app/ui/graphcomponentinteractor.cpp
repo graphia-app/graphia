@@ -89,6 +89,8 @@ void GraphComponentInteractor::leftDoubleClick()
         _scene->startTransition();
         clickedRenderer()->resetView();
     }
+    else
+        _graphRenderer->switchToOverviewMode();
 }
 
 void GraphComponentInteractor::wheelMove(float angle, float, float)
