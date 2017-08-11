@@ -3,6 +3,8 @@
 
 #include "pair_iterator.h"
 
+#include "shared/loading/progressfn.h"
+
 #include <QVector2D>
 #include <QVector3D>
 #include <QMatrix4x4>
@@ -10,6 +12,8 @@
 #include <QColor>
 #include <QString>
 #include <QStringList>
+#include <QJsonArray>
+#include <QVariantList>
 
 #include <type_traits>
 #include <algorithm>
@@ -229,6 +233,22 @@ namespace u
     std::vector<QString> toQStringVector(const QStringList& stringList);
 
     std::istream& getline(std::istream& is, std::string& t);
+
+    template<typename C>
+    QJsonArray jsonArrayFrom(const C& container, ProgressFn progressFn = [](int){})
+    {
+        QVariantList variantList;
+        variantList.reserve(container.size());
+
+        uint64_t i = 0;
+        for(const auto& value : container)
+        {
+            variantList.append(value);
+            progressFn((i++) * 100 / container.size());
+        }
+
+        return QJsonArray::fromVariantList(variantList);
+    }
 }
 
 #define ARRAY_SIZEOF(x) (sizeof(x)/sizeof((x)[0]))

@@ -53,24 +53,12 @@ void BaseGenericPluginInstance::setEdgeWeight(EdgeId edgeId, float weight)
 
 QByteArray BaseGenericPluginInstance::save(IMutableGraph& graph, const ProgressFn& progressFn) const
 {
-    int i = 0;
     QJsonObject jsonObject;
 
     if(_edgeWeights != nullptr)
     {
         graph.setPhase(QObject::tr("Edge Weights"));
-        QJsonArray weights;
-        for(auto edgeId : graph.edgeIds())
-        {
-            QJsonObject weight;
-            weight["id"] = QString::number(edgeId);
-            weight["weight"] = _edgeWeights->at(edgeId);
-
-            weights.append(weight);
-            progressFn((i++ * 100) / graph.numEdges());
-        }
-
-        jsonObject["edgeWeights"] = weights;
+        jsonObject["edgeWeights"] = u::jsonArrayFrom(*_edgeWeights, progressFn);
     }
 
     progressFn(-1);
@@ -102,8 +90,8 @@ bool BaseGenericPluginInstance::load(const QByteArray& data, int dataVersion,
         graph.setPhase(QObject::tr("Edge Weights"));
         for(const auto& edgeWeight : jsonEdgeWeights)
         {
-            auto id = edgeWeight.toObject()["id"].toInt();
-            auto weight = edgeWeight.toObject()["weight"].toDouble();
+            EdgeId id(i);
+            auto weight = edgeWeight.toDouble();
 
             setEdgeWeight(id, weight);
 

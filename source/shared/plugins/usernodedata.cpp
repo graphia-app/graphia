@@ -3,8 +3,6 @@
 #include "shared/graph/imutablegraph.h"
 #include "shared/graph/igraphmodel.h"
 
-#include <QJsonArray>
-
 void UserNodeData::initialise(IMutableGraph& mutableGraph)
 {
     _indexes = std::make_unique<NodeArray<size_t>>(mutableGraph, 0);
@@ -106,23 +104,15 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
     }
 }
 
-QJsonObject UserNodeData::save(const IMutableGraph& graph, const ProgressFn& progressFn) const
+QJsonObject UserNodeData::save(const IMutableGraph&, const ProgressFn& progressFn) const
 {
     QJsonObject jsonObject = UserData::save(progressFn);
 
-    QJsonArray jsonArray;
-    for(auto nodeId : graph.nodeIds())
-    {
-        auto row = _indexes->at(nodeId);
+    QJsonArray jsonIndexes;
+    for(auto index : *_indexes)
+        jsonIndexes.append(static_cast<qint64>(index));
 
-        QJsonObject index;
-        index["nodeId"] = static_cast<int>(nodeId);
-        index["row"] = static_cast<int>(row);
-
-        jsonArray.append(index);
-    }
-
-    jsonObject["indexes"] = jsonArray;
+    jsonObject["indexes"] = jsonIndexes;
 
     return jsonObject;
 }
@@ -140,18 +130,9 @@ bool UserNodeData::load(const QJsonObject& jsonObject, const ProgressFn& progres
 
     const auto& indexes = jsonObject["indexes"].toArray();
 
+    NodeId nodeId(0);
     for(const auto& index : indexes)
-    {
-        if(!index.isObject())
-            return false;
-
-        const auto& indexObject = index.toObject();
-
-        NodeId nodeId = indexObject["nodeId"].toInt();
-        size_t row = indexObject["row"].toInt();
-
-        setNodeIdForRowIndex(nodeId, row);
-    }
+        setNodeIdForRowIndex(nodeId++, index.toInt());
 
     return true;
 }

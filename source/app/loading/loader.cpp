@@ -13,7 +13,6 @@
 
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonArray>
 
 #include "thirdparty/zlib/zlib_disable_warnings.h"
 #include "thirdparty/zlib/zlib.h"
@@ -266,7 +265,7 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
     const auto& jsonNodes = jsonGraph["nodes"].toArray();
     const auto& jsonEdges = jsonGraph["edges"].toArray();
 
-    int i = 0;
+    uint64_t i = 0;
 
     graph.setPhase(QObject::tr("Nodes"));
     for(const auto& jsonNode : jsonNodes)
@@ -318,12 +317,12 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
         {
             _nodePositions = std::make_unique<ExactNodePositions>(graph);
 
+            NodeId nodeId(0);
             for(const auto& jsonPosition : jsonLayout["positions"].toArray())
             {
-                NodeId nodeId = jsonPosition.toObject()["id"].toInt(-1);
-                const auto& jsonPositionArray = jsonPosition.toObject()["position"].toArray();
+                const auto& jsonPositionArray = jsonPosition.toArray();
 
-                _nodePositions->set(nodeId, QVector3D(
+                _nodePositions->set(nodeId++, QVector3D(
                     jsonPositionArray.at(0).toDouble(),
                     jsonPositionArray.at(1).toDouble(),
                     jsonPositionArray.at(2).toDouble()));

@@ -1,6 +1,6 @@
 #include "userdatavector.h"
 
-#include <QJsonArray>
+#include "shared/utils/utils.h"
 
 void UserDataVector::set(size_t index, const QString& value)
 {
@@ -98,12 +98,7 @@ QJsonObject UserDataVector::save() const
     jsonObject["intMax"] = _intMax;
     jsonObject["floatMin"] = _floatMin;
     jsonObject["floatMax"] = _floatMax;
-
-    QJsonArray jsonValues;
-    for(const auto& value : _values)
-        jsonValues.append(value);
-
-    jsonObject["values"] = jsonValues;
+    jsonObject["values"] = u::jsonArrayFrom(_values);
 
     return jsonObject;
 }

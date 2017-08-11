@@ -78,7 +78,8 @@ QJsonObject UserData::save(const ProgressFn& progressFn) const
 
     jsonObject["numValues"] = _numValues;
 
-    QJsonArray vectors;
+    QVariantList vectors;
+    vectors.reserve(_userDataVectors.size());
     for(const auto& userDataVector : _userDataVectors)
     {
         const auto& name = userDataVector.first;
@@ -92,7 +93,7 @@ QJsonObject UserData::save(const ProgressFn& progressFn) const
         progressFn((i++ * 100) / static_cast<int>(_userDataVectors.size()));
     }
 
-    jsonObject["vectors"] = vectors;
+    jsonObject["vectors"] = QJsonArray::fromVariantList(vectors);
 
     progressFn(-1);
 
