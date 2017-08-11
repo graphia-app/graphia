@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName(PRODUCT_NAME);
     QCoreApplication::setApplicationVersion(VERSION);
 
-    QGuiApplication::styleHints()->setMousePressAndHoldInterval(200);
+    QGuiApplication::styleHints()->setMousePressAndHoldInterval(100);
 
     QIcon mainIcon;
     mainIcon.addFile(":/icon/Icon512x512.png");
