@@ -372,7 +372,8 @@ void Auth::sendRequestUsingEncryptedPassword(const QString& email, const QString
     _aesKey = generateKey();
     auto authReqJsonString = authRequest(_aesKey, email, encryptedPassword);
 
-    // Work around for QTBUG-31652 to essentially call QNetworkAccessManager::post asynchronously
+    // Work around for QTBUG-31652 (PRNG takes time to initialise) to
+    // effectively call QNetworkAccessManager::post asynchronously
     QTimer::singleShot(0, [this, authReqJsonString]
     {
         QNetworkRequest request;
