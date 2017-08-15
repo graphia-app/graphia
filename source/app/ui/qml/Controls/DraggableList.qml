@@ -38,8 +38,27 @@ Column
             onPressAndHold: held = true;
             onReleased: held = false;
 
-            // Pass click events on to the child item(s)
-            onClicked: { forwardEventToItem(mouse, "clicked"); }
+            property int _clickX
+            property int _clickY
+
+            // If the mouse is significantly moved after a click, initiate a drag
+            onPositionChanged:
+            {
+                var manhattan = Math.abs(_clickX - mouse.x) + Math.abs(_clickY - mouse.y);
+
+                if(manhattan > 3)
+                    held = true;
+            }
+
+            onClicked:
+            {
+                _clickX = mouse.x;
+                _clickY = mouse.y;
+
+                // Pass click events on to the child item(s)
+                forwardEventToItem(mouse, "clicked");
+            }
+
             onDoubleClicked: { forwardEventToItem(mouse, "doubleClicked"); }
 
             function forwardEventToItem(event, eventType)
