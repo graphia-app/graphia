@@ -192,9 +192,9 @@ bool Saver::encode(const ProgressFn& progressFn)
     auto uiDataJson = json::parse(_uiData.begin(), _uiData.end());
 
     if(uiDataJson.is_object() || uiDataJson.is_array())
-        content["uiData"] = uiDataJson;
+        content["ui"] = uiDataJson;
     else
-        content["uiData"] = QString(_uiData.toHex());
+        content["ui"] = QString(_uiData.toHex());
 
     jsonArray.emplace_back(content);
 

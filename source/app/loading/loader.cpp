@@ -345,9 +345,9 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
     if(!_pluginInstance->load(pluginData, header._pluginDataVersion, graph, progressFn))
         return false;
 
-    if(u::contains(jsonBody, "uiData"))
+    if(u::contains(jsonBody, "ui"))
     {
-        const auto& uiDataJsonValue = jsonBody["uiData"];
+        const auto& uiDataJsonValue = jsonBody["ui"];
 
         if(uiDataJsonValue.is_object() || uiDataJsonValue.is_array())
             _uiData = QByteArray::fromStdString(uiDataJsonValue.dump());
