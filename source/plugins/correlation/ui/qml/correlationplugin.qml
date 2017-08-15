@@ -184,6 +184,29 @@ PluginContent
         nameFilters: [ "PDF Document (*.pdf)", "PNG Image (*.png)", "JPEG Image (*.jpg *.jpeg)" ]
         onAccepted: { plot.savePlotImage(file, selectedNameFilter.extensions); }
     }
+
+    function save()
+    {
+        var data =
+        {
+            "sideBySide": toggleUiOrientationAction.checked,
+            "showCalculatedAttributes": toggleCalculatedAttributes.checked,
+            "showColumnNames": toggleColumnNamesAction.checked,
+            "sortColumn": tableView.sortIndicatorColumn,
+            "sortOrder": tableView.sortIndicatorOrder
+        };
+
+        return data;
+    }
+
+    function load(data, version)
+    {
+        toggleUiOrientationAction.checked = data.sideBySide;
+        toggleCalculatedAttributes.checked = data.showCalculatedAttributes;
+        toggleColumnNamesAction.checked = data.showColumnNames;
+        tableView.sortIndicatorColumn = data.sortColumn;
+        tableView.sortIndicatorOrder = data.sortOrder;
+    }
 }
 
 
