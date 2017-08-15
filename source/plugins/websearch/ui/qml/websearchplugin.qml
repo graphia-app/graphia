@@ -64,4 +64,25 @@ PluginContent
             }
         }
     }
+
+    function save()
+    {
+        var data =
+        {
+            "urlIndex": urlTemplate.currentIndex
+        };
+
+        if(urlTemplate.currentIndex < 0)
+            data["customUrl"] = urlTemplate.editText;
+
+        return data;
+    }
+
+    function load(data, version)
+    {
+        urlTemplate.currentIndex = data.urlIndex;
+
+        if(urlTemplate.currentIndex < 0)
+            urlTemplate.editText = data.customUrl;
+    }
 }
