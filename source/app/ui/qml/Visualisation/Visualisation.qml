@@ -116,6 +116,7 @@ Item
 
                     text: qsTr("Enabled")
                     checkable: true
+                    enabled: alertIcon.type !== "error"
 
                     onCheckedChanged:
                     {
@@ -132,6 +133,9 @@ Item
                     checkable: true
                     enabled:
                     {
+                        if(alertIcon.type === "error")
+                            return false;
+
                         var valueType = document.attribute(attribute).valueType;
                         return valueType === ValueType.Float || valueType === ValueType.Int;
                     }
@@ -293,7 +297,6 @@ Item
                 parseParameters(!error);
             }
 
-            enabledMenuItem.enabled = invertMenuItem.enabled = !error
             enabledMenuItem.checked = !isFlagSet("disabled") && !error;
             invertMenuItem.checked = isFlagSet("invert");
 
