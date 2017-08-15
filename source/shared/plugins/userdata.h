@@ -9,7 +9,8 @@
 #include <QObject>
 #include <QString>
 #include <QVariant>
-#include <QJsonObject>
+
+#include "thirdparty/json/json_helper.h"
 
 #include <vector>
 
@@ -38,8 +39,8 @@ public:
     void setValue(size_t index, const QString& name, const QString& value);
     QVariant value(size_t index, const QString& name) const;
 
-    QJsonObject save(const ProgressFn& progressFn) const;
-    bool load(const QJsonObject& jsonObject, const ProgressFn& progressFn);
+    json save(const ProgressFn& progressFn) const;
+    bool load(const json& jsonObject, const ProgressFn& progressFn);
 
 signals:
     void userDataVectorAdded(const QString& name);

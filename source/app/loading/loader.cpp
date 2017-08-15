@@ -11,8 +11,7 @@
 #include <QFileInfo>
 #include <QDataStream>
 
-#include <QJsonDocument>
-#include <QJsonObject>
+#include "json_helper.h"
 
 #include "thirdparty/zlib/zlib_disable_warnings.h"
 #include "thirdparty/zlib/zlib.h"
@@ -194,27 +193,26 @@ static bool parseHeader(const QUrl& url, Header* header = nullptr)
     }
 
     QString headerString = fragment.left(position);
-    QJsonDocument jsonHeader = QJsonDocument::fromJson(headerString.toUtf8());
+    auto headerByteArray = headerString.toUtf8();
+    json jsonHeader = json::parse(headerByteArray.begin(), headerByteArray.end());
 
-    if(jsonHeader.isNull() || !jsonHeader.isObject())
+    if(jsonHeader.is_null() || !jsonHeader.is_object())
         return false;
 
-    auto jsonHeaderObject = jsonHeader.object();
-
-    if(!jsonHeaderObject.contains("version"))
+    if(!u::contains(jsonHeader, "version"))
         return false;
 
-    if(!jsonHeaderObject.contains("pluginName"))
+    if(!u::contains(jsonHeader, "pluginName"))
         return false;
 
-    if(!jsonHeaderObject.contains("pluginDataVersion"))
+    if(!u::contains(jsonHeader, "pluginDataVersion"))
         return false;
 
     if(header != nullptr)
     {
-        header->_version            = jsonHeaderObject["version"].toInt();
-        header->_pluginName         = jsonHeaderObject["pluginName"].toString();
-        header->_pluginDataVersion  = jsonHeaderObject["pluginDataVersion"].toInt();
+        header->_version            = jsonHeader["version"];
+        header->_pluginName         = QString::fromStdString(jsonHeader["pluginName"]);
+        header->_pluginDataVersion  = jsonHeader["pluginDataVersion"];
     }
 
     return true;
@@ -233,44 +231,42 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
 
     progressFn(-1);
 
-    auto jsonDocument = QJsonDocument::fromJson(byteArray);
+    auto jsonArray = json::parse(byteArray.begin(), byteArray.end());
 
-    if(jsonDocument.isNull() || !jsonDocument.isArray())
+    if(jsonArray.is_null() || !jsonArray.is_array())
         return false;
-
-    auto jsonArray = jsonDocument.array();
 
     if(jsonArray.size() != 2)
         return false;
 
     for(const auto& i : jsonArray)
     {
-        if(!i.isObject())
+        if(!i.is_object())
             return false;
     }
 
-    auto jsonBody = jsonArray.at(1).toObject();
+    auto jsonBody = jsonArray.at(1);
 
-    if(!jsonBody.contains("graph") || !jsonBody["graph"].isObject())
+    if(!u::contains(jsonBody, "graph") || !jsonBody["graph"].is_object())
         return false;
 
-    const auto& jsonGraph = jsonBody["graph"].toObject();
+    const auto& jsonGraph = jsonBody["graph"];
 
-    if(!jsonGraph.contains("nodes") || !jsonGraph.contains("edges"))
+    if(!u::contains(jsonGraph, "nodes") || !u::contains(jsonGraph, "edges"))
         return false;
 
-    if(!jsonGraph.contains("nodes") || !jsonGraph.contains("edges"))
+    if(!u::contains(jsonGraph, "nodes") || !u::contains(jsonGraph, "edges"))
         return false;
 
-    const auto& jsonNodes = jsonGraph["nodes"].toArray();
-    const auto& jsonEdges = jsonGraph["edges"].toArray();
+    const auto& jsonNodes = jsonGraph["nodes"];
+    const auto& jsonEdges = jsonGraph["edges"];
 
     uint64_t i = 0;
 
     graph.setPhase(QObject::tr("Nodes"));
     for(const auto& jsonNode : jsonNodes)
     {
-        NodeId nodeId = jsonNode.toObject()["id"].toInt(-1);
+        NodeId nodeId = jsonNode["id"].get<int>();
 
         if(!nodeId.isNull())
             graph.addNode(nodeId);
@@ -285,9 +281,9 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
     graph.setPhase(QObject::tr("Edges"));
     for(const auto& jsonEdge : jsonEdges)
     {
-        EdgeId edgeId = jsonEdge.toObject()["id"].toInt(-1);
-        NodeId sourceId = jsonEdge.toObject()["source"].toInt(-1);
-        NodeId targetId = jsonEdge.toObject()["target"].toInt(-1);
+        EdgeId edgeId = jsonEdge["id"].get<int>();
+        NodeId sourceId = jsonEdge["source"].get<int>();
+        NodeId targetId = jsonEdge["target"].get<int>();
 
         if(!edgeId.isNull() && !sourceId.isNull() && !targetId.isNull())
             graph.addEdge(edgeId, sourceId, targetId);
@@ -297,70 +293,66 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
 
     progressFn(-1);
 
-    if(jsonBody.contains("transforms"))
+    if(u::contains(jsonBody, "transforms"))
     {
-        for(const auto& transform : jsonBody["transforms"].toArray())
-            _transforms.append(transform.toString());
+        for(const auto& transform : jsonBody["transforms"])
+            _transforms.append(QString::fromStdString(transform));
     }
 
-    if(jsonBody.contains("visualisations"))
+    if(u::contains(jsonBody, "visualisations"))
     {
-        for(const auto& visualisation : jsonBody["visualisations"].toArray())
-            _visualisations.append(visualisation.toString());
+        for(const auto& visualisation : jsonBody["visualisations"])
+            _visualisations.append(QString::fromStdString(visualisation));
     }
 
-    if(jsonBody.contains("layout"))
+    if(u::contains(jsonBody, "layout"))
     {
-        auto jsonLayout = jsonBody["layout"].toObject();
+        const auto& jsonLayout = jsonBody["layout"];
 
-        if(jsonLayout.contains("positions"))
+        if(u::contains(jsonLayout, "positions"))
         {
             _nodePositions = std::make_unique<ExactNodePositions>(graph);
 
             NodeId nodeId(0);
-            for(const auto& jsonPosition : jsonLayout["positions"].toArray())
+            for(const auto& jsonPosition : jsonLayout["positions"])
             {
-                const auto& jsonPositionArray = jsonPosition.toArray();
+                const auto& jsonPositionArray = jsonPosition;
 
                 _nodePositions->set(nodeId++, QVector3D(
-                    jsonPositionArray.at(0).toDouble(),
-                    jsonPositionArray.at(1).toDouble(),
-                    jsonPositionArray.at(2).toDouble()));
+                    jsonPositionArray.at(0),
+                    jsonPositionArray.at(1),
+                    jsonPositionArray.at(2)));
             }
         }
 
-        _layoutPaused = jsonLayout["paused"].toBool();
+        _layoutPaused = jsonLayout["paused"];
     }
 
-    if(!jsonBody.contains("pluginData"))
+    if(!u::contains(jsonBody, "pluginData"))
         return false;
 
     const auto& pluginDataJsonValue = jsonBody["pluginData"];
 
     QByteArray pluginData;
 
-    if(pluginDataJsonValue.isObject())
-        pluginData = QJsonDocument(pluginDataJsonValue.toObject()).toJson();
-    else if(pluginDataJsonValue.isArray())
-        pluginData = QJsonDocument(pluginDataJsonValue.toArray()).toJson();
-    else if(pluginDataJsonValue.isString())
-        pluginData = QByteArray::fromHex(pluginDataJsonValue.toString().toUtf8());
+    if(pluginDataJsonValue.is_object() || pluginDataJsonValue.is_array())
+        pluginData = QByteArray::fromStdString(pluginDataJsonValue.dump());
+    else if(pluginDataJsonValue.is_string())
+        pluginData = QByteArray::fromHex(QByteArray::fromStdString(pluginDataJsonValue));
     else
         return false;
 
     if(!_pluginInstance->load(pluginData, header._pluginDataVersion, graph, progressFn))
         return false;
 
-    if(jsonBody.contains("uiData"))
+    if(u::contains(jsonBody, "uiData"))
     {
         const auto& uiDataJsonValue = jsonBody["uiData"];
 
-        if(uiDataJsonValue.isObject())
-            _uiData = QJsonDocument(uiDataJsonValue.toObject()).toJson();
-        else if(uiDataJsonValue.isArray())
-            _uiData = QJsonDocument(uiDataJsonValue.toArray()).toJson();
-        else if(uiDataJsonValue.isString())
-            _uiData = QByteArray::fromHex(uiDataJsonValue.toString().toUtf8());
+        if(uiDataJsonValue.is_object() || uiDataJsonValue.is_array())
+            _uiData = QByteArray::fromStdString(uiDataJsonValue.dump());
+        else if(uiDataJsonValue.is_string())
+            _uiData = QByteArray::fromHex(QByteArray::fromStdString(uiDataJsonValue));
         else
             return false;
 

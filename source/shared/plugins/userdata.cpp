@@ -2,8 +2,6 @@
 
 #include "shared/utils/utils.h"
 
-#include <QJsonArray>
-
 const QString UserData::firstUserDataVectorName() const
 {
     if(!_userDataVectors.empty())
@@ -71,58 +69,58 @@ QVariant UserData::value(size_t index, const QString& name) const
     return {};
 }
 
-QJsonObject UserData::save(const ProgressFn& progressFn) const
+json UserData::save(const ProgressFn& progressFn) const
 {
-    QJsonObject jsonObject;
+    json jsonObject;
     int i = 0;
 
     jsonObject["numValues"] = _numValues;
 
-    QVariantList vectors;
-    vectors.reserve(_userDataVectors.size());
+    std::vector<std::map<std::string, json>> vectors;
     for(const auto& userDataVector : _userDataVectors)
     {
-        const auto& name = userDataVector.first;
-        auto jsonVector = userDataVector.second.save();
-
-        QJsonObject vector;
-        vector["name"] = name;
-        vector["vector"] = jsonVector;
-
-        vectors.append(vector);
+        std::map<std::string, json> vector;
+        const auto& name = userDataVector.first.toStdString();
+        vector.emplace(name, userDataVector.second.save());
+        vectors.emplace_back(vector);
         progressFn((i++ * 100) / static_cast<int>(_userDataVectors.size()));
     }
 
-    jsonObject["vectors"] = QJsonArray::fromVariantList(vectors);
+    jsonObject["vectors"] = vectors;
 
     progressFn(-1);
 
     return jsonObject;
 }
 
-bool UserData::load(const QJsonObject& jsonObject, const ProgressFn& progressFn)
+bool UserData::load(const json& jsonObject, const ProgressFn& progressFn)
 {
     int i = 0;
 
-    if(!jsonObject["vectors"].isArray())
+    if(!jsonObject["vectors"].is_array())
         return false;
 
     _userDataVectors.clear();
     _numValues = 0;
 
-    const auto& vectorsArray = jsonObject["vectors"].toArray();
-    for(const auto& vector : vectorsArray)
+    const auto& vectorsObject = jsonObject["vectors"];
+    for(const auto& vector : vectorsObject)
     {
-        const auto& name = vector.toObject()["name"].toString();
-        const auto& jsonVector = vector.toObject()["vector"].toObject();
+        if(!vector.is_object())
+            return false;
+
+        auto it = vector.begin();
+
+        const QString& name = QString::fromStdString(it.key());
+        const auto& jsonVector = it.value();
 
         UserDataVector userDataVector;
-        if(!userDataVector.load(jsonVector))
+        if(!userDataVector.load(name, jsonVector))
             return false;
 
         _userDataVectors.emplace_back(std::make_pair(name, userDataVector));
 
-        progressFn((i++ * 100) / vectorsArray.size());
+        progressFn((i++ * 100) / vectorsObject.size());
     }
 
     progressFn(-1);

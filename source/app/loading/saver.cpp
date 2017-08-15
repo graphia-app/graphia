@@ -8,10 +8,7 @@
 #include <QFile>
 #include <QDataStream>
 
-#include <QVariantList>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QJsonDocument>
+#include "json_helper.h"
 
 #include <QStringList>
 
@@ -81,96 +78,93 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, const
     return true;
 }
 
-static QJsonObject graphAsJson(const IGraph& graph, const ProgressFn& progressFn)
+static json graphAsJson(const IGraph& graph, const ProgressFn& progressFn)
 {
-    QJsonObject jsonObject;
+    json jsonObject;
 
     jsonObject["directed"] = true;
 
     int i;
 
     graph.setPhase(QObject::tr("Nodes")); i = 0;
-    QVariantList nodes;
-    nodes.reserve(graph.numNodes());
+    json nodes;
     for(auto nodeId : graph.nodeIds())
     {
-        QJsonObject node;
+        json node;
         node["id"] = static_cast<int>(nodeId);
 
-        nodes.append(node);
+        nodes.emplace_back(node);
         progressFn((i++ * 100) / graph.numNodes());
     }
 
     progressFn(-1);
 
-    jsonObject["nodes"] = QJsonArray::fromVariantList(nodes);
+    jsonObject["nodes"] = nodes;
 
     graph.setPhase(QObject::tr("Edges")); i = 0;
-    QVariantList edges;
-    edges.reserve(graph.numEdges());
+    json edges;
     for(auto edgeId : graph.edgeIds())
     {
         const auto& edge = graph.edgeById(edgeId);
 
-        QJsonObject jsonEdge;
+        json jsonEdge;
         jsonEdge["id"] = static_cast<int>(edgeId);
         jsonEdge["source"] = static_cast<int>(edge.sourceId());
         jsonEdge["target"] = static_cast<int>(edge.targetId());
 
-        edges.append(jsonEdge);
+        edges.emplace_back(jsonEdge);
         progressFn((i++ * 100) / graph.numEdges());
     }
 
     progressFn(-1);
 
-    jsonObject["edges"] = QJsonArray::fromVariantList(edges);
+    jsonObject["edges"] = edges;
 
     return jsonObject;
 }
 
-static QJsonArray nodePositionsAsJson(const IGraph& graph, const NodePositions& nodePositions,
-                                      const ProgressFn& progressFn)
+static json nodePositionsAsJson(const IGraph& graph, const NodePositions& nodePositions,
+                                const ProgressFn& progressFn)
 {
     int i = 0;
 
     graph.setPhase(QObject::tr("Positions"));
-    QVariantList positions;
-    positions.reserve(graph.numNodes());
+    json positions;
     for(auto nodeId : graph.nodeIds())
     {
         const auto& nodePosition = nodePositions.get(nodeId);
-        QJsonArray vector({nodePosition.x(), nodePosition.y(), nodePosition.z()});
+        json vector({nodePosition.x(), nodePosition.y(), nodePosition.z()});
 
-        positions.append(vector);
+        positions.emplace_back(vector);
         progressFn((i++ * 100) / graph.numNodes());
     }
 
     progressFn(-1);
 
-    return QJsonArray::fromVariantList(positions);
+    return positions;
 }
 
 bool Saver::encode(const ProgressFn& progressFn)
 {
-    QJsonArray jsonArray;
+    json jsonArray;
 
     auto graphModel = _document->graphModel();
 
-    QJsonObject header;
+    json header;
     header["version"] = 1;
     header["pluginName"] = graphModel->pluginName();
     header["pluginDataVersion"] = graphModel->pluginDataVersion();
-    jsonArray.append(header);
+    jsonArray.emplace_back(header);
 
     // The header must fit within a certain size, which is the maximum the loader will look at
-    if(QJsonDocument(QJsonArray({header})).toJson().size() > MaxHeaderSize)
+    if(json({header}).dump().size() > MaxHeaderSize)
         return false;
 
-    QJsonObject content;
+    json content;
 
     content["graph"] = graphAsJson(graphModel->mutableGraph(), progressFn);
 
-    QJsonObject layout;
+    json layout;
 
     layout["positions"] = nodePositionsAsJson(graphModel->mutableGraph(),
                                               graphModel->nodePositions(),
@@ -178,38 +172,34 @@ bool Saver::encode(const ProgressFn& progressFn)
     layout["paused"] = _document->layoutPauseState() == LayoutPauseState::Paused;
     content["layout"] = layout;
 
-    content["transforms"] = QJsonArray::fromStringList(_document->transforms());
-    content["visualisations"] = QJsonArray::fromStringList(_document->visualisations());
+    content["transforms"] = u::toQStringVector(_document->transforms());
+    content["visualisations"] = u::toQStringVector(_document->visualisations());
 
     graphModel->mutableGraph().setPhase(graphModel->pluginName());
     auto pluginData = _pluginInstance->save(graphModel->mutableGraph(), progressFn);
 
     progressFn(-1);
 
-    auto pluginDataJson = QJsonDocument::fromJson(pluginData);
+    auto pluginDataJson = json::parse(pluginData.begin(), pluginData.end());
 
     // If the plugin data is itself JSON, just whack it in
     // as is, but if it's not, hex encode it
-    if(!pluginDataJson.isNull() && pluginDataJson.isObject())
-        content["pluginData"] = pluginDataJson.object();
-    else if(!pluginDataJson.isNull() && pluginDataJson.isArray())
-        content["pluginData"] = pluginDataJson.array();
+    if(pluginDataJson.is_object() || pluginDataJson.is_array())
+        content["pluginData"] = pluginDataJson;
     else
         content["pluginData"] = QString(pluginData.toHex());
 
-    auto uiDataJson = QJsonDocument::fromJson(_uiData);
+    auto uiDataJson = json::parse(_uiData.begin(), _uiData.end());
 
-    if(!uiDataJson.isNull() && uiDataJson.isObject())
-        content["uiData"] = uiDataJson.object();
-    else if(!uiDataJson.isNull() && uiDataJson.isArray())
-        content["uiData"] = uiDataJson.array();
+    if(uiDataJson.is_object() || uiDataJson.is_array())
+        content["uiData"] = uiDataJson;
     else
         content["uiData"] = QString(_uiData.toHex());
 
-    jsonArray.append(content);
+    jsonArray.emplace_back(content);
 
     graphModel->mutableGraph().setPhase(QObject::tr("Compressing"));
-    return compress(QJsonDocument(jsonArray).toJson(), _fileUrl.path(), progressFn);
+    return compress(QByteArray::fromStdString(jsonArray.dump()), _fileUrl.path(), progressFn);
 }
 
 #include "thirdparty/zlib/zlib_enable_warnings.h"

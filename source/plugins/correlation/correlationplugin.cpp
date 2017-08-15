@@ -6,6 +6,8 @@
 #include "shared/utils/iterator_range.h"
 #include "shared/utils/qmlenum.h"
 
+#include "thirdparty/json/json_helper.h"
+
 CorrelationPluginInstance::CorrelationPluginInstance()
 {
     connect(this, SIGNAL(loadSuccess()), this, SLOT(onLoadSuccess()));
@@ -403,21 +405,19 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
 
 QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, const ProgressFn& progressFn) const
 {
-    QJsonObject jsonObject;
+    json jsonObject;
 
     jsonObject["numColumns"] = static_cast<int>(_numColumns);
     jsonObject["numRows"] = static_cast<int>(_numRows);
     jsonObject["userNodeData"] = _userNodeData.save(graph, progressFn);
     jsonObject["userColumnData"] =_userColumnData.save(progressFn);
-    jsonObject["dataColumnNames"] = u::jsonArrayFrom(_dataColumnNames, progressFn);
-
-    progressFn(-1);
+    jsonObject["dataColumnNames"] = jsonArrayFrom(_dataColumnNames, progressFn);
 
     graph.setPhase(QObject::tr("Data"));
-    jsonObject["data"] = u::jsonArrayFrom(_data, progressFn);
+    jsonObject["data"] = jsonArrayFrom(_data, progressFn);
 
     graph.setPhase(QObject::tr("Pearson Values"));
-    jsonObject["pearsonValues"] = u::jsonArrayFrom(*_pearsonValues);
+    jsonObject["pearsonValues"] = jsonArrayFrom(*_pearsonValues);
 
     jsonObject["minimumCorrelationValue"] = _minimumCorrelationValue;
     jsonObject["transpose"] = _transpose;
@@ -426,7 +426,7 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, const ProgressF
     jsonObject["missingDataType"] = static_cast<int>(_missingDataType);
     jsonObject["missingDataReplacementValue"] = _missingDataReplacementValue;
 
-    return QJsonDocument(jsonObject).toJson();
+    return QByteArray::fromStdString(jsonObject.dump());
 }
 
 bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IMutableGraph& graph,
@@ -435,43 +435,44 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     if(dataVersion != plugin()->dataVersion())
         return false;
 
-    QJsonDocument jsonDocument = QJsonDocument::fromJson(data);
+    json jsonObject = json::parse(data.begin(), data.end());
 
-    if(jsonDocument.isNull() || !jsonDocument.isObject())
+    if(jsonObject.is_null() || !jsonObject.is_object())
         return false;
 
-    const auto& jsonObject = jsonDocument.object();
-
-    if(!jsonObject.contains("numColumns") || !jsonObject.contains("numRows"))
+    if(!u::contains(jsonObject, "numColumns") || !u::contains(jsonObject, "numRows"))
         return false;
 
-    _numColumns = static_cast<size_t>(jsonObject["numColumns"].toInt());
-    _numRows = static_cast<size_t>(jsonObject["numRows"].toInt());
+    _numColumns = static_cast<size_t>(jsonObject["numColumns"].get<int>());
+    _numRows = static_cast<size_t>(jsonObject["numRows"].get<int>());
 
-    if(!jsonObject.contains("userNodeData") || !jsonObject.contains("userColumnData"))
+    if(!u::contains(jsonObject, "userNodeData") || !u::contains(jsonObject, "userColumnData"))
         return false;
 
-    _userNodeData.load(jsonObject["userNodeData"].toObject(), progressFn);
-    _userColumnData.load(jsonObject["userColumnData"].toObject(), progressFn);
+    if(!_userNodeData.load(jsonObject["userNodeData"], progressFn))
+        return false;
+
+    if(!_userColumnData.load(jsonObject["userColumnData"], progressFn))
+        return false;
 
     progressFn(-1);
 
-    if(!jsonObject.contains("dataColumnNames"))
+    if(!u::contains(jsonObject, "dataColumnNames"))
         return false;
 
-    for(const auto& dataColumnName : jsonObject["dataColumnNames"].toArray())
-        _dataColumnNames.emplace_back(dataColumnName.toString());
+    for(const auto& dataColumnName : jsonObject["dataColumnNames"])
+        _dataColumnNames.emplace_back(QString::fromStdString(dataColumnName));
 
     uint64_t i = 0;
 
-    if(!jsonObject.contains("data"))
+    if(!u::contains(jsonObject, "data"))
         return false;
 
     graph.setPhase(QObject::tr("Data"));
-    auto jsonData = jsonObject["data"].toArray();
+    const auto& jsonData = jsonObject["data"];
     for(const auto& value : jsonData)
     {
-        _data.emplace_back(value.toDouble());
+        _data.emplace_back(value);
         progressFn((i++ * 100) / static_cast<uint64_t>(jsonData.size()));
     }
 
@@ -490,39 +491,36 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         _dataRows.emplace_back(begin, end, nodeId, computeCost);
     }
 
-    if(!jsonObject.contains("pearsonValues"))
+    if(!u::contains(jsonObject, "pearsonValues"))
         return false;
 
-    const auto& jsonPearsonValues = jsonObject["pearsonValues"].toArray();
+    const auto& jsonPearsonValues = jsonObject["pearsonValues"];
     graph.setPhase(QObject::tr("Pearson Values"));
     i = 0;
     for(const auto& pearsonValue : jsonPearsonValues)
     {
-        EdgeId id(i);
-        auto value = pearsonValue.toDouble();
-
-        _pearsonValues->set(id, value);
+        _pearsonValues->set(i, pearsonValue);
         progressFn((i++ * 100) / jsonPearsonValues.size());
     }
 
     progressFn(-1);
 
-    if(!jsonObject.contains("minimumCorrelationValue") ||
-       !jsonObject.contains("transpose") ||
-       !jsonObject.contains("scaling") ||
-       !jsonObject.contains("normalisation") ||
-       !jsonObject.contains("missingDataType") ||
-       !jsonObject.contains("missingDataReplacementValue"))
+    if(!u::contains(jsonObject, "minimumCorrelationValue") ||
+       !u::contains(jsonObject, "transpose") ||
+       !u::contains(jsonObject, "scaling") ||
+       !u::contains(jsonObject, "normalisation") ||
+       !u::contains(jsonObject, "missingDataType") ||
+       !u::contains(jsonObject, "missingDataReplacementValue"))
     {
         return false;
     }
 
-    _minimumCorrelationValue = jsonObject["minimumCorrelationValue"].toDouble();
-    _transpose = jsonObject["transpose"].toBool();
-    _scaling = static_cast<ScalingType>(jsonObject["scaling"].toInt());
-    _normalisation = static_cast<NormaliseType>(jsonObject["normalisation"].toInt());
-    _missingDataType = static_cast<MissingDataType>(jsonObject["missingDataType"].toInt());
-    _missingDataReplacementValue = jsonObject["missingDataReplacementValue"].toDouble();
+    _minimumCorrelationValue = jsonObject["minimumCorrelationValue"];
+    _transpose = jsonObject["transpose"];
+    _scaling = static_cast<ScalingType>(jsonObject["scaling"]);
+    _normalisation = static_cast<NormaliseType>(jsonObject["normalisation"]);
+    _missingDataType = static_cast<MissingDataType>(jsonObject["missingDataType"]);
+    _missingDataReplacementValue = jsonObject["missingDataReplacementValue"];
 
     return true;
 }

@@ -104,20 +104,20 @@ void UserNodeData::exposeAsAttributes(IGraphModel& graphModel)
     }
 }
 
-QJsonObject UserNodeData::save(const IMutableGraph&, const ProgressFn& progressFn) const
+json UserNodeData::save(const IMutableGraph&, const ProgressFn& progressFn) const
 {
-    QJsonObject jsonObject = UserData::save(progressFn);
+    json jsonObject = UserData::save(progressFn);
 
-    QJsonArray jsonIndexes;
+    json jsonIndexes;
     for(auto index : *_indexes)
-        jsonIndexes.append(static_cast<qint64>(index));
+        jsonIndexes.emplace_back(index);
 
     jsonObject["indexes"] = jsonIndexes;
 
     return jsonObject;
 }
 
-bool UserNodeData::load(const QJsonObject& jsonObject, const ProgressFn& progressFn)
+bool UserNodeData::load(const json& jsonObject, const ProgressFn& progressFn)
 {
     if(!UserData::load(jsonObject, progressFn))
         return false;
@@ -125,14 +125,14 @@ bool UserNodeData::load(const QJsonObject& jsonObject, const ProgressFn& progres
     _indexes->resetElements();
     _rowToNodeIdMap.clear();
 
-    if(!jsonObject.contains("indexes") || !jsonObject["indexes"].isArray())
+    if(!u::contains(jsonObject, "indexes") || !jsonObject["indexes"].is_array())
         return false;
 
-    const auto& indexes = jsonObject["indexes"].toArray();
+    const auto& indexes = jsonObject["indexes"];
 
     NodeId nodeId(0);
     for(const auto& index : indexes)
-        setNodeIdForRowIndex(nodeId++, index.toInt());
+        setNodeIdForRowIndex(nodeId++, index);
 
     return true;
 }

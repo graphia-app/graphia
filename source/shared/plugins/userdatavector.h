@@ -2,7 +2,8 @@
 #define USERDATAVECTOR_H
 
 #include <QString>
-#include <QJsonObject>
+
+#include "thirdparty/json/json_helper.h"
 
 #include <vector>
 #include <limits>
@@ -55,8 +56,8 @@ public:
     void set(size_t index, const QString& value);
     QString get(size_t index) const;
 
-    QJsonObject save() const;
-    bool load(const QJsonObject& jsonObject);
+    json save() const;
+    bool load(const QString& name, const json& jsonObject);
 };
 
 #endif // USERDATAVECTOR_H

@@ -80,9 +80,9 @@ QString UserDataVector::get(size_t index) const
     return _values.at(index);
 }
 
-QJsonObject UserDataVector::save() const
+json UserDataVector::save() const
 {
-    QJsonObject jsonObject;
+    json jsonObject;
 
     switch(_type)
     {
@@ -93,19 +93,28 @@ QJsonObject UserDataVector::save() const
     case Type::Float:   jsonObject["type"] = "Float"; break;
     }
 
-    jsonObject["name"] = _name;
-    jsonObject["intMin"] = _intMin;
-    jsonObject["intMax"] = _intMax;
-    jsonObject["floatMin"] = _floatMin;
-    jsonObject["floatMax"] = _floatMax;
-    jsonObject["values"] = u::jsonArrayFrom(_values);
+    if(_intMin != std::numeric_limits<int>::max() && _intMax != std::numeric_limits<int>::lowest())
+    {
+        jsonObject["intMin"] = _intMin;
+        jsonObject["intMax"] = _intMax;
+    }
+
+    if(_floatMin != std::numeric_limits<double>::max() && _floatMax != std::numeric_limits<double>::lowest())
+    {
+        jsonObject["floatMin"] = _floatMin;
+        jsonObject["floatMax"] = _floatMax;
+    }
+
+    jsonObject["values"] = _values;
 
     return jsonObject;
 }
 
-bool UserDataVector::load(const QJsonObject& jsonObject)
+bool UserDataVector::load(const QString& name, const json& jsonObject)
 {
-    if(!jsonObject["type"].isString())
+    _name = name;
+
+    if(!jsonObject["type"].is_string())
         return false;
 
     if(jsonObject["type"] == "Unknown")
@@ -119,34 +128,30 @@ bool UserDataVector::load(const QJsonObject& jsonObject)
     else
         _type = Type::Unknown;
 
-    if(!jsonObject["name"].isString())
-        return false;
-
-    _name = jsonObject["name"].toString();
-
-    if(jsonObject.contains("intMin") && jsonObject.contains("intMax"))
+    if(u::contains(jsonObject, "intMin") && u::contains(jsonObject, "intMax"))
     {
-        if(!jsonObject["intMin"].isDouble() || !jsonObject["intMax"].isDouble())
+        if(!jsonObject["intMin"].is_number() || !jsonObject["intMax"].is_number())
             return false;
 
-        _intMin = jsonObject["intMin"].toInt();
-        _intMax = jsonObject["intMax"].toInt();
+        _intMin = jsonObject["intMin"];
+        _intMax = jsonObject["intMax"];
     }
 
-    if(jsonObject.contains("floatMin") && jsonObject.contains("floatMax"))
+    if(u::contains(jsonObject, "floatMin") && u::contains(jsonObject, "floatMax"))
     {
-        if(!jsonObject["floatMin"].isDouble() || !jsonObject["floatMax"].isDouble())
+        if(!jsonObject["floatMin"].is_number() || !jsonObject["floatMax"].is_number())
             return false;
 
-        _floatMin = jsonObject["floatMin"].toDouble();
-        _floatMax = jsonObject["floatMax"].toDouble();
+        _floatMin = jsonObject["floatMin"];
+        _floatMax = jsonObject["floatMax"];
     }
 
-    if(!jsonObject["values"].isArray())
+    if(!jsonObject["values"].is_array())
         return false;
 
-    for(const auto& jsonValue : jsonObject["values"].toArray())
-        _values.emplace_back(jsonValue.toString());
+    _values.clear();
+    for(const auto& value : jsonObject["values"])
+        _values.push_back(value);
 
     return true;
 }

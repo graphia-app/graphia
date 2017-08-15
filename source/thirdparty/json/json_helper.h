@@ -30,6 +30,8 @@ json jsonArrayFrom(const C& container, ProgressFn progressFn = [](int){})
         progressFn((i++) * 100 / container.size());
     }
 
+    progressFn(-1);
+
     return array;
 }
 

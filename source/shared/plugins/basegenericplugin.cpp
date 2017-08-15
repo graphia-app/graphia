@@ -4,8 +4,7 @@
 #include "shared/loading/pairwisetxtfileparser.h"
 #include "shared/loading/graphmlparser.h"
 
-#include <QJsonArray>
-#include <QJsonDocument>
+#include "thirdparty/json/json_helper.h"
 
 BaseGenericPluginInstance::BaseGenericPluginInstance()
 {
@@ -53,19 +52,19 @@ void BaseGenericPluginInstance::setEdgeWeight(EdgeId edgeId, float weight)
 
 QByteArray BaseGenericPluginInstance::save(IMutableGraph& graph, const ProgressFn& progressFn) const
 {
-    QJsonObject jsonObject;
+    json jsonObject;
 
     if(_edgeWeights != nullptr)
     {
         graph.setPhase(QObject::tr("Edge Weights"));
-        jsonObject["edgeWeights"] = u::jsonArrayFrom(*_edgeWeights, progressFn);
+        jsonObject["edgeWeights"] = jsonArrayFrom(*_edgeWeights, progressFn);
     }
 
     progressFn(-1);
 
     jsonObject["userNodeData"] = _userNodeData.save(graph, progressFn);
 
-    return QJsonDocument(jsonObject).toJson();
+    return QByteArray::fromStdString(jsonObject.dump());
 }
 
 bool BaseGenericPluginInstance::load(const QByteArray& data, int dataVersion,
@@ -74,37 +73,31 @@ bool BaseGenericPluginInstance::load(const QByteArray& data, int dataVersion,
     if(dataVersion != plugin()->dataVersion())
         return false;
 
-    QJsonDocument jsonDocument = QJsonDocument::fromJson(data);
+    json jsonObject = json::parse(data.begin(), data.end());
 
-    if(jsonDocument.isNull() || !jsonDocument.isObject())
+    if(jsonObject.is_null() || !jsonObject.is_object())
         return false;
 
-    const auto& jsonObject = jsonDocument.object();
-
-    if(jsonObject.contains("edgeWeights") && jsonObject["edgeWeights"].isArray())
+    if(u::contains(jsonObject, "edgeWeights") && jsonObject["edgeWeights"].is_array())
     {
-        const auto& jsonEdgeWeights = jsonObject["edgeWeights"].toArray();
+        const auto& jsonEdgeWeights = jsonObject["edgeWeights"];
 
         int i = 0;
 
         graph.setPhase(QObject::tr("Edge Weights"));
         for(const auto& edgeWeight : jsonEdgeWeights)
         {
-            EdgeId id(i);
-            auto weight = edgeWeight.toDouble();
-
-            setEdgeWeight(id, weight);
-
+            setEdgeWeight(i, edgeWeight);
             progressFn((i++ * 100) / jsonEdgeWeights.size());
         }
     }
 
     progressFn(-1);
 
-    if(!jsonObject.contains("userNodeData") || !jsonObject["userNodeData"].isObject())
+    if(!u::contains(jsonObject, "userNodeData") || !jsonObject["userNodeData"].is_object())
         return false;
 
-    const auto& jsonUserNodeData = jsonObject["userNodeData"].toObject();
+    const auto& jsonUserNodeData = jsonObject["userNodeData"];
 
     if(!_userNodeData.load(jsonUserNodeData, progressFn))
         return false;
