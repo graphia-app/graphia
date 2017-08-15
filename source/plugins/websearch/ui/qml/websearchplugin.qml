@@ -2,7 +2,7 @@ import QtQuick 2.7
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
-import QtWebEngine 1.3
+import QtWebEngine 1.5
 
 PluginContent
 {
@@ -31,8 +31,6 @@ PluginContent
                 "http://www.ebay.co.uk/sch/i.html?_nkw=%1"
             ]
             Layout.fillWidth: true
-
-            onCurrentTextChanged: webEngineView.updateUrl();
         }
     }
 
@@ -57,24 +55,13 @@ PluginContent
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            function updateUrl()
+            settings.focusOnNavigationEnabled: false
+
+            url:
             {
-                // Prevent focus stealing (QTBUG-52999)
-                webEngineView.enabled = false;
-
-                webEngineView.url = urlTemplate.currentText.indexOf("%1") >= 0 ?
-                    urlTemplate.currentText.arg(plugin.model.selectedNodeNames) : "";
-
-                webEngineView.enabled = true;
+                return urlTemplate.editText.indexOf("%1") >= 0 ?
+                    urlTemplate.editText.arg(plugin.model.selectedNodeNames) : "";
             }
         }
-    }
-
-
-
-    Connections
-    {
-        target: plugin.model
-        onSelectedNodeNamesChanged: webEngineView.updateUrl();
     }
 }
