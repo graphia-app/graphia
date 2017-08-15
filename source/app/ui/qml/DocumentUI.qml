@@ -511,15 +511,23 @@ Item
 
         function load(data, version)
         {
-            // It might be JSON, or it might be a plain string; try both
-            try
+            // This is a separate function because of QTBUG-62523
+            function tryParseJson(data)
             {
-                data = JSON.parse(data);
+                // It might be JSON, or it might be a plain string; try both
+                try
+                {
+                    data = JSON.parse(data);
+                }
+                catch(e)
+                {
+                    data = data.toString();
+                }
+
+                return data;
             }
-            catch(e)
-            {
-                data = data.toString();
-            }
+
+            data = tryParseJson(data);
 
             if(typeof(content.load) === "function")
                 content.load(data, version);
