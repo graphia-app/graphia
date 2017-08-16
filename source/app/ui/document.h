@@ -74,6 +74,8 @@ class Document : public QObject
 
     Q_PROPERTY(float fps READ fps NOTIFY fpsChanged)
 
+    Q_PROPERTY(bool saveRequired MEMBER _saveRequired NOTIFY saveRequiredChanged)
+
     Q_PROPERTY(int foundIndex READ foundIndex NOTIFY foundIndexChanged)
     Q_PROPERTY(int numNodesFound READ numNodesFound NOTIFY numNodesFoundChanged)
 
@@ -169,6 +171,8 @@ private:
     QQmlVariantListModel _visualisationsModel;
     QStringList _visualisations;
 
+    bool _saveRequired = false;
+
     QByteArray _uiData;
     int _uiDataVersion = -1;
 
@@ -188,6 +192,8 @@ private:
     NodeId incrementFoundIt();
     NodeId decrementFoundIt();
     void selectFoundNode(NodeId newFound);
+
+    void setSaveRequired();
 
     void initialiseLayoutSettingsModel();
 
@@ -224,6 +230,8 @@ signals:
     void canEnterOverviewModeChanged();
 
     void fpsChanged();
+
+    void saveRequiredChanged();
 
     void foundIndexChanged();
     void numNodesFoundChanged();
@@ -319,6 +327,8 @@ private slots:
 
     void onGraphChanged(const Graph*, bool);
     void onMutableGraphChanged();
+
+    void onPluginSaveRequired();
 
     void executeDeferred();
 };

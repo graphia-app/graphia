@@ -25,16 +25,21 @@ Item
     property url savedFileUrl
     property string fileType
 
-    property bool hasBeenSaved: { return Qt.resolvedUrl(savedFileUrl).length !== 0; }
+    property bool hasBeenSaved: { return Qt.resolvedUrl(savedFileUrl).length > 0; }
 
     property string title:
     {
-        if(hasBeenSaved)
-            return qmlUtils.baseFileNameForUrl(savedFileUrl);
-        else if(Qt.resolvedUrl(fileUrl).length !== 0)
-            return qmlUtils.baseFileNameForUrl(fileUrl);
+        var text = "";
 
-        return "";
+        if(hasBeenSaved)
+            text += qmlUtils.baseFileNameForUrl(savedFileUrl);
+        else if(Qt.resolvedUrl(fileUrl).length > 0)
+            text += qmlUtils.baseFileNameForUrl(fileUrl);
+
+        if(saveRequired)
+            return "*" + text;
+
+        return text;
     }
 
 
@@ -69,6 +74,8 @@ Item
 
     property int foundIndex: document.foundIndex
     property int numNodesFound: document.numNodesFound
+
+    property bool saveRequired: !hasBeenSaved || document.saveRequired || plugin.saveRequired
 
     property var selectPreviousFoundAction: find.selectPreviousAction
     property var selectNextFoundAction: find.selectNextAction
@@ -499,10 +506,33 @@ Item
                 popOutPlugin();
             else
                 popInPlugin();
+
+            plugin.resetSaveRequired();
+        }
+
+        property bool saveRequired:
+        {
+            if(loaded && content !== undefined)
+            {
+                if(typeof(content.saveRequired) === "boolean")
+                    return content.saveRequired;
+                else if(typeof(content.saveRequired) === "function")
+                    return content.saveRequired();
+            }
+
+            return false;
+        }
+
+        function resetSaveRequired()
+        {
+            if(typeof(content.saveRequired) === "boolean")
+                content.saveRequired = false;
         }
 
         function save()
         {
+            plugin.resetSaveRequired();
+
             if(typeof(content.save) === "function")
                 return content.save();
 

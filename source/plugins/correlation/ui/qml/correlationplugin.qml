@@ -9,6 +9,8 @@ import com.kajeka 1.0
 
 PluginContent
 {
+    id: root
+
     anchors.fill: parent
     minimumHeight: 320
 
@@ -19,6 +21,8 @@ PluginContent
         iconName: "list-add"
         checkable: true
         checked: true
+
+        onCheckedChanged: { root.saveRequired = true; }
     }
 
     Action
@@ -36,6 +40,8 @@ PluginContent
         iconName: "format-text-bold"
         checkable: true
         checked: true
+
+        onCheckedChanged: { root.saveRequired = true; }
     }
 
     Action
@@ -45,6 +51,8 @@ PluginContent
         iconName: "computer"
         checkable: true
         checked: true
+
+        onCheckedChanged: { root.saveRequired = true; }
     }
 
     function createMenu(index, menu)
@@ -99,6 +107,9 @@ PluginContent
                 if(rowCount > 0)
                     selection.selectAll();
             }
+
+            onSortIndicatorColumnChanged: { root.saveRequired = true; }
+            onSortIndicatorOrderChanged: { root.saveRequired = true; }
         }
 
         ColumnLayout
@@ -143,6 +154,7 @@ PluginContent
 
                 onRightClick: { contextMenu.popup(); }
             }
+
             ScrollView
             {
                 id: scrollView
@@ -184,6 +196,8 @@ PluginContent
         nameFilters: [ "PDF Document (*.pdf)", "PNG Image (*.png)", "JPEG Image (*.jpg *.jpeg)" ]
         onAccepted: { plot.savePlotImage(file, selectedNameFilter.extensions); }
     }
+
+    property bool saveRequired: false
 
     function save()
     {

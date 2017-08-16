@@ -86,6 +86,8 @@ public:
     QByteArray save(IMutableGraph&, const ProgressFn&) const { return {}; }
     bool load(const QByteArray&, int, IMutableGraph&, const ProgressFn&) { return true; }
 
+    void setSaveRequired() const { emit saveRequired(); }
+
     const IPlugin* plugin() { return _plugin; }
     IGraphModel* graphModel() { return _graphModel; }
     const IGraphModel* graphModel() const { return _graphModel; }
@@ -118,6 +120,8 @@ signals:
     void visualsChanged() const;
 
     void loadSuccess() const;
+
+    void saveRequired() const;
 };
 
 // Plugins can inherit from this to avoid having to reimplement the same createInstance member function

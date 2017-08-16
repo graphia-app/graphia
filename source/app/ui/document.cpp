@@ -153,6 +153,8 @@ void Document::toggleLayout()
     emit layoutPauseStateChanged();
 
     updateLayoutState();
+
+    setSaveRequired();
 }
 
 bool Document::canUndo() const
@@ -212,6 +214,8 @@ void Document::setTransforms(const QStringList& transforms)
     _graphTransformsModel.clear();
     for(const auto& transform : transforms)
         _graphTransformsModel.append(transform);
+
+    setSaveRequired();
 }
 
 void Document::setVisualisations(const QStringList& visualisations)
@@ -221,6 +225,8 @@ void Document::setVisualisations(const QStringList& visualisations)
     _visualisationsModel.clear();
     for(const auto& visualisation : visualisations)
         _visualisationsModel.append(visualisation);
+
+    setSaveRequired();
 }
 
 
@@ -336,6 +342,21 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     _pluginInstance->initialise(plugin, _graphModel.get(), _selectionManager.get(),
                                 &_commandManager, _graphFileParserThread.get());
 
+    // The plugin won't necessarily have the saveRequired signal or in fact be
+    // a QObject at all, hence this convoluted and defensive runtime connection
+    auto pluginInstanceQObject = dynamic_cast<const QObject*>(_pluginInstance.get());
+    if(pluginInstanceQObject != nullptr)
+    {
+        auto signature = QMetaObject::normalizedSignature("saveRequired()");
+        bool hasSignal = pluginInstanceQObject->metaObject()->indexOfSignal(signature) >= 0;
+
+        if(hasSignal)
+        {
+            connect(pluginInstanceQObject, SIGNAL(saveRequired()),
+                    this, SLOT(onPluginSaveRequired()), Qt::DirectConnection);
+        }
+    }
+
     connect(S(Preferences), &Preferences::preferenceChanged, this, &Document::onPreferenceChanged, Qt::DirectConnection);
     connect(&_graphModel->graph(), &Graph::graphChanged, [this]
     {
@@ -437,6 +458,9 @@ void Document::saveFile(const QUrl& fileUrl, const QByteArray& uiData)
 
         return success;
     });
+
+    _saveRequired = false;
+    emit saveRequiredChanged();
 }
 
 void Document::onPreferenceChanged(const QString& key, const QVariant&)
@@ -762,6 +786,15 @@ void Document::selectFoundNode(NodeId newFound)
         _graphQuickItem->moveFocusToNode(newFound);
 }
 
+void Document::setSaveRequired()
+{
+    if(!_loadComplete)
+        return;
+
+    _saveRequired = true;
+    emit saveRequiredChanged();
+}
+
 void Document::selectFirstFound()
 {
     selectFoundNode(*_foundNodeIds.begin());
@@ -872,6 +905,8 @@ void Document::onGraphChanged(const Graph*, bool)
     // If the graph changes then so do our visualisations
     _graphModel->buildVisualisations(_visualisations);
     setVisualisations(_visualisations);
+
+    setSaveRequired();
 }
 
 void Document::onMutableGraphChanged()
@@ -879,6 +914,13 @@ void Document::onMutableGraphChanged()
     // This is only called in order to force the UI to refresh the transform
     // controls, in case the attribute ranges have changed
     setTransforms(_graphTransforms);
+
+    setSaveRequired();
+}
+
+void Document::onPluginSaveRequired()
+{
+    setSaveRequired();
 }
 
 void Document::executeDeferred()

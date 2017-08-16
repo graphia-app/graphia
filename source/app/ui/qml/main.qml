@@ -30,7 +30,16 @@ ApplicationWindow
     property DocumentUI currentDocument: tabView.currentIndex < tabView.count ?
                                          tabView.getTab(tabView.currentIndex).item : null
 
-    title: (currentDocument ? currentDocument.title + qsTr(" - ") : "") + application.name
+    title:
+    {
+        var text = "";
+        if(currentDocument !== null && currentDocument.title.length > 0)
+            text += currentDocument.title + qsTr(" - ");
+
+        text += application.name;
+
+        return text;
+    }
 
     property bool _authenticatedAtLeastOnce: false
 

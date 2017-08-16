@@ -6,6 +6,8 @@ import QtWebEngine 1.5
 
 PluginContent
 {
+    id: root
+
     anchors.fill: parent
     visible: true
 
@@ -31,6 +33,9 @@ PluginContent
                 "http://www.ebay.co.uk/sch/i.html?_nkw=%1"
             ]
             Layout.fillWidth: true
+
+            onEditTextChanged: { root.saveRequired = true; }
+            onCurrentIndexChanged: { root.saveRequired = true; }
         }
     }
 
@@ -64,6 +69,8 @@ PluginContent
             }
         }
     }
+
+    property bool saveRequired: false
 
     function save()
     {

@@ -6,6 +6,8 @@ import SortFilterProxyModel 0.2
 
 PluginContent
 {
+    id: root
+
     enabled: plugin.model.nodeAttributeTableModel.columnNames.length > 0
 
     anchors.fill: parent
@@ -17,6 +19,8 @@ PluginContent
         iconName: "computer"
         checkable: true
         checked: true
+
+        onCheckedChanged: { root.saveRequired = true; }
     }
 
     toolStrip: RowLayout
@@ -39,8 +43,13 @@ PluginContent
 
             showCalculatedAttributes: toggleCalculatedAttributes.checked
             nodeAttributesModel: plugin.model.nodeAttributeTableModel
+
+            onSortIndicatorColumnChanged: { root.saveRequired = true; }
+            onSortIndicatorOrderChanged: { root.saveRequired = true; }
         }
     }
+
+    property bool saveRequired: false
 
     function save()
     {
