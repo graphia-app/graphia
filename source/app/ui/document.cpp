@@ -457,14 +457,7 @@ void Document::onLoadComplete(bool success)
     Q_ASSERT(success);
     Q_UNUSED(success);
 
-    _loadComplete = true;
-    emit commandInProgressChanged();
-    emit idleChanged();
-    emit commandVerbChanged(); // Stop showing loading message
-
-    // This causes the plugin UI to be loaded
-    emit pluginQmlPathChanged(_uiData, _uiDataVersion);
-
+    // Final tasks before load is considered complete
     setTransforms(_graphTransforms);
     setVisualisations(_visualisations);
 
@@ -475,6 +468,14 @@ void Document::onLoadComplete(bool success)
         _layoutThread->setStartingNodePositions(*_startingNodePositions);
         _startingNodePositions.reset();
     }
+
+    _loadComplete = true;
+    emit commandInProgressChanged();
+    emit idleChanged();
+    emit commandVerbChanged(); // Stop showing loading message
+
+    // This causes the plugin UI to be loaded
+    emit pluginQmlPathChanged(_uiData, _uiDataVersion);
 
     connect(_layoutThread.get(), &LayoutThread::pausedChanged, this, &Document::layoutPauseStateChanged);
     connect(_layoutThread.get(), &LayoutThread::settingChanged, [this] { _layoutRequired = true; });
