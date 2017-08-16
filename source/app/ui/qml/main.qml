@@ -493,7 +493,7 @@ ApplicationWindow
         iconName: "application-exit"
         text: qsTr("&Quit")
         shortcut: "Ctrl+Q"
-        onTriggered: Qt.quit()
+        onTriggered: { mainWindow.close(); }
     }
 
     Action
