@@ -41,10 +41,18 @@ Item
 
     property string title:
     {
-        var text = baseFileName;
+        var text;
+
+        if(hasBeenSaved)
+        {
+            // Don't display the file extension when it's a native file
+            text = qmlUtils.baseFileNameForUrlNoExtension(savedFileUrl);
+        }
+        else
+            text = baseFileName;
 
         if(baseFileName.length > 0 && saveRequired)
-            return "*" + text;
+            text = "*" + text;
 
         return text;
     }
