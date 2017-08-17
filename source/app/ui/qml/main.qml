@@ -499,7 +499,7 @@ ApplicationWindow
     {
         id: fileSaveAction
         iconName: "document-save"
-        text: qsTr("&Save...")
+        text: qsTr("&Save")
         shortcut: "Ctrl+S"
         enabled: currentDocument
         onTriggered:
@@ -515,7 +515,7 @@ ApplicationWindow
     {
         id: fileSaveAsAction
         iconName: "document-save"
-        text: qsTr("&Save As...")
+        text: qsTr("&Save As…")
         enabled: currentDocument
         onTriggered:
         {
