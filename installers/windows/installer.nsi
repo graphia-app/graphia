@@ -11,6 +11,10 @@
 
 !define EXE "${PRODUCT_NAME}.exe"
 
+!ifndef NATIVE_EXTENSION
+!define NATIVE_EXTENSION "unspecified-extension"
+!endif
+
 !ifndef VERSION
 !define VERSION "unspecified-version"
 !endif
@@ -157,6 +161,11 @@ SectionEnd
 
 ; File Associations
 SectionGroup "File associations"
+	Section "${PRODUCT_NAME} file (.${NATIVE_EXTENSION})"
+		!insertmacro APP_ASSOCIATE "${NATIVE_EXTENSION}" "${PRODUCT_NAME}" "${PRODUCT_NAME} File" \
+				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
+				"$INSTDIR\${EXE} $\"%1$\""
+	SectionEnd
 	Section "Graph Modelling Language file (.gml)"
 		!insertmacro APP_ASSOCIATE "gml" "${PRODUCT_NAME}.gml" "${PRODUCT_NAME} GML File" \
 				"$INSTDIR\${EXE},0" "Open with ${PRODUCT_NAME}" \
@@ -186,6 +195,7 @@ Section "Uninstall"
 
 	DeleteRegKey SHCTX "${UNINSTALL_KEY}"
 
+	!insertmacro APP_UNASSOCIATE "${NATIVE_EXTENSION}" "${PRODUCT_NAME}"
 	!insertmacro APP_UNASSOCIATE "gml" "${PRODUCT_NAME}.gml"
 	!insertmacro UPDATEFILEASSOC
 SectionEnd
