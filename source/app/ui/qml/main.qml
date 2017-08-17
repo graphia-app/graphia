@@ -1090,12 +1090,16 @@ ApplicationWindow
 
             ToolButton { action: fileOpenAction }
             ToolButton { action: fileOpenInTabAction }
+            ToolBarSeparator {}
             ToolButton { action: pauseLayoutAction }
+            ToolBarSeparator {}
             ToolButton { action: deleteAction }
             ToolButton { action: undoAction }
             ToolButton { action: redoAction }
+            ToolBarSeparator {}
             ToolButton { action: overviewModeAction }
             ToolButton { action: resetViewAction }
+            ToolBarSeparator {}
             ToolButton { action: optionsAction }
         }
     }
