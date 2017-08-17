@@ -565,6 +565,7 @@ ApplicationWindow
     Action
     {
         id: findAction
+        iconName: "edit-find"
         text: qsTr("&Find")
         shortcut: "Ctrl+F"
         enabled: currentDocument ? currentDocument.idle : false
@@ -1094,6 +1095,7 @@ ApplicationWindow
             ToolButton { action: pauseLayoutAction }
             ToolBarSeparator {}
             ToolButton { action: deleteAction }
+            ToolButton { action: findAction }
             ToolButton { action: undoAction }
             ToolButton { action: redoAction }
             ToolBarSeparator {}
