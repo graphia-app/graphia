@@ -143,6 +143,20 @@ ApplicationWindow
 
     onClosing:
     {
+        if(tabView.count > 0)
+        {
+            // If any tabs are open, close the first one and cancel the window close...
+            tabView.closeTab(0, function()
+            {
+                // ...then (recursively) resume closing if the user doesn't cancel
+                tabView.removeTab(0);
+                mainWindow.close();
+            });
+
+            close.accepted = false;
+            return;
+        }
+
         windowPreferences.maximised = mainWindow.maximised;
 
         if(!mainWindow.maximised)
@@ -406,12 +420,15 @@ ApplicationWindow
 
     function openFileOfTypeWithPluginAndParameters(fileUrl, fileType, pluginName, parameters, inNewTab)
     {
-        if(currentDocument != null && !inNewTab)
-            tabView.replaceTab();
-        else
-            tabView.createTab();
+        var openInCurrentTab = function()
+        {
+            tabView.openInCurrentTab(fileUrl, fileType, pluginName, parameters);
+        };
 
-        tabView.openInCurrentTab(fileUrl, fileType, pluginName, parameters);
+        if(currentDocument != null && !inNewTab)
+            tabView.replaceTab(openInCurrentTab);
+        else
+            tabView.createTab(openInCurrentTab);
     }
 
     function saveFile(fileUrl)
@@ -431,26 +448,6 @@ ApplicationWindow
         }
 
         property bool inTab: false
-    }
-
-    Component
-    {
-        // We use a Component here because for whatever reason, the Labs FileDialog only seems
-        // to allow you to set currentFile once. From looking at the source code it appears as
-        // if setting currentFile adds to the currently selected files, rather than replaces
-        // the currently selected files with a new one. Until this is fixed, we work around
-        // it by simply recreating the FileDialog everytime we need one.
-
-        id: fileSaveDialogComponent
-
-        Labs.FileDialog
-        {
-            title: qsTr("Save File...")
-            fileMode: Labs.FileDialog.SaveFile
-            defaultSuffix: selectedNameFilter.extensions[0]
-            nameFilters: [ application.name + " files (*." + application.nativeExtension + ")", "All files (*)" ]
-            onAccepted: { saveFile(file); }
-        }
     }
 
     Action
@@ -510,13 +507,7 @@ ApplicationWindow
             if(currentDocument === null)
                 return;
 
-            if(!currentDocument.hasBeenSaved)
-            {
-                fileSaveAsAction.trigger();
-                return;
-            }
-
-            saveFile(currentDocument.savedFileUrl);
+            currentDocument.saveFile();
         }
     }
 
@@ -531,18 +522,7 @@ ApplicationWindow
             if(currentDocument === null)
                 return;
 
-            var saveFile = "";
-            if(!currentDocument.hasBeenSaved)
-            {
-                saveFile = qmlUtils.replaceExtension(currentDocument.fileUrl,
-                    application.nativeExtension);
-            }
-            else
-                saveFile = currentDocument.savedFileUrl;
-
-            var fileSaveDialogObject = fileSaveDialogComponent.createObject(
-                mainWindow, {"currentFile": saveFile});
-            fileSaveDialogObject.open();
+            currentDocument.saveAsFile();
         }
     }
 
@@ -553,7 +533,7 @@ ApplicationWindow
         text: qsTr("&Close Tab")
         shortcut: "Ctrl+W"
         enabled: currentDocument
-        onTriggered: tabView.removeTab(tabView.currentIndex)
+        onTriggered: { tabView.closeTab(tabView.currentIndex); }
     }
 
     Action
@@ -566,7 +546,7 @@ ApplicationWindow
         onTriggered:
         {
             while(tabView.count > 0)
-                tabView.removeTab(0);
+                tabView.closeTab(0);
         }
     }
 
@@ -1229,17 +1209,27 @@ ApplicationWindow
                 return tab;
             }
 
-            function createTab()
+            function createTab(onCreateFunction)
             {
-                return insertTabAtIndex(tabView.count);
+                var tab = insertTabAtIndex(tabView.count);
+
+                if(onCreateFunction !== "undefined")
+                    onCreateFunction();
+
+                return tab;
             }
 
-            function replaceTab()
+            function replaceTab(onReplaceFunction)
             {
                 var oldIndex = tabView.currentIndex;
-                removeTab(tabView.currentIndex);
+                closeTab(tabView.currentIndex, function()
+                {
+                    removeTab(oldIndex);
+                    insertTabAtIndex(oldIndex);
 
-                return insertTabAtIndex(oldIndex);
+                    if(onReplaceFunction !== "undefined")
+                        onReplaceFunction();
+                });
             }
 
             function openInCurrentTab(fileUrl, fileType, pluginName, parameters)
@@ -1247,6 +1237,7 @@ ApplicationWindow
                 currentDocument.application = application;
                 if(!currentDocument.openFile(fileUrl, fileType, pluginName, parameters))
                 {
+                    // Remove the tab that was created but won't be used
                     removeTab(tabView.currentIndex);
 
                     errorOpeningFileMessageDialog.text = qmlUtils.baseFileNameForUrl(fileUrl) +
@@ -1255,6 +1246,21 @@ ApplicationWindow
                 }
                 else
                     addToRecentFiles(fileUrl);
+            }
+
+            function closeTab(index, onCloseFunction)
+            {
+                if(index < 0 || index >= count)
+                {
+                    console.log("closeTab called with out of range index: " + index);
+                    return false;
+                }
+
+                if(typeof(onCloseFunction) === "undefined")
+                    onCloseFunction = function() { removeTab(index); }
+
+                var document = tabView.getTab(index).item;
+                document.close(onCloseFunction);
             }
 
             Component

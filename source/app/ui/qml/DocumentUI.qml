@@ -5,6 +5,8 @@ import QtQuick.Window 2.2
 import QtQml.Models 2.2
 import QtQuick.Dialogs 1.2
 
+import Qt.labs.platform 1.0 as Labs
+
 import com.kajeka 1.0
 
 import "Constants.js" as Constants
@@ -27,16 +29,21 @@ Item
 
     property bool hasBeenSaved: { return Qt.resolvedUrl(savedFileUrl).length > 0; }
 
+    property string baseFileName:
+    {
+        if(hasBeenSaved)
+            return qmlUtils.baseFileNameForUrl(savedFileUrl);
+        else if(Qt.resolvedUrl(fileUrl).length > 0)
+            return qmlUtils.baseFileNameForUrl(fileUrl);
+
+        return "";
+    }
+
     property string title:
     {
-        var text = "";
+        var text = baseFileName;
 
-        if(hasBeenSaved)
-            text += qmlUtils.baseFileNameForUrl(savedFileUrl);
-        else if(Qt.resolvedUrl(fileUrl).length > 0)
-            text += qmlUtils.baseFileNameForUrl(fileUrl);
-
-        if(saveRequired)
+        if(baseFileName.length > 0 && saveRequired)
             return "*" + text;
 
         return text;
@@ -173,14 +180,104 @@ Item
         return true;
     }
 
-    function saveFile(fileUrl)
+    function saveAsNamedFile(desiredFileUrl)
     {
         var uiData = plugin.save();
 
         if(typeof(uiData) === "object")
             uiData = JSON.stringify(uiData);
 
-        document.saveFile(fileUrl, uiData);
+        document.saveFile(desiredFileUrl, uiData);
+    }
+
+    Component
+    {
+        // We use a Component here because for whatever reason, the Labs FileDialog only seems
+        // to allow you to set currentFile once. From looking at the source code it appears as
+        // if setting currentFile adds to the currently selected files, rather than replaces
+        // the currently selected files with a new one. Until this is fixed, we work around
+        // it by simply recreating the FileDialog everytime we need one.
+
+        id: fileSaveDialogComponent
+
+        Labs.FileDialog
+        {
+            title: qsTr("Save File...")
+            fileMode: Labs.FileDialog.SaveFile
+            defaultSuffix: selectedNameFilter.extensions[0]
+            nameFilters: [ application.name + " files (*." + application.nativeExtension + ")", "All files (*)" ]
+            onAccepted: { saveAsNamedFile(file); }
+
+            onRejected:
+            {
+                if(saveConfirmDialog.onCloseFunction !== null)
+                {
+                    document.saveComplete.disconnect(saveConfirmDialog.onCloseFunction);
+                    saveConfirmDialog.onCloseFunction = null;
+                }
+            }
+        }
+    }
+
+    function saveAsFile()
+    {
+        var initialFileUrl;
+
+        if(!hasBeenSaved)
+        {
+            initialFileUrl = qmlUtils.replaceExtension(fileUrl,
+                application.nativeExtension);
+        }
+        else
+            initialFileUrl = savedFileUrl;
+
+        var fileSaveDialogObject = fileSaveDialogComponent.createObject(
+            mainWindow, {"currentFile": initialFileUrl});
+        fileSaveDialogObject.open();
+    }
+
+    function saveFile()
+    {
+        if(!hasBeenSaved)
+            saveAsFile();
+        else
+            saveAsNamedFile(savedFileUrl);
+    }
+
+    MessageDialog
+    {
+        id: saveConfirmDialog
+
+        property string fileName
+        property var onCloseFunction
+
+        title: qsTr("File Changed")
+        text: qsTr("Do you want to save changes to '") + baseFileName + qsTr("'?")
+        icon: StandardIcon.Warning
+        standardButtons: StandardButton.Save | StandardButton.Discard | StandardButton.Cancel
+
+        onAccepted:
+        {
+            document.saveComplete.connect(onCloseFunction);
+            saveFile();
+        }
+
+        onDiscard:
+        {
+            onCloseFunction();
+            onCloseFunction = null;
+        }
+    }
+
+    function close(onCloseFunction)
+    {
+        if(saveRequired)
+        {
+            saveConfirmDialog.onCloseFunction = onCloseFunction;
+            saveConfirmDialog.open();
+        }
+        else
+            onCloseFunction();
     }
 
     function toggleLayout() { document.toggleLayout(); }
