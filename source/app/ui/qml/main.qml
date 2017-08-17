@@ -1157,6 +1157,7 @@ ApplicationWindow
 
             ToolButton { action: fileOpenAction }
             ToolButton { action: fileOpenInTabAction }
+            ToolButton { action: fileSaveAction }
             ToolBarSeparator {}
             ToolButton { action: pauseLayoutAction }
             ToolBarSeparator {}
