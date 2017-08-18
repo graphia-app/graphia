@@ -148,7 +148,7 @@ ApplicationWindow
             // If any tabs are open, close the first one and cancel the window close...
             tabView.closeTab(0, function(success)
             {
-                if(!success)
+                if(typeof(success) !== "undefined" && !success)
                     return;
 
                 // ...then (recursively) resume closing if the user doesn't cancel
@@ -1228,7 +1228,7 @@ ApplicationWindow
                 var oldIndex = tabView.currentIndex;
                 closeTab(tabView.currentIndex, function(success)
                 {
-                    if(!success)
+                    if(typeof(success) !== "undefined" && !success)
                         return;
 
                     removeTab(oldIndex);
@@ -1267,7 +1267,7 @@ ApplicationWindow
                 {
                     onCloseFunction = function(success)
                     {
-                        if(!success)
+                        if(typeof(success) !== "undefined" && !success)
                             return;
 
                         removeTab(index);
