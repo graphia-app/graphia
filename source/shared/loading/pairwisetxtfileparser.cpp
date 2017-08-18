@@ -228,7 +228,9 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const I
             }
         }
 
-        progress(static_cast<int>(file.tellg() * 100 / fileSize));
+        auto filePosition = file.tellg();
+        if(filePosition >= 0)
+            progress(static_cast<int>(filePosition * 100 / fileSize));
     }
 
     return true;
