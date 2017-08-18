@@ -271,7 +271,7 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
         if(!nodeId.isNull())
             graph.addNode(nodeId);
 
-        progressFn((i++ * 100) / jsonNodes.size());
+        progressFn(static_cast<int>((i++ * 100) /jsonNodes.size()));
     }
 
     progressFn(-1);
@@ -288,7 +288,7 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
         if(!edgeId.isNull() && !sourceId.isNull() && !targetId.isNull())
             graph.addEdge(edgeId, sourceId, targetId);
 
-        progressFn((i++ * 100) / jsonEdges.size());
+        progressFn(static_cast<int>((i++ * 100) / jsonEdges.size()));
     }
 
     progressFn(-1);

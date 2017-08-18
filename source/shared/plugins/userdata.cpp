@@ -95,7 +95,7 @@ json UserData::save(const ProgressFn& progressFn) const
 
 bool UserData::load(const json& jsonObject, const ProgressFn& progressFn)
 {
-    int i = 0;
+    uint64_t i = 0;
 
     if(!jsonObject["vectors"].is_array())
         return false;
@@ -120,7 +120,7 @@ bool UserData::load(const json& jsonObject, const ProgressFn& progressFn)
 
         _userDataVectors.emplace_back(std::make_pair(name, userDataVector));
 
-        progressFn((i++ * 100) / vectorsObject.size());
+        progressFn(static_cast<int>((i++ * 100) / vectorsObject.size()));
     }
 
     progressFn(-1);

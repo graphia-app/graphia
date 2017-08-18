@@ -27,7 +27,7 @@ json jsonArrayFrom(const C& container, ProgressFn progressFn = [](int){})
     for(const auto& value : container)
     {
         array.emplace_back(value);
-        progressFn((i++) * 100 / container.size());
+        progressFn(static_cast<int>((i++) * 100 / container.size()));
     }
 
     progressFn(-1);

@@ -82,13 +82,13 @@ bool BaseGenericPluginInstance::load(const QByteArray& data, int dataVersion,
     {
         const auto& jsonEdgeWeights = jsonObject["edgeWeights"];
 
-        int i = 0;
+        uint64_t i = 0;
 
         graph.setPhase(QObject::tr("Edge Weights"));
         for(const auto& edgeWeight : jsonEdgeWeights)
         {
             setEdgeWeight(i, edgeWeight);
-            progressFn((i++ * 100) / jsonEdgeWeights.size());
+            progressFn(static_cast<int>((i++ * 100) / jsonEdgeWeights.size()));
         }
     }
 

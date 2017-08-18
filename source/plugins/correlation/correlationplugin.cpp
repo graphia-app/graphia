@@ -473,7 +473,7 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     for(const auto& value : jsonData)
     {
         _data.emplace_back(value);
-        progressFn((i++ * 100) / static_cast<uint64_t>(jsonData.size()));
+        progressFn(static_cast<int>((i++ * 100) / jsonData.size()));
     }
 
     progressFn(-1);
@@ -500,7 +500,7 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     for(const auto& pearsonValue : jsonPearsonValues)
     {
         _pearsonValues->set(i, pearsonValue);
-        progressFn((i++ * 100) / jsonPearsonValues.size());
+        progressFn(static_cast<int>((i++ * 100) / jsonPearsonValues.size()));
     }
 
     progressFn(-1);
