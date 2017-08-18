@@ -199,7 +199,7 @@ bool Saver::encode(const ProgressFn& progressFn)
     jsonArray.emplace_back(content);
 
     graphModel->mutableGraph().setPhase(QObject::tr("Compressing"));
-    return compress(QByteArray::fromStdString(jsonArray.dump()), _fileUrl.path(), progressFn);
+    return compress(QByteArray::fromStdString(jsonArray.dump()), _fileUrl.toLocalFile(), progressFn);
 }
 
 #include "thirdparty/zlib/zlib_enable_warnings.h"

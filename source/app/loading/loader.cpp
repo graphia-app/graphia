@@ -157,7 +157,7 @@ static bool parseHeader(const QUrl& url, Header* header = nullptr)
 {
     QByteArray byteArray;
 
-    if(!load(url.path(), byteArray, Saver::MaxHeaderSize))
+    if(!load(url.toLocalFile(), byteArray, Saver::MaxHeaderSize))
         return false;
 
     // byteArray now has a JSON fragment that hopefully includes the header
@@ -226,7 +226,7 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
 
     QByteArray byteArray;
 
-    if(!load(url.path(), byteArray, -1, &graph, progressFn))
+    if(!load(url.toLocalFile(), byteArray, -1, &graph, progressFn))
         return false;
 
     progressFn(-1);
