@@ -214,7 +214,12 @@ Item
             fileMode: Labs.FileDialog.SaveFile
             defaultSuffix: selectedNameFilter.extensions[0]
             nameFilters: [ application.name + " files (*." + application.nativeExtension + ")", "All files (*)" ]
-            onAccepted: { saveAsNamedFile(file); }
+
+            onAccepted:
+            {
+                misc.fileSaveInitialFolder = folder.toString();
+                saveAsNamedFile(file);
+            }
 
             onRejected:
             {
@@ -239,8 +244,11 @@ Item
         else
             initialFileUrl = savedFileUrl;
 
-        var fileSaveDialogObject = fileSaveDialogComponent.createObject(
-            mainWindow, {"currentFile": initialFileUrl});
+        var fileSaveDialogObject = fileSaveDialogComponent.createObject(mainWindow,
+        {
+            "currentFile": initialFileUrl,
+            "folder": misc.fileSaveInitialFolder !== undefined ? misc.fileSaveInitialFolder: ""
+        });
         fileSaveDialogObject.open();
     }
 
@@ -585,6 +593,14 @@ Item
         property var pluginMaximised
         property alias pluginSplitSize: root.pluginSplitSize
         property alias pluginPoppedOut: root.pluginPoppedOut
+    }
+
+    Preferences
+    {
+        id: misc
+        section: "misc"
+
+        property var fileSaveInitialFolder
     }
 
     // This is only here to get at the default values of its properties
