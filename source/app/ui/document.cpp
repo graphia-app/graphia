@@ -454,7 +454,7 @@ void Document::saveFile(const QUrl& fileUrl, const QByteArray& uiData)
                 command.setProgress(progress);
             });
 
-        emit saveComplete(fileUrl, success);
+        emit saveComplete(success, fileUrl);
 
         return success;
     });

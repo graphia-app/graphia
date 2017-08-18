@@ -238,7 +238,7 @@ signals:
 
     void taskAddedToExecutor();
 
-    void saveComplete(QUrl fileUrl, bool success);
+    void saveComplete(bool success, QUrl fileUrl);
 
 public:
     // Main QML interface

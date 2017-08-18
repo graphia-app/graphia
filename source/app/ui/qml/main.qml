@@ -146,8 +146,11 @@ ApplicationWindow
         if(tabView.count > 0)
         {
             // If any tabs are open, close the first one and cancel the window close...
-            tabView.closeTab(0, function()
+            tabView.closeTab(0, function(success)
             {
+                if(!success)
+                    return;
+
                 // ...then (recursively) resume closing if the user doesn't cancel
                 tabView.removeTab(0);
                 mainWindow.close();
@@ -1223,8 +1226,11 @@ ApplicationWindow
             function replaceTab(onReplaceFunction)
             {
                 var oldIndex = tabView.currentIndex;
-                closeTab(tabView.currentIndex, function()
+                closeTab(tabView.currentIndex, function(success)
                 {
+                    if(!success)
+                        return;
+
                     removeTab(oldIndex);
                     insertTabAtIndex(oldIndex);
 
@@ -1258,7 +1264,15 @@ ApplicationWindow
                 }
 
                 if(typeof(onCloseFunction) === "undefined")
-                    onCloseFunction = function() { removeTab(index); }
+                {
+                    onCloseFunction = function(success)
+                    {
+                        if(!success)
+                            return;
+
+                        removeTab(index);
+                    }
+                }
 
                 var document = tabView.getTab(index).item;
                 document.close(onCloseFunction);
