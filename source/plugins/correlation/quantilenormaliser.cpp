@@ -1,60 +1,86 @@
 #include "quantilenormaliser.h"
 
 #include <set>
+#include <algorithm>
 
-QuantileNormaliser::QuantileNormaliser(const TabularData &data,
-                                       size_t firstDataColumn, size_t firstDataRow)
-    : _data(data), _firstDataColumn(firstDataColumn),
-      _firstDataRow(firstDataRow),
-      _numDataColumns(_data.numColumns() - _firstDataColumn),
-      _numDataRows(_data.numRows() - _firstDataRow),
-      _rowMeans(_data.numRows() - _firstDataRow),
-      _ranking(_data.numColumns() - _firstDataColumn, std::vector<double>(_data.numRows() - _firstDataRow))
+#include <QtGlobal>
+
+bool QuantileNormaliser::process(std::vector<double>& data, size_t numColumns, size_t numRows,
+                                 const std::function<bool()>& cancelled, const ProgressFn& progress) const
 {
-    std::vector<std::vector<double>> sortedColumnValues(_numDataColumns);
+    std::vector<std::vector<double>> sortedColumnValues(numColumns);
+    std::vector<size_t> ranking(data.size());
 
-    for(size_t column = 0; column < _numDataColumns; column++)
+    uint64_t j = 0;
+
+    for(size_t column = 0; column < numColumns; column++)
     {
+        if(cancelled())
+            return false;
+
         std::vector<double> columnValues;
 
         // Get column values
-        for(size_t row = _firstDataRow; row < _data.numRows(); row++)
-            columnValues.push_back(_data.valueAsQString(column + _firstDataColumn, row).toDouble());
+        for(size_t row = 0; row < numRows; row++)
+        {
+            auto index = (row * numColumns) + column;
+            columnValues.push_back(data.at(index));
+        }
 
         // Sort
         auto sortedValues = columnValues;
         std::sort(sortedValues.begin(), sortedValues.end());
         std::set<double> uniqueSortedValues(sortedValues.begin(), sortedValues.end());
 
-        for(size_t row = 0; row < _numDataRows; row++)
+        for(size_t row = 0; row < numRows; row++)
         {
+            auto index = (row * numColumns) + column;
+
             // Set the ranking
-            double dataValue = _data.valueAsQString(column + _firstDataColumn,
-                                                    row + firstDataRow).toDouble();
-            int i = 0;
+            size_t i = 0;
             for(auto uniqueValue : uniqueSortedValues)
             {
-                if (uniqueValue == dataValue)
-                    _ranking[column][row] = i;
+                if(uniqueValue == data.at(index))
+                    ranking[index] = i;
+
                 i++;
             }
+
+            progress(static_cast<int>((j++ * 100) / data.size()));
         }
+
         // Copy Result to sortedColumns
         sortedColumnValues[column] = sortedValues;
     }
 
-    // Populate row means
-    for(size_t row = 0; row < _numDataRows; row++)
-    {
-        double meanValue = 0;
-        for(size_t column = 0; column < _numDataColumns; column++)
-            meanValue += sortedColumnValues[column][row];
-        _rowMeans[row] = meanValue / static_cast<double>(_numDataColumns);
-    }
-}
+    progress(-1);
 
-double QuantileNormaliser::value(size_t column, size_t row)
-{
-    auto rank = _ranking[column - _firstDataColumn][row - _firstDataRow];
-    return _rowMeans[rank];
+    std::vector<double> rowMeans(numRows);
+
+    // Populate row means
+    for(size_t row = 0; row < numRows; row++)
+    {
+        double meanValue = 0.0;
+        for(size_t column = 0; column < numColumns; column++)
+            meanValue += sortedColumnValues[column][row];
+
+        rowMeans[row] = meanValue / static_cast<double>(numColumns);
+    }
+
+    for(size_t row = 0; row < numRows; row++)
+    {
+        if(cancelled())
+            return false;
+
+        for(size_t column = 0; column < numColumns; column++)
+        {
+            auto index = (row * numColumns) + column;
+            auto rank = ranking[index];
+            Q_ASSERT(rank < rowMeans.size());
+
+            data[index] = rowMeans[rank];
+        }
+    }
+
+    return true;
 }

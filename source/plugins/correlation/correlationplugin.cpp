@@ -46,38 +46,6 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
 
     uint64_t numDataPoints = static_cast<uint64_t>(tabularData.numColumns()) * tabularData.numRows();
 
-    TabularData scaledData = tabularData;
-
-    for(size_t column = firstDataColumn; column < tabularData.numColumns(); column++)
-    {
-        for(size_t row = firstDataRow; row < tabularData.numRows(); row++)
-        {
-            QString stringValue = tabularData.valueAsQString(column, row);
-            double value = 0.0;
-            // Replace missing values if required
-            if(_missingDataType == MissingDataType::Constant && stringValue.isEmpty())
-                value = _missingDataReplacementValue;
-            else
-                value = stringValue.toDouble();
-
-            value = scaleValue(value);
-            scaledData.setValueAt(column, row, std::to_string(value));
-        }
-    }
-    std::unique_ptr<Normaliser> normaliser = nullptr;
-
-    switch(_normalisation)
-    {
-    case NormaliseType::MinMax:
-        normaliser = std::make_unique<MinMaxNormaliser>(scaledData, firstDataColumn, firstDataRow);
-        break;
-    case NormaliseType::Quantile:
-        normaliser = std::make_unique<QuantileNormaliser>(scaledData, firstDataColumn, firstDataRow);
-        break;
-    default:
-        break;
-    }
-
     for(size_t rowIndex = 0; rowIndex < tabularData.numRows(); rowIndex++)
     {
         for(size_t columnIndex = 0; columnIndex < tabularData.numColumns(); columnIndex++)
@@ -124,20 +92,55 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
             {
                 if(dataColumnIndex >= 0)
                 {
-                    double transformedValue = scaledData.valueAsQString(columnIndex, rowIndex).toDouble();
-                    if(normaliser != nullptr)
-                        transformedValue = normaliser->value(columnIndex, rowIndex);
+                    double doubleValue = 0.0;
 
-                    setData(dataColumnIndex, dataRowIndex, transformedValue);
+                    // Replace missing values if required
+                    if(_missingDataType == MissingDataType::Constant && value.isEmpty())
+                        doubleValue = _missingDataReplacementValue;
+                    else
+                        doubleValue = value.toDouble();
 
-                    if(dataColumnIndex == static_cast<int>(_numColumns) - 1)
-                        finishDataRow(dataRowIndex);
+                    // Scale
+                    doubleValue = scaleValue(doubleValue);
+
+                    setData(dataColumnIndex, dataRowIndex, doubleValue);
                 }
                 else
                     _userNodeData.setValue(dataRowIndex, tabularData.valueAsQString(columnIndex, 0), value);
             }
         }
     }
+
+    progressFn(-1);
+
+    return true;
+}
+
+bool CorrelationPluginInstance::normalise(const std::function<bool()>& cancelled, const ProgressFn& progressFn)
+{
+    switch(_normalisation)
+    {
+    case NormaliseType::MinMax:
+    {
+        MinMaxNormaliser normaliser;
+        return normaliser.process(_data, _numColumns, _numRows, cancelled, progressFn);
+    }
+    case NormaliseType::Quantile:
+    {
+        QuantileNormaliser normaliser;
+        return normaliser.process(_data, _numColumns, _numRows, cancelled, progressFn);
+    }
+    default:
+        break;
+    }
+
+    return true;
+}
+
+void CorrelationPluginInstance::finishDataRowsAndCreateAttributes()
+{
+    for(size_t row = 0; row < _numRows; row++)
+        finishDataRow(row);
 
     graphModel()->createAttribute(tr("Mean Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._mean; })
@@ -172,8 +175,6 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
                                "Standard Deviation</a> is a measure of the spread of the values associated "
                                "with the node. It is defined as √∑(𝑥-𝜇)², where 𝑥 is the value "
                                "and 𝜇 is the mean."));
-
-    return true;
 }
 
 std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pearsonCorrelation(

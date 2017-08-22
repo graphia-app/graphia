@@ -170,6 +170,9 @@ public:
     void setDimensions(size_t numColumns, size_t numRows);
     bool loadUserData(const TabularData& tabularData, size_t firstDataColumn, size_t firstDataRow,
                       const std::function<bool()>& cancelled, const ProgressFn& progressFn);
+    bool requiresNormalisation() const { return _normalisation != NormaliseType::None; }
+    bool normalise(const std::function<bool()>& cancelled, const ProgressFn& progressFn);
+    void finishDataRowsAndCreateAttributes();
 
     std::vector<std::tuple<NodeId, NodeId, double>> pearsonCorrelation(
             double minimumThreshold, const std::function<bool()>& cancelled,

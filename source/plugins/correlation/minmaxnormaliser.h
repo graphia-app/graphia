@@ -3,25 +3,13 @@
 
 #include "normaliser.h"
 
-#include "shared/loading/tabulardata.h"
-#include "shared/utils/utils.h"
-
 #include <vector>
-
-#include <QString>
 
 class MinMaxNormaliser : public Normaliser
 {
-private:
-    const TabularData& _data;
-    std::vector<double> _minColumn;
-    std::vector<double> _maxColumn;
-    size_t _firstDataColumn;
-    size_t _firstDataRow;
 public:
-    MinMaxNormaliser(const TabularData& data, size_t firstDataColumn,
-                     size_t firstDataRow);
-    double value(size_t column, size_t row);
+    bool process(std::vector<double>& data, size_t numColumns, size_t numRows,
+                 const std::function<bool()>& cancelled, const ProgressFn& progress) const;
 };
 
 #endif // MINMAXNORMALISER_H

@@ -120,18 +120,31 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const P
 
     _plugin->setDimensions(dataRect.width(), dataRect.height());
 
+    auto cancelFn = [this]{ return cancelled(); };
+
     graph.setPhase(QObject::tr("Attributes"));
-    if(!_plugin->loadUserData(*tabularData, dataRect.left(), dataRect.top(), [this]{ return cancelled(); }, progressFn))
+    if(!_plugin->loadUserData(*tabularData, dataRect.left(), dataRect.top(), cancelFn, progressFn))
         return false;
 
+    if(_plugin->requiresNormalisation())
+    {
+        graph.setPhase(QObject::tr("Normalisation"));
+        if(!_plugin->normalise(cancelFn, progressFn))
+            return false;
+    }
+
+    progressFn(-1);
+
+    _plugin->finishDataRowsAndCreateAttributes();
+
     graph.setPhase(QObject::tr("Pearson Correlation"));
-    auto edges = _plugin->pearsonCorrelation(_plugin->minimumCorrelation(), [this]{ return cancelled(); }, progressFn);
+    auto edges = _plugin->pearsonCorrelation(_plugin->minimumCorrelation(), cancelFn, progressFn);
 
     if(cancelled())
         return false;
 
     graph.setPhase(QObject::tr("Building Graph"));
-    if(!_plugin->createEdges(edges, [this]{ return cancelled(); }, progressFn))
+    if(!_plugin->createEdges(edges, cancelFn, progressFn))
         return false;
 
     graph.clearPhase();

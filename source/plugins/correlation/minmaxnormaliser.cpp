@@ -1,27 +1,56 @@
 #include "minmaxnormaliser.h"
 
-MinMaxNormaliser::MinMaxNormaliser(const TabularData &data, size_t firstDataColumn, size_t firstDataRow)
-    : _data(data), _firstDataColumn(firstDataColumn), _firstDataRow(firstDataRow)
+#include <limits>
+#include <algorithm>
+
+bool MinMaxNormaliser::process(std::vector<double>& data, size_t numColumns, size_t numRows,
+                               const std::function<bool()>& cancelled, const ProgressFn& progress) const
 {
-    _minColumn.resize(data.numColumns() - _firstDataColumn, std::numeric_limits<double>::max());
-    _maxColumn.resize(data.numColumns() - _firstDataColumn, std::numeric_limits<double>::lowest());
-    for(size_t column = _firstDataColumn; column < _data.numColumns(); column++)
+    std::vector<double> minColumn;
+    std::vector<double> maxColumn;
+
+    minColumn.resize(numColumns, std::numeric_limits<double>::max());
+    maxColumn.resize(numColumns, std::numeric_limits<double>::lowest());
+
+    uint64_t i = 0;
+
+    for(size_t row = 0; row < numRows; row++)
     {
-        size_t index = column - _firstDataColumn;
-        for(size_t row = _firstDataRow; row < _data.numRows(); row++)
+        if(cancelled())
+            return false;
+
+        for(size_t column = 0; column < numColumns; column++)
         {
-            _minColumn[index] = std::min(_minColumn[index], data.valueAsQString(column, row).toDouble());
-            _maxColumn[index] = std::max(_maxColumn[index], data.valueAsQString(column, row).toDouble());
+            auto index = (row * numColumns) + column;
+
+            minColumn[column] = std::min(minColumn[column], data.at(index));
+            maxColumn[column] = std::max(maxColumn[column], data.at(index));
+
+            progress(static_cast<int>((i++ * 50) / data.size()));
         }
     }
-}
 
-double MinMaxNormaliser::value(size_t column, size_t row)
-{
-    double value = _data.valueAsQString(column, row).toDouble();
-    size_t index = column - _firstDataColumn;
-    if(_maxColumn[index] - _minColumn[index] != 0)
-        return (value - _minColumn[index]) / (_maxColumn[index] - _minColumn[index]);
-    else
-        return 0;
+    for(size_t row = 0; row < numRows; row++)
+    {
+        if(cancelled())
+            return false;
+
+        for(size_t column = 0; column < numColumns; column++)
+        {
+            auto index = (row * numColumns) + column;
+            auto& value = data[index];
+
+            auto range = maxColumn[column] - minColumn[column];
+            if(range > 0.0)
+                value = (value - minColumn[column]) / range;
+            else
+                value = 0.0;
+
+            progress(static_cast<int>((i++ * 50) / data.size()));
+        }
+    }
+
+    progress(-1);
+
+    return true;
 }
