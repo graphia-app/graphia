@@ -86,8 +86,13 @@ void MutableGraph::reserveNodeId(NodeId nodeId)
     if(nodeId < nextNodeId())
         return;
 
+    auto unusedNodeId = nextNodeId();
+
     Graph::reserveNodeId(nodeId);
     _n.resize(nextNodeId());
+
+    while(unusedNodeId < nodeId)
+        _unusedNodeIds.push_back(unusedNodeId++);
 }
 
 NodeId MutableGraph::addNode(NodeId nodeId)
@@ -214,8 +219,13 @@ void MutableGraph::reserveEdgeId(EdgeId edgeId)
     if(edgeId < nextEdgeId())
         return;
 
+    auto unusedEdgeId = nextEdgeId();
+
     Graph::reserveEdgeId(edgeId);
     _e.resize(nextEdgeId());
+
+    while(unusedEdgeId < edgeId)
+        _unusedEdgeIds.push_back(unusedEdgeId++);
 }
 
 NodeId MutableGraph::mergeNodes(NodeId nodeIdA, NodeId nodeIdB)
@@ -395,12 +405,12 @@ MutableGraph& MutableGraph::clone(const MutableGraph& other)
     _n             = other._n;
     _nodeIds       = other._nodeIds;
     _unusedNodeIds = other._unusedNodeIds;
-    reserveNodeId(other.largestNodeId());
+    Graph::reserveNodeId(other.largestNodeId());
 
     _e             = other._e;
     _edgeIds       = other._edgeIds;
     _unusedEdgeIds = other._unusedEdgeIds;
-    reserveEdgeId(other.largestEdgeId());
+    Graph::reserveEdgeId(other.largestEdgeId());
 
     // Reset collection pointers to collections in this
     for(auto& node : _n._nodes)
