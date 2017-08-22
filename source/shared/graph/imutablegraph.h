@@ -13,6 +13,8 @@ public:
 
     virtual void clear() = 0;
 
+    virtual void reserveNodeId(NodeId nodeId) = 0;
+
     virtual NodeId addNode() = 0;
     virtual NodeId addNode(NodeId nodeId) = 0;
     virtual NodeId addNode(const INode& node) = 0;
@@ -42,6 +44,8 @@ public:
 
         endTransaction();
     }
+
+    virtual void reserveEdgeId(EdgeId edgeId) = 0;
 
     virtual EdgeId addEdge(NodeId sourceId, NodeId targetId) = 0;
     virtual EdgeId addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId) = 0;
