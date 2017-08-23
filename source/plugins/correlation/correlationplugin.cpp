@@ -36,11 +36,11 @@ void CorrelationPluginInstance::initialise(const IPlugin* plugin, IGraphModel* g
 bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, size_t firstDataColumn, size_t firstDataRow,
                                              const std::function<bool()>& cancelled, const ProgressFn& progressFn)
 {
-    Q_ASSERT(firstDataColumn > 0);
-    Q_ASSERT(firstDataRow > 0);
-
     if(firstDataColumn == 0 || firstDataRow == 0)
+    {
+        qDebug() << "tabularData has no row or column names!";
         return false;
+    }
 
     progressFn(-1);
 
