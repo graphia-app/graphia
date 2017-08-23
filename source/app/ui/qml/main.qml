@@ -1073,7 +1073,7 @@ ApplicationWindow
     Connections
     {
         target: currentDocument
-        onPluginLoaded: updatePluginMenus();
+        onLoadComplete: updatePluginMenus();
         onPluginPoppedOutChanged: updatePluginMenus();
     }
 
