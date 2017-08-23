@@ -115,6 +115,22 @@ namespace u
         return contains(container, value, 0);
     }
 
+    template<typename C, typename T> bool containsAnyOf(const C& container, std::initializer_list<T>&& values)
+    {
+        return std::any_of(values.begin(), values.end(), [&](const auto& value)
+        {
+           return contains(container, value, 0);
+        });
+    }
+
+    template<typename C, typename T> bool containsAllOf(const C& container, std::initializer_list<T>&& values)
+    {
+        return std::all_of(values.begin(), values.end(), [&](const auto& value)
+        {
+           return contains(container, value, 0);
+        });
+    }
+
     template<typename C, typename T> bool containsKey(const C& container, const T& key)
     {
         return contains(make_key_wrapper(container), key, 0);
