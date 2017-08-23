@@ -265,7 +265,7 @@ Item
         id: saveConfirmDialog
 
         property string fileName
-        property var onCloseFunction
+        property var onSaveConfirmedFunction
 
         title: qsTr("File Changed")
         text: qsTr("Do you want to save changes to '") + baseFileName + qsTr("'?")
@@ -274,26 +274,33 @@ Item
 
         onAccepted:
         {
-            document.saveComplete.connect(onCloseFunction);
+            var proxyFn = function()
+            {
+                document.saveComplete.disconnect(proxyFn);
+                onSaveConfirmedFunction();
+                onSaveConfirmedFunction = null;
+            };
+
+            document.saveComplete.connect(proxyFn);
             saveFile();
         }
 
         onDiscard:
         {
-            onCloseFunction();
-            onCloseFunction = null;
+            onSaveConfirmedFunction();
+            onSaveConfirmedFunction = null;
         }
     }
 
-    function close(onCloseFunction)
+    function confirmSave(onSaveConfirmedFunction)
     {
         if(saveRequired)
         {
-            saveConfirmDialog.onCloseFunction = onCloseFunction;
+            saveConfirmDialog.onSaveConfirmedFunction = onSaveConfirmedFunction;
             saveConfirmDialog.open();
         }
         else
-            onCloseFunction();
+            onSaveConfirmedFunction();
     }
 
     function toggleLayout() { document.toggleLayout(); }

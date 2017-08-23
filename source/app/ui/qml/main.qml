@@ -347,18 +347,26 @@ ApplicationWindow
 
     function openFileOfType(fileUrl, fileType, inNewTab)
     {
-        var pluginNames = application.pluginNames(fileType);
-
-        if(pluginNames.length > 1)
+        var onSaveConfirmed = function()
         {
-            pluginChooserDialog.fileUrl = fileUrl
-            pluginChooserDialog.fileType = fileType;
-            pluginChooserDialog.pluginNames = pluginNames;
-            pluginChooserDialog.inNewTab = inNewTab;
-            pluginChooserDialog.open();
-        }
+            var pluginNames = application.pluginNames(fileType);
+
+            if(pluginNames.length > 1)
+            {
+                pluginChooserDialog.fileUrl = fileUrl
+                pluginChooserDialog.fileType = fileType;
+                pluginChooserDialog.pluginNames = pluginNames;
+                pluginChooserDialog.inNewTab = inNewTab;
+                pluginChooserDialog.open();
+            }
+            else
+                openFileOfTypeWithPlugin(fileUrl, fileType, pluginNames[0], inNewTab);
+        };
+
+        if(currentDocument !== null && !inNewTab)
+            currentDocument.confirmSave(onSaveConfirmed);
         else
-            openFileOfTypeWithPlugin(fileUrl, fileType, pluginNames[0], inNewTab)
+            onSaveConfirmed();
     }
 
     PluginChooserDialog
@@ -417,7 +425,10 @@ ApplicationWindow
             element['inNewTab'] === undefined ||
             element['show'] === undefined ||
             element['accepted'] === undefined)
+        {
             return false;
+        }
+
         return true;
     }
 
@@ -1274,8 +1285,7 @@ ApplicationWindow
                     }
                 }
 
-                var document = tabView.getTab(index).item;
-                document.close(onCloseFunction);
+                onCloseFunction();
             }
 
             Component
