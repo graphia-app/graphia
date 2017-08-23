@@ -1228,7 +1228,7 @@ ApplicationWindow
             {
                 var tab = insertTabAtIndex(tabView.count);
 
-                if(onCreateFunction !== "undefined")
+                if(typeof(onCreateFunction) !== "undefined")
                     onCreateFunction();
 
                 return tab;
