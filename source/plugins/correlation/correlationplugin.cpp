@@ -505,12 +505,8 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
     progressFn(-1);
 
-    if(!u::contains(jsonObject, "minimumCorrelationValue") ||
-       !u::contains(jsonObject, "transpose") ||
-       !u::contains(jsonObject, "scaling") ||
-       !u::contains(jsonObject, "normalisation") ||
-       !u::contains(jsonObject, "missingDataType") ||
-       !u::contains(jsonObject, "missingDataReplacementValue"))
+    if(!u::containsAllOf(jsonObject, {"minimumCorrelationValue", "transpose", "scaling",
+        "normalisation", "missingDataType", "missingDataReplacementValue"}))
     {
         return false;
     }
