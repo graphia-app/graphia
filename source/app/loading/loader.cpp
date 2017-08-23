@@ -375,7 +375,7 @@ void Loader::setPluginInstance(IPluginInstance* pluginInstance)
 
 const ExactNodePositions* Loader::nodePositions() const
 {
-    return _nodePositions != nullptr ? _nodePositions.get() : nullptr;
+    return _nodePositions.get();
 }
 
 QString Loader::pluginNameFor(const QUrl& url)
