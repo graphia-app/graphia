@@ -92,5 +92,5 @@ void ParserThread::run()
     if(result)
         emit success(_parser.get());
 
-    emit complete(result);
+    emit complete(_url, result);
 }

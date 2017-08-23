@@ -207,6 +207,8 @@ signals:
     void pluginNameChanged();
     void pluginQmlPathChanged(const QByteArray& uiData, int uiDataVersion);
 
+    void loadComplete(const QUrl& url, bool success);
+
     void titleChanged();
     void contrastingColorChanged();
     void statusChanged();
@@ -320,7 +322,7 @@ public:
 
 private slots:
     void onLoadProgress(int percentage);
-    void onLoadComplete(bool success);
+    void onLoadComplete(const QUrl& url, bool success);
 
     void onSelectionChanged(const SelectionManager* selectionManager);
     void onFoundNodeIdsChanged(const SearchManager* searchManager);

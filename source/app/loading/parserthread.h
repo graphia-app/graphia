@@ -33,7 +33,7 @@ private:
 signals:
     void progress(int percentage) const;
     void success(IParser*) const;
-    void complete(bool success) const;
+    void complete(const QUrl& url, bool success) const;
 };
 
 #endif // PARSERTHREAD_H

@@ -427,6 +427,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     }
 
     connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::onLoadComplete);
+    connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::loadComplete);
     _graphFileParserThread->start(std::move(parser));
 
     return true;
@@ -476,10 +477,14 @@ void Document::onLoadProgress(int percentage)
     emit commandVerbChanged();
 }
 
-void Document::onLoadComplete(bool success)
+void Document::onLoadComplete(const QUrl&, bool success)
 {
-    Q_ASSERT(success);
-    Q_UNUSED(success);
+    if(!success)
+    {
+        // Give up now because the whole Document object will be
+        // destroyed soon anyway
+        return;
+    }
 
     // Final tasks before load is considered complete
     setTransforms(_graphTransforms);

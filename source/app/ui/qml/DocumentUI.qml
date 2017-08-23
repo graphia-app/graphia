@@ -901,7 +901,7 @@ Item
                     plugin.load(uiData, uiDataVersion);
 
                 plugin.loaded = true;
-                loadComplete();
+                pluginLoadComplete();
             }
         }
 
@@ -918,7 +918,8 @@ Item
         }
     }
 
-    signal loadComplete()
+    signal loadComplete(url fileUrl, bool success)
+    signal pluginLoadComplete()
 
     property var comandProgressSamples: []
     property int commandSecondsRemaining
@@ -986,6 +987,11 @@ Item
                 commandTimer.stop();
                 commandComplete();
             }
+        }
+
+        onLoadComplete:
+        {
+            root.loadComplete(url, success);
         }
     }
 }

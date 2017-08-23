@@ -187,6 +187,12 @@ ApplicationWindow
         id: errorOpeningFileMessageDialog
         icon: StandardIcon.Critical
         title: qsTr("Error Opening File")
+
+        onAccepted:
+        {
+            // Even if a file failed to load, there may be more to process
+            processOnePendingArgument();
+        }
     }
 
     OptionsDialog
@@ -1153,7 +1159,7 @@ ApplicationWindow
     Connections
     {
         target: currentDocument
-        onLoadComplete: updatePluginMenus();
+        onPluginLoadComplete: updatePluginMenus();
         onPluginPoppedOutChanged: updatePluginMenus();
     }
 
@@ -1250,20 +1256,23 @@ ApplicationWindow
                 });
             }
 
+            // This is called if the file can't be opened immediately, or
+            // if the load has been attempted but it failed later
+            function onLoadFailure(fileUrl)
+            {
+                // Remove the tab that was created but won't be used
+                removeTab(tabView.currentIndex);
+
+                errorOpeningFileMessageDialog.text = qmlUtils.baseFileNameForUrl(fileUrl) +
+                        qsTr(" could not be opened due to an error.");
+                errorOpeningFileMessageDialog.open();
+            }
+
             function openInCurrentTab(fileUrl, fileType, pluginName, parameters)
             {
                 currentDocument.application = application;
                 if(!currentDocument.openFile(fileUrl, fileType, pluginName, parameters))
-                {
-                    // Remove the tab that was created but won't be used
-                    removeTab(tabView.currentIndex);
-
-                    errorOpeningFileMessageDialog.text = qmlUtils.baseFileNameForUrl(fileUrl) +
-                            qsTr(" could not be opened due to an error.");
-                    errorOpeningFileMessageDialog.open();
-                }
-                else
-                    addToRecentFiles(fileUrl);
+                    onLoadFailure(fileUrl);
             }
 
             function closeTab(index, onCloseFunction)
@@ -1296,10 +1305,15 @@ ApplicationWindow
                 {
                     id: document
 
-                    Component.onCompleted:
+                    onLoadComplete:
                     {
-                        // Continue processing arguments after the document is loaded
-                        document.loadComplete.connect(processOnePendingArgument);
+                        if(success)
+                        {
+                            addToRecentFiles(fileUrl);
+                            processOnePendingArgument();
+                        }
+                        else
+                            tabView.onLoadFailure(fileUrl);
                     }
                 }
             }
