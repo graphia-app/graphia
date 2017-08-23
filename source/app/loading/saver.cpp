@@ -180,7 +180,7 @@ bool Saver::encode(const ProgressFn& progressFn)
 
     progressFn(-1);
 
-    auto pluginDataJson = json::parse(pluginData.begin(), pluginData.end());
+    auto pluginDataJson = json::parse(pluginData.begin(), pluginData.end(), nullptr, false);
 
     // If the plugin data is itself JSON, just whack it in
     // as is, but if it's not, hex encode it
@@ -189,7 +189,7 @@ bool Saver::encode(const ProgressFn& progressFn)
     else
         content["pluginData"] = QString(pluginData.toHex());
 
-    auto uiDataJson = json::parse(_uiData.begin(), _uiData.end());
+    auto uiDataJson = json::parse(_uiData.begin(), _uiData.end(), nullptr, false);
 
     if(uiDataJson.is_object() || uiDataJson.is_array())
         content["ui"] = uiDataJson;

@@ -435,7 +435,7 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     if(dataVersion != plugin()->dataVersion())
         return false;
 
-    json jsonObject = json::parse(data.begin(), data.end());
+    json jsonObject = json::parse(data.begin(), data.end(), nullptr, false);
 
     if(jsonObject.is_null() || !jsonObject.is_object())
         return false;

@@ -194,7 +194,7 @@ static bool parseHeader(const QUrl& url, Header* header = nullptr)
 
     QString headerString = fragment.left(position);
     auto headerByteArray = headerString.toUtf8();
-    json jsonHeader = json::parse(headerByteArray.begin(), headerByteArray.end());
+    json jsonHeader = json::parse(headerByteArray.begin(), headerByteArray.end(), nullptr, false);
 
     if(jsonHeader.is_null() || !jsonHeader.is_object())
         return false;
@@ -231,7 +231,7 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
 
     progressFn(-1);
 
-    auto jsonArray = json::parse(byteArray.begin(), byteArray.end());
+    auto jsonArray = json::parse(byteArray.begin(), byteArray.end(), nullptr, false);
 
     if(jsonArray.is_null() || !jsonArray.is_array())
         return false;
