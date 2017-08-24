@@ -381,7 +381,8 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
     _graphOverviewScene->initialiseFromGraph(graph);
     _graphComponentScene->initialiseFromGraph(graph);
 
-    if(graph->componentIds().size() == 1)
+    // If the graph is a single component or empty, use component mode by default
+    if(graph->numComponents() <= 1)
         switchToComponentMode(false);
     else
         switchToOverviewMode(false);
