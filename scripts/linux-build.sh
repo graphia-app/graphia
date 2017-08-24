@@ -2,6 +2,7 @@
 
 . scripts/defaults.sh
 
+NUM_CORES=$(nproc --all)
 QMAKE_SPEC=$(qmake -query QMAKE_SPEC)
 BEAR=$(which bear)
 BUILD_DIR="build/${QMAKE_SPEC}"
@@ -18,9 +19,9 @@ mkdir -p ${BUILD_DIR}
   if [ ! -z "${BEAR}" ] && [ ${QMAKE_SPEC} = "linux-clang" ]
   then
     rm -f compile_command.json
-    bear make -O -j2 || exit $?
+    bear make -O -j${NUM_CORES} || exit $?
   else
-    make -O -j2 || exit $?
+    make -O -j${NUM_CORES} || exit $?
   fi
 
   # This just removes the intermediate build products
@@ -32,7 +33,7 @@ mkdir -p ${BUILD_DIR}
   mkdir -p breakpad-build
   cd breakpad-build
   ../source/thirdparty/breakpad/configure
-  make -O -j2
+  make -O -j${NUM_CORES}
 )
 
 breakpad-build/src/tools/linux/dump_syms/dump_syms \
