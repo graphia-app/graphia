@@ -389,6 +389,42 @@ Item
                         }
                     }
                 }
+
+                ToolButton
+                {
+                    property bool _visible: !graph.inOverviewMode && graph.numComponents > 1
+
+                    Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
+                    opacity: _visible ? 1.0 : 0.0
+                    visible: opacity > 0.0
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.margins: 20
+
+                    iconName: "go-left"
+                    tooltip: qsTr("Goto Previous Component");
+
+                    onClicked: { gotoPrevComponent(); }
+                }
+
+                ToolButton
+                {
+                    property bool _visible: !graph.inOverviewMode && graph.numComponents > 1
+
+                    Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
+                    opacity: _visible ? 1.0 : 0.0
+                    visible: opacity > 0.0
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.right: parent.right
+                    anchors.margins: 20
+
+                    iconName: "go-right"
+                    tooltip: qsTr("Goto Next Component");
+
+                    onClicked: { gotoNextComponent(); }
+                }
             }
 
             Column
