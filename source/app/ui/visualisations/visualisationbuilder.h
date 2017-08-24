@@ -110,17 +110,17 @@ public:
         for(int c = 0; c < NumChannels; c++)
             _applications[c].emplace_back(index, *_graph);
 
+        if(_elementIds->empty())
+        {
+            visualisationInfo.addAlert(AlertType::Error, QObject::tr("No Elements To Visualise"));
+            return;
+        }
+
         switch(attribute.valueType())
         {
         case ValueType::Int:
         case ValueType::Float:
         {
-            if(_elementIds->empty())
-            {
-                visualisationInfo.addAlert(AlertType::Error, QObject::tr("No Elements To Visualise"));
-                return;
-            }
-
             double min, max;
             std::tie(min, max) = attribute.findRangeforElements(*_elementIds,
             [this](const Attribute& _attribute, ElementId elementId)
