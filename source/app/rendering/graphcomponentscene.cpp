@@ -111,7 +111,17 @@ void GraphComponentScene::onShow()
 void GraphComponentScene::finishComponentTransition(ComponentId componentId, bool doTransition)
 {
     auto transitionType = Transition::Type::InversePower;
-    auto transitionStyle = componentId < _componentId ? TransitionStyle::SlideRight : TransitionStyle::SlideLeft;
+    TransitionStyle transitionStyle = TransitionStyle::None;
+
+    const auto& componentIds = _graphRenderer->graphModel()->graph().componentIds();
+
+    // If we're wrapping around the range of componentIds, we need to slide in the opposite direction
+    if(_componentId == componentIds.front() && componentId == componentIds.back())
+        transitionStyle = TransitionStyle::SlideRight;
+    else if(_componentId == componentIds.back() && componentId == componentIds.front())
+        transitionStyle = TransitionStyle::SlideLeft;
+    else
+        transitionStyle = componentId < _componentId ? TransitionStyle::SlideRight : TransitionStyle::SlideLeft;
 
     if(componentId.isNull())
         _componentId = _defaultComponentId;
