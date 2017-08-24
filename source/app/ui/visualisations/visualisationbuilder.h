@@ -115,6 +115,12 @@ public:
         case ValueType::Int:
         case ValueType::Float:
         {
+            if(_elementIds->empty())
+            {
+                visualisationInfo.addAlert(AlertType::Error, QObject::tr("No Elements To Visualise"));
+                return;
+            }
+
             double min, max;
             std::tie(min, max) = attribute.findRangeforElements(*_elementIds,
             [this](const Attribute& _attribute, ElementId elementId)
