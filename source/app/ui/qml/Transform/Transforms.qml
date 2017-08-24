@@ -28,7 +28,7 @@ Item
         document: root.document
     }
 
-    RowLayout
+    ColumnLayout
     {
         id: layout
         spacing: 0
@@ -68,56 +68,51 @@ Item
             }
         }
 
-        ColumnLayout
+        RowLayout
         {
-            Layout.alignment: Qt.AlignTop
+            Layout.alignment: Qt.AlignRight
+            spacing: 0
 
-            RowLayout
+            Text
             {
-                spacing: 0
+                id: transformSummaryText
 
-                ButtonMenu
+                visible: panel.hidden && list.count > 0
+                text:
                 {
-                    enabled: list.count > 0
-                    visible: panel.hidden || list.count === 0
-
-                    text:
-                    {
-                        return Utils.pluralise(list.count,
-                                               qsTr("transform"),
-                                               qsTr("transforms"));
-                    }
-
-                    textColor: enabled ? enabledTextColor : disabledTextColor
-                    hoverColor: heldColor
-
-                    onClicked: { panel.show(); }
+                    return Utils.pluralise(list.count,
+                                           qsTr("transform"),
+                                           qsTr("transforms"));
                 }
+            }
 
-                ToolButton
-                {
-                    iconName: "list-add"
-                    tooltip: qsTr("Add Transform")
-                    onClicked: { createTransformDialog.show(); }
-                }
+            ButtonMenu
+            {
+                visible: !transformSummaryText.visible
+                text: qsTr("Add Transform")
+
+                textColor: enabled ? enabledTextColor : disabledTextColor
+                hoverColor: heldColor
+
+                onClicked: { createTransformDialog.show(); }
             }
 
             ToolButton
             {
-                Layout.alignment: Qt.AlignRight
-
-                // enabled may be changed externally, so have an
-                // internal visibility property that we control
-                property bool _visible: !panel.hidden && list.count > 0
-
-                enabled: _visible
-                iconName: "go-top"
-                tooltip: qsTr("Hide")
+                visible: list.count > 0
+                iconName: panel.hidden ? "go-bottom" : "go-top"
+                tooltip: panel.hidden ? qsTr("Show") : qsTr("Hide")
 
                 Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
-                opacity: _visible ? 1.0 : 0.0
+                opacity: visible ? 1.0 : 0.0
 
-                onClicked: { panel.hide(); }
+                onClicked:
+                {
+                    if(panel.hidden)
+                        panel.show();
+                    else
+                        panel.hide();
+                }
             }
         }
     }
