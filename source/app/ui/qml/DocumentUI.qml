@@ -78,6 +78,7 @@ Item
     property bool canResetView: document.canResetView
     property bool canEnterOverviewMode: document.canEnterOverviewMode
 
+    property string pluginName: document.pluginName
     property bool hasPluginUI: document.pluginQmlPath
     property bool pluginPoppedOut: false
 
