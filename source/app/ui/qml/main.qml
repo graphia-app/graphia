@@ -531,7 +531,7 @@ ApplicationWindow
     Action
     {
         id: fileSaveAsAction
-        iconName: "document-save"
+        iconName: "document-save-as"
         text: qsTr("&Save As…")
         enabled: currentDocument
         onTriggered:
