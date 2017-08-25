@@ -32,6 +32,7 @@ void GraphQuickItem::initialise(GraphModel* graphModel,
     setFlag(Flag::ItemHasContents, true);
 
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphQuickItem::graphChanged);
+    connect(&_graphModel->graph(), &Graph::graphChanged, [this] { updateVisibleComponentIndex(); });
     emit graphChanged();
 
     // Force an initial update; this will usually occur anyway for other reasons,
@@ -113,6 +114,7 @@ void GraphQuickItem::setFocusedComponentId(ComponentId componentId)
     if(_focusedComponentId != componentId)
     {
         _focusedComponentId = componentId;
+        updateVisibleComponentIndex();
         emit focusedComponentIdChanged();
     }
 }
@@ -322,4 +324,13 @@ int GraphQuickItem::numComponents() const
         return _graphModel->graph().numComponents();
 
     return -1;
+}
+
+void GraphQuickItem::updateVisibleComponentIndex()
+{
+    const auto& componentIds = _graphModel->graph().componentIds();
+    _visibleComponentIndex = std::distance(componentIds.begin(),
+        std::find(componentIds.begin(), componentIds.end(), _focusedComponentId));
+
+    emit visibleComponentIndexChanged();
 }

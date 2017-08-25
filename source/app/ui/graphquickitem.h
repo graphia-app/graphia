@@ -35,6 +35,8 @@ class GraphQuickItem : public QQuickFramebufferObject
     Q_PROPERTY(int numVisibleEdges READ numVisibleEdges NOTIFY graphChanged)
     Q_PROPERTY(int numComponents READ numComponents NOTIFY graphChanged)
 
+    Q_PROPERTY(int visibleComponentIndex MEMBER _visibleComponentIndex NOTIFY visibleComponentIndexChanged)
+
     Q_PROPERTY(float fps READ fps NOTIFY fpsChanged)
 
 public:
@@ -106,6 +108,7 @@ private:
     bool _canEnterOverviewMode = false;
     bool _inOverviewMode = true;
     ComponentId _focusedComponentId;
+    int _visibleComponentIndex = -1;
 
     std::queue<std::unique_ptr<QEvent>> _eventQueue;
 
@@ -123,6 +126,8 @@ private:
     int numVisibleEdges() const;
     int numComponents() const;
 
+    void updateVisibleComponentIndex();
+
 public slots:
     void onLayoutChanged();
     void onFPSChanged(float fps);
@@ -136,6 +141,7 @@ signals:
     void canEnterOverviewModeChanged() const;
     void inOverviewModeChanged() const;
     void focusedComponentIdChanged() const;
+    void visibleComponentIndexChanged() const;
 
     void commandWillExecute() const;
     void commandCompleted() const;

@@ -425,6 +425,23 @@ Item
 
                     onClicked: { gotoNextComponent(); }
                 }
+
+                Text
+                {
+                    visible: !graph.inOverviewMode && graph.numComponents > 1
+
+                    text:
+                    {
+                        return qsTr("Component ") + graph.visibleComponentIndex +
+                            qsTr(" of ") + graph.numComponents;
+                    }
+
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.bottom
+                    anchors.margins: 20
+
+                    color: root.contrastingColor
+                }
             }
 
             Column
