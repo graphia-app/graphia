@@ -630,13 +630,7 @@ void Document::selectAllVisible()
         auto component = _graphModel->graph().componentById(componentId);
         auto nodeIds = component->nodeIds();
 
-        _commandManager.executeOnce({tr("Select All Visible"), tr("Selecting All Visible")},
-            [this, nodeIds = std::move(nodeIds)](Command& command)
-            {
-                bool nodesSelected = _selectionManager->selectNodes(nodeIds);
-                command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
-                return nodesSelected;
-            });
+        _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
     }
     else
         selectAll();
