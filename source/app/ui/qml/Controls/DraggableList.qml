@@ -27,6 +27,8 @@ Column
             anchors.left: alignment === Qt.AlignLeft ? parent.left : undefined
             anchors.right: alignment === Qt.AlignRight ? parent.right : undefined
 
+            acceptedButtons: Qt.AllButtons
+
             drag.target: held ? content : undefined
             drag.axis: Drag.YAxis
             drag.minimumY: 0

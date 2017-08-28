@@ -24,6 +24,13 @@ Item
     MouseArea
     {
         anchors.fill: row
+
+        onClicked:
+        {
+            if(mouse.button === Qt.RightButton)
+                hamburger.menu.popup();
+        }
+
         onDoubleClicked: { root.toggle(); }
 
         // Pass presses on to parent (DraggableList)
@@ -60,6 +67,8 @@ Item
 
         Hamburger
         {
+            id: hamburger
+
             width: 20
             height: 15
             color: disabledTextColor
