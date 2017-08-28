@@ -11,6 +11,9 @@ NodeId Collision::nodeClosestToLine(const std::vector<NodeId>& nodeIds, const QV
 
     for(NodeId nodeId : nodeIds)
     {
+        if(!_includeNotFound && _graphModel->nodeVisual(nodeId).state().test(VisualFlags::NotFound))
+            continue;
+
         const QVector3D position = _graphModel->nodePositions().getScaledAndSmoothed(nodeId) + _offset;
 
         if(plane.sideForPoint(position) != Plane::Side::Front)
@@ -47,6 +50,9 @@ void Collision::nodesInsideCylinder(const QVector3D &point, const QVector3D &dir
     const std::vector<NodeId>& nodeIds = component->nodeIds();
     for(NodeId nodeId : nodeIds)
     {
+        if(!_includeNotFound && _graphModel->nodeVisual(nodeId).state().test(VisualFlags::NotFound))
+            continue;
+
         const QVector3D position = _graphModel->nodePositions().getScaledAndSmoothed(nodeId) + _offset;
 
         if(plane.sideForPoint(position) != Plane::Side::Front)
@@ -75,6 +81,9 @@ NodeId Collision::nearestNodeInsideCylinder(const QVector3D& point, const QVecto
 
     for(NodeId nodeId : nodeIds)
     {
+        if(!_includeNotFound && _graphModel->nodeVisual(nodeId).state().test(VisualFlags::NotFound))
+            continue;
+
         float distance = _graphModel->nodePositions().getScaledAndSmoothed(nodeId).distanceToPoint(point);
 
         if(distance < minimumDistance)

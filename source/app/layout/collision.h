@@ -16,12 +16,14 @@ private:
     const GraphModel* _graphModel = nullptr;
     ComponentId _componentId;
     QVector3D _offset;
+    bool _includeNotFound = false;
 
 public:
-    Collision(const GraphModel& graphModel, ComponentId componentId) :
+    Collision(const GraphModel& graphModel, ComponentId componentId, bool includeNotFound = false) :
         _graphModel(&graphModel),
         _componentId(componentId),
-        _offset(0.0f, 0.0f, 0.0f)
+        _offset(0.0f, 0.0f, 0.0f),
+        _includeNotFound(includeNotFound)
     {}
 
     void setOffset(QVector3D offset) { _offset = offset; }

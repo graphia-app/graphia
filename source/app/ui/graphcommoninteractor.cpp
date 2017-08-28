@@ -33,6 +33,9 @@ NodeIdSet nodeIdsInsideFrustum(const GraphModel& graphModel,
     auto component = graphModel.graph().componentById(componentId);
     for(NodeId nodeId : component->nodeIds())
     {
+        if(graphModel.nodeVisual(nodeId).state().test(VisualFlags::NotFound))
+            continue;
+
         const QVector3D nodePosition = graphModel.nodePositions().getScaledAndSmoothed(nodeId);
         if(frustum.containsPoint(nodePosition))
             selection.insert(nodeId);
@@ -53,6 +56,9 @@ static NodeId nodeIdInsideFrustumNearestPoint(const GraphModel& graphModel,
 
     for(auto nodeId : nodeIds)
     {
+        if(graphModel.nodeVisual(nodeId).state().test(VisualFlags::NotFound))
+            continue;
+
         float distanceToCentre = Ray(frustum.centreLine()).distanceTo(point);
         float distanceToPoint = graphModel.nodePositions().getScaledAndSmoothed(nodeId).distanceToPoint(point);
         float distance = distanceToCentre + distanceToPoint;
@@ -234,12 +240,14 @@ void GraphCommonInteractor::leftMouseUp()
         }
         else
         {
+            bool multiSelect = modifiers() & Qt::ShiftModifier;
+
             if(!_clickedNodeId.isNull())
             {
                 _commandManager->executeOnce(makeSelectNodeCommand(_selectionManager, _clickedNodeId,
-                                                                   !(modifiers() & Qt::ShiftModifier)));
+                                                                   !multiSelect));
             }
-            else if(!_selectionManager->selectedNodes().empty())
+            else if(!_selectionManager->selectedNodes().empty() && !multiSelect)
             {
                 _commandManager->executeOnce({tr("Select None"), tr("Selecting None")},
                     [this](Command&) { return _selectionManager->clearNodeSelection(); });
