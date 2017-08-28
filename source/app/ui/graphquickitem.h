@@ -113,10 +113,6 @@ private:
 
     template<typename T> void enqueueEvent(const T* event)
     {
-        // Any mouse events cause us to get focus, not so much because we
-        // need focus ourselves, but we want other controls to lose focus
-        setFocus(true);
-
         _eventQueue.emplace(std::make_unique<T>(*event));
         update();
     }

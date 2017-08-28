@@ -258,7 +258,15 @@ void GraphQuickItem::onScreenshotComplete(QImage screenshot, QString path)
     });
 }
 
-void GraphQuickItem::mousePressEvent(QMouseEvent* e)        { enqueueEvent(e); }
+void GraphQuickItem::mousePressEvent(QMouseEvent* e)
+{
+    // Any mouse press events cause us to get focus, not so much because we
+    // need focus ourselves, but we want other controls to lose focus
+    setFocus(true);
+
+    enqueueEvent(e);
+}
+
 void GraphQuickItem::mouseReleaseEvent(QMouseEvent* e)      { enqueueEvent(e); }
 void GraphQuickItem::mouseMoveEvent(QMouseEvent* e)         { enqueueEvent(e); }
 void GraphQuickItem::mouseDoubleClickEvent(QMouseEvent* e)  { enqueueEvent(e); }
