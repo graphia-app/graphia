@@ -330,7 +330,7 @@ void GraphQuickItem::updateVisibleComponentIndex()
 {
     const auto& componentIds = _graphModel->graph().componentIds();
     _visibleComponentIndex = std::distance(componentIds.begin(),
-        std::find(componentIds.begin(), componentIds.end(), _focusedComponentId));
+        std::find(componentIds.begin(), componentIds.end(), _focusedComponentId)) + 1;
 
     emit visibleComponentIndexChanged();
 }
