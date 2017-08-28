@@ -648,6 +648,23 @@ void Document::selectNone()
     }
 }
 
+void Document::selectNeighbours()
+{
+    if(!idle() || _selectionManager == nullptr)
+        return;
+
+    auto selectedNodeIds = _selectionManager->selectedNodes();
+    NodeIdSet nodeIds = selectedNodeIds;
+
+    for(auto nodeId : selectedNodeIds)
+    {
+        auto neighbours = _graphModel->graph().neighboursOf(nodeId);
+        nodeIds.insert(neighbours.begin(), neighbours.end());
+    }
+
+    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
+}
+
 void Document::invertSelection()
 {
     if(!idle() || _selectionManager == nullptr)
@@ -659,7 +676,6 @@ void Document::invertSelection()
             _selectionManager->invertNodeSelection();
             command.setPastParticiple(_selectionManager->numNodesSelectedAsString());
         });
-
 }
 
 void Document::undo()

@@ -309,6 +309,7 @@ Item
     function selectAllVisible() { document.selectAllVisible(); }
     function selectNone() { document.selectNone(); }
     function invertSelection() { document.invertSelection(); }
+    function selectNeighbours() { document.selectNeighbours(); }
     function undo() { document.undo(); }
     function redo() { document.redo(); }
     function deleteSelectedNodes() { document.deleteSelectedNodes(); }

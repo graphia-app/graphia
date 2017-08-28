@@ -55,6 +55,8 @@ public:
     virtual const IGraphComponent* componentById(ComponentId componentId) const = 0;
     virtual bool containsComponentId(ComponentId componentId) const = 0;
 
+    virtual std::vector<NodeId> neighboursOf(NodeId nodeId) const = 0;
+
     virtual void setPhase(const QString& phase) const = 0;
     virtual void clearPhase() const = 0;
 };

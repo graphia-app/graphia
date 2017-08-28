@@ -129,6 +129,7 @@ public:
     bool clearNodeSelection();
     void invertNodeSelection();
 
+    int numNodesSelected() const { return static_cast<int>(_selectedNodeIds.size()); }
     QString numNodesSelectedAsString() const;
 
     void suppressSignals();

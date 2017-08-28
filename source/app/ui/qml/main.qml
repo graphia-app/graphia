@@ -635,6 +635,15 @@ ApplicationWindow
 
     Action
     {
+        id: selectNeighboursAction
+        text: qsTr("Select Neigh&bours")
+        shortcut: "Ctrl+B"
+        enabled: currentDocument ? currentDocument.idle : false
+        onTriggered: currentDocument && currentDocument.selectNeighbours()
+    }
+
+    Action
+    {
         id: invertSelectionAction
         text: qsTr("&Invert Selection")
         shortcut: "Ctrl+I"
@@ -977,6 +986,7 @@ ApplicationWindow
             MenuItem { action: selectAllVisibleAction }
             MenuItem { action: selectNoneAction }
             MenuItem { action: invertSelectionAction }
+            MenuItem { action: selectNeighboursAction }
             MenuSeparator {}
             MenuItem { action: findAction }
             MenuItem

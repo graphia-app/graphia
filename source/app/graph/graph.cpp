@@ -297,6 +297,21 @@ ComponentId Graph::componentIdOfLargestComponent() const
     return componentIdOfLargestComponent(componentIds());
 }
 
+std::vector<NodeId> Graph::neighboursOf(NodeId nodeId) const
+{
+    std::vector<NodeId> nodeIds;
+
+    const auto& node = nodeById(nodeId);
+
+    for(auto edgeId : node.edgeIds())
+    {
+        const auto& edge = edgeById(edgeId);
+        nodeIds.emplace_back(edge.oppositeId(nodeId));
+    }
+
+    return nodeIds;
+}
+
 void Graph::setPhase(const QString& phase) const
 {
     std::unique_lock<std::recursive_mutex> lock(_phaseMutex);

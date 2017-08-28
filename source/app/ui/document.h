@@ -258,6 +258,7 @@ public:
     Q_INVOKABLE void selectAll();
     Q_INVOKABLE void selectAllVisible();
     Q_INVOKABLE void selectNone();
+    Q_INVOKABLE void selectNeighbours();
     Q_INVOKABLE void invertSelection();
 
     Q_INVOKABLE void undo();

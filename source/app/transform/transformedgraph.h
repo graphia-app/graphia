@@ -49,6 +49,8 @@ public:
 
     EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const { return _target.edgeIdsForNodeId(nodeId); }
 
+    std::vector<NodeId> neighboursOf(NodeId nodeId) const { return _target.neighboursOf(nodeId); }
+
     void setPhase(const QString& phase) const { _source->setPhase(phase); }
     void clearPhase() const { _source->clearPhase(); }
     QString phase() const { return _source->phase(); }

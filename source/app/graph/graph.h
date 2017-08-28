@@ -187,6 +187,8 @@ public:
         return largestComponentId;
     }
 
+    std::vector<NodeId> neighboursOf(NodeId nodeId) const;
+
     // Call this to ensure the Graph is in a consistent state
     // Usually it is called automatically and is generally only
     // necessary when accessing the Graph before changes have
