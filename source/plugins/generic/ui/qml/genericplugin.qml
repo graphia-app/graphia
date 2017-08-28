@@ -14,6 +14,14 @@ PluginContent
 
     Action
     {
+        id: resizeColumnsToContentsAction
+        text: qsTr("&Resize Columns To Contents")
+        iconName: "format-justify-fill"
+        onTriggered: nodeAttributeTableView.resizeColumnsToContentsBugWorkaround();
+    }
+
+    Action
+    {
         id: toggleCalculatedAttributes
         text: qsTr("&Show Calculated Attributes")
         iconName: "computer"
@@ -26,6 +34,7 @@ PluginContent
     toolStrip: RowLayout
     {
         anchors.fill: parent
+        ToolButton { action: resizeColumnsToContentsAction }
         ToolButton { action: toggleCalculatedAttributes }
         Item { Layout.fillWidth: true }
     }
