@@ -426,22 +426,34 @@ Item
                     onClicked: { gotoNextComponent(); }
                 }
 
-                Text
+                RowLayout
                 {
                     visible: !graph.inOverviewMode && graph.numComponents > 1
-
-                    text:
-                    {
-                        return qsTr("Component ") + graph.visibleComponentIndex +
-                            qsTr(" of ") + graph.numComponents;
-                    }
 
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
                     anchors.margins: 20
 
-                    color: root.contrastingColor
+                    ToolButton
+                    {
+                        iconName: "undo"
+                        text: qsTr("Overview Mode")
+
+                        onClicked: { switchToOverviewMode(); }
+                    }
+
+                    Text
+                    {
+                        text:
+                        {
+                            return qsTr("Component ") + graph.visibleComponentIndex +
+                                qsTr(" of ") + graph.numComponents;
+                        }
+
+                        color: root.contrastingColor
+                    }
                 }
+
             }
 
             Column

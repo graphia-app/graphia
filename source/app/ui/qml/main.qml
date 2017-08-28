@@ -1187,9 +1187,7 @@ ApplicationWindow
             ToolButton { action: undoAction }
             ToolButton { action: redoAction }
             ToolBarSeparator {}
-            ToolButton { action: overviewModeAction }
             ToolButton { action: resetViewAction }
-            ToolBarSeparator {}
             ToolButton { action: optionsAction }
         }
     }
