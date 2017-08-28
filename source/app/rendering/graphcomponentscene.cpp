@@ -115,13 +115,16 @@ void GraphComponentScene::finishComponentTransition(ComponentId componentId, boo
 
     const auto& componentIds = _graphRenderer->graphModel()->graph().componentIds();
 
-    // If we're wrapping around the range of componentIds, we need to slide in the opposite direction
-    if(_componentId == componentIds.front() && componentId == componentIds.back())
-        transitionStyle = TransitionStyle::SlideRight;
-    else if(_componentId == componentIds.back() && componentId == componentIds.front())
-        transitionStyle = TransitionStyle::SlideLeft;
-    else
-        transitionStyle = componentId < _componentId ? TransitionStyle::SlideRight : TransitionStyle::SlideLeft;
+    if(!componentIds.empty())
+    {
+        // If we're wrapping around the range of componentIds, we need to slide in the opposite direction
+        if(_componentId == componentIds.front() && componentId == componentIds.back())
+            transitionStyle = TransitionStyle::SlideRight;
+        else if(_componentId == componentIds.back() && componentId == componentIds.front())
+            transitionStyle = TransitionStyle::SlideLeft;
+        else
+            transitionStyle = componentId < _componentId ? TransitionStyle::SlideRight : TransitionStyle::SlideLeft;
+    }
 
     if(componentId.isNull())
         _componentId = _defaultComponentId;
