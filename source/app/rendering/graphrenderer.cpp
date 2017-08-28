@@ -1509,7 +1509,7 @@ void GraphRenderer::renderScene()
 
 void GraphRenderer::render2D()
 {
-    auto& gpuGraphData = _gpuGraphData[0];
+    auto& gpuGraphData = _gpuGraphData.at(gpuGraphDataRenderOrder().front());
 
     if(gpuGraphData.unused())
         return;
