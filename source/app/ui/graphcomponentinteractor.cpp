@@ -37,6 +37,8 @@ GraphComponentInteractor::GraphComponentInteractor(GraphModel* graphModel,
 
 void GraphComponentInteractor::rightMouseDown()
 {
+    GraphCommonInteractor::rightMouseDown();
+
     if(clickedRenderer() != nullptr && !nearClickNodeId().isNull())
     {
         clickedRenderer()->disableFocusTracking();
@@ -46,6 +48,8 @@ void GraphComponentInteractor::rightMouseDown()
 
 void GraphComponentInteractor::rightMouseUp()
 {
+    GraphCommonInteractor::rightMouseUp();
+
     if(clickedRenderer() == nullptr)
         return;
 
@@ -68,6 +72,8 @@ void GraphComponentInteractor::rightMouseUp()
 
 void GraphComponentInteractor::rightDrag()
 {
+    GraphCommonInteractor::rightDrag();
+
     if(clickedRenderer() != nullptr && !nearClickNodeId().isNull())
         _scene->pan(nearClickNodeId(), localPrevCursorPosition(), localCursorPosition());
 }

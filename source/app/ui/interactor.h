@@ -1,6 +1,8 @@
 #ifndef INTERACTOR_H
 #define INTERACTOR_H
 
+#include "graph/qmlelementid.h"
+
 #include <QObject>
 
 class QMouseEvent;
@@ -32,6 +34,8 @@ public:
 signals:
     void userInteractionStarted() const;
     void userInteractionFinished() const;
+
+    void clicked(int button, QmlNodeId nodeId) const;
 };
 
 #endif // INTERACTOR_H

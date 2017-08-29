@@ -85,6 +85,8 @@ GraphCommonInteractor::GraphCommonInteractor(GraphModel* graphModel,
 {
     connect(this, &Interactor::userInteractionStarted, graphRenderer, &GraphRenderer::userInteractionStarted);
     connect(this, &Interactor::userInteractionFinished, graphRenderer, &GraphRenderer::userInteractionFinished);
+
+    connect(this, &Interactor::clicked, graphRenderer, &GraphRenderer::clicked);
 }
 
 void GraphCommonInteractor::mouseDown(const QPoint& position)
@@ -254,6 +256,7 @@ void GraphCommonInteractor::leftMouseUp()
             }
         }
 
+        emit clicked(Qt::LeftButton, _clickedNodeId);
         _selecting = false;
     }
 }
@@ -351,6 +354,25 @@ void GraphCommonInteractor::leftDrag()
                                                    clickedRenderer());
         camera->rotate(rotation);
     }
+}
+
+void GraphCommonInteractor::rightMouseDown()
+{
+    _selecting = true;
+}
+
+void GraphCommonInteractor::rightMouseUp()
+{
+    if(_selecting)
+    {
+        emit clicked(Qt::RightButton, _clickedNodeId);
+        _selecting = false;
+    }
+}
+
+void GraphCommonInteractor::rightDrag()
+{
+    _selecting = false;
 }
 
 QPoint GraphCommonInteractor::cursorPosition() const

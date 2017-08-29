@@ -2,6 +2,7 @@
 #define GRAPHQUICKITEM_H
 
 #include "graph/graph.h"
+#include "graph/qmlelementid.h"
 #include "rendering/compute/gpucomputethread.h"
 
 #include <QQuickFramebufferObject>
@@ -155,6 +156,8 @@ signals:
     void graphChanged() const;
 
     void fpsChanged() const;
+
+    void clicked(int button, QmlNodeId nodeId) const;
 };
 
 #endif // GRAPHQUICKITEM_H

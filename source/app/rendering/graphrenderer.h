@@ -12,6 +12,7 @@
 #include "primitives/rectangle.h"
 
 #include "shared/graph/grapharray.h"
+#include "graph/qmlelementid.h"
 
 #include "shared/utils/movablepointer.h"
 #include "shared/utils/deferredexecutor.h"
@@ -431,6 +432,8 @@ signals:
     void screenshotComplete(QImage screenshot, QString path) const;
 
     void fpsChanged(float fps) const;
+
+    void clicked(int button, QmlNodeId nodeId) const;
 };
 
 #endif // GRAPHRENDERER_H

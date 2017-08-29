@@ -196,6 +196,8 @@ QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const
     connect(graphRenderer, &GraphRenderer::userInteractionFinished, this, &GraphQuickItem::onUserInteractionFinished);
     connect(graphRenderer, &GraphRenderer::taskAddedToExecutor, this, &GraphQuickItem::update);
 
+    connect(graphRenderer, &GraphRenderer::clicked, this, &GraphQuickItem::clicked);
+
     connect(graphRenderer, &GraphRenderer::fpsChanged, this, &GraphQuickItem::onFPSChanged);
 
     return graphRenderer;

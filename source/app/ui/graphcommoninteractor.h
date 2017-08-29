@@ -67,13 +67,18 @@ private:
 
     void nativeGestureEvent(QNativeGestureEvent* e);
 
+    virtual GraphComponentRenderer* rendererAtPosition(const QPoint& position) const = 0;
+    virtual QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) const = 0;
+    virtual NodeIdSet selectionForRect(const QRectF& rect) const = 0;
+
+protected:
     virtual void leftMouseDown();
     virtual void leftMouseUp();
     virtual void leftDrag();
 
-    virtual void rightMouseDown() {}
-    virtual void rightMouseUp() {}
-    virtual void rightDrag() {}
+    virtual void rightMouseDown();
+    virtual void rightMouseUp();
+    virtual void rightDrag();
 
     virtual void leftDoubleClick() {}
     virtual void rightDoubleClick() {}
@@ -81,11 +86,6 @@ private:
     virtual void wheelMove(float, float, float) {}
     virtual void trackpadZoomGesture(float, float, float) {}
 
-    virtual GraphComponentRenderer* rendererAtPosition(const QPoint& position) const = 0;
-    virtual QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) const = 0;
-    virtual NodeIdSet selectionForRect(const QRectF& rect) const = 0;
-
-protected:
     QPoint cursorPosition() const;
     QPoint prevCursorPosition() const;
     QPoint localCursorPosition() const;

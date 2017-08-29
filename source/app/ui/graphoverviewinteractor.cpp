@@ -24,16 +24,22 @@ GraphOverviewInteractor::GraphOverviewInteractor(GraphModel* graphModel,
 
 void GraphOverviewInteractor::rightMouseDown()
 {
+    GraphCommonInteractor::rightMouseDown();
+
     _panStartPosition = cursorPosition();
 }
 
 void GraphOverviewInteractor::rightMouseUp()
 {
+    GraphCommonInteractor::rightMouseUp();
+
     emit userInteractionFinished();
 }
 
 void GraphOverviewInteractor::rightDrag()
 {
+    GraphCommonInteractor::rightDrag();
+
     if(!mouseMoving())
         emit userInteractionStarted();
 
