@@ -41,6 +41,7 @@ HEADERS += \
     graph/graph.h \
     graph/graphmodel.h \
     graph/mutablegraph.h \
+    graph/qmlelementid.h \
     layout/barneshuttree.h \
     layout/centreinglayout.h \
     layout/circlepackcomponentlayout.h \
