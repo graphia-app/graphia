@@ -562,6 +562,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::onSelectionChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged,
             _graphModel.get(), &GraphModel::onSelectionChanged, Qt::DirectConnection);
+    connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::numNodesSelectedChanged);
 
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, this, &Document::onFoundNodeIdsChanged);
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged,
@@ -807,6 +808,14 @@ void Document::setSaveRequired()
 
     _saveRequired = true;
     emit saveRequiredChanged();
+}
+
+int Document::numNodesSelected() const
+{
+    if(_selectionManager != nullptr)
+        return _selectionManager->numNodesSelected();
+
+    return 0;
 }
 
 void Document::selectFirstFound()

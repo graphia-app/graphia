@@ -81,6 +81,8 @@ class Document : public QObject, public IDocument
     Q_PROPERTY(int foundIndex READ foundIndex NOTIFY foundIndexChanged)
     Q_PROPERTY(int numNodesFound READ numNodesFound NOTIFY numNodesFoundChanged)
 
+    Q_PROPERTY(int numNodesSelected READ numNodesSelected NOTIFY numNodesSelectedChanged)
+
 public:
     explicit Document(QObject* parent = nullptr);
     ~Document();
@@ -203,6 +205,8 @@ private:
 
     void setSaveRequired();
 
+    int numNodesSelected() const;
+
     void initialiseLayoutSettingsModel();
 
     QVariantMap transformParameter(const QString& transformName, const QString& parameterName) const;
@@ -245,6 +249,8 @@ signals:
 
     void foundIndexChanged();
     void numNodesFoundChanged();
+
+    void numNodesSelectedChanged();
 
     void taskAddedToExecutor();
 

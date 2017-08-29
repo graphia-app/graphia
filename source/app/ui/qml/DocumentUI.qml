@@ -91,10 +91,12 @@ Item
     property int foundIndex: document.foundIndex
     property int numNodesFound: document.numNodesFound
 
-    property bool saveRequired: !hasBeenSaved || document.saveRequired || plugin.saveRequired
-
     property var selectPreviousFoundAction: find.selectPreviousAction
     property var selectNextFoundAction: find.selectNextAction
+
+    property bool saveRequired: !hasBeenSaved || document.saveRequired || plugin.saveRequired
+
+    property int numNodesSelected: document.numNodesSelected
 
     property color contrastingColor:
     {
