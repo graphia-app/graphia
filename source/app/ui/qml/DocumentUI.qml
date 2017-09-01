@@ -410,7 +410,7 @@ Item
                     MenuSeparator { visible: delete1.visible || delete2.visible }
 
                     MenuItem { visible: numNodesSelected < graph.numNodes; action: selectAllAction }
-                    MenuItem { visible: numNodesSelected < graph.numNodes; action: selectAllVisibleAction }
+                    MenuItem { visible: numNodesSelected < graph.numNodes && !graph.inOverviewMode; action: selectAllVisibleAction }
                     MenuItem { visible: numNodesSelected > 0; action: selectNoneAction }
                     MenuItem { visible: selectNeighbourOfNodeAction.enabled; action: selectNeighbourOfNodeAction }
                     MenuItem { visible: numNodesSelected > 0; action: selectNeighboursAction }
