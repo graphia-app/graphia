@@ -478,69 +478,69 @@ Item
                         }
                     }
                 }
+            }
+
+            ToolButton
+            {
+                property bool _visible: !graph.inOverviewMode && graph.numComponents > 1
+
+                Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
+                opacity: _visible ? 1.0 : 0.0
+                visible: opacity > 0.0
+
+                anchors.verticalCenter: graph.verticalCenter
+                anchors.left: graph.left
+                anchors.margins: 20
+
+                iconName: "go-left"
+                tooltip: qsTr("Goto Previous Component");
+
+                onClicked: { gotoPrevComponent(); }
+            }
+
+            ToolButton
+            {
+                property bool _visible: !graph.inOverviewMode && graph.numComponents > 1
+
+                Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
+                opacity: _visible ? 1.0 : 0.0
+                visible: opacity > 0.0
+
+                anchors.verticalCenter: graph.verticalCenter
+                anchors.right: graph.right
+                anchors.margins: 20
+
+                iconName: "go-right"
+                tooltip: qsTr("Goto Next Component");
+
+                onClicked: { gotoNextComponent(); }
+            }
+
+            RowLayout
+            {
+                visible: !graph.inOverviewMode && graph.numComponents > 1
+
+                anchors.horizontalCenter: graph.horizontalCenter
+                anchors.bottom: graph.bottom
+                anchors.margins: 20
 
                 ToolButton
                 {
-                    property bool _visible: !graph.inOverviewMode && graph.numComponents > 1
+                    iconName: "edit-undo"
+                    text: qsTr("Overview Mode")
 
-                    Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
-                    opacity: _visible ? 1.0 : 0.0
-                    visible: opacity > 0.0
-
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.left: parent.left
-                    anchors.margins: 20
-
-                    iconName: "go-left"
-                    tooltip: qsTr("Goto Previous Component");
-
-                    onClicked: { gotoPrevComponent(); }
+                    onClicked: { switchToOverviewMode(); }
                 }
 
-                ToolButton
+                Text
                 {
-                    property bool _visible: !graph.inOverviewMode && graph.numComponents > 1
-
-                    Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
-                    opacity: _visible ? 1.0 : 0.0
-                    visible: opacity > 0.0
-
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.right: parent.right
-                    anchors.margins: 20
-
-                    iconName: "go-right"
-                    tooltip: qsTr("Goto Next Component");
-
-                    onClicked: { gotoNextComponent(); }
-                }
-
-                RowLayout
-                {
-                    visible: !graph.inOverviewMode && graph.numComponents > 1
-
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottom: parent.bottom
-                    anchors.margins: 20
-
-                    ToolButton
+                    text:
                     {
-                        iconName: "edit-undo"
-                        text: qsTr("Overview Mode")
-
-                        onClicked: { switchToOverviewMode(); }
+                        return qsTr("Component ") + graph.visibleComponentIndex +
+                            qsTr(" of ") + graph.numComponents;
                     }
 
-                    Text
-                    {
-                        text:
-                        {
-                            return qsTr("Component ") + graph.visibleComponentIndex +
-                                qsTr(" of ") + graph.numComponents;
-                        }
-
-                        color: root.contrastingColor
-                    }
+                    color: root.contrastingColor
                 }
             }
 
