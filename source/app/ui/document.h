@@ -53,7 +53,7 @@ class Document : public QObject, public IDocument
     Q_PROPERTY(QString status MEMBER _status WRITE setStatus NOTIFY statusChanged)
 
     Q_PROPERTY(bool idle READ idle NOTIFY idleChanged)
-    Q_PROPERTY(bool canDelete READ canDelete NOTIFY canDeleteChanged)
+    Q_PROPERTY(bool editable READ editable NOTIFY editableChanged)
 
     Q_PROPERTY(bool commandInProgress READ commandInProgress NOTIFY commandInProgressChanged)
     Q_PROPERTY(int commandProgress READ commandProgress NOTIFY commandProgressChanged)
@@ -100,7 +100,7 @@ public:
 
     bool commandInProgress() const;
     bool idle() const;
-    bool canDelete() const;
+    bool editable() const;
 
     int commandProgress() const;
     QString commandVerb() const;
@@ -226,7 +226,7 @@ signals:
     void statusChanged();
 
     void idleChanged();
-    void canDeleteChanged();
+    void editableChanged();
 
     void commandInProgressChanged();
     void commandProgressChanged();

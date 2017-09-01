@@ -61,7 +61,8 @@ Item
     property string status: document.status
 
     property bool idle: document.idle
-    property bool canDelete: document.canDelete
+    property bool editable: document.editable
+    property bool canDeleteSelection: document.editable && document.numNodesSelected > 0
 
     property bool commandInProgress: document.commandInProgress && !commandTimer.running
     property int commandProgress: document.commandProgress
@@ -455,7 +456,6 @@ Item
                         color: root.contrastingColor
                     }
                 }
-
             }
 
             Column

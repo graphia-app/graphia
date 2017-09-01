@@ -62,6 +62,14 @@ bool Document::idle() const
     return !commandInProgress() && !_graphChanging && !_graphQuickItem->interacting();
 }
 
+bool Document::editable() const
+{
+    if(_graphModel == nullptr)
+        return false;
+
+    return idle() && _graphModel->editable();
+}
+
 void Document::maybeEmitIdleChanged()
 {
     if(idle() != _previousIdle)
@@ -69,14 +77,6 @@ void Document::maybeEmitIdleChanged()
         _previousIdle = idle();
         emit idleChanged();
     }
-}
-
-bool Document::canDelete() const
-{
-    if(_selectionManager != nullptr)
-        return idle() && !_selectionManager->selectedNodes().empty() && _graphModel->editable();
-
-    return false;
 }
 
 int Document::commandProgress() const
@@ -500,6 +500,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     _loadComplete = true;
     emit commandInProgressChanged();
     emit idleChanged();
+    emit editableChanged();
     emit commandVerbChanged(); // Stop showing loading message
 
     // This causes the plugin UI to be loaded
@@ -523,7 +524,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     connect(this, &Document::idleChanged, this, &Document::updateLayoutState, Qt::DirectConnection);
 
-    connect(this, &Document::idleChanged, this, &Document::canDeleteChanged);
+    connect(this, &Document::idleChanged, this, &Document::editableChanged);
     connect(this, &Document::idleChanged, this, &Document::canUndoChanged);
     connect(this, &Document::idleChanged, this, &Document::canRedoChanged);
     connect(this, &Document::idleChanged, this, &Document::canEnterOverviewModeChanged);
@@ -558,7 +559,6 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(&_commandManager, &CommandManager::commandCompleted, _graphQuickItem, &GraphQuickItem::commandCompleted);
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::commandInProgressChanged);
 
-    connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::canDeleteChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::onSelectionChanged);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged,
             _graphModel.get(), &GraphModel::onSelectionChanged, Qt::DirectConnection);
