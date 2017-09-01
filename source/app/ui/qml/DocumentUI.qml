@@ -435,7 +435,12 @@ Item
                     if(button === Qt.RightButton)
                     {
                         contextMenu.clickedNodeId = nodeId;
-                        contextMenu.popup();
+
+                        // This is a work around to a bug where sometimes the context menu
+                        // appears in the top left of the window. It appears to be related
+                        // to changing the contents of the menu (by setting clickedNodeId)
+                        // immediately before displaying it.
+                        Qt.callLater(function() { contextMenu.popup(); });
                     }
                 }
 
