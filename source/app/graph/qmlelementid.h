@@ -20,10 +20,11 @@
     public: \
         QML_TYPE(Type)() = default; \
         QML_TYPE(Type)(Type id) : _id(id) {} \
+        operator Type() const { return _id; } \
+        bool isNull() const { return _id.isNull(); } \
     private: \
         Type _id; \
         int id() const { return _id; } \
-        bool isNull() const { return _id.isNull(); } \
     };
 
 QML_ELEMENTID(NodeId)
