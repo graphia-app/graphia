@@ -30,7 +30,6 @@ HEADERS += \
     commands/applytransformscommand.h \
     commands/applyvisualisationscommand.h \
     commands/commandmanager.h \
-    commands/deleteselectednodescommand.h \
     commands/selectnodescommand.h \
     crashtype.h \
     graph/componentmanager.h \
@@ -119,7 +118,8 @@ HEADERS += \
     ui/visualisations/visualisationinfo.h \
     transform/availabletransformsmodel.h \
     loading/saver.h \
-    loading/loader.h
+    loading/loader.h \
+    commands/deletenodescommand.h
 
 SOURCES += \
     application.cpp \
@@ -130,7 +130,6 @@ SOURCES += \
     commands/applytransformscommand.cpp \
     commands/applyvisualisationscommand.cpp \
     commands/commandmanager.cpp \
-    commands/deleteselectednodescommand.cpp \
     graph/componentmanager.cpp \
     graph/graphconsistencychecker.cpp \
     graph/graph.cpp \
@@ -196,7 +195,8 @@ SOURCES += \
     ui/visualisations/visualisationconfigparser.cpp \
     transform/availabletransformsmodel.cpp \
     loading/saver.cpp \
-    loading/loader.cpp
+    loading/loader.cpp \
+    commands/deletenodescommand.cpp
 
 RESOURCES += \
     icon/mainicon.qrc \

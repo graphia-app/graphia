@@ -17,7 +17,7 @@
 #include "layout/layout.h"
 #include "layout/collision.h"
 
-#include "commands/deleteselectednodescommand.h"
+#include "commands/deletenodescommand.h"
 #include "commands/applytransformscommand.h"
 #include "commands/applyvisualisationscommand.h"
 #include "commands/selectnodescommand.h"
@@ -702,7 +702,8 @@ void Document::deleteSelectedNodes()
     if(_selectionManager->selectedNodes().empty())
         return;
 
-    _commandManager.execute(std::make_unique<DeleteSelectedNodesCommand>(_graphModel.get(), _selectionManager.get()));
+    _commandManager.execute(std::make_unique<DeleteNodesCommand>(_graphModel.get(),
+        _selectionManager.get(), _selectionManager->selectedNodes()));
 }
 
 void Document::resetView()

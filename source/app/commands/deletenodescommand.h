@@ -10,19 +10,21 @@
 class GraphModel;
 class SelectionManager;
 
-class DeleteSelectedNodesCommand : public ICommand
+class DeleteNodesCommand : public ICommand
 {
 private:
     GraphModel* _graphModel = nullptr;
     SelectionManager* _selectionManager = nullptr;
 
-    int _numSelectedNodes = 0;
+    bool _multipleNodes = false;
+    const NodeIdSet _selectedNodeIds;
     const NodeIdSet _nodeIds;
     std::vector<Edge> _edges;
 
 public:
-    DeleteSelectedNodesCommand(GraphModel* graphModel,
-                               SelectionManager* selectionManager);
+    DeleteNodesCommand(GraphModel* graphModel,
+                       SelectionManager* selectionManager,
+                       const NodeIdSet& nodeIds);
 
     QString description() const;
     QString verb() const;
