@@ -525,7 +525,7 @@ Item
 
                     ToolButton
                     {
-                        iconName: "undo"
+                        iconName: "edit-undo"
                         text: qsTr("Overview Mode")
 
                         onClicked: { switchToOverviewMode(); }
