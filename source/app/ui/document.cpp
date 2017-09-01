@@ -665,6 +665,19 @@ void Document::selectNeighbours()
     _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
 }
 
+void Document::selectNeighboursOf(QmlNodeId nodeId)
+{
+    if(!idle())
+        return;
+
+    NodeIdSet nodeIds = {nodeId};
+
+    auto neighbours = _graphModel->graph().neighboursOf(nodeId);
+    nodeIds.insert(neighbours.begin(), neighbours.end());
+
+    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
+}
+
 void Document::invertSelection()
 {
     if(!idle() || _selectionManager == nullptr)
@@ -692,6 +705,15 @@ void Document::redo()
         return;
 
     _commandManager.redo();
+}
+
+void Document::deleteNode(QmlNodeId nodeId)
+{
+    if(!idle())
+        return;
+
+    _commandManager.execute(std::make_unique<DeleteNodesCommand>(_graphModel.get(),
+        _selectionManager.get(), NodeIdSet{nodeId}));
 }
 
 void Document::deleteSelectedNodes()
@@ -878,6 +900,14 @@ void Document::updateFoundIndex(bool reselectIfInvalidated)
         _foundItValid = false;
         emit foundIndexChanged();
     }
+}
+
+QString Document::nodeName(QmlNodeId nodeId) const
+{
+    if(_graphModel == nullptr || nodeId.isNull())
+        return {};
+
+    return _graphModel->nodeName(nodeId);
 }
 
 void Document::onSelectionChanged(const SelectionManager*)

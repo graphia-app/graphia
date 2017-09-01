@@ -305,9 +305,11 @@ Item
     function selectNone() { document.selectNone(); }
     function invertSelection() { document.invertSelection(); }
     function selectNeighbours() { document.selectNeighbours(); }
+    function selectNeighboursOf(nodeId) { document.selectNeighboursOf(nodeId); }
     function undo() { document.undo(); }
     function redo() { document.redo(); }
     function deleteSelectedNodes() { document.deleteSelectedNodes(); }
+    function deleteNode(nodeId) { document.deleteNode(nodeId); }
     function resetView() { document.resetView(); }
     function switchToOverviewMode() { document.switchToOverviewMode(); }
     function gotoNextComponent() { document.gotoNextComponent(); }

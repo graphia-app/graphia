@@ -15,6 +15,7 @@
 #include "transform/availabletransformsmodel.h"
 #include "shared/utils/deferredexecutor.h"
 #include "shared/utils/semaphore.h"
+#include "graph/qmlelementid.h"
 #include "thirdparty/qt-qml-models/QQmlVariantListModel.h"
 
 #include <QQuickItem>
@@ -273,11 +274,13 @@ public:
     Q_INVOKABLE void selectAllVisible();
     Q_INVOKABLE void selectNone();
     Q_INVOKABLE void selectNeighbours();
+    Q_INVOKABLE void selectNeighboursOf(QmlNodeId nodeId);
     Q_INVOKABLE void invertSelection();
 
     Q_INVOKABLE void undo();
     Q_INVOKABLE void redo();
 
+    Q_INVOKABLE void deleteNode(QmlNodeId nodeId);
     Q_INVOKABLE void deleteSelectedNodes();
 
     Q_INVOKABLE void resetView();
@@ -293,6 +296,8 @@ public:
     Q_INVOKABLE void selectPrevFound();
     Q_INVOKABLE void selectAllFound();
     Q_INVOKABLE void updateFoundIndex(bool reselectIfInvalidated);
+
+    Q_INVOKABLE QString nodeName(QmlNodeId nodeId) const;
 
     Q_INVOKABLE AvailableTransformsModel* availableTransforms() const;
     Q_INVOKABLE QVariantMap transform(const QString& transformName) const;
