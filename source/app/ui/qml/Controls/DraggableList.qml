@@ -31,8 +31,8 @@ Column
 
             drag.target: held ? content : undefined
             drag.axis: Drag.YAxis
-            drag.minimumY: 0
-            drag.maximumY: { return repeater.itemAt(repeater.count - 1).y; }
+            drag.minimumY: root.parent.y
+            drag.maximumY: { return drag.minimumY + repeater.itemAt(repeater.count - 1).y; }
 
             property int _dragStartIndex: -1
 
