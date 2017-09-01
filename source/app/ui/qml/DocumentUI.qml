@@ -341,6 +341,33 @@ Item
         application: root.application
     }
 
+    ColorDialog
+    {
+        id: backgroundColorDialog
+        title: qsTr("Select a Colour")
+        onColorChanged:
+        {
+            visuals.backgroundColor = color;
+        }
+    }
+
+    Action
+    {
+        id: deleteNodeAction
+        iconName: "edit-delete"
+        text: qsTr("&Delete '") + contextMenu.clickedNodeName + qsTr("'")
+        enabled: editable && contextMenu.nodeWasClicked
+        onTriggered: { deleteNode(contextMenu.clickedNodeId); }
+    }
+
+    Action
+    {
+        id: selectNeighbourOfNodeAction
+        text: qsTr("Select Neigh&bours Of '") + contextMenu.clickedNodeName + qsTr("'")
+        enabled: idle && contextMenu.nodeWasClicked
+        onTriggered: { selectNeighboursOf(contextMenu.clickedNodeId); }
+    }
+
     SplitView
     {
         id: splitView
@@ -359,6 +386,58 @@ Item
             {
                 id: graph
                 anchors.fill: parent
+
+                Menu
+                {
+                    id: contextMenu
+
+                    TextMetrics
+                    {
+                        id: elidedNodeName
+
+                        elide: Text.ElideMiddle
+                        elideWidth: 150
+                        text: contextMenu.clickedNodeId !== undefined ?
+                            document.nodeName(contextMenu.clickedNodeId) : ""
+                    }
+
+                    property var clickedNodeId
+                    property string clickedNodeName: elidedNodeName.elidedText
+                    property bool nodeWasClicked: clickedNodeId !== undefined ? !clickedNodeId.isNull : false
+
+                    MenuItem { id: delete1; visible: deleteNodeAction.enabled; action: deleteNodeAction }
+                    MenuItem { id: delete2; visible: deleteAction.enabled; action: deleteAction }
+                    MenuSeparator { visible: delete1.visible || delete2.visible }
+
+                    MenuItem { visible: numNodesSelected < graph.numNodes; action: selectAllAction }
+                    MenuItem { visible: numNodesSelected < graph.numNodes; action: selectAllVisibleAction }
+                    MenuItem { visible: numNodesSelected > 0; action: selectNoneAction }
+                    MenuItem { visible: selectNeighbourOfNodeAction.enabled; action: selectNeighbourOfNodeAction }
+                    MenuItem { visible: numNodesSelected > 0; action: selectNeighboursAction }
+                    MenuItem { visible: numNodesSelected > 0; action: invertSelectionAction }
+
+                    MenuSeparator { visible: changeBackgroundColourMenuItem.visible }
+                    MenuItem
+                    {
+                        id: changeBackgroundColourMenuItem
+                        visible: !contextMenu.nodeWasClicked
+                        text: qsTr("Change Background &Colour")
+                        onTriggered:
+                        {
+                            backgroundColorDialog.color = visuals.backgroundColor;
+                            backgroundColorDialog.open();
+                        }
+                    }
+                }
+
+                onClicked:
+                {
+                    if(button === Qt.RightButton)
+                    {
+                        contextMenu.clickedNodeId = nodeId;
+                        contextMenu.popup();
+                    }
+                }
 
                 Label
                 {
