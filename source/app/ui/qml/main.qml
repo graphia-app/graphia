@@ -934,7 +934,7 @@ ApplicationWindow
         }
     }
 
-    MenuBar
+    menuBar: MenuBar
     {
         id: mainMenuBar
 
@@ -1003,7 +1003,7 @@ ApplicationWindow
             MenuItem { action: selectTargetsAction }
             MenuItem { action: selectNeighboursAction }
             MenuSeparator {}
-            MenuItem { action: findAction }
+            MenuItem {id: findButton; action: findAction}
             MenuItem
             {
                 action: currentDocument ? currentDocument.selectPreviousFoundAction : nullAction

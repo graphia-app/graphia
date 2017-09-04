@@ -90,6 +90,7 @@ Item
             ButtonMenu
             {
                 visible: !transformSummaryText.visible
+                id: addTransformBtn
                 text: qsTr("Add Transform")
 
                 textColor: enabled ? enabledTextColor : disabledTextColor
@@ -112,6 +113,22 @@ Item
                         panel.hide();
                 }
             }
+
+            Hubble
+            {
+                title: "Add Transform"
+                alignment: Qt.AlignLeft | Qt.AlignBottom
+                target: addTransformBtn
+                Text
+                {
+                    text: "This will add a transform the graph. \n Transforms can do all kinds of magic"
+                }
+                ToolButton
+                {
+                    iconName: "document-open"
+                }
+            }
         }
     }
 }
+
