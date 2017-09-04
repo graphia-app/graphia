@@ -221,15 +221,6 @@ Item
                 misc.fileSaveInitialFolder = folder.toString();
                 saveAsNamedFile(file);
             }
-
-            onRejected:
-            {
-                if(saveConfirmDialog.onCloseFunction !== null)
-                {
-                    document.saveComplete.disconnect(saveConfirmDialog.onCloseFunction);
-                    saveConfirmDialog.onCloseFunction = null;
-                }
-            }
         }
     }
 
