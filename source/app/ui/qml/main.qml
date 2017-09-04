@@ -1250,14 +1250,12 @@ ApplicationWindow
             function replaceTab(onReplaceFunction)
             {
                 var oldIndex = tabView.currentIndex;
-                closeTab(tabView.currentIndex, function()
-                {
-                    removeTab(oldIndex);
-                    insertTabAtIndex(oldIndex);
 
-                    if(onReplaceFunction !== "undefined")
-                        onReplaceFunction();
-                });
+                removeTab(oldIndex);
+                insertTabAtIndex(oldIndex);
+
+                if(onReplaceFunction !== "undefined")
+                    onReplaceFunction();
             }
 
             // This is called if the file can't be opened immediately, or
