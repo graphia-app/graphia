@@ -1293,7 +1293,8 @@ ApplicationWindow
                     }
                 }
 
-                currentDocument.confirmSave(onCloseFunction);
+                var tab = getTab(index).item;
+                tab.confirmSave(onCloseFunction);
             }
 
             Component
