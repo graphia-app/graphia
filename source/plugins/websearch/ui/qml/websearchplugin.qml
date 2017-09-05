@@ -1,8 +1,8 @@
 import QtQuick 2.7
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
-import QtWebEngine 1.5 // This must come before QtQuick.Controls.Styles (QTBUG-60761)
 import QtQuick.Controls.Styles 1.4
+import QtWebEngine 1.5
 
 PluginContent
 {

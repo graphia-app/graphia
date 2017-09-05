@@ -10,7 +10,7 @@ mkdir %INSTALLER_DIR%\plugins
 xcopy "%BUILD_DIR%\plugins\*.dll" %INSTALLER_DIR%\plugins
 copy %BUILD_DIR%\CrashReporter.exe %INSTALLER_DIR%\
 
-set QML_DIRS=
+set QML_DIRS=source\app\QTBUG-60671-hack
 for /d /r %%i in (*) do @if exist %%i\*.qml (set QML_DIRS=--qmldir %%i !QML_DIRS!)
 echo %QML_DIRS%
 
