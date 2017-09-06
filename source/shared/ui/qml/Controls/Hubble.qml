@@ -68,6 +68,9 @@ Item
 
     Component.onCompleted:
     {
+        if(target === undefined)
+            target = parent;
+
         if(target)
         {
             var component = Qt.createComponent("HelpMouseArea.qml");
