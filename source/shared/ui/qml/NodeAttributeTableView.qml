@@ -111,6 +111,12 @@ TableView
         }
     }
 
+    onDoubleClicked:
+    {
+        var mappedRow = model.mapToSource(row);
+        nodeAttributesModel.focusNodeForRowIndex(mappedRow);
+    }
+
     // Work around for QTBUG-58594
     function resizeColumnsToContentsBugWorkaround()
     {

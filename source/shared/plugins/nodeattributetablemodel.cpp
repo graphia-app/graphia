@@ -137,6 +137,12 @@ void NodeAttributeTableModel::showCalculatedAttributes(bool shouldShow)
     updateRoleNames();
 }
 
+void NodeAttributeTableModel::focusNodeForRowIndex(size_t row)
+{
+    auto nodeId = _userNodeData->nodeIdForRowIndex(row);
+    _document->moveFocusToNode(nodeId);
+}
+
 void NodeAttributeTableModel::onAttributeAdded(const QString& name)
 {
     // Recreate rolenames in the model if the attribute is new

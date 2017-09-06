@@ -68,6 +68,8 @@ public:
     void updateRoleNames();
     void showCalculatedAttributes(bool shouldShow);
 
+    Q_INVOKABLE void focusNodeForRowIndex(size_t row);
+
 public slots:
     void onAttributeAdded(const QString& name);
     void onAttributeRemoved(const QString& name);
