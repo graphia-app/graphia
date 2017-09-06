@@ -1,11 +1,14 @@
 #ifndef DOCUMENT_H
 #define DOCUMENT_H
 
+#include "shared/ui/idocument.h"
+
 #include "shared/plugins/iplugin.h"
 #include "rendering/compute/gpucomputethread.h"
 #include "graph/graph.h"
 #include "loading/parserthread.h"
 #include "commands/commandmanager.h"
+#include "ui/selectionmanager.h"
 #include "layout/layout.h"
 #include "shared/utils/qmlenum.h"
 #include "attributes/availableattributesmodel.h"
@@ -29,13 +32,12 @@
 class Application;
 class GraphQuickItem;
 class GraphModel;
-class SelectionManager;
 class SearchManager;
 
 DEFINE_QML_ENUM(Q_GADGET, LayoutPauseState,
                 Running, RunningFinished, Paused);
 
-class Document : public QObject
+class Document : public QObject, public IDocument
 {
     Q_OBJECT
 
@@ -85,6 +87,12 @@ public:
 
     const GraphModel* graphModel() const { return _graphModel.get(); }
     GraphModel* graphModel() { return _graphModel.get(); }
+
+    const SelectionManager* selectionManager() const { return _selectionManager.get(); }
+    SelectionManager* selectionManager() { return _selectionManager.get(); }
+
+    const CommandManager* commandManager() const { return &_commandManager; }
+    CommandManager* commandManager() { return &_commandManager; }
 
     static QColor contrastingColorForBackground();
 

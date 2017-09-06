@@ -51,7 +51,8 @@ HEADERS += \
     $$PWD/utils/utils.h \
     $$PWD/commands/compoundcommand.h \
     $$PWD/utils/qmlutils.h \
-    $$PWD/loading/progressfn.h
+    $$PWD/loading/progressfn.h \
+    $$PWD/ui/idocument.h
 
 SOURCES += \
     $$PWD/graph/elementtype.cpp \
