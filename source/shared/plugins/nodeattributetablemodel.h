@@ -2,8 +2,7 @@
 #define NODEATTRIBUTETABLEMODEL_H
 
 #include "shared/graph/elementid.h"
-#include "shared/ui/iselectionmanager.h"
-#include "shared/graph/igraphmodel.h"
+#include "shared/ui/idocument.h"
 
 #include <QAbstractTableModel>
 #include <QStringList>
@@ -24,9 +23,8 @@ class NodeAttributeTableModel : public QAbstractTableModel
     Q_PROPERTY(bool showCalculatedAttributes MEMBER _showCalculatedAttributes WRITE showCalculatedAttributes NOTIFY columnNamesChanged)
 
 private:
-    const ISelectionManager* _selectionManager = nullptr;
+    IDocument* _document = nullptr;
     const UserNodeData* _userNodeData = nullptr;
-    const IGraphModel* _graphModel = nullptr;
 
     enum Roles
     {
@@ -57,7 +55,7 @@ private slots:
 public:
     explicit NodeAttributeTableModel();
 
-    void initialise(ISelectionManager* selectionManager, IGraphModel* graphModel, UserNodeData* userNodeData);
+    void initialise(IDocument* document, UserNodeData* userNodeData);
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     int columnCount(const QModelIndex& parent = QModelIndex()) const;

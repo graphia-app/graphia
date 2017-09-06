@@ -22,9 +22,8 @@ void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
     BasePluginInstance::initialise(plugin, document, parserThread);
 
     auto graphModel = document->graphModel();
-    auto selectionManager = document->selectionManager();
     _userNodeData.initialise(graphModel->mutableGraph());
-    _nodeAttributeTableModel.initialise(selectionManager, graphModel, &_userNodeData);
+    _nodeAttributeTableModel.initialise(document, &_userNodeData);
     _pearsonValues = std::make_unique<EdgeArray<double>>(graphModel->mutableGraph());
 
     graphModel->createAttribute(tr("Pearson Correlation Value"))

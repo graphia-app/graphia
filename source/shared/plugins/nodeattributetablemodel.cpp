@@ -2,17 +2,21 @@
 
 #include "usernodedata.h"
 
+#include "shared/ui/iselectionmanager.h"
+#include "shared/graph/igraphmodel.h"
+
 NodeAttributeTableModel::NodeAttributeTableModel() :
     QAbstractTableModel()
 {}
 
-void NodeAttributeTableModel::initialise(ISelectionManager* selectionManager, IGraphModel* graphModel, UserNodeData* userNodeData)
+void NodeAttributeTableModel::initialise(IDocument* document, UserNodeData* userNodeData)
 {
-    _selectionManager = selectionManager;
-    _graphModel = graphModel;
+    _document = document;
     _userNodeData = userNodeData;
 
     updateRoleNames();
+
+    auto graphModel = _document->graphModel();
 
     auto modelQObject = dynamic_cast<const QObject*>(graphModel);
     connect(modelQObject, SIGNAL(attributeAdded(const QString&)),
@@ -34,7 +38,7 @@ QStringList NodeAttributeTableModel::columnNames() const
 
     if(_showCalculatedAttributes)
     {
-        for(auto& attributeName : _graphModel->attributeNames(ElementType::Node))
+        for(auto& attributeName : _document->graphModel()->attributeNames(ElementType::Node))
         {
             if(!u::contains(list, attributeName))
                 list.append(attributeName);
@@ -62,7 +66,7 @@ void NodeAttributeTableModel::update()
 
         NodeId nodeId = _userNodeData->nodeIdForRowIndex(row);
 
-        if(!_graphModel->graph().containsNodeId(nodeId))
+        if(!_document->graphModel()->graph().containsNodeId(nodeId))
         {
             // The graph doesn't necessarily have a node for every row since
             // it may have been transformed, leaving empty rows
@@ -76,10 +80,10 @@ void NodeAttributeTableModel::update()
             if(role == Roles::NodeIdRole)
                 dataRow[roleNum] = static_cast<int>(nodeId);
             else if(role == Roles::NodeSelectedRole)
-                dataRow[roleNum] = _selectionManager->nodeIsSelected(nodeId);
+                dataRow[roleNum] = _document->selectionManager()->nodeIsSelected(nodeId);
             else
             {
-                auto* attribute = _graphModel->attributeByName(_roleNames[role]);
+                auto* attribute = _document->graphModel()->attributeByName(_roleNames[role]);
                 if(attribute != nullptr)
                     dataRow[roleNum] = attribute->valueOf(nodeId);
             }
