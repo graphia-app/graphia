@@ -1,6 +1,8 @@
 #ifndef IDOCUMENT_H
 #define IDOCUMENT_H
 
+#include "shared/graph/elementid.h"
+
 class IGraphModel;
 class ISelectionManager;
 class ICommandManager;
@@ -18,6 +20,8 @@ public:
 
     virtual const ICommandManager* commandManager() const = 0;
     virtual ICommandManager* commandManager() = 0;
+
+    virtual void moveFocusToNode(NodeId nodeId) = 0;
 };
 
 #endif // IDOCUMENT_H

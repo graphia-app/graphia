@@ -88,6 +88,7 @@ public:
     explicit Document(QObject* parent = nullptr);
     ~Document();
 
+public: // IDocument
     const GraphModel* graphModel() const { return _graphModel.get(); }
     GraphModel* graphModel() { return _graphModel.get(); }
 
@@ -97,6 +98,9 @@ public:
     const CommandManager* commandManager() const { return &_commandManager; }
     CommandManager* commandManager() { return &_commandManager; }
 
+    void moveFocusToNode(NodeId nodeId);
+
+public:
     static QColor contrastingColorForBackground();
 
     bool commandInProgress() const;

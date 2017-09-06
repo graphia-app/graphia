@@ -824,6 +824,11 @@ void Document::selectFoundNode(NodeId newFound)
         _graphQuickItem->moveFocusToNode(newFound);
 }
 
+void Document::moveFocusToNode(NodeId nodeId)
+{
+    _graphQuickItem->moveFocusToNode(nodeId);
+}
+
 void Document::setSaveRequired()
 {
     if(!_loadComplete)
