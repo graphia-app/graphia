@@ -74,6 +74,12 @@ Item
             hoverColor: root.hoverColor
 
             onSelectedValueChanged: { updateExpression(); }
+
+            onClicked:
+            {
+                if(mouse.button === Qt.RightButton)
+                    mouse.accepted = false;
+            }
         }
 
         Label
@@ -101,9 +107,14 @@ Item
 
             onClicked:
             {
-                gradientList.visualisationIndex = index;
-                gradientList.selected = gradientKey.configuration;
-                gradientList.show();
+                if(mouse.button === Qt.LeftButton)
+                {
+                    gradientList.visualisationIndex = index;
+                    gradientList.selected = gradientKey.configuration;
+                    gradientList.show();
+                }
+                else
+                    mouse.accepted = false;
             }
         }
 

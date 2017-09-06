@@ -77,14 +77,14 @@ Item
         anchors.fill: parent
         onClicked:
         {
-            if(menu && !_modelIsUnset)
+            if(mouse.button === Qt.LeftButton && menu && !_modelIsUnset)
                 menu.__popup(parent.mapToItem(null, 0, parent.height + 4/*padding*/, 0, 0), 0);
 
-            root.clicked();
+            root.clicked(mouse);
         }
 
         onPressed: { mouse.accepted = !propogatePresses; }
     }
 
-    signal clicked()
+    signal clicked(var mouse)
 }

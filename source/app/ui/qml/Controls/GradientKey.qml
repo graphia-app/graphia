@@ -151,14 +151,14 @@ Item
 
         anchors.fill: root
 
-        onClicked: root.clicked()
-        onDoubleClicked: root.doubleClicked()
+        onClicked: root.clicked(mouse)
+        onDoubleClicked: root.doubleClicked(mouse)
 
         hoverEnabled: true
 
         onPressed: { mouse.accepted = !propogatePresses; }
     }
 
-    signal clicked()
-    signal doubleClicked()
+    signal clicked(var mouse)
+    signal doubleClicked(var mouse)
 }
