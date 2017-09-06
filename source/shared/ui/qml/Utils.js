@@ -107,6 +107,8 @@ function incrementForRange(min, max)
         return 0.1;
     else if(range <= 1000.0)
         return 10.0;
+    else if(range <= 10000.0)
+        return 100.0;
     else if(range <= 100000.0)
         return 1000.0;
 
