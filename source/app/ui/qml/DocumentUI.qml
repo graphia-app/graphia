@@ -197,6 +197,7 @@ Item
             uiData = JSON.stringify(uiData);
 
         document.saveFile(desiredFileUrl, uiData);
+        mainWindow.addToRecentFiles(desiredFileUrl);
     }
 
     Component
