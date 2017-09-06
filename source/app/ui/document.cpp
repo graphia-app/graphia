@@ -921,7 +921,7 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
 
     if(searchManager->foundNodeIds().empty())
     {
-        if(_foundItValid)
+        if(_foundItValid && searchManager->active())
             _selectionManager->clearNodeSelection();
 
         _foundItValid = false;

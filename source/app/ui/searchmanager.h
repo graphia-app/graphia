@@ -20,6 +20,8 @@ public:
     const NodeIdSet& foundNodeIds() const { return _foundNodeIds; }
     bool nodeWasFound(NodeId nodeId) const;
 
+    bool active() const { return !_regex.isEmpty(); }
+
 private:
     QString _regex;
     std::vector<QString> _attributeNames;
