@@ -448,12 +448,6 @@ ApplicationWindow
             tabView.createTab(openInCurrentTab);
     }
 
-    function saveFile(fileUrl)
-    {
-        if(currentDocument !== null)
-            currentDocument.saveFile(fileUrl);
-    }
-
     Labs.FileDialog
     {
         id: fileOpenDialog
