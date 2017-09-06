@@ -13,11 +13,13 @@ BaseGenericPluginInstance::BaseGenericPluginInstance()
             this, SLOT(onSelectionChanged(const ISelectionManager*)), Qt::DirectConnection);
 }
 
-void BaseGenericPluginInstance::initialise(const IPlugin* plugin, IGraphModel* graphModel, ISelectionManager* selectionManager,
-                                           ICommandManager* commandManager, const IParserThread* parserThread)
+void BaseGenericPluginInstance::initialise(const IPlugin* plugin, IDocument* document,
+                                           const IParserThread* parserThread)
 {
-    BasePluginInstance::initialise(plugin, graphModel, selectionManager, commandManager, parserThread);
+    BasePluginInstance::initialise(plugin, document, parserThread);
 
+    auto graphModel = document->graphModel();
+    auto selectionManager = document->selectionManager();
     _userNodeData.initialise(graphModel->mutableGraph());
     _nodeAttributeTableModel.initialise(selectionManager, graphModel, &_userNodeData);
 }

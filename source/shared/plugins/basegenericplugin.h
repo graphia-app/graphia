@@ -39,8 +39,8 @@ public:
     bool load(const QByteArray&, int, IMutableGraph&, const ProgressFn&);
 
 private:
-    void initialise(const IPlugin* plugin, IGraphModel* graphModel, ISelectionManager* selectionManager,
-                    ICommandManager* commandManager, const IParserThread* parserThread);
+    void initialise(const IPlugin* plugin, IDocument* document,
+                    const IParserThread* parserThread);
 
     QString selectedNodeNames() const;
 

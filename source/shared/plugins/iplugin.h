@@ -12,9 +12,7 @@
 #include <memory>
 
 class IPlugin;
-class IGraphModel;
-class ISelectionManager;
-class ICommandManager;
+class IDocument;
 class IParserThread;
 class IMutableGraph;
 class QUrl;
@@ -24,8 +22,8 @@ class IPluginInstance
 public:
     virtual ~IPluginInstance() = default;
 
-    virtual void initialise(const IPlugin* plugin, IGraphModel* graphModel, ISelectionManager* selectionManager,
-                            ICommandManager* commandManager, const IParserThread* parserThread) = 0;
+    virtual void initialise(const IPlugin* plugin, IDocument* document,
+                            const IParserThread* parserThread) = 0;
     virtual std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) = 0;
 
     virtual void applyParameter(const QString& name, const QString& value) = 0;

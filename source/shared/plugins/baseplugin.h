@@ -4,6 +4,7 @@
 #include "shared/plugins/iplugin.h"
 #include "shared/graph/igraph.h"
 #include "shared/graph/igraphmodel.h"
+#include "shared/ui/idocument.h"
 #include "shared/ui/iselectionmanager.h"
 #include "shared/commands/icommandmanager.h"
 #include "shared/loading/iparserthread.h"
@@ -31,15 +32,15 @@ private:
     ICommandManager* _commandManager = nullptr;
 
 public:
-    void initialise(const IPlugin* plugin, IGraphModel* graphModel, ISelectionManager* selectionManager,
-                    ICommandManager* commandManager, const IParserThread* parserThread)
+    void initialise(const IPlugin* plugin, IDocument* document,
+                    const IParserThread* parserThread)
     {
         _plugin = plugin;
-        _graphModel = graphModel;
-        _selectionManager = selectionManager;
-        _commandManager = commandManager;
+        _graphModel = document->graphModel();
+        _selectionManager = document->selectionManager();
+        _commandManager = document->commandManager();
 
-        auto graphQObject = dynamic_cast<const QObject*>(&graphModel->graph());
+        auto graphQObject = dynamic_cast<const QObject*>(&_graphModel->graph());
         Q_ASSERT(graphQObject != nullptr);
 
         connect(graphQObject, SIGNAL(graphWillChange(const Graph*)),
@@ -57,13 +58,13 @@ public:
         connect(graphQObject, SIGNAL(graphChanged(const Graph*, bool)),
                 this, SIGNAL(graphChanged()), Qt::DirectConnection);
 
-        auto selectionManagerQObject = dynamic_cast<const QObject*>(selectionManager);
+        auto selectionManagerQObject = dynamic_cast<const QObject*>(_selectionManager);
         Q_ASSERT(selectionManagerQObject != nullptr);
 
         connect(selectionManagerQObject, SIGNAL(selectionChanged(const SelectionManager*)),
                 this, SLOT(onSelectionChanged(const SelectionManager*)), Qt::DirectConnection);
 
-        auto graphModelQObject = dynamic_cast<const QObject*>(graphModel);
+        auto graphModelQObject = dynamic_cast<const QObject*>(_graphModel);
         Q_ASSERT(graphModelQObject != nullptr);
 
         connect(graphModelQObject, SIGNAL(visualsChanged()),

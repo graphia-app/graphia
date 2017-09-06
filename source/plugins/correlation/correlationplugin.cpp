@@ -16,11 +16,13 @@ CorrelationPluginInstance::CorrelationPluginInstance()
     connect(this, SIGNAL(visualsChanged()), this, SIGNAL(nodeColorsChanged()));
 }
 
-void CorrelationPluginInstance::initialise(const IPlugin* plugin, IGraphModel* graphModel, ISelectionManager* selectionManager,
-                                           ICommandManager* commandManager, const IParserThread* parserThread)
+void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* document,
+                                           const IParserThread* parserThread)
 {
-    BasePluginInstance::initialise(plugin, graphModel, selectionManager, commandManager, parserThread);
+    BasePluginInstance::initialise(plugin, document, parserThread);
 
+    auto graphModel = document->graphModel();
+    auto selectionManager = document->selectionManager();
     _userNodeData.initialise(graphModel->mutableGraph());
     _nodeAttributeTableModel.initialise(selectionManager, graphModel, &_userNodeData);
     _pearsonValues = std::make_unique<EdgeArray<double>>(graphModel->mutableGraph());

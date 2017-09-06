@@ -339,8 +339,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     _searchManager = std::make_unique<SearchManager>(*_graphModel);
 
     _pluginInstance = plugin->createInstance();
-    _pluginInstance->initialise(plugin, _graphModel.get(), _selectionManager.get(),
-                                &_commandManager, _graphFileParserThread.get());
+    _pluginInstance->initialise(plugin, this, _graphFileParserThread.get());
 
     // The plugin won't necessarily have the saveRequired signal or in fact be
     // a QObject at all, hence this convoluted and defensive runtime connection
