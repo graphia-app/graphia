@@ -36,13 +36,10 @@ QStringList NodeAttributeTableModel::columnNames() const
     for(const auto& userDataVector : *_userNodeData)
         list.append(userDataVector.name());
 
-    if(_showCalculatedAttributes)
+    for(auto& attributeName : _document->graphModel()->attributeNames(ElementType::Node))
     {
-        for(auto& attributeName : _document->graphModel()->attributeNames(ElementType::Node))
-        {
-            if(!u::contains(list, attributeName))
-                list.append(attributeName);
-        }
+        if(!u::contains(list, attributeName))
+            list.append(attributeName);
     }
 
     return list;
@@ -131,10 +128,9 @@ void NodeAttributeTableModel::updateRoleNames()
     emit columnNamesChanged();
 }
 
-void NodeAttributeTableModel::showCalculatedAttributes(bool shouldShow)
+bool NodeAttributeTableModel::columnIsCalculated(const QString& columnName)
 {
-    _showCalculatedAttributes = shouldShow;
-    updateRoleNames();
+    return !u::contains(_userNodeData->vectorNames(), columnName);
 }
 
 void NodeAttributeTableModel::focusNodeForRowIndex(size_t row)

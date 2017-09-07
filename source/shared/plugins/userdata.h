@@ -32,6 +32,8 @@ public:
 
     bool empty() const { return _userDataVectors.empty(); }
 
+    QStringList vectorNames() const;
+
     auto begin() const { return make_pair_second_iterator(_userDataVectors.begin()); }
     auto end() const { return make_pair_second_iterator(_userDataVectors.end()); }
 

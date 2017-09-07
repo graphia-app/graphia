@@ -20,7 +20,6 @@ class NodeAttributeTableModel : public QAbstractTableModel
     Q_OBJECT
 
     Q_PROPERTY(QStringList columnNames READ columnNames NOTIFY columnNamesChanged)
-    Q_PROPERTY(bool showCalculatedAttributes MEMBER _showCalculatedAttributes WRITE showCalculatedAttributes NOTIFY columnNamesChanged)
 
 private:
     IDocument* _document = nullptr;
@@ -42,7 +41,6 @@ private:
     std::deque<Table> _updatedData; // Update occurs here, before being moved to _cachedData
     Table _cachedData;
 
-    bool _showCalculatedAttributes = true;
     int _columnCount = 0;
 
     QStringList columnNames() const;
@@ -66,7 +64,8 @@ public:
 
     void onSelectionChanged();
     void updateRoleNames();
-    void showCalculatedAttributes(bool shouldShow);
+
+    Q_INVOKABLE bool columnIsCalculated(const QString& columnName);
 
     Q_INVOKABLE void focusNodeForRowIndex(size_t row);
 

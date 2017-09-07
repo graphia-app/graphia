@@ -17,8 +17,12 @@ TableView
     property bool showCalculatedAttributes: true
     onShowCalculatedAttributesChanged:
     {
-        if(nodeAttributesModel !== null)
-            nodeAttributesModel.showCalculatedAttributes = showCalculatedAttributes;
+        for(var i = 0; i < tableView.columnCount; i++)
+        {
+            var tableViewColumn = tableView.getColumn(i);
+            if(nodeAttributesModel.columnIsCalculated(tableViewColumn.role))
+                tableViewColumn.visible = showCalculatedAttributes;
+        }
     }
 
     sortIndicatorVisible: true

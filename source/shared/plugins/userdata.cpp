@@ -20,6 +20,16 @@ int UserData::numValues() const
     return _numValues;
 }
 
+QStringList UserData::vectorNames() const
+{
+    QStringList list;
+
+    for(const auto& vector : *this)
+        list.append(vector.name());
+
+    return list;
+}
+
 void UserData::add(const QString& name)
 {
     if(!u::containsKey(_userDataVectors, name))
