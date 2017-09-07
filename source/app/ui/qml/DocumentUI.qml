@@ -363,7 +363,7 @@ Item
     Action
     {
         id: selectNeighbourOfNodeAction
-        text: qsTr("Select Neigh&bours Of '") + contextMenu.clickedNodeName + qsTr("'")
+        text: qsTr("Select Neigh&bours of '") + contextMenu.clickedNodeName + qsTr("'")
         enabled: idle && contextMenu.nodeWasClicked
         onTriggered: { selectNeighboursOf(contextMenu.clickedNodeId); }
     }

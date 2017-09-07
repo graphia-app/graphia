@@ -630,7 +630,7 @@ ApplicationWindow
     Action
     {
         id: selectNeighboursAction
-        text: qsTr("Select Neigh&bours Of Selection")
+        text: qsTr("Select Neigh&bours of Selection")
         shortcut: "Ctrl+B"
         enabled: currentDocument ? currentDocument.idle : false
         onTriggered: currentDocument && currentDocument.selectNeighbours()
