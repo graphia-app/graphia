@@ -73,9 +73,6 @@ Item
                 iconName: panel.hidden ? "go-top" : "go-bottom"
                 tooltip: panel.hidden ? qsTr("Show") : qsTr("Hide")
 
-                Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
-                opacity: visible ? 1.0 : 0.0
-
                 onClicked:
                 {
                     if(panel.hidden)
