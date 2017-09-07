@@ -492,7 +492,7 @@ Item
                 anchors.left: graph.left
                 anchors.margins: 20
 
-                iconName: "go-left"
+                iconName: "go-previous"
                 tooltip: qsTr("Goto Previous Component");
 
                 onClicked: { gotoPrevComponent(); }
@@ -510,7 +510,7 @@ Item
                 anchors.right: graph.right
                 anchors.margins: 20
 
-                iconName: "go-right"
+                iconName: "go-next"
                 tooltip: qsTr("Goto Next Component");
 
                 onClicked: { gotoNextComponent(); }
