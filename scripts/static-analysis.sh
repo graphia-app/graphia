@@ -33,4 +33,4 @@ find source/app \
   source/plugins \
   source/crashreporter \
   -type f -iname "*.qml" | \
-  qmllint
+  xargs qmllint
