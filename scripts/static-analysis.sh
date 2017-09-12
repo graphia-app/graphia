@@ -7,7 +7,7 @@ find source/app \
   source/shared \
   source/plugins \
   source/crashreporter \
-  -iname "*.cpp" -not -iname "moc_*" -not -iname "qrc_*" | \
+  -type f -iname "*.cpp" -not -iname "moc_*" -not -iname "qrc_*" | \
   xargs cppcheck --enable=all \
   --xml --xml-version=2 \
   --library=scripts/cppcheck.cfg 2> cppcheck.xml
@@ -24,5 +24,13 @@ find source/app \
   source/shared \
   source/plugins \
   source/crashreporter \
-  -iname "*.cpp" -not -iname "moc_*" -not -iname "qrc_*" | \
+  -type f -iname "*.cpp" -not -iname "moc_*" -not -iname "qrc_*" | \
   xargs -n1 -P${NUM_CORES} clang-tidy ${CHECKS}
+
+# qmllint
+find source/app \
+  source/shared \
+  source/plugins \
+  source/crashreporter \
+  -type f -iname "*.qml" | \
+  qmllint
