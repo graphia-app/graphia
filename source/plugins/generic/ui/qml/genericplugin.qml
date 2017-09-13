@@ -17,7 +17,7 @@ PluginContent
         id: resizeColumnsToContentsAction
         text: qsTr("&Resize Columns To Contents")
         iconName: "format-justify-fill"
-        onTriggered: nodeAttributeTableView.resizeColumnsToContentsBugWorkaround();
+        onTriggered: tableView.resizeColumnsToContentsBugWorkaround();
     }
 
     Action
@@ -45,7 +45,7 @@ PluginContent
 
         NodeAttributeTableView
         {
-            id: nodeAttributeTableView
+            id: tableView
 
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -65,8 +65,8 @@ PluginContent
         var data =
         {
             "showCalculatedAttributes": toggleCalculatedAttributes.checked,
-            "sortColumn": nodeAttributeTableView.sortIndicatorColumn,
-            "sortOrder": nodeAttributeTableView.sortIndicatorOrder
+            "sortColumn": tableView.sortIndicatorColumn,
+            "sortOrder": tableView.sortIndicatorOrder
         };
 
         return data;
@@ -75,7 +75,7 @@ PluginContent
     function load(data, version)
     {
         toggleCalculatedAttributes.checked = data.showCalculatedAttributes;
-        nodeAttributeTableView.sortIndicatorColumn = data.sortColumn;
-        nodeAttributeTableView.sortIndicatorOrder = data.sortOrder;
+        tableView.sortIndicatorColumn = data.sortColumn;
+        tableView.sortIndicatorOrder = data.sortOrder;
     }
 }
