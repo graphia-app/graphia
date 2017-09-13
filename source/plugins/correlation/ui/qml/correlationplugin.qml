@@ -7,6 +7,8 @@ import Qt.labs.platform 1.0 as Labs
 
 import com.kajeka 1.0
 
+import "Utils.js" as Utils
+
 PluginContent
 {
     id: root
@@ -36,7 +38,7 @@ PluginContent
     Action
     {
         id: toggleColumnNamesAction
-        text: qsTr("&Show Column Names")
+        text: qsTr("Show &Column Names")
         iconName: "format-text-bold"
         checkable: true
         checked: true
@@ -55,6 +57,14 @@ PluginContent
         onCheckedChanged: { root.saveRequired = true; }
     }
 
+    Action
+    {
+        id: savePlotImageAction
+        text: qsTr("Save As &Image…")
+        iconName: "edit-save"
+        onTriggered: { imageSaveDialog.open(); }
+    }
+
     function createMenu(index, menu)
     {
         switch(index)
@@ -65,6 +75,15 @@ PluginContent
             menu.addItem("").action = resizeColumnsToContentsAction;
             menu.addItem("").action = toggleColumnNamesAction;
             menu.addItem("").action = toggleCalculatedAttributes;
+            return true;
+
+        case 1:
+            menu.title = qsTr("&Plot");
+            menu.addItem("").action = toggleColumnNamesAction;
+            menu.addItem("").action = savePlotImageAction;
+
+            Utils.cloneMenu(menu, plotContextMenu);
+
             return true;
         }
 
@@ -152,7 +171,7 @@ PluginContent
                             (scrollView.flickableItem.contentWidth - scrollView.viewport.width);
                 }
 
-                onRightClick: { contextMenu.popup(); }
+                onRightClick: { plotContextMenu.popup(); }
             }
 
             ScrollView
@@ -174,16 +193,7 @@ PluginContent
         }
     }
 
-    Menu
-    {
-        id: contextMenu
-
-        MenuItem
-        {
-            text: qsTr("Save Plot As…")
-            onTriggered: imageSaveDialog.open();
-        }
-    }
+    Menu { id: plotContextMenu }
 
     Labs.FileDialog
     {
@@ -192,7 +202,7 @@ PluginContent
         fileMode: Labs.FileDialog.SaveFile
         defaultSuffix: selectedNameFilter.extensions[0]
         selectedNameFilter.index: 1
-        title: "Save plot as…"
+        title: "Save Plot As Image"
         nameFilters: [ "PDF Document (*.pdf)", "PNG Image (*.png)", "JPEG Image (*.jpg *.jpeg)" ]
         onAccepted: { plot.savePlotImage(file, selectedNameFilter.extensions); }
     }
