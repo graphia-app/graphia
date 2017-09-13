@@ -211,6 +211,69 @@ function pluralise(count, singular, plural)
     return count + " " + plural;
 }
 
+// Clone one menu into another, such that to is a "proxy" for from that looks
+// identical to from, and uses from's behaviour
+function cloneMenu(from, to)
+{
+    // Clear out any existing items
+    while(to.items.length > 0)
+        to.removeItem(to.items[0]);
+
+    for(var index = 0; index < from.items.length; index++)
+    {
+        var fromItem = from.items[index];
+        var toItem = null;
+
+        switch(fromItem.type)
+        {
+        case MenuItemType.Item:
+            toItem = to.addItem(fromItem.text);
+            break;
+
+        case MenuItemType.Menu:
+            toItem = to.addMenu(fromItem.title);
+            cloneMenu(fromItem, toItem);
+            break;
+
+        case MenuItemType.Separator:
+            to.addSeparator();
+            break;
+        }
+
+        if(toItem === null)
+            continue;
+
+        var properties = [// Note "action" is specifcally skipped because
+                          //   a) the properties it proxies are bound anyway
+                          //   b) binding it will cause loops
+                          "checkable", "checked", "enabled",
+                          "exclusiveGroup", "iconName", "iconSource",
+                          "shortcut", "text", "visible"];
+
+        properties.forEach(function(prop)
+        {
+            if(fromItem[prop] !== undefined)
+            {
+                toItem[prop] = Qt.binding(function(fromItem, prop)
+                {
+                    return function()
+                    {
+                        return fromItem[prop];
+                    };
+                }(fromItem, prop));
+            }
+        });
+
+        toItem.triggered.connect(function(fromItem)
+        {
+            return function()
+            {
+                fromItem.trigger();
+            };
+        }(fromItem));
+    }
+}
+
 function setContains(set, value)
 {
     if(typeof(set) !== "array" && typeof(set) !== "object")
