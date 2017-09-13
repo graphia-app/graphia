@@ -30,7 +30,7 @@ PluginContent
     Action
     {
         id: resizeColumnsToContentsAction
-        text: qsTr("&Resize Columns To Contents")
+        text: qsTr("&Resize Columns To Fit Contents")
         iconName: "format-justify-fill"
         onTriggered: tableView.resizeColumnsToContentsBugWorkaround();
     }
@@ -70,11 +70,7 @@ PluginContent
         switch(index)
         {
         case 0:
-            menu.title = qsTr("&Correlation");
-            menu.addItem("").action = toggleUiOrientationAction;
-            menu.addItem("").action = resizeColumnsToContentsAction;
-            menu.addItem("").action = toggleColumnNamesAction;
-            menu.addItem("").action = toggleCalculatedAttributes;
+            tableView.populateTableMenu(menu);
             return true;
 
         case 1:
@@ -83,7 +79,6 @@ PluginContent
             menu.addItem("").action = savePlotImageAction;
 
             Utils.cloneMenu(menu, plotContextMenu);
-
             return true;
         }
 
@@ -217,7 +212,8 @@ PluginContent
             "showCalculatedAttributes": toggleCalculatedAttributes.checked,
             "showColumnNames": toggleColumnNamesAction.checked,
             "sortColumn": tableView.sortIndicatorColumn,
-            "sortOrder": tableView.sortIndicatorOrder
+            "sortOrder": tableView.sortIndicatorOrder,
+            "hiddenColumns": tableView.hiddenColumns
         };
 
         return data;
@@ -230,6 +226,7 @@ PluginContent
         toggleColumnNamesAction.checked = data.showColumnNames;
         tableView.sortIndicatorColumn = data.sortColumn;
         tableView.sortIndicatorOrder = data.sortOrder;
+        tableView.hiddenColumns = data.hiddenColumns;
     }
 }
 

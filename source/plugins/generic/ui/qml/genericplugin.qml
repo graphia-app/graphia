@@ -31,6 +31,18 @@ PluginContent
         onCheckedChanged: { root.saveRequired = true; }
     }
 
+    function createMenu(index, menu)
+    {
+        switch(index)
+        {
+        case 0:
+            tableView.populateTableMenu(menu);
+            return true;
+        }
+
+        return false;
+    }
+
     toolStrip: RowLayout
     {
         anchors.fill: parent

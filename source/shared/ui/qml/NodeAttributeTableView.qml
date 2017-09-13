@@ -3,6 +3,8 @@ import QtQuick.Controls 1.5
 
 import SortFilterProxyModel 0.2
 
+import "Utils.js" as Utils
+
 TableView
 {
     id: tableView
@@ -14,14 +16,32 @@ TableView
     }
 
     property var nodeAttributesModel
+
     property bool showCalculatedAttributes: true
-    onShowCalculatedAttributesChanged:
+    onShowCalculatedAttributesChanged: { tableView.updateColumnVisibility(); }
+
+    property var hiddenColumns: []
+    onHiddenColumnsChanged: { tableView.updateColumnVisibility(); }
+
+    function setColumnVisibility(columnName, columnVisible)
+    {
+        if(columnVisible)
+            Utils.setRemove(hiddenColumns, columnName);
+        else
+            Utils.setAdd(hiddenColumns, columnName);
+
+        updateColumnVisibility();
+    }
+
+    function updateColumnVisibility()
     {
         for(var i = 0; i < tableView.columnCount; i++)
         {
             var tableViewColumn = tableView.getColumn(i);
-            if(nodeAttributesModel.columnIsCalculated(tableViewColumn.role))
-                tableViewColumn.visible = showCalculatedAttributes;
+            var hidden = Utils.setContains(hiddenColumns, tableViewColumn.role);
+            var showIfCalculated = !nodeAttributesModel.columnIsCalculated(tableViewColumn.role) || showCalculatedAttributes;
+
+            tableViewColumn.visible = !hidden && showIfCalculated;
         }
     }
 
@@ -66,6 +86,7 @@ TableView
             // Hack - TableView doesn't respond to rolenames changes
             // so instead we recreate the model to force an update
             createModel();
+            populateTableMenu(tableMenu);
         }
     }
 
@@ -136,5 +157,85 @@ TableView
                     col.width = header.implicitWidth;
             }
         }
+    }
+
+    // This is just a reference to the menu, so we can repopulate it later as necessary
+    property Menu tableMenu
+
+    function populateTableMenu(menu)
+    {
+        if(menu === null)
+            return;
+
+        // Clear out any existing items
+        while(menu.items.length > 0)
+            menu.removeItem(menu.items[0]);
+
+        menu.title = qsTr("&Table");
+
+        var setVisibleFn = function(visible)
+        {
+            return function()
+            {
+                for(var i = 0; i < menu.items.length; i++)
+                {
+                    var item = menu.items[i];
+                    if(item.showColumnNameTag !== undefined)
+                        item.checked = visible;
+                }
+            };
+        };
+
+        menu.addItem("").action = resizeColumnsToContentsAction;
+        menu.addSeparator();
+        menu.addItem("").action = toggleCalculatedAttributes;
+
+        var showAll = menu.addItem(qsTr("&Show All Columns"));
+        showAll.triggered.connect(setVisibleFn(true));
+
+        var hideAll = menu.addItem(qsTr("&Hide All Columns"));
+        hideAll.triggered.connect(setVisibleFn(false));
+
+        menu.addSeparator();
+
+        plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName)
+        {
+            var menuItem = menu.addItem(columnName);
+            menuItem.checkable = true;
+
+            // This is just to let the hide/show all functions know this is a menu item
+            menuItem.showColumnNameTag = columnName;
+
+            menuItem.checked = !Utils.setContains(tableView.hiddenColumns, columnName);
+
+            if(plugin.model.nodeAttributeTableModel.columnIsCalculated(columnName))
+            {
+                menuItem.enabled = Qt.binding(function()
+                {
+                    return toggleCalculatedAttributes.checked;
+                });
+            }
+
+            menuItem.toggled.connect(function(checked)
+            {
+                tableView.setColumnVisibility(columnName, checked);
+            });
+        });
+
+        tableMenu = menu;
+        Utils.cloneMenu(menu, contextMenu);
+    }
+
+    Menu { id: contextMenu }
+
+    signal rightClick();
+    onRightClick: { contextMenu.popup(); }
+
+    MouseArea
+    {
+        anchors.fill: parent
+        acceptedButtons: Qt.RightButton
+        propagateComposedEvents: true
+        onClicked: { rightClick(); }
     }
 }
