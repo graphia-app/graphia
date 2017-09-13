@@ -88,19 +88,20 @@ Item
             {
                 id: nextSkipButtons
                 visible: displayButtons
-                Rectangle
-                {
-                    Layout.fillWidth: true
-                }
-
                 Text
                 {
                     text: qsTr("Skip")
                     font.underline: true
                     MouseArea
                     {
+                        cursorShape: Qt.PointingHandCursor
+                        anchors.fill: parent
                         onClicked: skipClicked();
                     }
+                }
+                Rectangle
+                {
+                    Layout.fillWidth: true
                 }
                 Button
                 {

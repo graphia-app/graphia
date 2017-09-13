@@ -203,7 +203,8 @@ RESOURCES += \
     icon-themes/icons.qrc \
     auth/keys.qrc \
     rendering/shaders.qrc \
-    ui/qml.qrc
+    ui/qml.qrc \
+    imagery.qrc
 
 mac {
     LIBS += -framework CoreFoundation

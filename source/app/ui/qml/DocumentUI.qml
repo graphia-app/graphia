@@ -1202,9 +1202,10 @@ Item
         displayButtons: true
         Text
         {
-            text: "As this is your first time openining Graphia we have opened an example Graph for you\n" +
-                  "The Graph represents the London Tube map!\n\n" +
-                  "Click next to learn about the key elements of a Graph"
+            textFormat: Text.StyledText
+            text: "As this is your first time openining Graphia we have opened an example Graph for you<br>" +
+                  "The Graph represents the <b>London Tube map!</b><br><br>" +
+                  "Click next to learn about navigation and the key elements of a Graph"
         }
         onSkipClicked: introHubble.visible = false;
         onNextClicked:
@@ -1222,16 +1223,49 @@ Item
         x: (root.width * 0.5) - childrenRect.width * 0.5
         y: 10
         displayButtons: true
-        Text
+        RowLayout
         {
-            textFormat: Text.StyledText
-            text: "A Graph in it's simplest form consists of <b>Nodes</b> and <b>Edges</b><br>" +
-                  "With the example graph Nodes represent tube stations, while edges represent a connection between<br><br>" +
-                  "<b>Zoom Graph:</b> Mouse Scrollwheel<br>" +
-                  "<b>Navigate Graph:</b> Right mouse drag<br>" +
-                  "<b>Select Node:</b> Left click a node<br><br>" +
-                  "<b>Focus Node:</b> Double click a node<br><br>" +
-                  "Click next to learn about finding content within a graph"
+            Column
+            {
+                Image
+                {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    fillMode: Image.PreserveAspectFit
+                    width: 75
+                    height: 75
+                    source: "qrc:///imagery/node.png"
+                }
+                Text
+                {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "A Node"
+                }
+                Image
+                {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    fillMode: Image.PreserveAspectFit
+                    width: 100
+                    height: 100
+                    source: "qrc:///imagery/edge.png"
+                }
+                Text
+                {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "An Edge"
+                }
+            }
+            Text
+            {
+                textFormat: Text.StyledText
+                text: "A Graph in it's simplest form consists of <b>Nodes</b> and <b>Edges</b><br>" +
+                      "With this example graph nodes represent tube stations, while edges represent a connection<br>" +
+                      "Edges always have a direction however direction can be ignored if required<br><br>" +
+                      "<b>Zoom Graph:</b> Mouse Scrollwheel<br>" +
+                      "<b>Navigate Graph:</b> Right mouse drag<br>" +
+                      "<b>Select Node:</b> Left click a node<br>" +
+                      "<b>Focus Node:</b> Double click a node<br><br>" +
+                      "Click next to learn about finding content within a graph"
+            }
         }
         onSkipClicked: nodeEdgesHubble.visible = false;
         onNextClicked:
@@ -1249,12 +1283,19 @@ Item
         target: find
         alignment: Qt.AlignBottom | Qt.AlignRight
         displayButtons: true
-        Text
+        RowLayout
         {
-            textFormat: Text.StyledText
-            text: "To perform a simple search within graph, click find /icon here/<br>" +
-                  "Try finding <b>Paddington</b> within the graph<br><br>" +
-                  "Click next to learn about inspecting node contents"
+            Text
+            {
+                textFormat: Text.StyledText
+                text: "To perform a simple search within graph, click Find<br>" +
+                      "Try finding <b>Paddington</b> within the graph<br><br>" +
+                      "Click next to learn about inspecting node contents"
+            }
+            ToolButton
+            {
+                iconName: "edit-find"
+            }
         }
         onSkipClicked: findHubble.visible = false
         onNextClicked:
@@ -1283,12 +1324,20 @@ Item
         title: "Node Attributes"
         alignment: Qt.AlignTop
         displayButtons: true
-        Text
+        RowLayout
         {
-            textFormat: Text.StyledText
-            text: "Information contained within the <b>selected</b> node will be displayed in the attribute table<br>" +
-                  "Data will be sourced from the file, additional attributes can be calculated from within Graphia<br><br>" +
-                  "Click next to learn about calculating attributes and transforming the graph"
+            Text
+            {
+                textFormat: Text.StyledText
+                text: "Information contained within the <b>selected</b> node will be displayed in the attribute table<br>" +
+                      "Data will be sourced from the file, additional attributes can be calculated from within Graphia<br><br>" +
+                      "Select a node using <b>left click</b> and view the node's attributes in the table.<br><br>" +
+                      "Click next to learn about calculating attributes and transforming the graph"
+            }
+            Image
+            {
+                source: "qrc:///imagery/attributes.png"
+            }
         }
         onSkipClicked: visible = false
         onNextClicked:
@@ -1338,9 +1387,9 @@ Item
         {
             textFormat: Text.StyledText
             text: "Visualisations modify the appearance of the Graph depending on attributes<br>" +
-                  "Node Colour, Size and Text can all be linked to an attribute<br>" +
+                  "<b>Node Colour</b>, <b>Size</b> and <b>Text</b> can all be linked to an attribute<br>" +
                   "Existing visualisations can be modified from here as well as new ones added<br><br>" +
-                  "The colour bar /picture here/ for a visualisation will allow you to change the colour scheme<br><br>"
+                  "Click the gradient bar to adjust the colour scheme if PageRank was added in the previous step<br><br>"
         }
         onSkipClicked: visible = false
         onNextClicked:
