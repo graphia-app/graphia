@@ -1,7 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
-import QtQuick.Controls 2.2
+import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 
 Item
@@ -10,17 +10,27 @@ Item
 
     default property var content
     property var _mouseArea
-    property var _padding: 10
+    property int _padding: 10
+    property alias color: backRectangle.color
 
     property var title
     property var target
     property int alignment: Qt.AlignLeft
+    property bool displayButtons: false
+    property bool hoverEnabled: false
+
+    height: backRectangle.height
+    width: backRectangle.width
+
+    signal nextClicked()
+    signal skipClicked()
 
     visible: false
     opacity: 0.0
     z: 99
 
     onContentChanged: { content.parent = containerLayout }
+    onTargetChanged: { linkToTarget() }
 
     Behavior on opacity
     {
@@ -33,7 +43,14 @@ Item
     onVisibleChanged:
     {
         if(visible)
+        {
+            if(target)
+            {
+                positionBubble();
+            }
+
             opacity = 1.0;
+        }
         else
             opacity = 0.0;
     }
@@ -47,49 +64,91 @@ Item
 
     Rectangle
     {
+        id: backRectangle
         color: Qt.rgba(0.96, 0.96, 0.96, 0.9)
         width: containerLayout.width + _padding
-        height: containerLayout.height + _padding
+        height: containerLayout.height + nextSkipButtons.height + _padding
         radius: 3
 
         ColumnLayout
         {
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-            id: containerLayout
-
-            Text
+            anchors.verticalCenter: backRectangle.verticalCenter
+            anchors.horizontalCenter: backRectangle.horizontalCenter
+            ColumnLayout
             {
-                text: title
-                font.pointSize: 15
+                id: containerLayout
+
+                Text
+                {
+                    text: title
+                    font.pointSize: 15
+                }
+            }
+            RowLayout
+            {
+                id: nextSkipButtons
+                visible: displayButtons
+                Rectangle
+                {
+                    Layout.fillWidth: true
+                }
+
+                Text
+                {
+                    text: qsTr("Skip")
+                    font.underline: true
+                    MouseArea
+                    {
+                        onClicked: skipClicked();
+                    }
+                }
+                Button
+                {
+                    id: nextButton
+                    text: qsTr("Next")
+                    onClicked:
+                    {
+                        nextClicked();
+                    }
+                }
             }
         }
     }
 
     Component.onCompleted:
     {
-        if(target === undefined)
-            target = parent;
+        linkToTarget();
+    }
 
+    function linkToTarget()
+    {
         if(target)
         {
-            var component = Qt.createComponent("HelpMouseArea.qml");
-            if (target.hoveredChanged === undefined)
-                return;
-            target.hoveredChanged.connect(function()
+            if(hoverEnabled)
             {
-                if(target.hovered)
+                var component = Qt.createComponent("HelpMouseArea.qml");
+                if(target.hoveredChanged === undefined)
+                    return;
+                target.hoveredChanged.connect(function()
                 {
-                    hoverTimer.start();
-                    root.parent = mainWindow.toolBar;
-                    positionBubble();
-                }
-                else
-                {
-                    hoverTimer.stop()
-                    root.visible = false
-                }
-            });
+                    if(target.hovered)
+                    {
+                        hoverTimer.start();
+                        root.parent = mainWindow.toolBar;
+                        positionBubble();
+                    }
+                    else
+                    {
+                        hoverTimer.stop()
+                        root.visible = false
+                    }
+                });
+            }
+            else
+            {
+                root.parent = mainWindow.toolBar;
+                positionBubble();
+            }
         }
     }
 
@@ -108,13 +167,14 @@ Item
             root.y = point.y - (childrenRect.height * 0.5);
             break;
         case Qt.AlignTop:
-            var point = target.mapToItem(parent, 0, target.width * 0.5);
-            root.x = target.width * 0.5
-            root.y = - child.height - _padding
+            var point = target.mapToItem(parent, target.width * 0.5, 0);
+            root.x = point.x - (childrenRect.width * 0.5);
+            root.y = point.y - (childrenRect.height) - _padding;
             break;
         case Qt.AlignBottom:
-            root.x = target.width * 0.5
-            root.y = target.height + _padding
+            var point = target.mapToItem(parent, target.width * 0.5, target.height);
+            root.x = point.x - (childrenRect.width * 0.5);
+            root.y = point.y + _padding;
             break;
         case Qt.AlignLeft | Qt.AlignTop:
             var point = target.mapToItem(parent, 0, 0);

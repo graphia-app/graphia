@@ -106,6 +106,8 @@ class Application : public QObject
     Q_PROPERTY(QString version READ version CONSTANT)
     Q_PROPERTY(QString copyright READ copyright CONSTANT)
     Q_PROPERTY(QString nativeExtension READ nativeExtension CONSTANT)
+    Q_PROPERTY(QString directory READ directory CONSTANT)
+
 
     Q_PROPERTY(QStringList nameFilters READ nameFilters NOTIFY nameFiltersChanged)
     Q_PROPERTY(QAbstractListModel* urlTypeDetails READ urlTypeDetails NOTIFY urlTypeDetailsChanged)
@@ -129,6 +131,8 @@ public:
     static QString copyright() { return QString(COPYRIGHT).replace("(c)", "©"); }
 
     static QString nativeExtension() { return name().toLower(); }
+
+    static QString directory() { return qApp->applicationDirPath(); }
 
     Q_INVOKABLE bool canOpen(const QString& urlTypeName) const;
     Q_INVOKABLE bool canOpenAnyOf(const QStringList& urlTypeNames) const;

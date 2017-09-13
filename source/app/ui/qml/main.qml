@@ -142,6 +142,15 @@ ApplicationWindow
         mainWindow.visible = true;
 
         application.tryToAuthenticateWithCachedCredentials();
+
+        if(misc.firstOpen)
+        {
+            var exampleFile = qmlUtils.urlForFileName(application.directory + "/examples/Simple_pairwise-London_tube_map.txt");
+            //introHubble.visible = false
+            openFileOfTypeWithPluginAndParameters(exampleFile,
+                "PairwiseTXT", "Generic",
+                {}, false);
+        }
     }
 
     onClosing:
@@ -228,6 +237,7 @@ ApplicationWindow
 
         property var fileOpenInitialFolder
         property string recentFiles
+        property var firstOpen
     }
 
     Preferences

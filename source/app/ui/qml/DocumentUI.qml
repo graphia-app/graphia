@@ -15,6 +15,7 @@ import "../../../shared/ui/qml/Utils.js" as Utils
 import "Controls"
 import "Transform"
 import "Visualisation"
+import "Controls"
 
 Item
 {
@@ -617,6 +618,7 @@ Item
 
             Transforms
             {
+                id: transforms
                 visible: plugin.loaded
 
                 anchors.right: parent.right
@@ -736,6 +738,7 @@ Item
 
             Visualisations
             {
+                id: visualisations
                 visible: plugin.loaded
 
                 anchors.right: parent.right
@@ -801,6 +804,7 @@ Item
         section: "misc"
 
         property var fileSaveInitialFolder
+        property var firstOpen
     }
 
     // This is only here to get at the default values of its properties
@@ -1185,6 +1189,164 @@ Item
         onLoadComplete:
         {
             root.loadComplete(url, success);
+        }
+    }
+
+    Hubble
+    {
+        id: introHubble
+        visible: misc.firstOpen
+        title: "Introduction"
+        x: 10
+        y: 10
+        displayButtons: true
+        Text
+        {
+            text: "As this is your first time openining Graphia we have opened an example Graph for you\n" +
+                  "The Graph represents the London Tube map!\n\n" +
+                  "Click next to learn about the key elements of a Graph"
+        }
+        onSkipClicked: introHubble.visible = false;
+        onNextClicked:
+        {
+            introHubble.visible = false;
+            nodeEdgesHubble.visible = true;
+        }
+    }
+
+    Hubble
+    {
+        id: nodeEdgesHubble
+        visible: false
+        title: "Nodes and Edges"
+        x: (root.width * 0.5) - childrenRect.width * 0.5
+        y: 10
+        displayButtons: true
+        Text
+        {
+            textFormat: Text.StyledText
+            text: "A Graph in it's simplest form consists of <b>Nodes</b> and <b>Edges</b><br>" +
+                  "With the example graph Nodes represent tube stations, while edges represent a connection between<br><br>" +
+                  "<b>Zoom Graph:</b> Mouse Scrollwheel<br>" +
+                  "<b>Navigate Graph:</b> Right mouse drag<br>" +
+                  "<b>Select Node:</b> Left click a node<br><br>" +
+                  "<b>Focus Node:</b> Double click a node<br><br>" +
+                  "Click next to learn about finding content within a graph"
+        }
+        onSkipClicked: nodeEdgesHubble.visible = false;
+        onNextClicked:
+        {
+            nodeEdgesHubble.visible = false;
+            findHubble.visible = true;
+        }
+    }
+
+    Hubble
+    {
+        id: findHubble
+        visible: false
+        title: "Search Graph"
+        target: find
+        alignment: Qt.AlignBottom | Qt.AlignRight
+        displayButtons: true
+        Text
+        {
+            textFormat: Text.StyledText
+            text: "To perform a simple search within graph, click find /icon here/<br>" +
+                  "Try finding <b>Paddington</b> within the graph<br><br>" +
+                  "Click next to learn about inspecting node contents"
+        }
+        onSkipClicked: findHubble.visible = false
+        onNextClicked:
+        {
+            findHubble.visible = false;
+            if(root.pluginPoppedOut)
+            {
+                pluginWindow.requestActivate();
+                pluginHubble.target = null;
+                pluginHubble.x = (root.width - pluginHubble.width) * 0.5
+                pluginHubble.y = root.height - pluginHubble.height - 10
+            }
+            else
+            {
+                pluginHubble.target = plugin.content.toolStrip
+            }
+
+            pluginHubble.visible = true;
+        }
+    }
+
+    Hubble
+    {
+        id: pluginHubble
+        visible: false
+        title: "Node Attributes"
+        alignment: Qt.AlignTop
+        displayButtons: true
+        Text
+        {
+            textFormat: Text.StyledText
+            text: "Information contained within the <b>selected</b> node will be displayed in the attribute table<br>" +
+                  "Data will be sourced from the file, additional attributes can be calculated from within Graphia<br><br>" +
+                  "Click next to learn about calculating attributes and transforming the graph"
+        }
+        onSkipClicked: visible = false
+        onNextClicked:
+        {
+            visible = false
+            transformHubble.visible = true;
+        }
+    }
+
+    Hubble
+    {
+        id: transformHubble
+        visible: false
+        title: "Transforms"
+        target: transforms
+        alignment: Qt.AlignLeft | Qt.AlignBottom
+        displayButtons: true
+        Text
+        {
+            textFormat: Text.StyledText
+            text: "Transforms are a powerful way to modify the graph and calculate additional attributes<br>" +
+                  "They can be used to remove nodes, collapse edges, calculate node metrics and much more<br>" +
+                  "Existing transforms will appear above <b>\"Add Transform\"</b><br><br>" +
+                  "Click <b>\"Add Transform\"</b> to bring up the add transform dialog<br>" +
+                  "Try selecting <b>\"PageRank\"</b><br>" +
+                  "Each attribute added to graph will also add a Visualisation<br>" +
+                  "Select <b>Colour</b> for the visualisation and then ok to add them<br><br>" +
+                  "Once a PageRank transform has been added, click next to learn about Visualisations"
+        }
+        onSkipClicked: visible = false
+        onNextClicked:
+        {
+            visible = false
+            visualisationsHubble.visible = true;
+        }
+    }
+
+    Hubble
+    {
+        id: visualisationsHubble
+        visible: false
+        title: "Visualisations"
+        target: visualisations
+        alignment: Qt.AlignLeft | Qt.AlignTop
+        displayButtons: true
+        Text
+        {
+            textFormat: Text.StyledText
+            text: "Visualisations modify the appearance of the Graph depending on attributes<br>" +
+                  "Node Colour, Size and Text can all be linked to an attribute<br>" +
+                  "Existing visualisations can be modified from here as well as new ones added<br><br>" +
+                  "The colour bar /picture here/ for a visualisation will allow you to change the colour scheme<br><br>"
+        }
+        onSkipClicked: visible = false
+        onNextClicked:
+        {
+            visible = false
+            introHubble.visible = true;
         }
     }
 }

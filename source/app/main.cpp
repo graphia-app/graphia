@@ -142,6 +142,8 @@ int main(int argc, char *argv[])
     preferences.define("misc/focusFoundNodes",                  true);
     preferences.define("misc/focusFoundComponents",             false);
 
+    preferences.define("misc/firstOpen",                        true);
+
     preferences.define("screenshot/width",                      1920);
     preferences.define("screenshot/height",                     1080);
     preferences.define("screenshot/path",                       QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)).toString());

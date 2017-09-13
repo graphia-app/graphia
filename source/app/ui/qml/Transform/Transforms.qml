@@ -15,6 +15,7 @@ Item
 
     property var document
 
+    property alias addTransformButton: addTransformBtn
     property color enabledTextColor
     property color disabledTextColor
     property color heldColor

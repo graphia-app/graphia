@@ -33,7 +33,7 @@ Item
         id: _gradientList
     }
 
-    RowLayout
+    ColumnLayout
     {
         id: layout
         spacing: 0
@@ -118,73 +118,6 @@ Item
                 alignment: Qt.AlignRight
 
                 onItemMoved: { document.moveVisualisation(from, to); }
-            }
-        }
-
-        ColumnLayout
-        {
-            Layout.alignment: Qt.AlignBottom
-
-            ToolButton
-            {
-                Layout.alignment:  Qt.AlignRight
-
-                // enabled may be changed externally, so have an
-                // internal visibility property that we control
-                property bool _visible: !panel.hidden && list.count > 0
-
-                enabled: _visible
-                iconName: "go-bottom"
-                tooltip: qsTr("Hide")
-
-                Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
-                opacity: _visible ? 1.0 : 0.0
-
-                onClicked: { panel.hide(); }
-            }
-
-            RowLayout
-            {
-                spacing: 0
-
-                ButtonMenu
-                {
-                    enabled: list.count > 0
-                    visible: panel.hidden || list.count === 0
-
-                    text:
-                    {
-                        return Utils.pluralise(list.count,
-                                               qsTr("visualisation"),
-                                               qsTr("visualisations"));
-                    }
-
-                    textColor: enabled ? enabledTextColor : disabledTextColor
-                    hoverColor: heldColor
-
-                    onClicked: { panel.show(); }
-                }
-
-                ToolButton
-                {
-                    iconName: "list-add"
-                    tooltip: qsTr("Add Visualisation")
-                    onClicked: { createVisualisationDialog.show(); }
-
-                    Hubble
-                    {
-                        title: "Add Visualisation"
-                        alignment: Qt.AlignLeft | Qt.AlignTop
-                        Text
-                        {
-                            text: qsTr("Visualisations use attributes to change the appearance\nof nodes and edges")
-                        }
-                        ToolButton
-                        {
-                            iconName: "document-open"
-                        }
-                    }
-                }
             }
         }
     }
