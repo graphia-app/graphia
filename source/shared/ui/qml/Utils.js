@@ -210,3 +210,39 @@ function pluralise(count, singular, plural)
 
     return count + " " + plural;
 }
+
+function setContains(set, value)
+{
+    if(typeof(set) !== "array" && typeof(set) !== "object")
+        return false;
+
+    return set.indexOf(value) > -1;
+}
+
+function setAdd(set, value)
+{
+    if(typeof(set) !== "array" && typeof(set) !== "object")
+    {
+        console.log("Utils.setAdd passed non-array");
+        return;
+    }
+
+    var found = setContains(set, value);
+
+    if(!found)
+        set.push(value);
+}
+
+function setRemove(set, value)
+{
+    if(typeof(set) !== "array" && typeof(set) !== "object")
+    {
+        console.log("Utils.setAdd passed non-array");
+        return;
+    }
+
+    var index = set.indexOf(value);
+
+    if(index > -1)
+        set.splice(index, 1);
+}
