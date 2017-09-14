@@ -167,7 +167,7 @@ void CorrelationPluginInstance::createAttributes()
     graphModel()->createAttribute(tr("Variance"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._variance; })
             .setFlag(AttributeFlag::AutoRangeMutable)
-            .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Variance">Variance</a> )" //
+            .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Variance">Variance</a> )"
                                "is a measure of the spread of the values associated "
                                "with the node. It is defined as ∑(𝑥-𝜇)², where 𝑥 is the value "
                                "and 𝜇 is the mean."));
@@ -175,10 +175,19 @@ void CorrelationPluginInstance::createAttributes()
     graphModel()->createAttribute(tr("Standard Deviation"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._stddev; })
             .setFlag(AttributeFlag::AutoRangeMutable)
-            .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Standard_deviation">)" //
+            .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Standard_deviation">)"
                                "Standard Deviation</a> is a measure of the spread of the values associated "
                                "with the node. It is defined as √∑(𝑥-𝜇)², where 𝑥 is the value "
                                "and 𝜇 is the mean."));
+
+    graphModel()->createAttribute(tr("Coefficient of Variation"))
+            .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._coefVar; })
+            .setFlag(AttributeFlag::AutoRangeMutable)
+            .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Coefficient_of_variation">)"
+                               "Coefficient of Variation</a> "
+                               "is a measure of the spread of the values associated "
+                               "with the node. It is defined as the standard deviation "
+                               "divided by the mean."));
 }
 
 std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pearsonCorrelation(

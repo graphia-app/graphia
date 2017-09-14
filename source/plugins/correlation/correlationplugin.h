@@ -105,6 +105,7 @@ private:
         double _mean = 0.0;
         double _variance = 0.0;
         double _stddev = 0.0;
+        double _coefVar = 0.0;
 
         double _minValue = std::numeric_limits<double>::max();
         double _maxValue = std::numeric_limits<double>::lowest();
@@ -135,6 +136,7 @@ private:
 
             _variance = sum / numColumns;
             _stddev = std::sqrt(_variance);
+            _coefVar = _stddev / _mean;
         }
     };
 
