@@ -140,6 +140,13 @@ Rectangle
                             return qsTr("Not Found");
                     }
                     color: "grey"
+
+                }
+
+                MouseArea
+                {
+                    anchors.fill: parent
+                    onClicked: { findField.forceActiveFocus(); }
                 }
             }
 
