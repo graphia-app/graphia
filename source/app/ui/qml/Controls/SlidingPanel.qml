@@ -48,6 +48,7 @@ Item
     }
 
     property bool initiallyOpen: true
+    property bool disableItemWhenClosed: true
 
     Component.onCompleted:
     {
@@ -70,7 +71,9 @@ Item
         if(implicitHeight >= item.height)
         {
             _resetDimensionBindings();
-            item.enabled = true;
+
+            if(disableItemWhenClosed)
+                item.enabled = true;
         }
         else
         {
@@ -127,7 +130,8 @@ Item
             if(animate)
                 drop.enabled = true;
 
-            item.enabled = false;
+            if(disableItemWhenClosed)
+                item.enabled = false;
 
             implicitHeight = 0;
 

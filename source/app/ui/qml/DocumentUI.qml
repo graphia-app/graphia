@@ -569,6 +569,7 @@ Item
                 anchors.leftMargin: -Constants.margin
 
                 initiallyOpen: false
+                disableItemWhenClosed: false
 
                 item: Find
                 {
