@@ -12,6 +12,7 @@ import com.kajeka 1.0
 import "Constants.js" as Constants
 import "Utils.js" as Utils
 
+import "Controls"
 import "Transform"
 import "Visualisation"
 
@@ -544,28 +545,39 @@ Item
                 }
             }
 
-            Column
+            Label
             {
                 anchors.left: parent.left
                 anchors.top: parent.top
                 anchors.margins: Constants.margin
-                spacing: Constants.spacing
 
-                Find
+                visible: toggleFpsMeterAction.checked
+
+                color: root.contrastingColor
+
+                horizontalAlignment: Text.AlignLeft
+                text: document.fps.toFixed(1) + qsTr(" fps")
+            }
+
+            SlidingPanel
+            {
+                id: findPanel
+
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.topMargin: -Constants.margin
+                anchors.leftMargin: -Constants.margin
+
+                initiallyOpen: false
+
+                item: Find
                 {
                     id: find
-                    visible: false
+
                     document: root
-                }
 
-                Label
-                {
-                    visible: toggleFpsMeterAction.checked
-
-                    color: root.contrastingColor
-
-                    horizontalAlignment: Text.AlignLeft
-                    text: document.fps.toFixed(1) + qsTr(" fps")
+                    onShown: { findPanel.show(); }
+                    onHidden: { findPanel.hide(); }
                 }
             }
 
@@ -1000,7 +1012,7 @@ Item
         return false;
     }
 
-    property bool findVisible: find.visible
+    property bool findVisible: !findPanel.hidden
     function showFind()
     {
         find.show();
