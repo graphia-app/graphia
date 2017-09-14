@@ -137,6 +137,8 @@ Item
 
             if(animate)
                 drop.enabled = false;
+            else
+                _hidden = true;
         }
     }
 
