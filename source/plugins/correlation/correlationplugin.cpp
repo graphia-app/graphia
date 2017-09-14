@@ -29,7 +29,7 @@ void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
     graphModel->createAttribute(tr("Pearson Correlation Value"))
             .setFloatValueFn([this](EdgeId edgeId) { return _pearsonValues->get(edgeId); })
             .setFlag(AttributeFlag::AutoRangeMutable)
-            .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">)" //
+            .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">)"
                                "Pearson Correlation Coefficient</a> is an indication of "
                                "the linear relationship between two variables."));
 }

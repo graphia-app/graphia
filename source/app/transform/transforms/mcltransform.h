@@ -39,7 +39,7 @@ public:
 
     QString description() const
     {
-        return R"(<a href="https://micans.org/mcl/">MCL - Markov Clustering</a> )" //
+        return R"(<a href="https://micans.org/mcl/">MCL - Markov Clustering</a> )"
                 "finds discrete groups (clusters) of nodes based on a flow simulation model.";
     }
     ElementType elementType() const { return ElementType::None; }

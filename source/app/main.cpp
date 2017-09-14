@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 
         QMessageBox messageBox(QMessageBox::Critical, QObject::tr("OpenGL support"),
             QObject::tr("The installed version of OpenGL is insufficient to run %1. "
-                        R"(Please install the latest <a href="%2">video drivers</a> available from )" //
+                        R"(Please install the latest <a href="%2">video drivers</a> available from )"
                         "your vendor and try again.").arg(Application::name()).arg(driversUrl),
             QMessageBox::Close);
 
