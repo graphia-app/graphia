@@ -138,11 +138,14 @@ bool CorrelationPluginInstance::normalise(const std::function<bool()>& cancelled
     return true;
 }
 
-void CorrelationPluginInstance::finishDataRowsAndCreateAttributes()
+void CorrelationPluginInstance::finishDataRows()
 {
     for(size_t row = 0; row < _numRows; row++)
         finishDataRow(row);
+}
 
+void CorrelationPluginInstance::createAttributes()
+{
     graphModel()->createAttribute(tr("Mean Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._mean; })
             .setFlag(AttributeFlag::AutoRangeMutable)
@@ -492,6 +495,8 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         auto nodeId = _userNodeData.nodeIdForRowIndex(row);
         _dataRows.emplace_back(begin, end, nodeId, computeCost);
     }
+
+    createAttributes();
 
     if(!u::contains(jsonObject, "pearsonValues"))
         return false;
