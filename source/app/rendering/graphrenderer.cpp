@@ -1509,7 +1509,8 @@ void GraphRenderer::renderScene()
 
 void GraphRenderer::render2D()
 {
-    auto index = gpuGraphDataRenderOrder().front();
+    const auto& renderOrder = gpuGraphDataRenderOrder();
+    auto index = !renderOrder.empty() ? renderOrder.front() : 0;
     auto& gpuGraphData = _gpuGraphData.at(index);
 
     if(gpuGraphData.unused())
