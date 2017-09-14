@@ -47,7 +47,15 @@ Item
         _updateAlignment();
     }
 
-    Component.onCompleted: { _resetDimensionBindings(); }
+    property bool initiallyOpen: true
+
+    Component.onCompleted:
+    {
+        if(!initiallyOpen)
+            hide(false);
+        else
+            show(false);
+    }
 
     clip: true
 
@@ -87,39 +95,55 @@ Item
         }
     }
 
-    function show()
+    function show(animate)
     {
+        if(animate === undefined)
+            animate = true;
+
         if(implicitHeight < item.height)
         {
             _hidden = false;
             animation.easing.type = Easing.OutBack;
-            drop.enabled = true;
+
+            if(animate)
+                drop.enabled = true;
 
             _resetDimensionBindings();
 
-            drop.enabled = false;
+            if(animate)
+                drop.enabled = false;
         }
     }
 
-    function hide()
+    function hide(animate)
     {
+        if(animate === undefined)
+            animate = true;
+
         if(implicitHeight >= item.height)
         {
             animation.easing.type = Easing.InBack;
-            drop.enabled = true;
+
+            if(animate)
+                drop.enabled = true;
+
             item.enabled = false;
 
             implicitHeight = 0;
 
-            drop.enabled = false;
+            if(animate)
+                drop.enabled = false;
         }
     }
 
-    function toggle()
+    function toggle(animate)
     {
+        if(animate === undefined)
+            animate = true;
+
         if(hidden)
-            show();
+            show(animate);
         else
-            hide();
+            hide(animate);
     }
 }
