@@ -177,10 +177,15 @@ private:
             case ConditionFnOp::String::Ends:
                 return [lhs, valueOfFn, rhs](E elementId) { return (lhs.*valueOfFn)(elementId).endsWith((rhs.*valueOfFn)(elementId)); };
             case ConditionFnOp::String::MatchesRegex:
+            case ConditionFnOp::String::MatchesRegexCaseInsensitive:
             {
-                return [lhs, valueOfFn, rhs](E elementId)
+                auto reOption = op == ConditionFnOp::String::MatchesRegexCaseInsensitive ?
+                            QRegularExpression::CaseInsensitiveOption :
+                            QRegularExpression::NoPatternOption;
+
+                return [lhs, valueOfFn, rhs, reOption](E elementId)
                 {
-                    QRegularExpression re((rhs.*valueOfFn)(elementId));
+                    QRegularExpression re((rhs.*valueOfFn)(elementId), reOption);
                     if(!re.isValid())
                         return false; // Regex isn't valid
 
@@ -314,8 +319,13 @@ private:
             case ConditionFnOp::String::Ends:
                 return [attribute, valueOfFn, value](E elementId) { return (attribute.*valueOfFn)(elementId).endsWith(value); };
             case ConditionFnOp::String::MatchesRegex:
+            case ConditionFnOp::String::MatchesRegexCaseInsensitive:
             {
-                QRegularExpression re(value);
+                auto reOption = op == ConditionFnOp::String::MatchesRegexCaseInsensitive ?
+                            QRegularExpression::CaseInsensitiveOption :
+                            QRegularExpression::NoPatternOption;
+
+                QRegularExpression re(value, reOption);
                 if(!re.isValid())
                     return nullptr; // Regex isn't valid
 
@@ -397,8 +407,13 @@ private:
             case ConditionFnOp::String::Starts:         return f(lhs.startsWith(rhs));
             case ConditionFnOp::String::Ends:           return f(lhs.endsWith(rhs));
             case ConditionFnOp::String::MatchesRegex:
+            case ConditionFnOp::String::MatchesRegexCaseInsensitive:
             {
-                QRegularExpression re(rhs);
+                auto reOption = op == ConditionFnOp::String::MatchesRegexCaseInsensitive ?
+                            QRegularExpression::CaseInsensitiveOption :
+                            QRegularExpression::NoPatternOption;
+
+                QRegularExpression re(rhs, reOption);
                 if(!re.isValid())
                     return nullptr; // Regex isn't valid
 

@@ -18,9 +18,9 @@ Window
     title: qsTr("Add Transform")
     modality: Qt.ApplicationModal
     flags: Qt.Window|Qt.Dialog
-    width: 800
+    width: 900
     height: 350
-    minimumWidth: 800
+    minimumWidth: 900
     minimumHeight: 350
 
     property var document
@@ -189,7 +189,7 @@ Window
                             id: opList
                             Layout.fillWidth: true
                             Layout.fillHeight: true
-                            Layout.preferredWidth: 120
+                            Layout.preferredWidth: 150
 
                             onSelectedValueChanged: { updateTransformExpression(); }
 

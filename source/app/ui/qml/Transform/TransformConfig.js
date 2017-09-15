@@ -38,22 +38,26 @@ function sanitiseOp(text)
 {
     var replacements =
     [
-        "==",       "=",
-        "!=",       "≠",
-        "<=",       "≤",
-        ">=",       "≥",
-        "&&",       "and",
-        "||",       "or",
-        "includes", "Includes",
-        "excludes", "Excludes",
-        "starts",   "Starts With",
-        "ends",     "Ends With",
-        "matches",  "Matches Regex",
-        "hasValue", "Has Value",
+        "==",                       "=",
+        "!=",                       "≠",
+        "<=",                       "≤",
+        ">=",                       "≥",
+        "&&",                       "and",
+        "||",                       "or",
+        "includes",                 "Includes",
+        "excludes",                 "Excludes",
+        "starts",                   "Starts With",
+        "ends",                     "Ends With",
+        "matches",                  "Matches Regex",
+        "matchesCaseInsensitive",   "Matches Case Insensitive Regex",
+        "hasValue",                 "Has Value",
     ];
 
     for(var i = 0; i < replacements.length; i += 2)
-        text = text.replace(replacements[i], replacements[i + 1]);
+    {
+        var regexLiteral = replacements[i].replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+        text = text.replace(new RegExp("^" + regexLiteral + "$"), replacements[i + 1]);
+    }
 
     return text;
 }

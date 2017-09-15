@@ -29,7 +29,8 @@ namespace ConditionFnOp
         Excludes,
         Starts,
         Ends,
-        MatchesRegex
+        MatchesRegex,
+        MatchesRegexCaseInsensitive,
     };
 
     enum class Unary

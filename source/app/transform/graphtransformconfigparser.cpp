@@ -92,11 +92,12 @@ struct string_op_ : x3::symbols<ConditionFnOp::String>
     string_op_()
     {
         add
-        ("includes", ConditionFnOp::String::Includes)
-        ("excludes", ConditionFnOp::String::Excludes)
-        ("starts",   ConditionFnOp::String::Starts)
-        ("ends",     ConditionFnOp::String::Ends)
-        ("matches",  ConditionFnOp::String::MatchesRegex)
+        ("includes",                ConditionFnOp::String::Includes)
+        ("excludes",                ConditionFnOp::String::Excludes)
+        ("starts",                  ConditionFnOp::String::Starts)
+        ("ends",                    ConditionFnOp::String::Ends)
+        ("matches",                 ConditionFnOp::String::MatchesRegex)
+        ("matchesCaseInsensitive",  ConditionFnOp::String::MatchesRegexCaseInsensitive)
         ;
     }
 } string_op;
