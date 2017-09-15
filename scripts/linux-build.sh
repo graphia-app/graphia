@@ -4,9 +4,13 @@
 
 NUM_CORES=$(nproc --all)
 QMAKE_SPEC=$(qmake -query QMAKE_SPEC)
+COMPILER=$(echo ${QMAKE_SPEC} | sed -e 's/linux-//')
 BEAR=$(which bear)
 BUILD_DIR="build/${QMAKE_SPEC}"
 TOP_BUILD_DIR=$(echo ${BUILD_DIR} | cut -d "/" -f1)
+
+${COMPILER} --version
+echo "NUM_CORES: ${NUM_CORES}"
 
 rm -rf ${TOP_BUILD_DIR}
 mkdir -p ${BUILD_DIR}
