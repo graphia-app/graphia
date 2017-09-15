@@ -50,7 +50,7 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> attribu
         for(auto& attribute : attributes)
         {
             auto conditionFn = CreateConditionFnFor::node(attribute,
-                ConditionFnOp::String::MatchesRegex, _regex);
+                ConditionFnOp::String::MatchesRegexCaseInsensitive, _regex);
 
             if(conditionFn != nullptr)
                 conditionFns.emplace_back(conditionFn);
