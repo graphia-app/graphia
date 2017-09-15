@@ -1,5 +1,13 @@
 #! /bin/bash
 
+for ARGUMENT in "$@"
+do
+  if [ -e ${ARGUMENT} ]
+  then
+    . ${ARGUMENT}
+  fi
+done
+
 NUM_CORES=$(nproc --all)
 
 # cppcheck

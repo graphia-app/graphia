@@ -2,6 +2,14 @@
 
 . scripts/defaults.sh
 
+for ARGUMENT in "$@"
+do
+  if [ -e ${ARGUMENT} ]
+  then
+    . ${ARGUMENT}
+  fi
+done
+
 NUM_CORES=$(nproc --all)
 QMAKE_SPEC=$(qmake -query QMAKE_SPEC)
 COMPILER=$(echo ${QMAKE_SPEC} | sed -e 's/linux-//')
