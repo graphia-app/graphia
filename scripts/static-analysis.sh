@@ -3,6 +3,7 @@
 NUM_CORES=$(nproc --all)
 
 # cppcheck
+cppcheck --version
 find source/app \
   source/shared \
   source/plugins \
@@ -19,6 +20,7 @@ CHECKS="-checks=*,\
 -google-*,\
 -clang-analyzer-alpha.deadcode.UnreachableCode"
 
+clang-tidy --version
 clang-tidy -p build/linux-clang -list-checks ${CHECKS}
 find source/app \
   source/shared \
@@ -28,6 +30,7 @@ find source/app \
   xargs -n1 -P${NUM_CORES} clang-tidy ${CHECKS}
 
 # qmllint
+qmllint --version
 find source/app \
   source/shared \
   source/plugins \
