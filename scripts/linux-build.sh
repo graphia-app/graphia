@@ -4,9 +4,13 @@
 
 for ARGUMENT in "$@"
 do
+  echo -n "Sourcing ${ARGUMENT}"
   if [ -e ${ARGUMENT} ]
   then
+    echo "..."
     . ${ARGUMENT}
+  else
+    echo "...doesn't exist"
   fi
 done
 
