@@ -87,9 +87,10 @@ PluginContent
 
     function load(data, version)
     {
-        urlTemplate.currentIndex = data.urlIndex;
+        if(data.urlIndex !== undefined)
+            urlTemplate.currentIndex = data.urlIndex;
 
-        if(urlTemplate.currentIndex < 0)
+        if(urlTemplate.currentIndex < 0 && data.customUrl !== undefined)
             urlTemplate.editText = data.customUrl;
     }
 }

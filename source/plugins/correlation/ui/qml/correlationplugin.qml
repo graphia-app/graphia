@@ -221,12 +221,12 @@ PluginContent
 
     function load(data, version)
     {
-        toggleUiOrientationAction.checked = data.sideBySide;
-        toggleCalculatedAttributes.checked = data.showCalculatedAttributes;
-        toggleColumnNamesAction.checked = data.showColumnNames;
-        tableView.sortIndicatorColumn = data.sortColumn;
-        tableView.sortIndicatorOrder = data.sortOrder;
-        tableView.hiddenColumns = data.hiddenColumns;
+        if(data.sideBySide !== undefined)               toggleUiOrientationAction.checked = data.sideBySide;
+        if(data.showCalculatedAttributes !== undefined) toggleCalculatedAttributes.checked = data.showCalculatedAttributes;
+        if(data.showColumnNames !== undefined)          toggleColumnNamesAction.checked = data.showColumnNames;
+        if(data.sortColumn !== undefined)               tableView.sortIndicatorColumn = data.sortColumn;
+        if(data.sortOrder !== undefined)                tableView.sortIndicatorOrder = data.sortOrder;
+        if(data.hiddenColumns !== undefined)            tableView.hiddenColumns = data.hiddenColumns;
     }
 }
 

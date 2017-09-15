@@ -86,8 +86,8 @@ PluginContent
 
     function load(data, version)
     {
-        toggleCalculatedAttributes.checked = data.showCalculatedAttributes;
-        tableView.sortIndicatorColumn = data.sortColumn;
-        tableView.sortIndicatorOrder = data.sortOrder;
+        if(data.showCalculatedAttributes !== undefined) toggleCalculatedAttributes.checked = data.showCalculatedAttributes;
+        if(data.sortColumn !== undefined)               tableView.sortIndicatorColumn = data.sortColumn;
+        if(data.sortOrder !== undefined)                tableView.sortIndicatorOrder = data.sortOrder;
     }
 }
