@@ -1211,6 +1211,49 @@ Item
         onNextClicked:
         {
             introHubble.visible = false;
+            overviewHubble.visible = true;
+        }
+    }
+
+    Hubble
+    {
+        id: overviewHubble
+        visible: false
+        title: "Overview Mode"
+        x: (root.width * 0.5) - childrenRect.width * 0.5
+        y: 10
+        displayButtons: true
+        RowLayout
+        {
+            ColumnLayout
+            {
+                ToolButton
+                {
+                    iconName: "go-next"
+                }
+                ToolButton
+                {
+                    iconName: "go-previous"
+                }
+            }
+            Text
+            {
+                textFormat: Text.StyledText
+                text: "When a file contains multiple graphs (Components) Graphia opens<br>" +
+                      "the file in Overview mode. From Overview mode all components are visible.<br><br>" +
+                      "To focus on a particular component and hide others, <b>double click</b><br>" +
+                      "the component. When inspecting a component, double click the background or press<br>" +
+                      "<b>Esc</b> to return to Overview mode<br><br>" +
+                      "<b>Inspect Component:</b> Double Click component<br>" +
+                      "<b>Return to overview:</b> Double Click background or Esc<br>" +
+                      "<b>Navigate components:</b> Pg-up, Pg-down<br><br>" +
+                      "Click next to learn about the overall structure in a graph"
+            }
+        }
+        onSkipClicked: overviewHubble.visible = false;
+        onNextClicked:
+        {
+            overviewHubble.visible = false;
             nodeEdgesHubble.visible = true;
         }
     }
@@ -1257,7 +1300,7 @@ Item
             Text
             {
                 textFormat: Text.StyledText
-                text: "A Graph in it's simplest form consists of <b>Nodes</b> and <b>Edges</b><br>" +
+                text: "A Graph in its simplest form consists of <b>Nodes</b> and <b>Edges</b><br>" +
                       "With this example graph nodes represent tube stations, while edges represent a connection<br>" +
                       "Edges always have a direction however direction can be ignored if required<br><br>" +
                       "<b>Zoom Graph:</b> Mouse Scrollwheel<br>" +
