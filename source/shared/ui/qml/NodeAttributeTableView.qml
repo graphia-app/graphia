@@ -5,48 +5,21 @@ import SortFilterProxyModel 0.2
 
 import "Utils.js" as Utils
 
-TableView
+Item
 {
-    id: tableView
-
-    Component
-    {
-        id: columnComponent
-        TableViewColumn { width: 200 }
-    }
+    id: root
 
     property var nodeAttributesModel
 
     property bool showCalculatedAttributes: true
-    onShowCalculatedAttributesChanged: { tableView.updateColumnVisibility(); }
+    onShowCalculatedAttributesChanged: { tableView._updateColumnVisibility(); }
 
     property var hiddenColumns: []
-    onHiddenColumnsChanged: { tableView.updateColumnVisibility(); }
+    onHiddenColumnsChanged: { tableView._updateColumnVisibility(); }
 
-    function setColumnVisibility(columnName, columnVisible)
-    {
-        if(columnVisible)
-            Utils.setRemove(hiddenColumns, columnName);
-        else
-            Utils.setAdd(hiddenColumns, columnName);
+    property var selectedRows: []
 
-        updateColumnVisibility();
-    }
-
-    function updateColumnVisibility()
-    {
-        for(var i = 0; i < tableView.columnCount; i++)
-        {
-            var tableViewColumn = tableView.getColumn(i);
-            var hidden = Utils.setContains(hiddenColumns, tableViewColumn.role);
-            var showIfCalculated = !nodeAttributesModel.columnIsCalculated(tableViewColumn.role) || showCalculatedAttributes;
-
-            tableViewColumn.visible = !hidden && showIfCalculated;
-        }
-    }
-
-    sortIndicatorVisible: true
-    property string sortRoleName:
+    readonly property string sortRoleName:
     {
         if(nodeAttributesModel.columnNames.length > 0 &&
            nodeAttributesModel.columnNames[sortIndicatorColumn] !== undefined)
@@ -57,98 +30,30 @@ TableView
         return "";
     }
 
-    function createModel()
-    {
-        model = proxyModelComponent.createObject(tableView,
-            {"columnNames": nodeAttributesModel.columnNames});
-
-        // Dynamically create the columns
-        while(columnCount > 0)
-            tableView.removeColumn(0);
-
-        for(var i = 0; i < nodeAttributesModel.columnNames.length; i++)
-        {
-            var columnName  = nodeAttributesModel.columnNames[i];
-            tableView.addColumn(columnComponent.createObject(tableView,
-                {"role": columnName, "title": columnName}));
-        }
-
-        // Snap the view back to the start
-        // Tableview can be left scrolled out of bounds if column count reduces
-        tableView.flickableItem.contentX = 0;
-    }
-
-    Connections
-    {
-        target: nodeAttributesModel
-        onColumnNamesChanged:
-        {
-            // Hack - TableView doesn't respond to rolenames changes
-            // so instead we recreate the model to force an update
-            createModel();
-            populateTableMenu(tableMenu);
-        }
-    }
-
-    Component.onCompleted: { createModel(); }
-
-    Component
-    {
-        id: proxyModelComponent
-
-        SortFilterProxyModel
-        {
-            sourceModel: nodeAttributesModel
-            sortRoleName: tableView.sortRoleName
-            ascendingSortOrder: tableView.sortIndicatorOrder === Qt.AscendingOrder
-
-            filterRoleName: 'nodeSelected'; filterValue: true
-
-            // NodeAttributeTableModel fires layoutChanged whenever the nodeSelected role
-            // changes which in turn affects which rows the model reflects. When the visible
-            // rows change, we emit a signal so that the owners of the TableView can react.
-            // Qt.callLater is used because otherwise the signal is emitted before the
-            // TableView has had a chance to update.
-            onLayoutChanged: { Qt.callLater(visibleRowsChanged); }
-        }
-    }
+    property alias sortIndicatorOrder: tableView.sortIndicatorOrder
+    property alias sortIndicatorColumn: tableView.sortIndicatorColumn
+    property alias selection: tableView.selection
+    property alias rowCount: tableView.rowCount
 
     signal visibleRowsChanged();
 
-    selectionMode: SelectionMode.ExtendedSelection
-
-    property var selectedRows: []
-
-    // Implementing selectedRows using a binding results in a binding loop,
-    // for some reason, so do it by connection instead
-    Connections
+    function setColumnVisibility(columnName, columnVisible)
     {
-        target: selection
-        onSelectionChanged:
-        {
-            var rows = [];
-            tableView.selection.forEach(function(rowIndex)
-            {
-                rows.push(model.mapToSource(rowIndex));
-            });
+        if(columnVisible)
+            Utils.setRemove(hiddenColumns, columnName);
+        else
+            Utils.setAdd(hiddenColumns, columnName);
 
-            selectedRows = rows;
-        }
-    }
-
-    onDoubleClicked:
-    {
-        var mappedRow = model.mapToSource(row);
-        nodeAttributesModel.focusNodeForRowIndex(mappedRow);
+        tableView._updateColumnVisibility();
     }
 
     // Work around for QTBUG-58594
     function resizeColumnsToContentsBugWorkaround()
     {
-        for(var i = 0; i < columnCount; ++i)
+        for(var i = 0; i < tableView.columnCount; ++i)
         {
-            var col = getColumn(i);
-            var header = __listView.headerItem.headerRepeater.itemAt(i);
+            var col = tableView.getColumn(i);
+            var header = tableView.__listView.headerItem.headerRepeater.itemAt(i);
             if(col)
             {
                 col.__index = i;
@@ -159,8 +64,6 @@ TableView
         }
     }
 
-    // This is just a reference to the menu, so we can repopulate it later as necessary
-    property Menu tableMenu
 
     function populateTableMenu(menu)
     {
@@ -206,7 +109,7 @@ TableView
             // This is just to let the hide/show all functions know this is a menu item
             menuItem.showColumnNameTag = columnName;
 
-            menuItem.checked = !Utils.setContains(tableView.hiddenColumns, columnName);
+            menuItem.checked = !Utils.setContains(hiddenColumns, columnName);
 
             if(plugin.model.nodeAttributeTableModel.columnIsCalculated(columnName))
             {
@@ -218,12 +121,148 @@ TableView
 
             menuItem.toggled.connect(function(checked)
             {
-                tableView.setColumnVisibility(columnName, checked);
+                root.setColumnVisibility(columnName, checked);
             });
         });
 
-        tableMenu = menu;
+        tableView._tableMenu = menu;
         Utils.cloneMenu(menu, contextMenu);
+    }
+
+    Label
+    {
+        text: qsTr("No Visible Columns")
+        visible: tableView.numVisibleColumns <= 0
+
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+    }
+
+    TableView
+    {
+        id: tableView
+
+        visible: numVisibleColumns > 0
+        anchors.fill: parent
+
+        readonly property int numVisibleColumns:
+        {
+            var count = 0;
+
+            for(var i = 0; i < tableView.columnCount; i++)
+            {
+                var tableViewColumn = tableView.getColumn(i);
+
+                if(tableViewColumn.visible)
+                    count++;
+            }
+
+            return count;
+        }
+
+        Component
+        {
+            id: columnComponent
+            TableViewColumn { width: 200 }
+        }
+
+        function _updateColumnVisibility()
+        {
+            for(var i = 0; i < tableView.columnCount; i++)
+            {
+                var tableViewColumn = tableView.getColumn(i);
+                var hidden = Utils.setContains(root.hiddenColumns, tableViewColumn.role);
+                var showIfCalculated = !root.nodeAttributesModel.columnIsCalculated(tableViewColumn.role) || root.showCalculatedAttributes;
+
+                tableViewColumn.visible = !hidden && showIfCalculated;
+            }
+        }
+
+        sortIndicatorVisible: true
+
+        function _createModel()
+        {
+            model = proxyModelComponent.createObject(tableView,
+                {"columnNames": root.nodeAttributesModel.columnNames});
+
+            // Dynamically create the columns
+            while(columnCount > 0)
+                tableView.removeColumn(0);
+
+            for(var i = 0; i < root.nodeAttributesModel.columnNames.length; i++)
+            {
+                var columnName  = root.nodeAttributesModel.columnNames[i];
+                tableView.addColumn(columnComponent.createObject(tableView,
+                    {"role": columnName, "title": columnName}));
+            }
+
+            // Snap the view back to the start
+            // Tableview can be left scrolled out of bounds if column count reduces
+            tableView.flickableItem.contentX = 0;
+        }
+
+        Connections
+        {
+            target: root.nodeAttributesModel
+            onColumnNamesChanged:
+            {
+                // Hack - TableView doesn't respond to rolenames changes
+                // so instead we recreate the model to force an update
+                createModel();
+                populateTableMenu(tableMenu);
+            }
+        }
+
+        Component.onCompleted: { _createModel(); }
+
+        Component
+        {
+            id: proxyModelComponent
+
+            SortFilterProxyModel
+            {
+                sourceModel: root.nodeAttributesModel
+                sortRoleName: root.sortRoleName
+                ascendingSortOrder: tableView.sortIndicatorOrder === Qt.AscendingOrder
+
+                filterRoleName: 'nodeSelected'; filterValue: true
+
+                // NodeAttributeTableModel fires layoutChanged whenever the nodeSelected role
+                // changes which in turn affects which rows the model reflects. When the visible
+                // rows change, we emit a signal so that the owners of the TableView can react.
+                // Qt.callLater is used because otherwise the signal is emitted before the
+                // TableView has had a chance to update.
+                onLayoutChanged: { Qt.callLater(root.visibleRowsChanged); }
+            }
+        }
+
+        selectionMode: SelectionMode.ExtendedSelection
+
+        // Implementing selectedRows using a binding results in a binding loop,
+        // for some reason, so do it by connection instead
+        Connections
+        {
+            target: tableView.selection
+            onSelectionChanged:
+            {
+                var rows = [];
+                tableView.selection.forEach(function(rowIndex)
+                {
+                    rows.push(tableView.model.mapToSource(rowIndex));
+                });
+
+                root.selectedRows = rows;
+            }
+        }
+
+        onDoubleClicked:
+        {
+            var mappedRow = model.mapToSource(row);
+            root.nodeAttributesModel.focusNodeForRowIndex(mappedRow);
+        }
+
+        // This is just a reference to the menu, so we can repopulate it later as necessary
+        property Menu _tableMenu
     }
 
     Menu { id: contextMenu }
@@ -236,6 +275,6 @@ TableView
         anchors.fill: parent
         acceptedButtons: Qt.RightButton
         propagateComposedEvents: true
-        onClicked: { rightClick(); }
+        onClicked: { root.rightClick(); }
     }
 }
