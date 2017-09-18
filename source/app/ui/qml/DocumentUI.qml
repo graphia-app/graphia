@@ -448,7 +448,7 @@ Item
                 Label
                 {
                     id: emptyGraphLabel
-                    text: "Empty Graph"
+                    text: qsTr("Empty Graph")
                     font.pixelSize: 48
                     color: root.contrastingColor
                     opacity: 0.0
