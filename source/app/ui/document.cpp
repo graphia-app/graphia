@@ -713,7 +713,7 @@ void Document::deleteNode(QmlNodeId nodeId)
         return;
 
     _commandManager.execute(std::make_unique<DeleteNodesCommand>(_graphModel.get(),
-        _selectionManager.get(), NodeIdSet{nodeId}));
+        _selectionManager.get(), std::move(NodeIdSet{nodeId})));
 }
 
 void Document::deleteSelectedNodes()
@@ -725,7 +725,7 @@ void Document::deleteSelectedNodes()
         return;
 
     _commandManager.execute(std::make_unique<DeleteNodesCommand>(_graphModel.get(),
-        _selectionManager.get(), _selectionManager->selectedNodes()));
+        _selectionManager.get(), std::move(_selectionManager->selectedNodes())));
 }
 
 void Document::resetView()

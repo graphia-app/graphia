@@ -98,8 +98,8 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
 
             // Normalise result
             float sum = 0.0f;
-            for(size_t i = 0UL; i < newPageRankVector.size(); ++i )
-                sum += newPageRankVector[i];
+            for(auto value : newPageRankVector)
+                sum += value;
              newPageRankVector = newPageRankVector / sum;
 
             // Detect PR Change

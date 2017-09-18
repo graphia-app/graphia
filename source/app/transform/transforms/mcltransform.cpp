@@ -425,14 +425,6 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
             expandAndPruneRow(clusterMatrix, iterator, &matrixStorage[iterator], rowData, MCL_PRUNE_LIMIT);
         }, true);
 
-        int totalThreadedTime = 0;
-        if(_debugIteration)
-        {
-            totalThreadedTime = threadedTimer.restart();
-            qDebug() << "Threaded Expansion Calculation time ms" << totalThreadedTime;
-            threadedTimer.restart();
-        }
-
         size_t newNNZCount = 0;
         for(auto& column : matrixStorage)
             newNNZCount += column.size();
@@ -453,7 +445,6 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
         if(_debugIteration)
         {
             int populationTime = threadedTimer.restart();
-            totalThreadedTime += populationTime;
             qDebug() << "Threaded Expansion Population time LL ms" << populationTime;
 
             qDebug() << "Expand nnz" << clusterMatrix.nonZeros();

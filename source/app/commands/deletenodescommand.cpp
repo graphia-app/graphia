@@ -8,11 +8,11 @@
 
 DeleteNodesCommand::DeleteNodesCommand(GraphModel* graphModel,
                                        SelectionManager* selectionManager,
-                                       const NodeIdSet& nodeIds) :
+                                       NodeIdSet nodeIds) :
     _graphModel(graphModel),
     _selectionManager(selectionManager),
     _selectedNodeIds(_selectionManager->selectedNodes()),
-    _nodeIds(nodeIds)
+    _nodeIds(std::move(nodeIds))
 {
     _multipleNodes = (_nodeIds.size() > 1);
 }

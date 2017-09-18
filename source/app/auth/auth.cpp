@@ -56,8 +56,8 @@ static Auth::AesKey generateKey()
 
     C::AutoSeededRandomPool rng;
 
-    rng.GenerateBlock(key._aes, sizeof(key._aes));
-    rng.GenerateBlock(key._iv, sizeof(key._iv));
+    rng.GenerateBlock(static_cast<byte*>(key._aes), sizeof(key._aes));
+    rng.GenerateBlock(static_cast<byte*>(key._iv), sizeof(key._iv));
 
     return key;
 }
@@ -99,7 +99,7 @@ static std::vector<byte> hexToBytes(const std::string& string)
         for(size_t i = 0; i < string.length(); i += 2)
         {
             auto byteString = string.substr(i, 2);
-            auto b = static_cast<byte>(std::strtol(byteString.data(), NULL, 16));
+            auto b = static_cast<byte>(std::strtol(byteString.data(), nullptr, 16));
             bytes.push_back(b);
         }
     }
@@ -116,7 +116,7 @@ static std::string hexToString(const std::string& string)
         for(size_t i = 0; i < string.length(); i += 2)
         {
             auto byteString = string.substr(i, 2);
-            auto b = static_cast<char>(std::strtol(byteString.data(), NULL, 16));
+            auto b = static_cast<char>(std::strtol(byteString.data(), nullptr, 16));
             output.push_back(b);
         }
     }
@@ -195,7 +195,7 @@ static std::string aesDecryptBytes(const std::vector<byte>& bytes, const Auth::A
 {
     std::vector<byte> outBytes(bytes.size());
 
-    C::CFB_Mode<C::AES>::Decryption decryption(aesKey._aes, sizeof(aesKey._aes), aesKey._iv);
+    C::CFB_Mode<C::AES>::Decryption decryption(static_cast<const byte*>(aesKey._aes), sizeof(aesKey._aes), aesKey._iv);
     decryption.ProcessData(outBytes.data(), bytes.data(), bytes.size());
 
     return std::string(reinterpret_cast<const char*>(outBytes.data()), outBytes.size());
@@ -205,7 +205,7 @@ static std::string aesDecryptString(const std::string& string, const Auth::AesKe
 {
     std::vector<byte> outBytes(string.size());
 
-    C::CFB_Mode<C::AES>::Decryption decryption(aesKey._aes, sizeof(aesKey._aes), aesKey._iv);
+    C::CFB_Mode<C::AES>::Decryption decryption(static_cast<const byte*>(aesKey._aes), sizeof(aesKey._aes), aesKey._iv);
     decryption.ProcessData(outBytes.data(), reinterpret_cast<const byte*>(string.data()), string.size());
 
     return std::string(reinterpret_cast<const char*>(outBytes.data()), outBytes.size());
@@ -218,7 +218,7 @@ static std::string aesEncryptString(const std::string& string, const Auth::AesKe
 
     std::vector<byte> outBytes(bytesSize);
 
-    C::CFB_Mode<C::AES>::Encryption encryption(aesKey._aes, sizeof(aesKey._aes), aesKey._iv);
+    C::CFB_Mode<C::AES>::Encryption encryption(static_cast<const byte*>(aesKey._aes), sizeof(aesKey._aes), aesKey._iv);
     encryption.ProcessData(outBytes.data(), inBytes, bytesSize);
 
     return bytesToHex(outBytes);

@@ -54,9 +54,9 @@ private:
 
 public:
     TransformCache(GraphModel& graphModel);
-    TransformCache(const TransformCache& other);
-    TransformCache(TransformCache&& other);
-    TransformCache& operator=(TransformCache&& other);
+    TransformCache(const TransformCache& other) = default;
+    TransformCache(TransformCache&& other) = default;
+    TransformCache& operator=(TransformCache&& other) noexcept;
 
     bool empty() const { return _cache.empty(); }
     void clear() { _cache.clear(); }

@@ -53,14 +53,14 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, const
         progressFn((bytePosition * 100) / totalBytes);
 
         zstream.avail_in = numBytes;
-        zstream.next_in = inBuffer;
+        zstream.next_in = static_cast<z_const Bytef*>(inBuffer);
         flush = input.atEnd() ? Z_FINISH : Z_NO_FLUSH;
 
         do
         {
             unsigned char outBuffer[ChunkSize];
             zstream.avail_out = ChunkSize;
-            zstream.next_out = outBuffer;
+            zstream.next_out = static_cast<Bytef*>(outBuffer);
 
             ret = deflate(&zstream, flush);
             Q_ASSERT(ret != Z_STREAM_ERROR);

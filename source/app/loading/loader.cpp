@@ -71,13 +71,13 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
         if(zstream.avail_in == 0)
             break;
 
-        zstream.next_in = inBuffer;
+        zstream.next_in = static_cast<z_const Bytef*>(inBuffer);
 
         do
         {
             unsigned char outBuffer[ChunkSize];
             zstream.avail_out = ChunkSize;
-            zstream.next_out = outBuffer;
+            zstream.next_out = static_cast<Bytef*>(outBuffer);
 
             ret = inflate(&zstream, Z_NO_FLUSH);
             Q_ASSERT(ret != Z_STREAM_ERROR);
@@ -131,8 +131,8 @@ static bool load(const QString& filePath, QByteArray& byteArray,
         const int ChunkSize = 2 << 16;
         char buffer[ChunkSize];
 
-        auto numBytes = input.readRawData(buffer, ChunkSize);
-        byteArray.append(buffer, numBytes);
+        auto numBytes = input.readRawData(static_cast<char*>(buffer), ChunkSize);
+        byteArray.append(static_cast<char*>(buffer), numBytes);
 
         bytesRead += numBytes;
         progressFn((bytesRead * 100) / totalBytes);

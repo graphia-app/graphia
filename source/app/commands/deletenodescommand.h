@@ -24,7 +24,7 @@ private:
 public:
     DeleteNodesCommand(GraphModel* graphModel,
                        SelectionManager* selectionManager,
-                       const NodeIdSet& nodeIds);
+                       NodeIdSet nodeIds);
 
     QString description() const;
     QString verb() const;
