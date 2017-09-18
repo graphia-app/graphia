@@ -34,7 +34,7 @@ mkdir -p ${BUILD_DIR}
 
   if [ ! -z "${BEAR}" ] && [ ${QMAKE_SPEC} = "linux-clang" ]
   then
-    rm -f compile_command.json
+    rm -f compile_commands.json
     echo "Building with ${BEAR}"
     ${BEAR} make -O -j${NUM_CORES} || exit $?
   else
