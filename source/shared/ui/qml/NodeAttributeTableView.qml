@@ -3,6 +3,8 @@ import QtQuick.Controls 1.5
 
 import SortFilterProxyModel 0.2
 
+import com.kajeka 1.0
+
 import "Utils.js" as Utils
 
 Item
@@ -264,6 +266,47 @@ Item
 
         // This is just a reference to the menu, so we can repopulate it later as necessary
         property Menu _tableMenu
+
+        // Ripped more or less verbatim from qtquickcontrols/src/controls/Styles/Desktop/TableViewStyle.qml
+        // except for the text property
+        itemDelegate: Item
+        {
+            height: Math.max(16, label.implicitHeight)
+            property int implicitWidth: label.implicitWidth + 16
+
+            Text
+            {
+                id: label
+                objectName: "label"
+                width: parent.width
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: styleData.hasOwnProperty("depth") && styleData.column === 0 ? 0 :
+                                    horizontalAlignment === Text.AlignRight ? 1 : 8
+                anchors.rightMargin: (styleData.hasOwnProperty("depth") && styleData.column === 0)
+                                     || horizontalAlignment !== Text.AlignRight ? 1 : 8
+                horizontalAlignment: styleData.textAlignment
+                anchors.verticalCenter: parent.verticalCenter
+                elide: styleData.elideMode
+
+                text:
+                {
+                    if(styleData.value === undefined)
+                        return "";
+
+                    var column = tableView.getColumn(styleData.column);
+
+                    if(column !== null && nodeAttributesModel.columnIsFloatingPoint(column.role))
+                        return Utils.formatForDisplay(styleData.value, 1);
+
+                    return styleData.value;
+                }
+
+                color: styleData.textColor
+                renderType: Text.NativeRendering
+            }
+        }
+
     }
 
     Menu { id: contextMenu }
