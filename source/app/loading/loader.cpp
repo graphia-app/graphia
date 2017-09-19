@@ -85,7 +85,6 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
             switch(ret)
             {
             case Z_NEED_DICT:
-                ret = Z_DATA_ERROR;
             case Z_DATA_ERROR:
             case Z_MEM_ERROR:
                 return false;
@@ -99,8 +98,8 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
             if(maxReadSize >= 0 && bytesDecompressed >= static_cast<uint64_t>(maxReadSize))
                 return true;
 
-        } while (zstream.avail_out == 0);
-    } while (ret != Z_STREAM_END);
+        } while(zstream.avail_out == 0);
+    } while(ret != Z_STREAM_END);
 
     return true;
 }

@@ -63,7 +63,8 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, const
             zstream.next_out = static_cast<Bytef*>(outBuffer);
 
             ret = deflate(&zstream, flush);
-            Q_ASSERT(ret != Z_STREAM_ERROR);
+            if(ret == Z_STREAM_ERROR)
+                return false;
 
             numBytes = ChunkSize - zstream.avail_out;
             if(output.writeRawData(reinterpret_cast<const char*>(outBuffer), numBytes) != numBytes)
