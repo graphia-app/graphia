@@ -297,6 +297,36 @@ ComponentId Graph::componentIdOfLargestComponent() const
     return componentIdOfLargestComponent(componentIds());
 }
 
+std::vector<NodeId> Graph::sourcesOf(NodeId nodeId) const
+{
+    std::vector<NodeId> nodeIds;
+
+    const auto& node = nodeById(nodeId);
+
+    for(auto edgeId : node.inEdgeIds())
+    {
+        const auto& edge = edgeById(edgeId);
+        nodeIds.emplace_back(edge.oppositeId(nodeId));
+    }
+
+    return nodeIds;
+}
+
+std::vector<NodeId> Graph::targetsOf(NodeId nodeId) const
+{
+    std::vector<NodeId> nodeIds;
+
+    const auto& node = nodeById(nodeId);
+
+    for(auto edgeId : node.outEdgeIds())
+    {
+        const auto& edge = edgeById(edgeId);
+        nodeIds.emplace_back(edge.oppositeId(nodeId));
+    }
+
+    return nodeIds;
+}
+
 std::vector<NodeId> Graph::neighboursOf(NodeId nodeId) const
 {
     std::vector<NodeId> nodeIds;

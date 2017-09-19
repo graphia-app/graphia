@@ -274,9 +274,15 @@ public:
 
     Q_INVOKABLE void toggleLayout();
 
+    Q_INVOKABLE bool nodeIsSelected(QmlNodeId nodeId) const;
+
     Q_INVOKABLE void selectAll();
     Q_INVOKABLE void selectAllVisible();
     Q_INVOKABLE void selectNone();
+    Q_INVOKABLE void selectSources();
+    Q_INVOKABLE void selectSourcesOf(QmlNodeId nodeId);
+    Q_INVOKABLE void selectTargets();
+    Q_INVOKABLE void selectTargetsOf(QmlNodeId nodeId);
     Q_INVOKABLE void selectNeighbours();
     Q_INVOKABLE void selectNeighboursOf(QmlNodeId nodeId);
     Q_INVOKABLE void invertSelection();

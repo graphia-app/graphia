@@ -605,6 +605,14 @@ void Document::onLoadComplete(const QUrl&, bool success)
                 _graphModel->graph().numComponents()));
 }
 
+bool Document::nodeIsSelected(QmlNodeId nodeId) const
+{
+    if(_selectionManager == nullptr)
+        return false;
+
+    return _selectionManager->nodeIsSelected(nodeId);
+}
+
 void Document::selectAll()
 {
     if(!idle() || _selectionManager == nullptr)
@@ -646,6 +654,66 @@ void Document::selectNone()
         _commandManager.executeOnce({tr("Select None"), tr("Selecting None")},
             [this](Command&) { return _selectionManager->clearNodeSelection(); });
     }
+}
+
+void Document::selectSources()
+{
+    if(!idle() || _selectionManager == nullptr)
+        return;
+
+    auto selectedNodeIds = _selectionManager->selectedNodes();
+    NodeIdSet nodeIds = selectedNodeIds;
+
+    for(auto nodeId : selectedNodeIds)
+    {
+        auto sources = _graphModel->graph().sourcesOf(nodeId);
+        nodeIds.insert(sources.begin(), sources.end());
+    }
+
+    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
+}
+
+void Document::selectSourcesOf(QmlNodeId nodeId)
+{
+    if(!idle())
+        return;
+
+    NodeIdSet nodeIds = {nodeId};
+
+    auto sources = _graphModel->graph().sourcesOf(nodeId);
+    nodeIds.insert(sources.begin(), sources.end());
+
+    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
+}
+
+void Document::selectTargets()
+{
+    if(!idle() || _selectionManager == nullptr)
+        return;
+
+    auto selectedNodeIds = _selectionManager->selectedNodes();
+    NodeIdSet nodeIds = selectedNodeIds;
+
+    for(auto nodeId : selectedNodeIds)
+    {
+        auto targets = _graphModel->graph().targetsOf(nodeId);
+        nodeIds.insert(targets.begin(), targets.end());
+    }
+
+    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
+}
+
+void Document::selectTargetsOf(QmlNodeId nodeId)
+{
+    if(!idle())
+        return;
+
+    NodeIdSet nodeIds = {nodeId};
+
+    auto targets = _graphModel->graph().targetsOf(nodeId);
+    nodeIds.insert(targets.begin(), targets.end());
+
+    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
 }
 
 void Document::selectNeighbours()

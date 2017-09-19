@@ -301,10 +301,15 @@ Item
     }
 
     function toggleLayout() { document.toggleLayout(); }
+    function nodeIsSelected(nodeId) { return document.nodeIsSelected(nodeId); }
     function selectAll() { document.selectAll(); }
     function selectAllVisible() { document.selectAllVisible(); }
     function selectNone() { document.selectNone(); }
     function invertSelection() { document.invertSelection(); }
+    function selectSources() { document.selectSources(); }
+    function selectSourcesOf(nodeId) { document.selectSourcesOf(nodeId); }
+    function selectTargets() { document.selectTargets(); }
+    function selectTargetsOf(nodeId) { document.selectTargetsOf(nodeId); }
     function selectNeighbours() { document.selectNeighbours(); }
     function selectNeighboursOf(nodeId) { document.selectNeighboursOf(nodeId); }
     function undo() { document.undo(); }
@@ -363,7 +368,23 @@ Item
 
     Action
     {
-        id: selectNeighbourOfNodeAction
+        id: selectSourcesOfNodeAction
+        text: qsTr("Select Sources of '") + contextMenu.clickedNodeName + qsTr("'")
+        enabled: idle && contextMenu.nodeWasClicked
+        onTriggered: { selectSourcesOf(contextMenu.clickedNodeId); }
+    }
+
+    Action
+    {
+        id: selectTargetsOfNodeAction
+        text: qsTr("Select Targets of '") + contextMenu.clickedNodeName + qsTr("'")
+        enabled: idle && contextMenu.nodeWasClicked
+        onTriggered: { selectTargetsOf(contextMenu.clickedNodeId); }
+    }
+
+    Action
+    {
+        id: selectNeighboursOfNodeAction
         text: qsTr("Select Neigh&bours of '") + contextMenu.clickedNodeName + qsTr("'")
         enabled: idle && contextMenu.nodeWasClicked
         onTriggered: { selectNeighboursOf(contextMenu.clickedNodeId); }
@@ -405,17 +426,24 @@ Item
                     property var clickedNodeId
                     property string clickedNodeName: elidedNodeName.elidedText
                     property bool nodeWasClicked: clickedNodeId !== undefined ? !clickedNodeId.isNull : false
+                    property bool clickedNodeIsSameAsSelection: { return numNodesSelected == 1 && nodeWasClicked && nodeIsSelected(clickedNodeId); }
 
                     MenuItem { id: delete1; visible: deleteNodeAction.enabled; action: deleteNodeAction }
-                    MenuItem { id: delete2; visible: deleteAction.enabled; action: deleteAction }
+                    MenuItem { id: delete2; visible: deleteAction.enabled && !contextMenu.clickedNodeIsSameAsSelection; action: deleteAction }
                     MenuSeparator { visible: delete1.visible || delete2.visible }
 
                     MenuItem { visible: numNodesSelected < graph.numNodes; action: selectAllAction }
                     MenuItem { visible: numNodesSelected < graph.numNodes && !graph.inOverviewMode; action: selectAllVisibleAction }
                     MenuItem { visible: numNodesSelected > 0; action: selectNoneAction }
-                    MenuItem { visible: selectNeighbourOfNodeAction.enabled; action: selectNeighbourOfNodeAction }
-                    MenuItem { visible: numNodesSelected > 0; action: selectNeighboursAction }
                     MenuItem { visible: numNodesSelected > 0; action: invertSelectionAction }
+
+                    MenuItem { visible: selectSourcesOfNodeAction.enabled; action: selectSourcesOfNodeAction }
+                    MenuItem { visible: selectTargetsOfNodeAction.enabled; action: selectTargetsOfNodeAction }
+                    MenuItem { visible: selectNeighboursOfNodeAction.enabled; action: selectNeighboursOfNodeAction }
+
+                    MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection; action: selectSourcesAction }
+                    MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection; action: selectTargetsAction }
+                    MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection; action: selectNeighboursAction }
 
                     MenuSeparator { visible: changeBackgroundColourMenuItem.visible }
                     MenuItem

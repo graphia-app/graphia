@@ -187,6 +187,8 @@ public:
         return largestComponentId;
     }
 
+    std::vector<NodeId> sourcesOf(NodeId nodeId) const;
+    std::vector<NodeId> targetsOf(NodeId nodeId) const;
     std::vector<NodeId> neighboursOf(NodeId nodeId) const;
 
     // Call this to ensure the Graph is in a consistent state

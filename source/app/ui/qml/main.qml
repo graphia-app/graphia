@@ -629,6 +629,22 @@ ApplicationWindow
 
     Action
     {
+        id: selectSourcesAction
+        text: qsTr("Select Sources of Selection")
+        enabled: currentDocument ? currentDocument.idle : false
+        onTriggered: currentDocument && currentDocument.selectSources()
+    }
+
+    Action
+    {
+        id: selectTargetsAction
+        text: qsTr("Select Targets of Selection")
+        enabled: currentDocument ? currentDocument.idle : false
+        onTriggered: currentDocument && currentDocument.selectTargets()
+    }
+
+    Action
+    {
         id: selectNeighboursAction
         text: qsTr("Select Neigh&bours of Selection")
         shortcut: "Ctrl+B"
@@ -980,6 +996,8 @@ ApplicationWindow
             MenuItem { action: selectAllVisibleAction }
             MenuItem { action: selectNoneAction }
             MenuItem { action: invertSelectionAction }
+            MenuItem { action: selectSourcesAction }
+            MenuItem { action: selectTargetsAction }
             MenuItem { action: selectNeighboursAction }
             MenuSeparator {}
             MenuItem { action: findAction }
