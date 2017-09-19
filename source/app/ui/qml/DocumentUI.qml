@@ -1195,7 +1195,7 @@ Item
     Hubble
     {
         id: introHubble
-        visible: misc.firstOpen
+        visible: false
         title: "Introduction"
         x: 10
         y: 10
@@ -1212,6 +1212,12 @@ Item
         {
             introHubble.visible = false;
             nodeEdgesHubble.visible = true;
+        }
+        Component.onCompleted:
+        {
+            if(misc.firstOpen === "true")
+                visible = true;
+            misc.firstOpen = false;
         }
     }
 

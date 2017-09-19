@@ -145,11 +145,18 @@ ApplicationWindow
 
         if(misc.firstOpen)
         {
-            var exampleFile = qmlUtils.urlForFileName(application.directory + "/examples/Simple_pairwise-London_tube_map.txt");
-            //introHubble.visible = false
-            openFileOfTypeWithPluginAndParameters(exampleFile,
-                "PairwiseTXT", "Generic",
-                {}, false);
+            var exampleFile = qmlUtils.urlForFileName(application.directory + "/examples/Pairwise_London_Tube_River_Bus.txt");
+            if(qmlUtils.fileUrlExists(exampleFile))
+            {
+                console.log(exampleFile)
+                openFileOfTypeWithPluginAndParameters(exampleFile,
+                    "PairwiseTXT", "Generic",
+                    {}, false);
+            }
+            else
+            {
+                misc.firstOpen = false;
+            }
         }
     }
 
