@@ -115,6 +115,14 @@ function incrementForRange(min, max)
     return 100000.0;
 }
 
+function numDecimalsAfterPoint(value)
+{
+    if(Math.floor(value) === value)
+        return 0;
+
+    return value.toString().split(".")[1].length || 0;
+}
+
 function superScriptValue(value)
 {
     if(!isNumeric(value))
@@ -140,13 +148,19 @@ function superScriptValue(value)
     return superScriptString;
 }
 
-function formatForDisplay(value, maxDecimalPlaces, scientificNotationDigitsThreshold)
+function formatForDisplay(value, minDecimalPlaces, maxDecimalPlaces, scientificNotationDigitsThreshold)
 {
     if(!isNumeric(value))
         return value;
 
+    minDecimalPlaces = (typeof minDecimalPlaces !== "undefined") ?
+        minDecimalPlaces : 0;
+
     maxDecimalPlaces = (typeof maxDecimalPlaces !== "undefined") ?
         maxDecimalPlaces : decimalPointsForValue(value);
+
+    if(maxDecimalPlaces < minDecimalPlaces)
+        maxDecimalPlaces = minDecimalPlaces;
 
     scientificNotationDigitsThreshold = (typeof scientificNotationDigitsThreshold !== "undefined") ?
         scientificNotationDigitsThreshold : 5;
@@ -174,6 +188,10 @@ function formatForDisplay(value, maxDecimalPlaces, scientificNotationDigitsThres
 
     // 1.100 -> 1.1
     var simplified = parseFloat(truncated);
+
+    // 1 -> 1.1
+    if(minDecimalPlaces > 0 && numDecimalsAfterPoint(simplified) < minDecimalPlaces)
+        simplified = simplified.toFixed(minDecimalPlaces);
 
     return simplified.toString();
 }
