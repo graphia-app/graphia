@@ -34,6 +34,7 @@ Item
     property alias sortIndicatorColumn: tableView.sortIndicatorColumn
     property alias selection: tableView.selection
     property alias rowCount: tableView.rowCount
+    property alias viewport: tableView.viewport
 
     signal visibleRowsChanged();
 
