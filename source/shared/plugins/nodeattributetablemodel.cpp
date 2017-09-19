@@ -4,6 +4,7 @@
 
 #include "shared/ui/iselectionmanager.h"
 #include "shared/graph/igraphmodel.h"
+#include "shared/attributes/valuetype.h"
 
 NodeAttributeTableModel::NodeAttributeTableModel() :
     QAbstractTableModel()
@@ -128,7 +129,7 @@ void NodeAttributeTableModel::updateRoleNames()
     emit columnNamesChanged();
 }
 
-bool NodeAttributeTableModel::columnIsCalculated(const QString& columnName)
+bool NodeAttributeTableModel::columnIsCalculated(const QString& columnName) const
 {
     return !u::contains(_userNodeData->vectorNames(), columnName);
 }
@@ -137,6 +138,17 @@ void NodeAttributeTableModel::focusNodeForRowIndex(size_t row)
 {
     auto nodeId = _userNodeData->nodeIdForRowIndex(row);
     _document->moveFocusToNode(nodeId);
+}
+
+bool NodeAttributeTableModel::columnIsFloatingPoint(const QString& columnName) const
+{
+    const auto* graphModel = _document->graphModel();
+    const auto* attribute = graphModel->attributeByName(columnName);
+
+    if(attribute != nullptr)
+        return attribute->valueType() == ValueType::Float;
+
+    return false;
 }
 
 void NodeAttributeTableModel::onAttributeAdded(const QString& name)

@@ -65,9 +65,9 @@ public:
     void onSelectionChanged();
     void updateRoleNames();
 
-    Q_INVOKABLE bool columnIsCalculated(const QString& columnName);
-
+    Q_INVOKABLE bool columnIsCalculated(const QString& columnName) const;
     Q_INVOKABLE void focusNodeForRowIndex(size_t row);
+    Q_INVOKABLE bool columnIsFloatingPoint(const QString& columnName) const;
 
 public slots:
     void onAttributeAdded(const QString& name);
