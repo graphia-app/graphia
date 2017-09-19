@@ -1204,56 +1204,13 @@ Item
         {
             textFormat: Text.StyledText
             text: "As this is your first time openining Graphia we have opened an example Graph for you<br>" +
-                  "The Graph represents the <b>London Tube map!</b><br><br>" +
+                  "The Graph represents the <b>London Tube System and River Buses!</b><br><br>" +
                   "Click next to learn about navigation and the key elements of a Graph"
         }
         onSkipClicked: introHubble.visible = false;
         onNextClicked:
         {
             introHubble.visible = false;
-            overviewHubble.visible = true;
-        }
-    }
-
-    Hubble
-    {
-        id: overviewHubble
-        visible: false
-        title: "Overview Mode"
-        x: (root.width * 0.5) - childrenRect.width * 0.5
-        y: 10
-        displayButtons: true
-        RowLayout
-        {
-            ColumnLayout
-            {
-                ToolButton
-                {
-                    iconName: "go-next"
-                }
-                ToolButton
-                {
-                    iconName: "go-previous"
-                }
-            }
-            Text
-            {
-                textFormat: Text.StyledText
-                text: "When a file contains multiple graphs (Components) Graphia opens<br>" +
-                      "the file in Overview mode. From Overview mode all components are visible.<br><br>" +
-                      "To focus on a particular component and hide others, <b>double click</b><br>" +
-                      "the component. When inspecting a component, double click the background or press<br>" +
-                      "<b>Esc</b> to return to Overview mode<br><br>" +
-                      "<b>Inspect Component:</b> Double Click component<br>" +
-                      "<b>Return to overview:</b> Double Click background or Esc<br>" +
-                      "<b>Navigate components:</b> Pg-up, Pg-down<br><br>" +
-                      "Click next to learn about the overall structure in a graph"
-            }
-        }
-        onSkipClicked: overviewHubble.visible = false;
-        onNextClicked:
-        {
-            overviewHubble.visible = false;
             nodeEdgesHubble.visible = true;
         }
     }
@@ -1268,6 +1225,7 @@ Item
         displayButtons: true
         RowLayout
         {
+            spacing: 10
             Column
             {
                 Image
@@ -1300,20 +1258,66 @@ Item
             Text
             {
                 textFormat: Text.StyledText
-                text: "A Graph in its simplest form consists of <b>Nodes</b> and <b>Edges</b><br>" +
-                      "With this example graph nodes represent tube stations, while edges represent a connection<br>" +
+                text: "A Graph in its simplest form consists of <b>Nodes</b> and <b>Edges</b><br><br>" +
+                      "With this example graph nodes represent stops, while edges represent a connection<br>" +
                       "Edges always have a direction however direction can be ignored if required<br><br>" +
+                      "Nodes and Edges can contain additional information known as <b>Attributes</b><br><br>" +
                       "<b>Zoom Graph:</b> Mouse Scrollwheel<br>" +
-                      "<b>Navigate Graph:</b> Right mouse drag<br>" +
-                      "<b>Select Node:</b> Left click a node<br>" +
-                      "<b>Focus Node:</b> Double click a node<br><br>" +
-                      "Click next to learn about finding content within a graph"
+                      "<b>Translate Graph:</b> Right mouse drag the graph<br><br>" +
+                      "Click next to learn more about navigating a graph"
             }
         }
         onSkipClicked: nodeEdgesHubble.visible = false;
         onNextClicked:
         {
             nodeEdgesHubble.visible = false;
+            overviewHubble.visible = true;
+        }
+    }
+
+    Hubble
+    {
+        id: overviewHubble
+        visible: false
+        title: "Overview Mode"
+        x: (root.width * 0.5) - childrenRect.width * 0.5
+        y: 10
+        displayButtons: true
+        RowLayout
+        {
+            Column
+            {
+                Image
+                {
+                    anchors.horizontalCenter: parent.horizontalCenter;
+                    source: "qrc:///imagery/overview.png"
+                    mipmap: true
+                    fillMode: Image.PreserveAspectFit
+                    width: 400
+                }
+            }
+            Text
+            {
+                textFormat: Text.StyledText
+                text: "When a graph contains multiple individual graphs (Components) Graphia opens the file in Overview<br>" +
+                      "mode. From Overview mode all components are visible. In this Graph the left component is the <br>" +
+                      "<b>London Tube map</b>, while the right component is the <b>London Riverbus Network</b><br><br>" +
+                      "To focus on a particular component and hide others, <b>Double click</b> the component. This<br>" +
+                      "enters Component mode which allows detailed inspection of a graph. When viewing a component<br>" +
+                      "on-screen buttons appear to help you navigate. Alternatively, <b>Double click<br>" +
+                      "the background</b> or press <b>Esc</b> to return to Overview mode<br><br>" +
+                      "<b>Enter Component Mode:</b> Double Click component<br>" +
+                      "<b>Return to Overview:</b> Double Click background or Esc<br>" +
+                      "<b>Navigate components:</b> Page-up, Page-down<br>" +
+                      "<b>Select Node:</b> Left click a node<br>" +
+                      "<b>Focus Node:</b> Double click a node<br><br>" +
+                      "Click next to learn about searching a graph"
+            }
+        }
+        onSkipClicked: overviewHubble.visible = false;
+        onNextClicked:
+        {
+            overviewHubble.visible = false;
             findHubble.visible = true;
         }
     }
@@ -1331,7 +1335,7 @@ Item
             Text
             {
                 textFormat: Text.StyledText
-                text: "To perform a simple search within graph, click Find<br>" +
+                text: "To perform a simple search within graph, click Find on the top toolbar<br>" +
                       "Try finding <b>Paddington</b> within the graph<br><br>" +
                       "Click next to learn about inspecting node contents"
             }
@@ -1398,17 +1402,36 @@ Item
         target: transforms
         alignment: Qt.AlignLeft | Qt.AlignBottom
         displayButtons: true
-        Text
+        RowLayout
         {
-            textFormat: Text.StyledText
-            text: "Transforms are a powerful way to modify the graph and calculate additional attributes<br>" +
-                  "They can be used to remove nodes, collapse edges, calculate node metrics and much more<br>" +
-                  "Existing transforms will appear above <b>\"Add Transform\"</b><br><br>" +
-                  "Click <b>\"Add Transform\"</b> to bring up the add transform dialog<br>" +
-                  "Try selecting <b>\"PageRank\"</b><br>" +
-                  "Each attribute added to graph will also add a Visualisation<br>" +
-                  "Select <b>Colour</b> for the visualisation and then ok to add them<br><br>" +
-                  "Once a PageRank transform has been added, click next to learn about Visualisations"
+            spacing: 10
+            Column
+            {
+                Image
+                {
+                    anchors.horizontalCenter: parent.horizontalCenter;
+                    source: "qrc:///imagery/mcl.svg"
+                    mipmap: true
+                    fillMode: Image.PreserveAspectFit
+                    width: 150
+                }
+                Text
+                {
+                    text: "An MCL transform with a colour<br>visualisation applied"
+                }
+            }
+            Text
+            {
+                textFormat: Text.StyledText
+                text: "Transforms are a powerful way to modify the graph and calculate additional attributes<br>" +
+                      "They can be used to remove nodes, collapse edges, calculate node metrics and much more<br>" +
+                      "Existing transforms will appear above <b>\"Add Transform\"</b><br><br>" +
+                      "Click <b>\"Add Transform\"</b> to bring up the add transform dialog<br>" +
+                      "Try selecting <b>\"PageRank\"</b><br>" +
+                      "Each attribute added to graph will also add a Visualisation<br>" +
+                      "Select <b>Colour</b> for the visualisation and then ok to add them<br><br>" +
+                      "Once a PageRank transform has been added, click next to learn about Visualisations"
+            }
         }
         onSkipClicked: visible = false
         onNextClicked:
@@ -1426,13 +1449,32 @@ Item
         target: visualisations
         alignment: Qt.AlignLeft | Qt.AlignTop
         displayButtons: true
-        Text
+        RowLayout
         {
-            textFormat: Text.StyledText
-            text: "Visualisations modify the appearance of the Graph depending on attributes<br>" +
-                  "<b>Node Colour</b>, <b>Size</b> and <b>Text</b> can all be linked to an attribute<br>" +
-                  "Existing visualisations can be modified from here as well as new ones added<br><br>" +
-                  "Click the gradient bar to adjust the colour scheme if PageRank was added in the previous step<br><br>"
+            spacing: 10
+            Column
+            {
+                Image
+                {
+                    anchors.horizontalCenter: parent.horizontalCenter;
+                    source: "qrc:///imagery/visualisations.svg"
+                    mipmap: true
+                    fillMode: Image.PreserveAspectFit
+                    width: 200
+                }
+                Text
+                {
+                    text: "A graph with Colour, Size and Text <br>visualisations applied"
+                }
+            }
+            Text
+            {
+                textFormat: Text.StyledText
+                text: "Visualisations modify the appearance of the Graph depending on attributes<br>" +
+                      "<b>Node Colour</b>, <b>Size</b> and <b>Text</b> can all be linked to an attribute<br>" +
+                      "Existing visualisations can be modified from here as well as new ones added<br><br>" +
+                      "Click the gradient bar to adjust the colour scheme if PageRank was added in the previous step<br><br>"
+            }
         }
         onSkipClicked: visible = false
         onNextClicked:
