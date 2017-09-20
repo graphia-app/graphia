@@ -348,6 +348,8 @@ public:
 
     Q_INVOKABLE void cancelCommand();
 
+    Q_INVOKABLE void writeTableViewToFile(QObject* tableView, const QUrl& fileUrl);
+
     Q_INVOKABLE void dumpGraph();
 
 private slots:

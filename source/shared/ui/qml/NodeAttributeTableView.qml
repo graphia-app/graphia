@@ -1,6 +1,8 @@
 import QtQuick 2.7
 import QtQuick.Controls 1.5
 
+import Qt.labs.platform 1.0 as Labs
+
 import SortFilterProxyModel 0.2
 
 import com.kajeka 1.0
@@ -67,7 +69,6 @@ Item
         }
     }
 
-
     function populateTableMenu(menu)
     {
         if(menu === null)
@@ -93,6 +94,7 @@ Item
         };
 
         menu.addItem("").action = resizeColumnsToContentsAction;
+        menu.addItem("").action = exportTableAction;
         menu.addSeparator();
         menu.addItem("").action = toggleCalculatedAttributes;
 
@@ -139,6 +141,42 @@ Item
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
+    }
+
+    Preferences
+    {
+        id: misc
+        section: "misc"
+
+        property var fileSaveInitialFolder
+    }
+
+    Labs.FileDialog
+    {
+        id: exportTableDialog
+        visible: false
+        fileMode: Labs.FileDialog.SaveFile
+        defaultSuffix: selectedNameFilter.extensions[0]
+        selectedNameFilter.index: 1
+        title: "Export Table"
+        nameFilters: ["CSV File (*.csv)"]
+        onAccepted:
+        {
+            misc.fileSaveInitialFolder = folder.toString();
+            document.writeTableViewToFile(tableView, file);
+        }
+    }
+
+    Action
+    {
+        id: exportTableAction
+        enabled: tableView.rowCount > 0
+        text: qsTr("Export…")
+        onTriggered:
+        {
+            exportTableDialog.folder = misc.fileSaveInitialFolder;
+            exportTableDialog.open();
+        }
     }
 
     TableView
@@ -306,7 +344,6 @@ Item
                 renderType: Text.NativeRendering
             }
         }
-
     }
 
     Menu { id: contextMenu }

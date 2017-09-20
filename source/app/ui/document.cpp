@@ -29,6 +29,12 @@
 #include "selectionmanager.h"
 #include "graphquickitem.h"
 
+#include <QQmlProperty>
+#include <QMetaObject>
+#include <QFile>
+#include <QAbstractItemModel>
+#include <QMessageBox>
+
 QColor Document::contrastingColorForBackground()
 {
     auto backColor = u::pref("visuals/backgroundColor").value<QColor>();
@@ -1582,6 +1588,91 @@ void Document::setLayoutSettingValue(const QString& name, float value)
 void Document::cancelCommand()
 {
     _commandManager.cancel();
+}
+
+void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
+{
+    // We have to do this on the same thread as the caller, because we can't invoke
+    // methods across threads; hopefully it's relatively quick
+    QStringList columnRoles;
+    for(int i = 0; i < QQmlProperty::read(tableView, "columnCount").toInt(); i++)
+    {
+        QVariant columnVariant;
+        QMetaObject::invokeMethod(tableView, "getColumn",
+                Q_RETURN_ARG(QVariant, columnVariant),
+                Q_ARG(QVariant, i));
+        QObject* tableViewColumn = qvariant_cast<QObject*>(columnVariant);
+
+        if(tableViewColumn != nullptr && QQmlProperty::read(tableViewColumn, "visible").toBool())
+            columnRoles.append(QQmlProperty::read(tableViewColumn, "role").toString());
+    }
+
+    QString localFileName = fileUrl.toLocalFile();
+    if(!QFile(localFileName).open(QIODevice::ReadWrite))
+    {
+        QMessageBox::critical(nullptr, tr("File Error"),
+            QString(tr("The file '%1' cannot be opened for writing. Please ensure "
+            "it is not open in another application and try again.")).arg(localFileName));
+        return;
+    }
+
+    _commandManager.executeOnce({tr("Export Table"), tr("Exporting Table")},
+    [=](Command&)
+    {
+        QFile file(localFileName);
+
+        if(!file.open(QIODevice::ReadWrite))
+        {
+            // We should never get here normally, since this check has already been performed
+            qDebug() << "Can't open" << localFileName << "for writing.";
+            return;
+        }
+
+        auto escapedString = [](const QString& string)
+        {
+            QString escaped = string;
+            escaped.replace("\"", "\\\"");
+            return QString("\"%1\"").arg(escaped);
+        };
+
+        QString rowString;
+        for(const auto& columnRole : columnRoles)
+        {
+            if(!rowString.isEmpty())
+                rowString.append(", ");
+
+            rowString.append(escapedString(columnRole));
+        }
+
+        QTextStream stream(&file);
+        stream << rowString << endl;
+
+        auto rowCount = QQmlProperty::read(tableView, "rowCount").toInt();
+        QAbstractItemModel* model = qvariant_cast<QAbstractItemModel*>(QQmlProperty::read(tableView, "model"));
+        if(model != nullptr)
+        {
+            for(int row = 0; row < rowCount; row++)
+            {
+                rowString.clear();
+                for(const auto& columnRole : columnRoles)
+                {
+                    if(!rowString.isEmpty())
+                        rowString.append(", ");
+
+                    auto value = model->data(model->index(row, 0),
+                        model->roleNames().key(columnRole.toUtf8(), -1));
+                    auto valueString = value.toString();
+
+                    if(value.type() == QVariant::String)
+                        rowString.append(escapedString(valueString));
+                    else
+                        rowString.append(valueString);
+                }
+
+                stream << rowString << endl;
+            }
+        }
+    });
 }
 
 void Document::dumpGraph()
