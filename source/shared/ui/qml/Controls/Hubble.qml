@@ -16,13 +16,15 @@ Item
     property var title
     property var target
     property int alignment: Qt.AlignLeft
-    property bool displayButtons: false
+    property bool displayNext: false
+    property bool displayClose: false
     property bool hoverEnabled: false
 
     height: backRectangle.height
     width: backRectangle.width
 
     signal nextClicked()
+    signal closeClicked()
     signal skipClicked()
 
     visible: false
@@ -86,10 +88,11 @@ Item
             }
             RowLayout
             {
+                visible: displayNext || displayClose
                 id: nextSkipButtons
-                visible: displayButtons
                 Text
                 {
+                    visible: displayNext
                     text: qsTr("Skip")
                     font.underline: true
                     MouseArea
@@ -105,11 +108,22 @@ Item
                 }
                 Button
                 {
+                    visible: displayNext
                     id: nextButton
                     text: qsTr("Next")
                     onClicked:
                     {
                         nextClicked();
+                    }
+                }
+                Button
+                {
+                    id: closeButton
+                    visible: displayClose
+                    text: qsTr("Close")
+                    onClicked:
+                    {
+                        closeClicked();
                     }
                 }
             }
