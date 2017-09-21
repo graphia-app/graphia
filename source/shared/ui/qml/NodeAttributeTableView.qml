@@ -249,12 +249,12 @@ Item
             {
                 // Hack - TableView doesn't respond to rolenames changes
                 // so instead we recreate the model to force an update
-                createModel();
+                tableView._createModel();
                 populateTableMenu(tableMenu);
             }
         }
 
-        Component.onCompleted: { _createModel(); }
+        Component.onCompleted: { tableView._createModel(); }
 
         Component
         {
