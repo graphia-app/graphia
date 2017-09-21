@@ -250,7 +250,7 @@ Item
                 // Hack - TableView doesn't respond to rolenames changes
                 // so instead we recreate the model to force an update
                 tableView._createModel();
-                populateTableMenu(tableMenu);
+                populateTableMenu(_tableMenu);
             }
         }
 
