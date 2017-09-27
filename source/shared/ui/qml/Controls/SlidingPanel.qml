@@ -7,6 +7,10 @@ Item
 
     property Item item
     property int alignment: Qt.AlignTop
+    property int direction: Qt.Vertical
+
+    property int horizontalOffset: 0
+    property int verticalOffset: 0
 
     function _updateAlignment()
     {
@@ -18,13 +22,15 @@ Item
                 item.anchors.top =
                 item.anchors.bottom = undefined;
 
-            switch(root.alignment)
-            {
-            case Qt.AlignTop:    item.anchors.bottom = root.bottom; break;
-            case Qt.AlignBottom: item.anchors.top    = root.top;    break;
-            case Qt.AlignLeft:   item.anchors.right  = root.right;  break;
-            case Qt.AlignRight:  item.anchors.left   = root.left;   break;
-            }
+            if(root.alignment & Qt.AlignTop)
+                item.anchors.bottom = root.bottom;
+            else if(root.alignment & Qt.AlignBottom)
+                item.anchors.top = root.top;
+
+            if(root.alignment & Qt.AlignLeft)
+                item.anchors.right = root.right;
+            else if(root.alignment & Qt.AlignRight)
+                item.anchors.left = root.left;
         }
     }
 
@@ -33,10 +39,29 @@ Item
         _updateAlignment();
     }
 
+    property int _expandedWidth: item.width + root.horizontalOffset;
+    property int _expandedHeight: item.height + root.verticalOffset;
+
+    property int _expandedDimension:
+    {
+        if(direction === Qt.Vertical)
+            return _expandedHeight;
+
+        return _expandedWidth;
+    }
+
+    property int _currentDimension:
+    {
+        if(direction === Qt.Vertical)
+            return implicitHeight;
+
+        return implicitWidth;
+    }
+
     function _resetDimensionBindings()
     {
-        implicitWidth = Qt.binding(function() { return item.width; } );
-        implicitHeight = Qt.binding(function() { return item.height; } );
+        implicitWidth = Qt.binding(function() { return _expandedWidth; } );
+        implicitHeight = Qt.binding(function() { return _expandedHeight; } );
     }
 
     onItemChanged:
@@ -68,7 +93,7 @@ Item
 
     function _onAnimationComplete()
     {
-        if(implicitHeight >= item.height)
+        if(_currentDimension >= _expandedDimension)
         {
             _resetDimensionBindings();
 
@@ -76,19 +101,32 @@ Item
                 item.enabled = true;
         }
         else
-        {
-            implicitWidth = 0;
             _hidden = true;
+    }
+
+    Behavior on implicitWidth
+    {
+        id: horizontalDrop
+        enabled: false
+        NumberAnimation
+        {
+            id: horizontalAnimation
+            onRunningChanged:
+            {
+                // After the animation has finished, restore the property binding
+                if(!running)
+                    root._onAnimationComplete();
+            }
         }
     }
 
     Behavior on implicitHeight
     {
-        id: drop
+        id: verticalDrop
         enabled: false
         NumberAnimation
         {
-            id: animation
+            id: verticalAnimation
             onRunningChanged:
             {
                 // After the animation has finished, restore the property binding
@@ -103,7 +141,19 @@ Item
         if(animate === undefined)
             animate = true;
 
-        if(implicitHeight < item.height)
+        var animation; var drop;
+        if(direction === Qt.Vertical)
+        {
+            animation = verticalAnimation;
+            drop = verticalDrop;
+        }
+        else
+        {
+            animation = horizontalAnimation;
+            drop = horizontalDrop;
+        }
+
+        if(_currentDimension < _expandedDimension)
         {
             _hidden = false;
             animation.easing.type = Easing.OutBack;
@@ -123,7 +173,19 @@ Item
         if(animate === undefined)
             animate = true;
 
-        if(implicitHeight >= item.height)
+        var animation; var drop;
+        if(direction === Qt.Vertical)
+        {
+            animation = verticalAnimation;
+            drop = verticalDrop;
+        }
+        else
+        {
+            animation = horizontalAnimation;
+            drop = horizontalDrop;
+        }
+
+        if(_currentDimension >= _expandedDimension)
         {
             animation.easing.type = Easing.InBack;
 
@@ -133,7 +195,10 @@ Item
             if(disableItemWhenClosed)
                 item.enabled = false;
 
-            implicitHeight = 0;
+            if(direction === Qt.Vertical)
+                implicitHeight = 0;
+            else
+                implicitWidth = 0;
 
             if(animate)
                 drop.enabled = false;

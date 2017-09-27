@@ -6,5 +6,6 @@
         <file>qml/PluginContent.qml</file>
         <file>qml/Controls/Wizard.qml</file>
         <file>qml/Controls/BaseParameterDialog.qml</file>
+        <file>qml/Controls/SlidingPanel.qml</file>
     </qresource>
 </RCC>

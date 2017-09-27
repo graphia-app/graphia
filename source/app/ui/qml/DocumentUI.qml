@@ -591,10 +591,13 @@ Item
             {
                 id: findPanel
 
+                alignment: Qt.AlignTop|Qt.AlignLeft
+
                 anchors.left: parent.left
                 anchors.top: parent.top
-                anchors.topMargin: -Constants.margin
-                anchors.leftMargin: -Constants.margin
+
+                horizontalOffset: -Constants.margin
+                verticalOffset: -Constants.margin
 
                 initiallyOpen: false
                 disableItemWhenClosed: false
