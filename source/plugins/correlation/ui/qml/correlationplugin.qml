@@ -48,13 +48,13 @@ PluginContent
 
     Action
     {
-        id: toggleCalculatedAttributes
-        text: qsTr("&Show Calculated Attributes")
+        id: selectColumnsAction
+        text: qsTr("&Select Visible Columns")
         iconName: "computer"
         checkable: true
-        checked: true
+        checked: tableView.columnSelectionMode
 
-        onCheckedChanged: { root.saveRequired = true; }
+        onTriggered: { tableView.columnSelectionMode = !tableView.columnSelectionMode; }
     }
 
     Action
@@ -92,7 +92,7 @@ PluginContent
         ToolButton { action: toggleUiOrientationAction }
         ToolButton { action: resizeColumnsToContentsAction }
         ToolButton { action: toggleColumnNamesAction }
-        ToolButton { action: toggleCalculatedAttributes }
+        ToolButton { action: selectColumnsAction }
         Item { Layout.fillWidth: true }
     }
 
@@ -109,10 +109,9 @@ PluginContent
             id: tableView
             Layout.fillHeight: splitView.orientation === Qt.Vertical
             Layout.minimumHeight: splitView.orientation === Qt.Vertical ? 100 + (height - viewport.height) : -1
-            Layout.minimumWidth: splitView.orientation === Qt.Horizontal ? 200 : -1
+            Layout.minimumWidth: splitView.orientation === Qt.Horizontal ? 400 : -1
 
             nodeAttributesModel: plugin.model.nodeAttributeTableModel
-            showCalculatedAttributes: toggleCalculatedAttributes.checked
 
             onVisibleRowsChanged:
             {
@@ -209,7 +208,6 @@ PluginContent
         var data =
         {
             "sideBySide": toggleUiOrientationAction.checked,
-            "showCalculatedAttributes": toggleCalculatedAttributes.checked,
             "showColumnNames": toggleColumnNamesAction.checked,
             "sortColumn": tableView.sortIndicatorColumn,
             "sortOrder": tableView.sortIndicatorOrder,
@@ -222,7 +220,6 @@ PluginContent
     function load(data, version)
     {
         if(data.sideBySide !== undefined)               toggleUiOrientationAction.checked = data.sideBySide;
-        if(data.showCalculatedAttributes !== undefined) toggleCalculatedAttributes.checked = data.showCalculatedAttributes;
         if(data.showColumnNames !== undefined)          toggleColumnNamesAction.checked = data.showColumnNames;
         if(data.sortColumn !== undefined)               tableView.sortIndicatorColumn = data.sortColumn;
         if(data.sortOrder !== undefined)                tableView.sortIndicatorOrder = data.sortOrder;

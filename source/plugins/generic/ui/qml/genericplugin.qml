@@ -22,13 +22,13 @@ PluginContent
 
     Action
     {
-        id: toggleCalculatedAttributes
-        text: qsTr("&Show Calculated Attributes")
+        id: selectColumnsAction
+        text: qsTr("&Select Visible Columns")
         iconName: "computer"
         checkable: true
-        checked: true
+        checked: tableView.columnSelectionMode
 
-        onCheckedChanged: { root.saveRequired = true; }
+        onTriggered: { tableView.columnSelectionMode = !tableView.columnSelectionMode; }
     }
 
     function createMenu(index, menu)
@@ -47,7 +47,7 @@ PluginContent
     {
         anchors.fill: parent
         ToolButton { action: resizeColumnsToContentsAction }
-        ToolButton { action: toggleCalculatedAttributes }
+        ToolButton { action: selectColumnsAction }
         Item { Layout.fillWidth: true }
     }
 
@@ -62,7 +62,6 @@ PluginContent
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            showCalculatedAttributes: toggleCalculatedAttributes.checked
             nodeAttributesModel: plugin.model.nodeAttributeTableModel
 
             onSortIndicatorColumnChanged: { root.saveRequired = true; }
@@ -76,7 +75,6 @@ PluginContent
     {
         var data =
         {
-            "showCalculatedAttributes": toggleCalculatedAttributes.checked,
             "sortColumn": tableView.sortIndicatorColumn,
             "sortOrder": tableView.sortIndicatorOrder
         };
@@ -86,7 +84,6 @@ PluginContent
 
     function load(data, version)
     {
-        if(data.showCalculatedAttributes !== undefined) toggleCalculatedAttributes.checked = data.showCalculatedAttributes;
         if(data.sortColumn !== undefined)               tableView.sortIndicatorColumn = data.sortColumn;
         if(data.sortOrder !== undefined)                tableView.sortIndicatorOrder = data.sortOrder;
     }

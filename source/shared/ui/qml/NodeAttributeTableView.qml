@@ -1,5 +1,8 @@
 import QtQuick 2.7
 import QtQuick.Controls 1.5
+import QtQuick.Layouts 1.3
+import QtQuick.Controls.Private 1.0 // StyleItem
+import QtGraphicalEffects 1.0
 
 import Qt.labs.platform 1.0 as Labs
 
@@ -7,16 +10,15 @@ import SortFilterProxyModel 0.2
 
 import com.kajeka 1.0
 
+import "Controls"
 import "Utils.js" as Utils
+import "Constants.js" as Constants
 
 Item
 {
     id: root
 
     property var nodeAttributesModel
-
-    property bool showCalculatedAttributes: true
-    onShowCalculatedAttributesChanged: { tableView._updateColumnVisibility(); }
 
     property var hiddenColumns: []
     onHiddenColumnsChanged: { tableView._updateColumnVisibility(); }
@@ -34,8 +36,63 @@ Item
         return "";
     }
 
-    property alias sortIndicatorOrder: tableView.sortIndicatorOrder
-    property alias sortIndicatorColumn: tableView.sortIndicatorColumn
+    property bool columnSelectionMode: false
+    onColumnSelectionModeChanged:
+    {
+        if(columnSelectionMode)
+        {
+            _sortEnabled = false;
+            tableView.headerDelegate = columnSelectionHeaderDelegate
+            columnSelectionControls.show();
+        }
+        else
+        {
+            columnSelectionControls.hide();
+
+            // The column selection mode will probably have changed these values, so set them
+            // back to what they were before
+            tableView.sortIndicatorColumn = root.sortIndicatorColumn;
+            tableView.sortIndicatorOrder = root.sortIndicatorOrder;
+            _sortEnabled = true;
+            tableView.flickableItem.contentX = 0;
+
+            tableView.headerDelegate = defaultTableView.headerDelegate;
+        }
+
+        tableView._updateColumnVisibility();
+    }
+
+    property bool _sortEnabled
+
+    Connections
+    {
+        target: tableView
+
+        onSortIndicatorColumnChanged:
+        {
+            if(_sortEnabled)
+                root.sortIndicatorColumn = tableView.sortIndicatorColumn;
+        }
+
+        onSortIndicatorOrderChanged:
+        {
+            if(_sortEnabled)
+                root.sortIndicatorOrder = tableView.sortIndicatorOrder;
+        }
+    }
+
+    property int sortIndicatorColumn
+    onSortIndicatorColumnChanged:
+    {
+        tableView.sortIndicatorColumn = root.sortIndicatorColumn;
+    }
+
+    property int sortIndicatorOrder
+    onSortIndicatorOrderChanged:
+    {
+        tableView.sortIndicatorOrder = root.sortIndicatorOrder;
+    }
+
     property alias selection: tableView.selection
     property alias rowCount: tableView.rowCount
     property alias viewport: tableView.viewport
@@ -45,11 +102,49 @@ Item
     function setColumnVisibility(columnName, columnVisible)
     {
         if(columnVisible)
-            Utils.setRemove(hiddenColumns, columnName);
+            hiddenColumns = Utils.setRemove(hiddenColumns, columnName);
         else
-            Utils.setAdd(hiddenColumns, columnName);
+            hiddenColumns = Utils.setAdd(hiddenColumns, columnName);
+    }
 
-        tableView._updateColumnVisibility();
+    function showAllColumns()
+    {
+        hiddenColumns = [];
+    }
+
+    function showAllCalculatedColumns()
+    {
+        var columns = hiddenColumns;
+        plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName)
+        {
+            if(root.nodeAttributesModel.columnIsCalculated(columnName))
+                columns = Utils.setRemove(columns, columnName);
+        });
+
+        hiddenColumns = columns;
+    }
+
+    function hideAllColumns()
+    {
+        var columns = [];
+        plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName)
+        {
+            columns.push(columnName);
+        });
+
+        hiddenColumns = columns;
+    }
+
+    function hideAllCalculatedColumns()
+    {
+        var columns = hiddenColumns;
+        plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName)
+        {
+            if(root.nodeAttributesModel.columnIsCalculated(columnName))
+                columns = Utils.setAdd(columns, columnName);
+        });
+
+        hiddenColumns = columns;
     }
 
     // Work around for QTBUG-58594
@@ -80,55 +175,10 @@ Item
 
         menu.title = qsTr("&Table");
 
-        var setVisibleFn = function(visible)
-        {
-            return function()
-            {
-                for(var i = 0; i < menu.items.length; i++)
-                {
-                    var item = menu.items[i];
-                    if(item.showColumnNameTag !== undefined)
-                        item.checked = visible;
-                }
-            };
-        };
-
         menu.addItem("").action = resizeColumnsToContentsAction;
         menu.addItem("").action = exportTableAction;
         menu.addSeparator();
-        menu.addItem("").action = toggleCalculatedAttributes;
-
-        var showAll = menu.addItem(qsTr("&Show All Columns"));
-        showAll.triggered.connect(setVisibleFn(true));
-
-        var hideAll = menu.addItem(qsTr("&Hide All Columns"));
-        hideAll.triggered.connect(setVisibleFn(false));
-
-        menu.addSeparator();
-
-        plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName)
-        {
-            var menuItem = menu.addItem(columnName);
-            menuItem.checkable = true;
-
-            // This is just to let the hide/show all functions know this is a menu item
-            menuItem.showColumnNameTag = columnName;
-
-            menuItem.checked = !Utils.setContains(hiddenColumns, columnName);
-
-            if(plugin.model.nodeAttributeTableModel.columnIsCalculated(columnName))
-            {
-                menuItem.enabled = Qt.binding(function()
-                {
-                    return toggleCalculatedAttributes.checked;
-                });
-            }
-
-            menuItem.toggled.connect(function(checked)
-            {
-                root.setColumnVisibility(columnName, checked);
-            });
-        });
+        menu.addItem("").action = selectColumnsAction;
 
         tableView._tableMenu = menu;
         Utils.cloneMenu(menu, contextMenu);
@@ -179,6 +229,16 @@ Item
         }
     }
 
+    // This only exists to provide the real tableView with its default headerDelegate
+    TableView
+    {
+        id: defaultTableView
+        visible: false
+        sortIndicatorVisible: true
+        sortIndicatorColumn: root.sortIndicatorColumn
+        sortIndicatorOrder: root.sortIndicatorOrder
+    }
+
     TableView
     {
         id: tableView
@@ -212,10 +272,11 @@ Item
             for(var i = 0; i < tableView.columnCount; i++)
             {
                 var tableViewColumn = tableView.getColumn(i);
-                var hidden = Utils.setContains(root.hiddenColumns, tableViewColumn.role);
-                var showIfCalculated = !root.nodeAttributesModel.columnIsCalculated(tableViewColumn.role) || root.showCalculatedAttributes;
 
-                tableViewColumn.visible = !hidden && showIfCalculated;
+                if(root.columnSelectionMode)
+                    tableViewColumn.visible = true;
+                else
+                    tableViewColumn.visible = !Utils.setContains(root.hiddenColumns, tableViewColumn.role);
             }
         }
 
@@ -237,6 +298,12 @@ Item
                     {"role": columnName, "title": columnName}));
             }
 
+            // Remove any hidden columns that no longer exist in the model
+            root.hiddenColumns = Utils.setIntersection(root.hiddenColumns,
+                root.nodeAttributesModel.columnNames);
+
+            tableView._updateColumnVisibility();
+
             // Snap the view back to the start
             // Tableview can be left scrolled out of bounds if column count reduces
             tableView.flickableItem.contentX = 0;
@@ -250,7 +317,7 @@ Item
                 // Hack - TableView doesn't respond to rolenames changes
                 // so instead we recreate the model to force an update
                 tableView._createModel();
-                populateTableMenu(_tableMenu);
+                populateTableMenu(tableView._tableMenu);
             }
         }
 
@@ -264,7 +331,7 @@ Item
             {
                 sourceModel: root.nodeAttributesModel
                 sortRoleName: root.sortRoleName
-                ascendingSortOrder: tableView.sortIndicatorOrder === Qt.AscendingOrder
+                ascendingSortOrder: root.sortIndicatorOrder === Qt.AscendingOrder
 
                 filterRoleName: 'nodeSelected'; filterValue: true
 
@@ -305,6 +372,54 @@ Item
         // This is just a reference to the menu, so we can repopulate it later as necessary
         property Menu _tableMenu
 
+        Component
+        {
+            id: columnSelectionHeaderDelegate
+
+            StyleItem
+            {
+                elementType: "header"
+
+                implicitWidth: checkbox.width + (2 * Constants.margin)
+
+                property int _clickedColumn
+
+                property bool _pressed: styleData.pressed
+                on_PressedChanged:
+                {
+                    // HACK: for some reason there are two styleDatas that get bound, one of which conveniently has
+                    // a resizable property whereas the other doesn't, so we just ignore one on that basis
+                    if(styleData.resizable === undefined)
+                        return;
+
+                    if(!styleData.pressed && _clickedColumn === styleData.column)
+                    {
+                        var columnShouldBeVisible = Utils.setContains(root.hiddenColumns, styleData.value);
+                        root.setColumnVisibility(styleData.value, columnShouldBeVisible);
+                    }
+                    else
+                        _clickedColumn = styleData.column;
+                }
+
+                Item
+                {
+                    anchors.leftMargin: Constants.margin
+                    anchors.rightMargin: Constants.margin
+                    anchors.fill: parent
+                    clip: true
+
+                    CheckBox
+                    {
+                        id: checkbox
+                        visible: styleData.value.length > 0
+                        text: styleData.value
+
+                        checked: { return !Utils.setContains(root.hiddenColumns, styleData.value); }
+                    }
+                }
+            }
+        }
+
         // Ripped more or less verbatim from qtquickcontrols/src/controls/Styles/Desktop/TableViewStyle.qml
         // except for the text property
         itemDelegate: Item
@@ -342,6 +457,102 @@ Item
 
                 color: styleData.textColor
                 renderType: Text.NativeRendering
+            }
+        }
+    }
+
+    ShaderEffectSource
+    {
+        id: effectSource
+        visible: columnSelectionMode
+
+        x: tableView.contentItem.x + 1
+        y: tableView.contentItem.y + tableView.__listView.headerItem.height + 1
+        width: tableView.contentItem.width
+        height: tableView.contentItem.height - tableView.__listView.headerItem.height
+
+        sourceItem: tableView
+        sourceRect: Qt.rect(x, y, width, height)
+    }
+
+    FastBlur
+    {
+        visible: columnSelectionMode
+        anchors.fill: effectSource
+        source: effectSource
+        radius: 32
+    }
+
+    SlidingPanel
+    {
+        id: columnSelectionControls
+        visible: tableView.visible
+
+        alignment: Qt.AlignTop|Qt.AlignLeft
+
+        anchors.left: tableView.left
+        anchors.top: tableView.top
+        anchors.topMargin: tableView.__listView.headerItem.height + 1
+
+        horizontalOffset: -Constants.margin
+        verticalOffset: -Constants.margin
+
+        initiallyOpen: false
+        disableItemWhenClosed: false
+
+        item: Rectangle
+        {
+            width: row.width
+            height: row.height
+
+            border.color: "black"
+            border.width: 1
+            radius: 4
+            color: "white"
+
+            RowLayout
+            {
+                id: row
+
+                // The RowLayout in a RowLayout is just a hack to get some padding
+                RowLayout
+                {
+                    Layout.topMargin: Constants.padding + Constants.margin - 2
+                    Layout.bottomMargin: Constants.padding
+                    Layout.leftMargin: Constants.padding + Constants.margin - 2
+                    Layout.rightMargin: Constants.padding
+
+                    Button
+                    {
+                        text: qsTr("Show All")
+                        onClicked: { root.showAllColumns(); }
+                    }
+
+                    Button
+                    {
+                        text: qsTr("Hide All")
+                        onClicked: { root.hideAllColumns(); }
+                    }
+
+                    Button
+                    {
+                        text: qsTr("Show Calculated")
+                        onClicked: { root.showAllCalculatedColumns(); }
+                    }
+
+                    Button
+                    {
+                        text: qsTr("Hide Calculated")
+                        onClicked: { root.hideAllCalculatedColumns(); }
+                    }
+
+                    ToolButton
+                    {
+                        text: qsTr("Done")
+                        iconName: "emblem-unreadable"
+                        onClicked: { columnSelectionMode = false; }
+                    }
+                }
             }
         }
     }
