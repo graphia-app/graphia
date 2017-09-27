@@ -88,7 +88,7 @@ private:
 
 private slots:
     void onCustomReplot();
-    void updateCustomPlotSize();
+    void updatePlotSize();
     void showTooltip();
     void hideTooltip();
 

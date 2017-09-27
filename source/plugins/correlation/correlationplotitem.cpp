@@ -46,14 +46,14 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem
     setAcceptHoverEvents(true);
     setAcceptedMouseButtons(Qt::AllButtons);
 
-    connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::updateCustomPlotSize);
-    connect(this, &QQuickPaintedItem::heightChanged, this, &CorrelationPlotItem::updateCustomPlotSize);
+    connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::updatePlotSize);
+    connect(this, &QQuickPaintedItem::heightChanged, this, &CorrelationPlotItem::updatePlotSize);
     connect(&_customPlot, &QCustomPlot::afterReplot, this, &CorrelationPlotItem::onCustomReplot);
 }
 
 void CorrelationPlotItem::refresh()
 {
-    updateCustomPlotSize();
+    updatePlotSize();
     buildPlot();
     _customPlot.replot();
 }
@@ -366,7 +366,7 @@ void CorrelationPlotItem::routeWheelEvent(QWheelEvent* event)
     QCoreApplication::postEvent(&_customPlot, newEvent);
 }
 
-void CorrelationPlotItem::updateCustomPlotSize()
+void CorrelationPlotItem::updatePlotSize()
 {
     _customPlot.setGeometry(0, 0, static_cast<int>(width()), static_cast<int>(height()));
     scaleXAxis();
