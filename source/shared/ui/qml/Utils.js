@@ -312,6 +312,8 @@ function setAdd(set, value)
 
     if(!found)
         set.push(value);
+
+    return set;
 }
 
 function setRemove(set, value)
@@ -326,4 +328,19 @@ function setRemove(set, value)
 
     if(index > -1)
         set.splice(index, 1);
+
+    return set;
+}
+
+function setIntersection(a, b)
+{
+    var result = [];
+
+    a.forEach(function(value)
+    {
+        if(setContains(b, value))
+            result.push(value);
+    });
+
+    return result;
 }
