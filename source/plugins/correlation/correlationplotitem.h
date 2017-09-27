@@ -15,7 +15,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_OBJECT
     Q_PROPERTY(QVector<double> data MEMBER _data)
     Q_PROPERTY(double scrollAmount MEMBER _scrollAmount WRITE setScrollAmount NOTIFY scrollAmountChanged)
-    Q_PROPERTY(double rangeSize READ rangeSize NOTIFY scrollAmountChanged)
+    Q_PROPERTY(double rangeSize READ rangeSize NOTIFY rangeSizeChanged)
     Q_PROPERTY(QVector<int> selectedRows MEMBER _selectedRows WRITE setSelectedRows)
     Q_PROPERTY(QVector<QColor> rowColors MEMBER _rowColors WRITE setRowColors)
     Q_PROPERTY(QStringList columnNames MEMBER _labelNames WRITE setLabelNames)
@@ -95,5 +95,6 @@ private slots:
 signals:
     void rightClick();
     void scrollAmountChanged();
+    void rangeSizeChanged();
 };
 #endif // CORRELATIONPLOTITEM_H

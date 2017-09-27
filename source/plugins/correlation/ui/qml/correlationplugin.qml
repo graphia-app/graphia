@@ -108,7 +108,7 @@ PluginContent
         {
             id: tableView
             Layout.fillHeight: splitView.orientation === Qt.Vertical
-            Layout.minimumHeight: splitView.orientation === Qt.Vertical ? 100 + (height - viewport.height) : -1
+            Layout.minimumHeight: splitView.orientation === Qt.Vertical ? 100 : -1
             Layout.minimumWidth: splitView.orientation === Qt.Horizontal ? 400 : -1
 
             nodeAttributesModel: plugin.model.nodeAttributeTableModel
@@ -125,18 +125,19 @@ PluginContent
             onSortIndicatorOrderChanged: { root.saveRequired = true; }
         }
 
-        ColumnLayout
+        Column
         {
-            spacing: 0
+            Layout.fillWidth: true
+            Layout.fillHeight: splitView.orientation !== Qt.Vertical
+            Layout.minimumHeight: splitView.orientation === Qt.Vertical ? 100 : -1
+            Layout.minimumWidth: splitView.orientation === Qt.Horizontal ? 200 : -1
 
             CorrelationPlot
             {
                 id: plot
 
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.minimumHeight: splitView.orientation === Qt.Vertical ? 100 : -1
-                Layout.minimumWidth: splitView.orientation === Qt.Horizontal ? 200 : -1
+                implicitHeight: parent.height - (scrollBarRequired ? scrollView.height : 0)
+                implicitWidth: parent.width
 
                 rowCount: plugin.model.rowCount
                 columnCount: plugin.model.columnCount
@@ -159,10 +160,12 @@ PluginContent
                     return quantised;
                 }
 
+                property bool scrollBarRequired: rangeSize < 1.0
+
                 scrollAmount:
                 {
-                    return (scrollView.flickableItem.contentX) /
-                            (scrollView.flickableItem.contentWidth - scrollView.viewport.width);
+                    return scrollView.flickableItem.contentX /
+                        (scrollView.flickableItem.contentWidth - scrollView.viewport.width);
                 }
 
                 onRightClick: { plotContextMenu.popup(); }
@@ -171,10 +174,10 @@ PluginContent
             ScrollView
             {
                 id: scrollView
-                visible: { return plot.rangeSize < 1.0 }
+                visible: plot.scrollBarRequired
                 verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
                 implicitHeight: 15
-                Layout.fillWidth: true
+                implicitWidth: parent.width
                 Rectangle
                 {
                     // This is a fake object to make native scrollbars appear

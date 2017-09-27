@@ -47,6 +47,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem
     setAcceptedMouseButtons(Qt::AllButtons);
 
     connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::updatePlotSize);
+    connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::rangeSizeChanged);
     connect(this, &QQuickPaintedItem::heightChanged, this, &CorrelationPlotItem::updatePlotSize);
     connect(&_customPlot, &QCustomPlot::afterReplot, this, &CorrelationPlotItem::onCustomReplot);
 }
@@ -296,7 +297,10 @@ void CorrelationPlotItem::setShowColumnNames(bool showColumnNames)
     _showColumnNames = showColumnNames;
 
     if(changed)
+    {
+        emit rangeSizeChanged();
         refresh();
+    }
 }
 
 void CorrelationPlotItem::setScrollAmount(double scrollAmount)
@@ -370,7 +374,6 @@ void CorrelationPlotItem::updatePlotSize()
 {
     _customPlot.setGeometry(0, 0, static_cast<int>(width()), static_cast<int>(height()));
     scaleXAxis();
-    emit scrollAmountChanged();
 }
 
 void CorrelationPlotItem::showTooltip()
