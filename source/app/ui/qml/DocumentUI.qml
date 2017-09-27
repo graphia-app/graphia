@@ -79,6 +79,7 @@ Item
 
     property bool canResetView: document.canResetView
     property bool canEnterOverviewMode: document.canEnterOverviewMode
+    property bool canChangeComponent: idle && graph.numComponents > 1
 
     property string pluginName: document.pluginName
     property bool hasPluginUI: document.pluginQmlPath

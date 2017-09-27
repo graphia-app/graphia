@@ -676,7 +676,7 @@ ApplicationWindow
         id: prevComponentAction
         text: qsTr("Goto &Previous Component")
         shortcut: "PgUp"
-        enabled: currentDocument ? currentDocument.idle : false
+        enabled: currentDocument ? currentDocument.canChangeComponent : false
         onTriggered: currentDocument && currentDocument.gotoPrevComponent()
     }
 
@@ -685,7 +685,7 @@ ApplicationWindow
         id: nextComponentAction
         text: qsTr("Goto &Next Component")
         shortcut: "PgDown"
-        enabled: currentDocument ? currentDocument.idle : false
+        enabled: currentDocument ? currentDocument.canChangeComponent : false
         onTriggered: currentDocument && currentDocument.gotoNextComponent()
     }
 
