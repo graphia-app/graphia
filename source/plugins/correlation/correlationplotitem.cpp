@@ -178,7 +178,7 @@ void CorrelationPlotItem::buildPlot()
     else
         _customPlot.axisRect()->setAutoMargins(QCP::MarginSide::msAll);
 
-    _customPlot.setBackground(QColor(220, 220, 220));
+    _customPlot.setBackground(Qt::white);
 }
 
 void CorrelationPlotItem::populateMeanAveragePlot()
