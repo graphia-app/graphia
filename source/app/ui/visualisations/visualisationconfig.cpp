@@ -54,6 +54,36 @@ QVariantMap VisualisationConfig::asVariantMap() const
     return map;
 }
 
+QString VisualisationConfig::asString() const
+{
+    QString s;
+
+    if(!_flags.empty())
+    {
+        s += "[";
+        for(const auto& flag : _flags)
+        {
+            if(s[s.length() - 1] != '[')
+                s += ", ";
+
+            s += flag;
+        }
+        s += "] ";
+    }
+
+    s += QString("\"%1\" \"%2\"").arg(_attributeName).arg(_channelName);
+
+    if(!_parameters.empty())
+    {
+        s += " with ";
+
+        for(const auto& parameter : _parameters)
+            s += QString(" %1 = %2").arg(parameter._name).arg(parameter.valueAsString(true));
+    }
+
+    return s;
+}
+
 bool VisualisationConfig::operator==(const VisualisationConfig& other) const
 {
     return _attributeName == other._attributeName &&

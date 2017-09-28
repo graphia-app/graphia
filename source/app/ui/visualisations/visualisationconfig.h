@@ -29,6 +29,7 @@ struct VisualisationConfig
     std::vector<Parameter> _parameters;
 
     QVariantMap asVariantMap() const;
+    QString asString() const;
 
     bool operator==(const VisualisationConfig& other) const;
     bool operator!=(const VisualisationConfig& other) const;

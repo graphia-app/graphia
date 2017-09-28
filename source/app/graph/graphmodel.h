@@ -70,6 +70,7 @@ private:
     std::map<QString, std::unique_ptr<VisualisationChannel>> _visualisationChannels;
 
     void removeDynamicAttributes();
+    QString normalisedAttributeName(QString attribute) const;
 
 public:
     MutableGraph& mutableGraph() { return _graph; }
@@ -119,9 +120,9 @@ public:
 
     std::vector<QString> attributeNames(ElementType elementType = ElementType::All) const;
 
-    Attribute& createAttribute(const QString& name);
+    void patchAttributeNames(QStringList& transforms, QStringList& visualisations) const;
+    Attribute& createAttribute(QString name);
 
-    void addAttribute(const QString& name, const Attribute& attribute);
     void addAttributes(const std::map<QString, Attribute>& attributes);
     void removeAttribute(const QString& name);
 

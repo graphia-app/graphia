@@ -68,7 +68,9 @@ void TransformCache::add(TransformCache::Result&& result)
 void TransformCache::attributeAdded(const QString& attributeName)
 {
     // When an attribute is added its values may differ to previous incarnations, so
-    // invalidate any entries that depend on it and all subsequent results too
+    // invalidate any subsequent entries that depend on it
+    // Furthermore, if any entries are /creating/ the same attribute that we're adding,
+    // invalidate those too as their names will need to be regenerated
     auto resultSetIt = _cache.begin();
     auto resultSetEnd = _cache.end();
     for(; resultSetIt != resultSetEnd; ++resultSetIt)
@@ -77,13 +79,22 @@ void TransformCache::attributeAdded(const QString& attributeName)
         auto resultEnd = resultSetIt->end();
         for(; resultIt != resultEnd; ++resultIt)
         {
+            // Depends on attributeName
             if(u::contains(resultIt->_config.attributeNames(), attributeName))
+            {
+                resultSetIt->erase(resultIt, resultEnd);
+                break;
+            }
+
+            // Creates attributeName
+            if(u::contains(resultIt->_newAttributes, attributeName))
             {
                 resultSetIt->erase(resultIt, resultEnd);
                 break;
             }
         }
 
+        // All subsequent results are now also invalid
         if(resultIt != resultEnd)
         {
             _cache.erase(resultSetIt, resultSetEnd);

@@ -22,7 +22,7 @@ public:
     virtual QString nodeName(NodeId nodeId) const = 0;
     virtual void setNodeName(NodeId nodeId, const QString& name) = 0;
 
-    virtual IAttribute& createAttribute(const QString& name) = 0;
+    virtual IAttribute& createAttribute(QString name) = 0;
     virtual const IAttribute* attributeByName(const QString& name) const = 0;
     virtual std::vector<QString> attributeNames(ElementType elementType = ElementType::All) const = 0;
 };

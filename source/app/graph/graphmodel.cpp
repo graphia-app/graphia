@@ -125,6 +125,27 @@ void GraphModel::removeDynamicAttributes()
         _attributes.erase(attributeName);
 }
 
+QString GraphModel::normalisedAttributeName(QString attribute) const
+{
+    while(u::contains(_attributes, attribute))
+    {
+        int number = 1;
+
+        // The attribute name is already used, so generate a new one
+        QRegularExpression re(R"(^(.*)\((\d+)\)$)");
+        auto match = re.match(attribute);
+        if(match.hasMatch())
+        {
+            attribute = match.captured(1);
+            number = match.captured(2).toInt() + 1;
+        }
+
+        attribute = QString("%1(%2)").arg(attribute).arg(number);
+    }
+
+    return attribute;
+}
+
 void GraphModel::setNodeName(NodeId nodeId, const QString& name)
 {
     _nodeNames[nodeId] = name;
@@ -440,24 +461,68 @@ std::vector<QString> GraphModel::attributeNames(ElementType elementType) const
     return attributeNames;
 }
 
-Attribute& GraphModel::createAttribute(const QString& name)
+void GraphModel::patchAttributeNames(QStringList& transforms, QStringList& visualisations) const
 {
-    bool attributeIsNew = !u::contains(_attributes, name);
+    if(transforms.empty() || visualisations.empty())
+        return;
 
+    std::map<QString, QString> substitutions;
+
+    for(const auto& transform : transforms)
+    {
+        GraphTransformConfigParser p;
+
+        if(!p.parse(transform))
+            continue;
+
+        const auto& graphTransformConfig = p.result();
+
+        if(!u::contains(_graphTransformFactories, graphTransformConfig._action))
+            continue;
+
+        auto& factory = _graphTransformFactories.at(graphTransformConfig._action);
+
+        auto newAttributes = u::keysFor(factory->declaredAttributes());
+
+        for(const auto& name : newAttributes)
+        {
+            auto normalisedName = normalisedAttributeName(name);
+            if(normalisedName != name)
+                substitutions.emplace(name, normalisedName);
+        }
+    }
+
+    QStringList patchedVisualisations;
+    for(const auto& visualisation : visualisations)
+    {
+        VisualisationConfigParser p;
+
+        if(!p.parse(visualisation))
+            continue;
+
+        auto visualisationConfig = p.result();
+
+        if(u::contains(substitutions, visualisationConfig._attributeName))
+            visualisationConfig._attributeName = substitutions[visualisationConfig._attributeName];
+
+        patchedVisualisations.append(visualisationConfig.asString());
+    }
+
+    visualisations = patchedVisualisations;
+}
+
+Attribute& GraphModel::createAttribute(QString name)
+{
+    name = normalisedAttributeName(name);
     Attribute& attribute = _attributes[name];
 
     // If we're creating an attribute during the graph transform, it's
     // a dynamically created attribute rather than a persistent one,
     // so mark it as such
-    if(_transformedGraphIsChanging && attributeIsNew)
+    if(_transformedGraphIsChanging)
         attribute.setFlag(AttributeFlag::Dynamic);
 
     return attribute;
-}
-
-void GraphModel::addAttribute(const QString& name, const Attribute& attribute)
-{
-    _attributes.emplace(name, attribute);
 }
 
 void GraphModel::addAttributes(const std::map<QString, Attribute>& attributes)

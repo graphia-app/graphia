@@ -1505,6 +1505,10 @@ void Document::update(QStringList newGraphTransforms, QStringList newVisualisati
     if(_graphModel == nullptr)
         return;
 
+    // When a transform creates a new attribute, its name may not match the default
+    // visualisation that it created for it, so we need to do a bit of patching
+    _graphModel->patchAttributeNames(newGraphTransforms, newVisualisations);
+
     std::vector<std::unique_ptr<ICommand>> commands;
 
     auto uiGraphTransforms = graphTransformConfigurationsFromUI();
