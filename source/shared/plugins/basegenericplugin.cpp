@@ -4,6 +4,8 @@
 #include "shared/loading/pairwisetxtfileparser.h"
 #include "shared/loading/graphmlparser.h"
 
+#include "shared/utils/iterator_range.h"
+
 #include "thirdparty/json/json_helper.h"
 
 BaseGenericPluginInstance::BaseGenericPluginInstance()
@@ -58,7 +60,8 @@ QByteArray BaseGenericPluginInstance::save(IMutableGraph& graph, const ProgressF
     if(_edgeWeights != nullptr)
     {
         graph.setPhase(QObject::tr("Edge Weights"));
-        jsonObject["edgeWeights"] = jsonArrayFrom(*_edgeWeights, progressFn);
+        auto range = make_iterator_range(_edgeWeights->cbegin(), _edgeWeights->cbegin() + graph.nextEdgeId());
+        jsonObject["edgeWeights"] = jsonArrayFrom(range, progressFn);
     }
 
     progressFn(-1);

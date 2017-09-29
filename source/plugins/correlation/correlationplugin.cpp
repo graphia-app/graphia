@@ -431,7 +431,8 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, const ProgressF
     jsonObject["data"] = jsonArrayFrom(_data, progressFn);
 
     graph.setPhase(QObject::tr("Pearson Values"));
-    jsonObject["pearsonValues"] = jsonArrayFrom(*_pearsonValues);
+    auto range = make_iterator_range(_pearsonValues->cbegin(), _pearsonValues->cbegin() + graph.nextEdgeId());
+    jsonObject["pearsonValues"] = jsonArrayFrom(range);
 
     jsonObject["minimumCorrelationValue"] = _minimumCorrelationValue;
     jsonObject["transpose"] = _transpose;
