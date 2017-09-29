@@ -321,12 +321,17 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
             NodeId nodeId(0);
             for(const auto& jsonPosition : jsonLayout["positions"])
             {
-                const auto& jsonPositionArray = jsonPosition;
+                if(graph.containsNodeId(nodeId))
+                {
+                    const auto& jsonPositionArray = jsonPosition;
 
-                _nodePositions->set(nodeId++, QVector3D(
-                    jsonPositionArray.at(0),
-                    jsonPositionArray.at(1),
-                    jsonPositionArray.at(2)));
+                    _nodePositions->set(nodeId, QVector3D(
+                        jsonPositionArray.at(0),
+                        jsonPositionArray.at(1),
+                        jsonPositionArray.at(2)));
+                }
+
+                nodeId++;
             }
         }
 

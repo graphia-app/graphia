@@ -516,7 +516,9 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     i = 0;
     for(const auto& pearsonValue : jsonPearsonValues)
     {
-        _pearsonValues->set(i, pearsonValue);
+        if(graph.containsEdgeId(i))
+            _pearsonValues->set(i, pearsonValue);
+
         progressFn(static_cast<int>((i++ * 100) / jsonPearsonValues.size()));
     }
 
