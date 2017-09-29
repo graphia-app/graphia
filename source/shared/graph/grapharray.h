@@ -116,8 +116,10 @@ public:
     //FIXME these iterators do not lock when locking is enabled; need to wrap in own iterator types
     typename std::vector<Element>::iterator begin() { return _array.begin(); }
     typename std::vector<Element>::const_iterator begin() const { return _array.begin(); }
+    typename std::vector<Element>::const_iterator cbegin() const { return _array.cbegin(); }
     typename std::vector<Element>::iterator end() { return _array.end(); }
     typename std::vector<Element>::const_iterator end() const { return _array.end(); }
+    typename std::vector<Element>::const_iterator cend() const { return _array.cend(); }
 
     int size() const
     {
