@@ -88,6 +88,12 @@ Window
                     updateTransformExpression();
                 }
 
+                onDoubleClicked:
+                {
+                    if(document.graphTransformIsValid(transformExpression))
+                        root.accept();
+                }
+
                 TransformListSortMenu { transformsList: transformsList }
             }
 

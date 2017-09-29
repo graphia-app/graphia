@@ -75,6 +75,13 @@ Item
                     root.selectedValue = undefined;
             }
         }
+
+        onDoubleClicked:
+        {
+            root.doubleClicked(index);
+        }
     }
+
+    signal doubleClicked(var index)
 }
 
