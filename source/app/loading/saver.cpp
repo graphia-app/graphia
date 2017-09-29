@@ -2,6 +2,7 @@
 
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/scope_exit.h"
+#include "shared/utils/iterator_range.h"
 
 #include "ui/document.h"
 
@@ -127,17 +128,18 @@ static json graphAsJson(const IGraph& graph, const ProgressFn& progressFn)
 static json nodePositionsAsJson(const IGraph& graph, const NodePositions& nodePositions,
                                 const ProgressFn& progressFn)
 {
-    int i = 0;
-
     graph.setPhase(QObject::tr("Positions"));
     json positions;
-    for(auto nodeId : graph.nodeIds())
+
+    auto range = make_iterator_range(nodePositions.cbegin(), nodePositions.cbegin() + graph.nextNodeId());
+    uint64_t i = 0;
+    for(const auto& nodePosition : range)
     {
-        const auto& nodePosition = nodePositions.get(nodeId);
-        json vector({nodePosition.x(), nodePosition.y(), nodePosition.z()});
+        auto v = nodePosition.newest();
+        json vector({v.x(), v.y(), v.z()});
 
         positions.emplace_back(vector);
-        progressFn((i++ * 100) / graph.numNodes());
+        progressFn((i++ * 100) / range.size());
     }
 
     progressFn(-1);
