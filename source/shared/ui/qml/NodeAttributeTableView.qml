@@ -401,6 +401,31 @@ Item
                         _clickedColumn = styleData.column;
                 }
 
+                SystemPalette { id: systemPalette }
+
+                // Highlight the selected columns with the blended system highlight colour
+                Rectangle
+                {
+                    anchors.fill: parent
+                    visible: checkbox.visible && checkbox.checked
+
+                    color:
+                    {
+                        var c = Qt.darker(systemPalette.highlight, 1.0);
+                        return Qt.rgba(c.r, c.g, c.b, 0.4);
+                    }
+                }
+
+                // Having a line under the header helps delineate the button controls
+                Rectangle
+                {
+                    anchors.left: parent.left
+                    anchors.bottom: parent.bottom
+                    anchors.right: parent.right
+                    height: 1
+                    color: systemPalette.dark
+                }
+
                 Item
                 {
                     anchors.leftMargin: Constants.margin
@@ -411,6 +436,8 @@ Item
                     CheckBox
                     {
                         id: checkbox
+
+                        anchors.verticalCenter: parent.verticalCenter
                         visible: styleData.value.length > 0
                         text: styleData.value
 
