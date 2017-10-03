@@ -148,7 +148,6 @@ ApplicationWindow
             var exampleFile = qmlUtils.urlForFileName(application.directory + "/examples/Pairwise_London_Tube_River_Bus.txt");
             if(qmlUtils.fileUrlExists(exampleFile))
             {
-                console.log(exampleFile)
                 openFileOfTypeWithPluginAndParameters(exampleFile,
                     "PairwiseTXT", "Generic",
                     {}, false);
@@ -1020,7 +1019,7 @@ ApplicationWindow
             MenuItem { action: selectTargetsAction }
             MenuItem { action: selectNeighboursAction }
             MenuSeparator {}
-            MenuItem {id: findButton; action: findAction}
+            MenuItem { action: findAction}
             MenuItem
             {
                 action: currentDocument ? currentDocument.selectPreviousFoundAction : nullAction

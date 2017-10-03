@@ -10,7 +10,7 @@ Item
 
     default property var content
     property var _mouseArea
-    property int _padding: 10
+    readonly property int _padding: 10
     property alias color: backRectangle.color
 
     property var title
@@ -31,7 +31,7 @@ Item
     opacity: 0.0
     z: 99
 
-    onContentChanged: { content.parent = containerLayout }
+    onContentChanged: { content.parent = containerLayout; }
     onTargetChanged: { linkToTarget() }
 
     Behavior on opacity
@@ -47,9 +47,7 @@ Item
         if(visible)
         {
             if(target)
-            {
                 positionBubble();
-            }
 
             opacity = 1.0;
         }
@@ -135,13 +133,21 @@ Item
         linkToTarget();
     }
 
+    Connections
+    {
+        target: target
+        onHoveredChanged:
+        {
+            console.log("I'm Hovered!");
+        }
+    }
+
     function linkToTarget()
     {
-        if(target)
+        if(target !== undefined && target !== null)
         {
             if(hoverEnabled)
             {
-                var component = Qt.createComponent("HelpMouseArea.qml");
                 if(target.hoveredChanged === undefined)
                     return;
                 target.hoveredChanged.connect(function()
@@ -154,7 +160,7 @@ Item
                     }
                     else
                     {
-                        hoverTimer.stop()
+                        hoverTimer.stop();
                         root.visible = false
                     }
                 });
@@ -184,7 +190,7 @@ Item
         case Qt.AlignTop:
             var point = target.mapToItem(parent, target.width * 0.5, 0);
             root.x = point.x - (childrenRect.width * 0.5);
-            root.y = point.y - (childrenRect.height) - _padding;
+            root.y = point.y - childrenRect.height - _padding;
             break;
         case Qt.AlignBottom:
             var point = target.mapToItem(parent, target.width * 0.5, target.height);

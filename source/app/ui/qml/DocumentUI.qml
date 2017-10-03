@@ -1296,7 +1296,7 @@ Item
             {
                 Image
                 {
-                    anchors.horizontalCenter: parent.horizontalCenter;
+                    anchors.horizontalCenter: parent.horizontalCenter
                     source: "qrc:///imagery/overview.png"
                     mipmap: true
                     fillMode: Image.PreserveAspectFit
@@ -1329,8 +1329,8 @@ Item
             {
                 pluginWindow.requestActivate();
                 pluginHubble.target = null;
-                pluginHubble.x = (root.width - pluginHubble.width) * 0.5
-                pluginHubble.y = root.height - pluginHubble.height - 10
+                pluginHubble.x = Qt.binding(function(){ return (root.width - pluginHubble.width) * 0.5});
+                pluginHubble.y = root.height - pluginHubble.height - 10;
             }
             else
             {
@@ -1363,10 +1363,10 @@ Item
                 source: "qrc:///imagery/attributes.png"
             }
         }
-        onSkipClicked: visible = false
+        onSkipClicked: visible = false;
         onNextClicked:
         {
-            visible = false
+            visible = false;
             transformHubble.visible = true;
         }
     }
@@ -1386,7 +1386,7 @@ Item
             {
                 Image
                 {
-                    anchors.horizontalCenter: parent.horizontalCenter;
+                    anchors.horizontalCenter: parent.horizontalCenter
                     source: "qrc:///imagery/mcl.svg"
                     mipmap: true
                     fillMode: Image.PreserveAspectFit
@@ -1465,7 +1465,7 @@ Item
     {
         id: findHubble
         visible: false
-        title: "Search Graph"
+        title: qsTr("Search Graph")
         target: find
         alignment: Qt.AlignBottom | Qt.AlignRight
         displayNext: true

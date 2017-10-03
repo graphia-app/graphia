@@ -204,7 +204,7 @@ RESOURCES += \
     auth/keys.qrc \
     rendering/shaders.qrc \
     ui/qml.qrc \
-    imagery.qrc
+    ui/imagery.qrc
 
 mac {
     LIBS += -framework CoreFoundation
