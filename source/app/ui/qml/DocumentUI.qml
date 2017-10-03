@@ -1287,7 +1287,7 @@ Item
         id: overviewHubble
         visible: false
         title: qsTr("Overview Mode")
-        x: (root.width * 0.5) - childrenRect.width * 0.5
+        x: (root.width * 0.5) - childrenRect.width * 0.5;
         y: 10
         displayNext: true
         RowLayout
@@ -1334,7 +1334,7 @@ Item
             }
             else
             {
-                pluginHubble.target = plugin.content.toolStrip
+                pluginHubble.target = plugin.content.toolStrip;
             }
 
             pluginHubble.visible = true;
@@ -1413,7 +1413,7 @@ Item
         onSkipClicked: visible = false
         onNextClicked:
         {
-            visible = false
+            visible = false;
             visualisationsHubble.visible = true;
         }
     }
@@ -1433,7 +1433,7 @@ Item
             {
                 Image
                 {
-                    anchors.horizontalCenter: parent.horizontalCenter;
+                    anchors.horizontalCenter: parent.horizontalCenter
                     source: "qrc:///imagery/visualisations.svg"
                     mipmap: true
                     fillMode: Image.PreserveAspectFit
@@ -1453,10 +1453,10 @@ Item
                       "Click the gradient bar to adjust the colour scheme if PageRank was added in the previous step<br><br>")
             }
         }
-        onSkipClicked: visible = false
+        onSkipClicked: visible = false;
         onNextClicked:
         {
-            visible = false
+            visible = false;
             findHubble.visible = true;
         }
     }
@@ -1496,7 +1496,7 @@ Item
         id: conclusionHubble
         visible: false
         title: qsTr("Conclusion")
-        x: (root.width * 0.5) - childrenRect.width * 0.5
+        x: (root.width * 0.5) - childrenRect.width * 0.5;
         y: 10
         displayClose: true
         RowLayout
@@ -1514,7 +1514,7 @@ Item
         onSkipClicked: visible = false
         onCloseClicked:
         {
-            visible = false
+            visible = false;
         }
     }
 }

@@ -847,6 +847,14 @@ ApplicationWindow
 
     Action
     {
+        id: resetFirstOpenAction
+        text: qsTr("Reset First Open")
+        enabled: !misc.firstOpen
+        onTriggered: { misc.firstOpen = true; }
+    }
+
+    Action
+    {
         id: saveImageAction
         iconName: "camera-photo"
         text: qsTr("Save As Image…")
@@ -1106,6 +1114,7 @@ ApplicationWindow
             MenuItem { action: dumpGraphAction }
             MenuItem { action: toggleFpsMeterAction }
             MenuItem { action: toggleGlyphmapSaveAction }
+            MenuItem { action: resetFirstOpenAction }
         }
         Menu { id: pluginMenu0; visible: false }
         Menu { id: pluginMenu1; visible: false }
