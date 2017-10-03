@@ -132,15 +132,6 @@ Item
         linkToTarget();
     }
 
-    Connections
-    {
-        target: target
-        onHoveredChanged:
-        {
-            console.log("I'm Hovered!");
-        }
-    }
-
     function linkToTarget()
     {
         if(target !== undefined && target !== null)
