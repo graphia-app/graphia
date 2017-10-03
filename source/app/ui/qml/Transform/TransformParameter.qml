@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.3
 import com.kajeka 1.0
 
 import ".."
-import "../Utils.js" as Utils
+import "../../../../shared/ui/qml/Utils.js" as Utils
 
 GridLayout
 {

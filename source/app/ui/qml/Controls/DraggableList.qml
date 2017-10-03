@@ -1,7 +1,7 @@
 import QtQuick 2.7
 import QtQml.Models 2.2
 
-import "../Constants.js" as Constants
+import "../../../../shared/ui/qml/Constants.js" as Constants
 
 Column
 {

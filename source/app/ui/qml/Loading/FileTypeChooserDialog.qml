@@ -6,7 +6,7 @@ import com.kajeka 1.0
 
 import SortFilterProxyModel 0.2
 
-import "../Constants.js" as Constants
+import "../../../../shared/ui/qml/Constants.js" as Constants
 
 Dialog
 {

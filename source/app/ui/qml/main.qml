@@ -9,7 +9,7 @@ import QtQuick.Window 2.2
 import Qt.labs.platform 1.0 as Labs
 
 import com.kajeka 1.0
-import "Utils.js" as Utils
+import "../../../shared/ui/qml/Utils.js" as Utils
 
 import "Loading"
 import "Options"

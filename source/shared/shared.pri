@@ -74,6 +74,7 @@ SOURCES += \
     $$PWD/utils/utils.cpp
 
 RESOURCES += \
-    $$PWD/ui/shared.qrc
+    $$PWD/ui/shared.qrc \
+    $$PWD/ui/js.qrc
 
 DISTFILES +=

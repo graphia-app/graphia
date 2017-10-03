@@ -7,7 +7,7 @@ import Qt.labs.platform 1.0 as Labs
 
 import com.kajeka 1.0
 
-import "Constants.js" as Constants
+import "../../../shared/ui/qml/Constants.js" as Constants
 
 Dialog
 {

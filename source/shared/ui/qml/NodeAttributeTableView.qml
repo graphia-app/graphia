@@ -11,8 +11,8 @@ import SortFilterProxyModel 0.2
 import com.kajeka 1.0
 
 import "Controls"
-import "Utils.js" as Utils
-import "Constants.js" as Constants
+import "../../../shared/ui/qml/Utils.js" as Utils
+import "../../../shared/ui/qml/Constants.js" as Constants
 
 Item
 {

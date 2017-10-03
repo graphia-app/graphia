@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.3
 import QtQuick.Controls.Styles 1.4
 
 import "Controls"
-import "Constants.js" as Constants
+import "../../../shared/ui/qml/Constants.js" as Constants
 
 Rectangle
 {

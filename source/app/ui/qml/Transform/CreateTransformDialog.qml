@@ -6,8 +6,8 @@ import com.kajeka 1.0
 
 import ".."
 import "TransformConfig.js" as TransformConfig
-import "../Constants.js" as Constants
-import "../Utils.js" as Utils
+import "../../../../shared/ui/qml/Constants.js" as Constants
+import "../../../../shared/ui/qml/Utils.js" as Utils
 
 import "../Controls"
 

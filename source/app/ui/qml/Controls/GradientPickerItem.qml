@@ -4,11 +4,8 @@ import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 
-import ".."
-import "../Constants.js" as Constants
-import "../Utils.js" as Utils
-
-import "../Controls/"
+import "../../../../shared/ui/qml/Constants.js" as Constants
+import "../../../../shared/ui/qml/Utils.js" as Utils
 
 Item
 {
