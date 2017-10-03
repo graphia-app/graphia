@@ -381,6 +381,7 @@ Item
                 elementType: "header"
 
                 implicitWidth: checkbox.width + (2 * Constants.margin)
+                implicitHeight: checkbox.height
 
                 property int _clickedColumn
 
