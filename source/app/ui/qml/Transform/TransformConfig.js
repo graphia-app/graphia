@@ -62,7 +62,7 @@ function sanitiseOp(text)
     return text;
 }
 
-function create(transform)
+function Create(transform)
 {
     this.action = transform.action;
     this.flags = transform.flags;

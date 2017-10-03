@@ -43,13 +43,16 @@ ApplicationWindow
 
     property bool _authenticatedAtLeastOnce: false
 
-    Application
+    Application { id: application }
+
+    // Use Connections to avoid an M16 JS lint error
+    Connections
     {
-        id: application
+        target: application
 
         onAuthenticatedChanged:
         {
-            if(authenticated && !_authenticatedAtLeastOnce)
+            if(application.authenticated && !_authenticatedAtLeastOnce)
             {
                 _authenticatedAtLeastOnce = true;
                 processArguments(Qt.application.arguments);

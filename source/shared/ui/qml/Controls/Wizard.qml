@@ -67,7 +67,8 @@ BaseParameterDialog
                     ctx.strokeStyle = systemPalette.dark;
 
                     // Draw lines between pips
-                    for(var pipNum = 1; pipNum < listPages.length; pipNum++)
+                    var pipNum = 0;
+                    for(pipNum = 1; pipNum < listPages.length; pipNum++)
                     {
                         ctx.beginPath();
                         ctx.moveTo(_padding + ((pipNum - 1) * spacing) + pipSize, topPip + (pipSize * 0.5));
@@ -76,7 +77,7 @@ BaseParameterDialog
                     }
 
                     // Draw pips
-                    for(var pipNum = 0; pipNum < listPages.length; pipNum++)
+                    for(pipNum = 0; pipNum < listPages.length; pipNum++)
                     {
                         ctx.strokeStyle = systemPalette.dark;
                         ctx.fillStyle = systemPalette.dark;

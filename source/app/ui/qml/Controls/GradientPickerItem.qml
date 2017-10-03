@@ -231,7 +231,7 @@ Item
 
                 function generateGradientString()
                 {
-                    var currentModel = new Object();
+                    var currentModel = {};
                     // Regenerate Model
                     for(var i = 0; i < markerRepeater.count; i++)
                     {
