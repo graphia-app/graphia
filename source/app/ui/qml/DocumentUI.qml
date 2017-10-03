@@ -1191,330 +1191,286 @@ Item
             root.loadComplete(url, success);
         }
     }
-
-    Hubble
+    Tutorial
     {
-        id: introHubble
-        visible: false
-        title: "Introduction"
-        x: 10
-        y: 10
-        displayNext: true
-        Text
+        visible: misc.firstOpen
+        Hubble
         {
-            textFormat: Text.StyledText
-            text: qsTr("As this is your first time openining Graphia we have opened an example Graph for you<br>" +
-                  "The Graph represents the <b>London Tube System and River Buses!</b><br><br>" +
-                  "Click next to learn about navigation and the key elements of a Graph")
-        }
-        onSkipClicked: introHubble.visible = false;
-        onNextClicked:
-        {
-            introHubble.visible = false;
-            nodeEdgesHubble.visible = true;
-        }
-        Component.onCompleted:
-        {
-            if(misc.firstOpen === "true")
-                visible = true;
-            misc.firstOpen = false;
-        }
-    }
-
-    Hubble
-    {
-        id: nodeEdgesHubble
-        visible: false
-        title: qsTr("Nodes and Edges")
-        x: (root.width * 0.5) - childrenRect.width * 0.5
-        y: 10
-        displayNext: true
-        RowLayout
-        {
-            spacing: 10
-            Column
+            id: introHubble
+            visible: false
+            title: "Introduction"
+            x: 10
+            y: 10
+            Text
             {
-                Image
+                textFormat: Text.StyledText
+                text: qsTr("As this is your first time openining Graphia we have opened an example Graph for you<br>" +
+                      "The Graph represents the <b>London Tube System and River Buses!</b><br><br>" +
+                      "Click next to learn about navigation and the key elements of a Graph")
+            }
+            Component.onCompleted:
+            {
+                misc.firstOpen = false;
+            }
+        }
+
+        Hubble
+        {
+            id: nodeEdgesHubble
+            visible: false
+            title: qsTr("Nodes and Edges")
+            x: (root.width * 0.5) - childrenRect.width * 0.5
+            y: 10
+            RowLayout
+            {
+                spacing: 10
+                Column
                 {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    fillMode: Image.PreserveAspectFit
-                    width: 75
-                    height: 75
-                    source: "qrc:///imagery/node.png"
+                    Image
+                    {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        fillMode: Image.PreserveAspectFit
+                        width: 75
+                        height: 75
+                        source: "qrc:///imagery/node.png"
+                    }
+                    Text
+                    {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: qsTr("A Node")
+                    }
+                    Image
+                    {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        fillMode: Image.PreserveAspectFit
+                        width: 100
+                        height: 100
+                        source: "qrc:///imagery/edge.png"
+                    }
+                    Text
+                    {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: qsTr("An Edge")
+                    }
                 }
                 Text
                 {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: qsTr("A Node")
+                    textFormat: Text.StyledText
+                    text: qsTr("A Graph in its simplest form consists of <b>Nodes</b> and <b>Edges</b><br><br>" +
+                          "With this example graph nodes represent stops, while edges represent a connection<br>" +
+                          "Edges always have a direction however direction can be ignored if required<br><br>" +
+                          "Nodes and Edges can contain additional information known as <b>Attributes</b><br><br>" +
+                          "<b>Rotate Graph:</b> Left click and drag graph<br>" +
+                          "<b>Zoom Graph:</b> Mouse Scrollwheel<br>" +
+                          "<b>Translate Graph:</b> Right mouse drag the graph<br><br>" +
+                          "Click next to learn more about navigating a graph")
                 }
-                Image
+            }
+        }
+
+        Hubble
+        {
+            id: overviewHubble
+            visible: false
+            title: qsTr("Overview Mode")
+            x: (root.width * 0.5) - childrenRect.width * 0.5;
+            y: 10
+            RowLayout
+            {
+                Column
                 {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    fillMode: Image.PreserveAspectFit
-                    width: 100
-                    height: 100
-                    source: "qrc:///imagery/edge.png"
+                    Image
+                    {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        source: "qrc:///imagery/overview.png"
+                        mipmap: true
+                        fillMode: Image.PreserveAspectFit
+                        width: 400
+                    }
                 }
                 Text
                 {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: qsTr("An Edge")
+                    textFormat: Text.StyledText
+                    text: qsTr("When a graph contains multiple individual graphs (Components) Graphia opens the file in Overview<br>" +
+                          "mode. From Overview mode all components are visible. In this Graph the left component is the <br>" +
+                          "<b>London Tube map</b>, while the right component is the <b>London Riverbus Network</b><br><br>" +
+                          "To focus on a particular component and hide others, <b>Double click</b> the component. This<br>" +
+                          "enters Component mode which allows detailed inspection of a graph. When viewing a component<br>" +
+                          "on-screen buttons appear to help you navigate. Alternatively, <b>Double click<br>" +
+                          "the background</b> or press <b>Esc</b> to return to Overview mode<br><br>" +
+                          "<b>Enter Component Mode:</b> Double Click component<br>" +
+                          "<b>Return to Overview:</b> Double Click background or Esc<br>" +
+                          "<b>Navigate components:</b> Page-up, Page-down<br>" +
+                          "<b>Select Node:</b> Left click a node<br>" +
+                          "<b>Focus Node:</b> Double click a node<br><br>" +
+                          "Click next to learn about searching a graph")
                 }
             }
-            Text
+            onNextClicked:
             {
-                textFormat: Text.StyledText
-                text: qsTr("A Graph in its simplest form consists of <b>Nodes</b> and <b>Edges</b><br><br>" +
-                      "With this example graph nodes represent stops, while edges represent a connection<br>" +
-                      "Edges always have a direction however direction can be ignored if required<br><br>" +
-                      "Nodes and Edges can contain additional information known as <b>Attributes</b><br><br>" +
-                      "<b>Rotate Graph:</b> Left click and drag graph<br>" +
-                      "<b>Zoom Graph:</b> Mouse Scrollwheel<br>" +
-                      "<b>Translate Graph:</b> Right mouse drag the graph<br><br>" +
-                      "Click next to learn more about navigating a graph")
+                overviewHubble.visible = false;
+                if(root.pluginPoppedOut)
+                {
+                    pluginWindow.requestActivate();
+                    pluginHubble.target = null;
+                    pluginHubble.x = Qt.binding(function(){ return (root.width - pluginHubble.width) * 0.5});
+                    pluginHubble.y = root.height - pluginHubble.height - 10;
+                }
+                else
+                {
+                    pluginHubble.target = plugin.content.toolStrip;
+                }
+
+                pluginHubble.visible = true;
             }
         }
-        onSkipClicked: nodeEdgesHubble.visible = false;
-        onNextClicked:
-        {
-            nodeEdgesHubble.visible = false;
-            overviewHubble.visible = true;
-        }
-    }
 
-    Hubble
-    {
-        id: overviewHubble
-        visible: false
-        title: qsTr("Overview Mode")
-        x: (root.width * 0.5) - childrenRect.width * 0.5;
-        y: 10
-        displayNext: true
-        RowLayout
+        Hubble
         {
-            Column
+            id: pluginHubble
+            visible: false
+            title: qsTr("Node Attributes")
+            alignment: Qt.AlignTop
+            RowLayout
             {
+                Text
+                {
+                    textFormat: Text.StyledText
+                    text: qsTr("Information contained within the <b>selected</b> node will be displayed in the attribute table<br>" +
+                          "Data will be sourced from the file, additional attributes can be calculated from within Graphia<br><br>" +
+                          "Select a node using <b>left click</b> and view the node's attributes in the table.<br><br>" +
+                          "Click next to learn about calculating attributes and transforming the graph")
+                }
                 Image
                 {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    source: "qrc:///imagery/overview.png"
-                    mipmap: true
-                    fillMode: Image.PreserveAspectFit
-                    width: 400
+                    source: "qrc:///imagery/attributes.png"
                 }
             }
-            Text
-            {
-                textFormat: Text.StyledText
-                text: qsTr("When a graph contains multiple individual graphs (Components) Graphia opens the file in Overview<br>" +
-                      "mode. From Overview mode all components are visible. In this Graph the left component is the <br>" +
-                      "<b>London Tube map</b>, while the right component is the <b>London Riverbus Network</b><br><br>" +
-                      "To focus on a particular component and hide others, <b>Double click</b> the component. This<br>" +
-                      "enters Component mode which allows detailed inspection of a graph. When viewing a component<br>" +
-                      "on-screen buttons appear to help you navigate. Alternatively, <b>Double click<br>" +
-                      "the background</b> or press <b>Esc</b> to return to Overview mode<br><br>" +
-                      "<b>Enter Component Mode:</b> Double Click component<br>" +
-                      "<b>Return to Overview:</b> Double Click background or Esc<br>" +
-                      "<b>Navigate components:</b> Page-up, Page-down<br>" +
-                      "<b>Select Node:</b> Left click a node<br>" +
-                      "<b>Focus Node:</b> Double click a node<br><br>" +
-                      "Click next to learn about searching a graph")
-            }
         }
-        onSkipClicked: overviewHubble.visible = false;
-        onNextClicked:
-        {
-            overviewHubble.visible = false;
-            if(root.pluginPoppedOut)
-            {
-                pluginWindow.requestActivate();
-                pluginHubble.target = null;
-                pluginHubble.x = Qt.binding(function(){ return (root.width - pluginHubble.width) * 0.5});
-                pluginHubble.y = root.height - pluginHubble.height - 10;
-            }
-            else
-            {
-                pluginHubble.target = plugin.content.toolStrip;
-            }
 
-            pluginHubble.visible = true;
-        }
-    }
-
-    Hubble
-    {
-        id: pluginHubble
-        visible: false
-        title: qsTr("Node Attributes")
-        alignment: Qt.AlignTop
-        displayNext: true
-        RowLayout
+        Hubble
         {
-            Text
+            id: transformHubble
+            visible: false
+            title: qsTr("Transforms")
+            target: transforms
+            alignment: Qt.AlignLeft | Qt.AlignBottom
+            RowLayout
             {
-                textFormat: Text.StyledText
-                text: qsTr("Information contained within the <b>selected</b> node will be displayed in the attribute table<br>" +
-                      "Data will be sourced from the file, additional attributes can be calculated from within Graphia<br><br>" +
-                      "Select a node using <b>left click</b> and view the node's attributes in the table.<br><br>" +
-                      "Click next to learn about calculating attributes and transforming the graph")
-            }
-            Image
-            {
-                source: "qrc:///imagery/attributes.png"
-            }
-        }
-        onSkipClicked: visible = false;
-        onNextClicked:
-        {
-            visible = false;
-            transformHubble.visible = true;
-        }
-    }
-
-    Hubble
-    {
-        id: transformHubble
-        visible: false
-        title: qsTr("Transforms")
-        target: transforms
-        alignment: Qt.AlignLeft | Qt.AlignBottom
-        displayNext: true
-        RowLayout
-        {
-            spacing: 10
-            Column
-            {
-                Image
+                spacing: 10
+                Column
                 {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    source: "qrc:///imagery/mcl.svg"
-                    mipmap: true
-                    fillMode: Image.PreserveAspectFit
-                    width: 150
+                    Image
+                    {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        source: "qrc:///imagery/mcl.svg"
+                        mipmap: true
+                        fillMode: Image.PreserveAspectFit
+                        width: 150
+                    }
+                    Text
+                    {
+                        text: qsTr("An MCL transform with a colour<br>visualisation applied")
+                    }
                 }
                 Text
                 {
-                    text: qsTr("An MCL transform with a colour<br>visualisation applied")
+                    textFormat: Text.StyledText
+                    text: qsTr("Transforms are a powerful way to modify the graph and calculate additional attributes<br>" +
+                          "They can be used to remove nodes, collapse edges, calculate node metrics and much more<br>" +
+                          "Existing transforms will appear above <b>\"Add Transform\"</b><br><br>" +
+                          "Click <b>\"Add Transform\"</b> to bring up the add transform dialog<br>" +
+                          "Try selecting <b>\"PageRank\"</b><br>" +
+                          "Each attribute added to graph will also add a Visualisation<br>" +
+                          "Select <b>Colour</b> for the visualisation and then ok to add them<br><br>" +
+                          "Once a PageRank transform has been added, click next to learn about Visualisations")
                 }
             }
-            Text
-            {
-                textFormat: Text.StyledText
-                text: qsTr("Transforms are a powerful way to modify the graph and calculate additional attributes<br>" +
-                      "They can be used to remove nodes, collapse edges, calculate node metrics and much more<br>" +
-                      "Existing transforms will appear above <b>\"Add Transform\"</b><br><br>" +
-                      "Click <b>\"Add Transform\"</b> to bring up the add transform dialog<br>" +
-                      "Try selecting <b>\"PageRank\"</b><br>" +
-                      "Each attribute added to graph will also add a Visualisation<br>" +
-                      "Select <b>Colour</b> for the visualisation and then ok to add them<br><br>" +
-                      "Once a PageRank transform has been added, click next to learn about Visualisations")
-            }
         }
-        onSkipClicked: visible = false
-        onNextClicked:
-        {
-            visible = false;
-            visualisationsHubble.visible = true;
-        }
-    }
 
-    Hubble
-    {
-        id: visualisationsHubble
-        visible: false
-        title: qsTr("Visualisations")
-        target: visualisations
-        alignment: Qt.AlignLeft | Qt.AlignTop
-        displayNext: true
-        RowLayout
+        Hubble
         {
-            spacing: 10
-            Column
+            id: visualisationsHubble
+            visible: false
+            title: qsTr("Visualisations")
+            target: visualisations
+            alignment: Qt.AlignLeft | Qt.AlignTop
+            RowLayout
             {
-                Image
+                spacing: 10
+                Column
                 {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    source: "qrc:///imagery/visualisations.svg"
-                    mipmap: true
-                    fillMode: Image.PreserveAspectFit
-                    width: 200
+                    Image
+                    {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        source: "qrc:///imagery/visualisations.svg"
+                        mipmap: true
+                        fillMode: Image.PreserveAspectFit
+                        width: 200
+                    }
+                    Text
+                    {
+                        text: qsTr("A graph with Colour, Size and Text <br>visualisations applied")
+                    }
                 }
                 Text
                 {
-                    text: qsTr("A graph with Colour, Size and Text <br>visualisations applied")
+                    textFormat: Text.StyledText
+                    text: qsTr("Visualisations modify the appearance of the Graph depending on attributes<br>" +
+                          "<b>Node Colour</b>, <b>Size</b> and <b>Text</b> can all be linked to an attribute<br>" +
+                          "Existing visualisations can be modified from here as well as new ones added<br><br>" +
+                          "Click the gradient bar to adjust the colour scheme if PageRank was added in the previous step<br><br>")
                 }
             }
-            Text
-            {
-                textFormat: Text.StyledText
-                text: qsTr("Visualisations modify the appearance of the Graph depending on attributes<br>" +
-                      "<b>Node Colour</b>, <b>Size</b> and <b>Text</b> can all be linked to an attribute<br>" +
-                      "Existing visualisations can be modified from here as well as new ones added<br><br>" +
-                      "Click the gradient bar to adjust the colour scheme if PageRank was added in the previous step<br><br>")
-            }
         }
-        onSkipClicked: visible = false;
-        onNextClicked:
-        {
-            visible = false;
-            findHubble.visible = true;
-        }
-    }
 
-    Hubble
-    {
-        id: findHubble
-        visible: false
-        title: qsTr("Search Graph")
-        target: find
-        alignment: Qt.AlignBottom | Qt.AlignRight
-        displayNext: true
-        RowLayout
+        Hubble
         {
-            Text
+            id: findHubble
+            visible: false
+            title: qsTr("Search Graph")
+            target: find
+            alignment: Qt.AlignBottom | Qt.AlignRight
+            RowLayout
             {
-                textFormat: Text.StyledText
-                text: qsTr("To perform a simple search within graph, click Find on the top toolbar<br>" +
-                      "Try finding <b>Paddington</b> within the graph<br><br>" +
-                      "Click next to learn about inspecting node contents")
-            }
-            ToolButton
-            {
-                iconName: "edit-find"
+                Text
+                {
+                    textFormat: Text.StyledText
+                    text: qsTr("To perform a simple search within graph, click Find on the top toolbar<br>" +
+                          "Try finding <b>Paddington</b> within the graph<br><br>" +
+                          "Click next to learn about inspecting node contents")
+                }
+                ToolButton
+                {
+                    iconName: "edit-find"
+                }
             }
         }
-        onSkipClicked: findHubble.visible = false
-        onNextClicked:
-        {
-            findHubble.visible = false;
-            conclusionHubble.visible = true;
-        }
-    }
 
-    Hubble
-    {
-        id: conclusionHubble
-        visible: false
-        title: qsTr("Conclusion")
-        x: (root.width * 0.5) - childrenRect.width * 0.5;
-        y: 10
-        displayClose: true
-        RowLayout
+        Hubble
         {
-            spacing: 10
-            Text
+            id: conclusionHubble
+            visible: false
+            title: qsTr("Conclusion")
+            x: (root.width * 0.5) - childrenRect.width * 0.5;
+            y: 10
+            displayClose: true
+            RowLayout
             {
-                textFormat: Text.StyledText
-                text: qsTr("This concludes our introduction tutorial of Graphia and the London transport network!<br>" +
-                      "Graphia can support <b>millions</b> of nodes and edges, this network is just the beginning.<br><br>" +
-                      "Utilising Transforms and Visualisations is key to getting the most from your Graph<br><br>" +
-                      "Click next to close the tutorial")
+                spacing: 10
+                Text
+                {
+                    textFormat: Text.StyledText
+                    text: qsTr("This concludes our introduction tutorial of Graphia and the London transport network!<br>" +
+                          "Graphia can support <b>millions</b> of nodes and edges, this network is just the beginning.<br><br>" +
+                          "Utilising Transforms and Visualisations is key to getting the most from your Graph<br><br>" +
+                          "Click next to close the tutorial")
+                }
             }
-        }
-        onSkipClicked: visible = false
-        onCloseClicked:
-        {
-            visible = false;
+            onCloseClicked:
+            {
+                visible = false;
+            }
         }
     }
 }

@@ -65,12 +65,13 @@ Item
     {
         id: backRectangle
         color: Qt.rgba(0.96, 0.96, 0.96, 0.9)
-        width: containerLayout.width + _padding
-        height: containerLayout.height + nextSkipButtons.height + _padding
+        width: fullHubbleLayout.width + _padding
+        height: fullHubbleLayout.height + _padding
         radius: 3
 
         ColumnLayout
         {
+            id: fullHubbleLayout;
             anchors.verticalCenter: backRectangle.verticalCenter
             anchors.horizontalCenter: backRectangle.horizontalCenter
             ColumnLayout
