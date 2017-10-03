@@ -7,6 +7,9 @@ CONFIG(debug,debug|release) {
 # https://www.kdab.com/disabling-narrowing-conversions-in-signal-slot-connections/
 DEFINES += QT_NO_NARROWING_CONVERSIONS_IN_CONNECT
 
+DEFINES += QT_DEPRECATED_WARNINGS
+DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000 # disables all the APIs deprecated before Qt 6.0.0
+
 gcc {
     QMAKE_CXXFLAGS += -Wpedantic -Wall -Wextra -Wcast-align -Wcast-qual \
         -Wdisabled-optimization -Wformat=2 -Winit-self \

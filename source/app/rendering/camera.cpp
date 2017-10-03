@@ -166,7 +166,7 @@ QMatrix4x4 Camera::viewMatrix() const
     if(_viewMatrixDirty)
     {
         _viewMatrix.setToIdentity();
-        _viewMatrix.rotate(_rotation.conjugate());
+        _viewMatrix.rotate(_rotation.conjugated());
 
         auto viewVector = -QVector3D(_viewMatrix.row(2));
 
