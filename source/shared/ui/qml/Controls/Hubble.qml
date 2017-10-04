@@ -71,7 +71,7 @@ Item
 
         ColumnLayout
         {
-            id: fullHubbleLayout;
+            id: fullHubbleLayout
             anchors.verticalCenter: backRectangle.verticalCenter
             anchors.horizontalCenter: backRectangle.horizontalCenter
             ColumnLayout
