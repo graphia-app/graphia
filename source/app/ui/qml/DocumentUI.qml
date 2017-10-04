@@ -588,6 +588,7 @@ Item
                 text: document.fps.toFixed(1) + qsTr(" fps")
             }
 
+            // @disable-check M300
             SlidingPanel
             {
                 id: findPanel
