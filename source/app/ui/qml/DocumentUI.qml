@@ -15,7 +15,6 @@ import "../../../shared/ui/qml/Utils.js" as Utils
 import "Controls"
 import "Transform"
 import "Visualisation"
-import "Controls"
 
 Item
 {
@@ -1191,9 +1190,11 @@ Item
             root.loadComplete(url, success);
         }
     }
+
     Tutorial
     {
         visible: misc.firstOpen
+
         Hubble
         {
             id: introHubble

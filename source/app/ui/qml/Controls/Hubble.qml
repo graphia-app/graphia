@@ -166,45 +166,47 @@ Item
 
     function positionBubble()
     {
+        var point = {};
+
         switch(alignment)
         {
         case Qt.AlignLeft:
-            var point = target.mapToItem(parent, 0, target.height * 0.5);
+            point = target.mapToItem(parent, 0, target.height * 0.5);
             root.x = point.x - childrenRect.width - _padding;
             root.y = point.y - (childrenRect.height * 0.5);
             break;
         case Qt.AlignRight:
-            var point = target.mapToItem(parent, target.width, target.height * 0.5);
+            point = target.mapToItem(parent, target.width, target.height * 0.5);
             root.x = point.x + _padding
             root.y = point.y - (childrenRect.height * 0.5);
             break;
         case Qt.AlignTop:
-            var point = target.mapToItem(parent, target.width * 0.5, 0);
+            point = target.mapToItem(parent, target.width * 0.5, 0);
             root.x = point.x - (childrenRect.width * 0.5);
             root.y = point.y - childrenRect.height - _padding;
             break;
         case Qt.AlignBottom:
-            var point = target.mapToItem(parent, target.width * 0.5, target.height);
+            point = target.mapToItem(parent, target.width * 0.5, target.height);
             root.x = point.x - (childrenRect.width * 0.5);
             root.y = point.y + _padding;
             break;
         case Qt.AlignLeft | Qt.AlignTop:
-            var point = target.mapToItem(parent, 0, 0);
+            point = target.mapToItem(parent, 0, 0);
             root.x = point.x - childrenRect.width - _padding;
             root.y = point.y - childrenRect.height - _padding;
             break;
         case Qt.AlignRight | Qt.AlignTop:
-            var point = target.mapToItem(parent, target.width, 0);
+            point = target.mapToItem(parent, target.width, 0);
             root.x = point.x + _padding
             root.y = point.y - _padding;
             break;
         case Qt.AlignLeft | Qt.AlignBottom:
-            var point = target.mapToItem(parent, 0, target.height);
+            point = target.mapToItem(parent, 0, target.height);
             root.x = point.x - childrenRect.width - _padding;
             root.y = point.y + _padding;
             break;
         case Qt.AlignRight | Qt.AlignBottom:
-            var point = target.mapToItem(parent, target.width, target.height);
+            point = target.mapToItem(parent, target.width, target.height);
             root.x = point.x + _padding;
             root.y = point.y + _padding;
             break;

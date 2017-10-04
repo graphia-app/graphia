@@ -5,7 +5,5 @@
         <file>qml/Controls/Wizard.qml</file>
         <file>qml/Controls/BaseParameterDialog.qml</file>
         <file>qml/Controls/SlidingPanel.qml</file>
-        <file>qml/Controls/Hubble.qml</file>
-        <file>qml/Controls/Tutorial.qml</file>
     </qresource>
 </RCC>
