@@ -52,7 +52,8 @@ HEADERS += \
     $$PWD/commands/compoundcommand.h \
     $$PWD/utils/qmlutils.h \
     $$PWD/loading/progressfn.h \
-    $$PWD/ui/idocument.h
+    $$PWD/ui/idocument.h \
+    $$PWD/ui/hovermousepassthrough.h
 
 SOURCES += \
     $$PWD/graph/elementtype.cpp \

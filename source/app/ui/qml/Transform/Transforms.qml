@@ -116,4 +116,20 @@ Item
             }
         }
     }
+
+    Hubble
+    {
+        title: "Add Transform"
+        alignment: Qt.AlignLeft | Qt.AlignBottom
+        target: addTransformBtn
+        hoverEnabled: true
+        Text
+        {
+            text: "This will add a transform the graph. \n Transforms can do all kinds of magic"
+        }
+        ToolButton
+        {
+            iconName: "document-open"
+        }
+    }
 }

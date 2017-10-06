@@ -119,7 +119,8 @@ HEADERS += \
     transform/availabletransformsmodel.h \
     loading/saver.h \
     loading/loader.h \
-    commands/deletenodescommand.h
+    commands/deletenodescommand.h \
+    ui/hovermousepassthrough.h
 
 SOURCES += \
     application.cpp \

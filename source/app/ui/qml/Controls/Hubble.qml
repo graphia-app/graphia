@@ -8,7 +8,6 @@ Item
     id: root
 
     default property var content
-    property var _mouseArea
     readonly property int _padding: 10
     property alias color: backRectangle.color
 
@@ -18,6 +17,7 @@ Item
     property bool displayNext: false
     property bool displayClose: false
     property bool hoverEnabled: false
+    property Item _mouseCapture
 
     height: backRectangle.height
     width: backRectangle.width
@@ -31,7 +31,11 @@ Item
     z: 99
 
     onContentChanged: { content.parent = containerLayout; }
-    onTargetChanged: { linkToTarget() }
+    onTargetChanged:
+    {
+        unlinkTarget();
+        linkToTarget()
+    }
 
     Behavior on opacity
     {
@@ -133,34 +137,71 @@ Item
         linkToTarget();
     }
 
+    function unlinkTarget()
+    {
+        if(_mouseCapture !== null)
+        {
+            for(var i = _mouseCapture.children.length; i >= 0; i--)
+            {
+                _mouseCapture.children[i].parent = _mouseCapture.parent;
+            }
+            _mouseCapture.parent = null;
+        }
+    }
+
     function linkToTarget()
     {
         if(target !== undefined && target !== null)
         {
             if(hoverEnabled)
             {
-                if(target.hoveredChanged === undefined)
-                    return;
-                target.hoveredChanged.connect(function()
+                // Use targets hoverChanged signal
+                if(target.hoveredChanged !== undefined)
                 {
-                    if(target.hovered)
+                    target.hoveredChanged.connect(onHover);
+                }
+                else
+                {
+                    // If the target doesn't have a hover signal, we'll
+                    // shim it with a HoverMousePassthrough item
+                    if(_mouseCapture === undefined || _mouseCapture === null)
                     {
-                        hoverTimer.start();
-                        root.parent = mainWindow.toolBar;
-                        positionBubble();
+                        var component = Qt.createComponent("HoverMousePassthrough.qml");
+                        _mouseCapture = component.createObject(target.parent);
                     }
-                    else
+                    if(target.parent !== _mouseCapture)
                     {
-                        hoverTimer.stop();
-                        root.visible = false
+                        _mouseCapture.width = Qt.binding(function() { return target.width; });
+                        _mouseCapture.height = Qt.binding(function() { return target.height; });
+
+                        _mouseCapture.parent = target.parent;
+                        target.parent = _mouseCapture;
+
+                        _mouseCapture.hoveredChanged.connect(onHover);
                     }
-                });
+                }
             }
             else
             {
                 root.parent = mainWindow.toolBar;
                 positionBubble();
             }
+        }
+    }
+
+    function onHover()
+    {
+        var hoverTarget = _mouseCapture !== null ? _mouseCapture : target;
+        if(hoverTarget.hovered)
+        {
+            hoverTimer.start();
+            root.parent = mainWindow.toolBar;
+            positionBubble();
+        }
+        else
+        {
+            hoverTimer.stop();
+            root.visible = false;
         }
     }
 

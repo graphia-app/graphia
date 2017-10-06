@@ -19,6 +19,7 @@
 #include "ui/document.h"
 #include "ui/graphquickitem.h"
 #include "ui/visualisations/defaultgradients.h"
+#include "ui/hovermousepassthrough.h"
 
 #include "shared/utils/threadpool.h"
 #include "shared/utils/preferences.h"
@@ -109,6 +110,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<GraphQuickItem>             (uri, maj, min, "Graph");
     qmlRegisterType<QmlPreferences>             (uri, maj, min, "Preferences");
     qmlRegisterType<QmlUtils>                   (uri, maj, min, "QmlUtils");
+    qmlRegisterType<HoverMousePassthrough>      (uri, maj, min, "HoverMousePassthrough");
 
     qRegisterMetaType<size_t>("size_t");
 
