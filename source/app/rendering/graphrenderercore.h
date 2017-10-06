@@ -26,7 +26,7 @@ struct GPUGraphData : OpenGLFunctions
     void prepareVertexBuffers();
     void prepareNodeVAO(QOpenGLShaderProgram& shader);
     void prepareEdgeVAO(QOpenGLShaderProgram& shader);
-    void prepareTextVAO(QOpenGLShaderProgram &shader);
+    void prepareTextVAO(QOpenGLShaderProgram& shader);
 
     bool prepareRenderBuffers(int width, int height, GLuint depthTexture);
 
