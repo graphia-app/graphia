@@ -3,13 +3,10 @@
 
 #include "opengldebuglogger.h"
 #include "openglfunctions.h"
+#include "graphrenderercore.h"
 #include "graphcomponentrenderer.h"
 #include "transition.h"
 #include "glyphmap.h"
-
-#include "primitives/arrow.h"
-#include "primitives/sphere.h"
-#include "primitives/rectangle.h"
 
 #include "shared/graph/grapharray.h"
 #include "graph/qmlelementid.h"
@@ -36,6 +33,7 @@
 #include <QDir>
 #include <QPixmap>
 #include <QPainter>
+#include <array>
 
 class Graph;
 class GraphQuickItem;
@@ -54,94 +52,6 @@ class GraphOverviewInteractor;
 class GraphComponentInteractor;
 
 class ICommand;
-
-struct GPUGraphData : OpenGLFunctions
-{
-    GPUGraphData();
-    ~GPUGraphData() override;
-
-    void initialise(QOpenGLShaderProgram& nodesShader,
-                    QOpenGLShaderProgram& edgesShader,
-                    QOpenGLShaderProgram& textShader);
-    void prepareVertexBuffers();
-    void prepareNodeVAO(QOpenGLShaderProgram& shader);
-    void prepareEdgeVAO(QOpenGLShaderProgram& shader);
-    void prepareTextVAO(QOpenGLShaderProgram &shader);
-
-    bool prepareRenderBuffers(int width, int height, GLuint depthTexture);
-
-    void reset();
-    void clearFramebuffer();
-    void clearDepthbuffer();
-
-    void upload();
-
-    int numNodes() const;
-    int numEdges() const;
-
-    Primitive::Sphere _sphere;
-    Primitive::Arrow _arrow;
-    Primitive::Rectangle _rectangle;
-
-    float alpha() const;
-
-    bool unused() const;
-
-    struct NodeData
-    {
-        float _position[3];
-        int _component = -1;
-        float _size = -1.0f;
-        float _outerColor[3];
-        float _innerColor[3];
-        float _outlineColor[3];
-    };
-
-    struct EdgeData
-    {
-        float _sourcePosition[3];
-        float _targetPosition[3];
-        float _sourceSize = 0.0f;
-        float _targetSize = 0.0f;
-        int _edgeType = -1;
-        int _component = -1;
-        float _size = -1.0f;
-        float _outerColor[3];
-        float _innerColor[3];
-        float _outlineColor[3];
-    };
-
-    struct GlyphData
-    {
-        int _component = -1;
-        float _textureCoord[2];
-        int _textureLayer = -1;
-        float _basePosition[3];
-        float _glyphOffset[2];
-        float _glyphSize[2];
-        float _color[3];
-    };
-
-    // There are two alpha values so that we can split the alpha blended layers
-    // depending on their purpose. The rendering occurs in order based on _alpha1,
-    // going from opaque to transparent, then resorting to _alpha2 in the same order,
-    // when the values of _alpha1 match
-    float _alpha1 = 0.0f;
-    float _alpha2 = 0.0f;
-
-    std::vector<NodeData> _nodeData;
-    QOpenGLBuffer _nodeVBO;
-
-    std::vector<GlyphData> _glyphData;
-    QOpenGLBuffer _textVBO;
-
-    std::vector<EdgeData> _edgeData;
-    QOpenGLBuffer _edgeVBO;
-
-    GLuint _fbo = 0;
-    GLuint _colorTexture = 0;
-    GLuint _selectionTexture = 0;
-};
 
 enum class TextAlignment
 {
@@ -163,7 +73,7 @@ void initialiseFromGraph(const Graph*, Target&);
 
 class GraphRenderer :
         public QObject,
-        public OpenGLFunctions,
+        public GraphRendererCore,
         public QQuickFramebufferObject::Renderer
 {
     Q_OBJECT
@@ -177,8 +87,6 @@ public:
                   SelectionManager* selectionManager,
                   GPUComputeThread* gpuComputeThread);
     ~GraphRenderer() override;
-
-    static const int NUM_MULTISAMPLES = 4;
 
     ComponentArray<MovablePointer<GraphComponentRenderer>, LockingGraphArray>& componentRenderers()
     {
@@ -290,19 +198,10 @@ private:
 
     OpenGLDebugLogger _openGLDebugLogger;
 
-    QOpenGLShaderProgram _screenShader;
-    QOpenGLShaderProgram _selectionShader;
     QOpenGLShaderProgram _sdfShader;
 
-    QOpenGLShaderProgram _nodesShader;
-    QOpenGLShaderProgram _edgesShader;
-
-    QOpenGLShaderProgram _selectionMarkerShader;
-    QOpenGLShaderProgram _textShader;
     QOpenGLShaderProgram _debugLinesShader;
 
-    int _width = 0;
-    int _height = 0;
     bool _resized = false;
 
     GLuint _colorTexture = 0;
@@ -311,15 +210,7 @@ private:
     int _currentSDFTextureIndex = 0;
     std::array<GLuint, 2> _sdfTextures = {};
 
-    GLuint _depthTexture = 0;
-
     bool _FBOcomplete = false;
-
-    QOpenGLVertexArrayObject _screenQuadVAO;
-    QOpenGLBuffer _screenQuadDataBuffer;
-
-    QOpenGLBuffer _selectionMarkerDataBuffer;
-    QOpenGLVertexArrayObject _selectionMarkerDataVAO;
 
     // When elements are added to the scene, it may be that they would lie
     // outside the confines of where they should be rendered, until a transition
@@ -328,11 +219,7 @@ private:
     NodeArray<bool> _hiddenNodes;
     EdgeArray<bool> _hiddenEdges;
 
-    std::array<GPUGraphData, 6> _gpuGraphData;
     bool _gpuDataRequiresUpdate = false;
-
-    GLuint _componentDataTexture = 0;
-    GLuint _componentDataTBO = 0;
 
     QRect _selectionRect;
 
@@ -349,17 +236,13 @@ private:
     PerformanceCounter _performanceCounter;
 
     void prepareSDFTextures();
-    void prepareSelectionMarkerVAO();
-    void prepareQuad();
     void prepareScreenshotFBO();
 
-    GLuint sdfTextureCurrent() const;
+    GLuint sdfTexture() const override;
     GLuint sdfTextureOffscreen() const;
     void swapSdfTexture();
 
     void updateText(bool waitForCompletion = false);
-
-    void prepareComponentDataTexture();
 
     void enableSceneUpdate();
     void disableSceneUpdate();
@@ -367,25 +250,12 @@ private:
 
     void clearHiddenElements();
 
-    GPUGraphData* gpuGraphDataForAlpha(float alpha1, float alpha2);
     void updateGPUDataIfRequired();
     enum class When { Later, Now };
     void updateGPUData(When when);
     void updateComponentGPUData();
 
-    void resize(int width, int height);
-
-    void render2DComposite(QOpenGLShaderProgram& shader, GLuint texture, float alpha);
-    void finishRender();
-
-    std::vector<int> gpuGraphDataRenderOrder() const;
-
-    void renderNodes(GPUGraphData& gpuGraphData);
-    void renderEdges(GPUGraphData& gpuGraphData);
-    void renderText(GPUGraphData& gpuGraphData);
-    void renderGraph(GPUGraphData& gpuGraphData);
-    void renderScene();
-    void render2D();
+    void updateScene();
 
     QOpenGLFramebufferObject* createFramebufferObject(const QSize &size) override;
     void render() override;
