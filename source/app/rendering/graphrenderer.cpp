@@ -539,7 +539,7 @@ void GraphRenderer::createGPUGlyphData(const QString& text, const QColor& textCo
         case TextAlignment::Bottom: baseOffset = {{horizontalCentre, bottom        }}; break;
         }
 
-        glyphData._glyphOffset[0] = baseOffset[0] + (glyph._advance * textScale);
+        glyphData._glyphOffset[0] = baseOffset[0] + (static_cast<float>(glyph._advance) * textScale);
         glyphData._glyphOffset[1] = baseOffset[1] - ((textureGlyph._height + textureGlyph._ascent) * textScale);
         glyphData._glyphSize[0] = textureGlyph._width;
         glyphData._glyphSize[1] = textureGlyph._height;

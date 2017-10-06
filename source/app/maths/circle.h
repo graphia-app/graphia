@@ -68,8 +68,8 @@ public:
 
     void translate(const QPointF& translation)
     {
-        _x += translation.x();
-        _y += translation.y();
+        _x += static_cast<float>(translation.x());
+        _y += static_cast<float>(translation.y());
     }
 
     // Scales around origin

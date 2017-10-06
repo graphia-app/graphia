@@ -106,8 +106,8 @@ void GraphOverviewScene::pan(float dx, float dy)
     float scaledDx = dx / (_zoomFactor);
     float scaledDy = dy / (_zoomFactor);
 
-    setOffset(_offset.x() - scaledDx,
-              _offset.y() - scaledDy);
+    setOffset(static_cast<float>(_offset.x()) - scaledDx,
+              static_cast<float>(_offset.y()) - scaledDy);
 
     updateZoomedComponentLayoutData();
 }
@@ -138,8 +138,8 @@ void GraphOverviewScene::zoom(float delta, float x, float y, bool doTransition)
     float newCentreX = (nx * _width) / _zoomFactor;
     float newCentreY = (ny * _height) / _zoomFactor;
 
-    setOffset(_offset.x() + (oldCentreX - newCentreX),
-              _offset.y() + (oldCentreY - newCentreY));
+    setOffset(static_cast<float>(_offset.x()) + (oldCentreX - newCentreX),
+              static_cast<float>(_offset.y()) + (oldCentreY - newCentreY));
 
     _zoomCentre.setX(newCentreX);
     _zoomCentre.setY(newCentreY);

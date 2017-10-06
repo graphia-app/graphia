@@ -257,11 +257,11 @@ bool u::isNumeric(const std::string& string)
 QColor u::contrastingColor(const QColor& color)
 {
 
-    float brightness = 0.299f * color.redF() +
-                       0.587f * color.greenF() +
-                       0.114f * color.blueF();
-    float blackDiff = std::abs(brightness - 0.0f);
-    float whiteDiff = std::abs(brightness - 1.0f);
+    auto brightness = 0.299 * color.redF() +
+                      0.587 * color.greenF() +
+                      0.114 * color.blueF();
+    auto blackDiff = std::abs(brightness - 0.0);
+    auto whiteDiff = std::abs(brightness - 1.0);
 
     return (blackDiff > whiteDiff) ? Qt::black : Qt::white;
 }

@@ -60,7 +60,8 @@ void PowerOf2GridComponentLayout::executeReal(const Graph& graph, const std::vec
         }
 
         float radius = dividedSize * 0.5f;
-        componentLayoutData[componentId].set(coord.x() + radius, coord.y() + radius, radius);
+        componentLayoutData[componentId].set(static_cast<float>(coord.x()) + radius,
+                                             static_cast<float>(coord.y()) + radius, radius);
 
         QPointF right(coord.x() + dividedSize, coord.y());
         QPointF down(coord.x(), coord.y() + dividedSize);

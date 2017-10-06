@@ -273,8 +273,8 @@ QMatrix4x4 GraphComponentRenderer::screenshotTileProjectionMatrix(float tileSize
     float xTranslation = (static_cast<float>(_dimensions.x() * 2.0 + _dimensions.width()) / tileSize) - (_viewportWidth / tileSize);
     float yTranslation = (static_cast<float>(_dimensions.y() * 2.0 + _dimensions.height()) / tileSize) - (_viewportHeight / tileSize);
 
-    float xScale = static_cast<float>(_dimensions.width() / tileSize);
-    float yScale = static_cast<float>(_dimensions.height() / tileSize);
+    float xScale = static_cast<float>(_dimensions.width()) / tileSize;
+    float yScale = static_cast<float>(_dimensions.height()) / tileSize;
     translation.translate(xTranslation, -yTranslation);
     translation.scale(xScale, yScale);
 

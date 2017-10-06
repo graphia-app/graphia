@@ -370,7 +370,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
     if(_debugIteration)
         qDebug() << "Pre nnz" << clusterMatrix.nonZeros();
 
-    clusterMatrix.erase([this]( double value ){ return value < MCL_PRUNE_LIMIT; } );
+    clusterMatrix.erase([this](float value){ return value < MCL_PRUNE_LIMIT; } );
 
     if(_debugIteration)
         qDebug() << "Pre-prune nnz" << clusterMatrix.nonZeros();

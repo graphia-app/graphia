@@ -393,8 +393,8 @@ void CorrelationPlotItem::showTooltip()
                          .arg(_itemTracer->position->value())
                          );
 
-    const float COLOR_RECT_WIDTH = 10.0f;
-    const float HOVER_MARGIN = 10.0f;
+    const auto COLOR_RECT_WIDTH = 10.0;
+    const auto HOVER_MARGIN = 10.0;
     auto hoverlabelWidth = _hoverLabel->right->pixelPosition().x() -
             _hoverLabel->left->pixelPosition().x();
     auto hoverlabelHeight = _hoverLabel->bottom->pixelPosition().y() -
@@ -408,13 +408,13 @@ void CorrelationPlotItem::showTooltip()
     // If it falls out of bounds, clip to bounds and move label above marker
     if(hoverLabelRightX > xBounds)
     {
-        targetPosition.rx() = xBounds - hoverlabelWidth - COLOR_RECT_WIDTH - 1.0f;
+        targetPosition.rx() = xBounds - hoverlabelWidth - COLOR_RECT_WIDTH - 1.0;
 
         // If moving the label above marker is less than 0, clip to 0 + labelHeight/2;
-        if(targetPosition.y() - hoverlabelHeight / 2.0f - HOVER_MARGIN * 2.0f < 0.0f)
-            targetPosition.setY(hoverlabelHeight / 2.0f);
+        if(targetPosition.y() - (hoverlabelHeight * 0.5) - HOVER_MARGIN * 2.0 < 0.0)
+            targetPosition.setY(hoverlabelHeight * 0.5);
         else
-            targetPosition.ry() -= HOVER_MARGIN * 2.0f;
+            targetPosition.ry() -= HOVER_MARGIN * 2.0;
     }
 
     _hoverLabel->position->setPixelPosition(targetPosition);

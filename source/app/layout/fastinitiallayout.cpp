@@ -141,7 +141,7 @@ void FastInitialLayout::executeReal(bool)
             double h = -1.0 + 2.0 * (i - 1.0) / static_cast<double>(edgeIds.size() - 1 + edgeCountOffset);
             double theta = std::acos(h);
             phi = phi + 3.6 / (std::sqrt((static_cast<double>(edgeIds.size() + edgeCountOffset)) * (1.0 - h * h)));
-            phi = std::fmod(phi, 2.0 * Constants::Pi());
+            phi = std::fmod(phi, 2.0 * static_cast<double>(Constants::Pi()));
 
             QVector3D offsetPosition(h, std::cos(phi) * std::sin(theta), std::sin(phi) * std::sin(theta));
 
