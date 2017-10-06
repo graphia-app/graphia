@@ -112,9 +112,9 @@ QString OpenGLFunctions::info()
     }
 
     return QString("%1\n%2\n%3\n%4\n%5")
-        .arg(f.getString(GL_VENDOR))
-        .arg(f.getString(GL_RENDERER))
-        .arg(f.getString(GL_VERSION))
-        .arg(f.getString(GL_SHADING_LANGUAGE_VERSION))
-        .arg(extensions);
+        .arg(f.getString(GL_VENDOR),
+             f.getString(GL_RENDERER),
+             f.getString(GL_VERSION),
+             f.getString(GL_SHADING_LANGUAGE_VERSION),
+             extensions);
 }

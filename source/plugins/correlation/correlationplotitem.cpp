@@ -388,10 +388,9 @@ void CorrelationPlotItem::showTooltip()
 
     _hoverLabel->setVisible(true);
     _hoverLabel->setText(QString("%1, %2: %3")
-                         .arg(_hoverPlottable->name())
-                         .arg(_labelNames[static_cast<int>(_itemTracer->position->key())])
-                         .arg(_itemTracer->position->value())
-                         );
+                     .arg(_hoverPlottable->name(),
+                          _labelNames[static_cast<int>(_itemTracer->position->key())])
+                     .arg(_itemTracer->position->value()));
 
     const auto COLOR_RECT_WIDTH = 10.0;
     const auto HOVER_MARGIN = 10.0;

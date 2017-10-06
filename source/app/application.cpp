@@ -218,8 +218,7 @@ void Application::loadPlugins()
             {
                 QMessageBox::warning(nullptr, QObject::tr("Plugin Load Failed"),
                     QObject::tr("The plugin \"%1\" failed to load. The reported error is:\n%2")
-                                     .arg(fileName)
-                                     .arg(pluginLoader->errorString()), QMessageBox::Ok);
+                                     .arg(fileName, pluginLoader->errorString()), QMessageBox::Ok);
             }
 
             if(plugin)
@@ -448,7 +447,7 @@ QVariant PluginDetailsModel::data(const QModelIndex& index, int role) const
             urlTypes = tr("None");
 
         return QString(tr("%1\n\nSupported data types: %2"))
-                .arg(plugin->description()).arg(urlTypes);
+                .arg(plugin->description(), urlTypes);
     }
 
     case ImageSource:

@@ -103,13 +103,13 @@ QString Document::commandVerb() const
     if(!_loadComplete)
     {
         if(!phase.isEmpty())
-            return QString(tr("Loading %1 (%2)").arg(_title).arg(phase));
+            return QString(tr("Loading %1 (%2)").arg(_title, phase));
 
         return QString(tr("Loading %1").arg(_title));
     }
 
     if(!phase.isEmpty())
-        return QString(tr("%1 (%2)")).arg(_commandManager.commandVerb()).arg(phase);
+        return QString(tr("%1 (%2)")).arg(_commandManager.commandVerb(), phase);
 
     return _commandManager.commandVerb();
 }

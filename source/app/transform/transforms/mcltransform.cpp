@@ -426,13 +426,13 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
         }, true);
 
         size_t newNNZCount = 0;
-        for(auto& column : matrixStorage)
+        for(const auto& column : matrixStorage)
             newNNZCount += column.size();
 
         MatrixType dstMatrix(clusterMatrix.rows(), clusterMatrix.rows());
         dstMatrix.reserve(newNNZCount);
         int row = 0;
-        for(auto matrixRow : matrixStorage)
+        for(const auto& matrixRow : matrixStorage)
         {
             for(auto matrixEntry: matrixRow)
                 dstMatrix.append(matrixEntry._row, matrixEntry._column, matrixEntry._value);

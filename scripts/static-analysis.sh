@@ -44,6 +44,7 @@ find source/app \
 # clazy
 CHECKS="-checks=level1,\
 no-rule-of-two-soft,\
+no-qenums,\
 no-non-pod-global-static"
 
 clazy-standalone --version

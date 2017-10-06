@@ -8,7 +8,7 @@
 DeferredExecutor::DeferredExecutor() :
     _executing(false)
 {
-    _debug = qgetenv("DEFERREDEXECUTOR_DEBUG").toInt();
+    _debug = qEnvironmentVariableIntValue("DEFERREDEXECUTOR_DEBUG");
 }
 
 DeferredExecutor::~DeferredExecutor()

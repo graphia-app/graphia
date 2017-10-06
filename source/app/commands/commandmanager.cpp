@@ -14,7 +14,7 @@ CommandManager::CommandManager() :
     connect(this, &CommandManager::commandQueued, this, &CommandManager::update);
     connect(this, &CommandManager::commandCompleted, this, &CommandManager::onCommandCompleted);
 
-    _debug = qgetenv("COMMAND_DEBUG").toInt();
+    _debug = qEnvironmentVariableIntValue("COMMAND_DEBUG");
 }
 
 CommandManager::~CommandManager()

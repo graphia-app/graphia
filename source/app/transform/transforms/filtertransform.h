@@ -41,8 +41,8 @@ public:
     QString description() const
     {
         return QObject::tr("%1 all the %2s which match the specified condition.")
-                .arg(_invert ? QObject::tr("Keep") : QObject::tr("Remove"))
-                .arg(elementTypeAsString(_elementType).toLower());
+                .arg(_invert ? QObject::tr("Keep") : QObject::tr("Remove"),
+                     elementTypeAsString(_elementType).toLower());
     }
     ElementType elementType() const { return _elementType; }
     bool requiresCondition() const { return true; }

@@ -71,14 +71,14 @@ QString VisualisationConfig::asString() const
         s += "] ";
     }
 
-    s += QString("\"%1\" \"%2\"").arg(_attributeName).arg(_channelName);
+    s += QString("\"%1\" \"%2\"").arg(_attributeName, _channelName);
 
     if(!_parameters.empty())
     {
         s += " with ";
 
         for(const auto& parameter : _parameters)
-            s += QString(" %1 = %2").arg(parameter._name).arg(parameter.valueAsString(true));
+            s += QString(" %1 = %2").arg(parameter._name, parameter.valueAsString(true));
     }
 
     return s;

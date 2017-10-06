@@ -18,7 +18,7 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
     _intermediatePositions(graphModel.graph()),
     _performanceCounter(std::chrono::seconds(1))
 {
-    _debug = qgetenv("LAYOUT_DEBUG").toInt();
+    _debug = qEnvironmentVariableIntValue("LAYOUT_DEBUG");
     _performanceCounter.setReportFn([this](float ticksPerSecond)
     {
         if(_debug > 1)

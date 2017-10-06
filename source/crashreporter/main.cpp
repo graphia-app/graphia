@@ -32,10 +32,10 @@ static void uploadReport(const QString& email, const QString& text,
         {"text",    text},
         {"product", PRODUCT_NAME},
         {"version", VERSION},
-        {"os",      QString("%1 %2 %3 %4").arg(QSysInfo::kernelType())
-                        .arg(QSysInfo::kernelVersion())
-                        .arg(QSysInfo::productType())
-                        .arg(QSysInfo::productVersion())},
+        {"os",      QString("%1 %2 %3 %4").arg(QSysInfo::kernelType(),
+                                               QSysInfo::kernelVersion(),
+                                               QSysInfo::productType(),
+                                               QSysInfo::productVersion())},
         {"gl",      OpenGLFunctions::info()},
     };
 
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName(PRODUCT_NAME);
     QCoreApplication::setApplicationVersion(VERSION);
 
-    if(app.arguments().size() < 2 || !QFileInfo(app.arguments().at(1)).exists())
+    if(app.arguments().size() < 2 || !QFileInfo::exists(app.arguments().at(1)))
     {
         QMessageBox::critical(nullptr, app.applicationName(),
                               QObject::tr("This program is intended for automatically "

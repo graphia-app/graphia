@@ -180,7 +180,7 @@ bool GmlFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressF
 
     std::istreambuf_iterator<char> startIt(stream.rdbuf());
 
-    if(!QFileInfo(localFile).exists())
+    if(!QFileInfo::exists(localFile))
         return false;
 
     std::vector<char> vec(startIt, std::istreambuf_iterator<char>());

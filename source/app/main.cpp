@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 
     // Since Qt is responsible for managing OpenGL, we need
     // to give it a hint that we want a debug context
-    if(qgetenv("OPENGL_DEBUG").toInt() > 0)
+    if(qEnvironmentVariableIntValue("OPENGL_DEBUG") > 0)
         qputenv("QSG_OPENGL_DEBUG", "1");
 
 #ifndef Q_OS_LINUX
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
         QMessageBox messageBox(QMessageBox::Critical, QObject::tr("OpenGL support"),
             QObject::tr("The installed version of OpenGL is insufficient to run %1. "
                         R"(Please install the latest <a href="%2">video drivers</a> available from )"
-                        "your vendor and try again.").arg(Application::name()).arg(driversUrl),
+                        "your vendor and try again.").arg(Application::name(), driversUrl),
             QMessageBox::Close);
 
         messageBox.setTextFormat(Qt::RichText);
@@ -159,7 +159,8 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    QObject* mainWindow = engine.rootObjects().first();
+    auto rootObjects = engine.rootObjects();
+    QObject* mainWindow = rootObjects.first();
     QObject::connect(&app, &SharedTools::QtSingleApplication::messageReceived,
     [mainWindow](const QString& message, QObject*)
     {

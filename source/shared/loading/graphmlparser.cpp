@@ -37,12 +37,12 @@ bool GraphMLHandler::endDocument()
         auto targetNodeId = _nodeMap.find(tempEdge._target);
         if(sourceNodeId == _nodeMap.end())
         {
-            _errorString = QString("Invalid Edge Source. Edge - Source: %1 Target: %2").arg(tempEdge._source).arg(tempEdge._target);
+            _errorString = QString("Invalid Edge Source. Edge - Source: %1 Target: %2").arg(tempEdge._source, tempEdge._target);
             return false;
         }
         if(targetNodeId == _nodeMap.end())
         {
-            _errorString = QString("Invalid Edge Target. Edge - Source: %1 Target: %2").arg(tempEdge._source).arg(tempEdge._target);
+            _errorString = QString("Invalid Edge Target. Edge - Source: %1 Target: %2").arg(tempEdge._source, tempEdge._target);
             return false;
         }
         const EdgeId& edgeId = _graph->addEdge(sourceNodeId->second, targetNodeId->second);
@@ -50,9 +50,9 @@ bool GraphMLHandler::endDocument()
     }
 
     // Populate EdgeAttributes with new EdgeIds and attributes
-    for(auto edgeAttr : _tempEdgeAttributes)
+    for(const auto& edgeAttr : _tempEdgeAttributes)
     {
-        for(auto idAttributePair : edgeAttr.second)
+        for(const auto& idAttributePair : edgeAttr.second)
         {
             auto& tempEdge = idAttributePair.first;
             auto& attr = idAttributePair.second;

@@ -175,7 +175,7 @@ QString QmlPreferences::preferenceNameByPropertyName(const QString& propertyName
     QString canoncicalPropertyName(propertyName);
     canoncicalPropertyName.replace(QRegularExpression("M(ax|in)imumValue"), "");
 
-    return QString("%1/%2").arg(_section).arg(canoncicalPropertyName);
+    return QString("%1/%2").arg(_section, canoncicalPropertyName);
 }
 
 QMetaProperty QmlPreferences::propertyByName(const QString& propertyName)

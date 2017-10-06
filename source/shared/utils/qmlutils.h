@@ -25,9 +25,9 @@ public:
     {
         auto fi = QFileInfo(url.toLocalFile());
         auto replaced = QFileInfo(QString("%1/%2.%3")
-                                  .arg(fi.path())
-                                  .arg(fi.baseName())
-                                  .arg(extension));
+                                  .arg(fi.path(),
+                                       fi.baseName(),
+                                       extension));
 
         return QUrl::fromLocalFile(replaced.filePath());
     }
