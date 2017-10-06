@@ -575,8 +575,16 @@ ApplicationWindow
         enabled: currentDocument
         onTriggered:
         {
-            while(tabView.count > 0)
-                tabView.closeTab(0);
+            if(tabView.count > 0)
+            {
+                // If any tabs are open, close the first one...
+                tabView.closeTab(0, function()
+                {
+                    // ...then (recursively) resume closing if the user doesn't cancel
+                    tabView.removeTab(0);
+                    closeAllTabsAction.trigger();
+                });
+            }
         }
     }
 
