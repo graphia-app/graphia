@@ -41,6 +41,19 @@ find source/app \
   -type f -iname "*.cpp" -not -iname "moc_*" -not -iname "qrc_*" | \
   xargs -n1 -P${NUM_CORES} clang-tidy ${CHECKS}
 
+# clazy
+CHECKS="-checks=level1,\
+no-rule-of-two-soft,\
+no-non-pod-global-static"
+
+clazy-standalone --version
+find source/app \
+  source/shared \
+  source/plugins \
+  source/crashreporter \
+  -type f -iname "*.cpp" -not -iname "moc_*" -not -iname "qrc_*" | \
+  xargs -n1 -P${NUM_CORES} clazy-standalone ${CHECKS}
+
 # qmllint
 qmllint --version
 find source/app \
