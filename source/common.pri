@@ -25,7 +25,7 @@ gcc {
 
 gcc:!clang {
     QMAKE_CXXFLAGS += -Wlogical-op -Wstrict-null-sentinel \
-        -Wjump-misses-init -Wdouble-promotion
+        -Wdouble-promotion
 }
 
 win32 {
