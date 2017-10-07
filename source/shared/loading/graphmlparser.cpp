@@ -31,7 +31,7 @@ bool GraphMLHandler::endDocument()
     }
 
     // Finally populate graph with Edges from tempEdges
-    for(auto tempEdge : _temporaryEdges)
+    for(const auto& tempEdge : _temporaryEdges)
     {
         auto sourceNodeId = _nodeMap.find(tempEdge._source);
         auto targetNodeId = _nodeMap.find(tempEdge._target);
