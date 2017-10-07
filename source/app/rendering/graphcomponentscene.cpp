@@ -272,23 +272,23 @@ bool GraphComponentScene::viewIsReset() const
 
 void GraphComponentScene::pan(NodeId clickedNodeId, const QPoint& start, const QPoint& end)
 {
+    Camera* camera = componentRenderer()->camera();
+    QVector3D pointOnTranslationPlane;
+
     if(!clickedNodeId.isNull())
-    {
-        Camera* camera = componentRenderer()->camera();
+        pointOnTranslationPlane = _graphRenderer->graphModel()->nodePositions().getScaledAndSmoothed(clickedNodeId);
+    else
+        pointOnTranslationPlane = componentRenderer()->focusPosition();
 
-        const QVector3D clickedNodePosition =
-                _graphRenderer->graphModel()->nodePositions().getScaledAndSmoothed(clickedNodeId);
+    Plane translationPlane(pointOnTranslationPlane, camera->viewVector());
 
-        Plane translationPlane(clickedNodePosition, camera->viewVector());
+    QVector3D prevPoint = translationPlane.rayIntersection(
+                camera->rayForViewportCoordinates(start.x(), start.y()));
+    QVector3D curPoint = translationPlane.rayIntersection(
+                camera->rayForViewportCoordinates(end.x(), end.y()));
+    QVector3D translation = prevPoint - curPoint;
 
-        QVector3D prevPoint = translationPlane.rayIntersection(
-                    camera->rayForViewportCoordinates(start.x(), start.y()));
-        QVector3D curPoint = translationPlane.rayIntersection(
-                    camera->rayForViewportCoordinates(end.x(), end.y()));
-        QVector3D translation = prevPoint - curPoint;
-
-        camera->translate(translation);
-    }
+    camera->translate(translation);
 }
 
 void GraphComponentScene::moveFocusToNode(NodeId nodeId, float cameraDistance)

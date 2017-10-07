@@ -39,7 +39,7 @@ void GraphComponentInteractor::rightMouseDown()
 {
     GraphCommonInteractor::rightMouseDown();
 
-    if(clickedRenderer() != nullptr && !nearClickNodeId().isNull())
+    if(clickedRenderer() != nullptr)
     {
         clickedRenderer()->disableFocusTracking();
         emit userInteractionStarted();
@@ -61,7 +61,7 @@ void GraphComponentInteractor::rightMouseUp()
 
     emit userInteractionFinished();
 
-    if(!nearClickNodeId().isNull() && mouseMoving())
+    if(mouseMoving())
     {
         _scene->startTransition();
         clickedRenderer()->moveFocusToNodeClosestCameraVector();
@@ -74,7 +74,7 @@ void GraphComponentInteractor::rightDrag()
 {
     GraphCommonInteractor::rightDrag();
 
-    if(clickedRenderer() != nullptr && !nearClickNodeId().isNull())
+    if(clickedRenderer() != nullptr)
         _scene->pan(nearClickNodeId(), localPrevCursorPosition(), localCursorPosition());
 }
 

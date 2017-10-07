@@ -1265,7 +1265,7 @@ Item
                           "Nodes and Edges may contain additional information known as <b>Attributes</b><br><br>" +
                           "<b>Rotate Graph:</b> Left click and drag graph<br>" +
                           "<b>Zoom Graph:</b> Mouse Scrollwheel<br>" +
-                          "<b>Translate Graph:</b> Right mouse drag a node<br><br>" +
+                          "<b>Pan Graph:</b> Right click and drag graph<br><br>" +
                           "Click next to learn more about navigating a graph")
                 }
             }
