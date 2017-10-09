@@ -43,6 +43,13 @@ find source/app \
 
 # clazy
 CHECKS="-checks=level1,\
+base-class-event,\
+container-inside-loop,\
+global-const-char-pointer,\
+implicit-casts,\
+missing-typeinfo,\
+qstring-allocation,\
+reserve-candidates,\
 no-rule-of-two-soft,\
 no-qenums,\
 no-non-pod-global-static"
