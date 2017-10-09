@@ -199,7 +199,7 @@ PluginContent
         fileMode: Labs.FileDialog.SaveFile
         defaultSuffix: selectedNameFilter.extensions[0]
         selectedNameFilter.index: 1
-        title: "Save Plot As Image"
+        title: qsTr("Save Plot As Image")
         nameFilters: [ "PDF Document (*.pdf)", "PNG Image (*.png)", "JPEG Image (*.jpg *.jpeg)" ]
         onAccepted: { plot.savePlotImage(file, selectedNameFilter.extensions); }
     }

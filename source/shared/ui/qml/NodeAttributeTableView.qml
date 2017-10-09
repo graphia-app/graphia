@@ -208,7 +208,7 @@ Item
         fileMode: Labs.FileDialog.SaveFile
         defaultSuffix: selectedNameFilter.extensions[0]
         selectedNameFilter.index: 1
-        title: "Export Table"
+        title: qsTr("Export Table")
         nameFilters: ["CSV File (*.csv)"]
         onAccepted:
         {

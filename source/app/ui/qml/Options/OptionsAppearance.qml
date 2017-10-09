@@ -158,7 +158,7 @@ Item
     FontDialog
     {
         id: fontDialog
-        title: "Please choose a font"
+        title: qsTr("Please choose a font")
         currentFont: Qt.font({ family: visuals.textFont, pointSize: visuals.textSize, weight: Font.Normal })
         font: Qt.font({ family: visuals.textFont, pointSize: visuals.textSize, weight: Font.Normal })
         onAccepted: {

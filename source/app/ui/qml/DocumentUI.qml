@@ -559,7 +559,7 @@ Item
                 {
                     iconName: "edit-undo"
                     text: qsTr("Overview Mode")
-
+                    tooltip: qsTr("Return to overview mode")
                     onClicked: { switchToOverviewMode(); }
                 }
 

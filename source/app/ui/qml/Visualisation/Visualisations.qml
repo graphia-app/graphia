@@ -152,7 +152,7 @@ Item
                 textFormat: Text.StyledText
                 text: qsTr("Visualisations modify the appearance of the Graph depending on attributes<br>" +
                       "<b>Node Colour</b>, <b>Size</b> and <b>Text</b> can all be linked to an attribute<br>" +
-                      "Existing visualisations can be modified from here and new ones added<br>" +
+                      "Existing visualisations can be modified from here and new ones added<br><br>" +
                       "Click <b>Add Visualisation</b> to bring up the add visualisation dialog")
             }
         }
