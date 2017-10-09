@@ -224,6 +224,7 @@ void GraphModel::cancelTransformBuild()
 QStringList GraphModel::availableTransformNames() const
 {
     QStringList stringList;
+    stringList.reserve(_graphTransformFactories.size());
 
     for(auto& t : _graphTransformFactories)
     {

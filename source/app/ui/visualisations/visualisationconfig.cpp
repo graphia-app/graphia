@@ -39,6 +39,7 @@ QVariantMap VisualisationConfig::asVariantMap() const
     QVariantMap map;
 
     QVariantList flags;
+    flags.reserve(_flags.size());
     for(const auto& flag : _flags)
         flags.append(flag);
     map.insert("flags", flags);

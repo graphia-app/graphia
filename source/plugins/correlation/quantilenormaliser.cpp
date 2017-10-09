@@ -19,6 +19,7 @@ bool QuantileNormaliser::process(std::vector<double>& data, size_t numColumns, s
             return false;
 
         std::vector<double> columnValues;
+        columnValues.reserve(numRows);
 
         // Get column values
         for(size_t row = 0; row < numRows; row++)

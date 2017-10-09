@@ -72,7 +72,7 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
             _root->addChild(_sourceNode);
             _root->addChild(_targetNode);
 
-            for(const auto& attribute : attributeList)
+            for(const auto& attribute : qAsConst(attributeList))
             {
                 _sourceNode->addChild(new AvailableAttributesModel::Item(attribute));
                 _targetNode->addChild(new AvailableAttributesModel::Item(attribute));

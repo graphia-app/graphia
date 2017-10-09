@@ -93,6 +93,7 @@ static bool isHex(const std::string& string)
 static std::vector<byte> hexToBytes(const std::string& string)
 {
     std::vector<byte> bytes;
+    bytes.reserve(string.length() / 2);
 
     if(isHex(string))
     {

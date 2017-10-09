@@ -222,6 +222,7 @@ const std::vector<QString> CommandManager::undoableCommandDescriptions() const
 {
     std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
     std::vector<QString> commandDescriptions;
+    commandDescriptions.reserve(_lastExecutedIndex);
 
     if(lock.owns_lock() && canUndoNoLocking())
     {
@@ -236,6 +237,7 @@ const std::vector<QString> CommandManager::redoableCommandDescriptions() const
 {
     std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
     std::vector<QString> commandDescriptions;
+    commandDescriptions.reserve(_stack.size());
 
     if(lock.owns_lock() && canRedoNoLocking())
     {

@@ -288,7 +288,9 @@ QStringList Document::graphTransformConfigurationsFromUI() const
 {
     QStringList transforms;
 
-    for(const auto& variant : _graphTransformsModel.list())
+    auto list = _graphTransformsModel.list();
+    transforms.reserve(list.size());
+    for(const auto& variant : qAsConst(list))
         transforms.append(variant.toString());
 
     return sortedTransforms(transforms);
@@ -298,7 +300,9 @@ QStringList Document::visualisationsFromUI() const
 {
     QStringList visualisations;
 
-    for(const auto& variant : _visualisationsModel.list())
+    auto list = _visualisationsModel.list();
+    visualisations.reserve(list.size());
+    for(const auto& variant : qAsConst(list))
         visualisations.append(variant.toString());
 
     return visualisations;
@@ -372,7 +376,8 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
 
     connect(&_graphModel->mutableGraph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
 
-    for(const auto& name : parameters.keys())
+    auto keys = parameters.keys();
+    for(const auto& name : qAsConst(keys))
         _pluginInstance->applyParameter(name, parameters.value(name).toString());
 
     emit pluginInstanceChanged();

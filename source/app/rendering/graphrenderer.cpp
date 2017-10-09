@@ -1316,6 +1316,7 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
 std::vector<int> GraphRenderer::gpuGraphDataRenderOrder() const
 {
     std::vector<int> renderOrder;
+    renderOrder.reserve(_gpuGraphData.size());
 
     for(int i = 0; i < static_cast<int>(_gpuGraphData.size()); i++)
         renderOrder.push_back(i);

@@ -192,13 +192,13 @@ void CorrelationPlotItem::populateMeanAveragePlot()
     graph->setName(tr("Mean average of selection"));
 
     // Use Average Calculation
-    QVector<double> yDataAvg;
-    QVector<double> xData;
+    QVector<double> yDataAvg; yDataAvg.reserve(_selectedRows.size());
+    QVector<double> xData; xData.reserve(_columnCount);
 
     for(size_t col = 0; col < _columnCount; col++)
     {
         double runningTotal = 0.0;
-        for(auto row : _selectedRows)
+        for(auto row : qAsConst(_selectedRows))
         {
             auto index = (row * _columnCount) + col;
             runningTotal += _data[static_cast<int>(index)];
@@ -234,15 +234,18 @@ void CorrelationPlotItem::populateRawPlot()
     double maxY = 0.0;
     double minY = 0.0;
 
+    QVector<double> yData; yData.reserve(_selectedRows.size());
+    QVector<double> xData; xData.reserve(_columnCount);
+
     // Plot each row individually
-    for(auto row : _selectedRows)
+    for(auto row : qAsConst(_selectedRows))
     {
         auto* graph = _customPlot.addGraph();
         graph->setPen(_rowColors.at(row));
         graph->setName(_graphNames[row]);
 
-        QVector<double> yData;
-        QVector<double> xData;
+        yData.clear();
+        xData.clear();
 
         for(size_t col = 0; col < _columnCount; col++)
         {
