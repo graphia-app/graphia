@@ -1240,7 +1240,12 @@ ApplicationWindow
             ToolButton { action: fileOpenInTabAction }
             ToolButton { action: fileSaveAction }
             ToolBarSeparator {}
-            ToolButton { id: pauseLayoutBtn; action: pauseLayoutAction }
+            ToolButton
+            {
+                id: pauseLayoutBtn
+                action: pauseLayoutAction
+                tooltip: ""
+            }
             ToolBarSeparator {}
             ToolButton { action: deleteAction }
             ToolButton { action: findAction }
@@ -1509,7 +1514,7 @@ ApplicationWindow
                 text: qsTr("The Graph layout system can be resumed or paused from here.<br>" +
                       "The layout system uses a <b>force-directed</b> model to position nodes within <br>" +
                       "the graph. This improves the graphs visual navigability<br><br>" +
-                      "The layout system will be automatically stopped if the layout is not deemed to be<br>" +
+                      "The layout system will be automatically stopped if the system is deemed to not be<br>" +
                       "improving the layout anymore<br>");
             }
         }
