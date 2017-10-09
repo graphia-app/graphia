@@ -48,7 +48,7 @@ container-inside-loop,\
 global-const-char-pointer,\
 implicit-casts,\
 missing-typeinfo,\
-qstring-allocation,\
+qstring-allocations,\
 reserve-candidates,\
 no-rule-of-two-soft,\
 no-qenums,\
