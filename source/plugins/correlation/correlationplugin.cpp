@@ -344,7 +344,7 @@ QVector<double> CorrelationPluginInstance::rawData()
 QVector<QColor> CorrelationPluginInstance::nodeColors()
 {
     QVector<QColor> colors;
-    colors.reserve(_numRows);
+    colors.reserve(static_cast<int>(_numRows));
 
     for(size_t i = 0; i < _numRows; i++)
     {

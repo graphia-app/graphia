@@ -23,7 +23,7 @@ int UserData::numValues() const
 QStringList UserData::vectorNames() const
 {
     QStringList list;
-    list.reserve(_userDataVectors.size());
+    list.reserve(static_cast<int>(_userDataVectors.size()));
 
     for(const auto& vector : *this)
         list.append(vector.name());

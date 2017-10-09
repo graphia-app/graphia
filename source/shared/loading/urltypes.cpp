@@ -37,7 +37,7 @@ QStringList UrlTypes::identifyByExtension(const QUrl& url) const
 QStringList UrlTypes::loadableUrlTypeNames() const
 {
     QStringList urlTypeNames;
-    urlTypeNames.reserve(_urlTypes.size());
+    urlTypeNames.reserve(static_cast<int>(_urlTypes.size()));
     for(auto& urlType : _urlTypes)
         urlTypeNames.append(urlType.first);
 

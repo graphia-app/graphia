@@ -235,7 +235,7 @@ void CorrelationPlotItem::populateRawPlot()
     double minY = 0.0;
 
     QVector<double> yData; yData.reserve(_selectedRows.size());
-    QVector<double> xData; xData.reserve(_columnCount);
+    QVector<double> xData; xData.reserve(static_cast<int>(_columnCount));
 
     // Plot each row individually
     for(auto row : qAsConst(_selectedRows))
