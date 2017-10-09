@@ -141,8 +141,8 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setOrganizationName(QStringLiteral("Kajeka"));
     QCoreApplication::setOrganizationDomain(QStringLiteral("kajeka.com"));
-    QCoreApplication::setApplicationName(PRODUCT_NAME);
-    QCoreApplication::setApplicationVersion(VERSION);
+    QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
+    QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
 
     if(app.arguments().size() < 2 || !QFileInfo::exists(app.arguments().at(1)))
     {

@@ -193,7 +193,7 @@ void CorrelationPlotItem::populateMeanAveragePlot()
 
     // Use Average Calculation
     QVector<double> yDataAvg; yDataAvg.reserve(_selectedRows.size());
-    QVector<double> xData; xData.reserve(_columnCount);
+    QVector<double> xData; xData.reserve(static_cast<int>(_columnCount));
 
     for(size_t col = 0; col < _columnCount; col++)
     {

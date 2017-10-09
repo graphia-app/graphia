@@ -26,7 +26,7 @@ bool GraphMLHandler::endDocument()
        !_activeNodes.empty() || !_activeTemporaryEdges.empty() ||
        !_activeElements.empty())
     {
-        _errorString = QLatin1String("Not all GraphML Elements are terminated. Stack not empty");
+        _errorString = QStringLiteral("Not all GraphML Elements are terminated. Stack not empty");
         return false;
     }
 

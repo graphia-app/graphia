@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     else
         SharedTools::QtSingleApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 
-    SharedTools::QtSingleApplication app(PRODUCT_NAME, argc, argv);
+    SharedTools::QtSingleApplication app(QStringLiteral(PRODUCT_NAME), argc, argv);
 
     if(app.isRunning())
     {
@@ -59,8 +59,8 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setOrganizationName(QStringLiteral("Kajeka"));
     QCoreApplication::setOrganizationDomain(QStringLiteral("kajeka.com"));
-    QCoreApplication::setApplicationName(PRODUCT_NAME);
-    QCoreApplication::setApplicationVersion(VERSION);
+    QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
+    QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
 
     QGuiApplication::styleHints()->setMousePressAndHoldInterval(500);
 
@@ -164,7 +164,8 @@ int main(int argc, char *argv[])
     QObject::connect(&app, &SharedTools::QtSingleApplication::messageReceived,
     [mainWindow](const QString& message, QObject*)
     {
-        QMetaObject::invokeMethod(mainWindow, "processArguments", Q_ARG(QVariant, message.split("\n")));
+        QMetaObject::invokeMethod(mainWindow, "processArguments",
+            Q_ARG(QVariant, message.split(QStringLiteral("\n"))));
     });
 
 #ifndef _DEBUG

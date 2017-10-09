@@ -358,7 +358,7 @@ QVector<QColor> CorrelationPluginInstance::nodeColors()
 QStringList CorrelationPluginInstance::columnNames()
 {
     QStringList list;
-    list.reserve(_dataColumnNames.size());
+    list.reserve(static_cast<int>(_dataColumnNames.size()));
     for(const auto& name : _dataColumnNames)
         list.append(name);
     return list;
@@ -367,7 +367,7 @@ QStringList CorrelationPluginInstance::columnNames()
 QStringList CorrelationPluginInstance::rowNames()
 {
     QStringList list;
-    list.reserve(_numRows);
+    list.reserve(static_cast<int>(_numRows));
 
     for(size_t i = 0; i < _numRows; i++)
         list.append(_userNodeData.begin()->get(i));
