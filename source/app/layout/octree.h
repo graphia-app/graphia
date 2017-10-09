@@ -268,9 +268,9 @@ public:
         visitVolumes(
             [&dump, &totalNodes](const SubVolumeType& subVolume, int treeDepth)
             {
-                QString indentString = "";
+                QString indentString = QLatin1String("");
                 for(int i = 0; i < treeDepth; i++)
-                    indentString += "  ";
+                    indentString += QLatin1String("  ");
 
                 QString subVolumeString;
                 subVolumeString.sprintf("0x%p", &subVolume);

@@ -8,7 +8,7 @@
 
 bool EccentricityTransform::apply(TransformedGraph& target) const
 {
-    target.setPhase("Eccentricity");
+    target.setPhase(QStringLiteral("Eccentricity"));
     target.setProgress(0);
     calculateDistances(target);
     return false;
@@ -90,7 +90,7 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
         return;
 
     _graphModel->createAttribute(QObject::tr("Node Eccentricity"))
-        .setDescription("A node's eccentricity is the length of the shortest path to the furthest node.")
+        .setDescription(QStringLiteral("A node's eccentricity is the length of the shortest path to the furthest node."))
         .setFloatValueFn([maxDistances](NodeId nodeId) { return maxDistances[nodeId]; });
 }
 

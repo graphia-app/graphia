@@ -91,14 +91,14 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const P
     TsvFileParser tsvFileParser;
 
     TabularData* tabularData = nullptr;
-    if(_urlTypeName == "CorrelationCSV")
+    if(_urlTypeName == QLatin1String("CorrelationCSV"))
     {
         if(!csvFileParser.parse(url, graph, progressFn))
             return false;
 
         tabularData = &(csvFileParser.tabularData());
     }
-    else if(_urlTypeName == "CorrelationTSV")
+    else if(_urlTypeName == QLatin1String("CorrelationTSV"))
     {
         if(!tsvFileParser.parse(url, graph, progressFn))
             return false;

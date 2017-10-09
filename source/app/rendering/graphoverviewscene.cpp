@@ -463,7 +463,7 @@ void GraphOverviewScene::onComponentAdded(const Graph*, ComponentId componentId,
         {
             if(visible())
                 _previousComponentAlpha[componentId] = 0.0f;
-        }, "GraphOverviewScene::onComponentAdded (set source alpha to 0)");
+        }, QStringLiteral("GraphOverviewScene::onComponentAdded (set source alpha to 0)"));
     }
 }
 
@@ -481,7 +481,7 @@ void GraphOverviewScene::onComponentWillBeRemoved(const Graph*, ComponentId comp
 
             _removedComponentIds.emplace_back(componentId);
             _componentAlpha[componentId] = 0.0f;
-        }, "GraphOverviewScene::onComponentWillBeRemoved (freeze renderer, set target alpha to 0)");
+        }, QStringLiteral("GraphOverviewScene::onComponentWillBeRemoved (freeze renderer, set target alpha to 0)"));
     }
 }
 
@@ -505,7 +505,7 @@ void GraphOverviewScene::onComponentSplit(const Graph*, const ComponentSplitSet&
                 _previousComponentAlpha[splitter] = _componentAlpha[oldComponentId];
             }
         }
-    }, "GraphOverviewScene::onComponentSplit (cloneCameraDataFrom, component layout)");
+    }, QStringLiteral("GraphOverviewScene::onComponentSplit (cloneCameraDataFrom, component layout)"));
 }
 
 void GraphOverviewScene::onComponentsWillMerge(const Graph*, const ComponentMergeSet& componentMergeSet)
@@ -525,7 +525,7 @@ void GraphOverviewScene::onComponentsWillMerge(const Graph*, const ComponentMerg
             if(merger != componentMergeSet.newComponentId())
                 _removedComponentIds.emplace_back(merger);
         }
-    }, "GraphOverviewScene::onComponentsWillMerge (freeze renderers)");
+    }, QStringLiteral("GraphOverviewScene::onComponentsWillMerge (freeze renderers)"));
 }
 
 void GraphOverviewScene::onGraphWillChange(const Graph*)
@@ -577,13 +577,13 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph, bool changed)
         _componentIds.insert(_componentIds.end(),
                              _removedComponentIds.begin(),
                              _removedComponentIds.end());
-    }, "GraphOverviewScene::onGraphChanged");
+    }, QStringLiteral("GraphOverviewScene::onGraphChanged"));
 }
 
 void GraphOverviewScene::onPreferenceChanged(const QString& key, const QVariant&)
 {
-    if(visible() && (key == "visuals/minimumComponentRadius" ||
-                     key == "visuals/defaultNodeSize"))
+    if(visible() && (key == QLatin1String("visuals/minimumComponentRadius") ||
+                     key == QLatin1String("visuals/defaultNodeSize")))
     {
         _commandManager->executeOnce({tr("Component Layout")},
         [this](Command&)
@@ -598,7 +598,7 @@ void GraphOverviewScene::onPreferenceChanged(const QString& key, const QVariant&
             _graphRenderer->executeOnRendererThread([this, graph]
             {
                 startComponentLayoutTransition();
-            }, "GraphOverviewScene::onPreferenceChanged");
+            }, QStringLiteral("GraphOverviewScene::onPreferenceChanged"));
         });
     }
 }

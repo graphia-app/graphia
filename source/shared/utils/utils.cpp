@@ -86,7 +86,7 @@ QString u::parentProcessName()
 {
     auto ppid = getppid();
 
-    QFile procFile(QString("/proc/%1/cmdline").arg(ppid));
+    QFile procFile(QStringLiteral("/proc/%1/cmdline").arg(ppid));
     if(procFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         QTextStream ts(&procFile);

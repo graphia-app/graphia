@@ -22,9 +22,9 @@ QString VisualisationConfig::Parameter::valueAsString(bool addQuotes) const
             if(_addQuotes)
             {
                 QString escapedString = s;
-                escapedString.replace(R"(")", R"(\")");
+                escapedString.replace(QLatin1String(R"(")"), QLatin1String(R"(\")"));
 
-                return QString(R"("%1")").arg(escapedString);
+                return QStringLiteral(R"("%1")").arg(escapedString);
             }
 
             return s;
@@ -42,15 +42,15 @@ QVariantMap VisualisationConfig::asVariantMap() const
     flags.reserve(static_cast<int>(_flags.size()));
     for(const auto& flag : _flags)
         flags.append(flag);
-    map.insert("flags", flags);
+    map.insert(QStringLiteral("flags"), flags);
 
-    map.insert("attribute", _attributeName);
-    map.insert("channel", _channelName);
+    map.insert(QStringLiteral("attribute"), _attributeName);
+    map.insert(QStringLiteral("channel"), _channelName);
 
     QVariantMap parameters;
     for(const auto& parameter : _parameters)
         parameters.insert(parameter._name, parameter.valueAsString(true));
-    map.insert("parameters", parameters);
+    map.insert(QStringLiteral("parameters"), parameters);
 
     return map;
 }
@@ -61,25 +61,25 @@ QString VisualisationConfig::asString() const
 
     if(!_flags.empty())
     {
-        s += "[";
+        s += QLatin1String("[");
         for(const auto& flag : _flags)
         {
             if(s[s.length() - 1] != '[')
-                s += ", ";
+                s += QLatin1String(", ");
 
             s += flag;
         }
-        s += "] ";
+        s += QLatin1String("] ");
     }
 
-    s += QString("\"%1\" \"%2\"").arg(_attributeName, _channelName);
+    s += QStringLiteral("\"%1\" \"%2\"").arg(_attributeName, _channelName);
 
     if(!_parameters.empty())
     {
-        s += " with ";
+        s += QLatin1String(" with ");
 
         for(const auto& parameter : _parameters)
-            s += QString(" %1 = %2").arg(parameter._name, parameter.valueAsString(true));
+            s += QStringLiteral(" %1 = %2").arg(parameter._name, parameter.valueAsString(true));
     }
 
     return s;

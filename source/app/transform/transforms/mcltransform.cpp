@@ -263,7 +263,7 @@ static void expandAndPruneRow(MatrixType &mclMatrix,
 bool MCLTransform::apply(TransformedGraph& target) const
 {
     double granularity = boost::get<double>(
-                config().parameterByName("Granularity")->_value);
+                config().parameterByName(QStringLiteral("Granularity"))->_value);
 
     if(_debugIteration)
     {
@@ -306,7 +306,7 @@ public:
 
 void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
 {
-    target.setPhase("MCL Initialising");
+    target.setPhase(QStringLiteral("MCL Initialising"));
 
     auto& graph = _graphModel->graph();
     int nodeCount = graph.numNodes();
@@ -392,7 +392,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
         if(cancelled())
             return;
 
-        target.setPhase(QString("MCL Iteration %1").arg(QString::number(iter + 1)));
+        target.setPhase(QStringLiteral("MCL Iteration %1").arg(QString::number(iter + 1)));
         if(_debugMatrices)
         {
             matrixStream << "Pre-Expanded Matrix\n";
@@ -511,7 +511,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
     if(_debugIteration)
         qDebug() << iter << "iterations";
 
-    target.setPhase(QString("MCL Interpreting"));
+    target.setPhase(QStringLiteral("MCL Interpreting"));
 
     // Interpret the matrix
     std::vector<std::set<size_t>> clusters;
@@ -592,7 +592,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
     }
 
     _graphModel->createAttribute(QObject::tr("MCL Cluster"))
-        .setDescription("The MCL-calculated cluster in which the node resides.")
+        .setDescription(QStringLiteral("The MCL-calculated cluster in which the node resides."))
         .setStringValueFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId]; })
         .setValueMissingFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId].isEmpty(); })
         .setSearchable(true);

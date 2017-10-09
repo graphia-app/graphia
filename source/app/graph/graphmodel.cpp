@@ -132,7 +132,7 @@ QString GraphModel::normalisedAttributeName(QString attribute) const
         int number = 1;
 
         // The attribute name is already used, so generate a new one
-        QRegularExpression re(R"(^(.*)\((\d+)\)$)");
+        QRegularExpression re(QStringLiteral(R"(^(.*)\((\d+)\)$)"));
         auto match = re.match(attribute);
         if(match.hasMatch())
         {
@@ -140,7 +140,7 @@ QString GraphModel::normalisedAttributeName(QString attribute) const
             number = match.captured(2).toInt() + 1;
         }
 
-        attribute = QString("%1(%2)").arg(attribute).arg(number);
+        attribute = QStringLiteral("%1(%2)").arg(attribute).arg(number);
     }
 
     return attribute;
@@ -193,7 +193,7 @@ void GraphModel::buildTransforms(const QStringList& transforms, ICommand* comman
         const auto& graphTransformConfig = graphTransformConfigParser.result();
         const auto& action = graphTransformConfig._action;
 
-        if(graphTransformConfig.isFlagSet("disabled"))
+        if(graphTransformConfig.isFlagSet(QStringLiteral("disabled")))
             continue;
 
         if(!u::contains(_graphTransformFactories, action))
@@ -206,7 +206,7 @@ void GraphModel::buildTransforms(const QStringList& transforms, ICommand* comman
         if(graphTransform != nullptr)
         {
             graphTransform->setConfig(graphTransformConfig);
-            graphTransform->setRepeating(graphTransformConfig.isFlagSet("repeating"));
+            graphTransform->setRepeating(graphTransformConfig.isFlagSet(QStringLiteral("repeating")));
             graphTransform->setInfo(&_transformInfos[index]);
             _transformedGraph.addTransform(std::move(graphTransform));
         }
@@ -341,12 +341,12 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
 
         const auto& visualisationConfig = visualisationConfigParser.result();
 
-        if(visualisationConfig.isFlagSet("disabled"))
+        if(visualisationConfig.isFlagSet(QStringLiteral("disabled")))
             continue;
 
         const auto& attributeName = visualisationConfig._attributeName;
         const auto& channelName = visualisationConfig._channelName;
-        bool invert = visualisationConfig.isFlagSet("invert");
+        bool invert = visualisationConfig.isFlagSet(QStringLiteral("invert"));
 
         if(!u::contains(_attributes, attributeName))
         {

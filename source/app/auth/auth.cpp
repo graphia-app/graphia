@@ -34,7 +34,7 @@ namespace C = CryptoPP;
 
 static C::RSA::PublicKey loadPublicKey()
 {
-    QFile file(":/keys/public_auth_key.der");
+    QFile file(QStringLiteral(":/keys/public_auth_key.der"));
     if(!file.open(QIODevice::ReadOnly))
         return {};
 
@@ -87,7 +87,7 @@ static std::string bytesToHex(const T& bytes)
 static bool isHex(const std::string& string)
 {
     return string.size() % 2 == 0 &&
-        QRegularExpression("^[a-fA-F0-9]+$").match(QString::fromStdString(string)).hasMatch();
+        QRegularExpression(QStringLiteral("^[a-fA-F0-9]+$")).match(QString::fromStdString(string)).hasMatch();
 }
 
 static std::vector<byte> hexToBytes(const std::string& string)
@@ -234,7 +234,7 @@ static QJsonObject decodeAuthResponse(const Auth::AesKey& aesKey, const std::str
         return {};
 
     auto jsonObject = jsonDocument.object();
-    auto aesKeySignatureHex = jsonObject["signature"].toString().toStdString();
+    auto aesKeySignatureHex = jsonObject[QStringLiteral("signature")].toString().toStdString();
     auto aesKeySignature = hexToString(aesKeySignatureHex);
 
     C::RSA::PublicKey publicKey = loadPublicKey();
@@ -243,7 +243,7 @@ static QJsonObject decodeAuthResponse(const Auth::AesKey& aesKey, const std::str
     if(!sessionVerified)
         return {};
 
-    auto encryptedPayload = hexToBytes(jsonObject["payload"].toString().toStdString());
+    auto encryptedPayload = hexToBytes(jsonObject[QStringLiteral("payload")].toString().toStdString());
 
     auto payload = aesDecryptBytes(encryptedPayload, aesKey);
 
@@ -320,16 +320,16 @@ void Auth::parseAuthToken()
 
     auto jsonObject = QJsonDocument::fromJson(decryptedAuthToken.data()).object();
 
-    if(jsonObject.contains("issueTime"))
-        _issueTime = jsonObject["issueTime"].toInt();
+    if(jsonObject.contains(QStringLiteral("issueTime")))
+        _issueTime = jsonObject[QStringLiteral("issueTime")].toInt();
 
-    if(jsonObject.contains("expiryTime"))
-        _expiryTime = jsonObject["expiryTime"].toInt();
+    if(jsonObject.contains(QStringLiteral("expiryTime")))
+        _expiryTime = jsonObject[QStringLiteral("expiryTime")].toInt();
 
-    if(jsonObject.contains("allowedPlugins"))
+    if(jsonObject.contains(QStringLiteral("allowedPlugins")))
     {
         _allowedPluginRegexps.clear();
-        auto value = jsonObject["allowedPlugins"].toArray();
+        auto value = jsonObject[QStringLiteral("allowedPlugins")].toArray();
         for(const auto& v : value)
             _allowedPluginRegexps.emplace_back(v.toString());
     }
@@ -378,7 +378,7 @@ void Auth::sendRequestUsingEncryptedPassword(const QString& email, const QString
     QTimer::singleShot(0, [this, authReqJsonString]
     {
         QNetworkRequest request;
-        request.setUrl(QUrl("https://auth.kajeka.com/"));
+        request.setUrl(QUrl(QStringLiteral("https://auth.kajeka.com/")));
 
         auto *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
@@ -468,20 +468,20 @@ void Auth::onReplyReceived()
             std::string authResponse = _reply->readAll().toStdString();
             auto decodedRespose = decodeAuthResponse(_aesKey, authResponse);
 
-            bool authenticated = decodedRespose.contains("authenticated") &&
-                decodedRespose["authenticated"].toBool() &&
-                decodedRespose.contains("authToken");
+            bool authenticated = decodedRespose.contains(QStringLiteral("authenticated")) &&
+                decodedRespose[QStringLiteral("authenticated")].toBool() &&
+                decodedRespose.contains(QStringLiteral("authToken"));
 
             if(_authenticated != authenticated)
             {
                 _authenticated = authenticated;
 
                 u::setPref("auth/password", u::pref("auth/rememberMe").toBool() ?
-                    _encryptedPassword : "");
+                    _encryptedPassword : QLatin1String(""));
 
                 if(_authenticated)
                 {
-                    u::setPref("auth/authToken", decodedRespose["authToken"].toString());
+                    u::setPref("auth/authToken", decodedRespose[QStringLiteral("authToken")].toString());
                     parseAuthToken();
 
                     auto issueTime = QDateTime::fromSecsSinceEpoch(_issueTime);
@@ -501,8 +501,8 @@ void Auth::onReplyReceived()
                 emit stateChanged();
             }
 
-            auto message = decodedRespose.contains("message") ?
-                decodedRespose["message"].toString() : "";
+            auto message = decodedRespose.contains(QStringLiteral("message")) ?
+                decodedRespose[QStringLiteral("message")].toString() : QLatin1String("");
 
             if(_message != message)
             {
@@ -512,7 +512,7 @@ void Auth::onReplyReceived()
         }
         else
         {
-            auto message = QString("<b>NETWORK ERROR:</b> %1").arg(_reply->errorString());
+            auto message = QStringLiteral("<b>NETWORK ERROR:</b> %1").arg(_reply->errorString());
             if(_message != message)
             {
                 _message = message;

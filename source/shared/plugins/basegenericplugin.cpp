@@ -27,11 +27,11 @@ void BaseGenericPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
 
 std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
 {
-    if(urlTypeName == "GML")
+    if(urlTypeName == QLatin1String("GML"))
         return std::make_unique<GmlFileParser>(&_userNodeData);
-    else if(urlTypeName == "PairwiseTXT")
+    else if(urlTypeName == QLatin1String("PairwiseTXT"))
         return std::make_unique<PairwiseTxtFileParser>(this, &_userNodeData);
-    else if(urlTypeName == "GraphML")
+    else if(urlTypeName == QLatin1String("GraphML"))
         return std::make_unique<GraphMLParser>(&_userNodeData);
 
     return nullptr;
@@ -118,7 +118,7 @@ QString BaseGenericPluginInstance::selectedNodeNames() const
     for(auto nodeId : selectionManager()->selectedNodes())
     {
         if(!s.isEmpty())
-            s += ", ";
+            s += QLatin1String(", ");
 
         s += graphModel()->nodeName(nodeId);
     }
@@ -141,9 +141,9 @@ void BaseGenericPluginInstance::onSelectionChanged(const ISelectionManager*)
 
 BaseGenericPlugin::BaseGenericPlugin()
 {
-    registerUrlType("GML", QObject::tr("GML File"), QObject::tr("GML Files"), {"gml"});
-    registerUrlType("PairwiseTXT", QObject::tr("Pairwise Text File"), QObject::tr("Pairwise Text Files"), {"txt", "layout"});
-    registerUrlType("GraphML", QObject::tr("GraphML File"), QObject::tr("GraphML Files"), {"graphml"});
+    registerUrlType(QStringLiteral("GML"), QObject::tr("GML File"), QObject::tr("GML Files"), {"gml"});
+    registerUrlType(QStringLiteral("PairwiseTXT"), QObject::tr("Pairwise Text File"), QObject::tr("Pairwise Text Files"), {"txt", "layout"});
+    registerUrlType(QStringLiteral("GraphML"), QObject::tr("GraphML File"), QObject::tr("GraphML Files"), {"graphml"});
 
 }
 

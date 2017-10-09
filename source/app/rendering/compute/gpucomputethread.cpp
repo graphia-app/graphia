@@ -62,7 +62,7 @@ void GPUComputeThread::run()
 {
     std::unique_lock<std::mutex> lock(_mutex);
 
-    u::setCurrentThreadName("ComputeThread");
+    u::setCurrentThreadName(QStringLiteral("ComputeThread"));
 
     QOpenGLContext computeGLContext;
     computeGLContext.setShareContext(_mainGLContext);

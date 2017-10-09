@@ -293,7 +293,7 @@ bool GraphTransformConfigParser::isAttributeName(const QString& variable)
 QString GraphTransformConfigParser::attributeNameFor(const QString& variable)
 {
     QString attributeName = variable;
-    attributeName.replace(QRegularExpression("^\\$"), "");
+    attributeName.replace(QRegularExpression(QStringLiteral("^\\$")), QLatin1String(""));
 
     return attributeName;
 }

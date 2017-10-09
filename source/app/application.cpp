@@ -323,7 +323,7 @@ void Application::updateNameFilters()
         for(const auto& extension : fileType._extensions)
         {
             if(second)
-                description += " ";
+                description += QLatin1String(" ");
             else
                 second = true;
 
@@ -331,7 +331,7 @@ void Application::updateNameFilters()
         }
     }
 
-    description += ")";
+    description += QLatin1String(")");
 
     _nameFilters.clear();
     _nameFilters.append(description);
@@ -344,14 +344,14 @@ void Application::updateNameFilters()
         for(const auto& extension : fileType._extensions)
         {
             if(second)
-                description += " ";
+                description += QLatin1String(" ");
             else
                 second = true;
 
             description += "*." + extension;
         }
 
-        description += ")";
+        description += QLatin1String(")");
 
         _nameFilters.append(description);
     }

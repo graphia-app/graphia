@@ -219,9 +219,9 @@ QVariant AvailableAttributesModel::get(const QModelIndex& index) const
     QString preamble;
 
     if(parent == _sourceNode)
-        preamble = "source.";
+        preamble = QLatin1String("source.");
     else if(parent == _targetNode)
-        preamble = "target.";
+        preamble = QLatin1String("target.");
 
     return preamble + data(index, Qt::DisplayRole).toString();
 }

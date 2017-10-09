@@ -261,7 +261,7 @@ static bool transformIsPinned(const QString& transform)
     GraphTransformConfigParser p;
 
     if(!p.parse(transform)) return false;
-    return p.result().isFlagSet("pinned");
+    return p.result().isFlagSet(QStringLiteral("pinned"));
 }
 
 static QStringList sortedTransforms(QStringList transforms)
@@ -476,7 +476,7 @@ void Document::saveFile(const QUrl& fileUrl, const QByteArray& uiData)
 
 void Document::onPreferenceChanged(const QString& key, const QVariant&)
 {
-    if(key == "visuals/backgroundColor")
+    if(key == QLatin1String("visuals/backgroundColor"))
         emit contrastingColorChanged();
 }
 
@@ -1173,9 +1173,9 @@ QVariantMap Document::transform(const QString& transformName) const
 
         auto elementType = transformFactory->elementType();
 
-        map.insert("elementType", static_cast<int>(elementType));
-        map.insert("description", transformFactory->description());
-        map.insert("requiresCondition", transformFactory->requiresCondition());
+        map.insert(QStringLiteral("elementType"), static_cast<int>(elementType));
+        map.insert(QStringLiteral("description"), transformFactory->description());
+        map.insert(QStringLiteral("requiresCondition"), transformFactory->requiresCondition());
 
         QVariantMap parameters;
         for(const auto& parameter : transformFactory->parameters())
@@ -1183,17 +1183,17 @@ QVariantMap Document::transform(const QString& transformName) const
             QVariantMap parameterMap = transformParameter(transformName, parameter.first);
             parameters.insert(parameter.first, parameterMap);
         }
-        map.insert("parameters", parameters);
+        map.insert(QStringLiteral("parameters"), parameters);
 
         QVariantMap declaredAttributes;
         for(const auto& declaredAttribute : transformFactory->declaredAttributes())
         {
             QVariantMap declaredAttributeMap;
-            declaredAttributeMap.insert("valueType", static_cast<int>(declaredAttribute.second._valueType));
-            declaredAttributeMap.insert("defaultVisualisation", declaredAttribute.second._defaultVisualisation);
+            declaredAttributeMap.insert(QStringLiteral("valueType"), static_cast<int>(declaredAttribute.second._valueType));
+            declaredAttributeMap.insert(QStringLiteral("defaultVisualisation"), declaredAttribute.second._defaultVisualisation);
             declaredAttributes.insert(declaredAttribute.first, declaredAttributeMap);
         }
-        map.insert("declaredAttributes", declaredAttributes);
+        map.insert(QStringLiteral("declaredAttributes"), declaredAttributes);
     }
 
     return map;
@@ -1208,8 +1208,8 @@ QVariantMap Document::transformInfoAtIndex(int index) const
 {
     QVariantMap map;
 
-    map.insert("alertType", static_cast<int>(AlertType::None));
-    map.insert("alertText", "");
+    map.insert(QStringLiteral("alertType"), static_cast<int>(AlertType::None));
+    map.insert(QStringLiteral("alertText"), "");
 
     if(_graphModel == nullptr)
         return map;
@@ -1229,8 +1229,8 @@ QVariantMap Document::transformInfoAtIndex(int index) const
 
     auto& transformAlert = alerts.at(0);
 
-    map.insert("alertType", static_cast<int>(transformAlert._type));
-    map.insert("alertText", transformAlert._text);
+    map.insert(QStringLiteral("alertType"), static_cast<int>(transformAlert._type));
+    map.insert(QStringLiteral("alertText"), transformAlert._text);
 
     return map;
 }
@@ -1255,17 +1255,17 @@ QVariantMap Document::transformParameter(const QString& transformName, const QSt
     if(u::contains(transformFactory->parameters(), parameterName))
     {
         auto parameter = transformFactory->parameters().at(parameterName);
-        map.insert("valueType", static_cast<int>(parameter.type()));
+        map.insert(QStringLiteral("valueType"), static_cast<int>(parameter.type()));
 
-        map.insert("hasRange", parameter.hasRange());
-        map.insert("hasMinimumValue", parameter.hasMin());
-        map.insert("hasMaximumValue", parameter.hasMax());
+        map.insert(QStringLiteral("hasRange"), parameter.hasRange());
+        map.insert(QStringLiteral("hasMinimumValue"), parameter.hasMin());
+        map.insert(QStringLiteral("hasMaximumValue"), parameter.hasMax());
 
-        if(parameter.hasMin()) map.insert("minimumValue", parameter.min());
-        if(parameter.hasMax()) map.insert("maximumValue", parameter.max());
+        if(parameter.hasMin()) map.insert(QStringLiteral("minimumValue"), parameter.min());
+        if(parameter.hasMax()) map.insert(QStringLiteral("maximumValue"), parameter.max());
 
-        map.insert("description", parameter.description());
-        map.insert("initialValue", parameter.initialValue());
+        map.insert(QStringLiteral("description"), parameter.description());
+        map.insert(QStringLiteral("initialValue"), parameter.initialValue());
     }
 
     return map;
@@ -1282,25 +1282,25 @@ QVariantMap Document::attribute(const QString& attributeName) const
     if(u::contains(_graphModel->availableAttributes(), parsedAttributeName._name))
     {
         const auto& attribute = _graphModel->attributeValueByName(parsedAttributeName._name);
-        map.insert("valueType", static_cast<int>(attribute.valueType()));
-        map.insert("elementType", static_cast<int>(attribute.elementType()));
+        map.insert(QStringLiteral("valueType"), static_cast<int>(attribute.valueType()));
+        map.insert(QStringLiteral("elementType"), static_cast<int>(attribute.elementType()));
 
-        map.insert("hasRange", attribute.numericRange().hasRange());
-        map.insert("hasMinimumValue", attribute.numericRange().hasMin());
-        map.insert("hasMaximumValue", attribute.numericRange().hasMax());
+        map.insert(QStringLiteral("hasRange"), attribute.numericRange().hasRange());
+        map.insert(QStringLiteral("hasMinimumValue"), attribute.numericRange().hasMin());
+        map.insert(QStringLiteral("hasMaximumValue"), attribute.numericRange().hasMax());
 
-        if(attribute.numericRange().hasMin()) map.insert("minimumValue", attribute.numericRange().min());
-        if(attribute.numericRange().hasMax()) map.insert("maximumValue", attribute.numericRange().max());
+        if(attribute.numericRange().hasMin()) map.insert(QStringLiteral("minimumValue"), attribute.numericRange().min());
+        if(attribute.numericRange().hasMax()) map.insert(QStringLiteral("maximumValue"), attribute.numericRange().max());
 
-        map.insert("description", attribute.description());
+        map.insert(QStringLiteral("description"), attribute.description());
         auto valueType = Flags<ValueType>(attribute.valueType());
 
         // For similarity purposes, treat Int and Float as the same
         if(valueType.anyOf(ValueType::Int, ValueType::Float))
             valueType.set(ValueType::Int, ValueType::Float);
 
-        map.insert("similar", _graphModel->availableAttributes(attribute.elementType(), *valueType));
-        map.insert("ops", _graphModel->avaliableConditionFnOps(parsedAttributeName._name));
+        map.insert(QStringLiteral("similar"), _graphModel->availableAttributes(attribute.elementType(), *valueType));
+        map.insert(QStringLiteral("ops"), _graphModel->avaliableConditionFnOps(parsedAttributeName._name));
     }
 
     return map;
@@ -1407,18 +1407,18 @@ QVariantMap Document::visualisationInfoAtIndex(int index) const
 {
     QVariantMap map;
 
-    map.insert("alertType", static_cast<int>(AlertType::None));
-    map.insert("alertText", "");
-    map.insert("minimumNumericValue", 0.0);
-    map.insert("maximumNumericValue", 1.0);
+    map.insert(QStringLiteral("alertType"), static_cast<int>(AlertType::None));
+    map.insert(QStringLiteral("alertText"), "");
+    map.insert(QStringLiteral("minimumNumericValue"), 0.0);
+    map.insert(QStringLiteral("maximumNumericValue"), 1.0);
 
     if(_graphModel == nullptr)
         return map;
 
     const auto& visualisationInfo = _graphModel->visualisationInfoAtIndex(index);
 
-    map.insert("minimumNumericValue", visualisationInfo.min());
-    map.insert("maximumNumericValue", visualisationInfo.max());
+    map.insert(QStringLiteral("minimumNumericValue"), visualisationInfo.min());
+    map.insert(QStringLiteral("maximumNumericValue"), visualisationInfo.max());
 
     auto alerts = visualisationInfo.alerts();
 
@@ -1433,8 +1433,8 @@ QVariantMap Document::visualisationInfoAtIndex(int index) const
 
     auto& alert = alerts.at(0);
 
-    map.insert("alertType", static_cast<int>(alert._type));
-    map.insert("alertText", alert._text);
+    map.insert(QStringLiteral("alertType"), static_cast<int>(alert._type));
+    map.insert(QStringLiteral("alertText"), alert._text);
 
     return map;
 }
@@ -1579,11 +1579,11 @@ QVariantMap Document::layoutSetting(const QString& name) const
     const auto* setting = _layoutThread->setting(name);
     if(setting != nullptr)
     {
-        map.insert("name", setting->name());
-        map.insert("displayName", setting->displayName());
-        map.insert("value", setting->value());
-        map.insert("minimumValue", setting->minimumValue());
-        map.insert("maximumValue", setting->maximumValue());
+        map.insert(QStringLiteral("name"), setting->name());
+        map.insert(QStringLiteral("displayName"), setting->displayName());
+        map.insert(QStringLiteral("value"), setting->value());
+        map.insert(QStringLiteral("minimumValue"), setting->minimumValue());
+        map.insert(QStringLiteral("maximumValue"), setting->maximumValue());
     }
 
     return map;
@@ -1604,7 +1604,7 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
     // We have to do this on the same thread as the caller, because we can't invoke
     // methods across threads; hopefully it's relatively quick
     QStringList columnRoles;
-    for(int i = 0; i < QQmlProperty::read(tableView, "columnCount").toInt(); i++)
+    for(int i = 0; i < QQmlProperty::read(tableView, QStringLiteral("columnCount")).toInt(); i++)
     {
         QVariant columnVariant;
         QMetaObject::invokeMethod(tableView, "getColumn",
@@ -1612,8 +1612,8 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
                 Q_ARG(QVariant, i));
         QObject* tableViewColumn = qvariant_cast<QObject*>(columnVariant);
 
-        if(tableViewColumn != nullptr && QQmlProperty::read(tableViewColumn, "visible").toBool())
-            columnRoles.append(QQmlProperty::read(tableViewColumn, "role").toString());
+        if(tableViewColumn != nullptr && QQmlProperty::read(tableViewColumn, QStringLiteral("visible")).toBool())
+            columnRoles.append(QQmlProperty::read(tableViewColumn, QStringLiteral("role")).toString());
     }
 
     QString localFileName = fileUrl.toLocalFile();
@@ -1640,8 +1640,8 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
         auto escapedString = [](const QString& string)
         {
             QString escaped = string;
-            escaped.replace("\"", "\\\"");
-            return QString("\"%1\"").arg(escaped);
+            escaped.replace(QLatin1String("\""), QLatin1String("\\\""));
+            return QStringLiteral("\"%1\"").arg(escaped);
         };
 
         QString rowString;
@@ -1656,8 +1656,8 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
         QTextStream stream(&file);
         stream << rowString << endl;
 
-        auto rowCount = QQmlProperty::read(tableView, "rowCount").toInt();
-        QAbstractItemModel* model = qvariant_cast<QAbstractItemModel*>(QQmlProperty::read(tableView, "model"));
+        auto rowCount = QQmlProperty::read(tableView, QStringLiteral("rowCount")).toInt();
+        QAbstractItemModel* model = qvariant_cast<QAbstractItemModel*>(QQmlProperty::read(tableView, QStringLiteral("model")));
         if(model != nullptr)
         {
             for(int row = 0; row < rowCount; row++)

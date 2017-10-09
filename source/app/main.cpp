@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
     if(app.isRunning())
     {
-        if(app.sendMessage(app.arguments().join("\n")))
+        if(app.sendMessage(app.arguments().join(QStringLiteral("\n"))))
             return 0;
     }
 
@@ -57,20 +57,20 @@ int main(int argc, char *argv[])
             app.setActivationWindow(QApplication::focusWindow());
     });
 
-    QCoreApplication::setOrganizationName("Kajeka");
-    QCoreApplication::setOrganizationDomain("kajeka.com");
+    QCoreApplication::setOrganizationName(QStringLiteral("Kajeka"));
+    QCoreApplication::setOrganizationDomain(QStringLiteral("kajeka.com"));
     QCoreApplication::setApplicationName(PRODUCT_NAME);
     QCoreApplication::setApplicationVersion(VERSION);
 
     QGuiApplication::styleHints()->setMousePressAndHoldInterval(500);
 
     QIcon mainIcon;
-    mainIcon.addFile(":/icon/Icon512x512.png");
-    mainIcon.addFile(":/icon/Icon256x256.png");
-    mainIcon.addFile(":/icon/Icon128x128.png");
-    mainIcon.addFile(":/icon/Icon64x64.png");
-    mainIcon.addFile(":/icon/Icon32x32.png");
-    mainIcon.addFile(":/icon/Icon16x16.png");
+    mainIcon.addFile(QStringLiteral(":/icon/Icon512x512.png"));
+    mainIcon.addFile(QStringLiteral(":/icon/Icon256x256.png"));
+    mainIcon.addFile(QStringLiteral(":/icon/Icon128x128.png"));
+    mainIcon.addFile(QStringLiteral(":/icon/Icon64x64.png"));
+    mainIcon.addFile(QStringLiteral(":/icon/Icon32x32.png"));
+    mainIcon.addFile(QStringLiteral(":/icon/Icon16x16.png"));
     app.setWindowIcon(mainIcon);
 
     // Since Qt is responsible for managing OpenGL, we need
@@ -85,8 +85,8 @@ int main(int argc, char *argv[])
     if(!OpenGLFunctions::hasOpenGLSupport())
     {
         QString vendor = OpenGLFunctions::vendor();
-        vendor.replace(" ", "+");
-        QString driversUrl = QString(R"(http://www.google.com/search?q=%1+video+driver+download&btnI)").arg(vendor);
+        vendor.replace(QLatin1String(" "), QLatin1String("+"));
+        QString driversUrl = QStringLiteral(R"(http://www.google.com/search?q=%1+video+driver+download&btnI)").arg(vendor);
 
         QMessageBox messageBox(QMessageBox::Critical, QObject::tr("OpenGL support"),
             QObject::tr("The installed version of OpenGL is insufficient to run %1. "
@@ -115,41 +115,41 @@ int main(int argc, char *argv[])
     ThreadPoolSingleton threadPool;
     Preferences preferences;
 
-    preferences.define("visuals/defaultNodeColor",              "#0000FF");
-    preferences.define("visuals/defaultEdgeColor",              "#FFFFFF");
-    preferences.define("visuals/multiElementColor",             "#FF0000");
-    preferences.define("visuals/backgroundColor",               "#C0C0C0");
-    preferences.define("visuals/highlightColor",                "#FFFFFF");
+    preferences.define(QStringLiteral("visuals/defaultNodeColor"),              "#0000FF");
+    preferences.define(QStringLiteral("visuals/defaultEdgeColor"),              "#FFFFFF");
+    preferences.define(QStringLiteral("visuals/multiElementColor"),             "#FF0000");
+    preferences.define(QStringLiteral("visuals/backgroundColor"),               "#C0C0C0");
+    preferences.define(QStringLiteral("visuals/highlightColor"),                "#FFFFFF");
 
-    preferences.define("visuals/defaultNodeSize",               0.6, 0.1,  3.0);
-    preferences.define("visuals/defaultEdgeSize",               0.2, 0.01, 2.0);
+    preferences.define(QStringLiteral("visuals/defaultNodeSize"),               0.6, 0.1,  3.0);
+    preferences.define(QStringLiteral("visuals/defaultEdgeSize"),               0.2, 0.01, 2.0);
 
-    preferences.define("visuals/showNodeText",                  QVariant::fromValue(static_cast<int>(TextState::Selected)));
-    preferences.define("visuals/showEdgeText",                  QVariant::fromValue(static_cast<int>(TextState::Selected)));
-    preferences.define("visuals/textFont",                      SharedTools::QtSingleApplication::font().family());
-    preferences.define("visuals/textSize",                      24.0f);
-    preferences.define("visuals/edgeVisualType",                QVariant::fromValue(static_cast<int>(EdgeVisualType::Cylinder)));
-    preferences.define("visuals/textAlignment",                 QVariant::fromValue(static_cast<int>(TextAlignment::Right)));
-    preferences.define("visuals/showMultiElementIndicators",    true);
-    preferences.define("visuals/savedGradients",                DEFAULT_GRADIENTS);
+    preferences.define(QStringLiteral("visuals/showNodeText"),                  QVariant::fromValue(static_cast<int>(TextState::Selected)));
+    preferences.define(QStringLiteral("visuals/showEdgeText"),                  QVariant::fromValue(static_cast<int>(TextState::Selected)));
+    preferences.define(QStringLiteral("visuals/textFont"),                      SharedTools::QtSingleApplication::font().family());
+    preferences.define(QStringLiteral("visuals/textSize"),                      24.0f);
+    preferences.define(QStringLiteral("visuals/edgeVisualType"),                QVariant::fromValue(static_cast<int>(EdgeVisualType::Cylinder)));
+    preferences.define(QStringLiteral("visuals/textAlignment"),                 QVariant::fromValue(static_cast<int>(TextAlignment::Right)));
+    preferences.define(QStringLiteral("visuals/showMultiElementIndicators"),    true);
+    preferences.define(QStringLiteral("visuals/savedGradients"),                DEFAULT_GRADIENTS);
 
-    preferences.define("visuals/minimumComponentRadius",        2.0, 0.05, 15.0);
-    preferences.define("visuals/transitionTime",                1.0, 0.1, 5.0);
+    preferences.define(QStringLiteral("visuals/minimumComponentRadius"),        2.0, 0.05, 15.0);
+    preferences.define(QStringLiteral("visuals/transitionTime"),                1.0, 0.1, 5.0);
 
-    preferences.define("misc/showGraphMetrics",                 false);
-    preferences.define("misc/showLayoutSettings",               false);
+    preferences.define(QStringLiteral("misc/showGraphMetrics"),                 false);
+    preferences.define(QStringLiteral("misc/showLayoutSettings"),               false);
 
-    preferences.define("misc/focusFoundNodes",                  true);
-    preferences.define("misc/focusFoundComponents",             false);
+    preferences.define(QStringLiteral("misc/focusFoundNodes"),                  true);
+    preferences.define(QStringLiteral("misc/focusFoundComponents"),             false);
 
-    preferences.define("misc/firstOpen",                        true);
+    preferences.define(QStringLiteral("misc/firstOpen"),                        true);
 
-    preferences.define("screenshot/width",                      1920);
-    preferences.define("screenshot/height",                     1080);
-    preferences.define("screenshot/path",                       QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)).toString());
+    preferences.define(QStringLiteral("screenshot/width"),                      1920);
+    preferences.define(QStringLiteral("screenshot/height"),                     1080);
+    preferences.define(QStringLiteral("screenshot/path"),                       QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)).toString());
 
     QQmlApplicationEngine engine;
-    engine.addImportPath("qrc:///qml");
+    engine.addImportPath(QStringLiteral("qrc:///qml"));
     engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
     if(engine.rootObjects().empty())
     {
@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
                 continue;
 
             QString fileName = QDir(directory).filePath(
-                QString("%1.png").arg(window->title().replace(" ", "_")));
+                QStringLiteral("%1.png").arg(window->title().replace(QLatin1String(" "), QLatin1String("_"))));
 
             std::cerr << "Writing " << fileName.toStdString() << "\n";
 

@@ -45,7 +45,7 @@ static void uploadReport(const QString& email, const QString& text,
     {
         QHttpPart part;
         part.setHeader(QNetworkRequest::ContentDispositionHeader,
-                       QVariant(QString(R"(form-data; name="%1")").arg(field.first)));
+                       QVariant(QStringLiteral(R"(form-data; name="%1")").arg(field.first)));
         part.setBody(field.second.toLatin1());
         multiPart->append(part);
 
@@ -55,14 +55,14 @@ static void uploadReport(const QString& email, const QString& text,
     // Send a hash of the contents of the report as a (crude) means of filtering bots/crawlers/etc.
     QHttpPart checksumPart;
     checksumPart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                           QVariant(QString(R"(form-data; name="checksum")")));
+                           QVariant(QStringLiteral(R"(form-data; name="checksum")")));
     checksumPart.setBody(checksum.result().toHex());
     multiPart->append(checksumPart);
 
     QHttpPart dmpPart;
     dmpPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
     dmpPart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                      QVariant(QString(R"(form-data; name="dmp"; filename="%1")")
+                      QVariant(QStringLiteral(R"(form-data; name="dmp"; filename="%1")")
                                .arg(QFileInfo(dmpFile).fileName())));
     auto* file = new QFile(dmpFile);
     file->open(QIODevice::ReadOnly);
@@ -84,7 +84,7 @@ static void uploadReport(const QString& email, const QString& text,
         QHttpPart attachmentPart;
         attachmentPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/octet-stream"));
         attachmentPart.setHeader(QNetworkRequest::ContentDispositionHeader,
-                                 QVariant(QString(R"(form-data; name="attachment%1"; filename="%2")")
+                                 QVariant(QStringLiteral(R"(form-data; name="attachment%1"; filename="%2")")
                                     .arg(fileIndex++).arg(QFileInfo(fileName).fileName())));
         auto* attachment = new QFile(fileName);
         attachment->open(QIODevice::ReadOnly);
@@ -93,7 +93,7 @@ static void uploadReport(const QString& email, const QString& text,
         multiPart->append(attachmentPart);
     }
 
-    QUrl url("http://crashreports.kajeka.com/");
+    QUrl url(QStringLiteral("http://crashreports.kajeka.com/"));
     QNetworkRequest request(url);
 
     QNetworkAccessManager manager;
@@ -139,8 +139,8 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    QCoreApplication::setOrganizationName("Kajeka");
-    QCoreApplication::setOrganizationDomain("kajeka.com");
+    QCoreApplication::setOrganizationName(QStringLiteral("Kajeka"));
+    QCoreApplication::setOrganizationDomain(QStringLiteral("kajeka.com"));
     QCoreApplication::setApplicationName(PRODUCT_NAME);
     QCoreApplication::setApplicationVersion(VERSION);
 
@@ -158,12 +158,12 @@ int main(int argc, char *argv[])
         attachmentsDir = app.arguments().at(2);
 
     QIcon mainIcon;
-    mainIcon.addFile(":/icon.svg");
+    mainIcon.addFile(QStringLiteral(":/icon.svg"));
     app.setWindowIcon(mainIcon);
 
     QQmlApplicationEngine engine;
     Report report;
-    engine.rootContext()->setContextProperty("report", &report);
+    engine.rootContext()->setContextProperty(QStringLiteral("report"), &report);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     int exitCode = app.exec();

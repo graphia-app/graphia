@@ -217,14 +217,14 @@ class CorrelationPlugin : public BasePlugin, public PluginInstanceProvider<Corre
 public:
     CorrelationPlugin();
 
-    QString name() const { return "Correlation"; }
+    QString name() const { return QStringLiteral("Correlation"); }
     QString description() const
     {
         return tr("Calculate pearson correlations between rows of data, and create "
                   "a graph based on the resultant matrix.");
     }
 
-    QString imageSource() const { return "qrc:///plots.svg"; }
+    QString imageSource() const { return QStringLiteral("qrc:///plots.svg"); }
 
     int dataVersion() const { return 1; }
 
@@ -232,8 +232,8 @@ public:
 
     bool editable() const { return true; }
 
-    QString parametersQmlPath() const { return "qrc:///qml/parameters.qml"; }
-    QString qmlPath() const { return "qrc:///qml/correlationplugin.qml"; }
+    QString parametersQmlPath() const { return QStringLiteral("qrc:///qml/parameters.qml"); }
+    QString qmlPath() const { return QStringLiteral("qrc:///qml/correlationplugin.qml"); }
 };
 
 #endif // CORRELATIONPLUGIN_H

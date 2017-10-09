@@ -24,7 +24,7 @@ public:
     Q_INVOKABLE QUrl replaceExtension(const QUrl& url, const QString& extension) const
     {
         auto fi = QFileInfo(url.toLocalFile());
-        auto replaced = QFileInfo(QString("%1/%2.%3")
+        auto replaced = QFileInfo(QStringLiteral("%1/%2.%3")
                                   .arg(fi.path(),
                                        fi.baseName(),
                                        extension));

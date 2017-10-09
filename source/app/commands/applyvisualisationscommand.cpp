@@ -34,7 +34,7 @@ void ApplyVisualisationsCommand::apply(const QStringList& visualisations,
     [this, newVisualisations = cancelled() ? previousVisualisations : visualisations]
     {
         _document->setVisualisations(newVisualisations);
-    }, "setVisualisations");
+    }, QStringLiteral("setVisualisations"));
 }
 
 bool ApplyVisualisationsCommand::execute()

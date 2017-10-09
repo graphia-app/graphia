@@ -114,9 +114,9 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
         {
             QVariantMap map;
 
-            map.insert("lhs", terminalValueAsString(terminalCondition._lhs));
-            map.insert("op", terminalCondition.opAsString());
-            map.insert("rhs", terminalValueAsString(terminalCondition._rhs));
+            map.insert(QStringLiteral("lhs"), terminalValueAsString(terminalCondition._lhs));
+            map.insert(QStringLiteral("op"), terminalCondition.opAsString());
+            map.insert(QStringLiteral("rhs"), terminalValueAsString(terminalCondition._rhs));
 
             return map;
         }
@@ -125,8 +125,8 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
         {
             QVariantMap map;
 
-            map.insert("lhs", terminalValueAsString(unaryCondition._lhs));
-            map.insert("op", unaryCondition.opAsString());
+            map.insert(QStringLiteral("lhs"), terminalValueAsString(unaryCondition._lhs));
+            map.insert(QStringLiteral("op"), unaryCondition.opAsString());
 
             return map;
         }
@@ -137,9 +137,9 @@ QVariantMap GraphTransformConfig::conditionAsVariantMap() const
             auto lhs = boost::apply_visitor(ConditionVisitor(), compoundCondition._lhs);
             auto rhs = boost::apply_visitor(ConditionVisitor(), compoundCondition._rhs);
 
-            map.insert("lhs", lhs);
-            map.insert("op", compoundCondition.opAsString());
-            map.insert("rhs", rhs);
+            map.insert(QStringLiteral("lhs"), lhs);
+            map.insert(QStringLiteral("op"), compoundCondition.opAsString());
+            map.insert(QStringLiteral("rhs"), rhs);
 
             return map;
         }
@@ -156,17 +156,17 @@ QVariantMap GraphTransformConfig::asVariantMap() const
     flags.reserve(static_cast<int>(_flags.size()));
     for(const auto& flag : _flags)
         flags.append(flag);
-    map.insert("flags", flags);
+    map.insert(QStringLiteral("flags"), flags);
 
-    map.insert("action", _action);
+    map.insert(QStringLiteral("action"), _action);
 
     QVariantMap parameters;
     for(const auto& parameter : _parameters)
         parameters.insert(parameter._name, parameter.valueAsString());
-    map.insert("parameters", parameters);
+    map.insert(QStringLiteral("parameters"), parameters);
 
     if(hasCondition())
-        map.insert("condition", conditionAsVariantMap());
+        map.insert(QStringLiteral("condition"), conditionAsVariantMap());
 
     return map;
 }

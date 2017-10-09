@@ -137,9 +137,9 @@ template<typename Fn> static void forEachProperty(const QObject* o, Fn fn)
         QString propertyName(mo->property(i).name());
         PropertyType type;
 
-        if(propertyName.endsWith("MinimumValue"))
+        if(propertyName.endsWith(QLatin1String("MinimumValue")))
             type = PropertyType::Minimum;
-        else if(propertyName.endsWith("MaximumValue"))
+        else if(propertyName.endsWith(QLatin1String("MaximumValue")))
             type = PropertyType::Maximum;
         else
             type = PropertyType::Value;
@@ -173,9 +173,9 @@ void QmlPreferences::componentComplete()
 QString QmlPreferences::preferenceNameByPropertyName(const QString& propertyName)
 {
     QString canoncicalPropertyName(propertyName);
-    canoncicalPropertyName.replace(QRegularExpression("M(ax|in)imumValue"), "");
+    canoncicalPropertyName.replace(QRegularExpression(QStringLiteral("M(ax|in)imumValue")), QLatin1String(""));
 
-    return QString("%1/%2").arg(_section, canoncicalPropertyName);
+    return QStringLiteral("%1/%2").arg(_section, canoncicalPropertyName);
 }
 
 QMetaProperty QmlPreferences::propertyByName(const QString& propertyName)
@@ -192,7 +192,7 @@ QMetaProperty QmlPreferences::propertyByName(const QString& propertyName)
 
 static QString propertyNameFrom(const QString& preferenceName)
 {
-    auto sepRegex = QRegularExpression(R"(\/)");
+    auto sepRegex = QRegularExpression(QStringLiteral(R"(\/)"));
     if(preferenceName.contains(sepRegex))
     {
         auto stringList = preferenceName.split(sepRegex);
@@ -210,12 +210,12 @@ QMetaProperty QmlPreferences::valuePropertyFrom(const QString& preferenceName)
 
 QMetaProperty QmlPreferences::minimumPropertyFrom(const QString& preferenceName)
 {
-    return propertyByName(QString("%1MinimumValue").arg(propertyNameFrom(preferenceName)));
+    return propertyByName(QStringLiteral("%1MinimumValue").arg(propertyNameFrom(preferenceName)));
 }
 
 QMetaProperty QmlPreferences::maximumPropertyFrom(const QString& preferenceName)
 {
-    return propertyByName(QString("%1MaximumValue").arg(propertyNameFrom(preferenceName)));
+    return propertyByName(QStringLiteral("%1MaximumValue").arg(propertyNameFrom(preferenceName)));
 }
 
 void QmlPreferences::setProperty(QMetaProperty property, const QVariant& value)

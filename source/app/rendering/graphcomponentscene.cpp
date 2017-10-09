@@ -165,7 +165,7 @@ void GraphComponentScene::finishComponentTransition(ComponentId componentId, boo
                     _graphRenderer->transition().willBeImmediatelyReused();
                     startTransition([this] { performQueuedTransition(); });
                     restoreViewData();
-                }, "GraphComponentScene::finishComponentTransition (restoreViewData)");
+                }, QStringLiteral("GraphComponentScene::finishComponentTransition (restoreViewData)"));
             }
             else
                 performQueuedTransition();
@@ -180,7 +180,7 @@ void GraphComponentScene::finishComponentTransitionOnRendererThread(ComponentId 
     _graphRenderer->executeOnRendererThread([this, componentId, doTransition]
     {
         finishComponentTransition(componentId, doTransition);
-    }, "GraphComponentScene::finishComponentTransition");
+    }, QStringLiteral("GraphComponentScene::finishComponentTransition"));
 }
 
 void GraphComponentScene::performQueuedTransition()
@@ -190,7 +190,7 @@ void GraphComponentScene::performQueuedTransition()
         _graphRenderer->executeOnRendererThread([this, nodeId = _queuedTransitionNodeId]
         {
             moveFocusToNode(nodeId);
-        }, "GraphComponentScene::performQueuedTransition");
+        }, QStringLiteral("GraphComponentScene::performQueuedTransition"));
 
         _queuedTransitionNodeId.setToNull();
     }
@@ -369,7 +369,7 @@ void GraphComponentScene::updateRendererVisibility()
 
             _graphRenderer->onVisibilityChanged();
         }
-    }, "GraphComponentScene::updateRendererVisibility");
+    }, QStringLiteral("GraphComponentScene::updateRendererVisibility"));
 }
 
 void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet)
@@ -403,7 +403,7 @@ void GraphComponentScene::onComponentSplit(const Graph* graph, const ComponentSp
 
             newGraphComponentRenderer->cloneViewDataFrom(*oldGraphComponentRenderer);
             setComponentId(newComponentId);
-        }, "GraphComponentScene::onComponentSplit (clone camera data, set component ID)");
+        }, QStringLiteral("GraphComponentScene::onComponentSplit (clone camera data, set component ID)"));
     }
 }
 
@@ -427,7 +427,7 @@ void GraphComponentScene::onComponentsWillMerge(const Graph*, const ComponentMer
                 // This occurs before GraphComponentRenderer::cleanup is called on oldGraphComponentRenderer
                 newGraphComponentRenderer->cloneViewDataFrom(*oldGraphComponentRenderer);
                 setComponentId(newComponentId);
-            }, "GraphComponentScene::onComponentsWillMerge (clone camera data, set component ID)");
+            }, QStringLiteral("GraphComponentScene::onComponentsWillMerge (clone camera data, set component ID)"));
             break;
         }
     }
@@ -508,7 +508,7 @@ void GraphComponentScene::onGraphChanged(const Graph* graph, bool changed)
                     _graphRenderer->rendererFinishedTransition();
             }
         }
-    }, "GraphComponentScene::onGraphChanged (setSize/moveFocusToCentreOfComponent)");
+    }, QStringLiteral("GraphComponentScene::onGraphChanged (setSize/moveFocusToCentreOfComponent)"));
 }
 
 void GraphComponentScene::onNodeRemoved(const Graph*, NodeId nodeId)
@@ -523,6 +523,6 @@ void GraphComponentScene::onNodeRemoved(const Graph*, NodeId nodeId)
 
             startTransition();
             componentRenderer()->moveFocusToCentreOfComponent();
-        }, "GraphWidget::onNodeRemoved");
+        }, QStringLiteral("GraphWidget::onNodeRemoved"));
     }
 }

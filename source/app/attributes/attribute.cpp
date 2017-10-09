@@ -273,7 +273,7 @@ IAttribute& AttributeNumericRange::setMax(double max)
 
 Attribute::Name Attribute::parseAttributeName(const QString& name)
 {
-    QRegularExpression edgeNodeRe("^(source|target)\\.(.+)$");
+    QRegularExpression edgeNodeRe(QStringLiteral("^(source|target)\\.(.+)$"));
     auto match = edgeNodeRe.match(name);
 
     if(match.hasMatch())
@@ -282,9 +282,9 @@ Attribute::Name Attribute::parseAttributeName(const QString& name)
         auto resolvedName = match.captured(2);
 
         EdgeNodeType edgeNodeType = EdgeNodeType::None;
-        if(edgeNodeTypeString == "source")
+        if(edgeNodeTypeString == QLatin1String("source"))
             edgeNodeType = EdgeNodeType::Source;
-        else if(edgeNodeTypeString == "target")
+        else if(edgeNodeTypeString == QLatin1String("target"))
             edgeNodeType = EdgeNodeType::Target;
 
         return {edgeNodeType, resolvedName};

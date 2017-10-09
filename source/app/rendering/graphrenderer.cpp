@@ -330,17 +330,17 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
 {
     resolveOpenGLFunctions();
 
-    ShaderTools::loadShaderProgram(_screenShader, ":/shaders/screen.vert", ":/shaders/screen.frag");
-    ShaderTools::loadShaderProgram(_selectionShader, ":/shaders/screen.vert", ":/shaders/selection.frag");
-    ShaderTools::loadShaderProgram(_sdfShader, ":/shaders/screen.vert", ":/shaders/sdf.frag");
+    ShaderTools::loadShaderProgram(_screenShader, QStringLiteral(":/shaders/screen.vert"), QStringLiteral(":/shaders/screen.frag"));
+    ShaderTools::loadShaderProgram(_selectionShader, QStringLiteral(":/shaders/screen.vert"), QStringLiteral(":/shaders/selection.frag"));
+    ShaderTools::loadShaderProgram(_sdfShader, QStringLiteral(":/shaders/screen.vert"), QStringLiteral(":/shaders/sdf.frag"));
 
-    ShaderTools::loadShaderProgram(_nodesShader, ":/shaders/instancednodes.vert", ":/shaders/nodecolorads.frag");
-    ShaderTools::loadShaderProgram(_edgesShader, ":/shaders/instancededges.vert", ":/shaders/edgecolorads.frag");
+    ShaderTools::loadShaderProgram(_nodesShader, QStringLiteral(":/shaders/instancednodes.vert"), QStringLiteral(":/shaders/nodecolorads.frag"));
+    ShaderTools::loadShaderProgram(_edgesShader, QStringLiteral(":/shaders/instancededges.vert"), QStringLiteral(":/shaders/edgecolorads.frag"));
 
-    ShaderTools::loadShaderProgram(_selectionMarkerShader, ":/shaders/2d.vert", ":/shaders/selectionMarker.frag");
-    ShaderTools::loadShaderProgram(_debugLinesShader, ":/shaders/debuglines.vert", ":/shaders/debuglines.frag");
+    ShaderTools::loadShaderProgram(_selectionMarkerShader, QStringLiteral(":/shaders/2d.vert"), QStringLiteral(":/shaders/selectionMarker.frag"));
+    ShaderTools::loadShaderProgram(_debugLinesShader, QStringLiteral(":/shaders/debuglines.vert"), QStringLiteral(":/shaders/debuglines.frag"));
 
-    ShaderTools::loadShaderProgram(_textShader, ":/shaders/textrender.vert", ":/shaders/textrender.frag");
+    ShaderTools::loadShaderProgram(_textShader, QStringLiteral(":/shaders/textrender.vert"), QStringLiteral(":/shaders/textrender.frag"));
 
     prepareSelectionMarkerVAO();
     prepareQuad();
@@ -401,7 +401,7 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
         {
             updateGPUData(When::Later);
             update(); // QQuickFramebufferObject::Renderer::update
-        }, "GraphModel::visualsChanged");
+        }, QStringLiteral("GraphModel::visualsChanged"));
 
         enableSceneUpdate();
     });
@@ -1016,7 +1016,7 @@ void GraphRenderer::finishTransitionToOverviewModeOnRendererThread(bool doTransi
     executeOnRendererThread([this, doTransition]
     {
         finishTransitionToOverviewMode(doTransition);
-    }, "GraphRenderer::finishTransitionToOverviewMode");
+    }, QStringLiteral("GraphRenderer::finishTransitionToOverviewMode"));
 }
 
 void GraphRenderer::finishTransitionToComponentMode(bool doTransition)
@@ -1041,7 +1041,7 @@ void GraphRenderer::finishTransitionToComponentModeOnRendererThread(bool doTrans
     executeOnRendererThread([this, doTransition]
     {
         finishTransitionToComponentMode(doTransition);
-    }, "GraphRenderer::finishTransitionToComponentMode");
+    }, QStringLiteral("GraphRenderer::finishTransitionToComponentMode"));
 }
 
 void GraphRenderer::switchToOverviewMode(bool doTransition)
@@ -1075,7 +1075,7 @@ void GraphRenderer::switchToOverviewMode(bool doTransition)
         else
             finishTransitionToOverviewMode(false);
 
-    }, "GraphRenderer::switchToOverviewMode");
+    }, QStringLiteral("GraphRenderer::switchToOverviewMode"));
 }
 
 void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId componentId)
@@ -1101,7 +1101,7 @@ void GraphRenderer::switchToComponentMode(bool doTransition, ComponentId compone
         else
             finishTransitionToComponentMode(false);
 
-    }, "GraphRenderer::switchToComponentMode");
+    }, QStringLiteral("GraphRenderer::switchToComponentMode"));
 }
 
 void GraphRenderer::onGraphWillChange(const Graph* graph)
@@ -1146,7 +1146,7 @@ void GraphRenderer::onGraphChanged(const Graph* graph, bool changed)
                                                             _selectionManager, this);
         }
         updateGPUData(When::Later);
-    }, "GraphRenderer::onGraphChanged update");
+    }, QStringLiteral("GraphRenderer::onGraphChanged update"));
 }
 
 void GraphRenderer::onComponentAdded(const Graph*, ComponentId componentId, bool)
@@ -1164,7 +1164,7 @@ void GraphRenderer::onComponentAdded(const Graph*, ComponentId componentId, bool
     {
         componentRendererForId(componentId)->initialise(_graphModel, componentId,
                                                         _selectionManager, this);
-    }, "GraphRenderer::onComponentAdded");
+    }, QStringLiteral("GraphRenderer::onComponentAdded"));
 }
 
 void GraphRenderer::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool)
@@ -1172,12 +1172,12 @@ void GraphRenderer::onComponentWillBeRemoved(const Graph*, ComponentId component
     executeOnRendererThread([this, componentId]
     {
         componentRendererForId(componentId)->cleanup();
-    }, QString("GraphRenderer::onComponentWillBeRemoved (cleanup) component %1").arg(static_cast<int>(componentId)));
+    }, QStringLiteral("GraphRenderer::onComponentWillBeRemoved (cleanup) component %1").arg(static_cast<int>(componentId)));
 }
 
 void GraphRenderer::onPreferenceChanged(const QString& key, const QVariant& value)
 {
-    if(key == "visuals/textFont")
+    if(key == QLatin1String("visuals/textFont"))
     {
         _glyphMap->setFontName(value.toString());
         updateText();
@@ -1252,7 +1252,7 @@ void GraphRenderer::updateText(bool waitForCompletion)
 
                 updateGPUData(When::Later);
                 update(); // QQuickFramebufferObject::Renderer::update
-            }, "GraphRenderer::updateText");
+            }, QStringLiteral("GraphRenderer::updateText"));
         });
 
         _gpuComputeThread->enqueue(job);
@@ -1301,10 +1301,10 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
 
     for(int i = 0; i < numberOfLights; i++)
     {
-        QByteArray positionId = QString("lights[%1].position").arg(i).toLatin1();
+        QByteArray positionId = QStringLiteral("lights[%1].position").arg(i).toLatin1();
         program.setUniformValue(positionId.data(), lights[i].position);
 
-        QByteArray intensityId = QString("lights[%1].intensity").arg(i).toLatin1();
+        QByteArray intensityId = QStringLiteral("lights[%1].intensity").arg(i).toLatin1();
         program.setUniformValue(intensityId.data(), lights[i].intensity);
     }
 

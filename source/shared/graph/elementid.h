@@ -39,7 +39,7 @@ public:
     operator QString() const
     {
         if(isNull())
-            return "Null";
+            return QStringLiteral("Null");
         else
             return QString::number(_value);
     }

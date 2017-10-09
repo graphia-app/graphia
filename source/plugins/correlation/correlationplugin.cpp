@@ -203,7 +203,7 @@ std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pears
 
     std::atomic<uint64_t> cost(0);
 
-    auto results = ThreadPool("PearsonCor").concurrent_for(_dataRows.begin(), _dataRows.end(),
+    auto results = ThreadPool(QStringLiteral("PearsonCor")).concurrent_for(_dataRows.begin(), _dataRows.end(),
     [&](std::vector<DataRow>::iterator rowAIt)
     {
         auto& rowA = *rowAIt;
@@ -387,7 +387,7 @@ void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager*)
 
 std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
 {
-    if(urlTypeName == "CorrelationCSV" || urlTypeName == "CorrelationTSV")
+    if(urlTypeName == QLatin1String("CorrelationCSV") || urlTypeName == QLatin1String("CorrelationTSV"))
         return std::make_unique<CorrelationFileParser>(this, urlTypeName);
 
     return nullptr;
@@ -395,17 +395,17 @@ std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const Q
 
 void CorrelationPluginInstance::applyParameter(const QString& name, const QString& value)
 {
-    if(name == "minimumCorrelation")
+    if(name == QLatin1String("minimumCorrelation"))
         _minimumCorrelationValue = value.toDouble();
-    else if(name == "transpose")
-        _transpose = (value == "true");
-    else if(name == "scaling")
+    else if(name == QLatin1String("transpose"))
+        _transpose = (value == QLatin1String("true"));
+    else if(name == QLatin1String("scaling"))
         _scaling = static_cast<ScalingType>(value.toInt());
-    else if(name == "normalise")
+    else if(name == QLatin1String("normalise"))
         _normalisation = static_cast<NormaliseType>(value.toInt());
-    else if(name == "missingDataType")
+    else if(name == QLatin1String("missingDataType"))
         _missingDataType = static_cast<MissingDataType>(value.toInt());
-    else if(name == "missingDataValue")
+    else if(name == QLatin1String("missingDataValue"))
         _missingDataReplacementValue = value.toDouble();
 }
 
@@ -545,8 +545,8 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
 CorrelationPlugin::CorrelationPlugin()
 {
-    registerUrlType("CorrelationCSV", QObject::tr("Correlation CSV File"), QObject::tr("Correlation CSV Files"), {"csv"});
-    registerUrlType("CorrelationTSV", QObject::tr("Correlation TSV File"), QObject::tr("Correlation TSV Files"), {"tsv"});
+    registerUrlType(QStringLiteral("CorrelationCSV"), QObject::tr("Correlation CSV File"), QObject::tr("Correlation CSV Files"), {"csv"});
+    registerUrlType(QStringLiteral("CorrelationTSV"), QObject::tr("Correlation TSV File"), QObject::tr("Correlation TSV Files"), {"tsv"});
     qmlRegisterType<CorrelationPlotItem>("com.kajeka", 1, 0, "CorrelationPlot");
 }
 

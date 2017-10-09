@@ -36,7 +36,7 @@ void ApplyTransformsCommand::doTransform(const QStringList& transformations, con
     [this, newTransformations = cancelled() ? previousTransformations : transformations]
     {
         _document->setTransforms(newTransformations);
-    }, "setTransforms");
+    }, QStringLiteral("setTransforms"));
 }
 
 bool ApplyTransformsCommand::execute()

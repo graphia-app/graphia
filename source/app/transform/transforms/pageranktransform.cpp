@@ -37,7 +37,7 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
     // http://michaelnielsen.org/blog/using-your-laptop-to-compute-pagerank-for-millions-of-webpages/
     NodeArray<float> pageRankScores(target);
 
-    target.setPhase(QString("PageRank"));
+    target.setPhase(QStringLiteral("PageRank"));
 
     // We must do our own componentisation as the graph's set of components
     // won't necessarily be up-to-date
@@ -78,7 +78,7 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
             if(cancelled())
                 return;
 
-            target.setPhase(QString("PageRank Iteration %1").arg(
+            target.setPhase(QStringLiteral("PageRank Iteration %1").arg(
                                 QString::number(totalIterationCount + 1)));
 
             // Calculate pagerank
@@ -151,7 +151,7 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
     }
 
     _graphModel->createAttribute(QObject::tr("Node PageRank"))
-            .setDescription("A node's PageRank is a measure of relative importance in the graph.")
+            .setDescription(QStringLiteral("A node's PageRank is a measure of relative importance in the graph."))
             .floatRange().setMin(0.0f)
             .floatRange().setMax(1.0f)
             .setFloatValueFn([pageRankScores](NodeId nodeId) { return pageRankScores[nodeId]; });

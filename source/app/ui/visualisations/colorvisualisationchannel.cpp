@@ -55,7 +55,7 @@ QVariantMap ColorVisualisationChannel::defaultParameters(ValueType valueType) co
     {
     case ValueType::Int:
     case ValueType::Float:
-        parameters.insert("gradient",
+        parameters.insert(QStringLiteral("gradient"),
             R"("{
               \"0\":    \"Red\",
               \"0.66\": \"Yellow\",
@@ -73,6 +73,6 @@ QVariantMap ColorVisualisationChannel::defaultParameters(ValueType valueType) co
 
 void ColorVisualisationChannel::setParameter(const QString& name, const QString& value)
 {
-    if(name == "gradient")
+    if(name == QLatin1String("gradient"))
         _colorGradient = ColorGradient(value);
 }

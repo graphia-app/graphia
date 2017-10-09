@@ -111,7 +111,7 @@ QString OpenGLFunctions::info()
         extensions.append(" ");
     }
 
-    return QString("%1\n%2\n%3\n%4\n%5")
+    return QStringLiteral("%1\n%2\n%3\n%4\n%5")
         .arg(f.getString(GL_VENDOR),
              f.getString(GL_RENDERER),
              f.getString(GL_VERSION),

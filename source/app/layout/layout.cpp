@@ -175,7 +175,7 @@ void LayoutThread::run()
 
     do
     {
-        u::setCurrentThreadName("Layout >");
+        u::setCurrentThreadName(QStringLiteral("Layout >"));
 
         for(auto& layout : _layouts)
         {
@@ -210,7 +210,7 @@ void LayoutThread::run()
                 qDebug() << "Layout paused" << reason;
             }
 
-            u::setCurrentThreadName("Layout ||");
+            u::setCurrentThreadName(QStringLiteral("Layout ||"));
             uncancel();
             _waitForPause.notify_all();
             _waitForResume.wait(lock);

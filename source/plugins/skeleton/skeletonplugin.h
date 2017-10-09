@@ -24,7 +24,7 @@ class SkeletonPlugin : public BasePlugin, public PluginInstanceProvider<Skeleton
 public:
     SkeletonPlugin();
 
-    QString name() const { return "Skeleton"; }
+    QString name() const { return QStringLiteral("Skeleton"); }
     QString description() const
     {
         return tr("An example plugin that does nothing. This serves as "
@@ -36,7 +36,7 @@ public:
     QStringList identifyUrl(const QUrl& url) const;
 
     bool editable() const { return true; }
-    QString qmlPath() const { return "qrc:///qml/skeletonplugin.qml"; }
+    QString qmlPath() const { return QStringLiteral("qrc:///qml/skeletonplugin.qml"); }
 };
 
 #endif // SKELETONPLUGIN_H

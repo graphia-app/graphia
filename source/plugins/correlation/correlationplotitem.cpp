@@ -7,9 +7,9 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem
     setRenderTarget(RenderTarget::FramebufferObject);
 
     _customPlot.setOpenGl(true);
-    _customPlot.addLayer("textLayer");
+    _customPlot.addLayer(QStringLiteral("textLayer"));
 
-    _textLayer = _customPlot.layer("textLayer");
+    _textLayer = _customPlot.layer(QStringLiteral("textLayer"));
     _textLayer->setMode(QCPLayer::LayerMode::lmBuffered);
 
     QFont defaultFont10Pt;
@@ -390,7 +390,7 @@ void CorrelationPlotItem::showTooltip()
     _itemTracer->setGraphKey(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
 
     _hoverLabel->setVisible(true);
-    _hoverLabel->setText(QString("%1, %2: %3")
+    _hoverLabel->setText(QStringLiteral("%1, %2: %3")
                      .arg(_hoverPlottable->name(),
                           _labelNames[static_cast<int>(_itemTracer->position->key())])
                      .arg(_itemTracer->position->value()));
@@ -401,11 +401,11 @@ void CorrelationPlotItem::showTooltip()
             _hoverLabel->left->pixelPosition().x();
     auto hoverlabelHeight = _hoverLabel->bottom->pixelPosition().y() -
             _hoverLabel->top->pixelPosition().y();
-    auto hoverLabelRightX = _itemTracer->anchor("position")->pixelPosition().x() +
+    auto hoverLabelRightX = _itemTracer->anchor(QStringLiteral("position"))->pixelPosition().x() +
             hoverlabelWidth + HOVER_MARGIN + COLOR_RECT_WIDTH;
     auto xBounds = clipRect().width();
-    QPointF targetPosition(_itemTracer->anchor("position")->pixelPosition().x() + HOVER_MARGIN,
-                           _itemTracer->anchor("position")->pixelPosition().y());
+    QPointF targetPosition(_itemTracer->anchor(QStringLiteral("position"))->pixelPosition().x() + HOVER_MARGIN,
+                           _itemTracer->anchor(QStringLiteral("position"))->pixelPosition().y());
 
     // If it falls out of bounds, clip to bounds and move label above marker
     if(hoverLabelRightX > xBounds)
@@ -442,11 +442,11 @@ void CorrelationPlotItem::hideTooltip()
 
 void CorrelationPlotItem::savePlotImage(const QUrl& url, const QStringList& extensions)
 {
-    if(extensions.contains("png"))
+    if(extensions.contains(QStringLiteral("png")))
         _customPlot.savePng(url.toLocalFile());
-    else if(extensions.contains("pdf"))
+    else if(extensions.contains(QStringLiteral("pdf")))
         _customPlot.savePdf(url.toLocalFile());
-    else if(extensions.contains("jpg"))
+    else if(extensions.contains(QStringLiteral("jpg")))
         _customPlot.saveJpg(url.toLocalFile());
 
     QDesktopServices::openUrl(url);

@@ -26,7 +26,7 @@ bool GraphMLHandler::endDocument()
        !_activeNodes.empty() || !_activeTemporaryEdges.empty() ||
        !_activeElements.empty())
     {
-        _errorString = "Not all GraphML Elements are terminated. Stack not empty";
+        _errorString = QLatin1String("Not all GraphML Elements are terminated. Stack not empty");
         return false;
     }
 
@@ -37,12 +37,12 @@ bool GraphMLHandler::endDocument()
         auto targetNodeId = _nodeMap.find(tempEdge._target);
         if(sourceNodeId == _nodeMap.end())
         {
-            _errorString = QString("Invalid Edge Source. Edge - Source: %1 Target: %2").arg(tempEdge._source, tempEdge._target);
+            _errorString = QStringLiteral("Invalid Edge Source. Edge - Source: %1 Target: %2").arg(tempEdge._source, tempEdge._target);
             return false;
         }
         if(targetNodeId == _nodeMap.end())
         {
-            _errorString = QString("Invalid Edge Target. Edge - Source: %1 Target: %2").arg(tempEdge._source, tempEdge._target);
+            _errorString = QStringLiteral("Invalid Edge Target. Edge - Source: %1 Target: %2").arg(tempEdge._source, tempEdge._target);
             return false;
         }
         const EdgeId& edgeId = _graph->addEdge(sourceNodeId->second, targetNodeId->second);
@@ -67,12 +67,12 @@ bool GraphMLHandler::endDocument()
 bool GraphMLHandler::startElement(const QString &, const QString &localName, const QString &, const QXmlAttributes &atts)
 {
     // New Edge
-    if(localName == "edge")
+    if(localName == QLatin1String("edge"))
     {
         // Do not parse if nested nodes/edges
         if(!_activeNodes.empty())
         {
-            QString attributes = "";
+            QString attributes = QLatin1String("");
             for(int i = 0; i < atts.count(); ++i)
                 attributes += atts.localName(i) + " " + atts.value(i) + ", ";
 
@@ -84,24 +84,24 @@ bool GraphMLHandler::startElement(const QString &, const QString &localName, con
         _temporaryEdges.push_back({atts.value("source"), atts.value("target")});
         _activeTemporaryEdges.push(&_temporaryEdges.back());
         // Check if id has already been used
-        if(u::contains(_temporaryEdgeMap, atts.value("id")))
+        if(u::contains(_temporaryEdgeMap, atts.value(QStringLiteral("id"))))
         {
-            _errorString = "Edge ID already in use. Edge ID: " + atts.value("id")
+            _errorString = "Edge ID already in use. Edge ID: " + atts.value(QStringLiteral("id"))
                     + " Line: " + QString::number(_locator->lineNumber());
             return false;
         }
-        if(atts.value("id").length() > 0)
-            _temporaryEdgeMap[atts.value("id")] = _temporaryEdges.back();
+        if(atts.value(QStringLiteral("id")).length() > 0)
+            _temporaryEdgeMap[atts.value(QStringLiteral("id"))] = _temporaryEdges.back();
 
 
     }
     // New Node
-    else if(localName == "node")
+    else if(localName == QLatin1String("node"))
     {
         // Do not parse if nested nodes/edges
         if(!_activeTemporaryEdges.empty())
         {
-            QString attributes = "";
+            QString attributes = QLatin1String("");
             for(int i = 0; i < atts.count(); ++i)
                 attributes += atts.localName(i) + " " + atts.value(i) + ", ";
 
@@ -113,33 +113,33 @@ bool GraphMLHandler::startElement(const QString &, const QString &localName, con
         auto nodeId = _graph->addNode();
         _activeNodes.push(nodeId);
         // Check if id has already been used
-        if(u::contains(_nodeMap, atts.value("id")))
+        if(u::contains(_nodeMap, atts.value(QStringLiteral("id"))))
         {
-            _errorString = "Node ID already in use. Node ID: " + atts.value("id")
+            _errorString = "Node ID already in use. Node ID: " + atts.value(QStringLiteral("id"))
                     + " Line: " + QString::number(_locator->lineNumber());
             return false;
         }
-        _nodeMap[atts.value("id")] = _activeNodes.top();
+        _nodeMap[atts.value(QStringLiteral("id"))] = _activeNodes.top();
 
         if(_userNodeData != nullptr)
         {
             _userNodeData->addNodeId(nodeId);
             _userNodeData->setValueByNodeId(nodeId, QObject::tr("Node Name"),
-                                              atts.value("id"));
+                                              atts.value(QStringLiteral("id")));
         }
     }
     // New Attribute Type
-    else if(localName == "key")
+    else if(localName == QLatin1String("key"))
     {
         AttributeKey attributeKey;
-        attributeKey._name = atts.value("attr.name");
-        attributeKey._type = atts.value("attr.type");
+        attributeKey._name = atts.value(QStringLiteral("attr.name"));
+        attributeKey._type = atts.value(QStringLiteral("attr.type"));
 
-        auto key = std::make_pair(atts.value("id"), atts.value("for"));
+        auto key = std::make_pair(atts.value(QStringLiteral("id")), atts.value(QStringLiteral("for")));
         // Check if id has already been used
         if(u::contains(_attributeKeyMap, key))
         {
-            _errorString = "Attribute Key ID already in use. Attribute Key ID: " + atts.value("id")
+            _errorString = "Attribute Key ID already in use. Attribute Key ID: " + atts.value(QStringLiteral("id"))
                     + " Line: " + QString::number(_locator->lineNumber());
             return false;
         }
@@ -148,7 +148,7 @@ bool GraphMLHandler::startElement(const QString &, const QString &localName, con
         _activeAttributeKeys.push(&_attributeKeyMap[key]);
     }
     // Data tags are likely attribute data
-    else if(localName == "data")
+    else if(localName == QLatin1String("data"))
     {
         if(!_activeNodes.empty())
         {
@@ -160,7 +160,7 @@ bool GraphMLHandler::startElement(const QString &, const QString &localName, con
                 return false;
             }
 
-            auto pairKey = std::make_pair(atts.value("key"), "node");
+            auto pairKey = std::make_pair(atts.value(QStringLiteral("key")), "node");
             if(u::contains(_attributeKeyMap, pairKey))
             {
                 auto attributeKey = _attributeKeyMap.at(pairKey);
@@ -168,7 +168,7 @@ bool GraphMLHandler::startElement(const QString &, const QString &localName, con
                 // Set Attribute as active for access later in characters
                 _activeAttributes.push(&_nodeAttributes[attributeKey][_activeNodes.top()]);
             }
-            auto noForPairKey = std::make_pair(atts.value("key"), "");
+            auto noForPairKey = std::make_pair(atts.value(QStringLiteral("key")), "");
             if(u::contains(_attributeKeyMap, noForPairKey))
             {
                 auto attributeKey = _attributeKeyMap.at(noForPairKey);
@@ -185,7 +185,7 @@ bool GraphMLHandler::startElement(const QString &, const QString &localName, con
                 return false;
             }
 
-            auto pairKey = std::make_pair(atts.value("key"), "edge");
+            auto pairKey = std::make_pair(atts.value(QStringLiteral("key")), "edge");
             if(u::contains(_attributeKeyMap, pairKey))
             {
                 auto attributeKey = _attributeKeyMap.at(pairKey);
@@ -193,7 +193,7 @@ bool GraphMLHandler::startElement(const QString &, const QString &localName, con
                 // Set Attribute as active for access later in characters
                 _activeAttributes.push(&_tempEdgeAttributes[attributeKey][*_activeTemporaryEdges.top()]);
             }
-            auto noForPairKey = std::make_pair(atts.value("key"), "");
+            auto noForPairKey = std::make_pair(atts.value(QStringLiteral("key")), "");
             if(u::contains(_attributeKeyMap, noForPairKey))
             {
                 auto attributeKey = _attributeKeyMap.at(noForPairKey);
@@ -211,13 +211,13 @@ bool GraphMLHandler::endElement(const QString &, const QString &localName, const
 {
     (*_progress)(_locator->lineNumber() * 100 / _lineCount );
 
-    if(localName == "node")
+    if(localName == QLatin1String("node"))
         _activeNodes.pop();
-    if(localName == "edge")
+    if(localName == QLatin1String("edge"))
         _activeTemporaryEdges.pop();
-    else if(localName == "key")
+    else if(localName == QLatin1String("key"))
         _activeAttributeKeys.pop();
-    else if(localName == "data" && (!_activeNodes.empty() || !_activeTemporaryEdges.empty()))
+    else if(localName == QLatin1String("data") && (!_activeNodes.empty() || !_activeTemporaryEdges.empty()))
     {
         auto attribute = _activeAttributes.top();
 
@@ -237,12 +237,12 @@ bool GraphMLHandler::endElement(const QString &, const QString &localName, const
 bool GraphMLHandler::characters(const QString &ch)
 {
     // Default tag for Attribute Keys
-    if(_activeElements.top() == "default" && !_activeAttributeKeys.empty())
+    if(_activeElements.top() == QLatin1String("default") && !_activeAttributeKeys.empty())
     {
         _activeAttributeKeys.top()->_default = ch.trimmed();
     }
     // Data value for Attribute
-    else if(_activeElements.top() == "data" && !_activeAttributes.empty())
+    else if(_activeElements.top() == QLatin1String("data") && !_activeAttributes.empty())
     {
         _activeAttributes.top()->_value = ch.trimmed();
     }
@@ -306,7 +306,7 @@ bool GraphMLParser::parse(const QUrl &url, IMutableGraph &graph, const ProgressF
     xmlReader.setErrorHandler(&handler);
     xmlReader.parse(source);
 
-    if(handler.errorString() != "")
+    if(handler.errorString() != QLatin1String(""))
     {
         qDebug() << handler.errorString();
         return false;

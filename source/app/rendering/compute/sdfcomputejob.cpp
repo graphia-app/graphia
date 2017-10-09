@@ -93,7 +93,7 @@ void SDFComputeJob::generateSDF()
     QOpenGLBuffer screenQuadDataBuffer;
     QOpenGLShaderProgram sdfShader;
 
-    ShaderTools::loadShaderProgram(sdfShader, ":/shaders/screen.vert", ":/shaders/sdf.frag");
+    ShaderTools::loadShaderProgram(sdfShader, QStringLiteral(":/shaders/screen.vert"), QStringLiteral(":/shaders/sdf.frag"));
     prepareQuad(screenQuadVAO, screenQuadDataBuffer, sdfShader);
 
     const int scaleFactor = 4;

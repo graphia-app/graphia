@@ -33,7 +33,7 @@ void ParserThread::cancel()
 
 void ParserThread::run()
 {
-    u::setCurrentThreadName("Parser");
+    u::setCurrentThreadName(QStringLiteral("Parser"));
 
     bool result = false;
 
