@@ -1520,7 +1520,7 @@ void Document::update(QStringList newGraphTransforms, QStringList newVisualisati
 
     if(!newGraphTransforms.empty())
     {
-        for(const auto& newGraphTransform : newGraphTransforms)
+        for(const auto& newGraphTransform : qAsConst(newGraphTransforms))
         {
             if(!transformIsPinned(newGraphTransform))
             {

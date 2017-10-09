@@ -33,6 +33,7 @@ void NodeAttributeTableModel::initialise(IDocument* document, UserNodeData* user
 QStringList NodeAttributeTableModel::columnNames() const
 {
     QStringList list;
+    list.reserve(_userNodeData->numUserDataVectors());
 
     for(const auto& userDataVector : *_userNodeData)
         list.append(userDataVector.name());
