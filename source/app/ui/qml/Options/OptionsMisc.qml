@@ -15,6 +15,7 @@ Item
 
         property alias focusFoundNodes: focusFoundNodesCheckbox.checked
         property alias focusFoundComponents: focusFoundComponentsCheckbox.checked
+        property alias disableHubbles: disableHubblesCheckbox.checked
     }
 
     Column
@@ -42,6 +43,12 @@ Item
             {
                 id: focusFoundComponentsCheckbox
                 text: qsTr("Switch To Component Mode When Searching")
+            }
+
+            CheckBox
+            {
+                id: disableHubblesCheckbox
+                text: qsTr("Disable extended help tooltips")
             }
         }
     }

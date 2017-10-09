@@ -3,6 +3,8 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 
+import com.kajeka 1.0
+
 Item
 {
     id: root
@@ -27,6 +29,14 @@ Item
     signal skipClicked()
 
     visible: false
+
+    Preferences
+    {
+        id: misc
+        section: "misc"
+        property var disableHubbles
+    }
+
     opacity: 0.0
     z: 99
 
@@ -47,6 +57,8 @@ Item
 
     onVisibleChanged:
     {
+        if(misc.disableHubbles && hoverEnabled)
+            visible = false;
         if(visible)
         {
             if(target)
@@ -61,7 +73,7 @@ Item
     Timer
     {
         id: hoverTimer
-        interval: 500
+        interval: 1000
         onTriggered: root.visible = true
     }
 
