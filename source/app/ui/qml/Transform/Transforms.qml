@@ -119,17 +119,37 @@ Item
 
     Hubble
     {
-        title: "Add Transform"
+        title: qsTr("Add Transform")
         alignment: Qt.AlignLeft | Qt.AlignBottom
         target: addTransformBtn
         hoverEnabled: true
-        Text
+        RowLayout
         {
-            text: "This will add a transform the graph. \n Transforms can do all kinds of magic"
-        }
-        ToolButton
-        {
-            iconName: "document-open"
+            spacing: 10
+            Column
+            {
+                Image
+                {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    source: "qrc:///imagery/mcl.svg"
+                    mipmap: true
+                    fillMode: Image.PreserveAspectFit
+                    width: 150
+                }
+                Text
+                {
+                    text: qsTr("An MCL transform with a colour<br>visualisation applied")
+                }
+            }
+            Text
+            {
+                textFormat: Text.StyledText
+                text: qsTr("Transforms are a powerful way to modify the graph and calculate additional attributes<br>" +
+                      "They can be used to remove nodes, collapse edges, calculate node metrics and much more<br>" +
+                      "Existing transforms will appear above <b>Add Transform</b><br><br>" +
+                      "Click <b>Add Transform</b> to bring up the add transform dialog<br>" +
+                      "Each attribute added to graph will also add a Visualisation<br>")
+            }
         }
     }
 }

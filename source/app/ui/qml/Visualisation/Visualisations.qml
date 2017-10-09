@@ -59,6 +59,7 @@ Item
             ButtonMenu
             {
                 visible: !visualisationSummaryText.visible
+                id: addVisualisationBtn
                 text: qsTr("Add Visualisation")
 
                 textColor: enabled ? enabledTextColor : disabledTextColor
@@ -118,6 +119,41 @@ Item
                 alignment: Qt.AlignRight
 
                 onItemMoved: { document.moveVisualisation(from, to); }
+            }
+        }
+    }
+
+    Hubble
+    {
+        title: qsTr("Add Visualisation")
+        alignment: Qt.AlignLeft | Qt.AlignTop
+        target: addVisualisationBtn
+        hoverEnabled: true
+        RowLayout
+        {
+            spacing: 10
+            Column
+            {
+                Image
+                {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    source: "qrc:///imagery/visualisations.svg"
+                    mipmap: true
+                    fillMode: Image.PreserveAspectFit
+                    width: 200
+                }
+                Text
+                {
+                    text: qsTr("A graph with Colour, Size and Text <br>visualisations applied")
+                }
+            }
+            Text
+            {
+                textFormat: Text.StyledText
+                text: qsTr("Visualisations modify the appearance of the Graph depending on attributes<br>" +
+                      "<b>Node Colour</b>, <b>Size</b> and <b>Text</b> can all be linked to an attribute<br>" +
+                      "Existing visualisations can be modified from here and new ones added<br>" +
+                      "Click <b>Add Visualisation</b> to bring up the add visualisation dialog")
             }
         }
     }

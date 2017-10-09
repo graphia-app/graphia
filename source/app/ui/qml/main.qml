@@ -1240,7 +1240,7 @@ ApplicationWindow
             ToolButton { action: fileOpenInTabAction }
             ToolButton { action: fileSaveAction }
             ToolBarSeparator {}
-            ToolButton { action: pauseLayoutAction }
+            ToolButton { id: pauseLayoutBtn; action: pauseLayoutAction }
             ToolBarSeparator {}
             ToolButton { action: deleteAction }
             ToolButton { action: findAction }
@@ -1485,6 +1485,33 @@ ApplicationWindow
 
             // Hack to force the RowLayout height to be the maximum of its children
             Rectangle { height: rowLayout.childrenRect.height }
+        }
+    }
+
+    Hubble
+    {
+        title: qsTr("Resume/Pause Layout")
+        alignment: Qt.AlignRight | Qt.AlignBottom
+        target: pauseLayoutBtn
+        hoverEnabled: true
+        RowLayout
+        {
+            spacing: 10
+            Column
+            {
+                ToolButton { iconName: "media-playback-start" }
+                ToolButton { iconName: "media-playback-stop" }
+                ToolButton { iconName: "media-playback-pause" }
+            }
+            Text
+            {
+                textFormat: Text.StyledText
+                text: qsTr("The Graph layout system can be resumed or paused from here.<br>" +
+                      "The layout system uses a <b>force-directed</b> model to position nodes within <br>" +
+                      "the graph. This improves the graphs visual navigability<br><br>" +
+                      "The layout system will be automatically stopped if the layout is not deemed to be<br>" +
+                      "improving the layout anymore<br>");
+            }
         }
     }
 
