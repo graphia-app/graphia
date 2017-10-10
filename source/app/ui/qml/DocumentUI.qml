@@ -97,7 +97,8 @@ Item
     property var selectPreviousFoundAction: find.selectPreviousAction
     property var selectNextFoundAction: find.selectNextAction
 
-    property bool saveRequired: !hasBeenSaved || document.saveRequired || plugin.saveRequired
+    property bool saveRequired: document.loadComplete &&
+        (!hasBeenSaved || document.saveRequired || plugin.saveRequired)
 
     property int numNodesSelected: document.numNodesSelected
 

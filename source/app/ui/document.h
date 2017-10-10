@@ -52,6 +52,7 @@ class Document : public QObject, public IDocument
 
     Q_PROPERTY(QString title MEMBER _title WRITE setTitle NOTIFY titleChanged)
     Q_PROPERTY(QString status MEMBER _status WRITE setStatus NOTIFY statusChanged)
+    Q_PROPERTY(bool loadComplete MEMBER _loadComplete NOTIFY loadComplete)
 
     Q_PROPERTY(bool idle READ idle NOTIFY idleChanged)
     Q_PROPERTY(bool editable READ editable NOTIFY editableChanged)
