@@ -34,7 +34,7 @@ Item
     {
         id: misc
         section: "misc"
-        property var disableHubbles
+        property bool disableHubbles
     }
 
     opacity: 0.0
