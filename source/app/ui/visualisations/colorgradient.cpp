@@ -26,9 +26,9 @@ ColorGradient::ColorGradient(const QString& descriptor)
     }
 
     auto jsonObject = jsonDocument.object();
-    auto keys = jsonObject.keys();
+    const auto keys = jsonObject.keys();
 
-    for(const auto& key : qAsConst(keys))
+    for(const auto& key : keys)
     {
         auto value = key.toDouble();
         auto colorString = jsonObject.value(key).toString();

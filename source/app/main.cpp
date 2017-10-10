@@ -173,7 +173,8 @@ int main(int argc, char *argv[])
     c.onCrash([](const QString& directory)
     {
         // Take screenshots of all the open windows
-        for(auto* window : QGuiApplication::allWindows())
+        const auto windows = QGuiApplication::allWindows();
+        for(auto* window : windows)
         {
             if(!window->isVisible())
                 continue;
