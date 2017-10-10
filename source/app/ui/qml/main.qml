@@ -406,6 +406,12 @@ ApplicationWindow
         if(parametersQmlPath.length > 0)
         {
             var component = Qt.createComponent(parametersQmlPath);
+            if(component.status !== Component.Ready)
+            {
+                console.log(component.errorString());
+                return;
+            }
+
             var contentObject = component.createObject(this);
             if(contentObject === null)
             {
