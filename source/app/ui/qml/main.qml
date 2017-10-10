@@ -1498,7 +1498,7 @@ ApplicationWindow
         title: qsTr("Resume/Pause Layout")
         alignment: Qt.AlignRight | Qt.AlignBottom
         target: pauseLayoutBtn
-        hoverEnabled: true
+        tooltipMode: true
         RowLayout
         {
             spacing: 10

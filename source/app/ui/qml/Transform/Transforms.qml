@@ -122,7 +122,7 @@ Item
         title: qsTr("Add Transform")
         alignment: Qt.AlignLeft | Qt.AlignBottom
         target: addTransformBtn
-        hoverEnabled: true
+        tooltipMode: true
         RowLayout
         {
             spacing: 10

@@ -128,7 +128,7 @@ Item
         title: qsTr("Add Visualisation")
         alignment: Qt.AlignLeft | Qt.AlignTop
         target: addVisualisationBtn
-        hoverEnabled: true
+        tooltipMode: true
         RowLayout
         {
             spacing: 10

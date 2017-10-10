@@ -18,7 +18,7 @@ Item
     property int alignment: Qt.AlignLeft
     property bool displayNext: false
     property bool displayClose: false
-    property bool hoverEnabled: false
+    property bool tooltipMode: false
     property Item _mouseCapture
 
     height: backRectangle.height
@@ -57,7 +57,7 @@ Item
 
     onVisibleChanged:
     {
-        if(misc.disableHubbles && hoverEnabled)
+        if(misc.disableHubbles && tooltipMode)
             visible = false;
         if(visible)
         {
@@ -165,7 +165,7 @@ Item
     {
         if(target !== undefined && target !== null)
         {
-            if(hoverEnabled)
+            if(tooltipMode)
             {
                 // Use targets hoverChanged signal
                 if(target.hoveredChanged !== undefined)
