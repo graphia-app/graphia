@@ -118,6 +118,8 @@ void CorrelationPlotItem::wheelEvent(QWheelEvent* event)
 
 void CorrelationPlotItem::buildPlot()
 {
+    _customPlot.legend->setVisible(false);
+
     // If the legend is not cleared first this will cause a slowdown
     // when removing a large number of graphs
     _customPlot.legend->clear();
@@ -132,7 +134,10 @@ void CorrelationPlotItem::buildPlot()
     if(_selectedRows.length() > MAX_SELECTED_ROWS_BEFORE_MEAN)
         populateMeanAveragePlot();
     else
-        populateRawPlot();
+        populatePlot();
+
+    if(_customPlot.graphCount() > 0)
+        _customPlot.legend->setVisible(_showLegend);
 
     QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
     _customPlot.xAxis->setTicker(categoryTicker);
@@ -182,6 +187,18 @@ void CorrelationPlotItem::buildPlot()
     _customPlot.setBackground(Qt::white);
 }
 
+void CorrelationPlotItem::setPlotScaleType(const int &plotScaleType)
+{
+    _plotScaleType = plotScaleType;
+    refresh();
+}
+
+void CorrelationPlotItem::setShowLegend(bool showLegend)
+{
+    _showLegend = showLegend;
+    refresh();
+}
+
 void CorrelationPlotItem::populateMeanAveragePlot()
 {
     double maxY = 0.0;
@@ -229,7 +246,7 @@ void CorrelationPlotItem::populateMeanAveragePlot()
     _customPlot.yAxis->setRange(minY, maxY);
 }
 
-void CorrelationPlotItem::populateRawPlot()
+void CorrelationPlotItem::populatePlot()
 {
     double maxY = 0.0;
     double minY = 0.0;
@@ -247,14 +264,62 @@ void CorrelationPlotItem::populateRawPlot()
         yData.clear();
         xData.clear();
 
+        double rowMean = 0;
+
         for(size_t col = 0; col < _columnCount; col++)
         {
             auto index = (row * _columnCount) + col;
-            xData.append(static_cast<double>(col));
-            yData.append(_data[static_cast<int>(index)]);
+            rowMean += _data[static_cast<int>(index)];
+        }
+        rowMean /= _columnCount;
 
-            maxY = std::max(maxY, _data[static_cast<int>(index)]);
-            minY = std::min(minY, _data[static_cast<int>(index)]);
+        double stdDev = 0;
+        for(size_t col = 0; col < _columnCount; col++)
+        {
+            auto index = (row * _columnCount) + col;
+            stdDev += (_data[static_cast<int>(index)] - rowMean) *
+                    (_data[static_cast<int>(index)] - rowMean);
+        }
+        stdDev /= _columnCount;
+        stdDev = std::sqrt(stdDev);
+        double pareto = std::sqrt(stdDev);
+
+        for(size_t col = 0; col < _columnCount; col++)
+        {
+            auto index = (row * _columnCount) + col;
+            auto data = _data[static_cast<int>(index)];
+            switch(static_cast<PlotScaleType>(_plotScaleType))
+            {
+            case PlotScaleType::Log:
+            {
+                // LogY(x+c) where c is EPSILON
+                // This prevents LogY(0) which is -inf
+                // Log2(0+c) = -1057
+                // Document this!
+                const double EPSILON = std::nextafter(0.0, 1.0);
+                data = std::log(data + EPSILON);
+            }
+                break;
+            case PlotScaleType::MeanCentre:
+                data -= rowMean;
+                break;
+            case PlotScaleType::UnitVariance:
+                data -= rowMean;
+                data /= stdDev;
+                break;
+            case PlotScaleType::Pareto:
+                data -= rowMean;
+                data /= pareto;
+                break;
+            default:
+                break;
+            }
+
+            xData.append(static_cast<double>(col));
+            yData.append(data);
+
+            maxY = std::max(maxY, data);
+            minY = std::min(minY, data);
         }
         graph->setData(xData, yData, true);
     }
@@ -304,6 +369,14 @@ void CorrelationPlotItem::setShowColumnNames(bool showColumnNames)
         emit rangeSizeChanged();
         refresh();
     }
+}
+
+void CorrelationPlotItem::setShowGridLines(bool showGridLines)
+{
+    _showGridLines = showGridLines;
+    _customPlot.xAxis->grid()->setVisible(_showGridLines);
+    _customPlot.yAxis->grid()->setVisible(_showGridLines);
+    refresh();
 }
 
 void CorrelationPlotItem::setScrollAmount(double scrollAmount)

@@ -1,6 +1,8 @@
 #ifndef CORRELATIONPLOTITEM_H
 #define CORRELATIONPLOTITEM_H
 
+#include "shared/utils/qmlenum.h"
+
 #include "thirdparty/qcustomplot/qcustomplot_disable_warnings.h"
 #include "thirdparty/qcustomplot/qcustomplot.h"
 #include "thirdparty/qcustomplot/qcustomplot_enable_warnings.h"
@@ -9,6 +11,13 @@
 #include <QVector>
 #include <QStringList>
 #include <QVector>
+
+DEFINE_QML_ENUM(Q_GADGET, PlotScaleType,
+                Raw,
+                Log,
+                MeanCentre,
+                UnitVariance,
+                Pareto);
 
 class CorrelationPlotItem : public QQuickPaintedItem
 {
@@ -24,12 +33,17 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(size_t rowCount MEMBER _rowCount)
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
     Q_PROPERTY(bool showColumnNames MEMBER _showColumnNames WRITE setShowColumnNames)
+    Q_PROPERTY(bool showGridLines MEMBER _showGridLines WRITE setShowGridLines)
+    Q_PROPERTY(bool showLegend MEMBER _showLegend WRITE setShowLegend)
+    Q_PROPERTY(int plotScaleType MEMBER _plotScaleType WRITE setPlotScaleType)
 
 public:
     explicit CorrelationPlotItem(QQuickItem* parent = nullptr);
     void paint(QPainter* painter);
 
     Q_INVOKABLE void savePlotImage(const QUrl& url, const QStringList& extensions);
+
+    void setPlotScaleType(const int &plotScaleType);
 
 protected:
     void routeMouseEvent(QMouseEvent* event);
@@ -66,10 +80,13 @@ private:
     QVector<int> _selectedRows;
     QVector<QColor> _rowColors;
     bool _showColumnNames = true;
+    bool _showGridLines = true;
+    bool _showLegend = true;
+    int _plotScaleType = static_cast<int>(PlotScaleType::Raw);
     double _scrollAmount = 0.0f;
 
     void populateMeanAveragePlot();
-    void populateRawPlot();
+    void populatePlot();
 
 public:
     Q_INVOKABLE void refresh();
@@ -81,9 +98,12 @@ private:
     void setElideLabelWidth(int elideLabelWidth);
     void setColumnCount(size_t columnCount);
     void setShowColumnNames(bool showColumnNames);
+    void setShowGridLines(bool showGridLines);
+    void setShowLegend(bool showLegend);
     void setScrollAmount(double scrollAmount);
 
     void scaleXAxis();
+
     double rangeSize();
     double columnLabelSize();
     double columnAxisWidth();

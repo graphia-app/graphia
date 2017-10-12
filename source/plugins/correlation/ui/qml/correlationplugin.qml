@@ -59,6 +59,74 @@ PluginContent
 
     Action
     {
+        id: toggleGridLines
+        text: qsTr("&Grid Lines")
+        checkable: true
+        checked: plot.showGridLines
+
+        onTriggered: { plot.showGridLines = !plot.showGridLines; }
+    }
+
+    Action
+    {
+        id: togglePlotLegend
+        text: qsTr("&Legend")
+        checkable: true
+        checked: plot.showLegend
+
+        onTriggered: { plot.showLegend = !plot.showLegend; }
+    }
+
+    ExclusiveGroup
+    {
+        Action
+        {
+            id: rawScaling
+            text: qsTr("&Raw")
+            checkable: true
+            checked: plot.plotScaleType === PlotScaleType.Raw
+            onTriggered: { plot.plotScaleType = PlotScaleType.Raw; }
+        }
+
+        Action
+        {
+            id: logScaling
+            text:  qsTr("Log(𝒙 + ε)");
+            checkable: true
+            checked: plot.plotScaleType === PlotScaleType.Log
+            onTriggered: { plot.plotScaleType = PlotScaleType.Log; }
+        }
+
+        Action
+        {
+            id: meanCentreScaling
+            text: qsTr("&Mean Centre Scaling")
+            checkable: true
+            checked: plot.plotScaleType === PlotScaleType.MeanCentre
+            onTriggered: { plot.plotScaleType = PlotScaleType.MeanCentre; }
+        }
+
+        Action
+        {
+            id: unitVarianceScaling
+            text: qsTr("&Unit Varience Scaling")
+            checkable: true
+            checked: plot.plotScaleType === PlotScaleType.UnitVariance
+            onTriggered: { plot.plotScaleType = PlotScaleType.UnitVariance; }
+        }
+
+        Action
+        {
+            id: paretoScaling
+            text: qsTr("&Pareto Scaling")
+            checkable: true
+            checked: plot.plotScaleType === PlotScaleType.Pareto
+            onTriggered: { plot.plotScaleType = PlotScaleType.Pareto; }
+        }
+    }
+
+    Action
+    {
         id: savePlotImageAction
         text: qsTr("Save As &Image…")
         iconName: "edit-save"
@@ -77,6 +145,14 @@ PluginContent
             menu.title = qsTr("&Plot");
             menu.addItem("").action = toggleColumnNamesAction;
             menu.addItem("").action = savePlotImageAction;
+            menu.addItem("").action = toggleGridLines;
+            menu.addItem("").action = togglePlotLegend;
+            var scalingMenu = menu.addMenu("Scaling");
+            scalingMenu.addItem("").action = rawScaling;
+            scalingMenu.addItem("").action = logScaling;
+            scalingMenu.addItem("").action = meanCentreScaling;
+            scalingMenu.addItem("").action = unitVarianceScaling;
+            scalingMenu.addItem("").action = paretoScaling;
 
             Utils.cloneMenu(menu, plotContextMenu);
             return true;
