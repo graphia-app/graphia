@@ -33,9 +33,9 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(size_t rowCount MEMBER _rowCount)
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
     Q_PROPERTY(bool showColumnNames MEMBER _showColumnNames WRITE setShowColumnNames)
-    Q_PROPERTY(bool showGridLines MEMBER _showGridLines WRITE setShowGridLines)
-    Q_PROPERTY(bool showLegend MEMBER _showLegend WRITE setShowLegend)
-    Q_PROPERTY(int plotScaleType MEMBER _plotScaleType WRITE setPlotScaleType)
+    Q_PROPERTY(bool showGridLines MEMBER _showGridLines WRITE setShowGridLines NOTIFY plotOptionsChanged)
+    Q_PROPERTY(bool showLegend MEMBER _showLegend WRITE setShowLegend NOTIFY plotOptionsChanged)
+    Q_PROPERTY(int plotScaleType MEMBER _plotScaleType WRITE setPlotScaleType NOTIFY plotOptionsChanged)
 
 public:
     explicit CorrelationPlotItem(QQuickItem* parent = nullptr);
@@ -118,5 +118,6 @@ signals:
     void rightClick();
     void scrollAmountChanged();
     void rangeSizeChanged();
+    void plotOptionsChanged();
 };
 #endif // CORRELATIONPLOTITEM_H
