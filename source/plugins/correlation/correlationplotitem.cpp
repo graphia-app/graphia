@@ -249,6 +249,9 @@ void CorrelationPlotItem::populateMeanLinePlot()
 
 void CorrelationPlotItem::populateMeanHistogramPlot()
 {
+    if (_selectedRows.size() == 0)
+        return;
+
     double maxY = 0.0;
     double minY = 0.0;
 
