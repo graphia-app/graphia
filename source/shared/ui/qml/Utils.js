@@ -282,13 +282,16 @@ function cloneMenu(from, to)
             }
         });
 
-        toItem.triggered.connect(function(fromItem)
+        if(toItem.triggered !== undefined)
         {
-            return function()
+            toItem.triggered.connect(function(fromItem)
             {
-                fromItem.trigger();
-            };
-        }(fromItem));
+                return function()
+                {
+                    fromItem.trigger();
+                };
+            }(fromItem));
+        }
     }
 }
 
