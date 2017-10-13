@@ -85,7 +85,8 @@ PluginContent
             text: qsTr("&Raw")
             checkable: true
             checked: plot.plotScaleType === PlotScaleType.Raw
-            onTriggered: { plot.plotScaleType = PlotScaleType.Raw; }
+            onTriggered: { plot.plotScaleType = PlotScaleType.Raw;
+            }
         }
 
         Action
@@ -125,6 +126,46 @@ PluginContent
         }
     }
 
+    ExclusiveGroup
+    {
+        Action
+        {
+            id: individualLineAverage
+            text: qsTr("&Individual Line")
+            checkable: true
+            checked: plot.plotAveragingType === PlotAveragingType.Individual
+            onTriggered: { plot.plotAveragingType = PlotAveragingType.Individual;
+            }
+        }
+
+        Action
+        {
+            id: meanLineAverage
+            text:  qsTr("&Mean Line");
+            checkable: true
+            checked: plot.plotAveragingType === PlotAveragingType.MeanLine
+            onTriggered: { plot.plotAveragingType = PlotAveragingType.MeanLine; }
+        }
+
+        Action
+        {
+            id: medianLineAverage
+            text: qsTr("&Median Line")
+            checkable: true
+            checked: plot.plotAveragingType === PlotAveragingType.MedianLine
+            onTriggered: { plot.plotAveragingType = PlotAveragingType.MedianLine; }
+        }
+
+        Action
+        {
+            id: meanHistogramAverage
+            text: qsTr("&Mean Histogram")
+            checkable: true
+            checked: plot.plotAveragingType === PlotAveragingType.MeanHistogram
+            onTriggered: { plot.plotAveragingType = PlotAveragingType.MeanHistogram; }
+        }
+    }
+
     Action
     {
         id: savePlotImageAction
@@ -147,12 +188,19 @@ PluginContent
             menu.addItem("").action = savePlotImageAction;
             menu.addItem("").action = toggleGridLines;
             menu.addItem("").action = togglePlotLegend;
+
             var scalingMenu = menu.addMenu("Scaling");
             scalingMenu.addItem("").action = rawScaling;
             scalingMenu.addItem("").action = logScaling;
             scalingMenu.addItem("").action = meanCentreScaling;
             scalingMenu.addItem("").action = unitVarianceScaling;
             scalingMenu.addItem("").action = paretoScaling;
+
+            var averagingMenu = menu.addMenu("Averaging");
+            averagingMenu.addItem("").action = individualLineAverage;
+            averagingMenu.addItem("").action = meanLineAverage;
+            averagingMenu.addItem("").action = medianLineAverage;
+            averagingMenu.addItem("").action = meanHistogramAverage;
 
             Utils.cloneMenu(menu, plotContextMenu);
             return true;

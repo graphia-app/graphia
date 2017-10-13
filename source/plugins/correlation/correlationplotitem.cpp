@@ -124,6 +124,7 @@ void CorrelationPlotItem::buildPlot()
     // when removing a large number of graphs
     _customPlot.legend->clear();
     _customPlot.clearGraphs();
+    _customPlot.clearPlottables();
 
     while(_customPlot.plotLayout()->rowCount() > 1)
     {
@@ -131,12 +132,16 @@ void CorrelationPlotItem::buildPlot()
         _customPlot.plotLayout()->simplify();
     }
 
-    if(_selectedRows.length() > MAX_SELECTED_ROWS_BEFORE_MEAN)
-        populateMeanAveragePlot();
+    auto plotAveragingType = static_cast<PlotAveragingType>(_plotAveragingType);
+    if(plotAveragingType == PlotAveragingType::MeanLine ||
+            _selectedRows.length() > MAX_SELECTED_ROWS_BEFORE_MEAN)
+        populateMeanLinePlot();
+    else if(plotAveragingType == PlotAveragingType::MeanHistogram)
+        populateMeanHistogramPlot();
     else
-        populatePlot();
+        populateLinePlot();
 
-    if(_customPlot.graphCount() > 0)
+    if(_customPlot.graphCount() > 0 || _customPlot.plottableCount() > 0)
         _customPlot.legend->setVisible(_showLegend);
 
     QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
@@ -193,13 +198,19 @@ void CorrelationPlotItem::setPlotScaleType(const int &plotScaleType)
     refresh();
 }
 
+void CorrelationPlotItem::setPlotAveragingType(const int &plotAveragingType)
+{
+    _plotAveragingType = plotAveragingType;
+    refresh();
+}
+
 void CorrelationPlotItem::setShowLegend(bool showLegend)
 {
     _showLegend = showLegend;
     refresh();
 }
 
-void CorrelationPlotItem::populateMeanAveragePlot()
+void CorrelationPlotItem::populateMeanLinePlot()
 {
     double maxY = 0.0;
     double minY = 0.0;
@@ -208,24 +219,13 @@ void CorrelationPlotItem::populateMeanAveragePlot()
     graph->setPen(QPen(Qt::black));
     graph->setName(tr("Mean average of selection"));
 
-    // Use Average Calculation
-    QVector<double> yDataAvg; yDataAvg.reserve(_selectedRows.size());
-    QVector<double> xData; xData.reserve(static_cast<int>(_columnCount));
+    QVector<double> xData(static_cast<int>(_columnCount));
+    // xData is just the column indecides
+    std::iota(std::begin(xData), std::end(xData), 0);
 
-    for(size_t col = 0; col < _columnCount; col++)
-    {
-        double runningTotal = 0.0;
-        for(auto row : qAsConst(_selectedRows))
-        {
-            auto index = (row * _columnCount) + col;
-            runningTotal += _data[static_cast<int>(index)];
-        }
-        xData.append(static_cast<double>(col));
-        yDataAvg.append(runningTotal / _selectedRows.length());
+    // Use Average Calculation and set min / max
+    QVector<double> yDataAvg = meanAverageData(minY, maxY);
 
-        maxY = std::max(maxY, yDataAvg.back());
-        minY = std::min(minY, yDataAvg.back());
-    }
     graph->setData(xData, yDataAvg, true);
 
     auto* plotModeTextElement = new QCPTextElement(&_customPlot);
@@ -246,7 +246,41 @@ void CorrelationPlotItem::populateMeanAveragePlot()
     _customPlot.yAxis->setRange(minY, maxY);
 }
 
-void CorrelationPlotItem::populatePlot()
+
+void CorrelationPlotItem::populateMeanHistogramPlot()
+{
+    double maxY = 0.0;
+    double minY = 0.0;
+
+    QVector<double> xData(static_cast<int>(_columnCount));
+    // xData is just the column indecides
+    std::iota(std::begin(xData), std::end(xData), 0);
+
+    // Use Average Calculation and set min / max
+    QVector<double> yDataAvg = meanAverageData(minY, maxY);
+
+    QCPBars *histogramBars = new QCPBars(_customPlot.xAxis, _customPlot.yAxis);
+    histogramBars->setName(tr("Mean histogram of selection"));
+    histogramBars->setData(xData, yDataAvg, true);
+
+    auto* plotModeTextElement = new QCPTextElement(&_customPlot);
+    plotModeTextElement->setLayer(_textLayer);
+    plotModeTextElement->setTextFlags(Qt::AlignLeft);
+    plotModeTextElement->setFont(_defaultFont9Pt);
+    plotModeTextElement->setTextColor(Qt::gray);
+    plotModeTextElement->setText(
+        QString(tr("*Mean histogram of %1 rows"))
+                .arg(_selectedRows.length()));
+    plotModeTextElement->setVisible(true);
+
+    _customPlot.plotLayout()->insertRow(1);
+    _customPlot.plotLayout()->addElement(1, 0, plotModeTextElement);
+
+    scaleXAxis();
+    _customPlot.yAxis->setRange(minY, maxY);
+}
+
+void CorrelationPlotItem::populateLinePlot()
 {
     double maxY = 0.0;
     double minY = 0.0;
@@ -407,6 +441,32 @@ void CorrelationPlotItem::scaleXAxis()
     }
 }
 
+QVector<double> CorrelationPlotItem::meanAverageData(double &min, double &max)
+{
+    min = 0.0f;
+    max = 0.0f;
+
+    // Use Average Calculation
+    QVector<double> yDataAvg; yDataAvg.reserve(_selectedRows.size());
+    QVector<double> xData; xData.reserve(static_cast<int>(_columnCount));
+
+    for(size_t col = 0; col < _columnCount; col++)
+    {
+        double runningTotal = 0.0;
+        for(auto row : qAsConst(_selectedRows))
+        {
+            auto index = (row * _columnCount) + col;
+            runningTotal += _data[static_cast<int>(index)];
+        }
+        xData.append(static_cast<double>(col));
+        yDataAvg.append(runningTotal / _selectedRows.length());
+
+        max = std::max(max, yDataAvg.back());
+        min = std::min(min, yDataAvg.back());
+    }
+    return yDataAvg;
+}
+
 double CorrelationPlotItem::rangeSize()
 {
     if(_showColumnNames)
@@ -454,13 +514,20 @@ void CorrelationPlotItem::updatePlotSize()
 
 void CorrelationPlotItem::showTooltip()
 {
-    auto graph = dynamic_cast<QCPGraph*>(_hoverPlottable);
-    Q_ASSERT(graph != nullptr);
+    _itemTracer->setGraph(nullptr);
+    if(auto graph = dynamic_cast<QCPGraph*>(_hoverPlottable))
+    {
+        _itemTracer->setGraph(graph);
+        _itemTracer->setGraphKey(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
+    }
+    else if (auto bars = dynamic_cast<QCPBars*>(_hoverPlottable))
+    {
+        auto xCoord = _customPlot.xAxis->pixelToCoord(_hoverPoint.x()) + 0.5f;
+        _itemTracer->position->setPixelPosition(bars->dataPixelPosition(xCoord));
+    }
 
-    _itemTracer->setGraph(graph);
     _itemTracer->setVisible(true);
     _itemTracer->setInterpolating(false);
-    _itemTracer->setGraphKey(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
 
     _hoverLabel->setVisible(true);
     _hoverLabel->setText(QStringLiteral("%1, %2: %3")

@@ -19,6 +19,12 @@ DEFINE_QML_ENUM(Q_GADGET, PlotScaleType,
                 UnitVariance,
                 Pareto);
 
+DEFINE_QML_ENUM(Q_GADGET, PlotAveragingType,
+                Individual,
+                MeanLine,
+                MedianLine,
+                MeanHistogram);
+
 class CorrelationPlotItem : public QQuickPaintedItem
 {
     Q_OBJECT
@@ -36,6 +42,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(bool showGridLines MEMBER _showGridLines WRITE setShowGridLines NOTIFY plotOptionsChanged)
     Q_PROPERTY(bool showLegend MEMBER _showLegend WRITE setShowLegend NOTIFY plotOptionsChanged)
     Q_PROPERTY(int plotScaleType MEMBER _plotScaleType WRITE setPlotScaleType NOTIFY plotOptionsChanged)
+    Q_PROPERTY(int plotAveragingType MEMBER _plotAveragingType WRITE setPlotAveragingType NOTIFY plotOptionsChanged)
 
 public:
     explicit CorrelationPlotItem(QQuickItem* parent = nullptr);
@@ -44,6 +51,7 @@ public:
     Q_INVOKABLE void savePlotImage(const QUrl& url, const QStringList& extensions);
 
     void setPlotScaleType(const int &plotScaleType);
+    void setPlotAveragingType(const int &plotAveragingType);
 
 protected:
     void routeMouseEvent(QMouseEvent* event);
@@ -83,10 +91,12 @@ private:
     bool _showGridLines = true;
     bool _showLegend = true;
     int _plotScaleType = static_cast<int>(PlotScaleType::Raw);
+    int _plotAveragingType = static_cast<int>(PlotAveragingType::Individual);
     double _scrollAmount = 0.0f;
 
-    void populateMeanAveragePlot();
-    void populatePlot();
+    void populateMeanLinePlot();
+    void populateLinePlot();
+    void populateMeanHistogramPlot();
 
 public:
     Q_INVOKABLE void refresh();
@@ -103,6 +113,7 @@ private:
     void setScrollAmount(double scrollAmount);
 
     void scaleXAxis();
+    QVector<double> meanAverageData(double &min, double &max);
 
     double rangeSize();
     double columnLabelSize();
