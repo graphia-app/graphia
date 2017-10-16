@@ -292,14 +292,14 @@ void Auth::parseAuthToken()
 
     auto encrypted = hexToString(authToken.toStdString());
 
-    std::string aesKeyAndEncryptedExpiryTime;
+    std::string aesKeyAndEncryptedAuthToken;
     try
     {
         C::RSA::PublicKey publicKey = loadPublicKey();
         C::RSASSA_PKCS1v15_SHA_Verifier rsaVerifier(publicKey);
         C::StringSource ss(encrypted, true,
             new C::SignatureVerificationFilter(
-                rsaVerifier, new C::StringSink(aesKeyAndEncryptedExpiryTime),
+                rsaVerifier, new C::StringSink(aesKeyAndEncryptedAuthToken),
                 C::SignatureVerificationFilter::SIGNATURE_AT_BEGIN |
                 C::SignatureVerificationFilter::PUT_MESSAGE |
                 C::SignatureVerificationFilter::THROW_EXCEPTION
@@ -309,27 +309,27 @@ void Auth::parseAuthToken()
     }
     catch(C::SignatureVerificationFilter::SignatureVerificationFailed)
     {
-        // If we key here, then someone is trying to manipulate the auth token
+        // If we get here, then someone is trying to manipulate the auth token
         return;
     }
 
-    Auth::AesKey aesKey(aesKeyAndEncryptedExpiryTime.c_str());
+    Auth::AesKey aesKey(aesKeyAndEncryptedAuthToken.c_str());
 
-    auto encryptedAuthToken = aesKeyAndEncryptedExpiryTime.substr(sizeof(aesKey._aes) + sizeof(aesKey._iv));
+    auto encryptedAuthToken = aesKeyAndEncryptedAuthToken.substr(sizeof(aesKey._aes) + sizeof(aesKey._iv));
     auto decryptedAuthToken = aesDecryptString(encryptedAuthToken, aesKey);
 
-    auto jsonObject = QJsonDocument::fromJson(decryptedAuthToken.data()).object();
+    auto autoTokenJson = QJsonDocument::fromJson(decryptedAuthToken.data()).object();
 
-    if(jsonObject.contains(QStringLiteral("issueTime")))
-        _issueTime = jsonObject[QStringLiteral("issueTime")].toInt();
+    if(autoTokenJson.contains(QStringLiteral("issueTime")))
+        _issueTime = autoTokenJson[QStringLiteral("issueTime")].toInt();
 
-    if(jsonObject.contains(QStringLiteral("expiryTime")))
-        _expiryTime = jsonObject[QStringLiteral("expiryTime")].toInt();
+    if(autoTokenJson.contains(QStringLiteral("expiryTime")))
+        _expiryTime = autoTokenJson[QStringLiteral("expiryTime")].toInt();
 
-    if(jsonObject.contains(QStringLiteral("allowedPlugins")))
+    if(autoTokenJson.contains(QStringLiteral("allowedPlugins")))
     {
         _allowedPluginRegexps.clear();
-        auto value = jsonObject[QStringLiteral("allowedPlugins")].toArray();
+        auto value = autoTokenJson[QStringLiteral("allowedPlugins")].toArray();
         for(const auto& v : value)
             _allowedPluginRegexps.emplace_back(v.toString());
     }
