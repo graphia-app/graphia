@@ -285,7 +285,7 @@ function cloneMenu(from, to)
 
         // Store a list of ExclusiveGroups so that we can recreate them
         // in the target menu, later
-        if(fromItem.exclusiveGroup !== null)
+        if(fromItem.exclusiveGroup !== undefined && fromItem.exclusiveGroup !== null)
         {
             var key = fromItem.exclusiveGroup.toString();
 
