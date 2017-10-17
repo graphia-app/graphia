@@ -136,10 +136,21 @@ void CorrelationPlotItem::buildPlot()
     if(plotAveragingType == PlotAveragingType::MeanLine ||
             _selectedRows.length() > MAX_SELECTED_ROWS_BEFORE_MEAN)
         populateMeanLinePlot();
+    else if(plotAveragingType == PlotAveragingType::MedianLine)
+        populateMedianLinePlot();
     else if(plotAveragingType == PlotAveragingType::MeanHistogram)
         populateMeanHistogramPlot();
     else
         populateLinePlot();
+
+    auto plotDeviationType = static_cast<PlotDeviationType>(_plotDeviationType);
+    if(plotAveragingType != PlotAveragingType::Individual)
+    {
+        if(plotDeviationType == PlotDeviationType::StdDev)
+            populateStdDevPlot();
+        else if(plotDeviationType == PlotDeviationType::StdErr)
+            populateStdErrorPlot();
+    }
 
     if(_customPlot.graphCount() > 0 || _customPlot.plottableCount() > 0)
         _customPlot.legend->setVisible(_showLegend);
@@ -195,18 +206,28 @@ void CorrelationPlotItem::buildPlot()
 void CorrelationPlotItem::setPlotScaleType(const int &plotScaleType)
 {
     _plotScaleType = plotScaleType;
+    emit plotOptionsChanged();
     refresh();
 }
 
 void CorrelationPlotItem::setPlotAveragingType(const int &plotAveragingType)
 {
     _plotAveragingType = plotAveragingType;
+    emit plotOptionsChanged();
+    refresh();
+}
+
+void CorrelationPlotItem::setPlotDeviationType(const int &plotDeviationType)
+{
+    _plotDeviationType = plotDeviationType;
+    emit plotOptionsChanged();
     refresh();
 }
 
 void CorrelationPlotItem::setShowLegend(bool showLegend)
 {
     _showLegend = showLegend;
+    emit plotOptionsChanged();
     refresh();
 }
 
@@ -246,10 +267,68 @@ void CorrelationPlotItem::populateMeanLinePlot()
     _customPlot.yAxis->setRange(minY, maxY);
 }
 
+void CorrelationPlotItem::populateMedianLinePlot()
+{
+    double maxY = 0.0;
+    double minY = 0.0;
+
+    auto* graph = _customPlot.addGraph();
+    graph->setPen(QPen(Qt::black));
+    graph->setName(tr("Median average of selection"));
+
+    QVector<double> xData(static_cast<int>(_columnCount));
+    // xData is just the column indecides
+    std::iota(std::begin(xData), std::end(xData), 0);
+
+    QVector<double> rowsEntries(_selectedRows.length());
+    QVector<double> yDataAvg(_columnCount);
+
+    for(size_t col = 0; col < _columnCount; col++)
+    {
+        rowsEntries.clear();
+        for(auto row : qAsConst(_selectedRows))
+        {
+            auto index = (row * _columnCount) + col;
+            rowsEntries.push_back(_data[static_cast<int>(index)]);
+        }
+        if(_selectedRows.size() > 0)
+        {
+            std::sort(rowsEntries.begin(), rowsEntries.end());
+            double median = 0.0;
+            if(rowsEntries.length()  % 2 == 0)
+                median = (rowsEntries[rowsEntries.length() / 2 - 1] + rowsEntries[rowsEntries.length() / 2]) / 2.0;
+            else
+                median = rowsEntries[rowsEntries.length() / 2];
+
+            yDataAvg[col] = median;
+
+            maxY = std::max(maxY, yDataAvg[col]);
+            minY = std::min(minY, yDataAvg[col]);
+        }
+    }
+
+    graph->setData(xData, yDataAvg, true);
+
+    auto* plotModeTextElement = new QCPTextElement(&_customPlot);
+    plotModeTextElement->setLayer(_textLayer);
+    plotModeTextElement->setTextFlags(Qt::AlignLeft);
+    plotModeTextElement->setFont(_defaultFont9Pt);
+    plotModeTextElement->setTextColor(Qt::gray);
+    plotModeTextElement->setText(
+        QString(tr("*Median average plot of %1 rows")
+                .arg(_selectedRows.length())));
+    plotModeTextElement->setVisible(true);
+
+    _customPlot.plotLayout()->insertRow(1);
+    _customPlot.plotLayout()->addElement(1, 0, plotModeTextElement);
+
+    scaleXAxis();
+    _customPlot.yAxis->setRange(minY, maxY);
+}
 
 void CorrelationPlotItem::populateMeanHistogramPlot()
 {
-    if (_selectedRows.size() == 0)
+    if(_selectedRows.size() == 0)
         return;
 
     double maxY = 0.0;
@@ -281,6 +360,72 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
 
     scaleXAxis();
     _customPlot.yAxis->setRange(minY, maxY);
+}
+
+void CorrelationPlotItem::populateStdDevPlot()
+{
+    QCPErrorBars* stdDevBars = new QCPErrorBars(_customPlot.xAxis, _customPlot.yAxis);
+    stdDevBars->removeFromLegend();
+    stdDevBars->setAntialiased(false);
+    stdDevBars->setDataPlottable(_customPlot.plottable(0));
+
+    QVector<double> stdDevs(_columnCount);
+    QVector<double> means(_columnCount);
+
+    for(size_t col = 0; col < _columnCount; col++)
+    {
+        for(auto row : qAsConst(_selectedRows))
+        {
+            auto index = (row * _columnCount) + col;
+            means[col] += _data[static_cast<int>(index)];
+        }
+        means[col] /= _selectedRows.count();
+
+        double stdDev = 0.0;
+        for(auto row : qAsConst(_selectedRows))
+        {
+            auto index = (row * _columnCount) + col;
+            stdDev += (_data[static_cast<int>(index)] - means[col]) *
+                    (_data[static_cast<int>(index)] - means[col]);
+        }
+        stdDev /= _columnCount;
+        stdDev = std::sqrt(stdDev);
+        stdDevs[col] = stdDev;
+    }
+    stdDevBars->setData(stdDevs);
+}
+
+void CorrelationPlotItem::populateStdErrorPlot()
+{
+    QCPErrorBars* stdErrBars = new QCPErrorBars(_customPlot.xAxis, _customPlot.yAxis);
+    stdErrBars->removeFromLegend();
+    stdErrBars->setAntialiased(false);
+    stdErrBars->setDataPlottable(_customPlot.plottable(0));
+
+    QVector<double> stdErrs(_columnCount);
+    QVector<double> means(_columnCount);
+
+    for(size_t col = 0; col < _columnCount; col++)
+    {
+        for(auto row : qAsConst(_selectedRows))
+        {
+            auto index = (row * _columnCount) + col;
+            means[col] += _data[static_cast<int>(index)];
+        }
+        means[col] /= _selectedRows.count();
+
+        double stdErr = 0.0;
+        for(auto row : qAsConst(_selectedRows))
+        {
+            auto index = (row * _columnCount) + col;
+            stdErr += (_data[static_cast<int>(index)] - means[col]) *
+                    (_data[static_cast<int>(index)] - means[col]);
+        }
+        stdErr /= _columnCount;
+        stdErr = std::sqrt(stdErr) / std::sqrt(static_cast<double>(_selectedRows.length()));
+        stdErrs[col] = stdErr;
+    }
+    stdErrBars->setData(stdErrs);
 }
 
 void CorrelationPlotItem::populateLinePlot()
@@ -451,7 +596,6 @@ QVector<double> CorrelationPlotItem::meanAverageData(double &min, double &max)
 
     // Use Average Calculation
     QVector<double> yDataAvg; yDataAvg.reserve(_selectedRows.size());
-    QVector<double> xData; xData.reserve(static_cast<int>(_columnCount));
 
     for(size_t col = 0; col < _columnCount; col++)
     {
@@ -461,7 +605,6 @@ QVector<double> CorrelationPlotItem::meanAverageData(double &min, double &max)
             auto index = (row * _columnCount) + col;
             runningTotal += _data[static_cast<int>(index)];
         }
-        xData.append(static_cast<double>(col));
         yDataAvg.append(runningTotal / _selectedRows.length());
 
         max = std::max(max, yDataAvg.back());
@@ -523,7 +666,7 @@ void CorrelationPlotItem::showTooltip()
         _itemTracer->setGraph(graph);
         _itemTracer->setGraphKey(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
     }
-    else if (auto bars = dynamic_cast<QCPBars*>(_hoverPlottable))
+    else if(auto bars = dynamic_cast<QCPBars*>(_hoverPlottable))
     {
         auto xCoord = _customPlot.xAxis->pixelToCoord(_hoverPoint.x()) + 0.5f;
         _itemTracer->position->setPixelPosition(bars->dataPixelPosition(xCoord));

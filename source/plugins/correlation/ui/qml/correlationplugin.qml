@@ -130,12 +130,39 @@ PluginContent
     {
         Action
         {
+            id: noDeviations
+            text: qsTr("&None")
+            checkable: true
+            checked: plot.plotDeviationType === PlotDeviationType.None
+            onTriggered: { plot.plotDeviationType = PlotDeviationType.None; }
+        }
+        Action
+        {
+            id: stdDeviations
+            text: qsTr("&Standard Deviation")
+            checkable: true
+            checked: plot.plotDeviationType === PlotDeviationType.StdDev
+            onTriggered: { plot.plotDeviationType = PlotDeviationType.StdDev; }
+        }
+        Action
+        {
+            id: stdErrorDeviations
+            text: qsTr("&Standard Error")
+            checkable: true
+            checked: plot.plotDeviationType === PlotDeviationType.StdErr
+            onTriggered: { plot.plotDeviationType = PlotDeviationType.StdErr; }
+        }
+    }
+
+    ExclusiveGroup
+    {
+        Action
+        {
             id: individualLineAverage
             text: qsTr("&Individual Line")
             checkable: true
             checked: plot.plotAveragingType === PlotAveragingType.Individual
-            onTriggered: { plot.plotAveragingType = PlotAveragingType.Individual;
-            }
+            onTriggered: { plot.plotAveragingType = PlotAveragingType.Individual; }
         }
 
         Action
@@ -201,6 +228,15 @@ PluginContent
             averagingMenu.addItem("").action = meanLineAverage;
             averagingMenu.addItem("").action = medianLineAverage;
             averagingMenu.addItem("").action = meanHistogramAverage;
+
+            var deviationsMenu = menu.addMenu("Deviations");
+            deviationsMenu.addItem("").action = noDeviations;
+            deviationsMenu.addItem("").action = stdDeviations;
+            deviationsMenu.addItem("").action = stdErrorDeviations;
+            deviationsMenu.enabled = Qt.binding(function()
+            {
+                return plot.plotAveragingType !== PlotAveragingType.Individual
+            });
 
             Utils.cloneMenu(menu, plotContextMenu);
             return true;

@@ -25,6 +25,11 @@ DEFINE_QML_ENUM(Q_GADGET, PlotAveragingType,
                 MedianLine,
                 MeanHistogram);
 
+DEFINE_QML_ENUM(Q_GADGET, PlotDeviationType,
+                None,
+                StdErr,
+                StdDev);
+
 class CorrelationPlotItem : public QQuickPaintedItem
 {
     Q_OBJECT
@@ -43,6 +48,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(bool showLegend MEMBER _showLegend WRITE setShowLegend NOTIFY plotOptionsChanged)
     Q_PROPERTY(int plotScaleType MEMBER _plotScaleType WRITE setPlotScaleType NOTIFY plotOptionsChanged)
     Q_PROPERTY(int plotAveragingType MEMBER _plotAveragingType WRITE setPlotAveragingType NOTIFY plotOptionsChanged)
+    Q_PROPERTY(int plotDeviationType MEMBER _plotDeviationType WRITE setPlotDeviationType NOTIFY plotOptionsChanged)
 
 public:
     explicit CorrelationPlotItem(QQuickItem* parent = nullptr);
@@ -52,6 +58,7 @@ public:
 
     void setPlotScaleType(const int &plotScaleType);
     void setPlotAveragingType(const int &plotAveragingType);
+    void setPlotDeviationType(const int &plotDeviationType);
 
 protected:
     void routeMouseEvent(QMouseEvent* event);
@@ -92,11 +99,15 @@ private:
     bool _showLegend = true;
     int _plotScaleType = static_cast<int>(PlotScaleType::Raw);
     int _plotAveragingType = static_cast<int>(PlotAveragingType::Individual);
+    int _plotDeviationType = static_cast<int>(PlotDeviationType::None);
     double _scrollAmount = 0.0f;
 
     void populateMeanLinePlot();
+    void populateMedianLinePlot();
     void populateLinePlot();
     void populateMeanHistogramPlot();
+    void populateStdDevPlot();
+    void populateStdErrorPlot();
 
 public:
     Q_INVOKABLE void refresh();
