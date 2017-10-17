@@ -191,6 +191,15 @@ PluginContent
             checked: plot.plotAveragingType === PlotAveragingType.MeanHistogram
             onTriggered: { plot.plotAveragingType = PlotAveragingType.MeanHistogram; }
         }
+
+        Action
+        {
+            id: iqrAverage
+            text: qsTr("&IQR Plot")
+            checkable: true
+            checked: plot.plotAveragingType === PlotAveragingType.IQRPlot
+            onTriggered: { plot.plotAveragingType = PlotAveragingType.IQRPlot; }
+        }
     }
 
     Action
@@ -222,12 +231,17 @@ PluginContent
             scalingMenu.addItem("").action = meanCentreScaling;
             scalingMenu.addItem("").action = unitVarianceScaling;
             scalingMenu.addItem("").action = paretoScaling;
+            scalingMenu.enabled = Qt.binding(function()
+            {
+                return plot.plotAveragingType == PlotAveragingType.Individual
+            });
 
             var averagingMenu = menu.addMenu("Averaging");
             averagingMenu.addItem("").action = individualLineAverage;
             averagingMenu.addItem("").action = meanLineAverage;
             averagingMenu.addItem("").action = medianLineAverage;
             averagingMenu.addItem("").action = meanHistogramAverage;
+            averagingMenu.addItem("").action = iqrAverage;
 
             var deviationsMenu = menu.addMenu("Deviations");
             deviationsMenu.addItem("").action = noDeviations;
@@ -235,7 +249,8 @@ PluginContent
             deviationsMenu.addItem("").action = stdErrorDeviations;
             deviationsMenu.enabled = Qt.binding(function()
             {
-                return plot.plotAveragingType !== PlotAveragingType.Individual
+                return plot.plotAveragingType !== PlotAveragingType.Individual &&
+                        plot.plotAveragingType !== PlotAveragingType.IQRPlot
             });
 
             Utils.cloneMenu(menu, plotContextMenu);

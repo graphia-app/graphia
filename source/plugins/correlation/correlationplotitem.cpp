@@ -140,6 +140,8 @@ void CorrelationPlotItem::buildPlot()
         populateMedianLinePlot();
     else if(plotAveragingType == PlotAveragingType::MeanHistogram)
         populateMeanHistogramPlot();
+    else if(plotAveragingType == PlotAveragingType::IQRPlot)
+        populateIQRPlot();
     else
         populateLinePlot();
 
@@ -359,6 +361,74 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     _customPlot.plotLayout()->addElement(1, 0, plotModeTextElement);
 
     scaleXAxis();
+    _customPlot.yAxis->setRange(minY, maxY);
+}
+
+double calculateMedian(const QVector<double>& sortedData)
+{
+    double median = 0.0;
+    if(sortedData.length() % 2 == 0)
+        median = (sortedData[sortedData.length() / 2 - 1] + sortedData[sortedData.length() / 2]) / 2.0;
+    else
+        median = sortedData[sortedData.length() / 2];
+    return median;
+}
+
+void CorrelationPlotItem::populateIQRPlot()
+{
+    QCPStatisticalBox *statPlot = new QCPStatisticalBox(_customPlot.xAxis, _customPlot.yAxis);
+    statPlot->setName(tr("IQR of selection"));
+
+    double maxY = 0.0;
+    double minY = 0.0;
+    QVector<double> xData(static_cast<int>(_columnCount));
+    // xData is just the column indecides
+    std::iota(std::begin(xData), std::end(xData), 0);
+
+    QVector<double> rowsEntries(_selectedRows.length());
+    QVector<double> firstQuartiles(static_cast<int>(_columnCount));
+    QVector<double> secondQuartiles(static_cast<int>(_columnCount));
+    QVector<double> thirdQuartiles(static_cast<int>(_columnCount));
+    QVector<double> minValues(static_cast<int>(_columnCount));
+    QVector<double> maxValues(static_cast<int>(_columnCount));
+
+    for(int col = 0; col < static_cast<int>(_columnCount); col++)
+    {
+        rowsEntries.clear();
+        for(auto row : qAsConst(_selectedRows))
+        {
+            auto index = (row * _columnCount) + col;
+            rowsEntries.push_back(_data[static_cast<int>(index)]);
+        }
+        if(_selectedRows.size() > 0)
+        {
+            std::sort(rowsEntries.begin(), rowsEntries.end());
+            secondQuartiles[col] = calculateMedian(rowsEntries);
+
+            if(rowsEntries.size() % 2 == 0)
+            {
+                firstQuartiles[col] = calculateMedian(
+                            rowsEntries.mid(0, (rowsEntries.size() / 2) - 1));
+                thirdQuartiles[col] = calculateMedian(
+                            rowsEntries.mid((rowsEntries.size() / 2)));
+            }
+            else
+            {
+                firstQuartiles[col] = calculateMedian(
+                            rowsEntries.mid(0, (rowsEntries.size() - 1 / 2) - 1));
+                thirdQuartiles[col] = calculateMedian(
+                            rowsEntries.mid(0, (rowsEntries.size() + 1 / 2) + 1));
+            }
+
+            maxValues[col] = *std::max_element(rowsEntries.begin(), rowsEntries.end());
+            minValues[col] = *std::min_element(rowsEntries.begin(), rowsEntries.end());
+
+            maxY = std::max(maxY, maxValues[col]);
+            minY = std::min(minY, minValues[col]);
+        }
+    }
+    statPlot->setData(xData, minValues, firstQuartiles, secondQuartiles, thirdQuartiles, maxValues, true);
+
     _customPlot.yAxis->setRange(minY, maxY);
 }
 

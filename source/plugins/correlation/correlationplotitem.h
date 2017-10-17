@@ -23,7 +23,8 @@ DEFINE_QML_ENUM(Q_GADGET, PlotAveragingType,
                 Individual,
                 MeanLine,
                 MedianLine,
-                MeanHistogram);
+                MeanHistogram,
+                IQRPlot);
 
 DEFINE_QML_ENUM(Q_GADGET, PlotDeviationType,
                 None,
@@ -106,6 +107,7 @@ private:
     void populateMedianLinePlot();
     void populateLinePlot();
     void populateMeanHistogramPlot();
+    void populateIQRPlot();
     void populateStdDevPlot();
     void populateStdErrorPlot();
 
