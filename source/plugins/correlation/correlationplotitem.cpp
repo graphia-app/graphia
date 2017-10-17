@@ -90,7 +90,7 @@ void CorrelationPlotItem::hoverMoveEvent(QHoverEvent* event)
 {
     _hoverPoint = event->posF();
 
-    auto* currentPlottable = _customPlot.plottableAt(event->posF());
+    auto* currentPlottable = _customPlot.plottableAt(event->posF(), true);
     if(_hoverPlottable != currentPlottable)
     {
         _hoverPlottable = currentPlottable;
@@ -364,9 +364,12 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
 
 void CorrelationPlotItem::populateStdDevPlot()
 {
+    double min = 0, max = 0;
+
     QCPErrorBars* stdDevBars = new QCPErrorBars(_customPlot.xAxis, _customPlot.yAxis);
     stdDevBars->removeFromLegend();
     stdDevBars->setAntialiased(false);
+    stdDevBars->setSelectable(QCP::SelectionType::stNone);
     stdDevBars->setDataPlottable(_customPlot.plottable(0));
 
     QVector<double> stdDevs(_columnCount);
@@ -391,14 +394,21 @@ void CorrelationPlotItem::populateStdDevPlot()
         stdDev /= _columnCount;
         stdDev = std::sqrt(stdDev);
         stdDevs[col] = stdDev;
+
+        min = std::min(min, means[col] - stdDev);
+        max = std::max(max, means[col] + stdDev);
     }
     stdDevBars->setData(stdDevs);
+    _customPlot.yAxis->setRange(min, max);
 }
 
 void CorrelationPlotItem::populateStdErrorPlot()
 {
+    double min = 0, max = 0;
+
     QCPErrorBars* stdErrBars = new QCPErrorBars(_customPlot.xAxis, _customPlot.yAxis);
     stdErrBars->removeFromLegend();
+    stdErrBars->setSelectable(QCP::SelectionType::stNone);
     stdErrBars->setAntialiased(false);
     stdErrBars->setDataPlottable(_customPlot.plottable(0));
 
@@ -424,8 +434,12 @@ void CorrelationPlotItem::populateStdErrorPlot()
         stdErr /= _columnCount;
         stdErr = std::sqrt(stdErr) / std::sqrt(static_cast<double>(_selectedRows.length()));
         stdErrs[col] = stdErr;
+
+        min = std::min(min, means[col] - stdErr);
+        max = std::max(max, means[col] + stdErr);
     }
     stdErrBars->setData(stdErrs);
+    _customPlot.yAxis->setRange(min, max);
 }
 
 void CorrelationPlotItem::populateLinePlot()
