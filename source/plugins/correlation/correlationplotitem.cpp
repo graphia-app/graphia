@@ -281,9 +281,9 @@ void CorrelationPlotItem::populateMedianLinePlot()
     std::iota(std::begin(xData), std::end(xData), 0);
 
     QVector<double> rowsEntries(_selectedRows.length());
-    QVector<double> yDataAvg(_columnCount);
+    QVector<double> yDataAvg(static_cast<int>(_columnCount));
 
-    for(size_t col = 0; col < _columnCount; col++)
+    for(int col = 0; col < static_cast<int>(_columnCount); col++)
     {
         rowsEntries.clear();
         for(auto row : qAsConst(_selectedRows))
@@ -372,10 +372,10 @@ void CorrelationPlotItem::populateStdDevPlot()
     stdDevBars->setSelectable(QCP::SelectionType::stNone);
     stdDevBars->setDataPlottable(_customPlot.plottable(0));
 
-    QVector<double> stdDevs(_columnCount);
-    QVector<double> means(_columnCount);
+    QVector<double> stdDevs(static_cast<int>(_columnCount));
+    QVector<double> means(static_cast<int>(_columnCount));
 
-    for(size_t col = 0; col < _columnCount; col++)
+    for(int col = 0; col < static_cast<int>(_columnCount); col++)
     {
         for(auto row : qAsConst(_selectedRows))
         {
@@ -412,10 +412,10 @@ void CorrelationPlotItem::populateStdErrorPlot()
     stdErrBars->setAntialiased(false);
     stdErrBars->setDataPlottable(_customPlot.plottable(0));
 
-    QVector<double> stdErrs(_columnCount);
-    QVector<double> means(_columnCount);
+    QVector<double> stdErrs(static_cast<int>(_columnCount));
+    QVector<double> means(static_cast<int>(_columnCount));
 
-    for(size_t col = 0; col < _columnCount; col++)
+    for(int col = 0; col < static_cast<int>(_columnCount); col++)
     {
         for(auto row : qAsConst(_selectedRows))
         {
