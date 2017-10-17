@@ -237,6 +237,8 @@ function cloneMenu(from, to)
     while(to.items.length > 0)
         to.removeItem(to.items[0]);
 
+    var exclusiveGroups = {};
+
     for(var index = 0; index < from.items.length; index++)
     {
         var fromItem = from.items[index];
@@ -265,7 +267,7 @@ function cloneMenu(from, to)
                           //   a) the properties it proxies are bound anyway
                           //   b) binding it will cause loops
                           "checkable", "checked", "enabled",
-                          "exclusiveGroup", "iconName", "iconSource",
+                          "iconName", "iconSource",
                           "shortcut", "text", "visible"];
 
         properties.forEach(function(prop)
@@ -282,6 +284,18 @@ function cloneMenu(from, to)
             }
         });
 
+        // Store a list of ExclusiveGroups so that we can recreate them
+        // in the target menu, later
+        if(fromItem.exclusiveGroup !== null)
+        {
+            var key = fromItem.exclusiveGroup.toString();
+
+            if(exclusiveGroups[key] === undefined)
+                exclusiveGroups[key] = [];
+
+            exclusiveGroups[key].push(toItem);
+        }
+
         if(toItem.triggered !== undefined)
         {
             toItem.triggered.connect(function(fromItem)
@@ -292,6 +306,18 @@ function cloneMenu(from, to)
                 };
             }(fromItem));
         }
+    }
+
+    // Create new ExclusiveGroups which correspond to the source menu's ExclusiveGroups
+    for(key in exclusiveGroups)
+    {
+        var fromExclusiveGroup = exclusiveGroups[key];
+        var toExclusiveGroup = Qt.createQmlObject('import QtQuick.Controls 1.4; ExclusiveGroup {}', to);
+
+        fromExclusiveGroup.forEach(function(menuItem)
+        {
+            menuItem.exclusiveGroup = toExclusiveGroup;
+        });
     }
 }
 
