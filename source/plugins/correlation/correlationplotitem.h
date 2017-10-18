@@ -97,7 +97,7 @@ private:
     QVector<QColor> _rowColors;
     bool _showColumnNames = true;
     bool _showGridLines = true;
-    bool _showLegend = true;
+    bool _showLegend = false;
     int _plotScaleType = static_cast<int>(PlotScaleType::Raw);
     int _plotAveragingType = static_cast<int>(PlotAveragingType::Individual);
     int _plotDeviationType = static_cast<int>(PlotDeviationType::None);

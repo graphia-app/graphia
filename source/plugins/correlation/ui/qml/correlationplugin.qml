@@ -412,7 +412,13 @@ PluginContent
             "showColumnNames": toggleColumnNamesAction.checked,
             "sortColumn": tableView.sortIndicatorColumn,
             "sortOrder": tableView.sortIndicatorOrder,
-            "hiddenColumns": tableView.hiddenColumns
+            "hiddenColumns": tableView.hiddenColumns,
+
+            "plotScaling": plot.plotScaleType,
+            "plotAveraging": plot.plotAveragingType,
+            "plotDeviation": plot.plotDeviationType,
+            "plotLegend": plot.showLegend,
+            "plotGridLines": plot.showGridLines
         };
 
         return data;
@@ -425,5 +431,11 @@ PluginContent
         if(data.sortColumn !== undefined)               tableView.sortIndicatorColumn = data.sortColumn;
         if(data.sortOrder !== undefined)                tableView.sortIndicatorOrder = data.sortOrder;
         if(data.hiddenColumns !== undefined)            tableView.hiddenColumns = data.hiddenColumns;
+
+        if(data.plotScaling !== undefined)              plot.plotScaleType = data.plotScaling;
+        if(data.plotAveraging !== undefined)            plot.plotAveragingType = data.plotAveraging;
+        if(data.plotDeviation !== undefined)            plot.plotDeviationType = data.plotDeviation;
+        if(data.plotLegend !== undefined)               plot.showLegend = data.plotLegend;
+        if(data.plotGridLines !== undefined)            plot.showGridLines = data.plotGridLines;
     }
 }

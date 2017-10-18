@@ -146,7 +146,8 @@ void CorrelationPlotItem::buildPlot()
         populateLinePlot();
 
     auto plotDeviationType = static_cast<PlotDeviationType>(_plotDeviationType);
-    if(plotAveragingType != PlotAveragingType::Individual)
+    if(plotAveragingType != PlotAveragingType::Individual &&
+            plotAveragingType != PlotAveragingType::IQRPlot)
     {
         if(plotDeviationType == PlotDeviationType::StdDev)
             populateStdDevPlot();
@@ -483,6 +484,9 @@ void CorrelationPlotItem::populateIQRPlot()
 
 void CorrelationPlotItem::populateStdDevPlot()
 {
+    if(_selectedRows.size() == 0)
+        return;
+
     double min = 0, max = 0;
 
     QCPErrorBars* stdDevBars = new QCPErrorBars(_customPlot.xAxis, _customPlot.yAxis);
@@ -523,6 +527,9 @@ void CorrelationPlotItem::populateStdDevPlot()
 
 void CorrelationPlotItem::populateStdErrorPlot()
 {
+    if(_selectedRows.size() == 0)
+        return;
+
     double min = 0, max = 0;
 
     QCPErrorBars* stdErrBars = new QCPErrorBars(_customPlot.xAxis, _customPlot.yAxis);
