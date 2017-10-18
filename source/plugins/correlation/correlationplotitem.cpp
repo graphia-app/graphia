@@ -786,6 +786,12 @@ void CorrelationPlotItem::showTooltip()
         auto xCoord = _customPlot.xAxis->pixelToCoord(_hoverPoint.x()) + 0.5f;
         _itemTracer->position->setPixelPosition(bars->dataPixelPosition(xCoord));
     }
+    else if(auto boxPlot = dynamic_cast<QCPStatisticalBox*>(_hoverPlottable))
+    {
+        // Only show simple tooltips for now, can extend this later...
+        auto xCoord = _customPlot.xAxis->pixelToCoord(_hoverPoint.x()) + 0.5f;
+        _itemTracer->position->setPixelPosition(boxPlot->dataPixelPosition(xCoord));
+    }
 
     _itemTracer->setVisible(true);
     _itemTracer->setInterpolating(false);
