@@ -384,7 +384,7 @@ void CorrelationPlotItem::populateIQRPlot()
     // Outlier values are (< Q1 - 1.5IQR and > Q3 + 1.5IQR)
 
     QCPStatisticalBox *statPlot = new QCPStatisticalBox(_customPlot.xAxis, _customPlot.yAxis);
-    statPlot->setName(tr("IQR of selection"));
+    statPlot->setName(tr("Median (IQR plots) of selection"));
 
     double maxY = 0.0;
     double minY = 0.0;
