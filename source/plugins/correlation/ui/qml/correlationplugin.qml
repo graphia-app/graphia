@@ -85,8 +85,7 @@ PluginContent
             text: qsTr("&Raw")
             checkable: true
             checked: plot.plotScaleType === PlotScaleType.Raw
-            onTriggered: { plot.plotScaleType = PlotScaleType.Raw;
-            }
+            onTriggered: { plot.plotScaleType = PlotScaleType.Raw; }
         }
 
         Action
@@ -219,13 +218,13 @@ PluginContent
             return true;
 
         case 1:
-            menu.title = qsTr("&Plot");
+            menu.title = qsTr(qsTr("&Plot"));
             menu.addItem("").action = toggleColumnNamesAction;
             menu.addItem("").action = savePlotImageAction;
             menu.addItem("").action = toggleGridLines;
             menu.addItem("").action = togglePlotLegend;
 
-            var scalingMenu = menu.addMenu("Scaling");
+            var scalingMenu = menu.addMenu(qsTr("Scaling"));
             scalingMenu.addItem("").action = rawScaling;
             scalingMenu.addItem("").action = logScaling;
             scalingMenu.addItem("").action = meanCentreScaling;
@@ -236,14 +235,14 @@ PluginContent
                 return plot.plotAveragingType == PlotAveragingType.Individual
             });
 
-            var averagingMenu = menu.addMenu("Averaging");
+            var averagingMenu = menu.addMenu(qsTr("Averaging"));
             averagingMenu.addItem("").action = individualLineAverage;
             averagingMenu.addItem("").action = meanLineAverage;
             averagingMenu.addItem("").action = medianLineAverage;
             averagingMenu.addItem("").action = meanHistogramAverage;
             averagingMenu.addItem("").action = iqrAverage;
 
-            var deviationsMenu = menu.addMenu("Deviations");
+            var deviationsMenu = menu.addMenu(qsTr("Deviations"));
             deviationsMenu.addItem("").action = noDeviations;
             deviationsMenu.addItem("").action = stdDeviations;
             deviationsMenu.addItem("").action = stdErrorDeviations;

@@ -392,6 +392,7 @@ void CorrelationPlotItem::populateIQRPlot()
     QVector<double> rowsEntries(_selectedRows.length());
     QVector<double> outliers;
 
+    // Calculate IQR's, outliers and ranges
     for(int col = 0; col < static_cast<int>(_columnCount); col++)
     {
         rowsEntries.clear();
@@ -408,6 +409,7 @@ void CorrelationPlotItem::populateIQRPlot()
             double firstQuartile = secondQuartile;
             double thirdQuartile = secondQuartile;
 
+            // Don't calculate medians if there's only one sample!
             if(rowsEntries.size() > 1)
             {
                 if(rowsEntries.size() % 2 == 0)
@@ -456,11 +458,27 @@ void CorrelationPlotItem::populateIQRPlot()
                 minY = std::min(minY, row);
             }
 
-            statPlot->addData(col, minValue, firstQuartile, secondQuartile, thirdQuartile, maxValue, outliers);
+            // Add data for each column individually because setData doesn't let us do outliers(??)
+            statPlot->addData(col, minValue, firstQuartile, secondQuartile, thirdQuartile,
+                              maxValue, outliers);
         }
     }
 
+    auto* plotModeTextElement = new QCPTextElement(&_customPlot);
+    plotModeTextElement->setLayer(_textLayer);
+    plotModeTextElement->setTextFlags(Qt::AlignLeft);
+    plotModeTextElement->setFont(_defaultFont9Pt);
+    plotModeTextElement->setTextColor(Qt::gray);
+    plotModeTextElement->setText(
+        QString(tr("*Median IQR box plots of %1 rows"))
+                .arg(_selectedRows.length()));
+    plotModeTextElement->setVisible(true);
+
+    _customPlot.plotLayout()->insertRow(1);
+    _customPlot.plotLayout()->addElement(1, 0, plotModeTextElement);
+
     _customPlot.yAxis->setRange(minY, maxY);
+    scaleXAxis();
 }
 
 void CorrelationPlotItem::populateStdDevPlot()
