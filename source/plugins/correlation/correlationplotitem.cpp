@@ -366,6 +366,9 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
 
 double calculateMedian(const QVector<double>& sortedData)
 {
+    if(sortedData.length() == 0)
+        return 0.0;
+
     double median = 0.0;
     if(sortedData.length() % 2 == 0)
         median = (sortedData[sortedData.length() / 2 - 1] + sortedData[sortedData.length() / 2]) / 2.0;
@@ -376,25 +379,23 @@ double calculateMedian(const QVector<double>& sortedData)
 
 void CorrelationPlotItem::populateIQRPlot()
 {
+    // Box-plots representing the IQR.
+    // Whiskers represent the maximum and minimum non-outlier values
+    // Outlier values are (< Q1 - 1.5IQR and > Q3 + 1.5IQR)
+
     QCPStatisticalBox *statPlot = new QCPStatisticalBox(_customPlot.xAxis, _customPlot.yAxis);
     statPlot->setName(tr("IQR of selection"));
 
     double maxY = 0.0;
     double minY = 0.0;
-    QVector<double> xData(static_cast<int>(_columnCount));
-    // xData is just the column indecides
-    std::iota(std::begin(xData), std::end(xData), 0);
 
     QVector<double> rowsEntries(_selectedRows.length());
-    QVector<double> firstQuartiles(static_cast<int>(_columnCount));
-    QVector<double> secondQuartiles(static_cast<int>(_columnCount));
-    QVector<double> thirdQuartiles(static_cast<int>(_columnCount));
-    QVector<double> minValues(static_cast<int>(_columnCount));
-    QVector<double> maxValues(static_cast<int>(_columnCount));
+    QVector<double> outliers;
 
     for(int col = 0; col < static_cast<int>(_columnCount); col++)
     {
         rowsEntries.clear();
+        outliers.clear();
         for(auto row : qAsConst(_selectedRows))
         {
             auto index = (row * _columnCount) + col;
@@ -403,31 +404,61 @@ void CorrelationPlotItem::populateIQRPlot()
         if(_selectedRows.size() > 0)
         {
             std::sort(rowsEntries.begin(), rowsEntries.end());
-            secondQuartiles[col] = calculateMedian(rowsEntries);
+            double secondQuartile = calculateMedian(rowsEntries);
+            double firstQuartile = secondQuartile;
+            double thirdQuartile = secondQuartile;
 
-            if(rowsEntries.size() % 2 == 0)
+            if(rowsEntries.size() > 1)
             {
-                firstQuartiles[col] = calculateMedian(
-                            rowsEntries.mid(0, (rowsEntries.size() / 2) - 1));
-                thirdQuartiles[col] = calculateMedian(
-                            rowsEntries.mid((rowsEntries.size() / 2)));
+                if(rowsEntries.size() % 2 == 0)
+                {
+                    firstQuartile = calculateMedian(
+                                rowsEntries.mid(0, (rowsEntries.size() / 2)));
+                    thirdQuartile = calculateMedian(
+                                rowsEntries.mid((rowsEntries.size() / 2)));
+                }
+                else
+                {
+                    firstQuartile = calculateMedian(
+                                rowsEntries.mid(0, ((rowsEntries.size() - 1) / 2)));
+                    thirdQuartile = calculateMedian(
+                                rowsEntries.mid(((rowsEntries.size() + 1) / 2)));
+                }
             }
-            else
+
+            double iqr = thirdQuartile - firstQuartile;
+            double minValue = secondQuartile;
+            double maxValue = secondQuartile;
+
+            for(auto row : rowsEntries)
             {
-                firstQuartiles[col] = calculateMedian(
-                            rowsEntries.mid(0, (rowsEntries.size() - 1 / 2) - 1));
-                thirdQuartiles[col] = calculateMedian(
-                            rowsEntries.mid(0, (rowsEntries.size() + 1 / 2) + 1));
+                // Find Maximum and minimum non-outliers
+                if(row < thirdQuartile + (iqr * 1.5))
+                {
+                    maxValue = std::max(maxValue, row);
+                }
+                if(row > firstQuartile - (iqr * 1.5))
+                {
+                    minValue = std::min(minValue, row);
+                }
+
+                // Find outliers
+                if(row > thirdQuartile + (iqr * 1.5))
+                {
+                    outliers.push_back(row);
+                }
+                else if(row < firstQuartile - (iqr * 1.5))
+                {
+                    outliers.push_back(row);
+                }
+
+                maxY = std::max(maxY, row);
+                minY = std::min(minY, row);
             }
 
-            maxValues[col] = *std::max_element(rowsEntries.begin(), rowsEntries.end());
-            minValues[col] = *std::min_element(rowsEntries.begin(), rowsEntries.end());
-
-            maxY = std::max(maxY, maxValues[col]);
-            minY = std::min(minY, minValues[col]);
+            statPlot->addData(col, minValue, firstQuartile, secondQuartile, thirdQuartile, maxValue, outliers);
         }
     }
-    statPlot->setData(xData, minValues, firstQuartiles, secondQuartiles, thirdQuartiles, maxValues, true);
 
     _customPlot.yAxis->setRange(minY, maxY);
 }

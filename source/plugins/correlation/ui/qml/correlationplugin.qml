@@ -249,8 +249,8 @@ PluginContent
             deviationsMenu.addItem("").action = stdErrorDeviations;
             deviationsMenu.enabled = Qt.binding(function()
             {
-                return plot.plotAveragingType !== PlotAveragingType.Individual &&
-                        plot.plotAveragingType !== PlotAveragingType.IQRPlot
+                return plot.plotAveragingType == PlotAveragingType.MeanLine ||
+                        plot.plotAveragingType == PlotAveragingType.MeanHistogram
             });
 
             Utils.cloneMenu(menu, plotContextMenu);
