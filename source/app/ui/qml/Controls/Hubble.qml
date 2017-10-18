@@ -43,8 +43,8 @@ Item
     onContentChanged: { content.parent = containerLayout; }
     onTargetChanged:
     {
-        unlinkTarget();
-        linkToTarget()
+        unlinkFromTarget();
+        linkToTarget();
     }
 
     Behavior on opacity
@@ -73,7 +73,7 @@ Item
     Timer
     {
         id: hoverTimer
-        interval: 1000
+        interval: 750
         onTriggered: root.visible = true
     }
 
@@ -149,8 +149,12 @@ Item
         linkToTarget();
     }
 
-    function unlinkTarget()
+    function unlinkFromTarget()
     {
+        // Remove the mouse capture shim
+        // Heirarchy was parent->mouseCapture->target
+        // Remove mouseCapture and reparent the child items to parent
+        // Results in parent->item
         if(_mouseCapture !== null)
         {
             for(var i = _mouseCapture.children.length; i >= 0; i--)
@@ -167,7 +171,7 @@ Item
         {
             if(tooltipMode)
             {
-                // Use targets hoverChanged signal
+                // Use target's hoverChanged signal
                 if(target.hoveredChanged !== undefined)
                 {
                     target.hoveredChanged.connect(onHover);
@@ -178,9 +182,14 @@ Item
                     // shim it with a HoverMousePassthrough item
                     if(_mouseCapture === undefined || _mouseCapture === null)
                     {
-                        var component = Qt.createComponent("HoverMousePassthrough.qml");
-                        _mouseCapture = component.createObject(target.parent);
+                        _mouseCapture = Qt.createQmlObject("import QtQuick 2.0; import com.kajeka 1.0;
+                                                             HoverMousePassthrough{}", target.parent);
                     }
+                    // Insert the mouse capture shim
+                    // Heirarchy was parent->target
+                    // Add mouseCapture below parent and reparent the child items to mousecapture
+                    // results in: parent->mouseCapture->target
+                    // This allows mouseCapture to access all mouse hover events!
                     if(target.parent !== _mouseCapture)
                     {
                         _mouseCapture.width = Qt.binding(function() { return target.width; });

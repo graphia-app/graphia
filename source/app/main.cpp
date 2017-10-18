@@ -144,8 +144,8 @@ int main(int argc, char *argv[])
     preferences.define(QStringLiteral("misc/focusFoundNodes"),                  true);
     preferences.define(QStringLiteral("misc/focusFoundComponents"),             false);
 
-    preferences.define("misc/disableHubbles",                                   false);
-    preferences.define("misc/firstOpen",                                        true);
+    preferences.define(QStringLiteral("misc/disableHubbles"),                   false);
+    preferences.define(QStringLiteral("misc/firstOpen"),                        true);
 
     preferences.define(QStringLiteral("screenshot/width"),                      1920);
     preferences.define(QStringLiteral("screenshot/height"),                     1080);

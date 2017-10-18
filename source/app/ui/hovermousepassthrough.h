@@ -2,7 +2,6 @@
 #define HOVERMOUSEPASSTHROUGH_H
 #include <QObject>
 #include <QQuickItem>
-#include <QGuiApplication>
 #include <QMouseEvent>
 
 class HoverMousePassthrough : public QQuickItem
@@ -12,7 +11,7 @@ class HoverMousePassthrough : public QQuickItem
 private:
     bool _hovered;
 public:
-    explicit HoverMousePassthrough(QQuickItem *parent = 0) : QQuickItem(parent)
+    explicit HoverMousePassthrough(QQuickItem* parent = nullptr) : QQuickItem(parent)
     {
         setAcceptHoverEvents(true);
     }
@@ -23,13 +22,13 @@ protected:
     {
         event->ignore();
         _hovered = true;
-        hoveredChanged();
+        emit hoveredChanged();
     }
     void hoverLeaveEvent(QHoverEvent *event)
     {
         event->ignore();
         _hovered = false;
-        hoveredChanged();
+        emit hoveredChanged();
     }
 };
 #endif // HOVERMOUSEPASSTHROUGH_H

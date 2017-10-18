@@ -48,7 +48,7 @@ Item
             CheckBox
             {
                 id: disableHubblesCheckbox
-                text: qsTr("Disable extended help tooltips")
+                text: qsTr("Disable Extended Help Tooltips")
             }
         }
     }
