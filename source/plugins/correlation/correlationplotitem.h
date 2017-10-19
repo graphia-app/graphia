@@ -79,6 +79,7 @@ private:
     const int MAX_SELECTED_ROWS_BEFORE_MEAN = 1000;
 
     QCPLayer* _textLayer = nullptr;
+    QCPLegend* _legend = nullptr;
     QCPAbstractPlottable* _hoverPlottable = nullptr;
     QPointF _hoverPoint;
     QCPItemText* _hoverLabel = nullptr;
@@ -131,6 +132,8 @@ private:
     double rangeSize();
     double columnLabelSize();
     double columnAxisWidth();
+
+    void configureLegend();
 
 private slots:
     void onCustomReplot();

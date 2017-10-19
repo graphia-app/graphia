@@ -8,6 +8,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem
 
     _customPlot.setOpenGl(true);
     _customPlot.addLayer(QStringLiteral("textLayer"));
+    _customPlot.setAutoAddPlottableToLegend(false);
 
     _textLayer = _customPlot.layer(QStringLiteral("textLayer"));
     _textLayer->setMode(QCPLayer::LayerMode::lmBuffered);
@@ -116,19 +117,79 @@ void CorrelationPlotItem::wheelEvent(QWheelEvent* event)
     routeWheelEvent(event);
 }
 
+void CorrelationPlotItem::configureLegend()
+{
+    if((_customPlot.graphCount() > 0 || _customPlot.plottableCount() > 0) && _showLegend)
+    {
+        // Create a subLayout to position the Legend
+        QCPLayoutGrid *subLayout = new QCPLayoutGrid;
+        _customPlot.plotLayout()->insertColumn(1);
+        _customPlot.plotLayout()->addElement(0, 1, subLayout);
+        subLayout->addElement(0, 0, _customPlot.legend);
+
+        QFontMetrics metrics(_defaultFont9Pt);
+        double legendItemSize =  (metrics.height() + subLayout->rowSpacing());
+
+        int maxLegendCount = (_customPlot.height() - (_customPlot.legend->margins().top() +
+                _customPlot.legend->margins().bottom())) / legendItemSize;
+
+        // HACK: Use a large bottom margin to stop the legend filling the whole vertical space
+        // and equally spacing elements. It looks weird. Clamp to maxLegendCount
+        double marginBuffer = _customPlot.height() -
+                (legendItemSize * std::min(_customPlot.plottableCount(), maxLegendCount)) -
+                (_customPlot.legend->margins().top()) -
+                (_customPlot.legend->margins().bottom());
+
+        // Populate the legend
+        _customPlot.legend->clear();
+        for (int i = 0; i < std::min(_customPlot.plottableCount(), maxLegendCount); ++i)
+            _customPlot.plottable(i)->addToLegend(_customPlot.legend);
+
+        if(_customPlot.plottableCount() > maxLegendCount)
+        {
+            auto* moreText = new QCPTextElement(&_customPlot);
+            moreText->setMargins(QMargins());
+            moreText->setLayer(_textLayer);
+            moreText->setTextFlags(Qt::AlignLeft);
+            moreText->setFont(_defaultFont9Pt);
+            moreText->setTextColor(Qt::gray);
+            moreText->setText(
+                QString(tr("and %1 more..."))
+                        .arg(_customPlot.plottableCount() - maxLegendCount + 1));
+            moreText->setVisible(true);
+
+            _customPlot.legend->removeAt(maxLegendCount - 1);
+            _customPlot.legend->addElement(moreText);
+        }
+
+        subLayout->setMargins(QMargins(0, 5, 5, marginBuffer));
+
+        _customPlot.plotLayout()->setColumnStretchFactor(0, 0.85);
+        _customPlot.plotLayout()->setColumnStretchFactor(1, 0.15);
+
+        _customPlot.legend->setVisible(true);
+    }
+}
+
 void CorrelationPlotItem::buildPlot()
 {
     _customPlot.legend->setVisible(false);
 
-    // If the legend is not cleared first this will cause a slowdown
-    // when removing a large number of graphs
-    _customPlot.legend->clear();
     _customPlot.clearGraphs();
     _customPlot.clearPlottables();
 
     while(_customPlot.plotLayout()->rowCount() > 1)
     {
         _customPlot.plotLayout()->removeAt(_customPlot.plotLayout()->rowColToIndex(1, 0));
+        _customPlot.plotLayout()->simplify();
+    }
+
+    while(_customPlot.plotLayout()->columnCount() > 1)
+    {
+        // Save the legend from getting destroyed
+        _customPlot.axisRect()->insetLayout()->addElement(_customPlot.legend, Qt::AlignRight);
+        _customPlot.plotLayout()->removeAt(_customPlot.plotLayout()->rowColToIndex(0, 1));
+        // Destroy the extra legend column
         _customPlot.plotLayout()->simplify();
     }
 
@@ -155,8 +216,7 @@ void CorrelationPlotItem::buildPlot()
             populateStdErrorPlot();
     }
 
-    if(_customPlot.graphCount() > 0 || _customPlot.plottableCount() > 0)
-        _customPlot.legend->setVisible(_showLegend);
+    configureLegend();
 
     QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
     _customPlot.xAxis->setTicker(categoryTicker);
