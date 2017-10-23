@@ -84,6 +84,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/rectangle.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/sphere.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/scene.h
+    ${CMAKE_CURRENT_LIST_DIR}/rendering/screenshotrenderer.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/shadertools.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/transition.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/availabletransformsmodel.h
@@ -194,6 +195,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/arrow.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/rectangle.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/primitives/sphere.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/rendering/screenshotrenderer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rendering/transition.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/availabletransformsmodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformconfig.cpp
