@@ -6,8 +6,13 @@ set INSTALLER_DIR=installer
 rmdir /s /q %INSTALLER_DIR%
 mkdir %INSTALLER_DIR%
 copy %BUILD_DIR%\%PRODUCT_NAME%.exe %INSTALLER_DIR%\
+
 mkdir %INSTALLER_DIR%\plugins
 xcopy "%BUILD_DIR%\plugins\*.dll" %INSTALLER_DIR%\plugins
+
+mkdir %INSTALLER_DIR%\examples
+xcopy "source\app\examples\*.*" %INSTALLER_DIR%\examples
+
 copy %BUILD_DIR%\CrashReporter.exe %INSTALLER_DIR%\
 
 set QML_DIRS=
