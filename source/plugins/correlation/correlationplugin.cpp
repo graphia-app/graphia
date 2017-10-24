@@ -203,18 +203,18 @@ std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pears
 
     std::atomic<uint64_t> cost(0);
 
-    auto results = ThreadPool(QStringLiteral("PearsonCor")).concurrent_for(_dataRows.begin(), _dataRows.end(),
-    [&](std::vector<DataRow>::iterator rowAIt)
+    auto results = ThreadPool(QStringLiteral("PearsonCor")).concurrent_for(_dataRows.cbegin(), _dataRows.cend(),
+    [&](std::vector<DataRow>::const_iterator rowAIt)
     {
-        auto& rowA = *rowAIt;
+        const auto& rowA = *rowAIt;
         std::vector<std::tuple<NodeId, NodeId, double>> edges;
 
         if(cancelled())
             return edges;
 
-        for(auto rowB : make_iterator_range(rowAIt + 1, _dataRows.end()))
+        for(const auto& rowB : make_iterator_range(rowAIt + 1, _dataRows.cend()))
         {
-            double productSum = std::inner_product(rowA.begin(), rowA.end(), rowB.begin(), 0.0);
+            double productSum = std::inner_product(rowA.cbegin(), rowA.cend(), rowB.cbegin(), 0.0);
             double numerator = (_numColumns * productSum) - (rowA._sum * rowB._sum);
             double denominator = rowA._variability * rowB._variability;
 

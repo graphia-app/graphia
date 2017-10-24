@@ -89,6 +89,9 @@ private:
         DataIterator begin() { return _data.begin(); }
         DataIterator end() { return _data.end(); }
 
+        ConstDataIterator cbegin() const { return _data.cbegin(); }
+        ConstDataIterator cend() const { return _data.cend(); }
+
         DataIterator sortedBegin() { return _sortedData.begin(); }
         DataIterator sortedEnd() { return _sortedData.end(); }
 
