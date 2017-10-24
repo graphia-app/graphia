@@ -243,7 +243,7 @@ ApplicationWindow
 
         property var fileOpenInitialFolder
         property string recentFiles
-        property var firstOpen
+        property bool firstOpen
     }
 
     Preferences

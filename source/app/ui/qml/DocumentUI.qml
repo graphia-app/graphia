@@ -804,7 +804,7 @@ Item
         section: "misc"
 
         property var fileSaveInitialFolder
-        property var firstOpen
+        property bool firstOpen
     }
 
     // This is only here to get at the default values of its properties
@@ -1194,34 +1194,31 @@ Item
 
     Tutorial
     {
-        visible: misc.firstOpen
+        Component.onCompleted:
+        {
+            if(misc.firstOpen)
+            {
+                misc.firstOpen = false;
+                start();
+            }
+        }
 
         Hubble
         {
-            id: introHubble
-            visible: false
             title: qsTr("Introduction")
             x: 10
             y: 10
             Text
             {
                 textFormat: Text.StyledText
-                text: qsTr("As this is your first time openining Graphia we have opened an example Graph for you<br>" +
+                text: qsTr("As this is your first time starting Graphia we have opened an example Graph for you<br>" +
                       "The Graph represents the <b>London Tube System and River Buses!</b><br><br>" +
                       "Click next to learn about navigation and the key elements of a Graph")
-            }
-            Component.onCompleted:
-            {
-                if(misc.firstOpen === "true")
-                    visible = true;
-                misc.firstOpen = false;
             }
         }
 
         Hubble
         {
-            id: nodeEdgesHubble
-            visible: false
             title: qsTr("Nodes and Edges")
             x: (root.width * 0.5) - childrenRect.width * 0.5
             y: 10
@@ -1274,8 +1271,6 @@ Item
 
         Hubble
         {
-            id: overviewHubble
-            visible: false
             title: qsTr("Overview Mode")
             x: (root.width * 0.5) - childrenRect.width * 0.5;
             y: 10
@@ -1311,7 +1306,6 @@ Item
             }
             onNextClicked:
             {
-                overviewHubble.visible = false;
                 if(root.pluginPoppedOut)
                 {
                     pluginWindow.requestActivate();
@@ -1323,15 +1317,12 @@ Item
                 {
                     pluginHubble.target = plugin.content.toolStrip;
                 }
-
-                pluginHubble.visible = true;
             }
         }
 
         Hubble
         {
             id: pluginHubble
-            visible: false
             title: qsTr("Node Attributes")
             alignment: Qt.AlignTop
             RowLayout
@@ -1353,8 +1344,6 @@ Item
 
         Hubble
         {
-            id: transformHubble
-            visible: false
             title: qsTr("Transforms")
             target: transforms
             alignment: Qt.AlignLeft | Qt.AlignBottom
@@ -1393,8 +1382,6 @@ Item
 
         Hubble
         {
-            id: visualisationsHubble
-            visible: false
             title: qsTr("Visualisations")
             target: visualisations
             alignment: Qt.AlignLeft | Qt.AlignTop
@@ -1429,8 +1416,6 @@ Item
 
         Hubble
         {
-            id: findHubble
-            visible: false
             title: qsTr("Search Graph")
             target: find
             alignment: Qt.AlignBottom | Qt.AlignRight
@@ -1451,12 +1436,9 @@ Item
 
         Hubble
         {
-            id: conclusionHubble
-            visible: false
             title: qsTr("Conclusion")
             x: (root.width * 0.5) - childrenRect.width * 0.5;
             y: 10
-            displayClose: true
             RowLayout
             {
                 spacing: 10
@@ -1468,10 +1450,6 @@ Item
                           "Utilising Transforms and Visualisations is key to getting the most from your Graph<br><br>" +
                           "Click close to complete the tutorial")
                 }
-            }
-            onCloseClicked:
-            {
-                visible = false;
             }
         }
     }

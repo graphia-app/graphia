@@ -2,89 +2,90 @@ import QtQuick 2.0
 
 Item
 {
-    property int visibleHubbleId: 0
-    property Item currentHubble: { return hubbles[visibleHubbleId] }
-    default property list<Item> hubbles
-
-    onVisibleChanged:
+    property int visibleHubbleId: -1
+    property Item currentHubble:
     {
-        if(visible)
-        {
-            currentHubble.opacity = 1.0;
-            currentHubble.visible = true;
-        }
-        else
-        {
-            currentHubble.opacity = 0.0;
-            currentHubble.visible = false;
-        }
+        if(visibleHubbleId < 0 || visibleHubbleId >= hubbles.length)
+            return null;
+
+        return hubbles[visibleHubbleId];
     }
+
+    property bool _hasNextHubble:
+    {
+        return visibleHubbleId < hubbles.length - 1;
+    }
+
+    default property list<Item> hubbles
 
     onHubblesChanged:
     {
-        init();
+        initialise();
     }
 
     Component.onCompleted:
     {
-        init();
+        initialise();
     }
 
-    function init()
+    function reset()
     {
+        closeCurrentHubble();
+        visibleHubbleId = -1;
+    }
+
+    function start()
+    {
+        reset();
+        gotoNextHubble();
+    }
+
+    function initialise()
+    {
+        reset();
+
         for(var i = 0; i < hubbles.length; i++)
         {
             hubbles[i].parent = parent;
+            hubbles[i].opacity = 0.0;
             hubbles[i].visible = false;
-            currentHubble.opacity = 0.0;
-        }
-        currentHubble.displayNext = true;
-        currentHubble.nextClicked.connect(nextHubble);
-        currentHubble.skipClicked.connect(skipAll);
-
-        if(visible)
-        {
-            currentHubble.opacity = 1.0;
-            currentHubble.visible = true;
-        }
-        else
-        {
-            currentHubble.opacity = 0.0;
-            currentHubble.visible = false;
         }
     }
 
-    function nextHubble()
+    function gotoNextHubble()
     {
-        currentHubble.nextClicked.disconnect(nextHubble);
-        currentHubble.skipClicked.disconnect(skipAll);
+        closeCurrentHubble();
 
-        if(visibleHubbleId < hubbles.length - 1)
+        if(_hasNextHubble)
         {
-            currentHubble.opacity = 0;
-            currentHubble.visible = false;
-
             visibleHubbleId++;
 
-            currentHubble.displayNext = true;
-            currentHubble.nextClicked.connect(nextHubble);
-            currentHubble.skipClicked.connect(skipAll);
-            currentHubble.visible = true;
+            if(_hasNextHubble)
+            {
+                currentHubble.displayNext = true;
+                currentHubble.nextClicked.connect(gotoNextHubble);
+                currentHubble.skipClicked.connect(closeCurrentHubble);
+            }
+            else
+            {
+                currentHubble.displayNext = false;
+                currentHubble.displayClose = true;
+                currentHubble.closeClicked.connect(closeCurrentHubble);
+            }
+
             currentHubble.opacity = 1.0;
-        }
-        if(visibleHubbleId === hubbles.length - 1)
-        {
-            currentHubble.displayNext = false;
-            currentHubble.displayClose = true;
-            currentHubble.closeClicked.connect(skipAll);
+            currentHubble.visible = true;
         }
     }
 
-    function skipAll()
+    function closeCurrentHubble()
     {
-        currentHubble.nextClicked.disconnect(nextHubble);
-        currentHubble.opacity = 0;
-        currentHubble.visible = false;
-        visibleHubbleId = 0;
+        if(currentHubble !== null)
+        {
+            currentHubble.nextClicked.disconnect(gotoNextHubble);
+            currentHubble.skipClicked.disconnect(closeCurrentHubble);
+            currentHubble.opacity = 0.0;
+            currentHubble.visible = false;
+        }
     }
 }
