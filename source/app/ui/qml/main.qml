@@ -139,9 +139,9 @@ ApplicationWindow
                 Window.Maximized : Window.Windowed;
         }
 
-        mainWindow.visible = true;
-
         application.tryToAuthenticateWithCachedCredentials();
+
+        mainWindow.visible = true;
 
         if(misc.firstOpen)
         {
