@@ -59,7 +59,7 @@ isEmpty(_VERSION) {
 
 _COPYRIGHT = $$(COPYRIGHT)
 isEmpty(_COPYRIGHT) {
-    _COPYRIGHT = "Copyright notice"
+    _COPYRIGHT = "(c) Copyright notice"
 }
 
 DEFINES += \
