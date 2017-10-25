@@ -15,9 +15,9 @@ cp -r plugins/*.dylib ${PRODUCT_NAME}.app/Contents/PlugIns/
 cp CrashReporter.app/Contents/MacOS/CrashReporter \
   ${PRODUCT_NAME}.app/Contents/MacOS/
 
-mkdir -p ${PRODUCT_NAME}.app/Resources
+mkdir -p ${PRODUCT_NAME}.app/Contents/Resources
 cp -r ../source/app/examples \
-  ${PRODUCT_NAME}.app/Resources
+  ${PRODUCT_NAME}.app/Contents/Resources
 
 QML_DIRS=$(find ../source -name "*.qml" | xargs -n1 dirname | \
   sort | uniq | sed -e 's/\(^.*$\)/-qmldir=\1/')
