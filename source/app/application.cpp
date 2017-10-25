@@ -48,6 +48,11 @@ IPlugin* Application::pluginForName(const QString& pluginName) const
     return nullptr;
 }
 
+QString Application::resourcesDirectory()
+{
+    return qApp->applicationDirPath();
+}
+
 bool Application::canOpen(const QString& urlTypeName) const
 {
     if(!_auth.state())

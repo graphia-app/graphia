@@ -132,7 +132,7 @@ public:
 
     static QString nativeExtension() { return name().toLower(); }
 
-    static QString resourcesDirectory() { return qApp->applicationDirPath(); }
+    static QString resourcesDirectory();
 
     Q_INVOKABLE bool canOpen(const QString& urlTypeName) const;
     Q_INVOKABLE bool canOpenAnyOf(const QStringList& urlTypeNames) const;
