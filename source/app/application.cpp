@@ -48,10 +48,30 @@ IPlugin* Application::pluginForName(const QString& pluginName) const
     return nullptr;
 }
 
+#ifdef Q_OS_MAC
+#include <corefoundation/CFBundle.h>
+
+QString Application::resourcesDirectory()
+{
+    CFURLRef resourcesURLRef = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
+    CFURLRef absoluteResourcesURLRef = CFURLCopyAbsoluteURL(resourcesURLRef);
+    CFStringRef pathCFString = CFURLCopyFileSystemPath(absoluteResourcesURLRef, kCFURLPOSIXPathStyle);
+
+    QString path = CFStringGetCStringPtr(pathCFString, CFStringGetSystemEncoding());
+
+    CFRelease(pathCFString);
+    CFRelease(absoluteResourcesURLRef);
+    CFRelease(resourcesURLRef);
+
+    return path;
+}
+
+#else
 QString Application::resourcesDirectory()
 {
     return qApp->applicationDirPath();
 }
+#endif
 
 bool Application::canOpen(const QString& urlTypeName) const
 {
