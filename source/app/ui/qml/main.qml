@@ -145,7 +145,9 @@ ApplicationWindow
 
         if(misc.firstOpen)
         {
-            var exampleFile = qmlUtils.urlForFileName(application.directory + "/examples/London_Tube_River_Bus.graphia");
+            var exampleFile = qmlUtils.urlForFileName(application.resourcesDirectory +
+                "/examples/London_Tube_River_Bus.graphia");
+
             if(qmlUtils.fileUrlExists(exampleFile))
             {
                 openFileOfTypeWithPluginAndParameters(exampleFile,

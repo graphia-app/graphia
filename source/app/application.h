@@ -106,7 +106,7 @@ class Application : public QObject
     Q_PROPERTY(QString version READ version CONSTANT)
     Q_PROPERTY(QString copyright READ copyright CONSTANT)
     Q_PROPERTY(QString nativeExtension READ nativeExtension CONSTANT)
-    Q_PROPERTY(QString directory READ directory CONSTANT)
+    Q_PROPERTY(QString resourcesDirectory READ resourcesDirectory CONSTANT)
 
 
     Q_PROPERTY(QStringList nameFilters READ nameFilters NOTIFY nameFiltersChanged)
@@ -132,7 +132,7 @@ public:
 
     static QString nativeExtension() { return name().toLower(); }
 
-    static QString directory() { return qApp->applicationDirPath(); }
+    static QString resourcesDirectory() { return qApp->applicationDirPath(); }
 
     Q_INVOKABLE bool canOpen(const QString& urlTypeName) const;
     Q_INVOKABLE bool canOpenAnyOf(const QStringList& urlTypeNames) const;
