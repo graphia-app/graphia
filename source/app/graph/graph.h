@@ -3,6 +3,7 @@
 
 #include "shared/graph/igraph.h"
 #include "shared/graph/elementid.h"
+#include "shared/graph/elementid_containers.h"
 #include "elementiddistinctsetcollection.h"
 #include "graphconsistencychecker.h"
 

@@ -1,5 +1,6 @@
 #include "graph.h"
 #include "shared/graph/igrapharray.h"
+#include "shared/graph/elementid_debug.h"
 #include "componentmanager.h"
 
 #include <QtGlobal>

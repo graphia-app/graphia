@@ -2,6 +2,7 @@
 #define SEARCHMANAGER_H
 
 #include "shared/graph/elementid.h"
+#include "shared/graph/elementid_containers.h"
 
 #include <QObject>
 

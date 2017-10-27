@@ -2,6 +2,7 @@
 #define ISELECTIONMANAGER_H
 
 #include "shared/graph/elementid.h"
+#include "shared/graph/elementid_containers.h"
 
 class ISelectionManager
 {

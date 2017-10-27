@@ -6,6 +6,8 @@
 
 #include <vector>
 
+class QString;
+
 class INode
 {
 public:

@@ -7,6 +7,7 @@
 
 #include "thirdparty/utfcpp/utf8.h"
 
+#include <QObject>
 #include <QUrl>
 
 #include <string>

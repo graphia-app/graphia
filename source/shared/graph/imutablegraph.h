@@ -2,6 +2,8 @@
 #define IMUTABLEGRAPH_H
 
 #include "shared/graph/elementid.h"
+#include "shared/graph/elementid_containers.h"
+
 #include "shared/graph/igraph.h"
 
 #include <functional>

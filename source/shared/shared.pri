@@ -57,7 +57,9 @@ HEADERS += \
     $$PWD/utils/random.h \
     $$PWD/utils/thread.h \
     $$PWD/utils/string.h \
-    $$PWD/utils/color.h
+    $$PWD/utils/color.h \
+    $$PWD/graph/elementid_containers.h \
+    $$PWD/graph/elementid_debug.h
 
 SOURCES += \
     $$PWD/graph/elementtype.cpp \
