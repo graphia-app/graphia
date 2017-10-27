@@ -62,7 +62,7 @@ Item
         tableView._updateColumnVisibility();
     }
 
-    property bool _sortEnabled
+    property bool _sortEnabled: true
 
     Connections
     {
