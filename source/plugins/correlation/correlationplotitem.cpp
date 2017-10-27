@@ -136,7 +136,7 @@ void CorrelationPlotItem::configureLegend()
         QFontMetrics metrics(_defaultFont9Pt);
         double legendItemSize = (metrics.height() + 5);
         int projectedItemHeight = _customPlot.height();
-        if (_customPlot.plotLayout()->rowCount() > 1)
+        if(_customPlot.plotLayout()->rowCount() > 1)
             projectedItemHeight -= metrics.height() + _customPlot.plotLayout()->rowSpacing() + 4;
 
         int maxLegendCount = (projectedItemHeight - (_customPlot.legend->margins().top() +
@@ -144,14 +144,14 @@ void CorrelationPlotItem::configureLegend()
 
         // HACK: Use a large bottom margin to stop the legend filling the whole vertical space
         // and equally spacing elements. It looks weird. Clamp to maxLegendCount
-        double marginBuffer = projectedItemHeight - (legendItemSize * std::min(_customPlot.plottableCount(), maxLegendCount)) -
-                (_customPlot.legend->margins().top()) -
-                (_customPlot.legend->margins().bottom());
-        subLayout->setMargins(QMargins(0, marginBuffer * 0.5, 5, marginBuffer * 0.5));
+        double marginBuffer = projectedItemHeight -
+                (legendItemSize * std::min(_customPlot.plottableCount(), maxLegendCount)) -
+                (_customPlot.legend->margins().top() + _customPlot.legend->margins().bottom());
+        subLayout->setMargins(QMargins(0, marginBuffer / 2, 5, marginBuffer / 2));
 
         // Populate the legend
         _customPlot.legend->clear();
-        for (int i = 0; i < std::min(_customPlot.plottableCount(), maxLegendCount); ++i)
+        for(int i = 0; i < std::min(_customPlot.plottableCount(), maxLegendCount); ++i)
             _customPlot.plottable(i)->addToLegend(_customPlot.legend);
 
         // Cap the legend count to only those visible
@@ -585,22 +585,22 @@ void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, QString name =
         stdDevBars->setDataPlottable(_customPlot.plottable(0));
         stdDevBars->setData(stdDevs);
     }
-    else if (visualType == PlotDispersionVisualType::GraphFill)
+    else if(visualType == PlotDispersionVisualType::Area)
     {
         QCPGraph* devTop = new QCPGraph(_customPlot.xAxis, _customPlot.yAxis);
-        devTop->setName(QStringLiteral("%1 Top").arg(name));
         QCPGraph* devBottom = new QCPGraph(_customPlot.xAxis, _customPlot.yAxis);
+        devTop->setName(QStringLiteral("%1 Top").arg(name));
         devBottom->setName(QStringLiteral("%1 Bottom").arg(name));
 
-        devTop->setChannelFillGraph(devBottom);
-        auto fillColour = _customPlot.plottable(0)->brush().color().lighter(180);
+        auto fillColour = _customPlot.plottable(0)->pen().color();
+        auto penColour = _customPlot.plottable(0)->pen().color().lighter(150);
         fillColour.setAlpha(50);
-        auto penColour = _customPlot.plottable(0)->brush().color().lighter(195);
         penColour.setAlpha(120);
 
+        devTop->setChannelFillGraph(devBottom);
         devTop->setBrush(QBrush(fillColour));
-
         devTop->setPen(QPen(penColour));
+
         devBottom->setPen(QPen(penColour));
 
         devBottom->setSelectable(QCP::SelectionType::stNone);
@@ -608,13 +608,14 @@ void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, QString name =
 
         auto topErr = QVector<double>(static_cast<int>(_columnCount));
         auto bottomErr = QVector<double>(static_cast<int>(_columnCount));
-        for (int i = 0; i < _columnCount; ++i)
+
+        for(int i = 0; i < _columnCount; ++i)
         {
             topErr[i] = _customPlot.plottable(0)->interface1D()->dataMainValue(i) + stdDevs[i];
             bottomErr[i] = _customPlot.plottable(0)->interface1D()->dataMainValue(i) - stdDevs[i];
         }
 
-        // xData is just the column indecides
+        // xData is just the column indices
         QVector<double> xData(static_cast<int>(_columnCount));
         std::iota(std::begin(xData), std::end(xData), 0);
 

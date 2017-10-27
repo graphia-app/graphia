@@ -142,11 +142,10 @@ PluginContent
             enabled: plot.plotDispersionType !== PlotDispersionType.None
             text: qsTr("&Area")
             checkable: true
-            checked: plot.plotDispersionVisualType === PlotDispersionVisualType.GraphFill
-            onTriggered: { plot.plotDispersionVisualType = PlotDispersionVisualType.GraphFill; }
+            checked: plot.plotDispersionVisualType === PlotDispersionVisualType.Area
+            onTriggered: { plot.plotDispersionVisualType = PlotDispersionVisualType.Area; }
         }
     }
-
 
     ExclusiveGroup
     {

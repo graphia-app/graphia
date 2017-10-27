@@ -33,7 +33,7 @@ DEFINE_QML_ENUM(Q_GADGET, PlotDispersionType,
 
 DEFINE_QML_ENUM(Q_GADGET, PlotDispersionVisualType,
                 Bars,
-                GraphFill,
+                Area,
                 StdDev);
 
 class CorrelationPlotItem : public QQuickPaintedItem
