@@ -1,11 +1,8 @@
 #ifndef ELEMENTID_H
 #define ELEMENTID_H
 
-namespace std { template<typename> struct hash; }
-
 template<typename T> class ElementId
 {
-    friend std::hash<ElementId<T>>;
 private:
     static const int NullValue = -1;
     int _value;

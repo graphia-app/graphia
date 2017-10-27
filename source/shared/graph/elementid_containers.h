@@ -7,20 +7,16 @@
 #include <unordered_map>
 #include <functional>
 
-namespace std
+template<typename T> struct ElementIdHash
 {
-    template<typename T> struct hash<ElementId<T>>
+    size_t operator()(const ElementId<T>& x) const noexcept
     {
-    public:
-        size_t operator()(const ElementId<T>& x) const noexcept
-        {
-            return x._value;
-        }
-    };
-}
+        return static_cast<size_t>(x);
+    }
+};
 
-template<typename T> using ElementIdSet = std::unordered_set<T, std::hash<ElementId<T>>>;
-template<typename K, typename V> using ElementIdMap = std::unordered_map<K, V, std::hash<ElementId<K>>>;
+template<typename T> using ElementIdSet = std::unordered_set<T, ElementIdHash<T>>;
+template<typename K, typename V> using ElementIdMap = std::unordered_map<K, V, ElementIdHash<K>>;
 
 using NodeIdSet = ElementIdSet<NodeId>;
 using EdgeIdSet = ElementIdSet<EdgeId>;

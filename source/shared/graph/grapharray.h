@@ -7,6 +7,8 @@
 #include <vector>
 #include <mutex>
 
+#include <QDebug>
+
 struct LockingGraphArray {};
 
 // A lock that does nothing if the second parameter isn't LockingGraphArray
