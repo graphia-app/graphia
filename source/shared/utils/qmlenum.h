@@ -3,7 +3,7 @@
 
 #include <QQmlEngine>
 
-#include "shared/utils/utils.h"
+#include "shared/utils/string.h"
 
 #ifndef APP_URI
 #define APP_URI "uri.missing"

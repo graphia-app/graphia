@@ -1,5 +1,4 @@
 #include "layoutsettings.h"
-#include "shared/utils/utils.h"
 
 float LayoutSettings::value(const QString& name) const
 {

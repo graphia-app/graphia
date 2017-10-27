@@ -5,8 +5,6 @@
 
 #include "shared/commands/icommand.h"
 
-#include "shared/utils/utils.h"
-
 #include <functional>
 
 TransformedGraph::TransformedGraph(GraphModel& graphModel, const MutableGraph& source) :

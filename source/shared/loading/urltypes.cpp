@@ -1,6 +1,6 @@
 #include "urltypes.h"
 
-#include "shared/utils/utils.h"
+#include "shared/utils/container.h"
 
 #include <QFileInfo>
 #include <QUrl>

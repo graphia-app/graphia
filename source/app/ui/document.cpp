@@ -5,7 +5,7 @@
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/flags.h"
-#include "shared/utils/utils.h"
+#include "shared/utils/color.h"
 
 #include "graph/graphmodel.h"
 

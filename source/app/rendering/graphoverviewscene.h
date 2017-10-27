@@ -78,8 +78,8 @@ private:
     bool _autoZooming = true;
     QPointF _offset;
 
-    ComponentArray<float, u::Locking> _previousComponentAlpha;
-    ComponentArray<float, u::Locking> _componentAlpha;
+    ComponentArray<float, LockingGraphArray> _previousComponentAlpha;
+    ComponentArray<float, LockingGraphArray> _componentAlpha;
 
     std::atomic<bool> _nextComponentLayoutDataChanged;
     ComponentLayoutData _nextComponentLayoutData;

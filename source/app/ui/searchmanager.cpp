@@ -3,8 +3,6 @@
 #include "graph/graphmodel.h"
 #include "attributes/conditionfncreator.h"
 
-#include "shared/utils/utils.h"
-
 #include <QRegularExpression>
 
 #include <algorithm>

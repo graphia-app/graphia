@@ -6,6 +6,8 @@
 #include "shared/graph/igraphmodel.h"
 #include "shared/attributes/valuetype.h"
 
+#include "shared/utils/container.h"
+
 NodeAttributeTableModel::NodeAttributeTableModel() :
     QAbstractTableModel()
 {}

@@ -4,10 +4,22 @@
 #include "shared/graph/igrapharray.h"
 #include "shared/graph/igrapharrayclient.h"
 
-#include "shared/utils/utils.h"
-
 #include <vector>
 #include <mutex>
+
+struct LockingGraphArray {};
+
+// A lock that does nothing if the second parameter isn't LockingGraphArray
+template<typename Mutex, typename L> struct _MaybeLock
+{
+    explicit _MaybeLock(Mutex&) {}
+};
+
+template<typename Mutex> struct _MaybeLock<Mutex, LockingGraphArray>
+{
+    std::unique_lock<Mutex> _lock;
+    explicit _MaybeLock(Mutex& mutex) : _lock(mutex) {}
+};
 
 template<typename Index, typename Element, typename Locking = void>
 class GenericGraphArray : public IGraphArray
@@ -16,7 +28,7 @@ private:
     static_assert(std::is_nothrow_move_constructible<Element>::value,
                   "GraphArray Element needs a noexcept move constructor");
 
-    using MaybeLock = u::MaybeLock<std::recursive_mutex, Locking>;
+    using MaybeLock = _MaybeLock<std::recursive_mutex, Locking>;
 
 protected:
     const IGraphArrayClient* _graph;

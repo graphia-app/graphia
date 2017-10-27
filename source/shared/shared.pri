@@ -52,7 +52,12 @@ HEADERS += \
     $$PWD/commands/compoundcommand.h \
     $$PWD/utils/qmlutils.h \
     $$PWD/loading/progressfn.h \
-    $$PWD/ui/idocument.h
+    $$PWD/ui/idocument.h \
+    $$PWD/utils/container.h \
+    $$PWD/utils/random.h \
+    $$PWD/utils/thread.h \
+    $$PWD/utils/string.h \
+    $$PWD/utils/color.h
 
 SOURCES += \
     $$PWD/graph/elementtype.cpp \
@@ -71,7 +76,10 @@ SOURCES += \
     $$PWD/utils/preferences.cpp \
     $$PWD/utils/semaphore.cpp \
     $$PWD/utils/threadpool.cpp \
-    $$PWD/utils/utils.cpp
+    $$PWD/utils/random.cpp \
+    $$PWD/utils/thread.cpp \
+    $$PWD/utils/string.cpp \
+    $$PWD/utils/color.cpp
 
 RESOURCES += \
     $$PWD/ui/shared.qrc \

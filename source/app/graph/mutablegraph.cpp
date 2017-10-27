@@ -1,8 +1,6 @@
 #include "mutablegraph.h"
 #include "componentmanager.h"
 
-#include "shared/utils/utils.h"
-
 MutableGraph::MutableGraph(const MutableGraph& other)
 {
     clone(other);

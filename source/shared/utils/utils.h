@@ -1,40 +1,11 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "pair_iterator.h"
-
-#include <QVector2D>
-#include <QVector3D>
-#include <QMatrix4x4>
-#include <QQuaternion>
-#include <QColor>
-#include <QString>
-#include <QStringList>
-#include <QVariantList>
-
-#include <type_traits>
-#include <algorithm>
-#include <vector>
-#include <mutex>
-#include <string>
-
 namespace u
 {
-    float rand(float low, float high);
-    int rand(int low, int high);
-
-    QVector2D randQVector2D(float low, float high);
-    QVector3D randQVector3D(float low, float high);
-    QColor randQColor();
-
     template<typename T> T interpolate(const T& a, const T& b, float f)
     {
         return a + ((b - a) * f);
-    }
-
-    template<typename T> bool valueIsCloseToZero(T value)
-    {
-        return qFuzzyCompare(1, value + 1);
     }
 
     template<typename T> T clamp(T min, T max, T value)
@@ -63,21 +34,18 @@ namespace u
         return (a > 0 && b > 0) || (a <= 0 && b <= 0);
     }
 
-    int smallestPowerOf2GreaterThan(int x);
-
-    int currentThreadId();
-    void setCurrentThreadName(const QString& name);
-    const QString currentThreadName();
-    QString parentProcessName();
-
-    QQuaternion matrixToQuaternion(const QMatrix4x4& m);
-
-    template<typename T> void checkEqual(T a, T b)
+    static inline int smallestPowerOf2GreaterThan(int x)
     {
-        // Hopefully this function call elides to nothing when in release mode
-        Q_ASSERT(a == b);
-        Q_UNUSED(a);
-        Q_UNUSED(b);
+        if(x < 0)
+            return 0;
+
+        x--;
+        x |= x >> 1;
+        x |= x >> 2;
+        x |= x >> 4;
+        x |= x >> 8;
+        x |= x >> 16;
+        return x + 1;
     }
 
     template<typename T>
@@ -85,167 +53,6 @@ namespace u
     {
         return !a != !b;
     }
-
-    template<typename C, typename T> void removeByValue(C& container, const T& value)
-    {
-        container.erase(std::remove(container.begin(), container.end(), value), container.end());
-    }
-
-    template<typename C, typename T> size_t indexOf(C& container, const T& value)
-    {
-        return std::distance(container.begin(), std::find(container.begin(), container.end(), value));
-    }
-
-    template<typename C, typename T>
-    auto contains(const C& container, const T& value, int)
-    -> decltype(container.find(value), bool())
-    {
-        return container.find(value) != container.end();
-    }
-
-    template<typename C, typename T>
-    auto contains(const C& container, const T& value, long)
-    -> decltype(std::find(container.begin(), container.end(), value), bool())
-    {
-        return std::find(container.begin(), container.end(), value) != container.end();
-    }
-
-    template<typename C, typename T> bool contains(const C& container, const T& value)
-    {
-        return contains(container, value, 0);
-    }
-
-    template<typename C, typename T> bool containsAnyOf(const C& container, std::initializer_list<T>&& values)
-    {
-        return std::any_of(values.begin(), values.end(), [&](const auto& value)
-        {
-           return contains(container, value, 0);
-        });
-    }
-
-    template<typename C, typename T> bool containsAllOf(const C& container, std::initializer_list<T>&& values)
-    {
-        return std::all_of(values.begin(), values.end(), [&](const auto& value)
-        {
-           return contains(container, value, 0);
-        });
-    }
-
-    template<typename C, typename T> bool containsKey(const C& container, const T& key)
-    {
-        return contains(make_key_wrapper(container), key, 0);
-    }
-
-    template<typename C, typename T> bool containsValue(const C& container, const T& value)
-    {
-        return contains(make_value_wrapper(container), value, 0);
-    }
-
-    template<typename T,
-             template<typename, typename...> class C1, typename... Args1,
-             template<typename, typename...> class C2, typename... Args2>
-    std::vector<T> setDifference(const C1<T, Args1...>& a, const C2<T, Args2...>& b)
-    {
-        std::vector<T> result;
-
-        for(const auto& value : a)
-        {
-            if(!contains(b, value))
-                result.emplace_back(value);
-        }
-
-        return result;
-    }
-
-    template<typename T,
-             template<typename, typename...> class C1, typename... Args1,
-             template<typename, typename...> class C2, typename... Args2>
-    bool setsDiffer(const C1<T, Args1...>& a, const C2<T, Args2...>& b)
-    {
-        if(a.size() != b.size())
-            return true;
-
-        for(const auto& value : a)
-        {
-            if(!contains(b, value))
-                return true;
-        }
-
-        return false;
-    }
-
-    template<typename T,
-             template<typename, typename...> class C1, typename... Args1,
-             template<typename, typename...> class C2, typename... Args2>
-    bool setsEqual(const C1<T, Args1...>& a, const C2<T, Args2...>& b)
-    {
-        return !setsDiffer(a, b);
-    }
-
-    template<typename T,
-             template<typename, typename...> class C1, typename... Args1,
-             template<typename, typename...> class C2, typename... Args2>
-    std::vector<T> setIntersection(const C1<T, Args1...>& a, const C2<T, Args2...>& b)
-    {
-        std::vector<T> result;
-
-        for(const auto& value : a)
-        {
-            if(contains(b, value))
-                result.emplace_back(value);
-        }
-
-        return result;
-    }
-
-    template<typename T, template<typename, typename...> class C, typename... Args>
-    std::vector<T> keysFor(const C<T, Args...>& container)
-    {
-        std::vector<T> keys;
-        for(const auto& key : make_key_wrapper(container))
-            keys.emplace_back(key);
-        return keys;
-    }
-
-    struct Locking {};
-
-    // A lock that does nothing if the second parameter isn't Locking
-    template<typename Mutex, typename L> struct MaybeLock
-    {
-        explicit MaybeLock(Mutex&) {}
-    };
-
-    template<typename Mutex> struct MaybeLock<Mutex, Locking>
-    {
-        std::unique_lock<Mutex> _lock;
-        explicit MaybeLock(Mutex& mutex) : _lock(mutex) {}
-    };
-
-    template<typename C> int count(const C& c)
-    {
-        int n = 0;
-
-        for(auto& i : c)
-        {
-            Q_UNUSED(i);
-            n++;
-        }
-
-        return n;
-    }
-
-    bool isNumeric(const std::string& string);
-
-    constexpr bool static_strcmp(char const* a, char const* b)
-    {
-        return (*a && *b) ? (*a == *b && static_strcmp(a + 1, b + 1)) : (!*a && !*b);
-    }
-
-    QColor contrastingColor(const QColor& color);
-
-    std::vector<QString> toQStringVector(const QStringList& stringList);
-
-    std::istream& getline(std::istream& is, std::string& t);
 }
 
 #define ARRAY_SIZEOF(x) (sizeof(x)/sizeof((x)[0]))

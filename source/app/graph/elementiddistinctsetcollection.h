@@ -2,7 +2,7 @@
 #define ELEMENTIDDISTINCTSETCOLLECTION
 
 #include "shared/graph/elementid.h"
-#include "shared/utils/utils.h"
+#include "shared/utils/container.h"
 
 #include <QDebug>
 

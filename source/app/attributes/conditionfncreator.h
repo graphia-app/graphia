@@ -6,7 +6,6 @@
 #include "shared/graph/elementid.h"
 #include "shared/graph/igraphcomponent.h"
 #include "graph/graphmodel.h"
-#include "shared/utils/utils.h"
 #include "transform/graphtransformconfig.h"
 #include "transform/graphtransformconfigparser.h"
 #include "attribute.h"

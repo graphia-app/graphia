@@ -188,7 +188,11 @@ public:
 
     static const int NUM_MULTISAMPLES = 4;
 
-    ComponentArray<MovablePointer<GraphComponentRenderer>, u::Locking>& componentRenderers() { return _componentRenderers; }
+    ComponentArray<MovablePointer<GraphComponentRenderer>, LockingGraphArray>& componentRenderers()
+    {
+        return _componentRenderers;
+    }
+
     GraphComponentRenderer* componentRendererForId(ComponentId componentId) const;
     Transition& transition() { return _transition; }
 
@@ -270,7 +274,7 @@ private:
     // able to use the existing renderers while this occurs. If the array stored
     // values, then the storage for the renderers themselves would potentially be
     // moved around, as opposed to just the storage for the pointers.
-    ComponentArray<MovablePointer<GraphComponentRenderer>, u::Locking> _componentRenderers;
+    ComponentArray<MovablePointer<GraphComponentRenderer>, LockingGraphArray> _componentRenderers;
     bool _transitionPotentiallyInProgress = false;
     DeferredExecutor _preUpdateExecutor;
 

@@ -3,7 +3,7 @@
 
 #include "shared/graph/imutablegraph.h"
 #include "shared/loading/iparser.h"
-#include "shared/utils/utils.h"
+#include "shared/utils/string.h"
 
 #include "thirdparty/utfcpp/utf8.h"
 

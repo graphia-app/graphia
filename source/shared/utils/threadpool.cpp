@@ -1,6 +1,6 @@
 #include "threadpool.h"
 
-#include "utils.h"
+#include "thread.h"
 
 ThreadPool::ThreadPool(const QString& threadNamePrefix, int numThreads) :
     _stop(false), _activeThreads(0)

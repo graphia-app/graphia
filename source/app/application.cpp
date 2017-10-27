@@ -2,7 +2,6 @@
 #include "crashtype.h"
 
 #include "shared/plugins/iplugin.h"
-#include "shared/utils/utils.h"
 
 #include "loading/loader.h"
 

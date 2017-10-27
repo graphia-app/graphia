@@ -1,6 +1,6 @@
 #include "visualisationconfig.h"
 
-#include "shared/utils/utils.h"
+#include "shared/utils/container.h"
 
 bool VisualisationConfig::Parameter::operator==(const VisualisationConfig::Parameter& other) const
 {

@@ -5,6 +5,8 @@
 #include "graph/graphmodel.h"
 #include "graph/componentmanager.h"
 
+#include "shared/utils/utils.h"
+
 #include <algorithm>
 
 #include <QObject>

@@ -11,6 +11,7 @@
 #include <vector>
 #include <unordered_set>
 #include <memory>
+#include <mutex>
 
 class GraphComponent;
 class ComponentManager;

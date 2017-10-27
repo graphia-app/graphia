@@ -2,6 +2,7 @@
 
 #include "shared/graph/imutablegraph.h"
 #include "shared/graph/igraphmodel.h"
+#include "shared/utils/container.h"
 
 void UserNodeData::initialise(IMutableGraph& mutableGraph)
 {

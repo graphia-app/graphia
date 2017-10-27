@@ -2,6 +2,9 @@
 
 #include "maths/constants.h"
 
+#include <QMatrix4x4>
+#include <QVector4D>
+
 void FastInitialLayout::positionNode(QVector3D& offsetPosition, const QMatrix4x4& orientationMatrix,
                                      const QVector3D& parentNodePosition, NodeId childNodeId,
                                      NodeArray<QVector3D>& directionNodeVectors)

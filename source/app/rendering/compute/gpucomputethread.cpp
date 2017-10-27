@@ -1,6 +1,6 @@
 #include "gpucomputethread.h"
 
-#include "shared/utils/utils.h"
+#include "shared/utils/thread.h"
 
 GPUComputeThread::GPUComputeThread() :
     _surface(std::make_unique<QOffscreenSurface>()),

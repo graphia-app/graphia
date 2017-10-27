@@ -5,6 +5,7 @@
 #include "shared/utils/threadpool.h"
 #include "shared/utils/iterator_range.h"
 #include "shared/utils/qmlenum.h"
+#include "shared/utils/container.h"
 
 #include "thirdparty/json/json_helper.h"
 

@@ -17,8 +17,6 @@
 
 #include "layout/collision.h"
 
-#include "shared/utils/utils.h"
-
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QtMath>

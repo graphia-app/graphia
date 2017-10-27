@@ -4,7 +4,6 @@
 #include "graph/mutablegraph.h"
 #include "transform/transformedgraph.h"
 
-#include "shared/utils/utils.h"
 #include "shared/utils/iterator_range.h"
 
 #include <algorithm>

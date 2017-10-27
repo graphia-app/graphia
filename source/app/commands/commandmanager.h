@@ -3,8 +3,6 @@
 
 #include "shared/commands/icommandmanager.h"
 
-#include "shared/utils/utils.h"
-
 #include <QtGlobal>
 #include <QObject>
 #include <QString>

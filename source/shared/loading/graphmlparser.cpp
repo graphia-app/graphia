@@ -3,7 +3,7 @@
 #include <QtXml/QXmlInputSource>
 #include <QDebug>
 #include <QUrl>
-#include <shared/utils/utils.h>
+#include <shared/utils/container.h>
 
 GraphMLHandler::GraphMLHandler(IMutableGraph &mutableGraph, const ProgressFn &progress,
                                UserNodeData* userNodeData, int lineCount)

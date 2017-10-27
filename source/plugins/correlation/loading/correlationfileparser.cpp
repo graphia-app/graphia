@@ -5,8 +5,6 @@
 
 #include "shared/loading/tabulardata.h"
 
-#include "shared/utils/utils.h"
-
 #include <QRect>
 
 #include <vector>

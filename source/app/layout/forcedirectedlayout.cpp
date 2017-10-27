@@ -3,7 +3,6 @@
 #include "barneshuttree.h"
 
 #include "shared/utils/threadpool.h"
-#include "shared/utils/utils.h"
 #include "shared/utils/preferences.h"
 
 template<typename T> float meanWeightedAvgBuffer(int start, int end, const T& buffer)
