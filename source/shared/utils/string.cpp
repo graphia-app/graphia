@@ -2,6 +2,8 @@
 
 #include <QStringList>
 
+#include <cmath>
+
 bool u::isNumeric(const std::string& string)
 {
     std::size_t pos;

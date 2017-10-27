@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <string>
+#include <vector>
 #include <istream>
 
 class QStringList;

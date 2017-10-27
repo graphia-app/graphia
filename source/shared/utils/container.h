@@ -4,6 +4,7 @@
 #include "pair_iterator.h"
 
 #include <algorithm>
+#include <vector>
 
 #include <QtGlobal>
 

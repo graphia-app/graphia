@@ -87,7 +87,7 @@ void u::setCurrentThreadName(const QString& name)
     SetThreadName(name.toLatin1().data());
 }
 
-const QString u::currentThreadName()
+QString u::currentThreadName()
 {
     // Windows doesn't really have a concept of named threads (see above), so use the ID instead
     return QString::number(u::currentThreadId());
@@ -130,7 +130,7 @@ QString u::parentProcessName()
 }
 #else
 void u::setCurrentThreadName(const QString&) {}
-const QString u::currentThreadName()
+QString u::currentThreadName()
 {
     return QString::number(u::currentThreadId());
 }
