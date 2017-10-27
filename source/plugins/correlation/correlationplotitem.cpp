@@ -119,7 +119,7 @@ void CorrelationPlotItem::wheelEvent(QWheelEvent* event)
 
 void CorrelationPlotItem::configureLegend()
 {
-    if((_customPlot.graphCount() > 0 || _customPlot.plottableCount() > 0) && _showLegend)
+    if(_customPlot.plottableCount() > 0 && _showLegend)
     {
         // Create a subLayout to position the Legend
         QCPLayoutGrid *subLayout = new QCPLayoutGrid;
@@ -127,24 +127,34 @@ void CorrelationPlotItem::configureLegend()
         _customPlot.plotLayout()->addElement(0, 1, subLayout);
         subLayout->addElement(0, 0, _customPlot.legend);
 
-        QFontMetrics metrics(_defaultFont9Pt);
-        double legendItemSize =  (metrics.height() + subLayout->rowSpacing());
+        // BIGGEST HACK
+        // Layouts and sizes aren't done until a replot is called, layout is performed on another
+        // thread which means it's too late to add or remove elements from the legend.
+        // The projected sizes for the legend layout are calculated here but will break
+        // if any additional rows are added to the plotLayout!!
 
-        int maxLegendCount = (_customPlot.height() - (_customPlot.legend->margins().top() +
-                _customPlot.legend->margins().bottom())) / legendItemSize;
+        QFontMetrics metrics(_defaultFont9Pt);
+        double legendItemSize = (metrics.height() + 5);
+        int projectedItemHeight = _customPlot.height();
+        if (_customPlot.plotLayout()->rowCount() > 1)
+            projectedItemHeight -= metrics.height() + _customPlot.plotLayout()->rowSpacing() + 4;
+
+        int maxLegendCount = (projectedItemHeight - (_customPlot.legend->margins().top() +
+                                                      _customPlot.legend->margins().bottom())) / legendItemSize;
 
         // HACK: Use a large bottom margin to stop the legend filling the whole vertical space
         // and equally spacing elements. It looks weird. Clamp to maxLegendCount
-        double marginBuffer = _customPlot.height() -
-                (legendItemSize * std::min(_customPlot.plottableCount(), maxLegendCount)) -
+        double marginBuffer = projectedItemHeight - (legendItemSize * std::min(_customPlot.plottableCount(), maxLegendCount)) -
                 (_customPlot.legend->margins().top()) -
                 (_customPlot.legend->margins().bottom());
+        subLayout->setMargins(QMargins(0, marginBuffer * 0.5, 5, marginBuffer * 0.5));
 
         // Populate the legend
         _customPlot.legend->clear();
         for (int i = 0; i < std::min(_customPlot.plottableCount(), maxLegendCount); ++i)
             _customPlot.plottable(i)->addToLegend(_customPlot.legend);
 
+        // Cap the legend count to only those visible
         if(_customPlot.plottableCount() > maxLegendCount)
         {
             auto* moreText = new QCPTextElement(&_customPlot);
@@ -161,8 +171,6 @@ void CorrelationPlotItem::configureLegend()
             _customPlot.legend->removeAt(maxLegendCount - 1);
             _customPlot.legend->addElement(moreText);
         }
-
-        subLayout->setMargins(QMargins(0, 5, 5, marginBuffer));
 
         _customPlot.plotLayout()->setColumnStretchFactor(0, 0.85);
         _customPlot.plotLayout()->setColumnStretchFactor(1, 0.15);
@@ -206,13 +214,13 @@ void CorrelationPlotItem::buildPlot()
     else
         populateLinePlot();
 
-    auto plotDeviationType = static_cast<PlotDeviationType>(_plotDeviationType);
+    auto plotDispersionType = static_cast<PlotDispersionType>(_plotDispersionType);
     if(plotAveragingType != PlotAveragingType::Individual &&
             plotAveragingType != PlotAveragingType::IQRPlot)
     {
-        if(plotDeviationType == PlotDeviationType::StdDev)
+        if(plotDispersionType == PlotDispersionType::StdDev)
             populateStdDevPlot();
-        else if(plotDeviationType == PlotDeviationType::StdErr)
+        else if(plotDispersionType == PlotDispersionType::StdErr)
             populateStdErrorPlot();
     }
 
@@ -266,6 +274,29 @@ void CorrelationPlotItem::buildPlot()
     _customPlot.setBackground(Qt::white);
 }
 
+void CorrelationPlotItem::setPlotDispersionVisualType(const int& plotDispersionVisualType)
+{
+    _plotDispersionVisualType = plotDispersionVisualType;
+    emit plotOptionsChanged();
+    refresh();
+}
+
+void CorrelationPlotItem::setYAxisLabel(const QString &plotYAxisLabel)
+{
+    _yAxisLabel = plotYAxisLabel;
+    _customPlot.yAxis->setLabel(_yAxisLabel);
+    emit plotOptionsChanged();
+    refresh();
+}
+
+void CorrelationPlotItem::setXAxisLabel(const QString &plotXAxisLabel)
+{
+    _xAxisLabel = plotXAxisLabel;
+    _customPlot.xAxis->setLabel(_xAxisLabel);
+    emit plotOptionsChanged();
+    refresh();
+}
+
 void CorrelationPlotItem::setPlotScaleType(const int &plotScaleType)
 {
     _plotScaleType = plotScaleType;
@@ -280,9 +311,9 @@ void CorrelationPlotItem::setPlotAveragingType(const int &plotAveragingType)
     refresh();
 }
 
-void CorrelationPlotItem::setPlotDeviationType(const int &plotDeviationType)
+void CorrelationPlotItem::setPlotDispersionType(const int &plotDispersionType)
 {
-    _plotDeviationType = plotDeviationType;
+    _plotDispersionType = plotDispersionType;
     emit plotOptionsChanged();
     refresh();
 }
@@ -542,18 +573,62 @@ void CorrelationPlotItem::populateIQRPlot()
     scaleXAxis();
 }
 
+void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, QString name = "Deviation")
+{
+    auto visualType = static_cast<PlotDispersionVisualType>(_plotDispersionVisualType);
+    if(visualType == PlotDispersionVisualType::Bars)
+    {
+        QCPErrorBars* stdDevBars = new QCPErrorBars(_customPlot.xAxis, _customPlot.yAxis);
+        stdDevBars->setName(name);
+        stdDevBars->setSelectable(QCP::SelectionType::stNone);
+        stdDevBars->setAntialiased(false);
+        stdDevBars->setDataPlottable(_customPlot.plottable(0));
+        stdDevBars->setData(stdDevs);
+    }
+    else if (visualType == PlotDispersionVisualType::GraphFill)
+    {
+        QCPGraph* devTop = new QCPGraph(_customPlot.xAxis, _customPlot.yAxis);
+        devTop->setName(QStringLiteral("%1 Top").arg(name));
+        QCPGraph* devBottom = new QCPGraph(_customPlot.xAxis, _customPlot.yAxis);
+        devBottom->setName(QStringLiteral("%1 Bottom").arg(name));
+
+        devTop->setChannelFillGraph(devBottom);
+        auto fillColour = _customPlot.plottable(0)->brush().color().lighter(180);
+        fillColour.setAlpha(50);
+        auto penColour = _customPlot.plottable(0)->brush().color().lighter(195);
+        penColour.setAlpha(120);
+
+        devTop->setBrush(QBrush(fillColour));
+
+        devTop->setPen(QPen(penColour));
+        devBottom->setPen(QPen(penColour));
+
+        devBottom->setSelectable(QCP::SelectionType::stNone);
+        devTop->setSelectable(QCP::SelectionType::stNone);
+
+        auto topErr = QVector<double>(static_cast<int>(_columnCount));
+        auto bottomErr = QVector<double>(static_cast<int>(_columnCount));
+        for (int i = 0; i < _columnCount; ++i)
+        {
+            topErr[i] = _customPlot.plottable(0)->interface1D()->dataMainValue(i) + stdDevs[i];
+            bottomErr[i] = _customPlot.plottable(0)->interface1D()->dataMainValue(i) - stdDevs[i];
+        }
+
+        // xData is just the column indecides
+        QVector<double> xData(static_cast<int>(_columnCount));
+        std::iota(std::begin(xData), std::end(xData), 0);
+
+        devTop->setData(xData, topErr);
+        devBottom->setData(xData, bottomErr);
+    }
+}
+
 void CorrelationPlotItem::populateStdDevPlot()
 {
     if(_selectedRows.size() == 0)
         return;
 
     double min = 0, max = 0;
-
-    QCPErrorBars* stdDevBars = new QCPErrorBars(_customPlot.xAxis, _customPlot.yAxis);
-    stdDevBars->removeFromLegend();
-    stdDevBars->setAntialiased(false);
-    stdDevBars->setSelectable(QCP::SelectionType::stNone);
-    stdDevBars->setDataPlottable(_customPlot.plottable(0));
 
     QVector<double> stdDevs(static_cast<int>(_columnCount));
     QVector<double> means(static_cast<int>(_columnCount));
@@ -581,7 +656,8 @@ void CorrelationPlotItem::populateStdDevPlot()
         min = std::min(min, means[col] - stdDev);
         max = std::max(max, means[col] + stdDev);
     }
-    stdDevBars->setData(stdDevs);
+
+    plotDispersion(stdDevs, "Std Dev");
     _customPlot.yAxis->setRange(min, max);
 }
 
@@ -591,12 +667,6 @@ void CorrelationPlotItem::populateStdErrorPlot()
         return;
 
     double min = 0, max = 0;
-
-    QCPErrorBars* stdErrBars = new QCPErrorBars(_customPlot.xAxis, _customPlot.yAxis);
-    stdErrBars->removeFromLegend();
-    stdErrBars->setSelectable(QCP::SelectionType::stNone);
-    stdErrBars->setAntialiased(false);
-    stdErrBars->setDataPlottable(_customPlot.plottable(0));
 
     QVector<double> stdErrs(static_cast<int>(_columnCount));
     QVector<double> means(static_cast<int>(_columnCount));
@@ -624,7 +694,8 @@ void CorrelationPlotItem::populateStdErrorPlot()
         min = std::min(min, means[col] - stdErr);
         max = std::max(max, means[col] + stdErr);
     }
-    stdErrBars->setData(stdErrs);
+
+    plotDispersion(stdErrs, "Std Err");
     _customPlot.yAxis->setRange(min, max);
 }
 

@@ -129,27 +129,50 @@ PluginContent
     {
         Action
         {
-            id: noDeviations
+            id: barDeviationVisual
+            enabled: plot.plotDispersionType !== PlotDispersionType.None
+            text: qsTr("&Error Bars")
+            checkable: true
+            checked: plot.plotDispersionVisualType === PlotDispersionVisualType.Bars
+            onTriggered: { plot.plotDispersionVisualType = PlotDispersionVisualType.Bars; }
+        }
+        Action
+        {
+            id: graphDeviationVisual
+            enabled: plot.plotDispersionType !== PlotDispersionType.None
+            text: qsTr("&Area")
+            checkable: true
+            checked: plot.plotDispersionVisualType === PlotDispersionVisualType.GraphFill
+            onTriggered: { plot.plotDispersionVisualType = PlotDispersionVisualType.GraphFill; }
+        }
+    }
+
+
+    ExclusiveGroup
+    {
+        Action
+        {
+            id: noDispersion
             text: qsTr("&None")
             checkable: true
-            checked: plot.plotDeviationType === PlotDeviationType.None
-            onTriggered: { plot.plotDeviationType = PlotDeviationType.None; }
+            checked: plot.plotDispersionType === PlotDispersionType.None
+            onTriggered: { plot.plotDispersionType = PlotDispersionType.None; }
         }
         Action
         {
             id: stdDeviations
             text: qsTr("&Standard Deviation")
             checkable: true
-            checked: plot.plotDeviationType === PlotDeviationType.StdDev
-            onTriggered: { plot.plotDeviationType = PlotDeviationType.StdDev; }
+            checked: plot.plotDispersionType === PlotDispersionType.StdDev
+            onTriggered: { plot.plotDispersionType = PlotDispersionType.StdDev; }
         }
         Action
         {
             id: stdErrorDeviations
             text: qsTr("&Standard Error")
             checkable: true
-            checked: plot.plotDeviationType === PlotDeviationType.StdErr
-            onTriggered: { plot.plotDeviationType = PlotDeviationType.StdErr; }
+            checked: plot.plotDispersionType === PlotDispersionType.StdErr
+            onTriggered: { plot.plotDispersionType = PlotDispersionType.StdErr; }
         }
     }
 
@@ -209,6 +232,65 @@ PluginContent
         onTriggered: { imageSaveDialog.open(); }
     }
 
+    Action
+    {
+        id: setXAxisLabelAction
+        text: qsTr("Set X Axis Label…")
+        onTriggered: { xAxisLabelDialog.open(); }
+    }
+
+    Action
+    {
+        id: setYAxisLabelAction
+        text: qsTr("Set Y Axis Label…")
+        onTriggered: { yAxisLabelDialog.open(); }
+    }
+
+    Dialog
+    {
+        id: xAxisLabelDialog
+        visible: false
+        title: "X Axis Label"
+
+        standardButtons: StandardButton.Ok | StandardButton.Cancel
+        ColumnLayout
+        {
+            Text
+            {
+                text: "Please enter an X Axis label"
+            }
+            TextField
+            {
+                id: xAxisTextField
+                text: plot.xAxisLabel
+            }
+        }
+        onAccepted: plot.xAxisLabel = xAxisTextField.text;
+    }
+
+    Dialog
+    {
+        id: yAxisLabelDialog
+        visible: false
+        title: "Y Axis Label"
+
+        standardButtons: StandardButton.Ok | StandardButton.Cancel
+        ColumnLayout
+        {
+            Text
+            {
+                text: "Please enter an Y Axis label"
+            }
+            TextField
+            {
+                id: yAxisTextField
+                text: plot.yAxisLabel
+            }
+        }
+
+        onAccepted: plot.yAxisLabel = yAxisTextField.text;
+    }
+
     function createMenu(index, menu)
     {
         switch(index)
@@ -223,6 +305,11 @@ PluginContent
             menu.addItem("").action = savePlotImageAction;
             menu.addItem("").action = toggleGridLines;
             menu.addItem("").action = togglePlotLegend;
+
+            var axisLabels = menu.addMenu(qsTr("Axis Labels"));
+            axisLabels.addItem("").action = setXAxisLabelAction;
+            axisLabels.addItem("").action = setYAxisLabelAction;
+            menu.addSeparator();
 
             var scalingMenu = menu.addMenu(qsTr("Scaling"));
             scalingMenu.addItem("").action = rawScaling;
@@ -242,11 +329,14 @@ PluginContent
             averagingMenu.addItem("").action = meanHistogramAverage;
             averagingMenu.addItem("").action = iqrAverage;
 
-            var deviationsMenu = menu.addMenu(qsTr("Deviations"));
-            deviationsMenu.addItem("").action = noDeviations;
-            deviationsMenu.addItem("").action = stdDeviations;
-            deviationsMenu.addItem("").action = stdErrorDeviations;
-            deviationsMenu.enabled = Qt.binding(function()
+            var dispersionMenu = menu.addMenu(qsTr("Dispersion"));
+            dispersionMenu.addItem("").action = noDispersion;
+            dispersionMenu.addItem("").action = stdDeviations;
+            dispersionMenu.addItem("").action = stdErrorDeviations;
+            dispersionMenu.addSeparator();
+            dispersionMenu.addItem("").action = barDeviationVisual;
+            dispersionMenu.addItem("").action = graphDeviationVisual;
+            dispersionMenu.enabled = Qt.binding(function()
             {
                 return plot.plotAveragingType == PlotAveragingType.MeanLine ||
                         plot.plotAveragingType == PlotAveragingType.MeanHistogram
@@ -416,7 +506,8 @@ PluginContent
 
             "plotScaling": plot.plotScaleType,
             "plotAveraging": plot.plotAveragingType,
-            "plotDeviation": plot.plotDeviationType,
+            "plotDispersion": plot.plotDispersionType,
+            "plotDispersionVisual": plot.plotDispersionVisualType,
             "plotLegend": plot.showLegend,
             "plotGridLines": plot.showGridLines
         };
@@ -434,7 +525,8 @@ PluginContent
 
         if(data.plotScaling !== undefined)              plot.plotScaleType = data.plotScaling;
         if(data.plotAveraging !== undefined)            plot.plotAveragingType = data.plotAveraging;
-        if(data.plotDeviation !== undefined)            plot.plotDeviationType = data.plotDeviation;
+        if(data.plotDispersion !== undefined)           plot.plotDispersionType = data.plotDispersion;
+        if(data.plotDispersionVisual !== undefined)     plot.plotDispersionVisualType = data.plotDispersionVisual;
         if(data.plotLegend !== undefined)               plot.showLegend = data.plotLegend;
         if(data.plotGridLines !== undefined)            plot.showGridLines = data.plotGridLines;
     }

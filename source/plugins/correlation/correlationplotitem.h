@@ -26,9 +26,14 @@ DEFINE_QML_ENUM(Q_GADGET, PlotAveragingType,
                 MeanHistogram,
                 IQRPlot);
 
-DEFINE_QML_ENUM(Q_GADGET, PlotDeviationType,
+DEFINE_QML_ENUM(Q_GADGET, PlotDispersionType,
                 None,
                 StdErr,
+                StdDev);
+
+DEFINE_QML_ENUM(Q_GADGET, PlotDispersionVisualType,
+                Bars,
+                GraphFill,
                 StdDev);
 
 class CorrelationPlotItem : public QQuickPaintedItem
@@ -49,7 +54,10 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(bool showLegend MEMBER _showLegend WRITE setShowLegend NOTIFY plotOptionsChanged)
     Q_PROPERTY(int plotScaleType MEMBER _plotScaleType WRITE setPlotScaleType NOTIFY plotOptionsChanged)
     Q_PROPERTY(int plotAveragingType MEMBER _plotAveragingType WRITE setPlotAveragingType NOTIFY plotOptionsChanged)
-    Q_PROPERTY(int plotDeviationType MEMBER _plotDeviationType WRITE setPlotDeviationType NOTIFY plotOptionsChanged)
+    Q_PROPERTY(int plotDispersionType MEMBER _plotDispersionType WRITE setPlotDispersionType NOTIFY plotOptionsChanged)
+    Q_PROPERTY(int plotDispersionVisualType MEMBER _plotDispersionVisualType WRITE setPlotDispersionVisualType NOTIFY plotOptionsChanged)
+    Q_PROPERTY(QString xAxisLabel MEMBER _xAxisLabel WRITE setXAxisLabel NOTIFY plotOptionsChanged)
+    Q_PROPERTY(QString yAxisLabel MEMBER _yAxisLabel WRITE setYAxisLabel NOTIFY plotOptionsChanged)
 
 public:
     explicit CorrelationPlotItem(QQuickItem* parent = nullptr);
@@ -57,9 +65,12 @@ public:
 
     Q_INVOKABLE void savePlotImage(const QUrl& url, const QStringList& extensions);
 
-    void setPlotScaleType(const int &plotScaleType);
-    void setPlotAveragingType(const int &plotAveragingType);
-    void setPlotDeviationType(const int &plotDeviationType);
+    void setPlotScaleType(const int& plotScaleType);
+    void setPlotDispersionType(const int& plotDispersionType);
+    void setXAxisLabel(const QString& plotXAxisLabel);
+    void setYAxisLabel(const QString& plotYAxisLabel);
+    void setPlotAveragingType(const int& plotAveragingType);
+    void setPlotDispersionVisualType(const int& plotDispersionVisualType);
 
 protected:
     void routeMouseEvent(QMouseEvent* event);
@@ -101,8 +112,11 @@ private:
     bool _showLegend = false;
     int _plotScaleType = static_cast<int>(PlotScaleType::Raw);
     int _plotAveragingType = static_cast<int>(PlotAveragingType::Individual);
-    int _plotDeviationType = static_cast<int>(PlotDeviationType::None);
+    int _plotDispersionType = static_cast<int>(PlotDispersionType::None);
+    int _plotDispersionVisualType = static_cast<int>(PlotDispersionVisualType::Bars);
     double _scrollAmount = 0.0f;
+    QString _xAxisLabel;
+    QString _yAxisLabel;
 
     void populateMeanLinePlot();
     void populateMedianLinePlot();
@@ -111,6 +125,7 @@ private:
     void populateIQRPlot();
     void populateStdDevPlot();
     void populateStdErrorPlot();
+    void plotDispersion(QVector<double> stdDevs, QString name);
 
 public:
     Q_INVOKABLE void refresh();
