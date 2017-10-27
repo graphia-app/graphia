@@ -4,7 +4,6 @@
 #include "shared/graph/elementid.h"
 #include "shared/graph/elementtype.h"
 
-#include "shared/utils/qmlenum.h"
 #include "shared/utils/cancellable.h"
 
 #include "transforminfo.h"
