@@ -10,7 +10,7 @@
 class IGraph;
 class IMutableGraph;
 class IAttribute;
-class IElementVisual;
+struct IElementVisual;
 
 class IGraphModel
 {
