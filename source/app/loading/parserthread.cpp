@@ -6,6 +6,8 @@
 
 #include <atomic>
 
+#include <QDebug>
+
 ParserThread::ParserThread(MutableGraph& graph, QUrl url) :
     _graph(&graph),
     _url(std::move(url))

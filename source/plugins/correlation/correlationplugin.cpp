@@ -5,6 +5,8 @@
 #include "shared/utils/threadpool.h"
 #include "shared/utils/iterator_range.h"
 #include "shared/utils/container.h"
+#include "shared/attributes/iattribute.h"
+#include "shared/ui/visualisations/ielementvisual.h"
 
 #include "thirdparty/json/json_helper.h"
 

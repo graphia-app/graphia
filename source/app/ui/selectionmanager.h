@@ -3,6 +3,7 @@
 
 #include "graph/graphmodel.h"
 #include "shared/ui/iselectionmanager.h"
+#include "shared/utils/container.h"
 
 #include <QObject>
 

@@ -4,6 +4,8 @@
 
 #include "shared/ui/iselectionmanager.h"
 #include "shared/graph/igraphmodel.h"
+#include "shared/graph/igraph.h"
+#include "shared/attributes/iattribute.h"
 #include "shared/attributes/valuetype.h"
 
 #include "shared/utils/container.h"

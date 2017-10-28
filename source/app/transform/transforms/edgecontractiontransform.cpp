@@ -3,6 +3,8 @@
 #include "attributes/conditionfncreator.h"
 #include "graph/graphmodel.h"
 
+#include "shared/utils/string.h"
+
 #include <QObject>
 
 bool EdgeContractionTransform::apply(TransformedGraph& target) const

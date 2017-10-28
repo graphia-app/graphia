@@ -1,6 +1,7 @@
 #include "componentmanager.h"
 
 #include "shared/utils/thread.h"
+#include "shared/utils/container.h"
 #include "shared/graph/elementid_debug.h"
 
 #include <map>

@@ -2,6 +2,8 @@
 #include "graph.h"
 #include "componentmanager.h"
 
+#include "shared/utils/container.h"
+
 GraphConsistencyChecker::GraphConsistencyChecker(const Graph& graph) :
     _graph(&graph)
 {

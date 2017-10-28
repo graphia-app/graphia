@@ -5,6 +5,7 @@
 #include "transform/transformedgraph.h"
 
 #include "shared/utils/iterator_range.h"
+#include "shared/utils/container.h"
 
 #include <algorithm>
 

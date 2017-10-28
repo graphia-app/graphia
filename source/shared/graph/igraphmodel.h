@@ -1,12 +1,16 @@
 #ifndef IGRAPHMODEL_H
 #define IGRAPHMODEL_H
 
-#include "igraph.h"
-#include "imutablegraph.h"
-#include "shared/attributes/iattribute.h"
-#include "shared/ui/visualisations/ielementvisual.h"
+#include "shared/graph/elementid.h"
+#include "shared/graph/elementtype.h"
 
-class QString;
+#include <vector>
+#include <QString>
+
+class IGraph;
+class IMutableGraph;
+class IAttribute;
+class IElementVisual;
 
 class IGraphModel
 {

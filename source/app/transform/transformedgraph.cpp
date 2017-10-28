@@ -4,6 +4,7 @@
 #include "graph/graphmodel.h"
 
 #include "shared/commands/icommand.h"
+#include "shared/utils/container.h"
 
 #include <functional>
 

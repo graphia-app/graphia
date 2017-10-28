@@ -1,9 +1,7 @@
 #ifndef LAYOUT_H
 #define LAYOUT_H
 
-#include "graph/graph.h"
-#include "shared/graph/grapharray.h"
-#include "graph/graphmodel.h"
+#include "shared/graph/igraphcomponent.h"
 #include "graph/componentmanager.h"
 #include "nodepositions.h"
 

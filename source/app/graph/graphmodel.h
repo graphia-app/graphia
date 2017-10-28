@@ -15,21 +15,21 @@
 
 #include "layout/nodepositions.h"
 
-#include "shared/plugins/iplugin.h"
 #include "shared/graph/igraphmodel.h"
 
-#include <QQuickItem>
 #include <QString>
 #include <QStringList>
 
 #include <memory>
 #include <utility>
 #include <map>
+#include <vector>
 #include <atomic>
 
 class SelectionManager;
 class SearchManager;
 class ICommand;
+class IPlugin;
 
 using NodeVisuals = NodeArray<ElementVisual>;
 using EdgeVisuals = EdgeArray<ElementVisual>;
@@ -88,10 +88,10 @@ public:
 
     const QString& name() const { return _name; }
 
-    bool editable() const { return _plugin->editable(); }
-    QString pluginName() const { return _plugin->name(); }
-    int pluginDataVersion() const { return _plugin->dataVersion(); }
-    QString pluginQmlPath() const { return _plugin->qmlPath(); }
+    bool editable() const;
+    QString pluginName() const;
+    int pluginDataVersion() const;
+    QString pluginQmlPath() const;
 
     bool graphTransformIsValid(const QString& transform) const;
     void buildTransforms(const QStringList& transforms, ICommand* command = nullptr);

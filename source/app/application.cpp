@@ -5,8 +5,6 @@
 
 #include "loading/loader.h"
 
-#include "ui/document.h"
-
 #include <QDir>
 #include <QStandardPaths>
 #include <QMessageBox>

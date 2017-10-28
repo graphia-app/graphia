@@ -19,6 +19,7 @@
 #include "ui/visualisations/visualisationconfigparser.h"
 #include "ui/visualisations/visualisationbuilder.h"
 
+#include "shared/plugins/iplugin.h"
 #include "shared/commands/icommand.h"
 
 #include "shared/utils/enumreflection.h"
@@ -160,6 +161,11 @@ void GraphModel::setNodeName(NodeId nodeId, const QString& name)
     _nodeNames[nodeId] = name;
     updateVisuals();
 }
+
+bool GraphModel::editable() const { return _plugin->editable(); }
+QString GraphModel::pluginName() const { return _plugin->name(); }
+int GraphModel::pluginDataVersion() const { return _plugin->dataVersion(); }
+QString GraphModel::pluginQmlPath() const { return _plugin->qmlPath(); }
 
 bool GraphModel::graphTransformIsValid(const QString& transform) const
 {

@@ -2,13 +2,13 @@
 #define ELEMENTIDDISTINCTSETCOLLECTION
 
 #include "shared/graph/elementid.h"
-#include "shared/utils/container.h"
-
-#include <QDebug>
 
 #include <vector>
 #include <array>
+#include <type_traits>
+#include <iterator>
 #include <algorithm>
+#include <cassert>
 
 enum class MultiElementType
 {
@@ -70,11 +70,11 @@ public:
 
     SetId add(SetId setId, T elementId)
     {
-        Q_ASSERT(!elementId.isNull());
+        assert(!elementId.isNull());
 
         if(setId.isNull())
         {
-            Q_ASSERT(_list[elementId].isNull() || _list[elementId].isSingleton(elementId));
+            assert(_list[elementId].isNull() || _list[elementId].isSingleton(elementId));
             setId = elementId;
         }
 
@@ -120,10 +120,10 @@ public:
             }
             else if(highListNode.isHead(highId))
             {
-                Q_ASSERT(!highListNode._opposite.isNull());
-                Q_ASSERT(lowListNode.isNull());
-                Q_ASSERT(lowListNode._prev.isNull());
-                Q_ASSERT(lowListNode._opposite.isNull());
+                assert(!highListNode._opposite.isNull());
+                assert(lowListNode.isNull());
+                assert(lowListNode._prev.isNull());
+                assert(lowListNode._opposite.isNull());
 
                 // Adding to the head
                 auto& tail = _list[highListNode._opposite];
@@ -137,10 +137,10 @@ public:
             }
             else if(lowListNode.isTail(lowId))
             {
-                Q_ASSERT(!lowListNode._opposite.isNull());
-                Q_ASSERT(highListNode.isNull());
-                Q_ASSERT(highListNode._prev.isNull());
-                Q_ASSERT(highListNode._opposite.isNull());
+                assert(!lowListNode._opposite.isNull());
+                assert(highListNode.isNull());
+                assert(highListNode._prev.isNull());
+                assert(highListNode._opposite.isNull());
 
                 // Adding to the tail
                 auto& head = _list[lowListNode._opposite];
@@ -158,8 +158,8 @@ public:
                 // Adding in the middle
                 if(!lowListNode.isNull())
                 {
-                    Q_ASSERT(highListNode.isNull());
-                    Q_ASSERT(!lowListNode._next.isNull());
+                    assert(highListNode.isNull());
+                    assert(!lowListNode._next.isNull());
                     auto& next = _list[lowListNode._next];
 
                     highListNode._prev = lowId;
@@ -170,8 +170,8 @@ public:
                 }
                 else if(!highListNode.isNull())
                 {
-                    Q_ASSERT(lowListNode.isNull());
-                    Q_ASSERT(!highListNode._prev.isNull());
+                    assert(lowListNode.isNull());
+                    assert(!highListNode._prev.isNull());
                     auto& prev = _list[highListNode._prev];
 
                     lowListNode._prev = highListNode._prev;
@@ -188,7 +188,7 @@ public:
 
     SetId remove(SetId setId, T elementId)
     {
-        Q_ASSERT(!elementId.isNull());
+        assert(!elementId.isNull());
         auto& listNode = _list[elementId];
 
         // Can't remove it if it isn't in the list
@@ -206,7 +206,7 @@ public:
             tail.setToSingleton(listNode._next);
             setId = listNode._next;
 
-            Q_ASSERT(_list[setId].isHead(setId) && _list[setId].isSingleton(setId));
+            assert(_list[setId].isHead(setId) && _list[setId].isSingleton(setId));
         }
         else if(listNode._prev == listNode._opposite)
         {
@@ -215,13 +215,13 @@ public:
             head.setToSingleton(listNode._prev);
             setId = listNode._prev;
 
-            Q_ASSERT(_list[setId].isHead(setId) && _list[setId].isSingleton(setId));
+            assert(_list[setId].isHead(setId) && _list[setId].isSingleton(setId));
         }
         else if(listNode.isHead(elementId))
         {
             // Removing from the head
-            Q_ASSERT(!listNode._next.isNull());
-            Q_ASSERT(!listNode._opposite.isNull());
+            assert(!listNode._next.isNull());
+            assert(!listNode._opposite.isNull());
             auto& newHead = _list[listNode._next];
             auto& tail = _list[listNode._opposite];
 
@@ -230,13 +230,13 @@ public:
             tail._opposite = listNode._next;
             setId = listNode._next;
 
-            Q_ASSERT(_list[setId].isHead(setId));
+            assert(_list[setId].isHead(setId));
         }
         else if(listNode.isTail(elementId))
         {
             // Removing from the tail
-            Q_ASSERT(!listNode._opposite.isNull());
-            Q_ASSERT(!listNode._prev.isNull());
+            assert(!listNode._opposite.isNull());
+            assert(!listNode._prev.isNull());
             auto& head = _list[listNode._opposite];
             auto& newTail = _list[listNode._prev];
 
@@ -245,15 +245,15 @@ public:
             newTail._opposite = listNode._opposite;
             setId = listNode._opposite;
 
-            Q_ASSERT(_list[setId].isHead(setId));
+            assert(_list[setId].isHead(setId));
         }
         else
         {
-            Q_ASSERT(_list[setId].isHead(setId));
+            assert(_list[setId].isHead(setId));
 
             // Removing from the middle
-            Q_ASSERT(!listNode._prev.isNull());
-            Q_ASSERT(!listNode._next.isNull());
+            assert(!listNode._prev.isNull());
+            assert(!listNode._next.isNull());
             auto& prev = _list[listNode._prev];
             auto& next = _list[listNode._next];
 
@@ -263,14 +263,14 @@ public:
 
         listNode.setToNull();
 
-        Q_ASSERT(setId.isNull() || _list[setId].isNull() || _list[setId].isHead(setId));
+        assert(setId.isNull() || _list[setId].isNull() || _list[setId].isHead(setId));
 
         return setId;
     }
 
     MultiElementType typeOf(T elementId) const
     {
-        Q_ASSERT(!elementId.isNull());
+        assert(!elementId.isNull());
         auto& listNode = _list[elementId];
 
         if(!listNode.isNull() && !listNode.isSingleton(elementId))
@@ -318,7 +318,7 @@ public:
         _head(head),
         _collection(collection)
     {
-        Q_ASSERT(collection->typeOf(head) != MultiElementType::Tail);
+        assert(collection->typeOf(head) != MultiElementType::Tail);
     }
 
     void setCollection(C* collection)
@@ -338,7 +338,7 @@ public:
     {
         _head = _collection->remove(_head, elementId);
 
-        Q_ASSERT(_size == -1 || _size > 0);
+        assert(_size == -1 || _size > 0);
         if(_size > 0)
             _size--;
     }
@@ -417,7 +417,7 @@ public:
         if(_size < 0)
         {
             // If we don't know the size, calculate it on demand
-            _size = u::count(*this);
+            _size = std::distance(begin(), end());
         }
 
         return _size;
@@ -441,16 +441,6 @@ using EdgeIdDistinctSet = ElementIdDistinctSet<ElementIdDistinctSetCollection<Ed
 
 using ConstNodeIdDistinctSet = ElementIdDistinctSet<const ElementIdDistinctSetCollection<NodeId>, NodeId>;
 using ConstEdgeIdDistinctSet = ElementIdDistinctSet<const ElementIdDistinctSetCollection<EdgeId>, EdgeId>;
-
-template<typename C, typename T> QDebug operator<<(QDebug d, const ElementIdDistinctSet<C, T>& set)
-{
-    d << "[";
-    for(auto id : set)
-        d << id;
-    d << "]";
-
-    return d;
-}
 
 template<typename T> class ElementIdDistinctSets
 {
@@ -583,7 +573,7 @@ public:
         if(_size < 0)
         {
             // If we don't know the size, calculate it on demand
-            _size = u::count(*this);
+            _size = std::distance(begin(), end());
         }
 
         return _size;
@@ -607,16 +597,6 @@ using EdgeIdDistinctSets = ElementIdDistinctSets<EdgeIdDistinctSet>;
 
 using ConstNodeIdDistinctSets = ElementIdDistinctSets<ConstNodeIdDistinctSet>;
 using ConstEdgeIdDistinctSets = ElementIdDistinctSets<ConstEdgeIdDistinctSet>;
-
-template<typename T> QDebug operator<<(QDebug d, const ElementIdDistinctSets<T>& set)
-{
-    d << "[";
-    for(auto id : set)
-        d << id;
-    d << "]";
-
-    return d;
-}
 
 #endif // ELEMENTIDSETCOLLECTION
 

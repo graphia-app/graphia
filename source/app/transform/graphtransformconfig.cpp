@@ -3,6 +3,8 @@
 
 #include "attributes/attribute.h"
 
+#include "shared/utils/container.h"
+
 #include <QVariantList>
 
 bool GraphTransformConfig::TerminalCondition::operator==(const GraphTransformConfig::TerminalCondition& other) const

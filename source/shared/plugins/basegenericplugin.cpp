@@ -4,6 +4,8 @@
 #include "shared/loading/pairwisetxtfileparser.h"
 #include "shared/loading/graphmlparser.h"
 
+#include "shared/attributes/iattribute.h"
+
 #include "shared/utils/container.h"
 #include "shared/utils/iterator_range.h"
 

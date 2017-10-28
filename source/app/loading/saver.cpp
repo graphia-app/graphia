@@ -3,6 +3,7 @@
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/scope_exit.h"
 #include "shared/utils/iterator_range.h"
+#include "shared/utils/string.h"
 
 #include "ui/document.h"
 

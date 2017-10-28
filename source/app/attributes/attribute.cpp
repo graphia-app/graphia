@@ -1,6 +1,7 @@
 #include "attribute.h"
 
 #include <QRegularExpression>
+#include <QDebug>
 
 void Attribute::clearValueFunctions()
 {

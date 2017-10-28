@@ -5,11 +5,11 @@
 #include "valuetype.h"
 
 #include "shared/graph/elementid.h"
-#include "shared/graph/igraphcomponent.h"
 #include "shared/graph/elementtype.h"
 
 #include <functional>
 
+#include <QString>
 #include <QVariant>
 
 enum class AttributeFlag
@@ -26,6 +26,8 @@ enum class AttributeFlag
     // Indicates this is a dynamically created attribute; set automatically
     Dynamic                 = 0x8,
 };
+
+class IGraphComponent;
 
 class IAttribute
 {

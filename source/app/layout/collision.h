@@ -1,14 +1,15 @@
 #ifndef COLLISION_H
 #define COLLISION_H
 
-#include "graph/graph.h"
-#include "graph/graphmodel.h"
+#include "shared/graph/elementid.h"
 #include "layout.h"
 
 #include <QVector3D>
 
 #include <vector>
 #include <memory>
+
+class GraphModel;
 
 class Collision
 {

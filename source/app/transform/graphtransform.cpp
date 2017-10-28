@@ -3,6 +3,8 @@
 
 #include "graph/graph.h"
 
+#include "shared/utils/container.h"
+
 bool GraphTransform::applyAndUpdate(TransformedGraph& target) const
 {
     bool anyChange = false;

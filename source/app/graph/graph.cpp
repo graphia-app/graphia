@@ -1,6 +1,8 @@
 #include "graph.h"
+#include "elementiddistinctsetcollection_debug.h"
 #include "shared/graph/igrapharray.h"
 #include "shared/graph/elementid_debug.h"
+#include "shared/utils/container.h"
 #include "componentmanager.h"
 
 #include <QtGlobal>

@@ -3,8 +3,6 @@
 
 #include <QQmlEngine>
 
-#include "shared/utils/string.h"
-
 #ifndef APP_URI
 #define APP_URI "uri.missing"
 #endif
@@ -15,6 +13,11 @@
 #define APP_MINOR_VERSION -1
 #endif
 
+constexpr bool static_strcmp(char const* a, char const* b)
+{
+    return (*a && *b) ? (*a == *b && static_strcmp(a + 1, b + 1)) : (!*a && !*b);
+}
+
 // Defining an enumeration that's usable in QML is awkward, so
 // here is a macro to make it easier:
 
@@ -22,7 +25,7 @@
 #define QML_ENUM_PROPERTY(x) _REFLECTOR(x)::Enum
 
 #define DEFINE_QML_ENUM(_Q_GADGET, ENUM_NAME, ...) \
-    static_assert(u::static_strcmp(#_Q_GADGET, "Q_GADGET"), \
+    static_assert(static_strcmp(#_Q_GADGET, "Q_GADGET"), \
         "First parameter to DEFINE_QML_ENUM must be Q_GADGET"); \
     class _REFLECTOR(ENUM_NAME) \
     { \

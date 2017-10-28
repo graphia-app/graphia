@@ -6,6 +6,7 @@
 #include "graph/componentmanager.h"
 
 #include "shared/utils/utils.h"
+#include "shared/utils/string.h"
 
 #include <algorithm>
 

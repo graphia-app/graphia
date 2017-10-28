@@ -6,6 +6,7 @@
 #include "shared/graph/imutablegraph.h"
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/scope_exit.h"
+#include "shared/utils/container.h"
 
 #include <QString>
 #include <QFileInfo>

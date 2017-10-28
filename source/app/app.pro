@@ -120,7 +120,8 @@ HEADERS += \
     loading/saver.h \
     loading/loader.h \
     commands/deletenodescommand.h \
-    ui/hovermousepassthrough.h
+    ui/hovermousepassthrough.h \
+    graph/elementiddistinctsetcollection_debug.h
 
 SOURCES += \
     application.cpp \

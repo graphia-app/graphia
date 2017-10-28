@@ -130,19 +130,6 @@ namespace u
             keys.emplace_back(key);
         return keys;
     }
-
-    template<typename C> int count(const C& c)
-    {
-        int n = 0;
-
-        for(auto& i : c)
-        {
-            Q_UNUSED(i);
-            n++;
-        }
-
-        return n;
-    }
 }
 
 #endif // CONTAINER_H

@@ -1,6 +1,7 @@
 #include "pairwisetxtfileparser.h"
 
 #include "shared/utils/container.h"
+#include "shared/utils/string.h"
 #include "shared/graph/imutablegraph.h"
 #include "shared/plugins/basegenericplugin.h"
 #include "shared/plugins/usernodedata.h"
