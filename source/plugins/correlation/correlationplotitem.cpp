@@ -57,7 +57,7 @@ void CorrelationPlotItem::refresh()
 {
     updatePlotSize();
     buildPlot();
-    _customPlot.replot();
+    _customPlot.replot(QCustomPlot::rpQueuedReplot);
 }
 
 void CorrelationPlotItem::paint(QPainter* painter)
