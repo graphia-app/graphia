@@ -114,7 +114,7 @@ GridLayout
 
         function updateValue()
         {
-            root.value = "\"" + text + "\"";
+            root.value = "\"" + Utils.escapeQuotes(text) + "\"";
         }
 
         onTextChanged:
