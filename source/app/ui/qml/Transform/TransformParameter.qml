@@ -156,7 +156,7 @@ GridLayout
             value = typedValue(value);
         }
         else
-            value = "\"" + initialValue + "\"";
+            value = "\"" + Utils.escapeQuotes(initialValue) + "\"";
 
         var floatValue = parseFloat(value);
 
