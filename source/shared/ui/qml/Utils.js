@@ -55,7 +55,6 @@ function normaliseWhitespace(text)
 function escapeQuotes(text)
 {
     text = text.replace(/\"/g, "\\\"");
-    text = "\"" + text + "\"";
     return text;
 }
 
@@ -64,10 +63,10 @@ function unescapeQuotes(text)
     // [\s\S] is like . except it matches \n
     var re = /^\s*"([\s\S]*)"\s*$/;
 
-    if(!text.match(re))
-        return text;
+    // Strip off enclosing (non-escaped) quotes, if present
+    if(text.match(re))
+        text = text.replace(re, "$1");
 
-    text = text.replace(re, "$1");
     text = text.replace(/\\"/g, "\"");
     return text;
 }

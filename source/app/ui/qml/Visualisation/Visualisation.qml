@@ -31,7 +31,7 @@ Item
             if(gradientList.visualisationIndex !== index)
                 return;
 
-            parameters["gradient"] = Utils.escapeQuotes(gradientList.configuration);
+            parameters["gradient"] = "\"" + Utils.escapeQuotes(gradientList.configuration) + "\"";
             root.updateExpression();
         }
     }
