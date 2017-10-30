@@ -6,8 +6,6 @@
 
 #include "shared/graph/igraph.h"
 
-#include <functional>
-
 class IMutableGraph : public virtual IGraph
 {
 public:
@@ -98,7 +96,8 @@ public:
         IMutableGraph* _graph;
     };
 
-    void performTransaction(std::function<void(IMutableGraph& graph)> transaction)
+    template<typename Fn>
+    void performTransaction(Fn&& transaction)
     {
         ScopedTransaction lock(*this);
         transaction(*this);
