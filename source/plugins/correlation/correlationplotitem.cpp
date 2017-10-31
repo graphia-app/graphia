@@ -122,7 +122,7 @@ void CorrelationPlotItem::configureLegend()
     if(_customPlot.plottableCount() > 0 && _showLegend)
     {
         // Create a subLayout to position the Legend
-        QCPLayoutGrid *subLayout = new QCPLayoutGrid;
+        auto* subLayout = new QCPLayoutGrid;
         _customPlot.plotLayout()->insertColumn(1);
         _customPlot.plotLayout()->addElement(0, 1, subLayout);
         subLayout->addElement(0, 0, _customPlot.legend);
@@ -435,7 +435,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     // Use Average Calculation and set min / max
     QVector<double> yDataAvg = meanAverageData(minY, maxY);
 
-    QCPBars *histogramBars = new QCPBars(_customPlot.xAxis, _customPlot.yAxis);
+    auto* histogramBars = new QCPBars(_customPlot.xAxis, _customPlot.yAxis);
     histogramBars->setName(tr("Mean histogram of selection"));
     histogramBars->setData(xData, yDataAvg, true);
 
@@ -475,7 +475,7 @@ void CorrelationPlotItem::populateIQRPlot()
     // Whiskers represent the maximum and minimum non-outlier values
     // Outlier values are (< Q1 - 1.5IQR and > Q3 + 1.5IQR)
 
-    QCPStatisticalBox *statPlot = new QCPStatisticalBox(_customPlot.xAxis, _customPlot.yAxis);
+    auto* statPlot = new QCPStatisticalBox(_customPlot.xAxis, _customPlot.yAxis);
     statPlot->setName(tr("Median (IQR plots) of selection"));
 
     double maxY = 0.0;
@@ -524,7 +524,7 @@ void CorrelationPlotItem::populateIQRPlot()
             double minValue = secondQuartile;
             double maxValue = secondQuartile;
 
-            for(auto row : rowsEntries)
+            for(auto row : qAsConst(rowsEntries))
             {
                 // Find Maximum and minimum non-outliers
                 if(row < thirdQuartile + (iqr * 1.5))
@@ -573,12 +573,12 @@ void CorrelationPlotItem::populateIQRPlot()
     scaleXAxis();
 }
 
-void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, QString name = "Deviation")
+void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, QString name = QStringLiteral("Deviation"))
 {
     auto visualType = static_cast<PlotDispersionVisualType>(_plotDispersionVisualType);
     if(visualType == PlotDispersionVisualType::Bars)
     {
-        QCPErrorBars* stdDevBars = new QCPErrorBars(_customPlot.xAxis, _customPlot.yAxis);
+        auto* stdDevBars = new QCPErrorBars(_customPlot.xAxis, _customPlot.yAxis);
         stdDevBars->setName(name);
         stdDevBars->setSelectable(QCP::SelectionType::stNone);
         stdDevBars->setAntialiased(false);
@@ -587,8 +587,8 @@ void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, QString name =
     }
     else if(visualType == PlotDispersionVisualType::Area)
     {
-        QCPGraph* devTop = new QCPGraph(_customPlot.xAxis, _customPlot.yAxis);
-        QCPGraph* devBottom = new QCPGraph(_customPlot.xAxis, _customPlot.yAxis);
+        auto* devTop = new QCPGraph(_customPlot.xAxis, _customPlot.yAxis);
+        auto* devBottom = new QCPGraph(_customPlot.xAxis, _customPlot.yAxis);
         devTop->setName(QStringLiteral("%1 Top").arg(name));
         devBottom->setName(QStringLiteral("%1 Bottom").arg(name));
 
@@ -609,7 +609,7 @@ void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, QString name =
         auto topErr = QVector<double>(static_cast<int>(_columnCount));
         auto bottomErr = QVector<double>(static_cast<int>(_columnCount));
 
-        for(int i = 0; i < _columnCount; ++i)
+        for(int i = 0; i < static_cast<int>(_columnCount); ++i)
         {
             topErr[i] = _customPlot.plottable(0)->interface1D()->dataMainValue(i) + stdDevs[i];
             bottomErr[i] = _customPlot.plottable(0)->interface1D()->dataMainValue(i) - stdDevs[i];
@@ -658,7 +658,7 @@ void CorrelationPlotItem::populateStdDevPlot()
         max = std::max(max, means[col] + stdDev);
     }
 
-    plotDispersion(stdDevs, "Std Dev");
+    plotDispersion(stdDevs, QStringLiteral("Std Dev"));
     _customPlot.yAxis->setRange(min, max);
 }
 
@@ -696,7 +696,7 @@ void CorrelationPlotItem::populateStdErrorPlot()
         max = std::max(max, means[col] + stdErr);
     }
 
-    plotDispersion(stdErrs, "Std Err");
+    plotDispersion(stdErrs, QStringLiteral("Std Err"));
     _customPlot.yAxis->setRange(min, max);
 }
 
@@ -940,13 +940,13 @@ void CorrelationPlotItem::showTooltip()
     }
     else if(auto bars = dynamic_cast<QCPBars*>(_hoverPlottable))
     {
-        auto xCoord = _customPlot.xAxis->pixelToCoord(_hoverPoint.x()) + 0.5f;
+        auto xCoord = static_cast<int>(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()) + 0.5);
         _itemTracer->position->setPixelPosition(bars->dataPixelPosition(xCoord));
     }
     else if(auto boxPlot = dynamic_cast<QCPStatisticalBox*>(_hoverPlottable))
     {
         // Only show simple tooltips for now, can extend this later...
-        auto xCoord = _customPlot.xAxis->pixelToCoord(_hoverPoint.x()) + 0.5f;
+        auto xCoord = static_cast<int>(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()) + 0.5);
         _itemTracer->position->setPixelPosition(boxPlot->dataPixelPosition(xCoord));
     }
 
