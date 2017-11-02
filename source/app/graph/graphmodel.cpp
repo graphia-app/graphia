@@ -67,12 +67,12 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
         .setDescription(tr("A node's degree is its number of incident edges."));
 
     GraphModel::createAttribute(tr("Node In Degree"))
-        .setIntValueFn([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).inEdgeIds().size(); })
+        .setIntValueFn([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).inDegree(); })
         .intRange().setMin(0)
         .setDescription(tr("A node's in degree is its number of inbound edges."));
 
     GraphModel::createAttribute(tr("Node Out Degree"))
-        .setIntValueFn([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).outEdgeIds().size(); })
+        .setIntValueFn([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).outDegree(); })
         .intRange().setMin(0)
         .setDescription(tr("A node's out degree is its number of outbound edges."));
 

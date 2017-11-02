@@ -1,6 +1,5 @@
 #include "attribute.h"
 
-#include <QRegularExpression>
 #include <QDebug>
 
 void Attribute::clearValueFunctions()
@@ -274,22 +273,13 @@ IAttribute& AttributeNumericRange::setMax(double max)
 
 Attribute::Name Attribute::parseAttributeName(const QString& name)
 {
-    QRegularExpression edgeNodeRe(QStringLiteral("^(source|target)\\.(.+)$"));
-    auto match = edgeNodeRe.match(name);
+    const QString sourceString("source.");
+    const QString targetString("target.");
 
-    if(match.hasMatch())
-    {
-        auto edgeNodeTypeString = match.captured(1);
-        auto resolvedName = match.captured(2);
-
-        EdgeNodeType edgeNodeType = EdgeNodeType::None;
-        if(edgeNodeTypeString == QLatin1String("source"))
-            edgeNodeType = EdgeNodeType::Source;
-        else if(edgeNodeTypeString == QLatin1String("target"))
-            edgeNodeType = EdgeNodeType::Target;
-
-        return {edgeNodeType, resolvedName};
-    }
+    if(name.startsWith(sourceString))
+        return {EdgeNodeType::Source, name.mid(sourceString.length())};
+    else if(name.startsWith(targetString))
+        return {EdgeNodeType::Target, name.mid(targetString.length())};
 
     return {Attribute::EdgeNodeType::None, name};
 }

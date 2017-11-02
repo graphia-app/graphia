@@ -14,6 +14,8 @@ public:
     virtual ~INode() = default;
 
     virtual int degree() const = 0;
+    virtual int inDegree() const = 0;
+    virtual int outDegree() const = 0;
     virtual NodeId id() const = 0;
 
     virtual std::vector<EdgeId> inEdgeIds() const = 0;
