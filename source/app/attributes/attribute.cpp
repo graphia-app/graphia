@@ -273,8 +273,8 @@ IAttribute& AttributeNumericRange::setMax(double max)
 
 Attribute::Name Attribute::parseAttributeName(const QString& name)
 {
-    const QString sourceString("source.");
-    const QString targetString("target.");
+    const QString sourceString = QStringLiteral("source.");
+    const QString targetString = QStringLiteral("target.");
 
     if(name.startsWith(sourceString))
         return {EdgeNodeType::Source, name.mid(sourceString.length())};
