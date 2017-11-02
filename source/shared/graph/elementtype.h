@@ -3,7 +3,8 @@
 
 #include "shared/utils/qmlenum.h"
 
-DEFINE_QML_ENUM(Q_GADGET, ElementType,
+DEFINE_QML_ENUM(
+      Q_GADGET, ElementType,
                 None        = 0x1,
                 Node        = 0x2,
                 Edge        = 0x4,

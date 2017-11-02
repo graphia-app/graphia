@@ -1,5 +1,5 @@
-#ifndef FILTER_H
-#define FILTER_H
+#ifndef GRAPHFILTER_H
+#define GRAPHFILTER_H
 
 #include "graph.h"
 
@@ -7,7 +7,7 @@
 #include <functional>
 #include <algorithm>
 
-class Filter
+class GraphFilter
 {
 private:
     std::vector<NodeConditionFn> _nodeFilters;
@@ -36,5 +36,5 @@ public:
     bool edgeIdFiltered(EdgeId edgeId) const { return elementIdFiltered(_edgeFilters, edgeId); }
 };
 
-#endif // FILTER_H
+#endif // GRAPHFILTER_H
 

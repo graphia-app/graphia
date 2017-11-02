@@ -3,7 +3,8 @@
 
 #include "shared/utils/qmlenum.h"
 
-DEFINE_QML_ENUM(Q_GADGET, CrashType,
+DEFINE_QML_ENUM(
+      Q_GADGET, CrashType,
                 NullPtrDereference,
                 CppException,
                 Win32Exception,

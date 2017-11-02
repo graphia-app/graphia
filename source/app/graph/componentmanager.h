@@ -4,7 +4,7 @@
 #include "graph.h"
 #include "graphcomponent.h"
 #include "shared/graph/grapharray.h"
-#include "filter.h"
+#include "graphfilter.h"
 
 #include <map>
 #include <queue>
@@ -51,7 +51,7 @@ public:
     ComponentId newComponentId() const { return _newComponentId; }
 };
 
-class ComponentManager : public QObject, public Filter
+class ComponentManager : public QObject, public GraphFilter
 {
     friend class Graph;
 

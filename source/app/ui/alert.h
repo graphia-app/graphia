@@ -9,7 +9,8 @@
 #include <map>
 #include <utility>
 
-DEFINE_QML_ENUM(Q_GADGET, AlertType,
+DEFINE_QML_ENUM(
+      Q_GADGET, AlertType,
                 None,
                 Warning,
                 Error);

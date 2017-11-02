@@ -34,7 +34,6 @@ HEADERS += \
     crashtype.h \
     graph/componentmanager.h \
     graph/elementiddistinctsetcollection.h \
-    graph/filter.h \
     graph/graphcomponent.h \
     graph/graphconsistencychecker.h \
     graph/graph.h \
@@ -121,7 +120,8 @@ HEADERS += \
     loading/loader.h \
     commands/deletenodescommand.h \
     ui/hovermousepassthrough.h \
-    graph/elementiddistinctsetcollection_debug.h
+    graph/elementiddistinctsetcollection_debug.h \
+    graph/graphfilter.h
 
 SOURCES += \
     application.cpp \

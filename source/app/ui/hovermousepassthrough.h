@@ -1,5 +1,6 @@
 #ifndef HOVERMOUSEPASSTHROUGH_H
 #define HOVERMOUSEPASSTHROUGH_H
+
 #include <QObject>
 #include <QQuickItem>
 #include <QMouseEvent>
@@ -8,8 +9,10 @@ class HoverMousePassthrough : public QQuickItem
 {
     Q_OBJECT
     Q_PROPERTY(bool hovered MEMBER _hovered NOTIFY hoveredChanged)
+
 private:
     bool _hovered;
+
 public:
     explicit HoverMousePassthrough(QQuickItem* parent = nullptr) : QQuickItem(parent)
     {
@@ -34,4 +37,5 @@ protected:
         emit hoveredChanged();
     }
 };
+
 #endif // HOVERMOUSEPASSTHROUGH_H

@@ -1,0 +1,15 @@
+include_directories(${CMAKE_CURRENT_LIST_DIR})
+include_directories(${CMAKE_CURRENT_LIST_DIR}/blaze)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/boost/spirit)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/json)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/json/src)
+
+add_definitions(-DQCUSTOMPLOT_USE_OPENGL)
+
+include(${CMAKE_CURRENT_LIST_DIR}/breakpad/breakpad.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cryptopp/cryptopp.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/qcustomplot/qcustomplot.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/qt-qml-models/QtQmlModels.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/qtsingleapplication/qtsingleapplication.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/SortFilterProxyModel/SortFilterProxyModel.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/zlib/zlib.cmake)
