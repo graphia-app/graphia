@@ -229,5 +229,3 @@ PluginContent
         if(data.hiddenColumns !== undefined)            tableView.hiddenColumns = data.hiddenColumns;
     }
 }
-
-
