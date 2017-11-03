@@ -4,6 +4,12 @@ SCRIPT=$(readlink -f $0)
 SCRIPT_DIR=$(dirname ${SCRIPT})
 ICON_FILE=$1
 
+if [[ -z ${ICON_FILE} ]]
+then
+  echo Missing icon file parameter!
+  exit 1
+fi
+
 if [ ! -e ${ICON_FILE} ]
 then
   echo ${ICON_FILE} does not exist!
