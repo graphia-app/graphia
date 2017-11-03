@@ -1,5 +1,4 @@
 include(${CMAKE_CURRENT_SOURCE_DIR}/../common.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/../shared/shared.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/thirdparty.cmake)
 
 add_definitions(-DPRODUCT_NAME="${PROJECT_NAME}")
@@ -203,7 +202,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${RESOURCES})
 
-target_link_libraries(${PROJECT_NAME} thirdparty)
+target_link_libraries(${PROJECT_NAME} thirdparty shared)
 
 find_package(Qt5 COMPONENTS Core Qml Quick OpenGL OpenGLExtensions PrintSupport Widgets Xml REQUIRED)
 target_link_libraries(${PROJECT_NAME}

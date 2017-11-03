@@ -8,6 +8,7 @@ endif()
 
 include_directories(source)
 
+add_subdirectory(source/shared)
 add_subdirectory(source/thirdparty)
 add_subdirectory(source/plugins)
 add_subdirectory(source/app)

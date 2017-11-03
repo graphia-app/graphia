@@ -1,5 +1,4 @@
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../common.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/../../shared/shared.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/thirdparty.cmake)
 
 set(PluginName "skeleton")
@@ -24,7 +23,7 @@ list(APPEND RESOURCES
 
 add_library(${PluginName} SHARED ${SOURCES} ${HEADERS} ${RESOURCES})
 
-target_link_libraries(${PluginName} thirdparty)
+target_link_libraries(${PluginName} thirdparty shared)
 
 find_package(Qt5 COMPONENTS Core Qml Quick OpenGL OpenGLExtensions PrintSupport Widgets Xml REQUIRED)
 target_link_libraries(${PluginName}

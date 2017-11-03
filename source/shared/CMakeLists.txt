@@ -1,3 +1,12 @@
+cmake_minimum_required(VERSION 3.5)
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/../common.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/thirdparty.cmake)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/attributes/iattribute.h 
     ${CMAKE_CURRENT_LIST_DIR}/attributes/iattributerange.h 
@@ -51,7 +60,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/utils.h 
     ${CMAKE_CURRENT_LIST_DIR}/commands/compoundcommand.h 
     ${CMAKE_CURRENT_LIST_DIR}/utils/qmlutils.h 
-    ${CMAKE_CURRENT_LIST_DIR}/loading/progressfn.h 
+    ${CMAKE_CURRENT_LIST_DIR}/loading/progressfn.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/idocument.h 
     ${CMAKE_CURRENT_LIST_DIR}/utils/container.h 
     ${CMAKE_CURRENT_LIST_DIR}/utils/random.h 
@@ -65,7 +74,7 @@ list(APPEND HEADERS
 list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementtype.cpp 
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlfileparser.cpp 
-    ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlparser.cpp 
+    ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlparser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisetxtfileparser.cpp 
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardata.cpp 
     ${CMAKE_CURRENT_LIST_DIR}/loading/urltypes.cpp 
@@ -83,6 +92,7 @@ list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/utils/thread.cpp 
     ${CMAKE_CURRENT_LIST_DIR}/utils/string.cpp 
     ${CMAKE_CURRENT_LIST_DIR}/utils/color.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils/utils.cpp
 )
 
 list(APPEND RESOURCES
@@ -90,4 +100,10 @@ list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/js.qrc
 )
 
-include_directories(${CMAKE_CURRENT_LIST_DIR})
+add_library(shared STATIC ${SOURCES} ${HEADERS} ${RESOURCES})
+
+find_package(Qt5 COMPONENTS Qml Widgets REQUIRED)
+target_link_libraries(shared
+    Qt5::Qml
+    Qt5::Widgets
+)

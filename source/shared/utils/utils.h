@@ -34,19 +34,7 @@ namespace u
         return (a > 0 && b > 0) || (a <= 0 && b <= 0);
     }
 
-    static inline int smallestPowerOf2GreaterThan(int x)
-    {
-        if(x < 0)
-            return 0;
-
-        x--;
-        x |= x >> 1;
-        x |= x >> 2;
-        x |= x >> 4;
-        x |= x >> 8;
-        x |= x >> 16;
-        return x + 1;
-    }
+    int smallestPowerOf2GreaterThan(int x);
 
     template<typename T>
     bool exclusiveOr(T a, T b)

@@ -4,7 +4,6 @@
 
 QColor u::contrastingColor(const QColor& color)
 {
-
     auto brightness = 0.299 * color.redF() +
                       0.587 * color.greenF() +
                       0.114 * color.blueF();
