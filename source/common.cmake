@@ -1,5 +1,9 @@
 set(CMAKE_CXX_STANDARD 14)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-D_DEBUG)
+endif()
+
 add_definitions(-DAPP_URI="com.kajeka")
 add_definitions(-DAPP_MINOR_VERSION=0)
 add_definitions(-DAPP_MAJOR_VERSION=1)
