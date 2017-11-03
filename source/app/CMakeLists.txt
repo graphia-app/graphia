@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.5)
-
 include(${CMAKE_CURRENT_SOURCE_DIR}/../common.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../shared/shared.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/thirdparty.cmake)
@@ -200,6 +198,8 @@ list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/qml.qrc
     ${CMAKE_CURRENT_LIST_DIR}/ui/imagery.qrc
 )
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${RESOURCES})
 
