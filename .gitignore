@@ -1,4 +1,5 @@
 *.pro.user*
+CMakeLists.txt.user
 *.autosave
 doxygen/*
 misc/__pycache__

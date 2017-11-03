@@ -4,12 +4,6 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/../common.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../shared/shared.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/thirdparty.cmake)
 
-if (NOT "$ENV{PRODUCT_NAME}" STREQUAL "")
-    project($ENV{PRODUCT_NAME} LANGUAGES C CXX)
-else()
-    project("GraphTool" LANGUAGES C CXX)
-endif()
-
 add_definitions(-DPRODUCT_NAME="${PROJECT_NAME}")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -209,6 +203,8 @@ list(APPEND RESOURCES
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${RESOURCES})
 
+target_link_libraries(${PROJECT_NAME} thirdparty)
+
 find_package(Qt5 COMPONENTS Core Qml Quick OpenGL OpenGLExtensions PrintSupport Widgets Xml REQUIRED)
 target_link_libraries(${PROJECT_NAME}
     Qt5::Core
@@ -227,6 +223,3 @@ target_link_libraries(${PROJECT_NAME} ${OPENGL_gl_LIBRARY})
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(${PROJECT_NAME} Threads::Threads)
-
-#FIXME
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/..)

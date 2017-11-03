@@ -1,9 +1,13 @@
-include_directories(${CMAKE_CURRENT_LIST_DIR}/../qtlockedfile)
+include(${CMAKE_CURRENT_LIST_DIR}/../qtlockedfile/qtlockedfile.cmake)
+
+list(APPEND HEADERS
+    ${CMAKE_CURRENT_LIST_DIR}/qtsingleapplication.h
+    ${CMAKE_CURRENT_LIST_DIR}/qtlocalpeer.h
+)
 
 list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/qtsingleapplication.cpp
     ${CMAKE_CURRENT_LIST_DIR}/qtlocalpeer.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../qtlockedfile/qtlockedfile.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../qtlockedfile/qtlockedfile_unix.cpp #FIXME
 )
 
+include_directories(${CMAKE_CURRENT_LIST_DIR})
