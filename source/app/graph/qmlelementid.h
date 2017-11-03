@@ -1,7 +1,7 @@
 #ifndef QMLELEMENTID_H
 #define QMLELEMENTID_H
 
-// This simply provides QML accesible version of the ElementId types
+// This simply provides QML accessible version of the ElementId types
 
 #include "application.h"
 
