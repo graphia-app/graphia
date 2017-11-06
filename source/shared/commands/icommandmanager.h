@@ -13,7 +13,7 @@ class ICommandManager
 public:
     virtual ~ICommandManager() = default;
 
-    virtual void execute(std::unique_ptr<ICommand>&& command) = 0;
+    virtual void execute(std::unique_ptr<ICommand> command) = 0;
 
     void execute(const Command::CommandDescription& commandDescription,
                  CommandFn&& executeFn, CommandFn&& undoFn)
@@ -22,13 +22,13 @@ public:
     }
 
     void execute(const Command::CommandDescription& commandDescription,
-                 std::vector<std::unique_ptr<ICommand>>&& commands)
+                 std::vector<std::unique_ptr<ICommand>> commands)
     {
         execute(std::make_unique<CompoundCommand>(commandDescription, std::move(commands)));
     }
 
     // Execute only once, i.e. so that it can't be undone
-    virtual void executeOnce(std::unique_ptr<ICommand>&& command) = 0;
+    virtual void executeOnce(std::unique_ptr<ICommand> command) = 0;
 
     void executeOnce(const Command::CommandDescription& commandDescription,
                      CommandFn&& executeFn)
@@ -37,7 +37,7 @@ public:
     }
 
     void executeOnce(const Command::CommandDescription& commandDescription,
-                     std::vector<std::unique_ptr<ICommand>>&& commands)
+                     std::vector<std::unique_ptr<ICommand>> commands)
     {
         executeOnce(std::make_unique<CompoundCommand>(commandDescription, std::move(commands)));
     }

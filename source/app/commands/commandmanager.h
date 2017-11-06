@@ -31,9 +31,9 @@ public:
 
     void clear();
 
-    void execute(std::unique_ptr<ICommand>&& command);
+    void execute(std::unique_ptr<ICommand> command);
     using ICommandManager::execute;
-    void executeOnce(std::unique_ptr<ICommand>&& command);
+    void executeOnce(std::unique_ptr<ICommand> command);
     using ICommandManager::executeOnce;
 
     void undo();

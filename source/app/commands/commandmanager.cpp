@@ -31,13 +31,13 @@ CommandManager::~CommandManager()
         _lock.unlock();
 }
 
-void CommandManager::execute(std::unique_ptr<ICommand>&& command)
+void CommandManager::execute(std::unique_ptr<ICommand> command)
 {
     _pendingCommands.emplace_back(CommandAction::Execute, std::move(command));
     emit commandQueued();
 }
 
-void CommandManager::executeOnce(std::unique_ptr<ICommand>&& command)
+void CommandManager::executeOnce(std::unique_ptr<ICommand> command)
 {
     _pendingCommands.emplace_back(CommandAction::ExecuteOnce, std::move(command));
     emit commandQueued();
