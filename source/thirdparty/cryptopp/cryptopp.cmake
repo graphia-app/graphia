@@ -121,3 +121,12 @@ list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/wake.cpp 
     ${CMAKE_CURRENT_LIST_DIR}/skipjack.cpp
 )
+
+if(MSVC)
+    list(APPEND SOURCES
+        ${CMAKE_CURRENT_LIST_DIR}/winpipes.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/rdrand.asm
+        ${CMAKE_CURRENT_LIST_DIR}/x64dll.asm
+        ${CMAKE_CURRENT_LIST_DIR}/x64masm.asm
+    )
+endif()

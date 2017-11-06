@@ -8,6 +8,13 @@ add_definitions(-DAPP_URI="com.kajeka")
 add_definitions(-DAPP_MINOR_VERSION=0)
 add_definitions(-DAPP_MAJOR_VERSION=1)
 
+if(MSVC)
+    add_definitions(-DUNICODE -D_UNICODE)
+
+    ENABLE_LANGUAGE(ASM_MASM)
+    set(CMAKE_ASM_MASM_FLAGS "/nologo /D_M_X64 /W3 /Cx /Zi")
+endif()
+
 if (NOT "$ENV{VERSION}" STREQUAL "")
     set(Version $ENV{VERSION})
 else()

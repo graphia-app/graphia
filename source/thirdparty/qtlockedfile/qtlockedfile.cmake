@@ -4,7 +4,16 @@ list(APPEND HEADERS
 
 list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/qtlockedfile.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/qtlockedfile_unix.cpp #FIXME
 )
+
+if(UNIX)
+    list(APPEND SOURCES
+        ${CMAKE_CURRENT_LIST_DIR}/qtlockedfile_unix.cpp
+    )
+elseif(MSVC)
+    list(APPEND SOURCES
+        ${CMAKE_CURRENT_LIST_DIR}/qtlockedfile_win.cpp
+    )
+endif()
 
 include_directories(${CMAKE_CURRENT_LIST_DIR})
