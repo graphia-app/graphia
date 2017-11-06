@@ -59,7 +59,6 @@ Item
             ButtonMenu
             {
                 visible: !visualisationSummaryText.visible
-                id: addVisualisationBtn
                 text: qsTr("Add Visualisation")
 
                 textColor: enabled ? enabledTextColor : disabledTextColor
@@ -127,7 +126,7 @@ Item
     {
         title: qsTr("Add Visualisation")
         alignment: Qt.AlignLeft | Qt.AlignTop
-        target: addVisualisationBtn
+        target: layout
         tooltipMode: true
         RowLayout
         {

@@ -15,7 +15,6 @@ Item
 
     property var document
 
-    property alias addTransformButton: addTransformBtn
     property color enabledTextColor
     property color disabledTextColor
     property color heldColor
@@ -91,7 +90,6 @@ Item
             ButtonMenu
             {
                 visible: !transformSummaryText.visible
-                id: addTransformBtn
                 text: qsTr("Add Transform")
 
                 textColor: enabled ? enabledTextColor : disabledTextColor
@@ -121,7 +119,7 @@ Item
     {
         title: qsTr("Add Transform")
         alignment: Qt.AlignLeft | Qt.AlignBottom
-        target: addTransformBtn
+        target: layout
         tooltipMode: true
         RowLayout
         {
