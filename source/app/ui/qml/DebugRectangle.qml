@@ -13,6 +13,9 @@ Rectangle
         color: borderColor
     }
 
-    anchors.fill: item
+    x: item.x
+    y: item.y
+    width: item.width
+    height: item.height
 }
 
