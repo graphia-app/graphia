@@ -200,7 +200,13 @@ list(APPEND RESOURCES
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${RESOURCES})
+if(APPLE)
+    set(MACOSX_FRAMEWORK_ICON_FILE ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.icns)
+    set(MACOSX_FRAMEWORK_IDENTIFIER com.kajeka.${PROJECT_NAME})
+    add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES})
+else()
+    add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${RESOURCES})
+endif()
 
 target_link_libraries(${PROJECT_NAME} thirdparty shared)
 
