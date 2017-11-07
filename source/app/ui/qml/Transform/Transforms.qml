@@ -89,6 +89,8 @@ Item
 
             ButtonMenu
             {
+                id: addTransformButton
+
                 visible: !transformSummaryText.visible
                 text: qsTr("Add Transform")
 
@@ -119,7 +121,7 @@ Item
     {
         title: qsTr("Add Transform")
         alignment: Qt.AlignLeft | Qt.AlignBottom
-        target: layout
+        target: addTransformButton
         tooltipMode: true
         RowLayout
         {
