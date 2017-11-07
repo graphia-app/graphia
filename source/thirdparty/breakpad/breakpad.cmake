@@ -32,23 +32,22 @@ if(LINUX)
     )
 endif()
 
-#mac {
-#    SOURCES += \
-#        ${CMAKE_CURRENT_LIST_DIR}/src/client/mac/handler/exception_handler.cc \
-#        ${CMAKE_CURRENT_LIST_DIR}/src/client/mac/handler/minidump_generator.cc \
-#        ${CMAKE_CURRENT_LIST_DIR}/src/client/mac/handler/dynamic_images.cc \
-#        ${CMAKE_CURRENT_LIST_DIR}/src/client/mac/crash_generation/crash_generation_client.cc \
-#        ${CMAKE_CURRENT_LIST_DIR}/src/client/mac/handler/breakpad_nlist_64.cc \
-#        ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/file_id.cc \
-#        ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/macho_utilities.cc \
-#        ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/macho_id.cc \
-#        ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/string_utilities.cc \
-#        ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/bootstrap_compat.cc \
-#        ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/macho_walker.cc
-#
-#    OBJECTIVE_SOURCES += \
-#        ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/MachIPC.mm
-#}
+if(APPLE)
+    list(APPEND SOURCES
+            ${CMAKE_CURRENT_LIST_DIR}/src/client/mac/handler/exception_handler.cc
+            ${CMAKE_CURRENT_LIST_DIR}/src/client/mac/handler/minidump_generator.cc
+            ${CMAKE_CURRENT_LIST_DIR}/src/client/mac/handler/dynamic_images.cc
+            ${CMAKE_CURRENT_LIST_DIR}/src/client/mac/crash_generation/crash_generation_client.cc
+            ${CMAKE_CURRENT_LIST_DIR}/src/client/mac/handler/breakpad_nlist_64.cc
+            ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/file_id.cc
+            ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/macho_utilities.cc
+            ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/macho_id.cc
+            ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/string_utilities.cc
+            ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/bootstrap_compat.cc
+            ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/macho_walker.cc
+            ${CMAKE_CURRENT_LIST_DIR}/src/common/mac/MachIPC.mm
+    )
+endif()
 
 if(MSVC)
     list(APPEND SOURCES
