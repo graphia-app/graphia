@@ -38,7 +38,7 @@ Item
         {
             id: panel
 
-            Layout.alignment: Qt.AlignTop
+            Layout.alignment: Qt.AlignTop | Qt.AlignRight
             alignment: Qt.AlignTop
 
             item: DraggableList

@@ -88,7 +88,7 @@ Item
         {
             id: panel
 
-            Layout.alignment: Qt.AlignBottom
+            Layout.alignment: Qt.AlignBottom | Qt.AlignRight
             alignment: Qt.AlignBottom
 
             item: DraggableList
