@@ -1151,7 +1151,7 @@ Item
         var latestSample = comandProgressSamples[comandProgressSamples.length - 1];
         var percentDelta = latestSample.progress - earliestSample.progress;
         var timeDelta = latestSample.seconds - earliestSample.seconds;
-        var percentRemaining = 100.0 - currentDocument.commandProgress;
+        var percentRemaining = 100.0 - commandProgress;
 
         commandSecondsRemaining = percentRemaining * timeDelta / percentDelta;
     }
