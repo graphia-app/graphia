@@ -12,6 +12,7 @@ set(CMAKE_AUTORCC ON)
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/correlationplugin.h
     ${CMAKE_CURRENT_LIST_DIR}/correlationplotitem.h
+    ${CMAKE_CURRENT_LIST_DIR}/normaliser.h
     ${CMAKE_CURRENT_LIST_DIR}/minmaxnormaliser.h
     ${CMAKE_CURRENT_LIST_DIR}/quantilenormaliser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/correlationfileparser.h
