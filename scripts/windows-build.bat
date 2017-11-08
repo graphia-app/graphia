@@ -5,10 +5,9 @@ rmdir /s /q %BUILD_DIR%
 mkdir %BUILD_DIR%
 
 cd %BUILD_DIR%
-qmake -version || EXIT /B 1
-qmake ..\GraphTool.pro || EXIT /B 1
-jom || EXIT /B 1
-jom clean || EXIT /B 1
+cmake --version || EXIT /B 1
+cmake -GNinja .. || EXIT /B 1
+cmake --build . --target all || EXIT /B 1
 cd ..
 
 setlocal EnableDelayedExpansion
