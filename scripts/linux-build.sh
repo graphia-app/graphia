@@ -28,7 +28,7 @@ mkdir -p ${BUILD_DIR}
 (
   cd ${BUILD_DIR}
   cmake --version || exit $?
-  cmake -GNinja .. || exit $?
+  cmake -GNinja ../.. || exit $?
 
   if [ ! -z "${BEAR}" ] && [ ${CC} = "clang" ]
   then
