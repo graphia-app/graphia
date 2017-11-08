@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
+set(default_build_type "Release")
+
 if (NOT "$ENV{PRODUCT_NAME}" STREQUAL "")
     project($ENV{PRODUCT_NAME} LANGUAGES C CXX)
 else()

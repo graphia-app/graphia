@@ -22,6 +22,13 @@ if(MSVC)
     set(CMAKE_ASM_MASM_FLAGS "/nologo /D_M_X64 /W3 /Cx /Zi")
 endif()
 
+# Always build with symbols
+if(MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zi")
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
+endif()
+
 if (NOT "$ENV{VERSION}" STREQUAL "")
     set(Version $ENV{VERSION})
 else()

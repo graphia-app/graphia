@@ -44,5 +44,5 @@ done
   cd ${BUILD_DIR}
 
   # This just removes the intermediate build products
-  make clean || exit $?
+  #FIXME make clean || exit $?
 )

@@ -15,13 +15,11 @@ do
 done
 
 NUM_CORES=$(nproc --all)
-QMAKE_SPEC=$(qmake -query QMAKE_SPEC)
-COMPILER=$(echo ${QMAKE_SPEC} | sed -e 's/linux-//')
 BEAR=$(which bear)
-BUILD_DIR="build/${QMAKE_SPEC}"
+BUILD_DIR="build/${CC}"
 TOP_BUILD_DIR=$(echo ${BUILD_DIR} | cut -d "/" -f1)
 
-${COMPILER} --version
+${CXX} --version
 echo "NUM_CORES: ${NUM_CORES}"
 
 rm -rf ${TOP_BUILD_DIR}
@@ -29,22 +27,22 @@ mkdir -p ${BUILD_DIR}
 
 (
   cd ${BUILD_DIR}
-  qmake -version || exit $?
-  qmake ../../GraphTool.pro || exit $?
+  cmake --version || exit $?
+  cmake -GNinja .. || exit $?
 
-  if [ ! -z "${BEAR}" ] && [ ${QMAKE_SPEC} = "linux-clang" ]
+  if [ ! -z "${BEAR}" ] && [ ${CC} = "clang" ]
   then
     BUILD_LOG=${WORKSPACE}/compile_commands.json
 
     rm -f ${BUILD_LOG}
     echo "Building with ${BEAR} ${BUILD_LOG}"
-    ${BEAR} -o ${BUILD_LOG} make -O -j${NUM_CORES} || exit $?
+    ${BEAR} -o ${BUILD_LOG} cmake --build . --target all || exit $?
   else
-    make -O -j${NUM_CORES} || exit $?
+    cmake --build . --target all || exit $?
   fi
 
   # This just removes the intermediate build products
-  make clean || exit $?
+  #FIXME make clean || exit $?
 )
 
 # To get breakpad dump_syms
