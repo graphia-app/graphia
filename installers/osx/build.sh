@@ -12,8 +12,7 @@ cd ${BUILD_DIR}
 mkdir -p ${PRODUCT_NAME}.app/Contents/PlugIns/
 cp -r plugins/*.dylib ${PRODUCT_NAME}.app/Contents/PlugIns/
 
-cp CrashReporter.app/Contents/MacOS/CrashReporter \
-  ${PRODUCT_NAME}.app/Contents/MacOS/
+cp CrashReporter ${PRODUCT_NAME}.app/Contents/MacOS/
 
 mkdir -p ${PRODUCT_NAME}.app/Contents/Resources
 cp -r ../source/app/examples \
