@@ -13,9 +13,9 @@ GCC_TREAT_WARNINGS_AS_ERRORS=NO xcodebuild -project \
 
 (
   cd ${BUILD_DIR}
-  qmake -version || exit $?
-  qmake ../GraphTool.pro || exit $?
-  make -j${NUM_CORES} || exit $?
+  cmake --version || exit $?
+  cmake -GNinja .. || exit $?
+  cmake --build . --target all || exit $?
 )
 
 function makeSymFile
