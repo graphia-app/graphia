@@ -15,9 +15,30 @@ add_definitions(-DAPP_URI="com.kajeka")
 add_definitions(-DAPP_MINOR_VERSION=0)
 add_definitions(-DAPP_MAJOR_VERSION=1)
 
+if(UNIX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpedantic -Wall -Wextra -Wcast-align -Wcast-qual \
+        -Wdisabled-optimization -Wformat=2 -Winit-self \
+        -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual \
+        -Wnon-virtual-dtor -Wredundant-decls -Wshadow")
+
+    # Surprisingly, this actually makes a difference to the pearson correlation code
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -funroll-loops")
+endif()
+
+# GCC specific warnings
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wlogical-op -Wstrict-null-sentinel \
+        -Wdouble-promotion")
+endif()
+
 if(MSVC)
     add_definitions(-DUNICODE -D_UNICODE)
 
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4250")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
+        /DYNAMICBASE /NXCOMPAT /INCREMENTAL:NO /MAP /debug /opt:ref")
+
+    # Assembler
     ENABLE_LANGUAGE(ASM_MASM)
     set(CMAKE_ASM_MASM_FLAGS "/nologo /D_M_X64 /W3 /Cx /Zi")
 endif()
