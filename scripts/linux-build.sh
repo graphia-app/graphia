@@ -22,7 +22,7 @@ TOP_BUILD_DIR=$(echo ${BUILD_DIR} | cut -d "/" -f1)
 ${CXX} --version
 echo "NUM_CORES: ${NUM_CORES}"
 
-rm -rf ${TOP_BUILD_DIR}
+rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
 
 (
