@@ -36,7 +36,9 @@ if(MSVC)
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4250 /wd4996")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
-        /DYNAMICBASE /NXCOMPAT /MAP /debug /opt:ref")
+        /DYNAMICBASE /NXCOMPAT /MAP /debug")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} \
+        /MAP /debug")
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
         /Zc:rvalueCast /Zc:inline /Zc:strictStrings \
