@@ -28,7 +28,7 @@ mkdir -p ${BUILD_DIR}
 (
   cd ${BUILD_DIR}
   cmake --version || exit $?
-  cmake -GNinja ../.. || exit $?
+  cmake -DCMAKE_BUILD_TYPE=Release -GNinja ../.. || exit $?
 
   if [ ! -z "${BEAR}" ] && [ ${CC} = "clang" ]
   then

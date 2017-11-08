@@ -14,7 +14,7 @@ GCC_TREAT_WARNINGS_AS_ERRORS=NO xcodebuild -project \
 (
   cd ${BUILD_DIR}
   cmake --version || exit $?
-  cmake -GNinja .. || exit $?
+  cmake -DCMAKE_BUILD_TYPE=Release -GNinja .. || exit $?
   cmake --build . --target all || exit $?
 )
 

@@ -6,7 +6,7 @@ mkdir %BUILD_DIR%
 
 cd %BUILD_DIR%
 cmake --version || EXIT /B 1
-cmake -GNinja .. || EXIT /B 1
+cmake -DCMAKE_BUILD_TYPE=Release -GNinja .. || EXIT /B 1
 cmake --build . --target all || EXIT /B 1
 cd ..
 

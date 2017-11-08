@@ -36,7 +36,7 @@ if(MSVC)
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4250")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
-        /DYNAMICBASE /NXCOMPAT /INCREMENTAL:NO /MAP /debug /opt:ref")
+        /DYNAMICBASE /NXCOMPAT /MAP /debug /opt:ref")
 
     # Assembler
     ENABLE_LANGUAGE(ASM_MASM)
