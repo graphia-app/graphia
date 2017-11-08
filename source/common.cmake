@@ -34,9 +34,13 @@ endif()
 if(MSVC)
     add_definitions(-DUNICODE -D_UNICODE)
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4250")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4250 /wd4996")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
         /DYNAMICBASE /NXCOMPAT /MAP /debug /opt:ref")
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
+        /Zc:rvalueCast /Zc:inline /Zc:strictStrings \
+        /Zc:wchar_t /Zc:throwingNew")
 
     # Assembler
     ENABLE_LANGUAGE(ASM_MASM)

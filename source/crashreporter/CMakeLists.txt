@@ -22,7 +22,11 @@ list(APPEND RESOURCES
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-add_executable(CrashReporter ${SOURCES} ${HEADERS} ${RESOURCES})
+if(MSVC)
+    add_executable(CrashReporter WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
+else()
+    add_executable(CrashReporter ${SOURCES} ${HEADERS} ${RESOURCES})
+endif()
 
 find_package(Qt5 COMPONENTS Qml Quick OpenGL OpenGLExtensions Xml REQUIRED)
 target_link_libraries(CrashReporter
