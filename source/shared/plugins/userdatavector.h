@@ -50,8 +50,8 @@ public:
 
     int intMin() const { return _intMin; }
     int intMax() const { return _intMax; }
-    int floatMin() const { return _floatMin; }
-    int floatMax() const { return _floatMax; }
+    double floatMin() const { return _floatMin; }
+    double floatMax() const { return _floatMax; }
 
     void set(size_t index, const QString& value);
     QString get(size_t index) const;
