@@ -371,7 +371,7 @@ void CorrelationPlotItem::populateMedianLinePlot()
     graph->setName(tr("Median average of selection"));
 
     QVector<double> xData(static_cast<int>(_columnCount));
-    // xData is just the column indecides
+    // xData is just the column indices
     std::iota(std::begin(xData), std::end(xData), 0);
 
     QVector<double> rowsEntries(_selectedRows.length());
@@ -429,7 +429,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     double minY = 0.0;
 
     QVector<double> xData(static_cast<int>(_columnCount));
-    // xData is just the column indecides
+    // xData is just the column indices
     std::iota(std::begin(xData), std::end(xData), 0);
 
     // Use Average Calculation and set min / max
