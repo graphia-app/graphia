@@ -65,12 +65,12 @@ public:
 
     Q_INVOKABLE void savePlotImage(const QUrl& url, const QStringList& extensions);
 
-    void setPlotScaleType(const int& plotScaleType);
-    void setPlotDispersionType(const int& plotDispersionType);
+    void setPlotScaleType(const int plotScaleType);
+    void setPlotDispersionType(const int plotDispersionType);
     void setXAxisLabel(const QString& plotXAxisLabel);
     void setYAxisLabel(const QString& plotYAxisLabel);
-    void setPlotAveragingType(const int& plotAveragingType);
-    void setPlotDispersionVisualType(const int& plotDispersionVisualType);
+    void setPlotAveragingType(const int plotAveragingType);
+    void setPlotDispersionVisualType(const int plotDispersionVisualType);
 
 protected:
     void routeMouseEvent(QMouseEvent* event);
@@ -114,7 +114,7 @@ private:
     int _plotAveragingType = static_cast<int>(PlotAveragingType::Individual);
     int _plotDispersionType = static_cast<int>(PlotDispersionType::None);
     int _plotDispersionVisualType = static_cast<int>(PlotDispersionVisualType::Bars);
-    double _scrollAmount = 0.0f;
+    double _scrollAmount = 0.0;
     QString _xAxisLabel;
     QString _yAxisLabel;
 
@@ -142,7 +142,7 @@ private:
     void setScrollAmount(double scrollAmount);
 
     void scaleXAxis();
-    QVector<double> meanAverageData(double &min, double &max);
+    QVector<double> meanAverageData(double& min, double& max);
 
     double rangeSize();
     double columnLabelSize();

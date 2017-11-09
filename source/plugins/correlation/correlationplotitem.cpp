@@ -133,7 +133,7 @@ void CorrelationPlotItem::configureLegend()
         // The projected sizes for the legend layout are calculated here but will break
         // if any additional rows are added to the plotLayout!!
 
-        QFontMetrics metrics(_defaultFont9Pt);
+        QFontMetrics metrics(_customPlot.legend->font());
         double legendItemSize = (metrics.height() + 5);
         int projectedItemHeight = _customPlot.height();
         if(_customPlot.plotLayout()->rowCount() > 1)
@@ -161,7 +161,7 @@ void CorrelationPlotItem::configureLegend()
             moreText->setMargins(QMargins());
             moreText->setLayer(_textLayer);
             moreText->setTextFlags(Qt::AlignLeft);
-            moreText->setFont(_defaultFont9Pt);
+            moreText->setFont(_customPlot.legend->font());
             moreText->setTextColor(Qt::gray);
             moreText->setText(
                 QString(tr("and %1 more..."))
@@ -274,14 +274,14 @@ void CorrelationPlotItem::buildPlot()
     _customPlot.setBackground(Qt::white);
 }
 
-void CorrelationPlotItem::setPlotDispersionVisualType(const int& plotDispersionVisualType)
+void CorrelationPlotItem::setPlotDispersionVisualType(const int plotDispersionVisualType)
 {
     _plotDispersionVisualType = plotDispersionVisualType;
     emit plotOptionsChanged();
     refresh();
 }
 
-void CorrelationPlotItem::setYAxisLabel(const QString &plotYAxisLabel)
+void CorrelationPlotItem::setYAxisLabel(const QString& plotYAxisLabel)
 {
     _yAxisLabel = plotYAxisLabel;
     _customPlot.yAxis->setLabel(_yAxisLabel);
@@ -289,7 +289,7 @@ void CorrelationPlotItem::setYAxisLabel(const QString &plotYAxisLabel)
     refresh();
 }
 
-void CorrelationPlotItem::setXAxisLabel(const QString &plotXAxisLabel)
+void CorrelationPlotItem::setXAxisLabel(const QString& plotXAxisLabel)
 {
     _xAxisLabel = plotXAxisLabel;
     _customPlot.xAxis->setLabel(_xAxisLabel);
@@ -297,21 +297,21 @@ void CorrelationPlotItem::setXAxisLabel(const QString &plotXAxisLabel)
     refresh();
 }
 
-void CorrelationPlotItem::setPlotScaleType(const int &plotScaleType)
+void CorrelationPlotItem::setPlotScaleType(const int plotScaleType)
 {
     _plotScaleType = plotScaleType;
     emit plotOptionsChanged();
     refresh();
 }
 
-void CorrelationPlotItem::setPlotAveragingType(const int &plotAveragingType)
+void CorrelationPlotItem::setPlotAveragingType(const int plotAveragingType)
 {
     _plotAveragingType = plotAveragingType;
     emit plotOptionsChanged();
     refresh();
 }
 
-void CorrelationPlotItem::setPlotDispersionType(const int &plotDispersionType)
+void CorrelationPlotItem::setPlotDispersionType(const int plotDispersionType)
 {
     _plotDispersionType = plotDispersionType;
     emit plotOptionsChanged();
@@ -335,7 +335,7 @@ void CorrelationPlotItem::populateMeanLinePlot()
     graph->setName(tr("Mean average of selection"));
 
     QVector<double> xData(static_cast<int>(_columnCount));
-    // xData is just the column indecides
+    // xData is just the column indices
     std::iota(std::begin(xData), std::end(xData), 0);
 
     // Use Average Calculation and set min / max
@@ -422,7 +422,7 @@ void CorrelationPlotItem::populateMedianLinePlot()
 
 void CorrelationPlotItem::populateMeanHistogramPlot()
 {
-    if(_selectedRows.size() == 0)
+    if(_selectedRows.isEmpty())
         return;
 
     double maxY = 0.0;
@@ -484,7 +484,7 @@ void CorrelationPlotItem::populateIQRPlot()
     QVector<double> rowsEntries(_selectedRows.length());
     QVector<double> outliers;
 
-    // Calculate IQR's, outliers and ranges
+    // Calculate IQRs, outliers and ranges
     for(int col = 0; col < static_cast<int>(_columnCount); col++)
     {
         rowsEntries.clear();
@@ -528,23 +528,15 @@ void CorrelationPlotItem::populateIQRPlot()
             {
                 // Find Maximum and minimum non-outliers
                 if(row < thirdQuartile + (iqr * 1.5))
-                {
                     maxValue = std::max(maxValue, row);
-                }
                 if(row > firstQuartile - (iqr * 1.5))
-                {
                     minValue = std::min(minValue, row);
-                }
 
                 // Find outliers
                 if(row > thirdQuartile + (iqr * 1.5))
-                {
                     outliers.push_back(row);
-                }
                 else if(row < firstQuartile - (iqr * 1.5))
-                {
                     outliers.push_back(row);
-                }
 
                 maxY = std::max(maxY, row);
                 minY = std::min(minY, row);
@@ -626,7 +618,7 @@ void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, QString name =
 
 void CorrelationPlotItem::populateStdDevPlot()
 {
-    if(_selectedRows.size() == 0)
+    if(_selectedRows.isEmpty())
         return;
 
     double min = 0, max = 0;
@@ -664,7 +656,7 @@ void CorrelationPlotItem::populateStdDevPlot()
 
 void CorrelationPlotItem::populateStdErrorPlot()
 {
-    if(_selectedRows.size() == 0)
+    if(_selectedRows.isEmpty())
         return;
 
     double min = 0, max = 0;
@@ -861,10 +853,10 @@ void CorrelationPlotItem::scaleXAxis()
     }
 }
 
-QVector<double> CorrelationPlotItem::meanAverageData(double &min, double &max)
+QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max)
 {
-    min = 0.0f;
-    max = 0.0f;
+    min = 0.0;
+    max = 0.0;
 
     // Use Average Calculation
     QVector<double> yDataAvg; yDataAvg.reserve(_selectedRows.size());

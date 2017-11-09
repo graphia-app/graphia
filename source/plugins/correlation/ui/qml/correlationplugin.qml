@@ -30,7 +30,7 @@ PluginContent
     Action
     {
         id: resizeColumnsToContentsAction
-        text: qsTr("&Resize Columns To Fit Contents")
+        text: qsTr("Resize Columns To Fit Contents")
         iconName: "format-justify-fill"
         onTriggered: tableView.resizeColumnsToContentsBugWorkaround();
     }
@@ -49,7 +49,7 @@ PluginContent
     Action
     {
         id: selectColumnsAction
-        text: qsTr("&Select Visible Columns")
+        text: qsTr("Select Visible Columns")
         iconName: "computer"
         checkable: true
         checked: tableView.columnSelectionMode
@@ -60,7 +60,7 @@ PluginContent
     Action
     {
         id: toggleGridLines
-        text: qsTr("&Grid Lines")
+        text: qsTr("Grid Lines")
         checkable: true
         checked: plot.showGridLines
 
@@ -70,7 +70,7 @@ PluginContent
     Action
     {
         id: togglePlotLegend
-        text: qsTr("&Legend")
+        text: qsTr("Legend")
         checkable: true
         checked: plot.showLegend
 
@@ -82,7 +82,7 @@ PluginContent
         Action
         {
             id: rawScaling
-            text: qsTr("&Raw")
+            text: qsTr("Raw")
             checkable: true
             checked: plot.plotScaleType === PlotScaleType.Raw
             onTriggered: { plot.plotScaleType = PlotScaleType.Raw; }
@@ -100,7 +100,7 @@ PluginContent
         Action
         {
             id: meanCentreScaling
-            text: qsTr("&Mean Centre Scaling")
+            text: qsTr("Mean Centre Scaling")
             checkable: true
             checked: plot.plotScaleType === PlotScaleType.MeanCentre
             onTriggered: { plot.plotScaleType = PlotScaleType.MeanCentre; }
@@ -109,7 +109,7 @@ PluginContent
         Action
         {
             id: unitVarianceScaling
-            text: qsTr("&Unit Varience Scaling")
+            text: qsTr("Unit Varience Scaling")
             checkable: true
             checked: plot.plotScaleType === PlotScaleType.UnitVariance
             onTriggered: { plot.plotScaleType = PlotScaleType.UnitVariance; }
@@ -118,7 +118,7 @@ PluginContent
         Action
         {
             id: paretoScaling
-            text: qsTr("&Pareto Scaling")
+            text: qsTr("Pareto Scaling")
             checkable: true
             checked: plot.plotScaleType === PlotScaleType.Pareto
             onTriggered: { plot.plotScaleType = PlotScaleType.Pareto; }
@@ -131,7 +131,7 @@ PluginContent
         {
             id: barDeviationVisual
             enabled: plot.plotDispersionType !== PlotDispersionType.None
-            text: qsTr("&Error Bars")
+            text: qsTr("Error Bars")
             checkable: true
             checked: plot.plotDispersionVisualType === PlotDispersionVisualType.Bars
             onTriggered: { plot.plotDispersionVisualType = PlotDispersionVisualType.Bars; }
@@ -140,7 +140,7 @@ PluginContent
         {
             id: graphDeviationVisual
             enabled: plot.plotDispersionType !== PlotDispersionType.None
-            text: qsTr("&Area")
+            text: qsTr("Area")
             checkable: true
             checked: plot.plotDispersionVisualType === PlotDispersionVisualType.Area
             onTriggered: { plot.plotDispersionVisualType = PlotDispersionVisualType.Area; }
@@ -152,7 +152,7 @@ PluginContent
         Action
         {
             id: noDispersion
-            text: qsTr("&None")
+            text: qsTr("None")
             checkable: true
             checked: plot.plotDispersionType === PlotDispersionType.None
             onTriggered: { plot.plotDispersionType = PlotDispersionType.None; }
@@ -160,7 +160,7 @@ PluginContent
         Action
         {
             id: stdDeviations
-            text: qsTr("&Standard Deviation")
+            text: qsTr("Standard Deviation")
             checkable: true
             checked: plot.plotDispersionType === PlotDispersionType.StdDev
             onTriggered: { plot.plotDispersionType = PlotDispersionType.StdDev; }
@@ -168,7 +168,7 @@ PluginContent
         Action
         {
             id: stdErrorDeviations
-            text: qsTr("&Standard Error")
+            text: qsTr("Standard Error")
             checkable: true
             checked: plot.plotDispersionType === PlotDispersionType.StdErr
             onTriggered: { plot.plotDispersionType = PlotDispersionType.StdErr; }
@@ -180,7 +180,7 @@ PluginContent
         Action
         {
             id: individualLineAverage
-            text: qsTr("&Individual Line")
+            text: qsTr("Individual Line")
             checkable: true
             checked: plot.plotAveragingType === PlotAveragingType.Individual
             onTriggered: { plot.plotAveragingType = PlotAveragingType.Individual; }
@@ -189,7 +189,7 @@ PluginContent
         Action
         {
             id: meanLineAverage
-            text:  qsTr("&Mean Line");
+            text:  qsTr("Mean Line");
             checkable: true
             checked: plot.plotAveragingType === PlotAveragingType.MeanLine
             onTriggered: { plot.plotAveragingType = PlotAveragingType.MeanLine; }
@@ -198,7 +198,7 @@ PluginContent
         Action
         {
             id: medianLineAverage
-            text: qsTr("&Median Line")
+            text: qsTr("Median Line")
             checkable: true
             checked: plot.plotAveragingType === PlotAveragingType.MedianLine
             onTriggered: { plot.plotAveragingType = PlotAveragingType.MedianLine; }
@@ -207,7 +207,7 @@ PluginContent
         Action
         {
             id: meanHistogramAverage
-            text: qsTr("&Mean Histogram")
+            text: qsTr("Mean Histogram")
             checkable: true
             checked: plot.plotAveragingType === PlotAveragingType.MeanHistogram
             onTriggered: { plot.plotAveragingType = PlotAveragingType.MeanHistogram; }
@@ -216,7 +216,7 @@ PluginContent
         Action
         {
             id: iqrAverage
-            text: qsTr("&IQR Plot")
+            text: qsTr("IQR Plot")
             checkable: true
             checked: plot.plotAveragingType === PlotAveragingType.IQRPlot
             onTriggered: { plot.plotAveragingType = PlotAveragingType.IQRPlot; }
@@ -252,15 +252,18 @@ PluginContent
         title: "X Axis Label"
 
         standardButtons: StandardButton.Ok | StandardButton.Cancel
-        ColumnLayout
+        RowLayout
         {
             Text
             {
-                text: "Please enter an X Axis label"
+                Layout.bottomMargin: 12
+                text: "Please enter an X Axis label:"
             }
             TextField
             {
                 id: xAxisTextField
+                Layout.bottomMargin: 12
+                implicitWidth: 150
                 text: plot.xAxisLabel
             }
         }
@@ -274,16 +277,19 @@ PluginContent
         title: "Y Axis Label"
 
         standardButtons: StandardButton.Ok | StandardButton.Cancel
-        ColumnLayout
+        RowLayout
         {
             Text
             {
-                text: "Please enter an Y Axis label"
+                Layout.bottomMargin: 12
+                text: "Please enter an Y Axis label:"
             }
             TextField
             {
                 id: yAxisTextField
-                text: plot.yAxisLabel
+                Layout.bottomMargin: 12
+                implicitWidth: 150
+                text: plot.xAxisLabel
             }
         }
 
@@ -299,7 +305,7 @@ PluginContent
             return true;
 
         case 1:
-            menu.title = qsTr(qsTr("&Plot"));
+            menu.title = qsTr("Plot");
             menu.addItem("").action = toggleColumnNamesAction;
             menu.addItem("").action = savePlotImageAction;
             menu.addItem("").action = toggleGridLines;
