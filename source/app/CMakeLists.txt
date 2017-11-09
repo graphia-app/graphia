@@ -198,17 +198,19 @@ list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/imagery.qrc
 )
 
-if(MSVC)
-    list(APPEND RESOURCES ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.rc)
-endif()
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 if(APPLE)
-    set(MACOSX_FRAMEWORK_ICON_FILE ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.icns)
-    set(MACOSX_FRAMEWORK_IDENTIFIER com.kajeka.${PROJECT_NAME})
+    set(MACOSX_BUNDLE_ICON_FILE Icon.icns)
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER com.kajeka.${PROJECT_NAME})
+    set(ICON ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.icns)
+    list(APPEND RESOURCES ${ICON})
+    set_source_files_properties(${ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+
     add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES})
 elseif(MSVC)
+    list(APPEND RESOURCES ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.rc)
+
     add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
 else()
     add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${RESOURCES})
