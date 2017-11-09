@@ -15,8 +15,9 @@ do
 done
 
 NUM_CORES=$(nproc --all)
+COMPILER=$(basename ${CC} | sed -e 's/-.*//g')
 BEAR=$(which bear)
-BUILD_DIR="build/${CC}"
+BUILD_DIR="build/${COMPILER}"
 TOP_BUILD_DIR=$(echo ${BUILD_DIR} | cut -d "/" -f1)
 
 ${CXX} --version
@@ -30,7 +31,7 @@ mkdir -p ${BUILD_DIR}
   cmake --version || exit $?
   cmake -DCMAKE_BUILD_TYPE=Release -GNinja ../.. || exit $?
 
-  if [ ! -z "${BEAR}" ] && [ ${CC} = "clang" ]
+  if [ ! -z "${BEAR}" ] && [ ${COMPILER} = "clang" ]
   then
     BUILD_LOG=${WORKSPACE}/compile_commands.json
 
