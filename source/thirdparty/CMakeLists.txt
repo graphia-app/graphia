@@ -17,6 +17,13 @@ include(${CMAKE_CURRENT_LIST_DIR}/zlib/zlib.cmake)
 
 add_library(thirdparty STATIC ${SOURCES} ${HEADERS} ${RESOURCES})
 
+# Disable all warnings
+if(MSVC)
+    set_target_properties(thirdparty PROPERTIES COMPILE_FLAGS "/w")
+else()
+    set_target_properties(thirdparty PROPERTIES COMPILE_FLAGS "-w")
+endif()
+
 find_package(Qt5 COMPONENTS Core Qml Network Widgets REQUIRED)
 target_link_libraries(thirdparty
     Qt5::Core
