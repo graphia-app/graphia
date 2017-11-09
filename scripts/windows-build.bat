@@ -8,6 +8,12 @@ cd %BUILD_DIR%
 cmake --version || EXIT /B 1
 cmake -DCMAKE_BUILD_TYPE=Release -GNinja .. || EXIT /B 1
 cmake --build . --target all || EXIT /B 1
+
+REM Clean intermediate build products
+FOR /f "tokens=2" %%R IN ('findstr "_COMPILER_ _STATIC_LIBRARY_" rules.ninja') DO (
+  ninja -t clean -r %%~R
+)
+
 cd ..
 
 setlocal EnableDelayedExpansion
