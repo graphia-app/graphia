@@ -44,7 +44,7 @@ mkdir -p ${BUILD_DIR}
 
   # Clean intermediate build products
   grep "^rule.*\(_COMPILER_\|_STATIC_LIBRARY_\)" rules.ninja | \
-    sed -e 's/^rule //' | xargs -n1 ninja -t clean -r
+    cut -d' ' -f2 | xargs -n1 ninja -t clean -r
 )
 
 # To get breakpad dump_syms
