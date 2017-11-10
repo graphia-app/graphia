@@ -1,7 +1,7 @@
 include_directories(${CMAKE_CURRENT_LIST_DIR}/src)
 
 if(UNIX)
-    list(APPEND SOURCES
+    list(APPEND BREAKPAD_SOURCES
         ${CMAKE_CURRENT_LIST_DIR}/src/client/minidump_file_writer.cc
         ${CMAKE_CURRENT_LIST_DIR}/src/common/convert_UTF.c
         ${CMAKE_CURRENT_LIST_DIR}/src/common/md5.cc
@@ -9,7 +9,7 @@ if(UNIX)
     )
 
     if(NOT APPLE)
-        list(APPEND SOURCES
+        list(APPEND BREAKPAD_SOURCES
             ${CMAKE_CURRENT_LIST_DIR}/src/client/linux/crash_generation/crash_generation_client.cc
             ${CMAKE_CURRENT_LIST_DIR}/src/client/linux/dump_writer_common/thread_info.cc
             ${CMAKE_CURRENT_LIST_DIR}/src/client/linux/dump_writer_common/ucontext_reader.cc
@@ -33,7 +33,7 @@ if(UNIX)
 endif()
 
 if(APPLE)
-    list(APPEND SOURCES
+    list(APPEND BREAKPAD_SOURCES
             ${CMAKE_CURRENT_LIST_DIR}/src/client/mac/handler/exception_handler.cc
             ${CMAKE_CURRENT_LIST_DIR}/src/client/mac/handler/minidump_generator.cc
             ${CMAKE_CURRENT_LIST_DIR}/src/client/mac/handler/dynamic_images.cc
@@ -50,7 +50,7 @@ if(APPLE)
 endif()
 
 if(MSVC)
-    list(APPEND SOURCES
+    list(APPEND BREAKPAD_SOURCES
         ${CMAKE_CURRENT_LIST_DIR}/src/client/windows/crash_generation/crash_generation_client.cc
         ${CMAKE_CURRENT_LIST_DIR}/src/common/windows/guid_string.cc
         ${CMAKE_CURRENT_LIST_DIR}/src/client/windows/handler/exception_handler.cc
@@ -58,5 +58,10 @@ if(MSVC)
 endif()
 
 list(APPEND HEADERS ${CMAKE_CURRENT_LIST_DIR}/crashhandler.h)
-list(APPEND SOURCES ${CMAKE_CURRENT_LIST_DIR}/crashhandler.cpp)
+list(APPEND BREAKPAD_SOURCES ${CMAKE_CURRENT_LIST_DIR}/crashhandler.cpp)
 
+if(UNITY_BUILD)
+    GenerateUnity(ORIGINAL_SOURCES BREAKPAD_SOURCES UNITY_PREFIX "breakpad")
+endif()
+
+list(APPEND SOURCES ${BREAKPAD_SOURCES})

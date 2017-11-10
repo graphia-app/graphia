@@ -1,6 +1,10 @@
 #ifndef IATTRIBUTERANGE_H
 #define IATTRIBUTERANGE_H
 
+// In case windows.h has been included prior to this file
+#undef min
+#undef max
+
 class IAttribute;
 
 template<typename T>

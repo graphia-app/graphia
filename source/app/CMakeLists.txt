@@ -1,4 +1,5 @@
 include(${CMAKE_CURRENT_SOURCE_DIR}/../common.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../unity.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/thirdparty.cmake)
 
 add_definitions(-DPRODUCT_NAME="${PROJECT_NAME}")
@@ -111,7 +112,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/graph/graphfilter.h
 )
 
-list(APPEND SOURCES
+list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/application.cpp 
     ${CMAKE_CURRENT_LIST_DIR}/attributes/attribute.cpp 
     ${CMAKE_CURRENT_LIST_DIR}/attributes/availableattributesmodel.cpp 
@@ -199,6 +200,12 @@ list(APPEND RESOURCES
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+if(UNITY_BUILD)
+    GenerateUnity(ORIGINAL_SOURCES APP_SOURCES UNITY_PREFIX "${PROJECT_NAME}")
+endif()
+
+list(APPEND SOURCES ${APP_SOURCES})
 
 if(APPLE)
     set(MACOSX_BUNDLE_ICON_FILE Icon.icns)

@@ -1,19 +1,15 @@
-list(APPEND SOURCES
+include(${CMAKE_CURRENT_SOURCE_DIR}/../unity.cmake)
+
+set(CRYPTOPP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/algparam.cpp
     ${CMAKE_CURRENT_LIST_DIR}/asn.cpp
     ${CMAKE_CURRENT_LIST_DIR}/basecode.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/cpu.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/cryptlib.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/des.cpp
     ${CMAKE_CURRENT_LIST_DIR}/dessp.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/dll.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ec2n.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ecp.cpp
     ${CMAKE_CURRENT_LIST_DIR}/filters.cpp
     ${CMAKE_CURRENT_LIST_DIR}/fips140.cpp
     ${CMAKE_CURRENT_LIST_DIR}/gf2n.cpp
     ${CMAKE_CURRENT_LIST_DIR}/gfpcrypt.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/hex.cpp
     ${CMAKE_CURRENT_LIST_DIR}/hmac.cpp
     ${CMAKE_CURRENT_LIST_DIR}/hrtimer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/integer.cpp
@@ -33,7 +29,23 @@ list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/rijndael.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rng.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rsa.cpp
+)
+
+if(UNITY_BUILD)
+    GenerateUnity(ORIGINAL_SOURCES CRYPTOPP_SOURCES UNITY_PREFIX "cryptopp")
+endif()
+
+list(APPEND SOURCES
+    ${CRYPTOPP_SOURCES}
+
+    ${CMAKE_CURRENT_LIST_DIR}/cryptlib.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/cpu.cpp
+
+    ${CMAKE_CURRENT_LIST_DIR}/ec2n.cpp
     ${CMAKE_CURRENT_LIST_DIR}/sha.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/des.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/hex.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/dll.cpp
 )
 
 if(MSVC)

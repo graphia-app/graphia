@@ -20,6 +20,10 @@ add_library(thirdparty STATIC ${SOURCES} ${HEADERS} ${RESOURCES})
 # Disable all warnings
 if(MSVC)
     set_target_properties(thirdparty PROPERTIES COMPILE_FLAGS "/w")
+
+    # Filter out any /W flags that have been added by CMake
+    string(REGEX REPLACE "\/W[0-9]" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    string(REGEX REPLACE "\/W[0-9]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 else()
     set_target_properties(thirdparty PROPERTIES COMPILE_FLAGS "-w")
 endif()

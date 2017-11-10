@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../common.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../unity.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/thirdparty.cmake)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -71,7 +72,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementid_debug.h
 )
 
-list(APPEND SOURCES
+list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/graph/elementtype.cpp 
     ${CMAKE_CURRENT_LIST_DIR}/loading/gmlfileparser.cpp 
     ${CMAKE_CURRENT_LIST_DIR}/loading/graphmlparser.cpp
@@ -99,6 +100,12 @@ list(APPEND RESOURCES
     ${CMAKE_CURRENT_LIST_DIR}/ui/shared.qrc
     ${CMAKE_CURRENT_LIST_DIR}/ui/js.qrc
 )
+
+if(UNITY_BUILD)
+    GenerateUnity(ORIGINAL_SOURCES SHARED_SOURCES UNITY_PREFIX "shared")
+endif()
+
+list(APPEND SOURCES ${SHARED_SOURCES})
 
 add_library(shared STATIC ${SOURCES} ${HEADERS} ${RESOURCES})
 
