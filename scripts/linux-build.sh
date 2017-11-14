@@ -29,7 +29,7 @@ mkdir -p ${BUILD_DIR}
 (
   cd ${BUILD_DIR}
   cmake --version || exit $?
-  cmake -DUNITY_BUILD -DCMAKE_BUILD_TYPE=Release -GNinja ../.. || exit $?
+  cmake -DUNITY_BUILD=ON -DCMAKE_BUILD_TYPE=Release -GNinja ../.. || exit $?
 
   if [ ! -z "${BEAR}" ] && [ ${COMPILER} = "clang" ]
   then
