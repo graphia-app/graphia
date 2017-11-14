@@ -29,18 +29,9 @@ mkdir -p ${BUILD_DIR}
 (
   cd ${BUILD_DIR}
   cmake --version || exit $?
-  cmake -DUNITY_BUILD=ON -DCMAKE_BUILD_TYPE=Release -GNinja ../.. || exit $?
-
-  if [ ! -z "${BEAR}" ] && [ ${COMPILER} = "clang" ]
-  then
-    BUILD_LOG=${WORKSPACE}/compile_commands.json
-
-    rm -f ${BUILD_LOG}
-    echo "Building with ${BEAR} ${BUILD_LOG}"
-    ${BEAR} -o ${BUILD_LOG} cmake --build . --target all || exit $?
-  else
-    cmake --build . --target all || exit $?
-  fi
+  cmake -DUNITY_BUILD=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+    -DCMAKE_BUILD_TYPE=Release -GNinja ../.. || exit $?
+  cmake --build . --target all || exit $?
 
   # Clean intermediate build products
   grep "^rule.*\(_COMPILER_\|_STATIC_LIBRARY_\)" rules.ninja | \
