@@ -13,17 +13,16 @@ do
 done
 
 NUM_CORES=$(nproc --all)
+COMPILER=$(basename ${CC} | sed -e 's/-.*//g')
+BUILD_DIR="build/${COMPILER}"
+
+CPP_FILES=$(cat ${BUILD_DIR}/compile_commands.json | \
+  jq '.[].file' | grep -vE "qrc_|_automoc")
 
 # cppcheck
 cppcheck --version
-find source/app \
-  source/shared \
-  source/plugins \
-  source/crashreporter \
-  -type f -iname "*.cpp" -not -iname "moc_*" -not -iname "qrc_*" | \
-  xargs cppcheck --enable=all \
-  --xml --xml-version=2 \
-  --library=scripts/cppcheck.cfg 2> cppcheck.xml
+echo ${CPP_FILES} | xargs cppcheck --enable=all \
+  --xml --xml-version=2 --library=scripts/cppcheck.cfg 2> cppcheck.xml
 
 # clang-tidy (this works better when a compile_command.json has been created by bear)
 CHECKS="-checks=*,\
@@ -34,12 +33,7 @@ CHECKS="-checks=*,\
 
 clang-tidy --version
 clang-tidy -p build/linux-clang -list-checks ${CHECKS}
-find source/app \
-  source/shared \
-  source/plugins \
-  source/crashreporter \
-  -type f -iname "*.cpp" -not -iname "moc_*" -not -iname "qrc_*" | \
-  xargs -n1 -P${NUM_CORES} clang-tidy ${CHECKS}
+echo ${CPP_FILES} | xargs -n1 -P${NUM_CORES} clang-tidy ${CHECKS}
 
 # clazy
 CHECKS="-checks=level1,\
@@ -55,12 +49,7 @@ no-qenums,\
 no-non-pod-global-static"
 
 clazy-standalone --version
-find source/app \
-  source/shared \
-  source/plugins \
-  source/crashreporter \
-  -type f -iname "*.cpp" -not -iname "moc_*" -not -iname "qrc_*" | \
-  xargs -n1 -P${NUM_CORES} clazy-standalone ${CHECKS}
+echo ${CPP_FILES} | xargs -n1 -P${NUM_CORES} clazy-standalone ${CHECKS}
 
 # qmllint
 qmllint --version

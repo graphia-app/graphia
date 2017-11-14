@@ -16,9 +16,7 @@ done
 
 NUM_CORES=$(nproc --all)
 COMPILER=$(basename ${CC} | sed -e 's/-.*//g')
-BEAR=$(which bear)
 BUILD_DIR="build/${COMPILER}"
-TOP_BUILD_DIR=$(echo ${BUILD_DIR} | cut -d "/" -f1)
 
 ${CXX} --version
 echo "NUM_CORES: ${NUM_CORES}"
