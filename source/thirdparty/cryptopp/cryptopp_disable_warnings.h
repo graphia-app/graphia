@@ -3,11 +3,12 @@
 // this is crypto_enable_warnings.h which should be included as soon as possible
 // after the affected code; especially if we're including from inside another header.
 
-#define GCC_DIAGNOSTIC_AWARE \
-    ((__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2)) || \
+#if ((__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2)) || \
     defined(__clang__))
+#define GCC_DIAGNOSTIC_AWARE
+#endif
 
-#if GCC_DIAGNOSTIC_AWARE
+#ifdef GCC_DIAGNOSTIC_AWARE
 // GCC/clang warnings
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-qual"

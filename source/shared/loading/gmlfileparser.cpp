@@ -141,13 +141,13 @@ template<typename It> bool parseGml(IMutableGraph &graph,
     bool succeeded = true;
 
     // Failure capture event
-    auto onFail = [&succeeded, &begin](It, It)
+    auto onFail = [&succeeded](It, It)
     {
         succeeded = false;
     };
 
     // Progress Capture event (Fired on keyValue rule match)
-    auto captureCount = axe::e_ref([&begin, &end, &cancelled, &progressFn](It, It i2)
+    auto captureCount = axe::e_ref([&begin, &end, &progressFn](It, It i2)
     {
         progressFn((std::distance(begin, i2)) * 100 / std::distance(begin, end));
     });

@@ -303,7 +303,7 @@ void QmlPreferences::onPropertyChanged()
     QMetaProperty changedProperty;
 
     forEachProperty(this,
-    [this, &metaMethodName, &changedProperty](const QMetaProperty& property, PropertyType)
+    [&metaMethodName, &changedProperty](const QMetaProperty& property, PropertyType)
     {
         if(property.notifySignal().name() == metaMethodName)
             changedProperty = property;

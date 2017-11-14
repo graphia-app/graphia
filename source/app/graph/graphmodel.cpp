@@ -101,7 +101,7 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
         .setDescription(tr("An edge's multiplicity is how many edges it represents."));
 
     GraphModel::createAttribute(tr("Component Size"))
-        .setIntValueFn([this](const IGraphComponent& component) { return component.numNodes(); })
+        .setIntValueFn([](const IGraphComponent& component) { return component.numNodes(); })
         .intRange().setMin(1)
         .setDescription(tr("Component Size refers to the number of nodes the component contains."));
 

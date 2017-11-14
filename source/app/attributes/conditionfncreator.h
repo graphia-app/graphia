@@ -94,7 +94,7 @@ private:
 
         ElementConditionFn<E> operator()(ConditionFnOp::Equality op) const
         {
-            auto comparisonFn = [this, op](const Attribute& lhs, auto valueOfFn, const Attribute& rhs) -> ElementConditionFn<E>
+            auto comparisonFn = [op](const Attribute& lhs, auto valueOfFn, const Attribute& rhs) -> ElementConditionFn<E>
             {
                 switch(op)
                 {
@@ -127,8 +127,8 @@ private:
             if(_lhs.valueType() == ValueType::String || _rhs.valueType() == ValueType::String)
                 return nullptr; // Can't compare a string attribute numerically
 
-            auto comparisonFn = [this, op](const Attribute& lhs, auto lhsValueOfFn,
-                                           const Attribute& rhs, auto rhsValueOfFn) -> ElementConditionFn<E>
+            auto comparisonFn = [op](const Attribute& lhs, auto lhsValueOfFn,
+                                     const Attribute& rhs, auto rhsValueOfFn) -> ElementConditionFn<E>
             {
                 switch(op)
                 {
@@ -216,7 +216,7 @@ private:
 
         ElementConditionFn<E> operator()(ConditionFnOp::Equality op) const
         {
-            auto comparisonFn = [this, op](const Attribute& attribute, auto valueOfFn, auto value) -> ElementConditionFn<E>
+            auto comparisonFn = [op](const Attribute& attribute, auto valueOfFn, auto value) -> ElementConditionFn<E>
             {
                 switch(op)
                 {
@@ -260,7 +260,7 @@ private:
                 }
             }
 
-            auto comparisonFn = [this, op](const Attribute& attribute, auto value) -> ElementConditionFn<E>
+            auto comparisonFn = [op](const Attribute& attribute, auto value) -> ElementConditionFn<E>
             {
                 switch(op)
                 {

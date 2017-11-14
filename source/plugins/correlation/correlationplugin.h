@@ -116,7 +116,7 @@ private:
 
         void sum()
         {
-            int numColumns = std::distance(begin(), end());
+            auto numColumns = std::distance(begin(), end());
 
             for(auto value : *this)
             {
