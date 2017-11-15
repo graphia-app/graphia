@@ -31,6 +31,7 @@ CHECKS="-checks=*,\
 -google-*,\
 -clang-analyzer-alpha.deadcode.UnreachableCode"
 
+echo "clang-tidy"
 clang-tidy --version
 clang-tidy -p build/linux-clang -list-checks ${CHECKS}
 echo ${CPP_FILES} | xargs -n1 -P${NUM_CORES} clang-tidy ${CHECKS}
@@ -48,6 +49,7 @@ no-rule-of-two-soft,\
 no-qenums,\
 no-non-pod-global-static"
 
+echo "clazy"
 clazy-standalone --version
 echo ${CPP_FILES} | xargs -n1 -P${NUM_CORES} clazy-standalone ${CHECKS}
 
