@@ -596,7 +596,7 @@ void GraphOverviewScene::onPreferenceChanged(const QString& key, const QVariant&
             _componentLayout->execute(*graph, graph->componentIds(), _nextComponentLayoutData);
             _nextComponentLayoutDataChanged = true;
 
-            _graphRenderer->executeOnRendererThread([this, graph]
+            _graphRenderer->executeOnRendererThread([this]
             {
                 this->startComponentLayoutTransition();
             }, QStringLiteral("GraphOverviewScene::onPreferenceChanged"));
