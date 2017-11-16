@@ -61,7 +61,7 @@ void CorrelationPlotItem::refresh()
 
 void CorrelationPlotItem::paint(QPainter* painter)
 {
-    QPixmap    picture(boundingRect().size().toSize());
+    QPixmap picture(boundingRect().size().toSize());
     QCPPainter qcpPainter(&picture);
 
     _customPlot.toPainter(&qcpPainter);
