@@ -285,7 +285,7 @@ void CorrelationPlotItem::setElideLabelWidth(int elideLabelWidth)
     bool changed = (_elideLabelWidth != elideLabelWidth);
     _elideLabelWidth = elideLabelWidth;
 
-    if(changed)
+    if(changed && _showColumnNames)
         refresh();
 }
 
