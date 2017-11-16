@@ -230,7 +230,8 @@ void CorrelationPlotItem::buildPlot()
     _customPlot.xAxis->setTicker(categoryTicker);
     _customPlot.xAxis->setTickLabelRotation(90);
 
-    bool columnNamesSuppressed = false;
+    _customPlot.xAxis->setLabel(_xAxisLabel);
+    _customPlot.yAxis->setLabel(_yAxisLabel);
 
     if(_showColumnNames)
     {
@@ -244,32 +245,14 @@ void CorrelationPlotItem::buildPlot()
         }
         else
         {
-            auto* text = new QCPTextElement(&_customPlot);
-            text->setLayer(_textLayer);
-            text->setTextFlags(Qt::AlignLeft);
-            text->setFont(_defaultFont9Pt);
-            text->setTextColor(Qt::gray);
-            text->setText(tr("Resize To Expose Column Names"));
-            text->setVisible(true);
-
-            _customPlot.plotLayout()->insertRow(1);
-            _customPlot.plotLayout()->addElement(1, 0, text);
-
-            columnNamesSuppressed = true;
+            // There is no room to display labels, so show a warning instead
+            QString warning = tr("Resize To Expose Column Names");
+            if(!_xAxisLabel.isEmpty())
+                _customPlot.xAxis->setLabel(QString("%1 (%2)").arg(_xAxisLabel, warning));
+            else
+                _customPlot.xAxis->setLabel(warning);
         }
     }
-
-    if(columnNamesSuppressed && _customPlot.plotLayout()->rowCount() > 1)
-    {
-        auto margins = _customPlot.axisRect()->margins();
-        margins.setBottom(0);
-        _customPlot.axisRect()->setAutoMargins(QCP::MarginSide::msLeft|
-                                               QCP::MarginSide::msRight|
-                                               QCP::MarginSide::msTop);
-        _customPlot.axisRect()->setMargins(margins);
-    }
-    else
-        _customPlot.axisRect()->setAutoMargins(QCP::MarginSide::msAll);
 
     _customPlot.setBackground(Qt::white);
 }
