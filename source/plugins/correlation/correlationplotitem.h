@@ -71,8 +71,10 @@ private:
     void populateMeanAveragePlot();
     void populateRawPlot();
 
-    void refresh();
+public:
+    Q_INVOKABLE void refresh();
 
+private:
     void setSelectedRows(const QVector<int>& selectedRows);
     void setRowColors(const QVector<QColor>& rowColors);
     void setLabelNames(const QStringList& labelNames);

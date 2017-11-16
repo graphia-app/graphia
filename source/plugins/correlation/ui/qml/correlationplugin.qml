@@ -96,6 +96,11 @@ PluginContent
         Item { Layout.fillWidth: true }
     }
 
+    function onResized()
+    {
+        plot.refresh();
+    }
+
     SplitView
     {
         id: splitView
@@ -103,6 +108,25 @@ PluginContent
         orientation: toggleUiOrientationAction.checked ? Qt.Horizontal : Qt.Vertical
 
         anchors.fill: parent
+
+        Timer
+        {
+            id: plotRefreshTimer; interval: 100; onTriggered: { plot.refresh(); }
+        }
+
+        // When the orientation changes it seems to take a little while for the
+        // plot's dimensional properties to "settle", and calling refresh() before
+        // this doesn't really work, so wait a little bit first (FIXME)
+        onOrientationChanged:
+        {
+            plotRefreshTimer.start();
+        }
+
+        onResizingChanged:
+        {
+            if(!resizing)
+                plot.refresh();
+        }
 
         NodeAttributeTableView
         {
