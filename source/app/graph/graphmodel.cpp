@@ -731,8 +731,11 @@ void GraphModel::onFoundNodeIdsChanged(const SearchManager* searchManager)
     updateVisuals(nullptr, searchManager);
 }
 
-void GraphModel::onPreferenceChanged(const QString&, const QVariant&)
+void GraphModel::onPreferenceChanged(const QString& name, const QVariant&)
 {
+    if(!name.startsWith("visuals"))
+        return;
+
     updateVisuals();
 }
 
