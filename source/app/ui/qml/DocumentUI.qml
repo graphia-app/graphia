@@ -783,6 +783,12 @@ Item
                 }
             }
         }
+
+        onResizingChanged:
+        {
+            if(!resizing && typeof plugin.content.onResized === "function")
+                plugin.content.onResized();
+        }
     }
 
     Preferences
@@ -986,6 +992,21 @@ Item
         {
             id: pluginWindowContent
             anchors.fill: parent
+        }
+
+        onWidthChanged: { windowResizedTimer.start(); }
+        onHeightChanged: { windowResizedTimer.start(); }
+
+        Timer
+        {
+            id: windowResizedTimer
+            interval: 500
+
+            onTriggered:
+            {
+                if(typeof plugin.content.onResized === "function")
+                    plugin.content.onResized();
+            }
         }
     }
 
