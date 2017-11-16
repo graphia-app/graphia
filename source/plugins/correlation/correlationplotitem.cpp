@@ -119,43 +119,61 @@ void CorrelationPlotItem::wheelEvent(QWheelEvent* event)
 
 void CorrelationPlotItem::configureLegend()
 {
-    if(_customPlot.plottableCount() > 0 && _showLegend)
+    if(_customPlot.plottableCount() <= 0 || !_showLegend)
+        return;
+
+    // Create a subLayout to position the Legend
+    auto* subLayout = new QCPLayoutGrid;
+    _customPlot.plotLayout()->insertColumn(1);
+    _customPlot.plotLayout()->addElement(0, 1, subLayout);
+
+    // Surround the legend row in two empty rows that are stretched maximally, and
+    // stretch the legend itself minimally, thus centreing the legend vertically
+    subLayout->insertRow(0);
+    subLayout->setRowStretchFactor(0, 1.0);
+    subLayout->addElement(1, 0, _customPlot.legend);
+    subLayout->setRowStretchFactor(1, std::numeric_limits<double>::min());
+    subLayout->insertRow(2);
+    subLayout->setRowStretchFactor(2, 1.0);
+
+    const int marginSize = 5;
+    subLayout->setMargins(QMargins(0, marginSize, marginSize, marginSize));
+    _customPlot.legend->setMargins(QMargins(marginSize, marginSize, marginSize, marginSize));
+
+    // BIGGEST HACK
+    // Layouts and sizes aren't done until a replot, and layout is performed on another
+    // thread which means it's too late to add or remove elements from the legend.
+    // The anticipated sizes for the legend layout are calculated here but will break
+    // if any additional rows are added to the plotLayout as the legend height is
+    // estimated using the total height of the QQuickItem, not the (unknowable) plot height
+
+    // See QCPPlottableLegendItem::draw for the reasoning behind this value
+    const auto legendElementHeight = std::max(QFontMetrics(_customPlot.legend->font()).height(),
+                                              _customPlot.legend->iconSize().height());
+
+    const auto totalExternalMargins = subLayout->margins().top() + subLayout->margins().bottom();
+    const auto totalInternalMargins = _customPlot.legend->margins().top() + _customPlot.legend->margins().bottom();
+    const auto maxLegendHeight = _customPlot.height() - (totalExternalMargins + totalInternalMargins);
+
+    int maxNumberOfElementsToDraw = 0;
+    int accumulatedHeight = legendElementHeight;
+    while(accumulatedHeight < maxLegendHeight)
     {
-        // Create a subLayout to position the Legend
-        auto* subLayout = new QCPLayoutGrid;
-        _customPlot.plotLayout()->insertColumn(1);
-        _customPlot.plotLayout()->addElement(0, 1, subLayout);
-        subLayout->addElement(0, 0, _customPlot.legend);
+        accumulatedHeight += (_customPlot.legend->rowSpacing() + legendElementHeight);
+        maxNumberOfElementsToDraw++;
+    };
 
-        // BIGGEST HACK
-        // Layouts and sizes aren't done until a replot is called, layout is performed on another
-        // thread which means it's too late to add or remove elements from the legend.
-        // The projected sizes for the legend layout are calculated here but will break
-        // if any additional rows are added to the plotLayout!!
+    const auto numberOfElementsToDraw = std::min(_customPlot.plottableCount(), maxNumberOfElementsToDraw);
 
-        QFontMetrics metrics(_customPlot.legend->font());
-        double legendItemSize = (metrics.height() + 5);
-        int projectedItemHeight = _customPlot.height();
-        if(_customPlot.plotLayout()->rowCount() > 1)
-            projectedItemHeight -= metrics.height() + _customPlot.plotLayout()->rowSpacing() + 4;
-
-        int maxLegendCount = (projectedItemHeight - (_customPlot.legend->margins().top() +
-                                                      _customPlot.legend->margins().bottom())) / legendItemSize;
-
-        // HACK: Use a large bottom margin to stop the legend filling the whole vertical space
-        // and equally spacing elements. It looks weird. Clamp to maxLegendCount
-        double marginBuffer = projectedItemHeight -
-                (legendItemSize * std::min(_customPlot.plottableCount(), maxLegendCount)) -
-                (_customPlot.legend->margins().top() + _customPlot.legend->margins().bottom());
-        subLayout->setMargins(QMargins(0, marginBuffer / 2, 5, marginBuffer / 2));
-
+    if(numberOfElementsToDraw > 0)
+    {
         // Populate the legend
         _customPlot.legend->clear();
-        for(int i = 0; i < std::min(_customPlot.plottableCount(), maxLegendCount); ++i)
+        for(int i = 0; i < numberOfElementsToDraw; i++)
             _customPlot.plottable(i)->addToLegend(_customPlot.legend);
 
         // Cap the legend count to only those visible
-        if(_customPlot.plottableCount() > maxLegendCount)
+        if(_customPlot.plottableCount() > maxNumberOfElementsToDraw)
         {
             auto* moreText = new QCPTextElement(&_customPlot);
             moreText->setMargins(QMargins());
@@ -163,15 +181,22 @@ void CorrelationPlotItem::configureLegend()
             moreText->setTextFlags(Qt::AlignLeft);
             moreText->setFont(_customPlot.legend->font());
             moreText->setTextColor(Qt::gray);
-            moreText->setText(
-                QString(tr("and %1 more..."))
-                        .arg(_customPlot.plottableCount() - maxLegendCount + 1));
+            moreText->setText(QString(tr("...and %1 more"))
+                .arg(_customPlot.plottableCount() - maxNumberOfElementsToDraw + 1));
             moreText->setVisible(true);
 
-            _customPlot.legend->removeAt(maxLegendCount - 1);
+            auto lastElementIndex = _customPlot.legend->rowColToIndex(_customPlot.legend->rowCount() - 1, 0);
+            _customPlot.legend->removeAt(lastElementIndex);
             _customPlot.legend->addElement(moreText);
+
+            // When we're overflowing, hackily enlarge the bottom margin to
+            // compensate for QCP's layout algorithm being a bit rubbish
+            auto margins = _customPlot.legend->margins();
+            margins.setBottom(margins.bottom() * 3);
+            _customPlot.legend->setMargins(margins);
         }
 
+        // Make the plot take 85% of the width, and the legend the remaining 15%
         _customPlot.plotLayout()->setColumnStretchFactor(0, 0.85);
         _customPlot.plotLayout()->setColumnStretchFactor(1, 0.15);
 
@@ -880,6 +905,7 @@ double CorrelationPlotItem::columnAxisWidth()
     const auto& margins = _customPlot.axisRect()->margins();
     const unsigned int axisWidth = margins.left() + margins.right();
 
+    //FIXME This value is wrong when the legend is enabled
     return width() - axisWidth;
 }
 
