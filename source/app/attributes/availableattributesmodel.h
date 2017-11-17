@@ -59,21 +59,21 @@ public:
                              QObject* parent = nullptr,
                              ElementType elementTypes = ElementType::All,
                              ValueType valueTypes = ValueType::All);
-    virtual ~AvailableAttributesModel();
+    ~AvailableAttributesModel() override;
 
-    QVariant data(const QModelIndex& index, int role) const;
-    Qt::ItemFlags flags(const QModelIndex& index) const;
+    QVariant data(const QModelIndex& index, int role) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant headerData(int section, Qt::Orientation orientation,
-                        int role = Qt::DisplayRole) const;
+                        int role = Qt::DisplayRole) const override;
     QModelIndex index(int row, int column,
-                      const QModelIndex& parentIndex = QModelIndex()) const;
-    QModelIndex parent(const QModelIndex& index) const;
-    int rowCount(const QModelIndex& parent = QModelIndex()) const;
-    int columnCount(const QModelIndex& parent = QModelIndex()) const;
+                      const QModelIndex& parentIndex = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex& index) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
     Q_INVOKABLE QVariant get(const QModelIndex& index) const;
 
-    QHash<int, QByteArray> roleNames() const;
+    QHash<int, QByteArray> roleNames() const override;
 };
 
 #endif // AVAILABLEATTRIBUTESMODEL_H

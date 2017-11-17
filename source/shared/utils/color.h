@@ -6,6 +6,6 @@
 namespace u
 {
     QColor contrastingColor(const QColor& color);
-}
+} // namespace u
 
 #endif // COLOR_H

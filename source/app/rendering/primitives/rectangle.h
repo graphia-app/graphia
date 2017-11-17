@@ -32,6 +32,6 @@ private:
 
     QOpenGLVertexArrayObject _vao;
 };
-}
+} // namespace Primitive
 
 #endif // RECTANGLE_H

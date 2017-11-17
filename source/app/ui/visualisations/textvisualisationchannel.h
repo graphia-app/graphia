@@ -8,13 +8,13 @@ class TextVisualisationChannel : public VisualisationChannel
 public:
     using VisualisationChannel::VisualisationChannel;
 
-    void apply(double value, ElementVisual& elementVisual) const;
-    void apply(const QString& value, ElementVisual& elementVisual) const;
+    void apply(double value, ElementVisual& elementVisual) const override;
+    void apply(const QString& value, ElementVisual& elementVisual) const override;
 
-    bool supports(ValueType valueType) const { return valueType != ValueType::Unknown; }
-    bool requiresNormalisedValue() const { return false; }
+    bool supports(ValueType valueType) const override { return valueType != ValueType::Unknown; }
+    bool requiresNormalisedValue() const override { return false; }
 
-    QString description(ElementType, ValueType) const;
+    QString description(ElementType, ValueType) const override;
 };
 
 #endif // TEXTVISUALISATIONCHANNEL_H

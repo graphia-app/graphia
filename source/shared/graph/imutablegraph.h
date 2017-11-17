@@ -9,7 +9,7 @@
 class IMutableGraph : public virtual IGraph
 {
 public:
-    virtual ~IMutableGraph() = default;
+    ~IMutableGraph() override = default;
 
     virtual void clear() = 0;
 

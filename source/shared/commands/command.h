@@ -83,20 +83,20 @@ public:
     Command& operator=(const Command&) = delete;
     Command& operator=(Command&&) = delete;
 
-    virtual ~Command() = default;
+    ~Command() override = default;
 
-    QString description() const { return _description; }
-    QString verb() const { return _verb; }
+    QString description() const override { return _description; }
+    QString verb() const override { return _verb; }
 
-    QString pastParticiple() const { return _pastParticiple; }
+    QString pastParticiple() const override { return _pastParticiple; }
     void setPastParticiple(const QString& pastParticiple)
     {
         _pastParticiple = pastParticiple;
     }
 
 private:
-    bool execute() { return _executeFn(*this); }
-    void undo() { _undoFn(*this); }
+    bool execute() override { return _executeFn(*this); }
+    void undo() override { _undoFn(*this); }
 
     QString _description;
     QString _verb;

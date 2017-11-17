@@ -65,7 +65,7 @@ private:
 
     void wheelEvent(QWheelEvent* e) final;
 
-    void nativeGestureEvent(QNativeGestureEvent* e);
+    void nativeGestureEvent(QNativeGestureEvent* e) override;
 
     virtual GraphComponentRenderer* rendererAtPosition(const QPoint& position) const = 0;
     virtual QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) const = 0;

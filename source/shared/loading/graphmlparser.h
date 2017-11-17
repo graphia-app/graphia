@@ -88,17 +88,17 @@ private:
 
 public:
     GraphMLHandler(IMutableGraph& mutableGraph, const ProgressFn& progressFn, UserNodeData* userNodeData, int lineCount);
-    bool startDocument();
-    bool endDocument();
-    bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts);
-    bool endElement(const QString &namespaceURI, const QString &localName, const QString &qName);
-    bool characters(const QString &ch);
-    void setDocumentLocator(QXmlLocator *locator);
+    bool startDocument() override;
+    bool endDocument() override;
+    bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts) override;
+    bool endElement(const QString &namespaceURI, const QString &localName, const QString &qName) override;
+    bool characters(const QString &ch) override;
+    void setDocumentLocator(QXmlLocator *locator) override;
 
-    QString errorString() const;
-    bool warning(const QXmlParseException &exception);
-    bool error(const QXmlParseException &exception);
-    bool fatalError(const QXmlParseException &exception);
+    QString errorString() const override;
+    bool warning(const QXmlParseException &exception) override;
+    bool error(const QXmlParseException &exception) override;
+    bool fatalError(const QXmlParseException &exception) override;
 };
 
 class GraphMLParser: public IParser
@@ -110,7 +110,7 @@ private:
 
 public:
     explicit GraphMLParser(UserNodeData *userNodeData = nullptr);
-    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn);
+    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn) override;
 };
 
 #endif // GRAPHMLPARSER_H

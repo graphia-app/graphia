@@ -24,7 +24,7 @@ class GraphTransform : public Cancellable
 {
 public:
     GraphTransform() = default;
-    virtual ~GraphTransform() = default;
+    ~GraphTransform() override = default;
 
     // Return value indicates that the graph changed
     virtual bool apply(TransformedGraph&) const { return false; }

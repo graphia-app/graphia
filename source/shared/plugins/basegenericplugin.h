@@ -31,16 +31,16 @@ private:
 public:
     BaseGenericPluginInstance();
 
-    std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName);
+    std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) override;
 
     void setEdgeWeight(EdgeId edgeId, float weight);
 
-    QByteArray save(IMutableGraph&, const ProgressFn&) const;
-    bool load(const QByteArray&, int, IMutableGraph&, const ProgressFn&);
+    QByteArray save(IMutableGraph&, const ProgressFn&) const override;
+    bool load(const QByteArray&, int, IMutableGraph&, const ProgressFn&) override;
 
 private:
     void initialise(const IPlugin* plugin, IDocument* document,
-                    const IParserThread* parserThread);
+                    const IParserThread* parserThread) override;
 
     QString selectedNodeNames() const;
 
@@ -60,9 +60,9 @@ class BaseGenericPlugin : public BasePlugin
 public:
     BaseGenericPlugin();
 
-    QStringList identifyUrl(const QUrl& url) const;
+    QStringList identifyUrl(const QUrl& url) const override;
 
-    bool editable() const { return true; }
+    bool editable() const override { return true; }
 };
 
 #endif // BASEGENERICPLUGIN_H

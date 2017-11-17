@@ -42,7 +42,7 @@ class IGraphComponent;
 class IGraph : public virtual IGraphArrayClient
 {
 public:
-    virtual ~IGraph() = default;
+    ~IGraph() override = default;
 
     virtual const std::vector<NodeId>& nodeIds() const = 0;
     virtual int numNodes() const = 0;

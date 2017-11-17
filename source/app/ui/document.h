@@ -87,19 +87,19 @@ class Document : public QObject, public IDocument
 
 public:
     explicit Document(QObject* parent = nullptr);
-    ~Document();
+    ~Document() override;
 
 public: // IDocument
-    const GraphModel* graphModel() const { return _graphModel.get(); }
-    GraphModel* graphModel() { return _graphModel.get(); }
+    const GraphModel* graphModel() const override { return _graphModel.get(); }
+    GraphModel* graphModel() override { return _graphModel.get(); }
 
-    const SelectionManager* selectionManager() const { return _selectionManager.get(); }
-    SelectionManager* selectionManager() { return _selectionManager.get(); }
+    const SelectionManager* selectionManager() const override { return _selectionManager.get(); }
+    SelectionManager* selectionManager() override { return _selectionManager.get(); }
 
-    const CommandManager* commandManager() const { return &_commandManager; }
-    CommandManager* commandManager() { return &_commandManager; }
+    const CommandManager* commandManager() const override { return &_commandManager; }
+    CommandManager* commandManager() override { return &_commandManager; }
 
-    void moveFocusToNode(NodeId nodeId);
+    void moveFocusToNode(NodeId nodeId) override;
 
 public:
     static QColor contrastingColorForBackground();

@@ -18,7 +18,7 @@ public:
         _invert(invert)
     {}
 
-    bool apply(TransformedGraph &target) const;
+    bool apply(TransformedGraph &target) const override;
 
 private:
     ElementType _elementType;
@@ -38,16 +38,16 @@ public:
         _elementType(elementType), _invert(invert)
     {}
 
-    QString description() const
+    QString description() const override
     {
         return QObject::tr("%1 all the %2s which match the specified condition.")
                 .arg(_invert ? QObject::tr("Keep") : QObject::tr("Remove"),
                      elementTypeAsString(_elementType).toLower());
     }
-    ElementType elementType() const { return _elementType; }
-    bool requiresCondition() const { return true; }
+    ElementType elementType() const override { return _elementType; }
+    bool requiresCondition() const override { return true; }
 
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const;
+    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // FILTERTRANSFORM_H

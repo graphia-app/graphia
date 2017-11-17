@@ -70,7 +70,7 @@ public:
     ComponentId desiredFocusComponentId();
     ComponentId focusedComponentId() const;
 
-    Renderer* createRenderer() const;
+    Renderer* createRenderer() const override;
 
     bool eventsPending();
     std::unique_ptr<QEvent> nextEvent();
@@ -87,12 +87,12 @@ public:
     Q_INVOKABLE void requestPreview(int width, int height, bool fillSize);
 
 private:
-    bool event(QEvent* e);
-    void mousePressEvent(QMouseEvent* e);
-    void mouseReleaseEvent(QMouseEvent* e);
-    void mouseMoveEvent(QMouseEvent* e);
-    void mouseDoubleClickEvent(QMouseEvent* e);
-    void wheelEvent(QWheelEvent* e);
+    bool event(QEvent* e) override;
+    void mousePressEvent(QMouseEvent* e) override;
+    void mouseReleaseEvent(QMouseEvent* e) override;
+    void mouseMoveEvent(QMouseEvent* e) override;
+    void mouseDoubleClickEvent(QMouseEvent* e) override;
+    void wheelEvent(QWheelEvent* e) override;
 
     GraphModel* _graphModel = nullptr;
     GPUComputeThread* _gpuComputeThread = nullptr;

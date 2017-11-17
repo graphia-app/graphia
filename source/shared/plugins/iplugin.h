@@ -47,7 +47,7 @@ public:
 class IPlugin : public virtual IUrlTypes, public virtual IPluginInstanceProvider
 {
 public:
-    virtual ~IPlugin() = default;
+    ~IPlugin() override = default;
 
     virtual QString name() const = 0;
     virtual QString description() const = 0;

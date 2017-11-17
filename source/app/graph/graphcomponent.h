@@ -30,9 +30,9 @@ private:
     std::vector<EdgeId> _edgeIds;
 
 public:
-    const std::vector<NodeId>& nodeIds() const { return _nodeIds; }
-    const std::vector<EdgeId>& edgeIds() const { return _edgeIds; }
-    const IGraph& graph() const { return *_graph; }
+    const std::vector<NodeId>& nodeIds() const override { return _nodeIds; }
+    const std::vector<EdgeId>& edgeIds() const override { return _edgeIds; }
+    const IGraph& graph() const override { return *_graph; }
 };
 
 #endif // GRAPHCOMPONENT_H

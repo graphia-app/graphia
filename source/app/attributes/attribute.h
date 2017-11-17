@@ -41,14 +41,14 @@ class AttributeRange<int> :
 public:
     using _AttributeRange::_AttributeRange;
 
-    bool hasMin() const;
-    bool hasMax() const;
-    bool hasRange() const;
+    bool hasMin() const override;
+    bool hasMax() const override;
+    bool hasRange() const override;
 
-    int min() const;
-    int max() const;
-    IAttribute& setMin(int min);
-    IAttribute& setMax(int max);
+    int min() const override;
+    int max() const override;
+    IAttribute& setMin(int min) override;
+    IAttribute& setMax(int max) override;
 };
 
 template<>
@@ -59,14 +59,14 @@ class AttributeRange<double> :
 public:
     using _AttributeRange::_AttributeRange;
 
-    bool hasMin() const;
-    bool hasMax() const;
-    bool hasRange() const;
+    bool hasMin() const override;
+    bool hasMax() const override;
+    bool hasRange() const override;
 
-    double min() const;
-    double max() const;
-    IAttribute& setMin(double min);
-    IAttribute& setMax(double max);
+    double min() const override;
+    double max() const override;
+    IAttribute& setMin(double min) override;
+    IAttribute& setMax(double max) override;
 };
 
 class AttributeNumericRange :
@@ -76,15 +76,15 @@ class AttributeNumericRange :
 public:
     using _AttributeRange::_AttributeRange;
 
-    bool hasMin() const;
-    bool hasMax() const;
-    bool hasRange() const;
+    bool hasMin() const override;
+    bool hasMax() const override;
+    bool hasRange() const override;
 
-    double min() const;
-    double max() const;
+    double min() const override;
+    double max() const override;
 
-    IAttribute& setMin(double min);
-    IAttribute& setMax(double max);
+    IAttribute& setMin(double min) override;
+    IAttribute& setMax(double max) override;
 };
 
 class Attribute : public IAttribute
@@ -257,45 +257,45 @@ public:
     template<typename T, typename E>
     using ValueOfFn = T(Attribute::*)(E&) const;
 
-    int intValueOf(NodeId nodeId) const { return intValueOf<NodeId>(nodeId); }
-    int intValueOf(EdgeId edgeId) const { return intValueOf<EdgeId>(edgeId); }
-    int intValueOf(const IGraphComponent& graphComponent) const
+    int intValueOf(NodeId nodeId) const override { return intValueOf<NodeId>(nodeId); }
+    int intValueOf(EdgeId edgeId) const override { return intValueOf<EdgeId>(edgeId); }
+    int intValueOf(const IGraphComponent& graphComponent) const override
     {
         return intValueOf<const IGraphComponent&>(graphComponent);
     }
 
-    double floatValueOf(NodeId nodeId) const { return floatValueOf<NodeId>(nodeId); }
-    double floatValueOf(EdgeId edgeId) const { return floatValueOf<EdgeId>(edgeId); }
-    double floatValueOf(const IGraphComponent& graphComponent) const
+    double floatValueOf(NodeId nodeId) const override { return floatValueOf<NodeId>(nodeId); }
+    double floatValueOf(EdgeId edgeId) const override { return floatValueOf<EdgeId>(edgeId); }
+    double floatValueOf(const IGraphComponent& graphComponent) const override
     {
         return floatValueOf<const IGraphComponent&>(graphComponent);
     }
 
-    QString stringValueOf(NodeId nodeId) const { return stringValueOf<NodeId>(nodeId); }
-    QString stringValueOf(EdgeId edgeId) const { return stringValueOf<EdgeId>(edgeId); }
-    QString stringValueOf(const IGraphComponent& graphComponent) const
+    QString stringValueOf(NodeId nodeId) const override { return stringValueOf<NodeId>(nodeId); }
+    QString stringValueOf(EdgeId edgeId) const override { return stringValueOf<EdgeId>(edgeId); }
+    QString stringValueOf(const IGraphComponent& graphComponent) const override
     {
         return stringValueOf<const IGraphComponent&>(graphComponent);
     }
 
-    Attribute& setIntValueFn(ValueFn<int, NodeId> valueFn);
-    Attribute& setIntValueFn(ValueFn<int, EdgeId> valueFn);
-    Attribute& setIntValueFn(ValueFn<int, const IGraphComponent&> valueFn);
+    Attribute& setIntValueFn(ValueFn<int, NodeId> valueFn) override;
+    Attribute& setIntValueFn(ValueFn<int, EdgeId> valueFn) override;
+    Attribute& setIntValueFn(ValueFn<int, const IGraphComponent&> valueFn) override;
 
-    Attribute& setFloatValueFn(ValueFn<double, NodeId> valueFn);
-    Attribute& setFloatValueFn(ValueFn<double, EdgeId> valueFn);
-    Attribute& setFloatValueFn(ValueFn<double, const IGraphComponent&> valueFn);
+    Attribute& setFloatValueFn(ValueFn<double, NodeId> valueFn) override;
+    Attribute& setFloatValueFn(ValueFn<double, EdgeId> valueFn) override;
+    Attribute& setFloatValueFn(ValueFn<double, const IGraphComponent&> valueFn) override;
 
-    Attribute& setStringValueFn(ValueFn<QString, NodeId> valueFn);
-    Attribute& setStringValueFn(ValueFn<QString, EdgeId> valueFn);
-    Attribute& setStringValueFn(ValueFn<QString, const IGraphComponent&> valueFn);
+    Attribute& setStringValueFn(ValueFn<QString, NodeId> valueFn) override;
+    Attribute& setStringValueFn(ValueFn<QString, EdgeId> valueFn) override;
+    Attribute& setStringValueFn(ValueFn<QString, const IGraphComponent&> valueFn) override;
 
-    Attribute& setValueMissingFn(ValueFn<bool, NodeId> missingFn);
-    Attribute& setValueMissingFn(ValueFn<bool, EdgeId> missingFn);
-    Attribute& setValueMissingFn(ValueFn<bool, const IGraphComponent&> missingFn);
+    Attribute& setValueMissingFn(ValueFn<bool, NodeId> missingFn) override;
+    Attribute& setValueMissingFn(ValueFn<bool, EdgeId> missingFn) override;
+    Attribute& setValueMissingFn(ValueFn<bool, const IGraphComponent&> missingFn) override;
 
-    ValueType valueType() const;
-    ElementType elementType() const;
+    ValueType valueType() const override;
+    ElementType elementType() const override;
 
     template<typename T>
     AttributeRange<T> range()
@@ -306,9 +306,9 @@ public:
         return r;
     }
 
-    IAttributeRange<int>& intRange() { return _intRange; }
-    IAttributeRange<double>& floatRange() { return _floatRange; }
-    const IAttributeRange<double>& numericRange() const { return _numericRange; }
+    IAttributeRange<int>& intRange() override { return _intRange; }
+    IAttributeRange<double>& floatRange() override { return _floatRange; }
+    const IAttributeRange<double>& numericRange() const override { return _numericRange; }
 
     template<typename T, typename E, typename Fn>
     auto findRangeforElements(const std::vector<E>& elementIds, Fn&& skip) const
@@ -381,18 +381,18 @@ public:
     }
 
     AttributeFlag flags() const { return *_.flags; }
-    bool testFlag(AttributeFlag flag) const { return _.flags.test(flag); }
-    Attribute& setFlag(AttributeFlag flag) { _.flags.set(flag); return *this; }
-    Attribute& resetFlag(AttributeFlag flag) { _.flags.reset(flag); return *this; }
+    bool testFlag(AttributeFlag flag) const override { return _.flags.test(flag); }
+    Attribute& setFlag(AttributeFlag flag) override { _.flags.set(flag); return *this; }
+    Attribute& resetFlag(AttributeFlag flag) override { _.flags.reset(flag); return *this; }
 
-    bool searchable() const { return _.searchable; }
-    Attribute& setSearchable(bool searchable) { _.searchable = searchable; return *this; }
+    bool searchable() const override { return _.searchable; }
+    Attribute& setSearchable(bool searchable) override { _.searchable = searchable; return *this; }
 
-    bool userDefined() const { return _.userDefined; }
-    IAttribute& setUserDefined(bool userDefined) { _.userDefined = userDefined; return *this; }
+    bool userDefined() const override { return _.userDefined; }
+    IAttribute& setUserDefined(bool userDefined) override { _.userDefined = userDefined; return *this; }
 
-    QString description() const { return _.description; }
-    Attribute& setDescription(const QString& description) { _.description = description; return *this; }
+    QString description() const override { return _.description; }
+    Attribute& setDescription(const QString& description) override { _.description = description; return *this; }
 
     bool isValid() const;
 

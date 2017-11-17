@@ -11,7 +11,7 @@ class OpenGLDebugLogger : public QObject
     Q_OBJECT
 public:
     explicit OpenGLDebugLogger(QObject* parent = nullptr);
-    virtual ~OpenGLDebugLogger();
+    ~OpenGLDebugLogger() override;
 
 private:
     int _debugLevel = 0;

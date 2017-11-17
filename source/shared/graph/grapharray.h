@@ -63,7 +63,7 @@ public:
         _defaultValue(other._defaultValue)
     {}
 
-    virtual ~GenericGraphArray() = default;
+    ~GenericGraphArray() override = default;
 
     GenericGraphArray& operator=(const GenericGraphArray& other)
     {
@@ -171,7 +171,7 @@ public:
     }
 
 protected:
-    void resize(int size)
+    void resize(int size) override
     {
         MaybeLock lock(_mutex);
         resize_(size);
@@ -189,7 +189,7 @@ protected:
         _array.resize(size);
     }
 
-    void invalidate()
+    void invalidate() override
     {
         MaybeLock lock(_mutex);
         _graph = nullptr;
@@ -238,7 +238,7 @@ public:
         return *this;
     }
 
-    ~NodeArray()
+    ~NodeArray() override
     {
         if(this->_graph != nullptr)
             this->_graph->eraseNodeArray(this);
@@ -287,7 +287,7 @@ public:
         return *this;
     }
 
-    ~EdgeArray()
+    ~EdgeArray() override
     {
         if(this->_graph != nullptr)
             this->_graph->eraseEdgeArray(this);
@@ -340,7 +340,7 @@ public:
         return *this;
     }
 
-    ~ComponentArray()
+    ~ComponentArray() override
     {
         if(this->_graph != nullptr)
             this->_graph->eraseComponentArray(this);

@@ -33,7 +33,7 @@ private:
 
 public:
     void initialise(const IPlugin* plugin, IDocument* document,
-                    const IParserThread* parserThread)
+                    const IParserThread* parserThread) override
     {
         _plugin = plugin;
         _graphModel = document->graphModel();
@@ -78,14 +78,14 @@ public:
     }
 
     // Ignore all settings, by default
-    void applyParameter(const QString&, const QString&) {}
+    void applyParameter(const QString&, const QString&) override {}
 
-    QStringList defaultTransforms() const { return {}; }
-    QStringList defaultVisualisations() const { return {}; }
+    QStringList defaultTransforms() const override { return {}; }
+    QStringList defaultVisualisations() const override { return {}; }
 
     // Save and restore no state, by default
-    QByteArray save(IMutableGraph&, const ProgressFn&) const { return {}; }
-    bool load(const QByteArray&, int, IMutableGraph&, const ProgressFn&) { return true; }
+    QByteArray save(IMutableGraph&, const ProgressFn&) const override { return {}; }
+    bool load(const QByteArray&, int, IMutableGraph&, const ProgressFn&) override { return true; }
 
     void setSaveRequired() const { emit saveRequired(); }
 
@@ -131,9 +131,9 @@ template<typename T>
 class PluginInstanceProvider : public virtual IPluginInstanceProvider
 {
 public:
-    virtual ~PluginInstanceProvider() = default;
+    ~PluginInstanceProvider() override = default;
 
-    std::unique_ptr<IPluginInstance> createInstance() { return std::make_unique<T>(); }
+    std::unique_ptr<IPluginInstance> createInstance() override { return std::make_unique<T>(); }
 };
 
 class BasePlugin : public QObject, public IPlugin, public UrlTypes
@@ -142,13 +142,13 @@ class BasePlugin : public QObject, public IPlugin, public UrlTypes
     Q_INTERFACES(IPlugin)
 
     // Default empty image
-    QString imageSource() const { return {}; }
+    QString imageSource() const override { return {}; }
 
     // Default to no settings UI
-    QString parametersQmlPath() const { return {}; }
+    QString parametersQmlPath() const override { return {}; }
 
     // Default to no UI
-    QString qmlPath() const { return {}; }
+    QString qmlPath() const override { return {}; }
 };
 
 #endif // BASEPLUGIN_H

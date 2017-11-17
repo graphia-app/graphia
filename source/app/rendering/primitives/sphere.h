@@ -45,6 +45,6 @@ private:
 
     QOpenGLVertexArrayObject _vao;
 };
-}
+} // namespace Primitive
 
 #endif // SPHERE_H

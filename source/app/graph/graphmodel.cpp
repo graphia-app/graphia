@@ -389,11 +389,11 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         switch(attribute.elementType())
         {
         case ElementType::Node:
-            nodeVisualisationsBuilder.build(attribute, *channel.get(), invert, index, _visualisationInfos[index]);
+            nodeVisualisationsBuilder.build(attribute, *channel, invert, index, _visualisationInfos[index]);
             break;
 
         case ElementType::Edge:
-            edgeVisualisationsBuilder.build(attribute, *channel.get(), invert, index, _visualisationInfos[index]);
+            edgeVisualisationsBuilder.build(attribute, *channel, invert, index, _visualisationInfos[index]);
             break;
 
         default:

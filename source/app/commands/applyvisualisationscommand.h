@@ -28,11 +28,11 @@ public:
                                QStringList previousVisualisations,
                                QStringList visualisations);
 
-    QString description() const;
-    QString verb() const;
+    QString description() const override;
+    QString verb() const override;
 
-    bool execute();
-    void undo();
+    bool execute() override;
+    void undo() override;
 };
 
 #endif // APPLYVISUALISATIONSSCOMMAND_H

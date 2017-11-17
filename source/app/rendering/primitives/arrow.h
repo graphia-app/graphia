@@ -47,6 +47,6 @@ private:
 
     QOpenGLVertexArrayObject _vao;
 };
-}
+} // namespace Primitive
 
 #endif // ARROW_H

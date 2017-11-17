@@ -26,8 +26,8 @@ private:
 public:
     Frustum(const Line3D& line1, const Line3D& line2, const Line3D& line3, const Line3D& line4);
 
-    bool containsPoint(const QVector3D& point) const;
-    Line3D centreLine() const { return _centreLine; }
+    bool containsPoint(const QVector3D& point) const override;
+    Line3D centreLine() const override { return _centreLine; }
 };
 
 #endif // FRUSTUM_H

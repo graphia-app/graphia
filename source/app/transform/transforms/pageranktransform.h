@@ -9,7 +9,7 @@ class PageRankTransform : public GraphTransform
 {
 public:
     explicit PageRankTransform(GraphModel* graphModel) : _graphModel(graphModel) {}
-    bool apply(TransformedGraph &target) const;
+    bool apply(TransformedGraph &target) const override;
 
     void enableDebug() { _debug = true; }
     void disableDebug() { _debug = false; }
@@ -34,23 +34,23 @@ public:
         GraphTransformFactory(graphModel)
     {}
 
-    QString description() const
+    QString description() const override
     {
         return R"(Calculates a <a href="https://en.wikipedia.org/wiki/PageRank">PageRank</a> )"
             "centrality measurement for each node. This can be viewed as "
             "measure of a node's relative importance in the graph.";
     }
-    ElementType elementType() const { return ElementType::None; }
-    GraphTransformParameters parameters() const
+    ElementType elementType() const override { return ElementType::None; }
+    GraphTransformParameters parameters() const override
     {
         return {};
     }
-    DeclaredAttributes declaredAttributes() const
+    DeclaredAttributes declaredAttributes() const override
     {
         return {{"Node PageRank", {ValueType::Float, QObject::tr("Colour")}}};
     }
 
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const;
+    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // PAGERANKTRANSFORM_H

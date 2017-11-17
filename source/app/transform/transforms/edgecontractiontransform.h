@@ -14,7 +14,7 @@ public:
         _graphModel(&graphModel)
     {}
 
-    bool apply(TransformedGraph &target) const;
+    bool apply(TransformedGraph &target) const override;
 
 private:
     const GraphModel* _graphModel;
@@ -27,16 +27,16 @@ public:
         GraphTransformFactory(graphModel)
     {}
 
-    QString description() const
+    QString description() const override
     {
         return QObject::tr(R"(<a href="https://en.wikipedia.org/wiki/Edge_contraction">Remove edges</a> )"
                            "which match the specified condition while simultaneously "
                            "merging the pairs of nodes that they previously joined.");
     }
-    ElementType elementType() const { return ElementType::Edge; }
-    bool requiresCondition() const { return true; }
+    ElementType elementType() const override { return ElementType::Edge; }
+    bool requiresCondition() const override { return true; }
 
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const;
+    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // EDGECONTRACTIONTRANSFORM_H

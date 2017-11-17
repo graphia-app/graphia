@@ -19,7 +19,7 @@ public:
         QObject(parent)
     {}
 
-    virtual ~Interactor() = default;
+    ~Interactor() override = default;
 
     virtual void mousePressEvent(QMouseEvent*) = 0;
     virtual void mouseReleaseEvent(QMouseEvent*) = 0;

@@ -13,7 +13,7 @@ class SkeletonPluginInstance : public BasePluginInstance
 public:
     SkeletonPluginInstance();
 
-    std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName);
+    std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) override;
 };
 
 class SkeletonPlugin : public BasePlugin, public PluginInstanceProvider<SkeletonPluginInstance>
@@ -24,19 +24,19 @@ class SkeletonPlugin : public BasePlugin, public PluginInstanceProvider<Skeleton
 public:
     SkeletonPlugin();
 
-    QString name() const { return QStringLiteral("Skeleton"); }
-    QString description() const
+    QString name() const override { return QStringLiteral("Skeleton"); }
+    QString description() const override
     {
         return tr("An example plugin that does nothing. This serves as "
                   "a template for developers creating new plugins.");
     }
 
-    int dataVersion() const { return 1; }
+    int dataVersion() const override { return 1; }
 
-    QStringList identifyUrl(const QUrl& url) const;
+    QStringList identifyUrl(const QUrl& url) const override;
 
-    bool editable() const { return true; }
-    QString qmlPath() const { return QStringLiteral("qrc:///qml/skeletonplugin.qml"); }
+    bool editable() const override { return true; }
+    QString qmlPath() const override { return QStringLiteral("qrc:///qml/skeletonplugin.qml"); }
 };
 
 #endif // SKELETONPLUGIN_H

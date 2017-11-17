@@ -34,15 +34,15 @@ public:
                            QStringList previousTransformations,
                            QStringList transformations);
 
-    QString description() const;
-    QString verb() const;
+    QString description() const override;
+    QString verb() const override;
 
-    bool execute();
-    void undo();
+    bool execute() override;
+    void undo() override;
 
-    void cancel();
+    void cancel() override;
 
-    bool cancellable() const { return true; }
+    bool cancellable() const override { return true; }
 };
 
 #endif // APPLYTRANSFORMSCOMMAND_H

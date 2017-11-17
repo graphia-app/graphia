@@ -22,7 +22,7 @@ private:
 
 public:
     ParserThread(MutableGraph& graph, QUrl url);
-    virtual ~ParserThread();
+    ~ParserThread() override;
 
     void start(std::unique_ptr<IParser> parser);
     void cancel();

@@ -154,7 +154,7 @@ private:
     double _missingDataReplacementValue = 0.0;
 
     void initialise(const IPlugin* plugin, IDocument* document,
-                    const IParserThread* parserThread);
+                    const IParserThread* parserThread) override;
 
     void setDataColumnName(size_t column, const QString& name);
     void setData(size_t column, size_t row, double value);
@@ -191,13 +191,13 @@ public:
                      const std::function<bool()>& cancelled,
                      const ProgressFn& progressFn);
 
-    std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName);
-    void applyParameter(const QString& name, const QString& value);
-    QStringList defaultTransforms() const;
+    std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) override;
+    void applyParameter(const QString& name, const QString& value) override;
+    QStringList defaultTransforms() const override;
 
-    QByteArray save(IMutableGraph& graph, const ProgressFn& progressFn) const;
+    QByteArray save(IMutableGraph& graph, const ProgressFn& progressFn) const override;
     bool load(const QByteArray& data, int dataVersion, IMutableGraph& graph,
-              const ProgressFn& progressFn);
+              const ProgressFn& progressFn) override;
 
 private slots:
     void onLoadSuccess();
@@ -220,23 +220,23 @@ class CorrelationPlugin : public BasePlugin, public PluginInstanceProvider<Corre
 public:
     CorrelationPlugin();
 
-    QString name() const { return QStringLiteral("Correlation"); }
-    QString description() const
+    QString name() const override { return QStringLiteral("Correlation"); }
+    QString description() const override
     {
         return tr("Calculate pearson correlations between rows of data, and create "
                   "a graph based on the resultant matrix.");
     }
 
-    QString imageSource() const { return QStringLiteral("qrc:///plots.svg"); }
+    QString imageSource() const override { return QStringLiteral("qrc:///plots.svg"); }
 
-    int dataVersion() const { return 1; }
+    int dataVersion() const override { return 1; }
 
-    QStringList identifyUrl(const QUrl& url) const;
+    QStringList identifyUrl(const QUrl& url) const override;
 
-    bool editable() const { return true; }
+    bool editable() const override { return true; }
 
-    QString parametersQmlPath() const { return QStringLiteral("qrc:///qml/parameters.qml"); }
-    QString qmlPath() const { return QStringLiteral("qrc:///qml/correlationplugin.qml"); }
+    QString parametersQmlPath() const override { return QStringLiteral("qrc:///qml/parameters.qml"); }
+    QString qmlPath() const override { return QStringLiteral("qrc:///qml/correlationplugin.qml"); }
 };
 
 #endif // CORRELATIONPLUGIN_H

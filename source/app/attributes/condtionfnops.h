@@ -37,6 +37,6 @@ namespace ConditionFnOp
     {
         HasValue
     };
-}
+} // namespace ConditionFnOp
 
 #endif // CONDTIONFNOPS_H

@@ -126,7 +126,7 @@ private:
     }
 
 public:
-    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn)
+    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn) override
     {
         size_t columns = 0;
         size_t rows = 0;

@@ -13,7 +13,7 @@ private:
 public:
     explicit GmlFileParser(UserNodeData* userNodeData = nullptr);
 
-    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn);
+    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn) override;
 };
 
 #endif // GMLFILEPARSER_H

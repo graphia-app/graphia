@@ -57,10 +57,10 @@ public:
         _displacements(graphComponent.numNodes())
     {}
 
-    bool finished() const { return _changeDetectionPhase == ChangeDetectionPhase::Finished; }
-    void unfinish() { _changeDetectionPhase = ChangeDetectionPhase::Initial; }
+    bool finished() const override { return _changeDetectionPhase == ChangeDetectionPhase::Finished; }
+    void unfinish() override { _changeDetectionPhase = ChangeDetectionPhase::Initial; }
 
-    void executeReal(bool firstIteration);
+    void executeReal(bool firstIteration) override;
 };
 
 class ForceDirectedLayoutFactory : public LayoutFactory
@@ -73,7 +73,7 @@ public:
         _layoutSettings.registerSetting("AttractiveForce", QObject::tr("Attractive Force"), 1.0f, 100.0f, 1.0f);
     }
 
-    std::unique_ptr<Layout> create(ComponentId componentId, NodePositions& nodePositions) const
+    std::unique_ptr<Layout> create(ComponentId componentId, NodePositions& nodePositions) const override
     {
         auto component = _graphModel->graph().componentById(componentId);
         return std::make_unique<ForceDirectedLayout>(*component, nodePositions, &_layoutSettings);

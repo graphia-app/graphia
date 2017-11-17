@@ -10,7 +10,7 @@ class IMutableGraph;
 class IParser : public Cancellable
 {
 public:
-    virtual ~IParser() = default;
+    ~IParser() override = default;
 
     virtual bool parse(const QUrl& url,
                        IMutableGraph& mutableGraph,

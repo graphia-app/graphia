@@ -7,7 +7,7 @@ class PowerOf2GridComponentLayout : public ComponentLayout
 {
 private:
     void executeReal(const Graph &graph, const std::vector<ComponentId>& componentIds,
-                     ComponentLayoutData &componentLayoutData);
+                     ComponentLayoutData &componentLayoutData) override;
 };
 
 #endif // POWEROF2GRIDCOMPONENTLAYOUT_H

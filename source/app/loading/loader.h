@@ -24,7 +24,7 @@ private:
     bool _layoutPaused = false;
 
 public:
-    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn);
+    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn) override;
     void setPluginInstance(IPluginInstance* pluginInstance);
 
     QStringList transforms() const { return _transforms; }

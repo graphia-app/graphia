@@ -60,7 +60,7 @@ public:
     ComponentManager(Graph& graph,
                      const NodeConditionFn& nodeFilter = nullptr,
                      const EdgeConditionFn& edgeFilter = nullptr);
-    virtual ~ComponentManager();
+    ~ComponentManager() override;
 
 private:
     std::vector<ComponentId> _componentIds;

@@ -13,7 +13,7 @@
 class ICommand : public Cancellable
 {
 public:
-    virtual ~ICommand() = default;
+    ~ICommand() override = default;
 
     virtual QString description() const = 0;
     virtual QString verb() const { return description(); }

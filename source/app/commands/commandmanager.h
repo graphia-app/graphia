@@ -27,13 +27,13 @@ class CommandManager : public QObject, public ICommandManager
 
 public:
     CommandManager();
-    virtual ~CommandManager();
+    ~CommandManager() override;
 
     void clear();
 
-    void execute(std::unique_ptr<ICommand> command);
+    void execute(std::unique_ptr<ICommand> command) override;
     using ICommandManager::execute;
-    void executeOnce(std::unique_ptr<ICommand> command);
+    void executeOnce(std::unique_ptr<ICommand> command) override;
     using ICommandManager::executeOnce;
 
     void undo();
@@ -78,7 +78,7 @@ private:
 
     void clearCurrentCommand();
 
-    void timerEvent(QTimerEvent *event);
+    void timerEvent(QTimerEvent *event) override;
 
     bool canUndoNoLocking() const;
     bool canRedoNoLocking() const;

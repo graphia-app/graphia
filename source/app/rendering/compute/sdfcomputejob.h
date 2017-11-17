@@ -29,7 +29,7 @@ private:
 public:
     SDFComputeJob(GLuint sdfTexture, GlyphMap *glyphMap);
 
-    void run();
+    void run() override;
     void executeWhenComplete(std::function<void()> onCompleteFn);
 };
 

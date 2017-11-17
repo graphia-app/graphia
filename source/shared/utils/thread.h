@@ -9,6 +9,6 @@ namespace u
     void setCurrentThreadName(const QString& name);
     QString currentThreadName();
     QString parentProcessName();
-}
+} // namespace u
 
 #endif // THREAD_H

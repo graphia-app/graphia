@@ -7,7 +7,7 @@ class CirclePackComponentLayout : public ComponentLayout
 {
 private:
     void executeReal(const Graph &graph, const std::vector<ComponentId>& componentIds,
-                     ComponentLayoutData &componentLayoutData);
+                     ComponentLayoutData &componentLayoutData) override;
 };
 
 #endif // CIRCLEPACKCOMPONENTLAYOUT_H

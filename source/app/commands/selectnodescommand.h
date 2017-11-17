@@ -33,7 +33,7 @@ public:
         _clearSelectionFirst(clearSelectionFirst)
     {}
 
-    QString description() const
+    QString description() const override
     {
         if(_nodeIds.size() == 1)
         {
@@ -45,7 +45,7 @@ public:
         return QObject::tr("Select Nodes");
     }
 
-    QString verb() const
+    QString verb() const override
     {
         if(_nodeIds.size() == 1)
         {
@@ -57,9 +57,9 @@ public:
         return QObject::tr("Selecting Nodes");
     }
 
-    QString pastParticiple() const { return _pastParticiple; }
+    QString pastParticiple() const override { return _pastParticiple; }
 
-    bool execute()
+    bool execute() override
     {
         if(_clearSelectionFirst)
         {

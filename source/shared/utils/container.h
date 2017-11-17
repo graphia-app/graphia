@@ -130,6 +130,6 @@ namespace u
             keys.emplace_back(key);
         return keys;
     }
-}
+} // namespace u
 
 #endif // CONTAINER_H

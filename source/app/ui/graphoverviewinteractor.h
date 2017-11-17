@@ -27,19 +27,19 @@ private:
     GraphOverviewScene* _scene;
     QPoint _panStartPosition;
 
-    void rightMouseDown();
-    void rightMouseUp();
-    void rightDrag();
+    void rightMouseDown() override;
+    void rightMouseUp() override;
+    void rightDrag() override;
 
-    void leftDoubleClick();
+    void leftDoubleClick() override;
 
-    void wheelMove(float angle, float x, float y);
-    void trackpadZoomGesture(float value, float x, float y);
+    void wheelMove(float angle, float x, float y) override;
+    void trackpadZoomGesture(float value, float x, float y) override;
 
     ComponentId componentIdAtPosition(const QPoint& position) const;
-    GraphComponentRenderer* rendererAtPosition(const QPoint& position) const;
-    QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) const;
-    NodeIdSet selectionForRect(const QRectF& rect) const;
+    GraphComponentRenderer* rendererAtPosition(const QPoint& position) const override;
+    QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) const override;
+    NodeIdSet selectionForRect(const QRectF& rect) const override;
 };
 
 #endif // GRAPHOVERVIEWINTERACTOR_H

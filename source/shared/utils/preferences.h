@@ -47,7 +47,7 @@ class QmlPreferences : public QObject, public QQmlParserStatus
 
 public:
     explicit QmlPreferences(QObject* parent = nullptr);
-    ~QmlPreferences();
+    ~QmlPreferences() override;
 
     QString section() const;
     void setSection(const QString& section);
@@ -58,10 +58,10 @@ private:
     std::map<QString, QVariant> _pendingPreferenceChanges;
     int _timerId = 0;
 
-    void timerEvent(QTimerEvent *);
+    void timerEvent(QTimerEvent *) override;
 
-    void classBegin() {}
-    void componentComplete();
+    void classBegin() override {}
+    void componentComplete() override;
 
     QString preferenceNameByPropertyName(const QString& propertyName);
     QMetaProperty propertyByName(const QString& propertyName);
@@ -94,7 +94,7 @@ namespace u
     template<typename... Args> QVariant maxPref(Args&&... args) { return S(Preferences)->maximum(std::forward<Args>(args)...); }
     template<typename... Args> void setPref(Args&&... args)     { return S(Preferences)->set(std::forward<Args>(args)...); }
     template<typename... Args> bool prefExists(Args&&... args)  { return S(Preferences)->exists(std::forward<Args>(args)...); }
-}
+} // namespace u
 
 #endif // PREFERENCES_H
 

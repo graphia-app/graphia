@@ -15,16 +15,19 @@ public:
     {
         setAcceptHoverEvents(true);
     }
+
 signals:
     void hoveredChanged();
+
 protected:
-    void hoverEnterEvent(QHoverEvent *event)
+    void hoverEnterEvent(QHoverEvent *event) override
     {
         event->ignore();
         _hovered = true;
         emit hoveredChanged();
     }
-    void hoverLeaveEvent(QHoverEvent *event)
+
+    void hoverLeaveEvent(QHoverEvent *event) override
     {
         event->ignore();
         _hovered = false;

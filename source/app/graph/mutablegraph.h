@@ -38,7 +38,7 @@ public:
     MutableGraph() = default;
     MutableGraph(const MutableGraph& other);
 
-    virtual ~MutableGraph();
+    ~MutableGraph() override;
 
 private:
     struct
@@ -101,8 +101,8 @@ private:
 
     bool _updateRequired = false;
 
-    void reserveNodeId(NodeId nodeId);
-    void reserveEdgeId(EdgeId edgeId);
+    void reserveNodeId(NodeId nodeId) override;
+    void reserveEdgeId(EdgeId edgeId) override;
 
     NodeId mergeNodes(NodeId nodeIdA, NodeId nodeIdB);
     EdgeId mergeEdges(EdgeId edgeIdA, EdgeId edgeIdB);
@@ -110,27 +110,27 @@ private:
     MutableGraph& clone(const MutableGraph& other);
 
 public:
-    void clear();
+    void clear() override;
 
-    const std::vector<NodeId>& nodeIds() const;
-    int numNodes() const;
-    const INode& nodeById(NodeId nodeId) const;
-    bool containsNodeId(NodeId nodeId) const;
-    MultiElementType typeOf(NodeId nodeId) const;
-    ConstNodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const;
+    const std::vector<NodeId>& nodeIds() const override;
+    int numNodes() const override;
+    const INode& nodeById(NodeId nodeId) const override;
+    bool containsNodeId(NodeId nodeId) const override;
+    MultiElementType typeOf(NodeId nodeId) const override;
+    ConstNodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const override;
 
-    NodeId addNode();
-    NodeId addNode(NodeId nodeId);
-    NodeId addNode(const INode& node);
-    void removeNode(NodeId nodeId);
+    NodeId addNode() override;
+    NodeId addNode(NodeId nodeId) override;
+    NodeId addNode(const INode& node) override;
+    void removeNode(NodeId nodeId) override;
 
-    const std::vector<EdgeId>& edgeIds() const;
-    int numEdges() const;
-    const IEdge& edgeById(EdgeId edgeId) const;
-    bool containsEdgeId(EdgeId edgeId) const;
-    MultiElementType typeOf(EdgeId edgeId) const;
-    ConstEdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const;
-    EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const;
+    const std::vector<EdgeId>& edgeIds() const override;
+    int numEdges() const override;
+    const IEdge& edgeById(EdgeId edgeId) const override;
+    bool containsEdgeId(EdgeId edgeId) const override;
+    MultiElementType typeOf(EdgeId edgeId) const override;
+    ConstEdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const override;
+    EdgeIdDistinctSets edgeIdsForNodeId(NodeId nodeId) const override;
     EdgeIdDistinctSet inEdgeIdsForNodeId(NodeId nodeId) const;
     EdgeIdDistinctSet outEdgeIdsForNodeId(NodeId nodeId) const;
 
@@ -154,13 +154,13 @@ public:
         return set;
     }
 
-    EdgeId addEdge(NodeId sourceId, NodeId targetId);
-    EdgeId addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId);
-    EdgeId addEdge(const IEdge& edge);
-    void removeEdge(EdgeId edgeId);
+    EdgeId addEdge(NodeId sourceId, NodeId targetId) override;
+    EdgeId addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId) override;
+    EdgeId addEdge(const IEdge& edge) override;
+    void removeEdge(EdgeId edgeId) override;
 
-    void contractEdge(EdgeId edgeId);
-    void contractEdges(const EdgeIdSet& edgeIds);
+    void contractEdge(EdgeId edgeId) override;
+    void contractEdges(const EdgeIdSet& edgeIds) override;
 
     MutableGraph& operator=(const MutableGraph& other);
 
@@ -183,15 +183,15 @@ public:
 
     Diff diffTo(const MutableGraph& other);
 
-    void update();
+    void update() override;
 
 private:
     int _graphChangeDepth = 0;
     bool _graphChangeOccurred = false;
     std::mutex _mutex;
 
-    void beginTransaction();
-    void endTransaction(bool graphChangeOccurred = true);
+    void beginTransaction() override;
+    void endTransaction(bool graphChangeOccurred = true) override;
 };
 
 #endif // MUTABLEGRAPH_H

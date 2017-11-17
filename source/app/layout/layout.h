@@ -155,7 +155,7 @@ public:
                  std::unique_ptr<LayoutFactory>&& layoutFactory,
                  bool repeating = false);
 
-    virtual ~LayoutThread()
+    ~LayoutThread() override
     {
         stop();
 

@@ -15,10 +15,10 @@ class SelectionManager : public QObject, public ISelectionManager
 public:
     explicit SelectionManager(const GraphModel& graphModel);
 
-    NodeIdSet selectedNodes() const;
-    NodeIdSet unselectedNodes() const;
+    NodeIdSet selectedNodes() const override;
+    NodeIdSet unselectedNodes() const override;
 
-    bool selectNode(NodeId nodeId);
+    bool selectNode(NodeId nodeId) override;
 
     //FIXME http://en.cppreference.com/w/cpp/container/unordered_set/merge will be useful here
     template<typename C> bool selectNodes(const C& nodeIds, bool selectMergedNodes = true)
@@ -54,12 +54,12 @@ public:
         return selectionWillChange;
     }
 
-    bool selectNodes(const NodeIdSet& nodeIds)
+    bool selectNodes(const NodeIdSet& nodeIds) override
     {
         return selectNodes(nodeIds, true);
     }
 
-    bool deselectNode(NodeId nodeId);
+    bool deselectNode(NodeId nodeId) override;
 
     template<typename C> bool deselectNodes(const C& nodeIds, bool deselectMergedNodes = true)
     {
@@ -90,7 +90,7 @@ public:
         return selectionWillChange;
     }
 
-    bool deselectNodes(const NodeIdSet& nodeIds)
+    bool deselectNodes(const NodeIdSet& nodeIds) override
     {
         return deselectNodes(nodeIds, true);
     }
@@ -112,9 +112,9 @@ public:
             emit selectionChanged(this);
     }
 
-    bool nodeIsSelected(NodeId nodeId) const;
+    bool nodeIsSelected(NodeId nodeId) const override;
 
-    bool setSelectedNodes(const NodeIdSet& nodeIds)
+    bool setSelectedNodes(const NodeIdSet& nodeIds) override
     {
         bool selectionWillChange = u::setsDiffer(_selectedNodeIds, nodeIds);
         _selectedNodeIds = std::move(nodeIds);
@@ -125,9 +125,9 @@ public:
         return selectionWillChange;
     }
 
-    bool selectAllNodes();
-    bool clearNodeSelection();
-    void invertNodeSelection();
+    bool selectAllNodes() override;
+    bool clearNodeSelection() override;
+    void invertNodeSelection() override;
 
     int numNodesSelected() const { return static_cast<int>(_selectedNodeIds.size()); }
     QString numNodesSelectedAsString() const;

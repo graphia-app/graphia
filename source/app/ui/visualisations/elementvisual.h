@@ -11,11 +11,11 @@ struct ElementVisual : IElementVisual
     QString _text;
     Flags<VisualFlags> _state = VisualFlags::None;
 
-    float size() const { return _size; }
-    QColor outerColor() const { return _outerColor; }
-    QColor innerColor() const { return _innerColor; }
-    QString text() const { return _text; }
-    Flags<VisualFlags> state() const { return _state; }
+    float size() const override { return _size; }
+    QColor outerColor() const override { return _outerColor; }
+    QColor innerColor() const override { return _innerColor; }
+    QString text() const override { return _text; }
+    Flags<VisualFlags> state() const override { return _state; }
 };
 
 #endif // ELEMENTVISUAL_H

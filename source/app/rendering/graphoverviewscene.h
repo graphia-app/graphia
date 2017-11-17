@@ -31,18 +31,18 @@ public:
     explicit GraphOverviewScene(CommandManager* commandManager,
                                 GraphRenderer* graphRenderer);
 
-    void update(float t);
-    void setViewportSize(int width, int height);
+    void update(float t) override;
+    void setViewportSize(int width, int height) override;
 
-    bool transitionActive() const;
+    bool transitionActive() const override;
 
-    void onShow();
-    void onHide();
+    void onShow() override;
+    void onHide() override;
 
     const ComponentLayoutData& componentLayout() { return _zoomedComponentLayoutData; }
 
-    void resetView(bool doTransition);
-    bool viewIsReset() const;
+    void resetView(bool doTransition) override;
+    bool viewIsReset() const override;
 
     void pan(float dx, float dy);
 
@@ -109,8 +109,8 @@ private:
 
 private slots:
     void onGraphWillChange(const Graph* graph);
-    void onGraphChanged(const Graph* graph, bool changed);
-    void onComponentAdded(const Graph* graph, ComponentId componentId, bool hasSplit);
+    void onGraphChanged(const Graph* graph, bool changed) override;
+    void onComponentAdded(const Graph* graph, ComponentId componentId, bool hasSplit) override;
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool hasMerged);
     void onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet);
     void onComponentsWillMerge(const Graph* graph, const ComponentMergeSet& componentMergeSet);

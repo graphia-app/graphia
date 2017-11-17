@@ -36,7 +36,7 @@ template <typename EF>
 auto make_scope_exit(EF &&exit_function) noexcept {
     return scope_exit<std::remove_reference_t<EF>>(std::forward<EF>(exit_function));
 }
-}
-}
+} // namespace experimental
+} // namespace std
 
 #endif // SCOPE_EXIT_H

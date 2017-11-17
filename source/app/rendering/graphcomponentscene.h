@@ -20,12 +20,12 @@ class GraphComponentScene :
 public:
     explicit GraphComponentScene(GraphRenderer* graphRenderer);
 
-    void update(float t);
-    void setViewportSize(int width = 0, int height = 0);
+    void update(float t) override;
+    void setViewportSize(int width = 0, int height = 0) override;
 
-    bool transitionActive() const;
+    bool transitionActive() const override;
 
-    void onShow();
+    void onShow() override;
 
     ComponentId componentId() const { return _componentId; }
     void setComponentId(ComponentId componentId, bool doTransition = false);
@@ -37,8 +37,8 @@ public:
     bool savedViewIsReset() const;
     void restoreViewData();
 
-    void resetView(bool doTransition);
-    bool viewIsReset() const;
+    void resetView(bool doTransition) override;
+    bool viewIsReset() const override;
 
     void pan(NodeId clickedNodeId, const QPoint &start, const QPoint &end);
 
@@ -79,10 +79,10 @@ private:
 private slots:
     void onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet);
     void onComponentsWillMerge(const Graph* graph, const ComponentMergeSet& componentMergeSet);
-    void onComponentAdded(const Graph* graph, ComponentId componentId, bool);
+    void onComponentAdded(const Graph* graph, ComponentId componentId, bool) override;
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool);
     void onGraphWillChange(const Graph* graph);
-    void onGraphChanged(const Graph* graph, bool changed);
+    void onGraphChanged(const Graph* graph, bool changed) override;
     void onNodeRemoved(const Graph* graph, NodeId nodeId);
 };
 

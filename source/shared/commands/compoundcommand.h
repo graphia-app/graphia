@@ -23,18 +23,18 @@ public:
     CompoundCommand& operator=(const CompoundCommand&) = delete;
     CompoundCommand& operator=(CompoundCommand&&) = delete;
 
-    virtual ~CompoundCommand() = default;
+    ~CompoundCommand() override = default;
 
-    QString description() const { return _description; }
-    QString verb() const { return _verb; }
+    QString description() const override { return _description; }
+    QString verb() const override { return _verb; }
 
-    QString pastParticiple() const { return _pastParticiple; }
+    QString pastParticiple() const override { return _pastParticiple; }
     void setPastParticiple(const QString& pastParticiple)
     {
         _pastParticiple = pastParticiple;
     }
 
-    void cancel()
+    void cancel() override
     {
         ICommand::cancel();
 
@@ -42,7 +42,7 @@ public:
             command->cancel();
     }
 
-    bool cancellable() const
+    bool cancellable() const override
     {
         return std::any_of(_commands.begin(), _commands.end(),
         [](const auto& command)
@@ -51,7 +51,7 @@ public:
         });
     }
 
-    void initialise()
+    void initialise() override
     {
         ICommand::initialise();
 
@@ -59,8 +59,8 @@ public:
             command->initialise();
     }
 
-    void setProgress(int) {}
-    int progress() const
+    void setProgress(int) override {}
+    int progress() const override
     {
         if(_executing != nullptr)
             return _executing->progress();
@@ -69,7 +69,7 @@ public:
     }
 
 private:
-    bool execute()
+    bool execute() override
     {
         bool anyExecuted = false;
         for(auto it = _commands.begin(); it != _commands.end(); ++it)
@@ -83,7 +83,7 @@ private:
         return anyExecuted;
     }
 
-    void undo()
+    void undo() override
     {
         for(auto it = _commands.rbegin(); it != _commands.rend(); ++it)
         {

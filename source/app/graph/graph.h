@@ -29,14 +29,14 @@ private:
     EdgeIdDistinctSet _outEdgeIds;
 
 public:
-    int degree() const { return _inEdgeIds.size() + _outEdgeIds.size(); }
-    int inDegree() const { return _inEdgeIds.size(); }
-    int outDegree() const { return _outEdgeIds.size(); }
-    NodeId id() const { return _id; }
+    int degree() const override { return _inEdgeIds.size() + _outEdgeIds.size(); }
+    int inDegree() const override { return _inEdgeIds.size(); }
+    int outDegree() const override { return _outEdgeIds.size(); }
+    NodeId id() const override { return _id; }
 
-    std::vector<EdgeId> inEdgeIds() const;
-    std::vector<EdgeId> outEdgeIds() const;
-    std::vector<EdgeId> edgeIds() const;
+    std::vector<EdgeId> inEdgeIds() const override;
+    std::vector<EdgeId> outEdgeIds() const override;
+    std::vector<EdgeId> edgeIds() const override;
 };
 
 class Edge : public IEdge
@@ -75,9 +75,9 @@ public:
         return *this;
     }
 
-    NodeId sourceId() const { return _sourceId; }
-    NodeId targetId() const { return _targetId; }
-    NodeId oppositeId(NodeId nodeId) const
+    NodeId sourceId() const override { return _sourceId; }
+    NodeId targetId() const override { return _targetId; }
+    NodeId oppositeId(NodeId nodeId) const override
     {
         if(nodeId == _sourceId)
             return _targetId;
@@ -87,9 +87,9 @@ public:
         return NodeId();
     }
 
-    bool isLoop() const { return _sourceId == _targetId; }
+    bool isLoop() const override { return _sourceId == _targetId; }
 
-    EdgeId id() const { return _id; }
+    EdgeId id() const override { return _id; }
 };
 
 class Graph : public QObject, public virtual IGraph
@@ -98,10 +98,10 @@ class Graph : public QObject, public virtual IGraph
 
 public:
     Graph();
-    virtual ~Graph();
+    ~Graph() override;
 
     NodeId firstNodeId() const;
-    bool containsNodeId(NodeId nodeId) const;
+    bool containsNodeId(NodeId nodeId) const override;
 
     virtual MultiElementType typeOf(NodeId nodeId) const = 0;
     virtual ConstNodeIdDistinctSet mergedNodeIdsForNodeId(NodeId nodeId) const = 0;
@@ -119,7 +119,7 @@ public:
     }
 
     EdgeId firstEdgeId() const;
-    bool containsEdgeId(EdgeId edgeId) const;
+    bool containsEdgeId(EdgeId edgeId) const override;
 
     virtual MultiElementType typeOf(EdgeId edgeId) const = 0;
     virtual ConstEdgeIdDistinctSet mergedEdgeIdsForEdgeId(EdgeId edgeId) const = 0;
@@ -166,10 +166,10 @@ public:
 
     void enableComponentManagement();
 
-    virtual const std::vector<ComponentId>& componentIds() const;
-    int numComponents() const;
-    bool containsComponentId(ComponentId componentId) const;
-    const IGraphComponent* componentById(ComponentId componentId) const;
+    const std::vector<ComponentId>& componentIds() const override;
+    int numComponents() const override;
+    bool containsComponentId(ComponentId componentId) const override;
+    const IGraphComponent* componentById(ComponentId componentId) const override;
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
     ComponentId componentIdOfLargestComponent() const;
@@ -191,9 +191,9 @@ public:
         return largestComponentId;
     }
 
-    std::vector<NodeId> sourcesOf(NodeId nodeId) const;
-    std::vector<NodeId> targetsOf(NodeId nodeId) const;
-    std::vector<NodeId> neighboursOf(NodeId nodeId) const;
+    std::vector<NodeId> sourcesOf(NodeId nodeId) const override;
+    std::vector<NodeId> targetsOf(NodeId nodeId) const override;
+    std::vector<NodeId> neighboursOf(NodeId nodeId) const override;
 
     // Call this to ensure the Graph is in a consistent state
     // Usually it is called automatically and is generally only
@@ -205,8 +205,8 @@ public:
     virtual void update() {}
 
     // Informational messages to indicate progress
-    virtual void setPhase(const QString& phase) const;
-    virtual void clearPhase() const;
+    void setPhase(const QString& phase) const override;
+    void clearPhase() const override;
     virtual QString phase() const;
 
     void dumpToQDebug(int detail) const;
@@ -231,23 +231,23 @@ private:
     mutable QString _subPhase;
     GraphConsistencyChecker _graphConsistencyChecker;
 
-    void insertNodeArray(IGraphArray* nodeArray) const;
-    void eraseNodeArray(IGraphArray* nodeArray) const;
+    void insertNodeArray(IGraphArray* nodeArray) const override;
+    void eraseNodeArray(IGraphArray* nodeArray) const override;
 
-    void insertEdgeArray(IGraphArray* edgeArray) const;
-    void eraseEdgeArray(IGraphArray* edgeArray) const;
+    void insertEdgeArray(IGraphArray* edgeArray) const override;
+    void eraseEdgeArray(IGraphArray* edgeArray) const override;
 
-    int numComponentArrays() const;
-    void insertComponentArray(IGraphArray* componentArray) const;
-    void eraseComponentArray(IGraphArray* componentArray) const;
+    int numComponentArrays() const override;
+    void insertComponentArray(IGraphArray* componentArray) const override;
+    void eraseComponentArray(IGraphArray* componentArray) const override;
 
-    bool isComponentManaged() const { return _componentManager != nullptr; }
+    bool isComponentManaged() const override { return _componentManager != nullptr; }
 
 protected:
-    NodeId nextNodeId() const;
+    NodeId nextNodeId() const override;
     NodeId largestNodeId() const { return nextNodeId() - 1; }
     virtual void reserveNodeId(NodeId nodeId);
-    EdgeId nextEdgeId() const;
+    EdgeId nextEdgeId() const override;
     EdgeId largestEdgeId() const { return nextEdgeId() - 1; }
     virtual void reserveEdgeId(EdgeId edgeId);
 

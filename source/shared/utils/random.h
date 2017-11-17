@@ -13,6 +13,6 @@ namespace u
     QVector2D randQVector2D(float low, float high);
     QVector3D randQVector3D(float low, float high);
     QColor randQColor();
-}
+} // namespace u
 
 #endif // RANDOM_H

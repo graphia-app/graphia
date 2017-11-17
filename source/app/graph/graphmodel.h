@@ -73,18 +73,18 @@ private:
     QString normalisedAttributeName(QString attribute) const;
 
 public:
-    MutableGraph& mutableGraph() { return _graph; }
-    const Graph& graph() const { return _transformedGraph; }
+    MutableGraph& mutableGraph() override { return _graph; }
+    const Graph& graph() const override { return _transformedGraph; }
     NodePositions& nodePositions() { return _nodePositions; }
     const NodePositions& nodePositions() const { return _nodePositions; }
 
-    const ElementVisual& nodeVisual(NodeId nodeId) const { return _nodeVisuals.at(nodeId); }
-    const ElementVisual& edgeVisual(EdgeId edgeId) const { return _edgeVisuals.at(edgeId); }
+    const ElementVisual& nodeVisual(NodeId nodeId) const override { return _nodeVisuals.at(nodeId); }
+    const ElementVisual& edgeVisual(EdgeId edgeId) const override { return _edgeVisuals.at(edgeId); }
 
     const NodeArray<QString>& nodeNames() const { return _nodeNames; }
 
-    QString nodeName(NodeId nodeId) const { return _nodeNames[nodeId]; }
-    void setNodeName(NodeId nodeId, const QString& name);
+    QString nodeName(NodeId nodeId) const override { return _nodeNames[nodeId]; }
+    void setNodeName(NodeId nodeId, const QString& name) override;
 
     const QString& name() const { return _name; }
 
@@ -118,15 +118,15 @@ public:
     QVariantMap visualisationDefaultParameters(ValueType valueType,
                                                const QString& channelName) const;
 
-    std::vector<QString> attributeNames(ElementType elementType = ElementType::All) const;
+    std::vector<QString> attributeNames(ElementType elementType = ElementType::All) const override;
 
     void patchAttributeNames(QStringList& transforms, QStringList& visualisations) const;
-    Attribute& createAttribute(QString name);
+    Attribute& createAttribute(QString name) override;
 
     void addAttributes(const std::map<QString, Attribute>& attributes);
     void removeAttribute(const QString& name);
 
-    const Attribute* attributeByName(const QString& name) const;
+    const Attribute* attributeByName(const QString& name) const override;
     Attribute attributeValueByName(const QString& name) const;
 
     void enableVisualUpdates();

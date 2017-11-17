@@ -9,7 +9,7 @@ class MCLTransform : public GraphTransform
 {
 public:
     explicit MCLTransform(GraphModel* graphModel) : _graphModel(graphModel) {}
-    bool apply(TransformedGraph &target) const;
+    bool apply(TransformedGraph &target) const override;
 
 private:
     void enableDebugIteration(){ _debugIteration = true; }
@@ -37,23 +37,23 @@ public:
         GraphTransformFactory(graphModel)
     {}
 
-    QString description() const
+    QString description() const override
     {
         return R"(<a href="https://micans.org/mcl/">MCL - Markov Clustering</a> )"
                 "finds discrete groups (clusters) of nodes based on a flow simulation model.";
     }
-    ElementType elementType() const { return ElementType::None; }
-    GraphTransformParameters parameters() const
+    ElementType elementType() const override { return ElementType::None; }
+    GraphTransformParameters parameters() const override
     {
         return {{"Granularity", {ValueType::Float, "Controls the size of the resultant clusters. "
             "A larger granularity value results in smaller clusters.", 2.2, 1.1, 3.5}}};
     }
-    DeclaredAttributes declaredAttributes() const
+    DeclaredAttributes declaredAttributes() const override
     {
         return {{"MCL Cluster", {ValueType::String, QObject::tr("Colour")}}};
     }
 
-    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const;
+    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
 };
 
 #endif // MCLTRANSFORM_H

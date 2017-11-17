@@ -45,12 +45,12 @@ protected:
     QStringList identifyByExtension(const QUrl& url) const;
 
 public:
-    virtual ~UrlTypes() = default;
+    ~UrlTypes() override = default;
 
-    QStringList loadableUrlTypeNames() const;
-    QString individualDescriptionForUrlTypeName(const QString& urlTypeName) const;
-    QString collectiveDescriptionForUrlTypeName(const QString& urlTypeName) const;
-    QStringList extensionsForUrlTypeName(const QString& urlTypeName) const;
+    QStringList loadableUrlTypeNames() const override;
+    QString individualDescriptionForUrlTypeName(const QString& urlTypeName) const override;
+    QString collectiveDescriptionForUrlTypeName(const QString& urlTypeName) const override;
+    QStringList extensionsForUrlTypeName(const QString& urlTypeName) const override;
 };
 
 #endif // URLTYPES_H

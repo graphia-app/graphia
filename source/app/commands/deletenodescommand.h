@@ -26,12 +26,12 @@ public:
                        SelectionManager* selectionManager,
                        NodeIdSet nodeIds);
 
-    QString description() const;
-    QString verb() const;
-    QString pastParticiple() const;
+    QString description() const override;
+    QString verb() const override;
+    QString pastParticiple() const override;
 
-    bool execute();
-    void undo();
+    bool execute() override;
+    void undo() override;
 };
 
 #endif // DELETENODESCOMMAND_H

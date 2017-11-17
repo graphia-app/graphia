@@ -69,7 +69,7 @@ protected:
 struct GPUGraphData : OpenGLFunctions
 {
     GPUGraphData();
-    virtual ~GPUGraphData();
+    ~GPUGraphData() override;
 
     void initialise(QOpenGLShaderProgram& nodesShader,
                     QOpenGLShaderProgram& edgesShader,
@@ -184,7 +184,7 @@ public:
                   CommandManager* commandManager,
                   SelectionManager* selectionManager,
                   GPUComputeThread* gpuComputeThread);
-    virtual ~GraphRenderer();
+    ~GraphRenderer() override;
 
     static const int NUM_MULTISAMPLES = 4;
 
@@ -225,8 +225,8 @@ private slots:
     void onEdgeAddedToComponent(const Graph*, EdgeId edgeId, ComponentId);
 
     void onGraphWillChange(const Graph* graph);
-    void onGraphChanged(const Graph* graph, bool changed);
-    void onComponentAdded(const Graph*, ComponentId componentId, bool);
+    void onGraphChanged(const Graph* graph, bool changed) override;
+    void onComponentAdded(const Graph*, ComponentId componentId, bool) override;
     void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
 
 public slots:
@@ -393,9 +393,9 @@ private:
     void renderScene();
     void render2D();
 
-    QOpenGLFramebufferObject* createFramebufferObject(const QSize &size);
-    void render();
-    void synchronize(QQuickFramebufferObject* item);
+    QOpenGLFramebufferObject* createFramebufferObject(const QSize &size) override;
+    void render() override;
+    void synchronize(QQuickFramebufferObject* item) override;
 
     std::mutex _resetOpenGLStateMutex;
     std::function<void()> resetOpenGLState;

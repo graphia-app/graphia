@@ -9,15 +9,15 @@ class ColorVisualisationChannel : public VisualisationChannel
 public:
     using VisualisationChannel::VisualisationChannel;
 
-    void apply(double value, ElementVisual& elementVisual) const;
-    void apply(const QString& value, ElementVisual& elementVisual) const;
+    void apply(double value, ElementVisual& elementVisual) const override;
+    void apply(const QString& value, ElementVisual& elementVisual) const override;
 
-    bool supports(ValueType valueType) const { return valueType != ValueType::Unknown; }
+    bool supports(ValueType valueType) const override { return valueType != ValueType::Unknown; }
 
-    QString description(ElementType, ValueType) const;
+    QString description(ElementType, ValueType) const override;
 
-    QVariantMap defaultParameters(ValueType valueType) const;
-    void setParameter(const QString& name, const QString& value);
+    QVariantMap defaultParameters(ValueType valueType) const override;
+    void setParameter(const QString& name, const QString& value) override;
 
 private:
     ColorGradient _colorGradient;
