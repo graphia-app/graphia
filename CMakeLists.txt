@@ -10,8 +10,8 @@ option(UNITY_BUILD "Perform a unity build" OFF)
 
 include_directories(source)
 
-add_subdirectory(source/shared)
 add_subdirectory(source/thirdparty)
+add_subdirectory(source/shared)
+add_subdirectory(source/app)
 add_subdirectory(source/plugins)
 add_subdirectory(source/crashreporter)
-add_subdirectory(source/app)

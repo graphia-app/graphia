@@ -1,3 +1,5 @@
+include(${CMAKE_CURRENT_SOURCE_DIR}/../unity.cmake)
+
 include_directories(${CMAKE_CURRENT_LIST_DIR}/src)
 
 if(UNIX)
