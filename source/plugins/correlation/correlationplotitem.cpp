@@ -273,7 +273,7 @@ void CorrelationPlotItem::buildPlot()
             // There is no room to display labels, so show a warning instead
             QString warning = tr("Resize To Expose Column Names");
             if(!_xAxisLabel.isEmpty())
-                _customPlot.xAxis->setLabel(QString("%1 (%2)").arg(_xAxisLabel, warning));
+                _customPlot.xAxis->setLabel(QString(QStringLiteral("%1 (%2)")).arg(_xAxisLabel, warning));
             else
                 _customPlot.xAxis->setLabel(warning);
         }
