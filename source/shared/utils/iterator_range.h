@@ -2,6 +2,7 @@
 #define ITERATOR_RANGE_H
 
 #include <type_traits>
+#include <utility>
 
 template<typename Iterator>
 struct is_const_iterator
@@ -15,7 +16,7 @@ template<typename BeginIt, typename EndIt> class iterator_range
 {
 public:
     iterator_range(BeginIt begin_, EndIt end_) :
-        _begin(begin_), _end(end_) {}
+        _begin(std::move(begin_)), _end(std::move(end_)) {}
 
     BeginIt& begin() { return _begin; }
     EndIt& end() { return _end; }

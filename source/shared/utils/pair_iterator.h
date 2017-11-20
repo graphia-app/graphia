@@ -2,12 +2,13 @@
 #define PAIR_ITERATOR_H
 
 #include <iterator>
+#include <utility>
 
 template<typename It, typename T, T It::value_type::*member>
 class pair_iterator : public std::iterator<std::bidirectional_iterator_tag, T>
 {
 public:
-    explicit pair_iterator(const It& it) : _it(it) {}
+    explicit pair_iterator(It it) : _it(std::move(it)) {}
     auto& operator++() { return _it.operator++(); }
     auto operator++(int i) { return operator++(i); }
     auto& operator--() { return _it.operator--(); }

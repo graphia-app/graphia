@@ -9,7 +9,7 @@
 class Normaliser
 {
 public:
-    virtual ~Normaliser() {}
+    virtual ~Normaliser() = default;
     virtual bool process(std::vector<double>& data, size_t numColumns, size_t numRows,
                          const std::function<bool()>& cancelled, const ProgressFn& progress) const = 0;
 };

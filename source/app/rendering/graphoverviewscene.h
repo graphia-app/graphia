@@ -2,7 +2,6 @@
 #define GRAPHOVERVIEWSCENE_H
 
 #include "scene.h"
-#include "graphrenderer.h"
 #include "transition.h"
 
 #include "graph/graph.h"
@@ -20,12 +19,14 @@
 
 class GraphModel;
 class CommandManager;
+class GraphRenderer;
 
 class GraphOverviewScene :
-        public Scene,
-        public GraphInitialiser
+        public Scene
 {
     Q_OBJECT
+
+    friend class GraphRenderer;
 
 public:
     explicit GraphOverviewScene(CommandManager* commandManager,
@@ -109,8 +110,8 @@ private:
 
 private slots:
     void onGraphWillChange(const Graph* graph);
-    void onGraphChanged(const Graph* graph, bool changed) override;
-    void onComponentAdded(const Graph* graph, ComponentId componentId, bool hasSplit) override;
+    void onGraphChanged(const Graph* graph, bool changed);
+    void onComponentAdded(const Graph* graph, ComponentId componentId, bool hasSplit);
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool hasMerged);
     void onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet);
     void onComponentsWillMerge(const Graph* graph, const ComponentMergeSet& componentMergeSet);

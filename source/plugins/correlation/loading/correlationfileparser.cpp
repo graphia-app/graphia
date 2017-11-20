@@ -9,9 +9,10 @@
 
 #include <vector>
 #include <stack>
+#include <utility>
 
-CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, const QString& urlTypeName) :
-    _plugin(plugin), _urlTypeName(urlTypeName)
+CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, QString urlTypeName) :
+    _plugin(plugin), _urlTypeName(std::move(urlTypeName))
 {}
 
 static QRect findLargestDataRect(const TabularData& tabularData)

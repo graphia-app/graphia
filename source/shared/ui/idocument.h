@@ -10,7 +10,7 @@ class ICommandManager;
 class IDocument
 {
 public:
-    virtual ~IDocument() {}
+    virtual ~IDocument() = default;
 
     virtual const IGraphModel* graphModel() const = 0;
     virtual IGraphModel* graphModel() = 0;

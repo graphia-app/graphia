@@ -16,6 +16,7 @@
 #include <queue>
 #include <thread>
 #include <vector>
+#include <utility>
 
 template<typename It> static It incrementIterator(It it, It last, const int n)
 {
@@ -77,7 +78,7 @@ private:
         {}
 
     public:
-        ResultsType(ResultsType&& other) :
+        ResultsType(ResultsType&& other) noexcept :
             _futures(std::move(other._futures))
         {}
 
@@ -162,7 +163,7 @@ private:
 
     public:
         CosterBase(It first, It last) :
-            _first(first), _last(last)
+            _first(std::move(first)), _last(std::move(last))
         {}
     };
 

@@ -15,6 +15,7 @@
 #include <vector>
 #include <functional>
 #include <algorithm>
+#include <utility>
 
 #include <QString>
 #include <QStringList>
@@ -75,7 +76,7 @@ private:
     struct DataRow
     {
         DataRow(ConstDataIterator _begin, ConstDataIterator _end, NodeId nodeId, int computeCost) :
-            _data(_begin, _end), _nodeId(nodeId), _cost(computeCost)
+            _data(std::move(_begin), std::move(_end)), _nodeId(nodeId), _cost(computeCost)
         {
             _sortedData = _data;
             std::sort(_sortedData.begin(), _sortedData.end());

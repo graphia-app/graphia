@@ -13,6 +13,7 @@
 #include <memory>
 #include <stack>
 #include <tuple>
+#include <array>
 #include <cstdlib>
 
 template<typename TreeType> struct SubVolume
@@ -61,12 +62,12 @@ protected:
     BoundingBox3D _boundingBox;
     QVector3D _centre;
     size_t _depth = 0;
-    SubVolumeType _subVolumes[8] = {};
+    std::array<SubVolumeType, 8> _subVolumes = {};
 
-    const SubVolumeType* _nonEmptyLeaves[8] = {};
+    std::array<const SubVolumeType*, 8> _nonEmptyLeaves = {};
     int _numNonEmptyLeaves = 0;
 
-    const SubVolumeType* _internalNodes[8] = {};
+    std::array<const SubVolumeType*, 8> _internalNodes = {};
     int _numInternalNodes = 0;
 
 private:
@@ -204,7 +205,7 @@ public:
         if(diff.x() >= 0.0f)
             i += 1;
 
-        SubVolumeType& subVolume = _subVolumes[i];
+        SubVolumeType& subVolume = _subVolumes.at(i);
 
         if(!subVolume._leaf)
             return subVolume._subTree->subVolumeForPoint(point);

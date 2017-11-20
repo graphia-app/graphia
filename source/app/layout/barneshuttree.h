@@ -46,7 +46,7 @@ public:
 
             for(int i = 0; i < subTree->_numInternalNodes; i++)
             {
-                auto subVolume = subTree->_internalNodes[i];
+                auto subVolume = subTree->_internalNodes.at(i);
 
                 const QVector3D& centreOfMass = subVolume->_subTree->_centreOfMass;
                 QVector3D difference = (centreOfMass - nodePosition);

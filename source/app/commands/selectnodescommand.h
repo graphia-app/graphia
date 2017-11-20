@@ -29,7 +29,8 @@ private:
 public:
     SelectNodesCommand(SelectionManager* selectionManager, C nodeIds,
                        bool clearSelectionFirst = true) :
-        _selectionManager(selectionManager), _nodeIds(nodeIds),
+        _selectionManager(selectionManager),
+        _nodeIds(std::move(nodeIds)),
         _clearSelectionFirst(clearSelectionFirst)
     {}
 

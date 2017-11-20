@@ -4,6 +4,8 @@
 #include <QVector2D>
 #include <QVector3D>
 
+#include <utility>
+
 template <typename Vector> class Line
 {
 private:
@@ -12,9 +14,9 @@ private:
     mutable float _length = -1.0f;
 
 public:
-    Line() {}
-    Line(const Vector& start, const Vector& end) :
-        _start(start), _end(end)
+    Line() = default;
+    Line(Vector start, Vector end) :
+        _start(std::move(start)), _end(std::move(end))
     {}
 
     const Vector& start() const { return _start; }

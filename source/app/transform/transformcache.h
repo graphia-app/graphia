@@ -23,13 +23,13 @@ public:
             _newAttributes(other._newAttributes)
         {}
 
-        Result(Result&& other) :
+        Result(Result&& other) noexcept :
             _config(std::move(other._config)),
             _graph(std::move(other._graph)),
             _newAttributes(std::move(other._newAttributes))
         {}
 
-        Result& operator=(Result&& other)
+        Result& operator=(Result&& other) noexcept
         {
             _config = std::move(other._config);
             _graph = std::move(other._graph);
@@ -55,7 +55,7 @@ private:
 public:
     TransformCache(GraphModel& graphModel);
     TransformCache(const TransformCache& other) = default;
-    TransformCache(TransformCache&& other) = default;
+    TransformCache(TransformCache&& other) noexcept = default;
     TransformCache& operator=(TransformCache&& other) noexcept;
 
     bool empty() const { return _cache.empty(); }

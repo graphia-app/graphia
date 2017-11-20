@@ -15,7 +15,7 @@ private:
 public:
     void push_back(const T& t)
     {
-        _array[_next] = t;
+        _array.at(_next) = t;
         _current = _next;
         _next++;
         _size = std::max(_size, _next);
@@ -36,7 +36,7 @@ public:
     {
         Q_ASSERT(_size > 0);
         auto base = _current - _size + 1;
-        return _array[(base + Size + index) % Size];
+        return _array.at((base + Size + index) % Size);
     }
 
     const T& newest() const

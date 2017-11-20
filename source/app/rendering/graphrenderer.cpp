@@ -23,6 +23,7 @@
 #include <QTextLayout>
 #include <QBuffer>
 
+#include <utility>
 #include <cstddef>
 
 template<typename T>
@@ -34,14 +35,6 @@ void setupTexture(T t, GLuint& texture, int width, int height, GLint format)
     t->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, GraphRenderer::NUM_MULTISAMPLES, format, width, height, GL_FALSE);
     t->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
     t->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-}
-
-void GraphInitialiser::initialiseFromGraph(const Graph *graph)
-{
-    for(auto componentId : graph->componentIds())
-        onComponentAdded(graph, componentId, false);
-
-    onGraphChanged(graph, true);
 }
 
 GPUGraphData::GPUGraphData()
@@ -377,9 +370,9 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
     _graphOverviewInteractor = new GraphOverviewInteractor(_graphModel, _graphOverviewScene, commandManager, _selectionManager, this);
     _graphComponentInteractor = new GraphComponentInteractor(_graphModel, _graphComponentScene, commandManager, _selectionManager, this);
 
-    initialiseFromGraph(graph);
-    _graphOverviewScene->initialiseFromGraph(graph);
-    _graphComponentScene->initialiseFromGraph(graph);
+    initialiseFromGraph(graph, *this);
+    initialiseFromGraph(graph, *_graphOverviewScene);
+    initialiseFromGraph(graph, *_graphComponentScene);
 
     // If the graph is a single component or empty, use component mode by default
     if(graph->numComponents() <= 1)
@@ -1282,8 +1275,8 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
     struct Light
     {
         Light() = default;
-        Light(const QVector4D& _position, const QVector3D& _intensity) :
-            position(_position), intensity(_intensity)
+        Light(QVector4D _position, QVector3D _intensity) :
+            position(std::move(_position)), intensity(std::move(_intensity))
         {}
 
         QVector4D position;

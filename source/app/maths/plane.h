@@ -1,9 +1,11 @@
 #ifndef PLANE_H
 #define PLANE_H
 
+#include "maths/ray.h"
+
 #include <QVector3D>
 
-#include "maths/ray.h"
+#include <utility>
 
 class Plane
 {
@@ -14,11 +16,11 @@ private:
 public:
     Plane() : _normal(0.0f, 0.0f, 1.0f) {}
 
-    Plane(float distance, const QVector3D& normal) :
-        _distance(distance), _normal(normal)
+    Plane(float distance, QVector3D normal) :
+        _distance(distance), _normal(std::move(normal))
     {}
 
-    Plane(const QVector3D& point, const QVector3D& normal);
+    Plane(const QVector3D& point, QVector3D normal);
     Plane(const QVector3D& pointA, const QVector3D& pointB, const QVector3D& pointC);
 
     float distance() const { return _distance; }

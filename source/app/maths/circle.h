@@ -6,43 +6,13 @@
 class Circle
 {
 public:
-    Circle() {}
+    Circle() = default;
 
     Circle(float x, float y, float radius) noexcept :
         _x(x),
         _y(y),
         _radius(radius)
     {}
-
-    Circle(const Circle& other) noexcept :
-        _x(other._x),
-        _y(other._y),
-        _radius(other._radius)
-    {}
-
-    Circle(Circle&& other) noexcept :
-        _x(other._x),
-        _y(other._y),
-        _radius(other._radius)
-    {}
-
-    Circle& operator=(const Circle& other) noexcept
-    {
-        _x = other._x;
-        _y = other._y;
-        _radius = other._radius;
-
-        return *this;
-    }
-
-    Circle& operator=(Circle&& other) noexcept
-    {
-        _x = other._x;
-        _y = other._y;
-        _radius = other._radius;
-
-        return *this;
-    }
 
     float x() const { return _x; }
     float y() const { return _y; }

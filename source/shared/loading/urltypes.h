@@ -7,6 +7,7 @@
 #include <QStringList>
 
 #include <map>
+#include <utility>
 
 class QUrl;
 
@@ -16,12 +17,12 @@ private:
     class UrlType
     {
     public:
-        UrlType(const QString& individualDescription,
-                const QString& collectiveDescription,
-                const QStringList& extensions) :
-            _individualDescription(individualDescription),
-            _collectiveDescription(collectiveDescription),
-            _extensions(extensions)
+        UrlType(QString individualDescription,
+                QString collectiveDescription,
+                QStringList extensions) :
+            _individualDescription(std::move(individualDescription)),
+            _collectiveDescription(std::move(collectiveDescription)),
+            _extensions(std::move(extensions))
         {}
 
         const QString& individualDescription() const { return _individualDescription; }

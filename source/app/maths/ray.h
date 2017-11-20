@@ -6,6 +6,7 @@
 #include "line.h"
 
 #include <array>
+#include <utility>
 
 class Ray
 {
@@ -24,8 +25,8 @@ private:
     }
 
 public:
-    Ray(const QVector3D& origin, const QVector3D& dir) :
-        _origin(origin), _dir(dir)
+    Ray(QVector3D origin, QVector3D dir) :
+        _origin(std::move(origin)), _dir(std::move(dir))
     {
         initialise();
     }

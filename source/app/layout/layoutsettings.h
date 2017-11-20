@@ -7,14 +7,15 @@
 #include <QString>
 
 #include <vector>
+#include <utility>
 
 class LayoutSetting
 {
 public:
-    LayoutSetting(const QString& name, const QString& displayName,
+    LayoutSetting(QString name, QString displayName,
                   float minimumValue, float maximumValue, float defaultValue) :
-        _name(name),
-        _displayName(displayName),
+        _name(std::move(name)),
+        _displayName(std::move(displayName)),
         _minimumValue(minimumValue),
         _maximumValue(maximumValue),
         _value(defaultValue)

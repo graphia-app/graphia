@@ -373,7 +373,7 @@ public:
         }
 
     public:
-        iterator_base() {}
+        iterator_base() = default;
 
         explicit iterator_base(const ElementIdDistinctSet* set) :
              _set(set)
@@ -456,9 +456,9 @@ private:
         if(index >= _numSets)
             return nullptr;
         else if(index < _setsSmall.size())
-            return _setsSmall[index];
+            return _setsSmall.at(index);
         else
-            return _setsBig[index - _setsSmall.size()];
+            return _setsBig.at(index - _setsSmall.size());
     }
 
 public:
@@ -470,7 +470,7 @@ public:
     void add(const T& set)
     {
         if(_numSets < _setsSmall.size())
-            _setsSmall[_numSets++] = &set;
+            _setsSmall.at(_numSets++) = &set;
         else
         {
             _setsBig.push_back(&set);
@@ -529,7 +529,7 @@ public:
         }
 
     public:
-        iterator_base() {}
+        iterator_base() = default;
 
         explicit iterator_base(const ElementIdDistinctSets* sets) :
              _sets(sets)

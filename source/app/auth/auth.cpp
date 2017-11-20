@@ -179,7 +179,7 @@ static bool rsaVerifySignature(const std::string& string, const std::string& sig
         ); // StringSource
         Q_UNUSED(ss);
     }
-    catch(C::SignatureVerificationFilter::SignatureVerificationFailed)
+    catch(C::SignatureVerificationFilter::SignatureVerificationFailed&)
     {
         return false;
     }
@@ -196,7 +196,8 @@ static std::string aesDecryptBytes(const std::vector<byte>& bytes, const Auth::A
 {
     std::vector<byte> outBytes(bytes.size());
 
-    C::CFB_Mode<C::AES>::Decryption decryption(static_cast<const byte*>(aesKey._aes), sizeof(aesKey._aes), aesKey._iv);
+    C::CFB_Mode<C::AES>::Decryption decryption(static_cast<const byte*>(aesKey._aes),
+        sizeof(aesKey._aes), static_cast<const byte*>(aesKey._iv));
     decryption.ProcessData(outBytes.data(), bytes.data(), bytes.size());
 
     return std::string(reinterpret_cast<const char*>(outBytes.data()), outBytes.size());
@@ -206,7 +207,8 @@ static std::string aesDecryptString(const std::string& string, const Auth::AesKe
 {
     std::vector<byte> outBytes(string.size());
 
-    C::CFB_Mode<C::AES>::Decryption decryption(static_cast<const byte*>(aesKey._aes), sizeof(aesKey._aes), aesKey._iv);
+    C::CFB_Mode<C::AES>::Decryption decryption(static_cast<const byte*>(aesKey._aes),
+        sizeof(aesKey._aes), static_cast<const byte*>(aesKey._iv));
     decryption.ProcessData(outBytes.data(), reinterpret_cast<const byte*>(string.data()), string.size());
 
     return std::string(reinterpret_cast<const char*>(outBytes.data()), outBytes.size());
@@ -219,7 +221,8 @@ static std::string aesEncryptString(const std::string& string, const Auth::AesKe
 
     std::vector<byte> outBytes(bytesSize);
 
-    C::CFB_Mode<C::AES>::Encryption encryption(static_cast<const byte*>(aesKey._aes), sizeof(aesKey._aes), aesKey._iv);
+    C::CFB_Mode<C::AES>::Encryption encryption(static_cast<const byte*>(aesKey._aes),
+        sizeof(aesKey._aes), static_cast<const byte*>(aesKey._iv));
     encryption.ProcessData(outBytes.data(), inBytes, bytesSize);
 
     return bytesToHex(outBytes);
@@ -307,7 +310,7 @@ void Auth::parseAuthToken()
         ); // StringSource
         Q_UNUSED(ss);
     }
-    catch(C::SignatureVerificationFilter::SignatureVerificationFailed)
+    catch(C::SignatureVerificationFilter::SignatureVerificationFailed&)
     {
         // If we get here, then someone is trying to manipulate the auth token
         return;

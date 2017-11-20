@@ -7,15 +7,17 @@
 
 #include <limits>
 #include <map>
+#include <utility>
 
 class GraphTransformParameter
 {
 public:
-    GraphTransformParameter(ValueType type, const QString& description,
+    GraphTransformParameter(ValueType type, QString description,
                             QVariant initialValue = QVariant(""),
                             double min = std::numeric_limits<double>::max(),
                             double max = std::numeric_limits<double>::lowest()) :
-        _type(type), _description(description), _min(min), _max(max), _initialValue(initialValue)
+        _type(type), _description(std::move(description)),
+        _initialValue(std::move(initialValue)), _min(min), _max(max)
     {}
 
     ValueType type() const { return _type; }
@@ -33,9 +35,9 @@ public:
 private:
     ValueType _type;
     QString _description;
+    QVariant _initialValue;
     double _min;
     double _max;
-    QVariant _initialValue;
 };
 
 using GraphTransformParameters = std::map<QString, GraphTransformParameter>;

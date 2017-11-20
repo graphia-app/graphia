@@ -2,20 +2,21 @@
 #define GRAPHCOMPONENTSCENE_H
 
 #include "scene.h"
-#include "graphrenderer.h"
 
 #include "graph/graph.h"
 #include "graph/componentmanager.h"
 #include "shared/graph/grapharray.h"
 #include "transition.h"
 
+class GraphRenderer;
 class GraphComponentRenderer;
 
 class GraphComponentScene :
-        public Scene,
-        public GraphInitialiser
+        public Scene
 {
     Q_OBJECT
+
+    friend class GraphRenderer;
 
 public:
     explicit GraphComponentScene(GraphRenderer* graphRenderer);
@@ -79,10 +80,10 @@ private:
 private slots:
     void onComponentSplit(const Graph* graph, const ComponentSplitSet& componentSplitSet);
     void onComponentsWillMerge(const Graph* graph, const ComponentMergeSet& componentMergeSet);
-    void onComponentAdded(const Graph* graph, ComponentId componentId, bool) override;
+    void onComponentAdded(const Graph* graph, ComponentId componentId, bool);
     void onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool);
     void onGraphWillChange(const Graph* graph);
-    void onGraphChanged(const Graph* graph, bool changed) override;
+    void onGraphChanged(const Graph* graph, bool changed);
     void onNodeRemoved(const Graph* graph, NodeId nodeId);
 };
 

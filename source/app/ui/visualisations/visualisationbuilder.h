@@ -68,11 +68,11 @@ public:
         {
             for(int i = 0; i < _numAppliedVisualisations - 1; i++)
             {
-                auto& iv = _applications[c].at(i);
+                auto& iv = _applications.at(c).at(i);
 
                 for(int j = i + 1; j < _numAppliedVisualisations; j++)
                 {
-                    auto& jv = _applications[c].at(j);
+                    auto& jv = _applications.at(c).at(j);
                     int bothSet = 0, sourceSet = 0;
 
                     for(auto elementId : *_elementIds)
@@ -109,7 +109,7 @@ public:
                bool invert, int index, VisualisationInfo& visualisationInfo)
     {
         for(int c = 0; c < NumChannels; c++)
-            _applications[c].emplace_back(index, *_graph);
+            _applications.at(c).emplace_back(index, *_graph);
 
         if(_elementIds->empty())
         {

@@ -33,7 +33,7 @@ constexpr bool static_strcmp(char const* a, char const* b)
     public: \
         enum class Enum {__VA_ARGS__}; Q_ENUM(Enum) \
         struct Constructor \
-        { Constructor() { static bool initialised = false; \
+        { Constructor() noexcept { static bool initialised = false; \
             if(initialised) return; \
             initialised = true; \
             qmlRegisterUncreatableType<_REFLECTOR(ENUM_NAME)>( \
@@ -52,7 +52,7 @@ DEFINE_QML_ENUM(Q_GADGET, Enumeration,
      Second,
      Third)
 
-Note: the first parameter must be Q_GADGET, so that qmake knows
+Note: the first parameter must be Q_GADGET, so that the build system knows
 to generate a moc_ file
 */
 

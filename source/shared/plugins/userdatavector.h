@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <limits>
+#include <utility>
 
 class UserDataVector
 {
@@ -34,10 +35,10 @@ private:
 public:
     UserDataVector() = default;
     UserDataVector(const UserDataVector&) = default;
-    UserDataVector(UserDataVector&&) = default;
+    UserDataVector(UserDataVector&&) noexcept = default;
 
-    explicit UserDataVector(const QString& name) :
-        _name(name)
+    explicit UserDataVector(QString name) :
+        _name(std::move(name))
     {}
 
     auto begin() const { return _values.begin(); }

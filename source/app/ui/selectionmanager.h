@@ -117,7 +117,7 @@ public:
     bool setSelectedNodes(const NodeIdSet& nodeIds) override
     {
         bool selectionWillChange = u::setsDiffer(_selectedNodeIds, nodeIds);
-        _selectedNodeIds = std::move(nodeIds);
+        _selectedNodeIds = nodeIds;
 
         if(selectionWillChange && !signalsSuppressed())
             emit selectionChanged(this);

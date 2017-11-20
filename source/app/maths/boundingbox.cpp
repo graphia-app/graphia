@@ -4,13 +4,14 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <utility>
 
 BoundingBox2D::BoundingBox2D() :
     _min(), _max()
 {}
 
-BoundingBox2D::BoundingBox2D(const QVector2D& min, const QVector2D& max) :
-    _min(min), _max(max)
+BoundingBox2D::BoundingBox2D(QVector2D min, QVector2D max) :
+    _min(std::move(min)), _max(std::move(max))
 {}
 
 BoundingBox2D::BoundingBox2D(const std::vector<QVector2D>& points)
@@ -83,8 +84,8 @@ BoundingBox3D::BoundingBox3D() :
     _min(), _max()
 {}
 
-BoundingBox3D::BoundingBox3D(const QVector3D& min, const QVector3D& max) :
-    _min(min), _max(max)
+BoundingBox3D::BoundingBox3D(QVector3D min, QVector3D max) :
+    _min(std::move(min)), _max(std::move(max))
 {}
 
 BoundingBox3D::BoundingBox3D(const std::vector<QVector3D>& points)

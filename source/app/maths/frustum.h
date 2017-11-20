@@ -6,6 +6,8 @@
 
 #include <QVector3D>
 
+#include <array>
+
 class BaseFrustum
 {
 public:
@@ -20,7 +22,7 @@ public:
 class Frustum : public BaseFrustum
 {
 private:
-    Plane _planes[6];
+    std::array<Plane, 6> _planes;
     Line3D _centreLine;
 
 public:

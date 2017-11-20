@@ -10,7 +10,7 @@ private:
 
 public:
     Cancellable() : _cancelled(false) {}
-    virtual ~Cancellable() {}
+    virtual ~Cancellable() = default;
 
     virtual void uncancel() { _cancelled = false; }
     virtual void cancel() { _cancelled = true; }

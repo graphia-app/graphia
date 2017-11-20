@@ -27,7 +27,11 @@ private:
         GraphTransformConfig::TerminalValue _terminalValue;
 
     public:
-        TerminalValueWrapper(GraphTransformConfig::TerminalValue terminalValue) :
+        TerminalValueWrapper(const GraphTransformConfig::TerminalValue& terminalValue) :
+            _terminalValue(terminalValue)
+        {}
+
+        TerminalValueWrapper(GraphTransformConfig::TerminalValue&& terminalValue) :
             _terminalValue(terminalValue)
         {}
 
@@ -205,7 +209,7 @@ private:
         TerminalValueWrapper _rhs;
         bool _operandsAreSwitched;
 
-        AttributeValueOpVistor(const Attribute& lhs, TerminalValueWrapper rhs,
+        AttributeValueOpVistor(const Attribute& lhs, const TerminalValueWrapper& rhs,
                                bool operandsAreSwitched = false) :
             _lhs(lhs), _rhs(rhs), _operandsAreSwitched(operandsAreSwitched)
         {}
@@ -343,7 +347,7 @@ private:
         TerminalValueWrapper _lhs;
         TerminalValueWrapper _rhs;
 
-        ValuesOpVistor(TerminalValueWrapper lhs, TerminalValueWrapper rhs) :
+        ValuesOpVistor(const TerminalValueWrapper& lhs, const TerminalValueWrapper& rhs) :
             _lhs(lhs), _rhs(rhs)
         {}
 

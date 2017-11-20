@@ -54,18 +54,6 @@ class GraphComponentInteractor;
 
 class ICommand;
 
-class GraphInitialiser
-{
-public:
-    virtual ~GraphInitialiser() = default;
-
-    void initialiseFromGraph(const Graph* graph);
-
-protected:
-    virtual void onGraphChanged(const Graph*, bool) = 0;
-    virtual void onComponentAdded(const Graph*, ComponentId, bool) = 0;
-};
-
 struct GPUGraphData : OpenGLFunctions
 {
     GPUGraphData();
@@ -172,7 +160,6 @@ DEFINE_QML_ENUM(Q_GADGET, EdgeVisualType,
 class GraphRenderer :
         public QObject,
         public OpenGLFunctions,
-        public GraphInitialiser,
         public QQuickFramebufferObject::Renderer
 {
     Q_OBJECT
@@ -218,6 +205,7 @@ public:
     bool layoutChanged() const { return _synchronousLayoutChanged; }
 
     bool visible() const;
+
 private slots:
     void onNodeAdded(const Graph*, NodeId nodeId);
     void onEdgeAdded(const Graph*, EdgeId edgeId);
@@ -225,8 +213,8 @@ private slots:
     void onEdgeAddedToComponent(const Graph*, EdgeId edgeId, ComponentId);
 
     void onGraphWillChange(const Graph* graph);
-    void onGraphChanged(const Graph* graph, bool changed) override;
-    void onComponentAdded(const Graph*, ComponentId componentId, bool) override;
+    void onGraphChanged(const Graph* graph, bool changed);
+    void onComponentAdded(const Graph*, ComponentId componentId, bool);
     void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
 
 public slots:
@@ -240,6 +228,7 @@ public slots:
     void onVisibilityChanged();
 
     void onPreviewRequested(int width, int height, bool fillSize);
+
 private:
     GraphModel* _graphModel = nullptr;
     int _numComponents = 0;
@@ -353,6 +342,15 @@ private:
     Transition _transition;
 
     PerformanceCounter _performanceCounter;
+
+    template<typename Target>
+    void initialiseFromGraph(const Graph *graph, Target& target)
+    {
+        for(auto componentId : graph->componentIds())
+            target.onComponentAdded(graph, componentId, false);
+
+        target.onGraphChanged(graph, true);
+    }
 
     void prepareSDFTextures();
     void prepareSelectionMarkerVAO();

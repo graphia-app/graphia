@@ -19,7 +19,7 @@ private:
     float _farRadius;
 
 public:
-    ConicalFrustum(const Line3D& centreLine, const Line3D& surfaceLine);
+    ConicalFrustum(Line3D centreLine, const Line3D& surfaceLine);
 
     bool containsPoint(const QVector3D& point) const override;
     Line3D centreLine() const override { return _centreLine; }

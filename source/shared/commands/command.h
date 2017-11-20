@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <type_traits>
+#include <utility>
 
 class Command;
 class CommandFn
@@ -62,16 +63,16 @@ public:
         CommandDescription(QString description = {},
                            QString verb = {},
                            QString pastParticiple = {}) :
-            _description(description),
-            _verb(verb),
-            _pastParticiple(pastParticiple)
+            _description(std::move(description)),
+            _verb(std::move(verb)),
+            _pastParticiple(std::move(pastParticiple))
         {}
     };
 
-    Command(const CommandDescription& commandDescription,
+    Command(CommandDescription commandDescription,
             CommandFn executeFn,
             CommandFn undoFn = [](Command&) { Q_ASSERT(!"undoFn not implemented"); }) :
-        _description(commandDescription._description),
+        _description(std::move(commandDescription._description)),
         _verb(commandDescription._verb),
         _pastParticiple(commandDescription._pastParticiple),
         _executeFn(executeFn),

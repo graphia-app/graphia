@@ -56,7 +56,7 @@ public:
         _defaultValue(other._defaultValue)
     {}
 
-    GenericGraphArray(GenericGraphArray&& other) :
+    GenericGraphArray(GenericGraphArray&& other) noexcept :
         _graph(other._graph),
         _array(std::move(other._array)),
         _mutex(),
@@ -75,7 +75,7 @@ public:
         return *this;
     }
 
-    GenericGraphArray& operator=(GenericGraphArray&& other)
+    GenericGraphArray& operator=(GenericGraphArray&& other) noexcept
     {
         Q_ASSERT(_graph == other._graph);
         _array = std::move(other._array);
@@ -220,7 +220,7 @@ public:
         this->_graph->insertNodeArray(this);
     }
 
-    NodeArray(NodeArray&& other) :
+    NodeArray(NodeArray&& other) noexcept :
         GenericGraphArray<NodeId, Element, Locking>(std::move(other))
     {
         this->_graph->insertNodeArray(this);
@@ -232,7 +232,7 @@ public:
         return *this;
     }
 
-    NodeArray& operator=(NodeArray&& other)
+    NodeArray& operator=(NodeArray&& other) noexcept
     {
         GenericGraphArray<NodeId, Element, Locking>::operator=(std::move(other));
         return *this;
@@ -269,7 +269,7 @@ public:
         this->_graph->insertEdgeArray(this);
     }
 
-    EdgeArray(EdgeArray&& other) :
+    EdgeArray(EdgeArray&& other) noexcept :
         GenericGraphArray<EdgeId, Element, Locking>(std::move(other))
     {
         this->_graph->insertEdgeArray(this);
@@ -281,7 +281,7 @@ public:
         return *this;
     }
 
-    EdgeArray& operator=(EdgeArray&& other)
+    EdgeArray& operator=(EdgeArray&& other) noexcept
     {
         GenericGraphArray<EdgeId, Element, Locking>::operator=(std::move(other));
         return *this;
@@ -321,7 +321,7 @@ public:
         this->_graph->insertComponentArray(this);
     }
 
-    ComponentArray(ComponentArray&& other) :
+    ComponentArray(ComponentArray&& other) noexcept :
         GenericGraphArray<ComponentId, Element, Locking>(std::move(other))
     {
         Q_ASSERT(this->_graph->isComponentManaged());
@@ -334,7 +334,7 @@ public:
         return *this;
     }
 
-    ComponentArray& operator=(ComponentArray&& other)
+    ComponentArray& operator=(ComponentArray&& other) noexcept
     {
         GenericGraphArray<ComponentId, Element, Locking>::operator=(std::move(other));
         return *this;

@@ -14,7 +14,7 @@ enum VisualFlags
 
 struct IElementVisual
 {
-    virtual ~IElementVisual() {}
+    virtual ~IElementVisual() = default;
 
     virtual float size() const = 0;
     virtual QColor outerColor() const = 0;

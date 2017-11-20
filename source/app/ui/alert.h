@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <map>
+#include <utility>
 
 DEFINE_QML_ENUM(Q_GADGET, AlertType,
                 None,
@@ -19,8 +20,8 @@ struct Alert
     QString _text;
 
     Alert() = default;
-    Alert(AlertType type, const QString& text) :
-        _type(type), _text(text)
+    Alert(AlertType type, QString text) :
+        _type(type), _text(std::move(text))
     {}
 };
 
