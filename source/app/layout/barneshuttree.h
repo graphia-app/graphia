@@ -68,7 +68,7 @@ public:
 
             for(int i = 0; i < subTree->_numNonEmptyLeaves; i++)
             {
-                auto subVolume = subTree->_nonEmptyLeaves[i];
+                auto subVolume = subTree->_nonEmptyLeaves.at(i);
 
                 NodeId otherNodeId = subVolume->_nodeIds.front();
                 if(otherNodeId != nodeId)

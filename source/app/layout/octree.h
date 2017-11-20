@@ -116,12 +116,12 @@ private:
                 stack.emplace(subVolume._subTree.get(), std::move(subVolume._nodeIds));
 
                 subVolume._leaf = false;
-                _internalNodes[_numInternalNodes++] = &subVolume;
+                _internalNodes.at(_numInternalNodes++) = &subVolume;
             }
             else
             {
                 subVolume._empty = false;
-                _nonEmptyLeaves[_numNonEmptyLeaves++] = &subVolume;
+                _nonEmptyLeaves.at(_numNonEmptyLeaves++) = &subVolume;
             }
         }
     }

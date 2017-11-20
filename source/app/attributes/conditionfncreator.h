@@ -27,12 +27,8 @@ private:
         GraphTransformConfig::TerminalValue _terminalValue;
 
     public:
-        TerminalValueWrapper(const GraphTransformConfig::TerminalValue& terminalValue) :
-            _terminalValue(terminalValue)
-        {}
-
-        TerminalValueWrapper(GraphTransformConfig::TerminalValue&& terminalValue) :
-            _terminalValue(terminalValue)
+        TerminalValueWrapper(GraphTransformConfig::TerminalValue terminalValue) :
+            _terminalValue(std::move(terminalValue))
         {}
 
         QString toString() const
@@ -347,8 +343,8 @@ private:
         TerminalValueWrapper _lhs;
         TerminalValueWrapper _rhs;
 
-        ValuesOpVistor(const TerminalValueWrapper& lhs, const TerminalValueWrapper& rhs) :
-            _lhs(lhs), _rhs(rhs)
+        ValuesOpVistor(TerminalValueWrapper lhs, TerminalValueWrapper rhs) :
+            _lhs(std::move(lhs)), _rhs(std::move(rhs))
         {}
 
         ElementConditionFn<E> f(bool condition) const

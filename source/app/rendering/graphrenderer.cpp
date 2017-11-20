@@ -1275,8 +1275,8 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
     struct Light
     {
         Light() = default;
-        Light(QVector4D _position, QVector3D _intensity) :
-            position(std::move(_position)), intensity(std::move(_intensity))
+        Light(const QVector4D& _position, const QVector3D& _intensity) :
+            position(_position), intensity(_intensity)
         {}
 
         QVector4D position;

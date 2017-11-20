@@ -2,10 +2,8 @@
 
 #include "shared/utils/utils.h"
 
-#include <utility>
-
-ConicalFrustum::ConicalFrustum(Line3D centreLine, const Line3D& surfaceLine) :
-    _centreLine(std::move(centreLine))
+ConicalFrustum::ConicalFrustum(const Line3D& centreLine, const Line3D& surfaceLine) :
+    _centreLine(centreLine)
 {
     _nearPlane = Plane(_centreLine.start(), -_centreLine.dir());
     _farPlane = Plane(_centreLine.end(), _centreLine.dir());

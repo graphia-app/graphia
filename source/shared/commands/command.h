@@ -75,8 +75,8 @@ public:
         _description(std::move(commandDescription._description)),
         _verb(commandDescription._verb),
         _pastParticiple(commandDescription._pastParticiple),
-        _executeFn(executeFn),
-        _undoFn(undoFn)
+        _executeFn(std::move(executeFn)),
+        _undoFn(std::move(undoFn))
     {}
 
     Command(const Command&) = delete;

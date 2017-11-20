@@ -2,8 +2,8 @@
 
 #include <utility>
 
-Plane::Plane(const QVector3D& point, QVector3D normal) :
-    _normal(std::move(normal))
+Plane::Plane(const QVector3D& point, const QVector3D& normal) :
+    _normal(normal)
 {
     float negDistance =
             _normal.x() * point.x() +
