@@ -10,7 +10,9 @@
 #pragma warning( push )
 #pragma warning( disable : 4100 ) // Unreferenced formal parameter
 #endif
+#include "blaze_disable_warnings.h"
 #include "blaze/Blaze.h"
+#include "blaze_enable_warnings.h"
 #ifdef _MSC_VER
 #pragma warning( pop )
 #endif
