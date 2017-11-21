@@ -5,8 +5,6 @@
 
 #include <QVector3D>
 
-#include <utility>
-
 class Plane
 {
 private:
@@ -16,8 +14,8 @@ private:
 public:
     Plane() : _normal(0.0f, 0.0f, 1.0f) {}
 
-    Plane(float distance, QVector3D normal) :
-        _distance(distance), _normal(std::move(normal))
+    Plane(float distance, const QVector3D& normal) :
+        _distance(distance), _normal(normal)
     {}
 
     Plane(const QVector3D& point, const QVector3D &normal);
