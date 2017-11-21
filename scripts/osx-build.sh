@@ -25,7 +25,7 @@ function makeSymFile
 
   dsymutil ${SOURCE} -flat -o ${TARGET}.dsym || exit $?
   source/thirdparty/breakpad/src/tools/mac/dump_syms/build/Release/dump_syms \
-    ${TARGET}.dsym > ${TARGET} || exit $?
+    ${TARGET}.dsym > ${TARGET} 2> /dev/null || exit $?
   rm ${TARGET}.dsym
 
   # Remove .sym.dsym from the MODULE name
