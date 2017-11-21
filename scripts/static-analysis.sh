@@ -19,12 +19,15 @@ BUILD_DIR="build/${COMPILER}"
 CPP_FILES=$(cat ${BUILD_DIR}/compile_commands.json | \
   jq '.[].file' | grep -vE "qrc_|_automoc|thirdparty")
 
+echo "Files to be analysed:"
+echo ${CPP_FILES}
+
 # cppcheck
 cppcheck --version
-echo ${CPP_FILES} | xargs cppcheck --enable=all \
+echo ${CPP_FILES} | xargs -n1 -P${NUM_CORES} cppcheck --enable=all \
   --xml --xml-version=2 --library=scripts/cppcheck.cfg 2> cppcheck.xml
 
-# clang-tidy (this works better when a compile_command.json has been created by bear)
+# clang-tidy
 CHECKS="-checks=*,\
 -*readability*,\
 -llvm-*,\
@@ -61,4 +64,4 @@ find source/app \
   source/plugins \
   source/crashreporter \
   -type f -iname "*.qml" | \
-  xargs qmllint
+  xargs -n1 -P${NUM_CORES} qmllint
