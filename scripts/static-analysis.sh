@@ -17,7 +17,7 @@ COMPILER=$(basename ${CC} | sed -e 's/-.*//g')
 BUILD_DIR="build/${COMPILER}"
 
 CPP_FILES=$(cat ${BUILD_DIR}/compile_commands.json | \
-  jq '.[].file' | grep -vE "qrc_|_automoc|thirdparty")
+  jq '.[].file' | grep -vE "qrc_|mocs_compilation|thirdparty")
 
 echo "Files to be analysed:"
 echo ${CPP_FILES}
