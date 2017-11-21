@@ -1,7 +1,4 @@
-#if ((__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2)) || \
-    defined(__clang__))
-#define GCC_DIAGNOSTIC_AWARE
-#endif
+#include "thirdparty/gccdiagaware.h"
 
 #ifdef GCC_DIAGNOSTIC_AWARE
 // GCC/clang warnings
