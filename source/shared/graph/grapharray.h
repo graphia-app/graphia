@@ -53,14 +53,14 @@ public:
         _graph(other._graph),
         _array(other._array),
         _mutex(),
-        _defaultValue(std::move(other._defaultValue))
+        _defaultValue(other._defaultValue)
     {}
 
     GenericGraphArray(GenericGraphArray&& other) noexcept :
         _graph(other._graph),
         _array(std::move(other._array)),
         _mutex(),
-        _defaultValue(other._defaultValue)
+        _defaultValue(std::move(other._defaultValue))
     {}
 
     ~GenericGraphArray() override = default;
