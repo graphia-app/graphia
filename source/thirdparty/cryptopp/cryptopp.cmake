@@ -41,17 +41,17 @@ list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/cryptlib.cpp
     ${CMAKE_CURRENT_LIST_DIR}/cpu.cpp
 
-    ${CMAKE_CURRENT_LIST_DIR}/ec2n.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/sha.cpp
     ${CMAKE_CURRENT_LIST_DIR}/des.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/hex.cpp
     ${CMAKE_CURRENT_LIST_DIR}/dll.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ec2n.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/hex.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/sha.cpp
 )
 
 if(MSVC)
     list(APPEND SOURCES
-        ${CMAKE_CURRENT_LIST_DIR}/winpipes.cpp
         ${CMAKE_CURRENT_LIST_DIR}/rdrand.asm
+        ${CMAKE_CURRENT_LIST_DIR}/winpipes.cpp
         ${CMAKE_CURRENT_LIST_DIR}/x64dll.asm
         ${CMAKE_CURRENT_LIST_DIR}/x64masm.asm
     )
