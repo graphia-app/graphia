@@ -65,7 +65,7 @@ const auto attributeName_def = char_('$') >> (quotedString | identifier);
 
 struct equality_op_ : x3::symbols<ConditionFnOp::Equality>
 {
-    equality_op_()
+    equality_op_() noexcept
     {
         add
         ("==", ConditionFnOp::Equality::Equal)
@@ -76,7 +76,7 @@ struct equality_op_ : x3::symbols<ConditionFnOp::Equality>
 
 struct numerical_op_ : x3::symbols<ConditionFnOp::Numerical>
 {
-    numerical_op_()
+    numerical_op_() noexcept
     {
         add
         ("<",  ConditionFnOp::Numerical::LessThan)
@@ -89,7 +89,7 @@ struct numerical_op_ : x3::symbols<ConditionFnOp::Numerical>
 
 struct string_op_ : x3::symbols<ConditionFnOp::String>
 {
-    string_op_()
+    string_op_() noexcept
     {
         add
         ("includes",                ConditionFnOp::String::Includes)
@@ -104,7 +104,7 @@ struct string_op_ : x3::symbols<ConditionFnOp::String>
 
 struct unary_op_ : x3::symbols<ConditionFnOp::Unary>
 {
-    unary_op_()
+    unary_op_() noexcept
     {
         add
         ("hasValue", ConditionFnOp::Unary::HasValue)
@@ -123,7 +123,7 @@ const auto unaryCondition_def = valueOperand >> unary_op;
 
 struct logical_op_ : x3::symbols<ConditionFnOp::Logical>
 {
-    logical_op_()
+    logical_op_() noexcept
     {
         add
         ("or",  ConditionFnOp::Logical::Or)
