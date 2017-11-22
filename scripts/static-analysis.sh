@@ -29,9 +29,16 @@ cppcheck --enable=all --xml --xml-version=2 \
 
 # clang-tidy
 CHECKS="-checks=*,\
--*readability*,\
+-readability-braces-around-statements,\
+-readability-identifier-naming,\
+-readability-named-parameter,\
 -llvm-*,\
+llvm-namespace-comment,\
 -google-*,\
+google-explicit-constructor,\
+google-runtime-int,\
+google-runtime-member-string-references,\
+-cppcoreguidelines-pro-type-vararg,\
 -clang-analyzer-alpha.deadcode.UnreachableCode"
 
 echo "clang-tidy"
