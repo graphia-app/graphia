@@ -36,8 +36,8 @@ CHECKS="-checks=*,\
 
 echo "clang-tidy"
 clang-tidy --version
-clang-tidy -p ${BUILD_DIR} -list-checks ${CHECKS}
-echo ${CPP_FILES} | xargs -n1 -P${NUM_CORES} clang-tidy \
+clang-tidy -list-checks ${CHECKS}
+echo ${CPP_FILES} | xargs -n1 -P${NUM_CORES} clang-tidy -p ${BUILD_DIR} \
   -header-filter="^.*source\/(app|shared|plugins).*$" ${CHECKS}
 
 # clazy
