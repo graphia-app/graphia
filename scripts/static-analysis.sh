@@ -24,8 +24,8 @@ echo ${CPP_FILES}
 
 # cppcheck
 cppcheck --version
-echo ${CPP_FILES} | xargs -n1 -P${NUM_CORES} cppcheck --enable=all \
-  --xml --xml-version=2 --library=scripts/cppcheck.cfg 2> cppcheck.xml
+cppcheck --enable=all --xml --xml-version=2 \
+  --library=scripts/cppcheck.cfg ${CPP_FILES} 2> cppcheck.xml
 
 # clang-tidy
 CHECKS="-checks=*,\
@@ -36,7 +36,7 @@ CHECKS="-checks=*,\
 
 echo "clang-tidy"
 clang-tidy --version
-clang-tidy -p build/linux-clang -list-checks ${CHECKS}
+clang-tidy -p ${BUILD_DIR} -list-checks ${CHECKS}
 echo ${CPP_FILES} | xargs -n1 -P${NUM_CORES} clang-tidy \
   -header-filter="^.*source\/(app|shared|plugins).*$" ${CHECKS}
 
