@@ -55,7 +55,8 @@ no-non-pod-global-static"
 
 echo "clazy"
 clazy-standalone --version
-echo ${CPP_FILES} | xargs -n1 -P${NUM_CORES} clazy-standalone ${CHECKS}
+echo ${CPP_FILES} | xargs -n1 -P${NUM_CORES} \
+  clazy-standalone -p ${BUILD_DIR}/compile_commands.json ${CHECKS}
 
 # qmllint
 qmllint --version
