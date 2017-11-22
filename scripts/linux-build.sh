@@ -31,6 +31,10 @@ mkdir -p ${BUILD_DIR}
     -DCMAKE_BUILD_TYPE=Release -GNinja ../.. || exit $?
   cmake --build . --target all || exit $?
 
+  # Hack to remove unnecessary dependencies (CMake issue 17097)
+  sed -i "s/ || cmake_object_order_depends_target_[A-Za-z]*$//" \
+    build.ninja
+
   # Clean intermediate build products
   grep "^rule.*\(_COMPILER_\|_STATIC_LIBRARY_\)" rules.ninja | \
     cut -d' ' -f2 | xargs -n1 ninja -t clean -r
