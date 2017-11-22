@@ -109,7 +109,7 @@ PluginContent
         Action
         {
             id: unitVarianceScaling
-            text: qsTr("Unit Varience Scaling")
+            text: qsTr("Unit Variance Scaling")
             checkable: true
             checked: plot.plotScaleType === PlotScaleType.UnitVariance
             onTriggered: { plot.plotScaleType = PlotScaleType.UnitVariance; }
