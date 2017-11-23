@@ -1,9 +1,9 @@
 #ifndef OCTREE_H
 #define OCTREE_H
 
-#include "graph/graph.h"
+#include "shared/graph/igraphcomponent.h"
 #include "maths/boundingbox.h"
-#include "layout.h"
+#include "nodepositions.h"
 
 #include <QVector3D>
 #include <QColor>
