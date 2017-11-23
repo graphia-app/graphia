@@ -5,6 +5,8 @@
 #include "shared/utils/iterator_range.h"
 #include "shared/utils/string.h"
 
+#include "graph/graphmodel.h"
+
 #include "ui/document.h"
 
 #include <QFile>
@@ -152,7 +154,8 @@ bool Saver::encode(const ProgressFn& progressFn)
 {
     json jsonArray;
 
-    auto graphModel = _document->graphModel();
+    auto graphModel = dynamic_cast<GraphModel*>(_document->graphModel());
+    Q_ASSERT(graphModel != nullptr);
 
     json header;
     header["version"] = 1;

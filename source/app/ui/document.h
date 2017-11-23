@@ -7,7 +7,6 @@
 #include "rendering/compute/gpucomputethread.h"
 #include "loading/parserthread.h"
 #include "commands/commandmanager.h"
-#include "ui/selectionmanager.h"
 #include "layout/layout.h"
 #include "shared/utils/qmlenum.h"
 #include "attributes/availableattributesmodel.h"
@@ -34,6 +33,7 @@ class Application;
 class GraphQuickItem;
 class GraphModel;
 class SearchManager;
+class SelectionManager;
 
 DEFINE_QML_ENUM(Q_GADGET, LayoutPauseState,
                 Running, RunningFinished, Paused);
@@ -90,14 +90,14 @@ public:
     ~Document() override;
 
 public: // IDocument
-    const GraphModel* graphModel() const override { return _graphModel.get(); }
-    GraphModel* graphModel() override { return _graphModel.get(); }
+    const IGraphModel* graphModel() const override;
+    IGraphModel* graphModel() override;
 
-    const SelectionManager* selectionManager() const override { return _selectionManager.get(); }
-    SelectionManager* selectionManager() override { return _selectionManager.get(); }
+    const ISelectionManager* selectionManager() const override;
+    ISelectionManager* selectionManager() override;
 
-    const CommandManager* commandManager() const override { return &_commandManager; }
-    CommandManager* commandManager() override { return &_commandManager; }
+    const ICommandManager* commandManager() const override { return &_commandManager; }
+    ICommandManager* commandManager() override { return &_commandManager; }
 
     void moveFocusToNode(NodeId nodeId) override;
 

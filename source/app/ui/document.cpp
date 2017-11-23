@@ -58,6 +58,26 @@ Document::~Document()
         _gpuComputeThread->destroySurface();
 }
 
+const IGraphModel* Document::graphModel() const
+{
+    return _graphModel.get();
+}
+
+IGraphModel* Document::graphModel()
+{
+    return _graphModel.get();
+}
+
+const ISelectionManager* Document::selectionManager() const
+{
+    return _selectionManager.get();
+}
+
+ISelectionManager* Document::selectionManager()
+{
+    return _selectionManager.get();
+}
+
 bool Document::commandInProgress() const
 {
     return !_loadComplete || _commandManager.busy();
