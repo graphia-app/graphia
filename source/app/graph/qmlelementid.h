@@ -19,7 +19,7 @@
         Q_PROPERTY(bool isNull READ isNull CONSTANT) \
     public: \
         QML_TYPE(Type)() = default; \
-        QML_TYPE(Type)(Type id) : _id(id) {} /* NOLINT */ \
+        QML_TYPE(Type)(Type id) : _id(id) {} \
         operator Type() const { return _id; } \
         bool isNull() const { return _id.isNull(); } \
     private: \
@@ -27,9 +27,9 @@
         int id() const { return _id; } \
     };
 
-QML_ELEMENTID(NodeId)
-QML_ELEMENTID(EdgeId)
-QML_ELEMENTID(ComponentId)
+QML_ELEMENTID(NodeId) // NOLINT
+QML_ELEMENTID(EdgeId) // NOLINT
+QML_ELEMENTID(ComponentId) // NOLINT
 
 inline void registerQmlElementIdTypes()
 {
