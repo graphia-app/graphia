@@ -1,4 +1,6 @@
 #include "mutablegraph.h"
+
+#include "graphcomponent.h"
 #include "componentmanager.h"
 
 #include "shared/utils/container.h"

@@ -2,6 +2,7 @@
 
 #include "transform/transformedgraph.h"
 
+#include "graph/graphcomponent.h"
 #include "graph/graphmodel.h"
 #include "graph/componentmanager.h"
 

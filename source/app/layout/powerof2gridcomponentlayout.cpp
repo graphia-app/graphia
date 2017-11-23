@@ -1,5 +1,7 @@
 #include "powerof2gridcomponentlayout.h"
 
+#include "graph/graph.h"
+#include "graph/graphcomponent.h"
 #include "graph/componentmanager.h"
 #include "shared/utils/utils.h"
 
