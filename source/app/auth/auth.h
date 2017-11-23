@@ -74,7 +74,7 @@ public:
     struct AesKey
     {
         AesKey() = default;
-        AesKey(const char* bytes)
+        explicit AesKey(const char* bytes)
         {
             std::memcpy(_aes, &bytes[0],            sizeof(_aes));
             std::memcpy(_iv,  &bytes[sizeof(_aes)], sizeof(_iv));

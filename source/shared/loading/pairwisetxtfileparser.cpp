@@ -111,7 +111,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const P
 
         if(isComment)
         {
-            if(tokens.size() >= 1 && _userNodeData != nullptr)
+            if(!tokens.empty() && _userNodeData != nullptr)
             {
                 NodeId nodeId;
                 QString attributeName;

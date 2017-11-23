@@ -204,7 +204,7 @@ private:
 
     int foundIndex() const;
     int numNodesFound() const;
-    void setFoundIt(std::vector<NodeId>::const_iterator it);
+    void setFoundIt(std::vector<NodeId>::const_iterator foundIt);
     NodeId incrementFoundIt();
     NodeId decrementFoundIt();
     void selectFoundNode(NodeId newFound);

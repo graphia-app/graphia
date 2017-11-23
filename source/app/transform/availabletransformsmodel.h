@@ -24,7 +24,7 @@ private:
 
 public:
     AvailableTransformsModel() = default;
-    AvailableTransformsModel(const GraphModel& graphModel,
+    explicit AvailableTransformsModel(const GraphModel& graphModel,
                              QObject* parent = nullptr);
 
     QVariant data(const QModelIndex& index, int role) const override;

@@ -26,7 +26,7 @@ private:
     size_t index(size_t column, size_t row) const;
 
 public:
-    void initialise(size_t numColumns, size_t numRows);
+    void initialise(size_t columns, size_t rows);
 
     size_t numColumns() const;
     size_t numRows() const;

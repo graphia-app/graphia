@@ -74,16 +74,14 @@ public:
             _pastParticiple = _selectionManager->numNodesSelectedAsString();
             return nodesSelected;
         }
-        else
-        {
-            _selectionManager->toggleNode(nodeId());
 
-            if(!_nodeWasSelected)
-                _pastParticiple = _selectionManager->numNodesSelectedAsString();
+        _selectionManager->toggleNode(nodeId());
 
-            return true;
-        }
-    }
+        if(!_nodeWasSelected)
+            _pastParticiple = _selectionManager->numNodesSelectedAsString();
+
+        return true;
+}
 };
 
 template<typename C>

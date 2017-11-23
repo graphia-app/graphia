@@ -1874,7 +1874,7 @@ void GraphRenderer::disableSceneUpdate()
 void GraphRenderer::ifSceneUpdateEnabled(const std::function<void()>& f)
 {
     std::unique_lock<std::mutex> lock(_sceneUpdateMutex);
-    if(!_sceneUpdateDisabled)
+    if(_sceneUpdateDisabled == 0)
         f();
 }
 

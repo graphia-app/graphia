@@ -28,7 +28,7 @@ namespace u
     }
 
     template<typename C, typename T>
-    auto contains(const C& container, const T& value, long)
+    auto contains(const C& container, const T& value, char)
     -> decltype(std::find(container.begin(), container.end(), value), bool())
     {
         return std::find(container.begin(), container.end(), value) != container.end();

@@ -50,7 +50,7 @@ public:
                                    float bottom, float top,
                                    float nearPlane, float farPlane);
 
-    void setPerspectiveProjection(float fieldOfView, float aspect,
+    void setPerspectiveProjection(float fieldOfView, float aspectRatio,
                                   float nearPlane, float farPlane);
 
     void setViewportWidth(const float viewportWidth) { _viewportWidth = viewportWidth; }

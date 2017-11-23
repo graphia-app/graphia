@@ -15,7 +15,7 @@
 
 constexpr bool static_strcmp(char const* a, char const* b)
 {
-    return (*a && *b) ? (*a == *b && static_strcmp(a + 1, b + 1)) : (!*a && !*b);
+    return (*a && *b) ? (*a == *b && static_strcmp(a + 1, b + 1)) : (*a == 0 && *b == 0);
 }
 
 // Defining an enumeration that's usable in QML is awkward, so

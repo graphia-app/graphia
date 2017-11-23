@@ -18,7 +18,8 @@ private:
         {
             if(_value < other._value)
                 return true;
-            else if(_value == other._value)
+
+            if(_value == other._value)
                 return _color.rgb() < other._color.rgb();
 
             return false;

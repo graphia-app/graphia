@@ -53,7 +53,7 @@ private:
     std::vector<ResultSet> _cache;
 
 public:
-    TransformCache(GraphModel& graphModel);
+    explicit TransformCache(GraphModel& graphModel);
     TransformCache(const TransformCache& other) = default;
     TransformCache(TransformCache&& other) noexcept = default;
     TransformCache& operator=(TransformCache&& other) noexcept;

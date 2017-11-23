@@ -24,10 +24,12 @@ public:
     >;
 
     template<typename Fn, typename = EnableIfFnReturnTypeIs<Fn, bool>>
-    CommandFn(Fn&& fn) : _boolFn(fn) {}
+    CommandFn(Fn&& fn) : // NOLINT
+        _boolFn(fn) {}
 
     template<typename Fn, typename = EnableIfFnReturnTypeIs<Fn, void>, typename = void>
-    CommandFn(Fn&& fn) : _voidFn(fn) {}
+    CommandFn(Fn&& fn) : // NOLINT
+        _voidFn(fn) {}
 
     CommandFn() = default;
     CommandFn(const CommandFn& other) = default;
@@ -60,7 +62,7 @@ public:
         QString _verb;
         QString _pastParticiple;
 
-        CommandDescription(QString description = {},
+        CommandDescription(QString description = {}, // NOLINT
                            QString verb = {},
                            QString pastParticiple = {}) :
             _description(std::move(description)),

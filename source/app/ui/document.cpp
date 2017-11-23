@@ -275,7 +275,8 @@ static QStringList sortedTransforms(QStringList transforms)
 
         if(aPinned && !bPinned)
             return false;
-        else if(!aPinned && bPinned)
+
+        if(!aPinned && bPinned)
             return true;
 
         return false;
@@ -1024,8 +1025,8 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
 
         if(componentIdA == componentIdB)
             return a < b;
-        else
-            return componentIdA < componentIdB;
+
+        return componentIdA < componentIdB;
     });
 
     // _foundNodeIds is potentially in a different memory location,

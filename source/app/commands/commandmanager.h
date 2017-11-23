@@ -102,7 +102,7 @@ private:
         PendingCommand(CommandAction action, std::unique_ptr<ICommand>&& command) :
             _action(action), _command(std::move(command)) {}
 
-        PendingCommand(CommandAction action) :
+        explicit PendingCommand(CommandAction action) :
             _action(action), _command(nullptr) {}
 
         CommandAction _action;

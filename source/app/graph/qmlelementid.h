@@ -19,7 +19,7 @@
         Q_PROPERTY(bool isNull READ isNull CONSTANT) \
     public: \
         QML_TYPE(Type)() = default; \
-        QML_TYPE(Type)(Type id) : _id(id) {} \
+        QML_TYPE(Type)(Type id) : _id(id) {} /* NOLINT */ \
         operator Type() const { return _id; } \
         bool isNull() const { return _id.isNull(); } \
     private: \

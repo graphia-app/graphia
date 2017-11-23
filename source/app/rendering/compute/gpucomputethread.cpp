@@ -76,7 +76,7 @@ void GPUComputeThread::run()
 
     while(!_shouldStop)
     {
-        if(_jobs.size() == 0)
+        if(_jobs.empty())
             _jobsPending.wait(lock);
 
         if(_shouldStop)

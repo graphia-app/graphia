@@ -24,7 +24,7 @@ private:
         Item* _parent = nullptr;
 
     public:
-        Item(const QVariant& value);
+        explicit Item(const QVariant& value);
         virtual ~Item();
 
         void addChild(Item* child);
@@ -55,7 +55,7 @@ private:
 
 public:
     AvailableAttributesModel() = default;
-    AvailableAttributesModel(const GraphModel& graphModel,
+    explicit AvailableAttributesModel(const GraphModel& graphModel,
                              QObject* parent = nullptr,
                              ElementType elementTypes = ElementType::All,
                              ValueType valueTypes = ValueType::All);
@@ -68,7 +68,7 @@ public:
     QModelIndex index(int row, int column,
                       const QModelIndex& parentIndex = QModelIndex()) const override;
     QModelIndex parent(const QModelIndex& index) const override;
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex& parentIndex = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
     Q_INVOKABLE QVariant get(const QModelIndex& index) const;

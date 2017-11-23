@@ -13,7 +13,7 @@ private:
     QString _urlTypeName;
 
 public:
-    explicit CorrelationFileParser(CorrelationPluginInstance* correlationPluginInstance, QString urlTypeName);
+    explicit CorrelationFileParser(CorrelationPluginInstance* plugin, QString urlTypeName);
 
     bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn) override;
 };

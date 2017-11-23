@@ -32,7 +32,7 @@ public:
         QVariant _value;
 
         //cppcheck-suppress noExplicitConstructor
-        Attribute(const AttributeKey& key)
+        Attribute(const AttributeKey& key) // NOLINT
         {
             _name = key._name;
             _default = key._default;
@@ -87,7 +87,7 @@ private:
     UserNodeData* _userNodeData;
 
 public:
-    GraphMLHandler(IMutableGraph& mutableGraph, const ProgressFn& progressFn, UserNodeData* userNodeData, int lineCount);
+    GraphMLHandler(IMutableGraph& mutableGraph, const ProgressFn& progress, UserNodeData* userNodeData, int lineCount);
     bool startDocument() override;
     bool endDocument() override;
     bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts) override;
@@ -110,7 +110,7 @@ private:
 
 public:
     explicit GraphMLParser(UserNodeData *userNodeData = nullptr);
-    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn) override;
+    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress) override;
 };
 
 #endif // GRAPHMLPARSER_H

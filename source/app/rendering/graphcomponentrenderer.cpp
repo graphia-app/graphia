@@ -206,7 +206,7 @@ void GraphComponentRenderer::update(float t)
 {
     Q_ASSERT(_initialised);
 
-    if(_graphModel)
+    if(_graphModel != nullptr)
     {
         Q_ASSERT(_graphRenderer != nullptr);
 
@@ -515,10 +515,8 @@ bool GraphComponentRenderer::transitionRequired()
         return true;
 
     updateEntireComponentZoomDistance();
-    if(_viewData._camera.distance() > _entireComponentZoomDistance)
-        return true;
 
-    return false;
+    return _viewData._camera.distance() > _entireComponentZoomDistance;
 }
 
 void GraphComponentRenderer::computeTransition()
@@ -553,8 +551,8 @@ QVector3D GraphComponentRenderer::focusPosition() const
 {
     if(_viewData._focusNodeId.isNull())
         return _viewData._focusPosition;
-    else
-        return _graphModel->nodePositions().getScaledAndSmoothed(_viewData._focusNodeId);
+
+    return _graphModel->nodePositions().getScaledAndSmoothed(_viewData._focusNodeId);
 }
 
 bool GraphComponentRenderer::trackingCentreOfComponent() const

@@ -278,7 +278,8 @@ Attribute::Name Attribute::parseAttributeName(const QString& name)
 
     if(name.startsWith(sourceString))
         return {EdgeNodeType::Source, name.mid(sourceString.length())};
-    else if(name.startsWith(targetString))
+
+    if(name.startsWith(targetString))
         return {EdgeNodeType::Target, name.mid(targetString.length())};
 
     return {Attribute::EdgeNodeType::None, name};

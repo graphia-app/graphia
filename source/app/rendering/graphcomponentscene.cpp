@@ -484,7 +484,8 @@ void GraphComponentScene::onGraphChanged(const Graph* graph, bool changed)
 
                     return true;
                 }
-                else if(_beingRemoved)
+
+                if(_beingRemoved)
                 {
                     setComponentId(_defaultComponentId, true);
                     return true;

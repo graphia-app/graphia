@@ -58,14 +58,14 @@ private:
 
     void mouseDown(const QPoint &position);
     void mouseUp();
-    void mousePressEvent(QMouseEvent* e) final;
-    void mouseReleaseEvent(QMouseEvent* e) final;
-    void mouseMoveEvent(QMouseEvent* e) final;
-    void mouseDoubleClickEvent(QMouseEvent* e) final;
+    void mousePressEvent(QMouseEvent* mouseEvent) final;
+    void mouseReleaseEvent(QMouseEvent* mouseEvent) final;
+    void mouseMoveEvent(QMouseEvent* mouseEvent) final;
+    void mouseDoubleClickEvent(QMouseEvent* mouseEvent) final;
 
-    void wheelEvent(QWheelEvent* e) final;
+    void wheelEvent(QWheelEvent* wheelEvent) final;
 
-    void nativeGestureEvent(QNativeGestureEvent* e) override;
+    void nativeGestureEvent(QNativeGestureEvent* nativeEvent) override;
 
     virtual GraphComponentRenderer* rendererAtPosition(const QPoint& position) const = 0;
     virtual QPoint componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) const = 0;

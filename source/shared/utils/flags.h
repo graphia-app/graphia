@@ -11,7 +11,7 @@ private:
 
 public:
     Flags() = default;
-    Flags(Enum value) :
+    Flags(Enum value) : // NOLINT
         _value(value)
     {}
 
@@ -49,7 +49,7 @@ public:
 
     bool test(Enum value) const
     {
-        return static_cast<int>(_value) & static_cast<int>(value);
+        return (static_cast<int>(_value) & static_cast<int>(value)) != 0;
     }
 
     bool anyOf(Enum value) const { return test(value); }

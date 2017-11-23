@@ -108,10 +108,7 @@ bool BaseGenericPluginInstance::load(const QByteArray& data, int dataVersion,
 
     const auto& jsonUserNodeData = jsonObject["userNodeData"];
 
-    if(!_userNodeData.load(jsonUserNodeData, progressFn))
-        return false;
-
-    return true;
+    return _userNodeData.load(jsonUserNodeData, progressFn);
 }
 
 QString BaseGenericPluginInstance::selectedNodeNames() const

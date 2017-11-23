@@ -889,8 +889,8 @@ double CorrelationPlotItem::rangeSize()
 {
     if(_showColumnNames)
         return (columnAxisWidth() / (columnLabelSize() * _columnCount));
-    else
-        return 1.0;
+
+    return 1.0;
 }
 
 double CorrelationPlotItem::columnLabelSize()

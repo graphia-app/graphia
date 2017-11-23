@@ -57,7 +57,7 @@ class ComponentManager : public QObject, public GraphFilter
 
     Q_OBJECT
 public:
-    ComponentManager(Graph& graph,
+    explicit ComponentManager(Graph& graph,
                      const NodeConditionFn& nodeFilter = nullptr,
                      const EdgeConditionFn& edgeFilter = nullptr);
     ~ComponentManager() override;

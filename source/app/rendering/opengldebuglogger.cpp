@@ -44,7 +44,7 @@ OpenGLDebugLogger::~OpenGLDebugLogger()
 
 void OpenGLDebugLogger::onMessageLogged(const QOpenGLDebugMessage& message)
 {
-    if(!(message.severity() & _debugLevel))
+    if((message.severity() & _debugLevel) == 0)
         return;
 
     qDebug() << "OpenGL:" << message.message();

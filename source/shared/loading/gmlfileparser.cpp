@@ -31,8 +31,8 @@ template<typename It> bool parseGml(IMutableGraph &graph,
             return axe::make_result(i1 != i2 && std::strchr(" \t\n\r", *i1),
                                     i1 != i2 ? std::next(i1) : i1, i1);
         }
-        else
-            return axe::make_result(false, i2);
+
+        return axe::make_result(false, i2);
     });
 
     // If this is declared and initialised on the same line, the move constructor for

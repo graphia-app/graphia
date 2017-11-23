@@ -95,12 +95,12 @@ GraphComponentRenderer* GraphOverviewInteractor::rendererAtPosition(const QPoint
     return nullptr;
 }
 
-QPoint GraphOverviewInteractor::componentLocalCursorPosition(const ComponentId& componentId, const QPoint& pos) const
+QPoint GraphOverviewInteractor::componentLocalCursorPosition(const ComponentId& componentId, const QPoint& position) const
 {
     auto& componentLayout = _scene->componentLayout();
     auto rect = componentLayout[componentId].boundingBox();
 
-    QPoint transformedPos(pos.x() - rect.x(), pos.y() - rect.y());
+    QPoint transformedPos(position.x() - rect.x(), position.y() - rect.y());
     return transformedPos;
 }
 

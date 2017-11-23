@@ -67,10 +67,10 @@ struct SparseMatrixEntry
 struct MCLRowData
 {
     std::vector<float> values;
-    std::vector<char> valid;
+    std::vector<bool> valid;
     std::vector<size_t> indices;
     explicit MCLRowData(size_t columnCount) : values(columnCount, 0.0f),
-        valid(columnCount, 0), indices(columnCount, 0UL) {}
+        valid(columnCount, false), indices(columnCount, 0UL) {}
 };
 
 static void expandAndPruneRow(MatrixType &mclMatrix,
@@ -102,7 +102,7 @@ static void expandAndPruneRow(MatrixType &mclMatrix,
             if(!rowData.valid[relem->index()])
             {
                 rowData.values[relem->index()] = mult;
-                rowData.valid[relem->index()] = 1;
+                rowData.valid[relem->index()] = true;
                 // Position in the rowData.values vector
                 rowData.indices[nonzeros] = relem->index();
                 ++nonzeros;
@@ -212,7 +212,7 @@ static void expandAndPruneRow(MatrixType &mclMatrix,
                 if(std::abs(rowData.values[rowData.indices[i]]) <= minValueCutoff)
                 {
                     rowData.values[rowData.indices[i]] = 0.0f;
-                    rowData.valid[rowData.indices[i]] = 0.0f;
+                    rowData.valid[rowData.indices[i]] = false;
                 }
                 else
                 {
@@ -244,7 +244,7 @@ static void expandAndPruneRow(MatrixType &mclMatrix,
                     matrixStorage->emplace_back(index, columnId, rowData.values[index]);
                     rowData.values[index] = 0.0f;
                 }
-                rowData.valid[index] = 0.0f;
+                rowData.valid[index] = false;
             }
         }
         else
@@ -256,7 +256,7 @@ static void expandAndPruneRow(MatrixType &mclMatrix,
                     matrixStorage->emplace_back(j, columnId, rowData.values[j]);
                     rowData.values[j] = 0.0f;
                 }
-                rowData.valid[j] = 0.0f;
+                rowData.valid[j] = false;
             }
         }
     }
@@ -301,7 +301,7 @@ public:
         reference operator*() const { return _num; }
     };
     MatrixType& matrix;
-    ColumnsIterator(MatrixType& _matrix) : matrix(_matrix) {}
+    explicit ColumnsIterator(MatrixType& _matrix) : matrix(_matrix) {}
     iterator begin() { return iterator(0); }
     iterator end() { return iterator(matrix.columns()); }
 };

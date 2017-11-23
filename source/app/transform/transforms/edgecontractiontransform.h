@@ -10,7 +10,7 @@
 class EdgeContractionTransform : public GraphTransform
 {
 public:
-    EdgeContractionTransform(const GraphModel& graphModel) :
+    explicit EdgeContractionTransform(const GraphModel& graphModel) :
         _graphModel(&graphModel)
     {}
 

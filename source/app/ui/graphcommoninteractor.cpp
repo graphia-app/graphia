@@ -211,7 +211,7 @@ void GraphCommonInteractor::leftMouseDown()
 {
     _selecting = true;
 
-    if(modifiers() & Qt::ShiftModifier)
+    if((modifiers() & Qt::ShiftModifier) != 0)
         _frustumSelectStart = cursorPosition();
     else
         _frustumSelectStart = QPoint();
@@ -240,7 +240,7 @@ void GraphCommonInteractor::leftMouseUp()
         }
         else
         {
-            bool multiSelect = modifiers() & Qt::ShiftModifier;
+            bool multiSelect = (modifiers() & Qt::ShiftModifier) != 0;
 
             if(!_clickedNodeId.isNull())
             {
@@ -314,7 +314,7 @@ static QQuaternion mouseMoveToRotation(const QPoint& prev, const QPoint& cur,
 
 void GraphCommonInteractor::leftDrag()
 {
-    if(modifiers() & Qt::ShiftModifier)
+    if((modifiers() & Qt::ShiftModifier) != 0)
     {
         if(!_frustumSelecting)
         {

@@ -204,7 +204,7 @@ void LayoutThread::run()
             _paused = true;
             emit pausedChanged();
 
-            if(_debug)
+            if(_debug != 0)
             {
                 auto* reason = _pause ?               "manually" :
                                allLayoutsFinished() ? "because all layouts finished" :
@@ -220,7 +220,7 @@ void LayoutThread::run()
             _paused = false;
             emit pausedChanged();
 
-            if(_debug) qDebug() << "Layout resumed";
+            if(_debug != 0) qDebug() << "Layout resumed";
         }
 
         std::this_thread::yield();

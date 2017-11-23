@@ -13,7 +13,7 @@ public:
         std::unique_ptr<T>(std::make_unique<T>(std::forward<Args>(args)...))
     {}
 
-    explicit MovablePointer(MovablePointer&& other) noexcept : std::unique_ptr<T>(std::move(other)) {}
+    MovablePointer(MovablePointer&& other) noexcept : std::unique_ptr<T>(std::move(other)) {}
 
     MovablePointer(const MovablePointer& other) = delete;
     void operator=(const MovablePointer& other) = delete;

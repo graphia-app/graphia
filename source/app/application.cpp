@@ -243,10 +243,10 @@ void Application::loadPlugins()
                                      .arg(fileName, pluginLoader->errorString()), QMessageBox::Ok);
             }
 
-            if(plugin)
+            if(plugin != nullptr)
             {
                 auto* iplugin = qobject_cast<IPlugin*>(plugin);
-                if(iplugin)
+                if(iplugin != nullptr)
                 {
                     if(!_auth.pluginAllowed(iplugin->name()))
                     {

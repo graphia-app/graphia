@@ -144,11 +144,14 @@ private:
 
             if(_lhs.valueType() == ValueType::Float && _rhs.valueType() == ValueType::Float)
                 return comparisonFn(_lhs, &Attribute::valueOf<double, E>, _rhs, &Attribute::valueOf<double, E>);
-            else if(_lhs.valueType() == ValueType::Float && _rhs.valueType() == ValueType::Int)
+
+            if(_lhs.valueType() == ValueType::Float && _rhs.valueType() == ValueType::Int)
                 return comparisonFn(_lhs, &Attribute::valueOf<double, E>, _rhs, &Attribute::valueOf<int, E>);
-            else if(_lhs.valueType() == ValueType::Int && _rhs.valueType() == ValueType::Float)
+
+            if(_lhs.valueType() == ValueType::Int && _rhs.valueType() == ValueType::Float)
                 return comparisonFn(_lhs, &Attribute::valueOf<int, E>, _rhs, &Attribute::valueOf<double, E>);
-            else if(_lhs.valueType() == ValueType::Int && _rhs.valueType() == ValueType::Int)
+
+            if(_lhs.valueType() == ValueType::Int && _rhs.valueType() == ValueType::Int)
                 return comparisonFn(_lhs, &Attribute::valueOf<int, E>, _rhs, &Attribute::valueOf<int, E>);
 
             qFatal("Shouldn't get here");
@@ -452,7 +455,7 @@ private:
             {
                 const GraphModel* _graphModel;
 
-                Visitor(const GraphModel* graphModel) :
+                explicit Visitor(const GraphModel* graphModel) :
                     _graphModel(graphModel)
                 {}
 
@@ -490,7 +493,7 @@ private:
             {
                 const GraphModel* _graphModel;
 
-                Visitor(const GraphModel* graphModel) :
+                explicit Visitor(const GraphModel* graphModel) :
                     _graphModel(graphModel)
                 {}
 
@@ -511,11 +514,7 @@ private:
         {
             const Attribute* attribute = boost::get<Attribute>(&resolvedTerminalValue);
 
-            if(attribute != nullptr && !attribute->isValid())
-                return true; // Unknown attribute
-
-            // Not an attribute, or a valid attribute
-            return false;
+            return attribute != nullptr && !attribute->isValid();
         }
 
         ElementConditionFn<E> operator()(const GraphTransformConfig::TerminalCondition& terminalCondition) const
@@ -554,19 +553,22 @@ private:
                 AttributesOpVistor<E> visitor(lhsAttribute, rhsAttribute);
                 return boost::apply_visitor(visitor, terminalCondition._op);
             }
-            else if(!lhsAttribute.isValid() && !rhsAttribute.isValid())
+
+            if(!lhsAttribute.isValid() && !rhsAttribute.isValid())
             {
                 // Neither side is an attribute
                 ValuesOpVistor<E> visitor(terminalCondition._lhs, terminalCondition._rhs);
                 return boost::apply_visitor(visitor, terminalCondition._op);
             }
-            else if(lhsAttribute.isValid())
+
+            if(lhsAttribute.isValid())
             {
                 // Left hand side is an attribute
                 AttributeValueOpVistor<E> visitor(lhsAttribute, terminalCondition._rhs, false);
                 return boost::apply_visitor(visitor, terminalCondition._op);
             }
-            else if(rhsAttribute.isValid())
+
+            if(rhsAttribute.isValid())
             {
                 // Right hand side is an attribute
                 AttributeValueOpVistor<E> visitor(rhsAttribute, terminalCondition._lhs, true);

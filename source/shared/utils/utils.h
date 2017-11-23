@@ -12,7 +12,8 @@ namespace u
     {
         if(value < min)
             return min;
-        else if(value > max)
+
+        if(value > max)
             return max;
 
         return value;

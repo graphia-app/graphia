@@ -497,7 +497,7 @@ void MutableGraph::beginTransaction()
 
 void MutableGraph::endTransaction(bool graphChangeOccurred)
 {
-    _graphChangeOccurred = _graphChangeOccurred | graphChangeOccurred;
+    _graphChangeOccurred = _graphChangeOccurred || graphChangeOccurred;
 
     Q_ASSERT(_graphChangeDepth > 0);
     if(--_graphChangeDepth <= 0)

@@ -80,7 +80,7 @@ Graph::~Graph()
 
 NodeId Graph::firstNodeId() const
 {
-    return nodeIds().size() > 0 ? nodeIds().at(0) : NodeId();
+    return !nodeIds().empty() ? nodeIds().at(0) : NodeId();
 }
 
 bool Graph::containsNodeId(NodeId nodeId) const
@@ -90,7 +90,7 @@ bool Graph::containsNodeId(NodeId nodeId) const
 
 EdgeId Graph::firstEdgeId() const
 {
-    return edgeIds().size() > 0 ? edgeIds().at(0) : EdgeId();
+    return !edgeIds().empty() ? edgeIds().at(0) : EdgeId();
 }
 
 bool Graph::containsEdgeId(EdgeId edgeId) const
@@ -120,7 +120,7 @@ void Graph::enableComponentManagement()
         connect(_componentManager.get(), &ComponentManager::edgeAddedToComponent,       this, &Graph::edgeAddedToComponent,     Qt::DirectConnection);
         connect(_componentManager.get(), &ComponentManager::edgeRemovedFromComponent,   this, &Graph::edgeRemovedFromComponent, Qt::DirectConnection);
 
-        if(qEnvironmentVariableIntValue("COMPONENTS_DEBUG"))
+        if(qEnvironmentVariableIntValue("COMPONENTS_DEBUG") != 0)
             _componentManager->enableDebug();
     }
 }

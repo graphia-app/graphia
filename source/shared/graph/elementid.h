@@ -8,7 +8,7 @@ private:
     int _value;
 
 public:
-    ElementId(int value = NullValue) :
+    ElementId(int value = NullValue) : // NOLINT
         _value(value)
     {
         static_assert(sizeof(ElementId) == sizeof(_value), "ElementId should not be larger than an int");

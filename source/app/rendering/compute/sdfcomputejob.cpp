@@ -111,7 +111,7 @@ void SDFComputeJob::generateSDF()
     screenQuadVAO.bind();
 
     glEnable(GL_BLEND);
-    glDepthMask(false);
+    glDepthMask(GL_FALSE);
 
     // Set render size to texture size only
     glViewport(0, 0, renderWidth, renderHeight);

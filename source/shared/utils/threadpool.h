@@ -34,7 +34,7 @@ private:
     std::atomic<int> _activeThreads;
 
 public:
-    ThreadPool(const QString& threadNamePrefix = QStringLiteral("Worker"),
+    explicit ThreadPool(const QString& threadNamePrefix = QStringLiteral("Worker"),
                int numThreads = std::thread::hardware_concurrency());
     ~ThreadPool();
 

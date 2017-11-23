@@ -81,7 +81,8 @@ public:
     {
         if(nodeId == _sourceId)
             return _targetId;
-        else if(nodeId == _targetId)
+
+        if(nodeId == _targetId)
             return _sourceId;
 
         return NodeId();

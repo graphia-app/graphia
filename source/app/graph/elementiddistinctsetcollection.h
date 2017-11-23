@@ -455,10 +455,11 @@ private:
     {
         if(index >= _numSets)
             return nullptr;
-        else if(index < _setsSmall.size())
+
+        if(index < _setsSmall.size())
             return _setsSmall.at(index);
-        else
-            return _setsBig.at(index - _setsSmall.size());
+
+        return _setsBig.at(index - _setsSmall.size());
     }
 
 public:

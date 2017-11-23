@@ -22,7 +22,8 @@ static QVector3D normalized(const QVector3D& v)
     float lengthSq = v.lengthSquared();
     if(qFuzzyIsNull(lengthSq - 1.0f))
         return v;
-    else if(!qIsNull(lengthSq))
+
+    if(!qIsNull(lengthSq))
         return v / std::sqrt(lengthSq);
 
     return QVector3D();
