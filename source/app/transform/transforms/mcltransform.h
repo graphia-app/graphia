@@ -2,7 +2,6 @@
 #define MCLTRANSFORM_H
 
 #include "transform/graphtransform.h"
-#include "graph/graph.h"
 #include "shared/utils/flags.h"
 
 class MCLTransform : public GraphTransform

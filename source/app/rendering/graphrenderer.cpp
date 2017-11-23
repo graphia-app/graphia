@@ -5,7 +5,9 @@
 #include "graphoverviewscene.h"
 #include "compute/sdfcomputejob.h"
 #include "shared/utils/preferences.h"
+
 #include "graph/graphmodel.h"
+
 #include "ui/graphcomponentinteractor.h"
 #include "ui/graphoverviewinteractor.h"
 #include "ui/document.h"

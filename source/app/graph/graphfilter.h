@@ -1,7 +1,7 @@
 #ifndef GRAPHFILTER_H
 #define GRAPHFILTER_H
 
-#include "graph.h"
+#include "shared/graph/elementid_containers.h"
 
 #include <vector>
 #include <functional>

@@ -5,7 +5,6 @@
 
 #include "shared/plugins/iplugin.h"
 #include "rendering/compute/gpucomputethread.h"
-#include "graph/graph.h"
 #include "loading/parserthread.h"
 #include "commands/commandmanager.h"
 #include "ui/selectionmanager.h"
@@ -30,6 +29,7 @@
 #include <mutex>
 #include <atomic>
 
+class Graph;
 class Application;
 class GraphQuickItem;
 class GraphModel;

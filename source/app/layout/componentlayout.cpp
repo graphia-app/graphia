@@ -1,5 +1,7 @@
 #include "componentlayout.h"
 
+#include "graph/graph.h"
+
 void ComponentLayout::execute(const Graph& graph, const std::vector<ComponentId>& componentIds,
                               ComponentLayoutData& componentLayoutData)
 {

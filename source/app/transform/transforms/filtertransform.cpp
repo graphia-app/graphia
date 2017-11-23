@@ -3,6 +3,7 @@
 #include "attributes/conditionfncreator.h"
 
 #include "graph/graphmodel.h"
+#include "graph/graphcomponent.h"
 #include "graph/componentmanager.h"
 
 #include "shared/utils/utils.h"

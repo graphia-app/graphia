@@ -1,7 +1,6 @@
 #ifndef GRAPHMODEL_H
 #define GRAPHMODEL_H
 
-#include "graph/graph.h"
 #include "graph/mutablegraph.h"
 #include "shared/graph/grapharray.h"
 
@@ -26,6 +25,7 @@
 #include <vector>
 #include <atomic>
 
+class Graph;
 class SelectionManager;
 class SearchManager;
 class ICommand;

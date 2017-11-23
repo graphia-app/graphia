@@ -11,6 +11,7 @@
 #include "primitives/sphere.h"
 #include "primitives/rectangle.h"
 
+#include "graph/graph.h"
 #include "shared/graph/grapharray.h"
 #include "graph/qmlelementid.h"
 
@@ -344,7 +345,7 @@ private:
     PerformanceCounter _performanceCounter;
 
     template<typename Target>
-    void initialiseFromGraph(const Graph *graph, Target& target)
+    void initialiseFromGraph(const Graph* graph, Target& target)
     {
         for(auto componentId : graph->componentIds())
             target.onComponentAdded(graph, componentId, false);

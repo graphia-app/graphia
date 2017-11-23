@@ -4,6 +4,9 @@
 #include "shared/utils/container.h"
 #include "shared/graph/elementid_debug.h"
 
+#include "graph.h"
+#include "graphcomponent.h"
+
 #include <map>
 #include <queue>
 

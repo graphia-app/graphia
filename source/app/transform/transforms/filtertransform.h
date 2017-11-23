@@ -2,7 +2,6 @@
 #define FILTERTRANSFORM_H
 
 #include "transform/graphtransform.h"
-#include "graph/graph.h"
 #include "attributes/attribute.h"
 
 #include <vector>

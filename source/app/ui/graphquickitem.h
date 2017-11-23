@@ -1,7 +1,6 @@
 #ifndef GRAPHQUICKITEM_H
 #define GRAPHQUICKITEM_H
 
-#include "graph/graph.h"
 #include "graph/qmlelementid.h"
 #include "rendering/compute/gpucomputethread.h"
 

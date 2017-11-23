@@ -4,7 +4,6 @@
 #include "scene.h"
 #include "transition.h"
 
-#include "graph/graph.h"
 #include "graph/componentmanager.h"
 #include "shared/graph/grapharray.h"
 
@@ -17,6 +16,7 @@
 #include <QRect>
 #include <QPointF>
 
+class Graph;
 class GraphModel;
 class CommandManager;
 class GraphRenderer;

@@ -32,6 +32,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "circlepackcomponentlayout.h"
 
+#include "graph/graph.h"
 #include "graph/componentmanager.h"
 
 #include "shared/utils/preferences.h"

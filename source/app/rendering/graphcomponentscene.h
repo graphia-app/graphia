@@ -3,11 +3,11 @@
 
 #include "scene.h"
 
-#include "graph/graph.h"
 #include "graph/componentmanager.h"
 #include "shared/graph/grapharray.h"
 #include "transition.h"
 
+class Graph;
 class GraphRenderer;
 class GraphComponentRenderer;
 

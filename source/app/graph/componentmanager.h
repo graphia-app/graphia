@@ -1,9 +1,8 @@
 #ifndef COMPONENTMANAGER_H
 #define COMPONENTMANAGER_H
 
-#include "graph.h"
-#include "graphcomponent.h"
 #include "shared/graph/grapharray.h"
+
 #include "graphfilter.h"
 
 #include <map>
@@ -12,6 +11,13 @@
 #include <vector>
 #include <functional>
 #include <algorithm>
+#include <memory>
+
+#include <QObject>
+#include <QtGlobal>
+
+class Graph;
+class GraphComponent;
 
 class ComponentSplitSet
 {

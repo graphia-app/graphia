@@ -3,7 +3,7 @@
 
 #include "interactor.h"
 
-#include "graph/graph.h"
+#include "shared/graph/elementid_containers.h"
 
 #include <QPoint>
 #include <QNativeGestureEvent>
