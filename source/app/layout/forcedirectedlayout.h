@@ -2,7 +2,6 @@
 #define FORCEDIRECTEDLAYOUT_H
 
 #include "layout.h"
-#include "graph/graphmodel.h"
 #include "graph/componentmanager.h"
 #include "shared/utils/circularbuffer.h"
 
@@ -73,11 +72,7 @@ public:
         _layoutSettings.registerSetting("AttractiveForce", QObject::tr("Attractive Force"), 1.0f, 100.0f, 1.0f);
     }
 
-    std::unique_ptr<Layout> create(ComponentId componentId, NodePositions& nodePositions) const override
-    {
-        auto component = _graphModel->graph().componentById(componentId);
-        return std::make_unique<ForceDirectedLayout>(*component, nodePositions, &_layoutSettings);
-    }
+    std::unique_ptr<Layout> create(ComponentId componentId, NodePositions& nodePositions) const override;
 };
 
 #endif // FORCEDIRECTEDLAYOUT_H

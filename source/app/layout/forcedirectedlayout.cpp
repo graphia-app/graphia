@@ -2,6 +2,8 @@
 #include "fastinitiallayout.h"
 #include "barneshuttree.h"
 
+#include "graph/graphmodel.h"
+
 #include "shared/utils/threadpool.h"
 #include "shared/utils/preferences.h"
 
@@ -280,4 +282,10 @@ void ForceDirectedLayout::oscillateChangeDetection()
             _unstableIterationCount = 0;
         }
     }
+}
+
+std::unique_ptr<Layout> ForceDirectedLayoutFactory::create(ComponentId componentId, NodePositions& nodePositions) const
+{
+    auto component = _graphModel->graph().componentById(componentId);
+    return std::make_unique<ForceDirectedLayout>(*component, nodePositions, &_layoutSettings);
 }
