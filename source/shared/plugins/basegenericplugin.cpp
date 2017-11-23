@@ -32,9 +32,11 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
 {
     if(urlTypeName == QLatin1String("GML"))
         return std::make_unique<GmlFileParser>(&_userNodeData);
-    else if(urlTypeName == QLatin1String("PairwiseTXT"))
+
+    if(urlTypeName == QLatin1String("PairwiseTXT"))
         return std::make_unique<PairwiseTxtFileParser>(this, &_userNodeData);
-    else if(urlTypeName == QLatin1String("GraphML"))
+
+    if(urlTypeName == QLatin1String("GraphML"))
         return std::make_unique<GraphMLParser>(&_userNodeData);
 
     return nullptr;

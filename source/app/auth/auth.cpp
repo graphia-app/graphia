@@ -41,7 +41,7 @@ static C::RSA::PublicKey loadPublicKey()
     auto byteArray = file.readAll();
     file.close();
 
-    C::ArraySource arraySource(reinterpret_cast<const byte*>(byteArray.constData()),
+    C::ArraySource arraySource(reinterpret_cast<const byte*>(byteArray.constData()), // NOLINT
                                byteArray.size(), true);
 
     C::RSA::PublicKey publicKey;
@@ -144,9 +144,9 @@ static std::string rsaEncryptString(const std::string& string, const C::RSA::Pub
 
 static std::string aesKeyAsJsonString(const Auth::AesKey& key)
 {
-    auto keyBaseHex = QByteArray(reinterpret_cast<const char*>(key._aes),
+    auto keyBaseHex = QByteArray(reinterpret_cast<const char*>(key._aes), // NOLINT
                                  sizeof(key._aes)).toHex();
-    auto ivBaseHex = QByteArray(reinterpret_cast<const char*>(key._iv),
+    auto ivBaseHex = QByteArray(reinterpret_cast<const char*>(key._iv), // NOLINT
                                 sizeof(key._iv)).toHex();
 
     auto keyJsonString = jsonObjectAsString(
@@ -200,7 +200,7 @@ static std::string aesDecryptBytes(const std::vector<byte>& bytes, const Auth::A
         sizeof(aesKey._aes), static_cast<const byte*>(aesKey._iv));
     decryption.ProcessData(outBytes.data(), bytes.data(), bytes.size());
 
-    return std::string(reinterpret_cast<const char*>(outBytes.data()), outBytes.size());
+    return std::string(reinterpret_cast<const char*>(outBytes.data()), outBytes.size()); // NOLINT
 }
 
 static std::string aesDecryptString(const std::string& string, const Auth::AesKey& aesKey)
@@ -209,14 +209,14 @@ static std::string aesDecryptString(const std::string& string, const Auth::AesKe
 
     C::CFB_Mode<C::AES>::Decryption decryption(static_cast<const byte*>(aesKey._aes),
         sizeof(aesKey._aes), static_cast<const byte*>(aesKey._iv));
-    decryption.ProcessData(outBytes.data(), reinterpret_cast<const byte*>(string.data()), string.size());
+    decryption.ProcessData(outBytes.data(), reinterpret_cast<const byte*>(string.data()), string.size()); // NOLINT
 
-    return std::string(reinterpret_cast<const char*>(outBytes.data()), outBytes.size());
+    return std::string(reinterpret_cast<const char*>(outBytes.data()), outBytes.size()); // NOLINT
 }
 
 static std::string aesEncryptString(const std::string& string, const Auth::AesKey& aesKey)
 {
-    auto inBytes = reinterpret_cast<const byte*>(string.data());
+    auto inBytes = reinterpret_cast<const byte*>(string.data()); // NOLINT
     auto bytesSize = string.size();
 
     std::vector<byte> outBytes(bytesSize);

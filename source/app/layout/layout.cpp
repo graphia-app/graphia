@@ -233,7 +233,7 @@ void LayoutThread::run()
     _paused = true;
     _waitForPause.notify_all();
 
-    if(_debug) qDebug() << "Layout stopped";
+    if(_debug != 0) qDebug() << "Layout stopped";
 }
 
 

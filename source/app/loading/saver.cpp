@@ -49,7 +49,7 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, const
         const int ChunkSize = 1 << 14;
         unsigned char inBuffer[ChunkSize];
 
-        auto numBytes = input.readRawData(reinterpret_cast<char*>(inBuffer), ChunkSize);
+        auto numBytes = input.readRawData(reinterpret_cast<char*>(inBuffer), ChunkSize); // NOLINT
 
         bytePosition += numBytes;
         progressFn((bytePosition * 100) / totalBytes);
@@ -69,7 +69,7 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, const
                 return false;
 
             numBytes = ChunkSize - zstream.avail_out;
-            if(output.writeRawData(reinterpret_cast<const char*>(outBuffer), numBytes) != numBytes)
+            if(output.writeRawData(reinterpret_cast<const char*>(outBuffer), numBytes) != numBytes) // NOLINT
                 return false;
 
         } while(zstream.avail_out == 0);

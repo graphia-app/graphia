@@ -25,7 +25,7 @@ void u::setCurrentThreadName(const QString& name)
 QString u::currentThreadName()
 {
     char threadName[16] = {0};
-    prctl(PR_GET_NAME, reinterpret_cast<uint64_t>(threadName));
+    prctl(PR_GET_NAME, reinterpret_cast<uint64_t>(threadName)); // NOLINT
 
     return QString(threadName);
 }
