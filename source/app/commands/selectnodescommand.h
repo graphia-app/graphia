@@ -95,7 +95,7 @@ auto makeSelectNodesCommand(SelectionManager* selectionManager, C nodeIds, bool 
 template<typename T>
 auto makeSelectNodeCommand(SelectionManager* selectionManager, T nodeId, bool clearSelectionFirst = true)
 {
-    std::array<T, 1> nodeIds{{nodeId}};
+    std::vector<T> nodeIds{{nodeId}};
     return makeSelectNodesCommand(selectionManager, nodeIds, clearSelectionFirst);
 }
 
