@@ -26,7 +26,7 @@ class SearchManager;
 class ICommand;
 class IPlugin;
 
-class ElementVisual;
+struct ElementVisual;
 
 class TransformInfo;
 class VisualisationInfo;

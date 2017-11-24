@@ -49,7 +49,7 @@ class GraphModelImpl
     friend class GraphModel;
 
 public:
-    GraphModelImpl(GraphModel& graphModel) :
+    explicit GraphModelImpl(GraphModel& graphModel) :
         _graph(),
         _transformedGraph(graphModel, _graph),
         _nodePositions(_graph),
