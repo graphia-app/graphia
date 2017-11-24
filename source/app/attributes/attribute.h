@@ -3,7 +3,6 @@
 
 #include "shared/graph/elementid.h"
 #include "shared/graph/elementtype.h"
-#include "graph/elementiddistinctsetcollection.h"
 #include "shared/attributes/iattribute.h"
 #include "shared/graph/igraphcomponent.h"
 #include "shared/utils/flags.h"
@@ -17,7 +16,6 @@
 #include <map>
 
 #include <QString>
-#include <QRegularExpression>
 
 class Attribute;
 

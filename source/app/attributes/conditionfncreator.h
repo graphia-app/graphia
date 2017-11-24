@@ -17,6 +17,8 @@
 
 #include <algorithm>
 
+#include <QRegularExpression>
+
 class CreateConditionFnFor
 {
 private:
