@@ -2,6 +2,7 @@
 #include "shared/utils/thread.h"
 #include "shared/utils/container.h"
 
+#include "graph/graph.h"
 #include "graph/graphmodel.h"
 #include "graph/componentmanager.h"
 

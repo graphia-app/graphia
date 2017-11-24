@@ -3,6 +3,8 @@
 #include "application.h"
 #include "graph/graphmodel.h"
 
+#include "transform/graphtransform.h"
+
 AvailableTransformsModel::AvailableTransformsModel(const GraphModel& graphModel,
                                                    QObject* parent) :
     QAbstractListModel(parent),

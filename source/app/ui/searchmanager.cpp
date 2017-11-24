@@ -1,5 +1,6 @@
 #include "searchmanager.h"
 
+#include "graph/graph.h"
 #include "graph/graphmodel.h"
 #include "attributes/conditionfncreator.h"
 

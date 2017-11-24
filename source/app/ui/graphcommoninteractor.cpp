@@ -17,6 +17,8 @@
 
 #include "layout/collision.h"
 
+#include "ui/visualisations/elementvisual.h"
+
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QtMath>

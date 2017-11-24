@@ -5,7 +5,10 @@
 
 #include "shared/utils/scope_exit.h"
 
+#include "graph/graph.h"
 #include "graph/graphmodel.h"
+
+#include "layout/nodepositions.h"
 
 #include "ui/graphquickitem.h"
 

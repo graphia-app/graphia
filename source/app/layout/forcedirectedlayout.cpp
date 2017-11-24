@@ -2,6 +2,7 @@
 #include "fastinitiallayout.h"
 #include "barneshuttree.h"
 
+#include "graph/graph.h"
 #include "graph/graphmodel.h"
 
 #include "shared/utils/threadpool.h"

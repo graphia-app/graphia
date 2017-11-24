@@ -2,8 +2,10 @@
 #include "graphrenderer.h"
 #include "graphcomponentrenderer.h"
 
+#include "graph/graph.h"
 #include "graph/graphmodel.h"
 
+#include "layout/nodepositions.h"
 #include "layout/powerof2gridcomponentlayout.h"
 #include "layout/circlepackcomponentlayout.h"
 

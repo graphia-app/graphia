@@ -14,6 +14,8 @@
 #include "ui/document.h"
 #include "ui/graphquickitem.h"
 #include "ui/selectionmanager.h"
+#include "ui/visualisations/elementvisual.h"
+
 #include "shadertools.h"
 
 #include <QObject>

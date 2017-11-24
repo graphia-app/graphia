@@ -5,6 +5,7 @@
 #include "shared/utils/iterator_range.h"
 #include "shared/utils/string.h"
 
+#include "graph/mutablegraph.h"
 #include "graph/graphmodel.h"
 
 #include "ui/document.h"

@@ -5,7 +5,10 @@
 
 #include "shared/graph/elementid.h"
 #include "shared/graph/igraphcomponent.h"
+#include "shared/graph/elementid_containers.h"
+
 #include "graph/graphmodel.h"
+
 #include "transform/graphtransformconfig.h"
 #include "transform/graphtransformconfigparser.h"
 #include "attribute.h"

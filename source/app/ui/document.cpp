@@ -7,6 +7,7 @@
 #include "shared/utils/flags.h"
 #include "shared/utils/color.h"
 
+#include "graph/mutablegraph.h"
 #include "graph/graphmodel.h"
 
 #include "loading/parserthread.h"
@@ -22,7 +23,9 @@
 #include "commands/applyvisualisationscommand.h"
 #include "commands/selectnodescommand.h"
 
+#include "transform/graphtransform.h"
 #include "transform/graphtransformconfigparser.h"
+#include "ui/visualisations/visualisationinfo.h"
 #include "ui/visualisations/visualisationconfigparser.h"
 
 #include "searchmanager.h"

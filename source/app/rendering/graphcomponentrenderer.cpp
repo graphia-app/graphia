@@ -3,8 +3,10 @@
 
 #include "camera.h"
 
+#include "graph/graph.h"
 #include "graph/graphmodel.h"
 #include "graph/componentmanager.h"
+
 #include "layout/layout.h"
 #include "layout/collision.h"
 
@@ -14,6 +16,7 @@
 
 #include "ui/graphquickitem.h"
 #include "ui/selectionmanager.h"
+#include "ui/visualisations/elementvisual.h"
 
 #include <QObject>
 

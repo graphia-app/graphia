@@ -1,6 +1,8 @@
 #include "graphmodel.h"
 #include "componentmanager.h"
 
+#include "layout/nodepositions.h"
+
 #include "ui/selectionmanager.h"
 #include "ui/searchmanager.h"
 

@@ -1,5 +1,6 @@
 #include "graphquickitem.h"
 
+#include "graph/graph.h"
 #include "graph/graphmodel.h"
 
 #include "rendering/graphrenderer.h"

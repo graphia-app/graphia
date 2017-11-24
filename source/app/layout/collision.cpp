@@ -1,6 +1,8 @@
 #include "collision.h"
 
+#include "graph/graph.h"
 #include "graph/graphmodel.h"
+#include "ui/visualisations/elementvisual.h"
 
 #include "maths/ray.h"
 #include "maths/plane.h"

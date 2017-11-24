@@ -7,6 +7,7 @@
 #include "rendering/graphrenderer.h"
 #include "rendering/graphoverviewscene.h"
 
+#include "graph/graph.h"
 #include "graph/graphmodel.h"
 
 #include <QMouseEvent>
