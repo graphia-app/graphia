@@ -58,7 +58,7 @@ private:
     {
         bool selectionWillChange = fn();
 
-        if(selectionWillChange && !signalsSuppressed())
+        if(!signalsSuppressed() && selectionWillChange)
             emit selectionChanged(this);
 
         return selectionWillChange;
