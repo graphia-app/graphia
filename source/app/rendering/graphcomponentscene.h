@@ -11,12 +11,16 @@ class Graph;
 class GraphRenderer;
 class GraphComponentRenderer;
 
+template<typename Target>
+void initialiseFromGraph(const Graph*, Target&);
+
 class GraphComponentScene :
         public Scene
 {
     Q_OBJECT
 
     friend class GraphRenderer;
+    friend void initialiseFromGraph<GraphComponentScene>(const Graph*, GraphComponentScene&);
 
 public:
     explicit GraphComponentScene(GraphRenderer* graphRenderer);

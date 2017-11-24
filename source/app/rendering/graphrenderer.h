@@ -11,7 +11,6 @@
 #include "primitives/sphere.h"
 #include "primitives/rectangle.h"
 
-#include "graph/graph.h"
 #include "shared/graph/grapharray.h"
 #include "graph/qmlelementid.h"
 
@@ -38,6 +37,7 @@
 #include <QPixmap>
 #include <QPainter>
 
+class Graph;
 class GraphQuickItem;
 class GraphModel;
 class CommandManager;
@@ -158,6 +158,9 @@ DEFINE_QML_ENUM(Q_GADGET, TextState,
 DEFINE_QML_ENUM(Q_GADGET, EdgeVisualType,
                 Cylinder, Arrow);
 
+template<typename Target>
+void initialiseFromGraph(const Graph*, Target&);
+
 class GraphRenderer :
         public QObject,
         public OpenGLFunctions,
@@ -166,6 +169,7 @@ class GraphRenderer :
     Q_OBJECT
 
     friend class GraphComponentRenderer;
+    friend void initialiseFromGraph<GraphRenderer>(const Graph*, GraphRenderer&);
 
 public:
     GraphRenderer(GraphModel* graphModel,
@@ -343,15 +347,6 @@ private:
     Transition _transition;
 
     PerformanceCounter _performanceCounter;
-
-    template<typename Target>
-    void initialiseFromGraph(const Graph* graph, Target& target)
-    {
-        for(auto componentId : graph->componentIds())
-            target.onComponentAdded(graph, componentId, false);
-
-        target.onGraphChanged(graph, true);
-    }
 
     void prepareSDFTextures();
     void prepareSelectionMarkerVAO();

@@ -6,6 +6,7 @@
 #include "compute/sdfcomputejob.h"
 #include "shared/utils/preferences.h"
 
+#include "graph/graph.h"
 #include "graph/graphmodel.h"
 
 #include "ui/graphcomponentinteractor.h"
@@ -37,6 +38,15 @@ void setupTexture(T t, GLuint& texture, int width, int height, GLint format)
     t->glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, GraphRenderer::NUM_MULTISAMPLES, format, width, height, GL_FALSE);
     t->glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
     t->glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+}
+
+template<typename Target>
+void initialiseFromGraph(const Graph* graph, Target& target)
+{
+    for(auto componentId : graph->componentIds())
+        target.onComponentAdded(graph, componentId, false);
+
+    target.onGraphChanged(graph, true);
 }
 
 GPUGraphData::GPUGraphData()

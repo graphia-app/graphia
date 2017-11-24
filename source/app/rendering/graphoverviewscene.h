@@ -21,12 +21,16 @@ class GraphModel;
 class CommandManager;
 class GraphRenderer;
 
+template<typename Target>
+void initialiseFromGraph(const Graph*, Target&);
+
 class GraphOverviewScene :
         public Scene
 {
     Q_OBJECT
 
     friend class GraphRenderer;
+    friend void initialiseFromGraph<GraphOverviewScene>(const Graph*, GraphOverviewScene&);
 
 public:
     explicit GraphOverviewScene(CommandManager* commandManager,
