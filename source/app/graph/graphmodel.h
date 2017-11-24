@@ -1,89 +1,77 @@
 #ifndef GRAPHMODEL_H
 #define GRAPHMODEL_H
 
-#include "graph/mutablegraph.h"
 #include "shared/graph/grapharray.h"
-
-#include "transform/transformedgraph.h"
-#include "transform/transforminfo.h"
 #include "attributes/attribute.h"
-
-#include "shared/ui/visualisations/ielementvisual.h"
-#include "ui/visualisations/visualisationchannel.h"
-#include "ui/visualisations/visualisationinfo.h"
-
-#include "layout/nodepositions.h"
 
 #include "shared/graph/igraphmodel.h"
 
 #include <QString>
 #include <QStringList>
+#include <QVariantMap>
 
 #include <memory>
-#include <utility>
 #include <map>
 #include <vector>
 #include <atomic>
 
+class GraphModelImpl;
 class Graph;
+class MutableGraph;
+class NodePositions;
+
 class SelectionManager;
 class SearchManager;
+
 class ICommand;
 class IPlugin;
 
-using NodeVisuals = NodeArray<ElementVisual>;
-using EdgeVisuals = EdgeArray<ElementVisual>;
+class ElementVisual;
+
+class TransformInfo;
+class VisualisationInfo;
+
+class GraphTransformFactory;
 
 class GraphModel : public QObject, public IGraphModel
 {
     Q_OBJECT
 public:
     GraphModel(QString name, IPlugin* plugin);
+    ~GraphModel() override;
 
 private:
-    MutableGraph _graph;
-    TransformedGraph _transformedGraph;
-    TransformInfosMap _transformInfos;
-    NodePositions _nodePositions;
-
-    NodeVisuals _nodeVisuals;
-    EdgeVisuals _edgeVisuals;
-    NodeVisuals _mappedNodeVisuals;
-    EdgeVisuals _mappedEdgeVisuals;
-    VisualisationInfosMap _visualisationInfos;
+    std::unique_ptr<GraphModelImpl> _;
 
     // While loading there may be lots of initial changes, and
     // we don't want to do many visual updates, so disable them
     bool _visualUpdatesEnabled = false;
 
     std::atomic_bool _transformedGraphIsChanging;
-
-    NodeArray<QString> _nodeNames;
-
     QString _name;
     IPlugin* _plugin;
-
-    std::map<QString, Attribute> _attributes;
-    std::vector<QString> _previousDynamicAttributeNames;
-    std::map<QString, std::unique_ptr<GraphTransformFactory>> _graphTransformFactories;
-
-    std::map<QString, std::unique_ptr<VisualisationChannel>> _visualisationChannels;
 
     void removeDynamicAttributes();
     QString normalisedAttributeName(QString attribute) const;
 
+    IMutableGraph& mutableGraphImpl() override;
+    const IGraph& graphImpl() const override;
+
+    const IElementVisual& nodeVisualImpl(NodeId nodeId) const override;
+    const IElementVisual& edgeVisualImpl(EdgeId edgeId) const override;
+
 public:
-    MutableGraph& mutableGraph() override { return _graph; }
-    const Graph& graph() const override { return _transformedGraph; }
-    NodePositions& nodePositions() { return _nodePositions; }
-    const NodePositions& nodePositions() const { return _nodePositions; }
+    MutableGraph& mutableGraph();
+    const Graph& graph() const;
+    const ElementVisual& nodeVisual(NodeId nodeId) const;
+    const ElementVisual& edgeVisual(EdgeId edgeId) const;
 
-    const ElementVisual& nodeVisual(NodeId nodeId) const override { return _nodeVisuals.at(nodeId); }
-    const ElementVisual& edgeVisual(EdgeId edgeId) const override { return _edgeVisuals.at(edgeId); }
+    NodePositions& nodePositions();
+    const NodePositions& nodePositions() const;
 
-    const NodeArray<QString>& nodeNames() const { return _nodeNames; }
+    const NodeArray<QString>& nodeNames() const;
 
-    QString nodeName(NodeId nodeId) const override { return _nodeNames[nodeId]; }
+    QString nodeName(NodeId nodeId) const override;
     void setNodeName(NodeId nodeId, const QString& name) override;
 
     const QString& name() const { return _name; }

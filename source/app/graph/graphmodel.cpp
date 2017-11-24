@@ -1,6 +1,9 @@
 #include "graphmodel.h"
 #include "componentmanager.h"
 
+#include "graph/mutablegraph.h"
+#include "shared/graph/grapharray.h"
+
 #include "layout/nodepositions.h"
 
 #include "ui/selectionmanager.h"
@@ -8,6 +11,8 @@
 
 #include "attributes/attribute.h"
 
+#include "transform/transformedgraph.h"
+#include "transform/transforminfo.h"
 #include "transform/transforms/filtertransform.h"
 #include "transform/transforms/edgecontractiontransform.h"
 #include "transform/transforms/mcltransform.h"
@@ -20,6 +25,8 @@
 #include "ui/visualisations/textvisualisationchannel.h"
 #include "ui/visualisations/visualisationconfigparser.h"
 #include "ui/visualisations/visualisationbuilder.h"
+#include "ui/visualisations/visualisationinfo.h"
+#include "ui/visualisations/elementvisual.h"
 
 #include "shared/plugins/iplugin.h"
 #include "shared/commands/icommand.h"
@@ -34,57 +41,90 @@
 
 #include <utility>
 
+using NodeVisuals = NodeArray<ElementVisual>;
+using EdgeVisuals = EdgeArray<ElementVisual>;
+
+class GraphModelImpl
+{
+    friend class GraphModel;
+
+public:
+    GraphModelImpl(GraphModel& graphModel) :
+        _graph(),
+        _transformedGraph(graphModel, _graph),
+        _nodePositions(_graph),
+        _nodeVisuals(_graph),
+        _edgeVisuals(_graph),
+        _mappedNodeVisuals(_graph),
+        _mappedEdgeVisuals(_graph),
+        _nodeNames(_graph)
+    {}
+
+private:
+    MutableGraph _graph;
+    TransformedGraph _transformedGraph;
+    TransformInfosMap _transformInfos;
+    NodePositions _nodePositions;
+
+    NodeVisuals _nodeVisuals;
+    EdgeVisuals _edgeVisuals;
+    NodeVisuals _mappedNodeVisuals;
+    EdgeVisuals _mappedEdgeVisuals;
+    VisualisationInfosMap _visualisationInfos;
+
+    NodeArray<QString> _nodeNames;
+
+    std::map<QString, Attribute> _attributes;
+    std::vector<QString> _previousDynamicAttributeNames;
+    std::map<QString, std::unique_ptr<GraphTransformFactory>> _graphTransformFactories;
+
+    std::map<QString, std::unique_ptr<VisualisationChannel>> _visualisationChannels;
+};
+
 GraphModel::GraphModel(QString name, IPlugin* plugin) :
-    _graph(),
-    _transformedGraph(*this, _graph),
-    _nodePositions(_graph),
-    _nodeVisuals(_graph),
-    _edgeVisuals(_graph),
-    _mappedNodeVisuals(_graph),
-    _mappedEdgeVisuals(_graph),
+    _(std::make_unique<GraphModelImpl>(*this)),
     _transformedGraphIsChanging(false),
-    _nodeNames(_graph),
     _name(std::move(name)),
     _plugin(plugin)
 {
-    connect(&_transformedGraph, &Graph::nodeRemoved, [this](const Graph*, NodeId nodeId)
+    connect(&_->_transformedGraph, &Graph::nodeRemoved, [this](const Graph*, NodeId nodeId)
     {
-       _nodeVisuals[nodeId]._state = VisualFlags::None;
+       _->_nodeVisuals[nodeId]._state = VisualFlags::None;
     });
-    connect(&_transformedGraph, &Graph::edgeRemoved, [this](const Graph*, EdgeId edgeId)
+    connect(&_->_transformedGraph, &Graph::edgeRemoved, [this](const Graph*, EdgeId edgeId)
     {
-       _edgeVisuals[edgeId]._state = VisualFlags::None;
+       _->_edgeVisuals[edgeId]._state = VisualFlags::None;
     });
 
-    connect(&_graph, &Graph::graphChanged, this, &GraphModel::onMutableGraphChanged, Qt::DirectConnection);
+    connect(&_->_graph, &Graph::graphChanged, this, &GraphModel::onMutableGraphChanged, Qt::DirectConnection);
 
-    connect(&_transformedGraph, &Graph::graphWillChange, this, &GraphModel::onTransformedGraphWillChange, Qt::DirectConnection);
-    connect(&_transformedGraph, &Graph::graphChanged, this, &GraphModel::onTransformedGraphChanged, Qt::DirectConnection);
+    connect(&_->_transformedGraph, &Graph::graphWillChange, this, &GraphModel::onTransformedGraphWillChange, Qt::DirectConnection);
+    connect(&_->_transformedGraph, &Graph::graphChanged, this, &GraphModel::onTransformedGraphChanged, Qt::DirectConnection);
 
     connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphModel::onPreferenceChanged);
 
     GraphModel::createAttribute(tr("Node Degree"))
-        .setIntValueFn([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).degree(); })
+        .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).degree(); })
         .intRange().setMin(0)
         .setDescription(tr("A node's degree is its number of incident edges."));
 
     GraphModel::createAttribute(tr("Node In Degree"))
-        .setIntValueFn([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).inDegree(); })
+        .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).inDegree(); })
         .intRange().setMin(0)
         .setDescription(tr("A node's in degree is its number of inbound edges."));
 
     GraphModel::createAttribute(tr("Node Out Degree"))
-        .setIntValueFn([this](NodeId nodeId) { return _transformedGraph.nodeById(nodeId).outDegree(); })
+        .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.nodeById(nodeId).outDegree(); })
         .intRange().setMin(0)
         .setDescription(tr("A node's out degree is its number of outbound edges."));
 
     GraphModel::createAttribute(tr("Node Multiplicity"))
         .setIntValueFn([this](NodeId nodeId)
         {
-            if(_transformedGraph.typeOf(nodeId) != MultiElementType::Head)
+            if(_->_transformedGraph.typeOf(nodeId) != MultiElementType::Head)
                 return 1;
 
-            return _transformedGraph.mergedNodeIdsForNodeId(nodeId).size();
+            return _->_transformedGraph.mergedNodeIdsForNodeId(nodeId).size();
         })
         .intRange().setMin(0)
         .setFlag(AttributeFlag::IgnoreTails)
@@ -93,10 +133,10 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     GraphModel::createAttribute(tr("Edge Multiplicity"))
         .setIntValueFn([this](EdgeId edgeId)
         {
-            if(_transformedGraph.typeOf(edgeId) != MultiElementType::Head)
+            if(_->_transformedGraph.typeOf(edgeId) != MultiElementType::Head)
                 return 1;
 
-            return _transformedGraph.mergedEdgeIdsForEdgeId(edgeId).size();
+            return _->_transformedGraph.mergedEdgeIdsForEdgeId(edgeId).size();
         })
         .intRange().setMin(0)
         .setFlag(AttributeFlag::IgnoreTails)
@@ -107,39 +147,44 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
         .intRange().setMin(1)
         .setDescription(tr("Component Size refers to the number of nodes the component contains."));
 
-    _graphTransformFactories.emplace(tr("Remove Nodes"),      std::make_unique<FilterTransformFactory>(this, ElementType::Node, false));
-    _graphTransformFactories.emplace(tr("Remove Edges"),      std::make_unique<FilterTransformFactory>(this, ElementType::Edge, false));
-    _graphTransformFactories.emplace(tr("Remove Components"), std::make_unique<FilterTransformFactory>(this, ElementType::Component, false));
-    _graphTransformFactories.emplace(tr("Keep Nodes"),        std::make_unique<FilterTransformFactory>(this, ElementType::Node, true));
-    _graphTransformFactories.emplace(tr("Keep Edges"),        std::make_unique<FilterTransformFactory>(this, ElementType::Edge, true));
-    _graphTransformFactories.emplace(tr("Keep Components"),   std::make_unique<FilterTransformFactory>(this, ElementType::Component, true));
-    _graphTransformFactories.emplace(tr("Contract Edges"),    std::make_unique<EdgeContractionTransformFactory>(this));
-    _graphTransformFactories.emplace(tr("MCL Cluster"),       std::make_unique<MCLTransformFactory>(this));
-    _graphTransformFactories.emplace(tr("PageRank"),          std::make_unique<PageRankTransformFactory>(this));
-    _graphTransformFactories.emplace(tr("Eccentricity"),      std::make_unique<EccentricityTransformFactory>(this));
+    _->_graphTransformFactories.emplace(tr("Remove Nodes"),      std::make_unique<FilterTransformFactory>(this, ElementType::Node, false));
+    _->_graphTransformFactories.emplace(tr("Remove Edges"),      std::make_unique<FilterTransformFactory>(this, ElementType::Edge, false));
+    _->_graphTransformFactories.emplace(tr("Remove Components"), std::make_unique<FilterTransformFactory>(this, ElementType::Component, false));
+    _->_graphTransformFactories.emplace(tr("Keep Nodes"),        std::make_unique<FilterTransformFactory>(this, ElementType::Node, true));
+    _->_graphTransformFactories.emplace(tr("Keep Edges"),        std::make_unique<FilterTransformFactory>(this, ElementType::Edge, true));
+    _->_graphTransformFactories.emplace(tr("Keep Components"),   std::make_unique<FilterTransformFactory>(this, ElementType::Component, true));
+    _->_graphTransformFactories.emplace(tr("Contract Edges"),    std::make_unique<EdgeContractionTransformFactory>(this));
+    _->_graphTransformFactories.emplace(tr("MCL Cluster"),       std::make_unique<MCLTransformFactory>(this));
+    _->_graphTransformFactories.emplace(tr("PageRank"),          std::make_unique<PageRankTransformFactory>(this));
+    _->_graphTransformFactories.emplace(tr("Eccentricity"),      std::make_unique<EccentricityTransformFactory>(this));
 
-    _visualisationChannels.emplace(tr("Colour"), std::make_unique<ColorVisualisationChannel>());
-    _visualisationChannels.emplace(tr("Size"), std::make_unique<SizeVisualisationChannel>());
-    _visualisationChannels.emplace(tr("Text"), std::make_unique<TextVisualisationChannel>());
+    _->_visualisationChannels.emplace(tr("Colour"), std::make_unique<ColorVisualisationChannel>());
+    _->_visualisationChannels.emplace(tr("Size"), std::make_unique<SizeVisualisationChannel>());
+    _->_visualisationChannels.emplace(tr("Text"), std::make_unique<TextVisualisationChannel>());
+}
+
+GraphModel::~GraphModel()
+{
+    // Only here so that we can have a unique_ptr to GraphModelImpl
 }
 
 void GraphModel::removeDynamicAttributes()
 {
     QStringList dynamicAttributeNames;
 
-    for(const auto& attributePair : _attributes)
+    for(const auto& attributePair : _->_attributes)
     {
         if(attributePair.second.testFlag(AttributeFlag::Dynamic))
             dynamicAttributeNames.append(attributePair.first);
     }
 
     for(const auto& attributeName : dynamicAttributeNames)
-        _attributes.erase(attributeName);
+        _->_attributes.erase(attributeName);
 }
 
 QString GraphModel::normalisedAttributeName(QString attribute) const
 {
-    while(u::contains(_attributes, attribute))
+    while(u::contains(_->_attributes, attribute))
     {
         int number = 1;
 
@@ -158,9 +203,26 @@ QString GraphModel::normalisedAttributeName(QString attribute) const
     return attribute;
 }
 
+IMutableGraph& GraphModel::mutableGraphImpl() { return mutableGraph(); }
+const IGraph& GraphModel::graphImpl() const { return graph(); }
+
+const IElementVisual& GraphModel::nodeVisualImpl(NodeId nodeId) const { return nodeVisual(nodeId); }
+const IElementVisual& GraphModel::edgeVisualImpl(EdgeId edgeId) const { return edgeVisual(edgeId); }
+
+MutableGraph& GraphModel::mutableGraph() { return _->_graph; }
+const Graph& GraphModel::graph() const { return _->_transformedGraph; }
+
+const ElementVisual& GraphModel::nodeVisual(NodeId nodeId) const { return _->_nodeVisuals.at(nodeId); }
+const ElementVisual& GraphModel::edgeVisual(EdgeId edgeId) const { return _->_edgeVisuals.at(edgeId); }
+
+NodePositions& GraphModel::nodePositions() { return _->_nodePositions; }
+const NodePositions& GraphModel::nodePositions() const { return _->_nodePositions; }
+
+const NodeArray<QString>& GraphModel::nodeNames() const { return _->_nodeNames; }
+QString GraphModel::nodeName(NodeId nodeId) const { return _->_nodeNames[nodeId]; }
 void GraphModel::setNodeName(NodeId nodeId, const QString& name)
 {
-    _nodeNames[nodeId] = name;
+    _->_nodeNames[nodeId] = name;
     updateVisuals();
 }
 
@@ -178,10 +240,10 @@ bool GraphModel::graphTransformIsValid(const QString& transform) const
     {
         const auto& graphTransformConfig = p.result();
 
-        if(!u::contains(_graphTransformFactories, graphTransformConfig._action))
+        if(!u::contains(_->_graphTransformFactories, graphTransformConfig._action))
             return false;
 
-        auto& factory = _graphTransformFactories.at(graphTransformConfig._action);
+        auto& factory = _->_graphTransformFactories.at(graphTransformConfig._action);
 
         if(factory->requiresCondition() && !graphTransformConfig.hasCondition())
             return false;
@@ -196,9 +258,9 @@ bool GraphModel::graphTransformIsValid(const QString& transform) const
 
 void GraphModel::buildTransforms(const QStringList& transforms, ICommand* command)
 {
-    _transformedGraph.clearTransforms();
-    _transformedGraph.setCommand(command);
-    _transformInfos.clear();
+    _->_transformedGraph.clearTransforms();
+    _->_transformedGraph.setCommand(command);
+    _->_transformInfos.clear();
     for(int index = 0; index < transforms.size(); index++)
     {
         const auto& transform = transforms.at(index);
@@ -213,10 +275,10 @@ void GraphModel::buildTransforms(const QStringList& transforms, ICommand* comman
         if(graphTransformConfig.isFlagSet(QStringLiteral("disabled")))
             continue;
 
-        if(!u::contains(_graphTransformFactories, action))
+        if(!u::contains(_->_graphTransformFactories, action))
             continue;
 
-        auto& factory = _graphTransformFactories.at(action);
+        auto& factory = _->_graphTransformFactories.at(action);
         auto graphTransform = factory->create(graphTransformConfig);
 
         Q_ASSERT(graphTransform != nullptr);
@@ -224,28 +286,28 @@ void GraphModel::buildTransforms(const QStringList& transforms, ICommand* comman
         {
             graphTransform->setConfig(graphTransformConfig);
             graphTransform->setRepeating(graphTransformConfig.isFlagSet(QStringLiteral("repeating")));
-            graphTransform->setInfo(&_transformInfos[index]);
-            _transformedGraph.addTransform(std::move(graphTransform));
+            graphTransform->setInfo(&_->_transformInfos[index]);
+            _->_transformedGraph.addTransform(std::move(graphTransform));
         }
     }
 
-    _transformedGraph.enableAutoRebuild();
-    _transformedGraph.setCommand(nullptr);
+    _->_transformedGraph.enableAutoRebuild();
+    _->_transformedGraph.setCommand(nullptr);
 }
 
 void GraphModel::cancelTransformBuild()
 {
-    _transformedGraph.cancelRebuild();
+    _->_transformedGraph.cancelRebuild();
 }
 
 QStringList GraphModel::availableTransformNames() const
 {
     QStringList stringList;
-    stringList.reserve(static_cast<int>(_graphTransformFactories.size()));
+    stringList.reserve(static_cast<int>(_->_graphTransformFactories.size()));
 
-    for(auto& t : _graphTransformFactories)
+    for(auto& t : _->_graphTransformFactories)
     {
-        auto elementType = _graphTransformFactories.at(t.first)->elementType();
+        auto elementType = _->_graphTransformFactories.at(t.first)->elementType();
         bool attributesAvailable = !availableAttributes(elementType, ValueType::All).isEmpty();
 
         if(elementType == ElementType::None || attributesAvailable)
@@ -257,8 +319,8 @@ QStringList GraphModel::availableTransformNames() const
 
 const GraphTransformFactory* GraphModel::transformFactory(const QString& transformName) const
 {
-    if(!transformName.isEmpty() && u::contains(_graphTransformFactories, transformName))
-        return _graphTransformFactories.at(transformName).get();
+    if(!transformName.isEmpty() && u::contains(_->_graphTransformFactories, transformName))
+        return _->_graphTransformFactories.at(transformName).get();
 
     return nullptr;
 }
@@ -267,7 +329,7 @@ QStringList GraphModel::availableAttributes(ElementType elementTypes, ValueType 
 {
     QStringList stringList;
 
-    for(auto& attribute : _attributes)
+    for(auto& attribute : _->_attributes)
     {
         if(!Flags<ElementType>(elementTypes).test(attribute.second.elementType()))
             continue;
@@ -285,10 +347,10 @@ QStringList GraphModel::avaliableConditionFnOps(const QString& attributeName) co
 {
     QStringList ops;
 
-    if(attributeName.isEmpty() || !u::contains(_attributes, attributeName))
+    if(attributeName.isEmpty() || !u::contains(_->_attributes, attributeName))
         return ops;
 
-    const auto& attribute = _attributes.at(attributeName);
+    const auto& attribute = _->_attributes.at(attributeName);
     ops.append(GraphTransformConfigParser::ops(attribute.valueType()));
 
     if(attribute.hasMissingValues())
@@ -299,15 +361,15 @@ QStringList GraphModel::avaliableConditionFnOps(const QString& attributeName) co
 
 bool GraphModel::hasTransformInfo() const
 {
-    return !_transformInfos.empty();
+    return !_->_transformInfos.empty();
 }
 
 const TransformInfo& GraphModel::transformInfoAtIndex(int index) const
 {
     static TransformInfo nullTransformInfo;
 
-    if(u::contains(_transformInfos, index))
-        return _transformInfos.at(index);
+    if(u::contains(_->_transformInfos, index))
+        return _->_transformInfos.at(index);
 
     return nullTransformInfo;
 }
@@ -326,10 +388,10 @@ bool GraphModel::visualisationIsValid(const QString& visualisation) const
     {
         const auto& visualisationConfig = p.result();
 
-        if(!u::contains(_attributes, visualisationConfig._attributeName))
+        if(!u::contains(_->_attributes, visualisationConfig._attributeName))
             return false;
 
-        if(!u::contains(_visualisationChannels, visualisationConfig._channelName))
+        if(!u::contains(_->_visualisationChannels, visualisationConfig._channelName))
             return false;
 
         return true;
@@ -340,12 +402,12 @@ bool GraphModel::visualisationIsValid(const QString& visualisation) const
 
 void GraphModel::buildVisualisations(const QStringList& visualisations)
 {
-    _mappedNodeVisuals.resetElements();
-    _mappedEdgeVisuals.resetElements();
+    _->_mappedNodeVisuals.resetElements();
+    _->_mappedEdgeVisuals.resetElements();
     clearVisualisationInfos();
 
-    VisualisationsBuilder<NodeId> nodeVisualisationsBuilder(graph(), graph().nodeIds(), _mappedNodeVisuals);
-    VisualisationsBuilder<EdgeId> edgeVisualisationsBuilder(graph(), graph().edgeIds(), _mappedEdgeVisuals);
+    VisualisationsBuilder<NodeId> nodeVisualisationsBuilder(graph(), graph().nodeIds(), _->_mappedNodeVisuals);
+    VisualisationsBuilder<EdgeId> edgeVisualisationsBuilder(graph(), graph().edgeIds(), _->_mappedEdgeVisuals);
 
     for(int index = 0; index < visualisations.size(); index++)
     {
@@ -365,22 +427,22 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         const auto& channelName = visualisationConfig._channelName;
         bool invert = visualisationConfig.isFlagSet(QStringLiteral("invert"));
 
-        if(!u::contains(_attributes, attributeName))
+        if(!u::contains(_->_attributes, attributeName))
         {
-            _visualisationInfos[index].addAlert(AlertType::Error,
+            _->_visualisationInfos[index].addAlert(AlertType::Error,
                 tr("Attribute doesn't exist"));
             continue;
         }
 
-        if(!u::contains(_visualisationChannels, channelName))
+        if(!u::contains(_->_visualisationChannels, channelName))
             continue;
 
         auto attribute = attributeValueByName(attributeName);
-        auto& channel = _visualisationChannels.at(channelName);
+        auto& channel = _->_visualisationChannels.at(channelName);
 
         if(!channel->supports(attribute.valueType()))
         {
-            _visualisationInfos[index].addAlert(AlertType::Error,
+            _->_visualisationInfos[index].addAlert(AlertType::Error,
                 tr("Visualisation doesn't support attribute type"));
             continue;
         }
@@ -391,11 +453,11 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         switch(attribute.elementType())
         {
         case ElementType::Node:
-            nodeVisualisationsBuilder.build(attribute, *channel, invert, index, _visualisationInfos[index]);
+            nodeVisualisationsBuilder.build(attribute, *channel, invert, index, _->_visualisationInfos[index]);
             break;
 
         case ElementType::Edge:
-            edgeVisualisationsBuilder.build(attribute, *channel, invert, index, _visualisationInfos[index]);
+            edgeVisualisationsBuilder.build(attribute, *channel, invert, index, _->_visualisationInfos[index]);
             break;
 
         default:
@@ -403,8 +465,8 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         }
     }
 
-    nodeVisualisationsBuilder.findOverrideAlerts(_visualisationInfos);
-    edgeVisualisationsBuilder.findOverrideAlerts(_visualisationInfos);
+    nodeVisualisationsBuilder.findOverrideAlerts(_->_visualisationInfos);
+    edgeVisualisationsBuilder.findOverrideAlerts(_->_visualisationInfos);
 
     updateVisuals();
 }
@@ -413,7 +475,7 @@ QStringList GraphModel::availableVisualisationChannelNames(ValueType valueType) 
 {
     QStringList stringList;
 
-    for(auto& t : _visualisationChannels)
+    for(auto& t : _->_visualisationChannels)
     {
         if(t.second->supports(valueType))
             stringList.append(t.first);
@@ -424,11 +486,11 @@ QStringList GraphModel::availableVisualisationChannelNames(ValueType valueType) 
 
 QString GraphModel::visualisationDescription(const QString& attributeName, const QString& channelName) const
 {
-    if(!u::contains(_attributes, attributeName) || !u::contains(_visualisationChannels, channelName))
+    if(!u::contains(_->_attributes, attributeName) || !u::contains(_->_visualisationChannels, channelName))
         return {};
 
     auto attribute = attributeValueByName(attributeName);
-    auto& channel = _visualisationChannels.at(channelName);
+    auto& channel = _->_visualisationChannels.at(channelName);
 
     if(!channel->supports(attribute.valueType()))
         return tr("This visualisation channel is not supported for the attribute type.");
@@ -438,30 +500,30 @@ QString GraphModel::visualisationDescription(const QString& attributeName, const
 
 void GraphModel::clearVisualisationInfos()
 {
-    _visualisationInfos.clear();
+    _->_visualisationInfos.clear();
 }
 
 bool GraphModel::hasVisualisationInfo() const
 {
-    return !_visualisationInfos.empty();
+    return !_->_visualisationInfos.empty();
 }
 
 const VisualisationInfo& GraphModel::visualisationInfoAtIndex(int index) const
 {
     static VisualisationInfo nullVisualisationInfo;
 
-    if(u::contains(_visualisationInfos, index))
-        return _visualisationInfos.at(index);
+    if(u::contains(_->_visualisationInfos, index))
+        return _->_visualisationInfos.at(index);
 
     return nullVisualisationInfo;
 }
 
 QVariantMap GraphModel::visualisationDefaultParameters(ValueType valueType, const QString& channelName) const
 {
-    if(!u::contains(_visualisationChannels, channelName))
+    if(!u::contains(_->_visualisationChannels, channelName))
         return {};
 
-    auto& channel = _visualisationChannels.at(channelName);
+    auto& channel = _->_visualisationChannels.at(channelName);
 
     return channel->defaultParameters(valueType);
 }
@@ -470,7 +532,7 @@ std::vector<QString> GraphModel::attributeNames(ElementType elementType) const
 {
     std::vector<QString> attributeNames;
 
-    for(auto& attribute : _attributes)
+    for(auto& attribute : _->_attributes)
     {
         if(Flags<ElementType>(elementType).test(attribute.second.elementType()))
             attributeNames.emplace_back(attribute.first);
@@ -495,10 +557,10 @@ void GraphModel::patchAttributeNames(QStringList& transforms, QStringList& visua
 
         const auto& graphTransformConfig = p.result();
 
-        if(!u::contains(_graphTransformFactories, graphTransformConfig._action))
+        if(!u::contains(_->_graphTransformFactories, graphTransformConfig._action))
             continue;
 
-        auto& factory = _graphTransformFactories.at(graphTransformConfig._action);
+        auto& factory = _->_graphTransformFactories.at(graphTransformConfig._action);
 
         auto newAttributes = u::keysFor(factory->declaredAttributes());
 
@@ -532,7 +594,7 @@ void GraphModel::patchAttributeNames(QStringList& transforms, QStringList& visua
 Attribute& GraphModel::createAttribute(QString name)
 {
     name = normalisedAttributeName(name);
-    Attribute& attribute = _attributes[name];
+    Attribute& attribute = _->_attributes[name];
 
     // If we're creating an attribute during the graph transform, it's
     // a dynamically created attribute rather than a persistent one,
@@ -545,37 +607,37 @@ Attribute& GraphModel::createAttribute(QString name)
 
 void GraphModel::addAttributes(const std::map<QString, Attribute>& attributes)
 {
-    _attributes.insert(attributes.begin(), attributes.end());
+    _->_attributes.insert(attributes.begin(), attributes.end());
 }
 
 void GraphModel::removeAttribute(const QString& name)
 {
-    if(u::contains(_attributes, name))
-        _attributes.erase(name);
+    if(u::contains(_->_attributes, name))
+        _->_attributes.erase(name);
 }
 
 const Attribute* GraphModel::attributeByName(const QString& name) const
 {
     auto attributeName = Attribute::parseAttributeName(name);
 
-    if(!u::contains(_attributes, attributeName._name))
+    if(!u::contains(_->_attributes, attributeName._name))
         return nullptr;
 
-    return &_attributes.at(attributeName._name);
+    return &_->_attributes.at(attributeName._name);
 }
 
 Attribute GraphModel::attributeValueByName(const QString& name) const
 {
     auto attributeName = Attribute::parseAttributeName(name);
 
-    if(!u::contains(_attributes, attributeName._name))
+    if(!u::contains(_->_attributes, attributeName._name))
         return {};
 
-    auto attribute = _attributes.at(attributeName._name);
+    auto attribute = _->_attributes.at(attributeName._name);
 
     if(attributeName._type != Attribute::EdgeNodeType::None)
     {
-        return Attribute::edgeNodesAttribute(_transformedGraph,
+        return Attribute::edgeNodesAttribute(_->_transformedGraph,
             attribute, attributeName._type);
     }
 
@@ -622,7 +684,7 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
         // Clear all edge Selected flags as we can't know what to change unless
         // we have the previous selection state to hand
         for(auto edgeId : graph().edgeIds())
-            _edgeVisuals[edgeId]._state.reset(VisualFlags::Selected);
+            _->_edgeVisuals[edgeId]._state.reset(VisualFlags::Selected);
     }
 
     if(searchManager != nullptr)
@@ -630,45 +692,45 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
         // Clear all edge NotFound flags as we can't know what to change unless
         // we have the previous search state to hand
         for(auto edgeId : graph().edgeIds())
-            _edgeVisuals[edgeId]._state.reset(VisualFlags::NotFound);
+            _->_edgeVisuals[edgeId]._state.reset(VisualFlags::NotFound);
     }
 
     for(auto nodeId : graph().nodeIds())
     {
         // Size
-        if(_mappedNodeVisuals[nodeId]._size >= 0.0f)
+        if(_->_mappedNodeVisuals[nodeId]._size >= 0.0f)
         {
-            _nodeVisuals[nodeId]._size = mappedSize(minNodeSize, maxNodeSize, nodeSize,
-                                         _mappedNodeVisuals[nodeId]._size);
+            _->_nodeVisuals[nodeId]._size = mappedSize(minNodeSize, maxNodeSize, nodeSize,
+                                         _->_mappedNodeVisuals[nodeId]._size);
         }
         else
-            _nodeVisuals[nodeId]._size = nodeSize;
+            _->_nodeVisuals[nodeId]._size = nodeSize;
 
         // Color
-        if(!_mappedNodeVisuals[nodeId]._outerColor.isValid())
-            _nodeVisuals[nodeId]._outerColor = nodeColor;
+        if(!_->_mappedNodeVisuals[nodeId]._outerColor.isValid())
+            _->_nodeVisuals[nodeId]._outerColor = nodeColor;
         else
-            _nodeVisuals[nodeId]._outerColor = _mappedNodeVisuals[nodeId]._outerColor;
+            _->_nodeVisuals[nodeId]._outerColor = _->_mappedNodeVisuals[nodeId]._outerColor;
 
-        _nodeVisuals[nodeId]._innerColor = !meIndicators || graph().typeOf(nodeId) == MultiElementType::Not ?
-                    _nodeVisuals[nodeId]._outerColor : multiColor;
+        _->_nodeVisuals[nodeId]._innerColor = !meIndicators || graph().typeOf(nodeId) == MultiElementType::Not ?
+                    _->_nodeVisuals[nodeId]._outerColor : multiColor;
 
         // Text
-        if(!_mappedNodeVisuals[nodeId]._text.isEmpty())
-            _nodeVisuals[nodeId]._text = _mappedNodeVisuals[nodeId]._text;
+        if(!_->_mappedNodeVisuals[nodeId]._text.isEmpty())
+            _->_nodeVisuals[nodeId]._text = _->_mappedNodeVisuals[nodeId]._text;
         else
-            _nodeVisuals[nodeId]._text = nodeName(nodeId);
+            _->_nodeVisuals[nodeId]._text = nodeName(nodeId);
 
         if(selectionManager != nullptr)
         {
             auto nodeIsSelected = selectionManager->nodeIsSelected(nodeId);
 
-            _nodeVisuals[nodeId]._state.setState(VisualFlags::Selected, nodeIsSelected);
+            _->_nodeVisuals[nodeId]._state.setState(VisualFlags::Selected, nodeIsSelected);
 
             if(nodeIsSelected)
             {
                 for(auto edgeId : graph().edgeIdsForNodeId(nodeId))
-                    _edgeVisuals[edgeId]._state.setState(VisualFlags::Selected, nodeIsSelected);
+                    _->_edgeVisuals[edgeId]._state.setState(VisualFlags::Selected, nodeIsSelected);
             }
         }
 
@@ -677,12 +739,12 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
             auto nodeWasFound = !searchManager->foundNodeIds().empty() &&
                     !searchManager->nodeWasFound(nodeId);
 
-            _nodeVisuals[nodeId]._state.setState(VisualFlags::NotFound, nodeWasFound);
+            _->_nodeVisuals[nodeId]._state.setState(VisualFlags::NotFound, nodeWasFound);
 
             if(nodeWasFound)
             {
                 for(auto edgeId : graph().edgeIdsForNodeId(nodeId))
-                    _edgeVisuals[edgeId]._state.set(VisualFlags::NotFound);
+                    _->_edgeVisuals[edgeId]._state.set(VisualFlags::NotFound);
             }
         }
     }
@@ -690,34 +752,34 @@ void GraphModel::updateVisuals(const SelectionManager* selectionManager, const S
     for(auto edgeId : graph().edgeIds())
     {
         // Size
-        if(_mappedEdgeVisuals[edgeId]._size >= 0.0f)
+        if(_->_mappedEdgeVisuals[edgeId]._size >= 0.0f)
         {
-            _edgeVisuals[edgeId]._size = mappedSize(minEdgeSize, maxEdgeSize, edgeSize,
-                                         _mappedEdgeVisuals[edgeId]._size);
+            _->_edgeVisuals[edgeId]._size = mappedSize(minEdgeSize, maxEdgeSize, edgeSize,
+                                         _->_mappedEdgeVisuals[edgeId]._size);
         }
         else
-            _edgeVisuals[edgeId]._size = edgeSize;
+            _->_edgeVisuals[edgeId]._size = edgeSize;
 
         // Restrict edgeSize to be no larger than the source or target size
         auto& edge = graph().edgeById(edgeId);
-        auto minEdgeNodesSize = std::min(_nodeVisuals[edge.sourceId()]._size,
-                                         _nodeVisuals[edge.targetId()]._size);
-        _edgeVisuals[edgeId]._size = std::min(_edgeVisuals[edgeId]._size, minEdgeNodesSize);
+        auto minEdgeNodesSize = std::min(_->_nodeVisuals[edge.sourceId()]._size,
+                                         _->_nodeVisuals[edge.targetId()]._size);
+        _->_edgeVisuals[edgeId]._size = std::min(_->_edgeVisuals[edgeId]._size, minEdgeNodesSize);
 
         // Color
-        if(!_mappedEdgeVisuals[edgeId]._outerColor.isValid())
-            _edgeVisuals[edgeId]._outerColor = edgeColor;
+        if(!_->_mappedEdgeVisuals[edgeId]._outerColor.isValid())
+            _->_edgeVisuals[edgeId]._outerColor = edgeColor;
         else
-            _edgeVisuals[edgeId]._outerColor = _mappedEdgeVisuals[edgeId]._outerColor;
+            _->_edgeVisuals[edgeId]._outerColor = _->_mappedEdgeVisuals[edgeId]._outerColor;
 
-        _edgeVisuals[edgeId]._innerColor = !meIndicators || graph().typeOf(edgeId) == MultiElementType::Not ?
-            _edgeVisuals[edgeId]._outerColor : multiColor;
+        _->_edgeVisuals[edgeId]._innerColor = !meIndicators || graph().typeOf(edgeId) == MultiElementType::Not ?
+            _->_edgeVisuals[edgeId]._outerColor : multiColor;
 
         // Text
-        if(!_mappedEdgeVisuals[edgeId]._text.isEmpty())
-            _edgeVisuals[edgeId]._text = _mappedEdgeVisuals[edgeId]._text;
+        if(!_->_mappedEdgeVisuals[edgeId]._text.isEmpty())
+            _->_edgeVisuals[edgeId]._text = _->_mappedEdgeVisuals[edgeId]._text;
         else
-            _edgeVisuals[edgeId]._text.clear();
+            _->_edgeVisuals[edgeId]._text.clear();
     }
 
     emit visualsChanged();
@@ -743,7 +805,7 @@ void GraphModel::onPreferenceChanged(const QString& name, const QVariant&)
 
 void GraphModel::onMutableGraphChanged(const Graph* graph)
 {
-    for(auto& attribute : make_value_wrapper(_attributes))
+    for(auto& attribute : make_value_wrapper(_->_attributes))
     {
         if(!attribute.testFlag(AttributeFlag::AutoRangeMutable))
             continue;
@@ -758,10 +820,10 @@ void GraphModel::onMutableGraphChanged(const Graph* graph)
 void GraphModel::onTransformedGraphWillChange(const Graph*)
 {
     // Store previous dynamic attributes for comparison
-    _previousDynamicAttributeNames.clear();
+    _->_previousDynamicAttributeNames.clear();
 
-    for(auto& name : u::keysFor(_attributes))
-        _previousDynamicAttributeNames.emplace_back(name);
+    for(auto& name : u::keysFor(_->_attributes))
+        _->_previousDynamicAttributeNames.emplace_back(name);
 
     removeDynamicAttributes();
 
@@ -772,7 +834,7 @@ void GraphModel::onTransformedGraphChanged(const Graph* graph)
 {
     _transformedGraphIsChanging = false;
 
-    for(auto& attribute : make_value_wrapper(_attributes))
+    for(auto& attribute : make_value_wrapper(_->_attributes))
     {
         if(!attribute.testFlag(AttributeFlag::AutoRangeTransformed))
             continue;
@@ -785,12 +847,12 @@ void GraphModel::onTransformedGraphChanged(const Graph* graph)
 
     // Compare with previous Dynamic attributes
     // Check for added
-    auto addedAttributeNames = u::setDifference(u::keysFor(_attributes), _previousDynamicAttributeNames);
+    auto addedAttributeNames = u::setDifference(u::keysFor(_->_attributes), _->_previousDynamicAttributeNames);
     for(auto& name : addedAttributeNames)
         emit attributeAdded(name);
 
     // Check for removed
-    auto removedAttributeNames = u::setDifference(_previousDynamicAttributeNames, u::keysFor(_attributes));
+    auto removedAttributeNames = u::setDifference(_->_previousDynamicAttributeNames, u::keysFor(_->_attributes));
     for(auto& name : removedAttributeNames)
         emit attributeRemoved(name);
 }

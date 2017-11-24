@@ -17,11 +17,19 @@ class IGraphModel
 public:
     virtual ~IGraphModel() = default;
 
-    virtual const IGraph& graph() const = 0;
-    virtual IMutableGraph& mutableGraph() = 0;
+protected:
+    virtual IMutableGraph& mutableGraphImpl() = 0;
+    virtual const IGraph& graphImpl() const = 0;
 
-    virtual const IElementVisual& nodeVisual(NodeId nodeId) const = 0;
-    virtual const IElementVisual& edgeVisual(EdgeId edgeId) const = 0;
+    virtual const IElementVisual& nodeVisualImpl(NodeId nodeId) const = 0;
+    virtual const IElementVisual& edgeVisualImpl(EdgeId edgeId) const = 0;
+
+public:
+    IMutableGraph& mutableGraph() { return mutableGraphImpl(); }
+    const IGraph& graph() const { return graphImpl(); }
+
+    const IElementVisual& nodeVisual(NodeId nodeId) const { return nodeVisualImpl(nodeId); }
+    const IElementVisual& edgeVisual(EdgeId edgeId) const { return edgeVisualImpl(edgeId); }
 
     virtual QString nodeName(NodeId nodeId) const = 0;
     virtual void setNodeName(NodeId nodeId, const QString& name) = 0;
