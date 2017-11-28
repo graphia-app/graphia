@@ -45,8 +45,8 @@ google-runtime-member-string-references,\
 echo "clang-tidy"
 clang-tidy --version
 clang-tidy -list-checks ${CHECKS}
-parallel -n1 -P${NUM_CORES} \
-  clang-tidy -p ${BUILD_DIR} -q \
+parallel -n1 -P${NUM_CORES} -q \
+  clang-tidy -p ${BUILD_DIR} \
   -header-filter="^.*source\/(app|shared|plugins).*$" ${CHECKS} {} \
   ::: ${CPP_FILES}
 
