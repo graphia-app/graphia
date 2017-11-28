@@ -46,7 +46,7 @@ echo "clang-tidy"
 clang-tidy --version
 clang-tidy -list-checks ${CHECKS}
 parallel -n1 -P${NUM_CORES} \
-  clang-tidy -p ${BUILD_DIR} \
+  clang-tidy -p ${BUILD_DIR} -q \
   -header-filter="^.*source\/(app|shared|plugins).*$" ${CHECKS} {} \
   ::: ${CPP_FILES}
 
