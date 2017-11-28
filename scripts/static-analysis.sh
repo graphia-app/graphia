@@ -76,4 +76,4 @@ find source/app \
   source/plugins \
   source/crashreporter \
   -type f -iname "*.qml" | \
-  xargs -n1 -P${NUM_CORES} -q qmllint
+  xargs -n1 -P${NUM_CORES} qmllint
