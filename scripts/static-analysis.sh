@@ -44,7 +44,7 @@ google-runtime-member-string-references,\
 echo "clang-tidy"
 clang-tidy --version
 clang-tidy -list-checks ${CHECKS}
-echo ${CPP_FILES} | parallel -n1 -P${NUM_CORES} clang-tidy -p ${BUILD_DIR} \
+echo ${CPP_FILES} | parallel -n1 -P${NUM_CORES} -q clang-tidy -p ${BUILD_DIR} \
   -header-filter="^.*source\/(app|shared|plugins).*$" ${CHECKS}
 
 # clazy
@@ -62,7 +62,7 @@ no-non-pod-global-static"
 
 echo "clazy"
 clazy-standalone --version
-echo ${CPP_FILES} | parallel -n1 -P${NUM_CORES} \
+echo ${CPP_FILES} | parallel -n1 -P${NUM_CORES} -q \
   clazy-standalone -p ${BUILD_DIR}/compile_commands.json ${CHECKS}
 
 # qmllint
@@ -72,4 +72,4 @@ find source/app \
   source/plugins \
   source/crashreporter \
   -type f -iname "*.qml" | \
-  parallel -n1 -P${NUM_CORES} qmllint
+  parallel -n1 -P${NUM_CORES} -q qmllint
