@@ -17,7 +17,8 @@ COMPILER=$(basename ${CC} | sed -e 's/-.*//g')
 BUILD_DIR="build/${COMPILER}"
 
 CPP_FILES=$(cat ${BUILD_DIR}/compile_commands.json | \
-  jq '.[].file' | grep -vE "qrc_|mocs_compilation|thirdparty")
+  jq '.[].file' | grep -vE "qrc_|mocs_compilation|thirdparty" | \
+  sed -e 's/"//g')
 
 echo "Files to be analysed:"
 echo ${CPP_FILES}
@@ -44,8 +45,10 @@ google-runtime-member-string-references,\
 echo "clang-tidy"
 clang-tidy --version
 clang-tidy -list-checks ${CHECKS}
-echo ${CPP_FILES} | parallel -n1 -P${NUM_CORES} -q clang-tidy -p ${BUILD_DIR} \
-  -header-filter="^.*source\/(app|shared|plugins).*$" ${CHECKS}
+parallel -n1 -P${NUM_CORES} \
+  clang-tidy -p ${BUILD_DIR} \
+  -header-filter="^.*source\/(app|shared|plugins).*$" ${CHECKS} {} \
+  ::: ${CPP_FILES}
 
 # clazy
 CHECKS="-checks=level1,\
@@ -62,8 +65,9 @@ no-non-pod-global-static"
 
 echo "clazy"
 clazy-standalone --version
-echo ${CPP_FILES} | parallel -n1 -P${NUM_CORES} -q \
-  clazy-standalone -p ${BUILD_DIR}/compile_commands.json ${CHECKS}
+parallel -n1 -P${NUM_CORES} \
+  clazy-standalone -p ${BUILD_DIR}/compile_commands.json ${CHECKS} {} \
+  ::: ${CPP_FILES}
 
 # qmllint
 qmllint --version
@@ -72,4 +76,4 @@ find source/app \
   source/plugins \
   source/crashreporter \
   -type f -iname "*.qml" | \
-  parallel -n1 -P${NUM_CORES} -q qmllint
+  xargs -n1 -P${NUM_CORES} -q qmllint
