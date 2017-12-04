@@ -140,7 +140,7 @@ bool NodeAttributeTableModel::columnIsCalculated(const QString& columnName) cons
     return !u::contains(_userNodeData->vectorNames(), columnName);
 }
 
-void NodeAttributeTableModel::focusNodeForRowIndex(size_t row)
+void NodeAttributeTableModel::moveFocusToNodeForRowIndex(size_t row)
 {
     auto nodeId = _userNodeData->nodeIdForRowIndex(row);
     _document->moveFocusToNode(nodeId);

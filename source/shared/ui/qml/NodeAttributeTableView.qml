@@ -366,7 +366,7 @@ Item
         onDoubleClicked:
         {
             var mappedRow = model.mapToSource(row);
-            root.nodeAttributesModel.focusNodeForRowIndex(mappedRow);
+            root.nodeAttributesModel.moveFocusToNodeForRowIndex(mappedRow);
         }
 
         // This is just a reference to the menu, so we can repopulate it later as necessary

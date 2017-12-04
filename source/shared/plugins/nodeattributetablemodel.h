@@ -66,7 +66,7 @@ public:
     void updateRoleNames();
 
     Q_INVOKABLE bool columnIsCalculated(const QString& columnName) const;
-    Q_INVOKABLE void focusNodeForRowIndex(size_t row);
+    Q_INVOKABLE void moveFocusToNodeForRowIndex(size_t row);
     Q_INVOKABLE bool columnIsFloatingPoint(const QString& columnName) const;
 
 public slots:
