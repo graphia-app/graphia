@@ -88,7 +88,7 @@ bool Document::commandInProgress() const
 
 bool Document::idle() const
 {
-    return !commandInProgress() && !_graphChanging && !_graphQuickItem->interacting();
+    return !commandInProgress() && !graphChanging() && !_graphQuickItem->interacting();
 }
 
 bool Document::editable() const
@@ -97,6 +97,11 @@ bool Document::editable() const
         return false;
 
     return idle() && _graphModel->editable();
+}
+
+bool Document::graphChanging() const
+{
+    return _graphChanging;
 }
 
 void Document::maybeEmitIdleChanged()
@@ -607,14 +612,24 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     connect(&_graphModel->graph(), &Graph::graphWillChange, [this]
     {
+        bool graphChangingWillChange = !_graphChanging;
         _graphChanging = true;
+
+        if(graphChangingWillChange)
+            emit graphChangingChanged();
+
         maybeEmitIdleChanged();
     });
 
     connect(&_graphModel->graph(), &Graph::graphChanged, [this]
     (const Graph*, bool changeOccurred)
     {
+        bool graphChangingWillChange = _graphChanging;
         _graphChanging = false;
+
+        if(graphChangingWillChange)
+            emit graphChangingChanged();
+
         _layoutRequired = changeOccurred || _layoutRequired;
         maybeEmitIdleChanged();
 

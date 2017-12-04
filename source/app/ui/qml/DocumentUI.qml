@@ -410,6 +410,7 @@ Item
             {
                 id: graph
                 anchors.fill: parent
+                enabled: !document.graphChanging
 
                 Menu
                 {

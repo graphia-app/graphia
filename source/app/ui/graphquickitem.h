@@ -116,6 +116,9 @@ private:
 
     template<typename T> void enqueueEvent(const T* event)
     {
+        if(!isEnabled())
+            return;
+
         _eventQueue.emplace(std::make_unique<T>(*event));
         update();
     }

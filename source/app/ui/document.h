@@ -57,6 +57,8 @@ class Document : public QObject, public IDocument
     Q_PROPERTY(bool idle READ idle NOTIFY idleChanged)
     Q_PROPERTY(bool editable READ editable NOTIFY editableChanged)
 
+    Q_PROPERTY(bool graphChanging READ graphChanging NOTIFY graphChangingChanged)
+
     Q_PROPERTY(bool commandInProgress READ commandInProgress NOTIFY commandInProgressChanged)
     Q_PROPERTY(int commandProgress READ commandProgress NOTIFY commandProgressChanged)
     Q_PROPERTY(QString commandVerb READ commandVerb NOTIFY commandVerbChanged)
@@ -107,6 +109,7 @@ public:
     bool commandInProgress() const;
     bool idle() const;
     bool editable() const;
+    bool graphChanging() const;
 
     int commandProgress() const;
     QString commandVerb() const;
@@ -233,6 +236,8 @@ signals:
 
     void idleChanged();
     void editableChanged();
+
+    void graphChangingChanged();
 
     void commandInProgressChanged();
     void commandProgressChanged();
