@@ -305,7 +305,7 @@ PluginContent
             return true;
 
         case 1:
-            menu.title = qsTr("Plot");
+            menu.title = qsTr("&Plot");
             menu.addItem("").action = toggleColumnNamesAction;
             menu.addItem("").action = savePlotImageAction;
             menu.addItem("").action = toggleGridLines;
