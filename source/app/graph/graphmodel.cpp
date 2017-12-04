@@ -147,6 +147,16 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
         .intRange().setMin(1)
         .setDescription(tr("Component Size refers to the number of nodes the component contains."));
 
+    GraphModel::createAttribute(tr("Node Component Identifier"))
+        .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.componentIdOfNode(nodeId) + 1; })
+        .intRange().setMin(0)
+        .setDescription(tr("A node's component identifier indicates which component it is part of."));
+
+    GraphModel::createAttribute(tr("Edge Component Identifier"))
+        .setIntValueFn([this](EdgeId edgeId) { return _->_transformedGraph.componentIdOfEdge(edgeId) + 1; })
+        .intRange().setMin(0)
+        .setDescription(tr("An edge's component identifier indicates which component it is part of."));
+
     _->_graphTransformFactories.emplace(tr("Remove Nodes"),      std::make_unique<FilterTransformFactory>(this, ElementType::Node, false));
     _->_graphTransformFactories.emplace(tr("Remove Edges"),      std::make_unique<FilterTransformFactory>(this, ElementType::Edge, false));
     _->_graphTransformFactories.emplace(tr("Remove Components"), std::make_unique<FilterTransformFactory>(this, ElementType::Component, false));
