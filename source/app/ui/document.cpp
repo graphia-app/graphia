@@ -1643,7 +1643,8 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
     // We have to do this on the same thread as the caller, because we can't invoke
     // methods across threads; hopefully it's relatively quick
     QStringList columnRoles;
-    for(int i = 0; i < QQmlProperty::read(tableView, QStringLiteral("columnCount")).toInt(); i++)
+    auto columnCount = QQmlProperty::read(tableView, QStringLiteral("columnCount")).toInt();
+    for(int i = 0; i < columnCount; i++)
     {
         QVariant columnVariant;
         QMetaObject::invokeMethod(tableView, "getColumn",
