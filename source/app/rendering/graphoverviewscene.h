@@ -12,6 +12,7 @@
 #include <vector>
 #include <mutex>
 #include <memory>
+#include <atomic>
 
 #include <QRect>
 #include <QPointF>
