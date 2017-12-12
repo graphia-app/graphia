@@ -7,8 +7,8 @@
 #include "shared/loading/iparser.h"
 #include "shared/plugins/userdata.h"
 #include "shared/plugins/usernodedata.h"
-#include "shared/plugins/nodeattributetablemodel.h"
 
+#include "correlationnodeattributetablemodel.h"
 #include "minmaxnormaliser.h"
 #include "quantilenormaliser.h"
 
@@ -65,7 +65,7 @@ private:
     UserNodeData _userNodeData;
     UserData _userColumnData;
 
-    NodeAttributeTableModel _nodeAttributeTableModel;
+    CorrelationNodeAttributeTableModel _nodeAttributeTableModel;
 
     using ConstDataIterator = std::vector<double>::const_iterator;
     using DataIterator = std::vector<double>::iterator;

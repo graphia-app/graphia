@@ -7,6 +7,7 @@
 #include <QAbstractTableModel>
 #include <QStringList>
 #include <QHash>
+#include <QObject>
 
 #include <set>
 #include <mutex>
@@ -43,7 +44,11 @@ private:
 
     int _columnCount = 0;
 
-    QStringList columnNames() const;
+protected:
+    virtual QStringList columnNames() const;
+    virtual QVariant dataValue(int row, int role) const;
+
+private:
     void update();
 
 private slots:
@@ -51,8 +56,6 @@ private slots:
     void onGraphChanged(const Graph*, bool);
 
 public:
-    explicit NodeAttributeTableModel();
-
     void initialise(IDocument* document, UserNodeData* userNodeData);
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -63,11 +66,12 @@ public:
     QHash<int, QByteArray> roleNames() const override { return _roleNames; }
 
     void onSelectionChanged();
-    void updateRoleNames();
+    virtual void updateRoleNames();
 
-    Q_INVOKABLE bool columnIsCalculated(const QString& columnName) const;
+    Q_INVOKABLE virtual bool columnIsCalculated(const QString& columnName) const;
+    Q_INVOKABLE virtual bool columnIsHiddenByDefault(const QString& columnName) const;
     Q_INVOKABLE void moveFocusToNodeForRowIndex(size_t row);
-    Q_INVOKABLE bool columnIsFloatingPoint(const QString& columnName) const;
+    Q_INVOKABLE virtual bool columnIsFloatingPoint(const QString& columnName) const;
 
 public slots:
     void onAttributeAdded(const QString& name);

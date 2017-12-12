@@ -10,10 +10,6 @@
 
 #include "shared/utils/container.h"
 
-NodeAttributeTableModel::NodeAttributeTableModel() :
-    QAbstractTableModel()
-{}
-
 void NodeAttributeTableModel::initialise(IDocument* document, UserNodeData* userNodeData)
 {
     _document = document;
@@ -51,6 +47,20 @@ QStringList NodeAttributeTableModel::columnNames() const
     return list;
 }
 
+QVariant NodeAttributeTableModel::dataValue(int row, int role) const
+{
+    auto* attribute = _document->graphModel()->attributeByName(_roleNames[role]);
+    if(attribute != nullptr)
+    {
+        auto nodeId = _userNodeData->nodeIdForRowIndex(row);
+
+        if(!attribute->valueMissingOf(nodeId))
+            return attribute->valueOf(nodeId);
+    }
+
+    return {};
+}
+
 void NodeAttributeTableModel::update()
 {
     std::unique_lock<std::mutex> lock;
@@ -85,11 +95,7 @@ void NodeAttributeTableModel::update()
             else if(role == Roles::NodeSelectedRole)
                 dataRow[roleNum] = _document->selectionManager()->nodeIsSelected(nodeId);
             else
-            {
-                auto* attribute = _document->graphModel()->attributeByName(_roleNames[role]);
-                if(attribute != nullptr)
-                    dataRow[roleNum] = attribute->valueOf(nodeId);
-            }
+                dataRow[roleNum] = dataValue(row, role);
         }
     }
 
@@ -138,6 +144,11 @@ void NodeAttributeTableModel::updateRoleNames()
 bool NodeAttributeTableModel::columnIsCalculated(const QString& columnName) const
 {
     return !u::contains(_userNodeData->vectorNames(), columnName);
+}
+
+bool NodeAttributeTableModel::columnIsHiddenByDefault(const QString&) const
+{
+    return false;
 }
 
 void NodeAttributeTableModel::moveFocusToNodeForRowIndex(size_t row)
