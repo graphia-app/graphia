@@ -8,7 +8,7 @@ QStringList CorrelationNodeAttributeTableModel::columnNames() const
 
     if(_dataColumnNames != nullptr)
     {
-        list.reserve(list.size() + _dataColumnNames->size());
+        list.reserve(list.size() + static_cast<int>(_dataColumnNames->size()));
         for(const auto& dataColumnName : *_dataColumnNames)
             list.append(dataColumnName);
     }
