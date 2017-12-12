@@ -861,6 +861,12 @@ Item
                 content.saveRequired = false;
         }
 
+        function initialise()
+        {
+            if(typeof(content.initialise) === "function")
+                content.initialise();
+        }
+
         function save()
         {
             plugin.resetSaveRequired();
@@ -1114,6 +1120,8 @@ Item
                     console.log(document.pluginQmlPath + ": failed to create instance");
                     return;
                 }
+
+                plugin.initialise();
 
                 // Restore saved data, if there is any
                 if(uiDataVersion >= 0)
