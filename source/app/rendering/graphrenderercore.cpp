@@ -354,10 +354,10 @@ static void setShaderADSParameters(QOpenGLShaderProgram& program)
 
     for(int i = 0; i < numberOfLights; i++)
     {
-        QByteArray positionId = QString("lights[%1].position").arg(i).toLatin1();
+        QByteArray positionId = QStringLiteral("lights[%1].position").arg(i).toLatin1();
         program.setUniformValue(positionId.data(), lights[i].position);
 
-        QByteArray intensityId = QString("lights[%1].intensity").arg(i).toLatin1();
+        QByteArray intensityId = QStringLiteral("lights[%1].intensity").arg(i).toLatin1();
         program.setUniformValue(intensityId.data(), lights[i].intensity);
     }
 
@@ -530,6 +530,7 @@ bool GraphRendererCore::resize(int width, int height)
 std::vector<int> GraphRendererCore::gpuGraphDataRenderOrder() const
 {
     std::vector<int> renderOrder;
+    renderOrder.reserve(_gpuGraphData.size());
 
     for(int i = 0; i < static_cast<int>(_gpuGraphData.size()); i++)
         renderOrder.push_back(i);

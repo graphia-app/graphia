@@ -18,7 +18,7 @@
 struct GPUGraphData : OpenGLFunctions
 {
     GPUGraphData();
-    virtual ~GPUGraphData();
+    ~GPUGraphData() override;
 
     void initialise(QOpenGLShaderProgram& nodesShader,
                     QOpenGLShaderProgram& edgesShader,
@@ -108,7 +108,7 @@ class GraphRendererCore :
 {
 public:
     GraphRendererCore();
-    virtual ~GraphRendererCore();
+    ~GraphRendererCore() override;
 
     static const int NUM_MULTISAMPLES = 4;
 
