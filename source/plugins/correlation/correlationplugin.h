@@ -140,7 +140,7 @@ private:
 
             _variance = sum / numColumns;
             _stddev = std::sqrt(_variance);
-            _coefVar = _stddev / _mean;
+            _coefVar = _stddev / (_mean > 0.0 ? _mean : 0.0);
         }
     };
 

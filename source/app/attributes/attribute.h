@@ -148,10 +148,6 @@ private:
     QString valueOf(Helper<QString>, EdgeId edgeId) const;
     QString valueOf(Helper<QString>, const IGraphComponent& component) const;
 
-    bool valueMissingOf(NodeId nodeId) const;
-    bool valueMissingOf(EdgeId edgeId) const;
-    bool valueMissingOf(const IGraphComponent& component) const;
-
     enum class Type
     {
         Unknown,
@@ -244,6 +240,10 @@ public:
 
         return std::numeric_limits<double>::signaling_NaN();
     }
+
+    bool valueMissingOf(NodeId nodeId) const override;
+    bool valueMissingOf(EdgeId edgeId) const override;
+    bool valueMissingOf(const IGraphComponent& component) const override;
 
     template<typename E> bool valueMissingOf(E& elementId) const
     {

@@ -184,6 +184,7 @@ void CorrelationPluginInstance::createAttributes()
 
     graphModel()->createAttribute(tr("Coefficient of Variation"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._coefVar; })
+            .setValueMissingFn([this](NodeId nodeId) { return std::isnan(dataRowForNodeId(nodeId)._coefVar); })
             .setFlag(AttributeFlag::AutoRangeMutable)
             .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Coefficient_of_variation">)"
                                "Coefficient of Variation</a> "
