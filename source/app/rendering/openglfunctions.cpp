@@ -1,5 +1,6 @@
 #include "openglfunctions.h"
 
+#include <QOpenGLFunctions_1_0>
 #include <QOpenGLContext>
 #include <QSurfaceFormat>
 #include <QOffscreenSurface>
@@ -17,21 +18,28 @@ void OpenGLFunctions::resolveOpenGLFunctions()
 
 void OpenGLFunctions::setDefaultFormat()
 {
+    defaultFormat();
+}
+
+QSurfaceFormat OpenGLFunctions::defaultFormat()
+{
     QSurfaceFormat format;
     format.setMajorVersion(4);
     format.setMinorVersion(0);
     format.setProfile(QSurfaceFormat::CoreProfile);
 
     QSurfaceFormat::setDefaultFormat(format);
+    return QSurfaceFormat::defaultFormat();
 }
 
+template<typename F>
 class Functions
 {
 private:
     bool _valid = false;
     QOpenGLContext _context;
     QOffscreenSurface _surface;
-    OpenGLFunctions* _f;
+    F* _f;
 
     QString GLubyteToQString(const GLubyte* bytes) const
     {
@@ -44,14 +52,12 @@ private:
     }
 
 public:
-    Functions()
+    Functions(const QSurfaceFormat& surfaceFormat)
     {
-        OpenGLFunctions::setDefaultFormat();
-        _context.setFormat(QSurfaceFormat::defaultFormat());
+        _context.setFormat(surfaceFormat);
         _context.create();
 
-        QOffscreenSurface surface;
-        _surface.setFormat(QSurfaceFormat::defaultFormat());
+        _surface.setFormat(surfaceFormat);
         _surface.create();
 
         if(!_surface.isValid())
@@ -62,7 +68,7 @@ public:
         if(!_context.isValid())
             return;
 
-        _f = _context.versionFunctions<OpenGLFunctions>();
+        _f = _context.versionFunctions<F>();
 
         if(_f == nullptr)
             return;
@@ -85,22 +91,30 @@ public:
         return GLubyteToQString(_f->glGetStringi(name, index));
     }
 
-    OpenGLFunctions* operator->() { return _f; }
+    F* operator->() { return _f; }
 };
 
 bool OpenGLFunctions::hasOpenGLSupport()
 {
-    return Functions().valid();
+    auto format = OpenGLFunctions::defaultFormat();
+    return Functions<OpenGLFunctions>(format).valid();
 }
 
 QString OpenGLFunctions::vendor()
 {
-    return Functions().getString(GL_VENDOR);
+    // Normally when we're calling this we'll not have good OpenGL drivers
+    // installed so use the most primitive OpenGL version we can
+    QSurfaceFormat format;
+    format.setMajorVersion(1);
+    format.setMajorVersion(0);
+
+    return Functions<QOpenGLFunctions_1_0>(format).getString(GL_VENDOR);
 }
 
 QString OpenGLFunctions::info()
 {
-    Functions f;
+    auto format = OpenGLFunctions::defaultFormat();
+    Functions<OpenGLFunctions> f(format);
 
     QString extensions;
     GLint numExtensions;

@@ -13,10 +13,12 @@ public:
 
     void resolveOpenGLFunctions();
 
-    static void setDefaultFormat();
     static bool hasOpenGLSupport();
     static QString vendor();
     static QString info();
+
+    static void setDefaultFormat();
+    static QSurfaceFormat defaultFormat();
 };
 
 #endif // OPENGLFUNCTIONS_H
