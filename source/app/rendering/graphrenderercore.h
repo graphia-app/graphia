@@ -11,7 +11,6 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
-#include <QOpenGLExtensions>
 
 #include <array>
 #include <vector>
