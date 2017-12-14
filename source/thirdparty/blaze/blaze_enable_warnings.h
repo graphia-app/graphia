@@ -3,3 +3,7 @@
 #if defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
+
+#if _MSC_VER < 1900
+#pragma warning( pop )
+#endif

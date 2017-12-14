@@ -9,3 +9,8 @@
 #endif
 
 #endif
+
+#if _MSC_VER < 1900
+#pragma warning( push )
+#pragma warning( disable : 4100 ) // Unreferenced formal parameter
+#endif

@@ -6,19 +6,9 @@
 #include "graph/graphmodel.h"
 #include "graph/componentmanager.h"
 
-#ifdef _MSC_VER
-#if _MSC_VER > 1900
-#error Check if blaze is still giving strange unreferenced parameter warnings
-#endif
-#pragma warning( push )
-#pragma warning( disable : 4100 ) // Unreferenced formal parameter
-#endif
 #include "blaze_disable_warnings.h"
 #include "blaze/Blaze.h"
 #include "blaze_enable_warnings.h"
-#ifdef _MSC_VER
-#pragma warning( pop )
-#endif
 
 #include <QElapsedTimer>
 
