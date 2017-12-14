@@ -2,6 +2,7 @@
 #define QMLENUM_H
 
 #include <QQmlEngine>
+#include <QCoreApplication>
 
 #ifndef APP_URI
 #define APP_URI "uri.missing"
@@ -34,16 +35,24 @@ constexpr bool static_strcmp(char const* a, char const* b)
         _Q_GADGET \
     public: \
         enum class Enum {__VA_ARGS__}; Q_ENUM(Enum) \
-        struct Constructor \
-        { Constructor() noexcept { static bool initialised = false; \
-            if(initialised) return; \
+        static void initialise() \
+        { \
+            static bool initialised = false; \
+            if(initialised) \
+                return; \
             initialised = true; \
             qmlRegisterUncreatableType<_REFLECTOR(ENUM_NAME)>( \
-            APP_URI, \
-            APP_MAJOR_VERSION, \
-            APP_MINOR_VERSION, \
-            #ENUM_NAME, QString()); } }; \
-    }; const _REFLECTOR(ENUM_NAME)::Constructor ENUM_NAME ## _constructor; \
+                APP_URI, \
+                APP_MAJOR_VERSION, \
+                APP_MINOR_VERSION, \
+                #ENUM_NAME, QString()); \
+        } \
+    }; \
+    static void ENUM_NAME ## _initialiser() \
+    { \
+        _REFLECTOR(ENUM_NAME)::initialise(); \
+    } \
+    Q_COREAPP_STARTUP_FUNCTION(ENUM_NAME ## _initialiser) \
     using ENUM_NAME = QML_ENUM_PROPERTY(ENUM_NAME)
 
 /*
