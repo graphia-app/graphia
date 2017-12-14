@@ -37,8 +37,8 @@ void OpenGLFunctions::setDefaultFormat()
 QSurfaceFormat OpenGLFunctions::defaultFormat()
 {
     QSurfaceFormat format;
-    format.setMajorVersion(4);
-    format.setMinorVersion(0);
+    format.setMajorVersion(3);
+    format.setMinorVersion(3);
     format.setProfile(QSurfaceFormat::CoreProfile);
 
     QSurfaceFormat::setDefaultFormat(format);
