@@ -556,8 +556,11 @@ void GraphRendererCore::renderGraph()
     glEnable(GL_MULTISAMPLE);
     glDisable(GL_BLEND);
 
-    // Enable per-sample shading, this makes small text look nice
-    glEnable(GL_SAMPLE_SHADING);
+    if(hasSampleShading())
+    {
+        // Enable per-sample shading, this makes small text look nice
+        glEnable(GL_SAMPLE_SHADING_ARB);
+    }
 
     for(auto& gpuGraphData : _gpuGraphData)
         gpuGraphData.clearFramebuffer();
@@ -572,8 +575,11 @@ void GraphRendererCore::renderGraph()
         if(gpuGraphData._alpha2 >= 1.0f)
             gpuGraphData.clearDepthbuffer();
 
-        // Shade all samples in multi-sampling
-        glMinSampleShading(1.0);
+        if(hasSampleShading())
+        {
+            // Shade all samples in multi-sampling
+            glMinSampleShading(1.0f);
+        }
 
         glBindFramebuffer(GL_FRAMEBUFFER, gpuGraphData._fbo);
 

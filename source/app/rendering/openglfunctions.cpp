@@ -5,14 +5,27 @@
 #include <QSurfaceFormat>
 #include <QOffscreenSurface>
 
+OpenGLFunctions::~OpenGLFunctions()
+{
+    delete _sampleShadingExtension;
+    _sampleShadingExtension = nullptr;
+}
+
 void OpenGLFunctions::resolveOpenGLFunctions()
 {
-    Q_ASSERT(QOpenGLContext::currentContext() != nullptr);
+    auto context = QOpenGLContext::currentContext();
+    Q_ASSERT(context != nullptr);
 
     if(!initializeOpenGLFunctions())
     {
         // This should never happen if hasOpenGLSupport has returned true
         qFatal("Could not obtain required OpenGL context version");
+    }
+
+    if(context->hasExtension(QByteArrayLiteral("GL_ARB_sample_shading")))
+    {
+        _sampleShadingExtension = new QOpenGLExtension_ARB_sample_shading();
+        _sampleShadingExtension->initializeOpenGLFunctions();
     }
 }
 
