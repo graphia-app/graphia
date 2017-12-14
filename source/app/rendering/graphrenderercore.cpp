@@ -5,8 +5,6 @@
 
 #include <QColor>
 
-#include <qopenglext.h>
-
 template<typename T>
 void setupTexture(T t, GLuint& texture, int width, int height, GLint format)
 {

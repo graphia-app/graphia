@@ -30,4 +30,15 @@ private:
     QOpenGLExtension_ARB_sample_shading* _sampleShadingExtension = nullptr;
 };
 
+// MacOS's glext.h is rubbish
+#ifndef GL_ARB_sample_shading
+#define GL_ARB_sample_shading 1
+#define GL_SAMPLE_SHADING_ARB             0x8C36
+#define GL_MIN_SAMPLE_SHADING_VALUE_ARB   0x8C37
+typedef void (APIENTRYP PFNGLMINSAMPLESHADINGARBPROC) (GLfloat value);
+#ifdef GL_GLEXT_PROTOTYPES
+GLAPI void APIENTRY glMinSampleShadingARB (GLfloat value);
+#endif
+#endif /* GL_ARB_sample_shading */
+
 #endif // OPENGLFUNCTIONS_H
