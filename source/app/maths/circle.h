@@ -2,6 +2,7 @@
 #define CIRCLE
 
 #include <QRectF>
+#include <cmath>
 
 class Circle
 {
