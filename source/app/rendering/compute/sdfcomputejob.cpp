@@ -175,7 +175,16 @@ void SDFComputeJob::generateSDF()
     // Debug code to pull out the SDF texture
     if(u::pref("debug/saveGlyphMaps").toBool())
     {
-        auto pixelCount = static_cast<int>((_glyphMap->images().at(0).sizeInBytes() / (scaleFactor * scaleFactor)) *
+        auto imageSize = [](const QImage& image)
+        {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+            return image.sizeInBytes();
+#else
+            return image.byteCount();
+#endif
+        };
+
+        auto pixelCount = static_cast<int>((imageSize(_glyphMap->images().at(0)) / (scaleFactor * scaleFactor)) *
                                            _glyphMap->images().size());
         std::vector<uchar> pixels(pixelCount);
         glBindTexture(GL_TEXTURE_2D_ARRAY, _sdfTexture);
@@ -184,7 +193,7 @@ void SDFComputeJob::generateSDF()
         // Save each layer as its own image for debug
         for(int layer = 0; layer < numImages; ++layer)
         {
-            int offset = (_glyphMap->images().at(0).sizeInBytes() / (scaleFactor * scaleFactor)) * layer;
+            int offset = (imageSize(_glyphMap->images().at(0)) / (scaleFactor * scaleFactor)) * layer;
             QImage sdfImage(pixels.data() + offset, renderWidth, renderHeight, QImage::Format_RGBA8888);
             sdfImage.save(QDir::currentPath() + "/SDF" + QString::number(layer) + ".png");
         }
