@@ -1,5 +1,6 @@
 #include "parserthread.h"
 
+#include "graph/graphmodel.h"
 #include "graph/mutablegraph.h"
 
 #include "shared/utils/thread.h"
@@ -8,8 +9,8 @@
 
 #include <QDebug>
 
-ParserThread::ParserThread(MutableGraph& graph, QUrl url) :
-    _graph(&graph),
+ParserThread::ParserThread(GraphModel& graphModel, QUrl url) :
+    _graphModel(&graphModel),
     _url(std::move(url))
 {}
 
@@ -39,13 +40,13 @@ void ParserThread::run()
 
     bool result = false;
 
-    _graph->performTransaction(
+    _graphModel->mutableGraph().performTransaction(
         [this, &result](IMutableGraph& graph)
         {
             std::atomic<int> percentage;
             percentage = -1;
 
-            result = _parser->parse(_url, graph,
+            result = _parser->parse(_url, *_graphModel,
                 [this, &percentage](int newPercentage)
                 {
 #ifdef _DEBUG

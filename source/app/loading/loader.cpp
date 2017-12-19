@@ -3,6 +3,7 @@
 
 #include "application.h"
 
+#include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/scope_exit.h"
@@ -218,7 +219,7 @@ static bool parseHeader(const QUrl& url, Header* header = nullptr)
     return true;
 }
 
-bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn)
+bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn)
 {
     Header header;
     if(!parseHeader(url, &header))
@@ -226,7 +227,7 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
 
     QByteArray byteArray;
 
-    if(!load(url.toLocalFile(), byteArray, -1, &graph, progressFn))
+    if(!load(url.toLocalFile(), byteArray, -1, &graphModel.mutableGraph(), progressFn))
         return false;
 
     progressFn(-1);
@@ -263,15 +264,15 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
 
     uint64_t i = 0;
 
-    graph.setPhase(QObject::tr("Nodes"));
+    graphModel.mutableGraph().setPhase(QObject::tr("Nodes"));
     for(const auto& jsonNode : jsonNodes)
     {
         NodeId nodeId = jsonNode["id"].get<int>();
 
         if(!nodeId.isNull())
         {
-            graph.reserveNodeId(nodeId);
-            graph.addNode(nodeId);
+            graphModel.mutableGraph().reserveNodeId(nodeId);
+            graphModel.mutableGraph().addNode(nodeId);
         }
 
         progressFn(static_cast<int>((i++ * 100) /jsonNodes.size()));
@@ -281,7 +282,7 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
 
     i = 0;
 
-    graph.setPhase(QObject::tr("Edges"));
+    graphModel.mutableGraph().setPhase(QObject::tr("Edges"));
     for(const auto& jsonEdge : jsonEdges)
     {
         EdgeId edgeId = jsonEdge["id"].get<int>();
@@ -290,8 +291,8 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
 
         if(!edgeId.isNull() && !sourceId.isNull() && !targetId.isNull())
         {
-            graph.reserveEdgeId(edgeId);
-            graph.addEdge(edgeId, sourceId, targetId);
+            graphModel.mutableGraph().reserveEdgeId(edgeId);
+            graphModel.mutableGraph().addEdge(edgeId, sourceId, targetId);
         }
 
         progressFn(static_cast<int>((i++ * 100) / jsonEdges.size()));
@@ -317,12 +318,12 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
 
         if(u::contains(jsonLayout, "positions"))
         {
-            _nodePositions = std::make_unique<ExactNodePositions>(graph);
+            _nodePositions = std::make_unique<ExactNodePositions>(graphModel.mutableGraph());
 
             NodeId nodeId(0);
             for(const auto& jsonPosition : jsonLayout["positions"])
             {
-                if(graph.containsNodeId(nodeId))
+                if(graphModel.mutableGraph().containsNodeId(nodeId))
                 {
                     const auto& jsonPositionArray = jsonPosition;
 
@@ -353,7 +354,7 @@ bool Loader::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& prog
     else
         return false;
 
-    if(!_pluginInstance->load(pluginData, header._pluginDataVersion, graph, progressFn))
+    if(!_pluginInstance->load(pluginData, header._pluginDataVersion, graphModel.mutableGraph(), progressFn))
         return false;
 
     if(u::contains(jsonBody, "ui"))

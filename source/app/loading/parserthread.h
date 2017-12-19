@@ -9,19 +9,19 @@
 
 #include <thread>
 
-class MutableGraph;
+class GraphModel;
 
 class ParserThread : public QObject, public IParserThread
 {
     Q_OBJECT
 private:
-    MutableGraph* _graph;
+    GraphModel* _graphModel;
     QUrl _url;
     std::unique_ptr<IParser> _parser;
     std::thread _thread;
 
 public:
-    ParserThread(MutableGraph& graph, QUrl url);
+    ParserThread(GraphModel& graphModel, QUrl url);
     ~ParserThread() override;
 
     void start(std::unique_ptr<IParser> parser);

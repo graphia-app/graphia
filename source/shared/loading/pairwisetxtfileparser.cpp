@@ -2,6 +2,7 @@
 
 #include "shared/utils/container.h"
 #include "shared/utils/string.h"
+#include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 #include "shared/plugins/basegenericplugin.h"
 #include "shared/plugins/usernodedata.h"
@@ -31,7 +32,7 @@ PairwiseTxtFileParser::PairwiseTxtFileParser(BaseGenericPluginInstance* genericP
         _userNodeData->add(QObject::tr("Node Name"));
 }
 
-bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn)
+bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn)
 {
     std::ifstream file(url.toLocalFile().toStdString());
     if(!file)
@@ -182,7 +183,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const P
 
             if(!u::contains(nodeIdMap, firstToken))
             {
-                firstNodeId = graph.addNode();
+                firstNodeId = graphModel.mutableGraph().addNode();
                 nodeIdMap.emplace(firstToken, firstNodeId);
 
                 if(_userNodeData != nullptr)
@@ -197,7 +198,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const P
 
             if(!u::contains(nodeIdMap, secondToken))
             {
-                secondNodeId = graph.addNode();
+                secondNodeId = graphModel.mutableGraph().addNode();
                 nodeIdMap.emplace(secondToken, secondNodeId);
 
                 if(_userNodeData != nullptr)
@@ -210,7 +211,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IMutableGraph& graph, const P
             else
                 secondNodeId = nodeIdMap[secondToken];
 
-            auto edgeId = graph.addEdge(firstNodeId, secondNodeId);
+            auto edgeId = graphModel.mutableGraph().addEdge(firstNodeId, secondNodeId);
 
             if(tokens.size() >= 3)
             {

@@ -1,5 +1,6 @@
 #include "correlationfileparser.h"
 
+#include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 #include "correlationplugin.h"
 
@@ -84,7 +85,7 @@ static QRect findLargestDataRect(const TabularData& tabularData)
     return dataRect;
 }
 
-bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn)
+bool CorrelationFileParser::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn)
 {
     CsvFileParser csvFileParser;
     TsvFileParser tsvFileParser;
@@ -92,14 +93,14 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const P
     TabularData* tabularData = nullptr;
     if(_urlTypeName == QLatin1String("CorrelationCSV"))
     {
-        if(!csvFileParser.parse(url, graph, progressFn))
+        if(!csvFileParser.parse(url, graphModel, progressFn))
             return false;
 
         tabularData = &(csvFileParser.tabularData());
     }
     else if(_urlTypeName == QLatin1String("CorrelationTSV"))
     {
-        if(!tsvFileParser.parse(url, graph, progressFn))
+        if(!tsvFileParser.parse(url, graphModel, progressFn))
             return false;
 
         tabularData = &(tsvFileParser.tabularData());
@@ -110,7 +111,7 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const P
 
     tabularData->setTransposed(_plugin->transpose());
 
-    graph.setPhase(QObject::tr("Finding Data Points"));
+    graphModel.mutableGraph().setPhase(QObject::tr("Finding Data Points"));
     progressFn(-1);
     auto dataRect = findLargestDataRect(*tabularData);
 
@@ -121,13 +122,13 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const P
 
     auto cancelFn = [this]{ return cancelled(); };
 
-    graph.setPhase(QObject::tr("Attributes"));
+    graphModel.mutableGraph().setPhase(QObject::tr("Attributes"));
     if(!_plugin->loadUserData(*tabularData, dataRect.left(), dataRect.top(), cancelFn, progressFn))
         return false;
 
     if(_plugin->requiresNormalisation())
     {
-        graph.setPhase(QObject::tr("Normalisation"));
+        graphModel.mutableGraph().setPhase(QObject::tr("Normalisation"));
         if(!_plugin->normalise(cancelFn, progressFn))
             return false;
     }
@@ -137,17 +138,17 @@ bool CorrelationFileParser::parse(const QUrl& url, IMutableGraph& graph, const P
     _plugin->finishDataRows();
     _plugin->createAttributes();
 
-    graph.setPhase(QObject::tr("Pearson Correlation"));
+    graphModel.mutableGraph().setPhase(QObject::tr("Pearson Correlation"));
     auto edges = _plugin->pearsonCorrelation(_plugin->minimumCorrelation(), cancelFn, progressFn);
 
     if(cancelled())
         return false;
 
-    graph.setPhase(QObject::tr("Building Graph"));
+    graphModel.mutableGraph().setPhase(QObject::tr("Building Graph"));
     if(!_plugin->createEdges(edges, cancelFn, progressFn))
         return false;
 
-    graph.clearPhase();
+    graphModel.mutableGraph().clearPhase();
 
     return true;
 }

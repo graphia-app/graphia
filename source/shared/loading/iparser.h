@@ -5,7 +5,7 @@
 #include "progressfn.h"
 
 class QUrl;
-class IMutableGraph;
+class IGraphModel;
 
 class IParser : public Cancellable
 {
@@ -13,7 +13,7 @@ public:
     ~IParser() override = default;
 
     virtual bool parse(const QUrl& url,
-                       IMutableGraph& mutableGraph,
+                       IGraphModel& graphModel,
                        const ProgressFn& progressFn) = 0;
 };
 

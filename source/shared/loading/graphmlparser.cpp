@@ -1,9 +1,12 @@
 #include "graphmlparser.h"
 
+#include "shared/graph/igraphmodel.h"
+#include "shared/graph/imutablegraph.h"
+#include "shared/utils/container.h"
+
 #include <QtXml/QXmlInputSource>
 #include <QDebug>
 #include <QUrl>
-#include <shared/utils/container.h>
 
 GraphMLHandler::GraphMLHandler(IMutableGraph &mutableGraph, const ProgressFn &progress,
                                UserNodeData* userNodeData, int lineCount)
@@ -278,7 +281,7 @@ GraphMLParser::GraphMLParser(UserNodeData* userNodeData) :
     _userNodeData(userNodeData)
 {}
 
-bool GraphMLParser::parse(const QUrl &url, IMutableGraph &graph, const ProgressFn &progress)
+bool GraphMLParser::parse(const QUrl &url, IGraphModel& graphModel, const ProgressFn &progress)
 {
     QFile file(url.toLocalFile());
     int lineCount = 0;
@@ -299,7 +302,7 @@ bool GraphMLParser::parse(const QUrl &url, IMutableGraph &graph, const ProgressF
 
     progress(-1);
 
-    GraphMLHandler handler(graph, progress, _userNodeData, lineCount);
+    GraphMLHandler handler(graphModel.mutableGraph(), progress, _userNodeData, lineCount);
     auto *source = new QXmlInputSource(&file);
     QXmlSimpleReader xmlReader;
     xmlReader.setContentHandler(&handler);

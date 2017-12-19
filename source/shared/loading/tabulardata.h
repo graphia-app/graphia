@@ -1,6 +1,7 @@
 #ifndef TABULARDATA_H
 #define TABULARDATA_H
 
+#include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 #include "shared/loading/iparser.h"
 #include "shared/utils/string.h"
@@ -126,13 +127,13 @@ private:
     }
 
 public:
-    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn) override
+    bool parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn) override
     {
         size_t columns = 0;
         size_t rows = 0;
 
         // First pass to determine the size of the table
-        graph.setPhase(QObject::tr("Finding size"));
+        graphModel.mutableGraph().setPhase(QObject::tr("Finding size"));
         bool success = parse(url, progressFn,
         [&columns, &rows](size_t column, size_t row, auto)
         {
@@ -145,7 +146,7 @@ public:
 
         _tabularData.initialise(columns, rows);
 
-        graph.setPhase(QObject::tr("Parsing"));
+        graphModel.mutableGraph().setPhase(QObject::tr("Parsing"));
         return parse(url, progressFn,
         [this](size_t column, size_t row, auto&& token)
         {

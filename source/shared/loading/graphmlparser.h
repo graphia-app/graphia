@@ -110,7 +110,7 @@ private:
 
 public:
     explicit GraphMLParser(UserNodeData *userNodeData = nullptr);
-    bool parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progress) override;
+    bool parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progress) override;
 };
 
 #endif // GRAPHMLPARSER_H

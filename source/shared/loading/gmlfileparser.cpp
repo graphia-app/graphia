@@ -1,4 +1,5 @@
 #include "gmlfileparser.h"
+#include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 #include "shared/plugins/usernodedata.h"
 
@@ -172,7 +173,7 @@ GmlFileParser::GmlFileParser(UserNodeData* userNodeData) :
         _userNodeData->add(QObject::tr("Node Name"));
 }
 
-bool GmlFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressFn& progressFn)
+bool GmlFileParser::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn)
 {
     QString localFile = url.toLocalFile();
     std::ifstream stream(localFile.toStdString());
@@ -187,6 +188,6 @@ bool GmlFileParser::parse(const QUrl& url, IMutableGraph& graph, const ProgressF
 
     progressFn(-1);
 
-    return parseGml(graph, _userNodeData, [this] { return cancelled(); },
+    return parseGml(graphModel.mutableGraph(), _userNodeData, [this] { return cancelled(); },
                     progressFn, vec.begin(), vec.end());;
 }

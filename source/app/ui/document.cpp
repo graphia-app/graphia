@@ -372,7 +372,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     _graphModel = std::make_unique<GraphModel>(fileUrl.fileName(), plugin);
 
     _gpuComputeThread = std::make_unique<GPUComputeThread>();
-    _graphFileParserThread = std::make_unique<ParserThread>(_graphModel->mutableGraph(), fileUrl);
+    _graphFileParserThread = std::make_unique<ParserThread>(*_graphModel, fileUrl);
 
     _selectionManager = std::make_unique<SelectionManager>(*_graphModel);
     _searchManager = std::make_unique<SearchManager>(*_graphModel);
