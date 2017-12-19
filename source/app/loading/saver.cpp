@@ -129,6 +129,25 @@ static json graphAsJson(const IGraph& graph, const ProgressFn& progressFn)
     return jsonObject;
 }
 
+static json nodeNamesAsJson(IGraphModel& graphModel,
+                            const ProgressFn& progressFn)
+{
+    graphModel.mutableGraph().setPhase(QObject::tr("Names"));
+    json names;
+
+    uint64_t i = 0;
+    const auto& nodeIds = graphModel.mutableGraph().nodeIds();
+    for(NodeId nodeId : nodeIds)
+    {
+        names.emplace_back(graphModel.nodeName(nodeId));
+        progressFn((i++ * 100) / nodeIds.size());
+    }
+
+    progressFn(-1);
+
+    return names;
+}
+
 static json nodePositionsAsJson(const IGraph& graph, const NodePositions& nodePositions,
                                 const ProgressFn& progressFn)
 {
@@ -171,6 +190,7 @@ bool Saver::encode(const ProgressFn& progressFn)
     json content;
 
     content["graph"] = graphAsJson(graphModel->mutableGraph(), progressFn);
+    content["nodeNames"] = nodeNamesAsJson(*graphModel, progressFn);
 
     json layout;
 

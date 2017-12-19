@@ -8,9 +8,9 @@
 #include <QDebug>
 #include <QUrl>
 
-GraphMLHandler::GraphMLHandler(IMutableGraph &mutableGraph, const ProgressFn &progress,
+GraphMLHandler::GraphMLHandler(IGraphModel& graphModel, const ProgressFn &progress,
                                UserNodeData* userNodeData, int lineCount)
-                               : _graph(&mutableGraph), _progress(&progress),
+                               : _graphModel(&graphModel), _progress(&progress),
                                  _lineCount(lineCount), _userNodeData(userNodeData)
 {
     if(_userNodeData != nullptr)
@@ -48,7 +48,7 @@ bool GraphMLHandler::endDocument()
             _errorString = QStringLiteral("Invalid Edge Target. Edge - Source: %1 Target: %2").arg(tempEdge._source, tempEdge._target);
             return false;
         }
-        const EdgeId& edgeId = _graph->addEdge(sourceNodeId->second, targetNodeId->second);
+        const EdgeId& edgeId = _graphModel->mutableGraph().addEdge(sourceNodeId->second, targetNodeId->second);
         _edgeIdMap[tempEdge] = edgeId;
     }
 
@@ -67,7 +67,7 @@ bool GraphMLHandler::endDocument()
     return true;
 }
 
-bool GraphMLHandler::startElement(const QString &, const QString &localName, const QString &, const QXmlAttributes &atts)
+bool GraphMLHandler::startElement(const QString&, const QString& localName, const QString&, const QXmlAttributes& atts)
 {
     // New Edge
     if(localName == QLatin1String("edge"))
@@ -113,7 +113,7 @@ bool GraphMLHandler::startElement(const QString &, const QString &localName, con
             return false;
         }
 
-        auto nodeId = _graph->addNode();
+        auto nodeId = _graphModel->mutableGraph().addNode();
         _activeNodes.push(nodeId);
         // Check if id has already been used
         if(u::contains(_nodeMap, atts.value(QStringLiteral("id"))))
@@ -126,9 +126,10 @@ bool GraphMLHandler::startElement(const QString &, const QString &localName, con
 
         if(_userNodeData != nullptr)
         {
-            _userNodeData->addNodeId(nodeId);
-            _userNodeData->setValueByNodeId(nodeId, QObject::tr("Node Name"),
-                                              atts.value(QStringLiteral("id")));
+            _userNodeData->addElementId(nodeId);
+            auto nodeName = atts.value(QStringLiteral("id"));
+            _userNodeData->setValueBy(nodeId, QObject::tr("Node Name"), nodeName);
+            _graphModel->setNodeName(nodeId, nodeName);
         }
     }
     // New Attribute Type
@@ -227,7 +228,7 @@ bool GraphMLHandler::endElement(const QString &, const QString &localName, const
         if(_userNodeData != nullptr && !_activeNodes.empty() && !attribute->_name.isEmpty())
         {
             _userNodeData->add(attribute->_name);
-            _userNodeData->setValueByNodeId(_activeNodes.top(), attribute->_name, attribute->_value.toString());
+            _userNodeData->setValueBy(_activeNodes.top(), attribute->_name, attribute->_value.toString());
         }
 
         _activeAttributes.pop();
@@ -302,7 +303,7 @@ bool GraphMLParser::parse(const QUrl &url, IGraphModel& graphModel, const Progre
 
     progress(-1);
 
-    GraphMLHandler handler(graphModel.mutableGraph(), progress, _userNodeData, lineCount);
+    GraphMLHandler handler(graphModel, progress, _userNodeData, lineCount);
     auto *source = new QXmlInputSource(&file);
     QXmlSimpleReader xmlReader;
     xmlReader.setContentHandler(&handler);

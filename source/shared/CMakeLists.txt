@@ -42,7 +42,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/plugins/nodeattributetablemodel.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/userdata.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/userdatavector.h
-    ${CMAKE_CURRENT_LIST_DIR}/plugins/usernodedata.h
+    ${CMAKE_CURRENT_LIST_DIR}/plugins/userelementdata.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/idocument.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/iselectionmanager.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/visualisations/ielementvisual.h
@@ -83,7 +83,6 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/plugins/nodeattributetablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/userdata.cpp
     ${CMAKE_CURRENT_LIST_DIR}/plugins/userdatavector.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/plugins/usernodedata.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/color.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/deferredexecutor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/performancecounter.cpp

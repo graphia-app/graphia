@@ -1,6 +1,6 @@
 #include "nodeattributetablemodel.h"
 
-#include "usernodedata.h"
+#include "userelementdata.h"
 
 #include "shared/ui/iselectionmanager.h"
 #include "shared/graph/igraphmodel.h"
@@ -52,7 +52,7 @@ QVariant NodeAttributeTableModel::dataValue(int row, int role) const
     auto* attribute = _document->graphModel()->attributeByName(_roleNames[role]);
     if(attribute != nullptr)
     {
-        auto nodeId = _userNodeData->nodeIdForRowIndex(row);
+        auto nodeId = _userNodeData->elementIdForRowIndex(row);
 
         if(!attribute->valueMissingOf(nodeId))
             return attribute->valueOf(nodeId);
@@ -77,7 +77,7 @@ void NodeAttributeTableModel::update()
         updatedData.emplace_back(_roleNames.size());
         auto& dataRow = updatedData.back();
 
-        NodeId nodeId = _userNodeData->nodeIdForRowIndex(row);
+        NodeId nodeId = _userNodeData->elementIdForRowIndex(row);
 
         if(!_document->graphModel()->graph().containsNodeId(nodeId))
         {
@@ -153,7 +153,7 @@ bool NodeAttributeTableModel::columnIsHiddenByDefault(const QString&) const
 
 void NodeAttributeTableModel::moveFocusToNodeForRowIndex(size_t row)
 {
-    auto nodeId = _userNodeData->nodeIdForRowIndex(row);
+    auto nodeId = _userNodeData->elementIdForRowIndex(row);
     _document->moveFocusToNode(nodeId);
 }
 

@@ -6,7 +6,6 @@
 #include "shared/utils/pair_iterator.h"
 #include "shared/loading/progressfn.h"
 
-#include <QObject>
 #include <QString>
 #include <QVariant>
 
@@ -14,19 +13,16 @@
 
 #include <vector>
 
-class UserData : public QObject
+class UserData
 {
-    Q_OBJECT
-
 private:
     // This is not a map because the data needs to be ordered
     std::vector<std::pair<QString, UserDataVector>> _userDataVectors;
     int _numValues = 0;
 
-protected:
-    const QString firstUserDataVectorName() const;
-
 public:
+    QString firstUserDataVectorName() const;
+
     int numUserDataVectors() const;
     int numValues() const;
 
@@ -43,9 +39,6 @@ public:
 
     json save(const ProgressFn& progressFn) const;
     bool load(const json& jsonObject, const ProgressFn& progressFn);
-
-signals:
-    void userDataVectorAdded(const QString& name);
 };
 
 #endif // USERDATA_H

@@ -300,6 +300,18 @@ bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& p
 
     progressFn(-1);
 
+    if(u::contains(jsonBody, "nodeNames"))
+    {
+        NodeId nodeId(0);
+        for(const auto& jsonNodeName : jsonBody["nodeNames"])
+        {
+            if(graphModel.mutableGraph().containsNodeId(nodeId))
+                graphModel.setNodeName(nodeId, jsonNodeName);
+
+            nodeId++;
+        }
+    }
+
     if(u::contains(jsonBody, "transforms"))
     {
         for(const auto& transform : jsonBody["transforms"])

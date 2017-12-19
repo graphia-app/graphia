@@ -303,7 +303,10 @@ void CorrelationPluginInstance::finishDataRow(size_t row)
     auto computeCost = static_cast<int>(_numRows - row + 1);
 
     _dataRows.emplace_back(begin, end, nodeId, computeCost);
-    _userNodeData.setNodeIdForRowIndex(nodeId, row);
+    _userNodeData.setElementIdForRowIndex(nodeId, row);
+
+    auto nodeName = _userNodeData.valueBy(nodeId, _userNodeData.firstUserDataVectorName()).toString();
+    graphModel()->setNodeName(nodeId, nodeName);
 }
 
 double CorrelationPluginInstance::scaleValue(double value)
@@ -334,7 +337,6 @@ double CorrelationPluginInstance::scaleValue(double value)
 
 void CorrelationPluginInstance::onLoadSuccess()
 {
-    _userNodeData.setNodeNamesToFirstUserDataVector(*graphModel());
     _userNodeData.exposeAsAttributes(*graphModel());
     _nodeAttributeTableModel.updateRoleNames();
 }
@@ -351,7 +353,7 @@ QVector<QColor> CorrelationPluginInstance::nodeColors()
 
     for(size_t i = 0; i < _numRows; i++)
     {
-        auto nodeId = _userNodeData.nodeIdForRowIndex(i);
+        auto nodeId = _userNodeData.elementIdForRowIndex(i);
         colors.append(graphModel()->nodeVisual(nodeId).outerColor());
     }
 
@@ -380,7 +382,7 @@ QStringList CorrelationPluginInstance::rowNames()
 
 const CorrelationPluginInstance::DataRow& CorrelationPluginInstance::dataRowForNodeId(NodeId nodeId) const
 {
-    return _dataRows.at(_userNodeData.rowIndexForNodeId(nodeId));
+    return _dataRows.at(_userNodeData.rowIndexFor(nodeId));
 }
 
 void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager*)
@@ -508,7 +510,7 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
         auto end = _data.cbegin() + dataEndIndex;
         auto computeCost = static_cast<int>(_numRows - row + 1);
 
-        auto nodeId = _userNodeData.nodeIdForRowIndex(row);
+        auto nodeId = _userNodeData.elementIdForRowIndex(row);
         _dataRows.emplace_back(begin, end, nodeId, computeCost);
     }
 

@@ -6,7 +6,7 @@
 #include "shared/loading/tabulardata.h"
 #include "shared/loading/iparser.h"
 #include "shared/plugins/userdata.h"
-#include "shared/plugins/usernodedata.h"
+#include "shared/plugins/userelementdata.h"
 
 #include "correlationnodeattributetablemodel.h"
 #include "minmaxnormaliser.h"

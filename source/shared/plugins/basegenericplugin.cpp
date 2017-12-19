@@ -130,7 +130,6 @@ QString BaseGenericPluginInstance::selectedNodeNames() const
 
 void BaseGenericPluginInstance::onLoadSuccess()
 {
-    _userNodeData.setNodeNamesToFirstUserDataVector(*graphModel());
     _userNodeData.exposeAsAttributes(*graphModel());
     _nodeAttributeTableModel.updateRoleNames();
 }

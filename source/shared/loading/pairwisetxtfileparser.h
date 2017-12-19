@@ -2,9 +2,9 @@
 #define PAIRWISETXTFILEPARSER_H
 
 #include "shared/loading/iparser.h"
+#include "shared/plugins/userelementdata.h"
 
 class BaseGenericPluginInstance;
-class UserNodeData;
 
 class PairwiseTxtFileParser : public IParser
 {

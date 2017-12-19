@@ -4,10 +4,10 @@
 #include "shared/loading/iparser.h"
 #include "shared/plugins/basegenericplugin.h"
 #include "shared/graph/imutablegraph.h"
+#include "shared/plugins/userelementdata.h"
+
 #include <QtXml/QXmlDefaultHandler>
 #include <stack>
-
-class UserNodeData;
 
 class GraphMLHandler : public QXmlDefaultHandler
 {
@@ -58,7 +58,7 @@ private:
         }
     };
 
-    IMutableGraph* _graph;
+    IGraphModel* _graphModel;
 
     const ProgressFn* _progress;
     QString _errorString = QString();
@@ -87,7 +87,7 @@ private:
     UserNodeData* _userNodeData;
 
 public:
-    GraphMLHandler(IMutableGraph& mutableGraph, const ProgressFn& progress, UserNodeData* userNodeData, int lineCount);
+    GraphMLHandler(IGraphModel& graphModel, const ProgressFn& progress, UserNodeData* userNodeData, int lineCount);
     bool startDocument() override;
     bool endDocument() override;
     bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &atts) override;

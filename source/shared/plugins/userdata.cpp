@@ -2,7 +2,7 @@
 
 #include "shared/utils/container.h"
 
-const QString UserData::firstUserDataVectorName() const
+QString UserData::firstUserDataVectorName() const
 {
     if(!_userDataVectors.empty())
         return _userDataVectors.at(0).first;
@@ -34,10 +34,7 @@ QStringList UserData::vectorNames() const
 void UserData::add(const QString& name)
 {
     if(!u::containsKey(_userDataVectors, name))
-    {
         _userDataVectors.emplace_back(std::make_pair(name, UserDataVector(name)));
-        emit userDataVectorAdded(name);
-    }
 }
 
 void UserData::setValue(size_t index, const QString& name, const QString& value)

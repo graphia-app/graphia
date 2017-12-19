@@ -1,7 +1,7 @@
 #include "gmlfileparser.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
-#include "shared/plugins/usernodedata.h"
+#include "shared/plugins/userelementdata.h"
 
 #include "thirdparty/axe/include/axe.h"
 
@@ -15,7 +15,7 @@
 #include <cstring>
 #include <iterator>
 
-template<typename It> bool parseGml(IMutableGraph &graph,
+template<typename It> bool parseGml(IGraphModel &graphModel,
                                     UserNodeData* userNodeData,
                                     const std::function<bool ()>& cancelled,
                                     const ProgressFn& progressFn,
@@ -65,23 +65,24 @@ template<typename It> bool parseGml(IMutableGraph &graph,
         label = std::string(i1, i2);
     });
 
-    auto captureNode = axe::e_ref([&nodeIndexMap, &id, &graph, &label,
+    auto captureNode = axe::e_ref([&nodeIndexMap, &id, &graphModel, &label,
                                   &userNodeData](It, It)
     {
         if(id >= 0)
         {
-            nodeIndexMap[id] = graph.addNode();
+            nodeIndexMap[id] = graphModel.mutableGraph().addNode();
 
             if(userNodeData != nullptr)
             {
-                userNodeData->addNodeId(nodeIndexMap[id]);
+                userNodeData->addElementId(nodeIndexMap[id]);
 
                 // If we don't have a label, use the id
                 if(label.empty())
                     label = std::to_string(id);
 
-                userNodeData->setValueByNodeId(nodeIndexMap[id], QObject::tr("Node Name"),
-                                               QString::fromStdString(label));
+                userNodeData->setValueBy(nodeIndexMap[id], QObject::tr("Node Name"),
+                                         QString::fromStdString(label));
+                graphModel.setNodeName(nodeIndexMap[id], QString::fromStdString(label));
             }
 
             label.clear();
@@ -115,14 +116,14 @@ template<typename It> bool parseGml(IMutableGraph &graph,
         isTargetSet = true;
     });
 
-    auto captureEdge = axe::e_ref([&source, &target, &nodeIndexMap, &graph, &isSourceSet, &isTargetSet](It, It)
+    auto captureEdge = axe::e_ref([&source, &target, &nodeIndexMap, &graphModel, &isSourceSet, &isTargetSet](It, It)
     {
         // Check if Target and Source values are set
         if(isTargetSet && isSourceSet)
         {
             NodeId sourceId = nodeIndexMap[source];
             NodeId targetId = nodeIndexMap[target];
-            graph.addEdge(sourceId, targetId);
+            graphModel.mutableGraph().addEdge(sourceId, targetId);
             isTargetSet = false;
             isSourceSet = false;
         }
@@ -188,6 +189,6 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel& graphModel, const Progre
 
     progressFn(-1);
 
-    return parseGml(graphModel.mutableGraph(), _userNodeData, [this] { return cancelled(); },
-                    progressFn, vec.begin(), vec.end());;
+    return parseGml(graphModel, _userNodeData, [this] { return cancelled(); },
+        progressFn, vec.begin(), vec.end());
 }

@@ -5,7 +5,7 @@
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
 #include "shared/plugins/basegenericplugin.h"
-#include "shared/plugins/usernodedata.h"
+#include "shared/plugins/userelementdata.h"
 
 #include "thirdparty/utfcpp/utf8.h"
 
@@ -169,7 +169,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
                 if(!nodeId.isNull())
                 {
                     _userNodeData->add(attributeName);
-                    _userNodeData->setValueByNodeId(nodeId, attributeName, value);
+                    _userNodeData->setValueBy(nodeId, attributeName, value);
                 }
             }
         }
@@ -188,9 +188,10 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
 
                 if(_userNodeData != nullptr)
                 {
-                    _userNodeData->addNodeId(firstNodeId);
-                    _userNodeData->setValueByNodeId(firstNodeId, QObject::tr("Node Name"),
-                                                      QString::fromStdString(firstToken));
+                    _userNodeData->addElementId(firstNodeId);
+                    auto nodeName = QString::fromStdString(firstToken);
+                    _userNodeData->setValueBy(firstNodeId, QObject::tr("Node Name"), nodeName);
+                    graphModel.setNodeName(firstNodeId, nodeName);
                 }
             }
             else
@@ -203,9 +204,10 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
 
                 if(_userNodeData != nullptr)
                 {
-                    _userNodeData->addNodeId(secondNodeId);
-                    _userNodeData->setValueByNodeId(secondNodeId, QObject::tr("Node Name"),
-                                                      QString::fromStdString(secondToken));
+                    _userNodeData->addElementId(secondNodeId);
+                    auto nodeName = QString::fromStdString(secondToken);
+                    _userNodeData->setValueBy(secondNodeId, QObject::tr("Node Name"), nodeName);
+                    graphModel.setNodeName(secondNodeId, nodeName);
                 }
             }
             else

@@ -2,8 +2,7 @@
 #define GMLFILEPARSER_H
 
 #include "shared/loading/iparser.h"
-
-class UserNodeData;
+#include "shared/plugins/userelementdata.h"
 
 class GmlFileParser: public IParser
 {

@@ -3,6 +3,7 @@
 
 #include "shared/graph/elementid.h"
 #include "shared/ui/idocument.h"
+#include "shared/plugins/userelementdata.h"
 
 #include <QAbstractTableModel>
 #include <QStringList>
@@ -13,7 +14,6 @@
 #include <mutex>
 #include <deque>
 
-class UserNodeData;
 class Graph;
 
 class NodeAttributeTableModel : public QAbstractTableModel

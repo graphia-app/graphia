@@ -3,7 +3,7 @@
 
 #include "baseplugin.h"
 
-#include "shared/plugins/usernodedata.h"
+#include "shared/plugins/userelementdata.h"
 #include "shared/plugins/nodeattributetablemodel.h"
 
 #include "shared/graph/grapharray.h"
