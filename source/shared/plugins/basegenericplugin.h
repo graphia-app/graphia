@@ -21,9 +21,8 @@ class BaseGenericPluginInstance : public BasePluginInstance
     Q_PROPERTY(QAbstractTableModel* nodeAttributeTableModel READ nodeAttributeTableModel CONSTANT)
 
 private:
-    std::unique_ptr<EdgeArray<float>> _edgeWeights;
-
     UserNodeData _userNodeData;
+    UserEdgeData _userEdgeData;
 
     NodeAttributeTableModel _nodeAttributeTableModel;
     QAbstractTableModel* nodeAttributeTableModel() { return &_nodeAttributeTableModel; }
@@ -32,8 +31,6 @@ public:
     BaseGenericPluginInstance();
 
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) override;
-
-    void setEdgeWeight(EdgeId edgeId, float weight);
 
     QByteArray save(IMutableGraph&, const ProgressFn&) const override;
     bool load(const QByteArray&, int, IMutableGraph&, const ProgressFn&) override;

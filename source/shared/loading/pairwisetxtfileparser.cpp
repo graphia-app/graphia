@@ -4,7 +4,6 @@
 #include "shared/utils/string.h"
 #include "shared/graph/igraphmodel.h"
 #include "shared/graph/imutablegraph.h"
-#include "shared/plugins/basegenericplugin.h"
 #include "shared/plugins/userelementdata.h"
 
 #include "thirdparty/utfcpp/utf8.h"
@@ -24,12 +23,10 @@
 #include <fstream>
 #include <cctype>
 
-PairwiseTxtFileParser::PairwiseTxtFileParser(BaseGenericPluginInstance* genericPluginInstance,
-                                             UserNodeData* userNodeData) :
-    _genericPluginInstance(genericPluginInstance), _userNodeData(userNodeData)
+PairwiseTxtFileParser::PairwiseTxtFileParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData) :
+    _userNodeData(userNodeData), _userEdgeData(userEdgeData)
 {
-    if(_userNodeData != nullptr)
-        _userNodeData->add(QObject::tr("Node Name"));
+    _userNodeData->add(QObject::tr("Node Name"));
 }
 
 bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn)
@@ -225,7 +222,8 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
                     if(std::isnan(edgeWeight) || !std::isfinite(edgeWeight))
                         edgeWeight = 1.0f;
 
-                    _genericPluginInstance->setEdgeWeight(edgeId, edgeWeight);
+                    _userEdgeData->add(QObject::tr("Edge Weight"));
+                    _userEdgeData->setValue(edgeId, QObject::tr("Edge Weight"), QString::number(edgeWeight));
                 }
             }
         }

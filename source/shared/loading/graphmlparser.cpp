@@ -13,8 +13,7 @@ GraphMLHandler::GraphMLHandler(IGraphModel& graphModel, const ProgressFn &progre
                                : _graphModel(&graphModel), _progress(&progress),
                                  _lineCount(lineCount), _userNodeData(userNodeData)
 {
-    if(_userNodeData != nullptr)
-        _userNodeData->add(QObject::tr("Node Name"));
+    _userNodeData->add(QObject::tr("Node Name"));
 }
 
 bool GraphMLHandler::startDocument()

@@ -109,7 +109,7 @@ private:
     GraphMLHandler::AttributeData<EdgeId> _edgeAttributeData;
 
 public:
-    explicit GraphMLParser(UserNodeData *userNodeData = nullptr);
+    explicit GraphMLParser(UserNodeData *userNodeData);
     bool parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progress) override;
 };
 

@@ -24,8 +24,11 @@ void BaseGenericPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
     BasePluginInstance::initialise(plugin, document, parserThread);
 
     auto graphModel = document->graphModel();
+
     _userNodeData.initialise(graphModel->mutableGraph());
     _nodeAttributeTableModel.initialise(document, &_userNodeData);
+
+    _userEdgeData.initialise(graphModel->mutableGraph());
 }
 
 std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
@@ -34,7 +37,7 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
         return std::make_unique<GmlFileParser>(&_userNodeData);
 
     if(urlTypeName == QLatin1String("PairwiseTXT"))
-        return std::make_unique<PairwiseTxtFileParser>(this, &_userNodeData);
+        return std::make_unique<PairwiseTxtFileParser>(&_userNodeData, &_userEdgeData);
 
     if(urlTypeName == QLatin1String("GraphML"))
         return std::make_unique<GraphMLParser>(&_userNodeData);
@@ -42,36 +45,14 @@ std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const Q
     return nullptr;
 }
 
-void BaseGenericPluginInstance::setEdgeWeight(EdgeId edgeId, float weight)
-{
-    if(_edgeWeights == nullptr)
-    {
-        _edgeWeights = std::make_unique<EdgeArray<float>>(graphModel()->mutableGraph());
-
-        graphModel()->createAttribute(tr("Edge Weight"))
-            .setFloatValueFn([this](EdgeId edgeId_) { return _edgeWeights->get(edgeId_); })
-            .setFlag(AttributeFlag::AutoRangeMutable)
-            .setDescription(tr("The Edge Weight is a generic value associated with the edge."))
-            .setUserDefined(true);
-    }
-
-    _edgeWeights->set(edgeId, weight);
-}
-
 QByteArray BaseGenericPluginInstance::save(IMutableGraph& graph, const ProgressFn& progressFn) const
 {
     json jsonObject;
 
-    if(_edgeWeights != nullptr)
-    {
-        graph.setPhase(QObject::tr("Edge Weights"));
-        auto range = make_iterator_range(_edgeWeights->cbegin(), _edgeWeights->cbegin() + graph.nextEdgeId());
-        jsonObject["edgeWeights"] = jsonArrayFrom(range, progressFn);
-    }
-
     progressFn(-1);
 
     jsonObject["userNodeData"] = _userNodeData.save(graph, progressFn);
+    jsonObject["userEdgeData"] = _userEdgeData.save(graph, progressFn);
 
     return QByteArray::fromStdString(jsonObject.dump());
 }
@@ -87,30 +68,23 @@ bool BaseGenericPluginInstance::load(const QByteArray& data, int dataVersion,
     if(jsonObject.is_null() || !jsonObject.is_object())
         return false;
 
-    if(u::contains(jsonObject, "edgeWeights") && jsonObject["edgeWeights"].is_array())
-    {
-        const auto& jsonEdgeWeights = jsonObject["edgeWeights"];
-
-        uint64_t i = 0;
-
-        graph.setPhase(QObject::tr("Edge Weights"));
-        for(const auto& edgeWeight : jsonEdgeWeights)
-        {
-            if(graph.containsEdgeId(i))
-                setEdgeWeight(i, edgeWeight);
-
-            progressFn(static_cast<int>((i++ * 100) / jsonEdgeWeights.size()));
-        }
-    }
-
     progressFn(-1);
 
     if(!u::contains(jsonObject, "userNodeData") || !jsonObject["userNodeData"].is_object())
         return false;
 
-    const auto& jsonUserNodeData = jsonObject["userNodeData"];
+    graph.setPhase(QObject::tr("User Node Data"));
+    if(!_userNodeData.load(jsonObject["userNodeData"], progressFn))
+        return false;
 
-    return _userNodeData.load(jsonUserNodeData, progressFn);
+    if(!u::contains(jsonObject, "edgeNodeData") || !jsonObject["edgeNodeData"].is_object())
+        return false;
+
+    graph.setPhase(QObject::tr("User Edge Data"));
+    if(!_userEdgeData.load(jsonObject["edgeNodeData"], progressFn))
+        return false;
+
+    return true;
 }
 
 QString BaseGenericPluginInstance::selectedNodeNames() const
@@ -131,6 +105,7 @@ QString BaseGenericPluginInstance::selectedNodeNames() const
 void BaseGenericPluginInstance::onLoadSuccess()
 {
     _userNodeData.exposeAsAttributes(*graphModel());
+    _userEdgeData.exposeAsAttributes(*graphModel());
     _nodeAttributeTableModel.updateRoleNames();
 }
 

@@ -168,8 +168,7 @@ template<typename It> bool parseGml(IGraphModel &graphModel,
 GmlFileParser::GmlFileParser(UserNodeData* userNodeData) :
     _userNodeData(userNodeData)
 {
-    if(_userNodeData != nullptr)
-        _userNodeData->add(QObject::tr("Node Name"));
+    _userNodeData->add(QObject::tr("Node Name"));
 }
 
 bool GmlFileParser::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn)
