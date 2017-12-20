@@ -188,7 +188,6 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
 
                 if(_userNodeData != nullptr)
                 {
-                    _userNodeData->addElementId(firstNodeId);
                     auto nodeName = QString::fromStdString(firstToken);
                     _userNodeData->setValue(firstNodeId, QObject::tr("Node Name"), nodeName);
                     graphModel.setNodeName(firstNodeId, nodeName);
@@ -204,7 +203,6 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
 
                 if(_userNodeData != nullptr)
                 {
-                    _userNodeData->addElementId(secondNodeId);
                     auto nodeName = QString::fromStdString(secondToken);
                     _userNodeData->setValue(secondNodeId, QObject::tr("Node Name"), nodeName);
                     graphModel.setNodeName(secondNodeId, nodeName);

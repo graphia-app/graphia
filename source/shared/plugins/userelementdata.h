@@ -16,24 +16,36 @@ template<typename E>
 class UserElementData : public UserData
 {
 private:
-    std::unique_ptr<ElementIdArray<E, size_t>> _indexes;
+    struct Index
+    {
+        bool _set = false;
+        size_t _row = 0;
+    };
+
+    std::unique_ptr<ElementIdArray<E, Index>> _indexes;
     std::map<size_t, E> _rowToElementIdMap;
+
+    void generateElementIdMapping(E elementId)
+    {
+        if(_indexes->get(elementId)._set)
+        {
+            // Already got one
+            return;
+        }
+
+        _indexes->set(elementId, {true, static_cast<size_t>(numValues())});
+        _rowToElementIdMap[numValues()] = elementId;
+    }
 
 public:
     void initialise(IMutableGraph& mutableGraph)
     {
-        _indexes = std::make_unique<ElementIdArray<E, size_t>>(mutableGraph, 0);
-    }
-
-    void addElementId(E elementId)
-    {
-        _indexes->set(elementId, numValues());
-        _rowToElementIdMap[numValues()] = elementId;
+        _indexes = std::make_unique<ElementIdArray<E, Index>>(mutableGraph);
     }
 
     void setElementIdForRowIndex(E elementId, size_t row)
     {
-        _indexes->set(elementId, row);
+        _indexes->set(elementId, {true, row});
         _rowToElementIdMap[row] = elementId;
     }
 
@@ -45,11 +57,12 @@ public:
 
     size_t rowIndexFor(E elementId) const
     {
-        return _indexes->get(elementId);
+        return _indexes->get(elementId)._row;
     }
 
     void setValue(E elementId, const QString& name, const QString& value)
     {
+        generateElementIdMapping(elementId);
         setValue(rowIndexFor(elementId), name, value);
     }
 
@@ -116,7 +129,7 @@ public:
 
         json jsonIndexes;
         for(auto index : *_indexes)
-            jsonIndexes.emplace_back(index);
+            jsonIndexes.emplace_back(index._row);
 
         jsonObject["indexes"] = jsonIndexes;
 

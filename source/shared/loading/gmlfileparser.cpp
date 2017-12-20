@@ -74,8 +74,6 @@ template<typename It> bool parseGml(IGraphModel &graphModel,
 
             if(userNodeData != nullptr)
             {
-                userNodeData->addElementId(nodeIndexMap[id]);
-
                 // If we don't have a label, use the id
                 if(label.empty())
                     label = std::to_string(id);

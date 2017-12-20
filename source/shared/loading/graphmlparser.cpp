@@ -126,7 +126,6 @@ bool GraphMLHandler::startElement(const QString&, const QString& localName, cons
 
         if(_userNodeData != nullptr)
         {
-            _userNodeData->addElementId(nodeId);
             auto nodeName = atts.value(QStringLiteral("id"));
             _userNodeData->setValue(nodeId, QObject::tr("Node Name"), nodeName);
             _graphModel->setNodeName(nodeId, nodeName);
