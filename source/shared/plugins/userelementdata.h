@@ -48,12 +48,12 @@ public:
         return _indexes->get(elementId);
     }
 
-    void setValueBy(E elementId, const QString& name, const QString& value)
+    void setValue(E elementId, const QString& name, const QString& value)
     {
         setValue(rowIndexFor(elementId), name, value);
     }
 
-    QVariant valueBy(E elementId, const QString& name) const
+    QVariant value(E elementId, const QString& name) const
     {
         return value(rowIndexFor(elementId), name);
     }
@@ -72,7 +72,7 @@ public:
             case UserDataVector::Type::Float:
                 attribute.setFloatValueFn([this, userDataVectorName](E elementId)
                         {
-                            return valueBy(elementId, userDataVectorName).toFloat();
+                            return value(elementId, userDataVectorName).toFloat();
                         })
                         .setFlag(AttributeFlag::AutoRangeMutable);
                 break;
@@ -80,7 +80,7 @@ public:
             case UserDataVector::Type::Int:
                 attribute.setIntValueFn([this, userDataVectorName](E elementId)
                         {
-                            return valueBy(elementId, userDataVectorName).toInt();
+                            return value(elementId, userDataVectorName).toInt();
                         })
                         .setFlag(AttributeFlag::AutoRangeMutable);
                 break;
@@ -88,7 +88,7 @@ public:
             case UserDataVector::Type::String:
                 attribute.setStringValueFn([this, userDataVectorName](E elementId)
                         {
-                            return valueBy(elementId, userDataVectorName).toString();
+                            return value(elementId, userDataVectorName).toString();
                         });
                 break;
 
@@ -102,7 +102,7 @@ public:
             {
                 attribute.setValueMissingFn([this, userDataVectorName](E elementId)
                 {
-                   return valueBy(elementId, userDataVectorName).toString().isEmpty();
+                   return value(elementId, userDataVectorName).toString().isEmpty();
                 });
             }
 

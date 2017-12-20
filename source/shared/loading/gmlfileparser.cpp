@@ -80,8 +80,8 @@ template<typename It> bool parseGml(IGraphModel &graphModel,
                 if(label.empty())
                     label = std::to_string(id);
 
-                userNodeData->setValueBy(nodeIndexMap[id], QObject::tr("Node Name"),
-                                         QString::fromStdString(label));
+                userNodeData->setValue(nodeIndexMap[id], QObject::tr("Node Name"),
+                                       QString::fromStdString(label));
                 graphModel.setNodeName(nodeIndexMap[id], QString::fromStdString(label));
             }
 

@@ -305,7 +305,7 @@ void CorrelationPluginInstance::finishDataRow(size_t row)
     _dataRows.emplace_back(begin, end, nodeId, computeCost);
     _userNodeData.setElementIdForRowIndex(nodeId, row);
 
-    auto nodeName = _userNodeData.valueBy(nodeId, _userNodeData.firstUserDataVectorName()).toString();
+    auto nodeName = _userNodeData.value(nodeId, _userNodeData.firstUserDataVectorName()).toString();
     graphModel()->setNodeName(nodeId, nodeName);
 }
 

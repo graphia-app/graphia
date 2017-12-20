@@ -128,7 +128,7 @@ bool GraphMLHandler::startElement(const QString&, const QString& localName, cons
         {
             _userNodeData->addElementId(nodeId);
             auto nodeName = atts.value(QStringLiteral("id"));
-            _userNodeData->setValueBy(nodeId, QObject::tr("Node Name"), nodeName);
+            _userNodeData->setValue(nodeId, QObject::tr("Node Name"), nodeName);
             _graphModel->setNodeName(nodeId, nodeName);
         }
     }
@@ -228,7 +228,7 @@ bool GraphMLHandler::endElement(const QString &, const QString &localName, const
         if(_userNodeData != nullptr && !_activeNodes.empty() && !attribute->_name.isEmpty())
         {
             _userNodeData->add(attribute->_name);
-            _userNodeData->setValueBy(_activeNodes.top(), attribute->_name, attribute->_value.toString());
+            _userNodeData->setValue(_activeNodes.top(), attribute->_name, attribute->_value.toString());
         }
 
         _activeAttributes.pop();
