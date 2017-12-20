@@ -241,7 +241,7 @@ double AttributeNumericRange::max() const
 {
     switch(_attribute->valueType())
     {
-    case ValueType::Int: return static_cast<double>(_attribute->_floatRange.max());
+    case ValueType::Int: return static_cast<double>(_attribute->_intRange.max());
     case ValueType::Float: return _attribute->_floatRange.max();
     default: return std::numeric_limits<double>::lowest();
     }
@@ -252,7 +252,7 @@ IAttribute& AttributeNumericRange::setMin(double min)
     switch(_attribute->valueType())
     {
     case ValueType::Int: _attribute->_intRange.setMin(static_cast<int>(min));
-    case ValueType::Float: _attribute->_intRange.setMin(min);
+    case ValueType::Float: _attribute->_floatRange.setMin(min);
     default: break;
     }
 
@@ -264,7 +264,7 @@ IAttribute& AttributeNumericRange::setMax(double max)
     switch(_attribute->valueType())
     {
     case ValueType::Int: _attribute->_intRange.setMax(static_cast<int>(max));
-    case ValueType::Float: _attribute->_intRange.setMax(max);
+    case ValueType::Float: _attribute->_floatRange.setMax(max);
     default: break;
     }
 
