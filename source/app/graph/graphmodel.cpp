@@ -654,6 +654,34 @@ Attribute GraphModel::attributeValueByName(const QString& name) const
     return attribute;
 }
 
+static void calculateAttributeRanges(const Graph* graph,
+    std::map<QString, Attribute>& attributes)
+{
+    AttributeFlag flag;
+
+    if(dynamic_cast<const MutableGraph*>(graph) != nullptr)
+        flag = AttributeFlag::AutoRangeMutable;
+    else if(dynamic_cast<const TransformedGraph*>(graph) != nullptr)
+        flag = AttributeFlag::AutoRangeTransformed;
+
+    for(auto& attribute : make_value_wrapper(attributes))
+    {
+        if(!attribute.testFlag(flag))
+            continue;
+
+        if(attribute.elementType() == ElementType::Node)
+            attribute.autoSetRangeForElements(graph->nodeIds());
+        else if(attribute.elementType() == ElementType::Edge)
+            attribute.autoSetRangeForElements(graph->edgeIds());
+    }
+}
+
+void GraphModel::initialiseAttributeRanges()
+{
+    calculateAttributeRanges(&mutableGraph(), _->_attributes);
+    calculateAttributeRanges(&graph(), _->_attributes);
+}
+
 void GraphModel::enableVisualUpdates()
 {
     _visualUpdatesEnabled = true;
@@ -815,16 +843,7 @@ void GraphModel::onPreferenceChanged(const QString& name, const QVariant&)
 
 void GraphModel::onMutableGraphChanged(const Graph* graph)
 {
-    for(auto& attribute : make_value_wrapper(_->_attributes))
-    {
-        if(!attribute.testFlag(AttributeFlag::AutoRangeMutable))
-            continue;
-
-        if(attribute.elementType() == ElementType::Node)
-            attribute.autoSetRangeForElements(graph->nodeIds());
-        else if(attribute.elementType() == ElementType::Edge)
-            attribute.autoSetRangeForElements(graph->edgeIds());
-    }
+    calculateAttributeRanges(graph, _->_attributes);
 }
 
 void GraphModel::onTransformedGraphWillChange(const Graph*)
@@ -844,16 +863,7 @@ void GraphModel::onTransformedGraphChanged(const Graph* graph)
 {
     _transformedGraphIsChanging = false;
 
-    for(auto& attribute : make_value_wrapper(_->_attributes))
-    {
-        if(!attribute.testFlag(AttributeFlag::AutoRangeTransformed))
-            continue;
-
-        if(attribute.elementType() == ElementType::Node)
-            attribute.autoSetRangeForElements(graph->nodeIds());
-        else if(attribute.elementType() == ElementType::Edge)
-            attribute.autoSetRangeForElements(graph->edgeIds());
-    }
+    calculateAttributeRanges(graph, _->_attributes);
 
     // Compare with previous Dynamic attributes
     // Check for added

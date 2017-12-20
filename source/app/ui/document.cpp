@@ -646,6 +646,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     connect(&_graphModel->mutableGraph(), &Graph::graphChanged, this, &Document::onMutableGraphChanged);
 
+    _graphModel->initialiseAttributeRanges();
     _graphModel->enableVisualUpdates();
 
     setStatus(QString(tr("Loaded %1 (%2 nodes, %3 edges, %4 components)")).arg(
