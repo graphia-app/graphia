@@ -140,7 +140,7 @@ static json nodeNamesAsJson(IGraphModel& graphModel,
     for(NodeId nodeId : nodeIds)
     {
         names.emplace_back(graphModel.nodeName(nodeId));
-        progressFn((i++ * 100) / nodeIds.size());
+        progressFn((i++ * 100) / static_cast<uint64_t>(nodeIds.size()));
     }
 
     progressFn(-1);
