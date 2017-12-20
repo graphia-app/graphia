@@ -657,12 +657,14 @@ Attribute GraphModel::attributeValueByName(const QString& name) const
 static void calculateAttributeRanges(const Graph* graph,
     std::map<QString, Attribute>& attributes)
 {
-    AttributeFlag flag;
+    AttributeFlag flag = AttributeFlag::None;
 
     if(dynamic_cast<const MutableGraph*>(graph) != nullptr)
         flag = AttributeFlag::AutoRangeMutable;
     else if(dynamic_cast<const TransformedGraph*>(graph) != nullptr)
         flag = AttributeFlag::AutoRangeTransformed;
+    else
+        return;
 
     for(auto& attribute : make_value_wrapper(attributes))
     {
