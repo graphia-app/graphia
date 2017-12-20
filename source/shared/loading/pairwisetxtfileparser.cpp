@@ -166,7 +166,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
                 if(!nodeId.isNull())
                 {
                     _userNodeData->add(attributeName);
-                    _userNodeData->setValue(nodeId, attributeName, value);
+                    _userNodeData->setValueBy(nodeId, attributeName, value);
                 }
             }
         }
@@ -186,7 +186,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
                 if(_userNodeData != nullptr)
                 {
                     auto nodeName = QString::fromStdString(firstToken);
-                    _userNodeData->setValue(firstNodeId, QObject::tr("Node Name"), nodeName);
+                    _userNodeData->setValueBy(firstNodeId, QObject::tr("Node Name"), nodeName);
                     graphModel.setNodeName(firstNodeId, nodeName);
                 }
             }
@@ -201,7 +201,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
                 if(_userNodeData != nullptr)
                 {
                     auto nodeName = QString::fromStdString(secondToken);
-                    _userNodeData->setValue(secondNodeId, QObject::tr("Node Name"), nodeName);
+                    _userNodeData->setValueBy(secondNodeId, QObject::tr("Node Name"), nodeName);
                     graphModel.setNodeName(secondNodeId, nodeName);
                 }
             }
