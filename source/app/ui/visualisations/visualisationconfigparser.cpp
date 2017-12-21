@@ -52,7 +52,7 @@ const auto visualisation_def =
     attributeName >> channelName >>
     -(x3::lit("with") >> +parameter);
 
-BOOST_SPIRIT_DEFINE(quotedString, identifier, visualisation, parameter);
+BOOST_SPIRIT_DEFINE(quotedString, identifier, visualisation, parameter)
 } // namespace SpiritVisualisationParser
 
 bool VisualisationConfigParser::parse(const QString& text)

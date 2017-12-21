@@ -153,7 +153,7 @@ const auto transform_def =
     -(x3::lit("with") >> +parameter) >>
     -(x3::lit("where") >> condition);
 
-BOOST_SPIRIT_DEFINE(quotedString, identifier, attributeName, transform, parameter, condition, terminalCondition, unaryCondition);
+BOOST_SPIRIT_DEFINE(quotedString, identifier, attributeName, transform, parameter, condition, terminalCondition, unaryCondition)
 } // namespace SpiritGraphTranformConfigParser
 
 bool GraphTransformConfigParser::parse(const QString& text)
