@@ -12,9 +12,7 @@ GraphMLHandler::GraphMLHandler(IGraphModel& graphModel, const ProgressFn &progre
                                UserNodeData* userNodeData, int lineCount)
                                : _graphModel(&graphModel), _progress(&progress),
                                  _lineCount(lineCount), _userNodeData(userNodeData)
-{
-    _userNodeData->add(QObject::tr("Node Name"));
-}
+{}
 
 bool GraphMLHandler::startDocument()
 {
@@ -224,10 +222,7 @@ bool GraphMLHandler::endElement(const QString &, const QString &localName, const
         auto attribute = _activeAttributes.top();
 
         if(_userNodeData != nullptr && !_activeNodes.empty() && !attribute->_name.isEmpty())
-        {
-            _userNodeData->add(attribute->_name);
             _userNodeData->setValueBy(_activeNodes.top(), attribute->_name, attribute->_value.toString());
-        }
 
         _activeAttributes.pop();
     }

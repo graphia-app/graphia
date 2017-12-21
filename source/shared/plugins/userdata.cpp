@@ -20,33 +20,34 @@ int UserData::numValues() const
     return _numValues;
 }
 
-QStringList UserData::vectorNames() const
+QSet<QString> UserData::vectorNames() const
 {
-    QStringList list;
-    list.reserve(static_cast<int>(_userDataVectors.size()));
-
-    for(const auto& vector : *this)
-        list.append(vector.name());
-
-    return list;
+    return _vectorNames;
 }
 
-void UserData::add(const QString& name)
+UserDataVector& UserData::add(const QString& name)
 {
-    if(!u::containsKey(_userDataVectors, name))
+    if(!u::contains(_vectorNames, name))
+    {
+        _vectorNames.insert(name);
         _userDataVectors.emplace_back(std::make_pair(name, UserDataVector(name)));
+        return _userDataVectors.back().second;
+    }
+
+    auto it = std::find_if(_userDataVectors.begin(), _userDataVectors.end(),
+                           [&name](const auto& it2) { return it2.first == name; });
+
+    Q_ASSERT(it != _userDataVectors.end());
+
+    return it->second;
 }
 
 void UserData::setValue(size_t index, const QString& name, const QString& value)
 {
-    auto it = std::find_if(_userDataVectors.begin(), _userDataVectors.end(),
-                           [&name](const auto& it2) { return it2.first == name; });
+    auto& userDataVector = add(name);
 
-    if(it != _userDataVectors.end())
-    {
-        it->second.set(index, value);
-        _numValues = std::max(_numValues, it->second.numValues());
-    }
+    userDataVector.set(index, value);
+    _numValues = std::max(_numValues, userDataVector.numValues());
 }
 
 QVariant UserData::value(size_t index, const QString& name) const

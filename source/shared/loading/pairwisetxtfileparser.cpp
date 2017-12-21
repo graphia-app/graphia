@@ -25,9 +25,7 @@
 
 PairwiseTxtFileParser::PairwiseTxtFileParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData) :
     _userNodeData(userNodeData), _userEdgeData(userEdgeData)
-{
-    _userNodeData->add(QObject::tr("Node Name"));
-}
+{}
 
 bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn)
 {
@@ -164,10 +162,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
                 }
 
                 if(!nodeId.isNull())
-                {
-                    _userNodeData->add(attributeName);
                     _userNodeData->setValueBy(nodeId, attributeName, value);
-                }
             }
         }
         else if(tokens.size() >= 2)
@@ -222,7 +217,6 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
                     if(std::isnan(edgeWeight) || !std::isfinite(edgeWeight))
                         edgeWeight = 1.0f;
 
-                    _userEdgeData->add(QObject::tr("Edge Weight"));
                     _userEdgeData->setValue(edgeId, QObject::tr("Edge Weight"), QString::number(edgeWeight));
                 }
             }

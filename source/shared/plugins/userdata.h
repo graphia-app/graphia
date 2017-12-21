@@ -8,6 +8,7 @@
 
 #include <QString>
 #include <QVariant>
+#include <QSet>
 
 #include "thirdparty/json/json_helper.h"
 
@@ -18,6 +19,7 @@ class UserData
 private:
     // This is not a map because the data needs to be ordered
     std::vector<std::pair<QString, UserDataVector>> _userDataVectors;
+    QSet<QString> _vectorNames;
     int _numValues = 0;
 
 public:
@@ -28,12 +30,12 @@ public:
 
     bool empty() const { return _userDataVectors.empty(); }
 
-    QStringList vectorNames() const;
+    QSet<QString> vectorNames() const;
 
     auto begin() const { return make_pair_second_iterator(_userDataVectors.begin()); }
     auto end() const { return make_pair_second_iterator(_userDataVectors.end()); }
 
-    void add(const QString& name);
+    UserDataVector& add(const QString& name);
     void setValue(size_t index, const QString& name, const QString& value);
     QVariant value(size_t index, const QString& name) const;
 
