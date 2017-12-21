@@ -129,14 +129,14 @@ void NodeAttributeTableModel::updateRoleNames()
     _roleNames.insert(Roles::NodeSelectedRole, "nodeSelected");
 
     int nextRole = Roles::FirstAttributeRole;
-    const auto names = columnNames();
-    for(const auto& name : names)
+    _columnNames = columnNames();
+    for(const auto& name : _columnNames)
     {
         _roleNames.insert(nextRole, name.toUtf8());
         nextRole++;
     }
 
-    _columnCount = names.size();
+    _columnCount = _columnNames.size();
 
     emit columnNamesChanged();
 }

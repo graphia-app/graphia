@@ -20,7 +20,7 @@ class NodeAttributeTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 
-    Q_PROPERTY(QStringList columnNames READ columnNames NOTIFY columnNamesChanged)
+    Q_PROPERTY(QStringList columnNames MEMBER _columnNames NOTIFY columnNamesChanged)
 
 private:
     IDocument* _document = nullptr;
@@ -42,6 +42,7 @@ private:
     std::deque<Table> _updatedData; // Update occurs here, before being moved to _cachedData
     Table _cachedData;
 
+    QStringList _columnNames;
     int _columnCount = 0;
 
 protected:
