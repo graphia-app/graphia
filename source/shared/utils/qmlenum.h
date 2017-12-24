@@ -3,6 +3,7 @@
 
 #include <QQmlEngine>
 #include <QCoreApplication>
+#include <QTimer>
 
 #ifndef APP_URI
 #define APP_URI "uri.missing"
@@ -50,7 +51,7 @@ constexpr bool static_strcmp(char const* a, char const* b)
     }; \
     static void ENUM_NAME ## _initialiser() \
     { \
-        _REFLECTOR(ENUM_NAME)::initialise(); \
+        QTimer::singleShot(0, [] { _REFLECTOR(ENUM_NAME)::initialise(); }); \
     } \
     Q_COREAPP_STARTUP_FUNCTION(ENUM_NAME ## _initialiser) \
     using ENUM_NAME = QML_ENUM_PROPERTY(ENUM_NAME)
