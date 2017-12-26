@@ -10,6 +10,8 @@
 
 #include "shared/utils/container.h"
 
+#include <QtGlobal>
+
 void NodeAttributeTableModel::initialise(IDocument* document, UserNodeData* userNodeData)
 {
     _document = document;
@@ -130,7 +132,7 @@ void NodeAttributeTableModel::updateRoleNames()
 
     int nextRole = Roles::FirstAttributeRole;
     _columnNames = columnNames();
-    for(const auto& name : _columnNames)
+    for(const auto& name : qAsConst(_columnNames))
     {
         _roleNames.insert(nextRole, name.toUtf8());
         nextRole++;
