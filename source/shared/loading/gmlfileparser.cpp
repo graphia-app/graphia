@@ -1,189 +1,297 @@
 #include "gmlfileparser.h"
+
+#include "thirdparty/boost/boost_disable_warnings.h"
+#include "boost/spirit/home/x3.hpp"
+#include "boost/fusion/include/adapt_struct.hpp"
+#include "boost/spirit/home/support/iterators/istream_iterator.hpp"
+#include "thirdparty/boost/boost_spirit_qstring_adapter.h"
+
+#include "progress_iterator.h"
+
+#include "shared/graph/elementid.h"
 #include "shared/graph/igraphmodel.h"
-#include "shared/graph/imutablegraph.h"
-#include "shared/plugins/userelementdata.h"
 
-#include "thirdparty/axe/include/axe.h"
-
-#include <QTime>
-#include <QFile>
-#include <QFileInfo>
+#include <QRegularExpression>
 #include <QUrl>
-#include <QDebug>
+#include <QFileInfo>
 
+#include <stack>
 #include <fstream>
-#include <cstring>
-#include <iterator>
 
-template<typename It> bool parseGml(IGraphModel &graphModel,
-                                    UserNodeData* userNodeData,
-                                    const std::function<bool ()>& cancelled,
-                                    const ProgressFn& progressFn,
-                                    It begin, It end)
+// http://www.fim.uni-passau.de/fileadmin/files/lehrstuhl/brandenburg/projekte/gml/gml-technical-report.pdf
+
+namespace SpiritGmlParser
 {
-    // General GML structure rules
-    axe::r_rule<It> keyValue;
-    double d;
+struct KeyValue;
+using List = std::vector<boost::recursive_wrapper<KeyValue>>;
 
-    auto whitespace = axe::r_ref([&cancelled](It i1, It i2)
-    {
-        if(!cancelled())
-        {
-            return axe::make_result(i1 != i2 && std::strchr(" \t\n\r", *i1),
-                                    i1 != i2 ? std::next(i1) : i1, i1);
-        }
-
-        return axe::make_result(false, i2);
-    });
-
-    // If this is declared and initialised on the same line, the move constructor for
-    // axe::r_rule is called which (for some reason) infinitely recurses, whereas using
-    // operator= doesn't
-    axe::r_rule<It> quotedString;
-    quotedString = '"' & *(R"(\")" | (axe::r_any() - '"')) & '"';
-
-    auto key = (+axe::r_alnum());
-    auto value = axe::r_double(d) | quotedString;
-
-    auto keyValueList = *whitespace & key & *whitespace & '[' & *whitespace &
-            axe::r_many(keyValue - axe::r_char(']'), axe::r_any(" \t\n\r"), 0) & *whitespace & ']';
-    auto keyValuePair = (*whitespace & key & *whitespace & value);
-
-    // Node State
-    int id = -1;
-    std::string label;
-    std::map<int, NodeId> nodeIndexMap;
-
-    // Node Capture Events
-    auto captureNodeId = axe::e_ref([&id](It i1, It i2)
-    {
-        id = std::stoi(std::string(i1, i2));
-    });
-
-    auto captureLabel = axe::e_ref([&label](It i1, It i2)
-    {
-        label = std::string(i1, i2);
-    });
-
-    auto captureNode = axe::e_ref([&nodeIndexMap, &id, &graphModel, &label,
-                                  &userNodeData](It, It)
-    {
-        if(id >= 0)
-        {
-            nodeIndexMap[id] = graphModel.mutableGraph().addNode();
-
-            if(userNodeData != nullptr)
-            {
-                // If we don't have a label, use the id
-                if(label.empty())
-                    label = std::to_string(id);
-
-                userNodeData->setValueBy(nodeIndexMap[id], QObject::tr("Node Name"),
-                                         QString::fromStdString(label));
-                graphModel.setNodeName(nodeIndexMap[id], QString::fromStdString(label));
-            }
-
-            label.clear();
-            id = -1;
-        }
-    });
-
-    // Node Rules
-    axe::r_rule<It> nodeKeyValuePair;
-    auto nodeKeyValueList = (*whitespace & "node" & *whitespace & '[' & *whitespace &
-                           axe::r_many(nodeKeyValuePair - axe::r_char(']'), axe::r_any(" \t\n\r"), 0) & *whitespace
-                           & ']') >> captureNode;
-    auto nodeId = *whitespace & "id" & *whitespace & value >> captureNodeId;
-    auto labelElement = *whitespace & "label" & *whitespace & value >> captureLabel;
-    nodeKeyValuePair = nodeId | labelElement | keyValuePair | keyValueList;
-
-    // Edge State
-    int source, target;
-    bool isSourceSet = false, isTargetSet = false;
-
-    // Edge Capture Events
-    auto captureEdgeSource = axe::e_ref([&source, &isSourceSet](It i1, It i2)
-    {
-        source = std::stoi(std::string(i1,i2));
-        isSourceSet = true;
-    });
-
-    auto captureEdgeTarget = axe::e_ref([&target, &isTargetSet](It i1, It i2)
-    {
-        target = std::stoi(std::string(i1,i2));
-        isTargetSet = true;
-    });
-
-    auto captureEdge = axe::e_ref([&source, &target, &nodeIndexMap, &graphModel, &isSourceSet, &isTargetSet](It, It)
-    {
-        // Check if Target and Source values are set
-        if(isTargetSet && isSourceSet)
-        {
-            NodeId sourceId = nodeIndexMap[source];
-            NodeId targetId = nodeIndexMap[target];
-            graphModel.mutableGraph().addEdge(sourceId, targetId);
-            isTargetSet = false;
-            isSourceSet = false;
-        }
-    });
-
-    // Edge Rules
-    axe::r_rule<It> edgeKeyValuePair;
-    auto edgeKeyValueList = (*whitespace & "edge" & *whitespace & '[' & *whitespace &
-                            axe::r_many(edgeKeyValuePair - axe::r_char(']'), axe::r_any(" \t\n\r"), 0) & *whitespace &
-                            ']' ) >> captureEdge;
-    auto edgeSource = (*whitespace & "source" & *whitespace & value >> captureEdgeSource);
-    auto edgeTarget = (*whitespace & "target" & *whitespace & value >> captureEdgeTarget);
-    edgeKeyValuePair = edgeSource | edgeTarget | keyValuePair | keyValueList;
-
-    // Full GML file rule
-    auto file = +(keyValue & axe::r_any(" \t\n\r"));
-    bool succeeded = true;
-
-    // Failure capture event
-    auto onFail = [&succeeded](It, It)
-    {
-        succeeded = false;
-    };
-
-    // Progress Capture event (Fired on keyValue rule match)
-    auto captureCount = axe::e_ref([&begin, &end, &progressFn](It, It i2)
-    {
-        progressFn((std::distance(begin, i2)) * 100 / std::distance(begin, end));
-    });
-
-    // All GML keyValue options
-    keyValue = (edgeKeyValueList | nodeKeyValueList | keyValueList | keyValuePair | +whitespace |
-        axe::r_end() | axe::r_fail(onFail)) >> captureCount;
-
-    // Perform file rule against begin & end iterators
-    (file >> axe::e_ref([&progressFn](It, It)
-    {
-        progressFn(100);
-    }) & axe::r_end())(begin, end);
-
-    return succeeded;
+using Value = boost::variant<double, int, QString, List>;
+struct KeyValue
+{
+    QString _key;
+    Value _value;
+};
 }
 
-GmlFileParser::GmlFileParser(UserNodeData* userNodeData) :
-    _userNodeData(userNodeData)
+BOOST_FUSION_ADAPT_STRUCT(
+    SpiritGmlParser::KeyValue,
+    (QString, _key),
+    (SpiritGmlParser::Value, _value)
+)
+
+namespace SpiritGmlParser
+{
+namespace x3 = boost::spirit::x3;
+namespace ascii = boost::spirit::x3::ascii;
+
+using x3::lit;
+// Only parse strict doubles (i.e. not integers)
+x3::real_parser<double, x3::strict_real_policies<double>> const double_ = {};
+using x3::int_;
+using x3::lexeme;
+using ascii::char_;
+
+const x3::rule<class L, List> list = "list";
+
+const x3::rule<class QuotedString, QString> quotedString = "quotedString";
+const auto escapedQuote = x3::lit('\\') >> char_('"');
+const auto quotedString_def = lexeme['"' >> *(escapedQuote | ~char_('"')) >> '"'];
+
+const x3::rule<class V, Value> value = "value";
+const auto value_def = double_ | int_ | quotedString | (x3::lit('[') >> list >> x3::lit(']'));
+
+const x3::rule<class K, QString> key = "key";
+const auto key_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
+
+const x3::rule<class KV, KeyValue> keyValue = "keyValue";
+const auto keyValue_def = key >> value;
+
+const auto list_def = *keyValue;
+
+BOOST_SPIRIT_DEFINE(list, quotedString, key, value, keyValue)
+
+struct Attribute
+{
+    Attribute(const QString& name, const QString& value) :
+        _name(name), _value(value)
+    {}
+
+    QString _name;
+    QString _value;
+};
+
+using AttributeVector = std::vector<Attribute>;
+
+AttributeVector processAttribute(const KeyValue& attribute)
+{
+    struct Visitor
+    {
+        QString _name;
+        Visitor(QString name) : _name(name) {}
+
+        AttributeVector operator()(double v) const          { return {{_name, QString::number(v)}}; }
+        AttributeVector operator()(int v) const             { return {{_name, QString::number(v)}}; }
+        AttributeVector operator()(const QString& v) const  { return {{_name, v}}; }
+        AttributeVector operator()(const List& v) const
+        {
+            AttributeVector result;
+
+            for(const auto& attribute : v)
+            {
+                auto childAttributes = processAttribute(attribute.get());
+
+                for(const auto& childAttribute : childAttributes)
+                {
+                    QString subName = _name + "." + childAttribute._name;
+                    result.emplace_back(subName, childAttribute._value);
+                }
+            }
+
+            return result;
+        }
+    };
+
+    return boost::apply_visitor(Visitor(attribute._key), attribute._value);
+}
+
+bool build(const List& gml, IGraphModel& graphModel,
+    UserNodeData& userNodeData, UserEdgeData& userEdgeData,
+    const ProgressFn& progressFn)
+{
+    auto findIntValue = [](const List& list, const QString& key) -> const int*
+    {
+        auto keyValue = std::find_if(list.begin(), list.end(), [&](auto& item)
+        {
+           return item.get()._key == key;
+        });
+
+        if(keyValue != list.end())
+            return boost::get<int>(&keyValue->get()._value);
+
+        return nullptr;
+    };
+
+    std::map<int, NodeId> gmlIdToNodeId;
+
+    auto processNode = [&](const List& node)
+    {
+        auto id = findIntValue(node, "id");
+        if(id == nullptr)
+            return false;
+
+        auto nodeId = graphModel.mutableGraph().addNode();
+        gmlIdToNodeId[*id] = nodeId;
+
+        auto nodeName = QString::number(*id);
+
+        for(const auto& attributeWrapper : node)
+        {
+            const auto& attribute = attributeWrapper.get();
+            if(attribute._key == "id")
+                continue;
+            else if(attribute._key == "label")
+            {
+                // If there is a label attribute, use it as the node name
+                const auto* label = boost::get<QString>(&attribute._value);
+                if(label != nullptr)
+                    nodeName = *label;
+            }
+            else
+            {
+                auto attributes = processAttribute(attribute);
+
+                for(const auto& attribute : attributes)
+                {
+                    QString attributeName = QObject::tr("Node ") + attribute._name;
+                    userNodeData.setValueBy(nodeId, attributeName, attribute._value);
+                }
+            }
+        }
+
+        userNodeData.setValueBy(nodeId, QObject::tr("Node Name"), nodeName);
+        graphModel.setNodeName(nodeId, nodeName);
+
+        return true;
+    };
+
+    auto processEdge = [&](const List& edge)
+    {
+        auto sourceId = findIntValue(edge, "source");
+        auto targetId = findIntValue(edge, "target");
+
+        if(sourceId == nullptr || targetId == nullptr)
+            return false;
+
+        if(!u::contains(gmlIdToNodeId, *sourceId) || !u::contains(gmlIdToNodeId, *targetId))
+            return false;
+
+        auto sourceNodeId = gmlIdToNodeId[*sourceId];
+        auto targetNodeId = gmlIdToNodeId[*targetId];
+        auto edgeId = graphModel.mutableGraph().addEdge(sourceNodeId, targetNodeId);
+
+        for(const auto& attributeWrapper : edge)
+        {
+            const auto& attribute = attributeWrapper.get();
+            if(attribute._key == "source" || attribute._key == "target")
+                continue;
+            else
+            {
+                auto attributes = processAttribute(attribute);
+
+                for(const auto& attribute : attributes)
+                {
+                    QString attributeName = QObject::tr("Edge ") + attribute._name;
+                    userEdgeData.setValueBy(edgeId, attributeName, attribute._value);
+                }
+            }
+        }
+
+        return true;
+    };
+
+    for(const auto& keyValue : gml)
+    {
+        const auto& key = keyValue.get()._key;
+
+        if(key == "graph")
+        {
+            const auto* graph = boost::get<List>(&keyValue.get()._value);
+
+            if(graph == nullptr)
+                return false;
+
+            uint64_t i = 0;
+            for(const auto& element : *graph)
+            {
+                progressFn(static_cast<int>((i++ * 100) / graph->size()));
+
+                const auto& type = element.get()._key;
+                const auto* value = boost::get<List>(&element.get()._value);
+
+                if(value == nullptr)
+                    continue;
+
+                bool success = true;
+
+                if(type == "node")
+                    success = processNode(*value);
+                else if(type == "edge")
+                    success = processEdge(*value);
+
+                if(!success)
+                    return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+} // namespace SpiritGmlParser
+
+GmlFileParser::GmlFileParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData) :
+    _userNodeData(userNodeData), _userEdgeData(userEdgeData)
 {}
 
 bool GmlFileParser::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn)
 {
     QString localFile = url.toLocalFile();
-    std::ifstream stream(localFile.toStdString());
-    stream.unsetf(std::ios::skipws);
+    QFileInfo fileInfo(localFile);
 
-    std::istreambuf_iterator<char> startIt(stream.rdbuf());
-
-    if(!QFileInfo::exists(localFile))
+    if(!fileInfo.exists())
         return false;
 
-    std::vector<char> vec(startIt, std::istreambuf_iterator<char>());
+    auto fileSize = fileInfo.size();
 
     progressFn(-1);
 
-    return parseGml(graphModel, _userNodeData, [this] { return cancelled(); },
-        progressFn, vec.begin(), vec.end());
+    std::ifstream stream(localFile.toStdString());
+    stream.unsetf(std::ios::skipws);
+
+    boost::spirit::istream_iterator istreamIt(stream);
+    progress_iterator<decltype(istreamIt)> end;
+    progress_iterator<decltype(istreamIt)> it(istreamIt, end);
+
+    it.onPositionChanged([&]
+    (size_t position)
+    {
+        progressFn(static_cast<int>((position * 100) / fileSize));
+    });
+
+    it.setCancelledFn([this] { return cancelled(); });
+
+    graphModel.mutableGraph().setPhase(QObject::tr("Parsing"));
+
+    SpiritGmlParser::List gml;
+    bool success = SpiritGmlParser::x3::phrase_parse(it, end,
+        SpiritGmlParser::list, SpiritGmlParser::ascii::space, gml);
+
+    if(!success || it != end)
+        return false;
+
+    graphModel.mutableGraph().setPhase(QObject::tr("Building Graph"));
+    progressFn(-1);
+
+    return SpiritGmlParser::build(gml, graphModel,
+        *_userNodeData, *_userEdgeData, progressFn);
 }

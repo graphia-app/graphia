@@ -34,7 +34,7 @@ void BaseGenericPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
 std::unique_ptr<IParser> BaseGenericPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
 {
     if(urlTypeName == QLatin1String("GML"))
-        return std::make_unique<GmlFileParser>(&_userNodeData);
+        return std::make_unique<GmlFileParser>(&_userNodeData, &_userEdgeData);
 
     if(urlTypeName == QLatin1String("PairwiseTXT"))
         return std::make_unique<PairwiseTxtFileParser>(&_userNodeData, &_userEdgeData);

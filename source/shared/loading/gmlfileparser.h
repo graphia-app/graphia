@@ -8,9 +8,10 @@ class GmlFileParser: public IParser
 {
 private:
     UserNodeData* _userNodeData;
+    UserEdgeData* _userEdgeData;
 
 public:
-    explicit GmlFileParser(UserNodeData* userNodeData = nullptr);
+    explicit GmlFileParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData);
 
     bool parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn) override;
 };
