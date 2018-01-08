@@ -34,6 +34,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/loading/iurltypes.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/pairwisetxtfileparser.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/progressfn.h
+    ${CMAKE_CURRENT_LIST_DIR}/loading/progress_iterator.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/tabulardata.h
     ${CMAKE_CURRENT_LIST_DIR}/loading/urltypes.h
     ${CMAKE_CURRENT_LIST_DIR}/plugins/basegenericplugin.h
