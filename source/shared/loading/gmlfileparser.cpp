@@ -11,11 +11,9 @@
 #include "shared/graph/elementid.h"
 #include "shared/graph/igraphmodel.h"
 
-#include <QRegularExpression>
 #include <QUrl>
 #include <QFileInfo>
 
-#include <stack>
 #include <fstream>
 
 // http://www.fim.uni-passau.de/fileadmin/files/lehrstuhl/brandenburg/projekte/gml/gml-technical-report.pdf
