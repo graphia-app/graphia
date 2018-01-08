@@ -31,7 +31,7 @@ struct KeyValue
     QString _key;
     Value _value;
 };
-}
+} // namespace SpiritGmlParser
 
 BOOST_FUSION_ADAPT_STRUCT(
     SpiritGmlParser::KeyValue,
@@ -72,8 +72,8 @@ BOOST_SPIRIT_DEFINE(list, quotedString, key, value, keyValue)
 
 struct Attribute
 {
-    Attribute(const QString& name, const QString& value) :
-        _name(name), _value(value)
+    Attribute(QString name, QString value) :
+        _name(std::move(name)), _value(std::move(value))
     {}
 
     QString _name;
@@ -87,7 +87,7 @@ AttributeVector processAttribute(const KeyValue& attribute)
     struct Visitor
     {
         QString _name;
-        Visitor(QString name) : _name(name) {}
+        explicit Visitor(QString name) : _name(name) {}
 
         AttributeVector operator()(double v) const          { return {{_name, QString::number(v)}}; }
         AttributeVector operator()(int v) const             { return {{_name, QString::number(v)}}; }
@@ -135,7 +135,7 @@ bool build(const List& gml, IGraphModel& graphModel,
 
     auto processNode = [&](const List& node)
     {
-        auto id = findIntValue(node, "id");
+        auto id = findIntValue(node, QStringLiteral("id"));
         if(id == nullptr)
             return false;
 
@@ -147,9 +147,9 @@ bool build(const List& gml, IGraphModel& graphModel,
         for(const auto& attributeWrapper : node)
         {
             const auto& attribute = attributeWrapper.get();
-            if(attribute._key == "id")
+            if(attribute._key == QStringLiteral("id"))
                 continue;
-            else if(attribute._key == "label")
+            else if(attribute._key == QStringLiteral("label"))
             {
                 // If there is a label attribute, use it as the node name
                 const auto* label = boost::get<QString>(&attribute._value);
@@ -176,8 +176,8 @@ bool build(const List& gml, IGraphModel& graphModel,
 
     auto processEdge = [&](const List& edge)
     {
-        auto sourceId = findIntValue(edge, "source");
-        auto targetId = findIntValue(edge, "target");
+        auto sourceId = findIntValue(edge, QStringLiteral("source"));
+        auto targetId = findIntValue(edge, QStringLiteral("target"));
 
         if(sourceId == nullptr || targetId == nullptr)
             return false;
@@ -192,7 +192,7 @@ bool build(const List& gml, IGraphModel& graphModel,
         for(const auto& attributeWrapper : edge)
         {
             const auto& attribute = attributeWrapper.get();
-            if(attribute._key == "source" || attribute._key == "target")
+            if(attribute._key == QStringLiteral("source") || attribute._key == QStringLiteral("target"))
                 continue;
             else
             {
@@ -213,7 +213,7 @@ bool build(const List& gml, IGraphModel& graphModel,
     {
         const auto& key = keyValue.get()._key;
 
-        if(key == "graph")
+        if(key == QStringLiteral("graph"))
         {
             const auto* graph = boost::get<List>(&keyValue.get()._value);
 
@@ -233,9 +233,9 @@ bool build(const List& gml, IGraphModel& graphModel,
 
                 bool success = true;
 
-                if(type == "node")
+                if(type == QStringLiteral("node"))
                     success = processNode(*value);
-                else if(type == "edge")
+                else if(type == QStringLiteral("edge"))
                     success = processEdge(*value);
 
                 if(!success)
