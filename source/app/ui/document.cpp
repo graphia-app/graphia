@@ -144,7 +144,12 @@ QString Document::commandVerb() const
 
 bool Document::commandIsCancellable() const
 {
-    return _commandManager.commandIsCancellable();
+    return !_loadComplete || _commandManager.commandIsCancellable();
+}
+
+bool Document::commandIsCancelling() const
+{
+    return _commandManager.commandIsCancelling();
 }
 
 void Document::updateLayoutState()
@@ -539,6 +544,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     _loadComplete = true;
     emit commandInProgressChanged();
+    emit commandIsCancellableChanged();
     emit idleChanged();
     emit editableChanged();
     emit commandVerbChanged(); // Stop showing loading message
@@ -578,6 +584,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(&_commandManager, &CommandManager::commandProgressChanged, this, &Document::commandProgressChanged);
     connect(&_commandManager, &CommandManager::commandVerbChanged, this, &Document::commandVerbChanged);
     connect(&_commandManager, &CommandManager::commandIsCancellableChanged, this, &Document::commandIsCancellableChanged);
+    connect(&_commandManager, &CommandManager::commandIsCancellingChanged, this, &Document::commandIsCancellingChanged);
 
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::canUndoChanged);
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::nextUndoActionChanged);

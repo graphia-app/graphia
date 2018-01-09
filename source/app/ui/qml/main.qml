@@ -1421,11 +1421,10 @@ ApplicationWindow
                 iconName: "process-stop"
                 tooltip: qsTr("Cancel")
 
-                visible: currentDocument ? currentDocument.commandIsCancellable && !cancelledIndicator.visible: false
+                visible: currentDocument ? currentDocument.commandIsCancellable && !currentDocument.commandIsCancelling : false
                 onClicked:
                 {
                     currentDocument.cancelCommand();
-                    cancelledIndicator.visible = true;
                 }
             }
 
@@ -1435,17 +1434,7 @@ ApplicationWindow
                 implicitHeight: cancelButton.implicitHeight
 
                 id: cancelledIndicator
-                visible: false
-            }
-
-            Connections
-            {
-                target: currentDocument
-                onCommandStarted:
-                {
-                    // Reset the cancellation indicator when a command starts
-                    cancelledIndicator.visible = false;
-                }
+                visible: currentDocument ? currentDocument.commandIsCancelling : false
             }
 
             Label

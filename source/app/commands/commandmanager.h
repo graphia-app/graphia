@@ -22,6 +22,7 @@ class CommandManager : public QObject, public ICommandManager
     Q_PROPERTY(int commandProgress MEMBER _commandProgress NOTIFY commandProgressChanged)
     Q_PROPERTY(QString commandVerb MEMBER _commandVerb NOTIFY commandVerbChanged)
     Q_PROPERTY(bool commandIsCancellable READ commandIsCancellable NOTIFY commandIsCancellableChanged)
+    Q_PROPERTY(bool commandIsCancelling MEMBER _cancelling NOTIFY commandIsCancellingChanged)
 
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
 
@@ -45,6 +46,7 @@ public:
     int commandProgress() const { return _commandProgress; }
     QString commandVerb() const { return _commandVerb; }
     bool commandIsCancellable() const;
+    bool commandIsCancelling() const { return _cancelling; }
 
     const std::vector<QString> undoableCommandDescriptions() const;
     const std::vector<QString> redoableCommandDescriptions() const;
@@ -124,6 +126,7 @@ private:
     int _commandProgressTimerId = -1;
     int _commandProgress = 0;
     QString _commandVerb;
+    bool _cancelling = false;
 
     int _debug = 0;
 
@@ -139,6 +142,7 @@ signals:
     void commandProgressChanged() const;
     void commandVerbChanged() const;
     void commandIsCancellableChanged() const;
+    void commandIsCancellingChanged() const;
     void commandQueued();
     void commandCompleted(bool success, QString description, QString pastParticiple) const;
     void commandStackCleared();

@@ -307,6 +307,12 @@ void CommandManager::clearCurrentCommand()
     // when the underlying unique_ptr is destroyed
     std::unique_lock<std::mutex> lock(_currentCommandMutex);
     _currentCommand = nullptr;
+
+    bool wasCancelling = _cancelling;
+    _cancelling = false;
+
+    if(wasCancelling)
+        emit commandIsCancellingChanged();
 }
 
 
@@ -316,6 +322,8 @@ void CommandManager::cancel()
 
     if(_currentCommand != nullptr)
     {
+        _cancelling = true;
+        emit commandIsCancellingChanged();
         _currentCommand->cancel();
 
         if(_debug > 0)

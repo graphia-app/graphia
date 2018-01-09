@@ -63,6 +63,7 @@ class Document : public QObject, public IDocument
     Q_PROPERTY(int commandProgress READ commandProgress NOTIFY commandProgressChanged)
     Q_PROPERTY(QString commandVerb READ commandVerb NOTIFY commandVerbChanged)
     Q_PROPERTY(bool commandIsCancellable READ commandIsCancellable NOTIFY commandIsCancellableChanged)
+    Q_PROPERTY(bool commandIsCancelling READ commandIsCancelling NOTIFY commandIsCancellingChanged)
 
     Q_PROPERTY(QML_ENUM_PROPERTY(LayoutPauseState) layoutPauseState READ layoutPauseState NOTIFY layoutPauseStateChanged)
 
@@ -114,6 +115,7 @@ public:
     int commandProgress() const;
     QString commandVerb() const;
     bool commandIsCancellable() const;
+    bool commandIsCancelling() const;
 
     void updateLayoutState();
     LayoutPauseState layoutPauseState();
@@ -243,6 +245,7 @@ signals:
     void commandProgressChanged();
     void commandVerbChanged();
     void commandIsCancellableChanged();
+    void commandIsCancellingChanged();
 
     void layoutPauseStateChanged();
 

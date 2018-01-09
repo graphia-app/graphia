@@ -69,6 +69,7 @@ Item
     property int commandProgress: document.commandProgress
     property string commandVerb: document.commandVerb
     property bool commandIsCancellable: commandInProgress && document.commandIsCancellable
+    property bool commandIsCancelling: document.commandIsCancelling
 
     property int layoutPauseState: document.layoutPauseState
 
