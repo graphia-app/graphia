@@ -51,7 +51,15 @@ constexpr bool static_strcmp(char const* a, char const* b)
     }; \
     static void ENUM_NAME ## _initialiser() \
     { \
-        QTimer::singleShot(0, [] { _REFLECTOR(ENUM_NAME)::initialise(); }); \
+        if(!QCoreApplication::instance()->startingUp()) \
+        { \
+            /* This will only occur from a DLL, where we need to delay the \
+            initialisation until later so we can guarantee it occurs \
+            after any static initialisation */ \
+            QTimer::singleShot(0, [] { _REFLECTOR(ENUM_NAME)::initialise(); }); \
+        } \
+        else \
+            _REFLECTOR(ENUM_NAME)::initialise(); \
     } \
     Q_COREAPP_STARTUP_FUNCTION(ENUM_NAME ## _initialiser) \
     using ENUM_NAME = QML_ENUM_PROPERTY(ENUM_NAME)
