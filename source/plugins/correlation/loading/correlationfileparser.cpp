@@ -51,7 +51,7 @@ static QRect findLargestDataRect(const TabularData& tabularData)
             {
                 lastIndex = indexes.top(); indexes.pop();
                 int height = heights.top(); heights.pop();
-                int width = (index - lastIndex) + 1;
+                int width = (index - lastIndex);
                 int area = width * height;
                 if(area > (dataRect.width() * dataRect.height()))
                 {
