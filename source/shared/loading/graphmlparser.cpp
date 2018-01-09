@@ -273,7 +273,10 @@ bool GraphMLHandler::fatalError(const QXmlParseException &)
 
 GraphMLParser::GraphMLParser(UserNodeData* userNodeData) :
     _userNodeData(userNodeData)
-{}
+{
+    // Add this up front, so that it appears first in the attribute table
+    userNodeData->add(QObject::tr("Node Name"));
+}
 
 bool GraphMLParser::parse(const QUrl &url, IGraphModel& graphModel, const ProgressFn &progress)
 {

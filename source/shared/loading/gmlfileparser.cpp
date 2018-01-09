@@ -249,7 +249,10 @@ bool build(const List& gml, IGraphModel& graphModel,
 
 GmlFileParser::GmlFileParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData) :
     _userNodeData(userNodeData), _userEdgeData(userEdgeData)
-{}
+{
+    // Add this up front, so that it appears first in the attribute table
+    userNodeData->add(QObject::tr("Node Name"));
+}
 
 bool GmlFileParser::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn)
 {

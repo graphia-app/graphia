@@ -25,7 +25,10 @@
 
 PairwiseTxtFileParser::PairwiseTxtFileParser(UserNodeData* userNodeData, UserEdgeData* userEdgeData) :
     _userNodeData(userNodeData), _userEdgeData(userEdgeData)
-{}
+{
+    // Add this up front, so that it appears first in the attribute table
+    userNodeData->add(QObject::tr("Node Name"));
+}
 
 bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn)
 {
