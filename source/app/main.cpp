@@ -74,14 +74,14 @@ int main(int argc, char *argv[])
     mainIcon.addFile(QStringLiteral(":/icon/Icon16x16.png"));
     app.setWindowIcon(mainIcon);
 
+#ifndef Q_OS_LINUX
+    QIcon::setThemeName("Tango");
+#endif
+
     // Since Qt is responsible for managing OpenGL, we need
     // to give it a hint that we want a debug context
     if(qEnvironmentVariableIntValue("OPENGL_DEBUG") > 0)
         qputenv("QSG_OPENGL_DEBUG", "1");
-
-#ifndef Q_OS_LINUX
-    QIcon::setThemeName("Tango");
-#endif
 
     if(!OpenGLFunctions::hasOpenGLSupport())
     {
