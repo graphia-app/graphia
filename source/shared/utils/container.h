@@ -130,6 +130,15 @@ namespace u
             keys.emplace_back(key);
         return keys;
     }
+
+    template<typename T, template<typename, typename...> class C, typename... Args>
+    std::vector<T> valuesFor(const C<T, Args...>& container)
+    {
+        std::vector<T> values;
+        for(const auto& value : make_value_wrapper(container))
+            values.emplace_back(value);
+        return values;
+    }
 } // namespace u
 
 #endif // CONTAINER_H
