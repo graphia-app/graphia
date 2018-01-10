@@ -146,6 +146,13 @@ private:
 
     std::vector<DataRow> _dataRows;
 
+    struct CorrelationEdge
+    {
+        NodeId _source;
+        NodeId _target;
+        double _r;
+    };
+
     std::unique_ptr<EdgeArray<double>> _pearsonValues;
     double _minimumCorrelationValue = 0.7;
     bool _transpose = false;
@@ -181,14 +188,14 @@ public:
     void finishDataRows();
     void createAttributes();
 
-    std::vector<std::tuple<NodeId, NodeId, double>> pearsonCorrelation(
+    std::vector<CorrelationEdge> pearsonCorrelation(
             double minimumThreshold, const std::function<bool()>& cancelled,
             const ProgressFn& progressFn);
 
     double minimumCorrelation() const { return _minimumCorrelationValue; }
     bool transpose() const { return _transpose; }
 
-    bool createEdges(const std::vector<std::tuple<NodeId, NodeId, double>>& edges,
+    bool createEdges(const std::vector<CorrelationEdge>& edges,
                      const std::function<bool()>& cancelled,
                      const ProgressFn& progressFn);
 

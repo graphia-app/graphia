@@ -193,7 +193,7 @@ void CorrelationPluginInstance::createAttributes()
                                "divided by the mean."));
 }
 
-std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pearsonCorrelation(
+std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstance::pearsonCorrelation(
         double minimumThreshold,
         const std::function<bool()>& cancelled,
         const ProgressFn& progressFn)
@@ -210,7 +210,7 @@ std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pears
     [&](std::vector<DataRow>::const_iterator rowAIt)
     {
         const auto& rowA = *rowAIt;
-        std::vector<std::tuple<NodeId, NodeId, double>> edges;
+        std::vector<CorrelationPluginInstance::CorrelationEdge> edges;
 
         if(cancelled())
             return edges;
@@ -224,7 +224,7 @@ std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pears
             double r = numerator / denominator;
 
             if(std::isfinite(r) && r >= minimumThreshold)
-                edges.emplace_back(rowA._nodeId, rowB._nodeId, r);
+                edges.push_back({rowA._nodeId, rowB._nodeId, r});
         }
 
         cost += rowA.computeCostHint();
@@ -236,7 +236,7 @@ std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pears
     // Returning the results might take time
     progressFn(-1);
 
-    std::vector<std::tuple<NodeId, NodeId, double>> edges;
+    std::vector<CorrelationEdge> edges;
 
     for(auto& result : results.get())
         edges.insert(edges.end(), result.begin(), result.end());
@@ -244,7 +244,7 @@ std::vector<std::tuple<NodeId, NodeId, double>> CorrelationPluginInstance::pears
     return edges;
 }
 
-bool CorrelationPluginInstance::createEdges(const std::vector<std::tuple<NodeId, NodeId, double>>& edges,
+bool CorrelationPluginInstance::createEdges(const std::vector<CorrelationPluginInstance::CorrelationEdge>& edges,
                                             const std::function<bool()>& cancelled,
                                             const ProgressFn& progressFn)
 {
@@ -257,8 +257,8 @@ bool CorrelationPluginInstance::createEdges(const std::vector<std::tuple<NodeId,
         progressFn(std::distance(edges.begin(), edgeIt) * 100 / static_cast<int>(edges.size()));
 
         auto& edge = *edgeIt;
-        auto edgeId = graphModel()->mutableGraph().addEdge(std::get<0>(edge), std::get<1>(edge));
-        _pearsonValues->set(edgeId, std::get<2>(edge));
+        auto edgeId = graphModel()->mutableGraph().addEdge(edge._source, edge._target);
+        _pearsonValues->set(edgeId, edge._r);
     }
 
     return true;
