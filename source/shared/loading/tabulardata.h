@@ -45,7 +45,7 @@ template<const char Delimiter> class TextDelimitedTabularDataParser : public IPa
 
 private:
     TabularData _tabularData;
-    const IParser* _parentParser = nullptr;
+    const IParser* _parent = nullptr;
 
     template<typename TokenFn>
     bool parse(const QUrl& url, const ProgressFn& progressFn, TokenFn tokenFn)
@@ -68,7 +68,7 @@ private:
         file.seekg(0, std::ios::beg);
         while(u::getline(file, line))
         {
-            if(_parentParser != nullptr && _parentParser->cancelled())
+            if(_parent != nullptr && _parent->cancelled())
                 return false;
 
             bool inQuotes = false;
@@ -127,6 +127,10 @@ private:
     }
 
 public:
+    TextDelimitedTabularDataParser(IParser* parent = nullptr) :
+        _parent(parent)
+    {}
+
     bool parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn) override
     {
         size_t columns = 0;
@@ -153,8 +157,6 @@ public:
             _tabularData.setValueAt(column, row, std::move(token));
         });
     }
-
-    void setParentParser(const IParser* parentParser) { _parentParser = parentParser; }
 
     TabularData& tabularData() { return _tabularData; }
 };
