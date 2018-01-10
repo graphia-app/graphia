@@ -1411,35 +1411,6 @@ ApplicationWindow
                 indeterminate: currentDocument ? currentDocument.commandProgress < 0.0 : false
             }
 
-            ToolButton
-            {
-                id: cancelButton
-
-                implicitHeight: progressBar.implicitHeight * 0.8
-                implicitWidth: implicitHeight
-
-                iconName: "process-stop"
-                tooltip: qsTr("Cancel")
-
-                visible: currentDocument ? currentDocument.commandIsCancellable && !currentDocument.commandIsCancelling : false
-                onClicked:
-                {
-                    if(currentDocument.loading)
-                        closeTabAction.trigger();
-                    else
-                        currentDocument.cancelCommand();
-                }
-            }
-
-            BusyIndicator
-            {
-                implicitWidth: cancelButton.implicitWidth
-                implicitHeight: cancelButton.implicitHeight
-
-                id: cancelledIndicator
-                visible: currentDocument ? currentDocument.commandIsCancelling : false
-            }
-
             Label
             {
                 property string currentCommandVerb
@@ -1479,6 +1450,35 @@ ApplicationWindow
 
                     return minutes + ":" + seconds;
                 }
+            }
+
+            ToolButton
+            {
+                id: cancelButton
+
+                implicitHeight: progressBar.implicitHeight * 0.8
+                implicitWidth: implicitHeight
+
+                iconName: "process-stop"
+                tooltip: qsTr("Cancel")
+
+                visible: currentDocument ? currentDocument.commandIsCancellable && !currentDocument.commandIsCancelling : false
+                onClicked:
+                {
+                    if(currentDocument.loading)
+                        closeTabAction.trigger();
+                    else
+                        currentDocument.cancelCommand();
+                }
+            }
+
+            BusyIndicator
+            {
+                implicitWidth: cancelButton.implicitWidth
+                implicitHeight: cancelButton.implicitHeight
+
+                id: cancelledIndicator
+                visible: currentDocument ? currentDocument.commandIsCancelling : false
             }
 
             // Hack to force the RowLayout height to be the maximum of its children
