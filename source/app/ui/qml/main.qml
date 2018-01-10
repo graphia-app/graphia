@@ -570,7 +570,36 @@ ApplicationWindow
         text: qsTr("&Close Tab")
         shortcut: "Ctrl+W"
         enabled: currentDocument
-        onTriggered: { tabView.closeTab(tabView.currentIndex); }
+        onTriggered:
+        {
+            // If we're currently busy, cancel and wait before closing
+            if(currentDocument.commandInProgress)
+            {
+                // If a load is cancelled the tab is closed automatically,
+                // and there is no command involved anyway, so in that case we
+                // don't need to wait for the command to complete
+                if(!currentDocument.loading)
+                {
+                    // Capture the document by value so we can use it to work out
+                    // which tab to close once the command is complete
+                    var closeTabFunction = function(document)
+                    {
+                        return function()
+                        {
+                            document.commandComplete.disconnect(closeTabFunction);
+                            tabView.closeTab(tabView.findTabIndex(document));
+                        };
+                    }(currentDocument);
+
+                    currentDocument.commandComplete.connect(closeTabFunction);
+                }
+
+                if(currentDocument.commandIsCancellable)
+                    currentDocument.cancelCommand();
+            }
+            else
+                tabView.closeTab(tabView.currentIndex);
+        }
     }
 
     Action
