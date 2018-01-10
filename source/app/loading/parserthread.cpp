@@ -31,7 +31,15 @@ void ParserThread::start(std::unique_ptr<IParser> parser)
 void ParserThread::cancel()
 {
     if(_thread.joinable())
+    {
         _parser->cancel();
+        emit cancelledChanged();
+    }
+}
+
+bool ParserThread::cancelled() const
+{
+    return _parser->cancelled();
 }
 
 void ParserThread::run()

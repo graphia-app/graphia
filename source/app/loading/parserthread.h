@@ -26,6 +26,7 @@ public:
 
     void start(std::unique_ptr<IParser> parser);
     void cancel();
+    bool cancelled() const;
 
 private:
     void run();
@@ -34,6 +35,8 @@ signals:
     void progress(int percentage) const;
     void success(IParser*) const;
     void complete(const QUrl& url, bool success) const;
+
+    void cancelledChanged() const;
 };
 
 #endif // PARSERTHREAD_H
