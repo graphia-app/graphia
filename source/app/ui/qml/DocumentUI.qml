@@ -65,6 +65,8 @@ Item
     property bool editable: document.editable
     property bool canDeleteSelection: document.editable && document.numNodesSelected > 0
 
+    property bool loading: !document.loadComplete
+
     property bool commandInProgress: document.commandInProgress && !commandTimer.running
     property int commandProgress: document.commandProgress
     property string commandVerb: document.commandVerb
