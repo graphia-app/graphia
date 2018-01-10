@@ -127,7 +127,7 @@ private:
     }
 
 public:
-    TextDelimitedTabularDataParser(IParser* parent = nullptr) :
+    explicit TextDelimitedTabularDataParser(IParser* parent = nullptr) :
         _parent(parent)
     {}
 
