@@ -1318,21 +1318,28 @@ ApplicationWindow
 
             // This is called if the file can't be opened immediately, or
             // if the load has been attempted but it failed later
-            function onLoadFailure(fileUrl)
+            function onLoadFailure(index, fileUrl)
             {
-                // Remove the tab that was created but won't be used
-                removeTab(tabView.currentIndex);
+                var document = getTab(index).item;
+                var loadWasCancelled = document.commandIsCancelling;
 
-                errorOpeningFileMessageDialog.text = qmlUtils.baseFileNameForUrl(fileUrl) +
-                        qsTr(" could not be opened due to an error.");
-                errorOpeningFileMessageDialog.open();
+                // Remove the tab that was created but won't be used
+                removeTab(index);
+
+                if(!loadWasCancelled)
+                {
+                    errorOpeningFileMessageDialog.text = qmlUtils.baseFileNameForUrl(fileUrl) +
+                            qsTr(" could not be opened due to an error.");
+                    errorOpeningFileMessageDialog.open();
+                }
             }
 
             function openInCurrentTab(fileUrl, fileType, pluginName, parameters)
             {
-                currentDocument.application = application;
-                if(!currentDocument.openFile(fileUrl, fileType, pluginName, parameters))
-                    onLoadFailure(fileUrl);
+                var document = currentDocument;
+                document.application = application;
+                if(!document.openFile(fileUrl, fileType, pluginName, parameters))
+                    onLoadFailure(findTabIndex(document), fileUrl);
             }
 
             function closeTab(index, onCloseFunction)
@@ -1355,6 +1362,18 @@ ApplicationWindow
                 tab.confirmSave(onCloseFunction);
             }
 
+            function findTabIndex(document)
+            {
+                for(var index = 0; index < count; index++)
+                {
+                    var tab = getTab(index);
+                    if(tab.item === document)
+                        return index;
+                }
+
+                return -1;
+            }
+
             Component
             {
                 id: tabComponent
@@ -1371,7 +1390,7 @@ ApplicationWindow
                             processOnePendingArgument();
                         }
                         else
-                            tabView.onLoadFailure(fileUrl);
+                            tabView.onLoadFailure(tabView.findTabIndex(document), fileUrl);
                     }
                 }
             }
