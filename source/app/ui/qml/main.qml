@@ -1465,10 +1465,7 @@ ApplicationWindow
                 visible: currentDocument ? currentDocument.commandIsCancellable && !currentDocument.commandIsCancelling : false
                 onClicked:
                 {
-                    if(currentDocument.loading)
-                        closeTabAction.trigger();
-                    else
-                        currentDocument.cancelCommand();
+                    currentDocument.cancelCommand();
                 }
             }
 

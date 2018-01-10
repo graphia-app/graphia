@@ -149,6 +149,9 @@ bool Document::commandIsCancellable() const
 
 bool Document::commandIsCancelling() const
 {
+    if(_graphFileParserThread != nullptr && _graphFileParserThread->cancelled())
+        return true;
+
     return _commandManager.commandIsCancelling();
 }
 
@@ -472,6 +475,8 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
 
     connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::onLoadComplete);
     connect(_graphFileParserThread.get(), &ParserThread::complete, this, &Document::loadComplete);
+    connect(_graphFileParserThread.get(), &ParserThread::cancelledChanged,
+            this, &Document::commandIsCancellingChanged);
     _graphFileParserThread->start(std::move(parser));
 
     return true;
@@ -1643,7 +1648,10 @@ void Document::setLayoutSettingValue(const QString& name, float value)
 
 void Document::cancelCommand()
 {
-    _commandManager.cancel();
+    if(!_loadComplete && _graphFileParserThread != nullptr)
+        _graphFileParserThread->cancel();
+    else
+        _commandManager.cancel();
 }
 
 void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
