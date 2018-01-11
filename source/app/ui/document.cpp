@@ -427,7 +427,6 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
         _graphModel->updateVisuals(_selectionManager.get(), _searchManager.get());
     });
 
-
     connect(this, &Document::taskAddedToExecutor, this, &Document::executeDeferred);
 
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, this, &Document::numNodesFoundChanged);
