@@ -200,15 +200,15 @@ function formatUsingSIPostfix(num)
 {
     var si =
         [
-            { value: 1E9,  symbol: "G" },
-            { value: 1E6,  symbol: "M" },
-            { value: 1E3,  symbol: "k" }
+            { threshold: 1E9, divider: 1E9, symbol: "B" },
+            { threshold: 1E6, divider: 1E6, symbol: "M" },
+            { threshold: 1E4, divider: 1E3, symbol: "k" }
         ], i;
 
     for(i = 0; i < si.length; i++)
     {
-        if(num >= si[i].value * 100)
-            return (num / si[i].value).toFixed(1).replace(/\.?0+$/, "") + si[i].symbol;
+        if(num >= si[i].threshold)
+            return (num / si[i].divider).toFixed(1).replace(/\.?0+$/, "") + si[i].symbol;
     }
 
     return num;
