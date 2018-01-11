@@ -7,13 +7,20 @@ template<typename Enum>
 class Flags
 {
 private:
-    Enum _value;
+    Enum _value = static_cast<Enum>(0);
 
 public:
     Flags() = default;
     Flags(Enum value) : // NOLINT
         _value(value)
     {}
+
+    template<typename... Tail>
+    Flags(Enum value, Tail... values)
+    {
+        set(value);
+        set(values...);
+    }
 
     void set(Enum value)
     {
