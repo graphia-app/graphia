@@ -147,10 +147,10 @@ public:
     QString pluginQmlPath() const;
 
     void executeOnMainThread(DeferredExecutor::TaskFn task,
-                             const QString& description);
+                             QString description = QStringLiteral("GenericTask"));
 
     void executeOnMainThreadAndWait(DeferredExecutor::TaskFn task,
-                                    const QString& description);
+                                    QString description = QStringLiteral("GenericTask"));
 
 private:
     Application* _application = nullptr;

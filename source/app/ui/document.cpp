@@ -1177,14 +1177,14 @@ NodeId Document::decrementFoundIt()
 }
 
 void Document::executeOnMainThread(DeferredExecutor::TaskFn task,
-                                   const QString& description)
+                                   QString description)
 {
     _deferredExecutor.enqueue(std::move(task), description);
     emit taskAddedToExecutor();
 }
 
 void Document::executeOnMainThreadAndWait(DeferredExecutor::TaskFn task,
-                                          const QString& description)
+                                          QString description)
 {
     executeOnMainThread(std::move(task), description);
     _executed.wait();
