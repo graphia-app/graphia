@@ -2,6 +2,7 @@
 
 #include <QStringList>
 
+#include <vector>
 #include <cmath>
 
 bool u::isNumeric(const std::string& string)
@@ -73,4 +74,34 @@ std::istream& u::getline(std::istream& is, std::string& t)
             t += static_cast<char>(c);
         }
     }
+}
+
+QString u::formatUsingSIPostfix(double number)
+{
+    struct PostFix
+    {
+        double threshold;
+        double divider;
+        char symbol;
+    };
+
+    const std::vector<PostFix> si
+    {
+        {1E9, 1E9, 'B'},
+        {1E6, 1E6, 'M'},
+        {1E4, 1E3, 'k'}
+    };
+
+    for(const auto& v : si)
+    {
+        if(number >= v.threshold)
+        {
+            auto digits = QString::number(number / v.divider, 'f', 1);
+            digits.replace("\\.?0+$", "");
+
+            return digits + v.symbol;
+        }
+    }
+
+    return QString::number(number);
 }

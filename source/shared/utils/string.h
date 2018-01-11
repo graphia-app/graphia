@@ -15,5 +15,7 @@ namespace u
     std::vector<QString> toQStringVector(const QStringList& stringList);
 
     std::istream& getline(std::istream& is, std::string& t);
+
+    QString formatUsingSIPostfix(double number);
 } // namespace u
 #endif // STRING_H
