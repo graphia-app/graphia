@@ -47,6 +47,7 @@ class CorrelationPluginInstance : public BasePluginInstance
 
     Q_PROPERTY(QAbstractTableModel* nodeAttributeTableModel READ nodeAttributeTableModel CONSTANT)
     Q_PROPERTY(QStringList columnNames READ columnNames NOTIFY columnNamesChanged)
+    Q_PROPERTY(QStringList attributeGroupNames READ attributeGroupNames NOTIFY attributeGroupNamesChanged)
     Q_PROPERTY(QStringList rowNames READ rowNames NOTIFY rowNamesChanged)
     Q_PROPERTY(QVector<double> rawData READ rawData NOTIFY rawDataChanged)
     Q_PROPERTY(QVector<QColor> nodeColors READ nodeColors NOTIFY nodeColorsChanged)
@@ -178,6 +179,7 @@ private:
     QStringList rowNames();
     QVector<double> rawData();
     QVector<QColor> nodeColors();
+    QStringList attributeGroupNames();
 
     const DataRow& dataRowForNodeId(NodeId nodeId) const;
 
@@ -213,6 +215,8 @@ public:
     bool load(const QByteArray& data, int dataVersion, IMutableGraph& graph,
               const ProgressFn& progressFn) override;
 
+    Q_INVOKABLE void performEnrichment(QStringList attributeGroupNames, QString selectedAttributeGroup);
+
 private slots:
     void onLoadSuccess();
     void onSelectionChanged(const ISelectionManager* selectionManager);
@@ -224,6 +228,7 @@ signals:
     void nodeColorsChanged();
     void columnNamesChanged();
     void rowNamesChanged();
+    void attributeGroupNamesChanged();
 };
 
 class CorrelationPlugin : public BasePlugin, public PluginInstanceProvider<CorrelationPluginInstance>

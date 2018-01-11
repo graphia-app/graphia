@@ -1,5 +1,6 @@
 #include "correlationplugin.h"
 
+#include "enrichmentcalculator.h"
 #include "correlationplotitem.h"
 #include "loading/correlationfileparser.h"
 #include "shared/utils/threadpool.h"
@@ -18,6 +19,7 @@ CorrelationPluginInstance::CorrelationPluginInstance()
     connect(this, SIGNAL(selectionChanged(const ISelectionManager*)),
             this, SLOT(onSelectionChanged(const ISelectionManager*)), Qt::DirectConnection);
     connect(this, SIGNAL(visualsChanged()), this, SIGNAL(nodeColorsChanged()));
+    connect(this, SIGNAL(graphChanged()), this, SIGNAL(attributeGroupNamesChanged()));
 }
 
 void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* document,
@@ -415,6 +417,21 @@ QVector<QColor> CorrelationPluginInstance::nodeColors()
     return colors;
 }
 
+QStringList CorrelationPluginInstance::attributeGroupNames()
+{
+    // Attribute Groups will return a list of attributes that are not
+    // floats.
+    QStringList list;
+    auto& attributeNames = graphModel()->attributeNames();
+    for(const auto& name : attributeNames)
+    {
+        auto* attribute = graphModel()->attributeByName(name);
+        if(attribute->valueType() != ValueType::Float)
+            list.append(name);
+    }
+    return list;
+}
+
 QStringList CorrelationPluginInstance::columnNames()
 {
     QStringList list;
@@ -601,6 +618,13 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     _missingDataReplacementValue = jsonObject["missingDataReplacementValue"];
 
     return true;
+}
+
+void CorrelationPluginInstance::performEnrichment(QStringList selectedAttributesAgainst, QString selectedAttribute)
+{
+    qDebug() << selectedAttributesAgainst;
+    auto& selectedNodes = selectionManager()->selectedNodes();
+    EnrichmentCalculator::overRepAgainstEachAttribute(selectedNodes, selectedAttributesAgainst[0], graphModel());
 }
 
 CorrelationPlugin::CorrelationPlugin()

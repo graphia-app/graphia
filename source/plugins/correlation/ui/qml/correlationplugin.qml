@@ -16,6 +16,13 @@ PluginContent
     anchors.fill: parent
     minimumHeight: 320
 
+    EnrichmentWizard
+    {
+        id: enrichmentWizard
+        attributeGroups: plugin.model.attributeGroupNames
+        onAccepted: plugin.model.performEnrichment(selectedAttributeGroupsAgainst, selectedAttributeGroup)
+    }
+
     Action
     {
         id: toggleUiOrientationAction
@@ -25,6 +32,17 @@ PluginContent
         checked: true
 
         onCheckedChanged: { root.saveRequired = true; }
+    }
+
+    Action
+    {
+        id: openEnrichment
+        text: qsTr("Enrichment")
+        iconName: "list-add"
+
+        onTriggered: {
+            enrichmentWizard.visible = true;
+        }
     }
 
     Action
@@ -362,6 +380,7 @@ PluginContent
         ToolButton { action: resizeColumnsToContentsAction }
         ToolButton { action: toggleColumnNamesAction }
         ToolButton { action: selectColumnsAction }
+        ToolButton { action: openEnrichment }
         Item { Layout.fillWidth: true }
     }
 

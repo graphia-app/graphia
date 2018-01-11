@@ -3,5 +3,6 @@
         <file>qml/correlationplugin.qml</file>
         <file>qml/parameters.qml</file>
         <file>plots.svg</file>
+        <file>qml/EnrichmentWizard.qml</file>
     </qresource>
 </RCC>
