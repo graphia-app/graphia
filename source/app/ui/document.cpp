@@ -81,6 +81,23 @@ ISelectionManager* Document::selectionManager()
     return _selectionManager.get();
 }
 
+MessageBoxButton Document::messageBox(MessageBoxIcon icon, const QString& title,
+    const QString& text, Flags<MessageBoxButton> buttons)
+{
+    MessageBoxButton result;
+
+    executeOnMainThreadAndWait([&]
+    {
+        QMessageBox messageBox(static_cast<QMessageBox::Icon>(icon), title, text,
+            static_cast<QMessageBox::StandardButton>(*buttons));
+
+        messageBox.exec();
+        result = static_cast<MessageBoxButton>(messageBox.result());
+    });
+
+    return result;
+}
+
 bool Document::commandInProgress() const
 {
     return !_loadComplete || _commandManager.busy();

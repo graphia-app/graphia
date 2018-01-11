@@ -102,6 +102,9 @@ public: // IDocument
     const ICommandManager* commandManager() const override { return &_commandManager; }
     ICommandManager* commandManager() override { return &_commandManager; }
 
+    MessageBoxButton messageBox(MessageBoxIcon icon, const QString& title, const QString& text,
+        Flags<MessageBoxButton> buttons = MessageBoxButton::Ok) override;
+
     void moveFocusToNode(NodeId nodeId) override;
 
 public:
