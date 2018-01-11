@@ -409,6 +409,10 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
         _searchManager->refresh();
         _graphModel->updateVisuals(_selectionManager.get(), _searchManager.get());
     });
+
+
+    connect(this, &Document::taskAddedToExecutor, this, &Document::executeDeferred);
+
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, this, &Document::numNodesFoundChanged);
 
     connect(&_graphModel->mutableGraph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
@@ -580,8 +584,6 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(this, &Document::idleChanged, this, &Document::canRedoChanged);
     connect(this, &Document::idleChanged, this, &Document::canEnterOverviewModeChanged);
     connect(this, &Document::idleChanged, this, &Document::canResetViewChanged);
-
-    connect(this, &Document::taskAddedToExecutor, this, &Document::executeDeferred);
 
     connect(&_commandManager, &CommandManager::commandWillExecute, _graphQuickItem, &GraphQuickItem::commandWillExecute);
     connect(&_commandManager, &CommandManager::commandWillExecute, this, &Document::commandInProgressChanged);
