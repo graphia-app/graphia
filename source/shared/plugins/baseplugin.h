@@ -27,6 +27,7 @@ class BasePluginInstance : public QObject, public IPluginInstance
 
 private:
     const IPlugin* _plugin = nullptr;
+    IDocument* _document = nullptr;
     IGraphModel* _graphModel = nullptr;
     ISelectionManager* _selectionManager = nullptr;
     ICommandManager* _commandManager = nullptr;
@@ -36,6 +37,7 @@ public:
                     const IParserThread* parserThread) override
     {
         _plugin = plugin;
+        _document = document;
         _graphModel = document->graphModel();
         _selectionManager = document->selectionManager();
         _commandManager = document->commandManager();
@@ -90,6 +92,8 @@ public:
     void setSaveRequired() const { emit saveRequired(); }
 
     const IPlugin* plugin() { return _plugin; }
+    IDocument* document() { return _document; }
+    const IDocument* document() const { return _document; }
     IGraphModel* graphModel() { return _graphModel; }
     const IGraphModel* graphModel() const { return _graphModel; }
     ISelectionManager* selectionManager() { return _selectionManager; }
