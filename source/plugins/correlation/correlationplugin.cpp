@@ -274,10 +274,9 @@ std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstanc
                 "graph (%3 nodes, approx. %4 edges). This has the potential to exhaust "
                 "system resources and lead to instability or freezes. Are you sure you "
                 "wish to continue?"))
-                .arg(fileName)
-                .arg(QString::number(minimumThreshold))
-                .arg(u::formatUsingSIPostfix(numNodes))
-                .arg(u::formatUsingSIPostfix(numEdgesEstimate)),
+                .arg(fileName, QString::number(minimumThreshold),
+                     u::formatUsingSIPostfix(numNodes),
+                     u::formatUsingSIPostfix(numEdgesEstimate)),
             {MessageBoxButton::Yes, MessageBoxButton::No});
 
         if(warningResult == MessageBoxButton::No)
