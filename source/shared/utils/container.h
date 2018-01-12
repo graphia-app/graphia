@@ -150,7 +150,10 @@ namespace u
         auto sample = container;
 
         for(size_t i = 0; i < numSamples; i++)
-            std::swap(sample[i], sample[i + u::rand(0, sample.size() - i - 1)]);
+        {
+            int high = static_cast<int>(sample.size() - i) - 1;
+            std::swap(sample[i], sample[i + u::rand(0, high)]);
+        }
 
         sample.resize(numSamples);
 
