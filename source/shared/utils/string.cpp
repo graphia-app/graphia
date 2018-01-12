@@ -98,7 +98,7 @@ QString u::formatUsingSIPostfix(double number)
         if(number >= v.threshold)
         {
             auto digits = QString::number(number / v.divider, 'f', 1);
-            digits.replace(QRegularExpression(R"(\.0+$)"), QStringLiteral(""));
+            digits.replace(QRegularExpression(QStringLiteral(R"(\.0+$)")), QStringLiteral(""));
 
             return digits + v.symbol;
         }
