@@ -6,12 +6,14 @@
 #include <vector>
 #include <cstdlib>
 
+class Cancellable;
+
 class Normaliser
 {
 public:
     virtual ~Normaliser() = default;
     virtual bool process(std::vector<double>& data, size_t numColumns, size_t numRows,
-                         const std::function<bool()>& cancelled, const ProgressFn& progress) const = 0;
+                         Cancellable& cancellable, const ProgressFn& progress) const = 0;
 };
 
 #endif // NORMALISER_H

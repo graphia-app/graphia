@@ -114,7 +114,7 @@ AttributeVector processAttribute(const KeyValue& attribute)
 
 bool build(const List& gml, IGraphModel& graphModel,
     UserNodeData& userNodeData, UserEdgeData& userEdgeData,
-    const ProgressFn& progressFn, const std::function<bool()>& cancelled)
+    const ProgressFn& progressFn, const Cancellable& cancellable)
 {
     auto findIntValue = [](const List& list, const QString& key) -> const int*
     {
@@ -236,7 +236,7 @@ bool build(const List& gml, IGraphModel& graphModel,
                 else if(type == QStringLiteral("edge"))
                     success = processEdge(*value);
 
-                if(!success || cancelled())
+                if(!success || cancellable.cancelled())
                     return false;
             }
         }
@@ -296,5 +296,5 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel& graphModel, const Progre
 
     return SpiritGmlParser::build(gml, graphModel,
         *_userNodeData, *_userEdgeData,
-        progressFn, cancelledFn);
+        progressFn, *this);
 }

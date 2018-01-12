@@ -120,16 +120,14 @@ bool CorrelationFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
 
     _plugin->setDimensions(dataRect.width(), dataRect.height());
 
-    auto cancelledFn = [this]{ return cancelled(); };
-
     graphModel.mutableGraph().setPhase(QObject::tr("Attributes"));
-    if(!_plugin->loadUserData(*tabularData, dataRect.left(), dataRect.top(), cancelledFn, progressFn))
+    if(!_plugin->loadUserData(*tabularData, dataRect.left(), dataRect.top(), *this, progressFn))
         return false;
 
     if(_plugin->requiresNormalisation())
     {
         graphModel.mutableGraph().setPhase(QObject::tr("Normalisation"));
-        if(!_plugin->normalise(cancelledFn, progressFn))
+        if(!_plugin->normalise(*this, progressFn))
             return false;
     }
 
@@ -139,13 +137,13 @@ bool CorrelationFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
     _plugin->createAttributes();
 
     graphModel.mutableGraph().setPhase(QObject::tr("Pearson Correlation"));
-    auto edges = _plugin->pearsonCorrelation(_plugin->minimumCorrelation(), cancelledFn, progressFn);
+    auto edges = _plugin->pearsonCorrelation(_plugin->minimumCorrelation(), *this, progressFn);
 
     if(cancelled())
         return false;
 
     graphModel.mutableGraph().setPhase(QObject::tr("Building Graph"));
-    if(!_plugin->createEdges(edges, cancelledFn, progressFn))
+    if(!_plugin->createEdges(edges, *this, progressFn))
         return false;
 
     graphModel.mutableGraph().clearPhase();

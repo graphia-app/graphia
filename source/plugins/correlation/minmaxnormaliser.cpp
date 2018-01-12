@@ -1,10 +1,12 @@
 #include "minmaxnormaliser.h"
 
+#include "shared/utils/cancellable.h"
+
 #include <limits>
 #include <algorithm>
 
 bool MinMaxNormaliser::process(std::vector<double>& data, size_t numColumns, size_t numRows,
-                               const std::function<bool()>& cancelled, const ProgressFn& progress) const
+                               Cancellable& cancellable, const ProgressFn& progress) const
 {
     std::vector<double> minColumn;
     std::vector<double> maxColumn;
@@ -16,7 +18,7 @@ bool MinMaxNormaliser::process(std::vector<double>& data, size_t numColumns, siz
 
     for(size_t row = 0; row < numRows; row++)
     {
-        if(cancelled())
+        if(cancellable.cancelled())
             return false;
 
         for(size_t column = 0; column < numColumns; column++)
@@ -32,7 +34,7 @@ bool MinMaxNormaliser::process(std::vector<double>& data, size_t numColumns, siz
 
     for(size_t row = 0; row < numRows; row++)
     {
-        if(cancelled())
+        if(cancellable.cancelled())
             return false;
 
         for(size_t column = 0; column < numColumns; column++)

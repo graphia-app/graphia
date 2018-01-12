@@ -37,7 +37,7 @@ void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
 }
 
 bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, size_t firstDataColumn, size_t firstDataRow,
-                                             const std::function<bool()>& cancelled, const ProgressFn& progressFn)
+                                             Cancellable& cancellable, const ProgressFn& progressFn)
 {
     if(firstDataColumn == 0 || firstDataRow == 0)
     {
@@ -53,7 +53,7 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
     {
         for(size_t columnIndex = 0; columnIndex < tabularData.numColumns(); columnIndex++)
         {
-            if(cancelled())
+            if(cancellable.cancelled())
                 return false;
 
             uint64_t rowOffset = static_cast<uint64_t>(rowIndex) * tabularData.numColumns();
@@ -119,19 +119,19 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
     return true;
 }
 
-bool CorrelationPluginInstance::normalise(const std::function<bool()>& cancelled, const ProgressFn& progressFn)
+bool CorrelationPluginInstance::normalise(Cancellable& cancellable, const ProgressFn& progressFn)
 {
     switch(_normalisation)
     {
     case NormaliseType::MinMax:
     {
         MinMaxNormaliser normaliser;
-        return normaliser.process(_data, _numColumns, _numRows, cancelled, progressFn);
+        return normaliser.process(_data, _numColumns, _numRows, cancellable, progressFn);
     }
     case NormaliseType::Quantile:
     {
         QuantileNormaliser normaliser;
-        return normaliser.process(_data, _numColumns, _numRows, cancelled, progressFn);
+        return normaliser.process(_data, _numColumns, _numRows, cancellable, progressFn);
     }
     default:
         break;
@@ -194,9 +194,7 @@ void CorrelationPluginInstance::createAttributes()
 }
 
 std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstance::pearsonCorrelation(
-        double minimumThreshold,
-        const std::function<bool()>& cancelled,
-        const ProgressFn& progressFn)
+        double minimumThreshold, Cancellable& cancellable, const ProgressFn& progressFn)
 {
     progressFn(-1);
 
@@ -210,9 +208,9 @@ std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstanc
     [&](std::vector<DataRow>::const_iterator rowAIt)
     {
         const auto& rowA = *rowAIt;
-        std::vector<CorrelationPluginInstance::CorrelationEdge> edges;
+        std::vector<CorrelationEdge> edges;
 
-        if(cancelled())
+        if(cancellable.cancelled())
             return edges;
 
         for(const auto& rowB : make_iterator_range(rowAIt + 1, _dataRows.cend()))
@@ -245,13 +243,13 @@ std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstanc
 }
 
 bool CorrelationPluginInstance::createEdges(const std::vector<CorrelationPluginInstance::CorrelationEdge>& edges,
-                                            const std::function<bool()>& cancelled,
+                                            Cancellable& cancellable,
                                             const ProgressFn& progressFn)
 {
     progressFn(-1);
     for(auto edgeIt = edges.begin(); edgeIt != edges.end(); ++edgeIt)
     {
-        if(cancelled())
+        if(cancellable.cancelled())
             return false;
 
         progressFn(std::distance(edges.begin(), edgeIt) * 100 / static_cast<int>(edges.size()));

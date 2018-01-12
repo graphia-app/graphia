@@ -1,12 +1,14 @@
 #include "quantilenormaliser.h"
 
+#include "shared/utils/cancellable.h"
+
 #include <set>
 #include <algorithm>
 
 #include <QtGlobal>
 
 bool QuantileNormaliser::process(std::vector<double>& data, size_t numColumns, size_t numRows,
-                                 const std::function<bool()>& cancelled, const ProgressFn& progress) const
+                                 Cancellable& cancellable, const ProgressFn& progress) const
 {
     std::vector<std::vector<double>> sortedColumnValues(numColumns);
     std::vector<size_t> ranking(data.size());
@@ -15,7 +17,7 @@ bool QuantileNormaliser::process(std::vector<double>& data, size_t numColumns, s
 
     for(size_t column = 0; column < numColumns; column++)
     {
-        if(cancelled())
+        if(cancellable.cancelled())
             return false;
 
         std::vector<double> columnValues;
@@ -70,7 +72,7 @@ bool QuantileNormaliser::process(std::vector<double>& data, size_t numColumns, s
 
     for(size_t row = 0; row < numRows; row++)
     {
-        if(cancelled())
+        if(cancellable.cancelled())
             return false;
 
         for(size_t column = 0; column < numColumns; column++)
