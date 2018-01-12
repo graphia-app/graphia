@@ -1,6 +1,7 @@
 #include "string.h"
 
 #include <QStringList>
+#include <QRegularExpression>
 
 #include <vector>
 #include <cmath>
@@ -97,7 +98,7 @@ QString u::formatUsingSIPostfix(double number)
         if(number >= v.threshold)
         {
             auto digits = QString::number(number / v.divider, 'f', 1);
-            digits.replace("\\.?0+$", "");
+            digits.replace(QRegularExpression(R"(\.0+$)"), QStringLiteral(""));
 
             return digits + v.symbol;
         }
