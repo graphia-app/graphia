@@ -2,6 +2,7 @@
 #define CONTAINER_H
 
 #include "pair_iterator.h"
+#include "random.h"
 
 #include <algorithm>
 #include <vector>
@@ -138,6 +139,22 @@ namespace u
         for(const auto& value : make_value_wrapper(container))
             values.emplace_back(value);
         return values;
+    }
+
+    template<typename T, template<typename, typename...> class C, typename... Args>
+    C<T, Args...> randomSample(const C<T, Args...>& container, size_t numSamples)
+    {
+        if(numSamples > container.size())
+            return container;
+
+        auto sample = container;
+
+        for(size_t i = 0; i < numSamples; i++)
+            std::swap(sample[i], sample[i + u::rand(0, sample.size() - i - 1)]);
+
+        sample.resize(numSamples);
+
+        return sample;
     }
 } // namespace u
 
