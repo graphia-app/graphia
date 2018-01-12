@@ -5,6 +5,8 @@
 #include "shared/utils/threadpool.h"
 #include "shared/utils/iterator_range.h"
 #include "shared/utils/container.h"
+#include "shared/utils/random.h"
+#include "shared/utils/string.h"
 #include "shared/attributes/iattribute.h"
 #include "shared/ui/visualisations/ielementvisual.h"
 
@@ -194,9 +196,11 @@ void CorrelationPluginInstance::createAttributes()
 }
 
 std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstance::pearsonCorrelation(
-        double minimumThreshold, Cancellable& cancellable, const ProgressFn& progressFn)
+        std::vector<DataRow>::const_iterator begin, std::vector<DataRow>::const_iterator end,
+        double minimumThreshold, Cancellable* cancellable, const ProgressFn* progressFn)
 {
-    progressFn(-1);
+    if(progressFn != nullptr)
+        (*progressFn)(-1);
 
     uint64_t totalCost = 0;
     for(auto& row : _dataRows)
@@ -204,16 +208,16 @@ std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstanc
 
     std::atomic<uint64_t> cost(0);
 
-    auto results = ThreadPool(QStringLiteral("PearsonCor")).concurrent_for(_dataRows.cbegin(), _dataRows.cend(),
+    auto results = ThreadPool(QStringLiteral("PearsonCor")).concurrent_for(begin, end,
     [&](std::vector<DataRow>::const_iterator rowAIt)
     {
         const auto& rowA = *rowAIt;
         std::vector<CorrelationEdge> edges;
 
-        if(cancellable.cancelled())
+        if(cancellable != nullptr && cancellable->cancelled())
             return edges;
 
-        for(const auto& rowB : make_iterator_range(rowAIt + 1, _dataRows.cend()))
+        for(const auto& rowB : make_iterator_range(rowAIt + 1, end))
         {
             double productSum = std::inner_product(rowA.cbegin(), rowA.cend(), rowB.cbegin(), 0.0);
             double numerator = (_numColumns * productSum) - (rowA._sum * rowB._sum);
@@ -226,13 +230,18 @@ std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstanc
         }
 
         cost += rowA.computeCostHint();
-        progressFn((cost * 100) / totalCost);
+
+        if(progressFn != nullptr)
+            (*progressFn)((cost * 100) / totalCost);
 
         return edges;
     });
 
-    // Returning the results might take time
-    progressFn(-1);
+    if(progressFn != nullptr)
+    {
+        // Returning the results might take time
+        (*progressFn)(-1);
+    }
 
     std::vector<CorrelationEdge> edges;
 
@@ -240,6 +249,45 @@ std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstanc
         edges.insert(edges.end(), result.begin(), result.end());
 
     return edges;
+}
+
+std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstance::pearsonCorrelation(
+    const QString& fileName, double minimumThreshold, Cancellable& cancellable, const ProgressFn& progressFn)
+{
+    // Perform a preliminary correlation on a small random sample of the input data, so we can
+    // tell if the user is trying to create an absurdly large graph and then give them the
+    // option to cancel incase they made a mistake
+    const int percent = 1;
+    const auto numSampleRows = (_dataRows.size() * percent) / 100;
+    const auto sample = u::randomSample(_dataRows, numSampleRows);
+    const auto sampleEdges = pearsonCorrelation(sample.cbegin(), sample.cend(), minimumThreshold);
+    const auto numEdgesEstimate = (sampleEdges.size() * 10000) / (percent * percent);
+
+    const auto numNodes = _dataRows.size();
+    const auto warningThreshold = static_cast<double>(5e6);
+
+    if(numNodes > warningThreshold || numEdgesEstimate > warningThreshold)
+    {
+        auto warningResult = document()->messageBox(MessageBoxIcon::Warning,
+            QObject::tr("Correlation"), QString(QObject::tr(
+                "Loading '%1' at a minimum threshold of %2 will result in a very large "
+                "graph (%3 nodes, approx. %4 edges). This has the potential to exhaust "
+                "system resources and lead to instability or freezes. Are you sure you "
+                "wish to continue?"))
+                .arg(fileName)
+                .arg(QString::number(minimumThreshold))
+                .arg(u::formatUsingSIPostfix(numNodes))
+                .arg(u::formatUsingSIPostfix(numEdgesEstimate)),
+            {MessageBoxButton::Yes, MessageBoxButton::No});
+
+        if(warningResult == MessageBoxButton::No)
+        {
+            cancellable.cancel();
+            return {};
+        }
+    }
+
+    return pearsonCorrelation(_dataRows.cbegin(), _dataRows.cend(), minimumThreshold, &cancellable, &progressFn);
 }
 
 bool CorrelationPluginInstance::createEdges(const std::vector<CorrelationPluginInstance::CorrelationEdge>& edges,

@@ -181,6 +181,11 @@ private:
 
     const DataRow& dataRowForNodeId(NodeId nodeId) const;
 
+    std::vector<CorrelationEdge> pearsonCorrelation(
+        std::vector<DataRow>::const_iterator begin, std::vector<DataRow>::const_iterator end,
+        double minimumThreshold, Cancellable* cancellable = nullptr,
+        const ProgressFn* progressFn = nullptr);
+
 public:
     void setDimensions(size_t numColumns, size_t numRows);
     bool loadUserData(const TabularData& tabularData, size_t firstDataColumn, size_t firstDataRow,
@@ -190,7 +195,7 @@ public:
     void finishDataRows();
     void createAttributes();
 
-    std::vector<CorrelationEdge> pearsonCorrelation(double minimumThreshold,
+    std::vector<CorrelationEdge> pearsonCorrelation(const QString& fileName, double minimumThreshold,
         Cancellable& cancellable, const ProgressFn& progressFn);
 
     double minimumCorrelation() const { return _minimumCorrelationValue; }
