@@ -75,6 +75,8 @@ private:
 
     struct DataRow
     {
+        DataRow() = default;
+        DataRow(const DataRow&) = default;
         DataRow(ConstDataIterator _begin, ConstDataIterator _end, NodeId nodeId, int computeCost) :
             _data(_begin, _end), _nodeId(nodeId), _cost(computeCost)
         {
@@ -98,7 +100,7 @@ private:
 
         NodeId _nodeId;
 
-        int _cost;
+        int _cost = 0;
         int computeCostHint() const { return _cost; }
 
         double _sum = 0.0;
