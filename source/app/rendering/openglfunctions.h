@@ -5,11 +5,11 @@
 #include <QOpenGLExtensions>
 #include <QString>
 
+#include <memory>
+
 class OpenGLFunctions : public QOpenGLFunctions_3_3_Core
 {
 public:
-    ~OpenGLFunctions() override;
-
     void resolveOpenGLFunctions();
 
     bool hasSampleShading() const { return _sampleShadingExtension != nullptr; }
@@ -27,7 +27,7 @@ public:
     static QSurfaceFormat defaultFormat();
 
 private:
-    QOpenGLExtension_ARB_sample_shading* _sampleShadingExtension = nullptr;
+    std::unique_ptr<QOpenGLExtension_ARB_sample_shading> _sampleShadingExtension;
 };
 
 // MacOS's glext.h is rubbish

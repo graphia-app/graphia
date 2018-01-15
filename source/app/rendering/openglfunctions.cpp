@@ -5,12 +5,6 @@
 #include <QSurfaceFormat>
 #include <QOffscreenSurface>
 
-OpenGLFunctions::~OpenGLFunctions()
-{
-    delete _sampleShadingExtension;
-    _sampleShadingExtension = nullptr;
-}
-
 void OpenGLFunctions::resolveOpenGLFunctions()
 {
     auto context = QOpenGLContext::currentContext();
@@ -24,7 +18,7 @@ void OpenGLFunctions::resolveOpenGLFunctions()
 
     if(context->hasExtension(QByteArrayLiteral("GL_ARB_sample_shading")))
     {
-        _sampleShadingExtension = new QOpenGLExtension_ARB_sample_shading();
+        _sampleShadingExtension = std::make_unique<QOpenGLExtension_ARB_sample_shading>();
         _sampleShadingExtension->initializeOpenGLFunctions();
     }
 }
