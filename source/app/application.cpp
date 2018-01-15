@@ -274,6 +274,10 @@ void Application::loadPlugins()
         }
     }
 
+    // Force event processing here so that we initialise any qmlenum.h based enums
+    // that were created in plugins
+    QCoreApplication::processEvents();
+
     updateNameFilters();
 }
 
