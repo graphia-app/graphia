@@ -27,7 +27,17 @@ void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
 
     auto graphModel = document->graphModel();
     _userNodeData.initialise(graphModel->mutableGraph());
-    _nodeAttributeTableModel.initialise(document, &_userNodeData, &_dataColumnNames, &_data);
+
+    if(_transpose)
+    {
+        // Don't include data columns in the table model when transposing as this is likely to
+        // result in a very large number of columns in the table model, which hurt performance
+        _nodeAttributeTableModel.initialise(document, &_userNodeData);
+    }
+    else
+        _nodeAttributeTableModel.initialise(document, &_userNodeData, &_dataColumnNames, &_data);
+
+
     _pearsonValues = std::make_unique<EdgeArray<double>>(graphModel->mutableGraph());
 
     graphModel->createAttribute(tr("Pearson Correlation Value"))

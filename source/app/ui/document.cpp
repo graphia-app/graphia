@@ -403,6 +403,11 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     _searchManager = std::make_unique<SearchManager>(*_graphModel);
 
     _pluginInstance = plugin->createInstance();
+
+    const auto keys = parameters.keys();
+    for(const auto& name : keys)
+        _pluginInstance->applyParameter(name, parameters.value(name).toString());
+
     _pluginInstance->initialise(plugin, this, _graphFileParserThread.get());
 
     // The plugin won't necessarily have the saveRequired signal or in fact be
@@ -432,10 +437,6 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, this, &Document::numNodesFoundChanged);
 
     connect(&_graphModel->mutableGraph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
-
-    const auto keys = parameters.keys();
-    for(const auto& name : keys)
-        _pluginInstance->applyParameter(name, parameters.value(name).toString());
 
     emit pluginInstanceChanged();
 

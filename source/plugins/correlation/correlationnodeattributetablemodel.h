@@ -23,8 +23,8 @@ private:
 
 public:
     void initialise(IDocument* document, UserNodeData* userNodeData,
-                    std::vector<QString>* dataColumnNames,
-                    std::vector<double>* data);
+                    std::vector<QString>* dataColumnNames = nullptr,
+                    std::vector<double>* data = nullptr);
 
     void updateRoleNames() override;
 
