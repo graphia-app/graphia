@@ -2,6 +2,7 @@
 #define COMMANDMANAGER_H
 
 #include "shared/commands/icommandmanager.h"
+#include "shared/utils/fatalerror.h"
 
 #include <QtGlobal>
 #include <QObject>
@@ -101,8 +102,15 @@ private:
 
     struct PendingCommand
     {
-        PendingCommand(CommandAction action, std::unique_ptr<ICommand>&& command) :
-            _action(action), _command(std::move(command)) {}
+        PendingCommand(CommandAction action, std::unique_ptr<ICommand> command) :
+            _action(action), _command(std::move(command))
+        {
+            if((action == CommandAction::Execute || action == CommandAction::ExecuteOnce) &&
+                _command == nullptr)
+            {
+                FATAL_ERROR(NullPendingCommand);
+            }
+        }
 
         explicit PendingCommand(CommandAction action) :
             _action(action), _command(nullptr) {}

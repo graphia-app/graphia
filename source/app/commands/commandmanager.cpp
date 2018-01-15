@@ -121,7 +121,7 @@ void CommandManager::undoReal()
 {
     if(_lock.owns_lock())
     {
-        _pendingCommands.emplace_back(CommandAction::Undo, nullptr);
+        _pendingCommands.emplace_back(CommandAction::Undo);
         return;
     }
 
@@ -157,7 +157,7 @@ void CommandManager::redoReal()
 {
     if(_lock.owns_lock())
     {
-        _pendingCommands.emplace_back(CommandAction::Redo, nullptr);
+        _pendingCommands.emplace_back(CommandAction::Redo);
         return;
     }
 
