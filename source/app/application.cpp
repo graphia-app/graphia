@@ -2,6 +2,7 @@
 #include "crashtype.h"
 
 #include "shared/plugins/iplugin.h"
+#include "shared/utils/fatalerror.h"
 
 #include "loading/loader.h"
 
@@ -187,6 +188,10 @@ void Application::crash(int crashType)
 
     case CrashType::CppException:
         throw;
+        break;
+
+    case CrashType::FatalError:
+        FATAL_ERROR(FatalErrorTest);
         break;
 
 #if defined(Q_OS_WIN32)

@@ -7,6 +7,7 @@ DEFINE_QML_ENUM(
       Q_GADGET, CrashType,
                 NullPtrDereference,
                 CppException,
+                FatalError,
                 Win32Exception,
                 Win32ExceptionNonContinuable);
 
