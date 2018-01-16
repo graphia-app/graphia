@@ -75,7 +75,6 @@ void EnrichmentCalculator::overRepAgainstEachAttribute(NodeIdSet& selectedNodeId
         ++attributeValueEntryCountSelected[stringAttributeValue];
     }
 
-
     int n = 0;
     int selectedInCategory = 0;
     int r1 = 0;
@@ -114,18 +113,27 @@ void EnrichmentCalculator::overRepAgainstEachAttribute(NodeIdSet& selectedNodeId
         qDebug() << "FExp" << fexp;
         qDebug() << "OverRep" << selectedInCategory / expectedNo;
         qDebug() << "ZScore" << zScore;
+
+        auto nonSelectedInCategory = r1 - selectedInCategory;
+        auto c1 = selectedNodeIds.size();
+        auto selectedNotInCategory = c1 - selectedInCategory;
+        auto c2 = n - c1;
+        auto nonSelectedNotInCategory = c2 - nonSelectedInCategory;
+
+        auto f = Fishers(selectedInCategory, nonSelectedInCategory, selectedNotInCategory, nonSelectedNotInCategory);
+        qDebug() << "Fishers" << f;
     }
 }
 
 std::vector<double> EnrichmentCalculator::doRandomSampling(int totalGenes, double expectedFrequency)
 {
     const int NUMBER_OF_TRIALS = 1000;
-    double trialObs[NUMBER_OF_TRIALS];
-    double trialOverRep[NUMBER_OF_TRIALS];
-    double trialObsAvg = 0;
-    double trialOverRepAvg = 0;
-    double trialObsStdev = 0;
-    double trialOverRepStdev = 0;
+    double observed[NUMBER_OF_TRIALS];
+    double overRepresentation[NUMBER_OF_TRIALS];
+    double observationAvg = 0;
+    double overRepresentationAvg = 0;
+    double observationStdDev = 0;
+    double overRepresentationStdDev = 0;
 
     for (int i = 0; i < NUMBER_OF_TRIALS; i++)
     {
@@ -134,24 +142,24 @@ std::vector<double> EnrichmentCalculator::doRandomSampling(int totalGenes, doubl
             if (u::rand(0.0f, 1.0f) <= expectedFrequency)
                 hits++;
 
-        trialObs[i] = hits / (double)totalGenes;
-        trialOverRep[i] = trialObs[i] / expectedFrequency;
-        trialObsAvg += trialObs[i];
-        trialOverRepAvg += trialOverRep[i];
+        observed[i] = hits / (double)totalGenes;
+        overRepresentation[i] = observed[i] / expectedFrequency;
+        observationAvg += observed[i];
+        overRepresentationAvg += overRepresentation[i];
     }
 
-    trialObsAvg = trialObsAvg / (double)NUMBER_OF_TRIALS;
-    trialOverRepAvg = trialOverRepAvg / (double)NUMBER_OF_TRIALS;
+    observationAvg = observationAvg / (double)NUMBER_OF_TRIALS;
+    overRepresentationAvg = overRepresentationAvg / (double)NUMBER_OF_TRIALS;
 
     for (int i = 0; i < NUMBER_OF_TRIALS; i++)
     {
-        trialObsStdev += (trialObs[i] - trialObsAvg) * (trialObs[i] - trialObsAvg);
-        trialOverRepStdev += (trialOverRep[i] - trialOverRepAvg) * (trialOverRep[i] - trialOverRepAvg);
+        observationStdDev += (observed[i] - observationAvg) * (observed[i] - observationAvg);
+        overRepresentationStdDev += (overRepresentation[i] - overRepresentationAvg) * (overRepresentation[i] - overRepresentationAvg);
     }
 
-    trialObsStdev = sqrt(trialObsStdev / (double)NUMBER_OF_TRIALS);
-    trialOverRepStdev = sqrt(trialOverRepStdev / (double)NUMBER_OF_TRIALS);
+    observationStdDev = sqrt(observationStdDev / (double)NUMBER_OF_TRIALS);
+    overRepresentationStdDev = sqrt(overRepresentationStdDev / (double)NUMBER_OF_TRIALS);
 
-    return { trialObsStdev, trialOverRepStdev, trialObsAvg, trialOverRepAvg };
+    return { observationStdDev, overRepresentationStdDev, observationAvg, overRepresentationAvg };
 }
 
