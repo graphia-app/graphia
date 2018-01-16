@@ -124,8 +124,8 @@ private:
     int _lastExecutedIndex = -1;
 
     std::thread _thread;
-    mutable std::mutex _mutex;
-    std::unique_lock<std::mutex> _lock;
+    mutable std::recursive_mutex _mutex;
+    std::unique_lock<std::recursive_mutex> _lock;
     std::atomic<bool> _busy;
     std::atomic<bool> _graphChanged;
 

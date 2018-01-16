@@ -33,24 +33,28 @@ CommandManager::~CommandManager()
 
 void CommandManager::execute(std::unique_ptr<ICommand> command)
 {
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
     _pendingCommands.emplace_back(CommandAction::Execute, std::move(command));
     emit commandQueued();
 }
 
 void CommandManager::executeOnce(std::unique_ptr<ICommand> command)
 {
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
     _pendingCommands.emplace_back(CommandAction::ExecuteOnce, std::move(command));
     emit commandQueued();
 }
 
 void CommandManager::undo()
 {
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
     _pendingCommands.emplace_back(CommandAction::Undo);
     emit commandQueued();
 }
 
 void CommandManager::redo()
 {
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
     _pendingCommands.emplace_back(CommandAction::Redo);
     emit commandQueued();
 }
@@ -190,7 +194,7 @@ void CommandManager::redoReal()
 
 bool CommandManager::canUndo() const
 {
-    std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
+    std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
 
     if(lock.owns_lock())
         return canUndoNoLocking();
@@ -200,7 +204,7 @@ bool CommandManager::canUndo() const
 
 bool CommandManager::canRedo() const
 {
-    std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
+    std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
 
     if(lock.owns_lock())
         return canRedoNoLocking();
@@ -220,7 +224,7 @@ bool CommandManager::commandIsCancellable() const
 
 const std::vector<QString> CommandManager::undoableCommandDescriptions() const
 {
-    std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
+    std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
     std::vector<QString> commandDescriptions;
     commandDescriptions.reserve(_lastExecutedIndex);
 
@@ -235,7 +239,7 @@ const std::vector<QString> CommandManager::undoableCommandDescriptions() const
 
 const std::vector<QString> CommandManager::redoableCommandDescriptions() const
 {
-    std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
+    std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
     std::vector<QString> commandDescriptions;
     commandDescriptions.reserve(_stack.size());
 
@@ -250,7 +254,7 @@ const std::vector<QString> CommandManager::redoableCommandDescriptions() const
 
 QString CommandManager::nextUndoAction() const
 {
-    std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
+    std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
 
     if(lock.owns_lock() && canUndoNoLocking())
     {
@@ -264,7 +268,7 @@ QString CommandManager::nextUndoAction() const
 
 QString CommandManager::nextRedoAction() const
 {
-    std::unique_lock<std::mutex> lock(_mutex, std::try_to_lock);
+    std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
 
     if(lock.owns_lock() && canRedoNoLocking())
     {
@@ -283,7 +287,7 @@ bool CommandManager::busy() const
 
 void CommandManager::clearCommandStack()
 {
-    std::unique_lock<std::mutex> lock(_mutex);
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     // If a command is still in progress, wait until it's finished
     if(_thread.joinable())
@@ -365,6 +369,8 @@ void CommandManager::onCommandCompleted(bool success, QString description, QStri
     if(_thread.joinable())
         _thread.join();
 
+    auto commandsArePending = !_pendingCommands.empty();
+
     Q_ASSERT(_lock.owns_lock());
     _lock.unlock();
 
@@ -381,7 +387,7 @@ void CommandManager::onCommandCompleted(bool success, QString description, QStri
             qDebug() << "Command failed/cancelled";
     }
 
-    if(!_pendingCommands.empty())
+    if(commandsArePending)
         update();
     else
     {
@@ -392,10 +398,12 @@ void CommandManager::onCommandCompleted(bool success, QString description, QStri
 
 void CommandManager::update()
 {
+    _lock.lock();
     if(!_pendingCommands.empty())
     {
         auto pendingCommand = std::move(_pendingCommands.front());
         _pendingCommands.pop_front();
+        _lock.unlock();
 
         switch(pendingCommand._action)
         {
@@ -406,4 +414,6 @@ void CommandManager::update()
         default: break;
         }
     }
+    else
+        _lock.unlock();
 }
