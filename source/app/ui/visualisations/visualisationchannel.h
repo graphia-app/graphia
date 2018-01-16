@@ -19,6 +19,7 @@ public:
 
     virtual bool supports(ValueType) const = 0;
     virtual bool requiresNormalisedValue() const { return true; }
+    virtual bool requiresRange() const { return true; }
 
     virtual QString description(ElementType, ValueType) const { return {}; }
 

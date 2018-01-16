@@ -133,7 +133,7 @@ public:
             visualisationInfo.setMin(min);
             visualisationInfo.setMax(max);
 
-            if(min == max)
+            if(channel.requiresRange() && min == max)
             {
                 visualisationInfo.addAlert(AlertType::Warning, QObject::tr("No Numeric Range To Map To"));
                 return;
