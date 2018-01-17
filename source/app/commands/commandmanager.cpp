@@ -398,12 +398,13 @@ void CommandManager::onCommandCompleted(bool success, QString description, QStri
 
 void CommandManager::update()
 {
-    _lock.lock();
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
+
     if(!_pendingCommands.empty())
     {
         auto pendingCommand = std::move(_pendingCommands.front());
         _pendingCommands.pop_front();
-        _lock.unlock();
+        lock.unlock();
 
         switch(pendingCommand._action)
         {
@@ -414,6 +415,4 @@ void CommandManager::update()
         default: break;
         }
     }
-    else
-        _lock.unlock();
 }
