@@ -12,6 +12,7 @@
 #include <QScreen>
 #include <QDir>
 #include <QStandardPaths>
+#include <QTimer>
 
 #include <iostream>
 
@@ -30,6 +31,8 @@
 
 #include "thirdparty/qtsingleapplication/qtsingleapplication.h"
 #include "thirdparty/breakpad/crashhandler.h"
+
+#include "watchdog.h"
 
 int main(int argc, char *argv[])
 {
@@ -170,6 +173,13 @@ int main(int argc, char *argv[])
         QMetaObject::invokeMethod(mainWindow, "processArguments",
             Q_ARG(QVariant, message.split(QStringLiteral("\n"))));
     });
+
+    Watchdog watchDog;
+
+    // Poke the watch dog every now and again so that it doesn't break/crash us
+    QTimer keepAliveTimer;
+    QObject::connect(&keepAliveTimer, &QTimer::timeout, &watchDog, &Watchdog::reset);
+    keepAliveTimer.start(1000);
 
 #ifndef _DEBUG
     CrashHandler c;
