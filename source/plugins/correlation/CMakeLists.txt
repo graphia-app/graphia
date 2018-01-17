@@ -17,6 +17,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/minmaxnormaliser.h
     ${CMAKE_CURRENT_LIST_DIR}/quantilenormaliser.h
     ${CMAKE_CURRENT_LIST_DIR}/enrichmentcalculator.h
+    ${CMAKE_CURRENT_LIST_DIR}/enrichmenttablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/correlationfileparser.h
 )
 
@@ -27,6 +28,7 @@ list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/minmaxnormaliser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/quantilenormaliser.cpp
     ${CMAKE_CURRENT_LIST_DIR}/enrichmentcalculator.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/enrichmenttablemodel.cpp
     ${CMAKE_CURRENT_LIST_DIR}/loading/correlationfileparser.cpp
 )
 

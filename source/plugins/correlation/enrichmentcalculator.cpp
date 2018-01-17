@@ -11,14 +11,14 @@
 #include "shared/attributes/iattribute.h"
 #include "shared/utils/random.h"
 
-static double logComb(double n, double r)
+static double combineLogs(double n, double r)
 {
     return std::lgamma(n + 1) - std::lgamma(r + 1) - std::lgamma(n - r + 1);
 }
 
 static double hyperGeometricProb(double x, double r1, double r2, double c1, double c2)
 {
-    return std::exp( logComb(r1, x) + logComb(r2, c1 - x) - logComb( c1 + c2, c1) );
+    return std::exp(combineLogs(r1, x) + combineLogs(r2, c1 - x) - combineLogs( c1 + c2, c1));
 }
 
 /*
@@ -46,22 +46,28 @@ double EnrichmentCalculator::Fishers(int a, int b, int c, int d)
     double crit = hyperGeometricProb(a, ab, cd, ac, bd);
 
     leftPval = rightPval = twoPval = 0.0;
-    for (double x = lm; x <= um; x++)
+    for(double x = lm; x <= um; x++)
     {
         double prob = hyperGeometricProb(x, ab, cd, ac, bd);
-        if (x <= a) leftPval += prob;
-        if (x >= a) rightPval += prob;
-        if (prob <= crit) twoPval += prob;
+        if(x <= a)
+            leftPval += prob;
+        if(x >= a)
+            rightPval += prob;
+        if(prob <= crit)
+            twoPval += prob;
     }
 
     return twoPval;
 }
 
-void EnrichmentCalculator::overRepAgainstEachAttribute(NodeIdSet& selectedNodeIds, QString attributeAgainst, IGraphModel* graphModel)
+EnrichmentCalculator::Table EnrichmentCalculator::overRepAgainstEachAttribute(NodeIdSet& selectedNodeIds, QString attributeAgainst,
+                                                       IGraphModel* graphModel, ICommand& command)
 {
     // Count of attribute values within the attribute
     std::map<QString, int> attributeValueEntryCountTotal;
     std::map<QString, int> attributeValueEntryCountSelected;
+    Table tableModel;
+    using Row = std::vector<QVariant>;
 
     for(auto nodeId : graphModel->graph().nodeIds())
     {
@@ -80,32 +86,57 @@ void EnrichmentCalculator::overRepAgainstEachAttribute(NodeIdSet& selectedNodeId
     int r1 = 0;
     double fobs = 0.0;
     double fexp = 0.0;
-    double overRep = 0.0;
+    double overRepresentation = 0.0;
     std::vector<double> stdevs(4);
     double expectedNo = 0.0;
     double expectedDev = 0.0;
     double expectedOverrep = 0.0;
     double zScore = 0.0;
 
+    int progress = 0;
+
     // Cluster is against attribute!
-    for ( auto& attributeValue : u::keysFor(attributeValueEntryCountSelected) )
+    for(auto& attributeValue : u::keysFor(attributeValueEntryCountSelected))
     {
+        Row row(9);
+        command.setProgress((1.0 / attributeValueEntryCountSelected.size()) * progress);
+        progress++;
+
         n = graphModel->graph().numNodes();
 
         selectedInCategory = attributeValueEntryCountSelected[attributeValue];
         
         r1 = attributeValueEntryCountTotal[attributeValue];
-        fobs = (double) selectedInCategory / (double) selectedNodeIds.size();
-        fexp = (double) r1 / (double) n;
-        overRep = fobs / fexp;
-        stdevs = doRandomSampling(selectedNodeIds.size(), fexp);
+        fobs = static_cast<double>(selectedInCategory) / static_cast<double>(selectedNodeIds.size());
+        fexp = static_cast<double>(r1) / static_cast<double>(n);
+        overRepresentation = fobs / fexp;
+        stdevs = doRandomSampling(static_cast<int>(selectedNodeIds.size()), fexp);
 
-        expectedNo = (((double) r1 / (double) n) * (double) selectedNodeIds.size());
-        expectedDev = ((stdevs[0]) * (double) selectedNodeIds.size());
+        expectedNo = (static_cast<double>(r1) / static_cast<double>(n)
+                                            * static_cast<double>(selectedNodeIds.size()));
+        expectedDev = stdevs[0] * static_cast<double>(selectedNodeIds.size());
         expectedOverrep = stdevs[3];
-        zScore = (overRep - expectedOverrep) / stdevs[1];
+        zScore = (overRepresentation - expectedOverrep) / stdevs[1];
+
+        auto nonSelectedInCategory = r1 - selectedInCategory;
+        auto c1 = static_cast<int>(selectedNodeIds.size());
+        auto selectedNotInCategory = c1 - selectedInCategory;
+        auto c2 = n - c1;
+        auto nonSelectedNotInCategory = c2 - nonSelectedInCategory;
+        auto f = Fishers(selectedInCategory, nonSelectedInCategory, selectedNotInCategory, nonSelectedNotInCategory);
 
         qDebug() << attributeValue;
+
+        row[0] = "Selection" + QString::number(progress);
+        row[1] = "Observed" + QString::number(selectedInCategory) + "/" + QString::number(selectedNodeIds.size());
+        row[2] = "Expected" + QString::number(expectedNo) + "/" + QString::number(selectedNodeIds.size());
+        row[3] = "ExpectedTrial" + QString::number(expectedNo) + "/" + QString::number(selectedNodeIds.size()) + "±" + QString::number(expectedDev);
+        row[4] = "FObs" + QString::number(fobs);
+        row[5] = "FExp" + QString::number(fexp);
+        row[6] = "OverRep" + QString::number(selectedInCategory / expectedNo);
+        row[7] = "ZScore" + QString::number(zScore);
+        row[8] = "Fishers" + QString::number(f);
+
         qDebug() << "Observed" << selectedInCategory << "/" << selectedNodeIds.size();
         qDebug() << "Expected" << expectedNo << "/" << selectedNodeIds.size();
         qDebug() << "ExpectedTrial" << expectedNo << "/" << selectedNodeIds.size() << "±" << expectedDev;
@@ -113,16 +144,10 @@ void EnrichmentCalculator::overRepAgainstEachAttribute(NodeIdSet& selectedNodeId
         qDebug() << "FExp" << fexp;
         qDebug() << "OverRep" << selectedInCategory / expectedNo;
         qDebug() << "ZScore" << zScore;
-
-        auto nonSelectedInCategory = r1 - selectedInCategory;
-        auto c1 = selectedNodeIds.size();
-        auto selectedNotInCategory = c1 - selectedInCategory;
-        auto c2 = n - c1;
-        auto nonSelectedNotInCategory = c2 - nonSelectedInCategory;
-
-        auto f = Fishers(selectedInCategory, nonSelectedInCategory, selectedNotInCategory, nonSelectedNotInCategory);
         qDebug() << "Fishers" << f;
+        tableModel.push_back(row);
     }
+    return tableModel;
 }
 
 std::vector<double> EnrichmentCalculator::doRandomSampling(int totalGenes, double expectedFrequency)
@@ -135,30 +160,32 @@ std::vector<double> EnrichmentCalculator::doRandomSampling(int totalGenes, doubl
     double observationStdDev = 0;
     double overRepresentationStdDev = 0;
 
-    for (int i = 0; i < NUMBER_OF_TRIALS; i++)
+    for(int i = 0; i < NUMBER_OF_TRIALS; i++)
     {
         int hits = 0;
-        for (int j = 0; j < totalGenes; j++)
-            if (u::rand(0.0f, 1.0f) <= expectedFrequency)
+        for(int j = 0; j < totalGenes; j++)
+        {
+            if(u::rand(0.0f, 1.0f) <= expectedFrequency)
                 hits++;
+        }
 
-        observed[i] = hits / (double)totalGenes;
+        observed[i] = hits / static_cast<double>(totalGenes);
         overRepresentation[i] = observed[i] / expectedFrequency;
         observationAvg += observed[i];
         overRepresentationAvg += overRepresentation[i];
     }
 
-    observationAvg = observationAvg / (double)NUMBER_OF_TRIALS;
-    overRepresentationAvg = overRepresentationAvg / (double)NUMBER_OF_TRIALS;
+    observationAvg = observationAvg / static_cast<double>(NUMBER_OF_TRIALS);
+    overRepresentationAvg = overRepresentationAvg / static_cast<double>(NUMBER_OF_TRIALS);
 
-    for (int i = 0; i < NUMBER_OF_TRIALS; i++)
+    for(int i = 0; i < NUMBER_OF_TRIALS; i++)
     {
         observationStdDev += (observed[i] - observationAvg) * (observed[i] - observationAvg);
         overRepresentationStdDev += (overRepresentation[i] - overRepresentationAvg) * (overRepresentation[i] - overRepresentationAvg);
     }
 
-    observationStdDev = sqrt(observationStdDev / (double)NUMBER_OF_TRIALS);
-    overRepresentationStdDev = sqrt(overRepresentationStdDev / (double)NUMBER_OF_TRIALS);
+    observationStdDev = sqrt(observationStdDev / static_cast<double>(NUMBER_OF_TRIALS));
+    overRepresentationStdDev = sqrt(overRepresentationStdDev / static_cast<double>(NUMBER_OF_TRIALS));
 
     return { observationStdDev, overRepresentationStdDev, observationAvg, overRepresentationAvg };
 }

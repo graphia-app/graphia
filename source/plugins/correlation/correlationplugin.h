@@ -11,6 +11,8 @@
 #include "correlationnodeattributetablemodel.h"
 #include "minmaxnormaliser.h"
 #include "quantilenormaliser.h"
+#include "enrichmenttablemodel.h"
+#include "enrichmentcalculator.h"
 
 #include <vector>
 #include <functional>
@@ -46,6 +48,7 @@ class CorrelationPluginInstance : public BasePluginInstance
     Q_OBJECT
 
     Q_PROPERTY(QAbstractTableModel* nodeAttributeTableModel READ nodeAttributeTableModel CONSTANT)
+    Q_PROPERTY(QAbstractTableModel* enrichmentTableModel READ enrichmentTableModel CONSTANT)
     Q_PROPERTY(QStringList columnNames READ columnNames NOTIFY columnNamesChanged)
     Q_PROPERTY(QStringList attributeGroupNames READ attributeGroupNames NOTIFY attributeGroupNamesChanged)
     Q_PROPERTY(QStringList rowNames READ rowNames NOTIFY rowNamesChanged)
@@ -67,6 +70,7 @@ private:
     UserData _userColumnData;
 
     CorrelationNodeAttributeTableModel _nodeAttributeTableModel;
+    EnrichmentTableModel _enrichmentTableModel;
 
     using ConstDataIterator = std::vector<double>::const_iterator;
     using DataIterator = std::vector<double>::iterator;
@@ -175,6 +179,7 @@ private:
     double scaleValue(double value);
 
     QAbstractTableModel* nodeAttributeTableModel() { return &_nodeAttributeTableModel; }
+    QAbstractTableModel* enrichmentTableModel() { return &_enrichmentTableModel; }
     QStringList columnNames();
     QStringList rowNames();
     QVector<double> rawData();
@@ -229,6 +234,7 @@ signals:
     void columnNamesChanged();
     void rowNamesChanged();
     void attributeGroupNamesChanged();
+    void enrichmentAnalysisComplete();
 };
 
 class CorrelationPlugin : public BasePlugin, public PluginInstanceProvider<CorrelationPluginInstance>

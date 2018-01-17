@@ -16,6 +16,17 @@ PluginContent
     anchors.fill: parent
     minimumHeight: 320
 
+    Connections
+    {
+        target: plugin.model
+        onEnrichmentAnalysisComplete:
+        {
+            var component = Qt.createComponent("EnrichmentResults.qml");
+            var enrichmentTableView = component.createObject(root);
+            enrichmentTableView.visible = true;
+        }
+    }
+
     EnrichmentWizard
     {
         id: enrichmentWizard

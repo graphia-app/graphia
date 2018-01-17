@@ -1,6 +1,5 @@
 #include "correlationplugin.h"
 
-#include "enrichmentcalculator.h"
 #include "correlationplotitem.h"
 #include "loading/correlationfileparser.h"
 #include "shared/utils/threadpool.h"
@@ -622,9 +621,21 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
 void CorrelationPluginInstance::performEnrichment(QStringList selectedAttributesAgainst, QString selectedAttribute)
 {
-    qDebug() << selectedAttributesAgainst;
-    auto& selectedNodes = selectionManager()->selectedNodes();
-    EnrichmentCalculator::overRepAgainstEachAttribute(selectedNodes, selectedAttributesAgainst[0], graphModel());
+    document()->commandManager()->executeOnce(
+        {
+            QString(tr("Perform Enrichment Analysis")),
+            QString(tr("Performing Enrichment Analysis")),
+            QString(tr("Enrichment Analysis Complete"))
+        },
+    [this, selectedAttributesAgainst](Command& command) mutable
+    {
+        auto result = EnrichmentCalculator::overRepAgainstEachAttribute(selectionManager()->selectedNodes(),
+                                                                        selectedAttributesAgainst[0],
+                                                                        graphModel(), command);
+        _enrichmentTableModel.setTableData(result);
+        emit enrichmentAnalysisComplete();
+        return true;
+    });
 }
 
 CorrelationPlugin::CorrelationPlugin()

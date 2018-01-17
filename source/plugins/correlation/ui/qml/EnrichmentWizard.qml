@@ -7,11 +7,13 @@ import "Controls"
 
 Wizard
 {
+    id: root
     minimumWidth: 640
     minimumHeight: 400
     property var attributeGroups;
-    property var selectedAttributeGroupsAgainst;
-    property var selectedAttributeGroup;
+    property var selectedAttributeGroupsAgainst: [];
+    property var selectedAttributeGroup: [];
+    finishEnabled: false;
 
     Item
     {
@@ -99,6 +101,17 @@ Wizard
                             CheckBox
                             {
                                 text: modelData
+                                onCheckedChanged:
+                                {
+                                    if(checked)
+                                        selectedAttributeGroupsAgainst.push(modelData)
+                                    else
+                                    {
+                                        var index = selectedAttributeGroupsAgainst.indexOf(modelData);
+                                        selectedAttributeGroupsAgainst.splice(index, 1);
+                                    }
+                                    root.finishEnabled = selectedAttributeGroupsAgainst.length > 0;
+                                }
                             }
                         }
                     }
@@ -159,29 +172,5 @@ Wizard
                 }
             }
         }
-    }
-
-    onAccepted:
-    {
-        // Find the selected nodes attribute to test on
-        var selectedAttribute;
-        for(var i=0; i<attributeSelectedRepeater.model.length; i++)
-        {
-            if(attributeSelectedRepeater.itemAt(i).checked)
-            {
-                selectedAttribute = attributeSelectedRepeater.itemAt(i).text;
-                break;
-            }
-        }
-        selectedAttributeGroup = selectedAttribute;
-
-        // Find the attribute to test against
-        var selectedAgainstAttributes = [];
-        for(var i=0; i<attributeAgainstRepeater.model.length; i++)
-        {
-            if(attributeAgainstRepeater.itemAt(i).checked)
-                selectedAgainstAttributes.push(attributeAgainstRepeater.itemAt(i).text);
-        }
-        selectedAttributeGroupsAgainst = selectedAgainstAttributes;
     }
 }
