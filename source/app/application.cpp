@@ -3,6 +3,7 @@
 
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/fatalerror.h"
+#include "shared/utils/thread.h"
 
 #include "loading/loader.h"
 
@@ -16,6 +17,9 @@
 #include <cmath>
 #include <memory>
 #include <iostream>
+#include <thread>
+#include <mutex>
+#include <chrono>
 
 const char* Application::_uri = APP_URI;
 
@@ -170,6 +174,37 @@ void Application::copyImageToClipboard(const QImage& image)
 #include <Windows.h>
 #endif
 
+static void infiniteLoop()
+{
+    while(true)
+    {
+        using namespace std::chrono_literals;
+        std::this_thread::sleep_for(1s);
+    }
+}
+
+static void deadlock()
+{
+    using namespace std::chrono_literals;
+
+    std::mutex a, b;
+
+    std::thread t([&]
+    {
+        u::setCurrentThreadName(QStringLiteral("DeadlockThread"));
+
+        std::unique_lock<std::mutex> lockA(a);
+        std::this_thread::sleep_for(1s);
+        std::unique_lock<std::mutex> lockB(b);
+    });
+
+    std::unique_lock<std::mutex> lockB(b);
+    std::this_thread::sleep_for(1s);
+    std::unique_lock<std::mutex> lockA(a);
+
+    t.join();
+}
+
 void Application::crash(int crashType)
 {
     std::cerr << "Application::crash() invoked!\n";
@@ -182,7 +217,7 @@ void Application::crash(int crashType)
     case CrashType::NullPtrDereference:
     {
         int* p = nullptr;
-        *p = 123;
+        *p = 0;
         break;
     }
 
@@ -192,6 +227,14 @@ void Application::crash(int crashType)
 
     case CrashType::FatalError:
         FATAL_ERROR(FatalErrorTest);
+        break;
+
+    case CrashType::InfiniteLoop:
+        infiniteLoop();
+        break;
+
+    case CrashType::Deadlock:
+        deadlock();
         break;
 
 #if defined(Q_OS_WIN32)

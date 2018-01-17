@@ -1149,6 +1149,16 @@ ApplicationWindow
                 }
                 MenuItem
                 {
+                    text: qsTr("Infinite Loop");
+                    onTriggered: application.crash(CrashType.InfiniteLoop);
+                }
+                MenuItem
+                {
+                    text: qsTr("Deadlock");
+                    onTriggered: application.crash(CrashType.Deadlock);
+                }
+                MenuItem
+                {
                     visible: Qt.platform.os === "windows"
                     text: qsTr("Windows Exception");
                     onTriggered: application.crash(CrashType.Win32Exception);

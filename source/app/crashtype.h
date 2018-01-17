@@ -8,6 +8,8 @@ DEFINE_QML_ENUM(
                 NullPtrDereference,
                 CppException,
                 FatalError,
+                InfiniteLoop,
+                Deadlock,
                 Win32Exception,
                 Win32ExceptionNonContinuable);
 
