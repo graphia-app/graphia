@@ -7,11 +7,13 @@ EnrichmentTableModel::EnrichmentTableModel()
 
 int EnrichmentTableModel::rowCount(const QModelIndex &parent) const
 {
-    return _data.size();
+    Q_UNUSED(parent);
+    return static_cast<int>(_data.size());
 }
 
 int EnrichmentTableModel::columnCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent);
     return COLUMN_COUNT;
 }
 
@@ -23,8 +25,6 @@ QVariant EnrichmentTableModel::data(const QModelIndex &index, int role) const
     const auto& dataRow = _data.at(row);
     auto value = dataRow.at(column);
 
-    qDebug() << "DATA ACCESS";
-    qDebug() << value;
     return value;
 }
 
@@ -43,18 +43,9 @@ QHash<int, QByteArray> EnrichmentTableModel::roleNames() const
     return _roleNames;
 }
 
-void EnrichmentTableModel::updateComplete()
-{
-    beginResetModel();
-    endResetModel();
-}
-
 void EnrichmentTableModel::setTableData(EnrichmentTableModel::Table data)
 {
     beginResetModel();
     _data = data;
     endResetModel();
-    QMetaObject::invokeMethod(this, "updateComplete");
-    emit dataChanged(createIndex(0,0), createIndex(_data.size(), COLUMN_COUNT));
-
 }

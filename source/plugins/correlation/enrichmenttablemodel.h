@@ -23,10 +23,6 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     void setTableData(Table data);
-private slots:
-    void updateComplete();
-
-
 };
 
 #endif // ENRICHMENTTABLEMODEL_H

@@ -127,15 +127,15 @@ EnrichmentCalculator::Table EnrichmentCalculator::overRepAgainstEachAttribute(No
 
         qDebug() << attributeValue;
 
-        row[0] = "Selection" + QString::number(progress);
-        row[1] = "Observed" + QString::number(selectedInCategory) + "/" + QString::number(selectedNodeIds.size());
-        row[2] = "Expected" + QString::number(expectedNo) + "/" + QString::number(selectedNodeIds.size());
-        row[3] = "ExpectedTrial" + QString::number(expectedNo) + "/" + QString::number(selectedNodeIds.size()) + "±" + QString::number(expectedDev);
-        row[4] = "FObs" + QString::number(fobs);
-        row[5] = "FExp" + QString::number(fexp);
-        row[6] = "OverRep" + QString::number(selectedInCategory / expectedNo);
-        row[7] = "ZScore" + QString::number(zScore);
-        row[8] = "Fishers" + QString::number(f);
+        row[0] = attributeValue;
+        row[1] = QString::number(selectedInCategory) + "/" + QString::number(selectedNodeIds.size());
+        row[2] = QString::number(expectedNo) + "/" + QString::number(selectedNodeIds.size());
+        row[3] = QString::number(expectedNo) + "/" + QString::number(selectedNodeIds.size()) + "±" + QString::number(expectedDev);
+        row[4] = QString::number(fobs);
+        row[5] = QString::number(fexp);
+        row[6] = QString::number(selectedInCategory / expectedNo);
+        row[7] = QString::number(zScore);
+        row[8] = QString::number(f);
 
         qDebug() << "Observed" << selectedInCategory << "/" << selectedNodeIds.size();
         qDebug() << "Expected" << expectedNo << "/" << selectedNodeIds.size();
