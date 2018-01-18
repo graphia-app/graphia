@@ -61,7 +61,7 @@ AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
     for(const auto& attribute : attributeList)
         _root->addChild(new AvailableAttributesModel::Item(attribute));
 
-    if(elementTypes == ElementType::Edge)
+    if(Flags<ElementType>(elementTypes).test(ElementType::Edge))
     {
         attributeList = graphModel.availableAttributes(ElementType::Node, valueTypes);
 
