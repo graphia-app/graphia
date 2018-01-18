@@ -5,10 +5,6 @@
 
 #include <QDebug>
 
-#ifdef _MSC_VER
-#include <intrin.h>
-#endif
-
 Watchdog::Watchdog()
 {
     auto *worker = new WatchdogWorker;
@@ -55,13 +51,6 @@ void WatchdogWorker::reset()
 #ifndef _DEBUG
             // Deliberately crash in release mode...
             FATAL_ERROR(WatchdogTimedOut);
-#elif Q_PROCESSOR_X86
-            // ...or invoke the debugger otherwise
-#ifdef _MSC_VER
-            __debugbreak();
-#else
-            __asm__("int3");
-#endif
 #endif
         });
 
