@@ -26,13 +26,31 @@ Watchdog::~Watchdog()
 
 void WatchdogWorker::reset()
 {
+    using namespace std::chrono;
+    const auto timeout = 15s;
+
     if(_timer == nullptr)
     {
         _timer = new QTimer(this);
         _timer->setSingleShot(true);
-        connect(_timer, &QTimer::timeout, []
+        connect(_timer, &QTimer::timeout, [=]
         {
-            qWarning() << "Watchdog timed out! Deadlock? Infinite loop?";
+            auto howLate = duration_cast<milliseconds>(clock_type::now() - _expectedExpiry);
+
+            // QTimers are guaranteed to be accurate within 5%, so this should be generous enough
+            auto lateThreshold = timeout * 0.1;
+
+            if(howLate > lateThreshold)
+            {
+                // If we're significantly late, then the watchdog thread itself has been paused
+                // for some time, implying that the *entire* application has been paused, so our
+                // detection of the freeze is probably incorrect and we should wait another interval
+                reset();
+                return;
+            }
+
+            qWarning() << "Watchdog timed out! Deadlock? "
+                "Infinite loop? Resuming from a breakpoint?";
 
 #ifndef _DEBUG
             // Deliberately crash in release mode...
@@ -50,6 +68,6 @@ void WatchdogWorker::reset()
         u::setCurrentThreadName(QStringLiteral("WatchdogThread"));
     }
 
-    const int timeout = 15000;
+    _expectedExpiry = clock_type::now() + timeout;
     _timer->start(timeout);
 }
