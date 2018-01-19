@@ -82,7 +82,9 @@ void CommandManager::executeReal(std::unique_ptr<ICommand> command, bool irrever
     auto verb = command->verb();
     doCommand(commandPtr, verb, [this, command = std::move(command), irreversible]() mutable
     {
-        u::setCurrentThreadName(command->description());
+        QString threadName = command->description().length() > 0 ?
+            command->description() : QStringLiteral("Anonymous Command");
+        u::setCurrentThreadName(threadName);
 
         _graphChanged = false;
 
