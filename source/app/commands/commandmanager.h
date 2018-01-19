@@ -65,6 +65,8 @@ private:
     template<typename Fn> void doCommand(ICommand* command,
                                          const QString& verb, Fn&& fn)
     {
+        command->initialise();
+
         _currentCommand = command;
         _commandProgress = -1;
         _commandVerb = verb;
@@ -73,10 +75,9 @@ private:
         emit commandIsCancellableChanged();
         emit commandWillExecute(command);
 
-        _thread = std::thread(std::forward<Fn>(fn));
-
-        command->initialise();
         _commandProgressTimerId = startTimer(200);
+
+        _thread = std::thread(std::forward<Fn>(fn));
     }
 
     void clearCurrentCommand();
