@@ -1081,7 +1081,7 @@ Item
         return false;
     }
 
-    property bool findVisible: !findPanel.hidden
+    property bool findHasFocus: find.hasTextFocus
     function showFind()
     {
         find.show();

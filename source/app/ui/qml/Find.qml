@@ -15,6 +15,8 @@ Rectangle
     property var selectPreviousAction: _selectPreviousAction
     property var selectNextAction: _selectNextAction
 
+    property var hasTextFocus: findField.focus
+
     property bool _visible: false
 
     property bool _finding
@@ -62,7 +64,7 @@ Rectangle
         id: closeAction
         text: qsTr("Close")
         iconName: "emblem-unreadable"
-        shortcut: _visible ? "Esc" : ""
+        shortcut: _visible && findField.focus ? "Esc" : ""
         onTriggered:
         {
             findField.focus = false;

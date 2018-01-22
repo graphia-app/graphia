@@ -799,7 +799,7 @@ ApplicationWindow
         id: overviewModeAction
         iconName: "view-fullscreen"
         text: qsTr("&Overview Mode")
-        shortcut: currentDocument && currentDocument.findVisible ? "" : "Esc"
+        shortcut: currentDocument && currentDocument.findHasFocus ? "" : "Esc"
         enabled: currentDocument ? currentDocument.canEnterOverviewMode : false
         onTriggered: currentDocument && currentDocument.switchToOverviewMode()
     }
@@ -809,7 +809,7 @@ ApplicationWindow
         id: resetViewAction
         iconName: "view-refresh"
         text: qsTr("&Reset View")
-        shortcut: currentDocument && (currentDocument.findVisible || currentDocument.canEnterOverviewMode) ? "" : "Esc"
+        shortcut: currentDocument && (currentDocument.findHasFocus || currentDocument.canEnterOverviewMode) ? "" : "Esc"
         enabled: currentDocument ? currentDocument.canResetView : false
         onTriggered: currentDocument && currentDocument.resetView()
     }
