@@ -3,18 +3,19 @@
 
 #include "shared/ui/idocument.h"
 
-#include "shared/plugins/iplugin.h"
-#include "rendering/compute/gpucomputethread.h"
-#include "loading/parserthread.h"
-#include "commands/commandmanager.h"
-#include "layout/layout.h"
-#include "shared/utils/qmlenum.h"
 #include "attributes/availableattributesmodel.h"
-#include "transform/availabletransformsmodel.h"
-#include "shared/utils/deferredexecutor.h"
-#include "shared/utils/semaphore.h"
+#include "commands/commandmanager.h"
 #include "graph/qmlelementid.h"
+#include "layout/layout.h"
+#include "loading/parserthread.h"
+#include "rendering/compute/gpucomputethread.h"
+#include "shared/plugins/iplugin.h"
+#include "shared/utils/deferredexecutor.h"
+#include "shared/utils/qmlenum.h"
+#include "shared/utils/semaphore.h"
+#include "transform/availabletransformsmodel.h"
 #include "ui/findoptions.h"
+
 #include "thirdparty/qt-qml-models/QQmlVariantListModel.h"
 
 #include <QQuickItem>
