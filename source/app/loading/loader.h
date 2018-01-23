@@ -19,8 +19,9 @@ private:
     QStringList _transforms;
     QStringList _visualisations;
     std::unique_ptr<ExactNodePositions> _nodePositions;
-    QByteArray _pluginUIData;
-    int _pluginUIDataVersion = -1;
+    QByteArray _uiData;
+    QByteArray _pluginUiData;
+    int _pluginUiDataVersion = -1;
     bool _layoutPaused = false;
 
 public:
@@ -30,8 +31,9 @@ public:
     QStringList transforms() const { return _transforms; }
     QStringList visualisations() const { return _visualisations; }
     const ExactNodePositions* nodePositions() const;
-    const QByteArray& pluginUIData() const { return _pluginUIData; }
-    int pluginUIDataVersion() const { return _pluginUIDataVersion; }
+    const QByteArray& uiData() const { return _uiData; }
+    const QByteArray& pluginUiData() const { return _pluginUiData; }
+    int pluginUiDataVersion() const { return _pluginUiDataVersion; }
     bool layoutPaused() const { return _layoutPaused; }
 
     static QString pluginNameFor(const QUrl& url);

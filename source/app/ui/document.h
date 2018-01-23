@@ -197,8 +197,10 @@ private:
 
     bool _saveRequired = false;
 
-    QByteArray _pluginUIData;
-    int _pluginUIDataVersion = -1;
+    QByteArray _uiData;
+
+    QByteArray _pluginUiData;
+    int _pluginUiDataVersion = -1;
 
     std::unique_ptr<ExactNodePositions> _startingNodePositions;
     bool _userLayoutPaused = false; // true if the user wants the layout to pause
@@ -229,9 +231,11 @@ signals:
     void applicationChanged();
     void graphQuickItemChanged();
 
+    void uiDataChanged(const QByteArray& uiData);
+
     void pluginInstanceChanged();
     void pluginNameChanged();
-    void pluginQmlPathChanged(const QByteArray& pluginUIData, int pluginUIDataVersion);
+    void pluginQmlPathChanged(const QByteArray& pluginUiData, int pluginUiDataVersion);
 
     void loadComplete(const QUrl& url, bool success);
 
@@ -280,7 +284,9 @@ public:
                               QString pluginName,
                               const QVariantMap& parameters);
 
-    Q_INVOKABLE void saveFile(const QUrl& fileUrl, const QByteArray& pluginUIData);
+    Q_INVOKABLE void saveFile(const QUrl& fileUrl,
+                              const QByteArray& uiData,
+                              const QByteArray& pluginUiData);
 
     Q_INVOKABLE void onPreferenceChanged(const QString& key, const QVariant& value);
 

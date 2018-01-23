@@ -200,12 +200,16 @@ Item
 
     function saveAsNamedFile(desiredFileUrl)
     {
-        var pluginUIData = plugin.save();
+        var uiData = {};
 
-        if(typeof(pluginUIData) === "object")
-            pluginUIData = JSON.stringify(pluginUIData);
+        uiData = JSON.stringify(uiData);
 
-        document.saveFile(desiredFileUrl, pluginUIData);
+        var pluginUiData = plugin.save();
+
+        if(typeof(pluginUiData) === "object")
+            pluginUiData = JSON.stringify(pluginUiData);
+
+        document.saveFile(desiredFileUrl, uiData, pluginUiData);
         mainWindow.addToRecentFiles(desiredFileUrl);
     }
 
@@ -1100,6 +1104,11 @@ Item
         application: root.application
         graph: graph
 
+        onUiDataChanged:
+        {
+            uiData = JSON.parse(uiData);
+        }
+
         onPluginQmlPathChanged:
         {
             if(document.pluginQmlPath.length > 0)
@@ -1127,8 +1136,8 @@ Item
                 plugin.initialise();
 
                 // Restore saved data, if there is any
-                if(pluginUIDataVersion >= 0)
-                    plugin.load(pluginUIData, pluginUIDataVersion);
+                if(pluginUiDataVersion >= 0)
+                    plugin.load(pluginUiData, pluginUiDataVersion);
 
                 plugin.loaded = true;
                 pluginLoadComplete();

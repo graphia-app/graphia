@@ -178,7 +178,7 @@ bool Saver::encode(const ProgressFn& progressFn)
     Q_ASSERT(graphModel != nullptr);
 
     json header;
-    header["version"] = 1;
+    header["version"] = 2;
     header["pluginName"] = graphModel->pluginName();
     header["pluginDataVersion"] = graphModel->pluginDataVersion();
     jsonArray.emplace_back(header);
@@ -203,6 +203,11 @@ bool Saver::encode(const ProgressFn& progressFn)
     content["transforms"] = u::toQStringVector(_document->transforms());
     content["visualisations"] = u::toQStringVector(_document->visualisations());
 
+    auto uiDataJson = json::parse(_uiData.begin(), _uiData.end(), nullptr, false);
+
+    if(uiDataJson.is_object() || uiDataJson.is_array())
+        content["ui"] = uiDataJson;
+
     graphModel->mutableGraph().setPhase(graphModel->pluginName());
     auto pluginData = _pluginInstance->save(graphModel->mutableGraph(), progressFn);
 
@@ -217,12 +222,12 @@ bool Saver::encode(const ProgressFn& progressFn)
     else
         content["pluginData"] = QString(pluginData.toHex());
 
-    auto pluginUIDataJson = json::parse(_pluginUIData.begin(), _pluginUIData.end(), nullptr, false);
+    auto pluginUiDataJson = json::parse(_pluginUiData.begin(), _pluginUiData.end(), nullptr, false);
 
-    if(pluginUIDataJson.is_object() || pluginUIDataJson.is_array())
-        content["ui"] = pluginUIDataJson;
+    if(pluginUiDataJson.is_object() || pluginUiDataJson.is_array())
+        content["pluginUiData"] = pluginUiDataJson;
     else
-        content["ui"] = QString(_pluginUIData.toHex());
+        content["pluginUiData"] = QString(_pluginUiData.toHex());
 
     jsonArray.emplace_back(content);
 

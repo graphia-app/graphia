@@ -225,6 +225,8 @@ bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& p
     if(!parseHeader(url, &header))
         return false;
 
+    auto version = header._version;
+
     QByteArray byteArray;
 
     if(!load(url.toLocalFile(), byteArray, -1, &graphModel.mutableGraph(), progressFn))
@@ -352,6 +354,16 @@ bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& p
         _layoutPaused = jsonLayout["paused"];
     }
 
+    if(version >= 2 && u::contains(jsonBody, "ui"))
+    {
+        const auto& jsonUiDataJsonValue = jsonBody["ui"];
+
+        if(jsonUiDataJsonValue.is_object() || jsonUiDataJsonValue.is_array())
+            _uiData = QByteArray::fromStdString(jsonUiDataJsonValue.dump());
+        else
+            return false;
+    }
+
     if(!u::contains(jsonBody, "pluginData"))
         return false;
 
@@ -369,18 +381,19 @@ bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& p
     if(!_pluginInstance->load(pluginData, header._pluginDataVersion, graphModel.mutableGraph(), progressFn))
         return false;
 
-    if(u::contains(jsonBody, "ui"))
+    const auto pluginUiDataKey = version >= 2 ? "pluginUiData" : "ui";
+    if(u::contains(jsonBody, pluginUiDataKey))
     {
-        const auto& pluginUIDataJsonValue = jsonBody["ui"];
+        const auto& pluginUiDataJsonValue = jsonBody[pluginUiDataKey];
 
-        if(pluginUIDataJsonValue.is_object() || pluginUIDataJsonValue.is_array())
-            _pluginUIData = QByteArray::fromStdString(pluginUIDataJsonValue.dump());
-        else if(pluginUIDataJsonValue.is_string())
-            _pluginUIData = QByteArray::fromHex(QByteArray::fromStdString(pluginUIDataJsonValue));
+        if(pluginUiDataJsonValue.is_object() || pluginUiDataJsonValue.is_array())
+            _pluginUiData = QByteArray::fromStdString(pluginUiDataJsonValue.dump());
+        else if(pluginUiDataJsonValue.is_string())
+            _pluginUiData = QByteArray::fromHex(QByteArray::fromStdString(pluginUiDataJsonValue));
         else
             return false;
 
-        _pluginUIDataVersion = header._pluginDataVersion;
+        _pluginUiDataVersion = header._pluginDataVersion;
     }
 
     return true;
