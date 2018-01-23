@@ -49,7 +49,7 @@ void SearchManager::findNodes(const QString& term, Flags<FindOptions> options,
         _term = QRegularExpression::escape(_term);
 
     if(options.test(FindOptions::MatchWholeWords))
-        _term = QString(R"(\b(%1)\b)").arg(_term);
+        _term = QStringLiteral(R"(\b(%1)\b)").arg(_term);
 
     QRegularExpression::PatternOptions reOptions;
 
