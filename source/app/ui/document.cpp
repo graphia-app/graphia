@@ -954,13 +954,16 @@ void Document::gotoNextComponent()
         _graphQuickItem->moveFocusToComponent(componentIds.front());
 }
 
-void Document::find(const QString& regex)
+void Document::find(const QString& term, int options, QStringList attributeNames)
 {
-    _commandManager.executeOnce([this, regex](Command&)
+    if(_searchManager == nullptr)
+        return;
+
+    _commandManager.executeOnce([=](Command&)
     {
         int previousNumNodesFound = numNodesFound();
 
-        _searchManager->findNodes(regex);
+        _searchManager->findNodes(term, static_cast<FindOptions>(options), attributeNames);
 
         if(previousNumNodesFound != numNodesFound())
             emit numNodesFoundChanged();

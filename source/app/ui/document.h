@@ -14,6 +14,7 @@
 #include "shared/utils/deferredexecutor.h"
 #include "shared/utils/semaphore.h"
 #include "graph/qmlelementid.h"
+#include "ui/findoptions.h"
 #include "thirdparty/qt-qml-models/QQmlVariantListModel.h"
 
 #include <QQuickItem>
@@ -318,7 +319,8 @@ public:
     Q_INVOKABLE void gotoPrevComponent();
     Q_INVOKABLE void gotoNextComponent();
 
-    Q_INVOKABLE void find(const QString& regex);
+    Q_INVOKABLE void find(const QString& term, int options,
+        QStringList attributeNames);
     Q_INVOKABLE void selectFirstFound();
     Q_INVOKABLE void selectNextFound();
     Q_INVOKABLE void selectPrevFound();

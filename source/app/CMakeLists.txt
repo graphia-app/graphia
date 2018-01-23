@@ -92,6 +92,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/pageranktransform.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/alert.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/document.h
+    ${CMAKE_CURRENT_LIST_DIR}/ui/findoptions.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/graphcommoninteractor.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/graphcomponentinteractor.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/graphoverviewinteractor.h

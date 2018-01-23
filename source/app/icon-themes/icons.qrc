@@ -34,6 +34,9 @@
 		<file>Tango/16x16/emblems/emblem-unreadable.png</file>
 		<file>Tango/22x22/emblems/emblem-unreadable.png</file>
 		<file>Tango/32x32/emblems/emblem-unreadable.png</file>
+		<file>Tango/16x16/mimetypes/font-x-generic.png</file>
+		<file>Tango/22x22/mimetypes/font-x-generic.png</file>
+		<file>Tango/32x32/mimetypes/font-x-generic.png</file>
 		<file>Tango/16x16/actions/format-justify-fill.png</file>
 		<file>Tango/22x22/actions/format-justify-fill.png</file>
 		<file>Tango/32x32/actions/format-justify-fill.png</file>
@@ -73,6 +76,9 @@
 		<file>Tango/16x16/actions/tab-new.png</file>
 		<file>Tango/22x22/actions/tab-new.png</file>
 		<file>Tango/32x32/actions/tab-new.png</file>
+		<file>Tango/16x16/mimetypes/text-x-generic.png</file>
+		<file>Tango/22x22/mimetypes/text-x-generic.png</file>
+		<file>Tango/32x32/mimetypes/text-x-generic.png</file>
 		<file>Tango/16x16/actions/view-fullscreen.png</file>
 		<file>Tango/22x22/actions/view-fullscreen.png</file>
 		<file>Tango/32x32/actions/view-fullscreen.png</file>

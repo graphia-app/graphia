@@ -200,7 +200,10 @@ Item
 
     function saveAsNamedFile(desiredFileUrl)
     {
-        var uiData = {};
+        var uiData =
+        {
+            lastSearchedAttributeName: find.lastSearchedAttributeName
+        };
 
         uiData = JSON.stringify(uiData);
 
@@ -334,7 +337,15 @@ Item
     function selectAllFound() { document.selectAllFound(); }
     function selectNextFound() { document.selectNextFound(); }
     function selectPrevFound() { document.selectPrevFound(); }
-    function find(text) { document.find(text); }
+    function find(term, options, attributes) { document.find(term, options, attributes); }
+
+    function availableAttributes(elementTypes, valueTypes)
+    {
+        elementTypes = typeof elementTypes !== "undefined" ? elementTypes : ElementType.All;
+        valueTypes = typeof valueTypes !== "undefined" ? valueTypes : ValueType.All;
+
+        return document.availableAttributes(elementTypes, valueTypes);
+    }
 
     function cancelCommand() { document.cancelCommand(); }
 
@@ -1086,9 +1097,9 @@ Item
     }
 
     property bool findHasFocus: find.hasTextFocus
-    function showFind()
+    function showFind(includeAdvancedOptions)
     {
-        find.show();
+        find.show(includeAdvancedOptions);
     }
 
     MessageDialog
@@ -1107,6 +1118,9 @@ Item
         onUiDataChanged:
         {
             uiData = JSON.parse(uiData);
+
+            if(uiData.lastSearchedAttributeName !== undefined)
+                find.lastSearchedAttributeName = uiData.lastSearchedAttributeName;
         }
 
         onPluginQmlPathChanged:

@@ -14,12 +14,14 @@ SearchManager::SearchManager(const GraphModel& graphModel) :
     _graphModel(&graphModel)
 {}
 
-void SearchManager::findNodes(const QString& regex, std::vector<QString> attributeNames)
+void SearchManager::findNodes(const QString& term, Flags<FindOptions> options,
+    QStringList attributeNames)
 {
-    _regex = regex;
+    _term = term;
+    _options = options;
     _attributeNames = std::move(attributeNames);
 
-    if(_regex.isEmpty())
+    if(_term.isEmpty())
     {
         clearFoundNodeIds();
         return;
@@ -31,7 +33,7 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> attribu
     if(_attributeNames.empty())
     {
         for(auto& attributeName : _graphModel->attributeNames(ElementType::Node))
-            _attributeNames.emplace_back(attributeName);
+            _attributeNames.append(attributeName);
     }
 
     std::vector<Attribute> attributes;
@@ -43,15 +45,29 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> attribu
             attributes.emplace_back(attribute);
     }
 
-    QRegularExpression re(_regex, QRegularExpression::CaseInsensitiveOption);
+    if(!options.test(FindOptions::MatchUsingRegex))
+        _term = QRegularExpression::escape(_term);
+
+    if(options.test(FindOptions::MatchWholeWords))
+        _term = QString(R"(\b(%1)\b)").arg(_term);
+
+    QRegularExpression::PatternOptions reOptions;
+
+    if(!options.test(FindOptions::MatchCase))
+        reOptions.setFlag(QRegularExpression::CaseInsensitiveOption);
+
+    QRegularExpression re(_term, reOptions);
 
     if(re.isValid())
     {
+        ConditionFnOp::String op = ConditionFnOp::String::MatchesRegex;
+        if(reOptions.testFlag(QRegularExpression::CaseInsensitiveOption))
+            op = ConditionFnOp::String::MatchesRegexCaseInsensitive;
+
         std::vector<NodeConditionFn> conditionFns;
         for(auto& attribute : attributes)
         {
-            auto conditionFn = CreateConditionFnFor::node(attribute,
-                ConditionFnOp::String::MatchesRegexCaseInsensitive, _regex);
+            auto conditionFn = CreateConditionFnFor::node(attribute, op, _term);
 
             if(conditionFn != nullptr)
                 conditionFns.emplace_back(conditionFn);
@@ -63,7 +79,10 @@ void SearchManager::findNodes(const QString& regex, std::vector<QString> attribu
             if(_graphModel->graph().typeOf(nodeId) == MultiElementType::Tail)
                 continue;
 
-            bool match = re.match(_graphModel->nodeNames().at(nodeId)).hasMatch();
+            bool match = false;
+
+            if(attributes.empty())
+                match = re.match(_graphModel->nodeNames().at(nodeId)).hasMatch();
 
             if(!match)
             {
@@ -106,7 +125,7 @@ void SearchManager::clearFoundNodeIds()
 
 void SearchManager::refresh()
 {
-    findNodes(_regex, _attributeNames);
+    findNodes(_term, _options, _attributeNames);
 }
 
 bool SearchManager::SearchManager::nodeWasFound(NodeId nodeId) const

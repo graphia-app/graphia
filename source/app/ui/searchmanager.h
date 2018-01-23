@@ -1,10 +1,15 @@
 #ifndef SEARCHMANAGER_H
 #define SEARCHMANAGER_H
 
+#include "findoptions.h"
+
 #include "shared/graph/elementid.h"
 #include "shared/graph/elementid_containers.h"
+#include "shared/utils/flags.h"
 
 #include <QObject>
+#include <QString>
+#include <QStringList>
 
 class GraphModel;
 
@@ -14,18 +19,20 @@ class SearchManager : public QObject
 public:
     explicit SearchManager(const GraphModel& graphModel);
 
-    void findNodes(const QString& regex, std::vector<QString> attributeNames = {});
+    void findNodes(const QString& term, Flags<FindOptions> options,
+        QStringList attributeNames);
     void clearFoundNodeIds();
     void refresh();
 
     const NodeIdSet& foundNodeIds() const { return _foundNodeIds; }
     bool nodeWasFound(NodeId nodeId) const;
 
-    bool active() const { return !_regex.isEmpty(); }
+    bool active() const { return !_term.isEmpty(); }
 
 private:
-    QString _regex;
-    std::vector<QString> _attributeNames;
+    QString _term;
+    Flags<FindOptions> _options;
+    QStringList _attributeNames;
 
     const GraphModel* _graphModel = nullptr;
     NodeIdSet _foundNodeIds;

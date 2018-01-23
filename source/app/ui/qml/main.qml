@@ -731,7 +731,17 @@ ApplicationWindow
         text: qsTr("&Find")
         shortcut: "Ctrl+F"
         enabled: currentDocument ? currentDocument.idle : false
-        onTriggered: currentDocument && currentDocument.showFind()
+        onTriggered: currentDocument && currentDocument.showFind(false)
+    }
+
+    Action
+    {
+        id: advancedFindAction
+        iconName: "edit-find"
+        text: qsTr("Advanced Find")
+        shortcut: "Ctrl+Shift+F"
+        enabled: currentDocument ? currentDocument.idle : false
+        onTriggered: currentDocument && currentDocument.showFind(true)
     }
 
     Action
@@ -1072,6 +1082,7 @@ ApplicationWindow
             MenuItem { action: selectNeighboursAction }
             MenuSeparator {}
             MenuItem { action: findAction}
+            MenuItem { action: advancedFindAction}
             MenuItem
             {
                 action: currentDocument ? currentDocument.selectPreviousFoundAction : nullAction
