@@ -217,12 +217,12 @@ bool Saver::encode(const ProgressFn& progressFn)
     else
         content["pluginData"] = QString(pluginData.toHex());
 
-    auto uiDataJson = json::parse(_uiData.begin(), _uiData.end(), nullptr, false);
+    auto pluginUIDataJson = json::parse(_pluginUIData.begin(), _pluginUIData.end(), nullptr, false);
 
-    if(uiDataJson.is_object() || uiDataJson.is_array())
-        content["ui"] = uiDataJson;
+    if(pluginUIDataJson.is_object() || pluginUIDataJson.is_array())
+        content["ui"] = pluginUIDataJson;
     else
-        content["ui"] = QString(_uiData.toHex());
+        content["ui"] = QString(_pluginUIData.toHex());
 
     jsonArray.emplace_back(content);
 

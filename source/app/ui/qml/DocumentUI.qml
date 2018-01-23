@@ -200,12 +200,12 @@ Item
 
     function saveAsNamedFile(desiredFileUrl)
     {
-        var uiData = plugin.save();
+        var pluginUIData = plugin.save();
 
-        if(typeof(uiData) === "object")
-            uiData = JSON.stringify(uiData);
+        if(typeof(pluginUIData) === "object")
+            pluginUIData = JSON.stringify(pluginUIData);
 
-        document.saveFile(desiredFileUrl, uiData);
+        document.saveFile(desiredFileUrl, pluginUIData);
         mainWindow.addToRecentFiles(desiredFileUrl);
     }
 
@@ -1127,8 +1127,8 @@ Item
                 plugin.initialise();
 
                 // Restore saved data, if there is any
-                if(uiDataVersion >= 0)
-                    plugin.load(uiData, uiDataVersion);
+                if(pluginUIDataVersion >= 0)
+                    plugin.load(pluginUIData, pluginUIDataVersion);
 
                 plugin.loaded = true;
                 pluginLoadComplete();

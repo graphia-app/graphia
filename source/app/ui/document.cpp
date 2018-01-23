@@ -476,8 +476,8 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
             if(nodePositions != nullptr)
                 _startingNodePositions = std::make_unique<ExactNodePositions>(*nodePositions);
 
-            _uiData = completedLoader->uiData();
-            _uiDataVersion = completedLoader->pluginDataVersion();
+            _pluginUIData = completedLoader->pluginUIData();
+            _pluginUIDataVersion = completedLoader->pluginUIDataVersion();
 
             _userLayoutPaused = completedLoader->layoutPaused();
         });
@@ -503,13 +503,13 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     return true;
 }
 
-void Document::saveFile(const QUrl& fileUrl, const QByteArray& uiData)
+void Document::saveFile(const QUrl& fileUrl, const QByteArray& pluginUIData)
 {
     Saver saver(fileUrl);
 
     saver.setDocument(this);
     saver.setPluginInstance(_pluginInstance.get());
-    saver.setUiData(uiData);
+    saver.setPluginUIData(pluginUIData);
 
     _commandManager.executeOnce(
         {
@@ -576,7 +576,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     emit commandVerbChanged(); // Stop showing loading message
 
     // This causes the plugin UI to be loaded
-    emit pluginQmlPathChanged(_uiData, _uiDataVersion);
+    emit pluginQmlPathChanged(_pluginUIData, _pluginUIDataVersion);
 
     connect(_layoutThread.get(), &LayoutThread::pausedChanged, this, &Document::layoutPauseStateChanged);
     connect(_layoutThread.get(), &LayoutThread::settingChanged, [this] { _layoutRequired = true; });

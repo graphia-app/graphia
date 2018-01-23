@@ -197,8 +197,8 @@ private:
 
     bool _saveRequired = false;
 
-    QByteArray _uiData;
-    int _uiDataVersion = -1;
+    QByteArray _pluginUIData;
+    int _pluginUIDataVersion = -1;
 
     std::unique_ptr<ExactNodePositions> _startingNodePositions;
     bool _userLayoutPaused = false; // true if the user wants the layout to pause
@@ -231,7 +231,7 @@ signals:
 
     void pluginInstanceChanged();
     void pluginNameChanged();
-    void pluginQmlPathChanged(const QByteArray& uiData, int uiDataVersion);
+    void pluginQmlPathChanged(const QByteArray& pluginUIData, int pluginUIDataVersion);
 
     void loadComplete(const QUrl& url, bool success);
 
@@ -280,7 +280,7 @@ public:
                               QString pluginName,
                               const QVariantMap& parameters);
 
-    Q_INVOKABLE void saveFile(const QUrl& fileUrl, const QByteArray& uiData);
+    Q_INVOKABLE void saveFile(const QUrl& fileUrl, const QByteArray& pluginUIData);
 
     Q_INVOKABLE void onPreferenceChanged(const QString& key, const QVariant& value);
 

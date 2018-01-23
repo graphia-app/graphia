@@ -371,16 +371,16 @@ bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& p
 
     if(u::contains(jsonBody, "ui"))
     {
-        const auto& uiDataJsonValue = jsonBody["ui"];
+        const auto& pluginUIDataJsonValue = jsonBody["ui"];
 
-        if(uiDataJsonValue.is_object() || uiDataJsonValue.is_array())
-            _uiData = QByteArray::fromStdString(uiDataJsonValue.dump());
-        else if(uiDataJsonValue.is_string())
-            _uiData = QByteArray::fromHex(QByteArray::fromStdString(uiDataJsonValue));
+        if(pluginUIDataJsonValue.is_object() || pluginUIDataJsonValue.is_array())
+            _pluginUIData = QByteArray::fromStdString(pluginUIDataJsonValue.dump());
+        else if(pluginUIDataJsonValue.is_string())
+            _pluginUIData = QByteArray::fromHex(QByteArray::fromStdString(pluginUIDataJsonValue));
         else
             return false;
 
-        _pluginDataVersion = header._pluginDataVersion;
+        _pluginUIDataVersion = header._pluginDataVersion;
     }
 
     return true;
