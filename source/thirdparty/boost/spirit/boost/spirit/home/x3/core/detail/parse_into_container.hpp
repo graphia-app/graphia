@@ -251,12 +251,12 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
           , Iterator& first, Iterator const& last
           , Context const& context, RContext& rcontext, Attribute& attr, mpl::true_)
         {
-            if (attr.empty())
+            if (traits::is_empty(attr))
                 return parser.parse(first, last, context, rcontext, attr);
             Attribute rest;
             bool r = parser.parse(first, last, context, rcontext, rest);
             if (r)
-                attr.insert(attr.end(), rest.begin(), rest.end());
+                traits::append(attr, rest.begin(), rest.end());
             return r;
         }
 
