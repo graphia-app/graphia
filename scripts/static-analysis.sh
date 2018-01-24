@@ -62,7 +62,19 @@ qstring-allocations,\
 reserve-candidates,\
 no-rule-of-two-soft,\
 no-qenums,\
-no-non-pod-global-static"
+no-non-pod-global-static,\
+connect-non-signal,\
+lambda-in-connect,\
+connect-3arg-lambda,\
+lambda-unique-connection,\
+thread-with-slots,\
+connect-not-normalized,\
+overriden-signal,\
+virtual-signal,\
+const-signal-or-slot,\
+incorrect-emit,\
+connect-by-name,\
+qproperty-without-notify"
 
 echo "clazy"
 clazy-standalone --version
