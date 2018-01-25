@@ -13,6 +13,7 @@
 
 #include <QUrl>
 #include <QFileInfo>
+#include <QTextDocumentFragment>
 
 #include <fstream>
 
@@ -51,12 +52,11 @@ using ascii::char_;
 
 const x3::rule<class L, List> list = "list";
 
-const x3::rule<class QuotedString, QString> quotedString = "quotedString";
-const auto escapedQuote = x3::lit('\\') >> char_('"');
-const auto quotedString_def = lexeme['"' >> *(escapedQuote | ~char_('"')) >> '"'];
+const x3::rule<class NoQuotesString, QString> noQuotesString = "noQuotesString";
+const auto noQuotesString_def = lexeme[x3::lit('"') >> *(~char_('"')) >> x3::lit('"')];
 
 const x3::rule<class V, Value> value = "value";
-const auto value_def = double_ | int_ | quotedString | (x3::lit('[') >> list >> x3::lit(']'));
+const auto value_def = double_ | int_ | noQuotesString | (x3::lit('[') >> list >> x3::lit(']'));
 
 const x3::rule<class K, QString> key = "key";
 const auto key_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
@@ -66,7 +66,7 @@ const auto keyValue_def = key >> value;
 
 const auto list_def = *keyValue;
 
-BOOST_SPIRIT_DEFINE(list, quotedString, key, value, keyValue)
+BOOST_SPIRIT_DEFINE(list, noQuotesString, key, value, keyValue)
 
 struct Attribute
 {
@@ -89,7 +89,10 @@ AttributeVector processAttribute(const KeyValue& attribute)
 
         AttributeVector operator()(double v) const          { return {{_name, QString::number(v)}}; }
         AttributeVector operator()(int v) const             { return {{_name, QString::number(v)}}; }
-        AttributeVector operator()(const QString& v) const  { return {{_name, v}}; }
+        AttributeVector operator()(const QString& v) const
+        {
+            return {{_name, QTextDocumentFragment::fromHtml(v).toPlainText()}};
+        }
         AttributeVector operator()(const List& v) const
         {
             AttributeVector result;
