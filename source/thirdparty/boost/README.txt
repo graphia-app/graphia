@@ -4,4 +4,9 @@ Get and unarchive boost, change into its directory
 ./bootstrap.sh
 ./b2 tools/bcp
 
-<boost-directory>/bin.v2/.../bcp --boost=<boost-directory> boost/spirit/home/x3.hpp boost/fusion/include/adapt_struct.hpp boost/fusion/include/io.hpp spirit/
+<boost-directory>/bin.v2/.../bcp --boost=<boost-directory> \
+  boost/spirit/home/x3.hpp \
+  boost/fusion/include/adapt_struct.hpp \
+  boost/fusion/include/io.hpp \
+  boost/spirit/home/support/iterators/istream_iterator.hpp \
+  spirit/
