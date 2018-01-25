@@ -13,7 +13,7 @@ Item
     readonly property int _padding: 10
     property alias color: backRectangle.color
 
-    property var title
+    property string title: ""
     property var target
     property int alignment: Qt.AlignLeft
     property bool displayNext: false
