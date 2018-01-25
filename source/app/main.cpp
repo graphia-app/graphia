@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
     auto rootObjects = engine.rootObjects();
     QObject* mainWindow = rootObjects.first();
     QObject::connect(&app, &SharedTools::QtSingleApplication::messageReceived,
-    [mainWindow](const QString& message, QObject*)
+    mainWindow, [mainWindow](const QString& message, QObject*)
     {
         QMetaObject::invokeMethod(mainWindow, "processArguments",
             Q_ARG(QVariant, message.split(QStringLiteral("\n"))));

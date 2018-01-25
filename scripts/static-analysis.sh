@@ -71,7 +71,6 @@ thread-with-slots,\
 connect-not-normalized,\
 overriden-signal,\
 virtual-signal,\
-const-signal-or-slot,\
 incorrect-emit,\
 connect-by-name,\
 qproperty-without-notify"

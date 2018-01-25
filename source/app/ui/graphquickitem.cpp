@@ -33,7 +33,7 @@ void GraphQuickItem::initialise(GraphModel* graphModel,
     setFlag(Flag::ItemHasContents, true);
 
     connect(&_graphModel->graph(), &Graph::graphChanged, this, &GraphQuickItem::graphChanged);
-    connect(&_graphModel->graph(), &Graph::graphChanged, [this] { updateVisibleComponentIndex(); });
+    connect(&_graphModel->graph(), &Graph::graphChanged, this, [this] { updateVisibleComponentIndex(); });
     emit graphChanged();
 
     // Force an initial update; this will usually occur anyway for other reasons,

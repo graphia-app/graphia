@@ -96,12 +96,12 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
         switchToOverviewMode(false);
 
     connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphRenderer::onPreferenceChanged, Qt::DirectConnection);
-    connect(_graphModel, &GraphModel::visualsWillChange, [this]
+    connect(_graphModel, &GraphModel::visualsWillChange, this, [this]
     {
         disableSceneUpdate();
     });
 
-    connect(_graphModel, &GraphModel::visualsChanged, [this]
+    connect(_graphModel, &GraphModel::visualsChanged, this, [this]
     {
         updateText();
 

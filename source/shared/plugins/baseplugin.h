@@ -101,15 +101,15 @@ public:
     ICommandManager* commandManager() { return _commandManager; }
 
 private slots:
-    void onNodeAdded(const Graph*, NodeId nodeId) const   { emit nodeAdded(nodeId); }
-    void onNodeRemoved(const Graph*, NodeId nodeId) const { emit nodeRemoved(nodeId); }
-    void onEdgeAdded(const Graph*, EdgeId edgeId) const   { emit edgeAdded(edgeId); }
-    void onEdgeRemoved(const Graph*, EdgeId edgeId) const { emit edgeRemoved(edgeId); }
+    void onNodeAdded(const Graph*, NodeId nodeId) const     { emit nodeAdded(nodeId); }
+    void onNodeRemoved(const Graph*, NodeId nodeId) const   { emit nodeRemoved(nodeId); }
+    void onEdgeAdded(const Graph*, EdgeId edgeId) const     { emit edgeAdded(edgeId); }
+    void onEdgeRemoved(const Graph*, EdgeId edgeId) const   { emit edgeRemoved(edgeId); }
 
-    void onSelectionChanged(const SelectionManager*) const { emit selectionChanged(_selectionManager); }
-    void onVisualsChanged() const { emit visualsChanged(); }
+    void onSelectionChanged(const SelectionManager*) const  { emit selectionChanged(_selectionManager); }
+    void onVisualsChanged() const                           { emit visualsChanged(); }
 
-    void onLoadSuccess() const { emit loadSuccess(); }
+    void onLoadSuccess() const                              { emit loadSuccess(); }
 
 signals:
     void graphWillChange() const;

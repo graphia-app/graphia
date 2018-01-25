@@ -29,7 +29,7 @@ void WatchdogWorker::reset()
     {
         _timer = new QTimer(this);
         _timer->setSingleShot(true);
-        connect(_timer, &QTimer::timeout, [=]
+        connect(_timer, &QTimer::timeout, this, [=]
         {
             auto howLate = duration_cast<milliseconds>(clock_type::now() - _expectedExpiry);
 
