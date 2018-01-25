@@ -242,7 +242,7 @@ private:
     GLuint sdfTextureOffscreen() const;
     void swapSdfTexture();
 
-    void updateText(bool waitForCompletion = false);
+    void updateText(std::function<void()> onCompleteFn = []{});
 
     void enableSceneUpdate();
     void disableSceneUpdate();
@@ -288,6 +288,8 @@ private:
                          int componentIndex, GPUGraphData* gpuGraphData);
 
 signals:
+    void initialised() const;
+
     void modeChanged() const;
 
     void userInteractionStarted() const;

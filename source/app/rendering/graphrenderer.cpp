@@ -119,8 +119,11 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
         emit fpsChanged(ticksPerSecond);
     });
 
-    updateText(true);
-    enableSceneUpdate();
+    updateText([this]
+    {
+        emit initialised();
+        enableSceneUpdate();
+    });
 }
 
 GraphRenderer::~GraphRenderer()
@@ -857,7 +860,7 @@ void GraphRenderer::swapSdfTexture()
     _currentSDFTextureIndex = 1 - _currentSDFTextureIndex;
 }
 
-void GraphRenderer::updateText(bool waitForCompletion)
+void GraphRenderer::updateText(std::function<void()> onCompleteFn)
 {
     std::unique_lock<std::recursive_mutex> glyphMapLock(_glyphMap->mutex());
 
@@ -870,7 +873,7 @@ void GraphRenderer::updateText(bool waitForCompletion)
     if(_glyphMap->updateRequired())
     {
         auto job = std::make_unique<SDFComputeJob>(sdfTextureOffscreen(), _glyphMap.get());
-        job->executeWhenComplete([this]
+        job->executeWhenComplete([this, onCompleteFn]
         {
             executeOnRendererThread([this]
             {
@@ -880,13 +883,13 @@ void GraphRenderer::updateText(bool waitForCompletion)
                 updateGPUData(When::Later);
                 update(); // QQuickFramebufferObject::Renderer::update
             }, QStringLiteral("GraphRenderer::updateText"));
+
+            onCompleteFn();
         });
 
         _gpuComputeThread->enqueue(job);
 
         glyphMapLock.unlock();
-        if(waitForCompletion)
-            _gpuComputeThread->wait();
     }
 }
 

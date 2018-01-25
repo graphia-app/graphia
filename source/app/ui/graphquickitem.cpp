@@ -190,6 +190,7 @@ QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const
     connect(this, &GraphQuickItem::screenshotRequested, graphRenderer, &GraphRenderer::onScreenshotRequested);
     connect(this, &GraphQuickItem::previewRequested, graphRenderer, &GraphRenderer::onPreviewRequested);
 
+    connect(graphRenderer, &GraphRenderer::initialised, this, &GraphQuickItem::onRendererInitialised);
     connect(graphRenderer, &GraphRenderer::previewComplete, this, &GraphQuickItem::previewComplete);
     connect(graphRenderer, &GraphRenderer::screenshotComplete, this, &GraphQuickItem::onScreenshotComplete);
     connect(graphRenderer, &GraphRenderer::modeChanged, this, &GraphQuickItem::update);
@@ -233,6 +234,12 @@ void GraphQuickItem::onLayoutChanged()
 {
     update();
     emit layoutChanged();
+}
+
+void GraphQuickItem::onRendererInitialised()
+{
+    _initialised = true;
+    emit initialisedChanged();
 }
 
 void GraphQuickItem::onFPSChanged(float fps)

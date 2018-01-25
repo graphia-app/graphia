@@ -528,6 +528,17 @@ Item
                         }
                     }
                 }
+
+                BusyIndicator
+                {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    width: parent.height * 0.3
+                    height: width
+
+                    visible: !graph.initialised && plugin.loaded
+                }
             }
 
             ToolButton

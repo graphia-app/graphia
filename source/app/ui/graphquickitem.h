@@ -24,6 +24,8 @@ class GraphQuickItem : public QQuickFramebufferObject
 {
     Q_OBJECT
 
+    Q_PROPERTY(bool initialised MEMBER _initialised NOTIFY initialisedChanged)
+
     Q_PROPERTY(bool interacting MEMBER _interacting NOTIFY interactingChanged)
     Q_PROPERTY(bool viewIsReset MEMBER _viewIsReset NOTIFY viewIsResetChanged)
     Q_PROPERTY(bool canEnterOverviewMode MEMBER _canEnterOverviewMode NOTIFY canEnterOverviewModeChanged)
@@ -103,6 +105,7 @@ private:
     NodeId _desiredFocusNodeId;
     ComponentId _desiredFocusComponentId;
 
+    bool _initialised = false;
     mutable bool _interacting = false;
     bool _viewIsReset = true;
     bool _canEnterOverviewMode = false;
@@ -133,12 +136,17 @@ private:
 
 public slots:
     void onLayoutChanged();
+
+private slots:
+    void onRendererInitialised();
     void onFPSChanged(float fps);
     void onUserInteractionStarted();
     void onUserInteractionFinished();
     void onScreenshotComplete(QImage screenshot, QString path);
 
 signals:
+    void initialisedChanged() const;
+
     void interactingChanged() const;
     void viewIsResetChanged() const;
     void canEnterOverviewModeChanged() const;
