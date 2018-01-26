@@ -74,30 +74,30 @@ void NodeAttributeTableModel::update()
 
     Table updatedData;
 
-    for(int row = 0; row < rowCount(); row++)
+    for(int column = 0; column < _roleNames.size(); column++)
     {
-        updatedData.emplace_back(_roleNames.size());
-        auto& dataRow = updatedData.back();
+        int role = Qt::UserRole + 1 + column;
 
-        NodeId nodeId = _userNodeData->elementIdForRowIndex(row);
+        updatedData.emplace_back(rowCount());
+        auto& dataColumn = updatedData.back();
 
-        if(!_document->graphModel()->graph().containsNodeId(nodeId))
+        for(int row = 0; row < rowCount(); row++)
         {
-            // The graph doesn't necessarily have a node for every row since
-            // it may have been transformed, leaving empty rows
-            continue;
-        }
+            NodeId nodeId = _userNodeData->elementIdForRowIndex(row);
 
-        for(int roleNum = 0; roleNum < _roleNames.size(); roleNum++)
-        {
-            int role = Qt::UserRole + 1 + roleNum;
+            if(!_document->graphModel()->graph().containsNodeId(nodeId))
+            {
+                // The graph doesn't necessarily have a node for every row since
+                // it may have been transformed, leaving empty rows
+                continue;
+            }
 
             if(role == Roles::NodeIdRole)
-                dataRow[roleNum] = static_cast<int>(nodeId);
+                dataColumn[row] = static_cast<int>(nodeId);
             else if(role == Roles::NodeSelectedRole)
-                dataRow[roleNum] = _document->selectionManager()->nodeIsSelected(nodeId);
+                dataColumn[row] = _document->selectionManager()->nodeIsSelected(nodeId);
             else
-                dataRow[roleNum] = dataValue(row, role);
+                dataColumn[row] = dataValue(row, role);
         }
     }
 
@@ -201,17 +201,17 @@ int NodeAttributeTableModel::columnCount(const QModelIndex&) const
 
 QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
 {
-    size_t row = index.row();
-    if(row >= _cachedData.size())
-        return {};
-
-    const auto& dataRow = _cachedData.at(row);
-
     size_t column = (role - Qt::UserRole - 1);
-    if(column >= dataRow.size())
+    const auto& dataColumn = _cachedData.at(column);
+
+    if(column >= _cachedData.size())
         return {};
 
-    auto cachedValue = dataRow.at(column);
+    size_t row = index.row();
+    if(row >= dataColumn.size())
+        return {};
+
+    auto cachedValue = dataColumn.at(row);
     return cachedValue;
 }
 
