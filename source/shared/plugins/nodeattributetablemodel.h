@@ -36,9 +36,10 @@ private:
     QHash<int, QByteArray> _roleNames;
     std::mutex _updateMutex;
 
-    using Table = std::vector<QVariant>;
+    using Row = std::vector<QVariant>;
+    using Table = std::vector<Row>;
 
-    std::deque<Table> _updatedDatas; // Update occurs here, before being moved to _cachedData
+    std::deque<Table> _updatedData; // Update occurs here, before being moved to _cachedData
     Table _cachedData;
 
     QStringList _columnNames;

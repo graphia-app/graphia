@@ -72,10 +72,13 @@ void NodeAttributeTableModel::update()
     // actually needs to change, and probably begin/endResetModel can be
     // avoided too
 
-    Table updatedData(rowCount() * _roleNames.size());
+    Table updatedData;
 
     for(int row = 0; row < rowCount(); row++)
     {
+        updatedData.emplace_back(_roleNames.size());
+        auto& dataRow = updatedData.back();
+
         NodeId nodeId = _userNodeData->elementIdForRowIndex(row);
 
         if(!_document->graphModel()->graph().containsNodeId(nodeId))
@@ -85,21 +88,20 @@ void NodeAttributeTableModel::update()
             continue;
         }
 
-        for(int column = 0; column < _roleNames.size(); column++)
+        for(int roleNum = 0; roleNum < _roleNames.size(); roleNum++)
         {
-            int role = Qt::UserRole + 1 + column;
-            int index = column + (row * _roleNames.size());
+            int role = Qt::UserRole + 1 + roleNum;
 
             if(role == Roles::NodeIdRole)
-                updatedData[index] = static_cast<int>(nodeId);
+                dataRow[roleNum] = static_cast<int>(nodeId);
             else if(role == Roles::NodeSelectedRole)
-                updatedData[index] = _document->selectionManager()->nodeIsSelected(nodeId);
+                dataRow[roleNum] = _document->selectionManager()->nodeIsSelected(nodeId);
             else
-                updatedData[index] = dataValue(row, role);
+                dataRow[roleNum] = dataValue(row, role);
         }
     }
 
-    _updatedDatas.emplace_back(std::move(updatedData));
+    _updatedData.emplace_back(std::move(updatedData));
 
     // Notify the main thread that the data has changed
     QMetaObject::invokeMethod(this, "onUpdateComplete");
@@ -110,8 +112,8 @@ void NodeAttributeTableModel::onUpdateComplete()
     std::unique_lock<std::mutex> lock;
 
     beginResetModel();
-    _cachedData = std::move(_updatedDatas.front());
-    _updatedDatas.pop_front();
+    _cachedData = std::move(_updatedData.front());
+    _updatedData.pop_front();
     endResetModel();
 }
 
@@ -200,14 +202,16 @@ int NodeAttributeTableModel::columnCount(const QModelIndex&) const
 QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
 {
     size_t row = index.row();
-    size_t column = (role - Qt::UserRole - 1);
-
-    size_t dataIndex = column + (row * static_cast<size_t>(_roleNames.size()));
-
-    if(dataIndex > _cachedData.size())
+    if(row >= _cachedData.size())
         return {};
 
-    auto cachedValue = _cachedData.at(dataIndex);
+    const auto& dataRow = _cachedData.at(row);
+
+    size_t column = (role - Qt::UserRole - 1);
+    if(column >= dataRow.size())
+        return {};
+
+    auto cachedValue = dataRow.at(column);
     return cachedValue;
 }
 
