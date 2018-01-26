@@ -74,7 +74,17 @@ no-rule-of-two-soft,\
 no-qenums,\
 no-non-pod-global-static,\
 no-connect-3arg-lambda,\
-no-const-signal-or-slot"
+no-const-signal-or-slot,\
+global-const-char-pointer,\
+implicit-casts,\
+missing-qobject-macro,\
+missing-typeinfo,\
+returning-void-expression,\
+virtual-call-ctor,\
+assert-with-side-effects,\
+bogus-dynamic-cast,\
+detaching-member,\
+thread-with-slots"
 
 echo "clazy"
 clazy-standalone --version
