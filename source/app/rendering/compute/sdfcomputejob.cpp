@@ -87,7 +87,12 @@ void SDFComputeJob::prepareScreenQuadDataBuffer(QOpenGLBuffer& buffer, int width
 void SDFComputeJob::generateSDF()
 {
     if(_glyphMap->images().empty())
+    {
+        if(_onCompleteFn != nullptr)
+            _onCompleteFn();
+
         return;
+    }
 
     QOpenGLVertexArrayObject screenQuadVAO;
     QOpenGLBuffer screenQuadDataBuffer;
@@ -153,6 +158,10 @@ void SDFComputeJob::generateSDF()
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         {
             qWarning("Unable to complete framebuffer in SDFComputeJob");
+
+            if(_onCompleteFn != nullptr)
+                _onCompleteFn();
+
             return;
         }
 

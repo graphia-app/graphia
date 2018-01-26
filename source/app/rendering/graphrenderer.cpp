@@ -891,6 +891,8 @@ void GraphRenderer::updateText(std::function<void()> onCompleteFn)
 
         glyphMapLock.unlock();
     }
+    else
+        onCompleteFn();
 }
 
 void GraphRenderer::resetView()
