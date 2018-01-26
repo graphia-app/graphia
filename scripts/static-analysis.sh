@@ -69,7 +69,7 @@ overriden-signal,\
 virtual-signal,\
 incorrect-emit,\
 connect-by-name,\
-qproperty-without-notify,
+qproperty-without-notify,\
 no-rule-of-two-soft,\
 no-qenums,\
 no-non-pod-global-static,\
