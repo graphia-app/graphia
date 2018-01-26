@@ -101,7 +101,7 @@ void NodeAttributeTableModel::update()
         }
     }
 
-    _updatedData.emplace_back(std::move(updatedData));
+    _updatedDatas.emplace_back(std::move(updatedData));
 
     // Notify the main thread that the data has changed
     QMetaObject::invokeMethod(this, "onUpdateComplete");
@@ -112,8 +112,8 @@ void NodeAttributeTableModel::onUpdateComplete()
     std::unique_lock<std::mutex> lock;
 
     beginResetModel();
-    _cachedData = std::move(_updatedData.front());
-    _updatedData.pop_front();
+    _cachedData = std::move(_updatedDatas.front());
+    _updatedDatas.pop_front();
     endResetModel();
 }
 
