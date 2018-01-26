@@ -639,7 +639,7 @@ void CorrelationPlotItem::populateStdDevPlot()
         for(auto row : qAsConst(_selectedRows))
         {
             auto index = (row * _columnCount) + col;
-            means[col] += _data[static_cast<int>(index)];
+            means[col] += _data.at(static_cast<int>(index));
         }
         means[col] /= _selectedRows.count();
 
@@ -647,15 +647,15 @@ void CorrelationPlotItem::populateStdDevPlot()
         for(auto row : qAsConst(_selectedRows))
         {
             auto index = (row * _columnCount) + col;
-            stdDev += (_data[static_cast<int>(index)] - means[col]) *
-                    (_data[static_cast<int>(index)] - means[col]);
+            stdDev += (_data.at(static_cast<int>(index)) - means.at(col)) *
+                    (_data.at(static_cast<int>(index)) - means.at(col));
         }
         stdDev /= _columnCount;
         stdDev = std::sqrt(stdDev);
         stdDevs[col] = stdDev;
 
-        min = std::min(min, means[col] - stdDev);
-        max = std::max(max, means[col] + stdDev);
+        min = std::min(min, means.at(col) - stdDev);
+        max = std::max(max, means.at(col) + stdDev);
     }
 
     plotDispersion(stdDevs, QStringLiteral("Std Dev"));
@@ -677,7 +677,7 @@ void CorrelationPlotItem::populateStdErrorPlot()
         for(auto row : qAsConst(_selectedRows))
         {
             auto index = (row * _columnCount) + col;
-            means[col] += _data[static_cast<int>(index)];
+            means[col] += _data.at(static_cast<int>(index));
         }
         means[col] /= _selectedRows.count();
 
@@ -685,15 +685,15 @@ void CorrelationPlotItem::populateStdErrorPlot()
         for(auto row : qAsConst(_selectedRows))
         {
             auto index = (row * _columnCount) + col;
-            stdErr += (_data[static_cast<int>(index)] - means[col]) *
-                    (_data[static_cast<int>(index)] - means[col]);
+            stdErr += (_data.at(static_cast<int>(index)) - means.at(col)) *
+                    (_data.at(static_cast<int>(index)) - means.at(col));
         }
         stdErr /= _columnCount;
         stdErr = std::sqrt(stdErr) / std::sqrt(static_cast<double>(_selectedRows.length()));
         stdErrs[col] = stdErr;
 
-        min = std::min(min, means[col] - stdErr);
-        max = std::max(max, means[col] + stdErr);
+        min = std::min(min, means.at(col) - stdErr);
+        max = std::max(max, means.at(col) + stdErr);
     }
 
     plotDispersion(stdErrs, QStringLiteral("Std Err"));
@@ -723,7 +723,7 @@ void CorrelationPlotItem::populateLinePlot()
         for(size_t col = 0; col < _columnCount; col++)
         {
             auto index = (row * _columnCount) + col;
-            rowMean += _data[static_cast<int>(index)];
+            rowMean += _data.at(static_cast<int>(index));
         }
         rowMean /= _columnCount;
 
@@ -731,8 +731,8 @@ void CorrelationPlotItem::populateLinePlot()
         for(size_t col = 0; col < _columnCount; col++)
         {
             auto index = (row * _columnCount) + col;
-            stdDev += (_data[static_cast<int>(index)] - rowMean) *
-                    (_data[static_cast<int>(index)] - rowMean);
+            stdDev += (_data.at(static_cast<int>(index)) - rowMean) *
+                    (_data.at(static_cast<int>(index)) - rowMean);
         }
         stdDev /= _columnCount;
         stdDev = std::sqrt(stdDev);
@@ -741,7 +741,7 @@ void CorrelationPlotItem::populateLinePlot()
         for(size_t col = 0; col < _columnCount; col++)
         {
             auto index = (row * _columnCount) + col;
-            auto data = _data[static_cast<int>(index)];
+            auto data = _data.at(static_cast<int>(index));
             switch(static_cast<PlotScaleType>(_plotScaleType))
             {
             case PlotScaleType::Log:
@@ -875,7 +875,7 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max)
         for(auto row : qAsConst(_selectedRows))
         {
             auto index = (row * _columnCount) + col;
-            runningTotal += _data[static_cast<int>(index)];
+            runningTotal += _data.at(static_cast<int>(index));
         }
         yDataAvg.append(runningTotal / _selectedRows.length());
 
