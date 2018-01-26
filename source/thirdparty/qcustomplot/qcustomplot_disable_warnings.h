@@ -15,5 +15,3 @@
 // MSVC warnings
 #pragma warning( push )
 #endif
-
-// clazy:excludeall=qproperty-without-notify

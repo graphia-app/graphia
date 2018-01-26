@@ -26,6 +26,8 @@
 #ifndef QCUSTOMPLOT_H
 #define QCUSTOMPLOT_H
 
+// clazy:excludeall=qproperty-without-notify
+
 #include <QtCore/qglobal.h>
 
 // some Qt version/configuration dependent macros to include or exclude certain code paths:

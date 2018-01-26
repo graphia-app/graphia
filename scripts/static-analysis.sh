@@ -60,9 +60,6 @@ implicit-casts,\
 missing-typeinfo,\
 qstring-allocations,\
 reserve-candidates,\
-no-rule-of-two-soft,\
-no-qenums,\
-no-non-pod-global-static,\
 connect-non-signal,\
 lambda-in-connect,\
 lambda-unique-connection,\
@@ -72,7 +69,12 @@ overriden-signal,\
 virtual-signal,\
 incorrect-emit,\
 connect-by-name,\
-qproperty-without-notify"
+qproperty-without-notify,
+no-rule-of-two-soft,\
+no-qenums,\
+no-non-pod-global-static,\
+no-connect-3arg-lambda,\
+no-const-signal-or-slot"
 
 echo "clazy"
 clazy-standalone --version
