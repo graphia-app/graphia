@@ -426,7 +426,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     }
 
     connect(S(Preferences), &Preferences::preferenceChanged, this, &Document::onPreferenceChanged, Qt::DirectConnection);
-    connect(&_graphModel->graph(), &Graph::graphChanged, this, [this]
+    connect(&_graphModel->graph(), &Graph::graphChanged, [this]
     {
         _searchManager->refresh();
         _graphModel->updateVisuals(_selectionManager.get(), _searchManager.get());
@@ -461,7 +461,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
         loader->setPluginInstance(_pluginInstance.get());
 
         connect(_graphFileParserThread.get(), &ParserThread::success,
-        this, [this](IParser* completedParser)
+        [this](IParser* completedParser)
         {
             auto completedLoader = dynamic_cast<Loader*>(completedParser);
             Q_ASSERT(completedLoader != nullptr);
@@ -486,7 +486,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     }
     else
     {
-        connect(_graphFileParserThread.get(), &ParserThread::success, this, [this]
+        connect(_graphFileParserThread.get(), &ParserThread::success, /*this,*/ [this]
         {
             _graphTransforms = sortedTransforms(_pluginInstance->defaultTransforms());
             _visualisations = _pluginInstance->defaultVisualisations();
@@ -586,7 +586,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     emit pluginQmlPathChanged(_pluginUiData, _pluginUiDataVersion);
 
     connect(_layoutThread.get(), &LayoutThread::pausedChanged, this, &Document::layoutPauseStateChanged);
-    connect(_layoutThread.get(), &LayoutThread::settingChanged, this, [this] { _layoutRequired = true; });
+    connect(_layoutThread.get(), &LayoutThread::settingChanged, [this] { _layoutRequired = true; });
     connect(_layoutThread.get(), &LayoutThread::settingChanged, this, &Document::updateLayoutState);
     _layoutThread->addAllComponents();
     initialiseLayoutSettingsModel();
@@ -621,7 +621,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::nextUndoActionChanged);
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::canRedoChanged);
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::nextRedoActionChanged);
-    connect(&_commandManager, &CommandManager::commandCompleted, this, [this](bool, QString, QString pastParticiple)
+    connect(&_commandManager, &CommandManager::commandCompleted, [this](bool, QString, QString pastParticiple)
     {
         // Commands might set the phase and neglect to unset it
         _graphModel->mutableGraph().clearPhase();
@@ -648,7 +648,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     connect(_layoutThread.get(), &LayoutThread::executed, _graphQuickItem, &GraphQuickItem::onLayoutChanged);
 
-    connect(&_graphModel->graph(), &Graph::graphWillChange, this, [this]
+    connect(&_graphModel->graph(), &Graph::graphWillChange, [this]
     {
         bool graphChangingWillChange = !_graphChanging;
         _graphChanging = true;
@@ -659,7 +659,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
         maybeEmitIdleChanged();
     });
 
-    connect(&_graphModel->graph(), &Graph::graphChanged, this, [this]
+    connect(&_graphModel->graph(), &Graph::graphChanged, [this]
     (const Graph*, bool changeOccurred)
     {
         bool graphChangingWillChange = _graphChanging;

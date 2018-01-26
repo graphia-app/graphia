@@ -96,12 +96,12 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
         switchToOverviewMode(false);
 
     connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphRenderer::onPreferenceChanged, Qt::DirectConnection);
-    connect(_graphModel, &GraphModel::visualsWillChange, this, [this]
+    connect(_graphModel, &GraphModel::visualsWillChange, [this]
     {
         disableSceneUpdate();
     });
 
-    connect(_graphModel, &GraphModel::visualsChanged, this, [this]
+    connect(_graphModel, &GraphModel::visualsChanged, [this]
     {
         updateText();
 
@@ -1045,11 +1045,11 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
                 item->window()->resetOpenGLState();
         };
 
-        connect(item, &QObject::destroyed, this, [this]
+        connect(item, &QObject::destroyed, [this]
         {
             std::unique_lock<std::mutex> lock(_resetOpenGLStateMutex);
             resetOpenGLState = []{};
-        }, Qt::DirectConnection);
+        });
     }
 
     auto graphQuickItem = qobject_cast<GraphQuickItem*>(item);

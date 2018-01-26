@@ -28,7 +28,7 @@ Application::Application(QObject *parent) :
     _urlTypeDetails(&_loadedPlugins),
     _pluginDetails(&_loadedPlugins)
 {
-    connect(&_auth, &Auth::stateChanged, this, [this]
+    connect(&_auth, &Auth::stateChanged, [this]
     {
         if(_auth.state())
             loadPlugins();

@@ -65,7 +65,6 @@ no-qenums,\
 no-non-pod-global-static,\
 connect-non-signal,\
 lambda-in-connect,\
-connect-3arg-lambda,\
 lambda-unique-connection,\
 thread-with-slots,\
 connect-not-normalized,\

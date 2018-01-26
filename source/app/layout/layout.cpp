@@ -33,7 +33,7 @@ LayoutThread::LayoutThread(GraphModel& graphModel,
     });
 
     connect(&graphModel.graph(), &Graph::graphChanged,
-    this, [this]
+    [this]
     {
         std::unique_lock<std::mutex> lock(_mutex);
         _layoutPotentiallyRequired = true;
@@ -247,7 +247,7 @@ void LayoutThread::addComponent(ComponentId componentId)
         auto layout = _layoutFactory->create(componentId, _intermediatePositions);
 
         connect(&_layoutFactory->settings(), &LayoutSettings::settingChanged,
-        this, [this]
+        [this]
         {
             std::unique_lock<std::mutex> innerLock(_mutex);
             _layoutPotentiallyRequired = true;

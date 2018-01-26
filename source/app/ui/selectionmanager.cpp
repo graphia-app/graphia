@@ -14,13 +14,13 @@ SelectionManager::SelectionManager(const GraphModel& graphModel) :
     _graphModel(&graphModel)
 {
     connect(&_graphModel->graph(), &Graph::nodeRemoved,
-    this, [this](const Graph*, NodeId nodeId)
+    [this](const Graph*, NodeId nodeId)
     {
        _deletedNodes.push_back(nodeId);
     });
 
     connect(&graphModel.graph(), &Graph::graphChanged,
-    this, [this]
+    [this]
     {
         if(!_deletedNodes.empty())
         {

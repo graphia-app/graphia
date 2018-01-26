@@ -87,11 +87,11 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     _name(std::move(name)),
     _plugin(plugin)
 {
-    connect(&_->_transformedGraph, &Graph::nodeRemoved, this, [this](const Graph*, NodeId nodeId)
+    connect(&_->_transformedGraph, &Graph::nodeRemoved, [this](const Graph*, NodeId nodeId)
     {
        _->_nodeVisuals[nodeId]._state = VisualFlags::None;
     });
-    connect(&_->_transformedGraph, &Graph::edgeRemoved, this, [this](const Graph*, EdgeId edgeId)
+    connect(&_->_transformedGraph, &Graph::edgeRemoved, [this](const Graph*, EdgeId edgeId)
     {
        _->_edgeVisuals[edgeId]._state = VisualFlags::None;
     });
