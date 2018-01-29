@@ -23,7 +23,7 @@ Watchdog::~Watchdog()
 void WatchdogWorker::reset()
 {
     using namespace std::chrono;
-    const auto timeout = 15s;
+    const auto timeout = 30s;
 
     if(_timer == nullptr)
     {
