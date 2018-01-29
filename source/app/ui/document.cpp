@@ -486,7 +486,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
     }
     else
     {
-        connect(_graphFileParserThread.get(), &ParserThread::success, /*this,*/ [this]
+        connect(_graphFileParserThread.get(), &ParserThread::success, [this]
         {
             _graphTransforms = sortedTransforms(_pluginInstance->defaultTransforms());
             _visualisations = _pluginInstance->defaultVisualisations();
