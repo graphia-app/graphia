@@ -21,16 +21,20 @@ static void normaliseColumnsColumnMajor(MatrixType &mclMatrix)
 {
     for(size_t column = 0; column<mclMatrix.columns(); column++)
     {
+        MatrixType::Iterator lelem=mclMatrix.begin(column);
         MatrixType::Iterator lend=mclMatrix.end(column);
 
+        if(lelem == lend)
+            continue;
+
         float value = 0.0f;
-        for(MatrixType::Iterator lelem=mclMatrix.begin(column); lelem!=lend; ++lelem)
+        for(lelem=mclMatrix.begin(column); lelem!=lend; ++lelem)
             value += lelem->value();
 
         Q_ASSERT(value > 0.0f);
         value = 1.0f / value;
 
-        for(MatrixType::Iterator lelem=mclMatrix.begin(column); lelem!=lend; ++lelem)
+        for(lelem=mclMatrix.begin(column); lelem!=lend; ++lelem)
             lelem->value() = lelem->value() * value;
     }
 }
