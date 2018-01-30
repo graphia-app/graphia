@@ -14,6 +14,7 @@
 #include <deque>
 
 class Graph;
+class IGraph;
 
 class NodeAttributeTableModel : public QAbstractTableModel
 {
@@ -23,6 +24,7 @@ class NodeAttributeTableModel : public QAbstractTableModel
 
 private:
     IDocument* _document = nullptr;
+    const IGraph* _graph = nullptr;
     const UserNodeData* _userNodeData = nullptr;
 
     enum Roles

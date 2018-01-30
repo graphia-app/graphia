@@ -16,6 +16,7 @@ void NodeAttributeTableModel::initialise(IDocument* document, UserNodeData* user
 {
     _document = document;
     _userNodeData = userNodeData;
+    _graph = &_document->graphModel()->graph();
 
     updateRoleNames();
 
@@ -168,7 +169,11 @@ void NodeAttributeTableModel::onUpdateComplete()
 void NodeAttributeTableModel::onGraphChanged(const Graph*, bool changeOccurred)
 {
     if(changeOccurred)
+    {
+        _graph->setPhase(tr("Attribute Table"));
         update();
+        _graph->clearPhase();
+    }
 }
 
 void NodeAttributeTableModel::updateRoleNames()

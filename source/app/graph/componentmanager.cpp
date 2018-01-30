@@ -365,6 +365,7 @@ void ComponentManager::onGraphChanged(const Graph* graph, bool changeOccurred)
     {
         graph->setPhase(tr("Componentising"));
         update(graph);
+        graph->clearPhase();
     }
 }
 
