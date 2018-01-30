@@ -68,10 +68,13 @@ void NodeAttributeTableModel::addRole(int role)
     std::unique_lock<std::mutex> lock;
 
     size_t index = role - (Qt::UserRole + 1);
-    _pendingData.insert(_pendingData.begin() + index, Column(rowCount()));
-    auto& column = _pendingData.at(index);
 
-    updateColumn(role, column);
+    if(index < _pendingData.size())
+        _pendingData.insert(_pendingData.begin() + index, {});
+    else
+        _pendingData.resize(index + 1);
+
+    updateColumn(role, _pendingData.at(index));
 
     QMetaObject::invokeMethod(this, "onUpdateComplete");
 }
