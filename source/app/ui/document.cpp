@@ -166,7 +166,7 @@ bool Document::commandIsCancellable() const
 
 bool Document::commandIsCancelling() const
 {
-    if(_graphFileParserThread != nullptr && _graphFileParserThread->cancelled())
+    if(!_loadComplete && _graphFileParserThread != nullptr && _graphFileParserThread->cancelled())
         return true;
 
     return _commandManager.commandIsCancelling();
@@ -573,6 +573,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     _loadComplete = true;
     emit commandInProgressChanged();
+    emit commandIsCancellingChanged();
     emit commandIsCancellableChanged();
     emit idleChanged();
     emit editableChanged();
