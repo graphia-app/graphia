@@ -63,48 +63,93 @@ QVariant NodeAttributeTableModel::dataValue(int row, int role) const
     return {};
 }
 
+void NodeAttributeTableModel::addRole(int role)
+{
+    std::unique_lock<std::mutex> lock;
+
+    size_t index = role - (Qt::UserRole + 1);
+    _pendingData.insert(_pendingData.begin() + index, Column(rowCount()));
+    auto& column = _pendingData.at(index);
+
+    updateColumn(role, column);
+
+    QMetaObject::invokeMethod(this, "onUpdateComplete");
+}
+
+void NodeAttributeTableModel::removeRole(int role)
+{
+    std::unique_lock<std::mutex> lock;
+
+    size_t index = role - (Qt::UserRole + 1);
+
+    Q_ASSERT(index < _pendingData.size());
+    _pendingData.erase(_pendingData.begin() + index);
+
+    QMetaObject::invokeMethod(this, "onUpdateComplete");
+}
+
+void NodeAttributeTableModel::updateRole(int role)
+{
+    std::unique_lock<std::mutex> lock;
+
+    size_t index = role - (Qt::UserRole + 1);
+
+    Q_ASSERT(index < _pendingData.size());
+    auto& column = _pendingData.at(index);
+
+    updateColumn(role, column);
+
+    QMetaObject::invokeMethod(this, "onUpdateRoleComplete", Q_ARG(int, role));
+}
+
+void NodeAttributeTableModel::updateColumn(int role, NodeAttributeTableModel::Column& column)
+{
+    column.resize(rowCount());
+
+    for(int row = 0; row < rowCount(); row++)
+    {
+        NodeId nodeId = _userNodeData->elementIdForRowIndex(row);
+
+        if(!_document->graphModel()->graph().containsNodeId(nodeId))
+        {
+            // The graph doesn't necessarily have a node for every row since
+            // it may have been transformed, leaving empty rows
+            column[row] = {};
+        }
+        else if(role == Roles::NodeIdRole)
+            column[row] = static_cast<int>(nodeId);
+        else if(role == Roles::NodeSelectedRole)
+            column[row] = _document->selectionManager()->nodeIsSelected(nodeId);
+        else
+            column[row] = dataValue(row, role);
+    }
+}
+
 void NodeAttributeTableModel::update()
 {
     std::unique_lock<std::mutex> lock;
-    //FIXME depending on the precise reasons for calling update(), it isn't
-    // necessarily required to regenerate all the data from scratch. e.g.
-    // if it's in response to a selection change, only the NodeSelectedRole
-    // actually needs to change, and probably begin/endResetModel can be
-    // avoided too
 
-    Table updatedData;
+    _pendingData.clear();
 
     for(int column = 0; column < _roleNames.size(); column++)
     {
         int role = Qt::UserRole + 1 + column;
 
-        updatedData.emplace_back(rowCount());
-        auto& dataColumn = updatedData.back();
-
-        for(int row = 0; row < rowCount(); row++)
-        {
-            NodeId nodeId = _userNodeData->elementIdForRowIndex(row);
-
-            if(!_document->graphModel()->graph().containsNodeId(nodeId))
-            {
-                // The graph doesn't necessarily have a node for every row since
-                // it may have been transformed, leaving empty rows
-                continue;
-            }
-
-            if(role == Roles::NodeIdRole)
-                dataColumn[row] = static_cast<int>(nodeId);
-            else if(role == Roles::NodeSelectedRole)
-                dataColumn[row] = _document->selectionManager()->nodeIsSelected(nodeId);
-            else
-                dataColumn[row] = dataValue(row, role);
-        }
+        _pendingData.emplace_back(rowCount());
+        updateColumn(role, _pendingData.back());
     }
 
-    _updatedDatas.emplace_back(std::move(updatedData));
-
-    // Notify the main thread that the data has changed
     QMetaObject::invokeMethod(this, "onUpdateComplete");
+}
+
+void NodeAttributeTableModel::onUpdateRoleComplete(int role)
+{
+    std::unique_lock<std::mutex> lock;
+
+    emit layoutAboutToBeChanged();
+    int column = role - (Qt::UserRole + 1);
+    _data.at(column) = _pendingData.at(column);
+    emit layoutChanged();
 }
 
 void NodeAttributeTableModel::onUpdateComplete()
@@ -112,8 +157,8 @@ void NodeAttributeTableModel::onUpdateComplete()
     std::unique_lock<std::mutex> lock;
 
     beginResetModel();
-    _cachedData = std::move(_updatedDatas.front());
-    _updatedDatas.pop_front();
+    _data = _pendingData;
+    emit columnNamesChanged();
     endResetModel();
 }
 
@@ -125,7 +170,6 @@ void NodeAttributeTableModel::onGraphChanged(const Graph*, bool changeOccurred)
 
 void NodeAttributeTableModel::updateRoleNames()
 {
-    // Regenerate rolenames
     _roleNames.clear();
     _roleNames.insert(Roles::NodeIdRole, "nodeId");
     _roleNames.insert(Roles::NodeSelectedRole, "nodeSelected");
@@ -139,8 +183,6 @@ void NodeAttributeTableModel::updateRoleNames()
     }
 
     _columnCount = _columnNames.size();
-
-    emit columnNamesChanged();
 }
 
 bool NodeAttributeTableModel::columnIsCalculated(const QString& columnName) const
@@ -176,7 +218,7 @@ void NodeAttributeTableModel::onAttributeAdded(const QString& name)
     if(!u::contains(_roleNames.values(), name.toUtf8()))
     {
         updateRoleNames();
-        update();
+        addRole(_roleNames.key(name.toUtf8()));
     }
 }
 
@@ -184,8 +226,9 @@ void NodeAttributeTableModel::onAttributeRemoved(const QString& name)
 {
     if(u::contains(_roleNames.values(), name.toUtf8()))
     {
+        int role = _roleNames.key(name.toUtf8());
         updateRoleNames();
-        update();
+        removeRole(role);
     }
 }
 
@@ -202,9 +245,9 @@ int NodeAttributeTableModel::columnCount(const QModelIndex&) const
 QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
 {
     size_t column = (role - Qt::UserRole - 1);
-    const auto& dataColumn = _cachedData.at(column);
+    const auto& dataColumn = _data.at(column);
 
-    if(column >= _cachedData.size())
+    if(column >= _data.size())
         return {};
 
     size_t row = index.row();
@@ -217,5 +260,5 @@ QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
 
 void NodeAttributeTableModel::onSelectionChanged()
 {
-    update();
+    updateRole(NodeSelectedRole);
 }

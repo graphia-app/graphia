@@ -10,7 +10,6 @@
 #include <QHash>
 #include <QObject>
 
-#include <set>
 #include <mutex>
 #include <deque>
 
@@ -39,8 +38,8 @@ private:
     using Column = std::vector<QVariant>;
     using Table = std::vector<Column>;
 
-    std::deque<Table> _updatedDatas; // Update occurs here, before being moved to _cachedData
-    Table _cachedData;
+    Table _pendingData; // Update actually occurs here, before being copied to _data on the UI thread
+    Table _data;
 
     QStringList _columnNames;
     int _columnCount = 0;
@@ -50,9 +49,14 @@ protected:
     virtual QVariant dataValue(int row, int role) const;
 
 private:
+    void addRole(int role);
+    void removeRole(int role);
+    void updateRole(int role);
+    void updateColumn(int role, Column& column);
     void update();
 
 private slots:
+    void onUpdateRoleComplete(int role);
     void onUpdateComplete();
     void onGraphChanged(const Graph*, bool);
 
