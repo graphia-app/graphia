@@ -159,6 +159,14 @@ namespace u
 
         return sample;
     }
+
+    template<typename T, template<typename, typename...> class C, typename... Args>
+    std::vector<T> vectorFrom(const C<T, Args...>& container)
+    {
+        std::vector<T> values;
+        std::copy(container.begin(), container.end(), std::back_inserter(values));
+        return values;
+    }
 } // namespace u
 
 #endif // CONTAINER_H
