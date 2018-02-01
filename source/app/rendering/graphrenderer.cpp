@@ -967,7 +967,8 @@ NodeId GraphRenderer::computeBestFocusNodeId(GraphQuickItem* graphQuickItem, flo
         radius = 0.0f;
         return {};
     }
-    else if(nodeIds.size() == 1)
+
+    if(nodeIds.size() == 1)
     {
         radius = GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS;
         return nodeIds.front();
