@@ -297,11 +297,8 @@ void GraphComponentScene::pan(NodeId clickedNodeId, const QPoint& start, const Q
 void GraphComponentScene::moveFocusToNode(NodeId nodeId, float radius)
 {
     // Do nothing if node already focused
-    if(componentRenderer()->focusNodeId() == nodeId &&
-       radius == componentRenderer()->camera()->distance())
-    {
+    if(componentRenderer()->focusedOnNodeAtRadius(nodeId, radius))
         return;
-    }
 
     ComponentId componentId = _graphRenderer->graphModel()->graph().componentIdOfNode(nodeId);
     Q_ASSERT(!componentId.isNull());

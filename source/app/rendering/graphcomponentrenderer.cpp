@@ -562,6 +562,11 @@ QVector3D GraphComponentRenderer::focusPosition() const
     return _graphModel->nodePositions().getScaledAndSmoothed(_viewData._focusNodeId);
 }
 
+bool GraphComponentRenderer::focusedOnNodeAtRadius(NodeId nodeId, float radius) const
+{
+    return focusNodeId() == nodeId && zoomDistanceForRadius(radius) == camera()->distance();
+}
+
 bool GraphComponentRenderer::trackingCentreOfComponent() const
 {
     return _viewData._focusNodeId.isNull();

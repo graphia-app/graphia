@@ -75,6 +75,8 @@ public:
     void enableFocusTracking() { _trackFocus = true; }
     void disableFocusTracking() { _trackFocus = false; }
 
+    bool focusedOnNodeAtRadius(NodeId nodeId, float radius) const;
+
     bool trackingCentreOfComponent() const;
 
     void resetView();
