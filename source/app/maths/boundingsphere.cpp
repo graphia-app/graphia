@@ -19,7 +19,7 @@ static float maxDistanceFromCentre(const QVector3D centre, const std::vector<QVe
 {
     float radius = 0.0f;
 
-    for(auto& point : points)
+    for(const auto& point : points)
     {
         float lengthSquared = (centre - point).lengthSquared();
         if(lengthSquared > radius)
@@ -35,7 +35,7 @@ BoundingSphere::BoundingSphere(const std::vector<QVector3D>& points) :
     // This is only an approximation; Welzl's algorithm will get a better result
 
     // Find barycentre
-    for(auto& point : points)
+    for(const auto& point : points)
         _centre += point;
     _centre /= points.size();
 
