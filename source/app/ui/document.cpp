@@ -1030,6 +1030,9 @@ void Document::selectPrevFound()
 void Document::selectAllFound()
 {
     _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), _searchManager->foundNodeIds()));
+
+    if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
+        _graphQuickItem->moveFocusToNodes(u::vectorFrom(_searchManager->foundNodeIds()));
 }
 
 void Document::updateFoundIndex(bool reselectIfInvalidated)
