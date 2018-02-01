@@ -27,7 +27,7 @@ class GraphComponentRenderer
 {
 public:
     static const float MINIMUM_ZOOM_DISTANCE;
-    static const float COMFORTABLE_ZOOM_DISTANCE;
+    static const float COMFORTABLE_ZOOM_RADIUS;
 
     GraphComponentRenderer() {}
 
@@ -59,7 +59,7 @@ public:
     QMatrix4x4 projectionMatrix() const;
     QMatrix4x4 screenshotTileProjectionMatrix(float tileSize) const;
 
-    void moveFocusToNode(NodeId nodeId, float cameraDistance = -1.0f);
+    void moveFocusToNode(NodeId nodeId, float radius = -1.0f);
     void moveFocusToCentreOfComponent();
     void moveFocusToNodeClosestCameraVector();
     void moveFocusToPositionAndRadius(const QVector3D& position, float radius,
@@ -154,14 +154,14 @@ private:
 
     QMatrix4x4 subViewportMatrix() const;
 
-    void centreNodeInViewport(NodeId nodeId, float cameraDistance = -1.0f);
+    void centreNodeInViewport(NodeId nodeId, float zoomDistance = -1.0f);
     void centrePositionInViewport(const QVector3D& focus,
-                                  float cameraDistance = -1.0f,
+                                  float zoomDistance = -1.0f,
                                   // Odd constructor makes a null quaternion
                                   const QQuaternion rotation = QQuaternion(QVector4D()));
 
     float _entireComponentZoomDistance = 0.0f;
-    float zoomDistanceForRadius(float radius);
+    float zoomDistanceForRadius(float radius) const;
     void updateFocusPosition();
     void updateEntireComponentZoomDistance();
 };

@@ -47,7 +47,7 @@ public:
 
     void pan(NodeId clickedNodeId, const QPoint &start, const QPoint &end);
 
-    void moveFocusToNode(NodeId nodeId, float cameraDistance = -1.0f);
+    void moveFocusToNode(NodeId nodeId, float radius = -1.0f);
 
     GraphComponentRenderer* componentRenderer() const;
     GraphComponentRenderer* transitioningComponentRenderer() const;

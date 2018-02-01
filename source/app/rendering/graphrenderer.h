@@ -280,7 +280,7 @@ private:
 
     bool transitionActive() const;
 
-    void moveFocusToNode(NodeId nodeId, float cameraDistance = -1.0f);
+    void moveFocusToNode(NodeId nodeId, float radius = -1.0f);
     void moveFocusToComponent(ComponentId componentId);
 
     void createGPUGlyphData(const QString& text, const QColor& textColor, const TextAlignment& textAlignment,

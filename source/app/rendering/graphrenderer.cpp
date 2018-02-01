@@ -525,16 +525,16 @@ bool GraphRenderer::transitionActive() const
     return _transition.active() || _scene->transitionActive();
 }
 
-void GraphRenderer::moveFocusToNode(NodeId nodeId, float cameraDistance)
+void GraphRenderer::moveFocusToNode(NodeId nodeId, float radius)
 {
     if(mode() == Mode::Component)
-        _graphComponentScene->moveFocusToNode(nodeId, cameraDistance);
+        _graphComponentScene->moveFocusToNode(nodeId, radius);
     else if(mode() == Mode::Overview)
     {
         // To focus on a node, we need to be in component mode
         auto componentId = _graphModel->graph().componentIdOfNode(nodeId);
         auto* newComponentRenderer = componentRendererForId(componentId);
-        newComponentRenderer->moveFocusToNode(nodeId, cameraDistance);
+        newComponentRenderer->moveFocusToNode(nodeId, radius);
         newComponentRenderer->saveViewData();
         newComponentRenderer->resetView();
 
@@ -1066,7 +1066,7 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
     ComponentId focusComponentId = graphQuickItem->desiredFocusComponentId();
 
     if(!focusNodeId.isNull())
-        moveFocusToNode(focusNodeId, GraphComponentRenderer::COMFORTABLE_ZOOM_DISTANCE);
+        moveFocusToNode(focusNodeId, GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS);
     else if(!focusComponentId.isNull())
     {
         if(mode() == Mode::Overview)
