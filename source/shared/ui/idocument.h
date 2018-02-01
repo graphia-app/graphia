@@ -4,6 +4,8 @@
 #include "shared/graph/elementid.h"
 #include "shared/utils/flags.h"
 
+#include <vector>
+
 class IGraphModel;
 class ISelectionManager;
 class ICommandManager;
@@ -50,6 +52,7 @@ public:
         Flags<MessageBoxButton> buttons = MessageBoxButton::Ok) = 0;
 
     virtual void moveFocusToNode(NodeId nodeId) = 0;
+    virtual void moveFocusToNodes(const std::vector<NodeId>& nodeIds) = 0;
 };
 
 #endif // IDOCUMENT_H

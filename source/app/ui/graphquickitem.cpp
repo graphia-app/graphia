@@ -147,15 +147,21 @@ bool GraphQuickItem::overviewModeSwitchPending()
 
 void GraphQuickItem::moveFocusToNode(NodeId nodeId)
 {
-    _desiredFocusNodeId = nodeId;
+    _desiredFocusNodeIds = {nodeId};
     update();
 }
 
-NodeId GraphQuickItem::desiredFocusNodeId()
+void GraphQuickItem::moveFocusToNodes(const std::vector<NodeId>& nodeIds)
 {
-    NodeId nodeId = _desiredFocusNodeId;
-    _desiredFocusNodeId.setToNull();
-    return nodeId;
+    _desiredFocusNodeIds = nodeIds;
+    update();
+}
+
+std::vector<NodeId> GraphQuickItem::desiredFocusNodeIds()
+{
+    auto nodeIds = _desiredFocusNodeIds;
+    _desiredFocusNodeIds.clear();
+    return nodeIds;
 }
 
 void GraphQuickItem::moveFocusToComponent(ComponentId componentId)

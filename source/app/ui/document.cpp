@@ -990,6 +990,11 @@ void Document::moveFocusToNode(NodeId nodeId)
     _graphQuickItem->moveFocusToNode(nodeId);
 }
 
+void Document::moveFocusToNodes(const std::vector<NodeId>& nodeIds)
+{
+    _graphQuickItem->moveFocusToNodes(nodeIds);
+}
+
 void Document::setSaveRequired()
 {
     if(!_loadComplete)

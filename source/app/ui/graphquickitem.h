@@ -65,7 +65,8 @@ public:
     bool overviewModeSwitchPending();
 
     void moveFocusToNode(NodeId nodeId);
-    NodeId desiredFocusNodeId();
+    void moveFocusToNodes(const std::vector<NodeId>& nodeIds);
+    std::vector<NodeId> desiredFocusNodeIds();
 
     void moveFocusToComponent(ComponentId componentId);
     ComponentId desiredFocusComponentId();
@@ -102,7 +103,7 @@ private:
 
     bool _viewResetPending = false;
     bool _overviewModeSwitchPending = false;
-    NodeId _desiredFocusNodeId;
+    std::vector<NodeId> _desiredFocusNodeIds;
     ComponentId _desiredFocusComponentId;
 
     bool _initialised = false;

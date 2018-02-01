@@ -958,6 +958,53 @@ void GraphRenderer::updateScene()
     }
 }
 
+NodeId GraphRenderer::computeBestFocusNodeId(GraphQuickItem* graphQuickItem, float& radius)
+{
+    auto nodeIds = graphQuickItem->desiredFocusNodeIds();
+
+    if(nodeIds.empty())
+    {
+        radius = 0.0f;
+        return {};
+    }
+    else if(nodeIds.size() == 1)
+    {
+        radius = GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS;
+        return nodeIds.front();
+    }
+
+    // If the request is for more than 1 node, then find their barycentre and
+    // pick the closest node to where ever this happens to be
+    std::vector<QVector3D> points(nodeIds.size());
+    size_t i = 0;
+    for(auto nodeId : nodeIds)
+    {
+        auto nodePosition = _graphModel->nodePositions().getScaledAndSmoothed(nodeId);
+        points.at(i++) = nodePosition;
+    }
+
+    BoundingSphere boundingSphere(points);
+    QVector3D centre = boundingSphere.centre();
+    float minDistance = std::numeric_limits<float>::max();
+    NodeId closestToCentreNodeId;
+    for(auto nodeId : nodeIds)
+    {
+        auto nodePosition = _graphModel->nodePositions().getScaledAndSmoothed(nodeId);
+        float distance = (centre - nodePosition).length();
+
+        if(distance < minDistance)
+        {
+            minDistance = distance;
+            closestToCentreNodeId = nodeId;
+        }
+    }
+
+    radius = GraphComponentRenderer::maxNodeDistanceFromPoint(*_graphModel,
+        _graphModel->nodePositions().getScaledAndSmoothed(closestToCentreNodeId), nodeIds);
+
+    return closestToCentreNodeId;
+}
+
 QOpenGLFramebufferObject* GraphRenderer::createFramebufferObject(const QSize& size)
 {
     // Piggy back our FBO resize on to Qt's
@@ -1062,11 +1109,12 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
     if(graphQuickItem->overviewModeSwitchPending())
         switchToOverviewMode();
 
-    NodeId focusNodeId = graphQuickItem->desiredFocusNodeId();
+    float radius = GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS;
+    NodeId focusNodeId = computeBestFocusNodeId(graphQuickItem, radius);
     ComponentId focusComponentId = graphQuickItem->desiredFocusComponentId();
 
     if(!focusNodeId.isNull())
-        moveFocusToNode(focusNodeId, GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS);
+        moveFocusToNode(focusNodeId, radius);
     else if(!focusComponentId.isNull())
     {
         if(mode() == Mode::Overview)

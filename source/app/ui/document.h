@@ -108,6 +108,7 @@ public: // IDocument
         Flags<MessageBoxButton> buttons = MessageBoxButton::Ok) override;
 
     void moveFocusToNode(NodeId nodeId) override;
+    void moveFocusToNodes(const std::vector<NodeId>& nodeIds) override;
 
 public:
     static QColor contrastingColorForBackground();
