@@ -974,6 +974,32 @@ NodeId GraphRenderer::computeBestFocusNodeId(GraphQuickItem* graphQuickItem, flo
         return nodeIds.front();
     }
 
+    ComponentIdSet componentIds;
+    for(auto nodeId : nodeIds)
+        componentIds.insert(_graphModel->graph().componentIdOfNode(nodeId));
+
+    if(componentIds.size() > 1)
+    {
+        // We want to focus on multiple nodes, but they span multiple components
+        if(mode() == Mode::Component)
+        {
+            // Prune the nodeIds we consider for focus down to only those in the focused component
+            auto focusedComponentId = _graphComponentScene->componentId();
+
+            nodeIds.erase(std::remove_if(nodeIds.begin(), nodeIds.end(),
+            [this, focusedComponentId](auto nodeId)
+            {
+                return _graphModel->graph().componentIdOfNode(nodeId) != focusedComponentId;
+            }));
+        }
+        else
+        {
+            // Just stay in overview mode
+            radius = 0.0f;
+            return {};
+        }
+    }
+
     // If the request is for more than 1 node, then find their barycentre and
     // pick the closest node to where ever this happens to be
     std::vector<QVector3D> points(nodeIds.size());
