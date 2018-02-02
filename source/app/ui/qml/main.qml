@@ -1298,7 +1298,7 @@ ApplicationWindow
             ToolBarSeparator {}
             ToolButton
             {
-                id: pauseLayoutBtn
+                id: pauseLayoutButton
                 action: pauseLayoutAction
                 tooltip: ""
             }
@@ -1560,8 +1560,9 @@ ApplicationWindow
     Hubble
     {
         title: qsTr("Resume/Pause Layout")
-        alignment: Qt.AlignRight | Qt.AlignBottom
-        target: pauseLayoutBtn
+        alignment: Qt.AlignBottom | Qt.AlignLeft
+        edges: Qt.LeftEdge | Qt.TopEdge
+        target: pauseLayoutButton
         tooltipMode: true
         RowLayout
         {

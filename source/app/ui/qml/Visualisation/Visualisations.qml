@@ -127,7 +127,8 @@ Item
     Hubble
     {
         title: qsTr("Add Visualisation")
-        alignment: Qt.AlignLeft | Qt.AlignTop
+        alignment: Qt.AlignRight | Qt.AlignTop
+        edges: Qt.RightEdge | Qt.BottomEdge
         target: addVisualisationButton
         tooltipMode: true
         RowLayout

@@ -19,7 +19,7 @@ Rectangle
     property var selectPreviousAction: _selectPreviousAction
     property var selectNextAction: _selectNextAction
 
-    property var hasTextFocus: findField.focus
+    property bool hasTextFocus: findField.focus
 
     property string lastSearchedAttributeName
 

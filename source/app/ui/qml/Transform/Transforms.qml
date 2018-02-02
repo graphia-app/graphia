@@ -120,7 +120,8 @@ Item
     Hubble
     {
         title: qsTr("Add Transform")
-        alignment: Qt.AlignLeft | Qt.AlignBottom
+        alignment: Qt.AlignRight | Qt.AlignBottom
+        edges: Qt.RightEdge | Qt.TopEdge
         target: addTransformButton
         tooltipMode: true
         RowLayout

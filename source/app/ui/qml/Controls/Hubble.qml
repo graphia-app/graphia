@@ -15,7 +15,10 @@ Item
 
     property string title: ""
     property var target
-    property int alignment: Qt.AlignLeft
+
+    property int alignment: Qt.AlignLeft | Qt.AlignTop
+    property int edges: Qt.LeftEdge | Qt.TopEdge
+
     property bool displayNext: false
     property bool displayClose: false
     property bool tooltipMode: false
@@ -59,6 +62,7 @@ Item
     {
         if(misc.disableHubbles && tooltipMode)
             visible = false;
+
         if(visible)
         {
             if(target)
@@ -232,7 +236,7 @@ Item
                     }
 
                     // Insert the mouse capture shim
-                    // Heirarchy was parent->target
+                    // Hierarchy was parent->target
                     // Add mouseCapture below parent and reparent the child items to mousecapture
                     // results in: parent->mouseCapture->target
                     // This allows mouseCapture to access all mouse hover events!
@@ -292,48 +296,23 @@ Item
     {
         var point = {};
 
-        switch(alignment)
-        {
-        case Qt.AlignLeft:
-            point = target.mapToItem(parent, 0, target.height * 0.5);
-            root.x = point.x - childrenRect.width - _padding;
-            root.y = point.y - (childrenRect.height * 0.5);
-            break;
-        case Qt.AlignRight:
-            point = target.mapToItem(parent, target.width, target.height * 0.5);
-            root.x = point.x + _padding
-            root.y = point.y - (childrenRect.height * 0.5);
-            break;
-        case Qt.AlignTop:
-            point = target.mapToItem(parent, target.width * 0.5, 0);
-            root.x = point.x - (childrenRect.width * 0.5);
-            root.y = point.y - childrenRect.height - _padding;
-            break;
-        case Qt.AlignBottom:
-            point = target.mapToItem(parent, target.width * 0.5, target.height);
-            root.x = point.x - (childrenRect.width * 0.5);
-            root.y = point.y + _padding;
-            break;
-        case Qt.AlignLeft | Qt.AlignTop:
-            point = target.mapToItem(parent, 0, 0);
-            root.x = point.x - childrenRect.width - _padding;
-            root.y = point.y - childrenRect.height - _padding;
-            break;
-        case Qt.AlignRight | Qt.AlignTop:
-            point = target.mapToItem(parent, target.width, 0);
-            root.x = point.x + _padding
-            root.y = point.y - _padding;
-            break;
-        case Qt.AlignLeft | Qt.AlignBottom:
-            point = target.mapToItem(parent, 0, target.height);
-            root.x = point.x - childrenRect.width - _padding;
-            root.y = point.y + _padding;
-            break;
-        case Qt.AlignRight | Qt.AlignBottom:
-            point = target.mapToItem(parent, target.width, target.height);
-            root.x = point.x + _padding;
-            root.y = point.y + _padding;
-            break;
-        }
+        if((alignment & Qt.AlignLeft) && (edges & Qt.LeftEdge))
+            root.x = target.mapToItem(parent, 0.0, 0.0).x;
+        else if((alignment & Qt.AlignLeft) && (edges & Qt.RightEdge))
+            root.x = target.mapToItem(parent, target.width, 0.0).x + _padding;
+        else if((alignment & Qt.AlignRight) && (edges & Qt.RightEdge))
+            root.x = target.mapToItem(parent, target.width, 0.0).x - childrenRect.width;
+        else if((alignment & Qt.AlignRight) && (edges & Qt.LeftEdge))
+            root.x = target.mapToItem(parent, 0.0, 0.0).x - childrenRect.width - _padding;
+
+        if((alignment & Qt.AlignTop) && (edges & Qt.TopEdge))
+            root.y = target.mapToItem(parent, 0.0, 0.0).y;
+        else if((alignment & Qt.AlignTop) && (edges & Qt.BottomEdge))
+            root.y = target.mapToItem(parent, 0.0, 0.0).y - childrenRect.height - _padding;
+        else if((alignment & Qt.AlignBottom) && (edges & Qt.BottomEdge))
+            root.y = target.mapToItem(parent, 0.0, target.height).y - childrenRect.height;
+        else if((alignment & Qt.AlignBottom) && (edges & Qt.TopEdge))
+            root.y = target.mapToItem(parent, 0.0, target.height).y + _padding;
+
     }
 }

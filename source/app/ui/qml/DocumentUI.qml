@@ -1371,27 +1371,14 @@ Item
                           "Click next to learn about searching a graph")
                 }
             }
-            onNextClicked:
-            {
-                if(root.pluginPoppedOut)
-                {
-                    pluginWindow.requestActivate();
-                    pluginHubble.target = null;
-                    pluginHubble.x = Qt.binding(function() { return (root.width - pluginHubble.width) * 0.5; });
-                    pluginHubble.y = root.height - pluginHubble.height - 10;
-                }
-                else
-                {
-                    pluginHubble.target = plugin.content.toolStrip;
-                }
-            }
         }
 
         Hubble
         {
             id: pluginHubble
             title: qsTr("Node Attributes")
-            alignment: Qt.AlignTop
+            x: 10
+            y: graph.height - height - 10
             RowLayout
             {
                 Text
@@ -1413,7 +1400,8 @@ Item
         {
             title: qsTr("Transforms")
             target: transforms
-            alignment: Qt.AlignLeft | Qt.AlignBottom
+            alignment: Qt.AlignRight | Qt.AlignBottom
+            edges: Qt.RightEdge | Qt.TopEdge
             RowLayout
             {
                 spacing: 10
@@ -1451,7 +1439,8 @@ Item
         {
             title: qsTr("Visualisations")
             target: visualisations
-            alignment: Qt.AlignLeft | Qt.AlignTop
+            alignment: Qt.AlignRight | Qt.AlignTop
+            edges: Qt.RightEdge | Qt.BottomEdge
             RowLayout
             {
                 spacing: 10
@@ -1484,8 +1473,8 @@ Item
         Hubble
         {
             title: qsTr("Search Graph")
-            target: find
-            alignment: Qt.AlignBottom | Qt.AlignRight
+            x: 10
+            y: !findPanel.hidden ? find.y + find.height + 10 : 10
             RowLayout
             {
                 Text
