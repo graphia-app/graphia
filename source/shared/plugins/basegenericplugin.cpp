@@ -77,11 +77,11 @@ bool BaseGenericPluginInstance::load(const QByteArray& data, int dataVersion,
     if(!_userNodeData.load(jsonObject["userNodeData"], progressFn))
         return false;
 
-    if(!u::contains(jsonObject, "edgeNodeData") || !jsonObject["edgeNodeData"].is_object())
+    if(!u::contains(jsonObject, "userEdgeData") || !jsonObject["userEdgeData"].is_object())
         return false;
 
     graph.setPhase(QObject::tr("User Edge Data"));
-    if(!_userEdgeData.load(jsonObject["edgeNodeData"], progressFn))
+    if(!_userEdgeData.load(jsonObject["userEdgeData"], progressFn))
         return false;
 
     return true;
