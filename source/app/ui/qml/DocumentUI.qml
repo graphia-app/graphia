@@ -102,6 +102,9 @@ Item
         (!hasBeenSaved || document.saveRequired || plugin.saveRequired)
 
     property int numNodesSelected: document.numNodesSelected
+    property var enrichmentTableModels: document.listEnrichmentTableModels
+    property var attributeGroupNames: document.attributeGroupNames
+
 
     property color contrastingColor: document.contrastingColor
 
@@ -333,6 +336,10 @@ Item
     function cancelCommand() { document.cancelCommand(); }
 
     function dumpGraph() { document.dumpGraph(); }
+    function performEnrichment(selectedAttributeGroupsAgainst, selectedAttributeGroup)
+    {
+        document.performEnrichment(selectedAttributeGroupsAgainst, selectedAttributeGroup);
+    }
 
     function copyImageToClipboard()
     {
@@ -1245,6 +1252,7 @@ Item
 
     signal loadComplete(url fileUrl, bool success)
     signal pluginLoadComplete()
+    signal enrichmentAnalysisComplete()
 
     property var comandProgressSamples: []
     property int commandSecondsRemaining
@@ -1317,6 +1325,11 @@ Item
         onLoadComplete:
         {
             root.loadComplete(url, success);
+        }
+
+        onEnrichmentAnalysisComplete:
+        {
+            enrichmentAnalysisComplete();
         }
     }
 

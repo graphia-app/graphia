@@ -416,21 +416,6 @@ QVector<QColor> CorrelationPluginInstance::nodeColors()
     return colors;
 }
 
-QStringList CorrelationPluginInstance::attributeGroupNames()
-{
-    // Attribute Groups will return a list of attributes that are not
-    // floats.
-    QStringList list;
-    auto& attributeNames = graphModel()->attributeNames();
-    for(const auto& name : attributeNames)
-    {
-        auto* attribute = graphModel()->attributeByName(name);
-        if(attribute->valueType() != ValueType::Float)
-            list.append(name);
-    }
-    return list;
-}
-
 QStringList CorrelationPluginInstance::columnNames()
 {
     QStringList list;
@@ -617,25 +602,6 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
     _missingDataReplacementValue = jsonObject["missingDataReplacementValue"];
 
     return true;
-}
-
-void CorrelationPluginInstance::performEnrichment(QStringList selectedAttributesAgainst, QString selectedAttribute)
-{
-    document()->commandManager()->executeOnce(
-        {
-            QString(tr("Perform Enrichment Analysis")),
-            QString(tr("Performing Enrichment Analysis")),
-            QString(tr("Enrichment Analysis Complete"))
-        },
-    [this, selectedAttributesAgainst](Command& command) mutable
-    {
-        auto result = EnrichmentCalculator::overRepAgainstEachAttribute(selectionManager()->selectedNodes(),
-                                                                        selectedAttributesAgainst[0],
-                                                                        graphModel(), command);
-        _enrichmentTableModel.setTableData(result);
-        emit enrichmentAnalysisComplete();
-        return true;
-    });
 }
 
 CorrelationPlugin::CorrelationPlugin()

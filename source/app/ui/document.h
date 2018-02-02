@@ -17,6 +17,7 @@
 #include "ui/findoptions.h"
 
 #include "thirdparty/qt-qml-models/QQmlVariantListModel.h"
+#include "attributes/enrichmenttablemodel.h"
 
 #include <QQuickItem>
 #include <QString>
@@ -61,6 +62,8 @@ class Document : public QObject, public IDocument
 
     Q_PROPERTY(bool graphChanging READ graphChanging NOTIFY graphChangingChanged)
 
+    Q_PROPERTY(QList<QObject*> listEnrichmentTableModels READ listEnrichmentTableModels NOTIFY enrichmentTableModelsChanged)
+
     Q_PROPERTY(bool commandInProgress READ commandInProgress NOTIFY commandInProgressChanged)
     Q_PROPERTY(int commandProgress READ commandProgress NOTIFY commandProgressChanged)
     Q_PROPERTY(QString commandVerb READ commandVerb NOTIFY commandVerbChanged)
@@ -89,6 +92,8 @@ class Document : public QObject, public IDocument
     Q_PROPERTY(int numNodesFound READ numNodesFound NOTIFY numNodesFoundChanged)
 
     Q_PROPERTY(int numNodesSelected READ numNodesSelected NOTIFY numNodesSelectedChanged)
+    Q_PROPERTY(QStringList attributeGroupNames READ attributeGroupNames NOTIFY attributeGroupNamesChanged)
+
 
     Q_PROPERTY(QStringList bookmarks READ bookmarks NOTIFY bookmarksChanged)
 
@@ -193,6 +198,8 @@ private:
     DeferredExecutor _deferredExecutor;
     semaphore _executed;
 
+    std::vector<std::unique_ptr<EnrichmentTableModel>> enrichmentTableModels;
+
     std::vector<NodeId> _foundNodeIds;
     bool _foundItValid = false;
     std::vector<NodeId>::const_iterator _foundIt = _foundNodeIds.begin();
@@ -235,10 +242,14 @@ private:
     void selectAndFocusNode(NodeId nodeId);
     void selectAndFocusNodes(const std::vector<NodeId>& nodeIds);
     void selectAndFocusNodes(const NodeIdSet& nodeIds);
+    void selectFoundNode(NodeId newFound);
+    QList<QObject*> listEnrichmentTableModels();
 
     void setSaveRequired();
 
     int numNodesSelected() const;
+
+    QStringList attributeGroupNames();
 
     void initialiseLayoutSettingsModel();
 
@@ -297,7 +308,11 @@ signals:
 
     void taskAddedToExecutor();
 
+    void enrichmentTableModelsChanged();
+    void enrichmentAnalysisComplete();
+
     void saveComplete(bool success, QUrl fileUrl);
+    void attributeGroupNamesChanged();
 
 public:
     // Main QML interface
@@ -400,6 +415,7 @@ public:
 
     Q_INVOKABLE void dumpGraph();
 
+    Q_INVOKABLE void performEnrichment(QStringList selectedAttributesAgainst, QString selectedAttribute);
 private slots:
     void onLoadProgress(int percentage);
     void onLoadComplete(const QUrl& url, bool success);

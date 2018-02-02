@@ -3,17 +3,23 @@ import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 
 import com.kajeka 1.0
-import "Controls"
+import "../Controls"
 
 Wizard
 {
     id: root
     minimumWidth: 640
     minimumHeight: 400
-    property var attributeGroups;
-    property var selectedAttributeGroupsAgainst: [];
-    property var selectedAttributeGroup: [];
-    finishEnabled: false;
+    property var attributeGroups
+    property var selectedAttributeGroupsAgainst: []
+    property var selectedAttributeGroup: []
+    finishEnabled: false
+
+    onAttributeGroupsChanged:
+    {
+        console.log("Attribute Groups");
+        console.log(attributeGroups);
+    }
 
     Item
     {

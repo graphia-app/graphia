@@ -14,6 +14,7 @@ import "../../../shared/ui/qml/Utils.js" as Utils
 import "Loading"
 import "Options"
 import "Controls"
+import "Enrichment"
 
 ApplicationWindow
 {
@@ -800,6 +801,17 @@ ApplicationWindow
 
     Action
     {
+        id: enrichmentAction
+        text: qsTr("Enrichment")
+        onTriggered:
+        {
+            if(currentDocument != undefined)
+                enrichmentWizard.show();
+        }
+    }
+
+    Action
+    {
         id: pauseLayoutAction
         iconName:
         {
@@ -1197,6 +1209,17 @@ ApplicationWindow
         }
         Menu
         {
+            title: qsTr("&Analyses")
+            Menu
+            {
+                title: qsTr("Enrichment")
+                enabled: currentDocument != undefined
+                MenuItem { action: enrichmentAction }
+                MenuItem { action: enrichmentResultsAction }
+            }
+        }
+        Menu
+        {
             id: bookmarksMenu
 
             title: qsTr("&Bookmarks")
@@ -1389,6 +1412,25 @@ ApplicationWindow
     onCurrentDocumentChanged:
     {
         updatePluginMenus();
+        if(currentDocument != null)
+            enrichmentResults.models = currentDocument.enrichmentTableModels;
+    }
+
+    EnrichmentResults
+    {
+        id: enrichmentResults
+        models: currentDocument ? currentDocument.enrichmentTableModels : []
+    }
+
+    EnrichmentWizard
+    {
+        id: enrichmentWizard
+        attributeGroups: currentDocument ? currentDocument.attributeGroupNames : []
+        onAccepted:
+        {
+            if(currentDocument != null)
+                currentDocument.performEnrichment(selectedAttributeGroupsAgainst, selectedAttributeGroup)
+        }
     }
 
     Connections
@@ -1396,6 +1438,12 @@ ApplicationWindow
         target: currentDocument
         onPluginLoadComplete: updatePluginMenus();
         onPluginPoppedOutChanged: updatePluginMenus();
+        onEnrichmentTableModelsChanged:
+        {
+            console.log("Table Models Changed!");
+            enrichmentResults.models = currentDocument.enrichmentTableModels;
+        }
+        onEnrichmentAnalysisComplete: { enrichmentResults.visible = true; }
     }
 
     toolBar: ToolBar

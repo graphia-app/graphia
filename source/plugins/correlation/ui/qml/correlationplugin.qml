@@ -16,24 +16,6 @@ PluginContent
     anchors.fill: parent
     minimumHeight: 320
 
-    Connections
-    {
-        target: plugin.model
-        onEnrichmentAnalysisComplete:
-        {
-            var component = Qt.createComponent("EnrichmentResults.qml");
-            var enrichmentTableView = component.createObject(root);
-            enrichmentTableView.visible = true;
-        }
-    }
-
-    EnrichmentWizard
-    {
-        id: enrichmentWizard
-        attributeGroups: plugin.model.attributeGroupNames
-        onAccepted: plugin.model.performEnrichment(selectedAttributeGroupsAgainst, selectedAttributeGroup)
-    }
-
     Action
     {
         id: toggleUiOrientationAction
@@ -43,17 +25,6 @@ PluginContent
         checked: true
 
         onCheckedChanged: { root.saveRequired = true; }
-    }
-
-    Action
-    {
-        id: openEnrichment
-        text: qsTr("Enrichment")
-        iconName: "list-add"
-
-        onTriggered: {
-            enrichmentWizard.visible = true;
-        }
     }
 
     Action
@@ -391,7 +362,6 @@ PluginContent
         ToolButton { action: resizeColumnsToContentsAction }
         ToolButton { action: toggleColumnNamesAction }
         ToolButton { action: selectColumnsAction }
-        ToolButton { action: openEnrichment }
         Item { Layout.fillWidth: true }
     }
 

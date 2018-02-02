@@ -43,5 +43,7 @@
         <file>qml/Controls/Tutorial.qml</file>
         <file>qml/AddBookmark.qml</file>
         <file>qml/ManageBookmarks.qml</file>
+        <file>qml/Enrichment/EnrichmentResults.qml</file>
+        <file>qml/Enrichment/EnrichmentWizard.qml</file>
     </qresource>
 </RCC>

@@ -2,6 +2,8 @@
 
 #include "application.h"
 
+#include "attributes/enrichmentcalculator.h"
+
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/flags.h"
@@ -1061,6 +1063,19 @@ void Document::selectAndFocusNodes(const NodeIdSet& nodeIds)
     selectAndFocusNodes(u::vectorFrom(nodeIds));
 }
 
+QList<QObject*> Document::listEnrichmentTableModels()
+{
+    QList<QObject*> vector;
+    vector.reserve(enrichmentTableModels.size());
+    qDebug() << "Enrichment Model Count" << enrichmentTableModels.size();
+    for (auto& tableModel : enrichmentTableModels)
+    {
+        if(tableModel != nullptr)
+            vector.append(tableModel.get());
+    }
+    return vector;
+}
+
 void Document::moveFocusToNode(NodeId nodeId)
 {
     _graphQuickItem->moveFocusToNode(nodeId);
@@ -1086,6 +1101,24 @@ int Document::numNodesSelected() const
         return _selectionManager->numNodesSelected();
 
     return 0;
+}
+
+QStringList Document::attributeGroupNames()
+{
+    // Attribute Groups will return a list of attributes that are not
+    // floats.
+    QStringList list;
+    if(graphModel() != nullptr)
+    {
+        auto& attributeNames = graphModel()->attributeNames();
+        for(const auto& name : attributeNames)
+        {
+            auto* attribute = graphModel()->attributeByName(name);
+            if(attribute->valueType() != ValueType::Float)
+                list.append(name);
+        }
+    }
+    return list;
 }
 
 void Document::selectFirstFound()
@@ -1950,4 +1983,25 @@ void Document::gotoBookmark(const QString& name)
 void Document::dumpGraph()
 {
     _graphModel->graph().dumpToQDebug(2);
+}
+
+void Document::performEnrichment(QStringList selectedAttributesAgainst, QString selectedAttribute)
+{
+    commandManager()->executeOnce(
+        {
+            QString(tr("Perform Enrichment Analysis")),
+            QString(tr("Performing Enrichment Analysis")),
+            QString(tr("Enrichment Analysis Complete"))
+        },
+    [this, selectedAttributesAgainst](Command& command) mutable
+    {
+        auto result = EnrichmentCalculator::overRepAgainstEachAttribute(selectionManager()->selectedNodes(),
+                                                                        selectedAttributesAgainst[0],
+                                                                        graphModel(), command);
+        enrichmentTableModels.push_back(std::make_unique<EnrichmentTableModel>());
+        enrichmentTableModels.back()->setTableData(result);
+        emit enrichmentTableModelsChanged();
+        emit enrichmentAnalysisComplete();
+        return true;
+    });
 }
