@@ -105,7 +105,7 @@ Rectangle
         id: _selectPreviousAction
         text: qsTr("Find Previous")
         iconName: "go-previous"
-        shortcut: "Ctrl+Shift+G"
+        shortcut: _visible ? "Ctrl+Shift+G" : ""
         enabled: document.numNodesFound > 0
         onTriggered: { document.selectPrevFound(); }
     }
@@ -115,7 +115,7 @@ Rectangle
         id: _selectNextAction
         text: qsTr("Find Next")
         iconName: "go-next"
-        shortcut: "Ctrl+G"
+        shortcut: _visible ? "Ctrl+G" : ""
         enabled: document.numNodesFound > 0
         onTriggered: { document.selectNextFound(); }
     }
