@@ -55,6 +55,9 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem
 
 void CorrelationPlotItem::refresh()
 {
+    // Note to future people; even for large quantities of data, this is a relatively
+    // cheap process, so despite being called multiple times per selection, it's not
+    // really worth optimising
     updatePlotSize();
     buildPlot();
     _customPlot.replot(QCustomPlot::rpQueuedReplot);
