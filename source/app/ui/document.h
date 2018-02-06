@@ -17,6 +17,7 @@
 #include "ui/findoptions.h"
 
 #include "thirdparty/qt-qml-models/QQmlVariantListModel.h"
+#include "thirdparty/qt-qml-models/QQmlObjectListModel.h"
 #include "attributes/enrichmenttablemodel.h"
 
 #include <QQuickItem>
@@ -62,7 +63,7 @@ class Document : public QObject, public IDocument
 
     Q_PROPERTY(bool graphChanging READ graphChanging NOTIFY graphChangingChanged)
 
-    Q_PROPERTY(QList<QObject*> listEnrichmentTableModels READ listEnrichmentTableModels NOTIFY enrichmentTableModelsChanged)
+    Q_PROPERTY(QAbstractListModel* listEnrichmentTableModels READ enrichmentTableModelsPtr NOTIFY enrichmentTableModelsChanged)
 
     Q_PROPERTY(bool commandInProgress READ commandInProgress NOTIFY commandInProgressChanged)
     Q_PROPERTY(int commandProgress READ commandProgress NOTIFY commandProgressChanged)
@@ -199,6 +200,7 @@ private:
     semaphore _executed;
 
     std::vector<std::unique_ptr<EnrichmentTableModel>> enrichmentTableModels;
+    QQmlObjectListModel<EnrichmentTableModel> _enrichmentTableModels;
 
     std::vector<NodeId> _foundNodeIds;
     bool _foundItValid = false;
@@ -243,7 +245,9 @@ private:
     void selectAndFocusNodes(const std::vector<NodeId>& nodeIds);
     void selectAndFocusNodes(const NodeIdSet& nodeIds);
     void selectFoundNode(NodeId newFound);
+
     QList<QObject*> listEnrichmentTableModels();
+    QQmlObjectListModel<EnrichmentTableModel>* enrichmentTableModelsPtr();
 
     void setSaveRequired();
 

@@ -53,7 +53,8 @@ Document::Document(QObject* parent) :
     QObject(parent),
     _graphChanging(false),
     _layoutRequired(true),
-    _graphTransformsModel(this)
+    _graphTransformsModel(this),
+    _enrichmentTableModels(this)
 {}
 
 Document::~Document()
@@ -1063,17 +1064,9 @@ void Document::selectAndFocusNodes(const NodeIdSet& nodeIds)
     selectAndFocusNodes(u::vectorFrom(nodeIds));
 }
 
-QList<QObject*> Document::listEnrichmentTableModels()
+QQmlObjectListModel<EnrichmentTableModel>* Document::enrichmentTableModelsPtr()
 {
-    QList<QObject*> vector;
-    vector.reserve(enrichmentTableModels.size());
-    qDebug() << "Enrichment Model Count" << enrichmentTableModels.size();
-    for (auto& tableModel : enrichmentTableModels)
-    {
-        if(tableModel != nullptr)
-            vector.append(tableModel.get());
-    }
-    return vector;
+    return &_enrichmentTableModels;
 }
 
 void Document::moveFocusToNode(NodeId nodeId)
@@ -1987,19 +1980,23 @@ void Document::dumpGraph()
 
 void Document::performEnrichment(QStringList selectedAttributesAgainst, QString selectedAttribute)
 {
+    auto* tableModel = new EnrichmentTableModel(this);
+    _enrichmentTableModels.append(tableModel);
+
     commandManager()->executeOnce(
         {
             QString(tr("Perform Enrichment Analysis")),
             QString(tr("Performing Enrichment Analysis")),
             QString(tr("Enrichment Analysis Complete"))
         },
-    [this, selectedAttributesAgainst](Command& command) mutable
+    [this, selectedAttributesAgainst, tableModel](Command& command) mutable
     {
         auto result = EnrichmentCalculator::overRepAgainstEachAttribute(selectionManager()->selectedNodes(),
                                                                         selectedAttributesAgainst[0],
                                                                         graphModel(), command);
         enrichmentTableModels.push_back(std::make_unique<EnrichmentTableModel>());
         enrichmentTableModels.back()->setTableData(result);
+        tableModel->setTableData(result);
         emit enrichmentTableModelsChanged();
         emit enrichmentAnalysisComplete();
         return true;

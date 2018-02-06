@@ -16,7 +16,8 @@ Window
             anchors.fill: parent
             ToolButton
             {
-                iconSource: "new.png"
+                iconName: "edit-delete"
+                onClicked: models.remove(models.get(tabView.currentIndex))
             }
         }
         TabView
@@ -34,7 +35,7 @@ Window
                     {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        model: modelData
+                        model: qtObject
                         TableViewColumn { role: "Selection"; title: "Selection"; width: 100 }
                         TableViewColumn { role: "Observed"; title: "Observed"; width: 100 }
                         TableViewColumn { role: "Expected"; title: "Expected"; width: 100 }

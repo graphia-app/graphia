@@ -13,7 +13,7 @@ private:
 
     Table _data;
 public:
-    EnrichmentTableModel();
+    EnrichmentTableModel(QObject* parent = nullptr);
 
     const int COLUMN_COUNT = 9;
 

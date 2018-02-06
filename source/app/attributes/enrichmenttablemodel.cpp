@@ -1,8 +1,9 @@
 #include "enrichmenttablemodel.h"
 #include <QDebug>
 
-EnrichmentTableModel::EnrichmentTableModel()
+EnrichmentTableModel::EnrichmentTableModel(QObject *parent)
 {
+    setParent(parent);
 }
 
 int EnrichmentTableModel::rowCount(const QModelIndex &parent) const
