@@ -472,6 +472,8 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
 
     connect(&_graphModel->mutableGraph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
 
+    connect(&_graphModel->graph(), &Graph::graphChanged, this, &Document::attributeGroupNamesChanged);
+
     emit pluginInstanceChanged();
 
     if(parser == nullptr)
@@ -1994,8 +1996,6 @@ void Document::performEnrichment(QStringList selectedAttributesAgainst, QString 
         auto result = EnrichmentCalculator::overRepAgainstEachAttribute(selectionManager()->selectedNodes(),
                                                                         selectedAttributesAgainst[0],
                                                                         graphModel(), command);
-        enrichmentTableModels.push_back(std::make_unique<EnrichmentTableModel>());
-        enrichmentTableModels.back()->setTableData(result);
         tableModel->setTableData(result);
         emit enrichmentTableModelsChanged();
         emit enrichmentAnalysisComplete();

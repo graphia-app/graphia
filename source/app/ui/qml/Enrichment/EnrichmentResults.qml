@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.3
 
 Window
 {
+    title: qsTr("Enrichment Results")
     height: 200
     width: 800
     property var models;
@@ -20,11 +21,18 @@ Window
                 onClicked: models.remove(models.get(tabView.currentIndex))
             }
         }
+        Text
+        {
+            anchors.centerIn: parent
+            text: "No Results";
+            visible: tabView.count === 0
+        }
         TabView
         {
             id: tabView
             Layout.fillWidth: true
             Layout.fillHeight: true
+            visible: tabView.count > 0
             Repeater
             {
                 model: models
