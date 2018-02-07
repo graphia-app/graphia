@@ -199,7 +199,6 @@ private:
     DeferredExecutor _deferredExecutor;
     semaphore _executed;
 
-    std::vector<std::unique_ptr<EnrichmentTableModel>> enrichmentTableModels;
     QQmlObjectListModel<EnrichmentTableModel> _enrichmentTableModels;
 
     std::vector<NodeId> _foundNodeIds;
