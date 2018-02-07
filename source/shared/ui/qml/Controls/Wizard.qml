@@ -167,6 +167,16 @@ BaseParameterDialog
         }
     }
 
+    function goToPage(index)
+    {
+        if(index <= listPages.length - 1 && index >= 0)
+        {
+            currentIndex = index;
+            numberAnimation.running = false;
+            numberAnimation.running = true;
+        }
+    }
+
     function indexOf(item)
     {
         for(var i = 0; i < listPages.length; i++)

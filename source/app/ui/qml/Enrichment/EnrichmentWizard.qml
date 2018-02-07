@@ -1,6 +1,8 @@
-import QtQuick 2.0
+import QtQuick 2.2
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
+import QtQuick.Dialogs 1.1
+
 
 import com.kajeka 1.0
 import "../Controls"
@@ -10,15 +12,23 @@ Wizard
     id: root
     minimumWidth: 640
     minimumHeight: 400
+
+    // Must be set before opening
     property var attributeGroups
+    property var selectedNodeCount
+
     property var selectedAttributeGroupsAgainst: []
     property var selectedAttributeGroup: []
-    finishEnabled: false
+    property bool attributesSelected: false
 
-    onAttributeGroupsChanged:
+    finishEnabled: attributesSelected && selectedNodeCount > 1
+
+    function reset()
     {
-        console.log("Attribute Groups");
-        console.log(attributeGroups);
+        // Reset on finish
+        goToPage(0);
+        for(var i=0; i < attributeAgainstRepeater.count; i++)
+            attributeAgainstRepeater.itemAt(i).checked = false;
     }
 
     Item
@@ -39,18 +49,37 @@ Wizard
 
             RowLayout
             {
-                Text
+                ColumnLayout
                 {
-                    text: qsTr("Enrichment identifies the significance of a group makeup versus the null hypothesis<br>" +
-                               "<br>" +
-                               "An attribute group will be selected to test for enrichment" +
-                               "<br>" +
-                               "The edges may be filtered using transforms once the graph has been created.")
-                    wrapMode: Text.WordWrap
-                    textFormat: Text.StyledText
-                    Layout.fillWidth: true
+                    Text
+                    {
+                        text: qsTr("Enrichment identifies the significance of a group makeup versus the null hypothesis<br>" +
+                                   "<br>" +
+                                   "An attribute group will be selected to test for enrichment" +
+                                   "<br>" +
+                                   "The edges may be filtered using transforms once the graph has been created.")
+                        wrapMode: Text.WordWrap
+                        textFormat: Text.StyledText
+                        Layout.fillWidth: true
+                    }
 
-                    onLinkActivated: Qt.openUrlExternally(link);
+                    Text
+                    {
+                        text: qsTr("<font color='red'><strong>Please select more than 1 node to perform enrichment</strong></font>")
+                        wrapMode: Text.WordWrap
+                        textFormat: Text.StyledText
+                        Layout.fillWidth: true
+                        visible: selectedNodeCount < 2
+                    }
+
+                    Text
+                    {
+                        text: qsTr("<strong>This will peform enrichment on " + selectedNodeCount + " selected node(s)</strong>")
+                        wrapMode: Text.WordWrap
+                        textFormat: Text.StyledText
+                        Layout.fillWidth: true
+                        visible: selectedNodeCount > 1
+                    }
                 }
 
                 Image
@@ -116,7 +145,7 @@ Wizard
                                         var index = selectedAttributeGroupsAgainst.indexOf(modelData);
                                         selectedAttributeGroupsAgainst.splice(index, 1);
                                     }
-                                    root.finishEnabled = selectedAttributeGroupsAgainst.length > 0;
+                                    attributesSelected = (selectedAttributeGroupsAgainst.length > 0);
                                 }
                             }
                         }

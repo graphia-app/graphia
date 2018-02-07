@@ -806,7 +806,7 @@ ApplicationWindow
         onTriggered:
         {
             if(currentDocument != undefined)
-                enrichmentWizard.show();
+                    enrichmentWizard.show();
         }
     }
 
@@ -1437,10 +1437,12 @@ ApplicationWindow
     {
         id: enrichmentWizard
         attributeGroups: currentDocument ? currentDocument.attributeGroupNames : []
+        selectedNodeCount: currentDocument ? currentDocument.numNodesSelected : 0
         onAccepted:
         {
             if(currentDocument != null)
                 currentDocument.performEnrichment(selectedAttributeGroupsAgainst, selectedAttributeGroup)
+            enrichmentWizard.reset();
         }
     }
 
