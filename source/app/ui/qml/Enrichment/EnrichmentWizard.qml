@@ -22,6 +22,7 @@ Wizard
     property bool attributesSelected: false
 
     finishEnabled: attributesSelected && selectedNodeCount > 1
+    nextEnabled: selectedNodeCount > 1
 
     function reset()
     {
