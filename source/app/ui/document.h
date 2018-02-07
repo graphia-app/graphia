@@ -63,7 +63,7 @@ class Document : public QObject, public IDocument
 
     Q_PROPERTY(bool graphChanging READ graphChanging NOTIFY graphChangingChanged)
 
-    Q_PROPERTY(QAbstractListModel* listEnrichmentTableModels READ enrichmentTableModelsPtr NOTIFY enrichmentTableModelsChanged)
+    Q_PROPERTY(QAbstractListModel* listEnrichmentTableModels READ enrichmentTableModels NOTIFY enrichmentTableModelsChanged)
 
     Q_PROPERTY(bool commandInProgress READ commandInProgress NOTIFY commandInProgressChanged)
     Q_PROPERTY(int commandProgress READ commandProgress NOTIFY commandProgressChanged)
@@ -148,6 +148,9 @@ public:
     QQmlVariantListModel* transformsModel() { return &_graphTransformsModel; }
     QStringList transforms() const { return _graphTransforms; }
     void setTransforms(const QStringList& transforms);
+
+    QQmlObjectListModel<EnrichmentTableModel>* enrichmentTableModels()
+    {  return &_enrichmentTableModels; }
 
     QQmlVariantListModel* visualisationsModel() { return &_visualisationsModel; }
     QStringList visualisations() const { return _visualisations; }
@@ -244,9 +247,6 @@ private:
     void selectAndFocusNodes(const std::vector<NodeId>& nodeIds);
     void selectAndFocusNodes(const NodeIdSet& nodeIds);
     void selectFoundNode(NodeId newFound);
-
-    QList<QObject*> listEnrichmentTableModels();
-    QQmlObjectListModel<EnrichmentTableModel>* enrichmentTableModelsPtr();
 
     void setSaveRequired();
 

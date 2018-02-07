@@ -802,11 +802,22 @@ ApplicationWindow
     Action
     {
         id: enrichmentAction
-        text: qsTr("Enrichment")
+        text: qsTr("Perform Enrichment")
         onTriggered:
         {
             if(currentDocument != undefined)
                 enrichmentWizard.show();
+        }
+    }
+
+    Action
+    {
+        id: enrichmentResultsAction
+        text: qsTr("Enrichment Results")
+        onTriggered:
+        {
+            if(currentDocument != undefined)
+                enrichmentResults.show();
         }
     }
 

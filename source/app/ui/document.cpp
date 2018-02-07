@@ -519,6 +519,18 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
             _pluginUiDataVersion = completedLoader->pluginUiDataVersion();
 
             _userLayoutPaused = completedLoader->layoutPaused();
+
+            auto& enrichmentTableModels = completedLoader->enrichmentTableModels();
+            executeOnMainThread([this, enrichmentTableModels]()
+            {
+                for(auto& table: enrichmentTableModels)
+                {
+                    auto* tableModel = new EnrichmentTableModel(this);
+                    _enrichmentTableModels.append(tableModel);
+                    tableModel->setTableData(table);
+                    emit enrichmentTableModelsChanged();
+                }
+            });
         });
     }
     else
@@ -1064,11 +1076,6 @@ void Document::selectAndFocusNodes(const std::vector<NodeId>& nodeIds)
 void Document::selectAndFocusNodes(const NodeIdSet& nodeIds)
 {
     selectAndFocusNodes(u::vectorFrom(nodeIds));
-}
-
-QQmlObjectListModel<EnrichmentTableModel>* Document::enrichmentTableModelsPtr()
-{
-    return &_enrichmentTableModels;
 }
 
 void Document::moveFocusToNode(NodeId nodeId)
@@ -1997,6 +2004,7 @@ void Document::performEnrichment(QStringList selectedAttributesAgainst, QString 
                                                                         selectedAttributesAgainst[0],
                                                                         graphModel(), command);
         tableModel->setTableData(result);
+        tableModel->toJson();
         emit enrichmentTableModelsChanged();
         emit enrichmentAnalysisComplete();
         return true;

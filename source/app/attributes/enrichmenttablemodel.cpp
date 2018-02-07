@@ -44,6 +44,24 @@ QHash<int, QByteArray> EnrichmentTableModel::roleNames() const
     return _roleNames;
 }
 
+json EnrichmentTableModel::toJson()
+{
+    json object;
+    // For each added rolename
+    for (int i = 0; i < COLUMN_COUNT; ++i)
+        object["rolenames"][i] = roleNames()[Qt::UserRole + i].toStdString();
+
+    for(int rowIndex = 0; rowIndex < _data.size(); ++rowIndex)
+    {
+        for(int columnIndex = 0; columnIndex < _data[rowIndex].size(); ++columnIndex)
+        {
+            object["data"][rowIndex].push_back(_data[rowIndex][columnIndex].toString().toStdString());
+        }
+    }
+    qDebug() << QString::fromStdString(object.dump());
+    return object;
+}
+
 void EnrichmentTableModel::setTableData(EnrichmentTableModel::Table data)
 {
     beginResetModel();

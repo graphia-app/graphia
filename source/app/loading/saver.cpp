@@ -224,6 +224,9 @@ bool Saver::encode(const ProgressFn& progressFn)
 
     content["bookmarks"] = bookmarksAsJson(*_document);
 
+    for(int tableIndex = 0; tableIndex < _document->enrichmentTableModels()->size(); ++tableIndex)
+       content["enrichmentTables"].push_back(_document->enrichmentTableModels()->at(tableIndex)->toJson());
+
     auto uiDataJson = json::parse(_uiData.begin(), _uiData.end(), nullptr, false);
 
     if(uiDataJson.is_object() || uiDataJson.is_array())

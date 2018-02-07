@@ -67,7 +67,7 @@ EnrichmentCalculator::Table EnrichmentCalculator::overRepAgainstEachAttribute(No
     std::map<QString, int> attributeValueEntryCountTotal;
     std::map<QString, int> attributeValueEntryCountSelected;
     Table tableModel;
-    using Row = std::vector<QVariant>;
+    using Row = EnrichmentCalculator::Row;
 
     for(auto nodeId : graphModel->graph().nodeIds())
     {

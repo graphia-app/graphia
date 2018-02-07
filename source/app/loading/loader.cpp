@@ -355,6 +355,26 @@ bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& p
         }
     }
 
+    if(u::contains(jsonBody, "enrichmentTables"))
+    {
+        for(const auto& tableModel : jsonBody["enrichmentTables"])
+        {
+            _enrichmentTablesData.emplace_back();
+            auto& table = _enrichmentTablesData.back();
+            // If Data is empty then it's just an empty table
+            if(u::contains(tableModel, "data"))
+            {
+                for(auto& dataRow : tableModel["data"])
+                {
+                    table.emplace_back();
+                    auto& row = table.back();
+                    for(auto& value : dataRow)
+                        row.push_back(QString::fromStdString(value.get<std::string>()));
+                }
+            }
+        }
+    }
+
     if(u::contains(jsonBody, "layout"))
     {
         const auto& jsonLayout = jsonBody["layout"];

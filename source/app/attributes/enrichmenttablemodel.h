@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QAbstractTableModel>
 
+#include "json_helper.h"
+
 class EnrichmentTableModel : public QAbstractTableModel
 {
     Q_OBJECT
@@ -23,6 +25,8 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     void setTableData(Table data);
+
+    json toJson();
 };
 
 #endif // ENRICHMENTTABLEMODEL_H
