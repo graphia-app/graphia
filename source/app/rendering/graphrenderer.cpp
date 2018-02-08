@@ -990,7 +990,7 @@ NodeId GraphRenderer::computeBestFocusNodeId(GraphQuickItem* graphQuickItem, flo
             [this, focusedComponentId](auto nodeId)
             {
                 return _graphModel->graph().componentIdOfNode(nodeId) != focusedComponentId;
-            }));
+            }), nodeIds.end());
         }
         else
         {
