@@ -24,13 +24,17 @@ if(UNIX)
 
     # Surprisingly, this actually makes a difference to the pearson correlation code
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -funroll-loops")
+
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Og")
 endif()
 
-# GCC specific warnings
+
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    # GCC
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wlogical-op -Wstrict-null-sentinel \
         -Wdouble-promotion")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    # clang
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-undefined-var-template")
 endif()
 
