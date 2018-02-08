@@ -18,7 +18,11 @@ Item
 {
     id: root
 
-    property var nodeAttributesModel
+    // External name
+    property alias model: root._nodeAttributesTableModel
+
+    // Internal name
+    property var _nodeAttributesTableModel
 
     property var hiddenColumns: []
     onHiddenColumnsChanged: { tableView._updateColumnVisibility(); }
@@ -27,10 +31,10 @@ Item
 
     readonly property string sortRoleName:
     {
-        if(nodeAttributesModel.columnNames.length > 0 &&
-           nodeAttributesModel.columnNames[sortIndicatorColumn] !== undefined)
+        if(_nodeAttributesTableModel.columnNames.length > 0 &&
+           _nodeAttributesTableModel.columnNames[sortIndicatorColumn] !== undefined)
         {
-            return nodeAttributesModel.columnNames[sortIndicatorColumn];
+            return _nodeAttributesTableModel.columnNames[sortIndicatorColumn];
         }
 
         return "";
@@ -117,7 +121,7 @@ Item
         var columns = hiddenColumns;
         plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName)
         {
-            if(root.nodeAttributesModel.columnIsCalculated(columnName))
+            if(root._nodeAttributesTableModel.columnIsCalculated(columnName))
                 columns = Utils.setRemove(columns, columnName);
         });
 
@@ -140,7 +144,7 @@ Item
         var columns = hiddenColumns;
         plugin.model.nodeAttributeTableModel.columnNames.forEach(function(columnName)
         {
-            if(root.nodeAttributesModel.columnIsCalculated(columnName))
+            if(root._nodeAttributesTableModel.columnIsCalculated(columnName))
                 columns = Utils.setAdd(columns, columnName);
         });
 
@@ -285,22 +289,22 @@ Item
         function _createModel()
         {
             model = proxyModelComponent.createObject(tableView,
-                {"columnNames": root.nodeAttributesModel.columnNames});
+                {"columnNames": root._nodeAttributesTableModel.columnNames});
 
             // Dynamically create the columns
             while(columnCount > 0)
                 tableView.removeColumn(0);
 
-            for(var i = 0; i < root.nodeAttributesModel.columnNames.length; i++)
+            for(var i = 0; i < root._nodeAttributesTableModel.columnNames.length; i++)
             {
-                var columnName  = root.nodeAttributesModel.columnNames[i];
+                var columnName  = root._nodeAttributesTableModel.columnNames[i];
                 tableView.addColumn(columnComponent.createObject(tableView,
                     {"role": columnName, "title": columnName}));
             }
 
             // Remove any hidden columns that no longer exist in the model
             root.hiddenColumns = Utils.setIntersection(root.hiddenColumns,
-                root.nodeAttributesModel.columnNames);
+                root._nodeAttributesTableModel.columnNames);
 
             tableView._updateColumnVisibility();
 
@@ -311,7 +315,7 @@ Item
 
         Connections
         {
-            target: root.nodeAttributesModel
+            target: root._nodeAttributesTableModel
             onColumnNamesChanged:
             {
                 // Hack - TableView doesn't respond to rolenames changes
@@ -329,7 +333,7 @@ Item
 
             SortFilterProxyModel
             {
-                sourceModel: root.nodeAttributesModel
+                sourceModel: root._nodeAttributesTableModel
                 sortRoleName: root.sortRoleName
                 ascendingSortOrder: root.sortIndicatorOrder === Qt.AscendingOrder
 
@@ -366,7 +370,7 @@ Item
         onDoubleClicked:
         {
             var mappedRow = model.mapToSource(row);
-            root.nodeAttributesModel.moveFocusToNodeForRowIndex(mappedRow);
+            root._nodeAttributesTableModel.moveFocusToNodeForRowIndex(mappedRow);
         }
 
         // This is just a reference to the menu, so we can repopulate it later as necessary
@@ -477,7 +481,7 @@ Item
 
                     var column = tableView.getColumn(styleData.column);
 
-                    if(column !== null && nodeAttributesModel.columnIsFloatingPoint(column.role))
+                    if(column !== null && _nodeAttributesTableModel.columnIsFloatingPoint(column.role))
                         return Utils.formatForDisplay(styleData.value, 1);
 
                     return styleData.value;

@@ -62,7 +62,7 @@ PluginContent
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            nodeAttributesModel: plugin.model.nodeAttributeTableModel
+            model: plugin.model.nodeAttributeTableModel
 
             onSortIndicatorColumnChanged: { root.saveRequired = true; }
             onSortIndicatorOrderChanged: { root.saveRequired = true; }
