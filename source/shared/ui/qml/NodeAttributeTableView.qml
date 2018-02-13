@@ -338,13 +338,6 @@ Item
                 ascendingSortOrder: root.sortIndicatorOrder === Qt.AscendingOrder
 
                 filterRoleName: 'nodeSelected'; filterValue: true
-
-                // NodeAttributeTableModel fires layoutChanged whenever the nodeSelected role
-                // changes which in turn affects which rows the model reflects. When the visible
-                // rows change, we emit a signal so that the owners of the TableView can react.
-                // Qt.callLater is used because otherwise the signal is emitted before the
-                // TableView has had a chance to update.
-                onLayoutChanged: { Qt.callLater(root.visibleRowsChanged); }
             }
         }
 
@@ -360,10 +353,24 @@ Item
                 var rows = [];
                 tableView.selection.forEach(function(rowIndex)
                 {
-                    rows.push(tableView.model.mapToSource(rowIndex));
+                    var sourceRowIndex = tableView.model.mapToSource(rowIndex);
+
+                    if(sourceRowIndex >= 0)
+                        rows.push(sourceRowIndex);
                 });
 
                 root.selectedRows = rows;
+            }
+        }
+
+        Connections
+        {
+            target: tableView.__listView.contentItem
+            onChildrenChanged:
+            {
+                // Qt.callLater conveniently coalesces multiple rapid (for some definition of "rapid")
+                // calls to a function into one, which is just what we need here
+                Qt.callLater(root.visibleRowsChanged);
             }
         }
 
