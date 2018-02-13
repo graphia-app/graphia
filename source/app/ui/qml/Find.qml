@@ -149,7 +149,7 @@ Rectangle
         id: closeAction
         text: qsTr("Close")
         iconName: "emblem-unreadable"
-        shortcut: _visible && findField.focus ? "Esc" : ""
+        shortcut: _visible && (findField.focus || !document.canResetView) ? "Esc" : ""
         onTriggered:
         {
             findField.focus = false;
