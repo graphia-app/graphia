@@ -60,8 +60,6 @@ ApplicationWindow
         }
     }
 
-    QmlUtils { id: qmlUtils }
-
     Auth
     {
         visible: !application.authenticated
@@ -96,7 +94,7 @@ ApplicationWindow
         var argument = _pendingArguments[0];
         _pendingArguments.shift();
 
-        var fileUrl = qmlUtils.urlForFileName(argument);
+        var fileUrl = QmlUtils.urlForFileName(argument);
         openFile(fileUrl, true);
     }
 
@@ -145,10 +143,10 @@ ApplicationWindow
 
         if(misc.firstOpen)
         {
-            var exampleFile = qmlUtils.urlForFileName(application.resourcesDirectory +
+            var exampleFile = QmlUtils.urlForFileName(application.resourcesDirectory +
                 "/examples/London_Tube_River_Bus.graphia");
 
-            if(qmlUtils.fileUrlExists(exampleFile))
+            if(QmlUtils.fileUrlExists(exampleFile))
             {
                 openFileOfTypeWithPluginAndParameters(exampleFile,
                     "Native", "", {}, false);
@@ -320,10 +318,10 @@ ApplicationWindow
     {
         fileUrl = fileUrl.toString().trim();
 
-        if(!qmlUtils.fileUrlExists(fileUrl))
+        if(!QmlUtils.fileUrlExists(fileUrl))
         {
             errorOpeningFileMessageDialog.title = qsTr("File Not Found");
-            errorOpeningFileMessageDialog.text = qmlUtils.baseFileNameForUrl(fileUrl) +
+            errorOpeningFileMessageDialog.text = QmlUtils.baseFileNameForUrl(fileUrl) +
                     qsTr(" does not exist.");
             errorOpeningFileMessageDialog.open();
             return;
@@ -334,7 +332,7 @@ ApplicationWindow
         if(fileTypes.length === 0)
         {
             errorOpeningFileMessageDialog.title = qsTr("Unknown File Type");
-            errorOpeningFileMessageDialog.text = qmlUtils.baseFileNameForUrl(fileUrl) +
+            errorOpeningFileMessageDialog.text = QmlUtils.baseFileNameForUrl(fileUrl) +
                     qsTr(" cannot be loaded as its file type is unknown.");
             errorOpeningFileMessageDialog.open();
             return;
@@ -343,7 +341,7 @@ ApplicationWindow
         if(!application.canOpenAnyOf(fileTypes))
         {
             errorOpeningFileMessageDialog.title = qsTr("Can't Open File");
-            errorOpeningFileMessageDialog.text = qmlUtils.baseFileNameForUrl(fileUrl) +
+            errorOpeningFileMessageDialog.text = QmlUtils.baseFileNameForUrl(fileUrl) +
                     qsTr(" cannot be loaded."); //FIXME more elaborate error message
             errorOpeningFileMessageDialog.open();
             return;
@@ -528,7 +526,7 @@ ApplicationWindow
         id: recentFileOpen
         onTriggered:
         {
-            openFile(qmlUtils.urlForFileName(source.text), true);
+            openFile(QmlUtils.urlForFileName(source.text), true);
         }
     }
 
@@ -1047,7 +1045,7 @@ ApplicationWindow
                             // FIXME: This fires with a -1 index onOpenFile
                             // BUG: Text overflows MenuItems on Windows
                             // https://bugreports.qt.io/browse/QTBUG-50849
-                            text: index > -1 ? qmlUtils.fileNameForUrl(mainWindow.recentFiles[index]) : "";
+                            text: index > -1 ? QmlUtils.fileNameForUrl(mainWindow.recentFiles[index]) : "";
                             action: recentFileOpen
                         }
                     }
@@ -1383,7 +1381,7 @@ ApplicationWindow
 
                 if(!loadWasCancelled)
                 {
-                    errorOpeningFileMessageDialog.text = qmlUtils.baseFileNameForUrl(fileUrl) +
+                    errorOpeningFileMessageDialog.text = QmlUtils.baseFileNameForUrl(fileUrl) +
                             qsTr(" could not be opened due to an error.");
                     errorOpeningFileMessageDialog.open();
                 }

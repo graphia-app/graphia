@@ -6,10 +6,17 @@
 #include <QDebug>
 #include <QFileInfo>
 
+class QQmlEngine;
+class QJSEngine;
+
 class QmlUtils : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(QmlUtils)
+
 public:
+    QmlUtils() = default;
+
     Q_INVOKABLE QString baseFileNameForUrl(const QUrl& url) const { return url.fileName(); }
     Q_INVOKABLE QString baseFileNameForUrlNoExtension(const QUrl& url) const
     {
@@ -30,6 +37,11 @@ public:
                                        extension));
 
         return QUrl::fromLocalFile(replaced.filePath());
+    }
+
+    static QObject* qmlInstance(QQmlEngine*, QJSEngine*)
+    {
+        return new QmlUtils;
     }
 };
 

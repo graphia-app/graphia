@@ -112,8 +112,9 @@ int main(int argc, char *argv[])
     qmlRegisterType<Document>                   (uri, maj, min, "Document");
     qmlRegisterType<GraphQuickItem>             (uri, maj, min, "Graph");
     qmlRegisterType<QmlPreferences>             (uri, maj, min, "Preferences");
-    qmlRegisterType<QmlUtils>                   (uri, maj, min, "QmlUtils");
     qmlRegisterType<HoverMousePassthrough>      (uri, maj, min, "HoverMousePassthrough");
+
+    qmlRegisterSingletonType<QmlUtils>          (uri, maj, min, "QmlUtils", &QmlUtils::qmlInstance);
 
     qRegisterMetaType<size_t>("size_t");
 

@@ -34,7 +34,7 @@ Dialog
 
         Text
         {
-            text: qmlUtils.baseFileNameForUrl(fileUrl) +
+            text: QmlUtils.baseFileNameForUrl(fileUrl) +
                   qsTr(" may be loaded by two or more plugins. " +
                        "Please select how you wish to proceed below.")
             Layout.fillWidth: true

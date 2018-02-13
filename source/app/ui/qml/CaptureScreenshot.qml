@@ -45,11 +45,11 @@ Dialog
 
     onAccepted:
     {
-        var path = utils.fileNameForUrl(screenshot.path) + "/" + application.name + "-capture-" +
+        var path = QmlUtils.fileNameForUrl(screenshot.path) + "/" + application.name + "-capture-" +
             new Date().toLocaleString(Qt.locale(), "yyyy-MM-dd-hhmmss");
 
         var fileDialogObject = fileDialogComponent.createObject(root,
-            {"folder": screenshot.path, "currentFile": utils.urlForFileName(path)});
+            {"folder": screenshot.path, "currentFile": QmlUtils.urlForFileName(path)});
 
         fileDialogObject.open();
     }
@@ -423,7 +423,7 @@ Dialog
 
             function updateFileExtension()
             {
-                currentFile = utils.replaceExtension(currentFile, selectedNameFilter.extensions[0]);
+                currentFile = QmlUtils.replaceExtension(currentFile, selectedNameFilter.extensions[0]);
             }
 
             Component.onCompleted:
@@ -445,8 +445,6 @@ Dialog
             nameFilters: ["PNG Image (*.png)" ,"JPEG Image (*.jpg)", "Bitmap Image (*.bmp)"]
         }
     }
-
-    QmlUtils { id: utils }
 
     onAspectRatioChanged:
     {

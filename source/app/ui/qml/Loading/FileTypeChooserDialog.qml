@@ -29,8 +29,6 @@ Dialog
             mapping.length = 0;
     }
 
-    QmlUtils { id: qmlUtils }
-
     GridLayout
     {
         columns: 2
@@ -40,7 +38,7 @@ Dialog
 
         Text
         {
-            text: qmlUtils.baseFileNameForUrl(fileUrl) +
+            text: QmlUtils.baseFileNameForUrl(fileUrl) +
                   qsTr(" may be interpreted as two or more possible formats. " +
                        "Please select how you wish to proceed below.")
             Layout.fillWidth: true

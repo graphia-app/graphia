@@ -20,8 +20,6 @@ Item
 {
     id: root
 
-    QmlUtils { id: qmlUtils }
-
     property Application application
 
     property url fileUrl
@@ -33,9 +31,9 @@ Item
     property string baseFileName:
     {
         if(hasBeenSaved)
-            return qmlUtils.baseFileNameForUrl(savedFileUrl);
+            return QmlUtils.baseFileNameForUrl(savedFileUrl);
         else if(Qt.resolvedUrl(fileUrl).length > 0)
-            return qmlUtils.baseFileNameForUrl(fileUrl);
+            return QmlUtils.baseFileNameForUrl(fileUrl);
 
         return "";
     }
@@ -47,7 +45,7 @@ Item
         if(hasBeenSaved)
         {
             // Don't display the file extension when it's a native file
-            text = qmlUtils.baseFileNameForUrlNoExtension(savedFileUrl);
+            text = QmlUtils.baseFileNameForUrlNoExtension(savedFileUrl);
         }
         else
             text = baseFileName;
@@ -247,7 +245,7 @@ Item
 
         if(!hasBeenSaved)
         {
-            initialFileUrl = qmlUtils.replaceExtension(fileUrl,
+            initialFileUrl = QmlUtils.replaceExtension(fileUrl,
                 application.nativeExtension);
         }
         else
@@ -1173,7 +1171,7 @@ Item
         {
             if(!success)
             {
-                errorSavingFileMessageDialog.text = qmlUtils.baseFileNameForUrl(fileUrl) +
+                errorSavingFileMessageDialog.text = QmlUtils.baseFileNameForUrl(fileUrl) +
                         qsTr(" could not be saved.");
                 errorSavingFileMessageDialog.open();
             }
