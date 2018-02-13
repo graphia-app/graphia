@@ -1,6 +1,8 @@
 #ifndef QMLUTILS_H
 #define QMLUTILS_H
 
+#include "shared/utils/thread.h"
+
 #include <QObject>
 #include <QUrl>
 #include <QDebug>
@@ -38,6 +40,8 @@ public:
 
         return QUrl::fromLocalFile(replaced.filePath());
     }
+
+    Q_INVOKABLE QString currentThreadName() const { return u::currentThreadName(); }
 
     static QObject* qmlInstance(QQmlEngine*, QJSEngine*)
     {
