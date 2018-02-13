@@ -5,7 +5,7 @@
 
 // Disable warnings that Valgrind
 #include "thirdparty/gccdiagaware.h"
-#ifdef GCC_DIAG_AWARE
+#ifdef GCC_DIAGNOSTIC_AWARE
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #endif
