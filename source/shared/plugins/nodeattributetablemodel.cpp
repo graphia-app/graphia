@@ -153,6 +153,16 @@ void NodeAttributeTableModel::onUpdateRoleComplete(int role)
     emit layoutAboutToBeChanged();
     int column = role - (Qt::UserRole + 1);
     _data.at(column) = _pendingData.at(column);
+
+    //FIXME: Emitting dataChanged /should/ be faster than doing a layoutChanged, but
+    // for some reason it's not, even with https://codereview.qt-project.org/#/c/219278/
+    // applied. Most of the performance seems to be lost deep in TableView's JS so perhaps
+    // we should just ditch TableView and implement our own custom table, that we can
+    // control better. Certainly the internet suggests using ListView:
+    //      https://stackoverflow.com/a/43856015
+    //      https://stackoverflow.com/a/45188582
+    //emit dataChanged(index(0, column), index(rowCount() - 1, column), {role});
+
     emit layoutChanged();
 }
 

@@ -3,7 +3,7 @@
 #include "shared/utils/fatalerror.h"
 #include "shared/utils/thread.h"
 
-// Disable warnings that Valgrind
+// Disable warnings from Valgrind
 #ifndef _MSC_VER
 #include "thirdparty/gccdiagaware.h"
 #ifdef GCC_DIAGNOSTIC_AWARE
