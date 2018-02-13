@@ -3,6 +3,15 @@
 #include "shared/utils/fatalerror.h"
 #include "shared/utils/thread.h"
 
+// Disable warnings that Valgrind
+#include "thirdparty/gccdiagaware.h"
+#ifdef GCC_DIAG_AWARE
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+#endif
+
+#include "thirdparty/valgrind/valgrind.h"
+
 #include <QDebug>
 
 Watchdog::Watchdog()
@@ -44,6 +53,10 @@ void WatchdogWorker::reset()
                 reset();
                 return;
             }
+
+            // Don't bother doing anything when running under Valgrind
+            if(RUNNING_ON_VALGRIND)
+                return;
 
             qWarning() << "Watchdog timed out! Deadlock? "
                 "Infinite loop? Resuming from a breakpoint?";
