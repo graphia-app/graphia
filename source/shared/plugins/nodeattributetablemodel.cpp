@@ -268,5 +268,5 @@ QVariant NodeAttributeTableModel::data(const QModelIndex& index, int role) const
 
 void NodeAttributeTableModel::onSelectionChanged()
 {
-    updateRole(NodeSelectedRole);
+    updateRole(Roles::NodeSelectedRole);
 }
