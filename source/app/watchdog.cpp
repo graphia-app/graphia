@@ -4,6 +4,7 @@
 #include "shared/utils/thread.h"
 
 // Disable warnings that Valgrind
+#ifndef _MSC_VER
 #include "thirdparty/gccdiagaware.h"
 #ifdef GCC_DIAGNOSTIC_AWARE
 #pragma GCC diagnostic push
@@ -11,6 +12,9 @@
 #endif
 
 #include "thirdparty/valgrind/valgrind.h"
+#else
+#define RUNNING_ON_VALGRIND 0
+#endif
 
 #include <QDebug>
 
