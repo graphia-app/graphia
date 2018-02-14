@@ -7,6 +7,7 @@
 
 #include "shared/utils/threadpool.h"
 #include "shared/utils/preferences.h"
+#include "shared/utils/scopetimer.h"
 
 template<typename T> float meanWeightedAvgBuffer(int start, int end, const T& buffer)
 {
@@ -65,6 +66,8 @@ static void dampOscillations(QVector3D& previous, QVector3D& next)
 
 void ForceDirectedLayout::executeReal(bool firstIteration)
 {
+    SCOPE_TIMER_MULTISAMPLES(50)
+
     _prevDisplacements.resize(positions().size());
     _displacements.resize(positions().size());
 

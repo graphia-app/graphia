@@ -25,6 +25,7 @@
 #include "shared/utils/threadpool.h"
 #include "shared/utils/preferences.h"
 #include "shared/utils/qmlutils.h"
+#include "shared/utils/scopetimer.h"
 
 #include "rendering/openglfunctions.h"
 #include "rendering/graphrenderer.h"
@@ -120,6 +121,7 @@ int main(int argc, char *argv[])
 
     ThreadPoolSingleton threadPool;
     Preferences preferences;
+    ScopeTimerManager scopeTimerManager;
 
     preferences.define(QStringLiteral("visuals/defaultNodeColor"),              "#0000FF");
     preferences.define(QStringLiteral("visuals/defaultEdgeColor"),              "#FFFFFF");

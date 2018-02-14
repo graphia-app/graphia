@@ -4,6 +4,7 @@
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/fatalerror.h"
 #include "shared/utils/thread.h"
+#include "shared/utils/scopetimer.h"
 
 #include "loading/loader.h"
 
@@ -246,6 +247,11 @@ void Application::crash(int crashType)
         break;
 #endif
     }
+}
+
+void Application::reportScopeTimers()
+{
+    ScopeTimerManager::instance()->reportToQDebug();
 }
 
 void Application::loadPlugins()

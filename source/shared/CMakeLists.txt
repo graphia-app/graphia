@@ -64,6 +64,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/utils/qmlenum.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/qmlutils.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/random.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/scopetimer.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/scope_exit.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/semaphore.h
     ${CMAKE_CURRENT_LIST_DIR}/utils/singleton.h
@@ -89,6 +90,7 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/utils/performancecounter.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/preferences.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/random.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils/scopetimer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/semaphore.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/string.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/thread.cpp

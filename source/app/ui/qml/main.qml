@@ -907,6 +907,14 @@ ApplicationWindow
 
     Action
     {
+        id: reportScopeTimersAction
+        text: qsTr("Report Scope Timers")
+        onTriggered: { application.reportScopeTimers(); }
+    }
+
+
+    Action
+    {
         id: saveImageAction
         iconName: "camera-photo"
         text: qsTr("Save As Image…")
@@ -1183,6 +1191,7 @@ ApplicationWindow
             MenuItem { action: toggleFpsMeterAction }
             MenuItem { action: toggleGlyphmapSaveAction }
             MenuItem { action: resetFirstOpenAction }
+            MenuItem { action: reportScopeTimersAction }
         }
         Menu { id: pluginMenu0; visible: false }
         Menu { id: pluginMenu1; visible: false }

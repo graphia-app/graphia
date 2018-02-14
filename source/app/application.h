@@ -153,6 +153,8 @@ public:
 
     Q_INVOKABLE void crash(int crashType);
 
+    Q_INVOKABLE void reportScopeTimers();
+
 signals:
     void nameFiltersChanged();
     void pluginDetailsChanged();
