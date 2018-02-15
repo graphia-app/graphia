@@ -617,30 +617,36 @@ Item
                 text: document.fps.toFixed(1) + qsTr(" fps")
             }
 
-            // @disable-check M300
-            SlidingPanel
+            Item
             {
-                id: findPanel
+                clip: true
 
-                alignment: Qt.AlignTop|Qt.AlignLeft
+                anchors.fill: parent
+                anchors.leftMargin: -Constants.margin
+                anchors.topMargin: -Constants.margin
 
-                anchors.left: parent.left
-                anchors.top: parent.top
-
-                horizontalOffset: -Constants.margin
-                verticalOffset: -Constants.margin
-
-                initiallyOpen: false
-                disableItemWhenClosed: false
-
-                item: Find
+                // @disable-check M300
+                SlidingPanel
                 {
-                    id: find
+                    id: findPanel
 
-                    document: root
+                    alignment: Qt.AlignTop|Qt.AlignLeft
 
-                    onShown: { findPanel.show(); }
-                    onHidden: { findPanel.hide(); }
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+
+                    initiallyOpen: false
+                    disableItemWhenClosed: false
+
+                    item: Find
+                    {
+                        id: find
+
+                        document: root
+
+                        onShown: { findPanel.show(); }
+                        onHidden: { findPanel.hide(); }
+                    }
                 }
             }
 

@@ -9,9 +9,6 @@ Item
     property int alignment: Qt.AlignTop
     property int direction: Qt.Vertical
 
-    property int horizontalOffset: 0
-    property int verticalOffset: 0
-
     function _updateAlignment()
     {
         if(item !== null)
@@ -39,15 +36,12 @@ Item
         _updateAlignment();
     }
 
-    property int _expandedWidth: item.width + root.horizontalOffset;
-    property int _expandedHeight: item.height + root.verticalOffset;
-
     property int _expandedDimension:
     {
         if(direction === Qt.Vertical)
-            return _expandedHeight;
+            return item.height;
 
-        return _expandedWidth;
+        return item.width;
     }
 
     property int _currentDimension:
@@ -60,8 +54,8 @@ Item
 
     function _resetDimensionBindings()
     {
-        implicitWidth = Qt.binding(function() { return _expandedWidth; } );
-        implicitHeight = Qt.binding(function() { return _expandedHeight; } );
+        implicitWidth = Qt.binding(function() { return item.width; } );
+        implicitHeight = Qt.binding(function() { return item.height; } );
     }
 
     onItemChanged:
