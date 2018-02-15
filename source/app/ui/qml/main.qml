@@ -892,7 +892,6 @@ ApplicationWindow
     {
         id: dumpGraphAction
         text: qsTr("Dump graph to qDebug")
-        shortcut: "Ctrl+D"
         enabled: application.debugEnabled
         onTriggered: currentDocument && currentDocument.dumpGraph()
     }
