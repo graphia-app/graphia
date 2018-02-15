@@ -7,8 +7,8 @@
 #include <algorithm>
 #include <cmath>
 
-ScopeTimer::ScopeTimer(const QString& name, size_t numSamples) :
-    _name(name), _numSamples(numSamples)
+ScopeTimer::ScopeTimer(QString name, size_t numSamples) :
+    _name(std::move(name)), _numSamples(numSamples)
 {
     _elapsedTimer.start();
 }
