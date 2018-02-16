@@ -623,7 +623,7 @@ Item
 
                 anchors.fill: parent
                 anchors.leftMargin: -Constants.margin
-                anchors.topMargin: -Constants.margin
+                anchors.topMargin: -(Constants.margin * 4)
 
                 // @disable-check M300
                 SlidingPanel
@@ -1111,10 +1111,17 @@ Item
         return false;
     }
 
-    property bool findHasFocus: find.hasTextFocus
-    function showFind(includeAdvancedOptions)
+    readonly property bool findVisible: find.showing
+    readonly property int findType: find.type
+    readonly property bool findHasFocus: find.hasTextFocus
+    function showFind(findType)
     {
-        find.show(includeAdvancedOptions);
+        find.show(findType);
+    }
+
+    function hideFind()
+    {
+        find.hide();
     }
 
     MessageDialog

@@ -664,6 +664,7 @@ ApplicationWindow
     Action
     {
         id: selectAllAction
+        iconName: "edit-select-all"
         text: qsTr("Select &All")
         shortcut: "Ctrl+Shift+A"
         enabled: currentDocument ? currentDocument.idle : false
@@ -673,6 +674,7 @@ ApplicationWindow
     Action
     {
         id: selectAllVisibleAction
+        iconName: "edit-select-all"
         text: qsTr("Select All &Visible")
         shortcut: "Ctrl+A"
         enabled: currentDocument ? currentDocument.idle : false
@@ -729,7 +731,16 @@ ApplicationWindow
         text: qsTr("&Find")
         shortcut: "Ctrl+F"
         enabled: currentDocument ? currentDocument.idle : false
-        onTriggered: currentDocument && currentDocument.showFind(false)
+        onTriggered:
+        {
+            if(currentDocument)
+            {
+                if(!currentDocument.findVisible || currentDocument.findType !== Find.Simple)
+                    currentDocument.showFind(Find.Simple);
+                else
+                    currentDocument.hideFind();
+            }
+        }
     }
 
     Action
@@ -739,7 +750,35 @@ ApplicationWindow
         text: qsTr("Advanced Find")
         shortcut: "Ctrl+Shift+F"
         enabled: currentDocument ? currentDocument.idle : false
-        onTriggered: currentDocument && currentDocument.showFind(true)
+        onTriggered:
+        {
+            if(currentDocument)
+            {
+                if(!currentDocument.findVisible || currentDocument.findType !== Find.Advanced)
+                    currentDocument.showFind(Find.Advanced);
+                else
+                    currentDocument.hideFind();
+            }
+        }
+    }
+
+    Action
+    {
+        id: selectByAttributeAction
+        iconName: "format-indent-more"
+        text: qsTr("Select By Attribute")
+        shortcut: "Ctrl+H"
+        enabled: currentDocument ? currentDocument.idle : false
+        onTriggered:
+        {
+            if(currentDocument)
+            {
+                if(!currentDocument.findVisible || currentDocument.findType !== Find.SelectByAttribute)
+                    currentDocument.showFind(Find.SelectByAttribute);
+                else
+                    currentDocument.hideFind();
+            }
+        }
     }
 
     Action
@@ -1082,12 +1121,13 @@ ApplicationWindow
             MenuItem { action: selectAllVisibleAction }
             MenuItem { action: selectNoneAction }
             MenuItem { action: invertSelectionAction }
+            MenuItem { action: selectByAttributeAction }
             MenuItem { action: selectSourcesAction }
             MenuItem { action: selectTargetsAction }
             MenuItem { action: selectNeighboursAction }
             MenuSeparator {}
-            MenuItem { action: findAction}
-            MenuItem { action: advancedFindAction}
+            MenuItem { action: findAction }
+            MenuItem { action: advancedFindAction }
             MenuItem
             {
                 action: currentDocument ? currentDocument.selectPreviousFoundAction : nullAction

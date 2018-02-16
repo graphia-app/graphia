@@ -28,6 +28,9 @@
 		<file>Tango/16x16/actions/edit-redo.png</file>
 		<file>Tango/22x22/actions/edit-redo.png</file>
 		<file>Tango/32x32/actions/edit-redo.png</file>
+		<file>Tango/16x16/actions/edit-select-all.png</file>
+		<file>Tango/22x22/actions/edit-select-all.png</file>
+		<file>Tango/32x32/actions/edit-select-all.png</file>
 		<file>Tango/16x16/actions/edit-undo.png</file>
 		<file>Tango/22x22/actions/edit-undo.png</file>
 		<file>Tango/32x32/actions/edit-undo.png</file>
@@ -37,6 +40,9 @@
 		<file>Tango/16x16/mimetypes/font-x-generic.png</file>
 		<file>Tango/22x22/mimetypes/font-x-generic.png</file>
 		<file>Tango/32x32/mimetypes/font-x-generic.png</file>
+		<file>Tango/16x16/actions/format-indent-more.png</file>
+		<file>Tango/22x22/actions/format-indent-more.png</file>
+		<file>Tango/32x32/actions/format-indent-more.png</file>
 		<file>Tango/16x16/actions/format-justify-fill.png</file>
 		<file>Tango/22x22/actions/format-justify-fill.png</file>
 		<file>Tango/32x32/actions/format-justify-fill.png</file>

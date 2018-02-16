@@ -19,9 +19,14 @@ Rectangle
     property var selectPreviousAction: _selectPreviousAction
     property var selectNextAction: _selectNextAction
 
-    property bool hasTextFocus: findField.focus
+    readonly property bool hasTextFocus: findField.focus
 
     property string lastSearchedAttributeName
+
+    readonly property bool showing: _visible
+
+    readonly property int type: _type
+    property int _type: Find.Simple
 
     property bool _visible: false
 
@@ -30,7 +35,7 @@ Rectangle
 
     property int _options:
     {
-        if(!advancedRow.visible)
+        if(_type !== Find.Advanced)
             return FindOptions.MatchUsingRegex;
 
         var o = 0;
@@ -49,15 +54,18 @@ Rectangle
 
     on_OptionsChanged: { _doFind(); }
 
-    property var _attributes:
+    property var _findAttributes:
     {
-        if(advancedRow.visible && attributeCheckBox.checked)
+        if(_type === Find.Advanced && attributeCheckBox.checked)
             return [attributeComboBox.currentText];
 
         return [];
     }
 
-    on_AttributesChanged: { _doFind(); }
+    on_FindAttributesChanged:
+    {
+        _doFind();
+    }
 
     function _doFind()
     {
@@ -67,7 +75,7 @@ Rectangle
         if(!_finding)
         {
             _finding = true;
-            document.find(findField.text, _options, _attributes);
+            document.find(findField.text, _options, _findAttributes);
         }
         else
             _pendingFind = true;
@@ -163,6 +171,43 @@ Rectangle
         }
     }
 
+    ValueFilter
+    {
+        id: searchableAttributesFilter
+        roleName: "searchable"
+        value: true
+    }
+
+    ValueFilter
+    {
+        id: stringAttributesFilter
+        roleName: "valueType"
+        value: "Textual"
+    }
+
+    SortFilterProxyModel
+    {
+        id: proxyModel
+        filters:
+        {
+            if(_type === Find.Advanced)
+                return [searchableAttributesFilter];
+            else if(_type === Find.SelectByAttribute)
+                return [stringAttributesFilter];
+
+            return [];
+        }
+
+        function rowIndexForAttributeName(attributeName)
+        {
+            for(var i = 0; i < rowCount(); i++)
+            {
+                if(data(index(i, 0)) === attributeName)
+                    return i;
+            }
+        }
+    }
+
     RowLayout
     {
         id: row
@@ -170,69 +215,95 @@ Rectangle
         // The ColumnLayout in a RowLayout is just a hack to get some padding
         ColumnLayout
         {
-            Layout.topMargin: Constants.padding + Constants.margin - 2
+            Layout.topMargin: Constants.padding - root.parent.parent.anchors.topMargin
             Layout.bottomMargin: Constants.padding
-            Layout.leftMargin: Constants.padding + Constants.margin - 2
+            Layout.leftMargin: Constants.padding - root.parent.parent.anchors.leftMargin
             Layout.rightMargin: Constants.padding
 
             RowLayout
             {
-                TextField
+                RowLayout
                 {
-                    id: findField
-                    width: 150
+                    visible: _type === Find.Simple || _type === Find.Advanced
 
-                    onTextChanged:
+                    TextField
                     {
-                        _doFind();
+                        id: findField
+                        width: 150
+
+                        onTextChanged:
+                        {
+                            _doFind();
+                        }
+
+                        onAccepted: { selectAllAction.trigger(); }
+
+                        style: TextFieldStyle
+                        {
+                            background: Rectangle
+                            {
+                                implicitWidth: 192
+                                color: "transparent"
+                            }
+                        }
                     }
 
-                    onAccepted: { selectAllAction.trigger(); }
-
-                    style: TextFieldStyle
+                    Item
                     {
-                        background: Rectangle
+                        Layout.fillHeight: true
+                        implicitWidth: 80
+
+                        Text
                         {
-                            implicitWidth: 192
-                            color: "transparent"
+                            anchors.fill: parent
+
+                            wrapMode: Text.NoWrap
+                            elide: Text.ElideLeft
+                            horizontalAlignment: Text.AlignRight
+                            verticalAlignment: Text.AlignVCenter
+
+                            visible: findField.length > 0
+                            text:
+                            {
+                                var index = document.foundIndex + 1;
+
+                                if(index > 0)
+                                    return index + qsTr(" of ") + document.numNodesFound;
+                                else if(document.numNodesFound > 0)
+                                    return document.numNodesFound + qsTr(" found");
+                                else
+                                    return qsTr("Not Found");
+                            }
+                            color: "grey"
+
+                        }
+
+                        MouseArea
+                        {
+                            anchors.fill: parent
+                            onClicked: { findField.forceActiveFocus(); }
                         }
                     }
                 }
 
-                Item
+                RowLayout
                 {
-                    Layout.fillHeight: true
-                    implicitWidth: 80
+                    visible: _type === Find.SelectByAttribute
 
-                    Text
+                    ComboBox
                     {
-                        anchors.fill: parent
+                        id: selectAttributeComboBox
+                        implicitWidth: 150
 
-                        wrapMode: Text.NoWrap
-                        elide: Text.ElideLeft
-                        horizontalAlignment: Text.AlignRight
-                        verticalAlignment: Text.AlignVCenter
+                        textRole: "display"
 
-                        visible: findField.length > 0
-                        text:
-                        {
-                            var index = document.foundIndex + 1;
-
-                            if(index > 0)
-                                return index + qsTr(" of ") + document.numNodesFound;
-                            else if(document.numNodesFound > 0)
-                                return document.numNodesFound + qsTr(" found");
-                            else
-                                return qsTr("Not Found");
-                        }
-                        color: "grey"
-
+                        model: proxyModel
                     }
 
-                    MouseArea
+                    ComboBox
                     {
-                        anchors.fill: parent
-                        onClicked: { findField.forceActiveFocus(); }
+                        id: valueComboBox
+                        implicitWidth: 150
                     }
                 }
 
@@ -240,13 +311,17 @@ Rectangle
 
                 ToolButton { action: _selectPreviousAction }
                 ToolButton { action: _selectNextAction }
-                ToolButton { action: selectAllAction }
+                ToolButton
+                {
+                    visible: _type === Find.Simple || _type === Find.Advanced
+                    action: selectAllAction
+                }
                 ToolButton { action: closeAction }
             }
 
             RowLayout
             {
-                id: advancedRow
+                visible: _type === Find.Advanced
 
                 Rectangle { width: Constants.padding }
 
@@ -263,19 +338,7 @@ Rectangle
                     enabled: attributeCheckBox.checked
                     textRole: "display"
 
-                    // Restrict the attribute list to only those which are searchable
-                    model: SortFilterProxyModel
-                    {
-                        id: proxyModel
-                        filters:
-                        [
-                            ValueFilter
-                            {
-                                roleName: "searchable"
-                                value: true
-                            }
-                        ]
-                    }
+                    model: proxyModel
 
                     onEnabledChanged:
                     {
@@ -312,38 +375,61 @@ Rectangle
         }
     }
 
-    function show(includeAdvancedOptions)
+    function show(findType)
     {
+        if(findType === undefined)
+            _type = Find.Simple;
+        else
+            _type = findType;
+
         proxyModel.sourceModel = document.availableAttributes(ElementType.Node);
-        var model = proxyModel;
+        var rowIndex = proxyModel.rowIndexForAttributeName(lastSearchedAttributeName);
 
-        for(var i = 0; i < model.rowCount(); i++)
+        if(_type === Find.Advanced)
         {
-            var attributeName = model.data(model.index(i, 0));
-
-            if(attributeName === lastSearchedAttributeName)
+            if(rowIndex >= 0)
             {
-                attributeComboBox.currentIndex = i;
+                attributeComboBox.currentIndex = rowIndex;
                 attributeCheckBox.checked = true;
-                break;
+            }
+            else
+            {
+                attributeComboBox.currentIndex = 0;
+                attributeCheckBox.checked = false;
             }
         }
-
-        if(i === model.rowCount())
+        else if(_type === Find.SelectByAttribute)
         {
-            attributeComboBox.currentIndex = 0;
-            attributeCheckBox.checked = false;
+            if(rowIndex >= 0)
+                selectAttributeComboBox.currentIndex = rowIndex;
+            else
+                selectAttributeComboBox.currentIndex = 0;
         }
 
-        advancedRow.visible = includeAdvancedOptions;
-
         root._visible = true;
-        findField.forceActiveFocus();
-        findField.selectAll();
+
+        if(_type === Find.Simple || _type === Find.Advanced)
+        {
+            findField.forceActiveFocus();
+            findField.selectAll();
+        }
 
         shown();
     }
 
+    function hide()
+    {
+        closeAction.trigger();
+    }
+
     signal shown();
     signal hidden();
+
+    // At the bottom of the file to avoid (completely) screwing up QtCreator's (4.5.1) syntax highlighting
+    enum FindType
+    {
+        Simple,
+        Advanced,
+        SelectByAttribute
+    }
 }
