@@ -60,25 +60,20 @@ double EnrichmentCalculator::Fishers(int a, int b, int c, int d)
     return twoPval;
 }
 
-EnrichmentCalculator::Table EnrichmentCalculator::overRepAgainstEachAttribute(NodeIdSet& selectedNodeIds, QString attributeAgainst,
+EnrichmentCalculator::Table EnrichmentCalculator::overRepAgainstEachAttribute(QString attributeAgainst, QString attributeFor,
                                                        IGraphModel* graphModel, ICommand& command)
 {
     // Count of attribute values within the attribute
     std::map<QString, int> attributeValueEntryCountTotal;
-    std::map<QString, int> attributeValueEntryCountSelected;
+    std::map<QString, int> attributeValueEntryForCountTotal;
     Table tableModel;
-    using Row = EnrichmentCalculator::Row;
 
     for(auto nodeId : graphModel->graph().nodeIds())
     {
         auto& stringAttributeValue = graphModel->attributeByName(attributeAgainst)->stringValueOf(nodeId);
+        auto& stringAttributeForValue = graphModel->attributeByName(attributeFor)->stringValueOf(nodeId);
         ++attributeValueEntryCountTotal[stringAttributeValue];
-    }
-
-    for(auto nodeId : selectedNodeIds)
-    {
-        auto& stringAttributeValue = graphModel->attributeByName(attributeAgainst)->stringValueOf(nodeId);
-        ++attributeValueEntryCountSelected[stringAttributeValue];
+        ++attributeValueEntryForCountTotal[stringAttributeForValue];
     }
 
     int n = 0;
@@ -93,60 +88,79 @@ EnrichmentCalculator::Table EnrichmentCalculator::overRepAgainstEachAttribute(No
     double expectedOverrep = 0.0;
     double zScore = 0.0;
 
+    // Comparing
+
     int progress = 0;
+    int iterCount = attributeValueEntryForCountTotal.size() * attributeValueEntryCountTotal.size();
 
-    // Cluster is against attribute!
-    for(auto& attributeValue : u::keysFor(attributeValueEntryCountSelected))
+    // Get all the nodeIds for each AttributeFor value
+    // Maps of vectors uhoh.
+    auto* attribute = graphModel->attributeByName(attributeFor);
+    std::map<QString, std::vector<NodeId>> nodeIdsForAttributeValue;
+    for(auto nodeId : graphModel->graph().nodeIds())
+        nodeIdsForAttributeValue[attribute->stringValueOf(nodeId)].push_back(nodeId);
+
+    for(auto& attributeValueFor : u::keysFor(attributeValueEntryForCountTotal))
     {
-        Row row(9);
-        command.setProgress((1.0 / attributeValueEntryCountSelected.size()) * progress);
-        progress++;
+        auto& selectedNodes = nodeIdsForAttributeValue[attributeValueFor];
 
-        n = graphModel->graph().numNodes();
+        for(auto& attributeValue : u::keysFor(attributeValueEntryCountTotal))
+        {
+            Row row(9);
+            command.setProgress(progress / iterCount);
+            progress++;
 
-        selectedInCategory = attributeValueEntryCountSelected[attributeValue];
-        
-        r1 = attributeValueEntryCountTotal[attributeValue];
-        fobs = static_cast<double>(selectedInCategory) / static_cast<double>(selectedNodeIds.size());
-        fexp = static_cast<double>(r1) / static_cast<double>(n);
-        overRepresentation = fobs / fexp;
-        stdevs = doRandomSampling(static_cast<int>(selectedNodeIds.size()), fexp);
+            n = graphModel->graph().numNodes();
 
-        expectedNo = (static_cast<double>(r1) / static_cast<double>(n)
-                                            * static_cast<double>(selectedNodeIds.size()));
-        expectedDev = stdevs[0] * static_cast<double>(selectedNodeIds.size());
-        expectedOverrep = stdevs[3];
-        zScore = (overRepresentation - expectedOverrep) / stdevs[1];
+            auto* attribute = graphModel->attributeByName(attributeAgainst);
+            selectedInCategory = 0;
+            for(auto nodeId : selectedNodes)
+            {
+                if(attribute->stringValueOf(nodeId) == attributeValue)
+                    selectedInCategory++;
+            }
 
-        auto nonSelectedInCategory = r1 - selectedInCategory;
-        auto c1 = static_cast<int>(selectedNodeIds.size());
-        auto selectedNotInCategory = c1 - selectedInCategory;
-        auto c2 = n - c1;
-        auto nonSelectedNotInCategory = c2 - nonSelectedInCategory;
-        auto f = Fishers(selectedInCategory, nonSelectedInCategory, selectedNotInCategory, nonSelectedNotInCategory);
+            r1 = attributeValueEntryCountTotal[attributeValue];
+            fobs = static_cast<double>(selectedInCategory) / static_cast<double>(selectedNodes.size());
+            fexp = static_cast<double>(r1) / static_cast<double>(n);
+            overRepresentation = fobs / fexp;
+            stdevs = doRandomSampling(static_cast<int>(selectedNodes.size()), fexp);
 
-        qDebug() << attributeValue;
+            expectedNo = (static_cast<double>(r1) / static_cast<double>(n)
+                                                * static_cast<double>(selectedNodes.size()));
+            expectedDev = stdevs[0] * static_cast<double>(selectedNodes.size());
+            expectedOverrep = stdevs[3];
+            zScore = (overRepresentation - expectedOverrep) / stdevs[1];
 
-        row[0] = attributeValue;
-        row[1] = QString::number(selectedInCategory) + "/" + QString::number(selectedNodeIds.size());
-        row[2] = QString::number(expectedNo) + "/" + QString::number(selectedNodeIds.size());
-        row[3] = QString::number(expectedNo) + "/" + QString::number(selectedNodeIds.size()) + "±" + QString::number(expectedDev);
-        row[4] = QString::number(fobs);
-        row[5] = QString::number(fexp);
-        row[6] = QString::number(selectedInCategory / expectedNo);
-        row[7] = QString::number(zScore);
-        row[8] = QString::number(f);
+            auto nonSelectedInCategory = r1 - selectedInCategory;
+            auto c1 = static_cast<int>(selectedNodes.size());
+            auto selectedNotInCategory = c1 - selectedInCategory;
+            auto c2 = n - c1;
+            auto nonSelectedNotInCategory = c2 - nonSelectedInCategory;
+            auto f = Fishers(selectedInCategory, nonSelectedInCategory, selectedNotInCategory, nonSelectedNotInCategory);
 
-        qDebug() << "Observed" << selectedInCategory << "/" << selectedNodeIds.size();
-        qDebug() << "Expected" << expectedNo << "/" << selectedNodeIds.size();
-        qDebug() << "ExpectedTrial" << expectedNo << "/" << selectedNodeIds.size() << "±" << expectedDev;
-        qDebug() << "FObs" << fobs;
-        qDebug() << "FExp" << fexp;
-        qDebug() << "OverRep" << selectedInCategory / expectedNo;
-        qDebug() << "ZScore" << zScore;
-        qDebug() << "Fishers" << f;
-        tableModel.push_back(row);
+            row[0] = attributeValueFor;
+            row[1] = attributeValue;
+            row[2] = QString::number(selectedInCategory) + " / " + QString::number(selectedNodes.size());
+            row[3] = QString::number(expectedNo, 'f', 2) + " / " + QString::number(selectedNodes.size());
+            row[4] = QString::number(expectedNo, 'f', 2) + " / " + QString::number(selectedNodes.size()) + " ± " + QString::number(expectedDev);
+            row[5] = QString::number(selectedInCategory / expectedNo, 'f', 2);
+            row[6] = QString::number(f, 'f', 2);
+
+            qDebug() << "For Attribute" << attributeValueFor;
+            qDebug() << "Against Attribute" << attributeValue;
+            qDebug() << "Observed" << selectedInCategory << "/" << selectedNodes.size();
+            qDebug() << "Expected" << expectedNo << "/" << selectedNodes.size();
+            qDebug() << "ExpectedTrial" << expectedNo << "/" << selectedNodes.size() << "±" << expectedDev;
+            qDebug() << "FObs" << fobs;
+            qDebug() << "FExp" << fexp;
+            qDebug() << "OverRep" << selectedInCategory / expectedNo;
+            qDebug() << "ZScore" << zScore;
+            qDebug() << "Fishers" << f;
+            tableModel.push_back(row);
+        }
     }
+
     return tableModel;
 }
 

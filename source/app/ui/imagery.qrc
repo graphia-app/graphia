@@ -6,5 +6,6 @@
         <file>imagery/mcl.svg</file>
         <file>imagery/visualisations.svg</file>
         <file>imagery/overview.png</file>
+        <file>imagery/bellcurve.svg</file>
     </qresource>
 </RCC>

@@ -17,7 +17,7 @@ public:
     EnrichmentCalculator();
     static double Fishers(int a, int b, int c, int d);
     static std::vector<double> doRandomSampling(int totalGenes, double expectedFrequency);
-    static Table overRepAgainstEachAttribute(NodeIdSet &selectedNodeIds, QString attributeAgainst, IGraphModel *graphModel, ICommand &command);
+    static Table overRepAgainstEachAttribute(QString attributeAgainst, QString attributeFor, IGraphModel *graphModel, ICommand &command);
 };
 
 #endif // ENRICHMENTCALCULATOR_H

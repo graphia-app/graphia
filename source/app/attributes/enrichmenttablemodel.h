@@ -17,7 +17,7 @@ private:
 public:
     EnrichmentTableModel(QObject* parent = nullptr);
 
-    const int COLUMN_COUNT = 9;
+    const int COLUMN_COUNT = 7;
 
     int rowCount(const QModelIndex &parent) const override;
     int columnCount(const QModelIndex &parent) const override;

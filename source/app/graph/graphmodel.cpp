@@ -656,6 +656,18 @@ Attribute GraphModel::attributeValueByName(const QString& name) const
     return attribute;
 }
 
+std::vector<NodeId> GraphModel::nodeIdsByAttributeValue(const QString &attributeName, const QString &attributeValue) const
+{
+    auto* attribute = attributeByName(attributeName);
+    std::vector<NodeId> nodeIds;
+    for(auto nodeId : graph().nodeIds())
+    {
+        if (attribute->stringValueOf(nodeId).compare(attributeValue) == 0)
+            nodeIds.push_back(nodeId);
+    }
+    return nodeIds;
+}
+
 static void calculateAttributeRanges(const Graph* graph,
     std::map<QString, Attribute>& attributes)
 {

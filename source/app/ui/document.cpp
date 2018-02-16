@@ -1998,10 +1998,9 @@ void Document::performEnrichment(QStringList selectedAttributesAgainst, QString 
             QString(tr("Performing Enrichment Analysis")),
             QString(tr("Enrichment Analysis Complete"))
         },
-    [this, selectedAttributesAgainst, tableModel](Command& command) mutable
+    [this, selectedAttributesAgainst, selectedAttribute, tableModel](Command& command) mutable
     {
-        auto result = EnrichmentCalculator::overRepAgainstEachAttribute(selectionManager()->selectedNodes(),
-                                                                        selectedAttributesAgainst[0],
+        auto result = EnrichmentCalculator::overRepAgainstEachAttribute(selectedAttributesAgainst[0], selectedAttribute,
                                                                         graphModel(), command);
         tableModel->setTableData(result);
         tableModel->toJson();

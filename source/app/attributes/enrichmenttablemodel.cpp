@@ -32,15 +32,13 @@ QVariant EnrichmentTableModel::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> EnrichmentTableModel::roleNames() const
 {
     QHash<int, QByteArray> _roleNames;
-    _roleNames[Qt::UserRole] = "Selection";
-    _roleNames[Qt::UserRole + 1] = "Observed";
-    _roleNames[Qt::UserRole + 2] = "Expected";
-    _roleNames[Qt::UserRole + 3] = "ExpectedTrial";
-    _roleNames[Qt::UserRole + 4] = "FObs";
-    _roleNames[Qt::UserRole + 5] = "FExp";
-    _roleNames[Qt::UserRole + 6] = "OverRep";
-    _roleNames[Qt::UserRole + 7] = "ZScore";
-    _roleNames[Qt::UserRole + 8] = "Fishers";
+    _roleNames[Qt::UserRole] = "Attribute Group";
+    _roleNames[Qt::UserRole + 1] = "Selection";
+    _roleNames[Qt::UserRole + 2] = "Observed";
+    _roleNames[Qt::UserRole + 3] = "Expected";
+    _roleNames[Qt::UserRole + 4] = "ExpectedTrial";
+    _roleNames[Qt::UserRole + 5] = "OverRep";
+    _roleNames[Qt::UserRole + 6] = "Fishers";
     return _roleNames;
 }
 

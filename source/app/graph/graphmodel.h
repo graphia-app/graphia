@@ -116,6 +116,7 @@ public:
 
     const Attribute* attributeByName(const QString& name) const override;
     Attribute attributeValueByName(const QString& name) const;
+    std::vector<NodeId> nodeIdsByAttributeValue(const QString &attributeName, const QString &attributeValue) const;
 
     void initialiseAttributeRanges();
     void initialiseUniqueAttributeValues();

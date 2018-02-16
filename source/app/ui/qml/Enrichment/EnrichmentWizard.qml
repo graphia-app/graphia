@@ -15,14 +15,12 @@ Wizard
 
     // Must be set before opening
     property var attributeGroups
-    property var selectedNodeCount
 
     property var selectedAttributeGroupsAgainst: []
     property var selectedAttributeGroup: []
     property bool attributesSelected: false
 
-    finishEnabled: attributesSelected && selectedNodeCount > 1
-    nextEnabled: selectedNodeCount > 1
+    finishEnabled: attributesSelected
 
     function reset()
     {
@@ -63,24 +61,6 @@ Wizard
                         textFormat: Text.StyledText
                         Layout.fillWidth: true
                     }
-
-                    Text
-                    {
-                        text: qsTr("<font color='red'><strong>Please select more than 1 node to perform enrichment</strong></font>")
-                        wrapMode: Text.WordWrap
-                        textFormat: Text.StyledText
-                        Layout.fillWidth: true
-                        visible: selectedNodeCount < 2
-                    }
-
-                    Text
-                    {
-                        text: qsTr("<strong>This will peform enrichment on " + selectedNodeCount + " selected node(s)</strong>")
-                        wrapMode: Text.WordWrap
-                        textFormat: Text.StyledText
-                        Layout.fillWidth: true
-                        visible: selectedNodeCount > 1
-                    }
                 }
 
                 Image
@@ -88,9 +68,9 @@ Wizard
                     anchors.top: parent.top
                     Layout.minimumWidth: 100
                     Layout.minimumHeight: 100
+                    fillMode: Image.PreserveAspectFit
                     sourceSize.width: 100
-                    sourceSize.height: 100
-                    source: "../plots.svg"
+                    source: "qrc:///imagery/bellcurve.svg"
                 }
             }
         }
@@ -192,6 +172,10 @@ Wizard
                         ExclusiveGroup
                         {
                             id: attributeSelectedExGroup
+                            onCurrentChanged:
+                            {
+                                selectedAttributeGroup = current.text;
+                            }
                         }
 
                         Repeater
@@ -206,6 +190,7 @@ Wizard
                         }
                     }
                 }
+
             }
         }
     }
