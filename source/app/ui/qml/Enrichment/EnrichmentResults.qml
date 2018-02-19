@@ -6,10 +6,10 @@ import SortFilterProxyModel 0.2
 
 Window
 {
+    property var models
     title: qsTr("Enrichment Results")
     height: 200
     width: 800
-    property var models;
     ColumnLayout
     {
         anchors.fill: parent
@@ -22,19 +22,21 @@ Window
                 {
                     iconName: "edit-delete"
                     onClicked: models.remove(models.get(tabView.currentIndex))
+                    tooltip: qsTr("Delete result table")
                 }
                 ToolButton
                 {
                     id: showOnlyEnrichedButton
                     iconName: "utilities-system-monitor"
                     checkable: true
+                    tooltip: qsTr("Show only over-represented")
                 }
             }
         }
         Text
         {
             anchors.centerIn: parent
-            text: "No Results";
+            text: qsTr("No Results")
             visible: tabView.count === 0
         }
         TabView
@@ -76,8 +78,8 @@ Window
                             sorters: ExpressionSorter
                             {
                                 id: sorter
-                                property var roleName;
-                                property var order;
+                                property var roleName
+                                property var order
                                 expression:
                                 {
                                     if(roleName === undefined)
@@ -111,13 +113,13 @@ Window
                             }
                         }
 
-                        TableViewColumn { role: "Attribute Group"; title: "Attribute Group"; width: 100 }
-                        TableViewColumn { role: "Selection"; title: "Selection"; width: 100 }
-                        TableViewColumn { role: "Observed"; title: "Observed"; width: 100 }
-                        TableViewColumn { role: "Expected"; title: "Expected"; width: 100 }
-                        TableViewColumn { role: "ExpectedTrial"; title: "ExpectedTrial"; width: 100 }
-                        TableViewColumn { role: "OverRep"; title: "OverRep"; width: 100 }
-                        TableViewColumn { role: "Fishers"; title: "Fishers"; width: 100 }
+                        TableViewColumn { role: "Attribute Group"; title:  qsTr("Attribute Group"); width: 100 }
+                        TableViewColumn { role: "Selection"; title: qsTr("Selection"); width: 100 }
+                        TableViewColumn { role: "Observed"; title: qsTr("Observed"); width: 100 }
+                        TableViewColumn { role: "Expected"; title: qsTr("Expected"); width: 100 }
+                        TableViewColumn { role: "Expected Trial"; title: qsTr("ExpectedTrial"); width: 100 }
+                        TableViewColumn { role: "Over-representation"; title: qsTr("OverRep"); width: 100 }
+                        TableViewColumn { role: "Fishers"; title: qsTr("Fishers"); width: 100 }
                     }
                 }
             }
