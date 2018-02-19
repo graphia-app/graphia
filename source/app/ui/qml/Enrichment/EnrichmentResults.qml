@@ -117,8 +117,8 @@ Window
                         TableViewColumn { role: "Selection"; title: qsTr("Selection"); width: 100 }
                         TableViewColumn { role: "Observed"; title: qsTr("Observed"); width: 100 }
                         TableViewColumn { role: "Expected"; title: qsTr("Expected"); width: 100 }
-                        TableViewColumn { role: "Expected Trial"; title: qsTr("ExpectedTrial"); width: 100 }
-                        TableViewColumn { role: "Over-representation"; title: qsTr("OverRep"); width: 100 }
+                        TableViewColumn { role: "ExpectedTrial"; title: qsTr("Expected Trial"); width: 100 }
+                        TableViewColumn { role: "OverRep"; title: qsTr("Over-Representation"); width: 100 }
                         TableViewColumn { role: "Fishers"; title: qsTr("Fishers"); width: 100 }
                     }
                 }
