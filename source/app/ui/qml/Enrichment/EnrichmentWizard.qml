@@ -19,8 +19,9 @@ Wizard
     property var selectedAttributeGroupsAgainst: []
     property var selectedAttributeGroup: []
     property bool attributesSelected: false
+    property bool attribute: value
 
-    finishEnabled: attributesSelected
+    finishEnabled: attributesSelected && (attributeSelectedExGroup.current != null)
 
     function reset()
     {
@@ -99,7 +100,7 @@ Wizard
                 Text
                 {
                     text: qsTr("Please select the attribute group(s) to perform<br>"+
-                               "enrichment analysis against")
+                               "enrichment analysis on")
                     Layout.alignment: Qt.AlignLeft
                     textFormat: Text.StyledText
                     Layout.fillWidth: true
@@ -127,6 +128,13 @@ Wizard
                                         selectedAttributeGroupsAgainst.splice(index, 1);
                                     }
                                     attributesSelected = (selectedAttributeGroupsAgainst.length > 0);
+
+                                    // Disable analysis on selected
+                                    for(var i=0; i<attributeSelectedRepeater.count; i++)
+                                    {
+                                        if(attributeSelectedRepeater.itemAt(i).text === modelData)
+                                            attributeSelectedRepeater.itemAt(i).enabled = !checked;
+                                    }
                                 }
                             }
                         }
@@ -157,8 +165,8 @@ Wizard
 
                 Text
                 {
-                    text: qsTr("Please select the attribute group(s) to perform<br>"+
-                               "enrichment analysis on")
+                    text: qsTr("Please select the attribute to test for<br>"+
+                               "enrichment")
                     Layout.alignment: Qt.AlignLeft
                     textFormat: Text.StyledText
                     Layout.fillWidth: true
