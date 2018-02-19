@@ -16,10 +16,19 @@ Window
         ToolBar
         {
             anchors.fill: parent
-            ToolButton
+            RowLayout
             {
-                iconName: "edit-delete"
-                onClicked: models.remove(models.get(tabView.currentIndex))
+                ToolButton
+                {
+                    iconName: "edit-delete"
+                    onClicked: models.remove(models.get(tabView.currentIndex))
+                }
+                ToolButton
+                {
+                    id: showOnlyEnrichedButton
+                    iconName: "utilities-system-monitor"
+                    checkable: true
+                }
             }
         }
         Text
@@ -90,6 +99,14 @@ Window
                                         else
                                             return modelLeft[roleName] < modelRight[roleName];
                                     }
+                                }
+                            }
+                            filters: ExpressionFilter
+                            {
+                                enabled: showOnlyEnrichedButton.checked
+                                expression:
+                                {
+                                    return Number(model["OverRep"]) > 1.0;
                                 }
                             }
                         }

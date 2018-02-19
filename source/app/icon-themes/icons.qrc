@@ -94,5 +94,8 @@
 		<file>Tango/16x16/status/weather-clear.png</file>
 		<file>Tango/22x22/status/weather-clear.png</file>
 		<file>Tango/32x32/status/weather-clear.png</file>
+		<file>Tango/16x16/apps/utilities-system-monitor.png</file>
+		<file>Tango/22x22/apps/utilities-system-monitor.png</file>
+		<file>Tango/32x32/apps/utilities-system-monitor.png</file>
 	</qresource>
 </RCC>
