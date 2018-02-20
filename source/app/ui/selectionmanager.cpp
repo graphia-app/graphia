@@ -172,12 +172,16 @@ template<typename C> void _toggleNodes(NodeIdSet& selectedNodeIds, const C& node
     selectedNodeIds = std::move(difference);
 }
 
-void SelectionManager::toggleNode(NodeId nodeId)
+bool SelectionManager::toggleNode(NodeId nodeId)
 {
     if(nodeIsSelected(nodeId))
+    {
         deselectNode(nodeId);
-    else
-        selectNode(nodeId);
+        return false;
+    }
+
+    selectNode(nodeId);
+    return true;
 }
 
 bool SelectionManager::nodeIsSelected(NodeId nodeId) const

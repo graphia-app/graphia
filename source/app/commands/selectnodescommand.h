@@ -17,7 +17,6 @@ private:
     SelectionManager* _selectionManager;
     C _nodeIds;
     bool _clearSelectionFirst;
-    bool _nodeWasSelected;
     QString _pastParticiple;
 
     NodeId nodeId() const
@@ -75,9 +74,8 @@ public:
             return nodesSelected;
         }
 
-        _selectionManager->toggleNode(nodeId());
-
-        if(!_nodeWasSelected)
+        bool nodeSelected = _selectionManager->toggleNode(nodeId());
+        if(nodeSelected)
             _pastParticiple = _selectionManager->numNodesSelectedAsString();
 
         return true;

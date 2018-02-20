@@ -27,7 +27,7 @@ public:
     bool deselectNodes(const NodeIdSet& nodeIds) override;
     bool deselectNodes(const std::vector<NodeId>& nodeIds);
 
-    void toggleNode(NodeId nodeId);
+    bool toggleNode(NodeId nodeId);
 
     bool nodeIsSelected(NodeId nodeId) const override;
 
