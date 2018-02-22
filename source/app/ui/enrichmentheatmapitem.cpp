@@ -7,7 +7,9 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPainted
 
     _customPlot.setOpenGl(true);
 
-    _colorMap = new QCPColorMap(_customPlot.xAxis, _customPlot.yAxis);
+    _colorMap = new QCPColorMap(_customPlot.xAxis, _customPlot.yAxis2);
+    _customPlot.yAxis2->setVisible(true);
+    _customPlot.yAxis->setVisible(false);
     _colorMap->setInterpolate(false);
     _colorMap->setGradient(QCPColorGradient::gpHot);
     _colorMap->data()->setSize(10, 10);
@@ -66,7 +68,7 @@ void EnrichmentHeatmapItem::update()
 
     _customPlot.xAxis->setTicker(xCategoryTicker);
     _customPlot.xAxis->setTickLabelRotation(90);
-    _customPlot.yAxis->setTicker(yCategoryTicker);
+    _customPlot.yAxis2->setTicker(yCategoryTicker);
 
     std::set<QString> attributeValueSetA;
     std::set<QString> attributeValueSetB;
@@ -89,7 +91,7 @@ void EnrichmentHeatmapItem::update()
     _colorMap->data()->setSize(attributeValueSetA.size(), attributeValueSetB.size());
     _colorMap->data()->setRange(QCPRange(0, attributeValueSetA.size()-1), QCPRange(0, attributeValueSetB.size()-1));
     _customPlot.xAxis->setRange(-0.5, attributeValueSetA.size()-0.5);
-    _customPlot.yAxis->setRange(-0.5, attributeValueSetB.size()-0.5);
+    _customPlot.yAxis2->setRange(-0.5, attributeValueSetB.size()-0.5);
 
     for(int i=0; i<_tableModel->rowCount(); i++)
     {
