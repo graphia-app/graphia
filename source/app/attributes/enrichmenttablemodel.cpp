@@ -29,6 +29,11 @@ QVariant EnrichmentTableModel::data(const QModelIndex &index, int role) const
     return value;
 }
 
+QVariant EnrichmentTableModel::data(int row, QString role)
+{
+    return data(index(row,0), roleNames().key(role.toUtf8()));
+}
+
 QHash<int, QByteArray> EnrichmentTableModel::roleNames() const
 {
     QHash<int, QByteArray> _roleNames;

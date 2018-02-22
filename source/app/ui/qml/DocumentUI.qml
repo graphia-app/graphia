@@ -340,6 +340,10 @@ Item
     {
         document.performEnrichment(selectedAttributeGroupsAgainst, selectedAttributeGroup);
     }
+    function attributeValues(attributeName)
+    {
+        return document.attributeValues(attributeName);
+    }
 
     function copyImageToClipboard()
     {

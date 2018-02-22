@@ -10,7 +10,6 @@
 #include <QQuickPaintedItem>
 #include <QVector>
 #include <QStringList>
-#include <QVector>
 
 DEFINE_QML_ENUM(Q_GADGET, PlotScaleType,
                 Raw,

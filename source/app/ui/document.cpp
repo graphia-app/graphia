@@ -2009,3 +2009,20 @@ void Document::performEnrichment(QStringList selectedAttributesAgainst, QString 
         return true;
     });
 }
+
+QStringList Document::attributeValues(QString attributeName)
+{
+    std::set<QString> values;
+    auto* attribute = graphModel()->attributeByName(attributeName);
+    if(graphModel() != nullptr)
+    {
+        for(auto nodeId : graphModel()->graph().nodeIds())
+            values.insert(attribute->stringValueOf(nodeId));
+    }
+
+    QStringList valuesList;
+    for(const auto& value: values)
+        valuesList.append(value);
+
+    return valuesList;
+}

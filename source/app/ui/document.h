@@ -419,6 +419,9 @@ public:
     Q_INVOKABLE void dumpGraph();
 
     Q_INVOKABLE void performEnrichment(QStringList selectedAttributesAgainst, QString selectedAttribute);
+
+    Q_INVOKABLE QStringList attributeValues(QString attributeName);
+
 private slots:
     void onLoadProgress(int percentage);
     void onLoadComplete(const QUrl& url, bool success);

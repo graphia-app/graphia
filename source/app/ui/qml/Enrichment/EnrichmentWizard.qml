@@ -19,7 +19,6 @@ Wizard
     property var selectedAttributeGroupsAgainst: []
     property var selectedAttributeGroup: []
     property bool attributesSelected: false
-    property bool attribute: value
 
     finishEnabled: attributesSelected && (attributeSelectedExGroup.current != null)
 
