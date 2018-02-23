@@ -313,6 +313,9 @@ public:
     template<typename E>
     void updateSharedValuesForElements(const std::vector<E>& elementIds)
     {
+        _._sharedValues.clear();
+
+        bool hasSharedValues = false;
         std::map<QString, int> values;
 
         for(auto elementId : elementIds)
@@ -320,17 +323,26 @@ public:
             auto value = stringValueOf(elementId);
 
             if(!value.isEmpty())
-                values[value]++;
+            {
+                int numValues = values[value]++;
+                if(numValues > 1)
+                    hasSharedValues = true;
+            }
         }
 
-         _._sharedValues.clear();
-         for(auto& value : values)
-             _._sharedValues.push_back({value.first, value.second});
+        // Every single value observed is unique
+        if(!hasSharedValues)
+            return;
 
-         std::sort(_._sharedValues.begin(), _._sharedValues.end(), [](const auto& a, const auto& b)
-         {
+        for(auto& value : values)
+            _._sharedValues.push_back({value.first, value.second});
+
+        // Sort in reverse order of how often the value occurs
+        std::sort(_._sharedValues.begin(), _._sharedValues.end(),
+        [](const auto& a, const auto& b)
+        {
             return a._count > b._count;
-         });
+        });
     }
 
     template<typename T, typename E, typename Fn>
