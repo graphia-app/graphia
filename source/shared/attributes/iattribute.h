@@ -16,15 +16,14 @@ enum class AttributeFlag
 {
     None                    = 0x0,
 
-    // Automatically set the range...
-    AutoRangeMutable        = 0x1, // ...using the MutableGraph ElementIds
-    AutoRangeTransformed    = 0x2, // ...using the TransformedGraph ElementIds
+    // Automatically set the range
+    AutoRange               = 0x1,
 
     // With multielements, don't process the tails in transforms
-    IgnoreTails             = 0x4,
+    IgnoreTails             = 0x2,
 
     // Indicates this is a dynamically created attribute; set automatically
-    Dynamic                 = 0x8,
+    Dynamic                 = 0x4,
 };
 
 class IGraphComponent;

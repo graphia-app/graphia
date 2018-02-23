@@ -657,18 +657,9 @@ Attribute GraphModel::attributeValueByName(const QString& name) const
 static void calculateAttributeRanges(const Graph* graph,
     std::map<QString, Attribute>& attributes)
 {
-    AttributeFlag flag = AttributeFlag::None;
-
-    if(dynamic_cast<const MutableGraph*>(graph) != nullptr)
-        flag = AttributeFlag::AutoRangeMutable;
-    else if(dynamic_cast<const TransformedGraph*>(graph) != nullptr)
-        flag = AttributeFlag::AutoRangeTransformed;
-    else
-        return;
-
     for(auto& attribute : make_value_wrapper(attributes))
     {
-        if(!attribute.testFlag(flag))
+        if(!attribute.testFlag(AttributeFlag::AutoRange))
             continue;
 
         if(attribute.elementType() == ElementType::Node)
@@ -681,7 +672,6 @@ static void calculateAttributeRanges(const Graph* graph,
 void GraphModel::initialiseAttributeRanges()
 {
     calculateAttributeRanges(&mutableGraph(), _->_attributes);
-    calculateAttributeRanges(&graph(), _->_attributes);
 }
 
 void GraphModel::enableVisualUpdates()
@@ -861,11 +851,9 @@ void GraphModel::onTransformedGraphWillChange(const Graph*)
     _transformedGraphIsChanging = true;
 }
 
-void GraphModel::onTransformedGraphChanged(const Graph* graph)
+void GraphModel::onTransformedGraphChanged(const Graph*)
 {
     _transformedGraphIsChanging = false;
-
-    calculateAttributeRanges(graph, _->_attributes);
 
     // Compare with previous Dynamic attributes
     // Check for added

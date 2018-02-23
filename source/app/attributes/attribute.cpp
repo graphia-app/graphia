@@ -118,7 +118,7 @@ Attribute::Type Attribute::type() const
 
 void Attribute::disableAutoRange()
 {
-    _.flags.reset(AttributeFlag::AutoRangeMutable, AttributeFlag::AutoRangeTransformed);
+    _.flags.reset(AttributeFlag::AutoRange);
 }
 
 bool Attribute::hasMissingValues() const

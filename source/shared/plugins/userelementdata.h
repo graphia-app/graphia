@@ -87,7 +87,7 @@ public:
                         {
                             return valueBy(elementId, userDataVectorName).toFloat();
                         })
-                        .setFlag(AttributeFlag::AutoRangeMutable);
+                        .setFlag(AttributeFlag::AutoRange);
                 break;
 
             case UserDataVector::Type::Int:
@@ -95,7 +95,7 @@ public:
                         {
                             return valueBy(elementId, userDataVectorName).toInt();
                         })
-                        .setFlag(AttributeFlag::AutoRangeMutable);
+                        .setFlag(AttributeFlag::AutoRange);
                 break;
 
             case UserDataVector::Type::String:

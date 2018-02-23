@@ -42,7 +42,7 @@ void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* doc
 
     graphModel->createAttribute(tr("Pearson Correlation Value"))
             .setFloatValueFn([this](EdgeId edgeId) { return _pearsonValues->get(edgeId); })
-            .setFlag(AttributeFlag::AutoRangeMutable)
+            .setFlag(AttributeFlag::AutoRange)
             .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">)"
                                "Pearson Correlation Coefficient</a> is an indication of "
                                "the linear relationship between two variables."));
@@ -162,25 +162,25 @@ void CorrelationPluginInstance::createAttributes()
 {
     graphModel()->createAttribute(tr("Mean Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._mean; })
-            .setFlag(AttributeFlag::AutoRangeMutable)
+            .setFlag(AttributeFlag::AutoRange)
             .setDescription(tr("The Mean Data Value is the mean of the values associated "
                                "with the node."));
 
     graphModel()->createAttribute(tr("Minimum Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._minValue; })
-            .setFlag(AttributeFlag::AutoRangeMutable)
+            .setFlag(AttributeFlag::AutoRange)
             .setDescription(tr("The Minimum Data Value is the minimum value associated "
                                "with the node."));
 
     graphModel()->createAttribute(tr("Maximum Data Value"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._maxValue; })
-            .setFlag(AttributeFlag::AutoRangeMutable)
+            .setFlag(AttributeFlag::AutoRange)
             .setDescription(tr("The Maximum Data Value is the maximum value associated "
                                "with the node."));
 
     graphModel()->createAttribute(tr("Variance"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._variance; })
-            .setFlag(AttributeFlag::AutoRangeMutable)
+            .setFlag(AttributeFlag::AutoRange)
             .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Variance">Variance</a> )"
                                "is a measure of the spread of the values associated "
                                "with the node. It is defined as ∑(𝑥-𝜇)², where 𝑥 is the value "
@@ -188,7 +188,7 @@ void CorrelationPluginInstance::createAttributes()
 
     graphModel()->createAttribute(tr("Standard Deviation"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._stddev; })
-            .setFlag(AttributeFlag::AutoRangeMutable)
+            .setFlag(AttributeFlag::AutoRange)
             .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Standard_deviation">)"
                                "Standard Deviation</a> is a measure of the spread of the values associated "
                                "with the node. It is defined as √∑(𝑥-𝜇)², where 𝑥 is the value "
@@ -197,7 +197,7 @@ void CorrelationPluginInstance::createAttributes()
     graphModel()->createAttribute(tr("Coefficient of Variation"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._coefVar; })
             .setValueMissingFn([this](NodeId nodeId) { return std::isnan(dataRowForNodeId(nodeId)._coefVar); })
-            .setFlag(AttributeFlag::AutoRangeMutable)
+            .setFlag(AttributeFlag::AutoRange)
             .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Coefficient_of_variation">)"
                                "Coefficient of Variation</a> "
                                "is a measure of the spread of the values associated "
