@@ -117,7 +117,7 @@ private:
         double floatMin = std::numeric_limits<double>::max();
         double floatMax = std::numeric_limits<double>::lowest();
 
-        std::vector<UniqueValue> _uniqueValues;
+        std::vector<SharedValue> _sharedValues;
 
         bool isValid = false;
         Flags<AttributeFlag> flags = AttributeFlag::None;
@@ -311,7 +311,7 @@ public:
     const IAttributeRange<double>& numericRange() const override { return _numericRange; }
 
     template<typename E>
-    void updateUniqueValuesForElements(const std::vector<E>& elementIds)
+    void updateSharedValuesForElements(const std::vector<E>& elementIds)
     {
         std::map<QString, int> values;
 
@@ -323,11 +323,11 @@ public:
                 values[value]++;
         }
 
-         _._uniqueValues.clear();
+         _._sharedValues.clear();
          for(auto& value : values)
-             _._uniqueValues.push_back({value.first, value.second});
+             _._sharedValues.push_back({value.first, value.second});
 
-         std::sort(_._uniqueValues.begin(), _._uniqueValues.end(), [](const auto& a, const auto& b)
+         std::sort(_._sharedValues.begin(), _._sharedValues.end(), [](const auto& a, const auto& b)
          {
             return a._count > b._count;
          });
@@ -408,7 +408,7 @@ public:
     Attribute& setFlag(AttributeFlag flag) override { _.flags.set(flag); return *this; }
     Attribute& resetFlag(AttributeFlag flag) override { _.flags.reset(flag); return *this; }
 
-    std::vector<UniqueValue> uniqueValues() const { return _._uniqueValues; }
+    std::vector<SharedValue> sharedValues() const { return _._sharedValues; }
 
     bool searchable() const override { return _.searchable; }
     Attribute& setSearchable(bool searchable) override { _.searchable = searchable; return *this; }

@@ -94,13 +94,13 @@ public:
     virtual IAttribute& setFlag(AttributeFlag flag) = 0;
     virtual IAttribute& resetFlag(AttributeFlag flag) = 0;
 
-    struct UniqueValue
+    struct SharedValue
     {
         QString _value;
         int _count;
     };
 
-    virtual std::vector<UniqueValue> uniqueValues() const = 0;
+    virtual std::vector<SharedValue> sharedValues() const = 0;
 
     virtual bool searchable() const = 0;
     virtual IAttribute& setSearchable(bool searchable) = 0;

@@ -127,9 +127,9 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
 
             return tr("Unknown Type");
         }
-        case Roles::HasUniqueValuesRole:
+        case Roles::HasSharedValuesRole:
         {
-            return !attribute->uniqueValues().empty();
+            return !attribute->sharedValues().empty();
         }
         case Roles::SearchableRole:
         {
@@ -240,7 +240,7 @@ QHash<int, QByteArray> AvailableAttributesModel::roleNames() const
 
     names[Roles::ElementTypeRole] = "elementType";
     names[Roles::ValueTypeRole] = "valueType";
-    names[Roles::HasUniqueValuesRole] = "hasUniqueValues";
+    names[Roles::HasSharedValuesRole] = "hasSharedValues";
     names[Roles::SearchableRole] = "searchable";
     names[Roles::UserDefinedRole] = "userDefined";
 

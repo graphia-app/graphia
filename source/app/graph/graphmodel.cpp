@@ -686,9 +686,9 @@ static void findUniqueAttributeValues(const Graph* graph,
             continue;
 
         if(attribute.elementType() == ElementType::Node)
-            attribute.updateUniqueValuesForElements(graph->nodeIds());
+            attribute.updateSharedValuesForElements(graph->nodeIds());
         else if(attribute.elementType() == ElementType::Edge)
-            attribute.updateUniqueValuesForElements(graph->edgeIds());
+            attribute.updateSharedValuesForElements(graph->edgeIds());
     }
 }
 

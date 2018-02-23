@@ -1406,13 +1406,13 @@ QVariantMap Document::attribute(const QString& attributeName) const
         map.insert(QStringLiteral("similar"), _graphModel->availableAttributes(attribute.elementType(), *valueType));
         map.insert(QStringLiteral("ops"), _graphModel->avaliableConditionFnOps(parsedAttributeName._name));
 
-        QStringList uniqueValues;
-        const auto& uniqueValueCounts = attribute.uniqueValues();
-        uniqueValues.reserve(static_cast<int>(uniqueValueCounts.size()));
-        for(const auto& uniqueValueCount : uniqueValueCounts)
-            uniqueValues.append(uniqueValueCount._value);
+        QStringList sharedValues;
+        const auto& sharedValueCounts = attribute.sharedValues();
+        sharedValues.reserve(static_cast<int>(sharedValueCounts.size()));
+        for(const auto& sharedValueCount : sharedValueCounts)
+            sharedValues.append(sharedValueCount._value);
 
-        map.insert(QStringLiteral("uniqueValues"), uniqueValues);
+        map.insert(QStringLiteral("sharedValues"), sharedValues);
     }
 
     return map;
