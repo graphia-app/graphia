@@ -127,6 +127,10 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
 
             return tr("Unknown Type");
         }
+        case Roles::HasUniqueValuesRole:
+        {
+            return !attribute->uniqueValues().empty();
+        }
         case Roles::SearchableRole:
         {
             return attribute->searchable();
@@ -236,6 +240,7 @@ QHash<int, QByteArray> AvailableAttributesModel::roleNames() const
 
     names[Roles::ElementTypeRole] = "elementType";
     names[Roles::ValueTypeRole] = "valueType";
+    names[Roles::HasUniqueValuesRole] = "hasUniqueValues";
     names[Roles::SearchableRole] = "searchable";
     names[Roles::UserDefinedRole] = "userDefined";
 

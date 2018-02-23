@@ -117,7 +117,7 @@ private:
         double floatMin = std::numeric_limits<double>::max();
         double floatMax = std::numeric_limits<double>::lowest();
 
-        std::map<QString, int> _uniqueStringValues;
+        std::vector<UniqueValue> _uniqueValues;
 
         bool isValid = false;
         Flags<AttributeFlag> flags = AttributeFlag::None;
@@ -313,13 +313,22 @@ public:
     template<typename E>
     void updateUniqueValuesForElements(const std::vector<E>& elementIds)
     {
-        _._uniqueStringValues.clear();
+        std::map<QString, int> values;
 
         for(auto elementId : elementIds)
         {
-            auto v = stringValueOf(elementId);
-            _._uniqueStringValues[v]++;
+            auto value = stringValueOf(elementId);
+            values[value]++;
         }
+
+         _._uniqueValues.clear();
+         for(auto& value : values)
+             _._uniqueValues.push_back({value.first, value.second});
+
+         std::sort(_._uniqueValues.begin(), _._uniqueValues.end(), [](const auto& a, const auto& b)
+         {
+            return a._count > b._count;
+         });
     }
 
     template<typename T, typename E, typename Fn>
@@ -396,6 +405,8 @@ public:
     bool testFlag(AttributeFlag flag) const override { return _.flags.test(flag); }
     Attribute& setFlag(AttributeFlag flag) override { _.flags.set(flag); return *this; }
     Attribute& resetFlag(AttributeFlag flag) override { _.flags.reset(flag); return *this; }
+
+    std::vector<UniqueValue> uniqueValues() const { return _._uniqueValues; }
 
     bool searchable() const override { return _.searchable; }
     Attribute& setSearchable(bool searchable) override { _.searchable = searchable; return *this; }

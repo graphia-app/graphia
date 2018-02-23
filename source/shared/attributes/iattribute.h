@@ -8,6 +8,7 @@
 #include "shared/graph/elementtype.h"
 
 #include <functional>
+#include <vector>
 
 #include <QString>
 #include <QVariant>
@@ -92,6 +93,14 @@ public:
     virtual bool testFlag(AttributeFlag flag) const = 0;
     virtual IAttribute& setFlag(AttributeFlag flag) = 0;
     virtual IAttribute& resetFlag(AttributeFlag flag) = 0;
+
+    struct UniqueValue
+    {
+        QString _value;
+        int _count;
+    };
+
+    virtual std::vector<UniqueValue> uniqueValues() const = 0;
 
     virtual bool searchable() const = 0;
     virtual IAttribute& setSearchable(bool searchable) = 0;

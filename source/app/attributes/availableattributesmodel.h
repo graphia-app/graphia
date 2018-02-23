@@ -48,6 +48,7 @@ private:
     {
         ElementTypeRole = Qt::UserRole + 1,
         ValueTypeRole,
+        HasUniqueValuesRole,
         SearchableRole,
         UserDefinedRole
     };
