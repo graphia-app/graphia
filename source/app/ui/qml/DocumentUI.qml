@@ -92,8 +92,8 @@ Item
     property alias pluginMenu3: pluginMenu3
     property alias pluginMenu4: pluginMenu4
 
-    property var selectPreviousFoundAction: find.selectPreviousAction
-    property var selectNextFoundAction: find.selectNextAction
+    property var previousAction: find.previousAction
+    property var nextAction: find.nextAction
 
     property bool saveRequired: document.loadComplete &&
         (!hasBeenSaved || document.saveRequired || plugin.saveRequired)

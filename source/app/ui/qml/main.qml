@@ -1130,12 +1130,12 @@ ApplicationWindow
             MenuItem { action: advancedFindAction }
             MenuItem
             {
-                action: currentDocument ? currentDocument.selectPreviousFoundAction : nullAction
+                action: currentDocument ? currentDocument.previousAction : nullAction
                 visible: currentDocument
             }
             MenuItem
             {
-                action: currentDocument ? currentDocument.selectNextFoundAction : nullAction
+                action: currentDocument ? currentDocument.nextAction : nullAction
                 visible: currentDocument
             }
             MenuSeparator {}

@@ -16,8 +16,8 @@ Rectangle
 
     property var document
 
-    property var selectPreviousAction: _selectPreviousAction
-    property var selectNextAction: _selectNextAction
+    property var previousAction: _previousAction
+    property var nextAction: _nextAction
 
     readonly property bool hasTextFocus: findField.focus
 
@@ -110,7 +110,7 @@ Rectangle
 
     Action
     {
-        id: _selectPreviousAction
+        id: _previousAction
         text: qsTr("Find Previous")
         iconName: "go-previous"
         shortcut: _visible ? "Ctrl+Shift+G" : ""
@@ -120,7 +120,7 @@ Rectangle
 
     Action
     {
-        id: _selectNextAction
+        id: _nextAction
         text: qsTr("Find Next")
         iconName: "go-next"
         shortcut: _visible ? "Ctrl+G" : ""
@@ -308,8 +308,8 @@ Rectangle
 
                 ToolBarSeparator {}
 
-                ToolButton { action: _selectPreviousAction }
-                ToolButton { action: _selectNextAction }
+                ToolButton { action: _previousAction }
+                ToolButton { action: _nextAction }
                 ToolButton
                 {
                     visible: _type === Find.Simple || _type === Find.Advanced
