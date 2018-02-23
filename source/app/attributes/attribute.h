@@ -318,7 +318,9 @@ public:
         for(auto elementId : elementIds)
         {
             auto value = stringValueOf(elementId);
-            values[value]++;
+
+            if(!value.isEmpty())
+                values[value]++;
         }
 
          _._uniqueValues.clear();
