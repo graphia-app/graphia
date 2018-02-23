@@ -117,6 +117,8 @@ private:
         double floatMin = std::numeric_limits<double>::max();
         double floatMax = std::numeric_limits<double>::lowest();
 
+        std::map<QString, int> _uniqueStringValues;
+
         bool isValid = false;
         Flags<AttributeFlag> flags = AttributeFlag::None;
         bool searchable = false;
@@ -307,6 +309,18 @@ public:
     IAttributeRange<int>& intRange() override { return _intRange; }
     IAttributeRange<double>& floatRange() override { return _floatRange; }
     const IAttributeRange<double>& numericRange() const override { return _numericRange; }
+
+    template<typename E>
+    void updateUniqueValuesForElements(const std::vector<E>& elementIds)
+    {
+        _._uniqueStringValues.clear();
+
+        for(auto elementId : elementIds)
+        {
+            auto v = stringValueOf(elementId);
+            _._uniqueStringValues[v]++;
+        }
+    }
 
     template<typename T, typename E, typename Fn>
     auto findRangeforElements(const std::vector<E>& elementIds, Fn&& skip) const

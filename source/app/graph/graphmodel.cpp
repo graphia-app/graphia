@@ -677,6 +677,26 @@ void GraphModel::initialiseAttributeRanges()
     calculateAttributeRanges(&mutableGraph(), _->_attributes);
 }
 
+static void findUniqueAttributeValues(const Graph* graph,
+    std::map<QString, Attribute>& attributes)
+{
+    for(auto& attribute : make_value_wrapper(attributes))
+    {
+        if(!attribute.testFlag(AttributeFlag::FindUnique))
+            continue;
+
+        if(attribute.elementType() == ElementType::Node)
+            attribute.updateUniqueValuesForElements(graph->nodeIds());
+        else if(attribute.elementType() == ElementType::Edge)
+            attribute.updateUniqueValuesForElements(graph->edgeIds());
+    }
+}
+
+void GraphModel::initialiseUniqueAttributeValues()
+{
+    findUniqueAttributeValues(&graph(), _->_attributes);
+}
+
 void GraphModel::enableVisualUpdates()
 {
     _visualUpdatesEnabled = true;
@@ -854,9 +874,11 @@ void GraphModel::onTransformedGraphWillChange(const Graph*)
     _transformedGraphIsChanging = true;
 }
 
-void GraphModel::onTransformedGraphChanged(const Graph*)
+void GraphModel::onTransformedGraphChanged(const Graph* graph)
 {
     _transformedGraphIsChanging = false;
+
+    findUniqueAttributeValues(graph, _->_attributes);
 
     // Compare with previous Dynamic attributes
     // Check for added

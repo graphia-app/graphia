@@ -118,6 +118,7 @@ public:
     Attribute attributeValueByName(const QString& name) const;
 
     void initialiseAttributeRanges();
+    void initialiseUniqueAttributeValues();
 
     void enableVisualUpdates();
     void updateVisuals(const SelectionManager* selectionManager = nullptr, const SearchManager* searchManager = nullptr);

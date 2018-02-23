@@ -24,6 +24,9 @@ enum class AttributeFlag
 
     // Indicates this is a dynamically created attribute; set automatically
     Dynamic                 = 0x4,
+
+    // Track the set of unique values held by the attribute
+    FindUnique              = 0x8,
 };
 
 class IGraphComponent;

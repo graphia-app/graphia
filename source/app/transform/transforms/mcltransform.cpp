@@ -591,6 +591,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
         .setDescription(QStringLiteral("The MCL-calculated cluster in which the node resides."))
         .setStringValueFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId]; })
         .setValueMissingFn([clusterNames](NodeId nodeId) { return clusterNames[nodeId].isEmpty(); })
+        .setFlag(AttributeFlag::FindUnique)
         .setSearchable(true);
 }
 

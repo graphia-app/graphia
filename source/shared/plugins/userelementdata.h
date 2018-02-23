@@ -102,7 +102,8 @@ public:
                 attribute.setStringValueFn([this, userDataVectorName](E elementId)
                         {
                             return valueBy(elementId, userDataVectorName).toString();
-                        });
+                        })
+                        .setFlag(AttributeFlag::FindUnique);
                 break;
 
             default: break;
