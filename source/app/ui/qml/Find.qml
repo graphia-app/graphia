@@ -164,8 +164,7 @@ Rectangle
             findField.text = "";
             _visible = false;
 
-            // Reset find
-            document.find();
+            document.resetFind();
 
             hidden();
         }
@@ -361,7 +360,7 @@ Rectangle
             {
                 target: document
 
-                onCommandComplete:
+                onCommandCompleted:
                 {
                     _finding = false;
 
@@ -413,6 +412,8 @@ Rectangle
             findField.forceActiveFocus();
             findField.selectAll();
         }
+        else
+            document.resetFind();
 
         shown();
     }

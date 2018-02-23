@@ -92,9 +92,6 @@ Item
     property alias pluginMenu3: pluginMenu3
     property alias pluginMenu4: pluginMenu4
 
-    property int foundIndex: document.foundIndex
-    property int numNodesFound: document.numNodesFound
-
     property var selectPreviousFoundAction: find.selectPreviousAction
     property var selectNextFoundAction: find.selectNextAction
 
@@ -103,10 +100,7 @@ Item
 
     property int numNodesSelected: document.numNodesSelected
 
-    property color contrastingColor:
-    {
-        return document.contrastingColor;
-    }
+    property color contrastingColor: document.contrastingColor
 
     Preferences
     {
@@ -331,19 +325,6 @@ Item
     function gotoNextComponent() { document.gotoNextComponent(); }
     function gotoPrevComponent() { document.gotoPrevComponent(); }
     function screenshot() { captureScreenshot.open(); }
-
-    function selectAllFound() { document.selectAllFound(); }
-    function selectNextFound() { document.selectNextFound(); }
-    function selectPrevFound() { document.selectPrevFound(); }
-    function find(term, options, attributes) { document.find(term, options, attributes); }
-
-    function availableAttributes(elementTypes, valueTypes)
-    {
-        elementTypes = typeof elementTypes !== "undefined" ? elementTypes : ElementType.All;
-        valueTypes = typeof valueTypes !== "undefined" ? valueTypes : ValueType.All;
-
-        return document.availableAttributes(elementTypes, valueTypes);
-    }
 
     function cancelCommand() { document.cancelCommand(); }
 
@@ -642,7 +623,7 @@ Item
                     {
                         id: find
 
-                        document: root
+                        document: document
 
                         onShown: { findPanel.show(); }
                         onHidden: { findPanel.hide(); }

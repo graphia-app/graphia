@@ -259,6 +259,7 @@ signals:
 
     void layoutPauseStateChanged();
 
+    void commandCompleted();
     void canUndoChanged();
     void nextUndoActionChanged();
     void canRedoChanged();
@@ -321,8 +322,8 @@ public:
     Q_INVOKABLE void gotoPrevComponent();
     Q_INVOKABLE void gotoNextComponent();
 
-    Q_INVOKABLE void find(const QString& term, int options,
-        QStringList attributeNames);
+    Q_INVOKABLE void find(const QString& term, int options, QStringList attributeNames);
+    Q_INVOKABLE void resetFind();
     Q_INVOKABLE void selectFirstFound();
     Q_INVOKABLE void selectNextFound();
     Q_INVOKABLE void selectPrevFound();

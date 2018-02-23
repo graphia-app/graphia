@@ -620,6 +620,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(&_commandManager, &CommandManager::commandIsCancellableChanged, this, &Document::commandIsCancellableChanged);
     connect(&_commandManager, &CommandManager::commandIsCancellingChanged, this, &Document::commandIsCancellingChanged);
 
+    connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::commandCompleted);
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::canUndoChanged);
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::nextUndoActionChanged);
     connect(&_commandManager, &CommandManager::commandCompleted, this, &Document::canRedoChanged);
@@ -972,6 +973,14 @@ void Document::find(const QString& term, int options, QStringList attributeNames
         if(previousNumNodesFound != numNodesFound())
             emit numNodesFoundChanged();
     });
+}
+
+void Document::resetFind()
+{
+    if(_searchManager == nullptr)
+        return;
+
+    find({}, {}, {});
 }
 
 static bool shouldMoveFindFocus(bool inOverviewMode)
