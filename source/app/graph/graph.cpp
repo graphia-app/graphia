@@ -153,7 +153,7 @@ void Graph::dumpToQDebug(int detail) const
 
     if(detail > 1)
     {
-        if(_componentManager)
+        if(_componentManager != nullptr)
         {
             for(auto componentId : _componentManager->componentIds())
             {
@@ -191,7 +191,7 @@ void Graph::eraseEdgeArray(IGraphArray* edgeArray) const
 
 int Graph::numComponentArrays() const
 {
-    if(_componentManager)
+    if(_componentManager != nullptr)
         return _componentManager->componentArrayCapacity();
 
     return 0;
@@ -199,13 +199,13 @@ int Graph::numComponentArrays() const
 
 void Graph::insertComponentArray(IGraphArray* componentArray) const
 {
-    if(_componentManager)
+    if(_componentManager != nullptr)
         _componentManager->insertComponentArray(componentArray);
 }
 
 void Graph::eraseComponentArray(IGraphArray* componentArray) const
 {
-    if(_componentManager)
+    if(_componentManager != nullptr)
         _componentManager->eraseComponentArray(componentArray);
 }
 
@@ -249,7 +249,7 @@ void Graph::clear()
 
 const std::vector<ComponentId>& Graph::componentIds() const
 {
-    if(_componentManager)
+    if(_componentManager != nullptr)
         return _componentManager->componentIds();
 
     static std::vector<ComponentId> emptyComponentIdList;
@@ -264,7 +264,7 @@ int Graph::numComponents() const
 
 bool Graph::containsComponentId(ComponentId componentId) const
 {
-    if(_componentManager)
+    if(_componentManager != nullptr)
         return _componentManager->containsComponentId(componentId);
 
     Q_ASSERT(!"Graph::containsComponentId called with component management disabled");
@@ -273,7 +273,7 @@ bool Graph::containsComponentId(ComponentId componentId) const
 
 const IGraphComponent* Graph::componentById(ComponentId componentId) const
 {
-    if(_componentManager)
+    if(_componentManager != nullptr)
         return _componentManager->componentById(componentId);
 
     Q_ASSERT(!"Graph::componentById called with component management disabled");
@@ -282,7 +282,7 @@ const IGraphComponent* Graph::componentById(ComponentId componentId) const
 
 ComponentId Graph::componentIdOfNode(NodeId nodeId) const
 {
-    if(_componentManager)
+    if(_componentManager != nullptr)
         return _componentManager->componentIdOfNode(nodeId);
 
     return ComponentId();
@@ -290,7 +290,7 @@ ComponentId Graph::componentIdOfNode(NodeId nodeId) const
 
 ComponentId Graph::componentIdOfEdge(EdgeId edgeId) const
 {
-    if(_componentManager)
+    if(_componentManager != nullptr)
         return _componentManager->componentIdOfEdge(edgeId);
 
     return ComponentId();
