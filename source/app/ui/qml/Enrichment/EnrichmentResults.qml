@@ -80,7 +80,7 @@ Window
                                 sorter.enabled = true;
                             }
 
-                            Layout.preferredWidth: parent.width / 2
+                            Layout.preferredWidth: showHeatmapButton.checked ? parent.width / 2 : parent.width
                             Layout.fillHeight: true
                             sortIndicatorVisible: true
                             model: SortFilterProxyModel

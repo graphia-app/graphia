@@ -26,6 +26,8 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPainted
     _colorMap->setTightBoundary(false);
 
     connect(this, &EnrichmentHeatmapItem::tableModelChanged, this, &EnrichmentHeatmapItem::update);
+    connect(this, &QQuickPaintedItem::widthChanged, this, &EnrichmentHeatmapItem::updatePlotSize);
+    connect(this, &QQuickPaintedItem::heightChanged, this, &EnrichmentHeatmapItem::updatePlotSize);
 }
 
 void EnrichmentHeatmapItem::paint(QPainter *painter)
@@ -79,14 +81,10 @@ void EnrichmentHeatmapItem::update()
     }
     int pos = 0;
     for(auto& value: attributeValueSetA)
-    {
         xCategoryTicker->addTick(pos++, value);
-    }
     pos = 0;
     for(auto& value: attributeValueSetB)
-    {
         yCategoryTicker->addTick(pos++, value);
-    }
 
     _colorMap->data()->setSize(attributeValueSetA.size(), attributeValueSetB.size());
     _colorMap->data()->setRange(QCPRange(0, attributeValueSetA.size()-1), QCPRange(0, attributeValueSetB.size()-1));
@@ -100,4 +98,9 @@ void EnrichmentHeatmapItem::update()
                                    _tableModel->data(i, "Fishers").toFloat());
     }
     _colorMap->rescaleDataRange(true);
+}
+
+void EnrichmentHeatmapItem::updatePlotSize()
+{
+    _customPlot.setGeometry(0, 0, static_cast<int>(width()), static_cast<int>(height()));
 }

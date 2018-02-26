@@ -21,6 +21,7 @@ public:
     void setData(EnrichmentCalculator::Table table);
 public:
     void paint(QPainter *painter);
+    void updatePlotSize();
 protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
