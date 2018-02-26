@@ -338,6 +338,16 @@ Item
                 ascendingSortOrder: root.sortIndicatorOrder === Qt.AscendingOrder
 
                 filterRoleName: 'nodeSelected'; filterValue: true
+
+                // NodeAttributeTableModel fires layoutChanged whenever the nodeSelected role
+                // changes which in turn affects which rows the model reflects. When the visible
+                // rows change, we emit a signal so that the owners of the TableView can react.
+                // Qt.callLater is used because otherwise the signal is emitted before the
+                // TableView has had a chance to update.
+                // This is a gigantic hack; it would be much nicer to react when a TableView's
+                // contents change, but there is no obvious sane way to do this
+                onLayoutChanged: { Qt.callLater(root.visibleRowsChanged); }
+
             }
         }
 
@@ -360,17 +370,6 @@ Item
                 });
 
                 root.selectedRows = rows;
-            }
-        }
-
-        Connections
-        {
-            target: tableView.__listView.contentItem
-            onChildrenChanged:
-            {
-                // Qt.callLater conveniently coalesces multiple rapid (for some definition of "rapid")
-                // calls to a function into one, which is just what we need here
-                Qt.callLater(root.visibleRowsChanged);
             }
         }
 

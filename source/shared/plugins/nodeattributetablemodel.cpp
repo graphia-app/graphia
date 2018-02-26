@@ -161,6 +161,8 @@ void NodeAttributeTableModel::onUpdateRoleComplete(int role)
     // control better. Certainly the internet suggests using ListView:
     //      https://stackoverflow.com/a/43856015
     //      https://stackoverflow.com/a/45188582
+    // Also, note that NodeAttributeTableView currently relies on layoutChanged, so if
+    // what we emit changes, we need to be account for it there too.
     //emit dataChanged(index(0, column), index(rowCount() - 1, column), {role});
 
     emit layoutChanged();
