@@ -24,8 +24,6 @@ if(UNIX)
 
     # Surprisingly, this actually makes a difference to the pearson correlation code
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -funroll-loops")
-
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Og")
 endif()
 
 
