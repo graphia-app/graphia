@@ -345,9 +345,8 @@ Item
                 // Qt.callLater is used because otherwise the signal is emitted before the
                 // TableView has had a chance to update.
                 // This is a gigantic hack; it would be much nicer to react when a TableView's
-                // contents change, but there is no obvious sane way to do this
+                // contents change, but there is no obvious sane way to do this.
                 onLayoutChanged: { Qt.callLater(root.visibleRowsChanged); }
-
             }
         }
 
