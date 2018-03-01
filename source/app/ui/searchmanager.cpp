@@ -45,6 +45,13 @@ void SearchManager::findNodes(const QString& term, Flags<FindOptions> options,
             attributes.emplace_back(attribute);
     }
 
+    // None of the given attributes are searchable
+    if(!_attributeNames.empty() && attributes.empty())
+    {
+        clearFoundNodeIds();
+        return;
+    }
+
     if(!options.test(FindOptions::MatchUsingRegex))
         _term = QRegularExpression::escape(_term);
 
@@ -81,6 +88,7 @@ void SearchManager::findNodes(const QString& term, Flags<FindOptions> options,
 
             bool match = false;
 
+            // Fall back on a node name search if there are no attributes provided
             if(attributes.empty())
                 match = re.match(_graphModel->nodeNames().at(nodeId)).hasMatch();
 
