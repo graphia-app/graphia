@@ -222,7 +222,7 @@ void GraphRenderer::updateGPUDataIfRequired()
         if(!componentRenderer->visible())
             continue;
 
-        const float NotFoundAlpha = 0.2f;
+        const float NotFoundAlpha = 0.15f;
 
         for(auto nodeId : componentRenderer->nodeIds())
         {
