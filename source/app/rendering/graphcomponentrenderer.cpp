@@ -457,7 +457,7 @@ void GraphComponentRenderer::moveFocusToNode(NodeId nodeId, float radius)
     _viewData._autoZooming = false;
     updateEntireComponentZoomDistance();
 
-    float zoomDistance = 0.0f;
+    float zoomDistance = -1.0f;
     if(radius >= 0.0f)
         zoomDistance = zoomDistanceForRadius(radius);
 
