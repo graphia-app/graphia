@@ -1098,14 +1098,16 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
         if(_foundItValid && searchManager->active())
             _selectionManager->clearNodeSelection();
 
+        _selectionManager->clearNodesMask();
+
         _foundItValid = false;
         emit foundIndexChanged();
 
         return;
     }
 
-    for(auto nodeId : searchManager->foundNodeIds())
-        _foundNodeIds.emplace_back(nodeId);
+    _selectionManager->setNodesMask(searchManager->foundNodeIds());
+    _foundNodeIds = u::vectorFrom(searchManager->foundNodeIds());
 
     std::sort(_foundNodeIds.begin(), _foundNodeIds.end(), [this](auto a, auto b)
     {
