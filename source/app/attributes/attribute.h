@@ -426,7 +426,7 @@ public:
     Attribute& setFlag(AttributeFlag flag) override { _.flags.set(flag); return *this; }
     Attribute& resetFlag(AttributeFlag flag) override { _.flags.reset(flag); return *this; }
 
-    std::vector<SharedValue> sharedValues() const { return _._sharedValues; }
+    std::vector<SharedValue> sharedValues() const override { return _._sharedValues; }
 
     bool searchable() const override { return _.searchable; }
     Attribute& setSearchable(bool searchable) override { _.searchable = searchable; return *this; }
