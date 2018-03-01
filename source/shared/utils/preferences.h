@@ -43,7 +43,7 @@ class QmlPreferences : public QObject, public QQmlParserStatus
 {
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(QString section READ section WRITE setSection CONSTANT)
+    Q_PROPERTY(QString section READ section WRITE setSection)
 
 public:
     explicit QmlPreferences(QObject* parent = nullptr);
