@@ -16,6 +16,7 @@
 #include <map>
 
 #include <QString>
+#include <QCollator>
 
 class Attribute;
 
@@ -338,9 +339,14 @@ public:
             _._sharedValues.push_back({value.first, value.second});
 
         // Sort in reverse order of how often the value occurs
+        QCollator collator;
+        collator.setNumericMode(true);
         std::sort(_._sharedValues.begin(), _._sharedValues.end(),
-        [](const auto& a, const auto& b)
+        [collator = std::move(collator)](const auto& a, const auto& b)
         {
+            if(a._count == b._count)
+                return collator.compare(a._value, b._value) < 0;
+
             return a._count > b._count;
         });
     }
