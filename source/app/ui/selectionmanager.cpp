@@ -56,7 +56,7 @@ NodeIdSet SelectionManager::unselectedNodes() const
 
 //FIXME http://en.cppreference.com/w/cpp/container/unordered_set/merge will be useful here
 template<typename C> bool _selectNodes(const GraphModel& graphModel, NodeIdSet& selectedNodeIds,
-    const C& nodeIds, bool selectMergedNodes = true)
+    NodeIdSet& mask, const C& nodeIds, bool selectMergedNodes = true)
 {
     NodeIdSet newSelectedNodeIds;
 
@@ -70,13 +70,19 @@ template<typename C> bool _selectNodes(const GraphModel& graphModel, NodeIdSet& 
             auto mergedNodeIds = graphModel.graph().mergedNodeIdsForNodeId(nodeId);
 
             for(auto mergedNodeId : mergedNodeIds)
-                newSelectedNodeIds.insert(mergedNodeId);
+            {
+                if(mask.empty() || u::contains(mask, mergedNodeId))
+                    newSelectedNodeIds.insert(mergedNodeId);
+            }
         }
     }
     else
     {
         for(auto nodeId : nodeIds)
-            newSelectedNodeIds.insert(nodeId);
+        {
+            if(mask.empty() || u::contains(mask, nodeId))
+                newSelectedNodeIds.insert(nodeId);
+        }
     }
 
     auto oldSize = selectedNodeIds.size();
@@ -88,7 +94,7 @@ bool SelectionManager::selectNodes(const NodeIdSet& nodeIds)
 {
     return callFnAndMaybeEmit([this, &nodeIds]
     {
-        return _selectNodes(*_graphModel, _selectedNodeIds, nodeIds, true);
+        return _selectNodes(*_graphModel, _selectedNodeIds, _nodeIdsMask, nodeIds, true);
     });
 }
 
@@ -96,7 +102,7 @@ bool SelectionManager::selectNodes(const std::vector<NodeId>& nodeIds)
 {
     return callFnAndMaybeEmit([this, &nodeIds]
     {
-        return _selectNodes(*_graphModel, _selectedNodeIds, nodeIds, true);
+        return _selectNodes(*_graphModel, _selectedNodeIds, _nodeIdsMask, nodeIds, true);
     });
 }
 
@@ -104,7 +110,7 @@ bool SelectionManager::selectNode(NodeId nodeId)
 {
     return callFnAndMaybeEmit([this, nodeId]
     {
-        return _selectNodes(*_graphModel, _selectedNodeIds, std::array<NodeId, 1>{{nodeId}}, true);
+        return _selectNodes(*_graphModel, _selectedNodeIds, _nodeIdsMask, std::array<NodeId, 1>{{nodeId}}, true);
     });
 }
 
@@ -160,13 +166,16 @@ bool SelectionManager::deselectNodes(const std::vector<NodeId>& nodeIds)
     });
 }
 
-template<typename C> void _toggleNodes(NodeIdSet& selectedNodeIds, const C& nodeIds)
+template<typename C> void _toggleNodes(NodeIdSet& selectedNodeIds, NodeIdSet& mask, const C& nodeIds)
 {
     NodeIdSet difference;
     for(auto nodeId : nodeIds)
     {
         if(!u::contains(selectedNodeIds, nodeId))
-            difference.insert(nodeId);
+        {
+            if(mask.empty() || u::contains(mask, nodeId))
+                difference.insert(nodeId);
+        }
     }
 
     selectedNodeIds = std::move(difference);
@@ -192,21 +201,11 @@ bool SelectionManager::nodeIsSelected(NodeId nodeId) const
     return u::contains(_selectedNodeIds, nodeId);
 }
 
-bool SelectionManager::setSelectedNodes(const NodeIdSet& nodeIds)
-{
-    return callFnAndMaybeEmit([this, &nodeIds]
-    {
-        bool selectionWillChange = u::setsDiffer(_selectedNodeIds, nodeIds);
-        _selectedNodeIds = nodeIds;
-        return selectionWillChange;
-    });
-}
-
 bool SelectionManager::selectAllNodes()
 {
     return callFnAndMaybeEmit([this]
     {
-        return _selectNodes(*_graphModel, _selectedNodeIds, _graphModel->graph().nodeIds(), true);
+        return _selectNodes(*_graphModel, _selectedNodeIds, _nodeIdsMask, _graphModel->graph().nodeIds(), true);
     });
 }
 
@@ -222,10 +221,30 @@ bool SelectionManager::clearNodeSelection()
 
 void SelectionManager::invertNodeSelection()
 {
-    _toggleNodes(_selectedNodeIds, _graphModel->graph().nodeIds());
+    _toggleNodes(_selectedNodeIds, _nodeIdsMask, _graphModel->graph().nodeIds());
 
     if(!signalsSuppressed())
         emit selectionChanged(this);
+}
+
+void SelectionManager::setNodesMask(const NodeIdSet& nodeIds)
+{
+    _nodeIdsMask = nodeIds;
+
+    std::vector<NodeId> nodeIdsToDeselect;
+
+    for(const auto& selectedNodeId : _selectedNodeIds)
+    {
+        if(!u::contains(_nodeIdsMask, selectedNodeId))
+            nodeIdsToDeselect.emplace_back(selectedNodeId);
+    }
+
+    deselectNodes(nodeIdsToDeselect);
+}
+
+void SelectionManager::setNodesMask(const std::vector<NodeId>& nodeIds)
+{
+    setNodesMask(NodeIdSet(nodeIds.begin(), nodeIds.end()));
 }
 
 QString SelectionManager::numNodesSelectedAsString() const

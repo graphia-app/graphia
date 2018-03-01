@@ -31,17 +31,18 @@ public:
 
     bool nodeIsSelected(NodeId nodeId) const override;
 
-    bool setSelectedNodes(const NodeIdSet& nodeIds) override;
-
     bool selectAllNodes() override;
     bool clearNodeSelection() override;
     void invertNodeSelection() override;
+
+    void setNodesMask(const NodeIdSet& nodeIds);
+    void setNodesMask(const std::vector<NodeId>& nodeIds);
+    void clearNodesMask() { _nodeIdsMask.clear(); }
 
     int numNodesSelected() const { return static_cast<int>(_selectedNodeIds.size()); }
     QString numNodesSelectedAsString() const;
 
     void suppressSignals();
-    bool signalsSuppressed();
 
 private:
     const GraphModel* _graphModel = nullptr;
@@ -51,7 +52,11 @@ private:
     // Temporary storage for NodeIds that have been deleted
     std::vector<NodeId> _deletedNodes;
 
+    NodeIdSet _nodeIdsMask;
+
     bool _suppressSignals = false;
+
+    bool signalsSuppressed();
 
     template<typename Fn>
     bool callFnAndMaybeEmit(Fn&& fn)

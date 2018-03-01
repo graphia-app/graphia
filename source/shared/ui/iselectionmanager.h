@@ -20,8 +20,6 @@ public:
 
     virtual bool nodeIsSelected(NodeId nodeId) const = 0;
 
-    virtual bool setSelectedNodes(const NodeIdSet& nodeIds) = 0;
-
     virtual bool selectAllNodes() = 0;
     virtual bool clearNodeSelection() = 0;
     virtual void invertNodeSelection() = 0;
