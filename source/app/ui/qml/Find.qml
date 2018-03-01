@@ -149,7 +149,7 @@ Rectangle
         text: qsTr("Select All")
         iconName: "weather-clear"
         enabled: document.numNodesFound > 0
-        onTriggered: { document.selectAllFound(); }
+        onTriggered: { document.selectAll(); }
     }
 
     Action

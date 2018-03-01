@@ -328,7 +328,6 @@ public:
     Q_INVOKABLE void selectFirstFound();
     Q_INVOKABLE void selectNextFound();
     Q_INVOKABLE void selectPrevFound();
-    Q_INVOKABLE void selectAllFound();
     Q_INVOKABLE void updateFoundIndex(bool reselectIfInvalidated);
 
     Q_INVOKABLE void selectByAttributeValue(const QString& attributeName, const QString& value);

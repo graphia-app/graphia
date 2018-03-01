@@ -1042,14 +1042,6 @@ void Document::selectPrevFound()
     selectFoundNode(decrementFoundIt());
 }
 
-void Document::selectAllFound()
-{
-    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), _searchManager->foundNodeIds()));
-
-    if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
-        _graphQuickItem->moveFocusToNodes(u::vectorFrom(_searchManager->foundNodeIds()));
-}
-
 void Document::updateFoundIndex(bool reselectIfInvalidated)
 {
     // For the purposes of updating the found index, we only care
@@ -1172,7 +1164,12 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
     _foundItValid = false;
 
     if(_searchManager->selectStyle() == FindSelectStyle::All)
-        selectAllFound();
+    {
+        selectAll();
+
+        if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
+            _graphQuickItem->moveFocusToNodes(u::vectorFrom(_searchManager->foundNodeIds()));
+    }
     else if(_selectionManager->selectedNodes().empty())
         selectFirstFound();
     else
