@@ -52,6 +52,5 @@ void main()
     float outlineAlpha = abs(cnv[0]) + abs(cnv[1]);
     outlineAlpha *= 0.25;
 
-    float interiorAlpha = I[1][1] * 0.5;
-    fragColor = vec4(highlightColor.rgb, (interiorAlpha + outlineAlpha) * alpha);
+    fragColor = vec4(highlightColor.rgb, outlineAlpha * alpha);
 }
