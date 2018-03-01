@@ -28,6 +28,8 @@
 #include "ui/visualisations/visualisationinfo.h"
 #include "ui/visualisations/visualisationconfigparser.h"
 
+#include "attributes/conditionfncreator.h"
+
 #include "searchmanager.h"
 #include "selectionmanager.h"
 #include "graphquickitem.h"
@@ -959,7 +961,7 @@ void Document::gotoNextComponent()
         _graphQuickItem->moveFocusToComponent(componentIds.front());
 }
 
-void Document::find(const QString& term, int options, QStringList attributeNames)
+void Document::find(const QString& term, int options, QStringList attributeNames, int findSelectStyle)
 {
     if(_searchManager == nullptr)
         return;
@@ -968,7 +970,8 @@ void Document::find(const QString& term, int options, QStringList attributeNames
     {
         int previousNumNodesFound = numNodesFound();
 
-        _searchManager->findNodes(term, static_cast<FindOptions>(options), attributeNames);
+        _searchManager->findNodes(term, static_cast<FindOptions>(options),
+            attributeNames, static_cast<FindSelectStyle>(findSelectStyle));
 
         if(previousNumNodesFound != numNodesFound())
             emit numNodesFoundChanged();
@@ -980,7 +983,7 @@ void Document::resetFind()
     if(_searchManager == nullptr)
         return;
 
-    find({}, {}, {});
+    find({}, {}, {}, {});
 }
 
 static bool shouldMoveFindFocus(bool inOverviewMode)
@@ -1088,6 +1091,38 @@ void Document::updateFoundIndex(bool reselectIfInvalidated)
     }
 }
 
+void Document::selectByAttributeValue(const QString& attributeName, const QString& value)
+{
+    std::vector<NodeId> nodeIds;
+
+    auto parsedAttributeName = Attribute::parseAttributeName(attributeName);
+    if(u::contains(_graphModel->availableAttributes(), parsedAttributeName._name))
+    {
+        const auto& attribute = _graphModel->attributeValueByName(parsedAttributeName._name);
+
+        auto conditionFn = CreateConditionFnFor::node(attribute, ConditionFnOp::Equality::Equal, value);
+        if(conditionFn != nullptr)
+        {
+            for(auto nodeId : _graphModel->graph().nodeIds())
+            {
+                if(_graphModel->graph().typeOf(nodeId) == MultiElementType::Tail)
+                    continue;
+
+                if(conditionFn(nodeId))
+                    nodeIds.emplace_back(nodeId);
+            }
+        }
+    }
+
+    if(nodeIds.empty())
+        return;
+
+    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
+
+    if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
+        _graphQuickItem->moveFocusToNodes(nodeIds);
+}
+
 QString Document::nodeName(QmlNodeId nodeId) const
 {
     if(_graphModel == nullptr || nodeId.isNull())
@@ -1136,7 +1171,9 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
     // so the iterator is now invalid
     _foundItValid = false;
 
-    if(_selectionManager->selectedNodes().empty())
+    if(_searchManager->selectStyle() == FindSelectStyle::All)
+        selectAllFound();
+    else if(_selectionManager->selectedNodes().empty())
         selectFirstFound();
     else
         updateFoundIndex(true);

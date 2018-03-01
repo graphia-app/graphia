@@ -19,9 +19,8 @@ Rectangle
     property var previousAction: _previousAction
     property var nextAction: _nextAction
 
-    readonly property bool hasTextFocus: findField.focus
-
-    property string lastSearchedAttributeName
+    property string lastAdvancedFindAttributeName
+    property string lastFindByAttributeName
 
     readonly property bool showing: _visible
 
@@ -33,21 +32,43 @@ Rectangle
     property bool _finding: false
     property bool _pendingFind: false
 
+    property string _findText:
+    {
+        if(_type === Find.ByAttribute)
+            return valueComboBox.currentText;
+
+        return findField.text;
+    }
+
+    on_FindTextChanged: { _doFind(); }
+
     property int _options:
     {
-        if(_type !== Find.Advanced)
-            return FindOptions.MatchUsingRegex;
-
         var o = 0;
 
-        if(matchCaseAction.checked)
-            o |= FindOptions.MatchCase;
+        switch(_type)
+        {
+        default:
+        case Find.Simple:
+            o = FindOptions.MatchUsingRegex;
+            break;
 
-        if(matchWholeWordsAction.checked)
-            o |= FindOptions.MatchWholeWords;
+        case Find.Advanced:
+            if(matchCaseAction.checked)
+                o |= FindOptions.MatchCase;
 
-        if(matchUsingRegexAction.checked)
-            o |= FindOptions.MatchUsingRegex;
+            if(matchWholeWordsAction.checked)
+                o |= FindOptions.MatchWholeWords;
+
+            if(matchUsingRegexAction.checked)
+                o |= FindOptions.MatchUsingRegex;
+
+            break;
+
+        case Find.ByAttribute:
+            o = FindOptions.MatchCase|FindOptions.MatchWholeWords;
+            break;
+        }
 
         return o;
     }
@@ -56,10 +77,21 @@ Rectangle
 
     property var _findAttributes:
     {
+        if(_type === Find.ByAttribute)
+            return [selectAttributeComboBox.currentText];
+
         if(_type === Find.Advanced && attributeCheckBox.checked)
             return [attributeComboBox.currentText];
 
         return [];
+    }
+
+    property var _findSelectStyle:
+    {
+        if(_type === Find.ByAttribute)
+            return FindSelectStyle.All;
+
+        return FindSelectStyle.First;
     }
 
     on_FindAttributesChanged:
@@ -69,13 +101,24 @@ Rectangle
 
     function _doFind()
     {
-        if(findField.text.length === 0)
+        if(!_visible)
             return;
 
         if(!_finding)
         {
+            if(_closing)
+                document.resetFind();
+            else if(_type === Find.ByAttribute && selectOnlyAction.checked)
+            {
+                document.resetFind();
+                document.selectByAttributeValue(selectAttributeComboBox.currentText, valueComboBox.currentText);
+            }
+            else if(_findText.length > 0)
+                document.find(_findText, _options, _findAttributes, _findSelectStyle);
+            else
+                document.resetFind();
+
             _finding = true;
-            document.find(findField.text, _options, _findAttributes);
         }
         else
             _pendingFind = true;
@@ -89,6 +132,7 @@ Rectangle
         property alias matchCase: matchCaseAction.checked
         property alias matchWholeWords: matchWholeWordsAction.checked
         property alias matchUsingRegex: matchUsingRegexAction.checked
+        property alias findByAttribtueSelectOnly: selectOnlyAction.checked
     }
 
     width: row.width
@@ -114,8 +158,14 @@ Rectangle
         text: qsTr("Find Previous")
         iconName: "go-previous"
         shortcut: _visible ? "Ctrl+Shift+G" : ""
-        enabled: document.numNodesFound > 0
-        onTriggered: { document.selectPrevFound(); }
+        enabled: _type === Find.ByAttribute || document.numNodesFound > 0
+        onTriggered:
+        {
+            if(_type === Find.ByAttribute)
+                valueComboBox.currentIndex = ((valueComboBox.currentIndex - 1) + valueComboBox.count) % valueComboBox.count;
+            else
+                document.selectPrevFound();
+        }
     }
 
     Action
@@ -124,8 +174,14 @@ Rectangle
         text: qsTr("Find Next")
         iconName: "go-next"
         shortcut: _visible ? "Ctrl+G" : ""
-        enabled: document.numNodesFound > 0
-        onTriggered: { document.selectNextFound(); }
+        enabled: _type === Find.ByAttribute || document.numNodesFound > 0
+        onTriggered:
+        {
+            if(_type === Find.ByAttribute)
+                valueComboBox.currentIndex = (valueComboBox.currentIndex + 1) % valueComboBox.count;
+            else
+                document.selectNextFound();
+        }
     }
 
     Action
@@ -154,48 +210,55 @@ Rectangle
 
     Action
     {
+        id: selectOnlyAction
+        text: qsTr("Select Only")
+        iconName: "edit-select-all"
+        checkable: true
+
+        onCheckedChanged: { _doFind(); }
+    }
+
+    property bool _closing: false
+    Action
+    {
         id: closeAction
         text: qsTr("Close")
         iconName: "emblem-unreadable"
-        shortcut: _visible && (findField.focus || !document.canResetView) ? "Esc" : ""
+        shortcut: _visible ? "Esc" : ""
+
         onTriggered:
         {
             findField.focus = false;
             findField.text = "";
+            _closing = true;
+
+            // Will reset find state
+            _doFind();
+
             _visible = false;
-
-            document.resetFind();
-
             hidden();
         }
     }
 
-    ValueFilter
-    {
-        id: searchableAttributesFilter
-        roleName: "searchable"
-        value: true
-    }
-
-    ValueFilter
-    {
-        id: stringAttributesFilter
-        roleName: "valueType"
-        value: "Textual"
-    }
 
     SortFilterProxyModel
     {
         id: proxyModel
         filters:
-        {
-            if(_type === Find.Advanced)
-                return [searchableAttributesFilter];
-            else if(_type === Find.SelectByAttribute)
-                return [stringAttributesFilter];
-
-            return [];
-        }
+        [
+            ValueFilter
+            {
+                enabled: _type === Find.Advanced
+                roleName: "searchable"
+                value: true
+            },
+            ValueFilter
+            {
+                enabled: _type === Find.ByAttribute
+                roleName: "hasSharedValues"
+                value: true
+            }
+        ]
 
         function rowIndexForAttributeName(attributeName)
         {
@@ -229,11 +292,6 @@ Rectangle
                     {
                         id: findField
                         width: 150
-
-                        onTextChanged:
-                        {
-                            _doFind();
-                        }
 
                         onAccepted: { selectAllAction.trigger(); }
 
@@ -287,26 +345,42 @@ Rectangle
 
                 RowLayout
                 {
-                    visible: _type === Find.SelectByAttribute
+                    id: findByAttributeRow
+
+                    visible: _type === Find.ByAttribute
 
                     ComboBox
                     {
                         id: selectAttributeComboBox
-                        implicitWidth: 150
+                        implicitWidth: 175
+
+                        enabled: selectAttributeComboBox.count > 0
 
                         textRole: "display"
 
                         model: proxyModel
+
+                        onCurrentTextChanged:
+                        {
+                            if(_visible && findByAttributeRow.visible)
+                                lastFindByAttributeName = currentText;
+                        }
                     }
 
                     ComboBox
                     {
                         id: valueComboBox
-                        implicitWidth: 150
+                        implicitWidth: 175
+
+                        enabled: valueComboBox.count > 0
+
+                        model:
+                        {
+                            var attribute = document.attribute(selectAttributeComboBox.currentText);
+                            return attribute.sharedValues;
+                        }
                     }
                 }
-
-                ToolBarSeparator {}
 
                 ToolButton { action: _previousAction }
                 ToolButton { action: _nextAction }
@@ -315,11 +389,18 @@ Rectangle
                     visible: _type === Find.Simple || _type === Find.Advanced
                     action: selectAllAction
                 }
+                ToolButton
+                {
+                    visible: _type === Find.ByAttribute
+                    action: selectOnlyAction
+                }
                 ToolButton { action: closeAction }
             }
 
             RowLayout
             {
+                id: advancedRow
+
                 visible: _type === Find.Advanced
 
                 Rectangle { width: Constants.padding }
@@ -327,6 +408,7 @@ Rectangle
                 CheckBox
                 {
                     id: attributeCheckBox
+                    enabled: attributeComboBox.count > 0
                 }
 
                 ComboBox
@@ -334,20 +416,23 @@ Rectangle
                     id: attributeComboBox
                     Layout.fillWidth: true
 
-                    enabled: attributeCheckBox.checked
+                    enabled: attributeCheckBox.checked && attributeComboBox.count > 0
                     textRole: "display"
 
                     model: proxyModel
 
                     onEnabledChanged:
                     {
-                        lastSearchedAttributeName = enabled ? currentText: "";
+                        console.log("onEnabledChanged " + advancedRow.visible);
+                        if(_visible && advancedRow.visible)
+                            lastAdvancedFindAttributeName = enabled ? currentText: "";
                     }
 
                     onCurrentTextChanged:
                     {
-                        if(attributeCheckBox.checked)
-                            lastSearchedAttributeName = currentText;
+                        console.log("onCurrentTextChanged " + advancedRow.visible + " " + enabled);
+                        if(_visible && advancedRow.visible && enabled)
+                            lastAdvancedFindAttributeName = currentText;
                     }
                 }
 
@@ -376,44 +461,57 @@ Rectangle
 
     function show(findType)
     {
+        _closing = false;
+
         if(findType === undefined)
             _type = Find.Simple;
         else
             _type = findType;
 
         proxyModel.sourceModel = document.availableAttributes(ElementType.Node);
-        var rowIndex = proxyModel.rowIndexForAttributeName(lastSearchedAttributeName);
 
         if(_type === Find.Advanced)
         {
+            var rowIndex = proxyModel.rowIndexForAttributeName(lastAdvancedFindAttributeName);
+
             if(rowIndex >= 0)
             {
                 attributeComboBox.currentIndex = rowIndex;
                 attributeCheckBox.checked = true;
             }
-            else
+            else if(attributeComboBox.count > 0)
             {
                 attributeComboBox.currentIndex = 0;
                 attributeCheckBox.checked = false;
             }
+            else
+            {
+                attributeComboBox.currentIndex = -1;
+                attributeCheckBox.checked = false;
+            }
         }
-        else if(_type === Find.SelectByAttribute)
+        else if(_type === Find.ByAttribute)
         {
+            var rowIndex = proxyModel.rowIndexForAttributeName(lastFindByAttributeName);
+
             if(rowIndex >= 0)
                 selectAttributeComboBox.currentIndex = rowIndex;
-            else
+            else if(selectAttributeComboBox.count > 0)
                 selectAttributeComboBox.currentIndex = 0;
+            else
+                selectAttributeComboBox.currentIndex = -1;
         }
-
-        root._visible = true;
 
         if(_type === Find.Simple || _type === Find.Advanced)
         {
             findField.forceActiveFocus();
             findField.selectAll();
         }
-        else
-            document.resetFind();
+
+        root._visible = true;
+
+        // Restore find state (if appropriate)
+        _doFind();
 
         shown();
     }
@@ -431,6 +529,6 @@ Rectangle
     {
         Simple,
         Advanced,
-        SelectByAttribute
+        ByAttribute
     }
 }

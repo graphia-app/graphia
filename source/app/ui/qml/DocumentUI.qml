@@ -194,7 +194,8 @@ Item
     {
         var uiData =
         {
-            lastSearchedAttributeName: find.lastSearchedAttributeName
+            lastAdvancedFindAttributeName: find.lastAdvancedFindAttributeName,
+            lastFindByAttributeName: find.lastFindByAttributeName
         };
 
         uiData = JSON.stringify(uiData);
@@ -1094,7 +1095,6 @@ Item
 
     readonly property bool findVisible: find.showing
     readonly property int findType: find.type
-    readonly property bool findHasFocus: find.hasTextFocus
     function showFind(findType)
     {
         find.show(findType);
@@ -1122,8 +1122,11 @@ Item
         {
             uiData = JSON.parse(uiData);
 
-            if(uiData.lastSearchedAttributeName !== undefined)
-                find.lastSearchedAttributeName = uiData.lastSearchedAttributeName;
+            if(uiData.lastAdvancedFindAttributeName !== undefined)
+                find.lastAdvancedFindAttributeName = uiData.lastAdvancedFindAttributeName;
+
+            if(uiData.lastFindByAttributeName !== undefined)
+                find.lastFindByAttributeName = uiData.lastFindByAttributeName;
         }
 
         onPluginQmlPathChanged:

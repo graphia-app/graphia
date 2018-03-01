@@ -13,6 +13,10 @@
 
 class GraphModel;
 
+// What to select when found nodes changes
+DEFINE_QML_ENUM(Q_GADGET, FindSelectStyle,
+                None, First, All);
+
 class SearchManager : public QObject
 {
     Q_OBJECT
@@ -20,7 +24,7 @@ public:
     explicit SearchManager(const GraphModel& graphModel);
 
     void findNodes(const QString& term, Flags<FindOptions> options,
-        QStringList attributeNames);
+        QStringList attributeNames, FindSelectStyle selectStyle);
     void clearFoundNodeIds();
     void refresh();
 
@@ -29,10 +33,13 @@ public:
 
     bool active() const { return !_term.isEmpty(); }
 
+    FindSelectStyle selectStyle() const { return _selectStyle; }
+
 private:
     QString _term;
     Flags<FindOptions> _options;
     QStringList _attributeNames;
+    FindSelectStyle _selectStyle;
 
     const GraphModel* _graphModel = nullptr;
     NodeIdSet _foundNodeIds;

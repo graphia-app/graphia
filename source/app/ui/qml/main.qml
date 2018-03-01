@@ -764,17 +764,17 @@ ApplicationWindow
 
     Action
     {
-        id: selectByAttributeAction
+        id: findByAttributeAction
         iconName: "format-indent-more"
-        text: qsTr("Select By Attribute")
+        text: qsTr("Find By Attribute Value")
         shortcut: "Ctrl+H"
         enabled: currentDocument ? currentDocument.idle : false
         onTriggered:
         {
             if(currentDocument)
             {
-                if(!currentDocument.findVisible || currentDocument.findType !== Find.SelectByAttribute)
-                    currentDocument.showFind(Find.SelectByAttribute);
+                if(!currentDocument.findVisible || currentDocument.findType !== Find.ByAttribute)
+                    currentDocument.showFind(Find.ByAttribute);
                 else
                     currentDocument.hideFind();
             }
@@ -846,7 +846,7 @@ ApplicationWindow
         id: overviewModeAction
         iconName: "view-fullscreen"
         text: qsTr("&Overview Mode")
-        shortcut: currentDocument && currentDocument.findHasFocus ? "" : "Esc"
+        shortcut: currentDocument && currentDocument.findVisible ? "" : "Esc"
         enabled: currentDocument ? currentDocument.canEnterOverviewMode : false
         onTriggered: currentDocument && currentDocument.switchToOverviewMode()
     }
@@ -856,7 +856,7 @@ ApplicationWindow
         id: resetViewAction
         iconName: "view-refresh"
         text: qsTr("&Reset View")
-        shortcut: currentDocument && (currentDocument.findHasFocus || currentDocument.canEnterOverviewMode) ? "" : "Esc"
+        shortcut: currentDocument && (currentDocument.findVisible || currentDocument.canEnterOverviewMode) ? "" : "Esc"
         enabled: currentDocument ? currentDocument.canResetView : false
         onTriggered: currentDocument && currentDocument.resetView()
     }
@@ -1121,13 +1121,13 @@ ApplicationWindow
             MenuItem { action: selectAllVisibleAction }
             MenuItem { action: selectNoneAction }
             MenuItem { action: invertSelectionAction }
-            MenuItem { action: selectByAttributeAction }
             MenuItem { action: selectSourcesAction }
             MenuItem { action: selectTargetsAction }
             MenuItem { action: selectNeighboursAction }
             MenuSeparator {}
             MenuItem { action: findAction }
             MenuItem { action: advancedFindAction }
+            MenuItem { action: findByAttributeAction }
             MenuItem
             {
                 action: currentDocument ? currentDocument.previousAction : nullAction

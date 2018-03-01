@@ -322,13 +322,16 @@ public:
     Q_INVOKABLE void gotoPrevComponent();
     Q_INVOKABLE void gotoNextComponent();
 
-    Q_INVOKABLE void find(const QString& term, int options, QStringList attributeNames);
+    Q_INVOKABLE void find(const QString& term, int options,
+        QStringList attributeNames, int findSelectStyle);
     Q_INVOKABLE void resetFind();
     Q_INVOKABLE void selectFirstFound();
     Q_INVOKABLE void selectNextFound();
     Q_INVOKABLE void selectPrevFound();
     Q_INVOKABLE void selectAllFound();
     Q_INVOKABLE void updateFoundIndex(bool reselectIfInvalidated);
+
+    Q_INVOKABLE void selectByAttributeValue(const QString& attributeName, const QString& value);
 
     Q_INVOKABLE QString nodeName(QmlNodeId nodeId) const;
 

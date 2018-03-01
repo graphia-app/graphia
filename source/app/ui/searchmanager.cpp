@@ -15,11 +15,12 @@ SearchManager::SearchManager(const GraphModel& graphModel) :
 {}
 
 void SearchManager::findNodes(const QString& term, Flags<FindOptions> options,
-    QStringList attributeNames)
+    QStringList attributeNames, FindSelectStyle selectStyle)
 {
     _term = term;
     _options = options;
     _attributeNames = std::move(attributeNames);
+    _selectStyle = selectStyle;
 
     if(_term.isEmpty())
     {
@@ -133,7 +134,7 @@ void SearchManager::clearFoundNodeIds()
 
 void SearchManager::refresh()
 {
-    findNodes(_term, _options, _attributeNames);
+    findNodes(_term, _options, _attributeNames, _selectStyle);
 }
 
 bool SearchManager::SearchManager::nodeWasFound(NodeId nodeId) const
