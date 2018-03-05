@@ -437,8 +437,6 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
 
     connect(this, &Document::taskAddedToExecutor, this, &Document::executeDeferred);
 
-    connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, this, &Document::numNodesFoundChanged);
-
     connect(&_graphModel->mutableGraph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
 
     emit pluginInstanceChanged();
@@ -968,13 +966,8 @@ void Document::find(const QString& term, int options, QStringList attributeNames
 
     _commandManager.executeOnce([=](Command&)
     {
-        int previousNumNodesFound = numNodesFound();
-
         _searchManager->findNodes(term, static_cast<FindOptions>(options),
             attributeNames, static_cast<FindSelectStyle>(findSelectStyle));
-
-        if(previousNumNodesFound != numNodesFound())
-            emit numNodesFoundChanged();
     });
 }
 
@@ -1081,6 +1074,12 @@ void Document::updateFoundIndex(bool reselectIfInvalidated)
         _foundItValid = false;
         emit foundIndexChanged();
     }
+
+    if(_numNodesFoundChanged)
+    {
+        _numNodesFoundChanged = false;
+        emit numNodesFoundChanged();
+    }
 }
 
 void Document::selectByAttributeValue(const QString& attributeName, const QString& value)
@@ -1130,6 +1129,7 @@ void Document::onSelectionChanged(const SelectionManager*)
 
 void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
 {
+    _numNodesFoundChanged = _foundNodeIds.size() != searchManager->foundNodeIds().size();
     _foundNodeIds.clear();
 
     if(searchManager->foundNodeIds().empty())
@@ -1141,6 +1141,7 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
 
         _foundItValid = false;
         emit foundIndexChanged();
+        emit numNodesFoundChanged();
 
         return;
     }
@@ -1165,7 +1166,7 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
 
     if(_searchManager->selectStyle() == FindSelectStyle::All)
     {
-        selectAll();
+        _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), _searchManager->foundNodeIds()));
 
         if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
             _graphQuickItem->moveFocusToNodes(u::vectorFrom(_searchManager->foundNodeIds()));

@@ -192,6 +192,11 @@ private:
     bool _foundItValid = false;
     std::vector<NodeId>::const_iterator _foundIt = _foundNodeIds.begin();
 
+    // This is a mildly awkard hack to ensure than the numNodeFoundChanged signal
+    // gets emitted /after/ the foundIndexChanged signal so that the number of
+    // found nodes text in the UI gets updated minimally
+    bool _numNodesFoundChanged = false;
+
     QQmlVariantListModel _graphTransformsModel;
     QStringList _graphTransforms;
 
