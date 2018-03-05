@@ -332,7 +332,6 @@ Rectangle
                                     return qsTr("Not Found");
                             }
                             color: "grey"
-
                         }
 
                         MouseArea
@@ -423,14 +422,12 @@ Rectangle
 
                     onEnabledChanged:
                     {
-                        console.log("onEnabledChanged " + advancedRow.visible);
                         if(_visible && advancedRow.visible)
                             lastAdvancedFindAttributeName = enabled ? currentText: "";
                     }
 
                     onCurrentTextChanged:
                     {
-                        console.log("onCurrentTextChanged " + advancedRow.visible + " " + enabled);
                         if(_visible && advancedRow.visible && enabled)
                             lastAdvancedFindAttributeName = currentText;
                     }
