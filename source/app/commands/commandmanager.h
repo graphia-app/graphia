@@ -91,6 +91,7 @@ private:
     void undoReal();
     void redoReal();
 
+    bool commandsArePending() const;
     void clearCommandStackNoLocking();
 
     enum class CommandAction
@@ -127,8 +128,6 @@ private:
     std::thread _thread;
     mutable std::recursive_mutex _mutex;
 
-    // Only using this to get owns_lock()
-    std::unique_lock<std::recursive_mutex> _lock;
     std::atomic<bool> _busy;
     std::atomic<bool> _graphChanged;
 

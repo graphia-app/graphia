@@ -7,7 +7,6 @@
 #include <thread>
 
 CommandManager::CommandManager() :
-    _lock(_mutex, std::defer_lock),
     _busy(false),
     _graphChanged(false)
 {
@@ -26,9 +25,6 @@ CommandManager::~CommandManager()
 
         _thread.join();
     }
-
-    if(_lock.owns_lock())
-        _lock.unlock();
 }
 
 void CommandManager::execute(std::unique_ptr<ICommand> command)
@@ -61,18 +57,6 @@ void CommandManager::redo()
 
 void CommandManager::executeReal(std::unique_ptr<ICommand> command, bool irreversible)
 {
-    if(_lock.owns_lock())
-    {
-        if(_debug > 0)
-            qDebug() << "enqueuing command" << command->description();
-
-        // Something is already executing, do the new command once that is finished
-        _pendingCommands.emplace_back(irreversible ? CommandAction::ExecuteOnce : CommandAction::Execute, std::move(command));
-        return;
-    }
-
-    _lock.lock();
-
     _busy = true;
     emit busyChanged();
     if(_debug > 0)
@@ -82,8 +66,10 @@ void CommandManager::executeReal(std::unique_ptr<ICommand> command, bool irrever
     auto verb = command->verb();
     doCommand(commandPtr, verb, [this, command = std::move(command), irreversible]() mutable
     {
+        std::unique_lock<std::recursive_mutex> lock(_mutex);
+
         QString threadName = command->description().length() > 0 ?
-            command->description() : QStringLiteral("Anonymous Command");
+            command->description() : QStringLiteral("Anon Command");
         u::setCurrentThreadName(threadName);
 
         _graphChanged = false;
@@ -125,14 +111,6 @@ void CommandManager::executeReal(std::unique_ptr<ICommand> command, bool irrever
 
 void CommandManager::undoReal()
 {
-    if(_lock.owns_lock())
-    {
-        _pendingCommands.emplace_back(CommandAction::Undo);
-        return;
-    }
-
-    _lock.lock();
-
     if(!canUndoNoLocking())
         return;
 
@@ -147,6 +125,8 @@ void CommandManager::undoReal()
 
     doCommand(command, undoVerb, [this, command]
     {
+        std::unique_lock<std::recursive_mutex> lock(_mutex);
+
         u::setCurrentThreadName("(u) " + command->description());
 
         command->undo();
@@ -161,14 +141,6 @@ void CommandManager::undoReal()
 
 void CommandManager::redoReal()
 {
-    if(_lock.owns_lock())
-    {
-        _pendingCommands.emplace_back(CommandAction::Redo);
-        return;
-    }
-
-    _lock.lock();
-
     if(!canRedoNoLocking())
         return;
 
@@ -183,6 +155,8 @@ void CommandManager::redoReal()
 
     doCommand(command, redoVerb, [this, command]
     {
+        std::unique_lock<std::recursive_mutex> lock(_mutex);
+
         u::setCurrentThreadName("(r) " + command->description());
 
         command->execute();
@@ -363,6 +337,13 @@ bool CommandManager::canRedoNoLocking() const
     return _lastExecutedIndex < static_cast<int>(_stack.size()) - 1;
 }
 
+bool CommandManager::commandsArePending() const
+{
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
+
+    return !_pendingCommands.empty();
+}
+
 void CommandManager::onCommandCompleted(bool success, QString description, QString)
 {
     killTimer(_commandProgressTimerId);
@@ -370,11 +351,6 @@ void CommandManager::onCommandCompleted(bool success, QString description, QStri
 
     if(_thread.joinable())
         _thread.join();
-
-    auto commandsArePending = !_pendingCommands.empty();
-
-    Q_ASSERT(_lock.owns_lock());
-    _lock.unlock();
 
     if(_debug > 0)
     {
@@ -389,7 +365,7 @@ void CommandManager::onCommandCompleted(bool success, QString description, QStri
             qDebug() << "Command failed/cancelled";
     }
 
-    if(commandsArePending)
+    if(commandsArePending())
         update();
     else
     {
@@ -402,11 +378,10 @@ void CommandManager::update()
 {
     std::unique_lock<std::recursive_mutex> lock(_mutex);
 
-    if(!_pendingCommands.empty())
+    if(!_thread.joinable() && commandsArePending())
     {
         auto pendingCommand = std::move(_pendingCommands.front());
         _pendingCommands.pop_front();
-        lock.unlock();
 
         switch(pendingCommand._action)
         {
