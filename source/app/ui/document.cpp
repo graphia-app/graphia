@@ -985,12 +985,38 @@ static bool shouldMoveFindFocus(bool inOverviewMode)
         ((inOverviewMode && u::pref("misc/focusFoundComponents").toBool()) || !inOverviewMode);
 }
 
-void Document::selectFoundNode(NodeId newFound)
+void Document::selectAndFocusNode(NodeId nodeId)
 {
-    _commandManager.executeOnce(makeSelectNodeCommand(_selectionManager.get(), newFound));
+    std::vector<std::unique_ptr<ICommand>> commands;
 
-    if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
-        _graphQuickItem->moveFocusToNode(newFound);
+    commands.emplace_back(makeSelectNodeCommand(_selectionManager.get(), nodeId));
+    commands.emplace_back(std::make_unique<Command>(Command::CommandDescription(), [=](Command&)
+    {
+        executeOnMainThread([=]
+        {
+            if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
+                _graphQuickItem->moveFocusToNode(nodeId);
+        });
+    }));
+
+    _commandManager.executeOnce(std::move(commands));
+}
+
+void Document::selectAndFocusNodes(std::vector<NodeId> nodeIds)
+{
+    std::vector<std::unique_ptr<ICommand>> commands;
+
+    commands.emplace_back(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
+    commands.emplace_back(std::make_unique<Command>(Command::CommandDescription(), [=](Command&)
+    {
+        executeOnMainThread([=]
+        {
+            if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
+                _graphQuickItem->moveFocusToNodes(nodeIds);
+        });
+    }));
+
+    _commandManager.executeOnce(std::move(commands));
 }
 
 void Document::moveFocusToNode(NodeId nodeId)
@@ -1022,17 +1048,17 @@ int Document::numNodesSelected() const
 
 void Document::selectFirstFound()
 {
-    selectFoundNode(*_foundNodeIds.begin());
+    selectAndFocusNode(*_foundNodeIds.begin());
 }
 
 void Document::selectNextFound()
 {
-    selectFoundNode(incrementFoundIt());
+    selectAndFocusNode(incrementFoundIt());
 }
 
 void Document::selectPrevFound()
 {
-    selectFoundNode(decrementFoundIt());
+    selectAndFocusNode(decrementFoundIt());
 }
 
 void Document::updateFoundIndex(bool reselectIfInvalidated)
@@ -1108,10 +1134,7 @@ void Document::selectByAttributeValue(const QString& attributeName, const QStrin
     if(nodeIds.empty())
         return;
 
-    _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
-
-    if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
-        _graphQuickItem->moveFocusToNodes(nodeIds);
+    selectAndFocusNodes(nodeIds);
 }
 
 QString Document::nodeName(QmlNodeId nodeId) const
@@ -1165,12 +1188,7 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
     _foundItValid = false;
 
     if(_searchManager->selectStyle() == FindSelectStyle::All)
-    {
-        _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), _searchManager->foundNodeIds()));
-
-        if(shouldMoveFindFocus(_graphQuickItem->inOverviewMode()))
-            _graphQuickItem->moveFocusToNodes(u::vectorFrom(_searchManager->foundNodeIds()));
-    }
+        selectAndFocusNodes(u::vectorFrom(_searchManager->foundNodeIds()));
     else if(_selectionManager->selectedNodes().empty())
         selectFirstFound();
     else

@@ -225,7 +225,8 @@ private:
     void setFoundIt(std::vector<NodeId>::const_iterator foundIt);
     NodeId incrementFoundIt();
     NodeId decrementFoundIt();
-    void selectFoundNode(NodeId newFound);
+    void selectAndFocusNode(NodeId nodeId);
+    void selectAndFocusNodes(std::vector<NodeId> nodeIds);
 
     void setSaveRequired();
 

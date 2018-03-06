@@ -27,6 +27,11 @@ public:
         execute(std::make_unique<CompoundCommand>(commandDescription, std::move(commands)));
     }
 
+    void execute(std::vector<std::unique_ptr<ICommand>> commands)
+    {
+        execute(std::make_unique<CompoundCommand>(Command::CommandDescription(), std::move(commands)));
+    }
+
     // Execute only once, i.e. so that it can't be undone
     virtual void executeOnce(std::unique_ptr<ICommand> command) = 0;
 
@@ -40,6 +45,11 @@ public:
                      std::vector<std::unique_ptr<ICommand>> commands)
     {
         executeOnce(std::make_unique<CompoundCommand>(commandDescription, std::move(commands)));
+    }
+
+    void executeOnce(std::vector<std::unique_ptr<ICommand>> commands)
+    {
+        executeOnce(std::make_unique<CompoundCommand>(Command::CommandDescription(), std::move(commands)));
     }
 
     void executeOnce(CommandFn&& executeFn)
