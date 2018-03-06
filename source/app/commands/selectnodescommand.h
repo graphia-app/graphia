@@ -88,12 +88,9 @@ auto makeSelectNodesCommand(SelectionManager* selectionManager, C nodeIds, bool 
     return std::make_unique<SelectNodesCommand<C>>(selectionManager, nodeIds, clearSelectionFirst);
 }
 
-// This doesn't really need to be a template, but the alternative is defining it in its own
-// compilation unit, which gets a bit awkward
-template<typename T>
-auto makeSelectNodeCommand(SelectionManager* selectionManager, T nodeId, bool clearSelectionFirst = true)
+inline auto makeSelectNodeCommand(SelectionManager* selectionManager, NodeId nodeId, bool clearSelectionFirst = true)
 {
-    std::vector<T> nodeIds{{nodeId}};
+    std::vector<NodeId> nodeIds{{nodeId}};
     return makeSelectNodesCommand(selectionManager, nodeIds, clearSelectionFirst);
 }
 
