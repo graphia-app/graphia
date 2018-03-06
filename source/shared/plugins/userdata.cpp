@@ -127,6 +127,7 @@ bool UserData::load(const json& jsonObject, const ProgressFn& progressFn)
         if(!userDataVector.load(name, jsonVector))
             return false;
 
+        _vectorNames.insert(name);
         _userDataVectors.emplace_back(std::make_pair(name, userDataVector));
 
         progressFn(static_cast<int>((i++ * 100) / vectorsObject.size()));
