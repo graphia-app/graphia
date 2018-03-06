@@ -735,6 +735,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(_selectionManager.get(), &SelectionManager::selectionChanged,
             _graphModel.get(), &GraphModel::onSelectionChanged, Qt::DirectConnection);
     connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::numNodesSelectedChanged);
+    connect(_selectionManager.get(), &SelectionManager::selectionChanged, this, &Document::numInvisibleNodesSelectedChanged);
 
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged, this, &Document::onFoundNodeIdsChanged);
     connect(_searchManager.get(), &SearchManager::foundNodeIdsChanged,
@@ -1167,6 +1168,27 @@ QStringList Document::nodeAttributeGroupNames()
         }
     }
     return list;
+}
+
+int Document::numInvisibleNodesSelected() const
+{
+    if(_selectionManager != nullptr)
+    {
+        auto selectedNodes = _selectionManager->selectedNodes();
+
+        for(auto it = selectedNodes.begin(); it != selectedNodes.end(); /*NO OP*/)
+        {
+            auto componentIdOfNode = _graphModel->graph().componentIdOfNode(*it);
+            if(_graphQuickItem->focusedComponentId() == componentIdOfNode)
+                it = selectedNodes.erase(it);
+            else
+                ++it;
+        }
+
+        return static_cast<int>(selectedNodes.size());
+    }
+
+    return 0;
 }
 
 void Document::selectFirstFound()

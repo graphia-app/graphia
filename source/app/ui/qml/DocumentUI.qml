@@ -625,7 +625,7 @@ Item
                     text:
                     {
                         return qsTr("Component ") + graph.visibleComponentIndex +
-                            qsTr(" of ") + graph.numComponents;
+                            qsTr(" of ") + graph.numComponents + " " + document.numInvisibleNodesSelected;
                     }
 
                     color: root.contrastingColor

@@ -97,6 +97,7 @@ class Document : public QObject, public IDocument
     Q_PROPERTY(int numNodesSelected READ numNodesSelected NOTIFY numNodesSelectedChanged)
     Q_PROPERTY(QStringList nodeAttributeGroupNames READ nodeAttributeGroupNames NOTIFY nodeAttributeGroupNamesChanged)
 
+    Q_PROPERTY(int numInvisibleNodesSelected READ numInvisibleNodesSelected NOTIFY numInvisibleNodesSelectedChanged)
 
     Q_PROPERTY(QStringList bookmarks READ bookmarks NOTIFY bookmarksChanged)
 
@@ -258,6 +259,7 @@ private:
     void setSaveRequired();
 
     int numNodesSelected() const;
+    int numInvisibleNodesSelected() const;
 
     QStringList nodeAttributeGroupNames();
 
@@ -316,6 +318,7 @@ signals:
     void numNodesFoundChanged();
 
     void numNodesSelectedChanged();
+    void numInvisibleNodesSelectedChanged();
 
     void bookmarksChanged();
 
