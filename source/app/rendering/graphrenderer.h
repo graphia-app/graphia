@@ -257,7 +257,7 @@ private:
 
     void updateScene();
 
-    NodeId computeBestFocusNodeId(GraphQuickItem* graphQuickItem, float& radius);
+    Mode bestFocusParameters(GraphQuickItem* graphQuickItem, NodeId& focusNodeId, float& radius) const;
 
     QOpenGLFramebufferObject* createFramebufferObject(const QSize &size) override;
     void render() override;

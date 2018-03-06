@@ -958,20 +958,22 @@ void GraphRenderer::updateScene()
     }
 }
 
-NodeId GraphRenderer::computeBestFocusNodeId(GraphQuickItem* graphQuickItem, float& radius)
+GraphRenderer::Mode GraphRenderer::bestFocusParameters(GraphQuickItem* graphQuickItem,
+    NodeId& focusNodeId, float& radius) const
 {
+    radius = 0.0f;
+    focusNodeId = {};
+
     auto nodeIds = graphQuickItem->desiredFocusNodeIds();
 
     if(nodeIds.empty())
-    {
-        radius = 0.0f;
-        return {};
-    }
+        return mode();
 
     if(nodeIds.size() == 1)
     {
         radius = GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS;
-        return nodeIds.front();
+        focusNodeId = nodeIds.front();
+        return Mode::Component;
     }
 
     ComponentIdSet componentIds;
@@ -993,12 +995,12 @@ NodeId GraphRenderer::computeBestFocusNodeId(GraphQuickItem* graphQuickItem, flo
             }), nodeIds.end());
         }
         else
-        {
-            // Just stay in overview mode
-            radius = 0.0f;
-            return {};
-        }
+            return mode();
     }
+
+    // None of the nodes are in the currently focused component
+    if(nodeIds.empty())
+        return Mode::Overview;
 
     // If the request is for more than 1 node, then find their barycentre and
     // pick the closest node to where ever this happens to be
@@ -1028,8 +1030,9 @@ NodeId GraphRenderer::computeBestFocusNodeId(GraphQuickItem* graphQuickItem, flo
 
     radius = GraphComponentRenderer::maxNodeDistanceFromPoint(*_graphModel,
         _graphModel->nodePositions().getScaledAndSmoothed(closestToCentreNodeId), nodeIds);
+    focusNodeId = closestToCentreNodeId;
 
-    return closestToCentreNodeId;
+    return mode();
 }
 
 QOpenGLFramebufferObject* GraphRenderer::createFramebufferObject(const QSize& size)
@@ -1137,10 +1140,13 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
         switchToOverviewMode();
 
     float radius = GraphComponentRenderer::COMFORTABLE_ZOOM_RADIUS;
-    NodeId focusNodeId = computeBestFocusNodeId(graphQuickItem, radius);
+    NodeId focusNodeId;
+    auto targetMode = bestFocusParameters(graphQuickItem, focusNodeId, radius);
     ComponentId focusComponentId = graphQuickItem->desiredFocusComponentId();
 
-    if(!focusNodeId.isNull())
+    if(mode() == Mode::Component && targetMode == Mode::Overview)
+        switchToOverviewMode();
+    else if(!focusNodeId.isNull())
         moveFocusToNode(focusNodeId, radius);
     else if(!focusComponentId.isNull())
     {
