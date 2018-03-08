@@ -59,8 +59,9 @@ Window
                 model: models
                 Tab
                 {
+                    id: tab
                     title: "Results " + index
-                    RowLayout
+                    SplitView
                     {
                         anchors.fill: parent
                         TableView
@@ -133,18 +134,68 @@ Window
                             TableViewColumn { role: "OverRep"; title: qsTr("Over-Representation"); width: 100 }
                             TableViewColumn { role: "Fishers"; title: qsTr("Fishers"); width: 100 }
                         }
-                        EnrichmentHeatmap
+                        GridLayout
                         {
-                            visible: showHeatmapButton.checked
+                            columns: 2
                             Layout.fillHeight: true
-                            Layout.fillWidth: true
-                            id: heatmap
-                            model: qtObject
+                            visible: showHeatmapButton.checked
+                            EnrichmentHeatmap
+                            {
+                                id: heatmap
+                                Layout.fillWidth: true
+                                Layout.fillHeight: true
+                                Layout.minimumHeight: 100
+                                Layout.minimumWidth: 170
+                                model: qtObject
+                                elideLabelWidth: 100
+                                scrollXAmount:
+                                {
+                                    return scrollViewHorizontal.flickableItem.contentX /
+                                            (scrollViewHorizontal.flickableItem.contentWidth - scrollViewHorizontal.viewport.width);
+                                }
+                                scrollYAmount:
+                                {
+                                    return scrollViewVertical.flickableItem.contentY /
+                                            (scrollViewVertical.flickableItem.contentHeight - scrollViewVertical.viewport.height);
+                                }
+                            }
+                            ScrollView
+                            {
+                                id: scrollViewVertical
+                                visible: true
+                                horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+                                Layout.fillHeight: true;
+                                implicitWidth: 15
+                                Rectangle
+                                {
+                                    // This is a fake object to make native scrollbars appear
+                                    // Prevent Qt opengl texture overflow (2^14 pixels)
+                                    width: 1
+                                    height: Math.min(heatmap.height / heatmap.verticalRangeSize, 16383)
+                                    color: "transparent"
+                                }
+                            }
+                            ScrollView
+                            {
+                                id: scrollViewHorizontal
+                                visible: true
+                                verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
+                                implicitHeight: 15
+                                Layout.fillWidth: true;
+                                Rectangle
+                                {
+                                    // This is a fake object to make native scrollbars appear
+                                    // Prevent Qt opengl texture overflow (2^14 pixels)
+                                    width: Math.min(heatmap.width / heatmap.horizontalRangeSize, 16383)
+                                    height: 1
+                                    color: "transparent"
+                                }
+                            }
                         }
                         Connections
                         {
                             target: qtObject
-                            onModelReset: heatmap.update()
+                            onModelReset: heatmap.buildPlot()
                         }
                     }
                 }

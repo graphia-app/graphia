@@ -1,5 +1,6 @@
 #include "enrichmentheatmapitem.h"
 #include <set>
+#include <iterator>
 
 EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPaintedItem(parent)
 {
@@ -25,9 +26,16 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPainted
     _colorMap->rescaleDataRange(true);
     _colorMap->setTightBoundary(false);
 
-    connect(this, &EnrichmentHeatmapItem::tableModelChanged, this, &EnrichmentHeatmapItem::update);
+    _defaultFont9Pt.setPointSize(9);
+
+    setFlag(QQuickItem::ItemHasContents, true);
+
+    connect(this, &EnrichmentHeatmapItem::tableModelChanged, this, &EnrichmentHeatmapItem::buildPlot);
+    connect(this, &QQuickPaintedItem::widthChanged, this, &EnrichmentHeatmapItem::horizontalRangeSizeChanged);
+    connect(this, &QQuickPaintedItem::heightChanged, this, &EnrichmentHeatmapItem::verticalRangeSizeChanged);
     connect(this, &QQuickPaintedItem::widthChanged, this, &EnrichmentHeatmapItem::updatePlotSize);
     connect(this, &QQuickPaintedItem::heightChanged, this, &EnrichmentHeatmapItem::updatePlotSize);
+    connect(&_customPlot, &QCustomPlot::afterReplot, this, &EnrichmentHeatmapItem::onCustomReplot);
 }
 
 void EnrichmentHeatmapItem::paint(QPainter *painter)
@@ -63,8 +71,11 @@ void EnrichmentHeatmapItem::routeMouseEvent(QMouseEvent* event)
     QCoreApplication::postEvent(&_customPlot, newEvent);
 }
 
-void EnrichmentHeatmapItem::update()
+void EnrichmentHeatmapItem::buildPlot()
 {
+    if(_tableModel == nullptr)
+        return;
+
     QSharedPointer<QCPAxisTickerText> xCategoryTicker(new QCPAxisTickerText);
     QSharedPointer<QCPAxisTickerText> yCategoryTicker(new QCPAxisTickerText);
 
@@ -74,27 +85,45 @@ void EnrichmentHeatmapItem::update()
 
     std::set<QString> attributeValueSetA;
     std::set<QString> attributeValueSetB;
+    std::map<QString, int> attributeSetNameAToAxisX;
+    std::map<QString, int> attributeSetNameBToAxisY;
     for (int i = 0; i < _tableModel->rowCount(); ++i)
     {
         attributeValueSetA.insert(_tableModel->data(i, "Attribute Group").toString());
         attributeValueSetB.insert(_tableModel->data(i, "Selection").toString());
     }
-    int pos = 0;
-    for(auto& value: attributeValueSetA)
-        xCategoryTicker->addTick(pos++, value);
-    pos = 0;
-    for(auto& value: attributeValueSetB)
-        yCategoryTicker->addTick(pos++, value);
 
-    _colorMap->data()->setSize(attributeValueSetA.size(), attributeValueSetB.size());
+    QFontMetrics metrics(_defaultFont9Pt);
+
+    int column = 0;
+    for(auto& labelName: attributeValueSetA)
+    {
+        attributeSetNameAToAxisX[labelName] = column;
+        if(_elideLabelWidth > 0)
+            xCategoryTicker->addTick(column++, metrics.elidedText(labelName, Qt::ElideRight, _elideLabelWidth));
+        else
+            xCategoryTicker->addTick(column++, labelName);
+    }
+    column = 0;
+    for(auto& labelName: attributeValueSetB)
+    {
+        attributeSetNameBToAxisY[labelName] = column;
+        if(_elideLabelWidth > 0)
+            yCategoryTicker->addTick(column++, metrics.elidedText(labelName, Qt::ElideRight, _elideLabelWidth));
+        else
+            yCategoryTicker->addTick(column++, labelName);
+    }
+
+    _colorMap->data()->setSize(static_cast<int>(attributeValueSetA.size()), static_cast<int>(attributeValueSetB.size()));
     _colorMap->data()->setRange(QCPRange(0, attributeValueSetA.size()-1), QCPRange(0, attributeValueSetB.size()-1));
-    _customPlot.xAxis->setRange(-0.5, attributeValueSetA.size()-0.5);
-    _customPlot.yAxis2->setRange(-0.5, attributeValueSetB.size()-0.5);
+
+    _attributeACount = static_cast<int>(attributeValueSetA.size());
+    _attributeBCount = static_cast<int>(attributeValueSetB.size());
 
     for(int i=0; i<_tableModel->rowCount(); i++)
     {
-        _colorMap->data()->setCell(xCategoryTicker->ticks().key(_tableModel->data(i, "Attribute Group").toString()) + 0.5,
-                                   yCategoryTicker->ticks().key(_tableModel->data(i, "Selection").toString()) + 0.5,
+        _colorMap->data()->setCell(attributeSetNameAToAxisX[_tableModel->data(i, "Attribute Group").toString()] + 0.5,
+                                   attributeSetNameBToAxisY[_tableModel->data(i, "Selection").toString()] + 0.5,
                                    _tableModel->data(i, "Fishers").toFloat());
     }
     _colorMap->rescaleDataRange(true);
@@ -103,4 +132,104 @@ void EnrichmentHeatmapItem::update()
 void EnrichmentHeatmapItem::updatePlotSize()
 {
     _customPlot.setGeometry(0, 0, static_cast<int>(width()), static_cast<int>(height()));
+    scaleXAxis();
+    scaleYAxis();
 }
+
+double EnrichmentHeatmapItem::columnAxisWidth()
+{
+    const auto& margins = _customPlot.axisRect()->margins();
+    const unsigned int axisWidth = margins.left() + margins.right();
+
+    //FIXME This value is wrong when the legend is enabled
+    return width() - axisWidth;
+}
+
+double EnrichmentHeatmapItem::columnAxisHeight()
+{
+    const auto& margins = _customPlot.axisRect()->margins();
+    const unsigned int axisHeight = margins.top() + margins.bottom();
+
+    //FIXME This value is wrong when the legend is enabled
+    return height() - axisHeight;
+}
+
+void EnrichmentHeatmapItem::scaleXAxis()
+{
+    auto maxX = static_cast<double>(_attributeACount);
+    double visiblePlotWidth = columnAxisWidth();
+    double textHeight = columnLabelSize();
+
+    double position = (_attributeACount - (visiblePlotWidth / textHeight)) * _scrollXAmount;
+
+    if(position + (visiblePlotWidth / textHeight) <= maxX)
+        _customPlot.xAxis->setRange(position - _HEATMAP_OFFSET, position + (visiblePlotWidth / textHeight) - _HEATMAP_OFFSET);
+    else
+        _customPlot.xAxis->setRange(-_HEATMAP_OFFSET, maxX - _HEATMAP_OFFSET);
+}
+
+void EnrichmentHeatmapItem::scaleYAxis()
+{
+    auto maxY = static_cast<double>(_attributeBCount);
+    double visiblePlotHeight = columnAxisHeight();
+    double textHeight = columnLabelSize();
+
+    double position = (_attributeBCount - (visiblePlotHeight / textHeight)) * (1.0-_scrollYAmount);
+
+    if((visiblePlotHeight / textHeight) <= maxY)
+        _customPlot.yAxis2->setRange(position - _HEATMAP_OFFSET, position + (visiblePlotHeight / textHeight) - _HEATMAP_OFFSET);
+    else
+        _customPlot.yAxis2->setRange(-_HEATMAP_OFFSET, maxY - _HEATMAP_OFFSET);
+}
+
+void EnrichmentHeatmapItem::setElideLabelWidth(int elideLabelWidth)
+{
+    bool changed = (_elideLabelWidth != elideLabelWidth);
+    _elideLabelWidth = elideLabelWidth;
+
+    if(changed)
+    {
+        updatePlotSize();
+        buildPlot();
+        _customPlot.replot(QCustomPlot::rpQueuedReplot);
+    }
+}
+
+
+void EnrichmentHeatmapItem::setScrollXAmount(double scrollAmount)
+{
+    _scrollXAmount = scrollAmount;
+    scaleXAxis();
+    _customPlot.replot();
+}
+
+void EnrichmentHeatmapItem::setScrollYAmount(double scrollAmount)
+{
+    _scrollYAmount = scrollAmount;
+    scaleYAxis();
+    _customPlot.replot();
+    update();
+}
+
+double EnrichmentHeatmapItem::columnLabelSize()
+{
+    QFontMetrics metrics(_defaultFont9Pt);
+    const unsigned int columnPadding = 1;
+    return metrics.height() + columnPadding;
+}
+
+double EnrichmentHeatmapItem::horizontalRangeSize()
+{
+    return (columnAxisWidth() / (columnLabelSize() * _attributeACount));
+}
+
+double EnrichmentHeatmapItem::verticalRangeSize()
+{
+    return (columnAxisHeight() / (columnLabelSize() * _attributeBCount));
+}
+
+void EnrichmentHeatmapItem::onCustomReplot()
+{
+    update();
+}
+
