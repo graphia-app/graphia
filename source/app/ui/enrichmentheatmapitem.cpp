@@ -93,10 +93,18 @@ void EnrichmentHeatmapItem::buildPlot()
         attributeValueSetB.insert(_tableModel->data(i, "Selection").toString());
     }
 
+    // Sensible sort strings using numbers
+    QCollator collator;
+    collator.setNumericMode(true);
+    std::vector<QString> sortAttributeValueSetA(attributeValueSetA.begin(), attributeValueSetA.end());
+    std::vector<QString> sortAttributeValueSetB(attributeValueSetB.begin(), attributeValueSetB.end());
+    std::sort(sortAttributeValueSetA.begin(), sortAttributeValueSetA.end(), collator);
+    std::sort(sortAttributeValueSetB.begin(), sortAttributeValueSetB.end(), collator);
+
     QFontMetrics metrics(_defaultFont9Pt);
 
     int column = 0;
-    for(auto& labelName: attributeValueSetA)
+    for(auto& labelName: sortAttributeValueSetA)
     {
         attributeSetNameAToAxisX[labelName] = column;
         if(_elideLabelWidth > 0)
@@ -105,7 +113,7 @@ void EnrichmentHeatmapItem::buildPlot()
             xCategoryTicker->addTick(column++, labelName);
     }
     column = 0;
-    for(auto& labelName: attributeValueSetB)
+    for(auto& labelName: sortAttributeValueSetB)
     {
         attributeSetNameBToAxisY[labelName] = column;
         if(_elideLabelWidth > 0)

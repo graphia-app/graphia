@@ -184,7 +184,7 @@ Window
                                 visible: true
                                 verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
                                 implicitHeight: 15
-                                Layout.fillWidth: true;
+                                Layout.fillWidth: true
                                 Rectangle
                                 {
                                     // This is a fake object to make native scrollbars appear
