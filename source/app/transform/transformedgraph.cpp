@@ -82,7 +82,9 @@ void TransformedGraph::rebuild()
 
     emit graphWillChange(this);
 
-    _target.performTransaction([this](IMutableGraph&)
+    QStringList updatedAttributeNames;
+
+    _target.performTransaction([this, &updatedAttributeNames](IMutableGraph&)
     {
         _graphChangeOccurred = false;
 
@@ -124,6 +126,9 @@ void TransformedGraph::rebuild()
                 _cache.clear();
             }
 
+            for(const auto& attribute : transform->attributes())
+                updatedAttributeNames.append(attribute);
+
             setCurrentTransform(nullptr);
 
             if(_cancelled)
@@ -154,6 +159,8 @@ void TransformedGraph::rebuild()
 
         _cache = std::move(newCache);
     });
+
+    emit attributeValuesChanged(updatedAttributeNames);
 
     emit graphChanged(this, _graphChangeOccurred);
     clearPhase();

@@ -11,6 +11,8 @@
 #include "attributes/attribute.h"
 
 #include <QObject>
+#include <QString>
+#include <QStringList>
 
 #include <functional>
 #include <atomic>
@@ -113,6 +115,9 @@ private:
 
 private slots:
     void onTargetGraphChanged(const Graph* graph);
+
+signals:
+    void attributeValuesChanged(QStringList attributeNames);
 };
 
 #endif // TRANSFORMEDGRAPH_H

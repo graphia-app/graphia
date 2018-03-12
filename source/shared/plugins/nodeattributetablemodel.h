@@ -83,6 +83,7 @@ public:
 public slots:
     void onAttributeAdded(const QString& name);
     void onAttributeRemoved(const QString& name);
+    void onAttributeValuesChanged(const QString& name);
 
 signals:
     void columnNamesChanged();

@@ -27,6 +27,8 @@ void NodeAttributeTableModel::initialise(IDocument* document, UserNodeData* user
             this, SLOT(onAttributeAdded(const QString&)), Qt::DirectConnection);
     connect(modelQObject, SIGNAL(attributeRemoved(const QString&)),
             this, SLOT(onAttributeRemoved(const QString&)), Qt::DirectConnection);
+    connect(modelQObject, SIGNAL(attributeValuesChanged(const QString&)),
+            this, SLOT(onAttributeValuesChanged(const QString&)), Qt::DirectConnection);
 
     auto graphQObject = dynamic_cast<const QObject*>(&graphModel->graph());
     connect(graphQObject, SIGNAL(graphChanged(const Graph*, bool)),
@@ -249,6 +251,15 @@ void NodeAttributeTableModel::onAttributeRemoved(const QString& name)
         int role = _roleNames.key(name.toUtf8());
         updateRoleNames();
         removeRole(role);
+    }
+}
+
+void NodeAttributeTableModel::onAttributeValuesChanged(const QString& name)
+{
+    if(u::contains(_roleNames.values(), name.toUtf8()))
+    {
+        int role = _roleNames.key(name.toUtf8());
+        updateRole(role);
     }
 }
 

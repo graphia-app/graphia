@@ -12,6 +12,8 @@
 
 #include <QString>
 
+#include <vector>
+#include <map>
 #include <memory>
 
 class Graph;
@@ -22,6 +24,8 @@ class Attribute;
 
 class GraphTransform : public Cancellable
 {
+    friend class GraphModel;
+
 public:
     GraphTransform() = default;
     ~GraphTransform() override = default;
@@ -46,7 +50,11 @@ public:
     // This is so that subclasses can access the config
     // Specifically, it is not a means to reconfigure an existing transform
     const GraphTransformConfig& config() const { return _config; }
+    const std::vector<QString>& attributes() const { return _attributes; }
+
+private:
     void setConfig(const GraphTransformConfig& config) { _config = config; }
+    void setAttributes(const std::vector<QString>& attributes) { _attributes = attributes; }
 
 protected:
     bool hasUnknownAttributes(const std::vector<QString>& referencedAttributes,
@@ -56,6 +64,7 @@ private:
     mutable TransformInfo* _info = nullptr;
     bool _repeating = false;
     GraphTransformConfig _config;
+    std::vector<QString> _attributes;
 };
 
 struct DeclaredAttribute

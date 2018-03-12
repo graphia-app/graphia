@@ -100,6 +100,8 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
 
     connect(&_->_transformedGraph, &Graph::graphWillChange, this, &GraphModel::onTransformedGraphWillChange, Qt::DirectConnection);
     connect(&_->_transformedGraph, &Graph::graphChanged, this, &GraphModel::onTransformedGraphChanged, Qt::DirectConnection);
+    connect(&_->_transformedGraph, &TransformedGraph::attributeValuesChanged, this,
+        &GraphModel::onAttributeValuesChanged, Qt::DirectConnection);
 
     connect(S(Preferences), &Preferences::preferenceChanged, this, &GraphModel::onPreferenceChanged);
 
@@ -295,6 +297,7 @@ void GraphModel::buildTransforms(const QStringList& transforms, ICommand* comman
         if(graphTransform != nullptr)
         {
             graphTransform->setConfig(graphTransformConfig);
+            graphTransform->setAttributes(u::keysFor(factory->declaredAttributes()));
             graphTransform->setRepeating(graphTransformConfig.isFlagSet(QStringLiteral("repeating")));
             graphTransform->setInfo(&_->_transformInfos[index]);
             _->_transformedGraph.addTransform(std::move(graphTransform));
@@ -865,4 +868,10 @@ void GraphModel::onTransformedGraphChanged(const Graph*)
     auto removedAttributeNames = u::setDifference(_->_previousDynamicAttributeNames, u::keysFor(_->_attributes));
     for(auto& name : removedAttributeNames)
         emit attributeRemoved(name);
+}
+
+void GraphModel::onAttributeValuesChanged(QStringList attributeNames)
+{
+    for(const auto& attributeName : attributeNames)
+        emit attributeValuesChanged(attributeName);
 }
