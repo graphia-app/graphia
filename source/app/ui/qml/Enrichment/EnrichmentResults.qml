@@ -69,54 +69,18 @@ Window
                         {
                             id: tableView
                             Layout.fillWidth: true
-                            // Hacks so the sorter re-evaluates
-                            onSortIndicatorColumnChanged:
-                            {
-                                sorter.roleName = getColumn(sortIndicatorColumn).role;
-                                sorter.enabled = false
-                                sorter.enabled = true;
-                            }
-                            onSortIndicatorOrderChanged:
-                            {
-                                sorter.order = sortIndicatorOrder;
-                                sorter.enabled = false
-                                sorter.enabled = true;
-                            }
-
-                            //Layout.preferredWidth: showHeatmapButton.checked ? parent.width / 2 : parent.width
                             Layout.fillHeight: true
                             sortIndicatorVisible: true
                             model: SortFilterProxyModel
                             {
                                 id: proxyModel
                                 sourceModel: qtObject
-                                sorters: ExpressionSorter
+                                sorters: StringSorter
                                 {
                                     id: sorter
-                                    property var roleName
-                                    property var order
-                                    expression:
-                                    {
-                                        if(roleName === undefined)
-                                            return false;
-
-                                        var convLeft = Number(modelLeft[roleName]);
-                                        var convRight = Number(modelRight[roleName]);
-                                        if(!isNaN(convLeft) && !isNaN(convRight))
-                                        {
-                                            if(order === Qt.AscendingOrder)
-                                                return convLeft < convRight;
-                                            else
-                                                return convLeft > convRight;
-                                        }
-                                        else
-                                        {
-                                            if(order === Qt.AscendingOrder)
-                                                return modelLeft[roleName] < modelRight[roleName];
-                                            else
-                                                return modelLeft[roleName] < modelRight[roleName];
-                                        }
-                                    }
+                                    roleName: tableView.getColumn(tableView.sortIndicatorColumn).role;
+                                    sortOrder: tableView.sortIndicatorOrder
+                                    numericMode: true
                                 }
                                 filters: ExpressionFilter
                                 {
