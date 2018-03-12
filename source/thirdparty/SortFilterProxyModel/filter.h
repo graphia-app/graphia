@@ -12,11 +12,9 @@ class Filter : public QObject
     Q_OBJECT
     Q_PROPERTY(bool enabled READ enabled WRITE setEnabled NOTIFY enabledChanged)
     Q_PROPERTY(bool inverted READ inverted WRITE setInverted NOTIFY invertedChanged)
-    friend class QQmlSortFilterProxyModel;
-    friend class FilterContainer;
 
 public:
-    explicit Filter(QObject *parent = 0);
+    explicit Filter(QObject *parent = nullptr);
     virtual ~Filter() = default;
 
     bool enabled() const;
@@ -25,26 +23,22 @@ public:
     bool inverted() const;
     void setInverted(bool inverted);
 
-    bool filterAcceptsRow(const QModelIndex &sourceIndex) const;
+    bool filterAcceptsRow(const QModelIndex &sourceIndex, const QQmlSortFilterProxyModel& proxyModel) const;
+
+    virtual void proxyModelCompleted(const QQmlSortFilterProxyModel& proxyModel);
 
 Q_SIGNALS:
     void enabledChanged();
     void invertedChanged();
-    void filterChanged();
-    void invalidate();
+    void invalidated();
 
 protected:
-    QQmlSortFilterProxyModel* proxyModel() const;
-    virtual bool filterRow(const QModelIndex &sourceIndex) const = 0;
-    virtual void proxyModelCompleted();
-
-private Q_SLOTS:
-    void onFilterChanged();
+    virtual bool filterRow(const QModelIndex &sourceIndex, const QQmlSortFilterProxyModel& proxyModel) const = 0;
+    void invalidate();
 
 private:
     bool m_enabled = true;
     bool m_inverted = false;
-    QQmlSortFilterProxyModel* m_proxyModel = nullptr;
 };
 
 class RoleFilter : public Filter
@@ -62,7 +56,7 @@ Q_SIGNALS:
     void roleNameChanged();
 
 protected:
-    QVariant sourceData(const QModelIndex &sourceIndex) const;
+    QVariant sourceData(const QModelIndex &sourceIndex, const QQmlSortFilterProxyModel& proxyModel) const;
 
 private:
     QString m_roleName;
@@ -79,7 +73,7 @@ public:
     void setValue(const QVariant& value);
 
 protected:
-    bool filterRow(const QModelIndex &sourceIndex) const override;
+    bool filterRow(const QModelIndex &sourceIndex, const QQmlSortFilterProxyModel& proxyModel) const override;
 
 Q_SIGNALS:
     void valueChanged();
@@ -103,7 +97,7 @@ public:
     void setMaximumIndex(const QVariant& maximumIndex);
 
 protected:
-    bool filterRow(const QModelIndex& sourceIndex) const override;
+    bool filterRow(const QModelIndex& sourceIndex, const QQmlSortFilterProxyModel& proxyModel) const override;
 
 Q_SIGNALS:
     void minimumIndexChanged();
@@ -117,23 +111,32 @@ private:
 class RegExpFilter : public RoleFilter {
     Q_OBJECT
     Q_PROPERTY(QString pattern READ pattern WRITE setPattern NOTIFY patternChanged)
-    Q_PROPERTY(QQmlSortFilterProxyModel::PatternSyntax syntax READ syntax WRITE setSyntax NOTIFY syntaxChanged)
+    Q_PROPERTY(PatternSyntax syntax READ syntax WRITE setSyntax NOTIFY syntaxChanged)
     Q_PROPERTY(Qt::CaseSensitivity caseSensitivity READ caseSensitivity WRITE setCaseSensitivity NOTIFY caseSensitivityChanged)
 
 public:
+    enum PatternSyntax {
+        RegExp = QRegExp::RegExp,
+        Wildcard = QRegExp::Wildcard,
+        FixedString = QRegExp::FixedString,
+        RegExp2 = QRegExp::RegExp2,
+        WildcardUnix = QRegExp::WildcardUnix,
+        W3CXmlSchema11 = QRegExp::W3CXmlSchema11 };
+    Q_ENUMS(PatternSyntax)
+
     using RoleFilter::RoleFilter;
 
     QString pattern() const;
     void setPattern(const QString& pattern);
 
-    QQmlSortFilterProxyModel::PatternSyntax syntax() const;
-    void setSyntax(QQmlSortFilterProxyModel::PatternSyntax syntax);
+    PatternSyntax syntax() const;
+    void setSyntax(PatternSyntax syntax);
 
     Qt::CaseSensitivity caseSensitivity() const;
     void setCaseSensitivity(Qt::CaseSensitivity caseSensitivity);
 
 protected:
-    bool filterRow(const QModelIndex& sourceIndex) const override;
+    bool filterRow(const QModelIndex& sourceIndex, const QQmlSortFilterProxyModel& proxyModel) const override;
 
 Q_SIGNALS:
     void patternChanged();
@@ -143,7 +146,7 @@ Q_SIGNALS:
 private:
     QRegExp m_regExp;
     Qt::CaseSensitivity m_caseSensitivity = m_regExp.caseSensitivity();
-    QQmlSortFilterProxyModel::PatternSyntax m_syntax = static_cast<QQmlSortFilterProxyModel::PatternSyntax>(m_regExp.patternSyntax());
+    PatternSyntax m_syntax = static_cast<PatternSyntax>(m_regExp.patternSyntax());
     QString m_pattern = m_regExp.pattern();
 };
 
@@ -169,7 +172,7 @@ public:
     void setMaximumInclusive(bool maximumInclusive);
 
 protected:
-    bool filterRow(const QModelIndex& sourceIndex) const override;
+    bool filterRow(const QModelIndex& sourceIndex, const QQmlSortFilterProxyModel& proxyModel) const override;
 
 Q_SIGNALS:
     void minimumValueChanged();
@@ -195,15 +198,16 @@ public:
     const QQmlScriptString& expression() const;
     void setExpression(const QQmlScriptString& scriptString);
 
+    void proxyModelCompleted(const QQmlSortFilterProxyModel& proxyModel) override;
+
 protected:
-    bool filterRow(const QModelIndex& sourceIndex) const override;
-    void proxyModelCompleted() override;
+    bool filterRow(const QModelIndex& sourceIndex, const QQmlSortFilterProxyModel& proxyModel) const override;
 
 Q_SIGNALS:
     void expressionChanged();
 
 private:
-    void updateContext();
+    void updateContext(const QQmlSortFilterProxyModel& proxyModel);
     void updateExpression();
 
     QQmlScriptString m_scriptString;
@@ -221,15 +225,16 @@ public:
 
     QQmlListProperty<Filter> filters();
 
+    void proxyModelCompleted(const QQmlSortFilterProxyModel& proxyModel) override;
+
+protected:
+    QList<Filter*> m_filters;
+
+private:
     static void append_filter(QQmlListProperty<Filter>* list, Filter* filter);
     static int count_filter(QQmlListProperty<Filter>* list);
     static Filter* at_filter(QQmlListProperty<Filter>* list, int index);
     static void clear_filters(QQmlListProperty<Filter>* list);
-
-protected:
-    void proxyModelCompleted() override;
-
-    QList<Filter*> m_filters;
 };
 
 class AnyOfFilter : public FilterContainer {
@@ -239,7 +244,7 @@ public:
     using FilterContainer::FilterContainer;
 
 protected:
-    bool filterRow(const QModelIndex& sourceIndex) const override;
+    bool filterRow(const QModelIndex& sourceIndex, const QQmlSortFilterProxyModel& proxyModel) const override;
 };
 
 class AllOfFilter : public FilterContainer {
@@ -249,7 +254,7 @@ public:
     using FilterContainer::FilterContainer;
 
 protected:
-    bool filterRow(const QModelIndex& sourceIndex) const override;
+    bool filterRow(const QModelIndex& sourceIndex, const QQmlSortFilterProxyModel& proxyModel) const override;
 };
 
 }
