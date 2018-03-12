@@ -61,12 +61,14 @@ Window
                 {
                     id: tab
                     title: "Results " + index
+
                     SplitView
                     {
-                        anchors.fill: parent
+                        id: splitView
                         TableView
                         {
                             id: tableView
+                            Layout.fillWidth: true
                             // Hacks so the sorter re-evaluates
                             onSortIndicatorColumnChanged:
                             {
@@ -81,7 +83,7 @@ Window
                                 sorter.enabled = true;
                             }
 
-                            Layout.preferredWidth: showHeatmapButton.checked ? parent.width / 2 : parent.width
+                            //Layout.preferredWidth: showHeatmapButton.checked ? parent.width / 2 : parent.width
                             Layout.fillHeight: true
                             sortIndicatorVisible: true
                             model: SortFilterProxyModel
@@ -146,6 +148,7 @@ Window
                                 Layout.fillHeight: true
                                 Layout.minimumHeight: 100
                                 Layout.minimumWidth: 170
+                                Layout.preferredWidth: (tab.width * 0.5) - 5
                                 model: qtObject
                                 elideLabelWidth: 100
                                 scrollXAmount:
@@ -201,8 +204,8 @@ Window
                 }
             }
         }
-    }
 
+    }
     onModelsChanged:
     {
         for(var i=0; i<tabView.count; i++)
