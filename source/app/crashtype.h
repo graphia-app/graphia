@@ -10,6 +10,7 @@ DEFINE_QML_ENUM(
                 FatalError,
                 InfiniteLoop,
                 Deadlock,
+                Hitch,
                 Win32Exception,
                 Win32ExceptionNonContinuable);
 

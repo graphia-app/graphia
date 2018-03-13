@@ -206,6 +206,12 @@ static void deadlock()
     t.join();
 }
 
+static void hitch()
+{
+    using namespace std::chrono_literals;
+    std::this_thread::sleep_for(35s);
+}
+
 void Application::crash(int crashType)
 {
     std::cerr << "Application::crash() invoked!\n";
@@ -236,6 +242,10 @@ void Application::crash(int crashType)
 
     case CrashType::Deadlock:
         deadlock();
+        break;
+
+    case CrashType::Hitch:
+        hitch();
         break;
 
 #if defined(Q_OS_WIN32)

@@ -1175,6 +1175,11 @@ ApplicationWindow
                 }
                 MenuItem
                 {
+                    text: qsTr("Hitch");
+                    onTriggered: application.crash(CrashType.Hitch);
+                }
+                MenuItem
+                {
                     visible: Qt.platform.os === "windows"
                     text: qsTr("Windows Exception");
                     onTriggered: application.crash(CrashType.Win32Exception);
