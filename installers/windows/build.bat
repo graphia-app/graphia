@@ -14,6 +14,7 @@ mkdir %INSTALLER_DIR%\examples
 xcopy "source\app\examples\*.*" %INSTALLER_DIR%\examples
 
 copy %BUILD_DIR%\CrashReporter.exe %INSTALLER_DIR%\
+copy %BUILD_DIR%\MessageBox.exe %INSTALLER_DIR%\
 
 set QML_DIRS=
 for /d /r %%i in (*) do @if exist %%i\*.qml (set QML_DIRS=--qmldir %%i !QML_DIRS!)
@@ -30,6 +31,8 @@ set QML_DIR=source\crashreporter
 IF NOT EXIST %QML_DIR%\NUL EXIT /B 1
 windeployqt --qmldir %QML_DIR% --no-angle --no-compiler-runtime ^
 	--no-opengl-sw %INSTALLER_DIR%\CrashReporter.exe || EXIT /B 1
+windeployqt --no-angle --no-compiler-runtime ^
+	--no-opengl-sw %INSTALLER_DIR%\MessageBox.exe || EXIT /B 1
 
 xcopy "%CRTDIRECTORY%*.*" %INSTALLER_DIR% || EXIT /B 1
 xcopy "%UniversalCRTSdkDir%redist\ucrt\DLLs\x64\*.*" %INSTALLER_DIR% || EXIT /B 1

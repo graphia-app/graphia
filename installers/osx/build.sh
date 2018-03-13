@@ -13,6 +13,7 @@ mkdir -p ${PRODUCT_NAME}.app/Contents/PlugIns/
 cp -r plugins/*.dylib ${PRODUCT_NAME}.app/Contents/PlugIns/
 
 cp CrashReporter ${PRODUCT_NAME}.app/Contents/MacOS/
+cp MessageBox ${PRODUCT_NAME}.app/Contents/MacOS/
 
 mkdir -p ${PRODUCT_NAME}.app/Contents/Resources
 cp -r ../source/app/examples \
@@ -25,6 +26,7 @@ macdeployqt ${PRODUCT_NAME}.app \
   ${QML_DIRS} \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/CrashReporter \
+  -executable=${PRODUCT_NAME}.app/Contents/MacOS/MessageBox \
   -codesign="${SIGN_APPLE_KEYCHAIN_ID}"
 
 # Need to sign again because macdeployqt won't sign the CrashReporter
