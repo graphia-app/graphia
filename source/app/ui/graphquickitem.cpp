@@ -44,7 +44,7 @@ void GraphQuickItem::initialise(GraphModel* graphModel,
 void GraphQuickItem::resetView()
 {
     _viewResetPending = true;
-    update();
+    updateRenderer();
 }
 
 bool GraphQuickItem::viewResetPending()
@@ -52,6 +52,11 @@ bool GraphQuickItem::viewResetPending()
     bool b = _viewResetPending;
     _viewResetPending = false;
     return b;
+}
+
+bool GraphQuickItem::updating() const
+{
+    return _updating;
 }
 
 bool GraphQuickItem::interacting() const
@@ -123,19 +128,19 @@ void GraphQuickItem::setFocusedComponentId(ComponentId componentId)
 void GraphQuickItem::captureScreenshot(int width, int height, QString path, int dpi, bool fillSize)
 {
     emit screenshotRequested(width, height, path, dpi, fillSize);
-    update();
+    updateRenderer();
 }
 
 void GraphQuickItem::requestPreview(int width, int height, bool fillSize)
 {
     emit previewRequested(width, height, fillSize);
-    update();
+    updateRenderer();
 }
 
 void GraphQuickItem::switchToOverviewMode(bool)
 {
     _overviewModeSwitchPending = true;
-    update();
+    updateRenderer();
 }
 
 bool GraphQuickItem::overviewModeSwitchPending()
@@ -148,13 +153,13 @@ bool GraphQuickItem::overviewModeSwitchPending()
 void GraphQuickItem::moveFocusToNode(NodeId nodeId)
 {
     _desiredFocusNodeIds = {nodeId};
-    update();
+    updateRenderer();
 }
 
 void GraphQuickItem::moveFocusToNodes(const std::vector<NodeId>& nodeIds)
 {
     _desiredFocusNodeIds = nodeIds;
-    update();
+    updateRenderer();
 }
 
 std::vector<NodeId> GraphQuickItem::desiredFocusNodeIds()
@@ -167,7 +172,7 @@ std::vector<NodeId> GraphQuickItem::desiredFocusNodeIds()
 void GraphQuickItem::moveFocusToComponent(ComponentId componentId)
 {
     _desiredFocusComponentId = componentId;
-    update();
+    updateRenderer();
 }
 
 ComponentId GraphQuickItem::desiredFocusComponentId()
@@ -191,7 +196,7 @@ QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const
     auto graphRenderer = new GraphRenderer(_graphModel, _commandManager, _selectionManager, _gpuComputeThread);
     connect(this, &GraphQuickItem::commandWillExecute, graphRenderer, &GraphRenderer::onCommandWillExecute, Qt::DirectConnection);
     connect(this, &GraphQuickItem::commandCompleted, graphRenderer, &GraphRenderer::onCommandCompleted, Qt::DirectConnection);
-    connect(this, &GraphQuickItem::commandCompleted, this, &GraphQuickItem::update);
+    connect(this, &GraphQuickItem::commandCompleted, this, &GraphQuickItem::updateRenderer);
     connect(this, &GraphQuickItem::layoutChanged, graphRenderer, &GraphRenderer::onLayoutChanged);
     connect(this, &GraphQuickItem::screenshotRequested, graphRenderer, &GraphRenderer::onScreenshotRequested);
     connect(this, &GraphQuickItem::previewRequested, graphRenderer, &GraphRenderer::onPreviewRequested);
@@ -203,6 +208,8 @@ QQuickFramebufferObject::Renderer* GraphQuickItem::createRenderer() const
     connect(graphRenderer, &GraphRenderer::userInteractionStarted, this, &GraphQuickItem::onUserInteractionStarted);
     connect(graphRenderer, &GraphRenderer::userInteractionFinished, this, &GraphQuickItem::onUserInteractionFinished);
     connect(graphRenderer, &GraphRenderer::taskAddedToExecutor, this, &GraphQuickItem::update);
+
+    connect(graphRenderer, &GraphRenderer::synchronizeComplete, this, &GraphQuickItem::onSynchronizeComplete);
 
     connect(graphRenderer, &GraphRenderer::clicked, this, &GraphQuickItem::clicked);
 
@@ -246,6 +253,12 @@ void GraphQuickItem::onRendererInitialised()
 {
     _initialised = true;
     emit initialisedChanged();
+}
+
+void GraphQuickItem::onSynchronizeComplete()
+{
+    _updating = false;
+    emit updatingChanged();
 }
 
 void GraphQuickItem::onFPSChanged(float fps)
@@ -349,4 +362,11 @@ void GraphQuickItem::updateVisibleComponentIndex()
         std::find(componentIds.begin(), componentIds.end(), _focusedComponentId)) + 1;
 
     emit visibleComponentIndexChanged();
+}
+
+void GraphQuickItem::updateRenderer()
+{
+    _updating = true;
+    emit updatingChanged();
+    update();
 }

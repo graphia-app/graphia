@@ -1189,6 +1189,8 @@ void GraphRenderer::synchronize(QQuickFramebufferObject* item)
 
     ComponentId focusedComponentId = mode() != Mode::Overview ? _graphComponentScene->componentId() : ComponentId();
     graphQuickItem->setFocusedComponentId(focusedComponentId);
+
+    emit synchronizeComplete();
 }
 
 GraphComponentRenderer* GraphRenderer::componentRendererForId(ComponentId componentId) const

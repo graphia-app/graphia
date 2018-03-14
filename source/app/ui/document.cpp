@@ -105,7 +105,8 @@ bool Document::commandInProgress() const
 
 bool Document::idle() const
 {
-    return !commandInProgress() && !graphChanging() && !_graphQuickItem->interacting();
+    return !commandInProgress() && !graphChanging() &&
+        !_graphQuickItem->updating() && !_graphQuickItem->interacting();
 }
 
 bool Document::editable() const
@@ -595,6 +596,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     _graphQuickItem->initialise(_graphModel.get(), &_commandManager, _selectionManager.get(), _gpuComputeThread.get());
 
+    connect(_graphQuickItem, &GraphQuickItem::updatingChanged, this, &Document::maybeEmitIdleChanged, Qt::DirectConnection);
     connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::maybeEmitIdleChanged, Qt::DirectConnection);
     connect(_graphQuickItem, &GraphQuickItem::viewIsResetChanged, this, &Document::canResetViewChanged);
     connect(_graphQuickItem, &GraphQuickItem::canEnterOverviewModeChanged, this, &Document::canEnterOverviewModeChanged);

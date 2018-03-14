@@ -294,6 +294,8 @@ signals:
 
     void modeChanged() const;
 
+    void synchronizeComplete() const;
+
     void userInteractionStarted() const;
     void userInteractionFinished() const;
 

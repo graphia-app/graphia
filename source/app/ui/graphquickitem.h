@@ -31,6 +31,8 @@ class GraphQuickItem : public QQuickFramebufferObject
     Q_PROPERTY(bool canEnterOverviewMode MEMBER _canEnterOverviewMode NOTIFY canEnterOverviewModeChanged)
     Q_PROPERTY(bool inOverviewMode MEMBER _inOverviewMode NOTIFY inOverviewModeChanged)
 
+    Q_PROPERTY(bool updating MEMBER _updating NOTIFY updatingChanged)
+
     Q_PROPERTY(int numNodes READ numNodes NOTIFY graphChanged)
     Q_PROPERTY(int numVisibleNodes READ numVisibleNodes NOTIFY graphChanged)
     Q_PROPERTY(int numEdges READ numEdges NOTIFY graphChanged)
@@ -55,6 +57,7 @@ public:
     void resetView();
     bool viewResetPending();
 
+    bool updating() const;
     bool interacting() const;
     void setInteracting(bool interacting) const;
     bool viewIsReset() const;
@@ -115,6 +118,7 @@ private:
     bool _inOverviewMode = true;
     ComponentId _focusedComponentId;
     int _visibleComponentIndex = -1;
+    bool _updating = false;
 
     std::queue<std::unique_ptr<QEvent>> _eventQueue;
 
@@ -138,10 +142,12 @@ private:
     void updateVisibleComponentIndex();
 
 public slots:
+    void updateRenderer();
     void onLayoutChanged();
 
 private slots:
     void onRendererInitialised();
+    void onSynchronizeComplete();
     void onFPSChanged(float fps);
     void onUserInteractionStarted();
     void onUserInteractionFinished();
@@ -150,6 +156,7 @@ private slots:
 signals:
     void initialisedChanged() const;
 
+    void updatingChanged() const;
     void interactingChanged() const;
     void viewIsResetChanged() const;
     void canEnterOverviewModeChanged() const;
