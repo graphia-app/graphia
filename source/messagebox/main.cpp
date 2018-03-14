@@ -39,8 +39,6 @@ static Button parseButton(const QString& text)
 
     button._text = tokens.at(0).trimmed();
 
-    auto role = tokens.at(1).trimmed();
-
     QHash<QString, QMessageBox::ButtonRole> roles =
     {
         {QStringLiteral("Accept"),      QMessageBox::AcceptRole},
@@ -54,8 +52,10 @@ static Button parseButton(const QString& text)
         {QStringLiteral("Reset"),       QMessageBox::ResetRole},
     };
 
-    if(roles.contains(text))
-        button._role = roles[text];
+    auto role = tokens.at(1).trimmed();
+
+    if(roles.contains(role))
+        button._role = roles[role];
 
     return button;
 }
