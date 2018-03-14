@@ -143,6 +143,9 @@ void TransformedGraph::rebuild()
             newCache.add(std::move(result));
         }
 
+        // Revert to indeterminate in case any more long running work occurs subsequently
+        setProgress(-1);
+
         if(_cancelled)
         {
             // We've been cancelled so rollback to our previous state
