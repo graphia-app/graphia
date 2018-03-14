@@ -105,10 +105,10 @@ bool Document::commandInProgress() const
     return !_loadComplete || _commandManager.busy();
 }
 
-bool Document::idle() const
+bool Document::busy() const
 {
-    return !commandInProgress() && !graphChanging() &&
-        !_graphQuickItem->updating() && !_graphQuickItem->interacting();
+    return commandInProgress() || graphChanging() ||
+        _graphQuickItem->updating() || _graphQuickItem->interacting();
 }
 
 bool Document::editable() const
@@ -116,7 +116,7 @@ bool Document::editable() const
     if(_graphModel == nullptr)
         return false;
 
-    return idle() && _graphModel->editable();
+    return !busy() && _graphModel->editable();
 }
 
 bool Document::graphChanging() const
@@ -124,12 +124,12 @@ bool Document::graphChanging() const
     return _graphChanging;
 }
 
-void Document::maybeEmitIdleChanged()
+void Document::maybeEmitBusyChanged()
 {
-    if(idle() != _previousIdle)
+    if(busy() != _previousBusy)
     {
-        _previousIdle = idle();
-        emit idleChanged();
+        _previousBusy = busy();
+        emit busyChanged();
     }
 }
 
@@ -177,7 +177,7 @@ bool Document::commandIsCancelling() const
 
 void Document::updateLayoutState()
 {
-    if(idle() && !_userLayoutPaused && _layoutRequired)
+    if(!busy() && !_userLayoutPaused && _layoutRequired)
     {
         _layoutThread->resume();
         _layoutRequired = false;
@@ -207,7 +207,7 @@ LayoutPauseState Document::layoutPauseState()
 
 void Document::toggleLayout()
 {
-    if(!idle())
+    if(busy())
         return;
 
     _userLayoutPaused = !_userLayoutPaused;
@@ -221,7 +221,7 @@ void Document::toggleLayout()
 
 bool Document::canUndo() const
 {
-    return idle() && _commandManager.canUndo();
+    return !busy() && _commandManager.canUndo();
 }
 
 QString Document::nextUndoAction() const
@@ -231,7 +231,7 @@ QString Document::nextUndoAction() const
 
 bool Document::canRedo() const
 {
-    return idle() && _commandManager.canRedo();
+    return !busy() && _commandManager.canRedo();
 }
 
 QString Document::nextRedoAction() const
@@ -241,12 +241,12 @@ QString Document::nextRedoAction() const
 
 bool Document::canResetView() const
 {
-    return idle() && !_graphQuickItem->viewIsReset();
+    return !busy() && !_graphQuickItem->viewIsReset();
 }
 
 bool Document::canEnterOverviewMode() const
 {
-    return idle() && _graphQuickItem->canEnterOverviewMode();
+    return !busy() && _graphQuickItem->canEnterOverviewMode();
 }
 
 void Document::setTitle(const QString& title)
@@ -394,7 +394,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
 
     setTitle(fileUrl.fileName());
     emit commandInProgressChanged();
-    emit idleChanged();
+    emit busyChanged();
     emit commandVerbChanged(); // Show Loading message
 
     _graphModel = std::make_unique<GraphModel>(fileUrl.fileName(), plugin);
@@ -576,7 +576,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     emit commandInProgressChanged();
     emit commandIsCancellingChanged();
     emit commandIsCancellableChanged();
-    emit idleChanged();
+    emit busyChanged();
     emit editableChanged();
     emit commandVerbChanged(); // Stop showing loading message
 
@@ -596,21 +596,21 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     _graphQuickItem->initialise(_graphModel.get(), &_commandManager, _selectionManager.get(), _gpuComputeThread.get());
 
-    connect(_graphQuickItem, &GraphQuickItem::updatingChanged, this, &Document::maybeEmitIdleChanged, Qt::DirectConnection);
-    connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::maybeEmitIdleChanged, Qt::DirectConnection);
+    connect(_graphQuickItem, &GraphQuickItem::updatingChanged, this, &Document::maybeEmitBusyChanged, Qt::DirectConnection);
+    connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::maybeEmitBusyChanged, Qt::DirectConnection);
     connect(_graphQuickItem, &GraphQuickItem::viewIsResetChanged, this, &Document::canResetViewChanged);
     connect(_graphQuickItem, &GraphQuickItem::canEnterOverviewModeChanged, this, &Document::canEnterOverviewModeChanged);
     connect(_graphQuickItem, &GraphQuickItem::fpsChanged, this, &Document::fpsChanged);
 
-    connect(&_commandManager, &CommandManager::busyChanged, this, &Document::maybeEmitIdleChanged, Qt::DirectConnection);
+    connect(&_commandManager, &CommandManager::busyChanged, this, &Document::maybeEmitBusyChanged, Qt::DirectConnection);
 
-    connect(this, &Document::idleChanged, this, &Document::updateLayoutState, Qt::DirectConnection);
+    connect(this, &Document::busyChanged, this, &Document::updateLayoutState, Qt::DirectConnection);
 
-    connect(this, &Document::idleChanged, this, &Document::editableChanged);
-    connect(this, &Document::idleChanged, this, &Document::canUndoChanged);
-    connect(this, &Document::idleChanged, this, &Document::canRedoChanged);
-    connect(this, &Document::idleChanged, this, &Document::canEnterOverviewModeChanged);
-    connect(this, &Document::idleChanged, this, &Document::canResetViewChanged);
+    connect(this, &Document::busyChanged, this, &Document::editableChanged);
+    connect(this, &Document::busyChanged, this, &Document::canUndoChanged);
+    connect(this, &Document::busyChanged, this, &Document::canRedoChanged);
+    connect(this, &Document::busyChanged, this, &Document::canEnterOverviewModeChanged);
+    connect(this, &Document::busyChanged, this, &Document::canResetViewChanged);
 
     connect(&_commandManager, &CommandManager::commandWillExecute, _graphQuickItem, &GraphQuickItem::commandWillExecute);
     connect(&_commandManager, &CommandManager::commandWillExecute, this, &Document::commandInProgressChanged);
@@ -660,7 +660,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
         if(graphChangingWillChange)
             emit graphChangingChanged();
 
-        maybeEmitIdleChanged();
+        maybeEmitBusyChanged();
     });
 
     connect(&_graphModel->graph(), &Graph::graphChanged, [this]
@@ -673,7 +673,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
             emit graphChangingChanged();
 
         _layoutRequired = changeOccurred || _layoutRequired;
-        maybeEmitIdleChanged();
+        maybeEmitBusyChanged();
 
         // If the graph has changed outside of a Command, then our new state is
         // inconsistent wrt the CommandManager, so throw away our undo history
@@ -709,7 +709,7 @@ bool Document::nodeIsSelected(QmlNodeId nodeId) const
 
 void Document::selectAll()
 {
-    if(!idle() || _selectionManager == nullptr)
+    if(busy() || _selectionManager == nullptr)
         return;
 
     _commandManager.executeOnce({tr("Select All"), tr("Selecting All")},
@@ -723,7 +723,7 @@ void Document::selectAll()
 
 void Document::selectAllVisible()
 {
-    if(!idle() || _selectionManager == nullptr)
+    if(busy() || _selectionManager == nullptr)
         return;
 
     if(canEnterOverviewMode())
@@ -740,7 +740,7 @@ void Document::selectAllVisible()
 
 void Document::selectNone()
 {
-    if(!idle() || _selectionManager == nullptr)
+    if(busy() || _selectionManager == nullptr)
         return;
 
     if(!_selectionManager->selectedNodes().empty())
@@ -752,7 +752,7 @@ void Document::selectNone()
 
 void Document::selectSources()
 {
-    if(!idle() || _selectionManager == nullptr)
+    if(busy() || _selectionManager == nullptr)
         return;
 
     auto selectedNodeIds = _selectionManager->selectedNodes();
@@ -769,7 +769,7 @@ void Document::selectSources()
 
 void Document::selectSourcesOf(QmlNodeId nodeId)
 {
-    if(!idle())
+    if(busy())
         return;
 
     NodeIdSet nodeIds = {nodeId};
@@ -782,7 +782,7 @@ void Document::selectSourcesOf(QmlNodeId nodeId)
 
 void Document::selectTargets()
 {
-    if(!idle() || _selectionManager == nullptr)
+    if(busy() || _selectionManager == nullptr)
         return;
 
     auto selectedNodeIds = _selectionManager->selectedNodes();
@@ -799,7 +799,7 @@ void Document::selectTargets()
 
 void Document::selectTargetsOf(QmlNodeId nodeId)
 {
-    if(!idle())
+    if(busy())
         return;
 
     NodeIdSet nodeIds = {nodeId};
@@ -812,7 +812,7 @@ void Document::selectTargetsOf(QmlNodeId nodeId)
 
 void Document::selectNeighbours()
 {
-    if(!idle() || _selectionManager == nullptr)
+    if(busy() || _selectionManager == nullptr)
         return;
 
     auto selectedNodeIds = _selectionManager->selectedNodes();
@@ -829,7 +829,7 @@ void Document::selectNeighbours()
 
 void Document::selectNeighboursOf(QmlNodeId nodeId)
 {
-    if(!idle())
+    if(busy())
         return;
 
     NodeIdSet nodeIds = {nodeId};
@@ -842,7 +842,7 @@ void Document::selectNeighboursOf(QmlNodeId nodeId)
 
 void Document::invertSelection()
 {
-    if(!idle() || _selectionManager == nullptr)
+    if(busy() || _selectionManager == nullptr)
         return;
 
     _commandManager.executeOnce({tr("Invert Selection"), tr("Inverting Selection")},
@@ -855,7 +855,7 @@ void Document::invertSelection()
 
 void Document::undo()
 {
-    if(!idle())
+    if(busy())
         return;
 
     _commandManager.undo();
@@ -863,7 +863,7 @@ void Document::undo()
 
 void Document::redo()
 {
-    if(!idle())
+    if(busy())
         return;
 
     _commandManager.redo();
@@ -871,7 +871,7 @@ void Document::redo()
 
 void Document::deleteNode(QmlNodeId nodeId)
 {
-    if(!idle())
+    if(busy())
         return;
 
     _commandManager.execute(std::make_unique<DeleteNodesCommand>(_graphModel.get(),
@@ -880,7 +880,7 @@ void Document::deleteNode(QmlNodeId nodeId)
 
 void Document::deleteSelectedNodes()
 {
-    if(!idle())
+    if(busy())
         return;
 
     if(_selectionManager->selectedNodes().empty())
@@ -892,7 +892,7 @@ void Document::deleteSelectedNodes()
 
 void Document::resetView()
 {
-    if(!idle())
+    if(busy())
         return;
 
     _graphQuickItem->resetView();
@@ -900,7 +900,7 @@ void Document::resetView()
 
 void Document::switchToOverviewMode(bool doTransition)
 {
-    if(!idle())
+    if(busy())
         return;
 
     _graphQuickItem->switchToOverviewMode(doTransition);
@@ -918,7 +918,7 @@ void Document::gotoPrevComponent()
     const auto& componentIds = _graphModel->graph().componentIds();
     auto focusedComponentId = _graphQuickItem->focusedComponentId();
 
-    if(!idle() || componentIds.empty())
+    if(busy() || componentIds.empty())
         return;
 
     if(!focusedComponentId.isNull())
@@ -941,7 +941,7 @@ void Document::gotoNextComponent()
     const auto& componentIds = _graphModel->graph().componentIds();
     auto focusedComponentId = _graphQuickItem->focusedComponentId();
 
-    if(!idle() || componentIds.empty())
+    if(busy() || componentIds.empty())
         return;
 
     if(!focusedComponentId.isNull())

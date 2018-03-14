@@ -59,7 +59,7 @@ Item
 
     property string status: document.status
 
-    property bool idle: document.idle
+    property bool busy: document.busy
     property bool editable: document.editable
     property bool canDeleteSelection: document.editable && document.numNodesSelected > 0
 
@@ -80,7 +80,7 @@ Item
 
     property bool canResetView: document.canResetView
     property bool canEnterOverviewMode: document.canEnterOverviewMode
-    property bool canChangeComponent: idle && graph.numComponents > 1
+    property bool canChangeComponent: !busy && graph.numComponents > 1
 
     property string pluginName: document.pluginName
     property bool hasPluginUI: document.pluginQmlPath
@@ -370,7 +370,7 @@ Item
     {
         id: selectSourcesOfNodeAction
         text: qsTr("Select Sources of '") + contextMenu.clickedNodeName + qsTr("'")
-        enabled: idle && contextMenu.nodeWasClicked
+        enabled: !busy && contextMenu.nodeWasClicked
         onTriggered: { selectSourcesOf(contextMenu.clickedNodeId); }
     }
 
@@ -378,7 +378,7 @@ Item
     {
         id: selectTargetsOfNodeAction
         text: qsTr("Select Targets of '") + contextMenu.clickedNodeName + qsTr("'")
-        enabled: idle && contextMenu.nodeWasClicked
+        enabled: !busy && contextMenu.nodeWasClicked
         onTriggered: { selectTargetsOf(contextMenu.clickedNodeId); }
     }
 
@@ -386,7 +386,7 @@ Item
     {
         id: selectNeighboursOfNodeAction
         text: qsTr("Select Neigh&bours of '") + contextMenu.clickedNodeName + qsTr("'")
-        enabled: idle && contextMenu.nodeWasClicked
+        enabled: !busy && contextMenu.nodeWasClicked
         onTriggered: { selectNeighboursOf(contextMenu.clickedNodeId); }
     }
 

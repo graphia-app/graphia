@@ -764,7 +764,7 @@ void GraphRenderer::onGraphChanged(const Graph* graph, bool changed)
     // We may not, in fact, subsequently actually start a transition here, but we
     // speculatively pretend we do so that if a command is currently in progress
     // there is some overlap between it and the renderer transition. This ensures
-    // that Document::idle() returns false for the duration of the transaction.
+    // that Document::busy() returns true for the duration of the transaction.
     if(visible())
         rendererStartedTransition();
 

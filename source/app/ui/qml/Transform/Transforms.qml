@@ -19,7 +19,7 @@ Item
     property color disabledTextColor
     property color heldColor
 
-    enabled: document.idle
+    enabled: !document.busy
 
     CreateTransformDialog
     {

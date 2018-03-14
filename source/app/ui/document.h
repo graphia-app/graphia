@@ -56,7 +56,7 @@ class Document : public QObject, public IDocument
     Q_PROPERTY(QString status MEMBER _status WRITE setStatus NOTIFY statusChanged)
     Q_PROPERTY(bool loadComplete MEMBER _loadComplete NOTIFY loadComplete)
 
-    Q_PROPERTY(bool idle READ idle NOTIFY idleChanged)
+    Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(bool editable READ editable NOTIFY editableChanged)
 
     Q_PROPERTY(bool graphChanging READ graphChanging NOTIFY graphChangingChanged)
@@ -114,7 +114,7 @@ public:
     static QColor contrastingColorForBackground();
 
     bool commandInProgress() const;
-    bool idle() const;
+    bool busy() const;
     bool editable() const;
     bool graphChanging() const;
 
@@ -213,12 +213,12 @@ private:
     std::unique_ptr<ExactNodePositions> _startingNodePositions;
     bool _userLayoutPaused = false; // true if the user wants the layout to pause
 
-    bool _previousIdle = true;
+    bool _previousBusy = false;
 
     QStringList graphTransformConfigurationsFromUI() const;
     QStringList visualisationsFromUI() const;
 
-    void maybeEmitIdleChanged();
+    void maybeEmitBusyChanged();
 
     int foundIndex() const;
     int numNodesFound() const;
@@ -252,7 +252,7 @@ signals:
     void contrastingColorChanged();
     void statusChanged();
 
-    void idleChanged();
+    void busyChanged();
     void editableChanged();
 
     void graphChangingChanged();

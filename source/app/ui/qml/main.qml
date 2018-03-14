@@ -667,7 +667,7 @@ ApplicationWindow
         iconName: "edit-select-all"
         text: qsTr("Select &All")
         shortcut: "Ctrl+Shift+A"
-        enabled: currentDocument ? currentDocument.idle : false
+        enabled: currentDocument ? !currentDocument.busy : false
         onTriggered: currentDocument && currentDocument.selectAll()
     }
 
@@ -677,7 +677,7 @@ ApplicationWindow
         iconName: "edit-select-all"
         text: qsTr("Select All &Visible")
         shortcut: "Ctrl+A"
-        enabled: currentDocument ? currentDocument.idle : false
+        enabled: currentDocument ? !currentDocument.busy : false
         onTriggered: currentDocument && currentDocument.selectAllVisible()
     }
 
@@ -686,7 +686,7 @@ ApplicationWindow
         id: selectNoneAction
         text: qsTr("Select &None")
         shortcut: "Ctrl+N"
-        enabled: currentDocument ? currentDocument.idle : false
+        enabled: currentDocument ? !currentDocument.busy : false
         onTriggered: currentDocument && currentDocument.selectNone()
     }
 
@@ -694,7 +694,7 @@ ApplicationWindow
     {
         id: selectSourcesAction
         text: qsTr("Select Sources of Selection")
-        enabled: currentDocument ? currentDocument.idle : false
+        enabled: currentDocument ? !currentDocument.busy : false
         onTriggered: currentDocument && currentDocument.selectSources()
     }
 
@@ -702,7 +702,7 @@ ApplicationWindow
     {
         id: selectTargetsAction
         text: qsTr("Select Targets of Selection")
-        enabled: currentDocument ? currentDocument.idle : false
+        enabled: currentDocument ? !currentDocument.busy : false
         onTriggered: currentDocument && currentDocument.selectTargets()
     }
 
@@ -711,7 +711,7 @@ ApplicationWindow
         id: selectNeighboursAction
         text: qsTr("Select Neigh&bours of Selection")
         shortcut: "Ctrl+B"
-        enabled: currentDocument ? currentDocument.idle : false
+        enabled: currentDocument ? !currentDocument.busy : false
         onTriggered: currentDocument && currentDocument.selectNeighbours()
     }
 
@@ -720,7 +720,7 @@ ApplicationWindow
         id: invertSelectionAction
         text: qsTr("&Invert Selection")
         shortcut: "Ctrl+I"
-        enabled: currentDocument ? currentDocument.idle : false
+        enabled: currentDocument ? !currentDocument.busy : false
         onTriggered: currentDocument && currentDocument.invertSelection()
     }
 
@@ -730,7 +730,7 @@ ApplicationWindow
         iconName: "edit-find"
         text: qsTr("&Find")
         shortcut: "Ctrl+F"
-        enabled: currentDocument ? currentDocument.idle : false
+        enabled: currentDocument ? !currentDocument.busy : false
         onTriggered:
         {
             if(currentDocument)
@@ -749,7 +749,7 @@ ApplicationWindow
         iconName: "edit-find"
         text: qsTr("Advanced Find")
         shortcut: "Ctrl+Shift+F"
-        enabled: currentDocument ? currentDocument.idle : false
+        enabled: currentDocument ? !currentDocument.busy : false
         onTriggered:
         {
             if(currentDocument)
@@ -768,7 +768,7 @@ ApplicationWindow
         iconName: "format-indent-more"
         text: qsTr("Find By Attribute Value")
         shortcut: "Ctrl+H"
-        enabled: currentDocument ? currentDocument.idle : false
+        enabled: currentDocument ? !currentDocument.busy : false
         onTriggered:
         {
             if(currentDocument)
@@ -830,7 +830,7 @@ ApplicationWindow
         text: currentDocument && currentDocument.layoutPauseState === LayoutPauseState.Paused ?
                   qsTr("&Resume Layout") : qsTr("&Pause Layout")
         shortcut: "Pause"
-        enabled: currentDocument ? currentDocument.idle : false
+        enabled: currentDocument ? !currentDocument.busy : false
         onTriggered: currentDocument && currentDocument.toggleLayout()
     }
 
