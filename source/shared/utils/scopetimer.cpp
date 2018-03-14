@@ -60,7 +60,7 @@ void ScopeTimerManager::reportToQDebug() const
             stdDev /= samples.size();
             stdDev = std::sqrt(stdDev);
 
-            qDebug() << name << QString("%1/%2/%3/%4 ms (mean/min/max/stddev)")
+            qDebug() << name << QStringLiteral("%1/%2/%3/%4 ms (mean/min/max/stddev)")
                 .arg(mean).arg(*minMax.first).arg(*minMax.second).arg(stdDev);
         }
         else

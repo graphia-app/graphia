@@ -105,6 +105,8 @@ void QmlPreferences::setSection(const QString& section)
 
         if(_initialised)
             load();
+
+        emit sectionChanged();
     }
 }
 

@@ -43,7 +43,7 @@ class QmlPreferences : public QObject, public QQmlParserStatus
 {
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(QString section READ section WRITE setSection)
+    Q_PROPERTY(QString section READ section WRITE setSection NOTIFY sectionChanged)
 
 public:
     explicit QmlPreferences(QObject* parent = nullptr);
@@ -84,6 +84,9 @@ private slots:
     void onMaximumChanged(const QString& key, const QVariant& value);
 
     void onPropertyChanged();
+
+signals:
+    void sectionChanged();
 };
 
 namespace u

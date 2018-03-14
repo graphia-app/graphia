@@ -45,17 +45,17 @@ void WatchdogWorker::showWarning()
 
     QStringList arguments;
     arguments <<
-        "-title" << "Error" <<
-        "-text" << QString(
-            tr("%1 is not responding. System resources may be under pressure, "
+        QStringLiteral("-title") << QStringLiteral("Error") <<
+        QStringLiteral("-text") << QString(
+            tr("%1 is not responding. System resources could be under pressure, "
                "so you may optionally wait in case a recovery occurs. "
                "Alternatively, please report a bug if you believe the "
                "freeze is as a result of a software problem."))
             .arg(qApp->applicationName()) <<
-        "-icon" << "Critical" <<
-        "-button" << "Wait:Reset" <<
-        "-button" << "Close and Report Bug:Destructive" <<
-        "-defaultButton" << "Wait";
+        QStringLiteral("-icon") << QStringLiteral("Critical") <<
+        QStringLiteral("-button") << QStringLiteral("Wait:Reset") <<
+        QStringLiteral("-button") << QStringLiteral("Close and Report Bug:Destructive") <<
+        QStringLiteral("-defaultButton") << QStringLiteral("Wait");
 
     QProcess* warningProcess = new QProcess(this);
 

@@ -10,14 +10,16 @@
 
 static QMessageBox::Icon parseIcon(const QString& text)
 {
-    if(text == "Question")
-        return QMessageBox::Question;
-    else if(text == "Information")
-        return QMessageBox::Information;
-    else if(text == "Warning")
-        return QMessageBox::Warning;
-    else if(text == "Critical")
-        return QMessageBox::Critical;
+    QHash<QString, QMessageBox::Icon> icons =
+    {
+        {QStringLiteral("Question"),    QMessageBox::Question},
+        {QStringLiteral("Information"), QMessageBox::Information},
+        {QStringLiteral("Warning"),     QMessageBox::Warning},
+        {QStringLiteral("Critical"),    QMessageBox::Critical},
+    };
+
+    if(icons.contains(text))
+        return icons[text];
 
     return QMessageBox::NoIcon;
 }
@@ -25,7 +27,7 @@ static QMessageBox::Icon parseIcon(const QString& text)
 struct Button
 {
     QString _text;
-    QMessageBox::ButtonRole _role;
+    QMessageBox::ButtonRole _role = QMessageBox::InvalidRole;
 };
 
 static Button parseButton(const QString& text)
@@ -39,24 +41,22 @@ static Button parseButton(const QString& text)
     button._text = tokens.at(0).trimmed();
 
     auto role = tokens.at(1).trimmed();
-    if(role == "Accept")
-        button._role = QMessageBox::AcceptRole;
-    else if(role == "Reject")
-        button._role = QMessageBox::RejectRole;
-    else if(role == "Destructive")
-        button._role = QMessageBox::DestructiveRole;
-    else if(role == "Action")
-        button._role = QMessageBox::ActionRole;
-    else if(role == "Help")
-        button._role = QMessageBox::HelpRole;
-    else if(role == "Yes")
-        button._role = QMessageBox::YesRole;
-    else if(role == "No")
-        button._role = QMessageBox::NoRole;
-    else if(role == "Apply")
-        button._role = QMessageBox::ApplyRole;
-    else if(role == "Reset")
-        button._role = QMessageBox::ResetRole;
+
+    QHash<QString, QMessageBox::ButtonRole> roles =
+    {
+        {QStringLiteral("Accept"),      QMessageBox::AcceptRole},
+        {QStringLiteral("Reject"),      QMessageBox::RejectRole},
+        {QStringLiteral("Destructive"), QMessageBox::DestructiveRole},
+        {QStringLiteral("Action"),      QMessageBox::ActionRole},
+        {QStringLiteral("Help"),        QMessageBox::HelpRole},
+        {QStringLiteral("Yes"),         QMessageBox::YesRole},
+        {QStringLiteral("No"),          QMessageBox::NoRole},
+        {QStringLiteral("Apply"),       QMessageBox::ApplyRole},
+        {QStringLiteral("Reset"),       QMessageBox::ResetRole},
+    };
+
+    if(roles.contains(text))
+        button._role = roles[text];
 
     return button;
 }
@@ -64,6 +64,7 @@ static Button parseButton(const QString& text)
 int main(int argc, char *argv[])
 {
     QStringList arguments;
+    arguments.reserve(argc);
     for(int i = 0; i < argc; i++)
         arguments << QString::fromLocal8Bit(argv[i]);
 
@@ -102,12 +103,13 @@ int main(int argc, char *argv[])
 
     QMessageBox mb;
 
-    mb.setWindowTitle(p.value("title"));
-    mb.setText(p.value("text"));
-    mb.setIcon(parseIcon(p.value("icon")));
-    auto defaultButtonText = p.value("defaultButton");
+    mb.setWindowTitle(p.value(QStringLiteral("title")));
+    mb.setText(p.value(QStringLiteral("text")));
+    mb.setIcon(parseIcon(p.value(QStringLiteral("icon"))));
+    auto defaultButtonText = p.value(QStringLiteral("defaultButton"));
 
-    for(const auto& buttonText : p.values("button"))
+    auto buttonTexts = p.values(QStringLiteral("button"));
+    for(const auto& buttonText : buttonTexts)
     {
         auto button = parseButton(buttonText);
 

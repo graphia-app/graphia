@@ -46,7 +46,10 @@ private:
 #define SCOPE_TIMER_FILE_LINE __FILE__ ## ":" ## __LINE__
 #define SCOPE_TIMER_MULTISAMPLES(samples) \
     ScopeTimer SCOPE_TIMER_INSTANCE_NAME( \
-        QString("%1:%2 %3").arg(SCOPE_TIMER_FILENAME).arg(__LINE__).arg(SCOPE_TIMER_FUNCTION), samples);
+        QStringLiteral("%1:%2 %3") \
+            .arg(SCOPE_TIMER_FILENAME) \
+            .arg(__LINE__) \
+            .arg(SCOPE_TIMER_FUNCTION), samples);
 #define SCOPE_TIMER SCOPE_TIMER_MULTISAMPLES(1)
 
 class ScopeTimerManager : public Singleton<ScopeTimerManager>
