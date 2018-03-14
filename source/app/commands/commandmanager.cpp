@@ -57,8 +57,6 @@ void CommandManager::redo()
 
 void CommandManager::executeReal(std::unique_ptr<ICommand> command, bool irreversible)
 {
-    _busy = true;
-    emit busyChanged();
     if(_debug > 0)
         qDebug() << "Command started" << command->description();
 
@@ -104,7 +102,6 @@ void CommandManager::executeReal(std::unique_ptr<ICommand> command, bool irrever
 
         clearCurrentCommand();
 
-        _busy = false;
         emit commandCompleted(success, description, pastParticiple);
     });
 }
@@ -115,9 +112,6 @@ void CommandManager::undoReal()
         return;
 
     auto command = _stack.at(_lastExecutedIndex).get();
-
-    _busy = true;
-    emit busyChanged();
 
     QString undoVerb = !command->description().isEmpty() ?
                 QObject::tr("Undoing ") + command->description() :
@@ -134,7 +128,6 @@ void CommandManager::undoReal()
 
         clearCurrentCommand();
 
-        _busy = false;
         emit commandCompleted(true, command->description(), QString());
     });
 }
@@ -145,9 +138,6 @@ void CommandManager::redoReal()
         return;
 
     auto command = _stack.at(++_lastExecutedIndex).get();
-
-    _busy = true;
-    emit busyChanged();
 
     QString redoVerb = !command->description().isEmpty() ?
                 QObject::tr("Redoing ") + command->description() :
@@ -163,7 +153,6 @@ void CommandManager::redoReal()
 
         clearCurrentCommand();
 
-        _busy = false;
         emit commandCompleted(true, command->description(), command->pastParticiple());
     });
 }
@@ -369,6 +358,7 @@ void CommandManager::onCommandCompleted(bool success, QString description, QStri
         update();
     else
     {
+        _busy = false;
         emit busyChanged();
         emit commandIsCancellableChanged();
     }

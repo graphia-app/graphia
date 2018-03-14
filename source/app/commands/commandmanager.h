@@ -67,6 +67,7 @@ private:
     {
         command->initialise();
 
+        _busy = true;
         _currentCommand = command;
         _commandProgress = -1;
         _commandVerb = verb;
@@ -74,6 +75,7 @@ private:
         emit commandVerbChanged();
         emit commandIsCancellableChanged();
         emit commandWillExecute(command);
+        emit busyChanged();
 
         _commandProgressTimerId = startTimer(200);
 
