@@ -5,8 +5,7 @@
 #include <QCommandLineParser>
 #include <QStringList>
 #include <QIcon>
-#include <QSocketNotifier>
-#include <QDebug>
+#include <QHash>
 
 static QMessageBox::Icon parseIcon(const QString& text)
 {
