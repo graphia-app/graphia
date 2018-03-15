@@ -523,7 +523,7 @@ ApplicationWindow
 
     Action
     {
-        id: recentFileOpen
+        id: recentFileOpenAction
         onTriggered:
         {
             openFile(QmlUtils.urlForFileName(source.text), true);
@@ -1092,7 +1092,7 @@ ApplicationWindow
                             // BUG: Text overflows MenuItems on Windows
                             // https://bugreports.qt.io/browse/QTBUG-50849
                             text: index > -1 ? QmlUtils.fileNameForUrl(mainWindow.recentFiles[index]) : "";
-                            action: recentFileOpen
+                            action: recentFileOpenAction
                         }
                     }
                     onObjectAdded: recentFileMenu.insertItem(index, object)
