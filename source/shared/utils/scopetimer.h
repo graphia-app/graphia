@@ -29,16 +29,16 @@ private:
 };
 
 #if defined(__GNUC__) || defined(__clang__)
-#define SCOPE_TIMER_FUNCTION static_cast<const char*>(__PRETTY_FUNCTION__)
+#define SCOPE_TIMER_FUNCTION QLatin1String(__PRETTY_FUNCTION__)
 #else
-#define SCOPE_TIMER_FUNCTION static_cast<const char*>(__func__)
+#define SCOPE_TIMER_FUNCTION QLatin1String(__func__)
 #endif
 
 #ifdef BUILD_SOURCE_DIR
 #define SCOPE_TIMER_FILENAME QStringLiteral(__FILE__).replace( \
     QStringLiteral(BUILD_SOURCE_DIR), QStringLiteral(""))
 #else
-#define SCOPE_TIMER_FILENAME static_cast<const char*>(__FILE__)
+#define SCOPE_TIMER_FILENAME QLatin1String(__FILE__)
 #endif
 
 #define SCOPE_TIMER_CONCAT2(a, b) a ## b
