@@ -1181,6 +1181,11 @@ ApplicationWindow
             MenuItem { action: pauseLayoutAction }
             MenuItem { action: toggleLayoutSettingsAction }
         }
+        Menu { id: pluginMenu0; visible: false }
+        Menu { id: pluginMenu1; visible: false }
+        Menu { id: pluginMenu2; visible: false }
+        Menu { id: pluginMenu3; visible: false }
+        Menu { id: pluginMenu4; visible: false }
         Menu
         {
             title: qsTr("&Debug")
@@ -1237,11 +1242,6 @@ ApplicationWindow
             MenuItem { action: resetFirstOpenAction }
             MenuItem { action: reportScopeTimersAction }
         }
-        Menu { id: pluginMenu0; visible: false }
-        Menu { id: pluginMenu1; visible: false }
-        Menu { id: pluginMenu2; visible: false }
-        Menu { id: pluginMenu3; visible: false }
-        Menu { id: pluginMenu4; visible: false }
         Menu
         {
             title: qsTr("&Help")
