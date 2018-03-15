@@ -36,7 +36,7 @@ private:
 
 #ifdef BUILD_SOURCE_DIR
 #define SCOPE_TIMER_FILENAME QStringLiteral(__FILE__).replace( \
-    QStringLiteral(BUILD_SOURCE_DIR), "")
+    QStringLiteral(BUILD_SOURCE_DIR), QStringLiteral(""))
 #else
 #define SCOPE_TIMER_FILENAME static_cast<const char*>(__FILE__)
 #endif
