@@ -1,6 +1,7 @@
 #include "crashhandler.h"
 
 #include "shared/utils/thread.h"
+#include "app/application.h"
 
 #include <QCoreApplication>
 #include <QTemporaryDir>
@@ -129,10 +130,7 @@ CrashHandler::CrashHandler()
 {
     QString path = QDir::tempPath();
 
-    QString crashReporterExecutableName(
-                QCoreApplication::applicationDirPath() +
-                QDir::separator() +
-                "CrashReporter");
+    QString crashReporterExecutableName = Application::resolvedExe(QStringLiteral("CrashReporter"));
 
     // Avoid using the CrashHandler if we're started by something that's probably an IDE
     auto parentProcess = u::parentProcessName();

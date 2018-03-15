@@ -264,13 +264,42 @@ void Application::reportScopeTimers()
     ScopeTimerManager::instance()->reportToQDebug();
 }
 
+QString Application::resolvedExe(const QString& exe)
+{
+    QString fullyQualifiedExe(
+        qApp->applicationDirPath() +
+        QDir::separator() + "MessageBox");
+
+#ifdef Q_OS_WIN
+    fullyQualifiedExe += ".exe";
+#endif
+
+    if(QFileInfo::exists(fullyQualifiedExe))
+        return fullyQualifiedExe;
+
+#ifdef Q_OS_MAC
+    // We might be debugging, in which case the exe might be outside the .app
+    QDir dotAppDir(qApp->applicationDirPath());
+    dotAppDir.cdUp();
+    dotAppDir.cdUp();
+    dotAppDir.cdUp();
+
+    fullyQualifiedExe = dotAppDir.absolutePath() + QDir::separator() + exe;
+
+    if(QFileInfo::exists(fullyQualifiedExe))
+        return fullyQualifiedExe;
+#endif
+
+    return {};
+}
+
 void Application::loadPlugins()
 {
     std::vector<QString> pluginsDirs =
     {
-        qApp->applicationDirPath() + "/plugins",
+        qApp->applicationDirPath() + QDir::separator() + "plugins",
         QStandardPaths::writableLocation(
-            QStandardPaths::StandardLocation::AppDataLocation) + "/plugins"
+            QStandardPaths::StandardLocation::AppDataLocation) + QDir::separator() + "plugins"
     };
 
 #ifdef Q_OS_MAC
@@ -278,12 +307,12 @@ void Application::loadPlugins()
 
     // Within the bundle itself
     dotAppDir.cdUp();
-    pluginsDirs.emplace_back(dotAppDir.absolutePath() + "/PlugIns");
+    pluginsDirs.emplace_back(dotAppDir.absolutePath() + QDir::separator() + "PlugIns");
 
     // Adjacent to the .app file
     dotAppDir.cdUp();
     dotAppDir.cdUp();
-    pluginsDirs.emplace_back(dotAppDir.absolutePath() + "/plugins");
+    pluginsDirs.emplace_back(dotAppDir.absolutePath() + QDir::separator() + "plugins");
 #endif
 
     for(auto& pluginsDir : pluginsDirs)

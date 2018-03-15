@@ -3,6 +3,8 @@
 #include "shared/utils/fatalerror.h"
 #include "shared/utils/thread.h"
 
+#include "application.h"
+
 // Disable warnings from Valgrind
 #ifndef _MSC_VER
 #include "thirdparty/gccdiagaware.h"
@@ -39,9 +41,13 @@ Watchdog::~Watchdog()
 
 void WatchdogWorker::showWarning()
 {
-    QString messageBoxExe(
-        QCoreApplication::applicationDirPath() +
-        QDir::separator() + "MessageBox");
+    QString messageBoxExe = Application::resolvedExe(QStringLiteral("MessageBox"));
+
+    if(messageBoxExe.isEmpty())
+    {
+        qWarning() << "Couldn't resolve MessageBox executable";
+        return;
+    }
 
     QStringList arguments;
     arguments <<

@@ -155,6 +155,8 @@ public:
 
     Q_INVOKABLE void reportScopeTimers();
 
+    static QString resolvedExe(const QString& exe);
+
 signals:
     void nameFiltersChanged();
     void pluginDetailsChanged();
