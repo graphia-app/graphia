@@ -268,7 +268,7 @@ QString Application::resolvedExe(const QString& exe)
 {
     QString fullyQualifiedExe(
         qApp->applicationDirPath() +
-        QDir::separator() + "MessageBox");
+        QDir::separator() + exe);
 
 #ifdef Q_OS_WIN
     fullyQualifiedExe += ".exe";
