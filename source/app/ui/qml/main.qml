@@ -856,6 +856,27 @@ ApplicationWindow
         }
     }
 
+    Action
+    {
+        id: addBookmarkAction
+        iconName: "list-add"
+        text: qsTr("Add Bookmark…")
+        shortcut: "Ctrl+D"
+        enabled: currentDocument ? !currentDocument.busy && currentDocument.numNodesSelected > 0 : false
+        onTriggered:
+        {
+            if(currentDocument !== null)
+                currentDocument.addBookmark();
+        }
+    }
+
+    Action
+    {
+        id: manageBookmarksAction
+        text: qsTr("Manage Bookmarks…")
+        enabled: currentDocument ? !currentDocument.busy && currentDocument.bookmarks.length > 0 : false
+    }
+
     ExclusiveGroup
     {
         id: nodeTextDisplay
@@ -1159,6 +1180,34 @@ ApplicationWindow
             title: qsTr("&Layout")
             MenuItem { action: pauseLayoutAction }
             MenuItem { action: toggleLayoutSettingsAction }
+        }
+        Menu
+        {
+            id: bookmarksMenu
+
+            title: qsTr("&Bookmarks")
+            MenuItem { action: addBookmarkAction }
+            MenuItem { action: manageBookmarksAction }
+            MenuSeparator { visible: currentDocument ? currentDocument.bookmarks.length > 0 : false }
+
+            Instantiator
+            {
+                model: currentDocument ? currentDocument.bookmarks : []
+                delegate: Component
+                {
+                    MenuItem
+                    {
+                        text: index > -1 ? currentDocument.bookmarks[index] : "";
+                        enabled: currentDocument ? !currentDocument.busy : false
+                        onTriggered:
+                        {
+                            currentDocument.gotoBookmark(text);
+                        }
+                    }
+                }
+                onObjectAdded: bookmarksMenu.insertItem(index, object)
+                onObjectRemoved: bookmarksMenu.removeItem(object)
+            }
         }
         Menu { id: pluginMenu0; visible: false }
         Menu { id: pluginMenu1; visible: false }

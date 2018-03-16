@@ -82,6 +82,8 @@ Item
     property bool canEnterOverviewMode: document.canEnterOverviewMode
     property bool canChangeComponent: !busy && graph.numComponents > 1
 
+    property var bookmarks: ["abc", "def", "ghi"]
+
     property string pluginName: document.pluginName
     property bool hasPluginUI: document.pluginQmlPath
     property bool pluginPoppedOut: false
@@ -338,6 +340,16 @@ Item
             application.copyImageToClipboard(result.image);
             document.status = qsTr("Copied Viewport To Clipboard");
         });
+    }
+
+    function addBookmark()
+    {
+        console.log("addBookmark()");
+    }
+
+    function gotoBookmark(name)
+    {
+        console.log("gotoBookmark(" + name + ")");
     }
 
     CaptureScreenshot
