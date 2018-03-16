@@ -176,7 +176,6 @@ void NodeAttributeTableModel::onUpdateComplete()
 
     beginResetModel();
     _data = _pendingData;
-    emit columnNamesChanged();
     endResetModel();
 }
 
@@ -205,6 +204,7 @@ void NodeAttributeTableModel::updateRoleNames()
     }
 
     _columnCount = _columnNames.size();
+    emit columnNamesChanged();
 }
 
 bool NodeAttributeTableModel::columnIsCalculated(const QString& columnName) const
@@ -241,6 +241,10 @@ void NodeAttributeTableModel::onAttributeAdded(const QString& name)
     {
         updateRoleNames();
         addRole(_roleNames.key(name.toUtf8()));
+
+        auto index = _columnNames.indexOf(name);
+        if(index >= 0)
+            emit columnAdded(index, name);
     }
 }
 
@@ -248,9 +252,14 @@ void NodeAttributeTableModel::onAttributeRemoved(const QString& name)
 {
     if(u::contains(_roleNames.values(), name.toUtf8()))
     {
+        auto index = _columnNames.indexOf(name);
+
         int role = _roleNames.key(name.toUtf8());
         updateRoleNames();
         removeRole(role);
+
+        if(index >= 0)
+            emit columnRemoved(index, name);
     }
 }
 

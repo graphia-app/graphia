@@ -87,6 +87,8 @@ public slots:
 
 signals:
     void columnNamesChanged();
+    void columnAdded(int index, const QString& name);
+    void columnRemoved(int index, const QString& name);
 };
 
 #endif // NODEATTRIBUTETABLEMODEL_H
