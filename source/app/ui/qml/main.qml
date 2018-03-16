@@ -523,15 +523,6 @@ ApplicationWindow
 
     Action
     {
-        id: recentFileOpenAction
-        onTriggered:
-        {
-            openFile(QmlUtils.urlForFileName(source.text), true);
-        }
-    }
-
-    Action
-    {
         id: fileSaveAction
         iconName: "document-save"
         text: qsTr("&Save")
@@ -1092,7 +1083,10 @@ ApplicationWindow
                             // BUG: Text overflows MenuItems on Windows
                             // https://bugreports.qt.io/browse/QTBUG-50849
                             text: index > -1 ? QmlUtils.fileNameForUrl(mainWindow.recentFiles[index]) : "";
-                            action: recentFileOpenAction
+                            onTriggered:
+                            {
+                                openFile(QmlUtils.urlForFileName(source.text), true);
+                            }
                         }
                     }
                     onObjectAdded: recentFileMenu.insertItem(index, object)
