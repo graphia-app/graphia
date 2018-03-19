@@ -326,6 +326,27 @@ bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& p
             _visualisations.append(QString::fromStdString(visualisation));
     }
 
+    if(u::contains(jsonBody, "bookmarks"))
+    {
+        const auto bookmarks = jsonBody["bookmarks"];
+        for(auto bookmarkIt = bookmarks.begin(); bookmarkIt != bookmarks.end(); ++bookmarkIt)
+        {
+            QString name = QString::fromStdString(bookmarkIt.key());
+            const auto& array = bookmarkIt.value();
+
+            if(array.is_array())
+            {
+                NodeIdSet nodeIds;
+                nodeIds.reserve(array.size());
+
+                for(auto nodeId : array)
+                    nodeIds.insert(static_cast<int>(nodeId));
+
+                _bookmarks.insert({name, nodeIds});
+            }
+        }
+    }
+
     if(u::contains(jsonBody, "layout"))
     {
         const auto& jsonLayout = jsonBody["layout"];

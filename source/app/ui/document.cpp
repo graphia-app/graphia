@@ -333,6 +333,14 @@ QStringList Document::bookmarks() const
     return list;
 }
 
+NodeIdSet Document::nodeIdsForBookmark(const QString& name) const
+{
+    if(u::containsKey(_bookmarks, name))
+        return _bookmarks.at(name);
+
+    return {};
+}
+
 static bool transformIsPinned(const QString& transform)
 {
     GraphTransformConfigParser p;
@@ -490,6 +498,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
 
             _graphTransforms = completedLoader->transforms();
             _visualisations = completedLoader->visualisations();
+            _bookmarks = completedLoader->bookmarks();
 
             _graphModel->buildTransforms(_graphTransforms);
             _graphModel->buildVisualisations(_visualisations);
@@ -584,6 +593,9 @@ void Document::onLoadComplete(const QUrl&, bool success)
     // Final tasks before load is considered complete
     setTransforms(_graphTransforms);
     setVisualisations(_visualisations);
+
+    if(!_bookmarks.empty())
+        emit bookmarksChanged();
 
     _layoutThread = std::make_unique<LayoutThread>(*_graphModel, std::make_unique<ForceDirectedLayoutFactory>(_graphModel.get()));
 

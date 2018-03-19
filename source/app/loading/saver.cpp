@@ -170,6 +170,23 @@ static json nodePositionsAsJson(const IGraph& graph, const NodePositions& nodePo
     return positions;
 }
 
+static json bookmarksAsJson(const Document& document)
+{
+    json bookmarks;
+
+    for(const auto& bookmark : document.bookmarks())
+    {
+        json nodeIds;
+        for(auto nodeId : document.nodeIdsForBookmark(bookmark))
+            nodeIds.emplace_back(static_cast<int>(nodeId));
+
+        auto bookmarkName = bookmark.toUtf8().constData();
+        bookmarks[bookmarkName] = nodeIds;
+    }
+
+    return bookmarks;
+}
+
 bool Saver::encode(const ProgressFn& progressFn)
 {
     json jsonArray;
@@ -202,6 +219,8 @@ bool Saver::encode(const ProgressFn& progressFn)
 
     content["transforms"] = u::toQStringVector(_document->transforms());
     content["visualisations"] = u::toQStringVector(_document->visualisations());
+
+    content["bookmarks"] = bookmarksAsJson(*_document);
 
     auto uiDataJson = json::parse(_uiData.begin(), _uiData.end(), nullptr, false);
 

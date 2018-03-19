@@ -155,6 +155,7 @@ public:
     QString pluginQmlPath() const;
 
     QStringList bookmarks() const;
+    NodeIdSet nodeIdsForBookmark(const QString& name) const;
 
     void executeOnMainThread(DeferredExecutor::TaskFn task,
                              QString description = QStringLiteral("GenericTask"));
