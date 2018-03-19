@@ -1881,13 +1881,17 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
 
 void Document::addBookmark(const QString& name)
 {
-    _bookmarks.insert({name, {}});
+    if(_selectionManager == nullptr)
+        return;
+
+    _bookmarks.insert({name, _selectionManager->selectedNodes()});
     emit bookmarksChanged();
 }
 
 void Document::gotoBookmark(const QString& name)
 {
-    qDebug() << "gotoBookmark" << name;
+    if(_selectionManager != nullptr && u::containsKey(_bookmarks, name))
+        selectAndFocusNodes(_bookmarks[name]);
 }
 
 void Document::dumpGraph()
