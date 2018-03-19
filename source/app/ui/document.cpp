@@ -39,6 +39,7 @@
 #include <QFile>
 #include <QAbstractItemModel>
 #include <QMessageBox>
+#include <QCollator>
 
 QColor Document::contrastingColorForBackground()
 {
@@ -318,6 +319,16 @@ QStringList Document::bookmarks() const
 
     for(const auto& name : u::keysFor(_bookmarks))
         list.append(name);
+
+    QCollator sorter;
+    sorter.setNumericMode(true);
+    sorter.setCaseSensitivity(Qt::CaseInsensitive);
+
+    std::sort( list.begin(), list.end(), [&]
+    (const auto& a, const auto& b)
+    {
+        return sorter.compare(a, b) < 0;
+    });
 
     return list;
 }
