@@ -312,6 +312,16 @@ QString Document::pluginQmlPath() const
     return _graphModel != nullptr ? _graphModel->pluginQmlPath() : QString();
 }
 
+QStringList Document::bookmarks() const
+{
+    QStringList list;
+
+    for(const auto& name : u::keysFor(_bookmarks))
+        list.append(name);
+
+    return list;
+}
+
 static bool transformIsPinned(const QString& transform)
 {
     GraphTransformConfigParser p;
@@ -1851,6 +1861,17 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
             }
         }
     });
+}
+
+void Document::addBookmark(const QString& name)
+{
+    _bookmarks.insert({name, {}});
+    emit bookmarksChanged();
+}
+
+void Document::gotoBookmark(const QString& name)
+{
+    qDebug() << "gotoBookmark" << name;
 }
 
 void Document::dumpGraph()

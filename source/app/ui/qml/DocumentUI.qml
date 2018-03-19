@@ -82,7 +82,7 @@ Item
     property bool canEnterOverviewMode: document.canEnterOverviewMode
     property bool canChangeComponent: !busy && graph.numComponents > 1
 
-    property var bookmarks: ["abc", "def", "ghi"]
+    property var bookmarks: document.bookmarks
 
     property string pluginName: document.pluginName
     property bool hasPluginUI: document.pluginQmlPath
@@ -342,14 +342,14 @@ Item
         });
     }
 
-    function addBookmark()
+    function showAddBookmark()
     {
-        console.log("addBookmark()");
+        addBookmark.show();
     }
 
     function gotoBookmark(name)
     {
-        console.log("gotoBookmark(" + name + ")");
+        document.gotoBookmark(name);
     }
 
     CaptureScreenshot
@@ -777,6 +777,38 @@ Item
                 heldColor: root.leastContrastingColor
 
                 document: document
+            }
+
+            Item
+            {
+                clip: true
+
+                anchors.fill: parent
+                anchors.topMargin: -(Constants.margin * 4)
+
+                // @disable-check M300
+                SlidingPanel
+                {
+                    id: bookmarkPanel
+
+                    alignment: Qt.AlignTop
+
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.top
+
+                    initiallyOpen: false
+                    disableItemWhenClosed: false
+
+                    item: AddBookmark
+                    {
+                        id: addBookmark
+
+                        document: document
+
+                        onShown: { bookmarkPanel.show(); }
+                        onHidden: { bookmarkPanel.hide(); }
+                    }
+                }
             }
         }
 

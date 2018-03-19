@@ -866,7 +866,7 @@ ApplicationWindow
         onTriggered:
         {
             if(currentDocument !== null)
-                currentDocument.addBookmark();
+                currentDocument.showAddBookmark();
         }
     }
 

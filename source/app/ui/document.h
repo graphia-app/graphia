@@ -90,6 +90,8 @@ class Document : public QObject, public IDocument
 
     Q_PROPERTY(int numNodesSelected READ numNodesSelected NOTIFY numNodesSelectedChanged)
 
+    Q_PROPERTY(QStringList bookmarks READ bookmarks NOTIFY bookmarksChanged)
+
 public:
     explicit Document(QObject* parent = nullptr);
     ~Document() override;
@@ -151,6 +153,8 @@ public:
 
     QObject* pluginInstance();
     QString pluginQmlPath() const;
+
+    QStringList bookmarks() const;
 
     void executeOnMainThread(DeferredExecutor::TaskFn task,
                              QString description = QStringLiteral("GenericTask"));
@@ -214,6 +218,8 @@ private:
     bool _userLayoutPaused = false; // true if the user wants the layout to pause
 
     bool _previousBusy = false;
+
+    std::map<QString, NodeIdSet> _bookmarks;
 
     QStringList graphTransformConfigurationsFromUI() const;
     QStringList visualisationsFromUI() const;
@@ -282,6 +288,8 @@ signals:
     void numNodesFoundChanged();
 
     void numNodesSelectedChanged();
+
+    void bookmarksChanged();
 
     void taskAddedToExecutor();
 
@@ -380,6 +388,9 @@ public:
     Q_INVOKABLE void cancelCommand();
 
     Q_INVOKABLE void writeTableViewToFile(QObject* tableView, const QUrl& fileUrl);
+
+    Q_INVOKABLE void addBookmark(const QString& name);
+    Q_INVOKABLE void gotoBookmark(const QString& name);
 
     Q_INVOKABLE void dumpGraph();
 
