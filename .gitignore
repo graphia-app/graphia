@@ -1,4 +1,3 @@
-*.pro.user*
 CMakeLists.txt.user
 *.autosave
 doxygen/*
