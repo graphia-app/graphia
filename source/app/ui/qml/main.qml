@@ -725,12 +725,7 @@ ApplicationWindow
         onTriggered:
         {
             if(currentDocument)
-            {
-                if(!currentDocument.findVisible || currentDocument.findType !== Find.Simple)
-                    currentDocument.showFind(Find.Simple);
-                else
-                    currentDocument.hideFind();
-            }
+                currentDocument.showFind(Find.Simple);
         }
     }
 
@@ -744,12 +739,7 @@ ApplicationWindow
         onTriggered:
         {
             if(currentDocument)
-            {
-                if(!currentDocument.findVisible || currentDocument.findType !== Find.Advanced)
-                    currentDocument.showFind(Find.Advanced);
-                else
-                    currentDocument.hideFind();
-            }
+                currentDocument.showFind(Find.Advanced);
         }
     }
 
@@ -763,12 +753,7 @@ ApplicationWindow
         onTriggered:
         {
             if(currentDocument)
-            {
-                if(!currentDocument.findVisible || currentDocument.findType !== Find.ByAttribute)
-                    currentDocument.showFind(Find.ByAttribute);
-                else
-                    currentDocument.hideFind();
-            }
+                currentDocument.showFind(Find.ByAttribute);
         }
     }
 
