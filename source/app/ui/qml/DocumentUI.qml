@@ -349,6 +349,7 @@ Item
 
     function gotoBookmark(name)
     {
+        hideFind();
         document.gotoBookmark(name);
     }
 
