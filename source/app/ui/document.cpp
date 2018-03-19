@@ -1023,7 +1023,7 @@ void Document::selectAndFocusNode(NodeId nodeId)
     _commandManager.executeOnce(std::move(commands));
 }
 
-void Document::selectAndFocusNodes(std::vector<NodeId> nodeIds)
+void Document::selectAndFocusNodes(const std::vector<NodeId>& nodeIds)
 {
     std::vector<std::unique_ptr<ICommand>> commands;
 
@@ -1038,6 +1038,11 @@ void Document::selectAndFocusNodes(std::vector<NodeId> nodeIds)
     }));
 
     _commandManager.executeOnce(std::move(commands));
+}
+
+void Document::selectAndFocusNodes(const NodeIdSet& nodeIds)
+{
+    selectAndFocusNodes(u::vectorFrom(nodeIds));
 }
 
 void Document::moveFocusToNode(NodeId nodeId)

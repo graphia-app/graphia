@@ -232,7 +232,8 @@ private:
     NodeId incrementFoundIt();
     NodeId decrementFoundIt();
     void selectAndFocusNode(NodeId nodeId);
-    void selectAndFocusNodes(std::vector<NodeId> nodeIds);
+    void selectAndFocusNodes(const std::vector<NodeId>& nodeIds);
+    void selectAndFocusNodes(const NodeIdSet& nodeIds);
 
     void setSaveRequired();
 
