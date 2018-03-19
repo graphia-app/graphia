@@ -1198,6 +1198,16 @@ ApplicationWindow
                     MenuItem
                     {
                         text: index > -1 ? currentDocument.bookmarks[index] : "";
+                        shortcut:
+                        {
+                            if(index >= 0 && index < 10)
+                                return "Ctrl+" + (index + 1);
+                            else if(index == 10)
+                                return "Ctrl+0";
+
+                            return "";
+                        }
+
                         enabled: currentDocument ? !currentDocument.busy : false
                         onTriggered:
                         {
