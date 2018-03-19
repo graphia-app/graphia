@@ -1891,7 +1891,10 @@ void Document::addBookmark(const QString& name)
 void Document::gotoBookmark(const QString& name)
 {
     if(_selectionManager != nullptr && u::containsKey(_bookmarks, name))
-        selectAndFocusNodes(_bookmarks[name]);
+    {
+        auto nodeIds = u::setIntersection(_graphModel->graph().nodeIds(), _bookmarks[name]);
+        selectAndFocusNodes(nodeIds);
+    }
 }
 
 void Document::dumpGraph()
