@@ -1070,7 +1070,7 @@ ApplicationWindow
                             text: index > -1 ? QmlUtils.fileNameForUrl(mainWindow.recentFiles[index]) : "";
                             onTriggered:
                             {
-                                openFile(QmlUtils.urlForFileName(source.text), true);
+                                openFile(QmlUtils.urlForFileName(text), true);
                             }
                         }
                     }
