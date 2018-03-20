@@ -23,6 +23,7 @@ public:
     int columnCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant data(int row, QString role);
+    int rowFromAttributeSets(QString attributeA, QString attributeB);
     QHash<int, QByteArray> roleNames() const override;
 
     void setTableData(Table data);

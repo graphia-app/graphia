@@ -2003,7 +2003,6 @@ void Document::performEnrichment(QStringList selectedAttributesAgainst, QString 
         auto result = EnrichmentCalculator::overRepAgainstEachAttribute(selectedAttributesAgainst[0], selectedAttribute,
                                                                         graphModel(), command);
         tableModel->setTableData(result);
-        tableModel->toJson();
         emit enrichmentTableModelsChanged();
         emit enrichmentAnalysisComplete();
         return true;

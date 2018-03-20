@@ -28,6 +28,8 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPainted
 
     _defaultFont9Pt.setPointSize(9);
 
+    setAcceptedMouseButtons(Qt::AllButtons);
+
     setFlag(QQuickItem::ItemHasContents, true);
 
     connect(this, &EnrichmentHeatmapItem::tableModelChanged, this, &EnrichmentHeatmapItem::buildPlot);
@@ -51,6 +53,12 @@ void EnrichmentHeatmapItem::paint(QPainter *painter)
 void EnrichmentHeatmapItem::mousePressEvent(QMouseEvent* event)
 {
     routeMouseEvent(event);
+    if(event->button() == Qt::MouseButton::LeftButton)
+    {
+        auto xCoord = static_cast<int>(std::round(_customPlot.xAxis->pixelToCoord(event->pos().x())));
+        auto yCoord = static_cast<int>(std::round(_customPlot.yAxis2->pixelToCoord(event->pos().y())));
+        emit plotValueClicked(_tableModel->rowFromAttributeSets(_xAxisToFullLabel[xCoord], _yAxisToFullLabel[yCoord]));
+    }
 }
 
 void EnrichmentHeatmapItem::mouseReleaseEvent(QMouseEvent* event)
@@ -85,8 +93,12 @@ void EnrichmentHeatmapItem::buildPlot()
 
     std::set<QString> attributeValueSetA;
     std::set<QString> attributeValueSetB;
-    std::map<QString, int> attributeSetNameAToAxisX;
-    std::map<QString, int> attributeSetNameBToAxisY;
+    std::map<QString, int> fullLabelToXAxis;
+    std::map<QString, int> fullLabelToYAxis;
+
+    _xAxisToFullLabel.clear();
+    _yAxisToFullLabel.clear();
+
     for (int i = 0; i < _tableModel->rowCount(); ++i)
     {
         attributeValueSetA.insert(_tableModel->data(i, "Attribute Group").toString());
@@ -106,7 +118,8 @@ void EnrichmentHeatmapItem::buildPlot()
     int column = 0;
     for(auto& labelName: sortAttributeValueSetA)
     {
-        attributeSetNameAToAxisX[labelName] = column;
+        fullLabelToXAxis[labelName] = column;
+        _xAxisToFullLabel[column] = labelName;
         if(_elideLabelWidth > 0)
             xCategoryTicker->addTick(column++, metrics.elidedText(labelName, Qt::ElideRight, _elideLabelWidth));
         else
@@ -115,7 +128,8 @@ void EnrichmentHeatmapItem::buildPlot()
     column = 0;
     for(auto& labelName: sortAttributeValueSetB)
     {
-        attributeSetNameBToAxisY[labelName] = column;
+        fullLabelToYAxis[labelName] = column;
+        _yAxisToFullLabel[column] = labelName;
         if(_elideLabelWidth > 0)
             yCategoryTicker->addTick(column++, metrics.elidedText(labelName, Qt::ElideRight, _elideLabelWidth));
         else
@@ -130,8 +144,8 @@ void EnrichmentHeatmapItem::buildPlot()
 
     for(int i=0; i<_tableModel->rowCount(); i++)
     {
-        _colorMap->data()->setCell(attributeSetNameAToAxisX[_tableModel->data(i, "Attribute Group").toString()] + 0.5,
-                                   attributeSetNameBToAxisY[_tableModel->data(i, "Selection").toString()] + 0.5,
+        _colorMap->data()->setCell(fullLabelToXAxis[_tableModel->data(i, "Attribute Group").toString()] + 0.5,
+                                   fullLabelToYAxis[_tableModel->data(i, "Selection").toString()] + 0.5,
                                    _tableModel->data(i, "Fishers").toFloat());
     }
     _colorMap->rescaleDataRange(true);
@@ -202,7 +216,6 @@ void EnrichmentHeatmapItem::setElideLabelWidth(int elideLabelWidth)
         _customPlot.replot(QCustomPlot::rpQueuedReplot);
     }
 }
-
 
 void EnrichmentHeatmapItem::setScrollXAmount(double scrollAmount)
 {

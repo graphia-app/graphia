@@ -60,7 +60,7 @@ Window
                 Tab
                 {
                     id: tab
-                    title: "Results " + index
+                    title: qsTr("Results") + " " + (index + 1)
 
                     SplitView
                     {
@@ -70,7 +70,9 @@ Window
                             id: tableView
                             Layout.fillWidth: true
                             Layout.fillHeight: true
+                            Layout.minimumWidth: 100
                             sortIndicatorVisible: true
+                            selectionMode: SelectionMode.SingleSelection
                             model: SortFilterProxyModel
                             {
                                 id: proxyModel
@@ -115,6 +117,17 @@ Window
                                 Layout.preferredWidth: (tab.width * 0.5) - 5
                                 model: qtObject
                                 elideLabelWidth: 100
+                                onPlotValueClicked:
+                                {
+                                    var convertedRow = proxyModel.mapFromSource(row);
+                                    if(convertedRow === -1)
+                                        return;
+                                    tableView.selection.clear();
+                                    tableView.selection.select(convertedRow);
+                                    tableView.positionViewAtRow(convertedRow, ListView.Beginning);
+                                    tableView.forceActiveFocus();
+                                }
+
                                 scrollXAmount:
                                 {
                                     return scrollViewHorizontal.flickableItem.contentX /

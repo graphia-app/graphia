@@ -22,6 +22,9 @@ private:
     QCustomPlot _customPlot;
     QStringList _xAttributeValues;
     QStringList _yAttributeValues;
+    std::map<int, QString> _xAxisToFullLabel;
+    std::map<int, QString> _yAxisToFullLabel;
+
     EnrichmentTableModel* _tableModel = nullptr;
     QFont _defaultFont9Pt;
     int _attributeACount = 0;
@@ -61,6 +64,7 @@ signals:
     void scrollAmountChanged();
     void horizontalRangeSizeChanged();
     void verticalRangeSizeChanged();
+    void plotValueClicked(int row);
 
 public slots:
     void onCustomReplot();

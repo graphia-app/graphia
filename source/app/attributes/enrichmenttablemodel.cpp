@@ -36,6 +36,17 @@ QVariant EnrichmentTableModel::data(int row, QString role)
     return data(index(row,0), roleNames().key(role.toUtf8()));
 }
 
+int EnrichmentTableModel::rowFromAttributeSets(QString attributeA, QString attributeB)
+{
+    for(int rowIndex = 0; rowIndex < _data.size(); ++rowIndex)
+    {
+        if(data(rowIndex, "Attribute Group") == attributeA
+                && data(rowIndex, "Selection") == attributeB)
+            return rowIndex;
+    }
+    return -1;
+}
+
 QHash<int, QByteArray> EnrichmentTableModel::roleNames() const
 {
     QHash<int, QByteArray> _roleNames;
