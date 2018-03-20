@@ -4,6 +4,8 @@
 #include "icommand.h"
 #include "command.h"
 
+#include <QObject>
+
 #include <memory>
 #include <vector>
 
@@ -28,8 +30,34 @@ public:
     QString description() const override { return _description; }
     QString verb() const override { return _verb; }
 
-    QString pastParticiple() const override { return _pastParticiple; }
+    QString pastParticiple() const override
+    {
+        if(_pastParticiple.isEmpty())
+        {
+            // If no past particple is set, fallback on the commands' one(s)
+            QString compoundPastParticiple;
+
+            for(const auto& command : _commands)
+            {
+                auto subCommandPastParticiple = command->pastParticiple();
+
+                if(subCommandPastParticiple.isEmpty())
+                    continue;
+
+                if(!compoundPastParticiple.isEmpty())
+                    compoundPastParticiple += QObject::tr(", ");
+
+                compoundPastParticiple += subCommandPastParticiple;
+            }
+
+            return compoundPastParticiple;
+        }
+
+        return _pastParticiple;
+    }
+
     void setPastParticiple(const QString& pastParticiple)
+
     {
         _pastParticiple = pastParticiple;
     }
