@@ -316,6 +316,7 @@ QString Document::pluginQmlPath() const
 QStringList Document::bookmarks() const
 {
     QStringList list;
+    list.reserve(_bookmarks.size());
 
     for(const auto& name : u::keysFor(_bookmarks))
         list.append(name);

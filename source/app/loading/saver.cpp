@@ -172,19 +172,21 @@ static json nodePositionsAsJson(const IGraph& graph, const NodePositions& nodePo
 
 static json bookmarksAsJson(const Document& document)
 {
-    json bookmarks;
+    json jsonObject;
 
-    for(const auto& bookmark : document.bookmarks())
+    auto bookmarks = document.bookmarks();
+    for(const auto& bookmark : bookmarks)
     {
         json nodeIds;
         for(auto nodeId : document.nodeIdsForBookmark(bookmark))
             nodeIds.emplace_back(static_cast<int>(nodeId));
 
-        auto bookmarkName = bookmark.toUtf8().constData();
-        bookmarks[bookmarkName] = nodeIds;
+        auto byteArray = bookmark.toUtf8();
+        auto bookmarkName = byteArray.constData();
+        jsonObject[bookmarkName] = nodeIds;
     }
 
-    return bookmarks;
+    return jsonObject;
 }
 
 bool Saver::encode(const ProgressFn& progressFn)

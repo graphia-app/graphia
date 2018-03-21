@@ -339,7 +339,7 @@ bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& p
                 NodeIdSet nodeIds;
                 nodeIds.reserve(array.size());
 
-                for(auto nodeId : array)
+                for(const auto& nodeId : array)
                     nodeIds.insert(static_cast<int>(nodeId));
 
                 _bookmarks.insert({name, nodeIds});
