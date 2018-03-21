@@ -347,6 +347,9 @@ Item
         addBookmark.show();
     }
 
+    function removeBookmarks(names) { document.removeBookmarks(names); }
+    function renameBookmark(from, to) { document.renameBookmark(from, to); }
+
     function gotoBookmark(name)
     {
         hideFind();

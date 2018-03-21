@@ -1898,6 +1898,40 @@ void Document::addBookmark(const QString& name)
 
     _bookmarks.insert({name, _selectionManager->selectedNodes()});
     emit bookmarksChanged();
+    setSaveRequired();
+}
+
+void Document::removeBookmarks(const QStringList& names)
+{
+    bool removed = false;
+
+    for(const auto& name : names)
+    {
+        const auto it = _bookmarks.find(name);
+        if(it != _bookmarks.end())
+        {
+            _bookmarks.erase(it);
+            removed = true;
+        }
+    }
+
+    if(removed)
+    {
+        emit bookmarksChanged();
+        setSaveRequired();
+    }
+}
+
+void Document::renameBookmark(const QString& from, const QString& to)
+{
+    if(u::containsKey(_bookmarks, from) && !u::containsKey(_bookmarks, to))
+    {
+        const auto it = _bookmarks.find(from);
+        std::swap(_bookmarks[to], it->second);
+        _bookmarks.erase(it);
+        emit bookmarksChanged();
+        setSaveRequired();
+    }
 }
 
 void Document::gotoBookmark(const QString& name)

@@ -870,11 +870,22 @@ ApplicationWindow
         }
     }
 
+    ManageBookmarks
+    {
+        id: manageBookmarks
+        document: currentDocument
+    }
+
     Action
     {
         id: manageBookmarksAction
         text: qsTr("Manage Bookmarks…")
         enabled: currentDocument ? !currentDocument.busy && currentDocument.bookmarks.length > 0 : false
+        onTriggered:
+        {
+            manageBookmarks.raise();
+            manageBookmarks.show();
+        }
     }
 
     ExclusiveGroup
