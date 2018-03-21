@@ -9,12 +9,22 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPainted
     _customPlot.setOpenGl(true);
 
     _colorMap = new QCPColorMap(_customPlot.xAxis, _customPlot.yAxis2);
+    _colorScale = new QCPColorScale(&_customPlot);
+    _colorScale->setLabel(tr("Fishers P-Value"));
+    _colorScale->setType(QCPAxis::atBottom);
+    _customPlot.plotLayout()->addElement(1, 0, _colorScale);
+    _colorScale->setMinimumMargins(QMargins(6, 0, 6, 0));
+
     _customPlot.yAxis2->setVisible(true);
     _customPlot.yAxis->setVisible(false);
     _colorMap->setInterpolate(false);
+    _colorMap->setColorScale(_colorScale);
+
+
     _colorMap->setGradient(QCPColorGradient::gpHot);
     _colorMap->data()->setSize(10, 10);
     // Offsets required as the cells are centered on the datapoints
+    _colorMap->data()->setRange(QCPRange(0.5,9.5), QCPRange(0.5,9.5));
     _colorMap->data()->setRange(QCPRange(0.5,9.5), QCPRange(0.5,9.5));
     for(int i=0; i<10; i++)
     {
@@ -149,6 +159,7 @@ void EnrichmentHeatmapItem::buildPlot()
                                    _tableModel->data(i, "Fishers").toFloat());
     }
     _colorMap->rescaleDataRange(true);
+    _colorScale->rescaleDataRange(false);
 }
 
 void EnrichmentHeatmapItem::updatePlotSize()

@@ -112,7 +112,7 @@ Window
                                 id: heatmap
                                 Layout.fillWidth: true
                                 Layout.fillHeight: true
-                                Layout.minimumHeight: 100
+                                Layout.minimumHeight: 200
                                 Layout.minimumWidth: 170
                                 Layout.preferredWidth: (tab.width * 0.5) - 5
                                 model: qtObject

@@ -19,6 +19,7 @@ class EnrichmentHeatmapItem : public QQuickPaintedItem
 
 private:
     QCPColorMap* _colorMap = nullptr;
+    QCPColorScale* _colorScale = nullptr;
     QCustomPlot _customPlot;
     QStringList _xAttributeValues;
     QStringList _yAttributeValues;
