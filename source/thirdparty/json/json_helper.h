@@ -1,7 +1,22 @@
 #ifndef JSON_HELPER_H
 #define JSON_HELPER_H
 
-#include "src/json.hpp"
+#include "thirdparty/gccdiagaware.h"
+
+#ifdef GCC_DIAGNOSTIC_AWARE
+#pragma GCC diagnostic push
+
+#ifndef __clang__
+#pragma GCC diagnostic ignored "-Wlogical-op"
+#endif
+#endif
+
+#include "json.hpp"
+
+#ifdef GCC_DIAGNOSTIC_AWARE
+#pragma GCC diagnostic pop
+#endif
+
 using json = nlohmann::json;
 
 #include "shared/loading/progressfn.h"
