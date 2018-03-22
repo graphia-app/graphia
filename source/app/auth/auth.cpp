@@ -30,6 +30,14 @@
 #include <string>
 #include <iomanip>
 
+#ifdef _DEBUG
+//#define DEBUG_AUTH
+
+#ifndef DEBUG_AUTH
+#define DISABLE_AUTH
+#endif
+#endif
+
 namespace C = CryptoPP;
 
 static C::RSA::PublicKey loadPublicKey()
@@ -391,8 +399,12 @@ void Auth::sendRequestUsingEncryptedPassword(const QString& email, const QString
         part.setBody(authReqJsonString.data());
         multiPart->append(part);
 
+#ifdef DISABLE_AUTH
+        onReplyReceived();
+#else
         _reply = _networkManager.post(request, multiPart);
         multiPart->setParent(_reply);
+#endif
     });
 }
 
@@ -406,10 +418,6 @@ void Auth::sendRequest(const QString& email, const QString& password)
 
 void Auth::sendRequestUsingCachedCredentials()
 {
-#ifdef _DEBUG
-    _authenticated = true;
-    emit stateChanged();
-#else
     if(u::pref("auth/rememberMe").toBool())
     {
         auto email = u::pref("auth/emailAddress").toString();
@@ -417,7 +425,6 @@ void Auth::sendRequestUsingCachedCredentials()
 
         sendRequestUsingEncryptedPassword(email, _encryptedPassword);
     }
-#endif
 }
 
 void Auth::reset()
@@ -464,7 +471,15 @@ void Auth::onReplyReceived()
     if(_timer.isActive())
     {
         _timer.stop();
-        emit busyChanged();
+
+#ifdef DISABLE_AUTH
+        if(_reply == nullptr)
+        {
+            _authenticated = true;
+            emit stateChanged();
+        }
+        else
+#endif
 
         if(_reply->error() == QNetworkReply::NetworkError::NoError)
         {
@@ -522,11 +537,17 @@ void Auth::onReplyReceived()
                 emit messageChanged();
             }
         }
+
+        emit busyChanged();
     }
 
     _encryptedPassword.clear();
-    _reply->deleteLater();
-    _reply = nullptr;
+
+    if(_reply != nullptr)
+    {
+        _reply->deleteLater();
+        _reply = nullptr;
+    }
 }
 
 void Auth::onTimeout()
