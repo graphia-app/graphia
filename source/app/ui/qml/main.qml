@@ -41,6 +41,7 @@ ApplicationWindow
         return text;
     }
 
+    property bool _authenticationAttemptedAtLeastOnce: false
     property bool _authenticatedAtLeastOnce: false
 
     Application { id: application }
@@ -58,11 +59,17 @@ ApplicationWindow
                 processArguments(Qt.application.arguments);
             }
         }
+
+        onAuthenticatingChanged:
+        {
+            if(!application.authenticating)
+                _authenticationAttemptedAtLeastOnce = true;
+        }
     }
 
     Auth
     {
-        visible: !application.authenticated
+        visible: !application.authenticated && _authenticationAttemptedAtLeastOnce
         enabled: visible
         anchors.fill: parent
 
