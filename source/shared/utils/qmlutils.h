@@ -43,6 +43,12 @@ public:
 
     Q_INVOKABLE QString currentThreadName() const { return u::currentThreadName(); }
 
+    Q_INVOKABLE bool urlIsValid(const QString& urlString) const
+    {
+        QUrl url = QUrl::fromUserInput(urlString);
+        return url.isValid();
+    }
+
     static QObject* qmlInstance(QQmlEngine*, QJSEngine*)
     {
         return new QmlUtils;
