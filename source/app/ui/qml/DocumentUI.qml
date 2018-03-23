@@ -462,6 +462,23 @@ Item
                     MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection; action: selectTargetsAction }
                     MenuItem { visible: numNodesSelected > 0 && !contextMenu.clickedNodeIsSameAsSelection; action: selectNeighboursAction }
 
+                    MenuSeparator { visible: searchWebMenuItem.visible }
+                    MenuItem
+                    {
+                        id: searchWebMenuItem
+                        visible: contextMenu.nodeWasClicked
+                        text: qsTr("Search Web for '") + contextMenu.clickedNodeName + qsTr("'")
+                        onTriggered:
+                        {
+                            var nodeName = document.nodeName(contextMenu.clickedNodeId);
+                            var url = misc.webSearchEngineUrl.indexOf("%1") >= 0 ?
+                                misc.webSearchEngineUrl.arg(nodeName) : "";
+
+                            if(QmlUtils.urlIsValid(url))
+                                Qt.openUrlExternally(url);
+                        }
+                    }
+
                     MenuSeparator { visible: changeBackgroundColourMenuItem.visible }
                     MenuItem
                     {
@@ -875,6 +892,7 @@ Item
 
         property var fileSaveInitialFolder
         property bool firstOpen
+        property string webSearchEngineUrl
     }
 
     // This is only here to get at the default values of its properties

@@ -151,6 +151,9 @@ int main(int argc, char *argv[])
     preferences.define(QStringLiteral("misc/focusFoundComponents"),             true);
 
     preferences.define(QStringLiteral("misc/disableHubbles"),                   false);
+
+    preferences.define(QStringLiteral("misc/webSearchEngineUrl"),               "https://www.google.com/#q=%1");
+
     preferences.define(QStringLiteral("misc/firstOpen"),                        true);
 
     preferences.define(QStringLiteral("screenshot/width"),                      1920);
