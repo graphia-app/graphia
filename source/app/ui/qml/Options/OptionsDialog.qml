@@ -12,9 +12,9 @@ Window
 
     title: qsTr("Options")
     flags: Qt.Window|Qt.Dialog
-    width: 640
+    width: 720
     height: 480
-    minimumWidth: 640
+    minimumWidth: 720
     minimumHeight: 480
 
     ColumnLayout

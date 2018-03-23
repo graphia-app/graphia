@@ -18,38 +18,37 @@ Item
         property alias disableHubbles: disableHubblesCheckbox.checked
     }
 
-    Column
+    ColumnLayout
     {
-        id: column
-        anchors.fill: parent
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+
         anchors.margins: Constants.margin
         spacing: Constants.spacing
 
-        ColumnLayout
+        Label
         {
-            Label
-            {
-                font.bold: true
-                text: qsTr("Find")
-            }
+            font.bold: true
+            text: qsTr("Find")
+        }
 
-            CheckBox
-            {
-                id: focusFoundNodesCheckbox
-                text: qsTr("Focus Found Nodes")
-            }
+        CheckBox
+        {
+            id: focusFoundNodesCheckbox
+            text: qsTr("Focus Found Nodes")
+        }
 
-            CheckBox
-            {
-                id: focusFoundComponentsCheckbox
-                text: qsTr("Switch To Component Mode When Searching")
-            }
+        CheckBox
+        {
+            id: focusFoundComponentsCheckbox
+            text: qsTr("Switch To Component Mode When Searching")
+        }
 
-            CheckBox
-            {
-                id: disableHubblesCheckbox
-                text: qsTr("Disable Extended Help Tooltips")
-            }
+        CheckBox
+        {
+            id: disableHubblesCheckbox
+            text: qsTr("Disable Extended Help Tooltips")
         }
     }
 }

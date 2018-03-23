@@ -43,114 +43,105 @@ Item
         property int textAlignment
     }
 
-    Column
+    RowLayout
     {
         id: column
         anchors.fill: parent
         anchors.margins: Constants.margin
         spacing: Constants.spacing
+
         GridLayout
         {
+            Layout.alignment: Qt.AlignTop|Qt.AlignLeft
+
             columns: 2
             rowSpacing: Constants.spacing
             columnSpacing: Constants.spacing
-            Column
+
+            Label
             {
-                GridLayout
-                {
-                    columns: 2
-                    rowSpacing: Constants.spacing
-                    columnSpacing: Constants.spacing
-
-                    Label
-                    {
-                        font.bold: true
-                        text: qsTr("Colours")
-                        Layout.columnSpan: 2
-                    }
-
-                    Label { text: qsTr("Nodes") }
-                    ColorPickButton { id: nodeColorPickButton }
-
-                    Label { text: qsTr("Edges") }
-                    ColorPickButton { id: edgeColorPickButton }
-
-                    Label { text: qsTr("Multi Elements") }
-                    ColorPickButton { id: multiElementColorPickButton }
-
-                    Label { text: qsTr("Background") }
-                    ColorPickButton { id: backgroundColorPickButton }
-
-                    Label { text: qsTr("Selection") }
-                    ColorPickButton { id: highlightColorPickButton }
-
-                    Label
-                    {
-                        font.bold: true
-                        text: qsTr("Sizes")
-                        Layout.columnSpan: 2
-                    }
-
-                    Label { text: qsTr("Nodes") }
-                    Slider { id: nodeSizeSlider }
-
-                    Label { text: qsTr("Edges") }
-                    Slider { id: edgeSizeSlider }
-
-                    Label
-                    {
-                        font.bold: true
-                        text: qsTr("Miscellaneous")
-                        Layout.columnSpan: 2
-                    }
-
-                    Label { text: qsTr("Transition Time") }
-                    Slider { id: transitionTimeSlider }
-
-                    Label { text: qsTr("Minimum Component Radius") }
-                    Slider { id: minimumComponentRadiusSlider }
-                }
+                font.bold: true
+                text: qsTr("Colours")
+                Layout.columnSpan: 2
             }
-            Column
+
+            Label { text: qsTr("Nodes") }
+            ColorPickButton { id: nodeColorPickButton }
+
+            Label { text: qsTr("Edges") }
+            ColorPickButton { id: edgeColorPickButton }
+
+            Label { text: qsTr("Multi Elements") }
+            ColorPickButton { id: multiElementColorPickButton }
+
+            Label { text: qsTr("Background") }
+            ColorPickButton { id: backgroundColorPickButton }
+
+            Label { text: qsTr("Selection") }
+            ColorPickButton { id: highlightColorPickButton }
+
+            Label
             {
-                spacing: Constants.spacing
-                anchors.top: parent.top
-                GridLayout
-                {
-                    columns: 2
-                    rowSpacing: Constants.spacing
-                    columnSpacing: Constants.spacing
-                    Label
-                    {
-                        font.bold: true
-                        text: qsTr("Graph Text")
-                        Layout.columnSpan: 2
-                    }
+                font.bold: true
+                text: qsTr("Sizes")
+                Layout.columnSpan: 2
+            }
 
-                    Label { text: qsTr("Font") }
-                    Button
-                    {
-                        text: visuals.textFont + " " + visuals.textSize + "pt";
-                        onClicked: { fontDialog.visible = true }
-                    }
+            Label { text: qsTr("Nodes") }
+            Slider { id: nodeSizeSlider }
 
-                    Label { text: qsTr("Alignment") }
-                    ComboBox
-                    {
-                        width: 200
-                        model:
-                        [
-                            // Must stay synced with TextAlignment in graphrenderer.h
-                            qsTr("Right"),
-                            qsTr("Left"),
-                            qsTr("Centre"),
-                            qsTr("Top"),
-                            qsTr("Bottom")
-                        ]
-                        currentIndex: visuals.textAlignment
-                        onCurrentIndexChanged: visuals.textAlignment = currentIndex;
-                    }
-                }
+            Label { text: qsTr("Edges") }
+            Slider { id: edgeSizeSlider }
+
+            Label
+            {
+                font.bold: true
+                text: qsTr("Miscellaneous")
+                Layout.columnSpan: 2
+            }
+
+            Label { text: qsTr("Transition Time") }
+            Slider { id: transitionTimeSlider }
+
+            Label { text: qsTr("Minimum Component Radius") }
+            Slider { id: minimumComponentRadiusSlider }
+        }
+
+        GridLayout
+        {
+            Layout.alignment: Qt.AlignTop|Qt.AlignLeft
+
+            columns: 2
+            rowSpacing: Constants.spacing
+            columnSpacing: Constants.spacing
+            Label
+            {
+                font.bold: true
+                text: qsTr("Text")
+                Layout.columnSpan: 2
+            }
+
+            Label { text: qsTr("Font") }
+            Button
+            {
+                text: visuals.textFont + " " + visuals.textSize + "pt";
+                onClicked: { fontDialog.visible = true }
+            }
+
+            Label { text: qsTr("Alignment") }
+            ComboBox
+            {
+                model:
+                [
+                    // Must stay synced with TextAlignment in graphrenderer.h
+                    qsTr("Right"),
+                    qsTr("Left"),
+                    qsTr("Centre"),
+                    qsTr("Top"),
+                    qsTr("Bottom")
+                ]
+                currentIndex: visuals.textAlignment
+                onCurrentIndexChanged: visuals.textAlignment = currentIndex;
             }
         }
     }
@@ -161,11 +152,11 @@ Item
         title: qsTr("Please choose a font")
         currentFont: Qt.font({ family: visuals.textFont, pointSize: visuals.textSize, weight: Font.Normal })
         font: Qt.font({ family: visuals.textFont, pointSize: visuals.textSize, weight: Font.Normal })
-        onAccepted: {
+        onAccepted:
+        {
             visuals.textFont = fontDialog.font.family;
             visuals.textSize = fontDialog.font.pointSize;
         }
-        visible: false
     }
 }
 
