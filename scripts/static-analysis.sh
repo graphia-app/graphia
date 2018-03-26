@@ -1,27 +1,52 @@
 #! /bin/bash
 
-for ARGUMENT in "$@"
+OPTIND=1
+VERBOSE=0
+
+while getopts "vs:" OPTION
 do
-  echo -n "Sourcing ${ARGUMENT}"
-  if [ -e ${ARGUMENT} ]
-  then
-    echo "..."
-    . ${ARGUMENT}
-  else
-    echo "...doesn't exist"
-  fi
+  case "${OPTION}" in
+    v)
+      VERBOSE=1
+      ;;
+    s)
+      echo -n "Sourcing ${OPTARG}"
+      if [ -e ${OPTARG} ]
+      then
+        echo "..."
+        . ${OPTARG}
+      else
+        echo "...doesn't exist"
+      fi
+      ;;
+  esac
 done
 
+shift $((OPTIND-1))
+[ "$1" = "--" ] && shift
+
 NUM_CORES=$(nproc --all)
-COMPILER=$(basename ${CC} | sed -e 's/-.*//g')
-BUILD_DIR="build/${COMPILER}"
 
-CPP_FILES=$(cat ${BUILD_DIR}/compile_commands.json | \
-  jq '.[].file' | grep -vE "qrc_|mocs_compilation|thirdparty" | \
-  sed -e 's/"//g')
+if [ -z ${BUILD_DIR} ]
+then
+  COMPILER=$(basename ${CC} | sed -e 's/-.*//g')
+  BUILD_DIR="build/${COMPILER}"
+fi
 
-echo "Files to be analysed:"
-echo ${CPP_FILES}
+if [ ! -z "$@" ]
+then
+  CPP_FILES=$@
+else
+  CPP_FILES=$(cat ${BUILD_DIR}/compile_commands.json | \
+    jq '.[].file' | grep -vE "qrc_|mocs_compilation|thirdparty" | \
+    sed -e 's/"//g')
+fi
+
+if [ "${VERBOSE}" != 0 ]
+then
+  echo "Files to be analysed:"
+  echo ${CPP_FILES}
+fi
 
 # cppcheck
 cppcheck --version
@@ -43,9 +68,13 @@ google-runtime-member-string-references,\
 -clang-diagnostic-unknown-warning-option,\
 -clang-analyzer-alpha.deadcode.UnreachableCode"
 
-echo "clang-tidy"
-clang-tidy --version
-clang-tidy -list-checks ${CHECKS}
+if [ "${VERBOSE}" != 0 ]
+then
+  echo "clang-tidy"
+  clang-tidy --version
+  clang-tidy -list-checks ${CHECKS}
+fi
+
 parallel -n1 -P${NUM_CORES} -q \
   clang-tidy -p ${BUILD_DIR} \
   -header-filter="^.*source\/(app|shared|plugins).*$" ${CHECKS} {} \
@@ -86,8 +115,12 @@ bogus-dynamic-cast,\
 detaching-member,\
 thread-with-slots"
 
-echo "clazy"
-clazy-standalone --version
+if [ "${VERBOSE}" != 0 ]
+then
+  echo "clazy"
+  clazy-standalone --version
+fi
+
 parallel -n1 -P${NUM_CORES} \
   clazy-standalone -p ${BUILD_DIR}/compile_commands.json ${CHECKS} {} \
   ::: ${CPP_FILES}
