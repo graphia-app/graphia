@@ -285,7 +285,7 @@ void CorrelationPlotItem::buildPlot()
     _customPlot.setBackground(Qt::white);
 }
 
-void CorrelationPlotItem::setPlotDispersionVisualType(const int plotDispersionVisualType)
+void CorrelationPlotItem::setPlotDispersionVisualType(int plotDispersionVisualType)
 {
     _plotDispersionVisualType = plotDispersionVisualType;
     emit plotOptionsChanged();
@@ -308,21 +308,21 @@ void CorrelationPlotItem::setXAxisLabel(const QString& plotXAxisLabel)
     refresh();
 }
 
-void CorrelationPlotItem::setPlotScaleType(const int plotScaleType)
+void CorrelationPlotItem::setPlotScaleType(int plotScaleType)
 {
     _plotScaleType = plotScaleType;
     emit plotOptionsChanged();
     refresh();
 }
 
-void CorrelationPlotItem::setPlotAveragingType(const int plotAveragingType)
+void CorrelationPlotItem::setPlotAveragingType(int plotAveragingType)
 {
     _plotAveragingType = plotAveragingType;
     emit plotOptionsChanged();
     refresh();
 }
 
-void CorrelationPlotItem::setPlotDispersionType(const int plotDispersionType)
+void CorrelationPlotItem::setPlotDispersionType(int plotDispersionType)
 {
     _plotDispersionType = plotDispersionType;
     emit plotOptionsChanged();
@@ -396,7 +396,8 @@ void CorrelationPlotItem::populateMedianLinePlot()
             auto index = (row * _columnCount) + col;
             rowsEntries.push_back(_data[static_cast<int>(index)]);
         }
-        if(_selectedRows.size() > 0)
+
+        if(!_selectedRows.empty())
         {
             std::sort(rowsEntries.begin(), rowsEntries.end());
             double median = 0.0;
@@ -505,7 +506,8 @@ void CorrelationPlotItem::populateIQRPlot()
             auto index = (row * _columnCount) + col;
             rowsEntries.push_back(_data[static_cast<int>(index)]);
         }
-        if(_selectedRows.size() > 0)
+
+        if(!_selectedRows.empty())
         {
             std::sort(rowsEntries.begin(), rowsEntries.end());
             double secondQuartile = calculateMedian(rowsEntries);

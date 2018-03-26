@@ -56,7 +56,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
                 removees.push_back(nodeId);
         }
 
-        uint64_t numRemovees = static_cast<uint64_t>(removees.size());
+        auto numRemovees = static_cast<uint64_t>(removees.size());
         uint64_t progress = 0;
         changed = !removees.empty() || changed;
         for(auto nodeId : removees)
@@ -87,7 +87,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
                 removees.push_back(edgeId);
         }
 
-        uint64_t numRemovees = static_cast<uint64_t>(removees.size());
+        auto numRemovees = static_cast<uint64_t>(removees.size());
         uint64_t progress = 0;
         changed = !removees.empty() || changed;
         for(auto edgeId : removees)
@@ -120,7 +120,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
             }
         }
 
-        uint64_t numRemovees = static_cast<uint64_t>(removees.size());
+        auto numRemovees = static_cast<uint64_t>(removees.size());
         uint64_t progress = 0;
         changed = !removees.empty() || changed;
         for(auto nodeId : removees)

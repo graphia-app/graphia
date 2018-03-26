@@ -286,7 +286,7 @@ static QVector3D virtualTrackballVector(int width, int height, const QPoint& cur
         z = t * t / d;
     }
 
-    return QVector3D(x, y, z);
+    return {x, y, z};
 }
 
 static QQuaternion mouseMoveToRotation(const QPoint& prev, const QPoint& cur,

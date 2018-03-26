@@ -10,7 +10,6 @@
 //#define EXPENSIVE_DEBUG_CHECKS
 
 SelectionManager::SelectionManager(const GraphModel& graphModel) :
-    QObject(),
     _graphModel(&graphModel)
 {
     connect(&_graphModel->graph(), &Graph::nodeRemoved,

@@ -158,10 +158,10 @@ public:
     NodeIdSet nodeIdsForBookmark(const QString& name) const;
 
     void executeOnMainThread(DeferredExecutor::TaskFn task,
-                             QString description = QStringLiteral("GenericTask"));
+                             const QString& description = QStringLiteral("GenericTask"));
 
     void executeOnMainThreadAndWait(DeferredExecutor::TaskFn task,
-                                    QString description = QStringLiteral("GenericTask"));
+                                    const QString& description = QStringLiteral("GenericTask"));
 
 private:
     Application* _application = nullptr;
@@ -339,7 +339,7 @@ public:
     Q_INVOKABLE void gotoNextComponent();
 
     Q_INVOKABLE void find(const QString& term, int options,
-        QStringList attributeNames, int findSelectStyle);
+        const QStringList& attributeNames, int findSelectStyle);
     Q_INVOKABLE void resetFind();
     Q_INVOKABLE void selectFirstFound();
     Q_INVOKABLE void selectNextFound();

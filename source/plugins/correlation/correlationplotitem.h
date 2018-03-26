@@ -65,12 +65,12 @@ public:
 
     Q_INVOKABLE void savePlotImage(const QUrl& url, const QStringList& extensions);
 
-    void setPlotScaleType(const int plotScaleType);
-    void setPlotDispersionType(const int plotDispersionType);
+    void setPlotScaleType(int plotScaleType);
+    void setPlotDispersionType(int plotDispersionType);
     void setXAxisLabel(const QString& plotXAxisLabel);
     void setYAxisLabel(const QString& plotYAxisLabel);
-    void setPlotAveragingType(const int plotAveragingType);
-    void setPlotDispersionVisualType(const int plotDispersionVisualType);
+    void setPlotAveragingType(int plotAveragingType);
+    void setPlotDispersionVisualType(int plotDispersionVisualType);
 
 protected:
     void routeMouseEvent(QMouseEvent* event);

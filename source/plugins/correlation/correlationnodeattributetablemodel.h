@@ -13,8 +13,8 @@ class CorrelationNodeAttributeTableModel : public NodeAttributeTableModel
     Q_OBJECT
 
 private:
-    std::vector<QString>* _dataColumnNames;
-    std::vector<double>* _data;
+    std::vector<QString>* _dataColumnNames =  nullptr;
+    std::vector<double>* _data = nullptr;
 
     int _firstDataColumnRole = -1;
 

@@ -764,7 +764,7 @@ void Document::selectAllVisible()
     {
         auto componentId = _graphQuickItem->focusedComponentId();
         auto component = _graphModel->graph().componentById(componentId);
-        auto nodeIds = component->nodeIds();
+        const auto& nodeIds = component->nodeIds();
 
         _commandManager.executeOnce(makeSelectNodesCommand(_selectionManager.get(), nodeIds));
     }
@@ -993,7 +993,7 @@ void Document::gotoNextComponent()
         _graphQuickItem->moveFocusToComponent(componentIds.front());
 }
 
-void Document::find(const QString& term, int options, QStringList attributeNames, int findSelectStyle)
+void Document::find(const QString& term, int options, const QStringList& attributeNames, int findSelectStyle)
 {
     if(_searchManager == nullptr)
         return;
@@ -1319,14 +1319,14 @@ NodeId Document::decrementFoundIt()
 }
 
 void Document::executeOnMainThread(DeferredExecutor::TaskFn task,
-                                   QString description)
+                                   const QString& description)
 {
     _deferredExecutor.enqueue(std::move(task), description);
     emit taskAddedToExecutor();
 }
 
 void Document::executeOnMainThreadAndWait(DeferredExecutor::TaskFn task,
-                                          QString description)
+                                          const QString& description)
 {
     executeOnMainThread(std::move(task), description);
     _executed.wait();
@@ -1818,7 +1818,7 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
         QMetaObject::invokeMethod(tableView, "getColumn",
                 Q_RETURN_ARG(QVariant, columnVariant),
                 Q_ARG(QVariant, i));
-        QObject* tableViewColumn = qvariant_cast<QObject*>(columnVariant);
+        auto tableViewColumn = qvariant_cast<QObject*>(columnVariant);
 
         if(tableViewColumn != nullptr && QQmlProperty::read(tableViewColumn, QStringLiteral("visible")).toBool())
             columnRoles.append(QQmlProperty::read(tableViewColumn, QStringLiteral("role")).toString());
@@ -1865,7 +1865,7 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
         stream << rowString << endl;
 
         auto rowCount = QQmlProperty::read(tableView, QStringLiteral("rowCount")).toInt();
-        QAbstractItemModel* model = qvariant_cast<QAbstractItemModel*>(QQmlProperty::read(tableView, QStringLiteral("model")));
+        auto model = qvariant_cast<QAbstractItemModel*>(QQmlProperty::read(tableView, QStringLiteral("model")));
         if(model != nullptr)
         {
             for(int row = 0; row < rowCount; row++)

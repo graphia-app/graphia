@@ -7,7 +7,7 @@
 template<typename T, size_t Size> class CircularBuffer
 {
 private:
-    std::array<T, Size> _array;
+    std::array<T, Size> _array{};
     size_t _size = 0;
     size_t _current = 0;
     size_t _next = 0;

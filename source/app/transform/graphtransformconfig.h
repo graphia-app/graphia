@@ -21,9 +21,9 @@ struct GraphTransformConfig
 
     struct TerminalCondition
     {
-        TerminalValue _lhs;
-        TerminalOp _op;
-        TerminalValue _rhs;
+        TerminalValue _lhs = 0;
+        TerminalOp _op = ConditionFnOp::Equality::Equal;
+        TerminalValue _rhs = 0;
 
         bool operator==(const TerminalCondition& other) const;
         QString opAsString() const;
@@ -31,8 +31,8 @@ struct GraphTransformConfig
 
     struct UnaryCondition
     {
-        TerminalValue _lhs;
-        ConditionFnOp::Unary _op;
+        TerminalValue _lhs = 0;
+        ConditionFnOp::Unary _op = ConditionFnOp::Unary::HasValue;
 
         bool operator==(const UnaryCondition& other) const;
         QString opAsString() const;
@@ -48,9 +48,9 @@ struct GraphTransformConfig
 
     struct CompoundCondition
     {
-        Condition _lhs;
-        ConditionFnOp::Logical _op;
-        Condition _rhs;
+        Condition _lhs = NoCondition{};
+        ConditionFnOp::Logical _op = ConditionFnOp::Logical::And;
+        Condition _rhs = NoCondition{};
 
         bool operator==(const CompoundCondition& other) const;
         QString opAsString() const;
@@ -60,7 +60,7 @@ struct GraphTransformConfig
     struct Parameter
     {
         QString _name;
-        ParameterValue _value;
+        ParameterValue _value = 0;
 
         bool operator==(const Parameter& other) const;
         QString valueAsString() const;

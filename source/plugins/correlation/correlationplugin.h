@@ -152,7 +152,7 @@ private:
     {
         NodeId _source;
         NodeId _target;
-        double _r;
+        double _r = 0.0;
     };
 
     std::unique_ptr<EdgeArray<double>> _pearsonValues;
