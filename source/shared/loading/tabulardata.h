@@ -154,7 +154,7 @@ public:
         return parse(url, progressFn,
         [this](size_t column, size_t row, auto&& token)
         {
-            _tabularData.setValueAt(column, row, std::move(token));
+            _tabularData.setValueAt(column, row, std::forward<decltype(token)>(token));
         });
     }
 

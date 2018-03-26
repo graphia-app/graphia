@@ -11,7 +11,7 @@ class HoverMousePassthrough : public QQuickItem
     Q_PROPERTY(bool hovered MEMBER _hovered NOTIFY hoveredChanged)
 
 private:
-    bool _hovered;
+    bool _hovered = false;
 
 public:
     explicit HoverMousePassthrough(QQuickItem* parent = nullptr) : QQuickItem(parent)

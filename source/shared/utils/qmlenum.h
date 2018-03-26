@@ -18,7 +18,7 @@
 constexpr bool static_strcmp(char const* a, char const* b)
 {
     return (*a != 0 && *b != 0) ?
-                (*a == *b && static_strcmp(a + 1, b + 1)) :
+                (*a == *b && static_strcmp(a + 1, b + 1)) : // NOLINT
                 (*a == 0 && *b == 0);
 }
 
@@ -33,7 +33,7 @@ constexpr bool static_strcmp(char const* a, char const* b)
         "First parameter to DEFINE_QML_ENUM must be Q_GADGET"); \
     class _REFLECTOR(ENUM_NAME) \
     { \
-        _Q_GADGET \
+        _Q_GADGET /* NOLINT */ \
     public: \
         enum class Enum {__VA_ARGS__}; Q_ENUM(Enum) \
         static void initialise() \
@@ -62,7 +62,7 @@ constexpr bool static_strcmp(char const* a, char const* b)
             _REFLECTOR(ENUM_NAME)::initialise(); \
     } \
     Q_COREAPP_STARTUP_FUNCTION(ENUM_NAME ## _initialiser) \
-    using ENUM_NAME = QML_ENUM_PROPERTY(ENUM_NAME)
+    using ENUM_NAME = QML_ENUM_PROPERTY(ENUM_NAME) /* NOLINT */
 
 /*
 Example:

@@ -2,8 +2,7 @@
 
 #include <stack>
 
-BarnesHutTree::BarnesHutTree() :
-    BaseOctree()
+BarnesHutTree::BarnesHutTree()
 {
     setMaxNodesPerLeaf(1);
 }

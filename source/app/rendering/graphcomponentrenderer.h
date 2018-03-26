@@ -29,7 +29,7 @@ public:
     static const float MINIMUM_ZOOM_DISTANCE;
     static const float COMFORTABLE_ZOOM_RADIUS;
 
-    GraphComponentRenderer() {}
+    GraphComponentRenderer() = default;
 
     void initialise(GraphModel* graphModel, ComponentId componentId,
                     SelectionManager* selectionManager,
@@ -160,7 +160,7 @@ private:
     void centrePositionInViewport(const QVector3D& focus,
                                   float zoomDistance = -1.0f,
                                   // Odd constructor makes a null quaternion
-                                  const QQuaternion rotation = QQuaternion(QVector4D()));
+                                  QQuaternion rotation = QQuaternion(QVector4D()));
 
     float _entireComponentZoomDistance = 0.0f;
     float zoomDistanceForRadius(float radius) const;

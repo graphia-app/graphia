@@ -9,12 +9,12 @@
 #include <functional>
 
 class BarnesHutTree;
-struct BarnesHutSubVolume : SubVolume<BarnesHutTree> { float _sSq; };
+struct BarnesHutSubVolume : SubVolume<BarnesHutTree> { float _sSq = 0.0f; };
 
 class BarnesHutTree : public BaseOctree<BarnesHutTree, BarnesHutSubVolume>
 {
 private:
-    static Q_DECL_CONSTEXPR QVector3D differenceEpsilon() { return QVector3D(0.0f, 0.0f, 0.0001f); }
+    static Q_DECL_CONSTEXPR QVector3D differenceEpsilon() { return {0.0f, 0.0f, 0.0001f}; }
     static Q_DECL_CONSTEXPR float distanceSqEpsilon()
     {
         auto e = differenceEpsilon();

@@ -118,7 +118,7 @@ void GlyphMap::layoutStrings(const QFont& font)
         QList<QGlyphRun> glyphRuns = line.glyphRuns(0, text.length());
 
         // No need to continue if there are no glyphruns
-        if(glyphRuns.size() > 0)
+        if(!glyphRuns.empty())
         {
             textLayoutPair.second._initialised = true;
 

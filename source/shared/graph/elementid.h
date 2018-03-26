@@ -14,7 +14,7 @@ public:
         static_assert(sizeof(ElementId) == sizeof(_value), "ElementId should not be larger than an int");
     }
 
-    inline operator int() const { return _value; }
+    inline operator int() const { return _value; } // NOLINT
     ElementId& operator=(const ElementId<T>& other) = default;
     inline T& operator++() { ++_value; return static_cast<T&>(*this); }
     inline T operator++(int) { T previous = static_cast<T&>(*this); ++_value; return previous; }

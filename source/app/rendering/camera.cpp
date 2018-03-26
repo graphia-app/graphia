@@ -259,7 +259,7 @@ Line3D Camera::lineForViewportCoordinates(int x, int y) const
     unproject(x, y, 0.0, start);
     unproject(x, y, 1.0, end);
 
-    return Line3D(start, end);
+    return {start, end};
 }
 
 Frustum Camera::frustumForViewportCoordinates(int x1, int y1, int x2, int y2) const

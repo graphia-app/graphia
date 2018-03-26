@@ -238,7 +238,7 @@ static std::string aesEncryptString(const std::string& string, const Auth::AesKe
 
 static QJsonObject decodeAuthResponse(const Auth::AesKey& aesKey, const std::string& authResponseJsonString)
 {
-    QJsonParseError jsonError;
+    QJsonParseError jsonError{};
     auto jsonDocument = QJsonDocument::fromJson(authResponseJsonString.data(), &jsonError);
 
     if(jsonError.error != QJsonParseError::ParseError::NoError)

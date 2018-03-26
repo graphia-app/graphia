@@ -333,7 +333,7 @@ bool CommandManager::commandsArePending() const
     return !_pendingCommands.empty();
 }
 
-void CommandManager::onCommandCompleted(bool success, QString description, QString)
+void CommandManager::onCommandCompleted(bool success, const QString& description, const QString&)
 {
     killTimer(_commandProgressTimerId);
     _commandProgressTimerId = -1;

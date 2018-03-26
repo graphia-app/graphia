@@ -9,7 +9,6 @@
 #include <functional>
 
 TransformedGraph::TransformedGraph(GraphModel& graphModel, const MutableGraph& source) :
-    Graph(),
     _graphModel(&graphModel),
     _source(&source),
     _cache(graphModel),

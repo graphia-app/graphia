@@ -19,12 +19,12 @@ int u::rand(int low, int high)
 
 QVector2D u::randQVector2D(float low, float high)
 {
-    return QVector2D(rand(low, high), rand(low, high));
+    return {rand(low, high), rand(low, high)};
 }
 
 QVector3D u::randQVector3D(float low, float high)
 {
-    return QVector3D(rand(low, high), rand(low, high), rand(low, high));
+    return {rand(low, high), rand(low, high), rand(low, high)};
 }
 
 QColor u::randQColor()
@@ -33,5 +33,5 @@ QColor u::randQColor()
     int g = rand(0, 255);
     int b = rand(0, 255);
 
-    return QColor(r, g, b);
+    return {r, g, b};
 }

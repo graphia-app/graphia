@@ -18,7 +18,7 @@ public:
     MovablePointer(const MovablePointer& other) = delete;
     void operator=(const MovablePointer& other) = delete;
 
-    inline operator T*() const { return this->get(); }
+    inline operator T*() const { return this->get(); } //NOLINT
 };
 
 #endif // MOVABLEPOINTER_H

@@ -42,7 +42,7 @@ private:
 
 public:
     Watchdog();
-    ~Watchdog();
+    ~Watchdog() override;
 
 signals:
     void reset();

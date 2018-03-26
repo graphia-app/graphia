@@ -394,7 +394,7 @@ void GraphComponentRenderer::centreNodeInViewport(NodeId nodeId, float zoomDista
 
 void GraphComponentRenderer::centrePositionInViewport(const QVector3D& focus,
                                                       float zoomDistance,
-                                                      const QQuaternion rotation)
+                                                      QQuaternion rotation)
 {
     if(zoomDistance < 0.0f)
     {

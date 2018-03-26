@@ -11,7 +11,7 @@ public:
     using ReportFn = std::function<void(float)>;
     explicit PerformanceCounter(std::chrono::seconds interval);
 
-    void setReportFn(ReportFn f) { _f = f; }
+    void setReportFn(ReportFn f) { _f = std::move(f); }
 
     void tick();
     float ticksPerSecond();

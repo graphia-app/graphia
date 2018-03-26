@@ -25,10 +25,12 @@ struct scope_exit {
             this->exit_function();
     }
     void release() noexcept { this->execute_on_destruction=false;}
-private:
+
     scope_exit(scope_exit const &)=delete;
     void operator=(scope_exit const &)=delete;
     scope_exit& operator=(scope_exit &&)=delete;
+
+private:
     EF exit_function;
     bool execute_on_destruction; // exposition only
 };

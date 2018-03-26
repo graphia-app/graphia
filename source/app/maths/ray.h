@@ -13,7 +13,7 @@ private:
     QVector3D _origin;
     QVector3D _dir;
     QVector3D _invDir;
-    std::array<int, 3> _sign;
+    std::array<int, 3> _sign{{0, 0, 0}};
 
     void initialise()
     {

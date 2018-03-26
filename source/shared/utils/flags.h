@@ -16,7 +16,7 @@ public:
     {}
 
     template<typename... Tail>
-    Flags(Enum value, Tail... values)
+    Flags(Enum value, Tail... values) // NOLINT
     {
         set(value);
         set(values...);

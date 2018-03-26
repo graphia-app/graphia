@@ -12,8 +12,7 @@ Arrow::Arrow() :
     _positionBuffer(QOpenGLBuffer::VertexBuffer),
     _normalBuffer(QOpenGLBuffer::VertexBuffer),
     _textureCoordBuffer(QOpenGLBuffer::VertexBuffer),
-    _indexBuffer(QOpenGLBuffer::IndexBuffer),
-    _vao()
+    _indexBuffer(QOpenGLBuffer::IndexBuffer)
 {
 }
 

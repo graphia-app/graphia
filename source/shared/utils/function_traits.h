@@ -18,12 +18,12 @@ struct _function_traits
     enum { arity = sizeof...(Args) };
     // arity is the number of arguments.
 
-    typedef ReturnType result_type;
+    using result_type = ReturnType;
 
     template <size_t i>
     struct arg
     {
-        typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
+        using type = typename std::tuple_element<i, std::tuple<Args...>>::type;
         // the i-th argument is equivalent to the i-th tuple element of a tuple
         // composed of those arguments.
     };

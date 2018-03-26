@@ -49,7 +49,7 @@ private:
     NodeId _targetId;
 
 public:
-    Edge() {}
+    Edge() = default;
 
     explicit Edge(const IEdge& other) :
                   _id(other.id()),
@@ -85,7 +85,7 @@ public:
         if(nodeId == _targetId)
             return _sourceId;
 
-        return NodeId();
+        return {};
     }
 
     bool isLoop() const override { return _sourceId == _targetId; }
@@ -156,6 +156,7 @@ public:
     {
         auto edgeIds = edgeIdsForNodeIds(nodeIds);
         std::vector<Edge> edges;
+        edges.reserve(edgeIds.size());
 
         for(auto edgeId : edgeIds)
             edges.emplace_back(edgeById(edgeId));

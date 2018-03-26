@@ -286,8 +286,7 @@ bool GPUGraphData::unused() const
     return _alpha1 == 0.0f && _alpha2 == 0.0f;
 }
 
-GraphRendererCore::GraphRendererCore() :
-    OpenGLFunctions()
+GraphRendererCore::GraphRendererCore()
 {
     resolveOpenGLFunctions();
 

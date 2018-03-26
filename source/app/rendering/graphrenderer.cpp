@@ -44,8 +44,6 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
                              CommandManager* commandManager,
                              SelectionManager* selectionManager,
                              GPUComputeThread* gpuComputeThread) :
-    QObject(),
-    GraphRendererCore(),
     _graphModel(graphModel),
     _selectionManager(selectionManager),
     _gpuComputeThread(gpuComputeThread),
@@ -868,7 +866,7 @@ void GraphRenderer::swapSdfTexture()
     _currentSDFTextureIndex = 1 - _currentSDFTextureIndex;
 }
 
-void GraphRenderer::updateText(std::function<void()> onCompleteFn)
+void GraphRenderer::updateText(std::function<void()> onCompleteFn) // NOLINT
 {
     std::unique_lock<std::recursive_mutex> glyphMapLock(_glyphMap->mutex());
 

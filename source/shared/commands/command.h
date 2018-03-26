@@ -33,9 +33,9 @@ public:
 
     CommandFn() = default;
     CommandFn(const CommandFn& other) = default;
-    CommandFn(CommandFn&& other) = default;
+    CommandFn(CommandFn&& other) = default; // NOLINT
     CommandFn& operator=(const CommandFn& other) = default;
-    CommandFn& operator=(CommandFn&& other) = default;
+    CommandFn& operator=(CommandFn&& other) = default; // NOLINT
 
     bool operator()(Command& command) const
     {

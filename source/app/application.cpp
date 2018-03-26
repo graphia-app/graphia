@@ -221,6 +221,8 @@ void Application::crash(int crashType)
     switch(_crashType)
     {
     default:
+        break;
+
     case CrashType::NullPtrDereference:
     {
         int* p = nullptr;

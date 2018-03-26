@@ -108,5 +108,5 @@ BoundingSphere NodePositions::boundingSphere(const NodePositions& nodePositions,
         }
     }
 
-    return BoundingSphere(center, radius);
+    return {center, radius};
 }

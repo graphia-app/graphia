@@ -455,7 +455,7 @@ ComponentId ComponentManager::componentIdOfNode(NodeId nodeId) const
 ComponentId ComponentManager::componentIdOfEdge(EdgeId edgeId) const
 {
     if(edgeId.isNull())
-        return ComponentId();
+        return {};
 
     unique_lock_with_warning<std::recursive_mutex> lock(_updateMutex);
 

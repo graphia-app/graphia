@@ -36,7 +36,12 @@ private:
 public:
     explicit ThreadPool(const QString& threadNamePrefix = QStringLiteral("Worker"),
                int numThreads = std::thread::hardware_concurrency());
-    ~ThreadPool();
+    virtual ~ThreadPool();
+
+    ThreadPool(const ThreadPool&) = delete;
+    ThreadPool(ThreadPool&&) = delete;
+    ThreadPool& operator=(const ThreadPool& other) = delete;
+    ThreadPool& operator=(ThreadPool&& other) = delete;
 
     bool saturated() const { return _activeThreads >= static_cast<int>(_threads.size()); }
     bool idle() const { return _activeThreads == 0; }
@@ -73,15 +78,11 @@ private:
     private:
         std::vector<std::future<ValueType>> _futures;
 
-        explicit ResultsType(std::vector<std::future<ValueType>>& futures) :
+        explicit ResultsType(std::vector<std::future<ValueType>>&& futures) :
             _futures(std::move(futures))
         {}
 
     public:
-        ResultsType(ResultsType&& other) noexcept :
-            _futures(std::move(other._futures))
-        {}
-
         void wait() const
         {
             for(auto& future : _futures)
@@ -210,9 +211,9 @@ public:
     {
         Coster<It> coster(first, last);
 
-        const int totalCost = coster.total();
-        const int numThreads = static_cast<int>(_threads.size());
-        const int costPerThread = totalCost / numThreads +
+        const auto totalCost = coster.total();
+        const auto numThreads = static_cast<int>(_threads.size());
+        const auto costPerThread = totalCost / numThreads +
                 ((totalCost % numThreads) ? 1 : 0);
 
         static_assert(std::is_convertible<ArgumentType<Fn>, It>::value ||
@@ -241,7 +242,7 @@ public:
             it = threadLast;
         }
 
-        auto results = Results<It, Fn>(futures);
+        auto results = Results<It, Fn>(std::move(futures));
 
         if(blocking)
             results.wait();
@@ -254,12 +255,12 @@ class ThreadPoolSingleton : public ThreadPool, public Singleton<ThreadPoolSingle
 
 template<typename Fn, typename... Args> auto execute_on_threadpool(Fn&& f, Args&&... args)
 {
-    return S(ThreadPoolSingleton)->execute_on_threadpool(std::move(f), args...);
+    return S(ThreadPoolSingleton)->execute_on_threadpool(std::forward<Fn>(f), args...);
 }
 
 template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn&& f, bool blocking = true)
 {
-    return S(ThreadPoolSingleton)->concurrent_for(first, last, std::move(f), blocking);
+    return S(ThreadPoolSingleton)->concurrent_for(first, last, std::forward<Fn>(f), blocking);
 }
 
 #endif // THREADPOOL_H

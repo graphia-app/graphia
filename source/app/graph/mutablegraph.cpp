@@ -67,7 +67,7 @@ MultiElementType MutableGraph::typeOf(NodeId nodeId) const
 
 ConstNodeIdDistinctSet MutableGraph::mergedNodeIdsForNodeId(NodeId nodeId) const
 {
-    return ConstNodeIdDistinctSet(nodeId, &_n._mergedNodeIds);
+    return {nodeId, &_n._mergedNodeIds};
 }
 
 NodeId MutableGraph::addNode()
@@ -179,7 +179,7 @@ MultiElementType MutableGraph::typeOf(EdgeId edgeId) const
 
 ConstEdgeIdDistinctSet MutableGraph::mergedEdgeIdsForEdgeId(EdgeId edgeId) const
 {
-    return ConstEdgeIdDistinctSet(edgeId, &_e._mergedEdgeIds);
+    return {edgeId, &_e._mergedEdgeIds};
 }
 
 EdgeIdDistinctSets MutableGraph::edgeIdsForNodeId(NodeId nodeId) const
@@ -296,10 +296,10 @@ void MutableGraph::removeEdge(EdgeId edgeId)
 
     auto undirectedEdge = UndirectedEdge(edge.sourceId(), edge.targetId());
     auto& connection = _e._connections[undirectedEdge];
-    Q_ASSERT(connection.size() > 0);
+    Q_ASSERT(!connection.empty());
     connection.remove(edgeId);
 
-    if(connection.size() == 0)
+    if(!connection.empty())
         _e._connections.erase(undirectedEdge);
 
     _e._edgeIdsInUse[edgeId] = false;
@@ -445,7 +445,8 @@ MutableGraph& MutableGraph::clone(const MutableGraph& other)
 
 MutableGraph& MutableGraph::operator=(const MutableGraph& other)
 {
-    return clone(other);
+    clone(other);
+    return *this;
 }
 
 MutableGraph::Diff MutableGraph::diffTo(const MutableGraph& other)

@@ -49,37 +49,37 @@ struct GPUGraphData : OpenGLFunctions
 
     struct NodeData
     {
-        float _position[3];
+        float _position[3] = {0.0f, 0.0f, 0.0f};
         int _component = -1;
         float _size = -1.0f;
-        float _outerColor[3];
-        float _innerColor[3];
-        float _outlineColor[3];
+        float _outerColor[3] = {0.0f, 0.0f, 0.0f};
+        float _innerColor[3] = {0.0f, 0.0f, 0.0f};
+        float _outlineColor[3] = {0.0f, 0.0f, 0.0f};
     };
 
     struct EdgeData
     {
-        float _sourcePosition[3];
-        float _targetPosition[3];
+        float _sourcePosition[3] = {0.0f, 0.0f, 0.0f};
+        float _targetPosition[3] = {0.0f, 0.0f, 0.0f};
         float _sourceSize = 0.0f;
         float _targetSize = 0.0f;
         int _edgeType = -1;
         int _component = -1;
         float _size = -1.0f;
-        float _outerColor[3];
-        float _innerColor[3];
-        float _outlineColor[3];
+        float _outerColor[3] = {0.0f, 0.0f, 0.0f};
+        float _innerColor[3] = {0.0f, 0.0f, 0.0f};
+        float _outlineColor[3] = {0.0f, 0.0f, 0.0f};
     };
 
     struct GlyphData
     {
         int _component = -1;
-        float _textureCoord[2];
+        float _textureCoord[2] = {0.0f, 0.0f};
         int _textureLayer = -1;
-        float _basePosition[3];
-        float _glyphOffset[2];
-        float _glyphSize[2];
-        float _color[3];
+        float _basePosition[3] = {0.0f, 0.0f, 0.0f};
+        float _glyphOffset[2] = {0.0f, 0.0f};
+        float _glyphSize[2] = {0.0f, 0.0f};
+        float _color[3] = {0.0f, 0.0f, 0.0f};
     };
 
     // There are two alpha values so that we can split the alpha blended layers

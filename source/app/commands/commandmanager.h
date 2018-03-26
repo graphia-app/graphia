@@ -143,7 +143,7 @@ private:
     int _debug = 0;
 
 private slots:
-    void onCommandCompleted(bool success, QString description, QString pastParticiple);
+    void onCommandCompleted(bool success, const QString& description, const QString& pastParticiple);
     void update();
 
 public slots:
@@ -156,7 +156,7 @@ signals:
     void commandIsCancellableChanged() const;
     void commandIsCancellingChanged() const;
     void commandQueued();
-    void commandCompleted(bool success, QString description, QString pastParticiple) const;
+    void commandCompleted(bool success, const QString& description, const QString& pastParticiple) const;
     void commandStackCleared();
 
     void busyChanged() const;

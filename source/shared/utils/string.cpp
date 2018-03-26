@@ -1,4 +1,4 @@
-#include "string.h"
+#include "string.h" //NOLINT
 
 #include <QStringList>
 #include <QRegularExpression>

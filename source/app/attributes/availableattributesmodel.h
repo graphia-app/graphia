@@ -24,7 +24,7 @@ private:
         Item* _parent = nullptr;
 
     public:
-        explicit Item(const QVariant& value);
+        explicit Item(QVariant value);
         virtual ~Item();
 
         void addChild(Item* child);

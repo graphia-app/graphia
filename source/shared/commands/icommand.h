@@ -35,7 +35,7 @@ public:
     virtual bool cancellable() const { return false; }
 
 private:
-    std::atomic<int> _progress;
+    std::atomic<int> _progress{-1};
 };
 
 #endif // ICOMMAND_H

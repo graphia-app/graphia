@@ -3,7 +3,7 @@
 
 #include <QtGlobal>
 
-template<typename T> class Singleton
+template<typename T> class Singleton // NOLINT
 {
 public:
   Singleton()

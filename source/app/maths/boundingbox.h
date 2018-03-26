@@ -26,8 +26,8 @@ public:
     float yLength() const { return _max.y() - _min.y(); }
     float maxLength() const;
 
-    QVector2D xVector() const { return QVector2D(xLength(), 0.0f); }
-    QVector2D yVector() const { return QVector2D(0.0f, yLength()); }
+    QVector2D xVector() const { return {xLength(), 0.0f}; }
+    QVector2D yVector() const { return {0.0f, yLength()}; }
 
     float area() const { return xLength() * yLength(); }
 
@@ -40,8 +40,8 @@ public:
 
     QVector2D centre() const;
 
-    BoundingBox2D operator+(const QVector2D v) const { return BoundingBox2D(_min + v, _max + v); }
-    BoundingBox2D operator*(float s) const { return BoundingBox2D(_min * s, _max * s); }
+    BoundingBox2D operator+(const QVector2D v) const { return {_min + v, _max + v}; }
+    BoundingBox2D operator*(float s) const { return {_min * s, _max * s}; }
 };
 
 class Ray;
@@ -65,9 +65,9 @@ public:
     float zLength() const { return _max.z() - _min.z(); }
     float maxLength() const;
 
-    QVector3D xVector() const { return QVector3D(xLength(), 0.0f, 0.0f); }
-    QVector3D yVector() const { return QVector3D(0.0f, yLength(), 0.0f); }
-    QVector3D zVector() const { return QVector3D(0.0f, 0.0f, zLength()); }
+    QVector3D xVector() const { return {xLength(), 0.0f, 0.0f}; }
+    QVector3D yVector() const { return {0.0f, yLength(), 0.0f}; }
+    QVector3D zVector() const { return {0.0f, 0.0f, zLength()}; }
 
     void scale(float s);
     BoundingBox3D scaled(float s) const;
@@ -87,8 +87,8 @@ public:
 
     bool valid() const;
 
-    BoundingBox3D operator+(const QVector3D v) const { return BoundingBox3D(_min + v, _max + v); }
-    BoundingBox3D operator*(float s) const { return BoundingBox3D(_min * s, _max * s); }
+    BoundingBox3D operator+(const QVector3D v) const { return {_min + v, _max + v}; }
+    BoundingBox3D operator*(float s) const { return {_min * s, _max * s}; }
 };
 
 #endif // BOUNDINGBOX_H

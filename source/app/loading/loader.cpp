@@ -36,7 +36,7 @@ static bool isCompressed(const QString& filePath)
 }
 
 static bool decompress(const QString& filePath, QByteArray& byteArray,
-                       int maxReadSize = -1, ProgressFn progressFn = [](int){})
+                       int maxReadSize = -1, ProgressFn progressFn = [](int){}) // NOLINT
 {
     QFile file(filePath);
 
@@ -108,7 +108,7 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
 
 static bool load(const QString& filePath, QByteArray& byteArray,
                  int maxReadSize = -1, IGraph* graph = nullptr,
-                 ProgressFn progressFn = [](int){})
+                 ProgressFn progressFn = [](int){}) // NOLINT
 {
     if(isCompressed(filePath))
     {

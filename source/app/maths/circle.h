@@ -19,11 +19,11 @@ public:
     float y() const { return _y; }
     float radius() const { return _radius; }
 
-    QPointF centre() const { return QPointF(_x, _y); }
+    QPointF centre() const { return {_x, _y}; }
 
     QRectF boundingBox() const
     {
-        return QRectF(_x - _radius, _y - _radius, _radius * 2.0f, _radius * 2.0f);
+        return {_x - _radius, _y - _radius, _radius * 2.0f, _radius * 2.0f};
     }
 
     void set(float x, float y, float radius)

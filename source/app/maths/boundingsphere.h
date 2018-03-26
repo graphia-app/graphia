@@ -18,9 +18,9 @@ private:
 
 public:
     BoundingSphere();
-    BoundingSphere(const QVector3D centre, float radius);
+    BoundingSphere(QVector3D centre, float radius);
     explicit BoundingSphere(const std::vector<QVector3D>& points);
-    BoundingSphere(const QVector3D centre, const std::vector<QVector3D>& points);
+    BoundingSphere(QVector3D centre, const std::vector<QVector3D>& points);
 
     const QVector3D& centre() const { return _centre; }
     float radius() const { return _radius; }
@@ -30,7 +30,7 @@ public:
 
     float volume() const { return (4.0f * Constants::Pi() * _radius * _radius * _radius) / 3.0f; }
 
-    void set(const QVector3D centre, float radius);
+    void set(QVector3D centre, float radius);
     void expandToInclude(const QVector3D& point);
     void expandToInclude(const BoundingSphere& other);
 

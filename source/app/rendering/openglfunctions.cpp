@@ -59,7 +59,7 @@ private:
     }
 
 public:
-    Functions(const QSurfaceFormat& surfaceFormat)
+    explicit Functions(const QSurfaceFormat& surfaceFormat)
     {
         _context.setFormat(surfaceFormat);
         _context.create();

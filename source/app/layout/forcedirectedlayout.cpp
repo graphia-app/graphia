@@ -30,7 +30,7 @@ static QVector3D normalized(const QVector3D& v)
     if(!qIsNull(lengthSq))
         return v / std::sqrt(lengthSq);
 
-    return QVector3D();
+    return {};
 }
 
 // This promotes movements where the direction is constant and mitigates movements when the direction changes

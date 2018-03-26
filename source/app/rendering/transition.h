@@ -42,7 +42,7 @@ public:
         _duration = duration;
         _elapsed = 0.0f;
         _type = type;
-        _function = function;
+        _function = std::move(function);
         _finishedFunctions = {finishedFunctions...};
         _suppressSignals = false;
     }

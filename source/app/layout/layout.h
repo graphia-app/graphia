@@ -57,7 +57,6 @@ public:
            Iterative iterative = Iterative::No,
            float scaling = 1.0f,
            int smoothing = 1) :
-        QObject(),
         _iterative(iterative),
         _scaling(scaling),
         _smoothing(smoothing),

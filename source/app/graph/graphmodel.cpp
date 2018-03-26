@@ -50,7 +50,6 @@ class GraphModelImpl
 
 public:
     explicit GraphModelImpl(GraphModel& graphModel) :
-        _graph(),
         _transformedGraph(graphModel, _graph),
         _nodePositions(_graph),
         _nodeVisuals(_graph),
@@ -175,7 +174,7 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     _->_visualisationChannels.emplace(tr("Text"), std::make_unique<TextVisualisationChannel>());
 }
 
-GraphModel::~GraphModel()
+GraphModel::~GraphModel() // NOLINT
 {
     // Only here so that we can have a unique_ptr to GraphModelImpl
 }

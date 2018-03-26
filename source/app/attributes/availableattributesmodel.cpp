@@ -4,8 +4,8 @@
 #include "graph/graphmodel.h"
 #include "shared/graph/elementtype.h"
 
-AvailableAttributesModel::Item::Item(const QVariant& value) :
-    _value(value)
+AvailableAttributesModel::Item::Item(QVariant value) :
+    _value(std::move(value))
 {}
 
 AvailableAttributesModel::Item::~Item()

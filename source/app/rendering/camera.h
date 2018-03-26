@@ -14,7 +14,7 @@
 class CameraPrivate;
 
 class QOpenGLShaderProgram;
-typedef QSharedPointer<QOpenGLShaderProgram> QOpenGLShaderProgramPtr;
+using QOpenGLShaderProgramPtr = QSharedPointer<QOpenGLShaderProgram>;
 
 class Camera
 {

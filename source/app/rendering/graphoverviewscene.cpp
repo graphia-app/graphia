@@ -344,11 +344,11 @@ bool GraphOverviewScene::transitionActive() const
 
 static Circle interpolateCircle(const Circle& a, const Circle& b, float f)
 {
-    return Circle(
+    return {
         u::interpolate(a.x(),       b.x(),      f),
         u::interpolate(a.y(),       b.y(),      f),
         u::interpolate(a.radius(),  b.radius(), f)
-        );
+        };
 }
 
 void GraphOverviewScene::startTransition(std::function<void()> finishedFunction, float duration,

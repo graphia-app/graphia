@@ -85,7 +85,7 @@ AttributeVector processAttribute(const KeyValue& attribute)
     struct Visitor
     {
         QString _name;
-        explicit Visitor(QString name) : _name(name) {}
+        explicit Visitor(QString name) : _name(std::move(name)) {}
 
         AttributeVector operator()(double v) const          { return {{_name, QString::number(v)}}; }
         AttributeVector operator()(int v) const             { return {{_name, QString::number(v)}}; }
@@ -150,7 +150,8 @@ bool build(const List& gml, IGraphModel& graphModel,
             const auto& attribute = attributeWrapper.get();
             if(attribute._key == QStringLiteral("id"))
                 continue;
-            else if(attribute._key == QStringLiteral("label"))
+
+            if(attribute._key == QStringLiteral("label"))
             {
                 // If there is a label attribute, use it as the node name
                 const auto* label = boost::get<QString>(&attribute._value);

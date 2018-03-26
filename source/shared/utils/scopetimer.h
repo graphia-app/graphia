@@ -20,6 +20,11 @@ public:
     explicit ScopeTimer(QString name, size_t numSamples = 1);
     ~ScopeTimer();
 
+    ScopeTimer(const ScopeTimer&) = delete;
+    ScopeTimer& operator=(const ScopeTimer&) = delete;
+    ScopeTimer(ScopeTimer&&) = delete;
+    ScopeTimer& operator=(ScopeTimer&&) = delete;
+
     void stop();
 
 private:

@@ -21,7 +21,7 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
     std::map<int, NodeId> matrixIndexToNodeId;
     for(auto& nodeId : _graphModel->graph().nodeIds())
     {
-        int size = static_cast<int>(nodeIdToMatrixIndex.size());
+        auto size = static_cast<int>(nodeIdToMatrixIndex.size());
         nodeIdToMatrixIndex[nodeId] = size;
         matrixIndexToNodeId[size - 1] = nodeId;
     }
