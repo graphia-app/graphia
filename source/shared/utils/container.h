@@ -167,6 +167,13 @@ namespace u
         std::copy(container.begin(), container.end(), std::back_inserter(values));
         return values;
     }
+
+    template<typename T> struct reversing_wrapper { T& container; };
+    template<typename T> auto begin(reversing_wrapper<T> wrapper) { return std::rbegin(wrapper.container); }
+    template<typename T> auto end(reversing_wrapper<T> wrapper) { return std::rend(wrapper.container); }
+
+    template<typename T>
+    reversing_wrapper<T> reverse(T&& container) { return {container}; }
 } // namespace u
 
 #endif // CONTAINER_H
