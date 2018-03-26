@@ -141,6 +141,8 @@ void GraphRenderer::createGPUGlyphData(const QString& text, const QColor& textCo
                                     float textScale, float elementSize, const QVector3D& elementPosition,
                                     int componentIndex, GPUGraphData* gpuGraphData)
 {
+    Q_ASSERT(gpuGraphData != nullptr);
+
     auto& textLayout = _textLayoutResults._layouts[text];
 
     auto verticalCentre = -textLayout._xHeight * textScale * 0.5f;
@@ -259,15 +261,18 @@ void GraphRenderer::updateGPUDataIfRequired()
                 nodeVisual._state.test(VisualFlags::NotFound) ? NotFoundAlpha : 1.0f);
 
             if(gpuGraphData != nullptr)
+            {
                 gpuGraphData->_nodeData.push_back(nodeData);
 
-            if(showNodeText == TextState::Off || nodeVisual._state.test(VisualFlags::NotFound))
-                continue;
+                if(showNodeText == TextState::Off || nodeVisual._state.test(VisualFlags::NotFound))
+                    continue;
 
-            if(showNodeText == TextState::Selected && !nodeVisual._state.test(VisualFlags::Selected))
-                continue;
+                if(showNodeText == TextState::Selected && !nodeVisual._state.test(VisualFlags::Selected))
+                    continue;
 
-            createGPUGlyphData(nodeVisual._text, textColor, textAlignment, textScale, nodeVisual._size, nodePosition, componentIndex, gpuGraphData);
+                createGPUGlyphData(nodeVisual._text, textColor, textAlignment, textScale,
+                    nodeVisual._size, nodePosition, componentIndex, gpuGraphData);
+            }
         }
 
         for(auto& edge : componentRenderer->edges())
@@ -308,16 +313,19 @@ void GraphRenderer::updateGPUDataIfRequired()
                 edgeVisual._state.test(VisualFlags::NotFound) ? NotFoundAlpha : 1.0f);
 
             if(gpuGraphData != nullptr)
+            {
                 gpuGraphData->_edgeData.push_back(edgeData);
 
-            if(showEdgeText == TextState::Off || edgeVisual._state.test(VisualFlags::NotFound))
-                continue;
+                if(showEdgeText == TextState::Off || edgeVisual._state.test(VisualFlags::NotFound))
+                    continue;
 
-            if(showEdgeText == TextState::Selected && !edgeVisual._state.test(VisualFlags::Selected))
-                continue;
+                if(showEdgeText == TextState::Selected && !edgeVisual._state.test(VisualFlags::Selected))
+                    continue;
 
-            QVector3D midPoint = (sourcePosition + targetPosition) * 0.5f;
-            createGPUGlyphData(edgeVisual._text, textColor, textAlignment, textScale, edgeVisual._size, midPoint, componentIndex, gpuGraphData);
+                QVector3D midPoint = (sourcePosition + targetPosition) * 0.5f;
+                createGPUGlyphData(edgeVisual._text, textColor, textAlignment, textScale,
+                    edgeVisual._size, midPoint, componentIndex, gpuGraphData);
+            }
         }
 
         componentIndex++;
