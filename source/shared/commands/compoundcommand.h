@@ -4,6 +4,8 @@
 #include "icommand.h"
 #include "command.h"
 
+#include "shared/utils/container.h"
+
 #include <QObject>
 
 #include <memory>
@@ -100,10 +102,10 @@ private:
     bool execute() override
     {
         bool anyExecuted = false;
-        for(auto it = _commands.begin(); it != _commands.end(); ++it)
+        for(const auto& command : _commands)
         {
-            _executing = (*it).get();
-            anyExecuted = (*it)->execute() || anyExecuted;
+            _executing = command.get();
+            anyExecuted = command->execute() || anyExecuted;
         }
 
         _executing = nullptr;
@@ -113,10 +115,10 @@ private:
 
     void undo() override
     {
-        for(auto it = _commands.rbegin(); it != _commands.rend(); ++it)
+        for(const auto& command : u::reverse(_commands))
         {
-            _executing = (*it).get();
-            (*it)->undo();
+            _executing = command.get();
+            command->undo();
         }
 
         _executing = nullptr;
