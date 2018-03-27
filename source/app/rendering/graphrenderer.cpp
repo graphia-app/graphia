@@ -368,7 +368,7 @@ void GraphRenderer::onPreviewRequested(int width, int height, bool fillSize)
     _isPreview = false;
 }
 
-void GraphRenderer::onScreenshotRequested(int width, int height, QString path, int dpi, bool fillSize)
+void GraphRenderer::onScreenshotRequested(int width, int height, const QString& path, int dpi, bool fillSize)
 {
     _isScreenshot = true;
 

@@ -12,7 +12,7 @@ class GraphRenderer;
 class GraphComponentRenderer;
 
 template<typename Target>
-void initialiseFromGraph(const Graph*, Target&);
+void initialiseFromGraph(const Graph*, Target&); // NOLINT
 
 class GraphComponentScene :
         public Scene

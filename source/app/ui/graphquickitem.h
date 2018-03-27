@@ -90,7 +90,7 @@ public:
     void setFocusedComponentId(ComponentId componentId);
 
 public:
-    Q_INVOKABLE void captureScreenshot(int width, int height, QString path, int dpi, bool fillSize);
+    Q_INVOKABLE void captureScreenshot(int width, int height, const QString& path, int dpi, bool fillSize);
     Q_INVOKABLE void requestPreview(int width, int height, bool fillSize);
 
 private:

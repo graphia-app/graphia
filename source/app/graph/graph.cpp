@@ -66,8 +66,8 @@ Graph::Graph() :
 {
     registerQtTypes();
 
-    connect(this, &Graph::nodeAdded, [this](const Graph*, NodeId nodeId) { reserveNodeId(nodeId); });
-    connect(this, &Graph::edgeAdded, [this](const Graph*, EdgeId edgeId) { reserveEdgeId(edgeId); });
+    connect(this, &Graph::nodeAdded, [this](const Graph*, NodeId nodeId) { reserveNodeId(nodeId); }); // NOLINT
+    connect(this, &Graph::edgeAdded, [this](const Graph*, EdgeId edgeId) { reserveEdgeId(edgeId); }); // NOLINT
 }
 
 Graph::~Graph()

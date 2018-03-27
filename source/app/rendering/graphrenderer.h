@@ -131,7 +131,7 @@ private slots:
     void onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool);
 
 public slots:
-    void onScreenshotRequested(int width, int height, QString path, int dpi, bool fillSize);
+    void onScreenshotRequested(int width, int height, const QString& path, int dpi, bool fillSize);
     void onCommandWillExecute();
     void onCommandCompleted();
     void onLayoutChanged();

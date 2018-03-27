@@ -23,7 +23,7 @@ class CommandManager;
 class GraphRenderer;
 
 template<typename Target>
-void initialiseFromGraph(const Graph*, Target&);
+void initialiseFromGraph(const Graph*, Target&); // NOLINT
 
 class GraphOverviewScene :
         public Scene
