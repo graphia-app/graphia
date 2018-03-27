@@ -54,30 +54,15 @@ cppcheck --enable=all --xml --xml-version=2 \
   --library=scripts/cppcheck.cfg ${CPP_FILES} 2> cppcheck.xml
 
 # clang-tidy
-CHECKS="-checks=*,\
--readability-braces-around-statements,\
--readability-identifier-naming,\
--readability-named-parameter,\
--llvm-*,\
-llvm-namespace-comment,\
--google-*,\
-google-explicit-constructor,\
-google-runtime-int,\
-google-runtime-member-string-references,\
--cppcoreguidelines-pro-type-vararg,\
--clang-diagnostic-unknown-warning-option,\
--clang-analyzer-alpha.deadcode.UnreachableCode"
-
 if [ "${VERBOSE}" != 0 ]
 then
   echo "clang-tidy"
   clang-tidy --version
-  clang-tidy -list-checks ${CHECKS}
+  clang-tidy -dump-config
 fi
 
 parallel -n1 -P${NUM_CORES} -q \
-  clang-tidy -p ${BUILD_DIR} \
-  -header-filter="^.*source\/(app|shared|plugins).*$" ${CHECKS} {} \
+  clang-tidy -p ${BUILD_DIR} {} \
   ::: ${CPP_FILES}
 
 # clazy
