@@ -149,9 +149,9 @@ static bool load(const QString& filePath, QByteArray& byteArray,
 
 struct Header
 {
-    int _version;
+    int _version = -1;
     QString _pluginName;
-    int _pluginDataVersion;
+    int _pluginDataVersion = -1;
 };
 
 static bool parseHeader(const QUrl& url, Header* header = nullptr)

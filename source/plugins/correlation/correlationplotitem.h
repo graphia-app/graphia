@@ -124,7 +124,7 @@ private:
     void populateIQRPlot();
     void populateStdDevPlot();
     void populateStdErrorPlot();
-    void plotDispersion(QVector<double> stdDevs, QString name);
+    void plotDispersion(QVector<double> stdDevs, const QString& name);
 
 public:
     Q_INVOKABLE void refresh();

@@ -2,6 +2,8 @@
 
 #include <QDesktopServices>
 
+#include <cmath>
+
 CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent)
 {
     setRenderTarget(RenderTarget::FramebufferObject);
@@ -578,7 +580,7 @@ void CorrelationPlotItem::populateIQRPlot()
     scaleXAxis();
 }
 
-void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, QString name = QStringLiteral("Deviation"))
+void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, const QString& name = QStringLiteral("Deviation"))
 {
     auto visualType = static_cast<PlotDispersionVisualType>(_plotDispersionVisualType);
     if(visualType == PlotDispersionVisualType::Bars)
@@ -946,13 +948,13 @@ void CorrelationPlotItem::showTooltip()
     }
     else if(auto bars = dynamic_cast<QCPBars*>(_hoverPlottable))
     {
-        auto xCoord = static_cast<int>(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()) + 0.5);
+        auto xCoord = std::lround(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
         _itemTracer->position->setPixelPosition(bars->dataPixelPosition(xCoord));
     }
     else if(auto boxPlot = dynamic_cast<QCPStatisticalBox*>(_hoverPlottable))
     {
         // Only show simple tooltips for now, can extend this later...
-        auto xCoord = static_cast<int>(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()) + 0.5);
+        auto xCoord = std::lround(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
         _itemTracer->position->setPixelPosition(boxPlot->dataPixelPosition(xCoord));
     }
 

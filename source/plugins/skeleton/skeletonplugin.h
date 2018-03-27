@@ -11,8 +11,6 @@ class SkeletonPluginInstance : public BasePluginInstance
     Q_OBJECT
 
 public:
-    SkeletonPluginInstance();
-
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) override;
 };
 
@@ -22,8 +20,6 @@ class SkeletonPlugin : public BasePlugin, public PluginInstanceProvider<Skeleton
     Q_PLUGIN_METADATA(IID IPluginIID FILE "skeletonplugin.json")
 
 public:
-    SkeletonPlugin();
-
     QString name() const override { return QStringLiteral("Skeleton"); }
     QString description() const override
     {

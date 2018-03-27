@@ -39,7 +39,7 @@ private:
     QString _term;
     Flags<FindOptions> _options;
     QStringList _attributeNames;
-    FindSelectStyle _selectStyle;
+    FindSelectStyle _selectStyle = FindSelectStyle::None;
 
     const GraphModel* _graphModel = nullptr;
     NodeIdSet _foundNodeIds;

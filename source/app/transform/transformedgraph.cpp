@@ -64,12 +64,12 @@ void TransformedGraph::reserve(const Graph& other)
     Graph::reserve(other);
 }
 
-MutableGraph& TransformedGraph::operator=(const MutableGraph& other)
+TransformedGraph& TransformedGraph::operator=(const MutableGraph& other)
 {
     _target = other;
     Graph::reserve(other);
 
-    return _target;
+    return *this;
 }
 
 void TransformedGraph::rebuild()

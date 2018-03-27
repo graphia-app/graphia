@@ -107,7 +107,7 @@ void WatchdogWorker::startTimer()
             }
 
             // Don't bother doing anything when running under Valgrind
-            if(RUNNING_ON_VALGRIND)
+            if(RUNNING_ON_VALGRIND) // NOLINT
                 return;
 
             qWarning() << "Watchdog timed out! Deadlock? "

@@ -150,7 +150,7 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
 Qt::ItemFlags AvailableAttributesModel::flags(const QModelIndex& index) const
 {
     if(!index.isValid())
-        return 0;
+        return 0; // NOLINT modernize-use-nullptr, huh?
 
     return QAbstractItemModel::flags(index);
 }

@@ -151,7 +151,7 @@ private slots:
     void onFPSChanged(float fps);
     void onUserInteractionStarted();
     void onUserInteractionFinished();
-    void onScreenshotComplete(QImage screenshot, QString path);
+    void onScreenshotComplete(const QImage& screenshot, const QString& path);
 
 signals:
     void initialisedChanged() const;

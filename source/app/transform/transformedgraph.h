@@ -62,7 +62,7 @@ public:
     MutableGraph& mutableGraph() { return _target; }
 
     void reserve(const Graph& other) override;
-    MutableGraph& operator=(const MutableGraph& other); // NOLINT
+    TransformedGraph& operator=(const MutableGraph& other);
 
     void update() override { _target.update(); }
 

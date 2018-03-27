@@ -40,14 +40,14 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
     for(auto componentId : componentManager.componentIds())
     {        
         const IGraphComponent* component = componentManager.componentById(componentId);
-        int componentNodeCount = static_cast<int>(component->nodeIds().size());
+        auto componentNodeCount = static_cast<int>(component->nodeIds().size());
 
         // Map NodeIds to Matrix index
         std::map<NodeId, int> nodeToIndexMap;
         std::map<int, NodeId> indexToNodeMap;
         for(auto nodeId : component->nodeIds())
         {
-            int index = static_cast<int>(nodeToIndexMap.size());
+            auto index = static_cast<int>(nodeToIndexMap.size());
             nodeToIndexMap[nodeId] = index;
             indexToNodeMap[index] = nodeId;
         }

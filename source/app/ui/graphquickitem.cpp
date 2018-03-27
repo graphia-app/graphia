@@ -277,7 +277,7 @@ void GraphQuickItem::onUserInteractionFinished()
     setInteracting(false);
 }
 
-void GraphQuickItem::onScreenshotComplete(QImage screenshot, QString path)
+void GraphQuickItem::onScreenshotComplete(const QImage& screenshot, const QString& path)
 {
     _commandManager->executeOnce({tr("Save Screenshot"),
                                  tr("Saving Screenshot")},

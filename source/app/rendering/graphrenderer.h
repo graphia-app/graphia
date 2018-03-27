@@ -303,7 +303,7 @@ signals:
     // Base64 encoded png image for QML...
     void previewComplete(QString previewBase64) const;
     // Screenshot doesn't go to QML so we can use QImage
-    void screenshotComplete(QImage screenshot, QString path) const;
+    void screenshotComplete(const QImage& screenshot, const QString& path) const;
 
     void fpsChanged(float fps) const;
 

@@ -53,35 +53,34 @@ void ParserThread::run()
         std::atomic<int> percentage;
         percentage = -1;
 
-        result = _parser->parse(_url, *_graphModel,
-            [this, &percentage](int newPercentage)
-            {
+        result = _parser->parse(_url, *_graphModel, [this, &percentage](int newPercentage)
+        {
 #ifdef _DEBUG
-                if(newPercentage < -1 || newPercentage > 100)
-                    qDebug() << "progress called with unusual percentage" << newPercentage;
+            if(newPercentage < -1 || newPercentage > 100)
+                qDebug() << "progress called with unusual percentage" << newPercentage;
 #endif
-                if(newPercentage >= 0)
+            if(newPercentage >= 0)
+            {
+                bool percentageIncreased = false;
+                int expected, desired;
+
+                do
                 {
-                    bool percentageIncreased = false;
-                    int expected, desired;
-
-                    do
-                    {
-                        expected = percentage.load();
-                        desired = newPercentage > expected ? newPercentage : expected;
-                        percentageIncreased = desired != expected;
-                    }
-                    while(!percentage.compare_exchange_weak(expected, desired));
-
-                    if(percentageIncreased)
-                        emit progress(newPercentage);
+                    expected = percentage.load();
+                    desired = newPercentage > expected ? newPercentage : expected;
+                    percentageIncreased = desired != expected;
                 }
-                else
-                {
-                    percentage = newPercentage;
+                while(!percentage.compare_exchange_weak(expected, desired));
+
+                if(percentageIncreased)
                     emit progress(newPercentage);
-                }
-            });
+            }
+            else
+            {
+                percentage = newPercentage;
+                emit progress(newPercentage);
+            }
+        });
 
         if(!result)
         {

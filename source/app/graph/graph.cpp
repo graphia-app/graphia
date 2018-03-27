@@ -285,7 +285,7 @@ ComponentId Graph::componentIdOfNode(NodeId nodeId) const
     if(_componentManager != nullptr)
         return _componentManager->componentIdOfNode(nodeId);
 
-    return ComponentId();
+    return {};
 }
 
 ComponentId Graph::componentIdOfEdge(EdgeId edgeId) const
@@ -293,7 +293,7 @@ ComponentId Graph::componentIdOfEdge(EdgeId edgeId) const
     if(_componentManager != nullptr)
         return _componentManager->componentIdOfEdge(edgeId);
 
-    return ComponentId();
+    return {};
 }
 
 ComponentId Graph::componentIdOfLargestComponent() const

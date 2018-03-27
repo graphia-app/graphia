@@ -4,7 +4,7 @@
 // This is more or less directly lifted from N4189
 
 // modeled slightly after Andrescu’s talk and article(s)
-namespace std{
+namespace std{ // NOLINT
 namespace experimental{
 template <typename EF>
 struct scope_exit {

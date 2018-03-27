@@ -196,15 +196,13 @@ bool build(const List& gml, IGraphModel& graphModel,
             const auto& attribute = attributeWrapper.get();
             if(attribute._key == QStringLiteral("source") || attribute._key == QStringLiteral("target"))
                 continue;
-            else
-            {
-                auto attributes = processAttribute(attribute);
 
-                for(const auto& attribute : attributes)
-                {
-                    QString attributeName = QObject::tr("Edge ") + attribute._name;
-                    userEdgeData.setValueBy(edgeId, attributeName, attribute._value);
-                }
+            auto attributes = processAttribute(attribute);
+
+            for(const auto& attribute : attributes)
+            {
+                QString attributeName = QObject::tr("Edge ") + attribute._name;
+                userEdgeData.setValueBy(edgeId, attributeName, attribute._value);
             }
         }
 
