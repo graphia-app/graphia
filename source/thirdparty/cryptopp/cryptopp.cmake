@@ -13,7 +13,6 @@ set(CRYPTOPP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/hmac.cpp
     ${CMAKE_CURRENT_LIST_DIR}/hrtimer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/integer.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/iterhash.cpp
     ${CMAKE_CURRENT_LIST_DIR}/misc.cpp
     ${CMAKE_CURRENT_LIST_DIR}/modes.cpp
     ${CMAKE_CURRENT_LIST_DIR}/mqueue.cpp
@@ -45,6 +44,7 @@ list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/dll.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ec2n.cpp
     ${CMAKE_CURRENT_LIST_DIR}/hex.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/iterhash.cpp
     ${CMAKE_CURRENT_LIST_DIR}/sha.cpp
 )
 
