@@ -18,6 +18,7 @@
 #include "ui/selectionmanager.h"
 #include "ui/visualisations/elementvisual.h"
 
+#include "shared/graph/elementid_debug.h"
 #include <QObject>
 
 #include <QKeyEvent>

@@ -3,6 +3,7 @@
 #include "graphcomponent.h"
 #include "componentmanager.h"
 
+#include "shared/graph/elementid_debug.h"
 #include "shared/utils/container.h"
 
 GraphConsistencyChecker::GraphConsistencyChecker(const Graph& graph) :
