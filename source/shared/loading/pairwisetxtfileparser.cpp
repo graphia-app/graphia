@@ -220,7 +220,7 @@ bool PairwiseTxtFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
                     if(std::isnan(edgeWeight) || !std::isfinite(edgeWeight))
                         edgeWeight = 1.0f;
 
-                    _userEdgeData->setValue(edgeId, QObject::tr("Edge Weight"), QString::number(edgeWeight));
+                    _userEdgeData->setValueBy(edgeId, QObject::tr("Edge Weight"), QString::number(edgeWeight));
                 }
             }
         }
