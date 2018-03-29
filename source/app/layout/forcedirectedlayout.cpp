@@ -77,11 +77,11 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
         initialLayout.execute(firstIteration);
 
         for(NodeId nodeId : nodeIds())
-            _prevDisplacements[nodeId] = QVector3D(0.0f, 0.0f, 0.0f);
+            _prevDisplacements[static_cast<int>(nodeId)] = QVector3D(0.0f, 0.0f, 0.0f);
     }
 
     for(NodeId nodeId : nodeIds())
-        _displacements[nodeId] = QVector3D(0.0f, 0.0f, 0.0f);
+        _displacements[static_cast<int>(nodeId)] = QVector3D(0.0f, 0.0f, 0.0f);
 
     BarnesHutTree barnesHutTree;
     barnesHutTree.build(graphComponent(), positions());
@@ -96,7 +96,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
             if(cancelled())
                 return;
 
-            _displacements[nodeId] -= barnesHutTree.evaluateKernel(nodeId,
+            _displacements[static_cast<int>(nodeId)] -= barnesHutTree.evaluateKernel(nodeId,
                 [REPULSIVE_FORCE](int mass, const QVector3D& difference, float distanceSq)
                 {
                     return REPULSIVE_FORCE * difference * mass / (0.0001f + distanceSq);
@@ -118,8 +118,8 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
                 const float SPRING_LENGTH = 10.0f;
                 const float force = ATTRACTIVE_FORCE * distanceSq / (SPRING_LENGTH * SPRING_LENGTH * SPRING_LENGTH);
 
-                _displacements[edge.targetId()] -= (force * difference);
-                _displacements[edge.sourceId()] += (force * difference);
+                _displacements[static_cast<int>(edge.targetId())] -= (force * difference);
+                _displacements[static_cast<int>(edge.sourceId())] += (force * difference);
             }
         }, false);
 
@@ -132,12 +132,12 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
     concurrent_for(nodeIds().begin(), nodeIds().end(),
         [this](const NodeId& nodeId)
         {
-            dampOscillations(_prevDisplacements[nodeId], _displacements[nodeId]);
+            dampOscillations(_prevDisplacements[static_cast<int>(nodeId)], _displacements[static_cast<int>(nodeId)]);
         });
 
     // Apply the forces
     for(auto nodeId : nodeIds())
-        positions().set(nodeId, positions().get(nodeId) + _displacements[nodeId]);
+        positions().set(nodeId, positions().get(nodeId) + _displacements[static_cast<int>(nodeId)]);
 
     // There are three main phases which decide when to stop the layout.
     // The phases operate primarily on the stddev of the forces within the graph
@@ -158,7 +158,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
     concurrent_for(nodeIds().begin(), nodeIds().end(),
         [this, &displacementSizes](const NodeId& nodeId)
         {
-            displacementSizes[nodeId] = _displacements[nodeId].length();
+            displacementSizes[static_cast<int>(nodeId)] = _displacements[static_cast<int>(nodeId)].length();
         });
 
     // Calculate force averages

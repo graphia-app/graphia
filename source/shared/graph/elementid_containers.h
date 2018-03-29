@@ -11,7 +11,7 @@ template<typename T> struct ElementIdHash
 {
     size_t operator()(const ElementId<T>& x) const noexcept
     {
-        return static_cast<size_t>(x);
+        return static_cast<size_t>(static_cast<int>(x));
     }
 };
 

@@ -90,7 +90,7 @@ private:
     void removeGraphComponent(ComponentId componentId);
 
     void update(const Graph* graph);
-    int componentArrayCapacity() const { return _nextComponentId; }
+    int componentArrayCapacity() const { return static_cast<int>(_nextComponentId); }
     ComponentIdSet assignConnectedElementsComponentId(const Graph* graph, NodeId rootId, ComponentId componentId,
                                                       NodeArray<ComponentId>& nodesComponentId,
                                                       EdgeArray<ComponentId>& edgesComponentId);

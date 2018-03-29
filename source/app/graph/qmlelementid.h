@@ -24,7 +24,7 @@
         bool isNull() const { return _id.isNull(); } \
     private: \
         Type _id; \
-        int id() const { return _id; } \
+        int id() const { return static_cast<int>(_id); } \
     };
 
 QML_ELEMENTID(NodeId) // NOLINT

@@ -154,7 +154,7 @@ static json nodePositionsAsJson(const IGraph& graph, const NodePositions& nodePo
     graph.setPhase(QObject::tr("Positions"));
     json positions;
 
-    auto range = make_iterator_range(nodePositions.cbegin(), nodePositions.cbegin() + graph.nextNodeId());
+    auto range = make_iterator_range(nodePositions.cbegin(), nodePositions.cbegin() + static_cast<int>(graph.nextNodeId()));
     uint64_t i = 0;
     for(const auto& nodePosition : range)
     {

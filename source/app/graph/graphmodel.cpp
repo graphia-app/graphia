@@ -149,12 +149,12 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
         .setDescription(tr("Component Size refers to the number of nodes the component contains."));
 
     GraphModel::createAttribute(tr("Node Component Identifier"))
-        .setIntValueFn([this](NodeId nodeId) { return _->_transformedGraph.componentIdOfNode(nodeId) + 1; })
+        .setIntValueFn([this](NodeId nodeId) { return static_cast<int>(_->_transformedGraph.componentIdOfNode(nodeId) + 1); })
         .intRange().setMin(0)
         .setDescription(tr("A node's component identifier indicates which component it is part of."));
 
     GraphModel::createAttribute(tr("Edge Component Identifier"))
-        .setIntValueFn([this](EdgeId edgeId) { return _->_transformedGraph.componentIdOfEdge(edgeId) + 1; })
+        .setIntValueFn([this](EdgeId edgeId) { return static_cast<int>(_->_transformedGraph.componentIdOfEdge(edgeId) + 1); })
         .intRange().setMin(0)
         .setDescription(tr("An edge's component identifier indicates which component it is part of."));
 

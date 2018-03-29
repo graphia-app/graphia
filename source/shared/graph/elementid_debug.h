@@ -9,7 +9,7 @@
 
 template<typename T> QDebug operator<<(QDebug d, const ElementId<T>& id)
 {
-    QString idString = id.isNull() ? QStringLiteral("Null") : QString::number(id);
+    QString idString = id.isNull() ? QStringLiteral("Null") : QString::number(static_cast<int>(id));
     d << idString;
 
     return d;
