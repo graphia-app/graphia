@@ -14,19 +14,23 @@ public:
         static_assert(sizeof(ElementId) == sizeof(_value), "ElementId should not be larger than an int");
     }
 
-    inline operator int() const { return _value; } // NOLINT
+    explicit operator int() const { return _value; }
     ElementId& operator=(const ElementId<T>& other) = default;
-    inline T& operator++() { ++_value; return static_cast<T&>(*this); }
-    inline T operator++(int) { T previous = static_cast<T&>(*this); ++_value; return previous; }
-    inline T& operator--() { --_value; return static_cast<T&>(*this); }
-    inline T operator--(int) { T previous = static_cast<T&>(*this); --_value; return previous; }
-    inline bool operator==(const ElementId<T>& other) const { return _value == other._value; }
-    inline bool operator==(int value) const { return _value == value; }
-    inline bool operator<(const ElementId<T>& other) const { return _value < other._value; }
-    inline bool operator<(int value) const { return _value < value; }
+    T& operator++() { ++_value; return static_cast<T&>(*this); }
+    T operator++(int) { T previous = static_cast<T&>(*this); ++_value; return previous; }
+    T& operator--() { --_value; return static_cast<T&>(*this); }
+    T operator--(int) { T previous = static_cast<T&>(*this); --_value; return previous; }
+    bool operator==(const ElementId<T>& other) const { return _value == other._value; }
+    bool operator!=(const ElementId<T>& other) const { return _value != other._value; }
+    bool operator<(const ElementId<T>& other) const { return _value < other._value; }
+    bool operator<=(const ElementId<T>& other) const { return _value <= other._value; }
+    bool operator>(const ElementId<T>& other) const { return _value > other._value; }
+    bool operator>=(const ElementId<T>& other) const { return _value >= other._value; }
+    T operator+(int value) const { return _value + value; }
+    T operator-(int value) const { return _value - value; }
 
-    inline bool isNull() const { return _value == NullValue; }
-    inline void setToNull() { _value = NullValue; }
+    bool isNull() const { return _value == NullValue; }
+    void setToNull() { _value = NullValue; }
 };
 
 class NodeId :      public ElementId<NodeId>      { using ElementId::ElementId; };
