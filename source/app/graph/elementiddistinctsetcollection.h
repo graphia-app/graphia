@@ -55,6 +55,16 @@ private:
     using List = std::vector<ListNode>;
     List _list;
 
+    const ListNode& listNodeFor(T elementId) const
+    {
+        return _list.at(static_cast<int>(elementId));
+    }
+
+    ListNode& listNodeFor(T elementId)
+    {
+        return _list.at(static_cast<int>(elementId));
+    }
+
 public:
     using SetId = T;
 
@@ -74,14 +84,14 @@ public:
 
         if(setId.isNull())
         {
-            assert(_list[elementId].isNull() || _list[elementId].isSingleton(elementId));
+            assert(listNodeFor(elementId).isNull() || listNodeFor(elementId).isSingleton(elementId));
             setId = elementId;
         }
 
         T lowId, highId;
         std::tie(lowId, highId) = std::minmax(setId, elementId);
-        auto& lowListNode = _list[lowId];
-        auto& highListNode = _list[highId];
+        auto& lowListNode = listNodeFor(lowId);
+        auto& highListNode = listNodeFor(highId);
 
         if(lowListNode.isSingleton(lowId))
             lowListNode.setToNull();
@@ -106,11 +116,11 @@ public:
             if(lowListNode.isHead(lowId) && highListNode.isHead(highId))
             {
                 // Merge two existing lists together
-                auto& tailOne = _list[lowListNode._opposite];
+                auto& tailOne = listNodeFor(lowListNode._opposite);
                 tailOne._opposite.setToNull();
                 tailOne._next = highId;
 
-                auto& tailTwo = _list[highListNode._opposite];
+                auto& tailTwo = listNodeFor(highListNode._opposite);
                 tailTwo._opposite = lowId;
 
                 highListNode._prev = lowListNode._opposite;
@@ -126,7 +136,7 @@ public:
                 assert(lowListNode._opposite.isNull());
 
                 // Adding to the head
-                auto& tail = _list[highListNode._opposite];
+                auto& tail = listNodeFor(highListNode._opposite);
                 tail._opposite = lowId;
 
                 lowListNode._next = highId;
@@ -143,7 +153,7 @@ public:
                 assert(highListNode._opposite.isNull());
 
                 // Adding to the tail
-                auto& head = _list[lowListNode._opposite];
+                auto& head = listNodeFor(lowListNode._opposite);
                 head._opposite = highId;
 
                 highListNode._prev = lowId;
@@ -160,7 +170,7 @@ public:
                 {
                     assert(highListNode.isNull());
                     assert(!lowListNode._next.isNull());
-                    auto& next = _list[lowListNode._next];
+                    auto& next = listNodeFor(lowListNode._next);
 
                     highListNode._prev = lowId;
                     highListNode._next = lowListNode._next;
@@ -172,7 +182,7 @@ public:
                 {
                     assert(lowListNode.isNull());
                     assert(!highListNode._prev.isNull());
-                    auto& prev = _list[highListNode._prev];
+                    auto& prev = listNodeFor(highListNode._prev);
 
                     lowListNode._prev = highListNode._prev;
                     lowListNode._next = highId;
@@ -189,7 +199,7 @@ public:
     SetId remove(SetId setId, T elementId)
     {
         assert(!elementId.isNull());
-        auto& listNode = _list[elementId];
+        auto& listNode = listNodeFor(elementId);
 
         // Can't remove it if it isn't in the list
         if(listNode.isNull())
@@ -202,60 +212,60 @@ public:
         else if(listNode._next == listNode._opposite)
         {
             // The tail is the only other element
-            auto& tail = _list[listNode._next];
+            auto& tail = listNodeFor(listNode._next);
             tail.setToSingleton(listNode._next);
             setId = listNode._next;
 
-            assert(_list[setId].isHead(setId) && _list[setId].isSingleton(setId));
+            assert(listNodeFor(setId).isHead(setId) && listNodeFor(setId).isSingleton(setId));
         }
         else if(listNode._prev == listNode._opposite)
         {
             // The head is the only other element
-            auto& head = _list[listNode._prev];
+            auto& head = listNodeFor(listNode._prev);
             head.setToSingleton(listNode._prev);
             setId = listNode._prev;
 
-            assert(_list[setId].isHead(setId) && _list[setId].isSingleton(setId));
+            assert(listNodeFor(setId).isHead(setId) && listNodeFor(setId).isSingleton(setId));
         }
         else if(listNode.isHead(elementId))
         {
             // Removing from the head
             assert(!listNode._next.isNull());
             assert(!listNode._opposite.isNull());
-            auto& newHead = _list[listNode._next];
-            auto& tail = _list[listNode._opposite];
+            auto& newHead = listNodeFor(listNode._next);
+            auto& tail = listNodeFor(listNode._opposite);
 
             newHead._opposite = listNode._opposite;
             newHead._prev.setToNull();
             tail._opposite = listNode._next;
             setId = listNode._next;
 
-            assert(_list[setId].isHead(setId));
+            assert(listNodeFor(setId).isHead(setId));
         }
         else if(listNode.isTail(elementId))
         {
             // Removing from the tail
             assert(!listNode._opposite.isNull());
             assert(!listNode._prev.isNull());
-            auto& head = _list[listNode._opposite];
-            auto& newTail = _list[listNode._prev];
+            auto& head = listNodeFor(listNode._opposite);
+            auto& newTail = listNodeFor(listNode._prev);
 
             head._opposite = listNode._prev;
             newTail._next = listNode._prev;
             newTail._opposite = listNode._opposite;
             setId = listNode._opposite;
 
-            assert(_list[setId].isHead(setId));
+            assert(listNodeFor(setId).isHead(setId));
         }
         else
         {
-            assert(_list[setId].isHead(setId));
+            assert(listNodeFor(setId).isHead(setId));
 
             // Removing from the middle
             assert(!listNode._prev.isNull());
             assert(!listNode._next.isNull());
-            auto& prev = _list[listNode._prev];
-            auto& next = _list[listNode._next];
+            auto& prev = listNodeFor(listNode._prev);
+            auto& next = listNodeFor(listNode._next);
 
             prev._next = listNode._next;
             next._prev = listNode._prev;
@@ -263,7 +273,7 @@ public:
 
         listNode.setToNull();
 
-        assert(setId.isNull() || _list[setId].isNull() || _list[setId].isHead(setId));
+        assert(setId.isNull() || listNodeFor(setId).isNull() || listNodeFor(setId).isHead(setId));
 
         return setId;
     }
@@ -271,7 +281,7 @@ public:
     MultiElementType typeOf(T elementId) const
     {
         assert(!elementId.isNull());
-        auto& listNode = _list[elementId];
+        auto& listNode = listNodeFor(elementId);
 
         if(!listNode.isNull() && !listNode.isSingleton(elementId))
         {
@@ -361,7 +371,7 @@ public:
 
         const typename ElementIdDistinctSetCollection<T>::ListNode& listNode() const
         {
-            return _set->_collection->_list[_p];
+            return _set->_collection->listNodeFor(_p);
         }
 
         void incrementPointer()
@@ -500,7 +510,7 @@ public:
 
         const typename ElementIdDistinctSetCollection<typename T::value_type>::ListNode& listNode() const
         {
-            return _sets->setAt(_i)->_collection->_list[_p];
+            return _sets->setAt(_i)->_collection->listNodeFor(_p);
         }
 
         pointer nextHead()
