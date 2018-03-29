@@ -101,6 +101,15 @@ private:
 
     bool _updateRequired = false;
 
+    Node& nodeBy(NodeId nodeId);
+    const Node& nodeBy(NodeId nodeId) const;
+    void claimNodeId(NodeId nodeId);
+    void releaseNodeId(NodeId nodeId);
+    Edge& edgeBy(EdgeId edgeId);
+    const Edge& edgeBy(EdgeId edgeId) const;
+    void claimEdgeId(EdgeId edgeId);
+    void releaseEdgeId(EdgeId edgeId);
+
     void reserveNodeId(NodeId nodeId) override;
     void reserveEdgeId(EdgeId edgeId) override;
 
@@ -139,7 +148,7 @@ public:
         EdgeIdDistinctSets set;
 
         for(auto nodeId : nodeIds)
-            set.add(_n._nodes[nodeId]._inEdgeIds);
+            set.add(nodeBy(nodeId)._inEdgeIds);
 
         return set;
     }
@@ -149,7 +158,7 @@ public:
         EdgeIdDistinctSets set;
 
         for(auto nodeId : nodeIds)
-            set.add(_n._nodes[nodeId]._outEdgeIds);
+            set.add(nodeBy(nodeId)._outEdgeIds);
 
         return set;
     }

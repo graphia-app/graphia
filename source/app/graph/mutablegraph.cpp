@@ -51,13 +51,13 @@ int MutableGraph::numNodes() const
 
 const INode& MutableGraph::nodeById(NodeId nodeId) const
 {
-    Q_ASSERT(_n._nodeIdsInUse[nodeId]);
-    return _n._nodes[nodeId];
+    Q_ASSERT(_n._nodeIdsInUse[static_cast<int>(nodeId)]);
+    return _n._nodes[static_cast<int>(nodeId)];
 }
 
 bool MutableGraph::containsNodeId(NodeId nodeId) const
 {
-    return _n._nodeIdsInUse[nodeId];
+    return _n._nodeIdsInUse[static_cast<int>(nodeId)];
 }
 
 MultiElementType MutableGraph::typeOf(NodeId nodeId) const
@@ -83,6 +83,46 @@ NodeId MutableGraph::addNode()
     return addNode(nextNodeId());
 }
 
+Node& MutableGraph::nodeBy(NodeId nodeId)
+{
+    return _n._nodes[static_cast<int>(nodeId)];
+}
+
+const Node& MutableGraph::nodeBy(NodeId nodeId) const
+{
+    return _n._nodes[static_cast<int>(nodeId)];
+}
+
+void MutableGraph::claimNodeId(NodeId nodeId)
+{
+    _n._nodeIdsInUse[static_cast<int>(nodeId)] = true;
+}
+
+void MutableGraph::releaseNodeId(NodeId nodeId)
+{
+    _n._nodeIdsInUse[static_cast<int>(nodeId)] = false;
+}
+
+Edge& MutableGraph::edgeBy(EdgeId edgeId)
+{
+    return _e._edges[static_cast<int>(edgeId)];
+}
+
+const Edge& MutableGraph::edgeBy(EdgeId edgeId) const
+{
+    return _e._edges[static_cast<int>(edgeId)];
+}
+
+void MutableGraph::claimEdgeId(EdgeId edgeId)
+{
+    _e._edgeIdsInUse[static_cast<int>(edgeId)] = true;
+}
+
+void MutableGraph::releaseEdgeId(EdgeId edgeId)
+{
+    _e._edgeIdsInUse[static_cast<int>(edgeId)] = false;
+}
+
 void MutableGraph::reserveNodeId(NodeId nodeId)
 {
     if(nodeId < nextNodeId())
@@ -91,7 +131,7 @@ void MutableGraph::reserveNodeId(NodeId nodeId)
     auto unusedNodeId = nextNodeId();
 
     Graph::reserveNodeId(nodeId);
-    _n.resize(nextNodeId());
+    _n.resize(static_cast<int>(nextNodeId()));
 
     while(unusedNodeId < nodeId)
         _unusedNodeIds.push_back(unusedNodeId++);
@@ -104,14 +144,14 @@ NodeId MutableGraph::addNode(NodeId nodeId)
     beginTransaction();
 
     // The requested ID is not available or is out of range, so resize and append
-    if(nodeId >= nextNodeId() || _n._nodeIdsInUse[nodeId])
+    if(nodeId >= nextNodeId() || containsNodeId(nodeId))
     {
         nodeId = nextNodeId();
         reserveNodeId(nodeId);
     }
 
-    _n._nodeIdsInUse[nodeId] = true;
-    auto& node = _n._nodes[nodeId];
+    claimNodeId(nodeId);
+    auto& node = nodeBy(nodeId);
     node._id = nodeId;
     node._inEdgeIds.setCollection(&_e._inEdgeIdsCollection);
     node._outEdgeIds.setCollection(&_e._outEdgeIdsCollection);
@@ -143,7 +183,7 @@ void MutableGraph::removeNode(NodeId nodeId)
         removeEdge(edgeId);
 
     _n._mergedNodeIds.remove(NodeIdDistinctSetCollection::SetId(), nodeId);
-    _n._nodeIdsInUse[nodeId] = false;
+    releaseNodeId(nodeId);
     _unusedNodeIds.push_back(nodeId);
 
     emit nodeRemoved(this, nodeId);
@@ -163,13 +203,13 @@ int MutableGraph::numEdges() const
 
 const IEdge& MutableGraph::edgeById(EdgeId edgeId) const
 {
-    Q_ASSERT(_e._edgeIdsInUse[edgeId]);
-    return _e._edges[edgeId];
+    Q_ASSERT(containsEdgeId(edgeId));
+    return _e._edges[static_cast<int>(edgeId)];
 }
 
 bool MutableGraph::containsEdgeId(EdgeId edgeId) const
 {
-    return _e._edgeIdsInUse[edgeId];
+    return _e._edgeIdsInUse[static_cast<int>(edgeId)];
 }
 
 MultiElementType MutableGraph::typeOf(EdgeId edgeId) const
@@ -185,7 +225,7 @@ ConstEdgeIdDistinctSet MutableGraph::mergedEdgeIdsForEdgeId(EdgeId edgeId) const
 EdgeIdDistinctSets MutableGraph::edgeIdsForNodeId(NodeId nodeId) const
 {
     EdgeIdDistinctSets set;
-    auto& node = _n._nodes[nodeId];
+    auto& node = nodeBy(nodeId);
 
     set.add(node._inEdgeIds);
     set.add(node._outEdgeIds);
@@ -195,12 +235,12 @@ EdgeIdDistinctSets MutableGraph::edgeIdsForNodeId(NodeId nodeId) const
 
 EdgeIdDistinctSet MutableGraph::inEdgeIdsForNodeId(NodeId nodeId) const
 {
-    return _n._nodes[nodeId]._inEdgeIds;
+    return nodeBy(nodeId)._inEdgeIds;
 }
 
 EdgeIdDistinctSet MutableGraph::outEdgeIdsForNodeId(NodeId nodeId) const
 {
-    return _n._nodes[nodeId]._outEdgeIds;
+    return nodeBy(nodeId)._outEdgeIds;
 }
 
 EdgeId MutableGraph::addEdge(NodeId sourceId, NodeId targetId)
@@ -224,7 +264,7 @@ void MutableGraph::reserveEdgeId(EdgeId edgeId)
     auto unusedEdgeId = nextEdgeId();
 
     Graph::reserveEdgeId(edgeId);
-    _e.resize(nextEdgeId());
+    _e.resize(static_cast<int>(nextEdgeId()));
 
     while(unusedEdgeId < edgeId)
         _unusedEdgeIds.push_back(unusedEdgeId++);
@@ -243,26 +283,26 @@ EdgeId MutableGraph::mergeEdges(EdgeId edgeIdA, EdgeId edgeIdB)
 EdgeId MutableGraph::addEdge(EdgeId edgeId, NodeId sourceId, NodeId targetId)
 {
     Q_ASSERT(!edgeId.isNull());
-    Q_ASSERT(_n._nodeIdsInUse[sourceId]);
-    Q_ASSERT(_n._nodeIdsInUse[targetId]);
+    Q_ASSERT(_n._nodeIdsInUse[static_cast<int>(sourceId)]);
+    Q_ASSERT(_n._nodeIdsInUse[static_cast<int>(targetId)]);
 
     beginTransaction();
 
     // The requested ID is not available or is out of range, so resize and append
-    if(edgeId >= nextEdgeId() || _e._edgeIdsInUse[edgeId])
+    if(edgeId >= nextEdgeId() || containsEdgeId(edgeId))
     {
         edgeId = nextEdgeId();
         reserveEdgeId(edgeId);
     }
 
-    _e._edgeIdsInUse[edgeId] = true;
-    auto& edge = _e._edges[edgeId];
+    claimEdgeId(edgeId);
+    auto& edge = edgeBy(edgeId);
     edge._id = edgeId;
     edge._sourceId = sourceId;
     edge._targetId = targetId;
 
-    _n._nodes[sourceId]._outEdgeIds.add(edgeId);
-    _n._nodes[targetId]._inEdgeIds.add(edgeId);
+    nodeBy(sourceId)._outEdgeIds.add(edgeId);
+    nodeBy(targetId)._inEdgeIds.add(edgeId);
 
     auto undirectedEdge = UndirectedEdge(sourceId, targetId);
     if(!u::contains(_e._connections, undirectedEdge))
@@ -289,10 +329,10 @@ void MutableGraph::removeEdge(EdgeId edgeId)
     beginTransaction();
 
     // Remove all node references to this edge
-    const auto& edge = _e._edges[edgeId];
+    const auto& edge = edgeBy(edgeId);
 
-    _n._nodes[edge.sourceId()]._outEdgeIds.remove(edgeId);
-    _n._nodes[edge.targetId()]._inEdgeIds.remove(edgeId);
+    nodeBy(edge.sourceId())._outEdgeIds.remove(edgeId);
+    nodeBy(edge.targetId())._inEdgeIds.remove(edgeId);
 
     auto undirectedEdge = UndirectedEdge(edge.sourceId(), edge.targetId());
     auto& connection = _e._connections[undirectedEdge];
@@ -302,7 +342,7 @@ void MutableGraph::removeEdge(EdgeId edgeId)
     if(!connection.empty())
         _e._connections.erase(undirectedEdge);
 
-    _e._edgeIdsInUse[edgeId] = false;
+    releaseEdgeId(edgeId);
     _unusedEdgeIds.push_back(edgeId);
 
     emit edgeRemoved(this, edgeId);
@@ -458,14 +498,14 @@ MutableGraph::Diff MutableGraph::diffTo(const MutableGraph& other)
     {
         if(nodeId < nextNodeId() && nodeId < other.nextNodeId())
         {
-            if(_n._nodeIdsInUse[nodeId] && !other._n._nodeIdsInUse[nodeId])
+            if(containsNodeId(nodeId) && !other.containsNodeId(nodeId))
                 diff._nodesRemoved.push_back(nodeId);
-            else if(!_n._nodeIdsInUse[nodeId] && other._n._nodeIdsInUse[nodeId])
+            else if(!containsNodeId(nodeId) && other.containsNodeId(nodeId))
                 diff._nodesAdded.push_back(nodeId);
         }
-        else if(nodeId < nextNodeId() && _n._nodeIdsInUse[nodeId])
+        else if(nodeId < nextNodeId() && containsNodeId(nodeId))
             diff._nodesRemoved.push_back(nodeId);
-        else if(nodeId < other.nextNodeId() && other._n._nodeIdsInUse[nodeId])
+        else if(nodeId < other.nextNodeId() && other.containsNodeId(nodeId))
             diff._nodesAdded.push_back(nodeId);
     }
 
@@ -474,14 +514,14 @@ MutableGraph::Diff MutableGraph::diffTo(const MutableGraph& other)
     {
         if(edgeId < nextEdgeId() && edgeId < other.nextEdgeId())
         {
-            if(_e._edgeIdsInUse[edgeId] && !other._e._edgeIdsInUse[edgeId])
+            if(containsEdgeId(edgeId) && !other.containsEdgeId(edgeId))
                 diff._edgesRemoved.push_back(edgeId);
-            else if(!_e._edgeIdsInUse[edgeId] && other._e._edgeIdsInUse[edgeId])
+            else if(!containsEdgeId(edgeId) && other.containsEdgeId(edgeId))
                 diff._edgesAdded.push_back(edgeId);
         }
-        else if(edgeId < nextEdgeId() && _e._edgeIdsInUse[edgeId])
+        else if(edgeId < nextEdgeId() && containsEdgeId(edgeId))
             diff._edgesRemoved.push_back(edgeId);
-        else if(edgeId < other.nextEdgeId() && other._e._edgeIdsInUse[edgeId])
+        else if(edgeId < other.nextEdgeId() && other.containsEdgeId(edgeId))
             diff._edgesAdded.push_back(edgeId);
     }
 
@@ -523,7 +563,7 @@ void MutableGraph::update()
     _unusedNodeIds.clear();
     for(NodeId nodeId(0); nodeId < nextNodeId(); ++nodeId)
     {
-        if(_n._nodeIdsInUse[nodeId])
+        if(containsNodeId(nodeId))
             _nodeIds.emplace_back(nodeId);
         else
             _unusedNodeIds.emplace_back(nodeId);
@@ -533,7 +573,7 @@ void MutableGraph::update()
     _unusedEdgeIds.clear();
     for(EdgeId edgeId(0); edgeId < nextEdgeId(); ++edgeId)
     {
-        if(_e._edgeIdsInUse[edgeId])
+        if(containsEdgeId(edgeId))
             _edgeIds.emplace_back(edgeId);
         else
             _unusedEdgeIds.emplace_back(edgeId);
