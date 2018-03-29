@@ -2,22 +2,22 @@
 
 const QVector3D& NodePositions::get(NodeId nodeId) const
 {
-    return _array[nodeId].newest();
+    return elementFor(nodeId).newest();
 }
 
 const QVector3D NodePositions::getScaledAndSmoothed(NodeId nodeId) const
 {
-    return _array[nodeId].mean(_smoothing) * _scale;
+    return elementFor(nodeId).mean(_smoothing) * _scale;
 }
 
 void NodePositions::set(NodeId nodeId, const QVector3D& position)
 {
-    _array.at(nodeId).push_back(position);
+    elementFor(nodeId).push_back(position);
 }
 
 void NodePositions::setExact(NodeId nodeId, const QVector3D& position)
 {
-    _array.at(nodeId).fill(position);
+    elementFor(nodeId).fill(position);
 }
 
 void NodePositions::update(const NodePositions& other)

@@ -38,6 +38,18 @@ protected:
     mutable std::recursive_mutex _mutex;
     Element _defaultValue;
 
+    const Element& elementFor(Index index) const
+    {
+        Q_ASSERT(static_cast<int>(index) >= 0 && static_cast<int>(index) < size());
+        return _array[static_cast<int>(index)];
+    }
+
+    Element& elementFor(Index index)
+    {
+        Q_ASSERT(static_cast<int>(index) >= 0 && static_cast<int>(index) < size());
+        return _array[static_cast<int>(index)];
+    }
+
 public:
     explicit GenericGraphArray(const IGraphArrayClient& graph) :
         _graph(&graph), _defaultValue()
@@ -86,43 +98,41 @@ public:
     Element& operator[](Index index)
     {
         MaybeLock lock(_mutex);
-        Q_ASSERT(index >= 0 && index < size());
-        return _array[index];
+        return elementFor(index);
     }
 
     const Element& operator[](Index index) const
     {
         MaybeLock lock(_mutex);
-        Q_ASSERT(index >= 0 && index < size());
-        return _array[index];
+        return elementFor(index);
     }
 
     Element& at(Index index)
     {
         MaybeLock lock(_mutex);
-        Q_ASSERT(index >= 0 && index < size());
-        return _array.at(index);
+        return elementFor(index);
     }
 
     const Element& at(Index index) const
     {
         MaybeLock lock(_mutex);
-        Q_ASSERT(index >= 0 && index < size());
-        return _array.at(index);
+        return elementFor(index);
     }
 
+
+    // get and set have to be implemented without elementFor because of std::vector<bool>
     Element get(Index index) const
     {
         MaybeLock lock(_mutex);
-        Q_ASSERT(index >= 0 && index < size());
-        return _array[index];
+        Q_ASSERT(static_cast<int>(index) >= 0 && static_cast<int>(index) < size());
+        return _array[static_cast<int>(index)];
     }
 
     void set(Index index, const Element& value)
     {
         MaybeLock lock(_mutex);
-        Q_ASSERT(index >= 0 && index < size());
-        _array[index] = value;
+        Q_ASSERT(static_cast<int>(index) >= 0 && static_cast<int>(index) < size());
+        _array[static_cast<int>(index)] = value;
     }
 
     //FIXME these iterators do not lock when locking is enabled; need to wrap in own iterator types
@@ -201,7 +211,7 @@ public:
     explicit NodeArray(const IGraphArrayClient& graph) :
         GenericGraphArray<NodeId, Element, Locking>(graph)
     {
-        this->resize(graph.nextNodeId());
+        this->resize(static_cast<int>(graph.nextNodeId()));
         graph.insertNodeArray(this);
     }
 
@@ -250,7 +260,7 @@ public:
     explicit EdgeArray(const IGraphArrayClient& graph) :
         GenericGraphArray<EdgeId, Element, Locking>(graph)
     {
-        this->resize(graph.nextEdgeId());
+        this->resize(static_cast<int>(graph.nextEdgeId()));
         graph.insertEdgeArray(this);
     }
 
