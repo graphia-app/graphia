@@ -42,7 +42,7 @@ mkdir -p ${BUILD_DIR}
   then
     ${LINUXDEPLOYQT} \
       ${BUILD_DIR}/AppDir/usr/share/applications/${PRODUCT_NAME}.desktop \
-      -appimage -no-copy-copyright-files -no-plugins -no-strip
+      -appimage -no-copy-copyright-files -no-strip
   else
     echo linuxdeployqt could not be found, please install \
       it from https://github.com/probonopd/linuxdeployqt
