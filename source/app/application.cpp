@@ -304,7 +304,7 @@ void Application::loadPlugins()
             QStandardPaths::StandardLocation::AppDataLocation) + QDir::separator() + "plugins"
     };
 
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
     QDir dotAppDir(qApp->applicationDirPath());
 
     // Within the bundle itself

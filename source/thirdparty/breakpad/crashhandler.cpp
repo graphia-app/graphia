@@ -15,7 +15,7 @@
 
 #include <unistd.h>
 
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MACOS)
 #include "thirdparty/breakpad/src/client/mac/handler/exception_handler.h"
 #elif defined(Q_OS_LINUX)
 #include "thirdparty/breakpad/src/client/linux/handler/exception_handler.h"
@@ -72,7 +72,7 @@ static bool minidumpCallback(
     const wchar_t* dumpDir, const wchar_t* minidumpId, void* context, EXCEPTION_POINTERS*, MDRawAssertionInfo*, bool success
 #elif defined(Q_OS_LINUX)
     const google_breakpad::MinidumpDescriptor& md, void* context, bool success
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
     const char* dumpDir, const char* minidumpId, void* context, bool success
 #endif
 )
@@ -112,7 +112,7 @@ static bool minidumpCallback(
     wcsncat(path, L".dmp", sizeof(path) - 1);
 #elif defined(Q_OS_LINUX)
     strncpy(path, md.path(), sizeof(path) - 1);
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
     strncat(path, dumpDir, sizeof(path) - 1);
     strncat(path, "/", sizeof(path) - 1);
     strncat(path, minidumpId, sizeof(path) - 1);
@@ -175,7 +175,7 @@ CrashHandler::CrashHandler()
                 md, nullptr,
                 minidumpCallback, this, true, -1);
 
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
 
     _handler = std::make_unique<google_breakpad::ExceptionHandler>(
                 path.toStdString(), nullptr,
