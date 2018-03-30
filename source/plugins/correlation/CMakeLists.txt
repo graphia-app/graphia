@@ -33,7 +33,10 @@ list(APPEND RESOURCES
 )
 
 add_library(${PluginName} SHARED ${SOURCES} ${HEADERS} ${RESOURCES})
-install(TARGETS ${PluginName} LIBRARY DESTINATION lib/${PROJECT_NAME}/plugins)
+
+if(NOT APPLE AND NOT MSVC)
+    install(TARGETS ${PluginName} LIBRARY DESTINATION lib/${PROJECT_NAME}/plugins)
+endif()
 
 target_link_libraries(${PluginName} thirdparty shared)
 
