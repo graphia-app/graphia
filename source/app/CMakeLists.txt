@@ -226,6 +226,18 @@ elseif(MSVC)
     add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
 else()
     add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${RESOURCES})
+    install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+
+    foreach(RESOLUTION 1024x1024 512x512 256x256 128x128 64x64 48x48 32x32 16x16)
+        install(FILES ${CMAKE_CURRENT_LIST_DIR}/icon/Icon${RESOLUTION}.png
+            DESTINATION share/icons/hicolor/${RESOLUTION}
+            RENAME ${PROJECT_NAME}.png)
+    endforeach()
+
+    configure_file(${CMAKE_CURRENT_LIST_DIR}/application.desktop.in
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.desktop @ONLY)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.desktop
+        DESTINATION share/applications)
 endif()
 
 target_link_libraries(${PROJECT_NAME} thirdparty shared)

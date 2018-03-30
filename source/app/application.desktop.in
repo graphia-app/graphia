@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=@PROJECT_NAME@
+Comment=@PROJECT_NAME@ is a tool for the visualisation and analysis of graphs.
+Exec=@PROJECT_NAME@
+Icon=@PROJECT_NAME@
+Categories=Office;

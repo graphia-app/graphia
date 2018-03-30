@@ -304,7 +304,7 @@ void Application::loadPlugins()
             QStandardPaths::StandardLocation::AppDataLocation) + QDir::separator() + "plugins"
     };
 
-#ifdef Q_OS_MACOS
+#if defined(Q_OS_MACOS)
     QDir dotAppDir(qApp->applicationDirPath());
 
     // Within the bundle itself
@@ -315,6 +315,13 @@ void Application::loadPlugins()
     dotAppDir.cdUp();
     dotAppDir.cdUp();
     pluginsDirs.emplace_back(dotAppDir.absolutePath() + QDir::separator() + "plugins");
+#elif defined(Q_OS_LINUX)
+    // Add the LSB location for the plugins
+    QDir usrDir(qApp->applicationDirPath());
+    usrDir.cdUp();
+
+    pluginsDirs.emplace_back(usrDir.absolutePath() + QDir::separator() + "lib" +
+        QDir::separator() + name() + QDir::separator() + "plugins");
 #endif
 
     for(auto& pluginsDir : pluginsDirs)

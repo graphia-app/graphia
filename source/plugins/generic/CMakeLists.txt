@@ -18,6 +18,7 @@ list(APPEND RESOURCES
 )
 
 add_library(${PluginName} SHARED ${SOURCES} ${HEADERS} ${RESOURCES})
+install(TARGETS ${PluginName} LIBRARY DESTINATION lib/${PROJECT_NAME}/plugins)
 
 target_link_libraries(${PluginName} thirdparty shared)
 
