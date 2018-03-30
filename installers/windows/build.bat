@@ -18,7 +18,6 @@ copy %BUILD_DIR%\MessageBox.exe %INSTALLER_DIR%\
 
 set QML_DIRS=
 for /d /r %%i in (*) do @if exist %%i\*.qml (set QML_DIRS=--qmldir %%i !QML_DIRS!)
-set QML_DIRS=--qmldir %WORKSPACE%\source\app\QTBUG-60761-hack !QML_DIRS!
 echo %QML_DIRS%
 
 windeployqt %QML_DIRS% --no-angle --no-compiler-runtime ^
