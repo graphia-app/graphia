@@ -35,6 +35,18 @@ mkdir -p ${BUILD_DIR}
   # Clean intermediate build products
   grep "^rule.*\(_COMPILER_\|_STATIC_LIBRARY_\)" rules.ninja | \
     cut -d' ' -f2 | xargs -n1 ninja -t clean -r
+
+  # Make an AppImage
+  LINUXDEPLOYQT=$(which linuxdeployqt)
+  if [ ! -z ${LINUXDEPLOYQT} ]
+  then
+    ${LINUXDEPLOYQT} \
+      ${BUILD_DIR}/AppDir/usr/share/applications/${PRODUCT_NAME}.desktop \
+      -appimage -no-copy-copyright-files -no-plugins -no-strip
+  else
+    echo linuxdeployqt could not be found, please install \
+      it from https://github.com/probonopd/linuxdeployqt
+  fi
 )
 
 # To get breakpad dump_syms
