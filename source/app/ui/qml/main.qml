@@ -82,7 +82,7 @@ ApplicationWindow
         }
     }
 
-    property var _pendingArguments
+    property var _pendingArguments: []
 
     // This is called when the app is started, but it also receives the arguments
     // of a second instance when it starts then immediately exits
