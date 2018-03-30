@@ -28,7 +28,7 @@ mkdir -p ${BUILD_DIR}
   cd ${BUILD_DIR}
   cmake --version || exit $?
   cmake -DUNITY_BUILD=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-    -DCMAKE_INSTALL_PREFIX=${BUILD_DIR}/AppDir/usr \
+    -DCMAKE_INSTALL_PREFIX=AppDir/usr \
     -DCMAKE_BUILD_TYPE=Release -GNinja ../.. || exit $?
   cmake --build . --target install || exit $?
 

@@ -13,8 +13,8 @@ LINUXDEPLOYQT=$(which linuxdeployqt)
 if [ ! -z ${LINUXDEPLOYQT} ]
 then
   ${LINUXDEPLOYQT} \
+    AppDir/usr/share/applications/${PRODUCT_NAME}.desktop \
     ${QML_DIRS} \
-    ${BUILD_DIR}/AppDir/usr/share/applications/${PRODUCT_NAME}.desktop \
     -appimage -no-copy-copyright-files -no-strip
 else
   echo linuxdeployqt could not be found, please install \
