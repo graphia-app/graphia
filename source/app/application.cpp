@@ -5,6 +5,7 @@
 #include "shared/utils/fatalerror.h"
 #include "shared/utils/thread.h"
 #include "shared/utils/scopetimer.h"
+#include "shared/utils/preferences.h"
 
 #include "loading/loader.h"
 
@@ -151,6 +152,9 @@ QString Application::parametersQmlPathForPlugin(const QString& pluginName) const
 
 bool Application::tryToAuthenticateWithCachedCredentials()
 {
+    if(!u::pref("auth/rememberMe").toBool())
+        return false;
+
     if(!_auth.state() && _auth.expired())
         return _auth.sendRequestUsingCachedCredentials();
 
