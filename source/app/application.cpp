@@ -326,7 +326,9 @@ void Application::loadPlugins()
 
     for(auto& pluginsDir : pluginsDirs)
     {
+#ifndef _DEBUG
         std::cerr << "Loading plugins from " << pluginsDir.toStdString() << "\n";
+#endif
 
         if(pluginsDir.isEmpty() || !QDir(pluginsDir).exists())
             continue;
@@ -374,8 +376,10 @@ void Application::loadPlugins()
 
                     initialisePlugin(iplugin, std::move(pluginLoader));
 
+#ifndef _DEBUG
                     std::cerr << "  ..." << QFileInfo(fileName).fileName().toStdString() <<
                         "(" << iplugin->name().toStdString() << ")" << "\n";
+#endif
                 }
             }
         }
