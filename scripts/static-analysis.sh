@@ -111,8 +111,11 @@ parallel -n1 -P${NUM_CORES} \
   ::: ${CPP_FILES}
 
 #FIXME disable qmllint until it catches up with the latest QML standard
-QT_VERSION=$(qmake --version | sed -n 2p | sed -e 's/Using Qt version \([^ ]*\).*$/\1/')
-if [ "${QT_VERSION}" == "`echo -e "${QT_VERSION}\n5.10.1" | sort -rV | head -n1`" ]
+BROKEN_QT_VERSION="5.10.1"
+CURRENT_QT_VERSION=$(qmake --version | sed -n 2p | sed -e 's/Using Qt version \([^ ]*\).*$/\1/')
+if [[ "${CURRENT_QT_VERSION}" != "${BROKEN_QT_VERSION}" ]] && \
+  [[ "${CURRENT_QT_VERSION}" == "`echo -e \
+  "${CURRENT_QT_VERSION}\n${BROKEN_QT_VERSION}" | sort -rV | head -n1`" ]]
 then
   echo "Check if qmllint works, following Qt upgrade"
   exit 1
