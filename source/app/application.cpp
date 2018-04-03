@@ -373,6 +373,9 @@ void Application::loadPlugins()
                     }
 
                     initialisePlugin(iplugin, std::move(pluginLoader));
+
+                    std::cerr << "  ..." << QFileInfo(fileName).fileName().toStdString() <<
+                        "(" << iplugin->name().toStdString() << ")" << "\n";
                 }
             }
         }
