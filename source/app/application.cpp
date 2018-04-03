@@ -326,6 +326,8 @@ void Application::loadPlugins()
 
     for(auto& pluginsDir : pluginsDirs)
     {
+        std::cerr << "Loading plugins from " << pluginsDir.toStdString() << "\n";
+
         if(pluginsDir.isEmpty() || !QDir(pluginsDir).exists())
             continue;
 
