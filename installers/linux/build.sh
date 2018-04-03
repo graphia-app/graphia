@@ -15,7 +15,8 @@ then
   ${LINUXDEPLOYQT} \
     AppDir/usr/share/applications/${PRODUCT_NAME}.desktop \
     ${QML_DIRS} \
-    -appimage -no-copy-copyright-files -no-strip
+    -appimage -no-copy-copyright-files -no-strip \
+    -extra-plugins=platformthemes/libqgtk3.so,imageformats/libqsvg.so,iconengines/libqsvgicon.so
 else
   echo linuxdeployqt could not be found, please install \
     it from https://github.com/probonopd/linuxdeployqt
