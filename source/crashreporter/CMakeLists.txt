@@ -26,6 +26,7 @@ if(MSVC)
     add_executable(CrashReporter WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
 else()
     add_executable(CrashReporter ${SOURCES} ${HEADERS} ${RESOURCES})
+    install(TARGETS CrashReporter RUNTIME DESTINATION bin)
 endif()
 
 find_package(Qt5 COMPONENTS Qml Quick OpenGL OpenGLExtensions Xml REQUIRED)

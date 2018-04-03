@@ -20,6 +20,7 @@ if(MSVC)
   add_executable(MessageBox WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
 else()
   add_executable(MessageBox ${SOURCES} ${HEADERS} ${RESOURCES})
+  install(TARGETS MessageBox RUNTIME DESTINATION bin)
 endif()
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
