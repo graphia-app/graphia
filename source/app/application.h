@@ -145,7 +145,9 @@ public:
     static int majorVersion() { return _majorVersion; }
     static int minorVersion() { return _minorVersion; }
 
-    Q_INVOKABLE void tryToAuthenticateWithCachedCredentials();
+    // Returns false if we need to authenticate, but couldn't
+    Q_INVOKABLE bool tryToAuthenticateWithCachedCredentials();
+
     Q_INVOKABLE void authenticate(const QString& email, const QString& password);
     Q_INVOKABLE void signOut();
 

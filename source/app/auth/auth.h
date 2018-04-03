@@ -90,7 +90,7 @@ public:
 
     bool expired();
     void sendRequest(const QString& email, const QString& password);
-    void sendRequestUsingCachedCredentials();
+    bool sendRequestUsingCachedCredentials();
     void reset();
 
     bool pluginAllowed(const QString& pluginName) const;

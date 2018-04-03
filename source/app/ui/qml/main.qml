@@ -41,7 +41,6 @@ ApplicationWindow
         return text;
     }
 
-    property bool _authenticationAttemptedAtLeastOnce: false
     property bool _authenticatedAtLeastOnce: false
 
     Application { id: application }
@@ -63,14 +62,16 @@ ApplicationWindow
         onAuthenticatingChanged:
         {
             if(!application.authenticating)
-                _authenticationAttemptedAtLeastOnce = true;
+                authUI.enabled = true;
         }
     }
 
     Auth
     {
-        visible: !application.authenticated && _authenticationAttemptedAtLeastOnce
-        enabled: visible
+        id: authUI
+
+        visible: !application.authenticated && enabled
+        enabled: false
         anchors.fill: parent
 
         message: application.authenticationMessage
@@ -144,8 +145,13 @@ ApplicationWindow
                 Window.Maximized : Window.Windowed;
         }
 
-        application.tryToAuthenticateWithCachedCredentials();
+        if(!application.tryToAuthenticateWithCachedCredentials())
+        {
+            // If we failed immediately, show the authentication UI
+            authUI.enabled = true;
+        }
 
+        mainMenuBar.updateVisibility();
         mainWindow.visible = true;
 
         if(misc.firstOpen)

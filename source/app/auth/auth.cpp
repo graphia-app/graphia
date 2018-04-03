@@ -416,7 +416,7 @@ void Auth::sendRequest(const QString& email, const QString& password)
     sendRequestUsingEncryptedPassword(email, _encryptedPassword);
 }
 
-void Auth::sendRequestUsingCachedCredentials()
+bool Auth::sendRequestUsingCachedCredentials()
 {
     if(u::pref("auth/rememberMe").toBool())
     {
@@ -424,7 +424,11 @@ void Auth::sendRequestUsingCachedCredentials()
         _encryptedPassword = u::pref("auth/password").toString();
 
         sendRequestUsingEncryptedPassword(email, _encryptedPassword);
+
+        return true;
     }
+
+    return false;
 }
 
 void Auth::reset()
