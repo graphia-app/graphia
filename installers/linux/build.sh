@@ -16,6 +16,8 @@ then
     AppDir/usr/share/applications/${PRODUCT_NAME}.desktop \
     ${QML_DIRS} \
     -appimage -no-copy-copyright-files -no-strip \
+    -executable AppDir/usr/bin/CrashReporter \
+    -executable AppDir/usr/bin/MessageBox \
     -extra-plugins=platformthemes/libqgtk3.so,imageformats/libqsvg.so,iconengines/libqsvgicon.so
 else
   echo linuxdeployqt could not be found, please install \
