@@ -52,11 +52,20 @@ IPlugin* Application::pluginForName(const QString& pluginName) const
     return nullptr;
 }
 
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
 #include <corefoundation/CFBundle.h>
+#endif
 
 QStringList Application::resourcesDirectories()
 {
+    QStringList resourceDirs
+    {
+        qApp->applicationDirPath(),
+        QStandardPaths::writableLocation(
+            QStandardPaths::StandardLocation::AppDataLocation) + QDir::separator() + "resources"
+    };
+
+#ifdef Q_OS_MACOS
     CFURLRef resourcesURLRef = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
     CFURLRef absoluteResourcesURLRef = CFURLCopyAbsoluteURL(resourcesURLRef);
     CFStringRef pathCFString = CFURLCopyFileSystemPath(absoluteResourcesURLRef, kCFURLPOSIXPathStyle);
@@ -67,15 +76,17 @@ QStringList Application::resourcesDirectories()
     CFRelease(absoluteResourcesURLRef);
     CFRelease(resourcesURLRef);
 
-    return {path};
-}
+    resourceDirs.append(path);
+#elif defined(Q_OS_LINUX)
+    QDir usrDir(qApp->applicationDirPath());
+    usrDir.cdUp();
 
-#else
-QStringList Application::resourcesDirectories()
-{
-    return {qApp->applicationDirPath()};
-}
+    resourceDirs.append(usrDir.absolutePath() + QDir::separator() + "share" +
+        QDir::separator() + name());
 #endif
+
+    return resourceDirs;
+}
 
 bool Application::canOpen(const QString& urlTypeName) const
 {
@@ -298,7 +309,7 @@ QString Application::resolvedExe(const QString& exe)
     if(QFileInfo::exists(fullyQualifiedExe))
         return fullyQualifiedExe;
 
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
     // We might be debugging, in which case the exe might be outside the .app
     QDir dotAppDir(qApp->applicationDirPath());
     dotAppDir.cdUp();
