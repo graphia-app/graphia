@@ -106,7 +106,7 @@ class Application : public QObject
     Q_PROPERTY(QString version READ version CONSTANT)
     Q_PROPERTY(QString copyright READ copyright CONSTANT)
     Q_PROPERTY(QString nativeExtension READ nativeExtension CONSTANT)
-    Q_PROPERTY(QString resourcesDirectory READ resourcesDirectory CONSTANT)
+    Q_PROPERTY(QStringList resourcesDirectories READ resourcesDirectories CONSTANT)
 
 
     Q_PROPERTY(QStringList nameFilters READ nameFilters NOTIFY nameFiltersChanged)
@@ -132,7 +132,7 @@ public:
 
     static QString nativeExtension() { return name().toLower(); }
 
-    static QString resourcesDirectory();
+    static QStringList resourcesDirectories();
 
     Q_INVOKABLE bool canOpen(const QString& urlTypeName) const;
     Q_INVOKABLE bool canOpenAnyOf(const QStringList& urlTypeNames) const;
@@ -152,6 +152,8 @@ public:
     Q_INVOKABLE void signOut();
 
     Q_INVOKABLE void copyImageToClipboard(const QImage& image);
+
+    Q_INVOKABLE QString resourceFile(const QString& relativePath) const;
 
     Q_INVOKABLE void crash(int crashType);
 

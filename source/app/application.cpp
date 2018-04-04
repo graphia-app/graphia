@@ -55,7 +55,7 @@ IPlugin* Application::pluginForName(const QString& pluginName) const
 #ifdef Q_OS_MAC
 #include <corefoundation/CFBundle.h>
 
-QString Application::resourcesDirectory()
+QStringList Application::resourcesDirectories()
 {
     CFURLRef resourcesURLRef = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
     CFURLRef absoluteResourcesURLRef = CFURLCopyAbsoluteURL(resourcesURLRef);
@@ -67,13 +67,13 @@ QString Application::resourcesDirectory()
     CFRelease(absoluteResourcesURLRef);
     CFRelease(resourcesURLRef);
 
-    return path;
+    return {path};
 }
 
 #else
-QString Application::resourcesDirectory()
+QStringList Application::resourcesDirectories()
 {
-    return qApp->applicationDirPath();
+    return {qApp->applicationDirPath()};
 }
 #endif
 
@@ -175,6 +175,19 @@ void Application::signOut()
 void Application::copyImageToClipboard(const QImage& image)
 {
     QApplication::clipboard()->setImage(image, QClipboard::Clipboard);
+}
+
+QString Application::resourceFile(const QString& relativePath) const
+{
+    for(const auto& resourceDirectory : resourcesDirectories())
+    {
+        auto resolvedPath = QDir(resourceDirectory).filePath(relativePath);
+
+        if(QFileInfo::exists(resolvedPath))
+            return resolvedPath;
+    }
+
+    return {};
 }
 
 #if defined(Q_OS_WIN32)

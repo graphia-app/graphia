@@ -55,7 +55,7 @@ ApplicationWindow
             if(application.authenticated && !_authenticatedAtLeastOnce)
             {
                 _authenticatedAtLeastOnce = true;
-                processArguments(Qt.application.arguments);
+                processOnePendingArgument();
             }
         }
 
@@ -85,8 +85,8 @@ ApplicationWindow
 
     property var _pendingArguments: []
 
-    // This is called when the app is started, but it also receives the arguments
-    // of a second instance when it starts then immediately exits
+    // This is called with the arguments of a second instance of the app,
+    // when it starts then immediately exits
     function processArguments(arguments)
     {
         _pendingArguments = arguments.slice(1);
@@ -154,20 +154,18 @@ ApplicationWindow
         mainMenuBar.updateVisibility();
         mainWindow.visible = true;
 
+        // Arguments minus the executable
+        _pendingArguments = Qt.application.arguments.slice(1);
+
         if(misc.firstOpen)
         {
-            var exampleFile = QmlUtils.urlForFileName(application.resourcesDirectory +
-                "/examples/London_Tube_River_Bus.graphia");
+            var exampleFile = QmlUtils.urlForFileName(application.resourceFile(
+                "examples/London_Tube_River_Bus.graphia"));
 
             if(QmlUtils.fileUrlExists(exampleFile))
-            {
-                openFileOfTypeWithPluginAndParameters(exampleFile,
-                    "Native", "", {}, false);
-            }
+                _pendingArguments.push(exampleFile);
             else
-            {
                 misc.firstOpen = false;
-            }
         }
     }
 
@@ -1500,6 +1498,10 @@ ApplicationWindow
                             qsTr(" could not be opened due to an error.");
                     errorOpeningFileMessageDialog.open();
                 }
+
+                // If the example file failed to load, we count that as having shown the tutorial,
+                // so we don't get into a situation where we keep trying to open it when it'll never work
+                misc.firstOpen = false;
             }
 
             function openInCurrentTab(fileUrl, fileType, pluginName, parameters)
