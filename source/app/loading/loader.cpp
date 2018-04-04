@@ -44,6 +44,10 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
         return false;
 
     uint64_t totalBytes = file.size();
+
+    if(totalBytes == 0)
+        return false;
+
     uint64_t bytesRead = 0;
     uint64_t bytesDecompressed = 0;
     QDataStream input(&file);
@@ -124,6 +128,10 @@ static bool load(const QString& filePath, QByteArray& byteArray,
         return false;
 
     auto totalBytes = file.size();
+
+    if(totalBytes == 0)
+        return false;
+
     int bytesRead = 0;
     QDataStream input(&file);
 
