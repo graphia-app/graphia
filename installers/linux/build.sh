@@ -4,8 +4,8 @@ NUM_CORES=$(nproc --all)
 COMPILER=$(basename ${CC} | sed -e 's/-.*//g')
 BUILD_DIR="build/${COMPILER}"
 
-QML_DIRS=$(find source -name "*.qml" | xargs -n1 dirname | \
-  sort | uniq | sed -e 's/\(^.*$\)/-qmldir=\1/')
+QML_DIRS=$(find source -name "*.qml" | xargs -n1 realpath | \
+  xargs -n1 dirname | sort | uniq | sed -e 's/\(^.*$\)/-qmldir=\1/')
 
 # Make an AppImage
 LINUXDEPLOYQT=$(which linuxdeployqt)
@@ -20,7 +20,8 @@ then
       -appimage -no-copy-copyright-files -no-strip \
       -executable=AppDir/usr/bin/CrashReporter \
       -executable=AppDir/usr/bin/MessageBox \
-      -extra-plugins=platformthemes/libqgtk3.so,imageformats/libqsvg.so,iconengines/libqsvgicon.so
+      -extra-plugins=platformthemes/libqgtk3.so,imageformats/libqsvg.so,iconengines/libqsvgicon.so \
+      || exit $?
   )
 else
   echo linuxdeployqt could not be found, please install \
