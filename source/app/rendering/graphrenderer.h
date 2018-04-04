@@ -30,7 +30,6 @@
 #include <atomic>
 #include <vector>
 #include <QImage>
-#include <QDir>
 #include <QPixmap>
 #include <QPainter>
 #include <array>

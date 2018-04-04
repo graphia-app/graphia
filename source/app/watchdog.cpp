@@ -20,7 +20,6 @@
 
 #include <QDebug>
 #include <QCoreApplication>
-#include <QDir>
 #include <QMessageBox>
 #include <QProcess>
 
