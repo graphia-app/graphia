@@ -7,6 +7,10 @@ BUILD_DIR="build/${COMPILER}"
 QML_DIRS=$(find source -name "*.qml" | xargs -n1 realpath | \
   xargs -n1 dirname | sort | uniq | sed -e 's/\(^.*$\)/-qmldir=\1/')
 
+mkdir -p ${BUILD_DIR}/AppDir/usr/share/${PRODUCT_NAME}
+cp -r source/app/examples \
+  ${BUILD_DIR}/AppDir/usr/share/${PRODUCT_NAME}
+
 # Make an AppImage
 LINUXDEPLOYQT=$(which linuxdeployqt)
 if [ ! -z ${LINUXDEPLOYQT} ]
