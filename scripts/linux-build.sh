@@ -36,22 +36,3 @@ mkdir -p ${BUILD_DIR}
   grep "^rule.*\(_COMPILER_\|_STATIC_LIBRARY_\)" rules.ninja | \
     cut -d' ' -f2 | xargs -n1 ninja -t clean -r
 )
-
-# To get breakpad dump_syms
-(
-  mkdir -p breakpad-build
-  cd breakpad-build
-  ../source/thirdparty/breakpad/configure
-  make -O -j${NUM_CORES}
-)
-
-breakpad-build/src/tools/linux/dump_syms/dump_syms \
-  ${BUILD_DIR}/${PRODUCT_NAME} > \
-  ${BUILD_DIR}/${PRODUCT_NAME}.sym || exit $?
-
-for PLUGIN in $(find ${BUILD_DIR}/plugins -iname "*.so")
-do
-  breakpad-build/src/tools/linux/dump_syms/dump_syms \
-    ${PLUGIN} > \
-    ${PLUGIN}.sym || exit $?
-done
