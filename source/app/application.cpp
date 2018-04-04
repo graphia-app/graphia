@@ -193,8 +193,14 @@ QString Application::resourceFile(const QString& relativePath) const
     for(const auto& resourceDirectory : resourcesDirectories())
     {
         auto resolvedPath = QDir(resourceDirectory).filePath(relativePath);
+        bool resolvedPathExists = QFileInfo::exists(resolvedPath);
 
-        if(QFileInfo::exists(resolvedPath))
+#ifndef _DEBUG
+        std::cerr << "Trying " << resolvedPath.toStdString() << "... " <<
+            (resolvedPathExists ? "success!\n" : "not found.\n");
+#endif
+
+        if(resolvedPathExists)
             return resolvedPath;
     }
 
