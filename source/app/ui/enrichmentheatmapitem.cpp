@@ -7,6 +7,7 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPainted
     setRenderTarget(RenderTarget::FramebufferObject);
 
     _customPlot.setOpenGl(true);
+    _customPlot.addLayer(QStringLiteral("textLayer"));
 
     _colorMap = new QCPColorMap(_customPlot.xAxis, _customPlot.yAxis2);
     _colorScale = new QCPColorScale(&_customPlot);
@@ -15,11 +16,26 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPainted
     _customPlot.plotLayout()->addElement(1, 0, _colorScale);
     _colorScale->setMinimumMargins(QMargins(6, 0, 6, 0));
 
+    _textLayer = _customPlot.layer(QStringLiteral("textLayer"));
+    _textLayer->setMode(QCPLayer::LayerMode::lmBuffered);
+
     _customPlot.yAxis2->setVisible(true);
     _customPlot.yAxis->setVisible(false);
     _colorMap->setInterpolate(false);
     _colorMap->setColorScale(_colorScale);
 
+    QFont defaultFont10Pt;
+    defaultFont10Pt.setPointSize(10);
+
+    _hoverLabel = new QCPItemText(&_customPlot);
+    _hoverLabel->setPositionAlignment(Qt::AlignVCenter|Qt::AlignLeft);
+    _hoverLabel->setLayer(_textLayer);
+    _hoverLabel->setFont(defaultFont10Pt);
+    _hoverLabel->setPen(QPen(Qt::black));
+    _hoverLabel->setBrush(QBrush(Qt::white));
+    _hoverLabel->setPadding(QMargins(3, 3, 3, 3));
+    _hoverLabel->setClipToAxisRect(false);
+    _hoverLabel->setVisible(false);
 
     _colorMap->setGradient(QCPColorGradient::gpHot);
     _colorMap->data()->setSize(10, 10);
@@ -39,6 +55,7 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPainted
     _defaultFont9Pt.setPointSize(9);
 
     setAcceptedMouseButtons(Qt::AllButtons);
+    setAcceptHoverEvents(true);
 
     setFlag(QQuickItem::ItemHasContents, true);
 
@@ -79,6 +96,27 @@ void EnrichmentHeatmapItem::mouseReleaseEvent(QMouseEvent* event)
 void EnrichmentHeatmapItem::mouseMoveEvent(QMouseEvent* event)
 {
     routeMouseEvent(event);
+}
+
+void EnrichmentHeatmapItem::hoverMoveEvent(QHoverEvent *event)
+{
+    _hoverPoint = event->posF();
+
+    auto* currentPlottable = _customPlot.plottableAt(event->posF(), true);
+    if(_hoverPlottable != currentPlottable)
+    {
+        qDebug() << currentPlottable;
+        _hoverPlottable = currentPlottable;
+        hideTooltip();
+    }
+
+    if(_hoverPlottable != nullptr)
+        showTooltip();
+}
+
+void EnrichmentHeatmapItem::hoverLeaveEvent(QHoverEvent *event)
+{
+
 }
 
 void EnrichmentHeatmapItem::routeMouseEvent(QMouseEvent* event)
@@ -146,16 +184,20 @@ void EnrichmentHeatmapItem::buildPlot()
             yCategoryTicker->addTick(column++, labelName);
     }
 
-    _colorMap->data()->setSize(static_cast<int>(attributeValueSetA.size()), static_cast<int>(attributeValueSetB.size()));
-    _colorMap->data()->setRange(QCPRange(0, attributeValueSetA.size()-1), QCPRange(0, attributeValueSetB.size()-1));
+    // WARNING: Colour maps seem to overdraw the map size, this means hover events won't be triggered on the
+    // overdrawn edges. As a fix I add a 1 cell margin on all sides of the map, offset the data by 1 cell
+    // and range it to match
+    _colorMap->data()->setSize(static_cast<int>(attributeValueSetA.size() + 2), static_cast<int>(attributeValueSetB.size() + 2));
+    _colorMap->data()->setRange(QCPRange(-1, attributeValueSetA.size()), QCPRange(-1, attributeValueSetB.size()));
 
     _attributeACount = static_cast<int>(attributeValueSetA.size());
     _attributeBCount = static_cast<int>(attributeValueSetB.size());
 
     for(int i=0; i<_tableModel->rowCount(); i++)
     {
-        _colorMap->data()->setCell(fullLabelToXAxis[_tableModel->data(i, "Attribute Group").toString()] + 0.5,
-                                   fullLabelToYAxis[_tableModel->data(i, "Selection").toString()] + 0.5,
+        // The data is offset by 1 to account for the empty margin
+        _colorMap->data()->setCell(fullLabelToXAxis[_tableModel->data(i, "Attribute Group").toString()] + 1,
+                                   fullLabelToYAxis[_tableModel->data(i, "Selection").toString()] + 1,
                                    _tableModel->data(i, "Fishers").toFloat());
     }
     _colorMap->rescaleDataRange(true);
@@ -258,6 +300,48 @@ double EnrichmentHeatmapItem::horizontalRangeSize()
 double EnrichmentHeatmapItem::verticalRangeSize()
 {
     return (columnAxisHeight() / (columnLabelSize() * _attributeBCount));
+}
+
+void EnrichmentHeatmapItem::showTooltip()
+{
+    _hoverLabel->setVisible(true);
+    double key, value;
+    _colorMap->pixelsToCoords(_hoverPoint, key, value);
+    _hoverLabel->setText(QString::number(_colorMap->data()->data(key,value)));
+
+    const auto COLOR_RECT_WIDTH = 10.0;
+    const auto HOVER_MARGIN = 10.0;
+    auto hoverlabelWidth = _hoverLabel->right->pixelPosition().x() -
+            _hoverLabel->left->pixelPosition().x();
+    auto hoverlabelHeight = _hoverLabel->bottom->pixelPosition().y() -
+            _hoverLabel->top->pixelPosition().y();
+    auto hoverLabelRightX = _hoverPoint.x() +
+            hoverlabelWidth + HOVER_MARGIN + COLOR_RECT_WIDTH;
+    auto xBounds = clipRect().width();
+    QPointF targetPosition(_hoverPoint.x() + HOVER_MARGIN,
+                           _hoverPoint.y());
+
+    // If it falls out of bounds, clip to bounds and move label above marker
+    if(hoverLabelRightX > xBounds)
+    {
+        targetPosition.rx() = xBounds - hoverlabelWidth - COLOR_RECT_WIDTH - 1.0;
+
+        // If moving the label above marker is less than 0, clip to 0 + labelHeight/2;
+        if(targetPosition.y() - (hoverlabelHeight * 0.5) - HOVER_MARGIN * 2.0 < 0.0)
+            targetPosition.setY(hoverlabelHeight * 0.5);
+        else
+            targetPosition.ry() -= HOVER_MARGIN * 2.0;
+    }
+
+    _hoverLabel->position->setPixelPosition(targetPosition);
+
+    update();
+}
+
+void EnrichmentHeatmapItem::hideTooltip()
+{
+    _hoverLabel->setVisible(false);
+    update();
 }
 
 void EnrichmentHeatmapItem::onCustomReplot()

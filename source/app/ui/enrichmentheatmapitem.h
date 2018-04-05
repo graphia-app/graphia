@@ -18,13 +18,18 @@ class EnrichmentHeatmapItem : public QQuickPaintedItem
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
 
 private:
+    QCPLayer* _textLayer = nullptr;
     QCPColorMap* _colorMap = nullptr;
     QCPColorScale* _colorScale = nullptr;
+    QCPItemText* _hoverLabel = nullptr;
+    QCPAbstractPlottable* _hoverPlottable = nullptr;
+    QPointF _hoverPoint;
     QCustomPlot _customPlot;
     QStringList _xAttributeValues;
     QStringList _yAttributeValues;
     std::map<int, QString> _xAxisToFullLabel;
     std::map<int, QString> _yAxisToFullLabel;
+
 
     EnrichmentTableModel* _tableModel = nullptr;
     QFont _defaultFont9Pt;
@@ -58,6 +63,8 @@ protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
+    void hoverMoveEvent(QHoverEvent* event) override;
+    void hoverLeaveEvent(QHoverEvent* event) override;
     void routeMouseEvent(QMouseEvent *event);
 
 signals:
@@ -69,6 +76,8 @@ signals:
 
 public slots:
     void onCustomReplot();
+    void showTooltip();
+    void hideTooltip();
 };
 
 #endif // ENRICHMENTHEATMAPITEM_H
