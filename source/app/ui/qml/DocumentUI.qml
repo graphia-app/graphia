@@ -1336,9 +1336,8 @@ Item
             Text
             {
                 textFormat: Text.StyledText
-                text: qsTr("As this is your first time starting Graphia we have opened an example Graph for you<br>" +
-                      "The Graph represents the <b>London Tube System and River Buses!</b><br><br>" +
-                      "Click next to learn about navigation and the key elements of a Graph")
+                text: qsTr("As this is your first time starting " + application.name + ", we have opened an example graph.<br>" +
+                      "The graph represents the <b>London Tube System and River Buses!</b>")
             }
         }
 
@@ -1381,15 +1380,17 @@ Item
                 }
                 Text
                 {
+                    Layout.preferredWidth: 500
+                    wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
-                    text: qsTr("A Graph in its simplest form consists of <b>Nodes</b> and <b>Edges</b><br><br>" +
-                          "With this example graph nodes represent stops, while edges represent a connection<br>" +
-                          "Edges always have a direction however direction can be ignored if desired<br><br>" +
-                          "Nodes and Edges may contain additional information known as <b>Attributes</b><br><br>" +
-                          "<b>Rotate Graph:</b> Left click and drag graph<br>" +
-                          "<b>Zoom Graph:</b> Mouse Scrollwheel<br>" +
-                          "<b>Pan Graph:</b> Right click and drag graph<br><br>" +
-                          "Click next to learn more about navigating a graph")
+                    text: qsTr("A graph consists of <b>Nodes</b> and <b>Edges</b>. " +
+                          "In this example, the nodes represent stops, and the edges represent a connection between two stops. " +
+                          "<b>Edges</b> always have a direction, however direction can be ignored if desired. " +
+                          "<b>Nodes</b> and <b>Edges</b> can also have additional information associated with them. " +
+                          "We refer to these as <b>Attributes</b>.<br><br>" +
+                          "<b>Rotate:</b> Left Click and Drag<br>" +
+                          "<b>Zoom:</b> Mouse Scrollwheel<br>" +
+                          "<b>Pan:</b> Right Click and Drag")
                 }
             }
         }
@@ -1401,32 +1402,31 @@ Item
             y: 10
             RowLayout
             {
-                Column
+                Image
                 {
-                    Image
-                    {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        source: "qrc:///imagery/overview.png"
-                        mipmap: true
-                        fillMode: Image.PreserveAspectFit
-                        width: 400
-                    }
+                    Layout.alignment: Qt.AlignVCenter
+                    source: "qrc:///imagery/overview.png"
+                    mipmap: true
+                    fillMode: Image.PreserveAspectFit
                 }
+
                 Text
                 {
+                    Layout.preferredWidth: 400
+                    wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
-                    text: qsTr("When a graph contains multiple individual graphs (Components) Graphia opens the file in Overview<br>" +
-                          "mode. From Overview mode all components are visible. In this Graph the left component is the <br>" +
-                          "<b>London Tube map</b>, while the right component is the <b>London Riverbus Network</b><br><br>" +
-                          "To focus on a particular component and hide others, <b>Double click</b> the component.<br>" +
-                          "When viewing a component, on-screen buttons appear to help you navigate. Alternatively, <b>Double click<br>" +
-                          "the background</b> or press <b>Esc</b> to return to Overview mode<br><br>" +
-                          "<b>Enter Component Mode:</b> Double Click component<br>" +
-                          "<b>Return to Overview:</b> Double Click background or Esc<br>" +
-                          "<b>Navigate components:</b> Page-up, Page-down<br>" +
-                          "<b>Select Node:</b> Left click a node<br>" +
-                          "<b>Focus Node:</b> Double click a node<br><br>" +
-                          "Click next to learn about searching a graph")
+                    text: qsTr("When a graph contains multiple disconnected graphs (<b>Components</b>) " + application.name +
+                          " opens the file in Overview mode. From Overview mode all components are visible. In this graph the " +
+                          "left component is the <b>London Tube map</b>, while the right component is the <b>London Riverbus " +
+                          "Network</b>.<br><br>" +
+                          "To focus on a particular component and hide others, <b>Double Click</b> it. " +
+                          "When viewing a component, on-screen buttons appear to help you navigate. Alternatively, <b>Double Click</b> " +
+                          "the background or press <b>Esc</b> to return to Overview mode.<br><br>" +
+                          "<b>Component Mode:</b> Double Click Component<br>" +
+                          "<b>Overview Mode:</b> Double Click Background or Press Esc<br>" +
+                          "<b>Scroll Through Components:</b> PageUp, PageDown<br>" +
+                          "<b>Select Node:</b> Left Click a Node<br>" +
+                          "<b>Focus Node:</b> Double Click a Node")
                 }
             }
         }
@@ -1441,11 +1441,12 @@ Item
             {
                 Text
                 {
+                    Layout.preferredWidth: 500
+                    wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
-                    text: qsTr("Information associated the <b>selected</b> node(s) will be displayed in the attribute table<br>" +
-                          "Attributes are sourced from the input file, additional attributes can be calculated by Graphia<br><br>" +
-                          "Select a node using <b>left click</b> and view the node's attributes in the table.<br><br>" +
-                          "Click next to learn about calculating attributes and transforming the graph")
+                    text: qsTr("Information associated with the <b>selected</b> node(s) will be displayed in the attribute table. " +
+                          "Attributes are sourced from the input file or calculated through the use of transforms.<br><br>" +
+                          "Select a node using <b>Left Click</b> and view the node's attributes in the table below.")
                 }
                 Image
                 {
@@ -1480,15 +1481,15 @@ Item
                 }
                 Text
                 {
+                    Layout.preferredWidth: 500
+                    wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
-                    text: qsTr("Transforms are a powerful way to modify the graph and calculate additional attributes<br>" +
-                          "They can be used to remove nodes, collapse edges, calculate node metrics and much more<br>" +
-                          "Existing transforms will appear above <b>Add Transform</b><br><br>" +
-                          "Click <b>Add Transform</b> to bring up the add transform dialog<br>" +
-                          "Try selecting <b>PageRank</b><br>" +
-                          "Each attribute added to graph will also add a Visualisation<br>" +
-                          "Select <b>Colour</b> for the visualisation and then ok to add them<br><br>" +
-                          "Once a PageRank transform has been added, click next to learn about Visualisations")
+                    text: qsTr("Transforms are a powerful way to modify the graph and calculate additional attributes. " +
+                          "They can be used to remove nodes or edges, calculate metrics and much more. " +
+                          "Transforms will appear above. They are applied in order, from top to bottom.<br><br>" +
+                          "Click <b>Add Transform</b> to create a new one.<br>" +
+                          "Try selecting <b>MCL Cluster</b>.<br>" +
+                          "Select <b>Colour</b> for the visualisation and then click <b>OK</b>.")
                 }
             }
         }
@@ -1519,11 +1520,12 @@ Item
                 }
                 Text
                 {
+                    Layout.preferredWidth: 500
+                    wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
-                    text: qsTr("Visualisations modify the appearance of the Graph depending on attributes<br>" +
-                          "<b>Node Colour</b>, <b>Size</b> and <b>Text</b> can all be linked to an attribute<br>" +
-                          "Existing visualisations can be modified from here and new ones added<br><br>" +
-                          "If you added PageRank in the previous step, click the gradient bar to adjust its colour scheme<br><br>")
+                    text: qsTr("Visualisations allow for displaying attribute values by modifying the appearance of the graph elements. " +
+                          "Node or edge <b>Colour</b>, <b>Size</b> and <b>Text</b> can all be linked to an attribute. " +
+                          "Visualisations can be created here or existing ones modified.")
                 }
             }
         }
@@ -1537,9 +1539,11 @@ Item
             {
                 Text
                 {
+                    Layout.preferredWidth: 400
+                    wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
-                    text: qsTr("To perform a simple search within graph, click Find on the top toolbar<br>" +
-                          "Try finding <b>Paddington</b> within the graph<br><br>")
+                    text: qsTr("To perform a simple search within the graph, click <b>Find</b> on the toolbar above.<br>" +
+                          "Try finding <b>Paddington</b>.")
                 }
                 ToolButton
                 {
@@ -1558,11 +1562,12 @@ Item
                 spacing: 10
                 Text
                 {
+                    Layout.preferredWidth: 600
+                    wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
-                    text: qsTr("This concludes our introduction tutorial of Graphia and the London transport network!<br>" +
-                          "Graphia can support <b>millions</b> of nodes and edges, this network is just the beginning.<br><br>" +
-                          "Utilising Transforms and Visualisations is key to getting the most from your Graph<br><br>" +
-                          "Click close to complete the tutorial")
+                    text: qsTr("This concludes our brief introduction of " + application.name + " using the London transport network!<br>" +
+                          application.name + " can support <b>millions</b> of nodes and edges, this network is just the beginning.<br><br>" +
+                          "Utilising Transforms and Visualisations is key to getting the most from your graph.")
                 }
             }
         }
