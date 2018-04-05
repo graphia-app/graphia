@@ -56,7 +56,7 @@ IPlugin* Application::pluginForName(const QString& pluginName) const
 #include <corefoundation/CFBundle.h>
 #endif
 
-QStringList Application::resourcesDirectories()
+QStringList Application::resourceDirectories()
 {
     QStringList resourceDirs
     {
@@ -190,7 +190,7 @@ void Application::copyImageToClipboard(const QImage& image)
 
 QString Application::resourceFile(const QString& relativePath) const
 {
-    for(const auto& resourceDirectory : resourcesDirectories())
+    for(const auto& resourceDirectory : resourceDirectories())
     {
         auto resolvedPath = QDir(resourceDirectory).filePath(relativePath);
         bool resolvedPathExists = QFileInfo::exists(resolvedPath);
