@@ -159,12 +159,15 @@ ApplicationWindow
 
         if(misc.firstOpen)
         {
+            misc.firstOpen = false;
+
             var exampleFile = application.resourceFile("examples/London_Tube_River_Bus.graphia");
 
             if(QmlUtils.fileExists(exampleFile))
+            {
+                // Add it to the pending arguments, in case we're in the middle of authenticating
                 _pendingArguments.push(exampleFile);
-            else
-                misc.firstOpen = false;
+            }
         }
     }
 
@@ -1497,10 +1500,6 @@ ApplicationWindow
                             qsTr(" could not be opened due to an error.");
                     errorOpeningFileMessageDialog.open();
                 }
-
-                // If the example file failed to load, we count that as having shown the tutorial,
-                // so we don't get into a situation where we keep trying to open it when it'll never work
-                misc.firstOpen = false;
             }
 
             function openInCurrentTab(fileUrl, fileType, pluginName, parameters)
@@ -1557,6 +1556,14 @@ ApplicationWindow
                         {
                             addToRecentFiles(fileUrl);
                             processOnePendingArgument();
+
+                            if(application.isResourceFileUrl(fileUrl) &&
+                                QmlUtils.baseFileNameForUrlNoExtension(fileUrl) === "London_Tube_River_Bus")
+                            {
+                                // Mild hack: if it looks like the tutorial file,
+                                // it probably is, so start the tutorial
+                                startTutorial();
+                            }
                         }
                         else
                             tabView.onLoadFailure(tabView.findTabIndex(document), fileUrl);

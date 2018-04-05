@@ -1320,16 +1320,14 @@ Item
         }
     }
 
+    function startTutorial()
+    {
+        tutorial.start();
+    }
+
     Tutorial
     {
-        Component.onCompleted:
-        {
-            if(misc.firstOpen)
-            {
-                misc.firstOpen = false;
-                start();
-            }
-        }
+        id: tutorial
 
         Hubble
         {
