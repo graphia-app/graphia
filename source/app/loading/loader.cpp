@@ -449,9 +449,6 @@ QString Loader::pluginNameFor(const QUrl& url)
 
 bool Loader::canOpen(const QUrl& url)
 {
-    if(QFileInfo(url.toLocalFile()).suffix() != Application::nativeExtension())
-        return false;
-
     Header header;
     auto result = parseHeader(url, &header);
 
