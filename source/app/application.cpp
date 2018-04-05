@@ -199,7 +199,7 @@ QString Application::resourceFile(const QString& relativePath) const
     }
 
 #ifndef _DEBUG
-        std::cerr << "Failed to resolve " << relativePath << "\n";
+        std::cerr << "Failed to resolve " << relativePath.toStdString() << "\n";
 #endif
 
     return {};
