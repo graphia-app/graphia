@@ -205,6 +205,26 @@ QString Application::resourceFile(const QString& relativePath) const
     return {};
 }
 
+bool Application::isResourceFile(const QString& path) const
+{
+    QString canonicalPath = QFileInfo(path).canonicalPath();
+
+    for(const auto& resourceDirectory : resourceDirectories())
+    {
+        QString canonicalResourceDirectory = QFileInfo(resourceDirectory).canonicalPath();
+
+        if(canonicalPath.startsWith(canonicalResourceDirectory))
+            return true;
+    }
+
+    return false;
+}
+
+bool Application::isResourceFileUrl(const QUrl& url) const
+{
+    return isResourceFile(url.toLocalFile());
+}
+
 #if defined(Q_OS_WIN32)
 #include <Windows.h>
 #endif

@@ -154,6 +154,8 @@ public:
     Q_INVOKABLE void copyImageToClipboard(const QImage& image);
 
     Q_INVOKABLE QString resourceFile(const QString& relativePath) const;
+    Q_INVOKABLE bool isResourceFile(const QString& path) const;
+    Q_INVOKABLE bool isResourceFileUrl(const QUrl& url) const;
 
     Q_INVOKABLE void crash(int crashType);
 
