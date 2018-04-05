@@ -161,7 +161,7 @@ ApplicationWindow
         {
             misc.firstOpen = false;
 
-            var exampleFile = application.resourceFile("examples/London_Tube_River_Bus.graphia");
+            var exampleFile = application.resourceFile("examples/Tutorial.graphia");
 
             if(QmlUtils.fileExists(exampleFile))
             {
@@ -1324,7 +1324,7 @@ ApplicationWindow
                 onTriggered:
                 {
                     var exampleFileUrl = QmlUtils.urlForFileName(application.resourceFile(
-                        "examples/London_Tube_River_Bus.graphia"));
+                        "examples/Tutorial.graphia"));
 
                     if(QmlUtils.fileUrlExists(exampleFileUrl))
                         openFile(exampleFileUrl, true);
@@ -1571,7 +1571,7 @@ ApplicationWindow
                             processOnePendingArgument();
 
                             if(application.isResourceFileUrl(fileUrl) &&
-                                QmlUtils.baseFileNameForUrlNoExtension(fileUrl) === "London_Tube_River_Bus")
+                                QmlUtils.baseFileNameForUrlNoExtension(fileUrl) === "Tutorial")
                             {
                                 // Mild hack: if it looks like the tutorial file,
                                 // it probably is, so start the tutorial
