@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 
     preferences.define(QStringLiteral("misc/webSearchEngineUrl"),               "https://www.google.com/#q=%1");
 
-    preferences.define(QStringLiteral("misc/firstOpen"),                        true);
+    preferences.define(QStringLiteral("misc/hasSeenTutorial"),                  false);
 
     preferences.define(QStringLiteral("screenshot/width"),                      1920);
     preferences.define(QStringLiteral("screenshot/height"),                     1080);

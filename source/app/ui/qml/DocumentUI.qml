@@ -891,7 +891,6 @@ Item
         section: "misc"
 
         property var fileSaveInitialFolder
-        property bool firstOpen
         property string webSearchEngineUrl
     }
 

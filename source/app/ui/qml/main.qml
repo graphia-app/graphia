@@ -157,10 +157,8 @@ ApplicationWindow
         // Arguments minus the executable
         _pendingArguments = Qt.application.arguments.slice(1);
 
-        if(misc.firstOpen)
+        if(!misc.hasSeenTutorial)
         {
-            misc.firstOpen = false;
-
             var exampleFile = application.resourceFile("examples/Tutorial.graphia");
 
             if(QmlUtils.fileExists(exampleFile))
@@ -255,7 +253,7 @@ ApplicationWindow
 
         property var fileOpenInitialFolder
         property string recentFiles
-        property bool firstOpen
+        property bool hasSeenTutorial
     }
 
     Preferences
@@ -958,14 +956,6 @@ ApplicationWindow
 
     Action
     {
-        id: resetFirstOpenAction
-        text: qsTr("Reset First Open")
-        enabled: !misc.firstOpen
-        onTriggered: { misc.firstOpen = true; }
-    }
-
-    Action
-    {
         id: reportScopeTimersAction
         text: qsTr("Report Scope Timers")
         onTriggered: { application.reportScopeTimers(); }
@@ -1301,7 +1291,6 @@ ApplicationWindow
             MenuItem { action: dumpGraphAction }
             MenuItem { action: toggleFpsMeterAction }
             MenuItem { action: toggleGlyphmapSaveAction }
-            MenuItem { action: resetFirstOpenAction }
             MenuItem { action: reportScopeTimersAction }
         }
         Menu
@@ -1576,6 +1565,7 @@ ApplicationWindow
                                 // Mild hack: if it looks like the tutorial file,
                                 // it probably is, so start the tutorial
                                 startTutorial();
+                                misc.hasSeenTutorial = true;
                             }
                         }
                         else
