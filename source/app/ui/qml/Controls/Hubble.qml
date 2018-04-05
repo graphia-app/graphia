@@ -85,65 +85,62 @@ Item
     {
         id: backRectangle
         color: Qt.rgba(0.96, 0.96, 0.96, 0.9)
-        width: fullHubbleLayout.width + _padding
-        height: fullHubbleLayout.height + _padding
+        width: mainLayout.width + _padding
+        height: mainLayout.height + _padding
         radius: 3
+    }
+
+    ColumnLayout
+    {
+        id: mainLayout
+        anchors.centerIn: backRectangle
 
         ColumnLayout
         {
-            id: fullHubbleLayout
-            anchors.verticalCenter: backRectangle.verticalCenter
-            anchors.horizontalCenter: backRectangle.horizontalCenter
-            ColumnLayout
-            {
-                id: containerLayout
+            id: containerLayout
 
-                Text
+            Text
+            {
+                text: title
+                font.pointSize: 15
+            }
+        }
+
+        RowLayout
+        {
+            Layout.preferredWidth: containerLayout.width
+
+            visible: displayNext || displayClose
+
+            Text
+            {
+                visible: displayNext
+                text: qsTr("Skip")
+                font.underline: true
+                MouseArea
                 {
-                    text: title
-                    font.pointSize: 15
+                    cursorShape: Qt.PointingHandCursor
+                    anchors.fill: parent
+                    onClicked: { skipClicked(); }
                 }
             }
-            RowLayout
+
+            Item { Layout.fillWidth: true }
+
+            Button
             {
-                visible: displayNext || displayClose
-                id: nextSkipButtons
-                Text
-                {
-                    visible: displayNext
-                    text: qsTr("Skip")
-                    font.underline: true
-                    MouseArea
-                    {
-                        cursorShape: Qt.PointingHandCursor
-                        anchors.fill: parent
-                        onClicked: skipClicked();
-                    }
-                }
-                Rectangle
-                {
-                    Layout.fillWidth: true
-                }
-                Button
-                {
-                    visible: displayNext
-                    id: nextButton
-                    text: qsTr("Next")
-                    onClicked:
-                    {
-                        nextClicked();
-                    }
-                }
-                Button
-                {
-                    id: closeButton
-                    visible: displayClose
-                    text: qsTr("Close")
-                    onClicked:
-                    {
-                        closeClicked();
-                    }
-                }
+                visible: displayNext
+                id: nextButton
+                text: qsTr("Next")
+                onClicked: { nextClicked(); }
+            }
+
+            Button
+            {
+                id: closeButton
+                visible: displayClose
+                text: qsTr("Close")
+                onClicked: { closeClicked(); }
             }
         }
     }
