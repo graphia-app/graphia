@@ -1318,6 +1318,19 @@ ApplicationWindow
                 }
             }
 
+            MenuItem
+            {
+                text: qsTr("Show Tutorial…")
+                onTriggered:
+                {
+                    var exampleFileUrl = QmlUtils.urlForFileName(application.resourceFile(
+                        "examples/London_Tube_River_Bus.graphia"));
+
+                    if(QmlUtils.fileUrlExists(exampleFileUrl))
+                        openFile(exampleFileUrl, true);
+                }
+            }
+
             MenuSeparator {}
             MenuItem { action: signOutAction }
         }
