@@ -28,6 +28,8 @@ public:
 
     Q_INVOKABLE QString fileNameForUrl(const QUrl& url) const { return url.toLocalFile(); }
     Q_INVOKABLE QUrl urlForFileName(const QString& fileName) const { return QUrl::fromLocalFile(fileName); }
+    Q_INVOKABLE QUrl urlForUserInput(const QString& userInput) const { return QUrl::fromUserInput(userInput); }
+    Q_INVOKABLE bool fileExists(const QString& fileName) const { return QFileInfo::exists(fileName); }
     Q_INVOKABLE bool fileUrlExists(const QUrl& url) const { return QFileInfo::exists(url.toLocalFile()); }
 
     Q_INVOKABLE QUrl replaceExtension(const QUrl& url, const QString& extension) const

@@ -102,8 +102,8 @@ ApplicationWindow
         var argument = _pendingArguments[0];
         _pendingArguments.shift();
 
-        var fileUrl = QmlUtils.urlForFileName(argument);
-        openFile(fileUrl, true);
+        var url = QmlUtils.urlForUserInput(argument);
+        openFile(url, true);
     }
 
     Component.onCompleted:
@@ -159,10 +159,9 @@ ApplicationWindow
 
         if(misc.firstOpen)
         {
-            var exampleFile = QmlUtils.urlForFileName(application.resourceFile(
-                "examples/London_Tube_River_Bus.graphia"));
+            var exampleFile = application.resourceFile("examples/London_Tube_River_Bus.graphia");
 
-            if(QmlUtils.fileUrlExists(exampleFile))
+            if(QmlUtils.fileExists(exampleFile))
                 _pendingArguments.push(exampleFile);
             else
                 misc.firstOpen = false;
