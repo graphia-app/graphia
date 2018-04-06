@@ -56,6 +56,7 @@ Item
         return text;
     }
 
+    readonly property string appName: application !== null ? application.name : ""
 
     property string status: document.status
 
@@ -226,7 +227,7 @@ Item
             title: qsTr("Save File...")
             fileMode: Labs.FileDialog.SaveFile
             defaultSuffix: selectedNameFilter.extensions[0]
-            nameFilters: [ application.name + " files (*." + application.nativeExtension + ")", "All files (*)" ]
+            nameFilters: [ appName + " files (*." + application.nativeExtension + ")", "All files (*)" ]
 
             onAccepted:
             {
@@ -1050,7 +1051,7 @@ Item
         minimumWidth: 480
         minimumHeight: 480
         title: application && document.pluginName.length > 0 ?
-                   document.pluginName + " - " + application.name : "";
+                   document.pluginName + " - " + appName : "";
         visible: root.visible && root.pluginPoppedOut && plugin.loaded
         property bool maximised: visibility === Window.Maximized
 
@@ -1336,7 +1337,7 @@ Item
             Text
             {
                 textFormat: Text.StyledText
-                text: qsTr("As this is your first time starting " + application.name + ", we have opened an example graph.<br>" +
+                text: qsTr("As this is your first time starting " + appName + ", we have opened an example graph.<br>" +
                       "The graph represents the <b>London Tube System and River Buses!</b>")
             }
         }
@@ -1415,7 +1416,7 @@ Item
                     Layout.preferredWidth: 400
                     wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
-                    text: qsTr("When a graph contains multiple disconnected graphs (<b>Components</b>) " + application.name +
+                    text: qsTr("When a graph contains multiple disconnected graphs (<b>Components</b>) " + appName +
                           " opens the file in Overview mode. From Overview mode all components are visible. In this graph the " +
                           "left component is the <b>London Tube map</b>, while the right component is the <b>London Riverbus " +
                           "Network</b>.<br><br>" +
@@ -1565,8 +1566,8 @@ Item
                     Layout.preferredWidth: 600
                     wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
-                    text: qsTr("This concludes our brief introduction of " + application.name + " using the London transport network!<br>" +
-                          application.name + " can support <b>millions</b> of nodes and edges, this network is just the beginning.<br><br>" +
+                    text: qsTr("This concludes our brief introduction of " + appName + " using the London transport network!<br>" +
+                          appName + " can support <b>millions</b> of nodes and edges, this network is just the beginning.<br><br>" +
                           "Utilising Transforms and Visualisations is key to getting the most from your graph.")
                 }
             }
