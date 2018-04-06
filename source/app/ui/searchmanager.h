@@ -23,7 +23,7 @@ class SearchManager : public QObject
 public:
     explicit SearchManager(const GraphModel& graphModel);
 
-    void findNodes(const QString& term, Flags<FindOptions> options,
+    void findNodes(QString term, Flags<FindOptions> options,
         QStringList attributeNames, FindSelectStyle selectStyle);
     void clearFoundNodeIds();
     void refresh();

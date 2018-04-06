@@ -14,7 +14,7 @@ SearchManager::SearchManager(const GraphModel& graphModel) :
     _graphModel(&graphModel)
 {}
 
-void SearchManager::findNodes(const QString& term, Flags<FindOptions> options,
+void SearchManager::findNodes(QString term, Flags<FindOptions> options,
     QStringList attributeNames, FindSelectStyle selectStyle)
 {
     _term = term;
@@ -22,7 +22,7 @@ void SearchManager::findNodes(const QString& term, Flags<FindOptions> options,
     _attributeNames = std::move(attributeNames);
     _selectStyle = selectStyle;
 
-    if(_term.isEmpty())
+    if(term.isEmpty())
     {
         clearFoundNodeIds();
         return;
@@ -54,17 +54,17 @@ void SearchManager::findNodes(const QString& term, Flags<FindOptions> options,
     }
 
     if(!options.test(FindOptions::MatchUsingRegex))
-        _term = QRegularExpression::escape(_term);
+        term = QRegularExpression::escape(term);
 
     if(options.test(FindOptions::MatchWholeWords))
-        _term = QStringLiteral(R"(\b(%1)\b)").arg(_term);
+        term = QStringLiteral(R"(\b(%1)\b)").arg(term);
 
     QRegularExpression::PatternOptions reOptions;
 
     if(!options.test(FindOptions::MatchCase))
         reOptions.setFlag(QRegularExpression::CaseInsensitiveOption);
 
-    QRegularExpression re(_term, reOptions);
+    QRegularExpression re(term, reOptions);
 
     if(re.isValid())
     {
@@ -75,7 +75,7 @@ void SearchManager::findNodes(const QString& term, Flags<FindOptions> options,
         std::vector<NodeConditionFn> conditionFns;
         for(auto& attribute : attributes)
         {
-            auto conditionFn = CreateConditionFnFor::node(attribute, op, _term);
+            auto conditionFn = CreateConditionFnFor::node(attribute, op, term);
 
             if(conditionFn != nullptr)
                 conditionFns.emplace_back(conditionFn);
