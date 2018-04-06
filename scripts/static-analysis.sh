@@ -62,7 +62,7 @@ then
 fi
 
 parallel -n1 -P${NUM_CORES} -q \
-  clang-tidy -p ${BUILD_DIR} {} \
+  clang-tidy -quiet -p ${BUILD_DIR} {} \
   ::: ${CPP_FILES}
 
 # clazy
