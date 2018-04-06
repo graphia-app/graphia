@@ -5,9 +5,12 @@ import QtQuick.Layouts 1.3
 import SortFilterProxyModel 0.2
 import com.kajeka 1.0
 
+import Qt.labs.platform 1.0 as Labs
+
 Window
 {
     property var models
+    property var currentHeatmap
     title: qsTr("Enrichment Results")
     height: 200
     width: 800
@@ -138,6 +141,11 @@ Window
                                     return scrollViewVertical.flickableItem.contentY /
                                             (scrollViewVertical.flickableItem.contentHeight - scrollViewVertical.viewport.height);
                                 }
+                                onRightClick:
+                                {
+                                    currentHeatmap = heatmap;
+                                    plotContextMenu.popup();
+                                }
                             }
                             ScrollView
                             {
@@ -187,5 +195,29 @@ Window
     {
         for(var i=0; i<tabView.count; i++)
             tabView.getTab(i).children[0].update();
+    }
+    Menu
+    {
+        id: plotContextMenu
+        MenuItem
+        {
+            text: qsTr("Save as Image...")
+            onTriggered: { heatmapSaveDialog.open(); }
+        }
+    }
+
+    Labs.FileDialog
+    {
+        id: heatmapSaveDialog
+        visible: false
+        fileMode: Labs.FileDialog.SaveFile
+        defaultSuffix: selectedNameFilter.extensions[0]
+        selectedNameFilter.index: 1
+        title: qsTr("Save Plot As Image")
+        nameFilters: [ "PDF Document (*.pdf)", "PNG Image (*.png)", "JPEG Image (*.jpg *.jpeg)" ]
+        onAccepted:
+        {
+            currentHeatmap.savePlotImage(file, selectedNameFilter.extensions);
+        }
     }
 }

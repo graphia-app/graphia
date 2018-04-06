@@ -59,6 +59,7 @@ public:
     void setElideLabelWidth(int elideLabelWidth);
 
     Q_INVOKABLE void buildPlot();
+    Q_INVOKABLE void savePlotImage(const QUrl &url, const QStringList &extensions);
 protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
@@ -68,6 +69,7 @@ protected:
     void routeMouseEvent(QMouseEvent *event);
 
 signals:
+    void rightClick();
     void tableModelChanged();
     void scrollAmountChanged();
     void horizontalRangeSizeChanged();

@@ -88,6 +88,9 @@ void EnrichmentHeatmapItem::mousePressEvent(QMouseEvent* event)
 void EnrichmentHeatmapItem::mouseReleaseEvent(QMouseEvent* event)
 {
     routeMouseEvent(event);
+    hideTooltip();
+    if(event->button() == Qt::RightButton)
+        emit rightClick();
 }
 
 void EnrichmentHeatmapItem::mouseMoveEvent(QMouseEvent* event)
@@ -113,7 +116,7 @@ void EnrichmentHeatmapItem::hoverMoveEvent(QHoverEvent *event)
 
 void EnrichmentHeatmapItem::hoverLeaveEvent(QHoverEvent *event)
 {
-
+    hideTooltip();
 }
 
 void EnrichmentHeatmapItem::routeMouseEvent(QMouseEvent* event)
@@ -346,6 +349,18 @@ void EnrichmentHeatmapItem::showTooltip()
     _hoverLabel->position->setPixelPosition(targetPosition);
 
     update();
+}
+
+void EnrichmentHeatmapItem::savePlotImage(const QUrl& url, const QStringList& extensions)
+{
+    if(extensions.contains(QStringLiteral("png")))
+        _customPlot.savePng(url.toLocalFile());
+    else if(extensions.contains(QStringLiteral("pdf")))
+        _customPlot.savePdf(url.toLocalFile());
+    else if(extensions.contains(QStringLiteral("jpg")))
+        _customPlot.saveJpg(url.toLocalFile());
+
+    QDesktopServices::openUrl(url);
 }
 
 void EnrichmentHeatmapItem::hideTooltip()
