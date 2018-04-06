@@ -144,12 +144,13 @@ Item
             }
             Text
             {
+                Layout.preferredWidth: 500
+                wrapMode: Text.WordWrap
                 textFormat: Text.StyledText
-                text: qsTr("Transforms are a powerful way to modify the graph and calculate additional attributes<br>" +
-                      "They can be used to remove nodes, collapse edges, calculate node metrics and much more<br>" +
-                      "Existing transforms will appear above <b>Add Transform</b><br><br>" +
-                      "Click <b>Add Transform</b> to bring up the add transform dialog<br>" +
-                      "Each attribute added to graph will also add a Visualisation<br>")
+                text: qsTr("Transforms are a powerful way to modify the graph and calculate additional attributes. " +
+                      "They can be used to remove nodes or edges, calculate metrics and much more. " +
+                      "Transforms will appear above. They are applied in order, from top to bottom.<br><br>" +
+                      "Click <b>Add Transform</b> to create a new one.")
             }
         }
     }

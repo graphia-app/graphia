@@ -151,11 +151,12 @@ Item
             }
             Text
             {
+                Layout.preferredWidth: 500
+                wrapMode: Text.WordWrap
                 textFormat: Text.StyledText
-                text: qsTr("Visualisations modify the appearance of the Graph depending on attributes<br>" +
-                      "<b>Node Colour</b>, <b>Size</b> and <b>Text</b> can all be linked to an attribute<br>" +
-                      "Existing visualisations can be modified from here and new ones added<br><br>" +
-                      "Click <b>Add Visualisation</b> to bring up the add visualisation dialog")
+                text: qsTr("Visualisations allow for displaying attribute values by modifying the appearance of the graph elements. " +
+                      "Node or edge <b>Colour</b>, <b>Size</b> and <b>Text</b> can all be linked to an attribute. " +
+                      "Visualisations can be created here or existing ones modified.")
             }
         }
     }
