@@ -1316,7 +1316,10 @@ ApplicationWindow
                         "examples/Tutorial.graphia"));
 
                     if(QmlUtils.fileUrlExists(exampleFileUrl))
-                        openFile(exampleFileUrl, true);
+                    {
+                        var tutorialAlreadyOpen = tabView.findAndActivateTab(exampleFileUrl);
+                        openFile(exampleFileUrl, !tutorialAlreadyOpen);
+                    }
                 }
             }
 
@@ -1542,6 +1545,21 @@ ApplicationWindow
                 }
 
                 return -1;
+            }
+
+            function findAndActivateTab(fileUrl)
+            {
+                for(var index = 0; index < count; index++)
+                {
+                    var tab = getTab(index);
+                    if(tab.item.fileUrl === fileUrl)
+                    {
+                        currentIndex = index;
+                        return true;
+                    }
+                }
+
+                return false;
             }
 
             Component
