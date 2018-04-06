@@ -1,5 +1,7 @@
 import QtQuick 2.0
 
+import com.kajeka 1.0
+
 Item
 {
     property int visibleHubbleId: -1
@@ -15,6 +17,18 @@ Item
     {
         return visibleHubbleId < hubbles.length - 1;
     }
+
+    Preferences
+    {
+        id: misc
+        section: "misc"
+        property bool disableHubbles
+    }
+
+    // We unconditionally disable tooltip style Hubbles for the duration of
+    // the tutorial, but need to track the state of the user preference so
+    // it can be restored to the original value once the tutorial is closed
+    property bool _tooltipHubbleOriginalDisableState: false
 
     default property list<Item> hubbles
 
@@ -32,11 +46,16 @@ Item
     {
         closeCurrentHubble();
         visibleHubbleId = -1;
+
+        misc.disableHubbles = _tooltipHubbleOriginalDisableState;
     }
 
     function start()
     {
+        _tooltipHubbleOriginalDisableState = misc.disableHubbles;
         reset();
+        misc.disableHubbles = true;
+
         gotoNextHubble();
     }
 
@@ -64,13 +83,13 @@ Item
             {
                 currentHubble.displayNext = true;
                 currentHubble.nextClicked.connect(gotoNextHubble);
-                currentHubble.skipClicked.connect(closeCurrentHubble);
+                currentHubble.skipClicked.connect(reset);
             }
             else
             {
                 currentHubble.displayNext = false;
                 currentHubble.displayClose = true;
-                currentHubble.closeClicked.connect(closeCurrentHubble);
+                currentHubble.closeClicked.connect(reset);
             }
 
             currentHubble.opacity = 1.0;

@@ -61,7 +61,10 @@ Item
     onVisibleChanged:
     {
         if(misc.disableHubbles && tooltipMode)
+        {
             visible = false;
+            return;
+        }
 
         if(visible)
         {
