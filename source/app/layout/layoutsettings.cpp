@@ -25,7 +25,7 @@ void LayoutSettings::setValue(const QString& name, float value)
 
 const LayoutSetting* LayoutSettings::setting(const QString& name) const
 {
-    auto* mutableThis = const_cast<LayoutSettings*>(this);
+    auto* mutableThis = const_cast<LayoutSettings*>(this); // NOLINT
     return mutableThis->setting(name);
 }
 
