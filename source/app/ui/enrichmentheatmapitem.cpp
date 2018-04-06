@@ -21,11 +21,25 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPainted
 
     _customPlot.yAxis2->setVisible(true);
     _customPlot.yAxis->setVisible(false);
+
+    QCPColorGradient gradient;
+    auto insignificantColor = QColor(Qt::gray);
+    auto verySignificantColor = QColor(Qt::yellow);
+    auto significantColor = QColor(Qt::red);
+    gradient.setColorStopAt(0, verySignificantColor);
+    gradient.setColorStopAt(5.0 / 6.0, significantColor);
+    gradient.setColorStopAt(5.0 / 6.0 + 0.001, insignificantColor);
+    gradient.setColorStopAt(1.0, insignificantColor);
+
     _colorMap->setInterpolate(false);
     _colorMap->setColorScale(_colorScale);
+    _colorMap->setGradient(gradient);
+    _colorMap->setTightBoundary(true);
 
     QFont defaultFont10Pt;
     defaultFont10Pt.setPointSize(10);
+
+    _defaultFont9Pt.setPointSize(9);
 
     _hoverLabel = new QCPItemText(&_customPlot);
     _hoverLabel->setPositionAlignment(Qt::AlignVCenter|Qt::AlignLeft);
@@ -36,23 +50,6 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPainted
     _hoverLabel->setPadding(QMargins(3, 3, 3, 3));
     _hoverLabel->setClipToAxisRect(false);
     _hoverLabel->setVisible(false);
-
-    _colorMap->setGradient(QCPColorGradient::gpHot);
-    _colorMap->data()->setSize(10, 10);
-    // Offsets required as the cells are centered on the datapoints
-    _colorMap->data()->setRange(QCPRange(0.5,9.5), QCPRange(0.5,9.5));
-    _colorMap->data()->setRange(QCPRange(0.5,9.5), QCPRange(0.5,9.5));
-    for(int i=0; i<10; i++)
-    {
-        for(int j=0; j<10; j++)
-        {
-            _colorMap->data()->setCell(i,j, i+j);
-        }
-    }
-    _colorMap->rescaleDataRange(true);
-    _colorMap->setTightBoundary(false);
-
-    _defaultFont9Pt.setPointSize(9);
 
     setAcceptedMouseButtons(Qt::AllButtons);
     setAcceptHoverEvents(true);
@@ -196,12 +193,25 @@ void EnrichmentHeatmapItem::buildPlot()
     for(int i=0; i<_tableModel->rowCount(); i++)
     {
         // The data is offset by 1 to account for the empty margin
+        // Set the data of the cell
         _colorMap->data()->setCell(fullLabelToXAxis[_tableModel->data(i, "Attribute Group").toString()] + 1,
                                    fullLabelToYAxis[_tableModel->data(i, "Selection").toString()] + 1,
                                    _tableModel->data(i, "Fishers").toFloat());
+
+        // Ugly hack: Colors blend from margin cells. I recolour them to match adjacent cells so you can't tell
+        // 200 IQ fix really...
+        if(fullLabelToXAxis[_tableModel->data(i, "Attribute Group").toString()] == 0)
+            _colorMap->data()->setCell(fullLabelToXAxis[_tableModel->data(i, "Attribute Group").toString()],
+                                       fullLabelToYAxis[_tableModel->data(i, "Selection").toString()] + 1,
+                                       _tableModel->data(i, "Fishers").toFloat());
+        else if(fullLabelToYAxis[_tableModel->data(i, "Selection").toString()] == attributeValueSetB.size() - 1)
+        {
+            _colorMap->data()->setCell(fullLabelToXAxis[_tableModel->data(i, "Attribute Group").toString()] + 1,
+                                       fullLabelToYAxis[_tableModel->data(i, "Selection").toString()] + 2,
+                                       _tableModel->data(i, "Fishers").toFloat());
+        }
     }
-    _colorMap->rescaleDataRange(true);
-    _colorScale->rescaleDataRange(false);
+    _colorScale->setDataRange(QCPRange(0, 0.06));
 }
 
 void EnrichmentHeatmapItem::updatePlotSize()
