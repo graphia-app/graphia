@@ -213,9 +213,9 @@ private:
         TerminalValueWrapper _rhs;
         bool _operandsAreSwitched;
 
-        AttributeValueOpVistor(const Attribute& lhs, const TerminalValueWrapper& rhs,
+        AttributeValueOpVistor(const Attribute& lhs, TerminalValueWrapper rhs,
                                bool operandsAreSwitched = false) :
-            _lhs(lhs), _rhs(rhs), _operandsAreSwitched(operandsAreSwitched)
+            _lhs(lhs), _rhs(std::move(rhs)), _operandsAreSwitched(operandsAreSwitched)
         {}
 
         ElementConditionFn<E> operator()(ConditionFnOp::Equality op) const

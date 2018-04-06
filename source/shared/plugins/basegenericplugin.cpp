@@ -82,7 +82,7 @@ bool BaseGenericPluginInstance::load(const QByteArray& data, int dataVersion,
 
     graph.setPhase(QObject::tr("Edge Data"));
     if(!_userEdgeData.load(jsonObject["userEdgeData"], progressFn))
-        return false;
+        return false; // NOLINT
 
     return true;
 }

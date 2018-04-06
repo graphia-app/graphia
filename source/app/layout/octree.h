@@ -48,7 +48,7 @@ template<typename TreeType> struct SubVolume
         const auto zh = _boundingBox.zLength() * 0.5f;
 
         if(cz + zh == cz || cz - zh == cz)
-            return false;
+            return false; // NOLINT
 
         return true;
     }

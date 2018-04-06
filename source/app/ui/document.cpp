@@ -363,7 +363,7 @@ static QStringList sortedTransforms(QStringList transforms)
             return false;
 
         if(!aPinned && bPinned)
-            return true;
+            return true; // NOLINT
 
         return false;
     });
