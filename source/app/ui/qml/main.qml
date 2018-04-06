@@ -1717,12 +1717,13 @@ ApplicationWindow
             }
             Text
             {
+                Layout.preferredWidth: 500
+                wrapMode: Text.WordWrap
                 textFormat: Text.StyledText
-                text: qsTr("The Graph layout system can be resumed or paused from here.<br>" +
-                      "The layout system uses a <b>force-directed</b> model to position nodes within <br>" +
-                      "the graph. This improves the graphs visual navigability<br><br>" +
-                      "The layout system will be automatically stopped if the system is deemed to not be<br>" +
-                      "improving the layout anymore<br>");
+                text: qsTr("The graph layout system can be resumed or paused from here.<br>" +
+                      "The layout system uses a <b>force-directed</b> model to position nodes. " +
+                      "This improves the graph's visual navigability.<br><br>" +
+                      "The process will automatically stop when it converges on a stable layout.");
             }
         }
     }
