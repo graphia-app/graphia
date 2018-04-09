@@ -11,6 +11,7 @@ Window
 {
     property var models
     property var currentHeatmap
+    property var wizard
     title: qsTr("Enrichment Results")
     height: 200
     width: 800
@@ -42,6 +43,13 @@ Window
                     iconName: "x-office-spreadsheet"
                     checkable: true
                     tooltip: qsTr("Show Heatmap")
+                }
+                ToolButton
+                {
+                    id: addEnrichment
+                    iconName: "list-add"
+                    tooltip: qsTr("New Enrichment")
+                    onClicked: wizard.show()
                 }
             }
         }

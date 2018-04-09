@@ -1430,6 +1430,7 @@ ApplicationWindow
     EnrichmentResults
     {
         id: enrichmentResults
+        wizard: enrichmentWizard
         models: currentDocument ? currentDocument.enrichmentTableModels : []
     }
 
