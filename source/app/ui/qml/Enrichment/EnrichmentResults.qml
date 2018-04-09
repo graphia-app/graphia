@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Window 2.3
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
+import QtQuick.Dialogs 1.3
 import SortFilterProxyModel 0.2
 import com.kajeka 1.0
 
@@ -16,6 +17,19 @@ Window
     height: 200
     width: 800
 
+    MessageDialog
+    {
+        id: confirmDelete
+        title: "Delete Enrichment Results?"
+        text: "Are you sure you want to delete this Enrichment result?"
+        icon: StandardIcon.Warning
+        standardButtons: StandardButton.Yes | StandardButton.Cancel
+        onYes:
+        {
+            models.remove(models.get(tabView.currentIndex));
+        }
+    }
+
     ColumnLayout
     {
         anchors.fill: parent
@@ -24,12 +38,6 @@ Window
             anchors.fill: parent
             RowLayout
             {
-                ToolButton
-                {
-                    iconName: "edit-delete"
-                    onClicked: models.remove(models.get(tabView.currentIndex))
-                    tooltip: qsTr("Delete result table")
-                }
                 ToolButton
                 {
                     id: showOnlyEnrichedButton
@@ -43,6 +51,12 @@ Window
                     iconName: "x-office-spreadsheet"
                     checkable: true
                     tooltip: qsTr("Show Heatmap")
+                }
+                ToolButton
+                {
+                    iconName: "edit-delete"
+                    onClicked: confirmDelete.open();
+                    tooltip: qsTr("Delete result table")
                 }
                 ToolButton
                 {
