@@ -14,7 +14,7 @@ class CorrelationNodeAttributeTableModel : public NodeAttributeTableModel
 
 private:
     std::vector<QString>* _dataColumnNames =  nullptr;
-    std::vector<double>* _data = nullptr;
+    std::vector<double>* _dataValues = nullptr;
 
     int _firstDataColumnRole = -1;
 
@@ -24,7 +24,7 @@ private:
 public:
     void initialise(IDocument* document, UserNodeData* userNodeData,
                     std::vector<QString>* dataColumnNames = nullptr,
-                    std::vector<double>* data = nullptr);
+                    std::vector<double>* dataValues = nullptr);
 
     void updateRoleNames() override;
 

@@ -18,14 +18,14 @@ QStringList CorrelationNodeAttributeTableModel::columnNames() const
 
 QVariant CorrelationNodeAttributeTableModel::dataValue(int row, int role) const
 {
-    if(_dataColumnNames != nullptr && _data != nullptr &&
+    if(_dataColumnNames != nullptr && _dataValues != nullptr &&
         _firstDataColumnRole > 0 && role >= _firstDataColumnRole)
     {
         size_t column = role - _firstDataColumnRole;
         size_t index = (row * _dataColumnNames->size()) + column;
 
-        Q_ASSERT(index < _data->size());
-        return _data->at(index);
+        Q_ASSERT(index < _dataValues->size());
+        return _dataValues->at(index);
     }
 
     return NodeAttributeTableModel::dataValue(row, role);
@@ -33,10 +33,10 @@ QVariant CorrelationNodeAttributeTableModel::dataValue(int row, int role) const
 
 void CorrelationNodeAttributeTableModel::initialise(IDocument* document, UserNodeData* userNodeData,
                                                     std::vector<QString>* dataColumnNames,
-                                                    std::vector<double>* data)
+                                                    std::vector<double>* dataValues)
 {
     _dataColumnNames = dataColumnNames;
-    _data = data;
+    _dataValues = dataValues;
 
     NodeAttributeTableModel::initialise(document, userNodeData);
 }
