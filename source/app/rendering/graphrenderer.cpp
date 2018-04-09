@@ -1230,7 +1230,7 @@ void GraphRenderer::prepareScreenshotFBO()
 
 void GraphRenderer::enableSceneUpdate()
 {
-    std::unique_lock<std::mutex> lock(_sceneUpdateMutex);
+    std::unique_lock<std::recursive_mutex> lock(_sceneUpdateMutex);
     Q_ASSERT(_sceneUpdateDisabled > 0);
     _sceneUpdateDisabled--;
     resetTime();
@@ -1238,13 +1238,13 @@ void GraphRenderer::enableSceneUpdate()
 
 void GraphRenderer::disableSceneUpdate()
 {
-    std::unique_lock<std::mutex> lock(_sceneUpdateMutex);
+    std::unique_lock<std::recursive_mutex> lock(_sceneUpdateMutex);
     _sceneUpdateDisabled++;
 }
 
 void GraphRenderer::ifSceneUpdateEnabled(const std::function<void()>& f)
 {
-    std::unique_lock<std::mutex> lock(_sceneUpdateMutex);
+    std::unique_lock<std::recursive_mutex> lock(_sceneUpdateMutex);
     if(_sceneUpdateDisabled == 0)
         f();
 }

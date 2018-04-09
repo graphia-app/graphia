@@ -225,7 +225,7 @@ private:
     QTime _time;
     float _lastTime = 0.0f;
     int _sceneUpdateDisabled = 1;
-    std::mutex _sceneUpdateMutex;
+    std::recursive_mutex _sceneUpdateMutex;
 
     std::atomic<bool> _layoutChanged;
     bool _synchronousLayoutChanged = false;
