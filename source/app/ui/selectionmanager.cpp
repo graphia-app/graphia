@@ -226,24 +226,27 @@ void SelectionManager::invertNodeSelection()
         emit selectionChanged(this);
 }
 
-void SelectionManager::setNodesMask(const NodeIdSet& nodeIds)
+void SelectionManager::setNodesMask(const NodeIdSet& nodeIds, bool applyMask)
 {
     _nodeIdsMask = nodeIds;
 
-    std::vector<NodeId> nodeIdsToDeselect;
-
-    for(const auto& selectedNodeId : _selectedNodeIds)
+    if(applyMask)
     {
-        if(!u::contains(_nodeIdsMask, selectedNodeId))
-            nodeIdsToDeselect.emplace_back(selectedNodeId);
-    }
+        std::vector<NodeId> nodeIdsToDeselect;
 
-    deselectNodes(nodeIdsToDeselect);
+        for(const auto& selectedNodeId : _selectedNodeIds)
+        {
+            if(!u::contains(_nodeIdsMask, selectedNodeId))
+                nodeIdsToDeselect.emplace_back(selectedNodeId);
+        }
+
+        deselectNodes(nodeIdsToDeselect);
+    }
 }
 
-void SelectionManager::setNodesMask(const std::vector<NodeId>& nodeIds)
+void SelectionManager::setNodesMask(const std::vector<NodeId>& nodeIds, bool applyMask)
 {
-    setNodesMask(NodeIdSet(nodeIds.begin(), nodeIds.end()));
+    setNodesMask(NodeIdSet(nodeIds.begin(), nodeIds.end()), applyMask);
 }
 
 QString SelectionManager::numNodesSelectedAsString() const

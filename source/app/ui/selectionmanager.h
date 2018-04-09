@@ -35,8 +35,8 @@ public:
     bool clearNodeSelection() override;
     void invertNodeSelection() override;
 
-    void setNodesMask(const NodeIdSet& nodeIds);
-    void setNodesMask(const std::vector<NodeId>& nodeIds);
+    void setNodesMask(const NodeIdSet& nodeIds, bool applyMask = true);
+    void setNodesMask(const std::vector<NodeId>& nodeIds, bool applyMask = true);
     void clearNodesMask() { _nodeIdsMask.clear(); }
 
     int numNodesSelected() const { return static_cast<int>(_selectedNodeIds.size()); }

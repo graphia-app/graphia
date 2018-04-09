@@ -1208,7 +1208,7 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
         return;
     }
 
-    _selectionManager->setNodesMask(searchManager->foundNodeIds());
+    _selectionManager->setNodesMask(searchManager->foundNodeIds(), false);
     _foundNodeIds = u::vectorFrom(searchManager->foundNodeIds());
 
     std::sort(_foundNodeIds.begin(), _foundNodeIds.end(), [this](auto a, auto b)
