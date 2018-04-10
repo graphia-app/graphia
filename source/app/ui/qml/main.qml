@@ -145,6 +145,9 @@ ApplicationWindow
                 Window.Maximized : Window.Windowed;
         }
 
+        // Arguments minus the executable
+        _pendingArguments = Qt.application.arguments.slice(1);
+
         if(!application.tryToAuthenticateWithCachedCredentials())
         {
             // If we failed immediately, show the authentication UI
@@ -153,9 +156,6 @@ ApplicationWindow
 
         mainMenuBar.updateVisibility();
         mainWindow.visible = true;
-
-        // Arguments minus the executable
-        _pendingArguments = Qt.application.arguments.slice(1);
 
         if(!misc.hasSeenTutorial)
         {
