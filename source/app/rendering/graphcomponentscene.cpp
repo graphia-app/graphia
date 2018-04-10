@@ -51,6 +51,8 @@ void GraphComponentScene::update(float t)
     // The static component, or the one transitioning in
     if(componentRenderer() != nullptr)
     {
+        Q_ASSERT(componentRenderer()->initialised());
+
         componentRenderer()->setDimensions(QRect(offset, 0, _width, _height));
 
         if(_transitionStyle == TransitionStyle::Fade ||
@@ -67,6 +69,8 @@ void GraphComponentScene::update(float t)
     if(transitioningComponentRenderer() != nullptr &&
        transitioningComponentRenderer() != componentRenderer())
     {
+        Q_ASSERT(transitioningComponentRenderer()->initialised());
+
         transitioningComponentRenderer()->setDimensions(QRect(outOffset, 0, _width, _height));
 
         if(_transitionStyle == TransitionStyle::Fade ||
