@@ -534,7 +534,12 @@ bool GraphRenderer::transitionActive() const
 void GraphRenderer::moveFocusToNode(NodeId nodeId, float radius)
 {
     if(mode() == Mode::Component)
-        _graphComponentScene->moveFocusToNode(nodeId, radius);
+    {
+        executeOnRendererThread([this, nodeId, radius]
+        {
+            _graphComponentScene->moveFocusToNode(nodeId, radius);
+        }, QStringLiteral("GraphRenderer::moveFocusToNode"));
+    }
     else if(mode() == Mode::Overview)
     {
         // To focus on a node, we need to be in component mode
