@@ -1112,7 +1112,7 @@ QStringList Document::attributeGroupNames()
     QStringList list;
     if(graphModel() != nullptr)
     {
-        auto& attributeNames = graphModel()->attributeNames();
+        const auto& attributeNames = graphModel()->attributeNames();
         for(const auto& name : attributeNames)
         {
             auto* attribute = graphModel()->attributeByName(name);
