@@ -3,14 +3,14 @@
 DoubleBufferedTexture::DoubleBufferedTexture()
 {
     resolveOpenGLFunctions();
-    glGenTextures(_textures.size(), &_textures[0]);
+    glGenTextures(static_cast<GLsizei>(_textures.size()), &_textures[0]);
 }
 
 DoubleBufferedTexture::~DoubleBufferedTexture()
 {
     if(_textures[0] != 0)
     {
-        glDeleteTextures(_textures.size(), &_textures[0]);
+        glDeleteTextures(static_cast<GLsizei>(_textures.size()), &_textures[0]);
         _textures = {};
     }
 }
