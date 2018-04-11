@@ -21,7 +21,7 @@ int EnrichmentTableModel::columnCount(const QModelIndex &parent) const
 QVariant EnrichmentTableModel::data(const QModelIndex &index, int role) const
 {
     if(role < Qt::UserRole)
-        return {};
+        return {};using Row = std::vector<QVariant>;
     size_t row = index.row();
     size_t column = (role - Qt::UserRole);
 

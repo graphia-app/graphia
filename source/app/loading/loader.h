@@ -7,7 +7,7 @@
 #include "shared/graph/elementid_containers.h"
 
 #include "layout/nodepositions.h"
-#include "attributes/enrichmentcalculator.h"
+#include "attributes/enrichmenttablemodel.h"
 
 #include <QString>
 #include <QStringList>
@@ -23,7 +23,7 @@ private:
     QStringList _transforms;
     QStringList _visualisations;
     std::map<QString, NodeIdSet> _bookmarks;
-    std::vector<EnrichmentCalculator::Table> _enrichmentTablesData;
+    std::vector<EnrichmentTableModel::Table> _enrichmentTablesData;
     std::unique_ptr<ExactNodePositions> _nodePositions;
     QByteArray _uiData;
     QByteArray _pluginUiData;
@@ -37,7 +37,7 @@ public:
     QStringList transforms() const { return _transforms; }
     QStringList visualisations() const { return _visualisations; }
     const auto& bookmarks() const { return _bookmarks; }
-    const std::vector<EnrichmentCalculator::Table>& enrichmentTableModels() const
+    const std::vector<EnrichmentTableModel::Table>& enrichmentTableModels() const
     { return _enrichmentTablesData; }
     const ExactNodePositions* nodePositions() const;
     const QByteArray& uiData() const { return _uiData; }

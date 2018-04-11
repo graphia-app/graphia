@@ -14,14 +14,14 @@ Window
     property var currentHeatmap
     property var wizard
     title: qsTr("Enrichment Results")
-    height: 200
-    width: 800
+    minimumHeight: 400
+    minimumWidth: 800
 
     MessageDialog
     {
         id: confirmDelete
-        title: "Delete Enrichment Results?"
-        text: "Are you sure you want to delete this Enrichment result?"
+        title: qsTr("Delete Enrichment Results?")
+        text: qsTr("Are you sure you want to delete this Enrichment result?")
         icon: StandardIcon.Warning
         standardButtons: StandardButton.Yes | StandardButton.Cancel
         onYes:
@@ -212,11 +212,6 @@ Window
             }
         }
 
-    }
-    onModelsChanged:
-    {
-        for(var i=0; i<tabView.count; i++)
-            tabView.getTab(i).children[0].update();
     }
     Menu
     {

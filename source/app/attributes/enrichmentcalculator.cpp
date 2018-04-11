@@ -60,20 +60,20 @@ double EnrichmentCalculator::Fishers(int a, int b, int c, int d)
     return twoPval;
 }
 
-EnrichmentCalculator::Table EnrichmentCalculator::overRepAgainstEachAttribute(QString attributeAgainst, QString attributeFor,
+EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(QString attributeA, QString attributeB,
                                                        IGraphModel* graphModel, ICommand& command)
 {
     // Count of attribute values within the attribute
-    std::map<QString, int> attributeValueEntryCountTotal;
-    std::map<QString, int> attributeValueEntryForCountTotal;
-    Table tableModel;
+    std::map<QString, int> attributeValueEntryCountATotal;
+    std::map<QString, int> attributeValueEntryCountBTotal;
+    EnrichmentTableModel::Table tableModel;
 
     for(auto nodeId : graphModel->graph().nodeIds())
     {
-        auto& stringAttributeValue = graphModel->attributeByName(attributeAgainst)->stringValueOf(nodeId);
-        auto& stringAttributeForValue = graphModel->attributeByName(attributeFor)->stringValueOf(nodeId);
-        ++attributeValueEntryCountTotal[stringAttributeValue];
-        ++attributeValueEntryForCountTotal[stringAttributeForValue];
+        auto& stringAttributeValue = graphModel->attributeByName(attributeA)->stringValueOf(nodeId);
+        auto& stringAttributeForValue = graphModel->attributeByName(attributeB)->stringValueOf(nodeId);
+        ++attributeValueEntryCountATotal[stringAttributeValue];
+        ++attributeValueEntryCountBTotal[stringAttributeForValue];
     }
 
     int n = 0;
@@ -91,28 +91,29 @@ EnrichmentCalculator::Table EnrichmentCalculator::overRepAgainstEachAttribute(QS
     // Comparing
 
     int progress = 0;
-    int iterCount = attributeValueEntryForCountTotal.size() * attributeValueEntryCountTotal.size();
+    int iterCount = static_cast<int>(attributeValueEntryCountBTotal.size()
+                                     * attributeValueEntryCountATotal.size());
 
     // Get all the nodeIds for each AttributeFor value
     // Maps of vectors uhoh.
-    auto* attribute = graphModel->attributeByName(attributeFor);
+    auto* attribute = graphModel->attributeByName(attributeB);
     std::map<QString, std::vector<NodeId>> nodeIdsForAttributeValue;
     for(auto nodeId : graphModel->graph().nodeIds())
         nodeIdsForAttributeValue[attribute->stringValueOf(nodeId)].push_back(nodeId);
 
-    for(auto& attributeValueFor : u::keysFor(attributeValueEntryForCountTotal))
+    for(auto& attributeValueFor : u::keysFor(attributeValueEntryCountBTotal))
     {
         auto& selectedNodes = nodeIdsForAttributeValue[attributeValueFor];
 
-        for(auto& attributeValue : u::keysFor(attributeValueEntryCountTotal))
+        for(auto& attributeValue : u::keysFor(attributeValueEntryCountATotal))
         {
-            Row row(9);
+            EnrichmentTableModel::Row row(9);
             command.setProgress(progress / iterCount);
             progress++;
 
             n = graphModel->graph().numNodes();
 
-            auto* attribute = graphModel->attributeByName(attributeAgainst);
+            auto* attribute = graphModel->attributeByName(attributeA);
             selectedInCategory = 0;
             for(auto nodeId : selectedNodes)
             {
@@ -120,7 +121,7 @@ EnrichmentCalculator::Table EnrichmentCalculator::overRepAgainstEachAttribute(QS
                     selectedInCategory++;
             }
 
-            r1 = attributeValueEntryCountTotal[attributeValue];
+            r1 = attributeValueEntryCountATotal[attributeValue];
             fobs = static_cast<double>(selectedInCategory) / static_cast<double>(selectedNodes.size());
             fexp = static_cast<double>(r1) / static_cast<double>(n);
             overRepresentation = fobs / fexp;
@@ -147,16 +148,6 @@ EnrichmentCalculator::Table EnrichmentCalculator::overRepAgainstEachAttribute(QS
             row[5] = QString::number(selectedInCategory / expectedNo, 'f', 2);
             row[6] = QString::number(f, 'f', 2);
 
-            qDebug() << "For Attribute" << attributeValueFor;
-            qDebug() << "Against Attribute" << attributeValue;
-            qDebug() << "Observed" << selectedInCategory << "/" << selectedNodes.size();
-            qDebug() << "Expected" << expectedNo << "/" << selectedNodes.size();
-            qDebug() << "ExpectedTrial" << expectedNo << "/" << selectedNodes.size() << "±" << expectedDev;
-            qDebug() << "FObs" << fobs;
-            qDebug() << "FExp" << fexp;
-            qDebug() << "OverRep" << selectedInCategory / expectedNo;
-            qDebug() << "ZScore" << zScore;
-            qDebug() << "Fishers" << f;
             tableModel.push_back(row);
         }
     }

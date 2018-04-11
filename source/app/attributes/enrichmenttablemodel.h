@@ -9,13 +9,10 @@
 class EnrichmentTableModel : public QAbstractTableModel
 {
     Q_OBJECT
-private:
-    using Row = std::vector<QVariant>;
-    using Table = std::vector<Row>;
-
-    Table _data;
 public:
     EnrichmentTableModel(QObject* parent = nullptr);
+    using Row = std::vector<QVariant>;
+    using Table = std::vector<Row>;
 
     const int COLUMN_COUNT = 7;
 
@@ -29,6 +26,8 @@ public:
     void setTableData(Table data);
 
     json toJson();
+private:
+    Table _data;
 };
 
 #endif // ENRICHMENTTABLEMODEL_H

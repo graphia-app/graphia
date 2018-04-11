@@ -1441,7 +1441,7 @@ ApplicationWindow
         onAccepted:
         {
             if(currentDocument != null)
-                currentDocument.performEnrichment(selectedAttributeGroupsAgainst, selectedAttributeGroup)
+                currentDocument.performEnrichment(selectedAttributeGroupA, selectedAttributeGroupB)
             enrichmentWizard.reset();
         }
     }

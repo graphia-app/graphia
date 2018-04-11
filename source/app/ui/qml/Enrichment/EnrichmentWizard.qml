@@ -6,6 +6,7 @@ import QtQuick.Dialogs 1.1
 
 import com.kajeka 1.0
 import "../Controls"
+import "../"
 
 Wizard
 {
@@ -16,29 +17,25 @@ Wizard
     // Must be set before opening
     property var attributeGroups
 
-    property var selectedAttributeGroupsAgainst: []
-    property var selectedAttributeGroup: []
-    property bool attributesSelected: false
+    property string selectedAttributeGroupA: ""
+    property string selectedAttributeGroupB: ""
 
-    finishEnabled: attributesSelected && (attributeSelectedExGroup.current != null)
+    finishEnabled: attributesSelected && (attributeSelectedBExclusiveGroup.current != null)
 
     function reset()
     {
         // Reset on finish
         goToPage(0);
-        for(var i=0; i < attributeAgainstRepeater.count; i++)
-            attributeAgainstRepeater.itemAt(i).checked = false;
+        for(var i=0; i < attributeSelectARepeater.count; i++)
+            attributeSelectARepeater.itemAt(i).checked = false;
     }
 
     Item
     {
-        anchors.fill: parent
         ColumnLayout
         {
-            width: parent.width
             anchors.left: parent.left
             anchors.right: parent.right
-
             Text
             {
                 text: qsTr("<h2>Enrichment</h2>")
@@ -52,9 +49,10 @@ Wizard
                 {
                     Text
                     {
+                        // Should expand this later
                         text: qsTr("Enrichment identifies the significance of a group makeup versus the null hypothesis<br>" +
                                    "<br>" +
-                                   "An attribute group will be selected to test for enrichment" +
+                                   "Two attribute groups will be selected to test for enrichment" +
                                    "<br>" +
                                    "The edges may be filtered using transforms once the graph has been created.")
                         wrapMode: Text.WordWrap
@@ -76,95 +74,29 @@ Wizard
         }
     }
 
+
     Item
     {
         ColumnLayout
         {
-            anchors.left: parent.left
-            anchors.right: parent.right
+            anchors.fill: parent
 
             Text
             {
-                text: qsTr("<h2>Enrichment Attribute Against</h2>")
+                text: qsTr("<h2>Enrichment Attribute - A</h2>")
                 Layout.alignment: Qt.AlignLeft
                 textFormat: Text.StyledText
             }
 
             ColumnLayout
             {
-                anchors.left: parent.left
-                anchors.right: parent.right
+                Layout.fillHeight: true
+                Layout.fillWidth: true
                 spacing: 20
 
                 Text
                 {
-                    text: qsTr("Please select the attribute group(s) to perform<br>"+
-                               "enrichment analysis on")
-                    Layout.alignment: Qt.AlignLeft
-                    textFormat: Text.StyledText
-                    Layout.fillWidth: true
-                }
-
-                ScrollView
-                {
-                    Layout.fillWidth: true
-                    ColumnLayout
-                    {
-                        Repeater
-                        {
-                            id: attributeAgainstRepeater
-                            model: attributeGroups
-                            CheckBox
-                            {
-                                text: modelData
-                                onCheckedChanged:
-                                {
-                                    if(checked)
-                                        selectedAttributeGroupsAgainst.push(modelData)
-                                    else
-                                    {
-                                        var index = selectedAttributeGroupsAgainst.indexOf(modelData);
-                                        selectedAttributeGroupsAgainst.splice(index, 1);
-                                    }
-                                    attributesSelected = (selectedAttributeGroupsAgainst.length > 0);
-
-                                    // Disable analysis on selected
-                                    for(var i=0; i<attributeSelectedRepeater.count; i++)
-                                    {
-                                        if(attributeSelectedRepeater.itemAt(i).text === modelData)
-                                            attributeSelectedRepeater.itemAt(i).enabled = !checked;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    Item
-    {
-        ColumnLayout
-        {
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            Text
-            {
-                text: qsTr("<h2>Enrichment Attribute On</h2>")
-                Layout.alignment: Qt.AlignLeft
-                textFormat: Text.StyledText
-            }
-
-            ColumnLayout
-            {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                spacing: 20
-
-                Text
-                {
-                    text: qsTr("Please select the attribute to test for<br>"+
+                    text: qsTr("Please select the first attribute group to test for "+
                                "enrichment")
                     Layout.alignment: Qt.AlignLeft
                     textFormat: Text.StyledText
@@ -174,30 +106,95 @@ Wizard
                 ScrollView
                 {
                     Layout.fillWidth: true
+                    Layout.fillHeight: true
                     ColumnLayout
                     {
                         ExclusiveGroup
                         {
-                            id: attributeSelectedExGroup
+                            id: attributeSelectedAExclusiveGroup
                             onCurrentChanged:
                             {
-                                selectedAttributeGroup = current.text;
+                                selectedAttributeGroupA = current.text;
+                                // Disable analysis on selected
+                                for(var i=0; i<attributeSelectedBRepeater.count; i++)
+                                {
+                                    var radioBtn = attributeSelectedBRepeater.itemAt(i);
+                                    radioBtn.enabled = radioBtn.text !== current.text;
+                                }
                             }
                         }
 
                         Repeater
                         {
-                            id: attributeSelectedRepeater
+                            id: attributeSelectARepeater
                             model: attributeGroups
                             RadioButton
                             {
                                 text: modelData
-                                exclusiveGroup: attributeSelectedExGroup
+                                exclusiveGroup: attributeSelectedAExclusiveGroup
                             }
                         }
                     }
                 }
+            }
+        }
+    }
+    Item
+    {
+        Layout.fillHeight: true
+        ColumnLayout
+        {
+            anchors.fill: parent
 
+            Text
+            {
+                text: qsTr("<h2>Enrichment Attribute - B</h2>")
+                Layout.alignment: Qt.AlignLeft
+                textFormat: Text.StyledText
+            }
+
+            ColumnLayout
+            {
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                spacing: 20
+
+                Text
+                {
+                    text: qsTr("Please select second attribute group to test for "+
+                               "enrichment")
+                    Layout.alignment: Qt.AlignLeft
+                    textFormat: Text.StyledText
+                    Layout.fillWidth: true
+                }
+
+                ScrollView
+                {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    ColumnLayout
+                    {
+                        ExclusiveGroup
+                        {
+                            id: attributeSelectedBExclusiveGroup
+                            onCurrentChanged:
+                            {
+                                selectedAttributeGroupB = current.text;
+                            }
+                        }
+
+                        Repeater
+                        {
+                            id: attributeSelectedBRepeater
+                            model: attributeGroups
+                            RadioButton
+                            {
+                                text: modelData
+                                exclusiveGroup: attributeSelectedBExclusiveGroup
+                            }
+                        }
+                    }
+                }
             }
         }
     }

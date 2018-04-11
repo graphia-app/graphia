@@ -30,7 +30,6 @@ private:
     std::map<int, QString> _xAxisToFullLabel;
     std::map<int, QString> _yAxisToFullLabel;
 
-
     EnrichmentTableModel* _tableModel = nullptr;
     QFont _defaultFont9Pt;
     int _attributeACount = 0;
@@ -42,7 +41,7 @@ private:
 
 public:
     explicit EnrichmentHeatmapItem(QQuickItem* parent = nullptr);
-    void setData(EnrichmentCalculator::Table table);
+    void setData(EnrichmentTableModel::Table table);
 
 public:
     void paint(QPainter *painter);
