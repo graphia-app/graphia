@@ -202,8 +202,6 @@ private:
     DeferredExecutor _deferredExecutor;
     semaphore _executed;
 
-    QQmlObjectListModel<EnrichmentTableModel> _enrichmentTableModels;
-
     std::vector<NodeId> _foundNodeIds;
     bool _foundItValid = false;
     std::vector<NodeId>::const_iterator _foundIt = _foundNodeIds.begin();
@@ -215,6 +213,8 @@ private:
 
     QQmlVariantListModel _graphTransformsModel;
     QStringList _graphTransforms;
+
+    QQmlObjectListModel<EnrichmentTableModel> _enrichmentTableModels;
 
     QQmlVariantListModel _visualisationsModel;
     QStringList _visualisations;

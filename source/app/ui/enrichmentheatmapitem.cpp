@@ -207,7 +207,7 @@ void EnrichmentHeatmapItem::buildPlot()
             _colorMap->data()->setCell(fullLabelToXAxis[_tableModel->data(i, "Attribute Group").toString()],
                                        fullLabelToYAxis[_tableModel->data(i, "Selection").toString()] + 1,
                                        _tableModel->data(i, "Fishers").toFloat());
-        else if(fullLabelToYAxis[_tableModel->data(i, "Selection").toString()] == attributeValueSetB.size() - 1)
+        else if(fullLabelToYAxis[_tableModel->data(i, "Selection").toString()] == static_cast<int>(attributeValueSetB.size()) - 1)
         {
             _colorMap->data()->setCell(fullLabelToXAxis[_tableModel->data(i, "Attribute Group").toString()] + 1,
                                        fullLabelToYAxis[_tableModel->data(i, "Selection").toString()] + 2,

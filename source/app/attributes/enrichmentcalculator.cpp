@@ -60,7 +60,7 @@ double EnrichmentCalculator::Fishers(int a, int b, int c, int d)
     return twoPval;
 }
 
-EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(QString attributeA, QString attributeB,
+EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(QString attributeAName, QString attributeBName,
                                                        IGraphModel* graphModel, ICommand& command)
 {
     // Count of attribute values within the attribute
@@ -70,8 +70,8 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(QS
 
     for(auto nodeId : graphModel->graph().nodeIds())
     {
-        auto& stringAttributeValue = graphModel->attributeByName(attributeA)->stringValueOf(nodeId);
-        auto& stringAttributeForValue = graphModel->attributeByName(attributeB)->stringValueOf(nodeId);
+        const auto& stringAttributeValue = graphModel->attributeByName(attributeAName)->stringValueOf(nodeId);
+        const auto& stringAttributeForValue = graphModel->attributeByName(attributeBName)->stringValueOf(nodeId);
         ++attributeValueEntryCountATotal[stringAttributeValue];
         ++attributeValueEntryCountBTotal[stringAttributeForValue];
     }
@@ -96,10 +96,10 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(QS
 
     // Get all the nodeIds for each AttributeFor value
     // Maps of vectors uhoh.
-    auto* attribute = graphModel->attributeByName(attributeB);
+    auto* attributeB = graphModel->attributeByName(attributeBName);
     std::map<QString, std::vector<NodeId>> nodeIdsForAttributeValue;
     for(auto nodeId : graphModel->graph().nodeIds())
-        nodeIdsForAttributeValue[attribute->stringValueOf(nodeId)].push_back(nodeId);
+        nodeIdsForAttributeValue[attributeB->stringValueOf(nodeId)].push_back(nodeId);
 
     for(auto& attributeValueFor : u::keysFor(attributeValueEntryCountBTotal))
     {
@@ -113,7 +113,7 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(QS
 
             n = graphModel->graph().numNodes();
 
-            auto* attribute = graphModel->attributeByName(attributeA);
+            auto* attribute = graphModel->attributeByName(attributeAName);
             selectedInCategory = 0;
             for(auto nodeId : selectedNodes)
             {
@@ -170,7 +170,7 @@ std::vector<double> EnrichmentCalculator::doRandomSampling(int totalGenes, doubl
         int hits = 0;
         for(int j = 0; j < totalGenes; j++)
         {
-            if(u::rand(0.0f, 1.0f) <= expectedFrequency)
+            if(u::rand(0.0, 1.0) <= expectedFrequency)
                 hits++;
         }
 

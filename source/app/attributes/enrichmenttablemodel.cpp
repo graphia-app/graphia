@@ -38,7 +38,7 @@ QVariant EnrichmentTableModel::data(int row, QString role)
 
 int EnrichmentTableModel::rowFromAttributeSets(QString attributeA, QString attributeB)
 {
-    for(int rowIndex = 0; rowIndex < _data.size(); ++rowIndex)
+    for(int rowIndex = 0; rowIndex < static_cast<int>(_data.size()); ++rowIndex)
     {
         if(data(rowIndex, "Attribute Group") == attributeA
                 && data(rowIndex, "Selection") == attributeB)
@@ -67,9 +67,9 @@ json EnrichmentTableModel::toJson()
     for (int i = 0; i < COLUMN_COUNT; ++i)
         object["rolenames"][i] = roleNames()[Qt::UserRole + i].toStdString();
 
-    for(int rowIndex = 0; rowIndex < _data.size(); ++rowIndex)
+    for(int rowIndex = 0; rowIndex < static_cast<int>(_data.size()); ++rowIndex)
     {
-        for(int columnIndex = 0; columnIndex < _data[rowIndex].size(); ++columnIndex)
+        for(int columnIndex = 0; columnIndex < static_cast<int>(_data[rowIndex].size()); ++columnIndex)
         {
             object["data"][rowIndex].push_back(_data[rowIndex][columnIndex].toString().toStdString());
         }
