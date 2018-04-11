@@ -170,7 +170,7 @@ std::vector<double> EnrichmentCalculator::doRandomSampling(int totalGenes, doubl
         int hits = 0;
         for(int j = 0; j < totalGenes; j++)
         {
-            if(u::rand(0.0, 1.0) <= expectedFrequency)
+            if(static_cast<double>(u::rand(0.0f, 1.0f)) <= expectedFrequency)
                 hits++;
         }
 
