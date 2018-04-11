@@ -8,7 +8,7 @@
 #include <QTime>
 #include <QDir>
 
-SDFComputeJob::SDFComputeJob(GLuint sdfTexture, GlyphMap* glyphMap) :
+SDFComputeJob::SDFComputeJob(DoubleBufferedTexture* sdfTexture, GlyphMap* glyphMap) :
     _sdfTexture(sdfTexture),
     _glyphMap(glyphMap)
 {}
@@ -85,6 +85,8 @@ void SDFComputeJob::prepareScreenQuadDataBuffer(QOpenGLBuffer& buffer, int width
 
 void SDFComputeJob::generateSDF()
 {
+    auto sdfTexture = _sdfTexture->back();
+
     if(_glyphMap->images().empty())
     {
         if(_onCompleteFn != nullptr)
@@ -128,7 +130,7 @@ void SDFComputeJob::generateSDF()
     glBindFramebuffer(GL_FRAMEBUFFER, sdfFBO);
 
     // SDF texture
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _sdfTexture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, sdfTexture);
 
     // Generate FBO texture
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA,
@@ -147,7 +149,7 @@ void SDFComputeJob::generateSDF()
     for(int layer = 0; layer < numImages; ++layer)
     {
         // Can only render to one texture layer per draw call :(
-        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _sdfTexture, 0, layer);
+        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, sdfTexture, 0, layer);
 
         // Set Frame draw buffers
         GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
@@ -195,7 +197,7 @@ void SDFComputeJob::generateSDF()
         auto pixelCount = static_cast<int>((imageSize(_glyphMap->images().at(0)) / (scaleFactor * scaleFactor)) *
                                            _glyphMap->images().size());
         std::vector<uchar> pixels(pixelCount);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, _sdfTexture);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, sdfTexture);
         glGetTexImage(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
 
         // Save each layer as its own image for debug

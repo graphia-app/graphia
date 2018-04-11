@@ -127,12 +127,6 @@ GraphRenderer::GraphRenderer(GraphModel* graphModel,
 GraphRenderer::~GraphRenderer()
 {
     _FBOcomplete = false;
-
-    if(_sdfTextures[0] != 0)
-    {
-        glDeleteTextures(2, &_sdfTextures[0]);
-        _sdfTextures = {};
-    }
 }
 
 void GraphRenderer::createGPUGlyphData(const QString& text, const QColor& textColor, const TextAlignment& textAlignment,
@@ -858,17 +852,7 @@ void GraphRenderer::onVisibilityChanged()
 
 GLuint GraphRenderer::sdfTexture() const
 {
-    return _sdfTextures.at(_currentSDFTextureIndex);
-}
-
-GLuint GraphRenderer::sdfTextureOffscreen() const
-{
-    return _sdfTextures.at(1 - _currentSDFTextureIndex);
-}
-
-void GraphRenderer::swapSdfTexture()
-{
-    _currentSDFTextureIndex = 1 - _currentSDFTextureIndex;
+    return _sdfTexture.front();
 }
 
 void GraphRenderer::updateText(std::function<void()> onCompleteFn) // NOLINT
@@ -883,12 +867,12 @@ void GraphRenderer::updateText(std::function<void()> onCompleteFn) // NOLINT
 
     if(_glyphMap->updateRequired())
     {
-        auto job = std::make_unique<SDFComputeJob>(sdfTextureOffscreen(), _glyphMap.get());
+        auto job = std::make_unique<SDFComputeJob>(&_sdfTexture, _glyphMap.get());
         job->executeWhenComplete([this, onCompleteFn]
         {
             executeOnRendererThread([this]
             {
-                swapSdfTexture();
+                _sdfTexture.swap();
                 _textLayoutResults = _glyphMap->results();
 
                 updateGPUData(When::Later);
@@ -1216,10 +1200,6 @@ GraphComponentRenderer* GraphRenderer::componentRendererForId(ComponentId compon
 
 void GraphRenderer::prepareSDFTextures()
 {
-    // Generate SDF textures
-    if(_sdfTextures[0] == 0)
-        glGenTextures(2, &_sdfTextures[0]);
-
     _sdfShader.bind();
     _sdfShader.enableAttributeArray("position");
     _sdfShader.setAttributeBuffer("position", GL_FLOAT, 0, 2, 2 * sizeof(GLfloat));

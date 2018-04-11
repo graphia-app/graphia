@@ -7,6 +7,7 @@
 #include "graphcomponentrenderer.h"
 #include "transition.h"
 #include "glyphmap.h"
+#include "doublebufferedtexture.h"
 
 #include "shared/graph/grapharray.h"
 #include "graph/qmlelementid.h"
@@ -205,9 +206,7 @@ private:
 
     GLuint _colorTexture = 0;
 
-    // The SDF textures are double buffered to prevent flicker when updating
-    int _currentSDFTextureIndex = 0;
-    std::array<GLuint, 2> _sdfTextures = {};
+    DoubleBufferedTexture _sdfTexture;
 
     bool _FBOcomplete = false;
 

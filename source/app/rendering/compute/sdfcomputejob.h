@@ -4,6 +4,7 @@
 #include "gpucomputejob.h"
 
 #include "rendering/glyphmap.h"
+#include "rendering/doublebufferedtexture.h"
 
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
@@ -14,7 +15,7 @@
 class SDFComputeJob : public GPUComputeJob
 {
 private:
-    GLuint _sdfTexture = 0;
+    DoubleBufferedTexture* _sdfTexture;
     GlyphMap* _glyphMap;
 
     std::function<void()> _onCompleteFn;
@@ -27,7 +28,7 @@ private:
     void generateSDF();
 
 public:
-    SDFComputeJob(GLuint sdfTexture, GlyphMap *glyphMap);
+    SDFComputeJob(DoubleBufferedTexture* sdfTexture, GlyphMap *glyphMap);
 
     void run() override;
     void executeWhenComplete(std::function<void()> onCompleteFn);
