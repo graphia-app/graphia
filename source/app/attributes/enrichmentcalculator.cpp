@@ -86,7 +86,7 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(QS
     double expectedNo = 0.0;
     double expectedDev = 0.0;
     double expectedOverrep = 0.0;
-    double zScore = 0.0;
+    //double zScore = 0.0;
 
     // Comparing
 
@@ -131,7 +131,7 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(QS
                                                 * static_cast<double>(selectedNodes.size()));
             expectedDev = stdevs[0] * static_cast<double>(selectedNodes.size());
             expectedOverrep = stdevs[3];
-            zScore = (overRepresentation - expectedOverrep) / stdevs[1];
+            //zScore = (overRepresentation - expectedOverrep) / stdevs[1];
 
             auto nonSelectedInCategory = r1 - selectedInCategory;
             auto c1 = static_cast<int>(selectedNodes.size());

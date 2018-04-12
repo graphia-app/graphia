@@ -1987,7 +1987,7 @@ void Document::dumpGraph()
     _graphModel->graph().dumpToQDebug(2);
 }
 
-void Document::performEnrichment(QStringList selectedAttributesAgainst, QString selectedAttribute)
+void Document::performEnrichment(QString selectedAttributeA, QString selectedAttributeB)
 {
     auto* tableModel = new EnrichmentTableModel(this);
     _enrichmentTableModels.append(tableModel);
@@ -1998,9 +1998,9 @@ void Document::performEnrichment(QStringList selectedAttributesAgainst, QString 
             QString(tr("Performing Enrichment Analysis")),
             QString(tr("Enrichment Analysis Complete"))
         },
-    [this, selectedAttributesAgainst, selectedAttribute, tableModel](Command& command) mutable
+    [this, selectedAttributeA, selectedAttributeB, tableModel](Command& command) mutable
     {
-        auto result = EnrichmentCalculator::overRepAgainstEachAttribute(selectedAttributesAgainst[0], selectedAttribute,
+        auto result = EnrichmentCalculator::overRepAgainstEachAttribute(selectedAttributeA, selectedAttributeB,
                                                                         graphModel(), command);
         tableModel->setTableData(result);
         emit enrichmentTableModelsChanged();

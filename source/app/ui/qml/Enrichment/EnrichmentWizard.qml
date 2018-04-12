@@ -20,14 +20,16 @@ Wizard
     property string selectedAttributeGroupA: ""
     property string selectedAttributeGroupB: ""
 
-    finishEnabled: attributesSelected && (attributeSelectedBExclusiveGroup.current != null)
+    finishEnabled: (attributeSelectedAExclusiveGroup.current != null) && (attributeSelectedBExclusiveGroup.current != null)
 
     function reset()
     {
         // Reset on finish
         goToPage(0);
-        for(var i=0; i < attributeSelectARepeater.count; i++)
-            attributeSelectARepeater.itemAt(i).checked = false;
+        attributeSelectARepeater.itemAt(0).checked = true;
+        attributeSelectBRepeater.itemAt(1).checked = true;
+        scrollViewA.flickableItem.contentY = 0;
+        scrollViewB.flickableItem.contentY = 0;
     }
 
     Item
@@ -105,6 +107,7 @@ Wizard
 
                 ScrollView
                 {
+                    id: scrollViewA
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     ColumnLayout
@@ -116,9 +119,9 @@ Wizard
                             {
                                 selectedAttributeGroupA = current.text;
                                 // Disable analysis on selected
-                                for(var i=0; i<attributeSelectedBRepeater.count; i++)
+                                for(var i=0; i<attributeSelectBRepeater.count; i++)
                                 {
-                                    var radioBtn = attributeSelectedBRepeater.itemAt(i);
+                                    var radioBtn = attributeSelectBRepeater.itemAt(i);
                                     radioBtn.enabled = radioBtn.text !== current.text;
                                 }
                             }
@@ -170,6 +173,7 @@ Wizard
 
                 ScrollView
                 {
+                    id: scrollViewB
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     ColumnLayout
@@ -179,13 +183,14 @@ Wizard
                             id: attributeSelectedBExclusiveGroup
                             onCurrentChanged:
                             {
-                                selectedAttributeGroupB = current.text;
+                                if(current != null)
+                                    selectedAttributeGroupB = current.text;
                             }
                         }
 
                         Repeater
                         {
-                            id: attributeSelectedBRepeater
+                            id: attributeSelectBRepeater
                             model: attributeGroups
                             RadioButton
                             {

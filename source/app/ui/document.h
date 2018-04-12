@@ -418,7 +418,7 @@ public:
 
     Q_INVOKABLE void dumpGraph();
 
-    Q_INVOKABLE void performEnrichment(QStringList selectedAttributesAgainst, QString selectedAttribute);
+    Q_INVOKABLE void performEnrichment(QString selectedAttributesA, QString selectedAttributesB);
 
     Q_INVOKABLE QStringList attributeValues(QString attributeName);
 

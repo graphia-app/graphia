@@ -44,7 +44,7 @@ public:
     void setData(EnrichmentTableModel::Table table);
 
 public:
-    void paint(QPainter *painter);
+    void paint(QPainter *painter) override;
     void updatePlotSize();
     double horizontalRangeSize();
     double verticalRangeSize();

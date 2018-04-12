@@ -105,7 +105,7 @@ void EnrichmentHeatmapItem::hoverMoveEvent(QHoverEvent *event)
     auto* currentPlottable = _customPlot.plottableAt(event->posF(), true);
     if(_hoverPlottable != currentPlottable)
     {
-        qDebug() << currentPlottable;
+        //qDebug() << currentPlottable;
         _hoverPlottable = currentPlottable;
         hideTooltip();
     }
@@ -117,6 +117,7 @@ void EnrichmentHeatmapItem::hoverMoveEvent(QHoverEvent *event)
 void EnrichmentHeatmapItem::hoverLeaveEvent(QHoverEvent *event)
 {
     hideTooltip();
+    Q_UNUSED(event);
 }
 
 void EnrichmentHeatmapItem::routeMouseEvent(QMouseEvent* event)
@@ -197,20 +198,22 @@ void EnrichmentHeatmapItem::buildPlot()
     {
         // The data is offset by 1 to account for the empty margin
         // Set the data of the cell
-        _colorMap->data()->setCell(fullLabelToXAxis[_tableModel->data(i, "Attribute Group").toString()] + 1,
-                                   fullLabelToYAxis[_tableModel->data(i, "Selection").toString()] + 1,
+        auto xValue = fullLabelToXAxis[_tableModel->data(i, "Attribute Group").toString()];
+        auto yValue = fullLabelToYAxis[_tableModel->data(i, "Selection").toString()];
+        _colorMap->data()->setCell(xValue + 1,
+                                   yValue + 1,
                                    _tableModel->data(i, "Fishers").toFloat());
 
         // Ugly hack: Colors blend from margin cells. I recolour them to match adjacent cells so you can't tell
         // 200 IQ fix really...
-        if(fullLabelToXAxis[_tableModel->data(i, "Attribute Group").toString()] == 0)
-            _colorMap->data()->setCell(fullLabelToXAxis[_tableModel->data(i, "Attribute Group").toString()],
-                                       fullLabelToYAxis[_tableModel->data(i, "Selection").toString()] + 1,
+        if(xValue == 0)
+            _colorMap->data()->setCell(xValue,
+                                       yValue + 1,
                                        _tableModel->data(i, "Fishers").toFloat());
-        else if(fullLabelToYAxis[_tableModel->data(i, "Selection").toString()] == static_cast<int>(attributeValueSetB.size()) - 1)
+        if(yValue == static_cast<int>(attributeValueSetB.size()) - 1)
         {
-            _colorMap->data()->setCell(fullLabelToXAxis[_tableModel->data(i, "Attribute Group").toString()] + 1,
-                                       fullLabelToYAxis[_tableModel->data(i, "Selection").toString()] + 2,
+            _colorMap->data()->setCell(xValue + 1,
+                                       yValue + 2,
                                        _tableModel->data(i, "Fishers").toFloat());
         }
     }

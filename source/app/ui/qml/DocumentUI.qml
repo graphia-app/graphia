@@ -336,9 +336,9 @@ Item
     function cancelCommand() { document.cancelCommand(); }
 
     function dumpGraph() { document.dumpGraph(); }
-    function performEnrichment(selectedAttributeGroupsAgainst, selectedAttributeGroup)
+    function performEnrichment(selectedAttributeGroupA, selectedAttributeGroupB)
     {
-        document.performEnrichment(selectedAttributeGroupsAgainst, selectedAttributeGroup);
+        document.performEnrichment(selectedAttributeGroupA, selectedAttributeGroupB);
     }
     function attributeValues(attributeName)
     {
