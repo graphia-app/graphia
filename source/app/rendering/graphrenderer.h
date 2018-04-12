@@ -53,16 +53,9 @@ class GraphComponentInteractor;
 
 class ICommand;
 
-enum class TextAlignment
-{
-    Right,
-    Left,
-    Centre,
-    Top,
-    Bottom
-};
-Q_DECLARE_METATYPE(TextAlignment)
-
+DEFINE_QML_ENUM(Q_GADGET, TextAlignment,
+                Right, Left, Centre,
+                Top, Bottom);
 DEFINE_QML_ENUM(Q_GADGET, TextState,
                 Off, Selected, All);
 DEFINE_QML_ENUM(Q_GADGET, EdgeVisualType,
