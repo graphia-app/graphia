@@ -146,6 +146,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
 
     qmlRegisterType<QmlPreferences>(APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "Preferences");
+    Preferences preferences;
 
     if(app.arguments().size() < 2 || !QFileInfo::exists(app.arguments().at(1)))
     {
