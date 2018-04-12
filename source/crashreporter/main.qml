@@ -89,9 +89,7 @@ ApplicationWindow
                 if(email.text.length == 0 || email.acceptableInput)
                 {
                     window.enabled = false;
-                    report.email = email.text;
-                    report.text = description.text;
-                    Qt.quit();
+                    window.close();
                 }
                 else
                     invalidEmailDialog.open();
@@ -103,5 +101,11 @@ ApplicationWindow
             section: "auth"
             property alias emailAddress: email.text
         }
+    }
+
+    onClosing:
+    {
+        report.email = email.text;
+        report.text = description.text;
     }
 }
