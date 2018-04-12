@@ -3,6 +3,7 @@ set(CMAKE_CXX_STANDARD 14)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-D_DEBUG)
     add_definitions(-DQT_QML_DEBUG)
+    add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
 # https://www.kdab.com/disabling-narrowing-conversions-in-signal-slot-connections/

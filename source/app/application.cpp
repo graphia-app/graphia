@@ -65,6 +65,11 @@ QStringList Application::resourceDirectories()
             QStandardPaths::StandardLocation::AppDataLocation) + "/resources"
     };
 
+#ifdef SOURCE_DIR
+    // Add the source code directory as resources, to ease debugging
+    resourceDirs.append(SOURCE_DIR);
+#endif
+
 #ifdef Q_OS_MACOS
     CFURLRef resourcesURLRef = CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
     CFURLRef absoluteResourcesURLRef = CFURLCopyAbsoluteURL(resourcesURLRef);
