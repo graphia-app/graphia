@@ -20,6 +20,7 @@
 
 #include "report.h"
 #include "app/rendering/openglfunctions.h"
+#include "shared/utils/preferences.h"
 
 static void uploadReport(const QString& email, const QString& text,
                          const QString& dmpFile, const QString& attachmentDir)
@@ -143,6 +144,8 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain(QStringLiteral("kajeka.com"));
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
+
+    qmlRegisterType<QmlPreferences>("com.kajeka", 1, 0, "Preferences");
 
     if(app.arguments().size() < 2 || !QFileInfo::exists(app.arguments().at(1)))
     {

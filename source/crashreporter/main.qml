@@ -3,7 +3,7 @@ import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 
-import Qt.labs.settings 1.0
+import com.kajeka 1.0
 
 import "../shared/ui/qml/Constants.js" as Constants
 
@@ -98,9 +98,10 @@ ApplicationWindow
             }
         }
 
-        Settings
+        Preferences
         {
-            property alias email: email.text
+            section: "auth"
+            property alias emailAddress: email.text
         }
     }
 }

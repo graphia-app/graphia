@@ -9,11 +9,13 @@ set(CMAKE_AUTORCC ON)
 list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/report.h
     ${CMAKE_CURRENT_LIST_DIR}/../app/rendering/openglfunctions.h
+    ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/preferences.h
 )
 
 list(APPEND SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../app/rendering/openglfunctions.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../shared/utils/preferences.cpp
 )
 
 list(APPEND RESOURCES
