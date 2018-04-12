@@ -62,7 +62,7 @@ QStringList Application::resourceDirectories()
     {
         QCoreApplication::instance()->applicationDirPath(),
         QStandardPaths::writableLocation(
-            QStandardPaths::StandardLocation::AppDataLocation) + QDir::separator() + "resources"
+            QStandardPaths::StandardLocation::AppDataLocation) + "/resources"
     };
 
 #ifdef Q_OS_MACOS
@@ -81,8 +81,7 @@ QStringList Application::resourceDirectories()
     QDir usrDir(QCoreApplication::instance()->applicationDirPath());
     usrDir.cdUp();
 
-    resourceDirs.append(usrDir.absolutePath() + QDir::separator() + "share" +
-        QDir::separator() + name());
+    resourceDirs.append(usrDir.absolutePath() + "/share/" + name());
 #endif
 
     return resourceDirs;
@@ -353,9 +352,9 @@ void Application::loadPlugins()
 {
     std::vector<QString> pluginsDirs =
     {
-        QCoreApplication::instance()->applicationDirPath() + QDir::separator() + "plugins",
+        QCoreApplication::instance()->applicationDirPath() + "/plugins",
         QStandardPaths::writableLocation(
-            QStandardPaths::StandardLocation::AppDataLocation) + QDir::separator() + "plugins"
+            QStandardPaths::StandardLocation::AppDataLocation) + "/plugins"
     };
 
 #if defined(Q_OS_MACOS)
@@ -363,19 +362,18 @@ void Application::loadPlugins()
 
     // Within the bundle itself
     dotAppDir.cdUp();
-    pluginsDirs.emplace_back(dotAppDir.absolutePath() + QDir::separator() + "PlugIns");
+    pluginsDirs.emplace_back(dotAppDir.absolutePath() + "/PlugIns");
 
     // Adjacent to the .app file
     dotAppDir.cdUp();
     dotAppDir.cdUp();
-    pluginsDirs.emplace_back(dotAppDir.absolutePath() + QDir::separator() + "plugins");
+    pluginsDirs.emplace_back(dotAppDir.absolutePath() + "/plugins");
 #elif defined(Q_OS_LINUX)
     // Add the LSB location for the plugins
     QDir usrDir(QCoreApplication::instance()->applicationDirPath());
     usrDir.cdUp();
 
-    pluginsDirs.emplace_back(usrDir.absolutePath() + QDir::separator() + "lib" +
-        QDir::separator() + name() + QDir::separator() + "plugins");
+    pluginsDirs.emplace_back(usrDir.absolutePath() + "/lib" + name() + "/plugins");
 #endif
 
     for(auto& pluginsDir : pluginsDirs)
