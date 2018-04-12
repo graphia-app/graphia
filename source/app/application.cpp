@@ -378,7 +378,7 @@ void Application::loadPlugins()
     QDir usrDir(QCoreApplication::instance()->applicationDirPath());
     usrDir.cdUp();
 
-    pluginsDirs.emplace_back(usrDir.absolutePath() + "/lib" + name() + "/plugins");
+    pluginsDirs.emplace_back(usrDir.absolutePath() + "/lib/" + name() + "/plugins");
 #endif
 
     for(auto& pluginsDir : pluginsDirs)
