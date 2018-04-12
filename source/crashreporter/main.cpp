@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName(QStringLiteral(PRODUCT_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(VERSION));
 
-    qmlRegisterType<QmlPreferences>("com.kajeka", 1, 0, "Preferences");
+    qmlRegisterType<QmlPreferences>(APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "Preferences");
 
     if(app.arguments().size() < 2 || !QFileInfo::exists(app.arguments().at(1)))
     {
