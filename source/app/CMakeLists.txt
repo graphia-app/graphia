@@ -258,7 +258,7 @@ target_link_libraries(${PROJECT_NAME}
 
 find_package(Qt5QuickCompiler)
 if(Qt5QuickCompiler_FOUND)
-    qtquick_compiler_add_resources(RESOURCES ${RESOURCES})
+    qtquick_compiler_add_resources(RESOURCES ${CMAKE_CURRENT_LIST_DIR}/ui/qml.qrc)
 endif()
 
 find_package(OpenGL REQUIRED)
