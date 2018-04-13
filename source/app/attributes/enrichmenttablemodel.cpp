@@ -31,7 +31,7 @@ QVariant EnrichmentTableModel::data(const QModelIndex &index, int role) const
     return value;
 }
 
-QVariant EnrichmentTableModel::data(int row, QString role)
+QVariant EnrichmentTableModel::data(int row, const QString& role)
 {
     return data(index(row,0), roleNames().key(role.toUtf8()));
 }

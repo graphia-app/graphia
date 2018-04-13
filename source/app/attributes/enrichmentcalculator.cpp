@@ -185,8 +185,8 @@ std::vector<double> EnrichmentCalculator::doRandomSampling(int totalGenes, doubl
 
     for(int i = 0; i < NUMBER_OF_TRIALS; i++)
     {
-        observationStdDev += (observed[i] - observationAvg) * (observed[i] - observationAvg);
-        overRepresentationStdDev += (overRepresentation[i] - overRepresentationAvg) * (overRepresentation[i] - overRepresentationAvg);
+        observationStdDev += (observed.at(i) - observationAvg) * (observed.at(i) - observationAvg);
+        overRepresentationStdDev += (overRepresentation.at(i) - overRepresentationAvg) * (overRepresentation.at(i) - overRepresentationAvg);
     }
 
     observationStdDev = sqrt(observationStdDev / static_cast<double>(NUMBER_OF_TRIALS));
