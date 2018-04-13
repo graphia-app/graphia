@@ -256,6 +256,11 @@ target_link_libraries(${PROJECT_NAME}
     Qt5::Xml
 )
 
+find_package(Qt5QuickCompiler)
+if(Qt5QuickCompiler_FOUND)
+    qtquick_compiler_add_resources(RESOURCES ${RESOURCES})
+endif()
+
 find_package(OpenGL REQUIRED)
 target_link_libraries(${PROJECT_NAME} ${OPENGL_gl_LIBRARY})
 
