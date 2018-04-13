@@ -178,7 +178,6 @@ private:
     QStringList rowNames();
     QVector<double> rawData();
     QVector<QColor> nodeColors();
-    QStringList attributeGroupNames();
 
     const DataRow& dataRowForNodeId(NodeId nodeId) const;
 
@@ -225,7 +224,6 @@ signals:
     void nodeColorsChanged();
     void columnNamesChanged();
     void rowNamesChanged();
-    void attributeGroupNamesChanged();
 };
 
 class CorrelationPlugin : public BasePlugin, public PluginInstanceProvider<CorrelationPluginInstance>

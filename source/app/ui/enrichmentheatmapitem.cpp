@@ -147,7 +147,7 @@ void EnrichmentHeatmapItem::buildPlot()
     _xAxisToFullLabel.clear();
     _yAxisToFullLabel.clear();
 
-    for (int i = 0; i < _tableModel->rowCount(); ++i)
+    for(int i = 0; i < _tableModel->rowCount(); ++i)
     {
         attributeValueSetA.insert(_tableModel->data(i, QStringLiteral("Attribute Group")).toString());
         attributeValueSetB.insert(_tableModel->data(i, QStringLiteral("Selection")).toString());
@@ -164,7 +164,7 @@ void EnrichmentHeatmapItem::buildPlot()
     QFontMetrics metrics(_defaultFont9Pt);
 
     int column = 0;
-    for(auto& labelName: sortAttributeValueSetA)
+    for(const auto& labelName: sortAttributeValueSetA)
     {
         fullLabelToXAxis[labelName] = column;
         _xAxisToFullLabel[column] = labelName;
@@ -174,7 +174,7 @@ void EnrichmentHeatmapItem::buildPlot()
             xCategoryTicker->addTick(column++, labelName);
     }
     column = 0;
-    for(auto& labelName: sortAttributeValueSetB)
+    for(const auto& labelName: sortAttributeValueSetB)
     {
         fullLabelToYAxis[labelName] = column;
         _yAxisToFullLabel[column] = labelName;
@@ -206,9 +206,11 @@ void EnrichmentHeatmapItem::buildPlot()
         // Ugly hack: Colors blend from margin cells. I recolour them to match adjacent cells so you can't tell
         // 200 IQ fix really...
         if(xValue == 0)
+        {
             _colorMap->data()->setCell(xValue,
                                        yValue + 1,
                                        _tableModel->data(i, QStringLiteral("Fishers")).toFloat());
+        }
         if(yValue == static_cast<int>(attributeValueSetB.size()) - 1)
         {
             _colorMap->data()->setCell(xValue + 1,
@@ -231,7 +233,6 @@ double EnrichmentHeatmapItem::columnAxisWidth()
     const auto& margins = _customPlot.axisRect()->margins();
     const unsigned int axisWidth = margins.left() + margins.right();
 
-    //FIXME This value is wrong when the legend is enabled
     return width() - axisWidth;
 }
 
@@ -240,7 +241,6 @@ double EnrichmentHeatmapItem::columnAxisHeight()
     const auto& margins = _customPlot.axisRect()->margins();
     const unsigned int axisHeight = margins.top() + margins.bottom();
 
-    //FIXME This value is wrong when the legend is enabled
     return height() - axisHeight;
 }
 
@@ -322,7 +322,7 @@ void EnrichmentHeatmapItem::showTooltip()
     _hoverLabel->setVisible(true);
     double key, value;
     _colorMap->pixelsToCoords(_hoverPoint, key, value);
-    _hoverLabel->setText(QString::number(_colorMap->data()->data(key,value)));
+    _hoverLabel->setText(tr("P-value: %1").arg(QString::number(_colorMap->data()->data(key,value), 'f', 2)));
 
     const auto COLOR_RECT_WIDTH = 10.0;
     const auto HOVER_MARGIN = 10.0;

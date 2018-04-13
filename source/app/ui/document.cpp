@@ -1991,7 +1991,6 @@ void Document::dumpGraph()
 void Document::performEnrichment(const QString& selectedAttributeA, const QString& selectedAttributeB)
 {
     auto* tableModel = new EnrichmentTableModel(this);
-    _enrichmentTableModels.append(tableModel);
 
     commandManager()->executeOnce(
         {
@@ -2001,9 +2000,14 @@ void Document::performEnrichment(const QString& selectedAttributeA, const QStrin
         },
     [this, selectedAttributeA, selectedAttributeB, tableModel](Command& command) mutable
     {
+
         auto result = EnrichmentCalculator::overRepAgainstEachAttribute(selectedAttributeA, selectedAttributeB,
                                                                         graphModel(), command);
         tableModel->setTableData(result);
+        executeOnMainThreadAndWait([this, tableModel]()
+        {
+            _enrichmentTableModels.append(tableModel);
+        });
         emit enrichmentTableModelsChanged();
         emit enrichmentAnalysisComplete();
         return true;

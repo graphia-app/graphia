@@ -10,6 +10,7 @@ class EnrichmentTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
+
     explicit EnrichmentTableModel(QObject* parent = nullptr);
     using Row = std::vector<QVariant>;
     using Table = std::vector<Row>;

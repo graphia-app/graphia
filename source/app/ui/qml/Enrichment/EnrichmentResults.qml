@@ -21,7 +21,7 @@ Window
     {
         id: confirmDelete
         title: qsTr("Delete Enrichment Results?")
-        text: qsTr("Are you sure you want to delete this Enrichment result?")
+        text: qsTr("Are you sure you want to delete this enrichment result?")
         icon: StandardIcon.Warning
         standardButtons: StandardButton.Yes | StandardButton.Cancel
         onYes:
@@ -48,7 +48,7 @@ Window
                 ToolButton
                 {
                     id: showHeatmapButton
-                    iconName: "x-office-spreadsheet"
+                    iconName: "x-office-spreadsheett"
                     checkable: true
                     tooltip: qsTr("Show Heatmap")
                 }

@@ -1,24 +1,23 @@
 #include "enrichmenttablemodel.h"
-#include <QDebug>
 
 EnrichmentTableModel::EnrichmentTableModel(QObject *parent)
 {
     setParent(parent);
 }
 
-int EnrichmentTableModel::rowCount(const QModelIndex &parent) const
+int EnrichmentTableModel::rowCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
     return static_cast<int>(_data.size());
 }
 
-int EnrichmentTableModel::columnCount(const QModelIndex &parent) const
+int EnrichmentTableModel::columnCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
     return COLUMN_COUNT;
 }
 
-QVariant EnrichmentTableModel::data(const QModelIndex &index, int role) const
+QVariant EnrichmentTableModel::data(const QModelIndex& index, int role) const
 {
     if(role < Qt::UserRole)
         return {};
@@ -74,7 +73,6 @@ json EnrichmentTableModel::toJson()
             object["data"][rowIndex].push_back(_data[rowIndex][columnIndex].toString().toStdString());
         }
     }
-    qDebug() << QString::fromStdString(object.dump());
     return object;
 }
 

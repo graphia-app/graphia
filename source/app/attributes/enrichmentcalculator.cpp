@@ -5,8 +5,6 @@
 #include <vector>
 #include <map>
 
-#include <QDebug>
-
 #include "shared/utils/container.h"
 #include "shared/attributes/iattribute.h"
 #include "shared/utils/random.h"
@@ -27,7 +25,7 @@ static double hyperGeometricProb(double x, double r1, double r2, double c1, doub
  *  C: Selected NOT In Category
  *  D: Not Selected NOT In Category
  */
-double EnrichmentCalculator::Fishers(int a, int b, int c, int d)
+double EnrichmentCalculator::fishers(int a, int b, int c, int d)
 {
     double ab = a + b;
     double cd = c + d;
@@ -49,10 +47,13 @@ double EnrichmentCalculator::Fishers(int a, int b, int c, int d)
     for(auto x = static_cast<int>(lm); x <= static_cast<int>(um); x++)
     {
         double prob = hyperGeometricProb(x, ab, cd, ac, bd);
+
         if(x <= a)
             leftPval += prob;
+
         if(x >= a)
             rightPval += prob;
+
         if(prob <= crit)
             twoPval += prob;
     }
@@ -79,14 +80,10 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(co
     int n = 0;
     int selectedInCategory = 0;
     int r1 = 0;
-    //double fobs = 0.0;
     double fexp = 0.0;
-    //double overRepresentation = 0.0;
     std::vector<double> stdevs(4);
     double expectedNo = 0.0;
     double expectedDev = 0.0;
-    //double expectedOverrep = 0.0;
-    //double zScore = 0.0;
 
     // Comparing
 
@@ -107,7 +104,7 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(co
 
         for(auto& attributeValue : u::keysFor(attributeValueEntryCountATotal))
         {
-            EnrichmentTableModel::Row row(9);
+            EnrichmentTableModel::Row row(7);
             command.setProgress(progress / iterCount);
             progress++;
 
@@ -122,23 +119,19 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(co
             }
 
             r1 = attributeValueEntryCountATotal[attributeValue];
-            //fobs = static_cast<double>(selectedInCategory) / static_cast<double>(selectedNodes.size());
             fexp = static_cast<double>(r1) / static_cast<double>(n);
-            //overRepresentation = fobs / fexp;
             stdevs = doRandomSampling(static_cast<int>(selectedNodes.size()), fexp);
 
-            expectedNo = (static_cast<double>(r1) / static_cast<double>(n)
-                                                * static_cast<double>(selectedNodes.size()));
+            expectedNo = static_cast<double>(r1) / n
+                                                * selectedNodes.size();
             expectedDev = stdevs[0] * static_cast<double>(selectedNodes.size());
-            //expectedOverrep = stdevs[3];
-            //zScore = (overRepresentation - expectedOverrep) / stdevs[1];
 
             auto nonSelectedInCategory = r1 - selectedInCategory;
             auto c1 = static_cast<int>(selectedNodes.size());
             auto selectedNotInCategory = c1 - selectedInCategory;
             auto c2 = n - c1;
             auto nonSelectedNotInCategory = c2 - nonSelectedInCategory;
-            auto f = Fishers(selectedInCategory, nonSelectedInCategory, selectedNotInCategory, nonSelectedNotInCategory);
+            auto f = fishers(selectedInCategory, nonSelectedInCategory, selectedNotInCategory, nonSelectedNotInCategory);
 
             row[0] = attributeValueFor;
             row[1] = attributeValue;
@@ -155,26 +148,26 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(co
     return tableModel;
 }
 
-std::vector<double> EnrichmentCalculator::doRandomSampling(int totalGenes, double expectedFrequency)
+std::vector<double> EnrichmentCalculator::doRandomSampling(int sampleCount, double expectedFrequency)
 {
     const int NUMBER_OF_TRIALS = 1000;
     std::array<double, NUMBER_OF_TRIALS> observed{};
     std::array<double, NUMBER_OF_TRIALS> overRepresentation{};
-    double observationAvg = 0;
-    double overRepresentationAvg = 0;
-    double observationStdDev = 0;
-    double overRepresentationStdDev = 0;
+    double observationAvg = 0.0;
+    double overRepresentationAvg = 0.0;
+    double observationStdDev = 0.0;
+    double overRepresentationStdDev = 0.0;
 
     for(int i = 0; i < NUMBER_OF_TRIALS; i++)
     {
         int hits = 0;
-        for(int j = 0; j < totalGenes; j++)
+        for(int j = 0; j < sampleCount; j++)
         {
             if(static_cast<double>(u::rand(0.0f, 1.0f)) <= expectedFrequency)
                 hits++;
         }
 
-        observed.at(i) = hits / static_cast<double>(totalGenes);
+        observed.at(i) = hits / static_cast<double>(sampleCount);
         overRepresentation.at(i) = observed.at(i) / expectedFrequency;
         observationAvg += observed.at(i);
         overRepresentationAvg += overRepresentation.at(i);
@@ -189,8 +182,8 @@ std::vector<double> EnrichmentCalculator::doRandomSampling(int totalGenes, doubl
         overRepresentationStdDev += (overRepresentation.at(i) - overRepresentationAvg) * (overRepresentation.at(i) - overRepresentationAvg);
     }
 
-    observationStdDev = sqrt(observationStdDev / static_cast<double>(NUMBER_OF_TRIALS));
-    overRepresentationStdDev = sqrt(overRepresentationStdDev / static_cast<double>(NUMBER_OF_TRIALS));
+    observationStdDev = std::sqrt(observationStdDev / static_cast<double>(NUMBER_OF_TRIALS));
+    overRepresentationStdDev = std::sqrt(overRepresentationStdDev / static_cast<double>(NUMBER_OF_TRIALS));
 
     return { observationStdDev, overRepresentationStdDev, observationAvg, overRepresentationAvg };
 }

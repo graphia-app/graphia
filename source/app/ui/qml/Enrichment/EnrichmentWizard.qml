@@ -32,6 +32,11 @@ Wizard
         scrollViewB.flickableItem.contentY = 0;
     }
 
+    onVisibilityChanged:
+    {
+        reset();
+    }
+
     Item
     {
         ColumnLayout
@@ -52,9 +57,9 @@ Wizard
                     Text
                     {
                         // Should expand this later
-                        text: qsTr("Enrichment identifies the significance of a group makeup versus the null hypothesis<br>" +
+                        text: qsTr("Enrichment identifies the significance of a group makeup versus the null hypothesis.<br>" +
                                    "<br>" +
-                                   "Two attribute groups will be selected to test for enrichment" +
+                                   "Two attribute groups will be selected to test for enrichment." +
                                    "<br>" +
                                    "The edges may be filtered using transforms once the graph has been created.")
                         wrapMode: Text.WordWrap
@@ -110,6 +115,7 @@ Wizard
                     id: scrollViewA
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    frameVisible: true
                     ColumnLayout
                     {
                         ExclusiveGroup
@@ -120,7 +126,7 @@ Wizard
                                 if(current != null)
                                     selectedAttributeGroupA = current.text;
                                 // Disable analysis on selected
-                                for(var i=0; i<attributeSelectBRepeater.count; i++)
+                                for(var i = 0; i < attributeSelectBRepeater.count; i++)
                                 {
                                     var radioBtn = attributeSelectBRepeater.itemAt(i);
                                     radioBtn.enabled = radioBtn.text !== current.text;
@@ -177,6 +183,7 @@ Wizard
                     id: scrollViewB
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    frameVisible: true
                     ColumnLayout
                     {
                         ExclusiveGroup

@@ -802,7 +802,8 @@ ApplicationWindow
     Action
     {
         id: enrichmentAction
-        text: qsTr("Enrichment")
+        text: qsTr("Enrichment...")
+        enabled: currentDocument != undefined
         onTriggered:
         {
             if(currentDocument != undefined)
@@ -1215,7 +1216,6 @@ ApplicationWindow
         Menu
         {
             title: qsTr("&Analyses")
-            enabled: currentDocument != undefined
             MenuItem { action: enrichmentAction }
         }
         Menu
