@@ -25,8 +25,6 @@ BaseParameterDialog
 
     onCurrentIndexChanged: pageIndicator.requestPaint()
 
-    Keys.onEnterPressed: root.accepted();
-
     SystemPalette { id: systemPalette }
 
     ColumnLayout

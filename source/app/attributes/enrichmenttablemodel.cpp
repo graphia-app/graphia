@@ -36,12 +36,12 @@ QVariant EnrichmentTableModel::data(int row, QString role)
     return data(index(row,0), roleNames().key(role.toUtf8()));
 }
 
-int EnrichmentTableModel::rowFromAttributeSets(QString attributeA, QString attributeB)
+int EnrichmentTableModel::rowFromAttributeSets(const QString& attributeA, const QString& attributeB)
 {
     for(int rowIndex = 0; rowIndex < static_cast<int>(_data.size()); ++rowIndex)
     {
-        if(data(rowIndex, "Attribute Group") == attributeA
-                && data(rowIndex, "Selection") == attributeB)
+        if(data(rowIndex, QStringLiteral("Attribute Group")) == attributeA
+                && data(rowIndex, QStringLiteral("Selection")) == attributeB)
             return rowIndex;
     }
     return -1;
@@ -81,6 +81,6 @@ json EnrichmentTableModel::toJson()
 void EnrichmentTableModel::setTableData(EnrichmentTableModel::Table data)
 {
     beginResetModel();
-    _data = data;
+    _data = std::move(data);
     endResetModel();
 }

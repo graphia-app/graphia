@@ -105,7 +105,6 @@ void EnrichmentHeatmapItem::hoverMoveEvent(QHoverEvent *event)
     auto* currentPlottable = _customPlot.plottableAt(event->posF(), true);
     if(_hoverPlottable != currentPlottable)
     {
-        //qDebug() << currentPlottable;
         _hoverPlottable = currentPlottable;
         hideTooltip();
     }
@@ -150,8 +149,8 @@ void EnrichmentHeatmapItem::buildPlot()
 
     for (int i = 0; i < _tableModel->rowCount(); ++i)
     {
-        attributeValueSetA.insert(_tableModel->data(i, "Attribute Group").toString());
-        attributeValueSetB.insert(_tableModel->data(i, "Selection").toString());
+        attributeValueSetA.insert(_tableModel->data(i, QStringLiteral("Attribute Group")).toString());
+        attributeValueSetB.insert(_tableModel->data(i, QStringLiteral("Selection")).toString());
     }
 
     // Sensible sort strings using numbers
@@ -198,23 +197,23 @@ void EnrichmentHeatmapItem::buildPlot()
     {
         // The data is offset by 1 to account for the empty margin
         // Set the data of the cell
-        auto xValue = fullLabelToXAxis[_tableModel->data(i, "Attribute Group").toString()];
-        auto yValue = fullLabelToYAxis[_tableModel->data(i, "Selection").toString()];
+        auto xValue = fullLabelToXAxis[_tableModel->data(i, QStringLiteral("Attribute Group")).toString()];
+        auto yValue = fullLabelToYAxis[_tableModel->data(i, QStringLiteral("Selection")).toString()];
         _colorMap->data()->setCell(xValue + 1,
                                    yValue + 1,
-                                   _tableModel->data(i, "Fishers").toFloat());
+                                   _tableModel->data(i, QStringLiteral("Fishers")).toFloat());
 
         // Ugly hack: Colors blend from margin cells. I recolour them to match adjacent cells so you can't tell
         // 200 IQ fix really...
         if(xValue == 0)
             _colorMap->data()->setCell(xValue,
                                        yValue + 1,
-                                       _tableModel->data(i, "Fishers").toFloat());
+                                       _tableModel->data(i, QStringLiteral("Fishers")).toFloat());
         if(yValue == static_cast<int>(attributeValueSetB.size()) - 1)
         {
             _colorMap->data()->setCell(xValue + 1,
                                        yValue + 2,
-                                       _tableModel->data(i, "Fishers").toFloat());
+                                       _tableModel->data(i, QStringLiteral("Fishers")).toFloat());
         }
     }
     _colorScale->setDataRange(QCPRange(0, 0.06));

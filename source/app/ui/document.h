@@ -418,9 +418,9 @@ public:
 
     Q_INVOKABLE void dumpGraph();
 
-    Q_INVOKABLE void performEnrichment(QString selectedAttributesA, QString selectedAttributesB);
+    Q_INVOKABLE void performEnrichment(const QString& selectedAttributeA, const QString& selectedAttributeB);
 
-    Q_INVOKABLE QStringList attributeValues(QString attributeName);
+    Q_INVOKABLE QStringList attributeValues(const QString& attributeName);
 
 private slots:
     void onLoadProgress(int percentage);

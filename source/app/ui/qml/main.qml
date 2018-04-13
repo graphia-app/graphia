@@ -802,22 +802,16 @@ ApplicationWindow
     Action
     {
         id: enrichmentAction
-        text: qsTr("Perform Enrichment")
+        text: qsTr("Enrichment")
         onTriggered:
         {
             if(currentDocument != undefined)
+            {
+                if(enrichmentResults.models.size() > 0)
+                    enrichmentResults.show();
+                else
                     enrichmentWizard.show();
-        }
-    }
-
-    Action
-    {
-        id: enrichmentResultsAction
-        text: qsTr("Enrichment Results")
-        onTriggered:
-        {
-            if(currentDocument != undefined)
-                enrichmentResults.show();
+            }
         }
     }
 
@@ -1221,13 +1215,8 @@ ApplicationWindow
         Menu
         {
             title: qsTr("&Analyses")
-            Menu
-            {
-                title: qsTr("Enrichment")
-                enabled: currentDocument != undefined
-                MenuItem { action: enrichmentAction }
-                MenuItem { action: enrichmentResultsAction }
-            }
+            enabled: currentDocument != undefined
+            MenuItem { action: enrichmentAction }
         }
         Menu
         {
@@ -1453,7 +1442,6 @@ ApplicationWindow
         onPluginPoppedOutChanged: updatePluginMenus();
         onEnrichmentTableModelsChanged:
         {
-            console.log("Table Models Changed!");
             enrichmentResults.models = currentDocument.enrichmentTableModels;
         }
         onEnrichmentAnalysisComplete: { enrichmentResults.visible = true; }

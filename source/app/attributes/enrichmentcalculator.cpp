@@ -46,7 +46,7 @@ double EnrichmentCalculator::Fishers(int a, int b, int c, int d)
     double crit = hyperGeometricProb(a, ab, cd, ac, bd);
 
     leftPval = rightPval = twoPval = 0.0;
-    for(double x = lm; x <= um; x++)
+    for(int x = static_cast<int>(lm); x <= static_cast<int>(um); x++)
     {
         double prob = hyperGeometricProb(x, ab, cd, ac, bd);
         if(x <= a)
@@ -60,7 +60,7 @@ double EnrichmentCalculator::Fishers(int a, int b, int c, int d)
     return twoPval;
 }
 
-EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(QString attributeAName, QString attributeBName,
+EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(const QString& attributeAName, const QString& attributeBName,
                                                        IGraphModel* graphModel, ICommand& command)
 {
     // Count of attribute values within the attribute
@@ -79,19 +79,19 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(QS
     int n = 0;
     int selectedInCategory = 0;
     int r1 = 0;
-    double fobs = 0.0;
+    //double fobs = 0.0;
     double fexp = 0.0;
-    double overRepresentation = 0.0;
+    //double overRepresentation = 0.0;
     std::vector<double> stdevs(4);
     double expectedNo = 0.0;
     double expectedDev = 0.0;
-    double expectedOverrep = 0.0;
+    //double expectedOverrep = 0.0;
     //double zScore = 0.0;
 
     // Comparing
 
     int progress = 0;
-    int iterCount = static_cast<int>(attributeValueEntryCountBTotal.size()
+    auto iterCount = static_cast<int>(attributeValueEntryCountBTotal.size()
                                      * attributeValueEntryCountATotal.size());
 
     // Get all the nodeIds for each AttributeFor value
@@ -122,15 +122,15 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(QS
             }
 
             r1 = attributeValueEntryCountATotal[attributeValue];
-            fobs = static_cast<double>(selectedInCategory) / static_cast<double>(selectedNodes.size());
+            //fobs = static_cast<double>(selectedInCategory) / static_cast<double>(selectedNodes.size());
             fexp = static_cast<double>(r1) / static_cast<double>(n);
-            overRepresentation = fobs / fexp;
+            //overRepresentation = fobs / fexp;
             stdevs = doRandomSampling(static_cast<int>(selectedNodes.size()), fexp);
 
             expectedNo = (static_cast<double>(r1) / static_cast<double>(n)
                                                 * static_cast<double>(selectedNodes.size()));
             expectedDev = stdevs[0] * static_cast<double>(selectedNodes.size());
-            expectedOverrep = stdevs[3];
+            //expectedOverrep = stdevs[3];
             //zScore = (overRepresentation - expectedOverrep) / stdevs[1];
 
             auto nonSelectedInCategory = r1 - selectedInCategory;
@@ -158,8 +158,8 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(QS
 std::vector<double> EnrichmentCalculator::doRandomSampling(int totalGenes, double expectedFrequency)
 {
     const int NUMBER_OF_TRIALS = 1000;
-    double observed[NUMBER_OF_TRIALS];
-    double overRepresentation[NUMBER_OF_TRIALS];
+    std::array<double, NUMBER_OF_TRIALS> observed;
+    std::array<double, NUMBER_OF_TRIALS> overRepresentation;
     double observationAvg = 0;
     double overRepresentationAvg = 0;
     double observationStdDev = 0;
@@ -174,10 +174,10 @@ std::vector<double> EnrichmentCalculator::doRandomSampling(int totalGenes, doubl
                 hits++;
         }
 
-        observed[i] = hits / static_cast<double>(totalGenes);
-        overRepresentation[i] = observed[i] / expectedFrequency;
-        observationAvg += observed[i];
-        overRepresentationAvg += overRepresentation[i];
+        observed.at(i) = hits / static_cast<double>(totalGenes);
+        overRepresentation.at(i) = observed.at(i) / expectedFrequency;
+        observationAvg += observed.at(i);
+        overRepresentationAvg += overRepresentation.at(i);
     }
 
     observationAvg = observationAvg / static_cast<double>(NUMBER_OF_TRIALS);

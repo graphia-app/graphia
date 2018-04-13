@@ -1113,6 +1113,7 @@ QStringList Document::attributeGroupNames()
     if(graphModel() != nullptr)
     {
         const auto& attributeNames = graphModel()->attributeNames();
+        list.reserve(attributeNames.size());
         for(const auto& name : attributeNames)
         {
             auto* attribute = graphModel()->attributeByName(name);
@@ -1987,7 +1988,7 @@ void Document::dumpGraph()
     _graphModel->graph().dumpToQDebug(2);
 }
 
-void Document::performEnrichment(QString selectedAttributeA, QString selectedAttributeB)
+void Document::performEnrichment(const QString& selectedAttributeA, const QString& selectedAttributeB)
 {
     auto* tableModel = new EnrichmentTableModel(this);
     _enrichmentTableModels.append(tableModel);
@@ -2009,7 +2010,7 @@ void Document::performEnrichment(QString selectedAttributeA, QString selectedAtt
     });
 }
 
-QStringList Document::attributeValues(QString attributeName)
+QStringList Document::attributeValues(const QString& attributeName)
 {
     std::set<QString> values;
     auto* attribute = graphModel()->attributeByName(attributeName);
@@ -2020,6 +2021,7 @@ QStringList Document::attributeValues(QString attributeName)
     }
 
     QStringList valuesList;
+    valuesList.reserve(values.size());
     for(const auto& value: values)
         valuesList.append(value);
 

@@ -10,7 +10,7 @@ class EnrichmentTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    EnrichmentTableModel(QObject* parent = nullptr);
+    explicit EnrichmentTableModel(QObject* parent = nullptr);
     using Row = std::vector<QVariant>;
     using Table = std::vector<Row>;
 
@@ -20,7 +20,7 @@ public:
     int columnCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     QVariant data(int row, QString role);
-    int rowFromAttributeSets(QString attributeA, QString attributeB);
+    int rowFromAttributeSets(const QString& attributeA, const QString& attributeB);
     QHash<int, QByteArray> roleNames() const override;
 
     void setTableData(Table data);

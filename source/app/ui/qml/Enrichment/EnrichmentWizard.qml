@@ -117,7 +117,8 @@ Wizard
                             id: attributeSelectedAExclusiveGroup
                             onCurrentChanged:
                             {
-                                selectedAttributeGroupA = current.text;
+                                if(current != null)
+                                    selectedAttributeGroupA = current.text;
                                 // Disable analysis on selected
                                 for(var i=0; i<attributeSelectBRepeater.count; i++)
                                 {
