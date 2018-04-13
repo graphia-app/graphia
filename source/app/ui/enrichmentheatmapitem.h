@@ -2,7 +2,9 @@
 #define ENRICHMENTHEATMAPITEM_H
 
 #include <QQuickPaintedItem>
+#include "thirdparty/qcustomplot/qcustomplot_disable_warnings.h"
 #include "thirdparty/qcustomplot/qcustomplot.h"
+#include "thirdparty/qcustomplot/qcustomplot_enable_warnings.h"
 #include "attributes/enrichmentcalculator.h"
 
 class EnrichmentHeatmapItem : public QQuickPaintedItem

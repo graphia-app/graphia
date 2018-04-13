@@ -46,7 +46,7 @@ double EnrichmentCalculator::Fishers(int a, int b, int c, int d)
     double crit = hyperGeometricProb(a, ab, cd, ac, bd);
 
     leftPval = rightPval = twoPval = 0.0;
-    for(int x = static_cast<int>(lm); x <= static_cast<int>(um); x++)
+    for(auto x = static_cast<int>(lm); x <= static_cast<int>(um); x++)
     {
         double prob = hyperGeometricProb(x, ab, cd, ac, bd);
         if(x <= a)
@@ -158,8 +158,8 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(co
 std::vector<double> EnrichmentCalculator::doRandomSampling(int totalGenes, double expectedFrequency)
 {
     const int NUMBER_OF_TRIALS = 1000;
-    std::array<double, NUMBER_OF_TRIALS> observed;
-    std::array<double, NUMBER_OF_TRIALS> overRepresentation;
+    std::array<double, NUMBER_OF_TRIALS> observed{};
+    std::array<double, NUMBER_OF_TRIALS> overRepresentation{};
     double observationAvg = 0;
     double overRepresentationAvg = 0;
     double observationStdDev = 0;

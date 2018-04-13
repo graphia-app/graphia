@@ -1113,7 +1113,7 @@ QStringList Document::attributeGroupNames()
     if(graphModel() != nullptr)
     {
         const auto& attributeNames = graphModel()->attributeNames();
-        list.reserve(attributeNames.size());
+        list.reserve(static_cast<int>(attributeNames.size()));
         for(const auto& name : attributeNames)
         {
             auto* attribute = graphModel()->attributeByName(name);
@@ -2021,7 +2021,7 @@ QStringList Document::attributeValues(const QString& attributeName)
     }
 
     QStringList valuesList;
-    valuesList.reserve(values.size());
+    valuesList.reserve(static_cast<int>(values.size()));
     for(const auto& value: values)
         valuesList.append(value);
 
