@@ -363,6 +363,23 @@ Rectangle
                         {
                             if(_visible && findByAttributeRow.visible)
                                 lastFindByAttributeName = currentText;
+
+                            valueComboBox.refresh();
+                        }
+
+                        function refresh()
+                        {
+                            var rowIndex = proxyModel.rowIndexForAttributeName(lastFindByAttributeName);
+
+                            if(rowIndex >= 0)
+                            {
+                                currentIndex = rowIndex;
+                                valueComboBox.refresh();
+                            }
+                            else if(count > 0)
+                                currentIndex = 0;
+                            else
+                                currentIndex = -1;
                         }
                     }
 
@@ -373,10 +390,22 @@ Rectangle
 
                         enabled: valueComboBox.count > 0
 
-                        model:
+                        function refresh()
                         {
+                            // Try to keep the same value selected
+                            var preUpdateText = currentText;
+
                             var attribute = document.attribute(selectAttributeComboBox.currentText);
-                            return attribute.sharedValues;
+                            model = attribute.sharedValues;
+
+                            var rowIndex = find(preUpdateText);
+
+                            if(rowIndex >= 0)
+                                currentIndex = rowIndex;
+                            else if(count > 0)
+                                currentIndex = 0;
+                            else
+                                currentIndex = -1;
                         }
                     }
                 }
@@ -431,29 +460,65 @@ Rectangle
                         if(_visible && advancedRow.visible && enabled)
                             lastAdvancedFindAttributeName = currentText;
                     }
+
+                    function refresh()
+                    {
+                        var rowIndex = proxyModel.rowIndexForAttributeName(lastAdvancedFindAttributeName);
+
+                        if(rowIndex >= 0)
+                        {
+                            currentIndex = rowIndex;
+                            attributeCheckBox.checked = true;
+                        }
+                        else if(count > 0)
+                        {
+                            currentIndex = 0;
+                            attributeCheckBox.checked = false;
+                        }
+                        else
+                        {
+                            currentIndex = -1;
+                            attributeCheckBox.checked = false;
+                        }
+                    }
                 }
 
                 ToolButton { action: matchCaseAction }
                 ToolButton { action: matchWholeWordsAction }
                 ToolButton { action: matchUsingRegexAction }
             }
+        }
+    }
 
-            Connections
+    Connections
+    {
+        target: document
+
+        onCommandCompleted:
+        {
+            _finding = false;
+
+            if(_pendingFind)
             {
-                target: document
-
-                onCommandCompleted:
-                {
-                    _finding = false;
-
-                    if(_pendingFind)
-                    {
-                        _doFind();
-                        _pendingFind = false;
-                    }
-                }
+                _doFind();
+                _pendingFind = false;
             }
         }
+
+        onGraphChanged:
+        {
+            refresh();
+        }
+    }
+
+    function refresh()
+    {
+        proxyModel.sourceModel = document.availableAttributes(ElementType.Node);
+
+        if(_type === Find.Advanced)
+            attributeComboBox.refresh();
+        else if(_type === Find.ByAttribute)
+            selectAttributeComboBox.refresh();
     }
 
     function show(findType)
@@ -465,39 +530,7 @@ Rectangle
         else
             _type = findType;
 
-        proxyModel.sourceModel = document.availableAttributes(ElementType.Node);
-
-        if(_type === Find.Advanced)
-        {
-            var rowIndex = proxyModel.rowIndexForAttributeName(lastAdvancedFindAttributeName);
-
-            if(rowIndex >= 0)
-            {
-                attributeComboBox.currentIndex = rowIndex;
-                attributeCheckBox.checked = true;
-            }
-            else if(attributeComboBox.count > 0)
-            {
-                attributeComboBox.currentIndex = 0;
-                attributeCheckBox.checked = false;
-            }
-            else
-            {
-                attributeComboBox.currentIndex = -1;
-                attributeCheckBox.checked = false;
-            }
-        }
-        else if(_type === Find.ByAttribute)
-        {
-            var rowIndex = proxyModel.rowIndexForAttributeName(lastFindByAttributeName);
-
-            if(rowIndex >= 0)
-                selectAttributeComboBox.currentIndex = rowIndex;
-            else if(selectAttributeComboBox.count > 0)
-                selectAttributeComboBox.currentIndex = 0;
-            else
-                selectAttributeComboBox.currentIndex = -1;
-        }
+        refresh();
 
         if(_type === Find.Simple || _type === Find.Advanced)
         {

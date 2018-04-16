@@ -263,6 +263,8 @@ signals:
     void busyChanged();
     void editableChanged();
 
+    void graphWillChange(const Graph* graph);
+    void graphChanged(const Graph* graph, bool changeOccurred);
     void graphChangingChanged();
 
     void commandInProgressChanged();

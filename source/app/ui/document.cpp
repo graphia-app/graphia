@@ -686,6 +686,9 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     connect(_layoutThread.get(), &LayoutThread::executed, _graphQuickItem, &GraphQuickItem::onLayoutChanged);
 
+    connect(&_graphModel->graph(), &Graph::graphWillChange, this, &Document::graphWillChange);
+    connect(&_graphModel->graph(), &Graph::graphChanged, this, &Document::graphChanged);
+
     connect(&_graphModel->graph(), &Graph::graphWillChange, [this]
     {
         bool graphChangingWillChange = !_graphChanging;
