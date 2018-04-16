@@ -35,7 +35,7 @@ private:
     };
 
     QHash<int, QByteArray> _roleNames;
-    std::mutex _updateMutex;
+    std::recursive_mutex _updateMutex;
 
     using Column = std::vector<QVariant>;
     using Table = std::vector<Column>;

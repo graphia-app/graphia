@@ -68,7 +68,7 @@ QVariant NodeAttributeTableModel::dataValue(int row, int role) const
 
 void NodeAttributeTableModel::addRole(int role)
 {
-    std::unique_lock<std::mutex> lock(_updateMutex);
+    std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
     size_t index = role - (Qt::UserRole + 1);
 
@@ -84,7 +84,7 @@ void NodeAttributeTableModel::addRole(int role)
 
 void NodeAttributeTableModel::removeRole(int role)
 {
-    std::unique_lock<std::mutex> lock(_updateMutex);
+    std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
     size_t index = role - (Qt::UserRole + 1);
 
@@ -96,7 +96,7 @@ void NodeAttributeTableModel::removeRole(int role)
 
 void NodeAttributeTableModel::updateRole(int role)
 {
-    std::unique_lock<std::mutex> lock(_updateMutex);
+    std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
     size_t index = role - (Qt::UserRole + 1);
 
@@ -133,7 +133,7 @@ void NodeAttributeTableModel::updateColumn(int role, NodeAttributeTableModel::Co
 
 void NodeAttributeTableModel::update()
 {
-    std::unique_lock<std::mutex> lock(_updateMutex);
+    std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
     _pendingData.clear();
 
@@ -150,7 +150,7 @@ void NodeAttributeTableModel::update()
 
 void NodeAttributeTableModel::onUpdateRoleComplete(int role)
 {
-    std::unique_lock<std::mutex> lock(_updateMutex);
+    std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
     emit layoutAboutToBeChanged();
     int column = role - (Qt::UserRole + 1);
@@ -172,7 +172,7 @@ void NodeAttributeTableModel::onUpdateRoleComplete(int role)
 
 void NodeAttributeTableModel::onUpdateComplete()
 {
-    std::unique_lock<std::mutex> lock(_updateMutex);
+    std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
     beginResetModel();
     _data = _pendingData;
