@@ -218,14 +218,13 @@ if(APPLE)
     set(MACOSX_BUNDLE_ICON_FILE Icon.icns)
     set(MACOSX_BUNDLE_GUI_IDENTIFIER com.kajeka.${PROJECT_NAME})
     set(ICON ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.icns)
-    list(APPEND RESOURCES ${ICON})
     set_source_files_properties(${ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
-    add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES})
+    add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES} ${ICON})
 elseif(MSVC)
-    list(APPEND RESOURCES ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.rc)
+    set(ICON ${CMAKE_CURRENT_LIST_DIR}/icon/Icon.rc)
 
-    add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS} ${RESOURCES})
+    add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS} ${RESOURCES} ${ICON})
 else()
     add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${RESOURCES})
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
@@ -258,7 +257,7 @@ target_link_libraries(${PROJECT_NAME}
 
 find_package(Qt5QuickCompiler)
 if(Qt5QuickCompiler_FOUND)
-    qtquick_compiler_add_resources(RESOURCES ${CMAKE_CURRENT_LIST_DIR}/ui/qml.qrc)
+    qtquick_compiler_add_resources(RESOURCES ${RESOURCES})
 endif()
 
 find_package(OpenGL REQUIRED)
