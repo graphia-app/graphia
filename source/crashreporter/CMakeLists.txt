@@ -42,3 +42,8 @@ target_link_libraries(CrashReporter
 
 find_package(OpenGL REQUIRED)
 target_link_libraries(CrashReporter ${OPENGL_gl_LIBRARY})
+
+find_package(Qt5QuickCompiler)
+if(Qt5QuickCompiler_FOUND)
+    qtquick_compiler_add_resources(RESOURCES ${RESOURCES})
+endif()

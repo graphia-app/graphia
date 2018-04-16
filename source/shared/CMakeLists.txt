@@ -116,3 +116,8 @@ target_link_libraries(shared
     Qt5::Qml
     Qt5::Widgets
 )
+
+find_package(Qt5QuickCompiler)
+if(Qt5QuickCompiler_FOUND)
+    qtquick_compiler_add_resources(RESOURCES ${RESOURCES})
+endif()
