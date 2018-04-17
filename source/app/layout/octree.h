@@ -163,6 +163,7 @@ public:
             const auto yh = subTree->_boundingBox.yLength() * 0.5f;
             const auto zh = subTree->_boundingBox.zLength() * 0.5f;
 
+            // clang-format off
             subTree->_subVolumes[0]._boundingBox = {{cx - xh, cy - yh, cz - zh}, {cx,      cy,      cz     }};
             subTree->_subVolumes[1]._boundingBox = {{cx,      cy - yh, cz - zh}, {cx + xh, cy,      cz     }};
             subTree->_subVolumes[2]._boundingBox = {{cx - xh, cy,      cz - zh}, {cx,      cy + yh, cz     }};
@@ -172,6 +173,7 @@ public:
             subTree->_subVolumes[5]._boundingBox = {{cx,      cy - yh, cz     }, {cx + xh, cy,      cz + zh}};
             subTree->_subVolumes[6]._boundingBox = {{cx - xh, cy,      cz     }, {cx,      cy + yh, cz + zh}};
             subTree->_subVolumes[7]._boundingBox = {{cx,      cy,      cz     }, {cx + xh, cy + yh, cz + zh}};
+            // clang-format on
 
             for(auto& subVolume : subTree->_subVolumes)
             {

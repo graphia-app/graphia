@@ -1,0 +1,40 @@
+---
+Language: Cpp
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+Standard: Cpp11
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: true
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  BeforeCatch: true
+  BeforeElse: true
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+
+ColumnLimit: 110
+BreakConstructorInitializers: AfterColon
+PointerAlignment: Left
+SpaceBeforeParens: Never
+SpaceInEmptyParentheses: false
+AlignAfterOpenBracket: Align
+BreakBeforeBinaryOperators: None
+AccessModifierOffset: -4
+AllowShortCaseLabelsOnASingleLine: true
+SpaceAfterTemplateKeyword: false
+BinPackArguments: true
+BinPackParameters: true
+AlwaysBreakTemplateDeclarations: true
+AlignEscapedNewlines: Right
+FixNamespaceComments: true
+NamespaceIndentation: All
+SortUsingDeclarations: true
+...
