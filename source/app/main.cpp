@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     qmlRegisterSingletonType<QmlUtils>               (uri, maj, min, "QmlUtils", &QmlUtils::qmlInstance);
 
     qmlRegisterUncreatableType<EnrichmentTableModel> (uri, maj, min, "EnrichmentRoles",
-                                                      "Exposed purely for results Enumerator");
+                                                      QStringLiteral("Exposed purely for results Enumerator"));
 
     qRegisterMetaType<size_t>("size_t");
 
