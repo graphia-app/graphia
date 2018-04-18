@@ -11,8 +11,8 @@
 #include <functional>
 #include <vector>
 #include <memory>
+#include <deque>
 #include <stack>
-#include <tuple>
 #include <array>
 #include <cstdlib>
 
@@ -74,8 +74,29 @@ private:
     unsigned int _maxNodesPerLeaf = 1;
     std::function<bool(const BoundingBox3D&)> _predicate;
 
-    void distributeNodesOverSubVolumes(const std::vector<NodeId>& nodeIds,
-                                       std::stack<std::tuple<BaseOctree*, std::vector<NodeId>>>& stack)
+    struct SubTree
+    {
+        BaseOctree* _tree;
+        std::vector<NodeId> _nodeIds;
+
+        SubTree(BaseOctree* tree, std::vector<NodeId> nodeIds) :
+            _tree(tree), _nodeIds(std::move(nodeIds))
+        {}
+
+        SubTree(SubTree&& other) :
+            _tree(other._tree), _nodeIds(std::move(other._nodeIds))
+        {}
+
+        SubTree& operator=(SubTree&& other)
+        {
+            _tree = other._tree;
+            _nodeIds = std::move(other._nodeIds);
+
+            return *this;
+        }
+    };
+
+    std::deque<SubTree> distributeNodesOverSubVolumes(const std::vector<NodeId>& nodeIds)
     {
         bool distinctPositions = false;
         QVector3D lastPosition = _nodePositions->get(nodeIds[0]);
@@ -100,6 +121,8 @@ private:
             }
         }
 
+        std::deque<SubTree> subTrees;
+
         // Decide if the SubVolumes need further sub-division
         for(auto& subVolume : _subVolumes)
         {
@@ -113,7 +136,7 @@ private:
                 subVolume._subTree = std::make_unique<TreeType>();
                 Q_ASSERT(subVolume._boundingBox.volume() > 0.0f);
                 subVolume._subTree->_boundingBox = subVolume._boundingBox;
-                stack.emplace(subVolume._subTree.get(), std::move(subVolume._nodeIds));
+                subTrees.emplace_back(subVolume._subTree.get(), std::move(subVolume._nodeIds));
 
                 subVolume._leaf = false;
                 _internalNodes.at(_numInternalNodes++) = &subVolume;
@@ -124,6 +147,8 @@ private:
                 _nonEmptyLeaves.at(_numNonEmptyLeaves++) = &subVolume;
             }
         }
+
+        return subTrees;
     }
 
     // The parameter and superset of _subVolumes[x]._nodeIds contain the same data, when this is called
@@ -142,16 +167,16 @@ public:
         _boundingBox = boundingBox;
         _depth = 0;
 
-        std::stack<std::tuple<BaseOctree*, std::vector<NodeId>>> stack;
-        stack.emplace(this, nodeIds);
+        std::deque<SubTree> subTrees;
+        subTrees.emplace_back(this, nodeIds);
 
-        while(!stack.empty())
+        while(!subTrees.empty())
         {
-            _depth = std::max(_depth, stack.size());
+            _depth = std::max(_depth, subTrees.size());
 
-            BaseOctree* subTree = std::get<0>(stack.top());
-            std::vector<NodeId> nodeIdsToDistribute = std::move(std::get<1>(stack.top()));
-            stack.pop();
+            BaseOctree* subTree = subTrees.back()._tree;
+            std::vector<NodeId> nodeIdsToDistribute = std::move(subTrees.back()._nodeIds);
+            subTrees.pop_back();
 
             subTree->_centre = subTree->_boundingBox.centre();
             subTree->_nodePositions = &nodePositions;
@@ -181,7 +206,10 @@ public:
                 subVolume._passesPredicate = _predicate(subVolume._boundingBox);
             }
 
-            subTree->distributeNodesOverSubVolumes(nodeIdsToDistribute, stack);
+            auto newSubTrees = subTree->distributeNodesOverSubVolumes(nodeIdsToDistribute);
+            subTrees.insert(subTrees.end(), std::make_move_iterator(newSubTrees.begin()),
+                std::make_move_iterator(newSubTrees.end()));
+
             subTree->initialiseTreeNode(nodeIdsToDistribute);
         }
     }
