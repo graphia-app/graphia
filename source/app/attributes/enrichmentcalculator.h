@@ -2,6 +2,7 @@
 #define ENRICHMENTCALCULATOR_H
 
 #include <QString>
+#include <random>
 
 #include "shared/graph/elementid_containers.h"
 #include "shared/graph/igraphmodel.h"

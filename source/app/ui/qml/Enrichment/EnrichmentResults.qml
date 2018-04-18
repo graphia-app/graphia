@@ -48,7 +48,7 @@ Window
                 ToolButton
                 {
                     id: showHeatmapButton
-                    iconName: "x-office-spreadsheett"
+                    iconName: "x-office-spreadsheet"
                     checkable: true
                     tooltip: qsTr("Show Heatmap")
                 }
@@ -79,6 +79,7 @@ Window
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: tabView.count > 0
+            onCountChanged: currentIndex = count - 1;
             Repeater
             {
                 model: models
@@ -119,13 +120,21 @@ Window
                                 }
                             }
 
-                            TableViewColumn { role: "Attribute Group"; title:  qsTr("Attribute Group"); width: 100 }
-                            TableViewColumn { role: "Selection"; title: qsTr("Selection"); width: 100 }
-                            TableViewColumn { role: "Observed"; title: qsTr("Observed"); width: 100 }
-                            TableViewColumn { role: "Expected"; title: qsTr("Expected"); width: 100 }
-                            TableViewColumn { role: "ExpectedTrial"; title: qsTr("Expected Trial"); width: 100 }
-                            TableViewColumn { role: "OverRep"; title: qsTr("Over-Representation"); width: 100 }
-                            TableViewColumn { role: "Fishers"; title: qsTr("Fishers"); width: 100 }
+                            TableViewColumn { role: roleEnumToString(EnrichmentRoles.SelectionA); title: qsTr("Selection A"); }
+                            TableViewColumn { role: roleEnumToString(EnrichmentRoles.SelectionB); title: qsTr("Selection B"); }
+                            TableViewColumn { role: roleEnumToString(EnrichmentRoles.Observed); title: qsTr("Observed"); }
+                            TableViewColumn { role: roleEnumToString(EnrichmentRoles.Expected); title: qsTr("Expected"); }
+                            TableViewColumn { role: roleEnumToString(EnrichmentRoles.ExpectedTrial); title: qsTr("Expected (Trial)"); }
+                            TableViewColumn { role: roleEnumToString(EnrichmentRoles.OverRep); title: qsTr("Representation"); }
+                            TableViewColumn { role: roleEnumToString(EnrichmentRoles.Fishers); title: qsTr("Fishers"); }
+
+                            Connections
+                            {
+                                target: qtObject
+                                onDataChanged: resizeColumnsToContentsBugWorkaround(tableView)
+                            }
+
+                            Component.onCompleted: Qt.callLater(resizeColumnsToContentsBugWorkaround, tableView);
                         }
                         GridLayout
                         {
@@ -235,6 +244,44 @@ Window
         onAccepted:
         {
             currentHeatmap.savePlotImage(file, selectedNameFilter.extensions);
+        }
+    }
+
+    function roleEnumToString(value)
+    {
+        switch(value)
+        {
+            case EnrichmentRoles.SelectionA:
+                return "SelectionA";
+            case EnrichmentRoles.SelectionB:
+                return "SelectionB";
+            case EnrichmentRoles.Observed:
+                return "Observed";
+            case EnrichmentRoles.Expected:
+                return "Expected";
+            case EnrichmentRoles.ExpectedTrial:
+                return "ExpectedTrial";
+            case EnrichmentRoles.OverRep:
+                return "OverRep";
+            case EnrichmentRoles.Fishers:
+                return "Fishers";
+        }
+    }
+
+    // Work around for QTBUG-58594
+    function resizeColumnsToContentsBugWorkaround(inTableView)
+    {
+        for(var i = 0; i < inTableView.columnCount; ++i)
+        {
+            var col = inTableView.getColumn(i);
+            var header = inTableView.__listView.headerItem.headerRepeater.itemAt(i);
+            if(col)
+            {
+                col.__index = i;
+                col.resizeToContents();
+                if(col.width < header.implicitWidth)
+                    col.width = header.implicitWidth;
+            }
         }
     }
 }

@@ -110,14 +110,17 @@ int main(int argc, char *argv[])
     const int maj = Application::majorVersion();
     const int min = Application::minorVersion();
 
-    qmlRegisterType<Application>                (uri, maj, min, "Application");
-    qmlRegisterType<Document>                   (uri, maj, min, "Document");
-    qmlRegisterType<GraphQuickItem>             (uri, maj, min, "Graph");
-    qmlRegisterType<QmlPreferences>             (uri, maj, min, "Preferences");
-    qmlRegisterType<HoverMousePassthrough>      (uri, maj, min, "HoverMousePassthrough");
-    qmlRegisterType<EnrichmentHeatmapItem>      (uri, maj, min, "EnrichmentHeatmap");
+    qmlRegisterType<Application>                     (uri, maj, min, "Application");
+    qmlRegisterType<Document>                        (uri, maj, min, "Document");
+    qmlRegisterType<GraphQuickItem>                  (uri, maj, min, "Graph");
+    qmlRegisterType<QmlPreferences>                  (uri, maj, min, "Preferences");
+    qmlRegisterType<HoverMousePassthrough>           (uri, maj, min, "HoverMousePassthrough");
+    qmlRegisterType<EnrichmentHeatmapItem>           (uri, maj, min, "EnrichmentHeatmap");
 
-    qmlRegisterSingletonType<QmlUtils>          (uri, maj, min, "QmlUtils", &QmlUtils::qmlInstance);
+    qmlRegisterSingletonType<QmlUtils>               (uri, maj, min, "QmlUtils", &QmlUtils::qmlInstance);
+
+    qmlRegisterUncreatableType<EnrichmentTableModel> (uri, maj, min, "EnrichmentRoles",
+                                                      "Exposed purely for results Enumerator");
 
     qRegisterMetaType<size_t>("size_t");
 

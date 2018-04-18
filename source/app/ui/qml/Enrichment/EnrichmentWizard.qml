@@ -2,7 +2,7 @@ import QtQuick 2.2
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.1
-
+import QtQuick.Window 2.2
 
 import com.kajeka 1.0
 import "../Controls"
@@ -123,7 +123,7 @@ Wizard
                             id: attributeSelectedAExclusiveGroup
                             onCurrentChanged:
                             {
-                                if(current != null)
+                                if(current != null && root.visible)
                                     selectedAttributeGroupA = current.text;
                                 // Disable analysis on selected
                                 for(var i = 0; i < attributeSelectBRepeater.count; i++)
@@ -191,7 +191,7 @@ Wizard
                             id: attributeSelectedBExclusiveGroup
                             onCurrentChanged:
                             {
-                                if(current != null)
+                                if(current != null && root.visible)
                                     selectedAttributeGroupB = current.text;
                             }
                         }

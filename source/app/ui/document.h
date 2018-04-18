@@ -63,7 +63,7 @@ class Document : public QObject, public IDocument
 
     Q_PROPERTY(bool graphChanging READ graphChanging NOTIFY graphChangingChanged)
 
-    Q_PROPERTY(QAbstractListModel* listEnrichmentTableModels READ enrichmentTableModels NOTIFY enrichmentTableModelsChanged)
+    Q_PROPERTY(QAbstractListModel* enrichmentTableModels READ enrichmentTableModels NOTIFY enrichmentTableModelsChanged)
 
     Q_PROPERTY(bool commandInProgress READ commandInProgress NOTIFY commandInProgressChanged)
     Q_PROPERTY(int commandProgress READ commandProgress NOTIFY commandProgressChanged)
@@ -419,8 +419,6 @@ public:
     Q_INVOKABLE void dumpGraph();
 
     Q_INVOKABLE void performEnrichment(const QString& selectedAttributeA, const QString& selectedAttributeB);
-
-    Q_INVOKABLE QStringList attributeValues(const QString& attributeName);
 
 private slots:
     void onLoadProgress(int percentage);

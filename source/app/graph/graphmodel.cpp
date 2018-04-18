@@ -662,7 +662,7 @@ std::vector<NodeId> GraphModel::nodeIdsByAttributeValue(const QString &attribute
     std::vector<NodeId> nodeIds;
     for(auto nodeId : graph().nodeIds())
     {
-        if (attribute->stringValueOf(nodeId).compare(attributeValue) == 0)
+        if (attribute->stringValueOf(nodeId) == attributeValue)
             nodeIds.push_back(nodeId);
     }
     return nodeIds;

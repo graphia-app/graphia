@@ -2013,21 +2013,3 @@ void Document::performEnrichment(const QString& selectedAttributeA, const QStrin
         return true;
     });
 }
-
-QStringList Document::attributeValues(const QString& attributeName)
-{
-    std::set<QString> values;
-    auto* attribute = graphModel()->attributeByName(attributeName);
-    if(graphModel() != nullptr)
-    {
-        for(auto nodeId : graphModel()->graph().nodeIds())
-            values.insert(attribute->stringValueOf(nodeId));
-    }
-
-    QStringList valuesList;
-    valuesList.reserve(static_cast<int>(values.size()));
-    for(const auto& value: values)
-        valuesList.append(value);
-
-    return valuesList;
-}

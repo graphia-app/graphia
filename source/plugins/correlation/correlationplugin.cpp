@@ -18,7 +18,6 @@ CorrelationPluginInstance::CorrelationPluginInstance()
     connect(this, SIGNAL(selectionChanged(const ISelectionManager*)),
             this, SLOT(onSelectionChanged(const ISelectionManager*)), Qt::DirectConnection);
     connect(this, SIGNAL(visualsChanged()), this, SIGNAL(nodeColorsChanged()));
-    connect(this, SIGNAL(graphChanged()), this, SIGNAL(attributeGroupNamesChanged()));
 }
 
 void CorrelationPluginInstance::initialise(const IPlugin* plugin, IDocument* document,

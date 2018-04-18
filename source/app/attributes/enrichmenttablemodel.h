@@ -10,12 +10,22 @@ class EnrichmentTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
+    enum Results
+    {
+        SelectionA,
+        SelectionB,
+        Observed,
+        Expected,
+        ExpectedTrial,
+        OverRep,
+        Fishers,
+        ENTRY_COUNT = 7
+    };
+    Q_ENUM(Results)
 
     explicit EnrichmentTableModel(QObject* parent = nullptr);
     using Row = std::vector<QVariant>;
     using Table = std::vector<Row>;
-
-    const int COLUMN_COUNT = 7;
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent) const override;

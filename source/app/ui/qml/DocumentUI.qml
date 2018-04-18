@@ -102,7 +102,7 @@ Item
         (!hasBeenSaved || document.saveRequired || plugin.saveRequired)
 
     property int numNodesSelected: document.numNodesSelected
-    property var enrichmentTableModels: document.listEnrichmentTableModels
+    property var enrichmentTableModels: document.enrichmentTableModels
     property var attributeGroupNames: document.attributeGroupNames
 
 
