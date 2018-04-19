@@ -92,8 +92,8 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(co
 
     // Comparing
 
-    int progress = 0;
-    auto iterCount = static_cast<int>(attributeValueEntryCountBTotal.size()
+    uint64_t progress = 0;
+    auto iterations = static_cast<uint64_t>(attributeValueEntryCountBTotal.size()
                                      * attributeValueEntryCountATotal.size());
 
     // Get all the nodeIds for each AttributeFor value
@@ -109,8 +109,8 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(co
 
         for(auto& attributeValueB : u::keysFor(attributeValueEntryCountATotal))
         {
-            EnrichmentTableModel::Row row(7);
-            command.setProgress(progress / iterCount);
+            EnrichmentTableModel::Row row(EnrichmentTableModel::Results::NUM_RESULTS_COLUMN);
+            command.setProgress(progress * 100 / iterations);
             progress++;
 
             n = graphModel->graph().numNodes();
@@ -127,8 +127,7 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(co
             fexp = static_cast<double>(r1) / static_cast<double>(n);
             stdevs = doRandomSampling(static_cast<int>(selectedNodes.size()), fexp);
 
-            expectedNo = static_cast<double>(r1) / n
-                                                * selectedNodes.size();
+            expectedNo = (static_cast<double>(r1) / n) * selectedNodes.size();
             expectedDev = stdevs[0] * static_cast<double>(selectedNodes.size());
 
             auto nonSelectedInCategory = r1 - selectedInCategory;

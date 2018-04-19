@@ -803,10 +803,10 @@ ApplicationWindow
     {
         id: enrichmentAction
         text: qsTr("Enrichment...")
-        enabled: currentDocument != undefined
+        enabled: currentDocument !== undefined
         onTriggered:
         {
-            if(currentDocument != undefined)
+            if(currentDocument !== undefined)
             {
                 if(enrichmentResults.models.size() > 0)
                     enrichmentResults.show();
@@ -1412,7 +1412,7 @@ ApplicationWindow
     onCurrentDocumentChanged:
     {
         updatePluginMenus();
-        if(currentDocument != null)
+        if(currentDocument !== null)
             enrichmentResults.models = currentDocument.enrichmentTableModels;
     }
 

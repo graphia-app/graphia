@@ -116,11 +116,10 @@ int main(int argc, char *argv[])
     qmlRegisterType<QmlPreferences>                  (uri, maj, min, "Preferences");
     qmlRegisterType<HoverMousePassthrough>           (uri, maj, min, "HoverMousePassthrough");
     qmlRegisterType<EnrichmentHeatmapItem>           (uri, maj, min, "EnrichmentHeatmap");
-
-    qmlRegisterSingletonType<QmlUtils>               (uri, maj, min, "QmlUtils", &QmlUtils::qmlInstance);
-
     qmlRegisterUncreatableType<EnrichmentTableModel> (uri, maj, min, "EnrichmentRoles",
                                                       QStringLiteral("Exposed purely for results Enumerator"));
+
+    qmlRegisterSingletonType<QmlUtils>               (uri, maj, min, "QmlUtils", &QmlUtils::qmlInstance);
 
     qRegisterMetaType<size_t>("size_t");
 

@@ -15,7 +15,7 @@ int EnrichmentTableModel::rowCount(const QModelIndex& parent) const
 int EnrichmentTableModel::columnCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
-    return Results::ENTRY_COUNT;
+    return Results::NUM_RESULTS_COLUMN;
 }
 
 QVariant EnrichmentTableModel::data(const QModelIndex& index, int role) const

@@ -104,7 +104,7 @@ Wizard
                 Text
                 {
                     text: qsTr("Please select the first attribute group to test for "+
-                               "enrichment")
+                               "enrichment:")
                     Layout.alignment: Qt.AlignLeft
                     textFormat: Text.StyledText
                     Layout.fillWidth: true
@@ -123,8 +123,9 @@ Wizard
                             id: attributeSelectedAExclusiveGroup
                             onCurrentChanged:
                             {
-                                if(current != null && root.visible)
+                                if(current !== null && root.visible)
                                     selectedAttributeGroupA = current.text;
+
                                 // Disable analysis on selected
                                 for(var i = 0; i < attributeSelectBRepeater.count; i++)
                                 {

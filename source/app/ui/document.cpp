@@ -1994,8 +1994,8 @@ void Document::performEnrichment(const QString& selectedAttributeA, const QStrin
 
     commandManager()->executeOnce(
         {
-            QString(tr("Perform Enrichment Analysis")),
-            QString(tr("Performing Enrichment Analysis")),
+            QString(tr("Enrichment Analysis")),
+            QString(tr("Enrichment Analysis")),
             QString(tr("Enrichment Analysis Complete"))
         },
     [this, selectedAttributeA, selectedAttributeB, tableModel](Command& command) mutable
@@ -2004,7 +2004,7 @@ void Document::performEnrichment(const QString& selectedAttributeA, const QStrin
         auto result = EnrichmentCalculator::overRepAgainstEachAttribute(selectedAttributeA, selectedAttributeB,
                                                                         graphModel(), command);
         tableModel->setTableData(result);
-        executeOnMainThreadAndWait([this, tableModel]()
+        executeOnMainThreadAndWait([this, &tableModel]()
         {
             _enrichmentTableModels.append(tableModel);
         });

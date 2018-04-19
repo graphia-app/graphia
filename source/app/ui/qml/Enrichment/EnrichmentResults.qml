@@ -265,6 +265,8 @@ Window
                 return "OverRep";
             case EnrichmentRoles.Fishers:
                 return "Fishers";
+            default:
+                console.log("Unknown roleEnum passed to roleEnumToString");
         }
     }
 
