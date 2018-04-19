@@ -19,7 +19,7 @@ public:
         ExpectedTrial,
         OverRep,
         Fishers,
-        NUM_RESULTS_COLUMN
+        NumResultColumns
     };
     Q_ENUM(Results)
 
