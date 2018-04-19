@@ -109,7 +109,7 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(co
 
         for(auto& attributeValueB : u::keysFor(attributeValueEntryCountATotal))
         {
-            EnrichmentTableModel::Row row(EnrichmentTableModel::Results::NUM_RESULTS_COLUMN);
+            EnrichmentTableModel::Row row(EnrichmentTableModel::Results::NumResultColumns);
             command.setProgress(progress * 100 / iterations);
             progress++;
 
