@@ -13,6 +13,7 @@ Window
     property var models
     property var currentHeatmap
     property var wizard
+
     title: qsTr("Enrichment Results")
     minimumHeight: 400
     minimumWidth: 800
@@ -76,6 +77,7 @@ Window
         TabView
         {
             id: tabView
+            property var tableViews: [];
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: tabView.count > 0
@@ -83,6 +85,7 @@ Window
             Repeater
             {
                 model: models
+                onItemAdded: Qt.callLater(resizeColumnsToContentsBugWorkaround);
                 Tab
                 {
                     id: tab
@@ -94,6 +97,7 @@ Window
                         TableView
                         {
                             id: tableView
+                            visible: false
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             Layout.minimumWidth: 100
@@ -131,10 +135,11 @@ Window
                             Connections
                             {
                                 target: qtObject
-                                onDataChanged: resizeColumnsToContentsBugWorkaround(tableView)
+                                onDataChanged: resizeColumnsToContentsBugWorkaround()
                             }
 
-                            Component.onCompleted: Qt.callLater(resizeColumnsToContentsBugWorkaround, tableView);
+                            Component.onCompleted: tabView.tableViews.push(tableView);
+                            Component.onDestruction: tabView.tableViews.splice(tabView.tableViews.indexOf(tableView), 1)
                         }
                         GridLayout
                         {
@@ -248,18 +253,23 @@ Window
     }
 
     // Work around for QTBUG-58594
-    function resizeColumnsToContentsBugWorkaround(inTableView)
+    function resizeColumnsToContentsBugWorkaround()
     {
-        for(var i = 0; i < inTableView.columnCount; ++i)
+        for(var j = 0; j < tabView.tableViews.length; ++j)
         {
-            var col = inTableView.getColumn(i);
-            var header = inTableView.__listView.headerItem.headerRepeater.itemAt(i);
-            if(col)
+            var inTableView = tabView.tableViews[j];
+            inTableView.visible = true;
+            for(var i = 0; i < inTableView.columnCount; ++i)
             {
-                col.__index = i;
-                col.resizeToContents();
-                if(col.width < header.implicitWidth)
-                    col.width = header.implicitWidth;
+                var col = inTableView.getColumn(i);
+                var header = inTableView.__listView.headerItem.headerRepeater.itemAt(i);
+                if(col)
+                {
+                    col.__index = i;
+                    col.resizeToContents();
+                    if(col.width < header.implicitWidth)
+                        col.width = header.implicitWidth;
+                }
             }
         }
     }
