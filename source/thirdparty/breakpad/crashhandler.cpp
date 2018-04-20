@@ -149,7 +149,6 @@ CrashHandler::CrashHandler()
         return;
     }
 
-    crashReporterExecutableName.append(".exe");
     int length = crashReporterExecutableName.toWCharArray(_crashReporterExecutableName);
     _crashReporterExecutableName[length] = 0;
     wchar_t tempPath[1024] = {0};
