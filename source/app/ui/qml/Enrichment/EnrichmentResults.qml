@@ -120,13 +120,13 @@ Window
                                 }
                             }
 
-                            TableViewColumn { role: roleEnumToString(EnrichmentRoles.SelectionA); title: qsTr("Selection A"); }
-                            TableViewColumn { role: roleEnumToString(EnrichmentRoles.SelectionB); title: qsTr("Selection B"); }
-                            TableViewColumn { role: roleEnumToString(EnrichmentRoles.Observed); title: qsTr("Observed"); }
-                            TableViewColumn { role: roleEnumToString(EnrichmentRoles.Expected); title: qsTr("Expected"); }
-                            TableViewColumn { role: roleEnumToString(EnrichmentRoles.ExpectedTrial); title: qsTr("Expected (Trial)"); }
-                            TableViewColumn { role: roleEnumToString(EnrichmentRoles.OverRep); title: qsTr("Representation"); }
-                            TableViewColumn { role: roleEnumToString(EnrichmentRoles.Fishers); title: qsTr("Fishers"); }
+                            TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.SelectionA); title: qsTr("Selection A"); }
+                            TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.SelectionB); title: qsTr("Selection B"); }
+                            TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.Observed); title: qsTr("Observed"); }
+                            TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.Expected); title: qsTr("Expected"); }
+                            TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.ExpectedTrial); title: qsTr("Expected (Trial)"); }
+                            TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.OverRep); title: qsTr("Representation"); }
+                            TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.Fishers); title: qsTr("Fishers"); }
 
                             Connections
                             {
@@ -244,29 +244,6 @@ Window
         onAccepted:
         {
             currentHeatmap.savePlotImage(file, selectedNameFilter.extensions);
-        }
-    }
-
-    function roleEnumToString(value)
-    {
-        switch(value)
-        {
-            case EnrichmentRoles.SelectionA:
-                return "SelectionA";
-            case EnrichmentRoles.SelectionB:
-                return "SelectionB";
-            case EnrichmentRoles.Observed:
-                return "Observed";
-            case EnrichmentRoles.Expected:
-                return "Expected";
-            case EnrichmentRoles.ExpectedTrial:
-                return "ExpectedTrial";
-            case EnrichmentRoles.OverRep:
-                return "OverRep";
-            case EnrichmentRoles.Fishers:
-                return "Fishers";
-            default:
-                console.log("Unknown roleEnum passed to roleEnumToString");
         }
     }
 

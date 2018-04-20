@@ -1426,7 +1426,7 @@ ApplicationWindow
     EnrichmentWizard
     {
         id: enrichmentWizard
-        attributeGroups: currentDocument ? currentDocument.attributeGroupNames : []
+        attributeGroups: currentDocument ? currentDocument.nodeAttributeGroupNames : []
         onAccepted:
         {
             if(currentDocument != null)

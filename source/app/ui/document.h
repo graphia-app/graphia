@@ -93,7 +93,7 @@ class Document : public QObject, public IDocument
     Q_PROPERTY(int numNodesFound READ numNodesFound NOTIFY numNodesFoundChanged)
 
     Q_PROPERTY(int numNodesSelected READ numNodesSelected NOTIFY numNodesSelectedChanged)
-    Q_PROPERTY(QStringList attributeGroupNames READ attributeGroupNames NOTIFY attributeGroupNamesChanged)
+    Q_PROPERTY(QStringList nodeAttributeGroupNames READ nodeAttributeGroupNames NOTIFY nodeAttributeGroupNamesChanged)
 
 
     Q_PROPERTY(QStringList bookmarks READ bookmarks NOTIFY bookmarksChanged)
@@ -252,7 +252,7 @@ private:
 
     int numNodesSelected() const;
 
-    QStringList attributeGroupNames();
+    QStringList nodeAttributeGroupNames();
 
     void initialiseLayoutSettingsModel();
 
@@ -315,7 +315,7 @@ signals:
     void enrichmentAnalysisComplete();
 
     void saveComplete(bool success, QUrl fileUrl);
-    void attributeGroupNamesChanged();
+    void nodeAttributeGroupNamesChanged();
 
 public:
     // Main QML interface

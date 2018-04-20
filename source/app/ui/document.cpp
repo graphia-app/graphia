@@ -472,7 +472,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
 
     connect(&_graphModel->mutableGraph(), &Graph::phaseChanged, this, &Document::commandVerbChanged);
 
-    connect(&_graphModel->graph(), &Graph::graphChanged, this, &Document::attributeGroupNamesChanged);
+    connect(&_graphModel->graph(), &Graph::graphChanged, this, &Document::nodeAttributeGroupNamesChanged);
 
     emit pluginInstanceChanged();
 
@@ -1105,14 +1105,14 @@ int Document::numNodesSelected() const
     return 0;
 }
 
-QStringList Document::attributeGroupNames()
+QStringList Document::nodeAttributeGroupNames()
 {
     // Attribute Groups will return a list of attributes that are not
     // floats.
     QStringList list;
     if(graphModel() != nullptr)
     {
-        const auto& attributeNames = graphModel()->attributeNames();
+        const auto& attributeNames = graphModel()->attributeNames(ElementType::Node);
         list.reserve(static_cast<int>(attributeNames.size()));
         for(const auto& name : attributeNames)
         {

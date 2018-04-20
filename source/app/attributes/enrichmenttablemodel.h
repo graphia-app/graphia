@@ -35,6 +35,7 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     void setTableData(Table data);
+    Q_INVOKABLE QString resultToString(Results result);
 
     json toJson();
 private:

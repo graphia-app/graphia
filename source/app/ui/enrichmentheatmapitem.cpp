@@ -149,8 +149,8 @@ void EnrichmentHeatmapItem::buildPlot()
 
     for(int i = 0; i < _tableModel->rowCount(); ++i)
     {
-        attributeValueSetA.insert(_tableModel->data(i, QStringLiteral("Attribute Group")).toString());
-        attributeValueSetB.insert(_tableModel->data(i, QStringLiteral("Selection")).toString());
+        attributeValueSetA.insert(_tableModel->data(i, _tableModel->resultToString(EnrichmentTableModel::Results::SelectionA)).toString());
+        attributeValueSetB.insert(_tableModel->data(i, _tableModel->resultToString(EnrichmentTableModel::Results::SelectionB)).toString());
     }
 
     // Sensible sort strings using numbers
@@ -197,8 +197,8 @@ void EnrichmentHeatmapItem::buildPlot()
     {
         // The data is offset by 1 to account for the empty margin
         // Set the data of the cell
-        auto xValue = fullLabelToXAxis[_tableModel->data(i, QStringLiteral("Attribute Group")).toString()];
-        auto yValue = fullLabelToYAxis[_tableModel->data(i, QStringLiteral("Selection")).toString()];
+        auto xValue = fullLabelToXAxis[_tableModel->data(i, _tableModel->resultToString(EnrichmentTableModel::Results::SelectionA)).toString()];
+        auto yValue = fullLabelToYAxis[_tableModel->data(i, _tableModel->resultToString(EnrichmentTableModel::Results::SelectionB)).toString()];
         _colorMap->data()->setCell(xValue + 1,
                                    yValue + 1,
                                    _tableModel->data(i, QStringLiteral("Fishers")).toFloat());

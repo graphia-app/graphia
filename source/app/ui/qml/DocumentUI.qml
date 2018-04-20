@@ -103,7 +103,7 @@ Item
 
     property int numNodesSelected: document.numNodesSelected
     property var enrichmentTableModels: document.enrichmentTableModels
-    property var attributeGroupNames: document.attributeGroupNames
+    property var nodeAttributeGroupNames: document.nodeAttributeGroupNames
 
 
     property color contrastingColor: document.contrastingColor

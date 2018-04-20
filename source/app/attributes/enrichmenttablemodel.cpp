@@ -79,3 +79,27 @@ void EnrichmentTableModel::setTableData(EnrichmentTableModel::Table data)
     _data = std::move(data);
     endResetModel();
 }
+
+QString EnrichmentTableModel::resultToString(Results result)
+{
+    switch(result)
+    {
+        case Results::SelectionA:
+            return QStringLiteral("SelectionA");
+        case Results::SelectionB:
+            return QStringLiteral("SelectionB");
+        case Results::Observed:
+            return QStringLiteral("Observed");
+        case Results::Expected:
+            return QStringLiteral("Expected");
+        case Results::ExpectedTrial:
+            return QStringLiteral("ExpectedTrial");
+        case Results::OverRep:
+            return QStringLiteral("OverRep");
+        case Results::Fishers:
+            return QStringLiteral("Fishers");
+        default:
+            qDebug() << "Unknown roleEnum passed to resultToString";
+        return {};
+    }
+}
