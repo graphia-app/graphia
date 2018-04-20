@@ -77,10 +77,11 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(co
     for(auto nodeId : graphModel->graph().nodeIds())
     {
         auto* attributeA = graphModel->attributeByName(attributeAName);
-        const auto& stringAttributeValue = attributeA->stringValueOf(nodeId);
-        const auto& stringAttributeForValue = attributeA->stringValueOf(nodeId);
-        ++attributeValueEntryCountATotal[stringAttributeValue];
-        ++attributeValueEntryCountBTotal[stringAttributeForValue];
+        auto* attributeB = graphModel->attributeByName(attributeBName);
+        const auto& stringAttributeA = attributeA->stringValueOf(nodeId);
+        const auto& stringAttributeB = attributeB->stringValueOf(nodeId);
+        ++attributeValueEntryCountATotal[stringAttributeA];
+        ++attributeValueEntryCountBTotal[stringAttributeB];
     }
 
     int n = 0;
