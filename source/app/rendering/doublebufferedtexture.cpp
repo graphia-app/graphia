@@ -22,14 +22,23 @@ GLuint DoubleBufferedTexture::front() const
 
 GLuint DoubleBufferedTexture::back()
 {
-    _mutex.lock();
+    std::unique_lock<std::mutex> lock(_mutex);
+
+    // Wait until any other users have swapped the texture
+    _cv.wait(lock, [this] { return _swapped; });
+    _swapped = false;
+
     return _textures.at(1 - _currentIndex);
 }
 
 GLuint DoubleBufferedTexture::swap()
 {
+    std::unique_lock<std::mutex> lock(_mutex);
     _currentIndex = 1 - _currentIndex;
-    _mutex.unlock();
+
+    // Notify any other users that the texture has been swapped
+    _swapped = true;
+    _cv.notify_all();
 
     return front();
 }
