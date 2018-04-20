@@ -339,7 +339,7 @@ void MutableGraph::removeEdge(EdgeId edgeId)
     Q_ASSERT(!connection.empty());
     connection.remove(edgeId);
 
-    if(!connection.empty())
+    if(connection.empty())
         _e._connections.erase(undirectedEdge);
 
     releaseEdgeId(edgeId);
