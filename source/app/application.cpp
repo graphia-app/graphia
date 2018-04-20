@@ -334,6 +334,11 @@ QString Application::resolvedExe(const QString& exe)
     fullyQualifiedExe += ".exe";
 #endif
 
+#ifndef _DEBUG
+    std::cerr << "Resolved executable " << fullyQualifiedExe.toStdString() <<
+        " from " << exe.toStdString() << "\n";
+#endif
+
     if(QFileInfo::exists(fullyQualifiedExe))
         return fullyQualifiedExe;
 
