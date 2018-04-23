@@ -77,7 +77,7 @@ Window
         TabView
         {
             id: tabView
-            property var tableViews: [];
+            property var tableViews: []
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: tabView.count > 0

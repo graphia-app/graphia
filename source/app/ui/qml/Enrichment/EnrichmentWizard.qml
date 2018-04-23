@@ -103,8 +103,7 @@ Wizard
 
                 Text
                 {
-                    text: qsTr("Please select the first attribute group to test for "+
-                               "enrichment:")
+                    text: qsTr("Please select the first attribute group to test for enrichment:")
                     Layout.alignment: Qt.AlignLeft
                     textFormat: Text.StyledText
                     Layout.fillWidth: true
@@ -172,8 +171,7 @@ Wizard
 
                 Text
                 {
-                    text: qsTr("Please select second attribute group to test for "+
-                               "enrichment")
+                    text: qsTr("Please select the second attribute group to test for enrichment:")
                     Layout.alignment: Qt.AlignLeft
                     textFormat: Text.StyledText
                     Layout.fillWidth: true
