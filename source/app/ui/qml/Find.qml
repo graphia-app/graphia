@@ -377,7 +377,10 @@ Rectangle
                                 valueComboBox.refresh();
                             }
                             else if(count > 0)
+                            {
                                 currentIndex = 0;
+                                lastFindByAttributeName = currentText;
+                            }
                             else
                                 currentIndex = -1;
                         }
