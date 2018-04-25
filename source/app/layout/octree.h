@@ -79,7 +79,7 @@ private:
         BaseOctree* _tree;
         std::vector<NodeId> _nodeIds;
 
-        SubTree(BaseOctree* tree, const std::vector<NodeId>& nodeIds) noexcept :
+        SubTree(BaseOctree* tree, const std::vector<NodeId>& nodeIds) noexcept : // NOLINT
             _tree(tree), _nodeIds(nodeIds)
         {}
 
@@ -88,9 +88,9 @@ private:
         {}
 
         SubTree(const SubTree& other) = default;
-        SubTree& operator=(const SubTree& other) = default;
+        SubTree& operator=(const SubTree& other) = default; // NOLINT
         SubTree(SubTree&& other) = default;
-        SubTree& operator=(SubTree&& other) = default;
+        SubTree& operator=(SubTree&& other) = default; // NOLINT
     };
 
     std::deque<SubTree> distributeNodesOverSubVolumes(const std::vector<NodeId>& nodeIds)

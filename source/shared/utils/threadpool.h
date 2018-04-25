@@ -125,13 +125,13 @@ private:
         class iterator
         {
         private:
-            template<typename T, typename IsContainer = void> struct impl;
+            template<typename T, bool = is_std_sequence_container<typename T::value_type>::value> struct impl;
 
             // If the concurrent function's return type is a sequence container, collapse its
             // values down, so that from the iterator user's point of view, they work with a single
             // homogenous sequence, rather than a vector of sequences
             template<typename T>
-            struct impl<T, std::enable_if_t<is_std_sequence_container<typename T::value_type>::value>>
+            struct impl<T, true>
             {
                 typename std::vector<T>::iterator _threadIt;
                 typename std::vector<T>::iterator _threadEndIt;
@@ -215,7 +215,7 @@ private:
                     return *_containerIt;
                 }
 
-                bool operator==(const impl<T, void>& other) const
+                bool operator==(const impl<T, true>& other) const
                 {
                     if(_threadIt != other._threadIt)
                         return false;
@@ -228,7 +228,7 @@ private:
             };
 
             template<typename T>
-            struct impl<T, std::enable_if_t<!is_std_sequence_container<typename T::value_type>::value>>
+            struct impl<T, false>
             {
                 typename std::vector<T>::iterator _threadIt;
                 typename std::vector<T>::iterator _threadEndIt;
@@ -286,7 +286,7 @@ private:
                     return *_resultsIt;
                 }
 
-                bool operator==(const impl<T, void>& other) const
+                bool operator==(const impl<T, false>& other) const
                 {
                     if(_threadIt != other._threadIt)
                         return false;

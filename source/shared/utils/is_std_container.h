@@ -39,7 +39,7 @@ namespace is_std_container_impl
     template<typename... Args> struct is_std_container<std::stack             <Args...>>:std::true_type{};
     template<typename... Args> struct is_std_container<std::queue             <Args...>>:std::true_type{};
     template<typename... Args> struct is_std_container<std::priority_queue    <Args...>>:std::true_type{};
-}
+} // namespace is_std_container_impl
 
 template<typename T> struct is_std_container
 {
@@ -55,7 +55,7 @@ namespace is_std_sequence_container_impl
     template<typename... Args> struct is_std_sequence_container<std::deque             <Args...>>:std::true_type{};
     template<typename... Args> struct is_std_sequence_container<std::list              <Args...>>:std::true_type{};
     template<typename... Args> struct is_std_sequence_container<std::forward_list      <Args...>>:std::true_type{};
-}
+} // namespace is_std_sequence_container_impl
 
 template<typename T> struct is_std_sequence_container
 {
