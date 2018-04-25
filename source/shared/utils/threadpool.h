@@ -3,6 +3,7 @@
 
 #include "singleton.h"
 #include "function_traits.h"
+#include "is_std_container.h"
 
 #include <QString>
 
@@ -17,6 +18,7 @@
 #include <thread>
 #include <vector>
 #include <utility>
+#include <type_traits>
 
 template<typename It> static It incrementIterator(It it, It last, const int n)
 {
@@ -48,7 +50,7 @@ public:
 
     template<typename Fn, typename... Args> using ReturnType = typename std::result_of_t<Fn(Args...)>;
 
-    template<typename Fn, typename... Args> std::future<ReturnType<Fn, Args...>> execute_on_threadpool(Fn f, Args&&... args)
+    template<typename Fn, typename... Args> std::future<ReturnType<Fn, Args...>> execute(Fn f, Args&&... args)
     {
         if(_stop)
             return std::future<ReturnType<Fn, Args...>>();
@@ -71,39 +73,268 @@ public:
     }
 
 private:
-    template<typename ValueType> class ResultsType
+    // If the concurrent function returns a value, give the ResultsType class a std::vector _values
+    // member, which contains the results from each thread
+    template<typename ResultsVectorOrVoid, typename IsVoid = void> class ResultMember;
+
+    template<typename ResultsVectorOrVoid>
+    class ResultMember<ResultsVectorOrVoid, std::enable_if_t<std::is_void<ResultsVectorOrVoid>::value>> {};
+
+    template<typename ResultsVectorOrVoid>
+    class ResultMember<ResultsVectorOrVoid, std::enable_if_t<!std::is_void<ResultsVectorOrVoid>::value>>
+    {
+    protected:
+        mutable std::vector<ResultsVectorOrVoid> _values;
+    };
+
+    template<typename ResultsVectorOrVoid> class ResultsType : public ResultMember<ResultsVectorOrVoid>
     {
         friend class ThreadPool;
 
     private:
-        std::vector<std::future<ValueType>> _futures;
+        mutable std::vector<std::future<ResultsVectorOrVoid>> _futures;
 
-        explicit ResultsType(std::vector<std::future<ValueType>>&& futures) :
+        explicit ResultsType(std::vector<std::future<ResultsVectorOrVoid>>&& futures) :
             _futures(std::move(futures))
         {}
 
     public:
-        void wait() const
+        // When the concurrent function returns a value, move it out of the future into the
+        // _values vector, provided by inheriting from the ResultsMember specialisation
+        template<typename T = ResultsVectorOrVoid>
+        typename std::enable_if_t<!std::is_void<T>::value, void>
+        wait() const
+        {
+            for(auto& future : _futures)
+            {
+                future.wait();
+                this->_values.emplace_back(std::move(future.get()));
+            }
+        }
+
+        // When the concurrent function doesn't return a value, just wait for the results
+        template<typename T = ResultsVectorOrVoid>
+        typename std::enable_if_t<std::is_void<T>::value, void>
+        wait() const
         {
             for(auto& future : _futures)
                 future.wait();
         }
 
-        template<typename T = ValueType> typename std::enable_if_t<!std::is_void<T>::value, T>
-        get()
+        // This iterator allows the results to be iterated over in a single pass
+        class iterator
         {
-            ValueType values;
+        private:
+            template<typename T, typename IsContainer = void> struct impl;
 
-            for(auto& future : _futures)
+            // If the concurrent function's return type is a sequence container, collapse its
+            // values down, so that from the iterator user's point of view, they work with a single
+            // homogenous sequence, rather than a vector of sequences
+            template<typename T>
+            struct impl<T, std::enable_if_t<is_std_sequence_container<typename T::value_type>::value>>
             {
-                auto v = std::move(future.get());
-                values.reserve(values.size() + v.size());
-                values.insert(values.end(), std::make_move_iterator(v.begin()),
-                                            std::make_move_iterator(v.end()));
+                typename std::vector<T>::iterator _threadIt;
+                typename std::vector<T>::iterator _threadEndIt;
+                typename T::iterator _resultsIt;
+                typename T::value_type::iterator _containerIt;
+
+                using value_type = typename T::value_type::value_type;
+
+                void increment()
+                {
+                    if(_containerIt != _resultsIt->end())
+                        ++_containerIt;
+
+                    while(_containerIt == _resultsIt->end())
+                    {
+                        if(_resultsIt != _threadIt->end())
+                            ++_resultsIt;
+
+                        if(_resultsIt != _threadIt->end())
+                            _containerIt = _resultsIt->begin();
+                        else do
+                        {
+                            if(_threadIt != _threadEndIt)
+                                ++_threadIt;
+
+                            if(_threadIt == _threadEndIt)
+                                break;
+
+                            _resultsIt = _threadIt->begin();
+                            _containerIt = _resultsIt->begin();
+
+                        } while(_resultsIt == _threadIt->end());
+
+                        if(_threadIt == _threadEndIt)
+                        {
+                            _resultsIt = {};
+                            _containerIt = {};
+                            break;
+                        }
+                    }
+                }
+
+                impl(std::vector<T>& values, bool end)
+                {
+                    if(!end)
+                    {
+                        _threadIt = values.begin();
+                        _threadEndIt = values.end();
+
+                        if(_threadIt != _threadEndIt)
+                        {
+                            _resultsIt = _threadIt->begin();
+                            while(_threadIt != _threadEndIt && _resultsIt == _threadIt->end())
+                                increment();
+
+                            if(_threadIt != _threadEndIt && _resultsIt != _threadIt->end())
+                            {
+                                _containerIt = _resultsIt->begin();
+                                while(_threadIt != _threadEndIt && _containerIt == _resultsIt->end())
+                                    increment();
+                            }
+                        }
+
+                        if(_threadIt == _threadEndIt)
+                        {
+                            _resultsIt = {};
+                            _containerIt = {};
+                        }
+                    }
+                    else
+                    {
+                        _threadIt = _threadEndIt = values.end();
+                        _resultsIt = {};
+                        _containerIt = {};
+                    }
+                }
+
+                auto& valueReference() const
+                {
+                    Q_ASSERT(_containerIt != _resultsIt->end());
+                    return *_containerIt;
+                }
+
+                bool operator==(const impl<T, void>& other) const
+                {
+                    if(_threadIt != other._threadIt)
+                        return false;
+
+                    if(_resultsIt != other._resultsIt)
+                        return false;
+
+                    return _containerIt == other._containerIt;
+                }
+            };
+
+            template<typename T>
+            struct impl<T, std::enable_if_t<!is_std_sequence_container<typename T::value_type>::value>>
+            {
+                typename std::vector<T>::iterator _threadIt;
+                typename std::vector<T>::iterator _threadEndIt;
+                typename T::iterator _resultsIt;
+
+                using value_type = typename T::value_type;
+
+                void increment()
+                {
+                    if(_resultsIt != _threadIt->end())
+                        ++_resultsIt;
+
+                    while(_resultsIt == _threadIt->end())
+                    {
+                        if(_threadIt != _threadEndIt)
+                            ++_threadIt;
+
+                        if(_threadIt == _threadEndIt)
+                            break;
+
+                        _resultsIt = _threadIt->begin();
+                    }
+
+                    if(_threadIt == _threadEndIt)
+                        _resultsIt = {};
+                }
+
+                impl(std::vector<T>& values, bool end)
+                {
+                    if(!end)
+                    {
+                        _threadIt = values.begin();
+                        _threadEndIt = values.end();
+
+                        if(_threadIt != _threadEndIt)
+                        {
+                            _resultsIt = _threadIt->begin();
+                            while(_threadIt != _threadEndIt && _resultsIt == _threadIt->end())
+                                increment();
+                        }
+
+                        if(_threadIt == _threadEndIt)
+                            _resultsIt = {};
+                    }
+                    else
+                    {
+                        _threadIt = _threadEndIt = values.end();
+                        _resultsIt = {};
+                    }
+                }
+
+                auto& valueReference() const
+                {
+                    Q_ASSERT(_resultsIt != _threadIt->end());
+                    return *_resultsIt;
+                }
+
+                bool operator==(const impl<T, void>& other) const
+                {
+                    if(_threadIt != other._threadIt)
+                        return false;
+
+                    return _resultsIt == other._resultsIt;
+                }
+            };
+
+            impl<ResultsVectorOrVoid> _impl;
+
+        public:
+            using self_type = iterator;
+            using value_type = typename impl<ResultsVectorOrVoid>::value_type;
+            using reference = value_type&;
+            using pointer = value_type*;
+            using iterator_category = std::forward_iterator_tag;
+            using difference_type = size_t;
+
+            iterator(ResultsType* results, bool end) :
+                _impl(results->_values, end)
+            {}
+
+            self_type operator++()
+            {
+                self_type i = *this;
+                _impl.increment();
+                return i;
             }
 
-            return values;
-        }
+            auto& operator*() const
+            {
+                return _impl.valueReference();
+            }
+
+            bool operator!=(const self_type& other) const { return !operator==(other); }
+            bool operator==(const self_type& other) const
+            {
+                return _impl == other._impl;
+            }
+        };
+
+        template<typename T = ResultsVectorOrVoid>
+        typename std::enable_if_t<!std::is_void<T>::value, iterator>
+        begin() { return iterator(this, false); }
+
+        template<typename T = ResultsVectorOrVoid>
+        typename std::enable_if_t<!std::is_void<T>::value, iterator>
+        end() { return iterator(this, true); }
     };
 
     template<typename Fn> using ArgumentType = typename function_traits<Fn>::template arg<0>::type;
@@ -127,14 +358,15 @@ private:
     template<typename It, typename Fn, typename Result>
     struct Executor : Invoker<It, Fn>
     {
-        using ValueType = std::vector<Result>;
+        using ResultsVectorOrVoid = std::vector<Result>;
 
-        ValueType operator()(It it, It last, Fn& f)
+        ResultsVectorOrVoid operator()(It it, It last, Fn& f)
         {
-            ValueType values;
+            ResultsVectorOrVoid values;
+            values.reserve(std::distance(it, last));
 
             for(; it != last; ++it)
-                values.emplace_back(this->invoke(f, it));
+                values.emplace_back(std::move(this->invoke(f, it)));
 
             return values;
         }
@@ -143,9 +375,9 @@ private:
     template<typename It, typename Fn>
     struct Executor<It, Fn, void> : Invoker<It, Fn>
     {
-        using ValueType = void;
+        using ResultsVectorOrVoid = void;
 
-        ValueType operator()(It it, It last, Fn& f) const
+        ResultsVectorOrVoid operator()(It it, It last, Fn& f) const
         {
             for(; it != last; ++it)
                 this->invoke(f, it);
@@ -205,7 +437,7 @@ private:
 
 public:
     template<typename It, typename Fn> using Results =
-        ResultsType<typename FnExecutor<It, Fn>::ValueType>;
+        ResultsType<typename FnExecutor<It, Fn>::ResultsVectorOrVoid>;
 
     template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn f, bool blocking = true)
     {
@@ -221,7 +453,7 @@ public:
                       "Fn's argument must be an It or an It::value_type");
 
         FnExecutor<It, Fn> executor;
-        std::vector<std::future<typename FnExecutor<It, Fn>::ValueType>> futures;
+        std::vector<std::future<typename FnExecutor<It, Fn>::ResultsVectorOrVoid>> futures;
 
         for(It it = first; it != last;)
         {
@@ -234,7 +466,7 @@ public:
             }
             while(threadLast != last && cost < costPerThread);
 
-            futures.emplace_back(execute_on_threadpool([executor, it, threadLast, f]() mutable
+            futures.emplace_back(execute([executor, it, threadLast, f]() mutable
             {
                 return executor(it, threadLast, f);
             }));
@@ -255,7 +487,7 @@ class ThreadPoolSingleton : public ThreadPool, public Singleton<ThreadPoolSingle
 
 template<typename Fn, typename... Args> auto execute_on_threadpool(Fn&& f, Args&&... args)
 {
-    return S(ThreadPoolSingleton)->execute_on_threadpool(std::forward<Fn>(f), args...);
+    return S(ThreadPoolSingleton)->execute(std::forward<Fn>(f), args...);
 }
 
 template<typename It, typename Fn> auto concurrent_for(It first, It last, Fn&& f, bool blocking = true)

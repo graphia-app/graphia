@@ -254,9 +254,8 @@ std::vector<CorrelationPluginInstance::CorrelationEdge> CorrelationPluginInstanc
     }
 
     std::vector<CorrelationEdge> edges;
-
-    for(auto& result : results.get())
-        edges.insert(edges.end(), result.begin(), result.end());
+    edges.reserve(std::distance(results.begin(), results.end()));
+    edges.insert(edges.end(), std::make_move_iterator(results.begin()), std::make_move_iterator(results.end()));
 
     return edges;
 }
