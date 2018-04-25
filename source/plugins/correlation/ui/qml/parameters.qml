@@ -33,10 +33,23 @@ Wizard
             width: parent.width
             anchors.left: parent.left
             anchors.right: parent.right
-            Text
+            ComboBox
             {
-                text: preParser.fileType
+                model:
+                {
+                    var list = [];
+                    console.log("Column Count" + preParser.columnCount)
+                    for(var i=0; i<preParser.columnCount; i++)
+                    {
+                        console.log(i)
+
+                        list.push(preParser.dataAt(i,0));
+                    }
+                    console.log(list);
+                    return list;
+                }
             }
+
             Text
             {
                 text: preParser.fileUrl

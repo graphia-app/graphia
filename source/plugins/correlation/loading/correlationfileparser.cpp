@@ -152,6 +152,16 @@ bool CorrelationFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
     return true;
 }
 
+int CorrelationPreParser::rowCount()
+{
+    return _data != nullptr ? _data->numRows() : 0;
+}
+
+int CorrelationPreParser::columnCount()
+{
+    return _data != nullptr ? _data->numColumns() : 0;
+}
+
 bool CorrelationPreParser::parse()
 {
     if(_fileType.isEmpty() || _fileUrl.isEmpty())

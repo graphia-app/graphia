@@ -27,12 +27,16 @@ private:
     Q_PROPERTY(QString fileType MEMBER _fileType NOTIFY fileTypeChanged)
     Q_PROPERTY(QString fileUrl MEMBER _fileUrl NOTIFY fileUrlChanged)
     Q_PROPERTY(QRect dataRect MEMBER _dataRect NOTIFY dataRectChanged)
+    Q_PROPERTY(int columnCount READ columnCount NOTIFY dataRectChanged)
+    Q_PROPERTY(int rowCount READ rowCount NOTIFY dataRectChanged)
 
     QString _fileType;
     QString _fileUrl;
     QRect _dataRect;
     TabularData* _data = nullptr;
 
+    int rowCount();
+    int columnCount();
 public:
     Q_INVOKABLE bool parse();
     Q_INVOKABLE QString dataAt(int column, int row);
