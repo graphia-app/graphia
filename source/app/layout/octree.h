@@ -79,21 +79,18 @@ private:
         BaseOctree* _tree;
         std::vector<NodeId> _nodeIds;
 
-        SubTree(BaseOctree* tree, std::vector<NodeId> nodeIds) :
+        SubTree(BaseOctree* tree, const std::vector<NodeId>& nodeIds) noexcept :
+            _tree(tree), _nodeIds(nodeIds)
+        {}
+
+        SubTree(BaseOctree* tree, std::vector<NodeId>&& nodeIds) noexcept :
             _tree(tree), _nodeIds(std::move(nodeIds))
         {}
 
-        SubTree(SubTree&& other) :
-            _tree(other._tree), _nodeIds(std::move(other._nodeIds))
-        {}
-
-        SubTree& operator=(SubTree&& other)
-        {
-            _tree = other._tree;
-            _nodeIds = std::move(other._nodeIds);
-
-            return *this;
-        }
+        SubTree(const SubTree& other) = default;
+        SubTree& operator=(const SubTree& other) = default;
+        SubTree(SubTree&& other) = default;
+        SubTree& operator=(SubTree&& other) = default;
     };
 
     std::deque<SubTree> distributeNodesOverSubVolumes(const std::vector<NodeId>& nodeIds)
