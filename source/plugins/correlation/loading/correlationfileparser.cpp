@@ -151,3 +151,35 @@ bool CorrelationFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
 
     return true;
 }
+
+bool CorrelationPreParser::parse()
+{
+    if(_fileType.isEmpty() || _fileUrl.isEmpty())
+        return false;
+
+    CsvFileParser csvFileParser;
+    TsvFileParser tsvFileParser;
+
+    if(_fileType == QLatin1String("CorrelationCSV"))
+    {
+        if(!csvFileParser.preParse(_fileUrl))
+            return false;
+
+        _data = &(csvFileParser.tabularData());
+    }
+    else if(_fileType == QLatin1String("CorrelationTSV"))
+    {
+        if(!tsvFileParser.preParse(_fileUrl))
+            return false;
+
+        _data = &(tsvFileParser.tabularData());
+    }
+
+    _dataRect = findLargestDataRect(*_data);
+    emit dataRectChanged();
+}
+
+QString CorrelationPreParser::dataAt(int column, int row)
+{
+    return QString::fromStdString(_data->valueAt(column, row));
+}

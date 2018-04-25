@@ -8,6 +8,7 @@ import "Controls"
 
 Wizard
 {
+    id: root
     //FIXME These should be set automatically by Wizard
     minimumWidth: 640
     minimumHeight: 400
@@ -15,6 +16,42 @@ Wizard
     Item
     {
         anchors.fill: parent
+        CorrelationPreParser
+        {
+            id: preParser
+            fileType: root.fileType
+            fileUrl: root.fileUrl
+            onDataRectChanged:
+            {
+                console.log(dataRect);
+                console.log(dataAt(dataRect.x, 0));
+            }
+        }
+
+        ColumnLayout
+        {
+            width: parent.width
+            anchors.left: parent.left
+            anchors.right: parent.right
+            Text
+            {
+                text: preParser.fileType
+            }
+            Text
+            {
+                text: preParser.fileUrl
+            }
+
+            Button
+            {
+                text: "Parse!";
+                onClicked: preParser.parse();
+            }
+        }
+    }
+
+    Item
+    {
         ColumnLayout
         {
             width: parent.width

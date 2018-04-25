@@ -48,7 +48,7 @@ private:
     const IParser* _parent = nullptr;
 
     template<typename TokenFn>
-    bool parse(const QUrl& url, const ProgressFn& progressFn, TokenFn tokenFn)
+    bool tokenise(const QUrl& url, const ProgressFn& progressFn, TokenFn tokenFn)
     {
         std::ifstream file(url.toLocalFile().toStdString());
         if(!file)
@@ -131,6 +131,32 @@ public:
         _parent(parent)
     {}
 
+    bool preParse(const QUrl& url)
+    {
+        size_t columns = 0;
+        size_t rows = 0;
+        auto progressFn = [](int progress){};
+
+        // First pass to determine the size of the table
+        bool success = tokenise(url, progressFn,
+        [&columns, &rows](size_t column, size_t row, auto)
+        {
+            columns = std::max(columns, column + 1);
+            rows = std::max(rows, row + 1);
+        });
+
+        if(!success)
+            return false;
+
+        _tabularData.initialise(columns, rows);
+
+        return tokenise(url, progressFn,
+        [this](size_t column, size_t row, auto&& token)
+        {
+            _tabularData.setValueAt(column, row, std::forward<decltype(token)>(token));
+        });
+    }
+
     bool parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn) override
     {
         size_t columns = 0;
@@ -138,7 +164,7 @@ public:
 
         // First pass to determine the size of the table
         graphModel.mutableGraph().setPhase(QObject::tr("Finding size"));
-        bool success = parse(url, progressFn,
+        bool success = tokenise(url, progressFn,
         [&columns, &rows](size_t column, size_t row, auto)
         {
             columns = std::max(columns, column + 1);
@@ -151,7 +177,7 @@ public:
         _tabularData.initialise(columns, rows);
 
         graphModel.mutableGraph().setPhase(QObject::tr("Parsing"));
-        return parse(url, progressFn,
+        return tokenise(url, progressFn,
         [this](size_t column, size_t row, auto&& token)
         {
             _tabularData.setValueAt(column, row, std::forward<decltype(token)>(token));
