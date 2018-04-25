@@ -21,7 +21,7 @@ ScopeTimer::~ScopeTimer()
 
 void ScopeTimer::stop()
 {
-    auto elapsed = _elapsedTimer.elapsed();
+    auto elapsed = _elapsedTimer.nsecsElapsed();
     ScopeTimerManager::instance()->submit(_name, elapsed, _numSamples);
     _elapsedTimer.invalidate();
 }
@@ -60,10 +60,15 @@ void ScopeTimerManager::reportToQDebug() const
             stdDev /= samples.size();
             stdDev = std::sqrt(stdDev);
 
+            mean /= 1000000.0;
+            auto min = *minMax.first / 1000000.0;
+            auto max = *minMax.second / 1000000.0;
+            stdDev /= 1000000.0;
+
             qDebug() << name << QStringLiteral("%1/%2/%3/%4 ms (mean/min/max/stddev)")
-                .arg(mean).arg(*minMax.first).arg(*minMax.second).arg(stdDev);
+                .arg(mean).arg(min).arg(max).arg(stdDev);
         }
         else
-            qDebug() << name << samples.front() << "ms";
+            qDebug() << name << (samples.front() / 1000000.0) << "ms";
     }
 }
