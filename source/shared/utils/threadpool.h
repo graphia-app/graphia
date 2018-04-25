@@ -75,13 +75,14 @@ public:
 private:
     // If the concurrent function returns a value, give the ResultsType class a std::vector _values
     // member, which contains the results from each thread
-    template<typename ResultsVectorOrVoid, typename IsVoid = void> class ResultMember;
+    template<typename ResultsVectorOrVoid, bool = std::is_void<ResultsVectorOrVoid>::value>
+    class ResultMember;
 
     template<typename ResultsVectorOrVoid>
-    class ResultMember<ResultsVectorOrVoid, std::enable_if_t<std::is_void<ResultsVectorOrVoid>::value>> {};
+    class ResultMember<ResultsVectorOrVoid, true> {};
 
     template<typename ResultsVectorOrVoid>
-    class ResultMember<ResultsVectorOrVoid, std::enable_if_t<!std::is_void<ResultsVectorOrVoid>::value>>
+    class ResultMember<ResultsVectorOrVoid, false>
     {
     protected:
         mutable std::vector<ResultsVectorOrVoid> _values;

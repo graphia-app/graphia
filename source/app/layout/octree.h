@@ -88,8 +88,8 @@ private:
         {}
 
         SubTree(const SubTree& other) = default;
-        SubTree& operator=(const SubTree& other) = default; // NOLINT
-        SubTree(SubTree&& other) = default;
+        SubTree& operator=(const SubTree& other) = default;
+        SubTree(SubTree&& other) = default; // NOLINT
         SubTree& operator=(SubTree&& other) = default; // NOLINT
     };
 
