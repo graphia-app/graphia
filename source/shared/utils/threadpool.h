@@ -126,7 +126,8 @@ private:
         class iterator
         {
         private:
-            template<typename T, bool = is_std_sequence_container<typename T::value_type>::value> struct impl;
+            template<typename T, bool = is_std_sequence_container<typename T::value_type>::value>
+            struct impl {};
 
             // If the concurrent function's return type is a sequence container, collapse its
             // values down, so that from the iterator user's point of view, they work with a single
