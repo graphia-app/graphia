@@ -216,7 +216,7 @@ private:
                     return *_containerIt;
                 }
 
-                bool operator==(const impl<T, true>& other) const
+                bool operator==(const impl& other) const
                 {
                     if(_threadIt != other._threadIt)
                         return false;
@@ -287,7 +287,7 @@ private:
                     return *_resultsIt;
                 }
 
-                bool operator==(const impl<T, false>& other) const
+                bool operator==(const impl& other) const
                 {
                     if(_threadIt != other._threadIt)
                         return false;
