@@ -13,6 +13,23 @@ Wizard
     minimumWidth: 640
     minimumHeight: 400
 
+    // Work around for QTBUG-58594
+    function resizeColumnsToContentsBugWorkaround(tableView)
+    {
+        for(var i = 0; i < tableView.columnCount; ++i)
+        {
+            var col = tableView.getColumn(i);
+            var header = tableView.__listView.headerItem.headerRepeater.itemAt(i);
+            if(col)
+            {
+                col.__index = i;
+                col.resizeToContents();
+                if(col.width < header.implicitWidth)
+                    col.width = header.implicitWidth;
+            }
+        }
+    }
+
     Item
     {
         CorrelationPreParser
@@ -20,11 +37,6 @@ Wizard
             id: preParser
             fileType: root.fileType
             fileUrl: root.fileUrl
-            onDataRectChanged:
-            {
-                console.log(dataRect);
-                console.log(dataAt(dataRect.x, 0));
-            }
         }
 
         ColumnLayout
@@ -55,6 +67,7 @@ Wizard
 
             TableView
             {
+                headerVisible: false
                 Layout.fillHeight: true
                 Layout.fillWidth: true
                 id: dataRectView
@@ -71,6 +84,7 @@ Wizard
                         dataRectView.addColumn(columnComponent.createObject(dataRectView,
                             {"role": i}));
                     }
+                    Qt.callLater(resizeColumnsToContentsBugWorkaround, dataRectView);
                 }
             }
 
