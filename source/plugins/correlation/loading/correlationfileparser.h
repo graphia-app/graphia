@@ -3,6 +3,7 @@
 
 #include "shared/loading/iparser.h"
 #include "shared/loading/tabulardata.h"
+#include "datarecttablemodel.h"
 #include <QString>
 #include <QRect>
 
@@ -29,17 +30,20 @@ private:
     Q_PROPERTY(QRect dataRect MEMBER _dataRect NOTIFY dataRectChanged)
     Q_PROPERTY(int columnCount READ columnCount NOTIFY dataRectChanged)
     Q_PROPERTY(int rowCount READ rowCount NOTIFY dataRectChanged)
+    Q_PROPERTY(QAbstractTableModel* model READ tableModel NOTIFY dataRectChanged)
 
     QString _fileType;
     QString _fileUrl;
     QRect _dataRect;
     TabularData* _data = nullptr;
+    DataRectTableModel _model;
 
     int rowCount();
     int columnCount();
 public:
     Q_INVOKABLE bool parse();
     Q_INVOKABLE QString dataAt(int column, int row);
+    DataRectTableModel* tableModel();
 signals:
     void dataRectChanged();
     void fileUrlChanged();

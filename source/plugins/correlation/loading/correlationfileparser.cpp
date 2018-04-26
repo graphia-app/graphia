@@ -186,10 +186,17 @@ bool CorrelationPreParser::parse()
     }
 
     _dataRect = findLargestDataRect(*_data);
+
+    _model.setTabularData(*_data);
     emit dataRectChanged();
 }
 
 QString CorrelationPreParser::dataAt(int column, int row)
 {
     return QString::fromStdString(_data->valueAt(column, row));
+}
+
+DataRectTableModel* CorrelationPreParser::tableModel()
+{
+    return &_model;
 }

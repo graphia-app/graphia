@@ -15,7 +15,6 @@ Wizard
 
     Item
     {
-        anchors.fill: parent
         CorrelationPreParser
         {
             id: preParser
@@ -30,22 +29,14 @@ Wizard
 
         ColumnLayout
         {
-            width: parent.width
-            anchors.left: parent.left
-            anchors.right: parent.right
+            anchors.fill: parent
             ComboBox
             {
                 model:
                 {
                     var list = [];
-                    console.log("Column Count" + preParser.columnCount)
                     for(var i=0; i<preParser.columnCount; i++)
-                    {
-                        console.log(i)
-
                         list.push(preParser.dataAt(i,0));
-                    }
-                    console.log(list);
                     return list;
                 }
             }
@@ -53,6 +44,34 @@ Wizard
             Text
             {
                 text: preParser.fileUrl
+            }
+
+
+            Component
+            {
+                id: columnComponent
+                TableViewColumn { width: 200 }
+            }
+
+            TableView
+            {
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                id: dataRectView
+                model: preParser.model
+            }
+
+            Connections
+            {
+                target: preParser.model
+                onModelReset:
+                {
+                    for(var i = 0; i < preParser.model.columnCount(); i++)
+                    {
+                        dataRectView.addColumn(columnComponent.createObject(dataRectView,
+                            {"role": i}));
+                    }
+                }
             }
 
             Button
