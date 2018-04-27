@@ -25,18 +25,19 @@ private:
     int _mass = 0;
     QVector3D _centreOfMass;
 
-    void initialiseTreeNode(const std::vector<NodeId> &nodeIds) override;
+    void initialise(const NodePositions& nodePositions, const std::vector<NodeId>& nodeIds) override;
 
 public:
     BarnesHutTree();
 
     void setTheta(float theta) { _theta = theta; }
 
-    template<typename Fn> QVector3D evaluateKernel(NodeId nodeId, Fn&& kernel) const
+    template<typename Fn>
+    QVector3D evaluateKernel(const NodePositions& nodePositions, NodeId nodeId, const Fn& kernel) const
     {
-        const QVector3D& nodePosition = _nodePositions->get(nodeId);
+        const QVector3D& nodePosition = nodePositions.get(nodeId);
         QVector3D result;
-        FixedSizeStack<const BarnesHutTree*> stack(_depth);
+        FixedSizeStack<const BarnesHutTree*> stack(_depthFirstTraversalStackSizeRequirement);
 
         stack.push(this);
 
@@ -73,7 +74,7 @@ public:
                 NodeId otherNodeId = subVolume->_nodeIds.front();
                 if(otherNodeId != nodeId)
                 {
-                    const QVector3D& otherNodePosition = _nodePositions->get(otherNodeId);
+                    const QVector3D& otherNodePosition = nodePositions.get(otherNodeId);
                     QVector3D difference = otherNodePosition - nodePosition;
                     float distanceSq = difference.lengthSquared();
 

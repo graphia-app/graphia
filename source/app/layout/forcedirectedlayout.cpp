@@ -96,7 +96,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
             if(cancelled())
                 return;
 
-            _displacements[static_cast<int>(nodeId)] -= barnesHutTree.evaluateKernel(nodeId,
+            _displacements[static_cast<int>(nodeId)] -= barnesHutTree.evaluateKernel(positions(), nodeId,
                 [REPULSIVE_FORCE](int mass, const QVector3D& difference, float distanceSq)
                 {
                     return REPULSIVE_FORCE * difference * mass / (0.0001f + distanceSq);

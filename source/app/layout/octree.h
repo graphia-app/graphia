@@ -4,6 +4,8 @@
 #include "shared/graph/igraphcomponent.h"
 #include "maths/boundingbox.h"
 #include "nodepositions.h"
+#include "shared/utils/scopetimer.h"
+#include "shared/utils/threadpool.h"
 
 #include <QVector3D>
 #include <QColor>
@@ -11,7 +13,6 @@
 #include <functional>
 #include <vector>
 #include <memory>
-#include <deque>
 #include <stack>
 #include <array>
 #include <cstdlib>
@@ -23,8 +24,6 @@ template<typename TreeType> struct SubVolume
     std::unique_ptr<TreeType> _subTree;
     bool _leaf = true;
     bool _empty = true;
-
-    bool _passesPredicate = true;
 
     // Floating point precision means that it becomes impossible to
     // divide a bounding box beyond a certain minimum size. We don't
@@ -58,10 +57,8 @@ template<typename TreeType> struct SubVolume
 template<typename TreeType, typename SubVolumeType = SubVolume<TreeType>> class BaseOctree
 {
 protected:
-    const NodePositions* _nodePositions = nullptr;
     BoundingBox3D _boundingBox;
-    QVector3D _centre;
-    size_t _depth = 0;
+    size_t _depthFirstTraversalStackSizeRequirement = 0;
     std::array<SubVolumeType, 8> _subVolumes = {};
 
     std::array<const SubVolumeType*, 8> _nonEmptyLeaves = {};
@@ -72,40 +69,64 @@ protected:
 
 private:
     unsigned int _maxNodesPerLeaf = 1;
-    std::function<bool(const BoundingBox3D&)> _predicate;
 
-    struct SubTree
+    // Temporary data structure used in the creation of the tree
+    struct NewTree
     {
         BaseOctree* _tree;
         std::vector<NodeId> _nodeIds;
 
-        SubTree(BaseOctree* tree, const std::vector<NodeId>& nodeIds) noexcept : // NOLINT
+        NewTree(BaseOctree* tree, const std::vector<NodeId>& nodeIds) noexcept : // NOLINT
             _tree(tree), _nodeIds(nodeIds)
         {}
 
-        SubTree(BaseOctree* tree, std::vector<NodeId>&& nodeIds) noexcept :
+        NewTree(BaseOctree* tree, std::vector<NodeId>&& nodeIds) noexcept :
             _tree(tree), _nodeIds(std::move(nodeIds))
         {}
 
-        SubTree(const SubTree& other) = default;
-        SubTree& operator=(const SubTree& other) = default;
-        SubTree(SubTree&& other) = default; // NOLINT
-        SubTree& operator=(SubTree&& other) = default; // NOLINT
+        NewTree(const NewTree& other) = default;
+        NewTree& operator=(const NewTree& other) = default;
+        NewTree(NewTree&& other) = default; // NOLINT
+        NewTree& operator=(NewTree&& other) = default; // NOLINT
     };
 
-    std::deque<SubTree> distributeNodesOverSubVolumes(const std::vector<NodeId>& nodeIds)
+    void initialiseSubVolumes()
     {
+        const auto cx = _boundingBox.centre().x();
+        const auto cy = _boundingBox.centre().y();
+        const auto cz = _boundingBox.centre().z();
+        const auto xh = _boundingBox.xLength() * 0.5f;
+        const auto yh = _boundingBox.yLength() * 0.5f;
+        const auto zh = _boundingBox.zLength() * 0.5f;
+
+        // clang-format off
+        _subVolumes[0]._boundingBox = {{cx - xh, cy - yh, cz - zh}, {cx,      cy,      cz     }};
+        _subVolumes[1]._boundingBox = {{cx,      cy - yh, cz - zh}, {cx + xh, cy,      cz     }};
+        _subVolumes[2]._boundingBox = {{cx - xh, cy,      cz - zh}, {cx,      cy + yh, cz     }};
+        _subVolumes[3]._boundingBox = {{cx,      cy,      cz - zh}, {cx + xh, cy + yh, cz     }};
+
+        _subVolumes[4]._boundingBox = {{cx - xh, cy - yh, cz     }, {cx,      cy,      cz + zh}};
+        _subVolumes[5]._boundingBox = {{cx,      cy - yh, cz     }, {cx + xh, cy,      cz + zh}};
+        _subVolumes[6]._boundingBox = {{cx - xh, cy,      cz     }, {cx,      cy + yh, cz + zh}};
+        _subVolumes[7]._boundingBox = {{cx,      cy,      cz     }, {cx + xh, cy + yh, cz + zh}};
+        // clang-format on
+
+        for(auto& subVolume : _subVolumes)
+            Q_ASSERT(subVolume._boundingBox.valid());
+    }
+
+    void distributeNodesOverSubVolumes(const NodePositions& nodePositions, const std::vector<NodeId>& nodeIds)
+    {
+        initialiseSubVolumes();
+
         bool distinctPositions = false;
-        QVector3D lastPosition = _nodePositions->get(nodeIds[0]);
+        QVector3D lastPosition = nodePositions.get(nodeIds[0]);
 
         // Distribute NodeIds over SubVolumes
         for(NodeId nodeId : nodeIds)
         {
-            const QVector3D& nodePosition = _nodePositions->get(nodeId);
+            const QVector3D& nodePosition = nodePositions.get(nodeId);
             SubVolumeType& subVolume = subVolumeForPoint(nodePosition);
-
-            if(!subVolume._passesPredicate)
-                continue;
 
             subVolume._nodeIds.push_back(nodeId);
 
@@ -118,12 +139,10 @@ private:
             }
         }
 
-        std::deque<SubTree> subTrees;
-
         // Decide if the SubVolumes need further sub-division
         for(auto& subVolume : _subVolumes)
         {
-            if(!subVolume._passesPredicate || subVolume._nodeIds.empty())
+            if(subVolume._nodeIds.empty())
                 continue;
 
             if(subVolume._nodeIds.size() > _maxNodesPerLeaf &&
@@ -133,7 +152,6 @@ private:
                 subVolume._subTree = std::make_unique<TreeType>();
                 Q_ASSERT(subVolume._boundingBox.volume() > 0.0f);
                 subVolume._subTree->_boundingBox = subVolume._boundingBox;
-                subTrees.emplace_back(subVolume._subTree.get(), std::move(subVolume._nodeIds));
 
                 subVolume._leaf = false;
                 _internalNodes.at(_numInternalNodes++) = &subVolume;
@@ -144,84 +162,82 @@ private:
                 _nonEmptyLeaves.at(_numNonEmptyLeaves++) = &subVolume;
             }
         }
-
-        return subTrees;
     }
 
-    // The parameter and superset of _subVolumes[x]._nodeIds contain the same data, when this is called
-    virtual void initialiseTreeNode(const std::vector<NodeId>&) {}
+    // The second parameter and superset of _subVolumes[x]._nodeIds are the
+    // same, at the point when this is called
+    virtual void initialise(const NodePositions&, const std::vector<NodeId>&) {}
 
 public:
-    BaseOctree() : _predicate([](const BoundingBox3D&) { return true; }) {}
     virtual ~BaseOctree() = default;
 
     void setMaxNodesPerLeaf(unsigned int maxNodesPerLeaf) { _maxNodesPerLeaf = maxNodesPerLeaf; }
-    void setPredicate(std::function<bool(const BoundingBox3D&)> predicate) { _predicate = predicate; }
 
-    void build(const std::vector<NodeId>& nodeIds, const NodePositions& nodePositions,
-               const BoundingBox3D &boundingBox)
+    void build(const std::vector<NodeId>& nodeIds, const NodePositions& nodePositions)
     {
-        _boundingBox = boundingBox;
-        _depth = 0;
+        SCOPE_TIMER_MULTISAMPLES(50)
 
-        std::deque<SubTree> subTrees;
-        subTrees.emplace_back(this, nodeIds);
+        std::vector<NewTree> newTrees;
+        newTrees.emplace_back(this, nodeIds);
 
-        while(!subTrees.empty())
+        while(!newTrees.empty())
         {
-            _depth = std::max(_depth, subTrees.size());
-
-            BaseOctree* subTree = subTrees.back()._tree;
-            std::vector<NodeId> nodeIdsToDistribute = std::move(subTrees.back()._nodeIds);
-            subTrees.pop_back();
-
-            subTree->_centre = subTree->_boundingBox.centre();
-            subTree->_nodePositions = &nodePositions;
-
-            const auto cx = subTree->_centre.x();
-            const auto cy = subTree->_centre.y();
-            const auto cz = subTree->_centre.z();
-            const auto xh = subTree->_boundingBox.xLength() * 0.5f;
-            const auto yh = subTree->_boundingBox.yLength() * 0.5f;
-            const auto zh = subTree->_boundingBox.zLength() * 0.5f;
-
-            // clang-format off
-            subTree->_subVolumes[0]._boundingBox = {{cx - xh, cy - yh, cz - zh}, {cx,      cy,      cz     }};
-            subTree->_subVolumes[1]._boundingBox = {{cx,      cy - yh, cz - zh}, {cx + xh, cy,      cz     }};
-            subTree->_subVolumes[2]._boundingBox = {{cx - xh, cy,      cz - zh}, {cx,      cy + yh, cz     }};
-            subTree->_subVolumes[3]._boundingBox = {{cx,      cy,      cz - zh}, {cx + xh, cy + yh, cz     }};
-
-            subTree->_subVolumes[4]._boundingBox = {{cx - xh, cy - yh, cz     }, {cx,      cy,      cz + zh}};
-            subTree->_subVolumes[5]._boundingBox = {{cx,      cy - yh, cz     }, {cx + xh, cy,      cz + zh}};
-            subTree->_subVolumes[6]._boundingBox = {{cx - xh, cy,      cz     }, {cx,      cy + yh, cz + zh}};
-            subTree->_subVolumes[7]._boundingBox = {{cx,      cy,      cz     }, {cx + xh, cy + yh, cz + zh}};
-            // clang-format on
-
-            for(auto& subVolume : subTree->_subVolumes)
+            auto results = concurrent_for(newTrees.begin(), newTrees.end(),
+            [&nodePositions](typename std::vector<NewTree>::iterator it)
             {
-                Q_ASSERT(subVolume._boundingBox.valid());
-                subVolume._passesPredicate = _predicate(subVolume._boundingBox);
+                auto* subTree = it->_tree;
+                const auto& nodeIdsToDistribute = it->_nodeIds;
+
+                subTree->distributeNodesOverSubVolumes(nodePositions, nodeIdsToDistribute);
+
+                std::vector<NewTree> newChildTrees;
+                for(int i = 0; i < subTree->_numInternalNodes; i++)
+                {
+                    auto subVolume = subTree->_internalNodes.at(i);
+                    newChildTrees.emplace_back(subVolume->_subTree.get(),
+                        std::move(subVolume->_nodeIds));
+                }
+
+                subTree->initialise(nodePositions, nodeIdsToDistribute);
+
+                return newChildTrees;
+            });
+
+            // subTrees has now been processsed, but may have resulted in more subTrees
+            newTrees.clear();
+            newTrees.insert(newTrees.end(), std::make_move_iterator(results.begin()),
+                std::make_move_iterator(results.end()));
+        }
+
+        std::stack<const BaseOctree*> stack;
+        stack.push(this);
+        _depthFirstTraversalStackSizeRequirement = 1;
+        while(!stack.empty())
+        {
+            const BaseOctree* subTree = stack.top();
+            stack.pop();
+
+            for(int i = 0; i < subTree->_numInternalNodes; i++)
+            {
+                auto subVolume = subTree->_internalNodes.at(i);
+                stack.push(subVolume->_subTree.get());
+                _depthFirstTraversalStackSizeRequirement =
+                    std::max(_depthFirstTraversalStackSizeRequirement, stack.size());
             }
-
-            auto newSubTrees = subTree->distributeNodesOverSubVolumes(nodeIdsToDistribute);
-            subTrees.insert(subTrees.end(), std::make_move_iterator(newSubTrees.begin()),
-                std::make_move_iterator(newSubTrees.end()));
-
-            subTree->initialiseTreeNode(nodeIdsToDistribute);
         }
     }
 
     void build(const IGraphComponent& graph, const NodePositions& nodePositions)
     {
-        BoundingBox3D boundingBox = BoundingBox3D(NodePositions::positionsVector(nodePositions, graph.nodeIds()));
-        Q_ASSERT(boundingBox.valid());
-        build(graph.nodeIds(), nodePositions, boundingBox);
+        _boundingBox = BoundingBox3D(NodePositions::positionsVector(nodePositions, graph.nodeIds()));
+        Q_ASSERT(_boundingBox.valid());
+        build(graph.nodeIds(), nodePositions);
     }
 
     SubVolumeType& subVolumeForPoint(const QVector3D& point)
     {
         int i = 0;
-        QVector3D diff = point - _centre;
+        QVector3D diff = point - _boundingBox.centre();
 
         if(diff.z() >= 0.0f)
             i += 4;
