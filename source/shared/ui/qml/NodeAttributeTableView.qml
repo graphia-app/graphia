@@ -228,7 +228,9 @@ Item
         text: qsTr("Export…")
         onTriggered:
         {
-            exportTableDialog.folder = misc.fileSaveInitialFolder;
+            exportTableDialog.folder = misc.fileSaveInitialFolder !== undefined ?
+                misc.fileSaveInitialFolder : "";
+
             exportTableDialog.open();
         }
     }
