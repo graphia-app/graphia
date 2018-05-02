@@ -1825,6 +1825,7 @@ QVariantMap Document::layoutSetting(const QString& name) const
         map.insert(QStringLiteral("name"), setting->name());
         map.insert(QStringLiteral("displayName"), setting->displayName());
         map.insert(QStringLiteral("value"), setting->value());
+        map.insert(QStringLiteral("normalisedValue"), setting->normalisedValue());
         map.insert(QStringLiteral("minimumValue"), setting->minimumValue());
         map.insert(QStringLiteral("maximumValue"), setting->maximumValue());
     }
@@ -1835,6 +1836,16 @@ QVariantMap Document::layoutSetting(const QString& name) const
 void Document::setLayoutSettingValue(const QString& name, float value)
 {
     _layoutThread->setSettingValue(name, value);
+}
+
+void Document::setLayoutSettingNormalisedValue(const QString& name, float normalisedValue)
+{
+    _layoutThread->setSettingNormalisedValue(name, normalisedValue);
+}
+
+void Document::resetLayoutSettingValue(const QString& name)
+{
+    _layoutThread->resetSettingValue(name);
 }
 
 void Document::cancelCommand()

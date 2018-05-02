@@ -335,3 +335,13 @@ void LayoutThread::setSettingValue(const QString& name, float value)
 {
     _layoutFactory->setSettingValue(name, value);
 }
+
+void LayoutThread::setSettingNormalisedValue(const QString& name, float normalisedValue)
+{
+    _layoutFactory->setSettingNormalisedValue(name, normalisedValue);
+}
+
+void LayoutThread::resetSettingValue(const QString& name)
+{
+    _layoutFactory->resetSettingValue(name);
+}

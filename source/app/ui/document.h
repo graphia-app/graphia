@@ -406,6 +406,8 @@ public:
 
     Q_INVOKABLE QVariantMap layoutSetting(const QString& name) const;
     Q_INVOKABLE void setLayoutSettingValue(const QString& name, float value);
+    Q_INVOKABLE void setLayoutSettingNormalisedValue(const QString& name, float normalisedValue);
+    Q_INVOKABLE void resetLayoutSettingValue(const QString& name);
 
     Q_INVOKABLE void cancelCommand();
 

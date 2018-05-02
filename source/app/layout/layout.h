@@ -116,6 +116,16 @@ public:
         _layoutSettings.setValue(name, value);
     }
 
+    void setSettingNormalisedValue(const QString& name, float normalisedValue)
+    {
+        _layoutSettings.setNormalisedValue(name, normalisedValue);
+    }
+
+    void resetSettingValue(const QString& name)
+    {
+        _layoutSettings.resetValue(name);
+    }
+
     virtual std::unique_ptr<Layout> create(ComponentId componentId, NodePositions& results) const = 0;
 };
 
@@ -180,6 +190,8 @@ public:
     const LayoutSetting* setting(const QString& name) const;
 
     void setSettingValue(const QString& name, float value);
+    void setSettingNormalisedValue(const QString& name, float normalisedValue);
+    void resetSettingValue(const QString& name);
 
 private:
     bool iterative();
