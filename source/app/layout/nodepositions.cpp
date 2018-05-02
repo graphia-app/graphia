@@ -12,6 +12,7 @@ const QVector3D NodePositions::getScaledAndSmoothed(NodeId nodeId) const
 
 void NodePositions::set(NodeId nodeId, const QVector3D& position)
 {
+    Q_ASSERT(!std::isnan(position.x()) && !std::isnan(position.y()) && !std::isnan(position.z()));
     elementFor(nodeId).push_back(position);
 }
 
