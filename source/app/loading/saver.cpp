@@ -189,6 +189,21 @@ static json bookmarksAsJson(const Document& document)
     return jsonObject;
 }
 
+static json layoutSettingsAsJson(const Document& document)
+{
+    json jsonObject;
+
+    auto settings = document.layoutSettings();
+    for(const auto& setting : settings)
+    {
+        auto byteArray = setting.name().toUtf8();
+        auto settingName = byteArray.constData();
+        jsonObject[settingName] = setting.value();
+    }
+
+    return jsonObject;
+}
+
 bool Saver::encode(const ProgressFn& progressFn)
 {
     json jsonArray;
@@ -213,6 +228,8 @@ bool Saver::encode(const ProgressFn& progressFn)
 
     json layout;
 
+    layout["algorithm"] = _document->layoutName();
+    layout["settings"] = layoutSettingsAsJson(*_document);
     layout["positions"] = nodePositionsAsJson(graphModel->mutableGraph(),
                                               graphModel->nodePositions(),
                                               progressFn);

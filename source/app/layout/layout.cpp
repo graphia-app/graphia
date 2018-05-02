@@ -237,7 +237,6 @@ void LayoutThread::run()
     if(_debug != 0) qDebug() << "Layout stopped";
 }
 
-
 void LayoutThread::addComponent(ComponentId componentId)
 {
     if(!u::contains(_layouts, componentId))
@@ -278,6 +277,11 @@ void LayoutThread::setStartingNodePositions(const ExactNodePositions& nodePositi
 
     // Stop the layouts throwing away our newly set positions
     _executedAtLeastOnce.fill(true);
+}
+
+QString LayoutThread::layoutName() const
+{
+    return _layoutFactory->name();
 }
 
 void LayoutThread::removeComponent(ComponentId componentId)

@@ -179,6 +179,16 @@ bool Document::commandIsCancelling() const
     return _commandManager.commandIsCancelling();
 }
 
+QString Document::layoutName() const
+{
+    return _layoutThread->layoutName();
+}
+
+std::vector<LayoutSetting>& Document::layoutSettings() const
+{
+    return _layoutThread->settings();
+}
+
 void Document::updateLayoutState()
 {
     if(!busy() && !_userLayoutPaused && _layoutRequired)
@@ -509,16 +519,19 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
             _graphModel->buildTransforms(_graphTransforms);
             _graphModel->buildVisualisations(_visualisations);
 
+            //FIXME make use this when we can switch algorithms = completedLoader->layoutName();
+            _loadedLayoutSettings = completedLoader->layoutSettings();
+
             auto nodePositions = completedLoader->nodePositions();
             if(nodePositions != nullptr)
                 _startingNodePositions = std::make_unique<ExactNodePositions>(*nodePositions);
+
+            _userLayoutPaused = completedLoader->layoutPaused();
 
             _uiData = completedLoader->uiData();
 
             _pluginUiData = completedLoader->pluginUiData();
             _pluginUiDataVersion = completedLoader->pluginUiDataVersion();
-
-            _userLayoutPaused = completedLoader->layoutPaused();
 
             auto& enrichmentTableModels = completedLoader->enrichmentTableModels();
             executeOnMainThread([this, enrichmentTableModels]()
@@ -616,6 +629,9 @@ void Document::onLoadComplete(const QUrl&, bool success)
         emit bookmarksChanged();
 
     _layoutThread = std::make_unique<LayoutThread>(*_graphModel, std::make_unique<ForceDirectedLayoutFactory>(_graphModel.get()));
+
+    for(const auto& layoutSetting : _loadedLayoutSettings)
+        _layoutThread->setSettingValue(layoutSetting._name, layoutSetting._value);
 
     if(_startingNodePositions != nullptr)
     {

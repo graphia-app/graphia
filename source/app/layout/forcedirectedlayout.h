@@ -72,6 +72,7 @@ public:
         _layoutSettings.registerSetting("AttractiveForce", QObject::tr("Attractive Force"), 1.0f, 100.0f, 1.0f);
     }
 
+    QString name() const override { return QStringLiteral("ForceDirected"); }
     std::unique_ptr<Layout> create(ComponentId componentId, NodePositions& nodePositions) const override;
 };
 

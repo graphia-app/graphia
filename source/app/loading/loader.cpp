@@ -380,6 +380,18 @@ bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& p
     {
         const auto& jsonLayout = jsonBody["layout"];
 
+        _layoutName = QString::fromStdString(jsonLayout["algorithm"]);
+
+        const auto settings = jsonLayout["settings"];
+        for(auto settingsIt = settings.begin(); settingsIt != settings.end(); ++settingsIt)
+        {
+            QString name = QString::fromStdString(settingsIt.key());
+            const auto& value = settingsIt.value();
+
+            if(value.is_number())
+                _layoutSettings.push_back({name, value});
+        }
+
         if(u::contains(jsonLayout, "positions"))
         {
             _nodePositions = std::make_unique<ExactNodePositions>(graphModel.mutableGraph());

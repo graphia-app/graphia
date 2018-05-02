@@ -25,6 +25,12 @@
 #include <set>
 #include <map>
 
+struct LayoutSettingKeyValue
+{
+    QString _name;
+    float _value;
+};
+
 class Layout : public QObject, public Cancellable
 {
     Q_OBJECT
@@ -126,6 +132,7 @@ public:
         _layoutSettings.resetValue(name);
     }
 
+    virtual QString name() const = 0;
     virtual std::unique_ptr<Layout> create(ComponentId componentId, NodePositions& results) const = 0;
 };
 
@@ -185,6 +192,8 @@ public:
     void addAllComponents();
 
     void setStartingNodePositions(const ExactNodePositions& nodePositions);
+
+    QString layoutName() const;
 
     std::vector<LayoutSetting>& settings();
     const LayoutSetting* setting(const QString& name) const;

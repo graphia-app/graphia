@@ -6,6 +6,7 @@
 
 #include "shared/graph/elementid_containers.h"
 
+#include "layout/layout.h"
 #include "layout/nodepositions.h"
 #include "attributes/enrichmenttablemodel.h"
 
@@ -22,12 +23,18 @@ private:
     IPluginInstance *_pluginInstance = nullptr;
     QStringList _transforms;
     QStringList _visualisations;
+
     std::map<QString, NodeIdSet> _bookmarks;
+
     std::vector<EnrichmentTableModel::Table> _enrichmentTablesData;
-    std::unique_ptr<ExactNodePositions> _nodePositions;
+
     QByteArray _uiData;
     QByteArray _pluginUiData;
     int _pluginUiDataVersion = -1;
+
+    QString _layoutName;
+    std::vector<LayoutSettingKeyValue> _layoutSettings;
+    std::unique_ptr<ExactNodePositions> _nodePositions;
     bool _layoutPaused = false;
 
 public:
@@ -39,10 +46,14 @@ public:
     const auto& bookmarks() const { return _bookmarks; }
     const std::vector<EnrichmentTableModel::Table>& enrichmentTableModels() const
     { return _enrichmentTablesData; }
-    const ExactNodePositions* nodePositions() const;
+
     const QByteArray& uiData() const { return _uiData; }
     const QByteArray& pluginUiData() const { return _pluginUiData; }
     int pluginUiDataVersion() const { return _pluginUiDataVersion; }
+
+    QString layoutName() const { return _layoutName; }
+    auto layoutSettings() const { return _layoutSettings; }
+    const ExactNodePositions* nodePositions() const;
     bool layoutPaused() const { return _layoutPaused; }
 
     static QString pluginNameFor(const QUrl& url);

@@ -2,13 +2,14 @@
 
 #include <cmath>
 
+#include <QDebug>
+
 float LayoutSettings::value(const QString& name) const
 {
     auto* v = setting(name);
     if(v != nullptr)
         return v->value();
 
-    Q_ASSERT(!"Setting not found");
     return 0.0f;
 }
 
@@ -18,7 +19,6 @@ float LayoutSettings::normalisedValue(const QString& name) const
     if(v != nullptr)
         return v->normalisedValue();
 
-    Q_ASSERT(!"Setting not found");
     return 0.0f;
 }
 
@@ -31,8 +31,6 @@ void LayoutSettings::setValue(const QString& name, float value)
         emit settingChanged();
         return;
     }
-
-    Q_ASSERT(!"Setting not found");
 }
 
 void LayoutSettings::setNormalisedValue(const QString& name, float normalisedValue)
@@ -44,8 +42,6 @@ void LayoutSettings::setNormalisedValue(const QString& name, float normalisedVal
         emit settingChanged();
         return;
     }
-
-    Q_ASSERT(!"Setting not found");
 }
 
 void LayoutSettings::resetValue(const QString& name)
@@ -57,8 +53,6 @@ void LayoutSettings::resetValue(const QString& name)
         emit settingChanged();
         return;
     }
-
-    Q_ASSERT(!"Setting not found");
 }
 
 const LayoutSetting* LayoutSettings::setting(const QString& name) const
@@ -78,6 +72,7 @@ LayoutSetting* LayoutSettings::setting(const QString& name)
     if(setting != _settings.end())
         return &(*setting);
 
+    qDebug() << QStringLiteral("Setting") << name << "not found!";
     return nullptr;
 }
 

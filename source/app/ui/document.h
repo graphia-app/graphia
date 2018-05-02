@@ -131,6 +131,8 @@ public:
     bool commandIsCancellable() const;
     bool commandIsCancelling() const;
 
+    QString layoutName() const;
+    std::vector<LayoutSetting>& layoutSettings() const;
     void updateLayoutState();
     LayoutPauseState layoutPauseState();
 
@@ -226,6 +228,7 @@ private:
     QByteArray _pluginUiData;
     int _pluginUiDataVersion = -1;
 
+    std::vector<LayoutSettingKeyValue> _loadedLayoutSettings;
     std::unique_ptr<ExactNodePositions> _startingNodePositions;
     bool _userLayoutPaused = false; // true if the user wants the layout to pause
 
