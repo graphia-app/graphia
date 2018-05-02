@@ -6,6 +6,7 @@
 #include "datarecttablemodel.h"
 #include <QString>
 #include <QRect>
+#include <QtConcurrent/QtConcurrent>
 
 class CorrelationPluginInstance;
 
@@ -32,6 +33,9 @@ private:
     Q_PROPERTY(int rowCount READ rowCount NOTIFY dataRectChanged)
     Q_PROPERTY(QAbstractTableModel* model READ tableModel NOTIFY dataRectChanged)
 
+    QFutureWatcher<void> _autoDetectDataRectangleWatcher;
+    CsvFileParser _csvFileParser;
+    TsvFileParser _tsvFileParser;
     QString _fileType;
     QString _fileUrl;
     QRect _dataRect;
@@ -40,10 +44,15 @@ private:
 
     int rowCount();
     int columnCount();
+
 public:
+    CorrelationPreParser();
     Q_INVOKABLE bool parse();
     Q_INVOKABLE QString dataAt(int column, int row);
+    Q_INVOKABLE void autoDetectDataRectangle(int column=0, int row=0);
+
     DataRectTableModel* tableModel();
+
 signals:
     void dataRectChanged();
     void fileUrlChanged();

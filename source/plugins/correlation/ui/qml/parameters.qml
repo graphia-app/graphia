@@ -72,6 +72,70 @@ Wizard
                 Layout.fillWidth: true
                 id: dataRectView
                 model: preParser.model
+                selectionMode: SelectionMode.NoSelection
+
+                itemDelegate: Item
+                {
+                    height: Math.max(16, label.implicitHeight)
+                    property int implicitWidth: label.implicitWidth + 16
+
+                    Rectangle
+                    {
+                        MouseArea
+                        {
+                            anchors.fill: parent
+                            onClicked:
+                            {
+                                console.log("Clicked!")
+                                preParser.autoDetectDataRectangle(styleData.column, styleData.row);
+                            }
+                        }
+
+                        width: parent.width
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        height: parent.height
+                        color:
+                        {
+                            if(styleData.column >= preParser.dataRect.x
+                                    && styleData.column < preParser.dataRect.x + preParser.dataRect.width
+                                    && styleData.row >= preParser.dataRect.y
+                                    &&  styleData.row < preParser.dataRect.x + preParser.dataRect.height)
+                                return "lightblue";
+                            else
+                                return "transparent"
+                        }
+
+                        Text
+                        {
+                            id: label
+                            objectName: "label"
+                            width: parent.width
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.leftMargin: styleData.hasOwnProperty("depth") && styleData.column === 0 ? 0 :
+                                                horizontalAlignment === Text.AlignRight ? 1 : 8
+                            anchors.rightMargin: (styleData.hasOwnProperty("depth") && styleData.column === 0)
+                                                 || horizontalAlignment !== Text.AlignRight ? 1 : 8
+                            horizontalAlignment: styleData.textAlignment
+                            anchors.verticalCenter: parent.verticalCenter
+                            elide: styleData.elideMode
+
+                            text:
+                            {
+                                if(styleData.value === undefined)
+                                    return "";
+
+                                var column = dataRectView.getColumn(styleData.column);
+
+                                return styleData.value;
+                            }
+
+                            color: styleData.textColor
+                            renderType: Text.NativeRendering
+                        }
+                    }
+                }
             }
 
             Connections
@@ -92,6 +156,12 @@ Wizard
             {
                 text: "Parse!";
                 onClicked: preParser.parse();
+            }
+
+            Button
+            {
+                text: qsTr("Auto-Detect Data Rect")
+                onClicked: preParser.autoDetectDataRectangle();
             }
         }
     }

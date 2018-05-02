@@ -16,13 +16,13 @@ CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, 
     _plugin(plugin), _urlTypeName(std::move(urlTypeName))
 {}
 
-static QRect findLargestDataRect(const TabularData& tabularData)
+static QRect findLargestDataRect(const TabularData& tabularData, int startColumn = 0, int startRow = 0)
 {
     std::vector<int> heightHistogram(tabularData.numColumns());
 
-    for(size_t column = 0; column < tabularData.numColumns(); column++)
+    for(size_t column = startColumn; column < tabularData.numColumns(); column++)
     {
-        for(size_t row = tabularData.numRows() - 1; row > 0; --row)
+        for(size_t row = tabularData.numRows() - 1; row >= startRow; --row)
         {
             auto& value = tabularData.valueAt(column, row);
             if(u::isNumeric(value) || value.empty())
@@ -162,33 +162,48 @@ int CorrelationPreParser::columnCount()
     return _data != nullptr ? _data->numColumns() : 0;
 }
 
+CorrelationPreParser::CorrelationPreParser()
+{
+    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::dataRectChanged);
+}
+
 bool CorrelationPreParser::parse()
 {
-    if(_fileType.isEmpty() || _fileUrl.isEmpty())
-        return false;
-
-    CsvFileParser csvFileParser;
-    TsvFileParser tsvFileParser;
-
-    if(_fileType == QLatin1String("CorrelationCSV"))
+    QFuture<void> future = QtConcurrent::run([this]()
     {
-        if(!csvFileParser.preParse(_fileUrl))
+        if(_fileType.isEmpty() || _fileUrl.isEmpty())
             return false;
 
-        _data = &(csvFileParser.tabularData());
-    }
-    else if(_fileType == QLatin1String("CorrelationTSV"))
+        if(_fileType == QLatin1String("CorrelationCSV"))
+        {
+            if(!_csvFileParser.preParse(_fileUrl))
+                return false;
+
+            _data = &(_csvFileParser.tabularData());
+        }
+        else if(_fileType == QLatin1String("CorrelationTSV"))
+        {
+            if(!_tsvFileParser.preParse(_fileUrl))
+                return false;
+
+            _data = &(_tsvFileParser.tabularData());
+        }
+
+        _dataRect = findLargestDataRect(*_data);
+
+        _model.setTabularData(*_data);
+    });
+    _autoDetectDataRectangleWatcher.setFuture(future);
+    return true;
+}
+
+void CorrelationPreParser::autoDetectDataRectangle(int column, int row)
+{
+    QFuture<void> future = QtConcurrent::run([this, column, row]()
     {
-        if(!tsvFileParser.preParse(_fileUrl))
-            return false;
-
-        _data = &(tsvFileParser.tabularData());
-    }
-
-    _dataRect = findLargestDataRect(*_data);
-
-    _model.setTabularData(*_data);
-    emit dataRectChanged();
+        _dataRect = findLargestDataRect(*_data, column, row);
+    });
+    _autoDetectDataRectangleWatcher.setFuture(future);
 }
 
 QString CorrelationPreParser::dataAt(int column, int row)
