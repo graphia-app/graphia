@@ -64,6 +64,15 @@ static void dampOscillations(QVector3D& previous, QVector3D& next)
     previous = next;
 }
 
+// This is a fairly arbitrary function that was arrived at through experimentation. The parameters
+// shortRange and longRange affect the emphasis that the result places on local forces and global
+// forces, respectively.
+static float repulse(const float distanceSq, const float shortRange, const float longRange)
+{
+    return ((distanceSq * distanceSq * longRange) + shortRange) /
+        ((distanceSq * distanceSq * distanceSq) + 0.0001f);
+}
+
 void ForceDirectedLayout::executeReal(bool firstIteration)
 {
     SCOPE_TIMER_MULTISAMPLES(50)
@@ -86,26 +95,26 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
     BarnesHutTree barnesHutTree;
     barnesHutTree.build(graphComponent(), positions());
 
-    float REPULSIVE_FORCE = _settings->value(QStringLiteral("RepulsiveForce"));
-    float ATTRACTIVE_FORCE = _settings->value(QStringLiteral("AttractiveForce"));
+    const float SHORT_RANGE = _settings->value(QStringLiteral("ShortRangeRepulseTerm"));
+    const float LONG_RANGE = 0.01f + _settings->value(QStringLiteral("LongRangeRepulseTerm"));
 
     // Repulsive forces
     auto repulsiveResults = concurrent_for(nodeIds().begin(), nodeIds().end(),
-    [this, &barnesHutTree, &repulsiveDisplacements, REPULSIVE_FORCE](const NodeId nodeId)
+    [this, &barnesHutTree, &repulsiveDisplacements, SHORT_RANGE, LONG_RANGE](const NodeId nodeId)
     {
         if(cancelled())
             return;
 
         repulsiveDisplacements[static_cast<int>(nodeId)] -= barnesHutTree.evaluateKernel(positions(), nodeId,
-            [REPULSIVE_FORCE](int mass, const QVector3D& difference, float distanceSq)
-            {
-                return REPULSIVE_FORCE * difference * mass / (0.0001f + distanceSq);
-            });
+        [SHORT_RANGE, LONG_RANGE](int mass, const QVector3D& difference, float distanceSq)
+        {
+            return difference * (mass * repulse(distanceSq, SHORT_RANGE, LONG_RANGE));
+        });
     }, false);
 
     // Attractive forces
     auto attractiveResults = concurrent_for(edgeIds().begin(), edgeIds().end(),
-    [this, &attractiveDisplacements, ATTRACTIVE_FORCE](const EdgeId edgeId)
+    [this, &attractiveDisplacements](const EdgeId edgeId)
     {
         if(cancelled())
             return;
@@ -115,7 +124,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
         {
             const QVector3D difference = positions().get(edge.targetId()) - positions().get(edge.sourceId());
             float distanceSq = difference.lengthSquared();
-            const float force = ATTRACTIVE_FORCE * distanceSq * 0.001f;
+            const float force = distanceSq * 0.001f;
 
             attractiveDisplacements[static_cast<int>(edge.targetId())] -= (force * difference);
             attractiveDisplacements[static_cast<int>(edge.sourceId())] += (force * difference);

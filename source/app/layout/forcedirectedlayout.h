@@ -68,8 +68,11 @@ public:
     explicit ForceDirectedLayoutFactory(GraphModel* graphModel) :
         LayoutFactory(graphModel)
     {
-        _layoutSettings.registerSetting("RepulsiveForce",  QObject::tr("Repulsive Force"),  1.0f, 100.0f, 1.0f);
-        _layoutSettings.registerSetting("AttractiveForce", QObject::tr("Attractive Force"), 1.0f, 100.0f, 1.0f);
+        _layoutSettings.registerSetting("ShortRangeRepulseTerm", QObject::tr("Local"),
+            1000.0f, 1000000000.0f, 1000000.0f, LayoutSettingScaleType::Log);
+
+        _layoutSettings.registerSetting("LongRangeRepulseTerm", QObject::tr("Global"),
+            0.0f, 20.0f, 10.0f);
     }
 
     QString name() const override { return QStringLiteral("ForceDirected"); }
