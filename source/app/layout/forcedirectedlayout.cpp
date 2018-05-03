@@ -71,6 +71,9 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
     _prevDisplacements.resize(positions().size());
     _displacements.resize(positions().size());
 
+    std::vector<QVector3D> repulsiveDisplacements(positions().size());
+    std::vector<QVector3D> attractiveDisplacements(positions().size());
+
     if(firstIteration)
     {
         FastInitialLayout initialLayout(graphComponent(), positions());
@@ -80,9 +83,6 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
             _prevDisplacements[static_cast<int>(nodeId)] = QVector3D(0.0f, 0.0f, 0.0f);
     }
 
-    for(NodeId nodeId : nodeIds())
-        _displacements[static_cast<int>(nodeId)] = QVector3D(0.0f, 0.0f, 0.0f);
-
     BarnesHutTree barnesHutTree;
     barnesHutTree.build(graphComponent(), positions());
 
@@ -91,37 +91,36 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
 
     // Repulsive forces
     auto repulsiveResults = concurrent_for(nodeIds().begin(), nodeIds().end(),
-        [this, &barnesHutTree, REPULSIVE_FORCE](const NodeId nodeId)
-        {
-            if(cancelled())
-                return;
+    [this, &barnesHutTree, &repulsiveDisplacements, REPULSIVE_FORCE](const NodeId nodeId)
+    {
+        if(cancelled())
+            return;
 
-            _displacements[static_cast<int>(nodeId)] -= barnesHutTree.evaluateKernel(positions(), nodeId,
-                [REPULSIVE_FORCE](int mass, const QVector3D& difference, float distanceSq)
-                {
-                    return REPULSIVE_FORCE * difference * mass / (0.0001f + distanceSq);
-                });
-        }, false);
+        repulsiveDisplacements[static_cast<int>(nodeId)] -= barnesHutTree.evaluateKernel(positions(), nodeId,
+            [REPULSIVE_FORCE](int mass, const QVector3D& difference, float distanceSq)
+            {
+                return REPULSIVE_FORCE * difference * mass / (0.0001f + distanceSq);
+            });
+    }, false);
 
     // Attractive forces
     auto attractiveResults = concurrent_for(edgeIds().begin(), edgeIds().end(),
-        [this, ATTRACTIVE_FORCE](const EdgeId edgeId)
+    [this, &attractiveDisplacements, ATTRACTIVE_FORCE](const EdgeId edgeId)
+    {
+        if(cancelled())
+            return;
+
+        const IEdge& edge = graphComponent().graph().edgeById(edgeId);
+        if(!edge.isLoop())
         {
-            if(cancelled())
-                return;
+            const QVector3D difference = positions().get(edge.targetId()) - positions().get(edge.sourceId());
+            float distanceSq = difference.lengthSquared();
+            const float force = ATTRACTIVE_FORCE * distanceSq * 0.001f;
 
-            const IEdge& edge = graphComponent().graph().edgeById(edgeId);
-            if(!edge.isLoop())
-            {
-                const QVector3D difference = positions().get(edge.targetId()) - positions().get(edge.sourceId());
-                float distanceSq = difference.lengthSquared();
-                const float SPRING_LENGTH = 10.0f;
-                const float force = ATTRACTIVE_FORCE * distanceSq / (SPRING_LENGTH * SPRING_LENGTH * SPRING_LENGTH);
-
-                _displacements[static_cast<int>(edge.targetId())] -= (force * difference);
-                _displacements[static_cast<int>(edge.sourceId())] += (force * difference);
-            }
-        }, false);
+            attractiveDisplacements[static_cast<int>(edge.targetId())] -= (force * difference);
+            attractiveDisplacements[static_cast<int>(edge.sourceId())] += (force * difference);
+        }
+    }, false);
 
     repulsiveResults.wait();
     attractiveResults.wait();
@@ -130,10 +129,14 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
         return;
 
     concurrent_for(nodeIds().begin(), nodeIds().end(),
-        [this](const NodeId& nodeId)
-        {
-            dampOscillations(_prevDisplacements[static_cast<int>(nodeId)], _displacements[static_cast<int>(nodeId)]);
-        });
+    [this, &repulsiveDisplacements, &attractiveDisplacements](const NodeId& nodeId)
+    {
+        _displacements[static_cast<int>(nodeId)] =
+                repulsiveDisplacements[static_cast<int>(nodeId)] +
+                attractiveDisplacements[static_cast<int>(nodeId)];
+
+        dampOscillations(_prevDisplacements[static_cast<int>(nodeId)], _displacements[static_cast<int>(nodeId)]);
+    });
 
     // Apply the forces
     for(auto nodeId : nodeIds())
