@@ -32,6 +32,7 @@ private:
     Q_PROPERTY(int columnCount READ columnCount NOTIFY dataRectChanged)
     Q_PROPERTY(int rowCount READ rowCount NOTIFY dataRectChanged)
     Q_PROPERTY(QAbstractTableModel* model READ tableModel NOTIFY dataRectChanged)
+    Q_PROPERTY(bool isRunning READ isRunning NOTIFY isRunningChanged)
 
     QFutureWatcher<void> _autoDetectDataRectangleWatcher;
     CsvFileParser _csvFileParser;
@@ -52,9 +53,11 @@ public:
     Q_INVOKABLE void autoDetectDataRectangle(int column=0, int row=0);
 
     DataRectTableModel* tableModel();
+    bool isRunning() { return _autoDetectDataRectangleWatcher.isRunning(); }
 
 signals:
     void dataRectChanged();
+    void isRunningChanged();
     void fileUrlChanged();
     void fileTypeChanged();
 };

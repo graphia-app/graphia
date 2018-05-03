@@ -165,6 +165,8 @@ int CorrelationPreParser::columnCount()
 CorrelationPreParser::CorrelationPreParser()
 {
     connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::dataRectChanged);
+    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::started, this, &CorrelationPreParser::isRunningChanged);
+    connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::isRunningChanged);
 }
 
 bool CorrelationPreParser::parse()

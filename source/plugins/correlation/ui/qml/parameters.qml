@@ -2,6 +2,7 @@ import QtQuick 2.7
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 import com.kajeka 1.0
+import QtGraphicalEffects 1.0
 
 import "../../../../shared/ui/qml/Constants.js" as Constants
 import "Controls"
@@ -30,6 +31,15 @@ Wizard
         }
     }
 
+    function scrollToCell(tableView, x, y)
+    {
+        tableView.positionViewAtRow(y, ListView.Center);
+        if(x > 0)
+            x--;
+        var header = tableView.__listView.headerItem.headerRepeater.itemAt(x);
+        tableView.flickableItem.contentX = header.x;
+    }
+
     Item
     {
         CorrelationPreParser
@@ -42,22 +52,6 @@ Wizard
         ColumnLayout
         {
             anchors.fill: parent
-            ComboBox
-            {
-                model:
-                {
-                    var list = [];
-                    for(var i=0; i<preParser.columnCount; i++)
-                        list.push(preParser.dataAt(i,0));
-                    return list;
-                }
-            }
-
-            Text
-            {
-                text: preParser.fileUrl
-            }
-
 
             Component
             {
@@ -67,33 +61,47 @@ Wizard
 
             TableView
             {
+                id: dataRectView
                 headerVisible: false
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                id: dataRectView
                 model: preParser.model
                 selectionMode: SelectionMode.NoSelection
+                enabled: !preParser.isRunning
+
+                BusyIndicator
+                {
+                    id: busyIndicator
+                    anchors.centerIn: parent
+                    running: preParser.isRunning
+                }
+
+                SystemPalette
+                {
+                    id: sysPalette
+                }
 
                 itemDelegate: Item
                 {
                     height: Math.max(16, label.implicitHeight)
                     property int implicitWidth: label.implicitWidth + 16
+                    clip: true
 
                     Rectangle
                     {
+                        //border.width: 0.5
+                        //border.color: sysPalette.mid
                         MouseArea
                         {
                             anchors.fill: parent
                             onClicked:
                             {
-                                console.log("Clicked!")
                                 preParser.autoDetectDataRectangle(styleData.column, styleData.row);
                             }
                         }
 
                         width: parent.width
-                        anchors.left: parent.left
-                        anchors.right: parent.right
+                        anchors.centerIn: parent
                         height: parent.height
                         color:
                         {
@@ -141,6 +149,7 @@ Wizard
             Connections
             {
                 target: preParser.model
+
                 onModelReset:
                 {
                     for(var i = 0; i < preParser.model.columnCount(); i++)
@@ -149,21 +158,15 @@ Wizard
                             {"role": i}));
                     }
                     Qt.callLater(resizeColumnsToContentsBugWorkaround, dataRectView);
+                    Qt.callLater(scrollToCell, dataRectView, preParser.dataRect.x, preParser.dataRect.y);
                 }
             }
-
-            Button
-            {
-                text: "Parse!";
-                onClicked: preParser.parse();
-            }
-
-            Button
-            {
-                text: qsTr("Auto-Detect Data Rect")
-                onClicked: preParser.autoDetectDataRectangle();
-            }
         }
+    }
+
+    onFileUrlChanged:
+    {
+        preParser.parse();
     }
 
     Item
