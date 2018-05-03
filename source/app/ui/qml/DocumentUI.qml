@@ -745,7 +745,9 @@ Item
 
                 anchors.fill: parent
                 anchors.leftMargin: -Constants.margin
+                anchors.rightMargin: -Constants.margin
                 anchors.topMargin: -(Constants.margin * 4)
+                anchors.bottomMargin: -(Constants.margin * 4)
 
                 // @disable-check M300
                 SlidingPanel
@@ -770,15 +772,30 @@ Item
                         onHidden: { findPanel.hide(); }
                     }
                 }
-            }
 
-            Item
-            {
-                clip: true
+                // @disable-check M300
+                SlidingPanel
+                {
+                    id: bookmarkPanel
 
-                anchors.fill: parent
-                anchors.leftMargin: -Constants.margin
-                anchors.bottomMargin: -(Constants.margin * 4)
+                    alignment: Qt.AlignTop
+
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.top
+
+                    initiallyOpen: false
+                    disableItemWhenClosed: false
+
+                    item: AddBookmark
+                    {
+                        id: addBookmark
+
+                        document: document
+
+                        onShown: { bookmarkPanel.show(); }
+                        onHidden: { bookmarkPanel.hide(); }
+                    }
+                }
 
                 // @disable-check M300
                 SlidingPanel
@@ -833,38 +850,6 @@ Item
                 heldColor: root.leastContrastingColor
 
                 document: document
-            }
-
-            Item
-            {
-                clip: true
-
-                anchors.fill: parent
-                anchors.topMargin: -(Constants.margin * 4)
-
-                // @disable-check M300
-                SlidingPanel
-                {
-                    id: bookmarkPanel
-
-                    alignment: Qt.AlignTop
-
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.top: parent.top
-
-                    initiallyOpen: false
-                    disableItemWhenClosed: false
-
-                    item: AddBookmark
-                    {
-                        id: addBookmark
-
-                        document: document
-
-                        onShown: { bookmarkPanel.show(); }
-                        onHidden: { bookmarkPanel.hide(); }
-                    }
-                }
             }
         }
 
