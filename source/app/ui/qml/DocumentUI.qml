@@ -644,54 +644,6 @@ Item
                 text: document.fps.toFixed(1) + qsTr(" fps")
             }
 
-            Item
-            {
-                clip: true
-
-                anchors.fill: parent
-                anchors.leftMargin: -Constants.margin
-                anchors.topMargin: -(Constants.margin * 4)
-
-                // @disable-check M300
-                SlidingPanel
-                {
-                    id: findPanel
-
-                    alignment: Qt.AlignTop|Qt.AlignLeft
-
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-
-                    initiallyOpen: false
-                    disableItemWhenClosed: false
-
-                    item: Find
-                    {
-                        id: find
-
-                        document: document
-
-                        onShown: { findPanel.show(); }
-                        onHidden: { findPanel.hide(); }
-                    }
-                }
-            }
-
-            Transforms
-            {
-                id: transforms
-                visible: plugin.loaded
-
-                anchors.right: parent.right
-                anchors.top: parent.top
-
-                enabledTextColor: root.contrastingColor
-                disabledTextColor: root.lessContrastingColor
-                heldColor: root.leastContrastingColor
-
-                document: document
-            }
-
             Column
             {
                 spacing: 10
@@ -785,16 +737,87 @@ Item
                         }
                     }
                 }
+            }
 
-                LayoutSettings
+            Item
+            {
+                clip: true
+
+                anchors.fill: parent
+                anchors.leftMargin: -Constants.margin
+                anchors.topMargin: -(Constants.margin * 4)
+
+                // @disable-check M300
+                SlidingPanel
                 {
+                    id: findPanel
+
+                    alignment: Qt.AlignTop|Qt.AlignLeft
+
                     anchors.left: parent.left
+                    anchors.top: parent.top
 
-                    visible: toggleLayoutSettingsAction.checked
+                    initiallyOpen: false
+                    disableItemWhenClosed: false
 
-                    document: document
-                    textColor: root.contrastingColor
+                    item: Find
+                    {
+                        id: find
+
+                        document: document
+
+                        onShown: { findPanel.show(); }
+                        onHidden: { findPanel.hide(); }
+                    }
                 }
+            }
+
+            Item
+            {
+                clip: true
+
+                anchors.fill: parent
+                anchors.leftMargin: -Constants.margin
+                anchors.bottomMargin: -(Constants.margin * 4)
+
+                // @disable-check M300
+                SlidingPanel
+                {
+                    id: layoutSettingsPanel
+
+                    alignment: Qt.AlignBottom|Qt.AlignLeft
+
+                    anchors.left: parent.left
+                    anchors.bottom: parent.bottom
+
+                    initiallyOpen: false
+                    disableItemWhenClosed: false
+
+                    item: LayoutSettings
+                    {
+                        id: layoutSettings
+
+                        document: document
+
+                        onShown: { layoutSettingsPanel.show(); }
+                        onHidden: { layoutSettingsPanel.hide(); }
+                    }
+                }
+            }
+
+            Transforms
+            {
+                id: transforms
+                visible: plugin.loaded
+
+                anchors.right: parent.right
+                anchors.top: parent.top
+
+                enabledTextColor: root.contrastingColor
+                disabledTextColor: root.lessContrastingColor
+                heldColor: root.leastContrastingColor
+
+                document: document
             }
 
             Visualisations
@@ -1180,6 +1203,11 @@ Item
     function hideFind()
     {
         find.hide();
+    }
+
+    function showLayoutSettings()
+    {
+        layoutSettings.toggle();
     }
 
     MessageDialog

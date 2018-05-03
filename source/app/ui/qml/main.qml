@@ -250,7 +250,6 @@ ApplicationWindow
         id: misc
         section: "misc"
         property alias showGraphMetrics: toggleGraphMetricsAction.checked
-        property alias showLayoutSettings: toggleLayoutSettingsAction.checked
 
         property var fileOpenInitialFolder
         property string recentFiles
@@ -842,8 +841,15 @@ ApplicationWindow
     Action
     {
         id: toggleLayoutSettingsAction
-        text: qsTr("Show Layout Settings")
-        checkable: true
+        iconName: "applications-system"
+        text: qsTr("Settings...")
+        shortcut: "Ctrl+L"
+
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.showLayoutSettings();
+        }
     }
 
     Action
