@@ -72,6 +72,7 @@ class Document : public QObject, public IDocument
     Q_PROPERTY(bool commandIsCancelling READ commandIsCancelling NOTIFY commandIsCancellingChanged)
 
     Q_PROPERTY(QML_ENUM_PROPERTY(LayoutPauseState) layoutPauseState READ layoutPauseState NOTIFY layoutPauseStateChanged)
+    Q_PROPERTY(QString layoutDisplayName READ layoutDisplayName NOTIFY layoutDisplayNameChanged)
 
     Q_PROPERTY(bool canUndo READ canUndo NOTIFY canUndoChanged)
     Q_PROPERTY(QString nextUndoAction READ nextUndoAction NOTIFY nextUndoActionChanged)
@@ -132,6 +133,7 @@ public:
     bool commandIsCancelling() const;
 
     QString layoutName() const;
+    QString layoutDisplayName() const;
     std::vector<LayoutSetting>& layoutSettings() const;
     void updateLayoutState();
     LayoutPauseState layoutPauseState();
@@ -291,6 +293,7 @@ signals:
     void commandIsCancellingChanged();
 
     void layoutPauseStateChanged();
+    void layoutDisplayNameChanged();
 
     void commandCompleted();
     void canUndoChanged();

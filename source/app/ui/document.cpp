@@ -181,7 +181,18 @@ bool Document::commandIsCancelling() const
 
 QString Document::layoutName() const
 {
-    return _layoutThread->layoutName();
+    if(_layoutThread != nullptr)
+        return _layoutThread->layoutName();
+
+    return {};
+}
+
+QString Document::layoutDisplayName() const
+{
+    if(_layoutThread != nullptr)
+        return _layoutThread->layoutDisplayName();
+
+    return {};
 }
 
 std::vector<LayoutSetting>& Document::layoutSettings() const
@@ -660,6 +671,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     _layoutThread->addAllComponents();
     initialiseLayoutSettingsModel();
     updateLayoutState();
+    emit layoutDisplayNameChanged();
 
     _graphQuickItem->initialise(_graphModel.get(), &_commandManager, _selectionManager.get(), _gpuComputeThread.get());
 

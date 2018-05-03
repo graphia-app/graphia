@@ -73,6 +73,7 @@ public:
     }
 
     QString name() const override { return QStringLiteral("ForceDirected"); }
+    QString displayName() const override { return QObject::tr("Force Directed"); }
     std::unique_ptr<Layout> create(ComponentId componentId, NodePositions& nodePositions) const override;
 };
 

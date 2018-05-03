@@ -133,6 +133,7 @@ public:
     }
 
     virtual QString name() const = 0;
+    virtual QString displayName() const = 0;
     virtual std::unique_ptr<Layout> create(ComponentId componentId, NodePositions& results) const = 0;
 };
 
@@ -194,6 +195,7 @@ public:
     void setStartingNodePositions(const ExactNodePositions& nodePositions);
 
     QString layoutName() const;
+    QString layoutDisplayName() const;
 
     std::vector<LayoutSetting>& settings();
     const LayoutSetting* setting(const QString& name) const;

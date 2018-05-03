@@ -284,6 +284,11 @@ QString LayoutThread::layoutName() const
     return _layoutFactory->name();
 }
 
+QString LayoutThread::layoutDisplayName() const
+{
+    return _layoutFactory->displayName();
+}
+
 void LayoutThread::removeComponent(ComponentId componentId)
 {
     bool resumeAfterRemoval = false;
