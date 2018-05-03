@@ -87,32 +87,37 @@ Wizard
                     property int implicitWidth: label.implicitWidth + 16
                     clip: true
 
+                    property var isInDataFrame:
+                    {
+                        return styleData.column >= preParser.dataRect.x
+                        && styleData.column < preParser.dataRect.x + preParser.dataRect.width
+                        && styleData.row >= preParser.dataRect.y
+                        &&  styleData.row < preParser.dataRect.x + preParser.dataRect.height
+                    }
+
                     Rectangle
                     {
-                        //border.width: 0.5
-                        //border.color: sysPalette.mid
+                        Rectangle
+                        {
+                            anchors.right: parent.right
+                            height: parent.height
+                            width: 1
+                            color: isInDataFrame ? sysPalette.light : sysPalette.mid
+                        }
+
                         MouseArea
                         {
                             anchors.fill: parent
                             onClicked:
                             {
-                                preParser.autoDetectDataRectangle(styleData.column, styleData.row);
+                                 preParser.autoDetectDataRectangle(styleData.column, styleData.row);
                             }
                         }
 
                         width: parent.width
                         anchors.centerIn: parent
                         height: parent.height
-                        color:
-                        {
-                            if(styleData.column >= preParser.dataRect.x
-                                    && styleData.column < preParser.dataRect.x + preParser.dataRect.width
-                                    && styleData.row >= preParser.dataRect.y
-                                    &&  styleData.row < preParser.dataRect.x + preParser.dataRect.height)
-                                return "lightblue";
-                            else
-                                return "transparent"
-                        }
+                        color: isInDataFrame ? "lightblue" : "transparent"
 
                         Text
                         {
