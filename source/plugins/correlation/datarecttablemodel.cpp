@@ -31,7 +31,7 @@ QVariant DataRectTableModel::data(const QModelIndex &index, int role) const
 QHash<int, QByteArray> DataRectTableModel::roleNames() const
 {
     QHash<int, QByteArray> _roleNames;
-    for(int i = 0; i < _data.numColumns(); ++i)
+    for(int i = 0; i < static_cast<int>(_data.numColumns()); ++i)
         _roleNames.insert(Qt::UserRole + i, QByteArray::number(i));
 
     return _roleNames;

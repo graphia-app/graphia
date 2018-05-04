@@ -23,7 +23,7 @@ static QRect findLargestDataRect(const TabularData& tabularData, int startColumn
 
     for(size_t column = startColumn; column < tabularData.numColumns(); column++)
     {
-        for(size_t row = tabularData.numRows() - 1; row >= startRow; --row)
+        for(size_t row = tabularData.numRows() - 1; row >= static_cast<size_t>(startRow); --row)
         {
             auto& value = tabularData.valueAt(column, row);
             if(u::isNumeric(value) || value.empty())
