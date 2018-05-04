@@ -67,10 +67,10 @@ struct MCLRowData
         valid(columnCount, false), indices(columnCount, 0UL) {}
 };
 
-static void expandAndPruneRow(MatrixType &mclMatrix,
-                              size_t columnId,
-                              std::vector<SparseMatrixEntry>* matrixStorage,
-                              MCLRowData& rowData, float minValueCutoff)
+template<typename CancelledFn>
+static void expandAndPruneRow(MatrixType& mclMatrix, size_t columnId,
+    std::vector<SparseMatrixEntry>* matrixStorage, MCLRowData& rowData,
+    float minValueCutoff, const CancelledFn& cancelledFn)
 {
     const bool DEBUG = false;
 
@@ -80,15 +80,19 @@ static void expandAndPruneRow(MatrixType &mclMatrix,
 
     size_t nonzeros = 0;
 
-    size_t minIndex(std::numeric_limits<size_t>::infinity()), maxIndex(0UL);
-    MatrixType::ConstIterator lend=mclMatrix.cend(columnId);
+    size_t minIndex = std::numeric_limits<size_t>::infinity();
+    size_t maxIndex = 0UL;
+    const auto lend = mclMatrix.cend(columnId);
 
     // Perform multiply and populate prune dependant data structures
-    for(MatrixType::ConstIterator lelem=mclMatrix.cbegin(columnId); lelem!=lend; ++lelem)
+    for(auto lelem = mclMatrix.cbegin(columnId); lelem != lend; ++lelem)
     {
+        if(cancelledFn())
+            break;
+
         // For each column (left)
-        const MatrixType::ConstIterator rend(mclMatrix.cend(lelem->index()));
-        for(MatrixType::ConstIterator relem= mclMatrix.cbegin( lelem->index() ); relem!=rend; ++relem)
+        const auto rend = mclMatrix.cend(lelem->index());
+        for(auto relem = mclMatrix.cbegin(lelem->index()); relem != rend; ++relem)
         {
             // For each column starting at left column index (right)
             float mult = lelem->value() * relem->value();
@@ -101,15 +105,16 @@ static void expandAndPruneRow(MatrixType &mclMatrix,
                 rowData.indices[nonzeros] = relem->index();
                 ++nonzeros;
 
-                if( relem->index() < minIndex ) minIndex = relem->index();
-                if( relem->index() > maxIndex ) maxIndex = relem->index();
+                if(relem->index() < minIndex) minIndex = relem->index();
+                if(relem->index() > maxIndex) maxIndex = relem->index();
             }
             else
-            {
                 rowData.values[relem->index()] += mult;
-            }
         }
     }
+
+    if(cancelledFn())
+        return;
 
     if(nonzeros > 0UL)
     {
@@ -416,10 +421,14 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
         MCLRowData rowData(clusterMatrix.columns());
         // Pass by value rowData, this gives each THREAD a copy of rowData, rather re-allocating vectors per row (slow)
         concurrent_for(colIterator.begin(), colIterator.end(),
-                       [this, rowData, &clusterMatrix, &matrixStorage](const size_t iterator) mutable
+        [this, rowData, &clusterMatrix, &matrixStorage, cancelledFn = [this] { return cancelled(); }](const size_t iterator) mutable
         {
-            expandAndPruneRow(clusterMatrix, iterator, &matrixStorage[iterator], rowData, MCL_PRUNE_LIMIT);
+            expandAndPruneRow(clusterMatrix, iterator, &matrixStorage[iterator],
+                rowData, MCL_PRUNE_LIMIT, cancelledFn);
         }, true);
+
+        if(cancelled())
+            return;
 
         size_t newNNZCount = 0;
         for(const auto& column : matrixStorage)
