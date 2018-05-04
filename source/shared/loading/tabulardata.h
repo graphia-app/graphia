@@ -137,7 +137,7 @@ public:
         size_t rows = 0;
 
         // First pass to determine the size of the table
-        bool success = tokenise(url, {},
+        bool success = tokenise(url, [](int){},
         [&columns, &rows](size_t column, size_t row, auto)
         {
             columns = std::max(columns, column + 1);
@@ -149,7 +149,7 @@ public:
 
         _tabularData.initialise(columns, rows);
 
-        return tokenise(url, {},
+        return tokenise(url, [](int){},
         [this](size_t column, size_t row, auto&& token)
         {
             _tabularData.setValueAt(column, row, std::forward<decltype(token)>(token));
