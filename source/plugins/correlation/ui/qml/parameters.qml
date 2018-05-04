@@ -42,143 +42,6 @@ Wizard
 
     Item
     {
-        CorrelationPreParser
-        {
-            id: preParser
-            fileType: root.fileType
-            fileUrl: root.fileUrl
-            onDataRectChanged: {
-                parameters.dataFrame = dataRect;
-            }
-        }
-
-        ColumnLayout
-        {
-            anchors.fill: parent
-
-            Component
-            {
-                id: columnComponent
-                TableViewColumn { width: 200 }
-            }
-
-            TableView
-            {
-                id: dataRectView
-                headerVisible: false
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                model: preParser.model
-                selectionMode: SelectionMode.NoSelection
-                enabled: !preParser.isRunning
-
-                BusyIndicator
-                {
-                    id: busyIndicator
-                    anchors.centerIn: parent
-                    running: preParser.isRunning
-                }
-
-                SystemPalette
-                {
-                    id: sysPalette
-                }
-
-                itemDelegate: Item
-                {
-                    height: Math.max(16, label.implicitHeight)
-                    property int implicitWidth: label.implicitWidth + 16
-                    clip: true
-
-                    property var isInDataFrame:
-                    {
-                        return styleData.column >= preParser.dataRect.x
-                        && styleData.column < preParser.dataRect.x + preParser.dataRect.width
-                        && styleData.row >= preParser.dataRect.y
-                        &&  styleData.row < preParser.dataRect.x + preParser.dataRect.height
-                    }
-
-                    Rectangle
-                    {
-                        Rectangle
-                        {
-                            anchors.right: parent.right
-                            height: parent.height
-                            width: 1
-                            color: isInDataFrame ? sysPalette.light : sysPalette.mid
-                        }
-
-                        MouseArea
-                        {
-                            anchors.fill: parent
-                            onClicked:
-                            {
-                                 preParser.autoDetectDataRectangle(styleData.column, styleData.row);
-                            }
-                        }
-
-                        width: parent.width
-                        anchors.centerIn: parent
-                        height: parent.height
-                        color: isInDataFrame ? "lightblue" : "transparent"
-
-                        Text
-                        {
-                            id: label
-                            objectName: "label"
-                            width: parent.width
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.leftMargin: styleData.hasOwnProperty("depth") && styleData.column === 0 ? 0 :
-                                                horizontalAlignment === Text.AlignRight ? 1 : 8
-                            anchors.rightMargin: (styleData.hasOwnProperty("depth") && styleData.column === 0)
-                                                 || horizontalAlignment !== Text.AlignRight ? 1 : 8
-                            horizontalAlignment: styleData.textAlignment
-                            anchors.verticalCenter: parent.verticalCenter
-                            elide: styleData.elideMode
-
-                            text:
-                            {
-                                if(styleData.value === undefined)
-                                    return "";
-
-                                var column = dataRectView.getColumn(styleData.column);
-
-                                return styleData.value;
-                            }
-
-                            color: styleData.textColor
-                            renderType: Text.NativeRendering
-                        }
-                    }
-                }
-            }
-
-            Connections
-            {
-                target: preParser.model
-
-                onModelReset:
-                {
-                    for(var i = 0; i < preParser.model.columnCount(); i++)
-                    {
-                        dataRectView.addColumn(columnComponent.createObject(dataRectView,
-                            {"role": i}));
-                    }
-                    Qt.callLater(resizeColumnsToContentsBugWorkaround, dataRectView);
-                    Qt.callLater(scrollToCell, dataRectView, preParser.dataRect.x, preParser.dataRect.y);
-                }
-            }
-        }
-    }
-
-    onFileUrlChanged:
-    {
-        preParser.parse();
-    }
-
-    Item
-    {
         ColumnLayout
         {
             width: parent.width
@@ -614,6 +477,143 @@ Wizard
                 }
             }
         }
+    }
+
+    Item
+    {
+        CorrelationPreParser
+        {
+            id: preParser
+            fileType: root.fileType
+            fileUrl: root.fileUrl
+            onDataRectChanged: {
+                parameters.dataFrame = dataRect;
+            }
+        }
+
+        ColumnLayout
+        {
+            anchors.fill: parent
+
+            Component
+            {
+                id: columnComponent
+                TableViewColumn { width: 200 }
+            }
+
+            TableView
+            {
+                id: dataRectView
+                headerVisible: false
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                model: preParser.model
+                selectionMode: SelectionMode.NoSelection
+                enabled: !preParser.isRunning
+
+                BusyIndicator
+                {
+                    id: busyIndicator
+                    anchors.centerIn: parent
+                    running: preParser.isRunning
+                }
+
+                SystemPalette
+                {
+                    id: sysPalette
+                }
+
+                itemDelegate: Item
+                {
+                    height: Math.max(16, label.implicitHeight)
+                    property int implicitWidth: label.implicitWidth + 16
+                    clip: true
+
+                    property var isInDataFrame:
+                    {
+                        return styleData.column >= preParser.dataRect.x
+                        && styleData.column < preParser.dataRect.x + preParser.dataRect.width
+                        && styleData.row >= preParser.dataRect.y
+                        &&  styleData.row < preParser.dataRect.x + preParser.dataRect.height
+                    }
+
+                    Rectangle
+                    {
+                        Rectangle
+                        {
+                            anchors.right: parent.right
+                            height: parent.height
+                            width: 1
+                            color: isInDataFrame ? sysPalette.light : sysPalette.mid
+                        }
+
+                        MouseArea
+                        {
+                            anchors.fill: parent
+                            onClicked:
+                            {
+                                 preParser.autoDetectDataRectangle(styleData.column, styleData.row);
+                            }
+                        }
+
+                        width: parent.width
+                        anchors.centerIn: parent
+                        height: parent.height
+                        color: isInDataFrame ? "lightblue" : "transparent"
+
+                        Text
+                        {
+                            id: label
+                            objectName: "label"
+                            width: parent.width
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.leftMargin: styleData.hasOwnProperty("depth") && styleData.column === 0 ? 0 :
+                                                horizontalAlignment === Text.AlignRight ? 1 : 8
+                            anchors.rightMargin: (styleData.hasOwnProperty("depth") && styleData.column === 0)
+                                                 || horizontalAlignment !== Text.AlignRight ? 1 : 8
+                            horizontalAlignment: styleData.textAlignment
+                            anchors.verticalCenter: parent.verticalCenter
+                            elide: styleData.elideMode
+
+                            text:
+                            {
+                                if(styleData.value === undefined)
+                                    return "";
+
+                                var column = dataRectView.getColumn(styleData.column);
+
+                                return styleData.value;
+                            }
+
+                            color: styleData.textColor
+                            renderType: Text.NativeRendering
+                        }
+                    }
+                }
+            }
+
+            Connections
+            {
+                target: preParser.model
+
+                onModelReset:
+                {
+                    for(var i = 0; i < preParser.model.columnCount(); i++)
+                    {
+                        dataRectView.addColumn(columnComponent.createObject(dataRectView,
+                            {"role": i}));
+                    }
+                    Qt.callLater(resizeColumnsToContentsBugWorkaround, dataRectView);
+                    Qt.callLater(scrollToCell, dataRectView, preParser.dataRect.x, preParser.dataRect.y);
+                }
+            }
+        }
+    }
+
+    onFileUrlChanged:
+    {
+        preParser.parse();
     }
 
     Component.onCompleted: initialise();
