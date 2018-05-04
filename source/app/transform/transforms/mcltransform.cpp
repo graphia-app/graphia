@@ -419,13 +419,22 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
 
         // To reduce vector allocations for every row we do some magic with rowData
         MCLRowData rowData(clusterMatrix.columns());
+
+        std::atomic<uint64_t> iteration(0);
+        const auto totalIterations = clusterMatrix.columns();
+        target.setProgress(0);
+
         // Pass by value rowData, this gives each THREAD a copy of rowData, rather re-allocating vectors per row (slow)
         concurrent_for(colIterator.begin(), colIterator.end(),
-        [this, rowData, &clusterMatrix, &matrixStorage, cancelledFn = [this] { return cancelled(); }](const size_t iterator) mutable
+        [&, rowData, cancelledFn = [this] { return cancelled(); }](const size_t iterator) mutable
         {
             expandAndPruneRow(clusterMatrix, iterator, &matrixStorage[iterator],
                 rowData, MCL_PRUNE_LIMIT, cancelledFn);
+
+            target.setProgress((iteration++ * 100) / totalIterations);
         }, true);
+
+        target.setProgress(-1);
 
         if(cancelled())
             return;
