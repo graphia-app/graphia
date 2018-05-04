@@ -13,7 +13,7 @@
 #include <utility>
 
 CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, QString urlTypeName,
-                                             QRect* dataRect) :
+                                             QRect dataRect) :
     _plugin(plugin), _urlTypeName(std::move(urlTypeName)), _dataRect(dataRect)
 {}
 
@@ -116,16 +116,16 @@ bool CorrelationFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
     progressFn(-1);
 
     // May be set by parameters
-    if(_dataRect == nullptr)
-        _dataRect = &findLargestDataRect(*tabularData);
+    if(_dataRect.isEmpty())
+        _dataRect = findLargestDataRect(*tabularData);
 
-    if(_dataRect->isEmpty() || cancelled())
+    if(_dataRect.isEmpty() || cancelled())
         return false;
 
-    _plugin->setDimensions(_dataRect->width(), _dataRect->height());
+    _plugin->setDimensions(_dataRect.width(), _dataRect.height());
 
     graphModel.mutableGraph().setPhase(QObject::tr("Attributes"));
-    if(!_plugin->loadUserData(*tabularData, _dataRect->left(), _dataRect->top(), *this, progressFn))
+    if(!_plugin->loadUserData(*tabularData, _dataRect.left(), _dataRect.top(), *this, progressFn))
         return false;
 
     if(_plugin->requiresNormalisation())

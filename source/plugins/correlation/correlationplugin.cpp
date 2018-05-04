@@ -447,7 +447,7 @@ void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager*)
 std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
 {
     if(urlTypeName == QLatin1String("CorrelationCSV") || urlTypeName == QLatin1String("CorrelationTSV"))
-        return std::make_unique<CorrelationFileParser>(this, urlTypeName, &_dataRect);
+        return std::make_unique<CorrelationFileParser>(this, urlTypeName, _dataRect);
 
     return nullptr;
 }
