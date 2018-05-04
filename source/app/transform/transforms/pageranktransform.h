@@ -35,9 +35,9 @@ public:
 
     QString description() const override
     {
-        return R"(Calculates a <a href="https://en.wikipedia.org/wiki/PageRank">PageRank</a> )"
+        return QObject::tr(R"(Calculates a <a href="https://en.wikipedia.org/wiki/PageRank">PageRank</a> )"
             "centrality measurement for each node. This can be viewed as "
-            "measure of a node's relative importance in the graph.";
+            "measure of a node's relative importance in the graph.");
     }
     ElementType elementType() const override { return ElementType::None; }
     GraphTransformParameters parameters() const override

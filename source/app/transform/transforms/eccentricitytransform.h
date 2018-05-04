@@ -25,7 +25,7 @@ public:
     QString description() const override
     {
         return QObject::tr(
-            R"-(<a href="https://en.wikipedia.org/wiki/Eccentricity_(graph_theory)">Eccentricity</a> )-" //
+            R"-(<a href="https://en.wikipedia.org/wiki/Eccentricity_(graph_theory)">Eccentricity</a> )-"
             "calculates the shortest path between every node and assigns the longest path length found for that node. "
             "This is a measure of a node's position within the overall graph structure.");
     }
