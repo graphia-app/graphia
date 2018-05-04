@@ -276,6 +276,30 @@ void GraphRenderer::updateGPUDataIfRequired()
             const QVector3D& targetPosition = scaledAndSmoothedNodePositions[edge->targetId()];
 
             auto& edgeVisual = _graphModel->edgeVisual(edge->id());
+            auto& sourceNodeVisual = _graphModel->nodeVisual(edge->sourceId());
+            auto& targetNodeVisual = _graphModel->nodeVisual(edge->targetId());
+
+            auto nodeRadiusSumSq = sourceNodeVisual._size + targetNodeVisual._size;
+            nodeRadiusSumSq *= nodeRadiusSumSq;
+            const auto edgeLengthSq = (targetPosition - sourcePosition).lengthSquared();
+
+            if(edgeLengthSq < nodeRadiusSumSq)
+            {
+                // The edge's nodes are intersecting. Their overlap defines a lens of a
+                // certain radius. If this is greater than the edge radius, the edge is
+                // entirely enclosed within the nodes and we can safely skip rendering
+                // it altogether since it is entirely occluded.
+
+                const auto sourceRadiusSq = sourceNodeVisual._size * sourceNodeVisual._size;
+                const auto targetRadiusSq = targetNodeVisual._size * targetNodeVisual._size;
+                const auto term = edgeLengthSq + sourceRadiusSq - targetRadiusSq;
+                const auto intersectionLensRadiusSq = (edgeLengthSq * edgeLengthSq * sourceRadiusSq) -
+                    ((edgeLengthSq * term * term) / 4.0f);
+                const auto edgeRadiusSq = edgeVisual._size * edgeVisual._size;
+
+                if(edgeRadiusSq < intersectionLensRadiusSq)
+                    continue;
+            }
 
             GPUGraphData::EdgeData edgeData;
             edgeData._sourcePosition[0] = sourcePosition.x();
@@ -295,7 +319,6 @@ void GraphRenderer::updateGPUDataIfRequired()
             edgeData._innerColor[0] = edgeVisual._innerColor.redF();
             edgeData._innerColor[1] = edgeVisual._innerColor.greenF();
             edgeData._innerColor[2] = edgeVisual._innerColor.blueF();
-
 
             edgeData._outlineColor[0] = 0.0f;
             edgeData._outlineColor[1] = 0.0f;
