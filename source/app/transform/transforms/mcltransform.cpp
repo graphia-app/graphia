@@ -431,7 +431,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
             expandAndPruneRow(clusterMatrix, iterator, &matrixStorage[iterator],
                 rowData, MCL_PRUNE_LIMIT, cancelledFn);
 
-            target.setProgress((iteration++ * 100) / totalIterations);
+            target.setProgress(static_cast<int>((iteration++ * 100) / totalIterations));
         }, true);
 
         target.setProgress(-1);
