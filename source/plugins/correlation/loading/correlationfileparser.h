@@ -29,8 +29,8 @@ private:
     Q_PROPERTY(QString fileType MEMBER _fileType NOTIFY fileTypeChanged)
     Q_PROPERTY(QString fileUrl MEMBER _fileUrl NOTIFY fileUrlChanged)
     Q_PROPERTY(QRect dataRect MEMBER _dataRect NOTIFY dataRectChanged)
-    Q_PROPERTY(int columnCount READ columnCount NOTIFY dataRectChanged)
-    Q_PROPERTY(int rowCount READ rowCount NOTIFY dataRectChanged)
+    Q_PROPERTY(size_t columnCount READ columnCount NOTIFY dataRectChanged)
+    Q_PROPERTY(size_t rowCount READ rowCount NOTIFY dataRectChanged)
     Q_PROPERTY(QAbstractTableModel* model READ tableModel NOTIFY dataRectChanged)
     Q_PROPERTY(bool isRunning READ isRunning NOTIFY isRunningChanged)
 
@@ -43,8 +43,8 @@ private:
     TabularData* _data = nullptr;
     DataRectTableModel _model;
 
-    int rowCount();
-    int columnCount();
+    size_t rowCount();
+    size_t columnCount();
 
 public:
     CorrelationPreParser();

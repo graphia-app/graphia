@@ -135,10 +135,9 @@ public:
     {
         size_t columns = 0;
         size_t rows = 0;
-        auto progressFn = [](int progress){};
 
         // First pass to determine the size of the table
-        bool success = tokenise(url, progressFn,
+        bool success = tokenise(url, {},
         [&columns, &rows](size_t column, size_t row, auto)
         {
             columns = std::max(columns, column + 1);
@@ -150,7 +149,7 @@ public:
 
         _tabularData.initialise(columns, rows);
 
-        return tokenise(url, progressFn,
+        return tokenise(url, {},
         [this](size_t column, size_t row, auto&& token)
         {
             _tabularData.setValueAt(column, row, std::forward<decltype(token)>(token));

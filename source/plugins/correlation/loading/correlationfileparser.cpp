@@ -156,12 +156,12 @@ bool CorrelationFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
     return true;
 }
 
-int CorrelationPreParser::rowCount()
+size_t CorrelationPreParser::rowCount()
 {
     return _data != nullptr ? _data->numRows() : 0;
 }
 
-int CorrelationPreParser::columnCount()
+size_t CorrelationPreParser::columnCount()
 {
     return _data != nullptr ? _data->numColumns() : 0;
 }
@@ -178,19 +178,19 @@ bool CorrelationPreParser::parse()
     QFuture<void> future = QtConcurrent::run([this]()
     {
         if(_fileType.isEmpty() || _fileUrl.isEmpty())
-            return false;
+            return;
 
         if(_fileType == QLatin1String("CorrelationCSV"))
         {
             if(!_csvFileParser.preParse(_fileUrl))
-                return false;
+                return;
 
             _data = &(_csvFileParser.tabularData());
         }
         else if(_fileType == QLatin1String("CorrelationTSV"))
         {
             if(!_tsvFileParser.preParse(_fileUrl))
-                return false;
+                return;
 
             _data = &(_tsvFileParser.tabularData());
         }

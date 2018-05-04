@@ -7,13 +7,13 @@ DataRectTableModel::DataRectTableModel()
 int DataRectTableModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return _data.numRows();
+    return static_cast<int>(_data.numRows());
 }
 
 int DataRectTableModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return _data.numColumns();
+    return static_cast<int>(_data.numColumns());
 }
 
 QVariant DataRectTableModel::data(const QModelIndex &index, int role) const
