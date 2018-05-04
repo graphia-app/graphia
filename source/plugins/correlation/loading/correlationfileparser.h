@@ -15,10 +15,10 @@ class CorrelationFileParser : public IParser
 private:
     CorrelationPluginInstance* _plugin;
     QString _urlTypeName;
+    QRect* _dataRect = nullptr;
 
 public:
-    explicit CorrelationFileParser(CorrelationPluginInstance* plugin, QString urlTypeName);
-
+    explicit CorrelationFileParser(CorrelationPluginInstance* plugin, QString urlTypeName, QRect* dataRect = nullptr);
     bool parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& progressFn) override;
 };
 

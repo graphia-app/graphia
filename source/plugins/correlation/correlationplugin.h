@@ -21,6 +21,7 @@
 #include <QStringList>
 #include <QVector>
 #include <QColor>
+#include <QRect>
 
 DEFINE_QML_ENUM(Q_GADGET, ScalingType,
                 None,
@@ -158,6 +159,7 @@ private:
     std::unique_ptr<EdgeArray<double>> _pearsonValues;
     double _minimumCorrelationValue = 0.7;
     bool _transpose = false;
+    QRect _dataRect;
     ScalingType _scaling = ScalingType::None;
     NormaliseType _normalisation = NormaliseType::None;
     MissingDataType _missingDataType = MissingDataType::None;
@@ -206,7 +208,7 @@ public:
                      const ProgressFn& progressFn);
 
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) override;
-    void applyParameter(const QString& name, const QString& value) override;
+    void applyParameter(const QString& name, const QVariant& value) override;
     QStringList defaultTransforms() const override;
 
     QByteArray save(IMutableGraph& graph, const ProgressFn& progressFn) const override;

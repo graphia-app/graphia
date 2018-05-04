@@ -447,12 +447,12 @@ void CorrelationPluginInstance::onSelectionChanged(const ISelectionManager*)
 std::unique_ptr<IParser> CorrelationPluginInstance::parserForUrlTypeName(const QString& urlTypeName)
 {
     if(urlTypeName == QLatin1String("CorrelationCSV") || urlTypeName == QLatin1String("CorrelationTSV"))
-        return std::make_unique<CorrelationFileParser>(this, urlTypeName);
+        return std::make_unique<CorrelationFileParser>(this, urlTypeName, &_dataRect);
 
     return nullptr;
 }
 
-void CorrelationPluginInstance::applyParameter(const QString& name, const QString& value)
+void CorrelationPluginInstance::applyParameter(const QString& name, const QVariant& value)
 {
     if(name == QLatin1String("minimumCorrelation"))
         _minimumCorrelationValue = value.toDouble();
@@ -466,6 +466,8 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QStrin
         _missingDataType = static_cast<MissingDataType>(value.toInt());
     else if(name == QLatin1String("missingDataValue"))
         _missingDataReplacementValue = value.toDouble();
+    else if(name == QLatin1String("dataFrame"))
+        _dataRect = value.toRect();
 }
 
 QStringList CorrelationPluginInstance::defaultTransforms() const

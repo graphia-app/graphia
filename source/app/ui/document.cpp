@@ -466,7 +466,7 @@ bool Document::openFile(const QUrl& fileUrl, const QString& fileType, QString pl
 
     const auto keys = parameters.keys();
     for(const auto& name : keys)
-        _pluginInstance->applyParameter(name, parameters.value(name).toString());
+        _pluginInstance->applyParameter(name, parameters.value(name));
 
     _pluginInstance->initialise(plugin, this, _graphFileParserThread.get());
 

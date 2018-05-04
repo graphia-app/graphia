@@ -12,8 +12,9 @@
 #include <stack>
 #include <utility>
 
-CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, QString urlTypeName) :
-    _plugin(plugin), _urlTypeName(std::move(urlTypeName))
+CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, QString urlTypeName,
+                                             QRect* dataRect) :
+    _plugin(plugin), _urlTypeName(std::move(urlTypeName)), _dataRect(dataRect)
 {}
 
 static QRect findLargestDataRect(const TabularData& tabularData, int startColumn = 0, int startRow = 0)
@@ -113,15 +114,18 @@ bool CorrelationFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
 
     graphModel.mutableGraph().setPhase(QObject::tr("Finding Data Points"));
     progressFn(-1);
-    auto dataRect = findLargestDataRect(*tabularData);
 
-    if(dataRect.isEmpty() || cancelled())
+    // May be set by parameters
+    if(_dataRect == nullptr)
+        _dataRect = &findLargestDataRect(*tabularData);
+
+    if(_dataRect->isEmpty() || cancelled())
         return false;
 
-    _plugin->setDimensions(dataRect.width(), dataRect.height());
+    _plugin->setDimensions(_dataRect->width(), _dataRect->height());
 
     graphModel.mutableGraph().setPhase(QObject::tr("Attributes"));
-    if(!_plugin->loadUserData(*tabularData, dataRect.left(), dataRect.top(), *this, progressFn))
+    if(!_plugin->loadUserData(*tabularData, _dataRect->left(), _dataRect->top(), *this, progressFn))
         return false;
 
     if(_plugin->requiresNormalisation())

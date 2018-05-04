@@ -80,7 +80,7 @@ public:
     }
 
     // Ignore all settings, by default
-    void applyParameter(const QString&, const QString&) override {}
+    void applyParameter(const QString&, const QVariant&) override {}
 
     QStringList defaultTransforms() const override { return {}; }
     QStringList defaultVisualisations() const override { return {}; }

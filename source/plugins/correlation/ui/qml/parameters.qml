@@ -47,6 +47,9 @@ Wizard
             id: preParser
             fileType: root.fileType
             fileUrl: root.fileUrl
+            onDataRectChanged: {
+                parameters.dataFrame = dataRect;
+            }
         }
 
         ColumnLayout
