@@ -610,6 +610,7 @@ CorrelationPlugin::CorrelationPlugin()
     registerUrlType(QStringLiteral("CorrelationTSV"), QObject::tr("Correlation TSV File"), QObject::tr("Correlation TSV Files"), {"tsv"});
     qmlRegisterType<CorrelationPlotItem>("com.kajeka", 1, 0, "CorrelationPlot");
     qmlRegisterType<CorrelationPreParser>("com.kajeka", 1, 0, "CorrelationPreParser");
+    qmlRegisterType<DataRectTableModel>("com.kajeka", 1, 0, "DataRectTableModel");
 }
 
 QStringList CorrelationPlugin::identifyUrl(const QUrl& url) const

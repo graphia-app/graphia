@@ -686,7 +686,14 @@ Wizard
 
     onFileUrlChanged:
     {
-        preParser.parse();
+        if(fileUrl !== "" && fileType != "")
+            preParser.parse();
+    }
+
+    onFileTypeChanged:
+    {
+        if(fileUrl !== "" && fileType != "")
+            preParser.parse();
     }
 
     Component.onCompleted: initialise();

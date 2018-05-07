@@ -35,6 +35,7 @@ private:
     Q_PROPERTY(bool isRunning READ isRunning NOTIFY isRunningChanged)
 
     QFutureWatcher<void> _autoDetectDataRectangleWatcher;
+    QFutureWatcher<void> _dataParserWatcher;
     CsvFileParser _csvFileParser;
     TsvFileParser _tsvFileParser;
     QString _fileType;
@@ -53,13 +54,15 @@ public:
     Q_INVOKABLE void autoDetectDataRectangle(int column=0, int row=0);
 
     DataRectTableModel* tableModel();
-    bool isRunning() { return _autoDetectDataRectangleWatcher.isRunning(); }
+    bool isRunning() { return _autoDetectDataRectangleWatcher.isRunning() || _dataParserWatcher.isRunning(); }
 
 signals:
     void dataRectChanged();
     void isRunningChanged();
     void fileUrlChanged();
     void fileTypeChanged();
+public slots:
+    void onDataParsed();
 };
 
 #endif // CORRELATIONFILEPARSER_H

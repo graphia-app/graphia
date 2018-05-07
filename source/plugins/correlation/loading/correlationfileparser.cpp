@@ -171,6 +171,9 @@ CorrelationPreParser::CorrelationPreParser()
     connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::dataRectChanged);
     connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::started, this, &CorrelationPreParser::isRunningChanged);
     connect(&_autoDetectDataRectangleWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::isRunningChanged);
+    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::isRunningChanged);
+    connect(&_dataParserWatcher, &QFutureWatcher<void>::started, this, &CorrelationPreParser::isRunningChanged);
+    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::onDataParsed);
 }
 
 bool CorrelationPreParser::parse()
@@ -196,10 +199,8 @@ bool CorrelationPreParser::parse()
         }
 
         _dataRect = findLargestDataRect(*_data);
-
-        _model.setTabularData(*_data);
     });
-    _autoDetectDataRectangleWatcher.setFuture(future);
+    _dataParserWatcher.setFuture(future);
     return true;
 }
 
@@ -215,6 +216,12 @@ void CorrelationPreParser::autoDetectDataRectangle(int column, int row)
 QString CorrelationPreParser::dataAt(int column, int row)
 {
     return QString::fromStdString(_data->valueAt(column, row));
+}
+
+void CorrelationPreParser::onDataParsed()
+{
+    if(_data != nullptr)
+        _model.setTabularData(*_data);
 }
 
 DataRectTableModel* CorrelationPreParser::tableModel()
