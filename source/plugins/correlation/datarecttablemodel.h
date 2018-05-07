@@ -8,14 +8,15 @@
 
 class DataRectTableModel : public QAbstractTableModel
 {
+    Q_OBJECT
 private:
     TabularData _data;
 public:
-    DataRectTableModel();
+    DataRectTableModel() = default;
 
-    int rowCount(const QModelIndex &parent) const;
-    int columnCount(const QModelIndex &parent) const;
-    QVariant data(const QModelIndex &index, int role) const;
+    int rowCount(const QModelIndex &parent) const override;
+    int columnCount(const QModelIndex &parent) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
     QHash<int, QByteArray> roleNames() const;
     void setTabularData(TabularData data);
     TabularData* tabularData();

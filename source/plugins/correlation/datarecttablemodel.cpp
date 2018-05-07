@@ -1,9 +1,5 @@
 #include "datarecttablemodel.h"
 
-DataRectTableModel::DataRectTableModel()
-{
-}
-
 int DataRectTableModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
@@ -40,7 +36,7 @@ QHash<int, QByteArray> DataRectTableModel::roleNames() const
 void DataRectTableModel::setTabularData(TabularData data)
 {
     beginResetModel();
-    _data = data;
+    _data = std::move(data);
     endResetModel();
 }
 
