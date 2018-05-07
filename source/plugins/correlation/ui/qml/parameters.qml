@@ -13,6 +13,8 @@ Wizard
     //FIXME These should be set automatically by Wizard
     minimumWidth: 640
     minimumHeight: 400
+    property int selectedRow: -1;
+    property int selectedCol: -1;
 
     // Work around for QTBUG-58594
     function resizeColumnsToContentsBugWorkaround(tableView)
@@ -29,6 +31,14 @@ Wizard
                     col.width = header.implicitWidth;
             }
         }
+    }
+
+    function isInsideRect(x,y, rect)
+    {
+        return  x >= rect.x &&
+                x < rect.x + rect.width &&
+                y >= rect.y &&
+                y < rect.x + rect.height;
     }
 
     function scrollToCell(tableView, x, y)
@@ -488,6 +498,11 @@ Wizard
             fileUrl: root.fileUrl
             onDataRectChanged: {
                 parameters.dataFrame = dataRect;
+                if(!isInsideRect(selectedCol, selectedRow, dataRect) &&
+                        selectedCol >= 0 && selectedRow >= 0)
+                {
+                    tooltipNonNumerical.visible = true;
+                }
             }
         }
 
@@ -501,6 +516,29 @@ Wizard
                 TableViewColumn { width: 200 }
             }
 
+            Text
+            {
+                text: qsTr("<h2>Adjust Numerical Data Frame</h2>")
+                Layout.alignment: Qt.AlignLeft
+                textFormat: Text.StyledText
+            }
+
+            Text
+            {
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                text: qsTr("A contiguious numerical dataframe will automatically be selected from your dataset." +
+                           " If you would like to adjust the dataframe, select the new starting cell below.")
+            }
+
+            Text
+            {
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                text: qsTr("<b>Note:</b> Dataframes will always end at the last cell of the input")
+            }
+
+
             TableView
             {
                 id: dataRectView
@@ -510,6 +548,40 @@ Wizard
                 model: preParser.model
                 selectionMode: SelectionMode.NoSelection
                 enabled: !preParser.isRunning
+
+                Rectangle
+                {
+                    id: tooltipNonNumerical
+                    color: sysPalette.light
+                    border.color: sysPalette.mid
+                    border.width: 1
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 25
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    implicitWidth: messageText.width + 5
+                    implicitHeight: messageText.height + 5
+                    onVisibleChanged:
+                    {
+                        if(visible)
+                            nonNumericalTimer.start();
+                    }
+                    visible: false
+
+                    Timer
+                    {
+                        id: nonNumericalTimer
+                        interval: 5000;
+                        onTriggered: { tooltipNonNumerical.visible = false }
+                    }
+
+                    Text
+                    {
+                        anchors.centerIn: parent
+                        id: messageText
+                        text: "This frame would contain non-numerical data. " +
+                              "Next availaible numerical column selected (" + preParser.dataRect.x + ")";
+                    }
+                }
 
                 BusyIndicator
                 {
@@ -531,10 +603,7 @@ Wizard
 
                     property var isInDataFrame:
                     {
-                        return styleData.column >= preParser.dataRect.x
-                        && styleData.column < preParser.dataRect.x + preParser.dataRect.width
-                        && styleData.row >= preParser.dataRect.y
-                        &&  styleData.row < preParser.dataRect.x + preParser.dataRect.height
+                        return isInsideRect(styleData.column, styleData.row, preParser.dataRect);
                     }
 
                     Rectangle
@@ -552,7 +621,11 @@ Wizard
                             anchors.fill: parent
                             onClicked:
                             {
-                                 preParser.autoDetectDataRectangle(styleData.column, styleData.row);
+                                tooltipNonNumerical.visible = false;
+                                nonNumericalTimer.stop();
+                                selectedCol = styleData.column
+                                selectedRow = styleData.row
+                                preParser.autoDetectDataRectangle(styleData.column, styleData.row);
                             }
                         }
 
