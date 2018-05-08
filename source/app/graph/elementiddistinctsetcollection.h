@@ -57,11 +57,13 @@ private:
 
     const ListNode& listNodeFor(T elementId) const
     {
+        assert(!elementId.isNull());
         return _list.at(static_cast<int>(elementId));
     }
 
     ListNode& listNodeFor(T elementId)
     {
+        assert(!elementId.isNull());
         return _list.at(static_cast<int>(elementId));
     }
 
@@ -259,8 +261,6 @@ public:
         }
         else
         {
-            assert(listNodeFor(setId).isHead(setId));
-
             // Removing from the middle
             assert(!listNode._prev.isNull());
             assert(!listNode._next.isNull());
