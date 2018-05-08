@@ -19,7 +19,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
 
     target.setPhase(QObject::tr("Filtering"));
 
-    auto attributeNames = config().attributeNames();
+    auto attributeNames = config().referencedAttributeNames();
 
     if(hasUnknownAttributes(attributeNames, u::toQStringVector(_graphModel->availableAttributes())))
         return false;

@@ -77,7 +77,7 @@ struct GraphTransformConfig
     QVariantMap conditionAsVariantMap() const;
     QVariantMap asVariantMap() const;
 
-    std::vector<QString> attributeNames() const;
+    std::vector<QString> referencedAttributeNames() const;
 
     bool operator==(const GraphTransformConfig& other) const;
     bool operator!=(const GraphTransformConfig& other) const;

@@ -37,7 +37,7 @@ void TransformCache::add(TransformCache::Result&& result)
 
     // If this result references attributes that were created in the last result set,
     // then move all said attribute creating results to their own set
-    const auto& referencedAttributeNames = result._config.attributeNames();
+    const auto& referencedAttributeNames = result._config.referencedAttributeNames();
     TransformCache::ResultSet attributeCreatingResultSet;
     for(auto& cachedResult : *resultSet)
     {
@@ -80,7 +80,7 @@ void TransformCache::attributeAdded(const QString& attributeName)
         for(; resultIt != resultEnd; ++resultIt)
         {
             // Depends on attributeName
-            if(u::contains(resultIt->_config.attributeNames(), attributeName))
+            if(u::contains(resultIt->_config.referencedAttributeNames(), attributeName))
             {
                 resultSetIt->erase(resultIt, resultEnd);
                 break;

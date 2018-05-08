@@ -171,7 +171,7 @@ QVariantMap GraphTransformConfig::asVariantMap() const
     return map;
 }
 
-std::vector<QString> GraphTransformConfig::attributeNames() const
+std::vector<QString> GraphTransformConfig::referencedAttributeNames() const
 {
     std::vector<QString> names;
 
