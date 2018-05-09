@@ -263,7 +263,7 @@ static void expandAndPruneRow(MatrixType& mclMatrix, size_t columnId,
 
 bool MCLTransform::apply(TransformedGraph& target) const
 {
-    double granularity = boost::get<double>(
+    auto granularity = boost::get<double>(
                 config().parameterByName(QStringLiteral("Granularity"))->_value);
 
     if(_debugIteration)
@@ -283,21 +283,25 @@ template<class MatrixType>
 class ColumnsIterator
 {
 public:
-    class iterator: public std::iterator<
-            std::input_iterator_tag,
-            size_t,
-            size_t,
-            const size_t*,
-            size_t
-            >{
+    class iterator
+    {
+    public:
+        using value_type = size_t;
+        using reference = value_type&;
+        using pointer = value_type*;
+        using iterator_category = std::input_iterator_tag;
+        using difference_type = size_t;
+
+    private:
         size_t _num = 0;
+
     public:
         explicit iterator(size_t num = 0) : _num(num) {}
         iterator& operator++() { _num = _num + 1; return *this; }
         iterator operator++(int) { iterator retval = *this; ++(*this); return retval; }
         bool operator==(iterator other) const { return _num == other._num; }
         bool operator!=(iterator other) const { return !(*this == other); }
-        reference operator*() const { return _num; }
+        value_type operator*() const { return _num; }
     };
     MatrixType& matrix;
     explicit ColumnsIterator(MatrixType& _matrix) : matrix(_matrix) {}
