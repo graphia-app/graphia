@@ -17,13 +17,13 @@ CorrelationFileParser::CorrelationFileParser(CorrelationPluginInstance* plugin, 
     _plugin(plugin), _urlTypeName(std::move(urlTypeName)), _dataRect(dataRect)
 {}
 
-static QRect findLargestDataRect(const TabularData& tabularData, int startColumn = 0, int startRow = 0)
+static QRect findLargestDataRect(const TabularData& tabularData, size_t startColumn = 0, size_t startRow = 0)
 {
     std::vector<int> heightHistogram(tabularData.numColumns());
 
     for(size_t column = startColumn; column < tabularData.numColumns(); column++)
     {
-        for(size_t row = tabularData.numRows() - 1; row >= static_cast<size_t>(startRow); --row)
+        for(size_t row = tabularData.numRows(); row-- > startRow; )
         {
             auto& value = tabularData.valueAt(column, row);
             if(u::isNumeric(value) || value.empty())
@@ -204,7 +204,7 @@ bool CorrelationPreParser::parse()
     return true;
 }
 
-void CorrelationPreParser::autoDetectDataRectangle(int column, int row)
+void CorrelationPreParser::autoDetectDataRectangle(size_t column, size_t row)
 {
     QFuture<void> future = QtConcurrent::run([this, column, row]()
     {

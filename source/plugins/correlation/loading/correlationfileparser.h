@@ -51,7 +51,7 @@ public:
     CorrelationPreParser();
     Q_INVOKABLE bool parse();
     Q_INVOKABLE QString dataAt(int column, int row);
-    Q_INVOKABLE void autoDetectDataRectangle(int column=0, int row=0);
+    Q_INVOKABLE void autoDetectDataRectangle(size_t column=0, size_t row=0);
 
     DataRectTableModel* tableModel();
     bool isRunning() { return _autoDetectDataRectangleWatcher.isRunning() || _dataParserWatcher.isRunning(); }
