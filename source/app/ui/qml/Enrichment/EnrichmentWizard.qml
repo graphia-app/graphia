@@ -70,7 +70,7 @@ Wizard
 
                 Image
                 {
-                    anchors.top: parent.top
+                    Layout.alignment: Qt.AlignTop
                     Layout.minimumWidth: 100
                     Layout.minimumHeight: 100
                     fillMode: Image.PreserveAspectFit

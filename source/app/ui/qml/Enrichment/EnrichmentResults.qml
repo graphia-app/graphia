@@ -8,7 +8,7 @@ import com.kajeka 1.0
 
 import Qt.labs.platform 1.0 as Labs
 
-Window
+ApplicationWindow
 {
     property var models
     property var currentHeatmap
@@ -31,49 +31,55 @@ Window
         }
     }
 
+    toolBar: ToolBar
+    {
+        RowLayout
+        {
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+
+            ToolButton
+            {
+                id: showOnlyEnrichedButton
+                iconName: "utilities-system-monitor"
+                checkable: true
+                tooltip: qsTr("Show only over-represented")
+            }
+            ToolButton
+            {
+                id: showHeatmapButton
+                iconName: "x-office-spreadsheet"
+                checkable: true
+                tooltip: qsTr("Show Heatmap")
+            }
+            ToolButton
+            {
+                iconName: "edit-delete"
+                onClicked: confirmDelete.open();
+                tooltip: qsTr("Delete result table")
+            }
+            ToolButton
+            {
+                id: addEnrichment
+                iconName: "list-add"
+                tooltip: qsTr("New Enrichment")
+                onClicked: wizard.show()
+            }
+        }
+    }
+
     ColumnLayout
     {
         anchors.fill: parent
-        ToolBar
-        {
-            anchors.fill: parent
-            RowLayout
-            {
-                ToolButton
-                {
-                    id: showOnlyEnrichedButton
-                    iconName: "utilities-system-monitor"
-                    checkable: true
-                    tooltip: qsTr("Show only over-represented")
-                }
-                ToolButton
-                {
-                    id: showHeatmapButton
-                    iconName: "x-office-spreadsheet"
-                    checkable: true
-                    tooltip: qsTr("Show Heatmap")
-                }
-                ToolButton
-                {
-                    iconName: "edit-delete"
-                    onClicked: confirmDelete.open();
-                    tooltip: qsTr("Delete result table")
-                }
-                ToolButton
-                {
-                    id: addEnrichment
-                    iconName: "list-add"
-                    tooltip: qsTr("New Enrichment")
-                    onClicked: wizard.show()
-                }
-            }
-        }
+
         Text
         {
-            anchors.centerIn: parent
+            Layout.alignment: Qt.AlignCenter
             text: qsTr("No Results")
             visible: tabView.count === 0
         }
+
         TabView
         {
             id: tabView

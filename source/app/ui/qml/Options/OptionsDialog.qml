@@ -45,7 +45,7 @@ Window
         Button
         {
             text: qsTr("Close")
-            anchors.right: column.right
+            Layout.alignment: Qt.AlignRight
             onClicked: optionsWindow.close()
         }
     }

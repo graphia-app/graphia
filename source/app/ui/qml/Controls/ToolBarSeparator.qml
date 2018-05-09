@@ -1,11 +1,11 @@
 import QtQuick 2.7
+import QtQuick.Layouts 1.3
 
 Item
 {
     width: 8
-    anchors.top: parent.top
-    anchors.bottom: parent.bottom
-    anchors.margins: 6
+    height: 16
+    Layout.margins: 6
 
     Rectangle
     {

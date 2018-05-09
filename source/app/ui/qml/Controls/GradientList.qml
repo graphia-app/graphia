@@ -110,6 +110,7 @@ Window
             Layout.fillHeight: true
             id: scrollView
 
+            frameVisible: true
             horizontalScrollBarPolicy: Qt.ScrollBarAlwaysOff
             contentItem: Column
             {
@@ -173,7 +174,7 @@ Window
         RowLayout
         {
             Layout.alignment: Qt.AlignRight
-            anchors.right: parent.right
+
             Text
             {
                 visible: gradientListRepeater.count >= 32

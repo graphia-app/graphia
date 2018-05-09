@@ -84,7 +84,7 @@ Window
         Button
         {
             text: qsTr("Close")
-            anchors.right: grid.right
+            Layout.alignment: Qt.AlignRight
             onClicked: pluginsWindow.close()
         }
     }
