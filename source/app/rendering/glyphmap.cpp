@@ -133,7 +133,7 @@ void GlyphMap::layoutStrings(const QFont& font)
                 textLayoutPair.second._glyphs.push_back({index, advance});
             }
 
-            textLayoutPair.second._width = static_cast<float>(fontMetrics.width(text)) /
+            textLayoutPair.second._width = static_cast<float>(fontMetrics.boundingRect(text).width()) /
                     static_cast<float>(_textureSize);
             textLayoutPair.second._xHeight = static_cast<float>(fontMetrics.xHeight()) /
                     static_cast<float>(_textureSize);
