@@ -66,7 +66,7 @@ Rectangle
             break;
 
         case Find.ByAttribute:
-            o = FindOptions.MatchCase|FindOptions.MatchWholeWords;
+            o = FindOptions.MatchExact;
             break;
         }
 

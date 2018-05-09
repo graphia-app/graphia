@@ -53,16 +53,24 @@ void SearchManager::findNodes(QString term, Flags<FindOptions> options,
         return;
     }
 
-    if(!options.test(FindOptions::MatchUsingRegex))
-        term = QRegularExpression::escape(term);
-
-    if(options.test(FindOptions::MatchWholeWords))
-        term = QStringLiteral(R"(\b(%1)\b)").arg(term);
-
     QRegularExpression::PatternOptions reOptions;
 
-    if(!options.test(FindOptions::MatchCase))
-        reOptions.setFlag(QRegularExpression::CaseInsensitiveOption);
+    if(options.test(FindOptions::MatchExact))
+    {
+        term = QRegularExpression::escape(term);
+        term = QStringLiteral("^%1$").arg(term);
+    }
+    else
+    {
+        if(!options.test(FindOptions::MatchUsingRegex))
+            term = QRegularExpression::escape(term);
+
+        if(options.test(FindOptions::MatchWholeWords))
+            term = QStringLiteral(R"(\b(%1)\b)").arg(term);
+
+        if(!options.test(FindOptions::MatchCase))
+            reOptions.setFlag(QRegularExpression::CaseInsensitiveOption);
+    }
 
     QRegularExpression re(term, reOptions);
 
