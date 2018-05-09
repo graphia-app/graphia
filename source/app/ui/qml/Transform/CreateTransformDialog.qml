@@ -368,6 +368,12 @@ Window
                             }
                         }
 
+                        function updateValues()
+                        {
+                            for(var parameterName in _values)
+                                _values[parameterName].updateValue();
+                        }
+
                         function valueOf(parameterName)
                         {
                             if(_values === undefined)
@@ -556,6 +562,8 @@ Window
 
     function updateTransformExpression()
     {
+        parameters.updateValues();
+
         var expression = "";
 
         if(transformsList.selectedValue !== undefined)

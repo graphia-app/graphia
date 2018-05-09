@@ -126,6 +126,14 @@ GridLayout
         onEditingFinished: { updateValue(); }
     }
 
+    function updateValue()
+    {
+        if(textField.visible)
+            textField.updateValue();
+        else if(spinBox.visible)
+            spinBox.updateValue();
+    }
+
     function configure(data)
     {
         for(var property in data)
