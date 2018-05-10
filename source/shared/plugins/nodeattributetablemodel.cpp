@@ -73,7 +73,7 @@ void NodeAttributeTableModel::addRole(int role)
     size_t index = role - (Qt::UserRole + 1);
 
     if(index < _pendingData.size())
-        _pendingData.insert(_pendingData.begin() + index, {});
+        _pendingData.insert(_pendingData.begin() + index, {{}});
     else
         _pendingData.resize(index + 1);
 
