@@ -288,22 +288,36 @@ Item
 
         sortIndicatorVisible: true
 
-        model: SortFilterProxyModel
+        function _resetSortFilterProxyModel()
         {
-            sourceModel: root._nodeAttributesTableModel
-            sortRoleName: root.sortRoleName
-            ascendingSortOrder: root.sortIndicatorOrder === Qt.AscendingOrder
+            // For reasons not fully understood, we seem to require the TableView's model to be
+            // recreated whenever it has a structural change, otherwise the view and the model
+            // get out of sync in exciting and unpredictable ways; hopefully we can get to the
+            // bottom of this when we transition to the new TableView component
+            tableView.model = sfpmComponent.createObject(tableView);
+        }
 
-            filterRoleName: 'nodeSelected'; filterValue: true
+        Component
+        {
+            id: sfpmComponent
 
-            // NodeAttributeTableModel fires layoutChanged whenever the nodeSelected role
-            // changes which in turn affects which rows the model reflects. When the visible
-            // rows change, we emit a signal so that the owners of the TableView can react.
-            // Qt.callLater is used because otherwise the signal is emitted before the
-            // TableView has had a chance to update.
-            // This is a gigantic hack; it would be much nicer to react when a TableView's
-            // contents change, but there is no obvious sane way to do this.
-            onLayoutChanged: { Qt.callLater(root.visibleRowsChanged); }
+            SortFilterProxyModel
+            {
+                sourceModel: root._nodeAttributesTableModel
+                sortRoleName: root.sortRoleName
+                ascendingSortOrder: root.sortIndicatorOrder === Qt.AscendingOrder
+
+                filterRoleName: 'nodeSelected'; filterValue: true
+
+                // NodeAttributeTableModel fires layoutChanged whenever the nodeSelected role
+                // changes which in turn affects which rows the model reflects. When the visible
+                // rows change, we emit a signal so that the owners of the TableView can react.
+                // Qt.callLater is used because otherwise the signal is emitted before the
+                // TableView has had a chance to update.
+                // This is a gigantic hack; it would be much nicer to react when a TableView's
+                // contents change, but there is no obvious sane way to do this.
+                onLayoutChanged: { Qt.callLater(root.visibleRowsChanged); }
+            }
         }
 
         Connections
@@ -312,6 +326,8 @@ Item
 
             onColumnAdded:
             {
+                tableView._resetSortFilterProxyModel();
+
                 tableView.insertColumn(index, columnComponent.createObject(tableView,
                     {"role": name, "title": name}));
 
@@ -320,6 +336,8 @@ Item
 
             onColumnRemoved:
             {
+                tableView._resetSortFilterProxyModel();
+
                 // Remove columns from the hidden columns list that no longer exist in the model
                 root.hiddenColumns = Utils.setIntersection(root.hiddenColumns,
                     root._nodeAttributesTableModel.columnNames);
@@ -336,6 +354,8 @@ Item
 
         Component.onCompleted:
         {
+            tableView._resetSortFilterProxyModel();
+
             for(var i = 0; i < root._nodeAttributesTableModel.columnNames.length; i++)
             {
                 var columnName = root._nodeAttributesTableModel.columnNames[i];
