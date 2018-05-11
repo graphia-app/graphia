@@ -688,12 +688,12 @@ void GraphModel::initialiseAttributeRanges()
     calculateAttributeRanges(&mutableGraph(), _->_attributes);
 }
 
-static void findUniqueAttributeValues(const Graph* graph,
+static void findSharedAttributeValues(const Graph* graph,
     std::map<QString, Attribute>& attributes)
 {
     for(auto& attribute : make_value_wrapper(attributes))
     {
-        if(!attribute.testFlag(AttributeFlag::FindUnique))
+        if(!attribute.testFlag(AttributeFlag::FindShared))
             continue;
 
         if(attribute.elementType() == ElementType::Node)
@@ -705,7 +705,7 @@ static void findUniqueAttributeValues(const Graph* graph,
 
 void GraphModel::initialiseUniqueAttributeValues()
 {
-    findUniqueAttributeValues(&graph(), _->_attributes);
+    findSharedAttributeValues(&graph(), _->_attributes);
 }
 
 void GraphModel::enableVisualUpdates()
@@ -889,7 +889,7 @@ void GraphModel::onTransformedGraphChanged(const Graph* graph)
 {
     _transformedGraphIsChanging = false;
 
-    findUniqueAttributeValues(graph, _->_attributes);
+    findSharedAttributeValues(graph, _->_attributes);
 
     // Compare with previous Dynamic attributes
     // Check for added

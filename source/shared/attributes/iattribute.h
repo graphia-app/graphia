@@ -27,7 +27,7 @@ enum class AttributeFlag
     Dynamic                 = 0x4,
 
     // Track the set of unique values held by the attribute
-    FindUnique              = 0x8,
+    FindShared              = 0x8,
 };
 
 class IGraphComponent;

@@ -103,7 +103,7 @@ public:
                         {
                             return valueBy(elementId, userDataVectorName).toString();
                         })
-                        .setFlag(AttributeFlag::FindUnique);
+                        .setFlag(AttributeFlag::FindShared);
                 break;
 
             default: break;
