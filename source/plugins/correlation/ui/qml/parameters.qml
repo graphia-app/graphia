@@ -43,11 +43,26 @@ Wizard
 
     function scrollToCell(tableView, x, y)
     {
-        tableView.positionViewAtRow(y, ListView.Center);
         if(x > 0)
             x--;
-        var header = tableView.__listView.headerItem.headerRepeater.itemAt(x);
-        tableView.flickableItem.contentX = header.x;
+        if(y > 0)
+            y--;
+
+        var runningWidth = 0;
+        for(var i = 0; i < x; ++i)
+        {
+            var col = tableView.getColumn(i);
+            var header = tableView.__listView.headerItem.headerRepeater.itemAt(i);
+            if(col)
+                runningWidth += col.width;
+        }
+        var runningHeight = 0;
+        for(i = 0; i < y; ++i)
+            runningHeight += dataRectView.__listView.contentItem.children[1].height;
+        dataFrameAnimationX.to = runningWidth;
+        dataFrameAnimationX.running = true;
+        dataFrameAnimationY.to = runningHeight;
+        dataFrameAnimationY.running = true;
     }
 
     Item
@@ -491,12 +506,26 @@ Wizard
 
     Item
     {
+        id: dataRectPage
+
+        Connections
+        {
+            target: root
+            onAnimatingChanged:
+            {
+                if(!animating && root.currentItem === dataRectPage)
+                    if(fileUrl !== "" && fileType !== "" && preParser.rowCount === 0)
+                        preParser.parse();
+            }
+        }
+
         CorrelationPreParser
         {
             id: preParser
             fileType: root.fileType
             fileUrl: root.fileUrl
-            onDataRectChanged: {
+            onDataRectChanged:
+            {
                 parameters.dataFrame = dataRect;
                 if(!isInsideRect(selectedCol, selectedRow, dataRect) &&
                         selectedCol >= 0 && selectedRow >= 0)
@@ -547,7 +576,27 @@ Wizard
                 Layout.fillWidth: true
                 model: preParser.model
                 selectionMode: SelectionMode.NoSelection
-                enabled: !preParser.isRunning
+                enabled: !(preParser.isRunning || root.animating)
+
+                PropertyAnimation
+                {
+                    id: dataFrameAnimationX
+                    target: dataRectView.flickableItem
+                    easing.type: Easing.InOutQuad
+                    property: "contentX"
+                    to: 0
+                    duration: 750
+                }
+
+                PropertyAnimation
+                {
+                    id: dataFrameAnimationY
+                    target: dataRectView.flickableItem
+                    easing.type: Easing.InOutQuad
+                    property: "contentY"
+                    to: 0
+                    duration: 750
+                }
 
                 Rectangle
                 {
@@ -578,8 +627,8 @@ Wizard
                     {
                         anchors.centerIn: parent
                         id: messageText
-                        text: "This frame would contain non-numerical data. " +
-                              "Next availaible numerical column selected (" + preParser.dataRect.x + ")";
+                        text: qsTr("This frame would contain non-numerical data. ") +
+                              qsTr("Next availaible frame selected (Row: ") + preParser.dataRect.y + qsTr(" column: ") + preParser.dataRect.x + ")";
                     }
                 }
 
@@ -587,7 +636,7 @@ Wizard
                 {
                     id: busyIndicator
                     anchors.centerIn: parent
-                    running: preParser.isRunning
+                    running: preParser.isRunning || root.animating
                 }
 
                 SystemPalette
@@ -682,18 +731,6 @@ Wizard
                 }
             }
         }
-    }
-
-    onFileUrlChanged:
-    {
-        if(fileUrl !== "" && fileType !== "")
-            preParser.parse();
-    }
-
-    onFileTypeChanged:
-    {
-        if(fileUrl !== "" && fileType !== "")
-            preParser.parse();
     }
 
     Component.onCompleted: initialise();
