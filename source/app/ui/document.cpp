@@ -42,6 +42,7 @@
 #include <QAbstractItemModel>
 #include <QMessageBox>
 #include <QCollator>
+#include <QApplication>
 
 QColor Document::contrastingColorForBackground()
 {
@@ -94,6 +95,7 @@ MessageBoxButton Document::messageBox(MessageBoxIcon icon, const QString& title,
 
     executeOnMainThreadAndWait([&]
     {
+        QApplication::alert(nullptr);
         QMessageBox messageBox(static_cast<QMessageBox::Icon>(icon), title, text,
             static_cast<QMessageBox::StandardButton>(*buttons));
 
