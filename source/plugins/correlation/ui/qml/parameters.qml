@@ -686,13 +686,13 @@ Wizard
 
     onFileUrlChanged:
     {
-        if(fileUrl !== "" && fileType != "")
+        if(fileUrl !== "" && fileType !== "")
             preParser.parse();
     }
 
     onFileTypeChanged:
     {
-        if(fileUrl !== "" && fileType != "")
+        if(fileUrl !== "" && fileType !== "")
             preParser.parse();
     }
 
