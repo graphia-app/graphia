@@ -514,7 +514,7 @@ Wizard
             onAnimatingChanged:
             {
                 if(!animating && root.currentItem === dataRectPage)
-                    if(fileUrl !== "" && fileType !== "" && preParser.rowCount === 0)
+                    if(root.fileUrl !== "" && root.fileType !== "" && preParser.rowCount === 0)
                         preParser.parse();
             }
         }
