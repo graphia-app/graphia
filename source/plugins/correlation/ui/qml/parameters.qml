@@ -576,7 +576,7 @@ Wizard
                 Layout.fillWidth: true
                 model: preParser.model
                 selectionMode: SelectionMode.NoSelection
-                enabled: !preParser.isRunning
+                enabled: !(preParser.isRunning || root.animating)
 
                 PropertyAnimation
                 {
@@ -636,7 +636,7 @@ Wizard
                 {
                     id: busyIndicator
                     anchors.centerIn: parent
-                    running: preParser.isRunning
+                    running: preParser.isRunning || root.animating
                 }
 
                 SystemPalette
