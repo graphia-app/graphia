@@ -44,8 +44,8 @@ private:
     TabularData* _data = nullptr;
     DataRectTableModel _model;
 
-    size_t rowCount();
-    size_t columnCount();
+    int rowCount();
+    int columnCount();
 
 public:
     CorrelationPreParser();

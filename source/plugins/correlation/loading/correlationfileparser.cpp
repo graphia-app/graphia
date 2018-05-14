@@ -156,14 +156,14 @@ bool CorrelationFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
     return true;
 }
 
-size_t CorrelationPreParser::rowCount()
+int CorrelationPreParser::rowCount()
 {
-    return _data != nullptr ? _data->numRows() : 0;
+    return _data != nullptr ? static_cast<int>(_data->numRows()) : 0;
 }
 
-size_t CorrelationPreParser::columnCount()
+int CorrelationPreParser::columnCount()
 {
-    return _data != nullptr ? _data->numColumns() : 0;
+    return _data != nullptr ? static_cast<int>(_data->numColumns()) : 0;
 }
 
 CorrelationPreParser::CorrelationPreParser()
