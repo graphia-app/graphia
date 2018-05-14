@@ -13,6 +13,11 @@ BaseParameterDialog
     property int enableFinishAtIndex: 0
     property bool nextEnabled: true
     property bool finishEnabled: true
+    property alias animating: numberAnimation.running
+    property Item currentItem:
+    {
+        return listPages[currentIndex];
+    }
 
     modality: Qt.ApplicationModal
 
@@ -23,7 +28,8 @@ BaseParameterDialog
     onWidthChanged: { content.x = currentIndex * -root.width }
     onHeightChanged: { content.x = currentIndex * -root.width }
 
-    onCurrentIndexChanged: pageIndicator.requestPaint()
+
+    onCurrentIndexChanged: pageIndicator.requestPaint();
 
     SystemPalette { id: systemPalette }
 
