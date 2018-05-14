@@ -62,24 +62,14 @@ Item
             visible: false
         }
 
-        ButtonMenu
+        ComboBox
         {
             id: attributeList
-            selectedValue: attribute
+
             model: document.attribute(attribute).similar;
             enabled: enabledMenuItem.checked
-            propogatePresses: true
 
-            textColor: root.textColor
-            hoverColor: root.hoverColor
-
-            onSelectedValueChanged: { updateExpression(); }
-
-            onClicked:
-            {
-                if(mouse.button === Qt.RightButton)
-                    mouse.accepted = false;
-            }
+            onCurrentIndexChanged: { updateExpression(); }
         }
 
         Label
@@ -234,7 +224,7 @@ Item
         if(flags.length > 0)
             flagsString = "[" + flags.toString() + "] ";
 
-        var newExpression = flagsString + "\"" + attributeList.selectedValue + "\" \"" + channel + "\"";
+        var newExpression = flagsString + "\"" + attributeList.currentText + "\" \"" + channel + "\"";
 
         if(Object.keys(parameters).length !== 0)
             newExpression += " with ";
@@ -319,6 +309,7 @@ Item
 
             enabledMenuItem.checked = !isFlagSet("disabled") && !error;
             invertMenuItem.checked = isFlagSet("invert");
+            attributeList.currentIndex = attributeList.find(attribute);
 
             ready = true;
         }
