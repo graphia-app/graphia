@@ -166,6 +166,7 @@ QVariantMap GraphTransformConfig::asVariantMap() const
     map.insert(QStringLiteral("action"), _action);
 
     QVariantList attributes;
+    attributes.reserve(static_cast<int>(_attributes.size()));
     for(const auto& attribute : _attributes)
         attributes.append(attribute);
     map.insert(QStringLiteral("attributes"), attributes);
