@@ -20,49 +20,38 @@ TransformCache& TransformCache::operator=(TransformCache&& other) noexcept
     return *this;
 }
 
-static bool setChangesGraph(const TransformCache::ResultSet& resultSet)
+bool TransformCache::lastResultChangesGraph() const
 {
-    return std::any_of(resultSet.begin(), resultSet.end(), [](const auto& result)
+    return std::any_of(_cache.back().begin(), _cache.back().end(), [](const auto& result)
     {
         return result._graph != nullptr;
     });
 }
 
+bool TransformCache::lastResultCreatedAnyOf(const std::vector<QString>& attributeNames) const
+{
+    return !u::setIntersection(attributesCreatedByLastResult(), attributeNames).empty();
+}
+
+std::vector<QString> TransformCache::attributesCreatedByLastResult() const
+{
+    std::vector<QString> attributeNames;
+
+    for(const auto& result : _cache.back())
+    {
+        auto resultAttributeNames = u::keysFor(result._newAttributes);
+        attributeNames.insert(attributeNames.end(), resultAttributeNames.begin(), resultAttributeNames.end());
+    }
+
+    return attributeNames;
+}
+
 void TransformCache::add(TransformCache::Result&& result)
 {
-    if(_cache.empty() || setChangesGraph(_cache.back()))
+    if(_cache.empty() || lastResultChangesGraph() || lastResultCreatedAnyOf(result.referencedAttributeNames()))
         _cache.emplace_back();
 
-    TransformCache::ResultSet* resultSet = &_cache.back();
-
-    // If this result references attributes that were created in the last result set,
-    // then move all said attribute creating results to their own set
-    const auto& referencedAttributeNames = result._config.referencedAttributeNames();
-    TransformCache::ResultSet attributeCreatingResultSet;
-    for(auto& cachedResult : *resultSet)
-    {
-        if(!u::setIntersection(u::keysFor(cachedResult._newAttributes), referencedAttributeNames).empty())
-            attributeCreatingResultSet.emplace_back(std::move(cachedResult));
-    }
-
-    if(!attributeCreatingResultSet.empty())
-    {
-        // Insert the attribute creating set before the last
-        _cache.insert(_cache.end() - 1, std::move(attributeCreatingResultSet));
-        resultSet = &_cache.back();
-
-        // Get rid of any results that have been moved from and won't do anything when applied
-        auto it = resultSet->begin();
-        while(it != resultSet->end())
-        {
-              if(!it->isApplicable())
-                  it = resultSet->erase(it);
-              else
-                  ++it;
-        }
-    }
-
-    resultSet->emplace_back(std::move(result));
+    _cache.back().emplace_back(std::move(result));
 }
 
 void TransformCache::attributeAdded(const QString& attributeName)

@@ -41,6 +41,11 @@ public:
         bool changesGraph() const { return _graph != nullptr; }
         bool isApplicable() const { return changesGraph() || !_newAttributes.empty(); }
 
+        std::vector<QString> referencedAttributeNames() const
+        {
+            return _config.referencedAttributeNames();
+        }
+
         GraphTransformConfig _config;
         std::unique_ptr<MutableGraph> _graph;
         std::map<QString, Attribute> _newAttributes;
@@ -49,6 +54,10 @@ public:
     using ResultSet = std::vector<Result>;
 
 private:
+    bool lastResultChangesGraph() const;
+    bool lastResultCreatedAnyOf(const std::vector<QString>& attributeNames) const;
+    std::vector<QString> attributesCreatedByLastResult() const;
+
     GraphModel* _graphModel;
     std::vector<ResultSet> _cache;
 
