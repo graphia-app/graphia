@@ -29,8 +29,8 @@ Window
 
     property var _transform: undefined
     property int _numParameters: _transform !== undefined ? Object.keys(_transform.parameters).length : 0
-    property int _numDeclaredAttributes: _transform !== undefined ?
-                                             Object.keys(_transform.declaredAttributes).length : 0
+    property int _numAttributeParameters: _transform !== undefined ? Object.keys(_transform.attributeParameters).length : 0
+    property int _numDeclaredAttributes: _transform !== undefined ? Object.keys(_transform.declaredAttributes).length : 0
 
     Preferences
     {
@@ -69,8 +69,11 @@ Window
                         parametersRepeater.model = [];
                         parameters._values = {};
 
-                        declaredAttributesRepeater.model = [];
-                        declaredAttributes._visualisations = {};
+                        attributeParametersRepeater.model = [];
+                        attributeParameters._attributeNames = {};
+
+                        visualisationsRepeater.model = [];
+                        visualisations._visualisations = {};
 
                         root._transform = document.transform(selectedValue);
                         lhsAttributeList.model = document.availableAttributes(root._transform.elementType);
@@ -80,8 +83,11 @@ Window
                         if(_transform.parameters !== undefined)
                             parametersRepeater.model = Object.keys(_transform.parameters);
 
+                        if(_transform.attributeParameters !== undefined)
+                            attributeParametersRepeater.model = Object.keys(_transform.attributeParameters);
+
                         if(_transform.declaredAttributes !== undefined)
-                            declaredAttributesRepeater.model = Object.keys(_transform.declaredAttributes);
+                            visualisationsRepeater.model = Object.keys(_transform.declaredAttributes);
                     }
 
                     description.update();
@@ -108,7 +114,7 @@ Window
                 font.pixelSize: 16
                 font.italic: true
 
-                text: _transform !== undefined && _numParameters === 0 ?
+                text: _transform !== undefined && _numParameters === 0 && _numAttributeParameters === 0 ?
                           qsTr("No Parameters Required") : qsTr("Select A Transform")
             }
 
@@ -116,11 +122,13 @@ Window
             {
                 id: scrollView
 
-                property bool _scrollBarVisible: (parameters.enabled || declaredAttributes.enabled) && condition.enabled
+                property bool _scrollBarVisible: (parameters.enabled || attributeParameters.enabled ||
+                    visualisations.enabled) && condition.enabled
                 property int margin: _scrollBarVisible ? 8 : 0
                 frameVisible: _scrollBarVisible
 
-                visible: parameters.enabled || declaredAttributes.enabled || condition.enabled
+                visible: parameters.enabled || attributeParameters.enabled || visualisations.enabled ||
+                         condition.enabled
 
                 Layout.fillWidth: visible
                 Layout.fillHeight: visible
@@ -145,7 +153,7 @@ Window
                         {
                             var conditionHeight = scrollView.viewport.height - (scrollView.margin * 2);
 
-                            if(parameters.enabled || declaredAttributes.enabled)
+                            if(parameters.enabled || visualisations.enabled)
                                 conditionHeight *= 0.5;
 
                             return Math.max(conditionHeight, 128);
@@ -311,6 +319,83 @@ Window
 
                     ColumnLayout
                     {
+                        id: attributeParameters
+                        enabled: _transform !== undefined && _numAttributeParameters > 0
+                        visible: enabled
+
+                        Layout.margins: scrollView.margin
+                        Layout.fillWidth: visible
+                        spacing: 20
+
+                        property var _attributeNames
+
+                        Repeater
+                        {
+                            id: attributeParametersRepeater
+
+                            delegate: Component
+                            {
+                                RowLayout
+                                {
+                                    property var parameterData: _transform.attributeParameters[modelData]
+
+                                    ColumnLayout
+                                    {
+                                        id: attributeParameterRowLayout
+                                        Layout.fillWidth: true
+
+                                        Label
+                                        {
+                                            Layout.alignment: Qt.AlignTop
+                                            font.italic: true
+                                            font.bold: true
+                                            text: modelData
+                                        }
+
+                                        Item { Layout.fillHeight: true }
+
+                                        Text
+                                        {
+                                            Layout.fillWidth: true
+                                            text: parameterData.description
+                                            textFormat: Text.StyledText
+                                            wrapMode: Text.WordWrap
+                                            elide: Text.ElideRight
+                                            onLinkActivated: Qt.openUrlExternally(link);
+                                        }
+                                    }
+
+                                    TreeBox
+                                    {
+                                        id: attributeParameterAttributeList
+                                        Layout.fillHeight: true
+
+                                        showSections: sortRoleName !== "display"
+                                        sortRoleName: "userDefined"
+
+                                        onSelectedValueChanged:
+                                        {
+                                            if(selectedValue !== undefined)
+                                                attributeParameters._attributeNames[modelData] = selectedValue;
+
+                                            updateTransformExpression();
+                                        }
+
+                                        AttributeListSortMenu { attributeList: attributeParameterAttributeList }
+                                    }
+
+                                    Component.onCompleted:
+                                    {
+                                        attributeParameterAttributeList.model =
+                                            document.availableAttributes(parameterData.elementType, parameterData.valueType);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    ColumnLayout
+                    {
                         id: parameters
                         enabled: _transform !== undefined && _numParameters > 0
                         visible: enabled
@@ -390,7 +475,7 @@ Window
 
                     ColumnLayout
                     {
-                        id: declaredAttributes
+                        id: visualisations
                         enabled: _transform !== undefined && _numDeclaredAttributes > 0
                         visible: enabled
 
@@ -410,7 +495,7 @@ Window
 
                         Repeater
                         {
-                            id: declaredAttributesRepeater
+                            id: visualisationsRepeater
 
                             delegate: Component
                             {
@@ -438,7 +523,7 @@ Window
                                                 if(value === "None")
                                                     value = "";
 
-                                                declaredAttributes._visualisations[modelData] = value;
+                                                visualisations._visualisations[modelData] = value;
                                             }
                                         }
 
@@ -450,7 +535,7 @@ Window
                                         var visualisationChannelNames = document.availableVisualisationChannelNames(declaredAttribute.valueType);
                                         visualisationsComboBox.model = ["None"].concat(visualisationChannelNames);
                                         visualisationsComboBox.currentIndex = visualisationsComboBox.model.indexOf(declaredAttribute.defaultVisualisation);
-                                        declaredAttributes._visualisations[modelData] = declaredAttribute.defaultVisualisation;
+                                        visualisations._visualisations[modelData] = declaredAttribute.defaultVisualisation;
                                     }
                                 }
                             }
@@ -570,7 +655,15 @@ Window
         {
             expression += "\"" + transformsList.selectedValue + "\"";
 
-            if(parameters !== undefined && Object.keys(_transform.parameters).length > 0)
+            if(attributeParameters !== undefined && _numAttributeParameters > 0)
+            {
+                expression += " using";
+
+                for(var attributeParameterName in attributeParameters._attributeNames)
+                    expression += " $\"" + attributeParameters._attributeNames[attributeParameterName] + "\"";
+            }
+
+            if(parameters !== undefined && _numParameters > 0)
             {
                 expression += " with";
 
@@ -602,7 +695,7 @@ Window
 
         Object.keys(_transform.declaredAttributes).forEach(function(attributeName)
         {
-            var channelName = declaredAttributes.selectedVisualisation(attributeName);
+            var channelName = visualisations.selectedVisualisation(attributeName);
 
             if(channelName.length > 0)
             {
@@ -636,9 +729,16 @@ Window
         transformExpression.text = "";
         defaultVisualisations = [];
         transformsList.model = document.availableTransforms();
+
+        parametersRepeater.model = undefined;
+        parameters._values = {};
+
+        attributeParametersRepeater.model = undefined;
+        attributeParameters._attributeNames = {};
+
         lhsAttributeList.model = rhsAttributeList.model = undefined;
         opList.model = undefined;
-        parametersRepeater.model = undefined;
+
         _transform = undefined;
     }
 }

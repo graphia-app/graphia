@@ -129,6 +129,20 @@ function Create(transform)
     // Action
     appendToElements(this._elements, transform.action);
 
+    // Attribute Parameters
+    if(transform.attributes.length > 0)
+    {
+        this.template += " using";
+        appendToElements(this._elements, " using ");
+
+        for(var i = 0; i < transform.attributes.length; i++)
+        {
+            var attribute = transform.attributes[i];
+            this.template += " $%";
+            appendToElements(this._elements, {attribute: attribute});
+        }
+    }
+
     // Parameters
     if(Object.keys(transform.parameters).length > 0)
     {
@@ -186,55 +200,81 @@ function Create(transform)
                 var parameter = this._elements[i];
 
                 var that = this;
-                function addOperand(operand, opposite)
+
+                if(parameter.lhs !== undefined)
                 {
-                    if(!operand || operand.length === 0)
-                        return;
+                    // The element is a parameter or a condition
 
-                    if(operand[0] === '$')
-                        labelText += sanitiseAttribute(operand);
-                    else
+                    function addOperand(operand, opposite)
                     {
-                        var parameterData = {};
+                        if(!operand || operand.length === 0)
+                            return;
 
-                        if(opposite.length > 0 && opposite[0] === '$')
-                        {
-                            var parameterName = opposite.substring(1);
-                            parameterData = document.findTransformParameter(that.action, parameterName);
-                        }
+                        if(operand[0] === '$')
+                            labelText += sanitiseAttribute(operand);
                         else
                         {
-                            // We known nothing of the type, so just treat it as a string
-                            parameterData.valueType = ValueType.String;
+                            var parameterData = {};
 
-                            parameterData.hasRange = false;
-                            parameterData.hasMinimumValue = false;
-                            parameterData.hasMaximumValue = false;
-                        }
-
-                        parameterData.initialValue = operand;
-
-                        if(locked)
-                        {
-                            if(parameterData.valueType === ValueType.String)
-                                labelText += " \\\"" + operand + "\\\"";
+                            if(opposite.length > 0 && opposite[0] === '$')
+                            {
+                                var parameterName = opposite.substring(1);
+                                parameterData = document.findTransformParameter(that.action, parameterName);
+                            }
                             else
-                                labelText += " " + Utils.formatForDisplay(operand);
+                            {
+                                // We known nothing of the type, so just treat it as a string
+                                parameterData.valueType = ValueType.String;
+
+                                parameterData.hasRange = false;
+                                parameterData.hasMinimumValue = false;
+                                parameterData.hasMaximumValue = false;
+                            }
+
+                            parameterData.initialValue = operand;
+
+                            if(locked)
+                            {
+                                if(parameterData.valueType === ValueType.String)
+                                    labelText += " \\\"" + operand + "\\\"";
+                                else
+                                    labelText += " " + Utils.formatForDisplay(operand);
+                            }
+                            else
+                                addLabel();
+
+                            var parameterObject = createTransformParameter(document,
+                                locked ? null : parent, // If locked, still create the object, but don't display it
+                                parameterData, onParameterChanged);
+
+                            that.parameters.push(parameterObject);
                         }
-                        else
-                            addLabel();
-
-                        var parameterObject = createTransformParameter(document,
-                            locked ? null : parent, // If locked, still create the object, but don't display it
-                            parameterData, onParameterChanged);
-
-                        that.parameters.push(parameterObject);
                     }
-                }
 
-                addOperand(parameter.lhs, parameter.rhs);
-                labelText += " " + sanitiseOp(parameter.op) + " ";
-                addOperand(parameter.rhs, parameter.lhs);
+                    addOperand(parameter.lhs, parameter.rhs);
+                    labelText += " " + sanitiseOp(parameter.op) + " ";
+                    addOperand(parameter.rhs, parameter.lhs);
+                }
+                else if(parameter.attribute !== undefined)
+                {
+                    // The element is an attribute
+
+                    if(locked)
+                        labelText += sanitiseAttribute(parameter.attribute);
+
+                    addLabel();
+
+                    var parameterData = {};
+                    parameterData.valueType = ValueType.StringList;
+                    parameterData.initialValue = document.attribute(attribute).similar;
+                    parameterData.initialIndex = parameterData.initialValue.indexOf(attribute);
+
+                    var parameterObject = createTransformParameter(document,
+                        locked ? null : parent, // If locked, still create the object, but don't display it
+                        parameterData, onParameterChanged);
+
+                    that.parameters.push(parameterObject);
+                }
             }
         }
 
