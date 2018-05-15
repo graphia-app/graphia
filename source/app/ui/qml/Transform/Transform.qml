@@ -199,7 +199,7 @@ Item
     }
 
     property string template
-    property var parameters
+    property var _parameterComponents
 
     function updateExpression()
     {
@@ -207,10 +207,10 @@ Item
             return;
 
         var numTemplateArguments = (template.match(/%/g) || []).length;
-        if(numTemplateArguments !== parameters.length)
+        if(numTemplateArguments !== _parameterComponents.length)
         {
             console.log("Number of template arguments (" + numTemplateArguments + ") doesn't " +
-                        "match number of parameters (" + parameters.length + ")");
+                        "match number of parameters (" + _parameterComponents.length + ")");
             return;
         }
 
@@ -220,9 +220,9 @@ Item
 
         var newExpression = flagsString + template;
 
-        for(var i = 0; i < parameters.length; i++)
+        for(var i = 0; i < _parameterComponents.length; i++)
         {
-            var parameter = parameters[i].value;
+            var parameter = _parameterComponents[i].value;
             parameter = parameter.replace("\$", "$$$$");
             newExpression = newExpression.replace("%", parameter);
         }
@@ -272,7 +272,7 @@ Item
             template = transformConfig.template;
 
             transformConfig.toComponents(document, expression, isFlagSet("locked") || error, updateExpression);
-            parameters = transformConfig.parameters;
+            _parameterComponents = transformConfig.parameters;
 
             enabledMenuItem.enabled =
                     lockedMenuItem.enabled =
