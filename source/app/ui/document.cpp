@@ -1442,6 +1442,14 @@ QVariantMap Document::transform(const QString& transformName) const
         map.insert(QStringLiteral("description"), transformFactory->description());
         map.insert(QStringLiteral("requiresCondition"), transformFactory->requiresCondition());
 
+        QVariantMap attributeParameters;
+        for(const auto& attributeParameter : transformFactory->attributeParameters())
+        {
+            QVariantMap attributeParameterMap = transformAttributeParameter(transformName, attributeParameter.first);
+            attributeParameters.insert(attributeParameter.first, attributeParameterMap);
+        }
+        map.insert(QStringLiteral("attributeParameters"), attributeParameters);
+
         QVariantMap parameters;
         for(const auto& parameter : transformFactory->parameters())
         {
@@ -1531,6 +1539,29 @@ QVariantMap Document::transformParameter(const QString& transformName, const QSt
 
         map.insert(QStringLiteral("description"), parameter.description());
         map.insert(QStringLiteral("initialValue"), parameter.initialValue());
+    }
+
+    return map;
+}
+
+QVariantMap Document::transformAttributeParameter(const QString& transformName, const QString& parameterName) const
+{
+    QVariantMap map;
+
+    if(_graphModel == nullptr)
+        return map;
+
+    const auto* transformFactory = _graphModel->transformFactory(transformName);
+
+    if(transformFactory == nullptr)
+        return map;
+
+    if(u::contains(transformFactory->attributeParameters(), parameterName))
+    {
+        auto parameter = transformFactory->attributeParameters().at(parameterName);
+        map.insert(QStringLiteral("elementType"), static_cast<int>(parameter.elementType()));
+        map.insert(QStringLiteral("valueType"), static_cast<int>(parameter.valueType()));
+        map.insert(QStringLiteral("description"), parameter.description());
     }
 
     return map;

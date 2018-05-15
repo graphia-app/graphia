@@ -262,6 +262,7 @@ private:
     void initialiseLayoutSettingsModel();
 
     QVariantMap transformParameter(const QString& transformName, const QString& parameterName) const;
+    QVariantMap transformAttributeParameter(const QString& transformName, const QString& parameterName) const;
 
 signals:
     void applicationChanged();

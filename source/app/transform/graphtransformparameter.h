@@ -4,6 +4,7 @@
 #include "shared/attributes/valuetype.h"
 
 #include <QString>
+#include <QVariant>
 
 #include <limits>
 #include <map>
