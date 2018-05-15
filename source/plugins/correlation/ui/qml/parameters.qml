@@ -530,6 +530,7 @@ Wizard
                 if(!isInsideRect(selectedCol, selectedRow, dataRect) &&
                         selectedCol >= 0 && selectedRow >= 0)
                 {
+                    scrollToCell(dataRectView, dataRect.x, dataRect.y)
                     tooltipNonNumerical.visible = true;
                 }
             }
@@ -619,7 +620,7 @@ Wizard
                     Timer
                     {
                         id: nonNumericalTimer
-                        interval: 5000;
+                        interval: 5000
                         onTriggered: { tooltipNonNumerical.visible = false }
                     }
 
@@ -627,8 +628,8 @@ Wizard
                     {
                         anchors.centerIn: parent
                         id: messageText
-                        text: qsTr("This frame would contain non-numerical data. ") +
-                              qsTr("Next availaible frame selected (Row: ") + preParser.dataRect.y + qsTr(" column: ") + preParser.dataRect.x + ")";
+                        text: qsTr("Selected frame contains non-numerical data. ") +
+                              qsTr("Next availaible frame selected");
                     }
                 }
 
