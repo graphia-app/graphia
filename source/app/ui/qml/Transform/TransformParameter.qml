@@ -16,8 +16,13 @@ GridLayout
     property bool hasMaximumValue
     property real minimumValue
     property real maximumValue
-    property string initialValue
+
+    // In configure(...) we test properties for undefined, which is the default
+    // for variant, so give initialValue some other (arbitrary) value
+    property variant initialValue: ({})
+
     property string value
+    property int initialIndex
 
     property bool updateValueImmediately: false
     property int direction: Qt.Horizontal
@@ -126,6 +131,22 @@ GridLayout
         onEditingFinished: { updateValue(); }
     }
 
+    ComboBox
+    {
+        id: comboBox
+        Layout.fillWidth: root.fillWidth
+        Layout.preferredWidth: root._preferredWidth * 2.0
+        visible: valueType === ValueType.StringList
+        enabled: valueType !== ValueType.Unknown
+
+        function updateValue()
+        {
+            root.value = "\"" + currentText + "\"";
+        }
+
+        onCurrentTextChanged: { updateValue(); }
+    }
+
     function updateValue()
     {
         if(textField.visible)
@@ -142,10 +163,14 @@ GridLayout
                 this[property] = data[property];
         }
 
-        if(valueType === ValueType.Unknown)
-            value = "";
-        else if(valueType !== ValueType.String)
+        switch(valueType)
         {
+        case ValueType.Unknown:
+            value = "";
+            break;
+
+        case ValueType.Float:
+        case ValueType.Int:
             if(initialValue.length === 0)
             {
                 // Make up a plausible value if an initialValue isn't given
@@ -162,39 +187,49 @@ GridLayout
                 value = initialValue;
 
             value = typedValue(value);
-        }
-        else
+
+            var floatValue = parseFloat(value);
+
+            if(!isNaN(floatValue))
+            {
+                if(hasMinimumValue)
+                {
+                    if(floatValue < minimumValue)
+                        floatValue = minimumValue;
+
+                    spinBox.minimumValue = slider.minimumValue = minimumValue;
+                }
+                else
+                    spinBox.minimumValue = slider.minimumValue = Number.NEGATIVE_INFINITY;
+
+                if(hasMaximumValue)
+                {
+                    if(floatValue > maximumValue)
+                        floatValue = maximumValue;
+
+                    spinBox.maximumValue = slider.maximumValue = maximumValue;
+                }
+                else
+                    spinBox.maximumValue = slider.maximumValue = Number.POSITIVE_INFINITY;
+
+                spinBox.value = floatValue;
+                slider.value = floatValue;
+            }
+            break;
+
+        case ValueType.String:
+            textField.text = initialValue;
+
             value = "\"" + Utils.escapeQuotes(initialValue) + "\"";
+            break;
 
-        var floatValue = parseFloat(value);
+        case ValueType.StringList:
+            comboBox.model = initialValue;
+            comboBox.currentIndex = initialIndex;
 
-        if(!isNaN(floatValue))
-        {
-            if(hasMinimumValue)
-            {
-                if(floatValue < minimumValue)
-                    floatValue = minimumValue;
-
-                spinBox.minimumValue = slider.minimumValue = minimumValue;
-            }
-            else
-                spinBox.minimumValue = slider.minimumValue = Number.NEGATIVE_INFINITY;
-
-            if(hasMaximumValue)
-            {
-                if(floatValue > maximumValue)
-                    floatValue = maximumValue;
-
-                spinBox.maximumValue = slider.maximumValue = maximumValue;
-            }
-            else
-                spinBox.maximumValue = slider.maximumValue = Number.POSITIVE_INFINITY;
-
-            spinBox.value = floatValue;
-            slider.value = floatValue;
+            value = "\"" + Utils.escapeQuotes(comboBox.currentText) + "\"";
+            break;
         }
-
-        textField.text = initialValue;
     }
 
     function reset()
@@ -203,7 +238,8 @@ GridLayout
                    hasRange: false,
                    hasMinimumValue: false,
                    hasMaximumValue: false,
-                   initialValue: ""});
+                   initialValue: "",
+                   initialIndex: -1});
     }
 
     Component.onCompleted: { reset(); }
