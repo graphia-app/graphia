@@ -240,6 +240,9 @@ QVariant QQmlSortFilterProxyModel::sourceData(const QModelIndex &sourceIndex, in
 
 QVariant QQmlSortFilterProxyModel::data(const QModelIndex &index, int role) const
 {
+    if(!index.isValid())
+        return {};
+
     return sourceData(mapToSource(index), role);
 }
 
