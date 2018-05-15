@@ -66,7 +66,9 @@ Item
         {
             id: attributeList
 
-            model: document.attribute(attribute).similar;
+            implicitWidth: 180
+
+            model: similarAttributes !== undefined ? similarAttributes : [attribute]
             enabled: enabledMenuItem.checked
 
             onCurrentIndexChanged: { updateExpression(); }
@@ -212,6 +214,7 @@ Item
     }
 
     property string attribute
+    readonly property var similarAttributes: document.attribute(attribute).similar
     property string channel
     property var parameters
 
