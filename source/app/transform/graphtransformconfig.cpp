@@ -56,6 +56,11 @@ bool GraphTransformConfig::Parameter::operator==(const GraphTransformConfig::Par
             _value == other._value;
 }
 
+const std::vector<QString>& GraphTransformConfig::attributeNames() const
+{
+    return _attributes;
+}
+
 const GraphTransformConfig::Parameter* GraphTransformConfig::parameterByName(const QString &name) const
 {
     auto it = std::find_if(_parameters.begin(), _parameters.end(),
@@ -160,6 +165,11 @@ QVariantMap GraphTransformConfig::asVariantMap() const
 
     map.insert(QStringLiteral("action"), _action);
 
+    QVariantList attributes;
+    for(const auto& attribute : _attributes)
+        attributes.append(attribute);
+    map.insert(QStringLiteral("attributes"), attributes);
+
     QVariantMap parameters;
     for(const auto& parameter : _parameters)
         parameters.insert(parameter._name, parameter.valueAsString());
@@ -173,7 +183,7 @@ QVariantMap GraphTransformConfig::asVariantMap() const
 
 std::vector<QString> GraphTransformConfig::referencedAttributeNames() const
 {
-    std::vector<QString> names;
+    std::vector<QString> names = _attributes;
 
     struct ConditionVisitor
     {
@@ -243,6 +253,7 @@ bool GraphTransformConfig::operator==(const GraphTransformConfig& other) const
     return _action == other._action &&
             !u::setsDiffer(_parameters, other._parameters) &&
             !u::setsDiffer(flags, otherFlags) &&
+            _attributes == other._attributes &&
             _condition == other._condition;
 }
 

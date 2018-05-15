@@ -37,6 +37,7 @@ BOOST_FUSION_ADAPT_STRUCT(
     GraphTransformConfig,
     (std::vector<QString>, _flags),
     (QString, _action),
+    (std::vector<QString>, _attributes),
     (std::vector<GraphTransformConfig::Parameter>, _parameters),
     (GraphTransformConfig::Condition, _condition)
 )
@@ -61,7 +62,7 @@ const x3::rule<class Identifier, QString> identifier = "identifier";
 const auto identifier_def = lexeme[char_("a-zA-Z_") >> *char_("a-zA-Z0-9_")];
 
 const x3::rule<class AttributeName, QString> attributeName = "attributeName";
-const auto attributeName_def = char_('$') >> (quotedString | identifier);
+const auto attributeName_def = lexeme[char_('$') >> (quotedString | identifier)];
 
 struct equality_op_ : x3::symbols<ConditionFnOp::Equality>
 {
@@ -138,6 +139,8 @@ const x3::rule<class Condition, GraphTransformConfig::Condition> condition = "co
 const auto operand = terminalCondition | unaryCondition | (x3::lit('(') >> condition >> x3::lit(')'));
 const auto condition_def = (operand >> logical_op >> operand) | operand;
 
+const auto attributeNameNoDollarCapture = lexeme[x3::lit('$') >> (quotedString | identifier)];
+
 const x3::rule<class Parameter, GraphTransformConfig::Parameter> parameter = "parameter";
 const auto parameterName = quotedString | identifier;
 const auto parameter_def = parameterName >> x3::lit('=') >> (double_ | int_ | quotedString);
@@ -150,6 +153,7 @@ const auto transformName = quotedString | identifier;
 const auto transform_def =
     -flags >>
     transformName >>
+    -(x3::lit("using") >> +attributeNameNoDollarCapture) >>
     -(x3::lit("with") >> +parameter) >>
     -(x3::lit("where") >> condition);
 

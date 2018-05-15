@@ -68,9 +68,11 @@ struct GraphTransformConfig
 
     std::vector<QString> _flags;
     QString _action;
+    std::vector<QString> _attributes;
     std::vector<Parameter> _parameters;
     Condition _condition;
 
+    const std::vector<QString>& attributeNames() const;
     const Parameter* parameterByName(const QString& name) const;
 
     bool hasCondition() const;
