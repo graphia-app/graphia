@@ -7,6 +7,7 @@
 #include "shared/utils/cancellable.h"
 
 #include "transforminfo.h"
+#include "graphtransformattributeparameter.h"
 #include "graphtransformparameter.h"
 #include "graphtransformconfig.h"
 
@@ -89,6 +90,7 @@ public:
 
     virtual QString description() const = 0;
     virtual ElementType elementType() const { return ElementType::None; }
+    virtual GraphTransformAttributeParameters attributeParameters() const { return {}; }
     virtual bool requiresCondition() const { return false; }
     virtual GraphTransformParameters parameters() const { return {}; }
     virtual DeclaredAttributes declaredAttributes() const { return {}; }

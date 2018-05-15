@@ -81,6 +81,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/rendering/shadertools.h
     ${CMAKE_CURRENT_LIST_DIR}/rendering/transition.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/availabletransformsmodel.h
+    ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformattributeparameter.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformconfig.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransformconfigparser.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/graphtransform.h
