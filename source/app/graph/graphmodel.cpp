@@ -18,6 +18,7 @@
 #include "transform/transforms/mcltransform.h"
 #include "transform/transforms/pageranktransform.h"
 #include "transform/transforms/eccentricitytransform.h"
+#include "transform/transforms/contractbyattributetransform.h"
 #include "transform/graphtransformconfigparser.h"
 
 #include "ui/visualisations/colorvisualisationchannel.h"
@@ -158,16 +159,17 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
         .intRange().setMin(0)
         .setDescription(tr("An edge's component identifier indicates which component it is part of."));
 
-    _->_graphTransformFactories.emplace(tr("Remove Nodes"),      std::make_unique<FilterTransformFactory>(this, ElementType::Node, false));
-    _->_graphTransformFactories.emplace(tr("Remove Edges"),      std::make_unique<FilterTransformFactory>(this, ElementType::Edge, false));
-    _->_graphTransformFactories.emplace(tr("Remove Components"), std::make_unique<FilterTransformFactory>(this, ElementType::Component, false));
-    _->_graphTransformFactories.emplace(tr("Keep Nodes"),        std::make_unique<FilterTransformFactory>(this, ElementType::Node, true));
-    _->_graphTransformFactories.emplace(tr("Keep Edges"),        std::make_unique<FilterTransformFactory>(this, ElementType::Edge, true));
-    _->_graphTransformFactories.emplace(tr("Keep Components"),   std::make_unique<FilterTransformFactory>(this, ElementType::Component, true));
-    _->_graphTransformFactories.emplace(tr("Contract Edges"),    std::make_unique<EdgeContractionTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("MCL Cluster"),       std::make_unique<MCLTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("PageRank"),          std::make_unique<PageRankTransformFactory>(this));
-    _->_graphTransformFactories.emplace(tr("Eccentricity"),      std::make_unique<EccentricityTransformFactory>(this));
+    _->_graphTransformFactories.emplace(tr("Remove Nodes"),             std::make_unique<FilterTransformFactory>(this, ElementType::Node, false));
+    _->_graphTransformFactories.emplace(tr("Remove Edges"),             std::make_unique<FilterTransformFactory>(this, ElementType::Edge, false));
+    _->_graphTransformFactories.emplace(tr("Remove Components"),        std::make_unique<FilterTransformFactory>(this, ElementType::Component, false));
+    _->_graphTransformFactories.emplace(tr("Keep Nodes"),               std::make_unique<FilterTransformFactory>(this, ElementType::Node, true));
+    _->_graphTransformFactories.emplace(tr("Keep Edges"),               std::make_unique<FilterTransformFactory>(this, ElementType::Edge, true));
+    _->_graphTransformFactories.emplace(tr("Keep Components"),          std::make_unique<FilterTransformFactory>(this, ElementType::Component, true));
+    _->_graphTransformFactories.emplace(tr("Contract Edges"),           std::make_unique<EdgeContractionTransformFactory>(this));
+    _->_graphTransformFactories.emplace(tr("MCL Cluster"),              std::make_unique<MCLTransformFactory>(this));
+    _->_graphTransformFactories.emplace(tr("PageRank"),                 std::make_unique<PageRankTransformFactory>(this));
+    _->_graphTransformFactories.emplace(tr("Eccentricity"),             std::make_unique<EccentricityTransformFactory>(this));
+    _->_graphTransformFactories.emplace(tr("Contract By Attribute"),    std::make_unique<ContractByAttributeTransformFactory>(this));
 
     _->_visualisationChannels.emplace(tr("Colour"), std::make_unique<ColorVisualisationChannel>());
     _->_visualisationChannels.emplace(tr("Size"), std::make_unique<SizeVisualisationChannel>());
