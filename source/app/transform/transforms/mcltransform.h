@@ -44,8 +44,11 @@ public:
 
     GraphTransformParameters parameters() const override
     {
-        return {{"Granularity", {ValueType::Float, QObject::tr("Controls the size of the resultant clusters. "
-            "A larger granularity value results in smaller clusters."), 2.2, 1.1, 3.5}}};
+        return {
+            {"Granularity", {ValueType::Float, QObject::tr("Controls the size of the resultant clusters. "
+            "A larger granularity value results in smaller clusters."), 2.2, 1.1, 3.5}},
+            {"Test", {ValueType::StringList, QObject::tr("sdfsdfs"), QStringList{"A", "B"} }}
+        };
     }
 
     DeclaredAttributes declaredAttributes() const override

@@ -40,7 +40,7 @@ std::vector<QString> u::toQStringVector(const QStringList& stringList)
 QStringList u::toQStringList(const std::vector<QString>& qStringVector)
 {
     QStringList l;
-    l.reserve(qStringVector.size());
+    l.reserve(static_cast<int>(qStringVector.size()));
 
     for(const auto& string : qStringVector)
         l.append(string);
