@@ -13,6 +13,7 @@ namespace u
     bool isNumeric(const std::string& string);
 
     std::vector<QString> toQStringVector(const QStringList& stringList);
+    QStringList toQStringList(const std::vector<QString>& qStringVector);
 
     std::istream& getline(std::istream& is, std::string& t);
 

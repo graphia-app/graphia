@@ -29,12 +29,23 @@ bool u::isNumeric(const std::string& string)
 
 std::vector<QString> u::toQStringVector(const QStringList& stringList)
 {
-    std::vector<QString> v;
+    std::vector<QString> v(stringList.size());
 
     for(const auto& string : stringList)
         v.emplace_back(string);
 
     return v;
+}
+
+QStringList u::toQStringList(const std::vector<QString>& qStringVector)
+{
+    QStringList l;
+    l.reserve(qStringVector.size());
+
+    for(const auto& string : qStringVector)
+        l.append(string);
+
+    return l;
 }
 
 // https://stackoverflow.com/a/6089413/2721809
