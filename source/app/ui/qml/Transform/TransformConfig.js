@@ -231,7 +231,10 @@ function Create(transform)
                                 parameterData.hasMaximumValue = false;
                             }
 
-                            parameterData.initialValue = operand;
+                            if(parameterData.valueType === ValueType.StringList)
+                                parameterData.initialIndex = parameterData.initialValue.indexOf(operand);
+                            else
+                                parameterData.initialValue = operand;
 
                             if(locked)
                             {

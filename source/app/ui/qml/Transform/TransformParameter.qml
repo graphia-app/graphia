@@ -30,7 +30,10 @@ GridLayout
     flow: (direction === Qt.Horizontal) ? GridLayout.LeftToRight : GridLayout.TopToBottom
 
     property bool fillWidth: false
-    property int _preferredWidth: (root.direction === Qt.Horizontal) ? 90 : 160
+    property int _preferredWidth:
+        (root.direction === Qt.Horizontal &&
+         valueType !== ValueType.StringList) ? // Always make the ComboBox wide
+            90 : 160
     implicitWidth: !fillWidth ? _preferredWidth : 0.0
 
     function typedValue(n)
@@ -135,7 +138,7 @@ GridLayout
     {
         id: comboBox
         Layout.fillWidth: root.fillWidth
-        Layout.preferredWidth: root._preferredWidth * 2.0
+        Layout.preferredWidth: root._preferredWidth
         visible: valueType === ValueType.StringList
         enabled: valueType !== ValueType.Unknown
 

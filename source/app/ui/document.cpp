@@ -1539,6 +1539,10 @@ QVariantMap Document::transformParameter(const QString& transformName, const QSt
 
         map.insert(QStringLiteral("description"), parameter.description());
         map.insert(QStringLiteral("initialValue"), parameter.initialValue());
+
+        // If it's a StringList parameter, select the first one by default
+        if(parameter.type() == ValueType::StringList)
+            map.insert(QStringLiteral("initialIndex"), 0);
     }
 
     return map;
