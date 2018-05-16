@@ -22,6 +22,7 @@ GridLayout
     property variant initialValue: ({})
 
     property string value
+    property int initialIndex
 
     property bool updateValueImmediately: false
     property int direction: Qt.Horizontal
@@ -223,8 +224,8 @@ GridLayout
             break;
 
         case ValueType.StringList:
-            comboBox.model = initialValue.values;
-            comboBox.currentIndex = initialValue.index;
+            comboBox.model = initialValue;
+            comboBox.currentIndex = initialIndex;
 
             value = "\"" + Utils.escapeQuotes(comboBox.currentText) + "\"";
             break;
@@ -237,7 +238,8 @@ GridLayout
                    hasRange: false,
                    hasMinimumValue: false,
                    hasMaximumValue: false,
-                   initialValue: ""});
+                   initialValue: "",
+                   initialIndex: -1});
     }
 
     Component.onCompleted: { reset(); }
