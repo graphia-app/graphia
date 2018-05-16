@@ -266,8 +266,13 @@ function Create(transform)
 
                     var parameterData = {};
                     parameterData.valueType = ValueType.StringList;
-                    parameterData.initialValue = document.attribute(attribute).similar;
-                    parameterData.initialIndex = parameterData.initialValue.indexOf(attribute);
+
+                    var similarAttributes = document.attribute(attribute).similar;
+                    parameterData.initialValue =
+                    {
+                        values: similarAttributes,
+                        index: similarAttributes.indexOf(attribute)
+                    };
 
                     var parameterObject = createTransformParameter(document,
                         locked ? null : parent, // If locked, still create the object, but don't display it
