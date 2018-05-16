@@ -5,7 +5,6 @@ Item
 {
     width: 8
     height: 16
-    Layout.margins: 6
 
     Rectangle
     {
