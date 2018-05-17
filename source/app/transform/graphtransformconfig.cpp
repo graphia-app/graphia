@@ -61,6 +61,12 @@ const std::vector<QString>& GraphTransformConfig::attributeNames() const
     return _attributes;
 }
 
+bool GraphTransformConfig::hasParameter(const QString& name) const
+{
+    return std::find_if(_parameters.begin(), _parameters.end(),
+    [&name](const auto& parameter) { return name == parameter._name; }) != _parameters.end();
+}
+
 const GraphTransformConfig::Parameter* GraphTransformConfig::parameterByName(const QString &name) const
 {
     auto it = std::find_if(_parameters.begin(), _parameters.end(),
@@ -71,6 +77,14 @@ const GraphTransformConfig::Parameter* GraphTransformConfig::parameterByName(con
 
     Q_ASSERT(!"Parameter not found");
     return nullptr;
+}
+
+bool GraphTransformConfig::parameterHasValue(const QString& name, const QString& value) const
+{
+    if(!hasParameter(name))
+        return false;
+
+    return parameterByName(name)->valueAsString() == value;
 }
 
 QString GraphTransformConfig::Parameter::valueAsString() const

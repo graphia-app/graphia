@@ -73,7 +73,9 @@ struct GraphTransformConfig
     Condition _condition;
 
     const std::vector<QString>& attributeNames() const;
+    bool hasParameter(const QString& name) const;
     const Parameter* parameterByName(const QString& name) const;
+    bool parameterHasValue(const QString& name, const QString& value) const;
 
     bool hasCondition() const;
     QVariantMap conditionAsVariantMap() const;
