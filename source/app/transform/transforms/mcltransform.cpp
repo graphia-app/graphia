@@ -619,8 +619,6 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
 
 std::unique_ptr<GraphTransform> MCLTransformFactory::create(const GraphTransformConfig&) const
 {
-    auto mclTransform = std::make_unique<MCLTransform>(graphModel());
-
-    return std::move(mclTransform); //FIXME std::move required because of clang bug
+    return std::make_unique<MCLTransform>(graphModel());
 }
 

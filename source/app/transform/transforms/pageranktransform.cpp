@@ -152,8 +152,6 @@ void PageRankTransform::calculatePageRank(TransformedGraph& target) const
 
 std::unique_ptr<GraphTransform> PageRankTransformFactory::create(const GraphTransformConfig&) const
 {
-    auto pageRankTransform = std::make_unique<PageRankTransform>(graphModel());
-
-    return std::move(pageRankTransform); //FIXME std::move required because of clang bug
+    return std::make_unique<PageRankTransform>(graphModel());
 }
 

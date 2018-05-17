@@ -48,7 +48,5 @@ bool EdgeContractionTransform::apply(TransformedGraph& target) const
 
 std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(const GraphTransformConfig&) const
 {
-    auto edgeContractionTransform = std::make_unique<EdgeContractionTransform>(*graphModel());
-
-    return std::move(edgeContractionTransform); //FIXME std::move required because of clang bug
+    return std::make_unique<EdgeContractionTransform>(*graphModel());
 }
