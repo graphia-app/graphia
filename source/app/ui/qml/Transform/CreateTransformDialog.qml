@@ -668,7 +668,7 @@ Window
                 expression += " with";
 
                 for(var parameterName in _transform.parameters)
-                    expression += " " + parameterName + " = " + parameters.valueOf(parameterName);
+                    expression += " \"" + parameterName + "\" = " + parameters.valueOf(parameterName);
             }
 
             if(lhsAttributeList.selectedValue !== undefined)
