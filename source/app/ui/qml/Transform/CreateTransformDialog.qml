@@ -369,6 +369,7 @@ Window
                                     {
                                         id: attributeParameterAttributeList
                                         Layout.fillHeight: true
+                                        Layout.preferredWidth: 250
 
                                         showSections: sortRoleName !== "display"
                                         sortRoleName: "userDefined"
