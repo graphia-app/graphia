@@ -59,7 +59,7 @@ private:
 
 protected:
     bool hasUnknownAttributes(const std::vector<QString>& referencedAttributes,
-                              const std::vector<QString>& availableAttributes) const;
+                              const GraphModel& graphModel) const;
 
 private:
     mutable TransformInfo* _info = nullptr;

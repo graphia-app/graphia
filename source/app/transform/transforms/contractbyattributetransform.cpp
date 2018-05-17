@@ -21,7 +21,7 @@ bool ContractByAttributeTransform::apply(TransformedGraph& target) const
 
     auto attributeName = attributeNames.front();
 
-    if(hasUnknownAttributes({attributeName}, u::toQStringVector(_graphModel->availableAttributes())))
+    if(hasUnknownAttributes({attributeName}, *_graphModel))
         return false;
 
     bool ignoreTails = _graphModel->attributeValueByName(attributeName).testFlag(AttributeFlag::IgnoreTails);

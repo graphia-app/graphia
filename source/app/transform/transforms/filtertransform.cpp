@@ -21,7 +21,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
 
     auto attributeNames = config().referencedAttributeNames();
 
-    if(hasUnknownAttributes(attributeNames, u::toQStringVector(_graphModel->availableAttributes())))
+    if(hasUnknownAttributes(attributeNames, *_graphModel))
         return false;
 
     bool ignoreTails =

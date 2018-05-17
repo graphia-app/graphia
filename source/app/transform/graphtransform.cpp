@@ -2,6 +2,7 @@
 #include "transformedgraph.h"
 
 #include "graph/graph.h"
+#include "graph/graphmodel.h"
 
 #include "shared/utils/container.h"
 
@@ -22,13 +23,13 @@ bool GraphTransform::applyAndUpdate(TransformedGraph& target) const
 }
 
 bool GraphTransform::hasUnknownAttributes(const std::vector<QString>& referencedAttributes,
-                                          const std::vector<QString>& availableAttributes) const
+                                          const GraphModel& graphModel) const
 {
     bool unknownAttributes = false;
 
     for(const auto& referencedAttributeName : referencedAttributes)
     {
-        if(!u::contains(availableAttributes, referencedAttributeName))
+        if(!graphModel.attributeExists(referencedAttributeName))
         {
             addAlert(AlertType::Error, QObject::tr(R"(Unknown Attribute: "%1")").arg(referencedAttributeName));
             unknownAttributes = true;
