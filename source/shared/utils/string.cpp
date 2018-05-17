@@ -29,7 +29,8 @@ bool u::isNumeric(const std::string& string)
 
 std::vector<QString> u::toQStringVector(const QStringList& stringList)
 {
-    std::vector<QString> v(stringList.size());
+    std::vector<QString> v;
+    v.reserve(stringList.size());
 
     for(const auto& string : stringList)
         v.emplace_back(string);
