@@ -404,7 +404,7 @@ bool GraphModel::visualisationIsValid(const QString& visualisation) const
     {
         const auto& visualisationConfig = p.result();
 
-        if(!u::contains(_->_attributes, visualisationConfig._attributeName))
+        if(!attributeExists(visualisationConfig._attributeName))
             return false;
 
         if(!u::contains(_->_visualisationChannels, visualisationConfig._channelName))
@@ -443,7 +443,7 @@ void GraphModel::buildVisualisations(const QStringList& visualisations)
         const auto& channelName = visualisationConfig._channelName;
         bool invert = visualisationConfig.isFlagSet(QStringLiteral("invert"));
 
-        if(!u::contains(_->_attributes, attributeName))
+        if(!attributeExists(attributeName))
         {
             _->_visualisationInfos[index].addAlert(AlertType::Error,
                 tr("Attribute doesn't exist"));
@@ -640,6 +640,12 @@ const Attribute* GraphModel::attributeByName(const QString& name) const
         return nullptr;
 
     return &_->_attributes.at(attributeName._name);
+}
+
+bool GraphModel::attributeExists(const QString& name) const
+{
+    auto attributeName = Attribute::parseAttributeName(name);
+    return u::contains(_->_attributes, attributeName._name);
 }
 
 Attribute GraphModel::attributeValueByName(const QString& name) const

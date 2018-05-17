@@ -1599,7 +1599,26 @@ QVariantMap Document::attribute(const QString& attributeName) const
         if(valueType.anyOf(ValueType::Int, ValueType::Float))
             valueType.set(ValueType::Int, ValueType::Float);
 
-        map.insert(QStringLiteral("similar"), _graphModel->availableAttributes(attribute.elementType(), *valueType));
+        auto similarAttributes = _graphModel->availableAttributes(attribute.elementType(), *valueType);
+        switch(parsedAttributeName._type)
+        {
+        case Attribute::EdgeNodeType::Source:
+        case Attribute::EdgeNodeType::Target:
+        {
+            auto sourceSimilarAttributes = similarAttributes;
+            auto targetSimilarAttributes = similarAttributes;
+            sourceSimilarAttributes.replaceInStrings(QRegularExpression("^"), QStringLiteral("source."));
+            targetSimilarAttributes.replaceInStrings(QRegularExpression("^"), QStringLiteral("target."));
+            similarAttributes = sourceSimilarAttributes + targetSimilarAttributes;
+            break;
+        }
+
+        default:
+        case Attribute::EdgeNodeType::None:
+            break;
+        }
+
+        map.insert(QStringLiteral("similar"), similarAttributes);
         map.insert(QStringLiteral("ops"), _graphModel->avaliableConditionFnOps(parsedAttributeName._name));
 
         QStringList sharedValues;
