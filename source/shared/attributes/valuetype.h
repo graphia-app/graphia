@@ -10,6 +10,7 @@ DEFINE_QML_ENUM(
                 Float       = 0x4,
                 String      = 0x8,
                 StringList  = 0x10,
+                Numerical = Int|Float,
                 All = Int|Float|String|StringList);
 
 #endif // VALUETYPE_H
