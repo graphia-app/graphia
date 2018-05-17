@@ -38,7 +38,6 @@ public:
     virtual const IAttribute* attributeByName(const QString& name) const = 0;
     virtual bool attributeExists(const QString& name) const = 0;
     virtual std::vector<QString> attributeNames(ElementType elementType = ElementType::All) const = 0;
-    virtual std::vector<NodeId> nodeIdsByAttributeValue(const QString& attributeName, const QString& attributeValue) const = 0;
 };
 
 #endif // IGRAPHMODEL_H
