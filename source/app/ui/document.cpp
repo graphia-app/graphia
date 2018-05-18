@@ -693,6 +693,8 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(this, &Document::busyChanged, this, &Document::canEnterOverviewModeChanged);
     connect(this, &Document::busyChanged, this, &Document::canResetViewChanged);
 
+    connect(this, &Document::busyChanged, this, &Document::onBusyChanged);
+
     connect(&_commandManager, &CommandManager::commandWillExecute, _graphQuickItem, &GraphQuickItem::commandWillExecute);
     connect(&_commandManager, &CommandManager::commandWillExecute, this, &Document::commandInProgressChanged);
 
@@ -781,6 +783,12 @@ void Document::onLoadComplete(const QUrl&, bool success)
                 _graphModel->graph().numNodes()).arg(
                 _graphModel->graph().numEdges()).arg(
                 _graphModel->graph().numComponents()));
+}
+
+void Document::onBusyChanged()
+{
+    if(!busy())
+        QApplication::alert(nullptr);
 }
 
 bool Document::nodeIsSelected(QmlNodeId nodeId) const
