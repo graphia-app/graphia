@@ -144,23 +144,23 @@ function Create(transform)
     }
 
     // Parameters
-    if(Object.keys(transform.parameters).length > 0)
+    if(transform.parameters.length > 0)
     {
         this.template += " with";
         appendToElements(this._elements, " with ");
 
         var firstParam = true;
 
-        for(var parameterName in transform.parameters)
+        for(var index in transform.parameters)
         {
             // Put whitespace between the parameters
             if(!firstParam)
                 appendToElements(this._elements, " ");
             firstParam = false;
 
-            var parameterValue = transform.parameters[parameterName];
-            this.template += " \"" + parameterName + "\" = %";
-            appendConditionToElements(this._elements, {lhs: "$" + parameterName, op:"=", rhs: parameterValue});
+            var parameter = transform.parameters[index];
+            this.template += " \"" + parameter.name + "\" = %";
+            appendConditionToElements(this._elements, {lhs: "$" + parameter.name, op:"=", rhs: parameter.value});
         }
     }
 

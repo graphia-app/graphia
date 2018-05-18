@@ -1450,20 +1450,26 @@ QVariantMap Document::transform(const QString& transformName) const
         map.insert(QStringLiteral("description"), transformFactory->description());
         map.insert(QStringLiteral("requiresCondition"), transformFactory->requiresCondition());
 
+        QStringList attributeParameterNames;
         QVariantMap attributeParameters;
         for(const auto& attributeParameter : transformFactory->attributeParameters())
         {
-            QVariantMap attributeParameterMap = transformAttributeParameter(transformName, attributeParameter.first);
-            attributeParameters.insert(attributeParameter.first, attributeParameterMap);
+            QVariantMap attributeParameterMap = transformAttributeParameter(transformName, attributeParameter.name());
+            attributeParameterNames.append(attributeParameter.name());
+            attributeParameters.insert(attributeParameter.name(), attributeParameterMap);
         }
+        map.insert(QStringLiteral("attributeParameterNames"), attributeParameterNames);
         map.insert(QStringLiteral("attributeParameters"), attributeParameters);
 
+        QStringList parameterNames;
         QVariantMap parameters;
         for(const auto& parameter : transformFactory->parameters())
         {
-            QVariantMap parameterMap = transformParameter(transformName, parameter.first);
-            parameters.insert(parameter.first, parameterMap);
+            QVariantMap parameterMap = transformParameter(transformName, parameter.name());
+            parameterNames.append(parameter.name());
+            parameters.insert(parameter.name(), parameterMap);
         }
+        map.insert(QStringLiteral("parameterNames"), parameterNames);
         map.insert(QStringLiteral("parameters"), parameters);
 
         QVariantMap declaredAttributes;
@@ -1533,9 +1539,10 @@ QVariantMap Document::transformParameter(const QString& transformName, const QSt
     if(transformFactory == nullptr)
         return map;
 
-    if(u::contains(transformFactory->parameters(), parameterName))
+    auto parameter = transformFactory->parameter(parameterName);
+    if(!parameter.name().isEmpty())
     {
-        auto parameter = transformFactory->parameters().at(parameterName);
+        map.insert(QStringLiteral("name"), parameter.name());
         map.insert(QStringLiteral("valueType"), static_cast<int>(parameter.type()));
 
         map.insert(QStringLiteral("hasRange"), parameter.hasRange());
@@ -1568,9 +1575,10 @@ QVariantMap Document::transformAttributeParameter(const QString& transformName, 
     if(transformFactory == nullptr)
         return map;
 
-    if(u::contains(transformFactory->attributeParameters(), parameterName))
+    auto parameter = transformFactory->attributeParameter(parameterName);
+    if(!parameter.name().isEmpty())
     {
-        auto parameter = transformFactory->attributeParameters().at(parameterName);
+        map.insert(QStringLiteral("name"), parameter.name());
         map.insert(QStringLiteral("elementType"), static_cast<int>(parameter.elementType()));
         map.insert(QStringLiteral("valueType"), static_cast<int>(parameter.valueType()));
         map.insert(QStringLiteral("description"), parameter.description());

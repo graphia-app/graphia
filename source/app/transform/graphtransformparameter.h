@@ -13,14 +13,16 @@
 class GraphTransformParameter
 {
 public:
-    GraphTransformParameter(ValueType type, QString description,
+    GraphTransformParameter() = default;
+    GraphTransformParameter(QString name, ValueType type, QString description,
                             QVariant initialValue = QVariant(""),
                             double min = std::numeric_limits<double>::max(),
                             double max = std::numeric_limits<double>::lowest()) :
-        _type(type), _description(std::move(description)),
+        _name(std::move(name)), _type(type), _description(std::move(description)),
         _initialValue(std::move(initialValue)), _min(min), _max(max)
     {}
 
+    QString name() const { return _name; }
     ValueType type() const { return _type; }
     QString description() const { return _description; }
 
@@ -34,6 +36,7 @@ public:
     QVariant initialValue() const { return _initialValue; }
 
 private:
+    QString _name;
     ValueType _type;
     QString _description;
     QVariant _initialValue;
@@ -41,6 +44,6 @@ private:
     double _max;
 };
 
-using GraphTransformParameters = std::map<QString, GraphTransformParameter>;
+using GraphTransformParameters = std::vector<GraphTransformParameter>;
 
 #endif // GRAPHTRANSFORMPARAMETER_H

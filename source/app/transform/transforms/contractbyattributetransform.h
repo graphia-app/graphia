@@ -34,9 +34,14 @@ public:
 
     GraphTransformAttributeParameters attributeParameters() const override
     {
-        return {{"Node Attribute", {ElementType::Node, ValueType::String,
-            QObject::tr("Each edge's source and target nodes have the selected attribute's value compared. "
-            "If they match, the edge is contracted, meaning it is hidden and its nodes merged.")}}};
+        return
+        {
+            {
+                "Node Attribute", ElementType::Node, ValueType::String,
+                QObject::tr("Each edge's source and target nodes have the selected attribute's value compared. "
+                    "If they match, the edge is contracted, meaning it is hidden and its nodes merged.")
+            }
+        };
     }
 
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;

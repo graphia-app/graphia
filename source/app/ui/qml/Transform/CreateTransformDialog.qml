@@ -28,8 +28,8 @@ Window
     property var defaultVisualisations
 
     property var _transform: undefined
-    property int _numParameters: _transform !== undefined ? Object.keys(_transform.parameters).length : 0
-    property int _numAttributeParameters: _transform !== undefined ? Object.keys(_transform.attributeParameters).length : 0
+    property int _numParameters: _transform !== undefined ? _transform.parameterNames.length : 0
+    property int _numAttributeParameters: _transform !== undefined ? _transform.attributeParameterNames.length : 0
     property int _numDeclaredAttributes: _transform !== undefined ? Object.keys(_transform.declaredAttributes).length : 0
 
     Preferences
@@ -80,11 +80,11 @@ Window
                         valueRadioButton.checked = true;
                         rhsAttributeList.model = undefined;
 
-                        if(_transform.parameters !== undefined)
-                            parametersRepeater.model = Object.keys(_transform.parameters);
+                        if(_transform.parameterNames !== undefined)
+                            parametersRepeater.model = _transform.parameterNames;
 
-                        if(_transform.attributeParameters !== undefined)
-                            attributeParametersRepeater.model = Object.keys(_transform.attributeParameters);
+                        if(_transform.attributeParameterNames !== undefined)
+                            attributeParametersRepeater.model = _transform.attributeParameterNames;
 
                         if(_transform.declaredAttributes !== undefined)
                             visualisationsRepeater.model = Object.keys(_transform.declaredAttributes);
@@ -656,20 +656,23 @@ Window
         {
             expression += "\"" + transformsList.selectedValue + "\"";
 
-            if(attributeParameters !== undefined && _numAttributeParameters > 0)
+            if(_numAttributeParameters > 0)
             {
                 expression += " using";
 
-                for(var attributeParameterName in attributeParameters._attributeNames)
-                    expression += " $\"" + attributeParameters._attributeNames[attributeParameterName] + "\"";
+                for(var attributeName in attributeParameters._attributeNames)
+                    expression += " $\"" + attributeParameters._attributeNames[attributeName] + "\"";
             }
 
-            if(parameters !== undefined && _numParameters > 0)
+            if(_numParameters > 0)
             {
                 expression += " with";
 
-                for(var parameterName in _transform.parameters)
+                for(var index in _transform.parameterNames)
+                {
+                    var parameterName = _transform.parameterNames[index];
                     expression += " \"" + parameterName + "\" = " + parameters.valueOf(parameterName);
+                }
             }
 
             if(lhsAttributeList.selectedValue !== undefined)

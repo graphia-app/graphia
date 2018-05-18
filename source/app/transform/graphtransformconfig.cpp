@@ -179,15 +179,20 @@ QVariantMap GraphTransformConfig::asVariantMap() const
 
     map.insert(QStringLiteral("action"), _action);
 
-    QVariantList attributes;
+    QStringList attributes;
     attributes.reserve(static_cast<int>(_attributes.size()));
     for(const auto& attribute : _attributes)
         attributes.append(attribute);
     map.insert(QStringLiteral("attributes"), attributes);
 
-    QVariantMap parameters;
+    QVariantList parameters;
     for(const auto& parameter : _parameters)
-        parameters.insert(parameter._name, parameter.valueAsString());
+    {
+        QVariantMap parameterMap;
+        parameterMap.insert(QStringLiteral("name"), parameter._name);
+        parameterMap.insert(QStringLiteral("value"), parameter.valueAsString());
+        parameters.append(parameterMap);
+    }
     map.insert(QStringLiteral("parameters"), parameters);
 
     if(hasCondition())

@@ -33,9 +33,14 @@ public:
 
     GraphTransformAttributeParameters attributeParameters() const override
     {
-        return {{"Node Attribute", {ElementType::Node, ValueType::String,
-            QObject::tr("Each edge's source and target nodes have the selected attribute's value compared. "
-            "If they differ, the edge is removed. This has the effect of grouping similar nodes into components.")}}};
+        return
+        {
+            {
+                "Node Attribute", ElementType::Node, ValueType::String,
+                QObject::tr("Each edge's source and target nodes have the selected attribute's value compared. "
+                    "If they differ, the edge is removed. This has the effect of grouping similar nodes into components.")
+            }
+        };
     }
 
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;

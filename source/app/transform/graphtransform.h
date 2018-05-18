@@ -91,8 +91,10 @@ public:
     virtual QString description() const = 0;
     virtual ElementType elementType() const { return ElementType::None; }
     virtual GraphTransformAttributeParameters attributeParameters() const { return {}; }
+    GraphTransformAttributeParameter attributeParameter(const QString& parameterName) const;
     virtual bool requiresCondition() const { return false; }
     virtual GraphTransformParameters parameters() const { return {}; }
+    GraphTransformParameter parameter(const QString& parameterName) const;
     virtual DeclaredAttributes declaredAttributes() const { return {}; }
 
     virtual std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const = 0;

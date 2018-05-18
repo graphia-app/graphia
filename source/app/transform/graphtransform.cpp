@@ -38,3 +38,25 @@ bool GraphTransform::hasUnknownAttributes(const std::vector<QString>& referenced
 
     return unknownAttributes;
 }
+
+GraphTransformAttributeParameter GraphTransformFactory::attributeParameter(const QString& parameterName) const
+{
+    for(const auto& attributeParameter : attributeParameters())
+    {
+        if(attributeParameter.name() == parameterName)
+            return attributeParameter;
+    }
+
+    return {};
+}
+
+GraphTransformParameter GraphTransformFactory::parameter(const QString& parameterName) const
+{
+    for(const auto& parameter : parameters())
+    {
+        if(parameter.name() == parameterName)
+            return parameter;
+    }
+
+    return {};
+}
