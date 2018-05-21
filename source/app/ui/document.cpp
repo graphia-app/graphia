@@ -1623,8 +1623,8 @@ QVariantMap Document::attribute(const QString& attributeName) const
         {
             auto sourceSimilarAttributes = similarAttributes;
             auto targetSimilarAttributes = similarAttributes;
-            sourceSimilarAttributes.replaceInStrings(QRegularExpression("^"), QStringLiteral("source."));
-            targetSimilarAttributes.replaceInStrings(QRegularExpression("^"), QStringLiteral("target."));
+            sourceSimilarAttributes.replaceInStrings(QRegularExpression(QStringLiteral("^")), QStringLiteral("source."));
+            targetSimilarAttributes.replaceInStrings(QRegularExpression(QStringLiteral("^")), QStringLiteral("target."));
             similarAttributes = sourceSimilarAttributes + targetSimilarAttributes;
             break;
         }
