@@ -313,13 +313,12 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
 {
     target.setPhase(QStringLiteral("MCL Initialising"));
 
-    auto& graph = _graphModel->graph();
-    int nodeCount = graph.numNodes();
+    int nodeCount = target.numNodes();
 
     // Map NodeIds to Matrix index
     std::map<NodeId, size_t> nodeToIndexMap;
     std::map<size_t, NodeId> indexToNodeMap;
-    for(NodeId nodeId : graph.nodeIds())
+    for(NodeId nodeId : target.nodeIds())
     {
         auto index = nodeToIndexMap.size();
         nodeToIndexMap[nodeId] = index;
@@ -329,19 +328,19 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
     MatrixType clusterMatrix(nodeCount, nodeCount);
     blaze::setNumThreads(std::thread::hardware_concurrency());
 
-    clusterMatrix.reserve((graph.numEdges()*2) + nodeCount);
+    clusterMatrix.reserve((target.numEdges() * 2) + nodeCount);
 
     // Populate the Matrix
-    for(NodeId nodeId : graph.nodeIds())
+    for(NodeId nodeId : target.nodeIds())
     {
         auto nodeIndex = nodeToIndexMap[nodeId];
-        auto connectedEdgeIds = graph.edgeIdsForNodeId(nodeId);
+        auto connectedEdgeIds = target.edgeIdsForNodeId(nodeId);
 
         // Add all connected node indexes to sorted set
         std::set<size_t> sortNodeIndexes;
         for(auto connectEdgeId : connectedEdgeIds)
         {
-            auto connectedNodeId = graph.edgeById(connectEdgeId).oppositeId(nodeId);
+            auto connectedNodeId = target.edgeById(connectEdgeId).oppositeId(nodeId);
             sortNodeIndexes.insert(nodeToIndexMap[connectedNodeId]);
         }
         // Add self loop
@@ -590,7 +589,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
             return a.size() > b.size();
         });
 
-    NodeArray<QString> clusterNames(graph);
+    NodeArray<QString> clusterNames(target);
     int clusterNumber = 1;
     for(const auto& cluster : clusters)
     {

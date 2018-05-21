@@ -19,16 +19,16 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
     // Setup the contiguous ids
     std::map<NodeId, int> nodeIdToMatrixIndex;
     std::map<int, NodeId> matrixIndexToNodeId;
-    for(auto& nodeId : _graphModel->graph().nodeIds())
+    for(auto& nodeId : target.nodeIds())
     {
         auto size = static_cast<int>(nodeIdToMatrixIndex.size());
         nodeIdToMatrixIndex[nodeId] = size;
         matrixIndexToNodeId[size - 1] = nodeId;
     }
 
-    NodeArray<float> maxDistances(_graphModel->graph());
+    NodeArray<float> maxDistances(target);
 
-    const auto& nodeIds = _graphModel->graph().nodeIds();
+    const auto& nodeIds = target.nodeIds();
     std::atomic_int progress(0);
     concurrent_for(nodeIds.begin(), nodeIds.end(),
                    [this, &maxDistances, &progress, &target](const NodeId source)
@@ -36,13 +36,13 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
         if(cancelled())
             return;
 
-        NodeArray<float> distance(_graphModel->graph());
-        NodeArray<bool> visited(_graphModel->graph());
+        NodeArray<float> distance(target);
+        NodeArray<bool> visited(target);
 
         auto comparator = [&distance](NodeId a, NodeId b){ return distance[a] > distance[b]; };
         std::priority_queue<NodeId, std::vector<NodeId>, decltype(comparator)> queue(comparator);
 
-        for(auto nodeId : _graphModel->graph().nodeIds())
+        for(auto nodeId : target.nodeIds())
             distance[nodeId] = std::numeric_limits<float>::max();
 
         queue.push(source);
@@ -62,9 +62,9 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
             visited.set(nodeId, true);
 
             auto nodeWeight = distance[nodeId];
-            for(EdgeId edgeId : _graphModel->graph().edgeIdsForNodeId(nodeId))
+            for(EdgeId edgeId : target.edgeIdsForNodeId(nodeId))
             {
-                NodeId adjacentNodeId = _graphModel->graph().edgeById(edgeId).oppositeId(nodeId);
+                NodeId adjacentNodeId = target.edgeById(edgeId).oppositeId(nodeId);
                 const int adjacentNodeWeight = 1;
                 if(!visited.get(adjacentNodeId) && (nodeWeight + adjacentNodeWeight < distance[adjacentNodeId]))
                 {
@@ -75,7 +75,7 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
         }
 
         float maxDistance = 0.0f;
-        for(auto& nodeId : _graphModel->graph().nodeIds())
+        for(auto& nodeId : target.nodeIds())
         {
             if(distance[nodeId] != std::numeric_limits<float>::max())
                 maxDistance = std::max(distance[nodeId], maxDistance);
