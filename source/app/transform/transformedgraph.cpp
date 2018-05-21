@@ -125,9 +125,6 @@ void TransformedGraph::rebuild()
                 _cache.clear();
             }
 
-            for(const auto& attribute : transform->attributes())
-                updatedAttributeNames.append(attribute);
-
             setCurrentTransform(nullptr);
 
             if(_cancelled)
@@ -137,6 +134,7 @@ void TransformedGraph::rebuild()
             {
                 result._newAttributes.emplace(attributeName, _graphModel->attributeValueByName(attributeName));
                 _cache.attributeAdded(attributeName);
+                updatedAttributeNames.append(attributeName);
             }
 
             newCache.add(std::move(result));

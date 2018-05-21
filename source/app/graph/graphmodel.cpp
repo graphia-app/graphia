@@ -300,7 +300,6 @@ void GraphModel::buildTransforms(const QStringList& transforms, ICommand* comman
         if(graphTransform != nullptr)
         {
             graphTransform->setConfig(graphTransformConfig);
-            graphTransform->setAttributes(u::keysFor(factory->declaredAttributes()));
             graphTransform->setRepeating(graphTransformConfig.isFlagSet(QStringLiteral("repeating")));
             graphTransform->setInfo(&_->_transformInfos[index]);
             _->_transformedGraph.addTransform(std::move(graphTransform));
