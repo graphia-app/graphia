@@ -310,6 +310,7 @@ void Document::setTransforms(const QStringList& transforms)
 void Document::setVisualisations(const QStringList& visualisations)
 {
     _visualisations = visualisations;
+    _graphModel->buildVisualisations(_visualisations);
 
     _visualisationsModel.clear();
     for(const auto& visualisation : visualisations)
@@ -1314,7 +1315,6 @@ void Document::onFoundNodeIdsChanged(const SearchManager* searchManager)
 void Document::onGraphChanged(const Graph*, bool)
 {
     // If the graph changes then so do our visualisations
-    _graphModel->buildVisualisations(_visualisations);
     setVisualisations(_visualisations);
 
     setSaveRequired();
