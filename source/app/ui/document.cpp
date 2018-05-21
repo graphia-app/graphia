@@ -1613,7 +1613,7 @@ QVariantMap Document::attribute(const QString& attributeName) const
 
         // For similarity purposes, treat Int and Float as the same
         if(valueType.anyOf(ValueType::Int, ValueType::Float))
-            valueType.set(ValueType::Int, ValueType::Float);
+            valueType.set(ValueType::Numerical);
 
         auto similarAttributes = _graphModel->availableAttributes(attribute.elementType(), *valueType);
         switch(parsedAttributeName._type)
