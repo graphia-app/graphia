@@ -26,8 +26,8 @@ public:
 
 private:
     QString _name;
-    ElementType _elementType;
-    ValueType _valueType;
+    ElementType _elementType = ElementType::None;
+    ValueType _valueType = ValueType::Unknown;
     QString _description;
 };
 

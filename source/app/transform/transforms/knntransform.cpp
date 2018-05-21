@@ -33,12 +33,12 @@ bool KNNTransform::apply(TransformedGraph& target) const
     bool ignoreTails = attribute.testFlag(AttributeFlag::IgnoreTails);
     bool ascending = config().parameterHasValue(QStringLiteral("Rank Order"), QStringLiteral("Ascending"));
 
-    std::function<bool(EdgeId, EdgeId)> compFn;
+    std::function<bool(const EdgeId&, const EdgeId&)> compFn;
 
     if(ascending)
-        compFn = [&attribute](auto a, auto b) { return attribute.numericValueOf(a) > attribute.numericValueOf(b); };
+        compFn = [&attribute](const auto& a, const auto& b) { return attribute.numericValueOf(a) > attribute.numericValueOf(b); };
     else
-        compFn = [&attribute](auto a, auto b) { return attribute.numericValueOf(a) < attribute.numericValueOf(b); };
+        compFn = [&attribute](const auto& a, const auto& b) { return attribute.numericValueOf(a) < attribute.numericValueOf(b); };
 
     struct KnnRank
     {
@@ -114,11 +114,11 @@ bool KNNTransform::apply(TransformedGraph& target) const
 
     _graphModel->createAttribute(QObject::tr("k-NN Source Rank"))
         .setDescription(QObject::tr("The ranking given by k-NN, relative to its source node."))
-        .setIntValueFn([ranks](EdgeId edgeId) { return ranks[edgeId]._source; });
+        .setIntValueFn([ranks](EdgeId edgeId) { return static_cast<int>(ranks[edgeId]._source); });
 
     _graphModel->createAttribute(QObject::tr("k-NN Target Rank"))
         .setDescription(QObject::tr("The ranking given by k-NN, relative to its target node."))
-        .setIntValueFn([ranks](EdgeId edgeId) { return ranks[edgeId]._target; });
+        .setIntValueFn([ranks](EdgeId edgeId) { return static_cast<int>(ranks[edgeId]._target); });
 
     _graphModel->createAttribute(QObject::tr("k-NN Mean Rank"))
         .setDescription(QObject::tr("The mean ranking given by k-NN."))

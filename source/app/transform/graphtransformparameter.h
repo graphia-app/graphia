@@ -37,11 +37,11 @@ public:
 
 private:
     QString _name;
-    ValueType _type;
+    ValueType _type = ValueType::Unknown;
     QString _description;
     QVariant _initialValue;
-    double _min;
-    double _max;
+    double _min = std::numeric_limits<double>::max();
+    double _max = std::numeric_limits<double>::lowest();
 };
 
 using GraphTransformParameters = std::vector<GraphTransformParameter>;
