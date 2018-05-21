@@ -8,7 +8,7 @@ class MCLTransform : public GraphTransform
 {
 public:
     explicit MCLTransform(GraphModel* graphModel) : _graphModel(graphModel) {}
-    bool apply(TransformedGraph &target) const override;
+    bool apply(TransformedGraph& target) const override;
 
 private:
     void enableDebugIteration(){ _debugIteration = true; }

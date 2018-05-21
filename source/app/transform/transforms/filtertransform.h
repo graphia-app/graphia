@@ -17,7 +17,7 @@ public:
         _invert(invert)
     {}
 
-    bool apply(TransformedGraph &target) const override;
+    bool apply(TransformedGraph& target) const override;
 
 private:
     ElementType _elementType;

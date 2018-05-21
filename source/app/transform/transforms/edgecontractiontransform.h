@@ -13,7 +13,7 @@ public:
         _graphModel(&graphModel)
     {}
 
-    bool apply(TransformedGraph &target) const override;
+    bool apply(TransformedGraph& target) const override;
 
 private:
     const GraphModel* _graphModel;
