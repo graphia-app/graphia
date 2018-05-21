@@ -7,8 +7,10 @@ def qdump__ElementId(d, value):
 
     if v >= 0:
         d.putValue(v)
-    else:
+    elif v == -1:
         d.putValue("null")
+    else:
+        d.putValue("INVALID")
 
     d.putNumChild(0)
 
