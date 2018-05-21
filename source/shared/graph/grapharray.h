@@ -218,7 +218,7 @@ public:
     NodeArray(const IGraphArrayClient& graph, const Element& defaultValue) :
         GenericGraphArray<NodeId, Element, Locking>(graph, defaultValue)
     {
-        this->resize(graph.nextNodeId());
+        this->resize(static_cast<int>(graph.nextNodeId()));
         graph.insertNodeArray(this);
     }
 
@@ -267,7 +267,7 @@ public:
     EdgeArray(const IGraphArrayClient& graph, const Element& defaultValue) :
         GenericGraphArray<EdgeId, Element, Locking>(graph, defaultValue)
     {
-        this->resize(graph.nextEdgeId());
+        this->resize(static_cast<int>(graph.nextEdgeId()));
         graph.insertEdgeArray(this);
     }
 
