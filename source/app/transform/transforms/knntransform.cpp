@@ -33,12 +33,12 @@ bool KNNTransform::apply(TransformedGraph& target) const
     bool ignoreTails = attribute.testFlag(AttributeFlag::IgnoreTails);
     bool ascending = config().parameterHasValue(QStringLiteral("Rank Order"), QStringLiteral("Ascending"));
 
-    std::function<bool(const EdgeId&, const EdgeId&)> compFn;
+    std::function<bool(EdgeId, EdgeId)> compFn;
 
     if(ascending)
-        compFn = [&attribute](const auto& a, const auto& b) { return attribute.numericValueOf(a) > attribute.numericValueOf(b); };
+        compFn = [&attribute](auto a, auto b) { return attribute.numericValueOf(a) > attribute.numericValueOf(b); };
     else
-        compFn = [&attribute](const auto& a, const auto& b) { return attribute.numericValueOf(a) < attribute.numericValueOf(b); };
+        compFn = [&attribute](auto a, auto b) { return attribute.numericValueOf(a) < attribute.numericValueOf(b); };
 
     struct KnnRank
     {
@@ -65,7 +65,7 @@ bool KNNTransform::apply(TransformedGraph& target) const
         }
 
         auto kthPlus1 = edgeIds.begin() + std::min(k, edgeIds.size());
-        std::partial_sort(edgeIds.begin(), kthPlus1, edgeIds.end(), compFn);
+        std::partial_sort(edgeIds.begin(), kthPlus1, edgeIds.end(), compFn); // NOLINT
 
         for(auto it = edgeIds.begin(); it != kthPlus1; ++it)
         {
