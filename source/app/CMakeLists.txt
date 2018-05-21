@@ -93,6 +93,7 @@ list(APPEND HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/eccentricitytransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/edgecontractiontransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/separatebyattributetransform.h
+    ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/knntransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/filtertransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/mcltransform.h
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/pageranktransform.h
@@ -188,6 +189,7 @@ list(APPEND APP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/eccentricitytransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/edgecontractiontransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/separatebyattributetransform.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/knntransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/filtertransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/mcltransform.cpp
     ${CMAKE_CURRENT_LIST_DIR}/transform/transforms/pageranktransform.cpp
