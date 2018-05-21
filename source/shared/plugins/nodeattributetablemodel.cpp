@@ -236,10 +236,15 @@ bool NodeAttributeTableModel::columnIsFloatingPoint(const QString& columnName) c
 
 void NodeAttributeTableModel::onAttributeAdded(const QString& name)
 {
+    // We're only interested in node attributes
+    if(_document->graphModel()->attributeByName(name)->elementType() != ElementType::Node)
+        return;
+
     // Recreate rolenames in the model if the attribute is new
     if(!u::contains(_roleNames.values(), name.toUtf8()))
     {
         updateRoleNames();
+        Q_ASSERT(u::contains(_roleNames.values(), name.toUtf8()));
         addRole(_roleNames.key(name.toUtf8()));
 
         auto index = _columnNames.indexOf(name);
