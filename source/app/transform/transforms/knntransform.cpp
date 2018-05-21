@@ -122,7 +122,7 @@ bool KNNTransform::apply(TransformedGraph& target) const
 
     _graphModel->createAttribute(QObject::tr("k-NN Mean Rank"))
         .setDescription(QObject::tr("The mean ranking given by k-NN."))
-        .setIntValueFn([ranks](EdgeId edgeId) { return ranks[edgeId]._mean; });
+        .setFloatValueFn([ranks](EdgeId edgeId) { return ranks[edgeId]._mean; });
 
     return anyEdgeRemoved;
 }
