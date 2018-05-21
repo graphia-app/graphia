@@ -55,7 +55,7 @@ public:
         };
     }
 
-    DeclaredAttributes declaredAttributes() const override
+    DefaultVisualisations defaultVisualisations() const override
     {
         return {{"MCL Cluster", {ValueType::String, QObject::tr("Colour")}}};
     }

@@ -30,7 +30,7 @@ Window
     property var _transform: undefined
     property int _numParameters: _transform !== undefined ? _transform.parameterNames.length : 0
     property int _numAttributeParameters: _transform !== undefined ? _transform.attributeParameterNames.length : 0
-    property int _numDeclaredAttributes: _transform !== undefined ? Object.keys(_transform.declaredAttributes).length : 0
+    property int _numDefaultVisualisations: _transform !== undefined ? Object.keys(_transform.defaultVisualisations).length : 0
 
     Preferences
     {
@@ -86,8 +86,8 @@ Window
                         if(_transform.attributeParameterNames !== undefined)
                             attributeParametersRepeater.model = _transform.attributeParameterNames;
 
-                        if(_transform.declaredAttributes !== undefined)
-                            visualisationsRepeater.model = Object.keys(_transform.declaredAttributes);
+                        if(_transform.defaultVisualisations !== undefined)
+                            visualisationsRepeater.model = Object.keys(_transform.defaultVisualisations);
                     }
 
                     description.update();
@@ -487,7 +487,7 @@ Window
                         ColumnLayout
                         {
                             id: visualisations
-                            enabled: _transform !== undefined && _numDeclaredAttributes > 0
+                            enabled: _transform !== undefined && _numDefaultVisualisations > 0
                             visible: enabled
 
                             Layout.fillWidth: visible
@@ -511,8 +511,8 @@ Window
                                 {
                                     ColumnLayout
                                     {
-                                        property var declaredAttribute: _transform !== undefined ?
-                                                                            _transform.declaredAttributes[modelData] : undefined
+                                        property var visualisation: _transform !== undefined ?
+                                            _transform.defaultVisualisations[modelData] : undefined
 
                                         RowLayout
                                         {
@@ -542,10 +542,10 @@ Window
 
                                         Component.onCompleted:
                                         {
-                                            var visualisationChannelNames = document.availableVisualisationChannelNames(declaredAttribute.valueType);
+                                            var visualisationChannelNames = document.availableVisualisationChannelNames(visualisation.valueType);
                                             visualisationsComboBox.model = ["None"].concat(visualisationChannelNames);
-                                            visualisationsComboBox.currentIndex = visualisationsComboBox.model.indexOf(declaredAttribute.defaultVisualisation);
-                                            visualisations._visualisations[modelData] = declaredAttribute.defaultVisualisation;
+                                            visualisationsComboBox.currentIndex = visualisationsComboBox.model.indexOf(visualisation.channelName);
+                                            visualisations._visualisations[modelData] = visualisation.channelName;
                                         }
                                     }
                                 }
@@ -707,7 +707,7 @@ Window
     {
         defaultVisualisations = [];
 
-        Object.keys(_transform.declaredAttributes).forEach(function(attributeName)
+        Object.keys(_transform.defaultVisualisations).forEach(function(attributeName)
         {
             var channelName = visualisations.selectedVisualisation(attributeName);
 
@@ -715,7 +715,7 @@ Window
             {
                 var expression = "\"" + attributeName + "\" \"" + channelName + "\"";
 
-                var valueType = _transform.declaredAttributes[attributeName].valueType;
+                var valueType = _transform.defaultVisualisations[attributeName].valueType;
                 var parameters = document.visualisationDefaultParameters(valueType,
                                                                          channelName);
 

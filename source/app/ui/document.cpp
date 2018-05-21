@@ -1472,15 +1472,15 @@ QVariantMap Document::transform(const QString& transformName) const
         map.insert(QStringLiteral("parameterNames"), parameterNames);
         map.insert(QStringLiteral("parameters"), parameters);
 
-        QVariantMap declaredAttributes;
-        for(const auto& declaredAttribute : transformFactory->declaredAttributes())
+        QVariantMap defaultVisualisations;
+        for(const auto& defaultVisualisation : transformFactory->defaultVisualisations())
         {
-            QVariantMap declaredAttributeMap;
-            declaredAttributeMap.insert(QStringLiteral("valueType"), static_cast<int>(declaredAttribute.second._valueType));
-            declaredAttributeMap.insert(QStringLiteral("defaultVisualisation"), declaredAttribute.second._defaultVisualisation);
-            declaredAttributes.insert(declaredAttribute.first, declaredAttributeMap);
+            QVariantMap defaultVisualisationMap;
+            defaultVisualisationMap.insert(QStringLiteral("valueType"), static_cast<int>(defaultVisualisation.second._valueType));
+            defaultVisualisationMap.insert(QStringLiteral("channelName"), defaultVisualisation.second._channelName);
+            defaultVisualisations.insert(defaultVisualisation.first, defaultVisualisationMap);
         }
-        map.insert(QStringLiteral("declaredAttributes"), declaredAttributes);
+        map.insert(QStringLiteral("defaultVisualisations"), defaultVisualisations);
     }
 
     return map;

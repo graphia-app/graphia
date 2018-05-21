@@ -65,13 +65,13 @@ private:
     GraphTransformConfig _config;
 };
 
-struct DeclaredAttribute
+struct DefaultVisualisation
 {
     ValueType _valueType;
-    QString _defaultVisualisation;
+    QString _channelName;
 };
 
-using DeclaredAttributes = std::map<QString, DeclaredAttribute>;
+using DefaultVisualisations = std::map<QString, DefaultVisualisation>;
 
 class GraphTransformFactory
 {
@@ -92,7 +92,7 @@ public:
     virtual bool requiresCondition() const { return false; }
     virtual GraphTransformParameters parameters() const { return {}; }
     GraphTransformParameter parameter(const QString& parameterName) const;
-    virtual DeclaredAttributes declaredAttributes() const { return {}; }
+    virtual DefaultVisualisations defaultVisualisations() const { return {}; }
 
     virtual std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const = 0;
 

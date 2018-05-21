@@ -34,7 +34,7 @@ public:
     {
         return {};
     }
-    DeclaredAttributes declaredAttributes() const override
+    DefaultVisualisations defaultVisualisations() const override
     {
         return {{"Node Eccentricity", {ValueType::Float, QObject::tr("Colour")}}};
     }

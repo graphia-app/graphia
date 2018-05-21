@@ -44,7 +44,7 @@ public:
     {
         return {};
     }
-    DeclaredAttributes declaredAttributes() const override
+    DefaultVisualisations defaultVisualisations() const override
     {
         return {{"Node PageRank", {ValueType::Float, QObject::tr("Colour")}}};
     }

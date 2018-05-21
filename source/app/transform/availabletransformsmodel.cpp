@@ -31,7 +31,7 @@ QVariant AvailableTransformsModel::data(const QModelIndex& index, int role) cons
         {
         case Roles::TransformTypeRole:
         {
-            if(!transform->declaredAttributes().empty())
+            if(!transform->defaultVisualisations().empty())
                 return tr("Analyses");
 
             return tr("Transforms");

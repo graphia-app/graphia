@@ -577,7 +577,7 @@ void GraphModel::patchAttributeNames(QStringList& transforms, QStringList& visua
 
         auto& factory = _->_graphTransformFactories.at(graphTransformConfig._action);
 
-        auto newAttributes = u::keysFor(factory->declaredAttributes());
+        auto newAttributes = u::keysFor(factory->defaultVisualisations());
 
         for(const auto& name : newAttributes)
         {
