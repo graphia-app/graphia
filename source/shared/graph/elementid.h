@@ -1,6 +1,8 @@
 #ifndef ELEMENTID_H
 #define ELEMENTID_H
 
+#include <cassert>
+
 template<typename T> class ElementId
 {
 private:
@@ -29,7 +31,7 @@ public:
     T operator+(int value) const { return _value + value; }
     T operator-(int value) const { return _value - value; }
 
-    bool isNull() const { return _value == NullValue; }
+    bool isNull() const { assert(_value >= NullValue); return _value == NullValue; }
     void setToNull() { _value = NullValue; }
 };
 
