@@ -1433,6 +1433,14 @@ AvailableAttributesModel* Document::availableAttributes(int elementTypes, int va
     return nullptr;
 }
 
+bool Document::attributeExists(const QString& attributeName) const
+{
+    if(_graphModel != nullptr)
+        return _graphModel->attributeExists(attributeName);
+
+    return false;
+}
+
 QVariantMap Document::transform(const QString& transformName) const
 {
     QVariantMap map;

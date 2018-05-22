@@ -269,8 +269,17 @@ function Create(transform)
 
                     var parameterData = {};
                     parameterData.valueType = ValueType.StringList;
-                    parameterData.initialValue = document.attribute(attribute).similar;
-                    parameterData.initialIndex = parameterData.initialValue.indexOf(attribute);
+
+                    if(document.attributeExists(attribute))
+                    {
+                        parameterData.initialValue = document.attribute(attribute).similar;
+                        parameterData.initialIndex = parameterData.initialValue.indexOf(attribute);
+                    }
+                    else
+                    {
+                        parameterData.initialValue = ["Unknown Attribute"];
+                        parameterData.initialIndex = 0;
+                    }
 
                     var parameterObject = createTransformParameter(document,
                         locked ? null : parent, // If locked, still create the object, but don't display it

@@ -388,6 +388,7 @@ public:
 
     Q_INVOKABLE AvailableAttributesModel* availableAttributes(int elementTypes = static_cast<int>(ElementType::All),
                                                               int valueTypes = static_cast<int>(ValueType::All)) const;
+    Q_INVOKABLE bool attributeExists(const QString& attributeName) const;
     Q_INVOKABLE QVariantMap attribute(const QString& attributeName) const;
 
     Q_INVOKABLE QVariantMap parseGraphTransform(const QString& transform) const;
