@@ -21,6 +21,7 @@
 #include "transform/transforms/contractbyattributetransform.h"
 #include "transform/transforms/separatebyattributetransform.h"
 #include "transform/transforms/knntransform.h"
+#include "transform/transforms/spanningtreetransform.h"
 #include "transform/graphtransformconfigparser.h"
 
 #include "ui/visualisations/colorvisualisationchannel.h"
@@ -174,6 +175,7 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     _->_graphTransformFactories.emplace(tr("Contract By Attribute"),    std::make_unique<ContractByAttributeTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Separate By Attribute"),    std::make_unique<SeparateByAttributeTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("k-NN"),                     std::make_unique<KNNTransformFactory>(this));
+    _->_graphTransformFactories.emplace(tr("Spanning Forest"),          std::make_unique<SpanningTreeTransformFactory>(this));
 
     _->_visualisationChannels.emplace(tr("Colour"), std::make_unique<ColorVisualisationChannel>());
     _->_visualisationChannels.emplace(tr("Size"), std::make_unique<SizeVisualisationChannel>());
