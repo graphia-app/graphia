@@ -30,7 +30,7 @@ public:
     {
         return QObject::tr("Reduce the number of edges in the graph using the "
             R"(<a href="https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm">)"
-            R"(k Nearest Neighbours algorithm</a>.)");
+            R"(k-nearest neighbours</a> algorithm.)");
     }
 
     GraphTransformAttributeParameters attributeParameters() const override
