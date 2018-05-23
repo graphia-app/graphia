@@ -32,7 +32,7 @@ GridLayout
     property bool fillWidth: false
     property int _preferredWidth:
         (root.direction === Qt.Horizontal &&
-         valueType !== ValueType.StringList) ? // Always make the ComboBox wide
+         (valueType & (ValueType.StringList|ValueType.String)) === 0) ? // Always make the string types wide
             90 : 160
     implicitWidth: !fillWidth ? _preferredWidth : 0.0
 
