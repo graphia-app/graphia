@@ -131,6 +131,12 @@ GridLayout
                 updateValue();
         }
 
+        onFocusChanged:
+        {
+            if(focus)
+                selectAll();
+        }
+
         onEditingFinished: { updateValue(); }
     }
 
