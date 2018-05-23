@@ -9,6 +9,7 @@ DEFINE_QML_ENUM(
                 Node        = 0x2,
                 Edge        = 0x4,
                 Component   = 0x8,
+                NodeAndEdge = Node|Edge,
                 All = Node|Edge|Component);
 
 QString elementTypeAsString(ElementType elementType);
