@@ -81,7 +81,7 @@ public:
     Q_INVOKABLE virtual bool columnIsFloatingPoint(const QString& columnName) const;
 
 public slots:
-    void onAttributesChanged(const QStringList& addedNames, const QStringList& removedNames);
+    void onAttributesChanged(const QStringList& added, const QStringList& removed);
     void onAttributeValuesChanged(const QString& name);
 
 signals:

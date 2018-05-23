@@ -35,7 +35,8 @@ bool AttributeSynthesisTransform::apply(TransformedGraph& target) const
 
     QRegularExpression regex(regexString);
 
-    if(newAttributeName.isEmpty() || !newAttributeName.contains(QRegularExpression("^[a-zA-Z_][a-zA-Z0-9_ ]*$")))
+    auto attributeNameRegex = QRegularExpression(QStringLiteral("^[a-zA-Z_][a-zA-Z0-9_ ]*$"));
+    if(newAttributeName.isEmpty() || !newAttributeName.contains(attributeNameRegex))
     {
         addAlert(AlertType::Error, QObject::tr("Invalid Attribute Name: '%1'").arg(newAttributeName));
         return false;

@@ -228,9 +228,10 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
+    auto byteArrayRoleNames =_roleNames.values();
     QStringList currentRoleNames;
     currentRoleNames.reserve(_roleNames.size());
-    for(const auto& roleName : _roleNames.values())
+    for(const auto& roleName : qAsConst(byteArrayRoleNames))
         currentRoleNames.append(roleName);
 
     Q_ASSERT(added.isEmpty() || currentRoleNames.toSet().intersect(added.toSet()).isEmpty());
