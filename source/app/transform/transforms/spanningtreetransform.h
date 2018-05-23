@@ -9,8 +9,6 @@
 class SpanningTreeTransform : public GraphTransform
 {
 public:
-    explicit SpanningTreeTransform() {}
-
     bool apply(TransformedGraph& target) const override;
 };
 
