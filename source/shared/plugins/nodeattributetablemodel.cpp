@@ -228,17 +228,20 @@ void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, cons
 {
     std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
-#ifdef _DEBUG
     QStringList currentRoleNames;
     currentRoleNames.reserve(_roleNames.size());
     for(const auto& roleName : _roleNames.values())
         currentRoleNames.append(roleName);
 
     Q_ASSERT(added.isEmpty() || currentRoleNames.toSet().intersect(added.toSet()).isEmpty());
-    Q_ASSERT(removed.isEmpty() || !removed.toSet().intersect(currentRoleNames.toSet()).isEmpty());
-#endif
 
-    for(const auto& name : removed)
+    // Ignore attribute names we aren't using (they may not be node attributes)
+    auto filteredRemoved = currentRoleNames.toSet().intersect(removed.toSet()).toList();
+
+    if(added.isEmpty() && filteredRemoved.isEmpty())
+        return;
+
+    for(const auto& name : filteredRemoved)
     {
         auto columnIndex = _columnNames.indexOf(name);
         int role = _roleNames.key(name.toUtf8());
