@@ -98,9 +98,6 @@ function Create(transform)
     {
         function templated(text)
         {
-            if(!text || text.length === 0)
-                return "";
-
             if(text[0] === '$')
             {
                 text = text.substring(1);
@@ -207,9 +204,6 @@ function Create(transform)
 
                     function addOperand(operand, opposite)
                     {
-                        if(!operand || operand.length === 0)
-                            return;
-
                         if(operand[0] === '$')
                             labelText += sanitiseAttribute(operand);
                         else
