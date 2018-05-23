@@ -51,8 +51,8 @@ protected:
     virtual QVariant dataValue(int row, int role) const;
 
 private:
-    void addRole(int role);
-    void removeRole(int role);
+    void onRoleAdded(int role);
+    void onRoleRemoved(int role);
     void updateRole(int role);
     void updateColumn(int role, Column& column);
     void update();
@@ -81,8 +81,7 @@ public:
     Q_INVOKABLE virtual bool columnIsFloatingPoint(const QString& columnName) const;
 
 public slots:
-    void onAttributeAdded(const QString& name);
-    void onAttributeRemoved(const QString& name);
+    void onAttributesChanged(const QStringList& addedNames, const QStringList& removedNames);
     void onAttributeValuesChanged(const QString& name);
 
 signals:

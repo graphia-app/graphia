@@ -40,6 +40,7 @@
 #include "shared/utils/utils.h"
 #include "shared/utils/pair_iterator.h"
 #include "shared/utils/flags.h"
+#include "shared/utils/string.h"
 
 #include <QRegularExpression>
 
@@ -893,15 +894,10 @@ void GraphModel::onTransformedGraphChanged(const Graph* graph)
     findSharedAttributeValues(graph, _->_attributes);
 
     // Compare with previous Dynamic attributes
-    // Check for added
-    auto addedAttributeNames = u::setDifference(u::keysFor(_->_attributes), _->_previousDynamicAttributeNames);
-    for(auto& name : addedAttributeNames)
-        emit attributeAdded(name);
-
-    // Check for removed
     auto removedAttributeNames = u::setDifference(_->_previousDynamicAttributeNames, u::keysFor(_->_attributes));
-    for(auto& name : removedAttributeNames)
-        emit attributeRemoved(name);
+    auto addedAttributeNames = u::setDifference(u::keysFor(_->_attributes), _->_previousDynamicAttributeNames);
+
+    emit attributesChanged(u::toQStringList(addedAttributeNames), u::toQStringList(removedAttributeNames));
 }
 
 void GraphModel::onAttributeValuesChanged(QStringList attributeNames)

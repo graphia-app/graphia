@@ -138,8 +138,7 @@ private slots:
 signals:
     void visualsWillChange();
     void visualsChanged();
-    void attributeAdded(const QString& name);
-    void attributeRemoved(const QString& name);
+    void attributesChanged(const QStringList& addedNames, const QStringList& removedNames);
     void attributeValuesChanged(const QString& name);
 };
 

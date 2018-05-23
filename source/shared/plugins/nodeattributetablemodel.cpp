@@ -23,10 +23,8 @@ void NodeAttributeTableModel::initialise(IDocument* document, UserNodeData* user
     auto graphModel = _document->graphModel();
 
     auto modelQObject = dynamic_cast<const QObject*>(graphModel);
-    connect(modelQObject, SIGNAL(attributeAdded(const QString&)),
-            this, SLOT(onAttributeAdded(const QString&)), Qt::DirectConnection);
-    connect(modelQObject, SIGNAL(attributeRemoved(const QString&)),
-            this, SLOT(onAttributeRemoved(const QString&)), Qt::DirectConnection);
+    connect(modelQObject, SIGNAL(attributesChanged(const QStringList&, const QStringList&)),
+            this, SLOT(onAttributesChanged(const QStringList&, const QStringList&)), Qt::DirectConnection);
     connect(modelQObject, SIGNAL(attributeValuesChanged(const QString&)),
             this, SLOT(onAttributeValuesChanged(const QString&)), Qt::DirectConnection);
 
@@ -66,10 +64,8 @@ QVariant NodeAttributeTableModel::dataValue(int row, int role) const
     return {};
 }
 
-void NodeAttributeTableModel::addRole(int role)
+void NodeAttributeTableModel::onRoleAdded(int role)
 {
-    std::unique_lock<std::recursive_mutex> lock(_updateMutex);
-
     size_t index = role - (Qt::UserRole + 1);
 
     if(index < _pendingData.size())
@@ -78,20 +74,14 @@ void NodeAttributeTableModel::addRole(int role)
         _pendingData.resize(index + 1);
 
     updateColumn(role, _pendingData.at(index));
-
-    QMetaObject::invokeMethod(this, "onUpdateComplete");
 }
 
-void NodeAttributeTableModel::removeRole(int role)
+void NodeAttributeTableModel::onRoleRemoved(int role)
 {
-    std::unique_lock<std::recursive_mutex> lock(_updateMutex);
-
     size_t index = role - (Qt::UserRole + 1);
 
     Q_ASSERT(index < _pendingData.size());
     _pendingData.erase(_pendingData.begin() + index);
-
-    QMetaObject::invokeMethod(this, "onUpdateComplete");
 }
 
 void NodeAttributeTableModel::updateRole(int role)
@@ -234,38 +224,45 @@ bool NodeAttributeTableModel::columnIsFloatingPoint(const QString& columnName) c
     return false;
 }
 
-void NodeAttributeTableModel::onAttributeAdded(const QString& name)
+void NodeAttributeTableModel::onAttributesChanged(const QStringList& added, const QStringList& removed)
 {
-    // We're only interested in node attributes
-    if(_document->graphModel()->attributeByName(name)->elementType() != ElementType::Node)
-        return;
+    std::unique_lock<std::recursive_mutex> lock(_updateMutex);
 
-    // Recreate rolenames in the model if the attribute is new
-    if(!u::contains(_roleNames.values(), name.toUtf8()))
+#ifdef _DEBUG
+    QStringList currentRoleNames;
+    currentRoleNames.reserve(_roleNames.size());
+    for(const auto& roleName : _roleNames.values())
+        currentRoleNames.append(roleName);
+
+    Q_ASSERT(added.isEmpty() || currentRoleNames.toSet().intersect(added.toSet()).isEmpty());
+    Q_ASSERT(removed.isEmpty() || !removed.toSet().intersect(currentRoleNames.toSet()).isEmpty());
+#endif
+
+    for(const auto& name : removed)
     {
-        updateRoleNames();
-        Q_ASSERT(u::contains(_roleNames.values(), name.toUtf8()));
-        addRole(_roleNames.key(name.toUtf8()));
-
-        auto index = _columnNames.indexOf(name);
-        if(index >= 0)
-            emit columnAdded(index, name);
-    }
-}
-
-void NodeAttributeTableModel::onAttributeRemoved(const QString& name)
-{
-    if(u::contains(_roleNames.values(), name.toUtf8()))
-    {
-        auto index = _columnNames.indexOf(name);
-
+        auto columnIndex = _columnNames.indexOf(name);
         int role = _roleNames.key(name.toUtf8());
-        updateRoleNames();
-        removeRole(role);
 
-        if(index >= 0)
-            emit columnRemoved(index, name);
+        onRoleRemoved(role);
+        emit columnRemoved(columnIndex, name);
     }
+
+    updateRoleNames();
+
+    for(const auto& name : added)
+    {
+        // We only care about node attributes, obviously
+        if(_document->graphModel()->attributeByName(name)->elementType() != ElementType::Node)
+            continue;
+
+        auto columnIndex = _columnNames.indexOf(name);
+        int role = _roleNames.key(name.toUtf8());
+
+        onRoleAdded(role);
+        emit columnAdded(columnIndex, name);
+    }
+
+    QMetaObject::invokeMethod(this, "onUpdateComplete");
 }
 
 void NodeAttributeTableModel::onAttributeValuesChanged(const QString& name)
