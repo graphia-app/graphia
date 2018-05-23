@@ -3,26 +3,17 @@
 
 #include <QString>
 
+#include "shared/utils/typeidentity.h"
+
 #include "thirdparty/json/json_helper.h"
 
 #include <vector>
 #include <limits>
 #include <utility>
 
-class UserDataVector
+class UserDataVector : public TypeIdentity
 {
-public:
-    enum class Type
-    {
-        Unknown,
-        String,
-        Int,
-        Float
-    };
-
 private:
-    Type _type = Type::Unknown;
-
     QString _name;
 
     std::vector<QString> _values;
@@ -44,7 +35,6 @@ public:
     auto begin() const { return _values.begin(); }
     auto end() const { return _values.end(); }
 
-    Type type() const { return _type; }
     const QString& name() const { return _name; }
     int numValues() const { return static_cast<int>(_values.size()); }
     void reserve(int size) { _values.reserve(size); }

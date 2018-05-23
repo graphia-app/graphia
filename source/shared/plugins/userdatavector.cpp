@@ -9,64 +9,17 @@ void UserDataVector::set(size_t index, const QString& value)
 
     _values.at(index) = value;
 
-    // If the value is empty we can't determine its type
-    if(value.isEmpty())
-        return;
+    updateType(value);
 
-    bool conversionSucceeded = false;
-
-    int intValue = value.toInt(&conversionSucceeded);
-    bool isInt = conversionSucceeded;
-
-    double floatValue = value.toDouble(&conversionSucceeded);
-    bool isFloat = conversionSucceeded;
-
-    switch(_type)
+    if(type() == Type::Int)
     {
-    default:
-    case Type::Unknown:
-        if(isInt)
-            _type = Type::Int;
-        else if(isFloat)
-            _type = Type::Float;
-        else
-            _type = Type::String;
-
-        break;
-
-    case Type::Int:
-        if(!isInt)
-        {
-            if(isFloat)
-                _type = Type::Float;
-            else
-                _type = Type::String;
-        }
-
-        break;
-
-    case Type::Float:
-        if(isFloat || isInt)
-            _type = Type::Float;
-        else
-            _type = Type::String;
-
-        break;
-
-    case Type::String:
-        _type = Type::String;
-
-        break;
-    }
-
-    if(isInt)
-    {
+        int intValue = value.toInt();
         _intMin = std::min(_intMin, intValue);
         _intMax = std::max(_intMax, intValue);
     }
-
-    if(isFloat)
+    else if(type() == Type::Float)
     {
+        double floatValue = value.toDouble();
         _floatMin = std::min(_floatMin, floatValue);
         _floatMax = std::max(_floatMax, floatValue);
     }
@@ -84,7 +37,7 @@ json UserDataVector::save() const
 {
     json jsonObject;
 
-    switch(_type)
+    switch(type())
     {
     default:
     case Type::Unknown: jsonObject["type"] = "Unknown"; break;
@@ -118,15 +71,15 @@ bool UserDataVector::load(const QString& name, const json& jsonObject)
         return false;
 
     if(jsonObject["type"] == "Unknown")
-        _type = Type::Unknown;
+        setType(Type::Unknown);
     else if(jsonObject["type"] == "String")
-        _type = Type::String;
+        setType(Type::String);
     else if(jsonObject["type"] == "Int")
-        _type = Type::Int;
+        setType(Type::Int);
     else if(jsonObject["type"] == "Float")
-        _type = Type::Float;
+        setType(Type::Float);
     else
-        _type = Type::Unknown;
+        setType(Type::Unknown);
 
     if(u::contains(jsonObject, "intMin") && u::contains(jsonObject, "intMax"))
     {
