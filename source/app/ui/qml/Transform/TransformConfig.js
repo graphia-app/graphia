@@ -264,10 +264,10 @@ function Create(transform)
                     var parameterData = {};
                     parameterData.valueType = ValueType.StringList;
 
-                    if(document.attributeExists(attribute))
+                    if(document.attributeExists(parameter.attribute))
                     {
-                        parameterData.initialValue = document.attribute(attribute).similar;
-                        parameterData.initialIndex = parameterData.initialValue.indexOf(attribute);
+                        parameterData.initialValue = document.attribute(parameter.attribute).similar;
+                        parameterData.initialIndex = parameterData.initialValue.indexOf(parameter.attribute);
                     }
                     else
                     {
