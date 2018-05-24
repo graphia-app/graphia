@@ -559,8 +559,8 @@ Wizard
             {
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
-                text: qsTr("A contiguious numerical dataframe will automatically be selected from your dataset." +
-                           " If you would like to adjust the dataframe, select the new starting cell below.")
+                text: qsTr("A contiguous numerical dataframe will automatically be selected from your dataset. " +
+                           "If you would like to adjust the dataframe, select the new starting cell below.")
             }
 
             Text
