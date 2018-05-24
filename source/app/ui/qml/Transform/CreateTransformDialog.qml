@@ -60,7 +60,15 @@ Window
                 Layout.fillHeight: true
 
                 showSections: sortRoleName !== "display"
-                sortRoleName: "type"
+                sortRoleName: "category"
+
+                Component.onCompleted:
+                {
+                    // The role name used to be called "type", so if the user still
+                    // has that in their preferences, just hack it to "category"
+                    if(sortRoleName === "type")
+                        sortRoleName = "category";
+                }
 
                 onSelectedValueChanged:
                 {

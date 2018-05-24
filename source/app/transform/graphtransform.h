@@ -23,6 +23,15 @@ class GraphModel;
 class TransformedGraph;
 class Attribute;
 
+enum class GraphTransformCategory
+{
+    Unknown,
+    Analysis,
+    Attribute,
+    Filter,
+    Transform
+};
+
 class GraphTransform : public Cancellable
 {
     friend class GraphModel;
@@ -86,6 +95,7 @@ public:
     virtual ~GraphTransformFactory() = default;
 
     virtual QString description() const = 0;
+    virtual GraphTransformCategory category() const { return GraphTransformCategory::Unknown; }
     virtual ElementType elementType() const { return ElementType::None; }
     virtual GraphTransformAttributeParameters attributeParameters() const { return {}; }
     GraphTransformAttributeParameter attributeParameter(const QString& parameterName) const;

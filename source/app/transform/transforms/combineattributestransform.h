@@ -29,6 +29,8 @@ public:
             "two other attributes.");
     }
 
+    GraphTransformCategory category() const override { return GraphTransformCategory::Attribute; }
+
     GraphTransformAttributeParameters attributeParameters() const override
     {
         return

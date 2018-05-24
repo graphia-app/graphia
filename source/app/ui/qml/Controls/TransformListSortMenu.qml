@@ -23,8 +23,8 @@ MouseArea
             {
                 var items =
                 [
-                    {"Name":    "display"},
-                    {"Type":    "type"}
+                    {"Name":        "display"},
+                    {"Category":    "category"}
                 ];
 
                 items.forEach(function(item)

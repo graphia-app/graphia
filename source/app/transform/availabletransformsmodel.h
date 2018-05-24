@@ -17,7 +17,7 @@ private:
 
     enum Roles
     {
-        TransformTypeRole = Qt::UserRole + 1
+        TransformCategoryRole = Qt::UserRole + 1
     };
 
     const GraphModel* _graphModel = nullptr;

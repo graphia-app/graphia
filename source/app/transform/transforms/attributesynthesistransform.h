@@ -29,6 +29,8 @@ public:
             "an existing source attribute.");
     }
 
+    GraphTransformCategory category() const override { return GraphTransformCategory::Attribute; }
+
     GraphTransformAttributeParameters attributeParameters() const override
     {
         return
