@@ -2,9 +2,6 @@
 #define ATTRIBUTESYNTHESISTRANSFORM_H
 
 #include "transform/graphtransform.h"
-#include "attributes/attribute.h"
-
-#include <vector>
 
 class AttributeSynthesisTransform : public GraphTransform
 {
@@ -64,7 +61,7 @@ public:
             {
                 "Attribute Value",
                 ValueType::String,
-                QObject::tr("The value to assign to the attribute. Capture groups are referenced using \n "
+                QObject::tr("The value to assign to the attribute. Capture groups are referenced using \\n "
                     "syntax, where n is the index of the regex capture group."),
                 "\\1"
             }
