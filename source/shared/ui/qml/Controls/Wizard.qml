@@ -28,7 +28,6 @@ BaseParameterDialog
     onWidthChanged: { content.x = currentIndex * -root.width }
     onHeightChanged: { content.x = currentIndex * -root.width }
 
-
     onCurrentIndexChanged: pageIndicator.requestPaint();
 
     SystemPalette { id: systemPalette }

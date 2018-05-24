@@ -1,18 +1,17 @@
 #include "datarecttablemodel.h"
 
-int DataRectTableModel::rowCount(const QModelIndex &parent) const
+int DataRectTableModel::rowCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
     return static_cast<int>(_data.numRows());
 }
 
-int DataRectTableModel::columnCount(const QModelIndex &parent) const
+int DataRectTableModel::columnCount(const QModelIndex&) const
 {
-    Q_UNUSED(parent);
     return static_cast<int>(_data.numColumns());
 }
 
-QVariant DataRectTableModel::data(const QModelIndex &index, int role) const
+QVariant DataRectTableModel::data(const QModelIndex& index, int role) const
 {
     if(role < Qt::UserRole)
         return {};

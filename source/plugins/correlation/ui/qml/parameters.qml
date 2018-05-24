@@ -2,7 +2,6 @@ import QtQuick 2.7
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 import com.kajeka 1.0
-import QtGraphicalEffects 1.0
 
 import "../../../../shared/ui/qml/Constants.js" as Constants
 import "Controls"
@@ -33,7 +32,7 @@ Wizard
         }
     }
 
-    function isInsideRect(x,y, rect)
+    function isInsideRect(x, y, rect)
     {
         return  x >= rect.x &&
                 x < rect.x + rect.width &&
@@ -53,7 +52,7 @@ Wizard
         {
             var col = tableView.getColumn(i);
             var header = tableView.__listView.headerItem.headerRepeater.itemAt(i);
-            if(col)
+            if(col !== null)
                 runningWidth += col.width;
         }
         var runningHeight = 0;
@@ -507,15 +506,18 @@ Wizard
     Item
     {
         id: dataRectPage
+        property bool _busy: preParser.isRunning || root.animating
 
         Connections
         {
             target: root
             onAnimatingChanged:
             {
-                if(!animating && root.currentItem === dataRectPage)
+                if(!root.animating && root.currentItem === dataRectPage)
+                {
                     if(root.fileUrl !== "" && root.fileType !== "" && preParser.rowCount === 0)
                         preParser.parse();
+                }
             }
         }
 
@@ -568,7 +570,6 @@ Wizard
                 text: qsTr("<b>Note:</b> Dataframes will always end at the last cell of the input")
             }
 
-
             TableView
             {
                 id: dataRectView
@@ -577,7 +578,7 @@ Wizard
                 Layout.fillWidth: true
                 model: preParser.model
                 selectionMode: SelectionMode.NoSelection
-                enabled: !(preParser.isRunning || root.animating)
+                enabled: !dataRectPage._busy
 
                 PropertyAnimation
                 {
@@ -628,8 +629,8 @@ Wizard
                     {
                         anchors.centerIn: parent
                         id: messageText
-                        text: qsTr("Selected frame contains non-numerical data. ") +
-                              qsTr("Next availaible frame selected");
+                        text: qsTr("Selected frame contains non-numerical data. " +
+                             "Next availaible frame selected");
                     }
                 }
 
@@ -637,7 +638,7 @@ Wizard
                 {
                     id: busyIndicator
                     anchors.centerIn: parent
-                    running: preParser.isRunning || root.animating
+                    running: dataRectPage._busy
                 }
 
                 SystemPalette
@@ -647,6 +648,7 @@ Wizard
 
                 itemDelegate: Item
                 {
+                    // Based on Qt source for BaseTableView delegate
                     height: Math.max(16, label.implicitHeight)
                     property int implicitWidth: label.implicitWidth + 16
                     clip: true
@@ -727,6 +729,9 @@ Wizard
                         dataRectView.addColumn(columnComponent.createObject(dataRectView,
                             {"role": i}));
                     }
+                    // Qt.callLater is used as the TableView will not generate the columns until
+                    // next loop has passed and there's no way to reliable listen for the change
+                    // (Thanks TableView)
                     Qt.callLater(resizeColumnsToContentsBugWorkaround, dataRectView);
                     Qt.callLater(scrollToCell, dataRectView, preParser.dataRect.x, preParser.dataRect.y);
                 }

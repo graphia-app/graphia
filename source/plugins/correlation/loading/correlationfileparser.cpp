@@ -158,12 +158,12 @@ bool CorrelationFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
 
 int CorrelationPreParser::rowCount()
 {
-    return _data != nullptr ? static_cast<int>(_data->numRows()) : 0;
+    return static_cast<int>(_data.numRows());
 }
 
 int CorrelationPreParser::columnCount()
 {
-    return _data != nullptr ? static_cast<int>(_data->numColumns()) : 0;
+    return static_cast<int>(_data.numColumns());
 }
 
 CorrelationPreParser::CorrelationPreParser()
@@ -180,25 +180,28 @@ bool CorrelationPreParser::parse()
 {
     QFuture<void> future = QtConcurrent::run([this]()
     {
+        CsvFileParser csvFileParser;
+        TsvFileParser tsvFileParser;
+
         if(_fileType.isEmpty() || _fileUrl.isEmpty())
             return;
 
         if(_fileType == QLatin1String("CorrelationCSV"))
         {
-            if(!_csvFileParser.preParse(_fileUrl))
+            if(!csvFileParser.preParse(_fileUrl))
                 return;
 
-            _data = &(_csvFileParser.tabularData());
+            _data = std::move(csvFileParser.tabularData());
         }
         else if(_fileType == QLatin1String("CorrelationTSV"))
         {
-            if(!_tsvFileParser.preParse(_fileUrl))
+            if(!tsvFileParser.preParse(_fileUrl))
                 return;
 
-            _data = &(_tsvFileParser.tabularData());
+            _data = std::move(tsvFileParser.tabularData());
         }
 
-        _dataRect = findLargestDataRect(*_data);
+        _dataRect = findLargestDataRect(_data);
     });
     _dataParserWatcher.setFuture(future);
     return true;
@@ -208,20 +211,19 @@ void CorrelationPreParser::autoDetectDataRectangle(size_t column, size_t row)
 {
     QFuture<void> future = QtConcurrent::run([this, column, row]()
     {
-        _dataRect = findLargestDataRect(*_data, column, row);
+        _dataRect = findLargestDataRect(_data, column, row);
     });
     _autoDetectDataRectangleWatcher.setFuture(future);
 }
 
 QString CorrelationPreParser::dataAt(int column, int row)
 {
-    return QString::fromStdString(_data->valueAt(column, row));
+    return QString::fromStdString(_data.valueAt(column, row));
 }
 
 void CorrelationPreParser::onDataParsed()
 {
-    if(_data != nullptr)
-        _model.setTabularData(*_data);
+    _model.setTabularData(_data);
 }
 
 DataRectTableModel* CorrelationPreParser::tableModel()

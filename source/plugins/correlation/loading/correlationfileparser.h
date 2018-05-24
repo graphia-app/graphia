@@ -36,12 +36,10 @@ private:
 
     QFutureWatcher<void> _autoDetectDataRectangleWatcher;
     QFutureWatcher<void> _dataParserWatcher;
-    CsvFileParser _csvFileParser;
-    TsvFileParser _tsvFileParser;
     QString _fileType;
     QString _fileUrl;
     QRect _dataRect;
-    TabularData* _data = nullptr;
+    TabularData _data;
     DataRectTableModel _model;
 
     int rowCount();
@@ -51,7 +49,7 @@ public:
     CorrelationPreParser();
     Q_INVOKABLE bool parse();
     Q_INVOKABLE QString dataAt(int column, int row);
-    Q_INVOKABLE void autoDetectDataRectangle(size_t column=0, size_t row=0);
+    Q_INVOKABLE void autoDetectDataRectangle(size_t column = 0, size_t row = 0);
 
     DataRectTableModel* tableModel();
     bool isRunning() { return _autoDetectDataRectangleWatcher.isRunning() || _dataParserWatcher.isRunning(); }
