@@ -117,6 +117,11 @@ bool Document::busy() const
         _graphQuickItem->updating() || _graphQuickItem->interacting();
 }
 
+bool Document::interacting() const
+{
+    return _graphQuickItem->interacting();
+}
+
 bool Document::editable() const
 {
     if(_graphModel == nullptr)
@@ -680,6 +685,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
 
     connect(_graphQuickItem, &GraphQuickItem::updatingChanged, this, &Document::maybeEmitBusyChanged, Qt::DirectConnection);
     connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::maybeEmitBusyChanged, Qt::DirectConnection);
+    connect(_graphQuickItem, &GraphQuickItem::interactingChanged, this, &Document::interactingChanged);
     connect(_graphQuickItem, &GraphQuickItem::viewIsResetChanged, this, &Document::canResetViewChanged);
     connect(_graphQuickItem, &GraphQuickItem::canEnterOverviewModeChanged, this, &Document::canEnterOverviewModeChanged);
     connect(_graphQuickItem, &GraphQuickItem::fpsChanged, this, &Document::fpsChanged);

@@ -438,6 +438,8 @@ Item
                 anchors.fill: parent
                 enabled: !document.graphChanging
 
+                property bool _inComponentMode: !inOverviewMode && numComponents > 1
+
                 Menu
                 {
                     id: contextMenu
@@ -568,7 +570,7 @@ Item
 
             ToolButton
             {
-                property bool _visible: !graph.inOverviewMode && graph.numComponents > 1
+                property bool _visible: graph._inComponentMode
 
                 Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
                 opacity: _visible ? 1.0 : 0.0
@@ -586,7 +588,7 @@ Item
 
             ToolButton
             {
-                property bool _visible: !graph.inOverviewMode && graph.numComponents > 1
+                property bool _visible: graph._inComponentMode
 
                 Behavior on opacity { NumberAnimation { easing.type: Easing.InOutQuad } }
                 opacity: _visible ? 1.0 : 0.0
@@ -604,7 +606,7 @@ Item
 
             RowLayout
             {
-                visible: !graph.inOverviewMode && graph.numComponents > 1
+                visible: !document.interacting && graph._inComponentMode
 
                 anchors.horizontalCenter: graph.horizontalCenter
                 anchors.bottom: graph.bottom
