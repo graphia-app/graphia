@@ -572,6 +572,9 @@ Wizard
 
             TableView
             {
+                // Hack to prevent TableView crawling when it adds a large number of columns
+                // Should be fixed with new tableview?
+                property int maxColumns: 200
                 id: dataRectView
                 headerVisible: false
                 Layout.fillHeight: true
@@ -673,6 +676,8 @@ Wizard
                             anchors.fill: parent
                             onClicked:
                             {
+                                if(styleData.column === dataRectView.maxColumns)
+                                    return;
                                 tooltipNonNumerical.visible = false;
                                 nonNumericalTimer.stop();
                                 selectedCol = styleData.column
@@ -703,10 +708,21 @@ Wizard
 
                             text:
                             {
+                                if(styleData.column >= dataRectView.maxColumns)
+                                {
+                                    if(styleData.row === 0)
+                                    {
+                                        return (preParser.columnCount - dataRectView.maxColumns) +
+                                            qsTr(" more columns...");
+                                    }
+                                    else
+                                    {
+                                        return "...";
+                                    }
+                                }
+
                                 if(styleData.value === undefined)
                                     return "";
-
-                                var column = dataRectView.getColumn(styleData.column);
 
                                 return styleData.value;
                             }
@@ -728,6 +744,14 @@ Wizard
                     {
                         dataRectView.addColumn(columnComponent.createObject(dataRectView,
                             {"role": i}));
+
+                        // Cap the column count since a huge number of columns causes a large slowdown
+                        if(i == dataRectView.maxColumns - 1)
+                        {
+                            // Add a blank
+                            dataRectView.addColumn(columnComponent.createObject(dataRectView));
+                            break;
+                        }
                     }
                     // Qt.callLater is used as the TableView will not generate the columns until
                     // next loop has passed and there's no way to reliable listen for the change
