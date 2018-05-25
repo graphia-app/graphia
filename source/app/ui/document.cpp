@@ -689,6 +689,7 @@ void Document::onLoadComplete(const QUrl&, bool success)
     connect(_graphQuickItem, &GraphQuickItem::viewIsResetChanged, this, &Document::canResetViewChanged);
     connect(_graphQuickItem, &GraphQuickItem::canEnterOverviewModeChanged, this, &Document::canEnterOverviewModeChanged);
     connect(_graphQuickItem, &GraphQuickItem::fpsChanged, this, &Document::fpsChanged);
+    connect(_graphQuickItem, &GraphQuickItem::visibleComponentIndexChanged, this, &Document::numInvisibleNodesSelectedChanged);
 
     connect(&_commandManager, &CommandManager::busyChanged, this, &Document::maybeEmitBusyChanged, Qt::DirectConnection);
 

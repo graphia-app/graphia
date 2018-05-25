@@ -620,15 +620,37 @@ Item
                     onClicked: { switchToOverviewMode(); }
                 }
 
-                Text
+                ColumnLayout
                 {
-                    text:
+                    Text
                     {
-                        return qsTr("Component ") + graph.visibleComponentIndex +
-                            qsTr(" of ") + graph.numComponents + " " + document.numInvisibleNodesSelected;
+                        Layout.alignment: Qt.AlignHCenter
+
+                        text:
+                        {
+                            return qsTr("Component ") + graph.visibleComponentIndex +
+                                qsTr(" of ") + graph.numComponents;
+                        }
+
+                        color: root.contrastingColor
                     }
 
-                    color: root.contrastingColor
+                    Text
+                    {
+                        Layout.alignment: Qt.AlignHCenter
+                        visible: document.numInvisibleNodesSelected > 0
+
+                        text:
+                        {
+                            var numNodes = Utils.formatUsingSIPostfix(document.numInvisibleNodesSelected);
+                            return "<i>" + qsTr("(") + numNodes +
+                                qsTr(" selected nodes not currently visible)") + "</i>";
+                        }
+
+                        color: root.contrastingColor
+
+                        textFormat: Text.StyledText
+                    }
                 }
             }
 
