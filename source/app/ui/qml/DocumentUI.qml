@@ -849,6 +849,13 @@ Item
 
                         onShown: { layoutSettingsPanel.show(); }
                         onHidden: { layoutSettingsPanel.hide(); }
+
+                        onValueChanged:
+                        {
+                            // If a layout setting changed and we're paused, unpause
+                            if(root.layoutPauseState === LayoutPauseState.Paused)
+                                root.toggleLayout();
+                        }
                     }
                 }
             }

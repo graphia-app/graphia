@@ -87,7 +87,10 @@ Rectangle
                         onValueChanged:
                         {
                             if(pressed)
+                            {
                                 document.setLayoutSettingNormalisedValue(modelData, value);
+                                root.valueChanged();
+                            }
                         }
                     }
 
@@ -123,4 +126,6 @@ Rectangle
 
     signal shown();
     signal hidden();
+
+    signal valueChanged();
 }
