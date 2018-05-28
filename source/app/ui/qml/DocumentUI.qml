@@ -649,9 +649,10 @@ Item
 
                         text:
                         {
+                            var nodeText = document.numInvisibleNodesSelected === 1 ? qsTr("node") : qsTr("nodes");
                             var numNodes = Utils.formatUsingSIPostfix(document.numInvisibleNodesSelected);
                             return "<i>" + qsTr("(") + numNodes +
-                                qsTr(" selected nodes not currently visible)") + "</i>";
+                                qsTr(" selected ") + nodeText + qsTr(" not currently visible)") + "</i>";
                         }
 
                         color: root.contrastingColor
