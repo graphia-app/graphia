@@ -61,7 +61,7 @@ Wizard
                                    "<br>" +
                                    "Two attribute groups will be selected to test for enrichment." +
                                    "<br>" +
-                                   "The edges may be filtered using transforms once the graph has been created.")
+                                   "The results will be presented in tabular form or using a heatmap.")
                         wrapMode: Text.WordWrap
                         textFormat: Text.StyledText
                         Layout.fillWidth: true
