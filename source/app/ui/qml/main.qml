@@ -857,7 +857,7 @@ ApplicationWindow
         id: overviewModeAction
         iconName: "view-fullscreen"
         text: qsTr("&Overview Mode")
-        shortcut: currentDocument && currentDocument.findVisible ? "" : "Esc"
+        shortcut: enabled && currentDocument && !currentDocument.findVisible ? "Esc" : ""
         enabled: currentDocument ? currentDocument.canEnterOverviewMode : false
         onTriggered: currentDocument && currentDocument.switchToOverviewMode()
     }
@@ -867,7 +867,7 @@ ApplicationWindow
         id: resetViewAction
         iconName: "view-refresh"
         text: qsTr("&Reset View")
-        shortcut: currentDocument && (currentDocument.findVisible || currentDocument.canEnterOverviewMode) ? "" : "Esc"
+        shortcut: enabled && currentDocument && !currentDocument.findVisible && !overviewModeAction.enabled ? "Esc" : ""
         enabled: currentDocument ? currentDocument.canResetView : false
         onTriggered: currentDocument && currentDocument.resetView()
     }
@@ -1011,9 +1011,31 @@ ApplicationWindow
 
     Action
     {
+        id: togglePluginMinimiseAction
+        shortcut: enabled && !overviewModeAction.enabled && !resetViewAction.enabled &&
+            currentDocument && !currentDocument.findVisible && !currentDocument.pluginMinimised ?
+            "Esc" : "Ctrl+M"
+        iconName: currentDocument && currentDocument.pluginMinimised ? "go-top" : "go-bottom"
+        text: currentDocument ? (currentDocument.pluginMinimised ? qsTr("Restore ") : qsTr("Minimise ")) +
+            currentDocument.pluginName : ""
+        enabled: currentDocument && currentDocument.hasPluginUI && !currentDocument.pluginPoppedOut
+        onTriggered: currentDocument && currentDocument.toggleMinimise()
+    }
+
+    // The shortcut to minimise the plugin is sometimes Esc, but we also always want Ctrl+M to
+    // work too, so this dummy action just passes through when Esc is the primary shortcut
+    Action
+    {
+        id: minimiseActionShortcutHack
+        shortcut: togglePluginMinimiseAction.shortcut !== "Ctrl+M" ? "Ctrl+M" : ""
+        onTriggered: { togglePluginMinimiseAction.trigger(); }
+    }
+
+    Action
+    {
         id: togglePluginWindowAction
         iconName: "preferences-system-windows"
-        text: currentDocument ? qsTr("Display " + currentDocument.pluginName + " In Separate &Window") : ""
+        text: currentDocument ? qsTr("Display ") + currentDocument.pluginName + qsTr(" In Separate &Window") : ""
         checkable: true
         checked: currentDocument && currentDocument.pluginPoppedOut
         enabled: currentDocument && currentDocument.hasPluginUI
@@ -1190,6 +1212,11 @@ ApplicationWindow
             MenuItem
             {
                 action: togglePluginWindowAction
+                visible: currentDocument && currentDocument.hasPluginUI
+            }
+            MenuItem
+            {
+                action: togglePluginMinimiseAction
                 visible: currentDocument && currentDocument.hasPluginUI
             }
             MenuSeparator {}

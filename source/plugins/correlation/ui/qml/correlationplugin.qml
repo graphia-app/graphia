@@ -422,8 +422,8 @@ PluginContent
         {
             Layout.fillWidth: true
             Layout.fillHeight: splitView.orientation !== Qt.Vertical
-            Layout.minimumHeight: splitView.orientation === Qt.Vertical ? 100 : -1
-            Layout.minimumWidth: splitView.orientation === Qt.Horizontal ? 200 : -1
+            Layout.minimumHeight: splitView.orientation === Qt.Vertical ? 100 : root.minimumHeight
+            Layout.minimumWidth: 200
 
             CorrelationPlot
             {

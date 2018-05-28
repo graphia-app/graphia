@@ -88,6 +88,13 @@ Item
     property string pluginName: document.pluginName
     property bool hasPluginUI: document.pluginQmlPath
     property bool pluginPoppedOut: false
+    property bool pluginMinimised: false
+
+    onPluginMinimisedChanged:
+    {
+        if(pluginMinimised)
+            plugin.minimisingOrMinimised = true;
+    }
 
     property alias pluginMenu0: pluginMenu0
     property alias pluginMenu1: pluginMenu1
@@ -887,6 +894,7 @@ Item
             StatusBar
             {
                 Layout.fillWidth: true
+                Layout.alignment: Qt.AlignTop
 
                 RowLayout
                 {
@@ -900,11 +908,18 @@ Item
                     Item
                     {
                         id: pluginContainerToolStrip
+                        enabled: !root.pluginMinimised
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                     }
 
-                    ToolButton { action: togglePluginWindowAction }
+                    RowLayout
+                    {
+                        enabled: !plugin.minimisingOrMinimised || plugin.minimised
+
+                        ToolButton { action: togglePluginMinimiseAction }
+                        ToolButton { action: togglePluginWindowAction }
+                    }
                 }
             }
         }
@@ -943,14 +958,60 @@ Item
 
     Item
     {
-        Layout.fillHeight: true
+        Layout.fillHeight: enabled
         Layout.fillWidth: true
 
         id: plugin
-        Layout.minimumHeight: plugin.content !== undefined &&
-                              plugin.content.minimumHeight !== undefined ?
-                              plugin.content.minimumHeight : defaultPluginContent.minimumHeight
-        visible: loaded && enabledChildren
+
+        Layout.minimumHeight: !enabled ? 0 :
+            (plugin.content !== undefined && plugin.content.minimumHeight !== undefined ?
+            plugin.content.minimumHeight : defaultPluginContent.minimumHeight)
+        Layout.maximumHeight: minimised && !root.pluginPoppedOut ? 0 : Number.POSITIVE_INFINITY
+
+        visible: loaded
+        enabled: !minimisingOrMinimised || root.pluginPoppedOut
+
+        property real _lastUnminimisedHeight: 0
+        onHeightChanged:
+        {
+            if(!plugin.minimisingOrMinimised)
+                _lastUnminimisedHeight = height;
+        }
+
+        Layout.preferredHeight: root.pluginMinimised && !root.pluginPoppedOut ? 0 : _lastUnminimisedHeight
+
+        property bool minimisingOrMinimised: false
+        property bool minimised: false
+
+        Behavior on Layout.preferredHeight
+        {
+            enabled: !plugin.enabled
+
+            SequentialAnimation
+            {
+                ScriptAction
+                {
+                    script:
+                    {
+                        if(!root.pluginMinimised)
+                            plugin.minimised = false;
+                    }
+                }
+
+                NumberAnimation { easing.type: Easing.InOutQuad }
+
+                ScriptAction
+                {
+                    script:
+                    {
+                        if(!root.pluginMinimised)
+                            plugin.minimisingOrMinimised = false;
+                        else
+                            plugin.minimised = true;
+                    }
+                }
+            }
+        }
 
         property var model: document.plugin
         property var content
@@ -1161,6 +1222,11 @@ Item
         // Mild hack to get the plugin window to close before the main window
         destructing = true;
         pluginWindow.close();
+    }
+
+    function toggleMinimise()
+    {
+        root.pluginMinimised = !root.pluginMinimised;
     }
 
     function popOutPlugin()
