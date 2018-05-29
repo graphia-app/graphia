@@ -89,10 +89,12 @@ void GraphComponentScene::setViewportSize(int width, int height)
     _width = width;
     _height = height;
 
-    if(componentRenderer() != nullptr)
+    const auto& componentIds = _graphRenderer->graphModel()->graph().componentIds();
+    for(auto componentId : componentIds)
     {
-        componentRenderer()->setDimensions(QRect(0, 0, width, height));
-        componentRenderer()->setViewportSize(width, height);
+        auto renderer = _graphRenderer->componentRendererForId(componentId);
+        renderer->setDimensions(QRect(0, 0, width, height));
+        renderer->setViewportSize(width, height);
     }
 }
 
