@@ -26,7 +26,7 @@ public:
     explicit GraphComponentScene(GraphRenderer* graphRenderer);
 
     void update(float t) override;
-    void setViewportSize(int width = 0, int height = 0) override;
+    void setViewportSize(int width, int height) override;
 
     bool transitionActive() const override;
 
