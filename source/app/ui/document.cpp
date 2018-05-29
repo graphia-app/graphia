@@ -1007,13 +1007,6 @@ void Document::switchToOverviewMode(bool doTransition)
     _graphQuickItem->switchToOverviewMode(doTransition);
 }
 
-static auto componentIdIterator(ComponentId componentId, const std::vector<ComponentId>& componentIds)
-{
-    Q_ASSERT(!componentId.isNull());
-    Q_ASSERT(std::is_sorted(componentIds.begin(), componentIds.end()));
-    return std::lower_bound(componentIds.begin(), componentIds.end(), componentId);
-}
-
 void Document::gotoPrevComponent()
 {
     const auto& componentIds = _graphModel->graph().componentIds();
@@ -1024,7 +1017,7 @@ void Document::gotoPrevComponent()
 
     if(!focusedComponentId.isNull())
     {
-        auto it = componentIdIterator(focusedComponentId, componentIds);
+        auto it = std::find(componentIds.begin(), componentIds.end(), focusedComponentId);
 
         if(it != componentIds.begin())
             --it;
@@ -1047,7 +1040,7 @@ void Document::gotoNextComponent()
 
     if(!focusedComponentId.isNull())
     {
-        auto it = componentIdIterator(focusedComponentId, componentIds);
+        auto it = std::find(componentIds.begin(), componentIds.end(), focusedComponentId);
 
         if(std::next(it) != componentIds.end())
             ++it;

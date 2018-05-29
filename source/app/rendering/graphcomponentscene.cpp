@@ -125,8 +125,20 @@ void GraphComponentScene::finishComponentTransition(ComponentId componentId, boo
             transitionStyle = TransitionStyle::SlideRight;
         else if(_componentId == componentIds.back() && componentId == componentIds.front())
             transitionStyle = TransitionStyle::SlideLeft;
-        else
-            transitionStyle = componentId < _componentId ? TransitionStyle::SlideRight : TransitionStyle::SlideLeft;
+        else if(!_componentId.isNull())
+        {
+            auto incomingComponentSize = _graphRenderer->graphModel()->graph().componentById(componentId)->numNodes();
+            auto outgoingComponentSize = _graphRenderer->graphModel()->graph().componentById(_componentId)->numNodes();
+
+            if(incomingComponentSize > outgoingComponentSize)
+                transitionStyle = TransitionStyle::SlideRight;
+            else if(incomingComponentSize < outgoingComponentSize)
+                transitionStyle = TransitionStyle::SlideLeft;
+            else if(componentId < _componentId)
+                transitionStyle = TransitionStyle::SlideRight;
+            else
+                transitionStyle = TransitionStyle::SlideLeft;
+        }
     }
 
     if(componentId.isNull())
