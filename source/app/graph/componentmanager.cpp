@@ -238,8 +238,8 @@ void ComponentManager::update(const Graph* graph)
     std::stable_sort(_componentIds.begin(), _componentIds.end(),
     [this](auto a, auto b)
     {
-        auto componentA = componentById(a);
-        auto componentB = componentById(b);
+        auto componentA = this->componentById(a);
+        auto componentB = this->componentById(b);
 
         if(componentA->numNodes() == componentB->numNodes())
             return a < b;
