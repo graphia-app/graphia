@@ -1013,7 +1013,7 @@ ApplicationWindow
     {
         id: togglePluginMinimiseAction
         shortcut: enabled && !overviewModeAction.enabled && !resetViewAction.enabled &&
-            currentDocument && !currentDocument.findVisible && !currentDocument.pluginMinimised ?
+            currentDocument && !currentDocument.findVisible ?
             "Esc" : "Ctrl+M"
         iconName: currentDocument && currentDocument.pluginMinimised ? "go-top" : "go-bottom"
         text: currentDocument ? (currentDocument.pluginMinimised ? qsTr("Restore ") : qsTr("Minimise ")) +
