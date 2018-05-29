@@ -1,8 +1,24 @@
 #include "datarecttablemodel.h"
+#include <QDebug>
 
-int DataRectTableModel::rowCount(const QModelIndex& parent) const
+bool DataRectTableModel::transposed() const
 {
-    Q_UNUSED(parent);
+    return _transposed;
+}
+
+void DataRectTableModel::setTransposed(bool transposed)
+{
+    if(_transposed != transposed)
+    {
+        beginResetModel();
+        _transposed = transposed;
+        _data.setTransposed(_transposed);
+        endResetModel();
+    }
+}
+
+int DataRectTableModel::rowCount(const QModelIndex&) const
+{
     return static_cast<int>(_data.numRows());
 }
 
@@ -32,7 +48,7 @@ QHash<int, QByteArray> DataRectTableModel::roleNames() const
     return _roleNames;
 }
 
-void DataRectTableModel::setTabularData(TabularData data)
+void DataRectTableModel::setTabularData(TabularData& data)
 {
     beginResetModel();
     _data = std::move(data);

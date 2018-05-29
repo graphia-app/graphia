@@ -14,6 +14,7 @@ Wizard
     minimumHeight: 400
     property int selectedRow: -1;
     property int selectedCol: -1;
+    property bool _clickedCell: false;
 
     // Work around for QTBUG-58594
     function resizeColumnsToContentsBugWorkaround(tableView)
@@ -113,6 +114,384 @@ Wizard
 
     Item
     {
+        id: dataRectPage
+        property bool _busy: preParser.isRunning || root.animating
+
+        Connections
+        {
+            target: root
+            onAnimatingChanged:
+            {
+                if(!root.animating && root.currentItem === dataRectPage)
+                {
+                    if(root.fileUrl !== "" && root.fileType !== "" && preParser.model.rowCount() === 0)
+                        preParser.parse();
+                }
+            }
+        }
+
+        CorrelationPreParser
+        {
+            id: preParser
+            fileType: root.fileType
+            fileUrl: root.fileUrl
+            onDataRectChanged:
+            {
+                parameters.dataFrame = dataRect;
+                if(!isInsideRect(selectedCol, selectedRow, dataRect) &&
+                        selectedCol >= 0 && selectedRow >= 0)
+                {
+                    scrollToCell(dataRectView, dataRect.x, dataRect.y)
+                    tooltipNonNumerical.visible = _clickedCell;
+                    _clickedCell = false;
+                }
+            }
+        }
+
+        ColumnLayout
+        {
+            anchors.fill: parent
+
+            Component
+            {
+                id: columnComponent
+                TableViewColumn { width: 200 }
+            }
+
+            Text
+            {
+                text: qsTr("<h2>Data Viewer - Select and adjust</h2>")
+                Layout.alignment: Qt.AlignLeft
+                textFormat: Text.StyledText
+            }
+
+            Text
+            {
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                text: qsTr("A contiguous numerical dataframe will automatically be selected from your dataset. " +
+                           "If you would like to adjust the dataframe, select the new starting cell below.")
+            }
+
+            RowLayout
+            {
+                ColumnLayout
+                {
+                    CheckBox
+                    {
+                        id: transposeCheckBox
+
+                        Layout.alignment: Qt.AlignLeft
+                        text: qsTr("Transpose Dataset")
+                        onCheckedChanged:
+                        {
+                            parameters.transpose = checked;
+                            preParser.transposed = checked;
+                        }
+                    }
+                    RowLayout
+                    {
+                        Text
+                        {
+                            text: qsTr("Scaling:")
+                            Layout.alignment: Qt.AlignLeft
+                        }
+
+                        ComboBox
+                        {
+                            id: scaling
+                            Layout.alignment: Qt.AlignRight
+                            model: ListModel
+                            {
+                                ListElement { text: qsTr("None");          value: ScalingType.None }
+                                ListElement { text: qsTr("Log2(𝒙 + ε)");   value: ScalingType.Log2 }
+                                ListElement { text: qsTr("Log10(𝒙 + ε)");  value: ScalingType.Log10 }
+                                ListElement { text: qsTr("AntiLog2(𝒙)");   value: ScalingType.AntiLog2 }
+                                ListElement { text: qsTr("AntiLog10(𝒙)");  value: ScalingType.AntiLog10 }
+                                ListElement { text: qsTr("Arcsin(𝒙)");     value: ScalingType.ArcSin }
+                            }
+                            textRole: "text"
+
+                            onCurrentIndexChanged:
+                            {
+                                parameters.scaling = model.get(currentIndex).value;
+                            }
+                        }
+                    }
+                }
+
+                GridLayout
+                {
+                    columns: 2
+                    rowSpacing: 20
+
+                    Text
+                    {
+                        text: "<b>Log</b>𝒃(𝒙 + ε):"
+                        Layout.alignment: Qt.AlignTop
+                        textFormat: Text.StyledText
+                    }
+
+                    Text
+                    {
+                        text: qsTr("Will perform a Log of 𝒙 + ε to base 𝒃, where 𝒙 is the input data and ε is a very small constant.");
+                        wrapMode: Text.WordWrap
+                        Layout.alignment: Qt.AlignTop
+                        Layout.fillWidth: true
+                    }
+
+                    Text
+                    {
+                        text: "<b>AntiLog</b>𝒃(𝒙):"
+                        Layout.alignment: Qt.AlignTop
+                        textFormat: Text.StyledText
+                    }
+
+                    Text
+                    {
+                        text: qsTr("Will raise x to the power of 𝒃, where 𝒙 is the input data.");
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
+                    }
+
+                    Text
+                    {
+                        text: "<b>Arcsin</b>(𝒙):"
+                        Layout.alignment: Qt.AlignTop
+                        textFormat: Text.StyledText
+                    }
+
+                    Text
+                    {
+                        text: qsTr("Will perform an inverse sine function of 𝒙, where 𝒙 is the input data. This is useful when " +
+                                   "you require a log transform but the dataset contains negative numbers or zeros.");
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
+                    }
+                }
+            }
+
+
+            Text
+            {
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                text: qsTr("<b>Note:</b> Dataframes will always end at the last cell of the input")
+            }
+
+            TableView
+            {
+                // Hack to prevent TableView crawling when it adds a large number of columns
+                // Should be fixed with new tableview?
+                property int maxColumns: 200
+                id: dataRectView
+                headerVisible: false
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                model: preParser.model
+                selectionMode: SelectionMode.NoSelection
+                enabled: !dataRectPage._busy
+
+                PropertyAnimation
+                {
+                    id: dataFrameAnimationX
+                    target: dataRectView.flickableItem
+                    easing.type: Easing.InOutQuad
+                    property: "contentX"
+                    to: 0
+                    duration: 750
+                }
+
+                PropertyAnimation
+                {
+                    id: dataFrameAnimationY
+                    target: dataRectView.flickableItem
+                    easing.type: Easing.InOutQuad
+                    property: "contentY"
+                    to: 0
+                    duration: 750
+                }
+
+                Rectangle
+                {
+                    id: tooltipNonNumerical
+                    color: sysPalette.light
+                    border.color: sysPalette.mid
+                    border.width: 1
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 25
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    implicitWidth: messageText.width + 5
+                    implicitHeight: messageText.height + 5
+                    onVisibleChanged:
+                    {
+                        if(visible)
+                            nonNumericalTimer.start();
+                    }
+                    visible: false
+
+                    Timer
+                    {
+                        id: nonNumericalTimer
+                        interval: 5000
+                        onTriggered: { tooltipNonNumerical.visible = false }
+                    }
+
+                    Text
+                    {
+                        anchors.centerIn: parent
+                        id: messageText
+                        text: qsTr("Selected frame contains non-numerical data. " +
+                             "Next availaible frame selected");
+                    }
+                }
+
+                BusyIndicator
+                {
+                    id: busyIndicator
+                    anchors.centerIn: parent
+                    running: dataRectPage._busy
+                }
+
+                SystemPalette
+                {
+                    id: sysPalette
+                }
+
+                itemDelegate: Item
+                {
+                    // Based on Qt source for BaseTableView delegate
+                    height: Math.max(16, label.implicitHeight)
+                    property int implicitWidth: label.implicitWidth + 16
+                    clip: true
+
+                    property var isInDataFrame:
+                    {
+                        return isInsideRect(styleData.column, styleData.row, preParser.dataRect);
+                    }
+
+                    Rectangle
+                    {
+                        Rectangle
+                        {
+                            anchors.right: parent.right
+                            height: parent.height
+                            width: 1
+                            color: isInDataFrame ? sysPalette.light : sysPalette.mid
+                        }
+
+                        MouseArea
+                        {
+                            anchors.fill: parent
+                            onClicked:
+                            {
+                                if(styleData.column === dataRectView.maxColumns)
+                                    return;
+                                tooltipNonNumerical.visible = false;
+                                nonNumericalTimer.stop();
+                                selectedCol = styleData.column
+                                selectedRow = styleData.row
+                                _clickedCell = true;
+                                preParser.autoDetectDataRectangle(styleData.column, styleData.row);
+                            }
+                        }
+
+                        width: parent.width
+                        anchors.centerIn: parent
+                        height: parent.height
+                        color: isInDataFrame ? "lightblue" : "transparent"
+
+                        Text
+                        {
+                            id: label
+                            objectName: "label"
+                            width: parent.width
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.leftMargin: styleData.hasOwnProperty("depth") && styleData.column === 0 ? 0 :
+                                                horizontalAlignment === Text.AlignRight ? 1 : 8
+                            anchors.rightMargin: (styleData.hasOwnProperty("depth") && styleData.column === 0)
+                                                 || horizontalAlignment !== Text.AlignRight ? 1 : 8
+                            horizontalAlignment: styleData.textAlignment
+                            anchors.verticalCenter: parent.verticalCenter
+                            elide: styleData.elideMode
+
+                            text:
+                            {
+                                if(styleData.column >= dataRectView.maxColumns)
+                                {
+                                    if(styleData.row === 0)
+                                    {
+                                        return (preParser.model.columnCount() - dataRectView.maxColumns) +
+                                            qsTr(" more columns...");
+                                    }
+                                    else
+                                    {
+                                        return "...";
+                                    }
+                                }
+
+                                if(styleData.value === undefined)
+                                    return "";
+
+                                return styleData.value;
+                            }
+
+                            color: styleData.textColor
+                            renderType: Text.NativeRendering
+                        }
+                    }
+                }
+            }
+
+            Connections
+            {
+                target: preParser.model
+
+                onModelReset:
+                {
+                    repopulateTableView();
+                    selectedCol = 0;
+                    selectedRow = 0;
+                    preParser.autoDetectDataRectangle();
+                }
+                onDataLoaded:
+                {
+                    repopulateTableView();
+                    Qt.callLater(scrollToCell, dataRectView, preParser.dataRect.x, preParser.dataRect.y);
+                }
+            }
+        }
+    }
+
+    function repopulateTableView()
+    {
+        while(dataRectView.columnCount > 0)
+            dataRectView.removeColumn(0);
+
+        dataRectView.model = null;
+        dataRectView.model = preParser.model;
+        for(var i = 0; i < preParser.model.columnCount(); i++)
+        {
+            dataRectView.addColumn(columnComponent.createObject(dataRectView,
+                {"role": i}));
+
+            // Cap the column count since a huge number of columns causes a large slowdown
+            if(i == dataRectView.maxColumns - 1)
+            {
+                // Add a blank
+                dataRectView.addColumn(columnComponent.createObject(dataRectView));
+                break;
+            }
+        }
+        // Qt.callLater is used as the TableView will not generate the columns until
+        // next loop has passed and there's no way to reliable listen for the change
+        // (Thanks TableView)
+        Qt.callLater(resizeColumnsToContentsBugWorkaround, dataRectView);
+    }
+
+    Item
+    {
         ColumnLayout
         {
             anchors.left: parent.left
@@ -208,25 +587,12 @@ Wizard
                 anchors.left: parent.left
                 anchors.right: parent.right
                 spacing: 20
-
                 Text
                 {
                     text: qsTr("Please select if the data should be transposed and the required method to " +
                                "scale the data input. This will occur before normalisation.")
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
-                }
-
-                CheckBox
-                {
-                    id: transposeCheckBox
-
-                    Layout.alignment: Qt.AlignLeft
-                    text: qsTr("Transpose Dataset")
-                    onCheckedChanged:
-                    {
-                        parameters.transpose = checked;
-                    }
                 }
 
                 RowLayout
@@ -237,27 +603,8 @@ Wizard
                         Layout.alignment: Qt.AlignLeft
                     }
 
-                    ComboBox
-                    {
-                        id: scaling
-                        Layout.alignment: Qt.AlignRight
-                        model: ListModel
-                        {
-                            ListElement { text: qsTr("None");          value: ScalingType.None }
-                            ListElement { text: qsTr("Log2(x + ε)");   value: ScalingType.Log2 }
-                            ListElement { text: qsTr("Log10(x + ε)");  value: ScalingType.Log10 }
-                            ListElement { text: qsTr("AntiLog2(x)");   value: ScalingType.AntiLog2 }
-                            ListElement { text: qsTr("AntiLog10(x)");  value: ScalingType.AntiLog10 }
-                            ListElement { text: qsTr("Arcsin(x)");     value: ScalingType.ArcSin }
-                        }
-                        textRole: "text"
-
-                        onCurrentIndexChanged:
-                        {
-                            parameters.scaling = model.get(currentIndex).value;
-                        }
-                    }
                 }
+
 
                 GridLayout
                 {
@@ -498,266 +845,6 @@ Wizard
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                     }
-                }
-            }
-        }
-    }
-
-    Item
-    {
-        id: dataRectPage
-        property bool _busy: preParser.isRunning || root.animating
-
-        Connections
-        {
-            target: root
-            onAnimatingChanged:
-            {
-                if(!root.animating && root.currentItem === dataRectPage)
-                {
-                    if(root.fileUrl !== "" && root.fileType !== "" && preParser.rowCount === 0)
-                        preParser.parse();
-                }
-            }
-        }
-
-        CorrelationPreParser
-        {
-            id: preParser
-            fileType: root.fileType
-            fileUrl: root.fileUrl
-            onDataRectChanged:
-            {
-                parameters.dataFrame = dataRect;
-                if(!isInsideRect(selectedCol, selectedRow, dataRect) &&
-                        selectedCol >= 0 && selectedRow >= 0)
-                {
-                    scrollToCell(dataRectView, dataRect.x, dataRect.y)
-                    tooltipNonNumerical.visible = true;
-                }
-            }
-        }
-
-        ColumnLayout
-        {
-            anchors.fill: parent
-
-            Component
-            {
-                id: columnComponent
-                TableViewColumn { width: 200 }
-            }
-
-            Text
-            {
-                text: qsTr("<h2>Adjust Numerical Data Frame</h2>")
-                Layout.alignment: Qt.AlignLeft
-                textFormat: Text.StyledText
-            }
-
-            Text
-            {
-                Layout.fillWidth: true
-                wrapMode: Text.WordWrap
-                text: qsTr("A contiguous numerical dataframe will automatically be selected from your dataset. " +
-                           "If you would like to adjust the dataframe, select the new starting cell below.")
-            }
-
-            Text
-            {
-                Layout.fillWidth: true
-                wrapMode: Text.WordWrap
-                text: qsTr("<b>Note:</b> Dataframes will always end at the last cell of the input")
-            }
-
-            TableView
-            {
-                // Hack to prevent TableView crawling when it adds a large number of columns
-                // Should be fixed with new tableview?
-                property int maxColumns: 200
-                id: dataRectView
-                headerVisible: false
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                model: preParser.model
-                selectionMode: SelectionMode.NoSelection
-                enabled: !dataRectPage._busy
-
-                PropertyAnimation
-                {
-                    id: dataFrameAnimationX
-                    target: dataRectView.flickableItem
-                    easing.type: Easing.InOutQuad
-                    property: "contentX"
-                    to: 0
-                    duration: 750
-                }
-
-                PropertyAnimation
-                {
-                    id: dataFrameAnimationY
-                    target: dataRectView.flickableItem
-                    easing.type: Easing.InOutQuad
-                    property: "contentY"
-                    to: 0
-                    duration: 750
-                }
-
-                Rectangle
-                {
-                    id: tooltipNonNumerical
-                    color: sysPalette.light
-                    border.color: sysPalette.mid
-                    border.width: 1
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 25
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    implicitWidth: messageText.width + 5
-                    implicitHeight: messageText.height + 5
-                    onVisibleChanged:
-                    {
-                        if(visible)
-                            nonNumericalTimer.start();
-                    }
-                    visible: false
-
-                    Timer
-                    {
-                        id: nonNumericalTimer
-                        interval: 5000
-                        onTriggered: { tooltipNonNumerical.visible = false }
-                    }
-
-                    Text
-                    {
-                        anchors.centerIn: parent
-                        id: messageText
-                        text: qsTr("Selected frame contains non-numerical data. " +
-                             "Next availaible frame selected");
-                    }
-                }
-
-                BusyIndicator
-                {
-                    id: busyIndicator
-                    anchors.centerIn: parent
-                    running: dataRectPage._busy
-                }
-
-                SystemPalette
-                {
-                    id: sysPalette
-                }
-
-                itemDelegate: Item
-                {
-                    // Based on Qt source for BaseTableView delegate
-                    height: Math.max(16, label.implicitHeight)
-                    property int implicitWidth: label.implicitWidth + 16
-                    clip: true
-
-                    property var isInDataFrame:
-                    {
-                        return isInsideRect(styleData.column, styleData.row, preParser.dataRect);
-                    }
-
-                    Rectangle
-                    {
-                        Rectangle
-                        {
-                            anchors.right: parent.right
-                            height: parent.height
-                            width: 1
-                            color: isInDataFrame ? sysPalette.light : sysPalette.mid
-                        }
-
-                        MouseArea
-                        {
-                            anchors.fill: parent
-                            onClicked:
-                            {
-                                if(styleData.column === dataRectView.maxColumns)
-                                    return;
-                                tooltipNonNumerical.visible = false;
-                                nonNumericalTimer.stop();
-                                selectedCol = styleData.column
-                                selectedRow = styleData.row
-                                preParser.autoDetectDataRectangle(styleData.column, styleData.row);
-                            }
-                        }
-
-                        width: parent.width
-                        anchors.centerIn: parent
-                        height: parent.height
-                        color: isInDataFrame ? "lightblue" : "transparent"
-
-                        Text
-                        {
-                            id: label
-                            objectName: "label"
-                            width: parent.width
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.leftMargin: styleData.hasOwnProperty("depth") && styleData.column === 0 ? 0 :
-                                                horizontalAlignment === Text.AlignRight ? 1 : 8
-                            anchors.rightMargin: (styleData.hasOwnProperty("depth") && styleData.column === 0)
-                                                 || horizontalAlignment !== Text.AlignRight ? 1 : 8
-                            horizontalAlignment: styleData.textAlignment
-                            anchors.verticalCenter: parent.verticalCenter
-                            elide: styleData.elideMode
-
-                            text:
-                            {
-                                if(styleData.column >= dataRectView.maxColumns)
-                                {
-                                    if(styleData.row === 0)
-                                    {
-                                        return (preParser.columnCount - dataRectView.maxColumns) +
-                                            qsTr(" more columns...");
-                                    }
-                                    else
-                                    {
-                                        return "...";
-                                    }
-                                }
-
-                                if(styleData.value === undefined)
-                                    return "";
-
-                                return styleData.value;
-                            }
-
-                            color: styleData.textColor
-                            renderType: Text.NativeRendering
-                        }
-                    }
-                }
-            }
-
-            Connections
-            {
-                target: preParser.model
-
-                onModelReset:
-                {
-                    for(var i = 0; i < preParser.model.columnCount(); i++)
-                    {
-                        dataRectView.addColumn(columnComponent.createObject(dataRectView,
-                            {"role": i}));
-
-                        // Cap the column count since a huge number of columns causes a large slowdown
-                        if(i == dataRectView.maxColumns - 1)
-                        {
-                            // Add a blank
-                            dataRectView.addColumn(columnComponent.createObject(dataRectView));
-                            break;
-                        }
-                    }
-                    // Qt.callLater is used as the TableView will not generate the columns until
-                    // next loop has passed and there's no way to reliable listen for the change
-                    // (Thanks TableView)
-                    Qt.callLater(resizeColumnsToContentsBugWorkaround, dataRectView);
-                    Qt.callLater(scrollToCell, dataRectView, preParser.dataRect.x, preParser.dataRect.y);
                 }
             }
         }

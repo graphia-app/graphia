@@ -29,10 +29,9 @@ private:
     Q_PROPERTY(QString fileType MEMBER _fileType NOTIFY fileTypeChanged)
     Q_PROPERTY(QString fileUrl MEMBER _fileUrl NOTIFY fileUrlChanged)
     Q_PROPERTY(QRect dataRect MEMBER _dataRect NOTIFY dataRectChanged)
-    Q_PROPERTY(int columnCount READ columnCount NOTIFY dataRectChanged)
-    Q_PROPERTY(int rowCount READ rowCount NOTIFY dataRectChanged)
     Q_PROPERTY(QAbstractTableModel* model READ tableModel NOTIFY dataRectChanged)
     Q_PROPERTY(bool isRunning READ isRunning NOTIFY isRunningChanged)
+    Q_PROPERTY(bool transposed READ transposed WRITE setTransposed)
 
     QFutureWatcher<void> _autoDetectDataRectangleWatcher;
     QFutureWatcher<void> _dataParserWatcher;
@@ -41,24 +40,25 @@ private:
     QRect _dataRect;
     TabularData _data;
     DataRectTableModel _model;
-
-    int rowCount();
-    int columnCount();
+    bool _transposed = false;
 
 public:
     CorrelationPreParser();
     Q_INVOKABLE bool parse();
-    Q_INVOKABLE QString dataAt(int column, int row);
     Q_INVOKABLE void autoDetectDataRectangle(size_t column = 0, size_t row = 0);
 
     DataRectTableModel* tableModel();
     bool isRunning() { return _autoDetectDataRectangleWatcher.isRunning() || _dataParserWatcher.isRunning(); }
+
+    bool transposed() const;
+    void setTransposed(bool transposed);
 
 signals:
     void dataRectChanged();
     void isRunningChanged();
     void fileUrlChanged();
     void fileTypeChanged();
+    void dataLoaded();
 public slots:
     void onDataParsed();
 };

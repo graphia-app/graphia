@@ -163,14 +163,14 @@ bool CorrelationFileParser::parse(const QUrl& url, IGraphModel& graphModel, cons
     return true;
 }
 
-int CorrelationPreParser::rowCount()
+bool CorrelationPreParser::transposed() const
 {
-    return static_cast<int>(_data.numRows());
+    return _model.transposed();
 }
 
-int CorrelationPreParser::columnCount()
+void CorrelationPreParser::setTransposed(bool transposed)
 {
-    return static_cast<int>(_data.numColumns());
+    _model.setTransposed(transposed);
 }
 
 CorrelationPreParser::CorrelationPreParser()
@@ -181,6 +181,7 @@ CorrelationPreParser::CorrelationPreParser()
     connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::isRunningChanged);
     connect(&_dataParserWatcher, &QFutureWatcher<void>::started, this, &CorrelationPreParser::isRunningChanged);
     connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::onDataParsed);
+    connect(&_dataParserWatcher, &QFutureWatcher<void>::finished, this, &CorrelationPreParser::dataLoaded);
 }
 
 bool CorrelationPreParser::parse()
@@ -218,14 +219,9 @@ void CorrelationPreParser::autoDetectDataRectangle(size_t column, size_t row)
 {
     QFuture<void> future = QtConcurrent::run([this, column, row]()
     {
-        _dataRect = findLargestDataRect(_data, column, row);
+        _dataRect = findLargestDataRect(*_model.tabularData(), column, row);
     });
     _autoDetectDataRectangleWatcher.setFuture(future);
-}
-
-QString CorrelationPreParser::dataAt(int column, int row)
-{
-    return QString::fromStdString(_data.valueAt(column, row));
 }
 
 void CorrelationPreParser::onDataParsed()
