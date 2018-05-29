@@ -140,6 +140,9 @@ void GraphComponentScene::finishComponentTransition(ComponentId componentId, boo
         transitionStyle = TransitionStyle::Fade;
     }
 
+    if(!_componentId.isNull())
+        componentRenderer()->resetView();
+
     if(doTransition)
     {
         _transitionStyle = transitionStyle;
