@@ -566,6 +566,11 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph, bool changed)
 
     graph->setPhase(tr("Component Layout"));
     _componentLayout->execute(*graph, graph->componentIds(), _nextComponentLayoutData);
+
+    // If the component layout hasn't changed, we don't need to perform a transition
+    if(_componentLayoutData == _nextComponentLayoutData)
+        return;
+
     _nextComponentLayoutDataChanged = true;
     graph->clearPhase();
 

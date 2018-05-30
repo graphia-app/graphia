@@ -15,6 +15,16 @@ public:
         _radius(radius)
     {}
 
+    bool operator==(const Circle& other) const
+    {
+        return _x == other._x && _y == other._y && _radius == other._radius;
+    }
+
+    bool operator!=(const Circle& other) const
+    {
+        return !operator==(other);
+    }
+
     float x() const { return _x; }
     float y() const { return _y; }
     float radius() const { return _radius; }
