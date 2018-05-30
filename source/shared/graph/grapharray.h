@@ -135,6 +135,18 @@ public:
         _array[static_cast<int>(index)] = value;
     }
 
+    bool operator==(const GenericGraphArray& other) const
+    {
+        return _graph == other._graph &&
+            _array == other._array &&
+            _defaultValue == other._defaultValue;
+    }
+
+    bool operator!=(const GenericGraphArray& other) const
+    {
+        return !operator==(other);
+    }
+
     //FIXME these iterators do not lock when locking is enabled; need to wrap in own iterator types
     typename std::vector<Element>::iterator begin() { return _array.begin(); }
     typename std::vector<Element>::const_iterator begin() const { return _array.begin(); }
