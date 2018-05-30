@@ -1,5 +1,7 @@
 #include "nodepositions.h"
 
+#include <cmath>
+
 const QVector3D& NodePositions::get(NodeId nodeId) const
 {
     return elementFor(nodeId).newest();
