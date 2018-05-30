@@ -275,6 +275,10 @@ void GraphQuickItem::onUserInteractionStarted()
 void GraphQuickItem::onUserInteractionFinished()
 {
     setInteracting(false);
+
+    // Force a call to GraphRenderer::synchronize so that any
+    // pending renderer state gets reflected in the QuickItem
+    update();
 }
 
 void GraphQuickItem::onScreenshotComplete(const QImage& screenshot, const QString& path)
