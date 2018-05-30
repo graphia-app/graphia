@@ -3,12 +3,14 @@
 #include "transform/transformedgraph.h"
 
 #include <memory>
-#include <stack>
+#include <deque>
 
 #include <QObject>
 
 bool SpanningTreeTransform::apply(TransformedGraph& target) const
 {
+    bool dfs = config().parameterHasValue(QStringLiteral("Traversal Order"), QStringLiteral("Depth First"));
+
     target.setPhase(QObject::tr("Spanning Tree"));
     target.setProgress(-1);
 
@@ -23,15 +25,26 @@ bool SpanningTreeTransform::apply(TransformedGraph& target) const
             EdgeId _edgeId;
         };
 
-        std::stack<S> stack;
-        stack.push({target.componentById(componentId)->nodeIds().at(0), {}});
+        std::deque<S> deque;
+        deque.push_back({target.componentById(componentId)->nodeIds().at(0), {}});
 
-        while(!stack.empty())
+        while(!deque.empty())
         {
-            auto route = stack.top();
+            S route;
+
+            if(dfs)
+            {
+                route = deque.back();
+                deque.pop_back();
+            }
+            else
+            {
+                route = deque.front();
+                deque.pop_front();
+            }
+
             auto nodeId = route._nodeId;
             auto traversedEdgeId = route._edgeId;
-            stack.pop();
 
             if(visitedNodes.get(nodeId))
                 continue;
@@ -46,7 +59,7 @@ bool SpanningTreeTransform::apply(TransformedGraph& target) const
                 auto oppositeId = target.edgeById(edgeId).oppositeId(nodeId);
 
                 if(!visitedNodes.get(oppositeId))
-                    stack.push({oppositeId, edgeId});
+                    deque.push_back({oppositeId, edgeId});
             }
         }
     }

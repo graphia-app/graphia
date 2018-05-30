@@ -25,6 +25,20 @@ public:
             R"(<a href="https://en.wikipedia.org/wiki/Spanning_tree">)"
             R"(spanning tree</a> for each component.)");
     }
+
+    GraphTransformParameters parameters() const override
+    {
+        return
+        {
+            {
+                "Traversal Order",
+                ValueType::StringList,
+                QObject::tr("Whether to visit nodes level by level, or by maximising depth."),
+                QStringList{"Breadth First", "Depth First"}
+            }
+        };
+    }
+
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
 };
 
