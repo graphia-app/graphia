@@ -375,6 +375,30 @@ Item
         document.gotoBookmark(name);
     }
 
+    Labs.FileDialog
+    {
+        id: exportNodePositionsFileDialog
+        visible: false
+        fileMode: Labs.FileDialog.SaveFile
+        defaultSuffix: selectedNameFilter.extensions[0]
+        selectedNameFilter.index: 1
+        title: qsTr("Export Node Positions")
+        nameFilters: ["JSON File (*.json)"]
+        onAccepted:
+        {
+            misc.fileSaveInitialFolder = folder.toString();
+            document.saveNodePositionsToFile(file);
+        }
+    }
+
+    function exportNodePositions()
+    {
+        exportNodePositionsFileDialog.folder = misc.fileSaveInitialFolder !== undefined ?
+            misc.fileSaveInitialFolder : "";
+
+        exportNodePositionsFileDialog.open();
+    }
+
     CaptureScreenshot
     {
         id: captureScreenshot

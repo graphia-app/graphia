@@ -36,6 +36,8 @@
 #include "selectionmanager.h"
 #include "graphquickitem.h"
 
+#include "json_helper.h"
+
 #include <QQmlProperty>
 #include <QMetaObject>
 #include <QFile>
@@ -2151,5 +2153,57 @@ void Document::performEnrichment(const QString& selectedAttributeA, const QStrin
         emit enrichmentTableModelsChanged();
         emit enrichmentAnalysisComplete();
         return true;
+    });
+}
+
+void Document::saveNodePositionsToFile(const QUrl& fileUrl)
+{
+    QString localFileName = fileUrl.toLocalFile();
+    if(!QFile(localFileName).open(QIODevice::ReadWrite))
+    {
+        QMessageBox::critical(nullptr, tr("File Error"),
+            QString(tr("The file '%1' cannot be opened for writing. Please ensure "
+            "it is not open in another application and try again.")).arg(localFileName));
+        return;
+    }
+
+    commandManager()->executeOnce(
+        {
+            QString(tr("Export Node Positions")),
+            QString(tr("Exporting Node Positions")),
+            QString(tr("Exported Node Positions"))
+        },
+    [this, localFileName](Command& command)
+    {
+        json positions;
+
+        uint64_t i = 0;
+        for(auto nodeId : _graphModel->graph().nodeIds())
+        {
+            auto name = _graphModel->nodeNames().at(nodeId);
+            auto v = _graphModel->nodePositions().getScaledAndSmoothed(nodeId);
+
+            positions.push_back(
+            {
+                {"id", static_cast<int>(nodeId)},
+                {"name", name.toStdString()},
+                {"position", {v.x(), v.y(), v.z()}}
+            });
+
+            command.setProgress((i++ * 100) / _graphModel->graph().numNodes());
+        }
+
+        command.setProgress(-1);
+
+        QFile file(localFileName);
+
+        if(!file.open(QIODevice::ReadWrite|QIODevice::Truncate))
+        {
+            // We should never get here normally, since this check has already been performed
+            qDebug() << "Can't open" << localFileName << "for writing.";
+            return;
+        }
+
+        file.write(QByteArray::fromStdString(positions.dump()));
     });
 }

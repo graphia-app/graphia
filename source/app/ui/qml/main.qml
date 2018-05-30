@@ -854,6 +854,19 @@ ApplicationWindow
 
     Action
     {
+        id: exportNodePositionsAction
+        text: qsTr("Export To File…")
+        enabled: currentDocument
+
+        onTriggered:
+        {
+            if(currentDocument)
+                currentDocument.exportNodePositions();
+        }
+    }
+
+    Action
+    {
         id: overviewModeAction
         iconName: "view-fullscreen"
         text: qsTr("&Overview Mode")
@@ -1245,6 +1258,7 @@ ApplicationWindow
             title: qsTr("&Layout")
             MenuItem { action: pauseLayoutAction }
             MenuItem { action: toggleLayoutSettingsAction }
+            MenuItem { action: exportNodePositionsAction }
         }
         Menu
         {

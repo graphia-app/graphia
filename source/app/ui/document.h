@@ -436,6 +436,8 @@ public:
 
     Q_INVOKABLE void performEnrichment(const QString& selectedAttributeA, const QString& selectedAttributeB);
 
+    Q_INVOKABLE void saveNodePositionsToFile(const QUrl& fileUrl);
+
 private slots:
     void onLoadProgress(int percentage);
     void onLoadComplete(const QUrl& url, bool success);
