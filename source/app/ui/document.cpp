@@ -1988,7 +1988,7 @@ void Document::cancelCommand()
 
 void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
 {
-    // We have to do this on the same thread as the caller, because we can't invoke
+    // We have to do this part on the same thread as the caller, because we can't invoke
     // methods across threads; hopefully it's relatively quick
     QStringList columnRoles;
     auto columnCount = QQmlProperty::read(tableView, QStringLiteral("columnCount")).toInt();
@@ -2018,7 +2018,7 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
     {
         QFile file(localFileName);
 
-        if(!file.open(QIODevice::ReadWrite))
+        if(!file.open(QIODevice::ReadWrite|QIODevice::Truncate))
         {
             // We should never get here normally, since this check has already been performed
             qDebug() << "Can't open" << localFileName << "for writing.";
@@ -2141,7 +2141,6 @@ void Document::performEnrichment(const QString& selectedAttributeA, const QStrin
         },
     [this, selectedAttributeA, selectedAttributeB, tableModel](Command& command) mutable
     {
-
         auto result = EnrichmentCalculator::overRepAgainstEachAttribute(selectedAttributeA, selectedAttributeB,
                                                                         graphModel(), command);
         tableModel->setTableData(result);

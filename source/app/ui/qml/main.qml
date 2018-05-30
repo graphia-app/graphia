@@ -801,7 +801,7 @@ ApplicationWindow
     Action
     {
         id: enrichmentAction
-        text: qsTr("Enrichment...")
+        text: qsTr("Enrichment…")
         enabled: currentDocument !== undefined
         onTriggered:
         {
@@ -842,7 +842,7 @@ ApplicationWindow
     {
         id: toggleLayoutSettingsAction
         iconName: "applications-system"
-        text: qsTr("Settings...")
+        text: qsTr("Settings…")
         shortcut: "Ctrl+L"
 
         onTriggered:
