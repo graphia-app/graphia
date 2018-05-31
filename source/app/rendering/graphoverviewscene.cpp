@@ -541,6 +541,9 @@ void GraphOverviewScene::startComponentLayoutTransition()
 {
     if(visible())
     {
+        bool componentLayoutDataChanged = _componentLayoutData != _nextComponentLayoutData;
+        float duration = !componentLayoutDataChanged ? 0.0f : u::pref("visuals/transitionTime").toFloat();
+
         onShow();
         setViewportSize(_width, _height);
 
@@ -553,7 +556,7 @@ void GraphOverviewScene::startComponentLayoutTransition()
                 _graphRenderer->transition().willBeImmediatelyReused();
                 _graphRenderer->switchToComponentMode();
             }
-        }, u::pref("visuals/transitionTime").toFloat(), Transition::Type::EaseInEaseOut);
+        }, duration, Transition::Type::EaseInEaseOut);
     }
 }
 
@@ -566,13 +569,9 @@ void GraphOverviewScene::onGraphChanged(const Graph* graph, bool changed)
 
     graph->setPhase(tr("Component Layout"));
     _componentLayout->execute(*graph, graph->componentIds(), _nextComponentLayoutData);
-
-    // If the component layout hasn't changed, we don't need to perform a transition
-    if(_componentLayoutData == _nextComponentLayoutData)
-        return;
+    graph->clearPhase();
 
     _nextComponentLayoutDataChanged = true;
-    graph->clearPhase();
 
     _graphRenderer->executeOnRendererThread([this, graph]
     {
