@@ -35,7 +35,7 @@ public:
     auto begin() const { return make_pair_second_iterator(_userDataVectors.begin()); }
     auto end() const { return make_pair_second_iterator(_userDataVectors.end()); }
 
-    UserDataVector& add(const QString& name);
+    UserDataVector& add(QString name);
     void setValue(size_t index, const QString& name, const QString& value);
     QVariant value(size_t index, const QString& name) const;
 

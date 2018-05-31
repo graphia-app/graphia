@@ -25,8 +25,11 @@ QSet<QString> UserData::vectorNames() const
     return _vectorNames;
 }
 
-UserDataVector& UserData::add(const QString& name)
+UserDataVector& UserData::add(QString name)
 {
+    if(name.isEmpty())
+        name = QObject::tr("Unnamed");
+
     if(!u::contains(_vectorNames, name))
     {
         _vectorNames.insert(name);
