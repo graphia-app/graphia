@@ -388,27 +388,41 @@ void Application::loadPlugins()
 
     for(auto& pluginsDir : pluginsDirs)
     {
-#ifndef _DEBUG
-        std::cerr << "Loading plugins from " << pluginsDir.toStdString() << "\n";
-#endif
-
         if(pluginsDir.isEmpty() || !QDir(pluginsDir).exists())
             continue;
 
-        QDir pluginsQDir(pluginsDir);
+        std::cerr << "Loading plugins from " << pluginsDir.toStdString() << "\n";
 
-        for(auto& fileName : pluginsQDir.entryList(QDir::Files))
+        QDir pluginsQDir(pluginsDir);
+        auto fileNames = pluginsQDir.entryList(QDir::Files);
+
+        if(fileNames.empty())
+        {
+            std::cerr << "  ...none found\n";
+            continue;
+        }
+
+        for(auto& fileName : fileNames)
         {
             if(!QLibrary::isLibrary(fileName))
+            {
+                std::cerr << "  ..." << QFileInfo(fileName).fileName().toStdString() <<
+                    " is not a library, skipping\n";
                 continue;
+            }
 
             auto pluginLoader = std::make_unique<QPluginLoader>(pluginsQDir.absoluteFilePath(fileName));
             QObject* plugin = pluginLoader->instance();
             if(!pluginLoader->isLoaded())
             {
+                std::cerr << "  ..." << QFileInfo(fileName).fileName().toStdString() <<
+                    " failed to load: " << pluginLoader->errorString().toStdString() << "\n";
+
                 QMessageBox::warning(nullptr, QObject::tr("Plugin Load Failed"),
                     QObject::tr("The plugin \"%1\" failed to load. The reported error is:\n%2")
                                      .arg(fileName, pluginLoader->errorString()), QMessageBox::Ok);
+
+                continue;
             }
 
             if(plugin != nullptr)
@@ -430,18 +444,17 @@ void Application::loadPlugins()
 
                     if(pluginNameAlreadyUsed)
                     {
-                        qDebug() << "WARNING: not loading plugin" << iplugin->name() <<
-                                    "as a plugin of the same name is already loaded";
+                        std::cerr << "  ..." << QFileInfo(fileName).fileName().toStdString() <<
+                            " (" << iplugin->name().toStdString() <<
+                            ") is already loaded from a different location\n";
                         pluginLoader->unload();
                         continue;
                     }
 
                     initialisePlugin(iplugin, std::move(pluginLoader));
 
-#ifndef _DEBUG
                     std::cerr << "  ..." << QFileInfo(fileName).fileName().toStdString() <<
-                        "(" << iplugin->name().toStdString() << ")" << "\n";
-#endif
+                        " (" << iplugin->name().toStdString() << ") loaded successfully\n";
                 }
             }
         }
