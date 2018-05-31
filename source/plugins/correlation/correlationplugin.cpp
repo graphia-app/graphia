@@ -613,8 +613,66 @@ CorrelationPlugin::CorrelationPlugin()
     qmlRegisterType<DataRectTableModel>("com.kajeka", 1, 0, "DataRectTableModel");
 }
 
+static QString contentIdentityOf(const QUrl& url)
+{
+    QString identity;
+
+    std::ifstream file(url.toLocalFile().toStdString());
+    std::string line;
+
+    if(file && u::getline(file, line))
+    {
+        size_t numCommas = 0;
+        size_t numTabs = 0;
+        bool inQuotes = false;
+
+        for(auto character : line)
+        {
+            switch(character)
+            {
+            case '"': inQuotes = !inQuotes; break;
+            case ',': if(!inQuotes) { numCommas++; } break;
+            case '\t': if(!inQuotes) { numTabs++; } break;
+            default: break;
+            }
+        }
+
+        if(numTabs > numCommas)
+            identity = QStringLiteral("CorrelationTSV");
+        else if(numCommas > numTabs)
+            identity = QStringLiteral("CorrelationCSV");
+    }
+
+    return identity;
+}
+
 QStringList CorrelationPlugin::identifyUrl(const QUrl& url) const
 {
-    //FIXME actually look at the file contents
-    return identifyByExtension(url);
+    auto urlTypes = identifyByExtension(url);
+
+    if(urlTypes.isEmpty() || contentIdentityOf(url) != urlTypes.first())
+        return {};
+
+    return urlTypes;
+}
+
+QString CorrelationPlugin::failureReason(const QUrl& url) const
+{
+    auto urlTypes = identifyByExtension(url);
+
+    if(urlTypes.isEmpty())
+        return {};
+
+    auto extensionIdentity = urlTypes.first();
+    auto contentIdentity = contentIdentityOf(url);
+
+    if(extensionIdentity != contentIdentity)
+    {
+        return tr("%1 has an extension that indicates it is a '%2', "
+            "however its content resembles a '%3'.").arg(url.fileName())
+            .arg(individualDescriptionForUrlTypeName(extensionIdentity))
+            .arg(individualDescriptionForUrlTypeName(contentIdentity));
+    }
+
+    return {};
 }

@@ -248,6 +248,7 @@ public:
     int dataVersion() const override { return 1; }
 
     QStringList identifyUrl(const QUrl& url) const override;
+    QString failureReason(const QUrl& url) const override;
 
     bool editable() const override { return true; }
 

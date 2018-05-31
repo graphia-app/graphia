@@ -135,6 +135,23 @@ QStringList Application::urlTypesOf(const QUrl& url) const
     return urlTypeNames;
 }
 
+QStringList Application::failureReasons(const QUrl& url) const
+{
+    QStringList failureReasons;
+
+    for(const auto& loadedPlugin : _loadedPlugins)
+    {
+        auto failureReason = loadedPlugin._instance->failureReason(url);
+
+        if(!failureReason.isEmpty())
+            failureReasons.append(failureReason);
+    }
+
+    failureReasons.removeDuplicates();
+
+    return failureReasons;
+}
+
 QStringList Application::pluginNames(const QString& urlTypeName) const
 {
     QStringList viablePluginNames;

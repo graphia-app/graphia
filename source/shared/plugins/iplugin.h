@@ -56,6 +56,7 @@ public:
     virtual int dataVersion() const = 0;
 
     virtual QStringList identifyUrl(const QUrl& url) const = 0;
+    virtual QString failureReason(const QUrl& url) const = 0;
 
     virtual bool editable() const = 0;
 
