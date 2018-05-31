@@ -568,7 +568,11 @@ bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IM
 
         auto nodeId = _userNodeData.elementIdForRowIndex(row);
         _dataRows.emplace_back(begin, end, nodeId, computeCost);
+
+        progressFn(static_cast<int>((row * 100) / _numRows));
     }
+
+    progressFn(-1);
 
     createAttributes();
 
