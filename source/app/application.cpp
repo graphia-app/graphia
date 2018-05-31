@@ -138,6 +138,7 @@ QStringList Application::urlTypesOf(const QUrl& url) const
 QStringList Application::failureReasons(const QUrl& url) const
 {
     QStringList failureReasons;
+    failureReasons.reserve(static_cast<int>(_loadedPlugins.size()));
 
     for(const auto& loadedPlugin : _loadedPlugins)
     {

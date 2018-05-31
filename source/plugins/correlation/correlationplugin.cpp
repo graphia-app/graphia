@@ -673,9 +673,9 @@ QString CorrelationPlugin::failureReason(const QUrl& url) const
     if(extensionIdentity != contentIdentity)
     {
         return tr("%1 has an extension that indicates it is a '%2', "
-            "however its content resembles a '%3'.").arg(url.fileName())
-            .arg(individualDescriptionForUrlTypeName(extensionIdentity))
-            .arg(individualDescriptionForUrlTypeName(contentIdentity));
+            "however its content resembles a '%3'.").arg(url.fileName(),
+            individualDescriptionForUrlTypeName(extensionIdentity),
+            individualDescriptionForUrlTypeName(contentIdentity));
     }
 
     return {};
