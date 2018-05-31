@@ -842,8 +842,9 @@ ApplicationWindow
     {
         id: toggleLayoutSettingsAction
         iconName: "applications-system"
-        text: qsTr("Settings…")
+        text: Qt.platform.os === "osx" ? qsTr("Layout Settings…") : qsTr("Settings…")
         shortcut: "Ctrl+L"
+        enabled: currentDocument
 
         onTriggered:
         {
