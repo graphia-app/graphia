@@ -48,7 +48,7 @@ public:
     }
 
     bool update(float dTime);
-    bool active() const { return _elapsed < _duration; }
+    bool active() const { return _elapsed == 0.0f || _elapsed < _duration; }
 
     // The idea behind this is that when you have a chain of transitions, you
     // don't necessarily want to signal when each starts and finishes, so by
