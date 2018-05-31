@@ -439,21 +439,30 @@ void GraphCommonInteractor::wheelEvent(QWheelEvent* wheelEvent)
 
     if(wheelEvent->source() == Qt::MouseEventSynthesizedBySystem)
     {
+        // These wheel events are synthesised by Qt when Mac trackpad scroll
+        // gestures are performed, but they aren't really suitable for our
+        // panning user interface, so we use the synthesised event and then
+        // synthensise our own right mouse button drag events, which the
+        // interactor classes interpret as a drag
+
         switch(wheelEvent->phase())
         {
         case Qt::ScrollBegin:
-            if(!_trackPadPanning)
-            {
-                QMouseEvent fakeRightDown(QEvent::Type::MouseButtonPress, wheelEvent->pos(),
-                    Qt::MouseButton::RightButton, Qt::NoButton, Qt::NoModifier);
-                mousePressEvent(&fakeRightDown);
-                _trackPadPanning = true;
-            }
+            _trackPadPanningState = TrackpadPanningState::Initiated;
             break;
 
         case Qt::ScrollUpdate:
-            if(_trackPadPanning)
+            if(_trackPadPanningState != TrackpadPanningState::Inactive)
             {
+                if(_trackPadPanningState != TrackpadPanningState::Active)
+                {
+                    QMouseEvent fakeRightDown(QEvent::Type::MouseButtonPress, wheelEvent->pos(),
+                        Qt::MouseButton::RightButton, Qt::NoButton, Qt::NoModifier);
+                    mousePressEvent(&fakeRightDown);
+                }
+
+                _trackPadPanningState = TrackpadPanningState::Active;
+
                 QMouseEvent fakeMouseMove(QEvent::Type::MouseMove,
                     cursorPosition() + wheelEvent->pixelDelta(),
                     Qt::MouseButton::RightButton, Qt::NoButton, Qt::NoModifier);
@@ -462,13 +471,14 @@ void GraphCommonInteractor::wheelEvent(QWheelEvent* wheelEvent)
             break;
 
         case Qt::ScrollEnd:
-            if(_trackPadPanning)
+            if(_trackPadPanningState == TrackpadPanningState::Active)
             {
                 QMouseEvent fakeRightUp(QEvent::Type::MouseButtonRelease, wheelEvent->pos(),
                     Qt::MouseButton::RightButton, Qt::NoButton, Qt::NoModifier);
                 mouseReleaseEvent(&fakeRightUp);
-                _trackPadPanning = false;
             }
+
+            _trackPadPanningState = TrackpadPanningState::Inactive;
             break;
 
         default:

@@ -39,7 +39,14 @@ private:
     QPoint _prevCursorPosition;
     bool _rightMouseButtonHeld = false;
     bool _leftMouseButtonHeld = false;
-    bool _trackPadPanning = false;
+
+    enum class TrackpadPanningState
+    {
+        Inactive,
+        Initiated,
+        Active
+    }
+    _trackPadPanningState = {};
 
     Qt::KeyboardModifiers _modifiers;
 
