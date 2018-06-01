@@ -209,6 +209,7 @@ private:
     bool allLayoutsFinished();
     bool workToDo();
     void uncancel();
+    void unfinish();
     void run();
 
     void addComponent(ComponentId componentId);

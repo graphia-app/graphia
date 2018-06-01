@@ -96,11 +96,7 @@ void LayoutThread::resume()
     if(!workToDo())
         return;
 
-    for(auto& layout : _layouts)
-    {
-        if(layout.second->finished())
-            layout.second->unfinish();
-    }
+    unfinish();
 
     _pause = false;
 
@@ -154,6 +150,12 @@ void LayoutThread::uncancel()
 {
     for(auto& layout : _layouts)
         layout.second->uncancel();
+}
+
+void LayoutThread::unfinish()
+{
+    for(auto& layout : _layouts)
+        layout.second->unfinish();
 }
 
 bool LayoutThread::allLayoutsFinished()
@@ -249,7 +251,10 @@ void LayoutThread::addComponent(ComponentId componentId)
         [this]
         {
             std::unique_lock<std::mutex> innerLock(_mutex);
+
             _layoutPotentiallyRequired = true;
+            unfinish();
+
             innerLock.unlock();
 
             emit settingChanged();
