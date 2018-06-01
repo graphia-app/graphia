@@ -62,12 +62,12 @@ bool KNNTransform::apply(TransformedGraph& target) const
         if(ascending)
         {
             std::partial_sort(edgeIds.begin(), kthPlus1, edgeIds.end(),
-                [&attribute](auto a, auto b) { return attribute.numericValueOf(a) > attribute.numericValueOf(b); });
+                [&attribute](auto a, auto b) { return attribute.numericValueOf(a) < attribute.numericValueOf(b); });
         }
         else
         {
             std::partial_sort(edgeIds.begin(), kthPlus1, edgeIds.end(),
-                [&attribute](auto a, auto b) { return attribute.numericValueOf(a) < attribute.numericValueOf(b); });
+                [&attribute](auto a, auto b) { return attribute.numericValueOf(a) > attribute.numericValueOf(b); });
         }
 
         for(auto it = edgeIds.begin(); it != kthPlus1; ++it)
