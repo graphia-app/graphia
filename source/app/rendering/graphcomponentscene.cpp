@@ -113,6 +113,10 @@ void GraphComponentScene::onShow()
 
 void GraphComponentScene::finishComponentTransition(ComponentId componentId, bool doTransition)
 {
+    // KEEP IN MIND: at this point _componentId may refer to a frozen component that is no longer
+    // in the graph, and is only being kept around to refer to its renderer; in other words don't
+    // use it to query the graph itself, because it might not work
+
     auto transitionType = Transition::Type::InversePower;
     TransitionStyle transitionStyle = TransitionStyle::None;
 
@@ -128,11 +132,10 @@ void GraphComponentScene::finishComponentTransition(ComponentId componentId, boo
         else if(!componentId.isNull() && !_componentId.isNull())
         {
             auto incomingComponentSize = _graphRenderer->graphModel()->graph().componentById(componentId)->numNodes();
-            auto outgoingComponentSize = _graphRenderer->graphModel()->graph().componentById(_componentId)->numNodes();
 
-            if(incomingComponentSize > outgoingComponentSize)
+            if(incomingComponentSize > _removedComponentSize)
                 transitionStyle = TransitionStyle::SlideRight;
-            else if(incomingComponentSize < outgoingComponentSize)
+            else if(incomingComponentSize < _removedComponentSize)
                 transitionStyle = TransitionStyle::SlideLeft;
             else if(componentId < _componentId)
                 transitionStyle = TransitionStyle::SlideRight;
@@ -452,12 +455,13 @@ void GraphComponentScene::onComponentAdded(const Graph*, ComponentId componentId
         setComponentId(componentId, visible());
 }
 
-void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool hasMerged)
+void GraphComponentScene::onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool hasMerged)
 {
     if(componentId == _componentId && visible() && !hasMerged)
     {
         // Keep the component alive until any transitions have finished
         _beingRemoved = true;
+        _removedComponentSize = graph->componentById(_componentId)->numNodes();
         componentRenderer()->freeze();
     }
 }

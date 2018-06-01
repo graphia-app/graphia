@@ -70,6 +70,7 @@ private:
     NodeId _queuedTransitionNodeId;
 
     bool _beingRemoved = false;
+    int _removedComponentSize = 0;
 
     int _numComponentsPriorToChange = 0;
 
