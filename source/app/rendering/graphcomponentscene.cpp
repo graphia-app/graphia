@@ -133,9 +133,9 @@ void GraphComponentScene::finishComponentTransition(ComponentId componentId, boo
         {
             auto incomingComponentSize = _graphRenderer->graphModel()->graph().componentById(componentId)->numNodes();
 
-            if(incomingComponentSize > _removedComponentSize)
+            if(incomingComponentSize > _componentSize)
                 transitionStyle = TransitionStyle::SlideRight;
-            else if(incomingComponentSize < _removedComponentSize)
+            else if(incomingComponentSize < _componentSize)
                 transitionStyle = TransitionStyle::SlideLeft;
             else if(componentId < _componentId)
                 transitionStyle = TransitionStyle::SlideRight;
@@ -156,7 +156,11 @@ void GraphComponentScene::finishComponentTransition(ComponentId componentId, boo
     }
 
     if(!_componentId.isNull())
+    {
+        Q_ASSERT(_graphRenderer->graphModel()->graph().containsComponentId(_componentId));
+        _componentSize = _graphRenderer->graphModel()->graph().componentById(_componentId)->numNodes();
         componentRenderer()->resetView();
+    }
 
     if(doTransition)
     {
@@ -461,7 +465,6 @@ void GraphComponentScene::onComponentWillBeRemoved(const Graph* graph, Component
     {
         // Keep the component alive until any transitions have finished
         _beingRemoved = true;
-        _removedComponentSize = graph->componentById(_componentId)->numNodes();
         componentRenderer()->freeze();
     }
 }
