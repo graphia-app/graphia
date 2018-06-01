@@ -459,7 +459,7 @@ void GraphComponentScene::onComponentAdded(const Graph*, ComponentId componentId
         setComponentId(componentId, visible());
 }
 
-void GraphComponentScene::onComponentWillBeRemoved(const Graph* graph, ComponentId componentId, bool hasMerged)
+void GraphComponentScene::onComponentWillBeRemoved(const Graph*, ComponentId componentId, bool hasMerged)
 {
     if(componentId == _componentId && visible() && !hasMerged)
     {
