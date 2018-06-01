@@ -33,35 +33,43 @@ static QVector3D normalized(const QVector3D& v)
     return {};
 }
 
-// This promotes movements where the direction is constant and mitigates movements when the direction changes
-static void dampOscillations(QVector3D& previous, QVector3D& next)
+void ForceDirectedDisplacement::computeAndDamp()
 {
-    const float previousLength = previous.length();
-    float nextLength = next.length();
+    _next = _repulsive + _attractive;
+    _nextLength = _next.length();
+
+    // Reset for next iteration
+    _repulsive = {};
+    _attractive = {};
+
+    // The following computation encouragements movements where the
+    // direction is constant and discourages movements when it changes
+
     const float MAX_DISPLACEMENT = 10.0f;
 
     // Filter large displacements that can induce instability
-    if(nextLength > MAX_DISPLACEMENT)
+    if(_nextLength > MAX_DISPLACEMENT)
     {
-        nextLength = MAX_DISPLACEMENT;
-        next = normalized(next) * nextLength;
+        _nextLength = MAX_DISPLACEMENT;
+        _next = normalized(_next) * _nextLength;
     }
 
-    if(previousLength > 0.0f && nextLength > 0.0f)
+    if(_previousLength > 0.0f && _nextLength > 0.0f)
     {
-        const float dotProduct = QVector3D::dotProduct(previous / previousLength, next / nextLength);
+        const float dotProduct = QVector3D::dotProduct(_previous / _previousLength, _next / _nextLength);
 
         // http://www.wolframalpha.com/input/?i=plot+0.5x%5E2%2B1.2x%2B1+from+x%3D-1to1
         const float f = (0.5f * dotProduct * dotProduct) + (1.2f * dotProduct) + 1.0f;
 
-        if(nextLength > (previousLength * f))
+        if(_nextLength > (_previousLength * f))
         {
-            const float r = previousLength / nextLength;
-            next *= (f * r);
+            const float r = _previousLength / _nextLength;
+            _next *= (f * r);
         }
     }
 
-    previous = next;
+    _previous = _next;
+    _previousLength = _previous.length();
 }
 
 // This is a fairly arbitrary function that was arrived at through experimentation. The parameters
@@ -77,19 +85,13 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
 {
     SCOPE_TIMER_MULTISAMPLES(50)
 
-    _prevDisplacements.resize(positions().size());
-    _displacements.resize(positions().size());
-
-    std::vector<QVector3D> repulsiveDisplacements(positions().size());
-    std::vector<QVector3D> attractiveDisplacements(positions().size());
-
     if(firstIteration)
     {
         FastInitialLayout initialLayout(graphComponent(), positions());
         initialLayout.execute(firstIteration);
 
         for(NodeId nodeId : nodeIds())
-            _prevDisplacements[static_cast<int>(nodeId)] = QVector3D(0.0f, 0.0f, 0.0f);
+            _displacements->at(nodeId)._previous = {};
     }
 
     BarnesHutTree barnesHutTree;
@@ -100,12 +102,12 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
 
     // Repulsive forces
     auto repulsiveResults = concurrent_for(nodeIds().begin(), nodeIds().end(),
-    [this, &barnesHutTree, &repulsiveDisplacements, SHORT_RANGE, LONG_RANGE](const NodeId nodeId)
+    [this, &barnesHutTree, SHORT_RANGE, LONG_RANGE](NodeId nodeId)
     {
         if(cancelled())
             return;
 
-        repulsiveDisplacements[static_cast<int>(nodeId)] -= barnesHutTree.evaluateKernel(positions(), nodeId,
+        _displacements->at(nodeId)._repulsive -= barnesHutTree.evaluateKernel(positions(), nodeId,
         [SHORT_RANGE, LONG_RANGE](int mass, const QVector3D& difference, float distanceSq)
         {
             return difference * (mass * repulse(distanceSq, SHORT_RANGE, LONG_RANGE));
@@ -114,7 +116,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
 
     // Attractive forces
     auto attractiveResults = concurrent_for(edgeIds().begin(), edgeIds().end(),
-    [this, &attractiveDisplacements](const EdgeId edgeId)
+    [this](EdgeId edgeId)
     {
         if(cancelled())
             return;
@@ -126,8 +128,8 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
             float distanceSq = difference.lengthSquared();
             const float force = distanceSq * 0.001f;
 
-            attractiveDisplacements[static_cast<int>(edge.targetId())] -= (force * difference);
-            attractiveDisplacements[static_cast<int>(edge.sourceId())] += (force * difference);
+            _displacements->at(edge.targetId())._attractive -= (force * difference);
+            _displacements->at(edge.sourceId())._attractive += (force * difference);
         }
     }, false);
 
@@ -138,18 +140,14 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
         return;
 
     concurrent_for(nodeIds().begin(), nodeIds().end(),
-    [this, &repulsiveDisplacements, &attractiveDisplacements](const NodeId& nodeId)
+    [this](NodeId nodeId)
     {
-        _displacements[static_cast<int>(nodeId)] =
-                repulsiveDisplacements[static_cast<int>(nodeId)] +
-                attractiveDisplacements[static_cast<int>(nodeId)];
-
-        dampOscillations(_prevDisplacements[static_cast<int>(nodeId)], _displacements[static_cast<int>(nodeId)]);
+        _displacements->at(nodeId).computeAndDamp();
     });
 
     // Apply the forces
     for(auto nodeId : nodeIds())
-        positions().set(nodeId, positions().get(nodeId) + _displacements[static_cast<int>(nodeId)]);
+        positions().set(nodeId, positions().get(nodeId) + _displacements->at(nodeId)._next);
 
     // There are three main phases which decide when to stop the layout.
     // The phases operate primarily on the stddev of the forces within the graph
@@ -166,17 +164,10 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
     // Finished  - Finish layout
     //
 
-    NodeArray<float> displacementSizes(graphComponent().graph());
-    concurrent_for(nodeIds().begin(), nodeIds().end(),
-        [this, &displacementSizes](const NodeId& nodeId)
-        {
-            displacementSizes[static_cast<int>(nodeId)] = _displacements[static_cast<int>(nodeId)].length();
-        });
-
     // Calculate force averages
     float deltaForceTotal = 0.0f;
     for(auto nodeId : nodeIds())
-        deltaForceTotal += displacementSizes[nodeId];
+        deltaForceTotal += _displacements->at(nodeId)._nextLength;
 
     _forceMean = deltaForceTotal / nodeIds().size();
 
@@ -184,7 +175,7 @@ void ForceDirectedLayout::executeReal(bool firstIteration)
     float variance = 0.0f;
     for(auto nodeId : nodeIds())
     {
-        float d = displacementSizes[nodeId] - _forceMean;
+        float d = _displacements->at(nodeId)._nextLength - _forceMean;
         variance += (d * d);
     }
 
@@ -300,8 +291,18 @@ void ForceDirectedLayout::oscillateChangeDetection()
     }
 }
 
-std::unique_ptr<Layout> ForceDirectedLayoutFactory::create(ComponentId componentId, NodePositions& nodePositions) const
+ForceDirectedLayoutFactory::ForceDirectedLayoutFactory(GraphModel* graphModel) :
+    LayoutFactory(graphModel), _displacements(graphModel->graph())
+{
+    _layoutSettings.registerSetting("ShortRangeRepulseTerm", QObject::tr("Local"),
+                                    1000.0f, 1000000000.0f, 1000000.0f, LayoutSettingScaleType::Log);
+
+    _layoutSettings.registerSetting("LongRangeRepulseTerm", QObject::tr("Global"),
+                                    0.0f, 20.0f, 10.0f);
+}
+
+std::unique_ptr<Layout> ForceDirectedLayoutFactory::create(ComponentId componentId, NodePositions& nodePositions)
 {
     auto component = _graphModel->graph().componentById(componentId);
-    return std::make_unique<ForceDirectedLayout>(*component, nodePositions, &_layoutSettings);
+    return std::make_unique<ForceDirectedLayout>(*component, _displacements, nodePositions, &_layoutSettings);
 }

@@ -134,7 +134,7 @@ public:
 
     virtual QString name() const = 0;
     virtual QString displayName() const = 0;
-    virtual std::unique_ptr<Layout> create(ComponentId componentId, NodePositions& results) const = 0;
+    virtual std::unique_ptr<Layout> create(ComponentId componentId, NodePositions& results) = 0;
 };
 
 class LayoutThread : public QObject

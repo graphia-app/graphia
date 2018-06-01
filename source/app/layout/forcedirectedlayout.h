@@ -9,6 +9,21 @@
 
 #include <vector>
 
+struct ForceDirectedDisplacement
+{
+    QVector3D _repulsive;
+    QVector3D _attractive;
+
+    QVector3D _previous;
+    QVector3D _next;
+    float _previousLength = 0.0f;
+    float _nextLength = 0.0f;
+
+    void computeAndDamp();
+};
+
+using ForceDirectedDisplacements = NodeArray<ForceDirectedDisplacement>;
+
 class ForceDirectedLayout : public Layout
 {
     Q_OBJECT
@@ -32,8 +47,7 @@ private:
 
     ChangeDetectionPhase _changeDetectionPhase = ChangeDetectionPhase::Initial;
 
-    std::vector<QVector3D> _prevDisplacements;
-    std::vector<QVector3D> _displacements;
+    ForceDirectedDisplacements* _displacements;
 
     float _forceStdDeviation = 0;
     float _forceMean = 0;
@@ -49,11 +63,11 @@ private:
 
 public:
     ForceDirectedLayout(const IGraphComponent& graphComponent,
+                        ForceDirectedDisplacements& displacements,
                         NodePositions& positions,
                         const LayoutSettings* settings) :
         Layout(graphComponent, positions, settings, Iterative::Yes, 0.4f, 4),
-        _prevDisplacements(graphComponent.numNodes()),
-        _displacements(graphComponent.numNodes())
+        _displacements(&displacements)
     {}
 
     bool finished() const override { return _changeDetectionPhase == ChangeDetectionPhase::Finished; }
@@ -64,20 +78,15 @@ public:
 
 class ForceDirectedLayoutFactory : public LayoutFactory
 {
-public:
-    explicit ForceDirectedLayoutFactory(GraphModel* graphModel) :
-        LayoutFactory(graphModel)
-    {
-        _layoutSettings.registerSetting("ShortRangeRepulseTerm", QObject::tr("Local"),
-            1000.0f, 1000000000.0f, 1000000.0f, LayoutSettingScaleType::Log);
+private:
+    ForceDirectedDisplacements _displacements;
 
-        _layoutSettings.registerSetting("LongRangeRepulseTerm", QObject::tr("Global"),
-            0.0f, 20.0f, 10.0f);
-    }
+public:
+    explicit ForceDirectedLayoutFactory(GraphModel* graphModel);
 
     QString name() const override { return QStringLiteral("ForceDirected"); }
     QString displayName() const override { return QObject::tr("Force Directed"); }
-    std::unique_ptr<Layout> create(ComponentId componentId, NodePositions& nodePositions) const override;
+    std::unique_ptr<Layout> create(ComponentId componentId, NodePositions& nodePositions) override;
 };
 
 #endif // FORCEDIRECTEDLAYOUT_H
