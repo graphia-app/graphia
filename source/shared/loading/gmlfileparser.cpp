@@ -288,7 +288,7 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel& graphModel, const Progre
     graphModel.mutableGraph().setPhase(QObject::tr("Parsing"));
 
     SpiritGmlParser::List gml;
-    bool success;
+    bool success = false;
 
     try
     {

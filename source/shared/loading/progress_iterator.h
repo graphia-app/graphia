@@ -20,7 +20,7 @@ private:
 public:
     progress_iterator() : progress_iterator<BaseItType>::iterator_adaptor_() {}
 
-    progress_iterator(const BaseItType& iterator) :
+    explicit progress_iterator(const BaseItType& iterator) :
         progress_iterator<BaseItType>::iterator_adaptor_(iterator)
     {}
 
