@@ -272,11 +272,12 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel& graphModel, const Progre
     stream.unsetf(std::ios::skipws);
 
     boost::spirit::istream_iterator istreamIt(stream);
-    progress_iterator<decltype(istreamIt)> end;
-    progress_iterator<decltype(istreamIt)> it(istreamIt, end);
+    using GmlIterator = progress_iterator<decltype(istreamIt)>;
+    GmlIterator it(istreamIt);
+    GmlIterator end;
 
-    it.onPositionChanged([&]
-    (size_t position)
+    it.onPositionChanged(
+    [&fileSize, &progressFn](size_t position)
     {
         progressFn(static_cast<int>((position * 100) / fileSize));
     });
@@ -287,8 +288,14 @@ bool GmlFileParser::parse(const QUrl& url, IGraphModel& graphModel, const Progre
     graphModel.mutableGraph().setPhase(QObject::tr("Parsing"));
 
     SpiritGmlParser::List gml;
-    bool success = SpiritGmlParser::x3::phrase_parse(it, end,
-        SpiritGmlParser::list, SpiritGmlParser::ascii::space, gml);
+    bool success;
+
+    try
+    {
+        success = SpiritGmlParser::x3::phrase_parse(it, end,
+            SpiritGmlParser::list, SpiritGmlParser::ascii::space, gml);
+    }
+    catch(GmlIterator::cancelled_exception&) {}
 
     if(cancelled() || !success || it != end)
         return false;

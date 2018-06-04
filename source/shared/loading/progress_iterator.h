@@ -15,15 +15,13 @@ private:
     std::function<void(size_t position)> _onPositionChangedFn;
     std::function<bool()> _cancelledFn;
 
-    const progress_iterator<BaseItType>* _end = nullptr;
     size_t _position = 0;
 
 public:
     progress_iterator() : progress_iterator<BaseItType>::iterator_adaptor_() {}
 
-    progress_iterator(const BaseItType& iterator, const progress_iterator<BaseItType>& end) :
-        progress_iterator<BaseItType>::iterator_adaptor_(iterator),
-        _end(&end)
+    progress_iterator(const BaseItType& iterator) :
+        progress_iterator<BaseItType>::iterator_adaptor_(iterator)
     {}
 
     template<typename OnPositionChangedFn>
@@ -38,25 +36,10 @@ public:
         _cancelledFn = cancelledFn;
     }
 
+    struct cancelled_exception {};
+
 private:
     friend class boost::iterator_core_access;
-
-    bool equal(const progress_iterator& other) const
-    {
-        // Check if we've been cancelled
-        if(_cancelledFn != nullptr && _cancelledFn())
-        {
-            if(_end != nullptr && other == *_end)
-            {
-                // If we're testing against the end iterator unconditionally return
-                // true, thus tricking whatever is using the iterator into
-                // believing that we have actually reached the end
-                return true;
-            }
-        }
-
-        return this->base_reference() == other.base_reference();
-    }
 
     void increment()
     {
@@ -65,6 +48,9 @@ private:
 
         if(_onPositionChangedFn != nullptr)
             _onPositionChangedFn(_position);
+
+        if(_cancelledFn != nullptr && _cancelledFn())
+            throw cancelled_exception();
     }
 };
 
