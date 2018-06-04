@@ -69,7 +69,18 @@ GridLayout
             return 0;
         }
 
-        stepSize: hasRange ? Utils.incrementForRange(root.minimumValue, root.maximumValue) : 1.0
+        stepSize:
+        {
+            if(hasRange)
+            {
+                var incrementSize = Utils.incrementForRange(root.minimumValue, root.maximumValue);
+
+                if(valueType === ValueType.Int && incrementSize < 1.0)
+                    return 1.0;
+            }
+
+            return 1.0;
+        }
 
         function updateValue()
         {
