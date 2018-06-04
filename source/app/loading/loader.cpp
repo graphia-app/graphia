@@ -8,6 +8,7 @@
 #include "shared/plugins/iplugin.h"
 #include "shared/utils/scope_exit.h"
 #include "shared/utils/container.h"
+#include "shared/loading/progress_iterator.h"
 
 #include <QString>
 #include <QFileInfo>
@@ -242,7 +243,10 @@ bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& p
 
     progressFn(-1);
 
-    auto jsonArray = json::parse(byteArray.begin(), byteArray.end(), nullptr, false);
+    auto jsonArray = parseJsonFrom(byteArray, progressFn, [this] { return cancelled(); });
+
+    if(cancelled())
+        return false;
 
     if(jsonArray.is_null() || !jsonArray.is_array())
         return false;
@@ -444,7 +448,7 @@ bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& p
     else
         return false;
 
-    if(!_pluginInstance->load(pluginData, header._pluginDataVersion, graphModel.mutableGraph(), progressFn))
+    if(!_pluginInstance->load(pluginData, header._pluginDataVersion, graphModel.mutableGraph(), *this, progressFn))
         return false;
 
     const auto pluginUiDataKey = version >= 2 ? "pluginUiData" : "ui";

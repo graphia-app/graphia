@@ -509,12 +509,15 @@ QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, const ProgressF
 }
 
 bool CorrelationPluginInstance::load(const QByteArray& data, int dataVersion, IMutableGraph& graph,
-                                     const ProgressFn& progressFn)
+                                     Cancellable& cancellable, const ProgressFn& progressFn)
 {
     if(dataVersion != plugin()->dataVersion())
         return false;
 
-    json jsonObject = json::parse(data.begin(), data.end(), nullptr, false);
+    json jsonObject = parseJsonFrom(data, progressFn, [&cancellable] { return cancellable.cancelled(); });
+
+    if(cancellable.cancelled())
+        return false;
 
     if(jsonObject.is_null() || !jsonObject.is_object())
         return false;

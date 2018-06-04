@@ -20,8 +20,10 @@
 using json = nlohmann::json;
 
 #include "shared/loading/progressfn.h"
+#include "shared/loading/progress_iterator.h"
 
 #include <QString>
+#include <QByteArray>
 
 inline void to_json(json& j, const QString& s)
 {
@@ -48,6 +50,32 @@ json jsonArrayFrom(const C& container, ProgressFn progressFn = [](int){})
     progressFn(-1);
 
     return array;
+}
+
+template<typename ProgressFn, typename CancelledFn>
+json parseJsonFrom(const QByteArray& byteArray, const ProgressFn& progressFn, const CancelledFn& cancelledFn)
+{
+    json result;
+
+    using JSONByteArrayIterator = progress_iterator<QByteArray::const_iterator>;
+    JSONByteArrayIterator it(byteArray.begin());
+    JSONByteArrayIterator end(byteArray.end());
+
+    it.onPositionChanged(
+    [&byteArray, &progressFn](size_t position)
+    {
+        progressFn(static_cast<int>((position * 100) / byteArray.size()));
+    });
+
+    it.setCancelledFn(cancelledFn);
+
+    try
+    {
+        result = json::parse(it, end, nullptr, false);
+    }
+    catch(JSONByteArrayIterator::cancelled_exception&) {}
+
+    return result;
 }
 
 #endif // JSON_HELPER_H

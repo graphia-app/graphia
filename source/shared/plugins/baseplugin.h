@@ -87,7 +87,7 @@ public:
 
     // Save and restore no state, by default
     QByteArray save(IMutableGraph&, const ProgressFn&) const override { return {}; }
-    bool load(const QByteArray&, int, IMutableGraph&, const ProgressFn&) override { return true; }
+    bool load(const QByteArray&, int, IMutableGraph&, Cancellable&, const ProgressFn&) override { return true; }
 
     void setSaveRequired() const { emit saveRequired(); }
 

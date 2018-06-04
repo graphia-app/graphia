@@ -33,7 +33,9 @@ public:
 
     virtual QByteArray save(IMutableGraph& mutableGraph, const ProgressFn& progressFn) const = 0;
     virtual bool load(const QByteArray& data, int dataVersion,
-                      IMutableGraph& mutableGraph, const ProgressFn& progressFn) = 0;
+                      IMutableGraph& mutableGraph,
+                      Cancellable& cancellable,
+                      const ProgressFn& progressFn) = 0;
 };
 
 class IPluginInstanceProvider

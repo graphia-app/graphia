@@ -33,7 +33,7 @@ public:
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) override;
 
     QByteArray save(IMutableGraph&, const ProgressFn&) const override;
-    bool load(const QByteArray&, int, IMutableGraph&, const ProgressFn&) override;
+    bool load(const QByteArray&, int, IMutableGraph&, Cancellable& cancellable, const ProgressFn&) override;
 
 private:
     void initialise(const IPlugin* plugin, IDocument* document,

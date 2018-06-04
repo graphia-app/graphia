@@ -213,7 +213,7 @@ public:
 
     QByteArray save(IMutableGraph& graph, const ProgressFn& progressFn) const override;
     bool load(const QByteArray& data, int dataVersion, IMutableGraph& graph,
-              const ProgressFn& progressFn) override;
+              Cancellable& cancellable, const ProgressFn& progressFn) override;
 
 private slots:
     void onLoadSuccess();
