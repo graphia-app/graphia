@@ -7,8 +7,8 @@ template<typename T>
 class PassKey
 {
     friend T;
-    PassKey() {}
-    PassKey(PassKey const&) {}
+    PassKey() {} // NOLINT
+    PassKey(PassKey const&) {} // NOLINT
 };
 
 #endif // PASSKEY_H

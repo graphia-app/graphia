@@ -107,8 +107,6 @@ void AttributeSynthesisTransform::apply(TransformedGraph& target) const
         synthesise(target.nodeIds());
     else if(sourceAttribute.elementType() == ElementType::Edge)
         synthesise(target.edgeIds());
-
-    return;
 }
 
 std::unique_ptr<GraphTransform> AttributeSynthesisTransformFactory::create(const GraphTransformConfig&) const

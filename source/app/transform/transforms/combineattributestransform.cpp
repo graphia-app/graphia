@@ -107,8 +107,6 @@ void CombineAttributesTransform::apply(TransformedGraph& target) const
         combine(target.nodeIds());
     else if(firstAttribute.elementType() == ElementType::Edge)
         combine(target.edgeIds());
-
-    return;
 }
 
 std::unique_ptr<GraphTransform> CombineAttributesTransformFactory::create(const GraphTransformConfig&) const

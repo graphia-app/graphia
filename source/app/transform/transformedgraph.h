@@ -69,8 +69,8 @@ public:
     bool update() override;
 
     // The obscure looking parameters here ensure that only GraphTransform can call these functions
-    void resetChangeOccurred(PassKey<GraphTransform>) { _graphChangeOccurred = false; }
-    bool changeOccurred(PassKey<GraphTransform>) const { return _graphChangeOccurred; }
+    void resetChangeOccurred(const PassKey<GraphTransform>&) { _graphChangeOccurred = false; }
+    bool changeOccurred(const PassKey<GraphTransform>&) const { return _graphChangeOccurred; }
 
 private:
     GraphModel* _graphModel = nullptr;
