@@ -2,6 +2,9 @@
 
 #include "transform/transformedgraph.h"
 
+#include "graph/componentmanager.h"
+#include "graph/graphcomponent.h"
+
 #include <memory>
 #include <deque>
 
@@ -17,7 +20,9 @@ bool SpanningTreeTransform::apply(TransformedGraph& target) const
     EdgeArray<bool> removees(target, true);
     NodeArray<bool> visitedNodes(target, false);
 
-    for(auto componentId : target.componentIds())
+    ComponentManager componentManager(target);
+
+    for(auto componentId : componentManager.componentIds())
     {
         struct S
         {
@@ -26,7 +31,7 @@ bool SpanningTreeTransform::apply(TransformedGraph& target) const
         };
 
         std::deque<S> deque;
-        deque.push_back({target.componentById(componentId)->nodeIds().at(0), {}});
+        deque.push_back({componentManager.componentById(componentId)->nodeIds().at(0), {}});
 
         while(!deque.empty())
         {
