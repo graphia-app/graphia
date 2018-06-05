@@ -552,10 +552,10 @@ void MutableGraph::endTransaction(bool graphChangeOccurred)
     }
 }
 
-void MutableGraph::update()
+bool MutableGraph::update()
 {
     if(!_updateRequired)
-        return;
+        return false;
 
     _updateRequired = false;
 
@@ -578,4 +578,6 @@ void MutableGraph::update()
         else
             _unusedEdgeIds.emplace_back(edgeId);
     }
+
+    return true;
 }

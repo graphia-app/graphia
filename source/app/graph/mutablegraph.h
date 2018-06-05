@@ -192,7 +192,7 @@ public:
 
     Diff diffTo(const MutableGraph& other);
 
-    void update() override;
+    bool update() override;
 
 private:
     int _graphChangeDepth = 0;

@@ -210,7 +210,7 @@ public:
     // Note that this DOES NOT update components, so if this
     // information is required a ComponentManager instance
     // must be used directly
-    virtual void update() {}
+    virtual bool update() { return false; }
 
     // Informational messages to indicate progress
     void setPhase(const QString& phase) const override;

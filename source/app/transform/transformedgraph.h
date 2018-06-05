@@ -6,7 +6,9 @@
 
 #include "graph/graph.h"
 #include "graph/mutablegraph.h"
+
 #include "shared/graph/grapharray.h"
+#include "shared/utils/passkey.h"
 
 #include "attributes/attribute.h"
 
@@ -64,7 +66,11 @@ public:
     void reserve(const Graph& other) override;
     TransformedGraph& operator=(const MutableGraph& other);
 
-    void update() override { _target.update(); }
+    bool update() override;
+
+    // The obscure looking parameters here ensure that only GraphTransform can call these functions
+    void resetChangeOccurred(PassKey<GraphTransform>) { _graphChangeOccurred = false; }
+    bool changeOccurred(PassKey<GraphTransform>) const { return _graphChangeOccurred; }
 
 private:
     GraphModel* _graphModel = nullptr;

@@ -13,10 +13,12 @@ bool GraphTransform::applyAndUpdate(TransformedGraph& target) const
 
     do
     {
+        target.resetChangeOccurred({});
         target.clearPhase();
-        change = apply(target);
-        anyChange = anyChange || change;
+        apply(target);
         target.update();
+        change = target.changeOccurred({});
+        anyChange = anyChange || change;
     } while(repeating() && change);
 
     return anyChange;

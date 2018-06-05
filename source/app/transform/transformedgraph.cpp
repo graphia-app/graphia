@@ -72,6 +72,12 @@ TransformedGraph& TransformedGraph::operator=(const MutableGraph& other)
     return *this;
 }
 
+bool TransformedGraph::update()
+{
+    _graphChangeOccurred = _target.update() || _graphChangeOccurred;
+    return _graphChangeOccurred;
+}
+
 void TransformedGraph::rebuild()
 {
     if(!_autoRebuild)
