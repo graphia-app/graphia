@@ -83,6 +83,13 @@ static QRect findLargestDataRect(const TabularData& tabularData, size_t startCol
         }
     }
 
+    // Enforce having at least one name/attribute row/column
+    if(dataRect.width() >= 2 && dataRect.left() == 0)
+        dataRect.setLeft(1);
+
+    if(dataRect.height() >= 2 && dataRect.top() == 0)
+        dataRect.setTop(1);
+
     return dataRect;
 }
 
