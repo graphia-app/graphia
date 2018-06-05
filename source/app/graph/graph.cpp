@@ -125,6 +125,13 @@ void Graph::enableComponentManagement()
         if(qEnvironmentVariableIntValue("COMPONENTS_DEBUG") != 0)
             _componentManager->enableDebug();
     }
+
+    _componentMangagementEnabled = true;
+}
+
+void Graph::disableComponentManagement()
+{
+    _componentMangagementEnabled = false;
 }
 
 template<typename G, typename C> void dumpGraphToQDebug(const G& graph, const C& component, const int detail)
@@ -249,7 +256,9 @@ void Graph::clear()
 
 const std::vector<ComponentId>& Graph::componentIds() const
 {
-    if(_componentManager != nullptr)
+    Q_ASSERT(_componentMangagementEnabled);
+
+    if(_componentMangagementEnabled && _componentManager != nullptr)
         return _componentManager->componentIds();
 
     static std::vector<ComponentId> emptyComponentIdList;
@@ -259,12 +268,16 @@ const std::vector<ComponentId>& Graph::componentIds() const
 
 int Graph::numComponents() const
 {
+    Q_ASSERT(_componentMangagementEnabled);
+
     return static_cast<int>(componentIds().size());
 }
 
 bool Graph::containsComponentId(ComponentId componentId) const
 {
-    if(_componentManager != nullptr)
+    Q_ASSERT(_componentMangagementEnabled);
+
+    if(_componentMangagementEnabled && _componentManager != nullptr)
         return _componentManager->containsComponentId(componentId);
 
     Q_ASSERT(!"Graph::containsComponentId called with component management disabled");
@@ -273,7 +286,9 @@ bool Graph::containsComponentId(ComponentId componentId) const
 
 const IGraphComponent* Graph::componentById(ComponentId componentId) const
 {
-    if(_componentManager != nullptr)
+    Q_ASSERT(_componentMangagementEnabled);
+
+    if(_componentMangagementEnabled && _componentManager != nullptr)
         return _componentManager->componentById(componentId);
 
     Q_ASSERT(!"Graph::componentById called with component management disabled");
@@ -282,7 +297,9 @@ const IGraphComponent* Graph::componentById(ComponentId componentId) const
 
 ComponentId Graph::componentIdOfNode(NodeId nodeId) const
 {
-    if(_componentManager != nullptr)
+    Q_ASSERT(_componentMangagementEnabled);
+
+    if(_componentMangagementEnabled && _componentManager != nullptr)
         return _componentManager->componentIdOfNode(nodeId);
 
     return {};
@@ -290,7 +307,9 @@ ComponentId Graph::componentIdOfNode(NodeId nodeId) const
 
 ComponentId Graph::componentIdOfEdge(EdgeId edgeId) const
 {
-    if(_componentManager != nullptr)
+    Q_ASSERT(_componentMangagementEnabled);
+
+    if(_componentMangagementEnabled && _componentManager != nullptr)
         return _componentManager->componentIdOfEdge(edgeId);
 
     return {};
@@ -298,6 +317,8 @@ ComponentId Graph::componentIdOfEdge(EdgeId edgeId) const
 
 ComponentId Graph::componentIdOfLargestComponent() const
 {
+    Q_ASSERT(_componentMangagementEnabled);
+
     return componentIdOfLargestComponent(componentIds());
 }
 

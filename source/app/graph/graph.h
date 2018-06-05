@@ -167,6 +167,7 @@ public:
     virtual void reserve(const Graph& other);
 
     void enableComponentManagement();
+    void disableComponentManagement();
 
     const std::vector<ComponentId>& componentIds() const override;
     int numComponents() const override;
@@ -178,6 +179,11 @@ public:
 
     template<typename C> ComponentId componentIdOfLargestComponent(const C& componentIds) const
     {
+        Q_ASSERT(_componentMangagementEnabled);
+
+        if(!_componentMangagementEnabled)
+            return {};
+
         ComponentId largestComponentId;
         int maxNumNodes = 0;
         for(auto componentId : componentIds)
@@ -226,6 +232,7 @@ private:
     mutable std::mutex _edgeArraysMutex;
     mutable std::unordered_set<IGraphArray*> _edgeArrays;
 
+    bool _componentMangagementEnabled = false;
     std::unique_ptr<ComponentManager> _componentManager;
 
     mutable std::recursive_mutex _phaseMutex;

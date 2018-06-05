@@ -81,6 +81,12 @@ void TransformedGraph::rebuild()
 
     emit graphWillChange(this);
 
+    // Disable the CompomentManager for the duration of the transform
+    // as its data will be out of date anyway; if transforms need to
+    // work on components, they will need to use their own
+    // ComponentManager instance
+    disableComponentManagement();
+
     QStringList updatedAttributeNames;
 
     _target.performTransaction([this, &updatedAttributeNames](IMutableGraph&)
@@ -161,6 +167,8 @@ void TransformedGraph::rebuild()
     });
 
     emit attributeValuesChanged(updatedAttributeNames);
+
+    enableComponentManagement();
 
     emit graphChanged(this, _changeSignalsEmitted);
     clearPhase();
