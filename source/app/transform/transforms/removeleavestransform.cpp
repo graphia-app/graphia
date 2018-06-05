@@ -3,6 +3,7 @@
 #include "transform/transformedgraph.h"
 
 #include <memory>
+#include <vector>
 
 #include <QObject>
 
@@ -15,27 +16,33 @@ bool RemoveLeavesTransform::apply(TransformedGraph& target) const
 
     bool changed = false;
 
+    // Hoist this out of the main loop, to avoid the alloc cost between passes
+    std::vector<NodeId> removees;
+
     while(unlimited || limit-- > 0)
     {
-        bool nodesRemoved = false;
-        uint64_t progress = 0;
         for(auto nodeId : target.nodeIds())
         {
             if(target.nodeById(nodeId).degree() == 1)
-            {
-                target.mutableGraph().removeNode(nodeId);
-                nodesRemoved = true;
-            }
-
-            target.setProgress((progress++ * 100) / target.numNodes());
+                removees.emplace_back(nodeId);
         }
 
-        if(!nodesRemoved)
+        if(removees.empty())
             break;
+
+        uint64_t progress = 0;
+        for(auto nodeId : removees)
+        {
+            target.mutableGraph().removeNode(nodeId);
+            target.setProgress((progress++ * 100) / target.numNodes());
+        }
+        target.setProgress(-1);
+
+        removees.clear();
 
         changed = true;
 
-        target.setProgress(-1);
+        // Do a manual update so that things are up-to-date for the next pass
         target.update();
     }
 
