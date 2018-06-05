@@ -82,6 +82,7 @@ private:
     TransformCache _cache;
 
     bool _graphChangeOccurred = false;
+    bool _changeSignalsEmitted = false;
     bool _autoRebuild = false;
     ICommand* _command = nullptr;
 

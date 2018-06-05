@@ -85,7 +85,7 @@ void TransformedGraph::rebuild()
 
     _target.performTransaction([this, &updatedAttributeNames](IMutableGraph&)
     {
-        _graphChangeOccurred = false;
+        _changeSignalsEmitted = false;
 
         TransformCache newCache(*_graphModel);
         *this = *_source;
@@ -162,7 +162,7 @@ void TransformedGraph::rebuild()
 
     emit attributeValuesChanged(updatedAttributeNames);
 
-    emit graphChanged(this, _graphChangeOccurred);
+    emit graphChanged(this, _changeSignalsEmitted);
     clearPhase();
 }
 
@@ -182,7 +182,7 @@ void TransformedGraph::onTargetGraphChanged(const Graph*)
         if(!_previousNodesState[nodeId].added() && _nodesState[nodeId].added())
         {
             emit nodeAdded(this, nodeId);
-            _graphChangeOccurred = true;
+            _changeSignalsEmitted = true;
         }
     }
 
@@ -191,12 +191,12 @@ void TransformedGraph::onTargetGraphChanged(const Graph*)
         if(!_previousEdgesState[edgeId].added() && _edgesState[edgeId].added())
         {
             emit edgeAdded(this, edgeId);
-            _graphChangeOccurred = true;
+            _changeSignalsEmitted = true;
         }
         else if(!_previousEdgesState[edgeId].removed() && _edgesState[edgeId].removed())
         {
             emit edgeRemoved(this, edgeId);
-            _graphChangeOccurred = true;
+            _changeSignalsEmitted = true;
         }
     }
 
@@ -205,7 +205,7 @@ void TransformedGraph::onTargetGraphChanged(const Graph*)
         if(!_previousNodesState[nodeId].removed() && _nodesState[nodeId].removed())
         {
             emit nodeRemoved(this, nodeId);
-            _graphChangeOccurred = true;
+            _changeSignalsEmitted = true;
         }
     }
 
