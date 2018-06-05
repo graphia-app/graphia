@@ -10,7 +10,7 @@
 #include <QObject>
 #include <QRegularExpression>
 
-bool AttributeSynthesisTransform::apply(TransformedGraph& target) const
+void AttributeSynthesisTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Attribute Synthesis"));
 
@@ -19,13 +19,13 @@ bool AttributeSynthesisTransform::apply(TransformedGraph& target) const
     if(attributeNames.empty())
     {
         addAlert(AlertType::Error, QObject::tr("Invalid parameter"));
-        return false;
+        return;
     }
 
     auto sourceAttributeName = attributeNames.front();
 
     if(hasUnknownAttributes({sourceAttributeName}, *_graphModel))
-        return false;
+        return;
 
     auto sourceAttribute = _graphModel->attributeValueByName(sourceAttributeName);
 
@@ -39,13 +39,13 @@ bool AttributeSynthesisTransform::apply(TransformedGraph& target) const
     if(newAttributeName.isEmpty() || !newAttributeName.contains(attributeNameRegex))
     {
         addAlert(AlertType::Error, QObject::tr("Invalid Attribute Name: '%1'").arg(newAttributeName));
-        return false;
+        return;
     }
 
     if(!regex.isValid())
     {
         addAlert(AlertType::Error, QObject::tr("Invalid Regular Expression: %1").arg(regex.errorString()));
-        return false;
+        return;
     }
 
     auto synthesise =
@@ -108,7 +108,7 @@ bool AttributeSynthesisTransform::apply(TransformedGraph& target) const
     else if(sourceAttribute.elementType() == ElementType::Edge)
         synthesise(target.edgeIds());
 
-    return false;
+    return;
 }
 
 std::unique_ptr<GraphTransform> AttributeSynthesisTransformFactory::create(const GraphTransformConfig&) const

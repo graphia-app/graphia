@@ -10,7 +10,7 @@
 #include <QObject>
 #include <QRegularExpression>
 
-bool CombineAttributesTransform::apply(TransformedGraph& target) const
+void CombineAttributesTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Combine Attributes"));
 
@@ -19,14 +19,14 @@ bool CombineAttributesTransform::apply(TransformedGraph& target) const
     if(attributeNames.size() != 2)
     {
         addAlert(AlertType::Error, QObject::tr("Invalid parameters"));
-        return false;
+        return;
     }
 
     auto firstAttributeName = attributeNames.at(0);
     auto secondAttributeName = attributeNames.at(1);
 
     if(hasUnknownAttributes({firstAttributeName, secondAttributeName}, *_graphModel))
-        return false;
+        return;
 
     auto firstAttribute = _graphModel->attributeValueByName(firstAttributeName);
     auto secondAttribute = _graphModel->attributeValueByName(secondAttributeName);
@@ -34,7 +34,7 @@ bool CombineAttributesTransform::apply(TransformedGraph& target) const
     if(firstAttribute.elementType() != secondAttribute.elementType())
     {
         addAlert(AlertType::Error, QObject::tr("Attributes must both be node or edge attributes, not a mixture"));
-        return false;
+        return;
     }
 
     auto newAttributeName = config().parameterByName(QStringLiteral("New Attribute Name"))->valueAsString();
@@ -44,7 +44,7 @@ bool CombineAttributesTransform::apply(TransformedGraph& target) const
     if(newAttributeName.isEmpty() || !newAttributeName.contains(attributeNameRegex))
     {
         addAlert(AlertType::Error, QObject::tr("Invalid Attribute Name: '%1'").arg(newAttributeName));
-        return false;
+        return;
     }
 
     auto combine =
@@ -108,7 +108,7 @@ bool CombineAttributesTransform::apply(TransformedGraph& target) const
     else if(firstAttribute.elementType() == ElementType::Edge)
         combine(target.edgeIds());
 
-    return false;
+    return;
 }
 
 std::unique_ptr<GraphTransform> CombineAttributesTransformFactory::create(const GraphTransformConfig&) const

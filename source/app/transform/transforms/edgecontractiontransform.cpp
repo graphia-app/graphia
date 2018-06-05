@@ -7,14 +7,14 @@
 
 #include <QObject>
 
-bool EdgeContractionTransform::apply(TransformedGraph& target) const
+void EdgeContractionTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Contracting"));
 
     auto attributeNames = config().referencedAttributeNames();
 
     if(hasUnknownAttributes(attributeNames, *_graphModel))
-        return false;
+        return;
 
     bool ignoreTails =
         std::any_of(attributeNames.begin(), attributeNames.end(),
@@ -27,7 +27,7 @@ bool EdgeContractionTransform::apply(TransformedGraph& target) const
     if(conditionFn == nullptr)
     {
         addAlert(AlertType::Error, QObject::tr("Invalid condition"));
-        return false;
+        return;
     }
 
     EdgeIdSet edgeIdsToContract;
@@ -42,8 +42,6 @@ bool EdgeContractionTransform::apply(TransformedGraph& target) const
     }
 
     target.mutableGraph().contractEdges(edgeIdsToContract);
-
-    return !edgeIdsToContract.empty();
 }
 
 std::unique_ptr<GraphTransform> EdgeContractionTransformFactory::create(const GraphTransformConfig&) const

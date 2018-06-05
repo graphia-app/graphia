@@ -8,7 +8,7 @@ class EccentricityTransform : public GraphTransform
 {
 public:
     explicit EccentricityTransform(GraphModel* graphModel) : _graphModel(graphModel) {}
-    bool apply(TransformedGraph& target) const override;
+    void apply(TransformedGraph& target) const override;
 
 private:
     GraphModel* _graphModel = nullptr;

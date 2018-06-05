@@ -9,7 +9,7 @@
 class SpanningTreeTransform : public GraphTransform
 {
 public:
-    bool apply(TransformedGraph& target) const override;
+    void apply(TransformedGraph& target) const override;
 };
 
 class SpanningTreeTransformFactory : public GraphTransformFactory

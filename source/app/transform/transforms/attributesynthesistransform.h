@@ -10,7 +10,7 @@ public:
         _graphModel(&graphModel)
     {}
 
-    bool apply(TransformedGraph& target) const override;
+    void apply(TransformedGraph& target) const override;
 
 private:
     GraphModel* _graphModel = nullptr;

@@ -7,7 +7,7 @@
 
 #include <QObject>
 
-bool EdgeReductionTransform::apply(TransformedGraph& target) const
+void EdgeReductionTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Edge Reduction"));
 
@@ -40,21 +40,15 @@ bool EdgeReductionTransform::apply(TransformedGraph& target) const
 
     progress = 0;
 
-    bool anyEdgeRemoved = false;
     for(const auto& edgeId : target.edgeIds())
     {
         if(removees.get(edgeId))
-        {
             target.mutableGraph().removeEdge(edgeId);
-            anyEdgeRemoved = true;
-        }
 
         target.setProgress((progress++ * 100) / target.numEdges());
     }
 
     target.setProgress(-1);
-
-    return anyEdgeRemoved;
 }
 
 std::unique_ptr<GraphTransform> EdgeReductionTransformFactory::create(const GraphTransformConfig&) const

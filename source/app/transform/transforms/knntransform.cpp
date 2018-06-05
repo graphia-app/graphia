@@ -10,7 +10,7 @@
 
 #include <QObject>
 
-bool KNNTransform::apply(TransformedGraph& target) const
+void KNNTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("k-NN"));
 
@@ -19,7 +19,7 @@ bool KNNTransform::apply(TransformedGraph& target) const
     if(attributeNames.empty())
     {
         addAlert(AlertType::Error, QObject::tr("Invalid parameter"));
-        return false;
+        return;
     }
 
     auto attributeName = attributeNames.front();
@@ -27,7 +27,7 @@ bool KNNTransform::apply(TransformedGraph& target) const
     auto k = static_cast<size_t>(boost::get<int>(config().parameterByName(QStringLiteral("k"))->_value));
 
     if(hasUnknownAttributes({attributeName}, *_graphModel))
-        return false;
+        return;
 
     auto attribute = _graphModel->attributeValueByName(attributeName);
     bool ignoreTails = attribute.testFlag(AttributeFlag::IgnoreTails);
@@ -87,7 +87,6 @@ bool KNNTransform::apply(TransformedGraph& target) const
 
     progress = 0;
 
-    bool anyEdgeRemoved = false;
     for(const auto& edgeId : target.edgeIds())
     {
         if(removees.get(edgeId))
@@ -96,7 +95,6 @@ bool KNNTransform::apply(TransformedGraph& target) const
                 continue;
 
             target.mutableGraph().removeEdge(edgeId);
-            anyEdgeRemoved = true;
         }
         else
         {
@@ -126,8 +124,6 @@ bool KNNTransform::apply(TransformedGraph& target) const
     _graphModel->createAttribute(QObject::tr("k-NN Mean Rank"))
         .setDescription(QObject::tr("The mean ranking given by k-NN."))
         .setFloatValueFn([ranks](EdgeId edgeId) { return ranks[edgeId]._mean; });
-
-    return anyEdgeRemoved;
 }
 
 std::unique_ptr<GraphTransform> KNNTransformFactory::create(const GraphTransformConfig&) const

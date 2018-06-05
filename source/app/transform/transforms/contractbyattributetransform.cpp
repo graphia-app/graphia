@@ -7,7 +7,7 @@
 
 #include <QObject>
 
-bool ContractByAttributeTransform::apply(TransformedGraph& target) const
+void ContractByAttributeTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Contracting"));
 
@@ -16,13 +16,13 @@ bool ContractByAttributeTransform::apply(TransformedGraph& target) const
     if(attributeNames.empty())
     {
         addAlert(AlertType::Error, QObject::tr("Invalid parameter"));
-        return false;
+        return;
     }
 
     auto attributeName = attributeNames.front();
 
     if(hasUnknownAttributes({attributeName}, *_graphModel))
-        return false;
+        return;
 
     bool ignoreTails = _graphModel->attributeValueByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
 
@@ -37,7 +37,7 @@ bool ContractByAttributeTransform::apply(TransformedGraph& target) const
     if(conditionFn == nullptr)
     {
         addAlert(AlertType::Error, QObject::tr("Invalid condition"));
-        return false;
+        return;
     }
 
     EdgeIdSet edgeIdsToContract;
@@ -52,8 +52,6 @@ bool ContractByAttributeTransform::apply(TransformedGraph& target) const
     }
 
     target.mutableGraph().contractEdges(edgeIdsToContract);
-
-    return !edgeIdsToContract.empty();
 }
 
 std::unique_ptr<GraphTransform> ContractByAttributeTransformFactory::create(const GraphTransformConfig&) const

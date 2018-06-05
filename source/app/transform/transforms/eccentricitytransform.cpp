@@ -6,12 +6,10 @@
 #include <map>
 #include <queue>
 
-bool EccentricityTransform::apply(TransformedGraph& target) const
+void EccentricityTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QStringLiteral("Eccentricity"));
-    target.setProgress(0);
     calculateDistances(target);
-    return false;
 }
 
 void EccentricityTransform::calculateDistances(TransformedGraph& target) const
@@ -27,6 +25,8 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
     }
 
     NodeArray<float> maxDistances(target);
+
+    target.setProgress(0);
 
     const auto& nodeIds = target.nodeIds();
     std::atomic_int progress(0);
@@ -85,6 +85,8 @@ void EccentricityTransform::calculateDistances(TransformedGraph& target) const
         progress++;
         target.setProgress(progress.load() * 100 / static_cast<int>(target.numNodes()));
     }, true);
+
+    target.setProgress(-1);
 
     if(cancelled())
         return;

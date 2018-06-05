@@ -7,14 +7,12 @@
 
 #include <QObject>
 
-bool RemoveLeavesTransform::apply(TransformedGraph& target) const
+void RemoveLeavesTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Leaf Removal"));
 
     auto limit = static_cast<size_t>(boost::get<int>(config().parameterByName(QStringLiteral("Limit"))->_value));
     bool unlimited = (limit == 0);
-
-    bool changed = false;
 
     // Hoist this out of the main loop, to avoid the alloc cost between passes
     std::vector<NodeId> removees;
@@ -40,13 +38,9 @@ bool RemoveLeavesTransform::apply(TransformedGraph& target) const
 
         removees.clear();
 
-        changed = true;
-
         // Do a manual update so that things are up-to-date for the next pass
         target.update();
     }
-
-    return changed;
 }
 
 std::unique_ptr<GraphTransform> RemoveLeavesTransformFactory::create(const GraphTransformConfig&) const

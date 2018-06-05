@@ -6,7 +6,7 @@
 class RemoveLeavesTransform : public GraphTransform
 {
 public:
-    bool apply(TransformedGraph& target) const override;
+    void apply(TransformedGraph& target) const override;
 };
 
 class RemoveLeavesTransformFactory : public GraphTransformFactory
@@ -29,7 +29,7 @@ public:
                 "Limit",
                 ValueType::Int,
                 QObject::tr("The number of leaves to remove from a branch before stopping. "
-                    "Setting this to 0 means unlimited."),
+                    "Setting this to 0 will remove the entire branch, leaving only cycles."),
                 0, 0
             }
         };

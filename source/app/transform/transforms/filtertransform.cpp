@@ -13,16 +13,14 @@
 
 #include <QObject>
 
-bool FilterTransform::apply(TransformedGraph& target) const
+void FilterTransform::apply(TransformedGraph& target) const
 {
-    bool changed = false;
-
     target.setPhase(QObject::tr("Filtering"));
 
     auto attributeNames = config().referencedAttributeNames();
 
     if(hasUnknownAttributes(attributeNames, *_graphModel))
-        return false;
+        return;
 
     bool ignoreTails =
         std::any_of(attributeNames.begin(), attributeNames.end(),
@@ -42,7 +40,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
         if(conditionFn == nullptr)
         {
             addAlert(AlertType::Error, QObject::tr("Invalid condition"));
-            return false;
+            return;
         }
 
         std::vector<NodeId> removees;
@@ -58,7 +56,6 @@ bool FilterTransform::apply(TransformedGraph& target) const
 
         auto numRemovees = static_cast<uint64_t>(removees.size());
         uint64_t progress = 0;
-        changed = !removees.empty() || changed;
         for(auto nodeId : removees)
         {
             target.mutableGraph().removeNode(nodeId);
@@ -73,7 +70,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
         if(conditionFn == nullptr)
         {
             addAlert(AlertType::Error, QObject::tr("Invalid condition"));
-            return false;
+            return;
         }
 
         std::vector<EdgeId> removees;
@@ -89,7 +86,6 @@ bool FilterTransform::apply(TransformedGraph& target) const
 
         auto numRemovees = static_cast<uint64_t>(removees.size());
         uint64_t progress = 0;
-        changed = !removees.empty() || changed;
         for(auto edgeId : removees)
         {
             target.mutableGraph().removeEdge(edgeId);
@@ -104,7 +100,7 @@ bool FilterTransform::apply(TransformedGraph& target) const
         if(conditionFn == nullptr)
         {
             addAlert(AlertType::Error, QObject::tr("Invalid condition"));
-            return false;
+            return;
         }
 
         ComponentManager componentManager(target);
@@ -122,7 +118,6 @@ bool FilterTransform::apply(TransformedGraph& target) const
 
         auto numRemovees = static_cast<uint64_t>(removees.size());
         uint64_t progress = 0;
-        changed = !removees.empty() || changed;
         for(auto nodeId : removees)
         {
             target.mutableGraph().removeNode(nodeId);
@@ -132,10 +127,8 @@ bool FilterTransform::apply(TransformedGraph& target) const
     }
 
     default:
-        return false;
+        break;
     }
-
-    return changed;
 }
 
 std::unique_ptr<GraphTransform> FilterTransformFactory::create(const GraphTransformConfig&) const

@@ -40,8 +40,7 @@ public:
     GraphTransform() = default;
     ~GraphTransform() override = default;
 
-    // Return value indicates that the graph changed
-    virtual bool apply(TransformedGraph&) const { return false; }
+    virtual void apply(TransformedGraph&) const {}
     bool applyAndUpdate(TransformedGraph& target) const;
 
     bool repeating() const { return _repeating; }

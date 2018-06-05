@@ -7,7 +7,7 @@
 
 #include <QObject>
 
-bool SeparateByAttributeTransform::apply(TransformedGraph& target) const
+void SeparateByAttributeTransform::apply(TransformedGraph& target) const
 {
     target.setPhase(QObject::tr("Contracting"));
 
@@ -16,13 +16,13 @@ bool SeparateByAttributeTransform::apply(TransformedGraph& target) const
     if(attributeNames.empty())
     {
         addAlert(AlertType::Error, QObject::tr("Invalid parameter"));
-        return false;
+        return;
     }
 
     auto attributeName = attributeNames.front();
 
     if(hasUnknownAttributes({attributeName}, *_graphModel))
-        return false;
+        return;
 
     bool ignoreTails = _graphModel->attributeValueByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
 
@@ -37,7 +37,7 @@ bool SeparateByAttributeTransform::apply(TransformedGraph& target) const
     if(conditionFn == nullptr)
     {
         addAlert(AlertType::Error, QObject::tr("Invalid condition"));
-        return false;
+        return;
     }
 
     EdgeIdSet edgeIdsToRemove;
@@ -52,8 +52,6 @@ bool SeparateByAttributeTransform::apply(TransformedGraph& target) const
     }
 
     target.mutableGraph().removeEdges(edgeIdsToRemove);
-
-    return !edgeIdsToRemove.empty();
 }
 
 std::unique_ptr<GraphTransform> SeparateByAttributeTransformFactory::create(const GraphTransformConfig&) const
