@@ -77,6 +77,8 @@ GridLayout
 
                 if(valueType === ValueType.Int && incrementSize < 1.0)
                     return 1.0;
+
+                return incrementSize;
             }
 
             return 1.0;
