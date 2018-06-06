@@ -21,6 +21,7 @@
 #include "transform/transforms/contractbyattributetransform.h"
 #include "transform/transforms/separatebyattributetransform.h"
 #include "transform/transforms/knntransform.h"
+#include "transform/transforms/percentnntransform.h"
 #include "transform/transforms/edgereductiontransform.h"
 #include "transform/transforms/spanningtreetransform.h"
 #include "transform/transforms/attributesynthesistransform.h"
@@ -180,6 +181,7 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     _->_graphTransformFactories.emplace(tr("Contract By Attribute"),    std::make_unique<ContractByAttributeTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Separate By Attribute"),    std::make_unique<SeparateByAttributeTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("k-NN"),                     std::make_unique<KNNTransformFactory>(this));
+    _->_graphTransformFactories.emplace(tr("%-NN"),                     std::make_unique<PercentNNTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Edge Reduction"),           std::make_unique<EdgeReductionTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Spanning Forest"),          std::make_unique<SpanningTreeTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Attribute Synthesis"),      std::make_unique<AttributeSynthesisTransformFactory>(this));
