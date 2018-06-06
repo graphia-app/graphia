@@ -206,28 +206,31 @@ Item
         if(!ready)
             return;
 
-        var numTemplateArguments = (template.match(/%/g) || []).length;
-        if(numTemplateArguments !== _parameterComponents.length)
+        var expandedTemplate = template;
+
+        expandedTemplate = expandedTemplate.replace(/%(\d+)/g,
+        function(match, index)
         {
-            console.log("Number of template arguments (" + numTemplateArguments + ") doesn't " +
-                        "match number of parameters (" + _parameterComponents.length + ")");
-            return;
-        }
+            if(index > _parameterComponents.length)
+            {
+                console.log("Template argument index is out of range " + index + " > " +
+                    _parameterComponents.length);
+                return match;
+            }
+
+            var parameterComponent = _parameterComponents[index - 1];
+            var value = parameterComponent.value;
+            return value !== undefined ? value : match;
+        });
+
+        // Unescape literal % in the original template
+        expandedTemplate = expandedTemplate.replace(/%\!/g, "%");
 
         var flagsString = "";
         if(flags.length > 0)
             flagsString = "[" + flags.toString() + "] ";
 
-        var newExpression = flagsString + template;
-
-        for(var i = 0; i < _parameterComponents.length; i++)
-        {
-            var parameter = _parameterComponents[i].value;
-            parameter = parameter.replace("\$", "$$$$");
-            newExpression = newExpression.replace("%", parameter);
-        }
-
-        value = newExpression;
+        value = flagsString + expandedTemplate;
         document.update();
     }
 

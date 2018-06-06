@@ -64,9 +64,14 @@ function sanitiseOp(text)
 
 function Create(transform)
 {
+    var parameterIndex = 1;
+
     this.action = transform.action;
     this.flags = transform.flags;
-    this.template = "\"" + transform.action + "\"";
+
+    // Escape '%' to '%!' so that when the template is actually employed, a literal
+    // % isn't potentially misinterpreted as a template substitution parameter
+    this.template = "\"" + transform.action.replace(/%/g, "%!") + "\"";
 
     this._elements = [];
 
@@ -104,7 +109,7 @@ function Create(transform)
                 return "$\"" + text + "\"";
             }
 
-            return "%";
+            return "%" + parameterIndex++;
         }
 
         var lhs = "";
@@ -135,7 +140,7 @@ function Create(transform)
         for(var i = 0; i < transform.attributes.length; i++)
         {
             var attribute = transform.attributes[i];
-            this.template += " $%";
+            this.template += " $%" + parameterIndex++;
             appendToElements(this._elements, {attribute: attribute});
         }
     }
@@ -156,7 +161,7 @@ function Create(transform)
             firstParam = false;
 
             var parameter = transform.parameters[index];
-            this.template += " \"" + parameter.name + "\" = %";
+            this.template += " \"" + parameter.name + "\" = %" + parameterIndex++;
             appendConditionToElements(this._elements, {lhs: "$" + parameter.name, op:"=", rhs: parameter.value});
         }
     }
