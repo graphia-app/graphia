@@ -7,7 +7,7 @@
 
 #include <QObject>
 
-static void removeLeaves(TransformedGraph& target, int limit = 0)
+static void removeLeaves(TransformedGraph& target, size_t limit = 0)
 {
     bool unlimited = (limit == 0);
 

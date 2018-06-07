@@ -52,6 +52,7 @@ QStringList ApplyVisualisationsCommand::patchedVisualisations() const
         if(!createdAttributeNames.empty())
         {
             QStringList patched;
+            patched.reserve(_visualisations.size());
 
             for(int i = 0; i < _visualisations.size(); i++)
             {

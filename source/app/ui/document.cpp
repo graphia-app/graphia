@@ -1880,7 +1880,7 @@ void Document::moveVisualisation(int from, int to)
         _visualisations, newVisualisations));
 }
 
-void Document::update(QStringList newGraphTransforms, QStringList newVisualisations)
+void Document::update(QStringList newGraphTransforms, QStringList newVisualisations) // NOLINT
 {
     if(_graphModel == nullptr)
         return;
