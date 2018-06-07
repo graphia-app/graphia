@@ -82,6 +82,7 @@ private:
     std::mutex _componentArraysMutex;
     std::unordered_set<IGraphArray*> _componentArrays;
 
+    bool _enabled = true;
     bool _debug = false;
 
     ComponentId generateComponentId();
@@ -108,6 +109,10 @@ public:
     const GraphComponent* componentById(ComponentId componentId) const;
     ComponentId componentIdOfNode(NodeId nodeId) const;
     ComponentId componentIdOfEdge(EdgeId edgeId) const;
+
+    void enable() { _enabled = true; }
+    void disable() { _enabled = false; }
+    bool enabled() const { return _enabled; }
 
     void enableDebug() { _debug = true; }
     void disbleDebug() { _debug = false; }

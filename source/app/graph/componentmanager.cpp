@@ -371,7 +371,7 @@ void ComponentManager::removeGraphComponent(ComponentId componentId)
 
 void ComponentManager::onGraphChanged(const Graph* graph, bool changeOccurred)
 {
-    if(changeOccurred)
+    if(_enabled && changeOccurred)
     {
         graph->setPhase(tr("Componentising"));
         update(graph);

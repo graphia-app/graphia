@@ -179,9 +179,9 @@ public:
 
     template<typename C> ComponentId componentIdOfLargestComponent(const C& componentIds) const
     {
-        Q_ASSERT(_componentMangagementEnabled);
+        Q_ASSERT(componentManagementEnabled());
 
-        if(!_componentMangagementEnabled)
+        if(!componentManagementEnabled())
             return {};
 
         ComponentId largestComponentId;
@@ -198,6 +198,8 @@ public:
 
         return largestComponentId;
     }
+
+    bool componentManagementEnabled() const;
 
     std::vector<NodeId> sourcesOf(NodeId nodeId) const override;
     std::vector<NodeId> targetsOf(NodeId nodeId) const override;
@@ -232,7 +234,6 @@ private:
     mutable std::mutex _edgeArraysMutex;
     mutable std::unordered_set<IGraphArray*> _edgeArrays;
 
-    bool _componentMangagementEnabled = false;
     std::unique_ptr<ComponentManager> _componentManager;
 
     mutable std::recursive_mutex _phaseMutex;
