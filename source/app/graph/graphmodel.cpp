@@ -314,6 +314,7 @@ void GraphModel::buildTransforms(const QStringList& transforms, ICommand* comman
         Q_ASSERT(graphTransform != nullptr);
         if(graphTransform != nullptr)
         {
+            graphTransform->setIndex(index);
             graphTransform->setConfig(graphTransformConfig);
             graphTransform->setRepeating(graphTransformConfig.isFlagSet(QStringLiteral("repeating")));
             graphTransform->setInfo(&_->_transformInfos[index]);
@@ -402,6 +403,11 @@ const TransformInfo& GraphModel::transformInfoAtIndex(int index) const
         return _->_transformInfos.at(index);
 
     return nullTransformInfo;
+}
+
+std::vector<QString> GraphModel::createdAttributeNamesAtTransformIndex(int index) const
+{
+    return _->_transformedGraph.createdAttributeNamesAtTransformIndex(index);
 }
 
 bool GraphModel::opIsUnary(const QString& op) const
@@ -569,56 +575,6 @@ std::vector<QString> GraphModel::attributeNames(ElementType elementType) const
     }
 
     return attributeNames;
-}
-
-void GraphModel::patchAttributeNames(QStringList& transforms, QStringList& visualisations) const
-{
-    if(transforms.empty() || visualisations.empty())
-        return;
-
-    std::map<QString, QString> substitutions;
-
-    for(const auto& transform : transforms)
-    {
-        GraphTransformConfigParser p;
-
-        if(!p.parse(transform))
-            continue;
-
-        const auto& graphTransformConfig = p.result();
-
-        if(!u::contains(_->_graphTransformFactories, graphTransformConfig._action))
-            continue;
-
-        auto& factory = _->_graphTransformFactories.at(graphTransformConfig._action);
-
-        auto newAttributes = u::keysFor(factory->defaultVisualisations());
-
-        for(const auto& name : newAttributes)
-        {
-            auto normalisedName = normalisedAttributeName(name);
-            if(normalisedName != name)
-                substitutions.emplace(name, normalisedName);
-        }
-    }
-
-    QStringList patchedVisualisations;
-    for(const auto& visualisation : visualisations)
-    {
-        VisualisationConfigParser p;
-
-        if(!p.parse(visualisation))
-            continue;
-
-        auto visualisationConfig = p.result();
-
-        if(u::contains(substitutions, visualisationConfig._attributeName))
-            visualisationConfig._attributeName = substitutions[visualisationConfig._attributeName];
-
-        patchedVisualisations.append(visualisationConfig.asString());
-    }
-
-    visualisations = patchedVisualisations;
 }
 
 Attribute& GraphModel::createAttribute(QString name)

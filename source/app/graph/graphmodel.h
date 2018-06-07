@@ -92,6 +92,7 @@ public:
     QStringList avaliableConditionFnOps(const QString& attributeName) const;
     bool hasTransformInfo() const;
     const TransformInfo& transformInfoAtIndex(int index) const;
+    std::vector<QString> createdAttributeNamesAtTransformIndex(int index) const;
 
     bool opIsUnary(const QString& op) const;
 
@@ -108,7 +109,6 @@ public:
 
     std::vector<QString> attributeNames(ElementType elementType = ElementType::All) const override;
 
-    void patchAttributeNames(QStringList& transforms, QStringList& visualisations) const;
     Attribute& createAttribute(QString name) override;
 
     void addAttributes(const std::map<QString, Attribute>& attributes);

@@ -14,7 +14,6 @@
 #include <QString>
 
 #include <vector>
-#include <map>
 #include <memory>
 
 class Graph;
@@ -56,11 +55,14 @@ public:
     const TransformInfo* info() const { return _info; }
     void setInfo(TransformInfo* info) { _info = info; }
 
+    int index() const { return _index; }
+
     // This is so that subclasses can access the config
     // Specifically, it is not a means to reconfigure an existing transform
     const GraphTransformConfig& config() const { return _config; }
 
 private:
+    void setIndex(int index) { _index = index; }
     void setConfig(const GraphTransformConfig& config) { _config = config; }
 
 protected:
@@ -70,6 +72,7 @@ protected:
 private:
     mutable TransformInfo* _info = nullptr;
     bool _repeating = false;
+    int _index = -1;
     GraphTransformConfig _config;
 };
 

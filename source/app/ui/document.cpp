@@ -1885,30 +1885,35 @@ void Document::update(QStringList newGraphTransforms, QStringList newVisualisati
     if(_graphModel == nullptr)
         return;
 
-    // When a transform creates a new attribute, its name may not match the default
-    // visualisation that it created for it, so we need to do a bit of patching
-    _graphModel->patchAttributeNames(newGraphTransforms, newVisualisations);
-
     std::vector<std::unique_ptr<ICommand>> commands;
 
     auto uiGraphTransforms = graphTransformConfigurationsFromUI();
+    int newGraphTransformIndex = -1;
 
     if(!newGraphTransforms.empty())
     {
+        int index = 0;
+
         for(const auto& newGraphTransform : qAsConst(newGraphTransforms))
         {
             if(!transformIsPinned(newGraphTransform))
             {
                 // Insert before any existing pinned transforms
-                int index = 0;
+                index = 0;
                 while(index < uiGraphTransforms.size() && !transformIsPinned(uiGraphTransforms.at(index)))
                     index++;
 
                 uiGraphTransforms.insert(index, newGraphTransform);
             }
             else
+            {
                 uiGraphTransforms.append(newGraphTransform);
+                index = uiGraphTransforms.size() - 1;
+            }
         }
+
+        if(newGraphTransforms.size() == 1)
+            newGraphTransformIndex = index;
     }
 
     if(transformsDiffer(_graphTransforms, uiGraphTransforms))
@@ -1932,7 +1937,7 @@ void Document::update(QStringList newGraphTransforms, QStringList newVisualisati
     {
         commands.emplace_back(std::make_unique<ApplyVisualisationsCommand>(
             _graphModel.get(), this,
-            _visualisations, uiVisualisations));
+            _visualisations, uiVisualisations, newGraphTransformIndex));
     }
     else
         setVisualisations(uiVisualisations);

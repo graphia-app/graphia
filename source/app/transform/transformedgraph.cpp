@@ -78,6 +78,14 @@ bool TransformedGraph::update()
     return _graphChangeOccurred;
 }
 
+std::vector<QString> TransformedGraph::createdAttributeNamesAtTransformIndex(int index) const
+{
+    if(u::contains(_createdAttributeNames, index))
+        return _createdAttributeNames.at(index);
+
+    return {};
+}
+
 void TransformedGraph::rebuild()
 {
     if(!_autoRebuild)
@@ -100,10 +108,12 @@ void TransformedGraph::rebuild()
         _changeSignalsEmitted = false;
 
         TransformCache newCache(*_graphModel);
+        CreatedAttributeNamesMap newCreatedAttributeNames;
         *this = *_source;
 
         // Save previous state in case we get cancelled
         auto oldCache = _cache;
+        auto oldCreatedAttributeNames = _createdAttributeNames;
 
         // Save attributes of current graph so we can remove ones added if cancelled
         auto fixedAttributeNames = _graphModel->attributeNames();
@@ -118,6 +128,7 @@ void TransformedGraph::rebuild()
             result = _cache.apply(result._config, *this);
             if(result.isApplicable())
             {
+                newCreatedAttributeNames[transform->index()] = u::keysFor(result._newAttributes);
                 newCache.add(std::move(result));
                 continue;
             }
@@ -142,13 +153,15 @@ void TransformedGraph::rebuild()
             if(_cancelled)
                 break;
 
-            for(const auto& attributeName : u::setDifference(_graphModel->attributeNames(), attributeNames))
+            auto newAttributeNames = u::setDifference(_graphModel->attributeNames(), attributeNames);
+            for(const auto& newAttributeName : newAttributeNames)
             {
-                result._newAttributes.emplace(attributeName, _graphModel->attributeValueByName(attributeName));
-                _cache.attributeAdded(attributeName);
-                updatedAttributeNames.append(attributeName);
+                result._newAttributes.emplace(newAttributeName, _graphModel->attributeValueByName(newAttributeName));
+                _cache.attributeAdded(newAttributeName);
+                updatedAttributeNames.append(newAttributeName);
             }
 
+            newCreatedAttributeNames[transform->index()] = newAttributeNames;
             newCache.add(std::move(result));
         }
 
@@ -159,6 +172,7 @@ void TransformedGraph::rebuild()
         {
             // We've been cancelled so rollback to our previous state
             _cache = std::move(oldCache);
+            _createdAttributeNames = std::move(oldCreatedAttributeNames);
             auto* cachedGraph = _cache.graph();
             *this = (cachedGraph != nullptr ? *cachedGraph : *_source);
 
@@ -170,6 +184,7 @@ void TransformedGraph::rebuild()
         }
 
         _cache = std::move(newCache);
+        _createdAttributeNames = std::move(newCreatedAttributeNames);
     });
 
     emit attributeValuesChanged(updatedAttributeNames);

@@ -19,14 +19,21 @@ private:
     QStringList _previousVisualisations;
     QStringList _visualisations;
 
+    // When visualisations are created as a result of a transform,
+    // this is an index with which the GraphModel can be interrogated
+    int _transformIndex = -1;
+
     void apply(const QStringList& visualisations,
                const QStringList& previousVisualisations);
+
+    QStringList patchedVisualisations() const;
 
 public:
     ApplyVisualisationsCommand(GraphModel* graphModel,
                                Document* document,
                                QStringList previousVisualisations,
-                               QStringList visualisations);
+                               QStringList visualisations,
+                               int transformIndex = -1);
 
     QString description() const override;
     QString verb() const override;
