@@ -46,7 +46,7 @@ public:
     }
     DefaultVisualisations defaultVisualisations() const override
     {
-        return {{"Node PageRank", {ValueType::Float, QObject::tr("Colour")}}};
+        return {{"Node PageRank", ValueType::Float, QObject::tr("Colour")}};
     }
 
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;

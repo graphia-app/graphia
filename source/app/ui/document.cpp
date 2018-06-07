@@ -1508,9 +1508,9 @@ QVariantMap Document::transform(const QString& transformName) const
         for(const auto& defaultVisualisation : transformFactory->defaultVisualisations())
         {
             QVariantMap defaultVisualisationMap;
-            defaultVisualisationMap.insert(QStringLiteral("valueType"), static_cast<int>(defaultVisualisation.second._valueType));
-            defaultVisualisationMap.insert(QStringLiteral("channelName"), defaultVisualisation.second._channelName);
-            defaultVisualisations.insert(defaultVisualisation.first, defaultVisualisationMap);
+            defaultVisualisationMap.insert(QStringLiteral("valueType"), static_cast<int>(defaultVisualisation._attributeValueType));
+            defaultVisualisationMap.insert(QStringLiteral("channelName"), defaultVisualisation._channel);
+            defaultVisualisations.insert(defaultVisualisation._attributeName, defaultVisualisationMap);
         }
         map.insert(QStringLiteral("defaultVisualisations"), defaultVisualisations);
     }

@@ -78,11 +78,12 @@ private:
 
 struct DefaultVisualisation
 {
-    ValueType _valueType;
-    QString _channelName;
+    QString _attributeName;
+    ValueType _attributeValueType;
+    QString _channel;
 };
 
-using DefaultVisualisations = std::map<QString, DefaultVisualisation>;
+using DefaultVisualisations = std::vector<DefaultVisualisation>;
 
 class GraphTransformFactory
 {
