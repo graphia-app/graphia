@@ -9,6 +9,12 @@ public:
     void apply(TransformedGraph& target) const override;
 };
 
+class RemoveBranchesTransform : public GraphTransform
+{
+public:
+    void apply(TransformedGraph& target) const override;
+};
+
 class RemoveLeavesTransformFactory : public GraphTransformFactory
 {
 public:
@@ -28,11 +34,25 @@ public:
             {
                 "Limit",
                 ValueType::Int,
-                QObject::tr("The number of leaves to remove from a branch before stopping. "
-                    "Setting this to 0 will remove the entire branch, leaving only cycles."),
-                0, 0
+                QObject::tr("The number of leaves to remove from a branch before stopping."),
+                1, 1
             }
         };
+    }
+
+    std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;
+};
+
+class RemoveBranchesTransformFactory : public GraphTransformFactory
+{
+public:
+    explicit RemoveBranchesTransformFactory(GraphModel* graphModel) :
+        GraphTransformFactory(graphModel)
+    {}
+
+    QString description() const override
+    {
+        return QObject::tr("Remove branches from the graph, leaving only cycles.");
     }
 
     std::unique_ptr<GraphTransform> create(const GraphTransformConfig& graphTransformConfig) const override;

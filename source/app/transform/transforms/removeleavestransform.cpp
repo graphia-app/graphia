@@ -7,11 +7,8 @@
 
 #include <QObject>
 
-void RemoveLeavesTransform::apply(TransformedGraph& target) const
+static void removeLeaves(TransformedGraph& target, int limit = 0)
 {
-    target.setPhase(QObject::tr("Leaf Removal"));
-
-    auto limit = static_cast<size_t>(boost::get<int>(config().parameterByName(QStringLiteral("Limit"))->_value));
     bool unlimited = (limit == 0);
 
     // Hoist this out of the main loop, to avoid the alloc cost between passes
@@ -42,8 +39,27 @@ void RemoveLeavesTransform::apply(TransformedGraph& target) const
         target.update();
     }
 }
+void RemoveLeavesTransform::apply(TransformedGraph& target) const
+{
+    target.setPhase(QObject::tr("Leaf Removal"));
+
+    auto limit = static_cast<size_t>(boost::get<int>(config().parameterByName(QStringLiteral("Limit"))->_value));
+    removeLeaves(target, limit);
+}
+
+void RemoveBranchesTransform::apply(TransformedGraph& target) const
+{
+    target.setPhase(QObject::tr("Branch Removal"));
+
+    removeLeaves(target);
+}
 
 std::unique_ptr<GraphTransform> RemoveLeavesTransformFactory::create(const GraphTransformConfig&) const
 {
     return std::make_unique<RemoveLeavesTransform>();
+}
+
+std::unique_ptr<GraphTransform> RemoveBranchesTransformFactory::create(const GraphTransformConfig&) const
+{
+    return std::make_unique<RemoveBranchesTransform>();
 }

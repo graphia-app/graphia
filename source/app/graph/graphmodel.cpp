@@ -187,6 +187,7 @@ GraphModel::GraphModel(QString name, IPlugin* plugin) :
     _->_graphTransformFactories.emplace(tr("Attribute Synthesis"),      std::make_unique<AttributeSynthesisTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Combine Attributes"),       std::make_unique<CombineAttributesTransformFactory>(this));
     _->_graphTransformFactories.emplace(tr("Remove Leaves"),            std::make_unique<RemoveLeavesTransformFactory>(this));
+    _->_graphTransformFactories.emplace(tr("Remove Branches"),          std::make_unique<RemoveBranchesTransformFactory>(this));
 
     _->_visualisationChannels.emplace(tr("Colour"), std::make_unique<ColorVisualisationChannel>());
     _->_visualisationChannels.emplace(tr("Size"), std::make_unique<SizeVisualisationChannel>());
