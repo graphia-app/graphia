@@ -32,6 +32,8 @@ public:
             "whose node's share the same attribute value.");
     }
 
+    GraphTransformCategory category() const override { return GraphTransformCategory::Transform; }
+
     GraphTransformAttributeParameters attributeParameters() const override
     {
         return
@@ -41,6 +43,15 @@ public:
                 QObject::tr("Each edge's source and target nodes have the selected attribute's value compared. "
                     "If they match, the edge is contracted, meaning it is hidden and its nodes merged.")
             }
+        };
+    }
+
+    DefaultVisualisations defaultVisualisations() const override
+    {
+        return
+        {
+            {"Node Multiplicity", ValueType::Int, QObject::tr("Size")},
+            {"Edge Multiplicity", ValueType::Int, QObject::tr("Size")}
         };
     }
 
