@@ -204,7 +204,23 @@ bool SelectionManager::selectAllNodes()
 {
     return callFnAndMaybeEmit([this]
     {
-        return _selectNodes(*_graphModel, _selectedNodeIds, _nodeIdsMask, _graphModel->graph().nodeIds(), true);
+        bool nodesDeselected = false;
+
+        // If there is a mask in place, selecting all might actually need some deselection first
+        if(!_nodeIdsMask.empty() && !_selectedNodeIds.empty())
+        {
+            NodeIdSet deselectedNodeIds;
+            for(auto nodeId : _selectedNodeIds)
+            {
+                if(!u::contains(_nodeIdsMask, nodeId))
+                    deselectedNodeIds.insert(nodeId);
+            }
+
+            nodesDeselected = _deselectNodes(*_graphModel, _selectedNodeIds, deselectedNodeIds, true);
+        }
+
+        return _selectNodes(*_graphModel, _selectedNodeIds, _nodeIdsMask,
+            _graphModel->graph().nodeIds(), true) || nodesDeselected;
     });
 }
 
