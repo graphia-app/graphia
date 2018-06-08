@@ -2034,9 +2034,14 @@ void Document::writeTableViewToFile(QObject* tableView, const QUrl& fileUrl)
 
         auto escapedString = [](const QString& string)
         {
-            QString escaped = string;
-            escaped.replace(QLatin1String("\""), QLatin1String("\\\""));
-            return QStringLiteral("\"%1\"").arg(escaped);
+            if(string.contains(QRegularExpression("[\",]")))
+            {
+                QString escaped = string;
+                escaped.replace(QLatin1String("\""), QLatin1String("\\\""));
+                return QStringLiteral("\"%1\"").arg(escaped);
+            }
+
+            return string;
         };
 
         QString rowString;
