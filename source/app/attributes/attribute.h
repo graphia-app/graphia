@@ -120,7 +120,6 @@ private:
 
         std::vector<SharedValue> _sharedValues;
 
-        bool isValid = false;
         Flags<AttributeFlag> flags = AttributeFlag::None;
         bool searchable = false;
 
