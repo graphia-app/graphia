@@ -436,7 +436,7 @@ public:
     QString description() const override { return _.description; }
     Attribute& setDescription(const QString& description) override { _.description = description; return *this; }
 
-    bool isValid() const;
+    bool isValid() const override;
 
     enum class EdgeNodeType { None, Source, Target };
     struct Name

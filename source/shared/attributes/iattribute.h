@@ -110,6 +110,8 @@ public:
 
     virtual QString description() const = 0;
     virtual IAttribute& setDescription(const QString& description) = 0;
+
+    virtual bool isValid() const = 0;
 };
 
 #endif // IATTRIBUTE_H
