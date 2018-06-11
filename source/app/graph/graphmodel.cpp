@@ -613,7 +613,12 @@ const Attribute* GraphModel::attributeByName(const QString& name) const
     if(!u::contains(_->_attributes, attributeName._name))
         return nullptr;
 
-    return &_->_attributes.at(attributeName._name);
+    auto attribute = &_->_attributes.at(attributeName._name);
+
+    if(_transformedGraphIsChanging && attribute->testFlag(AttributeFlag::DisableDuringTransfom))
+        return nullptr;
+
+    return attribute;
 }
 
 bool GraphModel::attributeExists(const QString& name) const
@@ -630,6 +635,9 @@ Attribute GraphModel::attributeValueByName(const QString& name) const
         return {};
 
     auto attribute = _->_attributes.at(attributeName._name);
+
+    if(_transformedGraphIsChanging && attribute.testFlag(AttributeFlag::DisableDuringTransfom))
+        return {};
 
     if(attributeName._type != Attribute::EdgeNodeType::None)
     {

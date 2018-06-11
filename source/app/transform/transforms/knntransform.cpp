@@ -30,6 +30,13 @@ void KNNTransform::apply(TransformedGraph& target) const
         return;
 
     auto attribute = _graphModel->attributeValueByName(attributeName);
+
+    if(!attribute.isValid())
+    {
+        addAlert(AlertType::Error, QObject::tr("Invalid attribute"));
+        return;
+    }
+
     bool ignoreTails = attribute.testFlag(AttributeFlag::IgnoreTails);
     bool ascending = config().parameterHasValue(QStringLiteral("Rank Order"), QStringLiteral("Ascending"));
 

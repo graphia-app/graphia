@@ -24,7 +24,15 @@ void ContractByAttributeTransform::apply(TransformedGraph& target) const
     if(hasUnknownAttributes({attributeName}, *_graphModel))
         return;
 
-    bool ignoreTails = _graphModel->attributeValueByName(attributeName).testFlag(AttributeFlag::IgnoreTails);
+    auto attribute = _graphModel->attributeValueByName(attributeName);
+
+    if(!attribute.isValid())
+    {
+        addAlert(AlertType::Error, QObject::tr("Invalid attribute"));
+        return;
+    }
+
+    bool ignoreTails = attribute.testFlag(AttributeFlag::IgnoreTails);
 
     GraphTransformConfig::TerminalCondition condition
     {

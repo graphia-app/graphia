@@ -16,6 +16,19 @@ void EdgeContractionTransform::apply(TransformedGraph& target) const
     if(hasUnknownAttributes(attributeNames, *_graphModel))
         return;
 
+    bool invalidAttributes =
+        std::any_of(attributeNames.begin(), attributeNames.end(),
+        [this](const auto& attributeName)
+        {
+            return !_graphModel->attributeValueByName(attributeName).isValid();
+        });
+
+    if(invalidAttributes)
+    {
+        addAlert(AlertType::Error, QObject::tr("One more more invalid attributes"));
+        return;
+    }
+
     bool ignoreTails =
         std::any_of(attributeNames.begin(), attributeNames.end(),
         [this](const auto& attributeName)

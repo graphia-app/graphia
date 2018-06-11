@@ -84,7 +84,9 @@ Window
                         visualisations._visualisations = {};
 
                         root._transform = document.transform(selectedValue);
-                        lhsAttributeList.model = document.availableAttributes(root._transform.elementType);
+                        lhsAttributeList.model = document.availableAttributes(
+                            root._transform.elementType, ValueType.All,
+                            AttributeFlag.DisableDuringTransfom);
                         valueRadioButton.checked = true;
                         rhsAttributeList.model = undefined;
 
@@ -309,7 +311,8 @@ Window
                                     if(parameterData.valueType !== undefined)
                                     {
                                         rhsAttributeList.model = document.availableAttributes(
-                                                    root._transform.elementType, parameterData.valueType);
+                                            root._transform.elementType, parameterData.valueType,
+                                            AttributeFlag.DisableDuringTransfom);
                                     }
                                     else
                                         rhsAttributeList.model = undefined;
@@ -398,8 +401,9 @@ Window
 
                                         Component.onCompleted:
                                         {
-                                            attributeParameterAttributeList.model =
-                                                document.availableAttributes(parameterData.elementType, parameterData.valueType);
+                                            attributeParameterAttributeList.model = document.availableAttributes(
+                                                parameterData.elementType, parameterData.valueType,
+                                                AttributeFlag.DisableDuringTransfom);
                                         }
                                     }
                                 }

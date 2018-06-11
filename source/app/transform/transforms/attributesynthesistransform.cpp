@@ -29,6 +29,12 @@ void AttributeSynthesisTransform::apply(TransformedGraph& target) const
 
     auto sourceAttribute = _graphModel->attributeValueByName(sourceAttributeName);
 
+    if(!sourceAttribute.isValid())
+    {
+        addAlert(AlertType::Error, QObject::tr("Invalid attribute"));
+        return;
+    }
+
     auto newAttributeName = config().parameterByName(QStringLiteral("New Attribute Name"))->valueAsString();
     auto regexString = config().parameterByName(QStringLiteral("Regular Expression"))->valueAsString();
     auto attributeValue = config().parameterByName(QStringLiteral("Attribute Value"))->valueAsString();

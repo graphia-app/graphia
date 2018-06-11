@@ -31,6 +31,12 @@ void CombineAttributesTransform::apply(TransformedGraph& target) const
     auto firstAttribute = _graphModel->attributeValueByName(firstAttributeName);
     auto secondAttribute = _graphModel->attributeValueByName(secondAttributeName);
 
+    if(!firstAttribute.isValid() || !secondAttribute.isValid())
+    {
+        addAlert(AlertType::Error, QObject::tr("Invalid attribute"));
+        return;
+    }
+
     if(firstAttribute.elementType() != secondAttribute.elementType())
     {
         addAlert(AlertType::Error, QObject::tr("Attributes must both be node or edge attributes, not a mixture"));
