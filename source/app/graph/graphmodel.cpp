@@ -357,7 +357,7 @@ const GraphTransformFactory* GraphModel::transformFactory(const QString& transfo
     return nullptr;
 }
 
-QStringList GraphModel::availableAttributes(ElementType elementTypes, ValueType valueTypes) const
+QStringList GraphModel::availableAttributes(ElementType elementTypes, ValueType valueTypes, AttributeFlag skipFlags) const
 {
     QStringList stringList;
 
@@ -367,6 +367,9 @@ QStringList GraphModel::availableAttributes(ElementType elementTypes, ValueType 
             continue;
 
         if(!Flags<ValueType>(valueTypes).test(attribute.second.valueType()))
+            continue;
+
+        if(attribute.second.testFlag(skipFlags))
             continue;
 
         stringList.append(attribute.first);

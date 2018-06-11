@@ -2,6 +2,7 @@
 #define AVAILABLEATTRIBUTESMODEL_H
 
 #include "shared/graph/elementtype.h"
+#include "shared/attributes/iattribute.h"
 #include "shared/attributes/valuetype.h"
 
 #include <QAbstractItemModel>
@@ -60,7 +61,8 @@ public:
     explicit AvailableAttributesModel(const GraphModel& graphModel,
                              QObject* parent = nullptr,
                              ElementType elementTypes = ElementType::All,
-                             ValueType valueTypes = ValueType::All);
+                             ValueType valueTypes = ValueType::All,
+                             AttributeFlag skipFlags = AttributeFlag::None);
     ~AvailableAttributesModel() override;
 
     QVariant data(const QModelIndex& index, int role) const override;

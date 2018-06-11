@@ -6,6 +6,7 @@
 
 #include "shared/graph/elementid.h"
 #include "shared/graph/elementtype.h"
+#include "shared/utils/qmlenum.h"
 
 #include <functional>
 #include <vector>
@@ -13,8 +14,8 @@
 #include <QString>
 #include <QVariant>
 
-enum class AttributeFlag
-{
+DEFINE_QML_ENUM(
+    Q_GADGET, AttributeFlag,
     None                    = 0x0,
 
     // Automatically set the range
@@ -28,7 +29,9 @@ enum class AttributeFlag
 
     // Track the set of unique values held by the attribute
     FindShared              = 0x8,
-};
+
+    // Can't be used during transform
+    DisableDuringTransfom   = 0x10);
 
 class IGraphComponent;
 

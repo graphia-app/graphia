@@ -1444,14 +1444,15 @@ AvailableTransformsModel* Document::availableTransforms() const
     return nullptr;
 }
 
-AvailableAttributesModel* Document::availableAttributes(int elementTypes, int valueTypes) const
+AvailableAttributesModel* Document::availableAttributes(int elementTypes, int valueTypes, int skipFlags) const
 {
     if(_graphModel != nullptr)
     {
         // The caller takes ownership and is responsible for deleting the model
         return new AvailableAttributesModel(*_graphModel, nullptr,
                                             static_cast<ElementType>(elementTypes),
-                                            static_cast<ValueType>(valueTypes));
+                                            static_cast<ValueType>(valueTypes),
+                                            static_cast<AttributeFlag>(skipFlags));
     }
 
     return nullptr;

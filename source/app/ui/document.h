@@ -393,7 +393,8 @@ public:
     Q_INVOKABLE bool opIsUnary(const QString& op) const;
 
     Q_INVOKABLE AvailableAttributesModel* availableAttributes(int elementTypes = static_cast<int>(ElementType::All),
-                                                              int valueTypes = static_cast<int>(ValueType::All)) const;
+                                                              int valueTypes = static_cast<int>(ValueType::All),
+                                                              int skipFlags = static_cast<int>(AttributeFlag::None)) const;
     Q_INVOKABLE bool attributeExists(const QString& attributeName) const;
     Q_INVOKABLE QVariantMap attribute(const QString& attributeName) const;
 

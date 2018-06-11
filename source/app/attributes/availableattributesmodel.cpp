@@ -50,13 +50,14 @@ AvailableAttributesModel::Item*AvailableAttributesModel::Item::parent()
 AvailableAttributesModel::AvailableAttributesModel(const GraphModel& graphModel,
                                                    QObject* parent,
                                                    ElementType elementTypes,
-                                                   ValueType valueTypes) :
+                                                   ValueType valueTypes,
+                                                   AttributeFlag skipFlags) :
     QAbstractItemModel(parent),
     _graphModel(&graphModel)
 {
     _root = new AvailableAttributesModel::Item(tr("Attribute"));
 
-    auto attributeList = graphModel.availableAttributes(elementTypes, valueTypes);
+    auto attributeList = graphModel.availableAttributes(elementTypes, valueTypes, skipFlags);
 
     for(const auto& attribute : attributeList)
         _root->addChild(new AvailableAttributesModel::Item(attribute));
@@ -103,7 +104,7 @@ QVariant AvailableAttributesModel::data(const QModelIndex& index, int role) cons
 
         auto attribute = _graphModel->attributeByName(itemValue);
 
-        if(attribute == nullptr)
+        if(attribute == nullptr || !attribute->isValid())
             return {};
 
         switch(role)

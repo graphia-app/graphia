@@ -88,7 +88,8 @@ public:
     QStringList availableTransformNames() const;
     const GraphTransformFactory* transformFactory(const QString& transformName) const;
     QStringList availableAttributes(ElementType elementTypes = ElementType::All,
-                                    ValueType valueTypes = ValueType::All) const;
+                                    ValueType valueTypes = ValueType::All,
+                                    AttributeFlag skipFlags = AttributeFlag::None) const;
     QStringList avaliableConditionFnOps(const QString& attributeName) const;
     bool hasTransformInfo() const;
     const TransformInfo& transformInfoAtIndex(int index) const;
