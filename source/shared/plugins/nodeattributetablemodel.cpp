@@ -53,7 +53,7 @@ QStringList NodeAttributeTableModel::columnNames() const
 QVariant NodeAttributeTableModel::dataValue(int row, int role) const
 {
     auto* attribute = _document->graphModel()->attributeByName(_roleNames[role]);
-    if(attribute != nullptr || !attribute->isValid())
+    if(attribute != nullptr && attribute->isValid())
     {
         auto nodeId = _userNodeData->elementIdForRowIndex(row);
 
@@ -218,7 +218,7 @@ bool NodeAttributeTableModel::columnIsFloatingPoint(const QString& columnName) c
     const auto* graphModel = _document->graphModel();
     const auto* attribute = graphModel->attributeByName(columnName);
 
-    if(attribute != nullptr || !attribute->isValid())
+    if(attribute != nullptr && attribute->isValid())
         return attribute->valueType() == ValueType::Float;
 
     return false;
