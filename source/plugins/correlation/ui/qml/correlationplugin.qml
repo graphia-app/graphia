@@ -59,6 +59,16 @@ PluginContent
 
     Action
     {
+        id: selectAllAction
+        text: qsTr("Select All")
+        iconName: "edit-select-all"
+        enabled: tableView.rowCount > 0
+
+        onTriggered: { tableView.selection.selectAll(); }
+    }
+
+    Action
+    {
         id: toggleGridLines
         text: qsTr("Grid Lines")
         checkable: true
@@ -360,8 +370,8 @@ PluginContent
 
         ToolButton { action: toggleUiOrientationAction }
         ToolButton { action: resizeColumnsToContentsAction }
-        ToolButton { action: toggleColumnNamesAction }
         ToolButton { action: selectColumnsAction }
+        ToolButton { action: toggleColumnNamesAction }
         Item { Layout.fillWidth: true }
     }
 

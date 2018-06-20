@@ -180,9 +180,10 @@ Item
         menu.title = qsTr("&Table");
 
         menu.addItem("").action = resizeColumnsToContentsAction;
+        menu.addItem("").action = selectColumnsAction;
         menu.addItem("").action = exportTableAction;
         menu.addSeparator();
-        menu.addItem("").action = selectColumnsAction;
+        menu.addItem("").action = selectAllAction;
 
         tableView._tableMenu = menu;
         Utils.cloneMenu(menu, contextMenu);
