@@ -1,6 +1,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
+import QtQuick.Window 2.2
 import com.kajeka 1.0
 
 import "../../../../shared/ui/qml/Constants.js" as Constants
@@ -220,57 +221,61 @@ Wizard
                     }
                 }
 
-                GridLayout
+                WindowTooltip
                 {
-                    columns: 2
-                    rowSpacing: 20
-
-                    Text
+                    width: 30
+                    height: 30
+                    GridLayout
                     {
-                        text: "<b>Log</b>𝒃(𝒙 + ε):"
-                        Layout.alignment: Qt.AlignTop
-                        textFormat: Text.StyledText
-                    }
+                        columns: 2
+                        rowSpacing: 10
 
-                    Text
-                    {
-                        text: qsTr("Will perform a Log of 𝒙 + ε to base 𝒃, where 𝒙 is the input data and ε is a very small constant.");
-                        wrapMode: Text.WordWrap
-                        Layout.alignment: Qt.AlignTop
-                        Layout.fillWidth: true
-                    }
+                        Text
+                        {
+                            text: "<b>Log</b>𝒃(𝒙 + ε):"
+                            Layout.alignment: Qt.AlignTop
+                            textFormat: Text.StyledText
+                        }
 
-                    Text
-                    {
-                        text: "<b>AntiLog</b>𝒃(𝒙):"
-                        Layout.alignment: Qt.AlignTop
-                        textFormat: Text.StyledText
-                    }
+                        Text
+                        {
+                            text: qsTr("Will perform a Log of 𝒙 + ε to base 𝒃, where 𝒙 is the input data and ε is a very small constant.");
+                            wrapMode: Text.WordWrap
+                            Layout.alignment: Qt.AlignTop
+                            Layout.fillWidth: true
+                        }
 
-                    Text
-                    {
-                        text: qsTr("Will raise x to the power of 𝒃, where 𝒙 is the input data.");
-                        wrapMode: Text.WordWrap
-                        Layout.fillWidth: true
-                    }
+                        Text
+                        {
+                            text: "<b>AntiLog</b>𝒃(𝒙):"
+                            Layout.alignment: Qt.AlignTop
+                            textFormat: Text.StyledText
+                        }
 
-                    Text
-                    {
-                        text: "<b>Arcsin</b>(𝒙):"
-                        Layout.alignment: Qt.AlignTop
-                        textFormat: Text.StyledText
-                    }
+                        Text
+                        {
+                            text: qsTr("Will raise x to the power of 𝒃, where 𝒙 is the input data.");
+                            wrapMode: Text.WordWrap
+                            Layout.fillWidth: true
+                        }
 
-                    Text
-                    {
-                        text: qsTr("Will perform an inverse sine function of 𝒙, where 𝒙 is the input data. This is useful when " +
-                                   "you require a log transform but the dataset contains negative numbers or zeros.");
-                        wrapMode: Text.WordWrap
-                        Layout.fillWidth: true
+                        Text
+                        {
+                            text: "<b>Arcsin</b>(𝒙):"
+                            Layout.alignment: Qt.AlignTop
+                            textFormat: Text.StyledText
+                        }
+
+                        Text
+                        {
+                            text: qsTr("Will perform an inverse sine function of 𝒙, where 𝒙 is the input data. This is useful when " +
+                                       "you require a log transform but the dataset contains negative numbers or zeros.");
+                            wrapMode: Text.WordWrap
+                            Layout.fillWidth: true
+                        }
                     }
                 }
             }
-
 
             Text
             {
@@ -342,7 +347,7 @@ Wizard
                         anchors.centerIn: parent
                         id: messageText
                         text: qsTr("Selected frame contains non-numerical data. " +
-                             "Next availaible frame selected");
+                                   "Next availaible frame selected");
                     }
                 }
 
@@ -409,7 +414,7 @@ Wizard
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.leftMargin: styleData.hasOwnProperty("depth") && styleData.column === 0 ? 0 :
-                                                horizontalAlignment === Text.AlignRight ? 1 : 8
+                                                                                                              horizontalAlignment === Text.AlignRight ? 1 : 8
                             anchors.rightMargin: (styleData.hasOwnProperty("depth") && styleData.column === 0)
                                                  || horizontalAlignment !== Text.AlignRight ? 1 : 8
                             horizontalAlignment: styleData.textAlignment
@@ -423,7 +428,7 @@ Wizard
                                     if(styleData.row === 0)
                                     {
                                         return (preParser.model.columnCount() - dataRectView.maxColumns) +
-                                            qsTr(" more columns...");
+                                                qsTr(" more columns...");
                                     }
                                     else
                                     {
@@ -474,7 +479,7 @@ Wizard
         for(var i = 0; i < preParser.model.columnCount(); i++)
         {
             dataRectView.addColumn(columnComponent.createObject(dataRectView,
-                {"role": i}));
+                                                                {"role": i}));
 
             // Cap the column count since a huge number of columns causes a large slowdown
             if(i == dataRectView.maxColumns - 1)

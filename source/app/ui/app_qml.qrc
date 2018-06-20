@@ -45,5 +45,6 @@
         <file>qml/ManageBookmarks.qml</file>
         <file>qml/Enrichment/EnrichmentResults.qml</file>
         <file>qml/Enrichment/EnrichmentWizard.qml</file>
+        <file>qml/Controls/WindowTooltip.qml</file>
     </qresource>
 </RCC>
