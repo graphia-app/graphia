@@ -49,7 +49,7 @@ struct CorrelationPlotConfig
     QStringList _labelNames;
     QStringList _graphNames;
 
-    const QVector<double>* _data;
+    const QVector<double>* _data = nullptr;
     QVector<int> _selectedRows;
     QVector<QColor> _rowColors;
 
@@ -94,7 +94,7 @@ class CorrelationPlotWorker : public QObject
 
 public:
     CorrelationPlotWorker();
-    virtual ~CorrelationPlotWorker();
+    ~CorrelationPlotWorker() override;
 
     QPixmap pixmap() const;
 
@@ -184,14 +184,14 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(bool busy MEMBER _busy NOTIFY busyChanged)
 
     Q_PROPERTY(double scrollAmount READ scrollAmount WRITE setScrollAmount NOTIFY scrollAmountChanged)
-    Q_PROPERTY(QVector<int> selectedRows READ selectedRows WRITE setSelectedRows)
-    Q_PROPERTY(QVector<QColor> rowColors READ rowColors WRITE setRowColors)
-    Q_PROPERTY(QStringList columnNames READ labelNames WRITE setLabelNames)
-    Q_PROPERTY(QStringList rowNames READ graphNames WRITE setGraphNames)
-    Q_PROPERTY(size_t columnCount READ columnCount WRITE setColumnCount)
-    Q_PROPERTY(size_t rowCount READ rowCount WRITE setRowCount)
-    Q_PROPERTY(int elideLabelWidth READ elideLabelWidth WRITE setElideLabelWidth)
-    Q_PROPERTY(bool showColumnNames READ showColumnNames WRITE setShowColumnNames)
+    Q_PROPERTY(QVector<int> selectedRows READ selectedRows WRITE setSelectedRows NOTIFY configChanged)
+    Q_PROPERTY(QVector<QColor> rowColors READ rowColors WRITE setRowColors NOTIFY configChanged)
+    Q_PROPERTY(QStringList columnNames READ labelNames WRITE setLabelNames NOTIFY configChanged)
+    Q_PROPERTY(QStringList rowNames READ graphNames WRITE setGraphNames NOTIFY configChanged)
+    Q_PROPERTY(size_t columnCount READ columnCount WRITE setColumnCount NOTIFY configChanged)
+    Q_PROPERTY(size_t rowCount READ rowCount WRITE setRowCount NOTIFY configChanged)
+    Q_PROPERTY(int elideLabelWidth READ elideLabelWidth WRITE setElideLabelWidth NOTIFY configChanged)
+    Q_PROPERTY(bool showColumnNames READ showColumnNames WRITE setShowColumnNames NOTIFY configChanged)
     Q_PROPERTY(bool showGridLines READ showGridLines WRITE setShowGridLines NOTIFY configChanged)
     Q_PROPERTY(bool showLegend READ showLegend WRITE setShowLegend NOTIFY configChanged)
     Q_PROPERTY(int plotScaleType READ plotScaleType WRITE setPlotScaleType NOTIFY configChanged)
@@ -203,7 +203,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
 
 public:
     explicit CorrelationPlotItem(QQuickItem* parent = nullptr);
-    virtual ~CorrelationPlotItem() override;
+    ~CorrelationPlotItem() override;
 
     void paint(QPainter* painter) override;
 

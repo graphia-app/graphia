@@ -1211,7 +1211,7 @@ void CorrelationPlotItem::setScrollAmount(double scrollAmount)
 void CorrelationPlotItem::savePlotImage(const QUrl& url, const QStringList& extensions)
 {
     QMetaObject::invokeMethod(_worker, "savePlotImage",
-        Q_ARG(const QUrl&, url), Q_ARG(const QStringList&, extensions));
+        Q_ARG(QUrl, url), Q_ARG(QStringList, extensions));
 }
 
 void CorrelationPlotItem::onPlotUpdated()
