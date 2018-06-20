@@ -244,11 +244,11 @@ Wizard
                         model: ListModel
                         {
                             ListElement { text: qsTr("None");          value: ScalingType.None }
-                            ListElement { text: qsTr("Log2(𝒙 + ε)");   value: ScalingType.Log2 }
-                            ListElement { text: qsTr("Log10(𝒙 + ε)");  value: ScalingType.Log10 }
-                            ListElement { text: qsTr("AntiLog2(𝒙)");   value: ScalingType.AntiLog2 }
-                            ListElement { text: qsTr("AntiLog10(𝒙)");  value: ScalingType.AntiLog10 }
-                            ListElement { text: qsTr("Arcsin(𝒙)");     value: ScalingType.ArcSin }
+                            ListElement { text: qsTr("Log2(𝑥 + ε)");   value: ScalingType.Log2 }
+                            ListElement { text: qsTr("Log10(𝑥 + ε)");  value: ScalingType.Log10 }
+                            ListElement { text: qsTr("AntiLog2(𝑥)");   value: ScalingType.AntiLog2 }
+                            ListElement { text: qsTr("AntiLog10(𝑥)");  value: ScalingType.AntiLog10 }
+                            ListElement { text: qsTr("Arcsin(𝑥)");     value: ScalingType.ArcSin }
                         }
                         textRole: "text"
 
@@ -266,14 +266,14 @@ Wizard
 
                     Text
                     {
-                        text: "<b>Log</b>𝒃(𝒙 + ε):"
+                        text: "<b>Log</b>𝑏(𝑥 + ε):"
                         Layout.alignment: Qt.AlignTop
                         textFormat: Text.StyledText
                     }
 
                     Text
                     {
-                        text: qsTr("Will perform a Log of 𝒙 + ε to base 𝒃, where 𝒙 is the input data and ε is a very small constant.");
+                        text: qsTr("Perform a Log of 𝑥 + ε to base 𝑏, where 𝑥 is the input data and ε is a very small constant.");
                         wrapMode: Text.WordWrap
                         Layout.alignment: Qt.AlignTop
                         Layout.fillWidth: true
@@ -281,28 +281,28 @@ Wizard
 
                     Text
                     {
-                        text: "<b>AntiLog</b>𝒃(𝒙):"
+                        text: "<b>AntiLog</b>𝑏(𝑥):"
                         Layout.alignment: Qt.AlignTop
                         textFormat: Text.StyledText
                     }
 
                     Text
                     {
-                        text: qsTr("Will raise x to the power of 𝒃, where 𝒙 is the input data.");
+                        text: qsTr("Raise 𝑥 to the power of 𝑏, where 𝑥 is the input data.");
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                     }
 
                     Text
                     {
-                        text: "<b>Arcsin</b>(𝒙):"
+                        text: "<b>Arcsin</b>(𝑥):"
                         Layout.alignment: Qt.AlignTop
                         textFormat: Text.StyledText
                     }
 
                     Text
                     {
-                        text: qsTr("Will perform an inverse sine function of 𝒙, where 𝒙 is the input data. This is useful when " +
+                        text: qsTr("Perform an inverse sine function of 𝑥, where 𝑥 is the input data. This is useful when " +
                                    "you require a log transform but the dataset contains negative numbers or zeros.");
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
