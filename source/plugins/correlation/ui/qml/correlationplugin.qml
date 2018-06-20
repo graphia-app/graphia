@@ -365,11 +365,6 @@ PluginContent
         Item { Layout.fillWidth: true }
     }
 
-    function onResized()
-    {
-        plot.refresh();
-    }
-
     SplitView
     {
         id: splitView
@@ -377,25 +372,6 @@ PluginContent
         orientation: toggleUiOrientationAction.checked ? Qt.Horizontal : Qt.Vertical
 
         anchors.fill: parent
-
-        Timer
-        {
-            id: plotRefreshTimer; interval: 100; onTriggered: { plot.refresh(); }
-        }
-
-        // When the orientation changes it seems to take a little while for the
-        // plot's dimensional properties to "settle", and calling refresh() before
-        // this doesn't really work, so wait a little bit first (FIXME)
-        onOrientationChanged:
-        {
-            plotRefreshTimer.start();
-        }
-
-        onResizingChanged:
-        {
-            if(!resizing)
-                plot.refresh();
-        }
 
         NodeAttributeTableView
         {
@@ -434,7 +410,7 @@ PluginContent
 
                 rowCount: plugin.model.rowCount
                 columnCount: plugin.model.columnCount
-                data: plugin.model.rawData
+                rawData: plugin.model.rawData
                 columnNames: plugin.model.columnNames
                 rowColors: plugin.model.nodeColors
                 rowNames: plugin.model.rowNames
@@ -453,7 +429,7 @@ PluginContent
                     return quantised;
                 }
 
-                property bool scrollBarRequired: rangeSize < 1.0
+                property bool scrollBarRequired: visibleHorizontalFraction < 1.0
 
                 scrollAmount:
                 {
@@ -462,6 +438,41 @@ PluginContent
                 }
 
                 onRightClick: { plotContextMenu.popup(); }
+
+                property bool _timedBusy: false
+
+                Timer
+                {
+                    id: busyIndicationTimer
+                    interval: 250
+                    repeat: false
+                    onTriggered:
+                    {
+                        if(plot.busy)
+                            plot._timedBusy = true;
+                    }
+                }
+
+                onBusyChanged:
+                {
+                    if(!plot.busy)
+                    {
+                        busyIndicationTimer.stop();
+                        plot._timedBusy = false;
+                    }
+                    else
+                        busyIndicationTimer.start();
+
+                }
+
+                BusyIndicator
+                {
+                    anchors.centerIn: parent
+                    width: 64
+                    height: 64
+
+                    visible: plot._timedBusy
+                }
             }
 
             ScrollView
@@ -471,13 +482,12 @@ PluginContent
                 verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
                 implicitHeight: 15
                 implicitWidth: parent.width
-                Rectangle
+                Item
                 {
                     // This is a fake object to make native scrollbars appear
                     // Prevent Qt opengl texture overflow (2^14 pixels)
-                    width: Math.min(plot.width / plot.rangeSize, 16383);
+                    width: Math.min(plot.width / plot.visibleHorizontalFraction, 16383);
                     height: 1
-                    color: "transparent"
                 }
             }
         }
