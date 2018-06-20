@@ -827,6 +827,9 @@ void CorrelationPlotWorker::buildPlot()
     _customPlot->xAxis->setLabel(_config._xAxisLabel);
     _customPlot->yAxis->setLabel(_config._yAxisLabel);
 
+    _customPlot->xAxis->grid()->setVisible(_config._showGridLines);
+    _customPlot->yAxis->grid()->setVisible(_config._showGridLines);
+
     if(_config._showColumnNames)
     {
         if(_config._elideLabelWidth > 0)
