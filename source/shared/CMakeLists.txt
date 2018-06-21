@@ -95,7 +95,6 @@ list(APPEND SHARED_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/utils/scopetimer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/semaphore.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/string.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/utils/thread.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/threadpool.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/typeidentity.cpp
     ${CMAKE_CURRENT_LIST_DIR}/utils/utils.cpp
