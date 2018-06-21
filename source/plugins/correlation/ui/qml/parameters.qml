@@ -102,7 +102,6 @@ Wizard
 
                 Image
                 {
-                    anchors.top: parent.top
                     Layout.minimumWidth: 100
                     Layout.minimumHeight: 100
                     sourceSize.width: 100
@@ -146,6 +145,11 @@ Wizard
                     tooltipNonNumerical.visible = _clickedCell;
                     _clickedCell = false;
                 }
+            }
+            onDataLoaded:
+            {
+                repopulateTableView();
+                Qt.callLater(scrollToCell, dataRectView, preParser.dataRect.x, preParser.dataRect.y);
             }
         }
 
@@ -460,11 +464,6 @@ Wizard
                     selectedRow = 0;
                     preParser.autoDetectDataRectangle();
                 }
-                onDataLoaded:
-                {
-                    repopulateTableView();
-                    Qt.callLater(scrollToCell, dataRectView, preParser.dataRect.x, preParser.dataRect.y);
-                }
             }
         }
     }
@@ -511,8 +510,6 @@ Wizard
 
             ColumnLayout
             {
-                anchors.left: parent.left
-                anchors.right: parent.right
                 spacing: 20
 
                 Text
@@ -589,8 +586,6 @@ Wizard
 
             ColumnLayout
             {
-                anchors.left: parent.left
-                anchors.right: parent.right
                 spacing: 20
                 Text
                 {
@@ -679,8 +674,6 @@ Wizard
             }
             ColumnLayout
             {
-                anchors.left: parent.left
-                anchors.right: parent.right
                 spacing: 20;
 
                 Text
@@ -771,8 +764,6 @@ Wizard
 
             ColumnLayout
             {
-                anchors.left: parent.left
-                anchors.right: parent.right
                 spacing: 20;
 
                 Text

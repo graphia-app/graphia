@@ -14,6 +14,13 @@ ToolButton
 
     onContentChanged: { content.parent = containerLayout; }
 
+    Timer
+    {
+        id: hoverTimer
+        interval: 500
+        onTriggered: tooltip.visible = true
+    }
+
     MouseArea
     {
         anchors.fill: parent
@@ -22,25 +29,40 @@ ToolButton
         {
             if(containsMouse)
             {
-                window.x = root.mapToGlobal(root.width, 0).x + _padding
-                window.y = root.mapToGlobal(0, 0).y
-                window.visible = true;
+                tooltip.x = root.mapToGlobal(root.width, 0).x + _padding
+                tooltip.y = root.mapToGlobal(0, 0).y
+                hoverTimer.start();
             }
             else
             {
-                window.visible = false;
+                tooltip.visible = false;
+                hoverTimer.stop();
             }
         }
     }
 
     Window
     {
-        id: window
+        id: tooltip
         width: Math.min(containerLayout.implicitWidth, maximumToolTipWidth) + _padding
         height: Math.min(containerLayout.implicitHeight, maximumToolTipHeight) + _padding
         // Magic flags: No shadows, transparent, no focus snatching, no border
         flags: Qt.ToolTip | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Popup
         color: "#00000000"
+        opacity: 0
+
+        onVisibilityChanged:
+        {
+            tooltip.opacity = visible ? 1.0 : 0
+        }
+
+        Behavior on opacity
+        {
+            PropertyAnimation
+            {
+                duration: 100
+            }
+        }
 
         Rectangle
         {
