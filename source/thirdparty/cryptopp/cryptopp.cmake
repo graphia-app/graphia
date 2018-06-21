@@ -51,6 +51,9 @@ list(APPEND SOURCES
 if(MSVC)
     list(APPEND SOURCES
         ${CMAKE_CURRENT_LIST_DIR}/rdrand.asm
+        ${CMAKE_CURRENT_LIST_DIR}/serpent.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/sosemanuk.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/wait.cpp
         ${CMAKE_CURRENT_LIST_DIR}/winpipes.cpp
         ${CMAKE_CURRENT_LIST_DIR}/x64dll.asm
         ${CMAKE_CURRENT_LIST_DIR}/x64masm.asm
