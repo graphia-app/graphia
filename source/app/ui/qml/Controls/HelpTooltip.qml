@@ -2,6 +2,7 @@ import QtQuick 2.7
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.2
 import QtQuick.Controls 1.5
+import QtQuick.Controls.Styles 1.4
 
 ToolButton
 {
@@ -9,10 +10,24 @@ ToolButton
     default property var content
     property int maximumToolTipWidth: 500
     property int maximumToolTipHeight: 300
-    readonly property int _padding: 10
-    iconName: "help-browser"
+    property string title: ""
+    readonly property int _padding: 20
+    readonly property int _offset: 10
+    iconSource: "qrc:/icons/Tango/16x16/apps/help-browser.png"
+    width: 20
+    height: 20
 
     onContentChanged: { content.parent = containerLayout; }
+    onIconSourceChanged: console.log(iconSource)
+
+    style: ButtonStyle
+    {
+        background: Rectangle {}
+    }
+
+    Component.onCompleted: {
+        console.log(style);
+    }
 
     Timer
     {
@@ -29,7 +44,7 @@ ToolButton
         {
             if(containsMouse)
             {
-                tooltip.x = root.mapToGlobal(root.width, 0).x + _padding
+                tooltip.x = root.mapToGlobal(root.width, 0).x + _offset
                 tooltip.y = root.mapToGlobal(0, 0).y
                 hoverTimer.start();
             }
@@ -44,8 +59,8 @@ ToolButton
     Window
     {
         id: tooltip
-        width: Math.min(containerLayout.implicitWidth, maximumToolTipWidth) + _padding
-        height: Math.min(containerLayout.implicitHeight, maximumToolTipHeight) + _padding
+        width: Math.min(wrapperLayout.implicitWidth, maximumToolTipWidth) + _padding
+        height: Math.min(wrapperLayout.implicitHeight, maximumToolTipHeight) + _padding
         // Magic flags: No shadows, transparent, no focus snatching, no border
         flags: Qt.ToolTip | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Popup
         color: "#00000000"
@@ -64,21 +79,39 @@ ToolButton
             }
         }
 
+        SystemPalette
+        {
+            id: sysPalette
+        }
+
         Rectangle
         {
             id: backRectangle
             color: Qt.rgba(0.96, 0.96, 0.96, 0.9)
-            width: Math.min(containerLayout.implicitWidth, maximumToolTipWidth) + _padding
-            height: Math.min(containerLayout.implicitHeight, maximumToolTipHeight) + _padding
-            radius: 10
+            border.width: 1
+            border.color: sysPalette.dark
+            width: Math.min(wrapperLayout.implicitWidth, maximumToolTipWidth) + _padding
+            height: Math.min(wrapperLayout.implicitHeight, maximumToolTipHeight) + _padding
+            radius: 3
         }
 
         ColumnLayout
         {
+            id: wrapperLayout
             anchors.centerIn: backRectangle
-            id: containerLayout
             anchors.fill: parent
-            anchors.margins: 5
+            anchors.margins: _padding * 0.5
+            Text
+            {
+                text: root.title
+                font.pointSize: 12
+            }
+            ColumnLayout
+            {
+                id: containerLayout
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+            }
         }
     }
 }

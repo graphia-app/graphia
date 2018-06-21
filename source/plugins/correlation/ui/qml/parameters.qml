@@ -13,9 +13,9 @@ Wizard
     //FIXME These should be set automatically by Wizard
     minimumWidth: 640
     minimumHeight: 400
-    property int selectedRow: -1;
-    property int selectedCol: -1;
-    property bool _clickedCell: false;
+    property int selectedRow: -1
+    property int selectedCol: -1
+    property bool _clickedCell: false
 
     // Work around for QTBUG-58594
     function resizeColumnsToContentsBugWorkaround(tableView)
@@ -180,18 +180,31 @@ Wizard
 
             RowLayout
             {
-                ColumnLayout
+                RowLayout
                 {
-                    CheckBox
+                    RowLayout
                     {
-                        id: transposeCheckBox
-
-                        Layout.alignment: Qt.AlignLeft
-                        text: qsTr("Transpose Dataset")
-                        onCheckedChanged:
+                        CheckBox
                         {
-                            parameters.transpose = checked;
-                            preParser.transposed = checked;
+                            id: transposeCheckBox
+
+                            Layout.alignment: Qt.AlignLeft
+                            text: qsTr("Transpose Dataset")
+                            onCheckedChanged:
+                            {
+                                parameters.transpose = checked;
+                                preParser.transposed = checked;
+                            }
+                        }
+                        HelpTooltip
+                        {
+                            title: qsTr("Transpose")
+                            Text
+                            {
+                                text: qsTr("Transpose will flip the data over it's diagonal. Moving rows to columns and vice versa")
+                                Layout.alignment: Qt.AlignTop
+                                textFormat: Text.StyledText
+                            }
                         }
                     }
                     RowLayout
@@ -222,60 +235,59 @@ Wizard
                                 parameters.scaling = model.get(currentIndex).value;
                             }
                         }
-                    }
-                }
 
-                WindowTooltip
-                {
-                    width: 30
-                    height: 30
-                    GridLayout
-                    {
-                        columns: 2
-                        rowSpacing: 10
-
-                        Text
+                        HelpTooltip
                         {
-                            text: "<b>Log</b>𝒃(𝒙 + ε):"
-                            Layout.alignment: Qt.AlignTop
-                            textFormat: Text.StyledText
-                        }
+                            title: qsTr("Scaling Types")
+                            GridLayout
+                            {
+                                columns: 2
+                                rowSpacing: 10
 
-                        Text
-                        {
-                            text: qsTr("Will perform a Log of 𝒙 + ε to base 𝒃, where 𝒙 is the input data and ε is a very small constant.");
-                            wrapMode: Text.WordWrap
-                            Layout.alignment: Qt.AlignTop
-                            Layout.fillWidth: true
-                        }
+                                Text
+                                {
+                                    text: "<b>Log</b>𝒃(𝒙 + ε):"
+                                    Layout.alignment: Qt.AlignTop
+                                    textFormat: Text.StyledText
+                                }
 
-                        Text
-                        {
-                            text: "<b>AntiLog</b>𝒃(𝒙):"
-                            Layout.alignment: Qt.AlignTop
-                            textFormat: Text.StyledText
-                        }
+                                Text
+                                {
+                                    text: qsTr("Will perform a Log of 𝒙 + ε to base 𝒃, where 𝒙 is the input data and ε is a very small constant.");
+                                    wrapMode: Text.WordWrap
+                                    Layout.alignment: Qt.AlignTop
+                                    Layout.fillWidth: true
+                                }
 
-                        Text
-                        {
-                            text: qsTr("Will raise x to the power of 𝒃, where 𝒙 is the input data.");
-                            wrapMode: Text.WordWrap
-                            Layout.fillWidth: true
-                        }
+                                Text
+                                {
+                                    text: "<b>AntiLog</b>𝒃(𝒙):"
+                                    Layout.alignment: Qt.AlignTop
+                                    textFormat: Text.StyledText
+                                }
 
-                        Text
-                        {
-                            text: "<b>Arcsin</b>(𝒙):"
-                            Layout.alignment: Qt.AlignTop
-                            textFormat: Text.StyledText
-                        }
+                                Text
+                                {
+                                    text: qsTr("Will raise x to the power of 𝒃, where 𝒙 is the input data.");
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                }
 
-                        Text
-                        {
-                            text: qsTr("Will perform an inverse sine function of 𝒙, where 𝒙 is the input data. This is useful when " +
-                                       "you require a log transform but the dataset contains negative numbers or zeros.");
-                            wrapMode: Text.WordWrap
-                            Layout.fillWidth: true
+                                Text
+                                {
+                                    text: "<b>Arcsin</b>(𝒙):"
+                                    Layout.alignment: Qt.AlignTop
+                                    textFormat: Text.StyledText
+                                }
+
+                                Text
+                                {
+                                    text: qsTr("Will perform an inverse sine function of 𝒙, where 𝒙 is the input data. This is useful when " +
+                                               "you require a log transform but the dataset contains negative numbers or zeros.");
+                                    wrapMode: Text.WordWrap
+                                    Layout.fillWidth: true
+                                }
+                            }
                         }
                     }
                 }
@@ -564,95 +576,6 @@ Wizard
                         {
                             minimumCorrelationSpinBox.value = value;
                         }
-                    }
-                }
-            }
-        }
-    }
-
-    Item
-    {
-        ColumnLayout
-        {
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            Text
-            {
-                text: qsTr("<h2>Data Transpose and Scaling</h2>")
-                Layout.alignment: Qt.AlignLeft
-                textFormat: Text.StyledText
-            }
-
-            ColumnLayout
-            {
-                spacing: 20
-                Text
-                {
-                    text: qsTr("Please select if the data should be transposed and the required method to " +
-                               "scale the data input. This will occur before normalisation.")
-                    wrapMode: Text.WordWrap
-                    Layout.fillWidth: true
-                }
-
-                RowLayout
-                {
-                    Text
-                    {
-                        text: qsTr("Scaling:")
-                        Layout.alignment: Qt.AlignLeft
-                    }
-
-                }
-
-
-                GridLayout
-                {
-                    columns: 2
-                    rowSpacing: 20
-
-                    Text
-                    {
-                        text: "<b>Log</b><i>b</i>(<i>x</i> + ε):"
-                        Layout.alignment: Qt.AlignTop
-                        textFormat: Text.StyledText
-                    }
-
-                    Text
-                    {
-                        text: qsTr("Perform a Log of <i>x</i> + ε to base <i>b</i>, where <i>x</i> is the input data and ε is a very small constant.");
-                        wrapMode: Text.WordWrap
-                        Layout.alignment: Qt.AlignTop
-                        Layout.fillWidth: true
-                    }
-
-                    Text
-                    {
-                        text: "<b>AntiLog</b><i>b</i>(<i>x</i>):"
-                        Layout.alignment: Qt.AlignTop
-                        textFormat: Text.StyledText
-                    }
-
-                    Text
-                    {
-                        text: qsTr("Raise <i>x</i> to the power of <i>b</i>, where <i>x</i> is the input data.");
-                        wrapMode: Text.WordWrap
-                        Layout.fillWidth: true
-                    }
-
-                    Text
-                    {
-                        text: "<b>Arcsin</b>(<i>x</i>):"
-                        Layout.alignment: Qt.AlignTop
-                        textFormat: Text.StyledText
-                    }
-
-                    Text
-                    {
-                        text: qsTr("Perform an inverse sine function of <i>x</i>, where <i>x</i> is the input data. This is useful when " +
-                                   "you require a log transform but the dataset contains negative numbers or zeros.");
-                        wrapMode: Text.WordWrap
-                        Layout.fillWidth: true
                     }
                 }
             }
