@@ -39,4 +39,8 @@ target_link_libraries(thirdparty
 
 if(APPLE)
     target_link_libraries(thirdparty "-framework CoreFoundation")
+elseif(MSVC)
+    # NOP
+else()
+    install(TARGETS thirdparty LIBRARY DESTINATION lib)
 endif()
