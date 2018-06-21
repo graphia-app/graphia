@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
     keepAliveTimer.start(1000);
 
 #ifndef _DEBUG
-    CrashHandler c;
+    CrashHandler c(Application::resolvedExe(QStringLiteral("CrashReporter")));
     c.onCrash([](const QString& directory)
     {
         // Take screenshots of all the open windows

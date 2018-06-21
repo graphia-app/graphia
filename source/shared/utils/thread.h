@@ -138,6 +138,10 @@ QString u::parentProcessName()
 
     return {};
 }
+
+// Sigh... windows.h
+#undef min
+#undef max
 #else
 inline void u::setCurrentThreadName(const QString&) {}
 

@@ -126,11 +126,9 @@ static bool minidumpCallback(
     return true;
 }
 
-CrashHandler::CrashHandler()
+CrashHandler::CrashHandler(const QString& crashReporterExecutableName)
 {
     QString path = QDir::tempPath();
-
-    QString crashReporterExecutableName = Application::resolvedExe(QStringLiteral("CrashReporter"));
 
     // Avoid using the CrashHandler if we're started by something that's probably an IDE
     auto parentProcess = u::parentProcessName();

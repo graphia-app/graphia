@@ -19,7 +19,7 @@ using platform_char =
 class CrashHandler
 {
 public:
-    CrashHandler();
+    CrashHandler(const QString& crashReporterExecutableName);
     virtual ~CrashHandler();
 
     const platform_char* crashReporterExecutableName() const { return _crashReporterExecutableName; }

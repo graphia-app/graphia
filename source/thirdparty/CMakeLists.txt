@@ -15,7 +15,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/qtsingleapplication/qtsingleapplication.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/SortFilterProxyModel/SortFilterProxyModel.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/zlib/zlib.cmake)
 
-add_library(thirdparty STATIC ${SOURCES} ${HEADERS} ${RESOURCES})
+add_library(thirdparty SHARED ${SOURCES} ${HEADERS} ${RESOURCES})
 
 # Disable all warnings
 if(MSVC)
@@ -28,10 +28,15 @@ else()
     set_target_properties(thirdparty PROPERTIES COMPILE_FLAGS "-w")
 endif()
 
-find_package(Qt5 COMPONENTS Core Qml Network Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Core Qml Network Widgets PrintSupport REQUIRED)
 target_link_libraries(thirdparty
     Qt5::Core
     Qt5::Qml
     Qt5::Network
     Qt5::Widgets
+    Qt5::PrintSupport
 )
+
+if(APPLE)
+    target_link_libraries(thirdparty "-framework CoreFoundation")
+endif()
