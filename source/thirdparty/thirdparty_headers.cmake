@@ -4,3 +4,4 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/boost/spirit)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/json)
 
 add_definitions(-DQCUSTOMPLOT_USE_OPENGL)
+add_definitions(-DQCUSTOMPLOT_USE_LIBRARY)

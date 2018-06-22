@@ -34,7 +34,7 @@ if(UNITY_BUILD)
     GenerateUnity(ORIGINAL_SOURCES CRYPTOPP_SOURCES UNITY_PREFIX "cryptopp")
 endif()
 
-list(APPEND SOURCES
+list(APPEND STATIC_THIRDPARTY_SOURCES
     ${CRYPTOPP_SOURCES}
 
     ${CMAKE_CURRENT_LIST_DIR}/cryptlib.cpp
@@ -49,7 +49,7 @@ list(APPEND SOURCES
 )
 
 if(MSVC)
-    list(APPEND SOURCES
+    list(APPEND STATIC_THIRDPARTY_SOURCES
         ${CMAKE_CURRENT_LIST_DIR}/rdrand.asm
         ${CMAKE_CURRENT_LIST_DIR}/serpent.cpp
         ${CMAKE_CURRENT_LIST_DIR}/sosemanuk.cpp

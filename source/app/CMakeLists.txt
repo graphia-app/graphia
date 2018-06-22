@@ -1,6 +1,6 @@
 include(${CMAKE_CURRENT_SOURCE_DIR}/../common.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../unity.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/thirdparty.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/thirdparty_headers.cmake)
 
 add_definitions(-DPRODUCT_NAME="${PROJECT_NAME}")
 
@@ -266,7 +266,7 @@ else()
         DESTINATION share/applications)
 endif()
 
-target_link_libraries(${PROJECT_NAME} thirdparty shared)
+target_link_libraries(${PROJECT_NAME} thirdparty_static thirdparty shared)
 
 find_package(Qt5 COMPONENTS Core Qml Quick OpenGL OpenGLExtensions PrintSupport Widgets Xml REQUIRED)
 target_link_libraries(${PROJECT_NAME}
@@ -280,11 +280,6 @@ target_link_libraries(${PROJECT_NAME}
     Qt5::Xml
 )
 
-find_package(Qt5QuickCompiler)
-if(Qt5QuickCompiler_FOUND)
-    qtquick_compiler_add_resources(RESOURCES ${RESOURCES})
-endif()
-
 find_package(OpenGL REQUIRED)
 target_link_libraries(${PROJECT_NAME} ${OPENGL_gl_LIBRARY})
 
@@ -295,3 +290,5 @@ target_link_libraries(${PROJECT_NAME} Threads::Threads)
 if(APPLE)
     target_link_libraries(${PROJECT_NAME} "-framework CoreFoundation")
 endif()
+
+add_definitions(-DQCUSTOMPLOT_USE_LIBRARY)

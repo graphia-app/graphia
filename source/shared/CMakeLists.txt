@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../common.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../unity.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/thirdparty.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/thirdparty_headers.cmake)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -118,8 +118,3 @@ target_link_libraries(shared
     Qt5::Qml
     Qt5::Widgets
 )
-
-find_package(Qt5QuickCompiler)
-if(Qt5QuickCompiler_FOUND)
-    qtquick_compiler_add_resources(RESOURCES ${RESOURCES})
-endif()

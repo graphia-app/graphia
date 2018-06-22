@@ -1,5 +1,5 @@
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../common.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/thirdparty.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/thirdparty_headers.cmake)
 
 set(PluginName "generic")
 
@@ -36,8 +36,3 @@ target_link_libraries(${PluginName}
     Qt5::Widgets
     Qt5::Xml
 )
-
-find_package(Qt5QuickCompiler)
-if(Qt5QuickCompiler_FOUND)
-    qtquick_compiler_add_resources(RESOURCES ${RESOURCES})
-endif()

@@ -6,6 +6,7 @@ set INSTALLER_DIR=installer
 rmdir /s /q %INSTALLER_DIR%
 mkdir %INSTALLER_DIR%
 copy %BUILD_DIR%\%PRODUCT_NAME%.exe %INSTALLER_DIR%\
+copy %BUILD_DIR%\thirdparty.dll %INSTALLER_DIR%\
 
 mkdir %INSTALLER_DIR%\plugins
 xcopy "%BUILD_DIR%\plugins\*.dll" %INSTALLER_DIR%\plugins

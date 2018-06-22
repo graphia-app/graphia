@@ -1,7 +1,6 @@
 #include "crashhandler.h"
 
 #include "shared/utils/thread.h"
-#include "app/application.h"
 
 #include <QCoreApplication>
 #include <QTemporaryDir>
