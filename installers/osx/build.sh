@@ -22,6 +22,23 @@ cp -r ../source/app/examples \
 QML_DIRS=$(find ../source -name "*.qml" | xargs -n1 dirname | \
   sort | uniq | sed -e 's/\(^.*$\)/-qmldir=\1/')
 
+# Any dylibs that we build ourselves will have an embedded RPATH that refers to
+# the absolute Qt directory on the build machine, and the GateKeeper objects to
+# this, so we manually remove them here
+DYLIBS=$(find source -name "*.dylib")
+
+for DYLIB in ${DYLIBS}
+do
+  RPATHS=$(otool -l ${DYLIB} | grep -A2 LC_RPATH | \
+    grep "^ *path.*" | sed -e 's/^ *path \([^\(]*\).*$/\1/')
+
+  for RPATH in ${RPATHS}
+  do
+    echo Removing RPATH ${RPATH} from ${DYLIB}...
+    install_name_tool -delete_rpath ${RPATH} ${DYLIB}
+  done
+done
+
 macdeployqt ${PRODUCT_NAME}.app \
   ${QML_DIRS} \
   -executable=${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} \
