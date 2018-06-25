@@ -34,6 +34,8 @@ function makeSymFile
 
 makeSymFile ${BUILD_DIR}/${PRODUCT_NAME}.app/Contents/MacOS/${PRODUCT_NAME} \
   ${BUILD_DIR}/${PRODUCT_NAME}.sym
+makeSymFile ${BUILD_DIR}/source/thirdparty/libthirdparty.dylib \
+  ${BUILD_DIR}/libthirdparty.dylib.sym
 
 for PLUGIN in $(find ${BUILD_DIR}/plugins -name "*.dylib")
 do

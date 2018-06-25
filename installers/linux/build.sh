@@ -44,6 +44,9 @@ fi
 breakpad-build/src/tools/linux/dump_syms/dump_syms \
   ${BUILD_DIR}/AppDir/usr/bin/${PRODUCT_NAME} > \
   ${BUILD_DIR}/${PRODUCT_NAME}.sym || exit $?
+breakpad-build/src/tools/linux/dump_syms/dump_syms \
+  ${BUILD_DIR}/AppDir/usr/lib/libthirdparty.so > \
+  ${BUILD_DIR}/libthirdparty.so.sym || exit $?
 
 for PLUGIN in $(find ${BUILD_DIR}/AppDir/usr/lib/${PRODUCT_NAME}/plugins -iname "*.so")
 do
