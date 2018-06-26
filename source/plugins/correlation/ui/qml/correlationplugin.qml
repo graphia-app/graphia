@@ -481,13 +481,12 @@ PluginContent
                 verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
                 implicitHeight: 15
                 implicitWidth: parent.width
-                Rectangle
+                Item
                 {
                     // This is a fake object to make native scrollbars appear
                     // Prevent Qt opengl texture overflow (2^14 pixels)
                     width: Math.min(plot.width / plot.visibleHorizontalFraction, 16383);
                     height: 1
-                    color: "transparent"
                 }
             }
         }
