@@ -50,8 +50,8 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem
     setAcceptedMouseButtons(Qt::AllButtons);
 
     connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::updatePlotSize);
-    connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::visibleHorizontalFractionChanged);
     connect(this, &QQuickPaintedItem::heightChanged, this, &CorrelationPlotItem::updatePlotSize);
+    connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::visibleHorizontalFractionChanged);
     connect(&_customPlot, &QCustomPlot::afterReplot, this, &CorrelationPlotItem::onReplot);
 }
 
@@ -115,222 +115,6 @@ void CorrelationPlotItem::mouseDoubleClickEvent(QMouseEvent* event)
 void CorrelationPlotItem::wheelEvent(QWheelEvent* event)
 {
     routeWheelEvent(event);
-}
-
-void CorrelationPlotItem::configureLegend()
-{
-    if(_customPlot.plottableCount() <= 0 || !_showLegend)
-        return;
-
-    // Create a subLayout to position the Legend
-    auto* subLayout = new QCPLayoutGrid;
-    _customPlot.plotLayout()->insertColumn(1);
-    _customPlot.plotLayout()->addElement(0, 1, subLayout);
-
-    // Surround the legend row in two empty rows that are stretched maximally, and
-    // stretch the legend itself minimally, thus centreing the legend vertically
-    subLayout->insertRow(0);
-    subLayout->setRowStretchFactor(0, 1.0);
-    subLayout->addElement(1, 0, _customPlot.legend);
-    subLayout->setRowStretchFactor(1, std::numeric_limits<double>::min());
-    subLayout->insertRow(2);
-    subLayout->setRowStretchFactor(2, 1.0);
-
-    const int marginSize = 5;
-    subLayout->setMargins(QMargins(0, marginSize, marginSize, marginSize));
-    _customPlot.legend->setMargins(QMargins(marginSize, marginSize, marginSize, marginSize));
-
-    // BIGGEST HACK
-    // Layouts and sizes aren't done until a replot, and layout is performed on another
-    // thread which means it's too late to add or remove elements from the legend.
-    // The anticipated sizes for the legend layout are calculated here but will break
-    // if any additional rows are added to the plotLayout as the legend height is
-    // estimated using the total height of the QQuickItem, not the (unknowable) plot height
-
-    // See QCPPlottableLegendItem::draw for the reasoning behind this value
-    const auto legendElementHeight = std::max(QFontMetrics(_customPlot.legend->font()).height(),
-                                              _customPlot.legend->iconSize().height());
-
-    const auto totalExternalMargins = subLayout->margins().top() + subLayout->margins().bottom();
-    const auto totalInternalMargins = _customPlot.legend->margins().top() + _customPlot.legend->margins().bottom();
-    const auto maxLegendHeight = _customPlot.height() - (totalExternalMargins + totalInternalMargins);
-
-    int maxNumberOfElementsToDraw = 0;
-    int accumulatedHeight = legendElementHeight;
-    while(accumulatedHeight < maxLegendHeight)
-    {
-        accumulatedHeight += (_customPlot.legend->rowSpacing() + legendElementHeight);
-        maxNumberOfElementsToDraw++;
-    };
-
-    const auto numberOfElementsToDraw = std::min(_customPlot.plottableCount(), maxNumberOfElementsToDraw);
-
-    if(numberOfElementsToDraw > 0)
-    {
-        // Populate the legend
-        _customPlot.legend->clear();
-        for(int i = 0; i < numberOfElementsToDraw; i++)
-            _customPlot.plottable(i)->addToLegend(_customPlot.legend);
-
-        // Cap the legend count to only those visible
-        if(_customPlot.plottableCount() > maxNumberOfElementsToDraw)
-        {
-            auto* moreText = new QCPTextElement(&_customPlot);
-            moreText->setMargins(QMargins());
-            moreText->setLayer(_textLayer);
-            moreText->setTextFlags(Qt::AlignLeft);
-            moreText->setFont(_customPlot.legend->font());
-            moreText->setTextColor(Qt::gray);
-            moreText->setText(QString(tr("...and %1 more"))
-                .arg(_customPlot.plottableCount() - maxNumberOfElementsToDraw + 1));
-            moreText->setVisible(true);
-
-            auto lastElementIndex = _customPlot.legend->rowColToIndex(_customPlot.legend->rowCount() - 1, 0);
-            _customPlot.legend->removeAt(lastElementIndex);
-            _customPlot.legend->addElement(moreText);
-
-            // When we're overflowing, hackily enlarge the bottom margin to
-            // compensate for QCP's layout algorithm being a bit rubbish
-            auto margins = _customPlot.legend->margins();
-            margins.setBottom(margins.bottom() * 3);
-            _customPlot.legend->setMargins(margins);
-        }
-
-        // Make the plot take 85% of the width, and the legend the remaining 15%
-        _customPlot.plotLayout()->setColumnStretchFactor(0, 0.85);
-        _customPlot.plotLayout()->setColumnStretchFactor(1, 0.15);
-
-        _customPlot.legend->setVisible(true);
-    }
-}
-
-void CorrelationPlotItem::buildPlot()
-{
-    _customPlot.legend->setVisible(false);
-
-    _customPlot.clearGraphs();
-    _customPlot.clearPlottables();
-
-    while(_customPlot.plotLayout()->rowCount() > 1)
-    {
-        _customPlot.plotLayout()->removeAt(_customPlot.plotLayout()->rowColToIndex(1, 0));
-        _customPlot.plotLayout()->simplify();
-    }
-
-    while(_customPlot.plotLayout()->columnCount() > 1)
-    {
-        // Save the legend from getting destroyed
-        _customPlot.axisRect()->insetLayout()->addElement(_customPlot.legend, Qt::AlignRight);
-        _customPlot.plotLayout()->removeAt(_customPlot.plotLayout()->rowColToIndex(0, 1));
-        // Destroy the extra legend column
-        _customPlot.plotLayout()->simplify();
-    }
-
-    auto plotAveragingType = static_cast<PlotAveragingType>(_plotAveragingType);
-    if(plotAveragingType == PlotAveragingType::MeanLine ||
-            _selectedRows.length() > MAX_SELECTED_ROWS_BEFORE_MEAN)
-        populateMeanLinePlot();
-    else if(plotAveragingType == PlotAveragingType::MedianLine)
-        populateMedianLinePlot();
-    else if(plotAveragingType == PlotAveragingType::MeanHistogram)
-        populateMeanHistogramPlot();
-    else if(plotAveragingType == PlotAveragingType::IQRPlot)
-        populateIQRPlot();
-    else
-        populateLinePlot();
-
-    auto plotDispersionType = static_cast<PlotDispersionType>(_plotDispersionType);
-    if(plotAveragingType != PlotAveragingType::Individual &&
-            plotAveragingType != PlotAveragingType::IQRPlot)
-    {
-        if(plotDispersionType == PlotDispersionType::StdDev)
-            populateStdDevPlot();
-        else if(plotDispersionType == PlotDispersionType::StdErr)
-            populateStdErrorPlot();
-    }
-
-    configureLegend();
-
-    QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
-    _customPlot.xAxis->setTicker(categoryTicker);
-    _customPlot.xAxis->setTickLabelRotation(90);
-
-    _customPlot.xAxis->setLabel(_xAxisLabel);
-    _customPlot.yAxis->setLabel(_yAxisLabel);
-
-    if(_showColumnNames)
-    {
-        if(_elideLabelWidth > 0)
-        {
-            QFontMetrics metrics(_defaultFont9Pt);
-            int column = 0;
-
-            for(auto& labelName : _labelNames)
-                categoryTicker->addTick(column++, metrics.elidedText(labelName, Qt::ElideRight, _elideLabelWidth));
-        }
-        else
-        {
-            // There is no room to display labels, so show a warning instead
-            QString warning = tr("Resize To Expose Column Names");
-            if(!_xAxisLabel.isEmpty())
-                _customPlot.xAxis->setLabel(QString(QStringLiteral("%1 (%2)")).arg(_xAxisLabel, warning));
-            else
-                _customPlot.xAxis->setLabel(warning);
-        }
-    }
-
-    _customPlot.setBackground(Qt::white);
-}
-
-void CorrelationPlotItem::setPlotDispersionVisualType(int plotDispersionVisualType)
-{
-    _plotDispersionVisualType = plotDispersionVisualType;
-    emit plotOptionsChanged();
-    refresh();
-}
-
-void CorrelationPlotItem::setYAxisLabel(const QString& plotYAxisLabel)
-{
-    _yAxisLabel = plotYAxisLabel;
-    _customPlot.yAxis->setLabel(_yAxisLabel);
-    emit plotOptionsChanged();
-    refresh();
-}
-
-void CorrelationPlotItem::setXAxisLabel(const QString& plotXAxisLabel)
-{
-    _xAxisLabel = plotXAxisLabel;
-    _customPlot.xAxis->setLabel(_xAxisLabel);
-    emit plotOptionsChanged();
-    refresh();
-}
-
-void CorrelationPlotItem::setPlotScaleType(int plotScaleType)
-{
-    _plotScaleType = plotScaleType;
-    emit plotOptionsChanged();
-    refresh();
-}
-
-void CorrelationPlotItem::setPlotAveragingType(int plotAveragingType)
-{
-    _plotAveragingType = plotAveragingType;
-    emit plotOptionsChanged();
-    refresh();
-}
-
-void CorrelationPlotItem::setPlotDispersionType(int plotDispersionType)
-{
-    _plotDispersionType = plotDispersionType;
-    emit plotOptionsChanged();
-    refresh();
-}
-
-void CorrelationPlotItem::setShowLegend(bool showLegend)
-{
-    _showLegend = showLegend;
-    emit plotOptionsChanged();
-    refresh();
 }
 
 void CorrelationPlotItem::populateMeanLinePlot()
@@ -465,7 +249,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     _customPlot.yAxis->setRange(minY, maxY);
 }
 
-double calculateMedian(const QVector<double>& sortedData)
+static double medianOf(const QVector<double>& sortedData)
 {
     if(sortedData.length() == 0)
         return 0.0;
@@ -507,7 +291,7 @@ void CorrelationPlotItem::populateIQRPlot()
         if(!_selectedRows.empty())
         {
             std::sort(rowsEntries.begin(), rowsEntries.end());
-            double secondQuartile = calculateMedian(rowsEntries);
+            double secondQuartile = medianOf(rowsEntries);
             double firstQuartile = secondQuartile;
             double thirdQuartile = secondQuartile;
 
@@ -516,16 +300,16 @@ void CorrelationPlotItem::populateIQRPlot()
             {
                 if(rowsEntries.size() % 2 == 0)
                 {
-                    firstQuartile = calculateMedian(
+                    firstQuartile = medianOf(
                                 rowsEntries.mid(0, (rowsEntries.size() / 2)));
-                    thirdQuartile = calculateMedian(
+                    thirdQuartile = medianOf(
                                 rowsEntries.mid((rowsEntries.size() / 2)));
                 }
                 else
                 {
-                    firstQuartile = calculateMedian(
+                    firstQuartile = medianOf(
                                 rowsEntries.mid(0, ((rowsEntries.size() - 1) / 2)));
-                    thirdQuartile = calculateMedian(
+                    thirdQuartile = medianOf(
                                 rowsEntries.mid(((rowsEntries.size() + 1) / 2)));
                 }
             }
@@ -784,6 +568,221 @@ void CorrelationPlotItem::populateLinePlot()
     _customPlot.yAxis->setRange(minY, maxY);
 }
 
+void CorrelationPlotItem::configureLegend()
+{
+    if(_customPlot.plottableCount() <= 0 || !_showLegend)
+        return;
+
+    // Create a subLayout to position the Legend
+    auto* subLayout = new QCPLayoutGrid;
+    _customPlot.plotLayout()->insertColumn(1);
+    _customPlot.plotLayout()->addElement(0, 1, subLayout);
+
+    // Surround the legend row in two empty rows that are stretched maximally, and
+    // stretch the legend itself minimally, thus centreing the legend vertically
+    subLayout->insertRow(0);
+    subLayout->setRowStretchFactor(0, 1.0);
+    subLayout->addElement(1, 0, _customPlot.legend);
+    subLayout->setRowStretchFactor(1, std::numeric_limits<double>::min());
+    subLayout->insertRow(2);
+    subLayout->setRowStretchFactor(2, 1.0);
+
+    const int marginSize = 5;
+    subLayout->setMargins(QMargins(0, marginSize, marginSize, marginSize));
+    _customPlot.legend->setMargins(QMargins(marginSize, marginSize, marginSize, marginSize));
+
+    // BIGGEST HACK
+    // Layouts and sizes aren't done until a replot, and layout is performed on another
+    // thread which means it's too late to add or remove elements from the legend.
+    // The anticipated sizes for the legend layout are calculated here but will break
+    // if any additional rows are added to the plotLayout as the legend height is
+    // estimated using the total height of the QQuickItem, not the (unknowable) plot height
+
+    // See QCPPlottableLegendItem::draw for the reasoning behind this value
+    const auto legendElementHeight = std::max(QFontMetrics(_customPlot.legend->font()).height(),
+                                              _customPlot.legend->iconSize().height());
+
+    const auto totalExternalMargins = subLayout->margins().top() + subLayout->margins().bottom();
+    const auto totalInternalMargins = _customPlot.legend->margins().top() + _customPlot.legend->margins().bottom();
+    const auto maxLegendHeight = _customPlot.height() - (totalExternalMargins + totalInternalMargins);
+
+    int maxNumberOfElementsToDraw = 0;
+    int accumulatedHeight = legendElementHeight;
+    while(accumulatedHeight < maxLegendHeight)
+    {
+        accumulatedHeight += (_customPlot.legend->rowSpacing() + legendElementHeight);
+        maxNumberOfElementsToDraw++;
+    };
+
+    const auto numberOfElementsToDraw = std::min(_customPlot.plottableCount(), maxNumberOfElementsToDraw);
+
+    if(numberOfElementsToDraw > 0)
+    {
+        // Populate the legend
+        _customPlot.legend->clear();
+        for(int i = 0; i < numberOfElementsToDraw; i++)
+            _customPlot.plottable(i)->addToLegend(_customPlot.legend);
+
+        // Cap the legend count to only those visible
+        if(_customPlot.plottableCount() > maxNumberOfElementsToDraw)
+        {
+            auto* moreText = new QCPTextElement(&_customPlot);
+            moreText->setMargins(QMargins());
+            moreText->setLayer(_textLayer);
+            moreText->setTextFlags(Qt::AlignLeft);
+            moreText->setFont(_customPlot.legend->font());
+            moreText->setTextColor(Qt::gray);
+            moreText->setText(QString(tr("...and %1 more"))
+                .arg(_customPlot.plottableCount() - maxNumberOfElementsToDraw + 1));
+            moreText->setVisible(true);
+
+            auto lastElementIndex = _customPlot.legend->rowColToIndex(_customPlot.legend->rowCount() - 1, 0);
+            _customPlot.legend->removeAt(lastElementIndex);
+            _customPlot.legend->addElement(moreText);
+
+            // When we're overflowing, hackily enlarge the bottom margin to
+            // compensate for QCP's layout algorithm being a bit rubbish
+            auto margins = _customPlot.legend->margins();
+            margins.setBottom(margins.bottom() * 3);
+            _customPlot.legend->setMargins(margins);
+        }
+
+        // Make the plot take 85% of the width, and the legend the remaining 15%
+        _customPlot.plotLayout()->setColumnStretchFactor(0, 0.85);
+        _customPlot.plotLayout()->setColumnStretchFactor(1, 0.15);
+
+        _customPlot.legend->setVisible(true);
+    }
+}
+
+void CorrelationPlotItem::buildPlot()
+{
+    _customPlot.legend->setVisible(false);
+
+    _customPlot.clearGraphs();
+    _customPlot.clearPlottables();
+
+    while(_customPlot.plotLayout()->rowCount() > 1)
+    {
+        _customPlot.plotLayout()->removeAt(_customPlot.plotLayout()->rowColToIndex(1, 0));
+        _customPlot.plotLayout()->simplify();
+    }
+
+    while(_customPlot.plotLayout()->columnCount() > 1)
+    {
+        // Save the legend from getting destroyed
+        _customPlot.axisRect()->insetLayout()->addElement(_customPlot.legend, Qt::AlignRight);
+        _customPlot.plotLayout()->removeAt(_customPlot.plotLayout()->rowColToIndex(0, 1));
+        // Destroy the extra legend column
+        _customPlot.plotLayout()->simplify();
+    }
+
+    auto plotAveragingType = static_cast<PlotAveragingType>(_plotAveragingType);
+    if(plotAveragingType == PlotAveragingType::MeanLine)
+        populateMeanLinePlot();
+    else if(plotAveragingType == PlotAveragingType::MedianLine)
+        populateMedianLinePlot();
+    else if(plotAveragingType == PlotAveragingType::MeanHistogram)
+        populateMeanHistogramPlot();
+    else if(plotAveragingType == PlotAveragingType::IQRPlot)
+        populateIQRPlot();
+    else
+        populateLinePlot();
+
+    auto plotDispersionType = static_cast<PlotDispersionType>(_plotDispersionType);
+    if(plotAveragingType != PlotAveragingType::Individual &&
+            plotAveragingType != PlotAveragingType::IQRPlot)
+    {
+        if(plotDispersionType == PlotDispersionType::StdDev)
+            populateStdDevPlot();
+        else if(plotDispersionType == PlotDispersionType::StdErr)
+            populateStdErrorPlot();
+    }
+
+    configureLegend();
+
+    QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
+    _customPlot.xAxis->setTicker(categoryTicker);
+    _customPlot.xAxis->setTickLabelRotation(90);
+
+    _customPlot.xAxis->setLabel(_xAxisLabel);
+    _customPlot.yAxis->setLabel(_yAxisLabel);
+
+    _customPlot.xAxis->grid()->setVisible(_showGridLines);
+    _customPlot.yAxis->grid()->setVisible(_showGridLines);
+
+    if(_showColumnNames)
+    {
+        if(_elideLabelWidth > 0)
+        {
+            QFontMetrics metrics(_defaultFont9Pt);
+            int column = 0;
+
+            for(auto& labelName : _labelNames)
+                categoryTicker->addTick(column++, metrics.elidedText(labelName, Qt::ElideRight, _elideLabelWidth));
+        }
+        else
+        {
+            // There is no room to display labels, so show a warning instead
+            QString warning = tr("Resize To Expose Column Names");
+            if(!_xAxisLabel.isEmpty())
+                _customPlot.xAxis->setLabel(QString(QStringLiteral("%1 (%2)")).arg(_xAxisLabel, warning));
+            else
+                _customPlot.xAxis->setLabel(warning);
+        }
+    }
+
+    _customPlot.setBackground(Qt::white);
+}
+
+void CorrelationPlotItem::setPlotDispersionVisualType(int plotDispersionVisualType)
+{
+    _plotDispersionVisualType = plotDispersionVisualType;
+    emit plotOptionsChanged();
+    refresh();
+}
+
+void CorrelationPlotItem::setYAxisLabel(const QString& plotYAxisLabel)
+{
+    _yAxisLabel = plotYAxisLabel;
+    emit plotOptionsChanged();
+    refresh();
+}
+
+void CorrelationPlotItem::setXAxisLabel(const QString& plotXAxisLabel)
+{
+    _xAxisLabel = plotXAxisLabel;
+    emit plotOptionsChanged();
+    refresh();
+}
+
+void CorrelationPlotItem::setPlotScaleType(int plotScaleType)
+{
+    _plotScaleType = plotScaleType;
+    emit plotOptionsChanged();
+    refresh();
+}
+
+void CorrelationPlotItem::setPlotAveragingType(int plotAveragingType)
+{
+    _plotAveragingType = plotAveragingType;
+    emit plotOptionsChanged();
+    refresh();
+}
+
+void CorrelationPlotItem::setPlotDispersionType(int plotDispersionType)
+{
+    _plotDispersionType = plotDispersionType;
+    emit plotOptionsChanged();
+    refresh();
+}
+
+void CorrelationPlotItem::setShowLegend(bool showLegend)
+{
+    _showLegend = showLegend;
+    emit plotOptionsChanged();
+    refresh();
+}
 void CorrelationPlotItem::setSelectedRows(const QVector<int>& selectedRows)
 {
     _selectedRows = selectedRows;
@@ -830,8 +829,6 @@ void CorrelationPlotItem::setShowColumnNames(bool showColumnNames)
 void CorrelationPlotItem::setShowGridLines(bool showGridLines)
 {
     _showGridLines = showGridLines;
-    _customPlot.xAxis->grid()->setVisible(_showGridLines);
-    _customPlot.yAxis->grid()->setVisible(_showGridLines);
     refresh();
 }
 
@@ -839,7 +836,7 @@ void CorrelationPlotItem::setScrollAmount(double scrollAmount)
 {
     _scrollAmount = scrollAmount;
     scaleXAxis();
-    _customPlot.replot();
+    _customPlot.replot(QCustomPlot::rpQueuedReplot);
 }
 
 void CorrelationPlotItem::scaleXAxis()
