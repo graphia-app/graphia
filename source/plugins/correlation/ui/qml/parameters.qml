@@ -7,7 +7,7 @@ import com.kajeka 1.0
 import "../../../../shared/ui/qml/Constants.js" as Constants
 import "Controls"
 
-Wizard
+Wizard2
 {
     id: root
     //FIXME These should be set automatically by Wizard
@@ -66,8 +66,9 @@ Wizard
         dataFrameAnimationY.running = true;
     }
 
-    Item
+    Wizard2Page
     {
+        title: qsTr("Introduction")
         ColumnLayout
         {
             width: parent.width
@@ -76,7 +77,7 @@ Wizard
 
             Text
             {
-                text: qsTr("<h2>Correlation</h2>")
+                text: qsTr("<h2>Correlation Graph Analysis</h2>")
                 Layout.alignment: Qt.AlignLeft
                 textFormat: Text.StyledText
             }
@@ -112,8 +113,9 @@ Wizard
         }
     }
 
-    Item
+    Wizard2Page
     {
+        title: qsTr("Data Viewer")
         id: dataRectPage
         property bool _busy: preParser.isRunning || root.animating
 
@@ -506,8 +508,9 @@ Wizard
         Qt.callLater(resizeColumnsToContentsBugWorkaround, dataRectView);
     }
 
-    Item
+    Wizard2Page
     {
+        title: qsTr("Correlation")
         ColumnLayout
         {
             anchors.left: parent.left
@@ -515,7 +518,7 @@ Wizard
 
             Text
             {
-                text: qsTr("<h2>Pearson Correlation</h2>")
+                text: qsTr("<h2>Correlation - Adjust Thresholds</h2>")
                 Layout.alignment: Qt.AlignLeft
                 textFormat: Text.StyledText
             }
@@ -582,8 +585,9 @@ Wizard
         }
     }
 
-    Item
+    Wizard2Page
     {
+        title: qsTr("Data Transforms")
         ColumnLayout
         {
             anchors.left: parent.left
@@ -597,7 +601,7 @@ Wizard
             }
             ColumnLayout
             {
-                spacing: 20;
+                spacing: 20
 
                 Text
                 {
@@ -671,8 +675,9 @@ Wizard
         }
     }
 
-    Item
+    Wizard2Page
     {
+        title: qsTr("Missing Data")
         ColumnLayout
         {
             anchors.left: parent.left
@@ -764,6 +769,55 @@ Wizard
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
                     }
+                }
+            }
+        }
+    }
+
+    Wizard2Page
+    {
+        title: "Summary"
+        ColumnLayout
+        {
+            anchors.fill: parent
+
+            Text
+            {
+                text: qsTr("<h2>Summary</h2>")
+                Layout.alignment: Qt.AlignLeft
+                textFormat: Text.StyledText
+            }
+
+            Text
+            {
+                text: qsTr("A graph will be created with the following parameters. Please inspect them " +
+                           "before clicking \"Finish\"")
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+            }
+            TextArea
+            {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                text:
+                {
+                    var summaryString = "";
+                    summaryString += "Minimum Correlation: " + minimumCorrelationSpinBox.value + "\n";
+                    if(preParser.dataRect != Qt.rect(0,0,0,0))
+                    {
+                        summaryString += "Data Frame:" +
+                                " x: " + preParser.dataRect.x +
+                                " y: " + preParser.dataRect.y +
+                                " width: " + preParser.dataRect.width +
+                                " height: " + preParser.dataRect.height + "\n";
+                    }
+                    summaryString += "Data Transpose: " + transposeCheckBox.checked + "\n";
+                    summaryString += "Data Scaling: " + scaling.currentText + "\n";
+                    summaryString += "Data Normalise: " + normalise.currentText + "\n";
+                    summaryString += "Missing Data Replacement: " + missingDataMethod.currentText + "\n";
+                    if(missingDataMethod.model.get(missingDataMethod.currentIndex).value === MissingDataType.Constant)
+                        summaryString += "Replacement Constant: " + replacementConstant.text + "\n";
+                    return summaryString;
                 }
             }
         }

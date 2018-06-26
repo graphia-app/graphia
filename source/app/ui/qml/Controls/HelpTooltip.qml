@@ -18,15 +18,10 @@ ToolButton
     height: 20
 
     onContentChanged: { content.parent = containerLayout; }
-    onIconSourceChanged: console.log(iconSource)
 
     style: ButtonStyle
     {
         background: Rectangle {}
-    }
-
-    Component.onCompleted: {
-        console.log(style);
     }
 
     Timer
