@@ -995,7 +995,7 @@ void CorrelationPlotItem::showTooltip()
 
     _textLayer->replot();
 
-    update();
+    onReplot();
 }
 
 void CorrelationPlotItem::hideTooltip()
@@ -1004,7 +1004,7 @@ void CorrelationPlotItem::hideTooltip()
     _hoverColorRect->setVisible(false);
     _itemTracer->setVisible(false);
     _textLayer->replot();
-    update();
+    onReplot();
 }
 
 void CorrelationPlotItem::savePlotImage(const QUrl& url, const QStringList& extensions)
