@@ -40,7 +40,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
 {
     Q_OBJECT
     Q_PROPERTY(QVector<double> rawData MEMBER _data)
-    Q_PROPERTY(double scrollAmount MEMBER _scrollAmount WRITE setScrollAmount NOTIFY scrollAmountChanged)
+    Q_PROPERTY(double horizontalScrollPosition MEMBER _horizontalScrollPosition WRITE setHorizontalScrollPosition NOTIFY horizontalScrollPositionChanged)
     Q_PROPERTY(double visibleHorizontalFraction READ visibleHorizontalFraction NOTIFY visibleHorizontalFractionChanged)
     Q_PROPERTY(QVector<int> selectedRows MEMBER _selectedRows WRITE setSelectedRows)
     Q_PROPERTY(QVector<QColor> rowColors MEMBER _rowColors WRITE setRowColors)
@@ -115,7 +115,7 @@ private:
     int _plotAveragingType = static_cast<int>(PlotAveragingType::Individual);
     int _plotDispersionType = static_cast<int>(PlotDispersionType::None);
     int _plotDispersionVisualType = static_cast<int>(PlotDispersionVisualType::Bars);
-    double _scrollAmount = 0.0;
+    double _horizontalScrollPosition = 0.0;
     QString _xAxisLabel;
     QString _yAxisLabel;
 
@@ -140,7 +140,7 @@ private:
     void setShowColumnNames(bool showColumnNames);
     void setShowGridLines(bool showGridLines);
     void setShowLegend(bool showLegend);
-    void setScrollAmount(double scrollAmount);
+    void setHorizontalScrollPosition(double horizontalScrollPosition);
 
     void scaleXAxis();
     QVector<double> meanAverageData(double& min, double& max);
@@ -159,7 +159,7 @@ private slots:
 
 signals:
     void rightClick();
-    void scrollAmountChanged();
+    void horizontalScrollPositionChanged();
     void visibleHorizontalFractionChanged();
     void plotOptionsChanged();
 };

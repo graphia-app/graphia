@@ -465,7 +465,7 @@ PluginContent
 
                 property bool scrollBarRequired: visibleHorizontalFraction < 1.0
 
-                scrollAmount:
+                horizontalScrollPosition:
                 {
                     return scrollView.flickableItem.contentX /
                         (scrollView.flickableItem.contentWidth - scrollView.viewport.width);

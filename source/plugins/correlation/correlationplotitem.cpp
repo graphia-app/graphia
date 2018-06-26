@@ -855,9 +855,9 @@ void CorrelationPlotItem::setShowGridLines(bool showGridLines)
     refresh();
 }
 
-void CorrelationPlotItem::setScrollAmount(double scrollAmount)
+void CorrelationPlotItem::setHorizontalScrollPosition(double horizontalScrollPosition)
 {
-    _scrollAmount = scrollAmount;
+    _horizontalScrollPosition = horizontalScrollPosition;
     scaleXAxis();
     _customPlot.replot(QCustomPlot::rpQueuedReplot);
 }
@@ -870,7 +870,7 @@ void CorrelationPlotItem::scaleXAxis()
         double visiblePlotWidth = columnAxisWidth();
         double textHeight = columnLabelSize();
 
-        double position = (_columnCount - (visiblePlotWidth / textHeight)) * _scrollAmount;
+        double position = (_columnCount - (visiblePlotWidth / textHeight)) * _horizontalScrollPosition;
 
         if(position + (visiblePlotWidth / textHeight) <= maxX)
             _customPlot.xAxis->setRange(position, position + (visiblePlotWidth / textHeight));
