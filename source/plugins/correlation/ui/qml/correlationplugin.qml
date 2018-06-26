@@ -444,7 +444,7 @@ PluginContent
 
                 rowCount: plugin.model.rowCount
                 columnCount: plugin.model.columnCount
-                data: plugin.model.rawData
+                rawData: plugin.model.rawData
                 columnNames: plugin.model.columnNames
                 rowColors: plugin.model.nodeColors
                 rowNames: plugin.model.rowNames

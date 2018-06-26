@@ -38,7 +38,7 @@ DEFINE_QML_ENUM(Q_GADGET, PlotDispersionVisualType,
 class CorrelationPlotItem : public QQuickPaintedItem
 {
     Q_OBJECT
-    Q_PROPERTY(QVector<double> data MEMBER _data)
+    Q_PROPERTY(QVector<double> rawData MEMBER _data)
     Q_PROPERTY(double scrollAmount MEMBER _scrollAmount WRITE setScrollAmount NOTIFY scrollAmountChanged)
     Q_PROPERTY(double visibleHorizontalFraction READ visibleHorizontalFraction NOTIFY visibleHorizontalFractionChanged)
     Q_PROPERTY(QVector<int> selectedRows MEMBER _selectedRows WRITE setSelectedRows)
