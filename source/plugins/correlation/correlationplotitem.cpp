@@ -50,7 +50,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem
     setAcceptedMouseButtons(Qt::AllButtons);
 
     connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::updatePlotSize);
-    connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::rangeSizeChanged);
+    connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::visibleHorizontalFractionChanged);
     connect(this, &QQuickPaintedItem::heightChanged, this, &CorrelationPlotItem::updatePlotSize);
     connect(&_customPlot, &QCustomPlot::afterReplot, this, &CorrelationPlotItem::onCustomReplot);
 }
@@ -827,7 +827,7 @@ void CorrelationPlotItem::setShowColumnNames(bool showColumnNames)
 
     if(changed)
     {
-        emit rangeSizeChanged();
+        emit visibleHorizontalFractionChanged();
         refresh();
     }
 }
@@ -892,7 +892,7 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max)
     return yDataAvg;
 }
 
-double CorrelationPlotItem::rangeSize()
+double CorrelationPlotItem::visibleHorizontalFraction()
 {
     if(_showColumnNames)
         return (columnAxisWidth() / (columnLabelSize() * _columnCount));

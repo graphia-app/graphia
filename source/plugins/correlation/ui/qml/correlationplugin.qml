@@ -463,7 +463,7 @@ PluginContent
                     return quantised;
                 }
 
-                property bool scrollBarRequired: rangeSize < 1.0
+                property bool scrollBarRequired: visibleHorizontalFraction < 1.0
 
                 scrollAmount:
                 {
@@ -485,7 +485,7 @@ PluginContent
                 {
                     // This is a fake object to make native scrollbars appear
                     // Prevent Qt opengl texture overflow (2^14 pixels)
-                    width: Math.min(plot.width / plot.rangeSize, 16383);
+                    width: Math.min(plot.width / plot.visibleHorizontalFraction, 16383);
                     height: 1
                     color: "transparent"
                 }
