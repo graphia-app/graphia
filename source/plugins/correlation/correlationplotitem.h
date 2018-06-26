@@ -10,6 +10,7 @@
 #include <QQuickPaintedItem>
 #include <QVector>
 #include <QStringList>
+#include <QElapsedTimer>
 
 DEFINE_QML_ENUM(Q_GADGET, PlotScaleType,
                 Raw,
@@ -87,6 +88,8 @@ protected:
 
 private:
     const int MAX_SELECTED_ROWS_BEFORE_MEAN = 1000;
+    bool _debug = false;
+    QElapsedTimer _replotTimer;
 
     QCPLayer* _textLayer = nullptr;
     QCPAbstractPlottable* _hoverPlottable = nullptr;

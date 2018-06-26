@@ -6,6 +6,9 @@
 
 CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent)
 {
+    if(qEnvironmentVariableIntValue("QCUSTOMPLOT_DEBUG") != 0)
+        _debug = true;
+
     setRenderTarget(RenderTarget::FramebufferObject);
 
     _customPlot.setOpenGl(true);
@@ -53,6 +56,12 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem
     connect(this, &QQuickPaintedItem::heightChanged, this, &CorrelationPlotItem::updatePlotSize);
     connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::visibleHorizontalFractionChanged);
     connect(&_customPlot, &QCustomPlot::afterReplot, this, &CorrelationPlotItem::onReplot);
+
+    if(_debug)
+    {
+        connect(&_customPlot, &QCustomPlot::beforeReplot, [this] { _replotTimer.restart(); });
+        connect(&_customPlot, &QCustomPlot::afterReplot, [this] { qDebug() << "replot" << _replotTimer.elapsed() << "ms"; });
+    }
 }
 
 void CorrelationPlotItem::refresh()
@@ -67,7 +76,15 @@ void CorrelationPlotItem::refresh()
 
 void CorrelationPlotItem::paint(QPainter* painter)
 {
-    painter->drawPixmap(QPoint(), _customPlot.toPixmap());
+    QElapsedTimer paintTimer;
+    paintTimer.start();
+
+    auto pixmap = _customPlot.toPixmap();
+
+    if(_debug)
+        qDebug() << "paint" << paintTimer.elapsed() << "ms";
+
+    painter->drawPixmap(0, 0, pixmap);
 }
 
 void CorrelationPlotItem::mousePressEvent(QMouseEvent* event)
@@ -657,6 +674,9 @@ void CorrelationPlotItem::configureLegend()
 
 void CorrelationPlotItem::buildPlot()
 {
+    QElapsedTimer buildTimer;
+    buildTimer.start();
+
     _customPlot.legend->setVisible(false);
 
     _customPlot.clearGraphs();
@@ -733,6 +753,9 @@ void CorrelationPlotItem::buildPlot()
     }
 
     _customPlot.setBackground(Qt::white);
+
+    if(_debug)
+        qDebug() << "buildPlot" << buildTimer.elapsed() << "ms";
 }
 
 void CorrelationPlotItem::setPlotDispersionVisualType(int plotDispersionVisualType)
