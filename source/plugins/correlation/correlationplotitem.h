@@ -149,7 +149,7 @@ private:
     void configureLegend();
 
 private slots:
-    void onCustomReplot();
+    void onReplot();
     void updatePlotSize();
     void showTooltip();
     void hideTooltip();

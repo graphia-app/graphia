@@ -52,7 +52,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem
     connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::updatePlotSize);
     connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::visibleHorizontalFractionChanged);
     connect(this, &QQuickPaintedItem::heightChanged, this, &CorrelationPlotItem::updatePlotSize);
-    connect(&_customPlot, &QCustomPlot::afterReplot, this, &CorrelationPlotItem::onCustomReplot);
+    connect(&_customPlot, &QCustomPlot::afterReplot, this, &CorrelationPlotItem::onReplot);
 }
 
 void CorrelationPlotItem::refresh()
@@ -1025,7 +1025,7 @@ void CorrelationPlotItem::savePlotImage(const QUrl& url, const QStringList& exte
 
 }
 
-void CorrelationPlotItem::onCustomReplot()
+void CorrelationPlotItem::onReplot()
 {
     update();
 }
