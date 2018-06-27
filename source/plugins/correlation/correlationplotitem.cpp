@@ -87,6 +87,22 @@ void CorrelationPlotItem::paint(QPainter* painter)
     painter->drawPixmap(0, 0, pixmap);
 }
 
+void CorrelationPlotItem::routeMouseEvent(QMouseEvent* event)
+{
+    auto* newEvent = new QMouseEvent(event->type(), event->localPos(),
+                                     event->button(), event->buttons(),
+                                     event->modifiers());
+    QCoreApplication::postEvent(&_customPlot, newEvent);
+}
+
+void CorrelationPlotItem::routeWheelEvent(QWheelEvent* event)
+{
+    auto* newEvent = new QWheelEvent(event->pos(), event->delta(),
+                                     event->buttons(), event->modifiers(),
+                                     event->orientation());
+    QCoreApplication::postEvent(&_customPlot, newEvent);
+}
+
 void CorrelationPlotItem::mousePressEvent(QMouseEvent* event)
 {
     routeMouseEvent(event);
@@ -102,6 +118,80 @@ void CorrelationPlotItem::mouseReleaseEvent(QMouseEvent* event)
 void CorrelationPlotItem::mouseMoveEvent(QMouseEvent* event)
 {
     routeMouseEvent(event);
+}
+
+void CorrelationPlotItem::showTooltip()
+{
+    _itemTracer->setGraph(nullptr);
+    if(auto graph = dynamic_cast<QCPGraph*>(_hoverPlottable))
+    {
+        _itemTracer->setGraph(graph);
+        _itemTracer->setGraphKey(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
+    }
+    else if(auto bars = dynamic_cast<QCPBars*>(_hoverPlottable))
+    {
+        auto xCoord = std::lround(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
+        _itemTracer->position->setPixelPosition(bars->dataPixelPosition(xCoord));
+    }
+    else if(auto boxPlot = dynamic_cast<QCPStatisticalBox*>(_hoverPlottable))
+    {
+        // Only show simple tooltips for now, can extend this later...
+        auto xCoord = std::lround(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
+        _itemTracer->position->setPixelPosition(boxPlot->dataPixelPosition(xCoord));
+    }
+
+    _itemTracer->setVisible(true);
+    _itemTracer->setInterpolating(false);
+
+    _hoverLabel->setVisible(true);
+    _hoverLabel->setText(QStringLiteral("%1, %2: %3")
+                     .arg(_hoverPlottable->name(),
+                          _labelNames[static_cast<int>(_itemTracer->position->key())])
+                     .arg(_itemTracer->position->value()));
+
+    const auto COLOR_RECT_WIDTH = 10.0;
+    const auto HOVER_MARGIN = 10.0;
+    auto hoverlabelWidth = _hoverLabel->right->pixelPosition().x() -
+            _hoverLabel->left->pixelPosition().x();
+    auto hoverlabelHeight = _hoverLabel->bottom->pixelPosition().y() -
+            _hoverLabel->top->pixelPosition().y();
+    auto hoverLabelRightX = _itemTracer->anchor(QStringLiteral("position"))->pixelPosition().x() +
+            hoverlabelWidth + HOVER_MARGIN + COLOR_RECT_WIDTH;
+    auto xBounds = clipRect().width();
+    QPointF targetPosition(_itemTracer->anchor(QStringLiteral("position"))->pixelPosition().x() + HOVER_MARGIN,
+                           _itemTracer->anchor(QStringLiteral("position"))->pixelPosition().y());
+
+    // If it falls out of bounds, clip to bounds and move label above marker
+    if(hoverLabelRightX > xBounds)
+    {
+        targetPosition.rx() = xBounds - hoverlabelWidth - COLOR_RECT_WIDTH - 1.0;
+
+        // If moving the label above marker is less than 0, clip to 0 + labelHeight/2;
+        if(targetPosition.y() - (hoverlabelHeight * 0.5) - HOVER_MARGIN * 2.0 < 0.0)
+            targetPosition.setY(hoverlabelHeight * 0.5);
+        else
+            targetPosition.ry() -= HOVER_MARGIN * 2.0;
+    }
+
+    _hoverLabel->position->setPixelPosition(targetPosition);
+
+    _hoverColorRect->setVisible(true);
+    _hoverColorRect->setBrush(QBrush(_hoverPlottable->pen().color()));
+    _hoverColorRect->bottomRight->setPixelPosition(QPointF(_hoverLabel->bottomRight->pixelPosition().x() + COLOR_RECT_WIDTH,
+                                                   _hoverLabel->bottomRight->pixelPosition().y()));
+
+    _textLayer->replot();
+
+    onReplot();
+}
+
+void CorrelationPlotItem::hideTooltip()
+{
+    _hoverLabel->setVisible(false);
+    _hoverColorRect->setVisible(false);
+    _itemTracer->setVisible(false);
+    _textLayer->replot();
+    onReplot();
 }
 
 void CorrelationPlotItem::hoverMoveEvent(QHoverEvent* event)
@@ -931,100 +1021,10 @@ double CorrelationPlotItem::columnAxisWidth()
     return width() - axisWidth;
 }
 
-void CorrelationPlotItem::routeMouseEvent(QMouseEvent* event)
-{
-    auto* newEvent = new QMouseEvent(event->type(), event->localPos(),
-                                     event->button(), event->buttons(),
-                                     event->modifiers());
-    QCoreApplication::postEvent(&_customPlot, newEvent);
-}
-
-void CorrelationPlotItem::routeWheelEvent(QWheelEvent* event)
-{
-    auto* newEvent = new QWheelEvent(event->pos(), event->delta(),
-                                     event->buttons(), event->modifiers(),
-                                     event->orientation());
-    QCoreApplication::postEvent(&_customPlot, newEvent);
-}
-
 void CorrelationPlotItem::updatePlotSize()
 {
     _customPlot.setGeometry(0, 0, static_cast<int>(width()), static_cast<int>(height()));
     scaleXAxis();
-}
-
-void CorrelationPlotItem::showTooltip()
-{
-    _itemTracer->setGraph(nullptr);
-    if(auto graph = dynamic_cast<QCPGraph*>(_hoverPlottable))
-    {
-        _itemTracer->setGraph(graph);
-        _itemTracer->setGraphKey(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
-    }
-    else if(auto bars = dynamic_cast<QCPBars*>(_hoverPlottable))
-    {
-        auto xCoord = std::lround(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
-        _itemTracer->position->setPixelPosition(bars->dataPixelPosition(xCoord));
-    }
-    else if(auto boxPlot = dynamic_cast<QCPStatisticalBox*>(_hoverPlottable))
-    {
-        // Only show simple tooltips for now, can extend this later...
-        auto xCoord = std::lround(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
-        _itemTracer->position->setPixelPosition(boxPlot->dataPixelPosition(xCoord));
-    }
-
-    _itemTracer->setVisible(true);
-    _itemTracer->setInterpolating(false);
-
-    _hoverLabel->setVisible(true);
-    _hoverLabel->setText(QStringLiteral("%1, %2: %3")
-                     .arg(_hoverPlottable->name(),
-                          _labelNames[static_cast<int>(_itemTracer->position->key())])
-                     .arg(_itemTracer->position->value()));
-
-    const auto COLOR_RECT_WIDTH = 10.0;
-    const auto HOVER_MARGIN = 10.0;
-    auto hoverlabelWidth = _hoverLabel->right->pixelPosition().x() -
-            _hoverLabel->left->pixelPosition().x();
-    auto hoverlabelHeight = _hoverLabel->bottom->pixelPosition().y() -
-            _hoverLabel->top->pixelPosition().y();
-    auto hoverLabelRightX = _itemTracer->anchor(QStringLiteral("position"))->pixelPosition().x() +
-            hoverlabelWidth + HOVER_MARGIN + COLOR_RECT_WIDTH;
-    auto xBounds = clipRect().width();
-    QPointF targetPosition(_itemTracer->anchor(QStringLiteral("position"))->pixelPosition().x() + HOVER_MARGIN,
-                           _itemTracer->anchor(QStringLiteral("position"))->pixelPosition().y());
-
-    // If it falls out of bounds, clip to bounds and move label above marker
-    if(hoverLabelRightX > xBounds)
-    {
-        targetPosition.rx() = xBounds - hoverlabelWidth - COLOR_RECT_WIDTH - 1.0;
-
-        // If moving the label above marker is less than 0, clip to 0 + labelHeight/2;
-        if(targetPosition.y() - (hoverlabelHeight * 0.5) - HOVER_MARGIN * 2.0 < 0.0)
-            targetPosition.setY(hoverlabelHeight * 0.5);
-        else
-            targetPosition.ry() -= HOVER_MARGIN * 2.0;
-    }
-
-    _hoverLabel->position->setPixelPosition(targetPosition);
-
-    _hoverColorRect->setVisible(true);
-    _hoverColorRect->setBrush(QBrush(_hoverPlottable->pen().color()));
-    _hoverColorRect->bottomRight->setPixelPosition(QPointF(_hoverLabel->bottomRight->pixelPosition().x() + COLOR_RECT_WIDTH,
-                                                   _hoverLabel->bottomRight->pixelPosition().y()));
-
-    _textLayer->replot();
-
-    onReplot();
-}
-
-void CorrelationPlotItem::hideTooltip()
-{
-    _hoverLabel->setVisible(false);
-    _hoverColorRect->setVisible(false);
-    _itemTracer->setVisible(false);
-    _textLayer->replot();
-    onReplot();
 }
 
 void CorrelationPlotItem::savePlotImage(const QUrl& url, const QStringList& extensions)
