@@ -11,8 +11,8 @@ Wizard2
 {
     id: root
     //FIXME These should be set automatically by Wizard
-    minimumWidth: 640
-    minimumHeight: 400
+    minimumWidth: 700
+    minimumHeight: 500
     property int selectedRow: -1
     property int selectedCol: -1
     property bool _clickedCell: false
@@ -799,6 +799,7 @@ Wizard2
             {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                readOnly: true
                 text:
                 {
                     var summaryString = "";

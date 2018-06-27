@@ -27,8 +27,8 @@ BaseParameterDialog
     //minimumWidth: 640
     //minimumHeight: 480
 
-    onWidthChanged: { content.x = currentIndex * -root.width }
-    onHeightChanged: { content.x = currentIndex * -root.width }
+    onWidthChanged: { content.x = currentIndex * -contentContainer.width }
+    onHeightChanged: { content.x = currentIndex * -contentContainer.width }
 
     SystemPalette { id: systemPalette }
 
@@ -92,14 +92,19 @@ BaseParameterDialog
 
             Item
             {
-                id: contentContainer
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                clip: true
                 Item
                 {
-                    id: content
-                    height: parent.height
+                    id: contentContainer
+                    anchors.fill: parent
+                    anchors.margins: Constants.margin
+                    clip: true
+                    Item
+                    {
+                        id: content
+                        height: parent.height
+                    }
                 }
             }
         }
@@ -204,9 +209,9 @@ BaseParameterDialog
         {
             listPages[i].parent = content;
             listPages[i].x = Qt.binding(function() {
-                return (indexOf(this) * ((contentContainer.width) + pageSelector.implicitWidth))  });
+                return (indexOf(this) * contentContainer.width + pageSelector.implicitWidth)  });
             listPages[i].width = Qt.binding(function() { return (contentContainer.width); });
-            listPages[i].height = Qt.binding(function() { return content.height; });
+            listPages[i].height = Qt.binding(function() { return contentContainer.height; });
         }
     }
 
