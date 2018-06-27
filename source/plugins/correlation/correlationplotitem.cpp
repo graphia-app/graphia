@@ -224,6 +224,30 @@ void CorrelationPlotItem::wheelEvent(QWheelEvent* event)
     routeWheelEvent(event);
 }
 
+QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max)
+{
+    min = 0.0;
+    max = 0.0;
+
+    // Use Average Calculation
+    QVector<double> yDataAvg; yDataAvg.reserve(_selectedRows.size());
+
+    for(size_t col = 0; col < _columnCount; col++)
+    {
+        double runningTotal = 0.0;
+        for(auto row : qAsConst(_selectedRows))
+        {
+            auto index = (row * _columnCount) + col;
+            runningTotal += _data.at(static_cast<int>(index));
+        }
+        yDataAvg.append(runningTotal / _selectedRows.length());
+
+        max = std::max(max, yDataAvg.back());
+        min = std::min(min, yDataAvg.back());
+    }
+    return yDataAvg;
+}
+
 void CorrelationPlotItem::populateMeanLinePlot()
 {
     double maxY = 0.0;
@@ -848,6 +872,25 @@ void CorrelationPlotItem::buildPlot()
         qDebug() << "buildPlot" << buildTimer.elapsed() << "ms";
 }
 
+void CorrelationPlotItem::scaleXAxis()
+{
+    auto maxX = static_cast<double>(_columnCount);
+    if(_showColumnNames)
+    {
+        double visiblePlotWidth = columnAxisWidth();
+        double textHeight = columnLabelSize();
+
+        double position = (_columnCount - (visiblePlotWidth / textHeight)) * _horizontalScrollPosition;
+
+        if(position + (visiblePlotWidth / textHeight) <= maxX)
+            _customPlot.xAxis->setRange(position, position + (visiblePlotWidth / textHeight));
+        else
+            _customPlot.xAxis->setRange(0, maxX);
+    }
+    else
+        _customPlot.xAxis->setRange(0, maxX);
+}
+
 void CorrelationPlotItem::setPlotDispersionVisualType(int plotDispersionVisualType)
 {
     _plotDispersionVisualType = plotDispersionVisualType;
@@ -952,50 +995,6 @@ void CorrelationPlotItem::setHorizontalScrollPosition(double horizontalScrollPos
     _customPlot.replot(QCustomPlot::rpQueuedReplot);
 }
 
-void CorrelationPlotItem::scaleXAxis()
-{
-    auto maxX = static_cast<double>(_columnCount);
-    if(_showColumnNames)
-    {
-        double visiblePlotWidth = columnAxisWidth();
-        double textHeight = columnLabelSize();
-
-        double position = (_columnCount - (visiblePlotWidth / textHeight)) * _horizontalScrollPosition;
-
-        if(position + (visiblePlotWidth / textHeight) <= maxX)
-            _customPlot.xAxis->setRange(position, position + (visiblePlotWidth / textHeight));
-        else
-            _customPlot.xAxis->setRange(0, maxX);
-    }
-    else
-    {
-        _customPlot.xAxis->setRange(0, maxX);
-    }
-}
-
-QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max)
-{
-    min = 0.0;
-    max = 0.0;
-
-    // Use Average Calculation
-    QVector<double> yDataAvg; yDataAvg.reserve(_selectedRows.size());
-
-    for(size_t col = 0; col < _columnCount; col++)
-    {
-        double runningTotal = 0.0;
-        for(auto row : qAsConst(_selectedRows))
-        {
-            auto index = (row * _columnCount) + col;
-            runningTotal += _data.at(static_cast<int>(index));
-        }
-        yDataAvg.append(runningTotal / _selectedRows.length());
-
-        max = std::max(max, yDataAvg.back());
-        min = std::min(min, yDataAvg.back());
-    }
-    return yDataAvg;
-}
 
 double CorrelationPlotItem::visibleHorizontalFraction()
 {
