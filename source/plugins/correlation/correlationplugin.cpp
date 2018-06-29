@@ -468,17 +468,27 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
         _missingDataReplacementValue = value.toDouble();
     else if(name == QLatin1String("dataFrame"))
         _dataRect = value.toRect();
+    else if(name == QLatin1String("clusteringType"))
+        _clusteringType = static_cast<ClusteringType>(value.toInt());
+    else if(name == QLatin1String("edgeReductionType"))
+        _edgeReductionType = static_cast<EdgeReductionType>(value.toInt());
 }
 
 QStringList CorrelationPluginInstance::defaultTransforms() const
 {
     double defaultCorrelationValue = (_minimumCorrelationValue + 1.0) * 0.5;
-
-    return
-    {
+    QStringList defaultTransforms = {
         QString(R"("Remove Edges" where $"Pearson Correlation Value" < %1)").arg(defaultCorrelationValue),
-        R"([pinned] "Remove Components" where $"Component Size" <= 1)",
+        R"([pinned] "Remove Components" where $"Component Size" <= 1)"
     };
+
+    if(_edgeReductionType == EdgeReductionType::KNN)
+        defaultTransforms.append(R"("k-NN" using $"Pearson Correlation Value" with "k" = 5 "Rank Order" = "Ascending")");
+
+    if(_clusteringType == ClusteringType::MCL)
+        defaultTransforms.append(R"("MCL Cluster" with "Granularity" = 2.2)");
+
+    return defaultTransforms;
 }
 
 QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, const ProgressFn& progressFn) const

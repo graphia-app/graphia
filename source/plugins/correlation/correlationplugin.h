@@ -42,6 +42,19 @@ DEFINE_QML_ENUM(Q_GADGET, MissingDataType,
                 ColumnAverage,
                 RowInterpolation);
 
+DEFINE_QML_ENUM(Q_GADGET, ClusteringType,
+                None,
+                MCL);
+
+DEFINE_QML_ENUM(Q_GADGET, EdgeReductionType,
+                None,
+                KNN);
+
+DEFINE_QML_ENUM(Q_GADGET, CorrelationType,
+                Pearson,
+                Spearman);
+
+
 class CorrelationPluginInstance : public BasePluginInstance
 {
     Q_OBJECT
@@ -163,6 +176,8 @@ private:
     ScalingType _scaling = ScalingType::None;
     NormaliseType _normalisation = NormaliseType::None;
     MissingDataType _missingDataType = MissingDataType::None;
+    ClusteringType _clusteringType = ClusteringType::None;
+    EdgeReductionType _edgeReductionType = EdgeReductionType::None;
     double _missingDataReplacementValue = 0.0;
 
     void initialise(const IPlugin* plugin, IDocument* document,

@@ -209,89 +209,6 @@ Wizard2
                             }
                         }
                     }
-                    RowLayout
-                    {
-                        Text
-                        {
-                            text: qsTr("Scaling:")
-                            Layout.alignment: Qt.AlignLeft
-                        }
-
-                        ComboBox
-                        {
-                            id: scaling
-                            Layout.alignment: Qt.AlignRight
-                            model: ListModel
-                            {
-                                ListElement { text: qsTr("None");          value: ScalingType.None }
-                                ListElement { text: qsTr("Log2(𝒙 + ε)");   value: ScalingType.Log2 }
-                                ListElement { text: qsTr("Log10(𝒙 + ε)");  value: ScalingType.Log10 }
-                                ListElement { text: qsTr("AntiLog2(𝒙)");   value: ScalingType.AntiLog2 }
-                                ListElement { text: qsTr("AntiLog10(𝒙)");  value: ScalingType.AntiLog10 }
-                                ListElement { text: qsTr("Arcsin(𝒙)");     value: ScalingType.ArcSin }
-                            }
-                            textRole: "text"
-
-                            onCurrentIndexChanged:
-                            {
-                                parameters.scaling = model.get(currentIndex).value;
-                            }
-                        }
-
-                        HelpTooltip
-                        {
-                            title: qsTr("Scaling Types")
-                            GridLayout
-                            {
-                                columns: 2
-                                rowSpacing: 10
-
-                                Text
-                                {
-                                    text: "<b>Log</b>𝒃(𝒙 + ε):"
-                                    Layout.alignment: Qt.AlignTop
-                                    textFormat: Text.StyledText
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("Will perform a Log of 𝒙 + ε to base 𝒃, where 𝒙 is the input data and ε is a very small constant.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.alignment: Qt.AlignTop
-                                    Layout.fillWidth: true
-                                }
-
-                                Text
-                                {
-                                    text: "<b>AntiLog</b>𝒃(𝒙):"
-                                    Layout.alignment: Qt.AlignTop
-                                    textFormat: Text.StyledText
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("Will raise x to the power of 𝒃, where 𝒙 is the input data.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
-
-                                Text
-                                {
-                                    text: "<b>Arcsin</b>(𝒙):"
-                                    Layout.alignment: Qt.AlignTop
-                                    textFormat: Text.StyledText
-                                }
-
-                                Text
-                                {
-                                    text: qsTr("Will perform an inverse sine function of 𝒙, where 𝒙 is the input data. This is useful when " +
-                                               "you require a log transform but the dataset contains negative numbers or zeros.");
-                                    wrapMode: Text.WordWrap
-                                    Layout.fillWidth: true
-                                }
-                            }
-                        }
-                    }
                 }
             }
 
@@ -587,7 +504,7 @@ Wizard2
 
     Wizard2Page
     {
-        title: qsTr("Data Transforms")
+        title: qsTr("Data Manipulation")
         ColumnLayout
         {
             anchors.left: parent.left
@@ -595,24 +512,192 @@ Wizard2
 
             Text
             {
-                text: qsTr("<h2>Data Normalisation</h2>")
+                text: qsTr("<h2>Data Manipulation</h2>")
                 Layout.alignment: Qt.AlignLeft
                 textFormat: Text.StyledText
             }
             ColumnLayout
             {
-                spacing: 20
+                spacing: 10
 
                 Text
                 {
-                    text: qsTr("Please select the required method to normalise the data input. " +
-                               "This will occur after scaling.")
+                    text: qsTr("Please select the required data manipulation. The manipulation " +
+                               "will occur in the order it is displayed as below.")
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
 
-                RowLayout
+                GridLayout
                 {
+                    columns: 3
+                    Text
+                    {
+                        text: qsTr("Imputation:")
+                        Layout.alignment: Qt.AlignLeft
+                    }
+
+                    ComboBox
+                    {
+                        id: missingDataMethod
+                        Layout.alignment: Qt.AlignRight
+                        model: ListModel
+                        {
+                            ListElement { text: qsTr("None");       value: MissingDataType.None }
+                            ListElement { text: qsTr("Constant");   value: MissingDataType.Constant }
+                        }
+                        textRole: "text"
+
+                        onCurrentIndexChanged:
+                        {
+                            parameters.missingDataType = model.get(currentIndex).value;
+                        }
+                    }
+
+                    HelpTooltip
+                    {
+                        title: "Imputation"
+                        GridLayout
+                        {
+                            columns: 2
+                            Text
+                            {
+                                text: "<b>None:</b>"
+                                textFormat: Text.StyledText
+                                Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                            }
+
+                            Text
+                            {
+                                text: qsTr("All empty or missing values will be treated as zeroes");
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                            }
+
+                            Text
+                            {
+                                text: "<b>Constant:</b>"
+                                textFormat: Text.StyledText
+                                Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                            }
+
+                            Text
+                            {
+                                text: qsTr("Replace all missing values with a constant.");
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                            }
+                        }
+                    }
+
+                    RowLayout
+                    {
+                        Layout.columnSpan: 3
+                        Layout.alignment: Qt.AlignHCenter
+                        visible: missingDataMethod.currentText === qsTr("Constant")
+
+                        Text
+                        {
+                            text: qsTr("Value:")
+                            Layout.alignment: Qt.AlignLeft
+                        }
+
+                        TextField
+                        {
+                            id: replacementConstant
+                            validator: DoubleValidator{}
+
+                            onTextChanged:
+                            {
+                                parameters.missingDataValue = text;
+                            }
+
+                            text: "0.0"
+                        }
+                    }
+
+                    Text
+                    {
+                        text: qsTr("Scaling:")
+                        Layout.alignment: Qt.AlignLeft
+                    }
+
+                    ComboBox
+                    {
+                        id: scaling
+                        Layout.alignment: Qt.AlignRight
+                        model: ListModel
+                        {
+                            ListElement { text: qsTr("None");          value: ScalingType.None }
+                            ListElement { text: qsTr("Log2(𝒙 + ε)");   value: ScalingType.Log2 }
+                            ListElement { text: qsTr("Log10(𝒙 + ε)");  value: ScalingType.Log10 }
+                            ListElement { text: qsTr("AntiLog2(𝒙)");   value: ScalingType.AntiLog2 }
+                            ListElement { text: qsTr("AntiLog10(𝒙)");  value: ScalingType.AntiLog10 }
+                            ListElement { text: qsTr("Arcsin(𝒙)");     value: ScalingType.ArcSin }
+                        }
+                        textRole: "text"
+
+                        onCurrentIndexChanged:
+                        {
+                            parameters.scaling = model.get(currentIndex).value;
+                        }
+                    }
+
+                    HelpTooltip
+                    {
+                        title: qsTr("Scaling Types")
+                        GridLayout
+                        {
+                            columns: 2
+                            rowSpacing: 10
+
+                            Text
+                            {
+                                text: "<b>Log</b>𝒃(𝒙 + ε):"
+                                Layout.alignment: Qt.AlignTop
+                                textFormat: Text.StyledText
+                            }
+
+                            Text
+                            {
+                                text: qsTr("Will perform a Log of 𝒙 + ε to base 𝒃, where 𝒙 is the input data and ε is a very small constant.");
+                                wrapMode: Text.WordWrap
+                                Layout.alignment: Qt.AlignTop
+                                Layout.fillWidth: true
+                            }
+
+                            Text
+                            {
+                                text: "<b>AntiLog</b>𝒃(𝒙):"
+                                Layout.alignment: Qt.AlignTop
+                                textFormat: Text.StyledText
+                            }
+
+                            Text
+                            {
+                                text: qsTr("Will raise x to the power of 𝒃, where 𝒙 is the input data.");
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                            }
+
+                            Text
+                            {
+                                text: "<b>Arcsin</b>(𝒙):"
+                                Layout.alignment: Qt.AlignTop
+                                textFormat: Text.StyledText
+                            }
+
+                            Text
+                            {
+                                text: qsTr("Will perform an inverse sine function of 𝒙, where 𝒙 is the input data. This is useful when " +
+                                           "you require a log transform but the dataset contains negative numbers or zeros.");
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                            }
+                        }
+
+                    }
+
                     Text
                     {
                         text: qsTr("Normalisation:")
@@ -636,39 +721,43 @@ Wizard2
                             parameters.normalise = model.get(currentIndex).value;
                         }
                     }
-                }
 
-                GridLayout
-                {
-                    columns: 2
-                    Text
+                    HelpTooltip
                     {
-                        text: "<b>MinMax:</b>"
-                        textFormat: Text.StyledText
-                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                    }
+                        title: "Normalisation Types"
+                        GridLayout
+                        {
+                            columns: 2
+                            Text
+                            {
+                                text: "<b>MinMax:</b>"
+                                textFormat: Text.StyledText
+                                Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                            }
 
-                    Text
-                    {
-                        text: qsTr("Normalise the data so 1.0 is the maximum value of that column and 0.0 the minimum. " +
-                                   "This is useful if the columns in the dataset have differing scales or units. " +
-                                   "Note: If all elements in a column have the same value this will rescale the values to 0.0.");
-                        wrapMode: Text.WordWrap
-                        Layout.fillWidth: true
-                    }
+                            Text
+                            {
+                                text: qsTr("Normalise the data so 1.0 is the maximum value of that column and 0.0 the minimum. " +
+                                           "This is useful if the columns in the dataset have differing scales or units. " +
+                                           "Note: If all elements in a column have the same value this will rescale the values to 0.0.");
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                            }
 
-                    Text
-                    {
-                        text: "<b>Quantile:</b>"
-                        textFormat: Text.StyledText
-                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                    }
+                            Text
+                            {
+                                text: "<b>Quantile:</b>"
+                                textFormat: Text.StyledText
+                                Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                            }
 
-                    Text
-                    {
-                        text: qsTr("Normalise the data so that the columns have equal distributions.");
-                        wrapMode: Text.WordWrap
-                        Layout.fillWidth: true
+                            Text
+                            {
+                                text: qsTr("Normalise the data so that the columns have equal distributions.");
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                            }
+                        }
                     }
                 }
             }
@@ -677,97 +766,126 @@ Wizard2
 
     Wizard2Page
     {
-        title: qsTr("Missing Data")
+        title: "Initial Transforms"
         ColumnLayout
         {
             anchors.left: parent.left
             anchors.right: parent.right
-
             Text
             {
-                text: qsTr("<h2>Handling Missing Data</h2>")
+                text: qsTr("<h2>Graph Transforms</h2>")
                 Layout.alignment: Qt.AlignLeft
                 textFormat: Text.StyledText
             }
 
-            ColumnLayout
+            Text
             {
-                spacing: 20;
+                text: qsTr("Commonly used transforms can be automatically added to " +
+                           "the graph from here")
+                Layout.alignment: Qt.AlignLeft
+            }
 
+            GridLayout
+            {
+                columns: 3
                 Text
                 {
-                    text: qsTr("Select how you would like to handle any missing data within " +
-                               "your dataset. By default missing values are zeroed.")
-                    wrapMode: Text.WordWrap
-                    Layout.fillWidth: true
+                    text: qsTr("Clustering:")
+                    Layout.alignment: Qt.AlignLeft
                 }
 
-                RowLayout
+                ComboBox
                 {
-                    Text
+                    id: clustering
+                    Layout.alignment: Qt.AlignRight
+                    model: ListModel
                     {
-                        text: qsTr("Replacement:")
-                        Layout.alignment: Qt.AlignLeft
+                        ListElement { text: qsTr("None");  value: ClusteringType.None }
+                        ListElement { text: qsTr("MCL");   value: ClusteringType.MCL }
                     }
+                    textRole: "text"
 
-                    ComboBox
+                    onCurrentIndexChanged:
                     {
-                        id: missingDataMethod
-                        Layout.alignment: Qt.AlignRight
-                        model: ListModel
-                        {
-                            ListElement { text: qsTr("None");       value: MissingDataType.None }
-                            ListElement { text: qsTr("Constant");   value: MissingDataType.Constant }
-                        }
-                        textRole: "text"
-
-                        onCurrentIndexChanged:
-                        {
-                            parameters.missingDataType = model.get(currentIndex).value;
-                        }
+                        parameters.clusteringType = model.get(currentIndex).value;
                     }
+                }
 
-                    RowLayout
+                HelpTooltip
+                {
+                    title: "Clustering"
+                    GridLayout
                     {
-                        visible: missingDataMethod.currentText === qsTr("Constant")
+                        columns: 2
+                        Text
+                        {
+                            text: "<b>MCL:</b>"
+                            textFormat: Text.StyledText
+                            Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                        }
 
                         Text
                         {
-                            text: qsTr("Value:")
-                            Layout.alignment: Qt.AlignLeft
-                        }
-
-                        TextField
-                        {
-                            id: replacementConstant
-                            validator: DoubleValidator{}
-
-                            onTextChanged:
-                            {
-                                parameters.missingDataValue = text;
-                            }
-
-                            text: "0.0"
+                            text: qsTr("Markov clustering algorithm simulates stochastic flow within the generated graph to identify " +
+                                       "distinct clusters. ");
+                            wrapMode: Text.WordWrap
+                            Layout.fillWidth: true
                         }
                     }
                 }
 
-                GridLayout
+                Text
                 {
-                    columns: 2
+                    text: qsTr("Edge Reduction:")
+                    Layout.alignment: Qt.AlignLeft
+                }
 
-                    Text
+                ComboBox
+                {
+                    id: edgeReduction
+                    Layout.alignment: Qt.AlignRight
+                    model: ListModel
                     {
-                        text: "<b>Constant:</b>"
-                        textFormat: Text.StyledText
-                        Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                        ListElement { text: qsTr("None");  value: EdgeReductionType.None }
+                        ListElement { text: qsTr("K-NN");   value: EdgeReductionType.KNN }
                     }
+                    textRole: "text"
 
-                    Text
+                    onCurrentIndexChanged:
                     {
-                        text: qsTr("Replace all missing values with a constant.");
-                        wrapMode: Text.WordWrap
-                        Layout.fillWidth: true
+                        parameters.edgeReductionType = model.get(currentIndex).value;
+                    }
+                }
+
+                HelpTooltip
+                {
+                    title: qsTr("Edge Reduction")
+                    ColumnLayout
+                    {
+                        Text
+                        {
+                            text: "Edge-reduction attempts to reduce unnecessary or non-useful edges"
+                            textFormat: Text.StyledText
+                            Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                        }
+
+                        GridLayout
+                        {
+                            columns: 2
+                            Text
+                            {
+                                text: "<b>K-NN:</b>"
+                                textFormat: Text.StyledText
+                                Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                            }
+
+                            Text
+                            {
+                                text: qsTr("K-Nearest neighbour ranks node edges and only keeps <i>k</i> number of edges per node");
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                            }
+                        }
                     }
                 }
             }
@@ -790,8 +908,7 @@ Wizard2
 
             Text
             {
-                text: qsTr("A graph will be created with the following parameters. Please inspect them " +
-                           "before clicking \"Finish\"")
+                text: qsTr("A graph will be created with the following parameters")
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
             }
@@ -818,6 +935,14 @@ Wizard2
                     summaryString += "Missing Data Replacement: " + missingDataMethod.currentText + "\n";
                     if(missingDataMethod.model.get(missingDataMethod.currentIndex).value === MissingDataType.Constant)
                         summaryString += "Replacement Constant: " + replacementConstant.text + "\n";
+                    var transformString = ""
+                    if(clustering.model.get(clustering.currentIndex).value !== ClusteringType.None)
+                        transformString += "Clustering (" + clustering.currentText + ")\n";
+                    if(edgeReduction.model.get(edgeReduction.currentIndex).value !== EdgeReductionType.None)
+                        transformString += "Edge Reduction (" + edgeReduction.currentText + ")\n";
+                    if(!transformString)
+                        transformString = "None"
+                    summaryString += "Intial Transforms: " + transformString;
                     return summaryString;
                 }
             }

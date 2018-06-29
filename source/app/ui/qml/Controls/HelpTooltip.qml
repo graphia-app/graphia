@@ -40,7 +40,7 @@ ToolButton
             if(containsMouse)
             {
                 tooltip.x = root.mapToGlobal(root.width, 0).x + _offset
-                tooltip.y = root.mapToGlobal(0, 0).y
+                tooltip.y = root.mapToGlobal(0, 0).y - (tooltip.height * 0.5)
                 hoverTimer.start();
             }
             else
