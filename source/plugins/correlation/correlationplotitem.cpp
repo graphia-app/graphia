@@ -272,9 +272,8 @@ void CorrelationPlotItem::populateMeanLinePlot()
     plotModeTextElement->setFont(_defaultFont9Pt);
     plotModeTextElement->setTextColor(Qt::gray);
     plotModeTextElement->setText(
-        QString(tr("*Mean average plot of %1 rows (maximum row count for individual plots is %2)"))
-                .arg(_selectedRows.length())
-                .arg(MAX_SELECTED_ROWS_BEFORE_MEAN));
+        QString(tr("*Mean average plot of %1 rows"))
+                .arg(_selectedRows.length()));
     plotModeTextElement->setVisible(true);
 
     _customPlot.plotLayout()->insertRow(1);

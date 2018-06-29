@@ -87,7 +87,6 @@ protected:
     void buildPlot();
 
 private:
-    const int MAX_SELECTED_ROWS_BEFORE_MEAN = 1000;
     bool _debug = false;
     QElapsedTimer _replotTimer;
 
