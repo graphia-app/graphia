@@ -375,11 +375,6 @@ PluginContent
         Item { Layout.fillWidth: true }
     }
 
-    function onResized()
-    {
-        plot.refresh();
-    }
-
     SplitView
     {
         id: splitView
@@ -387,25 +382,6 @@ PluginContent
         orientation: toggleUiOrientationAction.checked ? Qt.Horizontal : Qt.Vertical
 
         anchors.fill: parent
-
-        Timer
-        {
-            id: plotRefreshTimer; interval: 100; onTriggered: { plot.refresh(); }
-        }
-
-        // When the orientation changes it seems to take a little while for the
-        // plot's dimensional properties to "settle", and calling refresh() before
-        // this doesn't really work, so wait a little bit first (FIXME)
-        onOrientationChanged:
-        {
-            plotRefreshTimer.start();
-        }
-
-        onResizingChanged:
-        {
-            if(!resizing)
-                plot.refresh();
-        }
 
         NodeAttributeTableView
         {
@@ -432,15 +408,25 @@ PluginContent
         {
             Layout.fillWidth: true
             Layout.fillHeight: splitView.orientation !== Qt.Vertical
-            Layout.minimumHeight: splitView.orientation === Qt.Vertical ? 100 : root.minimumHeight
-            Layout.minimumWidth: 200
+            Layout.minimumHeight: splitView.orientation === Qt.Vertical ? _minimumHeight : root.minimumHeight
+            Layout.minimumWidth: _minimumWidth
+
+            readonly property int _minimumWidth: 200
+            readonly property int _minimumHeight: 100
 
             CorrelationPlot
             {
                 id: plot
 
-                implicitHeight: parent.height - (scrollBarRequired ? scrollView.height : 0)
-                implicitWidth: parent.width
+                // When the SplitView orientation is changed, it makes various seemingly spurious dimensional
+                // changes to its children, so this is an attempt to effectively filter out the more wacky ones
+                height:
+                {
+                    var minimumHeight = Math.min(splitView.height, Math.max(parent._minimumHeight, parent.height));
+                    return minimumHeight - (scrollBarRequired ? scrollView.height : 0);
+                }
+
+                width: { return Math.min(splitView.width, Math.max(parent._minimumWidth, parent.width)); }
 
                 rowCount: plugin.model.rowCount
                 columnCount: plugin.model.columnCount
@@ -472,6 +458,42 @@ PluginContent
                 }
 
                 onRightClick: { plotContextMenu.popup(); }
+
+                property bool _timedBusy: false
+
+                Timer
+                {
+                    id: busyIndicationTimer
+                    interval: 250
+                    repeat: false
+                    onTriggered:
+                    {
+                        if(plot.busy)
+                            plot._timedBusy = true;
+                    }
+                }
+
+                onBusyChanged:
+                {
+                    if(!plot.busy)
+                    {
+                        busyIndicationTimer.stop();
+                        plot._timedBusy = false;
+                    }
+                    else
+                        busyIndicationTimer.start();
+
+                }
+
+                BusyIndicator
+                {
+                    anchors.centerIn: parent
+                    width: 64
+                    height: 64
+
+                    visible: plot._timedBusy
+                }
+
             }
 
             ScrollView
@@ -479,8 +501,8 @@ PluginContent
                 id: scrollView
                 visible: plot.scrollBarRequired
                 verticalScrollBarPolicy: Qt.ScrollBarAlwaysOff
-                implicitHeight: 15
-                implicitWidth: parent.width
+                height: 15
+                width: plot.width
                 Item
                 {
                     // This is a fake object to make native scrollbars appear

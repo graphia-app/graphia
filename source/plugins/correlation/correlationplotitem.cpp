@@ -1,22 +1,123 @@
 #include "correlationplotitem.h"
 
+#include "shared/utils/scope_exit.h"
+
 #include <QDesktopServices>
 
 #include <cmath>
 
-CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem(parent)
+CorrelationPlotWorker::CorrelationPlotWorker(std::recursive_mutex& mutex,
+    QCustomPlot& customPlot, QCPLayer& tooltipLayer) :
+    _debug(qEnvironmentVariableIntValue("QCUSTOMPLOT_DEBUG") != 0),
+    _mutex(&mutex), _busy(false),
+    _customPlot(&customPlot), _tooltipLayer(&tooltipLayer)
 {
-    if(qEnvironmentVariableIntValue("QCUSTOMPLOT_DEBUG") != 0)
-        _debug = true;
+    if(_debug)
+    {
+        connect(_customPlot, &QCustomPlot::beforeReplot, [this] { _replotTimer.restart(); });
+        connect(_customPlot, &QCustomPlot::afterReplot, [this] { qDebug() << "replot" << _replotTimer.elapsed() << "ms"; });
+    }
+}
 
+bool CorrelationPlotWorker::busy() const
+{
+    return _busy;
+}
+
+void CorrelationPlotWorker::setWidth(int width)
+{
+    _width = width;
+}
+
+void CorrelationPlotWorker::setHeight(int height)
+{
+    _height = height;
+}
+
+void CorrelationPlotWorker::setXAxisRange(double min, double max)
+{
+    _xAxisMin = min;
+    _xAxisMax = max;
+}
+
+void CorrelationPlotWorker::updatePixmap(CorrelationPlotUpdateType updateType)
+{
+    if(updateType > _updateType)
+        _updateType = updateType;
+
+    // Avoid queueing up multiple redundant updates
+    if(_updateQueued)
+        return;
+
+    QMetaObject::invokeMethod(this, "renderPixmap", Qt::QueuedConnection);
+    _updateQueued = true;
+}
+
+void CorrelationPlotWorker::renderPixmap()
+{
+    _updateQueued = false;
+
+    std::unique_lock<std::recursive_mutex> lock(*_mutex);
+
+    // Don't indicate business if we're just updating the tooltip
+    if(_updateType != CorrelationPlotUpdateType::RenderAndTooltips)
+    {
+        _busy = true;
+        emit busyChanged();
+    }
+
+    auto atExit = std::experimental::make_scope_exit([this]
+    {
+        if(_busy)
+        {
+            _busy = false;
+            emit busyChanged();
+        }
+    });
+
+    if(_width < 0 || _height < 0)
+        return;
+
+    // OpenGL must be enabled on the thread which does the updates,
+    // so that the context is created with the correct affinity
+    if(!_customPlot->openGl())
+        _customPlot->setOpenGl(true);
+
+    _customPlot->setGeometry(0, 0, _width, _height);
+    _customPlot->xAxis->setRange(_xAxisMin, _xAxisMax);
+
+    if(_updateType >= CorrelationPlotUpdateType::RenderAndTooltips)
+        _tooltipLayer->replot();
+
+    if(_updateType >= CorrelationPlotUpdateType::ReplotAndRenderAndTooltips)
+        _customPlot->replot(QCustomPlot::rpImmediateRefresh);
+
+    _updateType = CorrelationPlotUpdateType::None;
+
+    QElapsedTimer _pixmapTimer;
+    _pixmapTimer.start();
+    QPixmap pixmap = _customPlot->toPixmap();
+
+    if(_debug)
+        qDebug() << "render" << _pixmapTimer.elapsed() << "ms";
+
+    // Ensure lock is released before receivers of pixmapUpdated are notified
+    lock.unlock();
+
+    emit pixmapUpdated(pixmap);
+}
+
+CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
+    QQuickPaintedItem(parent),
+    _debug(qEnvironmentVariableIntValue("QCUSTOMPLOT_DEBUG") != 0)
+{
     setRenderTarget(RenderTarget::FramebufferObject);
 
-    _customPlot.setOpenGl(true);
-    _customPlot.addLayer(QStringLiteral("textLayer"));
+    _customPlot.addLayer(QStringLiteral("tooltipLayer"));
     _customPlot.setAutoAddPlottableToLegend(false);
 
-    _textLayer = _customPlot.layer(QStringLiteral("textLayer"));
-    _textLayer->setMode(QCPLayer::LayerMode::lmBuffered);
+    _tooltipLayer = _customPlot.layer(QStringLiteral("tooltipLayer"));
+    _tooltipLayer->setMode(QCPLayer::LayerMode::lmBuffered);
 
     QFont defaultFont10Pt;
     defaultFont10Pt.setPointSize(10);
@@ -24,7 +125,7 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem
     _defaultFont9Pt.setPointSize(9);
 
     _hoverLabel = new QCPItemText(&_customPlot);
-    _hoverLabel->setLayer(_textLayer);
+    _hoverLabel->setLayer(_tooltipLayer);
     _hoverLabel->setPositionAlignment(Qt::AlignVCenter|Qt::AlignLeft);
     _hoverLabel->setFont(defaultFont10Pt);
     _hoverLabel->setPen(QPen(Qt::black));
@@ -34,14 +135,14 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem
     _hoverLabel->setVisible(false);
 
     _hoverColorRect = new QCPItemRect(&_customPlot);
-    _hoverColorRect->setLayer(_textLayer);
+    _hoverColorRect->setLayer(_tooltipLayer);
     _hoverColorRect->topLeft->setParentAnchor(_hoverLabel->topRight);
     _hoverColorRect->setClipToAxisRect(false);
     _hoverColorRect->setVisible(false);
 
     _itemTracer = new QCPItemTracer(&_customPlot);
     _itemTracer->setBrush(QBrush(Qt::white));
-    _itemTracer->setLayer(_textLayer);
+    _itemTracer->setLayer(_tooltipLayer);
     _itemTracer->setInterpolating(false);
     _itemTracer->setVisible(true);
     _itemTracer->setStyle(QCPItemTracer::TracerStyle::tsCircle);
@@ -52,39 +153,69 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) : QQuickPaintedItem
     setAcceptHoverEvents(true);
     setAcceptedMouseButtons(Qt::AllButtons);
 
+    qRegisterMetaType<CorrelationPlotUpdateType>("CorrelationPlotUpdateType");
+
+    _worker = new CorrelationPlotWorker(_mutex, _customPlot, *_tooltipLayer);
+    _worker->moveToThread(&_plotRenderThread);
+    connect(&_plotRenderThread, &QThread::finished, _worker, &QObject::deleteLater);
+
+    connect(this, &QQuickPaintedItem::widthChanged, [this] { QMetaObject::invokeMethod(_worker, "setWidth", Q_ARG(int, width())); });
+    connect(this, &QQuickPaintedItem::heightChanged, [this] { QMetaObject::invokeMethod(_worker, "setHeight", Q_ARG(int, height())); });
+
+    connect(_worker, &CorrelationPlotWorker::pixmapUpdated, this, &CorrelationPlotItem::onPixmapUpdated);
+    connect(_worker, &CorrelationPlotWorker::busyChanged, this, &CorrelationPlotItem::busyChanged);
+
+    connect(&_customPlot, &QCustomPlot::afterReplot, [this]
+    {
+        // The constructor of QCustomPlot does an initial replot scheduled in the UI event loop
+        // We wait for it to complete before starting the render thread, otherwise we get into
+        // the situation where the initial replot can potentially use the GL context created
+        // on the render thread, which is obviously bad
+        if(!_plotRenderThread.isRunning())
+            _plotRenderThread.start();
+    });
+
     connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::updatePlotSize);
     connect(this, &QQuickPaintedItem::heightChanged, this, &CorrelationPlotItem::updatePlotSize);
     connect(this, &QQuickPaintedItem::widthChanged, this, &CorrelationPlotItem::visibleHorizontalFractionChanged);
-    connect(&_customPlot, &QCustomPlot::afterReplot, this, &CorrelationPlotItem::onReplot);
-
-    if(_debug)
-    {
-        connect(&_customPlot, &QCustomPlot::beforeReplot, [this] { _replotTimer.restart(); });
-        connect(&_customPlot, &QCustomPlot::afterReplot, [this] { qDebug() << "replot" << _replotTimer.elapsed() << "ms"; });
-    }
 }
 
-void CorrelationPlotItem::refresh()
+CorrelationPlotItem::~CorrelationPlotItem()
 {
-    // Note to future people; even for large quantities of data, this is a relatively
-    // cheap process, so despite being called multiple times per selection, it's not
-    // really worth optimising
-    updatePlotSize();
-    buildPlot();
-    _customPlot.replot(QCustomPlot::rpQueuedReplot);
+    _plotRenderThread.quit();
+    _plotRenderThread.wait();
+}
+
+void CorrelationPlotItem::updatePixmap(CorrelationPlotUpdateType updateType)
+{
+    QMetaObject::invokeMethod(_worker, "updatePixmap", Q_ARG(CorrelationPlotUpdateType, updateType));
 }
 
 void CorrelationPlotItem::paint(QPainter* painter)
 {
-    QElapsedTimer paintTimer;
-    paintTimer.start();
+    if(_pixmap.isNull())
+        return;
 
-    auto pixmap = _customPlot.toPixmap();
+    painter->fillRect(0, 0, width(), height(), Qt::white);
 
-    if(_debug)
-        qDebug() << "paint" << paintTimer.elapsed() << "ms";
+    // Render the plot in the bottom left; that way when its container
+    // is resized, it doesn't hop around vertically, as it would if
+    // it had been rendered from the top left
+    painter->drawPixmap(0, height() - _pixmap.height(), _pixmap);
+}
 
-    painter->drawPixmap(0, 0, pixmap);
+void CorrelationPlotItem::onPixmapUpdated(QPixmap pixmap)
+{
+    if(!pixmap.isNull())
+    {
+        _pixmap = pixmap;
+        update();
+    }
+
+    // A tooltip update was attempted during the render, so
+    // complete it now, now that the render has finished
+    if(_tooltipNeedsUpdate)
+        updateTooltip();
 }
 
 void CorrelationPlotItem::routeMouseEvent(QMouseEvent* event)
@@ -120,98 +251,110 @@ void CorrelationPlotItem::mouseMoveEvent(QMouseEvent* event)
     routeMouseEvent(event);
 }
 
-void CorrelationPlotItem::showTooltip()
+void CorrelationPlotItem::updateTooltip()
 {
-    _itemTracer->setGraph(nullptr);
-    if(auto graph = dynamic_cast<QCPGraph*>(_hoverPlottable))
+    std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
+
+    if(!lock.owns_lock())
     {
-        _itemTracer->setGraph(graph);
-        _itemTracer->setGraphKey(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
-    }
-    else if(auto bars = dynamic_cast<QCPBars*>(_hoverPlottable))
-    {
-        auto xCoord = std::lround(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
-        _itemTracer->position->setPixelPosition(bars->dataPixelPosition(xCoord));
-    }
-    else if(auto boxPlot = dynamic_cast<QCPStatisticalBox*>(_hoverPlottable))
-    {
-        // Only show simple tooltips for now, can extend this later...
-        auto xCoord = std::lround(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
-        _itemTracer->position->setPixelPosition(boxPlot->dataPixelPosition(xCoord));
+        _tooltipNeedsUpdate = true;
+        return;
     }
 
-    _itemTracer->setVisible(true);
-    _itemTracer->setInterpolating(false);
+    _tooltipNeedsUpdate = false;
 
-    _hoverLabel->setVisible(true);
-    _hoverLabel->setText(QStringLiteral("%1, %2: %3")
-                     .arg(_hoverPlottable->name(),
-                          _labelNames[static_cast<int>(_itemTracer->position->key())])
-                     .arg(_itemTracer->position->value()));
+    QCPAbstractPlottable* plottableUnderCursor = nullptr;
 
-    const auto COLOR_RECT_WIDTH = 10.0;
-    const auto HOVER_MARGIN = 10.0;
-    auto hoverlabelWidth = _hoverLabel->right->pixelPosition().x() -
-            _hoverLabel->left->pixelPosition().x();
-    auto hoverlabelHeight = _hoverLabel->bottom->pixelPosition().y() -
-            _hoverLabel->top->pixelPosition().y();
-    auto hoverLabelRightX = _itemTracer->anchor(QStringLiteral("position"))->pixelPosition().x() +
-            hoverlabelWidth + HOVER_MARGIN + COLOR_RECT_WIDTH;
-    auto xBounds = clipRect().width();
-    QPointF targetPosition(_itemTracer->anchor(QStringLiteral("position"))->pixelPosition().x() + HOVER_MARGIN,
-                           _itemTracer->anchor(QStringLiteral("position"))->pixelPosition().y());
+    if(_hoverPoint.x() >= 0.0 && _hoverPoint.y() >= 0.0)
+        plottableUnderCursor = _customPlot.plottableAt(_hoverPoint, true);
 
-    // If it falls out of bounds, clip to bounds and move label above marker
-    if(hoverLabelRightX > xBounds)
+    if(plottableUnderCursor != nullptr)
     {
-        targetPosition.rx() = xBounds - hoverlabelWidth - COLOR_RECT_WIDTH - 1.0;
+        _itemTracer->setGraph(nullptr);
+        if(auto graph = dynamic_cast<QCPGraph*>(plottableUnderCursor))
+        {
+            _itemTracer->setGraph(graph);
+            _itemTracer->setGraphKey(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
+        }
+        else if(auto bars = dynamic_cast<QCPBars*>(plottableUnderCursor))
+        {
+            auto xCoord = std::lround(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
+            _itemTracer->position->setPixelPosition(bars->dataPixelPosition(xCoord));
+        }
+        else if(auto boxPlot = dynamic_cast<QCPStatisticalBox*>(plottableUnderCursor))
+        {
+            // Only show simple tooltips for now, can extend this later...
+            auto xCoord = std::lround(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
+            _itemTracer->position->setPixelPosition(boxPlot->dataPixelPosition(xCoord));
+        }
 
-        // If moving the label above marker is less than 0, clip to 0 + labelHeight/2;
-        if(targetPosition.y() - (hoverlabelHeight * 0.5) - HOVER_MARGIN * 2.0 < 0.0)
-            targetPosition.setY(hoverlabelHeight * 0.5);
-        else
-            targetPosition.ry() -= HOVER_MARGIN * 2.0;
+        _itemTracer->setVisible(true);
+        _itemTracer->setInterpolating(false);
+        _itemTracer->updatePosition();
+        auto itemTracerPosition = _itemTracer->anchor(QStringLiteral("position"))->pixelPosition();
+
+        _hoverLabel->setVisible(true);
+        _hoverLabel->setText(QStringLiteral("%1, %2: %3")
+                         .arg(plottableUnderCursor->name(),
+                              _labelNames[static_cast<int>(_itemTracer->position->key())])
+                         .arg(_itemTracer->position->value()));
+
+        const auto COLOR_RECT_WIDTH = 10.0;
+        const auto HOVER_MARGIN = 10.0;
+        auto hoverlabelWidth = _hoverLabel->right->pixelPosition().x() - _hoverLabel->left->pixelPosition().x();
+        auto hoverlabelHeight = _hoverLabel->bottom->pixelPosition().y() - _hoverLabel->top->pixelPosition().y();
+        auto hoverLabelRightX = itemTracerPosition.x() + hoverlabelWidth + HOVER_MARGIN + COLOR_RECT_WIDTH;
+        auto xBounds = clipRect().width();
+        QPointF targetPosition(itemTracerPosition.x() + HOVER_MARGIN, itemTracerPosition.y());
+
+        // If it falls out of bounds, clip to bounds and move label above marker
+        if(hoverLabelRightX > xBounds)
+        {
+            targetPosition.rx() = xBounds - hoverlabelWidth - COLOR_RECT_WIDTH - 1.0;
+
+            // If moving the label above marker is less than 0, clip to 0 + labelHeight/2;
+            if(targetPosition.y() - (hoverlabelHeight * 0.5) - HOVER_MARGIN * 2.0 < 0.0)
+                targetPosition.setY(hoverlabelHeight * 0.5);
+            else
+                targetPosition.ry() -= HOVER_MARGIN * 2.0;
+        }
+
+        _hoverLabel->position->setPixelPosition(targetPosition);
+
+        _hoverColorRect->setVisible(true);
+        _hoverColorRect->setBrush(QBrush(plottableUnderCursor->pen().color()));
+        _hoverColorRect->bottomRight->setPixelPosition(
+            {_hoverLabel->bottomRight->pixelPosition().x() + COLOR_RECT_WIDTH,
+            _hoverLabel->bottomRight->pixelPosition().y()});
+    }
+    else if(_itemTracer->visible())
+    {
+        _hoverLabel->setVisible(false);
+        _hoverColorRect->setVisible(false);
+        _itemTracer->setVisible(false);
+    }
+    else
+    {
+        // Nothing changed
+        return;
     }
 
-    _hoverLabel->position->setPixelPosition(targetPosition);
-
-    _hoverColorRect->setVisible(true);
-    _hoverColorRect->setBrush(QBrush(_hoverPlottable->pen().color()));
-    _hoverColorRect->bottomRight->setPixelPosition(QPointF(_hoverLabel->bottomRight->pixelPosition().x() + COLOR_RECT_WIDTH,
-                                                   _hoverLabel->bottomRight->pixelPosition().y()));
-
-    _textLayer->replot();
-
-    onReplot();
-}
-
-void CorrelationPlotItem::hideTooltip()
-{
-    _hoverLabel->setVisible(false);
-    _hoverColorRect->setVisible(false);
-    _itemTracer->setVisible(false);
-    _textLayer->replot();
-    onReplot();
+    updatePixmap(CorrelationPlotUpdateType::RenderAndTooltips);
 }
 
 void CorrelationPlotItem::hoverMoveEvent(QHoverEvent* event)
 {
+    if(event->posF() == _hoverPoint)
+        return;
+
     _hoverPoint = event->posF();
-
-    auto* currentPlottable = _customPlot.plottableAt(event->posF(), true);
-    if(_hoverPlottable != currentPlottable)
-    {
-        _hoverPlottable = currentPlottable;
-        hideTooltip();
-    }
-
-    if(_hoverPlottable != nullptr)
-        showTooltip();
+    updateTooltip();
 }
 
 void CorrelationPlotItem::hoverLeaveEvent(QHoverEvent*)
 {
-    hideTooltip();
+    _hoverPoint = {-1.0, -1.0};
+    updateTooltip();
 }
 
 void CorrelationPlotItem::mouseDoubleClickEvent(QMouseEvent* event)
@@ -267,7 +410,7 @@ void CorrelationPlotItem::populateMeanLinePlot()
     graph->setData(xData, yDataAvg, true);
 
     auto* plotModeTextElement = new QCPTextElement(&_customPlot);
-    plotModeTextElement->setLayer(_textLayer);
+    plotModeTextElement->setLayer(_tooltipLayer);
     plotModeTextElement->setTextFlags(Qt::AlignLeft);
     plotModeTextElement->setFont(_defaultFont9Pt);
     plotModeTextElement->setTextColor(Qt::gray);
@@ -279,7 +422,6 @@ void CorrelationPlotItem::populateMeanLinePlot()
     _customPlot.plotLayout()->insertRow(1);
     _customPlot.plotLayout()->addElement(1, 0, plotModeTextElement);
 
-    scaleXAxis();
     _customPlot.yAxis->setRange(minY, maxY);
 }
 
@@ -327,7 +469,7 @@ void CorrelationPlotItem::populateMedianLinePlot()
     graph->setData(xData, yDataAvg, true);
 
     auto* plotModeTextElement = new QCPTextElement(&_customPlot);
-    plotModeTextElement->setLayer(_textLayer);
+    plotModeTextElement->setLayer(_tooltipLayer);
     plotModeTextElement->setTextFlags(Qt::AlignLeft);
     plotModeTextElement->setFont(_defaultFont9Pt);
     plotModeTextElement->setTextColor(Qt::gray);
@@ -339,7 +481,6 @@ void CorrelationPlotItem::populateMedianLinePlot()
     _customPlot.plotLayout()->insertRow(1);
     _customPlot.plotLayout()->addElement(1, 0, plotModeTextElement);
 
-    scaleXAxis();
     _customPlot.yAxis->setRange(minY, maxY);
 }
 
@@ -363,7 +504,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     histogramBars->setData(xData, yDataAvg, true);
 
     auto* plotModeTextElement = new QCPTextElement(&_customPlot);
-    plotModeTextElement->setLayer(_textLayer);
+    plotModeTextElement->setLayer(_tooltipLayer);
     plotModeTextElement->setTextFlags(Qt::AlignLeft);
     plotModeTextElement->setFont(_defaultFont9Pt);
     plotModeTextElement->setTextColor(Qt::gray);
@@ -375,7 +516,6 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     _customPlot.plotLayout()->insertRow(1);
     _customPlot.plotLayout()->addElement(1, 0, plotModeTextElement);
 
-    scaleXAxis();
     _customPlot.yAxis->setRange(minY, maxY);
 }
 
@@ -473,7 +613,7 @@ void CorrelationPlotItem::populateIQRPlot()
     }
 
     auto* plotModeTextElement = new QCPTextElement(&_customPlot);
-    plotModeTextElement->setLayer(_textLayer);
+    plotModeTextElement->setLayer(_tooltipLayer);
     plotModeTextElement->setTextFlags(Qt::AlignLeft);
     plotModeTextElement->setFont(_defaultFont9Pt);
     plotModeTextElement->setTextColor(Qt::gray);
@@ -486,7 +626,6 @@ void CorrelationPlotItem::populateIQRPlot()
     _customPlot.plotLayout()->addElement(1, 0, plotModeTextElement);
 
     _customPlot.yAxis->setRange(minY, maxY);
-    scaleXAxis();
 }
 
 void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, const QString& name = QStringLiteral("Deviation"))
@@ -694,7 +833,6 @@ void CorrelationPlotItem::populateLinePlot()
         graph->setData(xData, yData, true);
     }
 
-    scaleXAxis();
     _customPlot.yAxis->setRange(minY, maxY);
 }
 
@@ -758,7 +896,7 @@ void CorrelationPlotItem::configureLegend()
         {
             auto* moreText = new QCPTextElement(&_customPlot);
             moreText->setMargins(QMargins());
-            moreText->setLayer(_textLayer);
+            moreText->setLayer(_tooltipLayer);
             moreText->setTextFlags(Qt::AlignLeft);
             moreText->setFont(_customPlot.legend->font());
             moreText->setTextColor(Qt::gray);
@@ -785,8 +923,10 @@ void CorrelationPlotItem::configureLegend()
     }
 }
 
-void CorrelationPlotItem::buildPlot()
+void CorrelationPlotItem::rebuildPlot()
 {
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
+
     QElapsedTimer buildTimer;
     buildTimer.start();
 
@@ -865,89 +1005,94 @@ void CorrelationPlotItem::buildPlot()
         }
     }
 
-    _customPlot.setBackground(Qt::white);
+    _customPlot.setBackground(Qt::transparent);
 
     if(_debug)
         qDebug() << "buildPlot" << buildTimer.elapsed() << "ms";
+
+    updatePixmap(CorrelationPlotUpdateType::ReplotAndRenderAndTooltips);
 }
 
-void CorrelationPlotItem::scaleXAxis()
+void CorrelationPlotItem::computeXAxisRange()
 {
-    auto maxX = static_cast<double>(_columnCount);
+    auto min = 0.0;
+    auto max = static_cast<double>(_columnCount);
     if(_showColumnNames)
     {
-        double visiblePlotWidth = columnAxisWidth();
-        double textHeight = columnLabelSize();
+        auto maxVisibleColumns = columnAxisWidth() / columnLabelWidth();
+        auto numHiddenColumns = max - maxVisibleColumns;
 
-        double position = (_columnCount - (visiblePlotWidth / textHeight)) * _horizontalScrollPosition;
+        double position = numHiddenColumns * _horizontalScrollPosition;
 
-        if(position + (visiblePlotWidth / textHeight) <= maxX)
-            _customPlot.xAxis->setRange(position, position + (visiblePlotWidth / textHeight));
-        else
-            _customPlot.xAxis->setRange(0, maxX);
+        if(position + maxVisibleColumns <= max)
+        {
+            min = position;
+            max = position + maxVisibleColumns;
+        }
     }
-    else
-        _customPlot.xAxis->setRange(0, maxX);
+
+    QMetaObject::invokeMethod(_worker, "setXAxisRange",
+        Q_ARG(double, min), Q_ARG(double, max));
 }
 
 void CorrelationPlotItem::setPlotDispersionVisualType(int plotDispersionVisualType)
 {
     _plotDispersionVisualType = plotDispersionVisualType;
     emit plotOptionsChanged();
-    refresh();
+    rebuildPlot();
 }
 
 void CorrelationPlotItem::setYAxisLabel(const QString& plotYAxisLabel)
 {
     _yAxisLabel = plotYAxisLabel;
     emit plotOptionsChanged();
-    refresh();
+    rebuildPlot();
 }
 
 void CorrelationPlotItem::setXAxisLabel(const QString& plotXAxisLabel)
 {
     _xAxisLabel = plotXAxisLabel;
     emit plotOptionsChanged();
-    refresh();
+    rebuildPlot();
 }
 
 void CorrelationPlotItem::setPlotScaleType(int plotScaleType)
 {
     _plotScaleType = plotScaleType;
     emit plotOptionsChanged();
-    refresh();
+    rebuildPlot();
 }
 
 void CorrelationPlotItem::setPlotAveragingType(int plotAveragingType)
 {
     _plotAveragingType = plotAveragingType;
     emit plotOptionsChanged();
-    refresh();
+    rebuildPlot();
 }
 
 void CorrelationPlotItem::setPlotDispersionType(int plotDispersionType)
 {
     _plotDispersionType = plotDispersionType;
     emit plotOptionsChanged();
-    refresh();
+    rebuildPlot();
 }
 
 void CorrelationPlotItem::setShowLegend(bool showLegend)
 {
     _showLegend = showLegend;
     emit plotOptionsChanged();
-    refresh();
+    rebuildPlot();
 }
 void CorrelationPlotItem::setSelectedRows(const QVector<int>& selectedRows)
 {
     _selectedRows = selectedRows;
-    refresh();
+    rebuildPlot();
 }
 
 void CorrelationPlotItem::setRowColors(const QVector<QColor>& rowColors)
 {
     _rowColors = rowColors;
-    refresh();
+    rebuildPlot();
 }
 
 void CorrelationPlotItem::setLabelNames(const QStringList& labelNames)
@@ -961,7 +1106,7 @@ void CorrelationPlotItem::setElideLabelWidth(int elideLabelWidth)
     _elideLabelWidth = elideLabelWidth;
 
     if(changed && _showColumnNames)
-        refresh();
+        rebuildPlot();
 }
 
 void CorrelationPlotItem::setColumnCount(size_t columnCount)
@@ -977,33 +1122,33 @@ void CorrelationPlotItem::setShowColumnNames(bool showColumnNames)
     if(changed)
     {
         emit visibleHorizontalFractionChanged();
-        refresh();
+        rebuildPlot();
     }
 }
 
 void CorrelationPlotItem::setShowGridLines(bool showGridLines)
 {
     _showGridLines = showGridLines;
-    refresh();
+    rebuildPlot();
 }
 
 void CorrelationPlotItem::setHorizontalScrollPosition(double horizontalScrollPosition)
 {
     _horizontalScrollPosition = horizontalScrollPosition;
-    scaleXAxis();
-    _customPlot.replot(QCustomPlot::rpQueuedReplot);
-}
+    computeXAxisRange();
 
+    updatePixmap(CorrelationPlotUpdateType::Render);
+}
 
 double CorrelationPlotItem::visibleHorizontalFraction()
 {
     if(_showColumnNames)
-        return (columnAxisWidth() / (columnLabelSize() * _columnCount));
+        return (columnAxisWidth() / (columnLabelWidth() * _columnCount));
 
     return 1.0;
 }
 
-double CorrelationPlotItem::columnLabelSize()
+double CorrelationPlotItem::columnLabelWidth()
 {
     QFontMetrics metrics(_defaultFont9Pt);
     const unsigned int columnPadding = 1;
@@ -1021,12 +1166,14 @@ double CorrelationPlotItem::columnAxisWidth()
 
 void CorrelationPlotItem::updatePlotSize()
 {
-    _customPlot.setGeometry(0, 0, static_cast<int>(width()), static_cast<int>(height()));
-    scaleXAxis();
+    computeXAxisRange();
+    updatePixmap(CorrelationPlotUpdateType::Render);
 }
 
 void CorrelationPlotItem::savePlotImage(const QUrl& url, const QStringList& extensions)
 {
+    std::unique_lock<std::recursive_mutex> lock(_mutex);
+
     if(extensions.contains(QStringLiteral("png")))
         _customPlot.savePng(url.toLocalFile());
     else if(extensions.contains(QStringLiteral("pdf")))
@@ -1035,10 +1182,4 @@ void CorrelationPlotItem::savePlotImage(const QUrl& url, const QStringList& exte
         _customPlot.saveJpg(url.toLocalFile());
 
     QDesktopServices::openUrl(url);
-
-}
-
-void CorrelationPlotItem::onReplot()
-{
-    update();
 }

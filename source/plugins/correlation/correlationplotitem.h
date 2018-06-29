@@ -11,6 +11,11 @@
 #include <QVector>
 #include <QStringList>
 #include <QElapsedTimer>
+#include <QThread>
+#include <QPixmap>
+
+#include <mutex>
+#include <atomic>
 
 DEFINE_QML_ENUM(Q_GADGET, PlotScaleType,
                 Raw,
@@ -36,6 +41,54 @@ DEFINE_QML_ENUM(Q_GADGET, PlotDispersionVisualType,
                 Area,
                 StdDev);
 
+enum class CorrelationPlotUpdateType
+{
+    None,
+    Render,
+    RenderAndTooltips,
+    ReplotAndRenderAndTooltips,
+};
+
+class CorrelationPlotWorker : public QObject
+{
+    Q_OBJECT
+
+public:
+    CorrelationPlotWorker(std::recursive_mutex& mutex,
+        QCustomPlot& customPlot, QCPLayer& tooltipLayer);
+
+    bool busy() const;
+
+    Q_INVOKABLE void setWidth(int width);
+    Q_INVOKABLE void setHeight(int height);
+    Q_INVOKABLE void setXAxisRange(double min, double max);
+    Q_INVOKABLE void updatePixmap(CorrelationPlotUpdateType updateType);
+
+private:
+    bool _debug = false;
+    QElapsedTimer _replotTimer;
+
+    mutable std::recursive_mutex* _mutex;
+    std::atomic_bool _busy;
+
+    QCustomPlot* _customPlot = nullptr;
+    QCPLayer* _tooltipLayer = nullptr;
+
+    int _width = -1;
+    int _height = -1;
+    double _xAxisMin = 0.0;
+    double _xAxisMax = 0.0;
+
+    bool _updateQueued = false;
+    CorrelationPlotUpdateType _updateType = CorrelationPlotUpdateType::None;
+
+    Q_INVOKABLE void renderPixmap();
+
+signals:
+    void busyChanged();
+    void pixmapUpdated(QPixmap pixmap);
+};
+
 class CorrelationPlotItem : public QQuickPaintedItem
 {
     Q_OBJECT
@@ -59,8 +112,12 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(QString xAxisLabel MEMBER _xAxisLabel WRITE setXAxisLabel NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString yAxisLabel MEMBER _yAxisLabel WRITE setYAxisLabel NOTIFY plotOptionsChanged)
 
+    Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
+
 public:
     explicit CorrelationPlotItem(QQuickItem* parent = nullptr);
+    ~CorrelationPlotItem() override;
+
     void paint(QPainter* painter) override;
 
     Q_INVOKABLE void savePlotImage(const QUrl& url, const QStringList& extensions);
@@ -84,15 +141,14 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
 
-    void buildPlot();
+    void rebuildPlot();
 
 private:
     bool _debug = false;
-    QElapsedTimer _replotTimer;
 
-    QCPLayer* _textLayer = nullptr;
-    QCPAbstractPlottable* _hoverPlottable = nullptr;
-    QPointF _hoverPoint;
+    bool _tooltipNeedsUpdate = false;
+    QCPLayer* _tooltipLayer = nullptr;
+    QPointF _hoverPoint{-1.0, -1.0};
     QCPItemText* _hoverLabel = nullptr;
     QCPItemRect* _hoverColorRect = nullptr;
     QCPItemTracer* _itemTracer = nullptr;
@@ -118,6 +174,12 @@ private:
     QString _xAxisLabel;
     QString _yAxisLabel;
 
+    std::recursive_mutex _mutex;
+    QThread _plotRenderThread;
+    CorrelationPlotWorker* _worker = nullptr;
+
+    QPixmap _pixmap;
+
     void populateMeanLinePlot();
     void populateMedianLinePlot();
     void populateLinePlot();
@@ -127,8 +189,7 @@ private:
     void populateStdErrorPlot();
     void plotDispersion(QVector<double> stdDevs, const QString& name);
 
-public:
-    Q_INVOKABLE void refresh();
+    bool busy() const { return _worker != nullptr ? _worker->busy() : false; }
 
 private:
     void setSelectedRows(const QVector<int>& selectedRows);
@@ -141,25 +202,27 @@ private:
     void setShowLegend(bool showLegend);
     void setHorizontalScrollPosition(double horizontalScrollPosition);
 
-    void scaleXAxis();
+    void computeXAxisRange();
     QVector<double> meanAverageData(double& min, double& max);
 
     double visibleHorizontalFraction();
-    double columnLabelSize();
+    double columnLabelWidth();
     double columnAxisWidth();
 
     void configureLegend();
 
+    void updatePixmap(CorrelationPlotUpdateType updateType);
+
 private slots:
-    void onReplot();
+    void onPixmapUpdated(QPixmap pixmap);
     void updatePlotSize();
-    void showTooltip();
-    void hideTooltip();
+    void updateTooltip();
 
 signals:
     void rightClick();
     void horizontalScrollPositionChanged();
     void visibleHorizontalFractionChanged();
     void plotOptionsChanged();
+    void busyChanged();
 };
 #endif // CORRELATIONPLOTITEM_H
