@@ -216,7 +216,7 @@ private:
     void updatePixmap(CorrelationPlotUpdateType updateType);
 
 private slots:
-    void onPixmapUpdated(QPixmap pixmap);
+    void onPixmapUpdated(const QPixmap& pixmap);
     void updatePlotSize();
     void updateTooltip();
 

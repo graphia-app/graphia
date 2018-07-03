@@ -219,7 +219,7 @@ void CorrelationPlotItem::paint(QPainter* painter)
     painter->drawPixmap(0, height() - _pixmap.height(), _pixmap);
 }
 
-void CorrelationPlotItem::onPixmapUpdated(QPixmap pixmap)
+void CorrelationPlotItem::onPixmapUpdated(const QPixmap& pixmap)
 {
     if(!pixmap.isNull())
     {
