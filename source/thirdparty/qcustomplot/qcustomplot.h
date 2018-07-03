@@ -3663,7 +3663,7 @@ public:
   void setMultiSelectModifier(Qt::KeyboardModifier modifier);
   void setSelectionRectMode(QCP::SelectionRectMode mode);
   void setSelectionRect(QCPSelectionRect *selectionRect);
-  void setOpenGl(bool enabled, int multisampling=16);
+  void setOpenGl(bool enabled, int multisampling=16, QSurface *surface=0);
   
   // non-property methods:
   // plottable interface:
@@ -3829,7 +3829,7 @@ protected:
   void setupPaintBuffers();
   QCPAbstractPaintBuffer *createPaintBuffer();
   bool hasInvalidatedPaintBuffers();
-  bool setupOpenGl();
+  bool setupOpenGl(QSurface *surface);
   void freeOpenGl();
   
   friend class QCPLegend;

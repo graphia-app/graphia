@@ -13314,14 +13314,16 @@ void QCustomPlot::setSelectionRect(QCPSelectionRect *selectionRect)
   QT variable in the qmake project files. For Qt versions 5.0 and higher, QCustomPlot switches to a
   newer OpenGL interface which is already in the "gui" module.
 */
-void QCustomPlot::setOpenGl(bool enabled, int multisampling)
+void QCustomPlot::setOpenGl(bool enabled, int multisampling, QSurface *surface)
 {
+  if (surface)
+    multisampling = surface->format().samples();
   mOpenGlMultisamples = qMax(0, multisampling);
 #ifdef QCUSTOMPLOT_USE_OPENGL
   mOpenGl = enabled;
   if (mOpenGl)
   {
-    if (setupOpenGl())
+    if (setupOpenGl(surface))
     {
       // backup antialiasing override and labelcaching setting so we can restore upon disabling OpenGL
       mOpenGlAntialiasedElementsBackup = mAntialiasedElements;
@@ -15155,20 +15157,24 @@ bool QCustomPlot::hasInvalidatedPaintBuffers()
 
   \see freeOpenGl
 */
-bool QCustomPlot::setupOpenGl()
+bool QCustomPlot::setupOpenGl(QSurface *surface)
 {
 #ifdef QCP_OPENGL_FBO
   freeOpenGl();
-  QSurfaceFormat proposedSurfaceFormat;
-  proposedSurfaceFormat.setSamples(mOpenGlMultisamples);
+  if (!surface)
+  {
+    QSurfaceFormat proposedSurfaceFormat;
+    proposedSurfaceFormat.setSamples(mOpenGlMultisamples);
 #ifdef QCP_OPENGL_OFFSCREENSURFACE
-  QOffscreenSurface *surface = new QOffscreenSurface;
+    QOffscreenSurface *newSurface = new QOffscreenSurface;
 #else
-  QWindow *surface = new QWindow;
-  surface->setSurfaceType(QSurface::OpenGLSurface);
+    QWindow *newSurface = new QWindow;
+    newSurface->setSurfaceType(QSurface::OpenGLSurface);
 #endif
-  surface->setFormat(proposedSurfaceFormat);
-  surface->create();
+    newSurface->setFormat(proposedSurfaceFormat);
+    newSurface->create();
+    surface = newSurface;
+  }
   mGlSurface = QSharedPointer<QSurface>(surface);
   mGlContext = QSharedPointer<QOpenGLContext>(new QOpenGLContext);
   mGlContext->setFormat(mGlSurface->format());
