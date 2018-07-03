@@ -13,6 +13,7 @@
 #include <QElapsedTimer>
 #include <QThread>
 #include <QPixmap>
+#include <QOffscreenSurface>
 
 #include <mutex>
 #include <atomic>
@@ -72,6 +73,7 @@ private:
     std::atomic_bool _busy;
 
     QCustomPlot* _customPlot = nullptr;
+    QOffscreenSurface* _surface = nullptr;
     QCPLayer* _tooltipLayer = nullptr;
 
     int _width = -1;

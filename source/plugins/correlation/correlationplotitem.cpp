@@ -12,6 +12,16 @@ CorrelationPlotWorker::CorrelationPlotWorker(std::recursive_mutex& mutex,
     _mutex(&mutex), _busy(false),
     _customPlot(&customPlot), _tooltipLayer(&tooltipLayer)
 {
+    QSurfaceFormat proposedSurfaceFormat;
+    proposedSurfaceFormat.setSamples(16);
+
+    // Qt requires that this is created on the UI thread, so we do so here
+    // Note QCustomPlot takes ownership of the memory, so it does not need
+    // to be deleted
+    _surface = new QOffscreenSurface;
+    _surface->setFormat(proposedSurfaceFormat);
+    _surface->create();
+
     if(_debug)
     {
         connect(_customPlot, &QCustomPlot::beforeReplot, [this] { _replotTimer.restart(); });
@@ -81,7 +91,12 @@ void CorrelationPlotWorker::renderPixmap()
     // OpenGL must be enabled on the thread which does the updates,
     // so that the context is created with the correct affinity
     if(!_customPlot->openGl())
-        _customPlot->setOpenGl(true);
+    {
+        _customPlot->setOpenGl(true, _surface->format().samples(), _surface);
+
+        // We don't need to use the surface any more, so give up access to it
+        _surface = nullptr;
+    }
 
     _customPlot->setGeometry(0, 0, _width, _height);
     _customPlot->xAxis->setRange(_xAxisMin, _xAxisMax);
