@@ -9,6 +9,7 @@
 
 #include <QQuickPaintedItem>
 #include <QVector>
+#include <QMap>
 #include <QStringList>
 #include <QElapsedTimer>
 #include <QThread>
@@ -176,6 +177,17 @@ private:
     QString _xAxisLabel;
     QString _yAxisLabel;
 
+    QCPLayer* _lineGraphLayer = nullptr;
+
+    struct CacheEntry
+    {
+        QCPGraph* _graph;
+        double _minY = std::numeric_limits<double>::max();
+        double _maxY = std::numeric_limits<double>::min();
+    };
+
+    QMap<int, CacheEntry> _lineGraphCache;
+
     std::recursive_mutex _mutex;
     QThread _plotRenderThread;
     CorrelationPlotWorker* _worker = nullptr;
@@ -212,6 +224,8 @@ private:
     double columnAxisWidth();
 
     void configureLegend();
+
+    void invalidateLineGraphCache();
 
     void updatePixmap(CorrelationPlotUpdateType updateType);
 

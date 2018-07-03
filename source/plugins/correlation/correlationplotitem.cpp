@@ -128,11 +128,15 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
 {
     setRenderTarget(RenderTarget::FramebufferObject);
 
-    _customPlot.addLayer(QStringLiteral("tooltipLayer"));
-    _customPlot.setAutoAddPlottableToLegend(false);
+    // Layer to keep individual line plots separate from everything else
+    _customPlot.addLayer(QStringLiteral("lineGraphLayer"));
+    _lineGraphLayer = _customPlot.layer(QStringLiteral("lineGraphLayer"));
 
+    _customPlot.addLayer(QStringLiteral("tooltipLayer"));
     _tooltipLayer = _customPlot.layer(QStringLiteral("tooltipLayer"));
     _tooltipLayer->setMode(QCPLayer::LayerMode::lmBuffered);
+
+    _customPlot.setAutoAddPlottableToLegend(false);
 
     QFont defaultFont10Pt;
     defaultFont10Pt.setPointSize(10);
@@ -772,8 +776,8 @@ void CorrelationPlotItem::populateStdErrorPlot()
 
 void CorrelationPlotItem::populateLinePlot()
 {
-    double maxY = 0.0;
-    double minY = 0.0;
+    double minY = std::numeric_limits<double>::max();
+    double maxY = std::numeric_limits<double>::min();
 
     QVector<double> yData; yData.reserve(_selectedRows.size());
     QVector<double> xData; xData.reserve(static_cast<int>(_columnCount));
@@ -781,71 +785,95 @@ void CorrelationPlotItem::populateLinePlot()
     // Plot each row individually
     for(auto row : qAsConst(_selectedRows))
     {
-        auto* graph = _customPlot.addGraph();
+        QCPGraph* graph = nullptr;
+        double rowMinY = std::numeric_limits<double>::max();
+        double rowMaxY = std::numeric_limits<double>::min();
+
+        if(!_lineGraphCache.contains(row))
+        {
+            graph = _customPlot.addGraph();
+            graph->setLayer(_lineGraphLayer);
+
+            double rowSum = 0.0;
+            for(size_t col = 0; col < _columnCount; col++)
+            {
+                auto index = (row * _columnCount) + col;
+                rowSum += _data.at(static_cast<int>(index));
+            }
+            double rowMean = rowSum / _columnCount;
+
+            double variance = 0.0;
+            for(size_t col = 0; col < _columnCount; col++)
+            {
+                auto index = (row * _columnCount) + col;
+                variance += (_data.at(static_cast<int>(index)) - rowMean) *
+                        (_data.at(static_cast<int>(index)) - rowMean);
+            }
+            variance /= _columnCount;
+            double stdDev = std::sqrt(variance);
+            double pareto = std::sqrt(stdDev);
+
+            yData.clear();
+            xData.clear();
+
+            for(size_t col = 0; col < _columnCount; col++)
+            {
+                auto index = (row * _columnCount) + col;
+                auto value = _data.at(static_cast<int>(index));
+                switch(static_cast<PlotScaleType>(_plotScaleType))
+                {
+                case PlotScaleType::Log:
+                {
+                    // LogY(x+c) where c is EPSILON
+                    // This prevents LogY(0) which is -inf
+                    // Log2(0+c) = -1057
+                    // Document this!
+                    const double EPSILON = std::nextafter(0.0, 1.0);
+                    value = std::log(value + EPSILON);
+                }
+                    break;
+                case PlotScaleType::MeanCentre:
+                    value -= rowMean;
+                    break;
+                case PlotScaleType::UnitVariance:
+                    value -= rowMean;
+                    value /= stdDev;
+                    break;
+                case PlotScaleType::Pareto:
+                    value -= rowMean;
+                    value /= pareto;
+                    break;
+                default:
+                    break;
+                }
+
+                xData.append(static_cast<double>(col));
+                yData.append(value);
+
+                rowMinY = std::min(rowMinY, value);
+                rowMaxY = std::max(rowMaxY, value);
+            }
+
+            graph->setData(xData, yData, true);
+
+            _lineGraphCache.insert(row, {graph, rowMinY, rowMaxY});
+        }
+        else
+        {
+            const auto& v = _lineGraphCache.value(row);
+            graph = v._graph;
+            rowMinY = v._minY;
+            rowMaxY = v._maxY;
+        }
+
+        minY = std::min(minY, rowMinY);
+        maxY = std::max(maxY, rowMaxY);
+
+        graph->setVisible(true);
+        graph->setSelectable(QCP::SelectionType::stWhole);
+
         graph->setPen(_rowColors.at(row));
         graph->setName(_graphNames[row]);
-
-        yData.clear();
-        xData.clear();
-
-        double rowMean = 0;
-
-        for(size_t col = 0; col < _columnCount; col++)
-        {
-            auto index = (row * _columnCount) + col;
-            rowMean += _data.at(static_cast<int>(index));
-        }
-        rowMean /= _columnCount;
-
-        double stdDev = 0;
-        for(size_t col = 0; col < _columnCount; col++)
-        {
-            auto index = (row * _columnCount) + col;
-            stdDev += (_data.at(static_cast<int>(index)) - rowMean) *
-                    (_data.at(static_cast<int>(index)) - rowMean);
-        }
-        stdDev /= _columnCount;
-        stdDev = std::sqrt(stdDev);
-        double pareto = std::sqrt(stdDev);
-
-        for(size_t col = 0; col < _columnCount; col++)
-        {
-            auto index = (row * _columnCount) + col;
-            auto data = _data.at(static_cast<int>(index));
-            switch(static_cast<PlotScaleType>(_plotScaleType))
-            {
-            case PlotScaleType::Log:
-            {
-                // LogY(x+c) where c is EPSILON
-                // This prevents LogY(0) which is -inf
-                // Log2(0+c) = -1057
-                // Document this!
-                const double EPSILON = std::nextafter(0.0, 1.0);
-                data = std::log(data + EPSILON);
-            }
-                break;
-            case PlotScaleType::MeanCentre:
-                data -= rowMean;
-                break;
-            case PlotScaleType::UnitVariance:
-                data -= rowMean;
-                data /= stdDev;
-                break;
-            case PlotScaleType::Pareto:
-                data -= rowMean;
-                data /= pareto;
-                break;
-            default:
-                break;
-            }
-
-            xData.append(static_cast<double>(col));
-            yData.append(data);
-
-            maxY = std::max(maxY, data);
-            minY = std::min(minY, data);
-        }
-        graph->setData(xData, yData, true);
     }
 
     _customPlot.yAxis->setRange(minY, maxY);
@@ -938,6 +966,14 @@ void CorrelationPlotItem::configureLegend()
     }
 }
 
+void CorrelationPlotItem::invalidateLineGraphCache()
+{
+    for(auto v : _lineGraphCache)
+        _customPlot.removeGraph(v._graph);
+
+    _lineGraphCache.clear();
+}
+
 void CorrelationPlotItem::rebuildPlot()
 {
     std::unique_lock<std::recursive_mutex> lock(_mutex);
@@ -947,8 +983,26 @@ void CorrelationPlotItem::rebuildPlot()
 
     _customPlot.legend->setVisible(false);
 
-    _customPlot.clearGraphs();
-    _customPlot.clearPlottables();
+    for(auto v : _lineGraphCache)
+    {
+        v._graph->setVisible(false);
+
+        // For some (stupid) reason, QCustomPlot::plottableAt returns lines that
+        // are invisible, but if we make them not selectable, it ignores them
+        v._graph->setSelectable(QCP::SelectionType::stNone);
+    }
+
+    for(int i = _customPlot.plottableCount() - 1; i >= 0; --i)
+    {
+        auto* plottable = _customPlot.plottable(i);
+
+        // Don't remove anything that's on the line graph layer,
+        // as these are cached to avoid costly recreation
+        if(plottable->layer() == _lineGraphLayer)
+            continue;
+
+        _customPlot.removePlottable(plottable);
+    }
 
     while(_customPlot.plotLayout()->rowCount() > 1)
     {
@@ -1075,6 +1129,7 @@ void CorrelationPlotItem::setPlotScaleType(int plotScaleType)
 {
     _plotScaleType = plotScaleType;
     emit plotOptionsChanged();
+    invalidateLineGraphCache();
     rebuildPlot();
 }
 
