@@ -6,7 +6,7 @@
 #include "rendering/graphrenderer.h"
 
 #include "commands/commandmanager.h"
-#include <QOffscreenSurface>
+
 #include <QOpenGLContext>
 
 
