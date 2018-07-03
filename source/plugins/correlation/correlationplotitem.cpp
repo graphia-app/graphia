@@ -968,7 +968,7 @@ void CorrelationPlotItem::configureLegend()
 
 void CorrelationPlotItem::invalidateLineGraphCache()
 {
-    for(auto v : _lineGraphCache)
+    for(auto v : qAsConst(_lineGraphCache))
         _customPlot.removeGraph(v._graph);
 
     _lineGraphCache.clear();
@@ -983,7 +983,7 @@ void CorrelationPlotItem::rebuildPlot()
 
     _customPlot.legend->setVisible(false);
 
-    for(auto v : _lineGraphCache)
+    for(auto v : qAsConst(_lineGraphCache))
     {
         v._graph->setVisible(false);
 

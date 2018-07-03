@@ -181,7 +181,7 @@ private:
 
     struct CacheEntry
     {
-        QCPGraph* _graph;
+        QCPGraph* _graph = nullptr;
         double _minY = std::numeric_limits<double>::max();
         double _maxY = std::numeric_limits<double>::min();
     };
