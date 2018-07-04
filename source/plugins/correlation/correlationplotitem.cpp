@@ -1,6 +1,7 @@
 #include "correlationplotitem.h"
 
 #include "shared/utils/scope_exit.h"
+#include "shared/utils/thread.h"
 
 #include <QDesktopServices>
 
@@ -96,6 +97,8 @@ void CorrelationPlotWorker::renderPixmap()
 
         // We don't need to use the surface any more, so give up access to it
         _surface = nullptr;
+
+        u::setCurrentThreadName(QStringLiteral("CorrPlotRender"));
     }
 
     _customPlot->setGeometry(0, 0, _width, _height);
