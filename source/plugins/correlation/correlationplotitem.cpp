@@ -2,6 +2,7 @@
 
 #include "shared/utils/scope_exit.h"
 #include "shared/utils/thread.h"
+#include "shared/utils/utils.h"
 
 #include <QDesktopServices>
 
@@ -1091,10 +1092,9 @@ void CorrelationPlotItem::computeXAxisRange()
         auto maxVisibleColumns = columnAxisWidth() / columnLabelWidth();
         auto numHiddenColumns = max - maxVisibleColumns;
 
-        double position = numHiddenColumns * _horizontalScrollPosition;
-
-        if(position + maxVisibleColumns <= max)
+        if(numHiddenColumns > 0.0)
         {
+            double position = numHiddenColumns * _horizontalScrollPosition;
             min = position;
             max = position + maxVisibleColumns;
         }
@@ -1204,7 +1204,7 @@ void CorrelationPlotItem::setShowGridLines(bool showGridLines)
 
 void CorrelationPlotItem::setHorizontalScrollPosition(double horizontalScrollPosition)
 {
-    _horizontalScrollPosition = horizontalScrollPosition;
+    _horizontalScrollPosition = u::clamp(0.0, 1.0, horizontalScrollPosition);
     computeXAxisRange();
 
     updatePixmap(CorrelationPlotUpdateType::Render);
