@@ -149,7 +149,7 @@ class optional_base : public optional_tag
     }
 #endif
 
-    // Creates an optional<T> initialized with 'val' IFF cond is true, otherwise creates an uninitialzed optional<T>.
+    // Creates an optional<T> initialized with 'val' IFF cond is true, otherwise creates an uninitialized optional<T>.
     // Can throw if T::T(T const&) does
     optional_base ( bool cond, argument_type val )
       :
@@ -160,7 +160,7 @@ class optional_base : public optional_tag
     }
 
 #ifndef  BOOST_OPTIONAL_DETAIL_NO_RVALUE_REFERENCES
-    // Creates an optional<T> initialized with 'move(val)' IFF cond is true, otherwise creates an uninitialzed optional<T>.
+    // Creates an optional<T> initialized with 'move(val)' IFF cond is true, otherwise creates an uninitialized optional<T>.
     // Can throw if T::T(T &&) does
     optional_base ( bool cond, rval_reference_type val )
       :
@@ -747,7 +747,7 @@ class optional_base : public optional_tag
 
   private :
 
-#if BOOST_WORKAROUND(BOOST_MSVC, <= 1600)
+#if BOOST_WORKAROUND(BOOST_MSVC, BOOST_TESTED_AT(1900))
     void destroy_impl ( ) { m_storage.ptr_ref()->~T() ; m_initialized = false ; }
 #else
     void destroy_impl ( ) { m_storage.ref().T::~T() ; m_initialized = false ; }
@@ -884,7 +884,7 @@ class optional
     template<class U>
     explicit optional ( optional<U> const& rhs
 #ifndef BOOST_OPTIONAL_DETAIL_NO_SFINAE_FRIENDLY_CONSTRUCTORS
-                        ,typename boost::enable_if< optional_detail::is_optional_constructible<T, U const&> >::type* = 0
+                        ,BOOST_DEDUCED_TYPENAME boost::enable_if< optional_detail::is_optional_constructible<T, U const&>, bool>::type = true
 #endif
                       )
       :
@@ -901,7 +901,7 @@ class optional
     template<class U>
     explicit optional ( optional<U> && rhs
 #ifndef BOOST_OPTIONAL_DETAIL_NO_SFINAE_FRIENDLY_CONSTRUCTORS
-                        ,typename boost::enable_if< optional_detail::is_optional_constructible<T, U> >::type* = 0
+                        ,BOOST_DEDUCED_TYPENAME boost::enable_if< optional_detail::is_optional_constructible<T, U>, bool>::type = true
 #endif
                       )
       :
@@ -927,7 +927,7 @@ class optional
 
   template<class Expr>
   explicit optional ( Expr&& expr, 
-                      BOOST_DEDUCED_TYPENAME boost::enable_if< optional_detail::is_optional_val_init_candidate<T, Expr> >::type* = 0 
+                      BOOST_DEDUCED_TYPENAME boost::enable_if< optional_detail::is_optional_val_init_candidate<T, Expr>, bool>::type = true 
   ) 
     : base(boost::forward<Expr>(expr),boost::addressof(expr)) 
     {}
