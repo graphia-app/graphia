@@ -183,16 +183,16 @@ void CorrelationPluginInstance::createAttributes()
             .setFlag(AttributeFlag::AutoRange)
             .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Variance">Variance</a> )"
                                "is a measure of the spread of the values associated "
-                               "with the node. It is defined as ∑(𝑥-𝜇)², where 𝑥 is the value "
-                               "and 𝜇 is the mean."));
+                               "with the node. It is defined as ∑(<i>x</i>-µ)², where <i>x</i> is the value "
+                               "and µ is the mean."));
 
     graphModel()->createAttribute(tr("Standard Deviation"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._stddev; })
             .setFlag(AttributeFlag::AutoRange)
             .setDescription(tr(R"(The <a href="https://en.wikipedia.org/wiki/Standard_deviation">)"
                                "Standard Deviation</a> is a measure of the spread of the values associated "
-                               "with the node. It is defined as √∑(𝑥-𝜇)², where 𝑥 is the value "
-                               "and 𝜇 is the mean."));
+                               "with the node. It is defined as √∑(<i>x</i>-µ)², where <i>x</i> is the value "
+                               "and µ is the mean."));
 
     graphModel()->createAttribute(tr("Coefficient of Variation"))
             .setFloatValueFn([this](NodeId nodeId) { return dataRowForNodeId(nodeId)._coefVar; })

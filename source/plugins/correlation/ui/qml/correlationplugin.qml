@@ -101,7 +101,7 @@ PluginContent
         Action
         {
             id: logScaling
-            text:  qsTr("Log(𝒙 + ε)");
+            text:  qsTr("Log(x + ε)");
             checkable: true
             checked: plot.plotScaleType === PlotScaleType.Log
             onTriggered: { plot.plotScaleType = PlotScaleType.Log; }
