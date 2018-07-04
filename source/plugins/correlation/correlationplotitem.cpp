@@ -13,14 +13,11 @@ CorrelationPlotWorker::CorrelationPlotWorker(std::recursive_mutex& mutex,
     _mutex(&mutex), _busy(false),
     _customPlot(&customPlot), _tooltipLayer(&tooltipLayer)
 {
-    QSurfaceFormat proposedSurfaceFormat;
-    proposedSurfaceFormat.setSamples(16);
-
     // Qt requires that this is created on the UI thread, so we do so here
     // Note QCustomPlot takes ownership of the memory, so it does not need
     // to be deleted
     _surface = new QOffscreenSurface;
-    _surface->setFormat(proposedSurfaceFormat);
+    _surface->setFormat(QSurfaceFormat::defaultFormat());
     _surface->create();
 
     if(_debug)
