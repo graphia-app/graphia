@@ -23,6 +23,8 @@ echo %QML_DIRS%
 
 windeployqt %QML_DIRS% --no-angle --no-compiler-runtime ^
 	--no-opengl-sw --dir %INSTALLER_DIR% %INSTALLER_DIR%\%PRODUCT_NAME%.exe || EXIT /B 1
+windeployqt --no-angle --no-compiler-runtime --no-opengl-sw ^
+  --dir %INSTALLER_DIR%\thirdparty.dll
 
 for %%i in (%INSTALLER_DIR%\plugins\*.dll) do windeployqt --no-angle --no-compiler-runtime ^
 	--no-opengl-sw --dir %INSTALLER_DIR% %%i
