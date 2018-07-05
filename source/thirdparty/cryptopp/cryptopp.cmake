@@ -28,6 +28,7 @@ set(CRYPTOPP_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/rijndael.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rng.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rsa.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/sse-simd.cpp
 )
 
 if(UNITY_BUILD)
@@ -46,6 +47,7 @@ list(APPEND STATIC_THIRDPARTY_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/hex.cpp
     ${CMAKE_CURRENT_LIST_DIR}/iterhash.cpp
     ${CMAKE_CURRENT_LIST_DIR}/sha.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/sha3.cpp
 )
 
 if(MSVC)

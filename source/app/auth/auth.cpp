@@ -49,7 +49,7 @@ static C::RSA::PublicKey loadPublicKey()
     auto byteArray = file.readAll();
     file.close();
 
-    C::ArraySource arraySource(reinterpret_cast<const byte*>(byteArray.constData()), // NOLINT
+    C::ArraySource arraySource(reinterpret_cast<const C::byte*>(byteArray.constData()), // NOLINT
                                byteArray.size(), true);
 
     C::RSA::PublicKey publicKey;
@@ -64,8 +64,8 @@ static Auth::AesKey generateKey()
 
     C::AutoSeededRandomPool rng;
 
-    rng.GenerateBlock(static_cast<byte*>(key._aes), sizeof(key._aes));
-    rng.GenerateBlock(static_cast<byte*>(key._iv), sizeof(key._iv));
+    rng.GenerateBlock(static_cast<C::byte*>(key._aes), sizeof(key._aes));
+    rng.GenerateBlock(static_cast<C::byte*>(key._iv), sizeof(key._iv));
 
     return key;
 }
@@ -98,9 +98,9 @@ static bool isHex(const std::string& string)
         QRegularExpression(QStringLiteral("^[a-fA-F0-9]+$")).match(QString::fromStdString(string)).hasMatch();
 }
 
-static std::vector<byte> hexToBytes(const std::string& string)
+static std::vector<C::byte> hexToBytes(const std::string& string)
 {
-    std::vector<byte> bytes;
+    std::vector<C::byte> bytes;
     bytes.reserve(string.length() / 2);
 
     if(isHex(string))
@@ -108,7 +108,7 @@ static std::vector<byte> hexToBytes(const std::string& string)
         for(size_t i = 0; i < string.length(); i += 2)
         {
             auto byteString = string.substr(i, 2);
-            auto b = static_cast<byte>(std::strtol(byteString.data(), nullptr, 16));
+            auto b = static_cast<C::byte>(std::strtol(byteString.data(), nullptr, 16));
             bytes.push_back(b);
         }
     }
@@ -138,7 +138,7 @@ static std::string rsaEncryptString(const std::string& string, const C::RSA::Pub
     C::RSAES_OAEP_SHA_Encryptor rsaEncryptor(publicKey);
 
     C::AutoSeededRandomPool rng;
-    std::vector<byte> cipher(rsaEncryptor.FixedCiphertextLength());
+    std::vector<C::byte> cipher(rsaEncryptor.FixedCiphertextLength());
 
     C::StringSource ss(string, true,
         new C::PK_EncryptorFilter(rng, rsaEncryptor,
@@ -200,12 +200,12 @@ static bool rsaVerifyAesKey(const Auth::AesKey& key, const std::string& signatur
     return rsaVerifySignature(aesKeyAsJsonString(key), signature, publicKey);
 }
 
-static std::string aesDecryptBytes(const std::vector<byte>& bytes, const Auth::AesKey& aesKey)
+static std::string aesDecryptBytes(const std::vector<C::byte>& bytes, const Auth::AesKey& aesKey)
 {
-    std::vector<byte> outBytes(bytes.size());
+    std::vector<C::byte> outBytes(bytes.size());
 
-    C::CFB_Mode<C::AES>::Decryption decryption(static_cast<const byte*>(aesKey._aes),
-        sizeof(aesKey._aes), static_cast<const byte*>(aesKey._iv));
+    C::CFB_Mode<C::AES>::Decryption decryption(static_cast<const C::byte*>(aesKey._aes),
+        sizeof(aesKey._aes), static_cast<const C::byte*>(aesKey._iv));
     decryption.ProcessData(outBytes.data(), bytes.data(), bytes.size());
 
     return std::string(reinterpret_cast<const char*>(outBytes.data()), outBytes.size()); // NOLINT
@@ -213,24 +213,24 @@ static std::string aesDecryptBytes(const std::vector<byte>& bytes, const Auth::A
 
 static std::string aesDecryptString(const std::string& string, const Auth::AesKey& aesKey)
 {
-    std::vector<byte> outBytes(string.size());
+    std::vector<C::byte> outBytes(string.size());
 
-    C::CFB_Mode<C::AES>::Decryption decryption(static_cast<const byte*>(aesKey._aes),
-        sizeof(aesKey._aes), static_cast<const byte*>(aesKey._iv));
-    decryption.ProcessData(outBytes.data(), reinterpret_cast<const byte*>(string.data()), string.size()); // NOLINT
+    C::CFB_Mode<C::AES>::Decryption decryption(static_cast<const C::byte*>(aesKey._aes),
+        sizeof(aesKey._aes), static_cast<const C::byte*>(aesKey._iv));
+    decryption.ProcessData(outBytes.data(), reinterpret_cast<const C::byte*>(string.data()), string.size()); // NOLINT
 
     return std::string(reinterpret_cast<const char*>(outBytes.data()), outBytes.size()); // NOLINT
 }
 
 static std::string aesEncryptString(const std::string& string, const Auth::AesKey& aesKey)
 {
-    auto inBytes = reinterpret_cast<const byte*>(string.data()); // NOLINT
+    auto inBytes = reinterpret_cast<const C::byte*>(string.data()); // NOLINT
     auto bytesSize = string.size();
 
-    std::vector<byte> outBytes(bytesSize);
+    std::vector<C::byte> outBytes(bytesSize);
 
-    C::CFB_Mode<C::AES>::Encryption encryption(static_cast<const byte*>(aesKey._aes),
-        sizeof(aesKey._aes), static_cast<const byte*>(aesKey._iv));
+    C::CFB_Mode<C::AES>::Encryption encryption(static_cast<const C::byte*>(aesKey._aes),
+        sizeof(aesKey._aes), static_cast<const C::byte*>(aesKey._iv));
     encryption.ProcessData(outBytes.data(), inBytes, bytesSize);
 
     return bytesToHex(outBytes);
