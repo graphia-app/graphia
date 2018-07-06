@@ -133,8 +133,8 @@ int main(int argc, char *argv[])
     preferences.define(QStringLiteral("visuals/backgroundColor"),               "#C0C0C0");
     preferences.define(QStringLiteral("visuals/highlightColor"),                "#FFFFFF");
 
-    preferences.define(QStringLiteral("visuals/defaultNodeSize"),               0.6, 0.1,  3.0);
-    preferences.define(QStringLiteral("visuals/defaultEdgeSize"),               0.2, 0.01, 2.0);
+    preferences.define(QStringLiteral("visuals/defaultNodeSize"),               1.5, 0.1,  3.0);
+    preferences.define(QStringLiteral("visuals/defaultEdgeSize"),               0.5, 0.01, 2.0);
 
     preferences.define(QStringLiteral("visuals/showNodeText"),                  QVariant::fromValue(static_cast<int>(TextState::Selected)));
     preferences.define(QStringLiteral("visuals/showEdgeText"),                  QVariant::fromValue(static_cast<int>(TextState::Selected)));
