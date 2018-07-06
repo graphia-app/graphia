@@ -12,6 +12,7 @@
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wparentheses"
 
 #ifndef __clang__
 // GCC specific warnings

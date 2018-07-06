@@ -9,6 +9,8 @@
 #include "shared/utils/preferences.h"
 #include "shared/utils/scopetimer.h"
 
+#include <cmath>
+
 template<typename T> float meanWeightedAvgBuffer(int start, int end, const T& buffer)
 {
     float average = 0.0f;
