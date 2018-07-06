@@ -251,8 +251,8 @@ IAttribute& AttributeNumericRange::setMin(double min)
 {
     switch(_attribute->valueType())
     {
-    case ValueType::Int: _attribute->_intRange.setMin(static_cast<int>(min));
-    case ValueType::Float: _attribute->_floatRange.setMin(min);
+    case ValueType::Int: _attribute->_intRange.setMin(static_cast<int>(min)); break;
+    case ValueType::Float: _attribute->_floatRange.setMin(min); break;
     default: break;
     }
 
@@ -263,8 +263,8 @@ IAttribute& AttributeNumericRange::setMax(double max)
 {
     switch(_attribute->valueType())
     {
-    case ValueType::Int: _attribute->_intRange.setMax(static_cast<int>(max));
-    case ValueType::Float: _attribute->_floatRange.setMax(max);
+    case ValueType::Int: _attribute->_intRange.setMax(static_cast<int>(max)); break;
+    case ValueType::Float: _attribute->_floatRange.setMax(max); break;
     default: break;
     }
 
