@@ -44,7 +44,7 @@
 #include "client/linux/minidump_writer/linux_ptrace_dumper.h"
 #include "common/linux/file_id.h"
 #include "common/linux/linux_libc_support.h"
-#include "common/memory.h"
+#include "common/memory_allocator.h"
 
 namespace {
 
@@ -181,6 +181,7 @@ class MicrodumpWriter {
     DumpProductInformation();
     DumpOSInformation();
     DumpProcessType();
+    DumpCrashReason();
     DumpGPUInformation();
 #if !defined(__LP64__)
     DumpFreeSpace();
@@ -295,6 +296,16 @@ class MicrodumpWriter {
     } else {
       LogAppend("UNKNOWN");
     }
+    LogCommitLine();
+  }
+
+  void DumpCrashReason() {
+    LogAppend("R ");
+    LogAppend(dumper_->crash_signal());
+    LogAppend(" ");
+    LogAppend(dumper_->GetCrashSignalString());
+    LogAppend(" ");
+    LogAppend(dumper_->crash_address());
     LogCommitLine();
   }
 
@@ -593,7 +604,7 @@ class MicrodumpWriter {
 
   void* Alloc(unsigned bytes) { return dumper_->allocator()->Alloc(bytes); }
 
-  const struct ucontext* const ucontext_;
+  const ucontext_t* const ucontext_;
 #if !defined(__ARM_EABI__) && !defined(__mips__)
   const google_breakpad::fpstate_t* const float_state_;
 #endif
@@ -637,9 +648,7 @@ bool WriteMicrodump(pid_t crashing_process,
     if (blob_size != sizeof(ExceptionHandler::CrashContext))
       return false;
     context = reinterpret_cast<const ExceptionHandler::CrashContext*>(blob);
-    dumper.set_crash_address(
-        reinterpret_cast<uintptr_t>(context->siginfo.si_addr));
-    dumper.set_crash_signal(context->siginfo.si_signo);
+    dumper.SetCrashInfoFromSigInfo(context->siginfo);
     dumper.set_crash_thread(context->tid);
   }
   MicrodumpWriter writer(context, mappings,

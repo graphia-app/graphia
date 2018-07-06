@@ -33,11 +33,6 @@
 # 'gclient runhooks' rather than 'gclient sync'.
 
 deps = {
-  # Logging code.
-  "src/src/third_party/glog":
-    "https://github.com/google/glog.git" +
-      "@v0.3.4",
-
   # Testing libraries and utilities.
   "src/src/testing":
     "https://github.com/google/googletest.git" +
@@ -51,34 +46,39 @@ deps = {
   # GYP project generator.
   "src/src/tools/gyp":
     "https://chromium.googlesource.com/external/gyp/" +
-      "@e8ab0833a42691cd2184bd4c45d779e43821d3e0",
+      "@324dd166b7c0b39d513026fa52d6280ac6d56770",
 
   # Linux syscall support.
   "src/src/third_party/lss":
     "https://chromium.googlesource.com/linux-syscall-support/" +
-      "@c555f533313986d29c827eb59c7bd99fd37b3ec4",
+      "@e6527b0cd469e3ff5764785dadcb39bf7d787154",
 }
 
 hooks = [
-  {
-    # TODO(chrisha): Fix the GYP files so that they work without
-    # --no-circular-check.
-    "pattern": ".",
-    "action": ["python",
-               "src/src/tools/gyp/gyp_main.py",
-               "--no-circular-check",
-               "src/src/client/windows/breakpad_client.gyp"],
-  },
-  {
-    # XXX: this and above should all be wired into build/all.gyp ?
-    "action": ["python",
-               "src/src/tools/gyp/gyp_main.py",
-               "--no-circular-check",
-               "src/src/tools/windows/tools_windows.gyp"],
-  },
   {
     # Keep the manifest up to date.
     "action": ["python", "src/src/tools/python/deps-to-manifest.py",
                "src/DEPS", "src/default.xml"],
   },
 ]
+
+hooks_os = {
+  'win': [
+    {
+      # TODO(chrisha): Fix the GYP files so that they work without
+      # --no-circular-check.
+      "pattern": ".",
+      "action": ["python",
+                 "src/src/tools/gyp/gyp_main.py",
+                 "--no-circular-check",
+                 "src/src/client/windows/breakpad_client.gyp"],
+    },
+    {
+      # XXX: this and above should all be wired into build/all.gyp ?
+      "action": ["python",
+                 "src/src/tools/gyp/gyp_main.py",
+                 "--no-circular-check",
+                 "src/src/tools/windows/tools_windows.gyp"],
+    },
+  ],
+}

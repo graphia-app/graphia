@@ -64,8 +64,9 @@
 #include "common/linux/elfutils-inl.h"
 #include "common/linux/elf_symbols_to_module.h"
 #include "common/linux/file_id.h"
-#include "common/memory.h"
+#include "common/memory_allocator.h"
 #include "common/module.h"
+#include "common/path_helper.h"
 #include "common/scoped_ptr.h"
 #ifndef NO_STABS_SUPPORT
 #include "common/stabs_reader.h"
@@ -99,15 +100,6 @@ using google_breakpad::wasteful_vector;
 // Define AARCH64 ELF architecture if host machine does not include this define.
 #ifndef EM_AARCH64
 #define EM_AARCH64      183
-#endif
-
-// Define SHT_ANDROID_REL and SHT_ANDROID_RELA if not defined by the host.
-// Sections with this type contain Android packed relocations.
-#ifndef SHT_ANDROID_REL
-#define SHT_ANDROID_REL  (SHT_LOOS + 1)
-#endif
-#ifndef SHT_ANDROID_RELA
-#define SHT_ANDROID_RELA (SHT_LOOS + 2)
 #endif
 
 //
@@ -626,28 +618,6 @@ bool LoadSymbols(const string& obj_file,
   bool found_debug_info_section = false;
   bool found_usable_info = false;
 
-  // Reject files that contain Android packed relocations. The pre-packed
-  // version of the file should be symbolized; the packed version is only
-  // intended for use on the target system.
-  if (FindElfSectionByName<ElfClass>(".rel.dyn", SHT_ANDROID_REL,
-                                     sections, names,
-                                     names_end, elf_header->e_shnum)) {
-    fprintf(stderr, "%s: file contains a \".rel.dyn\" section "
-                    "with type SHT_ANDROID_REL\n", obj_file.c_str());
-    fprintf(stderr, "Files containing Android packed relocations "
-                    "may not be symbolized.\n");
-    return false;
-  }
-  if (FindElfSectionByName<ElfClass>(".rela.dyn", SHT_ANDROID_RELA,
-                                     sections, names,
-                                     names_end, elf_header->e_shnum)) {
-    fprintf(stderr, "%s: file contains a \".rela.dyn\" section "
-                    "with type SHT_ANDROID_RELA\n", obj_file.c_str());
-    fprintf(stderr, "Files containing Android packed relocations "
-                    "may not be symbolized.\n");
-    return false;
-  }
-
   if (options.symbol_data != ONLY_CFI) {
 #ifndef NO_STABS_SUPPORT
     // Look for STABS debugging information, and load it if present.
@@ -877,16 +847,6 @@ const char* ElfArchitecture(const typename ElfClass::Ehdr* elf_header) {
   }
 }
 
-// Return the non-directory portion of FILENAME: the portion after the
-// last slash, or the whole filename if there are no slashes.
-string BaseFileName(const string &filename) {
-  // Lots of copies!  basename's behavior is less than ideal.
-  char* c_filename = strdup(filename.c_str());
-  string base = basename(c_filename);
-  free(c_filename);
-  return base;
-}
-
 template<typename ElfClass>
 bool SanitizeDebugFile(const typename ElfClass::Ehdr* debug_elf_header,
                        const string& debuglink_file,
@@ -937,7 +897,7 @@ bool InitModuleForElfClass(const typename ElfClass::Ehdr* elf_header,
     return false;
   }
 
-  string name = BaseFileName(obj_filename);
+  string name = google_breakpad::BaseName(obj_filename);
   string os = "Linux";
   // Add an extra "0" at the end.  PDB files on Windows have an 'age'
   // number appended to the end of the file identifier; this isn't

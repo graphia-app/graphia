@@ -50,6 +50,7 @@
 #include "common/linux/linux_libc_support.h"
 #include "common/linux/memory_mapped_file.h"
 #include "common/linux/safe_readlink.h"
+#include "google_breakpad/common/minidump_exception_linux.h"
 #include "third_party/lss/linux_syscall_support.h"
 
 #if defined(__ANDROID__)
@@ -229,20 +230,21 @@ void CrOSPostProcessMappings(wasteful_vector<MappingInfo*>& mappings) {
       l = m + 1;
   }
 
-  // Try to merge segments into the first.
-  if (next < mappings.size()) {
-    TryRecoverMappings(mappings[0], mappings[next]);
-    if (next - 1 > 0)
-      TryRecoverMappings(mappings[next - 1], mappings[0], mappings[next]);
-  }
+  // Shows the range that contains the entry point is
+  // [first_start_addr, first_end_addr)
+  size_t first_start_addr = mappings[0]->start_addr;
+  size_t first_end_addr = mappings[0]->start_addr + mappings[0]->size;
+
+  // Put the out-of-order segment in order.
+  std::rotate(mappings.begin(), mappings.begin() + 1, mappings.begin() + next);
 
   // Iterate through normal, sorted cases.
   // Normal case 1.
-  for (size_t i = 1; i < mappings.size() - 1; i++)
+  for (size_t i = 0; i < mappings.size() - 1; i++)
     TryRecoverMappings(mappings[i], mappings[i + 1]);
 
   // Normal case 2.
-  for (size_t i = 1; i < mappings.size() - 2; i++)
+  for (size_t i = 0; i < mappings.size() - 2; i++)
     TryRecoverMappings(mappings[i], mappings[i + 1], mappings[i + 2]);
 
   // Collect merged (size == 0) segments.
@@ -251,6 +253,22 @@ void CrOSPostProcessMappings(wasteful_vector<MappingInfo*>& mappings) {
     if (mappings[e]->size > 0)
       mappings[f++] = mappings[e];
   mappings.resize(f);
+
+  // The entry point is in the first mapping. We want to find the location
+  // of the entry point after merging segment. To do this, we want to find
+  // the mapping that covers the first mapping from the original mapping list.
+  // If the mapping is not in the beginning, we move it to the begining via
+  // a right rotate by using reverse iterators.
+  for (l = 0; l < mappings.size(); l++) {
+    if (mappings[l]->start_addr <= first_start_addr
+        && (mappings[l]->start_addr + mappings[l]->size >= first_end_addr))
+      break;
+  }
+  if (l > 0) {
+    r = mappings.size();
+    std::rotate(mappings.rbegin() + r - l - 1, mappings.rbegin() + r - l,
+                mappings.rend());
+  }
 }
 
 #endif  // __CHROMEOS__
@@ -265,6 +283,7 @@ LinuxDumper::LinuxDumper(pid_t pid, const char* root_prefix)
       root_prefix_(root_prefix),
       crash_address_(0),
       crash_signal_(0),
+      crash_signal_code_(0),
       crash_thread_(pid),
       threads_(&allocator_, 8),
       mappings_(&allocator_),
@@ -334,6 +353,83 @@ LinuxDumper::ElfFileIdentifierForMapping(const MappingInfo& mapping,
   }
 
   return success;
+}
+
+void LinuxDumper::SetCrashInfoFromSigInfo(const siginfo_t& siginfo) {
+  set_crash_address(reinterpret_cast<uintptr_t>(siginfo.si_addr));
+  set_crash_signal(siginfo.si_signo);
+  set_crash_signal_code(siginfo.si_code);
+}
+
+const char* LinuxDumper::GetCrashSignalString() const {
+  switch (static_cast<unsigned int>(crash_signal_)) {
+    case MD_EXCEPTION_CODE_LIN_SIGHUP:
+      return "SIGHUP";
+    case MD_EXCEPTION_CODE_LIN_SIGINT:
+      return "SIGINT";
+    case MD_EXCEPTION_CODE_LIN_SIGQUIT:
+      return "SIGQUIT";
+    case MD_EXCEPTION_CODE_LIN_SIGILL:
+      return "SIGILL";
+    case MD_EXCEPTION_CODE_LIN_SIGTRAP:
+      return "SIGTRAP";
+    case MD_EXCEPTION_CODE_LIN_SIGABRT:
+      return "SIGABRT";
+    case MD_EXCEPTION_CODE_LIN_SIGBUS:
+      return "SIGBUS";
+    case MD_EXCEPTION_CODE_LIN_SIGFPE:
+      return "SIGFPE";
+    case MD_EXCEPTION_CODE_LIN_SIGKILL:
+      return "SIGKILL";
+    case MD_EXCEPTION_CODE_LIN_SIGUSR1:
+      return "SIGUSR1";
+    case MD_EXCEPTION_CODE_LIN_SIGSEGV:
+      return "SIGSEGV";
+    case MD_EXCEPTION_CODE_LIN_SIGUSR2:
+      return "SIGUSR2";
+    case MD_EXCEPTION_CODE_LIN_SIGPIPE:
+      return "SIGPIPE";
+    case MD_EXCEPTION_CODE_LIN_SIGALRM:
+      return "SIGALRM";
+    case MD_EXCEPTION_CODE_LIN_SIGTERM:
+      return "SIGTERM";
+    case MD_EXCEPTION_CODE_LIN_SIGSTKFLT:
+      return "SIGSTKFLT";
+    case MD_EXCEPTION_CODE_LIN_SIGCHLD:
+      return "SIGCHLD";
+    case MD_EXCEPTION_CODE_LIN_SIGCONT:
+      return "SIGCONT";
+    case MD_EXCEPTION_CODE_LIN_SIGSTOP:
+      return "SIGSTOP";
+    case MD_EXCEPTION_CODE_LIN_SIGTSTP:
+      return "SIGTSTP";
+    case MD_EXCEPTION_CODE_LIN_SIGTTIN:
+      return "SIGTTIN";
+    case MD_EXCEPTION_CODE_LIN_SIGTTOU:
+      return "SIGTTOU";
+    case MD_EXCEPTION_CODE_LIN_SIGURG:
+      return "SIGURG";
+    case MD_EXCEPTION_CODE_LIN_SIGXCPU:
+      return "SIGXCPU";
+    case MD_EXCEPTION_CODE_LIN_SIGXFSZ:
+      return "SIGXFSZ";
+    case MD_EXCEPTION_CODE_LIN_SIGVTALRM:
+      return "SIGVTALRM";
+    case MD_EXCEPTION_CODE_LIN_SIGPROF:
+      return "SIGPROF";
+    case MD_EXCEPTION_CODE_LIN_SIGWINCH:
+      return "SIGWINCH";
+    case MD_EXCEPTION_CODE_LIN_SIGIO:
+      return "SIGIO";
+    case MD_EXCEPTION_CODE_LIN_SIGPWR:
+      return "SIGPWR";
+    case MD_EXCEPTION_CODE_LIN_SIGSYS:
+      return "SIGSYS";
+    case MD_EXCEPTION_CODE_LIN_DUMP_REQUESTED:
+      return "DUMP_REQUESTED";
+    default:
+      return "UNKNOWN";
+  }
 }
 
 bool LinuxDumper::GetMappingAbsolutePath(const MappingInfo& mapping,
@@ -539,6 +635,7 @@ bool LinuxDumper::EnumerateMappings() {
             }
           }
           MappingInfo* const module = new(allocator_) MappingInfo;
+          mappings_.push_back(module);
           my_memset(module, 0, sizeof(MappingInfo));
           module->system_mapping_info.start_addr = start_addr;
           module->system_mapping_info.end_addr = end_addr;
@@ -551,29 +648,30 @@ bool LinuxDumper::EnumerateMappings() {
             if (l < sizeof(module->name))
               my_memcpy(module->name, name, l);
           }
-          // If this is the entry-point mapping, and it's not already the
-          // first one, then we need to make it be first.  This is because
-          // the minidump format assumes the first module is the one that
-          // corresponds to the main executable (as codified in
-          // processor/minidump.cc:MinidumpModuleList::GetMainModule()).
-          if (entry_point_loc &&
-              (entry_point_loc >=
-                  reinterpret_cast<void*>(module->start_addr)) &&
-              (entry_point_loc <
-                  reinterpret_cast<void*>(module->start_addr+module->size)) &&
-              !mappings_.empty()) {
-            // push the module onto the front of the list.
-            mappings_.resize(mappings_.size() + 1);
-            for (size_t idx = mappings_.size() - 1; idx > 0; idx--)
-              mappings_[idx] = mappings_[idx - 1];
-            mappings_[0] = module;
-          } else {
-            mappings_.push_back(module);
-          }
         }
       }
     }
     line_reader->PopLine(line_len);
+  }
+
+  if (entry_point_loc) {
+    for (size_t i = 0; i < mappings_.size(); ++i) {
+      MappingInfo* module = mappings_[i];
+
+      // If this module contains the entry-point, and it's not already the first
+      // one, then we need to make it be first.  This is because the minidump
+      // format assumes the first module is the one that corresponds to the main
+      // executable (as codified in
+      // processor/minidump.cc:MinidumpModuleList::GetMainModule()).
+      if ((entry_point_loc >= reinterpret_cast<void*>(module->start_addr)) &&
+          (entry_point_loc <
+           reinterpret_cast<void*>(module->start_addr + module->size))) {
+        for (size_t j = i; j > 0; j--)
+          mappings_[j] = mappings_[j - 1];
+        mappings_[0] = module;
+        break;
+      }
+    }
   }
 
   sys_close(fd);

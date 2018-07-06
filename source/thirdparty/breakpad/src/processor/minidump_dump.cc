@@ -52,6 +52,7 @@ using google_breakpad::MinidumpAssertion;
 using google_breakpad::MinidumpSystemInfo;
 using google_breakpad::MinidumpMiscInfo;
 using google_breakpad::MinidumpBreakpadInfo;
+using google_breakpad::MinidumpCrashpadInfo;
 
 struct Options {
   Options()
@@ -120,6 +121,9 @@ static bool PrintMinidumpDump(const Options& options) {
     thread_list->Print();
   }
 
+  // It's useful to be able to see the full list of modules here even if it
+  // would cause minidump_stackwalk to fail.
+  MinidumpModuleList::set_max_modules(UINT32_MAX);
   MinidumpModuleList *module_list = minidump.GetModuleList();
   if (!module_list) {
     ++errors;
@@ -182,6 +186,12 @@ static bool PrintMinidumpDump(const Options& options) {
     memory_info_list->Print();
   }
 
+  MinidumpCrashpadInfo *crashpad_info = minidump.GetCrashpadInfo();
+  if (crashpad_info) {
+    // Crashpad info is optional, so don't treat absence as an error.
+    crashpad_info->Print();
+  }
+
   DumpRawStream(&minidump,
                 MD_LINUX_CMD_LINE,
                 "MD_LINUX_CMD_LINE",
@@ -212,7 +222,7 @@ static bool PrintMinidumpDump(const Options& options) {
 
 //=============================================================================
 static void
-Usage(int argc, const char *argv[], bool error) {
+Usage(int argc, char *argv[], bool error) {
   FILE *fp = error ? stderr : stdout;
 
   fprintf(fp,
@@ -228,7 +238,7 @@ Usage(int argc, const char *argv[], bool error) {
 
 //=============================================================================
 static void
-SetupOptions(int argc, const char *argv[], Options *options) {
+SetupOptions(int argc, char *argv[], Options *options) {
   int ch;
 
   while ((ch = getopt(argc, (char * const *)argv, "xh")) != -1) {
@@ -257,7 +267,7 @@ SetupOptions(int argc, const char *argv[], Options *options) {
 
 }  // namespace
 
-int main(int argc, const char *argv[]) {
+int main(int argc, char *argv[]) {
   Options options;
   BPLOG_INIT(&argc, &argv);
   SetupOptions(argc, argv, &options);
