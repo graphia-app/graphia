@@ -378,7 +378,7 @@ QString Application::resolvedExe(const QString& exe)
 
 void Application::loadPlugins()
 {
-    std::vector pluginsDirs =
+    std::vector<QString> pluginsDirs =
     {
         QCoreApplication::applicationDirPath() + "/plugins",
         QStandardPaths::writableLocation(
