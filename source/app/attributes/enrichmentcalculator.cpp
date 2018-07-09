@@ -100,16 +100,18 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(co
 
     // Get all the nodeIds for each AttributeFor value
     // Maps of vectors uhoh.
+    auto* attributeA = graphModel->attributeByName(attributeAName);
     auto* attributeB = graphModel->attributeByName(attributeBName);
+
     std::map<QString, std::vector<NodeId>> nodeIdsForAttributeValue;
     for(auto nodeId : graphModel->graph().nodeIds())
-        nodeIdsForAttributeValue[attributeB->stringValueOf(nodeId)].push_back(nodeId);
+        nodeIdsForAttributeValue[attributeA->stringValueOf(nodeId)].push_back(nodeId);
 
-    for(auto& attributeValueA : u::keysFor(attributeValueEntryCountBTotal))
+    for(auto& attributeValueA : u::keysFor(attributeValueEntryCountATotal))
     {
         auto& selectedNodes = nodeIdsForAttributeValue[attributeValueA];
 
-        for(auto& attributeValueB : u::keysFor(attributeValueEntryCountATotal))
+        for(auto& attributeValueB : u::keysFor(attributeValueEntryCountBTotal))
         {
             EnrichmentTableModel::Row row(EnrichmentTableModel::Results::NumResultColumns);
             command.setProgress(progress * 100 / iterations);
@@ -117,15 +119,14 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(co
 
             n = graphModel->graph().numNodes();
 
-            auto* attribute = graphModel->attributeByName(attributeAName);
             selectedInCategory = 0;
             for(auto nodeId : selectedNodes)
             {
-                if(attribute->stringValueOf(nodeId) == attributeValueB)
+                if(attributeB->stringValueOf(nodeId) == attributeValueB)
                     selectedInCategory++;
             }
 
-            r1 = attributeValueEntryCountATotal[attributeValueB];
+            r1 = attributeValueEntryCountBTotal[attributeValueB];
             fexp = static_cast<double>(r1) / static_cast<double>(n);
             stdevs = doRandomSampling(static_cast<int>(selectedNodes.size()), fexp);
 
