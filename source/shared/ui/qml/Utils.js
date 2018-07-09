@@ -132,14 +132,21 @@ function superScriptValue(value)
     // Make sure it's a string
     value = value.toString();
 
-    // Give up if not an integer
-    if(!value.match(/[0-9]*/))
+    // Give up if not an integer or minus
+    if(!value.match(/[0-9\-]*/))
         return value;
 
     var superScriptString = "";
 
     for(var i = 0; i < value.length; i++)
     {
+        // We want '-' symbols to be superscript too!
+        if(value[i] === "-")
+        {
+            superScriptString += "⁻";
+            continue;
+        }
+
         var index = parseInt(value[i]);
         superScriptString += superScriptDigits[index];
     }
@@ -167,8 +174,12 @@ function formatForDisplay(value, minDecimalPlaces, maxDecimalPlaces, scientificN
     // String to float
     value = parseFloat(value);
 
-    var threshold = Math.pow(10, scientificNotationDigitsThreshold);
-    if(value >= threshold || value <= -threshold)
+    // Scientific notation for very large and very small values
+    var largeThreshold = Math.pow(10, scientificNotationDigitsThreshold);
+    var smallThreshold = Math.pow(10, -(scientificNotationDigitsThreshold - 1));
+
+    if(value >= largeThreshold || value <= -largeThreshold
+       || (value < smallThreshold && value > -smallThreshold))
     {
         var exponential = value.toExponential(2);
         var mantissaAndExponent = exponential.split("e");

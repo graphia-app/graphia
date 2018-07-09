@@ -7,6 +7,7 @@ import SortFilterProxyModel 0.2
 import com.kajeka 1.0
 
 import Qt.labs.platform 1.0 as Labs
+import "../../../../shared/ui/qml/Utils.js" as Utils
 
 ApplicationWindow
 {
@@ -130,6 +131,44 @@ ApplicationWindow
                                 }
                             }
 
+                            itemDelegate: Item
+                            {
+                                height: Math.max(16, label.implicitHeight)
+                                property int implicitWidth: label.implicitWidth + 16
+
+                                Text
+                                {
+                                    id: label
+                                    objectName: "label"
+                                    width: parent.width
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.leftMargin: styleData.hasOwnProperty("depth") && styleData.column === 0 ? 0 :
+                                                        horizontalAlignment === Text.AlignRight ? 1 : 8
+                                    anchors.rightMargin: (styleData.hasOwnProperty("depth") && styleData.column === 0)
+                                                         || horizontalAlignment !== Text.AlignRight ? 1 : 8
+                                    horizontalAlignment: styleData.textAlignment
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    elide: styleData.elideMode
+
+                                    text:
+                                    {
+                                        if(styleData.value === undefined)
+                                            return "";
+
+                                        var column = tableView.getColumn(styleData.column);
+
+                                        if(column !== null && !isNaN(styleData.value))
+                                            return Utils.formatForDisplay(styleData.value, 1);
+
+                                        return styleData.value;
+                                    }
+
+                                    color: styleData.textColor
+                                    renderType: Text.NativeRendering
+                                }
+                            }
+
                             TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.SelectionA); title: qsTr("Selection A"); }
                             TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.SelectionB); title: qsTr("Selection B"); }
                             TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.Observed); title: qsTr("Observed"); }
@@ -137,6 +176,7 @@ ApplicationWindow
                             TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.ExpectedTrial); title: qsTr("Expected (Trial)"); }
                             TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.OverRep); title: qsTr("Representation"); }
                             TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.Fishers); title: qsTr("Fishers"); }
+                            TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.AdjustedFishers); title: qsTr("Adjusted Fishers"); }
 
                             Connections
                             {

@@ -57,6 +57,7 @@ QHash<int, QByteArray> EnrichmentTableModel::roleNames() const
     _roleNames[Qt::UserRole + Results::ExpectedTrial] = "ExpectedTrial";
     _roleNames[Qt::UserRole + Results::OverRep] = "OverRep";
     _roleNames[Qt::UserRole + Results::Fishers] = "Fishers";
+    _roleNames[Qt::UserRole + Results::AdjustedFishers] = "AdjustedFishers";
     return _roleNames;
 }
 
@@ -98,6 +99,8 @@ QString EnrichmentTableModel::resultToString(Results result)
             return QStringLiteral("OverRep");
         case Results::Fishers:
             return QStringLiteral("Fishers");
+        case Results::AdjustedFishers:
+            return QStringLiteral("AdjustedFishers");
         default:
             qDebug() << "Unknown roleEnum passed to resultToString";
         return {};
