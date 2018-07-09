@@ -60,7 +60,7 @@ QStringList Application::resourceDirectories()
 {
     QStringList resourceDirs
     {
-        QCoreApplication::instance()->applicationDirPath(),
+        QCoreApplication::applicationDirPath(),
         QStandardPaths::writableLocation(
             QStandardPaths::StandardLocation::AppDataLocation) + "/resources"
     };
@@ -83,7 +83,7 @@ QStringList Application::resourceDirectories()
 
     resourceDirs.append(path);
 #elif defined(Q_OS_LINUX)
-    QDir usrDir(QCoreApplication::instance()->applicationDirPath());
+    QDir usrDir(QCoreApplication::applicationDirPath());
     usrDir.cdUp();
 
     resourceDirs.append(usrDir.absolutePath() + "/share/" + name());
@@ -345,7 +345,7 @@ void Application::reportScopeTimers()
 QString Application::resolvedExe(const QString& exe)
 {
     QString fullyQualifiedExe(
-        QCoreApplication::instance()->applicationDirPath() +
+        QCoreApplication::applicationDirPath() +
         QDir::separator() + exe);
 
 #ifdef Q_OS_WIN
@@ -362,7 +362,7 @@ QString Application::resolvedExe(const QString& exe)
 
 #ifdef Q_OS_MACOS
     // We might be debugging, in which case the exe might be outside the .app
-    QDir dotAppDir(QCoreApplication::instance()->applicationDirPath());
+    QDir dotAppDir(QCoreApplication::applicationDirPath());
     dotAppDir.cdUp();
     dotAppDir.cdUp();
     dotAppDir.cdUp();
@@ -378,15 +378,15 @@ QString Application::resolvedExe(const QString& exe)
 
 void Application::loadPlugins()
 {
-    std::vector<QString> pluginsDirs =
+    std::vector pluginsDirs =
     {
-        QCoreApplication::instance()->applicationDirPath() + "/plugins",
+        QCoreApplication::applicationDirPath() + "/plugins",
         QStandardPaths::writableLocation(
             QStandardPaths::StandardLocation::AppDataLocation) + "/plugins"
     };
 
 #if defined(Q_OS_MACOS)
-    QDir dotAppDir(QCoreApplication::instance()->applicationDirPath());
+    QDir dotAppDir(QCoreApplication::applicationDirPath());
 
     // Within the bundle itself
     dotAppDir.cdUp();
@@ -398,7 +398,7 @@ void Application::loadPlugins()
     pluginsDirs.emplace_back(dotAppDir.absolutePath() + "/plugins");
 #elif defined(Q_OS_LINUX)
     // Add the LSB location for the plugins
-    QDir usrDir(QCoreApplication::instance()->applicationDirPath());
+    QDir usrDir(QCoreApplication::applicationDirPath());
     usrDir.cdUp();
 
     pluginsDirs.emplace_back(usrDir.absolutePath() + "/lib/" + name() + "/plugins");

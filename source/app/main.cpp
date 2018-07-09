@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
     if(app.isRunning())
     {
-        if(app.sendMessage(app.arguments().join(QStringLiteral("\n"))))
+        if(app.sendMessage(QCoreApplication::arguments().join(QStringLiteral("\n"))))
             return 0;
     }
 
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
     mainIcon.addFile(QStringLiteral(":/icon/Icon64x64.png"));
     mainIcon.addFile(QStringLiteral(":/icon/Icon32x32.png"));
     mainIcon.addFile(QStringLiteral(":/icon/Icon16x16.png"));
-    app.setWindowIcon(mainIcon);
+    QApplication::setWindowIcon(mainIcon);
 
 #ifndef Q_OS_LINUX
     QIcon::setThemeName("Tango");

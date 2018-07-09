@@ -148,9 +148,9 @@ int main(int argc, char *argv[])
     qmlRegisterType<QmlPreferences>(APP_URI, APP_MAJOR_VERSION, APP_MINOR_VERSION, "Preferences");
     Preferences preferences;
 
-    if(app.arguments().size() < 2 || !QFileInfo::exists(app.arguments().at(1)))
+    if(QCoreApplication::arguments().size() < 2 || !QFileInfo::exists(QCoreApplication::arguments().at(1)))
     {
-        QMessageBox::critical(nullptr, app.applicationName(),
+        QMessageBox::critical(nullptr, QCoreApplication::applicationName(),
                               QObject::tr("This program is intended for automatically "
                                           "reporting crashes and should not be invoked directly."),
                               QMessageBox::Close);
@@ -158,8 +158,8 @@ int main(int argc, char *argv[])
     }
 
     QString attachmentsDir;
-    if(app.arguments().size() == 3 && QFileInfo(app.arguments().at(2)).isDir())
-        attachmentsDir = app.arguments().at(2);
+    if(QCoreApplication::arguments().size() == 3 && QFileInfo(QCoreApplication::arguments().at(2)).isDir())
+        attachmentsDir = QCoreApplication::arguments().at(2);
 
     QIcon mainIcon;
     mainIcon.addFile(QStringLiteral(":/icon.svg"));
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
 
     int exitCode = app.exec();
 
-    uploadReport(report._email, report._text, app.arguments().at(1), attachmentsDir);
+    uploadReport(report._email, report._text, QCoreApplication::arguments().at(1), attachmentsDir);
 
     return exitCode;
 }

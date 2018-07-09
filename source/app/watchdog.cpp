@@ -56,7 +56,7 @@ void WatchdogWorker::showWarning()
                "so you may optionally wait in case a recovery occurs. "
                "Alternatively, please report a bug if you believe the "
                "freeze is as a result of a software problem."))
-            .arg(QCoreApplication::instance()->applicationName()) <<
+            .arg(QCoreApplication::applicationName()) <<
         QStringLiteral("-icon") << QStringLiteral("Critical") <<
         QStringLiteral("-button") << QStringLiteral("Wait:Reset") <<
         QStringLiteral("-button") << QStringLiteral("Close and Report Bug:Destructive") <<
