@@ -90,8 +90,7 @@ public:
             setId = elementId;
         }
 
-        T lowId, highId;
-        std::tie(lowId, highId) = std::minmax(setId, elementId);
+        auto [lowId, highId] = std::minmax(setId, elementId);
         auto& lowListNode = listNodeFor(lowId);
         auto& highListNode = listNodeFor(highId);
 

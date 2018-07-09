@@ -51,7 +51,7 @@ void Collision::nodesInsideCylinder(const QVector3D &point, const QVector3D &dir
 
     Q_ASSERT(!_componentId.isNull());
     const auto* component = _graphModel->graph().componentById(_componentId);
-    const std::vector<NodeId>& nodeIds = component->nodeIds();
+    const auto& nodeIds = component->nodeIds();
     for(NodeId nodeId : nodeIds)
     {
         if(!_includeNotFound && _graphModel->nodeVisual(nodeId).state().test(VisualFlags::NotFound))

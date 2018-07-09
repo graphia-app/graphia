@@ -123,7 +123,7 @@ namespace u
         return result;
     }
 
-    template<typename T, template<typename, typename...> class C, typename... Args>
+    template<typename T, template<typename, typename...> typename C, typename... Args>
     std::vector<T> keysFor(const C<T, Args...>& container)
     {
         std::vector<T> keys;
@@ -132,7 +132,7 @@ namespace u
         return keys;
     }
 
-    template<typename T, template<typename, typename...> class C, typename... Args>
+    template<typename T, template<typename, typename...> typename C, typename... Args>
     std::vector<T> valuesFor(const C<T, Args...>& container)
     {
         std::vector<T> values;
@@ -141,7 +141,7 @@ namespace u
         return values;
     }
 
-    template<typename T, template<typename, typename...> class C, typename... Args>
+    template<typename T, template<typename, typename...> typename C, typename... Args>
     C<T, Args...> randomSample(const C<T, Args...>& container, size_t numSamples)
     {
         if(numSamples > container.size())
@@ -160,7 +160,7 @@ namespace u
         return sample;
     }
 
-    template<typename T, template<typename, typename...> class C, typename... Args>
+    template<typename T, template<typename, typename...> typename C, typename... Args>
     std::vector<T> vectorFrom(const C<T, Args...>& container)
     {
         std::vector<T> values;

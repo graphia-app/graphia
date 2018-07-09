@@ -384,8 +384,7 @@ void MutableGraph::contractEdge(EdgeId edgeId)
     beginTransaction();
 
     auto& edge = edgeById(edgeId);
-    NodeId nodeId, nodeIdToMerge;
-    std::tie(nodeId, nodeIdToMerge) = std::minmax(edge.sourceId(), edge.targetId());
+    auto [nodeId, nodeIdToMerge] = std::minmax(edge.sourceId(), edge.targetId());
 
     removeEdge(edgeId);
     moveEdgesTo(*this, nodeId,

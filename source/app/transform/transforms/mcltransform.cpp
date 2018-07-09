@@ -128,7 +128,7 @@ static void expandAndPruneRow(MatrixType& mclMatrix, size_t columnId,
         for(size_t i = 0UL; i < nonzeros; ++i)
         {
             size_t index = rowData.indices[i];
-            if( std::abs( rowData.values[index] ) <= minValueCutoff)
+            if(std::abs(rowData.values[index]) <= minValueCutoff)
             {
                 // Remove from the remainCount;
                 remainCount--;

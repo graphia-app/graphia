@@ -203,7 +203,7 @@ QVariantMap GraphTransformConfig::asVariantMap() const
 
 std::vector<QString> GraphTransformConfig::referencedAttributeNames() const
 {
-    std::vector<QString> names = _attributes;
+    auto names = _attributes;
 
     struct ConditionVisitor
     {

@@ -268,9 +268,7 @@ public:
 
         while(!stack.empty())
         {
-            const BaseOctree* subTree;
-            int treeDepth;
-            std::tie(subTree, treeDepth) = stack.top();
+            auto[subTree, treeDepth] = stack.top();
             stack.pop();
 
             for(const auto& subVolume : subTree->_subVolumes)

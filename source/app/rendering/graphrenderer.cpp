@@ -29,7 +29,6 @@
 #include <QBuffer>
 
 #include <utility>
-#include <cstddef>
 
 template<typename Target>
 void initialiseFromGraph(const Graph* graph, Target& target)

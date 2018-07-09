@@ -122,8 +122,7 @@ public:
         case ValueType::Int:
         case ValueType::Float:
         {
-            double min, max;
-            std::tie(min, max) = attribute.findRangeforElements(*_elementIds,
+            auto [min, max] = attribute.findRangeforElements(*_elementIds,
             [this](const Attribute& _attribute, ElementId elementId)
             {
                 return _attribute.testFlag(AttributeFlag::IgnoreTails) &&
