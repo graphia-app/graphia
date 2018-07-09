@@ -200,7 +200,7 @@ void CirclePackComponentLayout::executeReal(const Graph& graph, const std::vecto
         componentLayoutData[componentId].setRadius(size);
     }
 
-    std::vector<ComponentId> sortedComponentIds = componentIds;
+    auto sortedComponentIds = componentIds;
     std::stable_sort(sortedComponentIds.begin(), sortedComponentIds.end(),
                      [&componentLayoutData](const ComponentId& a, const ComponentId& b)
     {

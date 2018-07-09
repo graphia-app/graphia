@@ -30,7 +30,7 @@ void PowerOf2GridComponentLayout::executeReal(const Graph& graph, const std::vec
         renderSizeDivisors[componentId] = u::smallestPowerOf2GreaterThan(divisor);
     }
 
-    std::vector<ComponentId> sortedComponentIds = componentIds;
+    auto sortedComponentIds = componentIds;
     std::stable_sort(sortedComponentIds.begin(), sortedComponentIds.end(),
               [&renderSizeDivisors](const ComponentId& a, const ComponentId& b)
     {
