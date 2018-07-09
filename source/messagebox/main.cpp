@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 
     QIcon mainIcon;
     mainIcon.addFile(QStringLiteral(":/icon/icon.svg"));
-    app.setWindowIcon(mainIcon);
+    QApplication::setWindowIcon(mainIcon);
 
     QCommandLineParser p;
 

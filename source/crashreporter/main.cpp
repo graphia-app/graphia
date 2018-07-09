@@ -163,14 +163,14 @@ int main(int argc, char *argv[])
 
     QIcon mainIcon;
     mainIcon.addFile(QStringLiteral(":/icon.svg"));
-    app.setWindowIcon(mainIcon);
+    QApplication::setWindowIcon(mainIcon);
 
     QQmlApplicationEngine engine;
     Report report;
     engine.rootContext()->setContextProperty(QStringLiteral("report"), &report);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
-    int exitCode = app.exec();
+    int exitCode = QCoreApplication::exec();
 
     uploadReport(report._email, report._text, QCoreApplication::arguments().at(1), attachmentsDir);
 
