@@ -374,7 +374,12 @@ bool Loader::parse(const QUrl& url, IGraphModel& graphModel, const ProgressFn& p
                     auto& row = table.back();
                     row.reserve(dataRow.size());
                     for(auto& value : dataRow)
-                        row.emplace_back(QString::fromStdString(value.get<std::string>()));
+                    {
+                        if(value.is_number())
+                            row.emplace_back(value.get<std::double_t>());
+                        else
+                            row.emplace_back(QString::fromStdString(value.get<std::string>()));
+                    }
                 }
             }
         }

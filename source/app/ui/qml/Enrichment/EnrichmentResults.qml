@@ -45,7 +45,16 @@ ApplicationWindow
                 id: showOnlyEnrichedButton
                 iconName: "utilities-system-monitor"
                 checkable: true
+                checked: true
                 tooltip: qsTr("Show only over-represented")
+            }
+            ToolButton
+            {
+                id: showOnlySignificantButton
+                iconName: "utilities-system-monitor"
+                checkable: true
+                checked: true
+                tooltip: qsTr("Show only significant p-values")
             }
             ToolButton
             {
@@ -109,26 +118,47 @@ ApplicationWindow
                             Layout.fillHeight: true
                             Layout.minimumWidth: 100
                             sortIndicatorVisible: true
+                            onSortIndicatorOrderChanged: { console.log(tableView.sortIndicatorOrder) }
                             selectionMode: SelectionMode.SingleSelection
                             model: SortFilterProxyModel
                             {
                                 id: proxyModel
                                 sourceModel: qtObject
-                                sorters: StringSorter
+                                sorters: ExpressionSorter
                                 {
-                                    id: sorter
-                                    roleName: tableView.getColumn(tableView.sortIndicatorColumn).role;
+                                    property var qmlUtils: QmlUtils
                                     sortOrder: tableView.sortIndicatorOrder
-                                    numericMode: true
+                                    expression:
+                                    {
+                                        var roleName = tableView.getColumn(tableView.sortIndicatorColumn).role;
+                                        if(typeof modelLeft[roleName] === "string")
+                                        {
+                                            var comparison = qmlUtils.localeCompareStrings(modelLeft[roleName], modelRight[roleName]);
+                                            return comparison < 0
+                                        }
+                                        else
+                                        {
+                                            return modelLeft[roleName] < modelRight[roleName]
+                                        }
+                                    }
                                 }
-                                filters: ExpressionFilter
+
+                                filters: [ ExpressionFilter
                                 {
                                     enabled: showOnlyEnrichedButton.checked
                                     expression:
                                     {
                                         return Number(model["OverRep"]) > 1.0;
                                     }
-                                }
+                                }, ExpressionFilter
+                                {
+                                    enabled: showOnlySignificantButton.checked
+                                    expression:
+                                    {
+                                        return Number(model["AdjustedFishers"]) < 0.05;
+                                    }
+                                }]
+
                             }
 
                             itemDelegate: Item
@@ -184,7 +214,11 @@ ApplicationWindow
                                 onDataChanged: resizeColumnsToContentsBugWorkaround()
                             }
 
-                            Component.onCompleted: tabView.tableViews.push(tableView);
+                            Component.onCompleted: {
+                                console.log( QmlUtils.localeCompareStrings("Cluster2", "Cluster10"));
+                                console.log( QmlUtils.localeCompareStrings("Cluster10", "Cluster2"));
+                                tabView.tableViews.push(tableView);
+                            }
                             Component.onDestruction: tabView.tableViews.splice(tabView.tableViews.indexOf(tableView), 1)
                         }
                         GridLayout

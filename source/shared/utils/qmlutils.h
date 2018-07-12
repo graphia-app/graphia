@@ -7,6 +7,7 @@
 #include <QUrl>
 #include <QDebug>
 #include <QFileInfo>
+#include <QCollator>
 
 class QQmlEngine;
 class QJSEngine;
@@ -51,10 +52,19 @@ public:
         return url.isValid();
     }
 
+    // QML JS comparelocale doesn't include numeric implementation...
+    Q_INVOKABLE int localeCompareStrings(const QString& left, const QString& right)
+    {
+        m_collator.setNumericMode(true);
+        return m_collator.compare(left, right);
+    }
+
     static QObject* qmlInstance(QQmlEngine*, QJSEngine*)
     {
         return new QmlUtils;
     }
+private:
+    QCollator m_collator;
 };
 
 #endif // QMLUTILS_H

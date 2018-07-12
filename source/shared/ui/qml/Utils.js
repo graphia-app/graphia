@@ -179,7 +179,7 @@ function formatForDisplay(value, minDecimalPlaces, maxDecimalPlaces, scientificN
     var smallThreshold = Math.pow(10, -(scientificNotationDigitsThreshold - 1));
 
     if(value >= largeThreshold || value <= -largeThreshold
-       || (value < smallThreshold && value > -smallThreshold))
+       || (value < smallThreshold && value > -smallThreshold && value !== 0))
     {
         var exponential = value.toExponential(2);
         var mantissaAndExponent = exponential.split("e");

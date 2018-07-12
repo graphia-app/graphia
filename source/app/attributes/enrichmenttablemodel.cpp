@@ -68,7 +68,11 @@ json EnrichmentTableModel::toJson()
     {
         for(int columnIndex = 0; columnIndex < static_cast<int>(_data[rowIndex].size()); ++columnIndex)
         {
-            object["data"][rowIndex].push_back(_data[rowIndex][columnIndex].toString().toStdString());
+            auto& variant = _data[rowIndex][columnIndex];
+            if(variant.type() == QVariant::String)
+                object["data"][rowIndex].push_back(_data[rowIndex][columnIndex].toString().toStdString());
+            else if(variant.type() == QVariant::Double || variant.type() == QVariant::Int)
+                object["data"][rowIndex].push_back(_data[rowIndex][columnIndex].toDouble());
         }
     }
     return object;
