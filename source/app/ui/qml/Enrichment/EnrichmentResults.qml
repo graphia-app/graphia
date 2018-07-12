@@ -118,7 +118,6 @@ ApplicationWindow
                             Layout.fillHeight: true
                             Layout.minimumWidth: 100
                             sortIndicatorVisible: true
-                            onSortIndicatorOrderChanged: { console.log(tableView.sortIndicatorOrder) }
                             selectionMode: SelectionMode.SingleSelection
                             model: SortFilterProxyModel
                             {
@@ -214,11 +213,8 @@ ApplicationWindow
                                 onDataChanged: resizeColumnsToContentsBugWorkaround()
                             }
 
-                            Component.onCompleted: {
-                                console.log( QmlUtils.localeCompareStrings("Cluster2", "Cluster10"));
-                                console.log( QmlUtils.localeCompareStrings("Cluster10", "Cluster2"));
-                                tabView.tableViews.push(tableView);
-                            }
+                            Component.onCompleted: tabView.tableViews.push(tableView)
+
                             Component.onDestruction: tabView.tableViews.splice(tabView.tableViews.indexOf(tableView), 1)
                         }
                         GridLayout

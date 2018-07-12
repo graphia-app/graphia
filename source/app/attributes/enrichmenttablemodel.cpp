@@ -40,8 +40,8 @@ int EnrichmentTableModel::rowFromAttributeSets(const QString& attributeA, const 
 {
     for(int rowIndex = 0; rowIndex < static_cast<int>(_data.size()); ++rowIndex)
     {
-        if(data(rowIndex, QStringLiteral("Attribute Group")) == attributeA
-                && data(rowIndex, QStringLiteral("Selection")) == attributeB)
+        if(data(rowIndex, QStringLiteral("SelectionA")) == attributeA
+                && data(rowIndex, QStringLiteral("SelectionB")) == attributeB)
             return rowIndex;
     }
     return -1;
