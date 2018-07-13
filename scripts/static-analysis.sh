@@ -79,10 +79,9 @@ lambda-in-connect,\
 lambda-unique-connection,\
 thread-with-slots,\
 connect-not-normalized,\
-overriden-signal,\
+overridden-signal,\
 virtual-signal,\
 incorrect-emit,\
-connect-by-name,\
 qproperty-without-notify,\
 no-rule-of-two-soft,\
 no-qenums,\
