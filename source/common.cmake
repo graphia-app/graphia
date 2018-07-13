@@ -33,7 +33,6 @@ if(UNIX)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
 endif()
 
-
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     # GCC
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wlogical-op -Wstrict-null-sentinel \
