@@ -26,6 +26,11 @@ if(UNIX)
 
     # Surprisingly, this actually makes a difference to the pearson correlation code
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -funroll-loops")
+
+    # This tells the linker to export all symbols, even if it thinks they're unused
+    # We need it because the plugins require symbols in order for certain things to
+    # work e.g. dynamic_cast to QObject from IGraph, under clang
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -rdynamic")
 endif()
 
 
@@ -35,7 +40,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         -Wdouble-promotion")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     # clang
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-undefined-var-template -stdlib=libc++")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lc++abi")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -lc++abi")
 endif()
