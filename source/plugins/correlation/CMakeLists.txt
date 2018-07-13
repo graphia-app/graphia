@@ -31,7 +31,7 @@ list(APPEND SOURCES
 )
 
 list(APPEND RESOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/ui/qml.qrc
+    ${CMAKE_CURRENT_LIST_DIR}/ui/correlation_qml.qrc
 )
 
 add_library(${PluginName} SHARED ${SOURCES} ${HEADERS} ${RESOURCES})

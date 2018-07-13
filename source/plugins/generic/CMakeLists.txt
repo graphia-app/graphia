@@ -14,7 +14,7 @@ list(APPEND HEADERS
 )
 
 list(APPEND RESOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/ui/qml.qrc
+    ${CMAKE_CURRENT_LIST_DIR}/ui/generic_qml.qrc
 )
 
 add_library(${PluginName} SHARED ${SOURCES} ${HEADERS} ${RESOURCES})
