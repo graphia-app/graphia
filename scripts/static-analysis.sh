@@ -46,6 +46,11 @@ else
   INCLUDE_DIRS=$(cat ${BUILD_DIR}/compile_commands.json | \
     jq '.[].command' | grep -oP '(?<=-I) *\/.*?(?= )' | sort | uniq | \
     sed -e 's/\(.*\)/-I\1/')
+
+  DEFINES=$(cat ${BUILD_DIR}/compile_commands.json | \
+    jq '.[].command' | grep -oP '(?<=-D) *.*?(?=-)' | \
+    grep -vE "SOURCE_DIR.*" | sort | uniq | \
+    sed -e 's/\(.*\)/-D\1/')
 fi
 
 if [ "${VERBOSE}" != 0 ]
@@ -58,7 +63,7 @@ fi
 cppcheck --version
 cppcheck --enable=all --xml --suppress=unusedFunction \
   --library=scripts/cppcheck.cfg \
-  ${SYSTEM_INCLUDE_DIRS} ${INCLUDE_DIRS} \
+  ${SYSTEM_INCLUDE_DIRS} ${INCLUDE_DIRS} ${DEFINES} \
   ${CPP_FILES} 2> cppcheck.xml
 
 # clang-tidy
