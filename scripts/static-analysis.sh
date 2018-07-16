@@ -50,7 +50,7 @@ fi
 
 # cppcheck
 cppcheck --version
-cppcheck --enable=all --xml --xml-version=2 \
+cppcheck --enable=all --xml --xml-version=2 --suppress=unusedFunction \
   --library=scripts/cppcheck.cfg ${CPP_FILES} 2> cppcheck.xml
 
 # clang-tidy

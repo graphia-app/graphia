@@ -32,6 +32,7 @@ private:
         GraphTransformConfig::TerminalValue _terminalValue;
 
     public:
+        // cppcheck-suppress noExplicitConstructor
         TerminalValueWrapper(GraphTransformConfig::TerminalValue terminalValue) : // NOLINT
             _terminalValue(std::move(terminalValue))
         {}

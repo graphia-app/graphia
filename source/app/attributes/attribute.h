@@ -187,6 +187,20 @@ public:
         _numericRange.setAttribute(*this);
     }
 
+    Attribute& operator=(const Attribute& other)
+    {
+        _ = other._;
+        _intRange = other._intRange;
+        _floatRange = other._floatRange;
+        _numericRange = other._numericRange;
+
+        _intRange.setAttribute(*this);
+        _floatRange.setAttribute(*this);
+        _numericRange.setAttribute(*this);
+
+        return *this;
+    }
+
     template<typename T, typename E> T valueOf(E& elementId) const
     {
         return valueOf(Helper<T>(), elementId);
