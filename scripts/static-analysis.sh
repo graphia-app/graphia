@@ -44,7 +44,7 @@ else
     jq '.[].command' | grep -oP '(?<=-isystem) *\/.*?(?= )' | sort | uniq | \
     sed -e 's/\(.*\)/-I\1/')
   INCLUDE_DIRS=$(cat ${BUILD_DIR}/compile_commands.json | \
-    jq '.[].command' | grep -oP '(?<=-I) *\/.*?(?= )' | sort | uniq \
+    jq '.[].command' | grep -oP '(?<=-I) *\/.*?(?= )' | sort | uniq | \
     sed -e 's/\(.*\)/-I\1/')
 fi
 
