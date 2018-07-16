@@ -10,10 +10,12 @@ void TypeIdentity::updateType(const QString& value)
 
     bool conversionSucceeded = false;
 
-    value.toInt(&conversionSucceeded);
+    auto intValue = value.toInt(&conversionSucceeded);
+    Q_UNUSED(intValue); // Keep cppcheck happy
     bool isInt = conversionSucceeded;
 
-    value.toDouble(&conversionSucceeded);
+    auto doubleValue = value.toDouble(&conversionSucceeded);
+    Q_UNUSED(doubleValue); // Keep cppcheck happy
     bool isFloat = conversionSucceeded;
 
     switch(_type)
