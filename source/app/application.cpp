@@ -301,6 +301,7 @@ void Application::crash(int crashType)
 
     case CrashType::NullPtrDereference:
     {
+        // cppcheck-suppress nullPointer
         int* p = nullptr;
         *p = 0;
         break;
