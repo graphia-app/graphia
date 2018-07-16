@@ -40,15 +40,15 @@ else
   CPP_FILES=$(cat ${BUILD_DIR}/compile_commands.json | \
     jq '.[].file' | grep -vE "qrc_|mocs_compilation|thirdparty" | \
     sed -e 's/"//g')
-  SYSTEM_INCLUDE_DIRS=$(cat ${BUILD_DIR}/compile_commands.json | \
-    jq '.[].command' | grep -oP '(?<=-isystem) *\/.*?(?= )' | sort | uniq | \
-    sed -e 's/\(.*\)/-I\1/')
+
   INCLUDE_DIRS=$(cat ${BUILD_DIR}/compile_commands.json | \
-    jq '.[].command' | grep -oP '(?<=-I) *\/.*?(?= )' | sort | uniq | \
+    jq '.[].command' | grep -oP '(?<=-I) *.*?(?= )' | \
+    grep -vE "thirdparty|autogen" \
+    sort | uniq | \
     sed -e 's/\(.*\)/-I\1/')
 
   DEFINES=$(cat ${BUILD_DIR}/compile_commands.json | \
-    jq '.[].command' | grep -oP '(?<=-D) *.*?(?=-)' | \
+    jq '.[].command' | grep -oP '(?<=-D) *.*?(?= -\D)' | \
     grep -vE "SOURCE_DIR.*" | sort | uniq | \
     sed -e 's/=.*\"/="dummmyvalue"/g' |
     sed -e 's/\(.*\)/-D\1/')
@@ -64,7 +64,7 @@ fi
 cppcheck --version
 cppcheck --enable=all --xml --suppress=unusedFunction \
   --library=scripts/cppcheck.cfg \
-  ${SYSTEM_INCLUDE_DIRS} ${INCLUDE_DIRS} ${DEFINES} \
+  ${INCLUDE_DIRS} ${DEFINES} \
   ${CPP_FILES} 2> cppcheck.xml
 
 # clang-tidy
