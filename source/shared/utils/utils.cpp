@@ -7,13 +7,14 @@ int u::smallestPowerOf2GreaterThan(int x)
     if(x < 0)
         return 0;
 
-    x--;
-    x |= x >> 1;
-    x |= x >> 2;
-    x |= x >> 4;
-    x |= x >> 8;
-    x |= x >> 16;
-    return x + 1;
+    auto xu = static_cast<uint64_t>(x);
+    xu--;
+    xu |= xu >> 1;
+    xu |= xu >> 2;
+    xu |= xu >> 4;
+    xu |= xu >> 8;
+    xu |= xu >> 16;
+    return static_cast<int>(xu + 1);
 }
 
 static void initQtResources()

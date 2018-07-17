@@ -314,7 +314,7 @@ public:
                 for(int i = 0; i < treeDepth; i++)
                     indentString += QLatin1String("  ");
 
-                QString subVolumeString = QString("0x%1").arg(&subVolume);
+                QString subVolumeString = QStringLiteral("0x%1").arg(&subVolume);
 
                 dump.append(indentString).append(subVolumeString);
                 if(subVolume._nodeIds.empty())
