@@ -53,7 +53,6 @@ QHash<int, QByteArray> EnrichmentTableModel::roleNames() const
     _roleNames[Qt::UserRole + Results::SelectionA] = "SelectionA";
     _roleNames[Qt::UserRole + Results::SelectionB] = "SelectionB";
     _roleNames[Qt::UserRole + Results::Observed] = "Observed";
-    _roleNames[Qt::UserRole + Results::Expected] = "Expected";
     _roleNames[Qt::UserRole + Results::ExpectedTrial] = "ExpectedTrial";
     _roleNames[Qt::UserRole + Results::OverRep] = "OverRep";
     _roleNames[Qt::UserRole + Results::Fishers] = "Fishers";
@@ -95,8 +94,6 @@ QString EnrichmentTableModel::resultToString(Results result)
             return QStringLiteral("SelectionB");
         case Results::Observed:
             return QStringLiteral("Observed");
-        case Results::Expected:
-            return QStringLiteral("Expected");
         case Results::ExpectedTrial:
             return QStringLiteral("ExpectedTrial");
         case Results::OverRep:

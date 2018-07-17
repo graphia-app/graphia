@@ -15,7 +15,6 @@ public:
         SelectionA,
         SelectionB,
         Observed,
-        Expected,
         ExpectedTrial,
         OverRep,
         Fishers,

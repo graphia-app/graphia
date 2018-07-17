@@ -201,8 +201,7 @@ ApplicationWindow
                             TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.SelectionA); title: qsTr("Selection A"); }
                             TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.SelectionB); title: qsTr("Selection B"); }
                             TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.Observed); title: qsTr("Observed"); }
-                            TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.Expected); title: qsTr("Expected"); }
-                            TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.ExpectedTrial); title: qsTr("Expected (Trial)"); }
+                            TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.ExpectedTrial); title: qsTr("Expected"); }
                             TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.OverRep); title: qsTr("Representation"); }
                             TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.Fishers); title: qsTr("Fishers"); }
                             TableViewColumn { role: qtObject.resultToString(EnrichmentRoles.AdjustedFishers); title: qsTr("Adjusted Fishers"); }
