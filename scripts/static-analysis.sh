@@ -62,11 +62,11 @@ fi
 
 # cppcheck
 cppcheck --version
-cppcheck --enable=all --xml --suppress=unusedFunction \
+cppcheck --enable=all --suppress=unusedFunction \
   --inline-suppr \
   --library=scripts/cppcheck.cfg \
   ${INCLUDE_DIRS} ${DEFINES} \
-  ${CPP_FILES} 2> cppcheck.xml
+  ${CPP_FILES}
 
 # clang-tidy
 if [ "${VERBOSE}" != 0 ]
