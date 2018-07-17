@@ -2,6 +2,8 @@ import QtQuick 2.7
 import QtQuick.Controls 1.5
 import QtQuick.Layouts 1.3
 
+import com.kajeka 1.0
+
 import "../../../../shared/ui/qml/Utils.js" as Utils
 
 Item
@@ -104,7 +106,7 @@ Item
             id: minimumLabel
 
             visible: root.showLabels
-            text: Utils.formatForDisplay(root.minimum)
+            text: QmlUtils.formatForDisplay(root.minimum)
             color: root.textColor
         }
 
@@ -140,7 +142,7 @@ Item
             id: maximumLabel
 
             visible: root.showLabels
-            text: Utils.formatForDisplay(root.maximum)
+            text: QmlUtils.formatForDisplay(root.maximum)
             color: root.textColor
         }
     }

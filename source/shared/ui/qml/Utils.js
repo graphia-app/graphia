@@ -154,58 +154,6 @@ function superScriptValue(value)
     return superScriptString;
 }
 
-function formatForDisplay(value, minDecimalPlaces, maxDecimalPlaces, scientificNotationDigitsThreshold)
-{
-    if(!isNumeric(value))
-        return value;
-
-    minDecimalPlaces = (typeof minDecimalPlaces !== "undefined") ?
-        minDecimalPlaces : 0;
-
-    maxDecimalPlaces = (typeof maxDecimalPlaces !== "undefined") ?
-        maxDecimalPlaces : decimalPointsForValue(value);
-
-    if(maxDecimalPlaces < minDecimalPlaces)
-        maxDecimalPlaces = minDecimalPlaces;
-
-    scientificNotationDigitsThreshold = (typeof scientificNotationDigitsThreshold !== "undefined") ?
-        scientificNotationDigitsThreshold : 5;
-
-    // String to float
-    value = parseFloat(value);
-
-    // Scientific notation for very large and very small values
-    var largeThreshold = Math.pow(10, scientificNotationDigitsThreshold);
-    var smallThreshold = Math.pow(10, -(scientificNotationDigitsThreshold - 1));
-
-    if(value >= largeThreshold || value <= -largeThreshold
-       || (value < smallThreshold && value > -smallThreshold && value !== 0))
-    {
-        var exponential = value.toExponential(2);
-        var mantissaAndExponent = exponential.split("e");
-
-        // 1.20 -> 1.2
-        var mantissa = parseFloat(mantissaAndExponent[0]);
-
-        // +123 -> 123
-        var exponent = parseInt(mantissaAndExponent[1]);
-
-        return mantissa + "×10" + superScriptValue(exponent);
-    }
-
-    // 1.234567... -> 1.234
-    var truncated = value.toFixed(maxDecimalPlaces);
-
-    // 1.100 -> 1.1
-    var simplified = parseFloat(truncated);
-
-    // 1 -> 1.1
-    if(minDecimalPlaces > 0 && numDecimalsAfterPoint(simplified) < minDecimalPlaces)
-        simplified = simplified.toFixed(minDecimalPlaces);
-
-    return simplified.toString();
-}
-
 // http://stackoverflow.com/questions/9461621
 function formatUsingSIPostfix(num)
 {

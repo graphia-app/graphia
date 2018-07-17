@@ -188,7 +188,7 @@ ApplicationWindow
                                         var column = tableView.getColumn(styleData.column);
 
                                         if(column !== null && !isNaN(styleData.value))
-                                            return Utils.formatForDisplay(styleData.value, 1);
+                                            return QmlUtils.formatForDisplay(styleData.value, 1);
 
                                         return styleData.value;
                                     }
@@ -303,6 +303,7 @@ ApplicationWindow
         }
 
     }
+
     Menu
     {
         id: plotContextMenu

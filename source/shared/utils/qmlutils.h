@@ -2,6 +2,8 @@
 #define QMLUTILS_H
 
 #include "shared/utils/thread.h"
+#include "utils.h"
+
 
 #include <QObject>
 #include <QUrl>
@@ -62,6 +64,11 @@ public:
     static QObject* qmlInstance(QQmlEngine*, QJSEngine*)
     {
         return new QmlUtils;
+    }
+
+    Q_INVOKABLE QString formatForDisplay(double value)
+    {
+        return u::formatNumberForDisplay(value);
     }
 private:
     QCollator m_collator;
