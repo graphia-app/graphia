@@ -62,7 +62,7 @@ fi
 
 # cppcheck
 cppcheck --version
-cppcheck --enable=all --suppress=unusedFunction \
+cppcheck -v --enable=all --xml --suppress=unusedFunction \
   --inline-suppr \
   --library=scripts/cppcheck.cfg \
   ${INCLUDE_DIRS} ${DEFINES} \
