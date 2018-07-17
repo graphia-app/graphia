@@ -72,7 +72,8 @@ QString u::formatNumberForDisplay(double value, int minDecimalPlaces, int maxDec
         }
     }
     formattedString.replace("e", "×10");
-    formattedString.replace("-", "⁻");
+    // Replace - sign with superscript, but ignore first char which may be - if minus
+    formattedString.replace(formattedString.indexOf("-", 1), 1, "⁻");
     formattedString.replace("+", "");
     return formattedString;
 }
