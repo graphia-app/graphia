@@ -46,15 +46,7 @@ ApplicationWindow
                 iconName: "utilities-system-monitor"
                 checkable: true
                 checked: true
-                tooltip: qsTr("Show only over-represented")
-            }
-            ToolButton
-            {
-                id: showOnlySignificantButton
-                iconName: "utilities-system-monitor"
-                checkable: true
-                checked: true
-                tooltip: qsTr("Show only significant p-values")
+                tooltip: qsTr("Show only significant over-represented results")
             }
             ToolButton
             {
@@ -142,22 +134,14 @@ ApplicationWindow
                                     }
                                 }
 
-                                filters: [ ExpressionFilter
+                                filters: ExpressionFilter
                                 {
                                     enabled: showOnlyEnrichedButton.checked
                                     expression:
                                     {
-                                        return Number(model["OverRep"]) > 1.0;
+                                        return Number(model["OverRep"]) > 1.0 && Number(model["AdjustedFishers"]) < 0.05;
                                     }
-                                }, ExpressionFilter
-                                {
-                                    enabled: showOnlySignificantButton.checked
-                                    expression:
-                                    {
-                                        return Number(model["AdjustedFishers"]) < 0.05;
-                                    }
-                                }]
-
+                                }
                             }
 
                             itemDelegate: Item

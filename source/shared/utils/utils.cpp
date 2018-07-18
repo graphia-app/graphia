@@ -2,6 +2,7 @@
 
 #include <QCoreApplication>
 #include <QRegularExpression>
+#include <QLocale>
 
 int u::smallestPowerOf2GreaterThan(int x)
 {
@@ -24,12 +25,44 @@ static void initQtResources()
     Q_INIT_RESOURCE(js);
 }
 
+QString u::stripZeroes(QString value)
+{
+    // Leading Zero
+    auto indexOfDecimal = value.indexOf(QLocale::system().decimalPoint(), 1);
+    for(int i = 0; i < value.length(); ++i)
+    {
+        if(!value[i].isDigit())
+            continue;
+
+        if(indexOfDecimal == 1)
+            break;
+
+        if(value[i] == '0')
+            value.remove(i, 1);
+        else
+            break;
+    }
+
+    // Trailing Zero
+    if(indexOfDecimal > -1)
+    {
+        while(indexOfDecimal < value.length() - 2)
+        {
+            if(value[value.length() - 1] == '0')
+                value.chop(1);
+            else
+                break;
+        }
+    }
+    return value;
+}
+
 QString u::formatNumberForDisplay(double value, int minDecimalPlaces, int maxDecimalPlaces, int minScientificformattedStringDigitsThreshold, int maxScientificformattedStringDigitsThreshold)
 {
     QString formattedString;
-    QRegularExpression trailingZeros(R"(^(-?(?:\d+\.\d+?[^0]*|\d+))0*$)");
     double smallThreshold = std::pow(10, -minScientificformattedStringDigitsThreshold);
     double largeThreshold = std::pow(10, maxScientificformattedStringDigitsThreshold);
+    auto exponentChar = QLocale::system().exponential();
 
     if(maxDecimalPlaces == 0)
     {
@@ -49,21 +82,24 @@ QString u::formatNumberForDisplay(double value, int minDecimalPlaces, int maxDec
         maxDecimalPlaces = minDecimalPlaces;
 
     if(value >= largeThreshold || value <= -largeThreshold ||
-            (value < smallThreshold && value > -smallThreshold && value != 0))
+            (value < smallThreshold && value > -smallThreshold && value != 0.0))
     {
-        formattedString = QString::number(value, 'e', 2);
+        formattedString = QLocale::system().toString(value, 'e', 2);
+        auto splitString = formattedString.split(exponentChar);
+        if(splitString.length() > 1)
+            formattedString = splitString[0] + exponentChar + u::stripZeroes(splitString[1]);
     }
     else
     {
-        formattedString = QString::number(value, 'f', maxDecimalPlaces);
-        formattedString = trailingZeros.match(formattedString).captured(1);
+        formattedString = QLocale::system().toString(value, 'f', maxDecimalPlaces);
+        formattedString = u::stripZeroes(formattedString);
     }
 
     const QString superScript = "⁰¹²³⁴⁵⁶⁷⁸⁹";
-    int startExponent = formattedString.indexOf("e");
+    int startExponent = formattedString.indexOf(exponentChar);
     if(startExponent != -1)
     {
-        for(int i = formattedString.indexOf("e") + 1; i < formattedString.length(); ++i)
+        for(int i = formattedString.indexOf(exponentChar) + 1; i < formattedString.length(); ++i)
         {
             bool converted;
             int result = QString(formattedString[i]).toInt(&converted);
@@ -71,7 +107,7 @@ QString u::formatNumberForDisplay(double value, int minDecimalPlaces, int maxDec
                 formattedString[i] = superScript[result];
         }
     }
-    formattedString.replace("e", "×10");
+    formattedString.replace(exponentChar, "×10");
     // Replace - sign with superscript, but ignore first char which may be - if minus
     formattedString.replace(formattedString.indexOf("-", 1), 1, "⁻");
     formattedString.replace("+", "");

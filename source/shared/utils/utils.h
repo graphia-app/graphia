@@ -6,6 +6,8 @@
 
 namespace u
 {
+    QString stripZeroes(QString value);
+
     QString formatNumberForDisplay(double value, int minDecimalPlaces = 0, int maxDecimalPlaces = 0,
                                    int minScientificformattedStringDigitsThreshold = 4,
                                    int maxScientificformattedStringDigitsThreshold = 5);
@@ -43,6 +45,8 @@ namespace u
     }
 
     int smallestPowerOf2GreaterThan(int x);
+
+
 
     template<typename T>
     bool exclusiveOr(T a, T b)
