@@ -813,10 +813,10 @@ ApplicationWindow
     {
         id: enrichmentAction
         text: qsTr("Enrichment…")
-        enabled: currentDocument !== undefined
+        enabled: currentDocument !== null && !currentDocument.loading
         onTriggered:
         {
-            if(currentDocument !== undefined)
+            if(currentDocument !== null)
             {
                 if(enrichmentResults.models.size() > 0)
                     enrichmentResults.show();
