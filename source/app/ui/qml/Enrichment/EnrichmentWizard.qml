@@ -8,6 +8,8 @@ import com.kajeka 1.0
 import "../Controls"
 import "../"
 
+import SortFilterProxyModel 0.2
+
 Wizard
 {
     id: root
@@ -15,7 +17,8 @@ Wizard
     minimumHeight: 400
 
     // Must be set before opening
-    property var attributeGroups
+    property var attributeGroups: null
+    property DocumentUI document: null
 
     property string selectedAttributeGroupA: ""
     property string selectedAttributeGroupB: ""
@@ -26,8 +29,6 @@ Wizard
     {
         // Reset on finish
         goToPage(0);
-        attributeSelectARepeater.itemAt(0).checked = true;
-        attributeSelectBRepeater.itemAt(1).checked = true;
         scrollViewA.flickableItem.contentY = 0;
         scrollViewB.flickableItem.contentY = 0;
     }
@@ -35,10 +36,33 @@ Wizard
     onVisibilityChanged:
     {
         reset();
+        proxyModel.sourceModel = document.availableAttributes(ElementType.Node);
     }
 
     Item
     {
+        SortFilterProxyModel
+        {
+            id: proxyModel
+            filters:
+            [
+                ValueFilter
+                {
+                    roleName: "hasSharedValues"
+                    value: true
+                }
+            ]
+
+            function rowIndexForAttributeName(attributeName)
+            {
+                for(var i = 0; i < rowCount(); i++)
+                {
+                    if(data(index(i, 0)) === attributeName)
+                        return i;
+                }
+            }
+        }
+
         ColumnLayout
         {
             anchors.left: parent.left
@@ -123,13 +147,15 @@ Wizard
                             onCurrentChanged:
                             {
                                 if(current !== null && root.visible)
-                                    selectedAttributeGroupA = current.text;
-
-                                // Disable analysis on selected
-                                for(var i = 0; i < attributeSelectBRepeater.count; i++)
                                 {
-                                    var radioBtn = attributeSelectBRepeater.itemAt(i);
-                                    radioBtn.enabled = radioBtn.text !== current.text;
+                                    selectedAttributeGroupA = current.attributeName;
+
+                                    // Disable analysis on selected
+                                    for(var i = 0; i < attributeSelectBRepeater.count; i++)
+                                    {
+                                        var radioBtn = attributeSelectBRepeater.itemAt(i);
+                                        radioBtn.enabled = radioBtn.attributeName !== current.attributeName;
+                                    }
                                 }
                             }
                         }
@@ -137,10 +163,11 @@ Wizard
                         Repeater
                         {
                             id: attributeSelectARepeater
-                            model: attributeGroups
+                            model: proxyModel
                             RadioButton
                             {
-                                text: modelData
+                                property var attributeName: model.display
+                                text: model.display + " (" + document.attribute(model.display).sharedValues.length + qsTr(" entries") + ")";
                                 exclusiveGroup: attributeSelectedAExclusiveGroup
                             }
                         }
@@ -191,17 +218,18 @@ Wizard
                             onCurrentChanged:
                             {
                                 if(current != null && root.visible)
-                                    selectedAttributeGroupB = current.text;
+                                    selectedAttributeGroupB = current.attributeName;
                             }
                         }
 
                         Repeater
                         {
                             id: attributeSelectBRepeater
-                            model: attributeGroups
+                            model: proxyModel
                             RadioButton
                             {
-                                text: modelData
+                                property var attributeName: model.display
+                                text: model.display + " (" + document.attribute(model.display).sharedValues.length + qsTr(" entries") + ")";
                                 exclusiveGroup: attributeSelectedBExclusiveGroup
                             }
                         }

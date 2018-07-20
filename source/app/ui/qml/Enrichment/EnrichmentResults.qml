@@ -121,6 +121,11 @@ ApplicationWindow
                                     sortOrder: tableView.sortIndicatorOrder
                                     expression:
                                     {
+                                        var column = tableView.getColumn(tableView.sortIndicatorColumn);
+
+                                        if (column === null)
+                                            return false;
+
                                         var roleName = tableView.getColumn(tableView.sortIndicatorColumn).role;
                                         if(typeof modelLeft[roleName] === "string")
                                         {

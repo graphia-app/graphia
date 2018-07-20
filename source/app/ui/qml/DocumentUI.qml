@@ -339,6 +339,8 @@ Item
     function gotoNextComponent() { document.gotoNextComponent(); }
     function gotoPrevComponent() { document.gotoPrevComponent(); }
     function screenshot() { captureScreenshot.open(); }
+    function availableAttributes(type) { return document.availableAttributes(type); }
+    function attribute(attributeName) { return document.attribute(attributeName); }
 
     function cancelCommand() { document.cancelCommand(); }
 
