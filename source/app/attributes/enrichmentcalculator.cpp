@@ -143,7 +143,7 @@ EnrichmentTableModel::Table EnrichmentCalculator::overRepAgainstEachAttribute(co
             row[EnrichmentTableModel::Results::SelectionA] = attributeValueA;
             row[EnrichmentTableModel::Results::SelectionB] = attributeValueB;
             row[EnrichmentTableModel::Results::Observed] = QString::number(selectedInCategory) + " / " + QString::number(selectedNodes.size());
-            row[EnrichmentTableModel::Results::ExpectedTrial] = QString::number(expectedNo, 'f', 2) + " / " + QString::number(selectedNodes.size()) + " ± " + QString::number(expectedDev);
+            row[EnrichmentTableModel::Results::ExpectedTrial] = QString::number(expectedNo, 'f', 2) + " ± " + QString::number(expectedDev) + " / " + QString::number(selectedNodes.size());
             row[EnrichmentTableModel::Results::OverRep] = QString::number(selectedInCategory / expectedNo, 'f', 2);
             row[EnrichmentTableModel::Results::Fishers] = f;
             row[EnrichmentTableModel::Results::AdjustedFishers] = f * u::keysFor(attributeValueEntryCountBTotal).size();
