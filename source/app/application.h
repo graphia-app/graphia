@@ -128,7 +128,7 @@ public:
 
     static QString name() { return QCoreApplication::applicationName(); }
     static QString version() { return QCoreApplication::applicationVersion(); }
-    static QString copyright() { return QStringLiteral(COPYRIGHT).replace(QStringLiteral("(c)"), QStringLiteral("\u00A9")); }
+    static QString copyright() { return QStringLiteral(COPYRIGHT).replace(QStringLiteral("(c)"), QStringLiteral(u"©")); }
 
     static QString nativeExtension() { return name().toLower(); }
 

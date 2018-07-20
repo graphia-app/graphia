@@ -47,6 +47,11 @@ endif()
 if(MSVC)
     add_definitions(-DUNICODE -D_UNICODE)
 
+    # MSVC is picky with UTF8 files recognition so force it on
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
+    # Disable large numbers of encoding warnings for boost with utf8 encoding on
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4828")
+
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4250 /wd4996")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
         /DYNAMICBASE /NXCOMPAT /MAP /debug")

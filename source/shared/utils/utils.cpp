@@ -95,7 +95,7 @@ QString u::formatNumberForDisplay(double value, int minDecimalPlaces, int maxDec
         formattedString = u::stripZeroes(formattedString);
     }
 
-    const QString superScript = "⁰¹²³⁴⁵⁶⁷⁸⁹";
+    const QString superScript = QStringLiteral(u"⁰¹²³⁴⁵⁶⁷⁸⁹");
     int startExponent = formattedString.indexOf(exponentChar);
     if(startExponent != -1)
     {
@@ -107,10 +107,10 @@ QString u::formatNumberForDisplay(double value, int minDecimalPlaces, int maxDec
                 formattedString[i] = superScript[result];
         }
     }
-    formattedString.replace(exponentChar, "×10");
+    formattedString.replace(exponentChar, QStringLiteral(u"×10"));
     // Replace - sign with superscript, but ignore first char which may be - if minus
-    formattedString.replace(formattedString.indexOf("-", 1), 1, "⁻");
-    formattedString.replace("+", "");
+    formattedString.replace(formattedString.indexOf(QStringLiteral("-"), 1), 1, QStringLiteral(u"⁻"));
+    formattedString.replace(QStringLiteral("+"), QString());
     return formattedString;
 }
 
