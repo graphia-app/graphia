@@ -167,7 +167,9 @@ Wizard
                             RadioButton
                             {
                                 property var attributeName: model.display
-                                text: model.display + " (" + document.attribute(model.display).sharedValues.length + qsTr(" entries") + ")";
+                                text: document !== null ? model.display + " (" +
+                                            document.attribute(model.display).sharedValues.length +
+                                            qsTr(" entries") + ")" : "";
                                 exclusiveGroup: attributeSelectedAExclusiveGroup
                             }
                         }
@@ -229,7 +231,9 @@ Wizard
                             RadioButton
                             {
                                 property var attributeName: model.display
-                                text: model.display + " (" + document.attribute(model.display).sharedValues.length + qsTr(" entries") + ")";
+                                text: document !== null ? model.display + " (" +
+                                            document.attribute(model.display).sharedValues.length +
+                                            qsTr(" entries") + ")" : "";
                                 exclusiveGroup: attributeSelectedBExclusiveGroup
                             }
                         }
