@@ -104,6 +104,13 @@ ApplicationWindow
                         id: splitView
                         TableView
                         {
+                            Text
+                            {
+                                anchors.centerIn: parent
+                                text: qsTr("No Significant Results")
+                                visible: tableView.rowCount == 0
+                            }
+
                             id: tableView
                             visible: false
                             Layout.fillWidth: true
