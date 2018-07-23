@@ -1,7 +1,8 @@
 #include "colorvisualisationchannel.h"
 
+#include "shared/utils/color.h"
+
 #include <QObject>
-#include <QCryptographicHash>
 
 void ColorVisualisationChannel::apply(double value, ElementVisual& elementVisual) const
 {
@@ -13,23 +14,7 @@ void ColorVisualisationChannel::apply(const QString& value, ElementVisual& eleme
     if(value.isEmpty())
         return;
 
-    QCryptographicHash hash(QCryptographicHash::Algorithm::Md5);
-    hash.addData(value.toUtf8());
-    auto result = hash.result();
-    int hue = 0, lightness = 0;
-
-    for(int i = 0; i < result.size(); i++)
-    {
-        int byte = result.at(i) + 128;
-        if(i < result.size() / 2)
-            hue = (hue + byte) % 255;
-        else
-            lightness = (lightness + byte) % 127;
-    }
-
-    lightness += 64;
-
-    elementVisual._outerColor.setHsl(hue, 255, lightness);
+    elementVisual._outerColor = u::colorForString(value);
 }
 
 QString ColorVisualisationChannel::description(ElementType elementType, ValueType valueType) const
