@@ -12,7 +12,7 @@ EnrichmentHeatmapItem::EnrichmentHeatmapItem(QQuickItem* parent) : QQuickPainted
 
     _colorMap = new QCPColorMap(_customPlot.xAxis, _customPlot.yAxis2);
     _colorScale = new QCPColorScale(&_customPlot);
-    _colorScale->setLabel(tr("AdjustedFishers P-Value"));
+    _colorScale->setLabel(tr("Adjusted Fishers P-Value"));
     _colorScale->setType(QCPAxis::atBottom);
     _customPlot.plotLayout()->addElement(1, 0, _colorScale);
     _colorScale->setMinimumMargins(QMargins(6, 0, 6, 0));

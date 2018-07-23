@@ -46,8 +46,6 @@ namespace u
 
     int smallestPowerOf2GreaterThan(int x);
 
-
-
     template<typename T>
     bool exclusiveOr(T a, T b)
     {

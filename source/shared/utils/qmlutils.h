@@ -56,8 +56,8 @@ public:
     // QML JS comparelocale doesn't include numeric implementation...
     Q_INVOKABLE int localeCompareStrings(const QString& left, const QString& right, bool numeric = true)
     {
-        m_collator.setNumericMode(numeric);
-        return m_collator.compare(left, right);
+        _collator.setNumericMode(numeric);
+        return _collator.compare(left, right);
     }
 
     static QObject* qmlInstance(QQmlEngine*, QJSEngine*)
@@ -70,7 +70,7 @@ public:
         return u::formatNumberForDisplay(value);
     }
 private:
-    QCollator m_collator;
+    QCollator _collator;
 };
 
 #endif // QMLUTILS_H

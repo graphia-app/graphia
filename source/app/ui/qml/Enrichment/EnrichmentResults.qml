@@ -107,7 +107,7 @@ ApplicationWindow
                             {
                                 anchors.centerIn: parent
                                 text: qsTr("No Significant Results")
-                                visible: tableView.rowCount == 0
+                                visible: tableView.rowCount === 0
                             }
 
                             id: tableView
@@ -136,11 +136,11 @@ ApplicationWindow
                                         if(typeof modelLeft[roleName] === "string")
                                         {
                                             var comparison = qmlUtils.localeCompareStrings(modelLeft[roleName], modelRight[roleName]);
-                                            return comparison < 0
+                                            return comparison < 0;
                                         }
                                         else
                                         {
-                                            return modelLeft[roleName] < modelRight[roleName]
+                                            return modelLeft[roleName] < modelRight[roleName];
                                         }
                                     }
                                 }
@@ -207,9 +207,9 @@ ApplicationWindow
                                 onDataChanged: resizeColumnsToContentsBugWorkaround()
                             }
 
-                            Component.onCompleted: tabView.tableViews.push(tableView)
+                            Component.onCompleted: { tabView.tableViews.push(tableView); }
 
-                            Component.onDestruction: tabView.tableViews.splice(tabView.tableViews.indexOf(tableView), 1)
+                            Component.onDestruction: { tabView.tableViews.splice(tabView.tableViews.indexOf(tableView), 1); }
                         }
                         GridLayout
                         {

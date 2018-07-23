@@ -57,7 +57,9 @@ QString u::stripZeroes(QString value)
     return value;
 }
 
-QString u::formatNumberForDisplay(double value, int minDecimalPlaces, int maxDecimalPlaces, int minScientificformattedStringDigitsThreshold, int maxScientificformattedStringDigitsThreshold)
+QString u::formatNumberForDisplay(double value, int minDecimalPlaces, int maxDecimalPlaces,
+                                  int minScientificformattedStringDigitsThreshold,
+                                  int maxScientificformattedStringDigitsThreshold)
 {
     QString formattedString;
     double smallThreshold = std::pow(10, -minScientificformattedStringDigitsThreshold);
@@ -86,8 +88,25 @@ QString u::formatNumberForDisplay(double value, int minDecimalPlaces, int maxDec
     {
         formattedString = QLocale::system().toString(value, 'e', 2);
         auto splitString = formattedString.split(exponentChar);
-        if(splitString.length() > 1)
-            formattedString = splitString[0] + exponentChar + u::stripZeroes(splitString[1]);
+
+        const QString superScript = QStringLiteral(u"⁰¹²³⁴⁵⁶⁷⁸⁹");
+        if(splitString.length() > 0)
+        {
+            auto exponentValueString = u::stripZeroes(splitString[1]);
+
+            for(int i = 0; i < exponentValueString.length(); ++i)
+            {
+                bool converted;
+                int result = QString(exponentValueString[i]).toInt(&converted);
+                if(converted)
+                    exponentValueString[i] = superScript[result];
+            }
+
+            exponentValueString.replace(QStringLiteral("-"), QStringLiteral(u"⁻"));
+            formattedString = splitString[0] + exponentChar + exponentValueString;
+        }
+
+        formattedString.replace(exponentChar, QStringLiteral(u"×10"));
     }
     else
     {
@@ -95,21 +114,6 @@ QString u::formatNumberForDisplay(double value, int minDecimalPlaces, int maxDec
         formattedString = u::stripZeroes(formattedString);
     }
 
-    const QString superScript = QStringLiteral(u"⁰¹²³⁴⁵⁶⁷⁸⁹");
-    int startExponent = formattedString.indexOf(exponentChar);
-    if(startExponent != -1)
-    {
-        for(int i = formattedString.indexOf(exponentChar) + 1; i < formattedString.length(); ++i)
-        {
-            bool converted;
-            int result = QString(formattedString[i]).toInt(&converted);
-            if(converted)
-                formattedString[i] = superScript[result];
-        }
-    }
-    formattedString.replace(exponentChar, QStringLiteral(u"×10"));
-    // Replace - sign with superscript, but ignore first char which may be - if minus
-    formattedString.replace(formattedString.indexOf(QStringLiteral("-"), 1), 1, QStringLiteral(u"⁻"));
     formattedString.replace(QStringLiteral("+"), QString());
     return formattedString;
 }

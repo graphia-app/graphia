@@ -56,9 +56,12 @@ Wizard
             {
                 expression:
                 {
-                    // Need this to capture it...
+                    // QML expressions are first evaluated with no captured variables
+                    // and the required variables are deduced after. If the variable is not
+                    // used during this no-context stage it cannot be captured hence this
+                    // seemingly pointless assignment
                     var tempDoc = document;
-                    if(tempDoc == null)
+                    if(tempDoc === null)
                         return false;
                     var leftCount = document.attribute(modelLeft.display).sharedValues.length;
                     var rightCount = document.attribute(modelRight.display).sharedValues.length;
