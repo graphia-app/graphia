@@ -103,10 +103,8 @@ QString u::formatNumberForDisplay(double value, int minDecimalPlaces, int maxDec
             }
 
             exponentValueString.replace(QStringLiteral("-"), QStringLiteral(u"⁻"));
-            formattedString = splitString[0] + exponentChar + exponentValueString;
+            formattedString = splitString[0] + QStringLiteral(u"×10") + exponentValueString;
         }
-
-        formattedString.replace(exponentChar, QStringLiteral(u"×10"));
     }
     else
     {
