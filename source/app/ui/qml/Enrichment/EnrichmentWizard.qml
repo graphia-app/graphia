@@ -52,6 +52,19 @@ Wizard
                     value: true
                 }
             ]
+            sorters: ExpressionSorter
+            {
+                expression:
+                {
+                    // Need this to capture it...
+                    var tempDoc = document;
+                    if(tempDoc == null)
+                        return false;
+                    var leftCount = document.attribute(modelLeft.display).sharedValues.length;
+                    var rightCount = document.attribute(modelRight.display).sharedValues.length;
+                    return leftCount < rightCount;
+                }
+            }
 
             function rowIndexForAttributeName(attributeName)
             {
