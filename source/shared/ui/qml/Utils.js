@@ -114,46 +114,6 @@ function incrementForRange(min, max)
     return 100000.0;
 }
 
-function numDecimalsAfterPoint(value)
-{
-    if(Math.floor(value) === value)
-        return 0;
-
-    return value.toString().split(".")[1].length || 0;
-}
-
-function superScriptValue(value)
-{
-    if(!isNumeric(value))
-        return value;
-
-    var superScriptDigits = "⁰¹²³⁴⁵⁶⁷⁸⁹";
-
-    // Make sure it's a string
-    value = value.toString();
-
-    // Give up if not an integer or minus
-    if(!value.match(/[0-9\-]*/))
-        return value;
-
-    var superScriptString = "";
-
-    for(var i = 0; i < value.length; i++)
-    {
-        // We want '-' symbols to be superscript too!
-        if(value[i] === "-")
-        {
-            superScriptString += "⁻";
-            continue;
-        }
-
-        var index = parseInt(value[i]);
-        superScriptString += superScriptDigits[index];
-    }
-
-    return superScriptString;
-}
-
 // http://stackoverflow.com/questions/9461621
 function formatUsingSIPostfix(num)
 {

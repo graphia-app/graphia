@@ -4,7 +4,6 @@
 #include "shared/utils/thread.h"
 #include "utils.h"
 
-
 #include <QObject>
 #include <QUrl>
 #include <QDebug>
@@ -55,9 +54,9 @@ public:
     }
 
     // QML JS comparelocale doesn't include numeric implementation...
-    Q_INVOKABLE int localeCompareStrings(const QString& left, const QString& right)
+    Q_INVOKABLE int localeCompareStrings(const QString& left, const QString& right, bool numeric = true)
     {
-        m_collator.setNumericMode(true);
+        m_collator.setNumericMode(numeric);
         return m_collator.compare(left, right);
     }
 

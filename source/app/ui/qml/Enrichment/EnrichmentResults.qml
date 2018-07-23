@@ -7,7 +7,6 @@ import SortFilterProxyModel 0.2
 import com.kajeka 1.0
 
 import Qt.labs.platform 1.0 as Labs
-import "../../../../shared/ui/qml/Utils.js" as Utils
 
 ApplicationWindow
 {
