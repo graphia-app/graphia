@@ -53,6 +53,12 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4828")
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4250 /wd4996")
+
+    if(NOT "${Version}" STREQUAL "development")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /analyze /analyze:ruleset \
+            ${CMAKE_SOURCE_DIR}\\scripts\\VCAnalyze.ruleset")
+    endif()
+
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} \
         /DYNAMICBASE /NXCOMPAT /MAP /debug")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} \
