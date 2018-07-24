@@ -147,20 +147,20 @@ bool build(const List& gml, IGraphModel& graphModel,
 
         for(const auto& attributeWrapper : node)
         {
-            const auto& attribute = attributeWrapper.get();
-            if(attribute._key == QStringLiteral("id"))
+            const auto& keyValue = attributeWrapper.get();
+            if(keyValue._key == QStringLiteral("id"))
                 continue;
 
-            if(attribute._key == QStringLiteral("label"))
+            if(keyValue._key == QStringLiteral("label"))
             {
                 // If there is a label attribute, use it as the node name
-                const auto* label = boost::get<QString>(&attribute._value);
+                const auto* label = boost::get<QString>(&keyValue._value);
                 if(label != nullptr)
                     nodeName = *label;
             }
             else
             {
-                auto attributes = processAttribute(attribute);
+                auto attributes = processAttribute(keyValue);
 
                 for(const auto& attribute : attributes)
                 {
@@ -193,11 +193,11 @@ bool build(const List& gml, IGraphModel& graphModel,
 
         for(const auto& attributeWrapper : edge)
         {
-            const auto& attribute = attributeWrapper.get();
-            if(attribute._key == QStringLiteral("source") || attribute._key == QStringLiteral("target"))
+            const auto& keyValue = attributeWrapper.get();
+            if(keyValue._key == QStringLiteral("source") || keyValue._key == QStringLiteral("target"))
                 continue;
 
-            auto attributes = processAttribute(attribute);
+            auto attributes = processAttribute(keyValue);
 
             for(const auto& attribute : attributes)
             {
