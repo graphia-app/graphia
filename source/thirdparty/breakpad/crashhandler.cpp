@@ -23,6 +23,9 @@
 #endif
 
 #ifdef Q_OS_WIN
+
+#include <cwchar>
+
 static void launch(const wchar_t* program, const wchar_t* dmpFile, const wchar_t* dir)
 {
     static STARTUPINFO si = {0};
@@ -30,11 +33,8 @@ static void launch(const wchar_t* program, const wchar_t* dmpFile, const wchar_t
     si.cb = sizeof(si);
 
     static wchar_t commandLine[1024] = {0};
-    wcsncat(commandLine, program, sizeof(commandLine) - 1);
-    wcsncat(commandLine, L" ", sizeof(commandLine) - 1);
-    wcsncat(commandLine, dmpFile, sizeof(commandLine) - 1);
-    wcsncat(commandLine, L" ", sizeof(commandLine) - 1);
-    wcsncat(commandLine, dir, sizeof(commandLine) - 1);
+    swprintf(commandLine, sizeof(commandLine) / sizeof(commandLine[0]),
+        L"%s %s %s", program, dmpFile, dir);
 
     if(!CreateProcess(nullptr, commandLine, nullptr, nullptr, FALSE,
                       CREATE_DEFAULT_ERROR_MODE,
@@ -105,10 +105,8 @@ static bool minidumpCallback(
     }
 
 #if defined(Q_OS_WIN32)
-    wcsncat(path, dumpDir, sizeof(path) - 1);
-    wcsncat(path, L"\\", sizeof(path) - 1);
-    wcsncat(path, minidumpId, sizeof(path) - 1);
-    wcsncat(path, L".dmp", sizeof(path) - 1);
+    swprintf(path, sizeof(path) / sizeof(path[0]),
+        L"%s\\%s.dmp", dumpDir, minidumpId);
 #elif defined(Q_OS_LINUX)
     strncpy(path, md.path(), sizeof(path) - 1);
 #elif defined(Q_OS_MACOS)
@@ -118,7 +116,13 @@ static bool minidumpCallback(
     strncat(path, ".dmp", sizeof(path) - 1);
 #endif
 
-    std::cerr << "Starting " << exe << " " << path << " " << dir << std::endl;
+#ifdef Q_OS_WIN
+    std::wcerr
+#else
+    std::cerr
+#endif
+            << "Starting " << exe << " " << path << " " << dir << std::endl;
+
     launch(exe, path, dir);
 
     // Do not pass on the exception
