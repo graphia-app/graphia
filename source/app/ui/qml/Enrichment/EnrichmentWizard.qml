@@ -23,6 +23,7 @@ Wizard
     property string selectedAttributeGroupA: ""
     property string selectedAttributeGroupB: ""
 
+    nextEnabled: proxyModel.count > 1
     finishEnabled: (attributeSelectedAExclusiveGroup.current != null) && (attributeSelectedBExclusiveGroup.current != null)
 
     function reset()
@@ -105,6 +106,13 @@ Wizard
                         wrapMode: Text.WordWrap
                         textFormat: Text.StyledText
                         Layout.fillWidth: true
+                    }
+                    Text
+                    {
+                        color: "red"
+                        text: qsTr("This dataset does not have enough attribute groups to perform enrichment." +
+                              " At least two groups are required")
+                        visible: proxyModel.count < 2
                     }
                 }
 
