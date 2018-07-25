@@ -31,6 +31,18 @@ ApplicationWindow
     property DocumentUI currentDocument: tabView.currentIndex < tabView.count ?
                                          tabView.getTab(tabView.currentIndex).item : null
 
+    property bool _anyDocumentsBusy:
+    {
+        for(var index = 0; index < tabView.count; index++)
+        {
+            var document = tabView.getTab(index).item;
+            if(document !== null && document.busy)
+                return true;
+        }
+
+        return false;
+    }
+
     title:
     {
         var text = "";
@@ -224,6 +236,8 @@ ApplicationWindow
     OptionsDialog
     {
         id: optionsDialog
+
+        enabled: !mainWindow._anyDocumentsBusy
     }
 
     AboutPluginsDialog

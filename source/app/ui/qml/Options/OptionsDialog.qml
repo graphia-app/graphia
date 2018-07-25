@@ -17,6 +17,8 @@ Window
     minimumWidth: 720
     minimumHeight: 480
 
+    property bool enabled: true
+
     ColumnLayout
     {
         id: column
@@ -28,6 +30,8 @@ Window
             id: tabView
             Layout.fillWidth: true
             Layout.fillHeight: true
+
+            enabled: optionsWindow.enabled
 
             Tab
             {
