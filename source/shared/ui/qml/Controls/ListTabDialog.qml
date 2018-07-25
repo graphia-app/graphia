@@ -5,15 +5,16 @@ import QtQuick.Layouts 1.3
 
 import "../../shared/ui/qml/Constants.js" as Constants
 
-// This dialog is conceptually similar to a tabview in a dialog
-// however the user interface consists of a vertical list with buttons
-// to OPTIONALLY progress through the settings rather than traditional tabs
+// This dialog is conceptually similar to a tabview in a dialog however the user
+// interface consists of a vertical list of tabs with buttons to OPTIONALLY
+// progress through. The transistions are based on Wizard
 //
 // Child Items should be a ListTab with a title string
+// Failing to do so will leave an empty tab title
 BaseParameterDialog
 {
     id: root
-    default property list<Item> listPages
+    default property list<Item> listTabs
     property int currentIndex: 0
     property int enableFinishAtIndex: 0
     property bool nextEnabled: true
@@ -23,12 +24,12 @@ BaseParameterDialog
     readonly property int _padding: 5
     property Item currentItem:
     {
-        return listPages[currentIndex];
+        return listTabs[currentIndex];
     }
 
     modality: Qt.ApplicationModal
 
-    //FIXME Set these based on the content pages
+    //FIXME Set these based on the content tabs
     //minimumWidth: 640
     //minimumHeight: 480
 
@@ -59,8 +60,8 @@ BaseParameterDialog
 
                 ListView
                 {
-                    id: pageSelector
-                    model: listPages.length
+                    id: tabSelector
+                    model: listTabs.length
                     z: 100
                     boundsBehavior: Flickable.StopAtBounds
                     anchors.centerIn: parent
@@ -82,13 +83,13 @@ BaseParameterDialog
                             {
                                 anchors.margins: _padding
                                 anchors.centerIn: parent
-                                text: listPages[index].title;
+                                text: listTabs[index].title
                                 z: 5
                             }
                             MouseArea
                             {
                                 anchors.fill: parent
-                                onClicked: goToPage(index);
+                                onClicked: goToTab(index);
                             }
                         }
                     }
@@ -134,7 +135,7 @@ BaseParameterDialog
                 id: nextButton
                 text: qsTr("Next")
                 onClicked: { root.next(); }
-                enabled: (currentIndex < listPages.length - 1) ? nextEnabled : false
+                enabled: (currentIndex < listTabs.length - 1) ? nextEnabled : false
             }
 
             Button
@@ -142,8 +143,8 @@ BaseParameterDialog
                 id: finishButton
                 text: qsTr("Finish")
                 onClicked: {
-                    if(summaryEnabled && currentIndex !== listPages.length - 1)
-                        goToPage(listPages.length - 1);
+                    if(summaryEnabled && currentIndex !== listTabs.length - 1)
+                        goToTab(listTabs.length - 1);
                     else
                         root.accepted();
                 }
@@ -160,7 +161,7 @@ BaseParameterDialog
 
     function next()
     {
-        if(currentIndex < listPages.length - 1)
+        if(currentIndex < listTabs.length - 1)
         {
             currentIndex++;
             numberAnimation.running = false;
@@ -178,9 +179,9 @@ BaseParameterDialog
         }
     }
 
-    function goToPage(index)
+    function goToTab(index)
     {
-        if(index <= listPages.length - 1 && index >= 0)
+        if(index <= listTabs.length - 1 && index >= 0)
         {
             currentIndex = index;
             numberAnimation.running = false;
@@ -190,9 +191,9 @@ BaseParameterDialog
 
     function indexOf(item)
     {
-        for(var i = 0; i < listPages.length; i++)
+        for(var i = 0; i < listTabs.length; i++)
         {
-            if(listPages[i] === item)
+            if(listTabs[i] === item)
                 return i;
         }
 
@@ -210,13 +211,13 @@ BaseParameterDialog
 
     Component.onCompleted:
     {
-        for(var i = 0; i < listPages.length; i++)
+        for(var i = 0; i < listTabs.length; i++)
         {
-            listPages[i].parent = content;
-            listPages[i].x = Qt.binding(function() {
-                return (indexOf(this) * contentContainer.width + pageSelector.implicitWidth)  });
-            listPages[i].width = Qt.binding(function() { return (contentContainer.width); });
-            listPages[i].height = Qt.binding(function() { return contentContainer.height; });
+            listTabs[i].parent = content;
+            listTabs[i].x = Qt.binding(function() {
+                return (indexOf(this) * contentContainer.width + tabSelector.implicitWidth)  });
+            listTabs[i].width = Qt.binding(function() { return (contentContainer.width); });
+            listTabs[i].height = Qt.binding(function() { return contentContainer.height; });
         }
     }
 

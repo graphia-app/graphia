@@ -917,10 +917,14 @@ ListTabDialog
                     if(preParser.dataRect != Qt.rect(0,0,0,0))
                     {
                         summaryString += "Data Frame:" +
-                                " x: " + preParser.dataRect.x +
-                                " y: " + preParser.dataRect.y +
-                                " width: " + preParser.dataRect.width +
-                                " height: " + preParser.dataRect.height + "\n";
+                                " [ Column:" + preParser.dataRect.x +
+                                " Row:" + preParser.dataRect.y +
+                                " Width:" + preParser.dataRect.width +
+                                " Height:" + preParser.dataRect.height + " ]\n";
+                    }
+                    else
+                    {
+                        summaryString += "Data Frame: Automatic\n";
                     }
                     summaryString += "Data Transpose: " + transposeCheckBox.checked + "\n";
                     summaryString += "Data Scaling: " + scaling.currentText + "\n";
@@ -936,7 +940,7 @@ ListTabDialog
                     if(!transformString)
                         transformString = "None"
                     summaryString += "Intial Transforms: " + transformString;
-                    return summaryString;
+                    return qsTr(summaryString);
                 }
             }
         }
