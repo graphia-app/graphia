@@ -5,6 +5,11 @@ import QtQuick.Layouts 1.3
 
 import "../../shared/ui/qml/Constants.js" as Constants
 
+// This dialog is conceptually similar to a tabview in a dialog
+// however the user interface consists of a vertical list with buttons
+// to OPTIONALLY progress through the settings rather than traditional tabs
+//
+// Child Items should be a ListTab with a title string
 BaseParameterDialog
 {
     id: root

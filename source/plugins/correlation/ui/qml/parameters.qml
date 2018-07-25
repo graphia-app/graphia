@@ -7,7 +7,7 @@ import com.kajeka 1.0
 import "../../../../shared/ui/qml/Constants.js" as Constants
 import "Controls"
 
-Wizard2
+ListTabDialog
 {
     id: root
     //FIXME These should be set automatically by Wizard
@@ -66,7 +66,7 @@ Wizard2
         dataFrameAnimationY.running = true;
     }
 
-    Wizard2Page
+    ListTab
     {
         title: qsTr("Introduction")
         ColumnLayout
@@ -113,7 +113,7 @@ Wizard2
         }
     }
 
-    Wizard2Page
+    ListTab
     {
         title: qsTr("Data Viewer")
         id: dataRectPage
@@ -418,7 +418,7 @@ Wizard2
         Qt.callLater(resizeColumnsToContentsBugWorkaround, dataRectView);
     }
 
-    Wizard2Page
+    ListTab
     {
         title: qsTr("Correlation")
         ColumnLayout
@@ -495,7 +495,7 @@ Wizard2
         }
     }
 
-    Wizard2Page
+    ListTab
     {
         title: qsTr("Data Manipulation")
         ColumnLayout
@@ -757,7 +757,7 @@ Wizard2
         }
     }
 
-    Wizard2Page
+    ListTab
     {
         title: "Initial Transforms"
         ColumnLayout
@@ -885,7 +885,7 @@ Wizard2
         }
     }
 
-    Wizard2Page
+    ListTab
     {
         title: "Summary"
         ColumnLayout

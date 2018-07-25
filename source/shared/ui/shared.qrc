@@ -5,7 +5,7 @@
         <file>qml/Controls/Wizard.qml</file>
         <file>qml/Controls/BaseParameterDialog.qml</file>
         <file>qml/Controls/SlidingPanel.qml</file>
-        <file>qml/Controls/Wizard2.qml</file>
-        <file>qml/Controls/Wizard2Page.qml</file>
+        <file>qml/Controls/ListTabDialog.qml</file>
+        <file>qml/Controls/ListTab.qml</file>
     </qresource>
 </RCC>
