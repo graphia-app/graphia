@@ -155,15 +155,15 @@ Wizard2
             }
         }
 
+        Component
+        {
+            id: columnComponent
+            TableViewColumn { width: 200 }
+        }
+
         ColumnLayout
         {
             anchors.fill: parent
-
-            Component
-            {
-                id: columnComponent
-                TableViewColumn { width: 200 }
-            }
 
             Text
             {
@@ -182,32 +182,25 @@ Wizard2
 
             RowLayout
             {
-                RowLayout
+                CheckBox
                 {
-                    RowLayout
-                    {
-                        CheckBox
-                        {
-                            id: transposeCheckBox
+                    id: transposeCheckBox
 
-                            Layout.alignment: Qt.AlignLeft
-                            text: qsTr("Transpose Dataset")
-                            onCheckedChanged:
-                            {
-                                parameters.transpose = checked;
-                                preParser.transposed = checked;
-                            }
-                        }
-                        HelpTooltip
-                        {
-                            title: qsTr("Transpose")
-                            Text
-                            {
-                                text: qsTr("Transpose will flip the data over it's diagonal. Moving rows to columns and vice versa")
-                                Layout.alignment: Qt.AlignTop
-                                textFormat: Text.StyledText
-                            }
-                        }
+                    text: qsTr("Transpose Dataset")
+                    onCheckedChanged:
+                    {
+                        parameters.transpose = checked;
+                        preParser.transposed = checked;
+                    }
+                }
+                HelpTooltip
+                {
+                    title: qsTr("Transpose")
+                    Text
+                    {
+                        text: qsTr("Transpose will flip the data over it's diagonal. Moving rows to columns and vice versa")
+                        Layout.alignment: Qt.AlignTop
+                        textFormat: Text.StyledText
                     }
                 }
             }

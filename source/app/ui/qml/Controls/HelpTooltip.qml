@@ -17,7 +17,7 @@ ToolButton
     width: 20
     height: 20
 
-    onContentChanged: { content.parent = containerLayout; }
+    onContentChanged: { content.parent = containerLayout; content.anchors.fill = parent }
 
     style: ButtonStyle
     {
@@ -39,8 +39,9 @@ ToolButton
         {
             if(containsMouse)
             {
-                tooltip.x = root.mapToGlobal(root.width, 0).x + _offset
-                tooltip.y = root.mapToGlobal(0, 0).y - (tooltip.height * 0.5)
+                tooltip.x = root.mapToGlobal(root.width, 0).x + _offset;
+                tooltip.y = root.mapToGlobal(0, 0).y - (wrapperLayout.implicitHeight * 0.5);
+
                 hoverTimer.start();
             }
             else
@@ -54,12 +55,15 @@ ToolButton
     Window
     {
         id: tooltip
-        width: Math.min(wrapperLayout.implicitWidth, maximumToolTipWidth) + _padding
-        height: Math.min(wrapperLayout.implicitHeight, maximumToolTipHeight) + _padding
+        maximumWidth: maximumToolTipWidth
+        height: backRectangle.height
+        width: backRectangle.width
         // Magic flags: No shadows, transparent, no focus snatching, no border
         flags: Qt.ToolTip | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Popup
         color: "#00000000"
         opacity: 0
+        x: 0
+        y: 0
 
         onVisibilityChanged:
         {
@@ -73,7 +77,6 @@ ToolButton
                 duration: 100
             }
         }
-
         SystemPalette
         {
             id: sysPalette
@@ -85,8 +88,8 @@ ToolButton
             color: Qt.rgba(0.96, 0.96, 0.96, 0.9)
             border.width: 1
             border.color: sysPalette.dark
-            width: Math.min(wrapperLayout.implicitWidth, maximumToolTipWidth) + _padding
-            height: Math.min(wrapperLayout.implicitHeight, maximumToolTipHeight) + _padding
+            width: wrapperLayout.width + _padding
+            height:  wrapperLayout.height + _padding
             radius: 3
         }
 
@@ -94,8 +97,13 @@ ToolButton
         {
             id: wrapperLayout
             anchors.centerIn: backRectangle
-            anchors.fill: parent
-            anchors.margins: _padding * 0.5
+            onWidthChanged:
+            {
+                // Clip widths if we have to. This allows wrapping
+                if(width > maximumToolTipWidth)
+                    width = maximumToolTipWidth;
+            }
+
             Text
             {
                 text: root.title
@@ -104,8 +112,6 @@ ToolButton
             ColumnLayout
             {
                 id: containerLayout
-                Layout.fillWidth: true
-                Layout.fillHeight: true
             }
         }
     }
