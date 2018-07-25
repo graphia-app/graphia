@@ -4,8 +4,10 @@
 #include "shared/utils/thread.h"
 #include "shared/utils/utils.h"
 #include "shared/utils/random.h"
+#include "shared/utils/color.h"
 
 #include <QDesktopServices>
+#include <QSet>
 
 #include <cmath>
 
@@ -101,7 +103,13 @@ void CorrelationPlotWorker::renderPixmap()
     }
 
     _customPlot->setGeometry(0, 0, _width, _height);
-    _customPlot->xAxis->setRange(_xAxisMin, _xAxisMax);
+
+    for(auto element : _customPlot->plotLayout()->elements(false))
+    {
+        auto axisRect = dynamic_cast<QCPAxisRect*>(element);
+        if(axisRect != nullptr)
+            axisRect->axis(QCPAxis::atBottom)->setRange(_xAxisMin, _xAxisMax);
+    }
 
     if(_updateType >= CorrelationPlotUpdateType::RenderAndTooltips)
         _tooltipLayer->replot();
@@ -412,6 +420,18 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max)
     return yDataAvg;
 }
 
+void CorrelationPlotItem::updateColumnAnnotaionVisibility()
+{
+    auto mainPlotHeight = height() - columnAnnotaionsHeight();
+    bool showColumnAnnotations = mainPlotHeight >= 100;
+
+    if(showColumnAnnotations != _showColumnAnnotations)
+    {
+        _showColumnAnnotations = showColumnAnnotations;
+        rebuildPlot();
+    }
+}
+
 void CorrelationPlotItem::populateMeanLinePlot()
 {
     double maxY = 0.0;
@@ -440,8 +460,7 @@ void CorrelationPlotItem::populateMeanLinePlot()
                 .arg(_selectedRows.length()));
     plotModeTextElement->setVisible(true);
 
-    _customPlot.plotLayout()->insertRow(1);
-    _customPlot.plotLayout()->addElement(1, 0, plotModeTextElement);
+    _customPlot.plotLayout()->addElement(_customPlot.plotLayout()->rowCount(), 0, plotModeTextElement);
 
     _customPlot.yAxis->setRange(minY, maxY);
 }
@@ -499,8 +518,7 @@ void CorrelationPlotItem::populateMedianLinePlot()
                 .arg(_selectedRows.length())));
     plotModeTextElement->setVisible(true);
 
-    _customPlot.plotLayout()->insertRow(1);
-    _customPlot.plotLayout()->addElement(1, 0, plotModeTextElement);
+    _customPlot.plotLayout()->addElement(_customPlot.plotLayout()->rowCount(), 0, plotModeTextElement);
 
     _customPlot.yAxis->setRange(minY, maxY);
 }
@@ -534,8 +552,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
                 .arg(_selectedRows.length()));
     plotModeTextElement->setVisible(true);
 
-    _customPlot.plotLayout()->insertRow(1);
-    _customPlot.plotLayout()->addElement(1, 0, plotModeTextElement);
+    _customPlot.plotLayout()->addElement(_customPlot.plotLayout()->rowCount(), 0, plotModeTextElement);
 
     _customPlot.yAxis->setRange(minY, maxY);
 }
@@ -643,8 +660,7 @@ void CorrelationPlotItem::populateIQRPlot()
                 .arg(_selectedRows.length()));
     plotModeTextElement->setVisible(true);
 
-    _customPlot.plotLayout()->insertRow(1);
-    _customPlot.plotLayout()->addElement(1, 0, plotModeTextElement);
+    _customPlot.plotLayout()->addElement(_customPlot.plotLayout()->rowCount(), 0, plotModeTextElement);
 
     _customPlot.yAxis->setRange(minY, maxY);
 }
@@ -881,6 +897,116 @@ void CorrelationPlotItem::populateLinePlot()
     _customPlot.yAxis->setRange(minY, maxY);
 }
 
+QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
+{
+    if(!_showColumnAnnotations || _columnAnnotations.empty())
+        return xAxis;
+
+    QCPAxisRect* columnAnnotationsAxisRect = new QCPAxisRect(&_customPlot);
+    _customPlot.plotLayout()->addElement(_customPlot.plotLayout()->rowCount(),
+        0, columnAnnotationsAxisRect);
+
+    const auto separation = 8;
+    _customPlot.axisRect()->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msTop);
+    _customPlot.axisRect()->setMargins(QMargins(0, 0, 0, separation));
+    columnAnnotationsAxisRect->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msBottom);
+    columnAnnotationsAxisRect->setMargins(QMargins(0, 0, separation, 0));
+
+    // Align the left and right hand sides of the axes
+    QCPMarginGroup* group = new QCPMarginGroup(&_customPlot);
+    _customPlot.axisRect()->setMarginGroup(QCP::msLeft|QCP::msRight, group);
+    columnAnnotationsAxisRect->setMarginGroup(QCP::msLeft|QCP::msRight, group);
+
+    xAxis->setTickLabels(false);
+
+    auto caXAxis = columnAnnotationsAxisRect->axis(QCPAxis::atBottom);
+    auto caYAxis = columnAnnotationsAxisRect->axis(QCPAxis::atLeft);
+    QCPColorMap* colorMap = new QCPColorMap(caXAxis, caYAxis);
+
+    QCPColorScale *colorScale = new QCPColorScale(&_customPlot);
+    colorMap->setColorScale(colorScale);
+    colorMap->setInterpolate(false);
+
+    size_t numColumnAnnotations = _columnAnnotations.size();
+    colorMap->data()->setSize(_columnCount, numColumnAnnotations);
+
+    QSize columnAnnotationsDisplaySize(QWIDGETSIZE_MAX, columnAnnotaionsHeight());
+    columnAnnotationsAxisRect->setMinimumSize(columnAnnotationsDisplaySize);
+    columnAnnotationsAxisRect->setMaximumSize(columnAnnotationsDisplaySize);
+
+    auto range = 1.0;
+    auto padding = 0.0;
+    if(numColumnAnnotations > 1)
+    {
+        range = numColumnAnnotations - 1.0;
+        padding = 0.5;
+    }
+
+    caYAxis->setRange(0.0 - padding, range + padding);
+
+    colorMap->data()->setRange(QCPRange(0, _columnCount - 1), QCPRange(0, range));
+
+    QSet<QString> uniqueValues;
+
+    for(const auto& columnAnnotation : _columnAnnotations)
+    {
+        auto columnAnnotationMap = columnAnnotation.toMap();
+
+        for(const auto& value : columnAnnotationMap[QStringLiteral("values")].toStringList())
+            uniqueValues.insert(value);
+    }
+
+    std::map<QString, double> stringColorIndexMap;
+
+    QCPColorGradient colorGradient;
+    colorGradient.setLevelCount(uniqueValues.size());
+
+    int i = 0;
+    for(const auto& value : uniqueValues)
+    {
+        auto index = uniqueValues.size() == 1 ? 0.0 :
+            static_cast<double>(i++) / (uniqueValues.size() - 1);
+        stringColorIndexMap[value] = index;
+        auto color = u::colorForString(value);
+
+        colorGradient.setColorStopAt(index, color);
+    }
+
+    QSharedPointer<QCPAxisTickerText> columnAnnotationTicker(new QCPAxisTickerText);
+
+    for(size_t y = 0U; y < numColumnAnnotations; y++)
+    {
+        auto index = (numColumnAnnotations - y) - 1;
+        const auto& columnAnnotation = _columnAnnotations.at(index);
+        auto columnAnnotationMap = columnAnnotation.toMap();
+
+        auto name = columnAnnotationMap[QStringLiteral("name")].toString();
+
+        double tickPosition = numColumnAnnotations > 1 ? static_cast<double>(y) : 0.5;
+        columnAnnotationTicker->addTick(tickPosition, name);
+
+        const auto values = columnAnnotationMap[QStringLiteral("values")].toStringList();
+        for(size_t x = 0U; x < _columnCount; x++)
+        {
+            auto stringValue = values.at(x);
+            auto cellValue = stringColorIndexMap[stringValue];
+            colorMap->data()->setCell(x, y, cellValue);
+        }
+    }
+
+    colorMap->setGradient(colorGradient);
+    colorMap->rescaleDataRange();
+
+    caYAxis->setTicker(columnAnnotationTicker);
+
+    caXAxis->grid()->setVisible(false);
+    caYAxis->grid()->setVisible(false);
+
+    xAxis = caXAxis;
+
+    return xAxis;
+}
+
 void CorrelationPlotItem::configureLegend()
 {
     if(_selectedRows.empty() || !_showLegend)
@@ -1051,37 +1177,49 @@ void CorrelationPlotItem::rebuildPlot()
             populateStdErrorPlot();
     }
 
+    QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
+
+    _customPlot.xAxis->setLabel({});
+    _customPlot.xAxis->setTicker(categoryTicker);
+
+    _customPlot.plotLayout()->setRowSpacing(0);
+    _customPlot.axisRect()->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msTop|QCP::msBottom);
+    _customPlot.axisRect()->setMargins(QMargins(0, 0, 0, 0));
+
+    QCPAxis* xAxis = configureColumnAnnotations(_customPlot.xAxis);
+
     configureLegend();
 
-    QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
-    _customPlot.xAxis->setTicker(categoryTicker);
-    _customPlot.xAxis->setTickLabelRotation(90);
+    xAxis->setTicker(categoryTicker);
+    xAxis->setTickLabelRotation(90);
+    xAxis->setTickLabels(_showColumnNames && (_elideLabelWidth > 0));
 
-    _customPlot.xAxis->setLabel(_xAxisLabel);
+    xAxis->setLabel(_xAxisLabel);
     _customPlot.yAxis->setLabel(_yAxisLabel);
 
     _customPlot.xAxis->grid()->setVisible(_showGridLines);
     _customPlot.yAxis->grid()->setVisible(_showGridLines);
 
-    if(_showColumnNames)
-    {
-        if(_elideLabelWidth > 0)
-        {
-            QFontMetrics metrics(_defaultFont9Pt);
-            int column = 0;
+    // Don't show an emphasised vertical zero line
+    _customPlot.xAxis->grid()->setZeroLinePen(_customPlot.xAxis->grid()->pen());
 
-            for(auto& labelName : _labelNames)
-                categoryTicker->addTick(column++, metrics.elidedText(labelName, Qt::ElideRight, _elideLabelWidth));
-        }
+    int tickColumn = 0;
+    for(auto& labelName : _labelNames)
+    {
+        categoryTicker->addTick(tickColumn++,
+            QFontMetrics(_defaultFont9Pt).elidedText(labelName, Qt::ElideRight, _elideLabelWidth));
+    }
+
+    if(_elideLabelWidth <= 0)
+    {
+        // There is no room to display labels, so show a warning instead
+        QString warning = !_showColumnAnnotations ? tr("Resize To Expose Column Information") :
+            tr("Resize To Expose Column Names");
+
+        if(!_xAxisLabel.isEmpty())
+            xAxis->setLabel(QString(QStringLiteral("%1 (%2)")).arg(_xAxisLabel, warning));
         else
-        {
-            // There is no room to display labels, so show a warning instead
-            QString warning = tr("Resize To Expose Column Names");
-            if(!_xAxisLabel.isEmpty())
-                _customPlot.xAxis->setLabel(QString(QStringLiteral("%1 (%2)")).arg(_xAxisLabel, warning));
-            else
-                _customPlot.xAxis->setLabel(warning);
-        }
+            xAxis->setLabel(warning);
     }
 
     _customPlot.setBackground(Qt::transparent);
@@ -1095,10 +1233,10 @@ void CorrelationPlotItem::rebuildPlot()
 void CorrelationPlotItem::computeXAxisRange()
 {
     auto min = 0.0;
-    auto max = static_cast<double>(_columnCount);
+    auto max = static_cast<double>(_columnCount - 1);
     if(_showColumnNames)
     {
-        auto maxVisibleColumns = columnAxisWidth() / columnLabelWidth();
+        auto maxVisibleColumns = columnAxisWidth() / labelHeight();
         auto numHiddenColumns = max - maxVisibleColumns;
 
         if(numHiddenColumns > 0.0)
@@ -1108,6 +1246,10 @@ void CorrelationPlotItem::computeXAxisRange()
             max = position + maxVisibleColumns;
         }
     }
+
+    const auto padding = 0.5;
+    min -= padding;
+    max += padding;
 
     QMetaObject::invokeMethod(_worker, "setXAxisRange",
         Q_ARG(double, min), Q_ARG(double, max));
@@ -1222,12 +1364,12 @@ void CorrelationPlotItem::setHorizontalScrollPosition(double horizontalScrollPos
 double CorrelationPlotItem::visibleHorizontalFraction()
 {
     if(_showColumnNames)
-        return (columnAxisWidth() / (columnLabelWidth() * _columnCount));
+        return (columnAxisWidth() / (labelHeight() * _columnCount));
 
     return 1.0;
 }
 
-double CorrelationPlotItem::columnLabelWidth()
+double CorrelationPlotItem::labelHeight()
 {
     QFontMetrics metrics(_defaultFont9Pt);
     const unsigned int columnPadding = 1;
@@ -1243,9 +1385,15 @@ double CorrelationPlotItem::columnAxisWidth()
     return width() - axisWidth;
 }
 
+double CorrelationPlotItem::columnAnnotaionsHeight()
+{
+    return _columnAnnotations.size() * labelHeight();
+}
+
 void CorrelationPlotItem::updatePlotSize()
 {
     computeXAxisRange();
+    updateColumnAnnotaionVisibility();
     updatePixmap(CorrelationPlotUpdateType::Render);
 }
 

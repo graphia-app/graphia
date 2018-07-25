@@ -418,8 +418,10 @@ QStringList CorrelationPluginInstance::columnNames()
 {
     QStringList list;
     list.reserve(static_cast<int>(_dataColumnNames.size()));
+
     for(const auto& name : _dataColumnNames)
         list.append(name);
+
     return list;
 }
 
@@ -428,8 +430,20 @@ QStringList CorrelationPluginInstance::rowNames()
     QStringList list;
     list.reserve(static_cast<int>(_numRows));
 
+    auto firstColumn = _userNodeData.begin();
     for(size_t i = 0; i < _numRows; i++)
-        list.append(_userNodeData.begin()->get(i));
+        list.append(firstColumn->get(i));
+
+    return list;
+}
+
+QStringList CorrelationPluginInstance::columnAttributeNames()
+{
+    QStringList list;
+    list.reserve(static_cast<int>(_userColumnData.vectorNames().size()));
+
+    for(const auto& name : _userColumnData.vectorNames())
+        list.append(name);
 
     return list;
 }

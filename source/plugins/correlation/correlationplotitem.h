@@ -11,6 +11,7 @@
 #include <QVector>
 #include <QMap>
 #include <QStringList>
+#include <QVariantList>
 #include <QElapsedTimer>
 #include <QThread>
 #include <QPixmap>
@@ -102,6 +103,9 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(QVector<QColor> rowColors MEMBER _rowColors WRITE setRowColors)
     Q_PROPERTY(QStringList columnNames MEMBER _labelNames WRITE setLabelNames)
     Q_PROPERTY(QStringList rowNames MEMBER _graphNames)
+
+    Q_PROPERTY(QVariantList columnAnnotations MEMBER _columnAnnotations)
+
     Q_PROPERTY(size_t columnCount MEMBER _columnCount WRITE setColumnCount)
     Q_PROPERTY(size_t rowCount MEMBER _rowCount)
     Q_PROPERTY(int elideLabelWidth MEMBER _elideLabelWidth WRITE setElideLabelWidth)
@@ -166,6 +170,7 @@ private:
     QVector<double> _data;
     QVector<int> _selectedRows;
     QVector<QColor> _rowColors;
+    QVariantList _columnAnnotations;
     bool _showColumnNames = true;
     bool _showGridLines = true;
     bool _showLegend = false;
@@ -176,6 +181,8 @@ private:
     double _horizontalScrollPosition = 0.0;
     QString _xAxisLabel;
     QString _yAxisLabel;
+
+    bool _showColumnAnnotations = true;
 
     QCPLayer* _lineGraphLayer = nullptr;
 
@@ -205,7 +212,6 @@ private:
 
     bool busy() const { return _worker != nullptr ? _worker->busy() : false; }
 
-private:
     void setSelectedRows(const QVector<int>& selectedRows);
     void setRowColors(const QVector<QColor>& rowColors);
     void setLabelNames(const QStringList& labelNames);
@@ -219,10 +225,14 @@ private:
     void computeXAxisRange();
     QVector<double> meanAverageData(double& min, double& max);
 
-    double visibleHorizontalFraction();
-    double columnLabelWidth();
-    double columnAxisWidth();
+    void updateColumnAnnotaionVisibility();
 
+    double visibleHorizontalFraction();
+    double labelHeight();
+    double columnAxisWidth();
+    double columnAnnotaionsHeight();
+
+    QCPAxis* configureColumnAnnotations(QCPAxis* xAxis);
     void configureLegend();
 
     void invalidateLineGraphCache();

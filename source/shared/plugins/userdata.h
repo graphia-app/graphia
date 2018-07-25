@@ -19,7 +19,7 @@ class UserData
 private:
     // This is not a map because the data needs to be ordered
     std::vector<std::pair<QString, UserDataVector>> _userDataVectors;
-    QSet<QString> _vectorNames;
+    std::vector<QString> _vectorNames;
     int _numValues = 0;
 
 public:
@@ -30,7 +30,7 @@ public:
 
     bool empty() const { return _userDataVectors.empty(); }
 
-    QSet<QString> vectorNames() const;
+    std::vector<QString> vectorNames() const;
 
     auto begin() const { return make_pair_second_iterator(_userDataVectors.begin()); }
     auto end() const { return make_pair_second_iterator(_userDataVectors.end()); }

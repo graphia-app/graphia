@@ -20,7 +20,7 @@ int UserData::numValues() const
     return _numValues;
 }
 
-QSet<QString> UserData::vectorNames() const
+std::vector<QString> UserData::vectorNames() const
 {
     return _vectorNames;
 }
@@ -32,7 +32,7 @@ UserDataVector& UserData::add(QString name)
 
     if(!u::contains(_vectorNames, name))
     {
-        _vectorNames.insert(name);
+        _vectorNames.emplace_back(name);
         _userDataVectors.emplace_back(std::make_pair(name, UserDataVector(name)));
         return _userDataVectors.back().second;
     }
@@ -130,7 +130,7 @@ bool UserData::load(const json& jsonObject, const ProgressFn& progressFn)
         if(!userDataVector.load(name, jsonVector))
             return false;
 
-        _vectorNames.insert(name);
+        _vectorNames.emplace_back(name);
         _userDataVectors.emplace_back(std::make_pair(name, userDataVector));
 
         progressFn(static_cast<int>((i++ * 100) / vectorsObject.size()));
