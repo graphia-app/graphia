@@ -55,7 +55,6 @@ ToolButton
     Window
     {
         id: tooltip
-        maximumWidth: maximumToolTipWidth
         height: backRectangle.height
         width: backRectangle.width
         // Magic flags: No shadows, transparent, no focus snatching, no border
@@ -103,11 +102,12 @@ ToolButton
                 if(width > maximumToolTipWidth)
                     width = maximumToolTipWidth;
             }
+            width: containerLayout.width
 
             Text
             {
                 text: root.title
-                font.pointSize: 12
+                font.pointSize: 15
             }
             ColumnLayout
             {

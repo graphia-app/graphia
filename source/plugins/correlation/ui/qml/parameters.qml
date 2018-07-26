@@ -198,9 +198,9 @@ ListTabDialog
                     title: qsTr("Transpose")
                     Text
                     {
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
                         text: qsTr("Transpose will flip the data over it's diagonal. Moving rows to columns and vice versa")
-                        Layout.alignment: Qt.AlignTop
-                        textFormat: Text.StyledText
                     }
                 }
             }
@@ -549,7 +549,7 @@ ListTabDialog
 
                     HelpTooltip
                     {
-                        title: "Imputation"
+                        title: qsTr("Imputation")
                         GridLayout
                         {
                             columns: 2

@@ -53,7 +53,27 @@ BaseParameterDialog
             Rectangle
             {
                 Layout.fillHeight: true
-                width: 100
+                Layout.preferredWidth: width
+                width:
+                {
+                    // Adjust width to match text contents
+                    var maxWidth = 100;
+
+                    for(var i = 0; i<listTabs.length; i++)
+                    {
+                        var delegateItem = tabSelector.contentItem.children[i];
+                        if(delegateItem === undefined)
+                            continue;
+
+                        if(delegateItem.children.length === 0)
+                            continue;
+
+                        maxWidth = Math.max(delegateItem.children[0].children[0].contentWidth + 5,
+                                 maxWidth);
+                    }
+                    return maxWidth;
+                }
+
                 border.width: 1
                 border.color: systemPalette.mid
                 z: -1
