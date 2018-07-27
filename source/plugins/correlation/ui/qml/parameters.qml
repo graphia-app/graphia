@@ -199,7 +199,6 @@ ListTabDialog
                     Text
                     {
                         wrapMode: Text.WordWrap
-                        Layout.fillWidth: true
                         text: qsTr("Transpose will flip the data over it's diagonal. Moving rows to columns and vice versa")
                     }
                 }

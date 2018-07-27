@@ -17,7 +17,14 @@ ToolButton
     width: 20
     height: 20
 
-    onContentChanged: { content.parent = containerLayout; content.anchors.fill = parent }
+    onContentChanged:
+    {
+        // Parent to the container
+        content.parent = containerLayout;
+        content.anchors.fill = parent;
+        // Set to fill layout to allow for text wrapping
+        content.Layout.fillWidth = true;
+    }
 
     style: ButtonStyle
     {
