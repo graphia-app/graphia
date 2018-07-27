@@ -1217,10 +1217,14 @@ void CorrelationPlotItem::rebuildPlot()
     if(_elideLabelWidth <= 0)
     {
         // There is no room to display labels, so show a warning instead
-        QString warning = !_showColumnAnnotations ? tr("Resize To Expose Column Information") :
-            tr("Resize To Expose Column Names");
+        QString warning;
 
-        if(!_xAxisLabel.isEmpty())
+        if(!_showColumnAnnotations && !_visibleColumnAnnotationNames.empty())
+            warning = tr("Resize To Expose Column Information");
+        else if(_showColumnNames)
+            warning = tr("Resize To Expose Column Names");
+
+        if(!_xAxisLabel.isEmpty() && !warning.isEmpty())
             xAxis->setLabel(QString(QStringLiteral("%1 (%2)")).arg(_xAxisLabel, warning));
         else
             xAxis->setLabel(warning);
