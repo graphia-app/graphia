@@ -1000,6 +1000,9 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 
     caYAxis->setTicker(columnAnnotationTicker);
 
+    caXAxis->setBasePen(QPen(Qt::transparent));
+    caYAxis->setBasePen(QPen(Qt::transparent));
+
     caXAxis->grid()->setVisible(false);
     caYAxis->grid()->setVisible(false);
 
