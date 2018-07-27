@@ -4,6 +4,8 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 1.5
 import QtQuick.Controls.Styles 1.4
 
+import "../"
+
 ToolButton
 {
     id: root
@@ -114,7 +116,7 @@ ToolButton
             Text
             {
                 text: root.title
-                font.pointSize: 15
+                font.pointSize: FontPointSize.h2
             }
             ColumnLayout
             {

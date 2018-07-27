@@ -7,5 +7,9 @@
         <file>qml/Controls/SlidingPanel.qml</file>
         <file>qml/Controls/ListTabDialog.qml</file>
         <file>qml/Controls/ListTab.qml</file>
+        <file>qml/Controls/HelpTooltip.qml</file>
+        <file>qml/Controls/Hubble.qml</file>
+        <file>qml/FontPointSize.qml</file>
+        <file>qml/qmldir</file>
     </qresource>
 </RCC>

@@ -4,6 +4,7 @@ import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 
 import com.kajeka 1.0
+import "../"
 
 Item
 {
@@ -105,7 +106,7 @@ Item
             Text
             {
                 text: title
-                font.pointSize: 15
+                font.pointSize: FontPointSize.h2
             }
         }
 
