@@ -5,6 +5,7 @@
 #include "shared/utils/utils.h"
 #include "shared/utils/random.h"
 #include "shared/utils/color.h"
+#include "shared/utils/container.h"
 
 #include <QDesktopServices>
 #include <QSet>
@@ -899,7 +900,7 @@ void CorrelationPlotItem::populateLinePlot()
 
 QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 {
-    if(!_showColumnAnnotations || _columnAnnotations.empty())
+    if(!_showColumnAnnotations || _visibleColumnAnnotations.empty())
         return xAxis;
 
     QCPAxisRect* columnAnnotationsAxisRect = new QCPAxisRect(&_customPlot);
@@ -927,7 +928,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
     colorMap->setColorScale(colorScale);
     colorMap->setInterpolate(false);
 
-    size_t numColumnAnnotations = _columnAnnotations.size();
+    size_t numColumnAnnotations = _visibleColumnAnnotations.size();
     colorMap->data()->setSize(_columnCount, numColumnAnnotations);
 
     QSize columnAnnotationsDisplaySize(QWIDGETSIZE_MAX, columnAnnotaionsHeight());
@@ -946,14 +947,15 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 
     colorMap->data()->setRange(QCPRange(0, _columnCount - 1), QCPRange(0, range));
 
-    QSet<QString> uniqueValues;
+    std::set<QString> uniqueValues;
 
     for(const auto& columnAnnotation : _columnAnnotations)
     {
-        auto columnAnnotationMap = columnAnnotation.toMap();
+        if(!u::contains(_visibleColumnAnnotations, columnAnnotation._name))
+            continue;
 
-        for(const auto& value : columnAnnotationMap[QStringLiteral("values")].toStringList())
-            uniqueValues.insert(value);
+        for(const auto& value : columnAnnotation._values)
+            uniqueValues.emplace(value);
     }
 
     std::map<QString, double> stringColorIndexMap;
@@ -974,24 +976,23 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 
     QSharedPointer<QCPAxisTickerText> columnAnnotationTicker(new QCPAxisTickerText);
 
-    for(size_t y = 0U; y < numColumnAnnotations; y++)
+    size_t y = numColumnAnnotations - 1;
+    for(const auto& columnAnnotation : _columnAnnotations)
     {
-        auto index = (numColumnAnnotations - y) - 1;
-        const auto& columnAnnotation = _columnAnnotations.at(index);
-        auto columnAnnotationMap = columnAnnotation.toMap();
-
-        auto name = columnAnnotationMap[QStringLiteral("name")].toString();
+        if(!u::contains(_visibleColumnAnnotations, columnAnnotation._name))
+            continue;
 
         double tickPosition = numColumnAnnotations > 1 ? static_cast<double>(y) : 0.5;
-        columnAnnotationTicker->addTick(tickPosition, name);
+        columnAnnotationTicker->addTick(tickPosition, columnAnnotation._name);
 
-        const auto values = columnAnnotationMap[QStringLiteral("values")].toStringList();
         for(size_t x = 0U; x < _columnCount; x++)
         {
-            auto stringValue = values.at(x);
+            auto stringValue = columnAnnotation._values.at(x);
             auto cellValue = stringColorIndexMap[stringValue];
             colorMap->data()->setCell(x, y, cellValue);
         }
+
+        y--;
     }
 
     colorMap->setGradient(colorGradient);
@@ -1361,6 +1362,19 @@ void CorrelationPlotItem::setHorizontalScrollPosition(double horizontalScrollPos
     updatePixmap(CorrelationPlotUpdateType::Render);
 }
 
+void CorrelationPlotItem::setColumnAnnotations(const QVariantList& columnAnnotations)
+{
+    for(const auto& columnAnnotation : columnAnnotations)
+    {
+        auto columnAnnotaionMap = columnAnnotation.toMap();
+        auto name = columnAnnotaionMap[QStringLiteral("name")].toString();
+        auto values = columnAnnotaionMap[QStringLiteral("values")].toStringList();
+
+        _visibleColumnAnnotations.emplace(name);
+        _columnAnnotations.push_back({name, values});
+    }
+}
+
 double CorrelationPlotItem::visibleHorizontalFraction()
 {
     if(_showColumnNames)
@@ -1387,7 +1401,7 @@ double CorrelationPlotItem::columnAxisWidth()
 
 double CorrelationPlotItem::columnAnnotaionsHeight()
 {
-    return _columnAnnotations.size() * labelHeight();
+    return _visibleColumnAnnotations.size() * labelHeight();
 }
 
 void CorrelationPlotItem::updatePlotSize()

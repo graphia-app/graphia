@@ -17,6 +17,8 @@
 #include <QPixmap>
 #include <QOffscreenSurface>
 
+#include <vector>
+#include <set>
 #include <mutex>
 #include <atomic>
 
@@ -104,7 +106,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(QStringList columnNames MEMBER _labelNames WRITE setLabelNames)
     Q_PROPERTY(QStringList rowNames MEMBER _graphNames)
 
-    Q_PROPERTY(QVariantList columnAnnotations MEMBER _columnAnnotations)
+    Q_PROPERTY(QVariantList columnAnnotations WRITE setColumnAnnotations)
 
     Q_PROPERTY(size_t columnCount MEMBER _columnCount WRITE setColumnCount)
     Q_PROPERTY(size_t rowCount MEMBER _rowCount)
@@ -170,7 +172,6 @@ private:
     QVector<double> _data;
     QVector<int> _selectedRows;
     QVector<QColor> _rowColors;
-    QVariantList _columnAnnotations;
     bool _showColumnNames = true;
     bool _showGridLines = true;
     bool _showLegend = false;
@@ -182,6 +183,15 @@ private:
     QString _xAxisLabel;
     QString _yAxisLabel;
 
+    struct ColumnAnnotation
+    {
+        QString _name;
+        QStringList _values;
+    };
+
+    std::vector<ColumnAnnotation> _columnAnnotations;
+
+    std::set<QString> _visibleColumnAnnotations;
     bool _showColumnAnnotations = true;
 
     QCPLayer* _lineGraphLayer = nullptr;
@@ -221,6 +231,7 @@ private:
     void setShowGridLines(bool showGridLines);
     void setShowLegend(bool showLegend);
     void setHorizontalScrollPosition(double horizontalScrollPosition);
+    void setColumnAnnotations(const QVariantList& columnAnnotations);
 
     void computeXAxisRange();
     QVector<double> meanAverageData(double& min, double& max);
