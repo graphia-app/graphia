@@ -900,7 +900,7 @@ void CorrelationPlotItem::populateLinePlot()
 
 QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 {
-    if(!_showColumnAnnotations || _visibleColumnAnnotations.empty())
+    if(!_showColumnAnnotations || _visibleColumnAnnotationNames.empty())
         return xAxis;
 
     QCPAxisRect* columnAnnotationsAxisRect = new QCPAxisRect(&_customPlot);
@@ -928,7 +928,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
     colorMap->setColorScale(colorScale);
     colorMap->setInterpolate(false);
 
-    size_t numColumnAnnotations = _visibleColumnAnnotations.size();
+    size_t numColumnAnnotations = _visibleColumnAnnotationNames.size();
     colorMap->data()->setSize(_columnCount, numColumnAnnotations);
 
     QSize columnAnnotationsDisplaySize(QWIDGETSIZE_MAX, columnAnnotaionsHeight());
@@ -951,7 +951,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 
     for(const auto& columnAnnotation : _columnAnnotations)
     {
-        if(!u::contains(_visibleColumnAnnotations, columnAnnotation._name))
+        if(!u::contains(_visibleColumnAnnotationNames, columnAnnotation._name))
             continue;
 
         for(const auto& value : columnAnnotation._values)
@@ -979,7 +979,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
     size_t y = numColumnAnnotations - 1;
     for(const auto& columnAnnotation : _columnAnnotations)
     {
-        if(!u::contains(_visibleColumnAnnotations, columnAnnotation._name))
+        if(!u::contains(_visibleColumnAnnotationNames, columnAnnotation._name))
             continue;
 
         double tickPosition = numColumnAnnotations > 1 ? static_cast<double>(y) : 0.5;
@@ -1370,9 +1370,16 @@ void CorrelationPlotItem::setColumnAnnotations(const QVariantList& columnAnnotat
         auto name = columnAnnotaionMap[QStringLiteral("name")].toString();
         auto values = columnAnnotaionMap[QStringLiteral("values")].toStringList();
 
-        _visibleColumnAnnotations.emplace(name);
+        _visibleColumnAnnotationNames.emplace(name);
         _columnAnnotations.push_back({name, values});
     }
+}
+
+void CorrelationPlotItem::setVisibleColumnAnnotationNames(const QStringList& columnAnnotations)
+{
+    _visibleColumnAnnotationNames.clear();
+    for(const auto& columnAnnotation : columnAnnotations)
+        _visibleColumnAnnotationNames.emplace(columnAnnotation);
 }
 
 double CorrelationPlotItem::visibleHorizontalFraction()
@@ -1401,7 +1408,7 @@ double CorrelationPlotItem::columnAxisWidth()
 
 double CorrelationPlotItem::columnAnnotaionsHeight()
 {
-    return _visibleColumnAnnotations.size() * labelHeight();
+    return _visibleColumnAnnotationNames.size() * labelHeight();
 }
 
 void CorrelationPlotItem::updatePlotSize()

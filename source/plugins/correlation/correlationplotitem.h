@@ -107,6 +107,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(QStringList rowNames MEMBER _graphNames)
 
     Q_PROPERTY(QVariantList columnAnnotations WRITE setColumnAnnotations)
+    Q_PROPERTY(QStringList visibleColumnAnnotationNames WRITE setVisibleColumnAnnotationNames)
 
     Q_PROPERTY(size_t columnCount MEMBER _columnCount WRITE setColumnCount)
     Q_PROPERTY(size_t rowCount MEMBER _rowCount)
@@ -191,7 +192,7 @@ private:
 
     std::vector<ColumnAnnotation> _columnAnnotations;
 
-    std::set<QString> _visibleColumnAnnotations;
+    std::set<QString> _visibleColumnAnnotationNames;
     bool _showColumnAnnotations = true;
 
     QCPLayer* _lineGraphLayer = nullptr;
@@ -232,6 +233,7 @@ private:
     void setShowLegend(bool showLegend);
     void setHorizontalScrollPosition(double horizontalScrollPosition);
     void setColumnAnnotations(const QVariantList& columnAnnotations);
+    void setVisibleColumnAnnotationNames(const QStringList& columnAnnotations);
 
     void computeXAxisRange();
     QVector<double> meanAverageData(double& min, double& max);

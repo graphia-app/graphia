@@ -439,9 +439,24 @@ PluginContent
                 columnNames: plugin.model.columnNames
                 rowColors: plugin.model.nodeColors
                 rowNames: plugin.model.rowNames
-                columnAnnotations: plugin.model.columnAnnotations
                 selectedRows: tableView.selectedRows
                 showColumnNames: toggleColumnNamesAction.checked
+
+                columnAnnotations: plugin.model.columnAnnotations
+
+                property var _availableColumnAnnotationNames:
+                {
+                    var list = [];
+
+                    plugin.model.columnAnnotations.forEach(function(columnAnnotation)
+                    {
+                        list.push(columnAnnotation.name);
+                    });
+
+                    return list;
+                }
+
+                visibleColumnAnnotationNames: _availableColumnAnnotationNames
 
                 elideLabelWidth:
                 {
@@ -564,7 +579,8 @@ PluginContent
             "plotDispersion": plot.plotDispersionType,
             "plotDispersionVisual": plot.plotDispersionVisualType,
             "plotLegend": plot.showLegend,
-            "plotGridLines": plot.showGridLines
+            "plotGridLines": plot.showGridLines,
+            "columnAnnotations": plot.visibleColumnAnnotationNames
         };
 
         return data;
@@ -584,5 +600,6 @@ PluginContent
         if(data.plotDispersionVisual !== undefined)     plot.plotDispersionVisualType = data.plotDispersionVisual;
         if(data.plotLegend !== undefined)               plot.showLegend = data.plotLegend;
         if(data.plotGridLines !== undefined)            plot.showGridLines = data.plotGridLines;
+        if(data.columnAnnotations !== undefined)        plot.visibleColumnAnnotationNames = data.columnAnnotations;
     }
 }
