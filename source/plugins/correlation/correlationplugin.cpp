@@ -430,20 +430,37 @@ QStringList CorrelationPluginInstance::rowNames()
     QStringList list;
     list.reserve(static_cast<int>(_numRows));
 
-    auto firstColumn = _userNodeData.begin();
+    const auto& [name, firstColumn] = *_userNodeData.begin();
     for(size_t i = 0; i < _numRows; i++)
-        list.append(firstColumn->get(i));
+        list.append(firstColumn.get(i));
 
     return list;
 }
 
-QStringList CorrelationPluginInstance::columnAttributeNames()
+QStringList CorrelationPluginInstance::columnAnnotationNames()
 {
     QStringList list;
     list.reserve(static_cast<int>(_userColumnData.vectorNames().size()));
 
     for(const auto& name : _userColumnData.vectorNames())
         list.append(name);
+
+    return list;
+}
+
+QVariantList CorrelationPluginInstance::columnAnnotations()
+{
+    QVariantList list;
+    list.reserve(_userColumnData.numUserDataVectors());
+
+    for(const auto& [name, values] : _userColumnData)
+    {
+        QVariantMap columnAnnotation;
+        columnAnnotation.insert(QStringLiteral("name"), name);
+        columnAnnotation.insert(QStringLiteral("values"), values.toStringList());
+
+        list.append(columnAnnotation);
+    }
 
     return list;
 }

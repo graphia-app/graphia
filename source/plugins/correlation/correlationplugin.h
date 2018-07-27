@@ -20,6 +20,7 @@
 #include <QString>
 #include <QStringList>
 #include <QVector>
+#include <QVariantList>
 #include <QColor>
 #include <QRect>
 
@@ -62,9 +63,12 @@ class CorrelationPluginInstance : public BasePluginInstance
     Q_PROPERTY(QAbstractTableModel* nodeAttributeTableModel READ nodeAttributeTableModel CONSTANT)
     Q_PROPERTY(QStringList columnNames READ columnNames NOTIFY columnNamesChanged)
     Q_PROPERTY(QStringList rowNames READ rowNames NOTIFY rowNamesChanged)
-    Q_PROPERTY(QStringList columnAttributeNames READ columnAttributeNames NOTIFY columnAttributeNamesChanged)
+
     Q_PROPERTY(QVector<double> rawData READ rawData NOTIFY rawDataChanged)
     Q_PROPERTY(QVector<QColor> nodeColors READ nodeColors NOTIFY nodeColorsChanged)
+
+    Q_PROPERTY(QVariantList columnAnnotations READ columnAnnotations NOTIFY columnAnnotationsChanged)
+
     Q_PROPERTY(size_t columnCount MEMBER _numColumns NOTIFY columnCountChanged)
     Q_PROPERTY(size_t rowCount MEMBER _numRows NOTIFY rowCountChanged)
 
@@ -195,9 +199,11 @@ private:
     QAbstractTableModel* nodeAttributeTableModel() { return &_nodeAttributeTableModel; }
     QStringList columnNames();
     QStringList rowNames();
-    QStringList columnAttributeNames();
     QVector<double> rawData();
     QVector<QColor> nodeColors();
+
+    QStringList columnAnnotationNames();
+    QVariantList columnAnnotations();
 
     const DataRow& dataRowForNodeId(NodeId nodeId) const;
 
@@ -241,9 +247,13 @@ private slots:
 signals:
     void rowCountChanged();
     void columnCountChanged();
-    void columnAttributeNamesChanged();
+
     void rawDataChanged();
     void nodeColorsChanged();
+
+    void columnAnnotationNamesChanged();
+    void columnAnnotationsChanged();
+
     void columnNamesChanged();
     void rowNamesChanged();
 };

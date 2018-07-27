@@ -11,6 +11,8 @@
 #include <limits>
 #include <utility>
 
+#include <QStringList>
+
 class UserDataVector : public TypeIdentity
 {
 private:
@@ -34,6 +36,8 @@ public:
 
     auto begin() const { return _values.begin(); }
     auto end() const { return _values.end(); }
+
+    QStringList toStringList() const;
 
     const QString& name() const { return _name; }
     int numValues() const { return static_cast<int>(_values.size()); }

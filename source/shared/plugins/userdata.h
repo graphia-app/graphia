@@ -32,8 +32,8 @@ public:
 
     std::vector<QString> vectorNames() const;
 
-    auto begin() const { return make_pair_second_iterator(_userDataVectors.begin()); }
-    auto end() const { return make_pair_second_iterator(_userDataVectors.end()); }
+    auto begin() const { return _userDataVectors.begin(); }
+    auto end() const { return _userDataVectors.end(); }
 
     UserDataVector& add(QString name);
     void setValue(size_t index, const QString& name, const QString& value);

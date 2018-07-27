@@ -38,7 +38,7 @@ QStringList NodeAttributeTableModel::columnNames() const
     QStringList list;
     list.reserve(_userNodeData->numUserDataVectors());
 
-    for(const auto& userDataVector : *_userNodeData)
+    for(const auto& [name, userDataVector] : *_userNodeData)
         list.append(userDataVector.name());
 
     for(auto& attributeName : _document->graphModel()->attributeNames(ElementType::Node))

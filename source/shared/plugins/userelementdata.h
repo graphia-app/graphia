@@ -73,9 +73,11 @@ public:
 
     void exposeAsAttributes(IGraphModel& graphModel)
     {
-        for(const auto& userDataVector : *this)
+        for(const auto& [name, userDataVector] : *this)
         {
-            const auto& userDataVectorName = userDataVector.name();
+            // https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
+            const auto& userDataVectorName = name;
+
             auto& attribute = graphModel.createAttribute(userDataVectorName)
                     .setSearchable(true)
                     .setUserDefined(true);

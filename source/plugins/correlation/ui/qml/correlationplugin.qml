@@ -439,6 +439,7 @@ PluginContent
                 columnNames: plugin.model.columnNames
                 rowColors: plugin.model.nodeColors
                 rowNames: plugin.model.rowNames
+                columnAnnotations: plugin.model.columnAnnotations
                 selectedRows: tableView.selectedRows
                 showColumnNames: toggleColumnNamesAction.checked
 

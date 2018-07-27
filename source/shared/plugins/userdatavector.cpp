@@ -2,6 +2,17 @@
 
 #include "shared/utils/container.h"
 
+QStringList UserDataVector::toStringList() const
+{
+    QStringList list;
+    list.reserve(numValues());
+
+    for(const auto& value : _values)
+        list.append(value);
+
+    return list;
+}
+
 void UserDataVector::set(size_t index, const QString& value)
 {
     if(index >= _values.size())
