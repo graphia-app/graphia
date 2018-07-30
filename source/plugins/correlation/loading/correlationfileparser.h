@@ -31,7 +31,7 @@ private:
     Q_PROPERTY(QRect dataRect MEMBER _dataRect NOTIFY dataRectChanged)
     Q_PROPERTY(QAbstractTableModel* model READ tableModel NOTIFY dataRectChanged)
     Q_PROPERTY(bool isRunning READ isRunning NOTIFY isRunningChanged)
-    Q_PROPERTY(bool transposed READ transposed WRITE setTransposed)
+    Q_PROPERTY(bool transposed READ transposed WRITE setTransposed NOTIFY transposeChanged)
 
     QFutureWatcher<void> _autoDetectDataRectangleWatcher;
     QFutureWatcher<void> _dataParserWatcher;
@@ -59,6 +59,7 @@ signals:
     void fileUrlChanged();
     void fileTypeChanged();
     void dataLoaded();
+    void transposeChanged();
 public slots:
     void onDataParsed();
 };

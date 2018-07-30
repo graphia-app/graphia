@@ -483,10 +483,10 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
     };
 
     if(_edgeReductionType == EdgeReductionType::KNN)
-        defaultTransforms.append(R"("k-NN" using $"Pearson Correlation Value" with "k" = 5 "Rank Order" = "Ascending")");
+        defaultTransforms.append(QStringLiteral(R"("k-NN" using $"Pearson Correlation Value" with "k" = 5 "Rank Order" = "Ascending")"));
 
     if(_clusteringType == ClusteringType::MCL)
-        defaultTransforms.append(R"("MCL Cluster" with "Granularity" = 2.2)");
+        defaultTransforms.append(QStringLiteral(R"("MCL Cluster" with "Granularity" = 2.2)"));
 
     return defaultTransforms;
 }
