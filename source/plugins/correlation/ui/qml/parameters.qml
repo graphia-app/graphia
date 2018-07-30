@@ -554,7 +554,7 @@ ListTabDialog
                             columns: 2
                             Text
                             {
-                                text: "<b>None:</b>"
+                                text: qsTr("<b>None:</b>")
                                 textFormat: Text.StyledText
                                 Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                             }
@@ -568,7 +568,7 @@ ListTabDialog
 
                             Text
                             {
-                                text: "<b>Constant:</b>"
+                                text: qsTr("<b>Constant:</b>")
                                 textFormat: Text.StyledText
                                 Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                             }
@@ -645,7 +645,7 @@ ListTabDialog
 
                             Text
                             {
-                                text: "<b>Log</b>𝒃(𝒙 + ε):"
+                                text: qsTr("<b>Log</b>𝒃(𝒙 + ε):")
                                 Layout.alignment: Qt.AlignTop
                                 textFormat: Text.StyledText
                             }
@@ -660,7 +660,7 @@ ListTabDialog
 
                             Text
                             {
-                                text: "<b>AntiLog</b>𝒃(𝒙):"
+                                text: qsTr("<b>AntiLog</b>𝒃(𝒙):")
                                 Layout.alignment: Qt.AlignTop
                                 textFormat: Text.StyledText
                             }
@@ -674,7 +674,7 @@ ListTabDialog
 
                             Text
                             {
-                                text: "<b>Arcsin</b>(𝒙):"
+                                text: qsTr("<b>Arcsin</b>(𝒙):")
                                 Layout.alignment: Qt.AlignTop
                                 textFormat: Text.StyledText
                             }
@@ -722,7 +722,7 @@ ListTabDialog
                             columns: 2
                             Text
                             {
-                                text: "<b>MinMax:</b>"
+                                text: qsTr("<b>MinMax:</b>")
                                 textFormat: Text.StyledText
                                 Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                             }
@@ -738,7 +738,7 @@ ListTabDialog
 
                             Text
                             {
-                                text: "<b>Quantile:</b>"
+                                text: qsTr("<b>Quantile:</b>")
                                 textFormat: Text.StyledText
                                 Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                             }
@@ -811,7 +811,7 @@ ListTabDialog
                         columns: 2
                         Text
                         {
-                            text: "<b>MCL:</b>"
+                            text: qsTr("<b>MCL:</b>")
                             textFormat: Text.StyledText
                             Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                         }
@@ -856,7 +856,7 @@ ListTabDialog
                     {
                         Text
                         {
-                            text: "Edge-reduction attempts to reduce unnecessary or non-useful edges"
+                            text: qsTr("Edge-reduction attempts to reduce unnecessary or non-useful edges")
                             textFormat: Text.StyledText
                             Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                         }
@@ -866,7 +866,7 @@ ListTabDialog
                             columns: 2
                             Text
                             {
-                                text: "<b>K-NN:</b>"
+                                text: qsTr("<b>K-NN:</b>")
                                 textFormat: Text.StyledText
                                 Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                             }
