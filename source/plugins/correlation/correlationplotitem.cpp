@@ -883,7 +883,7 @@ void CorrelationPlotItem::populateLinePlot()
 
 void CorrelationPlotItem::configureLegend()
 {
-    if(_customPlot.plottableCount() <= 0 || !_showLegend)
+    if(_selectedRows.size() <= 0 || !_showLegend)
         return;
 
     // Create a subLayout to position the Legend
@@ -927,17 +927,25 @@ void CorrelationPlotItem::configureLegend()
         maxNumberOfElementsToDraw++;
     };
 
-    const auto numberOfElementsToDraw = std::min(_customPlot.plottableCount(), maxNumberOfElementsToDraw);
+    const auto numberOfElementsToDraw = std::min(_selectedRows.size(), maxNumberOfElementsToDraw);
 
     if(numberOfElementsToDraw > 0)
     {
         // Populate the legend
         _customPlot.legend->clear();
-        for(int i = 0; i < numberOfElementsToDraw; i++)
-            _customPlot.plottable(i)->addToLegend(_customPlot.legend);
+        for(int i = 0; i < _customPlot.plottableCount(); i++)
+        {
+            auto* plottable = _customPlot.plottable(i);
+
+            // Don't add invisible plots to the legend
+            if(!plottable->visible())
+                continue;
+
+            plottable->addToLegend(_customPlot.legend);
+        }
 
         // Cap the legend count to only those visible
-        if(_customPlot.plottableCount() > maxNumberOfElementsToDraw)
+        if(_selectedRows.size() > maxNumberOfElementsToDraw)
         {
             auto* moreText = new QCPTextElement(&_customPlot);
             moreText->setMargins(QMargins());
@@ -946,7 +954,7 @@ void CorrelationPlotItem::configureLegend()
             moreText->setFont(_customPlot.legend->font());
             moreText->setTextColor(Qt::gray);
             moreText->setText(QString(tr("...and %1 more"))
-                .arg(_customPlot.plottableCount() - maxNumberOfElementsToDraw + 1));
+                .arg(_selectedRows.size() - maxNumberOfElementsToDraw + 1));
             moreText->setVisible(true);
 
             auto lastElementIndex = _customPlot.legend->rowColToIndex(_customPlot.legend->rowCount() - 1, 0);
