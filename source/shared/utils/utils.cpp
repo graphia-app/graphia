@@ -83,8 +83,9 @@ QString u::formatNumberForDisplay(double value, int minDecimalPlaces, int maxDec
     if(maxDecimalPlaces < minDecimalPlaces)
         maxDecimalPlaces = minDecimalPlaces;
 
-    if(value >= largeThreshold || value <= -largeThreshold ||
-            (value < smallThreshold && value > -smallThreshold && value != 0.0))
+    if(std::isfinite(value) &&
+        ((value >= largeThreshold || value <= -largeThreshold) ||
+        (value < smallThreshold && value > -smallThreshold && value != 0.0)))
     {
         formattedString = QLocale::system().toString(value, 'e', 2);
         auto splitString = formattedString.split(exponentChar);
