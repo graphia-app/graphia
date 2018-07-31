@@ -456,7 +456,10 @@ PluginContent
                     return list;
                 }
 
-                visibleColumnAnnotationNames: _availableColumnAnnotationNames
+                Component.onCompleted:
+                {
+                    visibleColumnAnnotationNames = _availableColumnAnnotationNames;
+                }
 
                 elideLabelWidth:
                 {

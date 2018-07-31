@@ -107,7 +107,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(QStringList rowNames MEMBER _graphNames)
 
     Q_PROPERTY(QVariantList columnAnnotations WRITE setColumnAnnotations)
-    Q_PROPERTY(QStringList visibleColumnAnnotationNames WRITE setVisibleColumnAnnotationNames)
+    Q_PROPERTY(QStringList visibleColumnAnnotationNames READ visibleColumnAnnotationNames WRITE setVisibleColumnAnnotationNames)
 
     Q_PROPERTY(size_t columnCount MEMBER _columnCount WRITE setColumnCount)
     Q_PROPERTY(size_t rowCount MEMBER _rowCount)
@@ -165,6 +165,11 @@ private:
     QFont _defaultFont9Pt;
 
     QCustomPlot _customPlot;
+    QCPLayoutGrid* _mainAxisLayout = nullptr;
+    QCPAxisRect* _mainAxisRect = nullptr;
+    QCPAxis* _mainXAxis = nullptr;
+    QCPAxis* _mainYAxis = nullptr;
+
     size_t _columnCount = 0;
     size_t _rowCount = 0;
     int _elideLabelWidth = 120;
@@ -233,6 +238,8 @@ private:
     void setShowLegend(bool showLegend);
     void setHorizontalScrollPosition(double horizontalScrollPosition);
     void setColumnAnnotations(const QVariantList& columnAnnotations);
+
+    QStringList visibleColumnAnnotationNames() const;
     void setVisibleColumnAnnotationNames(const QStringList& columnAnnotations);
 
     void computeXAxisRange();

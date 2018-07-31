@@ -105,7 +105,7 @@ void CorrelationPlotWorker::renderPixmap()
 
     _customPlot->setGeometry(0, 0, _width, _height);
 
-    for(auto element : _customPlot->plotLayout()->elements(false))
+    for(auto element : _customPlot->plotLayout()->elements(true))
     {
         auto axisRect = dynamic_cast<QCPAxisRect*>(element);
         if(axisRect != nullptr)
@@ -138,6 +138,24 @@ CorrelationPlotItem::CorrelationPlotItem(QQuickItem* parent) :
     _debug(qEnvironmentVariableIntValue("QCUSTOMPLOT_DEBUG") != 0)
 {
     setRenderTarget(RenderTarget::FramebufferObject);
+
+    // Discard the defaults...
+    _customPlot.plotLayout()->clear();
+
+    // ...and manage our own layout
+    _mainAxisLayout = new QCPLayoutGrid;
+    _customPlot.plotLayout()->addElement(_mainAxisLayout);
+
+    _mainAxisRect = new QCPAxisRect(&_customPlot);
+    _mainAxisLayout->addElement(_mainAxisRect);
+    _mainXAxis = _mainAxisRect->axis(QCPAxis::atBottom);
+    _mainYAxis = _mainAxisRect->axis(QCPAxis::atLeft);
+
+    for(auto& axis : _mainAxisRect->axes())
+    {
+        axis->setLayer(QStringLiteral("axes"));
+        axis->grid()->setLayer(QStringLiteral("grid"));
+    }
 
     // Layer to keep individual line plots separate from everything else
     _customPlot.addLayer(QStringLiteral("lineGraphLayer"));
@@ -304,18 +322,23 @@ void CorrelationPlotItem::updateTooltip()
         if(auto graph = dynamic_cast<QCPGraph*>(plottableUnderCursor))
         {
             _itemTracer->setGraph(graph);
-            _itemTracer->setGraphKey(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
+            _itemTracer->setGraphKey(_mainXAxis->pixelToCoord(_hoverPoint.x()));
         }
         else if(auto bars = dynamic_cast<QCPBars*>(plottableUnderCursor))
         {
-            auto xCoord = std::lround(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
+            auto xCoord = std::lround(_mainXAxis->pixelToCoord(_hoverPoint.x()));
             _itemTracer->position->setPixelPosition(bars->dataPixelPosition(xCoord));
         }
         else if(auto boxPlot = dynamic_cast<QCPStatisticalBox*>(plottableUnderCursor))
         {
             // Only show simple tooltips for now, can extend this later...
-            auto xCoord = std::lround(_customPlot.xAxis->pixelToCoord(_hoverPoint.x()));
+            auto xCoord = std::lround(_mainXAxis->pixelToCoord(_hoverPoint.x()));
             _itemTracer->position->setPixelPosition(boxPlot->dataPixelPosition(xCoord));
+        }
+        else
+        {
+            // Something that we don't know about/don't want a tooltip for
+            return;
         }
 
         _itemTracer->setVisible(true);
@@ -461,9 +484,9 @@ void CorrelationPlotItem::populateMeanLinePlot()
                 .arg(_selectedRows.length()));
     plotModeTextElement->setVisible(true);
 
-    _customPlot.plotLayout()->addElement(_customPlot.plotLayout()->rowCount(), 0, plotModeTextElement);
+    _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, plotModeTextElement);
 
-    _customPlot.yAxis->setRange(minY, maxY);
+    _mainYAxis->setRange(minY, maxY);
 }
 
 void CorrelationPlotItem::populateMedianLinePlot()
@@ -519,9 +542,9 @@ void CorrelationPlotItem::populateMedianLinePlot()
                 .arg(_selectedRows.length())));
     plotModeTextElement->setVisible(true);
 
-    _customPlot.plotLayout()->addElement(_customPlot.plotLayout()->rowCount(), 0, plotModeTextElement);
+    _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, plotModeTextElement);
 
-    _customPlot.yAxis->setRange(minY, maxY);
+    _mainYAxis->setRange(minY, maxY);
 }
 
 void CorrelationPlotItem::populateMeanHistogramPlot()
@@ -539,7 +562,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     // Use Average Calculation and set min / max
     QVector<double> yDataAvg = meanAverageData(minY, maxY);
 
-    auto* histogramBars = new QCPBars(_customPlot.xAxis, _customPlot.yAxis);
+    auto* histogramBars = new QCPBars(_mainXAxis, _mainYAxis);
     histogramBars->setName(tr("Mean histogram of selection"));
     histogramBars->setData(xData, yDataAvg, true);
 
@@ -553,9 +576,9 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
                 .arg(_selectedRows.length()));
     plotModeTextElement->setVisible(true);
 
-    _customPlot.plotLayout()->addElement(_customPlot.plotLayout()->rowCount(), 0, plotModeTextElement);
+    _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, plotModeTextElement);
 
-    _customPlot.yAxis->setRange(minY, maxY);
+    _mainYAxis->setRange(minY, maxY);
 }
 
 static double medianOf(const QVector<double>& sortedData)
@@ -577,7 +600,7 @@ void CorrelationPlotItem::populateIQRPlot()
     // Whiskers represent the maximum and minimum non-outlier values
     // Outlier values are (< Q1 - 1.5IQR and > Q3 + 1.5IQR)
 
-    auto* statPlot = new QCPStatisticalBox(_customPlot.xAxis, _customPlot.yAxis);
+    auto* statPlot = new QCPStatisticalBox(_mainXAxis, _mainYAxis);
     statPlot->setName(tr("Median (IQR plots) of selection"));
 
     double maxY = 0.0;
@@ -661,9 +684,9 @@ void CorrelationPlotItem::populateIQRPlot()
                 .arg(_selectedRows.length()));
     plotModeTextElement->setVisible(true);
 
-    _customPlot.plotLayout()->addElement(_customPlot.plotLayout()->rowCount(), 0, plotModeTextElement);
+    _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, plotModeTextElement);
 
-    _customPlot.yAxis->setRange(minY, maxY);
+    _mainYAxis->setRange(minY, maxY);
 }
 
 void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, const QString& name = QStringLiteral("Deviation"))
@@ -671,7 +694,7 @@ void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, const QString&
     auto visualType = static_cast<PlotDispersionVisualType>(_plotDispersionVisualType);
     if(visualType == PlotDispersionVisualType::Bars)
     {
-        auto* stdDevBars = new QCPErrorBars(_customPlot.xAxis, _customPlot.yAxis);
+        auto* stdDevBars = new QCPErrorBars(_mainXAxis, _mainYAxis);
         stdDevBars->setName(name);
         stdDevBars->setSelectable(QCP::SelectionType::stNone);
         stdDevBars->setAntialiased(false);
@@ -680,8 +703,8 @@ void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, const QString&
     }
     else if(visualType == PlotDispersionVisualType::Area)
     {
-        auto* devTop = new QCPGraph(_customPlot.xAxis, _customPlot.yAxis);
-        auto* devBottom = new QCPGraph(_customPlot.xAxis, _customPlot.yAxis);
+        auto* devTop = new QCPGraph(_mainXAxis, _mainYAxis);
+        auto* devBottom = new QCPGraph(_mainXAxis, _mainYAxis);
         devTop->setName(QStringLiteral("%1 Top").arg(name));
         devBottom->setName(QStringLiteral("%1 Bottom").arg(name));
 
@@ -752,7 +775,7 @@ void CorrelationPlotItem::populateStdDevPlot()
     }
 
     plotDispersion(stdDevs, QStringLiteral("Std Dev"));
-    _customPlot.yAxis->setRange(min, max);
+    _mainYAxis->setRange(min, max);
 }
 
 void CorrelationPlotItem::populateStdErrorPlot()
@@ -790,7 +813,7 @@ void CorrelationPlotItem::populateStdErrorPlot()
     }
 
     plotDispersion(stdErrs, QStringLiteral("Std Err"));
-    _customPlot.yAxis->setRange(min, max);
+    _mainYAxis->setRange(min, max);
 }
 
 void CorrelationPlotItem::populateLinePlot()
@@ -810,7 +833,7 @@ void CorrelationPlotItem::populateLinePlot()
 
         if(!_lineGraphCache.contains(row))
         {
-            graph = _customPlot.addGraph();
+            graph = _customPlot.addGraph(_mainXAxis, _mainYAxis);
             graph->setLayer(_lineGraphLayer);
 
             double rowSum = 0.0;
@@ -895,7 +918,7 @@ void CorrelationPlotItem::populateLinePlot()
         graph->setName(_graphNames[row]);
     }
 
-    _customPlot.yAxis->setRange(minY, maxY);
+    _mainYAxis->setRange(minY, maxY);
 }
 
 QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
@@ -904,18 +927,17 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
         return xAxis;
 
     QCPAxisRect* columnAnnotationsAxisRect = new QCPAxisRect(&_customPlot);
-    _customPlot.plotLayout()->addElement(_customPlot.plotLayout()->rowCount(),
-        0, columnAnnotationsAxisRect);
+    _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, columnAnnotationsAxisRect);
 
     const auto separation = 8;
-    _customPlot.axisRect()->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msTop);
-    _customPlot.axisRect()->setMargins(QMargins(0, 0, 0, separation));
+    _mainAxisRect->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msTop);
+    _mainAxisRect->setMargins(QMargins(0, 0, 0, separation));
     columnAnnotationsAxisRect->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msBottom);
     columnAnnotationsAxisRect->setMargins(QMargins(0, 0, separation, 0));
 
     // Align the left and right hand sides of the axes
     QCPMarginGroup* group = new QCPMarginGroup(&_customPlot);
-    _customPlot.axisRect()->setMarginGroup(QCP::msLeft|QCP::msRight, group);
+    _mainAxisRect->setMarginGroup(QCP::msLeft|QCP::msRight, group);
     columnAnnotationsAxisRect->setMarginGroup(QCP::msLeft|QCP::msRight, group);
 
     xAxis->setTickLabels(false);
@@ -931,9 +953,8 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
     size_t numColumnAnnotations = _visibleColumnAnnotationNames.size();
     colorMap->data()->setSize(_columnCount, numColumnAnnotations);
 
-    QSize columnAnnotationsDisplaySize(QWIDGETSIZE_MAX, columnAnnotaionsHeight());
-    columnAnnotationsAxisRect->setMinimumSize(columnAnnotationsDisplaySize);
-    columnAnnotationsAxisRect->setMaximumSize(columnAnnotationsDisplaySize);
+    columnAnnotationsAxisRect->setMinimumSize(0, columnAnnotaionsHeight());
+    columnAnnotationsAxisRect->setMaximumSize(QWIDGETSIZE_MAX, columnAnnotaionsHeight());
 
     auto range = 1.0;
     auto padding = 0.0;
@@ -1021,18 +1042,22 @@ void CorrelationPlotItem::configureLegend()
     _customPlot.plotLayout()->insertColumn(1);
     _customPlot.plotLayout()->addElement(0, 1, subLayout);
 
+    auto* legend = new QCPLegend;
+
     // Surround the legend row in two empty rows that are stretched maximally, and
     // stretch the legend itself minimally, thus centreing the legend vertically
     subLayout->insertRow(0);
     subLayout->setRowStretchFactor(0, 1.0);
-    subLayout->addElement(1, 0, _customPlot.legend);
+    subLayout->addElement(1, 0, legend);
     subLayout->setRowStretchFactor(1, std::numeric_limits<double>::min());
     subLayout->insertRow(2);
     subLayout->setRowStretchFactor(2, 1.0);
 
+    legend->setLayer(QStringLiteral("legend"));
+
     const int marginSize = 5;
+    legend->setMargins(QMargins(marginSize, marginSize, marginSize, marginSize));
     subLayout->setMargins(QMargins(0, marginSize, marginSize, marginSize));
-    _customPlot.legend->setMargins(QMargins(marginSize, marginSize, marginSize, marginSize));
 
     // BIGGEST HACK
     // Layouts and sizes aren't done until a replot, and layout is performed on another
@@ -1042,36 +1067,37 @@ void CorrelationPlotItem::configureLegend()
     // estimated using the total height of the QQuickItem, not the (unknowable) plot height
 
     // See QCPPlottableLegendItem::draw for the reasoning behind this value
-    const auto legendElementHeight = std::max(QFontMetrics(_customPlot.legend->font()).height(),
-                                              _customPlot.legend->iconSize().height());
+    const auto legendElementHeight = std::max(QFontMetrics(legend->font()).height(),
+                                              legend->iconSize().height());
 
     const auto totalExternalMargins = subLayout->margins().top() + subLayout->margins().bottom();
-    const auto totalInternalMargins = _customPlot.legend->margins().top() + _customPlot.legend->margins().bottom();
+    const auto totalInternalMargins = legend->margins().top() + legend->margins().bottom();
     const auto maxLegendHeight = _customPlot.height() - (totalExternalMargins + totalInternalMargins);
 
     int maxNumberOfElementsToDraw = 0;
     int accumulatedHeight = legendElementHeight;
     while(accumulatedHeight < maxLegendHeight)
     {
-        accumulatedHeight += (_customPlot.legend->rowSpacing() + legendElementHeight);
+        accumulatedHeight += (legend->rowSpacing() + legendElementHeight);
         maxNumberOfElementsToDraw++;
     };
 
-    const auto numberOfElementsToDraw = std::min(_selectedRows.size(), maxNumberOfElementsToDraw);
+    auto numberOfElementsToDraw = std::min(_selectedRows.size(), maxNumberOfElementsToDraw);
 
     if(numberOfElementsToDraw > 0)
     {
         // Populate the legend
-        _customPlot.legend->clear();
-        for(int i = 0; i < _customPlot.plottableCount(); i++)
+        legend->clear();
+        for(int i = 0; i < _customPlot.plottableCount() && numberOfElementsToDraw > 0; i++)
         {
             auto* plottable = _customPlot.plottable(i);
 
             // Don't add invisible plots to the legend
-            if(!plottable->visible())
+            if(!plottable->visible() || plottable->valueAxis() != _mainYAxis)
                 continue;
 
-            plottable->addToLegend(_customPlot.legend);
+            plottable->addToLegend(legend);
+            numberOfElementsToDraw--;
         }
 
         // Cap the legend count to only those visible
@@ -1081,28 +1107,28 @@ void CorrelationPlotItem::configureLegend()
             moreText->setMargins(QMargins());
             moreText->setLayer(_tooltipLayer);
             moreText->setTextFlags(Qt::AlignLeft);
-            moreText->setFont(_customPlot.legend->font());
+            moreText->setFont(legend->font());
             moreText->setTextColor(Qt::gray);
             moreText->setText(QString(tr("...and %1 more"))
                 .arg(_selectedRows.size() - maxNumberOfElementsToDraw + 1));
             moreText->setVisible(true);
 
-            auto lastElementIndex = _customPlot.legend->rowColToIndex(_customPlot.legend->rowCount() - 1, 0);
-            _customPlot.legend->removeAt(lastElementIndex);
-            _customPlot.legend->addElement(moreText);
+            auto lastElementIndex = legend->rowColToIndex(legend->rowCount() - 1, 0);
+            legend->removeAt(lastElementIndex);
+            legend->addElement(moreText);
 
             // When we're overflowing, hackily enlarge the bottom margin to
             // compensate for QCP's layout algorithm being a bit rubbish
-            auto margins = _customPlot.legend->margins();
+            auto margins = legend->margins();
             margins.setBottom(margins.bottom() * 3);
-            _customPlot.legend->setMargins(margins);
+            legend->setMargins(margins);
         }
 
         // Make the plot take 85% of the width, and the legend the remaining 15%
         _customPlot.plotLayout()->setColumnStretchFactor(0, 0.85);
         _customPlot.plotLayout()->setColumnStretchFactor(1, 0.15);
 
-        _customPlot.legend->setVisible(true);
+        legend->setVisible(true);
     }
 }
 
@@ -1114,14 +1140,23 @@ void CorrelationPlotItem::invalidateLineGraphCache()
     _lineGraphCache.clear();
 }
 
+static void removeAllExcept(QCPLayoutGrid* layout, QCPLayoutElement* except)
+{
+    for(int i = layout->elementCount() - 1; i >= 0; --i)
+    {
+        auto* element = layout->elementAt(i);
+        if(element != nullptr && element != except)
+            layout->removeAt(i);
+    }
+    layout->simplify();
+}
+
 void CorrelationPlotItem::rebuildPlot()
 {
     std::unique_lock<std::recursive_mutex> lock(_mutex);
 
     QElapsedTimer buildTimer;
     buildTimer.start();
-
-    _customPlot.legend->setVisible(false);
 
     for(auto v : qAsConst(_lineGraphCache))
     {
@@ -1144,20 +1179,9 @@ void CorrelationPlotItem::rebuildPlot()
         _customPlot.removePlottable(plottable);
     }
 
-    while(_customPlot.plotLayout()->rowCount() > 1)
-    {
-        _customPlot.plotLayout()->removeAt(_customPlot.plotLayout()->rowColToIndex(1, 0));
-        _customPlot.plotLayout()->simplify();
-    }
-
-    while(_customPlot.plotLayout()->columnCount() > 1)
-    {
-        // Save the legend from getting destroyed
-        _customPlot.axisRect()->insetLayout()->addElement(_customPlot.legend, Qt::AlignRight);
-        _customPlot.plotLayout()->removeAt(_customPlot.plotLayout()->rowColToIndex(0, 1));
-        // Destroy the extra legend column
-        _customPlot.plotLayout()->simplify();
-    }
+    // Return the plot layout to its immediate post-construction state
+    removeAllExcept(_mainAxisLayout, _mainAxisRect);
+    removeAllExcept(_customPlot.plotLayout(), _mainAxisLayout);
 
     auto plotAveragingType = static_cast<PlotAveragingType>(_plotAveragingType);
     if(plotAveragingType == PlotAveragingType::MeanLine)
@@ -1183,14 +1207,24 @@ void CorrelationPlotItem::rebuildPlot()
 
     QSharedPointer<QCPAxisTickerText> categoryTicker(new QCPAxisTickerText);
 
-    _customPlot.xAxis->setLabel({});
-    _customPlot.xAxis->setTicker(categoryTicker);
+    auto* xAxis = _mainXAxis;
 
-    _customPlot.plotLayout()->setRowSpacing(0);
-    _customPlot.axisRect()->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msTop|QCP::msBottom);
-    _customPlot.axisRect()->setMargins(QMargins(0, 0, 0, 0));
+    xAxis->setLabel({});
+    xAxis->setTicker(categoryTicker);
 
-    QCPAxis* xAxis = configureColumnAnnotations(_customPlot.xAxis);
+    xAxis->grid()->setVisible(_showGridLines);
+    xAxis->grid()->setVisible(_showGridLines);
+
+    // Don't show an emphasised vertical zero line
+    xAxis->grid()->setZeroLinePen(xAxis->grid()->pen());
+
+    xAxis->setLabel(_yAxisLabel);
+
+    _mainAxisLayout->setRowSpacing(0);
+    _mainAxisRect->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msTop|QCP::msBottom);
+    _mainAxisRect->setMargins(QMargins(0, 0, 0, 0));
+
+    xAxis = configureColumnAnnotations(xAxis);
 
     configureLegend();
 
@@ -1199,13 +1233,6 @@ void CorrelationPlotItem::rebuildPlot()
     xAxis->setTickLabels(_showColumnNames && (_elideLabelWidth > 0));
 
     xAxis->setLabel(_xAxisLabel);
-    _customPlot.yAxis->setLabel(_yAxisLabel);
-
-    _customPlot.xAxis->grid()->setVisible(_showGridLines);
-    _customPlot.yAxis->grid()->setVisible(_showGridLines);
-
-    // Don't show an emphasised vertical zero line
-    _customPlot.xAxis->grid()->setZeroLinePen(_customPlot.xAxis->grid()->pen());
 
     int tickColumn = 0;
     for(auto& labelName : _labelNames)
@@ -1382,6 +1409,17 @@ void CorrelationPlotItem::setColumnAnnotations(const QVariantList& columnAnnotat
     }
 }
 
+QStringList CorrelationPlotItem::visibleColumnAnnotationNames() const
+{
+    QStringList list;
+    list.reserve(static_cast<int>(_visibleColumnAnnotationNames.size()));
+
+    for(const auto& columnAnnotaionName : _visibleColumnAnnotationNames)
+        list.append(columnAnnotaionName);
+
+    return list;
+}
+
 void CorrelationPlotItem::setVisibleColumnAnnotationNames(const QStringList& columnAnnotations)
 {
     _visibleColumnAnnotationNames.clear();
@@ -1406,7 +1444,7 @@ double CorrelationPlotItem::labelHeight()
 
 double CorrelationPlotItem::columnAxisWidth()
 {
-    const auto& margins = _customPlot.axisRect()->margins();
+    const auto& margins = _mainAxisRect->margins();
     const unsigned int axisWidth = margins.left() + margins.right();
 
     //FIXME This value is wrong when the legend is enabled
