@@ -105,9 +105,10 @@ void CorrelationPlotWorker::renderPixmap()
 
     _customPlot->setGeometry(0, 0, _width, _height);
 
-    for(auto element : _customPlot->plotLayout()->elements(true))
+    auto elements = _customPlot->plotLayout()->elements(true);
+    for(auto* element : elements)
     {
-        auto axisRect = dynamic_cast<QCPAxisRect*>(element);
+        auto* axisRect = dynamic_cast<QCPAxisRect*>(element);
         if(axisRect != nullptr)
             axisRect->axis(QCPAxis::atBottom)->setRange(_xAxisMin, _xAxisMax);
     }
@@ -926,7 +927,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
     if(!_showColumnAnnotations || _visibleColumnAnnotationNames.empty())
         return xAxis;
 
-    QCPAxisRect* columnAnnotationsAxisRect = new QCPAxisRect(&_customPlot);
+    auto* columnAnnotationsAxisRect = new QCPAxisRect(&_customPlot);
     _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, columnAnnotationsAxisRect);
 
     const auto separation = 8;
@@ -936,7 +937,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
     columnAnnotationsAxisRect->setMargins(QMargins(0, 0, separation, 0));
 
     // Align the left and right hand sides of the axes
-    QCPMarginGroup* group = new QCPMarginGroup(&_customPlot);
+    auto* group = new QCPMarginGroup(&_customPlot);
     _mainAxisRect->setMarginGroup(QCP::msLeft|QCP::msRight, group);
     columnAnnotationsAxisRect->setMarginGroup(QCP::msLeft|QCP::msRight, group);
 
@@ -944,14 +945,15 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 
     auto caXAxis = columnAnnotationsAxisRect->axis(QCPAxis::atBottom);
     auto caYAxis = columnAnnotationsAxisRect->axis(QCPAxis::atLeft);
-    QCPColorMap* colorMap = new QCPColorMap(caXAxis, caYAxis);
+    auto* colorMap = new QCPColorMap(caXAxis, caYAxis);
 
-    QCPColorScale *colorScale = new QCPColorScale(&_customPlot);
+    auto *colorScale = new QCPColorScale(&_customPlot);
     colorMap->setColorScale(colorScale);
     colorMap->setInterpolate(false);
 
     size_t numColumnAnnotations = _visibleColumnAnnotationNames.size();
-    colorMap->data()->setSize(_columnCount, numColumnAnnotations);
+    colorMap->data()->setSize(static_cast<int>(_columnCount),
+        static_cast<int>(numColumnAnnotations));
 
     columnAnnotationsAxisRect->setMinimumSize(0, columnAnnotaionsHeight());
     columnAnnotationsAxisRect->setMaximumSize(QWIDGETSIZE_MAX, columnAnnotaionsHeight());
@@ -982,7 +984,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
     std::map<QString, double> stringColorIndexMap;
 
     QCPColorGradient colorGradient;
-    colorGradient.setLevelCount(uniqueValues.size());
+    colorGradient.setLevelCount(static_cast<int>(uniqueValues.size()));
 
     int i = 0;
     for(const auto& value : uniqueValues)
@@ -1008,9 +1010,9 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 
         for(size_t x = 0U; x < _columnCount; x++)
         {
-            auto stringValue = columnAnnotation._values.at(x);
+            auto stringValue = columnAnnotation._values.at(static_cast<int>(x));
             auto cellValue = stringColorIndexMap[stringValue];
-            colorMap->data()->setCell(x, y, cellValue);
+            colorMap->data()->setCell(static_cast<int>(x), static_cast<int>(y), cellValue);
         }
 
         y--;
@@ -1213,7 +1215,7 @@ void CorrelationPlotItem::rebuildPlot()
     xAxis->setTicker(categoryTicker);
 
     xAxis->grid()->setVisible(_showGridLines);
-    xAxis->grid()->setVisible(_showGridLines);
+    _mainYAxis->grid()->setVisible(_showGridLines);
 
     // Don't show an emphasised vertical zero line
     xAxis->grid()->setZeroLinePen(xAxis->grid()->pen());
@@ -1425,6 +1427,8 @@ void CorrelationPlotItem::setVisibleColumnAnnotationNames(const QStringList& col
     _visibleColumnAnnotationNames.clear();
     for(const auto& columnAnnotation : columnAnnotations)
         _visibleColumnAnnotationNames.emplace(columnAnnotation);
+
+    emit visibleColumnAnnotationNamesChanged();
 }
 
 double CorrelationPlotItem::visibleHorizontalFraction()

@@ -107,7 +107,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(QStringList rowNames MEMBER _graphNames)
 
     Q_PROPERTY(QVariantList columnAnnotations WRITE setColumnAnnotations)
-    Q_PROPERTY(QStringList visibleColumnAnnotationNames READ visibleColumnAnnotationNames WRITE setVisibleColumnAnnotationNames)
+    Q_PROPERTY(QStringList visibleColumnAnnotationNames READ visibleColumnAnnotationNames WRITE setVisibleColumnAnnotationNames NOTIFY visibleColumnAnnotationNamesChanged)
 
     Q_PROPERTY(size_t columnCount MEMBER _columnCount WRITE setColumnCount)
     Q_PROPERTY(size_t rowCount MEMBER _rowCount)
@@ -270,5 +270,7 @@ signals:
     void visibleHorizontalFractionChanged();
     void plotOptionsChanged();
     void busyChanged();
+
+    void visibleColumnAnnotationNamesChanged();
 };
 #endif // CORRELATIONPLOTITEM_H
