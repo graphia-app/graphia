@@ -463,7 +463,7 @@ Item
             id: graphItem
 
             Layout.fillHeight: true
-            Layout.minimumHeight: 100
+            Layout.minimumHeight: splitView.height * 0.5
 
             Graph
             {
@@ -997,9 +997,21 @@ Item
 
         id: plugin
 
-        Layout.minimumHeight: !enabled ? 0 :
-            (plugin.content !== undefined && plugin.content.minimumHeight !== undefined ?
-            plugin.content.minimumHeight : defaultPluginContent.minimumHeight)
+        Layout.minimumHeight:
+        {
+            var h = 0;
+
+            if(!enabled)
+                return h;
+
+            if(plugin.content !== undefined && plugin.content.minimumHeight !== undefined)
+                h = plugin.content.minimumHeight;
+            else
+                h = defaultPluginContent.minimumHeight;
+
+            return Math.min(h, splitView.height * 0.5);
+        }
+
         Layout.maximumHeight: minimised && !root.pluginPoppedOut ? 0 : Number.POSITIVE_INFINITY
 
         visible: loaded
