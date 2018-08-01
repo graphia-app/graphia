@@ -4,6 +4,7 @@
 #include "thirdparty/cryptopp/rsa.h"
 #include "thirdparty/cryptopp/osrng.h"
 #include "thirdparty/cryptopp/modes.h"
+#include "thirdparty/cryptopp/cryptopp_enable_warnings.h"
 
 #include "shared/utils/preferences.h"
 
@@ -562,5 +563,3 @@ void Auth::onTimeout()
 
     _reply->abort();
 }
-
-#include "thirdparty/cryptopp/cryptopp_enable_warnings.h"
