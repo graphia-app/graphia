@@ -11,10 +11,20 @@
 #endif
 #endif
 
+#ifdef _MSC_VER
+// MSVC warnings
+#pragma warning( push )
+#pragma warning( disable : 28020 ) // The expression ... is not true at this call
+#endif
+
 #include "json.hpp"
 
 #ifdef GCC_DIAGNOSTIC_AWARE
 #pragma GCC diagnostic pop
+#endif
+
+#ifdef _MSC_VER
+#pragma warning( pop )
 #endif
 
 using json = nlohmann::json;

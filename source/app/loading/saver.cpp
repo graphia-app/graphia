@@ -12,10 +12,11 @@
 
 #include <QFile>
 #include <QDataStream>
+#include <QStringList>
+
+#include <vector>
 
 #include "json_helper.h"
-
-#include <QStringList>
 
 #include "thirdparty/zlib/zlib_disable_warnings.h"
 #include "thirdparty/zlib/zlib.h"
@@ -50,29 +51,29 @@ static bool compress(const QByteArray& byteArray, const QString& filePath, const
     do
     {
         const int ChunkSize = 1 << 14;
-        unsigned char inBuffer[ChunkSize];
+        std::vector<unsigned char> inBuffer(ChunkSize);
 
-        auto numBytes = input.readRawData(reinterpret_cast<char*>(inBuffer), ChunkSize); // NOLINT
+        auto numBytes = input.readRawData(reinterpret_cast<char*>(inBuffer.data()), ChunkSize); // NOLINT
 
         bytePosition += numBytes;
         progressFn((bytePosition * 100) / totalBytes);
 
         zstream.avail_in = numBytes;
-        zstream.next_in = static_cast<z_const Bytef*>(inBuffer);
+        zstream.next_in = static_cast<z_const Bytef*>(inBuffer.data());
         flush = input.atEnd() ? Z_FINISH : Z_NO_FLUSH;
 
         do
         {
-            unsigned char outBuffer[ChunkSize];
+            std::vector<unsigned char> outBuffer(ChunkSize);
             zstream.avail_out = ChunkSize;
-            zstream.next_out = static_cast<Bytef*>(outBuffer);
+            zstream.next_out = static_cast<Bytef*>(outBuffer.data());
 
             ret = deflate(&zstream, flush);
             if(ret == Z_STREAM_ERROR)
                 return false;
 
             numBytes = ChunkSize - zstream.avail_out;
-            if(output.writeRawData(reinterpret_cast<const char*>(outBuffer), numBytes) != numBytes) // NOLINT
+            if(output.writeRawData(reinterpret_cast<const char*>(outBuffer.data()), numBytes) != numBytes) // NOLINT
                 return false;
 
         } while(zstream.avail_out == 0);

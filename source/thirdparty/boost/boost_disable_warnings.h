@@ -26,4 +26,5 @@
 #pragma warning( push )
 #pragma warning( disable : 4100 ) // Unreferenced formal parameter
 #pragma warning( disable : 4503 ) // Decorated name length exceeded, name was truncated
+#pragma warning( disable : 6011 ) // Dereferencing NULL pointer
 #endif

@@ -14,6 +14,8 @@
 #include <QFileInfo>
 #include <QDataStream>
 
+#include <vector>
+
 #include "json_helper.h"
 
 #include "thirdparty/zlib/zlib_disable_warnings.h"
@@ -67,9 +69,9 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
     do
     {
         const int ChunkSize = 1 << 14;
-        unsigned char inBuffer[ChunkSize];
+        std::vector<unsigned char> inBuffer(ChunkSize);
 
-        auto numBytes = input.readRawData(reinterpret_cast<char*>(inBuffer), ChunkSize); // NOLINT
+        auto numBytes = input.readRawData(reinterpret_cast<char*>(inBuffer.data()), ChunkSize); // NOLINT
 
         bytesRead += numBytes;
         progressFn((bytesRead * 100) / totalBytes);
@@ -78,13 +80,13 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
         if(zstream.avail_in == 0)
             break;
 
-        zstream.next_in = static_cast<z_const Bytef*>(inBuffer);
+        zstream.next_in = static_cast<z_const Bytef*>(inBuffer.data());
 
         do
         {
-            unsigned char outBuffer[ChunkSize];
+            std::vector<unsigned char> outBuffer(ChunkSize);
             zstream.avail_out = ChunkSize;
-            zstream.next_out = static_cast<Bytef*>(outBuffer);
+            zstream.next_out = static_cast<Bytef*>(outBuffer.data());
 
             ret = inflate(&zstream, Z_NO_FLUSH);
             Q_ASSERT(ret != Z_STREAM_ERROR);
@@ -99,7 +101,7 @@ static bool decompress(const QString& filePath, QByteArray& byteArray,
 
             numBytes = ChunkSize - zstream.avail_out;
             bytesDecompressed += numBytes;
-            byteArray.append(reinterpret_cast<const char*>(outBuffer), numBytes); // NOLINT
+            byteArray.append(reinterpret_cast<const char*>(outBuffer.data()), numBytes); // NOLINT
 
             // Check if we've read more than we've been asked to
             if(maxReadSize >= 0 && bytesDecompressed >= static_cast<uint64_t>(maxReadSize))
@@ -139,10 +141,10 @@ static bool load(const QString& filePath, QByteArray& byteArray,
     do
     {
         const int ChunkSize = 2 << 16;
-        char buffer[ChunkSize];
+        std::vector<unsigned char> buffer(ChunkSize);
 
-        auto numBytes = input.readRawData(static_cast<char*>(buffer), ChunkSize);
-        byteArray.append(static_cast<char*>(buffer), numBytes);
+        auto numBytes = input.readRawData(reinterpret_cast<char*>(buffer.data()), ChunkSize);
+        byteArray.append(reinterpret_cast<char*>(buffer.data()), numBytes);
 
         bytesRead += numBytes;
         progressFn((bytesRead * 100) / totalBytes);
