@@ -222,11 +222,14 @@ Item
         }
     }
 
+    property alias exportAction: exportTableAction
+
     Action
     {
         id: exportTableAction
         enabled: tableView.rowCount > 0
         text: qsTr("Export…")
+        iconName: "document-save"
         onTriggered:
         {
             exportTableDialog.folder = misc.fileSaveInitialFolder !== undefined ?

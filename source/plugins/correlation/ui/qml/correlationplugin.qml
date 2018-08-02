@@ -9,6 +9,8 @@ import com.kajeka 1.0
 
 import "../../../../shared/ui/qml/Utils.js" as Utils
 
+import "Controls"
+
 PluginContent
 {
     id: root
@@ -369,8 +371,11 @@ PluginContent
         anchors.fill: parent
 
         ToolButton { action: toggleUiOrientationAction }
+        ToolBarSeparator {}
         ToolButton { action: resizeColumnsToContentsAction }
         ToolButton { action: selectColumnsAction }
+        ToolButton { action: tableView.exportAction }
+        ToolBarSeparator {}
         ToolButton { action: toggleColumnNamesAction }
         Item { Layout.fillWidth: true }
     }
