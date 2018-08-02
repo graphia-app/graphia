@@ -56,7 +56,28 @@ PluginContent
         checkable: true
         checked: tableView.columnSelectionMode
 
-        onTriggered: { tableView.columnSelectionMode = !tableView.columnSelectionMode; }
+        onTriggered:
+        {
+            tableView.columnSelectionMode = !tableView.columnSelectionMode;
+        }
+    }
+
+    Action
+    {
+        id: selectColumnAnnotationsAction
+        text: qsTr("Select Visible Column Annotations")
+        iconName: "format-justify-right"
+
+        enabled: plot.canShowColumnAnnotationSelection &&
+            plugin.model.columnAnnotations.length > 0
+
+        checkable: true
+        checked: plot.columnAnnotationSelectionModeEnabled
+
+        onTriggered:
+        {
+            plot.columnAnnotationSelectionModeEnabled = !plot.columnAnnotationSelectionModeEnabled;
+        }
     }
 
     Action
@@ -319,7 +340,10 @@ PluginContent
         case 1:
             menu.title = qsTr("&Plot");
             menu.addItem("").action = toggleColumnNamesAction;
-            menu.addItem("").action = savePlotImageAction;
+
+            if(plugin.model.columnAnnotations.length > 0)
+                menu.addItem("").action = selectColumnAnnotationsAction;
+
             menu.addItem("").action = toggleGridLines;
             menu.addItem("").action = togglePlotLegend;
 
@@ -359,6 +383,9 @@ PluginContent
                         plot.plotAveragingType == PlotAveragingType.MeanHistogram
             });
 
+            menu.addSeparator();
+            menu.addItem("").action = savePlotImageAction;
+
             Utils.cloneMenu(menu, plotContextMenu);
             return true;
         }
@@ -377,6 +404,11 @@ PluginContent
         ToolButton { action: tableView.exportAction }
         ToolBarSeparator {}
         ToolButton { action: toggleColumnNamesAction }
+        ToolButton
+        {
+            visible: plugin.model.columnAnnotations.length > 0
+            action: selectColumnAnnotationsAction
+        }
         Item { Layout.fillWidth: true }
     }
 
@@ -516,6 +548,17 @@ PluginContent
                     height: 64
 
                     visible: plot._timedBusy
+                }
+
+                ToolButton
+                {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.margins: 4
+                    visible: plot.columnAnnotationSelectionModeEnabled
+                    iconName: "emblem-unreadable"
+
+                    onClicked: { plot.columnAnnotationSelectionModeEnabled = false; }
                 }
 
             }

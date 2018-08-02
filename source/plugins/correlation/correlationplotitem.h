@@ -99,7 +99,8 @@ class CorrelationPlotItem : public QQuickPaintedItem
 {
     Q_OBJECT
     Q_PROPERTY(QVector<double> rawData MEMBER _data)
-    Q_PROPERTY(double horizontalScrollPosition MEMBER _horizontalScrollPosition WRITE setHorizontalScrollPosition NOTIFY horizontalScrollPositionChanged)
+    Q_PROPERTY(double horizontalScrollPosition MEMBER _horizontalScrollPosition
+        WRITE setHorizontalScrollPosition NOTIFY horizontalScrollPositionChanged)
     Q_PROPERTY(double visibleHorizontalFraction READ visibleHorizontalFraction NOTIFY visibleHorizontalFractionChanged)
     Q_PROPERTY(QVector<int> selectedRows MEMBER _selectedRows WRITE setSelectedRows)
     Q_PROPERTY(QVector<QColor> rowColors MEMBER _rowColors WRITE setRowColors)
@@ -107,7 +108,11 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(QStringList rowNames MEMBER _graphNames)
 
     Q_PROPERTY(QVariantList columnAnnotations WRITE setColumnAnnotations)
-    Q_PROPERTY(QStringList visibleColumnAnnotationNames READ visibleColumnAnnotationNames WRITE setVisibleColumnAnnotationNames NOTIFY visibleColumnAnnotationNamesChanged)
+    Q_PROPERTY(QStringList visibleColumnAnnotationNames READ visibleColumnAnnotationNames
+        WRITE setVisibleColumnAnnotationNames NOTIFY visibleColumnAnnotationNamesChanged)
+    Q_PROPERTY(bool canShowColumnAnnotationSelection READ canShowColumnAnnotationSelection NOTIFY heightChanged)
+    Q_PROPERTY(bool columnAnnotationSelectionModeEnabled READ columnAnnotationSelectionModeEnabled
+        WRITE setColumnAnnotationSelectionModeEnabled NOTIFY columnAnnotationSelectionModeEnabledChanged)
 
     Q_PROPERTY(size_t columnCount MEMBER _columnCount WRITE setColumnCount)
     Q_PROPERTY(size_t rowCount MEMBER _rowCount)
@@ -118,7 +123,8 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(int plotScaleType MEMBER _plotScaleType WRITE setPlotScaleType NOTIFY plotOptionsChanged)
     Q_PROPERTY(int plotAveragingType MEMBER _plotAveragingType WRITE setPlotAveragingType NOTIFY plotOptionsChanged)
     Q_PROPERTY(int plotDispersionType MEMBER _plotDispersionType WRITE setPlotDispersionType NOTIFY plotOptionsChanged)
-    Q_PROPERTY(int plotDispersionVisualType MEMBER _plotDispersionVisualType WRITE setPlotDispersionVisualType NOTIFY plotOptionsChanged)
+    Q_PROPERTY(int plotDispersionVisualType MEMBER _plotDispersionVisualType
+        WRITE setPlotDispersionVisualType NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString xAxisLabel MEMBER _xAxisLabel WRITE setXAxisLabel NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString yAxisLabel MEMBER _yAxisLabel WRITE setYAxisLabel NOTIFY plotOptionsChanged)
 
@@ -169,6 +175,8 @@ private:
     QCPAxisRect* _mainAxisRect = nullptr;
     QCPAxis* _mainXAxis = nullptr;
     QCPAxis* _mainYAxis = nullptr;
+    QCPAxisRect* _columnAnnotationsAxisRect = nullptr;
+    bool _columnAnnotationSelectionModeEnabled = false;
 
     size_t _columnCount = 0;
     size_t _rowCount = 0;
@@ -241,19 +249,24 @@ private:
 
     QStringList visibleColumnAnnotationNames() const;
     void setVisibleColumnAnnotationNames(const QStringList& columnAnnotations);
+    bool columnAnnotationSelectionModeEnabled() const;
+    void setColumnAnnotationSelectionModeEnabled(bool enabled);
 
     void computeXAxisRange();
     QVector<double> meanAverageData(double& min, double& max);
 
     void updateColumnAnnotaionVisibility();
+    bool canShowColumnAnnotationSelection() const;
 
-    double visibleHorizontalFraction();
-    double labelHeight();
-    double columnAxisWidth();
-    double columnAnnotaionsHeight();
+    double visibleHorizontalFraction() const;
+    double labelHeight() const;
+    double columnAxisWidth() const;
+    double columnAnnotaionsHeight(bool allAttributes) const;
 
     QCPAxis* configureColumnAnnotations(QCPAxis* xAxis);
     void configureLegend();
+
+    void onLeftClick(const QPoint& pos);
 
     void invalidateLineGraphCache();
 
@@ -272,5 +285,6 @@ signals:
     void busyChanged();
 
     void visibleColumnAnnotationNamesChanged();
+    void columnAnnotationSelectionModeEnabledChanged();
 };
 #endif // CORRELATIONPLOTITEM_H

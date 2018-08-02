@@ -291,8 +291,19 @@ void CorrelationPlotItem::mousePressEvent(QMouseEvent* event)
 void CorrelationPlotItem::mouseReleaseEvent(QMouseEvent* event)
 {
     routeMouseEvent(event);
-    if(event->button() == Qt::RightButton)
+    switch(event->button())
+    {
+    case Qt::LeftButton:
+        onLeftClick(event->pos());
+        break;
+
+    case Qt::RightButton:
         emit rightClick();
+        break;
+
+    default:
+        break;
+    }
 }
 
 void CorrelationPlotItem::mouseMoveEvent(QMouseEvent* event)
@@ -445,16 +456,29 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max)
     return yDataAvg;
 }
 
+inline const auto MinimumMainPlotHeight = 100;
+
 void CorrelationPlotItem::updateColumnAnnotaionVisibility()
 {
-    auto mainPlotHeight = height() - columnAnnotaionsHeight();
-    bool showColumnAnnotations = mainPlotHeight >= 100;
+    auto mainPlotHeight = height() - columnAnnotaionsHeight(_columnAnnotationSelectionModeEnabled);
+    bool showColumnAnnotations = mainPlotHeight >= MinimumMainPlotHeight;
 
     if(showColumnAnnotations != _showColumnAnnotations)
     {
         _showColumnAnnotations = showColumnAnnotations;
+
+        // If we can't show column annotations, we also can't be in selection mode
+        if(!_showColumnAnnotations)
+            setColumnAnnotationSelectionModeEnabled(false);
+
         rebuildPlot();
     }
+}
+
+bool CorrelationPlotItem::canShowColumnAnnotationSelection() const
+{
+    auto mainPlotHeight = height() - columnAnnotaionsHeight(true);
+    return mainPlotHeight >= MinimumMainPlotHeight;
 }
 
 void CorrelationPlotItem::populateMeanLinePlot()
@@ -924,39 +948,52 @@ void CorrelationPlotItem::populateLinePlot()
 
 QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 {
-    if(!_showColumnAnnotations || _visibleColumnAnnotationNames.empty())
+    if(_columnAnnotations.empty())
         return xAxis;
 
-    auto* columnAnnotationsAxisRect = new QCPAxisRect(&_customPlot);
-    _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, columnAnnotationsAxisRect);
+    if(!_showColumnAnnotations)
+        return xAxis;
+
+    if(!_columnAnnotationSelectionModeEnabled && _visibleColumnAnnotationNames.empty())
+        return xAxis;
+
+    _columnAnnotationsAxisRect = new QCPAxisRect(&_customPlot);
+    _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, _columnAnnotationsAxisRect);
 
     const auto separation = 8;
     _mainAxisRect->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msTop);
     _mainAxisRect->setMargins(QMargins(0, 0, 0, separation));
-    columnAnnotationsAxisRect->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msBottom);
-    columnAnnotationsAxisRect->setMargins(QMargins(0, 0, separation, 0));
+    _columnAnnotationsAxisRect->setAutoMargins(QCP::msLeft|QCP::msRight|QCP::msBottom);
+    _columnAnnotationsAxisRect->setMargins(QMargins(0, 0, separation, 0));
 
     // Align the left and right hand sides of the axes
     auto* group = new QCPMarginGroup(&_customPlot);
     _mainAxisRect->setMarginGroup(QCP::msLeft|QCP::msRight, group);
-    columnAnnotationsAxisRect->setMarginGroup(QCP::msLeft|QCP::msRight, group);
+    _columnAnnotationsAxisRect->setMarginGroup(QCP::msLeft|QCP::msRight, group);
 
     xAxis->setTickLabels(false);
 
-    auto caXAxis = columnAnnotationsAxisRect->axis(QCPAxis::atBottom);
-    auto caYAxis = columnAnnotationsAxisRect->axis(QCPAxis::atLeft);
+    auto caXAxis = _columnAnnotationsAxisRect->axis(QCPAxis::atBottom);
+    auto caYAxis = _columnAnnotationsAxisRect->axis(QCPAxis::atLeft);
     auto* colorMap = new QCPColorMap(caXAxis, caYAxis);
 
     auto *colorScale = new QCPColorScale(&_customPlot);
     colorMap->setColorScale(colorScale);
     colorMap->setInterpolate(false);
 
-    size_t numColumnAnnotations = _visibleColumnAnnotationNames.size();
+    size_t numColumnAnnotations;
+
+    if(_columnAnnotationSelectionModeEnabled)
+        numColumnAnnotations = _columnAnnotations.size();
+    else
+        numColumnAnnotations = _visibleColumnAnnotationNames.size();
+
     colorMap->data()->setSize(static_cast<int>(_columnCount),
         static_cast<int>(numColumnAnnotations));
 
-    columnAnnotationsAxisRect->setMinimumSize(0, columnAnnotaionsHeight());
-    columnAnnotationsAxisRect->setMaximumSize(QWIDGETSIZE_MAX, columnAnnotaionsHeight());
+    auto h = columnAnnotaionsHeight(_columnAnnotationSelectionModeEnabled);
+    _columnAnnotationsAxisRect->setMinimumSize(0, h);
+    _columnAnnotationsAxisRect->setMaximumSize(QWIDGETSIZE_MAX, h);
 
     auto range = 1.0;
     auto padding = 0.0;
@@ -970,18 +1007,18 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 
     colorMap->data()->setRange(QCPRange(0, _columnCount - 1), QCPRange(0, range));
 
-    std::set<QString> uniqueValues;
+    using AnnotationValue = std::tuple<QString, bool>;
+    std::set<AnnotationValue> uniqueValues;
 
     for(const auto& columnAnnotation : _columnAnnotations)
     {
-        if(!u::contains(_visibleColumnAnnotationNames, columnAnnotation._name))
-            continue;
+        bool visible = u::contains(_visibleColumnAnnotationNames, columnAnnotation._name);
 
         for(const auto& value : columnAnnotation._values)
-            uniqueValues.emplace(value);
+            uniqueValues.emplace(value, visible);
     }
 
-    std::map<QString, double> stringColorIndexMap;
+    std::map<AnnotationValue, double> stringColorIndexMap;
 
     QCPColorGradient colorGradient;
     colorGradient.setLevelCount(static_cast<int>(uniqueValues.size()));
@@ -992,7 +1029,13 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
         auto index = uniqueValues.size() == 1 ? 0.0 :
             static_cast<double>(i++) / (uniqueValues.size() - 1);
         stringColorIndexMap[value] = index;
-        auto color = u::colorForString(value);
+
+        const auto& stringValue = std::get<0>(value);
+        auto visible = std::get<1>(value);
+        auto color = u::colorForString(stringValue);
+
+        if(!visible)
+            color = QColor::fromHsl(color.hue(), 20, std::max(color.lightness(), 150));
 
         colorGradient.setColorStopAt(index, color);
     }
@@ -1002,16 +1045,23 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
     size_t y = numColumnAnnotations - 1;
     for(const auto& columnAnnotation : _columnAnnotations)
     {
-        if(!u::contains(_visibleColumnAnnotationNames, columnAnnotation._name))
+        auto visible = u::contains(_visibleColumnAnnotationNames, columnAnnotation._name);
+        if(!visible && !_columnAnnotationSelectionModeEnabled)
             continue;
 
+        QString postfix;
+
+        if(_columnAnnotationSelectionModeEnabled)
+            postfix = visible ? QStringLiteral(" ☑") : QStringLiteral(" ☐");
+
         double tickPosition = numColumnAnnotations > 1 ? static_cast<double>(y) : 0.5;
-        columnAnnotationTicker->addTick(tickPosition, columnAnnotation._name);
+        columnAnnotationTicker->addTick(tickPosition, columnAnnotation._name + postfix);
 
         for(size_t x = 0U; x < _columnCount; x++)
         {
             auto stringValue = columnAnnotation._values.at(static_cast<int>(x));
-            auto cellValue = stringColorIndexMap[stringValue];
+            AnnotationValue value(stringValue, visible);
+            auto cellValue = stringColorIndexMap[value];
             colorMap->data()->setCell(static_cast<int>(x), static_cast<int>(y), cellValue);
         }
 
@@ -1019,7 +1069,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
     }
 
     colorMap->setGradient(colorGradient);
-    colorMap->rescaleDataRange();
+    colorMap->setDataRange(QCPRange(0.0, 1.0));
 
     caYAxis->setTicker(columnAnnotationTicker);
 
@@ -1134,6 +1184,35 @@ void CorrelationPlotItem::configureLegend()
     }
 }
 
+void CorrelationPlotItem::onLeftClick(const QPoint& pos)
+{
+    auto* axisRect = _customPlot.axisRectAt(pos);
+
+    if(_columnAnnotationSelectionModeEnabled && axisRect == _columnAnnotationsAxisRect)
+    {
+        auto rectHeight = axisRect->bottom() - axisRect->top();
+        auto y = pos.y() - axisRect->top();
+
+        if(y < rectHeight)
+        {
+            auto index = (y * _columnAnnotations.size()) / (rectHeight);
+
+            if(index < _columnAnnotations.size())
+            {
+                const auto& columnAnnotation = _columnAnnotations.at(index);
+                auto name = columnAnnotation._name;
+
+                if(u::contains(_visibleColumnAnnotationNames, name))
+                    _visibleColumnAnnotationNames.erase(name);
+                else
+                    _visibleColumnAnnotationNames.insert(name);
+
+                rebuildPlot();
+            }
+        }
+    }
+}
+
 void CorrelationPlotItem::invalidateLineGraphCache()
 {
     for(auto v : qAsConst(_lineGraphCache))
@@ -1180,6 +1259,8 @@ void CorrelationPlotItem::rebuildPlot()
 
         _customPlot.removePlottable(plottable);
     }
+
+    _columnAnnotationsAxisRect = nullptr;
 
     // Return the plot layout to its immediate post-construction state
     removeAllExcept(_mainAxisLayout, _mainAxisRect);
@@ -1431,7 +1512,27 @@ void CorrelationPlotItem::setVisibleColumnAnnotationNames(const QStringList& col
     emit visibleColumnAnnotationNamesChanged();
 }
 
-double CorrelationPlotItem::visibleHorizontalFraction()
+bool CorrelationPlotItem::columnAnnotationSelectionModeEnabled() const
+{
+    return _columnAnnotationSelectionModeEnabled;
+}
+
+void CorrelationPlotItem::setColumnAnnotationSelectionModeEnabled(bool enabled)
+{
+    // Don't set it if we can't enter selection mode
+    if(enabled && !canShowColumnAnnotationSelection())
+        return;
+
+    if(_columnAnnotationSelectionModeEnabled != enabled)
+    {
+        _columnAnnotationSelectionModeEnabled = enabled;
+        emit columnAnnotationSelectionModeEnabledChanged();
+
+        rebuildPlot();
+    }
+}
+
+double CorrelationPlotItem::visibleHorizontalFraction() const
 {
     if(_showColumnNames)
         return (columnAxisWidth() / (labelHeight() * _columnCount));
@@ -1439,14 +1540,14 @@ double CorrelationPlotItem::visibleHorizontalFraction()
     return 1.0;
 }
 
-double CorrelationPlotItem::labelHeight()
+double CorrelationPlotItem::labelHeight() const
 {
     QFontMetrics metrics(_defaultFont9Pt);
     const unsigned int columnPadding = 1;
     return metrics.height() + columnPadding;
 }
 
-double CorrelationPlotItem::columnAxisWidth()
+double CorrelationPlotItem::columnAxisWidth() const
 {
     const auto& margins = _mainAxisRect->margins();
     const unsigned int axisWidth = margins.left() + margins.right();
@@ -1455,8 +1556,11 @@ double CorrelationPlotItem::columnAxisWidth()
     return width() - axisWidth;
 }
 
-double CorrelationPlotItem::columnAnnotaionsHeight()
+double CorrelationPlotItem::columnAnnotaionsHeight(bool allAttributes) const
 {
+    if(allAttributes)
+        return _columnAnnotations.size() * labelHeight();
+
     return _visibleColumnAnnotationNames.size() * labelHeight();
 }
 
