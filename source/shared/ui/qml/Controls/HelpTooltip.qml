@@ -15,6 +15,8 @@ ToolButton
     property string title: ""
     readonly property int _padding: 20
     readonly property int _offset: 10
+    // If you use a custom element style you can't use iconName
+    // so I have to use iconSource (boo)
     iconSource: "qrc:/icons/Tango/16x16/apps/help-browser.png"
     width: 20
     height: 20
@@ -85,6 +87,7 @@ ToolButton
                 duration: 100
             }
         }
+
         SystemPalette
         {
             id: sysPalette

@@ -7,7 +7,7 @@ import "../../shared/ui/qml/Constants.js" as Constants
 
 // This dialog is conceptually similar to a tabview in a dialog however the user
 // interface consists of a vertical list of tabs with buttons to OPTIONALLY
-// progress through. The transistions are based on Wizard
+// progress through. The tab animations are based on Wizard way of animating
 //
 // Child Items should be a ListTab with a title string
 // Failing to do so will leave an empty tab title
@@ -59,7 +59,7 @@ BaseParameterDialog
                     // Adjust width to match text contents
                     var maxWidth = 100;
 
-                    for(var i = 0; i<listTabs.length; i++)
+                    for(var i = 0; i < listTabs.length; i++)
                     {
                         var delegateItem = tabSelector.contentItem.children[i];
                         if(delegateItem === undefined)
@@ -95,7 +95,7 @@ BaseParameterDialog
                         Rectangle
                         {
                             id: delegateRectangle
-                            color: index == currentIndex ? "lightblue" : "#00000000"
+                            color: index == currentIndex ? Qt.lighter(systemPalette.highlight, 1.7) : "#00000000"
                             anchors.centerIn: parent
                             width: parent.width
                             height: children[0].height + (_padding * 2.0)
@@ -146,7 +146,7 @@ BaseParameterDialog
             {
                 id: previousButton
                 text: qsTr("Previous")
-                onClicked: { root.previous(); }
+                onClicked: { root.goToPrevious(); }
                 enabled: currentIndex > 0
             }
 
@@ -154,15 +154,22 @@ BaseParameterDialog
             {
                 id: nextButton
                 text: qsTr("Next")
-                onClicked: { root.next(); }
+                onClicked: { root.goToNext(); }
                 enabled: (currentIndex < listTabs.length - 1) ? nextEnabled : false
             }
 
             Button
             {
                 id: finishButton
-                text: qsTr("Finish")
-                onClicked: {
+                text:
+                {
+                    if(summaryEnabled && currentIndex !== listTabs.length - 1)
+                        return qsTr("Confirm");
+                    else
+                        return qsTr("Finish");
+                }
+                onClicked:
+                {
                     if(summaryEnabled && currentIndex !== listTabs.length - 1)
                         goToTab(listTabs.length - 1);
                     else
@@ -179,7 +186,7 @@ BaseParameterDialog
         }
     }
 
-    function next()
+    function goToNext()
     {
         if(currentIndex < listTabs.length - 1)
         {
@@ -189,7 +196,7 @@ BaseParameterDialog
         }
     }
 
-    function previous()
+    function goToPrevious()
     {
         if(currentIndex > 0)
         {
@@ -234,8 +241,10 @@ BaseParameterDialog
         for(var i = 0; i < listTabs.length; i++)
         {
             listTabs[i].parent = content;
-            listTabs[i].x = Qt.binding(function() {
-                return (indexOf(this) * contentContainer.width + tabSelector.implicitWidth)  });
+            listTabs[i].x = Qt.binding(function()
+            {
+                return (indexOf(this) * contentContainer.width + tabSelector.implicitWidth);
+            });
             listTabs[i].width = Qt.binding(function() { return (contentContainer.width); });
             listTabs[i].height = Qt.binding(function() { return contentContainer.height; });
         }

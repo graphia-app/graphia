@@ -39,7 +39,7 @@ ListTabDialog
         return  x >= rect.x &&
                 x < rect.x + rect.width &&
                 y >= rect.y &&
-                y < rect.x + rect.height;
+                y < rect.y + rect.height;
     }
 
     function scrollToCell(tableView, x, y)
@@ -60,9 +60,13 @@ ListTabDialog
         var runningHeight = 0;
         for(i = 0; i < y; ++i)
             runningHeight += dataRectView.__listView.contentItem.children[1].height;
-        dataFrameAnimationX.to = runningWidth;
+        dataFrameAnimationX.to = Math.min(runningWidth,
+                                          dataRectView.flickableItem.contentWidth -
+                                          dataRectView.flickableItem.width);
         dataFrameAnimationX.running = true;
-        dataFrameAnimationY.to = runningHeight;
+        dataFrameAnimationY.to = Math.min(runningHeight,
+                                          dataRectView.flickableItem.contentHeight -
+                                          dataRectView.flickableItem.height);
         dataFrameAnimationY.running = true;
     }
 
@@ -115,7 +119,7 @@ ListTabDialog
 
     ListTab
     {
-        title: qsTr("Data Viewer")
+        title: qsTr("Data Selection")
         id: dataRectPage
         property bool _busy: preParser.isRunning || root.animating
 
@@ -167,7 +171,7 @@ ListTabDialog
 
             Text
             {
-                text: qsTr("<h2>Data Viewer - Select and adjust</h2>")
+                text: qsTr("<h2>Data Selection - Select and adjust</h2>")
                 Layout.alignment: Qt.AlignLeft
                 textFormat: Text.StyledText
             }
@@ -199,7 +203,8 @@ ListTabDialog
                     Text
                     {
                         wrapMode: Text.WordWrap
-                        text: qsTr("Transpose will flip the data over it's diagonal. Moving rows to columns and vice versa")
+                        text: qsTr("Transpose will flip the data over its diagonal. " +
+                                   "Moving rows to columns and vice versa")
                     }
                 }
             }
@@ -266,7 +271,7 @@ ListTabDialog
                     {
                         id: nonNumericalTimer
                         interval: 5000
-                        onTriggered: { tooltipNonNumerical.visible = false }
+                        onTriggered: { tooltipNonNumerical.visible = false; }
                     }
 
                     Text
@@ -274,7 +279,7 @@ ListTabDialog
                         anchors.centerIn: parent
                         id: messageText
                         text: qsTr("Selected frame contains non-numerical data. " +
-                                   "Next availaible frame selected");
+                                   "Next availaible frame selected.");
                     }
                 }
 
@@ -321,8 +326,8 @@ ListTabDialog
                                     return;
                                 tooltipNonNumerical.visible = false;
                                 nonNumericalTimer.stop();
-                                selectedCol = styleData.column
-                                selectedRow = styleData.row
+                                selectedCol = styleData.column;
+                                selectedRow = styleData.row;
                                 _clickedCell = true;
                                 preParser.autoDetectDataRectangle(styleData.column, styleData.row);
                             }
@@ -341,7 +346,7 @@ ListTabDialog
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.leftMargin: styleData.hasOwnProperty("depth") && styleData.column === 0 ? 0 :
-                                                                                                              horizontalAlignment === Text.AlignRight ? 1 : 8
+                                                 horizontalAlignment === Text.AlignRight ? 1 : 8
                             anchors.rightMargin: (styleData.hasOwnProperty("depth") && styleData.column === 0)
                                                  || horizontalAlignment !== Text.AlignRight ? 1 : 8
                             horizontalAlignment: styleData.textAlignment
@@ -355,11 +360,11 @@ ListTabDialog
                                     if(styleData.row === 0)
                                     {
                                         return (preParser.model.columnCount() - dataRectView.maxColumns) +
-                                                qsTr(" more columns...");
+                                                qsTr(" more columns…");
                                     }
                                     else
                                     {
-                                        return "...";
+                                        return "…";
                                     }
                                 }
 
@@ -412,7 +417,7 @@ ListTabDialog
             }
         }
         // Qt.callLater is used as the TableView will not generate the columns until
-        // next loop has passed and there's no way to reliable listen for the change
+        // next loop has passed and there's no way to reliably listen for the change
         // (Thanks TableView)
         Qt.callLater(resizeColumnsToContentsBugWorkaround, dataRectView);
     }
@@ -440,24 +445,23 @@ ListTabDialog
                 {
                     text: qsTr("A Pearson Correlation will be performed on the dataset to provide a measure of correlation between rows of data. " +
                                "1.0 represents highly correlated rows and 0.0 represents no correlation. Negative correlation values are discarded. " +
-                               "All values below the Minimum correlation value will also be discarded and will not create edges in the generated graph.<br>" +
+                               "All values below the Minimum correlation value will also be discarded and will not be included in the generated graph.<br>" +
                                "<br>" +
-                               "By default a transform is created which will create edges for all values above the minimum correlation threshold. " +
+                               "By default a transform is created which will create edges for all values above the initial correlation threshold. " +
                                "Is is not possible to create edges using values below the minimum correlation value.")
                     wrapMode: Text.WordWrap
                     textFormat: Text.StyledText
                     Layout.fillWidth: true
                 }
 
-                RowLayout
+                GridLayout
                 {
+                    columns: 4
                     Text
                     {
                         text: qsTr("Minimum Correlation:")
                         Layout.alignment: Qt.AlignRight
                     }
-
-                    Item { Layout.fillWidth: true }
 
                     SpinBox
                     {
@@ -475,18 +479,79 @@ ListTabDialog
                         onValueChanged:
                         {
                             parameters.minimumCorrelation = value;
-                            slider.value = value;
+                            minimumSlider.value = value;
                         }
                     }
 
                     Slider
                     {
-                        id: slider
+                        id: minimumSlider
                         minimumValue: 0.0
                         maximumValue: 1.0
                         onValueChanged:
                         {
                             minimumCorrelationSpinBox.value = value;
+                        }
+                    }
+
+                    HelpTooltip
+                    {
+                        title: qsTr("Minimum Correlation")
+                        Text
+                        {
+                            wrapMode: Text.WordWrap
+                            text: qsTr("This sets the minimum edge correlation value required " +
+                                       "to be included in the final graph. Values below this " +
+                                       "are discarded. A lower minimum value will take longer to compute.")
+                        }
+                    }
+
+                    Text
+                    {
+                        text: qsTr("Initial Correlation Threshold:")
+                        Layout.alignment: Qt.AlignRight
+                    }
+
+                    SpinBox
+                    {
+                        id: initialCorrelationSpinBox
+
+                        Layout.alignment: Qt.AlignLeft
+                        implicitWidth: 70
+
+                        minimumValue: minimumCorrelationSpinBox.value
+                        maximumValue: 1.0
+
+                        decimals: 3
+                        stepSize: (maximumValue - minimumValue) / 100.0
+
+                        onValueChanged:
+                        {
+                            parameters.initialThreshold = value;
+                            initialSlider.value = value;
+                        }
+                    }
+
+                    Slider
+                    {
+                        id: initialSlider
+                        minimumValue: minimumCorrelationSpinBox.value
+                        maximumValue: 1.0
+                        onValueChanged:
+                        {
+                            initialCorrelationSpinBox.value = value;
+                        }
+                    }
+
+                    HelpTooltip
+                    {
+                        title: qsTr("Correlation Threshold")
+                        Text
+                        {
+                            wrapMode: Text.WordWrap
+                            text: qsTr("This sets the minimum correlation value required to create an edge in the graph. " +
+                                       "In general a lower value creates more edges, while a higher value creates fewer. " +
+                                       "This can can be changed once the graph has been created.")
                         }
                     }
                 }
@@ -515,7 +580,7 @@ ListTabDialog
                 Text
                 {
                     text: qsTr("Please select the required data manipulation. The manipulation " +
-                               "will occur in the order it is displayed as below.")
+                               "will occur in the order it is displayed below.")
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
@@ -621,11 +686,11 @@ ListTabDialog
                         model: ListModel
                         {
                             ListElement { text: qsTr("None");          value: ScalingType.None }
-                            ListElement { text: qsTr("Log2(𝒙 + ε)");   value: ScalingType.Log2 }
-                            ListElement { text: qsTr("Log10(𝒙 + ε)");  value: ScalingType.Log10 }
-                            ListElement { text: qsTr("AntiLog2(𝒙)");   value: ScalingType.AntiLog2 }
-                            ListElement { text: qsTr("AntiLog10(𝒙)");  value: ScalingType.AntiLog10 }
-                            ListElement { text: qsTr("Arcsin(𝒙)");     value: ScalingType.ArcSin }
+                            ListElement { text: qsTr("Log2(x + ε)");   value: ScalingType.Log2 }
+                            ListElement { text: qsTr("Log10(x + ε)");  value: ScalingType.Log10 }
+                            ListElement { text: qsTr("AntiLog2(x)");   value: ScalingType.AntiLog2 }
+                            ListElement { text: qsTr("AntiLog10(x)");  value: ScalingType.AntiLog10 }
+                            ListElement { text: qsTr("Arcsin(x)");     value: ScalingType.ArcSin }
                         }
                         textRole: "text"
 
@@ -645,14 +710,14 @@ ListTabDialog
 
                             Text
                             {
-                                text: qsTr("<b>Log</b>𝒃(𝒙 + ε):")
+                                text: qsTr("<b>Log</b><i>b</i>(<i>x</i> + ε):")
                                 Layout.alignment: Qt.AlignTop
                                 textFormat: Text.StyledText
                             }
 
                             Text
                             {
-                                text: qsTr("Will perform a Log of 𝒙 + ε to base 𝒃, where 𝒙 is the input data and ε is a very small constant.");
+                                text: qsTr("Perform a Log of <i>x</i> + ε to base <i>b</i>, where <i>x</i> is the input data and ε is a very small constant.");
                                 wrapMode: Text.WordWrap
                                 Layout.alignment: Qt.AlignTop
                                 Layout.fillWidth: true
@@ -660,29 +725,29 @@ ListTabDialog
 
                             Text
                             {
-                                text: qsTr("<b>AntiLog</b>𝒃(𝒙):")
+                                text: qsTr("<b>AntiLog</b><i>b</i>(<i>x</i>):")
                                 Layout.alignment: Qt.AlignTop
                                 textFormat: Text.StyledText
                             }
 
                             Text
                             {
-                                text: qsTr("Will raise x to the power of 𝒃, where 𝒙 is the input data.");
+                                text: qsTr("Raise <i>x</i> to the power of <i>b</i>, where <i>x</i> is the input data.");
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
 
                             Text
                             {
-                                text: qsTr("<b>Arcsin</b>(𝒙):")
+                                text: qsTr("<b>Arcsin</b>(<i>x</i>):")
                                 Layout.alignment: Qt.AlignTop
                                 textFormat: Text.StyledText
                             }
 
                             Text
                             {
-                                text: qsTr("Will perform an inverse sine function of 𝒙, where 𝒙 is the input data. This is useful when " +
-                                           "you require a log transform but the dataset contains negative numbers or zeros.");
+                                text: qsTr("Perform an inverse sine function of <i>x</i>, where <i>x</i> is the input data. This is useful when " +
+                                                                   "you require a log transform but the dataset contains negative numbers or zeros.");
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
@@ -716,7 +781,7 @@ ListTabDialog
 
                     HelpTooltip
                     {
-                        title: "Normalisation Types"
+                        title: qsTr("Normalisation Types")
                         GridLayout
                         {
                             columns: 2
@@ -729,9 +794,12 @@ ListTabDialog
 
                             Text
                             {
-                                text: qsTr("Normalise the data so 1.0 is the maximum value of that column and 0.0 the minimum. " +
-                                           "This is useful if the columns in the dataset have differing scales or units. " +
-                                           "Note: If all elements in a column have the same value this will rescale the values to 0.0.");
+                                text: qsTr("Normalise the data so 1.0 is the maximum value " +
+                                           "of that column and 0.0 the minimum. " +
+                                           "This is useful if the columns in the dataset " +
+                                           "have differing scales or units. " +
+                                           "Note: If all elements in a column have the same value " +
+                                           "this will rescale the values to 0.0.");
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
@@ -758,7 +826,7 @@ ListTabDialog
 
     ListTab
     {
-        title: "Initial Transforms"
+        title: qsTr("Initial Transforms")
         ColumnLayout
         {
             anchors.left: parent.left
@@ -775,6 +843,7 @@ ListTabDialog
                 text: qsTr("Commonly used transforms can be automatically added to " +
                            "the graph from here")
                 Layout.alignment: Qt.AlignLeft
+                wrapMode: Text.WordWrap
             }
 
             GridLayout
@@ -805,7 +874,7 @@ ListTabDialog
 
                 HelpTooltip
                 {
-                    title: "Clustering"
+                    title: qsTr("Clustering")
                     GridLayout
                     {
                         columns: 2
@@ -839,7 +908,7 @@ ListTabDialog
                     model: ListModel
                     {
                         ListElement { text: qsTr("None");  value: EdgeReductionType.None }
-                        ListElement { text: qsTr("K-NN");   value: EdgeReductionType.KNN }
+                        ListElement { text: qsTr("k-NN");   value: EdgeReductionType.KNN }
                     }
                     textRole: "text"
 
@@ -866,7 +935,7 @@ ListTabDialog
                             columns: 2
                             Text
                             {
-                                text: qsTr("<b>K-NN:</b>")
+                                text: qsTr("<b>k-NN:</b>")
                                 textFormat: Text.StyledText
                                 Layout.alignment: Qt.AlignTop | Qt.AlignLeft
                             }
@@ -886,7 +955,7 @@ ListTabDialog
 
     ListTab
     {
-        title: "Summary"
+        title: qsTr("Summary")
         ColumnLayout
         {
             anchors.fill: parent
@@ -900,7 +969,7 @@ ListTabDialog
 
             Text
             {
-                text: qsTr("A graph will be created with the following parameters")
+                text: qsTr("A graph will be created with the following parameters:")
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
             }
@@ -912,34 +981,35 @@ ListTabDialog
                 text:
                 {
                     var summaryString = "";
-                    summaryString += "Minimum Correlation: " + minimumCorrelationSpinBox.value + "\n";
+                    summaryString += qsTr("Minimum Correlation: ") + minimumCorrelationSpinBox.value + "\n";
+                    summaryString += qsTr("Intial Correlation Threshold: ") + initialCorrelationSpinBox.value + "\n";
                     if(preParser.dataRect != Qt.rect(0,0,0,0))
                     {
-                        summaryString += "Data Frame:" +
-                                " [ Column:" + preParser.dataRect.x +
-                                " Row:" + preParser.dataRect.y +
-                                " Width:" + preParser.dataRect.width +
-                                " Height:" + preParser.dataRect.height + " ]\n";
+                        summaryString += qsTr("Data Frame:") +
+                                qsTr(" [ Column: ") + preParser.dataRect.x +
+                                qsTr(" Row: ") + preParser.dataRect.y +
+                                qsTr(" Width: ") + preParser.dataRect.width +
+                                qsTr(" Height: ") + preParser.dataRect.height + " ]\n";
                     }
                     else
                     {
-                        summaryString += "Data Frame: Automatic\n";
+                        summaryString += qsTr("Data Frame: Automatic\n");
                     }
-                    summaryString += "Data Transpose: " + transposeCheckBox.checked + "\n";
-                    summaryString += "Data Scaling: " + scaling.currentText + "\n";
-                    summaryString += "Data Normalise: " + normalise.currentText + "\n";
-                    summaryString += "Missing Data Replacement: " + missingDataMethod.currentText + "\n";
+                    summaryString += qsTr("Data Transpose: ") + transposeCheckBox.checked + "\n";
+                    summaryString += qsTr("Data Scaling: ") + scaling.currentText + "\n";
+                    summaryString += qsTr("Data Normalise: ") + normalise.currentText + "\n";
+                    summaryString += qsTr("Missing Data Replacement: ") + missingDataMethod.currentText + "\n";
                     if(missingDataMethod.model.get(missingDataMethod.currentIndex).value === MissingDataType.Constant)
-                        summaryString += "Replacement Constant: " + replacementConstant.text + "\n";
+                        summaryString += qsTr("Replacement Constant: ") + replacementConstant.text + "\n";
                     var transformString = ""
                     if(clustering.model.get(clustering.currentIndex).value !== ClusteringType.None)
-                        transformString += "Clustering (" + clustering.currentText + ")\n";
+                        transformString += qsTr("Clustering (") + clustering.currentText + ")\n";
                     if(edgeReduction.model.get(edgeReduction.currentIndex).value !== EdgeReductionType.None)
-                        transformString += "Edge Reduction (" + edgeReduction.currentText + ")\n";
+                        transformString += qsTr("Edge Reduction (") + edgeReduction.currentText + ")\n";
                     if(!transformString)
-                        transformString = "None"
-                    summaryString += "Intial Transforms: " + transformString;
-                    return qsTr(summaryString);
+                        transformString = qsTr("None")
+                    summaryString += qsTr("Intial Transforms: ") + transformString;
+                    return summaryString;
                 }
             }
         }
@@ -948,11 +1018,16 @@ ListTabDialog
     Component.onCompleted: initialise();
     function initialise()
     {
-        parameters = { minimumCorrelation: 0.7, transpose: false,
+        var DEFAULT_MINIMUM_CORRELATION = 0.7;
+        var DEFAULT_INITIAL_CORRELATION = DEFAULT_MINIMUM_CORRELATION +
+                ((1.0 - DEFAULT_MINIMUM_CORRELATION) * 0.5);
+
+        parameters = { minimumCorrelation: DEFAULT_MINIMUM_CORRELATION, initialThreshold: DEFAULT_INITIAL_CORRELATION, transpose: false,
             scaling: ScalingType.None, normalise: NormaliseType.None,
             missingDataType: MissingDataType.None };
 
-        minimumCorrelationSpinBox.value = 0.7;
+        minimumCorrelationSpinBox.value = DEFAULT_MINIMUM_CORRELATION;
+        initialCorrelationSpinBox.value = DEFAULT_INITIAL_CORRELATION;
         transposeCheckBox.checked = false;
     }
 }

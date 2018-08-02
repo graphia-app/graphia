@@ -171,6 +171,7 @@ private:
 
     std::unique_ptr<EdgeArray<double>> _pearsonValues;
     double _minimumCorrelationValue = 0.7;
+    double _initialCorrelationThreshold = 0.85;
     bool _transpose = false;
     QRect _dataRect;
     ScalingType _scaling = ScalingType::None;
@@ -225,6 +226,7 @@ public:
     std::unique_ptr<IParser> parserForUrlTypeName(const QString& urlTypeName) override;
     void applyParameter(const QString& name, const QVariant& value) override;
     QStringList defaultTransforms() const override;
+    QStringList defaultVisualisations() const override;
 
     QByteArray save(IMutableGraph& graph, const ProgressFn& progressFn) const override;
     bool load(const QByteArray& data, int dataVersion, IMutableGraph& graph,

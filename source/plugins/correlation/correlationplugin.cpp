@@ -456,6 +456,8 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
 {
     if(name == QLatin1String("minimumCorrelation"))
         _minimumCorrelationValue = value.toDouble();
+    else if(name == QLatin1String("initialThreshold"))
+        _initialCorrelationThreshold = value.toDouble();
     else if(name == QLatin1String("transpose"))
         _transpose = (value == QLatin1String("true"));
     else if(name == QLatin1String("scaling"))
@@ -476,9 +478,9 @@ void CorrelationPluginInstance::applyParameter(const QString& name, const QVaria
 
 QStringList CorrelationPluginInstance::defaultTransforms() const
 {
-    double defaultCorrelationValue = (_minimumCorrelationValue + 1.0) * 0.5;
-    QStringList defaultTransforms = {
-        QString(R"("Remove Edges" where $"Pearson Correlation Value" < %1)").arg(defaultCorrelationValue),
+    QStringList defaultTransforms =
+    {
+        QString(R"("Remove Edges" where $"Pearson Correlation Value" < %1)").arg(_initialCorrelationThreshold),
         R"([pinned] "Remove Components" where $"Component Size" <= 1)"
     };
 
@@ -489,6 +491,14 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
         defaultTransforms.append(QStringLiteral(R"("MCL Cluster" with "Granularity" = 2.2)"));
 
     return defaultTransforms;
+}
+
+QStringList CorrelationPluginInstance::defaultVisualisations() const
+{
+    if(_clusteringType == ClusteringType::MCL)
+        return { "\"MCL Cluster\" \"Colour\"" };
+    else
+        return {};
 }
 
 QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, const ProgressFn& progressFn) const
