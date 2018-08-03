@@ -496,11 +496,6 @@ ListTabDialog
                         decimals: 3
                         stepSize: (maximumValue - minimumValue) / 100.0
 
-                        onValueChanged:
-                        {
-                            parameters.minimumCorrelation = value;
-                            minimumSlider.value = value;
-                        }
                     }
 
                     Slider
@@ -508,6 +503,7 @@ ListTabDialog
                         id: minimumSlider
                         minimumValue: 0.0
                         maximumValue: 1.0
+                        value: minimumCorrelationSpinBox.value
                         onValueChanged:
                         {
                             minimumCorrelationSpinBox.value = value;
@@ -539,7 +535,6 @@ ListTabDialog
                         Layout.alignment: Qt.AlignLeft
                         implicitWidth: 70
 
-                        minimumValue: minimumCorrelationSpinBox.value
                         maximumValue: 1.0
 
                         decimals: 3
