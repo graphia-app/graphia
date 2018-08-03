@@ -63,11 +63,17 @@ ListTabDialog
         dataFrameAnimationX.to = Math.min(runningWidth,
                                           dataRectView.flickableItem.contentWidth -
                                           dataRectView.flickableItem.width);
-        dataFrameAnimationX.running = true;
+
+        // Only animate if we need to
+        if(dataRectView.flickableItem.contentX !== dataFrameAnimationX.to)
+            dataFrameAnimationX.running = true;
+
         dataFrameAnimationY.to = Math.min(runningHeight,
                                           dataRectView.flickableItem.contentHeight -
                                           dataRectView.flickableItem.height);
-        dataFrameAnimationY.running = true;
+
+        if(dataRectView.flickableItem.contentY !== dataFrameAnimationY.to)
+            dataFrameAnimationY.running = true;
     }
 
     ListTab
