@@ -63,6 +63,8 @@ ListTabDialog
         dataFrameAnimationX.to = Math.min(runningWidth,
                                           dataRectView.flickableItem.contentWidth -
                                           dataRectView.flickableItem.width);
+        // Pre-2017 ECMA doesn't have Math.clamp...
+        dataFrameAnimationX.to = Math.max(dataFrameAnimationX.to, 0);
 
         // Only animate if we need to
         if(dataRectView.flickableItem.contentX !== dataFrameAnimationX.to)
@@ -71,6 +73,7 @@ ListTabDialog
         dataFrameAnimationY.to = Math.min(runningHeight,
                                           dataRectView.flickableItem.contentHeight -
                                           dataRectView.flickableItem.height);
+        dataFrameAnimationY.to = Math.max(dataFrameAnimationY.to, 0);
 
         if(dataRectView.flickableItem.contentY !== dataFrameAnimationY.to)
             dataFrameAnimationY.running = true;
