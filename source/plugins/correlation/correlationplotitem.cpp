@@ -1207,6 +1207,8 @@ void CorrelationPlotItem::onLeftClick(const QPoint& pos)
                 else
                     _visibleColumnAnnotationNames.insert(name);
 
+                emit visibleColumnAnnotationNamesChanged();
+
                 rebuildPlot();
             }
         }

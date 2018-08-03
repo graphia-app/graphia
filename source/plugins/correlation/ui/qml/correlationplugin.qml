@@ -490,8 +490,11 @@ PluginContent
 
                 Component.onCompleted:
                 {
+                    // Show all column annotations by default
                     visibleColumnAnnotationNames = _availableColumnAnnotationNames;
                 }
+
+                onVisibleColumnAnnotationNamesChanged: { root.saveRequired = true; }
 
                 elideLabelWidth:
                 {
