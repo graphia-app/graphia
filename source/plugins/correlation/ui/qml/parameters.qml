@@ -237,6 +237,13 @@ ListTabDialog
                     property: "contentX"
                     to: 0
                     duration: 750
+                    onRunningChanged:
+                    {
+                        if(running)
+                            dataRectView.enabled = false;
+                        else if (!dataFrameAnimationY.running && !dataFrameAnimationX.running)
+                            dataRectView.enabled = true;
+                    }
                 }
 
                 PropertyAnimation
@@ -247,6 +254,13 @@ ListTabDialog
                     property: "contentY"
                     to: 0
                     duration: 750
+                    onRunningChanged:
+                    {
+                        if(running)
+                            dataRectView.enabled = false;
+                        else if (!dataFrameAnimationY.running && !dataFrameAnimationX.running)
+                            dataRectView.enabled = true;
+                    }
                 }
 
                 Rectangle
