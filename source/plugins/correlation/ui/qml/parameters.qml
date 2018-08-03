@@ -210,7 +210,7 @@ ListTabDialog
                     {
                         wrapMode: Text.WordWrap
                         text: qsTr("Transpose will flip the data over its diagonal. " +
-                                   "Moving rows to columns and vice versa")
+                                   "Moving rows to columns and vice versa.")
                     }
                 }
             }
@@ -219,7 +219,7 @@ ListTabDialog
             {
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
-                text: qsTr("<b>Note:</b> Dataframes will always end at the last cell of the input")
+                text: qsTr("<b>Note:</b> Dataframes will always end at the last cell of the input.")
             }
 
             TableView
@@ -465,7 +465,7 @@ ListTabDialog
                 {
                     text: qsTr("A Pearson Correlation will be performed on the dataset to provide a measure of correlation between rows of data. " +
                                "1.0 represents highly correlated rows and 0.0 represents no correlation. Negative correlation values are discarded. " +
-                               "All values below the Minimum correlation value will also be discarded and will not be included in the generated graph.<br>" +
+                               "All values below the minimum correlation value will also be discarded and will not be included in the generated graph.<br>" +
                                "<br>" +
                                "By default a transform is created which will create edges for all values above the initial correlation threshold. " +
                                "Is is not possible to create edges using values below the minimum correlation value.")
@@ -520,9 +520,9 @@ ListTabDialog
                         Text
                         {
                             wrapMode: Text.WordWrap
-                            text: qsTr("This sets the minimum edge correlation value required " +
-                                       "to be included in the final graph. Values below this " +
-                                       "are discarded. A lower minimum value will take longer to compute.")
+                            text: qsTr("The minimum correlation value above which an edge " +
+                                       "will be created in the graph. Using a lower minimum value will " +
+                                       "increase the computation time.")
                         }
                     }
 
@@ -569,9 +569,9 @@ ListTabDialog
                         Text
                         {
                             wrapMode: Text.WordWrap
-                            text: qsTr("This sets the minimum correlation value required to create an edge in the graph. " +
-                                       "In general a lower value creates more edges, while a higher value creates fewer. " +
-                                       "This can can be changed once the graph has been created.")
+                            text: qsTr("Sets the initial correlation threshold, below which edges in the graph are filtered. " +
+                                       "A lower value filters fewer, whereas a higher value filters more. " +
+                                       "Its value can be changed later, after the graph has been created.")
                         }
                     }
                 }
@@ -646,7 +646,7 @@ ListTabDialog
 
                             Text
                             {
-                                text: qsTr("All empty or missing values will be treated as zeroes");
+                                text: qsTr("All empty or missing values will be treated as zeroes.");
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
@@ -767,7 +767,7 @@ ListTabDialog
                             Text
                             {
                                 text: qsTr("Perform an inverse sine function of <i>x</i>, where <i>x</i> is the input data. This is useful when " +
-                                                                   "you require a log transform but the dataset contains negative numbers or zeros.");
+                                    "you require a log transform but the dataset contains negative numbers or zeros.");
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
@@ -861,7 +861,7 @@ ListTabDialog
             Text
             {
                 text: qsTr("Commonly used transforms can be automatically added to " +
-                           "the graph from here")
+                           "the graph from here.")
                 Layout.alignment: Qt.AlignLeft
                 wrapMode: Text.WordWrap
             }
@@ -962,7 +962,8 @@ ListTabDialog
 
                             Text
                             {
-                                text: qsTr("K-Nearest neighbour ranks node edges and only keeps <i>k</i> number of edges per node");
+                                text: qsTr("k-nearest neighbours ranks node edges and only " +
+                                    "keeps <i>k</i> number of edges per node.");
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
