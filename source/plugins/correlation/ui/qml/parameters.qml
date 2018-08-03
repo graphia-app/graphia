@@ -1001,7 +1001,7 @@ ListTabDialog
                 {
                     var summaryString = "";
                     summaryString += qsTr("Minimum Correlation: ") + minimumCorrelationSpinBox.value + "\n";
-                    summaryString += qsTr("Intial Correlation Threshold: ") + initialCorrelationSpinBox.value + "\n";
+                    summaryString += qsTr("Initial Correlation Threshold: ") + initialCorrelationSpinBox.value + "\n";
                     if(preParser.dataRect != Qt.rect(0,0,0,0))
                     {
                         summaryString += qsTr("Data Frame:") +
@@ -1027,7 +1027,7 @@ ListTabDialog
                         transformString += qsTr("Edge Reduction (") + edgeReduction.currentText + ")\n";
                     if(!transformString)
                         transformString = qsTr("None")
-                    summaryString += qsTr("Intial Transforms: ") + transformString;
+                    summaryString += qsTr("Initial Transforms: ") + transformString;
                     return summaryString;
                 }
             }
