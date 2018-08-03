@@ -251,6 +251,8 @@ private:
     void setVisibleColumnAnnotationNames(const QStringList& columnAnnotations);
     bool columnAnnotationSelectionModeEnabled() const;
     void setColumnAnnotationSelectionModeEnabled(bool enabled);
+    size_t numVisibleColumnAnnotations() const;
+    QString columnAnnotationValueAt(size_t x, size_t y) const;
 
     void computeXAxisRange();
     QVector<double> meanAverageData(double& min, double& max);

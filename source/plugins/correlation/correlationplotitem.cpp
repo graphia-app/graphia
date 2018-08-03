@@ -324,13 +324,24 @@ void CorrelationPlotItem::updateTooltip()
     _tooltipNeedsUpdate = false;
 
     QCPAbstractPlottable* plottableUnderCursor = nullptr;
+    QCPAxisRect* axisRectUnderCursor = nullptr;
 
     if(_hoverPoint.x() >= 0.0 && _hoverPoint.y() >= 0.0)
-        plottableUnderCursor = _customPlot.plottableAt(_hoverPoint, true);
-
-    if(plottableUnderCursor != nullptr)
     {
-        _itemTracer->setGraph(nullptr);
+        plottableUnderCursor = _customPlot.plottableAt(_hoverPoint, true);
+        axisRectUnderCursor = _customPlot.axisRectAt(_hoverPoint);
+    }
+
+    bool showTooltip = false;
+    _hoverLabel->setText(QStringLiteral(""));
+    _itemTracer->setGraph(nullptr);
+
+    QColor color;
+
+    if(plottableUnderCursor != nullptr || axisRectUnderCursor != nullptr)
+    {
+        showTooltip = true;
+
         if(auto graph = dynamic_cast<QCPGraph*>(plottableUnderCursor))
         {
             _itemTracer->setGraph(graph);
@@ -347,22 +358,40 @@ void CorrelationPlotItem::updateTooltip()
             auto xCoord = std::lround(_mainXAxis->pixelToCoord(_hoverPoint.x()));
             _itemTracer->position->setPixelPosition(boxPlot->dataPixelPosition(xCoord));
         }
-        else
+        else if(axisRectUnderCursor == _columnAnnotationsAxisRect &&
+            axisRectUnderCursor->rect().contains(_hoverPoint.toPoint()))
         {
-            // Something that we don't know about/don't want a tooltip for
-            return;
-        }
+            auto point = _hoverPoint - axisRectUnderCursor->topLeft();
+            int x = (point.x() * _columnCount) / axisRectUnderCursor->width();
+            int y = (point.y() * numVisibleColumnAnnotations()) / axisRectUnderCursor->height();
+            y = numVisibleColumnAnnotations() - y - 1;
 
+            _itemTracer->position->setPixelPosition(_hoverPoint);
+            _hoverLabel->setText(columnAnnotationValueAt(x, y));
+
+            Q_ASSERT(_columnAnnotationsAxisRect->plottables().size() == 1);
+            auto colorMap = dynamic_cast<QCPColorMap*>(_columnAnnotationsAxisRect->plottables().first());
+            color = colorMap->gradient().colorStops().value(colorMap->data()->data(x, y));
+        }
+        else
+            showTooltip = false;
+    }
+
+    if(showTooltip)
+    {
         _itemTracer->setVisible(true);
         _itemTracer->setInterpolating(false);
         _itemTracer->updatePosition();
         auto itemTracerPosition = _itemTracer->anchor(QStringLiteral("position"))->pixelPosition();
 
         _hoverLabel->setVisible(true);
-        _hoverLabel->setText(QStringLiteral("%1, %2: %3")
-                         .arg(plottableUnderCursor->name(),
-                              _labelNames[static_cast<int>(_itemTracer->position->key())])
-                         .arg(_itemTracer->position->value()));
+
+        if(_hoverLabel->text().isEmpty())
+        {
+            _hoverLabel->setText(QStringLiteral("%1, %2: %3")
+                .arg(plottableUnderCursor->name(), _labelNames[static_cast<int>(_itemTracer->position->key())])
+                .arg(_itemTracer->position->value()));
+        }
 
         const auto COLOR_RECT_WIDTH = 10.0;
         const auto HOVER_MARGIN = 10.0;
@@ -387,7 +416,11 @@ void CorrelationPlotItem::updateTooltip()
         _hoverLabel->position->setPixelPosition(targetPosition);
 
         _hoverColorRect->setVisible(true);
-        _hoverColorRect->setBrush(QBrush(plottableUnderCursor->pen().color()));
+
+        if(!color.isValid() && plottableUnderCursor != nullptr)
+            color = plottableUnderCursor->pen().color();
+
+        _hoverColorRect->setBrush(QBrush(color));
         _hoverColorRect->bottomRight->setPixelPosition(
             {_hoverLabel->bottomRight->pixelPosition().x() + COLOR_RECT_WIDTH,
             _hoverLabel->bottomRight->pixelPosition().y()});
@@ -981,12 +1014,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
     colorMap->setColorScale(colorScale);
     colorMap->setInterpolate(false);
 
-    size_t numColumnAnnotations;
-
-    if(_columnAnnotationSelectionModeEnabled)
-        numColumnAnnotations = _columnAnnotations.size();
-    else
-        numColumnAnnotations = _visibleColumnAnnotationNames.size();
+    size_t numColumnAnnotations = numVisibleColumnAnnotations();
 
     colorMap->data()->setSize(static_cast<int>(_columnCount),
         static_cast<int>(numColumnAnnotations));
@@ -1532,6 +1560,35 @@ void CorrelationPlotItem::setColumnAnnotationSelectionModeEnabled(bool enabled)
 
         rebuildPlot();
     }
+}
+
+size_t CorrelationPlotItem::numVisibleColumnAnnotations() const
+{
+    if(_columnAnnotationSelectionModeEnabled)
+        return _columnAnnotations.size();
+
+    return _visibleColumnAnnotationNames.size();
+}
+
+QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
+{
+    std::vector<size_t> visibleRowIndices;
+
+    size_t index = _columnAnnotations.size() - 1;
+    for(const auto& columnAnnotation : _columnAnnotations)
+    {
+        if(_columnAnnotationSelectionModeEnabled ||
+            u::contains(_visibleColumnAnnotationNames, columnAnnotation._name))
+        {
+            visibleRowIndices.push_back(index);
+        }
+
+        index--;
+    }
+
+    const auto& columnAnnotation = _columnAnnotations.at(visibleRowIndices.at(y));
+
+    return columnAnnotation._values.at(x);
 }
 
 double CorrelationPlotItem::visibleHorizontalFraction() const
