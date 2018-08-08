@@ -883,7 +883,7 @@ void CorrelationPlotItem::populateLinePlot()
 
 void CorrelationPlotItem::configureLegend()
 {
-    if(_selectedRows.size() <= 0 || !_showLegend)
+    if(_selectedRows.empty() || !_showLegend)
         return;
 
     // Create a subLayout to position the Legend
