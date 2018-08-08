@@ -618,8 +618,10 @@ ListTabDialog
                         Layout.alignment: Qt.AlignRight
                         model: ListModel
                         {
-                            ListElement { text: qsTr("None");       value: MissingDataType.None }
-                            ListElement { text: qsTr("Constant");   value: MissingDataType.Constant }
+                            ListElement { text: qsTr("None");               value: MissingDataType.None }
+                            ListElement { text: qsTr("Constant");           value: MissingDataType.Constant }
+                            ListElement { text: qsTr("Row Interpolate");    value: MissingDataType.RowInterpolation }
+                            ListElement { text: qsTr("Column Mean");        value: MissingDataType.ColumnAverage }
                         }
                         textRole: "text"
 
