@@ -9,6 +9,7 @@
 
 #include <QDesktopServices>
 #include <QSet>
+#include <QCollator>
 
 #include <cmath>
 
@@ -364,14 +365,17 @@ void CorrelationPlotItem::updateTooltip()
             auto point = _hoverPoint - axisRectUnderCursor->topLeft();
             int x = (point.x() * _columnCount) / axisRectUnderCursor->width();
             int y = (point.y() * numVisibleColumnAnnotations()) / axisRectUnderCursor->height();
-            y = numVisibleColumnAnnotations() - y - 1;
+            y = static_cast<int>(numVisibleColumnAnnotations()) - y - 1;
 
             _itemTracer->position->setPixelPosition(_hoverPoint);
             _hoverLabel->setText(columnAnnotationValueAt(x, y));
 
-            Q_ASSERT(_columnAnnotationsAxisRect->plottables().size() == 1);
-            auto colorMap = dynamic_cast<QCPColorMap*>(_columnAnnotationsAxisRect->plottables().first());
-            color = colorMap->gradient().colorStops().value(colorMap->data()->data(x, y));
+            auto plottables = _columnAnnotationsAxisRect->plottables();
+            Q_ASSERT(plottables.size() == 1);
+            auto colorMap = dynamic_cast<QCPColorMap*>(plottables.first());
+
+            if(colorMap != nullptr)
+                color = colorMap->gradient().colorStops().value(colorMap->data()->data(x, y));
         }
         else
             showTooltip = false;
@@ -386,10 +390,11 @@ void CorrelationPlotItem::updateTooltip()
 
         _hoverLabel->setVisible(true);
 
-        if(_hoverLabel->text().isEmpty())
+        if(_hoverLabel->text().isEmpty() && plottableUnderCursor != nullptr)
         {
+            auto mappedCol = static_cast<int>(_sortMap.at(static_cast<size_t>(_itemTracer->position->key())));
             _hoverLabel->setText(QStringLiteral("%1, %2: %3")
-                .arg(plottableUnderCursor->name(), _labelNames[static_cast<int>(_itemTracer->position->key())])
+                .arg(plottableUnderCursor->name(), _labelNames.at(mappedCol))
                 .arg(_itemTracer->position->value()));
         }
 
@@ -478,7 +483,7 @@ QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max)
         double runningTotal = 0.0;
         for(auto row : qAsConst(_selectedRows))
         {
-            auto index = (row * _columnCount) + col;
+            auto index = (row * _columnCount) + _sortMap[col];
             runningTotal += _data.at(static_cast<int>(index));
         }
         yDataAvg.append(runningTotal / _selectedRows.length());
@@ -568,7 +573,7 @@ void CorrelationPlotItem::populateMedianLinePlot()
         rowsEntries.clear();
         for(auto row : qAsConst(_selectedRows))
         {
-            auto index = (row * _columnCount) + col;
+            auto index = (row * _columnCount) + _sortMap[col];
             rowsEntries.push_back(_data[static_cast<int>(index)]);
         }
 
@@ -674,7 +679,7 @@ void CorrelationPlotItem::populateIQRPlot()
         outliers.clear();
         for(auto row : qAsConst(_selectedRows))
         {
-            auto index = (row * _columnCount) + col;
+            auto index = (row * _columnCount) + _sortMap[col];
             rowsEntries.push_back(_data[static_cast<int>(index)]);
         }
 
@@ -690,17 +695,13 @@ void CorrelationPlotItem::populateIQRPlot()
             {
                 if(rowsEntries.size() % 2 == 0)
                 {
-                    firstQuartile = medianOf(
-                                rowsEntries.mid(0, (rowsEntries.size() / 2)));
-                    thirdQuartile = medianOf(
-                                rowsEntries.mid((rowsEntries.size() / 2)));
+                    firstQuartile = medianOf(rowsEntries.mid(0, (rowsEntries.size() / 2)));
+                    thirdQuartile = medianOf(rowsEntries.mid((rowsEntries.size() / 2)));
                 }
                 else
                 {
-                    firstQuartile = medianOf(
-                                rowsEntries.mid(0, ((rowsEntries.size() - 1) / 2)));
-                    thirdQuartile = medianOf(
-                                rowsEntries.mid(((rowsEntries.size() + 1) / 2)));
+                    firstQuartile = medianOf(rowsEntries.mid(0, ((rowsEntries.size() - 1) / 2)));
+                    thirdQuartile = medianOf(rowsEntries.mid(((rowsEntries.size() + 1) / 2)));
                 }
             }
 
@@ -812,7 +813,7 @@ void CorrelationPlotItem::populateStdDevPlot()
     {
         for(auto row : qAsConst(_selectedRows))
         {
-            auto index = (row * _columnCount) + col;
+            auto index = (row * _columnCount) + _sortMap[col];
             means[col] += _data.at(static_cast<int>(index));
         }
         means[col] /= _selectedRows.count();
@@ -820,9 +821,9 @@ void CorrelationPlotItem::populateStdDevPlot()
         double stdDev = 0.0;
         for(auto row : qAsConst(_selectedRows))
         {
-            auto index = (row * _columnCount) + col;
+            auto index = (row * _columnCount) + _sortMap[col];
             stdDev += (_data.at(static_cast<int>(index)) - means.at(col)) *
-                    (_data.at(static_cast<int>(index)) - means.at(col));
+                (_data.at(static_cast<int>(index)) - means.at(col));
         }
         stdDev /= _columnCount;
         stdDev = std::sqrt(stdDev);
@@ -850,7 +851,7 @@ void CorrelationPlotItem::populateStdErrorPlot()
     {
         for(auto row : qAsConst(_selectedRows))
         {
-            auto index = (row * _columnCount) + col;
+            auto index = (row * _columnCount) + _sortMap[col];
             means[col] += _data.at(static_cast<int>(index));
         }
         means[col] /= _selectedRows.count();
@@ -858,9 +859,9 @@ void CorrelationPlotItem::populateStdErrorPlot()
         double stdErr = 0.0;
         for(auto row : qAsConst(_selectedRows))
         {
-            auto index = (row * _columnCount) + col;
+            auto index = (row * _columnCount) + _sortMap[col];
             stdErr += (_data.at(static_cast<int>(index)) - means.at(col)) *
-                    (_data.at(static_cast<int>(index)) - means.at(col));
+                (_data.at(static_cast<int>(index)) - means.at(col));
         }
         stdErr /= _columnCount;
         stdErr = std::sqrt(stdErr) / std::sqrt(static_cast<double>(_selectedRows.length()));
@@ -897,7 +898,7 @@ void CorrelationPlotItem::populateLinePlot()
             double rowSum = 0.0;
             for(size_t col = 0; col < _columnCount; col++)
             {
-                auto index = (row * _columnCount) + col;
+                auto index = (row * _columnCount) + _sortMap[col];
                 rowSum += _data.at(static_cast<int>(index));
             }
             double rowMean = rowSum / _columnCount;
@@ -905,7 +906,7 @@ void CorrelationPlotItem::populateLinePlot()
             double variance = 0.0;
             for(size_t col = 0; col < _columnCount; col++)
             {
-                auto index = (row * _columnCount) + col;
+                auto index = (row * _columnCount) + _sortMap[col];
                 variance += (_data.at(static_cast<int>(index)) - rowMean) *
                         (_data.at(static_cast<int>(index)) - rowMean);
             }
@@ -918,7 +919,7 @@ void CorrelationPlotItem::populateLinePlot()
 
             for(size_t col = 0; col < _columnCount; col++)
             {
-                auto index = (row * _columnCount) + col;
+                auto index = (row * _columnCount) + _sortMap[col];
                 auto value = _data.at(static_cast<int>(index));
                 switch(static_cast<PlotScaleType>(_plotScaleType))
                 {
@@ -1087,7 +1088,7 @@ QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
 
         for(size_t x = 0U; x < _columnCount; x++)
         {
-            auto stringValue = columnAnnotation._values.at(static_cast<int>(x));
+            auto stringValue = columnAnnotation._values.at(static_cast<int>(_sortMap[x]));
             AnnotationValue value(stringValue, visible);
             auto cellValue = stringColorIndexMap[value];
             colorMap->data()->setCell(static_cast<int>(x), static_cast<int>(y), cellValue);
@@ -1269,6 +1270,8 @@ void CorrelationPlotItem::rebuildPlot()
     QElapsedTimer buildTimer;
     buildTimer.start();
 
+    updateSortMap();
+
     for(auto v : qAsConst(_lineGraphCache))
     {
         v._graph->setVisible(false);
@@ -1347,11 +1350,11 @@ void CorrelationPlotItem::rebuildPlot()
 
     xAxis->setLabel(_xAxisLabel);
 
-    int tickColumn = 0;
-    for(auto& labelName : _labelNames)
+    for(size_t x = 0U; x < _columnCount; x++)
     {
-        categoryTicker->addTick(tickColumn++,
-            QFontMetrics(_defaultFont9Pt).elidedText(labelName, Qt::ElideRight, _elideLabelWidth));
+        auto labelName = _labelNames.at(static_cast<int>(_sortMap[x]));
+        categoryTicker->addTick(x, QFontMetrics(_defaultFont9Pt).elidedText(
+            labelName, Qt::ElideRight, _elideLabelWidth));
     }
 
     if(_elideLabelWidth <= 0)
@@ -1522,6 +1525,90 @@ void CorrelationPlotItem::setColumnAnnotations(const QVariantList& columnAnnotat
     }
 }
 
+void CorrelationPlotItem::updateSortMap()
+{
+    _sortMap.clear();
+
+    for(size_t i = 0U; i < _columnCount; i++)
+        _sortMap.push_back(i);
+
+    QCollator collator;
+    collator.setNumericMode(true);
+
+    switch(static_cast<PlotColumnSortType>(_columnSortType))
+    {
+    default:
+    case PlotColumnSortType::Natural:
+        return;
+
+    case PlotColumnSortType::ColumnName:
+    {
+        std::sort(_sortMap.begin(), _sortMap.end(),
+        [this, &collator](size_t a, size_t b)
+        {
+            return collator.compare(
+                _labelNames.at(static_cast<int>(a)),
+                _labelNames.at(static_cast<int>(b))) < 0;
+        });
+
+        break;
+    }
+
+    case PlotColumnSortType::ColumnAnnotation:
+    {
+        if(_columnAnnotations.empty() || _columnSortAnnotation.isEmpty())
+            return;
+
+        auto it = std::find_if(_columnAnnotations.begin(), _columnAnnotations.end(),
+            [this](const auto& v) { return v._name == _columnSortAnnotation; });
+
+        Q_ASSERT(it != _columnAnnotations.end());
+        if(it == _columnAnnotations.end())
+            return;
+
+        const auto& columnAnnotationValues = it->_values;
+
+        std::sort(_sortMap.begin(), _sortMap.end(),
+        [&collator, &columnAnnotationValues](size_t a, size_t b)
+        {
+            return collator.compare(
+                columnAnnotationValues.at(static_cast<int>(a)),
+                columnAnnotationValues.at(static_cast<int>(b))) < 0;
+        });
+
+        break;
+    }
+
+    }
+}
+
+void CorrelationPlotItem::setColumnSortType(int columnSortType)
+{
+    if(_columnSortType != columnSortType)
+    {
+        _columnSortType = columnSortType;
+        emit columnSortTypeChanged();
+
+        invalidateLineGraphCache();
+        rebuildPlot();
+    }
+}
+
+void CorrelationPlotItem::setColumnSortAnnotation(const QString& columnSortAnnotation)
+{
+    if(_columnSortAnnotation != columnSortAnnotation)
+    {
+        _columnSortAnnotation = columnSortAnnotation;
+        emit columnSortAnnotationChanged();
+
+        if(static_cast<PlotColumnSortType>(_columnSortType) == PlotColumnSortType::ColumnAnnotation)
+        {
+            invalidateLineGraphCache();
+            rebuildPlot();
+        }
+    }
+}
+
 QStringList CorrelationPlotItem::visibleColumnAnnotationNames() const
 {
     QStringList list;
@@ -1588,7 +1675,7 @@ QString CorrelationPlotItem::columnAnnotationValueAt(size_t x, size_t y) const
 
     const auto& columnAnnotation = _columnAnnotations.at(visibleRowIndices.at(y));
 
-    return columnAnnotation._values.at(x);
+    return columnAnnotation._values.at(static_cast<int>(_sortMap[x]));
 }
 
 double CorrelationPlotItem::visibleHorizontalFraction() const

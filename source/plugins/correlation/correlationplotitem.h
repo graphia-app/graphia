@@ -46,6 +46,11 @@ DEFINE_QML_ENUM(Q_GADGET, PlotDispersionVisualType,
                 Area,
                 StdDev);
 
+DEFINE_QML_ENUM(Q_GADGET, PlotColumnSortType,
+                Natural,
+                ColumnName,
+                ColumnAnnotation);
+
 enum class CorrelationPlotUpdateType
 {
     None,
@@ -125,6 +130,9 @@ class CorrelationPlotItem : public QQuickPaintedItem
     Q_PROPERTY(int plotDispersionType MEMBER _plotDispersionType WRITE setPlotDispersionType NOTIFY plotOptionsChanged)
     Q_PROPERTY(int plotDispersionVisualType MEMBER _plotDispersionVisualType
         WRITE setPlotDispersionVisualType NOTIFY plotOptionsChanged)
+    Q_PROPERTY(int columnSortType MEMBER _columnSortType WRITE setColumnSortType NOTIFY columnSortTypeChanged)
+    Q_PROPERTY(QString columnSortAnnotation MEMBER _columnSortAnnotation
+        WRITE setColumnSortAnnotation NOTIFY columnSortAnnotationChanged)
     Q_PROPERTY(QString xAxisLabel MEMBER _xAxisLabel WRITE setXAxisLabel NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString yAxisLabel MEMBER _yAxisLabel WRITE setYAxisLabel NOTIFY plotOptionsChanged)
 
@@ -193,9 +201,13 @@ private:
     int _plotAveragingType = static_cast<int>(PlotAveragingType::Individual);
     int _plotDispersionType = static_cast<int>(PlotDispersionType::None);
     int _plotDispersionVisualType = static_cast<int>(PlotDispersionVisualType::Bars);
+    int _columnSortType = static_cast<int>(PlotColumnSortType::Natural);
+    QString _columnSortAnnotation;
     double _horizontalScrollPosition = 0.0;
     QString _xAxisLabel;
     QString _yAxisLabel;
+
+    std::vector<size_t> _sortMap;
 
     struct ColumnAnnotation
     {
@@ -247,6 +259,10 @@ private:
     void setHorizontalScrollPosition(double horizontalScrollPosition);
     void setColumnAnnotations(const QVariantList& columnAnnotations);
 
+    void updateSortMap();
+    void setColumnSortType(int columnSortType);
+    void setColumnSortAnnotation(const QString& columnSortAnnotation);
+
     QStringList visibleColumnAnnotationNames() const;
     void setVisibleColumnAnnotationNames(const QStringList& columnAnnotations);
     bool columnAnnotationSelectionModeEnabled() const;
@@ -288,5 +304,7 @@ signals:
 
     void visibleColumnAnnotationNamesChanged();
     void columnAnnotationSelectionModeEnabledChanged();
+    void columnSortTypeChanged();
+    void columnSortAnnotationChanged();
 };
 #endif // CORRELATIONPLOTITEM_H

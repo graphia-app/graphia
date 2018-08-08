@@ -256,6 +256,11 @@ PluginContent
         }
     }
 
+    ExclusiveGroup
+    {
+        id: sortByExclusiveGroup
+    }
+
     Action
     {
         id: savePlotImageAction
@@ -384,6 +389,35 @@ PluginContent
             });
 
             menu.addSeparator();
+            var sortByMenu = menu.addMenu(qsTr("Sort By"));
+            root._availableplotColumnSortOptions.forEach(function(sortOption)
+            {
+                var sortByMenuItem = sortByMenu.addItem(sortOption.text);
+
+                sortByMenuItem.exclusiveGroup = sortByExclusiveGroup;
+                sortByMenuItem.checkable = true;
+                sortByMenuItem.checked = Qt.binding(function()
+                {
+                    if(sortOption.type === plot.columnSortType &&
+                        sortOption.type === PlotColumnSortType.ColumnAnnotation)
+                    {
+                        return sortOption.text === plot.columnSortAnnotation;
+                    }
+
+                    return sortOption.type === plot.columnSortType;
+                });
+
+                sortByMenuItem.triggered.connect(function()
+                {
+                    plot.columnSortAnnotation =
+                        sortOption.type === PlotColumnSortType.ColumnAnnotation ?
+                        sortOption.text : "";
+
+                    plot.columnSortType = sortOption.type;
+                });
+            });
+
+            menu.addSeparator();
             menu.addItem("").action = savePlotImageAction;
 
             Utils.cloneMenu(menu, plotContextMenu);
@@ -391,6 +425,34 @@ PluginContent
         }
 
         return false;
+    }
+
+    property var _availableColumnAnnotationNames:
+    {
+        var list = [];
+
+        plugin.model.columnAnnotations.forEach(function(columnAnnotation)
+        {
+            list.push(columnAnnotation.name);
+        });
+
+        return list;
+    }
+
+    property var _availableplotColumnSortOptions:
+    {
+        var options =
+        [
+            {type: PlotColumnSortType.Natural, text: qsTr("Natural")},
+            {type: PlotColumnSortType.ColumnName, text: qsTr("Column Name")}
+        ];
+
+        root._availableColumnAnnotationNames.forEach(function(columnAnnotationName)
+        {
+            options.push({type: PlotColumnSortType.ColumnAnnotation, text: columnAnnotationName});
+        });
+
+        return options;
     }
 
     toolStrip: RowLayout
@@ -476,22 +538,10 @@ PluginContent
 
                 columnAnnotations: plugin.model.columnAnnotations
 
-                property var _availableColumnAnnotationNames:
-                {
-                    var list = [];
-
-                    plugin.model.columnAnnotations.forEach(function(columnAnnotation)
-                    {
-                        list.push(columnAnnotation.name);
-                    });
-
-                    return list;
-                }
-
                 Component.onCompleted:
                 {
                     // Show all column annotations by default
-                    visibleColumnAnnotationNames = _availableColumnAnnotationNames;
+                    visibleColumnAnnotationNames = root._availableColumnAnnotationNames;
                 }
 
                 onVisibleColumnAnnotationNamesChanged: { root.saveRequired = true; }
@@ -629,7 +679,9 @@ PluginContent
             "plotDispersionVisual": plot.plotDispersionVisualType,
             "plotLegend": plot.showLegend,
             "plotGridLines": plot.showGridLines,
-            "columnAnnotations": plot.visibleColumnAnnotationNames
+            "columnAnnotations": plot.visibleColumnAnnotationNames,
+            "plotColumnSortType": plot.columnSortType,
+            "plotColumnSortAnnotation": plot.columnSortAnnotation
         };
 
         return data;
@@ -650,5 +702,7 @@ PluginContent
         if(data.plotLegend !== undefined)               plot.showLegend = data.plotLegend;
         if(data.plotGridLines !== undefined)            plot.showGridLines = data.plotGridLines;
         if(data.columnAnnotations !== undefined)        plot.visibleColumnAnnotationNames = data.columnAnnotations;
+        if(data.plotColumnSortType !== undefined)       plot.columnSortType = data.plotColumnSortType;
+        if(data.plotColumnSortAnnotation !== undefined) plot.columnSortAnnotation = data.plotColumnSortAnnotation;
     }
 }
