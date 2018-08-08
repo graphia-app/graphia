@@ -359,8 +359,8 @@ QStringList Document::bookmarks() const
     sorter.setNumericMode(true);
     sorter.setCaseSensitivity(Qt::CaseInsensitive);
 
-    std::sort( list.begin(), list.end(), [&]
-    (const auto& a, const auto& b)
+    std::sort(list.begin(), list.end(),
+    [&](const auto& a, const auto& b)
     {
         return sorter.compare(a, b) < 0;
     });
