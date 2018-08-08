@@ -95,15 +95,16 @@ QString u::formatNumberForDisplay(double value, int minDecimalPlaces, int maxDec
         {
             auto exponentValueString = u::stripZeroes(splitString[1]);
 
-            for(int i = 0; i < exponentValueString.length(); ++i)
+            for(auto& character : exponentValueString)
             {
                 bool converted;
-                int result = QString(exponentValueString[i]).toInt(&converted);
+                int result = QString(character).toInt(&converted);
                 if(converted)
-                    exponentValueString[i] = superScript[result];
+                    character = superScript[result];
             }
 
             exponentValueString.replace(QStringLiteral("-"), QStringLiteral(u"⁻"));
+            exponentValueString.replace(QStringLiteral("+"), "");
             formattedString = splitString[0] + QStringLiteral(u"×10") + exponentValueString;
         }
     }

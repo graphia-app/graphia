@@ -496,9 +496,9 @@ QStringList CorrelationPluginInstance::defaultTransforms() const
 QStringList CorrelationPluginInstance::defaultVisualisations() const
 {
     if(_clusteringType == ClusteringType::MCL)
-        return { "\"MCL Cluster\" \"Colour\"" };
-    else
-        return {};
+        return { R"("MCL Cluster" "Colour")" };
+
+    return {};
 }
 
 QByteArray CorrelationPluginInstance::save(IMutableGraph& graph, const ProgressFn& progressFn) const
