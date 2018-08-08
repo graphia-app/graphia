@@ -96,7 +96,7 @@ QString u::formatNumberForDisplay(double value, int minDecimalPlaces, int maxDec
             auto exponentValueString = u::stripZeroes(splitString[1]);
 
             exponentValueString.replace(QStringLiteral("-"), QStringLiteral(u"⁻"));
-            exponentValueString.replace(QStringLiteral("+"), "");
+            exponentValueString.replace(QStringLiteral("+"), QStringLiteral(""));
 
             for(auto& character : exponentValueString)
             {
