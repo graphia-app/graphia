@@ -544,7 +544,10 @@ PluginContent
                     visibleColumnAnnotationNames = root._availableColumnAnnotationNames;
                 }
 
+                onPlotOptionsChanged: { root.saveRequired = true; }
                 onVisibleColumnAnnotationNamesChanged: { root.saveRequired = true; }
+                onColumnSortTypeChanged: { root.saveRequired = true; }
+                onColumnSortAnnotationChanged: { root.saveRequired = true; }
 
                 elideLabelWidth:
                 {
