@@ -135,6 +135,7 @@ class CorrelationPlotItem : public QQuickPaintedItem
         WRITE setColumnSortAnnotation NOTIFY columnSortAnnotationChanged)
     Q_PROPERTY(QString xAxisLabel MEMBER _xAxisLabel WRITE setXAxisLabel NOTIFY plotOptionsChanged)
     Q_PROPERTY(QString yAxisLabel MEMBER _yAxisLabel WRITE setYAxisLabel NOTIFY plotOptionsChanged)
+    Q_PROPERTY(bool includeYZero MEMBER _includeYZero WRITE setIncludeYZero NOTIFY plotOptionsChanged)
 
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
 
@@ -150,6 +151,7 @@ public:
     void setPlotDispersionType(int plotDispersionType);
     void setXAxisLabel(const QString& plotXAxisLabel);
     void setYAxisLabel(const QString& plotYAxisLabel);
+    void setIncludeYZero(bool includeYZero);
     void setPlotAveragingType(int plotAveragingType);
     void setPlotDispersionVisualType(int plotDispersionVisualType);
 
@@ -206,6 +208,7 @@ private:
     double _horizontalScrollPosition = 0.0;
     QString _xAxisLabel;
     QString _yAxisLabel;
+    bool _includeYZero = false;
 
     std::vector<size_t> _sortMap;
 
@@ -271,6 +274,7 @@ private:
     QString columnAnnotationValueAt(size_t x, size_t y) const;
 
     void computeXAxisRange();
+    void setYAxisRange(double min, double max);
     QVector<double> meanAverageData(double& min, double& max);
 
     void updateColumnAnnotaionVisibility();

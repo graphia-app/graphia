@@ -549,7 +549,7 @@ void CorrelationPlotItem::populateMeanLinePlot()
 
     _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, plotModeTextElement);
 
-    _mainYAxis->setRange(minY, maxY);
+    setYAxisRange(minY, maxY);
 }
 
 void CorrelationPlotItem::populateMedianLinePlot()
@@ -607,7 +607,7 @@ void CorrelationPlotItem::populateMedianLinePlot()
 
     _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, plotModeTextElement);
 
-    _mainYAxis->setRange(minY, maxY);
+    setYAxisRange(minY, maxY);
 }
 
 void CorrelationPlotItem::populateMeanHistogramPlot()
@@ -641,7 +641,7 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
 
     _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, plotModeTextElement);
 
-    _mainYAxis->setRange(minY, maxY);
+    setYAxisRange(minY, maxY);
 }
 
 static double medianOf(const QVector<double>& sortedData)
@@ -745,7 +745,7 @@ void CorrelationPlotItem::populateIQRPlot()
 
     _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, plotModeTextElement);
 
-    _mainYAxis->setRange(minY, maxY);
+    setYAxisRange(minY, maxY);
 }
 
 void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, const QString& name = QStringLiteral("Deviation"))
@@ -834,7 +834,7 @@ void CorrelationPlotItem::populateStdDevPlot()
     }
 
     plotDispersion(stdDevs, QStringLiteral("Std Dev"));
-    _mainYAxis->setRange(min, max);
+    setYAxisRange(min, max);
 }
 
 void CorrelationPlotItem::populateStdErrorPlot()
@@ -872,7 +872,7 @@ void CorrelationPlotItem::populateStdErrorPlot()
     }
 
     plotDispersion(stdErrs, QStringLiteral("Std Err"));
-    _mainYAxis->setRange(min, max);
+    setYAxisRange(min, max);
 }
 
 void CorrelationPlotItem::populateLinePlot()
@@ -977,7 +977,7 @@ void CorrelationPlotItem::populateLinePlot()
         graph->setName(_graphNames[row]);
     }
 
-    _mainYAxis->setRange(minY, maxY);
+    setYAxisRange(minY, maxY);
 }
 
 QCPAxis* CorrelationPlotItem::configureColumnAnnotations(QCPAxis* xAxis)
@@ -1406,6 +1406,14 @@ void CorrelationPlotItem::computeXAxisRange()
         Q_ARG(double, min), Q_ARG(double, max));
 }
 
+void CorrelationPlotItem::setYAxisRange(double min, double max)
+{
+    if(_includeYZero && min > 0.0)
+        min = 0.0;
+
+    _mainYAxis->setRange(min, max);
+}
+
 void CorrelationPlotItem::setPlotDispersionVisualType(int plotDispersionVisualType)
 {
     _plotDispersionVisualType = plotDispersionVisualType;
@@ -1416,6 +1424,13 @@ void CorrelationPlotItem::setPlotDispersionVisualType(int plotDispersionVisualTy
 void CorrelationPlotItem::setYAxisLabel(const QString& plotYAxisLabel)
 {
     _yAxisLabel = plotYAxisLabel;
+    emit plotOptionsChanged();
+    rebuildPlot();
+}
+
+void CorrelationPlotItem::setIncludeYZero(bool includeYZero)
+{
+    _includeYZero = includeYZero;
     emit plotOptionsChanged();
     rebuildPlot();
 }

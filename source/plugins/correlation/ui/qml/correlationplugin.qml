@@ -110,6 +110,16 @@ PluginContent
         onTriggered: { plot.showLegend = !plot.showLegend; }
     }
 
+    Action
+    {
+        id: toggleIncludeYZero
+        text: qsTr("Include Zero In Y Axis")
+        checkable: true
+        checked: plot.includeYZero
+
+        onTriggered: { plot.includeYZero = !plot.includeYZero; }
+    }
+
     ExclusiveGroup
     {
         Action
@@ -387,6 +397,8 @@ PluginContent
                 return plot.plotAveragingType == PlotAveragingType.MeanLine ||
                         plot.plotAveragingType == PlotAveragingType.MeanHistogram
             });
+
+            menu.addItem("").action = toggleIncludeYZero;
 
             menu.addSeparator();
             var sortByMenu = menu.addMenu(qsTr("Sort By"));
@@ -680,8 +692,12 @@ PluginContent
             "plotAveraging": plot.plotAveragingType,
             "plotDispersion": plot.plotDispersionType,
             "plotDispersionVisual": plot.plotDispersionVisualType,
+
+            "plotIncludeYZero": plot.includeYZero,
+
             "plotLegend": plot.showLegend,
             "plotGridLines": plot.showGridLines,
+
             "columnAnnotations": plot.visibleColumnAnnotationNames,
             "plotColumnSortType": plot.columnSortType,
             "plotColumnSortAnnotation": plot.columnSortAnnotation
@@ -702,8 +718,12 @@ PluginContent
         if(data.plotAveraging !== undefined)            plot.plotAveragingType = data.plotAveraging;
         if(data.plotDispersion !== undefined)           plot.plotDispersionType = data.plotDispersion;
         if(data.plotDispersionVisual !== undefined)     plot.plotDispersionVisualType = data.plotDispersionVisual;
+
+        if(data.plotIncludeYZero !== undefined)         plot.includeYZero = data.plotIncludeYZero;
+
         if(data.plotLegend !== undefined)               plot.showLegend = data.plotLegend;
         if(data.plotGridLines !== undefined)            plot.showGridLines = data.plotGridLines;
+
         if(data.columnAnnotations !== undefined)        plot.visibleColumnAnnotationNames = data.columnAnnotations;
         if(data.plotColumnSortType !== undefined)       plot.columnSortType = data.plotColumnSortType;
         if(data.plotColumnSortAnnotation !== undefined) plot.columnSortAnnotation = data.plotColumnSortAnnotation;
