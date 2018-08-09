@@ -172,7 +172,8 @@ protected:
 private:
     bool _debug = false;
 
-    bool _tooltipNeedsUpdate = false;
+    bool _rebuildRequired = false;
+    bool _tooltipUpdateRequired = false;
     QCPLayer* _tooltipLayer = nullptr;
     QPointF _hoverPoint{-1.0, -1.0};
     QCPItemText* _hoverLabel = nullptr;

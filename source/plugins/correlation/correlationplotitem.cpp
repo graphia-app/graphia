@@ -262,9 +262,12 @@ void CorrelationPlotItem::onPixmapUpdated(const QPixmap& pixmap)
         update();
     }
 
-    // A tooltip update was attempted during the render, so
-    // complete it now, now that the render has finished
-    if(_tooltipNeedsUpdate)
+    // Updates were attempted during the render, so perform
+    // them now, now that the render has finished
+    if(_rebuildRequired)
+        rebuildPlot();
+
+    if(_tooltipUpdateRequired)
         updateTooltip();
 }
 
@@ -318,11 +321,11 @@ void CorrelationPlotItem::updateTooltip()
 
     if(!lock.owns_lock())
     {
-        _tooltipNeedsUpdate = true;
+        _tooltipUpdateRequired = true;
         return;
     }
 
-    _tooltipNeedsUpdate = false;
+    _tooltipUpdateRequired = false;
 
     QCPAbstractPlottable* plottableUnderCursor = nullptr;
     QCPAxisRect* axisRectUnderCursor = nullptr;
@@ -1270,7 +1273,15 @@ static void removeAllExcept(QCPLayoutGrid* layout, QCPLayoutElement* except)
 
 void CorrelationPlotItem::rebuildPlot()
 {
-    std::unique_lock<std::recursive_mutex> lock(_mutex);
+    std::unique_lock<std::recursive_mutex> lock(_mutex, std::try_to_lock);
+
+    if(!lock.owns_lock())
+    {
+        _rebuildRequired = true;
+        return;
+    }
+
+    _rebuildRequired = false;
 
     QElapsedTimer buildTimer;
     buildTimer.start();
