@@ -878,7 +878,7 @@ void CorrelationPlotItem::populateStdErrorPlot()
 void CorrelationPlotItem::populateLinePlot()
 {
     double minY = std::numeric_limits<double>::max();
-    double maxY = std::numeric_limits<double>::min();
+    double maxY = std::numeric_limits<double>::lowest();
 
     QVector<double> yData; yData.reserve(_selectedRows.size());
     QVector<double> xData; xData.reserve(static_cast<int>(_columnCount));
@@ -888,7 +888,7 @@ void CorrelationPlotItem::populateLinePlot()
     {
         QCPGraph* graph = nullptr;
         double rowMinY = std::numeric_limits<double>::max();
-        double rowMaxY = std::numeric_limits<double>::min();
+        double rowMaxY = std::numeric_limits<double>::lowest();
 
         if(!_lineGraphCache.contains(row))
         {

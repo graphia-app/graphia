@@ -229,7 +229,7 @@ private:
     {
         QCPGraph* _graph = nullptr;
         double _minY = std::numeric_limits<double>::max();
-        double _maxY = std::numeric_limits<double>::min();
+        double _maxY = std::numeric_limits<double>::lowest();
     };
 
     QMap<int, CacheEntry> _lineGraphCache;
