@@ -74,11 +74,13 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
 
             QString value = tabularData.valueAsQString(columnIndex, rowIndex);
 
-            auto dataColumnIndex = static_cast<int>(columnIndex - firstDataColumn);
-            auto dataRowIndex = static_cast<int>(rowIndex - firstDataRow);
+            size_t dataColumnIndex = columnIndex - firstDataColumn;
+            size_t dataRowIndex = rowIndex - firstDataRow;
+            bool isRowInDataRect = firstDataRow <= rowIndex;
+            bool isColumnInDataRect = firstDataColumn <= columnIndex;
 
-            if(dataColumnIndex >= static_cast<int>(_numColumns) ||
-               dataRowIndex >= static_cast<int>(_numRows))
+            if((isColumnInDataRect && dataColumnIndex >= _numColumns) ||
+                    (isRowInDataRect && dataRowIndex >= _numRows))
             {
                 qDebug() << QString("WARNING: Attempting to set data at coordinate (%1, %2) in "
                                     "dataRect of dimensions (%3, %4)")
@@ -91,124 +93,132 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
 
             if(rowIndex == 0)
             {
-                if(dataColumnIndex < 0)
+                if(!isColumnInDataRect)
                     _userNodeData.add(value);
                 else
+                {
                     setDataColumnName(dataColumnIndex, value);
+                }
             }
-            else if(dataRowIndex < 0)
+            else if(!isRowInDataRect)
             {
                 if(columnIndex == 0)
                     _userColumnData.add(value);
-                else if(dataColumnIndex >= 0)
+                else if(isColumnInDataRect)
                     _userColumnData.setValue(dataColumnIndex, tabularData.valueAsQString(0, rowIndex), value);
             }
-            else
+            else if(isColumnInDataRect) // Check it's in the datarect
             {
-                if(dataColumnIndex >= 0)
+                double transformedValue = 0.0;
+                // Check missing value
+                if(value.isEmpty())
                 {
-                    double transformedValue = 0.0;
-                    // Check missing value
-                    if(value.isEmpty())
+                    // Impute
+                    switch(_missingDataType)
                     {
-                        // Impute
-                        if(_missingDataType == MissingDataType::Constant)
-                        {
-                            transformedValue = _missingDataReplacementValue;
-                        }
-                        else if(_missingDataType == MissingDataType::ColumnAverage)
-                        {
-                            // Calculate column averages
-                            double averageValue = 0.0;
-                            size_t rowCount = 0;
-                            for(size_t avgRowIndex = firstDataRow; avgRowIndex < tabularData.numRows(); avgRowIndex++)
-                            {
-                                auto value = tabularData.valueAsQString(columnIndex, avgRowIndex);
-                                qDebug() << value;
-                                if(!value.isEmpty())
-                                {
-                                    qDebug() << value.toDouble();
-                                    averageValue += value.toDouble();
-                                    rowCount++;
-                                }
-                            }
-
-                            if(rowCount > 0)
-                                averageValue /= rowCount;
-
-                            transformedValue = averageValue;
-                        }
-                        else if(_missingDataType == MissingDataType::RowInterpolation)
-                        {
-                            double rightValue = 0.0;
-                            double leftValue = 0.0;
-                            size_t leftDistance = 0;
-                            size_t rightDistance = 0;
-                            bool rightValueFound = false;
-                            bool leftValueFound = false;
-
-                            // Find right value
-                            for(size_t rightColumn = columnIndex; rightColumn < tabularData.numColumns(); rightColumn++)
-                            {
-                                auto value = tabularData.valueAsQString(rightColumn, rowIndex);
-                                if(!value.isEmpty())
-                                {
-                                    rightValue = value.toDouble();
-                                    rightValueFound = true;
-                                    rightDistance = (rightColumn > columnIndex) ? rightColumn - columnIndex : columnIndex - rightColumn;
-                                    break;
-                                }
-                            }
-                            // Find left value
-                            for(size_t leftColumn = columnIndex; leftColumn-- != firstDataColumn;)
-                            {
-                                auto value = tabularData.valueAsQString(leftColumn, rowIndex);
-                                if(!value.isEmpty())
-                                {
-                                    leftValue = value.toDouble();
-                                    leftValueFound = true;
-                                    leftDistance = (leftColumn > columnIndex) ? leftColumn - columnIndex : columnIndex - leftColumn;
-                                    break;
-                                }
-                            }
-
-                            // Lerp the result
-                            if(leftValueFound && rightValueFound)
-                            {
-                                size_t totalDistance = leftDistance + rightDistance;
-                                double tween = leftDistance / static_cast<double>(totalDistance);
-                                // https://devblogs.nvidia.com/lerp-faster-cuda/
-                                double lerpedValue = std::fma(tween, rightValue, std::fma(-tween, leftValue, leftValue));
-                                transformedValue = lerpedValue;
-                            }
-                            else if(leftValueFound && !rightValueFound)
-                            {
-                                transformedValue = leftValue;
-                            }
-                            else if(!leftValueFound && rightValueFound)
-                            {
-                                transformedValue = rightValue;
-                            }
-                            else
-                            {
-                                transformedValue = 0.0;
-                            }
-                            qDebug() << "Interp Rows Cell Col" << columnIndex << "Row" << rowIndex << "Imputed Value" << transformedValue;
-                        }
-                    }
-                    else
+                    case MissingDataType::Constant:
                     {
-                        transformedValue = value.toDouble();
+                        transformedValue = _missingDataReplacementValue;
+                        break;
                     }
+                    case MissingDataType::ColumnAverage:
+                    {
+                        // Calculate column averages
+                        double averageValue = 0.0;
+                        size_t rowCount = 0;
+                        for(size_t avgRowIndex = firstDataRow; avgRowIndex < tabularData.numRows(); avgRowIndex++)
+                        {
+                            auto value = tabularData.valueAsQString(columnIndex, avgRowIndex);
+                            if(!value.isEmpty())
+                            {
+                                averageValue += value.toDouble();
+                                rowCount++;
+                            }
+                        }
 
-                    // Scale
-                    transformedValue = scaleValue(transformedValue);
+                        if(rowCount > 0)
+                            averageValue /= rowCount;
 
-                    setData(dataColumnIndex, dataRowIndex, transformedValue);
+                        transformedValue = averageValue;
+                        break;
+                    }
+                    case MissingDataType::RowInterpolation:
+                    {
+                        double rightValue = 0.0;
+                        double leftValue = 0.0;
+                        size_t leftDistance = 0;
+                        size_t rightDistance = 0;
+                        bool rightValueFound = false;
+                        bool leftValueFound = false;
+
+                        // Find right value
+                        for(size_t rightColumn = columnIndex; rightColumn < tabularData.numColumns(); rightColumn++)
+                        {
+                            auto value = tabularData.valueAsQString(rightColumn, rowIndex);
+                            if(!value.isEmpty())
+                            {
+                                rightValue = value.toDouble();
+                                rightValueFound = true;
+                                rightDistance = (rightColumn > columnIndex) ? rightColumn - columnIndex : columnIndex - rightColumn;
+                                break;
+                            }
+                        }
+                        // Find left value
+                        for(size_t leftColumn = columnIndex; leftColumn-- != firstDataColumn;)
+                        {
+                            auto value = tabularData.valueAsQString(leftColumn, rowIndex);
+                            if(!value.isEmpty())
+                            {
+                                leftValue = value.toDouble();
+                                leftValueFound = true;
+                                leftDistance = (leftColumn > columnIndex) ? leftColumn - columnIndex : columnIndex - leftColumn;
+                                break;
+                            }
+                        }
+
+                        // Lerp the result if possible, otherwise just set to found value
+                        if(leftValueFound && rightValueFound)
+                        {
+                            size_t totalDistance = leftDistance + rightDistance;
+                            double tween = leftDistance / static_cast<double>(totalDistance);
+                            // https://devblogs.nvidia.com/lerp-faster-cuda/
+                            double lerpedValue = std::fma(tween, rightValue, std::fma(-tween, leftValue, leftValue));
+                            transformedValue = lerpedValue;
+                        }
+                        else if(leftValueFound && !rightValueFound)
+                        {
+                            transformedValue = leftValue;
+                        }
+                        else if(!leftValueFound && rightValueFound)
+                        {
+                            transformedValue = rightValue;
+                        }
+                        else
+                        {
+                            // Nothing on the row, just zero it
+                            transformedValue = 0.0;
+                        }
+                        break;
+                    }
+                    default:
+                        break;
+                    }
                 }
                 else
-                    _userNodeData.setValue(dataRowIndex, tabularData.valueAsQString(columnIndex, 0), value);
+                {
+                    // Value is not empty so convert to double
+                    bool success = false;
+                    transformedValue = value.toDouble(&success);
+                    Q_ASSERT(success);
+                }
+
+                // Scale
+                transformedValue = scaleValue(transformedValue);
+
+                setData(dataColumnIndex, dataRowIndex, transformedValue);
             }
+            else // Not in data rect, not first row, put in to the userNodeData
+                _userNodeData.setValue(dataRowIndex, tabularData.valueAsQString(columnIndex, 0), value);
         }
     }
 

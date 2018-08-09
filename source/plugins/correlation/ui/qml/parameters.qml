@@ -664,6 +664,37 @@ ListTabDialog
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
+
+                            Text
+                            {
+                                text: qsTr("<b>Row Interpolate:</b>")
+                                textFormat: Text.StyledText
+                                Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                            }
+
+                            Text
+                            {
+                                text: qsTr("Linearly interpolate missing values using the nearest surrounding" +
+                                           " values in the row and their relative positions. If only one surrounding value" +
+                                           " is available the value will be set to match." +
+                                           " The value will be set to zero if the row is empty.");
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                            }
+
+                            Text
+                            {
+                                text: qsTr("<b>Column Mean:</b>")
+                                textFormat: Text.StyledText
+                                Layout.alignment: Qt.AlignTop | Qt.AlignLeft
+                            }
+
+                            Text
+                            {
+                                text: qsTr("Replace missing values with the mean value of their column, excluding missing values.");
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                            }
                         }
                     }
 
