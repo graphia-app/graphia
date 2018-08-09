@@ -1408,8 +1408,13 @@ void CorrelationPlotItem::computeXAxisRange()
 
 void CorrelationPlotItem::setYAxisRange(double min, double max)
 {
-    if(_includeYZero && min > 0.0)
-        min = 0.0;
+    if(_includeYZero)
+    {
+        if(min > 0.0)
+            min = 0.0;
+        else if(max < 0.0)
+            max = 0.0;
+    }
 
     _mainYAxis->setRange(min, max);
 }
