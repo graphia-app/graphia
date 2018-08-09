@@ -472,8 +472,8 @@ void CorrelationPlotItem::wheelEvent(QWheelEvent* event)
 
 QVector<double> CorrelationPlotItem::meanAverageData(double& min, double& max)
 {
-    min = 0.0;
-    max = 0.0;
+    min = std::numeric_limits<double>::max();
+    max = std::numeric_limits<double>::lowest();
 
     // Use Average Calculation
     QVector<double> yDataAvg; yDataAvg.reserve(_selectedRows.size());
@@ -521,8 +521,8 @@ bool CorrelationPlotItem::canShowColumnAnnotationSelection() const
 
 void CorrelationPlotItem::populateMeanLinePlot()
 {
-    double maxY = 0.0;
-    double minY = 0.0;
+    double minY = std::numeric_limits<double>::max();
+    double maxY = std::numeric_limits<double>::lowest();
 
     auto* graph = _customPlot.addGraph();
     graph->setPen(QPen(Qt::black));
@@ -550,12 +550,14 @@ void CorrelationPlotItem::populateMeanLinePlot()
     _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, plotModeTextElement);
 
     setYAxisRange(minY, maxY);
+
+    _meanPlot = graph;
 }
 
 void CorrelationPlotItem::populateMedianLinePlot()
 {
-    double maxY = 0.0;
-    double minY = 0.0;
+    double minY = std::numeric_limits<double>::max();
+    double maxY = std::numeric_limits<double>::lowest();
 
     auto* graph = _customPlot.addGraph();
     graph->setPen(QPen(Qt::black));
@@ -608,6 +610,8 @@ void CorrelationPlotItem::populateMedianLinePlot()
     _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, plotModeTextElement);
 
     setYAxisRange(minY, maxY);
+
+    _meanPlot = graph;
 }
 
 void CorrelationPlotItem::populateMeanHistogramPlot()
@@ -615,8 +619,8 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     if(_selectedRows.isEmpty())
         return;
 
-    double maxY = 0.0;
-    double minY = 0.0;
+    double minY = std::numeric_limits<double>::max();
+    double maxY = std::numeric_limits<double>::lowest();
 
     QVector<double> xData(static_cast<int>(_columnCount));
     // xData is just the column indices
@@ -642,6 +646,8 @@ void CorrelationPlotItem::populateMeanHistogramPlot()
     _mainAxisLayout->addElement(_mainAxisLayout->rowCount(), 0, plotModeTextElement);
 
     setYAxisRange(minY, maxY);
+
+    _meanPlot = histogramBars;
 }
 
 static double medianOf(const QVector<double>& sortedData)
@@ -666,8 +672,8 @@ void CorrelationPlotItem::populateIQRPlot()
     auto* statPlot = new QCPStatisticalBox(_mainXAxis, _mainYAxis);
     statPlot->setName(tr("Median (IQR plots) of selection"));
 
-    double maxY = 0.0;
-    double minY = 0.0;
+    double minY = std::numeric_limits<double>::max();
+    double maxY = std::numeric_limits<double>::lowest();
 
     QVector<double> rowsEntries(_selectedRows.length());
     QVector<double> outliers;
@@ -757,7 +763,7 @@ void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, const QString&
         stdDevBars->setName(name);
         stdDevBars->setSelectable(QCP::SelectionType::stNone);
         stdDevBars->setAntialiased(false);
-        stdDevBars->setDataPlottable(_customPlot.plottable(0));
+        stdDevBars->setDataPlottable(_meanPlot);
         stdDevBars->setData(stdDevs);
     }
     else if(visualType == PlotDispersionVisualType::Area)
@@ -767,8 +773,8 @@ void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, const QString&
         devTop->setName(QStringLiteral("%1 Top").arg(name));
         devBottom->setName(QStringLiteral("%1 Bottom").arg(name));
 
-        auto fillColour = _customPlot.plottable(0)->pen().color();
-        auto penColour = _customPlot.plottable(0)->pen().color().lighter(150);
+        auto fillColour = _meanPlot->pen().color();
+        auto penColour = _meanPlot->pen().color().lighter(150);
         fillColour.setAlpha(50);
         penColour.setAlpha(120);
 
@@ -786,8 +792,8 @@ void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, const QString&
 
         for(int i = 0; i < static_cast<int>(_columnCount); ++i)
         {
-            topErr[i] = _customPlot.plottable(0)->interface1D()->dataMainValue(i) + stdDevs[i];
-            bottomErr[i] = _customPlot.plottable(0)->interface1D()->dataMainValue(i) - stdDevs[i];
+            topErr[i] = _meanPlot->interface1D()->dataMainValue(i) + stdDevs[i];
+            bottomErr[i] = _meanPlot->interface1D()->dataMainValue(i) - stdDevs[i];
         }
 
         // xData is just the column indices
@@ -804,7 +810,8 @@ void CorrelationPlotItem::populateStdDevPlot()
     if(_selectedRows.isEmpty())
         return;
 
-    double min = 0, max = 0;
+    double min = std::numeric_limits<double>::max();
+    double max = std::numeric_limits<double>::lowest();
 
     QVector<double> stdDevs(static_cast<int>(_columnCount));
     QVector<double> means(static_cast<int>(_columnCount));
@@ -842,7 +849,8 @@ void CorrelationPlotItem::populateStdErrorPlot()
     if(_selectedRows.isEmpty())
         return;
 
-    double min = 0, max = 0;
+    double min = std::numeric_limits<double>::max();
+    double max = std::numeric_limits<double>::lowest();
 
     QVector<double> stdErrs(static_cast<int>(_columnCount));
     QVector<double> means(static_cast<int>(_columnCount));
@@ -1293,6 +1301,7 @@ void CorrelationPlotItem::rebuildPlot()
         _customPlot.removePlottable(plottable);
     }
 
+    _meanPlot = nullptr;
     _columnAnnotationsAxisRect = nullptr;
 
     // Return the plot layout to its immediate post-construction state

@@ -185,6 +185,7 @@ private:
     QCPAxisRect* _mainAxisRect = nullptr;
     QCPAxis* _mainXAxis = nullptr;
     QCPAxis* _mainYAxis = nullptr;
+    QCPAbstractPlottable* _meanPlot = nullptr;
     QCPAxisRect* _columnAnnotationsAxisRect = nullptr;
     bool _columnAnnotationSelectionModeEnabled = false;
 
