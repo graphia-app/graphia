@@ -186,18 +186,11 @@ bool CorrelationPluginInstance::loadUserData(const TabularData& tabularData, siz
                             transformedValue = lerpedValue;
                         }
                         else if(leftValueFound && !rightValueFound)
-                        {
                             transformedValue = leftValue;
-                        }
                         else if(!leftValueFound && rightValueFound)
-                        {
                             transformedValue = rightValue;
-                        }
-                        else
-                        {
-                            // Nothing on the row, just zero it
+                        else // Nothing on the row, just zero it
                             transformedValue = 0.0;
-                        }
                         break;
                     }
                     default:
