@@ -531,6 +531,7 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
     // Interpret the matrix
     std::vector<std::set<size_t>> clusters;
     std::vector<size_t> clusterGroups(nodeCount, 0);
+    std::vector<bool> clusterGroupAssigned(nodeCount, false);
     for(size_t k = 0; k < clusterMatrix.columns(); ++k)
     {
         for(auto it = clusterMatrix.cbegin(k); it != clusterMatrix.cend(k); ++it )
@@ -540,9 +541,11 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
 
             auto rowCluster = clusterGroups[it->index()];
             auto columnCluster = clusterGroups[k];
+            auto rowClusterAssigned = clusterGroupAssigned[it->index()];
+            auto columnClusterAssigned = clusterGroupAssigned[k];
 
             // If no cluster exists, make one
-            if(rowCluster == 0 && columnCluster == 0)
+            if(!rowClusterAssigned && !columnClusterAssigned)
             {
                 std::set<size_t> newClusterNodeIndex;
                 newClusterNodeIndex.insert(it->index());
@@ -552,10 +555,12 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
                 auto index = clusters.size() - 1;
                 clusterGroups[it->index()] = index;
                 clusterGroups[k] = index;
+                clusterGroupAssigned[it->index()] = true;
+                clusterGroupAssigned[k] = true;
             }
-            else if(rowCluster > 0)
+            else if(rowClusterAssigned)
             {
-                if(columnCluster > 0)
+                if(columnClusterAssigned)
                 {
                     if(columnCluster != rowCluster)
                     {
@@ -568,13 +573,15 @@ void MCLTransform::calculateMCL(float inflation, TransformedGraph& target) const
                 {
                     // Add to row cluster
                     clusterGroups[k] = rowCluster;
+                    clusterGroupAssigned[k] = true;
                     clusters[rowCluster].insert(k);
                 }
             }
-            else if(columnCluster > 0)
+            else if(columnClusterAssigned)
             {
                 // Add to Column Cluster
                 clusterGroups[it->index()] = columnCluster;
+                clusterGroupAssigned[it->index()] = true;
                 clusters[columnCluster].insert(it->index());
             }
         }
