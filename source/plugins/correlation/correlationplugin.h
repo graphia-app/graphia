@@ -138,9 +138,12 @@ private:
         void sum()
         {
             auto numColumns = std::distance(begin(), end());
+            bool allPositive = true;
 
             for(auto value : *this)
             {
+                allPositive = allPositive && !std::signbit(value);
+
                 _sum += value;
                 _sumSq += value * value;
                 _mean += value / numColumns;
@@ -161,7 +164,7 @@ private:
 
             _variance = sum / numColumns;
             _stddev = std::sqrt(_variance);
-            _coefVar = _stddev / (_mean > 0.0 ? _mean : 0.0);
+            _coefVar = (allPositive && _mean > 0.0) ? _stddev / _mean : std::nan("1");
         }
     };
 
