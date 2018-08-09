@@ -790,7 +790,7 @@ void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, const QString&
         auto topErr = QVector<double>(static_cast<int>(_columnCount));
         auto bottomErr = QVector<double>(static_cast<int>(_columnCount));
 
-        for(int i = 0; i < static_cast<int>(_columnCount); ++i)
+        for(int i = 0; i < static_cast<int>(_columnCount); i++)
         {
             topErr[i] = _meanPlot->interface1D()->dataMainValue(i) + stdDevs[i];
             bottomErr[i] = _meanPlot->interface1D()->dataMainValue(i) - stdDevs[i];
@@ -803,15 +803,23 @@ void CorrelationPlotItem::plotDispersion(QVector<double> stdDevs, const QString&
         devTop->setData(xData, topErr);
         devBottom->setData(xData, bottomErr);
     }
+
+    double minY = std::numeric_limits<double>::max();
+    double maxY = std::numeric_limits<double>::lowest();
+
+    for(int i = 0; i < static_cast<int>(_columnCount); i++)
+    {
+        minY = std::min(minY, _meanPlot->interface1D()->dataMainValue(i) - stdDevs[i]);
+        maxY = std::max(maxY, _meanPlot->interface1D()->dataMainValue(i) + stdDevs[i]);
+    }
+
+    setYAxisRange(minY, maxY);
 }
 
 void CorrelationPlotItem::populateStdDevPlot()
 {
     if(_selectedRows.isEmpty())
         return;
-
-    double min = std::numeric_limits<double>::max();
-    double max = std::numeric_limits<double>::lowest();
 
     QVector<double> stdDevs(static_cast<int>(_columnCount));
     QVector<double> means(static_cast<int>(_columnCount));
@@ -835,22 +843,15 @@ void CorrelationPlotItem::populateStdDevPlot()
         stdDev /= _columnCount;
         stdDev = std::sqrt(stdDev);
         stdDevs[col] = stdDev;
-
-        min = std::min(min, means.at(col) - stdDev);
-        max = std::max(max, means.at(col) + stdDev);
     }
 
     plotDispersion(stdDevs, QStringLiteral("Std Dev"));
-    setYAxisRange(min, max);
 }
 
 void CorrelationPlotItem::populateStdErrorPlot()
 {
     if(_selectedRows.isEmpty())
         return;
-
-    double min = std::numeric_limits<double>::max();
-    double max = std::numeric_limits<double>::lowest();
 
     QVector<double> stdErrs(static_cast<int>(_columnCount));
     QVector<double> means(static_cast<int>(_columnCount));
@@ -874,13 +875,9 @@ void CorrelationPlotItem::populateStdErrorPlot()
         stdErr /= _columnCount;
         stdErr = std::sqrt(stdErr) / std::sqrt(static_cast<double>(_selectedRows.length()));
         stdErrs[col] = stdErr;
-
-        min = std::min(min, means.at(col) - stdErr);
-        max = std::max(max, means.at(col) + stdErr);
     }
 
     plotDispersion(stdErrs, QStringLiteral("Std Err"));
-    setYAxisRange(min, max);
 }
 
 void CorrelationPlotItem::populateLinePlot()
