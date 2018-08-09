@@ -157,7 +157,7 @@ public:
     void setTransforms(const QStringList& transforms);
 
     QQmlObjectListModel<EnrichmentTableModel>* enrichmentTableModels()
-    {  return &_enrichmentTableModels; }
+    { return &_enrichmentTableModels; }
 
     QQmlVariantListModel* visualisationsModel() { return &_visualisationsModel; }
     QStringList visualisations() const { return _visualisations; }
